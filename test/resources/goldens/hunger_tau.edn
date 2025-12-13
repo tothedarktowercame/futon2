@@ -1,0 +1,163 @@
+({:name :normal,
+  :inputs
+  {:initial-h 0.42,
+   :tick {:food 0.55, :home-prox 0.35, :cargo 0.1},
+   :update {:ingest 0.32, :deposit 0.05, :risk 0.01},
+   :modulation
+   {:food 0.55,
+    :pher 0.25,
+    :food-trace 0.4,
+    :pher-trace 0.2,
+    :home-prox 0.35,
+    :enemy-prox 0.25},
+   :precision-seed {:Pi-o {}, :tau 1.0}},
+  :results
+  {:tick-hunger 0.427,
+   :update {:h' 0.23285, :dh -0.19415},
+   :tau 2.0760875,
+   :precision
+   {:Pi-o
+    {:food 1.32599,
+     :pher 1.26029,
+     :food-trace 0.669855,
+     :pher-trace 0.65343,
+     :home-prox 0.84,
+     :enemy-prox 1.03971,
+     :h 1.256135},
+    :tau 1.6262685416666665}}}
+ {:name :starvation,
+  :inputs
+  {:initial-h 0.88,
+   :tick {:food 0.05, :home-prox 0.05, :cargo 0.0},
+   :update {:ingest 0.02, :deposit 0.0, :risk 0.12},
+   :modulation
+   {:food 0.05,
+    :pher 0.05,
+    :food-trace 0.1,
+    :pher-trace 0.05,
+    :home-prox 0.05,
+    :enemy-prox 0.9},
+   :precision-seed {:Pi-o {}, :tau 0.8}},
+  :results
+  {:tick-hunger 0.896,
+   :update {:h' 0.88655, :dh -0.00945000000000007},
+   :tau 0.6052625,
+   :precision
+   {:Pi-o
+    {:food 2.24117,
+     :pher 0.8680700000000001,
+     :food-trace 0.8659649999999999,
+     :pher-trace 0.52269,
+     :home-prox 0.72,
+     :enemy-prox 1.43193,
+     :h 1.9752049999999999},
+    :tau 0.41359604166666664}}}
+ {:name :overstimulation,
+  :inputs
+  {:initial-h 0.5,
+   :tick {:food 0.9, :home-prox 0.2, :cargo 0.15},
+   :update {:ingest 0.4, :deposit 0.1, :risk 0.0},
+   :modulation
+   {:food 0.9,
+    :pher 0.85,
+    :food-trace 0.7,
+    :pher-trace 0.8,
+    :home-prox 0.2,
+    :enemy-prox 0.4},
+   :precision-seed {:Pi-o {:food 1.2, :pher 1.0}, :tau 1.2}},
+  :results
+  {:tick-hunger 0.5065,
+   :update {:h' 0.26164999999999994, :dh -0.24485},
+   :tau 2.0112875000000003,
+   :precision
+   {:Pi-o
+    {:food 1.5663099999999999,
+     :pher 1.4430100000000001,
+     :food-trace 0.678495,
+     :pher-trace 0.64767,
+     :home-prox 0.78,
+     :enemy-prox 1.0569899999999999,
+     :h 1.287815},
+    :tau 1.474944166666667}}}
+ {:name :heavy-cargo,
+  :inputs
+  {:initial-h 0.58,
+   :tick {:food 0.3, :home-prox 0.3, :cargo 0.95},
+   :tick-options {:load-pressure 0.4, :burn 0.025},
+   :update {:ingest 0.12, :deposit 0.0, :risk 0.05},
+   :modulation
+   {:food 0.3,
+    :pher 0.4,
+    :food-trace 0.45,
+    :pher-trace 0.5,
+    :home-prox 0.3,
+    :enemy-prox 0.3},
+   :precision-seed {:Pi-o {:food 1.1}, :tau 0.9}},
+  :results
+  {:tick-hunger 0.961,
+   :update {:h' 0.89015, :dh -0.07084999999999997},
+   :tau 0.5971625,
+   :precision
+   {:Pi-o
+    {:food 2.34621,
+     :pher 0.8659100000000001,
+     :food-trace 0.867045,
+     :pher-trace 0.52197,
+     :home-prox 0.82,
+     :enemy-prox 1.4340899999999999,
+     :h 1.979165},
+    :tau 0.4578245833333333}}}
+ {:name :high-risk,
+  :inputs
+  {:initial-h 0.6,
+   :tick {:food 0.4, :home-prox 0.15, :cargo 0.3},
+   :update {:ingest 0.05, :deposit 0.0, :risk 0.4},
+   :modulation
+   {:food 0.4,
+    :pher 0.1,
+    :food-trace 0.25,
+    :pher-trace 0.2,
+    :home-prox 0.15,
+    :enemy-prox 0.85},
+   :precision-seed {:Pi-o {:pher 0.9, :enemy-prox 1.2}, :tau 1.1}},
+  :results
+  {:tick-hunger 0.6705,
+   :update {:h' 0.64865, :dh -0.021850000000000036},
+   :tau 1.1405375000000002,
+   :precision
+   {:Pi-o
+    {:food 1.9081099999999998,
+     :pher 1.11081,
+     :food-trace 0.7945949999999999,
+     :pher-trace 0.57027,
+     :home-prox 0.76,
+     :enemy-prox 1.5891899999999999,
+     :h 1.7135150000000001},
+    :tau 0.8173852083333335}}}
+ {:name :high-ingest,
+  :inputs
+  {:initial-h 0.7,
+   :tick {:food 0.8, :home-prox 0.6, :cargo 0.05},
+   :update {:ingest 0.8, :deposit 0.2, :risk 0.0},
+   :modulation
+   {:food 0.8,
+    :pher 0.3,
+    :food-trace 0.5,
+    :pher-trace 0.35,
+    :home-prox 0.6,
+    :enemy-prox 0.2},
+   :precision-seed {:Pi-o {:food 1.0, :home-prox 0.9}, :tau 1.3}},
+  :results
+  {:tick-hunger 0.6745,
+   :update {:h' 0.18465, :dh -0.48985},
+   :tau 2.1845375000000002,
+   :precision
+   {:Pi-o
+    {:food 1.25851,
+     :pher 1.28921,
+     :food-trace 0.655395,
+     :pher-trace 0.66307,
+     :home-prox 1.1400000000000001,
+     :enemy-prox 1.01079,
+     :h 1.203115},
+    :tau 1.8932658333333336}}})

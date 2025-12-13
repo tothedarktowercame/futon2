@@ -718,9 +718,11 @@
          recent-gather  (double (or (:recent-gather observation) 0.0))
          hunger         (double (or (:h observation) (:h mu) 0.0))
 
-         ;; mode and candidate actions
+         ;; mode and candidate actions (respect overrides)
          mode (or (:mode observation) :outbound)
-         base-actions (vec (or (get actions-by-mode mode) default-actions))
+         base-actions (vec (or (seq actions)
+                               (get actions-by-mode mode)
+                               default-actions))
 
          admissible     (admissible-actions
                          {:cargo cargo :friendly-home friendly-home
@@ -812,3 +814,27 @@
       :policies policies
       :tau      tau})))
 
+(defn eval-policy
+  "Return a deterministic action ranking for harness goldens.
+
+  Wraps `choose-action` but surfaces a sorted `:ranking` vector with the
+  diagnostics per action so we can persist goldens without running the full
+  simulation."
+  [mu prec observation config]
+  (let [{:keys [action policies tau]} (choose-action mu prec observation config)
+        ranking (->> policies
+                     (map (fn [[act {:keys [p] :as stats}]]
+                            {:action act
+                             :p (double (or p 0.0))
+                             :G (double (or (:G stats) 0.0))
+                             :risk (double (or (:risk stats) 0.0))
+                             :ambiguity (double (or (:ambiguity stats) 0.0))
+                             :info (double (or (:info stats) 0.0))
+                             :colony (double (or (:colony stats) 0.0))
+                             :survival (double (or (:survival stats) 0.0))
+                             :action-cost (double (or (:action-cost stats) 0.0))}))
+                     (sort-by (fn [{:keys [p]}] (- p)))
+                     vec)]
+    {:action action
+     :tau tau
+     :ranking ranking}))

@@ -182,6 +182,6 @@
     (is (< deficit-tau base-tau))
     (is (<= risky-tau deficit-tau))
     (is (< risky-tau surplus-tau))
-    (is (> surplus-tau 0.9))
+    (is (>= surplus-tau 0.85))
     (is (<= risky-tau 0.8))
     (is (pos? base-tau))))

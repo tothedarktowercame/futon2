@@ -79,7 +79,7 @@
                       :deposit-feed 0.0
                       :home-bonus 0.0
                       :death-threshold 0.995
-                      :queen {:initial 0.0
+                      :queen {:initial 5.0
                               :burn 0.0
                               :per-ant 0.0
                               :starvation-grace 2
