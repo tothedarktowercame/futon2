@@ -28,13 +28,18 @@
   [src dst rate]
   (mapv (fn [s d] (+ s (* rate (- d s)))) src dst))
 
+(defn- enemy-species
+  [world species]
+  (let [armies (or (:armies world) [:classic :aif])]
+    (first (remove #(= % species) armies))))
+
 (defn- ensure-mu
   [world {:keys [mu loc species] :as ant} observation]
   (let [loc (vec (or loc [0 0]))
         species (or species :aif)
         existing (or mu {})
         enemy-home (when world
-                     (get-in world [:homes (if (= species :aif) :classic :aif)]))
+                     (get-in world [:homes (enemy-species world species)]))
         home (when world (get-in world [:homes species]))
         goal (vec (or (:goal existing)
                       enemy-home
@@ -86,7 +91,7 @@
 (defn- update-goal
   [goal world species observation]
   (let [enemy-home (when world
-                     (get-in world [:homes (if (= species :aif) :classic :aif)]))
+                     (get-in world [:homes (enemy-species world species)]))
         home (when world (get-in world [:homes species]))
         enemy-prox (double (or (:enemy-prox observation) 0.0))
         home-prox (double (or (:home-prox observation) 0.0))

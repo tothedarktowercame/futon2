@@ -21,8 +21,18 @@ This note captures the active inference loop for Futon2 plus the reproducible si
 4. **Policy** (`ants.aif.policy/choose-action`)
    - Predicts outcomes for each macro action, scores them via expected free energy plus hand-tuned biases, and softmaxes the logits with the hunger-modulated `tau`.
    - Returns `{:action … :policies {action {:G … :p …}} :tau …}`. This is the contract enforced by the new harness goldens.
+5. **Act & world update** (`ants.war` helpers like `move`, `turn`, `take-food`, `drop-food`)
+   - `ants.war/step` calls the chosen action inside a `dosync` transaction, mutating grid cells (food, pheromones, ant occupancy) and colony reserves.
+   - This keeps `core/aif-step` pure while still tracing the full loop from sensory keys to world state updates each tick.
 
 The Agent contract from `AGENTS.md` still holds: ant state is the grid location stored inside an `agent`, and the cell map carries mutable attributes. The architecture here merely sketches how the pure AIF stack reasons before mutating the world inside a `dosync` transaction.
+
+## Locked Parameters (Baseline)
+
+These constants are considered part of the baseline so goldens stay meaningful:
+
+- Predictive micro-steps: `max-steps=4`, `alpha=0.45`, `beta=0.28` (passed to `core/aif-step` during trace capture).
+- Hunger drift defaults (from `affect/tick-hunger`): `burn=0.02`, `feed=0.05`, `rest=0.03`, `load-pressure=0.25`.
 
 ## Trace & Snapshot Artifacts
 
@@ -40,6 +50,8 @@ Run `clj -M -m tools.trace-tick` to capture a deterministic single-tick update. 
 
 Because the EDN stores raw observables, engineers can diff it after tuning hunger knobs, and the SVG shows whether annealing, tau coupling, or hunger drift regress. No renderer plumbing was touched: the artifacts sit entirely in `doc/` and are generated via the pure `aif-step` API.
 
+Run `clj -M -m tools.microtrace-goldens` to refresh `test/resources/goldens/microtraces.edn`, which captures four microtrace scenarios used by the regression tests.
+
 ## Using the Snapshot API
 
 `ants.aif.core/aif-step` already exposes everything needed for mu/precision snapshots:
@@ -54,3 +66,11 @@ Because the EDN stores raw observables, engineers can diff it after tuning hunge
 ```
 
 The new documentation plus `doc/trace/single_tick.edn` codify the shape of these maps so downstream consumers (plotters, notebooks, ML probes) can rely on it without spelunking through namespaces.
+
+## Evidence Checklist
+
+- Observation ABI: `ants.aif.observe/sense->vector` ordering is documented and tested (`test/ants/aif/observe_test.clj`).
+- Observation normalization: property tests enforce 0–1 bounds plus edge/border cases.
+- AIF stack: four golden microtraces (`test/resources/goldens/microtraces.edn`) lock predictive micro-step evolution.
+- Cyber-ants: smoke coverage validates pattern availability and config attachment (`test/ants/cyber_test.clj`).
+- Run the suite with `clj -M:test -m cognitect.test-runner` to validate the baseline.

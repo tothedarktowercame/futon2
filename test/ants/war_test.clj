@@ -8,7 +8,8 @@
                               :ants-per-side 3
                               :ticks 5})]
     (testing "homes placed"
-      (is (= #{:classic :aif} (set (keys (:homes world)))))
+      (is (= (set (or (:armies world) [:classic :aif]))
+             (set (keys (:homes world)))))
       (doseq [[species loc] (:homes world)]
         (is (= species (get-in world [:grid :cells loc :home])))))
     (testing "ants spawned"
@@ -17,7 +18,9 @@
         (is (= id (get-in world [:grid :cells loc :ant])))
         (is (<= 0.0 h 1.0))))
     (testing "scores initialised"
-      (is (= {:classic 0.0 :aif 0.0} (:scores world))))
+      (let [expected (into {} (map (fn [sp] [sp 0.0])
+                                   (or (:armies world) [:classic :aif])))]
+        (is (= expected (:scores world)))))
     (testing "colonies initialised"
       (let [reserve (double (or (get-in world [:config :hunger :queen :initial]) 0.0))]
         (doseq [[_ {:keys [reserves starved-ticks]}] (:colonies world)]
@@ -42,6 +45,17 @@
                              :ticks 3}
                             {:hud? false})]
     (is (= 3 (:tick world)))))
+
+(deftest cyber-army-spawns
+  (let [world (war/new-world {:size [8 8]
+                              :ticks 4
+                              :ants-per-side 2
+                              :armies [:cyber :aif]
+                              :cyber {:pattern :cyber/white-space-scout}})
+        cyber-ants (filter #(= :cyber (:species %)) (vals (:ants world)))]
+    (is (= 2 (count cyber-ants)))
+    (is (every? #(= :aif (:brain %)) cyber-ants))
+    (is (every? :aif-config cyber-ants))))
 
 (deftest workers-do-not-gather-from-home
   (let [world (war/new-world {:size [6 6]

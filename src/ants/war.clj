@@ -3,6 +3,7 @@
   (:require [ants.aif.core :as aif]
             [ants.aif.observe :as observe]
             [ants.aif.affect :as affect]
+            [ants.cyber :as cyber]
             [ants.ui :as ui]
             [clojure.string :as str]))
 
@@ -26,6 +27,7 @@
    :pher-max 3.0
    :ticks 200
    :ants-per-side 6
+   :armies [:classic :aif]
    :ema-alpha 0.1
    :enable-termination? true
    :hunger {:initial 0.38
@@ -42,35 +44,47 @@
                     :per-ant 0.085
                     :starvation-grace 6
                     :starvation-boost 0.045}}
-   :aif aif/default-aif-config})
+   :aif aif/default-aif-config
+   :cyber {:pattern :cyber/baseline}})
 
 (def ^:private default-hunger (:hunger default-config))
 (def ^:private default-aif (:aif default-config))
+(def ^:private default-armies (:armies default-config))
+
+(def ^:private aif-species? (set [:aif :cyber]))
+
+(defn- aif-like?
+  [species]
+  (contains? aif-species? species))
 
 (def alice-id :aif-5)
 
 (defn- team-counts
   [world]
-  (let [ants (vals (:ants world))]
-    {:classic (count (filter #(= (:species %) :classic) ants))
-     :aif     (count (filter #(= (:species %) :aif) ants))}))
+  (->> (:ants world)
+       vals
+       (map :species)
+       (frequencies)))
 
 (defn termination-message
   [world]
   (when-let [reason (get-in world [:termination :reason])]
     (let [scores (:scores world)
           counts (team-counts world)
+          armies (or (:armies world) default-armies)
           base (case reason
                  :alice-dead "Game Over (Alice Died)"
                  :queen-starved "Game Over (Queen Starved)"
                  :all-ants-dead "Game Over (All Ants Dead)"
-                 "Game Over")]
-      (format "%s | Final Score Classic %.2f (ants %d) vs AIF %.2f (ants %d)"
-              base
-              (double (get scores :classic 0.0))
-              (int (get counts :classic 0))
-              (double (get scores :aif 0.0))
-              (int (get counts :aif 0))))))
+                 "Game Over")
+          summary (->> armies
+                       (map (fn [species]
+                              (format "%s %.2f (ants %d)"
+                                      (str/capitalize (name species))
+                                      (double (get scores species 0.0))
+                                      (int (get counts species 0)))))
+                       (str/join " vs "))]
+      (format "%s | Final Score %s" base summary))))
 
 (defn- merge-deep
   [& ms]
@@ -154,31 +168,42 @@
   (let [id (id-for species idx)
         hunger-cfg (hunger-config world)
         initial-h (double (or (get-in world [:ants id :h]) (:initial hunger-cfg) 0.35))
+        brain (if (aif-like? species) :aif :classic)
         ant {:id id
              :species species
-             :brain (if (= species :aif) :aif :classic)
+             :brain brain
              :loc loc
              :dir 0
              :cargo 0.0
              :h (observe/clamp01 initial-h)
              :mu (:mu (get-in world [:ants id]))
              :prec (:prec (get-in world [:ants id]))}
+        ant (if (= species :cyber)
+              (cyber/attach-config ant (get-in world [:config :cyber :pattern]))
+              ant)
         world (assoc-in world [:ants id] ant)]
     (-> world
         (assoc-in [:grid :cells loc :ant] id))))
 
+(defn- spawn-offset
+  [size home idx]
+  (let [[dx dy] [(mod idx 2) (quot idx 2)]
+        [w h] size
+        center-x (/ (dec (double w)) 2.0)
+        center-y (/ (dec (double h)) 2.0)
+        sx (if (> (double (first home)) center-x) -1 1)
+        sy (if (> (double (second home)) center-y) -1 1)]
+    [(* sx dx) (* sy dy)]))
+
 (defn- spawn-army
   [world species home n]
-  (reduce (fn [world idx]
-            (let [[dx dy] [(mod idx 2) (quot idx 2)]
-                  offset (if (= species :aif)
-                           [(- dx) (- dy)]
-                           [dx dy])
-                  loc (clamp-loc (get-in world [:grid :size])
-                                 (mapv + home offset))]
-              (spawn-ant world species idx loc)))
-          world
-          (range n)))
+  (let [size (get-in world [:grid :size])]
+    (reduce (fn [world idx]
+              (let [offset (spawn-offset size home idx)
+                    loc (clamp-loc size (mapv + home offset))]
+                (spawn-ant world species idx loc)))
+            world
+            (range n))))
 
 (defn new-world
   "Create a fresh war world using config (merged with defaults)."
@@ -187,27 +212,38 @@
    (let [config (-> (merge default-config config)
                     (update :hunger #(merge-deep default-hunger %))
                     (update :aif #(merge-deep default-aif %)))
+         armies (vec (or (:armies config) default-armies))
          grid (build-grid config)
-         homes {:classic [2 2]
-                :aif (let [[w h] (:size config)]
-                       [(max 1 (- w 3)) (max 1 (- h 3))])}
+         [w h] (:size config)
+         anchor-left [2 2]
+         anchor-right [(max 1 (- w 3)) (max 1 (- h 3))]
+         anchors (cycle [anchor-left anchor-right])
+         homes (into {}
+                     (map vector armies anchors))
          hunger (:hunger config)
          queen (:queen hunger)
          initial-reserve (double (or (:initial queen) 0.0))
+         score-map (into {} (map (fn [sp] [sp 0.0]) armies))
+         colony-map (into {}
+                          (map (fn [sp]
+                                 [sp {:reserves initial-reserve
+                                      :starved-ticks 0}])
+                               armies))
+         aif-stats (into {}
+                         (for [sp armies :when (aif-like? sp)]
+                           [sp {:actions-total 0
+                                :pheromone-count 0
+                                :pheromone-trail-sum 0.0
+                                :pheromone-trail-samples 0}]))
          world {:tick 0
                 :config config
+                :armies armies
                 :grid grid
                 :homes {}
-                :scores {:classic 0.0 :aif 0.0}
-                :colonies {:classic {:reserves initial-reserve
-                                     :starved-ticks 0}
-                           :aif {:reserves initial-reserve
-                                 :starved-ticks 0}}
+                :scores score-map
+                :colonies colony-map
                 :rolling {:G nil}
-                :stats {:aif {:actions-total 0
-                              :pheromone-count 0
-                              :pheromone-trail-sum 0.0
-                              :pheromone-trail-samples 0}}
+                :stats {:aif aif-stats}
                 :ants {}
                 :hero {:alice-dead? false}
                 :graveyard []
@@ -217,8 +253,10 @@
                          world
                          homes)
            per-side (:ants-per-side config 6)
-           world (spawn-army world :classic (:classic homes) per-side)
-           world (spawn-army world :aif (:aif homes) per-side)]
+           world (reduce (fn [w sp]
+                           (spawn-army w sp (get homes sp anchor-left) per-side))
+                         world
+                         armies)]
        world))))
 
 (defn- decaying
@@ -742,7 +780,7 @@
 (defn- attach-policy-diagnostics
   "Decorate action events with policy-derived diagnostics for richer logs."
   [event ant]
-  (if (and event (= (:species ant) :aif))
+  (if (and event (aif-like? (:species ant)))
     (if-let [policy (:last-policy ant)]
       (let [policies (:policies policy)
             chosen (when policies (get policies (:action event)))
@@ -810,7 +848,7 @@
         enabled?  (get cfg :alice? true)
         alice-id  (get cfg :alice-id 5)]
     (and enabled?
-         (= species :aif)
+         (aif-like? species)
          (or (same-id? id alice-id)
              (and name (same-id? name alice-id))))))
 
@@ -821,8 +859,8 @@
   [{:keys [id species action loc target cargo ingest gather deposit moved wander
            h tau risk ambiguity need G p
            white? since-ingest] :as event}]
-  ;; keep the same selection heuristic you already use; default to id=5, species :aif
-  (when (and (= species :aif)
+  ;; keep the same selection heuristic you already use; default to id=5, AIF-like species
+  (when (and (aif-like? species)
              (or (= id 5) (= id :alice) (= (:name event) "Alice")))
     (let [ws (or (:white-streak (:ant event)) (:white-streak event) 0) ;; prefer ant's maintained streak if you keep it there
           ;; pull any pre-computed alternatives if your diagnostics attach them
@@ -943,7 +981,7 @@
 (defn flush-traces! [] (flush-aif-pivot!))
 
 (defn- collect-aif-pivot! [world event]
-  (when (= :aif (:species event))
+  (when (aif-like? (:species event))
     (let [t (long (or (:tick world) 0))]         ;; <-- fix tick source
       (swap! aif-pivot*
              (fn [{pt :tick by :by-id :as st}]
@@ -1199,7 +1237,7 @@
    ;; rolling EMA of G (AIF only) + pheromone action stats
    (let [species   (:species ant)
          ema-alpha (get-in world [:config :ema-alpha] 0.1)
-         world     (if (= species :aif)
+         world     (if (aif-like? species)
                      (let [world (update-in world [:rolling :G]
                                             (fn [prev]
                                               (let [g (double (or G 0.0))]
@@ -1208,12 +1246,13 @@
                                                      (* ema-alpha g))
                                                   g))))
                            trail (double (or (:trail-grad observation) 0.0))
-                           world (update-in world [:stats :aif :actions-total] (fnil inc 0))]
+                           stats-path [:stats :aif species]
+                           world (update-in world (conj stats-path :actions-total) (fnil inc 0))]
                        (if (= action :pheromone)
                          (-> world
-                             (update-in [:stats :aif :pheromone-count] (fnil inc 0))
-                             (update-in [:stats :aif :pheromone-trail-sum] (fnil + 0.0) trail)
-                             (update-in [:stats :aif :pheromone-trail-samples] (fnil inc 0)))
+                             (update-in (conj stats-path :pheromone-count) (fnil inc 0))
+                             (update-in (conj stats-path :pheromone-trail-sum) (fnil + 0.0) trail)
+                             (update-in (conj stats-path :pheromone-trail-samples) (fnil inc 0)))
                          world))
                      world)
          base      (build-base-event world ant action policy-out)

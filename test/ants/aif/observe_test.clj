@@ -187,6 +187,17 @@
     (testing "cargo normalized"
       (is (= 0.25 (:cargo obs))))))
 
+(deftest dist-home-respects-max-dist
+  (let [world (assoc-in base-world [:grid :max-dist] 2.0)
+        ant {:species :aif :loc [2 2] :mu {:h 0.5}}
+        obs (observe/g-observe world ant)
+        [hx hy] (get-in world [:homes :aif])
+        [x y] (:loc ant)
+        dist (Math/sqrt (+ (Math/pow (- hx x) 2.0)
+                           (Math/pow (- hy y) 2.0)))
+        expected (observe/clamp01 (/ dist 2.0))]
+    (is (approx= expected (:dist-home obs)))))
+
 (deftest sense-vector-ordering
   (let [obs {:food 0.1 :pher 0.2 :food-trace 0.3 :pher-trace 0.4
              :home-prox 0.5 :enemy-prox 0.6 :h 0.7 :ingest 0.15

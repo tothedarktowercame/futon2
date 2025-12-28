@@ -44,6 +44,11 @@
             h' (max 1 (dec h))]
         (math/sqrt (+ (* w' w') (* h' h'))))))
 
+(defn- enemy-species
+  [world species]
+  (let [armies (or (:armies world) [:classic :aif])]
+    (first (remove #(= % species) armies))))
+
 (defn- cell-at [world loc]
   (get-in world [:grid :cells loc]
           {:food 0.0 :pher 0.0 :home nil :ant nil}))
@@ -117,7 +122,8 @@
         food-max (max-food world)
         pher-max (max-pher world)
         home (get-in world [:homes species])
-        enemy (get-in world [:homes (if (= species :aif) :classic :aif)])
+        enemy (let [enemy-spec (enemy-species world species)]
+                (get-in world [:homes enemy-spec]))
         hunger (or (get-in ant [:mu :h]) (get ant :h) 0.5)
         cargo (double (or (:cargo ant) 0.0))
         ingest (double (or (:ingest ant) 0.0))

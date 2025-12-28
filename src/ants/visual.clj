@@ -26,6 +26,27 @@
   [x lo hi]
   (-> x (max lo) (min hi)))
 
+(defn- species-color [species]
+  (case species
+    :classic (Color. 60 60 60)
+    :aif (Color. 200 40 60)
+    :cyber (Color. 70 140 220)
+    (Color. 100 100 100)))
+
+(defn- species-label [species]
+  (case species
+    :classic "Classic"
+    :aif "AIF"
+    :cyber "Cyber"
+    (str/capitalize (name species))))
+
+(defn- species-short [species]
+  (case species
+    :classic "C"
+    :aif "A"
+    :cyber "Z"
+    (str (first (species-label species)))))
+
 (defn- draw-cell
   [^Graphics g world scale x y]
   (let [cell (get-in world [:grid :cells [x y]] {})
@@ -41,8 +62,9 @@
     (.setColor g (Color. 245 245 245))
     (.fillRect g base-x base-y scale scale)
     (when home
-      (.setColor g (if (= home :aif)
-                     (Color. 255 236 236)
+      (.setColor g (case home
+                     :aif (Color. 255 236 236)
+                     :cyber (Color. 236 247 255)
                      (Color. 236 240 255)))
       (.fillRect g base-x base-y scale scale))
     (when (> pher 0.0)
@@ -55,8 +77,9 @@
         (.fillRect g base-x base-y scale scale)))
     (when ant
       (let [species (:species ant)
-            color (if (= species :aif)
-                    (Color. 210 40 60)
+            color (case species
+                    :aif (Color. 210 40 60)
+                    :cyber (Color. 70 140 220)
                     (Color. 40 40 40))
             inset (max 1 (int (/ scale 4)))
             size (max 2 (- scale (* 2 inset)))]
@@ -73,8 +96,9 @@
             y2 (- (+ base-y scale) pad 1)]
         (doseq [grave graves]
           (let [species (:species grave)
-                color (if (= species :aif)
-                        (Color. 200 60 80 220)
+                color (case species
+                        :aif (Color. 200 60 80 220)
+                        :cyber (Color. 80 160 230 220)
                         (Color. 60 60 60 220))]
             (.setColor g color)
             (.drawLine g x1 y1 x2 y2)
@@ -130,13 +154,13 @@
            (.fillRect g 0 0 w h)
            (when-let [world @world-atom]
              (let [queen-initial (double (or (get-in world [:config :hunger :queen :initial]) 1.0))
-                   species-info [[:classic "Classic" (Color. 60 60 60)]
-                                 [:aif "AIF" (Color. 200 40 60)]]]
-               (loop [[species label color] (first species-info)
-                      more (rest species-info)
+                   species-info (or (:armies world) [:classic :aif])]
+               (loop [[species & more] species-info
                       y y-start]
                  (when species
-                   (let [reserves (double (or (get-in world [:colonies species :reserves]) 0.0))
+                   (let [label (species-label species)
+                         color (species-color species)
+                         reserves (double (or (get-in world [:colonies species :reserves]) 0.0))
                          starved (int (or (get-in world [:colonies species :starved-ticks]) 0))
                          ratio (if (pos? queen-initial)
                                  (clamp (/ reserves queen-initial) 0.0 1.0)
@@ -164,8 +188,8 @@
                                        (filter #(= (:species %) species))
                                        (sort-by :id))
                              ants-start (+ bar-y bar-height 28)]
-                         (.setColor g (Color. 40 40 40))
-                         (.drawString g (str label " ants") padding (+ ants-start -4))
+                        (.setColor g (Color. 40 40 40))
+                        (.drawString g (str label " ants") padding (+ ants-start -4))
                          (loop [xs ants
                                 idx 0
                                 y-pos (+ ants-start 4)]
@@ -190,7 +214,7 @@
                                             (+ bar-y2 28))
                                (recur (rest xs) (inc idx) y-pos))))
                          (let [next-y (+ ants-start (* (max 0 (dec (count ants))) (+ bar-height line-gap)) 50)]
-                           (recur (first more) (rest more) next-y))))))))))))
+                           (recur more next-y))))))))))
       (.setPreferredSize preferred))))
 
 (defn- update-ui!

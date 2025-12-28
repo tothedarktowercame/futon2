@@ -26,7 +26,7 @@
 
 (def headers
   ["scenario" "label" "size" "ticks" "ants_per_side" "duration_ms"
-   "classic_score" "aif_score" "score_diff" "G_ema"])
+   "scores" "G_ema"])
 
 (defn- ensure-output-path
   [path]
@@ -47,9 +47,13 @@
         final-world (war/simulate config {:hud? false})
         elapsed-ms (/ (- (System/nanoTime) start) 1e6)
         scores (:scores final-world)
-        classic (double (get scores :classic 0.0))
-        aif (double (get scores :aif 0.0))
-        diff (- aif classic)
+        armies (or (:armies final-world) [:classic :aif])
+        score-summary (->> armies
+                           (map (fn [species]
+                                  (format "%s:%s"
+                                          (name species)
+                                          (format-double (get scores species 0.0)))))
+                           (str/join "|"))
         g-ema (get-in final-world [:rolling :G])]
     {:scenario (name id)
      :label label
@@ -57,9 +61,7 @@
      :ticks ticks
      :ants-per-side ants-per-side
      :duration-ms (format-double elapsed-ms)
-     :classic-score (format-double classic)
-     :aif-score (format-double aif)
-     :score-diff (format-double diff)
+     :scores score-summary
      :G-ema (format-double g-ema)}))
 
 (defn- ->row
@@ -70,9 +72,7 @@
    (str (result :ticks))
    (str (result :ants-per-side))
    (result :duration-ms)
-   (result :classic-score)
-   (result :aif-score)
-   (result :score-diff)
+   (result :scores)
    (result :G-ema)])
 
 (def output-file "out/bench.csv")
@@ -93,5 +93,5 @@
   [& _]
   (let [results (run!)]
     (println "Wrote benchmark results for" (count results) "scenarios ->" output-file)
-    (doseq [{:keys [label duration-ms score-diff]} results]
-      (println (format "%-8s %7sms Δscore %s" label duration-ms score-diff)))))
+    (doseq [{:keys [label duration-ms scores]} results]
+      (println (format "%-8s %7sms scores %s" label duration-ms scores)))))

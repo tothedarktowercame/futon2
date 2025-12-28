@@ -52,85 +52,118 @@
             (summarize-event event)))
         (reverse events)))
 
+(defn- species-label [species]
+  (case species
+    :classic "Classic"
+    :aif "AIF"
+    :cyber "Cyber"
+    (str/capitalize (name species))))
+
+(defn- species-short [species]
+  (case species
+    :classic "C"
+    :aif "A"
+    :cyber "Z"
+    (str (first (species-label species)))))
+
 (defn scoreboard
   "Return a single-line HUD string covering tick, scores, rolling G EMA, and
   the most recent action for each species."
   [world]
   (let [tick (:tick world 0)
-        {:keys [classic aif]} (:scores world)
-        ants (vals (:ants world))
-        classic-count (count (filter #(= (:species %) :classic) ants))
-        aif-count (count (filter #(= (:species %) :aif) ants))
+        armies (or (:armies world) [:classic :aif])
+        scores (:scores world)
+        ants-by-species (group-by :species (vals (:ants world)))
         white-thresh 0.05
         grid (:grid world)
         homes (:homes world)
         avg-dist (fn [species]
                    (let [home (get homes species)
-                         locs (keep (fn [ant]
-                                      (when (= (:species ant) species)
-                                        (:loc ant)))
-                                    ants)
+                         locs (keep :loc (get ants-by-species species))
                          distances (keep #(dist home %) locs)]
                      (when (seq distances)
                        (/ (reduce + distances) (count distances)))))
         white-count (fn [species]
-                      (count (for [ant ants
-                                   :when (= (:species ant) species)
+                      (count (for [ant (get ants-by-species species)
                                    :let [food (double (or (get-in grid [:cells (:loc ant) :food]) 0.0))]
                                    :when (<= food white-thresh)]
                                ant)))
-        classic-white (white-count :classic)
-        aif-white (white-count :aif)
-        classic-dist (avg-dist :classic)
-        aif-dist (avg-dist :aif)
-        classic-reserve (get-in world [:colonies :classic :reserves] 0.0)
-        aif-reserve (get-in world [:colonies :aif :reserves] 0.0)
+        reserve-of (fn [species]
+                     (double (or (get-in world [:colonies species :reserves]) 0.0)))
         g (get-in world [:rolling :G])
         ema (if (some? g) (format "%.3f" (double g)) "n/a")
         events (:last-events world)
-        classic-event (or (last-by-species events :classic) "—")
-        aif-event (or (last-by-species events :aif) "—")
-        action-summary (str "Classic " classic-event " | AIF " aif-event)
+        action-summary (->> armies
+                            (map (fn [species]
+                                   (str (species-label species) " "
+                                        (or (last-by-species events species) "—"))))
+                            (str/join " | "))
         termination (when-let [{:keys [reason species]} (:termination world)]
                       (str (name reason)
                            (when species
                              (str "(" (name species) ")"))))]
-    ;; How to integrate... white?={(int white?)} ws={:white-streak} si={:since-ingest}
-    (format "Tick %3d | Classic %s vs AIF %s | G_ema %s | Hive C:%s A:%s | Pop C:%02d A:%02d | White C:%02d A:%02d | Dist C:%s A:%s%s%s"
-            tick
-            (fmt-double classic)
-            (fmt-double aif)
-            ema
-            (fmt-double classic-reserve)
-            (fmt-double aif-reserve)
-            classic-count
-            aif-count
-            classic-white
-            aif-white
-            (fmt-double classic-dist)
-            (fmt-double aif-dist)
-            (if (seq action-summary)
-              (str " | " action-summary)
-              "")
-            (if termination
-              (str " | END " termination)
-              ""))))
+    (let [score-section (->> armies
+                             (map (fn [species]
+                                    (format "%s %s"
+                                            (species-label species)
+                                            (fmt-double (get scores species 0.0)))))
+                             (str/join " vs "))
+          reserve-section (->> armies
+                               (map (fn [species]
+                                      (format "%s:%s"
+                                              (species-short species)
+                                              (fmt-double (reserve-of species)))))
+                               (str/join " "))
+          pop-section (->> armies
+                           (map (fn [species]
+                                  (format "%s:%02d"
+                                          (species-short species)
+                                          (count (get ants-by-species species)))))
+                           (str/join " "))
+          white-section (->> armies
+                             (map (fn [species]
+                                    (format "%s:%02d"
+                                            (species-short species)
+                                            (white-count species))))
+                             (str/join " "))
+          dist-section (->> armies
+                            (map (fn [species]
+                                   (format "%s:%s"
+                                           (species-short species)
+                                           (fmt-double (avg-dist species)))))
+                            (str/join " "))]
+      (format "Tick %3d | Scores %s | G_ema %s | Hive %s | Pop %s | White %s | Dist %s%s%s"
+              tick
+              score-section
+              ema
+              reserve-section
+              pop-section
+              white-section
+              dist-section
+              (if (seq action-summary)
+                (str " | " action-summary)
+                "")
+              (if termination
+                (str " | END " termination)
+                "")))))
 
 (defn- queen-status-line
   [world]
-  (let [fmt (fn [species label]
+  (let [armies (or (:armies world) [:classic :aif])
+        fmt (fn [species]
               (let [reserves (double (or (get-in world [:colonies species :reserves]) 0.0))
                     starved (int (or (get-in world [:colonies species :starved-ticks]) 0))]
                 (format "%s %s (starve %d)"
-                        label
+                        (species-short species)
                         (fmt-double reserves)
                         starved)))]
-    (str "Queen " (fmt :classic "C") " | " (fmt :aif "A"))))
+    (str "Queen " (str/join " | " (map fmt armies)))))
 
 (defn- ant-health-line
   [world]
   (let [crit-thresh 0.85
-        fmt (fn [species label]
+        armies (or (:armies world) [:classic :aif])
+        fmt (fn [species]
               (let [ants (filter #(= (:species %) species) (vals (:ants world)))
                     cnt (max 1 (count ants))
                     hs (map #(double (or (:h %) 0.0)) ants)
@@ -141,13 +174,13 @@
                     crit (count (filter #(>= % crit-thresh) hs))
                     alive (count ants)]
                 (format "%s h %s/%s ingest %s crit %d/%d"
-                        label
+                        (species-short species)
                         (fmt-double avg-h)
                         (fmt-double min-h)
                         (fmt-double avg-ingest)
                         crit
                         alive)))]
-    (str "Ants " (fmt :classic "C") " | " (fmt :aif "A"))))
+    (str "Ants " (str/join " | " (map fmt armies)))))
 
 (defn visual-summary
   "Compose an overlay string suitable for the Swing visualization label.

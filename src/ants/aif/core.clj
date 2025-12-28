@@ -62,8 +62,11 @@
     (reduce merge* {} (remove nil? ms))))
 
 (defn- aif-config
-  [world]
-  (merge-deep default-aif-config (get-in world [:config :aif])))
+  [world ant]
+  (let [base (merge-deep default-aif-config (get-in world [:config :aif]))]
+    (if-let [override (:aif-config ant)]
+      (merge-deep base override)
+      base)))
 
 (defn dhdt
   "Return hunger trend (last - first) over the stored recent window."
@@ -122,7 +125,7 @@
    (aif-step world ant nil))
   ([world ant {:keys [actions] :as opts}]
    (let [ant (ensure-aif-baseline ant)
-         cfg (aif-config world)
+         cfg (aif-config world ant)
          precision-cfg (:precision cfg)
          trend-window (get-in cfg [:trend :window]
                               (get-in default-aif-config [:trend :window]))

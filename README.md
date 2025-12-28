@@ -85,6 +85,31 @@ The non-blocking form returns handles to the frame and world atom so you can ins
 
 Refer to `AGENTS.md` for an agent-state contract and helper semantics.
 
+Observation vector ordering (the `sense->vector` ABI):
+
+```clojure
+[:food :pher :food-trace :pher-trace :home-prox :enemy-prox :h :ingest
+ :friendly-home :trail-grad :novelty :dist-home :reserve-home :cargo]
+```
+
+### Cyber-AIF Armies
+
+You can now swap the classic faction for Futon3-derived cyber-ants. The Futon5
+`cyber_ants` operator reads pattern descriptions under `futon3/library/ants/`
+and emits configs Futon2 applies on a per-ant basis. Configure the matchup via
+`war/run` or the CLI:
+
+```clojure
+(war/run {:armies [:cyber :aif]
+          :cyber {:pattern :cyber/white-space-scout}
+          :ants-per-side 6})
+```
+
+Cyber ants reuse the AIF brain but carry pattern-specific `:aif-config` data,
+so you can flash alternative behaviour (baseline, white-space scout, hunger ↔
+precision coupling) without editing the simulation code. The HUD, scoreboard,
+and Swing visualizer automatically display whichever species you choose.
+
 ## Configuration
 
 `ants.war/default-config` covers grid size, food/pheromone caps, agents per side, EMA smoothing, tick count, and the hunger system. Override keys via the map passed to `war/run` or CLI args (ticks shorthand).
