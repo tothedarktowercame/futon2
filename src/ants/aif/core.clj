@@ -3,7 +3,8 @@
   (:require [ants.aif.affect :as affect]
             [ants.aif.observe :as observe]
             [ants.aif.perceive :as perceive]
-            [ants.aif.policy :as policy]))
+            [ants.aif.policy :as policy]
+            [ants.aif.pattern-sense :as pattern-sense]))
 
 (def default-aif-config
   {:preferences {:hunger {:mean 0.40 :sd 0.08}
@@ -130,6 +131,12 @@
          trend-window (get-in cfg [:trend :window]
                               (get-in default-aif-config [:trend :window]))
          observation (observe/g-observe world ant)
+         ;; Add pattern features if cyber-pattern is active
+         pattern-feats (when (get-in ant [:cyber-pattern :id])
+                         (pattern-sense/pattern-features ant observation))
+         observation (if pattern-feats
+                       (assoc observation :pattern pattern-feats)
+                       observation)
          recent (append-recent (:recent ant)
                                observation
                                trend-window
@@ -189,7 +196,9 @@
                                 :last-G (:G action-stats)
                                 :last-policy policy
                                 :need-error need
-                                :dhdt hunger-trend))]
+                                :dhdt hunger-trend)
+                         ;; Increment pattern ticks-active counter
+                         pattern-sense/increment-ticks-active)]
      {:ant updated-ant
       :action chosen
       :observation observation
@@ -205,4 +214,10 @@
                     :info (:info action-stats)
                     :colony (:colony action-stats)
                     :survival (:survival action-stats)
-                    :action-cost (:action-cost action-stats)}})))
+                    :action-cost (:action-cost action-stats)}
+      ;; Pattern trace for FuLab integration
+      :pattern-trace (when pattern-feats
+                       {:id (:pattern/active pattern-feats)
+                        :aligned? (:pattern/mode-aligned? pattern-feats)
+                        :constraint-ok? (:pattern/constraint-ok? pattern-feats)
+                        :ticks-active (get-in updated-ant [:cyber-pattern :ticks-active])})})))
