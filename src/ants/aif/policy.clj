@@ -1,6 +1,7 @@
 (ns ants.aif.policy
   "Action evaluation via 1-step expected free energy and softmax selection."
   (:require [ants.aif.observe :as observe]
+            [ants.aif.pattern-efe :as pattern-efe]
             [clojure.math :as math]))
 
 (def default-actions
@@ -489,6 +490,9 @@
         lambda (ensure-efe-lambda (get efe :lambda))
         colony-cfg (ensure-colony-config (get efe :colony))
         survival-cfg (ensure-survival-config (get efe :survival))
+        pattern-id (get-in observation [:pattern :pattern/active])
+        pattern (when pattern-id
+                  (pattern-efe/pattern-efe pattern-id action observation {:efe efe}))
         risk (risk-from-preferences outcome prefs)
         ambiguity (expected-ambiguity prec outcome)
         info (info-gain observation outcome)
@@ -503,13 +507,15 @@
              (* (:colony lambda) colony)
              (* (:survival lambda) survival)
              prior
-             (- (* (:info lambda) info)))]
+             (- (* (:info lambda) info))
+             (or (:G pattern) 0.0))]
     {:G G
      :risk risk
      :ambiguity ambiguity
      :info info
      :colony colony
      :survival survival
+     :pattern pattern
      :action-cost prior
      :outcome outcome}))
 

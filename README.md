@@ -92,6 +92,14 @@ Observation vector ordering (the `sense->vector` ABI):
  :friendly-home :trail-grad :novelty :dist-home :reserve-home :cargo]
 ```
 
+Note: the observation map also carries `:hunger`, `:recent-gather`, and `:white?`
+keys; the vector ABI intentionally omits those extras.
+
+## Devmap
+
+The prototype roadmap lives in `../futon3/holes/futon2.devmap`. This README
+tracks the runnable entry points and architecture notes that back the devmap.
+
 ### Cyber-AIF Armies
 
 You can now swap the classic faction for Futon3-derived cyber-ants. The Futon5

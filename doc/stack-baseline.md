@@ -7,6 +7,14 @@ This note captures the active inference loop for Futon2 plus the reproducible si
 1. **Observe** (`ants.aif.observe/g-observe`)
    - Reads the local grid cell, neighbour statistics, resource reserves, and ant memory.
    - Normalises every scalar to `[0,1]`, including derived channels such as `:trail-grad`, `:novelty`, `:dist-home`, and reserve pressure. Observation vectors are exported through `sense->vector`, locking the ABI ordering the README mentions.
+
+   `sense->vector` ordering (the ABI):
+   ```clojure
+   [:food :pher :food-trace :pher-trace :home-prox :enemy-prox :h :ingest
+    :friendly-home :trail-grad :novelty :dist-home :reserve-home :cargo]
+   ```
+   Note: the observation map also carries `:hunger`, `:recent-gather`, and
+   `:white?` keys that are intentionally excluded from the vector ABI.
 2. **Perceive** (`ants.aif.perceive/perceive`)
    - Seeds or updates the latent belief `mu` with position, goal, hunger and sensory predictions.
    - Runs predictive-coding micro-steps (defaults: 4 iterations, `alpha=0.45`, `beta=0.28`) that
