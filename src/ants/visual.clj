@@ -136,86 +136,89 @@
   [world-atom scale grid-height]
   (let [width 170
         height (* scale grid-height)
-        preferred (Dimension. width height)]
-    (doto
-     (proxy [JPanel] []
-       (getPreferredSize [] preferred)
-       (paintComponent [^Graphics g]
-         (proxy-super paintComponent g)
-         (let [w (.getWidth this)
-               h (.getHeight this)
-               padding 10
-               bar-width (- w (* 2 padding))
-               bar-height 12
-               line-gap 6
-               row-gap 18
-               y-start padding]
-           (.setColor g (Color. 250 250 252))
-           (.fillRect g 0 0 w h)
-           (when-let [world @world-atom]
-             (let [queen-initial (double (or (get-in world [:config :hunger :queen :initial]) 1.0))
-                   species-info (or (:armies world) [:classic :aif])]
-               (loop [[species & more] species-info
-                      y y-start]
-                 (when species
-                   (let [label (species-label species)
-                         color (species-color species)
-                         reserves (double (or (get-in world [:colonies species :reserves]) 0.0))
-                         starved (int (or (get-in world [:colonies species :starved-ticks]) 0))
-                         ratio (if (pos? queen-initial)
-                                 (clamp (/ reserves queen-initial) 0.0 1.0)
-                                 0.0)
-                         fill-width (int (* bar-width ratio))
-                         label-y (+ y 11)]
-                     (.setColor g (Color. 40 40 40))
-                     (.drawString g (str label " queen") padding label-y)
-                     (let [bar-y (+ y 14)]
-                       (.setColor g (Color. 230 230 230))
-                       (.fillRect g padding bar-y bar-width bar-height)
-                       (.setColor g color)
-                       (.fillRect g padding bar-y fill-width bar-height)
-                       (.setColor g (Color. 120 120 120))
-                       (.drawRect g padding bar-y (dec bar-width) (dec bar-height))
-                       (.setColor g (Color. 60 60 60))
-                       (.drawString g (format "%.2f" reserves)
-                                    padding
-                                    (+ bar-y bar-height 14))
-                       (.drawString g (str "starve " starved)
-                                    (+ padding 90)
-                                    (+ bar-y bar-height 14))
-                       (let [ants (->> (:ants world)
-                                       vals
-                                       (filter #(= (:species %) species))
-                                       (sort-by :id))
-                             ants-start (+ bar-y bar-height 28)]
-                        (.setColor g (Color. 40 40 40))
-                        (.drawString g (str label " ants") padding (+ ants-start -4))
-                         (loop [xs ants
-                                idx 0
-                                y-pos (+ ants-start 4)]
-                           (when-let [ant (first xs)]
-                             (let [hunger (double (or (:h ant) 0.0))
-                                   ingest (double (or (:ingest ant) 0.0))
-                                   bar-y2 (+ y-pos (* idx (+ bar-height line-gap)))
-                                   fill (int (* bar-width hunger))
-                                   color-h (hunger-color hunger)
-                                   id-text (name (:id ant))]
-                               (.setColor g (Color. 80 80 80))
-                               (.drawString g id-text padding (+ bar-y2 10))
-                               (.setColor g (Color. 230 230 230))
-                               (.fillRect g padding (+ bar-y2 12) bar-width bar-height)
-                               (.setColor g color-h)
-                               (.fillRect g padding (+ bar-y2 12) fill bar-height)
-                               (.setColor g (Color. 120 120 120))
-                               (.drawRect g padding (+ bar-y2 12) (dec bar-width) (dec bar-height))
-                               (.setColor g (Color. 60 60 60))
-                               (.drawString g (format "h=%.2f ing=%.2f" hunger ingest)
-                                            padding
-                                            (+ bar-y2 28))
-                               (recur (rest xs) (inc idx) y-pos))))
-                         (let [next-y (+ ants-start (* (max 0 (dec (count ants))) (+ bar-height line-gap)) 50)]
-                           (recur more next-y))))))))))
-      (.setPreferredSize preferred))))
+        preferred (Dimension. width height)
+        panel (proxy [JPanel] []
+                (getPreferredSize [] preferred)
+                (paintComponent [^Graphics g]
+                  (proxy-super paintComponent g)
+                  (let [w (.getWidth this)
+                        h (.getHeight this)
+                        padding 10
+                        bar-width (- w (* 2 padding))
+                        bar-height 12
+                        line-gap 6
+                        row-gap 18
+                        y-start padding]
+                    (.setColor g (Color. 250 250 252))
+                    (.fillRect g 0 0 w h)
+                    (when-let [world @world-atom]
+                      (let [queen-initial (double (or (get-in world [:config :hunger :queen :initial]) 1.0))
+                            species-info (or (:armies world) [:classic :aif])]
+                        (loop [[species & more] species-info
+                               y y-start]
+                          (when species
+                            (let [label (species-label species)
+                                  color (species-color species)
+                                  reserves (double (or (get-in world [:colonies species :reserves]) 0.0))
+                                  starved (int (or (get-in world [:colonies species :starved-ticks]) 0))
+                                  ratio (if (pos? queen-initial)
+                                          (clamp (/ reserves queen-initial) 0.0 1.0)
+                                          0.0)
+                                  fill-width (int (* bar-width ratio))
+                                  label-y (+ y 11)]
+                              (.setColor g (Color. 40 40 40))
+                              (.drawString g (str label " queen") padding label-y)
+                              (let [bar-y (+ y 14)]
+                                (.setColor g (Color. 230 230 230))
+                                (.fillRect g padding bar-y bar-width bar-height)
+                                (.setColor g color)
+                                (.fillRect g padding bar-y fill-width bar-height)
+                                (.setColor g (Color. 120 120 120))
+                                (.drawRect g padding bar-y (dec bar-width) (dec bar-height))
+                                (.setColor g (Color. 60 60 60))
+                                (.drawString g (format "%.2f" reserves)
+                                             padding
+                                             (+ bar-y bar-height 14))
+                                (.drawString g (str "starve " starved)
+                                             (+ padding 90)
+                                             (+ bar-y bar-height 14))
+                                (let [ants (->> (:ants world)
+                                                vals
+                                                (filter #(= (:species %) species))
+                                                (sort-by :id))
+                                      ants-start (+ bar-y bar-height 28)
+                                      next-y (+ ants-start
+                                                (* (max 0 (dec (count ants)))
+                                                   (+ bar-height line-gap))
+                                                50)]
+                                  (.setColor g (Color. 40 40 40))
+                                  (.drawString g (str label " ants") padding (+ ants-start -4))
+                                  (loop [xs ants
+                                         idx 0
+                                         y-pos (+ ants-start 4)]
+                                    (when-let [ant (first xs)]
+                                      (let [hunger (double (or (:h ant) 0.0))
+                                            ingest (double (or (:ingest ant) 0.0))
+                                            bar-y2 (+ y-pos (* idx (+ bar-height line-gap)))
+                                            fill (int (* bar-width hunger))
+                                            color-h (hunger-color hunger)
+                                            id-text (name (:id ant))]
+                                        (.setColor g (Color. 80 80 80))
+                                        (.drawString g id-text padding (+ bar-y2 10))
+                                        (.setColor g (Color. 230 230 230))
+                                        (.fillRect g padding (+ bar-y2 12) bar-width bar-height)
+                                        (.setColor g color-h)
+                                        (.fillRect g padding (+ bar-y2 12) fill bar-height)
+                                        (.setColor g (Color. 120 120 120))
+                                        (.drawRect g padding (+ bar-y2 12) (dec bar-width) (dec bar-height))
+                                        (.setColor g (Color. 60 60 60))
+                                        (.drawString g (format "h=%.2f ing=%.2f" hunger ingest)
+                                                     padding
+                                                     (+ bar-y2 28))
+                                        (recur (rest xs) (inc idx) y-pos))))
+                                  (recur more next-y)))))))))))]
+    (.setPreferredSize panel preferred)
+    panel))
 
 (defn- update-ui!
   [panel label stats-panel world]

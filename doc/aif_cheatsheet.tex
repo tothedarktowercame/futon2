@@ -1,0 +1,330 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{enumitem}
+
+\title{AIF Cheatsheet for clj-ants-aif}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section*{Purpose}
+This is a short, technical map of the Active Inference Framework (AIF) in this repo.
+It is intended for a collaborator who knows modeling and inference, but is new to this codebase.
+
+\section*{Definitions and Core Equation}
+\textbf{Notation used in this repo} (matches field names in the AIF result maps):
+\begin{itemize}[leftmargin=*]
+  \item $o$ --- observation (normalized sensory evidence map from \texttt{observe/g-observe}).
+  \item $a$ --- action (one of \texttt{:forage}, \texttt{:return}, \texttt{:pheromone}, \texttt{:hold}).
+  \item $\mu$ --- latent beliefs (map under \texttt{:mu}, including position, goal, hunger, and predicted senses).
+  \item $\Pi_o$ --- observation precision (map under \texttt{:prec :Pi-o}, per-sensory channel weights).
+  \item $\tau$ --- action temperature (policy precision) used in softmax over $-G/\tau$.
+  \item $G$ --- expected free energy for an action (scalar per action, lower is better).
+\end{itemize}
+
+\textbf{Typical AIF policy equation} (as implemented here, in words and weights):
+\begin{equation*}
+G(a) = \lambda_p\,\text{risk}(a) + \lambda_a\,\text{ambiguity}(a)
+      + \lambda_c\,\text{colony}(a) + \lambda_s\,\text{survival}(a)
+      - \lambda_i\,\text{info}(a) + \text{action-cost}(a)
+\end{equation*}
+Actions are sampled via a softmax over $-G/\tau$; $\tau$ is coupled to hunger,
+survival pressure, and colony reserve levels (see \texttt{ants.aif.policy}).
+
+\section*{Where AIF Lives}
+Core entry points (all pure, no world mutation):
+\begin{itemize}[leftmargin=*]
+  \item \texttt{src/ants/aif/core.clj} -- orchestration of observe $\to$ perceive $\to$ policy
+  \item \texttt{src/ants/aif/observe.clj} -- sensory normalization into observation vectors
+  \item \texttt{src/ants/aif/perceive.clj} -- predictive-coding micro-steps (belief updates)
+  \item \texttt{src/ants/aif/policy.clj} -- expected free energy (EFE) evaluation and softmax action choice
+  \item \texttt{src/ants/war.clj} -- scenario wiring and call site for AIF vs classic ants
+\end{itemize}
+
+\section*{Agent and World Model (Contract)}
+The core contract (\texttt{AGENTS.md}):
+\begin{itemize}[leftmargin=*]
+  \item An ant's \emph{state} is its grid location stored in a Clojure \texttt{agent}.
+  \item Mutable attributes live in the \emph{cell map} at that location:
+  \texttt{@(place loc) => \{:ant \{...\} :food ... :pher ... :home ...\}}.
+  \item A brain is a function \texttt{(loc) -> next-loc} that mutates the world inside a \texttt{dosync}.
+\end{itemize}
+
+AIF ant attributes (in the cell map) include:
+\begin{itemize}[leftmargin=*]
+  \item \texttt{:dir}, \texttt{:species :aif}, \texttt{:brain :aif}
+  \item Latent state \texttt{:mu}: \texttt{\{:pos [x y] :goal [gx gy] :h hunger\}}
+  \item Precision \texttt{:prec}: \texttt{\{:Pi-o \{sensory precisions\} :tau action temperature\}}
+\end{itemize}
+
+\section*{AIF Loop (per tick)}
+The function \texttt{ants.aif.core/aif-step} is pure and returns a rich result map.
+Pipeline:
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Observe} \newline
+  \texttt{observe/g-observe} normalizes local evidence (food, pheromone, proximity to home, etc.)
+  into a map with values in $[0,1]$.
+
+  \item \textbf{Perceive} \newline
+  \texttt{perceive/perceive} runs capped micro-steps (predictive coding). It updates
+  $\mu$ (beliefs) and precision, tracks free-energy proxy, and returns a trace.
+
+  \item \textbf{Policy} \newline
+  \texttt{policy/choose-action} computes one-step expected free energy $G$ for each action,
+  applies biases and constraints, and samples via softmax using temperature $\tau$.
+\end{enumerate}
+
+The output includes the updated ant and diagnostics:
+\begin{lstlisting}[basicstyle=\ttfamily\small]
+{:ant updated-ant
+ :action chosen
+ :observation observation
+ :perception perception
+ :policy policy
+ :G ... :P ...
+ :diagnostics {:need ... :dhdt ... :tau ...}}
+\end{lstlisting}
+
+\section*{Observation Model (evidence)}
+\texttt{observe/g-observe} computes normalized features, including:
+\begin{itemize}[leftmargin=*]
+  \item \texttt{:food}, \texttt{:pher}, \texttt{:food-trace}, \texttt{:pher-trace}
+  \item \texttt{:home-prox}, \texttt{:enemy-prox}, \texttt{:dist-home}, \texttt{:reserve-home}
+  \item \texttt{:h} (hunger), \texttt{:ingest}, \texttt{:cargo}, \texttt{:trail-grad}, \texttt{:novelty}
+  \item \texttt{:friendly-home} (1 on own nest cell), \texttt{:white?} low-signal flag
+\end{itemize}
+A consistent ordering is defined by \texttt{observe/sense->vector}.
+
+\section*{Perception Model (predictive coding)}
+\texttt{perceive/perceive} iterates $N$ micro-steps:
+\begin{itemize}[leftmargin=*]
+  \item Maintain latent state $\mu$ with \texttt{:sens} predictions for each sensory key.
+  \item Compute prediction errors with precision $\Pi_o$.
+  \item Update predicted sensory beliefs and hunger $h$.
+  \item Track a free-energy proxy via weighted MSE of errors.
+\end{itemize}
+Defaults: \texttt{max-steps=5}, \texttt{alpha=0.55}, \texttt{beta=0.3} (see \texttt{perceive.clj}).
+
+\section*{Policy and Expected Free Energy (EFE)}
+Actions are abstract and local: \texttt{:forage}, \texttt{:return}, \texttt{:pheromone}, \texttt{:hold}.
+
+For each candidate action, the policy computes:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Risk} from preference mismatch (hunger, ingest).
+  \item \textbf{Ambiguity} via precision-weighted outcome variance.
+  \item \textbf{Information gain} (novelty and trail changes).
+  \item \textbf{Colony pressure} (reserves and return bias).
+  \item \textbf{Survival pressure} (hunger, distance, ingest).
+  \item \textbf{Action cost} (heuristic penalties).
+\end{itemize}
+
+The expected free energy is aggregated as:
+\begin{equation*}
+G = \lambda_p \cdot \text{risk} + \lambda_a \cdot \text{ambiguity}
+    + \lambda_c \cdot \text{colony} + \lambda_s \cdot \text{survival}
+    - \lambda_i \cdot \text{info} + \text{action-cost}.
+\end{equation*}
+
+Action probabilities use a softmax over $-G/\tau$, where $\tau$ is modulated by
+hunger, survival pressure, and colony reserve status.
+
+\section*{Key Configuration Knobs}
+Default AIF config is in \texttt{ants.aif.core/default-aif-config}:
+\begin{itemize}[leftmargin=*]
+  \item Preferences: target mean/sd for hunger and ingest.
+  \item Precision control: $\tau$ floor/cap, gains for reserve and survival coupling.
+  \item EFE weights: \texttt{:pragmatic}, \texttt{:ambiguity}, \texttt{:info}, \texttt{:colony}, \texttt{:survival}.
+  \item Mode thresholds and heuristics for action gating.
+\end{itemize}
+
+\section*{How It Connects to the Simulation}
+\begin{itemize}[leftmargin=*]
+  \item \texttt{ants.war/step} calls \texttt{aif-step} for AIF ants and then applies
+  the chosen action to the world state (inside STM transaction).
+  \item The HUD log (\texttt{ants.ui}) prints per-tick scores and a detailed AIF line
+  for a designated ant (Alice, id 5).
+\end{itemize}
+
+\section*{Useful References}
+\begin{itemize}[leftmargin=*]
+  \item \texttt{README.md}: high-level overview and entry points.
+  \item \texttt{doc/stack-baseline.md}: an annotated single-tick trace and data contracts.
+  \item \texttt{tools/trace\_tick.clj}: helper to inspect a single AIF step.
+\end{itemize}
+
+\section*{Worked Example (Single Tick)}
+This example mirrors the shape of a real trace (see \texttt{doc/stack-baseline.md}).
+Start from a world and an ant, then run:
+\begin{lstlisting}[basicstyle=\ttfamily\small]
+(require '[ants.aif.core :as core])
+(let [{:keys [observation perception policy action]} (core/aif-step world ant)]
+  [(:food observation) (:pher observation) (:home-prox observation)
+   (:h observation) (:ingest observation) action])
+;; => [0.12 0.05 0.78 0.43 0.62 :return]
+\end{lstlisting}
+
+Interpretation:
+\begin{itemize}[leftmargin=*]
+  \item The ant is near home (\texttt{:home-prox 0.78}) with moderate hunger.
+  \item Policy selects \texttt{:return}, consistent with cargo/home bias and colony pressure.
+  \item The full \texttt{:policy} map includes per-action $G$ values and probabilities.
+  \item \texttt{:perception} includes a micro-step trace with $\tau$ and error summaries.
+\end{itemize}
+
+\section*{Adapting AIF to Pattern-Guided Agents}
+When we adapt the ant AIF loop to pattern-guided coding agents (fuclaude/fucodex),
+the same variables are reused with different semantics.
+
+\textbf{Reinterpreted variables}:
+\begin{itemize}[leftmargin=*]
+  \item $o$ --- observation becomes a structured summary of the session state
+  (trace events, anchors, tool results, and user feedback).
+  \item $a$ --- action becomes a candidate pattern choice (e.g., a pattern ID).
+  \item $\mu$ --- beliefs become the agent's state about task progress, fit of
+  patterns, and uncertainty about outcomes.
+  \item $\Pi_o$ --- observation precision becomes trust in evidence sources
+  (e.g., trace anchors vs. narrative claims).
+  \item $\tau$ --- policy precision becomes confidence in pattern selection; it
+  controls how strongly the agent commits to a chosen pattern.
+  \item $G$ --- expected free energy becomes a score over candidate patterns,
+  combining fit, risk, and information value.
+\end{itemize}
+
+\textbf{Record shapes}:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{PSR} (Pattern Selection Record) logs the selected pattern,
+  candidates considered, and forecasted outcomes.
+  \item \textbf{PUR} (Pattern Use Record) logs the outcome after applying the
+  pattern and updates beliefs/precision.
+\end{itemize}
+
+\textbf{Key adaptation}: the ant action loop is preserved, but the world and
+action space are replaced by a pattern catalog and a session trace. This keeps
+the AIF mechanics intact while grounding them in auditable evidence.
+
+\section*{Further Reading (AIF at the Implementation Level)}
+
+This list is curated for readers who already understand probabilistic modeling
+and control, and want to understand how Active Inference is operationalised in
+codebases like this one (one-step EFE, precision control, softmax policies,
+predictive coding loops).
+
+\subsection*{Foundational but Practical}
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Karl Friston et al.} (2017).
+  \emph{Active Inference: A Process Theory}.
+  \newline
+  This is the most implementation-oriented of Friston’s core papers.
+  It introduces expected free energy, risk vs ambiguity, and the softmax
+  policy update in a form close to what is implemented here.
+  \newline
+  \url{https://www.sciencedirect.com/science/article/pii/S0022249617300969}
+
+  \item \textbf{Friston, Parr, de Vries} (2017).
+  \emph{The Graphical Brain}.
+  \newline
+  Useful for understanding predictive coding as message passing with precision
+  weighting, without committing to biological realism.
+  \newline
+  \url{https://arxiv.org/abs/1702.02297}
+\end{itemize}
+
+\subsection*{Expected Free Energy and Action Selection}
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Parr \& Friston} (2019).
+  \emph{Generalised Free Energy and Active Inference}.
+  \newline
+  Clarifies the decomposition of expected free energy into pragmatic
+  (risk/survival) and epistemic (information gain) terms.
+  This directly maps to the $\lambda$-weighted $G$ aggregation used here.
+  \newline
+  \url{https://arxiv.org/abs/1807.08475}
+
+  \item \textbf{Da Costa et al.} (2020).
+  \emph{Active Inference on Discrete State-Spaces}.
+  \newline
+  Highly recommended for readers coming from reinforcement learning.
+  It shows discrete actions, categorical observations, and explicit softmax
+  policies over $-G$.
+  \newline
+  \url{https://arxiv.org/abs/2001.07299}
+\end{itemize}
+
+\subsection*{Precision, Temperature, and Control}
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Parr, Corcoran, Friston} (2019).
+  \emph{Attention, Precision, and Active Inference}.
+  \newline
+  The clearest treatment of precision as a control variable rather than a
+  statistical nuisance. Useful for understanding $\Pi_o$ and $\tau$ as
+  dynamically modulated parameters.
+  \newline
+  \url{https://www.sciencedirect.com/science/article/pii/S1053811919306287}
+
+  \item \textbf{Schwartenbeck et al.} (2015).
+  \emph{Exploration, Novelty, Surprise, and Free Energy}.
+  \newline
+  A good reference for the epistemic (information-seeking) term in $G$,
+  especially when novelty heuristics are used.
+  \newline
+  \url{https://www.frontiersin.org/articles/10.3389/fpsyg.2015.01209/full}
+\end{itemize}
+
+\subsection*{Code-Oriented and Comparative}
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{pymdp} (Parr et al.).
+  \emph{A Python Library for Active Inference}.
+  \newline
+  Not because this repo follows it, but because it makes design choices explicit
+  (factorised states, discrete policies, one-step vs multi-step planning).
+  Useful for comparison.
+  \newline
+  \url{https://github.com/infer-actively/pymdp}
+
+  \item \textbf{Buckley et al.} (2017).
+  \emph{The Free Energy Principle for Action and Perception}.
+  \newline
+  A compact survey that situates AIF relative to RL and control theory.
+  Good for collaborators who want orientation without metaphysics.
+  \newline
+  \url{https://arxiv.org/abs/1705.10033}
+\end{itemize}
+
+\subsection*{Bridges to Pattern-Guided or Cognitive Agents}
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Friston et al.} (2021).
+  \emph{Planning as Inference}.
+  \newline
+  Helpful for understanding why AIF ports cleanly from spatial agents
+  (ants) to abstract action spaces (patterns, plans, code moves).
+  \newline
+  \url{https://www.sciencedirect.com/science/article/pii/S0893608021000670}
+
+  \item \textbf{Tschantz et al.} (2020).
+  \emph{Learning Action-Oriented Models through Active Inference}.
+  \newline
+  Useful when extending from fixed heuristics to learned priors or pattern
+  preferences.
+  \newline
+  \url{https://arxiv.org/abs/2006.09003}
+\end{itemize}
+
+\paragraph{Reading strategy.}
+For collaborators working on this repo, a good sequence is:
+\newline
+(1) Da Costa et al. (discrete AIF),
+(2) Parr \& Friston (EFE decomposition),
+(3) Attention/precision paper,
+then skim pymdp to calibrate implementation choices.
+
+\end{document}
