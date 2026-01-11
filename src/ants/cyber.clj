@@ -99,12 +99,19 @@
 ;; -----------------------------------------------------------------------------
 ;; Pattern loading
 
+(defn- pattern-filename
+  "Resolve a pattern filename from a pattern key.
+   Falls back to <keyword-name>.flexiarg when not in the mapping."
+  [pattern-key]
+  (or (get pattern-key->filename pattern-key)
+      (str (name pattern-key) ".flexiarg")))
+
 (defn- pattern-file
   "Get the File for a pattern key."
   [pattern-key]
-  (when-let [filename (get pattern-key->filename pattern-key)]
-    (let [f (io/file pattern-root filename)]
-      (when (.exists f) f))))
+  (let [filename (pattern-filename pattern-key)
+        f (io/file pattern-root filename)]
+    (when (.exists f) f)))
 
 (defn- load-flexiarg
   "Load and parse a flexiarg file, returning pattern metadata."
@@ -133,7 +140,9 @@
       (->> (.listFiles dir)
            (filter #(str/ends-with? (.getName %) ".flexiarg"))
            (keep (fn [f]
-                   (when-let [pk (get filename->pattern-key (.getName f))]
+                   (let [name (.getName f)
+                         pk (or (get filename->pattern-key name)
+                                (keyword "cyber" (str/replace name #"\.flexiarg$" "")))]
                      {:id pk
                       :file (.getPath f)})))
            vec)

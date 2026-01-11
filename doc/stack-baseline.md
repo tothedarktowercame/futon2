@@ -15,6 +15,7 @@ This note captures the active inference loop for Futon2 plus the reproducible si
    ```
    Note: the observation map also carries `:hunger`, `:recent-gather`, and
    `:white?` keys that are intentionally excluded from the vector ABI.
+
 2. **Perceive** (`ants.aif.perceive/perceive`)
    - Seeds or updates the latent belief `mu` with position, goal, hunger and sensory predictions.
    - Runs predictive-coding micro-steps (defaults: 4 iterations, `alpha=0.45`, `beta=0.28`) that
@@ -23,12 +24,15 @@ This note captures the active inference loop for Futon2 plus the reproducible si
      * apply hunger drift via `affect/tick-hunger`
      * append trace rows `{:tau … :h … :error …}` for every micro-step.
    - Returns `{:mu … :prec … :trace …}`, so callers can snapshot beliefs without extra APIs.
+
 3. **Affect** (inside `ants.aif.core/aif-step`)
    - Tracks hunger trend windows (`core/dhdt`) and need error.
    - Calls `affect/update-tau` to incorporate hunger velocity and reserve pressure into the precision structure.
+
 4. **Policy** (`ants.aif.policy/choose-action`)
    - Predicts outcomes for each macro action, scores them via expected free energy plus hand-tuned biases, and softmaxes the logits with the hunger-modulated `tau`.
    - Returns `{:action … :policies {action {:G … :p …}} :tau …}`. This is the contract enforced by the new harness goldens.
+
 5. **Act & world update** (`ants.war` helpers like `move`, `turn`, `take-food`, `drop-food`)
    - `ants.war/step` calls the chosen action inside a `dosync` transaction, mutating grid cells (food, pheromones, ant occupancy) and colony reserves.
    - This keeps `core/aif-step` pure while still tracing the full loop from sensory keys to world state updates each tick.
