@@ -15,10 +15,24 @@
     (coll? value) (count value)
     :else 1))
 
+(defn- uncertainty-score [value]
+  (cond
+    (nil? value) 1.0
+    (number? value) (double (max 0.1 value))
+    (string? value) (double (max 1 (count (str/split value #"\s+"))))
+    (coll? value) (double (max 1 (count value)))
+    :else 1.0))
+
 (def default-config
   {:g/weights {:base 0.1
                :anchors 0.05
                :forecast 0.02}
+   :evidence/weights {:read -0.02
+                      :off-trail 0.12
+                      :implement -0.08
+                      :update -0.05}
+   :evidence/min -0.3
+   :evidence/max 0.3
    :tau/scale 1.0
    :tau/min 0.1
    :tau/max 2.0
@@ -26,6 +40,7 @@
 
 (defn- clamp [value min-val max-val]
   (-> value (max min-val) (min max-val)))
+
 
 (defn- compute-g [candidate context config]
   (let [{:keys [anchors forecast]} (:g/weights config)
@@ -37,13 +52,50 @@
     (+ (if (number? candidate-score)
          (double candidate-score)
          (double (/ (text-score candidate) 10.0)))
+
+(defn- normalize-action [action]
+  (cond
+    (keyword? action) action
+    (string? action) (keyword action)
+    :else :unknown))
+
+(defn- candidate-base-score [candidate context]
+  (if-let [score (get-in context [:candidate-scores candidate])]
+    (double score)
+    (text-score candidate)))
+
+(defn- evidence-score [state candidate config]
+  (let [weights (merge (:evidence/weights default-config)
+                       (:evidence/weights config))
+        counts (get-in state [:pattern-evidence candidate])
+        raw (reduce-kv (fn [acc action count]
+                         (+ acc (* (double (get weights action 0.0))
+                                   (double (or count 0)))))
+                       0.0
+                       (or counts {}))]
+    (clamp raw
+           (double (or (:evidence/min config) (:evidence/min default-config)))
+           (double (or (:evidence/max config) (:evidence/max default-config))))))
+
+(defn- compute-g [candidate state context config]
+  (let [{:keys [base anchors forecast]} (:g/weights config)
+        base-score (candidate-base-score candidate context)
+        anchor-score (text-score (:anchors context))
+        forecast-score (text-score (:forecast context))
+        evidence (evidence-score state candidate config)]
+    (+ (* base (+ base-score evidence))
+>>>>>>> c4b4c74 (Accept numeric uncertainty for AIF tau)
        (* anchors anchor-score)
        (* forecast forecast-score))))
 
 (defn- compute-tau [context config]
+<<<<<<< HEAD
   (let [uncertainty (if-let [u (:uncertainty context)]
                       (double (max 0.1 u))
                       1.0)
+=======
+  (let [uncertainty (uncertainty-score (:uncertainty context))
+>>>>>>> c4b4c74 (Accept numeric uncertainty for AIF tau)
         tau (double (/ (:tau/scale config) uncertainty))]
     (clamp tau (:tau/min config) (:tau/max config))))
 
@@ -100,8 +152,13 @@
           rng-value (.nextDouble rng)
           sampled (sample-from-probs probs rng-value)
           ;; Use explicit choice if provided, otherwise sampled
-          chosen (or (:chosen context) sampled)
-          sampled? (and (nil? (:chosen context)) (some? sampled))]
+          ;; chosen (or (:chosen context) sampled)
+          ;; sampled? (and (nil? (:chosen context)) (some? sampled))
+          ;;                [c (compute-g c _state context config)]))
+          chosen (or (:chosen context)
+                     (when (seq candidates)
+                       (first (sort-by scored candidates))))
+          tau (compute-tau context config)]
       (let [result {:decision/id (:decision/id context)
                     :candidates candidates
                     :chosen chosen
@@ -120,18 +177,41 @@
                      result))
         result)))
   (update-beliefs [_ _state observation]
-    (let [error (double (max 0.0 (dec (text-score (:outcome observation)))))
-          tau (compute-tau observation config)]
-      (let [result {:aif/state {:belief-updated true}
-                    :aif {:prediction-error error
-                          :tau-updated tau
+    (if (and (:pattern/id observation) (:pattern/action observation))
+      (let [pattern-id (:pattern/id observation)
+            action (normalize-action (:pattern/action observation))
+            prev-score (evidence-score _state pattern-id config)
+            updated (update-in _state [:pattern-evidence pattern-id action] (fnil inc 0))
+            next-score (evidence-score updated pattern-id config)
+            counts (get-in updated [:pattern-evidence pattern-id])
+            tau (compute-tau observation config)
+            result {:aif/state updated
+                    :aif {:tau-updated tau
+                          :evidence-score next-score
+                          :evidence-delta (when (and (number? next-score) (number? prev-score))
+                                            (- (double next-score) (double prev-score)))
+                          :evidence-counts counts
                           :belief-delta {:decision/id (:decision/id observation)
-                                         :status (or (:status observation) :unknown)}}}]
+                                         :pattern/id pattern-id
+                                         :action action
+                                         :status (or (:status observation) :observed)}}}]
         (tap> (merge {:type :aif/fulab
-                      :event :update
+                      :event :pattern-action
                       :session/id (:session/id observation)}
                      result))
-        result))))
+        result)
+      (let [error (double (max 0.0 (dec (text-score (:outcome observation)))))
+            tau (compute-tau observation config)]
+        (let [result {:aif/state {:belief-updated true}
+                      :aif {:prediction-error error
+                            :tau-updated tau
+                            :belief-delta {:decision/id (:decision/id observation)
+                                           :status (or (:status observation) :unknown)}}}]
+          (tap> (merge {:type :aif/fulab
+                        :event :update
+                        :session/id (:session/id observation)}
+                       result))
+          result)))))
 
 (defn new-adapter
   ([] (->FulabAdapter default-config))
