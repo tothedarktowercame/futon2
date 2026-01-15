@@ -125,6 +125,7 @@
             (if (<= target next-acc)
               k
               (recur (rest remaining) next-acc))))))))
+              (recur (rest remaining) next-acc))))))))
 
 (defrecord FulabAdapter [config]
   adapter/AifAdapter
@@ -132,6 +133,7 @@
     (let [candidates (vec (:candidates context))
           scored (into {}
                        (for [c candidates]
+                         [c (compute-g c state context config)]))
                          [c (compute-g c state context config)]))
           tau (compute-tau context config)
           seed (or (:seed context) (stable-seed context))
@@ -171,6 +173,7 @@
                    result))
       result))
 
+  (update-beliefs [_ state observation]
   (update-beliefs [_ state observation]
     (if (and (:pattern/id observation) (:pattern/action observation))
       ;; Pattern action observation - update evidence counts
