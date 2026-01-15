@@ -36,7 +36,11 @@
    :tau/scale 1.0
    :tau/min 0.1
    :tau/max 2.0
+<<<<<<< HEAD
    :tau/min-sample 0.55})  ;; below this, abstain from auto-selection
+=======
+   :tau/min-sample 0.55})
+>>>>>>> 5924b09 (adapters)
 
 (defn- clamp [value min-val max-val]
   (-> value (max min-val) (min max-val)))
@@ -99,6 +103,7 @@
         tau (double (/ (:tau/scale config) uncertainty))]
     (clamp tau (:tau/min config) (:tau/max config))))
 
+<<<<<<< HEAD
 ;; Softmax sampling implementation
 
 (defn- compute-seed
@@ -133,6 +138,50 @@
           (if (or (nil? rest) (< rng-value cumulative))
             id
             (recur rest cumulative)))))))
+=======
+(defn- stable-seed [context]
+  (let [sid (:session/id context)
+        decision (:decision/id context)
+        candidates (:candidates context)
+        basis (str sid "|" decision "|" (str/join "," candidates))]
+    (long (hash basis))))
+
+(defn- softmax [logits]
+  (let [values (vals logits)]
+    (if (seq values)
+      (let [max-logit (apply max values)
+            exp-map (into {}
+                          (map (fn [[k v]]
+                                 [k (Math/exp (- (double v) (double max-logit)))]))
+                          logits)
+            total (reduce + (vals exp-map))]
+        (into {}
+              (map (fn [[k v]]
+                     [k (if (pos? total)
+                          (/ (double v) (double total))
+                          0.0)]))
+              exp-map))
+      {})))
+
+(defn- sample-choice [probs seed]
+  (when (seq probs)
+    (let [sorted (sort-by key probs)
+          rng (java.util.Random. (long seed))
+          target (.nextDouble rng)]
+      (loop [remaining sorted
+             acc 0.0]
+        (when-let [[k p] (first remaining)]
+          (let [next (+ acc (double p))]
+            (if (<= target next)
+              k
+              (recur (rest remaining) next))))))))
+
+(defn- logits-from-g [g-map tau]
+  (into {}
+        (map (fn [[k g]]
+               [k (/ (- (double g)) (double tau))]))
+        g-map))
+>>>>>>> 5924b09 (adapters)
 
 (defrecord FulabAdapter [config]
   adapter/AifAdapter
@@ -140,6 +189,7 @@
     (let [candidates (vec (:candidates context))
           scored (into {}
                        (for [c candidates]
+<<<<<<< HEAD
                          [c (compute-g c context config)]))
           tau (compute-tau context config)
           min-sample (or (:tau/min-sample config) 0.55)
@@ -176,6 +226,45 @@
                       :session/id (:session/id context)}
                      result))
         result)))
+=======
+                         [c (compute-g c _state context config)]))
+          tau (compute-tau context config)
+          seed (or (:seed context) (stable-seed context))
+          min-sample (double (or (:tau/min-sample config) (:tau/min config) 0.1))
+          logits (when (and (seq candidates) (pos? tau))
+                   (logits-from-g scored tau))
+          probs (when (map? logits) (softmax logits))
+          abstain? (and (nil? (:chosen context))
+                        (number? tau)
+                        (< (double tau) min-sample))
+          sampled (when (and (not abstain?) (nil? (:chosen context)) (seq probs))
+                    (sample-choice probs seed))
+          chosen (cond
+                   (:chosen context) (:chosen context)
+                   abstain? nil
+                   sampled sampled
+                   (seq candidates) (first (sort-by scored candidates))
+                   :else nil)
+          sampled? (and sampled (not= sampled (:chosen context)))
+          result {:decision/id (:decision/id context)
+                  :candidates candidates
+                  :chosen chosen
+                  :aif {:G-chosen (get scored chosen)
+                        :G-rejected (apply dissoc scored [chosen])
+                        :tau tau
+                        :logits logits
+                        :probs probs
+                        :seed seed
+                        :sampled? sampled?
+                        :abstain? abstain?
+                        :min-sample min-sample
+                        :belief-id (or (:belief-id context) (:decision/id context))}}]
+      (tap> (merge {:type :aif/fulab
+                    :event :select
+                    :session/id (:session/id context)}
+                   result))
+      result))
+>>>>>>> 5924b09 (adapters)
   (update-beliefs [_ _state observation]
     (if (and (:pattern/id observation) (:pattern/action observation))
       (let [pattern-id (:pattern/id observation)
@@ -201,17 +290,17 @@
                      result))
         result)
       (let [error (double (max 0.0 (dec (text-score (:outcome observation)))))
-            tau (compute-tau observation config)]
-        (let [result {:aif/state {:belief-updated true}
-                      :aif {:prediction-error error
-                            :tau-updated tau
-                            :belief-delta {:decision/id (:decision/id observation)
-                                           :status (or (:status observation) :unknown)}}}]
-          (tap> (merge {:type :aif/fulab
-                        :event :update
-                        :session/id (:session/id observation)}
-                       result))
-          result)))))
+            tau (compute-tau observation config)
+            result {:aif/state {:belief-updated true}
+                    :aif {:prediction-error error
+                          :tau-updated tau
+                          :belief-delta {:decision/id (:decision/id observation)
+                                         :status (or (:status observation) :unknown)}}}]
+        (tap> (merge {:type :aif/fulab
+                      :event :update
+                      :session/id (:session/id observation)}
+                     result))
+        result))))
 
 (defn new-adapter
   ([] (->FulabAdapter default-config))
