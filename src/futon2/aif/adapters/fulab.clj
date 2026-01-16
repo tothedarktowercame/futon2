@@ -1,10 +1,11 @@
 (ns futon2.aif.adapters.fulab
-  "AIF adapter for fulab (fucodex/fuclaude) with proper softmax sampling.
+  "AIF adapter for fulab (fucodex/fuclaude/fubar) with softmax sampling.
 
    Implements deterministic stochastic policy sampling:
    - Given candidates and G scores, computes softmax probabilities over -G/tau
-   - Uses seeded RNG for reproducibility: seed = hash(session-id, turn, candidates)
-   - Supports abstain policy when tau < min-sample threshold"
+   - Uses seeded RNG for reproducibility: seed = hash(session-id, decision-id, candidates)
+   - Supports abstain policy when tau < min-sample threshold
+   - Tracks pattern evidence to adjust G scores over time"
   (:require [clojure.string :as str]
             [futon2.aif.adapter :as adapter])
   (:import [java.util Random]))
@@ -36,26 +37,10 @@
    :tau/scale 1.0
    :tau/min 0.1
    :tau/max 2.0
-<<<<<<< HEAD
-   :tau/min-sample 0.55})  ;; below this, abstain from auto-selection
-=======
    :tau/min-sample 0.55})
->>>>>>> 5924b09 (adapters)
 
 (defn- clamp [value min-val max-val]
   (-> value (max min-val) (min max-val)))
-
-
-(defn- compute-g [candidate context config]
-  (let [{:keys [anchors forecast]} (:g/weights config)
-        ;; Use candidate score directly as G base (lower is better)
-        candidate-score (get (:candidate-scores context) candidate 0.5)
-        anchor-score (text-score (:anchors context))
-        forecast-score (text-score (:forecast context))]
-    ;; G = candidate score + small adjustments from anchors/forecast
-    (+ (if (number? candidate-score)
-         (double candidate-score)
-         (double (/ (text-score candidate) 10.0)))
 
 (defn- normalize-action [action]
   (cond
@@ -72,9 +57,9 @@
   (let [weights (merge (:evidence/weights default-config)
                        (:evidence/weights config))
         counts (get-in state [:pattern-evidence candidate])
-        raw (reduce-kv (fn [acc action count]
+        raw (reduce-kv (fn [acc action cnt]
                          (+ acc (* (double (get weights action 0.0))
-                                   (double (or count 0)))))
+                                   (double (or cnt 0)))))
                        0.0
                        (or counts {}))]
     (clamp raw
@@ -88,63 +73,28 @@
         forecast-score (text-score (:forecast context))
         evidence (evidence-score state candidate config)]
     (+ (* base (+ base-score evidence))
->>>>>>> c4b4c74 (Accept numeric uncertainty for AIF tau)
        (* anchors anchor-score)
        (* forecast forecast-score))))
 
 (defn- compute-tau [context config]
-<<<<<<< HEAD
-  (let [uncertainty (if-let [u (:uncertainty context)]
-                      (double (max 0.1 u))
-                      1.0)
-=======
   (let [uncertainty (uncertainty-score (:uncertainty context))
->>>>>>> c4b4c74 (Accept numeric uncertainty for AIF tau)
         tau (double (/ (:tau/scale config) uncertainty))]
     (clamp tau (:tau/min config) (:tau/max config))))
 
-<<<<<<< HEAD
 ;; Softmax sampling implementation
 
-(defn- compute-seed
-  "Deterministic seed from session-id, turn, and candidates."
-  [context]
-  (let [session-id (or (:session/id context) "default")
-        turn (or (:turn context)
-                 (some-> (:decision/id context) (str/split #":turn-") last))
-        candidates (sort (:candidates context))]
-    (hash [session-id turn candidates])))
-
-(defn- softmax-probs
-  "Compute softmax probabilities over -G/tau (lower G = higher prob).
-   Returns map of {candidate-id probability}."
-  [g-scores tau]
-  (when (seq g-scores)
-    (let [logits (map (fn [[id g]] [id (/ (- (double g)) (double tau))]) g-scores)
-          max-logit (apply max (map second logits))
-          ;; Subtract max for numerical stability
-          exp-logits (map (fn [[id l]] [id (Math/exp (- (double l) max-logit))]) logits)
-          z (reduce + (map second exp-logits))]
-      (into {} (map (fn [[id e]] [id (/ (double e) z)]) exp-logits)))))
-
-(defn- sample-from-probs
-  "Sample a candidate given probabilities and a seeded random value [0,1)."
-  [probs rng-value]
-  (when (seq probs)
-    (let [sorted (sort-by (comp - val) probs)]  ;; Sort by descending probability
-      (loop [[[id p] & rest] sorted
-             cumulative 0.0]
-        (let [cumulative (+ cumulative (double p))]
-          (if (or (nil? rest) (< rng-value cumulative))
-            id
-            (recur rest cumulative)))))))
-=======
 (defn- stable-seed [context]
   (let [sid (:session/id context)
         decision (:decision/id context)
         candidates (:candidates context)
-        basis (str sid "|" decision "|" (str/join "," candidates))]
+        basis (str sid "|" decision "|" (str/join "," (sort candidates)))]
     (long (hash basis))))
+
+(defn- logits-from-g [g-map tau]
+  (into {}
+        (map (fn [[k g]]
+               [k (/ (- (double g)) (double tau))]))
+        g-map))
 
 (defn- softmax [logits]
   (let [values (vals logits)]
@@ -166,71 +116,26 @@
 (defn- sample-choice [probs seed]
   (when (seq probs)
     (let [sorted (sort-by key probs)
-          rng (java.util.Random. (long seed))
+          rng (Random. (long seed))
           target (.nextDouble rng)]
       (loop [remaining sorted
              acc 0.0]
         (when-let [[k p] (first remaining)]
-          (let [next (+ acc (double p))]
-            (if (<= target next)
+          (let [next-acc (+ acc (double p))]
+            (if (<= target next-acc)
               k
-              (recur (rest remaining) next))))))))
-
-(defn- logits-from-g [g-map tau]
-  (into {}
-        (map (fn [[k g]]
-               [k (/ (- (double g)) (double tau))]))
-        g-map))
->>>>>>> 5924b09 (adapters)
+              (recur (rest remaining) next-acc))))))))
 
 (defrecord FulabAdapter [config]
   adapter/AifAdapter
-  (select-pattern [_ _state context]
+  (select-pattern [_ state context]
     (let [candidates (vec (:candidates context))
           scored (into {}
                        (for [c candidates]
-<<<<<<< HEAD
-                         [c (compute-g c context config)]))
-          tau (compute-tau context config)
-          min-sample (or (:tau/min-sample config) 0.55)
-          abstain? (< tau min-sample)
-          ;; Compute softmax probabilities
-          probs (softmax-probs scored tau)
-          ;; Deterministic sampling
-          seed (compute-seed context)
-          rng (Random. (long seed))
-          rng-value (.nextDouble rng)
-          sampled (sample-from-probs probs rng-value)
-          ;; Use explicit choice if provided, otherwise sampled
-          ;; chosen (or (:chosen context) sampled)
-          ;; sampled? (and (nil? (:chosen context)) (some? sampled))
-          ;;                [c (compute-g c _state context config)]))
-          chosen (or (:chosen context)
-                     (when (seq candidates)
-                       (first (sort-by scored candidates))))
-          tau (compute-tau context config)]
-      (let [result {:decision/id (:decision/id context)
-                    :candidates candidates
-                    :chosen chosen
-                    :aif {:G-chosen (get scored chosen)
-                          :G-rejected (apply dissoc scored [chosen])
-                          :tau tau
-                          :min-sample min-sample
-                          :probs probs
-                          :sampled? sampled?
-                          :abstain? abstain?
-                          :seed seed
-                          :belief-id (or (:belief-id context) (:decision/id context))}}]
-        (tap> (merge {:type :aif/fulab
-                      :event :select
-                      :session/id (:session/id context)}
-                     result))
-        result)))
-=======
-                         [c (compute-g c _state context config)]))
+                         [c (compute-g c state context config)]))
           tau (compute-tau context config)
           seed (or (:seed context) (stable-seed context))
-          min-sample (double (or (:tau/min-sample config) (:tau/min config) 0.1))
+          min-sample (double (or (:tau/min-sample config) 0.55))
           logits (when (and (seq candidates) (pos? tau))
                    (logits-from-g scored tau))
           probs (when (map? logits) (softmax logits))
@@ -245,12 +150,13 @@
                    sampled sampled
                    (seq candidates) (first (sort-by scored candidates))
                    :else nil)
-          sampled? (and sampled (not= sampled (:chosen context)))
+          sampled? (and sampled (nil? (:chosen context)))
           result {:decision/id (:decision/id context)
                   :candidates candidates
                   :chosen chosen
                   :aif {:G-chosen (get scored chosen)
                         :G-rejected (apply dissoc scored [chosen])
+                        :G-scores scored
                         :tau tau
                         :logits logits
                         :probs probs
@@ -264,13 +170,14 @@
                     :session/id (:session/id context)}
                    result))
       result))
->>>>>>> 5924b09 (adapters)
-  (update-beliefs [_ _state observation]
+
+  (update-beliefs [_ state observation]
     (if (and (:pattern/id observation) (:pattern/action observation))
+      ;; Pattern action observation - update evidence counts
       (let [pattern-id (:pattern/id observation)
             action (normalize-action (:pattern/action observation))
-            prev-score (evidence-score _state pattern-id config)
-            updated (update-in _state [:pattern-evidence pattern-id action] (fnil inc 0))
+            prev-score (evidence-score state pattern-id config)
+            updated (update-in state [:pattern-evidence pattern-id action] (fnil inc 0))
             next-score (evidence-score updated pattern-id config)
             counts (get-in updated [:pattern-evidence pattern-id])
             tau (compute-tau observation config)
@@ -289,6 +196,7 @@
                       :session/id (:session/id observation)}
                      result))
         result)
+      ;; Generic observation - compute prediction error
       (let [error (double (max 0.0 (dec (text-score (:outcome observation)))))
             tau (compute-tau observation config)
             result {:aif/state {:belief-updated true}
