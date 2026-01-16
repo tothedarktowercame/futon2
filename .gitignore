@@ -1,0 +1,20 @@
+# local tooling caches
+.clj-kondo/
+.cpcache/
+.lsp/
+
+# local artifacts/reports
+PAUSE
+aif_cheatsheet.aux
+aif_cheatsheet.log
+aif_cheatsheet.out
+aif_cheatsheet.pdf
+aif_cheatsheet.txt
+generic-questing-sun.md
+
+# local outputs
+out/
+resources/
+
+# local file that shouldn't be tracked here
+LICENSE
