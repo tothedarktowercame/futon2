@@ -190,3 +190,79 @@
                                :title (:title config)
                                :delta (:aif-delta config)})
         (update :aif-config merge-deep (:aif-delta config)))))
+
+;; -----------------------------------------------------------------------------
+;; External config loader (pattern programs)
+
+(defn- tau->bounds
+  [tau]
+  (let [tau (double (or tau 1.0))
+        floor (max 0.05 (- tau 0.5))
+        cap (min 2.5 (+ tau 0.5))]
+    {:tau-floor floor :tau-cap cap}))
+
+(defn- config->aif-delta
+  "Convert a cyberant config (from futon5) into an AIF delta map."
+  [cfg]
+  (let [precision (:precision cfg)
+        tau (:tau precision)
+        pi-o (:Pi-o precision)]
+    (cond-> {}
+      (number? tau) (assoc :precision (tau->bounds tau))
+      (map? pi-o) (update :precision merge {:Pi-o pi-o}))))
+
+(defn- apply-external-config
+  [ant cfg]
+  (let [aif-delta (config->aif-delta cfg)
+        prec (cond-> {}
+               (map? (:Pi-o (:precision cfg))) (assoc :Pi-o (get-in cfg [:precision :Pi-o]))
+               (number? (get-in cfg [:precision :tau])) (assoc :tau (get-in cfg [:precision :tau])))]
+    (-> ant
+        (assoc :cyber-pattern {:id (or (:pattern-id cfg) :pattern-program)
+                               :title (:pattern-title cfg)
+                               :config (select-keys cfg [:policy-priors :precision
+                                                         :pattern-sense :adapt-config
+                                                         :pattern-program])})
+        (update :aif-config merge-deep aif-delta)
+        (update :prec merge-deep prec))))
+
+(defn- pick-cyberant
+  [data index]
+  (cond
+    (map? (:cyberant data)) (:cyberant data)
+    (seq (:cyberants data)) (nth (:cyberants data) (max 0 (min (dec (count (:cyberants data))) (or index 0))))
+    (map? data) data
+    :else nil))
+
+(defn load-cyber-edn
+  "Load a cyberant EDN bundle from disk and return the selected config."
+  [path & {:keys [index]}]
+  (when (and path (.exists (io/file path)))
+    (let [data (edn/read-string (slurp path))]
+      (pick-cyberant data index))))
+
+(defn attach-config*
+  "Attach either a flexiarg pattern or an external cyberant config.
+   Accepts:
+   - keyword pattern ids (legacy)
+   - {:pattern kw} (legacy)
+   - {:config <cyberant-map>} (new)
+   - {:config-path \"...\" :index N} (new)"
+  [ant cyber]
+  (cond
+    (keyword? cyber)
+    (attach-config ant cyber)
+
+    (and (map? cyber) (keyword? (:pattern cyber)))
+    (attach-config ant (:pattern cyber))
+
+    (and (map? cyber) (:config cyber))
+    (apply-external-config ant (:config cyber))
+
+    (and (map? cyber) (:config-path cyber))
+    (if-let [cfg (load-cyber-edn (:config-path cyber) :index (:index cyber))]
+      (apply-external-config ant cfg)
+      (attach-config ant default-pattern-id))
+
+    :else
+    (attach-config ant default-pattern-id)))

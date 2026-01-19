@@ -57,6 +57,7 @@
     :classic "Classic"
     :aif "AIF"
     :cyber "Cyber"
+    :cyber-sigil "Sigil"
     (str/capitalize (name species))))
 
 (defn- species-short [species]
@@ -64,6 +65,7 @@
     :classic "C"
     :aif "A"
     :cyber "Z"
+    :cyber-sigil "S"
     (str (first (species-label species)))))
 
 (defn scoreboard

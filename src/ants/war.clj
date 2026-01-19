@@ -45,13 +45,14 @@
                     :starvation-grace 6
                     :starvation-boost 0.045}}
    :aif aif/default-aif-config
-   :cyber {:pattern :cyber/baseline}})
+   :cyber {:pattern :cyber/baseline}
+   :cyber-sigil {:pattern :cyber/baseline}})
 
 (def ^:private default-hunger (:hunger default-config))
 (def ^:private default-aif (:aif default-config))
 (def ^:private default-armies (:armies default-config))
 
-(def ^:private aif-species? (set [:aif :cyber]))
+(def ^:private aif-species? (set [:aif :cyber :cyber-sigil]))
 
 (defn- aif-like?
   [species]
@@ -178,9 +179,14 @@
              :h (observe/clamp01 initial-h)
              :mu (:mu (get-in world [:ants id]))
              :prec (:prec (get-in world [:ants id]))}
-        ant (if (= species :cyber)
-              (cyber/attach-config ant (get-in world [:config :cyber :pattern]))
-              ant)
+        ant (cond
+              (= species :cyber)
+              (cyber/attach-config* ant (get-in world [:config :cyber]))
+
+              (= species :cyber-sigil)
+              (cyber/attach-config* ant (get-in world [:config :cyber-sigil]))
+
+              :else ant)
         world (assoc-in world [:ants id] ant)]
     (-> world
         (assoc-in [:grid :cells loc :ant] id))))

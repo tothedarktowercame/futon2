@@ -30,7 +30,8 @@
   (case species
     :classic (Color. 60 60 60)
     :aif (Color. 200 40 60)
-    :cyber (Color. 70 140 220)
+    :cyber (Color. 140 140 140)
+    :cyber-sigil (Color. 176 120 64)
     (Color. 100 100 100)))
 
 (defn- species-label [species]
@@ -38,6 +39,7 @@
     :classic "Classic"
     :aif "AIF"
     :cyber "Cyber"
+    :cyber-sigil "Sigil"
     (str/capitalize (name species))))
 
 (defn- species-short [species]
@@ -45,6 +47,7 @@
     :classic "C"
     :aif "A"
     :cyber "Z"
+    :cyber-sigil "S"
     (str (first (species-label species)))))
 
 (defn- draw-cell
@@ -64,7 +67,8 @@
     (when home
       (.setColor g (case home
                      :aif (Color. 255 236 236)
-                     :cyber (Color. 236 247 255)
+                     :cyber (Color. 238 238 238)
+                     :cyber-sigil (Color. 243 235 226)
                      (Color. 236 240 255)))
       (.fillRect g base-x base-y scale scale))
     (when (> pher 0.0)
@@ -79,7 +83,8 @@
       (let [species (:species ant)
             color (case species
                     :aif (Color. 210 40 60)
-                    :cyber (Color. 70 140 220)
+                    :cyber (Color. 140 140 140)
+                    :cyber-sigil (Color. 176 120 64)
                     (Color. 40 40 40))
             inset (max 1 (int (/ scale 4)))
             size (max 2 (- scale (* 2 inset)))]
@@ -98,7 +103,8 @@
           (let [species (:species grave)
                 color (case species
                         :aif (Color. 200 60 80 220)
-                        :cyber (Color. 80 160 230 220)
+                        :cyber (Color. 140 140 140 220)
+                        :cyber-sigil (Color. 176 120 64 220)
                         (Color. 60 60 60 220))]
             (.setColor g color)
             (.drawLine g x1 y1 x2 y2)
@@ -359,9 +365,39 @@
         positional (remove #(str/starts-with? % "--") args)
         log-every (some-> positional first parse-long)
         log-every (if (and log-every (pos? log-every)) log-every 5)
+        config-path (some->> args
+                             (drop-while #(not= % "--config"))
+                             second)
+        sigil-config-path (some->> args
+                                   (drop-while #(not= % "--sigil-config"))
+                                   second)
+        cyber-index (some->> args
+                             (drop-while #(not= % "--cyber-index"))
+                             second
+                             parse-long)
+        sigil-index (some->> args
+                             (drop-while #(not= % "--sigil-index"))
+                             second
+                             parse-long)
+        include-aif (contains? opts "--include-aif")
+        armies (cond
+                 (and config-path sigil-config-path)
+                 (vec (concat [:cyber :cyber-sigil] (when include-aif [:aif])))
+
+                 config-path
+                 [:cyber :aif]
+
+                 :else nil)
         config (merge (cond-> {}
                         (contains? opts "--no-termination")
-                        (assoc :enable-termination? false))
+                        (assoc :enable-termination? false)
+                        (seq armies) (assoc :armies armies)
+                        config-path
+                        (assoc :cyber {:config-path config-path
+                                       :index cyber-index})
+                        sigil-config-path
+                        (assoc :cyber-sigil {:config-path sigil-config-path
+                                             :index sigil-index}))
                       {{:logging {:alice? true :alice-id 5}}
                        {:log? true :log-every 1 :blocking? true}})]
     (visualize config {:blocking? true
