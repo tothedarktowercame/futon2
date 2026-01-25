@@ -121,7 +121,9 @@
         dy (- ty y)]
     (Math/sqrt (double (+ (* dx dx) (* dy dy))))))
 
-(defn- initial-food
+(defn- initial-food-snowdrift
+  "Original food distribution: radial falloff from center with sinusoidal texture.
+   Food is everywhere, densest in center."
   [[w h] [x y] food-max]
   (let [ctr (center [w h])
         dist (distance [x y] ctr)
@@ -131,14 +133,51 @@
         (+ (* 0.2 (Math/sin (+ (* 0.4 x) (* 0.3 y)))))
         (max 0.0))))
 
+(defn- initial-food-patchy
+  "Patchy food distribution: isolated clusters separated by empty space.
+   Rewards exploration and novelty-seeking."
+  [[w h] [x y] food-max {:keys [num-patches patch-radius seed]
+                          :or {num-patches 5 patch-radius 3 seed 42}}]
+  (let [rng (java.util.Random. seed)
+        ;; Generate patch centers (deterministic from seed)
+        patches (vec (for [_ (range num-patches)]
+                       [(.nextInt rng w) (.nextInt rng h)]))
+        ;; Check if [x y] is within any patch
+        in-patch? (fn [[px py]]
+                    (let [d (distance [x y] [px py])]
+                      (when (< d patch-radius)
+                        (- 1.0 (/ d patch-radius)))))
+        ;; Find best patch overlap
+        best-overlap (apply max 0.0 (keep in-patch? patches))]
+    (* best-overlap food-max)))
+
+(defn- initial-food-sparse
+  "Sparse food distribution: few small patches, mostly empty.
+   Even more challenging for exploration."
+  [[w h] [x y] food-max opts]
+  (initial-food-patchy [w h] [x y] food-max
+                       (merge {:num-patches 3 :patch-radius 2} opts)))
+
+(defn- initial-food
+  "Dispatch to appropriate food distribution based on config."
+  [[w h] [x y] food-max & [food-opts]]
+  (let [distribution (or (:distribution food-opts) :snowdrift)]
+    (case distribution
+      :snowdrift (initial-food-snowdrift [w h] [x y] food-max)
+      :patchy (initial-food-patchy [w h] [x y] food-max food-opts)
+      :sparse (initial-food-sparse [w h] [x y] food-max food-opts)
+      ;; Default to snowdrift
+      (initial-food-snowdrift [w h] [x y] food-max))))
+
 (defn- build-grid
-  [{:keys [size food-max pher-max]}]
+  [{:keys [size food-max pher-max food-distribution food-opts]}]
   (let [[w h] size
+        food-config (assoc (or food-opts {}) :distribution (or food-distribution :snowdrift))
         cells (into {}
                     (for [x (range w)
                           y (range h)]
                       (let [loc [x y]]
-                        [loc {:food (initial-food size loc food-max)
+                        [loc {:food (initial-food size loc food-max food-config)
                               :pher 0.0
                               :home nil
                               :ant nil}])))
@@ -147,6 +186,7 @@
      :max-food food-max
      :max-pher pher-max
      :max-dist max-dist
+     :food-distribution (or food-distribution :snowdrift)
      :cells cells}))
 
 (defn- place-home

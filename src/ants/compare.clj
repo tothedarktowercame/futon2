@@ -21,6 +21,7 @@
     "  --sigil PATH       EDN with :cyberants for sigil configs."
     "  --include-aif      Include AIF as third population."
     "  --no-termination   Disable early termination."
+    "  --food DIST        Food distribution: snowdrift (default), patchy, sparse."
     "  --out PATH         Write EDN summary to file."
     "  --help             Show this message."]))
 
@@ -61,6 +62,9 @@
           (= "--no-termination" flag)
           (recur more (assoc opts :no-termination true))
 
+          (= "--food" flag)
+          (recur (rest more) (assoc opts :food-distribution (keyword (first more))))
+
           :else
           (recur more (assoc opts :unknown flag))))
       opts)))
@@ -73,13 +77,14 @@
     0))
 
 (defn- run-once
-  [run-id {:keys [hex-path sigil-path hex-index sigil-index ticks include-aif? no-termination?]}]
+  [run-id {:keys [hex-path sigil-path hex-index sigil-index ticks include-aif? no-termination? food-distribution]}]
   (let [armies (vec (concat [:cyber :cyber-sigil] (when include-aif? [:aif])))
         config (cond-> {:ticks (or ticks 200)
                         :armies armies
                         :cyber {:config-path hex-path :index hex-index}
                         :cyber-sigil {:config-path sigil-path :index sigil-index}}
-                 no-termination? (assoc :enable-termination? false))
+                 no-termination? (assoc :enable-termination? false)
+                 food-distribution (assoc :food-distribution food-distribution))
         world (war/simulate config {:hud? false})
         scores (:scores world)
         reserves (:colonies world)
@@ -107,7 +112,7 @@
 
 (defn -main
   [& args]
-  (let [{:keys [help unknown runs ticks hex-path sigil-path out include-aif no-termination]
+  (let [{:keys [help unknown runs ticks hex-path sigil-path out include-aif no-termination food-distribution]
          :or {runs 50 ticks 200}} (parse-args args)]
     (cond
       help (println (usage))
@@ -119,6 +124,8 @@
       :else
       (let [hex-count (count-cyberants hex-path)
             sigil-count (count-cyberants sigil-path)
+            _ (when food-distribution
+                (println (str "Food distribution: " (name food-distribution))))
             rows (mapv (fn [idx]
                          (run-once (inc idx)
                                    {:hex-path hex-path
@@ -127,7 +134,8 @@
                                     :sigil-index (if (pos? sigil-count) (mod idx sigil-count) 0)
                                     :ticks ticks
                                     :include-aif? include-aif
-                                    :no-termination? no-termination}))
+                                    :no-termination? no-termination
+                                    :food-distribution food-distribution}))
                        (range runs))
             output {:generated-at (.toString (java.time.Instant/now))
                     :hex-path hex-path
@@ -135,6 +143,7 @@
                     :runs runs
                     :ticks ticks
                     :include-aif include-aif
+                    :food-distribution food-distribution
                     :summary (summarize rows)
                     :rows rows}
             rendered (pr-str output)]
