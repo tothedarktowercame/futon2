@@ -1,4 +1,4 @@
-(ns ants.aif.policy-test
+(ns ants.aif-policy-test
   (:require [clojure.test :refer :all]
             [ants.aif.policy :as policy]
             [ants.aif.core   :as core]
