@@ -1,5 +1,6 @@
 {:paths ["src" "resources" "."]
- :deps {org.clojure/clojure {:mvn/version "1.11.1"}}
+:deps {org.clojure/clojure {:mvn/version "1.11.1"}
+       common/common {:local/root "../futon1/apps/common"}}
  :aliases
  {:run {:main-opts ["-m" "ants.main"]}
   :run-m {:main-opts ["-m" "ants.clj-ants-aif"]}
