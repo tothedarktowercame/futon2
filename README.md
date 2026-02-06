@@ -1,4 +1,16 @@
-# clj-ants-aif
+# futon2 — AIF Ant Simulation
+
+futon2 is the experimental lab of the futon stack. It implements an Active
+Inference Framework (AIF) ant simulation where two hives compete for food using
+predictive coding, hunger dynamics, and expected free-energy minimization.
+Patterns discovered here (e.g., hunger↔precision coupling, white-space scouting)
+are formalized into the futon3 pattern library.
+
+> **Stack context**: futon2 experiments feed pattern proposals → futon3 pattern
+> library → futon5 meta-evolution. See `../futon0/README.md` for the full stack
+> diagram.
+
+---
 
 An experiment in active inference ants battling the classic Rich Hickey ruleset. Two hives spawn on opposite corners of a grid and compete for food while adapting via predictive coding, hunger dynamics, and expected free-energy minimisation.
 
