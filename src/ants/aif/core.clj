@@ -1,6 +1,7 @@
 (ns ants.aif.core
   "Top-level orchestration of the observe → perceive → policy cycle."
   (:require [ants.aif.affect :as affect]
+            [ants.aif.default-mode :as default-mode]
             [ants.aif.observe :as observe]
             [ants.aif.perceive :as perceive]
             [ants.aif.policy :as policy]
@@ -167,15 +168,24 @@
                                        :dhdt hunger-trend}
                                  precision-opts)
          perception-with-prec (assoc perception :prec prec)
+         ;; Default mode: pre-deliberative tropism-based fallback
+         ;; Computed from observation alone — no preferences, no EFE weights
+         default-policy (default-mode/select-action observation)
+
+         ;; Deliberative mode: full EFE evaluation (falls back to default mode)
          action-list (vec (or actions policy/default-actions))
-         policy (policy/choose-action mu
-                                      prec
-                                      observation
-                                      {:actions action-list
-                                       :preferences (:preferences cfg)
-                                       :action-costs (:actions cfg)
-                                       :efe (:efe cfg)
-                                       :precision precision-opts})
+         policy (try
+                  (policy/choose-action mu
+                                        prec
+                                        observation
+                                        {:actions action-list
+                                         :preferences (:preferences cfg)
+                                         :action-costs (:actions cfg)
+                                         :efe (:efe cfg)
+                                         :precision precision-opts})
+                  (catch Exception _e
+                    ;; Deliberative policy failed — fall back to default mode
+                    default-policy))
          tau (:tau policy)
          prec' (assoc prec :tau tau)
          perception (assoc perception-with-prec :prec prec')
@@ -214,7 +224,9 @@
                     :info (:info action-stats)
                     :colony (:colony action-stats)
                     :survival (:survival action-stats)
-                    :action-cost (:action-cost action-stats)}
+                    :action-cost (:action-cost action-stats)
+                    :default-mode-action (:action default-policy)
+                    :default-mode-agrees (= chosen (:action default-policy))}
       ;; Pattern trace for FuLab integration
       :pattern-trace (when pattern-feats
                        {:id (:pattern/active pattern-feats)
