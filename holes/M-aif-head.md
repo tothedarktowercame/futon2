@@ -1686,6 +1686,210 @@ diagram in §5.1 makes this explicit and checkable.
 
 ---
 
+## Pre-Instantiation PAR (Post-Action Review)
+
+*Checkpoint inserted between VERIFY and INSTANTIATE. This PAR reviews
+the IDENTIFY→MAP→DERIVE→ARGUE→VERIFY arc before implementation begins.
+Written 2026-03-15, jointly by joe and claude-1.*
+
+*Context for readers: M-aif-head was the first mission run end-to-end
+under the revised futonic-missions methodology (see
+`futon4/holes/mission-lifecycle.md`, committed `9126609` earlier this
+same day). The mission-lifecycle doc was revised to add optional wiring
+diagrams to DERIVE and structural verification to VERIFY — both of
+which were then used immediately in this mission. M-structural-law
+had just completed (~14:00–17:38), so the structural law inventory and
+crystallization narrative were fresh. The three-pillar synthesis
+(Argument = generative model, Invariants = precision, Missions = policy)
+emerged in conversation before the mission formally started.*
+
+---
+
+### 1. Review the intention: what did we expect to learn or make together?
+
+**Make:** An AIF head for the Mission Peripheral — the interface and
+design that turns a peripheral from a tool (does what Joe says) into
+an organism (maintains its own viability). The reusable `AifHead`
+protocol for all peripherals was the key deliverable.
+
+**Learn:** Whether the revised futonic-missions methodology (with the
+new VERIFY structural checks and optional DERIVE wiring diagrams)
+actually improves mission quality. This was the first full test of the
+revised lifecycle. Also: whether the "three pillars = AIF components"
+synthesis holds up under the pressure of a real design.
+
+**Implicit expectation:** Joe anticipated that the mission-lifecycle
+revisions would make instantiation smoother. The PAR is placed here
+specifically to test that prediction — we'll know after INSTANTIATE
+whether the specification was sufficient.
+
+### 2. Establish what is happening: what and how did we learn?
+
+**Timeline** (reconstructed from git evidence):
+
+| Time (UTC) | Event | Commit |
+|------------|-------|--------|
+| ~17:16 | mission-lifecycle.md revised in futon4 | `9126609` |
+| ~17:16 | structural-crystallization regenerability note | `be3e905` |
+| ~17:38 | M-structural-law completed (INSTANTIATE) | `f485b50` |
+| ~17:58 | Joe pushes independent IDENTIFY for M-aif-head | `6d99fbe` |
+| — | claude-1 had also written an independent IDENTIFY (in futon3c, later deleted) | — |
+| — | Three-pillar synthesis emerges in conversation | — |
+| — | Comparison and merge of two IDENTIFYs | — |
+| ~18:16 | MAP phase: 10 survey questions answered | `7388684` |
+| ~18:20 | Scope fix: "every peripheral, Mission first" | `113886f` |
+| ~18:41 | peripheral-aif-vocabulary.sexp created | `d2b7ee6` |
+| ~18:51 | Joe peripheral added (exogenous-human) | `34e87be` |
+| ~19:01 | DERIVE: 10 design decisions | `91c535b` |
+| ~19:13 | ARGUE: 8 arguments + coherence | `d5e4b7f` |
+| ~19:26 | VERIFY: AIF+ self-diagram + I1-I6 | `aa10879` |
+
+Total wall-clock time for IDENTIFY→VERIFY: approximately 2.5 hours.
+Approximately 1,500 lines of mission document accreted across 6 phases.
+
+**How we learned:**
+
+1. **Independent convergence as evidence.** Joe and claude-1 wrote
+   IDENTIFY independently. Comparison showed convergence on the core
+   structure (cycle engine wrapping, three-tier architecture, Portfolio
+   Inference coupling) and complementary additions (Joe: deeper
+   theoretical anchoring with Friston/Sen/Ostrom/Noether; claude-1:
+   three-pillar framing, evidence landscape connectivity, epistemic
+   action repertoire). The merge was additive, not conflicting. This
+   suggests the problem was well-posed — two agents reading the same
+   codebase converged on the same solution shape.
+
+2. **Vocabulary invention drives design.** The `peripheral-aif-vocabulary.sexp`
+   file was invented mid-MAP as a way to make "15 channels" concrete.
+   It became a load-bearing design artifact: DERIVE references it for
+   observation channels (D-2), epistemic actions (D-7), and action
+   arenas. The Joe peripheral entry was a creative extension that
+   grounded the abstract concept in something concrete and personally
+   meaningful. The sexp format forced precision — you can't be vague
+   in a typed data structure.
+
+3. **ARGUE as genuine discovery.** The pattern cross-reference was not
+   post-hoc decoration. Reading the AIF library patterns (especially
+   `term-to-channel-traceability` and `aif-as-environment-not-instruction`)
+   strengthened the arguments in ways that pure reasoning hadn't. The
+   coherence argument (all 5 AIF roles covered, all 6 invariants mapped
+   to specific decisions) emerged from the pattern survey, not from the
+   DERIVE design.
+
+4. **VERIFY as self-application.** Joe's suggestion to produce an AIF+
+   diagram *for the mission itself* was the session's key creative
+   moment. It tested the design's own framework against itself —
+   recursive verification. The finding (C9 needed explicit support,
+   I5 partial but bounded) was genuine — it produced a DERIVE revision
+   (H-9) that wouldn't have been discovered without structural checking.
+
+### 3. What are some different perspectives on what's happening?
+
+**The methodology perspective (Rob would care about this):**
+The revised mission-lifecycle earned its keep in one session. The
+optional wiring diagram in DERIVE (§3.3 of mission-lifecycle.md) was
+used and produced the AIF role mapping. The structural verification in
+VERIFY (§5.1) was used and caught a real gap (C9). These weren't
+ceremonial additions — they found things. The question is whether this
+scales: M-aif-head is a natural fit for AIF+ verification (it's
+literally about AIF). Will missions about, say, database migrations
+benefit equally from wiring diagrams? Probably not every mission, but
+the lifecycle doc already says "if applicable."
+
+**The AIF perspective:**
+The three-pillar synthesis (Argument/Invariants/Missions = generative
+model/precision/policy) survived contact with 10 design decisions, 19
+library patterns, and 6 invariant checks. It wasn't falsified. More
+importantly, it was *useful* — it organized the observation channels,
+explained why different evidence types contribute different precision,
+and grounded the action arena in policy theory. Whether it's
+*correct* in a deeper sense (does minimizing expected free energy
+actually describe what the mission cycle does?) is a question for
+M-futonzero.
+
+**The engineering perspective:**
+The design is well-specified: 9 handoff tasks, dependency graph, file
+layout, typed interfaces. The risk is that the specification is *too*
+detailed — that implementation will reveal assumptions baked into the
+design that don't survive contact with the actual code. The prediction
+enrichment (D-3) and effect sink (D-6) are the riskiest: they touch
+the most existing code and make the strongest assumptions about what
+the cycle engine can accommodate.
+
+**The collaboration perspective:**
+The session had a distinctive rhythm: Joe proposed conceptual frames
+(three pillars, Joe-as-peripheral, mission-as-AIF-loop), claude-1
+grounded them in code-level findings and pattern cross-references, and
+the result was richer than either could produce alone. The independent
+IDENTIFY comparison was a particularly clean example — genuine parallel
+work that merged cleanly because the problem was well-constrained.
+
+### 4. What did we learn or change?
+
+**Changed (artifacts):**
+- `futon4/holes/mission-lifecycle.md` — revised VERIFY and DERIVE
+  sections with optional wiring diagrams and structural verification
+- `futon3c/docs/peripheral-aif-vocabulary.sexp` — new artifact: typed
+  AIF terminal vocabulary per peripheral (3 entries: portfolio, mission,
+  joe)
+- `futon2/holes/M-aif-head.md` — ~1,500 lines accreted across 6 phases
+- DERIVE revision V-3: added H-9 + `aif/invariant.clj` for C9
+
+**Learned (transferable):**
+- **Independent IDENTIFY works.** Two agents writing IDENTIFY
+  independently and then merging produces better results than one
+  agent writing while the other watches. The convergence validates
+  the problem statement; the divergence enriches the solution.
+- **Sexp vocabularies force precision.** Inventing a typed data format
+  mid-mission is not scope creep — it's vocabulary invention, and it
+  makes downstream phases (DERIVE, ARGUE) more precise.
+- **Self-application is a genuine verification technique.** Applying
+  the mission's own framework to itself found a real gap (C9). This
+  is worth doing for any mission whose output is a framework or
+  protocol.
+- **The three-pillar framing is load-bearing.** It survived the full
+  IDENTIFY→VERIFY arc and organized the design at every phase. It's
+  not a metaphor — it's the actual structure.
+- **Revised mission-lifecycle additions earned their keep immediately.**
+  The optional wiring diagram in DERIVE and structural verification
+  in VERIFY both produced genuine findings. They should stay in the
+  lifecycle spec.
+
+### 5. What else should we change going forward?
+
+**For INSTANTIATE (immediate):**
+- The 9 handoff tasks (H-1 through H-9) are well-specified. The
+  dependency graph allows parallel execution. H-1 + H-2 + H-8 + H-9
+  can start immediately (no dependencies). H-6 and H-7 can follow
+  shortly after.
+- Riskiest tasks: H-4 (Mission AIF head, High complexity, integration
+  point) and H-5 (Default mode, touches cycle engine). These should
+  get the most careful review.
+- **Prediction to test:** Joe anticipates INSTANTIATE will go even
+  better than usual because of the specification quality. Measurable:
+  fewer DERIVE revisions during INSTANTIATE, fewer "wait, the design
+  didn't account for X" moments.
+
+**For the methodology (Rob and future missions):**
+- Consider making "pre-instantiation PAR" a standard checkpoint in
+  the mission lifecycle. The reflection point between "design is
+  complete" and "implementation begins" is valuable — it captures
+  what was learned during design before implementation overwrites
+  the memory.
+- The independent-IDENTIFY-then-merge pattern could be formalized.
+  When two agents are available, parallel IDENTIFY is cheap and
+  produces richer results.
+- Self-application (verifying the design against its own framework)
+  should be a standard VERIFY technique for framework/protocol missions.
+
+**For M-futonzero (deferred):**
+- When M-futonzero begins, produce the AIF+ composition diagram of
+  M-aif-head + M-futonzero to check I5 closure (V-1).
+- The Joe peripheral observation channels are the bridge: longitudinal
+  trends in behavioral traces constitute learning evidence.
+
+---
+
 ## 6. INSTANTIATE
 
 *Accretes after VERIFY.*
