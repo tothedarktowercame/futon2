@@ -1,4 +1,4 @@
-**Status:** ARGUE (2026-03-15)
+**Status:** VERIFY (2026-03-15)
 
 # M-aif-head: AIF Heads for Every Peripheral (Mission Peripheral First)
 
@@ -825,6 +825,8 @@ futon3c/
     cycle.clj              EDIT — add :on-cycle-complete hook
     mission_backend.clj    EDIT — extend validate-phase-advance
     mission_shapes.clj     EDIT — enrich :propose outputs
+  src/futon3c/aif/
+    invariant.clj          NEW — enumerate peripherals, check AifHead binding
   docs/
     peripheral-aif-vocabulary.sexp  EDIT — add epistemic actions
 ```
@@ -841,10 +843,11 @@ futon3c/
 | H-6: Prediction enrichment | futon3c | mission_shapes.clj, mission_backend.clj | edits to both | Low |
 | H-7: Refusal surface | futon3c | mission_backend.clj, inventory.clj | edit to mission_backend.clj | Medium |
 | H-8: Portfolio effect | futon3c | portfolio/policy.clj, mission_backend.clj | portfolio/effect.clj | Low |
+| H-9: AIF head invariant | futon3c | peripheral registry, head.clj | aif/invariant.clj | Low |
 
 H-1 and H-2 have no dependencies. H-3 depends on H-2. H-4 depends on
 H-1 + H-3. H-5 depends on H-4. H-6 and H-7 can run in parallel with
-H-4. H-8 is independent.
+H-4. H-8 and H-9 are independent (H-9 needs H-1 for the protocol def).
 
 Dependency graph:
 ```
@@ -854,6 +857,7 @@ H-2 ──► H-3 ──┘
 H-6 ──────────────► (parallel)
 H-7 ──────────────► (parallel, needs H-2)
 H-8 ──────────────► (independent)
+H-9 ──────────────► (independent, needs H-1)
 ```
 
 ---
@@ -1200,7 +1204,485 @@ part.
 
 ## 5. VERIFY
 
-*Accretes after ARGUE.*
+### 5.1 AIF+ Diagram for M-aif-head
+
+The mission about giving peripherals AIF heads should itself be an AIF+
+diagram — verified against the same invariants it implements.
+
+#### The Mission as AIF Loop
+
+The futonic mission lifecycle (IDENTIFY→MAP→DERIVE→ARGUE→VERIFY→INSTANTIATE)
+IS an AIF loop. The diagram below maps M-aif-head's own structure to the
+five AIF roles from Chapter 0 §1.1.
+
+```
+ENVIRONMENT                    PREFERENCES (glacial/slow)
+┌──────────────────────┐       ┌──────────────────────────────────┐
+│ Codebase state       │       │ I1-I6 invariants (Chapter 0)     │
+│ · futon2/aif/        │       │ Completion criteria C1-C9        │
+│ · futon3c/portfolio/  │       │ Three pillars:                   │
+│ · futon3c/peripheral/ │       │   Argument = gen model           │
+│ · futon3/library/     │       │   Invariants = precision (τ)     │
+│ Evidence landscape    │       │   Missions = policy              │
+│ Pattern library       │       │ Pattern library (499+ patterns)  │
+└─────────┬────────────┘       └──────────┬───────────────────────┘
+          │                               │
+          ▼                               ▼
+    SENSORY SURFACE                 PREFERENCE CONSTRAINT
+┌──────────────────────┐       ┌──────────────────────────────────┐
+│ MAP phase:           │       │ check-law equivalent:            │
+│ · Survey Q1-Q10      │       │ · Does DERIVE address all C1-C9? │
+│ · Ready/missing table │       │ · Does design satisfy I1-I6?     │
+│ · Code-level findings │       │ · Is the architecture sound      │
+│ · Surprise discovery  │       │   before code hardens?           │
+│                      │       │ · ARGUE pattern cross-ref        │
+│ Observation vector:  │       │                                  │
+│ 10 channels surveyed │       │ This IS the VERIFY phase.        │
+└─────────┬────────────┘       └──────────┬───────────────────────┘
+          │                               │
+          ▼                               │
+    INTERNAL STATES                       │
+┌──────────────────────┐                  │
+│ DERIVE phase:        │                  │
+│ · AifHead protocol   │◄────────────────-┘
+│ · 10 design decisions │  (preferences constrain beliefs)
+│ · File layout        │
+│ · Handoff boundaries │
+│                      │
+│ ARGUE phase:         │
+│ · Pattern grounding  │
+│ · Coherence argument │
+│ · Trade-off analysis │
+│                      │
+│ Belief updates:      │
+│ · MAP findings revise│
+│   DERIVE decisions   │
+│ · ARGUE patterns may │
+│   revise DERIVE      │
+└─────────┬────────────┘
+          │
+          ▼
+    ACTIVE SURFACE
+┌──────────────────────┐
+│ INSTANTIATE phase:   │
+│ · H-1 through H-8   │
+│ · Code artifacts     │
+│ · Test results       │
+│ · Evidence emission  │
+│                      │
+│ Effect on environment:│
+│ · New files created  │
+│ · Existing files     │
+│   edited             │
+│ · Evidence persisted │
+└─────────┬────────────┘
+          │
+          ▼
+    ENVIRONMENT (changed)
+```
+
+**Default mode** (inter-phase): Between phases, the mission does not
+stall — it produces PARs (documenting what was done), checks dependencies
+(is source material still current?), and consults the pattern library
+(are there patterns the next phase should consider?). The conversation
+context IS the default mode — switching between phases is an explicit
+mode transition, not an implicit gap.
+
+#### Exotype Diagram (EDN projection)
+
+```clojure
+{:mission/id :m-aif-head-self-diagram
+ :mission/state :verify
+
+ :ports
+ {:input
+  [{:id :I-codebase       :name "Codebase state"
+    :type :xtdb-entity
+    :source "futon2, futon3c, futon3 repos"
+    :timescale :fast}
+
+   {:id :I-source-material :name "Source material (futon3)"
+    :type :xtdb-entity
+    :source "futon3/src, futon3/library, futon3/docs"
+    :timescale :fast}
+
+   {:id :I-invariants      :name "AIF+ invariants I1-I6"
+    :type :config
+    :source "chapter0-aif-as-wiring-diagram.md"
+    :timescale :glacial
+    :constraint true}
+
+   {:id :I-pillars         :name "Three conceptual pillars"
+    :type :config
+    :source "holistic-argument, structural-crystallization, futonic-missions"
+    :timescale :slow
+    :constraint true}
+
+   {:id :I-patterns        :name "Pattern library"
+    :type :config
+    :source "futon3/library/**/*.flexiarg"
+    :timescale :glacial
+    :constraint true}
+
+   {:id :I-criteria        :name "Completion criteria C1-C9"
+    :type :config
+    :source "M-aif-head.md §Completion criteria"
+    :timescale :slow
+    :constraint true}]
+
+  :output
+  [{:id :O-protocol       :name "AifHead protocol + adapters"
+    :type :xtdb-entity
+    :consumer "futon2/aif, futon3c/aif"
+    :spec-ref "D-1, D-2"
+    :timescale :fast}
+
+   {:id :O-vocabulary     :name "Updated peripheral-aif-vocabulary.sexp"
+    :type :config
+    :consumer "all future peripheral adapters"
+    :spec-ref "D-7"
+    :timescale :slow}
+
+   {:id :O-evidence       :name "Mission evidence trail"
+    :type :xtdb-entity
+    :consumer "evidence landscape, future missions"
+    :spec-ref "C7, C8"
+    :timescale :medium}
+
+   {:id :O-code           :name "Code artifacts (7 new, 3 edits)"
+    :type :xtdb-entity
+    :consumer "futon2, futon3c codebases"
+    :spec-ref "D-9"
+    :timescale :fast}
+
+   {:id :O-errors         :name "Verification failures"
+    :type :error-response
+    :consumer "mission revision / DERIVE update"
+    :timescale :fast}]}
+
+ :components
+ [;; === SENSORY (MAP) ===
+  {:id :C-map           :name "MAP: Survey existing infrastructure"
+   :type :mission-phase
+   :accepts #{:xtdb-entity :config}
+   :produces #{:xtdb-entity}
+   :timescale :medium}
+
+  ;; === INTERNAL (DERIVE + ARGUE) ===
+  {:id :C-derive        :name "DERIVE: Design decisions D-1 to D-10"
+   :type :mission-phase
+   :accepts #{:xtdb-entity :config}
+   :produces #{:xtdb-entity :config}
+   :timescale :medium}
+
+  {:id :C-argue         :name "ARGUE: Pattern grounding + coherence"
+   :type :mission-phase
+   :accepts #{:xtdb-entity :config}
+   :produces #{:xtdb-entity}
+   :timescale :medium}
+
+  ;; === PREFERENCE GATE (VERIFY) ===
+  {:id :C-verify        :name "VERIFY: Check design against I1-I6 + C1-C9"
+   :type :mission-phase
+   :accepts #{:xtdb-entity :config}
+   :produces #{:xtdb-entity :error-response}
+   :timescale :medium}
+
+  ;; === ACTIVE (INSTANTIATE) ===
+  {:id :C-instantiate   :name "INSTANTIATE: Build H-1 through H-8"
+   :type :mission-phase
+   :accepts #{:xtdb-entity :config}
+   :produces #{:xtdb-entity}
+   :timescale :fast}
+
+  ;; === DEFAULT MODE (inter-phase) ===
+  {:id :C-default       :name "Default mode: PAR, dependency check, pattern scan"
+   :type :mission-phase
+   :accepts #{:xtdb-entity :config}
+   :produces #{:xtdb-entity}
+   :timescale :medium}]
+
+ :edges
+ [;; === MISSION PIPELINE (sequential) ===
+  {:from :I-codebase       :to :C-map         :type :xtdb-entity}
+  {:from :I-source-material :to :C-map        :type :xtdb-entity}
+  {:from :C-map            :to :C-derive      :type :xtdb-entity}
+  {:from :C-derive         :to :C-argue       :type :xtdb-entity}
+  {:from :C-argue          :to :C-verify      :type :xtdb-entity}
+  {:from :C-verify         :to :C-instantiate :type :xtdb-entity}
+
+  ;; === CONSTRAINT INPUTS (slow/glacial → mission phases) ===
+  {:from :I-invariants     :to :C-derive      :type :config}
+  {:from :I-invariants     :to :C-verify      :type :config}
+  {:from :I-pillars        :to :C-derive      :type :config}
+  {:from :I-patterns       :to :C-argue       :type :config}
+  {:from :I-patterns       :to :C-derive      :type :config}
+  {:from :I-criteria       :to :C-verify      :type :config}
+  {:from :I-criteria       :to :C-instantiate :type :config}
+
+  ;; === FEEDBACK (ARGUE/VERIFY may revise DERIVE) ===
+  {:from :C-argue          :to :C-derive      :type :xtdb-entity}
+  {:from :C-verify         :to :C-derive      :type :xtdb-entity}
+
+  ;; === DEFAULT MODE (parallel path, I6 closure) ===
+  {:from :I-codebase       :to :C-default     :type :xtdb-entity}
+  {:from :I-patterns       :to :C-default     :type :config}
+  {:from :C-default        :to :C-map         :type :xtdb-entity}
+
+  ;; === OUTPUTS ===
+  {:from :C-instantiate    :to :O-protocol    :type :xtdb-entity}
+  {:from :C-derive         :to :O-vocabulary  :type :config}
+  {:from :C-instantiate    :to :O-code        :type :xtdb-entity}
+  {:from :C-verify         :to :O-evidence    :type :xtdb-entity}
+  {:from :C-instantiate    :to :O-evidence    :type :xtdb-entity}
+
+  ;; === ERROR PROPAGATION ===
+  {:from :C-verify         :to :O-errors      :type :error-response}
+  {:from :C-instantiate    :to :O-errors      :type :error-response}]}
+```
+
+### 5.2 Invariant Verification (I1-I6)
+
+Checking the M-aif-head *design* (what it will produce) against I1-I6,
+and also checking the *mission itself* (its own process) against I1-I6.
+
+#### I1: Boundary Integrity
+
+**Design (what it builds):**
+- Boundary = the `AifHead` protocol interface. Three methods define the
+  controlled coupling: `observe` (inward), `check-law` (constraint),
+  `default-mode` (inter-cycle). The protocol IS the Markov blanket —
+  finite bandwidth, typed inputs/outputs.
+- ✅ PASS: Every interaction between peripheral internals and environment
+  goes through `AifHead` methods. No back-channel.
+
+**Mission (its own process):**
+- Boundary = mission scope (§Scope in / Scope out). Well-defined.
+  Structure learning, Lean integration, mana economics are explicitly out.
+- ✅ PASS: The 8 handoff tasks (H-1 to H-8) each have explicit `:in`
+  (read-only) and `:out` (create) boundaries. No task reads outside
+  its declared inputs.
+
+#### I2: Observation-Action Asymmetry
+
+**Design:**
+- Observation = `observe` method (10 channels, normalized [0,1], read-only)
+- Action = `select-pattern` output → effect sink → state change
+- ✅ PASS: `observe` is explicitly read-only (returns data, no side effects).
+  The effect sink (D-6) is the only write path. These are different
+  interfaces with different types.
+
+**Mission:**
+- Observation = MAP phase (read-only survey, no code changes)
+- Action = INSTANTIATE phase (code production)
+- ✅ PASS: MAP and INSTANTIATE are different phases with different outputs.
+  MAP produces facts; INSTANTIATE produces artifacts.
+
+#### I3: Timescale Separation
+
+**Design:**
+Four timescales, correctly ordered:
+
+| Timescale | What operates | Update frequency |
+|-----------|--------------|------------------|
+| Fast (perception) | `observe` + `update-beliefs` per tool call | ~seconds |
+| Medium (action) | `select-pattern` per phase transition | ~minutes |
+| Slow (learning) | Portfolio Inference belief updates | ~hours |
+| Glacial (preference) | Structural law inventory, I1-I6 | ~days/weeks |
+
+- ✅ PASS: Each timescale is at least an order of magnitude slower than
+  the one below it. Structural laws change glacially (only through
+  crystallization); Portfolio changes slowly (daily at most); action
+  selection happens per phase; perception happens per tool call.
+
+**Mission:**
+- Fast: individual implementation tasks (H-* handoffs)
+- Medium: mission phases (IDENTIFY→...→INSTANTIATE)
+- Glacial: I1-I6 invariants, three pillars, pattern library
+
+- ✅ PASS: Phases are slower than tasks. Invariants are slower than
+  phases. The pattern library doesn't change during the mission.
+
+#### I4: Preference Exogeneity
+
+**Design:**
+- Preferences = structural law inventory (loaded from sexp, not computed)
+  + completion criteria (from IDENTIFY, not rewritable by code)
+- ✅ PASS: No directed path from Active (effect sink, select-pattern)
+  to Preferences (structural laws, I1-I6) that bypasses Environment.
+  The sexp files are on disk; the AIF head reads but cannot write them.
+  An implementation task cannot modify the criteria it's being evaluated
+  against. This is the "no wireheading" property.
+
+**Mission:**
+- Preferences = C1-C9 completion criteria (written in IDENTIFY, before
+  any design work). The criteria cannot be weakened by DERIVE decisions.
+- ✅ PASS: The criteria were written on 2026-03-15 during IDENTIFY and
+  have not been modified. DERIVE designs *toward* them; it cannot
+  redefine them.
+
+**Note on I4 in the Joe peripheral:** D-5 specifies that the refusal
+surface applies to all actors including joe. The structural law
+inventory is the constitution; preference exogeneity means even the
+sovereign operates under constitutional constraints. This is the
+"I'm sorry, Joe, I can't do that" property from the theoretical
+anchoring.
+
+#### I5: Model Adequacy
+
+**Design:**
+- The generative model = structural law inventory + evidence landscape
+- The model must track: which invariants hold, which are candidates,
+  what evidence supports each, what transitions are legal.
+- ⚠️ PARTIAL: The model tracks invariant status and evidence counts
+  (C1, C8). It does NOT track full provenance graphs or causal chains.
+  This is adequate for the current scope (MAP Q5: "counts, existence
+  checks — not full provenance graphs") but may become inadequate for
+  structure learning (scoped out).
+- The adequacy boundary is clear: counts + existence → sufficient for
+  AIF head precision weighting. Provenance graphs → needed for
+  structure learning → deferred to M-futonzero.
+
+**Mission:**
+- The model = MAP findings + DERIVE design. Is it adequate?
+- The MAP phase answered 10 survey questions with code-level evidence.
+  6 of 10 observation channels already exist. The "ready vs missing"
+  table is concrete.
+- ✅ PASS (for current scope): MAP is specific enough to implement
+  from. ARGUE grounded every decision in existing patterns.
+
+#### I6: Compositional Closure
+
+**Design:**
+- The diagram must have at least two independent paths from observation
+  to action (Chapter 0 §6.6).
+- Path 1 (deliberative): observe → perceive → select-pattern → effect
+- Path 2 (default mode): observe → default-mode → {begin-next-cycle |
+  signal-complete}
+- ✅ PASS: If the deliberative path fails (select-pattern throws, EFE
+  computation errors, tau collapse), default-mode still operates. It
+  generates PARs, consults Portfolio, checks structural laws. The
+  peripheral doesn't go dark.
+- Reflex tier provides a third path for foundational violations
+  (throws immediately, preventing damage rather than sustaining
+  behavior).
+
+**Mission:**
+- If DERIVE fails, can the mission recover? Yes — ARGUE may identify
+  pattern conflicts that revise DERIVE. The feedback edges
+  (C-argue → C-derive, C-verify → C-derive) provide recovery paths.
+- ✅ PASS: The mission doesn't stall on one phase. Each phase can
+  trigger revision of prior phases.
+
+### 5.3 Projection Test (Chapter 0 §4.4)
+
+Checking the five failure criteria for projecting the abstract AIF+
+diagram onto the M-aif-head design:
+
+**F1 (Missing wire):** Every wire in the abstract diagram has a
+concrete implementation.
+- Observation → `observe` method + 10 channels ✅
+- Action → `select-pattern` + effect sink ✅
+- Model update → `update-beliefs` ✅
+- Preference constraint → `check-law` + structural law inventory ✅
+- Prediction → enriched `:propose` outputs ✅
+- ✅ NO MISSING WIRES
+
+**F2 (Violated invariant):** Checked in §5.2 above.
+- I1-I4: ✅ PASS
+- I5: ⚠️ PARTIAL (adequate for current scope, named boundary)
+- I6: ✅ PASS
+- ✅ NO VIOLATED INVARIANTS (I5 is partial but adequate, not violated)
+
+**F3 (Missing timescale):** Four timescales identified (fast, medium,
+slow, glacial). Each has a concrete process producing the separation.
+- Fast/medium: tool call vs phase transition ✅
+- Medium/slow: phase transition vs Portfolio update ✅
+- Slow/glacial: Portfolio update vs crystallization ✅
+- ✅ NO MISSING TIMESCALES
+
+**F4 (Type mismatch):** Wire types map to concrete Clojure types.
+- Observations → `{kw → [0,1]}` (normalized channel map) ✅
+- Actions → `{:action kw :params map}` (same shape as select-pattern) ✅
+- Beliefs → `{:mu map :tau float :evidence map}` (FulabAdapter shape) ✅
+- Preferences → structural law sexp → core.logic pldb facts ✅
+- Predictions → enriched `:propose` maps ✅
+- ✅ NO TYPE MISMATCHES
+
+**F5 (Structural surplus):** Does the domain have structure the
+diagram ignores?
+- The 9-phase cycle engine adds structure (phase ordering, required
+  outputs, obligation DAG) that the abstract AIF diagram doesn't
+  represent. But the design wraps the cycle engine rather than
+  replacing it — the AIF head observes and gates the cycle, it
+  doesn't flatten it.
+- ⚠️ NOTED: The cycle engine is structural surplus relative to the
+  abstract AIF diagram. The design handles this correctly (wrap, not
+  replace) but this should be documented as a design rationale.
+
+### 5.4 Completion Criteria Pre-Check
+
+| Criterion | DERIVE decision | Status |
+|-----------|----------------|--------|
+| C1: Generative model consultation | D-5 (refusal surface) + D-2 (observe, `:structural-law-compliance` channel) | ✅ Addressed |
+| C2: Prediction error signal | D-3 (prediction enrichment) + D-2 (`:prediction-divergence` channel) | ✅ Addressed |
+| C3: Default mode demonstrated | D-4 (cycle completion hook) + D-2 (default mode behavior) | ✅ Addressed |
+| C4: Refusal demonstrated | D-5 (refusal surface, error catalog) | ✅ Addressed |
+| C5: Three-tier architecture | D-1 (three-tier mapping table) | ✅ Addressed |
+| C6: Reusable AIF head interface | D-1 (AifHead protocol, 3 methods) | ✅ Addressed |
+| C7: Evidence emitted | D-5 (refusals as evidence), D-6 (effects as evidence) | ✅ Addressed |
+| C8: Evidence landscape queryable | D-2 (`:evidence-for-completion-criteria` channel reads from estore) | ✅ Addressed |
+| C9: Self-enforcing invariant | D-10 H-4 scope includes peripheral enumeration check | ⚠️ Implicit |
+
+**C9 finding:** The "every peripheral has an AIF head" invariant is
+addressed implicitly in H-4 (the Mission AIF Head implementation task)
+but there is no explicit enumeration function specified in DERIVE.
+This needs a DERIVE revision or an additional handoff task.
+
+**DERIVE revision needed:** Add to D-9 file layout:
+```
+futon3c/src/futon3c/aif/invariant.clj  NEW — enumerate peripherals,
+                                       check AifHead binding for each
+```
+And extend H-4 or create H-9 to implement this check.
+
+### 5.5 Decision Log
+
+**V-1: I5 (model adequacy) is partial but adequate.**
+The design explicitly scopes model adequacy to counts + existence checks.
+Full provenance graphs are deferred to M-futonzero. This is acceptable
+because the current scope (precision weighting from evidence counts) does
+not require causal reasoning. No DERIVE revision needed. When M-futonzero
+begins, produce an AIF+ diagram of the *composition* of M-aif-head and
+M-futonzero to verify that I5 closure emerges from the combination.
+
+**V-2: F5 (structural surplus) documented.**
+The 9-phase cycle engine is structural surplus that the abstract AIF
+diagram doesn't represent. The design correctly wraps rather than replaces
+the cycle engine. This is the right approach — the AIF head is a layer
+above the cycle engine, not a replacement for it. No DERIVE revision needed.
+
+**V-3: C9 needs explicit support.**
+The self-enforcing invariant ("every peripheral has an AIF head") requires
+an enumeration function that the current DERIVE does not specify. This
+function should:
+1. List all registered peripherals
+2. Check each has an `AifHead` protocol binding
+3. Return `{:ok true}` or `{:missing [peripheral-ids]}`
+4. Be callable by any AIF head's `check-law` method
+
+**Revision applied:** Added `aif/invariant.clj` to D-9 file layout.
+Added H-9 (Low complexity) to D-10 handoff boundaries with `:in` =
+peripheral registry + AifHead protocol, `:out` = `aif/invariant.clj`.
+Independent (needs H-1 for protocol def).
+
+**V-4: The mission itself passes I1-I6.**
+This is the recursive verification: the mission process (not just its
+output) satisfies the AIF+ invariants. The futonic mission lifecycle
+is itself an AIF loop. This is not coincidence — the lifecycle was
+designed around the same principles (observe before act, preferences
+constrain design, timescale separation between phases). The AIF+
+diagram in §5.1 makes this explicit and checkable.
 
 ---
 
