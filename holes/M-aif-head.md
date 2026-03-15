@@ -1,6 +1,6 @@
 **Status:** IDENTIFY (2026-03-15)
 
-# M-aif-head: Give the Mission Peripheral an Active Inference Head
+# M-aif-head: AIF Heads for Every Peripheral (Mission Peripheral First)
 
 ## 1. IDENTIFY
 
@@ -30,8 +30,13 @@ What it lacks — and what this mission supplies — is:
    `:propose` predicted?)
 
 These three additions turn the Mission Peripheral from a tool (does what
-Joe says) into an organism (maintains its own viability). The one
-invariant to rule them all: **each peripheral has an AIF head.**
+Joe says) into an organism (maintains its own viability). The Mission
+Peripheral is the first target because it has the richest existing
+infrastructure (cycle engine, obligations, gates, Portfolio Inference),
+but the end-state invariant applies to the whole stack: **each
+peripheral has an AIF head.** The reusable interface produced here
+(completion criterion C6) is what makes the generalization mechanical
+rather than a second design effort.
 
 The stack's three conceptual pillars map directly onto AIF components:
 - **The Argument** (holistic-argument-sketch) = generative model
@@ -117,8 +122,11 @@ disconnected from the peripherals where agents actually do work. The gap:
 - Add cross-phase prediction error tracking
 - Wire Portfolio Inference as the slow-timescale prior
 - Demonstrate refusal of at least one structurally illegal transition
-- Produce a reusable AIF head interface that the Proof Peripheral (and
-  future peripherals) can adopt
+- Produce a reusable AIF head interface and roll it out to all peripherals
+  that agents inhabit (chat, explore, edit, deploy, reflect, mentor,
+  proof, discipline, etc.). The Mission Peripheral is Phase 1; remaining
+  peripherals are Phase 2, expected to be mechanical once the interface
+  is proven
 - Connect the evidence landscape to the belief-update pathway: currently
   evidence is write-mostly; this mission makes it readable by AIF heads —
   accumulated evidence feeds back into precision estimates and model
@@ -135,8 +143,9 @@ disconnected from the peripherals where agents actually do work. The gap:
 - Full mana-gating economics (M-cyder territory; this mission uses
   budget constraints as one invariant among many)
 - Rewriting the 9-phase cycle engine (it stays; the AIF head wraps it)
-- Porting to the Proof Peripheral (follow-on mission, but the interface
-  should make it straightforward)
+- Deep per-peripheral customization (each peripheral gets the same
+  interface; domain-specific tuning of G-scores, observation channels,
+  and default-mode behavior is follow-on work)
 - Resolving the Stage 6 / superpod JSON closure problem (separate fix,
   upstream with Rob)
 - Full structure learning (automated model restructuring from evidence) —
@@ -199,7 +208,8 @@ disconnected from the peripherals where agents actually do work. The gap:
 9. **Self-enforcing invariant:** "Every peripheral has an AIF head" is
    itself testable — a function enumerates registered peripherals and
    checks each has an adapter binding. No peripheral can be registered
-   without one.
+   without one. All agent-inhabited peripherals have bindings by mission
+   completion.
 
 ### Relationship to other missions
 
