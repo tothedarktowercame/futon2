@@ -1,4 +1,4 @@
-**Status:** IDENTIFY (2026-03-15)
+**Status:** DERIVE (2026-03-15)
 
 # M-aif-head: AIF Heads for Every Peripheral (Mission Peripheral First)
 
@@ -514,7 +514,347 @@ Survey questions for the MAP phase:
 
 ## 3. DERIVE
 
-*Accretes after MAP.*
+### D-1: AIF Head Protocol (the reusable interface)
+
+**Decision**: Extend `AifAdapter` with three additional capabilities,
+expressed as a new protocol that composes with the existing one.
+
+```clojure
+(defprotocol AifHead
+  "Extends AifAdapter with peripheral-specific AIF capabilities.
+   Every peripheral that agents inhabit must implement this."
+
+  (observe [head state context]
+    "Gather observations from the peripheral's environment.
+     Returns {:channels {kw → [0,1]} :raw {kw → any}}")
+
+  (default-mode [head state observation]
+    "Inter-cycle / inter-action fallback behavior.
+     Called when the deliberative tier has nothing to do.
+     Returns same shape as select-pattern for drop-in substitution.")
+
+  (check-law [head state transition]
+    "Consult structural law inventory before a transition.
+     Returns {:ok true} or {:ok false :error {:code :structural-law-violation
+                                               :law-family kw ...}}"))
+```
+
+**IF** we keep the existing `AifAdapter` protocol unchanged, **HOWEVER**
+we need three capabilities it doesn't provide (domain-specific observation,
+default mode for I6, structural law consultation for I4/I5), **THEN** we
+add a separate `AifHead` protocol that composes with `AifAdapter`, **BECAUSE**:
+1. Existing adapters (FulabAdapter, Futon5McaAdapter) continue to work
+2. The 2-method core (`select-pattern` + `update-beliefs`) remains the
+   minimal interface for simple adapters
+3. `AifHead` is the "peripheral-grade" interface: observe + default-mode
+   + check-law + the inherited select-pattern + update-beliefs = 5 methods
+4. The ant default-mode already returns the same shape as policy — this
+   formalizes that convention
+
+**Three-tier mapping:**
+
+| Tier | Method | When invoked |
+|------|--------|-------------|
+| Reflex | `check-law` | Before every transition; throws on foundational violations |
+| Default mode | `default-mode` | When cycle completes or deliberative tier has no action |
+| Deliberative | `select-pattern` | Normal AIF action selection within a cycle |
+
+### D-2: Mission Peripheral Adapter
+
+**Entity**: `MissionAifHead` — implements both `AifAdapter` and `AifHead`.
+
+**Observation layer** (implements `observe`):
+
+10 channels as specified in `peripheral-aif-vocabulary.sexp` under
+`:peripheral/id :mission`. Sources:
+
+| Channel | Source function | Already exists? |
+|---------|----------------|-----------------|
+| `:phase-progress` | `cycle/current-phase` → ordinal | Yes |
+| `:obligation-satisfaction` | `mission-backend/obligation-summary` | Yes |
+| `:required-outputs-present` | `mission-logic/missing-phase-outputs` | Yes |
+| `:structural-law-compliance` | NEW: `logic/inventory/check-compliance` | No |
+| `:prediction-divergence` | NEW: cross-phase compare | No |
+| `:evidence-for-completion-criteria` | `estore/query*` with mission subject | Yes |
+| `:gate-readiness` | `gate-pipeline/dry-run` or count passing gates | Partial |
+| `:argument-claim-coverage` | NEW: argument → evidence lookup | No |
+| `:cycle-count` | `state :cycles-completed` | Yes |
+| `:days-since-last-activity` | `estore/query*` with mission subject | Yes |
+
+6 of 10 channels read from existing functions. 3 need new code
+(structural law, prediction divergence, argument claims). 1 is partial
+(gate dry-run).
+
+**Perception**: Reuse `portfolio/perceive.clj` pattern — predictive
+coding micro-steps. Same `compute-errors`, `update-sens`, `update-urgency`
+structure with mission-specific precision weights from the sexp.
+
+**Policy** (implements `select-pattern`):
+
+Action arena from sexp: `[:advance-phase :revise-approach :request-review
+:save-state :signal-blocked :signal-complete]`. EFE computation follows
+`portfolio/policy.clj` pattern: pragmatic + epistemic + effort terms,
+softmax with tau, abstain threshold.
+
+**Belief update** (implements `update-beliefs`):
+
+On each tool call result or phase transition, update pattern evidence
+counts and precision. Follows `FulabAdapter.update-beliefs` exactly.
+
+**Default mode** (implements `default-mode`):
+
+When cycle completes:
+1. Generate PAR for the completed cycle
+2. Consult Portfolio Inference for next assignment
+3. Check structural law compliance across repos
+4. Either begin next cycle or signal blocked/complete
+
+Returns `{:action :begin-next-cycle ...}` or `{:action :signal-complete ...}`
+— same shape as `select-pattern` output.
+
+**Law consultation** (implements `check-law`):
+
+Before phase transitions, query the structural law inventory (loaded as
+core.logic pldb facts) for violations. Returns `{:ok true}` or a
+structured refusal. The refusal is emitted as evidence and returned to
+the caller.
+
+### D-3: Prediction Enrichment
+
+**Decision**: Extend `:propose` required outputs from `{:approach str}`
+to a structured prediction.
+
+```clojure
+;; Current (mission_shapes.clj):
+:propose {:approach any?}
+
+;; Proposed:
+:propose {:approach any?
+          :predicted-artifacts [string?]      ;; expected file paths
+          :predicted-scope {:modules [kw?]    ;; affected modules
+                            :file-count int?} ;; rough estimate
+          :success-criteria [string?]}        ;; measurable outcomes
+```
+
+**IF** we want cross-phase prediction error (C2), **HOWEVER** `:propose`
+currently produces only a narrative string, **THEN** we add optional
+structured fields alongside the existing `:approach`, **BECAUSE**:
+1. Backward compatible — `:approach` remains required, new fields optional
+2. Agents naturally produce this information (they plan before executing)
+3. Divergence becomes computable: set difference on artifacts, scope
+   comparison, criteria checklist
+
+**Divergence computation** (injected into `dispatch-step` at cycle
+completion):
+
+```clojure
+(defn compute-prediction-divergence
+  "Compare :propose prediction against :execute actuals.
+   Returns [0,1] divergence score."
+  [propose-data execute-data]
+  (let [pred-artifacts (set (:predicted-artifacts propose-data))
+        actual-artifacts (set (:artifacts execute-data))
+        artifact-div (if (empty? pred-artifacts) 0.0
+                       (/ (count (clojure.set/symmetric-difference
+                                   pred-artifacts actual-artifacts))
+                          (max 1 (count (clojure.set/union
+                                          pred-artifacts actual-artifacts)))))
+        criteria-met (count (filter (:success-criteria propose-data)
+                                    ;; check against evidence
+                                    ))
+        criteria-total (count (:success-criteria propose-data))
+        criteria-div (if (zero? criteria-total) 0.0
+                       (- 1.0 (/ criteria-met criteria-total)))]
+    ;; Weighted average
+    (* 0.5 (+ artifact-div criteria-div))))
+```
+
+### D-4: Cycle Completion Hook (Default Mode Entry Point)
+
+**Decision**: Add an `:on-cycle-complete` callback to the cycle engine.
+
+**IF** the cycle engine has no completion callback (MAP Q4c, Q7),
+**HOWEVER** default mode needs to attach somewhere, **THEN** add a
+single hook point in `dispatch-step`'s completion branch, **BECAUSE**:
+1. Minimal change to cycle.clj (one `when` clause)
+2. The hook receives the completed state and returns a default-mode action
+3. Backward compatible — nil callback means current behavior (stop and wait)
+
+```clojure
+;; In cycle.clj dispatch-step, completion branch:
+(when-let [on-complete (:on-cycle-complete opts)]
+  (on-complete completed-state))
+```
+
+The `MissionAifHead.default-mode` method IS the callback. It gets wired
+in when the Mission Peripheral starts.
+
+### D-5: Structural Law Consultation (Refusal Surface)
+
+**Decision**: Inject law checking into `validate-phase-advance`.
+
+**IF** structural laws aren't consulted before transitions (MAP Q4a),
+**HOWEVER** the pre-transition hook already exists in `validate-phase-advance`,
+**THEN** extend it to call `AifHead.check-law` before allowing advancement,
+**BECAUSE**:
+1. Single interception point — all phase transitions go through this
+2. Returns `{:ok false}` on violation, same shape as existing errors
+3. Violation is emitted as evidence (coordination type)
+4. Reflex tier: foundational invariant violations throw `ex-info`
+   (these are "impossible states" — data corruption, not policy disagreement)
+
+**Error catalog** (new entries in mission-backend):
+
+```clojure
+:structural-law-violation      ;; candidate invariant would be violated
+:foundational-invariant-breach ;; operational invariant violated (reflex tier)
+:prediction-divergence-high    ;; propose/execute divergence above threshold
+:default-mode-override         ;; default mode action conflicts with requested
+```
+
+### D-6: Portfolio Effect Sink
+
+**Decision**: Wire Portfolio Inference's `:action` output to mission
+state changes.
+
+**IF** Portfolio produces actions but nothing consumes them (MAP Q1 gap),
+**THEN** add an effect handler that maps Portfolio actions to mission
+operations, **BECAUSE** the observation→inference path works and only
+the inference→effect path is missing.
+
+```clojure
+;; portfolio/effect.clj (new file, ~100 lines)
+(defn apply-portfolio-action
+  "Translate portfolio inference action into mission state change."
+  [action portfolio-result mission-state]
+  (case action
+    :work-on    {:effect :begin-cycle :mission (:focus portfolio-result)}
+    :review     {:effect :portfolio-review}
+    :consolidate {:effect :consolidate :targets (:consolidation-targets portfolio-result)}
+    :upvote     {:effect :upvote :target (:upvote-target portfolio-result)}
+    :wait       {:effect :none}))
+```
+
+This closes the AIF loop for Portfolio Inference: observe → perceive →
+policy → **effect** → observe. The effect changes mission state, which
+changes what the next observation sees.
+
+### D-7: Epistemic Action Repertoire
+
+**Decision**: Define as data in the sexp vocabulary, not as code.
+
+```clojure
+;; In peripheral-aif-vocabulary.sexp, new top-level section:
+(:epistemic-actions
+ [{:id :convention
+   :precision-contribution 0.1
+   :description "We've been doing it this way"
+   :verification :none
+   :cost :negligible}
+
+  {:id :property-test
+   :precision-contribution 0.3
+   :description "Generative tests probe the invariant boundary"
+   :verification :test-suite
+   :cost :low}
+
+  {:id :core-logic-validation
+   :precision-contribution 0.5
+   :description "Declarative specification checked against codebase"
+   :verification :pldb-query
+   :cost :medium}
+
+  {:id :formal-proof
+   :precision-contribution 0.9
+   :description "Machine-checked verification (Lean, Coq, etc.)"
+   :verification :theorem-prover
+   :cost :high}])
+```
+
+**IF** different invariants need different verification thresholds,
+**THEN** define the repertoire as data with precision contributions,
+**BECAUSE** an AIF adapter can then query: "what epistemic actions have
+been applied to this invariant?" → sum precision contributions →
+compare against promotion threshold. This is the crystallization gate
+formalized.
+
+### D-8: Wiring Diagram (optional per mission-lifecycle)
+
+Not a futon5 exotype diagram (this mission doesn't define a new component
+topology), but the AIF role mapping from MAP Q9 serves as the structural
+reference:
+
+```
+Environment ← Codebase + evidence store + repos
+    │
+    ▼
+Sensory ← :observe + :orient phases ──► OBSERVATION CHANNELS (10)
+    │
+    ▼
+Internal ← :propose + :classify ──► BELIEFS (μ) + PERCEPTION (micro-steps)
+    │                                     │
+    ▼                                     ▼
+Active ← :execute + :integrate ──► POLICY (EFE + softmax)
+    │                                     │
+    ▼                                     ▼
+Preferences ← Structural law inventory + completion criteria
+    │
+    ▼
+[check-law gate between Preferences and Active]
+[default-mode between cycles]
+[Portfolio Inference as slow-timescale prior on Preferences]
+```
+
+### D-9: File Layout
+
+```
+futon2/
+  src/futon2/aif/
+    head.clj              NEW — AifHead protocol definition
+
+futon3c/
+  src/futon3c/aif/
+    mission_head.clj      NEW — MissionAifHead implementation
+    observe.clj           NEW — mission observation channels
+    default_mode.clj      NEW — inter-cycle behavior
+  src/futon3c/logic/
+    inventory.clj          NEW — sexp → pldb loader
+  src/futon3c/portfolio/
+    effect.clj             NEW — portfolio action → mission state
+  src/futon3c/peripheral/
+    cycle.clj              EDIT — add :on-cycle-complete hook
+    mission_backend.clj    EDIT — extend validate-phase-advance
+    mission_shapes.clj     EDIT — enrich :propose outputs
+  docs/
+    peripheral-aif-vocabulary.sexp  EDIT — add epistemic actions
+```
+
+### D-10: Handoff Boundaries (Codex-scoped tasks)
+
+| Task | Scope | In (read-only) | Out (create) | Complexity |
+|------|-------|----------------|--------------|------------|
+| H-1: AifHead protocol | futon2 | adapter.clj | head.clj | Low |
+| H-2: Inventory loader | futon3c | inventory.sexp, structural_law.clj | logic/inventory.clj | Medium |
+| H-3: Mission observe | futon3c | mission_backend.clj, mission_shapes.clj, vocabulary.sexp | aif/observe.clj | Medium |
+| H-4: Mission AIF head | futon3c | head.clj, observe.clj, portfolio/perceive.clj | aif/mission_head.clj | High |
+| H-5: Default mode | futon3c | cycle.clj, portfolio/core.clj | aif/default_mode.clj, cycle.clj edit | Medium |
+| H-6: Prediction enrichment | futon3c | mission_shapes.clj, mission_backend.clj | edits to both | Low |
+| H-7: Refusal surface | futon3c | mission_backend.clj, inventory.clj | edit to mission_backend.clj | Medium |
+| H-8: Portfolio effect | futon3c | portfolio/policy.clj, mission_backend.clj | portfolio/effect.clj | Low |
+
+H-1 and H-2 have no dependencies. H-3 depends on H-2. H-4 depends on
+H-1 + H-3. H-5 depends on H-4. H-6 and H-7 can run in parallel with
+H-4. H-8 is independent.
+
+Dependency graph:
+```
+H-1 ──┐
+      ├──► H-4 ──► H-5
+H-2 ──► H-3 ──┘
+H-6 ──────────────► (parallel)
+H-7 ──────────────► (parallel, needs H-2)
+H-8 ──────────────► (independent)
+```
 
 ---
 
