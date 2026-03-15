@@ -33,6 +33,21 @@ These three additions turn the Mission Peripheral from a tool (does what
 Joe says) into an organism (maintains its own viability). The one
 invariant to rule them all: **each peripheral has an AIF head.**
 
+The stack's three conceptual pillars map directly onto AIF components:
+- **The Argument** (holistic-argument-sketch) = generative model
+  (beliefs about what the stack is)
+- **The Invariants** (structural-crystallization + inventory.sexp) =
+  precision (operational = high tau, candidate = low, liquid = negotiable)
+- **Futonic Missions** (futonic-missions.md) = policy (action selection
+  to minimize free energy: IDENTIFY→MAP→DERIVE→ARGUE→VERIFY→INSTANTIATE)
+
+This is not analogy. futon2 already has a working AIF engine with the
+`AifAdapter` protocol (`select-pattern` + `update-beliefs`), a full
+`FulabAdapter` with softmax/G-score/tau dynamics, and an ant-level AIF
+stack (observe→perceive→affect→policy). But this infrastructure is
+disconnected from the peripherals where agents actually do work. The gap:
+**peripherals constrain but don't learn.**
+
 ### Theoretical anchoring
 
 - **AIF+ (chapter0-aif-as-wiring-diagram.md):** The six invariants
@@ -80,6 +95,20 @@ invariant to rule them all: **each peripheral has an AIF head.**
   is the constitution; the AIF head enforces it against all actors,
   including the sovereign.
 
+- **Hierarchical generative models:** The stack has structure at multiple
+  scales — portfolio (which mission?), mission (which phase?), peripheral
+  (which action?). Each level has its own generative model facet, but
+  they compose into a single coherent model. Like an ant following local
+  pheromone gradients that encode global colony state.
+
+- **Structure learning (deferred but named):** The futon2 ants run for
+  200 ticks in a fixed world — they do parameter updating but not model
+  restructuring. The futon stack evolves: missions complete, invariants
+  crystallize, new missions emerge. This requires a second, slower AIF
+  loop that reads the evidence landscape and proposes generative model
+  revisions. This mission wires the heads; structure learning is a
+  follow-on that builds on the connectivity established here.
+
 ### Scope in
 
 - Equip the Mission Peripheral with an AIF head that consults the
@@ -90,6 +119,14 @@ invariant to rule them all: **each peripheral has an AIF head.**
 - Demonstrate refusal of at least one structurally illegal transition
 - Produce a reusable AIF head interface that the Proof Peripheral (and
   future peripherals) can adopt
+- Connect the evidence landscape to the belief-update pathway: currently
+  evidence is write-mostly; this mission makes it readable by AIF heads —
+  accumulated evidence feeds back into precision estimates and model
+  confidence (counts, existence checks — not full provenance graphs)
+- Define an epistemic action repertoire as data: the verification
+  spectrum (convention → property tests → core.logic → formal proof) as
+  named slots with precision contributions, queryable by adapters
+  deciding whether a candidate invariant is ready for promotion
 
 ### Scope out
 
@@ -102,6 +139,16 @@ invariant to rule them all: **each peripheral has an AIF head.**
   should make it straightforward)
 - Resolving the Stage 6 / superpod JSON closure problem (separate fix,
   upstream with Rob)
+- Full structure learning (automated model restructuring from evidence) —
+  this mission wires the heads; structure learning builds on the evidence
+  connectivity established here
+- Lean integration — the epistemic action repertoire *names* formal
+  verification as a slot; filling it with an actual Lean bridge is
+  separate work
+- Modifying the futon2 `AifAdapter` protocol itself — if the current
+  two-method protocol (`select-pattern` + `update-beliefs`) proves
+  insufficient, that's a futon2-internal change gated on evidence from
+  this mission
 
 ### Completion criteria
 
@@ -144,16 +191,39 @@ invariant to rule them all: **each peripheral has an AIF head.**
    to the evidence landscape, maintaining the "all turns are logged"
    property.
 
+8. **Evidence landscape queryable:** An AIF adapter can ask "how much
+   evidence supports this mission/invariant/claim?" and get a count
+   that feeds into G-score computation. The evidence store becomes
+   readable by heads, not just writable by agents.
+
+9. **Self-enforcing invariant:** "Every peripheral has an AIF head" is
+   itself testable — a function enumerates registered peripherals and
+   checks each has an adapter binding. No peripheral can be registered
+   without one.
+
 ### Relationship to other missions
 
-**Depends on:**
+**Depends on (ready):**
 - M-structural-law (the structural law inventory must be at least at
   Phase 1 IDENTIFY, which it is — the sexp exists)
 - Mission Peripheral operational (it is — README-mission-peripheral.md
   confirms)
 - Portfolio Inference operational (it is — portfolio/core.clj exists)
+- futon2 AIF engine — already built, `AifAdapter` protocol is stable
+
+**Depends on (partial):**
+- M-self-representing-stack — the evidence landscape as readable
+  substrate. This mission needs basic evidence queryability (counts,
+  existence checks); M-self-representing-stack goes further (provenance
+  graphs, causal tracing). We can build C8 with what exists now and
+  deepen it later.
 
 **Enables:**
+- Automated mission selection — the portfolio head replaces ad-hoc queue
+  management (bell/whistle/conductor) with principled free energy
+  minimization
+- Invariant promotion pipeline — epistemic action repertoire + precision
+  tracking creates a formal pathway from candidate → operational
 - M-aif-head-proof: port the AIF head to the Proof Peripheral
 - M-futon2-resolution: the resolution theorem prover that uses the
   AIF head pattern across all peripherals (the Eric-finder, the
@@ -174,18 +244,39 @@ invariant to rule them all: **each peripheral has an AIF head.**
 
 ### Source material
 
-- `structural-law-inventory.sexp` — the generative model content
-- `chapter0-aif-as-wiring-diagram.md` — the AIF+ invariant framework
-- `README-mission-peripheral.md` — current Mission Peripheral state
-- `src/futon3c/peripheral/mission.clj` — implementation
+**futon2 (AIF engine — the pattern source):**
+- `src/futon2/aif/adapter.clj` — `AifAdapter` protocol (2 methods:
+  `select-pattern`, `update-beliefs`)
+- `src/futon2/aif/engine.clj` — domain-agnostic engine wrapper
+- `src/futon2/aif/adapters/fulab.clj` — working adapter with
+  softmax/G-score/tau/evidence-tracking (the reference implementation)
+- `src/futon2/aif/adapters/futon5_mca.clj` — stub adapter (reference
+  shape for new adapters)
+- `src/ants/aif/` — 8-file ant AIF stack (observe/perceive/affect/policy)
+- `doc/aif-engine.md` — engine contract and API surface
+- `doc/stack-baseline.md` — ant AIF loop documentation with trace format
+
+**futon3c (peripherals — the wiring target):**
+- `src/futon3c/peripheral/adapter.clj` — tool mapping + prompt generation
+- `src/futon3c/peripheral/runner.clj` — `PeripheralRunner` protocol
+- `src/futon3c/peripheral/registry.clj` — peripheral registration
+- `src/futon3c/peripheral/mission.clj` — Mission Peripheral implementation
 - `src/futon3c/peripheral/cycle.clj` — generic cycle engine
 - `src/futon3c/peripheral/mission_backend.clj` — domain logic
 - `src/futon3c/peripheral/mission_shapes.clj` — state shapes
 - `src/futon3c/portfolio/core.clj` — Portfolio Inference
+
+**Conceptual anchors:**
+- `structural-law-inventory.sexp` — the generative model content
+- `chapter0-aif-as-wiring-diagram.md` — the AIF+ invariant framework
+- `futon3/holes/holistic-argument-sketch.md` — the Argument
+- `futon3c/docs/structural-crystallization.md` — crystallization narrative
+- `futon3c/docs/futonic-missions.md` — mission methodology
+
+**Other repos:**
 - `futon5/src/.../ct/dsl.clj` — CT DSL for diagram composition
 - `futon5/src/.../wiring/compose.clj` — wiring composition
 - `futon3b/src/futon3/gate/canon.clj` — gate canonisation logic
-- futon2 ants demo (AIF head proof of concept)
 
 ### Owner and dependencies
 
@@ -203,49 +294,211 @@ invariant to rule them all: **each peripheral has an AIF head.**
 
 Survey questions for the MAP phase:
 
-- [ ] **Q1:** What is the current interface between the Mission Peripheral
-  and Portfolio Inference? Is it a function call, a shared data structure,
-  or evidence-mediated?
+- [x] **Q1:** What is the current interface between the Mission Peripheral
+  and Portfolio Inference?
 
-- [ ] **Q2:** What does the ants AIF head actually look like in code? What
-  is the minimal interface (protocol, record, multimethod) that it
-  exposes? Can it be extracted as a reusable shape?
+  **Answer: All three — function call, shared data, and evidence-mediated.**
+  Mission Control Backend builds a `PortfolioReview` map via
+  `build-portfolio-review` (scans all repos → missions, devmaps, coverage,
+  mana, gaps). Portfolio Inference reads this via `observe/gather-mc-state`
+  → normalizes 15 channels → feeds into its own AIF step. Portfolio emits
+  three evidence types (observation, belief, policy) to the evidence store.
 
-- [ ] **Q3:** How is the structural law inventory best represented for
-  runtime consultation — as an sexp loaded into memory, as core.logic
-  relations, as Arxana hyperedges, or as a compiled gate configuration?
+  **Key gap:** The action loop is open. Portfolio inference produces an
+  `:action` keyword but nothing consumes it to modify mission state or
+  dispatch agents. The observation→inference path works; the
+  inference→effect path is missing.
 
-- [ ] **Q4:** Where in the cycle engine (`cycle.clj`) are the natural
-  interception points for: (a) pre-transition invariant checking,
-  (b) cross-phase prediction error, (c) default mode entry on cycle
-  completion?
+- [x] **Q2:** What does the ants AIF head actually look like in code?
 
-- [ ] **Q5:** What prediction is actually available at `:propose` that
-  could be compared against `:execute` output? Is it structured enough
-  for a computable divergence measure, or does it need to be?
+  **Answer: Five pure functions composed in `aif-step`, plus an extracted
+  protocol.** The ant pipeline is: observe (16-dim normalized vector) →
+  perceive (5 predictive coding micro-steps → mu/prec/errors/free-energy)
+  → affect (hunger→precision→tau coupling) → policy (EFE over 4 actions,
+  softmax, 5-component scoring) → default-mode (tropism-based fallback,
+  same output shape as policy for drop-in substitution).
 
-- [ ] **Q6:** What refusal mechanisms already exist in the stack (e.g.,
-  futon1a penholder refusal, futon3b gate rejection, obligation status
-  enforcement) and what is their common interface shape?
+  **Already extracted:** `futon2.aif.adapter/AifAdapter` protocol with
+  2 methods (`select-pattern`, `update-beliefs`). `FulabAdapter` is a
+  working reference (170 lines). `Futon5McaAdapter` is a stub. The ant
+  pipeline's perceive/affect/policy are domain-agnostic; only observe
+  and default-mode need domain-specific implementations.
 
-- [ ] **Q7:** What is the current "end of cycle" code path? What happens
-  after `:completed` clears the active phase — what state is the
-  peripheral left in, and what triggers the next action?
+- [x] **Q3:** How is the structural law inventory best represented for
+  runtime consultation?
 
-- [ ] **Q8:** Can the structural law inventory's candidate families be
-  loaded as core.logic relations alongside the existing operational
-  families in proof_logic.clj / agency/logic.clj, or does the
-  representation need a different approach?
+  **Answer: As core.logic relations (pldb).** Five domains already use
+  this exact pattern: portfolio, tickle, agency, proof, mission — each
+  with `build-db` → pldb facts → goals → `query-violations`. Shared
+  combinators in `futon3c.logic.structural-law` (paired-edge-mismatches,
+  dangling-targets, invalid-enums, missing-phase-outputs). The sexp
+  inventory (17 families) loads trivially as pldb facts with family-id,
+  status, scope, kind, home, implemented-in fields. ~200 lines of new
+  code, all following proven patterns.
 
-- [ ] **Q9:** What is the wiring diagram shape for the Mission Peripheral
-  as an AIF+ agent? Map its 9 phases, tool surfaces, and evidence
-  emissions onto the five AIF roles (Environment, Sensory, Internal,
-  Active, Preferences) and the six invariants (I1–I6).
+- [x] **Q4:** Where in the cycle engine are the natural interception
+  points?
 
-- [ ] **Q10:** What would a minimal "I'm sorry, Joe" look like in the
-  current Mission Peripheral infrastructure — a thrown exception, a
-  returned error map, a gate failure, an evidence emission, or
-  something else?
+  **(a) Pre-transition invariant checking:** `validate-phase-advance` in
+  `mission_backend.clj:273-285` — already blocks advancement if required
+  outputs missing. This is the hook for structural law consultation.
+
+  **(b) Cross-phase prediction error:** The condition
+  `(= new-phase last-phase)` at `cycle.clj:159` detects completion.
+  Before the state transformation that clears `:current-phase`, we could
+  inject cross-phase analysis. **No hook currently exists** — error
+  computation would need to be injected into `dispatch-step`.
+
+  **(c) Default mode entry:** **NO CURRENT MECHANISM.** When cycle
+  completes, `:current-phase` and `:current-cycle-id` are dissoc'd,
+  `:cycles-completed` incremented, and the peripheral reverts to setup
+  mode. No callback, no fire-on-idle, no automatic next action. What
+  happens next is the caller's responsibility.
+
+- [x] **Q5:** What prediction is available at `:propose` vs `:execute`?
+
+  **Answer: Not enough for divergence — yet.** `:propose` produces only
+  `{:approach "strategy description"}` (a narrative). `:execute` produces
+  `{:artifacts ["file1.clj" "file2.clj"]}` (concrete paths). These are
+  type-incompatible. To compute divergence, `:propose` needs enrichment:
+  predicted artifacts, predicted scope, predicted file count, measurable
+  success criteria. Then set-theoretic artifact divergence, scope
+  divergence, and criteria satisfaction become computable. This is a
+  DERIVE decision: enrich `:propose` required outputs.
+
+- [x] **Q6:** What refusal mechanisms already exist?
+
+  **Answer: Three layers, converging on `{:ok false ...}`.**
+
+  | Layer | Mechanism | Shape | Short-circuit |
+  |-------|-----------|-------|---------------|
+  | futon1a L3 | Penholder auth | Throws `ex-info` → HTTP 403 | Exception handler |
+  | futon3b G0–G5 | Gate pipeline | `{:ok false :type :gate/reject :error/key KW}` | `ok?` check |
+  | futon3c | Status/mode/DAG | `{:ok false :error {:code KW :message STR}}` | Tool return |
+
+  Common pattern: predefined error catalog, returned `{:ok false}` value,
+  short-circuit on failure, proof-of-rejection persisted. futon3b's gate
+  pipeline (33+ error keys) is the most mature model.
+
+- [x] **Q7:** What is the current "end of cycle" code path?
+
+  **Answer:** `dispatch-step` detects `(= new-phase last-phase)` →
+  dissocs `:current-phase` and `:current-cycle-id` → increments
+  `:cycles-completed` → emits step evidence → returns to setup mode.
+  No automatic save (agent must call `:mission-save`), no automatic
+  dispatch, no bell, no default mode entry. The peripheral just stops
+  accepting cycle-advance and waits.
+
+  **This is the primary gap for default mode.** The hook point is clear
+  (the completion branch in `dispatch-step`), but the machinery to
+  invoke default-mode behavior doesn't exist.
+
+- [x] **Q8:** Can candidate families load as core.logic relations?
+
+  **Answer: Yes, directly.** Relations are additive. Status field
+  (`:operational` vs `:candidate`) distinguishes them. The existing
+  `invariant_runner.clj` tracks load profiles. Cross-domain queries
+  like "which candidates implicate failure-locality?" become
+  straightforward. No architectural change needed — just new facts
+  in the same pldb databases.
+
+- [x] **Q9:** Wiring diagram: Mission Peripheral as AIF+ agent.
+
+  **Mapping the 9 phases to AIF roles:**
+
+  | AIF Role | Mission Peripheral Component |
+  |----------|------------------------------|
+  | **Environment** | Codebase + evidence store + other repos |
+  | **Sensory** | `:observe` + `:orient` phases (read state) |
+  | **Internal** | `:propose` + `:classify` (model, decide) |
+  | **Active** | `:execute` + `:integrate` (write code, commit) |
+  | **Preferences** | Structural law inventory + mission completion criteria |
+
+  **Invariant status:**
+
+  | Invariant | Status | Evidence |
+  |-----------|--------|----------|
+  | **I1 Boundary** | ✓ Satisfied | Phase-gated tool envelopes (read-only in observe, write in execute) |
+  | **I2 Obs/Act asymmetry** | ✓ Satisfied | Different tool sets per phase; observe≠execute |
+  | **I3 Timescale separation** | ○ Partial | Portfolio Inference is slower, but not formally coupled |
+  | **I4 Preference exogeneity** | ○ Partial | Obligation transitions are gated, but structural laws aren't consulted |
+  | **I5 Model adequacy** | ✗ Missing | No explicit generative model; no prediction error tracking |
+  | **I6 Compositional closure** | ✗ Missing | No default mode; cycle completion → dead stop |
+
+  **This mission targets I3 (wire Portfolio Inference as slow prior),
+  I5 (structural law inventory as generative model + prediction error),
+  and I6 (default mode tier for inter-cycle viability).**
+
+- [x] **Q10:** What would a minimal "I'm sorry, Joe" look like?
+
+  **Answer: A returned error map, following the futon3c pattern.**
+  Specifically: `{:ok false :error {:code :structural-law-violation
+  :message "Cannot advance: budgeted-action-selection requires..."
+  :law-family :budgeted-action-selection :law-status :candidate
+  :context {...}}}`. This fits the existing `mission-error` helper in
+  `mission_backend.clj`. The refusal would be emitted as evidence
+  (coordination evidence type) and returned as the tool result. No
+  exception — the pipeline continues, but the transition is blocked.
+
+  For the reflex tier (foundational invariant violations), throwing
+  `ex-info` is appropriate since these represent "impossible states"
+  rather than "unwise transitions."
+
+### Ready vs Missing
+
+**Ready (no new code needed):**
+
+| Component | Location | What it provides |
+|-----------|----------|-----------------|
+| AIF engine + adapter protocol | `futon2/src/futon2/aif/` | Domain-agnostic engine, 2-method protocol |
+| FulabAdapter reference impl | `futon2/src/futon2/aif/adapters/fulab.clj` | Working softmax/G/tau/evidence adapter |
+| 9-phase cycle engine | `futon3c/peripheral/cycle.clj` | Phase transitions, tool dispatch, evidence emission |
+| Mission Peripheral | `futon3c/peripheral/mission*.clj` | Full mission lifecycle (phases, obligations, gates) |
+| Portfolio Inference | `futon3c/portfolio/{core,observe,policy,logic}.clj` | 15-channel observation, AIF step, evidence emission |
+| core.logic infrastructure | 5 domain `*_logic.clj` files + `structural_law.clj` | Proven pldb pattern, shared combinators |
+| Structural law inventory | `futon3c/docs/structural-law-inventory.sexp` | 9 operational + 8 candidate families as data |
+| Refusal patterns | futon1a/futon3b/futon3c | `{:ok false}` convention, gate error catalogs |
+| Pre-transition hook | `mission_backend.clj:validate-phase-advance` | Existing interception point for invariant checking |
+| AIF+ invariant spec | `futon5/docs/chapter0-aif-as-wiring-diagram.md` | I1–I6 framework with formal definitions |
+
+**Missing (the actual work):**
+
+| Component | What needs building | Estimated size |
+|-----------|-------------------|----------------|
+| Inventory loader | `logic/inventory.clj` — load sexp → pldb facts | ~200 lines |
+| Mission AIF adapter | New `AifAdapter` impl for the Mission Peripheral | ~300 lines |
+| Default mode tier | Cycle-completion hook + inter-cycle behavior | ~200 lines |
+| Prediction enrichment | Extend `:propose` required outputs for divergence | ~100 lines |
+| Prediction error compute | Cross-phase divergence in `dispatch-step` | ~150 lines |
+| Refusal surface | Structural law consultation before transitions | ~150 lines |
+| Portfolio effect sink | Wire Portfolio `:action` → mission state changes | ~100 lines |
+| Reflex tier | Hard refusal for foundational invariant violations | ~100 lines |
+| AIF head protocol | Reusable shape: gen-model, pred-error, default-mode, refusal, coupling | ~100 lines |
+| Evidence read-back | Query evidence counts by mission/invariant/claim | ~150 lines |
+
+**Total estimated new code: ~1,550 lines across futon2 + futon3c.**
+
+### Surprises
+
+1. **Portfolio Inference is further along than expected.** It already has
+   a full AIF step with 15 observation channels, softmax policy, and
+   evidence emission. The gap is only the effect loop (action → state).
+
+2. **The cycle engine has no completion callback.** This is the single
+   biggest structural gap — there is literally nowhere for default mode
+   to attach without modifying `dispatch-step`.
+
+3. **`:propose` is unstructured.** It produces only a narrative string,
+   not a prediction. Enriching it is the prerequisite for prediction
+   error tracking — and this is a design decision, not just plumbing.
+
+4. **core.logic is thoroughly established.** Five domains already use the
+   same pldb pattern. Loading the sexp inventory is genuinely ~200 lines
+   of straightforward code, not a research problem.
+
+5. **Refusal conventions are convergent but not unified.** All three
+   repos use `{:ok false}` with error catalogs, but the specific shapes
+   differ. A common refusal type would be useful but isn't blocking.
 
 ---
 
