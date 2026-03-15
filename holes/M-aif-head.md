@@ -1,4 +1,4 @@
-**Status:** DERIVE (2026-03-15)
+**Status:** ARGUE (2026-03-15)
 
 # M-aif-head: AIF Heads for Every Peripheral (Mission Peripheral First)
 
@@ -860,7 +860,341 @@ H-8 ──────────────► (independent)
 
 ## 4. ARGUE
 
-*Accretes after DERIVE.*
+Each DERIVE decision is contextualized against the existing pattern library.
+The argument reads bottom-up: first the individual decision arguments
+(grounded in specific patterns), then the coherence argument that binds them
+into a single design.
+
+### Pattern Index
+
+Patterns referenced in arguments below, with library paths:
+
+| Short ID | Library path | Core claim |
+|----------|-------------|------------|
+| P-sda | agent/sense-deliberate-act | Three-phase cycle: sense → deliberate → act |
+| P-env | gauntlet/aif-as-environment-not-instruction | AIF state as observation, not instruction |
+| P-sov | aif/structured-observation-vector | Typed observation vector for comparable steps |
+| P-ttc | aif/term-to-channel-traceability | Each G term declares channels consumed |
+| P-epr | aif/evidence-precision-registry | Per-channel precision as tunable control surface |
+| P-efe | aif/expected-free-energy-scorecard | G as multi-term scorecard, not opaque scalar |
+| P-tau | aif/policy-precision-commitment-temperature | τ as commitment temperature |
+| P-cas | aif/candidate-pattern-action-space | Bounded candidate set for action selection |
+| P-boh | aif/belief-state-operational-hypotheses | Compact belief map, updated each step |
+| P-sih | agent/state-is-hypothesis | State as revisable hypothesis |
+| P-pnf | agent/pause-is-not-failure | Pause as first-class action |
+| P-mg | realtime/mode-gate | Explicit DISCUSS→DIAGNOSE→EXECUTE transitions |
+| P-stl | futon-theory/stop-the-line | Block writes on invariant failure |
+| P-lfs | realtime/loop-failure-signals | Sustained failure as health signal |
+| P-seo | realtime/structured-events-only | Structured event schema enforcement |
+| P-at | realtime/authoritative-transcript | Append-only event log as authority |
+| P-sto | futon-theory/structural-tension-as-observation | Two nested AIF loops, tension as observation |
+| P-sbh | social/scope-bounded-handoff | GitHub issue-based task handoff |
+| P-lag | realtime/learn-as-you-go | Record learnings to reduce repeated mistakes |
+
+---
+
+### A-1: The Three-Tier Architecture (grounds D-1)
+
+**Patterns**: P-sda, P-env, P-mg, P-stl
+
+**IF** every peripheral must have an AIF head, and the sense-deliberate-act
+cycle (P-sda) establishes three distinct phases, **HOWEVER** the existing
+`AifAdapter` (2 methods) conflates all three phases into `select-pattern` +
+`update-beliefs`, and the gauntlet pattern (P-env) requires AIF state to be
+sensory rather than instructive, **THEN** `AifHead` adds exactly three
+methods that recover the missing phases:
+
+| Phase (P-sda) | AifHead method | What it recovers |
+|---------------|----------------|-----------------|
+| Sense | `observe` | Domain-specific observation (P-sov) that was implicit |
+| Deliberate | — | Inherited: `select-pattern` remains unchanged |
+| Act (gated) | `check-law` | Mode-gate (P-mg) and stop-the-line (P-stl) before action |
+| Inter-cycle | `default-mode` | The gap between cycles that P-pnf says must be a real action |
+
+**BECAUSE**: The 2-method `AifAdapter` is an engineering shortcut that
+collapses sense and act into one deliberation step. This was adequate for
+the ant domain (simple observation, no structural laws). Peripherals are
+richer: they have domain-specific sensors, they operate under structural
+constraints, and they have inter-cycle behavior. Three additional methods
+recover the three-phase structure that P-sda requires without breaking the
+simpler adapters that don't need it.
+
+The composition (not inheritance) is key: `AifHead` composes with
+`AifAdapter` rather than replacing it, so the ant adapters continue working
+unchanged. The peripheral-grade interface is opt-in.
+
+---
+
+### A-2: Observation as Typed Vector (grounds D-2)
+
+**Patterns**: P-sov, P-ttc, P-epr, P-efe, P-tau, P-cas
+
+**IF** the Mission Peripheral needs 10 observation channels (D-2), and
+P-sov requires a typed, normalized observation vector for comparability,
+and P-ttc requires every G term to declare which channels it consumed,
+**HOWEVER** 6 of 10 channels already exist as functions scattered across
+`mission-backend`, `cycle`, and `estore` — they just aren't composed into
+a vector, **THEN** the `MissionAifHead.observe` method is primarily a
+*wiring* task (collecting existing signals into a typed vector) rather
+than an *invention* task, **BECAUSE**:
+
+1. P-sov: The vector must be typed and normalized [0,1] so that precision
+   weights (P-epr) are meaningful. This is already the convention in
+   `portfolio/observe.clj` (15 channels, all [0,1]).
+2. P-ttc: Each G term in the EFE scorecard (P-efe) must declare which
+   channels it consumed. The 10 mission channels map to specific G terms:
+   - `:phase-progress` + `:obligation-satisfaction` → pragmatic value
+   - `:prediction-divergence` + `:argument-claim-coverage` → epistemic value
+   - `:structural-law-compliance` → constraint violation
+   - `:gate-readiness` → readiness/effort
+3. P-tau: The policy uses softmax with τ, so the observation vector feeds
+   precision weights that modulate commitment temperature. High
+   `:prediction-divergence` → increase τ → explore alternatives.
+4. P-cas: The action arena `[:advance-phase :revise-approach :request-review
+   :save-state :signal-blocked :signal-complete]` is a bounded candidate
+   set, not an open-ended choice. P-cas says this is necessary for
+   meaningful scoring.
+
+The 3 new channels (structural law, prediction divergence, argument claims)
+are the only genuine new code. Everything else is composition.
+
+---
+
+### A-3: Prediction as Hypothesis (grounds D-3)
+
+**Patterns**: P-sih, P-boh, P-lag
+
+**IF** we want cross-phase prediction error (the `:prediction-divergence`
+channel from D-2), and P-sih says state should be a revisable hypothesis,
+and P-boh says to maintain a compact belief map updated each step,
+**HOWEVER** `:propose` currently produces only a narrative string — an
+opaque prediction that cannot be compared against outcomes, **THEN** we
+enrich `:propose` with structured, falsifiable fields (`predicted-artifacts`,
+`predicted-scope`, `success-criteria`), **BECAUSE**:
+
+1. P-sih: If state is hypothesis, predictions are testable claims. A
+   narrative approach statement is not falsifiable ("the approach was to
+   investigate..." is always true). Structured predictions can be compared
+   set-theoretically: predicted artifacts vs actual artifacts.
+2. P-boh: The belief map needs an `expected-next-observation` field.
+   Structured predictions fill this role for the Mission Peripheral's
+   cross-phase belief updates.
+3. P-lag: Each divergence between prediction and outcome is a learning
+   event. Without structured predictions, learn-as-you-go has nothing
+   to compare against.
+
+The enrichment is backward-compatible: `:approach` remains required, new
+fields are optional. Agents that don't produce structured predictions
+simply get `nil` divergence — the channel doesn't fire, and no precision
+weight is applied. This is the correct degenerate case: absence of
+prediction is ignorance, not error.
+
+---
+
+### A-4: Default Mode as Legitimate Phase (grounds D-4)
+
+**Patterns**: P-pnf, P-mg, P-sda
+
+**IF** the cycle engine currently has no completion callback (MAP Q4c),
+and P-pnf says pause must be a first-class action with defined triggers,
+and P-mg says mode transitions must be explicit, **HOWEVER** the current
+behavior at cycle end is simply to stop and wait — an implicit pause with
+no context, no trigger classification, and no handoff, **THEN** we add
+`:on-cycle-complete` as a single hook point that invokes
+`AifHead.default-mode`, **BECAUSE**:
+
+1. P-pnf: The inter-cycle gap is currently invisible. An agent finishes
+   a cycle and... nothing happens. This violates pause-is-not-failure:
+   the pause has no reason, no missing-info context, and no resume hook.
+   Default mode supplies all three.
+2. P-mg: Mode-gate requires explicit transitions. The cycle-to-next-cycle
+   transition is currently implicit. Default mode makes it an explicit
+   gate: PAR the completed cycle → consult Portfolio → check laws →
+   decide whether to begin next cycle or signal completion.
+3. P-sda: Between cycles, the agent is in the "sense" phase of the next
+   potential cycle. Default mode IS that sensing: it observes the
+   post-cycle state and deliberates on whether to act (start next cycle)
+   or pause (signal blocked/complete).
+
+The hook is minimal: one `when-let` clause in `dispatch-step`. The entire
+behavior lives in the `AifHead` implementation, not in the cycle engine.
+This preserves the engine's simplicity while giving peripherals a structured
+inter-cycle life.
+
+---
+
+### A-5: Refusal as Signal, Not Punishment (grounds D-5)
+
+**Patterns**: P-stl, P-lfs, P-seo, P-mg
+
+**IF** structural laws must be consulted before phase transitions (D-5),
+and P-stl says to block writes on invariant failure while allowing reads,
+and P-lfs says sustained failure should be treated as a health signal,
+**HOWEVER** the current system has no refusal mechanism — `validate-phase-advance`
+either succeeds or throws a generic exception, **THEN** we extend
+`validate-phase-advance` to call `AifHead.check-law` and return structured
+refusals, **BECAUSE**:
+
+1. P-stl: Stop-the-line distinguishes write-blocking from read-blocking.
+   `check-law` at the reflex tier blocks the transition (write) while
+   allowing the agent to continue observing and diagnosing (read). This
+   is exactly the stopped-state protocol.
+2. P-lfs: A refusal is a signal, not an error. It carries diagnostic
+   context: which law, which violation, what would need to change. The
+   error catalog (`:structural-law-violation`, `:foundational-invariant-breach`,
+   `:prediction-divergence-high`, `:default-mode-override`) classifies
+   refusals by kind, enabling the agent to respond appropriately.
+3. P-seo: Refusals must be structured events (P-seo), not exception
+   messages. They are emitted as evidence and stored in the evidence
+   landscape. This makes refusal patterns observable: "which laws refuse
+   most often?" becomes a tractable query.
+4. P-mg: The three-tier mapping in D-1 ensures refusals at different
+   tiers have different consequences. Reflex-tier refusals (foundational
+   invariant breach) throw — the system cannot continue. Default-tier
+   refusals (structural law violation) return `{:ok false}` — the agent
+   can try a different action. Deliberative-tier disagreements aren't
+   refusals at all — they're just low-G options.
+
+---
+
+### A-6: Closing the Loop (grounds D-6)
+
+**Patterns**: P-at, P-sto
+
+**IF** Portfolio Inference produces actions but nothing consumes them
+(MAP Q1 gap), and P-at says there must be a single authoritative state,
+and P-sto shows that the fast AIF loop requires an action→observation
+cycle, **HOWEVER** the current system has observe→perceive→policy but
+policy→effect is missing, **THEN** we add a portfolio effect handler
+that translates policy output into mission state changes, **BECAUSE**:
+
+1. P-at: Without the effect sink, Portfolio's action output is an
+   authoritative-seeming record that nobody reads. It's a transcript
+   with no readers — which P-at says is the same as no transcript at all.
+2. P-sto: The two-loop structure (task execution fast, library evolution
+   glacial) requires that the fast loop actually closes. An open loop
+   (observe→perceive→policy→∅) is not an AIF loop; it's a scorer. The
+   effect sink closes it by making portfolio actions change the state
+   that the next observation reads.
+
+The effect handler is small (~100 lines) because the hard work was
+already done: observation, perception, and policy all exist. The missing
+piece was always just the last wire.
+
+---
+
+### A-7: Epistemic Actions as Data (grounds D-7)
+
+**Patterns**: P-epr, P-sto, P-lag
+
+**IF** different invariants need different verification levels, and P-epr
+says precision must be an explicit, tunable control surface, and P-sto
+shows that NAMING→SELECTION→CANALIZATION is the glacial loop's policy,
+**HOWEVER** the current system has no vocabulary for "how verified is this
+invariant?", **THEN** we define the epistemic action repertoire as data
+in the sexp vocabulary, **BECAUSE**:
+
+1. P-epr: Each epistemic action (convention, property-test, core-logic,
+   formal-proof) contributes a specific precision increment. This makes
+   the crystallization gate computable: sum the precision contributions
+   of all epistemic actions applied to an invariant, compare against
+   threshold. The gate is a number, not a vibes check.
+2. P-sto: The glacial loop's observation vector includes structural
+   tension — the gap between what the library can express and what it
+   needs to. Epistemic actions are how the fast loop *reduces* that
+   tension: each verification action provides evidence that reduces
+   irritation. The repertoire data connects the fast loop's actions
+   to the glacial loop's observations.
+3. P-lag: Learn-as-you-go says to record what works. The precision
+   contributions are initial estimates. Over time, actual outcomes
+   (invariants verified at level X that later failed vs held) update
+   these contributions. The sexp is the starting point; the learning
+   loop tunes it.
+
+Defining this as data rather than code means any peripheral can query
+the repertoire. The Mission Peripheral consults it for
+`:argument-claim-coverage`; the Portfolio Peripheral could consult it
+for precision weighting. It's a shared vocabulary, not a private implementation.
+
+---
+
+### A-8: Handoff Boundaries (grounds D-10)
+
+**Patterns**: P-sbh, P-mg
+
+**IF** the design decomposes into 8 implementation tasks (D-10), and
+P-sbh says handoffs must be scope-bounded with explicit `:in`/`:out`
+files, and P-mg says execution authority requires explicit gating,
+**HOWEVER** dependencies between tasks create ordering constraints that
+must be respected, **THEN** the dependency graph (H-1+H-2 → H-3 → H-4
+→ H-5, with H-6/H-7/H-8 parallel) defines the execution order, and
+each task is a scope-bounded handoff per P-sbh, **BECAUSE**:
+
+1. P-sbh: Each H-* task has explicit read-only inputs and create/edit
+   outputs. An agent receiving H-3 knows exactly what files to read and
+   what files to produce. No ambiguity, no scope creep.
+2. P-mg: The dependency graph is the mode gate: H-4 cannot begin until
+   H-1 and H-3 are complete (DIAGNOSE→EXECUTE transition gated by
+   prerequisite completion). This prevents the integration task from
+   starting before its dependencies exist.
+
+The parallel tasks (H-6, H-7, H-8) are genuinely independent — they
+touch different files and have no data dependencies. Running them in
+parallel is safe because P-sbh's scope boundaries prevent collision.
+
+---
+
+### Coherence Argument
+
+The individual arguments establish that each decision is grounded in
+existing patterns. But are they coherent as a system? The binding claim:
+
+**IF** the AIF wiring diagram (Chapter 0) specifies that every
+peripheral needs five roles (Environment, Sensory, Internal, Active,
+Preferences), and the six invariants (I1-I6) must hold at every
+timescale the peripheral operates at, **HOWEVER** the existing
+`AifAdapter` only covers Internal (beliefs) and Active (policy) — three
+roles are missing, **THEN** the `AifHead` protocol plus its supporting
+decisions recover the full five-role mapping:
+
+| AIF Role | Covered by | Decision |
+|----------|-----------|----------|
+| Environment | Evidence landscape + repos | (already exists) |
+| Sensory | `observe` + typed observation vector | D-1, D-2 |
+| Internal | `update-beliefs` + prediction enrichment | (existing) + D-3 |
+| Active | `select-pattern` + effect sink | (existing) + D-6 |
+| Preferences | `check-law` + structural law inventory | D-1, D-5 |
+
+And the three mechanisms that the invariants require:
+
+| Invariant requirement | Mechanism | Decision |
+|----------------------|-----------|----------|
+| I1: Boundary integrity | Gate pipeline (exists) + check-law gate | D-5 |
+| I2: Obs-action asymmetry | observe reads, effect writes | D-2, D-6 |
+| I3: Timescale separation | Default mode bridges cycle/inter-cycle | D-4 |
+| I4: Preference exogeneity | Structural laws loaded from sexp, not computed | D-5, D-7 |
+| I5: Model adequacy | Prediction enrichment + divergence observation | D-3 |
+| I6: Compositional closure | Default mode ensures inter-cycle survival | D-4 |
+
+Every I-invariant maps to a specific decision. Every decision maps to
+at least one pattern. The pattern library provides the argument
+vocabulary; the decisions are the specific instantiation.
+
+**BECAUSE**: P-sto (structural-tension-as-observation) shows that the
+AIF wiring diagram is not a metaphor but a structural specification.
+If the specification requires five roles and six invariants, and our
+design provides exactly five roles and satisfies all six invariants,
+then the design is *complete* relative to the specification. It may not
+be *correct* — that's what VERIFY checks — but it is complete.
+
+The one risk: the design is complete relative to the *Mission Peripheral*.
+Other peripherals (chat, explore, edit, test, deploy, reflect) will need
+their own observation channels, action arenas, and law inventories. But
+the `AifHead` protocol is generic — `observe`, `default-mode`, `check-law`
+are not mission-specific. What varies per peripheral is the implementation,
+not the interface. This is the whole point of D-1's composition approach:
+the protocol is the reusable part; the adapter is the peripheral-specific
+part.
 
 ---
 
