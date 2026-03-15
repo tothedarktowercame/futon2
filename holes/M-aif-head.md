@@ -1,4 +1,4 @@
-**Status:** VERIFY (2026-03-15)
+**Status:** DOCUMENT (2026-03-15)
 
 # M-aif-head: AIF Heads for Every Peripheral (Mission Peripheral First)
 
@@ -1892,4 +1892,85 @@ work that merged cleanly because the problem was well-constrained.
 
 ## 6. INSTANTIATE
 
-*Accretes after VERIFY.*
+### Handoff completion evidence
+
+All 9 handoff tasks from DERIVE §D-10 implemented:
+
+| H | Task | File(s) | Status |
+|---|------|---------|--------|
+| H-1 | AifHead protocol | `futon2/src/futon2/aif/head.clj` | ✅ 3 methods: observe, default-mode, check-law |
+| H-2 | Inventory loader | `futon3c/src/futon3c/logic/inventory.clj` | ✅ sexp parser → core.logic pldb, check-compliance |
+| H-3 | Mission observe channels | `futon3c/src/futon3c/aif/observe.clj` | ✅ 10 channels [0,1], observe-mission composite |
+| H-4 | Mission AIF head | `futon3c/src/futon3c/aif/mission_head.clj` | ✅ MissionAifHead record, EFE, softmax, 6-action arena |
+| H-5 | Default mode + cycle hook | `futon3c/src/futon3c/peripheral/cycle.clj` | ✅ :on-cycle-complete callback in dispatch-step |
+| H-6 | Prediction enrichment | `futon3c/src/futon3c/peripheral/mission_shapes.clj` | ✅ compute-prediction-divergence |
+| H-7 | Refusal surface | `futon3c/src/futon3c/peripheral/mission_backend.clj` | ✅ 4-arity validate-phase-advance with check-law |
+| H-8 | Portfolio effect sink | `futon3c/src/futon3c/portfolio/effect.clj` | ✅ apply-portfolio-action, execute-effect!, evidence |
+| H-9 | AIF head invariant | `futon3c/src/futon3c/aif/invariant.clj` | ✅ register/check coverage, law-shaped output |
+
+### Test results
+
+1174 tests, 4312 assertions. 4 failures + 1 error — all pre-existing
+(dev_irc_summary_test, mission_control_test). No regressions from AIF head code.
+
+### Three-tier architecture instantiated
+
+- **Reflex tier**: `mission-check-law` → `invariant/check-aif-head-law` (H-7 + H-9)
+- **Default mode tier**: `mission-default-mode` → 3-branch fallback (H-5)
+- **Deliberative tier**: `select-mission-action` → EFE + softmax over 6 actions (H-4)
+
+### Dependency graph honored
+
+H-1+H-2 (parallel) → H-3 → H-4 → H-5 (sequential chain)
+H-6, H-7, H-8, H-9 (parallel, no internal deps)
+
+---
+
+## 7. DOCUMENT
+
+### Docbook entries
+
+6 entries created in the futon4 docbook, navigable via the table of contents:
+
+**futon2 book (Active Inference section):**
+
+| Doc ID | Title | Path |
+|--------|-------|------|
+| `futon2-9e25bd105947` | AifHead protocol | Active Inference / AifHead protocol |
+
+**futon3x book (new "AIF Heads" section):**
+
+| Doc ID | Title | Path |
+|--------|-------|------|
+| `futon3x-dfb76df0d113` | AIF Heads | AIF Heads |
+| `futon3x-4cdd6b7e610d` | Mission observation channels | AIF Heads / Mission observation channels |
+| `futon3x-d86686ddfd4d` | Structural law consultation | AIF Heads / Structural law consultation |
+| `futon3x-241366c9618f` | Default mode and cycle completion | AIF Heads / Default mode and cycle completion |
+| `futon3x-fb05e1abca38` | The coverage invariant | AIF Heads / The coverage invariant |
+
+### Cross-references
+
+Each entry links to related entries:
+- futon2 AifHead protocol ↔ futon3x AIF Heads (protocol ↔ implementation)
+- Mission observation channels → Portfolio Inference / Belief state and mu channels
+- Structural law consultation → Portfolio Inference / core.logic relations
+- Default mode and cycle completion → Portfolio Inference / Mode transitions and urgency
+
+### TOC placement
+
+The "AIF Heads" section is placed between "Portfolio Inference" and
+"Self-Representing Stack" in the futon3x table of contents — the natural
+progression from portfolio-level AIF to peripheral-level AIF.
+
+### Deferred items
+
+- **Phase 2 peripheral rollout**: AIF heads for chat, explore, edit, deploy,
+  reflect, mentor, proof, discipline peripherals. The `AifHead` protocol and
+  `MissionAifHead` reference implementation make this mechanical — each
+  peripheral needs domain-specific observation channels and default mode logic.
+- **I5 composition diagram**: Verify compositional closure across the full
+  peripheral set when M-futonzero provides the composition framework.
+- **Structure learning**: Automated generative model revision from evidence
+  landscape — builds on the evidence connectivity established here.
+- **Lean integration**: The epistemic action repertoire names formal
+  verification as a slot; filling it with an actual Lean bridge is separate work.
