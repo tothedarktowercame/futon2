@@ -1,0 +1,159 @@
+(ns war-machine.client.api
+  "Data fetch: GET /api/war-machine → JSON → data ratom + seed ants."
+  (:require [cljs-http.client :as http]
+            [cljs.core.async :refer [<!]]
+            [war-machine.client.state :as s]
+            [war-machine.client.tick :as tick])
+  (:require-macros [cljs.core.async.macros :refer [go]]))
+
+(def ^:private endpoint
+  "War Machine scan endpoint. Same-origin relative URL; when the page is
+   served by shadow-cljs dev-http with a :proxy-url pointed at futon3c,
+   the browser sees this path on :8710 and shadow proxies to :7070. In
+   the standalone server (war-machine.server.core) the path also resolves
+   locally — kept as a thin fallback for isolated testing."
+  "/api/alpha/war-machine")
+
+(defn- endpoint-with-days []
+  (str endpoint "?days=" @s/days-window))
+
+(defn load! []
+  (go
+    (let [resp (<! (http/get (endpoint-with-days)
+                             {:with-credentials? false}))]
+      (if (:success resp)
+        (let [data (:body resp)]
+          (reset! s/data data)
+          ;; Days-window changes redefine the timeline, so clear cached bounds
+          ;; and any prior selection before seeding replay from fresh data.
+          (reset! s/waveform
+                  {:selection nil :drag nil :hover-ms nil})
+          (reset! s/track-ui
+                  {:enabled (into {}
+                                  (map (fn [session]
+                                         [(:session-id session) true])
+                                       (get-in data [:sessions :sessions] [])))
+                   :selected nil})
+          (tick/seed-from-data! data)
+          (js/console.log "[api] loaded. sessions:"
+                          (count (get-in data ["sessions" "sessions"] []))))
+        (js/console.error "[api] load failed:" (pr-str resp))))))
+
+(def ^:private aif-endpoint
+  "/api/alpha/aif-stack/live")
+
+;; Single source of truth for AIF cadence: the recurring AIF tick on the
+;; server (M-stack-stereolithography Checkpoint 5). Each :scheduler block
+;; in the response carries :period-seconds; the UI poll cadence is
+;; derived from it via `desired-poll-ms`. Hard-coded 30 s polling at
+;; daily AIF cadence was wildly mismatched — this keeps the UI and
+;; scheduler in lockstep automatically.
+
+(def ^:private fallback-poll-ms
+  "Used when the response has no :scheduler block (older server, or the
+   scheduler is not running)."
+  300000) ;; 5 minutes
+
+(def ^:private min-poll-ms 60000)        ;; never poll faster than once a minute
+(def ^:private max-poll-ms 1800000)      ;; never poll slower than once every 30 min
+
+(defn- desired-poll-ms
+  "Compute UI poll cadence from the scheduler period. Aim for roughly
+   12 polls per AIF cycle, clamped to [1 min, 30 min]. At hourly that's
+   5 min; at daily that's 30 min (clamped from 2 h)."
+  [scheduler]
+  (if-let [period-s (:period-seconds scheduler)]
+    (-> (/ (* period-s 1000) 12)
+        long
+        (max min-poll-ms)
+        (min max-poll-ms))
+    fallback-poll-ms))
+
+(defonce ^:private aif-poll-handle (atom nil))
+(defonce ^:private aif-poll-current-ms (atom nil))
+
+(declare load-aif-stack!)
+
+(defn- restart-aif-poll!
+  "Restart the AIF poll interval with `new-ms`."
+  [new-ms]
+  (when-let [h @aif-poll-handle]
+    (js/clearInterval h))
+  (reset! aif-poll-handle
+          (js/setInterval (fn [] (load-aif-stack!)) new-ms))
+  (reset! aif-poll-current-ms new-ms)
+  (js/console.log "[api] aif-poll cadence set to" (long (/ new-ms 1000)) "s"))
+
+(defn- maybe-resync-poll!
+  "If the latest scheduler info differs from our current cadence,
+   re-establish the interval at the new rate."
+  [scheduler]
+  (let [target (desired-poll-ms scheduler)
+        current @aif-poll-current-ms]
+    (when (or (nil? current) (not= current target))
+      (restart-aif-poll! target))))
+
+(defn load-aif-stack! []
+  (go
+    (let [resp (<! (http/get aif-endpoint
+                             {:with-credentials? false}))]
+      (if (:success resp)
+        (let [body (:body resp)]
+          (reset! s/aif-data body)
+          (maybe-resync-poll! (:scheduler body))
+          (js/console.log "[api] aif-stack loaded. spine:"
+                          (count (:stack-nodes body))
+                          "scheduler-period-s:"
+                          (or (get-in body [:scheduler :period-seconds]) "?")))
+        (js/console.error "[api] aif-stack load failed:" (pr-str resp))))))
+
+(defn ensure-aif-poll!
+  "Establish the AIF poll if absent. Subsequent `load-aif-stack!` calls
+   will re-sync the cadence to match the server's reported scheduler
+   period."
+  []
+  (when-not @aif-poll-handle
+    (restart-aif-poll! (or @aif-poll-current-ms fallback-poll-ms))))
+
+(def ^:private show-in-emacs-endpoint
+  "/api/alpha/war-machine/show-in-emacs")
+
+(defn open-target-in-emacs!
+  "POST a generic Emacs target to the bridge. Supported target shapes:
+
+   {:kind :vsatarcs-story :leaf <name> :scene-anchor <opt>}
+   {:kind :workspace-file :path <repo-relative-path>}
+
+   Returns nothing useful synchronously; logs success/failure for inspection."
+  [target]
+  (when (and (map? target) (:kind target))
+    (go
+      (let [resp (<! (http/post show-in-emacs-endpoint
+                                {:with-credentials? false
+                                 :json-params target}))]
+        (cond
+          (:success resp)
+          (js/console.log "[api] opened in Emacs:"
+                          (clj->js (:body resp)))
+
+          (= 503 (:status resp))
+          (js/console.warn "[api] Emacs not reachable:"
+                           (or (get-in resp [:body :stderr])
+                               "emacsclient not on PATH"))
+
+          (= 404 (:status resp))
+          (js/console.warn "[api] Emacs target not found:"
+                           (clj->js target))
+
+          :else
+          (js/console.error "[api] open-target-in-emacs failed:"
+                            (pr-str resp)))))))
+
+(defn show-in-emacs!
+  "Backward-compatible wrapper for VSATARCS story leaves."
+  ([leaf-name] (show-in-emacs! leaf-name nil))
+  ([leaf-name scene-anchor]
+   (open-target-in-emacs!
+    (cond-> {:kind :vsatarcs-story
+             :leaf leaf-name}
+      scene-anchor (assoc :scene-anchor scene-anchor)))))

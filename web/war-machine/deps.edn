@@ -1,0 +1,13 @@
+{:paths ["src" "resources" "../../scripts"]
+ :deps  {org.clojure/clojure       {:mvn/version "1.12.0"}
+         org.clojure/data.json     {:mvn/version "2.5.1"}
+         http-kit/http-kit         {:mvn/version "2.8.0"}
+         ring/ring-core            {:mvn/version "1.12.2"}
+         ring/ring-defaults        {:mvn/version "0.5.0"}
+         ring/ring-json            {:mvn/version "0.5.1"}
+         metosin/reitit-ring       {:mvn/version "0.7.2"}
+         org.babashka/http-client  {:mvn/version "0.4.22"}
+         cheshire/cheshire         {:mvn/version "5.13.0"}}
+ :aliases
+ {:run  {:main-opts ["-m" "war-machine.server.core"]}
+  :dev  {:extra-deps {nrepl/nrepl {:mvn/version "1.3.0"}}}}}
