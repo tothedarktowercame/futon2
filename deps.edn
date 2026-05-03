@@ -1,8 +1,12 @@
-{:paths ["src" "resources" "."]
+{:paths ["src" "resources" "." "scripts"]
 :deps {org.clojure/clojure {:mvn/version "1.11.1"}
+       org.babashka/http-client {:mvn/version "0.4.22"}
+       cheshire/cheshire {:mvn/version "5.13.0"}
        common/common {:local/root "../futon1/apps/common"}}
  :aliases
  {:run {:main-opts ["-m" "ants.main"]}
+  :war-machine {:main-opts ["-m" "futon2.report.war-machine-visual"]}
+  :war-machine-text {:main-opts ["-m" "futon2.report.war-machine"]}
   :run-m {:main-opts ["-m" "ants.clj-ants-aif"]}
   :build {:deps {io.github.clojure/tools.build
                  {:mvn/version "0.9.6"}}
