@@ -1250,19 +1250,21 @@
       :else          (str n))))
 
 ;; ---------------------------------------------------------------------------
-;; Scan 12: Blocks in Flight
+;; Scan 12: Block Closures
 ;;
 ;; A 'Block' (futon-Block, Cook-Ting sense — see
 ;; futon3/library/structure/block-as-futonic-revolution.flexiarg) is one
 ;; revolution of the futonic loop. Per M-bounded-in-flight-state, each
-;; block is committed with a footer of the form:
+;; closed block is committed with a footer of the form:
 ;;   Block: <kind>-<YYYY-MM-DD>-<slug>
 ;; where <slug> typically references a mission doc-id (e.g. mbi05031b8c
 ;; for M-bounded-in-flight-state). This scan walks the 14-repo manifest
-;; for recent commits carrying that footer, so the operator can read
-;; recently-completed Block revolutions in one place — distinct from the
-;; mission-edge sense of 'block' (which is what Strategic Judgement's
-;; critical-path / mission-bottleneck priorities surface).
+;; for recent commits carrying that footer — i.e. *closed* Blocks. In-
+;; flight Blocks (identified but not yet committed) require a separate
+;; identification mechanism (see M-bounded-in-flight-state Q-21
+;; guidance-note follow-up). Distinct from the mission-edge sense of
+;; 'block' (which is what Strategic Judgement's critical-path /
+;; mission-bottleneck priorities surface).
 ;; ---------------------------------------------------------------------------
 
 (def ^:private block-footer-pattern
@@ -1541,11 +1543,19 @@
                            " | proposals=" (or (:active-proposals pool) 0)
                            "\n\n")))))
 
-    ;; --- Blocks in Flight (futonic-Block, Cook-Ting sense) ---
+    ;; --- Block Closures (futonic-Block, Cook-Ting sense) ---
+    ;; Every row here is a *closed* Block — one whose work was committed
+    ;; with a `Block:` footer. In-flight Blocks (identified but not yet
+    ;; committed) aren't visible at this surface; they'd require a
+    ;; separate identification step (see follow-up guidance note —
+    ;; M-bounded-in-flight-state QA item Q-21).
     (when (and blocks (pos? (:total blocks 0)))
-      (.append sb "## Blocks in Flight\n\n")
+      (.append sb "## Block Closures\n\n")
       (.append sb (str "_One Block = one revolution of the futonic loop "
                        "(see structure/block-as-futonic-revolution). "
+                       "Each row is a *closed* Block — one that's been "
+                       "committed; in-flight Blocks (identified but not yet "
+                       "committed) are not visible at this surface. "
                        "Distinct from the mission-edge sense of \"block\" "
                        "in Strategic Judgement below._\n\n"))
       (let [{:keys [total blocks by-kind by-slug by-repo]} blocks]
@@ -1620,7 +1630,7 @@
         (.append sb "### Priorities\n\n")
         (.append sb (str "_Note: `critical-path` and `blocked-pair` here "
                          "refer to mission-edge dependencies. For futonic-"
-                         "Block revolutions see the Blocks in Flight section "
+                         "Block revolutions see the Block Closures section "
                          "above._\n\n"))
         (.append sb (render-table
                      ["#" "Type" "Summary"]
