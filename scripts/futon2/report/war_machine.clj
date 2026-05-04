@@ -1566,21 +1566,28 @@
           (doseq [[repo n] (sort-by val > by-repo)]
             (.append sb (str "- " repo ": " n "\n")))
           (.append sb "\n"))
-        ;; Recent blocks (most recent first, capped)
-        (.append sb "**Recent revolutions:**\n\n")
+        ;; Recent blocks (most recent first, capped). Each block IS a
+        ;; commit — we show the short hash so the operator can pull the
+        ;; full diff with `git show <hash>`.
+        (.append sb "**Recent revolutions** (each row = one commit):\n\n")
         (.append sb (render-table
-                     ["Date" "Repo" "Kind" "Slug" "First line"]
-                     [:left :left :left :left :left]
-                     (mapv (fn [{:keys [date repo kind slug first-line]}]
+                     ["Date" "Repo" "Hash" "Kind" "Slug" "First line"]
+                     [:left :left :left :left :left :left]
+                     (mapv (fn [{:keys [date repo hash kind slug first-line]}]
                              (let [trimmed (str (or first-line ""))
-                                   short (if (> (count trimmed) 60)
-                                           (str (subs trimmed 0 57) "...")
-                                           trimmed)]
+                                   short-line (if (> (count trimmed) 80)
+                                                (str (subs trimmed 0 77) "...")
+                                                trimmed)
+                                   short-hash (if (and (string? hash)
+                                                       (>= (count hash) 7))
+                                                (subs hash 0 7)
+                                                (or hash "-"))]
                                [(or date "?")
                                 (or repo "?")
+                                short-hash
                                 (or kind "?")
                                 (or slug "?")
-                                short]))
+                                short-line]))
                            (take 20 blocks))))
         (.append sb "\n")))
 
