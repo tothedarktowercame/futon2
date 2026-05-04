@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>War Machine — Strategic Synthesis</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --panel: #f1f5f9;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --text-dim: #64748b;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+      height: 100vh;
+    }
+    #app { height: 100vh; display: flex; flex-direction: column; }
+    .war-machine { display: flex; flex-direction: column; height: 100vh; }
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .toolbar button {
+      padding: 6px 14px;
+      background: var(--accent);
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .toolbar button:hover { background: var(--accent-hover); }
+    .toolbar .toggle {
+      background: var(--panel);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .toolbar .title {
+      font-weight: 600;
+      color: var(--text);
+      margin-right: auto;
+    }
+    .main-area { flex: 1; display: flex; overflow: hidden; }
+    .hex-canvas { flex: 1; position: relative; overflow: hidden; background: #f8fafc; }
+    .hex-canvas svg { display: block; width: 100%; height: 100%; }
+    .legend-panel {
+      width: 240px;
+      min-width: 240px;
+      padding: 12px;
+      overflow-y: auto;
+      font-size: 12px;
+      background: transparent;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    /* Inner card: the legend itself sits in a bordered, shadowed tile so it
+       reads as a discrete pane rather than a transparent left-margin band. */
+    .legend-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .legend-card h3 {
+      font-size: 11px;
+      font-family: monospace;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 0 0 8px;
+    }
+    .legend-card .legend-section-label {
+      font-size: 10px;
+      color: var(--text-dim);
+      margin: 6px 0 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .legend-card .legend-section-label:first-of-type { margin-top: 0; }
+    /* Each legend row uses a two-column grid: a fixed-width swatch column
+       and a flexible text column.  This guarantees swatches are visually
+       column-aligned regardless of label length. */
+    .legend-card .row {
+      display: grid;
+      grid-template-columns: 16px 1fr;
+      gap: 8px;
+      align-items: center;
+      padding: 2px 0;
+      font-size: 11px;
+      line-height: 1.3;
+    }
+    .legend-card .swatch {
+      width: 14px;
+      height: 14px;
+      border: 1px solid #999;
+      box-sizing: border-box;
+      justify-self: center;
+    }
+    .legend-card .swatch.outline {
+      background: #fff;
+      border-width: 3px;
+    }
+    /* Activity waveform — Audacity-style timeline in the toolbar */
+    .waveform {
+      flex: 1;
+      max-width: 600px;
+      height: 56px;
+      margin: 0 12px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      cursor: crosshair;
+      position: relative;
+      user-select: none;
+    }
+    .waveform svg { display: block; width: 100%; height: 100%; }
+    .waveform .label {
+      position: absolute;
+      font-size: 9px;
+      color: var(--text-dim);
+      font-family: monospace;
+      pointer-events: none;
+    }
+    .waveform .label.left  { left: 4px; bottom: 1px; }
+    .waveform .label.right { right: 4px; bottom: 1px; }
+    .waveform .label.center {
+      left: 50%;
+      top: 2px;
+      transform: translateX(-50%);
+      max-width: calc(100% - 24px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      background: rgba(255,255,255,0.7);
+      padding: 0 4px;
+      border-radius: 3px;
+    }
+    .toolbar .title { margin-right: 8px; }
+    .sidebar {
+      width: 240px;
+      min-width: 240px;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      padding: 14px;
+      overflow-y: auto;
+      font-size: 12px;
+    }
+    .sidebar h3 {
+      font-size: 11px;
+      font-family: monospace;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 10px 0 6px;
+    }
+    .sidebar h3:first-child { margin-top: 0; }
+    /* Recommended Next Move tile — anchors the sidebar; the only place in
+       the UI that names a single concrete move the operator should make. */
+    .next-move-card {
+      background: linear-gradient(180deg, #fef3c7 0%, #fde68a 100%);
+      border: 1px solid #f59e0b;
+      border-radius: 6px;
+      padding: 10px 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    /* AIF mode tile — TI-3, M-war-machine-tuning § Checkpoint 4 */
+    .aif-mode-tile {
+      background: linear-gradient(180deg, #e0f2fe 0%, #bae6fd 100%);
+      border: 1px solid #0284c7;
+      border-radius: 6px;
+      padding: 8px 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      margin-bottom: 6px;
+    }
+    .aif-mode-header {
+      font-size: 10px;
+      font-family: monospace;
+      color: #075985;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+    .aif-mode-fresh { color: #047857; }
+    .aif-mode-aging { color: #b45309; }
+    .aif-mode-value {
+      font-size: 14px;
+      font-weight: 700;
+      color: #0c4a6e;
+      font-family: monospace;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+    .aif-mode-fields {
+      font-size: 11px;
+      color: #075985;
+      font-family: monospace;
+    }
+    /* AIF observation panel — TI-2 */
+    .aif-obs-tile {
+      background: #f8fafc;
+      border: 1px solid #94a3b8;
+      border-radius: 6px;
+      padding: 6px 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-bottom: 6px;
+    }
+    .aif-obs-summary {
+      cursor: pointer;
+      font-family: monospace;
+      font-size: 10px;
+      color: #334155;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      list-style-position: outside;
+    }
+    .aif-obs-summary-count { color: #64748b; }
+    .aif-obs-rows {
+      margin-top: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+    .aif-obs-row {
+      display: grid;
+      grid-template-columns: 1fr 60px 80px;
+      gap: 6px;
+      align-items: center;
+      font-family: monospace;
+      font-size: 10px;
+      color: #1e293b;
+    }
+    .aif-obs-label {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .aif-obs-value {
+      text-align: right;
+      color: #475569;
+    }
+    .aif-obs-bar {
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .aif-obs-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #0ea5e9 0%, #0284c7 100%);
+    }
+    /* EFE decomposition tile — TI-4 */
+    .aif-efe-tile {
+      background: #fef9c3;
+      border: 1px solid #ca8a04;
+      border-radius: 6px;
+      padding: 6px 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-bottom: 6px;
+    }
+    .aif-efe-header {
+      font-size: 10px;
+      font-family: monospace;
+      color: #713f12;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .aif-efe-rows { display: flex; flex-direction: column; gap: 2px; }
+    .aif-efe-row {
+      display: grid;
+      grid-template-columns: 70px 50px 90px 1fr;
+      gap: 6px;
+      align-items: center;
+      font-family: monospace;
+      font-size: 10px;
+      color: #713f12;
+    }
+    .aif-efe-label { font-weight: 600; }
+    .aif-efe-value { text-align: right; color: #92400e; }
+    .aif-efe-note { color: #a16207; font-style: italic; font-size: 9px; }
+    .aif-efe-bar {
+      height: 6px;
+      background: #fef3c7;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .aif-efe-bar-fill-value { height: 100%; background: #16a34a; }
+    .aif-efe-bar-fill-cost  { height: 100%; background: #dc2626; }
+    /* Prediction-error tile — TI-5 */
+    .aif-pe-tile {
+      background: #fdf4ff;
+      border: 1px solid #a21caf;
+      border-radius: 6px;
+      padding: 6px 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-bottom: 6px;
+    }
+    .aif-pe-header {
+      font-size: 10px;
+      font-family: monospace;
+      color: #701a75;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .aif-pe-rows { display: flex; flex-direction: column; gap: 2px; }
+    .aif-pe-row {
+      display: grid;
+      grid-template-columns: 1fr 60px 80px;
+      gap: 6px;
+      align-items: center;
+      font-family: monospace;
+      font-size: 10px;
+      color: #701a75;
+    }
+    .aif-pe-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .aif-pe-value { text-align: right; color: #86198f; }
+    .aif-pe-bar { height: 6px; background: #fae8ff; border-radius: 3px; overflow: hidden; }
+    .aif-pe-bar-fill-pos { height: 100%; background: #2563eb; } /* observation > predicted */
+    .aif-pe-bar-fill-neg { height: 100%; background: #ea580c; } /* observation < predicted */
+    .aif-pe-empty { font-size: 10px; font-style: italic; color: #86198f; }
+    .next-move-card h3 {
+      font-size: 11px;
+      font-family: monospace;
+      color: #92400e;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 0 0 6px;
+    }
+    .next-move-target {
+      font-size: 13px;
+      font-weight: 600;
+      color: #78350f;
+      margin-bottom: 4px;
+    }
+    .next-move-specifically {
+      font-size: 12px;
+      line-height: 1.4;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+    .next-move-phase,
+    .next-move-agenda,
+    .next-move-rollover,
+    .next-move-successor,
+    .next-move-witness,
+    .next-move-effect,
+    .next-move-missing,
+    .next-move-underspecified {
+      font-size: 11px;
+      line-height: 1.4;
+      color: #7c2d12;
+      margin-bottom: 6px;
+    }
+    .next-move-phase {
+      font-family: monospace;
+      background: rgba(255,255,255,0.42);
+      border-left: 3px solid #b45309;
+      padding: 4px 6px;
+    }
+    .next-move-phase-complete {
+      border-left-color: #15803d;
+      color: #14532d;
+      background: rgba(240,253,244,0.92);
+    }
+    .next-move-phase-warn {
+      border-left-color: #b45309;
+      color: #78350f;
+      background: rgba(255,251,235,0.95);
+    }
+    .next-move-underspecified,
+    .next-move-missing {
+      background: rgba(255,255,255,0.4);
+      border-left: 3px solid #d97706;
+      padding: 4px 6px;
+    }
+    .next-move-empirical {
+      font-size: 11px;
+      font-family: monospace;
+      color: #7c2d12;
+      background: rgba(255,255,255,0.45);
+      border-left: 3px solid #b91c1c;
+      padding: 4px 6px;
+      margin-bottom: 6px;
+    }
+    .next-move-card details { margin-top: 6px; }
+    .next-move-card summary {
+      cursor: pointer;
+      font-size: 11px;
+      color: #92400e;
+      font-family: monospace;
+      padding: 2px 0;
+    }
+    .next-move-card details[open] summary { margin-bottom: 4px; }
+    .next-move-card pre {
+      font-size: 11px;
+      line-height: 1.4;
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: rgba(255,255,255,0.5);
+      border-radius: 3px;
+      padding: 6px;
+      max-height: 180px;
+      overflow-y: auto;
+      color: #44260a;
+    }
+    .next-move-card ul {
+      list-style: disc inside;
+      font-size: 11px;
+      line-height: 1.4;
+      color: #44260a;
+      padding-left: 4px;
+    }
+    .next-move-card li { margin: 3px 0; }
+    .next-move-jump {
+      margin-top: 8px;
+      padding: 5px 10px;
+      background: #b91c1c;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 11px;
+      font-family: monospace;
+    }
+    .next-move-jump:hover { background: #991b1b; }
+    .warnings-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .warnings-card h3 {
+      font-size: 11px;
+      font-family: monospace;
+      color: #991b1b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 0 0 4px;
+    }
+    .warnings-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .warnings-list li {
+      font-size: 11px;
+      line-height: 1.4;
+      color: var(--text);
+      margin: 3px 0;
+    }
+    .warning-name {
+      font-family: monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: #991b1b;
+    }
+    /* Detail panel: small "Open in Emacs" button + the existing pre-text */
+    .detail-arxana {
+      float: right;
+      padding: 3px 8px;
+      background: #1d4ed8;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 11px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      margin-left: 8px;
+    }
+    .detail-arxana:hover { background: #1e40af; }
+    .detail-text {
+      font-family: monospace;
+      font-size: 11px;
+      white-space: pre-wrap;
+      margin: 0;
+    }
+    .sidebar .row { display: flex; justify-content: space-between; padding: 2px 0; }
+    .sidebar .bar {
+      height: 8px;
+      background: var(--panel);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 2px 0 6px;
+    }
+    .sidebar .bar > div {
+      height: 100%;
+      transition: width 0.3s;
+    }
+    .hud {
+      padding: 6px 14px;
+      border-top: 1px solid var(--border);
+      font-family: monospace;
+      font-size: 12px;
+      background: var(--surface);
+      color: var(--text);
+    }
+    .detail {
+      padding: 8px 14px;
+      border-top: 1px solid var(--border);
+      font-family: monospace;
+      font-size: 11px;
+      background: var(--panel);
+      color: var(--text);
+      min-height: 60px;
+      white-space: pre-wrap;
+    }
+    .loading, .empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="loading">Loading War Machine...</div>
+  </div>
+  <script src="/js/main.js"></script>
+</body>
+</html>

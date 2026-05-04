@@ -16,5 +16,10 @@ generic-questing-sun.md
 out/
 resources/
 
+# but keep the war-machine subproject's entry HTML tracked
+!web/war-machine/resources/
+!web/war-machine/resources/public/
+!web/war-machine/resources/public/index.html
+
 # local file that shouldn't be tracked here
 LICENSE
