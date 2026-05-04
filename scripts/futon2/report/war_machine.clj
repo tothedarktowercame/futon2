@@ -1101,13 +1101,86 @@
   (when (string? abs-path)
     (last (str/split abs-path #"/"))))
 
+(defn- pressure->tier
+  "Map a pressure value to a tier keyword. Matches the working-tree
+   thresholds used by futon3c.logic.metabolic-balance so the harmonic
+   structure (per drain-channel-shape) is preserved across channels."
+  [p]
+  (cond
+    (>= p 10.0) :stop-the-line
+    (>= p 3.0)  :high
+    (>= p 1.0)  :advisory
+    :else       :silent))
+
+(defn- tier-rank [tier]
+  (case (some-> tier name)
+    "stop-the-line" 3
+    "high"          2
+    "advisory"      1
+    "silent"        0
+    -1))
+
+(defn- tier-max
+  "Return the more severe of two tiers."
+  [a b]
+  (if (>= (tier-rank a) (tier-rank b)) a b))
+
+(defn- iso->ms [s]
+  (try
+    (when (string? s)
+      (.toEpochMilli (java.time.Instant/parse s)))
+    (catch Exception _ nil)))
+
+(def ^:private active-sessions-N 3)
+(def ^:private active-sessions-D-days 7.0)
+
+(defn- compute-active-sessions-channel
+  "Compute the active-sessions drain channel from session data.
+
+   Per drain-channel-shape, every drain channel shares the harmonic
+   structure: P = max(count/N, age/D, ...). For active-sessions:
+     - count = total registered sessions
+     - N = 3 (more than 3 sessions = mental-effort drain begins)
+     - age = days since the oldest session was last active
+     - D = 7 days
+   Bytes channel does not apply here.
+
+   Joe's intuition (2026-05-04): mental effort to remember which session
+   is which scales with count above ~3. Once tickle-1 is removed from
+   automatic startup, the floor drops by 1."
+  [sessions]
+  (let [count* (count sessions)
+        now-ms (System/currentTimeMillis)
+        ages-days (->> sessions
+                       (keep (fn [{:keys [last-active]}]
+                               (when-let [ms (iso->ms last-active)]
+                                 (/ (- now-ms ms) 86400000.0)))))
+        max-age (if (seq ages-days) (apply max ages-days) 0.0)
+        p-count (/ (double count*) active-sessions-N)
+        p-age   (/ (double max-age) active-sessions-D-days)
+        p (max p-count p-age)]
+    {:channel :active-sessions
+     :pressure p
+     :count count*
+     :max-age-days max-age
+     :p-count p-count
+     :p-age p-age
+     :tier (pressure->tier p)
+     :nominal {:N active-sessions-N :D-days active-sessions-D-days}}))
+
 (defn scan-metabolic-balance
-  "Read the mana snapshot for working-tree drain and per-session AIF-head data.
+  "Read the mana snapshot for drain-channel state and per-session AIF-head data.
 
    Returns nil if the snapshot is missing.
-   Otherwise returns a map with :available?, :per-repo (sorted by pressure),
-   :max-tier, :max-pressure, :sessions, :pool, :generated-at, and
-   :snapshot-age-minutes / :stale? for freshness."
+   Otherwise returns a map with:
+     :available?
+     :channels — drain channels (working-tree, active-sessions),
+                  each with :pressure, :tier, contributing detail
+     :max-tier / :max-pressure — across channels (replaces the snapshot's
+       working-tree-only values)
+     :per-repo — working-tree per-repo detail (sorted by pressure desc)
+     :sessions — per-session AIF-head detail
+     :pool, :generated-at, :snapshot-age-minutes, :stale?"
   []
   (let [f (java.io.File. mana-snapshot-path)]
     (when (.exists f)
@@ -1135,11 +1208,25 @@
                                      :balance (or (:balance s) 0)
                                      :earned (or (:earned s) 0)
                                      :spent (or (:spent s) 0.0)
-                                     :last-active (:last-active s)})))]
+                                     :last-active (:last-active s)})))
+              ;; Working-tree channel summary (the snapshot's existing data)
+              working-tree-channel
+              {:channel :working-tree
+               :pressure (or (:max-pressure snap) 0.0)
+               :tier (or (some-> (:max-tier snap) keyword)
+                         (pressure->tier (or (:max-pressure snap) 0.0)))
+               :repo-count (count (filter #(pos? (or (:pressure %) 0)) per-repo))
+               :nominal (:nominals snap)}
+              ;; New channel: active-sessions
+              active-sessions-channel (compute-active-sessions-channel sessions)
+              channels [working-tree-channel active-sessions-channel]
+              max-tier (reduce tier-max :silent (map :tier channels))
+              max-pressure (apply max 0.0 (map :pressure channels))]
           {:available? true
+           :channels channels
+           :max-tier max-tier
+           :max-pressure max-pressure
            :per-repo per-repo
-           :max-tier (:max-tier snap)
-           :max-pressure (:max-pressure snap)
            :sessions sessions
            :pool (:pool snap)
            :generated-at (:generated-at snap)
@@ -1161,6 +1248,87 @@
       (>= n 1048576) (format "%.1fM" (/ n 1048576.0))
       (>= n 1024)    (format "%dK" (long (/ n 1024)))
       :else          (str n))))
+
+;; ---------------------------------------------------------------------------
+;; Scan 12: Blocks in Flight
+;;
+;; A 'Block' (futon-Block, Cook-Ting sense — see
+;; futon3/library/structure/block-as-futonic-revolution.flexiarg) is one
+;; revolution of the futonic loop. Per M-bounded-in-flight-state, each
+;; block is committed with a footer of the form:
+;;   Block: <kind>-<YYYY-MM-DD>-<slug>
+;; where <slug> typically references a mission doc-id (e.g. mbi05031b8c
+;; for M-bounded-in-flight-state). This scan walks the 14-repo manifest
+;; for recent commits carrying that footer, so the operator can read
+;; recently-completed Block revolutions in one place — distinct from the
+;; mission-edge sense of 'block' (which is what Strategic Judgement's
+;; critical-path / mission-bottleneck priorities surface).
+;; ---------------------------------------------------------------------------
+
+(def ^:private block-footer-pattern
+  "Matches: Block: <kind>-<YYYY-MM-DD>-<slug>"
+  #"(?m)^\s*Block:\s+([a-z][a-z0-9-]*?)-(\d{4}-\d{2}-\d{2})-([A-Za-z0-9._-]+)\s*$")
+
+(defn- parse-block-footer [body]
+  (when (string? body)
+    (when-let [m (re-find block-footer-pattern body)]
+      {:kind (nth m 1)
+       :ymd  (nth m 2)
+       :slug (nth m 3)
+       :tag  (str (nth m 1) "-" (nth m 2) "-" (nth m 3))})))
+
+(defn- repo-blocks [repo-path label workstream since]
+  (let [;; Use ASCII-control delimiters so commit bodies don't collide
+        ;; (\x1e = record sep between commits, \x1f = field sep within commit)
+        log (git repo-path "log"
+                 (str "--since=" since)
+                 "--all"
+                 "--format=%H%x1f%aI%x1f%B%x1e")]
+    (when (string? log)
+      (->> (str/split log #"\x1e")
+           (keep (fn [chunk]
+                   (let [chunk (str/trim chunk)]
+                     (when (seq chunk)
+                       (let [[hash date & body-parts] (str/split chunk #"\x1f")
+                             body (str/join "" body-parts)]
+                         (when-let [b (parse-block-footer body)]
+                           (let [first-line (or (some-> body
+                                                        (str/split #"\n")
+                                                        first
+                                                        str/trim)
+                                                "")]
+                             (assoc b
+                                    :hash hash
+                                    :date (parse-iso-date date)
+                                    :first-line first-line
+                                    :repo label
+                                    :workstream workstream))))))))
+           vec))))
+
+(defn scan-blocks
+  "Walk the 14-repo manifest's recent commits for Block: footers.
+
+   A Block is one revolution of the futonic loop (see
+   block-as-futonic-revolution.flexiarg). The footer ties commits across
+   repos that participate in the same revolution.
+
+   Returns {:total N :blocks [...] :by-kind {kind→count}
+            :by-slug {slug→count} :by-date {ymd→count}}."
+  [days]
+  (let [since (since-str days)
+        ;; Filter to repos that exist on disk
+        repos (filter #(.exists (java.io.File. ^String (:path %))) all-repos)
+        all-blocks (->> repos
+                        (mapcat (fn [{:keys [label path workstream]}]
+                                  (repo-blocks path label workstream since)))
+                        (sort-by :date #(compare %2 %1))
+                        vec)]
+    {:total (count all-blocks)
+     :blocks all-blocks
+     :by-kind (frequencies (map :kind all-blocks))
+     :by-slug (frequencies (map :slug all-blocks))
+     :by-date (frequencies (map :date all-blocks))
+     :by-repo (frequencies (map :repo all-blocks))}))
 
 ;; ---------------------------------------------------------------------------
 ;; Renderer: markdown fallback
@@ -1211,7 +1379,7 @@
 (defn render-war-machine
   "Render the War Machine strategic synthesis as markdown."
   [{:keys [loop-health support-attack mission-triage graph portfolio
-           metabolic-balance now days] :as data}]
+           metabolic-balance blocks now days] :as data}]
   (let [sb (StringBuilder.)]
     (.append sb "# War Machine — Strategic Synthesis\n\n")
     (.append sb (str "**" now "** | " days "-day window\n\n"))
@@ -1292,22 +1460,46 @@
             (.append sb (str "- " (:mission/id m) " (" (:mission/repo m) ")\n")))
           (.append sb "\n"))))
 
-    ;; --- Metabolic Balance — Working-Tree Drain + Session AIF Heads ---
+    ;; --- Metabolic Balance — Drain Channels + Session AIF Heads ---
     (when (and metabolic-balance (:available? metabolic-balance))
       (.append sb "## Metabolic Balance\n\n")
-      (let [{:keys [per-repo max-tier max-pressure sessions pool
+      (let [{:keys [channels per-repo max-tier max-pressure sessions pool
                     snapshot-age-minutes stale?]} metabolic-balance]
         (.append sb (str "Snapshot: "
                          (if (and snapshot-age-minutes (number? snapshot-age-minutes))
                            (format "%.1f min ago" (double snapshot-age-minutes))
                            "?")
                          (when stale? " ⚠ stale")
-                         " | max-tier: " (or max-tier "-")
+                         " | max-tier: " (or (some-> max-tier name) "-")
                          " | P=" (if (and max-pressure (number? max-pressure))
                                    (format "%.2f" (double max-pressure))
                                    "?")
                          "\n\n"))
-        ;; Per-repo drain (omit silent rows below the fold)
+        ;; Drain channels overview (per drain-channel-shape: every channel
+        ;; has the same harmonic structure)
+        (when (seq channels)
+          (.append sb "### Drain Channels\n\n")
+          (.append sb (render-table
+                       ["Channel" "P" "Tier" "" "Detail"]
+                       [:left :right :left :left :left]
+                       (mapv (fn [{:keys [channel pressure tier count
+                                          repo-count max-age-days]
+                                   :as ch}]
+                               [(name channel)
+                                (format "%.2f" (double (or pressure 0)))
+                                (or (some-> tier name) "-")
+                                (tier-glyph tier)
+                                (case channel
+                                  :working-tree
+                                  (str (or repo-count 0) " repo(s) with drain")
+                                  :active-sessions
+                                  (str (or count 0) " sessions"
+                                       ", oldest "
+                                       (format "%.1fd" (double (or max-age-days 0))))
+                                  "-")])
+                             channels)))
+          (.append sb "\n"))
+        ;; Per-repo working-tree drain (omit silent rows below the fold)
         (let [active (filterv #(or (pos? (or (:pressure %) 0))
                                    (pos? (or (:count %) 0))) per-repo)]
           (when (seq active)
@@ -1349,6 +1541,49 @@
                            " | proposals=" (or (:active-proposals pool) 0)
                            "\n\n")))))
 
+    ;; --- Blocks in Flight (futonic-Block, Cook-Ting sense) ---
+    (when (and blocks (pos? (:total blocks 0)))
+      (.append sb "## Blocks in Flight\n\n")
+      (.append sb (str "_One Block = one revolution of the futonic loop "
+                       "(see structure/block-as-futonic-revolution). "
+                       "Distinct from the mission-edge sense of \"block\" "
+                       "in Strategic Judgement below._\n\n"))
+      (let [{:keys [total blocks by-kind by-slug by-repo]} blocks]
+        (.append sb (str "Total Blocks (last " days "d): **" total "**\n\n"))
+        ;; Summary tables
+        (when (seq by-slug)
+          (.append sb "**By mission slug:**\n\n")
+          (doseq [[slug n] (sort-by val > by-slug)]
+            (.append sb (str "- `" slug "`: " n "\n")))
+          (.append sb "\n"))
+        (when (seq by-kind)
+          (.append sb "**By kind:**\n\n")
+          (doseq [[kind n] (sort-by val > by-kind)]
+            (.append sb (str "- " kind ": " n "\n")))
+          (.append sb "\n"))
+        (when (seq by-repo)
+          (.append sb "**By repo:**\n\n")
+          (doseq [[repo n] (sort-by val > by-repo)]
+            (.append sb (str "- " repo ": " n "\n")))
+          (.append sb "\n"))
+        ;; Recent blocks (most recent first, capped)
+        (.append sb "**Recent revolutions:**\n\n")
+        (.append sb (render-table
+                     ["Date" "Repo" "Kind" "Slug" "First line"]
+                     [:left :left :left :left :left]
+                     (mapv (fn [{:keys [date repo kind slug first-line]}]
+                             (let [trimmed (str (or first-line ""))
+                                   short (if (> (count trimmed) 60)
+                                           (str (subs trimmed 0 57) "...")
+                                           trimmed)]
+                               [(or date "?")
+                                (or repo "?")
+                                (or kind "?")
+                                (or slug "?")
+                                short]))
+                           (take 20 blocks))))
+        (.append sb "\n")))
+
     ;; --- Judgement (priorities, losses, free energy) ---
     (when-let [j (:judgement data)]
       (.append sb "## Strategic Judgement\n\n")
@@ -1376,6 +1611,10 @@
       ;; Top priorities
       (when (seq (:priorities j))
         (.append sb "### Priorities\n\n")
+        (.append sb (str "_Note: `critical-path` and `blocked-pair` here "
+                         "refer to mission-edge dependencies. For futonic-"
+                         "Block revolutions see the Blocks in Flight section "
+                         "above._\n\n"))
         (.append sb (render-table
                      ["#" "Type" "Summary"]
                      [:right :left :left]
@@ -2096,20 +2335,23 @@
          :id :abandoned-missions
          :count (count abandoned)
          :summary (str (count abandoned) " abandoned missions (in-progress, no recent commits)")}])
-     ;; Critical path missions
+     ;; Critical path missions (mission-bottleneck — distinct from
+     ;; futonic-Block, which is one revolution of the futonic loop)
      (map (fn [{:keys [mission depth]}]
             {:type :critical-path
              :id (keyword mission)
              :depth depth
-             :summary (str mission " blocks " depth " other mission(s)")})
+             :summary (str mission " is a critical predecessor of "
+                           depth " other mission(s)")})
           critical-path)
-     ;; Blocked pairs
+     ;; Blocked pairs — phrased as 'waits on' so the word 'block' stays
+     ;; reserved for the futonic-Block sense in this report.
      (map (fn [[a b]]
             {:type :blocked-pair
              :id (keyword (str a "→" b))
              :blocker a
              :blocked b
-             :summary (str b " blocked by " a)})
+             :summary (str b " waits on " a)})
           blocked-pairs))))
 
 (defn judge
@@ -2229,6 +2471,7 @@
         patterns (scan-patterns)
         frames (scan-frames)
         metabolic-balance (scan-metabolic-balance)
+        blocks (scan-blocks days)
         window (scan-window days now-zdt)
         scan-data {:loop-health loop-health
                    :support-attack support-attack
@@ -2240,6 +2483,7 @@
                    :patterns patterns
                    :frames frames
                    :metabolic-balance metabolic-balance
+                   :blocks blocks
                    :window window}
         ;; Run the judgement layer
         judgement (judge scan-data)]
@@ -2251,6 +2495,7 @@
                                     :graph graph
                                     :portfolio portfolio
                                     :metabolic-balance metabolic-balance
+                                    :blocks blocks
                                     :judgement judgement
                                     :now now :days days})}))
 
