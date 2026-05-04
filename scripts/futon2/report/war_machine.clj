@@ -1083,6 +1083,86 @@
     (catch Exception _ nil)))
 
 ;; ---------------------------------------------------------------------------
+;; Scan 11: Metabolic Balance
+;;
+;; Reads the mana snapshot for two M-bounded-in-flight-state signals:
+;; per-repo working-tree drain (the metabolic-balance/working-tree
+;; channel as a continuous reading) and per-session AIF-head data
+;; (sessions ARE peripherals per the M-aif-head reread).
+;;
+;; Source: futon0/scripts/mana-snapshot.bb output at
+;; ~/code/storage/futon0/mana-snapshot.json.
+;; ---------------------------------------------------------------------------
+
+(def ^:private mana-snapshot-path
+  (str home "/code/storage/futon0/mana-snapshot.json"))
+
+(defn- repo-label-from-path [abs-path]
+  (when (string? abs-path)
+    (last (str/split abs-path #"/"))))
+
+(defn scan-metabolic-balance
+  "Read the mana snapshot for working-tree drain and per-session AIF-head data.
+
+   Returns nil if the snapshot is missing.
+   Otherwise returns a map with :available?, :per-repo (sorted by pressure),
+   :max-tier, :max-pressure, :sessions, :pool, :generated-at, and
+   :snapshot-age-minutes / :stale? for freshness."
+  []
+  (let [f (java.io.File. mana-snapshot-path)]
+    (when (.exists f)
+      (try
+        (let [snap (json/parse-string (slurp f) true)
+              age-min (/ (- (System/currentTimeMillis) (.lastModified f))
+                         60000.0)
+              per-repo (->> (or (:per-repo snap) [])
+                            (map (fn [r]
+                                   {:repo (or (:repo r)
+                                              (repo-label-from-path (:abs-path r)))
+                                    :pressure (or (:P r) 0.0)
+                                    :count (or (:count r) 0)
+                                    :max-age-days (or (:max-age-days r) 0.0)
+                                    :bytes (or (:total-bytes r) 0)
+                                    :tier (:tier r)}))
+                            (sort-by :pressure #(compare %2 %1))
+                            vec)
+              sessions (->> (or (:sessions snap) [])
+                            (mapv (fn [s]
+                                    {:session-id (:session-id s)
+                                     :agent-id (:agent-id s)
+                                     :phase (get s (keyword "aif-head/phase"))
+                                     :status (:status s)
+                                     :balance (or (:balance s) 0)
+                                     :earned (or (:earned s) 0)
+                                     :spent (or (:spent s) 0.0)
+                                     :last-active (:last-active s)})))]
+          {:available? true
+           :per-repo per-repo
+           :max-tier (:max-tier snap)
+           :max-pressure (:max-pressure snap)
+           :sessions sessions
+           :pool (:pool snap)
+           :generated-at (:generated-at snap)
+           :snapshot-age-minutes age-min
+           :stale? (> age-min 60.0)})
+        (catch Exception _ {:available? false :error :parse-failed})))))
+
+(defn- tier-glyph [tier]
+  (case (some-> tier name)
+    "stop-the-line" "●"
+    "high"          "◑"
+    "advisory"      "◔"
+    "silent"        "○"
+    "?"))
+
+(defn- bytes-str [n]
+  (let [n (long (or n 0))]
+    (cond
+      (>= n 1048576) (format "%.1fM" (/ n 1048576.0))
+      (>= n 1024)    (format "%dK" (long (/ n 1024)))
+      :else          (str n))))
+
+;; ---------------------------------------------------------------------------
 ;; Renderer: markdown fallback
 ;;
 ;; The primary renderer is the Swing visualiser (war_machine_visual.clj).
@@ -1130,7 +1210,8 @@
 
 (defn render-war-machine
   "Render the War Machine strategic synthesis as markdown."
-  [{:keys [loop-health support-attack mission-triage graph portfolio now days] :as data}]
+  [{:keys [loop-health support-attack mission-triage graph portfolio
+           metabolic-balance now days] :as data}]
   (let [sb (StringBuilder.)]
     (.append sb "# War Machine — Strategic Synthesis\n\n")
     (.append sb (str "**" now "** | " days "-day window\n\n"))
@@ -1211,6 +1292,63 @@
             (.append sb (str "- " (:mission/id m) " (" (:mission/repo m) ")\n")))
           (.append sb "\n"))))
 
+    ;; --- Metabolic Balance — Working-Tree Drain + Session AIF Heads ---
+    (when (and metabolic-balance (:available? metabolic-balance))
+      (.append sb "## Metabolic Balance\n\n")
+      (let [{:keys [per-repo max-tier max-pressure sessions pool
+                    snapshot-age-minutes stale?]} metabolic-balance]
+        (.append sb (str "Snapshot: "
+                         (if (and snapshot-age-minutes (number? snapshot-age-minutes))
+                           (format "%.1f min ago" (double snapshot-age-minutes))
+                           "?")
+                         (when stale? " ⚠ stale")
+                         " | max-tier: " (or max-tier "-")
+                         " | P=" (if (and max-pressure (number? max-pressure))
+                                   (format "%.2f" (double max-pressure))
+                                   "?")
+                         "\n\n"))
+        ;; Per-repo drain (omit silent rows below the fold)
+        (let [active (filterv #(or (pos? (or (:pressure %) 0))
+                                   (pos? (or (:count %) 0))) per-repo)]
+          (when (seq active)
+            (.append sb "### Working-Tree Drain (per repo)\n\n")
+            (.append sb (render-table
+                         ["Repo" "P" "Files" "Max age (d)" "Bytes" "Tier" ""]
+                         [:left :right :right :right :right :left :left]
+                         (mapv (fn [{:keys [repo pressure count max-age-days bytes tier]}]
+                                 [(or repo "?")
+                                  (format "%.2f" (double (or pressure 0)))
+                                  (str count)
+                                  (format "%.1f" (double (or max-age-days 0)))
+                                  (bytes-str bytes)
+                                  (or (some-> tier name) "-")
+                                  (tier-glyph tier)])
+                               active)))
+            (.append sb "\n")))
+        ;; Sessions as AIF heads
+        (when (seq sessions)
+          (.append sb "### Session AIF Heads\n\n")
+          (.append sb (render-table
+                       ["Agent" "Phase" "Status" "Balance" "Earned" "Spent" "Last active"]
+                       [:left :left :left :right :right :right :left]
+                       (mapv (fn [{:keys [agent-id phase status balance earned spent last-active]}]
+                               [(or agent-id "?")
+                                (or (some-> phase name) "?")
+                                (or (some-> status name) "?")
+                                (str balance)
+                                (str earned)
+                                (format "%.2f" (double (or spent 0)))
+                                (or (parse-iso-date last-active) "-")])
+                             sessions)))
+          (.append sb "\n"))
+        ;; Pool
+        (when pool
+          (.append sb (str "Pool: balance=" (or (:balance pool) 0)
+                           " | donated=" (or (:total-donated pool) 0)
+                           " | funded=" (or (:total-funded pool) 0)
+                           " | proposals=" (or (:active-proposals pool) 0)
+                           "\n\n")))))
+
     ;; --- Judgement (priorities, losses, free energy) ---
     (when-let [j (:judgement data)]
       (.append sb "## Strategic Judgement\n\n")
@@ -1250,10 +1388,25 @@
 
       ;; AIF Heads
       (.append sb "### AIF Heads\n\n")
-      (let [{:keys [heads missing]} (:heads j)]
-        (doseq [h heads]
+      (let [{:keys [heads missing]} (:heads j)
+            ;; Group session-aif-head/* into one summary line
+            session-heads (filterv #(= "session-aif-head"
+                                       (namespace (:head-id %))) heads)
+            other-heads (filterv #(not= "session-aif-head"
+                                        (namespace (:head-id %))) heads)]
+        (doseq [h other-heads]
           (.append sb (str "- **" (name (:head-id h)) "** — "
                            (get-in h [:judgement :summary] "available") "\n")))
+        (when (seq session-heads)
+          (let [phases (frequencies (keep #(get-in % [:state :phase])
+                                          session-heads))
+                balance-sum (reduce + 0 (keep #(get-in % [:state :balance])
+                                              session-heads))]
+            (.append sb (str "- **session-aif-head** — "
+                             (count session-heads) " sessions"
+                             ", phases " (pr-str phases)
+                             ", balance Σ=" balance-sum
+                             " (per-session detail in Metabolic Balance)\n"))))
         (when (seq missing)
           (.append sb "\n**Missing heads:**\n\n")
           (doseq [h missing]
@@ -1628,6 +1781,9 @@
 
    Currently available:
    - Portfolio Inference (futon3c): mode, urgency, tau, 16 channels, recommendation
+   - Session AIF Heads (per-session, sourced from the mana snapshot):
+     each chat session is an AIF head with phase + balance + status,
+     per the M-aif-head reread carried by M-bounded-in-flight-state
    - Mission AIF Head (futon3c): per-mission phase, obligation, law compliance
      (not yet exposed via HTTP — future endpoint)
 
@@ -1653,20 +1809,41 @@
                                           :summary (str mode
                                                         ", urgency " (format "%.2f" (double urgency))
                                                         ", tau " (format "%.2f" (double (:tau s 1.0))))})}))
+        ;; Session AIF Heads — sourced from the mana snapshot.
+        ;; Per M-bounded-in-flight-state's M-aif-head reread, every session
+        ;; IS a peripheral and each carries an AIF head with phase + balance.
+        mb (scan-metabolic-balance)
+        session-heads (when (and mb (:available? mb) (seq (:sessions mb)))
+                        (mapv (fn [{:keys [session-id agent-id phase status balance
+                                           earned spent last-active]}]
+                                {:head-id (keyword "session-aif-head" (str session-id))
+                                 :source "mana-snapshot.json :sessions"
+                                 :available? true
+                                 :state {:session-id session-id
+                                         :agent-id agent-id
+                                         :phase phase
+                                         :status status
+                                         :balance balance
+                                         :earned earned
+                                         :spent spent
+                                         :last-active last-active}
+                                 :judgement {:phase phase
+                                             :status status
+                                             :balance balance
+                                             :summary (str (or agent-id session-id)
+                                                           " phase=" (or (some-> phase name) "?")
+                                                           " status=" (or (some-> status name) "?")
+                                                           " balance=" balance)}})
+                              (:sessions mb)))
         ;; Mission AIF Head — not yet exposed via HTTP
         ;; When M-aif-head wires an endpoint, add it here.
         mission-head {:head-id :mission-aif-head
                       :source "futon3c aif/mission_head.clj"
                       :available? false
                       :note "Exists in code but no HTTP endpoint yet. Needs wiring."}
-        ;; Session AIF Head — doesn't exist yet
-        ;; Per M-aif-head, each session should have one.
-        session-head {:head-id :session-aif-head
-                      :source "not yet built"
-                      :available? false
-                      :note "Per M-aif-head, every peripheral needs an AIF head. Chat sessions don't have one yet."}
-        heads (filterv :available? [portfolio-head mission-head session-head])
-        missing (filterv (complement :available?) [portfolio-head mission-head session-head])]
+        all (vec (concat [portfolio-head] session-heads [mission-head]))
+        heads (filterv :available? all)
+        missing (filterv (complement :available?) all)]
     {:heads heads
      :head-count (count heads)
      :missing missing
@@ -2051,6 +2228,7 @@
         mission-detail (scan-mission-detail)
         patterns (scan-patterns)
         frames (scan-frames)
+        metabolic-balance (scan-metabolic-balance)
         window (scan-window days now-zdt)
         scan-data {:loop-health loop-health
                    :support-attack support-attack
@@ -2061,6 +2239,7 @@
                    :mission-detail mission-detail
                    :patterns patterns
                    :frames frames
+                   :metabolic-balance metabolic-balance
                    :window window}
         ;; Run the judgement layer
         judgement (judge scan-data)]
@@ -2071,6 +2250,7 @@
                                     :mission-triage mission-triage
                                     :graph graph
                                     :portfolio portfolio
+                                    :metabolic-balance metabolic-balance
                                     :judgement judgement
                                     :now now :days days})}))
 
