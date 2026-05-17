@@ -2217,6 +2217,134 @@
            :threshold   (some #(get-in % [:output-quality :stage6-parse-threshold]) batches)}}}))))
 
 ;; ---------------------------------------------------------------------------
+;; Evaluate: per-batch verdicts for the mark2 pipeline (Arm A rubric / A.5)
+;;
+;; Builds on scan-mark2's structured observations. For each batch, emits a
+;; verdict — :adds-signal / :saturates / :regresses / :inconclusive — based
+;; on three axes computed against the running corpus:
+;;
+;;   :novelty   — fraction of this batch's headliner patterns NOT seen in
+;;                prior batches' union; high novelty = new ground.
+;;   :density   — avg_nodes/paper relative to the running mean; high = more
+;;                structure extracted per paper.
+;;   :quality   — Stage 6 parse-rate + Stage 9 production rate; a drop means
+;;                output regressed regardless of throughput.
+;;
+;; Discipline: this is ground-truth assessment of pipeline behaviour, NOT an
+;; AIF model output. The verdicts come from observation, not inference.
+;; ---------------------------------------------------------------------------
+
+(defn- batch-patterns [manifest]
+  (set (or (:patterns manifest) [])))
+
+(defn- evaluate-novelty [this-patterns prior-union]
+  (let [novel (clojure.set/difference this-patterns prior-union)
+        denom (max 1 (count this-patterns))]
+    {:novel-count (count novel)
+     :total-count (count this-patterns)
+     :rate        (/ (double (count novel)) denom)
+     :novel       (sort novel)}))
+
+(defn- evaluate-density [manifest running-mean]
+  (let [avg-nodes (get-in manifest [:stage9a_stats :avg_nodes])]
+    (when (and avg-nodes running-mean (pos? running-mean))
+      {:avg-nodes      avg-nodes
+       :running-mean   running-mean
+       :ratio          (/ (double avg-nodes) running-mean)})))
+
+(defn- verdict-from-axes [novelty density quality-drop?]
+  ;; Verdict combination — keep simple and inspectable:
+  ;;   :regresses     — quality drop, regardless of other axes
+  ;;   :adds-signal   — novelty > 20% OR density > 1.10×, no regression
+  ;;   :saturates     — novelty ≤ 5% AND density ≈ 1.0, no regression
+  ;;   :inconclusive  — everything in between
+  (cond
+    quality-drop?                              :regresses
+    (or (>= (:rate novelty 0.0) 0.20)
+        (when-let [r (:ratio density)]
+          (>= r 1.10)))                        :adds-signal
+    (and (<= (:rate novelty 0.0) 0.05)
+         (when-let [r (:ratio density)]
+           (and (>= r 0.95) (<= r 1.05))))     :saturates
+    :else                                      :inconclusive))
+
+(defn evaluate-mark2-batches
+  "Per-batch evaluation of the mark2 arxiv pipeline (Arm A.5 rubric).
+
+   Consumes the same manifest cache as `scan-mark2` and produces verdicts:
+     :adds-signal | :saturates | :regresses | :inconclusive
+
+   Returns a map {:batches [{...per-batch-with-verdict...}]
+                  :overall {:corpus-pattern-union [...]
+                            :n-batches :verdict-counts}}.
+
+   Returns {:cache-status :missing :hint \"...\"} if the manifest cache
+   hasn't been prefetched."
+  []
+  (let [manifest-files (when (.exists (java.io.File. ^String mark2-manifests-dir))
+                        (->> (.listFiles (java.io.File. ^String mark2-manifests-dir))
+                             (filter #(str/ends-with? (.getName ^java.io.File %) ".json"))
+                             (sort-by #(.getName ^java.io.File %))
+                             (map #(.getAbsolutePath ^java.io.File %))))]
+    (if (empty? manifest-files)
+      {:cache-status :missing
+       :hint "No batch manifests cached. Run scripts/prefetch-mark2.bb."}
+      (let [manifests (for [f manifest-files
+                            :let [batch-id (-> ^String f
+                                               (java.io.File.)
+                                               .getName
+                                               (str/replace #"\.json$" ""))
+                                  m (safe-slurp-json f)]
+                            :when m]
+                        {:batch-id batch-id :manifest m})
+            ;; Walk batches in cache-order, accumulating prior pattern union
+            ;; and running density mean as we go.
+            stage6-threshold 0.95  ;; below this = quality regression
+            [batches _]
+            (reduce (fn [[acc prior-state] {:keys [batch-id manifest]}]
+                      (let [patterns         (batch-patterns manifest)
+                            prior-union      (:pattern-union prior-state)
+                            novelty          (evaluate-novelty patterns prior-union)
+                            avg-nodes        (get-in manifest [:stage9a_stats :avg_nodes])
+                            running-mean     (:density-mean prior-state)
+                            density          (when running-mean
+                                               (evaluate-density manifest running-mean))
+                            s6-rate          (get-in manifest [:stage6_stats :parse_rate])
+                            quality-drop?    (and s6-rate (< s6-rate stage6-threshold))
+                            ;; verdict is meaningful only when we have priors
+                            verdict          (if (nil? prior-union)
+                                               :inconclusive  ; first batch, no comparison
+                                               (verdict-from-axes novelty density quality-drop?))
+                            n-prior          (or (:n prior-state) 0)
+                            new-density-mean (if (and avg-nodes running-mean)
+                                               (/ (+ (* n-prior running-mean) avg-nodes)
+                                                  (inc n-prior))
+                                               (or avg-nodes running-mean))]
+                        [(conj acc {:batch-id     batch-id
+                                    :patterns     (sort patterns)
+                                    :novelty      novelty
+                                    :density      density
+                                    :stage6-rate  s6-rate
+                                    :quality-drop? quality-drop?
+                                    :verdict      verdict})
+                         {:pattern-union (clojure.set/union (or prior-union #{}) patterns)
+                          :density-mean  new-density-mean
+                          :n             (inc n-prior)}]))
+                    [[] {}]
+                    manifests)
+            verdicts (frequencies (map :verdict batches))]
+        {:cache-status :ok
+         :as-of (str (LocalDate/now tz))
+         :batches batches
+         :overall
+         {:n-batches (count batches)
+          :verdict-counts verdicts
+          :corpus-pattern-union (sort (reduce clojure.set/union #{}
+                                              (map #(set (:patterns %)) batches)))
+          :corpus-pattern-count (count (reduce clojure.set/union #{}
+                                               (map #(set (:patterns %)) batches)))}}))))
+
+;; ---------------------------------------------------------------------------
 ;; Scan: AIF Head integration
 ;; ---------------------------------------------------------------------------
 
