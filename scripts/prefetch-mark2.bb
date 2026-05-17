@@ -43,6 +43,7 @@
 
 (def pattern-tags-cache-dir (str storage-root "/pattern-tags"))
 (def entities-cache-dir (str storage-root "/entities"))
+(def ner-cache-dir (str storage-root "/ner-terms"))
 
 (defn extract-bundle-file! [tarball member-path cache-dir cache-suffix label]
   (let [batch-id (-> (fs/file-name tarball)
@@ -69,6 +70,10 @@
 (defn extract-entities! [tarball]
   (extract-bundle-file! tarball "output/entities.json"
                         entities-cache-dir ".json" "entities"))
+
+(defn extract-ner! [tarball]
+  (extract-bundle-file! tarball "output/ner-terms.json"
+                        ner-cache-dir ".json" "ner-terms"))
 
 (defn extract-all-manifests! []
   (let [tarballs (->> (fs/list-dir outbox-dir)
@@ -97,6 +102,15 @@
     (doseq [t tarballs]
       (extract-entities! t))))
 
+(defn extract-all-ner! []
+  (let [tarballs (->> (fs/list-dir outbox-dir)
+                      (map str)
+                      (filter #(str/ends-with? % ".tar.gz"))
+                      sort)]
+    (println "[prefetch-mark2] extracting ner-terms from" (count tarballs) "bundles")
+    (doseq [t tarballs]
+      (extract-ner! t))))
+
 ;; ---------------------------------------------------------------------------
 ;; Entry
 ;; ---------------------------------------------------------------------------
@@ -115,6 +129,8 @@
       (extract-all-pattern-tags!))
     (when (contains? opts "--entities")
       (extract-all-entities!))
+    (when (contains? opts "--ner")
+      (extract-all-ner!))
     (println "[prefetch-mark2] done.")))
 
 (apply -main *command-line-args*)
