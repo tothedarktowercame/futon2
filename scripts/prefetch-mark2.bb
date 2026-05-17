@@ -38,21 +38,32 @@
           (System/exit exit)))))
 
 ;; ---------------------------------------------------------------------------
-;; Extract bundle manifests
+;; Extract bundle manifests + pattern-tags
 ;; ---------------------------------------------------------------------------
 
-(defn extract-manifest! [tarball]
+(def pattern-tags-cache-dir (str storage-root "/pattern-tags"))
+
+(defn extract-bundle-file! [tarball member-path cache-dir cache-suffix label]
   (let [batch-id (-> (fs/file-name tarball)
                      (str/replace #"^results-" "")
                      (str/replace #"\.tar\.gz$" ""))
-        out-path (str manifest-cache-dir "/" batch-id ".json")]
-    (fs/create-dirs manifest-cache-dir)
+        out-path (str cache-dir "/" batch-id cache-suffix)]
+    (fs/create-dirs cache-dir)
     (let [{:keys [exit out err]} (shell {:out :string :err :string :continue true}
-                                        "tar" "-xzOf" tarball "output/manifest.json")]
+                                        "tar" "-xzOf" tarball member-path)]
       (if (zero? exit)
         (do (spit out-path out)
-            (println "[prefetch-mark2] extracted manifest for batch" batch-id))
-        (println "[prefetch-mark2] tar peek failed for" tarball ":" err)))))
+            (println "[prefetch-mark2] extracted" label "for batch" batch-id
+                     (str "(" (count out) " bytes)")))
+        (println "[prefetch-mark2] tar peek failed for" tarball "(" label "):" err)))))
+
+(defn extract-manifest! [tarball]
+  (extract-bundle-file! tarball "output/manifest.json"
+                        manifest-cache-dir ".json" "manifest"))
+
+(defn extract-pattern-tags! [tarball]
+  (extract-bundle-file! tarball "output/pattern-tags.json"
+                        pattern-tags-cache-dir ".json" "pattern-tags"))
 
 (defn extract-all-manifests! []
   (let [tarballs (->> (fs/list-dir outbox-dir)
@@ -63,16 +74,31 @@
     (doseq [t tarballs]
       (extract-manifest! t))))
 
+(defn extract-all-pattern-tags! []
+  (let [tarballs (->> (fs/list-dir outbox-dir)
+                      (map str)
+                      (filter #(str/ends-with? % ".tar.gz"))
+                      sort)]
+    (println "[prefetch-mark2] extracting pattern-tags from" (count tarballs) "bundles")
+    (doseq [t tarballs]
+      (extract-pattern-tags! t))))
+
 ;; ---------------------------------------------------------------------------
 ;; Entry
 ;; ---------------------------------------------------------------------------
 
 (defn -main [& args]
   (let [opts (set args)]
-    (when-not (contains? opts "--manifests-only")
+    (when (or (empty? opts)
+              (contains? opts "--state")
+              (contains? opts "--all"))
       (pull-state!))
-    (when-not (contains? opts "--state-only")
+    (when (or (empty? opts)
+              (contains? opts "--manifests")
+              (contains? opts "--all"))
       (extract-all-manifests!))
+    (when (contains? opts "--pattern-tags")
+      (extract-all-pattern-tags!))
     (println "[prefetch-mark2] done.")))
 
-(-main *command-line-args*)
+(apply -main *command-line-args*)
