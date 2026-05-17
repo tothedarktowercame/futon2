@@ -2027,7 +2027,198 @@
       :else
       :multiplied)))
 
-;; --- AIF Head integration ---
+;; ---------------------------------------------------------------------------
+;; Scan: mark2 arxiv pipeline (Arm A of the proxy-metric inventory)
+;;
+;; Reads two local caches populated by `scripts/prefetch-mark2.bb`:
+;;
+;;   ~/code/storage/mark2/state.json        — Rob-side authoritative
+;;                                              batch lifecycle (rsynced
+;;                                              from linode-chicago).
+;;   ~/code/storage/mark2/manifests/*.json  — per-batch manifest.json
+;;                                              extracted from each
+;;                                              results-NNN.tar.gz.
+;;
+;; The discipline (per Arm A.4 finding 2026-05-17): expose TWO
+;; sub-coordinates separately, never conflated:
+;;
+;;   :input-throughput — what fraction of attempted papers made it
+;;                        through preflight into the pipeline
+;;                        (state.json ok/papers).
+;;   :output-quality   — what fraction of papers that entered the
+;;                        pipeline produced clean output (manifest's
+;;                        Stage 6 parse rate, Stage 9 production rates).
+;;
+;; A more-selective-but-equally-capable pipeline drops the first
+;; coordinate without touching the second; conflating them would
+;; misread that case as a regression.
+;;
+;; cf. ~/code/futon7/holes/M-interim-director-proxy-metric-inventory.md
+;;     §2 Arm A and §2.A bundle-shape findings.
+;; ---------------------------------------------------------------------------
+
+(def ^:private mark2-state-path
+  (str home "/code/storage/mark2/state.json"))
+
+(def ^:private mark2-manifests-dir
+  (str home "/code/storage/mark2/manifests"))
+
+(defn- safe-slurp-json [path]
+  (when (.exists (java.io.File. ^String path))
+    (try (json/parse-string (slurp path) true)
+         (catch Exception _ nil))))
+
+(defn- batch-input-throughput [state-batch]
+  (let [papers (or (:papers state-batch) 0)
+        ok     (or (:ok state-batch) 0)
+        failed (or (:failed state-batch) 0)]
+    {:papers papers
+     :ok ok
+     :failed failed
+     :ok-rate (if (pos? papers) (/ (double ok) papers) 0.0)}))
+
+(defn- batch-output-quality [manifest]
+  ;; Pull the structured rates straight off the manifest. Each is a
+  ;; clean per-stage parse-rate or production-rate (0..1).
+  (let [s6   (:stage6_stats manifest)
+        s9a  (:stage9a_stats manifest)
+        s9b  (:stage9b_stats manifest)
+        gate (:health_gate_thresholds manifest)
+        s9a-papers (or (:papers_processed s9a) 0)
+        s9a-hg     (or (:hypergraphs_produced s9a) 0)
+        s9b-thr    (or (:n_threads s9b) 0)
+        s9b-emb    (or (:n_embedded s9b) 0)]
+    {:stage6-parse-rate         (or (:parse_rate s6) nil)
+     :stage6-parse-threshold    (or (:stage6_parse_rate_min gate) nil)
+     :stage9a-production-rate   (if (pos? s9a-papers)
+                                  (/ (double s9a-hg) s9a-papers) nil)
+     :stage9b-embed-rate        (if (pos? s9b-thr)
+                                  (/ (double s9b-emb) s9b-thr) nil)
+     :ner-coverage              (get-in manifest [:stage5_stats :ner_coverage])
+     :readiness-status          (get-in manifest [:readiness :status])
+     :health-issues-count       (count (or (:health_issues manifest) []))
+     :elapsed-seconds           (:elapsed_seconds manifest)
+     :unique-tags               (get-in manifest [:stats :unique_tags])
+     :entity-count              (:entity_count manifest)
+     :relation-count            (:relation_count manifest)
+     :pattern-schema            (:pattern_schema manifest)
+     :embed-model               (:embed_model manifest)
+     :llm-model                 (:llm_model manifest)}))
+
+(defn- collection-lag-days [returned-at-iso]
+  (when returned-at-iso
+    (try (let [returned (java.time.LocalDate/parse
+                          (subs returned-at-iso 0 10))
+               today    (LocalDate/now tz)]
+           (.getDays (java.time.Period/between returned today)))
+         (catch Exception _ nil))))
+
+(defn scan-mark2
+  "Scan the mark2 arxiv pipeline's state for Arm A proxy-metric signals.
+
+   Reads two local caches (refresh with scripts/prefetch-mark2.bb):
+     state.json     — Rob-side lifecycle authority
+     manifests/*    — per-batch processing receipts
+
+   Returns a map separating input-throughput (preflight gating) from
+   output-quality (Stage 6 + Stage 9 production rates). Conflating
+   them misreads a more-selective pipeline as a regression.
+
+   Returns {:batches [...] :overall {...} :cache-status ...}.
+   If the cache is missing or stale, returns
+   {:cache-status :missing :hint \"run scripts/prefetch-mark2.bb\"}."
+  []
+  (let [state    (safe-slurp-json mark2-state-path)
+        manifest-files (when (.exists (java.io.File. ^String mark2-manifests-dir))
+                        (->> (.listFiles (java.io.File. ^String mark2-manifests-dir))
+                             (filter #(str/ends-with? (.getName ^java.io.File %) ".json"))
+                             (map #(.getAbsolutePath ^java.io.File %))))
+        manifests-by-batch (into {}
+                                 (for [f (or manifest-files [])
+                                       :let [raw-id (-> ^String f
+                                                        (java.io.File.)
+                                                        .getName
+                                                        (str/replace #"\.json$" ""))
+                                             ;; state.json uses "1","2",...; cache uses "001","002",...
+                                             stripped-id (str/replace raw-id #"^0+" "")
+                                             stripped-id (if (empty? stripped-id) raw-id stripped-id)
+                                             m (safe-slurp-json f)]
+                                       :when m
+                                       k [raw-id stripped-id]]
+                                   [k m]))]
+    (cond
+      (nil? state)
+      {:cache-status :missing
+       :hint "Local mark2 state.json cache missing. Run scripts/prefetch-mark2.bb to pull from linode-chicago."
+       :state-path mark2-state-path}
+
+      (empty? manifests-by-batch)
+      {:cache-status :missing
+       :hint "No batch manifests cached. Run scripts/prefetch-mark2.bb to extract from local tarballs."
+       :manifests-dir mark2-manifests-dir}
+
+      :else
+      (let [batches (->> (:batches state)
+                         (map (fn [[k v]] [(name k) v]))
+                         (sort-by first)
+                         (mapv (fn [[batch-id batch]]
+                                 (let [m (get manifests-by-batch batch-id)]
+                                   {:batch-id        batch-id
+                                    :status          (:status batch)
+                                    :created-at      (:created_at batch)
+                                    :returned-at     (:returned_at batch)
+                                    :collected-at    (:collected_at batch)
+                                    :collection-lag-days
+                                    (when (and (#{"results-ready"} (:status batch))
+                                               (:returned_at batch))
+                                      (collection-lag-days (:returned_at batch)))
+                                    :input-throughput (batch-input-throughput batch)
+                                    :output-quality   (when m (batch-output-quality m))
+                                    :has-manifest     (boolean m)}))))
+            done    (filter #(= "done" (:status %)) batches)
+            ready   (filter #(= "results-ready" (:status %)) batches)
+            total-papers (reduce + 0 (map (comp :papers :input-throughput) batches))
+            total-ok     (reduce + 0 (map (comp :ok :input-throughput) batches))
+            total-failed (reduce + 0 (map (comp :failed :input-throughput) batches))
+            ;; Trend: input-throughput rate over the last 4 batches vs first 4
+            last-4-itr (->> batches reverse (take 4) (map (comp :ok-rate :input-throughput)))
+            first-4-itr (->> batches (take 4) (map (comp :ok-rate :input-throughput)))
+            mean (fn [xs] (when (seq xs) (/ (reduce + 0.0 xs) (count xs))))
+            ;; Output quality trend: Stage 6 parse-rate across batches with manifests
+            s6-rates (keep #(get-in % [:output-quality :stage6-parse-rate]) batches)]
+        {:cache-status     :ok
+         :as-of            (str (LocalDate/now tz))
+         :state-mtime      (-> (java.io.File. ^String mark2-state-path)
+                               .lastModified
+                               java.time.Instant/ofEpochMilli str)
+         :batches          batches
+         :overall
+         {:batches-total     (count batches)
+          :batches-done      (count done)
+          :batches-uncollected (count ready)
+          :uncollected-batch-ids (mapv :batch-id ready)
+          :max-collection-lag-days
+          (reduce max 0 (keep :collection-lag-days ready))
+          :papers-attempted-total total-papers
+          :papers-ok-total        total-ok
+          :papers-failed-total    total-failed
+          :input-throughput-rate-overall
+          (if (pos? total-papers) (/ (double total-ok) total-papers) 0.0)
+          :input-throughput-trend
+          {:first-4-mean (mean first-4-itr)
+           :last-4-mean  (mean last-4-itr)
+           :delta        (when (and (mean first-4-itr) (mean last-4-itr))
+                           (- (mean last-4-itr) (mean first-4-itr)))}
+          :output-quality-stage6-stats
+          {:n           (count s6-rates)
+           :min         (when (seq s6-rates) (apply min s6-rates))
+           :max         (when (seq s6-rates) (apply max s6-rates))
+           :mean        (mean s6-rates)
+           :threshold   (some #(get-in % [:output-quality :stage6-parse-threshold]) batches)}}}))))
+
+;; ---------------------------------------------------------------------------
+;; Scan: AIF Head integration
+;; ---------------------------------------------------------------------------
 
 (defn scan-aif-heads
   "Query all available AIF heads for their current state.
