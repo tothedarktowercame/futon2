@@ -27,9 +27,24 @@
    Pattern:   war-machine/operational-not-decorative"
   (:require [babashka.http-client :as http]
             [cheshire.core :as json]
+            [clojure.edn]
             [clojure.java.shell :as shell]
             [clojure.set]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [futon2.aif.action-proposer :as ap]
+            [futon2.aif.anticipation :as anticipation]
+            [futon2.aif.belief :as belief]
+            [futon2.aif.efe :as efe]
+            [futon2.aif.forward-model :as fm]
+            [futon2.aif.free-energy :as fe]
+            [futon2.aif.mission-registry :as mission-registry]
+            [futon2.aif.observation :as obs]
+            [futon2.aif.pattern-registry :as pattern-registry]
+            [futon2.aif.policy :as policy]
+            [futon2.aif.precision :as precision]
+            [futon2.aif.preferences :as pref]
+            [futon2.aif.sorry-registry :as sorry-registry]
+            [futon2.aif.trace :as trace])
   (:import (java.time LocalDate ZoneId ZonedDateTime)
            (java.time.format DateTimeFormatter)))
 
@@ -152,6 +167,211 @@
     (when (:ok data)
       (or (:missions data) []))))
 
+(defn- normalize-keyword [x]
+  (cond
+    (keyword? x) x
+    (string? x) (keyword x)
+    :else nil))
+
+(defn- event-name [entry]
+  (some-> (or (get-in entry [:evidence/body :event])
+              (get-in entry [:evidence/body "event"]))
+          name))
+
+(defn- evidence-at [entry]
+  (some-> (:evidence/at entry) str))
+
+(defn- newer-entry? [candidate prior]
+  (let [candidate-at (evidence-at candidate)
+        prior-at (evidence-at prior)]
+    (cond
+      (nil? prior) true
+      (and candidate-at prior-at) (pos? (compare candidate-at prior-at))
+      candidate-at true
+      :else false)))
+
+(defn- latest-by-key
+  "Keep the newest entry per derived key."
+  [entries key-fn]
+  (->> entries
+       (reduce (fn [acc entry]
+                 (if-let [k (key-fn entry)]
+                   (let [prior (get acc k)]
+                     (if (newer-entry? entry prior)
+                       (assoc acc k entry)
+                       acc))
+                   acc))
+               {})
+       vals
+       vec))
+
+(defn- severity-rank [severity]
+  (case severity
+    :critical 2
+    :warning 1
+    :info 0
+    -1))
+
+(defn- family-fired->issue
+  [entry]
+  (let [body (:evidence/body entry)
+        family-id (normalize-keyword (or (:family-id body) (get body "family-id")))
+        outcome (normalize-keyword (or (:outcome body) (get body "outcome")))
+        detail (or (:detail body) {})
+        at (evidence-at entry)]
+    (when (= :violation outcome)
+      (case family-id
+        :obsolescence-recognition/pipeline-tracer
+        (let [tracks (->> (:obsolete-artifacts detail)
+                          (keep #(normalize-keyword (:track-id %)))
+                          (map name)
+                          sort
+                          vec)
+              n (or (:obsolete-count detail) (count tracks))]
+          {:severity :warning
+           :surface "archaeology"
+           :summary (str n " overdue pipeline tracer"
+                         (when (not= 1 n) "s")
+                         " need close-or-extend decisions")
+           :action (if (seq tracks)
+                     (str "Review tracks: " (str/join ", " tracks))
+                     "Close or extend overdue pipeline tracers")
+           :at at
+           :source-id (some-> family-id name)})
+
+        :bounded-disposition/mission-doc
+        (let [violations (vec (:violations detail))
+              repos (->> violations
+                         (map (fn [{:keys [repo undecided-count total]}]
+                                (str (last (str/split repo #"/"))
+                                     " " undecided-count "/" total " unresolved")))
+                         (str/join ", "))]
+          {:severity :warning
+           :surface "mission-doc"
+           :summary (str "Mission-doc disposition pressure in "
+                         (count violations) " repo"
+                         (when (not= 1 (count violations)) "s"))
+           :action (if (seq repos)
+                     (str "Normalize mission statuses or adjust parser semantics in: " repos)
+                     "Normalize mission statuses or adjust parser semantics")
+           :at at
+           :source-id (some-> family-id name)})
+
+        :metabolic-balance/working-tree
+        (let [violators (->> (:per-repo detail)
+                             (filter #(contains? #{:high :stop-the-line
+                                                   "high" "stop-the-line"}
+                                                 (:tier %)))
+                             (sort-by :P >)
+                             vec)
+              top-repo (some-> violators first :repo (str/split #"/") last)
+              max-p (or (:max-pressure detail)
+                        (some-> violators first :P)
+                        0.0)]
+          {:severity (if (= :stop-the-line (normalize-keyword (:max-tier detail)))
+                       :critical
+                       :warning)
+           :surface "metabolic"
+           :summary (str "Working-tree pressure is "
+                         (or (some-> (:max-tier detail) name)
+                             (some-> (:max-tier detail) str/lower-case)
+                             "elevated"))
+           :action (str "Triage dirty trees"
+                        (when top-repo
+                          (format "; %s dominates at P=%.2f" top-repo (double max-p)))
+                        ". Use .futon-disposition.edn for generated/volatile tracked surfaces.")
+           :at at
+           :source-id (some-> family-id name)})
+
+        {:severity :warning
+         :surface "invariant"
+         :summary (str "Invariant warning: " (some-> family-id name))
+         :action "Inspect the latest :family-fired detail and decide whether to close, classify, or tune the check"
+         :at at
+         :source-id (some-> family-id name)}))))
+
+(defn- process-event->issue
+  [entry]
+  (let [body (:evidence/body entry)
+        event (event-name entry)
+        process-id (or (:process-id body) (get body "process-id"))
+        kind (or (:kind body) (get body "kind"))
+        severity (normalize-keyword (or (:severity body) (get body "severity")))
+        message (or (:message body) (get body "message"))
+        at (evidence-at entry)]
+    (case event
+      "process-alert"
+      {:severity (or severity :warning)
+       :surface "watchdog"
+       :summary (str process-id " " kind)
+       :action (str "Inspect " process-id ": " message)
+       :at at
+       :source-id process-id}
+
+      "process-recovery"
+      {:severity :info
+       :surface "watchdog"
+       :summary (str process-id " recovered")
+       :action "No action unless the alert recurs"
+       :at at
+       :source-id process-id}
+
+      nil)))
+
+(defn- summarize-self-watch
+  [entries]
+  (let [family-entries (filter #(= "family-fired" (event-name %)) entries)
+        latest-family (latest-by-key
+                       family-entries
+                       #(normalize-keyword (or (get-in % [:evidence/body :family-id])
+                                               (get-in % [:evidence/body "family-id"]))))
+        family-issues (->> latest-family
+                           (keep family-fired->issue))
+        process-entries (filter #(contains? #{"process-alert" "process-recovery"}
+                                             (event-name %))
+                                entries)
+        latest-process (latest-by-key
+                        process-entries
+                        #(or (get-in % [:evidence/body :process-id])
+                             (get-in % [:evidence/body "process-id"])))
+        process-issues (->> latest-process
+                            (keep process-event->issue))
+        issues (->> (concat family-issues
+                            (remove #(= :info (:severity %)) process-issues))
+                    (sort-by (juxt (comp - severity-rank :severity) :at))
+                    vec)
+        recoveries (->> process-issues
+                        (filter #(= :info (:severity %)))
+                        (sort-by :at #(compare %2 %1))
+                        vec)]
+    {:issues issues
+     :recoveries recoveries
+     :issue-count (count issues)
+     :critical-count (count (filter #(= :critical (:severity %)) issues))
+     :warning-count (count (filter #(= :warning (:severity %)) issues))}))
+
+(defn scan-self-watch
+  "Project self-observation evidence into operator-facing maintenance items.
+
+   Reads two already-emitted surfaces:
+   - `:family-fired` boot/probe warnings from archaeology/metabolic checks
+   - `process-alert` / `process-recovery` from the futon3c watchdog
+
+   The result is intentionally action-shaped rather than raw-evidence-shaped,
+   so War Machine can say what needs fixing instead of only replaying boot
+   banners."
+  [days]
+  (let [entries (fetch-evidence :limit 1000 :since (since-str days))]
+    (if (nil? entries)
+      {:available? false
+       :issues []
+       :recoveries []
+       :issue-count 0
+       :critical-count 0
+       :warning-count 0}
+      (assoc (summarize-self-watch entries)
+             :available? true))))
+
 ;; ---------------------------------------------------------------------------
 ;; Scan 1: Loop Health
 ;;
@@ -236,13 +456,27 @@
     (fn [entries _] ;; Forum posts = collective coordination outputs
       (filter #(= "forum-post" (:evidence/type %)) entries))}])
 
+(def ^:private arrow-health-freq-k
+  "Half-rate parameter for the asymptotic frequency component.
+   At count=k freq=0.5; at count=10k freq≈0.91; at count=100k freq≈0.99.
+   k=10 places the inflection at the same spot the prior min(1, count/10)
+   shape used as its saturation threshold, but the new shape never locks
+   at 1.0 — it just approaches asymptotically.  See E-wm-metric-redesign
+   (futon3c/holes/missions/E-wm-metric-redesign.md) for the saturation
+   diagnosis that motivated this change."
+  10.0)
+
 (defn- arrow-health
-  "Compute health [0,1] from evidence count and recency.
-   Combines frequency (count in window) and freshness (days since last)."
+  "Compute health [0,1) from evidence count and recency.
+
+   Frequency component: freq = count / (count + k) — asymptotic shape;
+   approaches 1.0 but never locks (avoids 100% saturation per F1 in
+   E-wm-metric-redesign).  At count=k=10 the freq is 0.50.
+
+   Freshness component: 1.0 at seen-today, 0.0 at unseen-in-window."
   [evidence-count days-since-last window-days]
-  (let [;; Frequency component: >10 entries/window = healthy
-        freq (min 1.0 (/ (double evidence-count) 10.0))
-        ;; Freshness component: seen today = 1.0, unseen in window = 0.0
+  (let [c (double evidence-count)
+        freq (/ c (+ c arrow-health-freq-k))
         fresh (if days-since-last
                 (max 0.0 (- 1.0 (/ (double days-since-last) (double window-days))))
                 0.0)]
@@ -1234,6 +1468,58 @@
            :stale? (> age-min 60.0)})
         (catch Exception _ {:available? false :error :parse-failed})))))
 
+(defn- summarize-working-tree-hygiene
+  "Project the metabolic-balance snapshot into an operator-facing hygiene
+   surface for the War Machine dashboard.
+
+   This is intentionally honest about what exists today: per-repo pressure
+   is available, but coherent file-cluster synthesis is not yet landed.
+   The `:commit-hygiene` payload therefore exposes repo-level queues and a
+   `:clustering-status` marker instead of pretending we already have safe
+   auto-commit bundles."
+  [metabolic-balance]
+  (if-not (:available? metabolic-balance)
+    {:available? false
+     :queues []
+     :active-count 0
+     :high-count 0
+     :stop-count 0
+     :clustering-status :unavailable}
+    (let [repos (or (:per-repo metabolic-balance) [])
+          active (->> repos
+                      (filter #(pos? (double (or (:pressure %) 0.0))))
+                      (mapv (fn [{:keys [repo pressure tier count max-age-days bytes]}]
+                              {:repo repo
+                               :pressure pressure
+                               :tier tier
+                               :count count
+                               :max-age-days max-age-days
+                               :bytes bytes
+                               :needs-fixing
+                               (format "%s has %d dirty paths, age %.1fd, %.2f pressure"
+                                       repo (or count 0) (double (or max-age-days 0.0))
+                                       (double (or pressure 0.0)))
+                               :action
+                               (format "Review %s for commit/disposition clustering"
+                                       repo)}))
+                      (sort-by (juxt (comp - tier-rank :tier) (comp - :pressure)))
+                      vec)
+          channels (or (:channels metabolic-balance) [])
+          active-sessions (some #(when (= :active-sessions (:channel %)) %) channels)
+          working-tree (some #(when (= :working-tree (:channel %)) %) channels)]
+      {:available? true
+       :clustering-status :not-yet-grouped
+       :queues (take 8 active)
+       :active-count (count active)
+       :high-count (count (filter #(= :high (:tier %)) active))
+       :stop-count (count (filter #(= :stop-the-line (:tier %)) active))
+       :max-tier (:max-tier metabolic-balance)
+       :max-pressure (:max-pressure metabolic-balance)
+       :snapshot-age-minutes (:snapshot-age-minutes metabolic-balance)
+       :stale? (:stale? metabolic-balance)
+       :working-tree-channel working-tree
+       :active-sessions-channel active-sessions})))
+
 (defn- tier-glyph [tier]
   (case (some-> tier name)
     "stop-the-line" "●"
@@ -1380,11 +1666,73 @@
 
 (defn render-war-machine
   "Render the War Machine strategic synthesis as markdown."
-  [{:keys [loop-health support-attack mission-triage graph portfolio
-           metabolic-balance blocks now days] :as data}]
+  [{:keys [self-watch loop-health support-attack mission-triage graph portfolio
+           metabolic-balance commit-hygiene blocks now days] :as data}]
   (let [sb (StringBuilder.)]
     (.append sb "# War Machine — Strategic Synthesis\n\n")
     (.append sb (str "**" now "** | " days "-day window\n\n"))
+
+    ;; --- Self Watch ---
+    (when self-watch
+      (.append sb "## Self-Watch\n\n")
+      (cond
+        (not (:available? self-watch))
+        (.append sb "*Self-watch evidence unavailable — futon3c evidence API did not answer.*\n\n")
+
+        (seq (:issues self-watch))
+        (do
+          (.append sb (str "Active warnings: " (:warning-count self-watch)
+                           " | critical: " (:critical-count self-watch) "\n\n"))
+          (.append sb (render-table
+                       ["Severity" "Surface" "Needs Fixing" "Action" "Last seen"]
+                       [:left :left :left :left :left]
+                       (mapv (fn [{:keys [severity surface summary action at]}]
+                               [(name severity)
+                                surface
+                                summary
+                                action
+                                (or (parse-iso-date at) at "-")])
+                             (:issues self-watch))))
+          (.append sb "\n"))
+
+        :else
+        (.append sb "*No active self-watch warnings in window.*\n\n"))
+
+      (when (seq (:recoveries self-watch))
+        (.append sb "**Recent recoveries:**\n\n")
+        (doseq [{:keys [summary at]} (take 5 (:recoveries self-watch))]
+          (.append sb (str "- " summary
+                           " (" (or (parse-iso-date at) at "-") ")\n")))
+        (.append sb "\n")))
+
+    ;; --- Commit Hygiene ---
+    (when commit-hygiene
+      (.append sb "## Commit Hygiene\n\n")
+      (cond
+        (not (:available? commit-hygiene))
+        (.append sb "*Commit-hygiene snapshot unavailable.*\n\n")
+
+        (seq (:queues commit-hygiene))
+        (do
+          (.append sb (str "Active repos: " (:active-count commit-hygiene)
+                           " | high: " (:high-count commit-hygiene)
+                           " | stop-the-line: " (:stop-count commit-hygiene)
+                           " | grouping: " (name (:clustering-status commit-hygiene)) "\n\n"))
+          (.append sb (render-table
+                       ["Repo" "Tier" "Pressure" "Dirty" "Max age" "Action"]
+                       [:left :left :right :right :right :left]
+                       (mapv (fn [{:keys [repo tier pressure count max-age-days action]}]
+                               [repo
+                                (name tier)
+                                (format "%.2f" (double pressure))
+                                (str count)
+                                (format "%.1fd" (double (or max-age-days 0.0)))
+                                action])
+                             (:queues commit-hygiene))))
+          (.append sb "\n"))
+
+        :else
+        (.append sb "*No working-tree queues above the reporting floor.*\n\n")))
 
     ;; --- Loop Health ---
     (.append sb "## Loop Health\n\n")
@@ -1709,6 +2057,87 @@
                              (:question fam) "\n")))
           (.append sb "\n"))))
 
+    ;; --- R-Criterion Status (M-war-machine-frontend-upgrade1 §6.20 — surfaces
+    ;;     the contract's R1-R12 ✓/✗/N-A from futon-aif-completeness.md
+    ;;     Summary table; parser in `scan-r-criteria`).
+    (when-let [rc (:r-criteria data)]
+      (.append sb "## R-Criterion Status\n\n")
+      (cond
+        (not (:available? rc))
+        (.append sb (str "*R-criteria contract unreadable: "
+                         (or (:error rc) "(unspecified)") "*\n\n"))
+
+        (zero? (:total rc))
+        (.append sb (str "*R-criteria contract found but Summary table empty; "
+                         "parser regex may need updating.* `" (:path rc) "`\n\n"))
+
+        :else
+        (do
+          (.append sb (str "Source: `" (:path rc) "` § Summary. "
+                           "Total criteria: " (:total rc) ".\n\n"))
+          (.append sb (render-table
+                       ["R-criterion" "Status" "Gap-closing checkpoint / blocker"]
+                       [:left :left :left]
+                       (mapv (fn [{:keys [id name status blocker]}]
+                               [(str id " — " name)
+                                status
+                                (if (> (count blocker) 90)
+                                  (str (subs blocker 0 87) "...")
+                                  blocker)])
+                             (:rows rc))))
+          (.append sb "\n"))))
+
+    ;; --- R12 Apparatus (M-war-machine-frontend-upgrade1 §6.20 — surfaces the
+    ;;     intrinsic-values atom state via wm-hyperparameter-update hyperedges
+    ;;     in futon1a XTDB; parser in `scan-r12-apparatus`).
+    (when-let [r12 (:r12-apparatus data)]
+      (.append sb "## R12 Apparatus (intrinsic-values atom)\n\n")
+      (cond
+        (not (:available? r12))
+        (.append sb (str "*R12 apparatus state unavailable: "
+                         (or (:error r12) "(unspecified)")
+                         ". Source-of-truth: `code/v05/wm-hyperparameter-update` "
+                         "hyperedges in futon1a XTDB.*\n\n"))
+
+        (zero? (:class-count r12))
+        (.append sb (str "*R12 apparatus initialized but no class records yet "
+                         "— wm-outer-loop hasn't fired. Cron entry: "
+                         "`30 4 * * *`; see "
+                         "`~/code/futon0/data/cron-jobs.edn`.*\n\n"))
+
+        :else
+        (do
+          (.append sb (str "Per-class Beta(α,β) posteriors from "
+                           (:total-records r12) " update record(s) "
+                           "(latest per class). Posterior mode = intrinsic-value "
+                           "the WM inner loop consults at `:learn-action-class` "
+                           "selection time.\n\n"))
+          (.append sb (render-table
+                       ["Class" "Beta(α, β)" "Intrinsic-value" "Emissions"
+                        "Followthrough" "Substrate" "As-of"]
+                       [:left :right :right :right :right :left :left]
+                       (mapv (fn [[class
+                                   {:keys [alpha beta intrinsic-value
+                                           n-emissions n-followthrough
+                                           n-followthrough-observed
+                                           substrate-status as-of]}]]
+                               [(str class)
+                                (format "(%.1f, %.1f)" (double (or alpha 1.0))
+                                                       (double (or beta 1.0)))
+                                (format "%.3f" (double (or intrinsic-value 0.5)))
+                                (str (or n-emissions 0))
+                                (cond
+                                  (and n-followthrough-observed
+                                       (not= n-followthrough-observed n-followthrough))
+                                  (str n-followthrough " (capped from "
+                                       n-followthrough-observed ")")
+                                  :else
+                                  (str (or n-followthrough 0)))
+                                (str (or substrate-status "unknown"))
+                                (or as-of "-")])
+                             (sort-by first (:per-class r12)))))
+          (.append sb "\n"))))
+
     ;; --- Portfolio Recommendation (adjacent-possible + EFE-ranked actions) ---
     (when-let [pr (get-in data [:judgement :portfolio-recommendation])]
       (.append sb "## Portfolio Recommendation\n\n")
@@ -1790,242 +2219,6 @@
           (.append sb "\n"))))
 
     (str sb)))
-
-;; ---------------------------------------------------------------------------
-;; Normalized observation vector (AIF terminal vocabulary)
-;;
-;; Converts the raw scan data into a normalized [0,1] observation vector
-;; following the core-terminal-vocabulary.md schema.
-;;
-;; cf. cyberants observe.clj/sense->vector — same pattern, strategic domain
-;; ---------------------------------------------------------------------------
-
-(def ^:private observation-channels
-  "The war machine's observation channels, harmonized from all vocabularies.
-   Each channel is a named terminal with a source vocabulary and normalization."
-  [:loop-health           ;; overall loop health [0,1] — from holistic argument
-   :support-coverage      ;; S1-S5 evidence coverage [0,1] — from holistic argument
-   :attack-coverage       ;; A1-A4 evidence coverage [0,1] — from holistic argument
-   :mission-health        ;; mission triage health [0,1] — from peripheral-aif
-   :stack-pct             ;; stack commit % [0,1] — from logic model / joe-hud
-   :consulting-pct        ;; consulting commit % [0,1] — from JSDQ
-   :portfolio-pct         ;; portfolio commit % [0,1] — from JSDQ
-   :mathematics-pct       ;; mathematics commit % [0,1] — from JSDQ
-   :active-repo-ratio     ;; active repos / total repos [0,1] — from logic model
-   :sorry-count-norm      ;; open sorrys / 10 (capped at 1) — from sorry topology
-   :coupling-density      ;; coupling edges / max edges [0,1] — from temporal analysis
-   :ticks-firing-ratio    ;; firing ticks / total ticks [0,1] — from logic model
-   :depositing-signal     ;; depositing cardinal direction [0,1] — from daily scan frames
-   ])
-
-(defn observe
-  "Produce normalized observation vector from raw scan data.
-   Returns a map of channel-id → [0,1] value.
-
-   This is the war machine's g-observe: the bridge between
-   raw scan data and the AIF loop."
-  [data]
-  (let [{:keys [loop-health support-attack mission-triage graph frames]} data
-        {:keys [commit-percentages ticks]} (:dynamics graph {})
-        {:keys [summary]} graph
-        depositing-signal (or (:depositing-signal frames) 0.0)]
-    {:loop-health (:overall loop-health 0.0)
-     :support-coverage (:support-coverage support-attack 0.0)
-     :attack-coverage (:attack-coverage support-attack 0.0)
-     :mission-health (:health mission-triage 0.0)
-     :stack-pct (:stack commit-percentages 0.0)
-     :consulting-pct (:consulting commit-percentages 0.0)
-     :portfolio-pct (:portfolio commit-percentages 0.0)
-     :mathematics-pct (:mathematics commit-percentages 0.0)
-     :active-repo-ratio (if (and summary (pos? (:total-repos summary)))
-                          (/ (double (:active-repos summary 0))
-                             (:total-repos summary))
-                          0.0)
-     :sorry-count-norm (min 1.0 (/ (double (:total-sorrys summary 0)) 10.0))
-     :coupling-density (let [n (:total-repos summary 0)
-                              max-edges (/ (* n (dec n)) 2)]
-                          (if (pos? max-edges)
-                            (min 1.0 (/ (double (:coupling-edges summary 0)) max-edges))
-                            0.0))
-     :ticks-firing-ratio (let [total (count (or ticks []))
-                                firing (:ticks-firing summary 0)]
-                            (if (pos? total)
-                              (/ (double firing) total)
-                              0.0))
-     :depositing-signal depositing-signal}))
-
-(defn sense->vector
-  "Convert observation map to ordered vector (for ML/AIF consumption).
-   cf. cyberants observe.clj/sense->vector."
-  [obs]
-  (mapv #(get obs % 0.0) observation-channels))
-
-;; ---------------------------------------------------------------------------
-;; Judgement Layer: Preferences, Free Energy, AIF Heads, Invariants
-;;
-;; The war machine's inference step. Sits between observe (scan data →
-;; 12-channel vector) and render (display).
-;;
-;; Reads:
-;;   1. Observation vector (from observe)
-;;   2. Preferences (from war-machine-terminal-vocabulary.edn)
-;;   3. AIF head states (from live endpoints)
-;;   4. Invariant inventory (from futon-stack-invariant-model.edn)
-;;
-;; Produces: ranked priority list, free energy decomposition, losses.
-;;
-;; cf. cyberants policy.clj — EFE computation
-;; cf. portfolio/policy.clj — action ranking
-;; cf. M-aif-head: the war machine integrates all heads, not replaces them
-;;
-;; Invariant: WM-I1 (read-only — judge produces data, never writes)
-;; Invariant: WM-I4 (sovereignty — priorities are informational, not commands)
-;; ---------------------------------------------------------------------------
-
-;; --- Preferences (C) from terminal vocabulary ---
-
-(def ^:private preferences
-  "Expected observation ranges from war-machine-terminal-vocabulary.edn :C/preferred.
-   Each channel maps to [lo hi] — the range where things are healthy."
-  {:loop-health        [0.8 1.0]
-   :support-coverage   [0.8 1.0]
-   :attack-coverage    [0.8 1.0]
-   :mission-health     [0.5 1.0]
-   :stack-pct          [0.15 0.25]
-   :consulting-pct     [0.20 0.35]
-   :portfolio-pct      [0.20 0.35]
-   :mathematics-pct    [0.15 0.25]
-   :active-repo-ratio  [0.5 1.0]
-   :sorry-count-norm   [0.0 0.3]
-   :coupling-density   [0.1 0.3]
-   :ticks-firing-ratio [0.0 0.0]})
-
-(def ^:private avoided-states
-  "States the system should not be in. From :C/avoided."
-  {:strategic-mode     :hermit
-   :stack-pct          [0.7 1.0]
-   :consulting-pct     [0.0 0.0]
-   :ticks-firing-ratio [0.5 1.0]
-   :sorry-count-norm   [0.8 1.0]
-   :active-repo-ratio  [0.0 0.2]})
-
-(def ^:private mode-prior
-  "Prior probability over strategic modes. From :C/mode-prior."
-  {:multiplied       0.35
-   :depositing       0.25
-   :foraging-trapped 0.15
-   :hermit           0.10
-   :stagnant         0.10
-   :dark             0.05})
-
-;; --- Free energy computation ---
-
-(defn- channel-gap
-  "Distance of observation from preferred range.
-   Returns 0.0 if within [lo, hi], positive distance otherwise."
-  [obs-val [lo hi]]
-  (let [v (double (or obs-val 0.0))]
-    (cond (< v lo) (- lo v)
-          (> v hi) (- v hi)
-          :else 0.0)))
-
-(defn- in-avoided?
-  "True if observation value falls within an avoided range."
-  [obs-val [lo hi]]
-  (let [v (double (or obs-val 0.0))]
-    (and (>= v lo) (<= v hi))))
-
-(def ^:private pragmatic-weights
-  "Per-channel weights for pragmatic free energy.
-   From :G/pragmatic-fn in terminal vocabulary."
-  {:stack-pct          0.25
-   :consulting-pct     0.25
-   :portfolio-pct      0.15
-   :mission-health     0.15
-   :ticks-firing-ratio 0.10
-   :sorry-count-norm   0.10})
-
-(defn compute-free-energy
-  "Compute strategic free energy from observation vector.
-
-   Returns {:G-total :G-pragmatic :G-epistemic :per-channel-gaps :avoided-active}.
-
-   G-pragmatic: weighted distance from preferences (dominated by workstream balance).
-   G-epistemic: uncertainty from dark arrows and unaddressed claims.
-   G-total: 0.65 * pragmatic + 0.35 * epistemic.
-
-   cf. war-machine-terminal-vocabulary.edn :G/pragmatic-fn, :G/epistemic-fn"
-  [obs]
-  (let [;; Pragmatic: gap between observations and preferences
-        per-channel (into {}
-                          (for [[ch pref] preferences
-                                :let [v (get obs ch 0.0)
-                                      gap (channel-gap v pref)]]
-                            [ch {:value v
-                                 :preferred pref
-                                 :gap gap
-                                 :in-range? (zero? gap)}]))
-        g-pragmatic (reduce-kv (fn [acc ch weight]
-                                 (+ acc (* weight (get-in per-channel [ch :gap] 0.0))))
-                               0.0
-                               pragmatic-weights)
-        ;; Epistemic: uncertainty from dark areas
-        g-epistemic (+ (* 0.4 (- 1.0 (:loop-health obs 0.0)))
-                       (* 0.3 (- 1.0 (:attack-coverage obs 0.0)))
-                       (* 0.3 (- 1.0 (:support-coverage obs 0.0))))
-        ;; Total
-        g-total (+ (* 0.65 g-pragmatic) (* 0.35 g-epistemic))
-        ;; Avoided states currently active
-        avoided (vec (for [[k v] avoided-states
-                           :when (not= k :strategic-mode)
-                           :when (vector? v)
-                           :when (in-avoided? (get obs k 0.0) v)]
-                       k))]
-    {:G-total g-total
-     :G-pragmatic g-pragmatic
-     :G-epistemic g-epistemic
-     :per-channel per-channel
-     :avoided-active avoided}))
-
-(defn infer-mode
-  "Infer strategic mode from observation vector.
-   Returns keyword: :multiplied, :depositing, :foraging-trapped, :hermit, :stagnant, :dark."
-  [obs]
-  (let [stack (get obs :stack-pct 0.0)
-        consulting (get obs :consulting-pct 0.0)
-        portfolio (get obs :portfolio-pct 0.0)
-        loop-h (get obs :loop-health 0.0)
-        active (get obs :active-repo-ratio 0.0)
-        ticks (get obs :ticks-firing-ratio 0.0)
-        depositing (get obs :depositing-signal 0.0)]
-    (cond
-      ;; Dark: nothing happening
-      (and (< active 0.2) (< loop-h 0.3))
-      :dark
-
-      ;; Depositing: consulting active (commit-based or frame-based)
-      (or (> consulting 0.2) (> depositing 0.15))
-      :depositing
-
-      ;; Hermit: stack-dominated, no consulting AND no depositing signal
-      (and (> stack 0.7) (< consulting 0.05) (< depositing 0.05))
-      :hermit
-
-      ;; Scanning: stack-dominated but daily scans active (transitional)
-      (and (> stack 0.7) (> depositing 0.0))
-      :scanning
-
-      ;; Foraging-trapped: stuck on stack under math/portfolio pressure
-      (and (> stack 0.5) (> ticks 0.5))
-      :foraging-trapped
-
-      ;; Stagnant: surfaces used but not improving
-      (and (> active 0.3) (< loop-h 0.5))
-      :stagnant
-
-      ;; Multiplied: healthy balance
-      :else
-      :multiplied)))
 
 ;; ---------------------------------------------------------------------------
 ;; Scan: mark2 arxiv pipeline (Arm A of the proxy-metric inventory)
@@ -2694,16 +2887,158 @@
   "The war machine's inference step.
 
    Composes observations, AIF head states, and invariant inventory
-   into a ranked priority list with free energy decomposition.
+   into a ranked priority list with free energy decomposition. As of
+   v0.5 of `futon2/docs/futon-aif-completeness.md`, also produces an
+   R5/R6 action recommendation: belief state, EFE-ranked candidate
+   actions, and a softmax-with-abstain decision. As of v0.7, optionally
+   persists a per-call trace record (R8) when an opts map carrying
+   `:trace-path` is passed — the production WM entrypoint passes the
+   default trace path; tests / one-off invocations omit it.
 
-   This is the function the previous session identified as missing:
-   the bridge between 'BUILD 0.74' and 'build THIS because THAT'.
-
-   Returns {:mode :free-energy :priorities :losses :heads :invariants}."
-  [scan-data]
-  (let [obs (observe scan-data)
-        free-energy (compute-free-energy obs)
-        mode (infer-mode obs)
+   Arity-1 ([scan-data]): no trace persistence.
+   Arity-2 ([scan-data opts]): writes trace if `:trace?` is truthy in
+     opts; uses `:trace-dir` if provided or default."
+  ([scan-data] (judge scan-data {}))
+  ([scan-data {:keys [trace? trace-dir] :or {trace? false}}]
+  (let [observation (obs/observe scan-data)
+        free-energy (fe/compute-free-energy observation)
+        ;; Base mode from equilibrium-classification of observations.
+        base-mode (fe/infer-mode observation)
+        ;; OVERRIDE-MODE check: when any metabolic-balance channel hits
+        ;; tier :stop-the-line, set mode to :stop-the-line regardless
+        ;; of base-mode.  See :μ/override-modes in
+        ;; war-machine-strategic-vocabulary.edn.  Andon-cord semantics.
+        metabolic-max-tier (get-in scan-data [:metabolic-balance :max-tier])
+        mode (if (= :stop-the-line metabolic-max-tier)
+               :stop-the-line
+               base-mode)
+        ;; AIF action selection (v0.5+):
+        ;; uniform-prior belief over empty entity set today; R8 trace
+        ;; persistence will carry belief across calls.
+        wm-sorrys (try (sorry-registry/open-sorrys) (catch Exception _ []))
+        ;; v0.9 symmetric bootstrap: belief domain = stack-annotations.edn
+        ;; :sections[] :id ∪ sorry-registry ids. Mirrors VSATARCS-side
+        ;; bootstrap so per-entity comparison reduces to alist-lookup
+        ;; equality on shared string entity-ids.
+        wm-belief-pre (belief/bootstrap-from-stack-annotations (map :id wm-sorrys))
+        wm-missions (try (mission-registry/open-missions) (catch Exception _ []))
+        ;; v0.10/v0.11/v0.13 R3a/R3b/R3d wiring: compute prediction-errors
+        ;; for every channel with a likelihood model (4 channels: :annotation-
+        ;; health, :sorry-count-norm, :mission-health, :active-repo-ratio).
+        ;; All four errors record into the trace's :prediction-errors map.
+        ;;
+        ;; v0.13 R3 multi-step inner iteration: run up to `r3-max-steps`
+        ;; micro-steps per call. Each step: compute prediction-errors on
+        ;; current belief → update precision-state → synthesize event from
+        ;; :annotation-health (weight-annealed per step) → apply belief
+        ;; update. Terminates early if all errors drop below
+        ;; `r3-error-eps`. Ports the inner-loop pattern from
+        ;; ants/aif/perceive.clj.
+        r3-max-steps 3
+        r3-error-eps 1.0e-3
+        prev-precision-state
+        (or (some-> (try (trace/latest-trace-record
+                          :dir (or trace-dir
+                                   (str (System/getProperty "user.home")
+                                        "/code/futon2/data/wm-trace")))
+                         (catch Exception _ nil))
+                    :precision-state)
+            (precision/initial-precision-state))
+        ;; Inner loop result
+        {:keys [belief precision-state prediction-errors micro-step-trace]}
+        (loop [step 0
+               belief wm-belief-pre
+               prec-state prev-precision-state
+               micro-trace []]
+          (let [predictions (belief/predict-observation belief)
+                raw-errors (into {}
+                                 (for [ch belief/channels-with-likelihood]
+                                   [ch (fe/compute-prediction-error
+                                        (get observation ch 0.0)
+                                        (get predictions ch))]))
+                prec-state' (precision/update-precision-state prec-state raw-errors)
+                weighted-errors (into {}
+                                      (for [[ch err-map] raw-errors]
+                                        [ch (precision/weighted-error
+                                             prec-state' ch err-map)]))
+                ;; v0.16 multi-channel R3d sign-aggregation: aggregate
+                ;; signed weighted-errors across all R3a-covered channels
+                ;; using per-channel :health-sign so sign-direction is
+                ;; coherent (high :sorry-count-norm = unhealthier vs high
+                ;; :annotation-health = healthier).
+                aggregated-signed-error
+                (reduce + (for [[ch err-map] weighted-errors
+                                :let [sign (double (get pref/channel-health-signs ch 0))
+                                      we (double (:weighted-error err-map 0.0))]]
+                            (* sign we)))
+                aggregated-magnitude (Math/abs aggregated-signed-error)
+                ann-error (get weighted-errors :annotation-health)
+                error-mag (Math/abs (double (:error ann-error 0.0)))
+                ;; Anneal event weight by step: step 0 = full; step K-1 = small
+                anneal-factor (max 0.0 (- 1.0 (/ (double step) r3-max-steps)))
+                base-weight (min 1.0 aggregated-magnitude)
+                event-weight (* base-weight anneal-factor 0.1)
+                events (when (pos? event-weight)
+                         (let [event-type (if (pos? aggregated-signed-error)
+                                            :strengthened :foreclosed)]
+                           (mapv (fn [eid] {:entity-id eid :type event-type
+                                            :weight event-weight})
+                                 (keys belief))))
+                belief' (if (seq events)
+                          (belief/update-belief-batch belief events)
+                          belief)
+                step-entry {:step step
+                            :error-magnitude error-mag
+                            :aggregated-signed-error aggregated-signed-error
+                            :anneal-factor anneal-factor
+                            :events-applied (count events)
+                            :event-weight event-weight}
+                micro-trace' (conj micro-trace step-entry)]
+            (if (or (>= (inc step) r3-max-steps)
+                    (< error-mag r3-error-eps))
+              {:belief belief'
+               :precision-state prec-state'
+               :prediction-errors weighted-errors
+               :micro-step-trace micro-trace'}
+              (recur (inc step) belief' prec-state' micro-trace'))))
+        wm-belief belief
+        ;; v0.13 anticipation v0.13 (read-only): expose upcoming typed
+        ;; events to the trace. R5 time-conditioning and R4 multi-horizon
+        ;; composition are deferred (v0.14 / v0.15 candidates).
+        anticipation-snapshot (anticipation/anticipation-snapshot)
+        wm-patterns (try (pattern-registry/open-patterns) (catch Exception _ []))
+        wm-state {:observation observation :belief wm-belief :sorrys wm-sorrys
+                  :missions wm-missions
+                  :patterns wm-patterns
+                  :anticipation anticipation-snapshot}
+        wm-candidates (ap/compose-proposers
+                       [ap/bootstrap-proposer
+                        pattern-registry/pattern-enumerator-proposer
+                        mission-registry/mission-enumerator-proposer
+                        sorry-registry/sorry-enumerator-proposer]
+                       wm-state)
+        ;; v0.14 anticipation-driven time-pressure: scale G-risk + G-survival
+        ;; by proximity to closest anticipated event in horizon. When no
+        ;; events are within horizon, time-pressure = 0 (no scaling).
+        wm-time-pressure (anticipation/time-pressure anticipation-snapshot
+                                                     (java.time.Instant/now))
+        ;; v0.15: multi-horizon scoring activates when anticipation
+        ;; loaded events in horizon. Falls back to single-step if no
+        ;; anticipation data.
+        wm-horizon-steps (when (and (:events-loaded? anticipation-snapshot)
+                                    (seq (:events anticipation-snapshot)))
+                           3)
+        wm-ranked (efe/rank-actions wm-state wm-candidates
+                                    {:time-pressure wm-time-pressure
+                                     :horizon-steps wm-horizon-steps})
+        ;; v0.13 R6 enhancement: pre-filter by can-execute? admissibility
+        ;; (composes with can-propose? at proposer-side); then run
+        ;; deliberative select-action with default-mode-select as a
+        ;; try/catch fallback for I6 compositional closure.
+        wm-admissible (filterv #(fm/can-execute? wm-state (:action %)) wm-ranked)
+        wm-decision (try (policy/select-action wm-admissible)
+                         (catch Exception _
+                           (policy/default-mode-select wm-state wm-admissible)))
         aif-heads (scan-aif-heads)
         inventory (load-invariant-inventory)
         ;; Get portfolio step data for structural info
@@ -2744,37 +3079,52 @@
                             vec)
         ;; Losses: avoided states that are currently active
         losses (vec (concat
-                     (when (= mode (:strategic-mode avoided-states))
+                     (when (= mode (:strategic-mode pref/avoided-states))
                        [{:type :avoided-mode
                          :mode mode
                          :summary (str "System in avoided mode: " (name mode))}])
                      (map (fn [ch]
                             {:type :avoided-channel
                              :channel ch
-                             :value (get obs ch 0.0)
-                             :range (get avoided-states ch)
+                             :value (get observation ch 0.0)
+                             :range (get pref/avoided-states ch)
                              :summary (str (name ch) " at "
-                                           (format "%.2f" (double (get obs ch 0.0)))
+                                           (format "%.2f" (double (get observation ch 0.0)))
                                            " — in avoided range "
-                                           (pr-str (get avoided-states ch)))})
-                          (:avoided-active free-energy))))]
-    {:mode mode
-     :mode-prior (get mode-prior mode 0.0)
-     :free-energy free-energy
-     :priorities all-priorities
-     :priority-count (count all-priorities)
-     :losses losses
-     :loss-count (count losses)
-     :heads aif-heads
-     :invariants inventory
-     :support-attack-enriched enriched-sa
-     :portfolio-recommendation
-     (when portfolio-step
-       {:action (:action portfolio-step)
-        :recommendation (:recommendation portfolio-step)
-        :adjacent (get-in portfolio-step [:structure :adjacent] [])
-        :critical-path (get-in portfolio-step [:structure :critical-path] [])})
-     :observation obs}))
+                                           (pr-str (get pref/avoided-states ch)))})
+                          (:avoided-active free-energy))))
+        result {:mode mode
+                :mode-prior (get pref/mode-prior mode 0.0)
+                :free-energy free-energy
+                :priorities all-priorities
+                :priority-count (count all-priorities)
+                :losses losses
+                :loss-count (count losses)
+                :heads aif-heads
+                :invariants inventory
+                :support-attack-enriched enriched-sa
+                :portfolio-recommendation
+                (when portfolio-step
+                  {:action (:action portfolio-step)
+                   :recommendation (:recommendation portfolio-step)
+                   :adjacent (get-in portfolio-step [:structure :adjacent] [])
+                   :critical-path (get-in portfolio-step [:structure :critical-path] [])})
+                :observation observation
+                :belief wm-belief
+                :belief-pre wm-belief-pre
+                :prediction-errors prediction-errors
+                :precision-state precision-state
+                :micro-step-trace micro-step-trace
+                :anticipation anticipation-snapshot
+                :ranked-actions wm-ranked
+                :decision wm-decision}]
+    (when trace?
+      (try
+        (if trace-dir
+          (trace/write-trace! result :dir trace-dir)
+          (trace/write-trace! result))
+        (catch Exception _ nil)))
+    result)))
 
 ;; ---------------------------------------------------------------------------
 ;; Orchestrator
@@ -2791,12 +3141,129 @@
                    DateTimeFormatter/ISO_OFFSET_DATE_TIME)
    :end (.format now-zdt DateTimeFormatter/ISO_OFFSET_DATE_TIME)})
 
+(defn scan-annotation-graph
+  "Read `stack-annotations.edn` and summarise its health for the WM's
+   `:annotation-health` observation channel (v0.10).
+
+   Returns `{:health <[0,1]> :anomaly-count <int> :section-count <int>}`.
+   Health is `1 − min(1, anomalies/sections)` — fewer anomalies relative to
+   sections = healthier. Resilient: returns `{:health 0.0 ...}` if the
+   canonical source is unreadable."
+  []
+  (try
+    (let [path (str home "/code/futon5a/holes/stack-annotations.edn")
+          doc (clojure.edn/read-string (slurp path))
+          sections (count (:sections doc))
+          anomalies (count (:lift-anomalies doc))
+          health (if (pos? sections)
+                   (max 0.0 (- 1.0 (min 1.0 (/ (double anomalies) sections))))
+                   0.0)]
+      {:health health :anomaly-count anomalies :section-count sections})
+    (catch Exception _
+      {:health 0.0 :anomaly-count 0 :section-count 0})))
+
+;; ---------------------------------------------------------------------------
+;; Scan 11: R-criterion contract status
+;;
+;; Parses the Summary table of `~/code/futon2/docs/futon-aif-completeness.md`
+;; so the markdown rendering surfaces the contract's current R1-R12 ✓/✗/N-A
+;; state. Mirrors claude-4's VSATARCS-side Q1 reader parser
+;; (`arxana-vsatarcs-r-criteria-wm.el`) — same source-of-truth, different
+;; consumer surface (this one writes into the markdown render; the elisp one
+;; renders into the VSATARCS browser chrome).
+;;
+;; Operator-surfaced gap 2026-05-24: the WM markdown rendering didn't carry
+;; R-criterion status at all, despite the apparatus tracking R1-R12 via the
+;; contract file. M-war-machine-frontend-upgrade1 §6.20 captures the fix.
+;; ---------------------------------------------------------------------------
+
+(def ^:private contract-path
+  (str home "/code/futon2/docs/futon-aif-completeness.md"))
+
+(def ^:private r-row-re
+  ;; Matches lines like `| R1 — Explicit belief state | **✓ as of v0.2** | — ... |`
+  #"^\|\s*(R\d+)\s+—\s+([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|")
+
+(defn scan-r-criteria
+  "Parse the contract's Summary table; return per-R status rows. v1."
+  []
+  (try
+    (when (.exists (java.io.File. contract-path))
+      (let [lines (str/split-lines (slurp contract-path))
+            rows (->> lines
+                      (keep (fn [line]
+                              (when-let [m (re-find r-row-re line)]
+                                {:id (nth m 1)
+                                 :name (str/trim (nth m 2))
+                                 :status (str/trim (nth m 3))
+                                 :blocker (str/trim (nth m 4))})))
+                      vec)]
+        {:available? (boolean (seq rows))
+         :rows rows
+         :total (count rows)
+         :path contract-path}))
+    (catch Exception e
+      {:available? false :error (.getMessage e)})))
+
+;; ---------------------------------------------------------------------------
+;; Scan 12: R12 apparatus state (intrinsic-values atom rehydrated from XTDB)
+;;
+;; Reads `code/v05/wm-hyperparameter-update` hyperedges from futon1a; groups
+;; by class; surfaces the latest Beta(α,β) posterior + intrinsic-value per
+;; WM action-class. This is the live state of the R12 narrow take-up
+;; apparatus shipped 2026-05-21 (M-war-machine-frontend-upgrade1 §6.20).
+;; Resilient: returns {:available? false ...} when XTDB is unreachable.
+;; ---------------------------------------------------------------------------
+
+(def ^:private wm-hp-update-type "code/v05/wm-hyperparameter-update")
+(def ^:private futon1a-base
+  (or (System/getenv "FUTON1A_BASE_URL") "http://localhost:7071/api/alpha"))
+
+(defn scan-r12-apparatus
+  "Query XTDB for wm-hyperparameter-update hyperedges; return per-class
+   latest Beta posterior + intrinsic-value + emission/follow-through counts.
+   v1."
+  []
+  (try
+    (let [url (str futon1a-base "/hyperedges?type=" wm-hp-update-type "&limit=200")
+          resp (http/get url {:headers {"Accept" "application/json"}
+                              :timeout 5000 :throw false})]
+      (if (= 200 (:status resp))
+        (let [body (json/parse-string (:body resp) true)
+              hxs (or (:hyperedges body) [])
+              ;; Group by class; pick latest by :as-of per class
+              by-class (group-by #(get-in % [:hx/props :class]) hxs)
+              per-class (into {}
+                              (for [[c class-hxs] by-class
+                                    :when c
+                                    :let [latest (last (sort-by #(get-in % [:hx/props :as-of])
+                                                                class-hxs))
+                                          p (:hx/props latest)]]
+                                [c {:alpha (:alpha-post p)
+                                    :beta (:beta-post p)
+                                    :intrinsic-value (:intrinsic-value-post p)
+                                    :n-emissions (:n-emissions-in-window p)
+                                    :n-followthrough (:n-followthrough-in-window p)
+                                    :n-followthrough-observed (:n-followthrough-observed p)
+                                    :substrate-status (:substrate-status p)
+                                    :window-days (:window-days p)
+                                    :as-of (:as-of p)
+                                    :outer-loop-run-id (:outer-loop-run-id p)}]))]
+          {:available? true
+           :per-class per-class
+           :total-records (count hxs)
+           :class-count (count per-class)})
+        {:available? false :error (str "HTTP " (:status resp))}))
+    (catch Exception e
+      {:available? false :error (.getMessage e)})))
+
 (defn generate-war-machine
   "Collect all strategic scans, run judgement layer, and render.
    Returns {:data ... :judgement ... :markdown ...}."
   [days]
   (let [now-zdt (ZonedDateTime/now tz)
         now (.toString (.toLocalDate now-zdt))
+        self-watch (scan-self-watch days)
         loop-health (scan-loop-health days)
         support-attack (scan-support-attack days)
         mission-triage (scan-mission-triage days)
@@ -2807,9 +3274,14 @@
         patterns (scan-patterns)
         frames (scan-frames)
         metabolic-balance (scan-metabolic-balance)
+        commit-hygiene (summarize-working-tree-hygiene metabolic-balance)
         blocks (scan-blocks days)
         window (scan-window days now-zdt)
-        scan-data {:loop-health loop-health
+        annotation-graph (scan-annotation-graph)
+        r-criteria (scan-r-criteria)
+        r12-apparatus (scan-r12-apparatus)
+        scan-data {:self-watch self-watch
+                   :loop-health loop-health
                    :support-attack support-attack
                    :mission-triage mission-triage
                    :graph graph
@@ -2819,19 +3291,27 @@
                    :patterns patterns
                    :frames frames
                    :metabolic-balance metabolic-balance
+                   :commit-hygiene commit-hygiene
                    :blocks blocks
-                   :window window}
+                   :window window
+                   :annotation-graph annotation-graph
+                   :r-criteria r-criteria
+                   :r12-apparatus r12-apparatus}
         ;; Run the judgement layer
         judgement (judge scan-data)]
     {:data scan-data
      :judgement judgement
-     :markdown (render-war-machine {:loop-health loop-health
+     :markdown (render-war-machine {:self-watch self-watch
+                                    :loop-health loop-health
                                     :support-attack support-attack
                                     :mission-triage mission-triage
                                     :graph graph
                                     :portfolio portfolio
                                     :metabolic-balance metabolic-balance
+                                    :commit-hygiene commit-hygiene
                                     :blocks blocks
+                                    :r-criteria r-criteria
+                                    :r12-apparatus r12-apparatus
                                     :judgement judgement
                                     :now now :days days})}))
 
