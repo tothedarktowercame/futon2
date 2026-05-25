@@ -1,0 +1,11 @@
+import { chromium } from 'playwright';
+const browser = await chromium.launch({ headless: true });
+const ctx = await browser.newContext({ viewport: { width: 1400, height: 900 } });
+const page = await ctx.newPage();
+await page.goto('http://localhost:8710/index.html', { waitUntil: 'domcontentloaded' });
+await page.locator('[data-testid="hud"]').waitFor({ state: 'visible', timeout: 60000 });
+await page.waitForTimeout(5000);
+await page.screenshot({ path: '/tmp/wm-status-cumulative.png', fullPage: true });
+const allAnchored = await page.locator('[style*="dotted"]').count();
+console.log('anchored spans visible:', allAnchored);
+await browser.close();
