@@ -1,0 +1,13 @@
+import { chromium } from 'playwright';
+const browser = await chromium.launch({ headless: true });
+const ctx = await browser.newContext({ viewport: { width: 1400, height: 900 } });
+const page = await ctx.newPage();
+await page.goto('http://localhost:8710/index.html', { waitUntil: 'domcontentloaded' });
+await page.locator('[data-testid="hud"]').waitFor({ state: 'visible', timeout: 60000 });
+await page.waitForTimeout(5000);
+const hudText = (await page.locator('[data-testid="hud"]').textContent()).trim();
+console.log('HUD text:', hudText);
+const m = hudText.match(/Replay cursor [\d:]+|Replay tick #/);
+console.log('Matched:', m ? m[0] : '(no match)');
+await page.screenshot({ path: '/tmp/wm-u3-verify.png', fullPage: true });
+await browser.close();
