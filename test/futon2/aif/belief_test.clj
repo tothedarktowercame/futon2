@@ -325,16 +325,20 @@
           (str "foreclosed belief → dormant; got " (:mean p))))))
 
 (deftest channels-with-likelihood-test
-  (testing "v0.11 covers 4 channels"
-    (is (= 4 (count belief/channels-with-likelihood)))
-    (is (= #{:annotation-health :sorry-count-norm :mission-health :active-repo-ratio}
+  (testing "E-support-coverage Cycle 3 (2026-05-26) brings coverage to 6 channels"
+    (is (= 6 (count belief/channels-with-likelihood)))
+    (is (= #{:annotation-health :sorry-count-norm :mission-health :active-repo-ratio
+             :support-coverage :attack-coverage}
            belief/channels-with-likelihood))))
 
 (deftest predict-observation-composite-test
-  (testing "predict-observation returns predictions for every channel-with-likelihood"
+  (testing "Single-arg predict-observation returns the 4 entity-tag-independent channels"
     (let [b (belief/initial-belief-state [:e1 :e2 :e3])
           predictions (belief/predict-observation b)]
-      (is (= belief/channels-with-likelihood (set (keys predictions))))
+      ;; Single-arg form is back-compat: only the 4 channels that don't
+      ;; need entity-tags.  Two-arg form (with tags) covers all 6.
+      (is (= #{:annotation-health :sorry-count-norm :mission-health :active-repo-ratio}
+             (set (keys predictions))))
       (is (every? (fn [p] (and (contains? p :mean) (contains? p :variance)))
                   (vals predictions)))
       (is (every? (fn [p] (and (number? (:mean p)) (number? (:variance p))))
@@ -394,3 +398,80 @@
       (is (= #{:supports-S1 :supports-S2 :supports-S3 :supports-S4 :supports-S5
                :attacks-A1 :attacks-A2 :attacks-A3 :attacks-A4}
              (->> tags vals (mapcat seq) set))))))
+
+;; =============================================================================
+;; E-support-coverage Cycle 3: predict-support-coverage + predict-attack-coverage
+;; =============================================================================
+
+(deftest predict-support-coverage-empty-cohort-test
+  (testing "Belief with no supports-tagged entities → maximally uncertain {0.0 1.0}"
+    (let [b {"e1" (belief/uniform-prior) "e2" (belief/uniform-prior)}
+          tags {}]
+      (is (= {:mean 0.0 :variance 1.0}
+             (belief/predict-support-coverage b tags))))))
+
+(deftest predict-support-coverage-uniform-cohort-test
+  (testing "Uniform belief over the supports cohort → mean = 2/7 (healthy = strengthened + addressed)"
+    (let [b {"e-S1" (belief/uniform-prior)
+             "e-S2" (belief/uniform-prior)
+             "untagged" (belief/uniform-prior)}
+          tags {"e-S1" #{:supports-S1}
+                "e-S2" #{:supports-S2}}
+          p (belief/predict-support-coverage b tags)]
+      ;; healthy-mass under uniform 7-status prior = 2/7 per entity, averaged = 2/7
+      (is (< (Math/abs (- (/ 2.0 7.0) (:mean p))) 1e-6)
+          (str "expected ~2/7 got " (:mean p))))))
+
+(deftest predict-support-coverage-peaked-strengthened-test
+  (testing "Peaked-strengthened cohort → mean approaches 1.0"
+    (let [peaked (reduce belief/update-entity-belief
+                         (belief/uniform-prior)
+                         (repeat 30 {:type :strengthened :weight 5.0}))
+          b {"e-S1" peaked "e-S2" peaked "untagged-noise" (belief/uniform-prior)}
+          tags {"e-S1" #{:supports-S1} "e-S2" #{:supports-S2}}
+          p (belief/predict-support-coverage b tags)]
+      (is (> (:mean p) 0.9)
+          (str "peaked-strengthened → near 1.0; got " (:mean p))))))
+
+(deftest predict-support-coverage-excludes-untagged-test
+  (testing "Untagged entities do not pollute the supports cohort"
+    (let [unhealthy (reduce belief/update-entity-belief
+                            (belief/uniform-prior)
+                            (repeat 30 {:type :foreclosed :weight 5.0}))
+          peaked (reduce belief/update-entity-belief
+                         (belief/uniform-prior)
+                         (repeat 30 {:type :strengthened :weight 5.0}))
+          b {"e-S1" peaked
+             "noise" unhealthy}
+          tags {"e-S1" #{:supports-S1}}
+          p (belief/predict-support-coverage b tags)]
+      ;; If 'noise' leaked into cohort, mean would be ~0.5; if excluded, ~1.0
+      (is (> (:mean p) 0.9)
+          (str "untagged unhealthy entity should not affect cohort; got " (:mean p))))))
+
+(deftest predict-attack-coverage-mirrors-support-test
+  (testing "predict-attack-coverage uses the attacks-tagged cohort symmetrically"
+    (let [peaked (reduce belief/update-entity-belief
+                         (belief/uniform-prior)
+                         (repeat 30 {:type :strengthened :weight 5.0}))
+          b {"e-A1" peaked "e-A2" peaked "untagged" (belief/uniform-prior)}
+          tags {"e-A1" #{:attacks-A1} "e-A2" #{:attacks-A2}}
+          p (belief/predict-attack-coverage b tags)]
+      (is (> (:mean p) 0.9)))))
+
+(deftest channels-with-likelihood-now-six-test
+  (testing "E-support-coverage Cycle 3 promotes channels-with-likelihood to 6"
+    (is (= 6 (count belief/channels-with-likelihood)))
+    (is (contains? belief/channels-with-likelihood :support-coverage))
+    (is (contains? belief/channels-with-likelihood :attack-coverage))))
+
+(deftest predict-observation-two-arity-test
+  (testing "Two-arg predict-observation adds :support-coverage + :attack-coverage"
+    (let [b (belief/initial-belief-state ["e1" "e2"])
+          tags {"e1" #{:supports-S1} "e2" #{:attacks-A1}}
+          one (belief/predict-observation b)
+          two (belief/predict-observation b tags)]
+      (is (= 4 (count one)) "single-arg form unchanged")
+      (is (= 6 (count two)) "two-arg form has 6 channels")
+      (is (contains? two :support-coverage))
+      (is (contains? two :attack-coverage)))))

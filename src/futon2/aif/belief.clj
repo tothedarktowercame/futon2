@@ -376,20 +376,89 @@
       {:mean (/ (reduce + (map (comp entity-nondormant-mass second) belief)) (double n))
        :variance (mean-entropy-variance belief)})))
 
+;; ---------------------------------------------------------------------------
+;; E-support-coverage Cycle 3 (cg-a5d2e756, 2026-05-26):
+;; Belief-filtered support/attack coverage likelihoods.  Filter belief by the
+;; bootstrap-derived entity-tags map (Cycle 2) to compute mean healthy-mass
+;; over the S1-S5 / A1-A4 tagged cohorts.
+;; ---------------------------------------------------------------------------
+
+(defn- entities-with-tag-prefix
+  "Return the subset of belief entities whose entity-tags include any tag
+   starting with PREFIX (e.g. 'supports-' or 'attacks-')."
+  [belief entity-tags prefix]
+  (filter (fn [[eid _]]
+            (some #(and (keyword? %)
+                        (clojure.string/starts-with? (name %) prefix))
+                  (get entity-tags eid #{})))
+          belief))
+
+(defn predict-support-coverage
+  "Predict observation distribution for the `:support-coverage` channel.
+
+   From belief filtered by entity-tags: mean healthy-mass over entities
+   tagged with any `:supports-S<N>` tag.  Variance: mean posterior entropy
+   over the same cohort, normalised against log(|status-set|).
+
+   Empty cohort (no supports-tagged entities in belief) → `{:mean 0.0
+   :variance 1.0}` mirroring the empty-belief branch of the existing
+   4 predictors — maximally uncertain when no data.
+
+   E-support-coverage Cycle 3."
+  [belief entity-tags]
+  (let [cohort (entities-with-tag-prefix belief entity-tags "supports-")]
+    (if (empty? cohort)
+      {:mean 0.0 :variance 1.0}
+      (let [n (count cohort)]
+        {:mean (/ (reduce + (map (comp entity-healthy-mass second) cohort)) (double n))
+         :variance (mean-entropy-variance cohort)}))))
+
+(defn predict-attack-coverage
+  "Predict observation distribution for the `:attack-coverage` channel.
+
+   Same shape as `predict-support-coverage` over the cohort tagged
+   `:attacks-A<N>`.  Mean healthy-mass measures how confidently the
+   attacking-evidence entities have been settled (closed-with-strength).
+
+   E-support-coverage Cycle 3."
+  [belief entity-tags]
+  (let [cohort (entities-with-tag-prefix belief entity-tags "attacks-")]
+    (if (empty? cohort)
+      {:mean 0.0 :variance 1.0}
+      (let [n (count cohort)]
+        {:mean (/ (reduce + (map (comp entity-healthy-mass second) cohort)) (double n))
+         :variance (mean-entropy-variance cohort)}))))
+
 (def channels-with-likelihood
   "Set of observation channels for which an R3a likelihood model exists.
-   v0.11: 4 of 14 channels covered. Remaining 10 are logged as
-   `:prototyping-forward` sorrys in `futon2/data/sorrys.edn`."
-  #{:annotation-health :sorry-count-norm :mission-health :active-repo-ratio})
+   v0.11: 4 channels (annotation-health, sorry-count-norm, mission-health,
+   active-repo-ratio).
+   E-support-coverage Cycle 3 (2026-05-26): +2 channels (support-coverage,
+   attack-coverage), bringing total to 6 of 14.  Remaining 4 sorries in
+   `futon2/data/sorrys.edn` stay `:prototyping-forward` pending their own
+   prerequisites (edge-entities, tick-entity-typing); the 6 reclassified
+   on cg-18b7831b were `:n-a-by-design`."
+  #{:annotation-health :sorry-count-norm :mission-health :active-repo-ratio
+    :support-coverage :attack-coverage})
 
 (defn predict-observation
   "Predict observation distributions across all channels for which a
    likelihood model exists. Returns a map of channel-id → `{:mean :variance}`.
+
+   Single-arg form: returns predictions for the 4 entity-tag-independent
+   channels (back-compatible with pre-E-support-coverage callers).
+
+   Two-arg form: adds `:support-coverage` and `:attack-coverage` (which
+   need `entity-tags` per Cycle 2's bootstrap-derived classification).
+
    Channels in `channels-with-likelihood` are included; others are absent
-   (callers using this must handle absence — typically by falling back to
-   preference-gap-driven scoring for those channels)."
-  [belief]
-  {:annotation-health (predict-annotation-health belief)
-   :sorry-count-norm (predict-sorry-count-norm belief)
-   :mission-health (predict-mission-health belief)
-   :active-repo-ratio (predict-active-repo-ratio belief)})
+   (callers handle absence by falling back to preference-gap-driven scoring)."
+  ([belief]
+   {:annotation-health (predict-annotation-health belief)
+    :sorry-count-norm (predict-sorry-count-norm belief)
+    :mission-health (predict-mission-health belief)
+    :active-repo-ratio (predict-active-repo-ratio belief)})
+  ([belief entity-tags]
+   (assoc (predict-observation belief)
+          :support-coverage (predict-support-coverage belief entity-tags)
+          :attack-coverage  (predict-attack-coverage belief entity-tags))))
