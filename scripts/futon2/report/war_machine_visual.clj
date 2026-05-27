@@ -25,7 +25,8 @@
 
    Invariant: WM-I1 (read-only observer — display only).
    Pattern:   war-machine/spatial-over-tabular"
-  (:require [futon2.report.war-machine :as wm]
+  (:require [futon2.aif.observation :as obs]
+            [futon2.report.war-machine :as wm]
             [clojure.string :as str])
   (:import [javax.swing JFrame JPanel JLabel SwingUtilities JButton JToolBar
                         JTextArea JScrollPane BorderFactory JCheckBox Timer]
@@ -1133,7 +1134,7 @@
                           (swap! y + 8)))
 
                       ;; Observation vector summary
-                      (when-let [obs (wm/observe data)]
+                      (when-let [obs (obs/observe data)]
                         (.setFont g2 (Font. "SansSerif" Font/BOLD 11))
                         (.setColor g2 (Color. 50 50 50))
                         (.drawString g2 "Observation Vector" pad @y)

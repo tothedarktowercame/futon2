@@ -59,6 +59,11 @@
       (str "http://localhost:" (or (System/getenv "FUTON3C_PORT") "7070"))))
 (def ^:private tz (ZoneId/of "Europe/London"))
 (def ^:private futon5a-root (str home "/code/futon5a"))
+(def ^:private futon1a-url
+  (or (System/getenv "FUTON1A_URL") "http://localhost:7071"))
+(def ^:private futon1a-penholder
+  (or (System/getenv "FUTON1A_PENHOLDER") "api"))
+(def ^:private g-total-tie-epsilon 1.0e-6)
 
 (def ^:private all-repos
   "All repos in the stack, classified by workstream.
@@ -116,6 +121,162 @@
     (when (.exists (java.io.File. path))
       (read-string (slurp path)))
     (catch Exception _ nil)))
+
+(defn- substrate-get-json [url]
+  (try
+    (let [resp (http/get url {:headers {"Accept" "application/json"
+                                        "X-Penholder" futon1a-penholder}
+                              :timeout 5000
+                              :throw false})]
+      (when (= 200 (:status resp))
+        (json/parse-string (:body resp) true)))
+    (catch Exception _ nil)))
+
+(defn- url-encode [s]
+  (java.net.URLEncoder/encode (str s) "UTF-8"))
+
+(defn- fetch-hyperedges-by-type
+  [hx-type]
+  (vec
+   (or (:hyperedges
+        (substrate-get-json
+         (str futon1a-url "/api/alpha/hyperedges?type="
+              (url-encode hx-type)
+              "&limit=500")))
+       [])))
+
+(defn- real-endpoints
+  [hx]
+  (vec (remove #(and (string? %) (str/starts-with? % "dir:"))
+               (:hx/endpoints hx))))
+
+(defn- hx-prop
+  [hx k]
+  (or (get-in hx [:hx/props k])
+      (get-in hx [:hx/props (keyword k)])
+      (get-in hx [:hx/props (str k)])))
+
+(defn- normalize-mission-id
+  [mission-name]
+  (str/replace-first (str mission-name) #"^M-" ""))
+
+(defn- action-target-key
+  [target]
+  (cond
+    (keyword? target) (if-let [ns-part (namespace target)]
+                        (str ns-part "/" (name target))
+                        (name target))
+    (string? target) target
+    :else (some-> target str)))
+
+(defn- sorry-doc-index
+  []
+  (reduce (fn [idx hx]
+            (let [endpoint (first (real-endpoints hx))
+                  local-id (when endpoint
+                             (second (re-find #"/sorry/(.+)$" endpoint)))
+                  action-target (when local-id
+                                  (str "sorry/" local-id))]
+              (cond-> idx
+                endpoint (assoc endpoint hx)
+                action-target (assoc action-target hx))))
+          {}
+          (fetch-hyperedges-by-type "code/v05/sorry")))
+
+(defn- mission-doc-index
+  []
+  (reduce (fn [idx hx]
+            (let [endpoint (first (real-endpoints hx))
+                  mission-id (some-> (hx-prop hx :mission/id)
+                                     normalize-mission-id)]
+              (if (and endpoint mission-id (not (str/blank? mission-id)))
+                (assoc idx mission-id endpoint)
+                idx)))
+          {}
+          (fetch-hyperedges-by-type "code/v05/mission-doc")))
+
+(defn- compute-delta-t-mission
+  [mission-endpoint]
+  (if-let [f (requiring-resolve 'futon3c.aif.mission-delta-t/delta-t-mission)]
+    (f mission-endpoint)
+    {:delta-T 0.0}))
+
+(defn- related-mission-endpoints
+  [sorry-doc mission-idx]
+  (->> (or (hx-prop sorry-doc :sorry/related-missions) [])
+       (keep (fn [mission-name]
+               (get mission-idx (normalize-mission-id mission-name))))
+       distinct
+       vec))
+
+(defn- address-sorry-entry?
+  [entry]
+  (= :address-sorry (get-in entry [:action :type])))
+
+(defn- tied-g-total?
+  [left right]
+  (<= (Math/abs (- (double (or (:G-total left) 0.0))
+                   (double (or (:G-total right) 0.0))))
+      g-total-tie-epsilon))
+
+(defn- partition-tied-groups
+  [ranked-actions]
+  (reduce (fn [groups entry]
+            (if-let [current (peek groups)]
+              (if (tied-g-total? (peek current) entry)
+                (conj (pop groups) (conj current entry))
+                (conj groups [entry]))
+              [[entry]]))
+          []
+          ranked-actions))
+
+(defn- anamnesis-concentration-for-entry
+  [entry {:keys [sorry-idx mission-idx delta-cache]}]
+  (let [target (action-target-key (get-in entry [:action :target]))
+        sorry-doc (get sorry-idx target)
+        mission-endpoints (when sorry-doc
+                            (related-mission-endpoints sorry-doc mission-idx))]
+    (double
+             (reduce (fn [acc mission-endpoint]
+               (let [delta-result (or (get @delta-cache mission-endpoint)
+                                      (let [result (compute-delta-t-mission
+                                                    mission-endpoint)]
+                                        (swap! delta-cache assoc mission-endpoint result)
+                                        result))]
+                 (+ acc (- 1.0 (double (:mission-T delta-result 0.5))))))
+             0.0
+             mission-endpoints))))
+
+(defn- apply-anamnesis-tiebreak
+  [ranked-actions]
+  (if (< (count ranked-actions) 2)
+    ranked-actions
+    (let [groups (partition-tied-groups ranked-actions)
+          needs-tiebreak? (some #(and (> (count %) 1)
+                                      (every? address-sorry-entry? %))
+                                groups)]
+      (if-not needs-tiebreak?
+        ranked-actions
+        (let [ctx {:sorry-idx (sorry-doc-index)
+                   :mission-idx (mission-doc-index)
+                   :delta-cache (atom {})}]
+          (->> groups
+               (mapcat (fn [group]
+                         (if (and (> (count group) 1)
+                                  (every? address-sorry-entry? group))
+                           (->> group
+                                (map-indexed
+                                 (fn [i entry]
+                                   {:entry entry
+                                    :original-index i
+                                    :anamnesis-concentration
+                                    (anamnesis-concentration-for-entry entry ctx)}))
+                                (sort-by (juxt (comp - :anamnesis-concentration)
+                                               :original-index))
+                                (mapv :entry))
+                           group)))
+               (map-indexed (fn [i entry] (assoc entry :rank (inc i))))
+               vec))))))
 
 (defn- since-str
   "Date string for N days ago."
@@ -1336,15 +1497,25 @@
     (last (str/split abs-path #"/"))))
 
 (defn- pressure->tier
-  "Map a pressure value to a tier keyword. Matches the working-tree
-   thresholds used by futon3c.logic.metabolic-balance so the harmonic
-   structure (per drain-channel-shape) is preserved across channels."
+  "Map a pressure value to a tier keyword. RECONCILED 2026-05-27 per
+   E-wm-staleness-meta-stop §3 to match the producer
+   (futon0/scripts/mana-snapshot.bb lines 81-86) and the JVM canonical
+   (futon3c.logic.metabolic-balance/pressure->tier line 70). Before this
+   fix the consumer's thresholds (silent<1, adv≥1, high≥3, stop≥10) silently
+   diverged from those two (silent<1, adv<2, high<4, stop≥4) — the
+   docstring claimed they matched but lied. Behavior change is nominal at
+   the call site because the consumer inherits the producer's
+   pre-computed :tier label (see scan-metabolic-balance ~line 1545); this
+   function is the fallback when :max-tier is absent from the snapshot
+   AND it determines the tier any time the consumer computes tier from
+   pressure directly. Canonical rationale: producer wins because it's
+   the de-facto rendered behavior and the JVM check-fn already agrees."
   [p]
   (cond
-    (>= p 10.0) :stop-the-line
-    (>= p 3.0)  :high
-    (>= p 1.0)  :advisory
-    :else       :silent))
+    (>= p 4.0) :stop-the-line
+    (>= p 2.0) :high
+    (>= p 1.0) :advisory
+    :else      :silent))
 
 (defn- tier-rank [tier]
   (case (some-> tier name)
@@ -2908,10 +3079,28 @@
         ;; tier :stop-the-line, set mode to :stop-the-line regardless
         ;; of base-mode.  See :μ/override-modes in
         ;; war-machine-strategic-vocabulary.edn.  Andon-cord semantics.
+        ;;
+        ;; INV: staleness gate (added 2026-05-27 per E-wm-staleness-meta-stop §1).
+        ;; When the metabolic snapshot is stale (file mtime > 60min per
+        ;; futon2.report.war-machine/scan-metabolic-balance's :stale? flag),
+        ;; do NOT honor :max-tier as :stop-the-line — fall through to
+        ;; base-mode and record the suppression in :override-suppressed-reason
+        ;; so the UI can render a "stale" indicator instead of red banner.
+        ;; The :stale? flag is computed (age-min > 60.0) but was previously
+        ;; logged-but-not-propagated (CLAUDE.md §9 silent-swallow anti-pattern).
         metabolic-max-tier (get-in scan-data [:metabolic-balance :max-tier])
-        mode (if (= :stop-the-line metabolic-max-tier)
+        metabolic-stale?   (get-in scan-data [:metabolic-balance :stale?])
+        mode (cond
+               (and metabolic-stale?
+                    (= :stop-the-line metabolic-max-tier))
+               base-mode
+               (= :stop-the-line metabolic-max-tier)
                :stop-the-line
+               :else
                base-mode)
+        override-suppressed-reason (when (and metabolic-stale?
+                                              (= :stop-the-line metabolic-max-tier))
+                                     :stale-data)
         ;; AIF action selection (v0.5+):
         ;; uniform-prior belief over empty entity set today; R8 trace
         ;; persistence will carry belief across calls.
@@ -3034,9 +3223,10 @@
         wm-horizon-steps (when (and (:events-loaded? anticipation-snapshot)
                                     (seq (:events anticipation-snapshot)))
                            3)
-        wm-ranked (efe/rank-actions wm-state wm-candidates
-                                    {:time-pressure wm-time-pressure
-                                     :horizon-steps wm-horizon-steps})
+        wm-ranked (-> (efe/rank-actions wm-state wm-candidates
+                                        {:time-pressure wm-time-pressure
+                                         :horizon-steps wm-horizon-steps})
+                      apply-anamnesis-tiebreak)
         ;; v0.13 R6 enhancement: pre-filter by can-execute? admissibility
         ;; (composes with can-propose? at proposer-side); then run
         ;; deliberative select-action with default-mode-select as a
@@ -3101,6 +3291,15 @@
                           (:avoided-active free-energy))))
         result {:mode mode
                 :mode-prior (get pref/mode-prior mode 0.0)
+                ;; INV (2026-05-27 staleness-gate): when the metabolic
+                ;; snapshot was stale, the :stop-the-line override is
+                ;; suppressed and :mode falls to base-mode. Record the
+                ;; reason so downstream UI can render "stale" indicator
+                ;; instead of red banner. Per CLAUDE.md §9 (no silent
+                ;; swallow): if we ignore the stale snapshot's override,
+                ;; we MUST surface why.
+                :override-suppressed-reason override-suppressed-reason
+                :metabolic-stale? (boolean metabolic-stale?)
                 :free-energy free-energy
                 :priorities all-priorities
                 :priority-count (count all-priorities)
