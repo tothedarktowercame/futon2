@@ -23,3 +23,11 @@ resources/
 
 # local file that shouldn't be tracked here
 LICENSE
+
+# Added 2026-05-26 by street-sweeper Phase B (allostatic-relief for INV-13 rejects)
+data/
+logs/
+*~arxana~
+
+# Added 2026-05-26 by street-sweeper Phase C (INV-10 relocations)
+web/war-machine/resources/public/index.html
