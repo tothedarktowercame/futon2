@@ -20,14 +20,32 @@
      [:button {:on-click #(api/load!)
                :data-testid "refresh"}
       "Refresh"]
+     ;; 0017 + 0018 (Joe directive 2026-05-24): sorrys + invariants
+     ;; views are deprecated as WM UI surfaces — operator vote was to
+     ;; deprecate them in favour of the richer VSATARCS globe pages
+     ;; (sorrys) and leaf-invariants.md + claude-4's R-criteria apparatus
+     ;; (invariants). Removed from the view-toggle cycle below; renderers
+     ;; in `hex.cljs` + `graph.cljs` stay for defensive completeness in
+     ;; case some other path sets `:view-mode` to those keywords. New
+     ;; cycle order: stack → self-watch → aif-stack → missions → patterns
+     ;; → stack (5 modes; was 7). Fallback case in `case` defaults to
+     ;; :stack so a stale :sorrys / :invariants value cycles forward
+     ;; cleanly. See M-war-machine-frontend-upgrade1 §6.17.
      [:button.toggle {:on-click (fn []
                                   (let [nxt (case vmode
-                                              :stack :aif-stack
+                                              :stack :self-watch
+                                              :self-watch :aif-stack
                                               :aif-stack :missions
-                                              :missions :sorrys
-                                              :sorrys :invariants
-                                              :invariants :patterns
-                                              :patterns :stack)]
+                                              :missions :patterns
+                                              :patterns :stack
+                                              ;; Stale-state fallback —
+                                              ;; if :view-mode is somehow
+                                              ;; :sorrys or :invariants
+                                              ;; (e.g. via a saved
+                                              ;; setting from before
+                                              ;; deprecation), cycle
+                                              ;; forward to :stack.
+                                              :stack)]
                                     (reset! s/view-mode nxt)))
                       :data-testid "view-toggle"}
       (str "View: " (name vmode))]
@@ -113,11 +131,29 @@
 
        :patterns
        [:div
-        (section "All cells")
-        (swatch "#22c55e" "pattern collection")
+        (section "Hue (pattern × activation balance)")
+        (swatch "hsl(240, 80%, 50%)" "blue — pattern-heavy, low activation")
+        (swatch "hsl(120, 80%, 50%)" "green — balanced (mixes)")
+        (swatch "hsl(60, 80%, 50%)"  "yellow — activation-heavy, few patterns")
+        (section "Saturation / fade")
+        [:div {:style {:font-size "11px" :color "#64748b"}}
+         "= pattern count (more patterns → more vivid)"]
         (section "Numeric badge")
+        [:div {:style {:font-size "11px" :color "#64748b"}}
+         "= activations / pattern-count (last 14d)"]
+        (section "Layout")
+        [:div {:style {:font-size "11px" :color "#64748b"}}
+         "Left→right, top→bottom: balance ascending (blue pole → green/yellow pole)"]]
+
+       :self-watch
+       [:div
+        (section "Severity")
+        (swatch "#b91c1c" "critical / stop-the-line")
+        (swatch "#d97706" "warning / high pressure")
+        (swatch "#2563eb" "recovery / informational")
+        (section "Intent")
         [:div {:style {:font-size "11px" :color (:text-dim "#64748b")}}
-         "= pattern count under each hex"]]
+         "Translate boot/watchdog/metabolic signals into concrete maintenance work."]]
 
        :stack
        [:div
@@ -359,13 +395,130 @@
         (when (number? fe)
           [:span.aif-mode-field " · G=" (.toFixed fe 3)])]])))
 
-(defn- next-move-tile []
-  "Reads :reading :next-move from the live AIF+ payload and renders it as
-   a prominent recommendation card.  Clicking 'Show in graph' selects the
-   conflict node it dis-bites so the detail panel populates."
-  (let [aif @s/aif-data
-        nm  (get-in aif [:reading :next-move])]
-    (when nm
+(defn- live-next-move-tile
+  "Render the live recommendation (E-wm-live-recommendation) — top of
+   judgement.ranked-actions, projected by the stack-generator into a
+   next-move-shape.  Reads :reading :next-move-live from the AIF+ payload."
+  [live]
+  (let [rationale       (:rationale live)
+        specifically    (:specifically live)
+        g-total         (:G-total live)
+        age-s           (:age-seconds live)
+        stale?          (:stale? live)
+        mode            (:mode live)
+        period-s        (or (:scheduler-period-seconds live) 300)
+        age-label       (when (number? age-s)
+                          (str (long (/ age-s 60)) "m ago"))
+        fresh-class     (if stale? "wm-live-badge-aging" "wm-live-badge-live")
+        alts            (:alternatives-considered live)
+        priorities      (:priorities live)]
+    [:div.next-move-card.next-move-card-live {:data-testid "next-move-live"}
+     [:h3 "Recommended Next Move "
+      [:span.wm-live-badge {:class fresh-class
+                            :style {:font-size "0.7em"
+                                    :padding "2px 6px"
+                                    :border-radius "10px"
+                                    :margin-left "8px"
+                                    :background (if stale? "#fbbf24" "#10b981")
+                                    :color "white"}}
+       (if stale? "AGING" "LIVE")
+       (when age-label (str " · " age-label))]]
+     [:div.next-move-source
+      {:style {:font-size "0.8em" :color "#6b7280" :margin-bottom "4px"}}
+      "Source: judgement.ranked-actions (recomputed every " period-s "s; "
+      "see E-wm-live-recommendation.md)"]
+     ;; E-wm-live-recommendation v1.1: tied-bucket display.
+     ;; Surface multiple tied actions when WM EFE has near-equal G-totals
+     ;; (e.g. 5 sibling sorries) instead of falsely promoting rank-1 as
+     ;; if it were a real preference.
+     (let [tied-actions (:tied-actions live)
+           tied-count   (or (:tied-count live) 1)]
+       (cond
+         (> tied-count 1)
+         [:div.next-move-tied-bucket
+          {:data-testid "next-move-live-tied-bucket"
+           :style {:padding "6px 0"}}
+          [:div.next-move-tied-header
+           {:style {:margin-bottom "4px"}}
+           "→ " [:strong tied-count " tied options"]
+           (when (number? g-total)
+             [:span {:style {:font-size "0.85em" :color "#6b7280" :margin-left "8px"}}
+              "G=" (.toFixed g-total 3) " (each)"])
+           [:span {:style {:font-size "0.75em" :color "#9ca3af" :margin-left "8px"
+                           :font-style "italic"}}
+            "WM has no clear preference among these — pick any"]]
+          [:ul.next-move-tied-list
+           {:style {:padding-left "20px" :margin "4px 0"}}
+           (for [entry tied-actions]
+             ^{:key (str (:rank entry))}
+             [:li {:style {:padding "2px 0"}
+                   :data-testid (str "next-move-tied-entry-" (:rank entry))}
+              (:specifically entry)])]]
+
+         :else
+         [:div.next-move-target {:data-testid "next-move-live-target"}
+          "→ " specifically
+          (when (number? g-total)
+            [:span {:style {:font-size "0.85em" :color "#6b7280" :margin-left "8px"}}
+             "G=" (.toFixed g-total 3)])]))
+     (when mode
+       [:div.next-move-mode
+        {:style {:font-size "0.85em" :color "#6b7280"}}
+        "WM mode: " (if (keyword? mode) (name mode) (str mode))])
+     (when rationale
+       [:div.next-move-rationale-inline
+        {:style {:margin-top "8px" :font-style "italic"}}
+        rationale])
+     (when (seq alts)
+       [:details.next-move-alts
+        [:summary (str "Alternatives considered (" (count alts) ")")]
+        [:ul
+         (for [[k v] alts]
+           ^{:key (str k)}
+           [:li
+            [:strong (if (keyword? k) (name k) (str k))]
+            ": " v])]])
+     (when (seq priorities)
+       [:details.next-move-priorities
+        [:summary (str "Priorities driving this rank (" (count priorities) ")")]
+        [:ul
+         (for [p priorities]
+           ^{:key (str (:id p) "-" (:rank p))}
+           [:li (or (:summary p) (pr-str p))])]])]))
+
+(defn- cached-prose-warning-banner
+  "Render an amber stripe when the stack-generator has attached a
+   :freshness-warning to the cached :reading :next-move
+   (E-wm-live-recommendation)."
+  [warning]
+  (when warning
+    (let [age-d (:age-days warning)
+          mtime (:mtime warning)]
+      [:div.next-move-freshness-warning
+       {:style {:background "#fef3c7"
+                :border "1px solid #f59e0b"
+                :color "#78350f"
+                :padding "8px 12px"
+                :margin-bottom "8px"
+                :border-radius "4px"
+                :font-size "0.85em"}}
+       [:strong "⚠ Cached prior · "]
+       (when (number? age-d) (str age-d " days old"))
+       (when mtime (str " (mtime " mtime ")"))
+       [:br]
+       "This is a static prior, not a live recommendation.  See "
+       [:code ":reading :next-move-live"]
+       " for the per-tick WM-judgement-derived recommendation."])))
+
+(defn- cached-next-move-tile
+  "Render the cached :reading :next-move prose (the static THE-STACK.aif.edn
+   prior) — used either standalone (when live surface is absent) or as a
+   collapsed `<details>` under the live tile.
+
+   Clicking 'Show in graph' selects the conflict node it dis-bites so the
+   detail panel populates."
+  [aif nm]
+  (when nm
       (let [close       (or (:close nm) "?")           ; e.g. "S6"
             specifically (:specifically nm)
             agenda       (:agenda nm)
@@ -414,8 +567,41 @@
             display-specifically (or (:specifically current) specifically)]
         [:div.next-move-card {:data-testid "next-move"}
          [:h3 "Recommended Next Move"]
-         [:div.next-move-target
-          (str "→ Close " (labels/stack-spine-display-id display-close))]
+         ;; Anchor 0009 (Recommended Next Move 'Close 🐜N' dead-weight).
+         ;; The card was rich-with-detail but operator-illegible at the
+         ;; surface — 🐜N glyph + 'Close' verb both opaque without the
+         ;; THE-STACK.aif.edn substrate knowledge. v1 discharge wraps
+         ;; the target line in an anchored span with a tooltip that
+         ;; expands the 🐜N + 'Close' semantics, plus a source subhead.
+         ;; The richer detail below the target stays as-is — it was
+         ;; already there, just buried below an inscrutable headline.
+         ;; See M-war-machine-frontend-upgrade1 §6.10.
+         [:div.next-move-source
+          {:style {:font-size "0.8em" :color "#6b7280" :margin-bottom "4px"}}
+          "Source: AIF reading layer (see ~/code/futon5a/holes/stories/THE-STACK.aif.edn for the 🐜N stack-spine taxonomy)"]
+         (let [display-id (labels/stack-spine-display-id display-close)
+               hover-label (labels/stack-spine-hover-label display-close)
+               tooltip (str display-id " = stack spine node " display-close
+                           " — " hover-label
+                           ". 'Close' = resolve the closure agenda for this node "
+                           "(per the AIF reading layer's per-tick recommendation; "
+                           "see :reading :next-move in the live war-machine response). "
+                           "Click for the anchor reference + substrate pointers.")]
+           [:div.next-move-target
+            "→ Close "
+            [:span {:data-testid "next-move-target"
+                    :title tooltip
+                    :on-click (fn [_]
+                                (js/console.log
+                                 (str "[anchor wm-ui-anchor:0009] close=" display-close
+                                      " (" display-id " — " hover-label ")"
+                                      " → opening ~/code/futon5a/holes/stories/THE-STACK.aif.edn"))
+                                (api/open-target-in-emacs!
+                                 {:kind :workspace-file
+                                  :path "futon5a/holes/stories/THE-STACK.aif.edn"}))
+                    :style {:cursor "pointer"
+                            :text-decoration "underline dotted"}}
+             display-id " ⓘ"]])
          (when agenda
            [:div.next-move-phase.next-move-phase-complete
             [:strong "Completed: "]
@@ -521,7 +707,36 @@
                                           ;; conflict's source leaves).
                                           :coalesces-from (:coalesces-from primary)}))))
               :data-testid "next-move-jump"}
-              (str (if shown? "Hide " "Show ") pid " detail")]))]))))
+              (str (if shown? "Hide " "Show ") pid " detail")]))])))
+
+(defn- next-move-tile
+  "Dispatch to the live recommendation tile when :reading :next-move-live is
+   present (E-wm-live-recommendation), or fall back to the cached prose tile
+   with a freshness-warning banner.  When both are present, the live tile is
+   the headline and the cached prior collapses into a <details> for context."
+  []
+  (let [aif     @s/aif-data
+        live    (get-in aif [:reading :next-move-live])
+        nm      (get-in aif [:reading :next-move])
+        warning (:freshness-warning nm)]
+    (cond
+      live
+      [:div
+       (live-next-move-tile live)
+       (when nm
+         [:details {:style {:margin-top "12px" :font-size "0.85em"}}
+          [:summary
+           "Cached prior (was the surface before E-wm-live-recommendation"
+           (when (number? (:age-days warning))
+             (str "; " (:age-days warning) "d old"))
+           ")"]
+          (cached-prose-warning-banner warning)
+          (cached-next-move-tile aif nm)])]
+
+      nm
+      [:div
+       (cached-prose-warning-banner warning)
+       (cached-next-move-tile aif nm)])))
 
 (defn- tick-title [tick-id]
   (case (if (keyword? tick-id) tick-id (keyword (str tick-id)))
@@ -531,9 +746,57 @@
     :cargo-warning "cargo!"
     (str tick-id)))
 
+;; Anchor 0008 (cargo CRITICAL warning aphorism — Batch 1).
+;;
+;; Pre-anchor: the Warnings tile rendered just the aphoristic :fires text
+;; ('Cargo undelivered. The prospectus converts demonstration to invoice.')
+;; with no concrete observed state, no actionable next steps, no link to
+;; the JSDQ market-interface vocabulary the aphorism's terms come from.
+;;
+;; Anchor 0008's discharge calls for: (a) replace aphorism-as-primary
+;; with plain-language statement of the concrete constraint, (b) per-term
+;; cargo/prospectus/invoice click-through to JSDQ market-interface
+;; vocabulary, (c) when warning fires, link click-through to specific
+;; actor actions. v1 below ships (a) + (c); per-term hover (b) is
+;; deferred to v2 because it requires highlighting specific terms within
+;; the aphorism prose.
+;;
+;; See M-war-machine-frontend-upgrade1 §6.9 +
+;; ~/code/futon5a/data/wm-ui-anchors.edn :anchors[0008].
+(def ^:private tick-actions
+  "Per-tick hardcoded actionable hints for the operator. Same hardcode
+   drift surface as the mode-rationale map — sourced from the operator's
+   strategic vocabulary + Joe's known operating patterns; covered by
+   :sorry/wm-ui-hud-mode-rationale-hardcode (the hardcode-vs-dynamic-read
+   resolution-path applies)."
+  {"hermit-warning"   ["Open a consulting-workstream repo and commit something concrete."
+                       "Check the highest-severity open sorry in sorrys.edn."
+                       "Review the cargo: are there undelivered sorries that should ship before more stack work?"]
+   "hobby-warning"    ["Audit recent portfolio commits: which advance JSDQ maturity vs which are hobby drift?"
+                       "Identify the next JSDQ maturity milestone and the smallest commit that advances it."]
+   "foraging-warning" ["Move to depositing mode: pick a near-finished thing and ship it."
+                       "Cap mathematics-workstream time-budget for the next session."]
+   "cargo-warning"    ["Close the highest-priority open sorry (see sorrys.edn :kind :status)."
+                       "Open a consulting-workstream commit (the cargo→depositing constraint)."
+                       "Check the Strategic SORRY Topology story for context."]})
+
+(defn- on-click-tick [tick-id observed]
+  (fn [_evt]
+    (js/console.log
+     (str "[anchor wm-ui-anchor:0008] tick=" tick-id
+          " observed=" (or observed "(none)")
+          " → see ~/code/futon5a/data/war-machine-strategic-vocabulary.edn"
+          " :harmonisation :jsdq-mapping AND Strategic SORRY Topology"))))
+
 (defn- warnings-tile []
-  "Minimal warning strip: show only directly computed warnings that are
-   currently firing. Proxy diagnostics stay out of the main UI."
+  "Anchored warning strip per wm-ui-anchor:0008. Shows directly-computed
+   firing ticks with: (1) concrete observed state as the primary signal,
+   (2) per-tick actionable hints the operator can act on, (3) the
+   aphoristic :fires text demoted to italic flavour-text below.
+
+   Each warning card is clickable (testid `warning-card-<tick-id>`);
+   tooltip carries the :condition; on-click logs the anchor reference +
+   observed state."
   (let [ticks (->> (get-in @s/data [:graph :dynamics :ticks])
                    (filter :computed?)
                    (filter :fired?)
@@ -543,11 +806,417 @@
        [:h3 "Warnings"]
        [:ul.warnings-list
         (for [t ticks]
-          ^{:key (str (:id t))}
-          [:li
-           [:span.warning-name (tick-title (:id t))]
-           " "
-           (or (:fires t) "warning firing")])]])))
+          (let [tick-id-str (let [i (:id t)]
+                              (cond
+                                (keyword? i) (name i)
+                                (string? i)  i
+                                :else        (str i)))
+                actions (get tick-actions tick-id-str)
+                concrete-tooltip (str (tick-title (:id t)) " — "
+                                     "condition: " (or (:condition t) "(condition unspecified)")
+                                     ". Source: " (or (:signal t) "(unspecified)")
+                                     ". Source-of-truth: strategic-vocabulary :harmonisation :jsdq-mapping."
+                                     " Click for the anchor reference.")]
+            ^{:key (str (:id t))}
+            [:li {:data-testid (str "warning-card-" tick-id-str)
+                  :on-click (on-click-tick tick-id-str (:observed t))
+                  :style {:cursor "pointer"
+                          :padding "6px 4px"
+                          :border-bottom "1px dotted #d1d5db"}
+                  :title concrete-tooltip}
+             ;; (a) primary signal: concrete observed state with the
+             ;; tick name; replaces the aphorism-as-primary that anchor
+             ;; 0008 flagged as the warning's worst legibility failure.
+             [:div {:style {:font-weight "600" :margin-bottom "4px"}}
+              [:span.warning-name (tick-title (:id t))]
+              " "
+              (or (:observed t) "(observed state unavailable)")]
+             ;; (c) actionable hints — per-tick hardcoded; covered by
+             ;; existing :sorry/wm-ui-hud-mode-rationale-hardcode for
+             ;; drift surface.
+             (when (seq actions)
+               [:ul {:style {:margin "4px 0 4px 16px" :padding 0
+                             :font-size "0.9em"}}
+                (for [[i a] (map-indexed vector actions)]
+                  ^{:key i} [:li {:style {:list-style "disc"}} a])])
+             ;; The aphoristic :fires text demoted to italic flavour
+             ;; below the concrete + actionable content. Anchor 0008:
+             ;; 'The aphorism itself may have a place — perhaps as
+             ;; italic flavour-text below the plain-language warning —
+             ;; but should not be the primary signal.'
+             (when-let [aphorism (:fires t)]
+               [:div {:style {:font-style "italic"
+                              :color "#6b7280"
+                              :font-size "0.85em"
+                              :margin-top "4px"}}
+                aphorism])]))]])))
+
+(defn- severity-class [severity]
+  (case severity
+    :critical "critical"
+    :warning "warning"
+    :info "info"
+    "warning"))
+
+(defn- tier-class [tier]
+  (case tier
+    :stop-the-line "critical"
+    :high "warning"
+    :advisory "info"
+    "info"))
+
+(defn- fmt-num [n]
+  (when (number? n)
+    (.toFixed (double n) 2)))
+
+(defn- fmt-age [n]
+  (when (number? n)
+    (str (.toFixed (double n) 1) "d")))
+
+;; Anchor 0010 (Self-watch active-warnings counter — batch 2). Joe's
+;; verbatim: "Those look like items I could hand off to an agent. I will
+;; try that and report back." v1 ships:
+;;   (1) anchored counter (tooltip + click-log naming the API path)
+;;   (2) per-issue 'Hand off to agent' button that POSTs to /api/alpha/bell
+;;       with the issue summary + severity + action. Operator picks the
+;;       target agent via a browser prompt (v1 — a dropdown UI is v2).
+;; See M-war-machine-frontend-upgrade1 §6.12.
+;;
+;; Note on shape: this is the SECOND structured-warning-rendering case
+;; (after 0008 cargo). Different API path (:self-watch :issues, not
+;; :graph :dynamics :ticks) and different per-item schema, so the
+;; renderer below is a sibling not a clone of warnings-tile. Per claude-10's
+;; threshold rule, this promotes :structured-warning-rendering-net from
+;; candidate to tracked sub-kind.
+(defn- hand-off-issue! [issue]
+  "POST a bell to /api/alpha/bell with the issue text. Operator picks
+   the target agent at prompt-time. v1: browser prompt(); errors logged
+   to console; success notifies via alert."
+  (let [{:keys [severity surface summary action at source-id]} issue
+        agent-id (js/prompt
+                  (str "Hand off this Self-watch issue to which agent?\n"
+                       "(e.g. claude-10, codex-3 — agent must be registered in the futon3c Agency)\n\n"
+                       "Issue: " summary)
+                  "claude-10")]
+    (when (and agent-id (not (clojure.string/blank? agent-id)))
+      (let [prompt-text (str "Self-watch hand-off (anchor wm-ui-anchor:0010 / wm-ui surface):\n"
+                            "Severity: " (name severity) "\n"
+                            "Surface: " surface "\n"
+                            "At: " (or at "(unknown)") "\n"
+                            "Source-id: " (or source-id "(none)") "\n"
+                            "Summary: " summary "\n"
+                            "Suggested action: " (or action "(none specified)") "\n\n"
+                            "Please investigate and report back.")
+            body (.stringify js/JSON
+                             (clj->js {:agent-id agent-id
+                                       :caller "wm-ui"
+                                       :surface "bell"
+                                       :prompt prompt-text}))]
+        (js/console.log
+         (str "[anchor wm-ui-anchor:0010] handing off issue '" summary
+              "' (severity=" (name severity) ") to agent=" agent-id))
+        (-> (js/fetch "http://localhost:7070/api/alpha/bell"
+                      (clj->js {:method "POST"
+                                :headers {"Content-Type" "application/json"
+                                          "Accept" "application/json"}
+                                :body body}))
+            (.then (fn [r] (.json r)))
+            (.then (fn [j]
+                     (let [parsed (js->clj j :keywordize-keys true)
+                           job-id (:job-id parsed)]
+                       (js/console.log
+                        (str "[anchor wm-ui-anchor:0010] bell accepted: job-id="
+                             job-id))
+                       (js/alert (str "✓ Handed off to " agent-id
+                                      "\nJob-id: " job-id
+                                      "\n\nThey'll process when their session permits.")))))
+            (.catch (fn [e]
+                      (js/console.error
+                       (str "[anchor wm-ui-anchor:0010] bell FAILED: " e))
+                      (js/alert (str "✗ Hand-off failed: " e
+                                     "\nCheck console for details.")))))))))
+
+;; Undocumented bug U6 (commit-hygiene routing — claude-10 batch 2):
+;; stop-the-line tier commit-hygiene queues don't route into the Self-watch
+;; :issues feed. The PROPER fix is substrate-side (futon3c self-watch
+;; subsystem should ingest commit-hygiene → :issues); the UI route below is
+;; a v1 bandage so the operator sees stop-the-line dirty-tree pressure
+;; alongside other Self-watch issues + can hand them off via the same
+;; per-issue button. Substrate-side fix is a separate ticket
+;; (M-war-machine-frontend-upgrade1 §6.13).
+(defn- synthesize-commit-hygiene-issues
+  "Convert commit-hygiene queues at :tier \"stop-the-line\" into issues
+   shaped like Self-watch :issues, so the counter + per-issue list +
+   hand-off button surface them uniformly."
+  [ch]
+  (->> (or (:queues ch) [])
+       (filter #(= "stop-the-line" (let [t (:tier %)]
+                                     (cond
+                                       (keyword? t) (name t)
+                                       (string? t)  t
+                                       :else        (str t)))))
+       (mapv (fn [{:keys [repo pressure count max-age-days needs-fixing action]}]
+               {:severity "critical"
+                :surface (str "commit-hygiene/" repo)
+                :summary (or needs-fixing
+                             (str repo " has " count " dirty paths, pressure " pressure))
+                :action (or action
+                            (str "Review " repo " for commit/disposition clustering"))
+                :at "(synthesized from /api/alpha/war-machine :commit-hygiene :queues; substrate-side routing pending — M-war-machine-frontend-upgrade1 §6.13 U6)"
+                :source-id (str "commit-hygiene-" repo)}))))
+
+;; Inhabitation Log card — replaces the static Pilot Contract card per
+;; M-war-machine-pilot cycle-3 (2026-05-25).  Reads (:pilot-inhabitations data)
+;; from /api/alpha/war-machine; substrate is futon5a/data/pilot-inhabitations.edn.
+;; Click [work in progress] / [work done] to expand event details (HTML details).
+
+(defn- short-event-id [event-id]
+  (when event-id
+    (str/replace (str event-id) #"^inhab/[^/]+/" "")))
+
+(defn- vsatarcs-status-badge
+  "Per-event badge showing whether E-pilot-vsatarcs-feed has ingested this
+   pilot-inhabitation event into VSATARCS bilateral evidence.  Joe's
+   emacs-repl request 2026-05-25: surface the feeder's per-event status
+   in the Inhabitation Log so processed/pending state is operator-visible."
+  [processed?]
+  [:span {:title (if processed?
+                   "VSATARCS bilateral evidence present (E-pilot-vsatarcs-feed ingested this event)"
+                   "VSATARCS bilateral evidence NOT yet present (feeder hasn't ingested this event yet, or the event isn't in its substantive-event whitelist)")
+          :style {:font-size "0.75em"
+                  :padding "1px 6px"
+                  :border-radius "8px"
+                  :margin-left "6px"
+                  :background (if processed? "#d1fae5" "#f3f4f6")
+                  :color (if processed? "#065f46" "#6b7280")
+                  :cursor "help"}}
+   (if processed? "VSATARCS ✓" "VSATARCS ○")])
+
+(defn- inhab-event-row [ev]
+  ^{:key (str (:id ev))}
+  [:div {:style {:margin-bottom "6px"}}
+   [:strong (short-event-id (:id ev))]
+   " — " (or (:event ev) "?")
+   (when-let [tool (:tool ev)]
+     (str " via " tool))
+   (when-let [tgt-anchor (get-in ev [:target :anchor])]
+     (str " → " tgt-anchor))
+   (vsatarcs-status-badge (:vsatarcs-processed? ev))
+   (when-let [cg (:cited-consent-gate-event-id ev)]
+     [:div {:style {:font-size "0.85em" :color "#666"}}
+      (str "cg: " cg)])
+   (when-let [target (or (:investigation-target ev)
+                         (when (map? (:target ev)) (:file (:target ev))))]
+     [:div {:style {:font-size "0.85em" :color "#666"}} target])])
+
+(defn- inhabitation-log-card [data]
+  (let [inh    (:pilot-inhabitations data)
+        cur    (:current-inhabitant inh)
+        prev   (:previous-inhabitant inh)
+        stale? (:stale? inh)
+        detail-box-style {:padding "6px 8px"
+                          :border "1px solid #d1d5db"
+                          :border-radius "4px"
+                          :margin "4px 0"
+                          :background "#f9fafb"
+                          :font-size "0.85em"}]
+    [:section.dashboard-card
+     [:div.dashboard-card-header
+      [:h3 "Inhabitation Log"]
+      [:span.dashboard-badge "live"]]
+     (cond
+       stale?
+       [:div.dashboard-empty
+        (str "Pilot inhabitations log unavailable"
+             (when-let [e (:error inh)] (str ": " e)))]
+
+       (and (nil? cur) (nil? prev))
+       [:div.dashboard-empty "No inhabitation events recorded yet."]
+
+       :else
+       [:div.dashboard-text
+        (when cur
+          [:span "current inhabitant " [:strong (:agent cur)] ", "
+           [:details {:style {:display "inline"}
+                      :data-testid "inhabitation-log-wip"}
+            [:summary {:style {:cursor "pointer" :display "inline"}}
+             [:em "[work in progress]"]]
+            [:div {:style detail-box-style}
+             (if (seq (:wip-events cur))
+               (for [ev (:wip-events cur)] (inhab-event-row ev))
+               [:div "No work-in-progress events."])
+             [:div {:style {:margin-top "6px" :color "#666"}}
+              (str "Inhabiting since " (or (:since cur) "?"))]]]
+           " " (or (:wip-cycles cur) 0) " tasks"])
+        (when (and cur prev) "; ")
+        (when prev
+          [:span "previous inhabitant " [:strong (:agent prev)] ", "
+           [:details {:style {:display "inline"}
+                      :data-testid "inhabitation-log-done"}
+            [:summary {:style {:cursor "pointer" :display "inline"}}
+             [:em "[work done]"]]
+            [:div {:style detail-box-style}
+             (if (seq (:done-events prev))
+               (for [ev (:done-events prev)] (inhab-event-row ev))
+               [:div "No completed cycles."])
+             [:div {:style {:margin-top "6px" :color "#666"}}
+              (str "Inhabitation ended " (or (:ended-at prev) "?"))]]]
+           " " (or (:done-cycles prev) 0) " tasks"])])]))
+
+(defn- self-watch-dashboard []
+  (let [data @s/data
+        sw (:self-watch data)
+        ch (:commit-hygiene data)
+        mb (:metabolic-balance data)
+        ;; U6 v1: synthesize commit-hygiene stop-the-line queues into the
+        ;; issues list. Operator sees them in the counter + can hand them
+        ;; off. Substrate-side fix (route via futon3c self-watch) is a
+        ;; separate ticket.
+        synth-issues (synthesize-commit-hygiene-issues ch)
+        issues (vec (concat (or (:issues sw) []) synth-issues))
+        recoveries (or (:recoveries sw) [])
+        queues (or (:queues ch) [])
+        channels (or (:channels mb) [])
+        ;; Adjust counts to reflect synthesized critical issues.
+        critical-n (+ (or (:critical-count sw) 0) (count synth-issues))
+        warning-n (:warning-count sw)
+        counter-tooltip (str "Active self-watch warnings: "
+                            (count issues) " open"
+                            (when critical-n (str " (" critical-n " critical"))
+                            (when warning-n (str ", " warning-n " warning"))
+                            (when (or critical-n warning-n) ")")
+                            ". Source: /api/alpha/war-machine response, :self-watch :issues field "
+                            "(populated by the futon3c self-watch subsystem; distinct from the "
+                            ":graph :dynamics :ticks pocketwatch warnings shown on the stack view). "
+                            "Click for the anchor reference.")
+        channel-rows (when (seq channels)
+                       (into
+                        [:div.dashboard-mini-list]
+                        (map (fn [{:keys [channel pressure tier count]}]
+                               [:div.dashboard-mini-row {:key (str channel)}
+                                [:span (name channel)]
+                                [:span (str (name tier)
+                                            " • "
+                                            (or (fmt-num pressure) "0.00")
+                                            (when (number? count)
+                                              (str " • " count)))]]))
+                        channels))]
+    [:div.dashboard-panel {:data-testid "self-watch-dashboard"}
+     [:div.dashboard-header
+      [:h2 "Self-Watch"]
+      [:div.dashboard-subtitle
+       "Operational maintenance surface for infrastructure health, load-time warnings, and commit hygiene pressure."]]
+     [:div.dashboard-grid
+      [:section.dashboard-card.dashboard-card-wide
+       [:div.dashboard-card-header
+        [:h3 "Active Warnings"]
+        ;; Anchored counter per wm-ui-anchor:0010.
+        [:span.dashboard-badge
+         {:data-testid "self-watch-issue-count"
+          :title counter-tooltip
+          :on-click (fn [_]
+                      (js/console.log
+                       (str "[anchor wm-ui-anchor:0010] active-warnings="
+                            (count issues)
+                            " critical=" (or critical-n 0)
+                            " warning=" (or warning-n 0)
+                            " → see /api/alpha/war-machine :self-watch")))
+          :style {:cursor "pointer"
+                  :text-decoration "underline dotted"}}
+         (str (count issues) " open"
+              (when (and critical-n (pos? critical-n))
+                (str " (" critical-n " critical)"))
+              " ⓘ")]]
+       (if (seq issues)
+         [:div.dashboard-list
+          (for [{:keys [severity surface summary action at source-id] :as issue} issues]
+            ^{:key (str surface "|" summary "|" at)}
+            [:article {:class (str "dashboard-item " (severity-class severity))
+                       :data-testid (str "self-watch-issue-" (or source-id at))}
+             [:div.dashboard-item-top
+              [:span.dashboard-chip (name severity)]
+              [:span.dashboard-meta surface]
+              [:span.dashboard-meta (or at "-")]]
+             [:div.dashboard-title summary]
+             [:div.dashboard-text action]
+             ;; Per-issue Hand-off-to-agent button. Anchor 0010 v1: prompt
+             ;; for agent-id, POST to /api/alpha/bell with the issue text.
+             ;; v2 would replace the prompt() with a dropdown of currently-
+             ;; registered Agency agents (from GET /api/alpha/agents).
+             [:button {:data-testid (str "self-watch-handoff-" (or source-id at))
+                       :on-click (fn [_] (hand-off-issue! issue))
+                       :style {:margin-top "6px"
+                               :padding "4px 10px"
+                               :font-size "0.85em"
+                               :background "#3b82f6"
+                               :color "white"
+                               :border "none"
+                               :border-radius "4px"
+                               :cursor "pointer"}}
+              "📤 Hand off to agent"]])]
+         [:div.dashboard-empty "No active self-watch warnings in the current window."])]
+
+      [:section.dashboard-card
+       [:div.dashboard-card-header
+        [:h3 "Recoveries"]
+        [:span.dashboard-badge (str (count recoveries) " recent")]]
+       (if (seq recoveries)
+         [:div.dashboard-list
+          (for [{:keys [summary at]} (take 6 recoveries)]
+            ^{:key (str summary "|" at)}
+            [:article {:class (str "dashboard-item " (severity-class :info))}
+             [:div.dashboard-item-top
+              [:span.dashboard-chip "info"]
+              [:span.dashboard-meta (or at "-")]]
+             [:div.dashboard-title summary]
+             [:div.dashboard-text "Recovered after a prior alert. No action unless it recurs."]])]
+         [:div.dashboard-empty "No recent process recoveries recorded."])]
+
+      [:section.dashboard-card.dashboard-card-wide
+       [:div.dashboard-card-header
+        [:h3 "Commit Hygiene"]
+        [:span.dashboard-badge
+         (str (or (:active-count ch) 0) " repos"
+              " • "
+              (name (or (:clustering-status ch) :unavailable)))]]
+       [:div.dashboard-card-note
+        "This is still repo-level pressure, not safe auto-commit clustering. The next step is grouping changed files into coherent candidate bundles."]
+       (if (seq queues)
+         [:div.dashboard-list
+          (for [{:keys [repo tier pressure count max-age-days action]} queues]
+            ^{:key repo}
+            [:article {:class (str "dashboard-item " (tier-class tier))}
+             [:div.dashboard-item-top
+              [:span.dashboard-chip (name tier)]
+              [:span.dashboard-meta repo]
+              [:span.dashboard-meta (str (or count 0) " dirty")]]
+             [:div.dashboard-title
+              (str repo " pressure " (or (fmt-num pressure) "?")
+                   " • max age " (or (fmt-age max-age-days) "?"))]
+             [:div.dashboard-text action]])]
+         [:div.dashboard-empty "No repos above the current working-tree reporting floor."])]
+
+      [:section.dashboard-card
+       [:div.dashboard-card-header
+        [:h3 "Metabolic Pressure"]
+        [:span.dashboard-badge (name (or (:max-tier mb) :unknown))]]
+       (if (:available? mb)
+         [:div.dashboard-metrics
+          [:div.dashboard-metric-row
+           [:span "Max pressure"]
+           [:strong (or (fmt-num (:max-pressure mb)) "0.00")]]
+          [:div.dashboard-metric-row
+           [:span "Snapshot age"]
+           [:strong (if-let [age (:snapshot-age-minutes mb)]
+                      (str (.toFixed (double age) 0) "m")
+                      "-")]]
+          [:div.dashboard-metric-row
+           [:span "Stale?"]
+           [:strong (if (:stale? mb) "yes" "no")]]
+          channel-rows]
+         [:div.dashboard-empty "Metabolic snapshot unavailable."])]
+
+      [inhabitation-log-card data]]]))
 
 (defn- track-summary [session]
   (let [start (some-> (:start session) waveform/parse-ms waveform/fmt-date-time)
@@ -647,42 +1316,171 @@
   (let [data @s/data]
     [:div.sidebar
      [:h3 "Loop Health"]
+     ;; Anchor 0002 (Loop Health bars) — per-arrow tooltip using the API's
+     ;; native :description / :count / :last-seen / :days-since fields (no
+     ;; hardcode; richer than 0001 because the substrate already exposes
+     ;; per-arrow rationale). Each bar is one of the 6 holistic-argument
+     ;; arrows. See wm-ui-anchor:0002 + strategic-vocabulary :loop-health.
+     ;; M-war-machine-frontend-upgrade1 §6.8.
      (when-let [lh (:loop-health data)]
-       (for [{:keys [label health]} (:arrows lh)]
-         ^{:key label}
-         [:div
-          [:div.row
-           [:span label]
-           [:span (str (.toFixed (* 100 (double health)) 0) "%")]]
-          [:div.bar
-           [:div {:style {:width (str (* 100 (double health)) "%")
-                          :background (cond
-                                        (> health 0.7) "#22c55e"
-                                        (> health 0.4) "#eab308"
-                                        :else "#ef4444")}}]]]))
+       (for [{:keys [label health description count last-seen days-since arrow-id]}
+             (:arrows lh)]
+         (let [health-pct (str (.toFixed (* 100 (double (or health 0))) 0) "%")
+               testid (str "loop-arrow-" (or arrow-id label))
+               last-seen-text (cond
+                                (and last-seen days-since (zero? days-since)) (str last-seen " (today)")
+                                (and last-seen days-since) (str last-seen " (" days-since " day(s) ago)")
+                                :else "never")
+               count-text (cond
+                            (or (nil? count) (zero? count)) "no evidence in window"
+                            (= 1 count) "1 evidence entry"
+                            :else (str count " evidence entries"))
+               tooltip (str label " — " (or description "(no description)")
+                           ". " count-text "; last seen " last-seen-text
+                           ". Health " health-pct ". Source: holistic-argument scan; "
+                           "see strategic-vocabulary :o/raw-fields :loop-health.")]
+           ^{:key label}
+           [:div
+            [:div.row
+             [:span label]
+             [:span {:data-testid testid
+                     :title tooltip
+                     :on-click (fn [_]
+                                 (js/console.log
+                                  (str "[anchor wm-ui-anchor:0002] " label "=" health-pct
+                                       " count=" (or count 0))))
+                     :style {:cursor "pointer"
+                             :text-decoration "underline dotted"}}
+              health-pct " ⓘ"]]
+            [:div.bar
+             [:div {:style {:width (str (* 100 (double (or health 0))) "%")
+                            :background (cond
+                                          (> (or health 0) 0.7) "#22c55e"
+                                          (> (or health 0) 0.4) "#eab308"
+                                          :else "#ef4444")}}]]])))
      [:h3 "Workstream Balance"]
-     (when-let [pcts (get-in data [:graph :dynamics :commit-percentages])]
-       (for [[ws pct] (sort-by val > pcts)]
-         ^{:key ws}
-         [:div
-          [:div.row
-           [:span (if (keyword? ws) (name ws) (str ws))]
-           [:span (str (.toFixed (* 100 (double pct)) 0) "%")]]
-          [:div.bar
-           [:div {:style {:width (str (* 100 (double pct)) "%")
-                          :background (case (if (keyword? ws) (name ws) (str ws))
-                                        "stack" "#4a90e2"
-                                        "mathematics" "#22c55e"
-                                        "portfolio" "#eab308"
-                                        "consulting" "#ef4444"
-                                        "#9ca3af")}}]]]))
+     ;; Per-workstream anchor tooltips. Anchor 0001 (consulting 0%) is
+     ;; explicit substrate-side; the other 3 workstreams (stack, mathematics,
+     ;; portfolio) share the same legibility-gap shape (measurement-substrate
+     ;; vs repo-presence; target range from strategic-vocab :C/preferred;
+     ;; jsdq-analog from :o/provenance) so they get the same affordance.
+     ;; claude-10 may author follow-up anchors (0001a/b/c or expand 0001) if
+     ;; substrate-side coordination needs them anchored individually.
+     ;; See M-war-machine-frontend-upgrade1 §6.8 + wm-ui-anchor:0001.
+     (let [;; Per-workstream tooltip data, sourced from
+           ;; ~/code/futon5a/data/war-machine-strategic-vocabulary.edn
+           ;; :o/provenance and :C/preferred (lines 88-110 + 189-201).
+           ;; Hardcoded for v1; same drift-vs-dynamic-read consideration as
+           ;; the Mode anchor's rationale map (see sorrys.edn
+           ;; :sorry/wm-ui-hud-mode-rationale-hardcode).
+           ws-info
+           {"consulting"  {:anchor-id "wm-ui-anchor:0001"
+                           :label-pattern "Paid consulting + day job"
+                           :jsdq "depositing"
+                           :target "[0.20, 0.35]"
+                           :substrate "commits to consulting-workstream repos over the active scan window (NOT presence-in-view; ~/code/invoices/ and ~/code/statements/ are not classified as consulting-workstream repos by the WM's :o/provenance :consulting-pct)"}
+            "stack"       {:anchor-id "wm-ui-anchor:0001a"
+                           :label-pattern "Stack inhabitation (futon0-5)"
+                           :jsdq "maintaining"
+                           :target "[0.15, 0.25]"
+                           :substrate "commits to futon0-5 stack-workstream repos over the active scan window"}
+            "mathematics" {:anchor-id "wm-ui-anchor:0001b"
+                           :label-pattern "Mathematics (futon6)"
+                           :jsdq "foraging"
+                           :target "[0.15, 0.25]"
+                           :substrate "commits to mathematics-workstream repos over the active scan window (primarily futon6)"}
+            "portfolio"   {:anchor-id "wm-ui-anchor:0001c"
+                           :label-pattern "Portfolio development (JSDQ carrying + trail-laying)"
+                           :jsdq "carrying"
+                           :target "[0.20, 0.35]"
+                           :substrate "commits to portfolio-workstream repos over the active scan window"}}]
+       (when-let [pcts (get-in data [:graph :dynamics :commit-percentages])]
+         (for [[ws pct] (sort-by val > pcts)]
+           (let [ws-name (if (keyword? ws) (name ws) (str ws))
+                 info (get ws-info ws-name)
+                 pct-text (str (.toFixed (* 100 (double pct)) 0) "%")
+                 tooltip (when info
+                           (str ws-name "-pct = % of " (:substrate info)
+                                ". Target " (:target info) " (JSDQ analog: "
+                                (:jsdq info) "). Current " pct-text
+                                ". Source: war-machine-strategic-vocabulary.edn "
+                                ":o/provenance :" ws-name "-pct; logic-model + jsdq-terminal."))]
+             ^{:key ws}
+             [:div
+              [:div.row
+               [:span ws-name]
+               (if info
+                 ;; Inline anchored span (workstream-anchor style; tooltip
+                 ;; per-workstream, click logs the anchor reference). Not
+                 ;; via `hud/anchor-span` because that helper lives in the
+                 ;; hud ns; this is a local equivalent.
+                 [:span {:data-testid (str "ws-pct-" ws-name)
+                         :title tooltip
+                         :on-click (fn [_]
+                                     (js/console.log
+                                      (str "[anchor " (:anchor-id info)
+                                           "] " ws-name "=" pct-text)))
+                         :style {:cursor "pointer"
+                                 :text-decoration "underline dotted"}}
+                  pct-text " ⓘ"]
+                 [:span pct-text])]
+              [:div.bar
+               [:div {:style {:width (str (* 100 (double pct)) "%")
+                              :background (case ws-name
+                                            "stack" "#4a90e2"
+                                            "mathematics" "#22c55e"
+                                            "portfolio" "#eab308"
+                                            "consulting" "#ef4444"
+                                            "#9ca3af")}}]]]))))
      [:h3 "Missions"]
      (when-let [mt (:mission-triage data)]
-       [:div
+        [:div
         [:div.row [:span "Active"] [:span (str (:active mt))]]
         [:div.row [:span "Total"] [:span (str (:total mt))]]
         [:div.row [:span "Abandoned"] [:span (str (:abandoned-count mt))]]])
      [tracks-panel data]]))
+
+(defn- main-panel []
+  (if (= :self-watch @s/view-mode)
+    [:div.hex-canvas.dashboard-canvas
+     [self-watch-dashboard]]
+    [:div.hex-canvas
+     [graph/hex-map]]))
+
+;; Stop-the-line override banner — surfaces the WM judgement mode override
+;; documented in war-machine-strategic-vocabulary.edn :μ/override-modes.
+;; When any metabolic-balance channel hits tier :stop-the-line, judge sets
+;; mode to :stop-the-line; this banner renders above main-area in every
+;; view so the override is not hidden behind a view-mode tab.
+(defn- stop-the-line-banner [data]
+  (when (= "stop-the-line" (get-in data [:judgement :mode]))
+    (let [mb (:metabolic-balance data)
+          channels (filter #(= "stop-the-line" (:tier %)) (:channels mb))
+          max-pressure (:max-pressure mb)]
+      [:div {:data-testid "stop-the-line-banner"
+             :style {:background "#7f1d1d"
+                     :color "#fef2f2"
+                     :padding "12px 20px"
+                     :border-bottom "3px solid #450a0a"
+                     :font-weight "600"
+                     :display "flex"
+                     :flex-direction "column"
+                     :gap "6px"}}
+       [:div {:style {:font-size "1.05em" :letter-spacing "0.05em"}}
+        "STOP-THE-LINE — address metabolic pressure before other work"]
+       [:div {:style {:font-size "0.9em" :font-weight "400" :opacity "0.95"}}
+        (str "Max pressure " (or (fmt-num max-pressure) "?")
+             " across " (count channels)
+             (if (= 1 (count channels)) " channel" " channels")
+             ".  Override active per :μ/override-modes (war-machine-strategic-vocabulary.edn).")]
+       (when (seq channels)
+         [:ul {:style {:margin "0" :padding-left "20px" :font-size "0.85em" :font-weight "400"}}
+          (for [ch channels]
+            ^{:key (str (:channel ch))}
+            [:li (str (or (:channel ch) "(unnamed channel)")
+                      " • pressure " (or (fmt-num (:pressure ch)) "?")
+                      (when (number? (:count ch))
+                        (str " • " (:count ch) " items")))])])])))
 
 (defn app []
   (let [data @s/data]
@@ -690,9 +1488,10 @@
       [:div.loading "Loading War Machine..."]
       [:div.war-machine
        [toolbar]
+       [stop-the-line-banner data]
        [:div.main-area
         [legend-panel]
-        [:div.hex-canvas [graph/hex-map]]
+        [main-panel]
         [sidebar]]
        [hud/hud-line]
        [graph/detail-panel]])))
@@ -708,13 +1507,21 @@
                         :h (max 300 (- h 160))})))
 
 (defn ^:dev/after-load reload []
-  (rdc/render root [app]))
+  ;; Re-render the React tree AND refetch /api/alpha/war-machine so any
+  ;; backend payload changes (e.g. new fields added by an edit this session)
+  ;; flow into s/data without an operator-side page refresh.  Adds a WM scan
+  ;; per code reload — acceptable dev cost; production builds use `init`
+  ;; not `reload`.
+  (rdc/render root [app])
+  (api/ensure-wm-poll!)
+  (api/load!))
 
 (defn init []
   (js/console.log "[init] war machine starting")
   (resize-viewport!)
   (.addEventListener js/window "resize" resize-viewport!)
   (api/load!)
+  (api/ensure-wm-poll!)
   (api/load-aif-stack!)
   (api/ensure-aif-poll!)
   (tick/start!)

@@ -3,7 +3,7 @@
    Swing version (futon0/scripts/futon0/report/war_machine_visual.clj):
 
      data-atom     → full scan snapshot from /api/war-machine
-     view-mode     → :stack | :aif-stack | :missions | :sorrys
+     view-mode     → :stack | :self-watch | :aif-stack | :missions | :sorrys
                      | :invariants | :patterns
      replay-atom   → {session-id {:steps :step-idx :color-idx :session-id}
                       :playing? bool} — the session-ant swarm

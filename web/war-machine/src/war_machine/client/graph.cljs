@@ -194,6 +194,17 @@
                             (:hits-by-spine join-ctx)
                             size)])
        [:g.cells
+       ;; React-key fix for the ghost-cell regression Joe surfaced
+       ;; 2026-05-24 (M-war-machine-frontend-upgrade1 §6.15):
+       ;; the prior `^{:key (or id (q:r))}` collided when two cells
+       ;; shared the same id (e.g., missions view has 8 missions
+       ;; registered against multiple repos: essays-retraction-visibility@futon4×2,
+       ;; vsatarcs-writer@futon4×2, etc.). Duplicate keys caused React
+       ;; reconciliation to keep stale DOM around; switching to other
+       ;; views then showed the stale cells as ghost hexagons.
+       ;; Fix: ALWAYS include q:r position in the key so it stays
+       ;; unique even when ids collide. `data-node-id` keeps the
+       ;; canonical id so tests + operator queries can still match.
        (for [cell cells
              :let [node (:node cell)
                    id (cell-id cell)
@@ -203,7 +214,7 @@
                                                                   (:label node))))
                    glow (when id (get hot id))
                    [cx cy] (cell-pixel cell size)]]
-         ^{:key (or (when id (str id)) (str (:q cell) ":" (:r cell)))}
+         ^{:key (str (when id (str id "@")) (:q cell) ":" (:r cell))}
          [:g {:on-click (fn []
                           (reset! s/selected node)
                           (when target

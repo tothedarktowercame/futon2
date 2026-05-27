@@ -6,16 +6,23 @@
             [war-machine.client.tick :as tick])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def ^:private endpoint
-  "War Machine scan endpoint. Same-origin relative URL; when the page is
-   served by shadow-cljs dev-http with a :proxy-url pointed at futon3c,
-   the browser sees this path on :8710 and shadow proxies to :7070. In
-   the standalone server (war-machine.server.core) the path also resolves
-   locally — kept as a thin fallback for isolated testing."
-  "/api/alpha/war-machine")
+(defn- api-base
+  "Read `window.WM_API_BASE` (set in index.html) and return it as the URL
+   prefix for API calls. Defaults to \"\" (same-origin/relative).
+
+   The override exists because shadow-cljs dev-http's proxy has a hard
+   timeout shorter than the WM scan's ~30s response; setting WM_API_BASE
+   to the absolute futon3c URL bypasses the proxy entirely. futon3c
+   returns Access-Control-Allow-Origin: * so cross-origin works.
+
+   See M-war-machine-frontend-upgrade1 §2.G (2026-05-21 unsticking)."
+  []
+  (or (some-> js/window .-WM_API_BASE) ""))
+
+(def ^:private endpoint-suffix "/api/alpha/war-machine")
 
 (defn- endpoint-with-days []
-  (str endpoint "?days=" @s/days-window))
+  (str (api-base) endpoint-suffix "?days=" @s/days-window))
 
 (defn load! []
   (go
@@ -39,8 +46,25 @@
                           (count (get-in data ["sessions" "sessions"] []))))
         (js/console.error "[api] load failed:" (pr-str resp))))))
 
-(def ^:private aif-endpoint
-  "/api/alpha/aif-stack/live")
+(def ^:private wm-poll-ms 60000)
+(defonce ^:private wm-poll-handle (atom nil))
+
+(defn restart-wm-poll! []
+  (when-let [h @wm-poll-handle]
+    (js/clearInterval h))
+  (reset! wm-poll-handle
+          (js/setInterval (fn [] (load!)) wm-poll-ms))
+  (js/console.log "[api] wm-poll cadence set to"
+                  (long (/ wm-poll-ms 1000)) "s"))
+
+(defn ensure-wm-poll! []
+  (when-not @wm-poll-handle
+    (restart-wm-poll!)))
+
+(def ^:private aif-endpoint-suffix "/api/alpha/aif-stack/live")
+
+(defn- aif-endpoint []
+  (str (api-base) aif-endpoint-suffix))
 
 ;; Single source of truth for AIF cadence: the recurring AIF tick on the
 ;; server (M-stack-stereolithography Checkpoint 5). Each :scheduler block
@@ -95,7 +119,7 @@
 
 (defn load-aif-stack! []
   (go
-    (let [resp (<! (http/get aif-endpoint
+    (let [resp (<! (http/get (aif-endpoint)
                              {:with-credentials? false}))]
       (if (:success resp)
         (let [body (:body resp)]
@@ -115,8 +139,11 @@
   (when-not @aif-poll-handle
     (restart-aif-poll! (or @aif-poll-current-ms fallback-poll-ms))))
 
-(def ^:private show-in-emacs-endpoint
+(def ^:private show-in-emacs-suffix
   "/api/alpha/war-machine/show-in-emacs")
+
+(defn- show-in-emacs-endpoint []
+  (str (api-base) show-in-emacs-suffix))
 
 (defn open-target-in-emacs!
   "POST a generic Emacs target to the bridge. Supported target shapes:
@@ -128,7 +155,7 @@
   [target]
   (when (and (map? target) (:kind target))
     (go
-      (let [resp (<! (http/post show-in-emacs-endpoint
+      (let [resp (<! (http/post (show-in-emacs-endpoint)
                                 {:with-credentials? false
                                  :json-params target}))]
         (cond

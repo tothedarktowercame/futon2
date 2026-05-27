@@ -244,20 +244,36 @@
 
 (defn- bounds-note
   "Explain the relationship between the requested scan window and the replayable
-   session-evidence span."
+   session-evidence span.
+
+   U2 fix (2026-05-24, M-war-machine-frontend-upgrade1 §6.11): the previous
+   cond only annotated the case where session-evidence was NARROWER than the
+   requested window. In practice sessions OVERFLOW the window (sessions live
+   in futon3c forever; the WM scan-window is just a query parameter), so the
+   timeline visually shows e.g. ~96 days while the label said only 'Scan
+   window 14d' — operator-confusing per Joe's QA. The fix annotates BOTH
+   directions: narrower OR broader gets the explicit session-evidence-span
+   note so the timeline axis and the window label can't disagree silently."
   [data display]
   (when-let [payload (payload-bounds data)]
     (let [days (get-in data [:window :days])
           payload-span (- (:latest-ms payload) (:earliest-ms payload))
           display-span (when display
-                         (- (:latest-ms display) (:earliest-ms display)))]
+                         (- (:latest-ms display) (:earliest-ms display)))
+          disagree? (and display
+                         display-span
+                         payload-span
+                         (not= display-span payload-span))]
       (cond
-        (and display
-             display-span
-             payload-span
-             (< display-span payload-span))
+        (and disagree? (< display-span payload-span))
         (str "Scan window " days "d; session evidence span "
-             (fmt-duration display-span))
+             (fmt-duration display-span)
+             " (narrower than window)")
+
+        (and disagree? (> display-span payload-span))
+        (str "Scan window " days "d; session evidence span "
+             (fmt-duration display-span)
+             " (broader than window — timeline axis shows full session history)")
 
         days
         (str "Scan window " days "d")

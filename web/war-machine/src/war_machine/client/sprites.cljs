@@ -101,14 +101,14 @@
                :font-size font-sz
                :fill "#1e1e1e"}
         line])
-     (when (and active? (pos? commits))
+     (when (and active? (or (:badge-display node) (pos? commits)))
        [:text {:x cx :y (+ cy (* size 0.45))
                :text-anchor "middle"
                :font-family "SansSerif"
                :font-weight "bold"
                :font-size (max 8 (int (* size 0.22)))
                :fill "#505050"}
-        (str commits)])
+        (or (:badge-display node) (str commits))])
      (when (pos? (double (or glow 0.0))) (glow-ring points glow))]))
 
 (defn- wrap-label

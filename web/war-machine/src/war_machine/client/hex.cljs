@@ -485,24 +485,140 @@
         group-fn (fn [n] (get tier-order (:tier n) 99))]
     (assign-nodes-layout adapted :sorry group-fn)))
 
+(defn assign-linear-layout
+  "Pack a flat seq of nodes into a row-major hex grid (left→right, top→bottom).
+   Used by `patterns-as-cells` so that, after sorting input by activation
+   balance, the resulting hex tiles form a visual hue gradient from one
+   pole (pure-blue, balance=0) to the other (green/yellow, balance≥0.5)
+   per Joe's emacs-repl 2026-05-25 directive.
+
+   `cols` controls grid width.  Input order is preserved verbatim — sort
+   upstream to control which cell lands at which position."
+  [nodes sprite-type cols]
+  (let [tagged (map #(assoc % :sprite-type sprite-type) nodes)]
+    (vec
+     (map-indexed
+      (fn [i node]
+        (let [col (mod i cols)
+              row (quot i cols)]
+          {:node node
+           :q   col
+           :r   row}))
+      tagged))))
+
+(defn- pattern-activation-hue
+  "Joe's blue-yellow-green hue scheme (emacs-repl 2026-05-25):
+
+   - Pattern count → BLUE weighting (HSL hue 240).
+   - Activation count → YELLOW weighting (HSL hue 60).
+   - Mixing yellow+blue → GREEN (HSL hue 120) at equal balance.
+
+   Computes `balance = activations / (pattern-count + activations)`, then
+   maps via a piecewise-linear hue:
+     - balance ≤ 0.5 :  240 - 240·balance   (blue → green)
+     - balance > 0.5 :  120 - 120·(balance − 0.5)   (green → yellow)
+   so balance ∈ {0, 0.5, 1} yields hue ∈ {240, 120, 60}.
+
+   Saturation/lightness intentionally NOT in this function — Joe explicitly
+   asked that saturation track the existing activity-alpha-on-pattern-count
+   behaviour, which is implemented in sprites.cljs via :fill-opacity."
+  [pattern-count activation-count]
+  (let [pc (max 0 (long (or pattern-count 0)))
+        ac (max 0 (long (or activation-count 0)))
+        total (+ pc ac)]
+    (cond
+      ;; No signal at all → default to blue (pattern-count axis).
+      (zero? total) 240
+      :else
+      (let [balance (/ (double ac) (double total))
+            hue (if (<= balance 0.5)
+                  (- 240.0 (* 240.0 balance))           ;; 240 → 120
+                  (- 120.0 (* 120.0 (- balance 0.5))))] ;; 120 → 60
+        (int (Math/round (double hue)))))))
+
+(defn- pattern-activation-color
+  "Wrap [[pattern-activation-hue]] into an HSL color string consumable by
+   SVG :fill.  Full saturation + medium lightness give vivid pure hues; the
+   sprite's existing activity-alpha provides the pattern-count-based fade."
+  [pattern-count activation-count]
+  (str "hsl(" (pattern-activation-hue pattern-count activation-count)
+       ", 80%, 50%)"))
+
 (defn patterns-as-cells
-  "Adapt pattern collections; cap at top 24 by :count for visual clarity."
+  "Adapt pattern collections; cap at top 24 by :count for visual clarity.
+
+   When the API surfaces a per-collection activations count (e.g.
+   :activations-14d, populated by futon3c.transport.http/derive-pattern-activations
+   from PSR evidence-store entries — M-pattern-application-diagnostic
+   integration, 2026-05-25):
+
+   - badge reads 'activations/pattern-count' instead of just 'pattern-count'
+   - :phase-color overrides the workstream-color to encode the
+     pattern-vs-activation balance in HSL hue (blue ↔ yellow with green
+     at the midpoint), per Joe's emacs-repl 2026-05-25 directive
+
+   :commits stays = pattern-count so the existing activity-alpha continues
+   to drive saturation/fade.  Joe explicitly asked that saturation track
+   pattern count 'much as it currently is.'"
   [war-machine-data]
   (let [collections (get-in war-machine-data [:patterns :collections] [])
+        window-days (some (fn [c] (or (:activations-window-days c)
+                                      (get c "activations-window-days")))
+                          collections)
+        activation-key (when window-days
+                         (keyword (str "activations-" window-days "d")))
+        activation-of (fn [c]
+                        (when activation-key
+                          (or (get c activation-key)
+                              (get c (name activation-key)))))
+        ;; Selection: keep the top-24 by pattern count (most substantive
+        ;; collections worth showing).
         top (->> collections
                  (sort-by (comp - #(or (:count %) 0)))
                  (take 24))
+        balance-of (fn [c]
+                     (let [pc (long (or (:count c) 0))
+                           ac (long (or (activation-of c) 0))
+                           total (+ pc ac)]
+                       (if (pos? total)
+                         (/ (double ac) (double total))
+                         0.0)))
+        ;; Geometric arrangement: re-sort the selected top-24 by
+        ;; activation balance ASCENDING, so pure-blue (balance 0,
+        ;; pattern-heavy / activation-low) lands at one pole and
+        ;; green / yellow tiles (high activation share) lands at the
+        ;; other.  Joe's emacs-repl 2026-05-25 directive.  The
+        ;; assign-nodes-layout call respects input order, so a sorted
+        ;; input yields a visual hue gradient across the hex grid.
+        arranged (sort-by balance-of top)
         adapted (map (fn [c]
-                       (let [full (or (:name c) (str (:id c)))]
-                         (assoc c
-                                :label      (truncate-label full 11)
-                                :workstream :mathematics  ;; green palette for the whole library
-                                :active?    true
-                                :commits    (or (:count c) 0)
-                                :tooltip    (str "PATTERN: " full
-                                                 "\nCount: " (:count c)))))
-                     top)]
-    (assign-nodes-layout adapted :repo)))
+                       (let [full      (or (:name c) (str (:id c)))
+                             total     (or (:count c) 0)
+                             activated (activation-of c)
+                             badge-display (when activated
+                                             (str activated "/" total))
+                             phase-color (pattern-activation-color
+                                          total
+                                          (or activated 0))]
+                         (cond-> (assoc c
+                                        :label       (truncate-label full 11)
+                                        :workstream  :mathematics
+                                        :active?     true
+                                        :commits     total
+                                        :phase-color phase-color
+                                        :tooltip     (str "PATTERN: " full
+                                                          "\nCount: " total
+                                                          (when activated
+                                                            (str
+                                                             "\nActivations (last "
+                                                             window-days "d): "
+                                                             activated))))
+                           badge-display (assoc :badge-display badge-display))))
+                     arranged)]
+    ;; Linear row-major layout (NOT centroid-packed) so the balance-sorted
+    ;; input becomes a left→right hue gradient on the rendered hex grid.
+    ;; 6 cols × 4 rows fits 24 tiles cleanly.
+    (assign-linear-layout adapted :repo 6)))
 
 ;; ----------------------------------------------------------------------------
 ;; AIF+ stack-self-model layout — for the :aif-stack view-mode.
