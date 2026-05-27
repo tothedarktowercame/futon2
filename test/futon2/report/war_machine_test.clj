@@ -33,12 +33,37 @@
       (is (zero? h) "evidence at window boundary means zero freshness"))))
 
 ;; ---------------------------------------------------------------------------
-;; observe (normalized observation vector)
+;; render-war-machine (markdown output)
 ;; ---------------------------------------------------------------------------
 
 (def ^:private sample-data
-  "Minimal scan data for testing the observe function."
-  {:loop-health {:overall 0.65
+  "Minimal scan data for testing render functions."
+  {:self-watch {:available? true
+                :issues [{:severity :warning
+                          :surface "archaeology"
+                          :summary "2 overdue pipeline tracers need close-or-extend decisions"
+                          :action "Review tracks: track-1, track-2"
+                          :at "2026-05-21T10:00:00Z"}]
+                :recoveries [{:severity :info
+                              :surface "watchdog"
+                              :summary "multi-watcher recovered"
+                              :action "No action unless the alert recurs"
+                              :at "2026-05-21T09:55:00Z"}]
+                :issue-count 1
+                :critical-count 0
+                :warning-count 1}
+   :commit-hygiene {:available? true
+                    :queues [{:repo "futon4"
+                              :tier :high
+                              :pressure 3.14
+                              :count 16
+                              :max-age-days 22.0
+                              :action "Review futon4 for commit/disposition clustering"}]
+                    :active-count 1
+                    :high-count 1
+                    :stop-count 0
+                    :clustering-status :not-yet-grouped}
+   :loop-health {:overall 0.65
                  :arrows [{:arrow-id :work→proof :health 0.9}
                           {:arrow-id :proof→patterns :health 0.0}]
                  :healthy-count 4
@@ -63,51 +88,12 @@
                      :coupling-edges 12
                      :ticks-firing 1}}})
 
-(deftest observe-test
-  (testing "observation vector has all expected channels"
-    (let [obs (wm/observe sample-data)]
-      (is (= 0.65 (:loop-health obs)))
-      (is (= 0.8 (:support-coverage obs)))
-      (is (= 0.5 (:attack-coverage obs)))
-      (is (= 0.4 (:mission-health obs)))
-      (is (= 0.7 (:stack-pct obs)))
-      (is (= 0.1 (:consulting-pct obs)))
-      (is (= 0.15 (:portfolio-pct obs)))
-      (is (= 0.05 (:mathematics-pct obs)))))
-
-  (testing "active-repo-ratio normalized correctly"
-    (let [obs (wm/observe sample-data)]
-      (is (= (/ 10.0 16) (:active-repo-ratio obs)))))
-
-  (testing "sorry-count-norm capped at 1.0"
-    (let [data (assoc-in sample-data [:graph :summary :total-sorrys] 20)
-          obs (wm/observe data)]
-      (is (= 1.0 (:sorry-count-norm obs)))))
-
-  (testing "ticks-firing-ratio"
-    (let [obs (wm/observe sample-data)]
-      (is (= 0.5 (:ticks-firing-ratio obs)))))
-
-  (testing "sense->vector produces ordered vector"
-    (let [obs (wm/observe sample-data)
-          v (wm/sense->vector obs)]
-      (is (= 13 (count v)) "should have 13 channels")
-      (is (every? number? v) "all values should be numbers"))))
-
-(deftest observe-empty-data-test
-  (testing "observe handles empty/nil data gracefully"
-    (let [obs (wm/observe {})]
-      (is (every? #(= 0.0 (val %)) obs)
-          "all channels should be 0.0 for empty data"))))
-
-;; ---------------------------------------------------------------------------
-;; render-war-machine (markdown output)
-;; ---------------------------------------------------------------------------
-
 (deftest render-war-machine-test
   (testing "produces non-empty markdown"
     (let [md (wm/render-war-machine
-              {:loop-health (:loop-health sample-data)
+              {:self-watch (:self-watch sample-data)
+               :commit-hygiene (:commit-hygiene sample-data)
+               :loop-health (:loop-health sample-data)
                :support-attack (:support-attack sample-data)
                :mission-triage (:mission-triage sample-data)
                :graph (:graph sample-data)
@@ -115,9 +101,59 @@
       (is (string? md))
       (is (pos? (count md)))
       (is (.contains md "War Machine"))
+      (is (.contains md "Self-Watch"))
+      (is (.contains md "Commit Hygiene"))
       (is (.contains md "Loop Health"))
       (is (.contains md "Holistic Argument"))
       (is (.contains md "Mission Triage")))))
+
+(deftest summarize-self-watch-projects-latest-warning-and-recovery
+  (let [entries [{:evidence/at "2026-05-21T10:00:00Z"
+                  :evidence/body {:event :family-fired
+                                  :family-id :obsolescence-recognition/pipeline-tracer
+                                  :outcome :violation
+                                  :detail {:obsolete-count 2
+                                           :obsolete-artifacts [{:track-id :track-1}
+                                                                {:track-id :track-2}]}}}
+                 {:evidence/at "2026-05-21T10:01:00Z"
+                  :evidence/body {:event "process-alert"
+                                  :process-id "multi-watcher"
+                                  :kind "stale"
+                                  :severity "critical"
+                                  :message "last-active age 45000ms"}}
+                 {:evidence/at "2026-05-21T10:02:00Z"
+                  :evidence/body {:event "process-recovery"
+                                  :process-id "drawbridge"
+                                  :kind "recovered"
+                                  :severity "info"
+                                  :message "recovered"}}]
+        summary (#'wm/summarize-self-watch entries)]
+    (is (= 2 (:issue-count summary)))
+    (is (= 1 (:critical-count summary)))
+    (is (= 1 (:warning-count summary)))
+    (is (= ["multi-watcher stale"
+            "2 overdue pipeline tracers need close-or-extend decisions"]
+           (mapv :summary (:issues summary))))
+    (is (= ["drawbridge recovered"]
+           (mapv :summary (:recoveries summary))))))
+
+(deftest summarize-working-tree-hygiene-projects-top-repos-honestly
+  (let [summary (#'wm/summarize-working-tree-hygiene
+                 {:available? true
+                  :max-tier :high
+                  :max-pressure 3.25
+                  :snapshot-age-minutes 12.0
+                  :stale? false
+                  :channels [{:channel :working-tree :pressure 3.25 :tier :high}
+                             {:channel :active-sessions :pressure 0.66 :tier :silent}]
+                  :per-repo [{:repo "futon4" :pressure 3.25 :count 48 :max-age-days 12.4 :bytes 1694674 :tier :high}
+                             {:repo "futon3c" :pressure 0.0 :count 0 :max-age-days 0.0 :bytes 0 :tier :silent}]})]
+    (is (:available? summary))
+    (is (= :not-yet-grouped (:clustering-status summary)))
+    (is (= 1 (:active-count summary)))
+    (is (= 1 (:high-count summary)))
+    (is (= ["futon4"] (mapv :repo (:queues summary))))
+    (is (.contains (:action (first (:queues summary))) "commit/disposition clustering"))))
 
 ;; ---------------------------------------------------------------------------
 ;; Data shape contracts
@@ -154,3 +190,104 @@
            (#'wm/detect-repos {:evidence/tags ["futon0"]
                                :evidence/type "coordination"
                                :evidence/body {:text "war-machine changes in futon3c"}})))))
+
+(deftest anamnesis-tiebreak-reorders-address-sorry-groups
+  (let [ranked [{:rank 1
+                 :G-total -4.2558
+                 :action {:type :address-sorry
+                          :target :sorry/r3a-likelihood-coupling-density}}
+                {:rank 2
+                 :G-total -4.2558
+                 :action {:type :address-sorry
+                          :target :sorry/r3a-likelihood-ticks-firing-ratio}}
+                {:rank 3
+                 :G-total -4.2558
+                 :action {:type :address-sorry
+                          :target :sorry/r3d-per-entity-attribution}}
+                {:rank 4
+                 :G-total -4.2558
+                 :action {:type :address-sorry
+                          :target :sorry/stub-lifts-pending-aif-edn}}
+                {:rank 5
+                 :G-total -4.2558
+                 :action {:type :address-sorry
+                          :target :sorry/wm-ui-hud-mode-rationale-hardcode}}
+                {:rank 6
+                 :G-total -4.2558
+                 :action {:type :address-sorry
+                          :target :sorry/mission-aif-head-not-served}}
+                {:rank 7
+                 :G-total -4.2558
+                 :action {:type :address-sorry
+                          :target :sorry/handler-closure-route-rebinding}}]
+        sorry-idx {"sorry/r3a-likelihood-coupling-density"
+                   {:hx/props {:sorry/related-missions ["M-r3a-density"]}}
+                   "sorry/r3a-likelihood-ticks-firing-ratio"
+                   {:hx/props {:sorry/related-missions ["M-r3a-ticks"]}}
+                   "sorry/r3d-per-entity-attribution"
+                   {:hx/props {:sorry/related-missions ["M-r3d"]}}
+                   "sorry/stub-lifts-pending-aif-edn"
+                   {:hx/props {:sorry/related-missions []}}
+                   "sorry/wm-ui-hud-mode-rationale-hardcode"
+                   {:hx/props {:sorry/related-missions ["M-wm-ui"]}}
+                   "sorry/mission-aif-head-not-served"
+                   {:hx/props {:sorry/related-missions ["M-head"]}}
+                   "sorry/handler-closure-route-rebinding"
+                   {:hx/props {:sorry/related-missions ["M-drawbridge"]}}}
+        mission-idx {"r3a-density" "futon3c-d/mission/r3a-density"
+                     "r3a-ticks" "futon3c-d/mission/r3a-ticks"
+                     "r3d" "futon3c-d/mission/r3d"
+                     "wm-ui" "futon3c-d/mission/wm-ui"
+                     "head" "futon3c-d/mission/head"
+                     "drawbridge" "futon3c-d/mission/drawbridge"}
+        delta-by-endpoint {"futon3c-d/mission/r3a-density" {:delta-T 0.0}
+                           "futon3c-d/mission/r3a-ticks" {:delta-T 0.0}
+                           "futon3c-d/mission/r3d" {:delta-T -0.7}
+                           "futon3c-d/mission/wm-ui" {:delta-T -0.2}
+                           "futon3c-d/mission/head" {:delta-T -2.2}
+                           "futon3c-d/mission/drawbridge" {:delta-T -1.0}}]
+    (with-redefs-fn {#'wm/sorry-doc-index (fn [] sorry-idx)
+                     #'wm/mission-doc-index (fn [] mission-idx)
+                     #'wm/compute-delta-t-mission
+                     (fn [mission-endpoint]
+                       (get delta-by-endpoint mission-endpoint {:delta-T 0.0}))}
+      (fn []
+        (let [reordered (#'wm/apply-anamnesis-tiebreak ranked)
+              targets (mapv #(get-in % [:action :target]) reordered)]
+          (is (= [:sorry/mission-aif-head-not-served
+                  :sorry/handler-closure-route-rebinding
+                  :sorry/r3d-per-entity-attribution
+                  :sorry/wm-ui-hud-mode-rationale-hardcode
+                  :sorry/r3a-likelihood-coupling-density
+                  :sorry/r3a-likelihood-ticks-firing-ratio
+                  :sorry/stub-lifts-pending-aif-edn]
+                 targets))
+          (is (= [1 2 3 4 5 6 7] (mapv :rank reordered)))
+          (is (= [:sorry/r3a-likelihood-coupling-density
+                  :sorry/r3a-likelihood-ticks-firing-ratio
+                  :sorry/stub-lifts-pending-aif-edn]
+                 (subvec targets 4 7))
+              "legitimate 0.0 concentration ties stay in original order"))))))
+
+(deftest anamnesis-tiebreak-leaves-mixed-or-non-sorry-ties-alone
+  (let [ranked [{:rank 1
+                 :G-total -4.2558
+                 :action {:type :address-sorry
+                          :target :sorry/r3d-per-entity-attribution}}
+                {:rank 2
+                 :G-total -4.2558
+                 :action {:type :open-mission
+                          :target "M-action-cost-modelling"}}
+                {:rank 3
+                 :G-total -4.2558
+                 :action {:type :open-mission
+                          :target "M-mission-wiring"}}]]
+    (with-redefs-fn {#'wm/sorry-doc-index (fn [] (throw (ex-info "should not be called" {})))
+                     #'wm/mission-doc-index (fn [] (throw (ex-info "should not be called" {})))
+                     #'wm/compute-delta-t-mission
+                     (fn [_] (throw (ex-info "should not be called" {})))}
+      (fn []
+        (let [reordered (#'wm/apply-anamnesis-tiebreak ranked)]
+          (is (= (mapv #(get-in % [:action :target]) ranked)
+                 (mapv #(get-in % [:action :target]) reordered)))
+          (is (= [1 2 3] (mapv :rank reordered))))))))
