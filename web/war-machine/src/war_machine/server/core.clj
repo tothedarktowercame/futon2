@@ -4,9 +4,15 @@
    Mirrors the webarxana pattern (futon4/dev/web/webarxana/src/webarxana/server/core.clj):
    reitit + http-kit + ring-json + resource handler for the SPA shell.
 
-   One data endpoint — /api/war-machine — calls the canonical
+   One data endpoint at THIS JVM — /api/war-machine — calls the canonical
    futon2.report.war-machine/generate-war-machine and returns the snapshot as JSON.
-   The tick loop, ant motion, glow decay all happen client-side in CLJS."
+   The tick loop, ant motion, glow decay all happen client-side in CLJS.
+
+   IMPORTANT: this JVM is NOT self-sufficient for the SPA.  The cljs client
+   also fetches /api/alpha/aif-stack/live and /api/alpha/war-machine/show-in-emacs
+   from the futon3c JVM on :7070 (the One JVM per futon3c/CLAUDE.md I-0).
+   In dev, shadow-cljs's :proxy-url stitches them together.  See
+   `futon2/INSTALL.md` for the full bring-up architecture + gotchas."
   (:require [org.httpkit.server :as hk]
             [reitit.ring :as ring]
             [ring.middleware.json :refer [wrap-json-response]]
