@@ -230,22 +230,41 @@
           []
           ranked-actions))
 
+(defn- structural-pressure-for-action
+  [action {:keys [sorry-idx mission-idx delta-cache]}]
+  (if (= :address-sorry (:type action))
+    (let [target (action-target-key (:target action))
+          sorry-doc (get sorry-idx target)
+          mission-endpoints (when sorry-doc
+                              (related-mission-endpoints sorry-doc mission-idx))]
+      (double
+       (reduce (fn [acc mission-endpoint]
+                 (let [delta-result (or (get @delta-cache mission-endpoint)
+                                        (let [result (compute-delta-t-mission
+                                                      mission-endpoint)]
+                                          (swap! delta-cache assoc mission-endpoint result)
+                                          result))]
+                   (+ acc (- 1.0 (double (:mission-T delta-result 0.5))))))
+               0.0
+               mission-endpoints)))
+    0.0))
+
 (defn- anamnesis-concentration-for-entry
-  [entry {:keys [sorry-idx mission-idx delta-cache]}]
-  (let [target (action-target-key (get-in entry [:action :target]))
-        sorry-doc (get sorry-idx target)
-        mission-endpoints (when sorry-doc
-                            (related-mission-endpoints sorry-doc mission-idx))]
-    (double
-             (reduce (fn [acc mission-endpoint]
-               (let [delta-result (or (get @delta-cache mission-endpoint)
-                                      (let [result (compute-delta-t-mission
-                                                    mission-endpoint)]
-                                        (swap! delta-cache assoc mission-endpoint result)
-                                        result))]
-                 (+ acc (- 1.0 (double (:mission-T delta-result 0.5))))))
-             0.0
-             mission-endpoints))))
+  [entry ctx]
+  (structural-pressure-for-action (:action entry) ctx))
+
+(defn- enrich-candidates-with-structural-pressure
+  [candidates]
+  (if-not (some #(= :address-sorry (:type %)) candidates)
+    (vec candidates)
+    (let [ctx {:sorry-idx (sorry-doc-index)
+               :mission-idx (mission-doc-index)
+               :delta-cache (atom {})}]
+      (mapv (fn [action]
+              (assoc action
+                     :structural-pressure-per-action
+                     (structural-pressure-for-action action ctx)))
+            candidates))))
 
 (defn- apply-anamnesis-tiebreak
   [ranked-actions]
@@ -273,7 +292,10 @@
                                     (anamnesis-concentration-for-entry entry ctx)}))
                                 (sort-by (juxt (comp - :anamnesis-concentration)
                                                :original-index))
-                                (mapv :entry))
+                                (mapv (fn [m]
+                                        (assoc (:entry m)
+                                               :anamnesis-concentration
+                                               (:anamnesis-concentration m)))))
                            group)))
                (map-indexed (fn [i entry] (assoc entry :rank (inc i))))
                vec))))))
@@ -2774,12 +2796,32 @@
                                                            " status=" (or (some-> status name) "?")
                                                            " balance=" balance)}})
                               (:sessions mb)))
-        ;; Mission AIF Head — not yet exposed via HTTP
-        ;; When M-aif-head wires an endpoint, add it here.
-        mission-head {:head-id :mission-aif-head
-                      :source "futon3c aif/mission_head.clj"
-                      :available? false
-                      :note "Exists in code but no HTTP endpoint yet. Needs wiring."}
+        ;; Mission AIF Head — bridge candidate (c) from
+        ;; sorry/mission-aif-head-not-served: the WM head reads the mission-AIF
+        ;; head's LOCAL computation in-process (a typed reading), making it
+        ;; "readable by the WM head" — the literal gap named by the sorry.
+        ;; (Unblocked by the futon3c.aif.invariant defonce fix, 2026-05-29;
+        ;; M-pilot-appearance REPL substantive cycle; cg in sorrys.edn :resolution.)
+        mission-head (try
+                       (let [sma (requiring-resolve 'futon3c.aif.mission-head/select-mission-action)
+                             arena (some-> (requiring-resolve 'futon3c.aif.mission-head/mission-arena) deref)
+                             reading (sma {} 1.0)]
+                         {:head-id :mission-aif-head
+                          :source "futon3c aif/mission_head.clj (in-process, bridge-c)"
+                          :available? true
+                          :state {:arena-id (:arena/id arena)
+                                  :selected-action (:action reading)
+                                  :abstain? (:abstain? reading)
+                                  :tau (:tau reading)}
+                          :judgement {:action (:action reading)
+                                      :summary (str "mission-aif-head selected "
+                                                    (some-> (:action reading) name)
+                                                    " (tau " (:tau reading) ")")}})
+                       (catch Throwable t
+                         {:head-id :mission-aif-head
+                          :source "futon3c aif/mission_head.clj"
+                          :available? false
+                          :note (str "in-process read failed: " (.getMessage t))}))
         all (vec (concat [portfolio-head] session-heads [mission-head]))
         heads (filterv :available? all)
         missing (filterv (complement :available?) all)]
@@ -3223,7 +3265,9 @@
         wm-horizon-steps (when (and (:events-loaded? anticipation-snapshot)
                                     (seq (:events anticipation-snapshot)))
                            3)
-        wm-ranked (-> (efe/rank-actions wm-state wm-candidates
+        wm-ranked (-> (efe/rank-actions wm-state
+                                        (enrich-candidates-with-structural-pressure
+                                         wm-candidates)
                                         {:time-pressure wm-time-pressure
                                          :horizon-steps wm-horizon-steps})
                       apply-anamnesis-tiebreak)
