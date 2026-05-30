@@ -223,8 +223,23 @@
   {:id :sorry/r3a-likelihood-ticks-firing-ratio
    :title "R3a likelihood model for :ticks-firing-ratio"
    :raised-at "2026-05-18"
-   :status :open
+   :status :addressed
    :kind :prototyping-forward
+   :resolved-at "2026-05-30"
+   :resolved-by-cg "cg-77efb863-dff7-40d5-8c87-45025d32628d"
+   :resolved-by-pilot "codex-2"
+   :resolution
+   (str
+    "Addressed by executing the tick/entity bridge scoped in "
+    "E-ticks-firing-ratio-likelihood.md. `stack-annotations.edn` now carries "
+    "four first-class `:logic-model-tick` sections sourced from "
+    "`stack-logic-model.edn :pocketwatch :ticks`; "
+    "`classify-entity-ticks-from-stack-annotations` maps those sections to "
+    "`:tick/<id>` tags; `predict-ticks-firing-ratio` selects the tick-entity "
+    "cohort corresponding to evaluated tick results and averages open/active "
+    "belief mass; and `judge` threads entity-ticks + tick-results into "
+    "`predict-observation`. `:ticks-firing-ratio` is now included in "
+    "`channels-with-likelihood` and the R3 prediction-error loop.")
    :has-excursion "futon3c/holes/missions/E-ticks-firing-ratio-likelihood.md"
    :decomposed-at "2026-05-30"
    :decomposed-by-cg "cg-bf2f9b00-f3a3-47cc-9859-e3c7c0e68671"

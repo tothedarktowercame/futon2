@@ -31,6 +31,7 @@
    ukrn_v3_belief.clj` — same shape, discrete status set instead of
    continuous (D, A) coordinates."
   (:require [clojure.edn :as edn]
+            [clojure.set :as set]
             [clojure.string :as str]))
 
 (def status-set
@@ -430,6 +431,37 @@
              (:sections doc)))
      (catch Throwable _ {}))))
 
+(def ^:private tick-ref-pattern
+  #"^tick\|logic-model\|([a-z0-9-]+)$")
+
+(defn- tick-tag-for-section
+  [section]
+  (let [tick-name (or (some-> (:tick-id section) name)
+                      (some->> (:ref section)
+                               (re-matches tick-ref-pattern)
+                               second))]
+    (when tick-name
+      (keyword "tick" tick-name))))
+
+(defn classify-entity-ticks-from-stack-annotations
+  "Read `stack-annotations.edn` and produce `{entity-id #{:tick/<id>}}`.
+
+   Tick entities are first-class stack-annotation sections with refs like
+   `tick|logic-model|hermit-warning`, sourced from the pocketwatch ticks in
+   `stack-logic-model.edn`."
+  ([] (classify-entity-ticks-from-stack-annotations default-stack-annotations-path))
+  ([path]
+   (try
+     (let [doc (edn/read-string (slurp path))]
+       (reduce (fn [acc section]
+                 (let [eid (:id section)]
+                   (if-let [tag (tick-tag-for-section section)]
+                     (update acc eid (fnil conj #{}) tag)
+                     acc)))
+               {}
+               (:sections doc)))
+     (catch Throwable _ {}))))
+
 (defn predict-support-coverage
   "Predict observation distribution for the `:support-coverage` channel.
 
@@ -497,6 +529,39 @@
                   (double n))
          :variance (mean-entropy-variance cohort)}))))
 
+(defn- tick-result-tags
+  [tick-results]
+  (into #{}
+        (keep (fn [t]
+                (some->> (:id t) name (keyword "tick"))))
+        tick-results))
+
+(defn- entities-with-tick-tags
+  [belief entity-ticks tick-results]
+  (let [wanted (tick-result-tags tick-results)]
+    (filter (fn [[eid _]]
+              (seq (set/intersection
+                    wanted
+                    (get entity-ticks eid #{}))))
+            belief)))
+
+(defn predict-ticks-firing-ratio
+  "Predict observation distribution for `:ticks-firing-ratio`.
+
+   Tick results are logic-model-level checks; belief is entity-level. This
+   bridge selects first-class tick entities from stack annotations whose
+   `:tick/<id>` tags correspond to evaluated tick results, then averages
+   open/active belief mass over that cohort. Open tick entities predict
+   firing constraint warnings."
+  [belief entity-ticks tick-results]
+  (let [cohort (entities-with-tick-tags belief entity-ticks tick-results)]
+    (if (empty? cohort)
+      {:mean 0.0 :variance 1.0}
+      (let [n (count cohort)]
+        {:mean (/ (reduce + (map (comp entity-open-mass second) cohort))
+                  (double n))
+         :variance (mean-entropy-variance cohort)}))))
+
 (def channels-with-likelihood
   "Set of observation channels for which an R3a likelihood model exists.
    v0.11: 4 channels (annotation-health, sorry-count-norm, mission-health,
@@ -505,12 +570,13 @@
    attack-coverage), bringing total to 6.
    WM pilot cycle 2 (2026-05-30): +1 channel (coupling-density), bridging
    repo-level temporal-coupling edges to entity-level belief by source repo.
+   WM pilot cycle 4 (2026-05-30): +1 channel (ticks-firing-ratio), bridging
+   logic-model tick checks to first-class tick entities in stack annotations.
    Remaining sorries in
    `futon2/data/sorrys.edn` stay `:prototyping-forward` pending their own
-   prerequisites (tick-entity-typing); the 6 reclassified
-   on cg-18b7831b were `:n-a-by-design`."
+   prerequisites; the 6 reclassified on cg-18b7831b were `:n-a-by-design`."
   #{:annotation-health :sorry-count-norm :mission-health :active-repo-ratio
-    :support-coverage :attack-coverage :coupling-density})
+    :support-coverage :attack-coverage :coupling-density :ticks-firing-ratio})
 
 (defn predict-observation
   "Predict observation distributions across all channels for which a
@@ -521,9 +587,11 @@
 
    Two-arg form: adds `:support-coverage` and `:attack-coverage`.
 
-   Three-arg form also adds `:coupling-density`; CONTEXT is either a map
-   carrying `:entity-repos` and `:coupling-edges`, or a legacy raw edge
-   collection (in which case entity repos default to `{}`).
+   Three-arg form also adds context-derived channels:
+   - `:coupling-density` from `:entity-repos` + `:coupling-edges`
+   - `:ticks-firing-ratio` from `:entity-ticks` + `:tick-results`
+
+   CONTEXT is either a map or a legacy raw coupling-edge collection.
 
    Channels in `channels-with-likelihood` are included; others are absent
    (callers handle absence by falling back to preference-gap-driven scoring)."
@@ -537,7 +605,7 @@
           :support-coverage (predict-support-coverage belief entity-tags)
           :attack-coverage  (predict-attack-coverage belief entity-tags)))
   ([belief entity-tags context]
-   (let [{:keys [entity-repos coupling-edges]}
+   (let [{:keys [entity-repos coupling-edges entity-ticks tick-results]}
          (if (map? context)
            context
            {:coupling-edges context})]
@@ -545,4 +613,8 @@
             :coupling-density
             (predict-coupling-density belief
                                       (or entity-repos {})
-                                      (or coupling-edges []))))))
+                                      (or coupling-edges []))
+            :ticks-firing-ratio
+            (predict-ticks-firing-ratio belief
+                                        (or entity-ticks {})
+                                        (or tick-results []))))))

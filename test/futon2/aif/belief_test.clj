@@ -325,10 +325,10 @@
           (str "foreclosed belief → dormant; got " (:mean p))))))
 
 (deftest channels-with-likelihood-test
-  (testing "WM pilot cycle 2 brings coverage to 7 channels"
-    (is (= 7 (count belief/channels-with-likelihood)))
+  (testing "WM pilot cycle 4 brings coverage to 8 channels"
+    (is (= 8 (count belief/channels-with-likelihood)))
     (is (= #{:annotation-health :sorry-count-norm :mission-health :active-repo-ratio
-             :support-coverage :attack-coverage :coupling-density}
+             :support-coverage :attack-coverage :coupling-density :ticks-firing-ratio}
            belief/channels-with-likelihood))))
 
 (deftest predict-observation-composite-test
@@ -408,6 +408,21 @@
                (belief/classify-entity-repos-from-stack-annotations path)))
         (finally (.delete tmp))))))
 
+(deftest classify-entity-ticks-from-stack-annotations-test
+  (testing "Logic-model tick sections are mapped to :tick/<id> tags"
+    (let [tmp (java.io.File/createTempFile "stack-ann-ticks-" ".edn")
+          path (.getAbsolutePath tmp)]
+      (try
+        (write-tmp-stack-annotations!
+         path
+         [{:id "hermit" :ref "tick|logic-model|hermit-warning"}
+          {:id "cargo" :tick-id :cargo-warning}
+          {:id "not-a-tick" :ref "futon5a/holes/stories/leaf-2.md"}])
+        (is (= {"hermit" #{:tick/hermit-warning}
+                "cargo" #{:tick/cargo-warning}}
+               (belief/classify-entity-ticks-from-stack-annotations path)))
+        (finally (.delete tmp))))))
+
 (deftest classify-entity-tags-smoke-against-real-substrate
   (testing "Real stack-annotations.edn yields exactly 9 tagged entities (S1-S5 + A1-A4)"
     (let [tags (belief/classify-entity-tags-from-stack-annotations)]
@@ -476,12 +491,13 @@
           p (belief/predict-attack-coverage b tags)]
       (is (> (:mean p) 0.9)))))
 
-(deftest channels-with-likelihood-now-six-test
-  (testing "WM pilot cycle 2 promotes channels-with-likelihood to 7"
-    (is (= 7 (count belief/channels-with-likelihood)))
+(deftest channels-with-likelihood-now-eight-test
+  (testing "WM pilot cycle 4 promotes channels-with-likelihood to 8"
+    (is (= 8 (count belief/channels-with-likelihood)))
     (is (contains? belief/channels-with-likelihood :support-coverage))
     (is (contains? belief/channels-with-likelihood :attack-coverage))
-    (is (contains? belief/channels-with-likelihood :coupling-density))))
+    (is (contains? belief/channels-with-likelihood :coupling-density))
+    (is (contains? belief/channels-with-likelihood :ticks-firing-ratio))))
 
 (deftest predict-observation-two-arity-test
   (testing "Two-arg predict-observation adds :support-coverage + :attack-coverage"
@@ -518,11 +534,37 @@
           (str "uncoupled dormant entity should not affect cohort; got " (:mean p))))))
 
 (deftest predict-observation-three-arity-adds-coupling-density-test
-  (testing "Three-arg predict-observation includes repo-bridged coupling-density"
-    (let [b (belief/initial-belief-state ["e1"])
+  (testing "Three-arg predict-observation includes context-bridged channels"
+    (let [b (belief/initial-belief-state ["e1" "tick"])
           tags {}
           context {:entity-repos {"e1" "futon2"}
-                   :coupling-edges [{:from "futon2" :to "futon3" :strength 0.25}]}
+                   :coupling-edges [{:from "futon2" :to "futon3" :strength 0.25}]
+                   :entity-ticks {"tick" #{:tick/hermit-warning}}
+                   :tick-results [{:id :hermit-warning :fired? true}]}
           predictions (belief/predict-observation b tags context)]
-      (is (= 7 (count predictions)))
-      (is (contains? predictions :coupling-density)))))
+      (is (= 8 (count predictions)))
+      (is (contains? predictions :coupling-density))
+      (is (contains? predictions :ticks-firing-ratio)))))
+
+(deftest predict-ticks-firing-ratio-empty-bridge-test
+  (testing "No tick entity tags or results → maximally uncertain"
+    (let [b {"tick" (belief/uniform-prior)}]
+      (is (= {:mean 0.0 :variance 1.0}
+             (belief/predict-ticks-firing-ratio b {} []))))))
+
+(deftest predict-ticks-firing-ratio-tick-cohort-test
+  (testing "Only entities tagged for evaluated tick ids contribute"
+    (let [openish (reduce belief/update-entity-belief
+                          (belief/uniform-prior)
+                          (repeat 30 {:type :reopened :weight 5.0}))
+          closed (reduce belief/update-entity-belief
+                         (belief/uniform-prior)
+                         (repeat 30 {:type :addressed :weight 5.0}))
+          b {"tick" openish
+             "other" closed}
+          tick-tags {"tick" #{:tick/hermit-warning}
+                     "other" #{:tick/cargo-warning}}
+          tick-results [{:id :hermit-warning :fired? true}]
+          p (belief/predict-ticks-firing-ratio b tick-tags tick-results)]
+      (is (> (:mean p) 0.9)
+          (str "non-selected tick entity should not affect cohort; got " (:mean p))))))

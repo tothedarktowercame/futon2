@@ -3170,8 +3170,12 @@
         ;; WM pilot cycle 2 (cg-7fa6aec3, 2026-05-30): static entity-repos
         ;; from stack-annotations.edn provenance/source path, bridging the
         ;; entity-level belief domain to repo-level temporal-coupling edges.
+        ;; WM pilot cycle 4 (cg-77efb863, 2026-05-30): first-class tick
+        ;; entities from stack-annotations.edn bridge logic-model tick
+        ;; results to entity-level belief.
         wm-entity-tags (belief/classify-entity-tags-from-stack-annotations)
         wm-entity-repos (belief/classify-entity-repos-from-stack-annotations)
+        wm-entity-ticks (belief/classify-entity-ticks-from-stack-annotations)
         wm-missions (try (mission-registry/open-missions) (catch Exception _ []))
         ;; v0.10/v0.11/v0.13/R3a/R3b/R3d wiring: compute prediction-errors
         ;; for every channel with a likelihood model. All errors record into
@@ -3204,7 +3208,9 @@
                              belief
                              wm-entity-tags
                              {:entity-repos wm-entity-repos
-                              :coupling-edges (get-in scan-data [:graph :edges :temporal-coupling])})
+                              :coupling-edges (get-in scan-data [:graph :edges :temporal-coupling])
+                              :entity-ticks wm-entity-ticks
+                              :tick-results (get-in scan-data [:graph :dynamics :ticks])})
                 raw-errors (into {}
                                  (for [ch belief/channels-with-likelihood]
                                    [ch (fe/compute-prediction-error
