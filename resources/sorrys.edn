@@ -344,10 +344,21 @@
            "futon2/scripts/futon2/report/war_machine.clj"]}
 
   {:id :sorry/stub-lifts-pending-aif-edn
-   :title "31 story stubs remain; .aif.edn authoring deferred for full decomposition"
+   :title "Story stubs have companion .aif.edn decompositions"
    :raised-at "2026-05-23"
-   :status :open
+   :status :addressed
    :kind :prototyping-forward
+   :resolved-at "2026-05-30"
+   :resolved-by-cg "cg-1abf150b-93a6-487b-a439-fbadb4c3c7a4"
+   :resolved-by-pilot "codex-2"
+   :resolution
+   (str
+    "Addressed by authoring genuine companion .aif.edn decompositions "
+    "for every remaining story still lifted as :stub-no-aif after the "
+    "leaf-1 pilot slice, then running lift_unlifted_stories.bb --only "
+    "for each story. stack-annotations.edn now has zero :stub-no-aif "
+    "sections, the sorry's story-path links are drained, and the only "
+    "remaining links are the lift script plus stack annotations registry.")
    :partial-progress
    [{:at "2026-05-30"
      :by-cg "cg-258e00b2-6855-47da-be88-11b830762e34"
@@ -383,38 +394,7 @@
     "discharged stub deepens the hypergraph; the queue's existence keeps "
     "the work visible.")
    :related-missions []
-   :links ["futon5a/holes/stories/globe1-market-interface.md"
-           "futon5a/holes/stories/globe2-mode-violation.md"
-           "futon5a/holes/stories/globe3-peer-eval-artifact.md"
-           "futon5a/holes/stories/globe4-paragogy-revenue.md"
-           "futon5a/holes/stories/globe5-vsat-revenue.md"
-           "futon5a/holes/stories/globe6-governance-interface.md"
-           "futon5a/holes/stories/globe7-novelty-floor.md"
-           "futon5a/holes/stories/globe8-policy-transition.md"
-           "futon5a/holes/stories/leaf-3.md"
-           "futon5a/holes/stories/leaf-4.md"
-           "futon5a/holes/stories/leaf-5.md"
-           "futon5a/holes/stories/leaf-6-0.md"
-           "futon5a/holes/stories/leaf-6-1.md"
-           "futon5a/holes/stories/leaf-6-2.md"
-           "futon5a/holes/stories/leaf-6-3.md"
-           "futon5a/holes/stories/leaf-6-4-0.md"
-           "futon5a/holes/stories/leaf-6-4-1.md"
-           "futon5a/holes/stories/leaf-6-4-3.md"
-           "futon5a/holes/stories/leaf-6-4-5.md"
-           "futon5a/holes/stories/leaf-6-5-0.md"
-           "futon5a/holes/stories/leaf-6-5-1.md"
-           "futon5a/holes/stories/leaf-6-5-2.md"
-           "futon5a/holes/stories/leaf-6-5-3.md"
-           "futon5a/holes/stories/leaf-6-5-4.md"
-           "futon5a/holes/stories/leaf-6-5-5.md"
-           "futon5a/holes/stories/leaf-7.md"
-           "futon5a/holes/stories/leaf-active-fronts.md"
-           "futon5a/holes/stories/leaf-start-here.md"
-           "futon5a/holes/stories/leaf-wm-r-criteria-walkthrough.md"
-           "futon5a/holes/stories/strategic-sorry-topology.md"
-           "futon5a/holes/stories/war-machine-lucid-scenes.md"
-           "futon4/scripts/lift_unlifted_stories.bb"
+   :links ["futon4/scripts/lift_unlifted_stories.bb"
            "futon5a/holes/stack-annotations.edn"]}
 
   {:id :sorry/wm-ui-hud-mode-rationale-hardcode
