@@ -344,10 +344,16 @@
            "futon2/scripts/futon2/report/war_machine.clj"]}
 
   {:id :sorry/stub-lifts-pending-aif-edn
-   :title "32 stories lifted as stubs; .aif.edn authoring deferred for full decomposition"
+   :title "31 story stubs remain; .aif.edn authoring deferred for full decomposition"
    :raised-at "2026-05-23"
    :status :open
    :kind :prototyping-forward
+   :partial-progress
+   [{:at "2026-05-30"
+     :by-cg "cg-258e00b2-6855-47da-be88-11b830762e34"
+     :story "futon5a/holes/stories/leaf-1.md"
+     :aif-edn "futon5a/holes/stories/leaf-1.aif.edn"
+     :result "Authored the singleton leaf's AIF+ graph and upgraded its stack-annotation stub to a composite parent plus child claim entities; 31 linked story stubs remain."}]
    :rationale
    (str
     "lift_unlifted_stories.bb (2026-05-23) registered parent :sections[] "
@@ -385,7 +391,6 @@
            "futon5a/holes/stories/globe6-governance-interface.md"
            "futon5a/holes/stories/globe7-novelty-floor.md"
            "futon5a/holes/stories/globe8-policy-transition.md"
-           "futon5a/holes/stories/leaf-1.md"
            "futon5a/holes/stories/leaf-3.md"
            "futon5a/holes/stories/leaf-4.md"
            "futon5a/holes/stories/leaf-5.md"
