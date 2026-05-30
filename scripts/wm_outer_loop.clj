@@ -185,13 +185,13 @@
    no commits in window."
   [window-days]
   (let [hashes (run-git wm-repo "log" (since-flag window-days)
-                        "--pretty=format:%H" "--" "data/sorrys.edn")]
+                        "--pretty=format:%H" "--" "resources/sorrys.edn")]
     (if (str/blank? (or hashes ""))
       {:n 0 :evidence-refs []}
       (let [hs (str/split-lines hashes)]
         (reduce
          (fn [acc h]
-           (let [diff (run-git wm-repo "show" h "--" "data/sorrys.edn")
+           (let [diff (run-git wm-repo "show" h "--" "resources/sorrys.edn")
                  added-lines (when diff
                                (->> (str/split-lines diff)
                                     (filter #(str/starts-with? % "+"))

@@ -21,6 +21,13 @@ resources/
 !web/war-machine/resources/public/
 !web/war-machine/resources/public/index.html
 
+# R-A.1 (M-war-machine-first-outing): track the sorry registry so git history is
+# the closure ledger and WM operation is reversible at the git level. Surgical:
+# re-include the dir, re-exclude its contents, then re-include just sorrys.edn.
+!resources/
+resources/*
+!resources/sorrys.edn
+
 # local file that shouldn't be tracked here
 LICENSE
 

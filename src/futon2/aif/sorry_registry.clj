@@ -35,7 +35,9 @@
             [futon2.aif.forward-model :as fm]))
 
 (def ^:private default-sorrys-path
-  (str (System/getProperty "user.home") "/code/futon2/data/sorrys.edn"))
+  ;; R-A.1 (M-war-machine-first-outing): relocated data/ → resources/ (tracked;
+  ;; git history is the closure ledger + git-level reversibility of WM operation).
+  (str (System/getProperty "user.home") "/code/futon2/resources/sorrys.edn"))
 
 (defn load-sorrys
   "Read the sorry-registry EDN file. Returns the full document map
