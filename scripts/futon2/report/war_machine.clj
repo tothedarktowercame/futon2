@@ -3166,16 +3166,16 @@
         ;; equality on shared string entity-ids.
         wm-belief-pre (belief/bootstrap-from-stack-annotations (map :id wm-sorrys))
         ;; E-support-coverage Cycle 4 (cg-a5d2e756, 2026-05-26): static
-        ;; entity-tags from stack-annotations.edn :ref classification —
-        ;; bootstrap-derived, read-only-after-bootstrap.  Threads into
-        ;; predict-observation's 2-arg form so :support-coverage +
-        ;; :attack-coverage channels light up.
+        ;; entity-tags from stack-annotations.edn :ref classification.
+        ;; WM pilot cycle 2 (cg-7fa6aec3, 2026-05-30): static entity-repos
+        ;; from stack-annotations.edn provenance/source path, bridging the
+        ;; entity-level belief domain to repo-level temporal-coupling edges.
         wm-entity-tags (belief/classify-entity-tags-from-stack-annotations)
+        wm-entity-repos (belief/classify-entity-repos-from-stack-annotations)
         wm-missions (try (mission-registry/open-missions) (catch Exception _ []))
-        ;; v0.10/v0.11/v0.13 R3a/R3b/R3d wiring: compute prediction-errors
-        ;; for every channel with a likelihood model (4 channels: :annotation-
-        ;; health, :sorry-count-norm, :mission-health, :active-repo-ratio).
-        ;; All four errors record into the trace's :prediction-errors map.
+        ;; v0.10/v0.11/v0.13/R3a/R3b/R3d wiring: compute prediction-errors
+        ;; for every channel with a likelihood model. All errors record into
+        ;; the trace's :prediction-errors map.
         ;;
         ;; v0.13 R3 multi-step inner iteration: run up to `r3-max-steps`
         ;; micro-steps per call. Each step: compute prediction-errors on
@@ -3200,7 +3200,11 @@
                belief wm-belief-pre
                prec-state prev-precision-state
                micro-trace []]
-          (let [predictions (belief/predict-observation belief wm-entity-tags)
+          (let [predictions (belief/predict-observation
+                             belief
+                             wm-entity-tags
+                             {:entity-repos wm-entity-repos
+                              :coupling-edges (get-in scan-data [:graph :edges :temporal-coupling])})
                 raw-errors (into {}
                                  (for [ch belief/channels-with-likelihood]
                                    [ch (fe/compute-prediction-error

@@ -200,8 +200,22 @@
   {:id :sorry/r3a-likelihood-coupling-density
    :title "R3a likelihood model for :coupling-density"
    :raised-at "2026-05-18"
-   :status :open
+   :status :addressed
    :kind :prototyping-forward
+   :resolved-at "2026-05-30"
+   :resolved-by-cg "cg-7fa6aec3-7a1b-4ada-b087-879bd850f80f"
+   :resolved-by-pilot "codex-2"
+   :resolution
+   (str
+    "Addressed by bridging repo-level temporal coupling to entity-level "
+    "belief. `classify-entity-repos-from-stack-annotations` maps each "
+    "stack-annotation section to a repo from its provenance/source path "
+    "(including devmap-futonN files); `predict-coupling-density` selects "
+    "entities whose repo participates in a temporal-coupling edge and "
+    "averages non-dormant belief mass across that cohort; and "
+    "`judge` passes both entity repos and `[:graph :edges :temporal-coupling]` "
+    "into `predict-observation`. `:coupling-density` is now included in "
+    "`channels-with-likelihood` and in the R3 prediction-error loop.")
    :rationale "Coupling edges / max edges [0,1] from temporal analysis. Could derive from belief mass on entities-with-cross-section-edges if edge-entities exist; currently doesn't."
    :related-missions ["M-war-machine-aif-completion"]
    :links ["futon2/docs/futon-aif-completeness.md#r3-predictive-coding-belief-update"]}

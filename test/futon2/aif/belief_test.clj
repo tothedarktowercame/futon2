@@ -325,10 +325,10 @@
           (str "foreclosed belief → dormant; got " (:mean p))))))
 
 (deftest channels-with-likelihood-test
-  (testing "E-support-coverage Cycle 3 (2026-05-26) brings coverage to 6 channels"
-    (is (= 6 (count belief/channels-with-likelihood)))
+  (testing "WM pilot cycle 2 brings coverage to 7 channels"
+    (is (= 7 (count belief/channels-with-likelihood)))
     (is (= #{:annotation-health :sorry-count-norm :mission-health :active-repo-ratio
-             :support-coverage :attack-coverage}
+             :support-coverage :attack-coverage :coupling-density}
            belief/channels-with-likelihood))))
 
 (deftest predict-observation-composite-test
@@ -390,6 +390,23 @@
   (testing "Missing or unreadable substrate returns empty map; bootstrap does not fail"
     (is (= {} (belief/classify-entity-tags-from-stack-annotations
                "/nonexistent/path/stack-annotations.edn")))))
+
+(deftest classify-entity-repos-from-stack-annotations-test
+  (testing "Sections are mapped to repos from provenance/source paths"
+    (let [tmp (java.io.File/createTempFile "stack-ann-repos-" ".edn")
+          path (.getAbsolutePath tmp)]
+      (try
+        (write-tmp-stack-annotations!
+         path
+         [{:id "leaf" :provenance {:source-file "futon5a/holes/stories/leaf-2.aif.edn"}}
+          {:id "devmap" :provenance {:source-file "futon5a/holes/stories/devmap-futon3.aif.edn"}}
+          {:id "doc" :ref "futon0/docs/stack-fitness-completeness.md"}
+          {:id "unknown" :ref "notes/plain.md"}])
+        (is (= {"leaf" "futon5a"
+                "devmap" "futon3"
+                "doc" "futon0"}
+               (belief/classify-entity-repos-from-stack-annotations path)))
+        (finally (.delete tmp))))))
 
 (deftest classify-entity-tags-smoke-against-real-substrate
   (testing "Real stack-annotations.edn yields exactly 9 tagged entities (S1-S5 + A1-A4)"
@@ -460,10 +477,11 @@
       (is (> (:mean p) 0.9)))))
 
 (deftest channels-with-likelihood-now-six-test
-  (testing "E-support-coverage Cycle 3 promotes channels-with-likelihood to 6"
-    (is (= 6 (count belief/channels-with-likelihood)))
+  (testing "WM pilot cycle 2 promotes channels-with-likelihood to 7"
+    (is (= 7 (count belief/channels-with-likelihood)))
     (is (contains? belief/channels-with-likelihood :support-coverage))
-    (is (contains? belief/channels-with-likelihood :attack-coverage))))
+    (is (contains? belief/channels-with-likelihood :attack-coverage))
+    (is (contains? belief/channels-with-likelihood :coupling-density))))
 
 (deftest predict-observation-two-arity-test
   (testing "Two-arg predict-observation adds :support-coverage + :attack-coverage"
@@ -475,3 +493,36 @@
       (is (= 6 (count two)) "two-arg form has 6 channels")
       (is (contains? two :support-coverage))
       (is (contains? two :attack-coverage)))))
+
+(deftest predict-coupling-density-empty-bridge-test
+  (testing "No entity→repo bridge or no coupling edges → maximally uncertain"
+    (let [b {"e1" (belief/uniform-prior)}]
+      (is (= {:mean 0.0 :variance 1.0}
+             (belief/predict-coupling-density b {} []))))))
+
+(deftest predict-coupling-density-coupled-repo-cohort-test
+  (testing "Only entities whose repo participates in coupling edges contribute"
+    (let [active (reduce belief/update-entity-belief
+                         (belief/uniform-prior)
+                         (repeat 30 {:type :strengthened :weight 5.0}))
+          dormant (reduce belief/update-entity-belief
+                          (belief/uniform-prior)
+                          (repeat 30 {:type :foreclosed :weight 5.0}))
+          b {"coupled" active
+             "uncoupled" dormant}
+          repos {"coupled" "futon3"
+                 "uncoupled" "futon9"}
+          edges [{:from "futon2" :to "futon3" :strength 0.4}]
+          p (belief/predict-coupling-density b repos edges)]
+      (is (> (:mean p) 0.9)
+          (str "uncoupled dormant entity should not affect cohort; got " (:mean p))))))
+
+(deftest predict-observation-three-arity-adds-coupling-density-test
+  (testing "Three-arg predict-observation includes repo-bridged coupling-density"
+    (let [b (belief/initial-belief-state ["e1"])
+          tags {}
+          context {:entity-repos {"e1" "futon2"}
+                   :coupling-edges [{:from "futon2" :to "futon3" :strength 0.25}]}
+          predictions (belief/predict-observation b tags context)]
+      (is (= 7 (count predictions)))
+      (is (contains? predictions :coupling-density)))))

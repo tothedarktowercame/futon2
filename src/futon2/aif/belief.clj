@@ -30,7 +30,8 @@
    continuous update used in `ukrn-services-simulation/notebooks/
    ukrn_v3_belief.clj` — same shape, discrete status set instead of
    continuous (D, A) coordinates."
-  (:require [clojure.edn :as edn]))
+  (:require [clojure.edn :as edn]
+            [clojure.string :as str]))
 
 (def status-set
   "The tagged status set the WM tracks per entity. Aligns with M-INC
@@ -393,9 +394,41 @@
   [belief entity-tags prefix]
   (filter (fn [[eid _]]
             (some #(and (keyword? %)
-                        (clojure.string/starts-with? (name %) prefix))
+                        (str/starts-with? (name %) prefix))
                   (get entity-tags eid #{})))
           belief))
+
+(defn- repo-from-source-file
+  "Derive the repo label for a stack-annotation source path.
+
+   Devmap story files are repo-specific even though they live under futon5a,
+   e.g. `futon5a/.../devmap-futon3.aif.edn` describes the futon3 repo.
+   Other paths use their first `futon*` path segment."
+  [source-file]
+  (when (string? source-file)
+    (or (second (re-find #"devmap-(futon[0-9a-z]+)\.aif\.edn" source-file))
+        (second (re-find #"^(futon[0-9a-z]+)(?:/|$)" source-file)))))
+
+(defn classify-entity-repos-from-stack-annotations
+  "Read `stack-annotations.edn` and produce `{entity-id repo-label}`.
+
+   This is the repo bridge needed by repo-level temporal-coupling edges:
+   belief is section/entity-level, while coupling is repo-level. Sections
+   without a derivable source repo are omitted."
+  ([] (classify-entity-repos-from-stack-annotations default-stack-annotations-path))
+  ([path]
+   (try
+     (let [doc (edn/read-string (slurp path))]
+       (into {}
+             (keep (fn [section]
+                     (let [eid (:id section)
+                           source-file (or (get-in section [:provenance :source-file])
+                                           (:ref section))
+                           repo (repo-from-source-file source-file)]
+                       (when (and eid repo)
+                         [eid repo]))))
+             (:sections doc)))
+     (catch Throwable _ {}))))
 
 (defn predict-support-coverage
   "Predict observation distribution for the `:support-coverage` channel.
@@ -433,17 +466,51 @@
         {:mean (/ (reduce + (map (comp entity-healthy-mass second) cohort)) (double n))
          :variance (mean-entropy-variance cohort)}))))
 
+(defn- coupled-repos
+  [coupling-edges]
+  (into #{}
+        (mapcat (fn [{:keys [from to]}]
+                  (keep identity [from to])))
+        coupling-edges))
+
+(defn- entities-in-coupled-repos
+  [belief entity-repos coupling-edges]
+  (let [repos (coupled-repos coupling-edges)]
+    (filter (fn [[eid _]]
+              (contains? repos (get entity-repos eid)))
+            belief)))
+
+(defn predict-coupling-density
+  "Predict observation distribution for `:coupling-density`.
+
+   Temporal coupling is repo-level, while belief is entity-level. This
+   bridges them by mapping stack-annotation entities to repos, selecting
+   entities whose repo participates in a temporal-coupling edge, and
+   averaging non-dormant belief mass over that cohort. Empty bridge/cohort
+   returns maximal uncertainty."
+  [belief entity-repos coupling-edges]
+  (let [cohort (entities-in-coupled-repos belief entity-repos coupling-edges)]
+    (if (empty? cohort)
+      {:mean 0.0 :variance 1.0}
+      (let [n (count cohort)]
+        {:mean (/ (reduce + (map (comp entity-nondormant-mass second) cohort))
+                  (double n))
+         :variance (mean-entropy-variance cohort)}))))
+
 (def channels-with-likelihood
   "Set of observation channels for which an R3a likelihood model exists.
    v0.11: 4 channels (annotation-health, sorry-count-norm, mission-health,
    active-repo-ratio).
    E-support-coverage Cycle 3 (2026-05-26): +2 channels (support-coverage,
-   attack-coverage), bringing total to 6 of 14.  Remaining 4 sorries in
+   attack-coverage), bringing total to 6.
+   WM pilot cycle 2 (2026-05-30): +1 channel (coupling-density), bridging
+   repo-level temporal-coupling edges to entity-level belief by source repo.
+   Remaining sorries in
    `futon2/data/sorrys.edn` stay `:prototyping-forward` pending their own
-   prerequisites (edge-entities, tick-entity-typing); the 6 reclassified
+   prerequisites (tick-entity-typing); the 6 reclassified
    on cg-18b7831b were `:n-a-by-design`."
   #{:annotation-health :sorry-count-norm :mission-health :active-repo-ratio
-    :support-coverage :attack-coverage})
+    :support-coverage :attack-coverage :coupling-density})
 
 (defn predict-observation
   "Predict observation distributions across all channels for which a
@@ -452,8 +519,11 @@
    Single-arg form: returns predictions for the 4 entity-tag-independent
    channels (back-compatible with pre-E-support-coverage callers).
 
-   Two-arg form: adds `:support-coverage` and `:attack-coverage` (which
-   need `entity-tags` per Cycle 2's bootstrap-derived classification).
+   Two-arg form: adds `:support-coverage` and `:attack-coverage`.
+
+   Three-arg form also adds `:coupling-density`; CONTEXT is either a map
+   carrying `:entity-repos` and `:coupling-edges`, or a legacy raw edge
+   collection (in which case entity repos default to `{}`).
 
    Channels in `channels-with-likelihood` are included; others are absent
    (callers handle absence by falling back to preference-gap-driven scoring)."
@@ -465,4 +535,14 @@
   ([belief entity-tags]
    (assoc (predict-observation belief)
           :support-coverage (predict-support-coverage belief entity-tags)
-          :attack-coverage  (predict-attack-coverage belief entity-tags))))
+          :attack-coverage  (predict-attack-coverage belief entity-tags)))
+  ([belief entity-tags context]
+   (let [{:keys [entity-repos coupling-edges]}
+         (if (map? context)
+           context
+           {:coupling-edges context})]
+     (assoc (predict-observation belief entity-tags)
+            :coupling-density
+            (predict-coupling-density belief
+                                      (or entity-repos {})
+                                      (or coupling-edges []))))))
