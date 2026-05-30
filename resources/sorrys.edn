@@ -373,8 +373,23 @@
   {:id :sorry/wm-ui-hud-mode-rationale-hardcode
    :title "WM UI HUD Mode tooltip rationale is hardcoded; should be sourced dynamically from strategic-vocabulary :μ/modes"
    :raised-at "2026-05-24"
-   :status :open
+   :status :addressed
    :kind :prototyping-forward
+   :resolved-at "2026-05-30"
+   :resolved-by-cg "cg-f1203497-547c-4818-839c-408b70f509c3"
+   :resolved-by-pilot "codex-2"
+   :resolution
+   (str
+    "Addressed by making the HUD Mode tooltip read mode records from the "
+    "live War Machine payload instead of a duplicated CLJS map. "
+    "`war-machine-strategic-vocabulary.edn` now carries first-class "
+    "`:μ/mode-rationales` data adjacent to `:μ/modes`; "
+    "`futon2.report.war-machine/scan-strategic-vocabulary` projects the "
+    "mode ids + rationales into `:strategic-vocabulary :mu :modes`; and "
+    "`war-machine.client.hud/mode-tooltip-text` looks up the current mode "
+    "there. The vocabulary file is not strict-EDN parseable as a whole "
+    "(`:snapshot/2026-04-12`), so the backend reader intentionally reads "
+    "only the named vocabulary forms needed by this surface.")
    :rationale
    (str
     "Anchor 0004 of `~/code/futon5a/data/wm-ui-anchors.edn` discharged "

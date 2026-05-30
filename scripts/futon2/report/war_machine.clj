@@ -60,6 +60,8 @@
       (str "http://localhost:" (or (System/getenv "FUTON3C_PORT") "7070"))))
 (def ^:private tz (ZoneId/of "Europe/London"))
 (def ^:private futon5a-root (str home "/code/futon5a"))
+(def ^:private strategic-vocabulary-path
+  (str futon5a-root "/data/war-machine-strategic-vocabulary.edn"))
 (def ^:private futon1a-url
   (or (System/getenv "FUTON1A_URL") "http://localhost:7071"))
 (def ^:private futon1a-penholder
@@ -3447,6 +3449,60 @@
     (catch Exception _
       {:health 0.0 :anomaly-count 0 :section-count 0})))
 
+(defn- mode-vocabulary-record
+  [mode rationales]
+  (cond-> {:id mode
+           :name (name mode)}
+    (contains? rationales mode)
+    (assoc :rationale (get rationales mode))))
+
+(defn- vocab-block-between
+  [text start-marker end-marker]
+  (when-let [start (str/index-of text start-marker)]
+    (let [after-start (+ start (count start-marker))
+          end (or (str/index-of text end-marker after-start)
+                  (count text))]
+      (subs text after-start end))))
+
+(defn- strip-edn-comments
+  [text]
+  (->> (str/split-lines text)
+       (map #(first (str/split % #";;" 2)))
+       (str/join "\n")))
+
+(defn- read-vocab-form-between
+  [text start-marker end-marker]
+  (some-> (vocab-block-between text start-marker end-marker)
+          strip-edn-comments
+          str/trim
+          clojure.edn/read-string))
+
+(defn scan-strategic-vocabulary
+  "Project the canonical WM strategic vocabulary into the JSON payload.
+
+   The HUD consumes `:mu :modes` so its Mode tooltip rationale follows the
+   vocabulary file instead of a duplicated CLJS-side map. The file is not
+   valid strict EDN as a whole, so read only the named forms needed here."
+  []
+  (try
+    (let [text (slurp strategic-vocabulary-path)
+          modes (vec (read-vocab-form-between text
+                                               ":μ/modes"
+                                               ":μ/mode-rationales"))
+          rationales (or (read-vocab-form-between text
+                                                   ":μ/mode-rationales"
+                                                   ":μ/override-modes")
+                         {})]
+      {:source-file strategic-vocabulary-path
+       :mu {:mode-ids modes
+            :modes (mapv #(mode-vocabulary-record % rationales)
+                         modes)}})
+    (catch Exception e
+      {:source-file strategic-vocabulary-path
+       :error (.getMessage e)
+       :mu {:mode-ids []
+            :modes []}})))
+
 ;; ---------------------------------------------------------------------------
 ;; Scan 11: R-criterion contract status
 ;;
@@ -3563,6 +3619,7 @@
         blocks (scan-blocks days)
         window (scan-window days now-zdt)
         annotation-graph (scan-annotation-graph)
+        strategic-vocabulary (scan-strategic-vocabulary)
         r-criteria (scan-r-criteria)
         r12-apparatus (scan-r12-apparatus)
         scan-data {:self-watch self-watch
@@ -3580,6 +3637,7 @@
                    :blocks blocks
                    :window window
                    :annotation-graph annotation-graph
+                   :strategic-vocabulary strategic-vocabulary
                    :r-criteria r-criteria
                    :r12-apparatus r12-apparatus}
         ;; Run the judgement layer

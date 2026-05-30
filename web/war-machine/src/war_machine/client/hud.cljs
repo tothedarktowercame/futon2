@@ -10,9 +10,10 @@
    M-war-machine-frontend-upgrade1 §2.2.1): interactive HUD segments
    carry a `:title` tooltip from the per-element anchor's rationale, plus
    an `:on-click` that surfaces the anchor's `:anthology-anchor` for
-   the operator. v1: console.log the anchor id + concept; v2: route to
-   an Arxana entity-view when one lands."
-  (:require [war-machine.client.api :as api]
+  the operator. v1: console.log the anchor id + concept; v2: route to
+  an Arxana entity-view when one lands."
+  (:require [clojure.string :as str]
+            [war-machine.client.api :as api]
             [war-machine.client.state :as s]
             [war-machine.client.waveform :as wf]))
 
@@ -28,39 +29,51 @@
   {:kind :workspace-file
    :path "futon5a/data/war-machine-strategic-vocabulary.edn"})
 
-;; ---------------------------------------------------------------------------
-;; Anchor rationales (per `:μ/modes` in
-;; `~/code/futon5a/data/war-machine-strategic-vocabulary.edn` :147-159)
-;; ---------------------------------------------------------------------------
-
-(def ^:private mode-rationale
-  "Per-mode one-sentence rationale, sourced from
-   `war-machine-strategic-vocabulary.edn :μ/modes` block. Hardcoded for v1;
-   if the vocab updates, re-sync here. (Reading the EDN dynamically is a
-   future substrate-side move, not in scope for the v1 anchor discharge.)"
-  {"multiplied"       "inhabitation × evolution > threshold; loop healthy, evidence flowing, sorrys closing"
-   "foraging-trapped" "mode stuck on :foraging under π-scholar; high stack-pct, low consulting-pct, cargo accumulating"
-   "hermit"           "stack→stack pathological loop; stack work feeding stack work, no external sorrys closing"
-   "depositing"       "mode switched to :depositing; consulting-pct rising, sorry-market-interface advancing"
-   "stagnant"         "inhabitation × (1−evolution); surfaces used but not improving"
-   "dark"             "1−inhabitation; no evidence, no commits, infrastructure rotting"})
-
 (defn- normalise-mode [m]
   (cond
     (keyword? m) (name m)
-    (string? m)  (if (clojure.string/starts-with? m ":") (subs m 1) m)
+    (string? m)  (if (str/starts-with? m ":") (subs m 1) m)
     :else        (str m)))
+
+(defn- mode-vocabulary-modes
+  "Read the mode records projected from
+   `war-machine-strategic-vocabulary.edn :μ/modes` by the WM payload."
+  [data]
+  (or (get-in data [:strategic-vocabulary :mu :modes])
+      []))
+
+(defn- mode-vocabulary-index [data]
+  (into {}
+        (keep (fn [row]
+                (let [mode-id (some-> (or (:id row) (:name row))
+                                      normalise-mode)
+                      rationale (:rationale row)]
+                  (when mode-id
+                    [mode-id {:rationale rationale
+                              :record row}]))))
+        (mode-vocabulary-modes data)))
+
+(defn- expected-mode-text [data]
+  (let [mode-names (->> (mode-vocabulary-modes data)
+                        (keep #(some-> (or (:id %) (:name %))
+                                       normalise-mode))
+                        seq)]
+    (if mode-names
+      (str/join " " (map #(str ":" %) mode-names))
+      "strategic-vocabulary payload unavailable")))
 
 (defn- mode-tooltip-text
   "Compose the `:title` text for the HUD Mode span. The text combines the
    mode name + its one-sentence rationale + the affordance hint that the
    element is clickable. Falls back to a generic label when the mode is
    unknown (off-vocabulary)."
-  [mode-str]
-  (let [rationale (get mode-rationale mode-str)]
+  [data mode-str]
+  (let [rationale (get-in (mode-vocabulary-index data)
+                          [mode-str :rationale])]
     (if rationale
-      (str mode-str " — " rationale ". Click for the 6-mode taxonomy (see strategic-vocabulary :μ/modes).")
-      (str mode-str " — (off-vocabulary; expected one of :multiplied :foraging-trapped :hermit :depositing :stagnant :dark)"))))
+      (str mode-str " — " rationale ". Click for the mode taxonomy (see strategic-vocabulary :μ/modes).")
+      (str mode-str " — (off-vocabulary; expected one of "
+           (expected-mode-text data) ")"))))
 
 (defn- on-click-mode
   "Click handler for the HUD Mode span (wm-ui-anchor:0004). Opens the
@@ -226,7 +239,7 @@
        ;; text depends on the per-mode rationale lookup, which the generic
        ;; anchor-span doesn't carry.
        [:span {:data-testid "hud-mode"
-               :title (mode-tooltip-text mode-str)
+               :title (mode-tooltip-text data mode-str)
                :on-click (on-click-mode mode-str)
                :style {:cursor "pointer"
                        :text-decoration "underline dotted"}}
