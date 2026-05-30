@@ -231,9 +231,31 @@
   {:id :sorry/r3d-per-entity-attribution
    :title "R3d wiring uses crude global attribution; refine to per-entity once real per-entity event streams arrive"
    :raised-at "2026-05-18"
-   :status :open
-   :has-excursion "futon3c/holes/missions/E-r3d-per-entity-attribution.md"
-   :excursion-authored-inline "2026-05-30 by the WM run (cg-f32696ac); ∇-deform/decompose cycle — path constructed, sorry NOT discharged"
+   :status :addressed
+   :resolved-at "2026-05-30"
+   :resolved-by-cg "cg-d9630a32-3b28-45ac-a733-bc84afc31204"
+   :resolved-by-pilot "claude-5 (war-machine-pilot, run live-d2068cc1) — the WM's own rank-1 recommendation (structural-pressure 0.9), followed"
+   :resolution
+   (str
+    "v0.17: judge's R3d belief-update is now PER-ENTITY BY CONTRIBUTION, not "
+    "uniform. The stated defect — 'the aggregate signal can't legitimately be "
+    "attributed equally to every entity' — is fixed: each entity's update is "
+    "weighted by how INCONSISTENT its current belief is with the error "
+    "direction (entities the signal is actually about move most; consistent "
+    "entities barely move), normalised so the mean weight = the prior uniform "
+    "event-weight (aggregate magnitude preserved). Uses the per-entity "
+    "expected-health predict-annotation-health already computes — no new event "
+    "streams required. Verified: weights differentiate ~6.7x on a 3-entity "
+    "sample, mean preserved exactly. Code: scripts/futon2/report/war_machine.clj "
+    "(events synthesis) + belief.clj entity-expected-health made public. "
+    "ENHANCEMENT (not a defect) still possible: full per-entity OBSERVATION "
+    "streams (vs re-attributed aggregate) per E-r3d-per-entity-attribution.md "
+    "— recorded there, not blocking."
+    "\n\n"
+    "[Earlier excursion: E-r3d-per-entity-attribution.md was authored inline "
+    "2026-05-30 (cg-f32696ac) as a ∇-deform when the path looked deeper than it "
+    "was; following the WM's #1 then surfaced the contribution-attribution fix "
+    "above, which discharges the stated gap.]")
    :kind :prototyping-forward
    :predecessor-satisfied-at "2026-05-26"
    :predecessor-satisfied-by "M-INC step (b) committed by claude-3 as futon3/library/structure/interest-event-vocabulary.flexiarg; the typed event vocabulary that was the named prerequisite for per-entity attribution now exists on disk.  Re-typing this sorry from :campaign-scale (its earlier classification in M-action-cost-modelling §3.2) to :mission-scale follows.  Still :open at the implementation level — the R3d rewiring to consume per-entity events hasn't yet landed — but the architectural blocker is gone."

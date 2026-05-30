@@ -3226,12 +3226,34 @@
                 anneal-factor (max 0.0 (- 1.0 (/ (double step) r3-max-steps)))
                 base-weight (min 1.0 aggregated-magnitude)
                 event-weight (* base-weight anneal-factor 0.1)
+                ;; R3d v0.17 (sorry/r3d-per-entity-attribution): per-entity
+                ;; attribution by CONTRIBUTION, not uniform. The aggregate signal
+                ;; is distributed unequally — each entity's update is weighted by
+                ;; how INCONSISTENT its current belief is with the error direction
+                ;; (the entities the signal is actually "about" move most;
+                ;; entities already consistent with the observation barely move).
+                ;; Weights are normalised so the MEAN equals event-weight, so the
+                ;; aggregate magnitude is preserved while attribution is honest.
+                ;; This fixes the stated dishonesty ("the aggregate signal can't
+                ;; legitimately be attributed equally to every entity") using the
+                ;; per-entity expected-health that predict-annotation-health
+                ;; already computes — no new event streams required.
                 events (when (pos? event-weight)
                          (let [event-type (if (pos? aggregated-signed-error)
-                                            :strengthened :foreclosed)]
-                           (mapv (fn [eid] {:entity-id eid :type event-type
-                                            :weight event-weight})
-                                 (keys belief))))
+                                            :strengthened :foreclosed)
+                               incons (into {}
+                                            (for [[eid p] belief]
+                                              (let [h (belief/entity-expected-health p)]
+                                                [eid (if (pos? aggregated-signed-error)
+                                                       (- 1.0 h)   ; healthier-than-predicted: surprise lives in low-health entities
+                                                       h)])))       ; unhealthier: surprise lives in high-health entities
+                               total (reduce + 0.0 (vals incons))
+                               n (count belief)
+                               norm (if (pos? total) (/ (* event-weight n) total) 0.0)]
+                           (->> (keys belief)
+                                (mapv (fn [eid]
+                                        {:entity-id eid :type event-type
+                                         :weight (* (double (get incons eid 0.0)) norm)})))))
                 belief' (if (seq events)
                           (belief/update-belief-batch belief events)
                           belief)

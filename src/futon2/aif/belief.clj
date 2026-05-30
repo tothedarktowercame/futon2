@@ -266,10 +266,14 @@
    :foreclosed   -0.5
    :falsified    -1.0})
 
-(defn- entity-expected-health
+(defn entity-expected-health
   "Compute predicted health contribution from one entity's posterior.
    Returns a value in [0, 1] after rescaling from the raw weighted-sum
-   range [-1, 1]."
+   range [-1, 1].
+
+   Public since R3d v0.17 (sorry/r3d-per-entity-attribution): the judge's
+   per-entity belief-update attribution weights each entity by its
+   health-deviation, so this per-entity quantity is needed at the judge site."
   [posterior]
   (let [raw (reduce + (for [[s p] posterior]
                         (* (double p)
