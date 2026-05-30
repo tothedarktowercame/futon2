@@ -33,6 +33,7 @@
             [clojure.string :as str]
             [futon2.aif.action-proposer :as ap]
             [futon2.aif.anticipation :as anticipation]
+            [futon2.aif.adapters.interest-network :as interest-net]
             [futon2.aif.belief :as belief]
             [futon2.aif.efe :as efe]
             [futon2.aif.forward-model :as fm]
@@ -97,7 +98,17 @@
    ;; Reclassified vsat.wiki from :portfolio (was a misfit) on 2026-04-24.
    {:label "vsat"      :path (str home "/vsat")      :workstream :consulting}
    {:label "vsat.wiki" :path (str home "/vsat.wiki") :workstream :consulting}
-   {:label "npt"       :path (str home "/npt")       :workstream :consulting}])
+   {:label "npt"       :path (str home "/npt")       :workstream :consulting}
+   ;; UKRN-S services simulation — active consulting-track work (added 2026-05-30;
+   ;; was producing real commits but invisible to the WM, a cause of "0% consulting").
+   {:label "ukrn-services-simulation" :path (str home "/code/ukrn-services-simulation") :workstream :consulting}])
+
+;; NOTE (2026-05-30): commit-count is a WEAK proxy for billable consulting —
+;; vsat has 219 commits but its value is billable HOURS, and recent consulting
+;; (the Eric/Brookes work) leaves little commit trace in these repos. The real
+;; consulting signal is the billable-hours ledger (~/code/ledger/, to be wired)
+;; + the paid-invoice log (~/code/invoices/log.edn). Indexing ukrn-services-sim
+;; fixes the immediate false-zero; wiring ledger/invoice evidence is the real fix.
 
 ;; ---------------------------------------------------------------------------
 ;; Helpers (same patterns as joe_hud.clj)
@@ -3266,8 +3277,11 @@
                                     (seq (:events anticipation-snapshot)))
                            3)
         wm-ranked (-> (efe/rank-actions wm-state
-                                        (enrich-candidates-with-structural-pressure
-                                         wm-candidates)
+                                        (->> wm-candidates
+                                             enrich-candidates-with-structural-pressure
+                                             ;; M-interest-network-coupling capstone:
+                                             ;; bias candidates by the lived interest posterior
+                                             interest-net/enrich-candidates)
                                         {:time-pressure wm-time-pressure
                                          :horizon-steps wm-horizon-steps})
                       apply-anamnesis-tiebreak)
