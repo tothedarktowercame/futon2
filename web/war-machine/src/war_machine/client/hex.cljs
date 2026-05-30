@@ -170,17 +170,28 @@
 ;; where each mission sits in its own cycle.  The legend in the sidebar
 ;; documents this scheme.
 (def phase-palette
-  {:identify    "#94a3b8"  ;; slate — just starting
+  ;; Lifecycle palette rebalanced 2026-05-27 (second pass) for maximum hue
+  ;; distinctness. The cool→warm→cool gradient is sacrificed in favour of
+  ;; legibility: every active phase lives in its own hue family rather than
+  ;; doubling-up in the blue/green families. Joe's diagnostic 2026-05-27:
+  ;; "2 blue-ish colours, 3 green-ish colours" — the previous pass produced
+  ;; that collision. This pass: each phase in a distinct hue family.
+  ;;
+  ;; Family map: pink → violet → blue → orange → yellow → emerald → indigo
+  ;; → deep-slate → light-grey → mid-grey. Only one green (instantiate),
+  ;; only one blue (derive). Pink/violet/indigo are visually separable.
+  ;; If even this proves insufficient, patterns/stripes are the next move.
+  {:identify    "#ec4899"  ;; pink — fresh start (distinct from blue and green families)
    :map         "#a78bfa"  ;; violet — mapping the territory
-   :derive      "#4a90e2"  ;; blue — constructing
+   :derive      "#3b82f6"  ;; blue — constructing (the ONLY blue)
    :argue       "#fb923c"  ;; orange — defending
    :verify      "#eab308"  ;; yellow — checking
-   :instantiate "#10b981"  ;; emerald — building
-   :document    "#16a34a"  ;; green — closing out
-   :complete    "#15803d"  ;; dark green — done
-   :ready       "#cbd5e1"  ;; light grey — declared but not started
+   :instantiate "#10b981"  ;; emerald — building (the ONLY green)
+   :document    "#78350f"  ;; dark brown / amber-900 — closing out / filing (distinct from map's violet; semantically "paperwork/archive ink")
+   :complete    "#1e293b"  ;; deep slate — settled / archived
+   :ready       "#ffffff"  ;; white — declared but not started (clearly distinct from :unknown grey)
    :testing     "#a855f7"  ;; purple
-   :unknown     "#9ca3af"  ;; grey
+   :unknown     "#d1d5db"  ;; light-mid grey — off-map / no phase declared (sits between :ready white and :complete dark slate; previously #6b7280 was too close to :complete)
    })
 
 (defn parse-phase
@@ -271,7 +282,12 @@
                                 :phase-color color
                                 :workstream  nil  ;; ignored — phase-color wins
                                 :active?     true
-                                :commits     1
+                                ;; Suppress the per-cell "1" badge for the missions
+                                ;; view (2026-05-27 fix). The commits default was
+                                ;; uninformative noise — every mission rendered
+                                ;; with a "1" overlay. Set to 0 so the sprite's
+                                ;; `(pos? commits)` gate keeps the badge hidden.
+                                :commits     0
                                 :blocked?    (:blocked? detail)
                                 :tooltip     (str "MISSION: " full
                                                   "\nPhase: " (name phase)
@@ -747,12 +763,16 @@
   numbers wasted a lot of whitespace, leaving labels squished into too-small
   hexes.  Min size raised so labels stay legible even on dense layouts."
   [cells panel-w panel-h]
-  (let [margin 24
+  (let [margin 12  ;; reduced from 24 (2026-05-27) — large-scale viewports had visible wasted whitespace
         usable-w (- panel-w (* 2 margin))
         usable-h (- panel-h (* 2 margin))
         {:keys [q-span r-span]} (layout-bounds cells)
-        size-w (/ usable-w (* sqrt3 (+ q-span 0.6)))
-        size-h (/ usable-h (* 1.5 (+ r-span 0.6)))]
+        ;; Padding-factor was 0.6 each side (1 hex of breathing room per dimension);
+        ;; tightened to 0.2 (2026-05-27) so connected-components fill the available
+        ;; space at large scale. Still leaves enough margin for label/border without
+        ;; overflow.
+        size-w (/ usable-w (* sqrt3 (+ q-span 0.2)))
+        size-h (/ usable-h (* 1.5 (+ r-span 0.2)))]
     (max 18.0 (min size-w size-h))))
 
 (defn layout-offset [cells hex-size panel-w panel-h]

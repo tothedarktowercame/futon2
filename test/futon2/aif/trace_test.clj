@@ -30,10 +30,12 @@
                  :per-channel {:loop-health {:value 0.7 :gap 0.0 :in-range? false}}
                  :avoided-active []}
    :ranked-actions [{:action {:type :no-op}
-                     :G-risk 0.05 :G-ambiguity 0.0 :G-total 0.05 :rank 1
+                     :G-risk 0.05 :G-ambiguity 0.0 :G-structural-pressure 0.0
+                     :G-total 0.05 :rank 1
                      :prediction {:huge :nested :map :that-should-be-stripped}}
                     {:action {:type :address-sorry :target :sorry/x}
-                     :G-risk 0.03 :G-ambiguity 0.015 :G-total 0.045 :rank 2
+                     :G-risk 0.03 :G-ambiguity 0.015 :G-structural-pressure 0.7
+                     :G-total 0.045 :rank 2
                      :prediction {:also :stripped}}]
    :decision {:action {:type :no-op}
               :rank 1 :G-total 0.05 :tau 0.2
@@ -57,7 +59,11 @@
     (let [r (trace/trace-record sample-judge-output)
           rs (:ranked-actions r)]
       (is (every? #(not (contains? % :prediction)) rs)
-          "trace ranked-actions don't carry :prediction"))))
+          "trace ranked-actions don't carry :prediction"))
+    (let [r (trace/trace-record sample-judge-output)
+          rs (:ranked-actions r)]
+      (is (= [0.0 0.7] (mapv :G-structural-pressure rs))
+          "trace preserves the structural-pressure term in ranked-actions"))))
 
 (deftest trace-record-strips-softmax-weights-test
   (testing "decision in trace drops :softmax-weights (non-stringable keys)"

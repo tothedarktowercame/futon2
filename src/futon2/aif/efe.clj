@@ -48,6 +48,7 @@
 
 (def default-info-weight 0.4)
 (def default-survival-weight 1.2)
+(def default-structural-pressure-weight 0.35)
 
 ;; v0.14: anticipation-driven scaling. When opts carries :time-pressure
 ;; in [0,1], G-risk and G-survival are multiplied by
@@ -117,7 +118,10 @@
       :G-ambiguity   <epistemic term: sum of per-channel predicted variance>
       :G-info        <info-gain term (v0.13, negative weight in G-total)>
       :G-survival    <survival hinge-loss term (v0.13)>
-      :G-total       <G-risk + G-ambiguity − info-weight×G-info + survival-weight×G-survival>
+      :G-structural-pressure <candidate-local structural-pressure term>
+      :G-total       <G-risk + G-ambiguity − info-weight×G-info
+                       + survival-weight×G-survival
+                       − structural-pressure-weight×G-structural-pressure>
       :per-channel   <per-channel risk decomposition (from compute-free-energy)>}
 
    Lower :G-total = more preferred action.
@@ -134,6 +138,8 @@
    Optional `opts`:
      :info-weight         — default `default-info-weight` (0.4)
      :survival-weight     — default `default-survival-weight` (1.2)
+     :structural-pressure-weight — default
+                            `default-structural-pressure-weight` (0.35)
      :time-pressure       — v0.14 anticipation-driven urgency in [0,1];
                             scales G-risk + G-survival by
                             `(1 + time-pressure × time-pressure-scale)`.
@@ -149,12 +155,18 @@
    for actions whose value isn't captured by observation-vector changes.
    Default 0.
 
+   `:structural-pressure-per-action` on the action map represents a
+   candidate-local structural-pressure signal. Higher values reduce
+   `:G-total` via the weighted subtraction in the decomposition, making
+   structurally load-bearing actions more preferred.
+
    Pure: same (state, action, opts) → same output."
   ([state action] (compute-efe state action {}))
-  ([state action {:keys [info-weight survival-weight time-pressure
+  ([state action {:keys [info-weight survival-weight structural-pressure-weight time-pressure
                          time-pressure-scale horizon-steps]
                   :or {info-weight default-info-weight
                        survival-weight default-survival-weight
+                       structural-pressure-weight default-structural-pressure-weight
                        time-pressure 0.0
                        time-pressure-scale default-time-pressure-scale}}]
    (let [single-prediction (fm/predict state action)
@@ -175,19 +187,23 @@
          g-ambig (ambiguity next-var)
          g-info (info-gain next-var)
          g-survival-base (survival-cost next-mean)
+         g-structural-pressure (double (or (:structural-pressure-per-action action) 0.0))
          urgency (+ 1.0 (* (double time-pressure) (double time-pressure-scale)))
          g-risk (* g-risk-base urgency)
          g-survival (* g-survival-base urgency)
          g-total (+ g-risk
                     g-ambig
                     (- (* (double info-weight) g-info))
-                    (* (double survival-weight) g-survival))]
+                    (* (double survival-weight) g-survival)
+                    (- (* (double structural-pressure-weight)
+                          g-structural-pressure)))]
      {:action action
       :prediction prediction
       :G-risk g-risk
       :G-ambiguity g-ambig
       :G-info g-info
       :G-survival g-survival
+      :G-structural-pressure g-structural-pressure
       :G-total g-total
       :time-pressure (double time-pressure)
       :horizon-steps (when multi (:horizon-steps multi))
@@ -200,7 +216,8 @@
 
    v0.14: optional `opts` map threaded to `compute-efe` for every
    candidate — supports `:info-weight`, `:survival-weight`,
-   `:time-pressure`, `:time-pressure-scale`."
+   `:structural-pressure-weight`, `:time-pressure`,
+   `:time-pressure-scale`."
   ([state candidate-actions] (rank-actions state candidate-actions {}))
   ([state candidate-actions opts]
    (->> candidate-actions

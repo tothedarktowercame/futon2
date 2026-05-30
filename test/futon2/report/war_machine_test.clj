@@ -231,21 +231,25 @@
                    "sorry/wm-ui-hud-mode-rationale-hardcode"
                    {:hx/props {:sorry/related-missions ["M-wm-ui"]}}
                    "sorry/mission-aif-head-not-served"
-                   {:hx/props {:sorry/related-missions ["M-head"]}}
+                   {:hx/props {:sorry/related-missions ["M-head-a" "M-head-b" "M-head-c"]}}
                    "sorry/handler-closure-route-rebinding"
                    {:hx/props {:sorry/related-missions ["M-drawbridge"]}}}
         mission-idx {"r3a-density" "futon3c-d/mission/r3a-density"
                      "r3a-ticks" "futon3c-d/mission/r3a-ticks"
                      "r3d" "futon3c-d/mission/r3d"
                      "wm-ui" "futon3c-d/mission/wm-ui"
-                     "head" "futon3c-d/mission/head"
+                     "head-a" "futon3c-d/mission/head-a"
+                     "head-b" "futon3c-d/mission/head-b"
+                     "head-c" "futon3c-d/mission/head-c"
                      "drawbridge" "futon3c-d/mission/drawbridge"}
-        delta-by-endpoint {"futon3c-d/mission/r3a-density" {:delta-T 0.0}
-                           "futon3c-d/mission/r3a-ticks" {:delta-T 0.0}
-                           "futon3c-d/mission/r3d" {:delta-T -0.7}
-                           "futon3c-d/mission/wm-ui" {:delta-T -0.2}
-                           "futon3c-d/mission/head" {:delta-T -2.2}
-                           "futon3c-d/mission/drawbridge" {:delta-T -1.0}}]
+        delta-by-endpoint {"futon3c-d/mission/r3a-density" {:mission-T 1.0}
+                           "futon3c-d/mission/r3a-ticks" {:mission-T 1.0}
+                           "futon3c-d/mission/r3d" {:mission-T 0.3}
+                           "futon3c-d/mission/wm-ui" {:mission-T 0.8}
+                           "futon3c-d/mission/head-a" {:mission-T 0.1}
+                           "futon3c-d/mission/head-b" {:mission-T 0.3}
+                           "futon3c-d/mission/head-c" {:mission-T 0.4}
+                           "futon3c-d/mission/drawbridge" {:mission-T 0.0}}]
     (with-redefs-fn {#'wm/sorry-doc-index (fn [] sorry-idx)
                      #'wm/mission-doc-index (fn [] mission-idx)
                      #'wm/compute-delta-t-mission
@@ -268,6 +272,35 @@
                   :sorry/stub-lifts-pending-aif-edn]
                  (subvec targets 4 7))
               "legitimate 0.0 concentration ties stay in original order"))))))
+
+(deftest structural-pressure-enrichment-attaches-candidate-local-values
+  (let [candidates [{:type :no-op}
+                    {:type :address-sorry
+                     :target :sorry/r3d-per-entity-attribution}
+                    {:type :address-sorry
+                     :target :sorry/mission-aif-head-not-served}]
+        sorry-idx {"sorry/r3d-per-entity-attribution"
+                   {:hx/props {:sorry/related-missions ["M-r3d"]}}
+                   "sorry/mission-aif-head-not-served"
+                   {:hx/props {:sorry/related-missions ["M-head-a" "M-head-b" "M-head-c"]}}}
+        mission-idx {"r3d" "futon3c-d/mission/r3d"
+                     "head-a" "futon3c-d/mission/head-a"
+                     "head-b" "futon3c-d/mission/head-b"
+                     "head-c" "futon3c-d/mission/head-c"}
+        delta-by-endpoint {"futon3c-d/mission/r3d" {:mission-T 0.3}
+                           "futon3c-d/mission/head-a" {:mission-T 0.1}
+                           "futon3c-d/mission/head-b" {:mission-T 0.3}
+                           "futon3c-d/mission/head-c" {:mission-T 0.4}}]
+    (with-redefs-fn {#'wm/sorry-doc-index (fn [] sorry-idx)
+                     #'wm/mission-doc-index (fn [] mission-idx)
+                     #'wm/compute-delta-t-mission
+                     (fn [mission-endpoint]
+                       (get delta-by-endpoint mission-endpoint {:mission-T 0.5}))}
+      (fn []
+        (let [enriched (#'wm/enrich-candidates-with-structural-pressure candidates)]
+          (is (= 0.0 (:structural-pressure-per-action (first enriched))))
+          (is (= 0.7 (:structural-pressure-per-action (second enriched))))
+          (is (= 2.2 (:structural-pressure-per-action (nth enriched 2)))))))))
 
 (deftest anamnesis-tiebreak-leaves-mixed-or-non-sorry-ties-alone
   (let [ranked [{:rank 1

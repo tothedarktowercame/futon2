@@ -86,15 +86,16 @@
        :missions
        [:div
         (section "Phase")
-        (swatch "#94a3b8" "identify")
+        (swatch "#ec4899" "identify")
         (swatch "#a78bfa" "map")
-        (swatch "#4a90e2" "derive / in-progress")
+        (swatch "#3b82f6" "derive / in-progress")
         (swatch "#fb923c" "argue")
         (swatch "#eab308" "verify")
         (swatch "#10b981" "instantiate")
-        (swatch "#15803d" "complete")
-        (swatch "#cbd5e1" "ready")
-        (swatch "#9ca3af" "unknown / no phase")
+        (swatch "#78350f" "document")
+        (swatch "#1e293b" "complete")
+        (swatch "#ffffff" "ready")
+        (swatch "#d1d5db" "unknown / no phase")
         (section "Border")
         (outline-swatch "#dc2626" "blocked")]
 
@@ -432,7 +433,14 @@
      ;; (e.g. 5 sibling sorries) instead of falsely promoting rank-1 as
      ;; if it were a real preference.
      (let [tied-actions (:tied-actions live)
-           tied-count   (or (:tied-count live) 1)]
+           tied-count   (or (:tied-count live) 1)
+           anam-values  (->> tied-actions
+                             (keep :anamnesis-concentration)
+                             (map double))
+           distinct-anam-levels (count (distinct anam-values))
+           tie-broken? (and (seq anam-values) (> distinct-anam-levels 1))
+           top-entry (first tied-actions)
+           top-anam (some-> top-entry :anamnesis-concentration double)]
        (cond
          (> tied-count 1)
          [:div.next-move-tied-bucket
@@ -440,20 +448,68 @@
            :style {:padding "6px 0"}}
           [:div.next-move-tied-header
            {:style {:margin-bottom "4px"}}
-           "→ " [:strong tied-count " tied options"]
+           "→ " [:strong tied-count " G-tied options"]
            (when (number? g-total)
              [:span {:style {:font-size "0.85em" :color "#6b7280" :margin-left "8px"}}
               "G=" (.toFixed g-total 3) " (each)"])
-           [:span {:style {:font-size "0.75em" :color "#9ca3af" :margin-left "8px"
-                           :font-style "italic"}}
-            "WM has no clear preference among these — pick any"]]
+           (cond
+             tie-broken?
+             [:span {:style {:font-size "0.75em" :color "#6b7280" :margin-left "8px"
+                             :font-style "italic"}}
+              "broken by ΔT-anamnesis-concentration ("
+              distinct-anam-levels " distinct levels; top = "
+              (.toFixed top-anam 2) ")"]
+             :else
+             [:span {:style {:font-size "0.75em" :color "#9ca3af" :margin-left "8px"
+                             :font-style "italic"}}
+              "WM has no clear preference among these — pick any"])]
+          (when tie-broken?
+            [:div.next-move-tied-recommend
+             {:style {:padding "4px 0 6px 0" :font-size "0.92em"}
+              :data-testid "next-move-tied-top-recommend"}
+             "Recommended: " [:strong (:specifically top-entry)]
+             [:span {:style {:font-size "0.85em" :color "#6b7280" :margin-left "8px"
+                             :font-family "monospace"}}
+              "anamnesis Δ = " (.toFixed top-anam 2)]])
           [:ul.next-move-tied-list
            {:style {:padding-left "20px" :margin "4px 0"}}
            (for [entry tied-actions]
              ^{:key (str (:rank entry))}
              [:li {:style {:padding "2px 0"}
                    :data-testid (str "next-move-tied-entry-" (:rank entry))}
-              (:specifically entry)])]]
+              (:specifically entry)
+              (let [anam (:anamnesis-concentration entry)
+                    g-risk (:G-risk entry)
+                    g-amb  (:G-ambiguity entry)
+                    g-info (:G-info entry)
+                    g-surv (:G-survival entry)
+                    g-tot  (:G-total entry)
+                    has-trace? (or (number? anam)
+                                   (some number? [g-risk g-amb g-info g-surv]))]
+                (when has-trace?
+                  [:details.next-move-trace
+                   {:style {:margin "4px 0 4px 0" :font-size "0.85em" :color "#4b5563"}
+                    :data-testid (str "next-move-trace-" (:rank entry))}
+                   [:summary {:style {:cursor "pointer"}}
+                    "trace"
+                    (when (number? anam)
+                      [:span {:style {:margin-left "8px" :font-family "monospace"
+                                      :color (if (pos? anam) "#059669" "#9ca3af")}}
+                       "anamnesis Δ = " (.toFixed (double anam) 2)])]
+                   [:div {:style {:padding "4px 0 4px 16px" :font-family "monospace"}}
+                    (when (number? g-tot)
+                      [:div "G-total = " (.toFixed (double g-tot) 4)])
+                    (when (some number? [g-risk g-amb g-info g-surv])
+                      [:div
+                       (when (number? g-risk)    [:div "  G-risk      = " (.toFixed (double g-risk) 4)])
+                       (when (number? g-amb)     [:div "  G-ambiguity = " (.toFixed (double g-amb) 4)])
+                       (when (number? g-info)    [:div "  G-info      = " (.toFixed (double g-info) 4)])
+                       (when (number? g-surv)    [:div "  G-survival  = " (.toFixed (double g-surv) 4)])])
+                    (when (number? anam)
+                      [:div {:style {:margin-top "4px" :color "#6b7280" :font-family "inherit"}}
+                       "tie-breaker (ΔT-anamnesis-concentration over related missions) = "
+                       (.toFixed (double anam) 4)
+                       (when (zero? anam) " — no incident open-sorry edges in current substrate")])]]))])]]
 
          :else
          [:div.next-move-target {:data-testid "next-move-live-target"}

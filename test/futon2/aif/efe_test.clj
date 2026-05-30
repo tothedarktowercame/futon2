@@ -44,7 +44,7 @@
       (is (= o1 o2)))))
 
 (deftest compute-efe-shape-test
-  (testing "compute-efe returns documented keys (v0.13 adds :G-info + :G-survival)"
+  (testing "compute-efe returns documented keys (v0.20 adds :G-structural-pressure)"
     (let [o (efe/compute-efe base-state {:type :no-op})]
       (is (contains? o :action))
       (is (contains? o :prediction))
@@ -52,26 +52,39 @@
       (is (contains? o :G-ambiguity))
       (is (contains? o :G-info))
       (is (contains? o :G-survival))
+      (is (contains? o :G-structural-pressure))
       (is (contains? o :G-total))
       (is (contains? o :per-channel))))
-  (testing "G-total composes all four principled terms (v0.13)"
-    ;; G-total = G-risk + G-ambiguity − info-weight·G-info + survival-weight·G-survival
-    (let [o (efe/compute-efe base-state {:type :address-sorry :target :m1})
-          info-w 0.4 surv-w 1.2
+  (testing "G-total composes all five principled terms"
+    ;; G-total = G-risk + G-ambiguity − info-weight·G-info
+    ;;           + survival-weight·G-survival
+    ;;           − structural-pressure-weight·G-structural-pressure
+    (let [o (efe/compute-efe base-state
+                             {:type :address-sorry
+                              :target :m1
+                              :structural-pressure-per-action 2.2})
+          info-w 0.4
+          surv-w 1.2
+          struct-w 0.35
           expected (+ (:G-risk o)
                       (:G-ambiguity o)
                       (- (* info-w (:G-info o)))
-                      (* surv-w (:G-survival o)))]
+                      (* surv-w (:G-survival o))
+                      (- (* struct-w (:G-structural-pressure o))))]
       (is (< (Math/abs (- (:G-total o) expected)) 1e-9)
-          "G-total decomposition includes info-weight·G-info (negative) + survival-weight·G-survival")))
-  (testing "G-risk, G-ambiguity, G-info, G-survival are individually non-negative"
+          "G-total decomposition includes the structural-pressure subtraction")))
+  (testing "G-risk, G-ambiguity, G-info, G-survival, G-structural-pressure are individually non-negative"
     ;; G-total CAN be negative because G-info has negative weight in G-total;
     ;; that's by design (informative actions are preferred).
-    (let [o (efe/compute-efe base-state {:type :address-sorry :target :m1})]
+    (let [o (efe/compute-efe base-state
+                             {:type :address-sorry
+                              :target :m1
+                              :structural-pressure-per-action 1.0})]
       (is (>= (:G-risk o) 0.0))
       (is (>= (:G-ambiguity o) 0.0))
       (is (>= (:G-info o) 0.0))
-      (is (>= (:G-survival o) 0.0)))))
+      (is (>= (:G-survival o) 0.0))
+      (is (>= (:G-structural-pressure o) 0.0)))))
 
 (deftest compute-efe-two-principled-terms-by-name-test
   (testing "both R5a (risk) and R5b (ambiguity) are present by name and distinct"
@@ -266,6 +279,30 @@
                           (+ (:G-risk b) (:G-ambiguity b))))
              1e-9)
           "with both new weights at 0, G-total reduces to v0.12 G-risk + G-ambiguity"))))
+
+(deftest structural-pressure-weight-and-ordering-test
+  (testing "structural-pressure lowers G-total by exactly weight × signal"
+    (let [base-action {:type :address-sorry :target :m1}
+          pressured-action {:type :address-sorry
+                            :target :m1
+                            :structural-pressure-per-action 2.2}
+          base-out (efe/compute-efe base-state base-action)
+          pressured-out (efe/compute-efe base-state pressured-action)]
+      (is (= 2.2 (:G-structural-pressure pressured-out)))
+      (is (< (Math/abs (- (:G-total pressured-out)
+                          (- (:G-total base-out) (* 0.35 2.2))))
+             1e-9)
+          "default structural-pressure weight is applied as a subtraction")))
+  (testing "rank-actions prefers otherwise-identical candidates with higher structural-pressure"
+    (let [candidates [{:type :address-sorry
+                       :target :m1
+                       :structural-pressure-per-action 0.0}
+                      {:type :address-sorry
+                       :target :m1
+                       :structural-pressure-per-action 2.2}]
+          ranked (efe/rank-actions base-state candidates)]
+      (is (= 2.2 (get-in (first ranked) [:action :structural-pressure-per-action])))
+      (is (= 0.0 (get-in (second ranked) [:action :structural-pressure-per-action]))))))
 
 (deftest intrinsic-value-can-make-learn-outrank-no-op-test
   (testing ":learn-action-class with :intrinsic-value 0.1 outranks :no-op when in-distribution"

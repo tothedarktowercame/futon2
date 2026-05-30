@@ -62,9 +62,10 @@
    the action, drop the deeply-nested :prediction (recoverable on
    demand by re-running forward-model/predict). v0.13 added
    `:G-info` + `:G-survival`; v0.14 added `:time-pressure`; v0.15
-   added `:horizon-steps`."
+   added `:horizon-steps`; v0.20 adds `:G-structural-pressure`."
   [r]
   (select-keys r [:action :G-risk :G-ambiguity :G-info :G-survival
+                  :G-structural-pressure
                   :G-total :rank :time-pressure :horizon-steps]))
 
 (defn- strip-decision
