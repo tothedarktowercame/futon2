@@ -490,27 +490,4 @@
    :related-missions ["M-drawbridge-multi-agent"]
    :links ["~/code/futon3c/src/futon3c/transport/http.clj"
            "~/code/futon3c/src/futon3c/wm/scheduler.clj"
-           "~/code/futon3c/README-drawbridge.md"]}
-
-  {:id :sorry/sorry-first-outing-probe
-   :title "SMOKE-TEST PROBE (M-war-machine-first-outing INSTANTIATE) — reversible synthetic sorry"
-   :raised-at "2026-05-30"
-   :status :addressed
-   :resolved-at "2026-05-30"
-   :resolved-by-cg "cg-ae3de1a1-d24e-4f72-b9b2-32cb727bc179"
-   :resolved-by-pilot "claude-5 (war-machine-pilot, run live-9536b3ce)"
-   :resolution "SMOKE-TEST discharge — flipped :open->:addressed to exercise the first-outing cycle (R-E gates) + ledger (R-A.1). Synthetic; reversed at run-end."
-   :kind :meta
-   :probe? true
-   :rationale
-   (str
-    "Synthetic, REVERSIBLE test artefact for verifying the first-outing "
-    "machinery end-to-end: ledger commit (R-A.1), the G1/G2/G3 cycle gates "
-    "(R-E), the :sorry-closures-stick regression invariant (R-A.2), and "
-    "git-level reversal. This is NOT real work — it carries :probe? true so it "
-    "is never confused with a genuine sorry and is DELETED at run-end. :kind "
-    ":meta gives it the highest intrinsic-value (0.4) to promote it toward "
-    "ranked-actions[0], per the operator's 'promote to the front of the queue' "
-    "directive. Discharge = flip :status :open -> :addressed; regression-test = "
-    "re-open keeping :resolved-at and adding :reopened-at.")
-   :related-missions ["M-war-machine-first-outing"]}]}
+           "~/code/futon3c/README-drawbridge.md"]}]}
