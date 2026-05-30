@@ -225,9 +225,22 @@
    :raised-at "2026-05-18"
    :status :open
    :kind :prototyping-forward
+   :has-excursion "futon3c/holes/missions/E-ticks-firing-ratio-likelihood.md"
+   :decomposed-at "2026-05-30"
+   :decomposed-by-cg "cg-bf2f9b00-f3a3-47cc-9859-e3c7c0e68671"
+   :decomposition
+   (str
+    "DECOMPOSED, not discharged. The coupling-density bridge pattern does "
+    "not currently hold for ticks: stack-logic-model tick definitions and "
+    "scan-graph tick results expose warning ids and evaluator outputs, but "
+    "no stack-annotation entity ids, entity tags, or canonical tick-to-entity "
+    "mapping. A real likelihood needs a first-class tick/entity bridge; "
+    "otherwise the predictor would be an ad hoc proxy over warning prose or "
+    "workstream names.")
    :rationale "Firing ticks / total ticks [0,1] from logic-model. Could derive from belief mass on entities representing ticks if ticks are entity-typed; currently aren't."
    :related-missions ["M-war-machine-aif-completion"]
-   :links ["futon2/docs/futon-aif-completeness.md#r3-predictive-coding-belief-update"]}
+   :links ["futon2/docs/futon-aif-completeness.md#r3-predictive-coding-belief-update"
+           "futon3c/holes/missions/E-ticks-firing-ratio-likelihood.md"]}
 
   {:id :sorry/r3a-likelihood-depositing-signal
    :title "R3a likelihood model for :depositing-signal"
