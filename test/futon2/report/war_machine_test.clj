@@ -155,6 +155,20 @@
     (is (= ["futon4"] (mapv :repo (:queues summary))))
     (is (.contains (:action (first (:queues summary))) "commit/disposition clustering"))))
 
+(deftest scan-vsatarcs-status-projects-compact-feed
+  (with-redefs-fn {#'wm/vsatarcs-status-script "/tmp"
+                   #'clojure.java.shell/sh
+                   (fn [& _]
+                     {:exit 0
+                      :out "{:build {:status :violation} :stories [{:story/id \"leaf-invariants\" :headline \"drift\" :build/status :violation :currency/chains [{:chain :content-drift :outcome :violation}]}] :wm-escalation {:tier :warning}}"
+                      :err ""})}
+    (fn []
+      (let [status (#'wm/scan-vsatarcs-status)]
+        (is (:available? status))
+        (is (= :violation (get-in status [:build :status])))
+        (is (= ["leaf-invariants"] (mapv :story/id (:stories status))))
+        (is (= :warning (get-in status [:wm-escalation :tier])))))))
+
 ;; ---------------------------------------------------------------------------
 ;; Data shape contracts
 ;; ---------------------------------------------------------------------------

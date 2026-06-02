@@ -62,6 +62,8 @@
 (def ^:private futon5a-root (str home "/code/futon5a"))
 (def ^:private strategic-vocabulary-path
   (str futon5a-root "/data/war-machine-strategic-vocabulary.edn"))
+(def ^:private vsatarcs-status-script
+  (str home "/code/futon4/scripts/build-invariant-state-projection.bb"))
 (def ^:private futon1a-url
   (or (System/getenv "FUTON1A_URL") "http://localhost:7071"))
 (def ^:private futon1a-penholder
@@ -3608,6 +3610,33 @@
     (catch Exception e
       {:available? false :error (.getMessage e)})))
 
+;; ---------------------------------------------------------------------------
+;; Scan 13: VSATARCS projection status
+;;
+;; Reads the futon4 invariant-state projection in compact WM-status mode. This
+;; scan is read-only and failure-is-data: the WM UI should show VSATARCS as
+;; unavailable rather than block the rest of the strategic snapshot.
+;; ---------------------------------------------------------------------------
+
+(defn scan-vsatarcs-status
+  []
+  (try
+    (if-not (.exists (java.io.File. vsatarcs-status-script))
+      {:available? false
+       :build {:status :error}
+       :error (str "Missing projection script: " vsatarcs-status-script)}
+      (let [{:keys [exit out err]} (shell/sh "bb" vsatarcs-status-script "--wm-status")]
+        (if (zero? exit)
+          (assoc (clojure.edn/read-string out) :available? true)
+          {:available? false
+           :build {:status :error}
+           :error (or (not-empty err)
+                      (str "VSATARCS status command exited " exit))})))
+    (catch Exception e
+      {:available? false
+       :build {:status :error}
+       :error (.getMessage e)})))
+
 (defn generate-war-machine
   "Collect all strategic scans, run judgement layer, and render.
    Returns {:data ... :judgement ... :markdown ...}."
@@ -3632,6 +3661,7 @@
         strategic-vocabulary (scan-strategic-vocabulary)
         r-criteria (scan-r-criteria)
         r12-apparatus (scan-r12-apparatus)
+        vsatarcs-status (scan-vsatarcs-status)
         scan-data {:self-watch self-watch
                    :loop-health loop-health
                    :support-attack support-attack
@@ -3649,7 +3679,8 @@
                    :annotation-graph annotation-graph
                    :strategic-vocabulary strategic-vocabulary
                    :r-criteria r-criteria
-                   :r12-apparatus r12-apparatus}
+                   :r12-apparatus r12-apparatus
+                   :vsatarcs-status vsatarcs-status}
         ;; Run the judgement layer
         judgement (judge scan-data)]
     {:data scan-data
@@ -3665,6 +3696,7 @@
                                     :blocks blocks
                                     :r-criteria r-criteria
                                     :r12-apparatus r12-apparatus
+                                    :vsatarcs-status vsatarcs-status
                                     :judgement judgement
                                     :now now :days days})}))
 

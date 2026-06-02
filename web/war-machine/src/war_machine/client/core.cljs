@@ -1119,6 +1119,98 @@
               (str "Inhabitation ended " (or (:ended-at prev) "?"))]]]
            " " (or (:done-cycles prev) 0) " tasks"])])]))
 
+(defn- wire-key [k]
+  (if (namespace k)
+    (str (namespace k) "/" (name k))
+    (name k)))
+
+(defn- wire-get [m k]
+  (or (get m k)
+      (get m (wire-key k))
+      (get m (name k))))
+
+(defn- status-text [status]
+  (cond
+    (keyword? status) (name status)
+    (string? status) status
+    (nil? status) "unknown"
+    :else (str status)))
+
+(defn- status-severity [status]
+  (case (status-text status)
+    "error" :critical
+    "violation" :critical
+    "inactive" :warning
+    "warning" :warning
+    "ok" :info
+    :warning))
+
+(defn- vsatarcs-story-card [story]
+  (let [status (status-text (wire-get story :build/status))
+        story-id (or (wire-get story :story/id) "story")
+        headline (or (wire-get story :headline) "VSATARCS story status unavailable")
+        domain (status-text (wire-get story :grounding/domain))
+        chains (or (wire-get story :currency/chains) [])]
+    ^{:key (str story-id)}
+    [:article {:class (str "dashboard-item " (severity-class (status-severity status)))
+               :data-testid (str "vsatarcs-story-" story-id)}
+     [:div.dashboard-item-top
+      [:span.dashboard-chip status]
+      [:span.dashboard-meta story-id]
+      [:span.dashboard-meta domain]]
+     [:div.dashboard-title headline]
+     (when (seq chains)
+       [:div.dashboard-mini-list
+        (for [chain chains
+              :let [chain-id (status-text (wire-get chain :chain))
+                    outcome (status-text (wire-get chain :outcome))]]
+          ^{:key (str story-id "|" chain-id)}
+          [:div.dashboard-mini-row
+           [:span chain-id]
+           [:span outcome]])])]))
+
+(defn- vsatarcs-status-card [data]
+  (let [status (wire-get data :vsatarcs-status)
+        available? (wire-get status :available?)
+        build (wire-get status :build)
+        build-status (status-text (wire-get build :status))
+        summary (wire-get status :summary)
+        stories (or (wire-get status :stories) [])
+        stale-stories (vec (remove #(= "ok" (status-text (wire-get % :build/status)))
+                                   stories))
+        escalation (wire-get status :wm-escalation)
+        tier (status-text (wire-get escalation :tier))]
+    [:section.dashboard-card.dashboard-card-wide
+     [:div.dashboard-card-header
+      [:h3 "VSATARCS Stories"]
+      [:span.dashboard-badge
+       (str (if available? build-status "unavailable")
+            " / " (count stale-stories) " stale")]]
+     [:div.dashboard-card-note
+      (str "Projection status feed; WM escalation tier " tier
+           ". Candidate dreams remain prospective until witnessed.")]
+     (cond
+       (nil? status)
+       [:div.dashboard-empty "VSATARCS status feed is not present in the current War Machine payload."]
+
+       (not available?)
+       [:div.dashboard-empty
+        (str "VSATARCS status unavailable"
+             (when-let [err (wire-get status :error)]
+               (str ": " err)))]
+
+       (seq stale-stories)
+       [:div.dashboard-list
+        (for [story stale-stories]
+          (vsatarcs-story-card story))]
+
+       :else
+       [:div.dashboard-empty
+        (str "No stale VSATARCS stories in the current projection"
+             (when-let [n (wire-get summary :stories-total)]
+               (str " (" n " checked)"))
+             ".")])]))
+
 (defn- self-watch-dashboard []
   (let [data @s/data
         sw (:self-watch data)
@@ -1211,6 +1303,8 @@
                                :cursor "pointer"}}
               "📤 Hand off to agent"]])]
          [:div.dashboard-empty "No active self-watch warnings in the current window."])]
+
+      [vsatarcs-status-card data]
 
       [:section.dashboard-card
        [:div.dashboard-card-header
