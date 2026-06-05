@@ -3,8 +3,8 @@
    Swing version (futon0/scripts/futon0/report/war_machine_visual.clj):
 
      data-atom     → full scan snapshot from /api/war-machine
-     view-mode     → :stack | :self-watch | :aif-stack | :missions | :sorrys
-                     | :invariants | :patterns
+     view-mode     → :stack | :self-watch | :aif-stack | :missions | :patterns
+                     | :operator
      replay-atom   → {session-id {:steps :step-idx :color-idx :session-id}
                       :playing? bool} — the session-ant swarm
      hotspot-atom  → {node-id intensity} — decays per tick, bumped on visit
@@ -15,6 +15,8 @@
 
 (defonce data       (r/atom nil))
 (defonce aif-data   (r/atom nil))   ;; payload from /api/alpha/aif-stack/live
+(defonce operator-bulletin (r/atom nil))
+(defonce operator-forward-model (r/atom nil))
 (defonce view-mode  (r/atom :stack))
 
 ;; Audacity-style activity waveform / timeline state.

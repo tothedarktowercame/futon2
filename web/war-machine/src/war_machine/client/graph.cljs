@@ -170,6 +170,7 @@
                               ;; the SORRY layout so the view isn't blank
                               (hex/sorrys-as-cells (:graph data)))
                 :patterns   (hex/patterns-as-cells data)
+                :operator   (hex/assign-stack-layout (:graph data))
                 (hex/assign-stack-layout (:graph data)))
         coupling (get-in data [:graph :edges :temporal-coupling] [])
         size  (hex/fit-hex-size cells w h)

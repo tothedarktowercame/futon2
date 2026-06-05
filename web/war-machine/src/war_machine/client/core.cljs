@@ -28,7 +28,7 @@
      ;; in `hex.cljs` + `graph.cljs` stay for defensive completeness in
      ;; case some other path sets `:view-mode` to those keywords. New
      ;; cycle order: stack → self-watch → aif-stack → missions → patterns
-     ;; → stack (5 modes; was 7). Fallback case in `case` defaults to
+     ;; → operator → stack (6 modes; was 7). Fallback case in `case` defaults to
      ;; :stack so a stale :sorrys / :invariants value cycles forward
      ;; cleanly. See M-war-machine-frontend-upgrade1 §6.17.
      [:button.toggle {:on-click (fn []
@@ -37,7 +37,8 @@
                                               :self-watch :aif-stack
                                               :aif-stack :missions
                                               :missions :patterns
-                                              :patterns :stack
+                                              :patterns :operator
+                                              :operator :stack
                                               ;; Stale-state fallback —
                                               ;; if :view-mode is somehow
                                               ;; :sorrys or :invariants
@@ -67,9 +68,10 @@
                       :data-testid "stop"}
       "Stop"]]))
 
-(defn- legend []
+(defn- legend
   "Per-view-mode colour-key. Renders inside a bordered card with grid-aligned
    swatches and labels."
+  []
   (let [vmode @s/view-mode
         swatch (fn [color label]
                  [:div.row
@@ -146,6 +148,16 @@
         [:div {:style {:font-size "11px" :color "#64748b"}}
          "Left→right, top→bottom: balance ascending (blue pole → green/yellow pole)"]]
 
+       :operator
+       [:div
+        (section "Morning Bulletin")
+        (swatch "#dc2626" "NAG — needs operator attention")
+        (swatch "#eab308" "BRIEF — salient context")
+        (swatch "#6b7280" "silent — discharged overnight")
+        (section "Forward model")
+        [:div {:style {:font-size "11px" :color "#64748b"}}
+         "Descriptive signals only: structural centrality, git-age, and operator priors."]]
+
        :self-watch
        [:div
         (section "Severity")
@@ -172,12 +184,13 @@
 (declare next-move-tile)
 (declare warnings-tile)
 
-(defn- legend-panel []
+(defn- legend-panel
   "The legend rendered as a free-floating tile to the LEFT of the hexagons,
   so it doesn't crowd the right-side stats panel.  The Recommended Next
   Move tile sits directly underneath so the strategic recommendation is
   paired with the colour key it explains.  Only directly computed warnings
   are surfaced, and only when one is currently firing."
+  []
   [:div.legend-panel
    [legend]
    ;; aif-mode-tile pulled 2026-04-27 per E-war-machine-qa: failed the
@@ -315,7 +328,7 @@
           [:span.aif-obs-summary-count (str " · " (count obs) " channels")]]
          (into [:div.aif-obs-rows] rows)]))))
 
-(defn- aif-mode-tile
+(defn aif-mode-tile
   "Compact AIF mode strip — first WM-I3 trace landing
    (M-war-machine-tuning § TI-3, Checkpoint 4 working assumption).
    Reads :scheduler/last-diagnostics from the AIF stack response.
@@ -844,7 +857,7 @@
           " → see ~/code/futon5a/data/war-machine-strategic-vocabulary.edn"
           " :harmonisation :jsdq-mapping AND Strategic SORRY Topology"))))
 
-(defn- warnings-tile []
+(defn- warnings-tile
   "Anchored warning strip per wm-ui-anchor:0008. Shows directly-computed
    firing ticks with: (1) concrete observed state as the primary signal,
    (2) per-tick actionable hints the operator can act on, (3) the
@@ -853,6 +866,7 @@
    Each warning card is clickable (testid `warning-card-<tick-id>`);
    tooltip carries the :condition; on-click logs the anchor reference +
    observed state."
+  []
   (let [ticks (->> (get-in @s/data [:graph :dynamics :ticks])
                    (filter :computed?)
                    (filter :fired?)
@@ -944,10 +958,11 @@
 ;; renderer below is a sibling not a clone of warnings-tile. Per claude-10's
 ;; threshold rule, this promotes :structured-warning-rendering-net from
 ;; candidate to tracked sub-kind.
-(defn- hand-off-issue! [issue]
+(defn- hand-off-issue!
   "POST a bell to /api/alpha/bell with the issue text. Operator picks
    the target agent at prompt-time. v1: browser prompt(); errors logged
    to console; success notifies via alert."
+  [issue]
   (let [{:keys [severity surface summary action at source-id]} issue
         agent-id (js/prompt
                   (str "Hand off this Self-watch issue to which agent?\n"
@@ -1011,7 +1026,7 @@
                                        (keyword? t) (name t)
                                        (string? t)  t
                                        :else        (str t)))))
-       (mapv (fn [{:keys [repo pressure count max-age-days needs-fixing action]}]
+       (mapv (fn [{:keys [repo pressure count needs-fixing action]}]
                {:severity "critical"
                 :surface (str "commit-hygiene/" repo)
                 :summary (or needs-fixing
@@ -1145,13 +1160,234 @@
     "ok" :info
     :warning))
 
-(defn- vsatarcs-story-card [story]
+(defn- display-text [v]
+  (cond
+    (keyword? v) (name v)
+    (string? v) v
+    (nil? v) nil
+    :else (str v)))
+
+(defn- canonical-id-text [v]
+  (some-> (display-text v)
+          (str/replace #"^:" "")))
+
+(defn- numeric-value [v]
+  (cond
+    (number? v) v
+    (string? v) (let [n (js/parseFloat v)]
+                  (when-not (js/isNaN n) n))
+    :else nil))
+
+(defn- truthy-value? [v]
+  (or (= true v)
+      (= "true" v)))
+
+(defn- fmt-money [n]
+  (when-let [value (numeric-value n)]
+    (str "£" (.toFixed (double value) 0))))
+
+(defn- sort-by-salience-desc [items]
+  (sort-by (fn [item]
+             (let [salience (numeric-value (wire-get item :salience))]
+               (if salience (- salience) js/Infinity)))
+           items))
+
+(defn- same-canonical-id? [a b]
+  (let [a-id (canonical-id-text a)
+        b-id (canonical-id-text b)]
+    (and a-id b-id (= a-id b-id))))
+
+(defn- operator-open-target! [target]
+  (let [target-text (canonical-id-text target)]
+    (cond
+      (map? target)
+      (api/open-target-in-emacs! target)
+
+      (or (nil? target-text) (str/blank? target-text))
+      nil
+
+      (or (str/starts-with? target-text "SORRY-")
+          (str/starts-with? target-text "sorry-")
+          (str/starts-with? target-text "S-"))
+      (js/console.log "[operator] sorry target is not routable yet:" target-text)
+
+      (str/starts-with? target-text "M-")
+      (api/open-target-in-emacs!
+       {:kind :workspace-file
+        :path (str "futon5a/holes/missions/" target-text ".md")})
+
+      (or (str/includes? target-text "/")
+          (str/ends-with? target-text ".md")
+          (str/ends-with? target-text ".html"))
+      (api/open-target-in-emacs!
+       {:kind :workspace-file
+        :path target-text})
+
+      :else
+      (js/console.log "[operator] target is not routable yet:" target-text))))
+
+(defn- bulletin-row [lane item]
+  (let [accent (if (= lane :nag) "#dc2626" "#eab308")
+        severity (if (= lane :nag) :critical :warning)
+        title (or (wire-get item :title) "(untitled)")
+        why (wire-get item :why)
+        source (or (display-text (wire-get item :source)) "source")
+        target (wire-get item :target)
+        salience (numeric-value (wire-get item :salience))]
+    ^{:key (str lane "-" (or (wire-get item :id) title))}
+    [:article {:class (str "dashboard-item " (severity-class severity))
+               :style {:border-left (str "4px solid " accent)
+                       :cursor (if target "pointer" "default")}
+               :on-click #(operator-open-target! target)}
+     [:div.dashboard-item-top
+      [:span.dashboard-chip source]
+      (when salience
+        [:span.dashboard-meta (str "salience " (.toFixed (double salience) 2))])]
+     [:div.dashboard-title title]
+     (when why
+       [:div.dashboard-text why])]))
+
+(defn- bulletin-lane [title lane items empty-text]
+  [:div {:style {:display "flex" :flex-direction "column" :gap "8px"}}
+   [:h4 {:style {:margin "4px 0 0" :font-size "0.9em"}} title]
+   (if (seq items)
+     [:div.dashboard-list
+      (for [item (sort-by-salience-desc items)]
+        (bulletin-row lane item))]
+     [:div.dashboard-empty empty-text])])
+
+(defn- morning-bulletin-card []
+  (let [bulletin @s/operator-bulletin
+        unavailable? (or (nil? bulletin)
+                         (truthy-value? (wire-get bulletin :unavailable)))
+        date (or (wire-get bulletin :date) "pending")
+        nag (or (wire-get bulletin :nag) [])
+        brief (or (wire-get bulletin :brief) [])
+        silent-count (or (wire-get bulletin :silent-count) 0)]
+    [:section.dashboard-card.dashboard-card-wide
+     [:div.dashboard-card-header
+      [:h3 (str "Morning Bulletin · " date)]
+      [:span.dashboard-badge (if unavailable? "pending" "live")]]
+     (if unavailable?
+       [:div.dashboard-empty
+        "Morning bulletin not wired yet (awaiting operator-lane endpoint)."]
+       [:div {:style {:display "flex" :flex-direction "column" :gap "10px"}}
+        [bulletin-lane "NAG" :nag nag "Nothing needs you right now."]
+        [bulletin-lane "BRIEF" :brief brief "No briefing items surfaced."]
+        [:div.dashboard-card-note
+         (str silent-count " discharged overnight")]])]))
+
+(defn- forward-row [item blocked?]
+  (let [sorry (or (canonical-id-text (wire-get item :sorry)) "unpriced")
+        lift (fmt-money (wire-get item :expected-lift))
+        metric (display-text (wire-get item :metric))
+        discharge (or (wire-get item :discharge) "No discharge text surfaced.")]
+    ^{:key (str sorry "-" blocked?)}
+    [:article {:class (str "dashboard-item "
+                           (severity-class (if blocked? :warning :info)))
+               :style (when blocked? {:opacity 0.68})}
+     [:div.dashboard-item-top
+      [:span.dashboard-chip sorry]
+      [:span.dashboard-meta
+       (str (or lift "n/a")
+            (when metric (str " · " metric))
+            (when blocked? " · blocked"))]]
+     [:div.dashboard-text discharge]]))
+
+(defn- forward-model-card []
+  (let [model @s/operator-forward-model
+        unavailable? (or (nil? model)
+                         (truthy-value? (wire-get model :unavailable)))
+        priced (or (wire-get model :priced-sorries) [])
+        unpriced (or (wire-get model :unpriced-sorries) [])
+        next-id (wire-get model :next-action)
+        next-item (some #(when (same-canonical-id? (wire-get % :sorry) next-id) %)
+                        priced)
+        action-text (or (wire-get next-item :discharge)
+                        (canonical-id-text next-id)
+                        "No immediate discharge surfaced.")
+        actionable (->> priced
+                        (remove #(truthy-value? (or (wire-get % :blocked?)
+                                                    (wire-get % :blocked))))
+                        (sort-by (fn [item]
+                                   (let [lift (numeric-value
+                                               (wire-get item :expected-lift))]
+                                     (if lift (- lift) js/Infinity)))))
+        gated (filter #(truthy-value? (or (wire-get % :blocked?)
+                                          (wire-get % :blocked)))
+                      priced)]
+    [:section.dashboard-card.dashboard-card-wide
+     [:div.dashboard-card-header
+      [:h3 "Forward Model"]
+      [:span.dashboard-badge (if unavailable? "pending" "descriptive")]]
+     (if unavailable?
+       [:div.dashboard-empty "Forward model endpoint not wired yet."]
+       [:div {:style {:display "flex" :flex-direction "column" :gap "12px"}}
+        [:div {:style {:padding "10px 12px"
+                       :border "1px solid #d1d5db"
+                       :border-radius "6px"
+                       :background "#f8fafc"}}
+         [:div.dashboard-meta "NEXT ACTION"]
+         [:div {:style {:font-weight "700" :font-size "1.05em"}}
+          action-text]]
+        [:div.dashboard-card-note
+         "Signals shown as structural centrality / git-age / operator priors; this panel does not present predictions."]
+        [:div
+         [:h4 {:style {:margin "0 0 6px" :font-size "0.9em"}}
+          "Actionable Now"]
+         (if (seq actionable)
+           [:div.dashboard-list
+            (for [item actionable]
+              (forward-row item false))]
+           [:div.dashboard-empty "No unblocked priced sorry surfaced."])]
+        (when (seq gated)
+          [:div
+           [:h4 {:style {:margin "0 0 6px" :font-size "0.9em"}}
+            "Gated"]
+           [:div.dashboard-list
+            (for [item gated]
+              (forward-row item true))]])
+        [:div
+         [:h4 {:style {:margin "0 0 6px" :font-size "0.9em"}}
+          "Unpriced Crux"]
+         (if (seq unpriced)
+           [:div.dashboard-list
+            (for [item unpriced
+                  :let [sorry (or (canonical-id-text (wire-get item :sorry))
+                                  "unpriced")
+                        discharge (or (wire-get item :discharge)
+                                      "No discharge text surfaced.")]]
+              ^{:key sorry}
+              [:article.dashboard-item.info
+               [:div.dashboard-title (str sorry " n:0→1")]
+               [:div.dashboard-text discharge]])]
+           [:div.dashboard-empty "No unpriced crux surfaced."])]])]))
+
+(defn- futon-runner-card []
+  [:section.dashboard-card
+   [:div.dashboard-card-header
+    [:h3 "Futon Runner"]
+    [:span.dashboard-badge "local"]]
+   [:button.toggle
+    {:on-click #(api/open-target-in-emacs!
+                 {:kind :workspace-file
+                  :path "futon7/holes/M-futon-forward-model.runner.html"})
+     :style {:align-self "flex-start"}}
+    "▶ 蒲团 Futon Runner"]])
+
+(defn- operator-dashboard []
+  [:div.dashboard-grid {:data-testid "operator-dashboard"}
+   [morning-bulletin-card]
+   [forward-model-card]
+   [futon-runner-card]])
+
+(defn- vsatarcs-story-card [idx story]
   (let [status (status-text (wire-get story :build/status))
         story-id (or (wire-get story :story/id) "story")
         headline (or (wire-get story :headline) "VSATARCS story status unavailable")
         domain (status-text (wire-get story :grounding/domain))
         chains (or (wire-get story :currency/chains) [])]
-    ^{:key (str story-id)}
+    ^{:key (str story-id "|" idx)}
     [:article {:class (str "dashboard-item " (severity-class (status-severity status)))
                :data-testid (str "vsatarcs-story-" story-id)}
      [:div.dashboard-item-top
@@ -1201,8 +1437,8 @@
 
        (seq stale-stories)
        [:div.dashboard-list
-        (for [story stale-stories]
-          (vsatarcs-story-card story))]
+        (for [[idx story] (map-indexed vector stale-stories)]
+          (vsatarcs-story-card idx story))]
 
        :else
        [:div.dashboard-empty
@@ -1460,7 +1696,7 @@
         (when-let [missions (seq (:missions-touched selected-session))]
           [:div {:style {:margin-top "4px"}}
            [:strong "Missions: "]
-           (str (str/join ", " missions))])])]))
+           (str/join ", " missions)])])]))
 
 (defn- sidebar []
   (let [data @s/data]
@@ -1591,9 +1827,15 @@
      [tracks-panel data]]))
 
 (defn- main-panel []
-  (if (= :self-watch @s/view-mode)
+  (case @s/view-mode
+    :self-watch
     [:div.hex-canvas.dashboard-canvas
      [self-watch-dashboard]]
+
+    :operator
+    [:div.hex-canvas.dashboard-canvas
+     [operator-dashboard]]
+
     [:div.hex-canvas
      [graph/hex-map]]))
 
@@ -1633,16 +1875,19 @@
                         (str " • " (:count ch) " items")))])])])))
 
 (defn app []
-  (let [data @s/data]
+  (let [data @s/data
+        operator? (= :operator @s/view-mode)]
     (if (nil? data)
       [:div.loading "Loading War Machine..."]
       [:div.war-machine
        [toolbar]
        [stop-the-line-banner data]
        [:div.main-area
-        [legend-panel]
+        (when-not operator?
+          [legend-panel])
         [main-panel]
-        [sidebar]]
+        (when-not operator?
+          [sidebar])]
        [hud/hud-line]
        [graph/detail-panel]])))
 

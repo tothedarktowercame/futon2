@@ -20,11 +20,69 @@
   (or (some-> js/window .-WM_API_BASE) ""))
 
 (def ^:private endpoint-suffix "/api/alpha/war-machine")
+(def ^:private operator-bulletin-suffix
+  "/api/alpha/war-machine/operator-bulletin")
+(def ^:private forward-model-suffix "/api/alpha/forward-model")
 
 (defn- endpoint-with-days []
   (str (api-base) endpoint-suffix "?days=" @s/days-window))
 
+(defn- operator-bulletin-endpoint []
+  ;; Use the same-origin path for defensive optional endpoints. The main WM
+  ;; scan uses WM_API_BASE to bypass dev-proxy timeouts; these endpoints are
+  ;; small and may 404 while their producers are not live yet. Same-origin keeps
+  ;; those cleanly observable instead of surfacing browser CORS errors.
+  operator-bulletin-suffix)
+
+(defn- forward-model-endpoint []
+  forward-model-suffix)
+
+(defn- unavailable-payload [status]
+  {:unavailable true
+   :status status})
+
+(defn- optional-operator-endpoints-ready? []
+  (true? (some-> js/window .-WM_OPERATOR_ENDPOINTS_READY)))
+
+(defn- load-optional-json!
+  "Fetch an optional JSON endpoint without emitting browser console errors for
+   ordinary non-200 statuses. Chrome reports 404 XHRs as console errors; fetch
+   lets the Operator view treat absent producers as clean empty states."
+  [url target-atom label]
+  (if-not (optional-operator-endpoints-ready?)
+    (reset! target-atom (unavailable-payload :not-wired))
+    (-> (js/fetch url #js {:method "GET"
+                           :credentials "omit"
+                           :headers #js {"Accept" "application/json"}})
+        (.then (fn [resp]
+                 (if (.-ok resp)
+                   (-> (.json resp)
+                       (.then (fn [body]
+                                (reset! target-atom
+                                        (js->clj body :keywordize-keys true)))))
+                   (do
+                     (reset! target-atom
+                             (unavailable-payload (.-status resp)))
+                     (js/console.warn "[api]" label "unavailable:"
+                                      (.-status resp))))))
+        (.catch (fn [err]
+                  (reset! target-atom (unavailable-payload 0))
+                  (js/console.warn "[api]" label "unavailable:"
+                                   (or (.-message err) err)))))))
+
+(defn load-operator-bulletin! []
+  (load-optional-json! (operator-bulletin-endpoint)
+                       s/operator-bulletin
+                       "operator bulletin"))
+
+(defn load-forward-model! []
+  (load-optional-json! (forward-model-endpoint)
+                       s/operator-forward-model
+                       "forward model"))
+
 (defn load! []
+  (load-operator-bulletin!)
+  (load-forward-model!)
   (go
     (let [resp (<! (http/get (endpoint-with-days)
                              {:with-credentials? false}))]
