@@ -47,14 +47,55 @@
     (is (not (contains? ids "hinge-log")))
     (is (not (contains? ids "README")))))
 
-(deftest open-missions-filters-complete-test
+(deftest load-missions-excludes-sandbox-and-derived-docs-test
+  (write-mission! "futon0/holes/missions/M-alpha.md"
+                  (str "Status: OPEN\n"
+                       "# Mission Alpha\n"))
+  (write-mission! "futon0/holes/missions/M-alpha.v1.md"
+                  (str "Status: IDENTIFY (draft 1)\n"
+                       "# Mission Alpha v1\n"))
+  (write-mission! "futon0/holes/missions/M-alpha.aif-wiring.md"
+                  (str "Status: OPEN\n"
+                       "# Mission Alpha wiring support\n"))
+  (write-mission! "futon3c/.state/night-shift-frames/frame/checkout/holes/missions/M-sandbox.md"
+                  (str "Status: OPEN\n"
+                       "# Sandbox Mission\n"))
+  (let [doc (mr/load-missions *tmpdir*)
+        ids (set (map :id (:missions doc)))]
+    (is (= #{"M-alpha"} ids))))
+
+(deftest open-missions-filters-closed-inactive-and-draft-test
   (let [doc {:missions [{:id "M-open" :status-class :open}
                         {:id "M-active" :status-class :active}
                         {:id "M-partial" :status-class :partial}
-                        {:id "M-complete" :status-class :complete}]}
+                        {:id "M-unknown" :status-class :unknown}
+                        {:id "M-complete" :status-class :complete}
+                        {:id "M-inactive" :status-class :inactive}
+                        {:id "M-draft" :status-class :draft}]}
         openes (mr/open-missions doc)]
-    (is (= #{"M-open" "M-active" "M-partial"}
+    (is (= #{"M-open" "M-active" "M-partial" "M-unknown"}
            (set (map :id openes))))))
+
+(deftest status-line-variants-are-classified-test
+  (write-mission! "futon0/holes/missions/M-plain.md"
+                  (str "Status: DONE\n"
+                       "# Plain Status\n"))
+  (write-mission! "futon0/holes/missions/M-heading.md"
+                  (str "## Status: archived\n"
+                       "# Heading Status\n"))
+  (write-mission! "futon0/holes/missions/M-bulleted.md"
+                  (str "- **Status:** **CLOSED 2026-06-04**\n"
+                       "# Bulleted Status\n"))
+  (write-mission! "futon0/holes/missions/M-draft.md"
+                  (str "**Status:** SPECIFIED, NOT YET IMPLEMENTED\n"
+                       "# Draft Status\n"))
+  (let [by-id (->> (:missions (mr/load-missions *tmpdir*))
+                   (map (juxt :id :status-class))
+                   (into {}))]
+    (is (= :complete (get by-id "M-plain")))
+    (is (= :inactive (get by-id "M-heading")))
+    (is (= :complete (get by-id "M-bulleted")))
+    (is (= :draft (get by-id "M-draft")))))
 
 (deftest default-open-missions-includes-at-least-one-addressable-mission-test
   (let [missions (mr/open-missions)
@@ -71,7 +112,20 @@
   (let [state {:missions [{:id "M-alpha"} {:id "M-beta"}]}]
     (is (true? (fm/can-execute? state {:type :open-mission :target "M-alpha"})))
     (is (true? (fm/can-execute? state {:type :open-mission :target "M-beta"})))
+    (is (true? (fm/can-execute? state {:type :open-mission
+                                       :target "futon4-d/mission/alpha"})))
     (is (false? (fm/can-execute? state {:type :open-mission :target "M-missing"})))))
+
+(deftest live-mission-target-normalizes-substrate-2-mission-endpoints-test
+  (let [missions [{:id "M-alpha" :status-class :open}
+                  {:id "M-beta" :status-class :complete}
+                  {:id "M-gamma" :status-class :draft}]]
+    (is (= "M-alpha" (mr/mission-target-id "futon4-d/mission/alpha")))
+    (is (= "M-alpha" (mr/mission-target-id "M-alpha")))
+    (is (true? (mr/live-mission-target? missions "futon4-d/mission/alpha")))
+    (is (false? (mr/live-mission-target? missions "futon4-d/mission/beta")))
+    (is (false? (mr/live-mission-target? missions "futon4-d/mission/gamma")))
+    (is (false? (mr/live-mission-target? missions "futon4-d/mission/missing")))))
 
 (deftest mission-enumerator-proposer-emits-candidates-test
   (let [state {:missions [{:id "M-alpha" :title "Mission Alpha" :status-class :open :path "/tmp/a"}

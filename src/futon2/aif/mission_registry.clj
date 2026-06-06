@@ -2,13 +2,13 @@
   "Mission-doc substrate adapter for the WM AIF apparatus.
 
    This namespace is the first concrete adapter for `:open-mission`.
-   It scans top-level mission docs at `*/holes/missions/M-*.md`,
+   It scans live top-level mission docs at `*/holes/missions/M-*.md`,
    extracts a lightweight status/title view, filters to missions that are
-   not complete, and exposes them as addressable targets for the WM's
+   not closed/draft/sandbox, and exposes them as addressable targets for the WM's
    action layer.
 
    Honest scope: file-backed and heuristic. The adapter reads mission docs'
-   `**Status:**` line rather than a typed substrate. This is still an honest
+   `Status:` line rather than a typed substrate. This is still an honest
    improvement over the prior state where `:open-mission` was permanently
    gated and only surfaced as `:learn-action-class`.
 
@@ -28,11 +28,19 @@
   #".*/holes/missions/(M-[^/]+)\.md$")
 
 (def ^:private status-line-pattern
-  #"(?i)^\*\*Status:\*\*\s*(.+)$")
+  #"(?i)^\s*(?:[-*]\s*)?(?:#+\s*)?(?:\*\*)?Status:?(?:\*\*)?\s*:?\s*(.+)$")
 
 (defn- mission-id-from-path
   [path]
   (second (re-matches mission-path-pattern path)))
+
+(defn- sandbox-path?
+  [path]
+  (str/includes? path "/.state/"))
+
+(defn- derived-mission-id?
+  [mission-id]
+  (str/includes? (or mission-id "") "."))
 
 (defn- mission-title-from-lines
   [mission-id lines]
@@ -46,13 +54,15 @@
   [status-line]
   (let [upper (str/upper-case (or status-line ""))]
     (cond
-      (str/includes? upper "COMPLETE") :complete
-      (str/includes? upper "COMPLETED") :complete
-      (str/includes? upper "CLOSED") :complete
+      (or (re-find #"\bDRAFT\b" upper)
+          (str/includes? upper "SPECIFIED, NOT YET IMPLEMENTED")) :draft
+      (re-find #"\b(ARCHIVED|PARKED|SUPERSEDED|DEFERRED|ABANDONED)\b" upper) :inactive
+      (re-find #"\b(COMPLETE|COMPLETED|CLOSED|DONE|DISCHARGED|ANSWERED|DISSOLVED)\b" upper) :complete
       (str/includes? upper "ACTIVE") :active
       (str/includes? upper "OPEN") :open
       (str/includes? upper "PARTIAL") :partial
       (str/includes? upper "IDENTIFY") :identify
+      (str/includes? upper "HEAD") :open
       :else :unknown)))
 
 (defn- mission-doc->entry
@@ -82,17 +92,47 @@
                        (filter #(.isFile %))
                        (map #(.getAbsolutePath %))
                        (filter #(re-matches mission-path-pattern %))
+                       (remove sandbox-path?)
                        sort
-                       (mapv mission-doc->entry))]
+                       (map mission-doc->entry)
+                       (remove #(derived-mission-id? (:id %)))
+                       vec)]
      {:missions missions})))
 
+(defn live-mission?
+  "True when a loaded mission entry is eligible for WM `:open-mission`
+   enumeration/ranking."
+  [mission]
+  (not (contains? #{:complete :inactive :draft}
+                  (:status-class mission))))
+
 (defn open-missions
-  "Filter loaded missions to those that are not complete. Zero-arg variant
+  "Filter loaded missions to those that are live. Zero-arg variant
    scans the default code root; one-arg variant accepts a pre-loaded doc."
   ([] (open-missions (load-missions)))
   ([loaded]
-   (vec (remove #(= :complete (:status-class %))
-                (:missions loaded)))))
+   (vec (filter live-mission? (:missions loaded)))))
+
+(defn mission-target-id
+  "Normalize a mission action target to the file-backed registry id when possible.
+   Substrate-2 mission endpoints such as `futon4-d/mission/foo` normalize to
+   `M-foo`; ordinary registry ids such as `M-foo` are returned unchanged."
+  [target]
+  (let [target (cond
+                 (keyword? target) (name target)
+                 (some? target) (str target)
+                 :else nil)]
+    (cond
+      (nil? target) nil
+      (str/starts-with? target "M-") target
+      :else (when-let [[_ local-id] (re-find #"/mission/([^/]+)$" target)]
+              (str "M-" local-id)))))
+
+(defn live-mission-target?
+  "True if TARGET resolves to one of MISSIONS' live registry ids."
+  [missions target]
+  (let [live-ids (set (map :id (filter live-mission? missions)))]
+    (contains? live-ids (mission-target-id target))))
 
 (defmethod fm/can-propose? :open-mission
   [state _action-type]
@@ -100,8 +140,7 @@
 
 (defmethod fm/can-execute? :open-mission
   [state action]
-  (boolean (some #(= (:target action) (:id %))
-                 (:missions state []))))
+  (live-mission-target? (:missions state []) (:target action)))
 
 (def mission-enumerator-proposer
   "Proposer that emits one `:open-mission` candidate per addressable mission

@@ -184,6 +184,34 @@
     (string? target) target
     :else (some-> target str)))
 
+(defn- rerank
+  [ranked-actions]
+  (->> ranked-actions
+       (map-indexed (fn [i entry] (assoc entry :rank (inc i))))
+       vec))
+
+(defn- live-open-mission-ranked-entry?
+  [missions entry]
+  (let [action (:action entry)]
+    (or (not= :open-mission (:type action))
+        (mission-registry/live-mission-target? missions (:target action)))))
+
+(defn- canonicalize-open-mission-ranked-entry
+  [entry]
+  (if (= :open-mission (get-in entry [:action :type]))
+    (let [registry-id (mission-registry/mission-target-id
+                       (get-in entry [:action :target]))]
+      (cond-> entry
+        registry-id (assoc-in [:action :target] registry-id)))
+    entry))
+
+(defn- filter-live-open-mission-ranked-actions
+  [missions ranked-actions]
+  (->> ranked-actions
+       (filter #(live-open-mission-ranked-entry? missions %))
+       (map canonicalize-open-mission-ranked-entry)
+       rerank))
+
 (defn- sorry-doc-index
   []
   (reduce (fn [idx hx]
@@ -691,7 +719,6 @@
    health is the normalized [0,1] observation."
   [days]
   (let [since (since-str days)
-        today (str (LocalDate/now tz))
         entries (or (fetch-evidence :limit 2000) [])
         ;; Filter entries to window
         window-entries (filter (fn [e]
@@ -1485,16 +1512,15 @@
                                   0.0)
               ;; Compute trend: average cardinal direction across daily frames
               cardinal-trend (when (seq daily-frames)
-                               (let [n (count daily-frames)]
-                                 (reduce (fn [acc frame]
-                                           (let [cd (or (:frame/cardinal-direction frame) {})]
-                                             (-> acc
-                                                 (update :hermit + (get cd :hermit 0.0))
-                                                 (update :foraging + (get cd :foraging 0.0))
-                                                 (update :cargo + (get cd :cargo 0.0))
-                                                 (update :depositing + (get cd :depositing 0.0)))))
-                                         {:hermit 0.0 :foraging 0.0 :cargo 0.0 :depositing 0.0}
-                                         daily-frames)))
+                               (reduce (fn [acc frame]
+                                         (let [cd (or (:frame/cardinal-direction frame) {})]
+                                           (-> acc
+                                               (update :hermit + (get cd :hermit 0.0))
+                                               (update :foraging + (get cd :foraging 0.0))
+                                               (update :cargo + (get cd :cargo 0.0))
+                                               (update :depositing + (get cd :depositing 0.0)))))
+                                       {:hermit 0.0 :foraging 0.0 :cargo 0.0 :depositing 0.0}
+                                       daily-frames))
               cardinal-avg (when cardinal-trend
                              (let [n (max 1 (count daily-frames))]
                                {:hermit (/ (:hermit cardinal-trend) n)
@@ -1874,7 +1900,7 @@
 
 (defn render-war-machine
   "Render the War Machine strategic synthesis as markdown."
-  [{:keys [self-watch loop-health support-attack mission-triage graph portfolio
+  [{:keys [self-watch loop-health support-attack mission-triage graph
            metabolic-balance commit-hygiene blocks now days] :as data}]
   (let [sb (StringBuilder.)]
     (.append sb "# War Machine — Strategic Synthesis\n\n")
@@ -1979,7 +2005,7 @@
                        ["Claim" "Type" "Evidence" "Invariant signal" "Status"]
                        [:left :left :right :left :left]
                        (mapv (fn [{:keys [claim-id type label evidence-count
-                                          last-evidence status invariant-evidence]}]
+                                          status invariant-evidence]}]
                                [(str (name claim-id) ": " label)
                                 (name type)
                                 (str evidence-count)
@@ -2041,8 +2067,7 @@
                        ["Channel" "P" "Tier" "" "Detail"]
                        [:left :right :left :left :left]
                        (mapv (fn [{:keys [channel pressure tier count
-                                          repo-count max-age-days]
-                                   :as ch}]
+                                          repo-count max-age-days]}]
                                [(name channel)
                                 (format "%.2f" (double (or pressure 0)))
                                 (or (some-> tier name) "-")
@@ -2910,17 +2935,16 @@
           live-summary (when (and live-data (:ok live-data))
                          (:summary live-data))
           live-domains (when (and live-data (:ok live-data))
-                         (:domains live-data))]
+                         (:domains live-data))
+          individual-candidates (vec (mapcat (fn [fam]
+                                                (map (fn [inv-kw]
+                                                       {:id inv-kw
+                                                        :name (name inv-kw)
+                                                        :family-id (:id fam)
+                                                        :layer (:layer fam)})
+                                                     (or (:candidate-invariants fam) [])))
+                                              candidate))]
       ;; Extract individual candidate invariants for the visualiser
-      (let [individual-candidates
-            (vec (mapcat (fn [fam]
-                           (map (fn [inv-kw]
-                                  {:id inv-kw
-                                   :name (name inv-kw)
-                                   :family-id (:id fam)
-                                   :layer (:layer fam)})
-                                (or (:candidate-invariants fam) [])))
-                         candidate))]
       {:layers invariants
        :families families
        :operational-families operational
@@ -2932,7 +2956,7 @@
        ;; Live runner data (nil if endpoint not available)
        :live-available? (boolean live-data)
        :live-summary live-summary
-       :live-domains live-domains}))))
+       :live-domains live-domains})))
 
 ;; --- Invariant → Support/Attack enrichment ---
 
@@ -3312,15 +3336,16 @@
         wm-horizon-steps (when (and (:events-loaded? anticipation-snapshot)
                                     (seq (:events anticipation-snapshot)))
                            3)
-        wm-ranked (-> (efe/rank-actions wm-state
-                                        (->> wm-candidates
-                                             enrich-candidates-with-structural-pressure
-                                             ;; M-interest-network-coupling capstone:
-                                             ;; bias candidates by the lived interest posterior
-                                             interest-net/enrich-candidates)
-                                        {:time-pressure wm-time-pressure
-                                         :horizon-steps wm-horizon-steps})
-                      apply-anamnesis-tiebreak)
+        wm-ranked (->> (efe/rank-actions wm-state
+                                          (->> wm-candidates
+                                               enrich-candidates-with-structural-pressure
+                                               ;; M-interest-network-coupling capstone:
+                                               ;; bias candidates by the lived interest posterior
+                                               interest-net/enrich-candidates)
+                                          {:time-pressure wm-time-pressure
+                                           :horizon-steps wm-horizon-steps})
+                       apply-anamnesis-tiebreak
+                       (filter-live-open-mission-ranked-actions wm-missions))
         ;; v0.13 R6 enhancement: pre-filter by can-execute? admissibility
         ;; (composes with can-propose? at proposer-side); then run
         ;; deliberative select-action with default-mode-select as a
