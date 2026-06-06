@@ -152,3 +152,27 @@
     (is (not (contains? learn-targets :open-mission)))
     (is (contains? learn-targets :address-sorry))
     (is (contains? learn-targets :fire-pattern))))
+
+(deftest sub-phase-keywords-do-not-terminally-classify-test
+  ;; Mission statuses describe per-phase progress; a mid-line terminal keyword
+  ;; (complete/done/deferred/draft for a SUB-phase) must NOT exclude a still-live
+  ;; mission. Only the LEADING state token classifies. Regression guard for the
+  ;; over-exclusion fix (claude-1 review of a3f8702): "HEAD complete; ... pending",
+  ;; "INSTANTIATE (... MAP completed ...)", "PARTIAL (... deferred)", and a
+  ;; "MAP ... revised-draft" lead all stay live; a leading COMPLETE is excluded.
+  (write-mission! "futon0/holes/missions/M-subphase-complete.md"
+                  "**Status:** HEAD complete; IDENTIFY drafted; MAP pilot run; DERIVE pending\n# X\n")
+  (write-mission! "futon0/holes/missions/M-instantiate-active.md"
+                  "**Status:** INSTANTIATE (INSTANTIATE-0 active; MAP completed; VERIFY accepted)\n# X\n")
+  (write-mission! "futon0/holes/missions/M-partial-deferred.md"
+                  "**Status:** PARTIAL (Phase 1 shipped; Phases 2-4 deferred)\n# X\n")
+  (write-mission! "futon0/holes/missions/M-map-lead-draft.md"
+                  "**Status:** MAP / DERIVE all complete. INSTANTIATE in progress; revised-draft landed\n# X\n")
+  (write-mission! "futon0/holes/missions/M-really-complete.md"
+                  "**Status:** COMPLETE (2026-01-01)\n# X\n")
+  (let [open-ids (set (map :id (mr/open-missions (mr/load-missions *tmpdir*))))]
+    (is (contains? open-ids "M-subphase-complete"))
+    (is (contains? open-ids "M-instantiate-active"))
+    (is (contains? open-ids "M-partial-deferred"))
+    (is (contains? open-ids "M-map-lead-draft"))
+    (is (not (contains? open-ids "M-really-complete")))))

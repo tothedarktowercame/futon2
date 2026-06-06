@@ -51,19 +51,32 @@
       mission-id))
 
 (defn- classify-status
+  "Classify a mission from its Status line. Terminal / draft / inactive states are
+   recognised ONLY from the LEADING state token (the mission's overall state, after
+   stripping markdown emphasis). Mission statuses describe per-phase progress, so a
+   mid-line keyword — \"HEAD complete; IDENTIFY drafted\", \"… 4 done\", \"MAP completed\",
+   \"PARTIAL (Phases 2-4 deferred)\", \"revised-draft landed\" — must NOT terminally
+   classify a still-live mission; the leading token wins. Bias is toward :unknown
+   (kept live) when the lead is unrecognised — a work queue should not silently hide
+   work."
   [status-line]
-  (let [upper (str/upper-case (or status-line ""))]
+  (let [upper (str/upper-case (or status-line ""))
+        lead  (-> upper (str/replace #"^[\s>*#`_~-]+" "") str/trim)
+        head  (or (re-find #"[A-Z][A-Z-]*" lead) "")]
     (cond
-      (or (re-find #"\bDRAFT\b" upper)
-          (str/includes? upper "SPECIFIED, NOT YET IMPLEMENTED")) :draft
-      (re-find #"\b(ARCHIVED|PARKED|SUPERSEDED|DEFERRED|ABANDONED)\b" upper) :inactive
-      (re-find #"\b(COMPLETE|COMPLETED|CLOSED|DONE|DISCHARGED|ANSWERED|DISSOLVED)\b" upper) :complete
-      (str/includes? upper "ACTIVE") :active
-      (str/includes? upper "OPEN") :open
-      (str/includes? upper "PARTIAL") :partial
-      (str/includes? upper "IDENTIFY") :identify
-      (str/includes? upper "HEAD") :open
-      :else :unknown)))
+      (str/includes? upper "SPECIFIED, NOT YET IMPLEMENTED")            :draft
+      (= "DRAFT" head)                                                  :draft
+      (#{"ARCHIVED" "PARKED" "SUPERSEDED" "ABANDONED" "DEFERRED"} head) :inactive
+      (#{"COMPLETE" "COMPLETED" "CLOSED" "DONE" "DISCHARGED"
+         "ANSWERED" "DISSOLVED"} head)                                  :complete
+      (= "ACTIVE" head)                                                 :active
+      (= "OPEN" head)                                                   :open
+      (= "PARTIAL" head)                                                :partial
+      (= "IDENTIFY" head)                                               :identify
+      (= "HEAD" head)                                                   :open
+      ;; a leading lifecycle-phase token = work in flight = live
+      (#{"INSTANTIATE" "MAP" "DERIVE" "ARGUE" "VERIFY"} head)           :active
+      :else                                                            :unknown)))
 
 (defn- mission-doc->entry
   [path]
