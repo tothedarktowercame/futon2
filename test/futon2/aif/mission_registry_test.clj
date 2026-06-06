@@ -97,6 +97,38 @@
     (is (= :complete (get by-id "M-bulleted")))
     (is (= :draft (get by-id "M-draft")))))
 
+(deftest open-hole-count-uses-representative-mission-work-signals-test
+  (write-mission! "futon0/holes/missions/M-live-work.md"
+                  (str "**Status:** HEAD complete; DERIVE pending; INSTANTIATE next\n"
+                       "# Live Work\n"
+                       "- [ ] unchecked task\n"
+                       "- [x] finished task\n"
+                       "TODO: tighten the witness\n"
+                       "hole: unresolved derivation case\n"
+                       "Parent sorry: `sorry/example-open`\n"
+                       "## Open questions\n"
+                       "1. Which substrate owns the new edge?\n"
+                       "2. How should the UI display it?\n"))
+  (let [mission (->> (:missions (mr/load-missions *tmpdir*))
+                     (filter #(= "M-live-work" (:id %)))
+                     first)]
+    (is (= :open (:status-class mission)))
+    (is (= 7 (:open-hole-count mission)))))
+
+(deftest open-hole-count-is-zero-for-closed-missions-test
+  (write-mission! "futon0/holes/missions/M-done.md"
+                  (str "**Status:** DONE\n"
+                       "# Done\n"
+                       "- [ ] stale unchecked task from old plan\n"
+                       "TODO: stale note\n"
+                       "## Open questions\n"
+                       "1. Historical question already closed\n"))
+  (let [mission (->> (:missions (mr/load-missions *tmpdir*))
+                     (filter #(= "M-done" (:id %)))
+                     first)]
+    (is (= :complete (:status-class mission)))
+    (is (zero? (:open-hole-count mission)))))
+
 (deftest default-open-missions-includes-at-least-one-addressable-mission-test
   (let [missions (mr/open-missions)
         ids (set (map :id missions))]
@@ -126,6 +158,22 @@
     (is (false? (mr/live-mission-target? missions "futon4-d/mission/beta")))
     (is (false? (mr/live-mission-target? missions "futon4-d/mission/gamma")))
     (is (false? (mr/live-mission-target? missions "futon4-d/mission/missing")))))
+
+(deftest mission-status-reports-open-and-hole-count-test
+  (write-mission! "futon0/holes/missions/M-alpha.md"
+                  (str "Status: OPEN\n"
+                       "# Alpha\n"
+                       "- [ ] remaining task\n"))
+  (let [load-missions mr/load-missions]
+    (with-redefs [mr/load-missions (fn
+                                     ([] (load-missions *tmpdir*))
+                                     ([root] (load-missions root)))]
+      (is (= {:open? true :open-hole-count 1}
+             (mr/mission-status "M-alpha")))
+      (is (= {:open? true :open-hole-count 1}
+             (mr/mission-status "futon4-d/mission/alpha")))
+      (is (= {:open? false :open-hole-count 0}
+             (mr/mission-status "M-missing"))))))
 
 (deftest mission-enumerator-proposer-emits-candidates-test
   (let [state {:missions [{:id "M-alpha" :title "Mission Alpha" :status-class :open :path "/tmp/a"}

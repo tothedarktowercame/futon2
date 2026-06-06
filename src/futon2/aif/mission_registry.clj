@@ -30,6 +30,21 @@
 (def ^:private status-line-pattern
   #"(?i)^\s*(?:[-*]\s*)?(?:#+\s*)?(?:\*\*)?Status:?(?:\*\*)?\s*:?\s*(.+)$")
 
+(def ^:private unchecked-task-pattern
+  #"^\s*[-*]\s+\[\s\]\s+\S.*$")
+
+(def ^:private explicit-work-marker-pattern
+  #"(?i)(?:^|[\s`(*_:-])(?:TODO|FIXME|XXX|TBD)(?:$|[\s`),.:;_-])|(?:\b(?:open\s+)?(?:hole|sorry)\s*:)|\bsorry/[-A-Za-z0-9_.]+")
+
+(def ^:private pending-lifecycle-pattern
+  #"(?i)\b(?:HEAD|IDENTIFY|MAP|DERIVE|ARGUE|VERIFY|INSTANTIATE)\b[^.\n;|]*\b(?:pending|next|open|blocked|active|in[ -]progress|remaining|not yet|needed)\b|\b(?:pending|next|open|blocked|active|in[ -]progress|remaining|not yet|needed)\b[^.\n;|]*\b(?:HEAD|IDENTIFY|MAP|DERIVE|ARGUE|VERIFY|INSTANTIATE)\b")
+
+(def ^:private open-section-heading-pattern
+  #"(?i)^\s*#{2,6}\s+(?:open questions?|open tasks?|remaining work|remaining tasks?|pending work|next steps)\b.*$")
+
+(def ^:private list-item-pattern
+  #"^\s*(?:[-*+]\s+|\d+[.)]\s+)\S.*$")
+
 (defn- mission-id-from-path
   [path]
   (second (re-matches mission-path-pattern path)))
@@ -78,6 +93,41 @@
       (#{"INSTANTIATE" "MAP" "DERIVE" "ARGUE" "VERIFY"} head)           :active
       :else                                                            :unknown)))
 
+(defn- heading-level
+  [line]
+  (some-> (re-find #"^\s*(#{1,6})\s+" line) second count))
+
+(defn- open-section-item-count
+  [lines]
+  (loop [remaining lines
+         active-level nil
+         n 0]
+    (if-let [line (first remaining)]
+      (let [level (heading-level line)
+            next-active-level (cond
+                                (re-find open-section-heading-pattern line) level
+                                (and active-level level (<= level active-level)) nil
+                                :else active-level)
+            count-line? (and next-active-level
+                             (not (re-find open-section-heading-pattern line))
+                             (re-find list-item-pattern line))]
+        (recur (rest remaining)
+               next-active-level
+               (cond-> n count-line? inc)))
+      n)))
+
+(defn- open-hole-count
+  "Conservative per-mission remaining-work count from the mission doc itself.
+   Terminal/draft/inactive mission states force zero; live documents count
+   explicit incomplete work signals only."
+  [status-class lines]
+  (if (contains? #{:complete :inactive :draft} status-class)
+    0
+    (+ (count (filter #(re-find unchecked-task-pattern %) lines))
+       (count (filter #(re-find explicit-work-marker-pattern %) lines))
+       (count (filter #(re-find pending-lifecycle-pattern %) lines))
+       (open-section-item-count lines))))
+
 (defn- mission-doc->entry
   [path]
   (let [lines (str/split-lines (slurp path))
@@ -85,12 +135,14 @@
         status-line (some (fn [line]
                             (when-let [[_ status] (re-matches status-line-pattern line)]
                               status))
-                          (take 20 lines))]
+                          (take 20 lines))
+        status-class (classify-status status-line)]
     {:id mission-id
      :path path
      :title (mission-title-from-lines mission-id lines)
      :status-line status-line
-     :status-class (classify-status status-line)}))
+     :status-class status-class
+     :open-hole-count (open-hole-count status-class lines)}))
 
 (defn load-missions
   "Scan the code root for top-level mission docs and return
@@ -146,6 +198,18 @@
   [missions target]
   (let [live-ids (set (map :id (filter live-mission? missions)))]
     (contains? live-ids (mission-target-id target))))
+
+(defn mission-status
+  "Return WM guardrail status for TARGET from the mission registry.
+   The result is deliberately small and stable for requiring-resolve callers:
+   `{:open? <bool> :open-hole-count <n>}`. Unknown targets are closed with
+   zero holes."
+  [target]
+  (let [target-id (mission-target-id target)
+        mission (some #(when (= target-id (:id %)) %)
+                      (:missions (load-missions)))]
+    {:open? (boolean (and mission (live-mission? mission)))
+     :open-hole-count (long (or (:open-hole-count mission) 0))}))
 
 (defmethod fm/can-propose? :open-mission
   [state _action-type]
