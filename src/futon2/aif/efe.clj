@@ -49,6 +49,9 @@
 (def default-info-weight 0.4)
 (def default-survival-weight 1.2)
 (def default-structural-pressure-weight 0.35)
+(def default-graph-applicability-penalty 1000.0)
+(def default-graph-body-weight 3.0)
+(def default-graph-ascent-weight 20.0)
 
 ;; v0.14: anticipation-driven scaling. When opts carries :time-pressure
 ;; in [0,1], G-risk and G-survival are multiplied by
@@ -56,6 +59,139 @@
 ;; scaled — urgency makes risk and survival dominate, reducing the
 ;; relative weight of exploration.
 (def default-time-pressure-scale 1.0)
+
+(defn capability-satisfied?
+  "True when a capability node is already bound/satisfied in the star-map."
+  [graph cap-id]
+  (= :satisfied (get-in graph [:capabilities cap-id :status])))
+
+(defn mission-node [graph mission-id]
+  (get-in graph [:missions mission-id]))
+
+(defn mission-applicable?
+  "INV-3 predicate for the graph scorer: every required capability is satisfied."
+  [graph mission-id]
+  (let [scope (:scope (mission-node graph mission-id))]
+    (and (some? scope)
+         (every? #(capability-satisfied? graph %) scope))))
+
+(defn mission-single-cycle-leaf?
+  "INV-4 slice predicate: applicable and one open hole."
+  [graph mission-id]
+  (and (mission-applicable? graph mission-id)
+       (= 1 (long (or (:open-hole-count (mission-node graph mission-id)) 0)))))
+
+(defn- goal-depths
+  "capability-id -> distance from the pre-registered goal through :scope edges."
+  [graph goal]
+  (loop [frontier [[goal 0]]
+         seen {}]
+    (if-let [[cap-id depth] (first frontier)]
+      (if (contains? seen cap-id)
+        (recur (subvec (vec frontier) 1) seen)
+        (let [parents (get-in graph [:capabilities cap-id :scope] [])]
+          (recur (into (subvec (vec frontier) 1)
+                       (map #(vector % (inc depth)) parents))
+                 (assoc seen cap-id depth))))
+      seen)))
+
+(defn mission-ascent-progress
+  "Credit for producing capabilities in the transitive scope of the operator goal.
+   The goal is an input to the selector; this function never chooses it."
+  [graph goal mission-id]
+  (let [depths (goal-depths graph goal)]
+    (reduce
+     + 0.0
+     (for [cap-id (:produces (mission-node graph mission-id))
+           :let [depth (get depths cap-id)]
+           :when depth]
+       (/ 1.0 (inc (double depth)))))))
+
+(defn graph-efe-terms
+  "Graph-functional EFE terms for a mission action. Lower total remains better:
+   unbound :requires adds a high applicability gate; body-size is a penalty;
+   ascent progress toward the pre-registered goal is a credit."
+  [graph goal action {:keys [graph-applicability-penalty graph-body-weight graph-ascent-weight]
+                      :or {graph-applicability-penalty default-graph-applicability-penalty
+                           graph-body-weight default-graph-body-weight
+                           graph-ascent-weight default-graph-ascent-weight}}]
+  (let [mission-id (:target action)
+        mission (mission-node graph mission-id)]
+    (if (and graph goal mission (= :open-mission (:type action)))
+      (let [applicable? (mission-applicable? graph mission-id)
+            body-size (double (or (:open-hole-count mission) 0))
+            progress (double (mission-ascent-progress graph goal mission-id))
+            applicability (if applicable? 0.0 (double graph-applicability-penalty))
+            body (* (double graph-body-weight) body-size)
+            ascent (* (double graph-ascent-weight) progress)]
+        {:G-applicability applicability
+         :G-body-size body
+         :G-ascent-progress ascent
+         :G-graph-pragmatic (+ applicability body (- ascent))
+         :graph/applicable? applicable?
+         :graph/single-cycle-leaf? (mission-single-cycle-leaf? graph mission-id)})
+      {:G-applicability 0.0
+       :G-body-size 0.0
+       :G-ascent-progress 0.0
+       :G-graph-pragmatic 0.0})))
+
+(defn pre-registered-capability?
+  [graph goal cap-id]
+  (or (= goal cap-id)
+      (true? (get-in graph [:capabilities cap-id :pre-registered?]))))
+
+(defn safe-action?
+  "INV-G selector boundary. Discovery can surface missing capability facts, but
+   pursuit of non-pre-registered capabilities and goal-extending decompose moves
+   require consent. Advancing past an operator-verify exit is also refused unless
+   the gap is agreed or consented."
+  [graph goal action]
+  (let [consent? (true? (:consent-granted? action))]
+    (case (:type action)
+      :pursue
+      (or (pre-registered-capability? graph goal (:target action)) consent?)
+
+      :decompose
+      (or (not (:extends-goal? action)) consent?)
+
+      :open-mission
+      (let [mission (mission-node graph (:target action))
+            crosses? (or (:crosses-exit? action)
+                         (:next-exit-operator-verify? mission))]
+        (or (not crosses?) (:gap-agreed? action) consent?))
+
+      true)))
+
+(defn selection-trace-step
+  "Translate a selected action into the abstract trace shape consumed by
+   futon3c.logic.capability-star-map-invariants/q-buck and q-gate."
+  ([graph goal action] (selection-trace-step graph goal action 1))
+  ([graph goal action step]
+   (let [mission-id (:target action)
+         mission (mission-node graph mission-id)
+         action-kind (case (:type action)
+                       :pursue :pursue
+                       :decompose :decompose
+                       :open-mission :advance
+                       (:type action))]
+     (cond-> {:step step :action action-kind}
+       (= :pursue action-kind)
+       (assoc :capability (:target action)
+              :pre-registered? (pre-registered-capability? graph goal (:target action)))
+
+       (= :decompose action-kind)
+       (assoc :mission mission-id
+              :extends-goal? (true? (:extends-goal? action)))
+
+       (= :advance action-kind)
+       (assoc :mission mission-id
+              :requires-sat? (mission-applicable? graph mission-id)
+              :crosses-exit? (boolean (or (:crosses-exit? action)
+                                          (:next-exit-operator-verify? mission)))
+              :gap-agreed? (true? (:gap-agreed? action)))
+
+       (:consent-granted? action)
+       (assoc :consent-granted? true)))))
 
 (defn- info-gain
   "Information-gain term ported from ants/aif/policy.clj.
@@ -163,12 +299,17 @@
    Pure: same (state, action, opts) → same output."
   ([state action] (compute-efe state action {}))
   ([state action {:keys [info-weight survival-weight structural-pressure-weight time-pressure
-                         time-pressure-scale horizon-steps]
+                         time-pressure-scale horizon-steps capability-graph
+                         pre-registered-goal graph-applicability-penalty
+                         graph-body-weight graph-ascent-weight]
                   :or {info-weight default-info-weight
                        survival-weight default-survival-weight
                        structural-pressure-weight default-structural-pressure-weight
                        time-pressure 0.0
-                       time-pressure-scale default-time-pressure-scale}}]
+                       time-pressure-scale default-time-pressure-scale
+                       graph-applicability-penalty default-graph-applicability-penalty
+                       graph-body-weight default-graph-body-weight
+                       graph-ascent-weight default-graph-ascent-weight}}]
    (let [single-prediction (fm/predict state action)
          ;; v0.15: opt-in multi-horizon trajectory; final-state observation
          ;; drives G-risk + G-survival. Ambiguity + info still use the
@@ -188,6 +329,13 @@
          g-info (info-gain next-var)
          g-survival-base (survival-cost next-mean)
          g-structural-pressure (double (or (:structural-pressure-per-action action) 0.0))
+         graph-terms (graph-efe-terms capability-graph pre-registered-goal action
+                                      {:graph-applicability-penalty
+                                       graph-applicability-penalty
+                                       :graph-body-weight
+                                       graph-body-weight
+                                       :graph-ascent-weight
+                                       graph-ascent-weight})
          urgency (+ 1.0 (* (double time-pressure) (double time-pressure-scale)))
          g-risk (* g-risk-base urgency)
          g-survival (* g-survival-base urgency)
@@ -196,18 +344,21 @@
                     (- (* (double info-weight) g-info))
                     (* (double survival-weight) g-survival)
                     (- (* (double structural-pressure-weight)
-                          g-structural-pressure)))]
-     {:action action
-      :prediction prediction
-      :G-risk g-risk
-      :G-ambiguity g-ambig
-      :G-info g-info
-      :G-survival g-survival
-      :G-structural-pressure g-structural-pressure
-      :G-total g-total
-      :time-pressure (double time-pressure)
-      :horizon-steps (when multi (:horizon-steps multi))
-      :per-channel (:per-channel fe-on-predicted)})))
+                          g-structural-pressure))
+                    (:G-graph-pragmatic graph-terms))]
+     (merge
+      {:action action
+       :prediction prediction
+       :G-risk g-risk
+       :G-ambiguity g-ambig
+       :G-info g-info
+       :G-survival g-survival
+       :G-structural-pressure g-structural-pressure
+       :G-total g-total
+       :time-pressure (double time-pressure)
+       :horizon-steps (when multi (:horizon-steps multi))
+       :per-channel (:per-channel fe-on-predicted)}
+      graph-terms))))
 
 (defn rank-actions
   "Score a sequence of candidate actions and order them by G-total
@@ -225,3 +376,18 @@
         (sort-by :G-total)
         (map-indexed (fn [i e] (assoc e :rank (inc i))))
         vec)))
+
+(defn rank-star-map-actions
+  "Rank candidate actions after applying the INV-G selector gate. Unsafe pursuit,
+   goal-extending decompose without consent, and unagreed operator-exit advances
+   are refused before EFE ranking."
+  [state candidate-actions {:keys [capability-graph pre-registered-goal] :as opts}]
+  (rank-actions state
+                (filter #(safe-action? capability-graph pre-registered-goal %) candidate-actions)
+                opts))
+
+(defn select-star-map-action
+  "Return the EFE-top safe action for a pre-registered goal, or nil if no safe
+   candidate remains."
+  [state candidate-actions opts]
+  (first (rank-star-map-actions state candidate-actions opts)))

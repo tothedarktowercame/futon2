@@ -27,7 +27,8 @@
    set means adding both a `predict-effects` multimethod arm (below)
    and a `can-propose?` arm if the action requires substrate
    addressability."
-  #{:no-op :address-sorry :open-mission :fire-pattern :learn-action-class})
+  #{:no-op :address-sorry :open-mission :fire-pattern :learn-action-class
+    :pursue :decompose})
 
 (defn- valid-action?
   "An action is a map carrying :type (one of action-types). Most actions
@@ -38,6 +39,7 @@
        (case type
          :no-op true
          :learn-action-class (some? target-class)
+         :decompose (some? target)
          (some? target))))
 
 (defn- merge-obs-delta
@@ -102,6 +104,18 @@
    :obs-variance {}
    :events []})
 
+(defmethod predict-effects :pursue
+  [_state {:keys [target weight] :or {weight 1.0}}]
+  {:obs-delta {}
+   :obs-variance {}
+   :events [{:entity-id target :type :pursued :weight weight}]})
+
+(defmethod predict-effects :decompose
+  [_state {:keys [target weight] :or {weight 1.0}}]
+  {:obs-delta {}
+   :obs-variance {}
+   :events [{:entity-id target :type :decomposed :weight weight}]})
+
 (defmulti can-propose?
   "Per-action-type capability check: can this action class be addressed
    against the current substrate? Default: false (the WM has no proposer
@@ -116,6 +130,8 @@
 (defmethod can-propose? :default [_ _] false)
 (defmethod can-propose? :no-op [_ _] true)
 (defmethod can-propose? :learn-action-class [_ _] true)
+(defmethod can-propose? :pursue [_ _] true)
+(defmethod can-propose? :decompose [_ _] true)
 
 ;; ---------------------------------------------------------------------------
 ;; v0.13: can-execute? — per-action-instance admissibility check.
@@ -134,6 +150,8 @@
 (defmethod can-execute? :default [_ _] true)
 (defmethod can-execute? :no-op [_ _] true)
 (defmethod can-execute? :learn-action-class [_ _] true)
+(defmethod can-execute? :pursue [_ _] true)
+(defmethod can-execute? :decompose [_ _] true)
 
 (defmethod can-execute? :address-sorry
   [state action]

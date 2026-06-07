@@ -1,6 +1,8 @@
 (ns futon2.aif.efe-test
   "Tests for Expected Free Energy composition (R5)."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.test :refer [deftest is testing]]
             [futon2.aif.belief :as belief]
             [futon2.aif.efe :as efe]
             [futon2.aif.free-energy :as fe]))
@@ -35,6 +37,65 @@
 (def ^:private stressed-state
   {:observation stressed-obs
    :belief (belief/initial-belief-state [:m1 :m2])})
+
+(defn- ensemble-fixture []
+  (edn/read-string
+   (slurp (io/file ".." "futon0" "holes" "missions"
+                   "M-capability-star-map.ensemble.edn"))))
+
+(defn- wm-region-graph-fixture []
+  (let [ensemble (ensemble-fixture)
+        caps (:capabilities ensemble)]
+    {:star-map/region :wm
+     :capabilities (-> caps
+                       (assoc-in [:wm-overnight-unsupervised :pre-registered?] true)
+                       (assoc-in [:efe-trustworthy-over-starmap :pre-registered?] true))
+     :missions {:M-capability-star-map
+                {:scope [:wm-steps-forward-guardrailed]
+                 :produces [:efe-trustworthy-over-starmap]
+                 :open-hole-count 1
+                 :phase :instantiate
+                 :status :active
+                 :next-exit-operator-verify? false}
+
+                :M-capability-star-map-mega
+                {:scope [:wm-steps-forward-guardrailed]
+                 :produces [:wm-overnight-unsupervised]
+                 :open-hole-count 9
+                 :phase :instantiate
+                 :status :active
+                 :next-exit-operator-verify? false}
+
+                :M-unbound-frontier
+                {:scope [:efe-trustworthy-over-starmap]
+                 :produces [:wm-overnight-unsupervised]
+                 :open-hole-count 1
+                 :phase :instantiate
+                 :status :active
+                 :next-exit-operator-verify? false}
+
+                :M-unagreed-exit
+                {:scope [:wm-steps-forward-guardrailed]
+                 :produces [:efe-trustworthy-over-starmap]
+                 :open-hole-count 1
+                 :phase :identify
+                 :status :active
+                 :next-exit-operator-verify? true}}
+     :edges [{:from :M-capability-star-map
+              :to :wm-steps-forward-guardrailed
+              :type :requires}
+             {:from :M-capability-star-map
+              :to :efe-trustworthy-over-starmap
+              :type :produces}
+             {:from :M-capability-star-map-mega
+              :to :wm-overnight-unsupervised
+              :type :produces}
+             {:from :M-unbound-frontier
+              :to :efe-trustworthy-over-starmap
+              :type :requires}
+             {:from :M-unagreed-exit
+              :to :efe-trustworthy-over-starmap
+              :type :produces}]}))
 
 (deftest compute-efe-purity-test
   (testing "compute-efe is pure"
@@ -315,3 +376,36 @@
           first-type (-> ranked first :action :type)]
       (is (= :learn-action-class first-type)
           "intrinsic credit should pull :learn-action-class to rank 1"))))
+
+(deftest star-map-efe-picks-applicable-single-cycle-leaf-test
+  (testing "Unit B acceptance over ensemble-1: EFE-top is an applicable single-cycle leaf"
+    (let [graph (wm-region-graph-fixture)
+          opts {:capability-graph graph
+                :pre-registered-goal :wm-overnight-unsupervised}
+          candidates [{:type :open-mission :target :M-capability-star-map-mega}
+                      {:type :open-mission :target :M-unbound-frontier}
+                      {:type :open-mission :target :M-capability-star-map}]
+          selected (efe/select-star-map-action base-state candidates opts)]
+      (is (= :M-capability-star-map (get-in selected [:action :target])))
+      (is (true? (:graph/applicable? selected)))
+      (is (true? (:graph/single-cycle-leaf? selected)))
+      (is (zero? (:G-applicability selected)))
+      (is (pos? (:G-applicability
+                 (efe/compute-efe base-state
+                                  {:type :open-mission :target :M-unbound-frontier}
+                                  opts)))
+          "unbound :requires carries a high G applicability gate"))))
+
+(deftest star-map-selector-refuses-unregistered-pursuit-and-goal-extending-decompose-test
+  (testing "INV-G is enforced at the selector boundary"
+    (let [graph (wm-region-graph-fixture)
+          opts {:capability-graph graph
+                :pre-registered-goal :wm-overnight-unsupervised}
+          candidates [{:type :pursue :target :cap/pentagon}
+                      {:type :decompose :target :M-capability-star-map :extends-goal? true}
+                      {:type :open-mission :target :M-capability-star-map}]
+          ranked (efe/rank-star-map-actions base-state candidates opts)
+          returned-actions (map :action ranked)]
+      (is (= [{:type :open-mission :target :M-capability-star-map}]
+             returned-actions)
+          "pursuit outside the brief and goal-extending decompose are filtered unless consented"))))
