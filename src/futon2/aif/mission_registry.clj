@@ -164,6 +164,32 @@
                        vec)]
      {:missions missions})))
 
+(def ^:private missions-cache (atom nil))
+
+(def missions-cache-ttl-ms
+  "TTL for the load-missions snapshot. A full scan walks ~/code and parses every
+   mission doc (~10s), so per-action callers (the WM guardrail selector calls
+   `mission-status` once per ranked :open-mission — dozens per selection) MUST
+   share one snapshot or a selection takes minutes. The TTL is short so
+   cross-cycle freshness (e.g. after the pilot advances a hole) still refreshes."
+  15000)
+
+(defn load-missions-cached
+  "Memoized `load-missions` (TTL = `missions-cache-ttl-ms`). Within one WM
+   selection the per-action calls hit the cache after the first scan; across
+   cycles the TTL refreshes. Use this on hot per-action paths, not `load-missions`."
+  ([] (load-missions-cached nil))
+  ([code-root]
+   (let [now (System/currentTimeMillis)
+         c   @missions-cache]
+     (if (and c (= code-root (:code-root c)) (< (- now (:at c)) missions-cache-ttl-ms))
+       (:doc c)
+       ;; nil code-root => zero-arg load-missions (preserves any rebinding of the
+       ;; zero-arity var, e.g. test redefs pointing at a tmpdir).
+       (let [doc (if code-root (load-missions code-root) (load-missions))]
+         (reset! missions-cache {:at now :code-root code-root :doc doc})
+         doc)))))
+
 (defn live-mission?
   "True when a loaded mission entry is eligible for WM `:open-mission`
    enumeration/ranking."
@@ -207,7 +233,7 @@
   [target]
   (let [target-id (mission-target-id target)
         mission (some #(when (= target-id (:id %)) %)
-                      (:missions (load-missions)))]
+                      (:missions (load-missions-cached)))]
     {:open? (boolean (and mission (live-mission? mission)))
      :open-hole-count (long (or (:open-hole-count mission) 0))}))
 
