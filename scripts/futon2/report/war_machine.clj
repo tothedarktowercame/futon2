@@ -69,6 +69,14 @@
 (def ^:private futon1a-penholder
   (or (System/getenv "FUTON1A_PENHOLDER") "api"))
 (def ^:private g-total-tie-epsilon 1.0e-6)
+(def ^:private capability-star-map-path
+  (str home "/code/futon0/holes/missions/M-capability-star-map.graph.edn"))
+(def ^:private live-star-map-goal :wm-overnight-unsupervised)
+(def ^:private live-star-map-efe-weights
+  {:graph-applicability-penalty 5.0
+   :graph-ascent-weight 6.0
+   :graph-body-weight 3.0})
+(defonce ^:private capability-star-map-cache (atom nil))
 
 (def ^:private all-repos
   "All repos in the stack, classified by workstream.
@@ -136,6 +144,24 @@
     (when (.exists (java.io.File. path))
       (read-string (slurp path)))
     (catch Exception _ nil)))
+
+(defn- capability-star-map []
+  (let [{:keys [path graph]} @capability-star-map-cache]
+    (if (= path capability-star-map-path)
+      graph
+      (let [graph (read-edn-file capability-star-map-path)]
+        (reset! capability-star-map-cache {:path capability-star-map-path
+                                           :graph graph})
+        graph))))
+
+(defn- live-star-map-efe-opts
+  [base-opts]
+  (if-let [graph (capability-star-map)]
+    (merge base-opts
+           live-star-map-efe-weights
+           {:capability-graph graph
+            :pre-registered-goal live-star-map-goal})
+    base-opts))
 
 (defn- substrate-get-json [url]
   (try
@@ -3342,8 +3368,9 @@
                                                ;; M-interest-network-coupling capstone:
                                                ;; bias candidates by the lived interest posterior
                                                interest-net/enrich-candidates)
-                                          {:time-pressure wm-time-pressure
-                                           :horizon-steps wm-horizon-steps})
+                                          (live-star-map-efe-opts
+                                           {:time-pressure wm-time-pressure
+                                            :horizon-steps wm-horizon-steps}))
                        apply-anamnesis-tiebreak
                        (filter-live-open-mission-ranked-actions wm-missions))
         ;; v0.13 R6 enhancement: pre-filter by can-execute? admissibility

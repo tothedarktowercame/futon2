@@ -135,6 +135,11 @@
        :G-ascent-progress 0.0
        :G-graph-pragmatic 0.0})))
 
+(defn- star-map-contribution?
+  [graph-terms]
+  (or (contains? graph-terms :graph/applicable?)
+      (not (zero? (double (:G-graph-pragmatic graph-terms 0.0))))))
+
 (defn pre-registered-capability?
   [graph goal cap-id]
   (or (= goal cap-id)
@@ -346,19 +351,22 @@
                     (- (* (double structural-pressure-weight)
                           g-structural-pressure))
                     (:G-graph-pragmatic graph-terms))]
-     (merge
-      {:action action
-       :prediction prediction
-       :G-risk g-risk
-       :G-ambiguity g-ambig
-       :G-info g-info
-       :G-survival g-survival
-       :G-structural-pressure g-structural-pressure
-       :G-total g-total
-       :time-pressure (double time-pressure)
-       :horizon-steps (when multi (:horizon-steps multi))
-       :per-channel (:per-channel fe-on-predicted)}
-      graph-terms))))
+     (cond->
+      (merge
+       {:action action
+        :prediction prediction
+        :G-risk g-risk
+        :G-ambiguity g-ambig
+        :G-info g-info
+        :G-survival g-survival
+        :G-structural-pressure g-structural-pressure
+        :G-total g-total
+        :time-pressure (double time-pressure)
+        :horizon-steps (when multi (:horizon-steps multi))
+        :per-channel (:per-channel fe-on-predicted)}
+       graph-terms)
+       (star-map-contribution? graph-terms)
+       (assoc :star-map? true)))))
 
 (defn rank-actions
   "Score a sequence of candidate actions and order them by G-total

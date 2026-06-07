@@ -409,3 +409,46 @@
       (is (= [{:type :open-mission :target :M-capability-star-map}]
              returned-actions)
           "pursuit outside the brief and goal-extending decompose are filtered unless consented"))))
+
+(deftest star-map-live-blend-activation-and-provenance-test
+  (testing "graph-known mission receives conservative graph terms and provenance"
+    (let [graph {:capabilities {:goal {:status :held :scope [:cap-done]}
+                                :cap-done {:status :satisfied}}
+                 :missions {"M-known" {:scope [:cap-done]
+                                        :produces [:goal]
+                                        :open-hole-count 1}}}
+          action {:type :open-mission :target "M-known"}
+          no-graph (efe/compute-efe base-state action)
+          with-graph (efe/compute-efe
+                      base-state action
+                      {:capability-graph graph
+                       :pre-registered-goal :goal
+                       :graph-applicability-penalty 5.0
+                       :graph-ascent-weight 6.0
+                       :graph-body-weight 3.0})]
+      (is (zero? (:G-graph-pragmatic no-graph)))
+      (is (not (:star-map? no-graph)))
+      (is (true? (:star-map? with-graph)))
+      (is (zero? (:G-applicability with-graph)))
+      (is (= 3.0 (:G-body-size with-graph)))
+      (is (= 6.0 (:G-ascent-progress with-graph)))
+      (is (= -3.0 (:G-graph-pragmatic with-graph)))))
+
+  (testing "graph-unknown mission is score-identical to no-graph baseline"
+    (let [graph {:capabilities {:goal {:status :held :scope [:cap-done]}
+                                :cap-done {:status :satisfied}}
+                 :missions {"M-known" {:scope [:cap-done]
+                                        :produces [:goal]
+                                        :open-hole-count 1}}}
+          action {:type :open-mission :target "M-unknown"}
+          no-graph (efe/compute-efe base-state action)
+          with-graph (efe/compute-efe
+                      base-state action
+                      {:capability-graph graph
+                       :pre-registered-goal :goal
+                       :graph-applicability-penalty 5.0
+                       :graph-ascent-weight 6.0
+                       :graph-body-weight 3.0})]
+      (is (= (:G-total no-graph) (:G-total with-graph)))
+      (is (= (:G-graph-pragmatic no-graph) (:G-graph-pragmatic with-graph)))
+      (is (not (:star-map? with-graph))))))

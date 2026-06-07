@@ -4,7 +4,8 @@
    Tests the pure data transformation functions — arrow-health,
    observation vector, and data shape contracts — without requiring
    live APIs or git repos."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.java.shell]
+            [clojure.test :refer [deftest is testing]]
             [futon2.report.war-machine :as wm]))
 
 ;; ---------------------------------------------------------------------------
@@ -315,6 +316,28 @@
           (is (= 0.0 (:structural-pressure-per-action (first enriched))))
           (is (= 0.7 (:structural-pressure-per-action (second enriched))))
           (is (= 2.2 (:structural-pressure-per-action (nth enriched 2)))))))))
+
+(deftest live-star-map-efe-opts-adds-conservative-graph-blend
+  (testing "live WM opts carry the graph and softened star-map weights when graph loads"
+    (let [graph {:capabilities {:goal {:status :held}}
+                 :missions {}}]
+      (with-redefs-fn {#'wm/capability-star-map (fn [] graph)}
+        (fn []
+          (let [opts (#'wm/live-star-map-efe-opts
+                      {:time-pressure 0.25 :horizon-steps 3})]
+            (is (= graph (:capability-graph opts)))
+            (is (= :wm-overnight-unsupervised (:pre-registered-goal opts)))
+            (is (= 5.0 (:graph-applicability-penalty opts)))
+            (is (= 6.0 (:graph-ascent-weight opts)))
+            (is (= 3.0 (:graph-body-weight opts)))
+            (is (= 0.25 (:time-pressure opts)))
+            (is (= 3 (:horizon-steps opts))))))))
+
+  (testing "live WM opts are unchanged if the star-map graph is absent"
+    (with-redefs-fn {#'wm/capability-star-map (fn [] nil)}
+      (fn []
+        (let [base {:time-pressure 0.25 :horizon-steps 3}]
+          (is (= base (#'wm/live-star-map-efe-opts base))))))))
 
 (deftest anamnesis-tiebreak-leaves-mixed-or-non-sorry-ties-alone
   (let [ranked [{:rank 1
