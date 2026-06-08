@@ -105,7 +105,7 @@
       (is (= o1 o2)))))
 
 (deftest compute-efe-shape-test
-  (testing "compute-efe returns documented keys (v0.20 adds :G-structural-pressure)"
+  (testing "compute-efe returns documented keys (v0.21 adds :G-gap)"
     (let [o (efe/compute-efe base-state {:type :no-op})]
       (is (contains? o :action))
       (is (contains? o :prediction))
@@ -114,16 +114,19 @@
       (is (contains? o :G-info))
       (is (contains? o :G-survival))
       (is (contains? o :G-structural-pressure))
+      (is (contains? o :G-gap))
       (is (contains? o :G-total))
       (is (contains? o :per-channel))))
-  (testing "G-total composes all five principled terms"
+  (testing "G-total composes all six principled terms"
     ;; G-total = G-risk + G-ambiguity − info-weight·G-info
     ;;           + survival-weight·G-survival
     ;;           − structural-pressure-weight·G-structural-pressure
+    ;;           − G-gap
     (let [o (efe/compute-efe base-state
                              {:type :address-sorry
                               :target :m1
-                              :structural-pressure-per-action 2.2})
+                              :structural-pressure-per-action 2.2}
+                             {:mission-gap-view {"M-known" 0.5}})
           info-w 0.4
           surv-w 1.2
           struct-w 0.35
@@ -131,10 +134,11 @@
                       (:G-ambiguity o)
                       (- (* info-w (:G-info o)))
                       (* surv-w (:G-survival o))
-                      (- (* struct-w (:G-structural-pressure o))))]
+                      (- (* struct-w (:G-structural-pressure o)))
+                      (- (:G-gap o)))]
       (is (< (Math/abs (- (:G-total o) expected)) 1e-9)
-          "G-total decomposition includes the structural-pressure subtraction")))
-  (testing "G-risk, G-ambiguity, G-info, G-survival, G-structural-pressure are individually non-negative"
+          "G-total decomposition includes the structural-pressure and gap subtractions")))
+  (testing "G-risk, G-ambiguity, G-info, G-survival, G-structural-pressure, and G-gap are individually non-negative"
     ;; G-total CAN be negative because G-info has negative weight in G-total;
     ;; that's by design (informative actions are preferred).
     (let [o (efe/compute-efe base-state
@@ -145,7 +149,8 @@
       (is (>= (:G-ambiguity o) 0.0))
       (is (>= (:G-info o) 0.0))
       (is (>= (:G-survival o) 0.0))
-      (is (>= (:G-structural-pressure o) 0.0)))))
+      (is (>= (:G-structural-pressure o) 0.0))
+      (is (>= (:G-gap o) 0.0)))))
 
 (deftest compute-efe-two-principled-terms-by-name-test
   (testing "both R5a (risk) and R5b (ambiguity) are present by name and distinct"
@@ -452,3 +457,37 @@
       (is (= (:G-total no-graph) (:G-total with-graph)))
       (is (= (:G-graph-pragmatic no-graph) (:G-graph-pragmatic with-graph)))
       (is (not (:star-map? with-graph))))))
+
+(deftest mission-gap-live-blend-activation-and-provenance-test
+  (testing "fold-view-known open mission receives weighted epistemic gap credit and provenance"
+    (let [action {:type :open-mission :target "M-gappy"}
+          no-gap (efe/compute-efe base-state action)
+          with-gap (efe/compute-efe base-state action
+                                    {:mission-gap-view {"M-gappy" 0.5}
+                                     :gap-weight 6.0})]
+      (is (zero? (:G-gap no-gap)))
+      (is (not (:gap? no-gap)))
+      (is (= 3.0 (:G-gap with-gap)))
+      (is (= 0.5 (:gap-score with-gap)))
+      (is (true? (:gap? with-gap)))
+      (is (= (- (:G-total no-gap) 3.0)
+             (:G-total with-gap)))))
+
+  (testing "fold-view-unknown open mission gets zero gap and no provenance tag"
+    (let [action {:type :open-mission :target "M-unknown"}
+          no-gap (efe/compute-efe base-state action)
+          with-gap (efe/compute-efe base-state action
+                                    {:mission-gap-view {"M-gappy" 0.5}
+                                     :gap-weight 6.0})]
+      (is (zero? (:G-gap with-gap)))
+      (is (zero? (:gap-score with-gap)))
+      (is (not (:gap? with-gap)))
+      (is (= (:G-total no-gap) (:G-total with-gap)))))
+
+  (testing "gap-weight is conservative and applied linearly"
+    (let [action {:type :open-mission :target :M-gappy}
+          weighted (efe/compute-efe base-state action
+                                    {:mission-gap-view {"M-gappy" 0.25}
+                                     :gap-weight 2.0})]
+      (is (= 0.5 (:G-gap weighted)))
+      (is (true? (:gap? weighted))))))

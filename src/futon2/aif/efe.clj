@@ -52,6 +52,7 @@
 (def default-graph-applicability-penalty 1000.0)
 (def default-graph-body-weight 3.0)
 (def default-graph-ascent-weight 20.0)
+(def default-gap-weight 6.0)
 
 ;; v0.14: anticipation-driven scaling. When opts carries :time-pressure
 ;; in [0,1], G-risk and G-survival are multiplied by
@@ -139,6 +140,38 @@
   [graph-terms]
   (or (contains? graph-terms :graph/applicable?)
       (not (zero? (double (:G-graph-pragmatic graph-terms 0.0))))))
+
+(defn- action-target-id
+  [action]
+  (let [target (:target action)]
+    (cond
+      (keyword? target) (if-let [ns-part (namespace target)]
+                          (str ns-part "/" (name target))
+                          (name target))
+      (string? target) target
+      :else (some-> target str))))
+
+(defn gap-efe-terms
+  "Mission-fold gap credit for open-mission actions.
+
+   The fold view maps mission id -> intrinsic gap-score in [0,1].  High gap
+   means announced-but-unfilled structure, i.e. epistemic room to grow.  The
+   weighted credit is subtracted from G-total by compute-efe, mirroring the
+   info/ascent direction: higher gap makes the mission more preferred."
+  [mission-gap-view action {:keys [gap-weight]
+                            :or {gap-weight default-gap-weight}}]
+  (let [mission-id (action-target-id action)
+        gap-score (double (or (get mission-gap-view mission-id) 0.0))
+        gap (* (double gap-weight) gap-score)]
+    (if (= :open-mission (:type action))
+      {:G-gap gap
+       :gap-score gap-score}
+      {:G-gap 0.0
+       :gap-score 0.0})))
+
+(defn- gap-contribution?
+  [gap-terms]
+  (pos? (double (:G-gap gap-terms 0.0))))
 
 (defn pre-registered-capability?
   [graph goal cap-id]
@@ -260,9 +293,11 @@
       :G-info        <info-gain term (v0.13, negative weight in G-total)>
       :G-survival    <survival hinge-loss term (v0.13)>
       :G-structural-pressure <candidate-local structural-pressure term>
+      :G-gap        <mission-fold gap credit; negative weight in G-total>
       :G-total       <G-risk + G-ambiguity − info-weight×G-info
                        + survival-weight×G-survival
-                       − structural-pressure-weight×G-structural-pressure>
+                       − structural-pressure-weight×G-structural-pressure
+                       − G-gap>
       :per-channel   <per-channel risk decomposition (from compute-free-energy)>}
 
    Lower :G-total = more preferred action.
@@ -301,12 +336,17 @@
    `:G-total` via the weighted subtraction in the decomposition, making
    structurally load-bearing actions more preferred.
 
+   `:mission-gap-view` in opts maps mission id -> gap-score in [0,1].  For
+   `:open-mission` actions, the weighted gap credit is subtracted from
+   `:G-total`, making announced-but-unfilled missions more preferred.
+
    Pure: same (state, action, opts) → same output."
   ([state action] (compute-efe state action {}))
   ([state action {:keys [info-weight survival-weight structural-pressure-weight time-pressure
                          time-pressure-scale horizon-steps capability-graph
                          pre-registered-goal graph-applicability-penalty
-                         graph-body-weight graph-ascent-weight]
+                         graph-body-weight graph-ascent-weight mission-gap-view
+                         gap-weight]
                   :or {info-weight default-info-weight
                        survival-weight default-survival-weight
                        structural-pressure-weight default-structural-pressure-weight
@@ -314,7 +354,8 @@
                        time-pressure-scale default-time-pressure-scale
                        graph-applicability-penalty default-graph-applicability-penalty
                        graph-body-weight default-graph-body-weight
-                       graph-ascent-weight default-graph-ascent-weight}}]
+                       graph-ascent-weight default-graph-ascent-weight
+                       gap-weight default-gap-weight}}]
    (let [single-prediction (fm/predict state action)
          ;; v0.15: opt-in multi-horizon trajectory; final-state observation
          ;; drives G-risk + G-survival. Ambiguity + info still use the
@@ -341,6 +382,8 @@
                                        graph-body-weight
                                        :graph-ascent-weight
                                        graph-ascent-weight})
+         gap-terms (gap-efe-terms mission-gap-view action
+                                  {:gap-weight gap-weight})
          urgency (+ 1.0 (* (double time-pressure) (double time-pressure-scale)))
          g-risk (* g-risk-base urgency)
          g-survival (* g-survival-base urgency)
@@ -350,7 +393,8 @@
                     (* (double survival-weight) g-survival)
                     (- (* (double structural-pressure-weight)
                           g-structural-pressure))
-                    (:G-graph-pragmatic graph-terms))]
+                    (:G-graph-pragmatic graph-terms)
+                    (- (:G-gap gap-terms)))]
      (cond->
       (merge
        {:action action
@@ -364,9 +408,13 @@
         :time-pressure (double time-pressure)
         :horizon-steps (when multi (:horizon-steps multi))
         :per-channel (:per-channel fe-on-predicted)}
-       graph-terms)
+       graph-terms
+       gap-terms)
        (star-map-contribution? graph-terms)
-       (assoc :star-map? true)))))
+       (assoc :star-map? true)
+
+       (gap-contribution? gap-terms)
+       (assoc :gap? true)))))
 
 (defn rank-actions
   "Score a sequence of candidate actions and order them by G-total

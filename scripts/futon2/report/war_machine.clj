@@ -78,6 +78,11 @@
    :graph-ascent-weight 6.0
    :graph-body-weight 3.0})
 (defonce ^:private capability-star-map-cache (atom nil))
+(def ^:private mission-fold-view-path
+  (str home "/code/futon6/data/mission-fold-view.edn"))
+(def ^:private live-gap-view-efe-weights
+  {:gap-weight 6.0})
+(defonce ^:private mission-fold-view-cache (atom nil))
 
 (def ^:private all-repos
   "All repos in the stack, classified by workstream.
@@ -162,6 +167,34 @@
            live-star-map-efe-weights
            {:capability-graph graph
             :pre-registered-goal live-star-map-goal})
+    base-opts))
+
+(defn- normalize-mission-gap-view
+  [fold-view]
+  (when (map? fold-view)
+    (->> (:missions fold-view)
+         (keep (fn [{:keys [mission gap-score]}]
+                 (when (and mission (number? gap-score))
+                   [(str mission) (double gap-score)])))
+         (into {}))))
+
+(defn- mission-gap-view
+  []
+  (let [{:keys [path gap-view]} @mission-fold-view-cache]
+    (if (= path mission-fold-view-path)
+      gap-view
+      (let [gap-view (normalize-mission-gap-view
+                      (read-edn-file mission-fold-view-path))]
+        (reset! mission-fold-view-cache {:path mission-fold-view-path
+                                         :gap-view gap-view})
+        gap-view))))
+
+(defn- live-gap-view-efe-opts
+  [base-opts]
+  (if-let [gap-view (mission-gap-view)]
+    (merge base-opts
+           live-gap-view-efe-weights
+           {:mission-gap-view gap-view})
     base-opts))
 
 (defn- substrate-get-json [url]
@@ -3378,8 +3411,9 @@
                                                ;; bias candidates by the lived interest posterior
                                                interest-net/enrich-candidates)
                                           (live-star-map-efe-opts
-                                           {:time-pressure wm-time-pressure
-                                            :horizon-steps wm-horizon-steps}))
+                                           (live-gap-view-efe-opts
+                                            {:time-pressure wm-time-pressure
+                                             :horizon-steps wm-horizon-steps})))
                        apply-anamnesis-tiebreak
                        (filter-live-open-mission-ranked-actions wm-missions))
         ;; v0.13 R6 enhancement: pre-filter by can-execute? admissibility

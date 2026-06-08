@@ -339,6 +339,24 @@
         (let [base {:time-pressure 0.25 :horizon-steps 3}]
           (is (= base (#'wm/live-star-map-efe-opts base))))))))
 
+(deftest live-gap-view-efe-opts-adds-conservative-gap-blend
+  (testing "live WM opts carry the fold-view gap scores and conservative gap weight"
+    (let [gap-view {"M-gappy" 0.75 "M-filled" 0.0}]
+      (with-redefs-fn {#'wm/mission-gap-view (fn [] gap-view)}
+        (fn []
+          (let [opts (#'wm/live-gap-view-efe-opts
+                      {:time-pressure 0.25 :horizon-steps 3})]
+            (is (= gap-view (:mission-gap-view opts)))
+            (is (= 6.0 (:gap-weight opts)))
+            (is (= 0.25 (:time-pressure opts)))
+            (is (= 3 (:horizon-steps opts))))))))
+
+  (testing "live WM opts are unchanged if the fold view is absent"
+    (with-redefs-fn {#'wm/mission-gap-view (fn [] nil)}
+      (fn []
+        (let [base {:time-pressure 0.25 :horizon-steps 3}]
+          (is (= base (#'wm/live-gap-view-efe-opts base))))))))
+
 (deftest anamnesis-tiebreak-leaves-mixed-or-non-sorry-ties-alone
   (let [ranked [{:rank 1
                  :G-total -4.2558
