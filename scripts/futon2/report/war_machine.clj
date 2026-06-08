@@ -82,10 +82,17 @@
   (str home "/code/futon6/data/mission-fold-view.edn"))
 (def ^:private mission-domain-ratified-path
   (str home "/code/futon6/data/mission-domain-ratified.edn"))
+(def ^:private forward-model-centrality-path
+  (str home "/code/futon7/holes/M-futon-forward-model.centrality.json"))
+(def ^:private forward-model-roi-results-path
+  (str home "/code/futon7/holes/M-futon-forward-model.roi-results.edn"))
 (def ^:private live-gap-view-efe-weights
   {:gap-weight 6.0})
 (defonce ^:private mission-fold-view-cache (atom nil))
 (defonce ^:private mission-domain-ratified-cache (atom nil))
+(defonce ^:private centrality-cache (atom nil))
+(defonce ^:private roi-results-cache (atom nil))
+(defonce !last-wm-inputs (atom nil))
 
 (def ^:private all-repos
   "All repos in the stack, classified by workstream.
@@ -152,6 +159,12 @@
   (try
     (when (.exists (java.io.File. path))
       (read-string (slurp path)))
+    (catch Exception _ nil)))
+
+(defn- read-json-file [path]
+  (try
+    (when (.exists (java.io.File. path))
+      (json/parse-string (slurp path) false))
     (catch Exception _ nil)))
 
 (defn- capability-star-map []
@@ -227,6 +240,112 @@
            live-gap-view-efe-weights
            {:mission-gap-view gap-view})
     base-opts))
+
+(defn- centrality-joint-map []
+  (let [{:keys [path centrality]} @centrality-cache]
+    (if (= path forward-model-centrality-path)
+      centrality
+      (let [centrality (->> (or (read-json-file forward-model-centrality-path) {})
+                            (keep (fn [[mission row]]
+                                    (when-let [c (get row "c_joint")]
+                                      [(str mission) (double c)])))
+                            (into {}))]
+        (reset! centrality-cache {:path forward-model-centrality-path
+                                  :centrality centrality})
+        centrality))))
+
+(defn- valuable-path-set [centrality]
+  (->> centrality
+       (sort-by (comp - val))
+       (take 25)
+       (map key)
+       set))
+
+(defn- roi-results []
+  (let [{:keys [path results]} @roi-results-cache]
+    (if (= path forward-model-roi-results-path)
+      results
+      (let [results (read-edn-file forward-model-roi-results-path)]
+        (reset! roi-results-cache {:path forward-model-roi-results-path
+                                   :results results})
+        results))))
+
+(defn- normalize-feature-key [v]
+  (-> (if (keyword? v) (name v) (str v))
+      (str/lower-case)
+      (str/replace #"^[a-z]\\+" "")
+      (str/replace #"[^a-z0-9]+" "")))
+
+(defn- roi-feature-map []
+  (->> (get-in (roi-results) [:default-effort :features])
+       (keep (fn [{:keys [id] :as feature}]
+               (when id
+                 [(normalize-feature-key id)
+                  (select-keys feature [:id :expected-roi-gbp])])))
+       (into {})))
+
+(defn- roi-map-for-missions [missions]
+  (let [features (roi-feature-map)]
+    (->> missions
+         (keep (fn [{:keys [id title]}]
+                 (let [mission-key (normalize-feature-key (or title id))
+                       match (some (fn [[feature-key feature]]
+                                     (when (or (str/includes? mission-key feature-key)
+                                               (str/includes? feature-key mission-key))
+                                       feature))
+                                   features)]
+                   (when (and id match)
+                     [id {:expected-roi-gbp
+                          (double (or (:expected-roi-gbp match) 0.0))
+                          :feature-id (:id match)}]))))
+         (into {}))))
+
+(defn pin-wm-snapshot
+  "Return the last live WM ranking input bundle with structure/grounding data.
+   Returns nil until `judge` has run once in this JVM."
+  []
+  (when-let [snapshot @!last-wm-inputs]
+    (let [centrality (centrality-joint-map)]
+      (merge snapshot
+             {:structure {:capability-graph (capability-star-map)
+                          :pre-registered-goal live-star-map-goal
+                          :mission-gap-view (mission-gap-view)
+                          :mission-domain-view (mission-domain-ratified)}
+              :grounding {:centrality centrality
+                          :valuable-path (valuable-path-set centrality)
+                          :roi-map (roi-map-for-missions (:wm-missions snapshot))}
+              :live-weights (merge live-star-map-efe-weights
+                                   live-gap-view-efe-weights)}))))
+
+(declare apply-anamnesis-tiebreak filter-live-open-mission-ranked-actions)
+
+(defn rollout-snapshot-under-weights
+  "Replay a pinned WM snapshot under injected EFE weights. Pure for the same
+   snapshot and weight-overrides; no scanning or live state mutation."
+  ([snapshot weight-overrides]
+   (rollout-snapshot-under-weights snapshot weight-overrides {}))
+  ([snapshot weight-overrides {:keys [k] :or {k 5}}]
+   (let [structure (:structure snapshot)
+         opts (merge (live-star-map-efe-opts
+                      (live-gap-view-efe-opts {:time-pressure 0}))
+                     (select-keys structure
+                                  [:capability-graph :pre-registered-goal
+                                   :mission-gap-view :mission-domain-view])
+                     weight-overrides)
+         ranked (->> (efe/rank-actions (:wm-state snapshot)
+                                        (:candidates snapshot)
+                                        opts)
+                     apply-anamnesis-tiebreak
+                     (filter-live-open-mission-ranked-actions
+                      (:wm-missions snapshot)))
+         admissible (filterv #(fm/can-execute? (:wm-state snapshot)
+                                               (:action %))
+                             ranked)
+         bundle (vec (take k admissible))]
+     {:ranked ranked
+      :admissible admissible
+      :bundle bundle
+      :opts opts})))
 
 (defn- substrate-get-json [url]
   (try
@@ -3242,7 +3361,7 @@
    Arity-2 ([scan-data opts]): writes trace if `:trace?` is truthy in
      opts; uses `:trace-dir` if provided or default."
   ([scan-data] (judge scan-data {}))
-  ([scan-data {:keys [trace? trace-dir] :or {trace? false}}]
+  ([scan-data {:keys [trace? trace-dir scan-id] :or {trace? false}}]
   (let [observation (obs/observe scan-data)
         free-energy (fe/compute-free-energy observation)
         ;; Base mode from equilibrium-classification of observations.
@@ -3435,12 +3554,22 @@
         wm-horizon-steps (when (and (:events-loaded? anticipation-snapshot)
                                     (seq (:events anticipation-snapshot)))
                            3)
+        wm-enriched-candidates (->> wm-candidates
+                                    enrich-candidates-with-structural-pressure
+                                    ;; M-interest-network-coupling capstone:
+                                    ;; bias candidates by the lived interest posterior
+                                    interest-net/enrich-candidates)
+        wm-as-of (str (java.time.Instant/now))
+        _wm-snapshot-stash (reset! !last-wm-inputs
+                                   {:wm-state wm-state
+                                    :candidates wm-enriched-candidates
+                                    :wm-missions wm-missions
+                                    :as-of wm-as-of
+                                    :scan-id (or (:scan-id scan-data)
+                                                 scan-id
+                                                 "war-machine/judge")})
         wm-ranked (->> (efe/rank-actions wm-state
-                                          (->> wm-candidates
-                                               enrich-candidates-with-structural-pressure
-                                               ;; M-interest-network-coupling capstone:
-                                               ;; bias candidates by the lived interest posterior
-                                               interest-net/enrich-candidates)
+                                          wm-enriched-candidates
                                           (live-star-map-efe-opts
                                            (live-gap-view-efe-opts
                                             {:time-pressure wm-time-pressure
