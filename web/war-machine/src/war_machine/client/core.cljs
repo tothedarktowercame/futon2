@@ -1226,13 +1226,23 @@
       :else
       (js/console.log "[operator] target is not routable yet:" target-text))))
 
+;; For a business-sorry target (:S-*), look up its :opens file in the live forward
+;; model — so a bulletin business-sorry is clickable even though the lane data
+;; carries no :path for it.
+(defn- sorry-opens [target]
+  (let [model @s/operator-forward-model]
+    (some (fn [s] (when (same-canonical-id? (wire-get s :sorry) target) (wire-get s :opens)))
+          (concat (wire-get model :priced-sorries) (wire-get model :unpriced-sorries)))))
+
 (defn- bulletin-row [lane item]
   (let [accent (if (= lane :nag) "#dc2626" "#eab308")
         severity (if (= lane :nag) :critical :warning)
         title (or (wire-get item :title) "(untitled)")
         why (wire-get item :why)
         source (or (display-text (wire-get item :source)) "source")
-        target (wire-get item :target)
+        target (or (wire-get item :path)
+                   (sorry-opens (wire-get item :target))   ; business-sorry → forward-model :opens
+                   (wire-get item :target))
         salience (numeric-value (wire-get item :salience))]
     ^{:key (str lane "-" (or (wire-get item :id) title))}
     [:article {:class (str "dashboard-item " (severity-class severity))
@@ -1262,7 +1272,10 @@
                          (truthy-value? (wire-get bulletin :unavailable)))
         date (or (wire-get bulletin :date) "pending")
         nag (or (wire-get bulletin :nag) [])
-        brief (or (wire-get bulletin :brief) [])
+        brief-all (or (wire-get bulletin :brief) [])
+        ;; Brief = "what needs you" → business-sorries only; backlog missions
+        ;; move to the Programme card (they're programme, not morning-comms).
+        brief (filterv #(not= "mission" (display-text (wire-get % :source))) brief-all)
         silent-count (or (wire-get bulletin :silent-count) 0)]
     [:section.dashboard-card.dashboard-card-wide
      [:div.dashboard-card-header
@@ -1281,17 +1294,19 @@
   (let [sorry (or (canonical-id-text (wire-get item :sorry)) "unpriced")
         lift (fmt-money (wire-get item :expected-lift))
         metric (display-text (wire-get item :metric))
-        discharge (or (wire-get item :discharge) "No discharge text surfaced.")]
+        discharge (or (wire-get item :discharge) "No discharge text surfaced.")
+        opens (wire-get item :opens)]
     ^{:key (str sorry "-" blocked?)}
-    [:article {:class (str "dashboard-item "
-                           (severity-class (if blocked? :warning :info)))
-               :style (when blocked? {:opacity 0.68})}
+    [:article {:class (str "dashboard-item " (severity-class (if blocked? :warning :info)))
+               :style (cond-> {} blocked? (assoc :opacity 0.68) opens (assoc :cursor "pointer"))
+               :on-click (when opens #(operator-open-target! opens))}
      [:div.dashboard-item-top
       [:span.dashboard-chip sorry]
       [:span.dashboard-meta
        (str (or lift "n/a")
             (when metric (str " · " metric))
-            (when blocked? " · blocked"))]]
+            (when blocked? " · blocked")
+            (when opens " · ↗ open"))]]
      [:div.dashboard-text discharge]]))
 
 (defn- forward-model-card []
@@ -1363,6 +1378,22 @@
                [:div.dashboard-text discharge]])]
            [:div.dashboard-empty "No unpriced crux surfaced."])]])]))
 
+(defn- programme-card []
+  (let [bulletin @s/operator-bulletin
+        mission-briefs (filterv #(= "mission" (display-text (wire-get % :source)))
+                                (or (wire-get bulletin :brief) []))]
+    [:section.dashboard-card.dashboard-card-wide
+     [:div.dashboard-card-header
+      [:h3 "Programme — backlog salience (futon-features)"]
+      [:span.dashboard-badge (str (count mission-briefs) " missions")]]
+     [:div.dashboard-card-note
+      "The 2nd bottom line: where the next ½M LOC lands. Moved out of the Bulletin (programme, not morning-comms). Click a mission to open it."]
+     (if (seq mission-briefs)
+       [:div.dashboard-list
+        (for [m (sort-by-salience-desc mission-briefs)]
+          (bulletin-row :brief m))]
+       [:div.dashboard-empty "no backlog missions surfaced"])]))
+
 (defn- futon-runner-card []
   [:section.dashboard-card
    [:div.dashboard-card-header
@@ -1379,6 +1410,7 @@
   [:div.dashboard-grid {:data-testid "operator-dashboard"}
    [morning-bulletin-card]
    [forward-model-card]
+   [programme-card]
    [futon-runner-card]])
 
 (defn- vsatarcs-story-card [idx story]

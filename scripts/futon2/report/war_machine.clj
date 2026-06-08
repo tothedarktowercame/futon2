@@ -45,7 +45,8 @@
             [futon2.aif.precision :as precision]
             [futon2.aif.preferences :as pref]
             [futon2.aif.sorry-registry :as sorry-registry]
-            [futon2.aif.trace :as trace])
+            [futon2.aif.trace :as trace]
+            [futon2.aif2.tension :as tension])
   (:import (java.time LocalDate ZoneId ZonedDateTime)
            (java.time.format DateTimeFormatter)))
 
@@ -3344,12 +3345,20 @@
         wm-state {:observation observation :belief wm-belief :sorrys wm-sorrys
                   :missions wm-missions
                   :patterns wm-patterns
-                  :anticipation anticipation-snapshot}
+                  :anticipation anticipation-snapshot
+                  ;; M-aif2 slice-1 live install (consent-gated, Joe 2026-06-01):
+                  ;; inject the delivered E1 curvature signal. Fail-safe —
+                  ;; absent/malformed ⇒ [] ⇒ tension-proposer silent ⇒ WM unchanged.
+                  :curvature-signal (tension/read-curvature-signal)}
         wm-candidates (ap/compose-proposers
                        [ap/bootstrap-proposer
                         pattern-registry/pattern-enumerator-proposer
                         mission-registry/mission-enumerator-proposer
-                        sorry-registry/sorry-enumerator-proposer]
+                        sorry-registry/sorry-enumerator-proposer
+                        ;; M-aif2 slice-1: credited + admissibility-gated
+                        ;; tension-proposer — emits existing S2 classes via κ at
+                        ;; high-curvature actionable substrate-2 nodes (E1 consume).
+                        (tension/tension-proposer)]
                        wm-state)
         ;; v0.14 anticipation-driven time-pressure: scale G-risk + G-survival
         ;; by proximity to closest anticipated event in horizon. When no
