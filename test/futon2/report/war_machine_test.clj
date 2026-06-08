@@ -6,6 +6,7 @@
    live APIs or git repos."
   (:require [clojure.java.shell]
             [clojure.test :refer [deftest is testing]]
+            [futon2.aif.efe :as efe]
             [futon2.report.war-machine :as wm]))
 
 ;; ---------------------------------------------------------------------------
@@ -340,22 +341,64 @@
           (is (= base (#'wm/live-star-map-efe-opts base))))))))
 
 (deftest live-gap-view-efe-opts-adds-conservative-gap-blend
-  (testing "live WM opts carry the fold-view gap scores and conservative gap weight"
-    (let [gap-view {"M-gappy" 0.75 "M-filled" 0.0}]
-      (with-redefs-fn {#'wm/mission-gap-view (fn [] gap-view)}
+  (testing "live WM opts carry only ratified local-capability fold-view gap scores"
+    (let [fold-view {:missions [{:mission "M-war-machine-tuning" :gap-score 0.491}
+                                {:mission "M-canon-fingerprint-store" :gap-score 0.8}]}
+          domain-view {:source "test-ratified"
+                       :missions [{:mission "M-war-machine-tuning"
+                                   :repo "futon3c"
+                                   :domain :local-capability}
+                                  {:mission "M-canon-fingerprint-store"
+                                   :repo "futon6"
+                                   :domain :math}]}]
+      (reset! @#'wm/mission-fold-view-cache nil)
+      (reset! @#'wm/mission-domain-ratified-cache nil)
+      (with-redefs-fn {#'wm/mission-fold-view-path "fold.edn"
+                       #'wm/mission-domain-ratified-path "domain.edn"
+                       #'wm/read-edn-file (fn [path]
+                                            (case path
+                                              "fold.edn" fold-view
+                                              "domain.edn" domain-view
+                                              nil))}
         (fn []
           (let [opts (#'wm/live-gap-view-efe-opts
-                      {:time-pressure 0.25 :horizon-steps 3})]
-            (is (= gap-view (:mission-gap-view opts)))
+                      {:time-pressure 0.25 :horizon-steps 3})
+                local (efe/gap-efe-terms (:mission-gap-view opts)
+                                         {:type :open-mission
+                                          :target "M-war-machine-tuning"}
+                                         {:gap-weight (:gap-weight opts)})
+                math (efe/gap-efe-terms (:mission-gap-view opts)
+                                        {:type :open-mission
+                                         :target "M-canon-fingerprint-store"}
+                                        {:gap-weight (:gap-weight opts)})]
+            (is (= {"M-war-machine-tuning" 0.491}
+                   (:mission-gap-view opts)))
             (is (= 6.0 (:gap-weight opts)))
+            (is (= 2.9459999999999997 (:G-gap local)))
+            (is (= 0.0 (:G-gap math)))
             (is (= 0.25 (:time-pressure opts)))
             (is (= 3 (:horizon-steps opts))))))))
 
-  (testing "live WM opts are unchanged if the fold view is absent"
-    (with-redefs-fn {#'wm/mission-gap-view (fn [] nil)}
+  (testing "live WM opts carry an empty gap view if the ratified domain file is absent"
+    (let [fold-view {:missions [{:mission "M-war-machine-tuning" :gap-score 0.491}]}]
+      (reset! @#'wm/mission-fold-view-cache nil)
+      (reset! @#'wm/mission-domain-ratified-cache nil)
+      (with-redefs-fn {#'wm/mission-fold-view-path "fold.edn"
+                       #'wm/mission-domain-ratified-path "missing.edn"
+                       #'wm/read-edn-file (fn [path]
+                                            (case path
+                                              "fold.edn" fold-view
+                                              "missing.edn" nil
+                                              nil))}
       (fn []
-        (let [base {:time-pressure 0.25 :horizon-steps 3}]
-          (is (= base (#'wm/live-gap-view-efe-opts base))))))))
+        (let [opts (#'wm/live-gap-view-efe-opts
+                    {:time-pressure 0.25 :horizon-steps 3})
+              local (efe/gap-efe-terms (:mission-gap-view opts)
+                                       {:type :open-mission
+                                        :target "M-war-machine-tuning"}
+                                       {:gap-weight (:gap-weight opts)})]
+          (is (= {} (:mission-gap-view opts)))
+          (is (= 0.0 (:G-gap local)))))))))
 
 (deftest anamnesis-tiebreak-leaves-mixed-or-non-sorry-ties-alone
   (let [ranked [{:rank 1

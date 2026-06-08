@@ -80,9 +80,12 @@
 (defonce ^:private capability-star-map-cache (atom nil))
 (def ^:private mission-fold-view-path
   (str home "/code/futon6/data/mission-fold-view.edn"))
+(def ^:private mission-domain-ratified-path
+  (str home "/code/futon6/data/mission-domain-ratified.edn"))
 (def ^:private live-gap-view-efe-weights
   {:gap-weight 6.0})
 (defonce ^:private mission-fold-view-cache (atom nil))
+(defonce ^:private mission-domain-ratified-cache (atom nil))
 
 (def ^:private all-repos
   "All repos in the stack, classified by workstream.
@@ -178,13 +181,41 @@
                    [(str mission) (double gap-score)])))
          (into {}))))
 
+(defn- normalize-mission-domain-view
+  [domain-view]
+  (when (map? domain-view)
+    (->> (:missions domain-view)
+         (keep (fn [{:keys [mission domain]}]
+                 (when (and mission domain)
+                   [(str mission) domain])))
+         (into {}))))
+
+(defn- mission-domain-ratified
+  []
+  (let [{:keys [path domain-view]} @mission-domain-ratified-cache]
+    (if (= path mission-domain-ratified-path)
+      domain-view
+      (let [domain-view (normalize-mission-domain-view
+                         (read-edn-file mission-domain-ratified-path))]
+        (reset! mission-domain-ratified-cache {:path mission-domain-ratified-path
+                                               :domain-view domain-view})
+        domain-view))))
+
 (defn- mission-gap-view
   []
   (let [{:keys [path gap-view]} @mission-fold-view-cache]
     (if (= path mission-fold-view-path)
       gap-view
-      (let [gap-view (normalize-mission-gap-view
-                      (read-edn-file mission-fold-view-path))]
+      (let [raw-gap-view (normalize-mission-gap-view
+                          (read-edn-file mission-fold-view-path))
+            domain-view (mission-domain-ratified)
+            gap-view (if (seq domain-view)
+                       (into {}
+                             (filter (fn [[mission _gap-score]]
+                                       (= :local-capability
+                                          (get domain-view mission))))
+                             raw-gap-view)
+                       {})]
         (reset! mission-fold-view-cache {:path mission-fold-view-path
                                          :gap-view gap-view})
         gap-view))))
