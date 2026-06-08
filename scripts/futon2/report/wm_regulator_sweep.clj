@@ -21,11 +21,18 @@
 (defn- open-mission-action? [entry]
   (= :open-mission (get-in entry [:action :type])))
 
-(defn- mission-open-hole-count [snapshot mission-id]
-  (long (or (get-in snapshot [:structure :capability-graph :missions mission-id :open-hole-count])
-            (some (fn [{:keys [id open-hole-count]}]
+(defn- mission-open-hole-count
+  "Open-hole count for a mission. REGISTRY-FIRST: the live `:wm-missions` carry
+   the current count and cover the full candidate set (~80); the capability-graph
+   is the star-map subset (~31) and may be stale, so it is only a fallback.
+   (F2 fix, 2026-06-08: the graph-first version blinded the useful axis to the
+   ~58 candidates that are not star-map nodes — `mission-applicable?` returned
+   false for them, so `:useful` was a measurement artifact, not a true signal.)"
+  [snapshot mission-id]
+  (long (or (some (fn [{:keys [id open-hole-count]}]
                     (when (= id mission-id) open-hole-count))
                   (:wm-missions snapshot))
+            (get-in snapshot [:structure :capability-graph :missions mission-id :open-hole-count])
             0)))
 
 (defn automatable-entry?
@@ -46,7 +53,15 @@
 
 (defn score-vector
   "Compute the v1 regulator score-vector for a pinned snapshot rollout.
-   Useful-work uses equal centrality/ascent weights by default (0.5/0.5)."
+   Useful-work uses equal centrality/ascent weights by default (0.5/0.5).
+
+   The single-cycle-leaf gate reads the LIVE registry hole-count (via
+   `mission-open-hole-count`), so it covers every candidate, not only star-map
+   nodes (F2 fix). Bundle entries are already admissible (executable open
+   missions), so `applicable?` holds by construction; leaf := exactly-1-open-hole.
+   NOTE: the ascent term is still graph-defined (`mission-ascent-progress`), so it
+   contributes 0 for non-star-map missions; `c_joint` carries their useful signal.
+   Extending ascent past the graph is a separate follow-up."
   ([snapshot rollout]
    (score-vector snapshot rollout {}))
   ([snapshot rollout {:keys [k centrality-weight ascent-weight]
@@ -62,7 +77,7 @@
          useful (mean
                  (for [entry bundle
                        :let [m (action-target entry)
-                             leaf? (efe/mission-single-cycle-leaf? graph m)
+                             leaf? (= 1 (mission-open-hole-count snapshot m))
                              c (double (or (get centrality m) 0.0))
                              ascent (double (efe/mission-ascent-progress graph goal m))]]
                    (if leaf?
