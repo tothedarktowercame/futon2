@@ -26,6 +26,8 @@
 (def ^:private capability-star-map-suffix "/api/alpha/capability-star-map")
 (def ^:private capability-star-map-static-path
   "/data/capability-star-map.graph.json")
+(def ^:private pudding-status-static-path
+  "/data/pudding-status.json")
 
 (defn- endpoint-with-days []
   (str (api-base) endpoint-suffix "?days=" @s/days-window))
@@ -116,10 +118,21 @@
                   (js/console.warn "[api] capability star-map unavailable:"
                                    (or (.-message err) err)))))))
 
+(defn load-pudding-status! []
+  (-> (fetch-json! pudding-status-static-path)
+      (.then (fn [body]
+               (reset! s/pudding-status
+                       (js->clj body :keywordize-keys true))))
+      (.catch (fn [err]
+                (reset! s/pudding-status (unavailable-payload 0))
+                (js/console.warn "[api] pudding status unavailable:"
+                                 (or (.-message err) err))))))
+
 (defn load! []
   (load-operator-bulletin!)
   (load-forward-model!)
   (load-capability-star-map!)
+  (load-pudding-status!)
   (go
     (let [resp (<! (http/get (endpoint-with-days)
                              {:with-credentials? false}))]

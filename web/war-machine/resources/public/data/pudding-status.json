@@ -1,0 +1,45 @@
+{
+  "pudding-prover" : {
+    "proof-state" : {
+      "satisfied" : 17,
+      "held" : 19,
+      "total" : 36
+    },
+    "kit" : {
+      "satisfied" : 4,
+      "held" : 3,
+      "specified" : 1,
+      "total" : 8
+    },
+    "frontier" : {
+      "id" : "T2.3",
+      "title" : "a cold EOI gets SENT to a real cold lead (not Eric/Rob) — the next base camp",
+      "needs" : "operator SENDS the outbox draft + a :send-witness logged (the one passive-voice act = H1)"
+    },
+    "invariant-test" : {
+      "status" : "passing",
+      "passed" : 5,
+      "total" : 5,
+      "command" : "bb pudding-prover.bb test"
+    }
+  },
+  "pudding-peradams" : {
+    "mission" : "M-pudding-peradams",
+    "certifier" : {
+      "status" : "corpus-passing",
+      "passed" : 14,
+      "total" : 14,
+      "certified" : 5,
+      "rejected-or-routed" : 9,
+      "command" : "bb pudding-prover.bb peradam-test"
+    },
+    "multiball" : {
+      "ready-label" : "1 multiball ready",
+      "summary" : "labor and fruit are present; live arrow-witness binding remains before award",
+      "labor-witness" : true,
+      "fruit-witness" : true,
+      "arrow-witness" : false,
+      "gate" : "bind arrow-witness to a live affect event"
+    }
+  }
+}

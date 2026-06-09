@@ -21,7 +21,8 @@
 .cap-node-ring{fill:rgba(255,255,255,.9);stroke:#e2e8f0;stroke-width:2}.cap-node-selected .cap-node-ring{stroke:#0f172a;stroke-width:3}.cap-node-dot{stroke:#fff;stroke-width:2}.cap-node-witness{fill:none;stroke:#facc15;stroke-width:2;stroke-dasharray:3 3}
 .cap-node-label{fill:#334155;font-size:10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;pointer-events:none}.cap-detail-panel{padding:14px;overflow:auto}.cap-detail-panel h3{margin:4px 0 6px;font-size:15px;line-height:1.3;color:#0f172a}
 .cap-detail-kicker,.cap-detail-label,.cap-detail-id{font-size:10px;font-family:monospace;text-transform:uppercase;color:#64748b;letter-spacing:.4px}.cap-detail-id{text-transform:none;letter-spacing:0;margin-bottom:10px;color:#475569}.cap-detail-section{margin-top:12px;display:flex;flex-direction:column;gap:6px}.cap-detail-text{font-size:12px;line-height:1.45;color:#334155}.cap-chip-row{display:flex;flex-wrap:wrap;gap:6px}.cap-chip{font-size:10px;font-family:monospace;color:#0f172a;background:#e0f2fe;border:1px solid #bae6fd;border-radius:999px;padding:3px 7px}.cap-chip-gate{background:#fef3c7;border-color:#fde68a}.capability-map-empty{padding:18px;color:#64748b;font-size:13px}
-@media(max-width:900px){body{overflow:auto}.war-machine{min-height:100vh;height:auto}.toolbar{flex-wrap:wrap}.main-area{flex-direction:column;overflow:visible}.legend-panel,.sidebar{width:100%;min-width:0;max-height:none;border-left:0}.legend-panel{order:2}.hex-canvas{order:1;width:100%;min-height:640px;overflow:visible}.sidebar{order:3;border-top:1px solid var(--border)}.capability-map-header,.capability-map-body{grid-template-columns:1fr}.capability-map-header{flex-direction:column}.cap-progress{min-width:0;width:100%}.cap-progress-top{justify-content:flex-start}}")
+.pudding-status-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.pudding-card{background:rgba(255,255,255,.96);border:1px solid #cbd5e1;border-radius:6px;box-shadow:0 8px 22px rgba(15,23,42,.06);padding:13px 14px;display:flex;flex-direction:column;gap:10px}.pudding-card h3{margin:0;color:#0f172a;font-size:15px}.pudding-kicker,.pudding-metric-label{font-size:10px;font-family:monospace;text-transform:uppercase;letter-spacing:.4px;color:#64748b}.pudding-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.pudding-metric{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:8px}.pudding-metric-value{font-size:18px;font-weight:700;color:#0f172a}.pudding-line{font-size:12px;line-height:1.45;color:#334155}.pudding-line strong{color:#0f172a}.pudding-ready{border-color:#86efac;background:#f0fdf4}.pudding-waiting{border-color:#fde68a;background:#fffbeb}
+@media(max-width:900px){body{overflow:auto}.war-machine{min-height:100vh;height:auto}.toolbar{flex-wrap:wrap}.main-area{flex-direction:column;overflow:visible}.legend-panel,.sidebar{width:100%;min-width:0;max-height:none;border-left:0}.legend-panel{order:2}.hex-canvas{order:1;width:100%;min-height:640px;overflow:visible}.sidebar{order:3;border-top:1px solid var(--border)}.capability-map-header,.capability-map-body,.pudding-status-grid{grid-template-columns:1fr}.capability-map-header{flex-direction:column}.cap-progress{min-width:0;width:100%}.cap-progress-top{justify-content:flex-start}}")
 
 (defn- style-node []
   [:style styles])
@@ -168,6 +169,52 @@
       [:div.cap-detail-text
        "Click a capability node to inspect prerequisites, producing missions, and witness shape."]])])
 
+(defn- metric [label value]
+  [:div.pudding-metric
+   [:div.pudding-metric-label label]
+   [:div.pudding-metric-value value]])
+
+(defn- ratio [a b]
+  (str (or a 0) "/" (or b 0)))
+
+(defn- pudding-status-view []
+  (let [status @s/pudding-status]
+    (when (and status (not (:unavailable status)))
+      (let [pp (:pudding-prover status)
+            ps (:proof-state pp)
+            kit (:kit pp)
+            frontier (:frontier pp)
+            inv (:invariant-test pp)
+            per (:pudding-peradams status)
+            cert (:certifier per)
+            mb (:multiball per)]
+        [:div.pudding-status-grid {:data-testid "pudding-status"}
+         [:section.pudding-card
+          [:div.pudding-kicker "Pudding Prover"]
+          [:h3 "Ascent State"]
+          [:div.pudding-metrics
+           [metric "Proof" (ratio (:satisfied ps) (:total ps))]
+           [metric "Kit" (ratio (:satisfied kit) (:total kit))]
+           [metric "Invariant" (ratio (:passed inv) (:total inv))]]
+          [:div.pudding-line
+           [:strong (:id frontier)] " - " (:title frontier)]
+          [:div.pudding-line
+           "Anti-laundering guard: " (:status inv)]]
+         [:section.pudding-card
+          [:div.pudding-kicker "M-pudding-peradams"]
+          [:h3 "Peradam Certifier"]
+          [:div.pudding-metrics
+           [metric "Corpus" (ratio (:passed cert) (:total cert))]
+           [metric "Certified" (:certified cert)]
+           [metric "Rejected" (:rejected-or-routed cert)]]
+          [:div.pudding-line
+           [:strong (:ready-label mb)] " - " (:summary mb)]
+          [:div {:class (str "pudding-line "
+                             (if (:arrow-witness mb)
+                               "pudding-ready"
+                               "pudding-waiting"))}
+           "G1: " (:gate mb)]]]))))
+
 (defn- edges [caps positions]
   (into []
         (for [[id node] caps
@@ -259,4 +306,5 @@
          (into [:g.cap-nodes] (map #(node-svg positions %) (sort-by key caps)))]
         [selected-panel selected]]
        [:div.capability-map-empty
-        "No capability graph is present in the current War Machine payload."])]))
+        "No capability graph is present in the current War Machine payload."])
+     [pudding-status-view]]))
