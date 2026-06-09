@@ -76,7 +76,14 @@
 (def ^:private live-star-map-efe-weights
   {:graph-applicability-penalty 5.0
    :graph-ascent-weight 6.0
-   :graph-body-weight 3.0})
+   :graph-body-weight 3.0
+   ;; M-wm-policies Track-1 (regulator-swept P=4, operator-consented 2026-06-09):
+   ;; off-map work no longer scores a free 0; body is next-step (leaf-aware), not
+   ;; whole-mission hole-count; ascent ignores already-:satisfied caps. Flips the
+   ;; live top from M-emacs-cursor-peripheral to on-ascent work (star-map / leaf).
+   :graph-off-map-penalty 4.0
+   :graph-body-mode :leaf
+   :graph-ascent-status-aware? true})
 (defonce ^:private capability-star-map-cache (atom nil))
 (def ^:private mission-fold-view-path
   (str home "/code/futon6/data/mission-fold-view.edn"))
