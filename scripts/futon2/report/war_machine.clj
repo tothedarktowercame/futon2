@@ -3678,7 +3678,13 @@
                 :micro-step-trace micro-step-trace
                 :anticipation anticipation-snapshot
                 :ranked-actions wm-ranked
-                :decision wm-decision}]
+                :decision wm-decision
+                ;; M-wm-policies v1: the visible cascade-policy lane (additive, defensive —
+                ;; a cascade failure can never break the scan; memoized; shell-out to minilm).
+                :cascade-policies (try
+                                    ((requiring-resolve 'futon2.report.cascade-lane/cascade-lane)
+                                     wm-ranked {:n 3 :budget 6})
+                                    (catch Throwable _ []))}]
     (when trace?
       (try
         (if trace-dir

@@ -19,16 +19,24 @@
 (def ^:private script-dir "/home/joe/code/futon3a/holes/labs/M-memes-arrows")
 (def default-budget 6)
 
+;; A cascade is deterministic in (|psi>, budget) — the pattern library + minilm are stable —
+;; so memoize across windows/ticks. Only successes are cached (failures retry).
+(defonce ^:private !cache (atom {}))
+(defn clear-cache! "Drop the cascade cache (e.g. after the pattern library changes)." [] (reset! !cache {}))
+
 (defn cascade-policy-for
   "Construct the budget-truncated cascade-policy for a circumstance |psi> (text).
-   Read-only, sim-only. Returns the parsed map or nil on failure."
+   Read-only, sim-only, memoized. Returns the parsed map or nil on failure."
   ([psi-text] (cascade-policy-for psi-text default-budget))
   ([psi-text budget]
-   (try
-     (let [{:keys [exit out]} (sh/sh py script psi-text (str budget) :dir script-dir)]
-       (when (zero? exit)
-         (json/parse-string out true)))
-     (catch Exception _ nil))))
+   (or (get @!cache [psi-text budget])
+       (let [v (try
+                 (let [{:keys [exit out]} (sh/sh py script psi-text (str budget) :dir script-dir)]
+                   (when (zero? exit)
+                     (json/parse-string out true)))
+                 (catch Exception _ nil))]
+         (when v (swap! !cache assoc [psi-text budget] v))
+         v))))
 
 (defn mission->psi
   "v1 circumstance text from a mission target id (strip M-, hyphens->spaces).
