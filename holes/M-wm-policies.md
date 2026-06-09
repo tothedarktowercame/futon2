@@ -701,8 +701,18 @@ from the judge ranking, **loaded in the live JVM and demonstrated over the live 
   `M-essay-corpus-substrate` → 6 patterns (C=9.98) — budget-6 of a ~32 coverage-saturated full cascade. **Real
   non-degenerate policies, visible over the live WM ranking.**
 - **Honest v1 edges:** the rollout value-correction is *deferred* (3-summit-thin in v1 — adds ~nothing yet,
-  touches the ranking — not wired). Auto-serving the lane in the WM UI = attach it to the async snapshot tick
-  (next small step; today it's loaded + callable + demonstrated). Budget=6 from the marginal-coverage data.
+  touches the ranking — not wired). Budget=6 from the marginal-coverage data.
+
+**Auto-serve DONE (claude-1, `8ab229e`).** `generate-war-machine` attaches `:cascade-policies` to the
+judgement (top-3, budget-6) via `requiring-resolve` + a defensive `try` (a cascade failure can't break the
+scan) + memoized constructor (no re-shell-out across windows/ticks). **Confirmed on the served judgement
+(tick 80, clean):** the lane auto-appears, 3 entries. **Useful finding — the cascade `C`-score is a second,
+orthogonal signal:** on-ascent missions carry *rich* coherent cascades (`M-capability-star-map` C=9.88 /
+`M-essay-corpus-substrate` C=9.98, full-size 32), while the silly cursor's cascade is *thin* (C=1.145,
+self-limits at 6) — so the wholeness of the argument *agrees with the ranking* and adds "how strong is the
+case for advancing this," not just "advance this." The cursor's thin low-`C` cascade is another tell it's
+weak. (The lane is **served/human-visible**; the *pilot's automated turn* doesn't *consume* it yet — a small
+follow-up if we want the pilot to act on the cascade, not just display it.)
 
 ### Track 2 — the rollout engine (DERIVE, 2026-06-09)
 
