@@ -13,6 +13,18 @@ futon stack's own structure, the "moves" are patterns/arrows, a "policy" is a *c
 pattern-language assembled for a circumstance), and the reward is a **peradam** (a certified unit
 of earned capability). The War Machine is the player.
 
+**Honest caveat on the lineage (Fable's review, 2026-06-09).** AlphaZero's *defining* feature is not
+prior+search+value — that's classical game-tree search with a learned evaluation (Stockfish-with-a-prior).
+What makes it AlphaZero is the **closed self-play loop**: an adversary that *is itself*, generating an
+automatic curriculum, with an *incorruptible* terminal reward. **FutonZero v1 does not have that yet** —
+the value (`C`) is handcrafted, the prior isn't trained from outcomes, and R2 is deferred. So v1 is
+structurally a **single-agent MDP**, closer to **AlphaTensor** (which framed algorithm-discovery as a
+single-player "TensorGame") than to AlphaZero. Earning the name needs two things v2 supplies: **R2**
+(search-result trains the prior = the self-play loop), and an **adversary** — and the natural adversary is
+the **Pudding Prover**: the anti-laundering verifier that tries to *refute* a peradam claim. That makes the
+loop genuinely two-player and imports the curriculum dynamics. Until then, read the table below as the
+*architecture*, not the *closed loop*.
+
 The pivot that made this possible: **Expected Free Energy is a property of *policies*, so `G(π)`
 is a path integral, not a scalar field.** A "next step" is the degenerate length-1 policy. Ranking
 single actions over a static field is the special case; the general object is the *geodesic* — the
@@ -70,3 +82,47 @@ Two ideas are genuinely futonic, not just borrowed:
 So FutonZero v1 is a real, honest first instantiation: the player sees the board, proposes
 move-policies, scores them by wholeness, and surfaces the cascade — with the deeper search and the
 self-improving loop staged behind a clearly-labeled edge.
+
+## 5. What v1 is NOT — open tensions + a kill criterion (Fable's review, incorporated)
+
+A typed sorry beats a smooth claim. Honest edges, in load-bearing order:
+
+- **Lineage (see §1 caveat):** single-agent MDP, AlphaTensor-shaped — *not yet* AlphaZero. The adversary
+  (Pudding Prover as refuter) + R2 (the self-play loop) are what would earn the name.
+- **The reward is self-graded — Goodhart's door.** Wholeness `C` is computed by the system over its *own*
+  pattern assembly: a cascade can score coherent *without doing work* (assemble six historically-co-applied
+  patterns → a respectable `C` whether or not the ARGUE bears on the circumstance). **So `C` is the *value
+  heuristic*, not the reward.** The reward is the **peradam**, and "certified by whom?" is answered
+  *externally* by the **Pudding Prover's 3-witness certificate** (labor + arrow + fruit). **Laundering
+  `C`-scores into reward without that check is precisely the failure the anti-laundering invariant forbids**
+  — the same de-laundering discipline applied to `certify-peradam` (this session). The peradam's
+  certification *is* a typed proof-state; `C` only ranks candidates *for* it.
+- **Semilattice vs the linear rollout.** A cascade is a *semilattice* (patterns overlap — "A City is Not a
+  Tree"), but `G(π) = Σ γ^t g(s_t)` is a path integral over a *sequence*; MCTS rolls out linear orders. So
+  either the rollout **linearizes** the cascade at search time (quietly betraying the partial-order claim
+  where it matters most), or it needs a procedure that natively samples partial orders — **GFlowNets** are
+  the better-fitting machinery (sample compositional objects *proportional to reward* — nearly a definition
+  of "assemble a pattern-language scored by wholeness"). In v1 the cascade lane (the semilattice) and the
+  rollout (the linear path) are **separate** machineries; reconciling them is open.
+- **The parsimony budget is a hyperparameter, not a principle.** Since `C` is monotone and bounded only
+  externally, **the budget *is* the regularizer** — budget-6 sets the character of *every* cascade. Why 6?
+  An *empirical* read of the marginal-coverage knee (~5–8 strong centres before the tail goes marginal), not
+  a law — **labeled here as a tunable constant.** And, per this doc's own scale-invariant-degeneracy lesson,
+  *exactly* the kind of unexamined constant where the next degeneracy could hide.
+- **The witness is constructed — the real test is empirical, and here is the kill criterion.** The
+  2-step-unlocks case passes, but the open question is whether mission terrain has unlocking structure
+  *densely enough* for multi-step search to pay rent. If most of the ~199 missions are reachable greedily,
+  the rollout is elegant machinery for a flat board. **Falsifiable prediction:** *after scope-grain v2,
+  ≥ ~15% of top-ranked policies should be non-greedy (a multi-step `G(π)` strictly beating its greedy
+  prefix). If not, the rollout is over-engineering — kill it and let the cascade lane carry the value alone.*
+  (15% is a first-cut threshold; refine against v2 data. The point is that v1 currently lacks a kill
+  criterion — this is it.)
+
+## 6. The pitchable artifact (Fable's strategic note)
+
+The most *legible* result is **not** the search — it's the **cascade-as-scored-ARGUE**: *"given this
+circumstance, here is the pattern-language that makes the case, with a coherence score."* That reads to
+people who will never care about EFE geodesics — including the **UKRN / consulting audience** the stack is
+converting before August. The thin-argument signal (cursor `C`=1.145 vs on-ascent `C`≈9.9) is the
+communicable hook: **the system can tell you when its own case is weak.** That is *assurance-machinery*
+language, and it is the bridge from FutonZero back to the commercial spine (`M-futon-forward-model`).
