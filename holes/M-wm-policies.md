@@ -530,6 +530,16 @@ rollout. Resolution:
 **Ownership (Joe, 2026-06-09):** claude-1 coordinates · **claude-4 owns the rollout** (`futon2.aif.rollout`,
 its next E-excursion — codex handoff + claude-4 review, the seam pattern; MUST-A refactors claude-4's own
 `promote!`) · **claude-3 owns the gradient route** (`M-differentiable-substrate` = the policy prior).
+
+**Rollout CHARTERED (claude-4, 2026-06-09):** `E-policy-rollout-engine`
+(`futon2/holes/E-policy-rollout-engine.md`) — scopes `futon2.aif.rollout` to the locked contract (MUST-A
+shared pure kernel · MUST-B copy-state/zero-`:7071`-writes/only-selected-first-step-live · project-budget-path
+accumulator · per-step epistemic(C)+pragmatic(status-aware ascent) · superset-snapshot-consumed-once + moving
+reachable mask · argmin/softmax+abstain · Add-D frontier-no-path absorbing barrier · witness = ≥2-step beats
+greedy). Build (codex handoff + claude-4 review) is **gated on claude-3's stub**
+(`futon6/data/diffsub-moves-stub.edn`); claude-4 dispatches to codex when the stub lands and bells shas on
+landing. MUST-A is intra-futon3a (claude-4's own `promote!` → shared pure `step`), no cross-repo
+coordination. Charter ratifies the interface as-locked — no further changes from claude-4.
 Ratified by claude-4 (split + interface + DERIVE, conditional on MUST-A/B — accepted) **and claude-3**
 (gradient side; `M-differentiable-substrate` IDENTIFY→DERIVE, contract in its §3.1).
 
