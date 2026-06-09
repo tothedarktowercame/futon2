@@ -132,6 +132,8 @@
        vals
        (apply max 1)))
 
+(def ^:private min-row-gap 58)
+
 (defn- selected-panel [node]
   [:div.cap-detail-panel
    (if node
@@ -215,7 +217,7 @@
         caps (normalize-capabilities graph)
         vp @s/viewport
         w (max 760 (:w vp))
-        h (max 620 (:h vp) (+ 150 (* 34 (max-depth-count caps))))
+        h (max 620 (:h vp) (+ 150 (* min-row-gap (max-depth-count caps))))
         positions (layout caps w h)
         p (progress caps)
         selected (when (= :capability (:sprite-type @s/selected))
