@@ -154,14 +154,14 @@
       "region" : "kit"
     },
     "hypergraph-operator" : {
-      "title" : "Hypergraph operator — operator over hypergraph structures; currently design material, not shipped operator",
+      "title" : "JSDQ hypergraph operator — person-facing 8-sector/39-item capability model over Joe's market-interface topology",
       "status" : "held",
       "scope" : [ ],
       "minted-by" : [ "M-hypergraph-operator" ],
       "pre-registered?" : true,
       "frontier" : true,
       "region" : "t5",
-      "grounding" : "M-hypergraph-operator design material only"
+      "grounding" : "M-hypergraph-operator partial-fold ruling: generic operational loop folded into WM/capability-star-map/pudding-prover; JSDQ person-facing operator remains unbuilt"
     },
     "wm-steps-forward-guardrailed" : {
       "title" : "WM steps forward (not wedges) under guardrails — engages the top autonomous action, NAGs the operator-forks",
