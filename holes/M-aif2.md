@@ -656,3 +656,50 @@ The seam where a stronger signal *replaces* the current curvature source, gated 
 **M-aif2 = CLOSED on its own criteria (DELIVERED, 2026-06-02).** Design complete (meta-model, shape + 3 siblings, T2, R11 ruled, T4 classified); two aif2 slices built + green; slice-1 live-installed consuming the delivered E1 curvature. **Named residue (Campaign RUN/DELIVER, not M-aif2):** the beats-baseline value-proof (#5 in flight) + the E2/E3/differentiable signal-upgrades behind the logged seam. The basic `aif` model stays frozen + honest (subsumption discipline held throughout).
 
 **QA-CONFIRMED LIVE (2026-06-02, interactive WM QA w/ Joe).** All 4 scenarios pass against the running WM/UI: **#1** the WM's chosen top action *is* the tension-candidate (`open-mission essays-diachronic-model`), end-to-end judge→`/api/alpha/aif-stack/live`→UI, carrying full `proposer-id s1/tension` provenance + the verbatim rationale; **#2** it ranks #1 in the 4-G-tied bucket (G=−4.811) via the curvature-intensity tie-break (curvature enters as the candidate `weight`; an EFE-level integration is a logged future refinement); **#3** fail-safe — absent/missing curvature ⇒ proposer silent ⇒ WM unchanged (the install *cannot* break the WM); **#4** admissibility-gated — deny-consent / `:pruned` ⇒ silent (not hardcoded always-on). The "stale Close-🐜6 card" concern was a stale *browser tab*, not the WM — the live reading was fresh + correct (the UI dispatcher already foregrounds `next-move-live`).
+
+---
+
+## Retrospective (2026-06-09, post–M-wm-policies): why the degenerate-policy loop passed R1–R12
+
+**The question (Joe):** the WM was "live for quite a while with an AIF loop scoring *degenerate* policies"
+(single-step EFE; the Emacs-cursor #1). Why did R1–R12 *permit* it — why wasn't the need for a robust
+policy mechanism flagged?
+
+**The answer — a scoped deferral, not a missed gap.** The R1–R12 ledger says so in plain text
+(`futon2/docs/futon-aif-completeness.md`): *"The WM is **not** a batch simulation. It is a **live
+observer** … **There is no action loop; no policy selection (yet).**"* R1–R12 are a **completeness
+contract for a snapshot judge** (belief + EFE-*ranking* of single actions), with policy selection
+**explicitly deferred** ("(yet)"). The single-step loop was the honest interim, *within scope* — it didn't
+sneak past the criteria; they were never about policy depth. R6 (the policy-ish criterion) is satisfied by
+`futon2.aif.policy/select-action` — single-action **softmax + abstain**, a *length-1* policy mechanism by
+construction.
+
+**Nothing was hidden — but two things were under-specified, and that is the real finding:**
+1. **The deferred mechanism's required *shape* was left open.** "(yet)" promised "policy selection is
+   coming"; it did **not** say "and it must be `G(π)` over *multi-step* policies (a path integral), not
+   single-step argmax." So when policy *adequacy* finally mattered, no criterion encoded "must be
+   path-integral / multi-step." The cursor #1 is the visible symptom of the unspecified shape (the field
+   view = the length-1 degenerate case).
+2. **Policy *depth* had no owning tier.** R1–R12 are inference-tier and **presuppose a fixed support**
+   (§ above, ~line 156: *"There is no R-criterion whose remit is 'may the support itself change?'"*).
+   M-aif2's own boundary-tier answer was about support **breadth** — the action-class *inventory* (new
+   *kinds* of action) — **not** policy **depth** (sequences). So "are the policies deep enough?" fell in
+   the gap *between* the tiers: inference-tier (fixed support, no policy selection yet) and boundary-tier
+   (inventory breadth). Neither tier's remit was depth.
+
+**And no criterion sniff-tests output *quality*.** R10 (live operation) checks the loop *runs*, not that
+the top pick is *sensible*. The cursor #1 was "long noted" informally but never encoded — so it never
+failed anything.
+
+**Recommended additions (homeless today, recorded for the next contract revision):**
+- **`R13-policy-adequacy`** — *is the policy mechanism `G(π)` over multi-step policies, or degenerate
+  (single-step argmax)?* The **depth** axis nobody owned; `M-wm-policies` is its first satisfaction.
+- **A degeneracy / sniff-test criterion** — *does the scoring have a pointwise-greedy degeneracy (greedy-
+  single wins / no knee), and does the top recommendation pass operator common-sense?* The cursor-bug
+  proved **scale-invariant** (the same "pointwise-greedy wins" degeneracy at the action level *and* at the
+  policy-scoring level — the proxy-knee artifact), so the right check is generic: **reward wholeness, never
+  pointwise-greedy, at every scale.**
+
+Net: R1–R12 were honest about their scope; the surprise dissolves into *under-specification of the
+deferral's shape* + *a depth axis with no owning tier*. M-wm-policies is the correction; FutonZero
+(`futon2/docs/futonzero-alphazero.md`) is the realization.
