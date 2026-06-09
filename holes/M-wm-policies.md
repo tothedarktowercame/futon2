@@ -556,6 +556,29 @@ The stored-chain reading above is the *degenerate, linear* case. The real object
   adequate* policy for the circumstance — Occam via `C`. A very-complex composed policy is *representable*
   but would usually score *low* (too complicated). So the policy-space is rich; the scoring keeps it honest.
 
+**Notation (Joe, refined):** patterns/policies are **operators**, missions/scopes are the **state-vectors**
+`|ψ⟩` they act on — a cascade is a product `O₃O₂O₁|ψ⟩`, scored by the wholeness of the result. (Container
+stays **M-wm-policies**; a **Campaign** spanning WM + aif2 + differentiable-substrate may be registered
+later. For now: **experiments, not formalism.**)
+
+**Experiment menu (candidate useful policies — affordances, not constraints; simple → composed →
+self-improving):**
+1. *Discharge-the-readiest-sorry* — `|ψ=open sorry, have satisfied⟩` → BHK-construction pattern →
+   `:open→:constructed`. (pudding-prover; simplest useful non-degenerate move — it *completes*.)
+2. *Clean-a-mess* (the seed) — `|ψ=low-coherence district / messy mission⟩` → mission-coherence cascade →
+   raise `C`. (Futon City + `C`.)
+3. *Unblock-then-do* — `|ψ=mission blocked by an unbuilt dependency⟩` → discharge dependency, then mission.
+   (The canonical non-degenerate policy greedy can't see — the witness shape.)
+4. *Walk-an-ascent* — `|ψ=on-ascent mission w/ claimed substrate⟩` → leaf-chain from substrate to a summit
+   cap (wm-overnight / ai-passes-prelims). (Star map + rollout.)
+5. *Propagate-a-win* — clean a mission → find another using the same pattern (co-application) → annotate its
+   PSR. (Joe's cross-ψ composition; phylogeny + PSR surface.)
+6. *Mint-a-peradam* — `|ψ=mission near a 3-witness certificate⟩` → complete labor+arrow+fruit → mint.
+   (Ties policies to the reward.)
+7. *Canalize-a-proven-pattern* — `|ψ=pattern applied across missions⟩` → EXPLORE→ASSIMILATE→CANALIZE → a
+   new library operator. (**Policies that extend the operator-registry = aif2 niche-construction — the
+   deepest one: policies that create policies.**)
+
 **The seed already exists: E-warranted-play = the length-1 cascade** (given a mission, select ONE pattern,
 apply it — the selector built this session). So we **generalize E-warranted-play (1-pattern) → small
 pattern-semilattice**, scored by `C`, growing the operator-registry as real circumstances demand it
