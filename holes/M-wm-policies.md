@@ -52,6 +52,39 @@ charters the policy layer (the bigger build).
 - **Regulator lesson ([[E-possible-world-regulator]]):** don't fabricate dynamics. The field-simulator
   must be real (claude-3's substrate-2), not invented, or the rollout scores fiction.
 
+### Theoretical correction — EFE is a path functional, not a field (Joe, ratified 2026-06-09)
+
+EFE is a property of **policies**, so `G(π)` is a **path integral** — a functional over the
+trajectory-distribution a policy induces — **not** a scalar field over states. A field assigns a value to
+each *point*; `G(π)` assigns a value to each *path*. The same map node sits on many policies with
+different `G`, so a node does not *own* an EFE: "colour each node by its EFE" is a category slip. Three
+objects get conflated under "the EFE field":
+
+- **`g(s)` — the per-step integrand.** A legitimate field: the local cost / **Lagrangian density**
+  (claude-3's substrate-2 `C`/holes + my per-step graph-ascent). Fine to render — but **not** EFE.
+- **`G(π)` — the policy EFE.** The path integral of `g` over the policy's trajectory. The quantity we
+  minimise. **Not a field.**
+- **`V(s)` — optimal cost-to-go.** *Is* a scalar field over states — but only as the **output** of
+  solving the path-minimisation (Bellman value), obtained by doing the integral, not read locally. This
+  is the "can be seen as a field" case.
+
+**Why this is the heart of the mission.** The field view is exact *only* for length-1 policies, where
+`G(π) = g(s₁)`. Today's WM is exactly that — `argmin` over single-step actions of a per-state proxy.
+**The cursor bug is the field worldview drawn as a picture: greedy-pointwise over a heatmap.** Track 2
+(policies, length > 1) *is* the move from field to path integral; past length 1 the field view becomes
+the error, not the answer.
+
+**Metric / geodesic reframing (generative).** substrate-2's `C` is the local **metric** (Lagrangian
+density); `G(π)` is the **action / path-length** in that metric; policy selection is **geodesic-finding**
+— the least-EFE *path*, not the lowest-metric *point*. Consequences:
+- **Render naming:** the `g(s)` heatmap is the **metric backdrop** — name it the *per-step cost / metric
+  field*, **not** "the EFE field." The *figure* is the **geodesic**: selected policies drawn as
+  trajectories/streamlines, ranked by `G(π)`. A heatmap read greedily is the very thing Track 2 exists
+  to stop.
+- The two-kinds-of-off-map finding (§4) is the same insight from the goal side: an unminted goal is an
+  **endpoint with no terrain** — no geodesic can reach it; the path must first be built by chartering a
+  minting mission.
+
 ### Scope in
 - Fix `graph-efe-terms` (off-map escape hatch + body granularity) — Track 1.
 - Regulator-sweep the fix across the whole field; apply live with consent.
@@ -245,8 +278,9 @@ further ascent-credit, else a policy farms ascent by re-attesting satisfied caps
 fan-out pilot #1 as a suspected bug; the rollout makes it a hard correctness requirement.) So Track 1's
 deliverable to the field side = the off-map-penalised, leaf-aware **and status-aware** graph-ascent.
 
-**Division of labour:** claude-3 owns materialize+link + the Futon City EFE-field render (epistemic pole
-built + screenshotted already); claude-4 owns the arrows (grounded by D1's psr/pur/pxr labelled
+**Division of labour:** claude-3 owns materialize+link + the Futon City per-step-cost/metric field render
+(epistemic pole built + screenshotted already — NB the *metric backdrop*, not "the EFE field"; the EFE
+*figure* is the geodesic/path overlay, per the §1 path-functional note); claude-4 owns the arrows (grounded by D1's psr/pur/pxr labelled
 examples); claude-1 owns the corrected status-aware pragmatic per-step (Track 1) + the rollout engine
 once the field + arrows land.
 
@@ -261,6 +295,36 @@ capability-scope. The state side of the contract is delivered; the pragmatic per
 remaining piece on my side.
 
 ---
+
+### Prior art to port — `~/code/ukrn-services-simulation/` (reviewed 2026-06-09)
+
+Joe's UKRN-services sim is AIF-based, Clojure/EDN, **zero external numeric deps** (`java.lang.Math` only)
+— so its machinery ports cleanly into `efe.clj`. Honest finding: its EFE is *also* mostly single-step
+per-tick (risk + ambiguity + pattern + budget + priority, composed each tick) — like our WM — **except**
+the budget term, which is a genuine horizon rollout. That rollout is the gold.
+
+- **The path-integral kernel: `project-budget-path`** (`notebooks/ukrn_v3_efe.clj:274-315`). A K-tick
+  horizon loop (default K=4) that accumulates per-step cost, applies a periodic replenishment schedule,
+  and has a sticky `:truncated` absorbing barrier. This **is** the `G(π) = Σ_t g(s_t)` accumulator we
+  need — port the loop structure as the rollout engine's spine.
+- **Shared-kernel pattern: `step-kernel`** (`notebooks/ukrn_v3_kernel.clj:235`). One `T(state, action) →
+  next-state` is called by **both** the live step and the predictive rollout — so the simulator *cannot
+  drift from reality*. This is the regulator's "the simulator must be real" lesson solved
+  *structurally*. **Architectural port:** claude-4's arrow `T` should BE the same transition the live WM
+  uses, not a parallel sim. (Ties to our [[E-possible-world-regulator]] no-fabricated-dynamics rule.)
+- **Belief update: `update-mu`** (`notebooks/ukrn_v3_belief.clj:12-40`) — Gaussian precision-weighted
+  predictive-coding; standard, portable, if we make states probabilistic.
+- **Selection: softmax + abstain** (`notebooks/ukrn_v3_efe.clj:599`) — `P(a) ∝ exp(−G/τ)` with an
+  abstain guard when top candidates are indiscriminable. *Not* geodesic, but a principled
+  policy-sampler; the abstain-on-low-discriminability guard maps onto WM-I4 (don't act when the field is
+  flat).
+- **Term templates:** `risk-term-v3` / `ambiguity-term-v3` (`ukrn_v3_efe.clj:233-252`) — pragmatic
+  (goal-distance) + epistemic (entropy) decomposition, drop-in shape for our two-pole `g(s)`.
+
+**Port plan (Track 2):** lift `project-budget-path`'s loop as the rollout spine; generalise its per-step
+cost from "engagement cost" to our `g(s) = epistemic(C) + pragmatic(corrected graph-ascent)`; drive it
+with claude-4's arrow as the `step-kernel`; select policies by softmax-over-`G(π)` with the abstain
+guard. All pure-Clojure, no new deps.
 
 ## 4. ARGUE
 
@@ -277,9 +341,9 @@ opposite handling:**
 - **off-map GOAL** (a pre-registered destination capability with no minting mission) → **do NOT penalise;
   surface as "needs a mission"** — a missing-terrain signal / a call to charter a minting mission.
 
-(Path-integral connection, *pending operator confirm of the field→path reframing*: an unminted goal is an
-*endpoint with no terrain* — there can be no geodesic to an unreachable destination; the path must first
-be built by chartering the mission. See the field-vs-path note when ratified.)
+(Path-integral connection — *ratified, see the §1 path-functional note*: an unminted goal is an *endpoint
+with no terrain* — there can be no geodesic to an unreachable destination; the path must first be built by
+chartering the mission.)
 
 ### VERIFY / INSTANTIATE — _pending_
 
