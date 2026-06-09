@@ -444,10 +444,41 @@ constructing one toward an island carries `:advances-cap <island-cap>`; island c
 `promote!` routes them to `:claimed`/witness. No new mechanism. *Build of route (a) creates an artifact +
 touches commercial/income strategy (M-futon-forward-model) → operator go before building.*
 
-### VERIFY / INSTANTIATE — _pending_
+### VERIFY / INSTANTIATE
 
-Track 1 INSTANTIATE = the regulator sweep + live apply (consent). Track 2 = the forward-model contract,
-then a ≥2-step rollout witness.
+**Track 1 — INSTANTIATE done (regulator sweep + operator-consented live-apply, 2026-06-09).**
+
+Regulator sweep over the live snapshot (efe.clj reloaded), `:leaf` + status-aware on, varying `P`:
+
+| P | cursor | M-capability-star-map | M-essay-corpus (leaf) | M-futonzero-mvp | M-EOI |
+|---|---|---|---|---|---|
+| 0 | **1** | 18 | 21 | 2 | 3 |
+| 4 | 3 | **1** | **2** | 4 | 10 |
+| 6 | 9 | **1** | **2** | 14 | 16 |
+| 8 | 14 | **1** | **2** | 18 | 19 |
+
+Findings: (1) the **off-map penalty is the load-bearing knob** — at `P=0` (leaf+status-aware on, no
+penalty) the cursor is still #1; leaf-body/status-aware fix the on-map *ordering*, the penalty closes the
+*escape hatch*. (2) At any `P≥4` the live top flips to on-ascent work (#1 `M-capability-star-map`, #2
+`M-essay-corpus-substrate` leaf), stable. (3) **The penalty is blunt** — it can't distinguish the *silly*
+off-map cursor from *valuable-but-unwired* off-map work (`M-futonzero-mvp` moves down *with* the cursor);
+no `P` isolates the cursor. **The real lever for unwired-valuable work is wiring it onto the graph** — the
+penalty correctly creates that incentive (the ARGUE principle). **`P=4` chosen** (operator) as the gentlest
+setting that flips the headline with least collateral (futonzero-mvp stays #4; residual: cursor at #3, no
+longer the recommendation).
+
+Live-apply: `live-star-map-efe-weights` (war_machine.clj `c13b5e2`) →
+`{:graph-off-map-penalty 4.0, :graph-body-mode :leaf, :graph-ascent-status-aware? true}`; `efe` +
+`war-machine` reloaded via Drawbridge (behavior-preserving by default; the new opts are the change). The
+in-process rollout under the new live opts confirms **cursor → #3, `M-capability-star-map` #1**. The served
+judgement (`!wm-snapshot`, scheduler period 300s) refreshes on the next tick (triggered async via
+`request-tick!`). NB the live JVM now runs the reloaded `efe`/`war-machine`; a JVM restart would reload
+from the (committed) branch files.
+
+**Track 2 — in progress:** state (claude-3, done) + transition (claude-4 arrow store + the `:advances-cap`
+promote! E-excursion, greenlit) + per-step (Track-1, done) → the **rollout engine** (mine) is the remaining
+build, plus the route-(a) island-foothold (aligned, build held for operator go). Witness = a ≥2-step
+rollout that beats the greedy one-step pick.
 
 ### PSR / PUR
 - **PSR (Track 1 fix):** Pattern: `logic-model-before-code` (verify the design over the live trace before
