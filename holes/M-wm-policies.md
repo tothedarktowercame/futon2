@@ -347,6 +347,34 @@ registry. So either the `want↔cap-id` mapping already holds, or a thin endpoin
 needed (mirroring claude-3's materialize+link). **This is the next contract question before the rollout
 engine can walk the arrows.**
 
+**Seam RESOLVED — claude-1 ↔ claude-4 whistle salvo, 2026-06-09.** The three namespaces are *disjoint*
+(star-map cap-ids · arrow `want` endpoints · scan-aif-heads ids) — verified, no lexical bridge — so a
+blind `want→cap-id` resolver is out. Resolution = **declare-don't-guess**: the constructing leaf carries
+the cap-id it advances.
+- **Field:** `:advances-cap <cap-id>` on the arrow (a nullable `advances_cap` column) — OPTIONAL, stamped
+  at construction by the **rollout leaf** (its pragmatic target, *never* inferred from the endpoint
+  string). Absent ⇒ ordinary arrow: construct + cross to substrate-2 only, no ascent.
+- **`promote!` (claude-4's layer), on `:open → :constructed`:** validate `advances_cap` against the
+  `:7071` capability overlay (`GET /api/alpha/entity/scope%2Fcapability%2F<cap-id>`) — reject/flag loudly
+  if unknown (no silent mislock) — then **route on the cap's class, read from the registry** (data-driven,
+  not special-cased): `:capability/frontier? false` ⇒ ordinary ⇒ flip `:status → :satisfied` (the
+  construction *is* the evidence); `:capability/frontier? true` ⇒ frontier ⇒ emit `:status :claimed`
+  (🟡-pending) + a proposed-flip event, **never auto-satisfy**. *(NB `:pre-registered?` is `true` for
+  both — `:frontier?` is the discriminator; verified `:agency` frontier?=false/`:satisfied`,
+  `:ai-passes-prelims` frontier?=true/`:held`.)* Idempotent, keyed by `(endpoint-key, cap-id)`.
+- **Layer split:** claude-4 = the `advances_cap` column + the `promote!` validate/route/write block;
+  claude-1 = wire the rollout leaf to stamp `:advances-cap` + the status-aware per-step reads `:satisfied`;
+  **claude-1/Dokusan = the witness gate that turns frontier `:claimed → :satisfied`** — `promote!` never
+  closes a frontier cap.
+- **Exactly-once loop:** construct flips `:satisfied` (write) ∧ status-aware per-step gives 0 credit for
+  satisfied (read) ⇒ a leaf advances ascent exactly once, no farming.
+- **New cross-lane contract:** claude-4's `promote!` now reads claude-3's `:7071` overlay as a *validation
+  API* — `:capability/frontier?` + `:capability/status` + the `scope/capability/<id>` endpoint are a
+  stable contract (FYI'd to claude-3; recorded in `futon3a/README` §4a on claude-4's side).
+- **Build status:** claude-4's half (column + `promote!` block + a worked example) is specced +
+  handoff-ready (codex-2 + claude-4 review, the H1–H6 pattern); **not on the immediate critical path** (I
+  wire my halves after the Track-1 sweep). Dispatch-now-vs-defer = operator's call.
+
 ---
 
 ### Prior art to port — `~/code/ukrn-services-simulation/` (reviewed 2026-06-09)
