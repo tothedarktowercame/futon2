@@ -505,17 +505,33 @@ rollout. Resolution:
   rollout's path-integral ranking = signal (combining-methods-as-diagnostic) — a move the gradient likes
   but the rollout finds dead-ends, or a path the local gradient couldn't see.
 
-**Engine design** (inputs all landed):
-- **Forward-model `step(state, leaf) → state'`** — PURE; mirrors `promote!` on a *copy* of the state (close
-  the hole; flip the cap `:status` if the leaf carries `:advances-cap`). Shared-kernel discipline (ukrn): the
-  simulated step ≡ what live `promote!` does, so the simulator can't drift.
+**Engine design** (inputs all landed; refined by claude-4's ratification 2026-06-09):
+- **Forward-model `step(state, leaf) → state'`** — **MUST-A (shared pure kernel, not a mirror):** refactor
+  `promote!`'s transition into ONE pure `step` that *both* the live path and the sim call — single source,
+  cannot drift (vs a mirror that can). **MUST-B (copy-state, no `:7071` writes in the rollout):** the sim
+  takes the cap-overlay as an *input snapshot* and returns an updated *copy* — it must **never** mutate a
+  real cap during simulation, else a K-step rollout launders frontier caps at scale. Only the **selected
+  policy's first step** applies live (claude-4's dry-run discipline becomes the rollout's foundation).
 - **Accumulator** — port ukrn `project-budget-path`'s K-step loop: `G(π) = Σ_t γ^t g(s_t)` over
-  `π = (leaf₁ … leaf_K)`, discounted, with absorbing barriers (goal reached / no admissible leaf).
+  `π = (leaf₁ … leaf_K)`, discounted, with absorbing barriers.
 - **Per-step `g(s)`** = epistemic(`C`/holes, claude-3) + pragmatic(Track-1-corrected graph-ascent, live).
 - **Move-set** = the gradient prior's top-k (`M-differentiable-substrate`), or — until that lands —
-  open-arrows-with-satisfied-`have` (claude-4).
+  **(Add-C)** the canonical fallback: an open arrow is reachable iff its `have` is reached by some
+  `:constructed` arrow (endpoint-graph reachability, computable from the store); the gradient top-k is the
+  prior *over that reachable set*.
+- **Barriers — (Add-D):** an `:advances-cap` at a *frontier* cap with no constructed path = "an endpoint
+  with no terrain" = an absorbing barrier the rollout can't close — it needs a *minting charter*, not a leaf
+  (wires the §4 three-kinds-of-off-map / island finding into the geodesic).
 - **Selection** — argmin `G(π)` (the geodesic) / softmax+abstain (ukrn `select-action`; abstain on
   indiscriminable policies = WM-I4). The selected policies = the geodesics claude-3's render draws.
+- **Witness — (Add-E):** a 2-step where step-1 *satisfies the `have`* of a high-ascent step-2 that
+  greedy-one-step can't see — the cleanest "policy beats greedy," exercising the transition chain directly.
+
+**Ownership (Joe, 2026-06-09):** claude-1 coordinates · **claude-4 owns the rollout** (`futon2.aif.rollout`,
+its next E-excursion — codex handoff + claude-4 review, the seam pattern; MUST-A refactors claude-4's own
+`promote!`) · **claude-3 owns the gradient route** (`M-differentiable-substrate` = the policy prior).
+Ratified by claude-4 (split + interface + DERIVE, conditional on MUST-A/B — accepted). Gradient-side
+ratification + the emitted move-set shape pending claude-3.
 
 **Build scope** (codex handoff *after* the G1 reconciliation is ratified): a futon2 ns `futon2.aif.rollout`
 — `step` (pure forward-model) · `rollout`/`G-of-policy` (accumulator) · `select-policy`. Test = a ≥2-step
