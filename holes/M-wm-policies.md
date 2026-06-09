@@ -530,8 +530,22 @@ rollout. Resolution:
 **Ownership (Joe, 2026-06-09):** claude-1 coordinates · **claude-4 owns the rollout** (`futon2.aif.rollout`,
 its next E-excursion — codex handoff + claude-4 review, the seam pattern; MUST-A refactors claude-4's own
 `promote!`) · **claude-3 owns the gradient route** (`M-differentiable-substrate` = the policy prior).
-Ratified by claude-4 (split + interface + DERIVE, conditional on MUST-A/B — accepted). Gradient-side
-ratification + the emitted move-set shape pending claude-3.
+Ratified by claude-4 (split + interface + DERIVE, conditional on MUST-A/B — accepted) **and claude-3**
+(gradient side; `M-differentiable-substrate` IDENTIFY→DERIVE, contract in its §3.1).
+
+**Move-set interface — LOCKED (claude-3 ↔ claude-4 ↔ claude-1, 2026-06-09).**
+- claude-3's gradient **emits a static snapshot artifact** — a ranked move-set over the **full candidate
+  space** (NOT just currently-reachable), each move `{:have :want :leaf/edit :score :confidence}` sorted by
+  score, with `:confidence :conjectural` flagging not-yet-reachable / island moves.
+- claude-4's rollout **consumes it once** (zero mid-search dependency on claude-3 or `:7071`) and applies a
+  **moving reachable mask** per node — intersect with the *currently*-reachable set, renormalize. The key
+  insight (claude-3): the prior must cover the **superset**, because *constructing an arrow mid-rollout opens
+  new reachable `:have`s*, so moves that are only legal deeper in the path must already be scored. **Prior =
+  a function over the candidate space; the rollout supplies the moving reachable mask.**
+- The return channel (training the gradient from rollout outcomes) is strictly **post-search**.
+- **Stub unblock:** claude-3 drops a hand-scored move-set in the locked shape at
+  `futon6/data/diffsub-moves-stub.edn`, so claude-4 builds + tests its rollout consumer against the *real
+  contract* immediately while claude-3 builds the actual grad-loop producer behind it.
 
 **Build scope** (codex handoff *after* the G1 reconciliation is ratified): a futon2 ns `futon2.aif.rollout`
 — `step` (pure forward-model) · `rollout`/`G-of-policy` (accumulator) · `select-policy`. Test = a ≥2-step
