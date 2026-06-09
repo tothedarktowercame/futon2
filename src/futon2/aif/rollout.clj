@@ -1,6 +1,7 @@
 (ns futon2.aif.rollout
   "Policy rollout search over meme-arrow transition leaves."
   (:require [clojure.edn :as edn]
+            [clojure.set :as set]
             [meme.step :as meme-step]))
 
 (def default-move-set-path
@@ -30,8 +31,71 @@
           (fn [reachable]
             (set (concat reachable (constructed-reachable state))))))
 
+(defn root-haves
+  "The unconstructed :haves — endpoints no move ever produces as a :want. Every
+   non-root :have is some precursor move's :want, so this set-difference recovers
+   exactly the root endpoints WITHOUT hardcoding them (drift-free as the move set
+   changes). They partition into three classes (claude-3's root taxonomy) — two
+   seeded axiom classes, one intended-dark island class — plus any drift. Strings
+   are matched verbatim; never normalize case (the §12.11 trap: mission stems are
+   lowercased but scope-id prefixes keep original case)."
+  [moves]
+  (set/difference (set (keep :have moves))
+                  (set (keep :want moves))))
+
+(defn- roots-matching [moves re]
+  (set (filter #(re-find re %) (root-haves moves))))
+
+(defn mission-roots
+  "SEED class 1: mission entities `<repo>-d/mission/<stem>` — the given axioms
+   that ignite each close-hole phase-chain at t=0."
+  [moves]
+  (roots-matching moves #"-d/mission/"))
+
+(defn capability-roots
+  "SEED class 2: claimed capabilities `scope/capability/<id>` — an achieved goal
+   is an axiom exactly like a mission. The :have of the reachable summit moves;
+   without seeding these the cap summits never ignite."
+  [moves]
+  (roots-matching moves #"^scope/capability/"))
+
+(defn conjectural-roots
+  "INTENDED-DARK class: conjectural footholds `scope/conjectural/<cap>-foothold` —
+   island :haves no move constructs BY DESIGN. They must stay unreachable until a
+   foothold is built (the summit/island reachability axis), so they are NOT seeded.
+   Their darkness is the 'needs a constructed foothold' signal, not drift."
+  [moves]
+  (roots-matching moves #"^scope/conjectural/"))
+
+(defn drift-roots
+  "Unconstructed :haves in NONE of the three known classes — genuine drift (a
+   producer left a dangling :have that would silently seed the search). Surface
+   loudly (the §12.11 guard); a non-empty result is a real problem."
+  [moves]
+  (set/difference (root-haves moves)
+                  (mission-roots moves)
+                  (capability-roots moves)
+                  (conjectural-roots moves)))
+
+(defn seed-roots
+  "Fold the SEED axiom classes (mission entities + claimed capabilities) into
+   :reachable at t=0 so the phase-chains and cap summits ignite. Conjectural
+   footholds are deliberately EXCLUDED — islands stay dark until a foothold is
+   constructed. Missions/claimed-caps are given, not constructed."
+  [state moves]
+  (update state :reachable (fnil into #{})
+          (set/union (mission-roots moves) (capability-roots moves))))
+
 (defn reachable? [state move]
   (contains? (:reachable state) (:have move)))
+
+(defn spent?
+  "A move whose arrow is already :constructed — the hole is closed, so the
+   move is spent and must not be re-offered. Without this, a uniform-cost
+   search farms the same construction (re-closing a closed hole) instead of
+   advancing down the precursor chain."
+  [state move]
+  (= :constructed (get-in state [:arrows [(:have move) (:want move)] :status])))
 
 (defn frontier-no-path? [state move]
   (let [cap-id (:advances-cap move)
@@ -46,6 +110,7 @@
   (let [state (normalize-state state)]
     (->> moves
          (remove #(frontier-no-path? state %))
+         (remove #(spent? state %))
          (filter #(reachable? state %))
          vec)))
 

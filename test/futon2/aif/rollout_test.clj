@@ -49,6 +49,68 @@
     (is (= ["a" "b"] (mapv :move/id (:policy best))))
     (is (< (:G best) (:G greedy)))))
 
+(deftest root-seed-ignites-phase-chain
+  ;; claude-3's hypergraph-operator example (v2 scope-grain seam): one
+  ;; mission-entity seed -> the full depth-5 detached-phase chain unrolls.
+  ;; Proves the consumer half string-exact BEFORE the producer lands.
+  (let [mission "futon5a-d/mission/hypergraph-operator"
+        chain [["derive"      mission                          "hypergraph-operator/derive"]
+               ["argue"       "hypergraph-operator/derive"     "hypergraph-operator/argue"]
+               ["verify"      "hypergraph-operator/argue"      "hypergraph-operator/verify"]
+               ["document"    "hypergraph-operator/verify"     "hypergraph-operator/document"]
+               ["instantiate" "hypergraph-operator/document"   "hypergraph-operator/instantiate"]]
+        moves (vec (map-indexed
+                    (fn [i [id have want]]
+                      {:move/id id :move/class :close-hole
+                       :have have :want want :score 1.0 :delta-g -0.1
+                       :rank (inc i) :move/terminal? false})
+                    chain))
+        seeded (rollout/seed-roots {:arrows {} :cap-overlay {} :reachable #{}} moves)
+        unseeded {:arrows {} :cap-overlay {} :reachable #{}}
+        best (rollout/best-rollout seeded moves :depth 5 :top-k 3 :gamma 0.9)]
+    ;; the lone axiom is the mission entity — not any phase scope
+    (is (= #{mission} (rollout/mission-roots moves)))
+    ;; every root is a known class (no producer drift)
+    (is (empty? (rollout/drift-roots moves)))
+    ;; no seed -> nothing ignites (missions aren't constructed)
+    (is (empty? (rollout/reachable-moves unseeded moves)))
+    ;; seeded -> the depth-5 chain unrolls from one ignition
+    (is (= ["derive" "argue" "verify" "document" "instantiate"]
+           (mapv :move/id (:policy best))))))
+
+(deftest root-taxonomy-seeds-axioms-not-islands
+  ;; claude-3's 3-way root taxonomy: mission entity + claimed capability = SEED
+  ;; (axioms ignite at t=0); conjectural foothold = intended-DARK island (stays
+  ;; unreachable until a foothold is constructed — that darkness is the signal).
+  (let [mission "futon3c-d/mission/war-machine"
+        claimed-cap "scope/capability/wm-steps-forward-guardrailed"
+        island "scope/conjectural/kit-outbox-foothold"
+        moves [;; mission chain root (close-hole)
+               {:move/id "phase" :move/class :close-hole
+                :have mission :want "war-machine/derive"
+                :score 1.0 :delta-g -0.1 :rank 1 :move/terminal? false}
+               ;; reachable summit: :have = a claimed cap (achieved axiom)
+               {:move/id "summit" :move/class :advance-capability
+                :have claimed-cap :want "scope/capability/wm-overnight-unsupervised"
+                :advances-cap "wm-overnight-unsupervised"
+                :score 2.0 :delta-g -1.0 :rank 2 :move/terminal? false}
+               ;; island: :have = a conjectural foothold, intended dark
+               {:move/id "island" :move/class :advance-capability
+                :have island :want "scope/capability/kit-outbox"
+                :advances-cap "kit-outbox"
+                :score 2.0 :delta-g -1.0 :rank 3 :move/terminal? false}]
+        seeded (rollout/seed-roots {:arrows {} :cap-overlay {} :reachable #{}} moves)
+        reachable-ids (set (mapv :move/id (rollout/reachable-moves seeded moves)))]
+    ;; the three classes partition cleanly, with no drift
+    (is (= #{mission} (rollout/mission-roots moves)))
+    (is (= #{claimed-cap} (rollout/capability-roots moves)))
+    (is (= #{island} (rollout/conjectural-roots moves)))
+    (is (empty? (rollout/drift-roots moves)))
+    ;; seeded axioms ignite; the conjectural island stays dark
+    (is (contains? reachable-ids "phase"))
+    (is (contains? reachable-ids "summit"))
+    (is (not (contains? reachable-ids "island")))))
+
 (deftest real-stub-loads-and-masks-reachable-moves
   (let [move-set (rollout/load-move-set)
         ms (rollout/moves move-set)
