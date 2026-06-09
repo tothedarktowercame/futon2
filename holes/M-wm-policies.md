@@ -409,22 +409,39 @@ guard. All pure-Clojure, no new deps.
 
 ## 4. ARGUE
 
-### Open ARGUE finding — two kinds of off-map (claude-3, 2026-06-09)
+### Open ARGUE finding — three kinds of off-map (claude-3 ↔ claude-1, 2026-06-09)
 
-The 10 unclaimed pre-registered frontier capabilities (the cold-outreach + KIT commercial cluster + the
-big aspirationals `ai-passes-prelims`, `wm-overnight-unsupervised`) are **off-map from the goal side**: no
-mission mints them, so no candidate action advances them and the ascent-gradient toward them is flat.
-This is the Track-1 off-map bug seen from the *destination* end — **the WM cannot be drawn toward a goal
-no mission mints.** Consequence: the off-map treatment must distinguish **two kinds of off-map, needing
-opposite handling:**
+The off-map treatment distinguishes **three kinds, needing different handling** (refined from the original
+two when claude-3 placed the unclaimed goal-endpoints in the metric):
 - **off-map WORK** (a candidate mission not on the capability graph) → **penalise** (Track 1's off-map
-  penalty — it doesn't advance a registered destination);
-- **off-map GOAL** (a pre-registered destination capability with no minting mission) → **do NOT penalise;
-  surface as "needs a mission"** — a missing-terrain signal / a call to charter a minting mission.
+  penalty — it doesn't advance a registered destination).
+- **off-map GOAL / summit** (a pre-registered cap that `:scope`-builds on a *claimed* ascent-parent — e.g.
+  `full-arxiv-mining`, `wm-overnight-unsupervised`, `ai-passes-prelims`) → **reachable**: a geodesic *can*
+  run to it from the claimed substrate below. Finite distance-to-goal; a normal ascent target, just high
+  up. Place it on the map above its substrate (dashed link).
+- **off-map GOAL / island** (a pre-registered cap with *no claimed anchor anywhere* — the entire `kit-*` +
+  `cold-*` commercial cluster; `cold-response-conversion` has **zero edges**) → **unreachable**: distance =
+  ∞, **no path exists**. Generates no ascent-gradient (the flat-field problem) — it **cannot be aimed at**
+  until terrain is constructed. Surface as **"needs a foothold,"** and treat *constructing the foothold* as
+  the first (meta-)leaf — not as a target the per-step scores toward.
 
-(Path-integral connection — *ratified, see the §1 path-functional note*: an unminted goal is an *endpoint
-with no terrain* — there can be no geodesic to an unreachable destination; the path must first be built by
-chartering the mission.)
+**Reachability ⟂ witness-class.** The summit/island axis (can a geodesic run?) is *orthogonal* to the
+`:frontier?` axis (promote!'s witness gate). Verified: both `cold-response-conversion` (island) and
+`wm-overnight-unsupervised` (summit) are `:frontier? true`. Keep them separate: reachability is the
+rollout's concern; `:frontier?` is promote!'s routing.
+
+**Island foothold — route (a), design-pattern-embed (Joe's lean; aligned, build held for operator go).**
+Write the commercial cluster as a *design-pattern* and embed it in the same MiniLM space as
+patterns+missions. Its job is to **seed candidate `:open` arrows** (M-memes `h4` similarity-join:
+similar+co-occurring+no-construction → seeded open sorries) = *conjectural terrain*. Then the rollout's
+distance-to-goal is the **path-length over those seeded arrows**, not the raw cosine (the embed seeds
+terrain; the path-metric measures it). The path is low-confidence (`:open`/`:correlated`, conjectural),
+labelled distinct from a summit's claimed-substrate path. Rejected route (b) — a `:real-mission? false`
+stub mission — as fabricating a path prematurely (the cluster is unclaimed *because* it has no defined
+path). **Drop-in:** route (a) IS the transition contract above — the seeded arrows are claude-4's arrows;
+constructing one toward an island carries `:advances-cap <island-cap>`; island caps are `:frontier?` →
+`promote!` routes them to `:claimed`/witness. No new mechanism. *Build of route (a) creates an artifact +
+touches commercial/income strategy (M-futon-forward-model) → operator go before building.*
 
 ### VERIFY / INSTANTIATE — _pending_
 
