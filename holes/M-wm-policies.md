@@ -250,9 +250,38 @@ built + screenshotted already); claude-4 owns the arrows (grounded by D1's psr/p
 examples); claude-1 owns the corrected status-aware pragmatic per-step (Track 1) + the rollout engine
 once the field + arrows land.
 
+**Status (2026-06-09) — materialize+link LANDED** (claude-3, `mission_scope_ingest.clj
+--wire-capabilities`). 33 capabilities from `M-capability-star-map.graph.edn` materialized into
+substrate-2 as `scope/capability/<cap-id>` nodes, **reusing D1's capability-scope endpoints** (the
+by-construction hinge → one state object). Per node: `:capability/{status, pre-registered?, frontier?,
+claimed?, minted-by}`; +13 ascent edges, +34 produces edges; 23 claimed / 10 unclaimed. **My status-aware
+pragmatic per-step now reads `:capability/status` directly** (GET
+`/api/alpha/entity/scope%2Fcapability%2F<cap-id>`); the transition flips it when a leaf closes the
+capability-scope. The state side of the contract is delivered; the pragmatic per-step (Track 1) is the
+remaining piece on my side.
+
 ---
 
-## 4. ARGUE / VERIFY / INSTANTIATE — _pending_
+## 4. ARGUE
+
+### Open ARGUE finding — two kinds of off-map (claude-3, 2026-06-09)
+
+The 10 unclaimed pre-registered frontier capabilities (the cold-outreach + KIT commercial cluster + the
+big aspirationals `ai-passes-prelims`, `wm-overnight-unsupervised`) are **off-map from the goal side**: no
+mission mints them, so no candidate action advances them and the ascent-gradient toward them is flat.
+This is the Track-1 off-map bug seen from the *destination* end — **the WM cannot be drawn toward a goal
+no mission mints.** Consequence: the off-map treatment must distinguish **two kinds of off-map, needing
+opposite handling:**
+- **off-map WORK** (a candidate mission not on the capability graph) → **penalise** (Track 1's off-map
+  penalty — it doesn't advance a registered destination);
+- **off-map GOAL** (a pre-registered destination capability with no minting mission) → **do NOT penalise;
+  surface as "needs a mission"** — a missing-terrain signal / a call to charter a minting mission.
+
+(Path-integral connection, *pending operator confirm of the field→path reframing*: an unminted goal is an
+*endpoint with no terrain* — there can be no geodesic to an unreachable destination; the path must first
+be built by chartering the mission. See the field-vs-path note when ratified.)
+
+### VERIFY / INSTANTIATE — _pending_
 
 Track 1 INSTANTIATE = the regulator sweep + live apply (consent). Track 2 = the forward-model contract,
 then a ≥2-step rollout witness.
