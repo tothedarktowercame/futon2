@@ -374,7 +374,12 @@ the cap-id it advances.
 - **Build status:** claude-4's half (column + `promote!` block + a worked example) is specced +
   handoff-ready (codex-2 + claude-4 review, the H1–H6 pattern); **not on the immediate critical path** (I
   wire my halves after the Track-1 sweep). **GREENLIT as a warranted E-excursion (Joe, 2026-06-09)** —
-  claude-4 owns it end-to-end (scope/name/dispatch-to-codex-2/review/land).
+  claude-4 owns it end-to-end (scope/name/dispatch-to-codex-2/review/land). **LANDED:
+  `E-wm-policy-arrow-seam`, futon3a `9e9d446` "Wire meme arrows to capability ascent" (codex-2,
+  claude-4-reviewed)** — touches `meme/{schema (advances_cap column), identity (promote! validate/route/
+  write), cap_ascent (NEW — validate-against-:7071-overlay + ordinary-flip / frontier-proposed-flip), arrow,
+  writer}` + a worked example. My halves (rollout leaf stamps `:advances-cap`; status-aware per-step reads
+  `:satisfied`) integrate at the rollout-engine build.
 
 ---
 
