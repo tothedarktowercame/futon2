@@ -161,7 +161,7 @@
       "pre-registered?" : true,
       "frontier" : true,
       "region" : "t5",
-      "grounding" : "M-hypergraph-operator partial-fold ruling: generic operational loop folded into WM/capability-star-map/pudding-prover; JSDQ person-facing operator remains unbuilt"
+      "grounding" : "M-hypergraph-operator partial-fold ruling: generic operational loop superseded by WM/capability-star-map/pudding-prover; original futon5a pocketwatch not built; JSDQ person-facing operator remains unbuilt"
     },
     "wm-steps-forward-guardrailed" : {
       "title" : "WM steps forward (not wedges) under guardrails — engages the top autonomous action, NAGs the operator-forks",
