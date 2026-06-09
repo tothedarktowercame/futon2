@@ -25,6 +25,19 @@ the **Pudding Prover**: the anti-laundering verifier that tries to *refute* a pe
 loop genuinely two-player and imports the curriculum dynamics. Until then, read the table below as the
 *architecture*, not the *closed loop*.
 
+**…or maybe self-play is the wrong frame entirely (Joe, 2026-06-09 — open, early).** The peradam may be
+*exogenous* (like AlphaZero's Lee Sedol match — the proof, not the trainer), and the endogenous engine may
+not be a formal adversary at all but **argument-across-possible-worlds**: competing *pattern-theoretic
+buildouts* of the same circumstance, the more-*whole* one winning. This would **out-bootstrap** AlphaZero —
+they dropped the *game history* (no human games), we drop the *game board* (no perfect simulator): the
+cascade's `C`-score *evaluates* a possible world directly, so **the patterns (good-enough invariants)
+replace the simulated playout**. And the machinery exists: `E-possible-world-regulator` is the referee, the
+multi-agent dialectic (gradient *vs* rollout; disagreement-as-signal) is the argument, the judge-panel
+patterns are the tournament. Generative dialectic (the curriculum) + adversarial refutation (the
+Pudding-Prover peradam, the incorruptible win) + the exogenous peradam-anchor (against Goodhart drift) may
+be the real shape. **Falsifiable test:** does arguing across buildouts beat the single best buildout? If not,
+it's ceremony. This is plausibly the conceptual core that makes FutonZero *Futon*-Zero rather than a port.
+
 The pivot that made this possible: **Expected Free Energy is a property of *policies*, so `G(π)`
 is a path integral, not a scalar field.** A "next step" is the degenerate length-1 policy. Ranking
 single actions over a static field is the special case; the general object is the *geodesic* — the
