@@ -310,6 +310,43 @@ capabilities sit on the terrain at their minting missions (link-lined); ⭐ uncl
 cold-outreach + KIT commercial cluster + the 3 aspirationals are all in the sky). The geodesic *figure*
 (selected policies as streamlines) is the next layer, gated on Track-1's corrected per-step.
 
+#### Transition layer — claude-4's arrow store (M-memes-arrows-patterns-diagrams, reviewed 2026-06-09)
+
+claude-4's deliverable (`futon3a/README-memes-and-arrows.md`, INSTANTIATE H1-H6 complete) supplies the
+contract's **transition `T`** — and it is richer than "a bare state-transition." An arrow is a
+`(have, want)` endpoint pair at **three maturity stages** (one arrow gaining structure,
+`correlation → conjecture → proof`):
+- `:correlated` (cascade/hunch) — observed co-occurrence, no committed goal.
+- `:open` (sorry) — goal committed, type fixed by the surrounding construction, **method absent**.
+- `:constructed` — a runnable method that produces `want` from `have` (a wiring diagram / BHK arrow).
+
+**Mapping onto the rollout** (this refines contract-v1's Transition clause):
+- **`:constructed` arrows = available transitions** the rollout may traverse.
+- **`:open` arrows = the needed-but-unbuilt transitions = the holes/leaves** a policy aims to close.
+- **`:correlated` arrows = candidate hunches** (pre-commitment, not yet a leaf).
+- **A rollout leaf = construct an `:open` arrow** whose `have` holds in the current state (promote
+  `:open → :constructed`) → `want` becomes available **and** the arrow crosses into substrate-2. This IS
+  claude-3's "`T` flips `:status → satisfied`": only `:constructed` arrows promote (the priors↔facts
+  boundary, R7), and they land as `code/v05/sorry` hyperedges — the *same* scope-hole convention
+  claude-3's epistemic state already reads. So a leaf closing an open arrow updates the epistemic state
+  by construction.
+- **Endpoint-identity keystone** (`(have, want)` primary key, unify-not-mint, I1+I4): the transition
+  graph self-dedups — a freshly-mined sorry unifies onto its existing arrow rather than minting a dup.
+
+**Storage split the rollout must respect:** the arrow store is `futon3a`/SQLite — the *proposals/priors*
+layer where an arrow lives its life; substrate-2 (`futon1a`, :7071) holds only `:constructed` arrows +
+scope-holes (the *facts*). So the rollout reads **both**: candidate leaves (`:open` arrows) from the meme
+store, satisfied state from substrate-2.
+
+**Open seam to resolve with claude-4 (the transition-side analogue of claude-3's state-rep keystone):**
+the *epistemic* side aligns by construction (constructed arrows land as `code/v05/sorry` scope-holes).
+The remaining question is the **pragmatic side**: does an arrow's `want` endpoint resolve onto a
+*capability-graph cap-id* (so closing it advances ascent / flips `:capability/status`)? The example
+endpoints are notion/scope-level; `meme.endpoints` already resolves against the live `scan-aif-heads`
+registry. So either the `want↔cap-id` mapping already holds, or a thin endpoint→capability resolver is
+needed (mirroring claude-3's materialize+link). **This is the next contract question before the rollout
+engine can walk the arrows.**
+
 ---
 
 ### Prior art to port — `~/code/ukrn-services-simulation/` (reviewed 2026-06-09)
