@@ -302,6 +302,14 @@ ranked by `G(π)`, not the heatmap. claude-3 also adopted the shared-kernel rule
 IS the live transition). **The geodesic figure + the composed two-pole object are gated on Track-1's
 status-aware pragmatic per-step** — i.e. Track 1 is now the critical path for all three lanes.
 
+**Star UI LANDED (claude-3, 2026-06-09)** — `futon6/scripts/mission_efe_field.py → mission-efe-field.html`.
+The metric field `g(s)` rendered as a **topographic map** (7 level bands + contour lines, not a smooth
+blob — legible level sets: a central massif = the dense mission core, plus a secondary island). 🌟 claimed
+capabilities sit on the terrain at their minting missions (link-lined); ⭐ unclaimed sit in a disconnected
+**"frontier sky"** strip — *the off-map-GOAL / unreachable-endpoint made literally visual* (the
+cold-outreach + KIT commercial cluster + the 3 aspirationals are all in the sky). The geodesic *figure*
+(selected policies as streamlines) is the next layer, gated on Track-1's corrected per-step.
+
 ---
 
 ### Prior art to port — `~/code/ukrn-services-simulation/` (reviewed 2026-06-09)
