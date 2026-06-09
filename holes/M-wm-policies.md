@@ -502,6 +502,36 @@ half of the AlphaZero loop now exists and the witness passes.
   `wm-outing/2026-06-08-regulator-sweep`).
 - Still open: route-(a) island-foothold (aligned, build held for operator go).
 
+### Make-it-live plan — value-correction + cascade-surfacing (2026-06-09)
+
+Joe's framing: a next-step is a **degenerate (length-1) policy**, so the rollout *generalizes* the live
+selector rather than replacing it — and he wants to **see** non-degenerate policies, not have them collapse
+back into a re-ranked single action. Two layers:
+- **(A) Value-correction (the floor):** `generate-war-machine` scores each candidate by `G(π*)` = best
+  policy starting with it; length-1 = today's single-step EFE (always-available fallback).
+- **(B) Cascade-surfacing (the *visible* non-degenerate policies):** a **cascade** = `:correlated` chain
+  (`arrowᵢ.want == arrowᵢ₊₁.have`); `π = "use a cascade"` is a ready-made multi-step policy (no
+  search-from-scratch). The rollout scores `G(π)` over the *given* chain (the accumulator already does this);
+  the WM **displays** top cascade-policies as their own lane.
+
+**claude-4's empirical findings (scoping whistle):**
+- **Store is empty of cascades** — live `meme.db` has 1 arrow; worked-example seeds were transient. So (B)
+  needs a **generation step 0**. Real source found: `pattern_phylogeny`'s **2538 co-application edges**
+  (mission-co-occurring pattern-pairs = ready `:correlated` arrows; co-app weight = the prior). Single arrows
+  first; chains emerge as paths over the co-app graph.
+- **Chain-follow unroll** = DFS over `:correlated` edges from each root `have`; single-arrow = length-1,
+  maximal path = the length-K non-degenerate policy; surface top-`G(π)`.
+- **Namespace flag (a design fork):** cascades live over **pattern-ids**, the value-corrected candidates over
+  **mission/scope-ids** → (B) is a **distinct "pattern-cascade policy" lane** shown *alongside* the
+  value-corrected mission actions, not conflated. (That separation is what makes the non-degenerate policy
+  visible *as its own thing*.)
+
+**Build order / ownership:** (0) batch-gen cascades from `pattern_phylogeny` → `:correlated` arrows ·
+(1) chain-extraction `cascades-as-candidate-policies` · (2) rollout scores `G(π)` per cascade — **claude-4**
+(codex + review, charter `E-cascade-policies` or extend `E-policy-rollout-engine`); (3) wire into
+`generate-war-machine` + the dual-lane display — **claude-1** (holds the live-judge context). MUST-B holds
+(scoring sim-only; `:correlated` arrows never promoted during scoring).
+
 ### Track 2 — the rollout engine (DERIVE, 2026-06-09)
 
 **G1 reconciliation with `M-differentiable-substrate` (claude-3) — the AlphaZero split** *(proposed, to
