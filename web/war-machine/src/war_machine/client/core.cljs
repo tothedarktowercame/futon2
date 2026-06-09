@@ -7,6 +7,7 @@
             [war-machine.client.api :as api]
             [war-machine.client.tick :as tick]
             [war-machine.client.graph :as graph]
+            [war-machine.client.capability-star-map :as capability-star-map]
             [war-machine.client.hud :as hud]
             [war-machine.client.aif-join :as aif]
             [war-machine.client.waveform :as waveform]))
@@ -37,7 +38,8 @@
                                               :self-watch :aif-stack
                                               :aif-stack :missions
                                               :missions :patterns
-                                              :patterns :operator
+                                              :patterns :capabilities
+                                              :capabilities :operator
                                               :operator :stack
                                               ;; Stale-state fallback —
                                               ;; if :view-mode is somehow
@@ -157,6 +159,17 @@
         (section "Forward model")
         [:div {:style {:font-size "11px" :color "#64748b"}}
          "Descriptive signals only: structural centrality, git-age, and operator priors."]]
+
+       :capabilities
+       [:div
+        (section "Capability status")
+        (swatch "#16a34a" "satisfied")
+        (swatch "#d97706" "held")
+        (swatch "#2563eb" "frontier")
+        (swatch "#7c3aed" "keystone")
+        (section "Ring")
+        (outline-swatch "#0f172a" "selected")
+        (outline-swatch "#facc15" "pre-witness")]
 
        :self-watch
        [:div
@@ -1867,6 +1880,10 @@
     :operator
     [:div.hex-canvas.dashboard-canvas
      [operator-dashboard]]
+
+    :capabilities
+    [:div.hex-canvas.dashboard-canvas
+     [capability-star-map/star-map-view]]
 
     [:div.hex-canvas
      [graph/hex-map]]))

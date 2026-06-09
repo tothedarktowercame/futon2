@@ -14,6 +14,8 @@
    In dev, shadow-cljs's :proxy-url stitches them together.  See
    `futon2/INSTALL.md` for the full bring-up architecture + gotchas."
   (:require [org.httpkit.server :as hk]
+            [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [reitit.ring :as ring]
             [ring.middleware.json :refer [wrap-json-response]]
             [ring.util.response :as resp]
@@ -22,6 +24,9 @@
 
 (def config
   (atom {:port (or (some-> (System/getenv "PORT") Integer/parseInt) 3110)}))
+
+(def ^:private capability-star-map-path
+  "/home/joe/code/futon0/holes/missions/M-capability-star-map.graph.edn")
 
 (defn- keywordize-keys
   "Recursively convert map keys to strings for JSON serialization.
@@ -60,6 +65,14 @@
     (-> {:status 200
          :body (war-machine-data days)})))
 
+(defn- capability-star-map-data []
+  (with-open [r (io/reader capability-star-map-path)]
+    (edn/read (java.io.PushbackReader. r))))
+
+(defn- capability-star-map-handler [_req]
+  {:status 200
+   :body (keywordize-keys (capability-star-map-data))})
+
 (defn app-routes []
   (ring/ring-handler
    (ring/router
@@ -67,6 +80,7 @@
     ;; short /api/war-machine alias for backwards compatibility with any
     ;; existing probes.
     [["/api/alpha/war-machine" {:get (-> data-handler wrap-json-response)}]
+     ["/api/alpha/capability-star-map" {:get (-> capability-star-map-handler wrap-json-response)}]
      ["/api/war-machine"       {:get (-> data-handler wrap-json-response)}]])
    (ring/routes
     (ring/create-resource-handler {:path "/"})

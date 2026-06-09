@@ -73,6 +73,20 @@
 
 (defn- node-detail-text [node]
   (cond
+    (= :capability (:sprite-type node))
+    (str "CAPABILITY: " (or (:id node) "?") "\n"
+         "Status: " (or (:status node) "?") "\n"
+         (when (:frontier node) "Frontier: true\n")
+         (when (:keystone node) "Keystone: true\n")
+         (when (seq (:scope node))
+           (str "\nRequires:\n"
+                (str/join "" (map #(str "  " % "\n") (:scope node)))))
+         (when (seq (:minted-by node))
+           (str "\nMinted by:\n"
+                (str/join "" (map #(str "  " % "\n") (:minted-by node)))))
+         (when-let [w (first (:pre-witness node))]
+           (str "\nPre-witness:\n  " (:doing w))))
+
     (= :load-bearing-conflict (:role node))
     (let [ctx       (aif/join-context)
           eb        (get-in ctx [:empirical-bites (:id node)])

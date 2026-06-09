@@ -4,7 +4,7 @@
 
      data-atom     → full scan snapshot from /api/war-machine
      view-mode     → :stack | :self-watch | :aif-stack | :missions | :patterns
-                     | :operator
+                     | :capabilities | :operator
      replay-atom   → {session-id {:steps :step-idx :color-idx :session-id}
                       :playing? bool} — the session-ant swarm
      hotspot-atom  → {node-id intensity} — decays per tick, bumped on visit
@@ -15,6 +15,7 @@
 
 (defonce data       (r/atom nil))
 (defonce aif-data   (r/atom nil))   ;; payload from /api/alpha/aif-stack/live
+(defonce capability-star-map (r/atom nil))
 (defonce operator-bulletin (r/atom nil))
 (defonce operator-forward-model (r/atom nil))
 (defonce view-mode  (r/atom :stack))

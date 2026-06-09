@@ -3917,6 +3917,7 @@
         r-criteria (scan-r-criteria)
         r12-apparatus (scan-r12-apparatus)
         vsatarcs-status (scan-vsatarcs-status)
+        capability-star-map (capability-star-map)
         scan-data {:self-watch self-watch
                    :loop-health loop-health
                    :support-attack support-attack
@@ -3935,6 +3936,7 @@
                    :strategic-vocabulary strategic-vocabulary
                    :r-criteria r-criteria
                    :r12-apparatus r12-apparatus
+                   :capability-star-map capability-star-map
                    :vsatarcs-status vsatarcs-status}
         ;; Run the judgement layer
         judgement (judge scan-data)]

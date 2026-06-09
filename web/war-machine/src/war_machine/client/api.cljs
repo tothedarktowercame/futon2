@@ -23,6 +23,7 @@
 (def ^:private operator-bulletin-suffix
   "/api/alpha/war-machine/operator-bulletin")
 (def ^:private forward-model-suffix "/api/alpha/forward-model")
+(def ^:private capability-star-map-suffix "/api/alpha/capability-star-map")
 
 (defn- endpoint-with-days []
   (str (api-base) endpoint-suffix "?days=" @s/days-window))
@@ -36,6 +37,9 @@
 
 (defn- forward-model-endpoint []
   forward-model-suffix)
+
+(defn- capability-star-map-endpoint []
+  capability-star-map-suffix)
 
 (defn- unavailable-payload [status]
   {:unavailable true
@@ -80,9 +84,15 @@
                        s/operator-forward-model
                        "forward model"))
 
+(defn load-capability-star-map! []
+  (load-optional-json! (capability-star-map-endpoint)
+                       s/capability-star-map
+                       "capability star-map"))
+
 (defn load! []
   (load-operator-bulletin!)
   (load-forward-model!)
+  (load-capability-star-map!)
   (go
     (let [resp (<! (http/get (endpoint-with-days)
                              {:with-credentials? false}))]
