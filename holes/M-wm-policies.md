@@ -555,6 +555,19 @@ single-step `T` once its state-delta is defined (e.g. "reduces the district's op
 (ii) **operator go** — claude-4 flagged an autonomy/leash question to Joe and awaits his call before
 dispatching the codex build. **This is now the *only* remaining gate.** On it clearing, claude-4 dispatches
 + reviews + bells the shas.
+
+**Operator GO given (Joe, 2026-06-09) — both builds dispatched in parallel (codex pool codex-1..4 open).**
+Two framing corrections from Joe:
+- **The two routes are NOT a cross-check — they are the two *required* halves of the AlphaZero featureset**
+  (gradient prior ‖ rollout search); both are needed, not redundant. Disagreement-as-diagnostic is a minor
+  side-benefit, not the rationale for two routes.
+- **Consumer confirmed — not architecture-ahead-of-need.** The overnight WM runs **now** with
+  **E-warranted-play as the default policy** (a live baseline); `M-wm-policies` (the rollout) lets it
+  *explore the benefits of different policies and improve within a run*. So the rollout is a measurable
+  improvement on a live capability, with the witness (≥2-step beats greedy) as the proof it helps.
+
+Parallelization: claude-4 grabs a codex for the rollout build; claude-3 grabs a codex for the grad-loop
+producer (concurrent, not serialized behind the stub); claude-1 coordinates.
 Ratified by claude-4 (split + interface + DERIVE, conditional on MUST-A/B — accepted) **and claude-3**
 (gradient side; `M-differentiable-substrate` IDENTIFY→DERIVE, contract in its §3.1).
 
