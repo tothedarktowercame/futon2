@@ -115,12 +115,22 @@
          vec)))
 
 (defn renormalize-priors
-  "R1: recompute :prior as softmax(:score) over this node's survivors."
+  "R1: per-node PUCT branching weights, renormalized over THIS node's reachable
+   survivors. Consumes the producer's sharpened :prior field (the policy-head
+   output) when every survivor carries a positive one, falling back to
+   softmax(:score) otherwise. (Originally this always recomputed softmax(:score),
+   which silently discarded a sharpened :prior whenever :score was flat — as it
+   is at scope-grain — re-flattening the policy head to uniform.)"
   [moves]
-  (let [weights (mapv #(Math/exp (double (or (:score %) 0.0))) moves)
+  (let [have-prior? (and (seq moves)
+                         (every? #(let [p (:prior %)] (and p (pos? (double p)))) moves))
+        weight (if have-prior?
+                 #(double (:prior %))
+                 #(Math/exp (double (or (:score %) 0.0))))
+        weights (mapv weight moves)
         total (reduce + 0.0 weights)]
-    (mapv (fn [move weight]
-            (assoc move :prior (if (pos? total) (/ weight total) 0.0)))
+    (mapv (fn [move w]
+            (assoc move :prior (if (pos? total) (/ w total) 0.0)))
           moves
           weights)))
 
