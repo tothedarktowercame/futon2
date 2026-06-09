@@ -24,6 +24,8 @@
   "/api/alpha/war-machine/operator-bulletin")
 (def ^:private forward-model-suffix "/api/alpha/forward-model")
 (def ^:private capability-star-map-suffix "/api/alpha/capability-star-map")
+(def ^:private capability-star-map-static-path
+  "/data/capability-star-map.graph.json")
 
 (defn- endpoint-with-days []
   (str (api-base) endpoint-suffix "?days=" @s/days-window))
@@ -40,6 +42,11 @@
 
 (defn- capability-star-map-endpoint []
   capability-star-map-suffix)
+
+(defn- capability-star-map-fallback-endpoint []
+  (str (or (some-> js/window .-WM_CAPABILITY_STAR_MAP_BASE)
+           "http://localhost:3110")
+       capability-star-map-suffix))
 
 (defn- unavailable-payload [status]
   {:unavailable true
@@ -84,10 +91,30 @@
                        s/operator-forward-model
                        "forward model"))
 
+(defn- fetch-json!
+  [url]
+  (-> (js/fetch url #js {:method "GET"
+                         :credentials "omit"
+                         :headers #js {"Accept" "application/json"}})
+      (.then (fn [resp]
+               (if (.-ok resp)
+                 (.json resp)
+                 (throw (js/Error. (str "HTTP " (.-status resp)))))))))
+
 (defn load-capability-star-map! []
-  (load-optional-json! (capability-star-map-endpoint)
-                       s/capability-star-map
-                       "capability star-map"))
+  (let [static-json capability-star-map-static-path
+        same-origin (capability-star-map-endpoint)
+        fallback (capability-star-map-fallback-endpoint)]
+    (-> (fetch-json! static-json)
+        (.catch (fn [_] (fetch-json! same-origin)))
+        (.catch (fn [_] (fetch-json! fallback)))
+        (.then (fn [body]
+                 (reset! s/capability-star-map
+                         (js->clj body :keywordize-keys true))))
+        (.catch (fn [err]
+                  (reset! s/capability-star-map (unavailable-payload 0))
+                  (js/console.warn "[api] capability star-map unavailable:"
+                                   (or (.-message err) err)))))))
 
 (defn load! []
   (load-operator-bulletin!)

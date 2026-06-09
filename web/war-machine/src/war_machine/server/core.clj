@@ -71,6 +71,7 @@
 
 (defn- capability-star-map-handler [_req]
   {:status 200
+   :headers {"Access-Control-Allow-Origin" "*"}
    :body (keywordize-keys (capability-star-map-data))})
 
 (defn app-routes []
@@ -92,4 +93,5 @@
   (let [port (:port @config)]
     (println (str "War Machine web starting on http://localhost:" port))
     (hk/run-server (app-routes) {:port port})
-    (println "Ready.")))
+    (println "Ready.")
+    @(promise)))

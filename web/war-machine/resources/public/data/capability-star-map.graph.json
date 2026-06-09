@@ -1,0 +1,869 @@
+{
+  "star-map/region" : "full-grounded-landscape",
+  "star-map/source" : {
+    "ensemble" : "/home/joe/code/futon0/holes/missions/M-capability-star-map.ensemble.edn",
+    "pudding-registry" : "/home/joe/code/futon7/holes/pudding-prover-registry.edn",
+    "mission-source" : "futon2.aif.mission-registry/load-missions",
+    "exclusion" : [ "worktrees", "futon3-origin", ".state" ],
+    "grounded-ledger" : "/home/joe/code/futon7/holes/C-pudding-prover.md#8.2",
+    "regions" : [ "wm", "t5", "kit", "t3", "t2" ]
+  },
+  "capabilities" : {
+    "kit-cadence" : {
+      "title" : "Pudding-prover cadence — forward-model posterior to base-case/capability cadence; not wired",
+      "status" : "held",
+      "scope" : [ ],
+      "minted-by" : [ ],
+      "pre-registered?" : true,
+      "frontier" : true,
+      "region" : "kit"
+    },
+    "math-ct-prior-substrate" : {
+      "attested-substrate" : true,
+      "pre-registered?" : true,
+      "status" : "satisfied",
+      "region" : "t3",
+      "scope" : [ ],
+      "attested" : true,
+      "title" : "ArXiv math.CT prior substrate — harvested CT corpus and term prior",
+      "grounding" : "build_ct_prior.py; harvest-arxiv-ct.py; ct-term-prior.json",
+      "minted-by" : [ "M-prior-mathematics" ]
+    },
+    "rob-joe-codrafting" : {
+      "pre-registered?" : true,
+      "status" : "satisfied",
+      "region" : "t3",
+      "scope" : [ ],
+      "attested" : true,
+      "title" : "Rob + Joe mathematical co-drafting — external/lived collaboration witness",
+      "grounding" : "active Rob/Joe collaboration; testimonial/process witness",
+      "minted-by" : [ "external/rob-joe-codrafting" ],
+      "external" : true
+    },
+    "cold-send-response" : {
+      "title" : "Cold send draws a response — n_outreach remains zero",
+      "status" : "held",
+      "scope" : [ "kit-cadence" ],
+      "minted-by" : [ ],
+      "pre-registered?" : true,
+      "frontier" : true,
+      "region" : "t2"
+    },
+    "arxana-hypergraph-store" : {
+      "attested-substrate" : true,
+      "pre-registered?" : true,
+      "status" : "satisfied",
+      "region" : "t5",
+      "scope" : [ ],
+      "attested" : true,
+      "title" : "Arxana hypergraph store — entities, relations, hyperedges, essays ingest, and hyperedge HTTP/API substrate",
+      "grounding" : "futon1a futon1_write.clj + hyperedge HTTP API/tests; futon4 arxana-store.el + browsers",
+      "minted-by" : [ "M-webarxana", "M-essay-corpus-substrate", "M-arxana-roundtrip" ]
+    },
+    "kit-render" : {
+      "title" : "Pudding-prover render — headless text/org render and CLI",
+      "status" : "satisfied",
+      "scope" : [ ],
+      "minted-by" : [ "builder/pudding-prover" ],
+      "pre-registered?" : true,
+      "attested" : true,
+      "region" : "kit",
+      "grounding" : "pudding-prover.bb render-text/org"
+    },
+    "symbol-grounding" : {
+      "title" : "Symbol-grounding / CT-vision — categorical wiring vocabulary and prototypes; vision remains held",
+      "status" : "held",
+      "scope" : [ ],
+      "minted-by" : [ "builder/ct-prototype" ],
+      "pre-registered?" : true,
+      "frontier" : true,
+      "region" : "t5",
+      "grounding" : "futon5 CT prototype files; CT-vision not shipped"
+    },
+    "rob-proof-graph-kb" : {
+      "pre-registered?" : true,
+      "status" : "satisfied",
+      "region" : "t3",
+      "scope" : [ ],
+      "attested" : true,
+      "title" : "Rob proof-graph KB + similarity retrieval — external proof graph and embedding retrieval witness",
+      "grounding" : "Rob external system; not Joe-repo commits",
+      "minted-by" : [ "external/rob-proof-graph-kb" ],
+      "external" : true
+    },
+    "live-geometric-stack" : {
+      "title" : "Substrate-2 — the live geometric stack / commit-factored hypergraph the WM reads",
+      "status" : "satisfied",
+      "scope" : [ "self-representing-stack" ],
+      "minted-by" : [ "M-live-geometric-stack" ],
+      "pre-registered?" : true,
+      "attested" : true
+    },
+    "cold-eoi-sent" : {
+      "title" : "Cold EOI gets sent to a real cold lead — the crux, n=0",
+      "status" : "held",
+      "scope" : [ "kit-intake" ],
+      "minted-by" : [ ],
+      "pre-registered?" : true,
+      "frontier" : true,
+      "region" : "t2"
+    },
+    "full-arxiv-mining" : {
+      "title" : "Full ArXiv mining with structure-based representation — held beyond the CT prior substrate",
+      "status" : "held",
+      "scope" : [ "math-ct-prior-substrate" ],
+      "minted-by" : [ ],
+      "pre-registered?" : true,
+      "frontier" : true,
+      "region" : "t3"
+    },
+    "cold-eoi-authored-outbox" : {
+      "title" : "Cold EOI can be authored into the outbox — near frontier, outbox integration not wired",
+      "status" : "held",
+      "scope" : [ "kit-outbox" ],
+      "minted-by" : [ ],
+      "pre-registered?" : true,
+      "frontier" : true,
+      "region" : "t2"
+    },
+    "war-machine" : {
+      "title" : "The War Machine — strategic dashboard + pilot REPL (the differential operator v·∇ over the AIF field)",
+      "status" : "satisfied",
+      "scope" : [ "live-geometric-stack" ],
+      "minted-by" : [ "M-war-machine-pilot", "M-war-machine-first-outing" ],
+      "pre-registered?" : true,
+      "attested" : true
+    },
+    "kit-certify" : {
+      "title" : "Pudding-prover certify — held→satisfied transition plus anti-laundering guard",
+      "status" : "satisfied",
+      "scope" : [ ],
+      "minted-by" : [ "builder/pudding-prover" ],
+      "pre-registered?" : true,
+      "attested" : true,
+      "region" : "kit",
+      "grounding" : "pudding-prover.bb certify"
+    },
+    "kit-intake" : {
+      "title" : "Pudding-prover intake — outreach-sent evidence intake; not wired",
+      "status" : "held",
+      "scope" : [ ],
+      "minted-by" : [ ],
+      "pre-registered?" : true,
+      "frontier" : true,
+      "region" : "kit"
+    },
+    "hypergraph-operator" : {
+      "title" : "Hypergraph operator — operator over hypergraph structures; currently design material, not shipped operator",
+      "status" : "held",
+      "scope" : [ ],
+      "minted-by" : [ "M-hypergraph-operator" ],
+      "pre-registered?" : true,
+      "frontier" : true,
+      "region" : "t5",
+      "grounding" : "M-hypergraph-operator design material only"
+    },
+    "wm-steps-forward-guardrailed" : {
+      "title" : "WM steps forward (not wedges) under guardrails — engages the top autonomous action, NAGs the operator-forks",
+      "status" : "satisfied",
+      "scope" : [ "war-machine" ],
+      "minted-by" : [ "builder/wm-guardrails-core", "builder/wm-input-sources-hygiene", "builder/wm-hole-counter", "builder/wm-gate-runner" ],
+      "pre-registered?" : true,
+      "attested" : true,
+      "grounding" : "futon3c/src/futon3c/wm/{guardrails,needs_you,outing}.clj; futon2 mission-registry :open-hole-count"
+    },
+    "math-embedding-retrieval" : {
+      "attested-substrate" : true,
+      "pre-registered?" : true,
+      "status" : "satisfied",
+      "region" : "t3",
+      "scope" : [ ],
+      "attested" : true,
+      "title" : "Joe-side math embedding/retrieval substrate — graph_embed/similarity/hypergraph over math.CT with BGE retrieval",
+      "grounding" : "futon6 graph_embed.py/similarity.py/hypergraph.py; 9,916 math.CT papers",
+      "minted-by" : [ "M-superpod-mark2" ]
+    },
+    "kit-mint" : {
+      "title" : "Pudding-prover mint — static metric to priced conditional sorry",
+      "status" : "satisfied",
+      "scope" : [ ],
+      "minted-by" : [ "builder/pudding-prover" ],
+      "pre-registered?" : true,
+      "attested" : true,
+      "region" : "kit",
+      "grounding" : "pudding-prover.bb mint"
+    },
+    "agency" : {
+      "title" : "Multi-agent dispatch — N:1 registry/routing; many Claude/Codex self-register, route in one JVM",
+      "status" : "satisfied",
+      "scope" : [ ],
+      "minted-by" : [ "M-agency-unified-routing", "M-drawbridge-multi-agent", "M-agency-rebuild" ],
+      "pre-registered?" : true,
+      "attested" : true,
+      "grounding" : "futon3c/src/futon3c/agency/{registry,federation,hop_events}.clj"
+    },
+    "stack-stereolithography-substrate" : {
+      "attested-substrate" : true,
+      "pre-registered?" : true,
+      "status" : "satisfied",
+      "region" : "t5",
+      "scope" : [ ],
+      "attested" : true,
+      "title" : "Stack stereolithography substrate — harvested stack render / queryable stereolithographic view",
+      "grounding" : "stack-stereolithography-render-v1.md + harvest runs; WebArxana-queryable",
+      "minted-by" : [ "M-stack-stereolithography", "M-stack-geometry" ]
+    },
+    "apm-prelim-corpus-substrate" : {
+      "attested-substrate" : true,
+      "pre-registered?" : true,
+      "status" : "satisfied",
+      "region" : "t3",
+      "scope" : [ ],
+      "attested" : true,
+      "title" : "APM prelim corpus/tutor substrate — 489-problem APM corpus, canaries, and conductor",
+      "grounding" : "apm-lean corpus + ApmCanaries.lean; futon3c apm_conductor.clj",
+      "minted-by" : [ "M-apm-solutions", "M-futonzero-prelim-practice" ]
+    },
+    "evidence-persistence" : {
+      "title" : "Session/lab persistence — turns persist to XTDB (the substrate precursor)",
+      "status" : "satisfied",
+      "scope" : [ ],
+      "minted-by" : [ "M-labs-integration" ],
+      "pre-registered?" : true,
+      "attested" : true
+    },
+    "interest-network-apparatus" : {
+      "title" : "Interest-network apparatus — bipartite essays × interest-territories graph, forward-pass, edit-proposal, and WebArxana render path",
+      "status" : "satisfied",
+      "scope" : [ ],
+      "minted-by" : [ "M-interest-network-coupling" ],
+      "pre-registered?" : true,
+      "attested" : true,
+      "region" : "t5",
+      "grounding" : "interest-network-bipartite-graph-v1.bb; WebArxana interest_network.clj/cljs; annotations.edn"
+    },
+    "daily-scan-lead-foraging" : {
+      "attested-substrate" : true,
+      "pre-registered?" : true,
+      "status" : "satisfied",
+      "region" : "t2",
+      "scope" : [ ],
+      "attested" : true,
+      "title" : "Daily-scan / lead-foraging methodology exists and runs",
+      "grounding" : "futon7 src/f7/daily.clj + probe expansion",
+      "minted-by" : [ "builder/futon7-daily-scan" ]
+    },
+    "cold-response-conversion" : {
+      "title" : "Cold response converts to a paid engagement — n_conversion remains zero",
+      "status" : "held",
+      "scope" : [ ],
+      "minted-by" : [ ],
+      "pre-registered?" : true,
+      "frontier" : true,
+      "region" : "t2"
+    },
+    "efe-trustworthy-over-starmap" : {
+      "title" : "EFE does real AIF over the star-map — the WM's pick is an applicable single-cycle leaf (no pilot cherry-pick)",
+      "status" : "held",
+      "scope" : [ "wm-steps-forward-guardrailed" ],
+      "minted-by" : [ "M-capability-star-map" ],
+      "pre-registered?" : true,
+      "pre-witness" : [ {
+        "id" : "wm-ranks-applicable-single-cycle-leaf",
+        "doing" : "Run the production-faithful WM ranking over the extracted capability graph and live guardrail-admissible candidates.",
+        "attests" : "efe-trustworthy-over-starmap",
+        "witness-kind" : "efe-selection",
+        "success-criteria" : [ "top ranked action is an :open-mission", "top ranked mission is graph-applicable", "top ranked mission has exactly one open hole", "no unsafe pursuit or unagreed operator-exit action reaches ranking" ],
+        "status" : "candidate"
+      } ],
+      "keystone" : true
+    },
+    "warm-customer-pays" : {
+      "pre-registered?" : true,
+      "status" : "satisfied",
+      "region" : "t2",
+      "scope" : [ ],
+      "attested" : true,
+      "title" : "Warm customer pays for FUTON work — Eric/Oxford Brookes VSAT-PoC revenue witness",
+      "grounding" : "VSAT proof-of-concept invoice + log.edn + ledger/statements",
+      "minted-by" : [ "external/vsat-poc-customer" ],
+      "external" : true
+    },
+    "kit-registry" : {
+      "title" : "Pudding-prover kit registry — two-kind sorry registry + schema",
+      "status" : "satisfied",
+      "scope" : [ ],
+      "minted-by" : [ "builder/pudding-prover" ],
+      "pre-registered?" : true,
+      "attested" : true,
+      "region" : "kit",
+      "grounding" : "pudding-prover-registry.edn"
+    },
+    "wm-overnight-unsupervised" : {
+      "cap/altitude" : 80,
+      "pre-registered?" : true,
+      "status" : "held",
+      "scope" : [ "wm-steps-forward-guardrailed", "efe-trustworthy-over-starmap" ],
+      "title" : "The WM runs overnight without supervision — 'I trust the stack to code while I sleep'",
+      "frontier" : true,
+      "minted-by" : [ ],
+      "pudding-thesis" : "T4.2",
+      "pre-witness" : [ {
+        "id" : "guarded-overnight-wm-run",
+        "doing" : "Run the guarded WM play-selector loop overnight over the pre-registered ascent, then review the morning Dokusan for only warranted minted or blocked moves.",
+        "attests" : "wm-overnight-unsupervised",
+        "witness-kind" : "overnight-run",
+        "requires" : [ "wm-steps-forward-guardrailed", "efe-trustworthy-over-starmap" ],
+        "hard-gates" : [ "worktree-isolated-staging", "operator-consent-for-non-preregistered-pursuit", "morning-dokusan-review" ],
+        "status" : "candidate"
+      } ]
+    },
+    "ai-passes-prelims" : {
+      "title" : "AI passes UT-Austin prelims — compute-gated held claim above the shipped corpus/tutor substrate",
+      "status" : "held",
+      "scope" : [ "apm-prelim-corpus-substrate" ],
+      "minted-by" : [ ],
+      "pre-registered?" : true,
+      "frontier" : true,
+      "compute-gated" : true,
+      "region" : "t3"
+    },
+    "self-representing-stack" : {
+      "title" : "The stack reflects itself — 6-gate trace chain devmap→evidence→source code",
+      "status" : "satisfied",
+      "scope" : [ "agency", "evidence-persistence" ],
+      "minted-by" : [ "M-self-representing-stack", "M-three-column-stack" ],
+      "pre-registered?" : true,
+      "attested" : true,
+      "grounding" : "VSATARCS (futon7a/vsatarcs.html); ~1529 hyperedges across math/code/project"
+    },
+    "kit-outbox" : {
+      "title" : "Pudding-prover outbox — daily-scan → interest-network → EOI → staged outbox; pieces exist, integration held",
+      "status" : "held",
+      "scope" : [ ],
+      "minted-by" : [ ],
+      "pre-registered?" : true,
+      "frontier" : true,
+      "region" : "kit"
+    }
+  },
+  "missions" : {
+    "builder/wm-gate-runner" : {
+      "next-exit-operator-verify?" : false,
+      "built-under" : "WM-GUARDRAILS-SPEC",
+      "builder" : "gate-runner",
+      "status" : "complete",
+      "scope" : [ "war-machine" ],
+      "open-hole-count" : 0,
+      "produces" : [ "wm-steps-forward-guardrailed" ],
+      "real-mission?" : false,
+      "phase" : "builder"
+    },
+    "M-live-geometric-stack" : {
+      "scope" : [ "self-representing-stack" ],
+      "produces" : [ "live-geometric-stack" ],
+      "real-mission?" : true,
+      "next-exit-operator-verify?" : false,
+      "open-hole-count" : 0,
+      "phase" : "complete",
+      "status" : "complete",
+      "path" : "/home/joe/code/futon3/holes/missions/M-live-geometric-stack.md"
+    },
+    "M-three-column-stack" : {
+      "scope" : [ "agency", "evidence-persistence" ],
+      "produces" : [ "self-representing-stack" ],
+      "real-mission?" : true,
+      "next-exit-operator-verify?" : false,
+      "open-hole-count" : 0,
+      "phase" : "complete",
+      "status" : "complete",
+      "path" : "/home/joe/code/futon4/holes/missions/M-three-column-stack.md"
+    },
+    "M-prior-mathematics" : {
+      "scope" : [ ],
+      "produces" : [ "math-ct-prior-substrate" ],
+      "real-mission?" : true,
+      "next-exit-operator-verify?" : false,
+      "open-hole-count" : 0,
+      "phase" : "unknown",
+      "status" : "unknown",
+      "path" : "/home/joe/code/futon6/holes/missions/M-prior-mathematics.md"
+    },
+    "M-superpod-mark2" : {
+      "scope" : [ ],
+      "produces" : [ "math-embedding-retrieval" ],
+      "real-mission?" : true,
+      "next-exit-operator-verify?" : false,
+      "open-hole-count" : 0,
+      "phase" : "active",
+      "status" : "active",
+      "path" : "/home/joe/code/futon6/holes/missions/M-superpod-mark2.md"
+    },
+    "M-essay-corpus-substrate" : {
+      "scope" : [ ],
+      "produces" : [ "arxana-hypergraph-store" ],
+      "real-mission?" : true,
+      "next-exit-operator-verify?" : false,
+      "open-hole-count" : 1,
+      "phase" : "unknown",
+      "status" : "unknown",
+      "path" : "/home/joe/code/futon4/holes/missions/M-essay-corpus-substrate.md"
+    },
+    "M-labs-integration" : {
+      "scope" : [ ],
+      "produces" : [ "evidence-persistence" ],
+      "real-mission?" : true,
+      "next-exit-operator-verify?" : false,
+      "open-hole-count" : 0,
+      "phase" : "complete",
+      "status" : "complete",
+      "path" : "/home/joe/code/futon3/holes/missions/M-labs-integration.md"
+    },
+    "M-war-machine-pilot" : {
+      "scope" : [ "live-geometric-stack" ],
+      "produces" : [ "war-machine" ],
+      "real-mission?" : true,
+      "next-exit-operator-verify?" : false,
+      "open-hole-count" : 9,
+      "phase" : "open",
+      "status" : "open",
+      "path" : "/home/joe/code/futon3c/holes/missions/M-war-machine-pilot.md"
+    },
+    "M-war-machine-first-outing" : {
+      "scope" : [ "live-geometric-stack" ],
+      "produces" : [ "war-machine" ],
+      "real-mission?" : true,
+      "next-exit-operator-verify?" : false,
+      "open-hole-count" : 0,
+      "phase" : "complete",
+      "status" : "complete",
+      "path" : "/home/joe/code/futon3c/holes/missions/M-war-machine-first-outing.md"
+    },
+    "M-hypergraph-operator" : {
+      "scope" : [ ],
+      "produces" : [ "hypergraph-operator" ],
+      "real-mission?" : true,
+      "next-exit-operator-verify?" : false,
+      "open-hole-count" : 0,
+      "phase" : "identify",
+      "status" : "identify",
+      "path" : "/home/joe/code/futon5a/holes/missions/M-hypergraph-operator.md"
+    },
+    "external/rob-proof-graph-kb" : {
+      "next-exit-operator-verify?" : false,
+      "witness" : "Rob external proof-graph KB",
+      "status" : "complete",
+      "scope" : [ ],
+      "open-hole-count" : "unknown",
+      "produces" : [ "rob-proof-graph-kb" ],
+      "real-mission?" : false,
+      "phase" : "external",
+      "external" : true
+    },
+    "builder/wm-guardrails-core" : {
+      "next-exit-operator-verify?" : false,
+      "built-under" : "WM-GUARDRAILS-SPEC",
+      "builder" : "guardrails core",
+      "status" : "complete",
+      "scope" : [ "war-machine" ],
+      "open-hole-count" : 0,
+      "produces" : [ "wm-steps-forward-guardrailed" ],
+      "real-mission?" : false,
+      "phase" : "builder"
+    },
+    "M-stack-geometry" : {
+      "scope" : [ ],
+      "produces" : [ "stack-stereolithography-substrate" ],
+      "real-mission?" : true,
+      "next-exit-operator-verify?" : false,
+      "open-hole-count" : 24,
+      "phase" : "identify",
+      "status" : "identify",
+      "path" : "/home/joe/code/futon5a/holes/missions/M-stack-geometry.md"
+    },
+    "M-apm-solutions" : {
+      "scope" : [ ],
+      "produces" : [ "apm-prelim-corpus-substrate" ],
+      "real-mission?" : true,
+      "next-exit-operator-verify?" : false,
+      "open-hole-count" : 0,
+      "phase" : "inactive",
+      "status" : "inactive",
+      "path" : "/home/joe/code/futon3c/holes/missions/M-apm-solutions.md"
+    },
+    "M-capability-star-map" : {
+      "scope" : [ "wm-steps-forward-guardrailed" ],
+      "produces" : [ "efe-trustworthy-over-starmap" ],
+      "real-mission?" : true,
+      "next-exit-operator-verify?" : true,
+      "open-hole-count" : 10,
+      "phase" : "unknown",
+      "status" : "unknown",
+      "path" : "/home/joe/code/futon0/holes/missions/M-capability-star-map.md"
+    },
+    "M-drawbridge-multi-agent" : {
+      "scope" : [ ],
+      "produces" : [ "agency" ],
+      "real-mission?" : true,
+      "next-exit-operator-verify?" : false,
+      "open-hole-count" : 0,
+      "phase" : "complete",
+      "status" : "complete",
+      "path" : "/home/joe/code/futon3/holes/missions/M-drawbridge-multi-agent.md"
+    },
+    "builder/ct-prototype" : {
+      "next-exit-operator-verify?" : false,
+      "built-under" : "futon5 CT prototype",
+      "builder" : "CT prototype",
+      "status" : "held",
+      "scope" : [ ],
+      "open-hole-count" : "unknown",
+      "produces" : [ "symbol-grounding" ],
+      "real-mission?" : false,
+      "phase" : "prototype"
+    },
+    "builder/pudding-prover" : {
+      "next-exit-operator-verify?" : false,
+      "built-under" : "C-pudding-prover",
+      "builder" : "pudding prover",
+      "status" : "complete",
+      "scope" : [ ],
+      "open-hole-count" : 0,
+      "produces" : [ "kit-registry", "kit-certify", "kit-mint", "kit-render" ],
+      "real-mission?" : false,
+      "phase" : "builder"
+    },
+    "M-stack-stereolithography" : {
+      "scope" : [ ],
+      "produces" : [ "stack-stereolithography-substrate" ],
+      "real-mission?" : true,
+      "next-exit-operator-verify?" : false,
+      "open-hole-count" : 4,
+      "phase" : "active",
+      "status" : "active",
+      "path" : "/home/joe/code/futon5a/holes/missions/M-stack-stereolithography.md"
+    },
+    "M-interest-network-coupling" : {
+      "scope" : [ ],
+      "produces" : [ "interest-network-apparatus" ],
+      "real-mission?" : true,
+      "next-exit-operator-verify?" : false,
+      "open-hole-count" : 0,
+      "phase" : "complete",
+      "status" : "complete",
+      "path" : "/home/joe/code/futon4/holes/missions/M-interest-network-coupling.md"
+    },
+    "M-webarxana" : {
+      "scope" : [ ],
+      "produces" : [ "arxana-hypergraph-store" ],
+      "real-mission?" : true,
+      "next-exit-operator-verify?" : false,
+      "open-hole-count" : 3,
+      "phase" : "active",
+      "status" : "active",
+      "path" : "/home/joe/code/futon4/holes/missions/M-webarxana.md"
+    },
+    "builder/futon7-daily-scan" : {
+      "next-exit-operator-verify?" : false,
+      "built-under" : "futon7 scan engine",
+      "builder" : "futon7 daily scan",
+      "status" : "complete",
+      "scope" : [ ],
+      "open-hole-count" : 0,
+      "produces" : [ "daily-scan-lead-foraging" ],
+      "real-mission?" : false,
+      "phase" : "builder"
+    },
+    "external/vsat-poc-customer" : {
+      "next-exit-operator-verify?" : false,
+      "witness" : "Oxford Brookes / Eric White VSAT-PoC revenue",
+      "status" : "complete",
+      "scope" : [ ],
+      "open-hole-count" : "unknown",
+      "produces" : [ "warm-customer-pays" ],
+      "real-mission?" : false,
+      "phase" : "external",
+      "external" : true
+    },
+    "M-agency-rebuild" : {
+      "scope" : [ ],
+      "produces" : [ "agency" ],
+      "real-mission?" : true,
+      "next-exit-operator-verify?" : false,
+      "open-hole-count" : 0,
+      "phase" : "complete",
+      "status" : "complete",
+      "path" : "/home/joe/code/futon3/holes/missions/M-agency-rebuild.md"
+    },
+    "builder/wm-input-sources-hygiene" : {
+      "next-exit-operator-verify?" : false,
+      "built-under" : "WM-GUARDRAILS-SPEC",
+      "builder" : "input-sources hygiene",
+      "status" : "complete",
+      "scope" : [ "war-machine" ],
+      "open-hole-count" : 0,
+      "produces" : [ "wm-steps-forward-guardrailed" ],
+      "real-mission?" : false,
+      "phase" : "builder"
+    },
+    "builder/wm-hole-counter" : {
+      "next-exit-operator-verify?" : false,
+      "built-under" : "WM-GUARDRAILS-SPEC",
+      "builder" : "hole-counter",
+      "status" : "complete",
+      "scope" : [ "war-machine" ],
+      "open-hole-count" : 0,
+      "produces" : [ "wm-steps-forward-guardrailed" ],
+      "real-mission?" : false,
+      "phase" : "builder"
+    },
+    "M-futonzero-prelim-practice" : {
+      "scope" : [ ],
+      "produces" : [ "apm-prelim-corpus-substrate" ],
+      "real-mission?" : true,
+      "next-exit-operator-verify?" : false,
+      "open-hole-count" : 0,
+      "phase" : "identify",
+      "status" : "identify",
+      "path" : "/home/joe/code/futon0/holes/missions/M-futonzero-prelim-practice.md"
+    },
+    "M-agency-unified-routing" : {
+      "scope" : [ ],
+      "produces" : [ "agency" ],
+      "real-mission?" : true,
+      "next-exit-operator-verify?" : false,
+      "open-hole-count" : 0,
+      "phase" : "complete",
+      "status" : "complete",
+      "path" : "/home/joe/code/futon3/holes/missions/M-agency-unified-routing.md"
+    },
+    "external/rob-joe-codrafting" : {
+      "next-exit-operator-verify?" : false,
+      "witness" : "Rob/Joe co-drafting collaboration",
+      "status" : "complete",
+      "scope" : [ ],
+      "open-hole-count" : "unknown",
+      "produces" : [ "rob-joe-codrafting" ],
+      "real-mission?" : false,
+      "phase" : "external",
+      "external" : true
+    },
+    "M-self-representing-stack" : {
+      "scope" : [ "agency", "evidence-persistence" ],
+      "produces" : [ "self-representing-stack" ],
+      "real-mission?" : true,
+      "next-exit-operator-verify?" : false,
+      "open-hole-count" : 0,
+      "phase" : "complete",
+      "status" : "complete",
+      "path" : "/home/joe/code/futon4/holes/missions/M-self-representing-stack.md"
+    },
+    "M-arxana-roundtrip" : {
+      "scope" : [ ],
+      "produces" : [ "arxana-hypergraph-store" ],
+      "real-mission?" : true,
+      "next-exit-operator-verify?" : false,
+      "open-hole-count" : 0,
+      "phase" : "identify",
+      "status" : "identify",
+      "path" : "/home/joe/code/futon4/holes/missions/M-arxana-roundtrip.md"
+    }
+  },
+  "edges" : [ {
+    "from" : "efe-trustworthy-over-starmap",
+    "to" : "wm-steps-forward-guardrailed",
+    "type" : "requires"
+  }, {
+    "from" : "live-geometric-stack",
+    "to" : "self-representing-stack",
+    "type" : "requires"
+  }, {
+    "from" : "self-representing-stack",
+    "to" : "agency",
+    "type" : "requires"
+  }, {
+    "from" : "self-representing-stack",
+    "to" : "evidence-persistence",
+    "type" : "requires"
+  }, {
+    "from" : "war-machine",
+    "to" : "live-geometric-stack",
+    "type" : "requires"
+  }, {
+    "from" : "wm-overnight-unsupervised",
+    "to" : "wm-steps-forward-guardrailed",
+    "type" : "requires"
+  }, {
+    "from" : "wm-overnight-unsupervised",
+    "to" : "efe-trustworthy-over-starmap",
+    "type" : "requires"
+  }, {
+    "from" : "wm-steps-forward-guardrailed",
+    "to" : "war-machine",
+    "type" : "requires"
+  }, {
+    "from" : "M-agency-unified-routing",
+    "to" : "agency",
+    "type" : "produces"
+  }, {
+    "from" : "M-drawbridge-multi-agent",
+    "to" : "agency",
+    "type" : "produces"
+  }, {
+    "from" : "M-agency-rebuild",
+    "to" : "agency",
+    "type" : "produces"
+  }, {
+    "from" : "M-capability-star-map",
+    "to" : "efe-trustworthy-over-starmap",
+    "type" : "produces"
+  }, {
+    "from" : "M-labs-integration",
+    "to" : "evidence-persistence",
+    "type" : "produces"
+  }, {
+    "from" : "M-live-geometric-stack",
+    "to" : "live-geometric-stack",
+    "type" : "produces"
+  }, {
+    "from" : "M-self-representing-stack",
+    "to" : "self-representing-stack",
+    "type" : "produces"
+  }, {
+    "from" : "M-three-column-stack",
+    "to" : "self-representing-stack",
+    "type" : "produces"
+  }, {
+    "from" : "M-war-machine-pilot",
+    "to" : "war-machine",
+    "type" : "produces"
+  }, {
+    "from" : "M-war-machine-first-outing",
+    "to" : "war-machine",
+    "type" : "produces"
+  }, {
+    "from" : "builder/wm-guardrails-core",
+    "to" : "wm-steps-forward-guardrailed",
+    "type" : "produces"
+  }, {
+    "from" : "builder/wm-input-sources-hygiene",
+    "to" : "wm-steps-forward-guardrailed",
+    "type" : "produces"
+  }, {
+    "from" : "builder/wm-hole-counter",
+    "to" : "wm-steps-forward-guardrailed",
+    "type" : "produces"
+  }, {
+    "from" : "builder/wm-gate-runner",
+    "to" : "wm-steps-forward-guardrailed",
+    "type" : "produces"
+  }, {
+    "from" : "T4.2",
+    "to" : "T4",
+    "type" : "specialises"
+  }, {
+    "from" : "T4",
+    "to" : "T5",
+    "type" : "couples"
+  }, {
+    "from" : "full-arxiv-mining",
+    "to" : "math-ct-prior-substrate",
+    "type" : "requires"
+  }, {
+    "from" : "cold-eoi-sent",
+    "to" : "kit-intake",
+    "type" : "requires"
+  }, {
+    "from" : "cold-send-response",
+    "to" : "kit-cadence",
+    "type" : "requires"
+  }, {
+    "from" : "cold-eoi-authored-outbox",
+    "to" : "kit-outbox",
+    "type" : "requires"
+  }, {
+    "from" : "ai-passes-prelims",
+    "to" : "apm-prelim-corpus-substrate",
+    "type" : "requires"
+  }, {
+    "from" : "M-interest-network-coupling",
+    "to" : "interest-network-apparatus",
+    "type" : "produces"
+  }, {
+    "from" : "builder/pudding-prover",
+    "to" : "kit-mint",
+    "type" : "produces"
+  }, {
+    "from" : "M-webarxana",
+    "to" : "arxana-hypergraph-store",
+    "type" : "produces"
+  }, {
+    "from" : "M-essay-corpus-substrate",
+    "to" : "arxana-hypergraph-store",
+    "type" : "produces"
+  }, {
+    "from" : "M-arxana-roundtrip",
+    "to" : "arxana-hypergraph-store",
+    "type" : "produces"
+  }, {
+    "from" : "M-superpod-mark2",
+    "to" : "math-embedding-retrieval",
+    "type" : "produces"
+  }, {
+    "from" : "external/rob-joe-codrafting",
+    "to" : "rob-joe-codrafting",
+    "type" : "produces"
+  }, {
+    "from" : "M-prior-mathematics",
+    "to" : "math-ct-prior-substrate",
+    "type" : "produces"
+  }, {
+    "from" : "external/vsat-poc-customer",
+    "to" : "warm-customer-pays",
+    "type" : "produces"
+  }, {
+    "from" : "builder/ct-prototype",
+    "to" : "symbol-grounding",
+    "type" : "produces"
+  }, {
+    "from" : "builder/pudding-prover",
+    "to" : "kit-render",
+    "type" : "produces"
+  }, {
+    "from" : "M-stack-stereolithography",
+    "to" : "stack-stereolithography-substrate",
+    "type" : "produces"
+  }, {
+    "from" : "M-stack-geometry",
+    "to" : "stack-stereolithography-substrate",
+    "type" : "produces"
+  }, {
+    "from" : "builder/futon7-daily-scan",
+    "to" : "daily-scan-lead-foraging",
+    "type" : "produces"
+  }, {
+    "from" : "external/rob-proof-graph-kb",
+    "to" : "rob-proof-graph-kb",
+    "type" : "produces"
+  }, {
+    "from" : "M-apm-solutions",
+    "to" : "apm-prelim-corpus-substrate",
+    "type" : "produces"
+  }, {
+    "from" : "M-futonzero-prelim-practice",
+    "to" : "apm-prelim-corpus-substrate",
+    "type" : "produces"
+  }, {
+    "from" : "builder/pudding-prover",
+    "to" : "kit-registry",
+    "type" : "produces"
+  }, {
+    "from" : "M-hypergraph-operator",
+    "to" : "hypergraph-operator",
+    "type" : "produces"
+  }, {
+    "from" : "builder/pudding-prover",
+    "to" : "kit-certify",
+    "type" : "produces"
+  } ]
+}

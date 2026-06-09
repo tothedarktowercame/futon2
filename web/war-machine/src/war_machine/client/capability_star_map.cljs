@@ -167,17 +167,18 @@
        "Click a capability node to inspect prerequisites, producing missions, and witness shape."]])])
 
 (defn- edges [caps positions]
-  (for [[id node] caps
-        req (:scope node)
-        :let [from (get positions req)
-              to (get positions id)]
-        :when (and from to)]
-    ^{:key (str req "->" id)}
-    [:line.cap-edge
-     {:x1 (:x from)
-      :y1 (:y from)
-      :x2 (:x to)
-      :y2 (:y to)}]))
+  (into []
+        (for [[id node] caps
+              req (:scope node)
+              :let [from (get positions req)
+                    to (get positions id)]
+              :when (and from to)]
+          ^{:key (str req "->" id)}
+          [:line.cap-edge
+           {:x1 (:x from)
+            :y1 (:y from)
+            :x2 (:x to)
+            :y2 (:y to)}])))
 
 (defn- node-svg [positions [id node]]
   (let [{:keys [x y]} (get positions id)
@@ -243,17 +244,17 @@
           :preserveAspectRatio "xMidYMid meet"
           :style {:height (str h "px")}
           :data-capability-count (count caps)}
-         [:g.cap-depth-lines
-          (let [depths (->> positions vals (map :depth) distinct sort)]
-            (for [d depths
-                  :let [x (:x (first (filter #(= d (:depth %)) (vals positions))))]]
-              ^{:key (str "depth-" d)}
-              [:g
-               [:line.cap-depth-line {:x1 x :x2 x :y1 32 :y2 (- h 36)}]
-               [:text.cap-depth-label {:x x :y 24 :text-anchor "middle"}
-                (str "level " d)]]))]
-         [:g.cap-edges (edges caps positions)]
-         [:g.cap-nodes (map #(node-svg positions %) (sort-by key caps))]]
+         (into [:g.cap-depth-lines]
+               (let [depths (->> positions vals (map :depth) distinct sort)]
+                 (for [d depths
+                       :let [x (:x (first (filter #(= d (:depth %)) (vals positions))))]]
+                   ^{:key (str "depth-" d)}
+                   [:g
+                    [:line.cap-depth-line {:x1 x :x2 x :y1 32 :y2 (- h 36)}]
+                    [:text.cap-depth-label {:x x :y 24 :text-anchor "middle"}
+                     (str "level " d)]])))
+         (into [:g.cap-edges] (edges caps positions))
+         (into [:g.cap-nodes] (map #(node-svg positions %) (sort-by key caps)))]
         [selected-panel selected]]
        [:div.capability-map-empty
         "No capability graph is present in the current War Machine payload."])]))
