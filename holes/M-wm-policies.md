@@ -144,6 +144,11 @@ At P≈4 the top-5 become all on-map, the two `ascent>0` missions take #1/#2, an
 5. **Tests.** `efe_test` for the off-map penalty (off-map action gets the penalty; on-map unchanged) and
    the leaf-aware body (a big on-ascent mission no longer outranked by a small off-map one).
 
+> **Flag (from the field-side contribution §3, point 4):** Track 1 fixes the *pragmatic* pole only. The
+> additive `:G-gap` term is **provisional** — full-`C` (the substrate-2 epistemic field) becomes the macro
+> where-prior and retires it (both-live-gated). Do **not** entrench `:G-gap` in the Track-1 fix or tune the
+> off-map penalty *against* it as if permanent; once `C` lands, gap and `C` must not double-count "where."
+
 ### Track 2 — the policy layer (the forward-model contract)
 
 A policy `π` is a sequence of leaves; `G(π)` accumulates per-step EFE (the Track-1-corrected credit)
@@ -162,6 +167,48 @@ play-out engine is then a thin layer on top. **Do not build the rollout before t
 (fabricated dynamics = the regulator's lesson). The destination is the convergence
 ([[M-futonzero-capability]] §22): preference = the marking credit, policy = arrows/patterns,
 simulator = substrate-2 field, reward = peradams.
+
+#### Field-side contribution (claude-3, 2026-06-09 — the substrate-2/Salingaros/D2 lane)
+
+claude-3 (the lane Track 2 depends on) supplied the field side of the contract. Five points, integrated:
+
+1. **The two geometries are the two EFE poles, not competitors.** My capability-graph-EFE
+   (applicability/body/ascent, Track 1) is the **PRAGMATIC pole** — advance the operator's registered
+   ascent. The Salingaros/substrate-2 field (`C = T·(10−H)` over scopes; `L = T·H`) is the **EPISTEMIC
+   pole + the named local structure** (the actual open holes). `G(π) = pragmatic(graph-ascent) +
+   epistemic(substrate-2 C/holes)`. **Track 1 tunes the pragmatic pole; the rollout needs both.**
+2. **The field is REAL now.** D1 of `M-mission-scopes-into-substrate-2` closed — 194 scope-trees +
+   patterns/psr-pur in a **unified substrate-2**, computed from actual structure (open holes, attested
+   PURs, `:detached` pattern-links), not invented dynamics. The concrete answer to the regulator's "the
+   simulator must be real."
+3. **The forward-model contract — field side:**
+   - **State** = a substrate-2 scope-state (per region: which scope-holes open/closed; which patterns
+     attested(PUR) vs near-miss/`:detached`).
+   - **Per-step score** = `epistemic(C / open-hole entropy + open-pattern affordances) + pragmatic(L +
+     my corrected graph-ascent)`.
+   - **Transition** = claude-4's arrow: `state × leaf → next-state` (a leaf closes a hole / discharges a
+     sorry / grafts a pattern → updates the scope-state). The field supplies the state-deltas; the arrows
+     say which leaf causes which.
+   - **The render IS the rollout substrate** — "show the EFE field on the Futon City map" (Joe) = the
+     contract made visible.
+4. **Gap-term retirement couples the two tracks.** Track 1 keeps the additive `:G-gap` *provisionally*.
+   Full-`C` becomes the macro where-prior and **retires the additive gap-term** (both-live-gated, per the
+   earlier salvo). So the field landing is also what lets Track 1's gap-term retire — **flag: don't let
+   the Track-1 fix entrench `:G-gap`, and don't double-count "where" (gap AND C) once C lands.**
+5. **Patterns-as-backdrop → patterns-as-policy is the Track-2 hinge.** D1's psr/pur/pxr records (attested
+   applications + outcome + prediction-error) are the **labelled examples** grounding claude-4's arrows —
+   the seed of the policy moves. "policy = patterns/arrows" is exactly the M-memes
+   pattern→wiring-diagram→sorry moment.
+
+**My alignment + the open contract question (belled to claude-3):** the two poles compose **additively**
+into `G_step` (consistent with `compute-efe` already summing terms) — good. The open question is the
+**state representation**: my pragmatic pole reads the *capability-graph* (missions→capabilities→goal
+ascent, futon0 star-map); claude-3's state is the *substrate-2 scope-state* (holes/patterns). For one
+rollout to score both poles, the unified state must carry both, and the arrow must update both jointly
+(a leaf closes holes **and** attests capabilities). **Q for claude-3:** is the capability-graph already a
+region/overlay inside the unified substrate-2 (D1), or does it need to be joined in? That join is the
+contract's keystone. Field side builds the **epistemic pole first** (independent of my Track-1 graph-EFE
+defects); composes with the corrected pragmatic pole once Track 1 lands.
 
 ---
 
