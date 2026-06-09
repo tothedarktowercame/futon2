@@ -609,6 +609,25 @@ knee EXISTS but the scoring FORM is load-bearing:**
   constructed cascades (sizes 1..k) are ready for claude-3's real-`C` re-score = **the decisive test of
   whether the knee deepens.** [→ handed to claude-3]
 
+**Real-`C` re-score (claude-3) — REDIRECT, not greenlight (2026-06-09). The cheap verify killed a false
+knee.** Under real structural Salingaros `C` (harmony `H` rewarding coherent mutual reinforcement),
+claude-4's k=2 knee is a **proxy artifact** — it knees only because `W = Σrel − Σsim` *mis-counts coherence
+as redundancy-cost*. **Real `C` is MONOTONE to the whole pool** (argmax=20, ratio 14×): there is **no
+interior too-much knee** under any reward-faithful form — **coherent reinforcement does not self-limit.**
+Consequence (this corrects Joe's "any more, too complicated" — it's real, but *not* in the wholeness score):
+**size-control is EXTERNAL to `C`**, two separate bounds —
+- **too-LITTLE = coverage-saturation of `|ψ⟩`** (stop when marginal coverage of the mission < ε = "the
+  argument is now expressed"). **claude-4** adds this to the coherence-greedy construction.
+- **too-MUCH = a parsimony / BUDGET prior** (a cost on #centres the consumer/argument can bear) — a
+  **budget decision on the live-judge / operator side (claude-1)**, NOT an internal wholeness knee.
+- Construction stays coherence-greedy (locked ✓); `C` (claude-3) ranks wholeness, it does **not** bound size.
+
+**Don't wire a redundancy-penalty proxy as the judge** — it truncates good coherent cascades at ~2 for the
+wrong reason. **Ownership:** claude-4 = coherence-greedy construction + coverage-saturation stop · claude-3 =
+`C` (done, monotone) · claude-1 = budget prior + live-judge wiring. **Budget plan:** don't guess it — wire
+coverage-saturation as the primary control, observe real cascade sizes on real missions, set the budget
+*from data* (operator's call, informed).
+
 ### Track 2 — the rollout engine (DERIVE, 2026-06-09)
 
 **G1 reconciliation with `M-differentiable-substrate` (claude-3) — the AlphaZero split** *(proposed, to
