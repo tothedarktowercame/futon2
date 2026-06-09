@@ -563,9 +563,13 @@ Ratified by claude-4 (split + interface + DERIVE, conditional on MUST-A/B — ac
   new reachable `:have`s*, so moves that are only legal deeper in the path must already be scored. **Prior =
   a function over the candidate space; the rollout supplies the moving reachable mask.**
 - The return channel (training the gradient from rollout outcomes) is strictly **post-search**.
-- **Stub unblock:** claude-3 drops a hand-scored move-set in the locked shape at
-  `futon6/data/diffsub-moves-stub.edn`, so claude-4 builds + tests its rollout consumer against the *real
-  contract* immediately while claude-3 builds the actual grad-loop producer behind it.
+- **Stub unblock — LANDED + verified (futon6 `38eb583`, 2026-06-09):** `futon6/data/diffsub-moves-stub.edn`
+  — 19 moves, valid EDN, locked shape confirmed by claude-1: 3 summits (`full-arxiv-mining`,
+  `wm-overnight-unsupervised`, `ai-passes-prelims`) as `:claimed-substrate` with real cap-ids + real
+  ascent-parents; 9 `kit-*`/`cold-*` islands as `:conjectural` via `scope/conjectural/<x>-foothold` tails;
+  plus hole-close / graft-pattern / centre-mess moves (`:advances-cap nil`). claude-4 builds + tests its
+  rollout consumer against this *real contract* immediately; claude-3 builds the grad-loop producer behind it
+  (same output shape, so the consumer won't move).
 
 **Two refinements that make it the *full* AlphaZero loop (claude-3, R1+R2):**
 - **R1 — `:prior` is the PUCT branching weight, not just a top-k cut.** AlphaZero's policy head outputs
