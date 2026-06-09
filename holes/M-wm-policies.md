@@ -485,6 +485,43 @@ promote! E-excursion, greenlit) + per-step (Track-1, done) → the **rollout eng
 build, plus the route-(a) island-foothold (aligned, build held for operator go). Witness = a ≥2-step
 rollout that beats the greedy one-step pick.
 
+### Track 2 — the rollout engine (DERIVE, 2026-06-09)
+
+**G1 reconciliation with `M-differentiable-substrate` (claude-3) — the AlphaZero split** *(proposed, to
+ratify with the gradient-route owner before either builds; resolves that mission's G1 + success-criterion-3).*
+`M-differentiable-substrate` builds a **second route to `G(π)`**: a gradient over the materialised metric
+(`grad(loss)(A)` = ranked edit-proposals = the differentiable geodesic — the `code_diff_jax_pilot` /
+`jax_refine` port, already numerically healthy on code). Its G1 asks how that relates to my discrete
+rollout. Resolution:
+- **The gradient route is the POLICY PRIOR; the discrete rollout is the SEARCH** — exactly AlphaZero. The
+  gradient pass is fast, global, *first-order*: it ranks candidate moves (which single edits descend the
+  metric toward goal-anchors). The rollout is deliberate, *multi-step*: it takes the gradient's top-k
+  proposed moves as its **branching set** and evaluates actual **paths** (`G(π)` over sequences), capturing
+  the combinatorial structure a first-order gradient misses (a move bad alone but good as step-1 of a path).
+- So: **gradient = prior over moves (policy net) · rollout = lookahead over paths (MCTS) · value = `G(π)` ·
+  reward = peradam.** They compose as prior+search, not competitors — G1 options (b)+(c) (the gradient
+  *seeds* the move-set / is the continuous *relaxation* the rollout discretises).
+- **Cross-check (a) as a diagnostic:** where the gradient's first-order ranking disagrees with the
+  rollout's path-integral ranking = signal (combining-methods-as-diagnostic) — a move the gradient likes
+  but the rollout finds dead-ends, or a path the local gradient couldn't see.
+
+**Engine design** (inputs all landed):
+- **Forward-model `step(state, leaf) → state'`** — PURE; mirrors `promote!` on a *copy* of the state (close
+  the hole; flip the cap `:status` if the leaf carries `:advances-cap`). Shared-kernel discipline (ukrn): the
+  simulated step ≡ what live `promote!` does, so the simulator can't drift.
+- **Accumulator** — port ukrn `project-budget-path`'s K-step loop: `G(π) = Σ_t γ^t g(s_t)` over
+  `π = (leaf₁ … leaf_K)`, discounted, with absorbing barriers (goal reached / no admissible leaf).
+- **Per-step `g(s)`** = epistemic(`C`/holes, claude-3) + pragmatic(Track-1-corrected graph-ascent, live).
+- **Move-set** = the gradient prior's top-k (`M-differentiable-substrate`), or — until that lands —
+  open-arrows-with-satisfied-`have` (claude-4).
+- **Selection** — argmin `G(π)` (the geodesic) / softmax+abstain (ukrn `select-action`; abstain on
+  indiscriminable policies = WM-I4). The selected policies = the geodesics claude-3's render draws.
+
+**Build scope** (codex handoff *after* the G1 reconciliation is ratified): a futon2 ns `futon2.aif.rollout`
+— `step` (pure forward-model) · `rollout`/`G-of-policy` (accumulator) · `select-policy`. Test = a ≥2-step
+rollout beats the greedy one-step on a constructed case (success-criterion-4). Gated on: reconciliation
+ratified + the move-set source pinned.
+
 ### PSR / PUR
 - **PSR (Track 1 fix):** Pattern: `logic-model-before-code` (verify the design over the live trace before
   coding) + the ARGUE "advance-the-map" principle. Alternatives considered: thread `:capability-graph`
