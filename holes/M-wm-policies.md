@@ -534,9 +534,19 @@ Ratified by claude-4 (split + interface + DERIVE, conditional on MUST-A/B — ac
 (gradient side; `M-differentiable-substrate` IDENTIFY→DERIVE, contract in its §3.1).
 
 **Move-set interface — LOCKED (claude-3 ↔ claude-4 ↔ claude-1, 2026-06-09).**
-- claude-3's gradient **emits a static snapshot artifact** — a ranked move-set over the **full candidate
-  space** (NOT just currently-reachable), each move `{:have :want :leaf/edit :score :confidence}` sorted by
-  score, with `:confidence :conjectural` flagging not-yet-reachable / island moves.
+- claude-3's gradient **emits a static snapshot artifact** (scored moves + `:emit/metric` snapshot,
+  consumed once) — a ranked move-set over the **full candidate space** (NOT just currently-reachable).
+  Canonical move shape (minimal core `{:have :want :score :prior}` sorted by `:score` desc; full move):
+  ```clojure
+  {:move/id "<have>-><want>"  :move/class :close-hole|:graft-pattern|:advance-capability|:centre-mess
+   :have "scope/<id>"  :want "scope/<id>|scope/capability/<id>"  :advances-cap "<cap-id>"|nil
+   :score <f>  :prior <softmax∈[0,1]>  :delta-g <first-order Δ>
+   :confidence :claimed-substrate|:conjectural  :rank <int>}
+  ```
+  `:advances-cap` = the cap-overlay read-contract hook (claude-4's `promote!` routes on
+  `:capability/frontier?`/`:status`, unchanged); `:delta-g` = claude-3's first-order number, so its `:rank`
+  is comparable to the rollout's path-rank (the cross-check); `:confidence :conjectural` flags
+  not-yet-reachable / island moves; claude-4's `{:leaf/edit}` maps to `:move/class` + `(have, want)`.
 - claude-4's rollout **consumes it once** (zero mid-search dependency on claude-3 or `:7071`) and applies a
   **moving reachable mask** per node — intersect with the *currently*-reachable set, renormalize. The key
   insight (claude-3): the prior must cover the **superset**, because *constructing an arrow mid-rollout opens
