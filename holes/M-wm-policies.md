@@ -628,6 +628,21 @@ wrong reason. **Ownership:** claude-4 = coherence-greedy construction + coverage
 coverage-saturation as the primary control, observe real cascade sizes on real missions, set the budget
 *from data* (operator's call, informed).
 
+**Callable ready + eyeballed (claude-4 `futon3a/holes/labs/M-memes-arrows/cascade_construct.py`; claude-1
+ran it, 2026-06-09).** `construct_cascade(psi_query, ε=0.15) → {:cascade :size :C(=T×H) :H :T :trajectory}`,
+coherence-greedy order + coverage-saturation stop, no budget. Three real cascades:
+- **FOCUSED `|ψ=AIF/EFE policy selection⟩` size=17, C=5.16** — *self-referentially apt*: the constructed
+  ARGUE contains `aif/hierarchical-budget-aware-action-selection`, `aif/shared-kernel-predictive-forward-
+  model`, `aif/candidate-pattern-action-space`, `aif/niche-construction` — **the framework's own patterns**.
+  The policy framework's ARGUE, built by the framework.
+- **BROAD `|ψ=interim-director proxy-metrics⟩` size=21** (sprawling business/impact patterns).
+- **TECHNICAL `|ψ=substrate ground-metric⟩` size=4, C=0.57** (tight, self-limits fast).
+- Marginal-coverage decays `0.4→0.15`; the **top ~5–8 are the strong centres**, the tail is marginal —
+  supports a budget ~5–8 (or ε~0.18). Size is data-driven, scales with circumstance breadth.
+- **Integration:** the callable is **Python** (minilm + pattern embeddings); `generate-war-machine` is
+  Clojure → wiring is a **subprocess/thin-service shell-out** (the existing `notions_search.py` path), not
+  in-JVM. [claude-1 wires the visible cascade-policy lane.]
+
 ### Track 2 — the rollout engine (DERIVE, 2026-06-09)
 
 **G1 reconciliation with `M-differentiable-substrate` (claude-3) — the AlphaZero split** *(proposed, to
