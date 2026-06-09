@@ -17,6 +17,7 @@
 (defonce aif-data   (r/atom nil))   ;; payload from /api/alpha/aif-stack/live
 (defonce capability-star-map (r/atom nil))
 (defonce pudding-status (r/atom nil))
+(defonce affect-events (r/atom nil))
 (defonce operator-bulletin (r/atom nil))
 (defonce operator-forward-model (r/atom nil))
 (defonce view-mode  (r/atom :stack))

@@ -28,6 +28,8 @@
   "/data/capability-star-map.graph.json")
 (def ^:private pudding-status-static-path
   "/data/pudding-status.json")
+(def ^:private affect-events-static-path
+  "/data/affect-events.json")
 
 (defn- endpoint-with-days []
   (str (api-base) endpoint-suffix "?days=" @s/days-window))
@@ -128,11 +130,22 @@
                 (js/console.warn "[api] pudding status unavailable:"
                                  (or (.-message err) err))))))
 
+(defn load-affect-events! []
+  (-> (fetch-json! affect-events-static-path)
+      (.then (fn [body]
+               (reset! s/affect-events
+                       (js->clj body :keywordize-keys true))))
+      (.catch (fn [err]
+                (reset! s/affect-events (unavailable-payload 0))
+                (js/console.warn "[api] affect events unavailable:"
+                                 (or (.-message err) err))))))
+
 (defn load! []
   (load-operator-bulletin!)
   (load-forward-model!)
   (load-capability-star-map!)
   (load-pudding-status!)
+  (load-affect-events!)
   (go
     (let [resp (<! (http/get (endpoint-with-days)
                              {:with-credentials? false}))]
