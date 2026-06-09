@@ -21,7 +21,7 @@
 .cap-node-ring{fill:rgba(255,255,255,.9);stroke:#e2e8f0;stroke-width:2}.cap-node-selected .cap-node-ring{stroke:#0f172a;stroke-width:3}.cap-node-dot{stroke:#fff;stroke-width:2}.cap-node-witness{fill:none;stroke:#facc15;stroke-width:2;stroke-dasharray:3 3}
 .cap-node-label{fill:#334155;font-size:10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;pointer-events:none}.cap-detail-panel{padding:14px;overflow:auto}.cap-detail-panel h3{margin:4px 0 6px;font-size:15px;line-height:1.3;color:#0f172a}
 .cap-detail-kicker,.cap-detail-label,.cap-detail-id{font-size:10px;font-family:monospace;text-transform:uppercase;color:#64748b;letter-spacing:.4px}.cap-detail-id{text-transform:none;letter-spacing:0;margin-bottom:10px;color:#475569}.cap-detail-section{margin-top:12px;display:flex;flex-direction:column;gap:6px}.cap-detail-text{font-size:12px;line-height:1.45;color:#334155}.cap-chip-row{display:flex;flex-wrap:wrap;gap:6px}.cap-chip{font-size:10px;font-family:monospace;color:#0f172a;background:#e0f2fe;border:1px solid #bae6fd;border-radius:999px;padding:3px 7px}.cap-chip-gate{background:#fef3c7;border-color:#fde68a}.capability-map-empty{padding:18px;color:#64748b;font-size:13px}
-.pudding-status-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.pudding-card{background:rgba(255,255,255,.96);border:1px solid #cbd5e1;border-radius:6px;box-shadow:0 8px 22px rgba(15,23,42,.06);padding:13px 14px;display:flex;flex-direction:column;gap:10px}.pudding-card h3{margin:0;color:#0f172a;font-size:15px}.pudding-kicker,.pudding-metric-label{font-size:10px;font-family:monospace;text-transform:uppercase;letter-spacing:.4px;color:#64748b}.pudding-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.pudding-metric{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:8px}.pudding-metric-value{font-size:18px;font-weight:700;color:#0f172a}.pudding-line{font-size:12px;line-height:1.45;color:#334155}.pudding-line strong{color:#0f172a}.pudding-ready{border-color:#86efac;background:#f0fdf4}.pudding-waiting{border-color:#fde68a;background:#fffbeb}.affect-list{display:flex;flex-direction:column;gap:7px;max-height:260px;overflow:auto}.affect-row{border:1px solid #e2e8f0;border-radius:6px;background:#f8fafc;padding:7px;display:flex;flex-direction:column;gap:4px}.affect-row-candidate{border-color:#bae6fd;background:#f0f9ff}.affect-row-top{display:flex;align-items:center;gap:7px;justify-content:space-between}.affect-marker{font-size:10px;font-family:monospace;text-transform:uppercase;color:#0f172a;background:#e2e8f0;border-radius:999px;padding:2px 7px}.affect-marker-candidate{background:#dbeafe;color:#1d4ed8}.affect-time{font-size:10px;font-family:monospace;color:#64748b}.affect-excerpt{font-size:11px;line-height:1.35;color:#334155}.affect-counts{display:flex;flex-wrap:wrap;gap:5px}.affect-count{font-size:10px;font-family:monospace;color:#475569;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:2px 6px}
+.pudding-status-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.pudding-card{background:rgba(255,255,255,.96);border:1px solid #cbd5e1;border-radius:6px;box-shadow:0 8px 22px rgba(15,23,42,.06);padding:13px 14px;display:flex;flex-direction:column;gap:10px}.pudding-card h3{margin:0;color:#0f172a;font-size:15px}.pudding-kicker,.pudding-metric-label{font-size:10px;font-family:monospace;text-transform:uppercase;letter-spacing:.4px;color:#64748b}.pudding-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.pudding-metric{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:8px}.pudding-metric-value{font-size:18px;font-weight:700;color:#0f172a}.pudding-line{font-size:12px;line-height:1.45;color:#334155}.pudding-line strong{color:#0f172a}.pudding-ready{border-color:#86efac;background:#f0fdf4}.pudding-waiting{border-color:#fde68a;background:#fffbeb}.affect-list{display:flex;flex-direction:column;gap:7px;max-height:260px;overflow:auto}.affect-row{border:1px solid #e2e8f0;border-radius:6px;background:#f8fafc;padding:7px;display:flex;flex-direction:column;gap:4px}.affect-row-candidate{border-color:#bae6fd;background:#f0f9ff}.affect-row-top{display:flex;align-items:center;gap:7px;justify-content:space-between}.affect-marker{font-size:10px;font-family:monospace;text-transform:uppercase;color:#0f172a;background:#e2e8f0;border-radius:999px;padding:2px 7px}.affect-marker-candidate{background:#dbeafe;color:#1d4ed8}.affect-time{font-size:10px;font-family:monospace;color:#64748b}.affect-target{font-size:10px;font-family:monospace;color:#475569;overflow-wrap:anywhere}.affect-excerpt{font-size:11px;line-height:1.35;color:#334155}.affect-counts{display:flex;flex-wrap:wrap;gap:5px}.affect-count{font-size:10px;font-family:monospace;color:#475569;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:2px 6px}
 @media(max-width:1100px){.pudding-status-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:900px){body{overflow:auto}.war-machine{min-height:100vh;height:auto}.toolbar{flex-wrap:wrap}.main-area{flex-direction:column;overflow:visible}.legend-panel,.sidebar{width:100%;min-width:0;max-height:none;border-left:0}.legend-panel{order:2}.hex-canvas{order:1;width:100%;min-height:640px;overflow:visible}.sidebar{order:3;border-top:1px solid var(--border)}.capability-map-header,.capability-map-body,.pudding-status-grid{grid-template-columns:1fr}.capability-map-header{flex-direction:column}.cap-progress{min-width:0;width:100%}.cap-progress-top{justify-content:flex-start}}")
 
 (defn- style-node []
@@ -187,6 +187,15 @@
     (str (subs s 5 10) " " (subs s 11 16))
     (id-text s)))
 
+(defn- affect-target [event]
+  (let [target (or (:clocked_target event)
+                   (:excursion_id event)
+                   (:mission_id event)
+                   (:campaign_id event))]
+    (if (str/blank? (id-text target))
+      "unclocked"
+      (id-text target))))
+
 (defn- affect-row [event]
   (let [candidate? (:candidate event)
         marker (id-text (:marker event))]
@@ -198,6 +207,7 @@
       [:span.affect-time
        (str (short-time (:timestamp event)) " / " (id-text (:author event))
             " / " (rounded-value (:value event)))]]
+     [:div.affect-target (affect-target event)]
      [:div.affect-excerpt (:trigger_excerpt event)]]))
 
 (defn- affect-events-view []
