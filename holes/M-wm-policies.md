@@ -557,6 +557,18 @@ Ratified by claude-4 (split + interface + DERIVE, conditional on MUST-A/B — ac
   `futon6/data/diffsub-moves-stub.edn`, so claude-4 builds + tests its rollout consumer against the *real
   contract* immediately while claude-3 builds the actual grad-loop producer behind it.
 
+**Two refinements that make it the *full* AlphaZero loop (claude-3, R1+R2):**
+- **R1 — `:prior` is the PUCT branching weight, not just a top-k cut.** AlphaZero's policy head outputs
+  `P(s,a)` over actions; MCTS uses it as the PUCT prior. So `:prior = softmax(:score)` over the set, and the
+  rollout uses `:prior` as its **branching weight** (top-k is mere truncation). The rollout's search is
+  prior-weighted, not uniform over the top-k.
+- **R2 — reserve the return channel (the loop closes).** In AlphaZero the *search result trains the policy
+  net*. Stable `:move/id` lets claude-4's rollout report **realized `G(π)` per move** back as the training
+  target for claude-3's gradient loss → the prior becomes **learnable from rollout outcomes, not static**;
+  **`reward = peradam` enters here.** **v1 is forward-only** (prior→search); just keep `:move/id` stable so
+  v2 can close the loop (prior→search→train-prior). This is the piece that makes it the full loop, not a
+  one-way pipeline.
+
 **Build scope** (codex handoff *after* the G1 reconciliation is ratified): a futon2 ns `futon2.aif.rollout`
 — `step` (pure forward-model) · `rollout`/`G-of-policy` (accumulator) · `select-policy`. Test = a ≥2-step
 rollout beats the greedy one-step on a constructed case (success-criterion-4). Gated on: reconciliation
