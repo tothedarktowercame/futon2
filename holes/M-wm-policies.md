@@ -532,6 +532,42 @@ back into a re-ranked single action. Two layers:
 `generate-war-machine` + the dual-lane display — **claude-1** (holds the live-judge context). MUST-B holds
 (scoring sim-only; `:correlated` arrows never promoted during scoring).
 
+### The policy framework — a cascade is an on-the-fly pattern-semilattice (Joe, 2026-06-09; SUPERSEDES the stored-chain plan)
+
+The stored-chain reading above is the *degenerate, linear* case. The real object (Joe):
+- **A cascade is constructed *on-the-fly* for a circumstance** — Christopher Alexander's original name for a
+  Pattern Language. It is precisely **the ARGUE move**: "what patterns make the case for *this* design?"
+  Every mission's ARGUE phase already constructs one; we make it a first-class, scored object. The
+  `pattern_phylogeny` is the **prior** (what tends to combine), not the cascade itself.
+- **A policy is a SEMILATTICE of patterns, not a sequence** (Alexander, *A City is Not a Tree* — patterns
+  overlap, they don't nest in a tree). So the rollout's linear `G(π)=Σγ^t g(s_t)` is the *linearized*
+  degenerate case; the real `G(π)` is a **wholeness-functional over the semilattice** = Joe's "any more, too
+  complicated; any less, not expressive enough" = **Salingaros `C = T·(10−H)`** (expressiveness `T` vs
+  parsimony `H`). **claude-3's epistemic metric `C` *is* the cascade-scoring, one scale up.**
+- **Each pattern is itself a policy** → policies compose recursively; "move" and "policy" are the same kind
+  of thing at different grains.
+- **The bra `⟨ψ|` (the circumstance) is heterogeneous and extensible** — `⟨ψ=mission|`, `⟨ψ=scope|`, … i.e.
+  **substrate-2's node-types** (the unified state already holds scope/mission/capability/pattern/PSR). Moves
+  are an **extensible operator-registry over that state** (not the fixed 4 `:move/class`) — find-a-messy-
+  mission · run-a-cascade-over-a-scope · match-a-pattern-across-missions · annotate-a-PSR · … — and they
+  **compose across ψ-types**. (That extensible operator-space is the **M-aif2 extensible-registry /
+  niche-construction** primitive — the make-it-live work and aif2 converge here.)
+- **Complexity is expressible but NOT rewarded** (Joe): the `C`/wholeness score selects the *simplest
+  adequate* policy for the circumstance — Occam via `C`. A very-complex composed policy is *representable*
+  but would usually score *low* (too complicated). So the policy-space is rich; the scoring keeps it honest.
+
+**The seed already exists: E-warranted-play = the length-1 cascade** (given a mission, select ONE pattern,
+apply it — the selector built this session). So we **generalize E-warranted-play (1-pattern) → small
+pattern-semilattice**, scored by `C`, growing the operator-registry as real circumstances demand it
+(niche-construction, not big-design-up-front). Spectrum: `1 pattern (E-warranted-play) → small semilattice
+→ full ARGUE-grade language for a hard design`.
+
+**Proposed concrete seed (claude-1):** take a *real messy mission* (e.g. `interim-director-proxy-metric-
+inventory`, ~29 open holes), construct the **mission-coherence cascade** (a small pattern-semilattice) over
+it on-the-fly, score it by `C` (show the too-much/too-little knee biting on real data), surface it in the WM
+as a *visible non-degenerate policy*. Smallest thing that demonstrates a *grown* policy + the scoring
+discriminating — and it's Joe's own first example.
+
 ### Track 2 — the rollout engine (DERIVE, 2026-06-09)
 
 **G1 reconciliation with `M-differentiable-substrate` (claude-3) — the AlphaZero split** *(proposed, to
