@@ -52,6 +52,7 @@
 (def default-graph-applicability-penalty 1000.0)
 (def default-graph-body-weight 3.0)
 (def default-graph-ascent-weight 20.0)
+(def default-graph-off-map-penalty 0.0)
 (def default-gap-weight 6.0)
 
 ;; v0.14: anticipation-driven scaling. When opts carries :time-pressure
@@ -98,39 +99,59 @@
 
 (defn mission-ascent-progress
   "Credit for producing capabilities in the transitive scope of the operator goal.
-   The goal is an input to the selector; this function never chooses it."
-  [graph goal mission-id]
-  (let [depths (goal-depths graph goal)]
-    (reduce
-     + 0.0
-     (for [cap-id (:produces (mission-node graph mission-id))
-           :let [depth (get depths cap-id)]
-           :when depth]
-       (/ 1.0 (inc (double depth)))))))
+   The goal is an input to the selector; this function never chooses it. When
+   `status-aware?` is true, already-satisfied produced capabilities are skipped
+   so ascent credit cannot be farmed from completed map nodes."
+  ([graph goal mission-id] (mission-ascent-progress graph goal mission-id false))
+  ([graph goal mission-id status-aware?]
+   (let [depths (goal-depths graph goal)]
+     (reduce
+      + 0.0
+      (for [cap-id (:produces (mission-node graph mission-id))
+            :let [depth (get depths cap-id)]
+            :when (and depth
+                       (or (not status-aware?)
+                           (not= :satisfied (get-in graph [:capabilities cap-id :status]))))]
+        (/ 1.0 (inc (double depth))))))))
 
 (defn graph-efe-terms
   "Graph-functional EFE terms for a mission action. Lower total remains better:
    unbound :requires adds a high applicability gate; body-size is a penalty;
    ascent progress toward the pre-registered goal is a credit."
-  [graph goal action {:keys [graph-applicability-penalty graph-body-weight graph-ascent-weight]
+  [graph goal action {:keys [graph-applicability-penalty graph-body-weight graph-ascent-weight
+                             graph-off-map-penalty graph-body-mode
+                             graph-ascent-status-aware?]
                       :or {graph-applicability-penalty default-graph-applicability-penalty
                            graph-body-weight default-graph-body-weight
-                           graph-ascent-weight default-graph-ascent-weight}}]
+                           graph-ascent-weight default-graph-ascent-weight
+                           graph-off-map-penalty default-graph-off-map-penalty
+                           graph-body-mode :whole
+                           graph-ascent-status-aware? false}}]
   (let [mission-id (:target action)
         mission (mission-node graph mission-id)]
-    (if (and graph goal mission (= :open-mission (:type action)))
-      (let [applicable? (mission-applicable? graph mission-id)
-            body-size (double (or (:open-hole-count mission) 0))
-            progress (double (mission-ascent-progress graph goal mission-id))
-            applicability (if applicable? 0.0 (double graph-applicability-penalty))
-            body (* (double graph-body-weight) body-size)
-            ascent (* (double graph-ascent-weight) progress)]
-        {:G-applicability applicability
-         :G-body-size body
-         :G-ascent-progress ascent
-         :G-graph-pragmatic (+ applicability body (- ascent))
-         :graph/applicable? applicable?
-         :graph/single-cycle-leaf? (mission-single-cycle-leaf? graph mission-id)})
+    (if (and graph goal (= :open-mission (:type action)))
+      (if mission
+        (let [applicable? (mission-applicable? graph mission-id)
+              body-size (double (or (:open-hole-count mission) 0))
+              progress (double (mission-ascent-progress graph goal mission-id
+                                                        graph-ascent-status-aware?))
+              applicability (if applicable? 0.0 (double graph-applicability-penalty))
+              body (case graph-body-mode
+                     :leaf (* (double graph-body-weight)
+                              (if (mission-single-cycle-leaf? graph mission-id) 0.0 1.0))
+                     :whole (* (double graph-body-weight) body-size)
+                     (* (double graph-body-weight) body-size))
+              ascent (* (double graph-ascent-weight) progress)]
+          {:G-applicability applicability
+           :G-body-size body
+           :G-ascent-progress ascent
+           :G-graph-pragmatic (+ applicability body (- ascent))
+           :graph/applicable? applicable?
+           :graph/single-cycle-leaf? (mission-single-cycle-leaf? graph mission-id)})
+        {:G-applicability 0.0
+         :G-body-size 0.0
+         :G-ascent-progress 0.0
+         :G-graph-pragmatic (double graph-off-map-penalty)})
       {:G-applicability 0.0
        :G-body-size 0.0
        :G-ascent-progress 0.0
@@ -340,12 +361,19 @@
    `:open-mission` actions, the weighted gap credit is subtracted from
    `:G-total`, making announced-but-unfilled missions more preferred.
 
+   `:graph-off-map-penalty` defaults to 0.0 and applies only to off-map
+   `:open-mission` actions when graph + goal are present. `:graph-body-mode`
+   defaults to `:whole`; `:leaf` scores a bounded next-step body term. When
+   `:graph-ascent-status-aware?` is true, ascent credit ignores produced
+   capabilities already marked `:satisfied`.
+
    Pure: same (state, action, opts) → same output."
   ([state action] (compute-efe state action {}))
   ([state action {:keys [info-weight survival-weight structural-pressure-weight time-pressure
                          time-pressure-scale horizon-steps capability-graph
                          pre-registered-goal graph-applicability-penalty
-                         graph-body-weight graph-ascent-weight mission-gap-view
+                         graph-body-weight graph-ascent-weight graph-off-map-penalty
+                         graph-body-mode graph-ascent-status-aware? mission-gap-view
                          gap-weight]
                   :or {info-weight default-info-weight
                        survival-weight default-survival-weight
@@ -355,6 +383,9 @@
                        graph-applicability-penalty default-graph-applicability-penalty
                        graph-body-weight default-graph-body-weight
                        graph-ascent-weight default-graph-ascent-weight
+                       graph-off-map-penalty default-graph-off-map-penalty
+                       graph-body-mode :whole
+                       graph-ascent-status-aware? false
                        gap-weight default-gap-weight}}]
    (let [single-prediction (fm/predict state action)
          ;; v0.15: opt-in multi-horizon trajectory; final-state observation
@@ -381,7 +412,13 @@
                                        :graph-body-weight
                                        graph-body-weight
                                        :graph-ascent-weight
-                                       graph-ascent-weight})
+                                       graph-ascent-weight
+                                       :graph-off-map-penalty
+                                       graph-off-map-penalty
+                                       :graph-body-mode
+                                       graph-body-mode
+                                       :graph-ascent-status-aware?
+                                       graph-ascent-status-aware?})
          gap-terms (gap-efe-terms mission-gap-view action
                                   {:gap-weight gap-weight})
          urgency (+ 1.0 (* (double time-pressure) (double time-pressure-scale)))

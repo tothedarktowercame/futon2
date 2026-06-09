@@ -97,6 +97,32 @@
               :to :efe-trustworthy-over-starmap
               :type :produces}]}))
 
+(defn- graph-efe-cleanup-fixture []
+  {:capabilities {:goal {:status :held
+                         :scope [:cap-held :cap-satisfied]}
+                  :req {:status :satisfied}
+                  :missing-req {:status :held}
+                  :cap-held {:status :held}
+                  :cap-satisfied {:status :satisfied}}
+   :missions {"M-leaf" {:scope [:req]
+                        :produces [:cap-held]
+                        :open-hole-count 1}
+              "M-nonleaf-small" {:scope [:missing-req]
+                                  :produces [:cap-held]
+                                  :open-hole-count 1}
+              "M-nonleaf-big" {:scope [:missing-req]
+                                :produces [:cap-held]
+                                :open-hole-count 30}
+              "M-on-ascent-big" {:scope [:req]
+                                  :produces [:cap-held]
+                                  :open-hole-count 30}
+              "M-satisfied-only" {:scope [:req]
+                                  :produces [:cap-satisfied]
+                                  :open-hole-count 1}
+              "M-mixed-status" {:scope [:req]
+                                :produces [:cap-satisfied :cap-held]
+                                :open-hole-count 1}}})
+
 (deftest compute-efe-purity-test
   (testing "compute-efe is pure"
     (let [action {:type :address-sorry :target :m1}
@@ -414,6 +440,101 @@
       (is (= [{:type :open-mission :target :M-capability-star-map}]
              returned-actions)
           "pursuit outside the brief and goal-extending decompose are filtered unless consented"))))
+
+(deftest graph-efe-off-map-penalty-test
+  (testing "off-map open missions are penalised only when the opt is set"
+    (let [graph (graph-efe-cleanup-fixture)
+          action {:type :open-mission :target "M-off-map"}
+          default-terms (efe/graph-efe-terms graph :goal action {})
+          penalised (efe/graph-efe-terms graph :goal action
+                                         {:graph-off-map-penalty 4.0})]
+      (is (zero? (:G-graph-pragmatic default-terms))
+          "default 0.0 preserves current off-map behaviour")
+      (is (= 4.0 (:G-graph-pragmatic penalised))
+          "opted-in off-map open mission gets the configured penalty")))
+
+  (testing "non-open-mission actions and absent graph/goal cases are not penalised"
+    (let [graph (graph-efe-cleanup-fixture)
+          pursue (efe/graph-efe-terms graph :goal
+                                      {:type :pursue :target :cap-held}
+                                      {:graph-off-map-penalty 4.0})
+          no-graph (efe/graph-efe-terms nil :goal
+                                        {:type :open-mission :target "M-off-map"}
+                                        {:graph-off-map-penalty 4.0})
+          no-goal (efe/graph-efe-terms graph nil
+                                       {:type :open-mission :target "M-off-map"}
+                                       {:graph-off-map-penalty 4.0})]
+      (is (zero? (:G-graph-pragmatic pursue)))
+      (is (zero? (:G-graph-pragmatic no-graph)))
+      (is (zero? (:G-graph-pragmatic no-goal))))))
+
+(deftest graph-efe-leaf-body-mode-test
+  (testing ":leaf body mode scores a bounded next-step body cost"
+    (let [graph (graph-efe-cleanup-fixture)
+          opts {:graph-body-weight 2.0
+                :graph-body-mode :leaf
+                :graph-ascent-weight 0.0
+                :graph-applicability-penalty 0.0}
+          leaf (efe/graph-efe-terms graph :goal
+                                    {:type :open-mission :target "M-leaf"}
+                                    opts)
+          nonleaf-small (efe/graph-efe-terms graph :goal
+                                             {:type :open-mission :target "M-nonleaf-small"}
+                                             opts)
+          nonleaf-big (efe/graph-efe-terms graph :goal
+                                           {:type :open-mission :target "M-nonleaf-big"}
+                                           opts)]
+      (is (zero? (:G-body-size leaf))
+          "single-cycle leaf gets zero body penalty")
+      (is (= 2.0 (:G-body-size nonleaf-small)))
+      (is (= (:G-body-size nonleaf-small) (:G-body-size nonleaf-big))
+          "open-hole-count 1 and 30 produce the same bounded body in :leaf mode")))
+
+  (testing ":whole body mode preserves weight times open-hole-count"
+    (let [graph (graph-efe-cleanup-fixture)
+          big (efe/graph-efe-terms graph :goal
+                                   {:type :open-mission :target "M-nonleaf-big"}
+                                   {:graph-body-weight 2.0
+                                    :graph-body-mode :whole
+                                    :graph-ascent-weight 0.0
+                                    :graph-applicability-penalty 0.0})]
+      (is (= 60.0 (:G-body-size big))))))
+
+(deftest graph-efe-status-aware-ascent-test
+  (testing "default ascent still credits all produced capabilities in goal scope"
+    (let [graph (graph-efe-cleanup-fixture)]
+      (is (= 0.5 (efe/mission-ascent-progress graph :goal "M-satisfied-only")))
+      (is (= 1.0 (efe/mission-ascent-progress graph :goal "M-mixed-status")))))
+
+  (testing "status-aware ascent skips satisfied caps and still credits held caps"
+    (let [graph (graph-efe-cleanup-fixture)]
+      (is (zero? (efe/mission-ascent-progress graph :goal "M-satisfied-only" true))
+          "already-satisfied produced cap contributes no ascent credit")
+      (is (= 0.5 (efe/mission-ascent-progress graph :goal "M-mixed-status" true))
+          "held produced cap keeps its depth-weighted credit"))))
+
+(deftest graph-efe-track-one-integration-ordering-test
+  (testing "opted-in cleanup keeps big on-ascent work ahead of small off-map work"
+    (let [graph (graph-efe-cleanup-fixture)
+          opts {:capability-graph graph
+                :pre-registered-goal :goal
+                :graph-off-map-penalty 4.0
+                :graph-body-mode :leaf
+                :graph-ascent-status-aware? true
+                :graph-applicability-penalty 0.0
+                :graph-body-weight 3.0
+                :graph-ascent-weight 20.0}
+          ranked (efe/rank-actions base-state
+                                   [{:type :open-mission :target "M-off-map"}
+                                    {:type :open-mission :target "M-on-ascent-big"}]
+                                   opts)
+          on-ascent (first ranked)
+          off-map (second ranked)]
+      (is (= "M-on-ascent-big" (get-in on-ascent [:action :target])))
+      (is (= 3.0 (:G-body-size on-ascent))
+          "leaf mode uses a bounded next-step body despite 30 open holes")
+      (is (= 4.0 (:G-graph-pragmatic off-map)))
+      (is (< (:G-total on-ascent) (:G-total off-map))))))
 
 (deftest star-map-live-blend-activation-and-provenance-test
   (testing "graph-known mission receives conservative graph terms and provenance"
