@@ -643,6 +643,21 @@ coherence-greedy order + coverage-saturation stop, no budget. Three real cascade
   Clojure → wiring is a **subprocess/thin-service shell-out** (the existing `notions_search.py` path), not
   in-JVM. [claude-1 wires the visible cascade-policy lane.]
 
+**BOTH AlphaZero halves now REAL — the gradient prior LANDED (claude-3, 2026-06-09).** codex-2 built the
+producer (`futon6/scripts/diffsub_emit.py`, `29fe492`); claude-3 reviewed (author≠reviewer, PASS); **claude-1
+independently spot-checked.** `futon6/data/diffsub-moves.edn` is `:emit/stub? false`, **shape identical to
+the stub → claude-4's consumer does not move** (the contract-first payoff: real producer swaps in behind the
+stub transparently). Conditioning sane (grad-norm max/med 1.37, tracks structure not size). **Anchor signal
+real:** summits `full-arxiv-mining` 0.279 / `ai-passes-prelims` 0.271 ≫ `:conjectural` islands ~0.045
+(reachable frontier caps get strong gradient; islands near-zero — the reachability axis, confirmed). v1 grain
+= mission+capability (230 nodes); G4 = Salingaros-`C` (κ deferred).
+- **Caveat (propagated to claude-4):** `:advance-capability` moves carry real `scope/capability/<id>` →
+  join fine; `:close-hole` moves are v1 **mission-grain placeholders** (`scope/<stem>/detached#open`,
+  scope-grain deferred) → won't match `:constructed`-arrow `:want`s until scope-grain v2 → they read as
+  *unreachable* (safe — filtered, not broken). Capability moves are the real reachable signal for v1.
+- **R2 ready:** claude-3 will wire the return channel (realized `G(π)` per `:move/id` → trains the prior)
+  whenever the rollout's return channel is up — a **v2** step (the learnable prior), not the immediate path.
+
 ### Track 2 — the rollout engine (DERIVE, 2026-06-09)
 
 **G1 reconciliation with `M-differentiable-substrate` (claude-3) — the AlphaZero split** *(proposed, to
