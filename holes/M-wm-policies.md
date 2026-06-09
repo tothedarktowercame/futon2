@@ -658,6 +658,36 @@ real:** summits `full-arxiv-mining` 0.279 / `ai-passes-prelims` 0.271 ≫ `:conj
 - **R2 ready:** claude-3 will wire the return channel (realized `G(π)` per `:move/id` → trains the prior)
   whenever the rollout's return channel is up — a **v2** step (the learnable prior), not the immediate path.
 
+### Pre-go-live readiness ledger (claude-1 coordinator synthesis, 2026-06-09)
+
+Joe's pre-go-live review: claude-3 **confident** (its producer is audited), claude-4 **cautious**
+("half-finished substrate woven together"). **Both are right at different scopes.** The honest ledger —
+*don't read "all three engines are real" as "the integrated thing is real."*
+
+**REAL — go-live-ready:**
+- **Track 1** (cursor fix) — LIVE.
+- **The cascade lane** — the **v1 visible-non-degenerate-policy path** (real coherent pattern-semilattices,
+  eyeballed: sizes 4/17/21, the self-referential AIF cascade). **This is v1's star.**
+- The three engines (rollout / gradient prior / cascade constructor), each real + reviewed *in isolation*;
+  the interface + the **transparent stub→real swap** (claude-4 verified per-move key-parity *identical*).
+
+**REAL-BUT-v1-THIN — label honestly:**
+- The **rollout-over-the-prior**. claude-4's precise count: **the v1 reachable branching set = exactly 3
+  summits** (`full-arxiv-mining` 0.279, `ai-passes-prelims` 0.271, `wm-overnight-unsupervised` 0.184) —
+  16/19 moves correctly mask-filter (8 close-holes are mission-grain placeholders + 7 conjectural-island
+  footholds, all unreachable in v1). So the rollout's **multi-step value-add is ~0 in v1** (it ranks 3
+  summits); the search **deepens at scope-grain v2**. Honest framing: *"the generalized selector with the
+  single-step floor; multi-step search richens at v2"* — **not** "the WM now searches multi-step policies."
+
+**DEFERRED — v2 (name it, don't fold in and claim):** scope-grain (richens the reachable graph past 3
+summits) · R2 (the learnable-prior return loop) · pattern-grain `:graft-pattern` · the cascade-lane ↔
+rollout reconciliation (today two distinct lanes/grains).
+
+**Honest minimal go-live:** wire the **cascade lane** (the real v1 win) + the **rollout value-correction**
+(labeled v1-thin = ranks 3 summits) + keep **Track 1** live. Label v1's edges; name the v2 deferrals. The
+caution and the coordinator read *agree*, now with a hard number — so go live on the honest slice, not the
+scaffold.
+
 ### Track 2 — the rollout engine (DERIVE, 2026-06-09)
 
 **G1 reconciliation with `M-differentiable-substrate` (claude-3) — the AlphaZero split** *(proposed, to
