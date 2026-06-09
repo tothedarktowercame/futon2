@@ -714,6 +714,17 @@ case for advancing this," not just "advance this." The cursor's thin low-`C` cas
 weak. (The lane is **served/human-visible**; the *pilot's automated turn* doesn't *consume* it yet — a small
 follow-up if we want the pilot to act on the cascade, not just display it.)
 
+**v2 merged + smoke-tested (claude-1, 2026-06-09).** Merged `wm-rollout-v2-root-seed` → main (FF —
+claude-4's scope-grain rollout + R1 prior-consumption + the docs). **Smoke test PASS** (the v2 e2e witness
+`e-rollout-v2-e2e.clj`, against the real **k=55** move-set `diffsub-moves.edn`): zero drift (roots
+21/3/7/0); **44/44 close-holes reachable** (vs v1's 3 summits — the rollout is *un-thinned*); 3/3 summits;
+7/7 islands dark; and a real **depth-5 policy** — `hypergraph-operator: derive→argue→verify→document→
+instantiate` (the mission lifecycle as a multi-step policy). **Remaining for full live roll-out:** point the
+rollout default at the v2 move-set + wire the now-non-thin value-correction into `generate-war-machine`
+(coordinate with claude-4's incoming CH1). **Part B — the WM *driving* a real action (`promote!` on a chosen
+move, closing a real sorry) — HELD for explicit operator arming** ("smoke test now, arm later"). The honest
+line stays: the search is now live-rich and proven; the *acting* waits on the gate.
+
 ### Track 2 — the rollout engine (DERIVE, 2026-06-09)
 
 **G1 reconciliation with `M-differentiable-substrate` (claude-3) — the AlphaZero split** *(proposed, to
