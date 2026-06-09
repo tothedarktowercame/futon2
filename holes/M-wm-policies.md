@@ -135,14 +135,20 @@ At P≈4 the top-5 become all on-map, the two `ascent>0` missions take #1/#2, an
    cost: reward/score the next single-cycle leaf (the `:graph/single-cycle-leaf?` flag exists) rather
    than penalize whole-mission size; gate by opt (e.g. `:graph-body-mode :whole | :leaf`, default
    `:whole` to preserve behavior).
-3. **Sweep, don't guess.** Run [[E-possible-world-regulator]] over the *whole field* (not just this
+3. **Make ascent status-aware** (hard requirement from the forward-model contract v1, below).
+   `mission-ascent-progress` must yield **zero** credit for capabilities already `:satisfied` — only
+   not-yet-satisfied capabilities in the goal's transitive scope count. Without this, a rollout farms
+   ascent by re-attesting satisfied caps. (Suspected-bug flag from fan-out pilot #1, now a correctness
+   requirement.) Test: an already-`:satisfied` produced cap contributes 0.
+4. **Sweep, don't guess.** Run [[E-possible-world-regulator]] over the *whole field* (not just this
    snapshot) to pin a robust `:graph-off-map-penalty` (and body-mode); P≈4 is the snapshot estimate —
    verify it generalizes. (NB: hand-guessing weights was refuted earlier this session; the regulator
    exists for exactly this.)
-4. **Apply live with consent.** Set the pinned values in `live-star-map-efe-opts`
+5. **Apply live with consent.** Set the pinned values in `live-star-map-efe-opts`
    (futon3c `report/war_machine.clj`). The live EFE is the operator's consent locus.
-5. **Tests.** `efe_test` for the off-map penalty (off-map action gets the penalty; on-map unchanged) and
-   the leaf-aware body (a big on-ascent mission no longer outranked by a small off-map one).
+6. **Tests.** `efe_test` for the off-map penalty (off-map action gets the penalty; on-map unchanged), the
+   leaf-aware body (a big on-ascent mission no longer outranked by a small off-map one), and status-aware
+   ascent (already-`:satisfied` cap contributes 0).
 
 > **Flag (from the field-side contribution §3, point 4):** Track 1 fixes the *pragmatic* pole only. The
 > additive `:G-gap` term is **provisional** — full-`C` (the substrate-2 epistemic field) becomes the macro
@@ -209,6 +215,40 @@ rollout to score both poles, the unified state must carry both, and the arrow mu
 region/overlay inside the unified substrate-2 (D1), or does it need to be joined in? That join is the
 contract's keystone. Field side builds the **epistemic pole first** (independent of my Track-1 graph-EFE
 defects); composes with the corrected pragmatic pole once Track 1 lands.
+
+#### Forward-model contract v1 — RESOLVED (claude-3 ↔ claude-1, 2026-06-09)
+
+**State-rep keystone answered: ONE state object via a thin materialize+link, NOT a coupled pair.** The
+hinge already exists by construction — D1 detected the substrate-2 capability-scopes by matching mission
+text against the *same* `M-capability-star-map.graph.edn` `:capabilities` registry that `efe.clj` reads
+as `:capability-graph`. So every capability-scope already names a real star-map capability; the
+mission↔capability link is already in substrate-2 (the `.graph.edn` capability *nodes/ascent-edges* are
+not yet materialized — that is the one small ingest claude-3 owns).
+
+- **State `s`** = a substrate-2 snapshot, one object hinged on capability-scopes:
+  - *epistemic part* = per-mission scope-hole set (open/closed + `:detached`).
+  - *pragmatic part* = per-capability `{:status, :pre-registered?, :scope/parents}` — the materialized
+    `.graph.edn` overlay over the shared mission nodes.
+- **Per-step score `g(s)`** = `epistemic(C / open-holes)` + `pragmatic(Track-1-corrected graph-ascent)`.
+  **Additive.** claude-1 bells the corrected pragmatic per-step; claude-3 composes it in.
+- **Transition `T(s, leaf) → s'`** (claude-4's arrow) = leaf closes scope-hole(s) [epistemic] **and**, if
+  it closes a *capability-scope*, flips that capability `:status → satisfied` [pragmatic, via the hinge].
+  One arrow updates both edge-families jointly — no separate join object.
+- **Rollout `G(π) = Σ discounted g(s_t)`** over `π = (leaf₁, leaf₂, …)`; `G(π)` vs greedy one-step is the
+  **completion-criterion-4 witness.**
+
+**The one requirement this puts on Track 1 (claude-1 owns):** the corrected pragmatic per-step must be
+**status-aware** — `mission-ascent-progress` currently credits a mission for the capabilities it
+`:produces` in the goal's transitive scope *without* checking whether they are already `:satisfied`. In a
+rollout that flips capabilities to `:satisfied`, an already-satisfied capability must yield **zero**
+further ascent-credit, else a policy farms ascent by re-attesting satisfied caps. (Flagged earlier in the
+fan-out pilot #1 as a suspected bug; the rollout makes it a hard correctness requirement.) So Track 1's
+deliverable to the field side = the off-map-penalised, leaf-aware **and status-aware** graph-ascent.
+
+**Division of labour:** claude-3 owns materialize+link + the Futon City EFE-field render (epistemic pole
+built + screenshotted already); claude-4 owns the arrows (grounded by D1's psr/pur/pxr labelled
+examples); claude-1 owns the corrected status-aware pragmatic per-step (Track 1) + the rollout engine
+once the field + arrows land.
 
 ---
 
