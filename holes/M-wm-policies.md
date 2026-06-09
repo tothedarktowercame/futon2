@@ -480,10 +480,27 @@ judgement (`!wm-snapshot`, scheduler period 300s) refreshes on the next tick (tr
 `request-tick!`). NB the live JVM now runs the reloaded `efe`/`war-machine`; a JVM restart would reload
 from the (committed) branch files.
 
-**Track 2 — in progress:** state (claude-3, done) + transition (claude-4 arrow store + the `:advances-cap`
-promote! E-excursion, greenlit) + per-step (Track-1, done) → the **rollout engine** (mine) is the remaining
-build, plus the route-(a) island-foothold (aligned, build held for operator go). Witness = a ≥2-step
-rollout that beats the greedy one-step pick.
+**Track 2 — the rollout engine LANDED + reviewed-pass + independently verified (2026-06-09).** The search
+half of the AlphaZero loop now exists and the witness passes.
+- **Shas:** futon2 `65f137d` "Add policy rollout engine" (`futon2.aif.rollout` + `rollout_test.clj` +
+  witness `holes/labs/e-rollout-witness.clj`); futon3a `2122daf` "Extract pure meme transition step"
+  (`src/meme/step.clj` — the MUST-A shared pure kernel). Codex-authored, **claude-4-reviewed** (traced).
+- **claude-1 independent verification (the real gate, not a rubber-stamp — what I ran):**
+  - `rollout-test`: **3 tests / 9 assertions / 0 failures.**
+  - Full futon2 suite: **326 / 1004, 1 failure** = the *same pre-existing* `sorry-registry` red (was 323/1;
+    the 3 new rollout tests added cleanly — **no new regression**).
+  - **Witness (independent lab run):** greedy one-step `G = −0.2` vs **2-step rollout `G = −1.0`** — the
+    multi-step policy (`root→bridge`, `bridge→agency`, where step-1 unlocks step-2's `have`) **beats greedy**,
+    which greedy can't see. **This is the proof policy-EFE works.**
+  - **MUST-A ✓** live-plan-target `:claimed` = sim-target `:claimed` (same `meme.step/step` kernel, no drift).
+  - **MUST-B ✓** rollout write-count = **0** (zero `:7071` writes during search — the safety invariant holds).
+  - `:move/terminal?` carried + truncated (centre-mess); consumes the real 19-move stub honoring
+    `:conjectural` reachability; PUCT-prior branching (R1) + threaded `:move/id` return-channel (R2).
+- **State:** the SEARCH half is live against claude-3's stub. The full loop needs claude-3's real grad-loop
+  producer (building in parallel) as the live prior, + v2 (the return channel — claude-4 emits realized
+  `G(π)`-per-`:move/id` back to train the prior, on demand). **Gated on operator merge** (branch
+  `wm-outing/2026-06-08-regulator-sweep`).
+- Still open: route-(a) island-foothold (aligned, build held for operator go).
 
 ### Track 2 — the rollout engine (DERIVE, 2026-06-09)
 
