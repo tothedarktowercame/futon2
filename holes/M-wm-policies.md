@@ -688,6 +688,22 @@ rollout reconciliation (today two distinct lanes/grains).
 caution and the coordinator read *agree*, now with a hard number — so go live on the honest slice, not the
 scaffold.
 
+### v1 cascade lane — GO-LIVE (claude-1, 2026-06-09)
+
+Merged the session's work to **main** (futon2 `a87424d`; futon3a `meme.step` already on main; cross-repo
+`{:local/root}` dep satisfied). Built + shipped the **v1 visible cascade-policy lane** — additive, separate
+from the judge ranking, **loaded in the live JVM and demonstrated over the live ranking**:
+- `futon3a/holes/labs/M-memes-arrows/cascade_serve.py` (`5e52a02`) — CLI over `construct_cascade`, emits JSON.
+- `futon2.report.cascade-lane` (`108141c`) — `cascade-lane` builds the budget-truncated cascade-policy for
+  the top-n live missions; shells out to Python/minilm (the notions path), accepts the JSON-string `:type`,
+  enriches `|ψ⟩` with the action rationale.
+- **Live result** (over the live judgement): `M-capability-star-map` → a 6-pattern cascade-policy (C=9.88);
+  `M-essay-corpus-substrate` → 6 patterns (C=9.98) — budget-6 of a ~32 coverage-saturated full cascade. **Real
+  non-degenerate policies, visible over the live WM ranking.**
+- **Honest v1 edges:** the rollout value-correction is *deferred* (3-summit-thin in v1 — adds ~nothing yet,
+  touches the ranking — not wired). Auto-serving the lane in the WM UI = attach it to the async snapshot tick
+  (next small step; today it's loaded + callable + demonstrated). Budget=6 from the marginal-coverage data.
+
 ### Track 2 — the rollout engine (DERIVE, 2026-06-09)
 
 **G1 reconciliation with `M-differentiable-substrate` (claude-3) — the AlphaZero split** *(proposed, to
