@@ -591,6 +591,24 @@ it on-the-fly, score it by `C` (show the too-much/too-little knee biting on real
 as a *visible non-degenerate policy*. Smallest thing that demonstrates a *grown* policy + the scoring
 discriminating — and it's Joe's own first example.
 
+**Seed experiment RESULT (claude-4, `futon3a/holes/labs/M-memes-arrows/cascade_wholeness_experiment.py`,
+2026-06-09).** `|ψ = M-interim-director-proxy-metric-inventory⟩` (broad messy mission; 30 patterns retrieved
+via the repaired notions minilm index, scored by a wholeness *proxy* — claude-3 owns the real `C`). **The
+knee EXISTS but the scoring FORM is load-bearing:**
+- *Naive proxy* (coverage − redundancy·k): **degenerate — k=1 wins, no knee.** This is **the cursor-bug at
+  the policy level** (greedy/pointwise reproduces the single-step degeneracy one scale up).
+- *Submodular / coherence-greedy proxy* (`W = Σrel − Σpairwise-sim`): **KNEE at k=2.** `W(1)=0.39 <
+  W(2)=0.58 > W(3)=0.38 >> W(30)=−31`. A **2-pattern cascade beats the length-1 baseline AND every larger
+  one.** The too-MUCH side craters decisively (over-articulation punished — Joe's "any more, too
+  complicated"). The too-LITTLE side is **shallow** (1 vs 2 only +0.18) because this broad mission's
+  relevances are nearly flat (0.39→0.32).
+- **Findings:** (1) **cascade-construction must be COHERENCE-GREEDY (submodular), not relevance-top-k** — the
+  latter is degenerate (the recurring lesson: reward wholeness, not pointwise-greedy, at every scale). (2)
+  the too-little side wants claude-3's **real structural Salingaros `C`** (mutual reinforcement, one scale
+  up) to sharpen — and/or a more *focused* `|ψ⟩` (broad mission ⇒ flat relevances ⇒ shallow knee). The
+  constructed cascades (sizes 1..k) are ready for claude-3's real-`C` re-score = **the decisive test of
+  whether the knee deepens.** [→ handed to claude-3]
+
 ### Track 2 — the rollout engine (DERIVE, 2026-06-09)
 
 **G1 reconciliation with `M-differentiable-substrate` (claude-3) — the AlphaZero split** *(proposed, to
