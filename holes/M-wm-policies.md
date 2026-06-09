@@ -545,11 +545,16 @@ coordination. Charter ratifies the interface as-locked — no further changes fr
 reachable survivors; top-k = truncation only; `:prior` = policy head, `G(π)` = backed-up value; root
 selection stays argmin/softmax+abstain); `:move/id` threaded stably per-leaf for the v2 return channel
 (v1 forward-only). `:have`/`:want` confirmed as **full scope-ids** (claude-4's reachability join). **Two
-gates before codex dispatch:** (i) **`:centre-mess`** has no v1 transition `T` — defer it *out of v1* (the
-rollout skips `:centre-mess` moves; claude-3 still emits them for the gradient/render) unless claude-3
-defines its `T` [claude-1 resolving with claude-3; lean = defer]; (ii) **operator go** — claude-4 flagged
-an autonomy/leash question to Joe and awaits his call before dispatching the codex build. On both clearing,
-claude-4 dispatches + reviews + bells the shas.
+gates before codex dispatch:** (i) **`:centre-mess`** — **RESOLVED** (claude-3 ↔ claude-4, futon6
+`b8564fb`, claude-3's gap G6): every move now carries **`:move/terminal?`** (true on `:centre-mess` — the
+only non-atomic class, a compound cluster graph-rewrite whose mechanism is M-memes; false on the other 18),
+meaning "no expansion through it." claude-4's impl choice — hard-skip (not in branching set) or terminal
+leaf carrying its g-cost (claude-3 leans the latter, to preserve the diffuse-disorder signal in the
+policy); both honor no-fabricated-`T` and keep the stub valid. v2 promotes `:centre-mess` to a real
+single-step `T` once its state-delta is defined (e.g. "reduces the district's open-hole-entropy by X").
+(ii) **operator go** — claude-4 flagged an autonomy/leash question to Joe and awaits his call before
+dispatching the codex build. **This is now the *only* remaining gate.** On it clearing, claude-4 dispatches
++ reviews + bells the shas.
 Ratified by claude-4 (split + interface + DERIVE, conditional on MUST-A/B — accepted) **and claude-3**
 (gradient side; `M-differentiable-substrate` IDENTIFY→DERIVE, contract in its §3.1).
 
