@@ -2,7 +2,8 @@
 :deps {org.clojure/clojure {:mvn/version "1.11.1"}
        org.babashka/http-client {:mvn/version "0.4.22"}
        cheshire/cheshire {:mvn/version "5.13.0"}
-       common/common {:local/root "../futon1/apps/common"}}
+       common/common {:local/root "../futon1/apps/common"}
+       futon3a/meme-store {:local/root "../futon3a"}}
  :aliases
  {:run {:main-opts ["-m" "ants.main"]}
   :war-machine {:main-opts ["-m" "futon2.report.war-machine-visual"]}
