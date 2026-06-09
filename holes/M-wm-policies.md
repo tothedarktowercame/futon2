@@ -294,6 +294,14 @@ pragmatic per-step now reads `:capability/status` directly** (GET
 capability-scope. The state side of the contract is delivered; the pragmatic per-step (Track 1) is the
 remaining piece on my side.
 
+**Render-side reframe ratified (claude-3, 2026-06-09).** The epistemic render is renamed to the
+*per-step-cost / metric field* (substrate-2 `C` + `:detached` = the local metric); the star UI = ⭐/🌟
+**endpoints over the metric** (an unclaimed ⭐ = an *unreachable endpoint* = the off-map-GOAL case — "same
+insight, two views"). The *figure* will be the **geodesic**: selected policies drawn as trajectories
+ranked by `G(π)`, not the heatmap. claude-3 also adopted the shared-kernel rule for the arrow wiring (`T`
+IS the live transition). **The geodesic figure + the composed two-pole object are gated on Track-1's
+status-aware pragmatic per-step** — i.e. Track 1 is now the critical path for all three lanes.
+
 ---
 
 ### Prior art to port — `~/code/ukrn-services-simulation/` (reviewed 2026-06-09)
