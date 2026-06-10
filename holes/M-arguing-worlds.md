@@ -221,3 +221,17 @@ grounded yardstick is an **audit**, not a retraining. The grounded retrial asks 
 actually earn peradams* — "better" measured by **real discharge** rather than self-estimated `G(π)`. That is
 exactly the non-circular external measure this v0 negative is "revisit-able under." The v0 result stands as
 recorded; the grounded retest is framed as a calibration-audit, escrowed on [[M-peradam-grounding]].
+
+## STANDARD-VERIFY ratified — grounded yardstick = CLOSURE-FOLD outcome, car-independent (2026-06-10)
+
+Joe ratified STANDARD-VERIFY (via claude-3); this mission's grounded path is **`:contract-released`**,
+**car-independent**. Per the converged `futon3c/holes/campaigns/grounded-learning-spec.md`, the grounded
+yardstick is now the **closure-fold outcome** (a real closure in the shared store, external to wholeness-`C`)
+— **not** the peradam. This supersedes the "revisit under the grounded peradam yardstick" framing above: the
+grounded retrial asks *does arguing-across-worlds beat single-best when "better" = the used-set actually
+**closes** (a real fold)*, rather than self-estimated `G(π)` (v0 floor) or peradam-discharge (the earlier
+escrow framing). The peradam remains only the out-of-loop **auditor** (drift-check), never the retrial's
+yardstick. The v0 negative stands as recorded; the grounded retrial is now buildable on the live closure
+signal — gated on enough diverse buildouts reaching real closures (the same diversity precheck applies),
+and, like [[M-pattern-posteriors]], it can only *discriminate* once **failed** folds are recorded (today the
+ledger is success-only — see that mission's survivorship-bias finding).
