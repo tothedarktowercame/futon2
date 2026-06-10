@@ -11,13 +11,42 @@
    deepens at scope-grain v2 (in v1 its reachable set is 3 summits). Sim-only, read-only:
    constructs cascades over a state copy, never promotes/writes."
   (:require [cheshire.core :as json]
-            [clojure.java.shell :as sh]
-            [clojure.string :as str]))
+            [clojure.java.io :as io]
+            [clojure.string :as str])
+  (:import [java.util.concurrent TimeUnit]))
 
 (def ^:private py "/home/joe/code/futon3a/.venv/bin/python")
 (def ^:private script "/home/joe/code/futon3a/holes/labs/M-memes-arrows/cascade_serve.py")
 (def ^:private script-dir "/home/joe/code/futon3a/holes/labs/M-memes-arrows")
 (def default-budget 6)
+
+(def ^:private cascade-timeout-ms
+  "Hard ceiling on the Python cascade constructor (minilm cold-load + build). A hung child must NEVER
+   wedge the calling scheduler thread permanently (fable-1, WM cycle-#2 hardening). Env-overridable."
+  (long (or (some-> (System/getenv "FUTON2_CASCADE_TIMEOUT_MS") parse-long) 30000)))
+
+(defn- read-stream [stream]
+  ;; drain in a future so a chatty child can't deadlock on a full pipe buffer
+  (future (with-open [rdr (io/reader stream)] (slurp rdr))))
+
+(defn- sh-timed
+  "Run cmd (a seq of strings) in dir with a HARD timeout. Returns {:exit :out} or nil on
+   timeout/failure. Mirrors futon3c watcher/projections/python.clj: ProcessBuilder + waitFor(timeout)
+   + destroy/destroyForcibly, so a hung cascade_serve.py can never wedge the calling (scheduler)
+   thread — unlike clojure.java.shell/sh, whose waitFor is unbounded."
+  [cmd dir timeout-ms]
+  (let [proc (-> (ProcessBuilder. ^java.util.List (vec cmd))
+                 (.directory (io/file dir))
+                 (.start))
+        out* (read-stream (.getInputStream proc))
+        _err* (read-stream (.getErrorStream proc))]
+    (if (.waitFor proc timeout-ms TimeUnit/MILLISECONDS)
+      {:exit (.exitValue proc) :out @out*}
+      (do (.destroy proc)
+          (when-not (.waitFor proc 1000 TimeUnit/MILLISECONDS)
+            (.destroyForcibly proc)
+            (.waitFor proc 1000 TimeUnit/MILLISECONDS))
+          nil))))
 
 ;; A cascade is deterministic in (|psi>, budget) — the pattern library + minilm are stable —
 ;; so memoize across windows/ticks. Only successes are cached (failures retry).
@@ -31,8 +60,9 @@
   ([psi-text budget]
    (or (get @!cache [psi-text budget])
        (let [v (try
-                 (let [{:keys [exit out]} (sh/sh py script psi-text (str budget) :dir script-dir)]
-                   (when (zero? exit)
+                 (let [{:keys [exit out]} (sh-timed [py script psi-text (str budget)]
+                                                    script-dir cascade-timeout-ms)]
+                   (when (and exit (zero? exit))
                      (json/parse-string out true)))
                  (catch Exception _ nil))]
          (when v (swap! !cache assoc [psi-text budget] v))
