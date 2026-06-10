@@ -24,12 +24,24 @@
       (is (= 2 (count openes)))
       (is (= #{:a :d} (set (map :id openes)))))))
 
-(deftest open-sorrys-default-includes-meta-sorry-test
-  (testing "the default-path registry includes the meta-sorry as an open entry"
-    (let [open (sr/open-sorrys)
-          ids (set (map :id open))]
+(deftest default-registry-loads-and-contains-meta-sorry-test
+  ;; The meta-sorry was DESIGNED to be discharged, and was — resolved
+  ;; 2026-05-25 by pilot claude-1 (cg-5b03db29, :acknowledged-v1-in-force,
+  ;; committed 2026-05-30). The old assertion here pinned it as permanently
+  ;; :open, failing the suite from that commit onward. The durable contract:
+  ;; the default registry file loads, the meta-sorry entry exists (any
+  ;; status), and open-sorrys returns only genuinely-:open entries —
+  ;; possibly none: an all-discharged registry is a real state (it is WHY
+  ;; the WM surfaces learn-action-class :address-sorry — the substrate ran
+  ;; dry on 2026-05-25 and was never refilled).
+  (testing "the default-path registry loads and carries the meta-sorry entry"
+    (let [doc (sr/load-sorrys)
+          ids (set (map :id (:sorrys doc)))]
+      (is (seq (:sorrys doc)) "default registry must not be empty")
       (is (contains? ids :sorry/wm-aif-substrate-addressability)
-          "meta-sorry must be present and open in the default registry"))))
+          "meta-sorry entry must exist in the default registry")
+      (is (every? #(= :open (:status %)) (sr/open-sorrys))
+          "open-sorrys must return only :open entries"))))
 
 (deftest can-propose-address-sorry-when-state-has-sorrys-test
   (testing "can-propose? :address-sorry returns true iff state carries non-empty :sorrys"
