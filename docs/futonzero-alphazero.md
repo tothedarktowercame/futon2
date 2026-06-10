@@ -25,7 +25,8 @@ the **Pudding Prover**: the anti-laundering verifier that tries to *refute* a pe
 loop genuinely two-player and imports the curriculum dynamics. Until then, read the table below as the
 *architecture*, not the *closed loop*.
 
-**…or maybe self-play is the wrong frame entirely (Joe, 2026-06-09 — open, early).** The peradam may be
+**…or maybe self-play is the wrong frame entirely (Joe, 2026-06-09 — measured negative on the realized-`G(π)`
+floor 2026-06-10, revisit under the grounded yardstick; see the falsifiable-test result below).** The peradam may be
 *exogenous* (like AlphaZero's Lee Sedol match — the proof, not the trainer), and the endogenous engine may
 not be a formal adversary at all but **argument-across-possible-worlds**: competing *pattern-theoretic
 buildouts* of the same circumstance, the more-*whole* one winning. This would **out-bootstrap** AlphaZero —
@@ -37,6 +38,17 @@ patterns are the tournament. Generative dialectic (the curriculum) + adversarial
 Pudding-Prover peradam, the incorruptible win) + the exogenous peradam-anchor (against Goodhart drift) may
 be the real shape. **Falsifiable test:** does arguing across buildouts beat the single best buildout? If not,
 it's ceremony. This is plausibly the conceptual core that makes FutonZero *Futon*-Zero rather than a port.
+
+> **Measured (M-arguing-worlds v0, 2026-06-10 — codex-1 build, claude-1 PM-review, `2eca617`):** on the
+> realized-`G(π)` floor, **no** — on a genuinely-diverse generator (4 lenses, pattern-overlap 0.11, moves
+> disagree) the dialectic does *not* beat the single best buildout (`:single-best-holds`). So **on this
+> floor it is ceremony** — Joe's own argument-across-worlds hypothesis falsified and recorded honestly, a
+> clean campaign negative (guarded against both failure modes: yardstick is realized-`G(π)` not `C`, and a
+> non-diverse generator returns `:monotone-generator` before judging — not a circular grade, not a
+> diversity artifact). **Caveat:** the yardstick is the realized-`G(π)` floor, *not* the grounded peradam;
+> the peradam-yardstick seam is `:escrowed` ([[M-peradam-grounding]]) and the verdict is revisit-able under
+> it. **Interlock:** M-pattern-posteriors v0 (sparse near-null) lands the *same* conclusion from the other
+> lane — both point at the grounded peradam as the unlock.
 
 The pivot that made this possible: **Expected Free Energy is a property of *policies*, so `G(π)`
 is a path integral, not a scalar field.** A "next step" is the degenerate length-1 policy. Ranking
