@@ -215,3 +215,9 @@ yardstick** (escrowed, [[M-peradam-grounding]]) could flip it — codex-1 correc
 negative; revisit under the grounded yardstick. **Interlock:** with [[M-pattern-posteriors]] (sparse-data
 near-null, needs grounded evidence to move), **both cascade-lane v0 results converge on M-peradam-grounding
 as the unlock** — the campaign spine, confirmed independently from two lanes. Mergeable on operator/coordinator call.
+
+**Role-fork resolved (Joe via claude-3, 2026-06-10 — `:O-peradam-role` → CALIBRATION, not training):** the
+grounded yardstick is an **audit**, not a retraining. The grounded retrial asks *does the dialectic's winner
+actually earn peradams* — "better" measured by **real discharge** rather than self-estimated `G(π)`. That is
+exactly the non-circular external measure this v0 negative is "revisit-able under." The v0 result stands as
+recorded; the grounded retest is framed as a calibration-audit, escrowed on [[M-peradam-grounding]].
