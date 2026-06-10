@@ -27,8 +27,8 @@
    set means adding both a `predict-effects` multimethod arm (below)
    and a `can-propose?` arm if the action requires substrate
    addressability."
-  #{:no-op :address-sorry :open-mission :fire-pattern :learn-action-class
-    :pursue :decompose})
+  #{:no-op :address-sorry :open-mission :advance-mission :fire-pattern
+    :learn-action-class :pursue :decompose})
 
 (defn- valid-action?
   "An action is a map carrying :type (one of action-types). Most actions
@@ -84,6 +84,19 @@
    :obs-variance {:mission-health 0.02
                   :active-repo-ratio 0.01}
    :events [{:entity-id target :type :spawned :weight weight}]})
+
+(defmethod predict-effects :advance-mission
+  [_state {:keys [target weight] :or {weight 1.0}}]
+  ;; advancing an ALREADY-OPEN mission discharges open holes: mission-health
+  ;; rises and remaining-work pressure falls. The event is :addressed, not
+  ;; :spawned — an in-flight mission advanced is work discharged, not a new
+  ;; entity. (:open-mission predicting :spawned for already-open missions
+  ;; was the WM scoring a hole that wasn't there — pilot cycle #1, 2026-06-10.)
+  {:obs-delta {:mission-health 0.04
+               :sorry-count-norm -0.05}
+   :obs-variance {:mission-health 0.015
+                  :sorry-count-norm 0.01}
+   :events [{:entity-id target :type :addressed :weight weight}]})
 
 (defmethod predict-effects :fire-pattern
   [_state {:keys [target weight] :or {weight 1.0}}]

@@ -407,15 +407,21 @@
        (map-indexed (fn [i entry] (assoc entry :rank (inc i))))
        vec))
 
+(def ^:private mission-action-types
+  ;; :advance-mission = engage an already-open mission's holes (the
+  ;; enumerator's type since pilot cycle #1, 2026-06-10); :open-mission
+  ;; retained for genuinely-unopened targets.
+  #{:open-mission :advance-mission})
+
 (defn- live-open-mission-ranked-entry?
   [missions entry]
   (let [action (:action entry)]
-    (or (not= :open-mission (:type action))
+    (or (not (mission-action-types (:type action)))
         (mission-registry/live-mission-target? missions (:target action)))))
 
 (defn- canonicalize-open-mission-ranked-entry
   [entry]
-  (if (= :open-mission (get-in entry [:action :type]))
+  (if (mission-action-types (get-in entry [:action :type]))
     (let [registry-id (mission-registry/mission-target-id
                        (get-in entry [:action :target]))]
       (cond-> entry
