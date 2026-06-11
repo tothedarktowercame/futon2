@@ -615,7 +615,14 @@
   {:id :sorry/pattern-two-projections-of-one-quantity
    :title "Mint structure/two-projections-of-one-quantity — cited in ARGUE, absent from the library"
    :raised-at "2026-06-10"
-   :status :open
+   :status :addressed
+   :addressed-at "2026-06-11"
+   :resolution
+   (str
+    "Pattern minted: futon3/library/structure/"
+    "two-projections-of-one-quantity.flexiarg (futon3 c1c0325, Turn-3 "
+    "2026-06-10). Provenance arrow arr-4d50ce67-10b promotion = store-side "
+    "half, ground-control follow-up.")
    :rationale
    (str
     "GAP (meme.db arrow arr-4d50ce67-10b, cascade/E-mission-head-argue): "
