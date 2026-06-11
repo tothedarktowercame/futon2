@@ -3581,14 +3581,31 @@
                                     :scan-id (or (:scan-id scan-data)
                                                  scan-id
                                                  "war-machine/judge")})
-        wm-ranked (->> (efe/rank-actions wm-state
-                                          wm-enriched-candidates
-                                          (live-star-map-efe-opts
-                                           (live-gap-view-efe-opts
-                                            {:time-pressure wm-time-pressure
-                                             :horizon-steps wm-horizon-steps})))
+        wm-efe-opts (live-star-map-efe-opts
+                     (live-gap-view-efe-opts
+                      {:time-pressure wm-time-pressure
+                       :horizon-steps wm-horizon-steps}))
+        wm-ranked (->> (efe/rank-actions wm-state wm-enriched-candidates wm-efe-opts)
                        apply-anamnesis-tiebreak
                        (filter-live-open-mission-ranked-actions wm-missions))
+        ;; Dual-prediction logging (target-sensitive model, 2026-06-11): every
+        ;; ranked entry also carries :G-constant — the frozen v1 constant
+        ;; model's counterfactual G for the SAME (state, action) — so
+        ;; constant-vs-scaled discriminates on the same measured pairs.
+        ;; Pure recompute, no second scan.
+        g-constant-by-key (binding [fm/*effects-mode* :constant]
+                            (into {}
+                                  (map (fn [e] [[(get-in e [:action :type])
+                                                 (get-in e [:action :target])]
+                                                (:G-total e)]))
+                                  (efe/rank-actions wm-state wm-enriched-candidates wm-efe-opts)))
+        wm-ranked (mapv (fn [e]
+                          (if-some [gc (get g-constant-by-key
+                                            [(get-in e [:action :type])
+                                             (get-in e [:action :target])])]
+                            (assoc e :G-constant gc)
+                            e))
+                        wm-ranked)
         ;; v0.13 R6 enhancement: pre-filter by can-execute? admissibility
         ;; (composes with can-propose? at proposer-side); then run
         ;; deliberative select-action with default-mode-select as a

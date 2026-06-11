@@ -273,6 +273,10 @@
          :target (:id m)
          :weight 1.0
          :mission-path (:path m)
+         ;; carried so the forward model can be TARGET-SENSITIVE without a
+         ;; registry dependency cycle (predict reads the action, not the
+         ;; registry) — same pattern as :intrinsic-value on address-sorry.
+         :open-hole-count (:open-hole-count m)
          :rationale (str "mission substrate: " (:title m)
                          " [" (name (:status-class m))
                          "; advance open holes]")}))
