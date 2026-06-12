@@ -1,0 +1,1221 @@
+{
+ "frozen-at": "2026-06-12T09:46:30.061869542Z",
+ "source": "GET /api/alpha/war-machine (live snapshot)",
+ "purpose": "E-cascade-sampler-sampler exit-1 circumstance freeze (raw); circumstance assembly per arguing-worlds experiment-runner follows",
+ "ranked-actions": [
+  {
+   "type": "advance-mission",
+   "target": "M-first-flights",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c/holes/missions/M-first-flights.md",
+   "open-hole-count": 4,
+   "rationale": "mission substrate: M-first-flights \u2014 we have flight data (Orville); we need the data shapes (Wilbur) [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 1
+  },
+  {
+   "type": "learn-action-class",
+   "rationale": "no addressable entities for :fire-pattern in current substrate",
+   "structural-pressure-per-action": 0.0,
+   "rank": 2
+  },
+  {
+   "type": "address-sorry",
+   "target": "sorry/pattern-measure-never-target",
+   "weight": 1.0,
+   "rationale": "open sorry: Mint the A1 discipline as a library pattern (third live instance today)",
+   "structural-pressure-per-action": 0.5,
+   "rank": 3
+  },
+  {
+   "type": "address-sorry",
+   "target": "sorry/pattern-typed-theme-liberates-the-solo",
+   "weight": 1.0,
+   "rationale": "open sorry: Mint the Gantt-ification defense \u2014 load-bearing in two missions, not in the library",
+   "structural-pressure-per-action": 0.5,
+   "rank": 4
+  },
+  {
+   "type": "address-sorry",
+   "target": "sorry/pudding-g1-arrow-witness-binding",
+   "weight": 1.0,
+   "rationale": "open sorry: G-REWARD's named open home: bind arrow-witness to the per-turn affect detector",
+   "structural-pressure-per-action": 0.09999999999999998,
+   "rank": 5
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-futonzero-generative",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon0/holes/missions/M-futonzero-generative.md",
+   "open-hole-count": 9,
+   "rationale": "mission substrate: Mission: FutonZero Generative \u2014 Self-Bootstrapping WM Learner [open; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 6
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-futonzero-mvp",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon0/holes/missions/M-futonzero-mvp.md",
+   "open-hole-count": 8,
+   "rationale": "mission substrate: Mission: FutonZero MVP \u2014 Capability Monitor + Tutor for First Proof [identify; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 7
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-pattern-application-diagnostic",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3/holes/missions/M-pattern-application-diagnostic.md",
+   "open-hole-count": 9,
+   "rationale": "mission substrate: Mission: Pattern Application Diagnostic [identify; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 8
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-pattern-mining",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3/holes/missions/M-pattern-mining.md",
+   "open-hole-count": 7,
+   "rationale": "mission substrate: Mission: Pattern Mining [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 9
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-action-cost-modelling",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c-desktop-save/holes/missions/M-action-cost-modelling.md",
+   "open-hole-count": 23,
+   "rationale": "mission substrate: Mission: Action Cost/Benefit Modelling for the WM [open; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 10
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-agency-hardening",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c-desktop-save/holes/missions/M-agency-hardening.md",
+   "open-hole-count": 11,
+   "rationale": "mission substrate: M-agency-hardening -- Conference-ready IRC-backed Agency [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 11
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-bounded-in-flight-state",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c-desktop-save/holes/missions/M-bounded-in-flight-state.md",
+   "open-hole-count": 22,
+   "rationale": "mission substrate: M-bounded-in-flight-state: transactional discipline over the file-system substrate [open; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 12
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-kangaroo",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c-desktop-save/holes/missions/M-kangaroo.md",
+   "open-hole-count": 6,
+   "rationale": "mission substrate: M-kangaroo \u2014 Warm-pouch persistent agent processes [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 13
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-war-machine-pilot",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c-desktop-save/holes/missions/M-war-machine-pilot.md",
+   "open-hole-count": 9,
+   "rationale": "mission substrate: Mission: War Machine Pilot [open; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 14
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-action-cost-modelling",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c/holes/missions/M-action-cost-modelling.md",
+   "open-hole-count": 23,
+   "rationale": "mission substrate: Mission: Action Cost/Benefit Modelling for the WM [open; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 15
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-agency-hardening",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c/holes/missions/M-agency-hardening.md",
+   "open-hole-count": 11,
+   "rationale": "mission substrate: M-agency-hardening -- Conference-ready IRC-backed Agency [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 16
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-bounded-in-flight-state",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c/holes/missions/M-bounded-in-flight-state.md",
+   "open-hole-count": 22,
+   "rationale": "mission substrate: M-bounded-in-flight-state: transactional discipline over the file-system substrate [open; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 17
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-chipwitz-corps",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c/holes/missions/M-chipwitz-corps.md",
+   "open-hole-count": 12,
+   "rationale": "mission substrate: Mission: ChipWitz Corps \u2014 the warranted-work control layer [identify; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 18
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-kangaroo",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c/holes/missions/M-kangaroo.md",
+   "open-hole-count": 6,
+   "rationale": "mission substrate: M-kangaroo \u2014 Warm-pouch persistent agent processes [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 19
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-war-machine-pilot",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c/holes/missions/M-war-machine-pilot.md",
+   "open-hole-count": 9,
+   "rationale": "mission substrate: Mission: War Machine Pilot [open; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 20
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-or-training-as-learning-system",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon4/holes/missions/M-or-training-as-learning-system.md",
+   "open-hole-count": 8,
+   "rationale": "mission substrate: M-or-training-as-learning-system [identify; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 21
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-peeragogy-rewrite",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon4/holes/missions/M-peeragogy-rewrite.md",
+   "open-hole-count": 7,
+   "rationale": "mission substrate: M-peeragogy-rewrite: scope, shape, and carriers for an updated peeragogy [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 22
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-simulating-or-training-as-learning-system",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon4/holes/missions/M-simulating-or-training-as-learning-system.md",
+   "open-hole-count": 9,
+   "rationale": "mission substrate: M-simulating-or-training-as-learning-system [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 23
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-vsatarcs-writer",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon4/holes/missions/M-vsatarcs-writer.md",
+   "open-hole-count": 7,
+   "rationale": "mission substrate: Mission: M-vsatarcs-writer [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 24
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-eoi-outbox-management",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon5a/holes/missions/M-eoi-outbox-management.md",
+   "open-hole-count": 6,
+   "rationale": "mission substrate: Mission: EOI Outbox Management [identify; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 25
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-expressions-of-interest",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon5a/holes/missions/M-expressions-of-interest.md",
+   "open-hole-count": 6,
+   "rationale": "mission substrate: Mission: Expressions of Interest [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 26
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-learning-loop",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon5a/holes/missions/M-learning-loop.md",
+   "open-hole-count": 6,
+   "rationale": "mission substrate: Mission: Learning Loop (capability mining across missions) [identify; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 27
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-stack-geometry",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon5a/holes/missions/M-stack-geometry.md",
+   "open-hole-count": 24,
+   "rationale": "mission substrate: Mission: Stack Geometry (spatial synthesis of the existing rationalization attempts) [identify; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 28
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-war-machine-wiring",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon5a/holes/missions/M-war-machine-wiring.md",
+   "open-hole-count": 10,
+   "rationale": "mission substrate: Mission: War Machine Wiring (last-mile bridge to M-live-geometric-stack) [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 29
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-canon-fingerprint-store",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon6/holes/missions/M-canon-fingerprint-store.md",
+   "open-hole-count": 7,
+   "rationale": "mission substrate: Mission: Canon fingerprint store \u2014 Billey-Tenner instantiation for symbol grounding [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 30
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-superpod-mark3",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon6/holes/missions/M-superpod-mark3.md",
+   "open-hole-count": 7,
+   "rationale": "mission substrate: Mission: Superpod Mark 3 \u2014 Pattern-Tagged + Geometrically Annotated arXiv Corpus [identify; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 31
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-reflective-discipline",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon2-arguing-worlds/holes/missions/M-reflective-discipline.md",
+   "open-hole-count": 5,
+   "rationale": "mission substrate: Mission: Reflective Discipline (PSR / PUR / PAR as tangent vectors) [identify; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 32
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-reflective-discipline",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon2/holes/missions/M-reflective-discipline.md",
+   "open-hole-count": 5,
+   "rationale": "mission substrate: Mission: Reflective Discipline (PSR / PUR / PAR as tangent vectors) [identify; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 33
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-single-entry-point",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c-desktop-save/holes/missions/M-single-entry-point.md",
+   "open-hole-count": 5,
+   "rationale": "mission substrate: M-single-entry-point: One JVM, one launcher for the local dev stack [open; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 34
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-single-entry-point",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c/holes/missions/M-single-entry-point.md",
+   "open-hole-count": 5,
+   "rationale": "mission substrate: M-single-entry-point: One JVM, one launcher for the local dev stack [open; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 35
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-futon-enrichment",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon4/holes/missions/M-futon-enrichment.md",
+   "open-hole-count": 5,
+   "rationale": "mission substrate: Mission: Futon Enrichment (Rational Reconstruction) [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 36
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-web-arxana-missions",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon4/holes/missions/M-web-arxana-missions.md",
+   "open-hole-count": 5,
+   "rationale": "mission substrate: Mission: M-web-arxana-missions \u2014 Show a Mission's Semantic Network in WebArxana [identify; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 37
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-categorical-code",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon5/holes/missions/M-categorical-code.md",
+   "open-hole-count": 5,
+   "rationale": "mission substrate: M-categorical-code [identify; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 38
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-paper-reverse-morphogenesis",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon6/holes/missions/M-paper-reverse-morphogenesis.md",
+   "open-hole-count": 5,
+   "rationale": "mission substrate: Mission: Paper Reverse Morphogenesis [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 39
+  },
+  {
+   "type": "address-sorry",
+   "target": "sorry/wm-realised-on-merge-binding",
+   "weight": 1.0,
+   "rationale": "open sorry: \u03b3 loss stream needs realised-G bound to EXECUTED actions, tagged independent",
+   "structural-pressure-per-action": 0.09999999999999998,
+   "rank": 40
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-autoclock-in",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c-desktop-save/holes/missions/M-autoclock-in.md",
+   "open-hole-count": 4,
+   "rationale": "mission substrate: Mission: M-autoclock-in [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 41
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-the-perfect-crime",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c-desktop-save/holes/missions/M-the-perfect-crime.md",
+   "open-hole-count": 4,
+   "rationale": "mission substrate: M-the-perfect-crime [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 42
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-autoclock-in",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c/holes/missions/M-autoclock-in.md",
+   "open-hole-count": 4,
+   "rationale": "mission substrate: Mission: M-autoclock-in [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 43
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-the-perfect-crime",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c/holes/missions/M-the-perfect-crime.md",
+   "open-hole-count": 4,
+   "rationale": "mission substrate: M-the-perfect-crime [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 44
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-vsatarcs-invariants-integration",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon4/holes/missions/M-vsatarcs-invariants-integration.md",
+   "open-hole-count": 4,
+   "rationale": "mission substrate: Mission: M-vsatarcs-invariants-integration [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 45
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-web-arxana-ui-improvements",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon4/holes/missions/M-web-arxana-ui-improvements.md",
+   "open-hole-count": 4,
+   "rationale": "mission substrate: Mission: WebArxana UI Improvements [open; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 46
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-a-sorry-enterprise",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon5a/holes/missions/M-a-sorry-enterprise.md",
+   "open-hole-count": 4,
+   "rationale": "mission substrate: Mission: A Sorry Enterprise [identify; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 47
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-stack-stereolithography",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon5a/holes/missions/M-stack-stereolithography.md",
+   "open-hole-count": 4,
+   "rationale": "mission substrate: Mission: Stack Stereolithography [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 48
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-distributed-frontiermath",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon6/holes/missions/M-distributed-frontiermath.md",
+   "open-hole-count": 4,
+   "rationale": "mission substrate: Mission: Distributed Proofs & Refutations \u2014 FM-001 [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 49
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-archaeology-control",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c-desktop-save/holes/missions/M-archaeology-control.md",
+   "open-hole-count": 3,
+   "rationale": "mission substrate: M-archaeology-control: Obsolescence-recognition as a namespace of sibling invariants [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 50
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-archaeology-control",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c/holes/missions/M-archaeology-control.md",
+   "open-hole-count": 3,
+   "rationale": "mission substrate: M-archaeology-control: Obsolescence-recognition as a namespace of sibling invariants [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 51
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-essays-retraction-visibility",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon4/holes/missions/M-essays-retraction-visibility.md",
+   "open-hole-count": 3,
+   "rationale": "mission substrate: Mission: Essays Retraction Visibility \u2014 Persist Retained Annotations Across Reopen [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 52
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-webarxana",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon4/holes/missions/M-webarxana.md",
+   "open-hole-count": 3,
+   "rationale": "mission substrate: Mission: WebArxana \u2014 Collaborative Hypergraph Surface [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 53
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-differentiable-code",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon5/holes/missions/M-differentiable-code.md",
+   "open-hole-count": 3,
+   "rationale": "mission substrate: M-differentiable-code [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 54
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-daily-scan",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon7/holes/missions/M-daily-scan.md",
+   "open-hole-count": 3,
+   "rationale": "mission substrate: Mission: Daily GitHub Scan Brief [identify; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 55
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-the-futon-stack-Q6-r12-design-choices",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon0/holes/missions/M-the-futon-stack-Q6-r12-design-choices.md",
+   "open-hole-count": 2,
+   "rationale": "mission substrate: M-the-futon-stack Q6 \u2014 R12 narrow-take-up: design choices [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 56
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-the-futon-stack",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon0/holes/missions/M-the-futon-stack.md",
+   "open-hole-count": 2,
+   "rationale": "mission substrate: M-the-futon-stack: A homeostatic software agent that maintains itself [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 57
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-mission-scopes-into-substrate-2",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c-desktop-save/holes/missions/M-mission-scopes-into-substrate-2.md",
+   "open-hole-count": 2,
+   "rationale": "mission substrate: Mission: M-mission-scopes-into-substrate-2 [open; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 58
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-state-snapshot-witness",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c-desktop-save/holes/missions/M-state-snapshot-witness.md",
+   "open-hole-count": 2,
+   "rationale": "mission substrate: M-state-snapshot-witness: Periodic point-in-time projection as queryable evidence [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 59
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-mission-scopes-into-substrate-2",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c/holes/missions/M-mission-scopes-into-substrate-2.md",
+   "open-hole-count": 2,
+   "rationale": "mission substrate: Mission: M-mission-scopes-into-substrate-2 [open; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 60
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-state-snapshot-witness",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c/holes/missions/M-state-snapshot-witness.md",
+   "open-hole-count": 2,
+   "rationale": "mission substrate: M-state-snapshot-witness: Periodic point-in-time projection as queryable evidence [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 61
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-essays-edit-cycle",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon4/holes/missions/M-essays-edit-cycle.md",
+   "open-hole-count": 2,
+   "rationale": "mission substrate: Mission: Essays Edit Cycle \u2014 Re-anchoring Annotated Editions Under Editing [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 62
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-hypergraph-operator",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon5a/holes/missions/M-hypergraph-operator.md",
+   "open-hole-count": 2,
+   "rationale": "mission substrate: Mission: Hypergraph Operator [identify; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 63
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-recommendation-bindings",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon5a/holes/missions/M-recommendation-bindings.md",
+   "open-hole-count": 2,
+   "rationale": "mission substrate: Mission: Recommendation Bindings (make the War Machine's next-move land in operational surfaces) [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 64
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-emacs-cursor-peripheral",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3/holes/missions/M-emacs-cursor-peripheral.md",
+   "open-hole-count": 1,
+   "rationale": "mission substrate: Mission: Emacs Cursor Peripheral [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 65
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-mission-coherence-patterns",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3/holes/missions/M-mission-coherence-patterns.md",
+   "open-hole-count": 1,
+   "rationale": "mission substrate: Mission: Mission-Coherence Patterns [open; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 66
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-pattern-ingest",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3/holes/missions/M-pattern-ingest.md",
+   "open-hole-count": 1,
+   "rationale": "mission substrate: Mission: Pattern Ingest \u2014 XTDB as the Authoritative Record [identify; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 67
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-pattern-retrieval-calibration",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3/holes/missions/M-pattern-retrieval-calibration.md",
+   "open-hole-count": 1,
+   "rationale": "mission substrate: Mission: Pattern Retrieval Calibration [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 68
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-weird-modernism",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3/holes/missions/M-weird-modernism.md",
+   "open-hole-count": 1,
+   "rationale": "mission substrate: Mission: Weird Modernism \u2014 A Futon-Theoretic Reading of PKD [identify; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 69
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-reachable-from-boot",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c-desktop-save/holes/missions/M-reachable-from-boot.md",
+   "open-hole-count": 1,
+   "rationale": "mission substrate: M-reachable-from-boot: Long-lived state has a construction path rooted at bootstrap [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 70
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-single-locus",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c-desktop-save/holes/missions/M-single-locus.md",
+   "open-hole-count": 1,
+   "rationale": "mission substrate: M-single-locus: Uniqueness of attribute per identity, exhibited across artifact-classes [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 71
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-substrate-metric",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c-desktop-save/holes/missions/M-substrate-metric.md",
+   "open-hole-count": 1,
+   "rationale": "mission substrate: Mission: M-substrate-metric [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 72
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-reachable-from-boot",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c/holes/missions/M-reachable-from-boot.md",
+   "open-hole-count": 1,
+   "rationale": "mission substrate: M-reachable-from-boot: Long-lived state has a construction path rooted at bootstrap [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 73
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-single-locus",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c/holes/missions/M-single-locus.md",
+   "open-hole-count": 1,
+   "rationale": "mission substrate: M-single-locus: Uniqueness of attribute per identity, exhibited across artifact-classes [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 74
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-smart-emacs-cursor",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c/holes/missions/M-smart-emacs-cursor.md",
+   "open-hole-count": 1,
+   "rationale": "mission substrate: Mission: M-smart-emacs-cursor \u2014 the spoken mission loop [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 75
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-substrate-metric",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c/holes/missions/M-substrate-metric.md",
+   "open-hole-count": 1,
+   "rationale": "mission substrate: Mission: M-substrate-metric [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 76
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-essay-corpus-substrate",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon4/holes/missions/M-essay-corpus-substrate.md",
+   "open-hole-count": 1,
+   "rationale": "mission substrate: M-essay-corpus-substrate: Uniform essay import per `~/code/futonN/essays/` convention [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 77
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-war-machine-vsatarcs-interop",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon4/holes/missions/M-war-machine-vsatarcs-interop.md",
+   "open-hole-count": 1,
+   "rationale": "mission substrate: M-war-machine-vsatarcs-interop: Operational convergence of WM and VSATARCs [open; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 78
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-trip-journal",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon5a/holes/missions/M-trip-journal.md",
+   "open-hole-count": 1,
+   "rationale": "mission substrate: M-trip-journal [identify; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 79
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-structure-seed-promotion",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon6/holes/missions/M-structure-seed-promotion.md",
+   "open-hole-count": 1,
+   "rationale": "mission substrate: Mission: Structure-Seed Promotion \u2014 From Replay Labels to a Live Pattern Inducer [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 80
+  },
+  {
+   "type": "no-op",
+   "structural-pressure-per-action": 0.0,
+   "rank": 81
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-coupling-as-constraint",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/.worktrees/futon5-ada2533/holes/missions/M-coupling-as-constraint.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: Coupling as Constraint [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 82
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-fulab-wiring-survey",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/.worktrees/futon5-ada2533/holes/missions/M-fulab-wiring-survey.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: Fulab Wiring Survey [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 83
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-tpg-coupling-evolution",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/.worktrees/futon5-ada2533/holes/missions/M-tpg-coupling-evolution.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: TPG Coupling Evolution [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 84
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-xor-coupling-probe",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/.worktrees/futon5-ada2533/holes/missions/M-xor-coupling-probe.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: XOR Coupling Probe [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 85
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-futonzero-prelim-practice",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon0/holes/missions/M-futonzero-prelim-practice.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: FutonZero Prelim Practice \u2014 Joe Learns Graduate Mathematics [identify; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 86
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-patterns-done-right",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon0/holes/missions/M-patterns-done-right.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: M-patterns-done-right: Patterns threaded through every layer [open; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 87
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-stack-hud-refactor",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon0/holes/missions/M-stack-hud-refactor.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: Stack HUD Refactor \u2014 ant's-eye view, posframe-native [partial; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 88
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-pattern-posteriors",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3a/holes/missions/M-pattern-posteriors.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: M-pattern-posteriors [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 89
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-agency-hardening-datapoints",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c-desktop-save/holes/missions/M-agency-hardening-datapoints.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: M-agency-hardening \u2014 live datapoints (2026-06-10 claude-4 \u2194 claude-3 co-build) [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 90
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-bounded-disposition",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c-desktop-save/holes/missions/M-bounded-disposition.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: M-bounded-disposition: Per-artifact triage + population bound, exhibited across artifact-classes [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 91
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-intent-curvature",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c-desktop-save/holes/missions/M-intent-curvature.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: M-intent-curvature [identify; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 92
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-war-machine-first-outing-expectations",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c-desktop-save/holes/missions/M-war-machine-first-outing-expectations.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: M-war-machine-first-outing \u2014 Expectations vs Actual (R-L) [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 93
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-agency-hardening-datapoints",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c/holes/missions/M-agency-hardening-datapoints.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: M-agency-hardening \u2014 live datapoints (2026-06-10 claude-4 \u2194 claude-3 co-build) [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 94
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-bounded-disposition",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c/holes/missions/M-bounded-disposition.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: M-bounded-disposition: Per-artifact triage + population bound, exhibited across artifact-classes [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 95
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-intent-curvature",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c/holes/missions/M-intent-curvature.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: M-intent-curvature [identify; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 96
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-war-machine-first-outing-expectations",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon3c/holes/missions/M-war-machine-first-outing-expectations.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: M-war-machine-first-outing \u2014 Expectations vs Actual (R-L) [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 97
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-arxana-roundtrip",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon4/holes/missions/M-arxana-roundtrip.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: Arxana Round-Trip \u2014 Backend Adapters for Editable Hypertext [identify; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 98
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-editorial-assistant",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon4/holes/missions/M-editorial-assistant.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: M-editorial-assistant: Reviewer-and-operator audit loop over the essay-revise substrate [open; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 99
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-coupling-as-constraint",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon5-health-main/holes/missions/M-coupling-as-constraint.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: Coupling as Constraint [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 100
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-fulab-wiring-survey",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon5-health-main/holes/missions/M-fulab-wiring-survey.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: Fulab Wiring Survey [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 101
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-tpg-coupling-evolution",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon5-health-main/holes/missions/M-tpg-coupling-evolution.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: TPG Coupling Evolution [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 102
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-xor-coupling-probe",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon5-health-main/holes/missions/M-xor-coupling-probe.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: XOR Coupling Probe [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 103
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-coupling-as-constraint",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon5/holes/missions/M-coupling-as-constraint.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: Coupling as Constraint [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 104
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-fulab-wiring-survey",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon5/holes/missions/M-fulab-wiring-survey.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: Fulab Wiring Survey [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 105
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-tpg-coupling-evolution",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon5/holes/missions/M-tpg-coupling-evolution.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: TPG Coupling Evolution [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 106
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-xor-coupling-probe",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon5/holes/missions/M-xor-coupling-probe.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: XOR Coupling Probe [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 107
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-landing-practice",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon5a/holes/missions/M-landing-practice.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: Landing Practice \u2014 Capability-to-Engagement Pipeline [identify; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 108
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-self-improvement-loop",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon5a/holes/missions/M-self-improvement-loop.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: The Self-Improvement Loop [identify; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 109
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-artificial-stack-exchange",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon6/holes/missions/M-artificial-stack-exchange.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: Artificial Stack Exchange [identify; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 110
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-bayesian-structure-learning",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon6/holes/missions/M-bayesian-structure-learning.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: Bayesian structure learning \u2014 formalising what we mean by it [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 111
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-differentiable-math",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon6/holes/missions/M-differentiable-math.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: Differentiable Mathematics \u2014 a ground-metric pilot on real math embeddings [identify; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 112
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-differentiable-substrate",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon6/holes/missions/M-differentiable-substrate.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: M-differentiable-substrate [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 113
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-futonzero-grounding",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon6/holes/missions/M-futonzero-grounding.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: M-futonzero-grounding [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 114
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-hyperreal-dictionary-planning",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon6/holes/missions/M-hyperreal-dictionary-planning.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: Hyperreal Dictionary Planning [identify; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 115
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-prior-mathematics",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon6/holes/missions/M-prior-mathematics.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: Prior Mathematics \u2014 a corpus base-rate prior for Stage 5 NER [unknown; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 116
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-superpod-mark2",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon6/holes/missions/M-superpod-mark2.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: Superpod Mark 2 \u2014 All of arXiv [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 117
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-symbol-grounding-scaling-plan",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon6/holes/missions/M-symbol-grounding-scaling-plan.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Symbol grounding: scaling plan \u2014 preparation phase + expected value at 5K / 50K / 500K papers [active; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 118
+  },
+  {
+   "type": "advance-mission",
+   "target": "M-symbol-grounding",
+   "weight": 1.0,
+   "mission-path": "/home/joe/code/futon6/holes/missions/M-symbol-grounding.md",
+   "open-hole-count": 0,
+   "rationale": "mission substrate: Mission: Symbol Grounding \u2014 Structure Mining Inside `$...$` Math Content [identify; advance open holes]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 119
+  },
+  {
+   "type": "open-mission",
+   "target": "M-canon-fingerprint-store",
+   "weight": 0.14999999999999988,
+   "rationale": "tension at mission futon6-d/mission/canon-fingerprint-store: min-incident-\u03ba -0.1667, resolvedness 0.10 \u2014 strain bridge [\"futon6-d/mission/canon-fingerprint-store\" \"futon6-py-d/mission/bayesian-structure-learning\"]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 120
+  },
+  {
+   "type": "open-mission",
+   "target": "M-bayesian-structure-learning",
+   "weight": 0.14999999999999988,
+   "rationale": "tension at mission futon6-d/mission/bayesian-structure-learning: min-incident-\u03ba -0.1667, resolvedness 0.10 \u2014 strain bridge [\"futon6-d/mission/bayesian-structure-learning\" \"futon6-py-d/mission/symbol-grounding\"]",
+   "structural-pressure-per-action": 0.0,
+   "rank": 121
+  }
+ ],
+ "cascade-policies": [
+  {
+   "mission": "M-canon-fingerprint-store",
+   "psi": "canon fingerprint store tension at mission futon6-d/mission/canon-fingerprint-store: min-incident-\u03ba -0.1667, resolvedness 0.10 \u2014 strain bridge [\"futon6-d/mission/canon-fingerprint-store\" \"futon6-py-d/mission/bayesian-structure-learning\"]",
+   "size": 1,
+   "C": 0.458,
+   "budget": 6,
+   "truncated": false,
+   "shown": [
+    "devmap-coherence/ifr-f1-dhammavicaya"
+   ]
+  },
+  {
+   "mission": "M-bayesian-structure-learning",
+   "psi": "bayesian structure learning tension at mission futon6-d/mission/bayesian-structure-learning: min-incident-\u03ba -0.1667, resolvedness 0.10 \u2014 strain bridge [\"futon6-d/mission/bayesian-structure-learning\" \"futon6-py-d/mission/symbol-grounding\"]",
+   "size": 2,
+   "C": 0.832,
+   "budget": 6,
+   "truncated": false,
+   "shown": [
+    "stack-coherence/futon-bridge-health",
+    "futon-theory/mission-interface-signature"
+   ]
+  }
+ ]
+}
