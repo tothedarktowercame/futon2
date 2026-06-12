@@ -38,3 +38,6 @@ logs/
 
 # Added 2026-05-26 by street-sweeper Phase C (INV-10 relocations)
 web/war-machine/resources/public/index.html
+scripts/__pycache__/
+
+__pycache__/
