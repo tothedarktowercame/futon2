@@ -184,3 +184,27 @@ edits, flagged to the curators, not this build. S1's
 circumstances-v0.edn written deterministically from the freeze.
 Next: S4 owner-side — GFlowNet CascadeEnv + C-proxy in a py3.10 venv,
 entering through the proven sampler protocol.
+
+## Checkpoint 3 — 2026-06-12 (exit-4 discharged: the pipe trains)
+The trainability probe ran end-to-end on fable-1's R11 projection
+(`futon3c/data/repl-traces/r11-training-examples.edn`): 33 flight
+examples, **31 refused by the derived-never-authored validity mask**
+(derivation-thin; candidates carried as typed sorries) — the
+anti-laundering machinery passing its first live test on real data —
+leaving 2 :in, 1 :clean. Training the TB sampler on the one
+flight-grounded reward (target M-daily-scan, |realised-G| 4.04, frozen
+circumstance 04): **P(target ∈ sample) 0.434 untrained → 0.641
+trained** (+0.21 > the +0.15 bar; 600 steps, 391s CPU, seed 20260612;
+artifact `s4/trainability-probe.json`). Verdict: **pipe-trains, n=1,
+reported as n=1** — the smallest possible demonstration of the R2
+return channel running flight → projection → mask → reward → shifted
+policy. The corpus grows one flight at a time from here.
+
+Also recorded while the main 1200-step run cooks: the C-flatness
+suspicion. With this freeze's scores uniformly 1.0 and the library's
+exact-6 restriction, intensity is constant and C varies only through
+harmony; distinct-counts at 1200 steps (117–126/128 ≈ uniform) suggest
+a nearly flat generation landscape. The verdict table will report
+per-circumstance C-spread; if confirmed, the §5 note is that score-flat
+freezes give C no generation signal beyond size — the discriminating
+signal needs the ground metric (M-substrate-metric's charter, again).
