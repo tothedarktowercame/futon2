@@ -59,3 +59,28 @@ portfolio move classes BEFORE the next golden round.
    claude-1's blind decks.
 
 Salted. The metric picks itself up when the triples land.
+
+## Addendum (Joe, ~19:20) — the embed-layout EFE field
+
+Joe, comparing data/mission-efe-field-embed.html (new, M-efe-bge lane)
+to the older mission-efe-field.html: "much more interesting to me...
+with the mass spread out I think it would be easier to make sense of.
+I don't know if that strictly can inform our work on the METRIC — but
+since this picture is linked with EFE it should inform future WM work."
+
+Filed under the salt-down's own ruling: layout is a PROJECTION for
+legibility — it belongs to the feed/display side, never the judge.
+The WM's display layer can adopt embedding layout while judgment stays
+graph-native; legibility wins are real wins (the operator's
+sense-making bandwidth IS a WM channel) without touching the ground
+metric.
+
+Note the M-efe-bge lane already built the right harness: alongside
+-embed there are -force/-seed/-springs variants AND controls
+(-ctrl-rand1..3, -ctrl-shuf1..3, generated 17:24-17:25; commit dce8c4c
+"Embed-richness diagnostics: verdict ARTIFACT"). Cheap blind test
+available whenever Joe has two minutes: embed vs ctrl-shuf, unlabeled —
+if the "easier to make sense of" survives shuffling, the win is
+declutter; if he can pick the real one, the embedding carries
+operator-visible structure. Either answer is useful, and it's the same
+sealed-key protocol as the metric's golden decks.
