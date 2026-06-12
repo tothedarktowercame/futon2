@@ -208,3 +208,50 @@ a nearly flat generation landscape. The verdict table will report
 per-circumstance C-spread; if confirmed, the §5 note is that score-flat
 freezes give C no generation signal beyond size — the discriminating
 signal needs the ground metric (M-substrate-metric's charter, again).
+
+## Checkpoint 4 — 2026-06-12 (exits 2+3 discharged: the verdict table)
+
+Five arms × 10 frozen circumstances (trained GFlowNet: 1200 TB steps,
+K=128 per circumstance; artifacts `s4/gflownet-entries.json`,
+`contest-verdicts-v0.edn`):
+
+| sampler | entries | median G | best G | wins |
+|---|---|---|---|---|
+| greedy-ε (0.15) | 1 | **−10.73** | −12.61 | 3 |
+| gflownet-tb | 8 | −9.49 | −12.31 | 4 |
+| incumbent (lens, depth-1) | 1 | −8.05 | −8.44 | 0 |
+| uniform-best-of-8 | 8 | −6.32 | −10.27 | 0 |
+| random (1) | 1 | −2.18 | −6.11 | 0 |
+
+7 `:sampler-wins`, 3 `:monotone-generator` (diversity guard culled
+circumstances where the field converged — the guard working).
+
+**The decisive measurement: C-spread = 0.000 on every circumstance.**
+All frontier moves share token structure (root/class/score identical),
+so every pairwise Jaccard is equal and C = 5.333 for EVERY budget-6
+selection. The wholeness proxy provided literally zero generation
+signal on this freeze. Consequences, stated plainly:
+
+1. The GFlowNet's margin over uniform-best-of-8 (−9.49 vs −6.32) is an
+   ARTIFACT — with constant reward, TB's residual policy bias favours
+   low-index (= better-ranked) moves, and rank correlates with G. The
+   fairness arm exposed it; without that arm the table would have read
+   as "learning wins."
+2. greedy-ε single-best holds at the median — the M-arguing-worlds
+   falsification reproduced by different machinery on a different
+   floor. Third independent confirmation.
+3. The library verdict stands apart from the proxy verdict: the
+   machinery WORKS (off-the-shelf set-selection env; TB trains when
+   signal exists — exit-4's +0.21 on a real flight reward proves it;
+   CPU costs trivial). What is missing is not the sampler but the
+   GRADIENT. `can_select_fewer_than_max` NotImplementedError noted as
+   the one library defect hit.
+
+**Exit-5 recommendation (written to futonzero-alphazero.md §5):** the
+semilattice-vs-rollout tension survives v0 honestly — it cannot be
+adjudicated while the generation proxy is flat. The unlock is the
+DELIVERED-but-unconsumed M-substrate-metric v1: wire its curvature
+signal as the generation proxy (the campaign's awaited "paired consumer
+consuming live") and re-run this same contest as v1. Joe independently
+concurred 2026-06-12: "the thin scalar field has got to be fixed — it
+has only ever been a placeholder."

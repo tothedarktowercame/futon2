@@ -129,6 +129,15 @@ A typed sorry beats a smooth claim. Honest edges, in load-bearing order:
   the better-fitting machinery (sample compositional objects *proportional to reward* — nearly a definition
   of "assemble a pattern-language scored by wholeness"). In v1 the cascade lane (the semilattice) and the
   rollout (the linear path) are **separate** machineries; reconciling them is open.
+- **Semilattice-vs-rollout: contested, measured, honestly unresolved (E-cascade-sampler-sampler v0,
+  2026-06-12).** The GFlowNet machinery works off the shelf (set-selection env, TB trains when signal
+  exists — +0.21 on a real flight-grounded reward) and the contest harness stands (5 arms, realized-G
+  floor, diversity guard, fairness null) — but **C-spread was 0.000 on every frozen circumstance**: with
+  uniform scores the wholeness proxy has no generation gradient, so v0 could not adjudicate the tension
+  (greedy-ε single-best held the median — the arguing-worlds negative reproduced by different machinery).
+  The unlock is the delivered-but-unconsumed **M-substrate-metric v1** as generation proxy (its campaign's
+  awaited live consumer); contest v1 re-runs there. Verdicts:
+  `futon2/holes/labs/E-cascade-sampler-sampler/contest-verdicts-v0.edn`.
 - **The parsimony budget is a hyperparameter, not a principle.** Since `C` is monotone and bounded only
   externally, **the budget *is* the regularizer** — budget-6 sets the character of *every* cascade. Why 6?
   An *empirical* read of the marginal-coverage knee (~5–8 strong centres before the tail goes marginal), not
