@@ -1,0 +1,41 @@
+{:session "golden-v0"
+ :date "2026-06-12"
+ :protocol-note "Round 1 asked for selection-level ranking; the operator answered
+ with per-target dispositions — adopted as the gold schema from round 1 onward
+ (finer grain; selection scores derivable from target labels + composition)."
+ :rounds
+ [{:round 1
+   :circumstance "wm-freeze-2026-06-12-00"
+   :presented [:A :B :C :D] ;; key in golden-round-1-key.json
+   :gold-grain :per-target
+   :judgments
+   [{:target "M-first-flights"
+     :disposition :operator-coupled
+     :verbatim "first-flights *is* top of queue in the WM, however it also has an interactive aspect (what we are doing now — prep for Phase B) that I wouldn't expect to close automatically"}
+    {:target "M-agency-hardening"
+     :disposition :saturated
+     :verbatim "agency-hardening is substantially done (just recent)"}
+    {:target "M-superpod-mark3"
+     :disposition :push-forward
+     :verbatim "superpod-mark3 is interesting current work that might be pushed forward"}
+    {:target "M-autoclock-in"
+     :disposition :automate-best
+     :verbatim "autoclock-in would indeed be a good target for automation (best)"}
+    {:target "M-fulab-wiring-survey"
+     :disposition :legacy-worst
+     :verbatim "fulab-wiring-survey seems like legacy stuff that I'm not that interested in (worst)"}]
+   :dimensions-revealed
+   [:automatability "does the work close without the operator? (the WM cycle is an autonomous worker — gold criterion is good-autonomous-target, not important-mission)"
+    :saturation "recently-substantially-done means low marginal value regardless of structure"
+    :operator-interest "legacy/disinterest disqualifies independent of graph position"]}
+ :round-1-refinements
+ [{:target "M-agency-hardening"
+   :refines :saturated
+   :verbatim "it's *possible* that agency-hardening would be a good selection if there are 'a few more things to close' and we prioritise 'closing things' over exploring further. I think all that really needs done there is to mark it as CLOSED. It'd be fine for the WM to notice that and do it as part of a 'bundle' of other operations."
+   :implication {:action-vocabulary "saturated missions are CLOSE-OUT candidates, not advance candidates — the move type changes, the target does not disqualify"
+                 :policy-delegation "WM bundle-closure of substantively-done missions is operator-granted (2026-06-12); contested closures remain Joe's call"}}
+  {:target "M-first-flights"
+   :refines :operator-coupled
+   :verbatim "effectively substrate-2 could say 'joe and fable-2 are clocked in on this right now, don't touch it'"
+   :implication {:signal :live-presence
+                 :finding "the slot EXISTS unfilled: agency roster carries mission-id per agent (stale/nil in practice); WM snapshot has pilot-inhabitations (coarse, stale). The structural fix is M-autoclock-in — which this session's gold independently rated automate-best. The golden session validated its own remedy."}}]]}
