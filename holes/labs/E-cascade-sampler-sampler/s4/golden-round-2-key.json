@@ -1,0 +1,35 @@
+{
+  "round" : 2,
+  "circumstance" : "wm-freeze-2026-06-12-06",
+  "sealed-at" : "2026-06-12T14:05:57.550128505Z",
+  "key" : {
+    "A" : {
+      "sampler" : "uniform-best-of-k",
+      "realized-G" : -10.26555,
+      "targets" : [ "M-bounded-in-flight-state", "M-essay-corpus-substrate", "M-futonzero-mvp", "M-learning-loop", "M-patterns-done-right", "M-web-arxana-missions" ],
+      "v0" : 3.064284186010478,
+      "v11" : 1.9367428077797348
+    },
+    "B" : {
+      "sampler" : "gflownet-tb",
+      "realized-G" : -8.149425,
+      "targets" : [ "M-a-sorry-enterprise", "M-essay-corpus-substrate", "M-futonzero-mvp", "M-learning-loop", "M-war-machine-first-outing-expectations", "M-web-arxana-missions" ],
+      "v0" : 2.6571004129076723,
+      "v11" : 1.6998965635997971
+    },
+    "C" : {
+      "sampler" : "greedy-eps/eps-0-15",
+      "realized-G" : -12.614482500000001,
+      "targets" : [ "M-a-sorry-enterprise", "M-bounded-in-flight-state", "M-essay-corpus-substrate", "M-futonzero-mvp", "M-learning-loop", "M-web-arxana-missions" ],
+      "v0" : 3.0446817497237335,
+      "v11" : 1.9099568182438291
+    },
+    "D" : {
+      "sampler" : "incumbent/budget-6",
+      "realized-G" : -8.0475,
+      "targets" : [ "M-bounded-in-flight-state" ],
+      "v0" : 0.6630292448712374,
+      "v11" : 0.23206023570493306
+    }
+  }
+}

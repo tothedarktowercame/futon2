@@ -275,3 +275,81 @@ evidence (the engine is consumed live — their open condition);
 Standing disciplines (non-negotiable): C generates / C NEVER judges;
 spread check before any training; per-sampler entry counts disclosed;
 clean negatives are valid outcomes.
+
+## Checkpoint 6 — 2026-06-12 (claude-1: the six-arm verdict)
+
+Ownership acknowledged (bell to fable-2, 13:45); trainer completed
+clean (10/10 circumstances, ~37 min); six-arm contest v1 run
+(`s4/contest_run_v1.clj`, gates clj-kondo 0/0 + check-parens OK;
+artifact `contest-verdicts-v1.edn`). 6 `:sampler-wins`,
+4 `:monotone-generator`. Per-sampler-best over the 6 judged
+circumstances (8 buildouts/circ for the multi-draw arms, 1 for the
+rest — counts in the artifact):
+
+| sampler | median G | best G | wins |
+|---|---|---|---|
+| greedy-ε (0.15) | **−10.73** | −12.61 | 3 |
+| gflownet-metric | −9.53 | −12.60 | 1 |
+| gflownet-tb (flat) | −9.49 | −12.31 | 2 |
+| incumbent (lens, depth-1) | −8.05 | −8.44 | 0 |
+| uniform-best-of-8 | −6.32 | −10.27 | 0 |
+| random (1) | −0.77 | −6.11 | 0 |
+
+**The non-flat proxy did not move the needle: gflownet-metric ≈
+gflownet-tb at the median (−9.53 vs −9.49, within noise), still under
+greedy-ε.** Fourth independent confirmation of single-best-holds.
+Mechanism visible in the sampling stats: 114–125 distinct/128 even
+after metric training (vs 117–126 flat) — a 1.06–2.74 reward range is
+too weak to concentrate the TB policy at 1200 steps. Entry-protocol
+note: token-C is constant, so each GFlowNet arm enters 8 *draws from
+its policy* — symmetric with uniform-best-of-8; fair, disclosed.
+
+Reading: the v0 conclusion sharpens rather than reverses. The blocker
+was never just *flatness* — the proxy must also be *informative toward
+the yardstick* and *steep enough to train against*. Metric-C v1 (raw
+curvature) cleared flatness but not the other two; golden round 1
+already named why (saturation false-positive, missing presence) — the
+v1.1 corrections exist precisely to steepen and de-noise it.
+Next: v1.1 matrix (resolution-state scaling + presence mask, engine
+functions unmodified), spread check, golden round 2 calibration with
+Joe BEFORE any v1.1 training spend.
+
+## Checkpoint 7 — 2026-06-12 (golden round 2: the vocabulary is the gap)
+
+v1.1 matrix shipped and spread-checked (per-circumstance std 0.24–0.44,
+non-flat everywhere; 7 saturated targets zeroed, 1 presence-masked
+live, disclosures in `s4/metric-matrix-v1.1.json`). Golden round 2 run
+to protocol (deck from -06's per-sampler-best, key sealed pre-
+presentation; gold + unsealing in `s4/golden-selections-v0.edn`).
+
+Calibration verdict, stated plainly: **v1.1 did not change the bundle
+ranking (identical to v0: A>C>B>D) and BOTH mis-rank the operator pick
+(B = gflownet-tb's entry, ranked 3rd of 4). The realized-G floor also
+diverges: its best bundle (C, −12.61) was not the pick either.** Soft-
+pick caveat recorded ("something like Bundle B").
+
+Why this is progress, not just a third negative: round 2 localizes the
+failure to the ACTION VOCABULARY, not the state detection —
+1. The saturation filter was RIGHT on state (war-machine-first-outing
+   resolvedness 1.0; Joe: "over and should probably close") but Joe
+   kept it in his bundle AS A CLOSE-OUT. Advance-only intensity turns
+   a good close-out into dead weight; close-intensity should score BY
+   resolvedness, not be zeroed by it. (Round 1's bundle-closure grant,
+   now confirmed at bundle grain.)
+2. Bundle gold is portfolio-shaped ("quick wins and some deeper
+   dives" + close-outs) — not a sum of per-target advance values.
+3. New dimension: phase-based resolvedness can't tell early-because-
+   young from early-because-abandoned (patterns-done-right: doc 0.1,
+   Joe: legacy, :survey-first). Recency/staleness is missing from the
+   matrix.
+4. One state disagreement flagged, not adjudicated: essay-corpus-
+   substrate (doc: complete; operator: unsure) — dig before trusting
+   either side.
+
+Consequence for the v1.1 training decision: a training run on the
+current v1.1 proxy is NOT warranted — it would optimize an advance-
+only score the gold just rejected at bundle grain. The cheaper, right
+move is move-class-conditional intensity (advance × (1−res), close ×
+res, survey for stale-early) + a composition-aware bundle score, THEN
+train. That extension belongs to the action-vocabulary lane the
+handoff flagged.
