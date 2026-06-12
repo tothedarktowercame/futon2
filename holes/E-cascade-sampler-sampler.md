@@ -99,6 +99,55 @@ circumstance set and is judged by the SAME yardstick.
 - GPU/superpod runs. v0 is CPU-sized by design; scale-up is a follow-on
   decision taken on evidence.
 
+## Harness spec v0 (owner-side, from the 2026-06-12 interface recon)
+
+**Reuse verdict: the M-arguing-worlds referee IS the harness.**
+`futon2.aif.arguing-worlds/referee-harness` (futon2-arguing-worlds,
+`arguing_worlds.clj:135`) already does N-contestant judgment on the
+realized-`G` floor with the `:monotone-generator` diversity guard. The
+contest extends it rather than rebuilding: a *sampler* is a
+generate-buildout strategy; each (sampler × circumstance) yields one
+BUILDOUT-shaped entry (`:policy` moves + `:pattern-set` + `:C` +
+referee-filled `:realized-G`).
+
+**The contest runs in buildout space, not raw pattern space.** This is
+the one design decision the recon forced: realized-`G` is computed by
+`rollout/project-policy` over MOVES, while the cascade lane emits
+PATTERN-SETS. Entrants therefore emit buildouts; the incumbent
+deterministic constructor enters via its existing psi→cascade path with
+its cascade rendered as a policy (its patterns as the move set it
+implies), and the GFlowNet's `CascadeEnv` builds over the circumstance's
+candidate move list (actions = add-move + EOS, ≤ budget), so its samples
+are directly projectable. No new yardstick code.
+
+**Proxy luck:** the incumbent constructor (`cascade_construct.py`,
+futon3a M-memes-arrows lab) is already Python, and computes the
+embedding-based `C` in-process. The GFlowNet proxy imports the same
+code path instead of reimplementing Salingaros arithmetic — the
+"verify proxy against JVM scorer" exit-1 obligation reduces to
+verifying the two C implementations' agreement once (token-Jaccard
+`score-buildout-c` vs embedding C), then standardizing the contest on
+ONE of them for generation.
+
+**Circumstance set:** WM snapshots are transient (in-JVM memoized), so
+the set is captured once and FROZEN to a file: GET
+`/api/alpha/war-machine/state` → ranked actions → ≥10 (mission, psi,
+state, moves) tuples in the arguing-worlds circumstance shape. The
+freeze is part of exit-1; every contestant reads the same file.
+
+**Two referee extensions needed (small, in the worktree):**
+1. Ensemble aggregation for N ≥ 4: per-sampler best (each sampler's
+   best buildout per circumstance competes), NOT ensemble mean — the
+   contest asks "which sampler finds the best cascades," not "whose
+   average is nice."
+2. Tie preference at equal realized-`G`: fewer moves wins, then lower
+   wall-clock; ties beyond that are reported as ties.
+
+**Build slices (bellable):** S1 freeze-circumstances script; S2 referee
+N-way extension + tests; S3 incumbent + null-arm entrants; S4 GFlowNet
+CascadeEnv + proxy (py3.10 venv) + TB run; S5 trainability probe (R11
+projection). S1–S3 are JVM/bb-side; S4–S5 Python-side.
+
 ## Checkpoint 0 — 2026-06-12
 Chartered from the morning's review chain: satisficing review of
 M-first-flights against futonzero-alphazero.md → three whistle amendments
