@@ -433,6 +433,23 @@
          policy (take budget (seeded-shuffle seed (:moves circumstance)))]
      [(sampler-buildout :random-under-budget policy)])))
 
+(defn uniform-best-of-k-sampler
+  "The fairness null for multi-entry samplers (review note, fable-2
+  2026-06-12): a sampler submitting K entries gains order-statistics
+  advantage under per-sampler-best aggregation regardless of learning.
+  This arm submits K seeded-uniform budget-selections; whatever margin a
+  trained sampler shows BEYOND this arm is the part attributable to
+  learning rather than to sampling more."
+  ([circumstance] (uniform-best-of-k-sampler circumstance {:k 8 :budget 6}))
+  ([circumstance {:keys [k budget] :or {k 8 budget 6}}]
+   (let [moves (vec (:moves circumstance))]
+     (vec
+      (for [i (range k)
+            :let [seed (hash [(:circumstance/id circumstance) i])
+                  policy (vec (take budget (seeded-shuffle seed moves)))]
+            :when (seq policy)]
+        (sampler-buildout (keyword "uniform-best-of-k" (str "s" i)) policy))))))
+
 (defn run-sampler-field
   [circumstance samplers]
   (mapv (fn [[sampler-id sampler-fn]]
