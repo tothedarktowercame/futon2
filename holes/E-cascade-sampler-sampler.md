@@ -157,3 +157,15 @@ diversity pitch explicitly NOT the warrant) → Joe: "this is exactly an
 excursion of that shape," named with the deliberate doubling.
 Next: owner assignment (Joe's call), then the harness spec (owner-side)
 before any contestant code (bellable).
+
+## Checkpoint 1 — 2026-06-12 (autonomous tick, fable-2)
+Exit-1 first half done: live WM judgement FROZEN to
+`holes/labs/E-cascade-sampler-sampler/wm-judgement-freeze-2026-06-12.json`
+(121 ranked actions + 2 carried cascade-policies, slimmed to contest
+fields, c3b1579) — snapshots are transient, so the freeze is the
+reproducible input. Recorded handoff (recorded-handoff pattern): S1–S3
+belled to codex-1, job `invoke-1781257721447-774-d9b40d65` — circumstance
+assembly, referee N-way extension (per-sampler-best, tie preference,
+guard intact), incumbent + null-arm entrants behind an open sampler
+protocol; gates clj-kondo + check-parens + tests; bell-back to fable-2
+with shas. S4 (GFlowNet CascadeEnv, py3.10 venv) stays owner-side next.
