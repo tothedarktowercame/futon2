@@ -463,7 +463,8 @@
 
 (defn- compute-delta-t-mission
   [mission-endpoint]
-  (if-let [f (requiring-resolve 'futon3c.aif.mission-delta-t/delta-t-mission)]
+  (if-let [f (try (requiring-resolve 'futon3c.aif.mission-delta-t/delta-t-mission)
+                  (catch Throwable _ nil))]
     (f mission-endpoint)
     {:delta-T 0.0}))
 
