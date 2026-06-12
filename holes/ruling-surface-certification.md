@@ -35,3 +35,36 @@ Design consequences:
 Status: design note; the build is the cascade pretty-print ruling
 surface (fable-1's flight-pretty-print proposal, grown to the full
 chain). Pairs: claude-3 (metric), claude-1 (contest consumer).
+
+## Advance typing (Joe, voice, 16:40) — the automation of "talking it through"
+
+"If we really wanted to automate this, I wouldn't have to be talking
+it through. We would say: what kind of mission advance are we aiming
+for? Quick wins closable immediately — a documentation-only fix? Or
+something that's one Codex fix away, because that's documented in the
+mission?"
+
+This is the satiety algebra applied to missions. A mission's open hole
+has a TYPE that determines what feeds it — and the type is mechanically
+detectable from the mission file + substrate-2:
+
+- {:hungry-for :checkpoint-only} — substantively done, needs the
+  closing checkpoint (the bundle-closure case already delegated to the
+  WM by standing ruling).
+- {:hungry-for :ratified-car} — a next car is ALREADY DOCUMENTED and
+  ratified in the mission text (flight-pretty-print was exactly this:
+  Checkpoint 21 said "next car on this mission"). Detectable by
+  pattern; dispatchable to Codex without conversation.
+- {:hungry-for :design} — the hole needs shape before anyone can build.
+  Routes to a Claude pairing, not the Codex pool.
+- {:hungry-for :operator-ruling} — blocked on a judgment only Joe can
+  make (mission-close, consent gates, golden rulings).
+
+The WM advance loop then runs without narration: rank missions by
+(hunger-type x cost x value); :ratified-car items auto-assemble their
+cascade (the chain is pre-written in the mission file — harvest it,
+R12-style, don't infer it); :checkpoint-only items bundle-close;
+:design and :operator-ruling items QUEUE for their respective humans/
+Claudes with the chain rendered for certification. Today's manual hops
+(tile -> mission-mode -> checkpoint 21 -> bell codex-3) were a hand
+exec of exactly this loop, one item, type :ratified-car.
