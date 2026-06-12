@@ -115,7 +115,13 @@
         b (aw/assemble-circumstances freeze {:n 2 :budget 4})]
     (is (= a b))
     (is (= 2 (count a)))
-    (is (every? #(= 4 (count (:moves %))) a))
+    ;; review fix (fable-2): the frontier is the interleaved share of ALL
+    ;; ranked actions, strictly larger than the cascade budget when supply
+    ;; allows — frontier == budget degenerates the contest.
+    (is (every? #(= 6 (count (:moves %))) a))
+    (is (every? #(> (count (:moves %)) 4) a))
+    (is (= (set (map :rank (:ranked-actions freeze)))
+           (set (map :rank (mapcat :moves a)))))
     (is (every? #(contains? % :psi) a))))
 
 (deftest referee-field-harness-picks-best-of-four-samplers

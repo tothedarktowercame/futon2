@@ -272,15 +272,21 @@
 
 (defn assemble-circumstances
   "Assemble deterministic arguing-worlds-shaped circumstances from the frozen
-  WM ranked actions. Each circumstance contains a budget-sized action frontier
-  reachable from a copied root state."
+  WM ranked actions. Each circumstance carries an action FRONTIER strictly
+  larger than the cascade budget (review fix, fable-2 2026-06-12: with
+  frontier == budget every budget-bounded selection is the whole frontier and
+  the contest degenerates). Deterministic stride interleave: circumstance i
+  takes ranked actions where (mod idx n) == i, so every frontier spans the
+  full rank spectrum instead of being one rank-band."
   ([freeze] (assemble-circumstances freeze {:n 10 :budget 6}))
   ([freeze {:keys [n budget] :or {n 10 budget 6}}]
    (let [actions (->> (:ranked-actions freeze)
                       (sort-by #(long (or (:rank %) Long/MAX_VALUE)))
-                      (take (* n budget))
                       vec)]
-     (->> (partition-all budget actions)
+     (->> (range (count actions))
+          (group-by #(mod % n))
+          (sort-by key)
+          (map (fn [[_ idxs]] (mapv actions idxs)))
           (take n)
           (map-indexed
            (fn [idx chunk]
