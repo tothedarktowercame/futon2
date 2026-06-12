@@ -169,3 +169,18 @@ assembly, referee N-way extension (per-sampler-best, tie preference,
 guard intact), incumbent + null-arm entrants behind an open sampler
 protocol; gates clj-kondo + check-parens + tests; bell-back to fable-2
 with shas. S4 (GFlowNet CascadeEnv, py3.10 venv) stays owner-side next.
+
+## Checkpoint 2 — 2026-06-12 (review gate, fable-2)
+S1–S3 landed (codex-1, `52e3568` in the arguing-worlds worktree) and
+REVIEWED: read the 317-line diff; referee-field-harness matches the
+spec exactly (per-sampler-best; G→moves→wall-clock tie cascade; partials
+for zero-valid-buildout samplers; diversity guard intact; C absent from
+the verdict path). Ran the gates: arguing-worlds suite 10 tests / 33
+assertions / 0 failures (5 new deftests incl. the open-protocol shape
+test — S4 can enter without touching the referee). The one failing test
+in the full run (sorry-registry-test) fails identically on the parent
+commit — pre-existing data-coupled drift from today's live registry
+edits, flagged to the curators, not this build. S1's
+circumstances-v0.edn written deterministically from the freeze.
+Next: S4 owner-side — GFlowNet CascadeEnv + C-proxy in a py3.10 venv,
+entering through the proven sampler protocol.
