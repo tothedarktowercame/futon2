@@ -3,9 +3,10 @@
 Date: 2026-06-12
 Parent: `M-wm-policies` (the build); resolves-candidate for the semilattice-vs-
 linear-rollout tension in `futon2/docs/futonzero-alphazero.md` §5.
-Owner: fable-2 (assigned 2026-06-12 — Joe: "let's focus on this"; harness
-spec owner-side, contestant code bellable per the coding-handoff protocol).
-Status: IN FLIGHT — harness recon begun 2026-06-12.
+Owner: claude-1 (transferred from fable-2 at Joe's direction, 2026-06-12
+afternoon — "sufficiently well specified to hand off"; claude-1 authored
+futonzero-alphazero.md, so the excursion returns to its conceptual home).
+Status: IN FLIGHT — v0 complete (checkpoints 0–4); v1 mid-flight at handoff.
 
 The doubled name is the design (Joe, 2026-06-12, "stet"): this is not "build
 the GFlowNet sampler" — it is a **sampler over samplers**. Several methods
@@ -255,3 +256,22 @@ signal as the generation proxy (the campaign's awaited "paired consumer
 consuming live") and re-run this same contest as v1. Joe independently
 concurred 2026-06-12: "the thin scalar field has got to be fixed — it
 has only ever been a placeholder."
+
+## Checkpoint 5 — 2026-06-12 (ownership → claude-1)
+Handed off at Joe's direction with v1 mid-flight. State at transfer:
+metric-matrix frozen (dabb84e lineage), metric-C spread VERIFIED
+non-flat (1.06–2.74/circumstance), gflownet-metric arm TRAINING in
+background (train_cascade_gfn.py 1200 cascade_metric_proxy... →
+gflownet-metric-entries.json). Remaining, in order: (1) wire the metric
+arm into contest_run.clj's field and run the SIX-arm contest v1;
+(2) metric-C v1.1 — import the campaign's delivered resolution-state
+filter (kills the saturation false-positive found by golden round 1)
+and a presence mask (roster mission-id; structural fix = M-autoclock-in);
+(3) golden rounds 2+ with Joe (per-target dispositions, blind labels,
+sealed keys — protocol + round-1 gold in s4/golden-selections-v0.edn);
+(4) bell the M-substrate-metric campaign owner with consumption
+evidence (the engine is consumed live — their open condition);
+(5) finalize exit-5 in futonzero-alphazero.md §5.
+Standing disciplines (non-negotiable): C generates / C NEVER judges;
+spread check before any training; per-sampler entry counts disclosed;
+clean negatives are valid outcomes.
