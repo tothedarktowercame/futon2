@@ -3,9 +3,9 @@
 Date: 2026-06-12
 Parent: `M-wm-policies` (the build); resolves-candidate for the semilattice-vs-
 linear-rollout tension in `futon2/docs/futonzero-alphazero.md` §5.
-Owner: unassigned (single owner end-to-end, per the E-convention; charter
-authored fable-2 at Joe's direction).
-Status: CHARTERED — not started.
+Owner: fable-2 (assigned 2026-06-12 — Joe: "let's focus on this"; harness
+spec owner-side, contestant code bellable per the coding-handoff protocol).
+Status: IN FLIGHT — harness recon begun 2026-06-12.
 
 The doubled name is the design (Joe, 2026-06-12, "stet"): this is not "build
 the GFlowNet sampler" — it is a **sampler over samplers**. Several methods
