@@ -149,14 +149,16 @@
 ;; Helpers (same patterns as joe_hud.clj)
 ;; ---------------------------------------------------------------------------
 
-(defn- http-get-json [url]
-  (try
-    (let [resp (http/get url {:headers {"Accept" "application/json"}
-                              :timeout 5000
-                              :throw false})]
-      (when (= 200 (:status resp))
-        (json/parse-string (:body resp) true)))
-    (catch Exception _ nil)))
+(defn- http-get-json
+  ([url] (http-get-json url 5000))
+  ([url timeout-ms]
+   (try
+     (let [resp (http/get url {:headers {"Accept" "application/json"}
+                               :timeout timeout-ms
+                               :throw false})]
+       (when (= 200 (:status resp))
+         (json/parse-string (:body resp) true)))
+     (catch Exception _ nil))))
 
 (defn- git [repo-path & args]
   (let [{:keys [exit out]} (apply shell/sh "git" "-C" repo-path args)]
@@ -592,14 +594,15 @@
    Options:
    - :limit  maximum number of entries to request
    - :since  inclusive ISO date string (YYYY-MM-DD) lower bound"
-  [& {:keys [limit since]}]
+  [& {:keys [limit since timeout]}]
   (let [params (cond-> []
                  (and (int? limit) (pos? limit))
                  (conj (str "limit=" limit))
                  (string? since)
                  (conj (str "since=" since)))
         qs (when (seq params) (str "?" (str/join "&" params)))]
-    (when-let [data (http-get-json (str futon3c-url "/api/alpha/evidence" qs))]
+    (when-let [data (http-get-json (str futon3c-url "/api/alpha/evidence" qs)
+                                   (or timeout 5000))]
       (when (:ok data)
         (or (:entries data) [])))))
 
@@ -1194,7 +1197,18 @@
    Returns {:sessions [...] :total-sessions N}."
   [days]
   (let [since (since-str days)
-        entries (or (fetch-evidence :since since) [])
+        ;; Bound the fetch. The evidence store is large (60k+ entries / 100+ MB) and the
+        ;; API full-scans on every query (~9s), so an UNLIMITED windowed pull blew past
+        ;; http-get-json's default 5s timeout and silently returned nil → 0 sessions → an
+        ;; empty "Scan window" panel. The API returns NEWEST-first, so :limit yields the
+        ;; most-recent activity: degrade to "latest N entries" rather than showing nothing,
+        ;; with a timeout that lets the (slow) call finish (Joe, 2026-06-12). The waveform's
+        ;; bounds-note already annotates when the shown span is narrower than the window.
+        ;; Tunable via FUTON3C_WM_SESSION_EVIDENCE_LIMIT (default 10000 ≈ last ~4-5 days).
+        ev-limit (or (some-> (System/getenv "FUTON3C_WM_SESSION_EVIDENCE_LIMIT")
+                             Long/parseLong)
+                     10000)
+        entries (or (fetch-evidence :since since :limit ev-limit :timeout 30000) [])
         ;; Get mission IDs for mission detection
         mission-ids (when-let [missions (fetch-missions)]
                       (vec (keep :mission/id missions)))
@@ -1206,19 +1220,31 @@
                              (let [sorted (sort-by :evidence/at ses-entries)
                                    start (:evidence/at (first sorted))
                                    end (:evidence/at (last sorted))
-                                   steps (mapv (fn [e]
-                                                 {:at (:evidence/at e)
-                                                  :type (:evidence/type e)
-                                                  :event (get-in e [:evidence/body :event])
-                                                  :repos (detect-repos e)
-                                                  :missions (if mission-ids
-                                                              (detect-missions e mission-ids)
-                                                              [])
-                                                  :text (subs (str (get-in e [:evidence/body :text] ""))
-                                                              0 (min 80 (count (str (get-in e [:evidence/body :text] "")))))})
-                                               sorted)
-                                   repos-touched (->> steps (mapcat :repos) distinct vec)
-                                   missions-touched (->> steps (mapcat :missions) distinct vec)]
+                                   ;; Replay-minimal step: only what the frontend reads — :at
+                                   ;; (playhead timeline) + :repos/:missions (aif-join spine
+                                   ;; highlight). :type/:event were unread dead weight. The
+                                   ;; Scan Window itself only needs the session's start/end +
+                                   ;; entry-count (a length-bar); steps exist solely for replay.
+                                   all-steps (mapv (fn [e]
+                                                     {:at (:evidence/at e)
+                                                      :repos (detect-repos e)
+                                                      :missions (if mission-ids
+                                                                  (detect-missions e mission-ids)
+                                                                  [])})
+                                                   sorted)
+                                   ;; Cap per-session steps so one long-running session (a
+                                   ;; multi-thousand-entry agent session) can't dominate the
+                                   ;; payload. Downsample evenly to ~250 to preserve the timeline
+                                   ;; span/shape the waveform plots. :start/:end and the
+                                   ;; touched-summaries below use the FULL set, so spans and
+                                   ;; repo/mission coverage stay complete. (Joe, 2026-06-12.)
+                                   n (count all-steps)
+                                   steps (if (> n 250)
+                                           (vec (take-nth (long (Math/ceil (/ (double n) 250.0)))
+                                                          all-steps))
+                                           all-steps)
+                                   repos-touched (->> all-steps (mapcat :repos) distinct vec)
+                                   missions-touched (->> all-steps (mapcat :missions) distinct vec)]
                                {:session-id sid
                                 :entry-count (count ses-entries)
                                 :start start
