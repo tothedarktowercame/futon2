@@ -1302,7 +1302,17 @@
    Returns {:sessions [...] :total-sessions N}."
   [days]
   (let [since (since-str days)
-        entries (or (fetch-evidence :since since) [])
+        ;; Bound the fetch. The evidence store is large (60k+ entries / 100+MB) and the
+        ;; API full-scans on every query (~9s); even under the 30s fetch timeout an
+        ;; UNLIMITED windowed pull is a huge, slow payload. The API returns NEWEST-first,
+        ;; so :limit yields the most-recent activity — degrade to "latest N entries"
+        ;; rather than a slow/empty Scan window. Tunable via FUTON3C_WM_SESSION_EVIDENCE_LIMIT
+        ;; (default 10000 ≈ last ~4-5 days). (Ported from the arguing-worlds worktree WIP,
+        ;; 2026-06-12; the timeout it also added is already handled by fetch-evidence.)
+        ev-limit (or (some-> (System/getenv "FUTON3C_WM_SESSION_EVIDENCE_LIMIT")
+                             Long/parseLong)
+                     10000)
+        entries (or (fetch-evidence :since since :limit ev-limit) [])
         ;; Get mission IDs for mission detection
         mission-ids (when-let [missions (fetch-missions)]
                       (vec (keep :mission/id missions)))
