@@ -23,6 +23,9 @@
      generate-war-machine [days]   (compose all scans)
      render-war-machine [data]     (produce markdown)
 
+   Babashka text entrypoint:
+     cd ~/code/futon2 && bb -Sdeps '{:paths [\"src\" \"scripts\" \"resources\" \".\" \"/home/joe/code/futon3c/src\"] :deps {metosin/malli {:mvn/version \"0.16.3\"}}}' -m futon2.report.war-machine
+
    Invariant: WM-I1 (read-only observer — no writes to stack).
    Pattern:   war-machine/operational-not-decorative"
   (:require [babashka.http-client :as http]
@@ -100,6 +103,11 @@
 (defonce ^:private centrality-cache (atom nil))
 (defonce ^:private roi-results-cache (atom nil))
 (defonce !last-wm-inputs (atom nil))
+(def ^:private mission-api-timeout-ms
+  ;; The substrate-backed mission endpoint can take several seconds while it
+  ;; projects substrate-2 mission-doc hyperedges. The previous 5s default made
+  ;; mission triage silently report zero missions on normal live runs.
+  60000)
 
 (def ^:private all-repos
   "All repos in the stack, classified by workstream.
@@ -149,14 +157,54 @@
 ;; Helpers (same patterns as joe_hud.clj)
 ;; ---------------------------------------------------------------------------
 
-(defn- http-get-json [url]
-  (try
-    (let [resp (http/get url {:headers {"Accept" "application/json"}
-                              :timeout 5000
-                              :throw false})]
-      (when (= 200 (:status resp))
-        (json/parse-string (:body resp) true)))
-    (catch Exception _ nil)))
+(defn- body-snippet [body]
+  (when body
+    (let [s (str body)]
+      (subs s 0 (min 160 (count s))))))
+
+(defn- http-get-json-result
+  ([url] (http-get-json-result url 5000))
+  ([url timeout-ms]
+   (try
+     (let [resp (http/get url {:headers {"Accept" "application/json"}
+                               :timeout timeout-ms
+                               :throw false})]
+       (if (= 200 (:status resp))
+         (try
+           {:ok true
+            :url url
+            :data (json/parse-string (:body resp) true)}
+           (catch Exception e
+             {:ok false
+              :url url
+              :error :invalid-json
+              :message (.getMessage e)}))
+         {:ok false
+          :url url
+          :status (:status resp)
+          :message (body-snippet (:body resp))}))
+     (catch java.net.SocketTimeoutException e
+       {:ok false
+        :url url
+        :error :timeout
+        :message (.getMessage e)})
+     (catch java.net.ConnectException e
+       {:ok false
+        :url url
+        :error :connect-failed
+        :message (.getMessage e)})
+     (catch Exception e
+       {:ok false
+        :url url
+        :error :request-failed
+        :message (.getMessage e)}))))
+
+(defn- http-get-json
+  ([url] (http-get-json url 5000))
+  ([url timeout-ms]
+   (let [result (http-get-json-result url timeout-ms)]
+     (when (:ok result)
+       (:data result)))))
 
 (defn- git [repo-path & args]
   (let [{:keys [exit out]} (apply shell/sh "git" "-C" repo-path args)]
@@ -407,15 +455,21 @@
        (map-indexed (fn [i entry] (assoc entry :rank (inc i))))
        vec))
 
+(def ^:private mission-action-types
+  ;; :advance-mission = engage an already-open mission's holes (the
+  ;; enumerator's type since pilot cycle #1, 2026-06-10); :open-mission
+  ;; retained for genuinely-unopened targets.
+  #{:open-mission :advance-mission})
+
 (defn- live-open-mission-ranked-entry?
   [missions entry]
   (let [action (:action entry)]
-    (or (not= :open-mission (:type action))
+    (or (not (mission-action-types (:type action)))
         (mission-registry/live-mission-target? missions (:target action)))))
 
 (defn- canonicalize-open-mission-ranked-entry
   [entry]
-  (if (= :open-mission (get-in entry [:action :type]))
+  (if (mission-action-types (get-in entry [:action :type]))
     (let [registry-id (mission-registry/mission-target-id
                        (get-in entry [:action :target]))]
       (cond-> entry
@@ -457,7 +511,8 @@
 
 (defn- compute-delta-t-mission
   [mission-endpoint]
-  (if-let [f (requiring-resolve 'futon3c.aif.mission-delta-t/delta-t-mission)]
+  (if-let [f (try (requiring-resolve 'futon3c.aif.mission-delta-t/delta-t-mission)
+                  (catch Throwable _ nil))]
     (f mission-endpoint)
     {:delta-T 0.0}))
 
@@ -586,12 +641,7 @@
 ;; Evidence API helpers
 ;; ---------------------------------------------------------------------------
 
-(defn- fetch-evidence
-  "Fetch evidence entries from the API. Returns vec or nil.
-
-   Options:
-   - :limit  maximum number of entries to request
-   - :since  inclusive ISO date string (YYYY-MM-DD) lower bound"
+(defn- evidence-query-url
   [& {:keys [limit since]}]
   (let [params (cond-> []
                  (and (int? limit) (pos? limit))
@@ -599,16 +649,54 @@
                  (string? since)
                  (conj (str "since=" since)))
         qs (when (seq params) (str "?" (str/join "&" params)))]
-    (when-let [data (http-get-json (str futon3c-url "/api/alpha/evidence" qs))]
-      (when (:ok data)
-        (or (:entries data) [])))))
+    (str futon3c-url "/api/alpha/evidence" qs)))
+
+(defn- fetch-evidence-result
+  "Fetch evidence entries from the API with endpoint-level diagnostics."
+  [& {:keys [limit since]}]
+  (let [url (evidence-query-url :limit limit :since since)]
+    ;; The evidence endpoint is live but commonly takes multiple seconds for a
+    ;; 2000-entry scan during active flights; the default 5s HTTP timeout made evidence
+    ;; backed panels silently read as empty.
+    (if-let [result (http-get-json-result url 30000)]
+      (if-not (:ok result)
+        (assoc result :available? false)
+        (let [data (:data result)]
+          (if (:ok data)
+            {:available? true
+             :url url
+             :entries (or (:entries data) [])}
+            {:available? false
+             :url url
+             :error :api-not-ok
+             :message (or (:err data) (:error data) "response ok=false")
+             :response (dissoc data :entries)})))
+      {:available? false
+       :url url
+       :error :request-failed
+       :message "http-get-json-result returned nil"})))
+
+(defn- fetch-evidence
+  "Fetch evidence entries from the API. Returns vec or nil.
+
+   Options:
+   - :limit  maximum number of entries to request
+   - :since  inclusive ISO date string (YYYY-MM-DD) lower bound"
+  [& {:keys [limit since]}]
+  (let [result (fetch-evidence-result :limit limit :since since)]
+    (when (:available? result)
+      (:entries result))))
 
 (defn- fetch-missions
   "Fetch mission inventory from the API. Returns vec or nil."
   []
-  (when-let [data (http-get-json (str futon3c-url "/api/alpha/missions"))]
+  (when-let [data (http-get-json (str futon3c-url "/api/alpha/missions")
+                                 mission-api-timeout-ms)]
     (when (:ok data)
       (or (:missions data) []))))
+
+(def ^:private active-mission-statuses
+  #{"active" "in-progress" "in_progress" "stale-in-progress" "testing"})
 
 (defn- normalize-keyword [x]
   (cond
@@ -620,6 +708,20 @@
   (some-> (or (get-in entry [:evidence/body :event])
               (get-in entry [:evidence/body "event"]))
           name))
+
+(defn- evidence-text [entry]
+  (let [body (:evidence/body entry)]
+    (str/join " "
+              (keep #(some-> % str not-empty)
+                    [(get body :text)
+                     (get body "text")
+                     (get body :prompt-preview)
+                     (get body "prompt-preview")
+                     (get body :summary)
+                     (get body "summary")
+                     (:evidence/type entry)
+                     (:evidence/claim-type entry)
+                     (event-name entry)]))))
 
 (defn- evidence-at [entry]
   (some-> (:evidence/at entry) str))
@@ -801,12 +903,14 @@
    - `process-alert` / `process-recovery` from the futon3c watchdog
 
    The result is intentionally action-shaped rather than raw-evidence-shaped,
-   so War Machine can say what needs fixing instead of only replaying boot
-   banners."
+  so War Machine can say what needs fixing instead of only replaying boot
+  banners."
   [days]
-  (let [entries (fetch-evidence :limit 1000 :since (since-str days))]
-    (if (nil? entries)
+  (let [result (fetch-evidence-result :limit 1000 :since (since-str days))
+        entries (:entries result)]
+    (if-not (:available? result)
       {:available? false
+       :diagnostic (dissoc result :entries)
        :issues []
        :recoveries []
        :issue-count 0
@@ -836,7 +940,7 @@
     :description "Work produces auditable evidence via gate pipeline"
     :detect-fn
     (fn [entries _] ;; Any chat-turn = work is happening
-      (filter #(= "chat-turn" (get-in % [:evidence/body :event])) entries))}
+      (filter #(= "chat-turn" (event-name %)) entries))}
 
    {:id :proof→patterns
     :label "Proof paths → Pattern discovery"
@@ -845,8 +949,9 @@
     (fn [entries _] ;; PSR/PUR evidence OR goal-typed claims OR pattern mentions
       (filter #(or (#{"pattern-selection" "pattern-outcome"} (:evidence/type %))
                    (= "goal" (:evidence/claim-type %))
-                   (when-let [text (get-in % [:evidence/body :text])]
-                     (re-find #"(?i)pattern.*select|PSR|PUR|pattern.*record" text)))
+                   (#{"pattern-selection" "pattern-outcome"} (event-name %))
+                   (re-find #"(?i)pattern.*select|PSR|PUR|pattern.*record"
+                            (evidence-text %)))
               entries))}
 
    {:id :patterns→coordination
@@ -855,8 +960,9 @@
     :detect-fn
     (fn [entries _] ;; Context retrieval certificates or retrieval mentions
       (filter #(or (= "context-retrieval" (:evidence/type %))
-                   (when-let [text (get-in % [:evidence/body :text])]
-                     (re-find #"(?i)context.?retriev|pattern.?retriev|notions.*search" text)))
+                   (= "context-retrieval" (event-name %))
+                   (re-find #"(?i)context.?retriev|pattern.?retriev|notions.*search"
+                            (evidence-text %)))
               entries))}
 
    {:id :coordination→self-rep
@@ -888,8 +994,9 @@
     :detect-fn
     (fn [entries _] ;; Portfolio evidence or review/inference mentions
       (filter #(or (str/starts-with? (or (:evidence/type %) "") "portfolio")
-                   (when-let [text (get-in % [:evidence/body :text])]
-                     (re-find #"(?i)portfolio|inference|review|triage" text)))
+                   (str/starts-with? (or (event-name %) "") "portfolio")
+                   (re-find #"(?i)portfolio|inference|review|triage"
+                            (evidence-text %)))
               entries))}
 
    {:id :inference→work
@@ -897,7 +1004,9 @@
     :description "Inference improves work selection"
     :detect-fn
     (fn [entries _] ;; Forum posts = collective coordination outputs
-      (filter #(= "forum-post" (:evidence/type %)) entries))}])
+      (filter #(or (= "forum-post" (:evidence/type %))
+                   (= "forum-post" (event-name %)))
+              entries))}])
 
 (def ^:private arrow-health-freq-k
   "Half-rate parameter for the asymptotic frequency component.
@@ -936,7 +1045,7 @@
    health is the normalized [0,1] observation."
   [days]
   (let [since (since-str days)
-        entries (or (fetch-evidence :limit 2000) [])
+        entries (or (fetch-evidence :limit 2000 :since since) [])
         ;; Filter entries to window
         window-entries (filter (fn [e]
                                  (when-let [d (parse-iso-date (:evidence/at e))]
@@ -1082,8 +1191,8 @@
         ;; Classify by repo
         by-repo (frequencies (map #(or (:mission/repo %) "unknown") missions))
         ;; Detect abandoned: in-progress but no commits in window
-        in-progress (filter #(#{"active" "in-progress" "in_progress"}
-                               (:mission/status %))
+        in-progress (filter #(contains? active-mission-statuses
+                                        (:mission/status %))
                             missions)
         abandoned (when (seq in-progress)
                     (let [;; Build repo→commit-count cache
@@ -1100,8 +1209,7 @@
         total (count missions)
         completed (get by-status "complete" 0)
         blocked (get by-status "blocked" 0)
-        active (+ (get by-status "active" 0) (get by-status "in-progress" 0)
-                  (get by-status "in_progress" 0))]
+        active (reduce + (map #(get by-status % 0) active-mission-statuses))]
     {:total total
      :by-status by-status
      :by-repo by-repo
@@ -2115,6 +2223,25 @@
         (>= h 0.3) "◐"  ;; partial
         :else       "○")) ;; absent
 
+(defn- self-watch-diagnostic-text
+  [{:keys [url status error message]}]
+  (let [target (or url (str futon3c-url "/api/alpha/evidence"))]
+    (cond
+      (= :timeout error)
+      (str "GET " target " timed out after 30000ms"
+           (when (seq message) (str " (" message ")")))
+
+      status
+      (str "GET " target " returned HTTP " status
+           (when (seq message) (str " (" message ")")))
+
+      error
+      (str "GET " target " failed: " (name error)
+           (when (seq message) (str " (" message ")")))
+
+      :else
+      (str "GET " target " did not return usable evidence data"))))
+
 (defn render-war-machine
   "Render the War Machine strategic synthesis as markdown."
   [{:keys [self-watch loop-health support-attack mission-triage graph
@@ -2128,7 +2255,9 @@
       (.append sb "## Self-Watch\n\n")
       (cond
         (not (:available? self-watch))
-        (.append sb "*Self-watch evidence unavailable — futon3c evidence API did not answer.*\n\n")
+        (.append sb (str "*Self-watch evidence unavailable — "
+                         (self-watch-diagnostic-text (:diagnostic self-watch))
+                         ".*\n\n"))
 
         (seq (:issues self-watch))
         (do
@@ -3575,14 +3704,31 @@
                                     :scan-id (or (:scan-id scan-data)
                                                  scan-id
                                                  "war-machine/judge")})
-        wm-ranked (->> (efe/rank-actions wm-state
-                                          wm-enriched-candidates
-                                          (live-star-map-efe-opts
-                                           (live-gap-view-efe-opts
-                                            {:time-pressure wm-time-pressure
-                                             :horizon-steps wm-horizon-steps})))
+        wm-efe-opts (live-star-map-efe-opts
+                     (live-gap-view-efe-opts
+                      {:time-pressure wm-time-pressure
+                       :horizon-steps wm-horizon-steps}))
+        wm-ranked (->> (efe/rank-actions wm-state wm-enriched-candidates wm-efe-opts)
                        apply-anamnesis-tiebreak
                        (filter-live-open-mission-ranked-actions wm-missions))
+        ;; Dual-prediction logging (target-sensitive model, 2026-06-11): every
+        ;; ranked entry also carries :G-constant — the frozen v1 constant
+        ;; model's counterfactual G for the SAME (state, action) — so
+        ;; constant-vs-scaled discriminates on the same measured pairs.
+        ;; Pure recompute, no second scan.
+        g-constant-by-key (binding [fm/*effects-mode* :constant]
+                            (into {}
+                                  (map (fn [e] [[(get-in e [:action :type])
+                                                 (get-in e [:action :target])]
+                                                (:G-total e)]))
+                                  (efe/rank-actions wm-state wm-enriched-candidates wm-efe-opts)))
+        wm-ranked (mapv (fn [e]
+                          (if-some [gc (get g-constant-by-key
+                                            [(get-in e [:action :type])
+                                             (get-in e [:action :target])])]
+                            (assoc e :G-constant gc)
+                            e))
+                        wm-ranked)
         ;; v0.13 R6 enhancement: pre-filter by can-execute? admissibility
         ;; (composes with can-propose? at proposer-side); then run
         ;; deliberative select-action with default-mode-select as a

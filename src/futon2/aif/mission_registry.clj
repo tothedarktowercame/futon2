@@ -245,17 +245,39 @@
   [state action]
   (live-mission-target? (:missions state []) (:target action)))
 
+(defmethod fm/can-propose? :advance-mission
+  [state _action-type]
+  (boolean (seq (:missions state))))
+
+(defmethod fm/can-execute? :advance-mission
+  [state action]
+  (live-mission-target? (:missions state []) (:target action)))
+
 (def mission-enumerator-proposer
-  "Proposer that emits one `:open-mission` candidate per addressable mission
-   in the state map. State must carry `:missions` (populated by
-   `open-missions`)."
+  "Proposer that emits one mission candidate per addressable mission in the
+   state map. State must carry `:missions` (populated by `open-missions`).
+
+   A live mission doc IS an already-open mission (the doc exists because the
+   mission was opened), so the candidate type is `:advance-mission` — engage
+   the mission's open holes — not `:open-mission`. Proposing `:open-mission`
+   for already-open missions made the whole top of the WM differential
+   un-earnable (teleport): the forward model predicted :spawned for missions
+   that already existed (pilot cycle #1 finding, 2026-06-10). `:open-mission`
+   remains a recognised type for a future substrate that can distinguish
+   genuinely-unopened missions (e.g. proposals/drafts greenlit by the
+   operator)."
   (reify ap/ActionProposer
     (propose [_ state]
       (for [m (:missions state)]
-        {:type :open-mission
+        {:type :advance-mission
          :target (:id m)
          :weight 1.0
          :mission-path (:path m)
+         ;; carried so the forward model can be TARGET-SENSITIVE without a
+         ;; registry dependency cycle (predict reads the action, not the
+         ;; registry) — same pattern as :intrinsic-value on address-sorry.
+         :open-hole-count (:open-hole-count m)
          :rationale (str "mission substrate: " (:title m)
-                         " [" (name (:status-class m)) "]")}))
+                         " [" (name (:status-class m))
+                         "; advance open holes]")}))
     (proposer-id [_] :mission-enumerator)))

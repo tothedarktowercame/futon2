@@ -1,0 +1,17 @@
+{:session "golden-papers-v0"
+ :date "2026-06-12"
+ :rounds
+ [{:round 1
+   :paper "arxiv-1312.2127"
+   :surface "golden-1312.2127-text.html (full-text anatomy glasses + title card)"
+   :judgments
+   [{:finding :no-face
+     :verbatim "can you tell me what this paper is about at a glance? I can't. What is its concept signature? How many theorems does it contain? What are their theorem fingerprints... Like a dramatis personae and plot summary."
+     :disposition :fixed-same-session
+     :fix "paper_title_card.py (726bc47): concept signature, theorem census, fingerprints, env-flow plot"}
+    {:finding :malformed-bind-symbols
+     :verbatim "we can see the errors right away from binds: $yields to a functor \\[ \\mathcal{A}_{\\infty} [\\Delta^{-}]$ — that's not a thing"
+     :disposition :fixed-same-session
+     :fix "typed-arrow temper + display-typed-arrow variant: 50 malformed -> 0; 57 clean display bindings incl. the paper's defining functor"}
+    {:finding :tex-noise
+     :note "markup over raw TeX source; whether anatomy should render over detexed prose is an open UX question (fable-2 observation, not yet operator-ruled)"}]}]}

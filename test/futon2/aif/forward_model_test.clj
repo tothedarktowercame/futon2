@@ -227,3 +227,39 @@
       (is (not= (get-in step1 [:next-belief :m1])
                 (get-in step2 [:next-belief :m1]))
           "step2's belief is further-shifted than step1's (one more event applied)"))))
+
+;; --- target-sensitive forward model (2026-06-11, Joe-approved) -------------
+
+(deftest target-sensitive-advance-mission-scales-by-holes
+  (let [pred #(fm/predict {:observation {:mission-health 0.5 :sorry-count-norm 0.5}
+                           :belief {}}
+                          {:type :advance-mission :target "M-x" :open-hole-count %})
+        health #(get-in (pred %) [:next-observation :mean :mission-health])]
+    (testing "continuity: 3 holes reproduces the v1 constant exactly"
+      (is (= (health 3)
+             (binding [fm/*effects-mode* :constant] (health 3)))))
+    (testing "more holes -> larger predicted discharge (falsifiable per target)"
+      (is (> (health 6) (health 3)))
+      (is (> (health 3) (health 1))))
+    (testing "cap at 2x and floor at 0.1 (a scale is a hypothesis, not a blank check)"
+      (is (= (health 6) (health 12)))
+      (is (= (health 0) (health 0))) ; floor engages, no NaN/zero-div
+      (is (pos? (- (health 1) 0.5))))
+    (testing ":constant mode is hole-INsensitive (the frozen baseline)"
+      (binding [fm/*effects-mode* :constant]
+        (is (= (health 1) (health 6)))))))
+
+(deftest target-sensitive-address-sorry-scales-by-intrinsic-value
+  (let [pred #(fm/predict {:observation {:mission-health 0.5 :sorry-count-norm 0.5}
+                           :belief {}}
+                          {:type :address-sorry :target "sorry/x" :intrinsic-value %})
+        scn #(get-in (pred %) [:next-observation :mean :sorry-count-norm])]
+    (testing "continuity: 0.5 (and absent) reproduce the v1 constant"
+      (is (= (scn 0.5) (scn nil)))
+      (is (= (scn 0.5)
+             (binding [fm/*effects-mode* :constant] (scn 0.5)))))
+    (testing "higher intrinsic value -> larger predicted discharge"
+      (is (< (scn 1.0) (scn 0.5)))) ; more discharge = lower sorry-count-norm
+    (testing ":constant mode is value-INsensitive"
+      (binding [fm/*effects-mode* :constant]
+        (is (= (scn 0.15) (scn 1.0)))))))

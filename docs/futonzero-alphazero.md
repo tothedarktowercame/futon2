@@ -129,6 +129,34 @@ A typed sorry beats a smooth claim. Honest edges, in load-bearing order:
   the better-fitting machinery (sample compositional objects *proportional to reward* — nearly a definition
   of "assemble a pattern-language scored by wholeness"). In v1 the cascade lane (the semilattice) and the
   rollout (the linear path) are **separate** machineries; reconciling them is open.
+- **Semilattice-vs-rollout: contested, measured, honestly unresolved (E-cascade-sampler-sampler v0,
+  2026-06-12).** The GFlowNet machinery works off the shelf (set-selection env, TB trains when signal
+  exists — +0.21 on a real flight-grounded reward) and the contest harness stands (5 arms, realized-G
+  floor, diversity guard, fairness null) — but **C-spread was 0.000 on every frozen circumstance**: with
+  uniform scores the wholeness proxy has no generation gradient, so v0 could not adjudicate the tension
+  (greedy-ε single-best held the median — the arguing-worlds negative reproduced by different machinery).
+  The unlock is the delivered-but-unconsumed **M-substrate-metric v1** as generation proxy (its campaign's
+  awaited live consumer); contest v1 re-runs there. Verdicts:
+  `futon2/holes/labs/E-cascade-sampler-sampler/contest-verdicts-v0.edn`.
+- **Semilattice-vs-rollout, contest v1 + golden round 2: the tension survives, sharpened to the action
+  vocabulary (E-cascade-sampler-sampler v1, 2026-06-12 afternoon).** The metric proxy ran (M-substrate-metric
+  v1 consumed live, unmodified; spread 1.06–2.74, non-flat) and **still did not separate from the flat-proxy
+  arm on realized-G** (median −9.53 vs −9.49; greedy-ε held the median at −10.73 — fourth independent
+  confirmation of single-best-holds). Mechanism: the trained policy stayed near-uniform (114–125 distinct/128
+  draws) — a 2.6× reward range is too weak to concentrate TB at 1200 steps. So flatness was *necessary but not
+  sufficient*: the generation proxy must also be **steep enough to train against** and **informative toward
+  the yardstick**. Golden round 2 (blind deck, sealed key) then localized the gap one level deeper: the v1.1
+  corrections (resolution-state scaling + presence mask — both right *on state*) left the bundle ranking
+  unchanged, and **the operator's pick was mis-ranked by the proxy AND by the realized-G floor itself** —
+  operator gold is *portfolio-shaped* ("quick wins and some deeper dives" + close-outs of saturated missions),
+  while every score in the stack prices only the *advance* move class. The next unlock is therefore not more
+  training: it is **move-class-conditional intensity** (advance × (1−resolvedness); close × resolvedness;
+  survey for stale-early targets) **+ a composition-aware bundle score** — i.e. the action-vocabulary
+  extension — *then* spend training compute. Verdicts: `contest-verdicts-v1.edn`; gold:
+  `s4/golden-selections-v0.edn` (rounds 1–2); full narrative: charter checkpoints 6–7. The §5 question (a) —
+  does native semilattice sampling find cascades the linearizers cannot? — remains open and now has a
+  *precondition*: it cannot be answered until the score being sampled toward prices all the move classes the
+  operator actually values.
 - **The parsimony budget is a hyperparameter, not a principle.** Since `C` is monotone and bounded only
   externally, **the budget *is* the regularizer** — budget-6 sets the character of *every* cascade. Why 6?
   An *empirical* read of the marginal-coverage knee (~5–8 strong centres before the tail goes marginal), not

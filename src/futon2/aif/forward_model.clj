@@ -27,8 +27,8 @@
    set means adding both a `predict-effects` multimethod arm (below)
    and a `can-propose?` arm if the action requires substrate
    addressability."
-  #{:no-op :address-sorry :open-mission :fire-pattern :learn-action-class
-    :pursue :decompose})
+  #{:no-op :address-sorry :open-mission :advance-mission :fire-pattern
+    :learn-action-class :pursue :decompose})
 
 (defn- valid-action?
   "An action is a map carrying :type (one of action-types). Most actions
@@ -65,15 +65,43 @@
    :obs-variance {}
    :events []})
 
+(def ^:dynamic *effects-mode*
+  "Prediction-effects mode (target-sensitive forward model, Joe-approved
+   2026-06-11, WM pilot cycles 5-7 finding):
+   - :target-sensitive (default) — per-target predictions scaled by what the
+     action map carries (:open-hole-count for advance-mission,
+     :intrinsic-value for address-sorry). Falsifiable per target.
+   - :constant — the frozen v1 per-action-type constants, kept as the
+     counterfactual baseline so constant-vs-scaled discriminates on the
+     SAME pairs (dual-prediction logging).
+   The judgement's per-target G composes these same effects, so this mode
+   re-ranks the field — that coupling (prior==value) is exactly why the
+   constant model produced an unfalsifiable, hole-insensitive field."
+  :target-sensitive)
+
+(defn- sensitivity-factor
+  "1.0 under :constant (and at the continuity point under :target-sensitive),
+   else the per-target scale. Bounded — a scale is a hypothesis, not a
+   blank check."
+  [x continuity-point cap]
+  (if (= :constant *effects-mode*)
+    1.0
+    (-> (/ (double (or x continuity-point)) (double continuity-point))
+        (max 0.1)
+        (min (double cap)))))
+
 (defmethod predict-effects :address-sorry
-  [_state {:keys [target weight] :or {weight 1.0}}]
+  [_state {:keys [target weight intrinsic-value] :or {weight 1.0}}]
   ;; addressing a sorry reduces sorry-count-norm by ~0.1
-  ;; (sorry-count-norm = open-sorrys / 10); raises mission-health slightly
-  {:obs-delta {:sorry-count-norm -0.1
-               :mission-health 0.02}
-   :obs-variance {:sorry-count-norm 0.01
-                  :mission-health 0.005}
-   :events [{:entity-id target :type :addressed :weight weight}]})
+  ;; (sorry-count-norm = open-sorrys / 10); raises mission-health slightly.
+  ;; Target-sensitive: scaled by the candidate's :intrinsic-value
+  ;; (kind-derived; 0.5 = continuity with the v1 constant).
+  (let [f (sensitivity-factor intrinsic-value 0.5 3.0)]
+    {:obs-delta {:sorry-count-norm (* -0.1 f)
+                 :mission-health (* 0.02 f)}
+     :obs-variance {:sorry-count-norm 0.01
+                    :mission-health 0.005}
+     :events [{:entity-id target :type :addressed :weight (* weight f)}]}))
 
 (defmethod predict-effects :open-mission
   [_state {:keys [target weight] :or {weight 1.0}}]
@@ -84,6 +112,25 @@
    :obs-variance {:mission-health 0.02
                   :active-repo-ratio 0.01}
    :events [{:entity-id target :type :spawned :weight weight}]})
+
+(defmethod predict-effects :advance-mission
+  [_state {:keys [target weight open-hole-count] :or {weight 1.0}}]
+  ;; advancing an ALREADY-OPEN mission discharges open holes: mission-health
+  ;; rises and remaining-work pressure falls. The event is :addressed, not
+  ;; :spawned — an in-flight mission advanced is work discharged, not a new
+  ;; entity. (:open-mission predicting :spawned for already-open missions
+  ;; was the WM scoring a hole that wasn't there — pilot cycle #1, 2026-06-10.)
+  ;; Target-sensitive: scaled by the candidate's :open-hole-count (3 holes =
+  ;; continuity with the v1 constant; capped at 2x = 6+ holes). A mission
+  ;; with more visible remaining work predicts more discharge per advance —
+  ;; and after one hole closes, the SAME action's prediction drops a notch,
+  ;; so settled G finally moves on hole-closure (cycles 5-7: it didn't).
+  (let [f (sensitivity-factor open-hole-count 3 2.0)]
+    {:obs-delta {:mission-health (* 0.04 f)
+                 :sorry-count-norm (* -0.05 f)}
+     :obs-variance {:mission-health 0.015
+                    :sorry-count-norm 0.01}
+     :events [{:entity-id target :type :addressed :weight (* weight f)}]}))
 
 (defmethod predict-effects :fire-pattern
   [_state {:keys [target weight] :or {weight 1.0}}]

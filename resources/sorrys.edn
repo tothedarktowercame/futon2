@@ -556,4 +556,113 @@
    :related-missions ["M-drawbridge-multi-agent"]
    :links ["~/code/futon3c/src/futon3c/transport/http.clj"
            "~/code/futon3c/src/futon3c/wm/scheduler.clj"
-           "~/code/futon3c/README-drawbridge.md"]}]}
+           "~/code/futon3c/README-drawbridge.md"]}
+
+  ;; --- registry refill, 2026-06-10 (ground-control fix, Joe's directive) ---
+  ;; The registry ran dry 2026-05-25 (meta-sorry legitimately discharged,
+  ;; never refilled) — with zero :open entries, can-propose? :address-sorry
+  ;; is false and the WM field tops out at learn-action-class ("feed me").
+  ;; Anti-laundering bar for these entries (G-REWARD): every hole below was
+  ;; raised BEFORE this refill, in a named artifact, with a construction
+  ;; that closes it. Two are the futonzero-generative hard-gate blockers;
+  ;; three are unminted library patterns recorded as :open arrows in the
+  ;; futon3a meme store (cascade/E-mission-head-argue) — this refill is
+  ;; stage 3 of the sorry-mining chain (store hole -> registry entry),
+  ;; with arrow ids as provenance.
+
+  {:id :sorry/wm-realised-on-merge-binding
+   :title "γ loss stream needs realised-G bound to EXECUTED actions, tagged independent"
+   :raised-at "2026-06-10"
+   :status :open
+   :kind :prototyping-forward
+   :rationale
+   (str
+    "The pilot γ stream computes realised-discharge by re-reading the next "
+    "scan after a PROPOSAL — so predicted≈realised by construction and the "
+    "calibration evidence is degenerate (15 paired records, 13 exact-zero "
+    "errors; futon3c.aif.calibration verdict :degenerate). G-SIM "
+    "(M-futonzero-generative §2) cannot clear on self-referential pairs. "
+    "Construction that closes this: close-live-cycle! (or a sibling) binds "
+    "realised-G only when an action EXECUTES (operator merge / substantive "
+    "mode), and tags such pairs distinguishable (e.g. :independent? true) "
+    "so the calibration verdict is computed over independent pairs ONLY — "
+    "the gate that diagnoses degeneracy must not be clearable by more "
+    "degeneracy (fable-1 G-SIM verdict, 2026-06-10).")
+   :related-missions ["M-futonzero-generative"]
+   :links ["~/code/futon3c/src/futon3c/peripheral/war_machine_pilot.clj"
+           "~/code/futon3c/src/futon3c/aif/calibration.clj"
+           "~/code/futon3c/holes/PILOTS-LOG.md"]}
+
+  {:id :sorry/pudding-g1-arrow-witness-binding
+   :title "G-REWARD's named open home: bind arrow-witness to the per-turn affect detector"
+   :raised-at "2026-06-08"
+   :status :open
+   :kind :external-dependency
+   :rationale
+   (str
+    "M-futonzero-generative §2 G-REWARD names its open home explicitly: "
+    "M-pudding-peradams G1 — the arrow-witness stays false until bound to "
+    "live affect evidence; until then no reward signal may train the "
+    "learner and 'reward' remains a labelled evaluation artifact. "
+    "Construction that closes this: the G1 binding of arrow-witness to the "
+    "per-turn affect detector on the Pudding Prover channel (three-witness "
+    "certificate discipline). External-dependency kind because the arming "
+    "conditions are operator-held (Joe-confirm + cert-half + "
+    "STANDARD-VERIFY per M-peradam-grounding).")
+   :related-missions ["M-futonzero-generative" "M-pudding-peradams"]
+   :links ["~/code/futon0/holes/missions/M-futonzero-generative.md"]}
+
+  {:id :sorry/pattern-two-projections-of-one-quantity
+   :title "Mint structure/two-projections-of-one-quantity — cited in ARGUE, absent from the library"
+   :raised-at "2026-06-10"
+   :status :addressed
+   :addressed-at "2026-06-11"
+   :resolution
+   (str
+    "Pattern minted: futon3/library/structure/"
+    "two-projections-of-one-quantity.flexiarg (futon3 c1c0325, Turn-3 "
+    "2026-06-10). Provenance arrow arr-4d50ce67-10b promotion = store-side "
+    "half, ground-control follow-up.")
+   :rationale
+   (str
+    "GAP (meme.db arrow arr-4d50ce67-10b, cascade/E-mission-head-argue): "
+    "prose HEAD and compiled sigil are two projections of one intent — "
+    "cited as structure/two-projections-of-one-quantity in the M-memes PSR "
+    "but NEVER MINTED in the library; the argument leans on a pattern that "
+    "does not exist on disk. The anatomy preprint's §5 synthesis is the "
+    "worked construction. Closes by writing the flexiarg and promoting the "
+    "arrow.")
+   :related-missions ["M-memes-arrows-patterns-diagrams"]
+   :links ["~/code/futon6/holes/anatomy-of-a-futonic-mission.md"]}
+
+  {:id :sorry/pattern-measure-never-target
+   :title "Mint the A1 discipline as a library pattern (third live instance today)"
+   :raised-at "2026-06-10"
+   :status :open
+   :rationale
+   (str
+    "GAP (meme.db arrow arr-4f917cf2-fc2, cascade/E-mission-head-argue): "
+    "amendment A1 (readout never gates, never optimized — Goodhart "
+    "discipline) recurs across peradams, health-readouts, attestation — "
+    "and now a third live instance: calibration verdicts computed over "
+    "independent pairs only (2026-06-10). No library pattern captures it. "
+    "Closes by minting the flexiarg with the scope condition "
+    "(externally-discharged targetable / self-estimated observation-only) "
+    "and promoting the arrow.")
+   :related-missions ["M-memes-arrows-patterns-diagrams"]
+   :links ["~/code/futon6/holes/missions/E-mission-head.aif.edn"]}
+
+  {:id :sorry/pattern-typed-theme-liberates-the-solo
+   :title "Mint the Gantt-ification defense — load-bearing in two missions, not in the library"
+   :raised-at "2026-06-10"
+   :status :open
+   :rationale
+   (str
+    "GAP (meme.db arrow arr-69f9c0d3-333, cascade/E-mission-head-argue): "
+    "the core defense against the Gantt-ification objection — a typed "
+    "theme LIBERATES the solo (the ants animate BECAUSE of their sigils; "
+    "charting the head is not charting the improvisation) — is "
+    "load-bearing in two missions and absent from the library. Closes by "
+    "minting the flexiarg and promoting the arrow.")
+   :related-missions ["M-memes-arrows-patterns-diagrams"]
+   :links ["~/code/futon6/holes/missions/E-mission-head.md"]}]}

@@ -1,0 +1,87 @@
+{:session "golden-v0"
+ :date "2026-06-12"
+ :protocol-note "Round 1 asked for selection-level ranking; the operator answered
+ with per-target dispositions — adopted as the gold schema from round 1 onward
+ (finer grain; selection scores derivable from target labels + composition)."
+ :rounds
+ [{:round 1
+   :circumstance "wm-freeze-2026-06-12-00"
+   :presented [:A :B :C :D] ;; key in golden-round-1-key.json
+   :gold-grain :per-target
+   :judgments
+   [{:target "M-first-flights"
+     :disposition :operator-coupled
+     :verbatim "first-flights *is* top of queue in the WM, however it also has an interactive aspect (what we are doing now — prep for Phase B) that I wouldn't expect to close automatically"}
+    {:target "M-agency-hardening"
+     :disposition :saturated
+     :verbatim "agency-hardening is substantially done (just recent)"}
+    {:target "M-superpod-mark3"
+     :disposition :push-forward
+     :verbatim "superpod-mark3 is interesting current work that might be pushed forward"}
+    {:target "M-autoclock-in"
+     :disposition :automate-best
+     :verbatim "autoclock-in would indeed be a good target for automation (best)"}
+    {:target "M-fulab-wiring-survey"
+     :disposition :legacy-worst
+     :verbatim "fulab-wiring-survey seems like legacy stuff that I'm not that interested in (worst)"}]
+   :dimensions-revealed
+   [:automatability "does the work close without the operator? (the WM cycle is an autonomous worker — gold criterion is good-autonomous-target, not important-mission)"
+    :saturation "recently-substantially-done means low marginal value regardless of structure"
+    :operator-interest "legacy/disinterest disqualifies independent of graph position"]}
+  {:round 2
+   :circumstance "wm-freeze-2026-06-12-06"
+   :presented [:A :B :C :D] ;; key in golden-round-2-key.json (sealed before presentation)
+   :gold-grain :per-target
+   :judgments
+   [{:target "M-a-sorry-enterprise"
+     :disposition :verify-working
+     :verbatim "good autonomous target, we might not close the mission but we could verify how much is working"}
+    {:target "M-bounded-in-flight-state"
+     :disposition :clarify-signals
+     :verbatim "good autonomous target, the idea is to limit work in progress, so again, we could at least clarify what the signals are — possibly moving it to closure"}
+    {:target "M-futonzero-mvp"
+     :disposition :build-mvp
+     :verbatim "good autonomous target (it is an MVP), even if the result is something that needs interactive testing later"}
+    {:target "M-learning-loop"
+     :disposition :scan-then-close
+     :verbatim "might be ready to close after an autonomous scan"}
+    {:target "M-patterns-done-right"
+     :disposition :survey-first
+     :verbatim "unknown, this is legacy, could be *surveyed* to see if it is still viable in any way"}
+    {:target "M-war-machine-first-outing-expectations"
+     :disposition :close-out
+     :verbatim "that's over and should probably close"}
+    {:target "M-web-arxana-missions"
+     :disposition :automate-try
+     :verbatim "possibly tricky to do anonomously but worth seeing what can be done with Playwright for a first demo"}
+    {:target "M-essay-corpus-substrate"
+     :disposition :operator-uncertain
+     :verbatim "I wasn't sure about the M-essay-corpus-substrate in bundle C, but I'd have to dig to distinguish it!"
+     :note "substrate doc says resolvedness 1.0 (complete); operator unsure — stale-doc-or-operator-drift, needs a dig before either side is trusted"}]
+   :bundle-judgment
+   {:picked :B
+    :verbatim "Subject to these notes, I would spend my budget of 6 across something like Bundle B, looking for some quick wins and some deeper dives"
+    :note "soft pick (\"something like\"); the first delivery was truncated mid-list (leading \"scan\" = tail of \"after an autonomous scan\") — full 8-target gold arrived on redelivery and is recorded above"}
+   :unsealed
+   {:B :gflownet-tb ;; realized-G -8.15, ranked 3rd of 4 by BOTH v0 and v1.1 metric-C
+    :v0-ranking [:A :C :B :D] ;; A=uniform-best-of-k C=greedy-eps D=incumbent
+    :v11-ranking [:A :C :B :D]
+    :realized-G-ranking [:C :A :B :D]}
+   :dimensions-revealed
+   [:bundle-composition "gold values portfolio shape (quick wins + deeper dives + close-outs), not sum of per-target advance-value; B contains BOTH v1.1-zeroed targets and was still picked"
+    :move-class-conditional-intensity "saturation filter is CORRECT on state (war-machine-first-outing resolvedness 1.0, Joe: should close) but advance-only vocabulary turns a good close-out into dead weight; close-intensity should SCORE BY resolvedness, not be zeroed by it"
+    :recency-staleness "phase-based resolvedness cannot distinguish early-because-young from early-because-abandoned (patterns-done-right: doc says 0.1, Joe says legacy/survey-first); same class as round 1's M-fulab-wiring-survey"
+    :yardstick-divergence "realized-G's best bundle (C, -12.61) was NOT the operator pick (B, -8.15) — the floor itself diverges from gold at bundle level, soft-pick caveat noted"
+    :move-class-menu "the full 8-target gold spells out the autonomous move vocabulary: verify-working / clarify-signals / build-mvp / scan-then-close / survey-first / close-out / automate-try — six-plus move classes where the proxy prices one (advance)"
+    :omission-not-negative "bounded-in-flight-state rated good-autonomous-target yet left out of the picked bundle — budget composition chooses among goods; exclusion carries no negative signal"]}]
+ :round-1-refinements
+ [{:target "M-agency-hardening"
+   :refines :saturated
+   :verbatim "it's *possible* that agency-hardening would be a good selection if there are 'a few more things to close' and we prioritise 'closing things' over exploring further. I think all that really needs done there is to mark it as CLOSED. It'd be fine for the WM to notice that and do it as part of a 'bundle' of other operations."
+   :implication {:action-vocabulary "saturated missions are CLOSE-OUT candidates, not advance candidates — the move type changes, the target does not disqualify"
+                 :policy-delegation "WM bundle-closure of substantively-done missions is operator-granted (2026-06-12); contested closures remain Joe's call"}}
+  {:target "M-first-flights"
+   :refines :operator-coupled
+   :verbatim "effectively substrate-2 could say 'joe and fable-2 are clocked in on this right now, don't touch it'"
+   :implication {:signal :live-presence
+                 :finding "the slot EXISTS unfilled: agency roster carries mission-id per agent (stale/nil in practice); WM snapshot has pilot-inhabitations (coarse, stale). The structural fix is M-autoclock-in — which this session's gold independently rated automate-best. The golden session validated its own remedy."}}]}

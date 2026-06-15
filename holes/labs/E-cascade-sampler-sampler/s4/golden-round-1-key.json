@@ -1,0 +1,91 @@
+{
+ "circumstance": "wm-freeze-2026-06-12-00",
+ "mapping": {
+  "metric-argmax": "D",
+  "greedy-rank": "B",
+  "uniform": "A",
+  "metric-argmin": "C"
+ },
+ "selections": {
+  "D": {
+   "method": "metric-argmax",
+   "indices": [
+    0,
+    1,
+    3,
+    4,
+    5,
+    9
+   ],
+   "targets": [
+    "M-first-flights",
+    "M-agency-hardening",
+    "M-superpod-mark3",
+    "M-autoclock-in",
+    "M-archaeology-control",
+    "M-bounded-disposition"
+   ],
+   "metric_c": 2.8339614926177714
+  },
+  "B": {
+   "method": "greedy-rank",
+   "indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "targets": [
+    "M-first-flights",
+    "M-agency-hardening",
+    "M-or-training-as-learning-system",
+    "M-superpod-mark3",
+    "M-autoclock-in",
+    "M-archaeology-control"
+   ],
+   "metric_c": 2.5921572732662557
+  },
+  "A": {
+   "method": "uniform",
+   "indices": [
+    0,
+    1,
+    3,
+    4,
+    8,
+    10
+   ],
+   "targets": [
+    "M-first-flights",
+    "M-agency-hardening",
+    "M-superpod-mark3",
+    "M-autoclock-in",
+    "?",
+    "M-fulab-wiring-survey"
+   ],
+   "metric_c": 1.321411997641221
+  },
+  "C": {
+   "method": "metric-argmin",
+   "indices": [
+    2,
+    7,
+    8,
+    10,
+    11,
+    12
+   ],
+   "targets": [
+    "M-or-training-as-learning-system",
+    "M-single-locus",
+    "?",
+    "M-fulab-wiring-survey",
+    "M-bayesian-structure-learning",
+    "M-bayesian-structure-learning"
+   ],
+   "metric_c": 0.2694534459292862
+  }
+ }
+}

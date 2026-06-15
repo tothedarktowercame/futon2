@@ -180,7 +180,9 @@
                           {:id "M-beta" :title "Mission Beta" :status-class :partial :path "/tmp/b"}]}
         candidates (ap/propose mr/mission-enumerator-proposer state)]
     (is (= 2 (count candidates)))
-    (is (every? #(= :open-mission (:type %)) candidates))
+    ;; live mission docs are ALREADY-OPEN missions: the enumerator proposes
+    ;; advancing them, never re-opening them (pilot cycle #1, 2026-06-10)
+    (is (every? #(= :advance-mission (:type %)) candidates))
     (is (= #{"M-alpha" "M-beta"} (set (map :target candidates))))
     (is (every? :mission-path candidates))
     (is (every? #(string? (:rationale %)) candidates))))

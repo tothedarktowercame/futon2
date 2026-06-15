@@ -1,0 +1,20 @@
+{
+ "corpus": {
+  "total": 33,
+  "masked-out": 31,
+  "masked-in": 2,
+  "clean": 1
+ },
+ "probe": {
+  "target": "M-daily-scan",
+  "circumstance": "wm-freeze-2026-06-12-04",
+  "n-train-steps": 600,
+  "k-samples": 256,
+  "seed": 20260612,
+  "p-target-untrained": 0.43359375,
+  "p-target-trained": 0.640625,
+  "train-seconds": 391.2
+ },
+ "verdict": "pipe-trains",
+ "honesty": "n=1 clean example; 31/33 refused by the derived-never-authored mask \u2014 the corpus grows one flight at a time"
+}
