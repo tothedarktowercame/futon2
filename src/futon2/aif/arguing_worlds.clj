@@ -4,8 +4,18 @@
   The referee yardstick is realized rollout G(pi), not cascade C. C is only used
   to define the single-buildout baseline that the dialectic must beat. Diversity
   is checked before judging; a non-diverse generator returns :monotone-generator."
-  (:require [clojure.set :as set]
+  (:require [cheshire.core :as json]
+            [clojure.java.io :as io]
+            [clojure.set :as set]
             [futon2.aif.rollout :as rollout]))
+
+
+
+(def default-freeze-path
+  "/home/joe/code/futon2/holes/labs/E-cascade-sampler-sampler/wm-judgement-freeze-2026-06-12.json")
+
+(def default-circumstances-path
+  "/home/joe/code/futon2/holes/labs/E-cascade-sampler-sampler/circumstances-v0.edn")
 
 (def default-lenses
   [{:lens/id :capability-ascent
@@ -221,3 +231,229 @@
       :peradam-grounding :escrowed
       :results (mapv #(evaluate-circumstance % :n 4 :depth 1 :top-k 19)
                      circumstances)})))
+
+(defn read-freeze
+  "Read the frozen WM judgement used by E-cascade-sampler-sampler S1."
+  ([] (read-freeze default-freeze-path))
+  ([path]
+   (json/parse-string (slurp path) true)))
+
+(defn- action-target
+  [action]
+  (or (:target action) (:name action) (str (:rank action))))
+
+(defn- action-class
+  [action]
+  (case (:type action)
+    "advance-mission" :advance-capability
+    "open-mission" :close-hole
+    "close-hole" :close-hole
+    "graft-pattern" :graft-pattern
+    :centre-mess))
+
+(defn action->move
+  "Render a frozen ranked action as a rollout move. The move is synthetic and
+  deterministic; it gives the contest harness a realized-G yardstick without
+  claiming these transitions model the live field."
+  [action]
+  (let [rank (long (or (:rank action) 0))
+        target (action-target action)
+        open-holes (double (or (:open-hole-count action) 1.0))
+        weight (double (or (:weight action) 1.0))]
+    {:move/id (str (:type action) ":" target ":" rank)
+     :move/class (action-class action)
+     :have "wm-freeze/root"
+     :want (str "wm-freeze/action/" rank "/" target)
+     :score weight
+     :delta-g (- (+ 0.1 (* 0.2 open-holes) (* 0.01 (max 0 (- 122 rank)))))
+     :rank rank
+     :move/terminal? (<= open-holes 1.0)
+     :source/action action}))
+
+(defn assemble-circumstances
+  "Assemble deterministic arguing-worlds-shaped circumstances from the frozen
+  WM ranked actions. Each circumstance carries an action FRONTIER strictly
+  larger than the cascade budget (review fix, fable-2 2026-06-12: with
+  frontier == budget every budget-bounded selection is the whole frontier and
+  the contest degenerates). Deterministic stride interleave: circumstance i
+  takes ranked actions where (mod idx n) == i, so every frontier spans the
+  full rank spectrum instead of being one rank-band."
+  ([freeze] (assemble-circumstances freeze {:n 10 :budget 6}))
+  ([freeze {:keys [n budget] :or {n 10 budget 6}}]
+   (let [actions (->> (:ranked-actions freeze)
+                      (sort-by #(long (or (:rank %) Long/MAX_VALUE)))
+                      vec)]
+     (->> (range (count actions))
+          (group-by #(mod % n))
+          (sort-by key)
+          (map (fn [[_ idxs]] (mapv actions idxs)))
+          (take n)
+          (map-indexed
+           (fn [idx chunk]
+             (let [moves (mapv action->move chunk)
+                   ranks (map :rank chunk)]
+               {:circumstance/id (keyword (format "wm-freeze-2026-06-12-%02d" idx))
+                :psi (format "WM judgement freeze 2026-06-12 ranks %s-%s"
+                             (first ranks) (last ranks))
+                :state {:arrows {}
+                        :cap-overlay {}
+                        :reachable #{"wm-freeze/root"}}
+                :moves moves})))
+          vec))))
+
+(defn write-circumstances!
+  "Write S1 circumstances to EDN. Deterministic for a fixed freeze file."
+  ([] (write-circumstances! default-freeze-path default-circumstances-path))
+  ([freeze-path out-path]
+   (let [circumstances (assemble-circumstances (read-freeze freeze-path))
+         f (io/file out-path)]
+     (.mkdirs (.getParentFile f))
+     (spit f (with-out-str (prn circumstances)))
+     {:path out-path
+      :circumstance-count (count circumstances)
+      :move-count (reduce + (map (comp count :moves) circumstances))})))
+
+(defn- buildout-move-count
+  [buildout]
+  (count (:policy buildout)))
+
+(defn- score-sampler-buildout
+  [state gamma sampler-id wall-clock-ms buildout]
+  (let [g (realized-g-score state buildout :gamma gamma)]
+    (assoc buildout
+           :sampler/id sampler-id
+           :yardstick :realized-G
+           :realized-G (:G g)
+           :rollout g
+           :move-count (buildout-move-count buildout)
+           :wall-clock-ms (double (or wall-clock-ms 0.0)))))
+
+(defn- valid-buildouts
+  [sampler-result]
+  (->> (:buildouts sampler-result)
+       (filter #(seq (:policy %)))
+       vec))
+
+(defn referee-field-harness
+  "N-contestant referee. Each sampler contributes its best buildout per
+  circumstance; the field is judged only by realized G(pi). C never enters the
+  verdict path. Equal G prefers fewer moves, then lower wall-clock, then reports
+  a tie."
+  [state sampler-results & {:keys [gamma diversity-opts]
+                            :or {gamma 0.9}}]
+  (let [partials (->> sampler-results
+                      (keep (fn [{:keys [sampler/id] :as result}]
+                              (when (empty? (valid-buildouts result))
+                                {:sampler/id id
+                                 :status :partial
+                                 :reason :zero-valid-buildouts})))
+                      vec)
+        scored (->> sampler-results
+                    (mapcat (fn [{:keys [sampler/id wall-clock-ms] :as result}]
+                              (map #(score-sampler-buildout state gamma id wall-clock-ms %)
+                                   (valid-buildouts result))))
+                    vec)]
+    (if (empty? scored)
+      {:verdict :no-valid-buildouts
+       :partials partials
+       :argument-record [{:finding :no-valid-buildouts}]}
+      (let [diversity (apply diversity-report scored (mapcat identity diversity-opts))]
+        (if-not (:diverse? diversity)
+          {:verdict :monotone-generator
+           :partials partials
+           :diversity diversity
+           :argument-record [{:finding :non-diverse-generator
+                              :reason "Diversity precondition failed across the contestant field."}]}
+          (let [per-sampler (->> scored
+                                 (group-by :sampler/id)
+                                 (mapv (fn [[sid bs]]
+                                         (first (sort-by (juxt :realized-G :move-count :wall-clock-ms)
+                                                         (map #(assoc % :sampler/id sid) bs))))))
+                min-g (apply min (map :realized-G per-sampler))
+                g-tied (filterv #(= min-g (:realized-G %)) per-sampler)
+                min-moves (apply min (map :move-count g-tied))
+                move-tied (filterv #(= min-moves (:move-count %)) g-tied)
+                min-wall (apply min (map :wall-clock-ms move-tied))
+                final-tied (filterv #(= min-wall (:wall-clock-ms %)) move-tied)
+                winner (first final-tied)]
+            {:verdict (if (= 1 (count final-tied)) :sampler-wins :tie)
+             :winner (when (= 1 (count final-tied)) winner)
+             :ties (when (< 1 (count final-tied)) final-tied)
+             :per-sampler-best (sort-by :realized-G per-sampler)
+             :partials partials
+             :diversity diversity
+             :argument-record [{:finding :field-diversity-passed
+                                :max-overlap (:max-overlap diversity)}
+                               {:finding :winner-by-realized-G
+                                :winner (:sampler/id winner)
+                                :realized-G (:realized-G winner)}]}))))))
+
+(defn- sampler-buildout
+  [id policy]
+  {:buildout/id id
+   :policy (vec policy)
+   :pattern-set (buildout-pattern-set policy)
+   :implied-moves (mapv :move/id policy)
+   :C (score-buildout-c policy)})
+
+(defn incumbent-sampler
+  "Deterministic budget-6 incumbent. This uses the in-JVM rollout/cascade lane
+  already present in this ns so tests stay offline; the sampler protocol allows
+  a later cascade_lane/cascade-policy-for implementation to emit the same entry
+  shape without changing the referee."
+  [circumstance]
+  (let [b (generate-buildout (:state circumstance) (:moves circumstance)
+                             (first default-lenses)
+                             {:depth 1 :top-k 6})]
+    [(assoc b :buildout/id :incumbent/budget-6)]))
+
+(defn greedy-eps-sampler
+  ([circumstance] (greedy-eps-sampler circumstance {:eps 0.15 :budget 6}))
+  ([circumstance {:keys [eps budget] :or {eps 0.15 budget 6}}]
+   (let [moves (vec (sort-by (comp - double #(or (:score %) 0.0)) (:moves circumstance)))
+         greedy (vec (take budget moves))
+         explore-idx (min (dec (count moves)) (max 0 (long (Math/ceil (/ 1.0 eps)))))
+         explore (when (and (pos? eps) (seq moves)) (moves explore-idx))
+         policy (if (and explore (seq greedy) (not (some #(= (:move/id %) (:move/id explore)) greedy)))
+                  (conj (vec (butlast greedy)) explore)
+                  greedy)]
+     [(sampler-buildout :greedy-eps/eps-0-15 policy)])))
+
+(defn- seeded-shuffle
+  [seed xs]
+  (let [al (java.util.ArrayList. xs)
+        rng (java.util.Random. (long seed))]
+    (java.util.Collections/shuffle al rng)
+    (vec al)))
+
+(defn random-under-budget-sampler
+  ([circumstance] (random-under-budget-sampler circumstance {:budget 6}))
+  ([circumstance {:keys [budget] :or {budget 6}}]
+   (let [seed (hash (:circumstance/id circumstance))
+         policy (take budget (seeded-shuffle seed (:moves circumstance)))]
+     [(sampler-buildout :random-under-budget policy)])))
+
+(defn uniform-best-of-k-sampler
+  "The fairness null for multi-entry samplers (review note, fable-2
+  2026-06-12): a sampler submitting K entries gains order-statistics
+  advantage under per-sampler-best aggregation regardless of learning.
+  This arm submits K seeded-uniform budget-selections; whatever margin a
+  trained sampler shows BEYOND this arm is the part attributable to
+  learning rather than to sampling more."
+  ([circumstance] (uniform-best-of-k-sampler circumstance {:k 8 :budget 6}))
+  ([circumstance {:keys [k budget] :or {k 8 budget 6}}]
+   (let [moves (vec (:moves circumstance))]
+     (vec
+      (for [i (range k)
+            :let [seed (hash [(:circumstance/id circumstance) i])
+                  policy (vec (take budget (seeded-shuffle seed moves)))]
+            :when (seq policy)]
+        (sampler-buildout (keyword "uniform-best-of-k" (str "s" i)) policy))))))
+
+(defn run-sampler-field
+  [circumstance samplers]
+  (mapv (fn [[sampler-id sampler-fn]]
+          {:sampler/id sampler-id
+           :buildouts (vec (sampler-fn circumstance))
+           :wall-clock-ms 0.0})
+        samplers))
