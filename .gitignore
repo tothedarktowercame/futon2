@@ -21,6 +21,13 @@ resources/
 !web/war-machine/resources/public/
 !web/war-machine/resources/public/index.html
 
+# Generated runtime snapshot — rewritten on every WM affect scan by
+# futon0 scripts/futon0/rhythm/affect.clj (--refresh-wm-summary), so it churns
+# perpetually as a tracked file. Don't track it; it's regenerated automatically.
+# (Sibling data/*.json left tracked — no confirmed generator; revisit if they
+# turn out to be generated too.)
+web/war-machine/resources/public/data/affect-events.json
+
 # R-A.1 (M-war-machine-first-outing): track the sorry registry so git history is
 # the closure ledger and WM operation is reversible at the git level. Surgical:
 # re-include the dir, re-exclude its contents, then re-include just sorrys.edn.
