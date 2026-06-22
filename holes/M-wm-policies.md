@@ -104,6 +104,49 @@ density); `G(π)` is the **action / path-length** in that metric; policy selecti
 4. A policy rollout (≥2 steps) scores a sequence and beats the equivalent greedy one-step pick on at
    least one case where they differ — Track 2 (the policy-selection witness).
 
+### Checkpoint: policies → proof strategies (2026-06-22, Joe + claude-1)
+
+*A pointer left for another agent to pick up, while the futon6 side focuses on the post-IATC
+Lean↔NL alignment. It says: the CT proof-strategy work is a concrete, field-is-real proving ground
+for this mission's `G(π)`.*
+
+**The use-case that makes `G(π)` concrete.** A *proof strategy* (induction, diagonalisation,
+construct-an-auxiliary-object, reduce-to-known) is an **AIF runner** — a policy `π`. "Verified" = its
+**path integral** `G(π)`: a tactic-trace that discharges the goal is a low-`G` path; a strategy applied
+outside its domain "runs out of road" (high `G` — induction wants countable+recursive structure;
+diagonalisation wants reals-like). So strategy selection/verification over proofs **is** the `G(π)`
+policy-evaluation this mission charters — the same frontier, approached from mathematics instead of the
+WM backlog.
+
+**Where it already runs (futon6, this session).** The CT/IATC → CLean → comprehension pipeline is a
+low-stakes Track-2 testbed:
+- a per-proof **comprehension floor** = R2d (noun grounding) ⊕ rung-3 (strategy grounding) — a graded
+  `g(s)`-style per-step score (grounded / thin / ungrounded), corpus-relative.
+- the **strategy axis is the policy-verification problem**: a `thin` move = a recognised-but-unverified
+  strategy (a policy proposed, `G(π)` not yet evaluated); `grounded` = verified discharge; converting
+  thin→grounded **is** doing the path integral.
+- **the field is real here** (the §1 regulator lesson — don't fabricate dynamics): Lean's kernel
+  furnishes verification for free. A Lean tactic is a verified runner; a tactic-trace to QED is `G(π)`
+  already evaluated. Seeding the strategy vocabulary from Lean tactics (ProofBridge / NuminaMath-Lean-PF,
+  ~39k NL↔Lean 4 proof pairs) is a verified policy library with no invented field.
+
+**The mapping (WM ↔ proofs):**
+
+| M-wm-policies | proof-strategy instance |
+|---|---|
+| policy `π` (sequence of leaves) | proof strategy / tactic-trace (sequence of moves) |
+| `g(s)` per-step integrand | per-move comprehension score (R2d ⊕ rung-3) |
+| `G(π)` path integral | does the strategy discharge (Lean kernel / verifier) |
+| field-simulator must be real | Lean kernel **is** the real verifier (no fabricated dynamics) |
+| a policy's domain | a strategy's basin (tactic preconditions / typeclasses) |
+
+**Open question handed off.** Can the CT proving-ground **close Track 2's forward-model contract
+empirically** — use Lean-verified tactic-traces as ground-truth `G(π)` rollouts to validate the
+policy-beats-greedy witness (completion criterion 4) on a domain where the field is genuinely real,
+then port the lesson back to the WM backlog field? Track 1 (the three coordinated moves, §3) is
+unchanged by this checkpoint. Cross-refs: `futon6/holes/excursions/{E-comprehension-foundation,E-clean}.md`,
+`futon6/holes/clean/CLEAN-LEAN-RELATION.md`, ProofBridge (arXiv:2510.15681).
+
 ---
 
 ## 2. MAP — the live diagnosis (grounded 2026-06-09)
