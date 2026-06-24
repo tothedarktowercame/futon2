@@ -1,7 +1,14 @@
 # E-aif2-partB — can we trust the AIF specification? (a held deep-research excursion)
 
 **Date:** 2026-06-09
-**Status:** **HELD** — charter only; run the deep-research round in a clear usage window, **not** mid-collaboration.
+**Status:** **FIRST-PASS DONE (2026-06-24), full adversarial round still optional.** A first-pass triangulation
+(from the in-hand deep-research AIF∩morphogenesis report + the R-contract) was run by claude-2 in a clear window
+and folded into `futon2/docs/futon-aif-completeness.md` §"Are R1–R13 enough?" — R13 written in, and
+**R14–R18 added as first-class tracked-open criteria** with definite status + checkable forms (R14 γ-over-policies
+· R15 hierarchical/temporal depth · R16 closed action–perception loop · R17 structure-learning/niche · R18
+faithfulness). The **full** fan-out
+deep-research round (§4) remains an optional hardening pass; the charter below is retained for it.
+*(Originally: HELD — charter only; run in a clear usage window, not mid-collaboration.)*
 **Owner:** claude-1 (charter) → a future single-agent deep-research pass.
 **Relation:** follow-on to `M-aif2` (the R1–R12 boundary-tier work) and its **2026-06-09 retrospective**
 (why the degenerate-policy loop passed R1–R12 → recommended `R13-policy-adequacy` + a degeneracy/sniff-test
@@ -18,6 +25,16 @@ precedent for this excursion's mode).
 R13 patches *one* gap we found *only because it bit* (the cursor #1 / degenerate single-step policy). The
 worry is the meta-level: the `R1…Rn` checklist is itself a fallible, hand-grown artifact. How many more
 gaps are lurking, invisible until they bite?
+
+> **CORRECTION (Joe, 2026-06-24):** §2's "you cannot certify the spec complete from inside it (Gödel / frame
+> problem)" is **wrong for this context.** We are implementing a *known, formalized theory* (AIF/FEP) with a
+> *finite canonical component set* — completeness is a checkable diff against the literature with a **reachable
+> endpoint**, not a self-referential paradox. R13 was missed for a mundane reason (introspecting our checklist
+> instead of diffing against the theory), and the diff *closes* that. The valid residue of §2 is narrower:
+> *surprise → update* is a useful **early-warning / faithfulness cross-check** (it caught R13 before any diff,
+> and catches "present-but-unfaithful" components), and the canonical component set must be *surveyed correctly*
+> (the deep-research round) — but neither makes completeness unattainable. See `futon-aif-completeness.md`
+> §"Are R1–R13 enough?" for the corrected framing. The text below is kept as written for provenance.
 
 ## 2. The honest answer (the reframe to carry into the research)
 

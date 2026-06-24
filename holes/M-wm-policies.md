@@ -1,7 +1,7 @@
 # Mission: WM selects over policies, not just next steps (M-wm-policies)
 
 **Date:** 2026-06-09
-**Status:** IDENTIFY (with grounded MAP material already in hand)
+**Status:** **CLOSED (Joe, 2026-06-24).** All 4 completion criteria MET + live-verified; Track 1 LIVE, Track 2 (rollout/R13) LANDED+witnessed, Track 3 (niche-construction/R17 + grounding/R18) LIVE+committed; DOCUMENT done (§5 + `M-wm-policies-documented-run-2026-06-24.md`). Drove the AIF contract **R12→R18** (created R13; surfaced R16/R17/R18). Gated next-phases continue under their own homes: Car-3 acting → operator arming (R16 loop-closure + consent gate); `E-prove-salingaros-cascade-scorer` (R18 proof); route-(a) island foothold → operator go.
 **Owner:** Joe + claude-1
 **Repos:** futon2 (`aif/efe.clj` — the pure scorer), futon3c (`peripheral/war-machine-pilot`,
   `report/war_machine.clj` — the live judgement + opts), futon0 (`M-capability-star-map` — the graph)
@@ -1139,6 +1139,55 @@ criterion), not size/C.
   `L=T·H = accuracy×(−complexity)` as a theorem (or showing they're distinct) is
   `futon3c/holes/excursions/E-prove-salingaros-cascade-scorer.md` (the live data already hints `F` and `C=T·H`
   don't co-rank — a clean positive identity is unlikely).
+
+## 5. DOCUMENT — completion check, AIF-theory touch-map, close recommendation (claude-2, 2026-06-24)
+
+**→ Real documented run of the live WM (every new feature firing + the difference it makes):
+`M-wm-policies-documented-run-2026-06-24.md`** — Track-1 off-map demotion (cursor #1→55/63), Track-3
+niche-construction on a flat field (`:wait`/freeze → `:acquire-patterns`/propose+diagnose, EIG=0.429 wins),
+the proactive `:pattern-gaps` lane, the cascade `F-free-energy` act-gate, and the R13 multi-step witness
+(greedy −0.20 vs best −1.01), all on live/real data.
+
+**Completion criteria (§1.4) — all four MET, live-verified 2026-06-24:**
+1. Live WM no longer ranks off-map junk above on-ascent work — ✓ (served judgement: cursor at rank **55/63**,
+   top = `learn-action-class` / `address-sorry` / `advance-mission`; Track-1 off-map-penalty + leaf-aware +
+   status-aware live).
+2. Off-map-penalty swept (regulator) + applied with consent — ✓ (P=4; `live-star-map-efe-weights`).
+3. Forward-model contract exists — ✓ (state/transition/per-step/rollout resolved; claude-3 field + claude-4 arrows joined).
+4. Policy rollout (≥2 steps) beats greedy — ✓ (witness `G(π)=−1.0` vs greedy `−0.2`; v2 depth-5 mission-lifecycle policy).
+
+**Track-3 deepening (Joe added it this session) — landed + committed:** reactive niche-construction lane
+(`:acquire-patterns`, real EIG) + proactive defensive-driving gap-map both LIVE; the C↔G(π) act-gate settled by
+VWM simulation; both AIF-grounding omissions closed (real EIG; real ΔF). Shas: futon3c `ac93ed4`, futon2
+`af26ef6`, futon3a `5708281` (+ daisy/VWM `4bec7f9`/`da26ee1`).
+
+**AIF-theory touch-map — which parts of the theory M-wm-policies actually exercised** (the purpose of the
+R-audit; see `futon2/docs/futon-aif-completeness.md` §"Are R1–R13 enough?"):
+
+| R-criterion | How M-wm-policies touched it |
+|---|---|
+| **R5** (EFE terms) | Track 1 corrected the pragmatic graph-EFE term (off-map penalty + leaf-aware + status-aware); Track 3 added the real **info-gain epistemic** term (EIG = action-posterior entropy) |
+| **R6** (action selection + abstain) | Track 3 turned abstain from *freeze* (`:wait`) into *niche-construction* (`:acquire-patterns`); WM-I4 abstain on flat fields |
+| **R13** (policy adequacy — multi-step `G(π)`) | **M-wm-policies CREATED R13** — Track 2 built the rollout engine + the 2-step-beats-greedy witness; the field-vs-path-integral correction (§1) is its theoretical core |
+| **R16** (closed action–perception loop) | **surfaced it** — defined the act-gate (ΔF∧ΔG), settled it by VWM simulation; *acting* HELD for arming = the R16 consent-gate first-class step (the loop's remaining closure) |
+| **R17** (structure learning / niche construction) | **implemented it** — `:acquire-patterns` = model expansion on a flat field; the gap-map = which classes lack patterns; lifted `:learn-action-class` from addendum to live instance |
+| **R18** (faithfulness) | **forced it into the contract** — the grounding audit (real EIG, real ΔF; `L=T·H` flagged analogical → `E-prove-salingaros-cascade-scorer` chartered) |
+| R4 (forward model) | used by Track 2's rollout (the `step` kernel). R7 / R14 / R15 — not touched. |
+
+**The finding (Joe's purpose).** This one mission drove the AIF contract **from R12 → R18** — it *created* R13
+and *surfaced* R16/R17/R18. So M-wm-policies is not a narrow tuning mission: it exercised, and in three cases
+*originated*, the **policy / structure-learning / faithfulness frontier** of the theory. That is the substantive
+answer to "which parts of AIF does it touch."
+
+**Gated next-phases (NOT close-blockers — each has its own home):**
+- **Car-3 acting (Part B)** → operator arming; the R16 loop-closure (`ΔF∧ΔG` act-gate + consent gate / WM-I4).
+- **`E-prove-salingaros-cascade-scorer`** (R18 formal proof of `L=T·H ↔ F`) → its own excursion.
+- **Route-(a) island foothold** → operator go.
+- Rollout value-correction full live-ranking integration → follow-up (the cascade lane is today's visible non-degenerate policy).
+
+**Close recommendation:** criteria met + live-verified; Track-3 deepening landed + committed; the theory-touch-map
+shows R5/R6/R13/R16/R17/R18 exercised (three *originated*); the remaining items are gated next-phases with their
+own homes, not blockers. **Recommend CLOSE.** Per discipline, mission-close is the operator's call — Joe. **→ CLOSED by Joe, 2026-06-24.**
 
 ### PSR / PUR
 - **PSR (Track 1 fix):** Pattern: `logic-model-before-code` (verify the design over the live trace before
