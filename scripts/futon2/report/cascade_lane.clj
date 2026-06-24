@@ -12,7 +12,8 @@
    constructs cascades over a state copy, never promotes/writes."
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [futon2.aif.rollout :as rollout])
   (:import [java.util.concurrent TimeUnit]))
 
 (def ^:private py "/home/joe/code/futon3a/.venv/bin/python")
@@ -76,6 +77,40 @@
       (str/replace #"^M-" "")
       (str/replace #"-" " ")))
 
+;; ---------------------------------------------------------------------------
+;; Seam 2 (M-wm-policies Car-3 / R16): join the rollout grain-3 G(π) into the lane,
+;; so the act-gate's ΔG leg sits beside ΔF (the cascade F-free-energy) at EVAL.
+;; Read-only / sim-only: best-rollout does ZERO :7071 writes (MUST-B). nil when the
+;; mission has no moves in the v2 set (no rollout path → ΔG unavailable → gate abstains).
+;; ---------------------------------------------------------------------------
+(def ^:private rollout-move-set-path "/home/joe/code/futon6/data/diffsub-moves.edn")
+(defonce ^:private !rollout-moves
+  (delay (try (rollout/moves (rollout/load-move-set rollout-move-set-path)) (catch Throwable _ []))))
+(defonce ^:private !rollout-cap-overlay
+  (delay (into {} (for [cid (keep :advances-cap @!rollout-moves)]
+                    [cid {:id (str "scope/capability/" cid)
+                          :props {:capability/frontier? true :capability/status :held}}]))))
+(defonce ^:private !rollout-g-cache (atom {}))
+
+(defn rollout-g-for
+  "grain-3 ΔG: best-rollout G(π) over the v2 move-set restricted to this mission's moves.
+   Returns the (negative-better) G as a double, or nil if the mission has no moves in the
+   set (no rollout path — ΔG genuinely unavailable, not zero). Memoized per stem."
+  [mission-target]
+  (let [stem (-> (str mission-target) (str/replace #"^M-" ""))]
+    (if (contains? @!rollout-g-cache stem)
+      (get @!rollout-g-cache stem)
+      (let [g (try
+                (let [pat (re-pattern (java.util.regex.Pattern/quote stem))
+                      mv  (filter #(re-find pat (str (:have %) (:want %))) @!rollout-moves)]
+                  (when (seq mv)
+                    (let [seed (rollout/seed-roots {:arrows {} :cap-overlay @!rollout-cap-overlay :reachable #{}} mv)
+                          best (rollout/best-rollout seed mv :depth 5 :top-k 3 :gamma 0.9)]
+                      (some-> (:G best) double))))
+                (catch Throwable _ nil))]
+        (swap! !rollout-g-cache assoc stem g)
+        g))))
+
 (defn cascade-lane
   "The v1 cascade lane: for the top-n :open-mission targets in ranked-actions, build the
    cascade-policy for each circumstance. Returns
@@ -96,6 +131,9 @@
                     {:mission m :psi psi
                      :size (:size c) :wholeness (:wholeness c) :budget (:budget c)
                      :truncated (:truncated c)
+                     ;; both act-gate legs (Car-3): ΔF = cascade F-free-energy, ΔG = rollout G(π)
+                     :F-free-energy (:F-free-energy c)
+                     :G-rollout (rollout-g-for m)
                      :shown (mapv :pattern (:shown c))}))))
         vec)))
 
@@ -131,6 +169,7 @@
                      free-energy (:F-free-energy c)
                      gap? (or (nil? c) (nil? free-energy) (<= free-energy gap-free-energy-threshold))]
                  {:mission m :psi psi :F-free-energy free-energy
+                  :G-rollout (rollout-g-for m)                 ; ΔG leg beside ΔF (Car-3 seam 2)
                   :accuracy (:accuracy c) :complexity (:complexity c)
                   :wholeness (:wholeness c) :size (:size c) :gap? gap?
                   :note (cond

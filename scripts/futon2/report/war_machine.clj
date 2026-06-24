@@ -3747,6 +3747,29 @@
         wm-decision (try (policy/select-action wm-admissible)
                          (catch Exception _
                            (policy/default-mode-select wm-state wm-admissible)))
+        ;; Car-3 (R16) seam 1: lift the acquired cascade-policies out of the read-only lane
+        ;; into the differential as SELECTABLE :apply-cascade actions, each carrying BOTH
+        ;; act-gate legs (ΔF = cascade F-free-energy, ΔG = rollout G(π)) + the conjunction
+        ;; verdict. They are APPENDED to the served ranked-actions (so wm-admissible/wm-decision
+        ;; — the WM's own auto-selection — are unaffected) and tagged :held-for-arming? true:
+        ;; the pilot can SELECT one as v and mint a consent gate over it, but EXECUTING it is
+        ;; Part B, held for operator arming (WM-I4). cascade-policies computed once, reused below.
+        cascade-policies (try ((requiring-resolve 'futon2.report.cascade-lane/cascade-lane)
+                               wm-ranked {:n 3 :budget 6})
+                              (catch Throwable _ []))
+        cascade-actions (mapv (fn [cp]
+                                (let [dF (:F-free-energy cp) dG (:G-rollout cp)
+                                      pass? (boolean (and dF (pos? dF) dG (neg? dG)))]
+                                  {:action {:type :apply-cascade
+                                            :target (:mission cp)
+                                            :rationale "apply the acquired cascade-policy (Car-3 / R16); execution HELD for operator arming"
+                                            :cascade {:shown (:shown cp) :wholeness (:wholeness cp)}
+                                            :act-gate {:delta-F dF :delta-G dG :pass? pass?}}
+                                   :G-total (or dG 0.0)
+                                   :held-for-arming? true}))
+                              cascade-policies)
+        wm-ranked+cascades (vec (map-indexed (fn [i e] (assoc e :rank (inc i)))
+                                             (into (vec wm-ranked) cascade-actions)))
         aif-heads (scan-aif-heads)
         inventory (load-invariant-inventory)
         ;; Get portfolio step data for structural info
@@ -3833,14 +3856,11 @@
                 :precision-state precision-state
                 :micro-step-trace micro-step-trace
                 :anticipation anticipation-snapshot
-                :ranked-actions wm-ranked
+                :ranked-actions wm-ranked+cascades
                 :decision wm-decision
                 ;; M-wm-policies v1: the visible cascade-policy lane (additive, defensive —
                 ;; a cascade failure can never break the scan; memoized; shell-out to minilm).
-                :cascade-policies (try
-                                    ((requiring-resolve 'futon2.report.cascade-lane/cascade-lane)
-                                     wm-ranked {:n 3 :budget 6})
-                                    (catch Throwable _ []))
+                :cascade-policies cascade-policies
                 ;; M-wm-policies Track 3 (proactive / defensive driving): the horizon
                 ;; gap-scan — open-mission classes with THIN pattern coverage (candidates
                 ;; for seeding cascades before the WM gets stuck in them). Additive,
