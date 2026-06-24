@@ -899,6 +899,247 @@ Ratified by claude-4 (split + interface + DERIVE, conditional on MUST-A/B — ac
 rollout beats the greedy one-step on a constructed case (success-criterion-4). Gated on: reconciliation
 ratified + the move-set source pinned.
 
+### Track 3 — "not being stuck" is a niche-construction action (Joe, 2026-06-24; the VWM made live)
+
+*The VWM excursion ([[E-vwm]]) showed, on real/current data, that **68% of missions (132/194) sit in a
+flat-cosine stall** (mean top match 0.386) and that for **91%** a cluster **cascade** (the "downward growth"
+of what missions-like-this applied) offers a warranted move. Joe's framing: build that into the **real** WM,
+and justify it on AIF terms — "anticipation and reducing surprisal are big parts of AIF, but so is **not being
+stuck**." This is Track 3.*
+
+**The stall, located in the live code.** Two selectors freeze on a flat field:
+- `futon3c.portfolio.policy/choose-action` — the autonomous loop's tick selector. `abstain? = (< τ 0.55)` →
+  action **`:wait`** → `{:effect :none}`. The arena is `[:work-on :review :consolidate :upvote :wait]`.
+- the WM mission-EFE / cascade lane — flat-low candidate cosines (the VWM's 68%).
+
+**The AIF diagnosis (the heart of Track 3): the arena has no epistemic / model-expanding action.** EFE
+minimisation is *over policies*; it presupposes a policy set rich enough to contain a low-`G` option. A flat
+field means the *current* set has no good move — and the five arena actions are all **pragmatic** (act on
+existing structure). So when pragmatic value is flat (τ low), nothing wins → abstain → `:wait` → `:none`.
+**Freezing is AIF-wrong**: you cannot lower `G` by not acting. The FEP-correct response is **structure
+learning / niche construction** — expand the generative model's policy space so a low-`G` policy *comes into
+being* (Friston/Levin/Pezzulo "Knowing one's place"; morphogenesis raises complexity to lower EFE — the
+session's soap-bubble-vs-daisy thread: don't *flatten*, *organise*). The daisy proved this is learnable
+(evolution succeeds where REINFORCE collapsed — [[project_aif_daisyworld]]). This is **experiment-menu item 7**
+("policies that create policies = aif2 niche-construction") promoted from menu to live behaviour, and the
+**M-aif2 `extensible-registry`** primitive ([[project_aif2]]) instantiated at the WM stratum.
+
+**Two beliefs the WM must distinguish (Joe).**
+- **"I don't have the right patterns *yet*"** — an epistemic gap the agent can close *itself* (find/build a
+  cascade for this class). Actionable autonomously. → the niche-construction move.
+- **"I need the operator"** — reserved for *semantic / consent* decisions (WM-I4: don't act *unilaterally*; the
+  consent-gate is the locus). A pattern-gap is **not** this. Today's bug: `abstain → :wait` collapses both into
+  one degenerate freeze, so a closable gap masquerades as needing Joe.
+
+**Two triggers (Joe).**
+- **Reactive (on stall).** When `choose-action` would abstain, instead of `:wait` emit **`:acquire-patterns`**:
+  run the VWM read on the current `|ψ⟩`, construct a candidate cascade (the existing coherence-greedy
+  `cascade_construct.py` / `report.cascade-lane`), and either *propose* it (if its `C` clears) or record "no
+  good-enough patterns for this class — foothold needed" (the island/gap case, §4 three-kinds-of-off-map).
+- **Proactive (on completion / idle — defensive driving).** When a task wraps and the field is quiet, run the
+  VWM **gap-map** over open missions, find the pattern-gap clusters (v1: cluster 4 math-reasoning/ai4ci is the
+  robust gap; the mature core is well-covered), and **build good-enough cascades for those classes before
+  they're hit** — the relaxation of "seed the perfect pattern" (slice-1) to "seed good-enough-for-the-class."
+
+**Why it falls out of EFE, not bolted on.** `:acquire-patterns` carries high *epistemic* value (it reduces
+uncertainty over which policies are available — pure info gain) and ~zero pragmatic value. So in EFE
+`G = effort − (λ_p·prag + λ_e·epis + …)` it is dominated whenever a pragmatic action is available, and **wins
+exactly when the pragmatic field is flat** — i.e. the abstain regime. Adding it to the arena turns "get unstuck
+by learning" into the EFE-optimal move precisely when stuck. (The abstain threshold stays as the *guard* — but
+it now routes to a *constructive* action, not `:none`.)
+
+**Build plan (wiring, not new infra — the machinery exists).**
+1. `:acquire-patterns` added to `portfolio-arena` + an `expected-free-energy` epistemic term for it (high when
+   the rest of the field is flat) — `portfolio/policy.clj`.
+2. Effect handler `:acquire-patterns → :portfolio-acquire` — `portfolio/effect.clj`: shells the existing
+   cascade constructor over the stalled `|ψ⟩` (the `cascade-lane` Python path), returns the proposed cascade or
+   the foothold-needed record. (MUST mirror cascade-lane's *propose-don't-promote*: zero `:7071` writes; an
+   actually-applied cascade still goes through the consent gate — WM-I4 intact.)
+3. The abstain branch in `choose-action` splits: flat-but-closable → `:acquire-patterns`; genuinely-nothing /
+   operator-semantic → `:wait`.
+4. Proactive hook: on cycle-completion, `generate-war-machine` (already attaches `:cascade-policies`) also runs
+   the VWM gap-map and attaches `:pattern-gaps` (the defensive-driving lane) — served/visible first, acted-on
+   behind the gate.
+5. Tests: `policy_test` — when the field is flat, `:acquire-patterns` is selected over `:wait`; when a pragmatic
+   action is available, it is **not** (the epistemic term must not hijack normal operation).
+
+**BUILD STATUS — reactive path LANDED + live-verified (claude-2, 2026-06-24; built directly, Codex paused).**
+Steps 1–3 (the reactive niche-construction path) are implemented, tested, gated, reloaded into the live JVM, and
+demonstrated end-to-end:
+- `futon3c/portfolio/policy.clj`: `:acquire-patterns` added to `portfolio-arena`; pragmatic term (small, stall/gap
+  warranted), epistemic term (high in the abstain regime — **τ-gated**: `0.9·flatness·low-confidence`, exactly 0
+  when τ≥0.55 so it cannot hijack normal operation), effort 0.3. The abstain branch no longer hardcodes `:wait` —
+  it selects argmin-`G` over `{:acquire-patterns :wait}` (the two-beliefs split falls out of EFE).
+- `futon3c/portfolio/effect.clj`: `:acquire-patterns → :acquire-patterns` effect; `execute-effect!` calls
+  `futon2.report.cascade-lane/cascade-policy-for` (read-only / sim-only / never promotes — WM-I4 intact) via
+  `requiring-resolve`, defensively (a constructor failure surfaces in `:note`, never breaks the loop, never
+  silently swallowed). Returns `:proposed-cascade` or a foothold-needed note.
+- **What I checked (auditable):** clj-kondo **0 errors** (3 warnings, all pre-existing — `observation`/`mission-state`/`work-efe`,
+  not introduced); `check-parens` OK on all 3 files; `policy-test` **13 tests / 39 assertions / 0 failures**
+  (new: stuck-flat→`:acquire-patterns`, calm→`:wait`, confident→no-hijack); `core-test` **8 / 36 / 0** (no
+  regression); effect.clj loads clean. Reloaded both ns via Drawbridge (no JVM restart — I-0); live arena now
+  `[:work-on :review :consolidate :upvote :acquire-patterns :wait]`. Live demo in the running JVM: stuck+flat →
+  abstain + `:acquire-patterns`; calm → abstain + `:wait`; confident → `:review` (no hijack). End-to-end: stalled
+  `M-substrate-metric` → proposed cascade `math-formalization/metric-cauchy-convergence` (C=0.311), zero `:7071`
+  writes. **The WM no longer freezes-and-escalates on a flat field; it constructs a candidate policy.**
+- **Still open this mission:** step 4 (proactive completion/idle gap-map hook → `:pattern-gaps` lane in
+  `generate-war-machine`); Part B (the WM autonomously *applying* an acquired cascade) — HELD for operator arming.
+
+**BUILD STATUS — proactive horizon gap-map LANDED + live-verified (claude-2, 2026-06-24).** Step 4 (the
+defensive-driving lane):
+- `futon2/report/cascade-lane`: new `gap-lane` (reuses `cascade-policy-for` + its memo, read-only/sim-only) —
+  for the top-n open missions, flags those whose coverage-saturated cascade is THIN as pattern-gaps.
+- `futon2/report/war-machine`: `:pattern-gaps` attached to the judgement beside `:cascade-policies` (same
+  defensive `try`/`requiring-resolve` pattern; a failure never breaks the scan).
+- **Live-verified end-to-end:** the served judgement (`/api/alpha/war-machine`) carries `:pattern-gaps` over the
+  real rationale-enriched `ranked-actions`. Both current open missions (`M-canon-fingerprint-store`,
+  `M-bayesian-structure-learning`) flag as gaps — and they are *futon6 math/Bayesian* missions, i.e. exactly the
+  VWM's independent gap cluster (cluster 4, math-reasoning), corroborating the signal.
+- **Finding that forced a fix (auditable, honesty-first):** I first thresholded on absolute wholesomeness `C`
+  (< 2.0, taken from this mission's 2026-06-09 go-live numbers C≈9.9). A known-rich-mission control showed the
+  **absolute C-scale has DRIFTED ~4–5× down** since then (`M-capability-star-map` 9.88→**2.20**; essay-corpus
+  9.98→**0.48**), so a stale-C threshold mislabels rich missions as gaps — I had hand-guessed off stale data. Fix:
+  gap criterion is now **coverage-saturated SIZE** (≤2 = thin), which is **scale-independent** (how many patterns
+  the constructor found relevant enough to add). Re-verified discrimination: capability-star-map size 7 / wm-pilot
+  size 5 → not-gap; canon-fingerprint size 1 → gap. clj-kondo 0/0, check-parens OK, reloaded live (next scheduled
+  tick serves the size-based lane). **Residual caveat:** the verdict is sensitive to ψ text for *borderline*
+  missions (size 2–3); clear cases (1 vs 5–7) are robust. The threshold should still be set from the full current
+  size distribution across all open missions, not the 2 currently ranked (a small follow-up).
+
+**Ownership / handoff.** Design + AIF justification + spec (this section) = Claude owner (done). The `.clj`
+build (steps 1–5) is **substantial → bell to an idle Codex with the gate bar** (clj-kondo, `check-parens`,
+`policy_test`), then author≠reviewer review by the Claude owner — *unless* Joe opts for a live-JVM interactive
+build (the JVM is a standing asset; Drawbridge reload, no restart — I-0). **Part B — the WM autonomously
+*applying* an acquired cascade — stays HELD for explicit operator arming** (same line as Track 2's `promote!`:
+"build + display now, arm later"). The reactive/proactive *surfacing* needs no arming; only the *acting* does.
+
+### How G(π) is computed in the new regime — the Car-3 gate (claude-2, 2026-06-24)
+
+*Joe before arming Part B: "I'm not even sure how G(π) is computed; before we go live I'd like to see how
+that works." This is the honest account. The key: there is **no single G(π)** — there are **three scorers at
+three grains**, and the design's coherence is the claim that they are the **same quantity (expected free energy /
+wholeness) recursively applied** ("move" and "policy" are the same kind of thing at different grains, §4).*
+
+**Grain 1 — `G(a)`, the per-tick action selector (LIVE; what Track 3 just changed).** In
+`futon3c/portfolio/policy.clj` `expected-free-energy`: for a single arena action `a`,
+`G(a) = λ_eff·effort(a) − λ_prag·pragmatic(a) − λ_epis·epistemic(a) − λ_upv·upvote(a)` (lower = better; pick by
+argmin / softmax+abstain). This is a **length-1 policy** EFE — the degenerate case the whole mission is about
+(§1: "the field view is exact *only* for length-1 policies"). `:acquire-patterns` is just a new action here; its
+epistemic term (expected info gain = reduces uncertainty over *which policies exist*) is the standard EXPLORE
+pole, τ-gated so it only dominates in the abstain regime. **Answers: "what do I do THIS tick?"**
+
+**Grain 2 — `C`, the cascade wholeness (LIVE; what `:acquire-patterns` produces).** The cascade a stuck WM
+builds is a **semilattice of patterns** (Alexander), and it is scored **not by a path-sum but by Salingaros
+`C = T·(10−H)`** — expressiveness `T` vs parsimony `H` (§4: "C IS the cascade-scoring, one scale up"). Computed
+by the coherence-greedy Python constructor (`cascade-policy-for`). **Answers: "how whole is THIS policy (this
+argument) for the circumstance?"** This is the score `gap-lane` reads to flag thin coverage.
+
+**Grain 3 — `G(π)`, the rollout path-integral (LIVE for SEARCH, ACTING held; Track 2).** For a policy that is a
+*sequence* of moves `π = (leaf₁ … leaf_K)` (e.g. *unblock-then-do*), `G(π) = Σ_t γ^t g(s_t)` accumulated over a
+rollout through the shared forward-model (`futon2.aif.rollout`), with per-step `g(s) = epistemic(C/holes) +
+pragmatic(status-aware graph-ascent)`. This is the genuine **path integral** (§1: a functional over the
+trajectory, NOT a field). v2 is merged + smoke-tested (a real depth-5 policy witnessed); MUST-B holds (zero
+`:7071` writes during search). **Answers: "does applying these moves *in sequence* descend free energy more than
+greedy?"**
+
+**The relationship (why it's one principle, not three hacks).** Grain 1 is a length-1 policy; Grain 2 is a
+*set*-policy (a pattern semilattice scored by wholeness); Grain 3 is a *sequence*-policy (a path scored by least
+action). `:acquire-patterns` is the **bridge**: it is *selected* at Grain 1 by `G(a)`, and what it *does* is
+*construct* a Grain-2 object (a cascade) scored by `C`. Applying that cascade's patterns over time would be
+*evaluated* at Grain 3 by `G(π)`.
+
+**The Car-3 gate (the honest open question).** Before the WM autonomously *acts* on an acquired cascade, we must
+say **which scorer governs the ACT**: the cascade's wholeness `C` ("is this a good argument?") or the rollout
+`G(π)` ("does applying these patterns in sequence actually descend free energy?"). These are **today two distinct
+lanes at two grains** — the mission already flags "the cascade-lane ↔ rollout reconciliation" as a v2 deferral
+(§"DEFERRED — v2"). **Recommendation: Car 3 does NOT go live until that reconciliation is specified** — i.e.
+until the act-gate is defined as a concrete function of `C` and/or `G(π)` (and the consent gate sits on top of
+it, WM-I4). Joe's instinct is exactly right: the *acting* is gated on settling this; the *proposing* (Cars 1–2)
+is not, which is why it could land now. The clean next step for Car 3 is an excursion to **reconcile `C` and
+`G(π)` into a single act-gate** (do they agree on real cascades? where they disagree = the diagnostic signal,
+combining-methods-as-diagnostic).
+
+### Car-3 act-gate, settled by SIMULATION not arming (claude-2 + Joe, 2026-06-24)
+
+*Joe: "this is where the VWM should come in handy — we could simulate the process of a few runs without
+actually doing it." So instead of arming Part B and watching, the VWM computes BOTH candidate act-gates for a
+few stalled missions without acting (`futon3c/holes/labs/vwm/vwm_sim_runs.clj`; both scorers read-only/sim-only):
+grain-2 cascade `C`/size (`cascade-policy-for`) and grain-3 rollout `G(π)`/depth (`futon2.aif.rollout` over the
+v2 k=55 move-set, MUST-B zero `:7071` writes). Six simulated runs (enriched live-shape ψ):*
+
+| mission | grain-2 (C/size) | grain-3 (G(π)/depth) | both |
+|---|---|---|---|
+| substrate-metric | 1.55 / 6 | −0.0015 / 2 | act ✓ |
+| hypergraph-operator | 1.01 / 3 | −0.0043 / 5 | act ✓ |
+| war-machine | 2.05 / 6 | −0.0008 / 1 | act ✓ |
+| canon-fingerprint-store | 0.36 / 1 | no path | don't ✓ |
+| capability-star-map | 0.44 / 1 | no path | don't ✓ |
+| bayesian-structure-learning | 1.19 / 4 | no path | disagree ✗ |
+
+**Findings (the reconciliation, empirical):**
+1. **Where both grains have coverage they AGREE** (the three act rows) — `C` and `G(π)` are **not deeply
+   contradictory**. This is the key result: the gate is buildable.
+2. **The disagreements are COVERAGE / STABILITY artifacts, not a real C-vs-G(π) tension:**
+   - grain-3 reads "no path" for `canon`/`bayesian`/`capability-star-map` only because the v2 move-set doesn't
+     *contain* those missions — a move-set **coverage** gap, not true unreachability.
+   - grain-2 is **ψ-text-fragile**: `capability-star-map` flipped size 7→1 on a minor ψ wording change; plus the
+     library-scale drift (C 9.9→~2) found in Car 2. So cascade `C`/size is an **unstable** gate alone.
+   - grain-3's `G(π)` magnitudes are tiny (~1e-3) — a weak preference signal.
+3. **Act-gate the simulation argues for:** **act only where both grains have coverage AND concur on
+   "actionable"** (conjunction) — robust to each scorer's blind spot. On disagreement, **do not act**: treat it
+   as a coverage/stability flag (fix coverage, or route to operator). Combining-methods-as-diagnostic *is* the
+   gate. WM-I4: the consent gate still sits on top.
+4. **The real blockers to arming Car 3 are now concrete and un-mysterious** — close grain-2's ψ-stability (+
+   library coverage) and grain-3's move-set coverage (+ signal magnitude) — **not** "reconcile an irreconcilable
+   tension." Learned with **zero real runs** — exactly the VWM's purpose.
+
+**AIF grounding audit (deep-research-AIF-morphogenesis.md §"Grounding audit", 2026-06-24).** Before closing those
+blockers, the act-gate was checked against the real literature. Verdict: the **conjunctive gate is AIF-correct in
+form** — it maps to structure-learning's "accept an expanded model only if ΔF (marginal likelihood) AND ΔG
+(expected free energy) both improve" — and **grain-3 `G(π)` is the real ΔG (genuine EFE)**. But **grain-2 `C`
+(Salingaros wholeness) is the ANALOGICAL leg**: the report's headline finding is that L=T·H is *not* formally
+linked to free energy anywhere in the literature. So the principled Car-3 re-scope is **`ΔF ∧ ΔG`** with grain-3
+kept as ΔG and grain-2 either labelled an explicit heuristic or upgraded to a real **ΔF = marginal-likelihood
+gain** of the acquired cascade; and the `:acquire-patterns` epistemic term upgraded from a flatness-proxy toward
+real **expected information gain**. These are *model* decisions, not technical fixes — hence the pause before
+closing blockers is correct.
+
+**Omission 1 GROUNDED + LIVE (claude-2, 2026-06-24).** The `:acquire-patterns` epistemic term is now the real
+**expected information gain** = normalized Shannon entropy of the action-posterior `P(a) ∝ exp(−G/τ)` over the
+existing (pragmatic) actions (`futon3c/portfolio/policy.clj`: new `posterior-entropy`; `choose-action` computes
+it over the non-acquire evals and injects it via `expected-free-energy`'s new `:epistemic-override`; the old
+flatness-from-precision proxy is demoted to a labelled fallback). τ-gated (×low-confidence) so it is exactly 0
+when confident (no hijack). Verified: entropy = 1.0 on a flat field, ~0 when peaked; behavior preserved
+(stuck-flat→`:acquire-patterns`, calm→`:wait`, confident→`:review`). Checked: clj-kondo 0 errors (1 pre-existing
+warning), check-parens OK, policy-test + core-test **21/75/0**, reloaded live. *This is the Millidge-correct
+form: the epistemic drive is added (not derived from projecting VFE forward) and its magnitude is a genuine
+information-theoretic quantity (entropy of the belief over which action helps), not a heuristic.*
+
+**Omission 2 GROUNDED + LIVE (claude-2, 2026-06-24) — grain-2 C → real marginal-likelihood F.** The cascade
+act-gate leg is now **F = accuracy − λ·complexity** (Bayesian Occam; F>0 = accept the expansion), replacing the
+Salingaros-`C` analogy. This *is* the report's open-Q3: **accuracy** = total ψ-coverage (`T`); **complexity** =
+Σ −log(co-application **base-rate inclusion prior**) of the selected patterns (the `(10−H)` "architectural
+entropy" → KL-of-selection-from-prior map). Implemented in `cascade_construct.py` (`base_rate_prior` +
+accuracy/complexity/F) and surfaced through `cascade_serve.py`; `gap-lane` now gates on **F ≤ 0** (the AIF accept
+criterion), not size/C.
+- **Bug caught by the data sweep (auditable, honesty-first):** the first formulation used a *categorical* prior
+  (mass/total over ~300 patterns) → every −log P ≈ log N bits → complexity swamped accuracy → F collapsed to
+  size-1 and *penalized rich cascades* (the degenerate "no-knee" failure the §4 cheap-verify warned of). Fix: a
+  **Bernoulli inclusion prior** `(mass+f)/(mass+f+K)`, K = median co-app mass → complexity ~O(1), commensurate
+  with coverage → F gets a real interior knee.
+- **λ set from data, not hand-guessed:** on the spectrum sweep the size-1 thin mission crosses F=0 at λ≈0.216 and
+  a rich size-7 at λ≈0.287, so **λ=0.25** puts the F=0 boundary exactly between thin and rich (re-confirm on the
+  full live distribution — same discipline as the size threshold).
+- **Live-verified discrimination:** canon-fingerprint F=−0.02 → gap; capability-star-map 0.28, bayesian 0.41,
+  hypergraph 1.68 → not gaps. clj-kondo 0/0, py_compile OK, check-parens OK, reloaded live (cache cleared).
+- **Both omissions now closed:** grain-2 is a real ΔF and the epistemic term is real EIG — so the Car-3 gate
+  `ΔF ∧ ΔG` is now genuinely AIF on *both* legs (grain-3 G(π) was already real EFE). The coverage blockers can
+  now be closed as real-model fixes, not proxy-hardening.
+- **Formal residual chartered separately:** O2 grounds `(10−H)→complexity` *operationally*; *proving*
+  `L=T·H = accuracy×(−complexity)` as a theorem (or showing they're distinct) is
+  `futon3c/holes/excursions/E-prove-salingaros-cascade-scorer.md` (the live data already hints `F` and `C=T·H`
+  don't co-rank — a clean positive identity is unlikely).
+
 ### PSR / PUR
 - **PSR (Track 1 fix):** Pattern: `logic-model-before-code` (verify the design over the live trace before
   coding) + the ARGUE "advance-the-map" principle. Alternatives considered: thread `:capability-graph`

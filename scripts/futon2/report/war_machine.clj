@@ -3840,7 +3840,15 @@
                 :cascade-policies (try
                                     ((requiring-resolve 'futon2.report.cascade-lane/cascade-lane)
                                      wm-ranked {:n 3 :budget 6})
-                                    (catch Throwable _ []))}]
+                                    (catch Throwable _ []))
+                ;; M-wm-policies Track 3 (proactive / defensive driving): the horizon
+                ;; gap-scan — open-mission classes with THIN pattern coverage (candidates
+                ;; for seeding cascades before the WM gets stuck in them). Additive,
+                ;; defensive (a failure never breaks the scan); shares the cascade memo.
+                :pattern-gaps (try
+                                ((requiring-resolve 'futon2.report.cascade-lane/gap-lane)
+                                 wm-ranked {:n 10 :budget 6})
+                                (catch Throwable _ []))}]
     (when trace?
       (try
         (if trace-dir

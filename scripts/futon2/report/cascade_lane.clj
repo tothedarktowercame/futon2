@@ -79,7 +79,7 @@
 (defn cascade-lane
   "The v1 cascade lane: for the top-n :open-mission targets in ranked-actions, build the
    cascade-policy for each circumstance. Returns
-   [{:mission :psi :size :C :budget :truncated :shown [pattern-ids...]} ...]."
+   [{:mission :psi :size :wholeness :budget :truncated :shown [pattern-ids...]} ...]."
   ([ranked-actions] (cascade-lane ranked-actions {}))
   ([ranked-actions {:keys [n budget] :or {n 3 budget default-budget}}]
    (->> ranked-actions
@@ -94,7 +94,53 @@
                       c (cascade-policy-for psi budget)]
                   (when c
                     {:mission m :psi psi
-                     :size (:size c) :C (:C c) :budget (:budget c)
+                     :size (:size c) :wholeness (:wholeness c) :budget (:budget c)
                      :truncated (:truncated c)
                      :shown (mapv :pattern (:shown c))}))))
+        vec)))
+
+(def ^:private gap-free-energy-threshold
+  "A cascade whose marginal-likelihood F = accuracy − λ·complexity falls at/below this is a
+   defensive-driving GAP. F is the AIF-grounded grain-2 act-gate leg (M-wm-policies omission
+   2): F > 0 = the cascade's ψ-coverage outweighs the complexity of justifying its patterns
+   against the base-rate prior = a net-positive model expansion (Bayesian Occam accept). This
+   REPLACES the Salingaros-C / coverage-size heuristics — C was an analogy (L=T·H is not
+   formally a free-energy functional), size was scale-but-not-prior-aware. λ is set from data
+   in cascade_construct.py (the rich/thin F=0 knee, λ=0.25 on the 2026-06-24 spectrum)."
+  0.0)
+
+(defn gap-lane
+  "Defensive-driving HORIZON SCAN (M-wm-policies Track 3, proactive). For the top-n
+   open-mission targets, construct each circumstance's cascade and flag those whose
+   marginal-likelihood F ≤ gap-F-threshold (or no cascade) as PATTERN-GAPS — classes whose
+   coverage does not pay for its pattern-complexity = the WM has no good-enough patterns for
+   them yet, the places to seed cascades *before* it gets stuck. Reuses cascade-policy-for
+   (read-only / sim-only / never promotes — WM-I4 intact) and its memo cache. F is the
+   AIF act-gate leg; wholeness/size reported as context. Returns
+   [{:mission :psi :F-free-energy :accuracy :complexity :wholeness :size :gap? :note} ...], gaps first (lowest F)."
+  ([ranked-actions] (gap-lane ranked-actions {}))
+  ([ranked-actions {:keys [n budget] :or {n 10 budget default-budget}}]
+   (->> ranked-actions
+        (filter #(#{:open-mission "open-mission"} (get-in % [:action :type])))
+        (take n)
+        (map (fn [e]
+               (let [m   (get-in e [:action :target])
+                     psi (str/trim (str (mission->psi m) " "
+                                        (or (get-in e [:action :rationale]) "")))
+                     c   (cascade-policy-for psi budget)
+                     free-energy (:F-free-energy c)
+                     gap? (or (nil? c) (nil? free-energy) (<= free-energy gap-free-energy-threshold))]
+                 {:mission m :psi psi :F-free-energy free-energy
+                  :accuracy (:accuracy c) :complexity (:complexity c)
+                  :wholeness (:wholeness c) :size (:size c) :gap? gap?
+                  :note (cond
+                          (nil? c)
+                          "no cascade constructed (constructor unavailable or no patterns — foothold needed)"
+                          gap?
+                          (format "F=%.2f ≤ 0 (acc %.2f < λ·complexity) — coverage doesn't pay for its patterns; seed here"
+                                  (double (or free-energy 0.0)) (double (or (:accuracy c) 0.0)))
+                          :else
+                          (format "F=%.2f > 0 (acc %.2f vs λ·complexity) — net-positive cascade"
+                                  (double free-energy) (double (or (:accuracy c) 0.0))))})))
+        (sort-by (fn [r] [(if (:gap? r) 0 1) (or (:F-free-energy r) 0.0)]))
         vec)))
