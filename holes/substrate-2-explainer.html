@@ -52,13 +52,18 @@
   .wip .wiplab{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:#d98e04;font-weight:700;margin-bottom:4px}
   .wip p{margin:0;font-size:13px;line-height:1.5}
   .wip code{background:#f1e9d8;padding:0 3px;border-radius:3px;font-size:12px}
+  .node text.dtag{fill:#7a3fa0;font-weight:700;pointer-events:none}
+  .del{margin:14px 0 0;background:#f7f3fb;border-left:3px solid #7a3fa0;padding:10px 13px;border-radius:0 6px 6px 0}
+  .del .dellab{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:#7a3fa0;font-weight:700;margin-bottom:4px}
+  .del p{margin:0;font-size:13px;line-height:1.5}
+  .del code{background:#ece3f4;padding:0 3px;border-radius:3px;font-size:12px}
 </style>
 </head>
 <body>
 <header>
   <h1>Substrate-2: what's actually in the kitchen</h1>
   <p>The XTDB hypergraph on port 7071 (futon1a). 203 types are <i>declared</i>; ~35 are <i>populated</i> — the sediment of several ingestion campaigns under different labels.
-     <b class="live">green = live</b> · <b class="partial">amber = populated but thin / HEAD-only</b> · <b class="empty">red dashed = declared but empty</b> · <b class="elsewhere">blue = lives in a sibling store</b> · <b>🚧 = active work upstream</b> (futon6 mission-miner). Click any box. Counts are live as of 2026-06-25.</p>
+     <b class="live">green = live</b> · <b class="partial">amber = populated but thin / HEAD-only</b> · <b class="empty">red dashed = declared but empty</b> · <b class="elsewhere">blue = lives in a sibling store</b> · <b>🚧 = active work upstream</b> (futon6 mission-miner). Click any box. Counts live as of 2026-06-25.<br/><span style="color:#7a3fa0;font-weight:600">Purple corner tags = mission deliverables (D0–D8)</span> that act on that box — ✅ done · ▶ next · ◻ planned. (Reader-fix + D7 living-inventory are cross-cutting.)</p>
 </header>
 <div class="wrap">
   <div class="stage"><svg id="svg" viewBox="0 0 880 660" role="img" aria-label="Substrate-2 layers"></svg></div>
@@ -68,11 +73,13 @@
 const NODES = [
   // ---- BAND A: CODE & HISTORY ----
   {id:"COMMIT", t:"Commit history", s:"SHA-pinned spine", band:"A", x:150,y:118, st:"live",
+   del:"<b>D0</b> ✅ liveness restored (commit-ingest re-enabled) · <b>D0.1</b> ✅ cheap cycles (lazy/local edit-resolution).",
    count:"3,255 commits · 3,242 precedes · 3,255 authored · 207 authors",
    now:"Immutable commit vertices keyed by SHA, each with {repo, author, timestamp, subject}. `precedes` edges chain commit→next-commit per repo; `authored` links authors. Spans every futon repo it watches (futon3c, futon6-py-d, futon3a-d, …).",
    infer:"REAL: temporal ordering ('what came before what'), authorship & provenance, 'commits since SHA'. This is the one genuinely diachronic layer — a SHA is a point in time, forever.",
    should:"The history is about commit <i>metadata</i>, not yet about <i>code</i>. It should connect down to the (empty) code-detail layer so 'this commit changed these definitions' is answerable, and carry cross-repo causal ordering, not just per-repo."},
   {id:"CODEDETAIL", t:"Code detail", s:"a frozen HEAD graph", band:"A", x:340,y:118, st:"partial",
+   del:"<b>D2.1</b> ✅ live commit→def edits (new commits link to the defs they change) · <b>D3</b> ▶ NEXT: valid-time versioning — write the structural graph with valid-time = commit timestamp so <code>db-as-of</code> recovers past structure. Includes the <b>historical re-ingest</b> (April→now) to un-freeze this box.",
    count:"115,148 var · 184,368 edits · 74,133 calls · 63,046 contains · 8,906 coverage",
    now:"Heavily populated — and the busiest layer in the store. <b>~445k edges</b>: var vertices, `edits` (commit → def changed), `calls`, `contains` (namespace → def), `coverage` (test → def). (An earlier version of this box said \"0 var / 0 edits\" — that was a query-timeout artifact: futon1a's type query materialised + sorted the whole set before applying the limit, so large types returned empty. Fixed 2026-06-25.) The catch: it's all <b>frozen at April</b> `-d`/`phase-1` labels — a single HEAD snapshot.",
    infer:"RICH but FROZEN: 'what defs are in a namespace' (contains), 'what test covers what def' (coverage), and even 'what did commit C change' (edits) — but only for commits up to April. New commits (now flowing again post-D0) get <b>no</b> edits, because edit-resolution's lookup read is still starved (it must scan all 115k vars to find one repo's, since repo isn't indexed).",
@@ -89,17 +96,20 @@ const NODES = [
    should:"Pin file refs to the commit/content-hash they were ingested at (so they stop drifting), and backfill commit→mission from trailers at scale — 4 links across 3,255 commits is near-blind."},
   // ---- BAND B: WORK & PROOF ----
   {id:"SORRY", t:"Sorries", s:"a populated island", band:"B", x:190,y:288, st:"partial",
+   del:"<b>D5</b> ◻ wire <code>depends-on-sorry</code>/<code>closes</code> edges so closing a sorry propagates — discharging the island.",
    count:"293 sorries (if / however / then / next-steps)",
    now:"293 sorry entities — the richest non-code content in the store — each carrying structured if/however/then and next-steps. A real corpus of proof-holes and open work.",
    infer:"LOOKUP ONLY: you can list and read them. But `depends-on-sorry` = 0 and `closes` = 0, so every sorry links to <b>nothing</b>. You cannot ask 'what breaks if I close this' or 'what code does this sorry gate'. It's an island.",
    should:"Wire `depends-on-sorry` / `closes` / `constructs` edges from each sorry to the code and claims it gates. Then closing a sorry <i>propagates</i> — it discharges dependents — and a sorry becomes a live hole in a wiring diagram, not a sticky note."},
   {id:"PROOF", t:"Proof / argument relations", s:"the connective tissue", band:"B", x:455,y:288, st:"empty",
+   del:"<b>D4</b> ◻ populate the argument/proof relation layer (3 feeders: sorry-typing edges, mission-miner promotion path 🚧, claude-4 BHK arrows).",
    count:"0 — all 8 relation types empty",
    now:"All declared, all zero: `constructs`, `closes`, `depends-on-sorry`, `uses-definition`, `would-refute`, `supported-by`, `attacks-claim`, `implemented-by`. The entire inferential-relation layer is unbuilt.",
    infer:"NONE — and this is precisely why substrate-2 is a fact store, not an inference substrate. Without these edges nothing can propagate.",
    should:"<b>The biggest single gap.</b> These are the BHK-arrow / argumentation edges that let belief move: close a sorry → discharge its dependents; refute a claim → weaken what it supported; construct an arrow → mark a have→want path satisfied. Populating this layer is what turns the graph from storage into reasoning.",
    wip:"futon6 <code>mission_mine_moves.py</code> mints <code>have→want</code> moves of class <code>:close-hole</code> — structurally the same arrow as <code>:constructs</code>/<code>:closes</code> — for abstaining missions, borrowing score/prior from each mission's nearest structural neighbour. <b>But</b> they land in a sim-only overlay (<code>data/diffsub-moves-mined.edn</code>), <b>not</b> promoted into substrate-2. So this layer has a generator in flight; the missing piece is a promotion path from overlay → store."},
   {id:"CLAIM", t:"Claims / propositions", s:"the assertion layer", band:"B", x:710,y:288, st:"empty",
+   del:"<b>D5</b> ◻ populate the assertion layer the proof/argument relations act on.",
    count:"0 claims · 2 propositions · 5 questions",
    now:"Almost nothing: 0 claims, 2 propositions, 5 questions. The layer that argument-relations would operate over barely exists.",
    infer:"NONE meaningful.",
@@ -116,6 +126,7 @@ const NODES = [
    infer:"NONE.",
    should:"The posterior-enrichment layer: themes and tensions woven <i>over</i> the running graph (WebArxana-as-monitor) — the difference between stored priors and an enriched, interpreted posterior. This is the 'reading' layer the rest of the substrate would feed."},
   {id:"MISSION", t:"Missions / scopes", s:"the success story", band:"C", x:710,y:448, st:"live",
+   del:"<b>D1</b> ◻ reconcile the palimpsest (unify labels, reconcile the 3 sorry forms) — this layer is the model to follow.",
    count:"~15,000 mission-scope edges (loose 4,923 · nesting 4,835 · source 1,423 · cap 530 · eightfold 405 · map 693 · in 651 · out 527 · pattern 618) · 9 PSR · 5 PUR",
    now:"The most-built non-commit layer, and the one success story. M-mission-scopes-into-substrate-2 landed ~15,000 verbatim-anchored `:mission-scope/*` hyperedges across 7 structural scope types plus 4,835 nesting edges — watcher-maintained, idempotent, re-resolving on mission edits without manual repair. (My first census missed this: I queried `mission` entities (8) and `scope/psr`, not the `mission-scope/*` family.)",
    infer:"REAL scope-anatomy: which scope contains what, parent/child nesting, PSR/PUR with prediction-error grounding. The richest non-code layer in the store.",
@@ -128,6 +139,7 @@ const NODES = [
    infer:"RECORD: an append-only log of updates and evidence. It accumulates; it doesn't yet revise anything.",
    should:"Scale it and connect it to the relation layer so a learning-update actually <i>moves a posterior</i> (reliability of a pattern, trust in a strategy) rather than just being logged."},
   {id:"ENGINE", t:"The inference engine itself", s:"missing meta-layer", band:"D", x:585,y:585, st:"empty",
+   del:"<b>D6</b> ◻ the inference layer — priors→posteriors propagation over D4's relations · <b>D8</b> ◻ graph+vector co-query (the neo4j+pgvector bar).",
    count:"n/a — substrate-2 is a fact store with graph lookup",
    now:"There is no propagation or posterior machinery over the graph. XTDB gives durable, bitemporal, queryable storage; on top of it today there is traversal and filtering — and nothing else.",
    infer:"TRAVERSAL & FILTER ONLY. Every 'inference' above bottoms out in 'walk these edges, return matching rows'.",
@@ -135,7 +147,7 @@ const NODES = [
    wip:"futon6 <code>mission_mine_moves.py</code> exists precisely to give move-less (abstaining) missions a <b>ΔG</b> — minting score/prior/delta-g so the War Machine's policy evaluation has something to rank. That's forward-model / rollout machinery (the propagation layer) being built upstream of substrate-2."},
 ];
 const BANDS=[
-  ["A","CODE & HISTORY", 60,150, 760,86],
+  ["A","CODE & HISTORY", 60,80, 760,86],
   ["B","WORK & PROOF", 60,250, 760,86],
   ["C","ARGUMENT & MEANING", 60,410, 760,86],
   ["D","LEARNING & INFERENCE", 60,547, 760,86],
@@ -179,6 +191,8 @@ for(const n of NODES){const g=el("g",{class:"node s-"+n.st,"data-id":n.id});
   if(n.wip){const w=el("text",{x:n.x+n._w/2-13,y:n.y-n._h/2+15,"font-size":13,"text-anchor":"middle"});w.textContent="🚧";g.appendChild(w);}
   const t1=el("text",{x:n.x,y:n.y-2,"text-anchor":"middle","font-size":11.5});t1.textContent=n.t;g.appendChild(t1);
   const t2=el("text",{class:"sub",x:n.x,y:n.y+12,"text-anchor":"middle","font-size":9.5});t2.textContent=n.s;g.appendChild(t2);
+  if(n.del){const ds=(n.del.match(/D[0-9.]+/g)||[]).join("·");
+    const dt=el("text",{class:"dtag",x:n.x-n._w/2+6,y:n.y+n._h/2-5,"font-size":8.5});dt.textContent=ds;g.appendChild(dt);}
   g.addEventListener("click",()=>select(n.id));svg.appendChild(g);}
 const leg=el("text",{class:"elabel",x:62,y:652});leg.textContent="Red dashed arrows = a wanted link that is currently empty. The populated store is the green/amber boxes; the reasoning the substrate is named for lives mostly in the red ones.";svg.appendChild(leg);
 
@@ -194,6 +208,7 @@ function select(id){
      `<p><span class="lab">Inference it supports</span>${n.infer}</p></div>`;
   h+=`<div class="col should"><h3>What it should be</h3><p>${n.should}</p></div>`;
   h+=`</div>`;
+  if(n.del){h+=`<div class="del"><span class="dellab">Mission deliverables (M-populate-substrate-2)</span><p>${n.del}</p></div>`;}
   if(n.wip){h+=`<div class="wip"><span class="wiplab">🚧 Work in progress — upstream</span><p>${n.wip}</p></div>`;}
   panel.innerHTML=h;
 }
