@@ -41,9 +41,11 @@
 
    cf. war-machine-terminal-vocabulary.edn :G/pragmatic-fn, :G/epistemic-fn"
   [obs]
-  (let [;; Pragmatic: gap between observations and preferences
+  (let [;; Pragmatic: gap between observations and preferences. Read through the
+        ;; current-C seam (E-C-vector-live §4.5) so the channel preferences can
+        ;; go live without touching this consumer; today identical to the static map.
         per-channel (into {}
-                          (for [[ch pref-range] pref/preferences
+                          (for [[ch pref-range] (pref/current-C)
                                 :let [v (get obs ch 0.0)
                                       gap (channel-gap v pref-range)]]
                             [ch {:value v

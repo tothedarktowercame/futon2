@@ -77,3 +77,43 @@ Forward method-mining (M-operational-vocabulary); the substrate-2 PROOF store / 
 ## 8. Disciplines
 
 Never restart the JVM; reload via Drawbridge `load-file`. Use `/api/alpha/census` (per-type, count-pushdown) for substrate-2 populations — never a high-limit `?type=` scan (it times out; that footgun is why the census endpoint exists). Evidence-first (specific counts/files). Gates per AGENTS.md (clj-kondo, check-parens, tests). **Ship the freshness guard with the live C, not after** — §HEAD.
+
+> **NB (claude-10, 2026-06-26):** the `/api/alpha/census` route on the running :7071 returned `:not-found` (the JVM predates it — a live freshness smell, logged not fixed; never restarted). The deliverable therefore reads populations via the working `entities/latest?type=…` endpoint, exactly as `c_vector.bb` does.
+
+---
+
+## 9. DERIVE + INSTANTIATE — the live mechanism (claude-10, 2026-06-26; driven by Joe directly, Codex on vacation)
+
+**Decisions ratified by Joe (the §4/§5 open forks):**
+1. **Goal-outcome risk = a separate additive term**, not folded into the channel risk — *"fine as long as we don't forget predictive-risk later."* So: STATIC risk now (distance of the current corpus from C); the **predictive** term (KL of a policy's predicted goal-outcomes ‖ C — the W1 join) is a **named, un-removable seam** (`goal-outcome-risk` :TODO), not a silent drop.
+2. **The live C lives in an atom** (`futon2.aif.c-vector/c-state`).
+
+**Delivered (all in futon2):**
+- `src/futon2/aif/c_vector.clj` (new) — derives the **stated** channel LIVE from :7071 (caps not-yet-attested + clean open sorries, kept shape-identical to `c_vector.bb/produce-stated`); atom-backed `c-state`; `refresh!`/`maybe-refresh!` (off-cycle, derive-and-cache — never the WM tick); `corpus-signature-of` + `stale?`/`freshness-check` (the mandatory guard, loud on *err*; injectable arity for hermetic tests); `goal-outcome-risk` (mean-normalised, W4); `merge-entries` (the extension point for the mess/incompleteness/應-voice overlays — *not* duplicated here).
+- `aif/preferences.clj` — `current-C` indirection seam (returns the static map today; channel-liveness can override without touching consumers).
+- `aif/free_energy.clj` + `aif/efe.clj` (`survival-cost`) — read preferences through `current-C` (behaviour-identical floor).
+- `aif/efe.clj` `compute-efe` — additive `:G-goal-outcome` term reading the live C (`[]` ⇒ 0.0 ⇒ reduces exactly to the pre-change behaviour); `:goal-outcome-weight` / `:goal-outcome-entries` opts.
+- `test/futon2/aif/c_vector_test.clj` (new) — 8 tests / 34 assertions mapping to §6 exits.
+
+**Exit conditions — met (verified, auditable):**
+1. **Derived, not static** ✓ — live smoke: `refresh!` produced **139** C-entries from :7071 (31 caps, 293 sorries).
+2. **Updates off the hot path** ✓ — `maybe-refresh!` re-derives only when `stale?`; the WM tick reads the atom only.
+3. **efe's risk reads the live C** ✓ — live `:G-goal-outcome = 0.3396` on a no-op; hermetic test shows satisfying a goal lowers the term and re-ranks heavy-vs-light. *(Per-policy re-ranking in full is the predictive W1 extension; the wiring that turns a goal-outcome difference into a re-rank is done + tested.)*
+4. **Freshness guard fires loudly** ✓ — hermetic + live: fresh right after derive, `fresh?=false`/`stale?=true` after a simulated corpus drift, warning emitted to *err*.
+5. **Degrades safely to the floor** ✓ — empty/unreachable corpus ⇒ `[]` ⇒ `G-goal-outcome 0.0` ⇒ identical to pre-change EFE; `refresh!` never clobbers a good belly to empty.
+
+**Gates:** clj-kondo 0 errors (1 pre-existing warning in `infer-mode`, untouched); check-parens OK on all changed files; `clojure -X:test` — c-vector 8/34 pass, regression on efe/free-energy/preferences 45 tests / 153 assertions, 0 failures.
+
+**Known follow-ups (named, not hidden):** (a) ~~the **predictive-risk** seam~~ → **landed, see §10**; (b) **unify** the two `produce-stated` implementations (futon2 ns vs `c_vector.bb`) — deliberate duplication today so futon2 needs no futon6 files; (c) fold the **mess / incompleteness / 應-voice** channels via `merge-entries` over the `c_vector.bb` overlays; (d) a cheaper freshness probe once the `/census` route is live on :7071.
+
+## 10. Predictive-risk — the action-dependent term (claude-10, 2026-06-26; Joe: "push ahead")
+
+The static term (§9) is a constant offset across policies, so it cannot re-rank. **Predictive-risk** = `risk = divergence(π's PREDICTED goal-outcomes ‖ C)` — the canonical EFE term — *is* action-dependent and re-ranks. Built in its **in-memory** form (the durable PROOF store stays M-populate-substrate-2 D4's):
+
+- **The discharge link, reusing existing structure** (no parallel mechanism): an action's *advanced outcome ids* = its `:target` ∪ (for `:open-mission`) the star-map mission's `:produces` caps ∪ an explicit `:advances-outcomes` override seam. `c-vector/advanced-outcome-ids`.
+- **`predictive-goal-outcome-risk`** — entries the action advances are predicted satisfied (a deterministic point-mass forward step) ⇒ contribute 0; the **denominator stays the current open-count** (fixed), so advancing a goal can only *lower* risk, never raise it via a shrinking mean. Reduces to the static term exactly when the action advances nothing (`:no-op`).
+- **`efe/compute-efe`** now uses the predictive form (passing `action` + `capability-graph`); `:no-op` → identical to before, so all prior tests hold.
+
+**Verified:** clj-kondo 0/0, check-parens OK; tests now **56 / 203 assertions, 0 failures** (3 new predictive tests incl. a through-`compute-efe` per-policy re-rank). **Live:** against the real 139-entry belly, `risk(:no-op)=0.33957` vs `risk(pursue ai-passes-prelims)=0.33525` → the goal-advancing policy is preferred (re-ranks ✓).
+
+**Still deferred (named):** the durable `discharged-by` PROOF join (M-populate-substrate-2 D4) replacing the in-memory id-match; a **probabilistic** predicted outcome (advance-with-probability-p — the full KL) rather than the point-mass flip.

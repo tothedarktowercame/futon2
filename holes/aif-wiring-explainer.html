@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>AIF wiring explainer — R1–R19 on a brain (v0.6 · the belly R19=C is now BUILT · A·B·C·D·E tagged)</title>
+<style>
+  :root{
+    --done:#2e7d32; --done-bg:#e3f5e3; --partial:#b8860b; --partial-bg:#fff5d6;
+    --gap:#c62828; --gap-bg:#fbe0e2; --sibling:#1565c0; --sibling-bg:#e0ecfa;
+    --belly:#6d3aa8; --belly-bg:#f1e8fb;
+    --ink:#1a1a1a; --mut:#6b6b6b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:#fafafa}
+  header{padding:14px 22px;border-bottom:1px solid #e3e3e3;background:#fff}
+  header h1{margin:0 0 3px;font-size:18px}
+  header p{margin:0;color:var(--mut);font-size:13px}
+  .wrap{display:flex;min-height:640px}
+  .stage{flex:1 1 auto;min-width:0;padding:8px}
+  .panel{flex:0 0 372px;border-left:1px solid #e3e3e3;background:#fff;padding:20px 22px;overflow:auto}
+  svg{width:100%;height:auto;display:block}
+  .node rect{rx:8;ry:8;stroke-width:1.6px;cursor:pointer}
+  .node:hover rect{filter:brightness(.96)}
+  .node text{cursor:pointer;font-weight:600;pointer-events:none}
+  .node .sub{font-weight:500;fill:var(--mut)}
+  .node.sel rect{stroke-width:3px}
+  .s-done rect{fill:var(--done-bg);stroke:var(--done)} .s-done text{fill:var(--done)}
+  .s-partial rect{fill:var(--partial-bg);stroke:var(--partial)} .s-partial text{fill:var(--partial)}
+  .s-gap rect{fill:var(--gap-bg);stroke:var(--gap);stroke-dasharray:5 3} .s-gap text{fill:var(--gap)}
+  .s-sibling rect{fill:var(--sibling-bg);stroke:var(--sibling)} .s-sibling text{fill:var(--sibling)}
+  .s-belly rect{fill:var(--belly-bg);stroke:var(--belly);stroke-width:2.4px} .s-belly text{fill:var(--belly)}
+  .edge{fill:none;stroke:#9a9a9a;stroke-width:1.6px;marker-end:url(#arrow)}
+  .edge.mod{stroke:#b9b9b9;stroke-width:1.3px;stroke-dasharray:3 3;marker-end:url(#arrowlite)}
+  .edge.held{stroke:var(--gap);stroke-width:1.8px;stroke-dasharray:6 4;marker-end:url(#arrowgap)}
+  .edge.drive{stroke:#2e7d32;stroke-width:2.2px;marker-end:url(#arrowgrn)}
+  .edge.faint{stroke:#d0d0d0;stroke-width:1.1px;stroke-dasharray:2 4;marker-end:url(#arrowlite)}
+  .elabel{font-size:9px;fill:#8a8a8a}
+  .region{font-size:9.5px;fill:#a07fb4;font-style:italic;font-weight:600;pointer-events:none}
+  .frame{fill:none;stroke:#e0e0e0;stroke-width:1.2px;stroke-dasharray:4 4}
+  .framelab{font-size:10px;fill:#aaa;font-style:italic}
+  .panel .badge{display:inline-block;padding:2px 9px;border-radius:11px;font-size:11px;font-weight:700;margin-bottom:10px}
+  .b-done{background:var(--done-bg);color:var(--done)} .b-partial{background:var(--partial-bg);color:var(--partial)}
+  .b-gap{background:var(--gap-bg);color:var(--gap)} .b-sibling{background:var(--sibling-bg);color:var(--sibling)}
+  .b-belly{background:var(--belly-bg);color:var(--belly)}
+  .panel h2{margin:2px 0 0;font-size:19px}
+  .panel .reg{color:#a07fb4;font-size:12px;font-style:italic;margin:2px 0 0}
+  .panel .rid{color:var(--mut);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px}
+  .panel h3{margin:18px 0 5px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut)}
+  .panel p{margin:0 0 10px;font-size:14px;line-height:1.5}
+  .panel .promise{background:#fff8f8;border-left:3px solid var(--gap);padding:9px 12px;border-radius:0 6px 6px 0}
+  .panel .wired{background:#f5fbf5;border-left:3px solid var(--done);padding:9px 12px;border-radius:0 6px 6px 0}
+  .panel .sib{background:#f3f8fe;border-left:3px solid var(--sibling);padding:9px 12px;border-radius:0 6px 6px 0}
+  .hint{color:var(--mut);font-size:13px;font-style:italic}
+</style>
+</head>
+<body>
+<header>
+  <h1>How the War Machine does Active Inference — R1–R18, on a brain</h1>
+  <p>Core inference nodes sit on their Friston brain regions (purple labels); the implementation apparatus & wider system sit outside the brain. Green = wired · amber = partial · <b>red dashed = gap</b> · blue = on the futon3c sibling surface · <b style="color:#6d3aa8">lavender = the belly (R19) — built but not yet steering</b>. Click any node.<br/><b>Two sweeps.</b> The <i>forward</i> loop (sense→infer→select→act) is the policy/method — the <i>mind</i> (mens) and the <i>hand</i> (manus). The <i>backward</i> flow of goals/preferred-states is the <i>belly</i> (venter — the hara 丹田) — what the loop is FOR. The contract enumerates the forward half (R1–R14); the belly (R19, now <b style="color:#6d3aa8">built</b> as a derived C-vector — 452 preferences across 5 channels — though not yet steering) names the preference organ, and R15/R16/R14 are its goal-completion criteria. The five canonical generative-model matrices are now tagged on their nodes: <b>A→R3</b> (perceive) · <b>B→R4</b> · <b>C→R19</b> (the belly) · <b>D→R1</b> · <b>E→R12</b>. C was the silent miss — now named R19.</p>
+</header>
+<div class="wrap">
+  <div class="stage"><svg id="svg" viewBox="0 0 820 620" role="img" aria-label="AIF wiring on a brain"></svg></div>
+  <div class="panel" id="panel"><p class="hint">Click a node to learn what that piece of Active Inference does and how (or whether) the War Machine implements it.</p></div>
+</div>
+<script>
+const NODES = [
+  // ---- core inference, placed on Friston brain regions ----
+  {id:"SI", r:"R2", t:"Sensory input", s:"observation schema", reg:"occipital cortex", gm:"A — likelihood P(o|s) (via the R3 perceive update)", x:686,y:250, st:"done",
+   concept:"Everything starts with observation. An active-inference agent never sees the world directly — it receives a vector of sense-data and must infer what's behind it.",
+   how:"WIRED — the WM senses the futon stack through a 13–14 channel observation schema (annotation-health, sorry-count, mission-health, active-repo-ratio, …). Each channel is one sensor reading the stack's live state."},
+  {id:"BEL", r:"R1", t:"Belief", s:"state estimation", reg:"hippocampus", gm:"D — initial-state prior (the R1 belief's prior)", x:455,y:258, st:"done",
+   concept:"The agent holds a belief: a probability distribution over hidden states of the world — not a single guess, but graded confidence across possibilities.",
+   how:"WIRED — futon2.aif.belief keeps a posterior over a per-entity status set {spawned, refined, strengthened, addressed, falsified, foreclosed, reopened}. That distribution IS the WM's belief about where each piece of work stands."},
+  {id:"FM", r:"R4", t:"Forward model", s:"predict next outcome", reg:"dorsal PFC", gm:"B — state transitions P(s′|s,π)", x:163,y:178, st:"done",
+   concept:"A generative model predicts what to expect next — and what to expect under each possible action. This is imagining the consequences before acting.",
+   how:"WIRED — futon2.aif.forward-model/predict rolls the belief forward a K=3 step horizon, giving the WM a short-range forecast of how the stack would evolve under each move."},
+  {id:"G", r:"R5", t:"Evaluate policies", s:"Expected Free Energy", reg:"ventral PFC (vmPFC)", x:166,y:300, st:"done",
+   concept:"Each candidate plan is scored by Expected Free Energy (G). G has two parts: RISK (how far the expected outcome is from what you prefer) and AMBIGUITY (how much uncertainty you'd resolve). Minimising G balances getting what you want against learning what you don't know.",
+   how:"WIRED — futon2.aif.efe/compute-efe splits G into G-risk + G-ambiguity and ranks actions by G-total. This is the WM's value function."},
+  {id:"SEL", r:"R6", t:"Policy selection", s:"softmax + abstain", reg:"basal ganglia", x:344,y:204, st:"done",
+   concept:"The agent commits: a softmax turns policy scores into a choice (lower G → more likely), with an ABSTAIN option so it does nothing rather than act on noise.",
+   how:"WIRED — futon2.aif.policy/select-action: softmax with adaptive temperature τ, plus an abstain branch that emits a gap-report when nothing beats no-op."},
+  {id:"PREC", r:"R7", t:"Precision", s:"over channels", reg:"VTA / SN (dopamine)", x:430,y:360, st:"done",
+   concept:"Precision is confidence-weighting. Not all prediction errors are equal — a precise (low-noise) channel's error should move belief more than a noisy one's. Precision = inverse variance.",
+   how:"WIRED over channels — futon2.aif.precision tracks the rolling variance of each channel's error history and weights it accordingly, carried across ticks in the trace."},
+  {id:"ACT", r:"R10", t:"Predicted action", s:"live snapshot", reg:"motor cortex", x:322,y:110, st:"done",
+   concept:"The selected policy yields a predicted action — the agent's output back onto the world.",
+   how:"WIRED as a SNAPSHOT — the WM emits a ranked recommendation each tick. But see the red arc back to Sensory input: that's R16, where it would actually ACT. Today it only proposes."},
+  {id:"HABIT", r:"R12", t:"Habit learning", s:"dual-loop hyperparams", reg:"cerebellum", gm:"E — policy prior / habit (with R14 γ = its precision)", x:690,y:400, st:"done",
+   concept:"Slow learning: while the fast loop infers states, a slow dual loop tunes the hyperparameters — the agent's habits and preferences — from accumulated outcomes.",
+   how:"WIRED (apparatus) — futon2.aif.intrinsic-values + the outer loop; it accrues real learning once R10's cron is running."},
+  // ---- satellites riding on a region ----
+  {id:"R13", r:"R13", t:"Multi-step G(π)", s:"policies, not steps", x:256,y:362, st:"done", sm:true,
+   concept:"A policy is a whole SEQUENCE of actions, not one step. G(π) sums the EFE along the trajectory a policy induces — a path integral. This is what lets an agent pick a move that looks bad alone but is great as step 1 of a plan.",
+   how:"WIRED — futon2.aif.rollout scores multi-step policies; the witness test shows a 2-step policy correctly beating the greedy single-step pick."},
+  {id:"R14", r:"R14", t:"Precision over policies", s:"the γ term", x:566,y:360, st:"gap", sm:true,
+   concept:"Precision over POLICIES — the γ term — is the agent's confidence in its own decision-making: how sharply it commits to the best plan. In the brain this is a dopamine signal (the same VTA/SN region as R7), inferred from how well past plans turned out.",
+   how:"GAP — R7 gives precision over sensory channels, but there is still no γ over policies; the selection temperature is a fixed heuristic. What changed: R16's consent gate now records a ΔF∧ΔG verdict every cycle — the first trickle of the realized-policy-outcome history γ would learn from.",
+   promise:"If wired: the WM becomes self-calibrating in decisiveness — committing hard when its recent plans have paid off, hedging and exploring when they haven't. Confidence that's earned, not hand-set. Its feed is R16's realized-outcome channel; now that R16 closes as far as the act-gate, that feed is finally in reach — R14 is the next build once armed actions start returning outcomes."},
+  {id:"R16", r:"R16", t:"Close the loop", s:"act → world → observe", x:548,y:96, st:"partial", sm:true,
+   concept:"A true active-inference agent CLOSES the loop: observe → infer → select → ACT → observe the consequence → update. The action leaves the brain (mens) and the hand acts on the world (manus) — R16 sits on the hand it works through — and the change returns as new sensory input. Acting is the 'active' half of active inference.",
+   how:"PARTIAL (Car-3, 2026-06-24) — the loop is wired and the hand is real. The WM computes an act-gate ΔF∧ΔG per candidate (futon2's rollout G(π) joined beside the cascade's free-energy F via cascade-lane/rollout-g-for); the executor apply-cascade! folds a chosen cascade into a wiring diagram. But the gate ABSTAINS (:abstain-missing-leg) on every served mission — because ΔG is nil: there is no rollout PATH for it. The loop stays open not for want of permission but because the agent has no policy it can evaluate, so R6 correctly refuses to commit.",
+   promise:"To close it, give the gate something to decide: a ΔG-having reachable set — criterion (2), the rollout path. The forward model (the move-set) is a thin v2 stub that doesn't cover the missions the WM actually ranks; ingesting the REAL arrow store (claude-4's :constructed / :open arrows, the pattern_phylogeny co-application edges) gives those missions modeled trajectories → ΔG appears → the gate :passes / :fails instead of abstaining → the loop demonstrably closes. This is sim-only (zero substrate writes), so it needs no arming to prove out. Whether a :passed action then FIRES is the exogenous operator / autopen switch (WM-I4) — governance, not inference: it belongs in the meta layer, not on this arc."},
+  // ---- apparatus & wider system (outside the brain) ----
+  {id:"LIVE", r:"R10", t:"Live operation", s:"scheduled heartbeat", x:120,y:506, st:"done", ap:true,
+   concept:"An agent is something that RUNS — perceiving and acting on a clock, not only when poked.",
+   how:"WIRED (scheduled-ready) — wm_scheduled_run.clj + a :wm-scheduled alias drive the loop end-to-end. The one remaining step is YOU installing the cron entry, flipping it from 'ready' to 'running in production'."},
+  {id:"TRACE", r:"R8", t:"Per-tick trace", s:"memory tape", x:298,y:506, st:"done", ap:true,
+   concept:"Memory of what happened: a per-tick record of belief-before, observation, decision, belief-after.",
+   how:"WIRED — futon2.aif.trace writes EDN-line records each tick: the evidence everything else (validation, learning) reads."},
+  {id:"VALID", r:"R9", t:"Validation properties", s:"self-check", x:480,y:506, st:"done", ap:true,
+   concept:"Named, checkable properties asserting 'the apparatus is behaving like AIF' — belief entropy shrinks, free energy decreases under stress, abstain fires when it should.",
+   how:"WIRED — V-shrink, F-decrease, EFE-stress, Abstain-fires: named tests with quantitative criteria, run against the trace."},
+  {id:"R18", r:"R18", t:"Faithfulness lens", s:"real vs analogical", x:662,y:506, st:"gap", ap:true,
+   concept:"Faithfulness (meta): is each named quantity REALLY the AIF thing it's labelled, or a heuristic wearing the name? 'Free energy' should be free energy, not a relabeled score.",
+   how:"GAP as a criterion — the 2026-06-24 audit found EIG and ΔF genuine, but the Salingaros L=T·H ↔ free-energy link only ANALOGICAL.",
+   promise:"If wired: every quantity on this diagram carries a badge — derived-from-FEP (real) or :analogical — so you can trust the labels. It's the honesty layer over everything else here."},
+  {id:"STRUCT", r:"R17", t:"Structure learning", s:"model expansion / niche", x:298,y:578, st:"sibling", ap:true,
+   concept:"Learning new STRUCTURE — new hidden causes, new policies, new kinds of action — not just updating the numbers in a fixed model. The model GROWS. (Same move as morphogenesis: a body plan adding structure.)",
+   how:"LIVE ON THE SIBLING SURFACE (futon3c portfolio) — :acquire-patterns builds a NEW cascade-policy rather than freeze, accepted by ΔF (Bayesian Occam: only if the added complexity pays for itself), using real expected-information-gain.",
+   promise:"Not yet a futon2.aif criterion: needs porting + morphogenesis-event recording + the ΔF∧ΔG gate. If wired here: the WM could invent new action-classes when its current repertoire can't cope."},
+  {id:"L2", r:"R15", t:"Higher level", s:"nested model", x:480,y:578, st:"partial", ap:true,
+   concept:"Hierarchical / deep models: a higher level's belief sets the PRIOR for the level below (and 'deep temporal' inference = beliefs about future beliefs). The big picture conditions the details.",
+   how:"PARTIAL — there's a K=3 horizon and a cascade grain-hierarchy, but no nested model where an upper level parameterises a lower one.",
+   promise:"If wired: the WM holds a mission-level strategic belief that shapes its entity-level tactical beliefs at the same time — strategy and tactics in one coherent inference instead of a flat list."},
+  {id:"MULTI", r:"R11", t:"Other agents", s:"multi-brain", x:662,y:578, st:"partial", ap:true,
+   concept:"Composition: many active-inference agents, each with its own Markov blanket, coupled into a larger system — brains made of brains.",
+   how:"N/A at this scope (single observer), but tracked.",
+   promise:"If developed: the WM's loop composes with sibling agents (the futon3c portfolio surface, other peripherals) into a multi-agent active-inference system — your whole mesh as one nested inference."},
+  // ---- the BELLY: the backward/goal organ (preferences), parallel to the hand ----
+  {id:"WANT", r:"R19", t:"The belly · 丹田 (hara)", s:"prior preferences (C-vector)", gm:"C — prior preferences (the C-vector)", x:110,y:432, st:"belly", ap:true,
+   concept:"The seat of appetite — what the organism is HUNGRY for. In active inference these are the PREFERRED STATES (Friston's C-vector): the goals the loop exists to reach. mens et manus gave the diagram a mind and a hand; the belly is what they are FOR — the backward, goal-directed half (T1, the trainee's need) that steers the forward policy (T3, the methods).",
+   how:"BUILT (provisional) — the belly now EXISTS as a DERIVED C-vector. <code>c_vector.bb</code> assembles 452 open preferences across 5 channels: <b>stated</b> (29 capabilities + 110 clean sorries), <b>incompleteness</b> (81 started-but-not-run missions), <b>mess</b> (43 low-coherence missions + a standing global-coherence regularizer), and the GPU-mined <b>應-voice</b> — <b>reach</b> (171, what the agent orients toward) + <b>correction</b> (18, where the operator overrode it). Every entry carries provenance (I1 — derived from a real source, never authored) and a weight basis (I2), stored in a sim-only substrate-2 overlay. M-goals-and-holes is the mission that built it. (Origin: C — one of the five matrices A/B/C/D/E — had sat implicit inside R5's RISK and mislabeled as static hyperparameters; a silent miss, now named R19. The 應-voice channel is salvaged-provisional — the clean GPU rerun supersedes it.)",
+   promise:"The belly READS OUT what the agent wants — it does not yet STEER. Static risk (distance from a preferred outcome) ranks the holes, but it is a per-policy CONSTANT, so the WANT→G edge stays held until PREDICTIVE risk exists: a C-entry's outcome evaluated UNDER a candidate policy, so a policy that discharges a preference lowers its risk. That join is W1 = substrate-2's empty PROOF layer (the goal↔method bridge, shared with M-operational-vocabulary). Until then the organ is built and honest, but the setpoint is a readout, not a controller — and R16/R14/R15 (the backward goal-completion criteria) close only once it steers."},
+];
+const REGIONS = [
+  ["motor cortex",322,86],["dorsal PFC",163,150],["ventral PFC (vmPFC)",166,332],
+  ["basal ganglia",344,178],["hippocampus",455,230],["VTA / SN (dopamine)",430,392],
+  ["occipital cortex",686,224],["cerebellum",690,432],
+];
+const EDGES = [
+  ["SI","BEL","edge","perceive"],["BEL","FM","edge",""],["FM","G","edge",""],["G","SEL","edge",""],["SEL","ACT","edge",""],
+  ["ACT","R16","edge","propose"],["R16","SI","held","close"],
+  ["PREC","SEL","mod",""],["R14","SEL","mod","γ"],["R13","G","mod",""],["BEL","PREC","mod","errors"],
+  ["LIVE","SEL","drive","drives tick"],["ACT","TRACE","faint",""],["TRACE","VALID","faint",""],["TRACE","HABIT","faint",""],["HABIT","PREC","faint",""],
+  ["STRUCT","R13","faint",""],["L2","BEL","faint",""],["MULTI","BEL","faint",""],["R18","G","faint",""],["R18","PREC","faint",""],["R18","STRUCT","faint",""],
+  ["WANT","G","held","risk ← goal"],["L2","WANT","faint","goals ↓"],
+];
+const NById=Object.fromEntries(NODES.map(n=>[n.id,n]));
+for(const n of NODES){ n._w = n.sm?112:(n.ap?150:132); n._h = n.sm?30:(n.ap?42:40); }
+const SVG="http://www.w3.org/2000/svg";
+const el=(t,a)=>{const e=document.createElementNS(SVG,t);for(const k in a)e.setAttribute(k,a[k]);return e;};
+function trim(n,sx,sy){const hx=n._w/2+4,hy=n._h/2+4;const tx=Math.abs(sx)>1e-3?hx/Math.abs(sx):1e9;const ty=Math.abs(sy)>1e-3?hy/Math.abs(sy):1e9;const t=Math.min(tx,ty);return [n.x+sx*t,n.y+sy*t];}
+function edgePath(a,b){const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1;const [x1,y1]=trim(a,dx/d,dy/d);const [x2,y2]=trim(b,-dx/d,-dy/d);return {x1,y1,x2,y2};}
+const svg=document.getElementById("svg");
+const defs=el("defs",{});
+const marker=(id,c)=>{const m=el("marker",{id,markerWidth:9,markerHeight:9,refX:7,refY:3,orient:"auto",markerUnits:"strokeWidth"});m.appendChild(el("path",{d:"M0,0 L7,3 L0,6 Z",fill:c}));return m;};
+defs.appendChild(marker("arrow","#9a9a9a"));defs.appendChild(marker("arrowlite","#c4c4c4"));defs.appendChild(marker("arrowgap","#c62828"));defs.appendChild(marker("arrowgrn","#2e7d32"));
+svg.appendChild(defs);
+// brain silhouette (left-facing: frontal lobe left, occipital right, cerebellum lower-right)
+const brain=el("g",{id:"brain",opacity:"0.72"});
+brain.appendChild(el("path",{d:"M95,318 C58,250 72,168 152,140 C232,96 330,96 410,102 C500,106 602,100 690,142 C758,172 776,250 742,312 C766,360 706,402 624,402 C520,416 430,408 360,402 C280,402 182,402 132,372 C98,356 102,338 95,318 Z",fill:"#efeaf2",stroke:"#dcd3df","stroke-width":"2"}));
+for(const d of ["M178,150 C218,212 208,300 168,360","M300,118 C322,212 300,312 280,392","M430,108 C442,220 430,322 420,398","M560,120 C582,212 560,322 540,398","M118,300 C300,332 520,332 722,300"])
+  brain.appendChild(el("path",{d,fill:"none",stroke:"#dcd3df","stroke-width":"1.4"}));
+brain.appendChild(el("path",{d:"M648,372 C694,356 762,366 764,402 C764,430 706,442 666,424 C640,412 636,388 648,372 Z",fill:"#e8e2ec",stroke:"#dcd3df","stroke-width":"2"}));
+brain.appendChild(el("path",{d:"M470,396 C470,432 482,452 492,454 C502,452 512,432 510,396 Z",fill:"#e8e2ec",stroke:"#dcd3df","stroke-width":"2"}));
+svg.appendChild(brain);
+// apparatus frame (outside the brain)
+const fr=el("g",{});
+fr.appendChild(el("rect",{class:"frame",x:34,y:476,width:752,height:124,rx:10}));
+const fl=el("text",{class:"framelab",x:44,y:492});fl.textContent="implementation apparatus & wider system — outside the inference core";fr.appendChild(fl);
+svg.appendChild(fr);
+// region labels
+for(const [txt,x,y] of REGIONS){const t=el("text",{class:"region",x,y,"text-anchor":"middle"});t.textContent=txt;svg.appendChild(t);}
+// edges
+for(const [f,t,cls,lab] of EDGES){const a=NById[f],b=NById[t];if(!a||!b)continue;const p=edgePath(a,b);
+  svg.appendChild(el("line",{class:"edge "+cls,x1:p.x1,y1:p.y1,x2:p.x2,y2:p.y2}));
+  if(lab){const tx=el("text",{class:"elabel",x:(p.x1+p.x2)/2,y:(p.y1+p.y2)/2-2,"text-anchor":"middle"});tx.textContent=lab;svg.appendChild(tx);}}
+// giant hand behind R16 — the manus the close-the-loop node acts through (R16 sits on the palm)
+const hand=el("text",{x:548,y:96,"text-anchor":"middle","font-size":150,opacity:0.85});
+hand.setAttribute("dominant-baseline","central");hand.textContent="🖐";svg.appendChild(hand);
+// giant belly behind WANT — the hara (丹田) the goals are seated in (the backward, preference half)
+const belly=el("text",{x:108,y:430,"text-anchor":"middle","font-size":132,opacity:0.8});
+belly.setAttribute("dominant-baseline","central");belly.textContent="🧘";svg.appendChild(belly);
+// nodes
+for(const n of NODES){const g=el("g",{class:"node s-"+n.st,"data-id":n.id});
+  g.appendChild(el("rect",{x:n.x-n._w/2,y:n.y-n._h/2,width:n._w,height:n._h}));
+  const fs=n.sm?10:11.5;
+  const t1=el("text",{x:n.x,y:n.y+(n.sm?3:-2),"text-anchor":"middle","font-size":fs});t1.textContent=n.r+" · "+n.t;g.appendChild(t1);
+  if(!n.sm){const t2=el("text",{class:"sub",x:n.x,y:n.y+12,"text-anchor":"middle","font-size":9.5});t2.textContent=n.s;g.appendChild(t2);}
+  g.addEventListener("click",()=>select(n.id));svg.appendChild(g);}
+const leg=el("text",{class:"elabel",x:14,y:612});leg.textContent="Forward sweep = policy/method (mind + hand, manus). Backward sweep = goals/preferences (the belly, hara) feeding R5's risk — the diagram's missing setpoint. R16 acts; the belly says what it acts toward.";svg.appendChild(leg);
+const motto=el("text",{class:"framelab",x:626,y:34,"text-anchor":"middle"});motto.textContent="mens et manus — the mind decides, the hand acts";svg.appendChild(motto);
+
+const panel=document.getElementById("panel");
+const BADGE={done:["b-done","WIRED"],partial:["b-partial","PARTIAL"],gap:["b-gap","GAP — not yet wired"],sibling:["b-sibling","LIVE ON SIBLING SURFACE"],belly:["b-belly","BUILT (provisional) — reads out, doesn't yet steer"]};
+function select(id){
+  document.querySelectorAll(".node").forEach(e=>e.classList.toggle("sel",e.getAttribute("data-id")===id));
+  const n=NById[id];const [bc,bt]=BADGE[n.st];
+  let h=`<div class="rid">${n.r}</div><span class="badge ${bc}">${bt}</span><h2>${n.t}</h2>`;
+  if(n.reg) h+=`<div class="reg">brain region · ${n.reg}</div>`;
+  if(n.gm) h+=`<div class="reg">generative model · ${n.gm}</div>`;
+  h+=`<h3>What this piece of Active Inference does</h3><p>${n.concept}</p>`;
+  if(n.st==="gap"){h+=`<h3>The gap</h3><p>${n.how}</p>`;if(n.promise)h+=`<h3>What you'd gain if it were wired</h3><div class="promise"><p style="margin:0">${n.promise}</p></div>`;}
+  else if(n.st==="sibling"){h+=`<h3>How it's wired</h3><div class="sib"><p style="margin:0">${n.how}</p></div>`;if(n.promise)h+=`<h3>What's left to bring it home</h3><div class="promise"><p style="margin:0">${n.promise}</p></div>`;}
+  else if(n.st==="belly"){h+=`<h3>How it's built</h3><p>${n.how}</p>`;if(n.promise)h+=`<h3>What's left to make it steer (not just read out)</h3><div class="promise"><p style="margin:0">${n.promise}</p></div>`;}
+  else{h+=`<h3>How it's wired in the War Machine</h3><div class="wired"><p style="margin:0">${n.how}</p></div>`;
+    if(n.st==="partial"&&n.promise){h+=`<h3>What's left to finish it</h3><div class="promise"><p style="margin:0">${n.promise}</p></div>`;}}
+  panel.innerHTML=h;
+}
+select("SI");
+</script>
+
+<hr style="border:none;border-top:2px solid #e0d6ea;margin:32px 0 0"/>
+<style>
+  #rb{--rb-paper:#f7f5ef;--rb-line:#ddd6c8;
+      --rb-ready:#1d7a3a;--rb-ready-bg:#e7f6ec; --rb-partial:#9a6a00;--rb-partial-bg:#fdf3e0;
+      --rb-build:#0e7490;--rb-build-bg:#e2f4f7; --rb-break:#8a2bbd;--rb-break-bg:#f3e8fb;
+      --rb-open:#555;--rb-open-bg:#ececec; --rb-vision:#555;--rb-vision-bg:#eee;
+      --rb-cpu:#6b7280;--rb-cpu-bg:#f3f4f6; --rb-gpu:#a11;--rb-gpu-bg:#fbe9e9;
+      background:var(--rb-paper);color:#1a1a1a;padding:20px 32px 56px;
+      font:14px/1.5 "Iowan Old Style",Georgia,serif;}
+  #rb h1{font-size:20px;margin:8px 0 3px;}
+  #rb .rb-meta{color:#666;font-size:12.5px;margin-bottom:12px;}
+  #rb .rb-flow{margin:12px 0;padding:10px 14px;border:1px solid var(--rb-line);background:#fff;
+        font:12.5px/1.7 ui-sans-serif,system-ui;color:#333;border-radius:6px;} #rb .rb-flow b{color:#000}
+  #rb .rb-legend{display:flex;gap:14px;flex-wrap:wrap;margin:10px 0;font:12px/1.8 ui-sans-serif,system-ui;}
+  #rb .rb-badge{display:inline-block;padding:2px 8px;border-radius:10px;font:600 11px/1.5 ui-sans-serif,system-ui;
+         text-transform:uppercase;letter-spacing:.03em;}
+  #rb .ready{color:var(--rb-ready);background:var(--rb-ready-bg);} #rb .partial{color:var(--rb-partial);background:var(--rb-partial-bg);}
+  #rb .build{color:var(--rb-build);background:var(--rb-build-bg);} #rb .break{color:var(--rb-break);background:var(--rb-break-bg);}
+  #rb .open{color:var(--rb-open);background:var(--rb-open-bg);} #rb .vision{color:var(--rb-vision);background:var(--rb-vision-bg);}
+  #rb .rb-phase{margin:20px 0;}
+  #rb .rb-phase h2{font-size:15px;margin:0 0 8px;border-bottom:2px solid var(--rb-line);padding-bottom:4px;}
+  #rb .rb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px;}
+  #rb .rb-card{border:1px solid var(--rb-line);border-top-width:4px;background:#fff;border-radius:6px;padding:11px 13px;display:flex;flex-direction:column;}
+  #rb .rb-card.s-ready{border-top-color:var(--rb-ready);} #rb .rb-card.s-partial{border-top-color:var(--rb-partial);}
+  #rb .rb-card.s-build{border-top-color:var(--rb-build);} #rb .rb-card.s-break{border-top-color:var(--rb-break);}
+  #rb .rb-card.s-open{border-top-color:var(--rb-open);} #rb .rb-card.s-vision{border-top-color:var(--rb-vision);}
+  #rb .rb-card.rb-new{background:#f1e8fb;}
+  #rb .rb-card h3{margin:0 0 2px;font-size:13.5px;} #rb .rb-id{color:#999;font:600 11px/1 ui-sans-serif,system-ui;}
+  #rb .rb-row1{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+  #rb .rb-chip{display:inline-block;font:600 10px/1.4 ui-sans-serif,system-ui;padding:1px 6px;border-radius:3px;margin-left:4px;}
+  #rb .rb-chip.cpu{background:var(--rb-cpu-bg);color:var(--rb-cpu);} #rb .rb-chip.gpu{background:var(--rb-gpu-bg);color:var(--rb-gpu);}
+  #rb .rb-ev{font:11px/1.4 "SF Mono",ui-monospace,Menlo,monospace;color:#2456a6;margin:5px 0 0;}
+  #rb .rb-note{font-size:12.5px;color:#333;margin:6px 0 0;} #rb code{background:#ece8dd;padding:1px 4px;border-radius:3px;font-size:11.5px;}
+  #rb .rb-link{margin-top:auto;padding-top:8px;font-size:11.5px;} #rb .rb-link a{color:#0e7490;font-weight:600;text-decoration:none;border-bottom:1px solid #0e7490;}
+</style>
+<div id="rb">
+  <h1>Build-status board — what the dots hide</h1>
+  <div class="rb-meta">claude-10 · 2026-06-26 · companion to the diagram above (kept as-is). Each R-node up there is ONE coloured dot — but a dot belies the stack of sub-tickets underneath. This board decomposes the nodes whose micro-ticket hides real complexity, so a half-built / inconsistent state is <b>visible, not hidden</b>.</div>
+  <div class="rb-flow">
+    <b>Why this exists</b> (Joe, 2026-06-26): the purple R19 reads "the belly is built" — true, but underneath sit ~11 pieces at four different maturities; R16 ("close the loop") and R14 (γ) are the same shape. The board is the consistency ledger: nothing is "done" until its row is green, and the deferred rows are named rather than silently skipped.
+  </div>
+  <div class="rb-legend">
+    <span class="rb-badge ready">built+reviewed</span> gated, verified ·
+    <span class="rb-badge partial">v1 / gaps</span> works, known limits ·
+    <span class="rb-badge build">needs build</span> specified, ready ·
+    <span class="rb-badge break">needs breakdown</span> decompose / depends ·
+    <span class="rb-badge open">open question</span> governance / decision pending ·
+    <span class="rb-chip cpu">cpu</span><span class="rb-chip gpu">gpu</span> ·
+    <span style="display:inline-block;width:11px;height:11px;background:#f1e8fb;border:1px solid #c8a8e8;border-radius:2px;vertical-align:middle"></span> lavender = NEW this session
+  </div>
+  <main id="rb-app"></main>
+</div>
+<script>(function(){
+const CARDS = {
+ "R19 · The belly (C-vector) — what the purple dot contains": [
+  {id:"R19-DERIVE", t:"Live stated-channel derive from substrate-2", s:"ready", c:"cpu",
+   ev:"futon2.aif.c-vector/derive-stated · live: 139 entries (31 caps, 293 sorries) off :7071",
+   n:"Caps not-yet-attested + clean open sorries (33 boilerplate dropped) → C-entries carrying provenance (I1) + weight basis (I2). Read-only; <code>[]</code> on an unreachable store."},
+  {id:"R19-FRESH", t:"Freshness guard — derived-stale-vs-source", s:"ready", c:"cpu",
+   ev:"corpus-signature-of + stale?/freshness-check · live: flips fresh→stale on a simulated drift",
+   n:"The mandatory §HEAD guard (the D7a 5-week-freeze lesson). A hash over (id, satisfaction-state) catches a close+open swap at constant count; loud warning on <code>*err*</code>. Shipped WITH the live C, not after."},
+  {id:"R19-RISK", t:"Static goal-outcome risk + efe wiring", s:"ready", c:"cpu",
+   ev:"goal-outcome-risk → compute-efe :G-goal-outcome · mean-normalised (W4)",
+   n:"Additive R5 term = weight·mean divergence of the CURRENT corpus from C; <code>[]</code> ⇒ 0.0 ⇒ EFE reduces exactly to the pre-belly floor. Action-INDEPENDENT — a readout, a constant offset across policies."},
+  {id:"R19-PRED", t:"Predictive risk — the belly STEERS selection", s:"ready", c:"cpu", new:true,
+   ev:"predictive-goal-outcome-risk + advanced-outcome-ids · live re-rank 0.33957→0.33525 (pursue ai-passes-prelims) · 56 tests / 203 assertions",
+   n:"<b>NEW this session</b> (Joe: \"push ahead\"). The canonical EFE term: a policy's PREDICTED goal-outcomes vs C — entries an action advances are predicted satisfied ⇒ its risk drops ⇒ it re-ranks policies. In-memory discharge link reuses the action <code>:target</code> ∪ star-map <code>:produces</code>; denominator held fixed so advancing a goal can only LOWER risk."},
+  {id:"R19-CURRENT-C", t:"current-C channel-liveness seam", s:"partial", c:"cpu",
+   ev:"futon2.aif.preferences/current-C (free-energy + survival-cost rewired)",
+   n:"The indirection seam. Today it returns the STATIC channel map (behaviour-identical floor) — the channel-range C is not yet itself derived live. The goal-OUTCOME half is what's live; this seam lets the channel half follow without touching consumers."},
+  {id:"R19-CHANNELS", t:"Fold mess / incompleteness / 應-voice into the live atom", s:"build", c:"cpu",
+   ev:"merge-entries (extension point) + c_vector.bb overlays",
+   n:"The live atom carries only the STATED channel. The other four (43 mess + 81 incompleteness + 171 reach + 18 correction) are produced by <code>c_vector.bb</code>; <code>merge-entries</code> exists to fold their overlays in — not yet wired into <code>refresh!</code>."},
+  {id:"R19-UNIFY", t:"Unify the two produce-stated implementations", s:"build", c:"cpu",
+   n:"The stated channel is derived twice — <code>futon2.aif.c-vector</code> (live, native :7071) and <code>c_vector.bb/produce-stated</code> (the validated snapshot). Deliberate duplication so futon2 needs no futon6 files; should converge to one source."},
+  {id:"R19-WM-LOOP", t:"Wire maybe-refresh! into the WM outer loop", s:"build", c:"cpu",
+   ev:"c-vector/maybe-refresh! (off-cycle, derive-and-cache)",
+   n:"The mechanism exists (re-derive only when <code>stale?</code>, off the per-action tick). Not yet called from the running loop — so in production the belly refreshes only by hand. Wiring it is what makes \"live\" true in the running system."},
+  {id:"R19-PROOF-JOIN", t:"Durable discharged-by PROOF join", s:"break", c:"cpu",
+   ev:"depends: M-populate-substrate-2 D4 (substrate-2 PROOF layer)",
+   n:"Predictive risk uses an IN-MEMORY id-match (action target ↔ C-entry outcome-ref). The durable form is the goals↔methods PROOF join (W1), shared with M-operational-vocabulary — persisted, promotable. Out of E-C-vector-live scope; named so it isn't lost."},
+  {id:"R19-KL", t:"Probabilistic predicted outcome (full KL)", s:"build", c:"cpu",
+   n:"Today's predictive step is a deterministic point-mass (advance ⇒ satisfied). The canonical risk = KL(Q(o|π) ‖ C) wants advance-with-probability-<i>p</i> from the forward model — the refinement over the point-mass flip."},
+  {id:"R19-YING-RERUN", t:"應-voice clean GPU rerun (supersede salvage)", s:"build", c:"gpu",
+   n:"The 189 應-voice entries (reach + correction) are SALVAGED-provisional from a pre-fix run. The clean backward <code>meme_mine_joint</code> pass over assistant-turns (hot-swapped on the standing forward box) supersedes them."}
+ ],
+ "R16 · Close the loop — what the amber dot contains": [
+  {id:"R16-GATE", t:"Act-gate ΔF∧ΔG per candidate", s:"partial", c:"cpu",
+   ev:"cascade-lane/rollout-g-for + apply-cascade! (Car-3, 2026-06-24)",
+   n:"The gate is wired and the hand is real, but it ABSTAINS (<code>:abstain-missing-leg</code>) on every served mission because ΔG is nil — there is no rollout PATH. R6 correctly refuses to commit on a policy it cannot evaluate."},
+  {id:"R16-ROLLOUT", t:"ΔG-having reachable set (the rollout path)", s:"build", c:"cpu",
+   n:"Give the gate something to decide: a modeled trajectory per ranked mission so ΔG exists. The forward model's move-set is a thin v2 stub that doesn't cover the missions the WM actually ranks."},
+  {id:"R16-ARROWS", t:"Ingest the real arrow store", s:"build", c:"cpu",
+   n:"The <code>:constructed</code>/<code>:open</code> arrows + <code>pattern_phylogeny</code> co-application edges give those missions modeled trajectories → ΔG appears → the gate <code>:passes</code>/<code>:fails</code> instead of abstaining → the loop demonstrably closes. Sim-only; needs no arming to prove out."},
+  {id:"R16-ARM", t:"Arming / autopen switch (WM-I4)", s:"open", c:"cpu",
+   n:"Whether a <code>:passed</code> action FIRES is the exogenous operator / autopen switch — governance, not inference; the meta layer, not this arc. The consent gate is the substitutable location (supervised → autonomous = swap operator for autopen)."}
+ ],
+ "R14 · Precision over policies (γ) — what the red dot contains": [
+  {id:"R14-GAMMA", t:"γ — precision over policies", s:"break", c:"cpu",
+   n:"R7 gives precision over sensory channels; there is still no γ over POLICIES — the selection temperature τ is a fixed heuristic. The agent isn't yet self-calibrating in how hard it commits."},
+  {id:"R14-FEED", t:"Realized-policy-outcome history (γ's feed)", s:"partial", c:"cpu",
+   ev:"R16's consent gate records a ΔF∧ΔG verdict per cycle",
+   n:"γ learns from how past plans turned out. R16 now records the first trickle of that realized-outcome history; once armed actions return outcomes, γ has a feed. Gated behind R16 closing."}
+ ]
+};
+const LBL={ready:"built+reviewed",partial:"v1 / gaps",build:"needs build",break:"needs breakdown",open:"open question",vision:"deferred"};
+const BASE="file:///home/joe/code/futon2/holes/";
+const LINKS={
+ "R19-DERIVE":"E-C-vector-live.md","R19-FRESH":"E-C-vector-live.md","R19-RISK":"E-C-vector-live.md",
+ "R19-PRED":"E-C-vector-live.md","R19-CURRENT-C":"E-C-vector-live.md","R19-CHANNELS":"M-goals-and-holes.md",
+ "R19-UNIFY":"E-C-vector-live.md","R19-WM-LOOP":"E-C-vector-live.md","R19-PROOF-JOIN":"M-goals-and-holes.md",
+ "R19-KL":"E-C-vector-live.md","R19-YING-RERUN":"M-goals-and-holes.md",
+ "R16-GATE":"M-aif-wiring.md","R16-ROLLOUT":"M-aif-wiring.md","R16-ARROWS":"M-aif-wiring.md","R16-ARM":"M-aif-wiring.md",
+ "R14-GAMMA":"M-aif-wiring.md","R14-FEED":"M-aif-wiring.md"
+};
+const app=document.getElementById('rb-app');
+for(const [phase,cards] of Object.entries(CARDS)){
+  const sec=document.createElement('section'); sec.className='rb-phase';
+  sec.innerHTML=`<h2>${phase}</h2><div class="rb-grid"></div>`;
+  const grid=sec.querySelector('.rb-grid');
+  for(const c of cards){
+    const chip = c.c?`<span class="rb-chip ${c.c}">${c.c}</span>`:'';
+    grid.innerHTML += `<div class="rb-card s-${c.s}${c.new?' rb-new':''}">
+      <div class="rb-row1"><h3>${c.t} ${chip}</h3><span class="rb-badge ${c.s}">${LBL[c.s]}</span></div>
+      <div class="rb-id">${c.id}</div>
+      <div class="rb-note">${c.n}</div>
+      ${c.ev?`<div class="rb-ev">${c.ev}</div>`:''}
+      ${LINKS[c.id]?`<div class="rb-link"><a href="${BASE}${LINKS[c.id]}">▸ ${LINKS[c.id]}</a></div>`:''}</div>`;
+  }
+  app.appendChild(sec);
+}
+})();</script>
+</body>
+</html>

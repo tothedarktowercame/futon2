@@ -32,7 +32,8 @@
    R7-related deliverable; ambiguity is the principled R5b minimum."
   (:require [futon2.aif.forward-model :as fm]
             [futon2.aif.free-energy :as fe]
-            [futon2.aif.preferences :as pref]))
+            [futon2.aif.preferences :as pref]
+            [futon2.aif.c-vector :as cv]))
 
 (defn- ambiguity
   "Sum of per-channel predicted variances. Higher = more uncertain
@@ -293,7 +294,7 @@
                             :mission-health :active-repo-ratio}]
     (reduce + (for [[ch v] observation-mean
                     :when (contains? survival-channels ch)
-                    :let [pref (get pref/preferences ch)]
+                    :let [pref (get (pref/current-C) ch)]
                     :when pref
                     :let [[lo hi] pref
                           d (double v)
@@ -315,10 +316,14 @@
       :G-survival    <survival hinge-loss term (v0.13)>
       :G-structural-pressure <candidate-local structural-pressure term>
       :G-gap        <mission-fold gap credit; negative weight in G-total>
+      :G-goal-outcome <E-C-vector-live: additive risk = divergence of this
+                       action's PREDICTED goal-outcomes from the LIVE C-vector
+                       (the belly); advancing a goal lowers it ⇒ re-ranks
+                       policies; 0 when no live C ⇒ reduces to the static floor>
       :G-total       <G-risk + G-ambiguity − info-weight×G-info
                        + survival-weight×G-survival
                        − structural-pressure-weight×G-structural-pressure
-                       − G-gap>
+                       − G-gap + G-goal-outcome>
       :per-channel   <per-channel risk decomposition (from compute-free-energy)>}
 
    Lower :G-total = more preferred action.
@@ -361,6 +366,11 @@
    `:open-mission` actions, the weighted gap credit is subtracted from
    `:G-total`, making announced-but-unfilled missions more preferred.
 
+   `:goal-outcome-entries` in opts overrides the live C-vector source (defaults
+   to `c-vector/current-c-vector`); `:goal-outcome-weight` scales the
+   mean-normalised goal-outcome risk (W4). With no live C the term is 0.0 —
+   `compute-efe` is then identical to its pre-E-C-vector-live behaviour.
+
    `:graph-off-map-penalty` defaults to 0.0 and applies only to off-map
    `:open-mission` actions when graph + goal are present. `:graph-body-mode`
    defaults to `:whole`; `:leaf` scores a bounded next-step body term. When
@@ -374,7 +384,7 @@
                          pre-registered-goal graph-applicability-penalty
                          graph-body-weight graph-ascent-weight graph-off-map-penalty
                          graph-body-mode graph-ascent-status-aware? mission-gap-view
-                         gap-weight]
+                         gap-weight goal-outcome-weight goal-outcome-entries]
                   :or {info-weight default-info-weight
                        survival-weight default-survival-weight
                        structural-pressure-weight default-structural-pressure-weight
@@ -386,7 +396,8 @@
                        graph-off-map-penalty default-graph-off-map-penalty
                        graph-body-mode :whole
                        graph-ascent-status-aware? false
-                       gap-weight default-gap-weight}}]
+                       gap-weight default-gap-weight
+                       goal-outcome-weight cv/default-goal-outcome-weight}}]
    (let [single-prediction (fm/predict state action)
          ;; v0.15: opt-in multi-horizon trajectory; final-state observation
          ;; drives G-risk + G-survival. Ambiguity + info still use the
@@ -421,6 +432,16 @@
                                        graph-ascent-status-aware?})
          gap-terms (gap-efe-terms mission-gap-view action
                                   {:gap-weight gap-weight})
+         ;; E-C-vector-live: the LIVE goal-outcome half of C contributes an
+         ;; additive risk term — divergence of the policy's PREDICTED goal
+         ;; outcomes from C (entries this action advances are predicted
+         ;; satisfied ⇒ the action's risk drops ⇒ the belly re-ranks policies).
+         ;; Source defaults to the maintained live C-vector; [] (never derived /
+         ;; store down) ⇒ 0.0 ⇒ EFE reduces to the static floor (regression-
+         ;; safe). Reduces to the static term when the action advances nothing.
+         g-goal-outcome (cv/predictive-goal-outcome-risk
+                         (or goal-outcome-entries (cv/current-c-vector))
+                         action capability-graph goal-outcome-weight)
          urgency (+ 1.0 (* (double time-pressure) (double time-pressure-scale)))
          g-risk (* g-risk-base urgency)
          g-survival (* g-survival-base urgency)
@@ -431,7 +452,8 @@
                     (- (* (double structural-pressure-weight)
                           g-structural-pressure))
                     (:G-graph-pragmatic graph-terms)
-                    (- (:G-gap gap-terms)))]
+                    (- (:G-gap gap-terms))
+                    g-goal-outcome)]
      (cond->
       (merge
        {:action action
@@ -441,6 +463,7 @@
         :G-info g-info
         :G-survival g-survival
         :G-structural-pressure g-structural-pressure
+        :G-goal-outcome g-goal-outcome
         :G-total g-total
         :time-pressure (double time-pressure)
         :horizon-steps (when multi (:horizon-steps multi))

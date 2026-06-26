@@ -56,6 +56,18 @@
    :ticks-firing-ratio 0.10
    :sorry-count-norm   0.10})
 
+(defn current-C
+  "The CURRENT channel-preference component of C — the per-channel `[lo hi]`
+   ranges EFE's risk measures predicted outcomes against. Indirection seam for
+   E-C-vector-live (§4.5): today it returns the static `preferences` floor, so
+   it is behaviour-identical to reading `preferences` directly (regression-safe,
+   the augment-don't-rip-out floor). The LIVE goal-OUTCOME half of C is
+   delivered separately by `futon2.aif.c-vector` (derived, freshness-guarded,
+   atom-backed); a future channel-liveness can override here without touching
+   the consumers."
+  []
+  preferences)
+
 (def channel-health-signs
   "v0.16: per-channel sign convention for R3d multi-channel aggregation.
    `+1` = higher observed value is HEALTHIER (positive prediction-error
