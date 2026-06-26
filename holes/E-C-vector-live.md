@@ -117,3 +117,15 @@ The static term (§9) is a constant offset across policies, so it cannot re-rank
 **Verified:** clj-kondo 0/0, check-parens OK; tests now **56 / 203 assertions, 0 failures** (3 new predictive tests incl. a through-`compute-efe` per-policy re-rank). **Live:** against the real 139-entry belly, `risk(:no-op)=0.33957` vs `risk(pursue ai-passes-prelims)=0.33525` → the goal-advancing policy is preferred (re-ranks ✓).
 
 **Still deferred (named):** the durable `discharged-by` PROOF join (M-populate-substrate-2 D4) replacing the in-memory id-match; a **probabilistic** predicted outcome (advance-with-probability-p — the full KL) rather than the point-mass flip.
+
+## 11. R19-PROOF-JOIN — breakdown (the durable discharged-by join)
+
+Predictive risk (§10) uses an **in-memory** id-match (action `:target` ↔ C-entry `:outcome-ref`). The durable form — a persisted goals↔methods join the forward model reads to predict goal-progress under a policy — is **specified here, gated on M-populate-substrate-2 D4** (the substrate-2 PROOF layer) + M-operational-vocabulary (the mined method arrows). Decomposed into steps:
+
+1. **Persist C-entries** — promote the sim-only `c-store-overlay.edn` (452 `:c-entry` entities) to :7071 as first-class entities. *(Gated: M-populate-substrate-2 promotion path, D4.)*
+2. **Persist `discharged-by`** — each C-entry already carries `:discharged-by` (e.g. `:centre-mess`, `:adopt-redirect`); write it as a substrate-2 **relation** `c-entry --discharged-by--> method`. *(The empty `:closes`/`:depends-on-sorry`/… relation family in the substrate-2 explainer is exactly this layer.)*
+3. **Method arrows** — join `discharged-by` to M-operational-vocabulary's mined forward methods (the `meme.arrow` constructs) so a method/mission is a queryable node the join can reach.
+4. **Forward-model read** — replace `advanced-outcome-ids`' in-memory token-match with a query over the persisted join: "which C-entries does this policy's method discharge?" → the predictive set, now durable + promotable + auditable.
+5. **Reconcile** — the join is the bidirectional bridge: backward (goals/holes, M-goals-and-holes) ↔ forward (methods, M-operational-vocabulary). This is the substrate-2 PROOF store's reason for being.
+
+**Dependencies (why it's not built here):** D4's promotion path + the two owning missions must land first; building the join before them would invent relation content this excursion explicitly scoped out (§7). The in-memory match (§10) is the working stand-in until then.
