@@ -104,3 +104,23 @@ Arming / acting on a `:pass` (R16-ARM / WM-I4 — governance, not inference); th
 *comparison study* (this excursion delivers the interface + impl #1; the bake-off is its own
 follow-on); the R16 contract text + A/B/C/D/E diff (M-aif-wiring). This excursion is **only**
 the fold interface (the sorry) + the first construction that closes the loop through it.
+
+## 6b. INSTANTIATE — exit-1 + exit-2 done (impl #1; 2026-06-26)
+
+- **exit-1 — interface minted.** `futon2.aif.fold` — `fold : (cascade, circumstance) → {:wiring :delta-g :policy-holes}` + `valid-fold-output?` / `act-gate-leg` (nil ⇒ abstain) / `closes?` (ΔG<0). **Data-agnostic** (no store/corpus/weights named). (`9f0a5bf`)
+- **exit-2 — impl #1 closes the gate (sim-only).** `meme.fold` (the classical rule-table fold, promoted lab→lib, `82ff44a`) + `futon2.aif.fold-classical` (`ae016ec`): the fold's **coverage** (folded boxes vs policy-holes) → a discharge move → **`rollout/project-policy` G(π)** = ΔG. Verified in a clean test JVM (no live-pilot touch, no writes, no loop): foldable cascade ⇒ ΔG=−1.0 ⇒ gate **`:pass`**; foreign cascade ⇒ ΔG nil ⇒ **`:abstain-missing-leg`**; foreign patterns surfaced as policy-holes. So the loop demonstrably closes through the interface.
+
+### The two comparison axes (Joe, 2026-06-26 — write both up)
+
+A close-the-loop solution varies independently along **two** axes; the interface is the fixed socket both plug into:
+
+| axis | options (all to the same `fold`/`:delta-g` ports) |
+|---|---|
+| **build** (how `:wiring` is produced) | **classical** rule-table (`meme.fold`, impl #1 ✅) · **LLM-turn** (inhabiting agent) · **embedding-flow** (DarkTower) |
+| **evaluation** (how `:delta-g` is produced) | **coverage→rollout G(π)** (impl #1 ✅) · **multi-move rollout** over the box sequence · **coherence/wholeness** (Salingaros) · the belly's **predictive-goal-outcome-risk** |
+
+Because **data is solution-side** (a build × evaluation cell picks its own data), the cells are a comparison grid: any build can be paired with any evaluation behind the one interface, and scored on the same served missions. impl #1 is the (classical × coverage-rollout) cell; the bake-off across the grid is the named follow-on.
+
+### Remaining
+- Wire impl #1 into the **live** act-gate path (it's sim-verified off-path today) — carefully, given the gate lives in the just-recovered pilot backend; reuse the existing scheduler tick, no new loop.
+- impl #2 (LLM-turn) / #3 (embedding) builds; alt evaluations — the grid bake-off.
