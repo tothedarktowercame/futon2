@@ -271,6 +271,34 @@
   []
   (if (stale?) (refresh!) @c-state))
 
+(def ^:private default-debounce-ms
+  "Refresh the belly at most once per this window when demand-driven (5 min)."
+  300000)
+
+(defonce ^:private !last-refresh-ms (atom 0))
+
+(defn ensure-belly-fresh!
+  "DEMAND-DRIVEN, debounced belly refresh — the safe replacement for a
+   background poll loop (post-incident 2026-06-26; see E-arxana-clock). Call at
+   SCORE TIME (when the belly is about to be read for EFE); it re-derives at most
+   once per `debounce-ms` (default 5 min) and ONLY when actually called — so
+   there is no perpetual loop competing with the request path. Concurrency-safe
+   via compare-and-set! (one caller wins the refresh; the rest read the current
+   atom). Synchronous + bounded (a couple :7071 reads + the overlay files, rare);
+   reads substrate-2, never the evidence/invoke path. Returns the live C-vector.
+
+   NB this never refreshes inside a unit test that doesn't call it — nothing
+   auto-invokes it; the scoring entrypoints (wm.scheduler tick, wm_scheduled_run)
+   do."
+  ([] (ensure-belly-fresh! default-debounce-ms))
+  ([debounce-ms]
+   (let [now  (System/currentTimeMillis)
+         last @!last-refresh-ms]
+     (when (and (> (- now last) (long debounce-ms))
+                (compare-and-set! !last-refresh-ms last now))
+       (try (refresh!) (catch Throwable _ nil))))
+   (current-c-vector)))
+
 ;; ---------------------------------------------------------------------------
 ;; The additive goal-outcome risk term (the wiring into EFE's R5 risk)
 ;; ---------------------------------------------------------------------------
