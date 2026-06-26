@@ -15,33 +15,14 @@
    rule-table `meme.fold/RULES`. The LLM-turn and embedding folds draw on OTHER
    data behind the SAME interface — that's what makes them comparable.
 
-   Alternative ΔG evaluations (Joe, 2026-06-26 — all target the same `:delta-g`
-   port, to compare later): (a) coverage-as-local-g via rollout (THIS); (b) a
-   multi-move rollout over the box sequence as a policy; (c) a coherence /
-   wholeness score of the wiring (Salingaros); (d) the belly's
-   `predictive-goal-outcome-risk`. See E-close-the-loop."
+   ΔG evaluation is the SHARED coverage→rollout axis (`futon2.aif.fold-eval`) —
+   the same path impl #2 (LLM-turn) uses, so the comparison isolates the *build*.
+   Alternative ΔG evaluations (all target the same `:delta-g` port, to compare
+   later) live in `fold-eval`. See E-close-the-loop §6b."
   (:require [meme.fold :as mf]
-            [futon2.aif.rollout :as rollout]))
+            [futon2.aif.fold-eval :as fe]))
 
 (def default-want-signature "MissionState -> {Wiring, PolicyHoles}")
-
-(defn coverage
-  "Fraction of the cascade the fold turned into construction boxes (vs surfaced
-   policy-holes). nil when nothing folded (no boxes) — the gate then abstains."
-  [wiring]
-  (let [folded (count (:boxes wiring))
-        holes  (count (:policy-holes wiring))
-        total  (+ folded holes)]
-    (when (pos? folded) (/ (double folded) (double total)))))
-
-(defn- rollout-delta-g
-  "ΔG = the rollout G(π) of a single discharge move whose local g is −coverage
-   (negative = descends EFE). Reuses the canonical `project-policy` accumulator;
-   pure (the in-memory meme-step does no I/O)."
-  [cov]
-  (when cov
-    (:G (rollout/project-policy {:reachable #{} :cap-overlay {}}
-                                [{:move/id :fold/discharge :delta-g (- (double cov))}]))))
 
 (defn classical-fold
   "Impl #1 satisfying `futon2.aif.fold`: (cascade, circumstance) →
@@ -50,5 +31,5 @@
   (let [want-sig (or (:want-signature circumstance) default-want-signature)
         wiring   (mf/fold (vec cascade) want-sig)]
     {:wiring wiring
-     :delta-g (rollout-delta-g (coverage wiring))
+     :delta-g (fe/coverage-delta-g wiring)
      :policy-holes (:policy-holes wiring)}))
