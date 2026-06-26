@@ -31,6 +31,7 @@
    freezes (the D7a derived-stale lesson; cf. `futon3c.watcher.freshness`)."
   (:require [clojure.string :as str]
             [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [babashka.http-client :as http]))
 
 (def ^:private default-store-base
@@ -59,23 +60,38 @@
 ;; Static risk — divergence + risk-of (kept identical to c_vector.bb)
 ;; ---------------------------------------------------------------------------
 
+(defn- frac
+  "Normalise a one-sided shortfall to [0,1] as a fraction of the target — so a
+   range channel (mess coherence, 0–35) is COMMENSURABLE with a :becomes channel
+   (0/1) when both feed one mean (the W4 scale concern). 0 target ⇒ any shortfall
+   is full risk."
+  [shortfall value]
+  (let [v (Math/abs (double value))]
+    (if (zero? v) (if (pos? shortfall) 1.0 0.0)
+        (min 1.0 (/ (double shortfall) v)))))
+
 (defn- divergence
-  "One-sided distance of the current outcome from the preferred floor.
+  "Normalised distance ([0,1]) of the current outcome from the preferred floor.
    `:becomes` = a binary goal (cap attested / sorry closed): full unit risk
-   while unmet, 0 when reached."
+   while unmet, 0 when reached. Range ops (`:>=`/`:<=`) return the fractional
+   shortfall so channels stay commensurable (W4)."
   [current {:keys [op value]}]
   (case op
-    :>=      (max 0.0 (- (double value) (double current)))
-    :<=      (max 0.0 (- (double current) (double value)))
+    :>=      (frac (max 0.0 (- (double value) (double current))) value)
+    :<=      (frac (max 0.0 (- (double current) (double value))) value)
     :becomes (if (= current value) 0.0 1.0)
-    (Math/abs (double (- (double current) (double value))))))
+    (min 1.0 (Math/abs (double (- (double current) (double value)))))))
 
 (defn- current-outcome
-  "The current observable outcome a C-entry is scored against. Derived entries
-   are emitted only while UNMET, so the default is a not-yet sentinel; range
-   channels (e.g. mess L) carry their current reading in `:provenance :current`."
+  "The current observable outcome a C-entry is scored against. `:becomes`
+   derived entries are emitted only while UNMET ⇒ the not-yet sentinel; range
+   channels carry their current reading in `:provenance` as `:current` (live),
+   `:L` (mess per-mission coherence), or `:value` (mess standing-regularizer)."
   [e]
-  (get-in e [:provenance :current] ::unmet))
+  (or (get-in e [:provenance :current])
+      (get-in e [:provenance :L])
+      (get-in e [:provenance :value])
+      ::unmet))
 
 (defn risk-of
   "Static R5 contribution of one open C-entry: weight·divergence(current, preferred)."
@@ -173,17 +189,46 @@
   []
   (:entries @c-state))
 
+(declare merge-entries)
+
+;; The non-stated channels (mess / incompleteness / 應-voice) are produced by
+;; futon6/scripts/c_vector.bb into overlay EDN. The stated channel is derived
+;; natively + LIVE here; these are folded in SEMI-LIVE (as fresh as the last
+;; c_vector.bb run) — graceful if futon6 isn't present (override the dir via
+;; C_VECTOR_OVERLAY_DIR). R19-CHANNELS.
+(def ^:private overlay-dir
+  (or (System/getenv "C_VECTOR_OVERLAY_DIR")
+      "/home/joe/code/futon6/data/c-vector"))
+
+(def ^:private overlay-files
+  ["c-entries.mess.edn" "c-entries.incomplete.edn" "c-entries.yingvoice.edn"])
+
+(defn read-overlay-channels
+  "Read the non-stated channels from the c_vector.bb overlays. Returns the
+   merged entry vector ([] if absent/unreadable — the belly degrades to the
+   live stated channel)."
+  []
+  (vec (mapcat (fn [fname]
+                 (let [f (io/file overlay-dir fname)]
+                   (when (.exists f)
+                     (try (:entries (edn/read-string (slurp f))) (catch Exception _ nil)))))
+               overlay-files)))
+
 (defn refresh!
-  "Re-derive the live C-vector from the current corpus and swap the atom.
-   OFF-CYCLE only (watcher / periodic probe) — never the per-action tick
-   (§5 derive-and-cache, not recompute-per-tick). On an empty derive (store
-   down) the atom is left UNCHANGED — the last-good C (or the static floor)
-   stays in force; the belly is never silently clobbered to empty."
+  "Re-derive the live C-vector (stated channel from :7071) and FOLD the overlay
+   channels (mess/incompleteness/應-voice), then swap the atom. OFF-CYCLE only
+   (watcher / periodic probe) — never the per-action tick (§5 derive-and-cache).
+   On an empty stated derive (store down) the atom is left UNCHANGED — the
+   last-good C stays in force; the belly is never clobbered to empty."
   []
   (let [{:keys [entries signature n-source]} (derive-stated)]
     (if (seq entries)
-      (reset! c-state {:entries entries :signature signature
-                       :derived-at (java.time.Instant/now) :n-source n-source})
+      (let [overlay (read-overlay-channels)
+            folded  (merge-entries entries overlay)]
+        (reset! c-state {:entries folded :signature signature
+                         :derived-at (java.time.Instant/now)
+                         :n-source (assoc n-source :overlay (count overlay)
+                                          :stated (count entries) :total (count folded))}))
       @c-state)))
 
 (defn live-signature

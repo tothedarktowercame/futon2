@@ -208,6 +208,36 @@
 
 ;; ---- merge-entries extension point -----------------------------------------
 
+;; ---- R19-CHANNELS: range channels stay commensurable + overlay fold --------
+
+(def ^:private mess-messy
+  "A mess (coherence) C-entry, current L=10 vs preferred >=45.9 (very messy)."
+  (cv/c-entry {:flavour :mess :outcome-ref {:kind :coherence :mission "M-x" :metric :L}
+               :preferred {:op :>= :value 45.9}
+               :weight {:value 1.0 :basis :standing}
+               :provenance {:source :test :L 10.0}}))
+
+(def ^:private mess-healthy
+  (cv/c-entry {:flavour :mess :outcome-ref {:kind :coherence :mission "M-y" :metric :L}
+               :preferred {:op :>= :value 45.9}
+               :weight {:value 1.0 :basis :standing}
+               :provenance {:source :test :L 50.0}}))
+
+(deftest range-channel-risk-is-normalised
+  (testing "a :>= range entry's risk is in [0,1] — commensurable with :becomes (W4)"
+    (let [r (cv/risk-of mess-messy nil)]
+      (is (<= 0.0 r 1.0))
+      (is (< (Math/abs (- r 0.7821)) 1e-3) "35.9/45.9 ≈ 0.782"))
+    (testing "a healthy (above-floor) coherence entry contributes 0"
+      (is (= 0.0 (cv/risk-of mess-healthy nil)))))
+  (testing "mixing a heavy range channel with :becomes no longer swamps the mean"
+    (let [mixed (cv/goal-outcome-risk (cons mess-messy c-heavy))]
+      (is (<= 0.0 mixed 1.0) "the belly mean stays bounded across channels"))))
+
+(deftest overlay-channels-read-as-vector
+  (testing "read-overlay-channels returns a vector (folds c_vector.bb overlays; [] if absent)"
+    (is (vector? (cv/read-overlay-channels)))))
+
 (deftest merge-entries-dedup-test
   (testing "overlay channels fold in, de-duplicated by outcome-ref"
     (let [extra [(cv/c-entry {:flavour :mess :outcome-ref {:kind :sorry :id :a}
