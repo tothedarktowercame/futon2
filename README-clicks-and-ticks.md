@@ -202,6 +202,41 @@ hides cross-call state in a sidecar file. This makes bilateral drift
 signals interpretable: drift between sides reflects what their
 respective traces show, not what either side privately knows.
 
+## Implementation: the Arxana Clock + outstanding issues (E-arxana-clock)
+
+The clicks/ticks framing is realised as the **Arxana Clock** — one read-only
+surface over the system's time-drivers — in
+`futon3c/holes/excursions/E-arxana-clock.md`. As of 2026-06-26:
+
+- **Aggregator** `futon3c/scripts/arxana_clock.bb` — **scan-primary** (not a
+  registry you can skip): scans ALL cron locations + user/system systemd timers
+  + the JVM thread table, **reconciles** periodic threads against the
+  `futon3c.cyder` registry, flags the residue as **⚠ UNACCOUNTED**, and prints a
+  **coverage manifest** (every source scanned). Writes an EDN snapshot.
+- **View** `futon4/dev/arxana-vsatarcs-clock.el` — the regular-Emacs Arxana
+  surface (`M-x arxana-clock-browse`), sibling to the Arxana Ledger.
+- **Turn-trigger** `futon3c/src/futon3c/clock/turn_trigger.clj` — the every-≈N-
+  clicks driver (the `:turn` subclass above), polling the invoke-jobs ledger;
+  its first rider keeps the serving-JVM C-vector (belly) fresh.
+
+**Outstanding issues (named here, deferred — tracked in E-arxana-clock):**
+
+- **Completeness is bounded, not absolute.** The thread scan is ground-truth-
+  complete for threads that *exist*, but cannot prove no hidden
+  `(future (loop …))` will be *created* later; coverage is auditable (the
+  manifest), not provable. UNACCOUNTED residue attribution is heuristic
+  (token-overlap) — e.g. `FileSystemWatchService ×22` is flagged though it may
+  belong to the multi-watcher.
+- **cyder cadence/next-fire is mostly `—`.** Only the turn-trigger declares a
+  cadence; the other in-JVM processes (watchers, schedulers) carry no cadence/
+  next-fire metadata yet.
+- **No stale-driver alarm.** A driver whose next-fire has passed without firing
+  (the substrate-2 5-week-freeze failure mode) is not yet flagged — now
+  tractable since the scan yields real next-fire times to compare against.
+- **The turn-trigger is not auto-started on JVM boot** (operator action, like
+  the cron install); and the snapshot EDN is a generated artifact (re-run the
+  aggregator; don't trust a stale copy).
+
 ## What this README is NOT
 
 - **Not a futon3c bells-and-whistles mirror.** Bells / whistles /
@@ -237,3 +272,5 @@ respective traces show, not what either side privately knows.
   the methodology memo captured 2026-05-18.
 - `~/code/futon3c/README-bells-and-whistles.md` — sibling README at
   comparable scope on the agent-coordination side.
+- `~/code/futon3c/holes/excursions/E-arxana-clock.md` — the Arxana Clock
+  (the implementation of this framing) + its outstanding issues.
