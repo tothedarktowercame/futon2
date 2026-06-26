@@ -62,13 +62,52 @@
 <body>
 <header>
   <h1>Substrate-2: what's actually in the kitchen</h1>
-  <p>The XTDB hypergraph on port 7071 (futon1a). 203 types are <i>declared</i>; <b>~130 are actually populated</b> (99 entity-types + ~30 hyperedge-types, verified via the count-pushdown census) — the sediment of several ingestion campaigns. (An earlier "~35 populated" was a timeout-sniff undercount: type queries timed out → looked empty.)
-     <b class="live">green = live</b> · <b class="partial">amber = populated but thin / HEAD-only</b> · <b class="empty">red dashed = declared but empty</b> · <b class="elsewhere">blue = lives in a sibling store</b> · <b>🚧 = active work upstream</b> (futon6 mission-miner). Click any box. Counts live as of 2026-06-25.<br/><span style="color:#7a3fa0;font-weight:600">Purple corner tags = mission deliverables (D0–D8)</span> that act on that box — ✅ done · ▶ next · ◻ planned. (Reader-fix + D7 living-inventory are cross-cutting.)</p>
+  <p>The XTDB hypergraph on port 7071 (futon1a). The declared catalog is an append-only <code>run-write!</code> byproduct, so the raw count drifts (216 type-docs → 196 distinct ids → <b>186 real declared types</b> once 10 abstract <code>*</code>-globs are dropped; 2026-06-26). Of those 186, <b>101 are populated (≈54%)</b>, 85 empty — these are <i>not</i> a frozen figure: re-derive on demand with <code>futon3c/scripts/catalog_census.bb</code> (per-type count-pushdown; never a high-limit scan, which lies — footgun #1). A further band of <b>off-catalog</b> populations lives in the store but is <i>not</i> declared as a type — the heavy structural graph <code>code/v05/edits</code> (185,340) · <code>code/v05/var</code> (125,306) + the <code>mission-scope/*</code> family — so "store-side populated" (~130 distinct types) ≠ "% of the declared catalog". (An earlier "~35 populated" was a timeout-sniff undercount: type queries timed out → looked empty.)
+     <b class="live">green = live</b> · <b class="partial">amber = populated but thin / HEAD-only</b> · <b class="empty">red dashed = declared but empty</b> · <b class="elsewhere">blue = lives in a sibling store</b> · <b>🚧 = active work upstream</b> (futon6 mission-miner). Click any box. Counts re-derivable via <code>catalog_census.bb</code>; figures as of 2026-06-26.<br/><span style="color:#7a3fa0;font-weight:600">Purple corner tags = mission deliverables (D0–D8)</span> that act on that box — ✅ done · ▶ next · ◻ planned. (Reader-fix + D7 living-inventory are cross-cutting.)</p>
 </header>
 <div class="wrap">
   <div class="stage"><svg id="svg" viewBox="0 0 880 660" role="img" aria-label="Substrate-2 layers"></svg></div>
   <div class="panel" id="panel"><p class="hint">Click a layer to see what's in it now (left) and what it should be (right).</p></div>
 </div>
+
+<style>
+  .negspace{padding:18px 24px 36px;border-top:1px solid #e3e3e3;background:#fcfbfd;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#1a1a1a}
+  .negspace h2{font-size:16px;margin:0 0 3px} .negspace .nsmeta{color:#6b6b6b;font-size:12.5px;margin:0 0 14px;line-height:1.5}
+  .negspace .nsgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:11px}
+  .negspace .fam{border:1px solid #e3dcec;border-left-width:4px;background:#fff;border-radius:6px;padding:10px 12px}
+  .negspace .fam h3{margin:0 0 2px;font-size:13.5px} .negspace .fam .n{float:right;font:600 12px/1 ui-monospace,Menlo,monospace;color:#7a3fa0}
+  .negspace .fam p{margin:5px 0 0;font-size:12.5px;line-height:1.45;color:#333}
+  .negspace .fam code{background:#ece3f4;padding:0 3px;border-radius:3px;font-size:11.5px}
+  .negspace .own{display:inline-block;margin-top:7px;font:600 10.5px/1.5 ui-sans-serif,system-ui;padding:1px 7px;border-radius:10px;text-transform:uppercase;letter-spacing:.03em}
+  .negspace .fam.hyg{border-left-color:#9a6a00} .negspace .own.hyg{background:#fdf3e0;color:#9a6a00}
+  .negspace .fam.other{border-left-color:#2456a6} .negspace .own.other{background:#e8f0fb;color:#2456a6}
+  .negspace .fam.stand{border-left-color:#1d7a3a} .negspace .own.stand{background:#e7f6ec;color:#1d7a3a}
+  .negspace .fam.partly{border-left-color:#0e7490} .negspace .own.partly{background:#e2f4f7;color:#0e7490}
+</style>
+<section class="negspace">
+  <h2>The negative space — 85 empty declared types, in 6 families (not one fill job)</h2>
+  <p class="nsmeta">Of the 186 real declared types (2026-06-26, via <code>catalog_census.bb</code>), 85 are empty. They are <b>not</b> one campaign: ~20% is empty-by-design (catalog hygiene), ~50% is the deliverable of <i>other</i> in-flight missions (each needs its own miner), and only one family is a clean standalone ingest. Each empty cupboard below is labelled by who owns filling it. Source: <code>E-clean-up-substrate-2.md §2.3</code>.</p>
+  <div class="nsgrid">
+    <div class="fam hyg"><h3>A · Glob parents + dup-docs <span class="n">≈22</span></h3>
+      <p>Abstract <code>*</code>-globs (10) + cross-kind / two-encoding dup-docs. All confirmed empty under every kind. Fixing them is the <i>denominator</i>, not a fill.</p>
+      <span class="own hyg">never populate · E-clean-up (Q-den, gated)</span></div>
+    <div class="fam other"><h3>B · Sorry / claim / definition graph <span class="n">≈20</span></h3>
+      <p><code>:closes :depends-on-sorry :defines :constructs :implemented-by :supported-by :attacks-claim :would-refute :produces …</code> — the inferential layer the substrate is <i>named</i> for. Needs a semantic miner per relation.</p>
+      <span class="own other">owns: M-goals-and-holes · M-operational-vocabulary</span></div>
+    <div class="fam other"><h3>C · Pattern-language decomposition <span class="n">≈13</span></h3>
+      <p><code>:pattern/has-{because,context,if,then,…} :pattern/includes :pattern/tensions :sigil/sigil :prototype/has-sigil</code> — needs a pattern-miner.</p>
+      <span class="own other">gated on M-pattern work</span></div>
+    <div class="fam other"><h3>D · Arxana interest / theme graph <span class="n">≈14</span></h3>
+      <p><code>:arxana/{theme,scholium,tension-edge,metaphor-theme} :interest/{holds,grounded-in,tagged,…}</code> — gated: Arxana writes its own store today.</p>
+      <span class="own other">gated on Arxana → substrate-2</span></div>
+    <div class="fam stand"><h3>E · Document structure <span class="n">≈15</span></h3>
+      <p><code>:docbook/{entry,heading,toc} :figure :media :diagram :example :excursion</code> — reuses the file-ingest pattern. <b>No upstream dependency.</b></p>
+      <span class="own stand">the one clean standalone campaign</span></div>
+    <div class="fam partly"><h3>F · Mission / flight + clustering <span class="n">≈15</span></h3>
+      <p><code>:has-phase :next-phase :has-operator-turn :has-failed-route :covers-repo :in-{cluster,leaf}-* :open-world/{entity,relation}</code> — flight-ingest + anthology clustering emit these.</p>
+      <span class="own partly">partly emittable now (flight-ingest)</span></div>
+  </div>
+</section>
 <script>
 const NODES = [
   // ---- BAND A: CODE & HISTORY ----
@@ -117,11 +156,11 @@ const NODES = [
    infer:"NONE meaningful.",
    should:"The assertions the proof/argument relations act on — populated from missions, forum/ArSE threads and PSR/PUR — so claims can be supported, attacked, refuted and tracked as live or fallen."},
   // ---- BAND C: ARGUMENT & MEANING ----
-  {id:"PATTERN", t:"Patterns", s:"declared rich, empty here", band:"C", x:190,y:448, st:"elsewhere",
-   count:"0 here · rich schema (clause, sigil, IF/HOWEVER/THEN, library)",
-   now:"Substrate-2 declares a full pattern type system (pattern, clause, sigil, language, library) but holds 0 instances. The actual pattern library lives in the sibling stores — futon3a's meme.arrow and futon3b's library/.",
-   infer:"NONE here (it's elsewhere).",
-   should:"Import pattern-application (PSR) edges so 'which pattern was applied where, and did it pay off' is queryable in the same graph as the code it shaped — joining the pattern lane to the code lane."},
+  {id:"PATTERN", t:"Patterns", s:"structure populated, decomposition empty", band:"C", x:190,y:448, st:"partial",
+   count:"≈23k here (2026-06-26): component 12,179 · clause 6,299 · library 4,635 · language 44 — BUT pattern-language decomposition = 0",
+   now:"Correction (2026-06-26 census): substrate-2 does NOT hold 0 patterns — the pattern STRUCTURE is heavily populated (`:pattern/component` 12,179 · `:pattern/clause` 6,299 · `:pattern/library` 4,635 · `:pattern/language` 44). What is empty is the pattern-LANGUAGE decomposition (`:pattern/has-{because,context,if,then,…}`, `:pattern/tensions`, sigil bindings) — family C of the negative space below. (The richer authored library + arrows also live in the sibling stores futon3a meme.arrow / futon3b library/.)",
+   infer:"PARTIAL — structure is queryable; the clause-level decomposition + PSR-application edges are not yet here.",
+   should:"Populate the pattern-language decomposition (a pattern-miner) + import pattern-application (PSR) edges so 'which pattern was applied where, and did it pay off' is queryable in the same graph as the code it shaped — joining the pattern lane to the code lane."},
   {id:"ARXANA", t:"Arxana enrichment", s:"the monitor / posterior", band:"C", x:455,y:448, st:"empty",
    count:"0 essays · 0 themes · 0 tensions · 0 metaphors",
    now:"A large declared vocabulary (essays, sections, themes, metaphors, tensions, constellations, venues) — all empty in substrate-2.",
