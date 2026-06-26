@@ -20,6 +20,7 @@
    non-zero exit code so cron can surface them via its standard
    error-mail mechanism."
   (:require [futon2.aif.trace :as trace]
+            [futon2.aif.c-vector :as cv]
             [futon2.report.war-machine :as wm])
   (:import (java.time Instant)))
 
@@ -55,9 +56,18 @@
   [& args]
   (try
     (let [days (if (seq args) (Integer/parseInt (first args)) 14)
+          ;; E-C-vector-live: keep the belly fresh BEFORE scoring. Off-cycle
+          ;; (once per scheduled tick, not per candidate action) — derive the
+          ;; live C only when the goal/hole corpus changed (maybe-refresh!).
+          ;; Without this the belly is [] and EFE risk drops C entirely
+          ;; (builds toward nothing). Degrades safely: store down -> [] -> the
+          ;; static floor; never throws the run.
+          belly (try (cv/maybe-refresh!) (catch Exception _ {:entries []}))
           {:keys [judgement]} (wm/generate-war-machine days)
           trace-path (trace/write-trace! judgement)]
-      (println (summarise judgement trace-path))
+      (println (str (summarise judgement trace-path)
+                    " belly=" (count (:entries belly))
+                    (when (:derived-at belly) (str " derived=" (:derived-at belly)))))
       (System/exit 0))
     (catch Throwable t
       (binding [*out* *err*]
