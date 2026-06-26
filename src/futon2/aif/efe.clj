@@ -384,7 +384,7 @@
                          pre-registered-goal graph-applicability-penalty
                          graph-body-weight graph-ascent-weight graph-off-map-penalty
                          graph-body-mode graph-ascent-status-aware? mission-gap-view
-                         gap-weight goal-outcome-weight goal-outcome-entries]
+                         gap-weight goal-outcome-weight goal-outcome-entries goal-outcome-prob-fn]
                   :or {info-weight default-info-weight
                        survival-weight default-survival-weight
                        structural-pressure-weight default-structural-pressure-weight
@@ -441,7 +441,8 @@
          ;; safe). Reduces to the static term when the action advances nothing.
          g-goal-outcome (cv/predictive-goal-outcome-risk
                          (or goal-outcome-entries (cv/current-c-vector))
-                         action capability-graph goal-outcome-weight)
+                         action capability-graph goal-outcome-weight
+                         (or goal-outcome-prob-fn cv/credit-satisfy-prob))
          urgency (+ 1.0 (* (double time-pressure) (double time-pressure-scale)))
          g-risk (* g-risk-base urgency)
          g-survival (* g-survival-base urgency)

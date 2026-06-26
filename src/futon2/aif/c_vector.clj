@@ -325,34 +325,54 @@
                    (get-in capability-graph [:missions target :produces]))]
     (into #{} (keep norm-id (concat (:advances-outcomes action) [target] produced)))))
 
+(defn credit-satisfy-prob
+  "R19-KL: P(an action of this class actually satisfies its goal) — the
+   probability the predictive risk weights with. Sourced from the R12 Beta-credit
+   learner (`futon2.aif.intrinsic-values/credit-for`, in [0,1], 0.5 prior).
+   Dynamic-resolve keeps this ns babashka-loadable (R19-UNIFY) and degrades to
+   the point-mass p=1 when the learner isn't on the classpath. As the learner
+   accumulates real follow-through, p sharpens away from the 0.5 prior and the
+   belly's predictive risk improves — the burn-in (README-loss.md)."
+  [action]
+  (or (when-let [cls (:type action)]
+        (when-let [cf (try (requiring-resolve 'futon2.aif.intrinsic-values/credit-for)
+                           (catch Throwable _ nil))]
+          (try (let [p (cf cls)] (when (number? p) (double p))) (catch Throwable _ nil))))
+      1.0))
+
 (defn predictive-goal-outcome-risk
   "The CANONICAL EFE goal-outcome risk: weight·MEAN divergence of the PREDICTED
-   outcomes under the policy from C. Entries the action advances are predicted
-   satisfied ⇒ contribute 0; the rest stay at their current divergence. The
-   denominator is the CURRENT open count (fixed), so advancing a goal can only
-   LOWER risk — never raise it via a shrinking mean. Action-dependent ⇒ it
-   re-ranks policies (the belly steers selection — the W1 deliverable in its
-   in-memory, deterministic-point-mass form).
+   outcomes under the policy from C. An entry the action advances is predicted
+   satisfied with probability p = `(satisfy-prob-fn action)` ⇒ it contributes its
+   EXPECTED residual risk `(1-p)·risk-of` (R19-KL); the rest stay at their
+   current divergence. The denominator is the CURRENT open count (fixed), so
+   advancing a goal can only LOWER risk. Action-dependent ⇒ it re-ranks policies.
 
-   Reduces to `goal-outcome-risk` exactly when the action advances nothing
-   (e.g. :no-op) ⇒ static behaviour preserved; [] ⇒ 0.0 ⇒ the static floor.
+   `satisfy-prob-fn` defaults to `credit-satisfy-prob` (the R12-credit-weighted,
+   burn-in form). **Point-mass** (the prior deterministic flip) is the special
+   case `(constantly 1.0)` ⇒ advanced entries contribute 0. With no advanced
+   entries (e.g. :no-op) it reduces to `goal-outcome-risk`; [] ⇒ 0.0 (floor).
 
-   Deferred refinements (named, not hidden): the durable `discharged-by` PROOF
-   join (M-populate-substrate-2 D4) and a PROBABILISTIC predicted outcome
-   (advance with probability p, the full KL) rather than this point-mass flip."
+   Deferred refinement (named): the durable `discharged-by` PROOF join
+   (M-populate-substrate-2 D4) replacing the in-memory id-match — §11."
   ([entries action capability-graph]
-   (predictive-goal-outcome-risk entries action capability-graph default-goal-outcome-weight))
+   (predictive-goal-outcome-risk entries action capability-graph default-goal-outcome-weight credit-satisfy-prob))
   ([entries action capability-graph weight]
+   (predictive-goal-outcome-risk entries action capability-graph weight credit-satisfy-prob))
+  ([entries action capability-graph weight satisfy-prob-fn]
    (let [open (filter #(= :open (:status %)) entries)
          n    (count open)
-         adv  (advanced-outcome-ids action capability-graph)]
+         adv  (advanced-outcome-ids action capability-graph)
+         ;; (1-p): expected residual risk of an advanced entry — p chance it is
+         ;; satisfied (0 risk), (1-p) chance it still carries its divergence.
+         residual (- 1.0 (max 0.0 (min 1.0 (double (satisfy-prob-fn action)))))]
      (if (zero? n)
        0.0
        (* (double weight)
           (/ (reduce + 0.0
                      (for [e open]
                        (if (contains? adv (norm-id (-> e :outcome-ref :id)))
-                         0.0
+                         (* residual (risk-of e nil))
                          (risk-of e nil))))
              (double n)))))))
 

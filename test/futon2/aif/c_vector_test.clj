@@ -138,26 +138,43 @@
       (is (contains? (cv/advanced-outcome-ids {:type :pursue :target :ai-passes-prelims} nil)
                      "ai-passes-prelims")))))
 
+(def ^:private point-mass (constantly 1.0))   ; p=1: advanced ⇒ satisfied (deterministic)
+(defn- pm-risk [entries action]
+  (cv/predictive-goal-outcome-risk entries action nil cv/default-goal-outcome-weight point-mass))
+
 (deftest predictive-goal-outcome-risk-test
-  (testing "advancing a goal lowers predicted risk vs advancing nothing"
-    (let [r-noop (cv/predictive-goal-outcome-risk c-heavy {:type :no-op} nil)
-          r-a    (cv/predictive-goal-outcome-risk c-heavy {:type :pursue :target :a} nil)]
+  (testing "advancing a goal lowers predicted risk vs advancing nothing (point-mass)"
+    (let [r-noop (pm-risk c-heavy {:type :no-op})
+          r-a    (pm-risk c-heavy {:type :pursue :target :a})]
       (is (< r-a r-noop))
       ;; static sum {0.6,0.2,0.2}/3 = 0.333…; advancing :a ⇒ {0,0.2,0.2}/3 = 0.133…
       (is (< (Math/abs (- r-a 0.1333333)) 1e-4))))
   (testing "advancing the HEAVIEST goal lowers risk most (the belly prefers it)"
-    (let [r-a (cv/predictive-goal-outcome-risk c-heavy {:type :pursue :target :a} nil)
-          r-b (cv/predictive-goal-outcome-risk c-heavy {:type :pursue :target :b} nil)]
-      (is (< r-a r-b) "advancing the 0.6 goal beats advancing a 0.2 goal")))
+    (is (< (pm-risk c-heavy {:type :pursue :target :a})
+           (pm-risk c-heavy {:type :pursue :target :b}))
+        "advancing the 0.6 goal beats advancing a 0.2 goal"))
   (testing "denominator is fixed ⇒ advancing any goal can only lower risk (never raise)"
-    (let [base (cv/predictive-goal-outcome-risk c-heavy {:type :no-op} nil)]
+    (let [base (pm-risk c-heavy {:type :no-op})]
       (doseq [g [:a :b :c]]
-        (is (<= (cv/predictive-goal-outcome-risk c-heavy {:type :pursue :target g} nil) base)))))
+        (is (<= (pm-risk c-heavy {:type :pursue :target g}) base)))))
   (testing "reduces to the static term when the action advances nothing"
-    (is (= (cv/goal-outcome-risk c-heavy)
-           (cv/predictive-goal-outcome-risk c-heavy {:type :no-op} nil))))
+    (is (= (cv/goal-outcome-risk c-heavy) (pm-risk c-heavy {:type :no-op}))))
   (testing "[] ⇒ 0.0 (the floor) regardless of action"
-    (is (= 0.0 (cv/predictive-goal-outcome-risk [] {:type :pursue :target :a} nil)))))
+    (is (= 0.0 (pm-risk [] {:type :pursue :target :a})))))
+
+(deftest predictive-risk-is-probability-weighted   ; R19-KL
+  (testing "p=1 (point-mass) fully discounts an advanced goal; p=0 leaves it; p=0.5 halves it"
+    (let [adv {:type :pursue :target :a}
+          r1   (cv/predictive-goal-outcome-risk c-heavy adv nil cv/default-goal-outcome-weight (constantly 1.0))
+          r0   (cv/predictive-goal-outcome-risk c-heavy adv nil cv/default-goal-outcome-weight (constantly 0.0))
+          rhalf (cv/predictive-goal-outcome-risk c-heavy adv nil cv/default-goal-outcome-weight (constantly 0.5))
+          static (cv/goal-outcome-risk c-heavy)]
+      ;; p=0 ⇒ advancing satisfies nothing ⇒ identical to the static term
+      (is (< (Math/abs (- r0 static)) 1e-9))
+      ;; p=1 ⇒ the advanced entry contributes 0 (point-mass)
+      (is (< r1 r0))
+      ;; p=0.5 ⇒ the advanced entry contributes half ⇒ strictly between
+      (is (< r1 rhalf static)))))
 
 (deftest efe-predictive-rerank-test
   (testing "through compute-efe: the belly's term re-ranks an action that advances a goal"
@@ -166,7 +183,8 @@
           entries [(cv/c-entry {:flavour :stated :outcome-ref {:kind :sorry :id :m1}
                                 :preferred {:op :becomes :value :closed}
                                 :weight {:value 0.6 :basis :test} :provenance {:source :test}})]
-          opts {:goal-outcome-entries entries}
+          ;; point-mass prob-fn so the assertion is deterministic (not credit-dependent)
+          opts {:goal-outcome-entries entries :goal-outcome-prob-fn point-mass}
           g-noop (:G-goal-outcome (efe/compute-efe st {:type :no-op} opts))
           g-addr (:G-goal-outcome (efe/compute-efe st {:type :address-sorry :target :m1} opts))]
       (is (pos? g-noop) "no-op leaves the goal unmet ⇒ positive belly risk")
