@@ -121,6 +121,49 @@ A close-the-loop solution varies independently along **two** axes; the interface
 
 Because **data is solution-side** (a build × evaluation cell picks its own data), the cells are a comparison grid: any build can be paired with any evaluation behind the one interface, and scored on the same served missions. impl #1 is the (classical × coverage-rollout) cell; the bake-off across the grid is the named follow-on.
 
+## 6c. INSTANTIATE — impl #2 (LLM-turn fold) + exit-3 (2026-06-26)
+
+Joe, 2026-06-26: impl #1 is a *toy* — its rule-table only "constructs" the ~10
+pre-compiled patterns, so a real minilm cascade rarely hits it (it abstains).
+Feeding it exactly those patterns is itself an impl-#3 (embedding) capability. So
+**don't polish impl #1** — build impl #2 and "see if we get something that makes
+a bit more sense in context."
+
+- **The evaluation axis is now SHARED** — `futon2.aif.fold-eval` (coverage→rollout ΔG)
+  factored out of impl #1; both impls use it, so the comparison isolates the BUILD.
+  impl #1 refactored to it (behaviour identical; regression green). (`1e8f465`)
+- **impl #2 — `futon2.aif.fold-llm`** (the LLM-turn build): an inhabiting agent
+  reads the cascade's NL prose (IF/HOWEVER/THEN) + circumstance and constructs a
+  *fitted* wiring, surfacing honest policy-holes. `turn-fn`/`prose-fn` **injected**
+  ⇒ incident-safe (NO LLM in the serving JVM; nil turn-fn ⇒ abstain, never
+  blocks/spawns) and pure-testable.
+- **Demonstrated on the REAL `M-value-creation-loop` cascade** (`scripts/.../fold_llm_demo.clj`),
+  the inhabiting agent (claude-10) as the engine per E-llm-fold:
+  - **THIN** (budget 12, cascade `[f6/self-play-loop]`, ΔF=−0.214): the construction
+    leg **closes** (5 boxes / 3 holes ⇒ ΔG=−0.625) but the gate **`:fail`s on ΔF**
+    — honest: ΔF below the Bayesian-Occam knee is a *cascade-richness* problem, not
+    a fold problem.
+  - **RICH** (fuller psi, 4-pattern cascade `[self-play-loop · pattern-as-strategy ·
+    q-turnstile-a · trail-enables-return]`, ΔF=+0.707): both legs close (7 boxes / 4
+    holes ⇒ ΔG=−0.636) ⇒ the gate **`:PASS`es** — the loop fully closes through impl #2.
+  - **impl #1 abstains on both** (`:abstain` — the rule-table can't fold these
+    contentful library patterns). This *is* the reach difference.
+- **exit-2 ✓** (abstain → :pass/:fail on a real served mission) and **exit-3 ✓**
+  (a second impl, different build AND different data — the NL library vs the
+  rule-table — targets the same ports without changing the gate). exit-1 (interface)
+  and exit-4 (no data leak into the contract) hold.
+
+### Honest finding (carry forward)
+The fold supplies the ΔG leg the gate was abstaining for; whether the gate then
+:passes depends on **ΔF (cascade richness)** — a different knob (the cascade
+constructor's psi/budget), upstream of the fold. THIN-cascade missions need a
+richer cascade to pass, independent of which fold builds the construction.
+
 ### Remaining
-- Wire impl #1 into the **live** act-gate path (it's sim-verified off-path today) — carefully, given the gate lives in the just-recovered pilot backend; reuse the existing scheduler tick, no new loop.
-- impl #2 (LLM-turn) / #3 (embedding) builds; alt evaluations — the grid bake-off.
+- Wire a fold into the **live** act-gate path (sim-verified off-path today) —
+  carefully, given the gate lives in the just-recovered pilot backend; reuse the
+  existing scheduler tick, no new loop. (Joe's call on touching the live pilot.)
+- impl #2's `turn-fn` is hand-fed today (the agent turn encoded as data). A real
+  out-of-process producer — a **bell to an agent** or a **recorded fold-turn read
+  from escrow** — is the productionization (still no LLM in the serving JVM).
+- impl #3 (embedding) build; alt evaluations (b/c/d in `fold-eval`) — the grid bake-off.
