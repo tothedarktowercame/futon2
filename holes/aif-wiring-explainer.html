@@ -356,6 +356,9 @@ const CARDS = {
   {id:"R16-ROLLOUT", t:"ΔG-having reachable set (the rollout path)", s:"partial", c:"cpu",
    ev:"E-close-the-loop: fold interface + impl #1 (classical) · sim-verified gate flip",
    n:"REFRAMED + sim-done. The gate's missing ΔG now comes from a <b>fold</b>: a mission's cascade → a construction, and the fold's coverage→<code>rollout/project-policy</code> G(π) = ΔG (<code>futon2.aif.fold-classical</code>). Sim-verified in a clean JVM: foldable cascade ⇒ ΔG=−1.0 ⇒ gate <code>:pass</code>; no-fold ⇒ ΔG nil ⇒ <code>:abstain</code>. <b>Remaining:</b> wire impl #1 into the LIVE act-gate (carefully — pilot backend; reuse the scheduler tick, no loop)."},
+  {id:"R16-IMPL-SELECT", t:"Which fold impl (#1/#2/#3) best meets our requirements?", s:"open", c:"cpu", new:true,
+   ev:"E-close-the-loop §6b build×evaluation grid · #1 classical + #2 LLM-turn sim-built; #3 embedding frontier",
+   n:"<b>OPEN QUESTION</b> (Joe, 2026-06-27). Three builds satisfy the SAME <code>futon2.aif.fold</code> interface — but which we RELY on is undecided, and the requirements that decide it aren't yet pinned. Evidence so far: <b>#1 classical</b> is a TOY (folds only ~10 rule-table patterns, abstains on real cascades) — deterministic but low-reach; <b>#2 LLM-turn</b> folds the contentful library patterns #1 can't (flips <code>:abstain→:pass/:fail</code> on a real mission) but each fold is a non-deterministic agent turn (cost, reproducibility, no live-JVM call); <b>#3 embedding</b> (wiring-as-graph, DarkTower CT target) could be deterministic + fast and could even FEED #1 its patterns, but is unbuilt and needs a (cascade→wiring) corpus (E-have-want-pairs). Likely NOT one winner — a <b>hybrid</b> (#3 retrieves candidates → #2 adapts → #1-style check verifies) may dominate. Decide against EXPLICIT requirements (determinism? cost? construction soundness? honesty of policy-holes? live latency?) scored across the grid — the <b>bake-off</b> is the named follow-on, seeded by E-wiring-diagram-corpus."},
   {id:"R16-ARROWS", t:"Arrow store = one fold's DATA (solution-side)", s:"vision", c:"cpu",
    n:"REFRAMED (Joe, 2026-06-26): the arrow store / <code>pattern_phylogeny</code> isn't interface work — code-is-data ⇒ which data a fold draws on is part of its <i>construction</i>, not the (data-agnostic) <code>futon2.aif.fold</code> contract. impl #1 draws on the rule-table; an arrow-backed fold is a different cell of the build×evaluation grid (E-close-the-loop §6b). A per-impl data choice, not a card to build."},
   {id:"R16-ARM", t:"Arming / autopen switch (WM-I4)", s:"open", c:"cpu",
@@ -376,7 +379,7 @@ const LINKS={
  "R19-PRED":"E-C-vector-live.md","R19-CURRENT-C":"E-C-vector-live.md","R19-CHANNELS":"M-goals-and-holes.md",
  "R19-UNIFY":"E-C-vector-live.md","R19-WM-LOOP":"E-C-vector-live.md","R19-PROOF-JOIN":"M-goals-and-holes.md",
  "R19-KL":"E-C-vector-live.md","R19-YING-RERUN":"M-goals-and-holes.md",
- "R16-GATE":"M-aif-wiring.md","R16-ROLLOUT":"M-aif-wiring.md","R16-ARROWS":"M-aif-wiring.md","R16-ARM":"M-aif-wiring.md",
+ "R16-GATE":"M-aif-wiring.md","R16-ROLLOUT":"E-close-the-loop.md","R16-IMPL-SELECT":"E-close-the-loop.md","R16-ARROWS":"M-aif-wiring.md","R16-ARM":"M-aif-wiring.md",
  "R14-GAMMA":"M-aif-wiring.md","R14-FEED":"M-aif-wiring.md"
 };
 const app=document.getElementById('rb-app');
