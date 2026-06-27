@@ -1,6 +1,6 @@
 # M-points-de-fuite — a tiny DSL for minting structure on the line of flight
 
-**Status:** IDENTIFY ratified (Joe, 2026-06-25) → MAP complete (2026-06-26) → **DERIVE prototyped (2026-06-26, §3)** → **ARGUE/VERIFY: live-reproduction protocol registered (§4, Joe 2026-06-26) — not yet run.** (Lifecycle: `futon4/holes/mission-lifecycle.md`.)
+**Status:** IDENTIFY → MAP (§2) → DERIVE prototyped (§3) → ARGUE/VERIFY basic-pass (§4, claude-11) → INSTANTIATE built + verified (§5) → **DOCUMENT (§6, 2026-06-26).** (Lifecycle: `futon4/holes/mission-lifecycle.md`.)
 **Owner:** Joe + claude-1 · **Spawned:** 2026-06-25, from the meme/goals-holes mining work — the realization that we are paying a 70B to *recover, twice, after the fact* the very structure the agent *knew* it was minting as it worked.
 
 > *"[I]t is by headlong flight that things progress and signs proliferate."* — Deleuze & Guattari, *A Thousand Plateaus* (1980, p. 73).
@@ -272,10 +272,33 @@ The DERIVE-shape (§MAP→DERIVE convergence) targeted mapping the weaving onto 
 ### INSTANTIATE exit (for Joe)
 The live in-flow weaving surface is **built and reproduced on a fresh session**.  Remaining to close: **5.1** (one small build — live WebArxana orbit) and **5.2** (one DOCUMENT decision — vocabulary).  5.3 are carve-outs.  **← Do 5.1 + 5.2, then INSTANTIATE → DOCUMENT?**
 
-## Phases ahead
-- **MAP** ✓ (§2) · **DERIVE** ✓ prototyped (§3) · **ARGUE/VERIFY protocol** ✓ registered (§4) · **INSTANTIATE** ✓ built + verified, finishing steps in §5.
-- **VERIFY ran** — claude-11 × E-precision-over-policies, basic-pass (§4); findings recorded (threshold-calibration to 0.42, code-heavy comb weakness, partial-pass verdict).
-- **Now:** finish INSTANTIATE per **§5** — the live WebArxana orbit (§5.1) + the vocabulary decision (§5.2) — then **DOCUMENT** (carrying the §4 findings forward).
-- *Update transport — WS option (Joe, 2026-06-26):* the overview's live update currently runs the detector as an **async subprocess** (zero Emacs blocking, but Emacs computes). If it feels slow, switch to a **WebSocket push** — server computes, pushes over the agent WS (already operational for `*agents*`). A revisit, not a rebuild.
+## 6. DOCUMENT (claude-1, 2026-06-26)
+
+### 6.0 Outcome
+The mission asked (§1): *can turns weave themselves lightly, in the flow, reproducibly — and give rise to flight?*  **Answered yes, with a working, verified instrument.**  IDENTIFY→MAP→DERIVE→VERIFY→INSTANTIATE produced a **live, in-flow weaving surface**: per-turn sigils (`session-mode.el`) + a per-session auto-updating overview (`session-overview.el`: comb · threads · moves · scopes) + a live WebArxana orbit/scope-surface (poll + per-turn producer + hover-to-explain), all on a **free, reproducible** substrate (embeddings + move-basins; the mining is backfill, not the engine).  **Reproduced on a fresh, different-author session** (claude-11 × E-precision-over-policies), decided by a mechanical checklist (`verify_check.py`) — a basic pass, with the honest findings recorded in §4 (threshold-calibration to 0.42; the comb is weaker for code-heavy than discussion-heavy sessions).
+
+### 6.1 §5.2 vocabulary decision — comb/threads SUPERSEDE the flight-anatomy organs
+The DERIVE-shape floated mapping the weaving onto `flight-mode.el`'s **organ** vocabulary (field-read · velocity · attribution · …) as ghost-organs.  **Decision: the comb (mission pivot) + threads (recurrent patterns) + moves are the realized control-layer; they supersede the organ-mapping** — they are concrete, computed, reproducible, and (see §6.2) load-bearing in a way the organs are not.  The organs remain the Pilot's *flight* vocabulary (`flight-mode.el`); a future unification could render `session-overview` as a flight-mode organ-sibling, but that is an **optional** convergence, **not a gap**.
+
+### 6.2 Realisation (Joe, 2026-06-26) — the threads close the pattern-learning loop at mission close
+A **thread IS a pattern's binder + the scopes it threaded through** (e.g. `futon-theory/mission-lifecycle` threads 7 scopes; `futon-theory/derive-exits-on-a-minted-sorry` threads 6).  That is exactly the **missing feedback path from pattern-application back to the pattern library** — until now patterns were applied but never *learned from* their application.  So **at mission close**, for each thread, **map-reduce across the scopes it touched** to either **improve** the binding pattern (sharpen its definition / hotwords / applicability from the scopes it actually wove) or **invalidate** it (the scopes show it was applied incorrectly — a misfire).  This is the **L1 library-evolution loop** (cf. futon3b) finally given its in-flow signal.  *It also validates §6.1:* the **thread**, not the organ, is the primitive that carries this loop — which is why comb/threads is the right vocabulary.
+- *Candidate follow-on:* an excursion/mission for **per-mission thread→pattern map-reduce** (improve / invalidate at close).  Recorded here as the realisation; not built.
+
+### 6.3 The putuan (蒲團) diagrams ARE the empirical per-mission cascade
+The per-mission **orbit / phase-portrait** — scattered turns woven and concentrated into a visible form winding across the scope-surface — is **§0's 蒲團 made empirical, per mission.**  This is **of direct interest to [[C-cascade-real]]** (the live operational self-model — these diagrams are what a real per-mission cascade *looks like*, computed from real sessions) and to **M-aif-wiring** (the concentration-field reading of flight, R-series).  Offer standing (per the C-cascade-real rally): `session-overview` + the orbit can serve as the cascade's "sessions" live-render.
+
+### 6.4 Artifacts (where the instrument lives)
+- **futon6/scripts:** `reflow.py` (comb→threads→orbit) · `session_mission_comb.py` · `session_threads.py` · `thread_orbits.py` · `session_scope_view.py` · `mining_recogniser.py` (→ move-basins) · `verify_check.py` (the mechanical checklist).
+- **futon3c/emacs:** `session-mode.el` (sigils) · `session-overview.el` (per-session overview + live-orbit producer).
+- **futon4 (WebArxana):** `graph.cljs` (orbit render · live poll · hover/halo) · `proxy.clj` (`focus-anchor` E-/C- resolve).
+- **Depends on [[M-post-mining-ingest]]** for the historical-reconstruction half (a canonical, contracted mine).
+
+## Phases ahead — mission lifecycle COMPLETE (IDENTIFY→DOCUMENT); follow-ons spun out
+- **Done:** MAP (§2) · DERIVE (§3) · ARGUE/VERIFY basic-pass (§4) · INSTANTIATE built+verified (§5) · DOCUMENT (§6). The instrument is live and reproducible.
+- **Follow-ons (recorded, not built):**
+  - **Per-mission thread→pattern map-reduce** (§6.2) — improve/invalidate the binding pattern from the scopes its thread wove, at mission close. The L1 library-evolution loop's missing in-flow signal. *Candidate excursion.*
+  - **Historical 蒲團 reconstruction** (§6.3) — depends on **[[M-post-mining-ingest]]** (canonical mine).
+  - **Pilot/flight unification** — render `session-overview` as a `flight-mode.el` organ-sibling (optional, §6.1).
+- *WS upgrade (Joe, 2026-06-26):* the live overview/orbit run as **async subprocesses** today (zero blocking, Emacs/Emacs-spawned compute). If it feels slow, switch to a **WebSocket push** (server computes, pushes over the agent WS — already operational for `*agents*`). A revisit, not a rebuild.
 
 *(Historical MAP plan, for the record: recognition-first survey of already-recognized acts, the futonic act-vocabulary 咅/香/應, and the notations — catalogued in §2; the MAP→DERIVE convergence superseded "design a symbol set" with "flow the existing per-turn sigils into a control layer.")*
