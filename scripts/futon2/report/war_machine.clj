@@ -45,6 +45,7 @@
             [futon2.aif.observation :as obs]
             [futon2.aif.pattern-registry :as pattern-registry]
             [futon2.aif.policy :as policy]
+            [futon2.aif.policy-precision :as policy-precision]
             [futon2.aif.precision :as precision]
             [futon2.aif.preferences :as pref]
             [futon2.aif.sorry-registry :as sorry-registry]
@@ -3572,14 +3573,38 @@
         ;; ants/aif/perceive.clj.
         r3-max-steps 3
         r3-error-eps 1.0e-3
+        prev-trace-record
+        (try (trace/latest-trace-record
+              :dir (or trace-dir
+                       (str (System/getProperty "user.home")
+                            "/code/futon2/data/wm-trace")))
+             (catch Exception _ nil))
         prev-precision-state
-        (or (some-> (try (trace/latest-trace-record
-                          :dir (or trace-dir
-                                   (str (System/getProperty "user.home")
-                                        "/code/futon2/data/wm-trace")))
-                         (catch Exception _ nil))
-                    :precision-state)
+        (or (:precision-state prev-trace-record)
             (precision/initial-precision-state))
+        ;; R14 precision-over-policies (γ): the previous tick's γ-state, read
+        ;; from the trace like :precision-state. Default = the prior (γ=1.0).
+        prev-policy-precision
+        (or (:policy-precision prev-trace-record)
+            (policy-precision/initial-policy-precision-state))
+        ;; R14 learning step: fold the REALIZED outcome of an enacted policy into
+        ;; γ. The signal is R16's committed `:realized-outcome` trace contract
+        ;; (paired with claude-10, E-close-the-loop), written at enactment and
+        ;; READ here next tick — async-clean, never a synchronous cross-subsystem
+        ;; call (cf. the 2026-06-26 freeze incident):
+        ;;   {:policy <id> :expected-G <g> :realized-G <g'> :tick <enactment tick>}
+        ;; Both legs are the SAME EFE quantity (the fold's coverage→rollout ΔG —
+        ;; expected over the PREDICTED wiring, realized over the ENACTED wiring),
+        ;; so the relative error is apples-to-apples (NOT a ΔG-vs-ΔF mismatch).
+        ;; STAGING (E-precision-over-policies §3.5): until enactment is
+        ;; live-wired the field is ABSENT ⇒ no sample ⇒ γ holds at the prior 1.0
+        ;; ⇒ byte-identical to today's τ path. `:last-outcome-tick` (carried in
+        ;; the γ-state) dedups: judge ticks far faster than enactment, so the
+        ;; same outcome must be folded at most once.
+        policy-precision-state
+        (policy-precision/fold-realized-outcome
+         prev-policy-precision (:realized-outcome prev-trace-record))
+        gamma (policy-precision/gamma-for policy-precision-state)
         ;; Inner loop result
         {:keys [belief precision-state prediction-errors micro-step-trace]}
         (loop [step 0
@@ -3744,7 +3769,7 @@
         ;; deliberative select-action with default-mode-select as a
         ;; try/catch fallback for I6 compositional closure.
         wm-admissible (filterv #(fm/can-execute? wm-state (:action %)) wm-ranked)
-        wm-decision (try (policy/select-action wm-admissible)
+        wm-decision (try (policy/select-action wm-admissible {:policy-precision gamma})
                          (catch Exception _
                            (policy/default-mode-select wm-state wm-admissible)))
         ;; Car-3 (R16) seam 1: lift the acquired cascade-policies out of the read-only lane
@@ -3854,6 +3879,10 @@
                 :belief-pre wm-belief-pre
                 :prediction-errors prediction-errors
                 :precision-state precision-state
+                ;; R14 precision-over-policies (γ): the learned, bounded inverse
+                ;; selection temperature this tick used (τ_eff = τ_spread / γ).
+                ;; Persisted so the next tick continues the rolling outcome window.
+                :policy-precision policy-precision-state
                 :micro-step-trace micro-step-trace
                 :anticipation anticipation-snapshot
                 :ranked-actions wm-ranked+cascades

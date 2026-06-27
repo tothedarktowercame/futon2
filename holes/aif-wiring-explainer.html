@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>AIF wiring explainer — R1–R19 on a brain (v0.6 · the belly R19=C is now BUILT · A·B·C·D·E tagged)</title>
+<title>AIF wiring explainer — R1–R19 on a brain (v0.7 · R14 γ WIRED · openable ⟨⟩ interface nodes on edges · A·B·C·D·E tagged)</title>
 <style>
   :root{
     --done:#2e7d32; --done-bg:#e3f5e3; --partial:#b8860b; --partial-bg:#fff5d6;
@@ -34,6 +34,17 @@
   .edge.held{stroke:var(--gap);stroke-width:1.8px;stroke-dasharray:6 4;marker-end:url(#arrowgap)}
   .edge.drive{stroke:#2e7d32;stroke-width:2.2px;marker-end:url(#arrowgrn)}
   .edge.faint{stroke:#d0d0d0;stroke-width:1.1px;stroke-dasharray:2 4;marker-end:url(#arrowlite)}
+  .edge.feed{stroke:#0a8a6f;stroke-width:1.7px;stroke-dasharray:5 3;marker-end:url(#arrowteal)}
+  /* round openable interface nodes sitting on edges */
+  .ifnode{stroke-width:2px;cursor:pointer}
+  .ifnode.live{fill:#e6faf4;stroke:#0a8a6f}
+  .ifnode.staged{fill:#fdf3e0;stroke:#d99a2b}
+  .ifnode:hover{filter:brightness(.93)}
+  .ifnode.sel{stroke-width:3px}
+  .ifglyph{font-size:9px;font-weight:700;pointer-events:none;text-anchor:middle;fill:#444}
+  .b-iface-live{background:#e6faf4;color:#0a8a6f} .b-iface-staged{background:#fdf3e0;color:#b9791f}
+  .panel .iface{background:#f1fbf8;border-left:3px solid #0a8a6f;padding:9px 12px;border-radius:0 6px 6px 0}
+  .panel .iface code{background:#dff5ee;padding:1px 5px;border-radius:4px;font-size:12.5px}
   .elabel{font-size:9px;fill:#8a8a8a}
   .region{font-size:9.5px;fill:#a07fb4;font-style:italic;font-weight:600;pointer-events:none}
   .frame{fill:none;stroke:#e0e0e0;stroke-width:1.2px;stroke-dasharray:4 4}
@@ -56,7 +67,7 @@
 <body>
 <header>
   <h1>How the War Machine does Active Inference — R1–R18, on a brain</h1>
-  <p>Core inference nodes sit on their Friston brain regions (purple labels); the implementation apparatus & wider system sit outside the brain. Green = wired · amber = partial · <b>red dashed = gap</b> · blue = on the futon3c sibling surface · <b style="color:#6d3aa8">lavender = the belly (R19) — built but not yet steering</b>. Click any node.<br/><b>Two sweeps.</b> The <i>forward</i> loop (sense→infer→select→act) is the policy/method — the <i>mind</i> (mens) and the <i>hand</i> (manus). The <i>backward</i> flow of goals/preferred-states is the <i>belly</i> (venter — the hara 丹田) — what the loop is FOR. The contract enumerates the forward half (R1–R14); the belly (R19, now <b style="color:#6d3aa8">built</b> as a derived C-vector — 452 preferences across 5 channels — though not yet steering) names the preference organ, and R15/R16/R14 are its goal-completion criteria. The five canonical generative-model matrices are now tagged on their nodes: <b>A→R3</b> (perceive) · <b>B→R4</b> · <b>C→R19</b> (the belly) · <b>D→R1</b> · <b>E→R12</b>. C was the silent miss — now named R19.</p>
+  <p>Core inference nodes sit on their Friston brain regions (purple labels); the implementation apparatus & wider system sit outside the brain. Green = wired · amber = partial · <b>red dashed = gap</b> · blue = on the futon3c sibling surface · <b style="color:#6d3aa8">lavender = the belly (R19) — built but not yet steering</b>. Click any node — or a <b style="color:#0a8a6f">⟨⟩ interface node</b> on an edge to open the contract that crosses it (teal = live · amber = staged).<br/><b>Two sweeps.</b> The <i>forward</i> loop (sense→infer→select→act) is the policy/method — the <i>mind</i> (mens) and the <i>hand</i> (manus). The <i>backward</i> flow of goals/preferred-states is the <i>belly</i> (venter — the hara 丹田) — what the loop is FOR. The contract enumerates the forward half (R1–R14); the belly (R19, now <b style="color:#6d3aa8">built</b> as a derived C-vector — 452 preferences across 5 channels — though not yet steering) names the preference organ, and R15/R16/R14 are its goal-completion criteria. The five canonical generative-model matrices are now tagged on their nodes: <b>A→R3</b> (perceive) · <b>B→R4</b> · <b>C→R19</b> (the belly) · <b>D→R1</b> · <b>E→R12</b>. C was the silent miss — now named R19.</p>
 </header>
 <div class="wrap">
   <div class="stage"><svg id="svg" viewBox="0 0 820 620" role="img" aria-label="AIF wiring on a brain"></svg></div>
@@ -93,10 +104,10 @@ const NODES = [
   {id:"R13", r:"R13", t:"Multi-step G(π)", s:"policies, not steps", x:256,y:362, st:"done", sm:true,
    concept:"A policy is a whole SEQUENCE of actions, not one step. G(π) sums the EFE along the trajectory a policy induces — a path integral. This is what lets an agent pick a move that looks bad alone but is great as step 1 of a plan.",
    how:"WIRED — futon2.aif.rollout scores multi-step policies; the witness test shows a 2-step policy correctly beating the greedy single-step pick."},
-  {id:"R14", r:"R14", t:"Precision over policies", s:"the γ term", x:566,y:360, st:"gap", sm:true,
+  {id:"R14", r:"R14", t:"Precision over policies", s:"the γ term", x:566,y:360, st:"partial", sm:true,
    concept:"Precision over POLICIES — the γ term — is the agent's confidence in its own decision-making: how sharply it commits to the best plan. In the brain this is a dopamine signal (the same VTA/SN region as R7), inferred from how well past plans turned out.",
-   how:"GAP — R7 gives precision over sensory channels, but there is still no γ over policies; the selection temperature is a fixed heuristic. What changed: R16's consent gate now records a ΔF∧ΔG verdict every cycle — the first trickle of the realized-policy-outcome history γ would learn from.",
-   promise:"If wired: the WM becomes self-calibrating in decisiveness — committing hard when its recent plans have paid off, hedging and exploring when they haven't. Confidence that's earned, not hand-set. Its feed is R16's realized-outcome channel; now that R16 closes as far as the act-gate, that feed is finally in reach — R14 is the next build once armed actions start returning outcomes."},
+   how:"WIRED (R14, 2026-06-27) — γ is now a LEARNED, bounded inverse selection temperature (futon2.aif.policy-precision), the policy-scale sibling of R7's channel precision one level up. Selection divides the spread-derived temperature by it: <code>τ_eff = adaptive-temperature(G-spread) / γ</code> (see the live ⟨τ_eff⟩ interface node on the R14→R6 edge). γ defaults to 1.0 — reducing EXACTLY to the old spread-only τ — and learns from R16's realized-vs-expected outcomes via a scale-free symmetric relative error, clamped to [0.5, 2.0], with a burn-in gate (γ holds at 1.0 until 5 realized samples accrue). State persists in the trace as :policy-precision, read back each tick like R7's :precision-state.",
+   promise:"Full self-calibration waits on R16 live-wiring enactment so its :realized-outcome feed flows (the staged ⟨:realized-outcome⟩ interface node on the R16→R14 edge). Until then the field is ABSENT ⇒ γ holds at 1.0 ⇒ decisiveness byte-identical to today — the machinery, the τ_eff wiring, and the trace seam are all live and tested; only the outcome data is pending. When it flows: the WM commits hard after a run of plans that paid off, hedges after a run that didn't. Confidence that's earned, not hand-set."},
   {id:"R16", r:"R16", t:"Close the loop", s:"act → world → observe", x:548,y:96, st:"partial", sm:true,
    concept:"A true active-inference agent CLOSES the loop: observe → infer → select → ACT → observe the consequence → update. The action leaves the brain (mens) and the hand acts on the world (manus) — R16 sits on the hand it works through — and the change returns as new sensory input. Acting is the 'active' half of active inference.",
    how:"PARTIAL (Car-3, 2026-06-24) — the loop is wired and the hand is real. The WM computes an act-gate ΔF∧ΔG per candidate (futon2's rollout G(π) joined beside the cascade's free-energy F via cascade-lane/rollout-g-for); the executor apply-cascade! folds a chosen cascade into a wiring diagram. But the gate ABSTAINS (:abstain-missing-leg) on every served mission — because ΔG is nil: there is no rollout PATH for it. The loop stays open not for want of permission but because the agent has no policy it can evaluate, so R6 correctly refuses to commit.",
@@ -141,11 +152,25 @@ const REGIONS = [
 const EDGES = [
   ["SI","BEL","edge","perceive"],["BEL","FM","edge",""],["FM","G","edge",""],["G","SEL","edge",""],["SEL","ACT","edge",""],
   ["ACT","R16","edge","propose"],["R16","SI","held","close"],
-  ["PREC","SEL","mod",""],["R14","SEL","mod","γ"],["R13","G","mod",""],["BEL","PREC","mod","errors"],
+  ["PREC","SEL","mod",""],["R14","SEL","mod","γ","gamma-tau"],["R13","G","mod",""],["BEL","PREC","mod","errors"],
+  ["R16","R14","feed","realized ΔG","realized-outcome"],
   ["LIVE","SEL","drive","drives tick"],["ACT","TRACE","faint",""],["TRACE","VALID","faint",""],["TRACE","HABIT","faint",""],["HABIT","PREC","faint",""],
   ["STRUCT","R13","faint",""],["L2","BEL","faint",""],["MULTI","BEL","faint",""],["R18","G","faint",""],["R18","PREC","faint",""],["R18","STRUCT","faint",""],
   ["WANT","G","held","risk ← goal"],["L2","WANT","faint","goals ↓"],
 ];
+// ⟨interfaces⟩ — the CONTRACTS that ride on edges. Each renders as a round,
+// openable node at its edge's midpoint; click it for the port/type detail.
+// status: "live" (the contract is flowing) | "staged" (built + agreed, data pending).
+const IFACES = {
+  "gamma-tau":{
+    t:"τ_eff = τ_spread / γ", sub:"R14 → R6 · policy/effective-temperature", status:"live",
+    detail:"How γ STEERS selection. R6's softmax temperature is the spread-derived τ DIVIDED by γ: high γ ⇒ lower τ_eff ⇒ sharper commitment; low γ ⇒ higher τ_eff ⇒ flatter / abstain-leaning; <b>γ = 1.0 ⇒ exactly today's spread-only τ</b> (reduction-safe). γ is floored defensively so it can never divide τ to zero or flip its sign. The decision trace records both <code>:tau</code> (effective) and <code>:tau-spread</code> (pre-γ) so the modulation is auditable.",
+    ports:"in: <code>G-spread</code> (candidate EFE spread) · <code>γ</code> (policy-precision) → out: <code>τ_eff</code> (softmax temperature)"},
+  "realized-outcome":{
+    t:":realized-outcome", sub:"R16 → R14 · close-the-loop trace contract", status:"staged",
+    detail:"The signal γ LEARNS from — paired with claude-10 (E-close-the-loop). R16's enactor WRITES a record at enactment; R14 READS it next tick — <b>async-clean</b> (a trace field, never a synchronous cross-subsystem call, per the 2026-06-26 freeze discipline). Both G legs are the <b>same EFE quantity</b> (the fold's coverage→rollout ΔG) — expected over the PREDICTED wiring, realized over the actually-ENACTED wiring — so γ's relative-error is apples-to-apples, not a ΔG-vs-ΔF mismatch. <b>Today the field is ABSENT</b> (enactment not yet live-wired) ⇒ γ holds at its prior 1.0. fold.clj stays expected-only; the realized term lives only here.",
+    ports:"<code>{:policy id&nbsp; :expected-G g&nbsp; :realized-G g'&nbsp; :tick t}</code> — deduped by <code>:tick</code> (WM ticks ≫ enactments)"},
+};
 const NById=Object.fromEntries(NODES.map(n=>[n.id,n]));
 for(const n of NODES){ n._w = n.sm?112:(n.ap?150:132); n._h = n.sm?30:(n.ap?42:40); }
 const SVG="http://www.w3.org/2000/svg";
@@ -155,7 +180,7 @@ function edgePath(a,b){const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1;const 
 const svg=document.getElementById("svg");
 const defs=el("defs",{});
 const marker=(id,c)=>{const m=el("marker",{id,markerWidth:9,markerHeight:9,refX:7,refY:3,orient:"auto",markerUnits:"strokeWidth"});m.appendChild(el("path",{d:"M0,0 L7,3 L0,6 Z",fill:c}));return m;};
-defs.appendChild(marker("arrow","#9a9a9a"));defs.appendChild(marker("arrowlite","#c4c4c4"));defs.appendChild(marker("arrowgap","#c62828"));defs.appendChild(marker("arrowgrn","#2e7d32"));
+defs.appendChild(marker("arrow","#9a9a9a"));defs.appendChild(marker("arrowlite","#c4c4c4"));defs.appendChild(marker("arrowgap","#c62828"));defs.appendChild(marker("arrowgrn","#2e7d32"));defs.appendChild(marker("arrowteal","#0a8a6f"));
 svg.appendChild(defs);
 // brain silhouette (left-facing: frontal lobe left, occipital right, cerebellum lower-right)
 const brain=el("g",{id:"brain",opacity:"0.72"});
@@ -172,10 +197,13 @@ const fl=el("text",{class:"framelab",x:44,y:492});fl.textContent="implementation
 svg.appendChild(fr);
 // region labels
 for(const [txt,x,y] of REGIONS){const t=el("text",{class:"region",x,y,"text-anchor":"middle"});t.textContent=txt;svg.appendChild(t);}
-// edges
-for(const [f,t,cls,lab] of EDGES){const a=NById[f],b=NById[t];if(!a||!b)continue;const p=edgePath(a,b);
+// edges (collect interface midpoints to render ON TOP after the nodes)
+const IFNODES=[];
+for(const [f,t,cls,lab,iface] of EDGES){const a=NById[f],b=NById[t];if(!a||!b)continue;const p=edgePath(a,b);
   svg.appendChild(el("line",{class:"edge "+cls,x1:p.x1,y1:p.y1,x2:p.x2,y2:p.y2}));
-  if(lab){const tx=el("text",{class:"elabel",x:(p.x1+p.x2)/2,y:(p.y1+p.y2)/2-2,"text-anchor":"middle"});tx.textContent=lab;svg.appendChild(tx);}}
+  const mx=(p.x1+p.x2)/2,my=(p.y1+p.y2)/2;
+  if(lab){const tx=el("text",{class:"elabel",x:mx,y:my-2,"text-anchor":"middle"});tx.textContent=lab;svg.appendChild(tx);}
+  if(iface&&IFACES[iface]) IFNODES.push({id:iface,x:mx,y:my+(lab?9:0)});}
 // giant hand behind R16 — the manus the close-the-loop node acts through (R16 sits on the palm)
 const hand=el("text",{x:548,y:96,"text-anchor":"middle","font-size":150,opacity:0.85});
 hand.setAttribute("dominant-baseline","central");hand.textContent="🖐";svg.appendChild(hand);
@@ -189,6 +217,12 @@ for(const n of NODES){const g=el("g",{class:"node s-"+n.st,"data-id":n.id});
   const t1=el("text",{x:n.x,y:n.y+(n.sm?3:-2),"text-anchor":"middle","font-size":fs});t1.textContent=n.r+" · "+n.t;g.appendChild(t1);
   if(!n.sm){const t2=el("text",{class:"sub",x:n.x,y:n.y+12,"text-anchor":"middle","font-size":9.5});t2.textContent=n.s;g.appendChild(t2);}
   g.addEventListener("click",()=>select(n.id));svg.appendChild(g);}
+// interface nodes — round, openable, ON TOP of edges/nodes
+for(const ifn of IFNODES){const spec=IFACES[ifn.id];
+  const c=el("circle",{class:"ifnode "+spec.status,"data-iface":ifn.id,cx:ifn.x,cy:ifn.y,r:7.5});
+  const gl=el("text",{class:"ifglyph",x:ifn.x,y:ifn.y+3});gl.textContent="⟨⟩";
+  c.addEventListener("click",(e)=>{e.stopPropagation();selectIface(ifn.id);});
+  svg.appendChild(c);svg.appendChild(gl);}
 const leg=el("text",{class:"elabel",x:14,y:612});leg.textContent="Forward sweep = policy/method (mind + hand, manus). Backward sweep = goals/preferences (the belly, hara) feeding R5's risk — the diagram's missing setpoint. R16 acts; the belly says what it acts toward.";svg.appendChild(leg);
 const motto=el("text",{class:"framelab",x:626,y:34,"text-anchor":"middle"});motto.textContent="mens et manus — the mind decides, the hand acts";svg.appendChild(motto);
 
@@ -206,6 +240,18 @@ function select(id){
   else if(n.st==="belly"){h+=`<h3>How it's built</h3><p>${n.how}</p>`;if(n.promise)h+=`<h3>What's left to make it steer (not just read out)</h3><div class="promise"><p style="margin:0">${n.promise}</p></div>`;}
   else{h+=`<h3>How it's wired in the War Machine</h3><div class="wired"><p style="margin:0">${n.how}</p></div>`;
     if(n.st==="partial"&&n.promise){h+=`<h3>What's left to finish it</h3><div class="promise"><p style="margin:0">${n.promise}</p></div>`;}}
+  panel.innerHTML=h;
+}
+function selectIface(id){
+  document.querySelectorAll(".node").forEach(e=>e.classList.remove("sel"));
+  document.querySelectorAll(".ifnode").forEach(e=>e.classList.toggle("sel",e.getAttribute("data-iface")===id));
+  const f=IFACES[id];const live=f.status==="live";
+  const bc=live?"b-iface-live":"b-iface-staged";
+  const bt=live?"INTERFACE — live":"INTERFACE — staged (built + agreed, data pending)";
+  let h=`<div class="rid">⟨⟩ interface</div><span class="badge ${bc}">${bt}</span><h2>${f.t}</h2>`;
+  h+=`<div class="reg">${f.sub}</div>`;
+  h+=`<h3>What crosses this edge</h3><div class="iface"><p style="margin:0">${f.detail}</p></div>`;
+  if(f.ports) h+=`<h3>Ports / type</h3><p><code style="font-size:13px">${f.ports}</code></p>`;
   panel.innerHTML=h;
 }
 select("SI");

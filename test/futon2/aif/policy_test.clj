@@ -27,6 +27,33 @@
     (is (< (Math/abs (- 0.5 (policy/adaptive-temperature [0.0 1.0] {:k 2.0}))) 1e-9))))
 
 ;; ---------------------------------------------------------------------------
+;; effective-temperature — R14 γ modulation (τ_eff = τ_spread / γ)
+;; ---------------------------------------------------------------------------
+
+(deftest effective-temperature-reduces-at-unity-test
+  (testing "γ = 1.0 → τ_eff == adaptive-temperature (reduction-safe)"
+    (let [g [0.0 0.5 1.0]]
+      (is (= (policy/adaptive-temperature g)
+             (policy/effective-temperature g 1.0))))))
+
+(deftest effective-temperature-monotone-in-gamma-test
+  (testing "higher γ → lower effective temperature (sharper)"
+    (let [g [0.0 1.0]
+          lo (policy/effective-temperature g 0.5)
+          mid (policy/effective-temperature g 1.0)
+          hi (policy/effective-temperature g 2.0)]
+      (is (> lo mid))
+      (is (> mid hi))
+      (is (< (Math/abs (- (/ mid 2.0) hi)) 1e-9) "τ_eff = τ_spread / γ exactly"))))
+
+(deftest effective-temperature-floors-degenerate-gamma-test
+  (testing "γ ≤ 0 is floored at tau-min so τ_eff never divides by ~0 or flips sign"
+    (let [g [0.0 1.0]
+          t (policy/effective-temperature g 0.0)]
+      (is (pos? t))
+      (is (< (Math/abs (- t (/ (policy/adaptive-temperature g) 0.01))) 1e-9)))))
+
+;; ---------------------------------------------------------------------------
 ;; softmax-weights
 ;; ---------------------------------------------------------------------------
 
@@ -71,6 +98,45 @@
           out (policy/select-action ranked-acts)
           weights (vals (:softmax-weights out))]
       (is (< (Math/abs (- 1.0 (reduce + weights))) 1e-9)))))
+
+;; ---------------------------------------------------------------------------
+;; select-action — R14 γ (policy-precision) modulation of selection
+;; ---------------------------------------------------------------------------
+
+(deftest select-action-default-gamma-is-reduction-safe-test
+  (testing "omitting :policy-precision ⇒ τ and softmax identical to the spread path"
+    (let [ranked-acts (ranked [[:address-sorry 0.0]
+                               [:no-op 0.5]
+                               [:fire-pattern 1.0]])
+          out (policy/select-action ranked-acts)
+          g-totals (mapv :G-total ranked-acts)]
+      (is (= (policy/adaptive-temperature g-totals) (:tau out))
+          "effective τ equals spread-only τ at the γ=1.0 default")
+      (is (= 1.0 (:policy-precision out)))
+      (is (= (policy/softmax-weights g-totals (policy/adaptive-temperature g-totals))
+             (vals (:softmax-weights out)))))))
+
+(deftest select-action-high-gamma-sharpens-test
+  (testing "higher γ sharpens the softmax — more probability mass on the best action"
+    (let [ranked-acts (ranked [[:address-sorry 0.0]
+                               [:fire-pattern 1.0]])
+          best-w (fn [g] (apply max (vals (:softmax-weights
+                                           (policy/select-action
+                                            ranked-acts {:policy-precision g})))))
+          w-lo (best-w 0.5)
+          w-mid (best-w 1.0)
+          w-hi (best-w 2.0)]
+      (is (> w-hi w-mid) "γ=2 commits harder than γ=1")
+      (is (> w-mid w-lo) "γ=1 commits harder than γ=0.5 (more abstain-leaning)"))))
+
+(deftest select-action-records-tau-spread-test
+  (testing "the chosen branch records both effective τ and the pre-γ spread τ"
+    (let [ranked-acts (ranked [[:address-sorry 0.0] [:fire-pattern 1.0]])
+          out (policy/select-action ranked-acts {:policy-precision 2.0})]
+      (is (= (policy/adaptive-temperature (mapv :G-total ranked-acts))
+             (:tau-spread out)))
+      (is (< (:tau out) (:tau-spread out)) "γ=2 lowered the effective τ")
+      (is (= 2.0 (:policy-precision out))))))
 
 ;; ---------------------------------------------------------------------------
 ;; select-action — abstain branch

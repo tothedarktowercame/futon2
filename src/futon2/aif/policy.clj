@@ -32,6 +32,26 @@
      (let [spread (- (apply max g-totals) (apply min g-totals))]
        (max tau-min (/ spread k))))))
 
+(defn effective-temperature
+  "The selection temperature actually used, after R14 precision-over-policies
+   (γ) modulation:
+
+       τ_eff = adaptive-temperature(g-totals) / γ
+
+   where γ (`policy-precision`) is the agent's learned confidence in its own
+   decision-making (`futon2.aif.policy-precision`). High γ ⇒ lower τ_eff ⇒
+   sharper commitment; low γ ⇒ higher τ_eff ⇒ flatter / abstain-leaning. γ = 1.0
+   (the default and the burn-in prior) reduces this EXACTLY to today's spread-only
+   temperature, so the change is reduction-safe.
+
+   γ is floored at `tau-min` defensively so a degenerate γ can never divide τ to
+   zero or flip its sign."
+  ([g-totals gamma] (effective-temperature g-totals gamma {}))
+  ([g-totals gamma {:keys [tau-min] :or {tau-min 0.01} :as temperature-opts}]
+   (let [tau (adaptive-temperature g-totals temperature-opts)
+         g (max (double tau-min) (double gamma))]
+     (/ tau g))))
+
 (defn softmax-weights
   "P(a) ∝ exp(−G(a) / τ), normalised to sum to 1.0. Numerically stable
    via the standard log-sum-exp trick."
@@ -116,6 +136,9 @@
      :abstain-epsilon — minimum (no-op.G-total − best.G-total) required
                         to NOT abstain. Default 0.01.
      :temperature-opts — passed to `adaptive-temperature`.
+     :policy-precision — γ, the R14 learned inverse-temperature
+                        (`futon2.aif.policy-precision`). τ_eff = τ_spread / γ.
+                        Default 1.0 ⇒ behaviour identical to the spread-only path.
 
    Returns one of:
 
@@ -137,9 +160,10 @@
    - :no-op is present AND (no-op.G-total − best.G-total) < ε
      (i.e. the best action isn't meaningfully better than doing nothing)."
   ([ranked-actions] (select-action ranked-actions {}))
-  ([ranked-actions {:keys [abstain-epsilon temperature-opts]
+  ([ranked-actions {:keys [abstain-epsilon temperature-opts policy-precision]
                     :or {abstain-epsilon 0.01
-                         temperature-opts {}}}]
+                         temperature-opts {}
+                         policy-precision 1.0}}]
    (cond
      (empty? ranked-actions)
      {:action :abstain
@@ -160,10 +184,13 @@
           :gap-report (gap-report ranked-actions)
           :ranked-actions ranked-actions}
          (let [g-totals (mapv :G-total ranked-actions)
-               tau (adaptive-temperature g-totals temperature-opts)
+               tau-spread (adaptive-temperature g-totals temperature-opts)
+               tau (effective-temperature g-totals policy-precision temperature-opts)
                weights (softmax-weights g-totals tau)]
            {:action (:action best)
             :rank 1
             :G-total best-g
             :tau tau
+            :tau-spread tau-spread
+            :policy-precision (double policy-precision)
             :softmax-weights (zipmap (mapv :action ranked-actions) weights)}))))))

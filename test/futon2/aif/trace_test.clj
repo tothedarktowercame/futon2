@@ -113,6 +113,39 @@
       (is (= :multiplied (:mode r)))
       (is (map? (:observation r))))))
 
+(deftest trace-record-propagates-policy-precision-test
+  (testing "R14 γ-state propagates through trace-record from judge output"
+    (let [gamma-state {:policy-precision 1.6 :error-history [0.2 0.1]
+                       :mean-error 0.15 :samples 7}
+          r (trace/trace-record (assoc sample-judge-output
+                                       :policy-precision gamma-state))]
+      (is (= gamma-state (:policy-precision r)))))
+  (testing "absent γ-state reconstructs the prior (γ=1.0), never nil"
+    (let [r (trace/trace-record sample-judge-output)]
+      (is (= 1.0 (get-in r [:policy-precision :policy-precision]))
+          "trace always carries a usable γ-state for the next tick's read-back"))))
+
+(deftest policy-precision-roundtrips-through-trace-test
+  (testing "γ-state survives write → read so the next tick continues the window"
+    (let [gamma-state {:policy-precision 0.75 :error-history [0.6 0.7 0.65]
+                       :mean-error 0.65 :samples 12}
+          out (assoc sample-judge-output :policy-precision gamma-state)]
+      (trace/write-trace! out :dir *tmpdir* :date-str "2026-06-26")
+      (let [record (trace/latest-trace-record :dir *tmpdir*
+                                              :end-date (LocalDate/parse "2026-06-26")
+                                              :lookback-days 1)]
+        (is (= gamma-state (:policy-precision record)))))))
+
+(deftest realized-outcome-present-only-passthrough-test
+  (testing "R16 :realized-outcome is propagated when the enactor supplies it"
+    (let [outcome {:policy :p/x :expected-G 0.2 :realized-G 0.05 :tick 41}
+          r (trace/trace-record (assoc sample-judge-output :realized-outcome outcome))]
+      (is (= outcome (:realized-outcome r)))))
+  (testing "absent today (enactment not live-wired) ⇒ key not present (not nil)"
+    (let [r (trace/trace-record sample-judge-output)]
+      (is (not (contains? r :realized-outcome))
+          "present-only: no noisy nil seam in ordinary records"))))
+
 (deftest latest-trace-record-spans-midnight-utc-test
   (testing "latest-trace-record falls back to yesterday when today's bucket is empty"
     (let [yesterday-output (assoc sample-judge-output

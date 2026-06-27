@@ -1,7 +1,54 @@
 # Excursion: precision over policies — the γ term (E-precision-over-policies)
 
-**Date:** 2026-06-26 · **Status:** IDENTIFY + MAP grounded in live code — charter for the driver (claude-10).
-**Authored by:** claude-10.
+**Date:** 2026-06-26 · **Status:** DELIVERED 2026-06-27 (driven by claude-11; gated; see §7).
+**Authored by:** claude-10. **Driven by:** claude-11.
+
+---
+
+## 7. DELIVERED (claude-11, 2026-06-27)
+
+γ built as a learned, bounded, trace-persisted scalar wired into selection;
+reduction-safe (≡ today at γ=1.0); learning staged on R16's realized-outcome feed.
+
+**ARGUE (§4) decisions ratified:**
+- **§4.1 — γ scalar, default 1.0, reduction-safe.** ✓ Burn-in gate: γ holds at
+  1.0 until ≥5 realized samples accrue.
+- **§4.2 — learning signal.** Ratified a *divergence* from the charter's literal
+  "1/rolling-variance" R7-mirror: γ uses a **symmetric relative error**
+  `ρ = |exp−real|/(|exp|+|real|+ε)` over expected-vs-realized G. Scale-free (no
+  G-unit constant) and sounder than variance (variance rewards a *consistent
+  bias* as false confidence; relative error reads a consistent miss as low
+  confidence). Approved by Joe. The realized term is R16's `:realized-outcome`
+  (not R12 Beta-credit — a different quantity, as §4 anticipated).
+- **§4.3 — modulation `τ_eff = τ_spread / γ`.** ✓ (not a γ-only temperature).
+- **§4.4 — staging.** ✓ Machinery + wiring + the trace seam built now; the rich
+  signal is gated on R16 live-wiring enactment. **Interface paired with claude-10:**
+  the realized term is the `:realized-outcome` trace contract
+  `{:policy :expected-G :realized-G :tick}` — both legs the *same* EFE quantity
+  (fold coverage→rollout ΔG over predicted vs enacted wiring); written by the
+  enactor, read by γ next tick (async-clean). fold.clj stays expected-only.
+
+**Exit conditions (§5):** all met. (1) bounded [0.5,2.0], trace-persisted
+`:policy-precision`, default 1.0 ✓ · (2) γ updates from realized-vs-expected
+history off the hot path ✓ · (3) selection reads γ — higher γ sharpens, lower
+flattens, demonstrated in tests ✓ · (4) reduction-safe — γ=1 byte-identical;
+`:realized-outcome` absent today ⇒ neutral ✓ · (5) burn-in observability note:
+`README-gamma.md` ✓.
+
+**Artifacts:** `src/futon2/aif/policy_precision.clj` (new γ learner) ·
+`policy.clj` (`effective-temperature`, `select-action :policy-precision`) ·
+`trace.clj` (`:policy-precision` + `:realized-outcome` seam) ·
+`scripts/futon2/report/war_machine.clj` (judge: read prior γ, fold realized
+outcome, feed selection) · tests for all · `README-gamma.md` · explainer
+`holes/aif-wiring-explainer.html` (R14 → WIRED; openable ⟨⟩ interface nodes).
+
+**Gates:** clj-kondo 0/0 · check-parens OK · full suite 395 tests / 1243
+assertions / 0 fail · explainer headless-verified (2 iface nodes, 0 JS errors).
+
+**Scope-out held (§6):** scalar-only (per-context γ deferred); R15 hierarchical
+γ; R16 arming. Pending: the live `:realized-outcome` feed (R16 / claude-10).
+
+---
 **Parent / relates:**
 [[M-aif-wiring]] (R14 is its γ criterion — this excursion delivers it; the R-contract text stays with M-aif-wiring) ·
 [[E-C-vector-live]] (R19 — the belly; the same "wire the canonical AIF quantity, default to the prior, sharpen on burn-in" shape) ·

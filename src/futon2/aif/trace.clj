@@ -34,7 +34,8 @@
    R3a (predicted-observation likelihood model) is still partial. The
   trace schema will gain `:prediction-errors` when R3a lands."
   (:require [clojure.edn :as edn]
-            [clojure.java.io :as io])
+            [clojure.java.io :as io]
+            [futon2.aif.policy-precision :as policy-precision])
   (:import (java.io PushbackReader)
            (java.time Instant LocalDate ZoneId)
            (java.time.format DateTimeFormatter)))
@@ -95,20 +96,38 @@
    per-channel precision tracked across calls via prediction-error
    history. Subsequent calls read this field to continue the rolling
    window; trace-record itself is pure (read-side is `judge`'s
-   responsibility)."
+   responsibility).
+
+   As of R14 (precision-over-policies), `:policy-precision` is propagated
+   too — the policy-scale γ-state (`futon2.aif.policy-precision`): a single
+   bounded inverse-temperature learned from the realized-vs-expected
+   outcomes of chosen policies. Same cross-call read-back pattern as
+   `:precision-state`; absent ⇒ the prior (γ=1.0) is reconstructed."
   [judge-output]
-  {:timestamp (str (Instant/now))
-   :mu-pre (or (:belief-pre judge-output) (:belief judge-output))
-   :mu-post (:belief judge-output)
-   :observation (:observation judge-output)
-   :free-energy (:free-energy judge-output)
-   :prediction-errors (:prediction-errors judge-output {})
-   :precision-state (:precision-state judge-output {})
-   :micro-step-trace (:micro-step-trace judge-output [])
-   :anticipation (:anticipation judge-output {:events-loaded? false :events []})
-   :ranked-actions (mapv strip-ranked-action (:ranked-actions judge-output))
-   :decision (strip-decision (:decision judge-output))
-   :mode (:mode judge-output)})
+  (cond->
+   {:timestamp (str (Instant/now))
+    :mu-pre (or (:belief-pre judge-output) (:belief judge-output))
+    :mu-post (:belief judge-output)
+    :observation (:observation judge-output)
+    :free-energy (:free-energy judge-output)
+    :prediction-errors (:prediction-errors judge-output {})
+    :precision-state (:precision-state judge-output {})
+    ;; R14 precision-over-policies (γ): the policy-scale sibling of
+    ;; :precision-state. The next tick reads this back to continue the rolling
+    ;; realized-outcome window. Absent ⇒ the prior (γ=1.0) is reconstructed.
+    :policy-precision (:policy-precision judge-output
+                                         (policy-precision/initial-policy-precision-state))
+    :micro-step-trace (:micro-step-trace judge-output [])
+    :anticipation (:anticipation judge-output {:events-loaded? false :events []})
+    :ranked-actions (mapv strip-ranked-action (:ranked-actions judge-output))
+    :decision (strip-decision (:decision judge-output))
+    :mode (:mode judge-output)}
+    ;; R16 close-the-loop seam (interface paired with claude-10): the enactor
+    ;; writes `:realized-outcome` at enactment; R14's γ reader consumes it next
+    ;; tick (see `policy-precision/fold-realized-outcome`). Present-only — ABSENT
+    ;; today (enactment not yet live-wired), which keeps γ at its prior.
+    (:realized-outcome judge-output)
+    (assoc :realized-outcome (:realized-outcome judge-output))))
 
 (defn write-trace!
   "Append one trace record (constructed from a judge-style output) to
