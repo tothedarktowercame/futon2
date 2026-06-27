@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>What a wiring diagram IS — the DarkTower CT model</title>
+<style>
+  :root{--ink:#1a1a1a;--mut:#6b6b6b;--done:#2e7d32;--gap:#c62828;--build:#0e7490;--belly:#6d3aa8;
+        --paper:#faf8f3;--line:#e3ddcf;--box:#fff;--hole:#b8860b;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 "Iowan Old Style",Palatino,Georgia,serif;}
+  header{padding:22px 30px 8px;max-width:1180px;margin:0 auto;}
+  h1{font-size:23px;margin:0 0 6px;}
+  header p{font-size:14px;line-height:1.6;color:#333;margin:0 0 8px;max-width:960px;}
+  .wrap{display:flex;gap:18px;max-width:1180px;margin:0 auto;padding:8px 30px 20px;align-items:flex-start;}
+  .stage{flex:1 1 60%;background:#fff;border:1px solid var(--line);border-radius:10px;}
+  .panel{flex:1 1 40%;background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px 18px;min-height:430px;}
+  .panel .rid{color:#999;font:600 11px/1 ui-sans-serif,system-ui;letter-spacing:.04em;text-transform:uppercase;}
+  .panel h2{font-size:18px;margin:3px 0 2px;}
+  .panel .reg{color:var(--mut);font-size:12.5px;font-style:italic;margin-bottom:8px;}
+  .panel h3{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--mut);margin:14px 0 4px;}
+  .panel p{margin:0 0 9px;font-size:13.5px;line-height:1.55;}
+  .panel pre{background:#f6f3ea;border:1px solid var(--line);border-radius:6px;padding:9px 11px;overflow-x:auto;
+        font:12px/1.45 "SF Mono",ui-monospace,Menlo,monospace;color:#243;margin:4px 0 6px;white-space:pre-wrap;}
+  .panel .ground{background:#f3f8fe;border-left:3px solid #4a78c0;padding:7px 11px;border-radius:0 6px 6px 0;font-size:12.5px;color:#234;}
+  .panel code{background:#ece8dd;padding:1px 4px;border-radius:3px;font-size:12px;}
+  .badge{display:inline-block;padding:2px 9px;border-radius:11px;font:600 10.5px/1.5 ui-sans-serif,system-ui;text-transform:uppercase;letter-spacing:.03em;margin-left:6px;vertical-align:middle;}
+  .b-done{color:#1d7a3a;background:#e7f6ec;} .b-build{color:#0e7490;background:#e2f4f7;} .b-belly{color:var(--belly);background:#f1e8fb;}
+  .hint{color:var(--mut);font-size:13px;font-style:italic;}
+  text{font-family:ui-sans-serif,system-ui;}
+  .node rect{fill:var(--box);stroke:#cdbf9e;stroke-width:1.5;rx:7;cursor:pointer;transition:.12s;}
+  .node:hover rect{stroke:var(--hole);stroke-width:2.2;}
+  .node.sel rect{stroke:var(--hole);stroke-width:3;fill:#fffdf5;}
+  .node.prim rect{fill:#fffdf6;} .node.inst rect{fill:#f3f8fe;stroke:#9bb6db;}
+  .node text{pointer-events:none;}
+  .nt{font-size:12px;font-weight:600;fill:#222;} .ns{font-size:9.5px;fill:#777;}
+  .edge{stroke:#b9ad8f;stroke-width:1.4;fill:none;} .edge.faint{stroke:#d8cfb8;stroke-dasharray:3 3;}
+  .elabel{font-size:9.5px;fill:#8a7c58;}
+  .secthead{max-width:1180px;margin:0 auto;padding:6px 30px;}
+  .secthead h2{font-size:17px;border-bottom:2px solid var(--line);padding-bottom:5px;margin:18px 0 10px;}
+  .ex{max-width:1180px;margin:0 auto;padding:0 30px;display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:14px;}
+  .excard{background:#fff;border:1px solid var(--line);border-top-width:4px;border-radius:8px;padding:13px 15px;}
+  .excard.mission{border-top-color:var(--done);} .excard.paper{border-top-color:#4a78c0;} .excard.fold{border-top-color:var(--build);}
+  .excard h3{margin:0 0 3px;font-size:15px;} .excard .sub{color:var(--mut);font-size:12px;font-style:italic;margin-bottom:7px;}
+  .excard pre{background:#f6f3ea;border:1px solid var(--line);border-radius:6px;padding:8px 10px;overflow-x:auto;font:11px/1.4 "SF Mono",ui-monospace,Menlo,monospace;color:#243;white-space:pre-wrap;}
+  .excard p{font-size:13px;margin:6px 0;} .excard code{background:#ece8dd;padding:1px 4px;border-radius:3px;font-size:11.5px;}
+  .tag{display:inline-block;font:600 10px/1.4 ui-sans-serif,system-ui;padding:1px 6px;border-radius:3px;background:#e7f6ec;color:#1d7a3a;}
+  footer{max-width:1180px;margin:0 auto;padding:18px 30px 50px;color:var(--mut);font-size:12.5px;}
+</style>
+</head>
+<body>
+<header>
+  <h1>What a wiring diagram <i>is</i> — the DarkTower category-theory model</h1>
+  <p>The fold turns a cascade into a <b>wiring diagram</b> (R16, the close-the-loop arc — see <code>aif-wiring-explainer.html</code>). But what <i>is</i> a wiring diagram, precisely? This is the <b>semantics</b> layer: DarkTower (real Lean in <code>~/code/mathlib4/DarkTower</code>) answers it categorically. The payoff, in DarkTower's own words: <b>one small interface</b> — typed holes + filling + combs, sequenced by BV — <b>types a mission, a paper, AND a fold's wiring as the same structure</b>, not three theories. A wiring diagram is <b>a comb of typed holes you fill and discharge under a coverage.</b></p>
+  <p><span class="hint">Click a primitive (gold) or an instance (blue) to see its real Lean signature, plain-English meaning, and status. Below: the two worked examples that are already <b>0-sorry in Lean</b>, and the CLean bridge that renders EDN outlines into these types.</span></p>
+</header>
+<div class="wrap">
+  <div class="stage"><svg id="svg" viewBox="0 0 860 520" role="img" aria-label="DarkTower CT wiring model"></svg></div>
+  <div class="panel" id="panel"><p class="hint">Click a node to learn what that categorical primitive does and how DarkTower implements it in Lean.</p></div>
+</div>
+
+<div class="secthead"><h2>The three worked examples — one interface, three domains</h2></div>
+<div class="ex">
+  <div class="excard mission">
+    <h3>① A mission <span class="tag">0-sorry ✓</span></h3>
+    <div class="sub">DarkTower/Examples.lean §MissionExample · futon3c E-mission-head.md</div>
+    <p>The 8-phase lifecycle is a <b>BV sequence</b> (non-commutative spine); the <b>scope</b> and <b>organism</b> readings are one object held together by <code>BV.copar</code>; an <b>unwritten phase is a typed hole</b> hungry to be written.</p>
+    <pre>def lifecycle : BV Phase :=
+  BV.seq (head) (… (seq instantiate document))
+def readings : BV Reading :=
+  BV.copar (scope) (organism)
+def ghostPhaseHole : TypedHole where
+  poly := { A := Phase, B := fun _ => GhostDirection }
+  satiety := fun p => if p = document
+              then .payoff else .parse</pre>
+    <p><code>document</code> is graded <b>payoff</b> (hungry — the goal), the rest <b>parse</b>. Reassociating the spine is a checked <code>BV.Step</code>.</p>
+  </div>
+  <div class="excard paper">
+    <h3>② A paper <span class="tag">0-sorry ✓</span></h3>
+    <div class="sub">DarkTower/Examples.lean §PaperExample · arXiv 0809.2517 "Let H be a Hopf algebra"</div>
+    <p>An <b>ungrounded symbol</b> (<code>H</code>) is a typed hole <i>hungry for a concept</i>; a <b>binder store</b> grounds it; the grounding is the <code>ungroundedBinder</code> discharge polarity — and the answer is computed, not asserted.</p>
+    <pre>def symbolHole : TypedHole where
+  poly := { A := Symbol, B := fun _ => Concept }
+  satiety := fun _ => .role
+def groundingPolarity : DischargeKind :=
+  .ungroundedBinder
+-- answer by computation (rfl):
+example : answers binderQuery binderStore
+        = [expectedBinding] := rfl   -- ?concept = HopfAlgebra</pre>
+    <p>Symbol grounding <b>is</b> a typed-hole discharge — the third member of DarkTower's discharge duality (sorry/proof · query/answer · symbol/binder).</p>
+  </div>
+  <div class="excard fold">
+    <h3>③ A fold's wiring <span class="badge b-build" style="margin:0">to build</span></h3>
+    <div class="sub">the R16 fold (E-close-the-loop) · "a useful third example for a later file" — Examples.lean</div>
+    <p>Examples.lean explicitly names our fold — <b>M-first-flights cascade → temporary-gap → wiring</b> — as the intended third instance. A fold's wiring is a <b>comb of typed holes</b>: boxes consume/produce, the fold <b>fills</b> them, <code>:policy-holes</code> are the <b>un-discharged</b> directions, and a closing ΔG is a <b>discharge</b>. Same interface as ① and ②.</p>
+    <p>This is the bridge back to R16: the <code>futon2.aif.fold</code> contract (<code>{:wiring :delta-g :policy-holes}</code>) is the operational shadow of <code>TypedHole</code>/<code>Fill</code>/<code>Discharge</code>. Making the corpus DarkTower-shaped makes it <b>Lean-checkable</b> (0-sorry iff well-formed).</p>
+  </div>
+</div>
+
+<div class="secthead"><h2>The CLean bridge — EDN outlines → these Lean types, 0-sorry-gated</h2></div>
+<div class="ex">
+  <div class="excard">
+    <h3>CLean = the EDN image of a CT treatment</h3>
+    <div class="sub">futon6/holes/excursions/E-clean.md · DarkTower/CLeanProofs.lean · clean_to_lean.py</div>
+    <p><b>CLean</b> is "Clojure/EDN as Lean-sketch" — a comb of typed Poly interfaces with typed holes, <i>without the proof-term weight</i>. <code>clean_to_lean.py</code> renders <code>*.clean.edn</code> into the same <code>BV</code>/<code>TypedHole</code>/<code>DischargeKind</code> machinery; <b>the render builds 0-sorry iff the CLean is well-formed</b> — that <i>is</i> the correctness gate.</p>
+    <p>Each CLean carries a <b>dual reading</b> (<code>:clean/copar</code>): the informal pattern-tagged method spine <i>and</i> the formal comb — well-formedness is their coherence (every method tag is exactly one box, in order).</p>
+    <table style="font-size:12px;border-collapse:collapse;width:100%">
+      <tr style="color:#777"><td style="padding:2px 6px">CLean (EDN)</td><td style="padding:2px 6px">DarkTower Lean</td></tr>
+      <tr><td style="padding:2px 6px"><code>:clean/seq</code></td><td style="padding:2px 6px"><code>BV.seq</code> over <code>inductive Method</code></td></tr>
+      <tr><td style="padding:2px 6px"><code>:clean/boxes[]</code></td><td style="padding:2px 6px"><code>TypedHole</code> (position + directions)</td></tr>
+      <tr><td style="padding:2px 6px"><code>:hole {:satiety …}</code></td><td style="padding:2px 6px"><code>SatietyGrade</code></td></tr>
+    </table>
+  </div>
+  <div class="excard">
+    <h3>Why CT and not text embeddings (EXP-3)</h3>
+    <div class="sub">E-clean.md · the de-scope finding</div>
+    <p><b>Text retrieval provably plateaus on structural similarity</b> — EXP-3 found that the load-bearing signal for "are these two proofs/missions alike?" is the <b>compositional shape</b> (combs + typed holes), <i>not</i> the prose. No embedding-model size closes that gap.</p>
+    <p>This is exactly why the <b>embedding fold (impl #3) is an ansatz, not the foundation</b>: the structure is the real object; an embedding is a bet about computing over it efficiently. And it clarifies the division of labour with <b>Rob's pipeline</b> (Lean→neo4j+pgvector, graph+embedding indexing): our job is to <b>emit structure-bearing artifacts</b> (CLean / DarkTower-shaped wirings) his pipeline ingests — not to be the retriever.</p>
+  </div>
+</div>
+
+<div class="secthead"><h2>CT-layer status — what's built vs. what's a hole</h2></div>
+<div class="ex" id="rb"></div>
+
+<footer>
+  Peer of <code>aif-wiring-explainer.html</code> (theory / AIF) and the future <code>fold-explainer.html</code> (implementation / enablers). This is the <b>semantics</b> layer — what a wiring diagram <i>is</i>. Source: <code>~/code/mathlib4/DarkTower/</code> · <code>futon6/holes/excursions/E-clean.md</code> · <code>futon3c/holes/missions/M-typed-holes</code>. Authored by claude-10, 2026-06-27.
+</footer>
+
+<script>
+const NODES = [
+  {id:"TypedHole", cls:"prim", t:"TypedHole", s:"a hole = a Poly position", x:150,y:96,
+   lean:"structure TypedHole where\n  poly : PFunctor          -- A = nodes, B a = the holes at a\n  satiety : poly.A → SatietyGrade\n-- holeType T a := T.poly.B a",
+   ground:"Niu–Spivak, <i>Polynomial Functors</i> (arXiv 2312.00990). A node is a position; the directions at it are the typed holes available there.",
+   concept:"A typed hole is a <b>position of a polynomial functor</b>: read a position as a node (a box) and the dependent family of directions at it as the <b>typed holes</b> open at that box. Each node also carries a <b>SatietyGrade</b> — <code>parse / payoff / canon / bundling / role</code> — naming what KIND of obligation the hole is (e.g. <code>payoff</code> = a hungry goal, <code>role</code> = an ungrounded symbol). This is the atom every wiring is made of.",
+   st:"done"},
+  {id:"Comb", cls:"prim", t:"Comb", s:"a wire = a dependent lens", x:360,y:96,
+   lean:"structure Comb (P Q : PFunctor) where\n  onPos : P.A → Q.A          -- forward on positions\n  onDir : (a:P.A) → Q.B (onPos a) → P.B a  -- backward on directions\n-- id, comp, with unit + assoc laws",
+   ground:"Dependent lenses / morphisms of polynomial functors (Poly). The composition laws (<code>id_comp</code>, <code>comp_assoc</code>) are proved.",
+   concept:"A <b>comb is a dependent lens</b> — a morphism of polynomial functors: <b>forward on positions</b> (which box feeds which), <b>backward on directions</b> (how the downstream hole pulls back to an upstream one). This is the <b>wire</b> of a wiring diagram, done categorically: not an ad-hoc edge but a structure-preserving map with identity and associative composition. A whole wiring diagram is a comb (or a composite of combs).",
+   st:"done"},
+  {id:"Fill", cls:"prim", t:"Fill", s:"fill = Poly substitution", x:555,y:96,
+   lean:"def fill (P₂ P₁ : PFunctor) : PFunctor   -- substitution/∘\ndef I : PFunctor                          -- one unfilled variable\n-- leftUnit : fill I P ≃ P ; rightUnit too",
+   ground:"Gambino–Kock, <i>Polynomial functors and polynomial monads</i> (2013). Substitution/composition of polynomial functors.",
+   concept:"<b>Filling a typed hole is polynomial substitution</b> — you plug one polynomial into the directions of another. <code>I</code> is the identity polynomial: a single <b>unfilled variable</b>. The unit laws say filling by <code>I</code> changes nothing (an unfilled hole is just the variable). So a <b>construction</b> (the fold's <code>:wiring</code>) is a chain of fills; a <b>policy-hole</b> is a direction left as <code>I</code> — unfilled, surfaced, not fabricated.",
+   st:"done"},
+  {id:"Discharge", cls:"prim", t:"Discharge", s:"close = comonad counit", x:730,y:200,
+   lean:"structure Discharge (G : Comonad C) where\n  carrier ; opened : A ⟶ G.obj A   -- coalgebra\n  filled : G.obj A ⟶ A             -- counit ε discharges\ninductive DischargeKind  -- the three dualities",
+   ground:"Eilenberg–Moore coalgebra of a comonad: a position opens by its coalgebra map <code>A ⟶ G A</code>; the counit <code>ε : G A ⟶ A</code> discharges it back to the filled position.",
+   concept:"<b>Discharging a hole is the comonad counit.</b> A position <b>opens</b> into its context (the coalgebra map <code>A ⟶ G A</code>), and the counit <code>ε</code> <b>discharges</b> it back to the filled position. <code>DischargeKind</code> records that ONE shape covers <b>three dualities</b>: <b>sorry/proof</b>, <b>query/answer</b>, and <b>ungrounded-symbol/binder</b>. In fold terms: a descending ΔG is a discharge; an abstain is an un-opened hole.",
+   st:"done"},
+  {id:"Coverage", cls:"prim", t:"Coverage", s:"the exhaustiveness certificate", x:730,y:320,
+   lean:"inductive Projection  -- exactly 6 constructors\ntheorem noOrphan : Fintype.card Projection = 6\ntheorem coverageComplete : ∀ p, ∃ facet, fillFacet p = facet\n-- cascadeFeed routes through satiety; proof through the counit",
+   ground:"A design certificate (Grothendieck-coverage flavour) for the six typed-hole discharge projections — the point is NOT to add a 7th fill op, but to certify the six are exhaustive and each routes through an existing facet.",
+   concept:"<b>Coverage is the certificate</b> that the discharge machinery is <b>complete and non-redundant</b>: the six operational projections of typed-hole discharge are exhaustive (<code>noOrphan</code>: exactly 6) and <b>each routes through an existing fill facet</b> (<code>coverageComplete</code>) — cascade-feed through <code>satiety</code>, proof-discharge through the counit. It's the honesty layer: no orphan operation, no silent 7th path.",
+   st:"done"},
+  {id:"BV", cls:"prim", t:"BV", s:"the spine: seq ; and copar ‖", x:300,y:230,
+   lean:"inductive BV (α) | atom | seq | copar\nBV.Cong  -- structural congruence (seq reassociates)\nBV.Step  -- a one-step structural move",
+   ground:"The seq (<code>;</code>, non-commutative) and copar (<code>‖</code>) of deep-inference system BV (Guglielmi). Order matters for the spine; copar holds simultaneous readings.",
+   concept:"<b>BV is the algebra that holds the boxes in order.</b> <code>seq</code> (<code>;</code>) is the <b>non-commutative spine</b> — a mission's phases, a proof's steps, the order is load-bearing. <code>copar</code> (<code>‖</code>) holds <b>simultaneous readings of one object</b> (a mission's scope ‖ organism). Structural congruence lets the spine reassociate (a checked <code>BV.Step</code>) without changing meaning. BV is <i>where</i> the combs live in sequence.",
+   st:"done"},
+  {id:"ScopeQuery", cls:"prim", t:"ScopeQuery", s:"grounding by role-keyed query", x:540,y:300,
+   lean:"structure Sig where Kind ; Role\ndef Store / Query / Binding\ndef answers : Query → Store → List Binding",
+   ground:"Role-keyed hyperedge query answering. The mission scope store and the paper binder store are the same machinery; symbol grounding is a binder query.",
+   concept:"<b>ScopeQuery grounds a hole by asking the store.</b> A signature (<code>Kind</code>, <code>Role</code>), a <code>Store</code> of role-keyed hyperedges, a <code>Query</code> with variables → <code>answers</code> returns the bindings. Symbol grounding (example ②) is exactly a binder query whose answer fills the symbol's hole — <b>computed</b>, returning <code>?concept = HopfAlgebra</code>. The same store machinery serves mission scope and paper binders.",
+   st:"done"},
+  // instances
+  {id:"Mission", cls:"inst", t:"① Mission", s:"BV.seq of phases", x:175,y:430,
+   lean:"-- §MissionExample (0-sorry)\nlifecycle = BV.seq head … document\nreadings  = BV.copar scope organism\nghostPhaseHole : TypedHole  (document = payoff)",
+   ground:"futon3c/holes/missions/E-mission-head.md → DarkTower/Examples.lean §MissionExample.",
+   concept:"A <b>mission</b> as the interface: phases = a <code>BV.seq</code> spine, the scope/organism readings = a <code>BV.copar</code>, an unwritten phase = a <code>TypedHole</code> graded <code>payoff</code>. <b>0-sorry in Lean.</b> See the worked card below.",
+   st:"done"},
+  {id:"Paper", cls:"inst", t:"② Paper", s:"symbol = hole, binder = answer", x:430,y:430,
+   lean:"-- §PaperExample (0-sorry)\nsymbolHole : TypedHole  (H, satiety = role)\ngroundingPolarity = .ungroundedBinder\nanswers binderQuery binderStore = [HopfAlgebra]",
+   ground:"arXiv 0809.2517 golden graph, the 'Let H be a Hopf algebra' binder → §PaperExample.",
+   concept:"A <b>paper fragment</b> as the interface: the ungrounded symbol <code>H</code> = a <code>TypedHole</code> hungry for a concept (satiety <code>role</code>); the binder grounds it via <code>ScopeQuery</code>; the polarity is <code>ungroundedBinder</code>. <b>0-sorry in Lean.</b> See the worked card below.",
+   st:"done"},
+  {id:"Fold", cls:"inst", t:"③ Fold wiring", s:"the R16 target (to build)", x:690,y:430,
+   lean:"-- the intended third instance (Examples.lean note)\n-- futon2.aif.fold : (cascade,circumstance)\n--   → {:wiring :delta-g :policy-holes}\n-- :wiring = comb of TypedHoles ; ΔG = discharge",
+   ground:"M-first-flights cascade→gap→wiring; the R16 fold (E-close-the-loop). Named in Examples.lean as the third example for a later file.",
+   concept:"A <b>fold's wiring</b> as the interface — the bridge to R16. The <code>:wiring</code> is a comb of typed holes; <code>:policy-holes</code> are directions left as <code>I</code> (unfilled, surfaced); a descending ΔG is a <code>Discharge</code>. This is the one instance <b>not yet typed in Lean</b> — building it (DarkTower-shaping the fold corpus) makes the corpus 0-sorry-checkable. The work of E-darktower-wiring + E-wiring-diagram-corpus.",
+   st:"build"},
+];
+const EDGES = [
+  ["TypedHole","Comb","wire"],["Comb","Fill","substitute"],["Fill","Discharge","close"],
+  ["Discharge","Coverage","certified by"],["BV","TypedHole","orders"],["ScopeQuery","Discharge","grounds"],
+  ["Mission","TypedHole","faint"],["Paper","TypedHole","faint"],["Fold","Fill","faint"],
+];
+const NById=Object.fromEntries(NODES.map(n=>[n.id,n]));
+for(const n of NODES){ n._w=n.cls==="inst"?118:104; n._h=38; }
+const SVG="http://www.w3.org/2000/svg";
+const el=(t,a)=>{const e=document.createElementNS(SVG,t);for(const k in a)e.setAttribute(k,a[k]);return e;};
+function trim(n,sx,sy){const hx=n._w/2+5,hy=n._h/2+5;const tx=Math.abs(sx)>1e-3?hx/Math.abs(sx):1e9;const ty=Math.abs(sy)>1e-3?hy/Math.abs(sy):1e9;const t=Math.min(tx,ty);return [n.x+sx*t,n.y+sy*t];}
+const svg=document.getElementById("svg");
+const defs=el("defs",{});
+const mk=(id,c)=>{const m=el("marker",{id,markerWidth:9,markerHeight:9,refX:7,refY:3,orient:"auto",markerUnits:"strokeWidth"});m.appendChild(el("path",{d:"M0,0 L7,3 L0,6 Z",fill:c}));return m;};
+defs.appendChild(mk("a1","#b9ad8f"));defs.appendChild(mk("a2","#d8cfb8"));svg.appendChild(defs);
+// title strip
+const ts=el("text",{x:24,y:30,"font-size":13,"font-weight":700,fill:"#6d3aa8"});ts.textContent="A wiring diagram = a comb of typed holes, filled and discharged under a coverage.";svg.appendChild(ts);
+const ts2=el("text",{x:24,y:472,"font-size":11,fill:"#777"});ts2.textContent="One interface (gold) · three instances (blue): mission, paper, fold-wiring — same structure.";svg.appendChild(ts2);
+// edges
+for(const [f,t,lab] of EDGES){const a=NById[f],b=NById[t];if(!a||!b)continue;
+  const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1;const [x1,y1]=trim(a,dx/d,dy/d);const [x2,y2]=trim(b,-dx/d,-dy/d);
+  const faint=lab==="faint";
+  svg.appendChild(el("line",{class:"edge"+(faint?" faint":""),x1,y1,x2,y2,"marker-end":faint?"url(#a2)":"url(#a1)"}));
+  if(!faint){const mx=(x1+x2)/2,my=(y1+y2)/2;const tx=el("text",{class:"elabel",x:mx,y:my-3,"text-anchor":"middle"});tx.textContent=lab;svg.appendChild(tx);}}
+// nodes
+for(const n of NODES){const g=el("g",{class:"node "+n.cls,"data-id":n.id});
+  g.appendChild(el("rect",{x:n.x-n._w/2,y:n.y-n._h/2,width:n._w,height:n._h,rx:7}));
+  const t1=el("text",{class:"nt",x:n.x,y:n.y-2,"text-anchor":"middle"});t1.textContent=n.t;g.appendChild(t1);
+  const t2=el("text",{class:"ns",x:n.x,y:n.y+11,"text-anchor":"middle"});t2.textContent=n.s;g.appendChild(t2);
+  g.addEventListener("click",()=>select(n.id));svg.appendChild(g);}
+
+const panel=document.getElementById("panel");
+const BADGE={done:["b-done","BUILT — 0-sorry in Lean"],build:["b-build","TO BUILD"],belly:["b-belly","derived"]};
+function select(id){
+  document.querySelectorAll(".node").forEach(e=>e.classList.toggle("sel",e.getAttribute("data-id")===id));
+  const n=NById[id];const [bc,bt]=BADGE[n.st];
+  let h=`<div class="rid">${n.cls==="inst"?"instance":"CT primitive"}</div><span class="badge ${bc}">${bt}</span><h2>${n.t}</h2>`;
+  h+=`<div class="reg">${n.s}</div>`;
+  h+=`<h3>What it is</h3><p>${n.concept}</p>`;
+  h+=`<h3>In Lean (DarkTower)</h3><pre>${n.lean}</pre>`;
+  h+=`<h3>Grounding</h3><div class="ground">${n.ground}</div>`;
+  panel.innerHTML=h;
+}
+// status board
+const RB=[
+  ["TypedHole / Fill / Comb / Discharge / Coverage / BV / ScopeQuery","done","The 7 primitives — all built in Lean with their laws (unit/assoc/congruence) proved. The interface a wiring is built to."],
+  ["① MissionExample — a mission as typed holes","done","Examples.lean §MissionExample: lifecycle BV.seq, scope‖organism copar, unwritten-phase hole. 0-sorry."],
+  ["② PaperExample — symbol grounding as discharge","done","Examples.lean §PaperExample: ungrounded H, binder store, ungroundedBinder polarity; answer by rfl. 0-sorry."],
+  ["CLean render gate (.clean.edn → Lean)","done","CLeanProofs.lean via clean_to_lean.py: APM proofs render to BV/TypedHole/DischargeKind, builds 0-sorry iff well-formed. E-clean.md."],
+  ["③ Fold-wiring as a DarkTower instance","build","The R16 fold's :wiring typed as a comb of typed holes — the intended third example (Examples.lean note). E-close-the-loop × E-darktower-wiring."],
+  ["Port CLean from APM-proofs to missions/code","build","The corpus bridge: emit mission/code .clean.edn outlines → DarkTower wirings (Rob's pipeline ingests them). E-wiring-diagram-corpus."],
+  ["Coverage as a live gate over real wirings","build","The exhaustiveness cert exists for the 6 projections; running it as a check over produced wirings is unbuilt."],
+];
+const RBBADGE={done:["#1d7a3a","#e7f6ec","built — 0-sorry"],build:["#0e7490","#e2f4f7","to build"]};
+const rb=document.getElementById("rb");
+for(const [t,s,n] of RB){const [c,bg,lbl]=RBBADGE[s];
+  const d=document.createElement("div");d.className="excard";d.style.borderTopColor=c;
+  d.innerHTML=`<h3 style="font-size:13.5px">${t}</h3><span style="display:inline-block;font:600 10px/1.4 ui-sans-serif;text-transform:uppercase;color:${c};background:${bg};padding:1px 7px;border-radius:10px">${lbl}</span><p style="margin-top:7px">${n}</p>`;
+  rb.appendChild(d);}
+select("TypedHole");
+</script>
+</body>
+</html>
