@@ -119,6 +119,54 @@ example : answers binderQuery binderStore
   </div>
 </div>
 
+<div class="secthead"><h2>Worked CLean examples — pulled back from the Linode math.CT run (102 papers)</h2>
+  <p style="font-size:13.5px;max-width:960px;color:#333">102 <b>math.CT arXiv papers</b>, run on Linode, each turned into a <b>CLean</b> — a method-tagged spine + a comb of typed boxes + the dual <code>copar</code> reading, with the method/macro types assigned by LLaMA (mechanical otherwise), rendered to the DarkTower Lean types. <b>The shape recurs hard:</b> 98/102 share the <code>construct-exploit-discharge</code> macro (the rest: 3 <code>contradiction-reduce</code>, 1 <code>induct-tower</code>), and the spine draws from a <b>~10-tag closed vocabulary</b> (<code>reduce-to-known-result</code> 170 · <code>construct-auxiliary-object</code> 163 · <code>transport-along-symmetry</code> 69 · <code>compute-invariant</code> 20 · <code>local-to-global</code> 13 · …). This is <b>EXP-3's thesis made concrete</b>: the compositional shape is real, recurring, and small — exactly the structure that embeddings (or Rob's pgvector index) should key on, not the prose. Source: <code>futon6/data/mark5-ct100-run/holes/clean-ct200/</code>.</p>
+</div>
+<div class="ex">
+  <div class="excard" style="border-top-color:#6d3aa8">
+    <h3>1410.3218 — Birkhoff subcategories</h3>
+    <div class="sub">categorical algebra · macro: construct-exploit-discharge</div>
+    <pre>:clean/seq [:construct-auxiliary-object :reduce-to-known-result
+            :local-to-global :transport-along-symmetry
+            :reduce-to-known-result]
+:clean/boxes
+[{:id :e-birkhoff-subcategory :method :construct-auxiliary-object
+  :text "Bc is a Birkhoff subcategory of Ac"
+  :consumes [:k :d-circ-k-zero :d-factorises]   ; typed holes
+  :produces :birkhoff-subcategory}]             ; filled position
+:clean/wires
+[{:from :e-birkhoff-subcategory :to :e-k-v-zero-closed
+  :carries :birkhoff-subcategory}]              ; a Comb (wire)</pre>
+    <p>Each box <b>is</b> a <code>TypedHole</code> — <code>:consumes</code> = its directions/holes, <code>:produces</code> = the filled position; each wire is a <code>Comb</code>; the spine is the <code>BV.seq</code>. The whole paper proof is one wiring diagram.</p>
+  </div>
+  <div class="excard" style="border-top-color:#6d3aa8">
+    <h3>1606.04999 — pseudonatural transformations</h3>
+    <div class="sub">2-category theory · macro: construct-exploit-discharge</div>
+    <pre>:clean/seq [:construct-auxiliary-object
+            :construct-auxiliary-object]
+:clean/boxes
+[{:method :construct-auxiliary-object
+  :text "definition of horizontal composition
+         of pseudonatural transformations"
+  …}]
+:clean/copar [{:reading :informal :is :clean/seq} …]</pre>
+    <p>A short two-box construction. The <code>:clean/copar</code> holds the <b>dual reading</b> — the informal method-spine alongside the formal comb; well-formedness is their coherence (one method tag ↔ one box, in order).</p>
+  </div>
+  <div class="excard" style="border-top-color:#6d3aa8">
+    <h3>1112.4128 — fibrations</h3>
+    <div class="sub">fibred categories · macro: construct-exploit-discharge</div>
+    <pre>:clean/seq [:construct-auxiliary-object
+            :reduce-to-known-result :reduce-to-known-result
+            :reduce-to-known-result :construct-auxiliary-object
+            :transport-along-symmetry]
+:clean/boxes
+[{:method :construct-auxiliary-object
+  :text "the fibre above 1 is the pointed category Gp"
+  …}]</pre>
+    <p>A 6-box spine ending in <code>transport-along-symmetry</code>. Different paper, different mathematics — <b>same interface</b>: boxes (typed holes) wired into a BV-sequenced comb. That sameness across 102 papers is the point.</p>
+  </div>
+</div>
+
 <div class="secthead"><h2>CT-layer status — what's built vs. what's a hole</h2></div>
 <div class="ex" id="rb"></div>
 
@@ -227,7 +275,7 @@ const RB=[
   ["TypedHole / Fill / Comb / Discharge / Coverage / BV / ScopeQuery","done","The 7 primitives — all built in Lean with their laws (unit/assoc/congruence) proved. The interface a wiring is built to."],
   ["① MissionExample — a mission as typed holes","done","Examples.lean §MissionExample: lifecycle BV.seq, scope‖organism copar, unwritten-phase hole. 0-sorry."],
   ["② PaperExample — symbol grounding as discharge","done","Examples.lean §PaperExample: ungrounded H, binder store, ungroundedBinder polarity; answer by rfl. 0-sorry."],
-  ["CLean render gate (.clean.edn → Lean)","done","CLeanProofs.lean via clean_to_lean.py: APM proofs render to BV/TypedHole/DischargeKind, builds 0-sorry iff well-formed. E-clean.md."],
+  ["CLean render gate (.clean.edn → Lean)","done","CLeanProofs.lean via clean_to_lean.py: APM proofs render to BV/TypedHole/DischargeKind, builds 0-sorry iff well-formed (E-clean.md). The pipeline also ran on Linode over 102 math.CT arXiv papers (mark5-ct100-run) — 98/102 share the construct-exploit-discharge macro; a ~10-tag method vocabulary."],
   ["③ Fold-wiring as a DarkTower instance","build","The R16 fold's :wiring typed as a comb of typed holes — the intended third example (Examples.lean note). E-close-the-loop × E-darktower-wiring."],
   ["Port CLean from APM-proofs to missions/code","build","The corpus bridge: emit mission/code .clean.edn outlines → DarkTower wirings (Rob's pipeline ingests them). E-wiring-diagram-corpus."],
   ["Coverage as a live gate over real wirings","build","The exhaustiveness cert exists for the 6 projections; running it as a check over produced wirings is unbuilt."],
