@@ -364,6 +364,26 @@ const CARDS = {
   {id:"R16-ARM", t:"Arming / autopen switch (WM-I4)", s:"open", c:"cpu",
    n:"Whether a <code>:passed</code> action FIRES is the exogenous operator / autopen switch — governance, not inference; the meta layer, not this arc. The consent gate is the substitutable location (supervised → autonomous = swap operator for autopen)."}
  ],
+ "Fold enablers · the implementation layer (neither CT nor AIF) — does it actually WORK?": [
+  {id:"FOLD-MINILM", t:"MiniLM cascade embedding — the (have→want) magnet", s:"ready", c:"cpu", new:true,
+   ev:"cascade_construct.py / cascade_serve.py · LIVE this session (M-value-creation-loop meme-magnet ⇒ F=+0.90)",
+   n:"<b>WORKS</b> — embeds the magnet psi (minilm) and phylogeny-greedy coverage-saturates a cascade from the pattern pool. Proven live this session. futon3a/.venv has sentence_transformers+torch. The INPUT side of every fold; cascade-on-demand is real (richness gated by library coverage, not the embedding)."},
+  {id:"FOLD-DIFFSUB", t:"diffsub_emit (JAX) — the (have,want) move-set producer", s:"ready", c:"gpu", new:true,
+   ev:"futon6/scripts/diffsub_emit.py --jax → data/diffsub-moves.edn (55 scored moves, real substrate-2 scopes, 2026-06-09)",
+   n:"<b>WORKS on REAL data</b> — the success JAX case: sparse JAX adjacency over real substrate-2 scopes+capabilities → 55 <code>:have</code>/<code>:want</code> moves with <code>:delta-g</code>, the move-set the rollout ΔG already consumes. Runs via futon5/.venv-tpg. (Contrast FOLD-GAE — same toolchain, opposite outcome.)"},
+  {id:"FOLD-EXOTYPE", t:"exotype/xenotype bridge — encoding → wiring diagram", s:"partial", c:"gpu", new:true,
+   ev:"pattern_exotype_bridge.py (791 patterns→8/36-bit) · data/xenotype-*-wirings · docs/…technote4-exotype-lift-audit.md",
+   n:"<b>REAL PRIOR ART that encoding→WIRING works</b> — it already compiles xenotype encodings into wiring diagrams (mermaid <code>graph LR</code> + edn <code>:diagram {:nodes :edges}</code>, with a wiring-design-principles doc). BUT two limits for impl #3: (a) the sigil→physics <b>LIFT is audited NOT-READY</b> (technote4 P1 gate — it currently STEERS kernel specs, doesn't implement the 8→36-bit stable-physics expansion); (b) the wirings target <b>CA-physics, not mission/sorry discharge</b>. The machinery transfers; the target domain + lift-alignment don't. Last touched 2026-02-16."},
+  {id:"FOLD-GAE", t:"GAE link-prediction (predict WIRES via GNN)", s:"open", c:"gpu", new:true,
+   ev:"futon5/tools/embed/jax-learning/it2_link_prediction.py · commit 2b31d2a: \"GCN < heuristics, lift -0.058\"",
+   n:"<b>CAUTION — the obvious 'predict wires via GNN' path FAILED its one test.</b> The GCN UNDERPERFORMED common-neighbour / Adamic-Adar heuristics by <b>lift −0.058</b> on a toy SBM graph (claude-6's bar is lift-over-heuristics, not absolute AUC), and the real-data step (git_dep_graph_asof) was never taken. Open decision for impl #3: understand WHY it lost / try real data, or DON'T lean on GNN link-prediction for wires. Do not assume it works — it didn't."},
+  {id:"FOLD-GFLOWNET", t:"GFlowNet — diverse wiring sampler", s:"vision", c:"gpu", new:true,
+   ev:"vendored gflownet/ (upstream alexhernandezgarcia, torch, synced 2026-06-11)",
+   n:"The diversity arm for impl #3 (sample wirings ∝ −ΔG instead of one). EXTERNAL + UNINTEGRATED — a full upstream research repo with slurm launch tooling, no stack wiring. Deferred until a #3 v0 needs diverse generation; integration cost is real."},
+  {id:"FOLD-JAXREFINE", t:"TPG jax_refine — differentiable wiring polish", s:"vision", c:"gpu", new:true,
+   ev:"futon5/tools/tpg/jax_refine.py (autodiff weight opt against verifier band-scores)",
+   n:"A tangential enabler — Lamarckian gradient refinement of program weights toward constraint satisfaction; could polish a wiring toward low ΔG, but TPG-domain, not the fold's construction. Deferred / opportunistic."}
+ ],
  "R14 · Precision over policies (γ) — what the red dot contains": [
   {id:"R14-GAMMA", t:"γ — precision over policies", s:"break", c:"cpu",
    n:"R7 gives precision over sensory channels; there is still no γ over POLICIES — the selection temperature τ is a fixed heuristic. The agent isn't yet self-calibrating in how hard it commits."},
@@ -380,7 +400,9 @@ const LINKS={
  "R19-UNIFY":"E-C-vector-live.md","R19-WM-LOOP":"E-C-vector-live.md","R19-PROOF-JOIN":"M-goals-and-holes.md",
  "R19-KL":"E-C-vector-live.md","R19-YING-RERUN":"M-goals-and-holes.md",
  "R16-GATE":"M-aif-wiring.md","R16-ROLLOUT":"E-close-the-loop.md","R16-IMPL-SELECT":"E-close-the-loop.md","R16-ARROWS":"M-aif-wiring.md","R16-ARM":"M-aif-wiring.md",
- "R14-GAMMA":"M-aif-wiring.md","R14-FEED":"M-aif-wiring.md"
+ "R14-GAMMA":"M-aif-wiring.md","R14-FEED":"M-aif-wiring.md",
+ "FOLD-MINILM":"E-have-want-pairs.md","FOLD-DIFFSUB":"E-have-want-pairs.md","FOLD-EXOTYPE":"E-have-want-pairs.md",
+ "FOLD-GAE":"E-have-want-pairs.md","FOLD-GFLOWNET":"E-have-want-pairs.md","FOLD-JAXREFINE":"E-have-want-pairs.md"
 };
 const app=document.getElementById('rb-app');
 for(const [phase,cards] of Object.entries(CARDS)){
