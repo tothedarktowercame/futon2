@@ -3,6 +3,7 @@
    temperature learned from the realized-vs-expected PERFORMANCE of chosen
    policies (signed: beat ⇒ commit, miss ⇒ hedge)."
   (:require [clojure.test :refer [deftest is testing]]
+            [futon2.aif.policy :as policy]
             [futon2.aif.policy-precision :as gamma]))
 
 ;; ---------------------------------------------------------------------------
@@ -194,3 +195,56 @@
     (doseq [perf [-1.0 -0.6 -0.25 0.0 0.25 0.6 1.0]]
       (let [g (:policy-precision (feed perf 10))]
         (is (<= 0.5 g 2.0) (str "γ=" g " out of bounds for perf=" perf))))))
+
+;; ---------------------------------------------------------------------------
+;; LOCK-IN regression — γ self-calibration, end to end (outcome → γ → selection)
+;; ---------------------------------------------------------------------------
+;; This is the drift guard for R14's whole point: a run of GOOD realized outcomes
+;; must SHARPEN selection (γ↑ / τ↓ / more mass on the best policy), a run of BAD
+;; ones must HEDGE (γ↓ / τ↑ / flatter), and realizing exactly-as-predicted must
+;; be byte-identical to the spread-only path (reduction-safe). Numbers are pinned
+;; deterministically so any silent change to the signal, transfer, or wiring
+;; trips this test. Outcomes are driven through the REAL R16 :realized-outcome
+;; seam (fold-realized-outcome), then through the REAL selector (select-action).
+
+(defn- fold-run
+  "Fold n identical realized outcomes (distinct ticks) through the R16 seam."
+  [expected realized n]
+  (reduce (fn [s t] (gamma/fold-realized-outcome
+                     s {:policy :pi :expected-G expected :realized-G realized :tick t}))
+          (gamma/initial-policy-precision-state)
+          (range 1 (inc n))))
+
+(deftest gamma-self-calibration-regression-test
+  (let [cand [{:action {:type :a} :G-total 0.0}    ; fixed candidates ⇒ fixed
+              {:action {:type :b} :G-total 0.5}    ; G-spread, so any sharpness
+              {:action {:type :c} :G-total 1.0}]   ; change is γ alone
+        ;; lower G is better: realized below expected = beat; above = miss.
+        good (fold-run -0.5 -1.5 8)   ; every plan over-delivers → perf̄ = 0.5
+        bad  (fold-run -0.5  0.5 8)   ; every plan misses        → perf̄ = -1.0
+        even (fold-run -0.5 -0.5 8)   ; every plan as predicted  → perf̄ = 0.0
+        sel  (fn [st] (policy/select-action cand {:policy-precision (gamma/gamma-for st)}))
+        best (fn [d] (apply max (vals (:softmax-weights d))))
+        dg (sel good) db (sel bad) de (sel even)]
+
+    (testing "γ is pinned to its deterministic transfer values (catches drift)"
+      (is (< (Math/abs (- (Math/sqrt 2.0) (gamma/gamma-for good))) 1e-6)
+          "perf̄=0.5 → γ = 2^0.5 ≈ 1.4142")
+      (is (< (Math/abs (- 0.5 (gamma/gamma-for bad))) 1e-6)  "perf̄=-1 → γ = floor 0.5")
+      (is (< (Math/abs (- 1.0 (gamma/gamma-for even))) 1e-9) "perf̄=0 → γ = 1.0 (neutral)"))
+
+    (testing "GOOD run sharpens selection vs the neutral baseline"
+      (is (> (gamma/gamma-for good) 1.0))
+      (is (< (:tau dg) (:tau-spread dg)) "effective τ pulled BELOW the spread-τ")
+      (is (> (best dg) (best de)) "more probability mass on the best policy"))
+
+    (testing "BAD run hedges selection vs the neutral baseline"
+      (is (< (gamma/gamma-for bad) 1.0))
+      (is (> (:tau db) (:tau-spread db)) "effective τ pushed ABOVE the spread-τ")
+      (is (< (best db) (best de)) "probability mass spread flatter"))
+
+    (testing "EXACT-as-predicted is reduction-safe (byte-identical to spread path)"
+      (is (= (:tau-spread de) (:tau de)) "τ_eff == τ_spread at γ=1.0"))
+
+    (testing "monotone decisiveness ordering: good ≻ neutral ≻ bad"
+      (is (> (best dg) (best de) (best db))))))

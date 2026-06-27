@@ -1,6 +1,6 @@
 # Excursion: precision over policies — the γ term (E-precision-over-policies)
 
-**Date:** 2026-06-26 · **Status:** DELIVERED 2026-06-27 (driven by claude-11; gated; see §7).
+**Date:** 2026-06-26 · **Status:** CLOSED 2026-06-27 (driven by claude-11; gated; performance-reading confirmed by Joe; lock-in regression pins self-calibration; see §7).
 **Authored by:** claude-10. **Driven by:** claude-11.
 
 ---
@@ -40,6 +40,13 @@ history off the hot path ✓ · (3) selection reads γ — higher γ sharpens, l
 flattens, demonstrated in tests ✓ · (4) reduction-safe — γ=1 byte-identical;
 `:realized-outcome` absent today ⇒ neutral ✓ · (5) burn-in observability note:
 `README-gamma.md` ✓.
+
+**Lock-in (Joe, 2026-06-27):** `gamma-self-calibration-regression-test` pins the
+whole property end-to-end through the real seam + selector — a run of GOOD
+outcomes sharpens (γ=√2, τ_eff<τ_spread, more mass on best), a run of BAD ones
+hedges (γ=0.5, τ_eff>τ_spread, flatter), exact-as-predicted is byte-identical
+(γ=1.0) — with deterministic numbers so the signal/transfer/wiring cannot
+silently drift. **R14 closed.**
 
 **Artifacts:** `src/futon2/aif/policy_precision.clj` (new γ learner) ·
 `policy.clj` (`effective-temperature`, `select-action :policy-precision`) ·
