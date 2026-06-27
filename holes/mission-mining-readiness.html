@@ -1,0 +1,201 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<title>Mission-mining → rollout moves — readiness (port of the proofcheck spine to missions)</title>
+<style>
+  :root{
+    --paper:#f7f5ef; --ink:#1a1a1a; --line:#ddd6c8;
+    --ready:#1d7a3a; --ready-bg:#e7f6ec;
+    --partial:#9a6a00; --partial-bg:#fdf3e0;
+    --vision:#555; --vision-bg:#eee;
+    --build:#0e7490; --build-bg:#e2f4f7;
+    --break:#8a2bbd; --break-bg:#f3e8fb;
+    --open:#555; --open-bg:#ececec;
+    --cpu:#6b7280; --cpu-bg:#f3f4f6;
+    --gpu:#a11; --gpu-bg:#fbe9e9;
+    --llm:#6d3aa8; --llm-bg:#f0e8fb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.5 "Iowan Old Style",Georgia,serif;}
+  header{padding:24px 32px 8px;} h1{font-size:22px;margin:0 0 4px;} .meta{color:#666;font-size:12.5px;}
+  .flow{margin:14px 32px;padding:10px 14px;border:1px solid var(--line);background:#fff;
+        font:12.5px/1.7 ui-sans-serif,system-ui;color:#333;border-radius:6px;} .flow b{color:#000}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin:10px 32px;font:12px/1.8 ui-sans-serif,system-ui;}
+  .badge{display:inline-block;padding:2px 8px;border-radius:10px;font:600 11px/1.5 ui-sans-serif,system-ui;
+         text-transform:uppercase;letter-spacing:.03em;}
+  .ready{color:var(--ready);background:var(--ready-bg);} .partial{color:var(--partial);background:var(--partial-bg);}
+  .vision{color:var(--vision);background:var(--vision-bg);}
+  .build{color:var(--build);background:var(--build-bg);} .break{color:var(--break);background:var(--break-bg);}
+  .open{color:var(--open);background:var(--open-bg);}
+  main{padding:8px 24px 40px;} .phase{margin:20px 8px;}
+  .phase h2{font-size:15px;margin:0 0 2px;border-bottom:2px solid var(--line);padding-bottom:4px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;}
+  .card{border:1px solid var(--line);border-top-width:4px;background:#fff;border-radius:6px;padding:11px 13px;display:flex;flex-direction:column;}
+  .card.s-ready{border-top-color:var(--ready);} .card.s-partial{border-top-color:var(--partial);}
+  .card.s-build{border-top-color:var(--build);} .card.s-break{border-top-color:var(--break);}
+  .card.s-open{border-top-color:var(--open);} .card.s-vision{border-top-color:var(--vision);}
+  .card.new{background:#f1e8fb;}  /* lavender: the turn / Evidence-Landscape layer — the new asset */
+  .card h3{margin:0 0 2px;font-size:13.5px;} .card .id{color:#999;font:600 11px/1 ui-sans-serif,system-ui;}
+  .row1{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+  .chip{display:inline-block;font:600 10px/1.4 ui-sans-serif,system-ui;padding:1px 6px;border-radius:3px;margin-left:4px;}
+  .chip.cpu{background:var(--cpu-bg);color:var(--cpu);} .chip.gpu{background:var(--gpu-bg);color:var(--gpu);}
+  .chip.llm{background:var(--llm-bg);color:var(--llm);}
+  .ev{font:11px/1.4 "SF Mono",ui-monospace,Menlo,monospace;color:#2456a6;margin:5px 0 0;}
+  .note{font-size:12.5px;color:#333;margin:6px 0 0;} code{background:#ece8dd;padding:1px 4px;border-radius:3px;font-size:11.5px;}
+  footer{padding:8px 32px 60px;max-width:960px;} footer h2{font-size:15px;border-bottom:2px solid var(--line);padding-bottom:4px;}
+  footer li{font-size:13px;margin:4px 0;}
+</style></head><body>
+<header>
+  <h1>Mission-mining → rollout moves — readiness</h1>
+  <div class="meta">claude-1 · 2026-06-25 · the port of <code>proofcheck-readiness.html</code>'s spine from <b>proofs</b> to <b>missions</b>. Closes criterion (2) of <code>M-aif-wiring</code> R16 (the rollout path / ΔG) — see <code>E-mine-mission-transitions.md</code>. "Give the agent a memory of previous actions, and help it relate the current possible actions to previous ones."</div>
+</header>
+<div class="flow">
+  <b>The spine</b> (deterministic-where-possible, LLM-only-for-the-residue, an incremental monoid over THREE corpora — mission docs · patterns · <b>turns</b>):<br>
+  <b>rung −1</b> structure-first missions — <i>are the mission's scopes/concepts grounded?</i> → <b>:structure lift</b> (scope-tree → mission-state) → <b>referent grounding</b> (scopes → capabilities/patterns) → <b>structure embedding</b> (nearest-<i>structural</i> mission, not nearest-text) → <b>rung 0–2</b> deterministic move-mining (action-classes from structure) → <b>rung 3</b> turn-grounded move-synthesis (read the turns where pattern P was applied → educated guess) → <b>select-per-mission-topology</b> (matched-cascade set IS the action-topology) → <b>actionability floor</b> (only act where moves are grounded; else "needs a foothold"). A <i>move</i> = a transition with provenance (which turns / PSR-PUR) and an outcome (→ R14 γ).
+</div>
+<div class="legend">
+  <span class="badge ready">built/verified</span> exists, checked this session ·
+  <span class="badge partial">v1 / weak</span> exists, known gaps ·
+  <span class="badge build">needs build</span> specified, ready ·
+  <span class="badge break">needs breakdown</span> decompose first ·
+  <span class="badge open">open question</span> decision pending ·
+  <span class="chip cpu">cpu</span><span class="chip gpu">gpu</span><span class="chip llm">llm</span> ·
+  <span style="display:inline-block;width:11px;height:11px;background:#f1e8fb;border:1px solid #c8a8e8;border-radius:2px;vertical-align:middle"></span> lavender = the turns / Evidence-Landscape layer (the new asset)
+</div>
+<main id="app"></main>
+<footer>
+  <h2>Open questions (Joe to steer)</h2>
+  <ol id="breakdowns"></ol>
+  <h2>Suggested order (dependency-aware)</h2>
+  <ol>
+    <li><b>✓ DONE — <code>STRUCT-EMBED</code></b> (<code>mission_structure_embed.py</code>): structural NN finds a same-class mission 0.79 vs text 0.38; the abstaining targets now draw a same-class provenance (<code>structure-seed-promotion</code>) instead of a wrong-class text neighbour, and the mined move flips ΔG nil → −7.71e-4. Next load-bearing build ↓.</li>
+    <li><b>Light up the corpora as queryable</b> (mostly exists): the three-corpus join — turn → pattern → mission — with the PSR/PUR (<code>pattern-outcome</code>) entries surfaced as action+outcome records.</li>
+    <li><b>Coverage now done (177/177 flip) — the frontier is provenance QUALITY:</b> the move rungs — <code>MOVE-RECOGNIZER</code> (verb-twin, over turn prose) + <code>TURN-SYNTH</code> (LLM reads the turns where P fired) — turn the 37% weak/cross-class priors into grounded ones. The verb side is the binding constraint (proofcheck found noun ~1.0, strategy thin).</li>
+    <li><b>Port the cap:</b> <code>SELECT-PER-MISSION</code> + <code>ACTIONABILITY-FLOOR</code> + <code>ACTION-CERT</code>, then wire mined moves → <code>diffsub-moves</code> → <code>rollout-g-for</code> (ΔG, criterion 2) and PSR/PUR outcomes → R14 γ.</li>
+  </ol>
+</footer>
+<script>
+const CARDS = {
+ "A · Corpora — what we mine (mission docs · patterns · turns)": [
+  {id:"MISSION-DOCS", t:"Mission scope-trees (the :structure source)", s:"ready", c:"cpu",
+   ev:"futon6/scripts/mission_scope_detect.py → futon6/data/mission-scope-trees/M-*.json (214 missions, verified)",
+   n:"Each mission parsed to a scope hyperedge-forest: 7-phase spine (head→identify→map→derive→argue→verify→instantiate→document), binder-types (eightfold-phase / loose-section / map-item / capability-scope), detached flag per scope. The distilled, after-the-fact structure."},
+  {id:"PATTERNS", t:"Pattern ↔ mission co-embedding", s:"ready", c:"cpu",
+   ev:"futon3a/resources/notions/minilm_{pattern,mission}_embeddings.json (490 patterns + 800+ missions, 384-d L2) · futon6/data/mission-pattern-scopes.edn (:applied + :try-candidates)",
+   n:"Live MiniLM space; supports \"missions where pattern P was used\" + nearest-pattern-to-mission. <b>But text-weak:</b> the witness's nearest analog was cos 0.31 — below E-vwm's 0.5 stall line. Motivates STRUCT-EMBED."},
+  {id:"TURNS", t:"Turns in the Evidence Landscape", s:"partial", c:"cpu", new:true,
+   ev:"futon3c/src/futon3c/evidence/{store,threads,backend,xtdb_backend}.clj (tests passing) · backfill_claude_jsonl_chat_turns.py · TN-forum-to-evidence-landscape.md",
+   n:"XTDB-backed append-only evidence store. <b>EvidenceEntry carries pattern-id + tags</b> (turn↔pattern, embedding-tagged — the WEAK-but-present link). EvidenceType includes <code>pattern-selection</code> / <code>pattern-outcome</code> = <b>PSR/PUR</b>: pattern→action→outcome→prediction-error. The literal \"memory of previous actions\" — and the moves live HERE (the prose of doing), not in the distilled docs."},
+  {id:"TURN-MISSION", t:"turn ↔ mission link (autoclock-in)", s:"open", c:"cpu", new:true,
+   ev:"backfill_turn_commit_mission_bestguess.py → futon5a/data/turn-commit-mission-backfill.json (best-guess, 90-min window)",
+   n:"<b>WEAK by Joe's design note:</b> no historical clock-in, so turn↔mission is a choppy best-guess (touched M-*.md or mission→file overlap). <b>Decision:</b> don't depend on it — route turn → <i>pattern</i> → mission (strong tag + co-embedding) instead; harden M-autoclock-in only if the indirect path proves insufficient."}
+ ],
+ "B · Structure — the :structure lift + the load-bearing embedding": [
+  {id:"SCOPE-LIFT", t:":structure lift (scope-tree → mission-state)", s:"ready", c:"cpu",
+   ev:"mission_scope_detect.py (live; 214 JSONs)",
+   n:"The analog of proofcheck's LaTeXML→Clojure transducer: raw mission .md → structured phase/scope state. Already deterministic and corpus-wide."},
+  {id:"REFERENT-GROUND", t:"Referent grounding (scope → capability / pattern)", s:"ready", c:"cpu",
+   ev:"capability overlay materialize+link (M-wm-policies); :7071 scope/capability/<id> overlay",
+   n:"The analog of proofcheck's symbol grounding: bind a mission's capability-scopes to the star-map registry. The pragmatic hinge for the move's :advances-cap (declared, never inferred)."},
+  {id:"STRUCT-EMBED", t:"Mission-STRUCTURE embedding (BUILT)", s:"ready", c:"cpu",
+   ev:"futon6/scripts/mission_structure_embed.py (2026-06-25) · 198 missions, 161-d · same-class NN-match 0.79 structure vs 0.38 text · data/mission-structure-embed/",
+   n:"<b>BUILT — the load-bearing rung.</b> Deterministic 161-d vector per mission (phase presence/detached · class one-hot · binder histogram · shape scalars · phase-transition bigrams · applied-pattern presence), z-normed + L2. Verified: structural NN finds a same-CLASS mission <b>0.79</b> vs text <b>0.38</b>. <b>End-to-end witness:</b> for abstaining canon-fingerprint-store the structural provenance is structure-seed-promotion (same-class pipeline, sim 0.60) where TEXT picked symbol-grounding (wrong class, 0.31); borrowing its move-prior flips ΔG nil → −7.71e-4. CPU, offline, sim-only."}
+ ],
+ "C · Move-mining — the rung ladder (the verb side = the binding constraint)": [
+  {id:"MOVE-v0", t:"Deterministic move-classes v0", s:"partial", c:"cpu",
+   ev:"futon6/scripts/diffsub_emit.py — 3 classes: :close-hole / :advance-capability / :centre-mess; minted ONLY from detached scopes",
+   n:"Works, but <b>too narrow</b>: a mission with 0 detached scopes (e.g. M-canon-fingerprint-store) gets 0 moves → no path → abstain. No \"apply a cascade that worked on a similar mission\" class — exactly what mining supplies."},
+  {id:"MINED-WITNESS", t:"Mined-move ΔG witness", s:"ready", c:"cpu",
+   ev:"/tmp/mine-witness.clj (2026-06-25): canon-only ΔG=nil (abstain) → +1 mined move ΔG=−7.41e-4 (gate decides)",
+   n:"PASSED. One mined move (provenance = nearest co-embedded mission, prior borrowed not fabricated) flips the abstaining gate. Sim-only, zero :7071 writes. Proves criterion (2)'s fix-shape; the weak 0.31 analog is why STRUCT-EMBED is next."},
+  {id:"MINE-GEN", t:"Mined-move generator — whole abstaining set", s:"ready", c:"cpu",
+   ev:"futon6/scripts/mission_mine_moves.py → data/diffsub-moves-mined.edn (2026-06-25): 177/177 move-less missions flip abstain→ΔG (median −7.7e-4); same-class provenance 63%",
+   n:"<b>Generalizes the witness n=1 → n=177.</b> For every move-less mission mint one excursion-shaped phase-advance move (\"fill the next hole\"), prior borrowed from its nearest STRUCTURAL neighbour-with-moves. Rollout-verified: <b>all 177 get a non-nil ΔG</b>. <b>The honest frontier is provenance QUALITY:</b> 63% same-class — the 37% weak/cross-class priors are guesses, exactly what MOVE-RECOGNIZER/TURN-SYNTH sharpen. Overlay only — not auto-promoted."},
+  {id:"MOVE-RECOGNIZER", t:"Move recognizer over turn prose (verb-twin)", s:"ready", c:"cpu", new:true,
+   ev:"FOLDED into meme_mine_runner.py — meme extraction over human→agent turns IS the verb-twin; empirical op-vocab ~10 classes",
+   n:"<b>DONE as MEME-MINE:</b> extracting (have,want,op) from turn prose IS recognizing the move-class (op). The empirical op-vocabulary (dispatch/build/find/deploy/investigate…) emerged from the asks — the verb side proofcheck flagged as the binding constraint, now mined."},
+  {id:"TURN-SYNTH", t:"Turn-grounded move synthesis (rung-3, LLM-on-residue)", s:"ready", c:"llm", new:true,
+   ev:"FOLDED into meme_mine_runner.py Layer-2 (extract+resolve+cite, stub|openai) + meme_consume.py (endpoint-identity bridge)",
+   n:"<b>DONE as the runner's Layer 2:</b> the LLM reads the ask in its thread window → meme, resolving endpoints with verbatim evidence or :unsupported (SFC2b discipline). meme_consume.py bridges a mission-resolved meme → a move (validated: M-war-machine ΔG −0.0036, real-ask provenance)."}
+ ],
+ "D · Select · floor · certificate (port CAS-SEL / COMPREHENSION / CAS-CERT)": [
+  {id:"SELECT-PER-MISSION", t:"select-per-mission-topology", s:"build", c:"cpu",
+   ev:"PORT: proofcheck CAS-SEL (cas_select.py) — matched-pattern set IS the topology",
+   n:"Match the move-menu to THIS mission's structural topology rather than a uniform set. The matched-cascade set IS the mission's action-topology (read off by STRUCT-EMBED retrieve + TURN-SYNTH verify)."},
+  {id:"ACTIONABILITY-FLOOR", t:"Actionability floor (noun ⊕ move)", s:"ready", c:"cpu",
+   ev:"meme_consume.py --floor → data/meme-mine/action-cert.json (2026-06-25): 186 structure-borrowed · 12 island · 0 meme-grounded (82 groundable via targeting)",
+   n:"<b>BUILT — the honesty gate.</b> Per rollout mission, best provenance: meme-grounded > structure-borrowed > island. The <b>12 islands</b> (no move) are surfaced as <b>needs-a-foothold</b>, never given a fabricated path — the three-kinds-of-off-map case, gated. Missions upgrade structure→meme-grounded as targeted/box mining lands."},
+  {id:"ACTION-CERT", t:"Per-mission action certificate", s:"ready", c:"cpu",
+   ev:"meme_consume.py --floor → data/meme-mine/action-cert.json (per-mission provenance tier over all 198)",
+   n:"<b>BUILT</b> (folded with the floor): a per-mission certificate of provenance tier (meme-grounded / structure-borrowed / island = the abstain reason). The per-mission substrate the rollout reads; the islands are the ArSE-seed / foothold list."}
+ ],
+ "E · The loop join — feeds R16 (ΔG) and R14 (γ)": [
+  {id:"ROLLOUT-FEED", t:"Mined moves → rollout → act-gate ΔG", s:"partial", c:"cpu",
+   ev:"meme_consume.py (bridge + feed, 2026-06-25) + futon2.aif.rollout + cascade-lane/rollout-g-for",
+   n:"<b>Consume-side mechanism BUILT + validated.</b> meme_consume.py bridges a meme whose endpoint resolves to a known rollout mission → a seedable move (namespace resolver — meme refs ≠ rollout nodes, only mission/-kind bridge, declare-don't-guess). Selftest: a mission-resolved meme → <b>ΔG −0.0017</b> (meme-grounded move yields a verdict). Criterion (2) of R16 with REAL provenance. <b>Coverage gap (honest):</b> 0/11 random-sample memes name a rollout mission → meme→move coverage needs box-scale OR mission-targeted sampling. Sim-only."},
+  {id:"GAMMA-FEED", t:"PSR/PUR outcomes → R14 γ (precision over policies)", s:"build", c:"llm",
+   ev:"Evidence Landscape pattern-outcome entries (action → outcome → prediction-error) · M-aif-wiring R14",
+   n:"<b>The unexpected join:</b> the same turns that supply move-CONTENT also carry realized OUTCOMES. Accumulating the gate's ΔF∧ΔG verdicts + the PSR/PUR outcomes IS γ's feed — an adaptive selection temperature learned from how past plans turned out. So criterion (2) is strictly upstream of R14: coverage → verdict history → policy precision. (DarkTower: moves=level-1 iching, γ=level-2 iiching.)"}
+ ],
+ "F · The operational vocabulary — turns as the hidden layer (futon-theory/futonic-logic) [VISION]": [
+  {id:"HIDDEN-LAYER", t:"Scopes are an overlay; turns are the hidden layer", s:"open", c:"cpu", new:true,
+   ev:"futon3/library/futon-theory/futonic-logic.flexiarg · turn store preserves role=user|assistant + author (verified)",
+   n:"<b>Framing (Joe):</b> today's scopes (IDENTIFY / &lt;patternname&gt;) are a coarse OUTPUT-layer overlay; the rich operational vocabulary (futonic-logic's 鹵/皿/部/鹽/咅/香/應…) is latent in the turns = the HIDDEN layers; substrate-2 is its compiled OUTPUT. Mining the hidden layer is what turns the move-priors from guesses into load-bearing ones."},
+  {id:"CONCEPT-TAG", t:"NNexus-style concept tagging in turns + missions (香)", s:"ready", c:"cpu", new:true,
+   ev:"mission_concept_tag.py (2026-06-25): 1307-surface gazetteer (missions/patterns/caps/futonic-vocab/components) + id-literals → data/meme-mine/concept-index.json; 198 missions + 300 turns",
+   n:"<b>BUILT — the noun axis + a routing bonus.</b> High-precision CPU spotter GROUNDS only id-literals + multi-word phrases (香→identification); single-token salience (間 risk) deferred to the LLM layer. 109/300 turns carry a grounded concept; <b>15 concepts bridge turns↔missions → 32/300 turns route to a mission via shared concept</b> — a model-free turn→mission link complementing the weak autoclock (exactly the routing the pipeline needs)."},
+  {id:"MEME-MINE", t:"human→agent turns → memes (have→want arrows)", s:"partial", c:"llm", new:true,
+   ev:"mission_mine_memes.py (--sample/--emit/--dedup) + data/meme-mine/{sample,memes,resolved-memes}.json · runner spec: futon6/holes/meme-mine-runner-spec.md (2026-06-25)",
+   n:"A human→agent turn is an ASK = a (have, want) arrow = a meme. <b>v0 + endpoint-identity VALIDATED (small sample, LLM-in-the-loop):</b> 11 asks → 11 memes; empirical op-vocabulary ~10 classes vs 3 hand-coded. Layer-2 resolution (evidence-cited): contextual <b>59%</b> / named <b>23%</b> / unsupported <b>18%</b> → resolution is LLM (GPU); CPU 香-prepass catches named anchors (R2d, claude-4…); Layer-3 dedup key (have,want,op). 3-layer runner BUILT (meme_mine_runner.py, --backend stub|openai) + stub-validated end-to-end (auto/system exclusion + thread-window + 香 pre-tag + evidence-check + dedup); openai path mirrors the proven SFC2b vLLM call. <b>Next:</b> run --backend openai on the 4-GPU Linode over ~6.4k turns (SSH-tunnel the vLLM port; turns stay local)."},
+  {id:"SORRY-MINE", t:"agent→human turns → sorries (the 應 voice)", s:"break", c:"llm", new:true,
+   ev:"futonic-logic: sorries are stated in the voice of 應; sorrys.edn registry · grounded 2026-06-25: 22.7k agent→human turns this box, ~20% fire a should/sorry marker (salience upper-bound — procedural narration inflates it)",
+   n:"Reverse the arrows: an agent→human turn in the 應 (should/needs) voice is a SORRY = an undischarged hole. Mining role=assistant turns surfaces the co-structure of gaps — the residual-sorry / needs-a-foothold map and rung-3's thin-move detector, grounded in real conversation. <b>Grounding caveat:</b> the raw ~20% is 香 (salience); procedural narration (\"let me…/I need to…\") inflates it. <b>First breakdown sub-task: a tighter 應 recognizer</b> separating procedural next-step narration from durable should / open-question / deferred sorries."}
+ ]
+};
+const app=document.getElementById('app'), bd=document.getElementById('breakdowns');
+const LBL={ready:"built/verified",partial:"v1 / weak",build:"needs build",break:"needs breakdown",open:"open question",vision:"deferred"};
+const BASE="file:///home/joe/code/";
+const LINKS={
+ "MISSION-DOCS":"futon6/scripts/mission_scope_detect.py",
+ "PATTERNS":"futon6/data/mission-pattern-scopes.edn",
+ "TURNS":"futon3c/holes/technotes/TN-forum-to-evidence-landscape.md",
+ "TURN-MISSION":"futon3c/scripts/backfill_turn_commit_mission_bestguess.py",
+ "SCOPE-LIFT":"futon6/scripts/mission_scope_detect.py",
+ "STRUCT-EMBED":"futon6/scripts/mission_structure_embed.py",
+ "MOVE-v0":"futon6/scripts/diffsub_emit.py",
+ "MINED-WITNESS":"futon2/holes/E-mine-mission-transitions.md",
+ "MINE-GEN":"futon6/scripts/mission_mine_moves.py",
+ "MOVE-RECOGNIZER":"futon6/scripts/strategy_recognizer.py",
+ "TURN-SYNTH":"futon2/holes/E-mine-mission-transitions.md",
+ "SELECT-PER-MISSION":"futon6/scripts/cas_select.py",
+ "ACTIONABILITY-FLOOR":"futon6/scripts/clean_comprehension.py",
+ "ACTION-CERT":"futon6/scripts/cas_cert.py",
+ "ROLLOUT-FEED":"futon2/holes/aif-wiring-explainer.html",
+ "GAMMA-FEED":"futon2/holes/M-aif-wiring.md",
+ "HIDDEN-LAYER":"futon3/library/futon-theory/futonic-logic.flexiarg",
+ "CONCEPT-TAG":"futon6/scripts/sfc_concept_coverage.py",
+ "MEME-MINE":"futon6/holes/meme-mine-runner-spec.md",
+ "SORRY-MINE":"futon3/library/futon-theory/futonic-logic.flexiarg"
+};
+const BREAKS=[
+ {id:"TURN-MISSION", t:"Depend on turn→pattern→mission, or harden M-autoclock-in?"},
+ {id:"PSR-PUR-COVERAGE", t:"How many evidence entries are pattern-outcome with real action+outcome content? (gates TURN-SYNTH + GAMMA-FEED)"},
+ {id:"MOVE-VOCAB", t:"Move action-class vocabulary — empirical from the turns? ANSWERED (v0, mission_mine_memes.py): ~10 op-classes emerged from 11 asks vs 3 hand-coded; normalize/cluster into a canonical set at scale."},
+ {id:"OPERATIONAL-VOCAB", t:"Mine the operational vocabulary from turns (memes ← human→agent · sorries ← agent→human · concepts via 香) — the hidden-layer thesis (futonic-logic). Decompose MEME-MINE + SORRY-MINE."},
+ {id:"TARGETED-SAMPLE ✓ RESOLVED", t:"Mission-targeted sampling — BUILT (meme_target_sample.py): term-match asks per mission; --scan shows 82/198 missions meme-groundable from this corpus; end-to-end validated (M-war-machine real-ask meme → move → ΔG −0.0036). Random sampling's 0-coverage gap is closed by targeting."}
+];
+for(const [phase,cards] of Object.entries(CARDS)){
+  const sec=document.createElement('section'); sec.className='phase';
+  sec.innerHTML=`<h2>${phase}</h2><div class="grid"></div>`;
+  const grid=sec.querySelector('.grid');
+  for(const c of cards){
+    const chip = c.c?`<span class="chip ${c.c}">${c.c}</span>`:'';
+    grid.innerHTML += `<div class="card s-${c.s}${c.new?' new':''}">
+      <div class="row1"><h3>${c.t} ${chip}</h3><span class="badge ${c.s}">${LBL[c.s]}</span></div>
+      <div class="id">${c.id}</div>
+      <div class="note">${c.n}</div>
+      ${c.ev?`<div class="ev">${c.ev}</div>`:''}
+      ${LINKS[c.id]?`<div class="ev"><a href="${BASE}${LINKS[c.id]}">▸ ${LINKS[c.id].split('/').pop()}</a></div>`:''}</div>`;
+  }
+  app.appendChild(sec);
+}
+for(const b of BREAKS){ bd.innerHTML += `<li><b>${b.id}</b> — ${b.t}</li>`; }
+</script></body></html>

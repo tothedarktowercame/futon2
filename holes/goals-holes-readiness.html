@@ -1,0 +1,176 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<title>Goals &amp; holes → the C-vector — readiness (the backward dual of mission-mining)</title>
+<style>
+  :root{
+    --paper:#f7f5ef; --ink:#1a1a1a; --line:#ddd6c8;
+    --ready:#1d7a3a; --ready-bg:#e7f6ec;
+    --partial:#9a6a00; --partial-bg:#fdf3e0;
+    --vision:#555; --vision-bg:#eee;
+    --build:#0e7490; --build-bg:#e2f4f7;
+    --break:#8a2bbd; --break-bg:#f3e8fb;
+    --open:#555; --open-bg:#ececec;
+    --cpu:#6b7280; --cpu-bg:#f3f4f6;
+    --gpu:#a11; --gpu-bg:#fbe9e9;
+    --llm:#6d3aa8; --llm-bg:#f0e8fb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.5 "Iowan Old Style",Georgia,serif;}
+  header{padding:24px 32px 8px;} h1{font-size:22px;margin:0 0 4px;} .meta{color:#666;font-size:12.5px;}
+  .flow{margin:14px 32px;padding:10px 14px;border:1px solid var(--line);background:#fff;
+        font:12.5px/1.7 ui-sans-serif,system-ui;color:#333;border-radius:6px;} .flow b{color:#000}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin:10px 32px;font:12px/1.8 ui-sans-serif,system-ui;}
+  .badge{display:inline-block;padding:2px 8px;border-radius:10px;font:600 11px/1.5 ui-sans-serif,system-ui;
+         text-transform:uppercase;letter-spacing:.03em;}
+  .ready{color:var(--ready);background:var(--ready-bg);} .partial{color:var(--partial);background:var(--partial-bg);}
+  .vision{color:var(--vision);background:var(--vision-bg);}
+  .build{color:var(--build);background:var(--build-bg);} .break{color:var(--break);background:var(--break-bg);}
+  .open{color:var(--open);background:var(--open-bg);}
+  main{padding:8px 24px 40px;} .phase{margin:20px 8px;}
+  .phase h2{font-size:15px;margin:0 0 2px;border-bottom:2px solid var(--line);padding-bottom:4px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;}
+  .card{border:1px solid var(--line);border-top-width:4px;background:#fff;border-radius:6px;padding:11px 13px;display:flex;flex-direction:column;}
+  .card.s-ready{border-top-color:var(--ready);} .card.s-partial{border-top-color:var(--partial);}
+  .card.s-build{border-top-color:var(--build);} .card.s-break{border-top-color:var(--break);}
+  .card.s-open{border-top-color:var(--open);} .card.s-vision{border-top-color:var(--vision);}
+  .card.new{background:#f1e8fb;}  /* lavender: the C-vector / belly layer — the new asset this mission adds */
+  .card h3{margin:0 0 2px;font-size:13.5px;} .card .id{color:#999;font:600 11px/1 ui-sans-serif,system-ui;}
+  .row1{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+  .chip{display:inline-block;font:600 10px/1.4 ui-sans-serif,system-ui;padding:1px 6px;border-radius:3px;margin-left:4px;}
+  .chip.cpu{background:var(--cpu-bg);color:var(--cpu);} .chip.gpu{background:var(--gpu-bg);color:var(--gpu);}
+  .chip.llm{background:var(--llm-bg);color:var(--llm);}
+  .ev{font:11px/1.4 "SF Mono",ui-monospace,Menlo,monospace;color:#2456a6;margin:5px 0 0;}
+  .note{font-size:12.5px;color:#333;margin:6px 0 0;} code{background:#ece8dd;padding:1px 4px;border-radius:3px;font-size:11.5px;}
+  footer{padding:8px 32px 60px;max-width:960px;} footer h2{font-size:15px;border-bottom:2px solid var(--line);padding-bottom:4px;}
+  footer li{font-size:13px;margin:4px 0;}
+</style></head><body>
+<header>
+  <h1>Goals &amp; holes → the C-vector — readiness</h1>
+  <div class="meta">claude-1 · 2026-06-25 · INSTANTIATE for <code>M-goals-and-holes.md</code> — the <b>backward dual</b> of <code>mission-mining-readiness.html</code>. That one mined <b>methods</b> (the policy half of EFE); this builds the <b>belly</b> — Friston's <b>C-vector</b> (prior preferences, R19 of <code>futon-aif-completeness</code>), the preference half. "Give the agent something it <i>wants</i>, not just things it can <i>do</i>."</div>
+  <div class="meta" style="margin-top:6px"><b>STATUS — INSTANTIATE built.</b> The belly exists: <b>263 derived preferences</b> across 3 CPU channels (<code>c_vector.bb</code>), the 應-voice GPU producer stub-validated (<code>c_mine_joint.py</code>), all stored in substrate-2 shape (sim-only). Every entry honors I1 (provenance) / I2 (weight-basis) / I3 (witness-only closure). <b>Steering</b> the agent with these preferences is a different mission (see <i>scope boundary</i>). Sim-only, zero <code>:7071</code> writes; acting stays operator-gated (R16/Car-3).</div>
+</header>
+<div class="flow">
+  <b>The spine, built:</b> channels surface goals/holes → each becomes a <b>C-entry</b> <code>{flavour, outcome-ref, preferred, weight, provenance, discharged-by}</code> → <b>stored</b> in substrate-2 shape → scored by <b>static risk</b> (distance preferred↔current, the R5 term the C-less EFE drops). The assembled open C-entries <i>are</i> the C-vector — <b>derived, never authored</b>.<br>
+  <b>Channels (mostly CPU — goals are already structured, so reads not mining):</b>
+  <b>stated</b> (unmet star-map caps + clean open sorries) · <b>incompleteness</b> (started-but-not-run, the phase-spine silence) · <b>mess</b> (low Salingaros coherence = an implicit hole; + the standing global-coherence regularizer) — these three are built (263 entries). <b>latent</b> is deferred (honest under-claim); the <b>應-voice</b> GPU channel (<b>reach</b> + <b>correction</b>) is built &amp; stub-validated, awaiting the box pass. <i>mess ↔ correction are one preference at two timescales</i> (drift caught per-turn vs accumulated).<br>
+  <b>Boundary:</b> <i>static</i> risk ranks the holes (diagnostic, built); <i>steering</i> the agent needs <b>predictive</b> risk — a policy that discharges a preference lowers its risk — which is the goal↔method join, a separate mission (below).
+</div>
+<div class="legend">
+  <span class="badge ready">built/verified</span> done this mission ·
+  <span class="badge partial">built · gated</span> producer built; remaining half is another mission (W1 / the box) ·
+  <span class="badge break">needs breakdown</span> its own mission ·
+  <span class="badge open">operational</span> a decision, not code ·
+  <span class="chip cpu">cpu</span><span class="chip gpu">gpu</span><span class="chip llm">llm</span> ·
+  <span style="display:inline-block;width:11px;height:11px;background:#f1e8fb;border:1px solid #c8a8e8;border-radius:2px;vertical-align:middle"></span> lavender = the C-vector / belly layer (the new asset)
+</div>
+<main id="app"></main>
+<footer>
+  <h2>What this mission delivered</h2>
+  <ol>
+    <li><b>The C-vector, derived not authored</b> — 263 open preferences (stated 139 · incompleteness 81 · mess 43), each with provenance (I1), a weight basis (I2), and witness-only closure (I3). One <code>c-entry</code> record shared by the CPU and GPU producers.</li>
+    <li><b>Three CPU channels</b> in <code>c_vector.bb</code> — <b>stated</b> (29 unmet caps + 110 clean sorries, the 33-boilerplate audit split reproduced), <b>incompleteness</b> (81 started-but-not-run), <b>mess</b> (43 + the standing coherence regularizer; reproduces the VERIFY spike, ranks the messiest).</li>
+    <li><b>The 應-voice GPU producer</b> in <code>c_mine_joint.py</code> — the backward fork of the meme-miner (operator-only pairs → reach/correction), stub-validated end-to-end (40 pairs → 45 C-entries, 28 grounded).</li>
+    <li><b>Storage</b> — every C-entry mapped to substrate-2 entity shape (local overlay, 263/263 derived-from links, 0 collisions), promotable as-is. Zero <code>:7071</code> writes.</li>
+  </ol>
+  <h2>Scope boundary — what is NOT this mission (so the "gated" cards aren't a to-do list)</h2>
+  <ul>
+    <li><b>Steering / predictive risk (W1-JOIN)</b> → the goal↔method join = substrate-2's empty PROOF layer. That is <code>M-populate-substrate-2</code> + the discharge side of <code>M-operational-vocabulary</code>, not here. Static risk (built) is diagnostic; predictive risk is what makes the belly <i>steer</i>.</li>
+    <li><b>The 應-voice box run</b> → a GPU pass (hot-swap onto the standing forward-run box). The producer is built; running it is an ops action, not a producer gap.</li>
+    <li><b>:7071 promotion of the overlay</b> → gated on <code>M-populate-substrate-2</code>; sim-only by design until greenlit.</li>
+  </ul>
+  <h2>Open (operational — a decision, not code)</h2>
+  <ol id="breakdowns"></ol>
+</footer>
+<script>
+const CARDS = {
+ "A · The channels — what surfaces a goal / hole (the C sources)": [
+  {id:"C-MESS", t:"mess channel — low Salingaros coherence (BUILT)", s:"ready", c:"cpu",
+   ev:"futon6/scripts/c_vector.bb (2026-06-25) → data/c-vector/c-entries.mess.edn: 43 per-mission + 1 standing regularizer; preferred=alive-median L=45.9; reproduces the spike (M-editorial-assistant L=10 → top risk)",
+   n:"<b>BUILT — durable producer.</b> The VERIFY spike promoted to <code>produce-mess</code>: each mess-class mission → <code>C-entry{flavour=mess, outcome-ref=coherence L, preferred=≥45.9}</code> + the STANDING global-coherence regularizer. Discharge = the existing <code>:centre-mess</code> move — the cleanest channel, proves C→risk→discharge with no GPU, no W1."},
+  {id:"C-STATED", t:"stated channel — caps · sorries (BUILT)", s:"ready", c:"cpu",
+   ev:"futon6/scripts/c_vector.bb produce-stated → data/c-vector/c-entries.stated.edn: 31 unmet caps (13 :held w=0.6 + 18 frontier w=0.4) + 110 clean open sorries (143 open − 33 boilerplate, the audit split) = 141",
+   n:"<b>BUILT — the bulk, all :7071 reads</b> (the backward asymmetry: goals are <i>already structured</i>). Each not-attested capability / clean open sorry → <code>C-entry{flavour=stated, preferred=:becomes attested|closed}</code>; the 33 templated-:if boilerplate sorries dropped. <b>Declare, don't guess</b> — provenance is the source id, weight from star-map status (I2)."},
+  {id:"C-INCOMPLETE", t:"incompleteness channel — started-but-not-run (BUILT)", s:"ready", c:"cpu",
+   ev:"futon6/scripts/c_vector.bb produce-incomplete → data/c-vector/c-entries.incomplete.edn: 81 of 211 missions have identify/map but none of verify/instantiate/document",
+   n:"<b>BUILT.</b> A mission begun but never run is a hole stated by its own silence (the not-talking tell). Phase-spine signal: early phase present ∧ no late phase → <code>C-entry{flavour=incompleteness, preferred=:run}</code>. <b>I4: surfaced, never dropped</b>; un-oriented → default-low weight. (M-editorial-assistant appears here AND in mess — a real cross-channel signal.)"},
+  {id:"C-LATENT", t:"latent channel — conjectural / surfaced", s:"vision", c:"cpu",
+   ev:"honest scope: surfaced as conjecture, NOT asserted as known goals",
+   n:"<b>Deliberately under-claimed.</b> Goals nobody has stated and no structure reveals — surfaced as <i>conjectural</i> C-entries (low confidence, flagged), never presented as established. Keeps the channel honest; the LLM 應-voice pass (C-REACH) is the realistic route to most of these."},
+  {id:"C-REACH", t:"應-voice reach — unstated goals (stub-validated)", s:"partial", c:"llm", new:true,
+   ev:"futon6/scripts/c_mine_joint.py (2026-06-25, --backend stub): 40 pairs → reach C-entries grounding to real missions (M-a-sorry-enterprise, M-first-flights, M-typed-bells); 28/45 grounded",
+   n:"<b>Producer BUILT, stub-validated.</b> The exact dual of the forward meme-mine: read agent→human turns for what the agent is <i>orienting toward</i> → <code>C-entry{flavour=reach}</code>, grounded to a candidate mission/pattern via the shared retriever. <b>Needs the box run</b> (--backend openai) for real reach classification — the GPU path mirrors the proven forward runner."},
+  {id:"C-CORRECTION", t:"應-voice correction — human override (stub-validated)", s:"partial", c:"llm", new:true,
+   ev:"futon6/scripts/c_mine_joint.py: (agent-turn, human-reply) PAIRS; operator-only filter (drops inter-agent bells / plumbing); CPU correction-cue pre-tag (香). Joe 2026-06-25: \"not just unstated goals — corrections\"",
+   n:"<b>Producer BUILT, stub-validated.</b> The cleanest C-signal: a human reply that overrides the agent (\"not only\", \"not that — this\") → the redirected target is a preference the agent's C <i>lacked</i>; the delta IS the C-entry. <b>Relational</b> — read from the pair. Filtered to the OPERATOR (joe) — inter-agent bells aren't preferences. <b>Worked example, live:</b> scoping this as \"unstated goals\" drew Joe's \"not only\". Shares the coherence C-entry with C-MESS (drift caught per-turn vs accumulated as mess). <b>Needs the box run</b> for real override detection."}
+ ],
+ "B · The C-entry — the shared target + its store": [
+  {id:"C-ENTRY", t:"C-entry entity (the shared record)", s:"ready", c:"cpu", new:true,
+   ev:"futon6/scripts/c_vector.bb (c-entry constructor, I1/I2/I3 enforced) + c_mine_joint.py (to_c_entry) emit the SAME shape: {flavour, outcome-ref, preferred, weight{value,basis}, status, provenance, discharged-by, witness}",
+   n:"<b>BUILT — the shared target.</b> One constructor, used by both the CPU (bb) and GPU (py) producers: provenance required (I1, no preference without a source), weight carries its basis (I2, un-oriented → default-low), status flips open→met only with a witness (I3). The canonical C-vector entry for all five channels."},
+  {id:"C-STORE", t:"substrate-2 overlay (sim-only — BUILT)", s:"ready", c:"cpu", new:true,
+   ev:"futon6/scripts/c_vector.bb ->substrate-entity → data/c-vector/c-store-overlay.edn: 263 C-entries → :c-entry entities, unique promotable ids, 263/263 derived-from links, 0 collisions, ZERO :7071 writes",
+   n:"<b>BUILT — local overlay.</b> Each C-entry → the substrate-2 entity shape <code>{:id :name :type :props}</code> (cf. the :7071 cap/sorry entities); relations inlined in props (<code>:c-entry/derived-from</code> = provenance/I1, <code>:c-entry/discharged-by</code> = the PROOF-layer join). Idempotent ids keyed off the source's unique substrate id. <b>Promotion to :7071 stays gated</b> ([[M-populate-substrate-2]]) — sim-only until greenlit."}
+ ],
+ "C · C → EFE risk (the consume side — port the forward rollout)": [
+  {id:"C-RISK", t:"compute-efe over C-entries (risk = distance)", s:"partial", c:"cpu",
+   ev:"futon6/scripts/c_vector.bb risk-of = weight·divergence(current,preferred) — static risk BUILT, ranks 43 mess holes · futon2.aif compute-efe / rollout-g-for (the policy side to wire into)",
+   n:"<b>Static risk BUILT</b> (<code>risk-of</code>, weighted by I2): reads each C-entry's current observable outcome and adds risk = distance-to-preferred — the R5 term the C-less EFE drops. <b>Remaining:</b> wire it into the live <code>compute-efe</code> alongside the policy term; <b>predictive</b> risk (outcome under a policy) is W1-gated."},
+  {id:"W1-JOIN", t:"goal ↔ method join (predictive risk)", s:"break", c:"cpu",
+   ev:"the W1 stress-test (ARGUE §4) — the C-entry's outcome under a candidate move",
+   n:"<b>Needs breakdown.</b> Predictive risk asks \"what would this outcome be if I ran move M?\" — that requires joining a C-entry's outcome to the forward model's move effects (the empty PROOF layer, the goal↔method bridge). Static risk does NOT need it; sequence W1 after the static loop closes."}
+ ],
+ "D · Discharge + the standing regularizer (safety)": [
+  {id:"DISCHARGE", t:"pudding discharge (C-entry → reducing move)", s:"partial", c:"cpu",
+   ev:"invariant I3 (DERIVE) · mess discharge = existing :centre-mess / mission-coherence move (diffsub_emit.py)",
+   n:"<b>The pudding test: a C-entry must name a move that reduces its risk</b>, else it is an idle wish. For mess this is <i>built</i> (the existing <code>:centre-mess</code> move). For stated/reach the discharge is the forward mining's move set (the dual closes here). General discharge wiring = the build."},
+  {id:"COHERENCE-REG", t:"standing global-coherence regularizer (the safety preference)", s:"partial", c:"cpu", new:true,
+   ev:"futon6/scripts/c_vector.bb produce-mess emits the STANDING C-entry (outcome-ref=stack median-L, preferred=stays-high, w=1.0) · ARGUE \"generalization = safety regularizer\" · Joe 2026-06-25: weak supervision via a pattern-harness",
+   n:"<b>Standing C-entry BUILT; regularization is W1-gated.</b> The STANDING coherence preference is produced — but it only <i>regularizes</i> (penalizes policies that LOWER coherence) under predictive risk, so the safety effect waits on W1. This is how acting can eventually run under <b>weak</b> (not absent) supervision: patterns as an end-user harness; corrections mined today (C-CORRECTION) become tomorrow's discipline. <b>Acting still operator-gated (R16/Car-3)</b> — safety is in the harness + this regularizer, not in removing the gate."}
+ ],
+ "E · The 應-voice Linode companion (the GPU backward pass — hot-swap)": [
+  {id:"BACKWARD-JOINT", t:"meme_mine_joint fork — 應-voice backward pass (BUILT)", s:"partial", c:"gpu", new:true,
+   ev:"futon6/scripts/c_mine_joint.py (2026-06-25) — read_pairs(assistant+reply) · operator-only filter · shared retriever + backend + null-norm + 200-checkpoint · stub end-to-end: 40 pairs → 45 C-entries (40 reach + 5 correction, 28 grounded)",
+   n:"<b>BUILT + stub-validated.</b> Small fork of the proven forward joint runner: same retriever (concept-tag gazetteer), same vLLM backend, same checkpointing/null-normalization. Reads the assistant turn paired with the human reply; emits the shared C-entry (corrections → preferred = the redirected target). <b>Outputs embed verbatim spans → gitignored.</b> Transcripts stay on dev (tunnel). <b>Remaining:</b> the <code>--backend openai</code> box run for real classification."},
+  {id:"HOT-SWAP", t:"hot-swap onto the standing forward box", s:"open", c:"gpu", new:true,
+   ev:"runner BUILT: futon6/scripts/linode-goals-and-holes-mine.sh (mirrors linode-meme-mine.sh; tunnel-first; resolves repo/venv on dev AND box; bash -n clean)",
+   n:"<b>Ready to swap — only the decision is open.</b> Producer (<code>c_mine_joint.py</code>) + runner both built; tunnel mode reuses the box already serving the forward run (same model, no teardown). <b>Decision (Joe):</b> hold the box to run the 應-voice pass before the forward run finishes, or accept a separate commission? Either way nothing more to build."}
+ ]
+};
+const app=document.getElementById('app'), bd=document.getElementById('breakdowns');
+const LBL={ready:"built/verified",partial:"built · gated",build:"needs build",break:"needs breakdown",open:"operational",vision:"deferred"};
+const BASE="file:///home/joe/code/";
+const LINKS={
+ "C-MESS":"futon6/scripts/c_vector.bb",
+ "C-STATED":"futon6/scripts/c_vector.bb",
+ "C-INCOMPLETE":"futon6/scripts/c_vector.bb",
+ "C-LATENT":"futon2/holes/M-goals-and-holes.md",
+ "C-REACH":"futon6/scripts/c_mine_joint.py",
+ "C-CORRECTION":"futon6/scripts/c_mine_joint.py",
+ "C-ENTRY":"futon6/scripts/c_vector.bb",
+ "C-STORE":"futon6/scripts/c_vector.bb",
+ "C-RISK":"futon6/scripts/c_vector.bb",
+ "W1-JOIN":"futon2/holes/M-goals-and-holes.md",
+ "DISCHARGE":"futon6/scripts/diffsub_emit.py",
+ "COHERENCE-REG":"futon2/holes/aif-wiring-explainer.html",
+ "BACKWARD-JOINT":"futon6/scripts/c_mine_joint.py",
+ "HOT-SWAP":"futon6/scripts/linode-goals-and-holes-mine.sh"
+};
+const BREAKS=[
+ {id:"HOT-SWAP", t:"Hold the standing box to hot-swap the 應-voice pass while the forward run finishes, or accept a separate commission? (The producer is ready either way.)"}
+];
+for(const [phase,cards] of Object.entries(CARDS)){
+  const sec=document.createElement('section'); sec.className='phase';
+  sec.innerHTML=`<h2>${phase}</h2><div class="grid"></div>`;
+  const grid=sec.querySelector('.grid');
+  for(const c of cards){
+    const chip = c.c?`<span class="chip ${c.c}">${c.c}</span>`:'';
+    grid.innerHTML += `<div class="card s-${c.s}${c.new?' new':''}">
+      <div class="row1"><h3>${c.t} ${chip}</h3><span class="badge ${c.s}">${LBL[c.s]}</span></div>
+      <div class="id">${c.id}</div>
+      <div class="note">${c.n}</div>
+      ${c.ev?`<div class="ev">${c.ev}</div>`:''}
+      ${LINKS[c.id]?`<div class="ev"><a href="${BASE}${LINKS[c.id]}">▸ ${LINKS[c.id].split('/').pop()}</a></div>`:''}</div>`;
+  }
+  app.appendChild(sec);
+}
+for(const b of BREAKS){ bd.innerHTML += `<li><b>${b.id}</b> — ${b.t}</li>`; }
+</script></body></html>
