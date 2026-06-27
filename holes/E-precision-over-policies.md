@@ -14,12 +14,18 @@ reduction-safe (≡ today at γ=1.0); learning staged on R16's realized-outcome 
 - **§4.1 — γ scalar, default 1.0, reduction-safe.** ✓ Burn-in gate: γ holds at
   1.0 until ≥5 realized samples accrue.
 - **§4.2 — learning signal.** Ratified a *divergence* from the charter's literal
-  "1/rolling-variance" R7-mirror: γ uses a **symmetric relative error**
-  `ρ = |exp−real|/(|exp|+|real|+ε)` over expected-vs-realized G. Scale-free (no
-  G-unit constant) and sounder than variance (variance rewards a *consistent
-  bias* as false confidence; relative error reads a consistent miss as low
-  confidence). Approved by Joe. The realized term is R16's `:realized-outcome`
-  (not R12 Beta-credit — a different quantity, as §4 anticipated).
+  "1/rolling-variance" R7-mirror: γ uses a **signed, scale-free performance
+  ratio** `perf = (expected−realized)/(|expected|+|realized|+ε) ∈ [−1,1]` over
+  expected-vs-realized G (lower G = better ⇒ realized-below-expected = beat =
+  perf>0). Transfer `γ = clamp(2^perf̄, 0.5, 2.0)`, neutral 1.0 at exact-match.
+  Scale-free (no G-unit constant). *Two-step history:* first a symmetric relative
+  error (vs variance, to avoid consistent-bias false confidence); then made
+  **signed** after a 2026-06-27 demo showed a symmetric metric measures only
+  CALIBRATION — a large over-delivery (a big mismatch) spuriously lowered γ —
+  whereas the excursion's goal (HEAD: decisiveness earned by good outcomes)
+  needs PERFORMANCE direction. Both confirmed by Joe. The realized term is R16's
+  `:realized-outcome` (not R12 Beta-credit — a different quantity, as §4
+  anticipated).
 - **§4.3 — modulation `τ_eff = τ_spread / γ`.** ✓ (not a γ-only temperature).
 - **§4.4 — staging.** ✓ Machinery + wiring + the trace seam built now; the rich
   signal is gated on R16 live-wiring enactment. **Interface paired with claude-10:**

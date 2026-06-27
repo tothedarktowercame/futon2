@@ -41,22 +41,29 @@ claude-10, `E-close-the-loop`):
 
 Both legs are the **same EFE quantity** — the fold's coverage→rollout ΔG, evaluated
 over the *predicted* wiring (`:expected-G`) vs the actually-*enacted* wiring
-(`:realized-G`). γ folds them via a **symmetric relative error** (scale-free, so no
-G-unit constant is needed, and a ΔG-vs-ΔF mismatch is impossible):
+(`:realized-G`). Free energy convention: **lower G is better**, so a realized G
+*below* expected means the plan over-delivered. γ folds them via a **signed,
+scale-free performance ratio** (no G-unit constant; a ΔG-vs-ΔF mismatch is
+impossible):
 
 ```
-ρ = |expected-G − realized-G| / (|expected-G| + |realized-G| + ε) ∈ [0,1]
-γ = clamp( 2^(2·(ρ* − ρ̄)), floor, cap )       ; ρ* = 0.5, floor 0.5, cap 2.0
+perf = (expected-G − realized-G) / (|expected-G| + |realized-G| + ε) ∈ [−1,1]
+γ = clamp( 2^(gain · perf̄), floor, cap )      ; gain 1.0, floor 0.5, cap 2.0
 ```
 
-So ρ̄ = 0 (plans realize as predicted) → γ → cap (commit); ρ̄ = 1 (total miss) →
-γ → floor (hedge); ρ̄ = ρ* → γ = 1.
+So perf̄ = +1 (every plan over-delivered) → γ → cap (commit); perf̄ = −1 (every
+plan missed) → γ → floor (hedge); perf̄ = 0 (realized exactly as predicted) →
+γ = 1 (use the spread-τ as-is).
 
-**Why relative error, not R7's literal 1/variance** (a deliberate divergence from
-the charter's R7-mirror wording, ratified E-precision-over-policies §4): variance
-rewards a *consistent bias* (a policy always wrong by the same amount → low
-variance → spuriously high confidence). Relative error correctly reads a
-consistent miss as low confidence.
+**Why SIGNED performance, not a symmetric |error|** (decided 2026-06-27 after a
+demo): the excursion's goal is decisiveness *earned by good outcomes* — commit
+after plans that paid off, hedge after a run that didn't. A symmetric error
+measures only **calibration** (did realized match expected?), so a large
+over-delivery — a big *mismatch* — would spuriously LOWER γ (a demo showed a big
+beat dropping γ to 0.64). The signed ratio is monotone in performance, and reads
+a consistent under-delivery as a consistent hedge (correct on the bias axis too —
+the original reason for choosing a ratio over R7's literal 1/variance still
+holds; only the *direction* changed).
 
 ## The burn-in (what we hope to watch improve)
 
@@ -80,7 +87,7 @@ spread-τ, a bounded and reversible blast radius.
 | Signal | Where | Healthy trajectory |
 |---|---|---|
 | γ itself | WM trace `:policy-precision :policy-precision` | holds 1.0 pre-signal; moves into (0.5, 2.0) as outcomes accrue |
-| Mean realized error ρ̄ | trace `:policy-precision :mean-error` | nil during burn-in; drops over runs as plans pay off |
+| Mean realized performance perf̄ | trace `:policy-precision :mean-perf` | nil during burn-in; rises (toward +1) as plans beat expectation, falls (toward −1) as they miss |
 | Samples seen | trace `:policy-precision :samples` | climbs only as enacted outcomes arrive (not per tick) |
 | Effective vs spread τ | decision `:tau` vs `:tau-spread` | equal at γ=1; `:tau` < `:tau-spread` when γ>1 (sharper) |
 | Commitment | decision `:softmax-weights` peak mass | widens as γ rises |
