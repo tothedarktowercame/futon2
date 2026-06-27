@@ -244,11 +244,34 @@ DERIVE's object was the **flow `per-turn sigils → control layer`** (the MAP ve
 
 **Gate before VERIFY can start:** parameterize the §3 prototype into `reflow <session> <mission>` (claude-1 — carve-out (b): wrote the scripts this session, holds the context). Until then the apparatus is pinned to this session.
 
+## 5. INSTANTIATE — wire the weaving into the live mode-family (claude-1, 2026-06-26)
+
+**Object:** the per-turn weaving runs **live, in-flow** in a mode-family sibling to `mission-mode.el` / `flight-mode.el` — not a batch post-hoc pass.  **Substantively built and VERIFIED** (claude-11 basic-pass, §4): the live control-layer exists.
+
+### 5.0 Built & verified (the live in-flow weaving surface)
+- `session-mode.el` — per-turn **sigils**, M-/E-/C- recognition, the mention spine (live, on the turn-end advice).
+- `session-overview.el` — **per-session** (`*session-overview:<agent>*`, several coexist), **auto-updates non-blocking** on each turn (turn-end advice → async-subprocess detector → re-render): comb (mission pivot) + linear turns + thread chips + move chips + weak scopes.  `C-c s o`.
+- **WebArxana follow-along** (C6) — focus the target by its natural name, see the scope-surface (`focus-anchor` proxy smart-resolve).
+- The **reflow** apparatus + **move-basins recogniser** (free, reproducible — the mining is backfill, not the engine).
+
+### 5.1 Finishing step — make the WebArxana orbit live (small build)
+`session-overview` auto-updates per turn, but the **WebArxana orbit JSON is still batch** (written only when `reflow` runs).  For "follow along live in WebArxana" to be literally true per-turn, give the served orbit the same **turn-end async refresh** the overview has (write the focused session/mission's orbit to the served path on each turn).  ~the scope of the §5.0 session-overview async-update already done.
+
+### 5.2 Finishing step — settle the vocabulary (first line of DOCUMENT)
+The DERIVE-shape (§MAP→DERIVE convergence) targeted mapping the weaving onto the **flight-anatomy ORGANS** (field-read · velocity · attribution · prediction · counterfactual · begin-state · act+witness · measurement · out-of-band · self-record) as **ghost-organs, sibling to `flight-mode.el`**.  What got built renders a **comb / threads / moves** vocabulary instead.  **Decision to record:** did comb/threads **supersede** the organ-mapping (INSTANTIATE done, in a better-fitting vocabulary) — my read — or is mapping-onto-the-organs a genuine residual?  If superseded, note `flight-mode` organ-sibling unification as an **optional future**, not a gap.
+
+### 5.3 Carve-outs / follow-ons (NOT blocking INSTANTIATE)
+- **Pilot/flight unification** — wire the *same* reflow into `flight-mode.el` so the WM Pilot's flight gets the session-weaving too (realizes the **author-invariance** finding: operator and Pilot peers in one recognizer).  *Pilot-dependent → follow-on.*
+- **Historical 蒲團 reconstruction** (mine-the-past: enrich any historical session/mission in WebArxana from the mine) — **depends on [[M-post-mining-ingest]]** (a canonical, contracted mine); sequenced after that mission's DERIVE.
+- **session-mode mining-driven improvements** — also [[M-post-mining-ingest]]'s concern.
+
+### INSTANTIATE exit (for Joe)
+The live in-flow weaving surface is **built and reproduced on a fresh session**.  Remaining to close: **5.1** (one small build — live WebArxana orbit) and **5.2** (one DOCUMENT decision — vocabulary).  5.3 are carve-outs.  **← Do 5.1 + 5.2, then INSTANTIATE → DOCUMENT?**
+
 ## Phases ahead
-- **MAP** ✓ (§2) · **DERIVE** ✓ prototyped (§3) · **ARGUE/VERIFY protocol** ✓ registered (§4).
-- **Next:** the VERIFY *gate* — parameterize the §3 prototype into `reflow <session> <mission>` — then **run VERIFY** (live reproduction on M′ + a different agent).
-- **Then, only if VERIFY passes:** **INSTANTIATE** (wire the reflow into the live mode-family — the `session-mode.el` / `flight-mode.el` ghost-organs, sibling to `mission-mode.el`, so the aggregate weaves in-flow, not as a batch post-hoc step) → **DOCUMENT**.
-  - *INSTANTIATE — partly built (2026-06-26):* `session-overview.el` is now **per-session** (`*session-overview:<agent>*`, multiple coexist) and **auto-updates non-blocking** on each turn (turn-end advice → **async subprocess** detector → re-render; the per-turn sigil chips already live in `session-mode.el`). Opened from a session-mode buffer via **`C-c s o`**.
-  - *Update transport — WS option (Joe, 2026-06-26):* the live update currently runs the detector as an async subprocess (zero Emacs blocking, but Emacs does the compute). **If it feels slow, switch to a WebSocket push** — compute the overview server-side and push it over the agent WS to Emacs (so Emacs does zero compute). WS is **already operational for `*agents*`**, so the transport exists; this is a known upgrade path to revisit, not a rebuild.
+- **MAP** ✓ (§2) · **DERIVE** ✓ prototyped (§3) · **ARGUE/VERIFY protocol** ✓ registered (§4) · **INSTANTIATE** ✓ built + verified, finishing steps in §5.
+- **VERIFY ran** — claude-11 × E-precision-over-policies, basic-pass (§4); findings recorded (threshold-calibration to 0.42, code-heavy comb weakness, partial-pass verdict).
+- **Now:** finish INSTANTIATE per **§5** — the live WebArxana orbit (§5.1) + the vocabulary decision (§5.2) — then **DOCUMENT** (carrying the §4 findings forward).
+- *Update transport — WS option (Joe, 2026-06-26):* the overview's live update currently runs the detector as an **async subprocess** (zero Emacs blocking, but Emacs computes). If it feels slow, switch to a **WebSocket push** — server computes, pushes over the agent WS (already operational for `*agents*`). A revisit, not a rebuild.
 
 *(Historical MAP plan, for the record: recognition-first survey of already-recognized acts, the futonic act-vocabulary 咅/香/應, and the notations — catalogued in §2; the MAP→DERIVE convergence superseded "design a symbol set" with "flow the existing per-turn sigils into a control layer.")*
