@@ -55,6 +55,21 @@
         ;; γ folded the outcome exactly once
         (is (= 1 (:samples gs1)) "the realized outcome was folded")
         (is (= 7 (:last-outcome-tick gs1)) "dedup key set")
-        (is (<= 0.5 (pp/gamma-for gs1) 2.0) "γ stays in the reduction-safe band")
+        ;; this producer's realized-G (≈ −0.667, the enacted coverage) BEATS
+        ;; expected-G (−0.5) — lower G is better — so the plan over-delivered.
+        (is (< (:realized-G ro) (:expected-G ro)) "realized beat expected (lower G better)")
+        ;; burn-in (R14 v1, a3f8d38): one sample keeps γ EXACTLY 1.0 (reduction-
+        ;; safe) — the beat is recorded but does not yet move selection.
+        (is (= 1.0 (pp/gamma-for gs1)) "γ holds at 1.0 during burn-in")
+        (is (pos? (first (:perf-history gs1))) "the beat IS captured (perf>0)")
+        ;; directional contract: a SUSTAINED beat, once burn-in (min-history 5)
+        ;; clears, drives γ>1 (commit harder) — through the live producer→reader seam.
+        (let [gs5 (reduce (fn [gs t]
+                            (let [ro-t (-> (fr/with-realized-outcome judge-output decision enacted t)
+                                           trace/trace-record :realized-outcome)]
+                              (pp/fold-realized-outcome gs ro-t)))
+                          gs1 [8 9 10 11])]
+          (is (= 5 (:samples gs5)) "burn-in cleared")
+          (is (< 1.0 (pp/gamma-for gs5) 2.0) "sustained beat ⇒ γ>1 (within the band)"))
         ;; same tick again ⇒ no double-count
         (is (= gs1 gs1-again) "tick-dedup: the same outcome folds at most once")))))
