@@ -394,11 +394,12 @@ const CARDS = {
    n:"A tangential enabler — Lamarckian gradient refinement of program weights toward constraint satisfaction; could polish a wiring toward low ΔG, but TPG-domain, not the fold's construction. Deferred / opportunistic."}
  ],
  "R14 · Precision over policies (γ) — what the red dot contains": [
-  {id:"R14-GAMMA", t:"γ — precision over policies", s:"break", c:"cpu",
-   n:"R7 gives precision over sensory channels; there is still no γ over POLICIES — the selection temperature τ is a fixed heuristic. The agent isn't yet self-calibrating in how hard it commits."},
+  {id:"R14-GAMMA", t:"γ — precision over policies", s:"ready", c:"cpu", new:true,
+   ev:"futon2.aif.policy-precision (39142f1) · τ_eff = τ_spread / γ · R14 CLOSED",
+   n:"DONE — <b>R14 CLOSED</b> (claude-11, 2026-06-27). γ is a LEARNED, bounded inverse selection temperature: <code>τ_eff = τ_spread / γ</code>, the policy-scale sibling of R7's channel precision. It learns from realized-vs-expected outcomes via a <b>signed performance ratio</b> (beat ⇒ commit, miss ⇒ hedge, exact ⇒ neutral), clamped <b>[0.5, 2.0]</b>, with a 5-sample burn-in; <b>γ = 1.0 reduces EXACTLY to today's spread-only τ</b> (reduction-safe). The machinery, the τ_eff wiring, and the trace seam are all live + tested."},
   {id:"R14-FEED", t:"Realized-policy-outcome history (γ's feed)", s:"partial", c:"cpu",
-   ev:"R16's consent gate records a ΔF∧ΔG verdict per cycle",
-   n:"γ learns from how past plans turned out. R16 now records the first trickle of that realized-outcome history; once armed actions return outcomes, γ has a feed. Gated behind R16 closing."}
+   ev:"futon2.aif.fold-realized → :realized-outcome trace; read by policy-precision/fold-realized-outcome (round-trip tested)",
+   n:"γ learns from realized-vs-expected outcomes. The producer→reader SEAM is BUILT + round-trip tested (the R16→R14 <code>:realized-outcome</code> contract, claude-10×claude-11) — but STAGED behind <code>*live-wire?*</code>: enactment (apply-cascade!) isn't live-wired, so the field is absent ⇒ γ holds at 1.0 (reduction-safe). Flips to flowing the moment R16 enacts."}
  ]
 };
 const LBL={ready:"built+reviewed",partial:"v1 / gaps",build:"needs build",break:"needs breakdown",open:"open question",vision:"deferred"};
