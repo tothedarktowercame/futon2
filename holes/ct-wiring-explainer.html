@@ -49,6 +49,13 @@
 </style>
 </head>
 <body>
+<nav style="max-width:1180px;margin:0 auto;padding:10px 30px 0;font:13px/1.6 ui-sans-serif,system-ui;color:#555;">
+  <b style="color:#6d3aa8">Explainer series</b> <span style="color:#999">(open in tabs ↗):</span>&nbsp;
+  <a href="aif-wiring-explainer.html" target="_blank" style="color:#0e7490;font-weight:600">AIF · theory ↗</a> &nbsp;·&nbsp;
+  <span style="font-weight:700;color:#222">● CT / DarkTower · semantics</span> &nbsp;·&nbsp;
+  <span style="color:#aaa">fold · implementation (planned)</span>
+  &nbsp;&nbsp;|&nbsp;&nbsp;<span style="color:#888">related:</span> <a href="substrate-2-explainer.html" target="_blank" style="color:#0e7490">substrate-2 ↗</a>
+</nav>
 <header>
   <h1>What a wiring diagram <i>is</i> — the DarkTower category-theory model</h1>
   <p>The fold turns a cascade into a <b>wiring diagram</b> (R16, the close-the-loop arc — see <code>aif-wiring-explainer.html</code>). But what <i>is</i> a wiring diagram, precisely? This is the <b>semantics</b> layer: DarkTower (real Lean in <code>~/code/mathlib4/DarkTower</code>) answers it categorically. The payoff, in DarkTower's own words: <b>one small interface</b> — typed holes + filling + combs, sequenced by BV — <b>types a mission, a paper, AND a fold's wiring as the same structure</b>, not three theories. A wiring diagram is <b>a comb of typed holes you fill and discharge under a coverage.</b></p>
