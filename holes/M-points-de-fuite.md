@@ -293,6 +293,22 @@ The per-mission **orbit / phase-portrait** — scattered turns woven and concent
 - **futon4 (WebArxana):** `graph.cljs` (orbit render · live poll · hover/halo) · `proxy.clj` (`focus-anchor` E-/C- resolve).
 - **Depends on [[M-post-mining-ingest]]** for the historical-reconstruction half (a canonical, contracted mine).
 
+### 6.5 The `→` override primitive, instantiated in the clocking recognizer (2026-07-01, claude-3)
+§1's candidate primitive `→ M-typed-holes` — **the heaviest tier: an explicit symbol used ONLY as OVERRIDE, to *switch* the clock against the recognition default** (the "thin escape hatch") — is now **built**, in the live clocking recognizer (`futon3c/emacs/agent-chat.el`, `agent-chat--maybe-auto-clock-from-turn`; shared by claude-repl via `claude-repl-send-input → agent-chat-send-input`). It arose from wanting to move the clock onto [[E-monster-to-joey]] while already clocked on `E-agency-ws-cutover`.
+
+**The clocking recognition gradient, as realized** (the §1 table made concrete for the clock-in act):
+
+| weight | signal | behavior | mechanism |
+|---|---|---|---|
+| lightest | **bare mention** of an exact `C-/M-/E-` token | fills the **no-target floor** only (first-mention clock-in); **never switches** an active clock — a mention while clocked stays a mention | M-autoclock-in turn-text scan (`agent-chat--auto-clock-target-from-text`) |
+| middle | **sustained edit** of a `C-/M-/E-.md` doc | **switches** the durable clock (anti-thrash: **3 edits / 10-min window / dominant**) | server-side edit-activity (`clock-store/apply-edit-activity` → `clock-lineage/clock-edit!`), fed by the warm-pouch per-tool feed (`dev.clj/record-agent-tool-use!`) — witness `agent-tool-edit` |
+| heaviest | **`→ E-foo`** decoration (arrow, optional space) | **switches even when already clocked** — the explicit override | NEW: `agent-chat--explicit-switch-token` (explicit-not-fuzzy: exactly one arrow-token, must resolve) — witness `explicit-switch-arrow` |
+
+**Associated issues / findings (recorded here per Joe):**
+- **"Switch on edit" already existed and works** — verified live (3 edits of `E-monster-to-joey.md` → durable `excursion-id`; a real session showed `{"E-agency-ws-cutover" 2}` recorded, sitting under the 3-edit threshold). So the middle tier is not new; it is the edit-activity clock. A **single authoring edit does not switch** (below threshold) — which is why *authoring* [[E-monster-to-joey]] did not auto-clock; the `→` escape hatch (or a 3rd edit) is the deliberate switch.
+- **Floor-only is deliberate** for bare mentions (anti-fuzzy-switch, M-autoclock-in principle) — so the `→` override is the *correct* place to put explicit switch intent, not a loosening of the mention rule.
+- **Buffer vs durable divergence:** the Emacs buffer clock (set by mention/`→`) is separate from the durable server clock (fed by edits); they reconcile only where a surface pulls the durable clock on turn-end (`agent-chat--sync-clock-from-server!`). The `→` switch sets the buffer clock; making a `→` switch *also* durable is an open follow-on (the durable set-path is currently edit- and dispatch-fed; `set-dispatch-mission!` is mission-only, no excursion).
+
 ## Phases ahead — mission lifecycle COMPLETE (IDENTIFY→DOCUMENT); follow-ons spun out
 - **Done:** MAP (§2) · DERIVE (§3) · ARGUE/VERIFY basic-pass (§4) · INSTANTIATE built+verified (§5) · DOCUMENT (§6). The instrument is live and reproducible.
 - **Follow-ons (recorded, not built):**
