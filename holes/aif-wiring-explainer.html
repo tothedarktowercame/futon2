@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>AIF wiring explainer — R1–R19 on a brain (v0.7 · R14 γ WIRED · openable ⟨⟩ interface nodes on edges · A·B·C·D·E tagged)</title>
+<title>AIF wiring explainer — R1–R19 on a brain (v0.8 · R14 γ live readout · cascade LIVE · openable ⟨⟩ interface nodes on edges · A·B·C·D·E tagged)</title>
 <style>
   :root{
     --done:#2e7d32; --done-bg:#e3f5e3; --partial:#b8860b; --partial-bg:#fff5d6;
@@ -399,7 +399,7 @@ const CARDS = {
  "R14 · Precision over policies (γ) — what the red dot contains": [
   {id:"R14-GAMMA", t:"γ — precision over policies", s:"ready", c:"cpu", new:true,
    ev:"futon2.aif.policy-precision (39142f1) · τ_eff = τ_spread / γ · R14 CLOSED",
-   n:"DONE — <b>R14 CLOSED</b> (claude-11, 2026-06-27). γ is a LEARNED, bounded inverse selection temperature: <code>τ_eff = τ_spread / γ</code>, the policy-scale sibling of R7's channel precision. It learns from realized-vs-expected outcomes via a <b>signed performance ratio</b> (beat ⇒ commit, miss ⇒ hedge, exact ⇒ neutral), clamped <b>[0.5, 2.0]</b>, with a 5-sample burn-in; <b>γ = 1.0 reduces EXACTLY to today's spread-only τ</b> (reduction-safe). The machinery, the τ_eff wiring, and the trace seam are all live + tested."},
+   n:"DONE — <b>R14 CLOSED</b> (claude-11, 2026-06-27). γ is a LEARNED, bounded inverse selection temperature: <code>τ_eff = τ_spread / γ</code>, the policy-scale sibling of R7's channel precision. It learns from realized-vs-expected outcomes via a <b>signed performance ratio</b> (beat ⇒ commit, miss ⇒ hedge, exact ⇒ neutral), clamped <b>[0.5, 2.0]</b>, with a 5-sample burn-in; <b>γ = 1.0 reduces EXACTLY to today's spread-only τ</b> (reduction-safe). The machinery, the τ_eff wiring, and the trace seam are all live + tested. <b>LIVE READOUT (2026-07-01):</b> γ now has a live state readout — <code>:r14-gamma</code> in <code>/api/alpha/war-machine</code>, rendered in the <a href='../../futon3c/holes/excursions/aif-cascade-loop-live.html' target='_blank' style='color:#0a8a6f;font-weight:600'>AIF↔cascade loop view ↗</a>. Current: <b>γ = 1.0 (held at prior)</b> with <b>0 policy-outcome samples</b> — its R16 <code>:realized-outcome</code> feed is STAGED behind <code>*live-wire?*</code> (enactment isn't live-wired), and per policy_precision.clj <i>absent today ⇒ no sample ⇒ γ holds at 1.0</i>. The 5-sample burn-in is thus not even in play yet. (The readout also surfaces a calibration DISCHARGE signal — predicted-vs-realised discharge over repl-traces — which is RELATED but DISTINCT from γ's policy feed, and must not be read as γ's sample count.) Flip <code>*live-wire?*</code> ⇒ the realized outcomes flow ⇒ γ moves off 1.0. That's why R14 stays <i>partial</i> (machinery CLOSED, feed STAGED), not fully closed."},
   {id:"R14-FEED", t:"Realized-policy-outcome history (γ's feed)", s:"partial", c:"cpu",
    ev:"futon2.aif.fold-realized → :realized-outcome trace; read by policy-precision/fold-realized-outcome (round-trip tested)",
    n:"γ learns from realized-vs-expected outcomes. The producer→reader SEAM is BUILT + round-trip tested (the R16→R14 <code>:realized-outcome</code> contract, claude-10×claude-11) — but STAGED behind <code>*live-wire?*</code>: enactment (apply-cascade!) isn't live-wired, so the field is absent ⇒ γ holds at 1.0 (reduction-safe). Flips to flowing the moment R16 enacts."}
