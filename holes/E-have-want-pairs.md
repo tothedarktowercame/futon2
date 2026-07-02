@@ -1,7 +1,7 @@
 # Excursion: have-want pairs — provenance, reliance, and the magnet (E-have-want-pairs)
 
-**Date:** 2026-06-27 · **Status:** IDENTIFY/MAP — charter for a receiving agent (findings banked; probe + decision remain).
-**Authored by:** claude-10 (with Joe, 2026-06-27). **Owner:** TBD (hand-off).
+**Date:** 2026-06-27 · **Status:** ✅ **CLOSED 2026-07-02** — all 3 exit conditions met (author's ruling, claude-10). Proof-join remainder SPAWNED to `E-proof-join-population`, not absorbed (§3).
+**Authored by:** claude-10 (with Joe, 2026-06-27). **Discharged by:** claude-11 (Q-A reliance verdict + Q-C ship) + claude-6 (Q-B scorecard). **Owner:** claude-10 (author).
 **Parent / relates:**
 [[E-close-the-loop]] (impl #3, the embedding fold — its (cascade→wiring) corpus needs reliable (have→want) memes; this excursion decides whether we have them) ·
 `cascade-sorry-wiring-symbol-grounding.html` (futon3c — the (have→want)→cascade→sorry→wiring lifecycle; the **magnet** vision) ·
@@ -73,6 +73,17 @@ The (have→want) **meme** is the magnet that, per `cascade-sorry-wiring-symbol-
 1. A **reliance verdict** (Q-A): the canonical (have,want) source(s) + grain impl #3 can rely on today, with counts.
 2. A **magnet-quality scorecard** (Q-B): evidence that the have→want magnet does/doesn't produce qualitatively-good cascades, on real data.
 3. The **foliation ratified** (§3): which siblings are real excursions, owners assigned.
+
+### ✅ Closure ruling (claude-10, author, 2026-07-02)
+
+All three exit conditions met — excursion **CLOSED**:
+1. **Q-A reliance verdict** (claude-11): impl #3 can rely today on (a) the 55 `diffsub` phase-grain pairs (real, scored, semi-circular), (b) the ~455-entry live C-vector **want** side (mission-grain, *unpaired* — have reconstructed from mission state), (c) `meme.db`'s 17 arrows (right shape, seed-scale). Mission-level **paired** arrows remain the empty PROOF join → spawned below.
+2. **Q-B magnet-quality scorecard** (claude-6, 2026-07-01): mechanical `M_havewant` lifts ΔF **+0.093 mean**, **58.9% of 319** improved, F>0 fraction 0.21→0.30 — real lift, well under the hand-meme ceiling (+0.90); **library coverage binds** (confirms §1b). *This is why the naive self-loop wire regressed and I refused it (E1); Q-B found the wire that actually lifts.*
+3. **Foliation ratified** (§3, claude-11): `E-proof-join-population` REAL + priority; `E-wiring-diagram-corpus` REAL — **minting mechanism now LIVE** (the R16 escrow path: every honest fold turn IS a (cascade→wiring) pair; M-canon-fingerprint-store = pair #1); `E-darktower-wiring` partially discharged (`ct-wiring-explainer.html` shipped, claude-10); `E-fold-explainer` + `E-library-coverage` real, unowned. Nothing absorbed.
+
+**Bonus — Q-C (carve-out) shipped + was the keystone:** `mission->psi` derives `M_havewant` mechanically (`ecf2a37`); it lifted M-bayesian-structure-learning F −0.01→+0.209 ⇒ the first **classical** act-gate `:pass` ⇒ the first **numeric** `:realized-outcome` (−0.2/−0.2, two independent *coverage* legs agreeing — apples-to-apples, not the rollout mismatch) ⇒ R14 γ's first real sample. Q-C turned out to enable the whole live R16→R14 chain.
+
+**Spawned (the live remainder — NOT held inside this excursion, per §3):** **`E-proof-join-population`** = the mission-level (have→want) paired corpus = substrate-2's empty PROOF join = R19 headline remainder (E-C-vector-live §11). Owner follows **M-populate-substrate-2 D4** + M-operational-vocabulary's discharge lane. This excursion established the need + handed the spec; it does not build it.
 
 ---
 
