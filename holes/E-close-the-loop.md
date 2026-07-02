@@ -160,10 +160,34 @@ constructor's psi/budget), upstream of the fold. THIN-cascade missions need a
 richer cascade to pass, independent of which fold builds the construction.
 
 ### Remaining
-- Wire a fold into the **live** act-gate path (sim-verified off-path today) —
-  carefully, given the gate lives in the just-recovered pilot backend; reuse the
-  existing scheduler tick, no new loop. (Joe's call on touching the live pilot.)
-- impl #2's `turn-fn` is hand-fed today (the agent turn encoded as data). A real
-  out-of-process producer — a **bell to an agent** or a **recorded fold-turn read
-  from escrow** — is the productionization (still no LLM in the serving JVM).
+- ~~Wire a fold into the **live** act-gate path~~ **DONE — LIVE-WIRED 2026-07-02**
+  (Joe-ratified; see §6d).
+- ~~impl #2's out-of-process producer~~ **DONE — the escrow path** (§6d): a
+  recorded fold turn at `data/fold-escrow/<mission>.edn` feeds the gate's ΔG
+  leg. Still no LLM in any JVM.
 - impl #3 (embedding) build; alt evaluations (b/c/d in `fold-eval`) — the grid bake-off.
+
+## 6d. INSTANTIATE — LIVE WIRING (2026-07-02, Joe-ratified; claude-11; futon2 `3cfd429` + futon3c `5a6741a`)
+
+The loop now closes LIVE, in the **scheduled one-shot JVM** (`wm_scheduled_run`,
+the hourly cron) — NOT the serving JVM, so the no-live-pilot-edit discipline is
+preserved. `futon2.aif.enact` per tick: act-gates over the cascade lane; ΔG
+reconciliation gains a **third source** — an ESCROWED fold turn
+(`data/fold-escrow/<mission>.edn`, `{:boxes [...] :policy-holes [...]}`, written
+by an inhabiting agent out-of-process) = **impl #2 live at the gate**; first
+`:pass` is ENACTED via the deterministic executor (the futon3a `fold_engine
+apply`, the Car-3 executor) — **artifact-only** (no substrate write; WM-I4
+firing stays operator-gated); the `:realized-outcome` record rides the trace to
+R14's γ next tick. **Honest realized semantics:** `:realized-G` = what the
+executor actually REPRODUCED (adopting a predicted wiring as its own
+realization would launder a tautology into γ); executor reproduces nothing ⇒
+`:realized-G` nil ⇒ γ holds. Runner switch `FUTON_WM_LIVE_WIRE` (default on).
+Trace gains present-only `:act-gate-verdicts` (both legs + ΔG source) +
+`:enactment` audit. The serving-JVM `:r14-gamma` readout now reads the REAL
+trace state (it was hardcoded — which had masked the R14 v0 stale-schema bug:
+γ pinned at 0.5 on 8 degenerate 2026-06-27 samples for five days; fixed by
+`policy-precision/coerce-state`, γ verified back to the honest prior).
+**Live behaviour today:** gates verdict per tick (e.g. `M-canon-fingerprint-store
+ΔF=+0.005, ΔG=nil ⇒ :abstain-missing-leg`); a real cascade reaches `:pass` when
+an escrow turn (or rule-table growth) supplies ΔG **and** ΔF>0 — cascade
+richness (the §6c finding) remains the upstream knob.
