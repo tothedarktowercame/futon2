@@ -1,12 +1,12 @@
 # AIF completeness contract — Futon War Machine
 
-*The properties an Active Inference implementation must satisfy to honestly carry the label, and which of them the War Machine AIF apparatus in `futon2.aif.*` currently supports. **R1–R13 are ratified criteria; R14–R18 are first-class tracked-open gaps** surfaced by the 2026-06-24 triangulation against the canonical FEP/AIF decomposition (§"Are R1–R13 enough?"). AIF is a known theory with a finite canonical component set, so completeness is a **reachable, checkable target** (diff every canonical component, present + faithful); R14–R18 are the measured remaining distance, revised as the diff is hardened or the theory advances.*
+*The properties an Active Inference implementation must satisfy to honestly carry the label, and which of them the War Machine AIF apparatus in `futon2.aif.*` currently supports. **R1–R13 are ratified criteria; R14–R19 are first-class tracked-open gaps** — R14–R18 surfaced by the 2026-06-24 triangulation against the canonical FEP/AIF decomposition, R19 (the C-vector / prior preferences) by the 2026-06-25 A/B/C/D/E matrix-diff (§"Are R1–R13 enough?"). AIF is a known theory with a finite canonical component set, so completeness is a **reachable, checkable target** (diff every canonical component, present + faithful); R14–R19 are the measured remaining distance, revised as the diff is hardened or the theory advances.*
 
 ## Why this document exists
 
 The War Machine in `futon2/scripts/futon2/report/war_machine.clj` carries the "AIF observer" claim through the `judge` function (composes observe → compute-free-energy → infer-mode). The vocabulary — free energy, observation, mode — is evocative enough that it can be borrowed by code which implements only a fraction of the apparatus. This contract specifies, property by property, what the WM must do to earn the description honestly, and grades the current implementation.
 
-R1-R12 (R for *requirement*) were ported from the predecessor `~/code/ukrn-services-simulation/docs/aif-completeness.md`; **R13 (policy adequacy) and R14–R18 are futon-native extensions** — R13 found when a degenerate single-step policy bit (cursor-#1), R14–R18 by diffing against the canonical literature (the gap-surfacing process, not a closed checklist). Where the predecessor measures a *batch simulation* against the Friston / Da Costa / Parr formulation, this contract measures a *live observer* operating at strategic timescale over the futon stack's substrate. R1-R12 numbering/semantics are shared with the predecessor; satisfaction modes differ (R10 in particular flips from N/A-by-design to in-flight).
+R1-R12 (R for *requirement*) were ported from the predecessor `~/code/ukrn-services-simulation/docs/aif-completeness.md`; **R13 (policy adequacy), R14–R18, and R19 are futon-native extensions** — R13 found when a degenerate single-step policy bit (cursor-#1), R14–R18 by diffing against the canonical literature (the gap-surfacing process, not a closed checklist). Where the predecessor measures a *batch simulation* against the Friston / Da Costa / Parr formulation, this contract measures a *live observer* operating at strategic timescale over the futon stack's substrate. R1-R12 numbering/semantics are shared with the predecessor; satisfaction modes differ (R10 in particular flips from N/A-by-design to in-flight).
 
 ## Scope note — F1-F10 vs R1-R18
 
@@ -15,7 +15,7 @@ R1-R12 (R for *requirement*) were ported from the predecessor `~/code/ukrn-servi
 | Scope | Contract | Home | What it measures |
 |---|---|---|---|
 | Whole futon stack | F1-F10 | `~/code/futon0/docs/stack-fitness-completeness.md` | Stack as a homeostat (substrate-2, watcher daemons, satisficing-zapper, metabolic-balance, VSATARCS) |
-| WM AIF apparatus | R1-R18 (this doc) | `~/code/futon2/docs/futon-aif-completeness.md` | WM as an AIF implementation (belief, predictive coding, EFE, action selection, trace, multi-step policy, + R14–R18 tracked-open gaps) |
+| WM AIF apparatus | R1-R19 (this doc) | `~/code/futon2/docs/futon-aif-completeness.md` | WM as an AIF implementation (belief, predictive coding, EFE, action selection, trace, multi-step policy, + R14–R19 tracked-open gaps incl. R19 the C-vector) |
 
 The WM's satisfaction of R-criteria *contributes to* F-criteria movement at stack scope, but R and F are not interchangeable. The cross-mapping is named explicitly in §"Cross-mapping to F1-F10" below.
 
@@ -345,13 +345,25 @@ F3 (coherent structure) and F9 (feed-readable annotation graph) are stack-level 
 | R11 — Hierarchical composition | N/A | Single observer at this scope |
 | R12 — Dual-loop hyperparameter inference | **✓ as of 2026-05-21** (apparatus; awaits R10 cron-install for accumulated learning) | Narrow take-up landed via `M-the-futon-stack` Q6 — `futon2.aif.intrinsic-values` + `wm_outer_loop`; static per-channel hyperparameters in `preferences.clj` remain a separate open direction |
 | R13 — Policy adequacy (multi-step `G(π)`) | **✓ apparatus as of v0.21** (`futon2.aif.rollout`; witness: 2-step beats greedy); live-ranking integration partial, *acting* HELD for arming | Found because the degenerate single-step selector bit (cursor-#1); the standing example for the known-unknowns audit below |
-| R14 — Precision over policies (γ) | **OPEN — absent** | No γ over the policy prior; R7 is precision over channels. Checkable form in §R14. (added v0.21 by triangulation) |
-| R15 — Hierarchical / temporal depth | **OPEN — partial** | R4 K=3 horizon + cascade grain-hierarchy, but no nested generative models / sophisticated inference. §R15. |
-| R16 — Closed action–perception loop | **OPEN — partial** | R10 is a snapshot; acting is propose-only (Part B HELD + consent gate / WM-I4). §R16. |
+| R14 — Precision over policies (γ) | **✓ as of v0.22 (2026-07-02)** — machinery + LIVE feed + burn-in crossed; γ=1.0 EARNED (8 realized samples, mean-perf 0.0); **variance-evidence tracked open** (§R14 — taken up inside the mining run) | `futon2.aif.policy-precision`: τ_eff = τ_spread/γ; folds R16's `:realized-outcome` with tick-dedup; two integrity bugs review-caught + fixed same day (retired-schema 0.5-pin; rollout-scale leg pinned to coverage-ΔG at caller AND contract). |
+| R15 — Hierarchical / temporal depth | **OPEN — partial** | R4 K=3 horizon + cascade grain-hierarchy, but no nested generative models / sophisticated inference. §R15. **The last open forward-sweep criterion.** |
+| R16 — Closed action–perception loop | **✓ as of v0.22 (2026-07-02, Joe-ratified)** — the loop CLOSES LIVE hourly | `futon2.aif.enact` in the scheduled runner: act-gates per tick, first `:pass` ENACTED (artifact-only — the checkable form's consent/act-gate step is first-class + recorded per tick as `:act-gate-verdicts`; FIRING stays operator/WM-I4); `:realized-outcome` → γ. First live pass 2026-07-02 (escrow impl #2, M-canon-fingerprint-store). claude-10 review PASS. |
 | R17 — Structure learning / niche construction | **OPEN — present-in-code (futon3c `:acquire-patterns`), not yet a futon2.aif criterion** | Model expansion accepted by ΔF; the code reached it before the contract named it. §R17. |
 | R18 — Faithfulness of the quantities (meta) | **OPEN — absent as a criterion** | The meta-check the grounding audit performs informally (real EIG/ΔF vs analogical L=T·H). §R18. |
+| R19 — Prior preferences (the C-vector) | **OPEN — present-but-implicit** | C (one of the canonical A/B/C/D/E matrices) is implicit in R5a's risk + mislabeled as static hyperparameters in `aif.preferences`; no first-class goal-prior the risk scores against. Surfaced by the A/B/C/D/E matrix-diff (the *belly*, 2026-06-25). §R19. Mission: `M-goals-and-holes`. |
 
-**Honest current claim (as of v0.21):** The WM AIF apparatus satisfies R1, R2, R3 (for 4 of 14 channels; remaining 10 logged as `:prototyping-forward` sorries), R4, R5, R6, R7 (for the same 4 channels), R8, R9, R10 (scheduled-execution-ready; cron-install is the operator's call), R12 (apparatus), and **R13 (apparatus — multi-step `G(π)` via `futon2.aif.rollout`, witness passes; live-ranking integration partial, acting HELD)** cleanly; R11 N/A. **But R1–R13 are necessary, NOT sufficient** — the 2026-06-24 triangulation against the canonical FEP/AIF decomposition adds **R14–R18 as first-class tracked-open gaps** (next section): R14 (γ over policies, absent), R15 (hierarchical/temporal depth, partial), R16 (closed action–perception loop, partial), R17 (structure-learning/niche, present-in-code on futon3c, not yet a futon2.aif criterion), R18 (faithfulness, absent as criterion). Completeness against the canonical theory is a reachable, checkable bar (implement every canonical component, faithfully); R14–R18 are the measured remaining distance — not yet complete, but not unattainable. (R19+ only if the full literature diff surfaces a component this first pass missed, or the theory advances.) The current vocabulary "WM AIF agent (with explicit belief, forward model, EFE-scored action selection, persisted trace, named validation properties, and scheduled-execution entrypoint)" is honest. **Load-bearing remaining work for the v1.0 contract:** (a) operator installs cron entry — flips R10 from "scheduled-execution-ready" to "running in production"; (b) R3a likelihood model so the trace's `:prediction-errors` field becomes meaningful. The substrate-adapter bar beyond the v1 hand-curated sorry registry is now met twice: `:open-mission` via mission docs (v0.18) and `:fire-pattern` via recent context-retrieval evidence (v0.19). None of these are gate-conditions for the apparatus's *current* claim of being an AIF-complete agent under its scope; (a) is operator action, (b) is the remaining R-criteria completion on the v1.0 path.
+**Honest current claim (as of v0.21):** The WM AIF apparatus satisfies R1, R2, R3 (for 4 of 14 channels; remaining 10 logged as `:prototyping-forward` sorries), R4, R5, R6, R7 (for the same 4 channels), R8, R9, R10 (scheduled-execution-ready; cron-install is the operator's call), R12 (apparatus), and **R13 (apparatus — multi-step `G(π)` via `futon2.aif.rollout`, witness passes; live-ranking integration partial, acting HELD)** cleanly; R11 N/A. **But R1–R13 are necessary, NOT sufficient** — the 2026-06-24 triangulation against the canonical FEP/AIF decomposition adds **R14–R18 as first-class tracked-open gaps** (next section): R14 (γ over policies, absent), R15 (hierarchical/temporal depth, partial), R16 (closed action–perception loop, partial), R17 (structure-learning/niche, present-in-code on futon3c, not yet a futon2.aif criterion), R18 (faithfulness, absent as criterion). Completeness against the canonical theory is a reachable, checkable bar (implement every canonical component, faithfully); R14–R18 are the measured remaining distance — not yet complete, but not unattainable. (**R19 is now exactly that:** the A/B/C/D/E matrix-diff (2026-06-25) surfaced **C — prior preferences** as the component the policy-depth-focused R14–R18 round missed — see §R19.) The current vocabulary "WM AIF agent (with explicit belief, forward model, EFE-scored action selection, persisted trace, named validation properties, and scheduled-execution entrypoint)" is honest. **Load-bearing remaining work for the v1.0 contract:** (a) operator installs cron entry — flips R10 from "scheduled-execution-ready" to "running in production"; (b) R3a likelihood model so the trace's `:prediction-errors` field becomes meaningful. The substrate-adapter bar beyond the v1 hand-curated sorry registry is now met twice: `:open-mission` via mission docs (v0.18) and `:fire-pattern` via recent context-retrieval evidence (v0.19). None of these are gate-conditions for the apparatus's *current* claim of being an AIF-complete agent under its scope; (a) is operator action, (b) is the remaining R-criteria completion on the v1.0 path.
+
+**v0.22 update (2026-07-02, Joe-ratified session):** **R16 and R14 flip to ✓.** The loop closes
+live (hourly cron; enactment artifact-only; WM-I4 firing stays the operator's; first live pass via
+an escrowed impl-#2 fold turn) and γ crossed its burn-in the same day (1.0 EARNED, 8 samples,
+mean-perf 0.0) after two review-caught integrity fixes. **R19 is built AND steering** (455-entry
+live C-vector; predictive risk re-ranks per action after the vocabulary-correlation fix — 0/110 →
+55/110 actions advancing entries, 25 distinct `:G-goal-outcome` values per tick; PROOF-join steps
+1–3 durable on :7071). Tracked open: R14 **variance evidence** (γ driven off 1.0 by diverse
+outcomes — a named workstream inside the mining run), R15 (now the last open forward-sweep
+criterion), R17, R18, and R19's durable-join steps 4–5. The remaining distance is measured, small,
+and each piece has an owner.
 
 ## Are R1–R13 enough? — known-unknowns (E-aif2-partB triangulation, first-pass 2026-06-24)
 
@@ -366,6 +378,7 @@ The concrete completeness check: **diff R1–R13 against the canonical FEP/AIF d
 | Canonical FEP/AIF component | R-coverage | Verdict |
 |---|---|---|
 | Generative model (priors + likelihood) | R1 + R3a | partial (4/14 channels) |
+| **Prior preferences over outcomes (the C matrix)** | R5a *uses* it; mislabeled as hyperparams in `aif.preferences`; no first-class criterion | **absent as criterion → R19** |
 | Approx-posterior / recognition density | R1 / R3 | present |
 | EFE pragmatic (risk) | R5a | present |
 | EFE epistemic — ambiguity | R5b | present |
@@ -378,14 +391,31 @@ The concrete completeness check: **diff R1–R13 against the canonical FEP/AIF d
 | Learning — structure (model expansion / niche) | §Capability-gap addendum + futon3c `:acquire-patterns` | present-in-code, **no criterion** |
 | Faithfulness of the quantities (real vs analogical) | grounding audit (EIG/ΔF real; L=T·H analogical) | **absent as criterion** |
 
-**R14–R18 are now FIRST-CLASS tracked criteria of this contract** (same discipline as R3's `:prototyping-forward` sorries: a known gap is an explicit, numbered, addressable entry — never an implicit hedge). They are *open* (mostly absent/partial), which is a satisfaction state, not an out-of-contract state — exactly as R10/R12 were carried open before they landed. Each has a definite status and a checkable form.
+**R14–R19 are now FIRST-CLASS tracked criteria of this contract** (same discipline as R3's `:prototyping-forward` sorries: a known gap is an explicit, numbered, addressable entry — never an implicit hedge). They are *open* (mostly absent/partial), which is a satisfaction state, not an out-of-contract state — exactly as R10/R12 were carried open before they landed. Each has a definite status and a checkable form.
 
 ### R14 — Precision over policies (the γ term)
 
 Canonical AIF carries precision (confidence) over the **policy prior** — the γ term that scales how sharply the agent commits to the best policy and is itself inferred from outcomes — not only over observation channels (which is R7).
 
-**Status: ABSENT (open).** R7 adapts precision over channels; there is no γ over policies. `select-policy`'s adaptive τ scales with EFE *spread*, which is a fixed heuristic, not an inferred policy-precision.
-**Checkable form.** A γ scaling policy-selection sharpness in `futon2.aif.rollout/select-policy`, updated from realized policy-outcome history (the R13 return channel is the natural feed).
+**Status: SATISFIED as of v0.22 (2026-07-02) — with one tracked-open follow-on.** The checkable
+form is met: `futon2.aif.policy-precision` scales selection sharpness (`τ_eff = τ_spread / γ`,
+bounded [0.5, 2.0], 5-sample burn-in) and IS updated from realized policy-outcome history — R16's
+live `:realized-outcome` trace contract, folded with tick-dedup. As of 2026-07-02: **γ = 1.0
+EARNED** (8 realized samples, mean-perf 0.0 — a posterior, not the held prior). Integrity
+hardening the same day: the retired v0 `:error-history` schema had pinned γ at 0.5 on 8
+degenerate samples for 5 days (fixed: `coerce-state`); the expected leg is pinned to coverage-ΔG
+at both the enact caller and the `realized-outcome-of` contract so no rollout-vs-coverage scale
+mismatch can recur (claude-10 review must-fix).
+**Tracked-open follow-on — VARIANCE EVIDENCE (Joe, 2026-07-02: taken up INSIDE the mining run).**
+All 8 samples to date are the same construction reproduced identically (perf 0.0 ×8) — γ has
+never been *driven* off 1.0 by data, so the commit/hedge behaviour is machinery-tested but not
+outcome-tested in vivo. The mining pilot (claude-3, R19-PROOF-JOIN lane) carries the workstream:
+recovered discharge methods → executor reach (rule entries / mined-moves) → diverse realized-G →
+a non-degenerate perf distribution → γ demonstrably moving off 1.0 in both directions. Checkable
+form for closure: γ ≠ 1.0 in a live trace record, traceable to a non-zero perf sample.
+**Checkable form (original, for the record).** A γ scaling policy-selection sharpness in
+`futon2.aif.rollout/select-policy`, updated from realized policy-outcome history (the R13 return
+channel is the natural feed). ✓
 
 ### R15 — Hierarchical / temporal depth
 
@@ -398,8 +428,22 @@ Nested generative models (the upper level's state is a prior over the lower's) a
 
 A true AIF agent *closes* observe → infer → select → **act** → observe; the consequence of acting feeds the next belief.
 
-**Status: PARTIAL (open) — the loop is not closed.** R10 is a live *snapshot*; the WM proposes but does not act (Part B HELD; consent gate / WM-I4). R13's "acting HELD" is the same gap, generalized.
-**Checkable form.** The agent takes a selected action, observes the consequence, and the next tick's belief reflects it — with the **consent / act-gate (WM-I4) as a first-class, recorded step** (supervised → autonomous = swap operator for autopen at that one location).
+**Status: SATISFIED as of v0.22 (2026-07-02, Joe-ratified).** The loop closes LIVE, hourly:
+`futon2.aif.enact` (scheduled runner — never the serving JVM) act-gates the cascade lane per tick
+(ΔG reconciles rollout → classical fold → escrowed LLM fold turn), ENACTS the first `:pass` via
+the deterministic executor (artifact-only), and the `:realized-outcome` rides the trace into the
+next tick's belief/γ update. The checkable form is met precisely: the consent/act-gate is a
+first-class, RECORDED step (`:act-gate-verdicts` with both legs + ΔG source persisted per tick),
+and FIRING substantive actions stays the operator/autopen switch (WM-I4) — supervised today,
+the autonomous swap is one location. First live pass 2026-07-02 (escrow impl #2 on
+M-canon-fingerprint-store); honest realized semantics (executor-reproduced, never the prediction
+echoed back) claude-10-review-endorsed. Remaining texture lives on the R16 board in the wiring
+explainer: executor rule-table reach is a NAMED DEBT (`:prototyping-forward`), and the fold
+SUPPLY corpus (E-have-want-pairs → E-wiring-diagram-corpus) is the open frontier.
+**Checkable form (original, for the record).** The agent takes a selected action, observes the
+consequence, and the next tick's belief reflects it — with the **consent / act-gate (WM-I4) as a
+first-class, recorded step** (supervised → autonomous = swap operator for autopen at that one
+location). ✓
 
 ### R17 — Structure learning / model expansion (niche construction)
 
@@ -415,7 +459,15 @@ R1–R17 check that the *apparatus* exists; R18 checks the named quantities are 
 **Status: ABSENT as a criterion (the meta-check that the grounding audit performs informally).** The 2026-06-24 grounding audit found EIG and ΔF real (action-posterior entropy; accuracy − complexity) while Salingaros `L=T·H ↔ free-energy` is analogical/unbuilt (the report's headline gap; `E-prove-salingaros-cascade-scorer`).
 **Checkable form.** Every named AIF term in the apparatus has *either* a written derivation to the canonical FEP formula *or* an explicit `:analogical` flag — no silent relabeling.
 
-**Provenance + how complete this is.** R14–R18 are a *first-pass* triangulation (from the in-hand AIF∩morphogenesis report + this contract); they discharge the bulk of `E-aif2-partB`'s deliverable without a fresh fan-out. A full adversarial deep-research round (that charter §4) would make the canonical-component list **authoritative** and may surface any component this first pass missed (R19+). The target is finite and reachable — every canonical AIF component, present + faithful; the full round is how we get a *trustworthy* enumeration of that target, not evidence the target recedes.
+**Provenance + how complete this is.** R14–R18 are a *first-pass* triangulation (from the in-hand AIF∩morphogenesis report + this contract); they discharge the bulk of `E-aif2-partB`'s deliverable without a fresh fan-out. A full adversarial deep-research round (that charter §4) would make the canonical-component list **authoritative** and may surface further components this first pass missed (R20+). A *partial* such diff already landed one: the A/B/C/D/E matrix-check surfaced **R19 (the C-vector)** — see §R19; the full round should re-check D and E for the same reason. The target is finite and reachable — every canonical AIF component, present + faithful; the full round is how we get a *trustworthy* enumeration of that target, not evidence the target recedes.
+
+### R19 — Prior preferences (the C-vector)
+
+Active inference's generative model has five canonical matrices — **A** (likelihood `P(o|s)`), **B** (transitions `P(s′|s,π)`), **C** (prior preferences over outcomes), **D** (initial-state prior), **E** (policy prior). **C encodes the agent's goals** as a categorical (log-)preference over outcomes; the EFE **risk** term is the divergence between a policy's predicted outcomes and C. With C ignored, `G` reduces to pure information-gain (Da Costa et al. 2020, *Active inference on discrete state-spaces: a synthesis*) — a policy that explores but builds *toward nothing*.
+
+**Status: PRESENT-BUT-IMPLICIT (open).** C is not a first-class criterion: it sits implicit inside R5a's risk ("distance from what you prefer") and is mislabeled as static per-channel hyperparameters in `futon2.aif.preferences` (`preferences`, `avoided-states`, `pragmatic-weights`) — EFE weights, not the goal-prior the risk scores against. Nothing *sets or learns* the WM's preferred outcomes from its goals/holes. This is both an `E-aif2-partB` **silent miss** (the hand-grown R-list, diffed for policy-*depth* in the R14–R18 round, was never diffed against A/B/C/D/E *as matrices*) and an **R18 faithfulness fault** (a load-bearing quantity present-but-unnamed).
+**Checkable form.** A first-class preference object (the C-vector) populated from the WM's goals/holes — the *stated* sorries + the *unstated/latent* holes — that R5a's risk is scored against, settable top-down by R15 and learnable from outcomes. The mission that builds it is **`M-goals-and-holes`** (the backward/goal dual of the forward `M-operational-vocabulary` mining; the *belly* / hara on the wiring diagram).
+**The standing lesson (alongside R13).** R13 was the "found because it bit" example; **R19 is the "found by diffing against the matrices" example** — the R14–R18 round diffed for *depth* (γ, hierarchy, structure) but not against the generative-model decomposition A/B/C/D/E, so it walked past C. The systematic A/B/C/D/E diff is the fix; it should also re-check **D** (≈R1, partial) and **E** (≈R12/R14, partial), the other prior matrices the depth-diff under-weighted.
 
 ## Capability-gap modeling as endogenous action: the modeller inside the model
 
