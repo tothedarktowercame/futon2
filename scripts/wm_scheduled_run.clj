@@ -21,8 +21,19 @@
    error-mail mechanism."
   (:require [futon2.aif.trace :as trace]
             [futon2.aif.c-vector :as cv]
+            [futon2.aif.enact :as enact]
+            [futon2.aif.fold-realized :as fr]
             [futon2.report.war-machine :as wm])
   (:import (java.time Instant)))
+
+(defn- live-wire?
+  "R16 enactment switch for THIS runner (Joe-ratified ON, 2026-07-02).
+   `FUTON_WM_LIVE_WIRE=0` (or `false`) disables — the operator-visible
+   escape hatch. The `fold-realized/*live-wire?*` dynamic var keeps its
+   global default (false) for every other consumer; we bind it only
+   around this runner's enactment step."
+  []
+  (not (contains? #{"0" "false"} (System/getenv "FUTON_WM_LIVE_WIRE"))))
 
 (defn- summarise
   "One-line summary of a WM run for stdout/cron logs."
@@ -64,10 +75,26 @@
           ;; static floor; never throws the run.
           belly (try (cv/maybe-refresh!) (catch Exception _ {:entries []}))
           {:keys [judgement]} (wm/generate-war-machine days)
+          ;; R16 close-the-loop (live-wired 2026-07-02): act-gates over the
+          ;; judged actions; first :pass is ENACTED (artifact-only — escrow
+          ;; impl #2 else fold-engine impl #1) and the :realized-outcome
+          ;; record rides the trace to R14's γ next tick. Tick = epoch-ms
+          ;; (γ dedups on it). Guarded inside close-loop!: any failure
+          ;; returns the judgement unchanged.
+          judgement (if (live-wire?)
+                      (binding [fr/*live-wire?* true]
+                        (enact/close-loop! judgement (System/currentTimeMillis)))
+                      judgement)
           trace-path (trace/write-trace! judgement)]
       (println (str (summarise judgement trace-path)
                     " belly=" (count (:entries belly))
-                    (when (:derived-at belly) (str " derived=" (:derived-at belly)))))
+                    (when (:derived-at belly) (str " derived=" (:derived-at belly)))
+                    " gates=" (pr-str (frequencies (map :verdict (:act-gate-verdicts judgement))))
+                    (when-let [e (:enactment judgement)]
+                      (str " ENACTED=" (:mission e) " src=" (name (:source e))
+                           " boxes=" (:boxes e) " holes=" (:policy-holes e)))
+                    (when-let [ro (:realized-outcome judgement)]
+                      (str " realizedG=" (:realized-G ro) " expectedG=" (:expected-G ro)))))
       (System/exit 0))
     (catch Throwable t
       (binding [*out* *err*]

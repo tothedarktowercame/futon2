@@ -124,10 +124,18 @@
     :mode (:mode judge-output)}
     ;; R16 close-the-loop seam (interface paired with claude-10): the enactor
     ;; writes `:realized-outcome` at enactment; R14's γ reader consumes it next
-    ;; tick (see `policy-precision/fold-realized-outcome`). Present-only — ABSENT
-    ;; today (enactment not yet live-wired), which keeps γ at its prior.
+    ;; tick (see `policy-precision/fold-realized-outcome`). Present-only —
+    ;; LIVE-WIRED 2026-07-02 (Joe-ratified; `futon2.aif.enact` in the scheduled
+    ;; runner); absent whenever nothing enacted, which keeps γ at its prior.
     (:realized-outcome judge-output)
-    (assoc :realized-outcome (:realized-outcome judge-output))))
+    (assoc :realized-outcome (:realized-outcome judge-output))
+    ;; R16 audit fields (present-only): the per-tick act-gate verdicts and the
+    ;; enactment summary — so a trace reader can see WHAT the gate decided and
+    ;; what was enacted, not just the γ-facing outcome record.
+    (seq (:act-gate-verdicts judge-output))
+    (assoc :act-gate-verdicts (:act-gate-verdicts judge-output))
+    (:enactment judge-output)
+    (assoc :enactment (:enactment judge-output))))
 
 (defn write-trace!
   "Append one trace record (constructed from a judge-style output) to

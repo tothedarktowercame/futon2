@@ -204,6 +204,23 @@
          (assoc :last-outcome-tick (:tick realized-outcome)))
      gamma-state)))
 
+(defn coerce-state
+  "Schema guard for a γ-state read back from a persisted trace record.
+
+   The R14 v0 feed (live for one day, 2026-06-27, retired for the signed-perf
+   redesign) persisted a symmetric-|error| schema (`:error-history`/`:mean-error`)
+   whose 8 samples were DEGENERATE — a scale-mismatched expected-vs-realized
+   comparison drove error ≈ 1.0 every time, pinning γ to the floor 0.5 — and the
+   stale state then rode the trace forward verbatim for days (found 2026-07-02:
+   the live WM hedging 2× on junk). A state without a `:perf-history` vector is
+   that retired schema (or otherwise malformed): reconstruct the honest prior
+   instead of inheriting it. Real samples re-accrue through burn-in from live
+   R16 `:realized-outcome` records."
+  [state]
+  (if (and (map? state) (vector? (:perf-history state)))
+    state
+    (initial-policy-precision-state)))
+
 (defn gamma-for
   "Read the current γ from a γ-state, defaulting to the prior 1.0 when absent
    (nil state, or a state with no `:policy-precision`). Mirrors

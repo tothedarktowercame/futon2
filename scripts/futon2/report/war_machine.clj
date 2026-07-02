@@ -3584,9 +3584,13 @@
             (precision/initial-precision-state))
         ;; R14 precision-over-policies (γ): the previous tick's γ-state, read
         ;; from the trace like :precision-state. Default = the prior (γ=1.0).
+        ;; coerce-state guards against the retired v0 :error-history schema
+        ;; whose degenerate 8-sample state pinned γ to 0.5 for days (2026-07-02
+        ;; find) — malformed/retired shapes reset to the honest prior.
         prev-policy-precision
-        (or (:policy-precision prev-trace-record)
-            (policy-precision/initial-policy-precision-state))
+        (policy-precision/coerce-state
+         (or (:policy-precision prev-trace-record)
+             (policy-precision/initial-policy-precision-state)))
         ;; R14 learning step: fold the REALIZED outcome of an enacted policy into
         ;; γ. The signal is R16's committed `:realized-outcome` trace contract
         ;; (paired with claude-10, E-close-the-loop), written at enactment and
