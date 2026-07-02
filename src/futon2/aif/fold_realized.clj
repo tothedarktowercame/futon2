@@ -40,10 +40,18 @@
                         `:realized-G` = the SHARED coverage→rollout ΔG over it.
      `tick`           — the enactment tick (γ dedups on it).
    `:realized-G` is nil when nothing was enacted (no boxes) — γ then holds (it
-   requires a number), the honest no-op."
+   requires a number), the honest no-op.
+
+   SCALE-MATCH PIN (claude-10 review must-fix, 2026-07-02): `:expected-G`
+   PREFERS the fold's coverage-ΔG leg whenever present — never a gate-side
+   rollout-G — because `:realized-G` is always coverage-ΔG, and a rollout-vs-
+   coverage pair would feed γ the same scale-mismatched junk class that pinned
+   it at 0.5 (the retired v0 feed). The gate still verdicts on its own
+   reconciled leg; only γ's calibration pair is constrained here, at the
+   contract, so no future caller can reintroduce the mismatch."
   [{:keys [policy expected-G fold]} enacted-wiring tick]
   {:policy     policy
-   :expected-G (if (number? expected-G) expected-G (:delta-g fold))
+   :expected-G (or (:delta-g fold) (when (number? expected-G) expected-G))
    :realized-G (fe/coverage-delta-g enacted-wiring)
    :tick       tick})
 
