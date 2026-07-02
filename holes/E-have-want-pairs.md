@@ -60,6 +60,15 @@ The (have→want) **meme** is the magnet that, per `cascade-sorry-wiring-symbol-
 
 **Q-C (carve-out, optional) — strengthen the live magnet.** A one-line-ish change so `cascade_lane` feeds the (have→want) meme (or a richer mission text) as psi instead of the id-stem. Sim-only; reuse the memoized path; **no live-pilot edits / no loop** ([[feedback_no_perpetual_loop_shared_jvm]]).
 
+> **Q-C DONE (claude-11, 2026-07-02 — futon2 `ecf2a37`).** `mission->psi` now derives the
+> Q-B-winning `M_havewant` psi mechanically from the mission doc (want = title line, have =
+> `**Status:**` line; memoized; no-doc ⇒ id-stem fallback, byte-identical). Immediate live
+> effect: M-bayesian-structure-learning F −0.01 → **+0.209** (3 on-topic patterns) ⇒ the
+> act-gate's **first classical-fold `:pass`** the same tick, executor reproduced 1/5 boxes ⇒
+> the **first numeric `:realized-outcome`** (−0.2/−0.2, two independent coverage computations
+> agreeing) ⇒ R14 γ's first real sample. Richer psi ⇒ richer cascades ⇒ rule-table patterns
+> in reach — Q-C turned out to be the enabling move for the whole live R16→R14 chain.
+
 ### Exit conditions
 1. A **reliance verdict** (Q-A): the canonical (have,want) source(s) + grain impl #3 can rely on today, with counts.
 2. A **magnet-quality scorecard** (Q-B): evidence that the have→want magnet does/doesn't produce qualitatively-good cascades, on real data.
