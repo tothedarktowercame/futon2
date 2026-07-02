@@ -129,3 +129,16 @@ Predictive risk (§10) uses an **in-memory** id-match (action `:target` ↔ C-en
 5. **Reconcile** — the join is the bidirectional bridge: backward (goals/holes, M-goals-and-holes) ↔ forward (methods, M-operational-vocabulary). This is the substrate-2 PROOF store's reason for being.
 
 **Dependencies (why it's not built here):** D4's promotion path + the two owning missions must land first; building the join before them would invent relation content this excursion explicitly scoped out (§7). The in-memory match (§10) is the working stand-in until then.
+
+> **STEPS 1+2 (+2b) DONE — 2026-07-02, Joe-ratified (claude-11).** `futon2/scripts/promote_c_entries.bb`
+> (dry-run default, idempotent name-keyed upserts, x-penholder api, run-write! pipeline):
+> **454 `c-entry` entities** durable on :7071 (455 live entries, one exact-duplicate pair deduped;
+> full EDN fidelity in `:props :entry-edn` + flat convenience props), **3 `method/class` entities**,
+> **62 `:discharged-by` relations** (c-entry → method/{centre-mess,adopt-redirect,preserve-coherence})
+> and — step 2b, what makes the join graph-queryable — **190 `:outcome-ref` relations** from c-entries
+> to CANONICAL mission nodes (`<repo>-d/mission/<stem>`, resolved via the 472 mission/doc entities;
+> 5 unresolved, reported). Names follow README-conventions (entity `:name` = the identifier =
+> relation endpoint). Prerequisite fixed the same day: the in-memory join's vocabulary-correlation
+> bug (futon2 `2fd9022` — 0/110 → 55/110 actions advancing entries). Steps 3–5 (mined-move join,
+> forward-model reads the DURABLE join, reconcile) remain — step 3 dispatched to a helper agent
+> with the mining-run landing spec (the deferred M-fold-ansatz batch-recovery now has a place to land).
