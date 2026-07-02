@@ -112,15 +112,23 @@
     :enactment <audit>}. `:enacted` nil ⇒ the executor reproduced nothing —
    the realized-outcome will carry `:realized-G` nil and γ holds (honest)."
   [{:keys [mission shown act-gate]}]
-  (let [enacted (when (seq shown) (engine-wiring shown))]
+  (let [enacted (when (seq shown) (engine-wiring shown))
+        ;; γ's expected leg must be the fold's COVERAGE-ΔG — never the gate's
+        ;; reconciled :delta-G, which prefers rollout-G. realized-G is always
+        ;; coverage-ΔG, and a rollout-vs-coverage pair would re-inject the v0
+        ;; scale mismatch that pinned γ at 0.5 (claude-10 review finding,
+        ;; 2026-07-02). No fold leg ⇒ nil ⇒ γ holds (honest). The GATE still
+        ;; verdicts on its own reconciled leg; only γ's pair is constrained.
+        gamma-expected (get-in act-gate [:fold :delta-g])]
     {:enacted enacted
      :decision {:policy mission
-                :expected-G (:delta-G act-gate)
+                :expected-G gamma-expected
                 :fold (:fold act-gate)}
      :enactment {:mission mission
                  :source :classical-engine
                  :predicted-via (:delta-G/source act-gate)
-                 :expected-G (:delta-G act-gate)
+                 :gate-delta-G (:delta-G act-gate)
+                 :gamma-expected-G gamma-expected
                  :cascade shown
                  :boxes (count (:boxes enacted))
                  :policy-holes (count (:policy-holes enacted))}}))
