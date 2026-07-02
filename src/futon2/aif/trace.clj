@@ -65,8 +65,11 @@
    `:G-info` + `:G-survival`; v0.14 added `:time-pressure`; v0.15
    added `:horizon-steps`; v0.20 adds `:G-structural-pressure`."
   [r]
+  ;; :G-goal-outcome (R19, 2026-07-02): the belly's predictive-risk term was
+  ;; computed per action but STRIPPED here — so no flight could show the belly
+  ;; steering. Persist it: the R19 analog of R16's :act-gate-verdicts audit.
   (select-keys r [:action :G-risk :G-ambiguity :G-info :G-survival
-                  :G-structural-pressure
+                  :G-structural-pressure :G-goal-outcome
                   :G-total :rank :time-pressure :horizon-steps]))
 
 (defn- strip-decision
