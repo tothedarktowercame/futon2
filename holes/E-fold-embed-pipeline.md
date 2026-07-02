@@ -151,3 +151,51 @@ fallback rung to separate state-space-size from mechanism failure. Code → `fut
 verdicts → `futon6/data/fold-embed-gfn/`. v0 tests the MECHANISM (env + reward + trainability), not
 cascade→sorry generalization — the conditional/cross-mission policy is v1, and (b) stays the data
 escalation if v0 says "works but starved". (First bell mis-sent to codex-1 — a bare shell; superseded.)
+
+## G.1 SEED RESULT (2026-07-02) — NEGATIVE, and it's a **FIX** not a **KILL** (claude-4 + claude-11)
+Both rungs ran, laptop/CPU, seed 20260702, β=6.0 (reward range [1.0, 403.4]), K=128 probe:
+- **Reduced rung** (mine, clean loader — pools 20–23, own gold + ~13 sibling-mission hard negatives):
+  `gfn-seed-verdicts-reduced.json`, **10/10 missions**, all k match gold [7,7,7,8,6,6,7,9,7,6],
+  `mean_cov_lift 0.005`, `n_with_positive_lift 0`. Coverage pinned at **chance** (≈k/pool: autoclock
+  0.365 vs 7/21=0.333; single-entry 0.404 vs 9/23=0.391), **distinct 128/128 pre AND post** → the trained
+  policy stayed ≈uniform. **Zero concentration even on ~20-item pools.**
+- **Full rung** (claude-11, pool 70, 1200 steps): `gfn-seed-verdicts-full-PARTIAL.json`, **PARTIAL 6/10**
+  (killed by a session restart), all 6 null, same signature. Honest partial — labelled, not 10/10.
+
+**VERDICT (consolidated): reward-LANDSCAPE null — NOT a GFN-mechanism null, NOT state-space-size alone.**
+Three legs pin it:
+1. **The reduced rung rules out state-space size as the sole cause** — a 20-item pool is small, and it was
+   *still* flat. Size is not the story.
+2. **The SAME laptop GFN concentrates when the pool is gold-dense** — `labs/fold-gfn/fold_gfn.py`
+   (2026-07-01) selects the spine from a mission's *own* cascade (gold ≈ 60–70% of the pool) with the same
+   `exp(β·overlap)` reward and **learns (0.40→0.68) + generalizes (leave-one-out F1 0.69 vs 0.51)**. Note
+   the reward *formula* is identical — at exact-k, F1 = coverage — so the differentiator is **not the
+   reward function, it's the pool composition**.
+3. **Mechanism (claude-11, ratified):** the seed's decoy-padded pool (gold only ~30–35% of refs) puts the
+   untrained policy's explorable region in a **flat, near-chance-coverage band** — most random k-subsets
+   share 2–3 gold, so per-trajectory reward variance is tiny and TB gets almost no gradient, despite the
+   403× nominal range. The gold-dense fold-GFN pool has a wide, high reward band → dense gradient → it
+   climbs. **This is the fifth/sixth consistent confirmation of the M-fold-ansatz through-line: the fold's
+   difficulty is reward/signal STEEPNESS (gradient where the policy actually lives), not representation or
+   compute.** (Siblings: E-cascade-sampler-sampler flat-reward, ×4; s4 membership-reward +0.21 positive.)
+
+**Why FIX not KILL (Joe's steer, and the data backs it):** the working regime is *known* — a reward with
+gradient in the explorable region (fold-GFN 0.69, s4 +0.21). Decisive next controls, in info-gain order:
+- **(a) per-item / membership shaping OR a gold-dense curriculum** (start on the own-cascade pool like
+  fold-GFN, then anneal in decoys). Restores gradient; the known-working shape. *This is the decisive
+  control that isolates reward-shape from the residual 9-vs-20 pool confound.*
+- **(c) conditioning features (the cascade as generator input).** The seed env gave the GFN **no features
+  to tell gold from decoy** — and with **0 cross-mission shared refs**, the task as posed is pure
+  per-mission index *memorization*, nothing transferable to learn. Cascade-conditioned features turn it
+  into a learnable "does this ref match this cascade" scorer — **which is exactly where the E-fold-embed
+  embedding pipeline (Stages A–E) plugs into the GFN as node features.** The negative therefore
+  *re-motivates* the embedding arm and tightens the two-arm composition: **embedding = the GFN's eyes.**
+- (b) more steps (3000+) as a cheap control, only to confirm it's landscape not budget.
+
+**Escalation (b, the GPU mining run) is NOT triggered** — v0 did not say "works but data-starved"; it said
+"featureless memorization over disjoint pools has no gradient." Data volume is not the missing ingredient;
+**conditioning features are.** So the next build is (a)+(c) laptop, not the box.
+
+Artifacts: `futon6/data/fold-embed-gfn/gfn-seed-verdicts-{reduced,full-PARTIAL}.json` · trainer
+`futon6/scripts/fold_embed/gfn_seed_v0.py` (`47c7566`+`928676a`) · proxy `sorry_proxy.py` · positive
+control `futon2/holes/labs/fold-gfn/`. **Pending Joe's ratification before canon.**

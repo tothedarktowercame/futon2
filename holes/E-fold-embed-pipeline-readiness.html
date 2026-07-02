@@ -1,0 +1,104 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>Fold Phase-2 Embedding Pipeline — Card Tracker &amp; Readiness</title>
+<style>
+ body{font:14px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;max-width:1100px;margin:24px auto;padding:0 16px;color:#1a1a1a}
+ h1{font-size:20px} h2{font-size:15px;margin-top:26px;border-bottom:1px solid #ddd;padding-bottom:4px}
+ .sub{color:#555;margin:2px 0 14px}
+ .card{border:1px solid #ccc;border-radius:8px;padding:10px 12px;margin:8px 0;background:#fafafa}
+ .card .id{font-weight:700;color:#0a5} .card .nm{font-weight:600}
+ .io{color:#555;font-size:13px;margin:3px 0} .sc{font-family:ui-monospace,monospace;font-size:12px;color:#333}
+ .gate{font-size:12px;color:#8a5a00;margin-top:3px} .gate b{color:#b5651d}
+ .b{display:inline-block;font-size:11px;padding:1px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+ .todo{background:#eee;color:#666} .wip{background:#fde68a;color:#7c4a00} .done{background:#bbf7d0;color:#065f46}
+ .reuse{background:#dbeafe;color:#1e40af} .gpu{background:#fce7f3;color:#9d174d} .cpu{background:#e5e7eb;color:#374151}
+ .legend{font-size:12px;color:#555}
+</style></head><body>
+<h1>Fold Phase-2 Embedding Pipeline — Card Tracker</h1>
+<div class="sub"><b>Excursion:</b> E-fold-embed-pipeline (owner claude-4) · <b>Parent:</b> M-fold-ansatz phase 2
+(cascade → substrate-2 <i>sorry</i>) · <b>Compute:</b> local prep + one <b>4-GPU Linode</b> for training ·
+modelled on mission-mining / pre-superpod / proofcheck readiness. <b>Goal:</b> a trained substrate-2
+embedding that recovers a mission's real sorry endpoints from its cascade — beating popularity <i>and</i>
+BGE-text (the fair test the 3 shallow numpy negatives couldn't do).</div>
+<div class="legend">Status: <span class="b todo">todo</span><span class="b wip">wip</span><span class="b done">done</span>
+ · Compute: <span class="b cpu">CPU/laptop</span><span class="b gpu">4-GPU</span> · <span class="b reuse">reuses existing script</span></div>
+
+<h2>A — Extract the typed heterogeneous graph <span class="b cpu">CPU</span><span class="b wip">wip</span></h2>
+<div class="card" style="background:#f0fdf4"><span class="id">A.2 RESULT (2026-07-01)</span> mission↔code linkage SOLVED via
+ <b>doc-sha-citations</b>: 495 commits cited across <b>93 mission docs</b> (subject-match only gave 24) →
+ commit→var via <code>edits</code> (191k). Precise on spot-check. ≥93 missions have a code-endpoint set —
+ clears the gate. (Signals: doc-sha-citation primary · subject-match supplement · clock-timestamp fallback.)</div>
+<div class="card"><span class="id">A.1</span> <span class="nm">Pull substrate-2 multi-relational graph</span>
+ <div class="io">nodes: code/v05/var (125,730) · namespace (7,053) · pattern/library · mission/doc · sorry —
+  edges: calls (89,304) · contains (73,628) · coverage (10,690) · test (29,802) · edits (191,485) ·
+  mission↔pattern (1,783) · sorry↔mission (:related-missions) → <code>graph.npz</code> + node-catalog</div>
+ <div class="sc">reuses: futon1a /api/alpha/hyperedges (repo-filtered) · f1_codegraph.py pull</div>
+ <div class="gate"><b>gate:</b> every node typed + ≥1 edge; body sizes sane</div></div>
+<div class="card"><span class="id">A.2</span> <span class="nm">BUILD the mission↔code linkage (unbuilt — the real crux)</span> <span class="b wip">wip</span>
+ <div class="io">mission → commit → var. VERIFIED unbuilt: turn/commit/mission edges = 0; the readiness-doc's
+  <code>backfill_turn_commit_mission_bestguess.py</code> does NOT exist on disk. Build it: <b>commit
+  :subject → mission-id text match</b> (commits often name their mission, e.g. "Add M-codex-irc-execution
+  mission…") is the primary bestguess; clock/clocked-on valid-time (agent≈author, timestamp) secondary.
+  code/v05/edits (191,485, commit→var) makes commit→code solid.</div>
+ <div class="sc">build: mission_code_linkage.py (subject-match + clock-history fallback) → mission↔commit edges</div>
+ <div class="gate"><b>gate:</b> ≥N missions with a resolved code-endpoint set; precision of the bestguess spot-checked</div></div>
+
+<h2>B — Ground truth + hard-negative mining <span class="b cpu">CPU</span><span class="b wip">wip</span></h2>
+<div class="card" style="background:#f0fdf4"><span class="id">B first-cut RESULT (2026-07-01)</span>
+ mission→endpoints derived from A.2 (cited-commits → <code>edits</code> → code). <b>Grain finding:</b>
+ VAR-level too coarse (median 784/mission = code footprint, not interface). <b>NAMESPACE-level usable:</b>
+ 123 missions, median <b>29 ns</b>, and <b>50 missions ≤25 ns</b> (interface-grain). Usable ground truth;
+ refine further with added-vs-edited / centrality. Focused empirical sorries (autoclock-in ~6) stay the
+ gold template for a held-out eval subset.</div>
+<div class="card"><span class="id">B.1</span> <span class="nm">Post-hoc empirical sorries → labelled pairs</span>
+ <div class="io">doc+code+git+XTDB → (cascade, {have,want endpoints}); autoclock-in sealed = template →
+  <code>pairs.jsonl</code>, split BY MISSION</div>
+ <div class="sc">reuses: A-next-autoclock-in/*-EMPIRICAL.edn (template) · mission_mine_moves.py · mission_scope_detect.py</div>
+ <div class="gate"><b>gate:</b> ≥30 missions with sealed empirical sorries</div></div>
+<div class="card"><span class="id">B.2</span> <span class="nm">Hard-negative mining</span>
+ <div class="io">popular non-endpoints + sibling-mission endpoints (near-misses) — NOT random (the thing my hacks missed)</div>
+ <div class="gate"><b>gate:</b> hard-negative ratio checked; no train/test mission leakage</div></div>
+
+<h2>C — Embedding training (the actual experiment) <span class="b gpu">4-GPU</span><span class="b todo">todo</span></h2>
+<div class="card"><span class="id">C.1</span> <span class="nm">Node features: BGE-text ⊕ type</span> <span class="b reuse">reuse</span>
+ <div class="sc">reuses: BGE embedder (prior: BGE beat R-GCN for retrieval — so text is a first-class feature AND baseline)</div></div>
+<div class="card"><span class="id">C.2</span> <span class="nm">Relational GNN + link-prediction train</span> <span class="b reuse">reuse</span>
+ <div class="io">R-GCN/GraphSAGE over typed edges; cascade-centroid→endpoint objective; hard negatives; degree-corrected loss</div>
+ <div class="sc">reuses: mission_structure_embed.py · diffsub_emit.py (JAX soft-adjacency scaffold) · the pre-superpod staging harness</div>
+ <div class="gate"><b>gate:</b> val recall early-stop; <b>checkpoint before box release</b> (capture-before-decommission)</div></div>
+<div class="card"><span class="id">C.3</span> <span class="nm">ABLATION: text-only vs struct-only vs hybrid</span>
+ <div class="io">settles BGE-vs-structure FAIRLY on this task — the crux the 3 shallow negatives could not decide</div></div>
+
+<h2>D — Evaluation <span class="b cpu">CPU</span><span class="b todo">todo</span></h2>
+<div class="card"><span class="id">D.1</span> <span class="nm">Endpoint-recovery on held-out missions</span>
+ <div class="io">recall@k · MRR · degree-corrected · DISTRIBUTION not n=1 · vs 3 baselines (popularity · BGE-text · random) → <code>scorecard.md</code></div>
+ <div class="gate"><b>gate:</b> verdict stated either way (beats baselines ⇒ legs; ties ⇒ measured ceiling)</div></div>
+
+<h2>E — Laptop export (reconciles laptop-only + GPU) <span class="b cpu">CPU</span><span class="b todo">todo</span></h2>
+<div class="card"><span class="id">E.1</span> <span class="nm">Freeze embeddings → laptop fold</span>
+ <div class="io">trained node vectors → <code>laptop-index.npz</code> + <code>fold_phase2(cascade)→ranked endpoints</code>;
+  runtime = laptop dot-products, sub-second. Train once on GPU; infer on the laptop.</div>
+ <div class="gate"><b>gate:</b> sub-second laptop inference confirmed (the efficiency claim)</div></div>
+
+<h2>G — GFlowNet prep (parallel; deploys at f2 / phase 3) <span class="b cpu">CPU</span><span class="b reuse">reuse</span><span class="b done">done</span></h2>
+<div class="card" style="background:#fef2f2"><span class="id">G.1 SEED RESULT (2026-07-02) — NEGATIVE = FIX not KILL</span>
+ Both rungs ran (laptop/CPU, seed 20260702, β=6, reward range 1–403×). <b>Reduced</b> (pools 20–23, own gold + sibling hard-negs):
+ 10/10, all k match gold [7,7,7,8,6,6,7,9,7,6], <b>mean_cov_lift 0.005, 0/10 positive, distinct 128/128 pre&amp;post</b> — coverage pinned at chance,
+ zero concentration even on ~20-item pools. <b>Full</b> (pool 70): PARTIAL 6/10 (session restart), all null, same signature.
+ <b>Verdict:</b> reward-LANDSCAPE null, <i>not</i> mechanism-null and <i>not</i> state-space-size (reduced rung was still flat).
+ The SAME laptop GFN concentrates when the pool is gold-dense (<code>labs/fold-gfn</code>: F1 0.69 vs 0.51, same exp(β·overlap) reward)
+ — differentiator is <b>pool composition, not reward formula</b> (at exact-k, F1=coverage). Decoy-padded pool ⇒ flat near-chance
+ reward band ⇒ TB gets no gradient. <b>5th/6th confirmation of the steepness through-line.</b>
+ <b>Next (info-gain order):</b> (a) membership shaping / gold-dense curriculum (decisive reward-shape control) ·
+ (c) <b>cascade-conditioning features — the E-fold-embed embedding is the GFN's eyes</b> (0 cross-mission shared refs ⇒ featureless task
+ is pure memorization) · (b) 3000-step control. Escalation (b, GPU mining) NOT triggered — the gap is features, not data volume.
+ Artifacts: <code>futon6/data/fold-embed-gfn/gfn-seed-verdicts-{reduced,full-PARTIAL}.json</code>. <i>Pending Joe ratification.</i></div>
+<div class="card"><span class="id">G.1</span> <span class="nm">Stand up the GFN env + 0-sorry reward adapter</span>
+ <div class="io">so f2 (wiring generation) + a future "meaningful-fold designer" are a config-swap, not a build.
+  Reward = DarkTower 0-sorry gate (STEEP, unlike the flat C-wholeness that sank the sampler — MAP M1)</div>
+ <div class="sc">reuses: E-cascade-sampler-sampler/s4/ (config machinery · proxy-adapter · TB loss · flight-probe)</div>
+ <div class="gate"><b>gate:</b> GFN trains on a toy 0-sorry-rewarded task; adapter validated. <i>META (Joe): GFN can also DESIGN meaningful folds (sample diverse reward-weighted folds) — noted, not first.</i></div></div>
+
+<h2>Success criteria</h2>
+<div class="io">1. hybrid (or ablation winner) beats popularity <b>and</b> BGE-text on held-out missions — or a rigorous measured ceiling.
+ 2. laptop inference sub-second from GPU-trained embeddings. 3. plugs into E-close-the-loop as phase-2 realizer of fold(cascade, circumstance).</div>
+</body></html>
