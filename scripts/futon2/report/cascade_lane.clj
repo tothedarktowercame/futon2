@@ -69,13 +69,63 @@
          (when v (swap! !cache assoc [psi-text budget] v))
          v))))
 
-(defn mission->psi
-  "v1 circumstance text from a mission target id (strip M-, hyphens->spaces).
-   Enrichable with full mission text later; the id-stem is a workable v1 query."
+(defn- id-stem-psi
+  "The v1 psi: strip M-, hyphens->spaces. Kept as the FALLBACK when no mission
+   doc is found (and as the baseline the Q-B scorecard measured against)."
   [target]
   (-> (str target)
       (str/replace #"^M-" "")
       (str/replace #"-" " ")))
+
+(def ^:private mission-doc-roots
+  "Where mission docs live, per repo convention (holes/missions/ preferred,
+   bare holes/ as secondary)."
+  (let [home (System/getProperty "user.home")]
+    (for [repo ["futon0" "futon1" "futon2" "futon3" "futon3a" "futon3b" "futon3c"
+                "futon4" "futon5" "futon5a" "futon6" "futon7"]
+          sub ["holes/missions" "holes"]]
+      (str home "/code/" repo "/" sub))))
+
+(defn- mission-doc-file [target]
+  (->> mission-doc-roots
+       (map #(io/file % (str target ".md")))
+       (filter #(.exists ^java.io.File %))
+       first))
+
+(defonce ^:private !psi-cache (atom {}))
+
+(defn mission->psi
+  "Q-C (E-have-want-pairs, 2026-07-02): a mechanically-derived have→want meme
+   psi — the Q-B scorecard's winning M_havewant recipe (mean ΔF +0.093 over the
+   id-stem, 58.9% of 319 improved). want = the mission doc's title line (the
+   goal phrasing); have = its **Status:** line (the current state). Both are
+   read from the doc, truncated, memoized; NO doc found ⇒ the id-stem psi
+   (byte-identical to the old behaviour — reduction-safe fallback)."
+  [target]
+  (or (get @!psi-cache target)
+      (let [stem (id-stem-psi target)
+            psi (or (when-let [f (mission-doc-file target)]
+                      (try
+                        (let [lines (str/split-lines (slurp f))
+                              clip (fn [s n] (let [s (str/trim (str s))]
+                                               (subs s 0 (min n (count s)))))
+                              title (some->> lines
+                                             (filter #(str/starts-with? % "# "))
+                                             first
+                                             (re-find #"^#\s*(?:Mission:)?\s*(.*)")
+                                             second)
+                              status (some->> lines
+                                              (filter #(re-find #"(?i)^\*\*Status:?\*\*" %))
+                                              first
+                                              (re-find #"(?i)^\*\*Status:?\*\*:?\s*(.*)")
+                                              second)]
+                          (when title
+                            (str stem " — want: " (clip title 160)
+                                 (when (seq (str status)) (str ". have: " (clip status 160))))))
+                        (catch Throwable _ nil)))
+                    stem)]
+        (swap! !psi-cache assoc target psi)
+        psi)))
 
 ;; ---------------------------------------------------------------------------
 ;; Seam 2 (M-wm-policies Car-3 / R16): join the rollout grain-3 G(π) into the lane,
