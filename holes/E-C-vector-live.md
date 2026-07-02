@@ -142,3 +142,24 @@ Predictive risk (§10) uses an **in-memory** id-match (action `:target` ↔ C-en
 > bug (futon2 `2fd9022` — 0/110 → 55/110 actions advancing entries). Steps 3–5 (mined-move join,
 > forward-model reads the DURABLE join, reconcile) remain — step 3 dispatched to a helper agent
 > with the mining-run landing spec (the deferred M-fold-ansatz batch-recovery now has a place to land).
+
+> **STEP 3 DONE — the durable join, queried (2026-07-02, claude-11; claude-3's step-0 finding:**
+> the HTTP census/type endpoints don't count relation-kind docs, and `:relation/type` is stored
+> KEYWORDIZED — the join runs via Drawbridge datalog, not the HTTP scan.) **Coverage:** of the
+> 189 `:outcome-ref` relations, **119 c-entries reach ≥1 `code/v05/mined-move`** through the
+> shared canonical mission node (83 distinct missions; head: autoclock-in ×5, the-futon-stack ×4,
+> buyer-discovery ×4); 354 mission nodes carry moves. So the durable join has real signal for the
+> mission-directed slice (119/454 ≈ 26% of all c-entries); the token-match stays the fallback for
+> the rest. The query (reusable, read-only, Drawbridge):
+> ```clojure
+> (let [db (xtdb.api/db (:node @futon3c.dev/!f1-sys))
+>       rels (xtdb.api/q db '{:find [f t] :where [[r :relation/type :outcome-ref]
+>                                                 [r :relation/from f] [r :relation/to t]]})
+>       mm (into #{} (map first) (xtdb.api/q db '{:find [ep]
+>                                                 :where [[e :hx/type :code/v05/mined-move]
+>                                                         [e :hx/endpoints ep]]}))]
+>   (filter (fn [[_ m]] (mm m)) rels))   ; ⇒ the c-entry ↔ mined-move join pairs
+> ```
+> Remaining: step 4 (forward-model reads THIS join for the covered slice) · step 5 (reconcile) ·
+> the mining pilot (claude-3, fresh cycles) growing `:discharged-by` toward the 70 uncovered
+> mission-directed entries.
