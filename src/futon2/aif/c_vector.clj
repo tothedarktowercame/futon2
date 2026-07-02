@@ -335,23 +335,58 @@
 
 (defn- norm-id
   "Match outcome-ref ids across action targets (often keywords) and live
-   C-entries (often strings) on a common normal form."
+   C-entries (often strings) on a common normal form. Keywords keep their
+   NAMESPACE (str (symbol kw)) — (name kw) silently dropped :sorry/foo → foo,
+   half of the 2026-07-02 vocabulary-correlation gap."
   [x]
-  (when (some? x) (if (keyword? x) (name x) (str x))))
+  (when (some? x)
+    (if (keyword? x) (str (symbol x)) (str x))))
+
+(defn- id-tokens
+  "The normalized MATCH TOKENS of one id: the raw normal form plus its
+   known-alias tails, so the mission/sorry vocabularies correlate —
+   \"mission/M-x\" ↔ \"M-x\" ↔ \"<repo>-d/mission/x\" tail, \"sorry/y\" ↔ \"y\".
+   Bounded alias set, documented over-match risk accepted for the IN-MEMORY
+   stand-in; canonical identity is the durable join's job (§11)."
+  [x]
+  (when-let [s (norm-id x)]
+    (let [tail (peek (str/split s #"[/|]"))]   ; devmap sorries are |-delimited
+      (cond-> #{s}
+        (and tail (not= tail s)) (conj tail)
+        ;; canonical <repo>-d/mission/<stem> ↔ M-<stem>
+        (re-find #"(?:^|/)mission/" s) (conj (str "M-" tail))))))
+
+(defn- ref-tokens
+  "All match tokens of a C-entry's :outcome-ref, across the CHANNEL SHAPES
+   (the 2026-07-02 finding: only the stated channel used :id — incompleteness
+   carries :mission (\"M-x\"), the 應-voice reach channel carries :referent
+   (\"mission/M-x\"); 314/455 live entries were unmatchable, so the belly's
+   predictive term was CONSTANT across policies in every live tick)."
+  [outcome-ref]
+  (into #{} (mapcat id-tokens)
+        (keep outcome-ref [:id :mission :referent])))
 
 (defn advanced-outcome-ids
-  "The set of C-entry outcome-ref ids a candidate action is predicted to advance
-   toward satisfaction — the IN-MEMORY core of the discharged-by join (the
+  "The set of match tokens for the C-entry outcomes a candidate action is
+   predicted to advance — the IN-MEMORY core of the discharged-by join (the
    durable PROOF-store version is M-populate-substrate-2 D4, out of scope). It
    reuses the existing action / star-map structure rather than a parallel map:
    an explicit `:advances-outcomes` on the action (the override seam) ∪ the
    action's `:target` ∪ (for `:open-mission`) the mission's `:produces` caps
-   from the capability graph. Normalised so keyword targets match string ids."
+   from the capability graph. Tokenised (id-tokens) on both sides so keyword /
+   alias / canonical vocabularies correlate."
   [action capability-graph]
   (let [target   (:target action)
         produced (when (= :open-mission (:type action))
                    (get-in capability-graph [:missions target :produces]))]
-    (into #{} (keep norm-id (concat (:advances-outcomes action) [target] produced)))))
+    (into #{} (mapcat id-tokens)
+          (concat (:advances-outcomes action) [target] produced))))
+
+(defn ref-advanced?
+  "Does the action's advanced-token set intersect this outcome-ref's tokens?
+   The in-memory join predicate (both sides tokenised)."
+  [adv outcome-ref]
+  (boolean (seq (filter adv (ref-tokens outcome-ref)))))
 
 (defn credit-satisfy-prob
   "R19-KL: P(an action of this class actually satisfies its goal) — the
@@ -399,7 +434,7 @@
        (* (double weight)
           (/ (reduce + 0.0
                      (for [e open]
-                       (if (contains? adv (norm-id (-> e :outcome-ref :id)))
+                       (if (ref-advanced? adv (:outcome-ref e))
                          (* residual (risk-of e nil))
                          (risk-of e nil))))
              (double n)))))))
