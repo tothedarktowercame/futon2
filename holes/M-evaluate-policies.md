@@ -1197,9 +1197,16 @@ verification-time discoveries, per the lifecycle's decision-log slot)
   E/Π terms back in their slots — not σ-scaling. Decision-log entry per the lifecycle:
   C4 = decided + now evidence-backed. One design note carried forward: argmin hears
   *within-tick* dispersion; corpus-σ is the wrong normalisation unit if anyone revisits.
-- **Remaining VERIFY items:** D5a sim spike / E6 shadow comparison (E4 side unblocked;
-  W1 boundary bell out to claude-4); live-tick I-checks (watcher armed); the exhibit
+- **Remaining VERIFY items:** D5a sim spike / E6 shadow comparison (fully unblocked —
+  boundary agreed, contract ratified); live-tick I-checks (watcher armed); the exhibit
   could gain E4/E5 panels at DOCUMENT.
+- **E7 (new D7 entry, 2026-07-03):** post-merge re-census of G-goal-outcome's decision
+  influence. claude-4's `2315d49` (branch `wm-policies-proof-strategy-checkpoint`;
+  seam-checked: `c_vector.clj` only, `predictive-goal-outcome-risk` unchanged, no
+  contract impact) makes the belly's advancement join far livelier (190/455 entries
+  reachable; re-ranks vs no-op). Our "goal-outcome flips 0% (young)" is dated the
+  moment that merges — rerun `wm_trace_census.bb` after merge + a few days' corpus and
+  update §7.4's table. Cheap: the apparatus already exists.
 - **E6 hypothesis sharpened (analytic, from the E4 review):** the D5c
   `:gaussian-entropy` mode changes ambiguity's *dispersion*, not just its magnitude —
   entropy differences are ½·ln(σ²ᵢ/σ²ⱼ), so within-tick variance ratios of ~6× become

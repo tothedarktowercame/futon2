@@ -72,9 +72,13 @@
   ;; same fix, same reason — these terms ENTER :G-total but were stripped, so
   ;; recomputing the total from persisted terms carried a hidden residual
   ;; (census: mean-abs 0.324). Whitelist ⊇ terms entering :G-total (invariant I4).
+  ;; :score-provenance (D1b follow-up, same day): the cascade-row marker was
+  ;; attached in war_machine.clj but stripped HERE — the D1a spec omitted it
+  ;; from the whitelist (caught by the live post-deploy I-check: markers nil in
+  ;; the 13:03Z tick). Invariant I2 needs it persisted, not just attached.
   (select-keys r [:action :G-risk :G-ambiguity :G-info :G-survival
                   :G-structural-pressure :G-goal-outcome
-                  :G-gap :G-graph-pragmatic :G-core
+                  :G-gap :G-graph-pragmatic :G-core :score-provenance
                   :G-total :rank :time-pressure :horizon-steps]))
 
 (defn- strip-decision
