@@ -40,7 +40,9 @@
    :repair
    "predict outcome distribution Q(o|π) and KL against a normalised preference C",
    :note
-   "M-evaluate-policies 2026-07-03: flips 35.9% (live hinge). D5a :risk-mode :kl BUILT DARK (f6451ba): c-distribution densities in preferences.clj per the W1 contract (E-C-vector-live.md:230). E6: winner-changing (ρ.841, sd ×22). Open refinements → holes/E-KL-refinements.md."},
+   "M-evaluate-policies 2026-07-03: flips 35.9% (live hinge). D5a :risk-mode :kl BUILT DARK (f6451ba): c-distribution densities in preferences.clj per the W1 contract (E-C-vector-live.md:230). E6: winner-changing (ρ.841, sd ×22). Open refinements → holes/E-KL-refinements.md.",
+   :repair-built
+   ":risk-mode :kl (f6451ba) — dark; E6: winner-changing; flip BLOCKED until E-KL-refinements 1+2, then operator decision"},
   :G-info
   {:badge :analogical,
    :claims "epistemic info-gain (EIG)",
@@ -73,7 +75,9 @@
    "sum of per-channel predicted variance (monotone Gaussian-entropy proxy)",
    :repair "use ½ln(2πe σ²) under Q(s|π) → :derived-from-FEP",
    :note
-   "M-evaluate-policies 2026-07-03: influence MEASURED 0% flips/674 ticks (within-tick sd 0.0039 — argmin hears σ not μ, E4). Canonical repair BUILT DARK (:ambiguity-mode :gaussian-entropy, 2d6533e). E6 shadow: sd ×554, FLIPS the live winner alone ⇒ enabling is Joe-gated on e6-shadow.edn evidence."},
+   "M-evaluate-policies 2026-07-03: influence MEASURED 0% flips/674 ticks (within-tick sd 0.0039 — argmin hears σ not μ, E4). Canonical repair BUILT DARK (:ambiguity-mode :gaussian-entropy, 2d6533e). E6 shadow: sd ×554, FLIPS the live winner alone ⇒ enabling is Joe-gated on e6-shadow.edn evidence.",
+   :repair-built
+   ":ambiguity-mode :gaussian-entropy (2d6533e) — the audit's named repair, dark; E6: flips live winner; flip = operator decision"},
   :effective-temperature-softmax
   {:badge :principled-approximation,
    :claims "policy selection P(π) = σ(−γ·G)",

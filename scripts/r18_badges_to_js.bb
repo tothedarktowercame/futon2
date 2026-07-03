@@ -9,6 +9,6 @@
       qs (into {} (map (fn [[k v]]
                          [(name k) (-> v
                                        (update :badge name)
-                                       (select-keys [:badge :claims :cite :code-ref :computes :repair :note]))])
+                                       (select-keys [:badge :claims :cite :code-ref :computes :repair :note :repair-built]))])
                        (:quantities d)))]
   (println (str "const R18B=" (json/generate-string qs) ";")))
