@@ -31,6 +31,11 @@ mission; anything that grows gets its own E-note.
   `p4ng/sequel-notebook.org`: `flight_log_extract.bb` (flights org-table/JSON),
   `proof-mine-gold-eval.json` (mining quality 0.54/0.70/0.70 + the 8-hallucinated-shas story),
   the §11 coverage-delta. Recompute the abstract's "~30% mechanical" number honestly.
+- **#6.5 — R18 badge RENDER** (the yellow→green step; added 2026-07-03 after claude-2's audit,
+  futon2 `dcbe021`): wire `data/r18-badges.edn` into the aif-wiring-explainer nodes + the live
+  readout so every quantity permanently carries its provenance badge (0 FEP-derived · 7
+  principled-approx · 9 analogical today — and each badge's `:repair` field is a costed upgrade
+  path; the sharpest, :G-goal-outcome's non-KL, is exactly the named W1).
 - **#6 — The shelf** (in view, not urgent): **R15** — the last open forward-sweep criterion;
   design-shaped (nested model: mission-level belief priors entity-level belief) — charter fresh as
   its own excursion. The DarkTower pair (③ fold-wiring instance + Coverage live gate — both have
