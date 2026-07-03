@@ -225,6 +225,21 @@ puts it — the state of affairs that would earn back the sentence "EFE-scored."
 
 Ranking by wholeness: 3 > 1 > 2. Ranking by F: 3 > 1 > 2. The two native currencies **agree** on this sample — the disagreement that matters is between both of them and the arena's constant.
 
+## The experimental series (D7) — what each experiment did to the design
+
+| exp | headline result | design consequence |
+|---|---|---|
+| E1 census (674 ticks, v2) | flips: survival 47.9 / str-pressure 44.5 / risk 35.9 / **epistemic pole 0.0** (info's 21.8 was a placeholder artifact) | multi-term confirmed; deletion sequencing constraint (IHTB-2) |
+| E2 core-only counterfactual | agreement 35.3%; 98.4% of disagreements switch TYPE → learn-action-class (6%→61%) | **overlay = prosthetic C**; repair route = strengthen C (W1) |
+| E3 spectral potentials | ρ(Σπ, F)=0.885 but size-confounded (~0.87); size-controlled ρ vs wholeness 0.566 | field-lift = menu **prior**, never selector |
+| E4 renorm sweep | identity 0.0% ✓; z-norm 34.4%; 1/σ-ambiguity **93.8%** (overshoots); equal-unit 11.4%; argmin hears σ not μ | live renormalisation declined (C4 closed); within-tick dispersion is the unit |
+| E5 conditioned probe | situation-enriched ψ rebuilds cascades: Jaccard 0.128, 11/13 top flips (necessary-not-sufficient per slice-2a) | conditioning channel real; route lanes to one situation source |
+| E6 mode shadow (110 live candidates) | `:kl` flips winner (ρ.841, sd ×22); **`:gaussian-entropy` alone flips winner (sd ×554)**; canonical epistemics also chooses learn-action-class | both repairs winner-changing ⇒ flips stay operator-gated; 3rd prosthetic-C signal |
+
+*E7 (chartered): re-census G-goal-outcome after the W1 durable-join merge. KL-formula
+debt: `holes/E-KL-refinements.md`. Artifacts for every row live in
+`holes/labs/M-evaluate-policies/`.*
+
 ## What this argues for (the DERIVE design, §8)
 
 1. **Observability before semantics** (D1/D2): persist the stripped terms, mark the

@@ -1,17 +1,19 @@
 # Mission: Evaluate policies honestly — make R5's score what it says it is
 
 **Date:** 2026-07-03
-**Status:** HEAD + IDENTIFY complete 2026-07-03 (operator gates passed in-session);
-**MAP COMPLETE 2026-07-03 (§7.11) — all questions Q1–Q8 answered**; headline facts:
-epistemic pole behaviourally absent (flip v2: survival 47.9 / structural-pressure 44.5 /
-risk 35.9 / hidden 8.3 / info 0.0 artifact-corrected / ambiguity 0.0); core-only agreement
-35.3% with 98.4% type-switches → learn-action-class (**overlay = prosthetic C**); F7 = 293
-cascade rows, all wholeness-bearing, 0 ever ΔG-scored (`(or dG 0.0)` at
-war_machine.clj:3797); dispositions §7.6. DERIVE §8 (D1–D6
-flag-gated, IHTB-1..3, GF, I1–I5, PSR-1..3). **ARGUE §9 = the exhibit
-(`holes/labs/M-evaluate-policies/exhibit/argue-exhibit.pdf`, 6pp, 3 real cascades ×
-every valuation; 3 candidate meta-patterns §9.2) — pending Joe's read.** VERIFY next;
-C10 confirmation + D5 dark-vs-default = Joe's
+**Status:** ALL PHASES THROUGH DOCUMENT complete 2026-07-03 — single day, operator
+gates passed in-session at every transition. HEAD (4 intake passes) → IDENTIFY (§6) →
+MAP (§7, Q1–Q8; prosthetic-C + epistemic-pole-inert headline facts) → DERIVE (§8,
+D1–D8) → ARGUE (§9 = the 11-pp exhibit: cascades + recorded fold + DarkTower PASS +
+formal reconciliation + D7 panel) → VERIFY (§11: I1–I5 logic model, live I-checks all
+green incl. residual 0.000e0 in production, W1 contract ratified) → INSTANTIATE (§12:
+D5a built dark, E6 shadow — both canonical repairs winner-changing, flips Joe-gated) →
+DOCUMENT (§13: badges + explainer updated to current reality, E-KL-refinements
+chartered, 4 meta-patterns planted in futon3/library/aif, C6 executed in the
+completeness doc). Coordination §10: 4 parcels on Agency, all reviewed
+(author ≠ reviewer throughout). **OPEN at close-candidate:** C10 (Joe) · E7
+(post-W1-merge re-census) · E-KL-refinements 1–5 · any D5 flip (Joe-gated on
+e6-shadow evidence). **Mission-close is Joe's call.**
 (chartered from the R18 faithfulness audit — Joe: "the items from R5 should
 probably be put into the IDENTIFY stage of a new mission")
 **Owner:** unassigned (framed by Joe + claude-11)
@@ -1315,6 +1317,58 @@ back to the KL issues after."
 
 **Remaining:** DOCUMENT (meta-pattern flexiargs, explainer embed, exhibit E4/E5/E6
 panels, C6 paper sentence, C10 coordination) + the deferred KL issues.
+
+## 13. DOCUMENT (2026-07-03)
+
+Per the lifecycle: durable, navigable artifacts in the living surfaces — not the
+mission doc.
+
+- **Faithfulness badges reflect current reality** (operator ask): `data/r18-badges.edn`
+  gained dated M-evaluate-policies notes on 9 quantities (measured flip-rates,
+  dark-build status + E6 flip evidence, persistence repairs, D8 dispositions);
+  regenerated into `aif-wiring-explainer.html` via `r18_badges_to_js.bb` (the
+  established mechanism, not hand-editing); R5 and R18 prose entries gained dated
+  addenda (honest label, flattened-generative-model reading, pointers here and to the
+  exhibit and E-KL-refinements). The EDN re-parses; the badge notes render per node.
+- **`holes/E-KL-refinements.md` CHARTERED** (operator ask): the D5a KL debt as
+  prototyping-forward items 1–5 (truncate Q to [0,1] → badge candidate; channel-weight
+  parity preset; temperature calibration on *within-tick* dispersion; negative-
+  divergence guard; Bernoulli path round-trip with W1). Cross-referenced from §8.6/§12,
+  the `:G-risk` badge note, and the W1 contract. Exit = re-audit `:G-risk` under
+  dcbe021 rules. Explicitly: a `:kl` flip before items 1+2 land is blocked; mission
+  close is not.
+- **Four meta-patterns planted in `futon3/library/aif/`** (discharges the fold's s6
+  sorry): `currency-before-merge`, `placeholder-is-load-bearing`,
+  `valuation-reads-the-paperwork`, `declare-the-conditioning` — each with evidence
+  lines citing this mission's measured artifacts, cross-referenced to each other.
+- **Exhibit final form (11 pp):** added the D7 panel — E1–E6 one-row-each with
+  headline result and design consequence, E7 + KL-debt pointers. The exhibit is the
+  navigable single-artifact story (argument → cascades → fold → formal reconciliation
+  → experiments).
+- **C6 EXECUTED:** the load-bearing sentence lived in
+  `docs/futon-aif-completeness.md` §"Honest current claim" (the sequel notebook no
+  longer carries the phrase — checked). Now reads: *"selection by a multi-objective
+  score with an EFE core"*, with the earn-back condition stated (G in nats = risk +
+  ambiguity (− EIG), slots restored; dark builds + E-KL-refinements as the path, flips
+  operator-gated). R6 table gloss aligned.
+- **C10 status:** candidate criterion, Joe's call; the defect report + boundary ack
+  (§10 row D) are the coordination artifacts M-G-over-cascades needs to close against.
+- **Deferred-item tickets:** E7 (§11, post-merge re-census) · E-KL-refinements items
+  1–5 · exhibit conditions-on/D7 panels live only in the PDF pipeline (regeneratable) ·
+  I2 judge-path enforcement (census-asserted today; production gate when the judge is
+  next touched) · docbook/futon3x entry — NOT created this pass: the explainer + badges
+  + exhibit are this apparatus's actual navigable surfaces; a docbook entry would
+  duplicate them (recorded as a decision, revisitable).
+
+**PUR-4: pattern-planting (the s6 discharge)**
+- Pattern: futon-theory/pattern-planting (as practiced; four new library entries)
+- Actions taken: wrote the four §9.2 candidates as full flexiargs with measured
+  evidence lines; cross-linked; s6 hole of the fold construction discharged.
+- Outcome: success
+- Prediction error: low — the §9.2 sketches translated directly; declare-the-
+  conditioning absorbed the sense×semantics×conditioning triple cleanly.
+- Notes: the four form a small family around "honest valuation"; a future
+  shape-first pass might name the family explicitly.
 
 ## 10. Coordination ledger (2026-07-03 — session on Agency as claude-5)
 
