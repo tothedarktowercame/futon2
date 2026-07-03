@@ -1,6 +1,8 @@
 # E-KL-refinements
 
-**Date:** 2026-07-03 · **Status:** CHARTERED (debt registered; owner TBD — Joe assigns)
+**Date:** 2026-07-03 · **Status:** IN PROGRESS (owner: claude-5, Joe-assigned 2026-07-03;
+items 1+2 dispatched to claude-10, job …e60b4474, per the coding-handoff protocol —
+review + badge re-audit stay with claude-5)
 **Parent:** `holes/M-evaluate-policies.md` §12 (D5a built dark, `f6451ba`; refinements
 deliberately deferred — Joe: "we can come back to the KL issues after [E6]").
 **Consumers:** M-evaluate-policies (any future `:risk-mode :kl` flip) · W1/claude-4
@@ -15,22 +17,32 @@ prototyping-forward debt (`:kind :prototyping-forward`), not silent debt.
 
 ## The items
 
-1. **Truncate Q to [0,1].** The closed form takes E_Q over ℝ while C is supported on
-   [0,1]; untruncated tail mass makes the "KL" a divergence score (can dip below 0 for
-   wide σ). Repair: renormalise Q on [0,1] (two Φ terms) in `expected-hinge` + the
-   entropy term → a true KL between densities on the same support → badge candidate
-   `:derived-from-FEP` (under the Gaussian channel model).
-2. **Channel-weight parity.** `:kl-channel-weights` defaults to uniform; the hinge path
-   uses `free_energy`'s pragmatic weights. E6's ×22 risk-dispersion mixes functional
-   change with weight change. Repair: a `:kl-channel-weights :pragmatic-parity` preset
-   sourcing the same weight map, so E6-style comparisons isolate the functional.
+1. **Truncate Q to [0,1].** ✅ **DONE (claude-10, 2026-07-03, `0f8d5c6`).** New
+   `preferences/kl-gaussian-range`: Q~ = N(mu,s2) truncated+renormalised to [0,1]
+   (closed-form in Φ/φ), so it's a true KL on the shared support ⇒ ≥ 0.
+   **Verified against Riemann quadrature** (`truncated-kl-matches-quadrature`, the
+   load-bearing test, tol 1e-3 over a 144-cell sweep) — claude-5's algebra
+   confirmed, not trusted blind. Non-negativity (incl. the named regression case
+   mu 0.5/s2 1.0/[0,1]/T 1.0 = +6.8e-4, was < 0) + monotonicity tested. M clamped
+   1e-12 (mu-far-outside regime, documented); result `(max 0.0 …)` = numerical clamp
+   only. HONESTY block + docstring updated; **badge candidate `:derived-from-FEP`,
+   re-audit is the owner's step (not claimed).** Bernoulli branch untouched.
+2. **Channel-weight parity.** ✅ **DONE (claude-10, 2026-07-03, `0f8d5c6`).**
+   `efe/compute-efe`: `:kl-channel-weights :pragmatic-parity` resolves to
+   `pref/pragmatic-weights` with MISSING channels weighted 0.0 (parity = zero-weight,
+   not 1.0). Map form + uniform default byte-identical. Tested
+   (`kl-pragmatic-parity-preset`): parity ≡ pragmatic-over-0-default, ≠ uniform, and
+   an absent channel (`:mathematics-pct`) proven to contribute 0.
 3. **Temperature calibration.** `default-c-temperature` 0.1 was documented, not fitted:
    at T=0.1 an 0.1 out-of-range excursion costs ~1 nat, and E6's winner flip is partly
    a T-choice. Candidate: fit T so that KL-risk's within-tick dispersion matches the
    hinge's (behaviour-anchored), or derive per-channel T from observed channel σ.
    The E4 lesson binds: calibrate on *within-tick* dispersion, never corpus σ.
-4. **Negative-divergence guard.** Until item 1 lands: decide clamp-at-0 vs report-raw
-   (currently raw; fine dark, wrong live).
+4. **Negative-divergence guard.** ✅ **DISCHARGED BY ITEM 1 (claude-10, 2026-07-03).**
+   Moot once truncation landed: the score is now a true KL ≥ 0 by construction, so
+   there is no negative divergence to guard. The residual `(max 0.0 …)` is a numerical
+   clamp against ~1e-7 erf-approximation noise only (documented as such), not a
+   semantic clamp on a divergence score.
 5. **Bernoulli path exercised end-to-end.** The `:becomes` Bernoulli form is built +
    unit-tested but has no live consumer yet; W1's first real use (claude-4) should
    round-trip it and feed back any contract friction.
