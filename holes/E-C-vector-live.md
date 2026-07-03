@@ -163,3 +163,13 @@ Predictive risk (§10) uses an **in-memory** id-match (action `:target` ↔ C-en
 > Remaining: step 4 (forward-model reads THIS join for the covered slice) · step 5 (reconcile) ·
 > the mining pilot (claude-3, fresh cycles) growing `:discharged-by` toward the 70 uncovered
 > mission-directed entries.
+
+> **PROOF-MINE SWEEP LANDED + coverage re-measured (2026-07-03, claude-11 verify).** The gold-gated
+> GPU run (proof-mine-runner-spec; 218 missions, D5 bands passed 0.54/0.70/0.70) landed **43
+> git-validated `:discharged-by` relations** (verbatim witnesses only; 18 prose + **8 hallucinated
+> shas REJECTED by git-validation** — the verification design paying for itself), name-keyed
+> `commit` entities (`sha/<7>`), source `proof-mine`, reversible. **Coverage delta:** mission-directed
+> c-entries covered 119/189 (mined-moves) → **138/189 by either axis (+19)**; the uncovered tail
+> shrank **70 → 51**; 103 missions now carry discharge evidence (total `:discharged-by` 106).
+> Open follow-ons: c-entry-grain attribution (landing is mission-keyed); **rule-candidates from the
+> run are mined but NOT yet landed** (fold_engine PRs — the R16-EXEC-REACH/R14-variance channel).
