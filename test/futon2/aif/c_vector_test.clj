@@ -191,6 +191,52 @@
       (is (= 0.0 g-addr) "addressing the goal discounts it ⇒ the belly term drops")
       (is (< g-addr g-noop) "the belly re-ranks: the goal-advancing action is preferred"))))
 
+;; ---- item 5 (E-KL-refinements): the Bernoulli KL path, round-tripped --------
+
+(def ^:private range-entry
+  "A :>= (range) entry — NOT :becomes, so the KL form must leave it to the
+   hinge (defined here because mess-messy lives later in the file)."
+  (cv/c-entry {:flavour :mess :outcome-ref {:kind :coherence :mission "M-kl" :metric :L}
+               :preferred {:op :>= :value 45.9}
+               :weight {:value 1.0 :basis :standing}
+               :provenance {:source :test :L 10.0}}))
+
+(deftest kl-risk-of-roundtrip-test
+  (let [e (first c-heavy)]                       ; weight 0.6, :becomes, :open
+    (testing "unmet (q=0) costs ≈ weight·(1/T) nats at the default T=0.1"
+      (let [r (cv/kl-risk-of e 0.0)]
+        (is (< 5.0 r 7.0) "0.6 · ~10 nats — the unit-scale friction, visible")))
+    (testing "met-for-certain (q=1) costs ≈ 0"
+      (is (< (cv/kl-risk-of e 1.0) 1e-3)))
+    (testing "temperature: lower T ⇒ harder preference ⇒ costlier unmet (contract pt 2)"
+      (is (> (cv/kl-risk-of e 0.0 0.05) (cv/kl-risk-of e 0.0 0.1)
+             (cv/kl-risk-of e 0.0 0.5))))
+    (testing "q is monotone: likelier satisfaction ⇒ lower KL risk"
+      (is (> (cv/kl-risk-of e 0.1) (cv/kl-risk-of e 0.5) (cv/kl-risk-of e 0.9))))
+    (testing "non-:becomes and non-open entries contribute 0 (efe's lane, not W1's)"
+      (is (= 0.0 (cv/kl-risk-of range-entry 0.0)))
+      (is (= 0.0 (cv/kl-risk-of (assoc (first c-heavy) :status :closed) 0.0))))))
+
+(deftest predictive-goal-outcome-risk-kl-test
+  (testing "the dark KL twin re-ranks: advancing a goal lowers predicted risk"
+    (let [r-noop (cv/predictive-goal-outcome-risk-kl c-heavy {:type :no-op} nil
+                                                     cv/default-goal-outcome-weight point-mass 0.1)
+          r-a    (cv/predictive-goal-outcome-risk-kl c-heavy {:type :pursue :target :a} nil
+                                                     cv/default-goal-outcome-weight point-mass 0.1)]
+      (is (< r-a r-noop))
+      (is (pos? r-a) "the two un-advanced goals still carry their unmet KL")))
+  (testing "advancing the heaviest goal lowers KL risk most (ranking preserved vs hinge)"
+    (let [pk (fn [t] (cv/predictive-goal-outcome-risk-kl c-heavy {:type :pursue :target t} nil
+                                                         cv/default-goal-outcome-weight point-mass 0.1))]
+      (is (< (pk :a) (pk :b)))))
+  (testing "[] ⇒ 0.0 (the floor holds in the KL form)"
+    (is (= 0.0 (cv/predictive-goal-outcome-risk-kl [] {:type :no-op} nil))))
+  (testing "range entries keep the hinge (unit-mixing is deliberate + visible)"
+    (let [r (cv/predictive-goal-outcome-risk-kl [range-entry] {:type :no-op} nil
+                                                cv/default-goal-outcome-weight point-mass 0.1)]
+      (is (< (Math/abs (- r (cv/goal-outcome-risk [range-entry]))) 1e-9)
+          "a range-only belly scores identically to the production hinge term"))))
+
 ;; ---- §11 step 4: the durable discharged-by join feeds the advanced set ------
 
 (def ^:private durable-join-fixture

@@ -32,7 +32,8 @@
   (:require [clojure.string :as str]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [babashka.http-client :as http]))
+            [babashka.http-client :as http]
+            [futon2.aif.preferences :as pref]))
 
 (def ^:private default-store-base
   (or (System/getenv "FUTON1A_BASE_URL")
@@ -568,6 +569,64 @@
                      (for [e open]
                        (if (ref-advanced? adv (:outcome-ref e))
                          (* residual (risk-of e nil))
+                         (risk-of e nil))))
+             (double n)))))))
+
+;; ---------------------------------------------------------------------------
+;; KL form of the goal-outcome risk — the item-5 Bernoulli consumer
+;; (E-KL-refinements item 5; contract E-C-vector-live §12 boundary note).
+;; DARK: nothing in the production scoring path calls these; the live lane
+;; stays the hinge forms above. Exercised by tests + the recorded live
+;; round-trip. W1 CONSUMES pref/c-distribution + pref/kl — no private C.
+;; ---------------------------------------------------------------------------
+
+(defn kl-risk-of
+  "One OPEN `:becomes` entry's goal-outcome risk in the KL form (nats):
+   weight · KL(Bernoulli(q-sat) ‖ pref/c-distribution {:becomes 1}), where
+   q-sat is the policy's predicted probability the entry's outcome is MET.
+   The preference target is always 1 (met) in outcome space — W1's `:becomes`
+   values are domain keywords (:attested / :closed) naming WHAT is met, not a
+   binary to hit, so the Bernoulli target is fixed and the keyword stays in
+   the entry's provenance. Non-`:becomes` / non-open entries ⇒ 0.0 (their KL
+   form needs the forward model's per-channel Gaussian Q — efe's lane, not
+   here). NB units: at temperature T an unmet entry (q≈0) costs ≈ 1/T nats
+   (T=0.1 ⇒ ≈10), vs the hinge form's ≤ weight·1.0 — the scale friction is
+   item 3's calibration question, named in the §12 round-trip note."
+  ([e q-sat] (kl-risk-of e q-sat pref/default-c-temperature))
+  ([{:keys [preferred weight status]} q-sat temperature]
+   (if (and (= status :open) (= :becomes (:op preferred)))
+     (* (double (:value weight))
+        (pref/kl {:kind :bernoulli :p (double q-sat)}
+                 (pref/c-distribution {:becomes 1} :temperature temperature)))
+     0.0)))
+
+(defn predictive-goal-outcome-risk-kl
+  "DARK twin of `predictive-goal-outcome-risk` with the `:becomes` entries
+   scored by the exact Bernoulli KL (item 5) instead of the hinge: an advanced
+   entry's q-sat = (satisfy-prob-fn action); a non-advanced entry's q-sat = 0.0
+   (still unmet under this policy; `pref/kl` clamps to 1e-9). Range entries
+   keep their hinge divergence — mixing nats (:becomes, scale ~1/T) with the
+   hinge's [0,1] in one mean is UNIT-MIXING, deliberate and visible here so the
+   flip decision confronts it (feeds E-KL-refinements item 3); do not flip this
+   in as-is without a temperature/weight calibration. Same fixed denominator
+   and [] ⇒ 0.0 floor as the production form."
+  ([entries action capability-graph]
+   (predictive-goal-outcome-risk-kl entries action capability-graph
+                                    default-goal-outcome-weight credit-satisfy-prob
+                                    pref/default-c-temperature))
+  ([entries action capability-graph weight satisfy-prob-fn temperature]
+   (let [open (filter #(= :open (:status %)) entries)
+         n    (count open)
+         adv  (advanced-outcome-ids action capability-graph)
+         p    (max 0.0 (min 1.0 (double (satisfy-prob-fn action))))]
+     (if (zero? n)
+       0.0
+       (* (double weight)
+          (/ (reduce + 0.0
+                     (for [e open]
+                       (if (= :becomes (get-in e [:preferred :op]))
+                         (kl-risk-of e (if (ref-advanced? adv (:outcome-ref e)) p 0.0)
+                                     temperature)
                          (risk-of e nil))))
              (double n)))))))
 

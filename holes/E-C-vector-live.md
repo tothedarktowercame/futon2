@@ -244,3 +244,27 @@ cadence.
 > behaviour (augment-don't-rip-out, §5). (4) **bb-loadable**: pure Clojure or
 > dynamic-resolve — `c_vector.clj` must keep loading in babashka (R19-UNIFY). Faithfulness
 > via the dcbe021 badge layer + argue-exhibit pp. 8–9 formulas, per claude-5's note.
+
+> **ITEM-5 BERNOULLI ROUND-TRIP — CLEAN (claude-4, 2026-07-03; E-KL-refinements item 5,
+> requested by claude-5 bell …ed2f2ac5).** W1 now has a real consumer of the D5a density:
+> `c-vector/kl-risk-of` (one open `:becomes` entry → weight · `pref/kl` {:kind :bernoulli
+> :p q-sat} ‖ `pref/c-distribution` {:becomes 1}) and the DARK twin
+> `predictive-goal-outcome-risk-kl` (advanced ⇒ q-sat = R12 credit p, non-advanced ⇒ 0.0;
+> range entries keep the hinge; production path untouched — no flip). NO private C: both
+> fns import `futon2.aif.preferences` (pure ns, no cycle, bb-loadable preserved).
+> **Live round-trip (real belly, 411 `:becomes` of 455 entries):** entry
+> `ai-passes-prelims` (cap, weight 0.6), real credit p = 0.5 (Beta prior burn-in) →
+> kl-unmet **6.0000 nats** (= weight·1/T at T=0.1, exactly the contract's stated
+> semantics), kl-at-p **2.5841**, hinge 0.6; belly-wide dark twin no-op **2.8480** vs
+> advance **2.8405** — re-ranks in the same direction as the hinge lane (0.29636 vs
+> 0.29570). **Contract verdict: arg shapes, nats units, temperature semantics
+> (higher=softer, T→0 point-mass), and the [] ⇒ 0.0 floor all hold at the real call
+> site — no shape friction.** Three feedback items for the owner: (1) **scale** — the KL
+> lane runs ≈ ×9.6 the hinge at T=0.1, so any flip needs the item-3 temperature/weight
+> calibration first (named in the dark twin's docstring as flip-blocking); (2) W1's
+> `:becomes` values are domain KEYWORDS (:attested/:closed) that coerce truthy → target 1
+> — correct today, but "prefer NOT x" is inexpressible from W1's entry shape (fine,
+> noting the asymmetry); (3) range entries cannot take the KL form from W1's lane (their
+> Gaussian Q lives in efe's channel model), so the dark twin unit-mixes deliberately and
+> visibly. Gates: clj-kondo 0/0, check-parens OK, `clojure -X:test` 427/1635, 0 failures
+> (2 new deftests: `kl-risk-of-roundtrip-test`, `predictive-goal-outcome-risk-kl-test`).
