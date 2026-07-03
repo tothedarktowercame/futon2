@@ -1,0 +1,149 @@
+;; r18-badges.edn — machine-readable faithfulness badges for the WM AIF quantities.
+;; Produced by E-r18-faithfulness-audit.md (2026-07-03, claude-2). Consumed by the explainer /
+;; readout to RENDER a badge per node (that render is the follow-on build that turns R18 green).
+;;
+;; :badge  — :derived-from-FEP | :principled-approximation | :analogical
+;; :claims — the canonical AIF quantity the code labels itself as
+;; :cite   — the canonical literature anchor (the defining form)
+;; :code-ref — file:line of the actual computation
+;; :computes — what the code actually computes (plain)
+;; :repair — what would raise the badge
+;;
+;; Headline: 0 :derived-from-FEP (adversarial rule — refute first, default weaker), 7
+;; :principled-approximation, 9 :analogical. Sharpest fault: :G-goal-outcome (a non-KL labelled "KL").
+
+{:schema  {:version 1 :audit "futon2/holes/E-r18-faithfulness-audit.md" :date "2026-07-03"
+           :badges [:derived-from-FEP :principled-approximation :analogical]}
+
+ :quantities
+ {:G-ambiguity
+  {:badge :principled-approximation
+   :claims "EFE ambiguity  E_Q(s|π)[H[P(o|s)]]"
+   :cite "Da Costa et al. 2020 (arXiv:2001.07203), G = risk + ambiguity"
+   :code-ref "futon2/src/futon2/aif/efe.clj:38"
+   :computes "sum of per-channel predicted variance (monotone Gaussian-entropy proxy)"
+   :repair "use ½ln(2πe σ²) under Q(s|π) → :derived-from-FEP"}
+
+  :channel-precision
+  {:badge :principled-approximation
+   :claims "AIF precision (inverse variance of prediction errors)"
+   :cite "Da Costa et al. 2020; Friston precision = inverse variance"
+   :code-ref "futon2/src/futon2/aif/precision.clj:92"
+   :computes "1/max(var,ε) (canonical) + affect-modulated need-component, clamped"
+   :repair "gate the need term as a separate salience channel, not summed into precision"}
+
+  :belief-update
+  {:badge :principled-approximation
+   :claims "variational / marginal message passing"
+   :cite "Da Costa et al. 2020, belief updating Q(s)=σ(ln Aᵀo + …)"
+   :code-ref "futon2/src/futon2/aif/belief.clj:68"
+   :computes "exact categorical Bayes structure with a hand-set (1+w) likelihood; no A-matrix"
+   :repair "derive the (1+w) likelihood from an explicit observation model A"}
+
+  :F-free-energy
+  {:badge :principled-approximation
+   :claims "VFE = accuracy − complexity (Bayesian Occam)"
+   :cite "Friston et al. 2023 (arXiv:2311.10300), VFE = complexity − accuracy"
+   :code-ref "futon3a/holes/labs/M-memes-arrows/cascade_construct.py:214"
+   :computes "accuracy(coverage-sum) − λ·complexity(Σ−log P(include)); complexity genuine, accuracy heuristic"
+   :repair "make accuracy an actual expected log-likelihood"
+   :note "UPGRADE from the retired Salingaros L=T·H :analogical"}
+
+  :coverage-delta-g
+  {:badge :principled-approximation
+   :claims "rollout EFE G(π)"
+   :cite "prior-verified grain-3 rollout G(π) = expected free energy"
+   :code-ref "futon2/src/futon2/aif/fold_eval.clj:30"
+   :computes "rollout accumulator (genuine) fed a per-move cost g = −coverage (proxy)"
+   :repair "derive the move's g from actual ΔF/evidence, not a coverage fraction"}
+
+  :policy-precision-gamma
+  {:badge :principled-approximation
+   :claims "Friston policy precision γ over policies"
+   :cite "Da Costa et al. 2020 (β update from E[G] over policies); Friston et al. 2017"
+   :code-ref "futon2/src/futon2/aif/policy_precision.clj:123"
+   :computes "γ = clamp(2^(gain·mean-perf),0.5,2.0) from realized-vs-expected outcomes, not E[G]-over-policies"
+   :repair "fold prospective G-spread-over-policies into γ's prior; realized loop as correction"
+   :note "borderline — the estimator is a substitution, not an approximation of the β-update"}
+
+  :effective-temperature-softmax
+  {:badge :principled-approximation
+   :claims "policy selection P(π) = σ(−γ·G)"
+   :cite "Da Costa et al. 2020, P(π) = σ(−γ·G(π))"
+   :code-ref "futon2/src/futon2/aif/policy.clj:35"
+   :computes "softmax(−G/τ_eff), τ_eff = τ_spread/γ, τ_spread = range(G)/k — extra adaptive-temperature layer"
+   :repair "let γ carry sharpness alone; treat spread-normalisation as a separately-justified calibration"}
+
+  :G-total
+  {:badge :analogical
+   :claims "Expected Free Energy"
+   :cite "Da Costa et al. 2020 / Millidge et al. 2021, EFE = risk + ambiguity"
+   :code-ref "futon2/src/futon2/aif/efe.clj:449"
+   :computes "linear sum of 8 terms in incommensurate units at hand-set weights; risk+ambiguity core diluted"
+   :repair "expose canonical G = risk+ambiguity separately; label the blend a multi-objective score, not EFE"}
+
+  :G-risk
+  {:badge :analogical
+   :claims "EFE risk = D_KL[Q(o|π) ‖ C]"
+   :cite "Da Costa et al. 2020, risk = KL of predicted outcomes from preferences C"
+   :code-ref "futon2/src/futon2/aif/free_energy.clj:44"
+   :computes "weighted L1 hinge-distance of predicted point-estimate from preference ranges; no distribution/log/KL"
+   :repair "predict outcome distribution Q(o|π) and KL against a normalised preference C"}
+
+  :G-info
+  {:badge :analogical
+   :claims "epistemic info-gain (EIG)"
+   :cite "Da Costa et al. 2020, epistemic = E[KL[Q(s|o,π) ‖ Q(s|π)]]"
+   :code-ref "futon2/src/futon2/aif/efe.clj:256"
+   :computes "Σ max(0,1−variance) = complement of ambiguity (same next-var); no belief-entropy reduction"
+   :repair "compute real expected information gain over beliefs (as the futon3c portfolio sibling does)"}
+
+  :G-goal-outcome
+  {:badge :analogical
+   :claims "\"the CANONICAL EFE goal-outcome risk … KL\" (docstring)"
+   :cite "Da Costa et al. 2020, risk = KL[Q(o|π) ‖ C]"
+   :code-ref "futon2/src/futon2/aif/c_vector.clj:406"
+   :computes "mean over open C-entries of (mostly binary) goal-satisfaction divergences; p=1 default ⇒ deterministic"
+   :repair "the named W1: predict goal-outcome distribution under π and KL against a normalised C-vector"
+   :note "SHARPEST relabel — a non-KL explicitly labelled canonical/KL; ns docstring concedes it is deferred"}
+
+  :G-survival
+  {:badge :analogical
+   :claims "survival-pressure EFE term"
+   :cite "no canonical EFE counterpart"
+   :code-ref "futon2/src/futon2/aif/efe.clj:275"
+   :computes "unweighted Σ hinge-gap over 4 critical channels — a second G-risk on a subset"
+   :repair "fold into risk, or rename 'homeostatic pressure' and drop the EFE framing"}
+
+  :G-graph-pragmatic
+  {:badge :analogical
+   :claims "pragmatic value"
+   :cite "Da Costa et al. 2020, pragmatic value = E[ln C(o)]"
+   :code-ref "futon2/src/futon2/aif/efe.clj:118"
+   :computes "1000·[not-applicable] + 3·holes − 20·ascent-progress (graph heuristic counts/gates)"
+   :repair "split: applicability = feasibility mask; ascent = pragmatic proxy toward C"}
+
+  :G-gap
+  {:badge :analogical
+   :claims "epistemic 'room to grow'"
+   :cite "Da Costa et al. 2020, epistemic value (expected info gain)"
+   :code-ref "futon2/src/futon2/aif/efe.clj:176"
+   :computes "6.0 × caller-supplied gap-score lookup; no expected-information computation"
+   :repair "compute expected uncertainty-reduction from filling the gap"}
+
+  :G-structural-pressure
+  {:badge :analogical
+   :claims "weighted EFE term"
+   :cite "no canonical counterpart"
+   :code-ref "futon2/src/futon2/aif/efe.clj:419"
+   :computes "pass-through of a caller-injected scalar × 0.35; not a computed quantity"
+   :repair "derive from the generative model (novelty/salience) or rename as an exogenous weight"}
+
+  :policy-performance-ratio
+  {:badge :analogical
+   :claims "(γ's learning signal — not itself labelled an AIF quantity)"
+   :cite "Da Costa et al. 2020 / Friston et al. 2017 (canonical γ signal = E[G] over policies)"
+   :code-ref "futon2/src/futon2/aif/policy_precision.clj:82"
+   :computes "(expected−realized)/(|expected|+|realized|+ε) ∈ [−1,1]; signed, scale-free control-loop feedback"
+   :repair "replace/augment with the E[G]-over-policies signal if it is to feed γ canonically"
+   :note "honestly named (no AIF label) ⇒ no R18 relabeling fault; :analogical only as a variational quantity"}}}
