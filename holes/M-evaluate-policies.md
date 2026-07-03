@@ -1318,6 +1318,33 @@ back to the KL issues after."
 **Remaining:** DOCUMENT (meta-pattern flexiargs, explainer embed, exhibit E4/E5/E6
 panels, C6 paper sentence, C10 coordination) + the deferred KL issues.
 
+## 14. PRODUCTION FLIP — D5c live (2026-07-03, operator decision)
+
+**Joe:** "I'd like to get the best-of-class changes into production now, so that we can
+flip at least some of the badges… prove that what we've done in this mission can be
+used — or rework it if it can't be."
+
+- **What flipped:** `:ambiguity-mode :gaussian-entropy` in the arena
+  (`war_machine.clj arena-ambiguity-mode`, both rank lanes; env escape hatch
+  `FUTON_WM_AMBIGUITY_MODE=variance-sum`, mirroring the live-wire pattern). The
+  audit's own named repair — the only flip with no E-KL-refinements blocker.
+  `:risk-mode :kl` stays dark pending that excursion (assigned out by Joe).
+- **Evidence weighed at flip time:** e6-shadow.edn (winner-changing, sd ×554; expected
+  drift toward learn-action-class) + E4 (σ-not-μ). Operator accepted the behaviour
+  change explicitly.
+- **Sim confirmation through the production path (pre-commit):** G-ambiguity ≈ −125
+  (Gaussian-entropy signature), within-tick spread 16.5 (was ~0.03 — ambiguity is now
+  the loudest term, as E4's "audible = dominant" warned), winner = learn-action-class
+  (E6's prediction, realised), `:risk-mode :hinge` unchanged, G-core present. Suite
+  421/1351/0; kondo 0/0.
+- **Badge protocol:** `:G-ambiguity` badge moves only on LIVE evidence — first
+  post-flip tick verified in `data/wm-trace/`, then EDN badge →
+  `:derived-from-FEP` (scope note: Gaussian channel model, per-channel independence),
+  explainer regenerated. C9 burn-in: before/after census archived once post-flip
+  corpus accumulates; the escape hatch is the rollback.
+- **IHTB-2 check at flip:** gaussian ambiguity shifts totals DOWN (~−125), away from
+  the 0.0 placeholders — no placeholder hazard in this direction.
+
 ## 13. DOCUMENT (2026-07-03)
 
 Per the lifecycle: durable, navigable artifacts in the living surfaces — not the

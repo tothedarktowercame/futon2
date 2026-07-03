@@ -104,6 +104,20 @@
 (defonce ^:private centrality-cache (atom nil))
 (defonce ^:private roi-results-cache (atom nil))
 (defonce !last-wm-inputs (atom nil))
+
+(defn- arena-ambiguity-mode
+  "D5c PRODUCTION FLIP (Joe, 2026-07-03, M-evaluate-policies §14): the audit's
+   named repair for G-ambiguity — per-channel Gaussian entropy ½ln(2πe·σ²) —
+   is ON in the arena. `FUTON_WM_AMBIGUITY_MODE=variance-sum` is the operator
+   escape hatch back to the historical proxy (mirrors FUTON_WM_LIVE_WIRE's
+   env-off pattern). Evidence weighed at flip time: e6-shadow.edn
+   (winner-changing — within-tick sd ×554; expected drift toward
+   learn-action-class) + E4 (argmin hears σ, not μ)."
+  []
+  (if (= "variance-sum" (System/getenv "FUTON_WM_AMBIGUITY_MODE"))
+    :variance-sum
+    :gaussian-entropy))
+
 (def ^:private mission-api-timeout-ms
   ;; The substrate-backed mission endpoint can take several seconds while it
   ;; projects substrate-2 mission-doc hyperedges. The previous 5s default made
@@ -383,7 +397,10 @@
   ([snapshot weight-overrides {:keys [k] :or {k 5}}]
    (let [structure (:structure snapshot)
          opts (merge (live-star-map-efe-opts
-                      (live-gap-view-efe-opts {:time-pressure 0}))
+                      (live-gap-view-efe-opts
+                       {:time-pressure 0
+                        ;; D5c flip — keep the re-rank lane mode-coherent
+                        :ambiguity-mode (arena-ambiguity-mode)}))
                      (select-keys structure
                                   [:capability-graph :pre-registered-goal
                                    :mission-gap-view :mission-domain-view])
@@ -3746,7 +3763,9 @@
         wm-efe-opts (live-star-map-efe-opts
                      (live-gap-view-efe-opts
                       {:time-pressure wm-time-pressure
-                       :horizon-steps wm-horizon-steps}))
+                       :horizon-steps wm-horizon-steps
+                       ;; D5c flip — see arena-ambiguity-mode docstring
+                       :ambiguity-mode (arena-ambiguity-mode)}))
         wm-ranked (->> (efe/rank-actions wm-state wm-enriched-candidates wm-efe-opts)
                        apply-anamnesis-tiebreak
                        (filter-live-open-mission-ranked-actions wm-missions))
