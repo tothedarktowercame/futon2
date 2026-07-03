@@ -67,3 +67,21 @@ them in fold_engine would fabricate reach (the honest-NL→rule bar from proof-m
 They may still be useful as CLAIM/invariant material — a possible future lane, not this one.
 The *discharge* lane of the same run remains excellent (43 landed, git-validated); the lesson is
 per-lane review: one run, two lanes, two different verdicts.
+- **#7 — REACH GOAL (Joe, 2026-07-03): formally prove we have an AIF implementation.** Not
+  AIF-the-physics (the FEP-as-principle isn't a provable proposition) but the mathematical
+  stratum: Da Costa et al.'s discrete-state active inference is well-defined algorithms on
+  POMDPs — formalizable. Sketch of rungs, each standing alone: **(A)** AIFSpec.lean — the
+  canonical definitions (VFE, EFE = risk+ambiguity, softmax selection, the γ update) atop
+  Mathlib probability, in DarkTower (the Lean machinery + 0-sorry gate already exist and are
+  exercised — CLean renders mission wirings today); **(B)** spec-level theorems = the R9
+  validation properties lifted from runtime checks to proofs (perf ∈ [−1,1], γ clamped,
+  τ_eff reduction-safe at γ=1, Bayes-update properties); **(C)** CONFORMANCE — a verified
+  reference core in Lean, differentially tested against futon2 on flight-log inputs (the burn-in
+  corpus = the test vectors): "the production loop agrees with the verified reference on N
+  flights to ε" — the honest meaning of 'proved implementation' for a live Clojure system;
+  **(D)** R18 badges become Lean-checked correspondences (:derived-from-FEP = a compiled
+  theorem, not a reviewed claim). SEQUENCING: gated on M-evaluate-policies' core/overlay split
+  (one cannot prove the blend is EFE — it isn't; prove the CORE after the split). The R-contract
+  (v0.23 checkable forms) is the informal spec; the badge :repair fields are the lemma inventory;
+  the peradam 3-witness frame is the natural certificate shape.
+
