@@ -1,6 +1,6 @@
 # Excursion: a LIVE C-vector — the WM's preferences, kept current (E-C-vector-live)
 
-**Date:** 2026-06-25 · **Status:** IDENTIFY — charter for handoff (owned end-to-end by one agent; Joe assigns).
+**Date:** 2026-06-25 · **Status:** DELIVERED through §12 (live C §9 · predictive risk §10 · durable-join steps 1–4 + reconcile §11–12); full PROOF-store promotion stays D4-gated.
 **Authored by:** claude-2 (scoping only — not the driver).
 **Parent / relates:**
 [[M-goals-and-holes]] (the backward/goal dual — this excursion *delivers* the live C that its R19 / C-vector needs; it does NOT own the R19 contract text) ·
@@ -160,9 +160,9 @@ Predictive risk (§10) uses an **in-memory** id-match (action `:target` ↔ C-en
 >                                                         [e :hx/endpoints ep]]}))]
 >   (filter (fn [[_ m]] (mm m)) rels))   ; ⇒ the c-entry ↔ mined-move join pairs
 > ```
-> Remaining: step 4 (forward-model reads THIS join for the covered slice) · step 5 (reconcile) ·
-> the mining pilot (claude-3, fresh cycles) growing `:discharged-by` toward the 70 uncovered
-> mission-directed entries.
+> Remaining: ~~step 4 (forward-model reads THIS join for the covered slice) · step 5 (reconcile)~~
+> → **landed, see §12** · the mining pilot (claude-3, fresh cycles) growing `:discharged-by`
+> toward the uncovered mission-directed entries (43 as of 2026-07-03, §12).
 
 > **PROOF-MINE SWEEP LANDED + coverage re-measured (2026-07-03, claude-11 verify).** The gold-gated
 > GPU run (proof-mine-runner-spec; 218 missions, D5 bands passed 0.54/0.70/0.70) landed **43
@@ -173,3 +173,74 @@ Predictive risk (§10) uses an **in-memory** id-match (action `:target` ↔ C-en
 > shrank **70 → 51**; 103 missions now carry discharge evidence (total `:discharged-by` 106).
 > Open follow-ons: c-entry-grain attribution (landing is mission-keyed); **rule-candidates from the
 > run are mined but NOT yet landed** (fold_engine PRs — the R16-EXEC-REACH/R14-variance channel).
+
+## 12. STEPS 4+5 DONE — the forward model reads the durable join; the bridge reconciled (claude-4, 2026-07-03; Joe: "drive the excursion")
+
+**Step 4 — the durable read (all in futon2, live-loaded via Drawbridge `load-file`, JVM never restarted):**
+- `c_vector.clj` gains a **durable-join section**: `fetch-durable-join*` reads the persisted
+  `:outcome-ref` + `:discharged-by` relations and each c-entry's `:entry-edn` outcome-ref from the
+  in-JVM XTDB node via `requiring-resolve` (relations have NO HTTP read route — the claude-3
+  finding — and the WM scheduler cohabits the serving JVM with the store, so the same
+  dynamic-resolve discipline as `credit-satisfy-prob` applies: resolves live, nil in bb/futon2's
+  test JVM ⇒ degrade to token-match). Injectable via the `!durable-join-fn` atom seam.
+- `build-durable-adv` (pure, hermetically tested) compiles the fetch into the forward-model lookup
+  `{advancer-token → #{c-entry ref tokens}}` from TWO edge families: mission `:outcome-ref` edges,
+  and c-entry→`method/*` `:discharged-by` edges — the literal "which C-entries does this policy's
+  method discharge?" read. Mission→`sha/*` rows are past-discharge EVIDENCE, deliberately NOT
+  compiled (they feed the §5 reconcile numbers via `durable-join-stats`).
+- `refresh!` caches the compiled map in `c-state` under `:durable-adv` (+ `:durable-join-meta`) —
+  derive-and-cache, off the WM hot path, last-good preserved on fetch failure. NB the corpus
+  signature does not observe relation-only changes; join staleness is bounded by the refresh
+  cadence (any corpus change / the 5-min `ensure-belly-fresh!` debounce), documented in-line.
+- `advanced-outcome-ids` expands its base set through the cached join: lookup keys = base tokens ∪
+  the action's method/`:type` tokens; nil join ⇒ exactly the pre-durable behaviour (the uncovered
+  slice keeps the token-match fallback). `predictive-goal-outcome-risk` is signature-unchanged.
+- **Blank-token guard:** `id-tokens` now yields NO tokens for blank ids — a correction entry's
+  empty `:ref-id` would otherwise compile to `""` and every blank-id entry would match every
+  expansion (silent over-match, caught while writing the hermetic fixture).
+
+**Gates:** clj-kondo 0 errors / 0 warnings on both changed files; check-parens OK;
+`clojure -X:test` **414 tests / 1322 assertions, 0 failures** (4 new deftests: pure compile,
+expansion arities, join-only re-rank, blank-guard).
+
+**Live verification (real belly, real join):** `refresh!` → 455 live entries (141 stated + 314
+overlay), join meta `{:outcome-ref 189, :disch-entry->method 62, :disch-mission->commit 43,
+:advancer-tokens 351}`. **190/455 live entries are reachable through the durable join.** The
+method-class read is pure new signal: `{:type :centre-mess}` advances **75 entries the token-match
+cannot reach at all** (its base set is empty) and re-ranks live — risk 0.27939 vs no-op 0.29636;
+a covered mission action also re-ranks (0.29525). The join additionally covers 4 alias-gap
+missions token-match missed (e.g. `web-arxana-missions`, whose entries only carry the `M-` form).
+
+**Step 5 — reconcile (the bidirectional bridge, measured fresh from the store 2026-07-03):**
+backward (goals/holes → 189 outcome-ref'd c-entries over 115 canonical mission nodes) meets
+forward (methods) on three axes: **119 via mined-moves · 51 via method-class · 36 via commit
+witnesses ⇒ 146/189 (77%) covered by ≥1 axis, uncovered tail 43** (down from 51 — the
+method-class axis had not been counted in the "either axis" figure before). The bridge is no
+longer only *queryable* — since step 4 the WM's predictive risk **consumes it on every scored
+tick**, so a newly landed `:discharged-by` relation changes policy ranking at the next belly
+refresh with no code change. Full durable-join *promotion* (persisted C-entries as the canonical
+source replacing the in-memory derive) stays gated on M-populate-substrate-2 D4, per §7.
+
+**Open follow-ons (named, not hidden):** the 43-entry uncovered tail (mining pilot);
+c-entry-grain attribution for the mission-keyed commit evidence; rule-candidates from the GPU run
+still unlanded (fold_engine PRs); unify the two `produce-stated` producers (§9 follow-up (b),
+untouched here); a relation-aware freshness probe if relation landings ever outpace the refresh
+cadence.
+
+> **BOUNDARY AGREED with M-evaluate-policies D5a (claude-4 ↔ claude-5 bell, 2026-07-03):**
+> `c-distribution` (per-channel normalised preference DENSITY over [0,1], uniform-on-[lo,hi]
+> + exponential tails, temperature param) lives in `futon2.aif.preferences`, **owned by
+> M-evaluate-policies D5a**; W1 (this excursion's remaining probabilistic-KL upgrade, §10
+> deferred item) is a CONSUMER — neither mission builds a private C. W1's consumer
+> requirements, accepted as the shape contract: (1) a **Bernoulli/point-mass form for
+> `:becomes` (binary) goal-outcome entries** — Q is the policy's predicted satisfaction
+> prob (the R12 credit p already sourced in `credit-satisfy-prob`); don't force binaries
+> through the continuous density; range channels (`:>=`/`:<=`, `frac`-normalised) use the
+> continuous density directly. Expose `(log-preference dist x)` + `(kl q dist)` for both
+> Gaussian and Bernoulli Q. (2) **KL in nats, densities normalised over [0,1]**, stated in
+> one place, so D5a's Σ Πch·KL and W1's mean-normalised goal-outcome term add honestly
+> into G-total (W4). Temperature: higher = softer; temp→0 = hard hinge/point-mass; default
+> documented. (3) **Degrade-safe**: flag off / density absent ⇒ exactly the current hinge
+> behaviour (augment-don't-rip-out, §5). (4) **bb-loadable**: pure Clojure or
+> dynamic-resolve — `c_vector.clj` must keep loading in babashka (R19-UNIFY). Faithfulness
+> via the dcbe021 badge layer + argue-exhibit pp. 8–9 formulas, per claude-5's note.

@@ -191,6 +191,80 @@
       (is (= 0.0 g-addr) "addressing the goal discounts it ⇒ the belly term drops")
       (is (< g-addr g-noop) "the belly re-ranks: the goal-advancing action is preferred"))))
 
+;; ---- §11 step 4: the durable discharged-by join feeds the advanced set ------
+
+(def ^:private durable-join-fixture
+  "Fixture in fetch-durable-join*'s shape. The reach entry's own vocabulary
+   (a pair-<hash> referent) is opaque to any action target — the exact class
+   the in-memory token-match cannot correlate — but the durable :outcome-ref
+   relation reaches it through its mission; the mess entry is also reachable
+   via its method class."
+  {:oref  [["c-entry/reach/pair-1" "futon9-d/mission/opaque-mission"]]
+   :disch [["c-entry/mess/M-opaque-mission" "method/centre-mess"]
+           ;; mission→commit grain: discharge EVIDENCE, must NOT be compiled
+           ["futon9-d/mission/opaque-mission" "sha/abc1234"]]
+   :entry-refs {"c-entry/reach/pair-1"          {:kind :reach :referent "pair-1"}
+                "c-entry/mess/M-opaque-mission" {:kind :coherence :mission "M-opaque-mission" :metric :L}}})
+
+(def ^:private entry-unmatchable
+  "A live entry whose own ref tokens ({\"pair-1\"}) no action target hits —
+   advanceable ONLY through the durable join."
+  (cv/c-entry {:flavour :reach :outcome-ref {:kind :reach :referent "pair-1"}
+               :preferred {:op :becomes :value :reached}
+               :weight {:value 0.6 :basis :test} :provenance {:source :test}}))
+
+(deftest blank-ids-yield-no-tokens-test
+  (testing "an empty ref id compiles to NO tokens — never a \"\" that over-matches"
+    (is (= #{} (cv/advanced-outcome-ids {:type :pursue :target ""} nil)))
+    (let [adv (cv/build-durable-adv
+               {:oref [["c-entry/correction/pair-x" "futon9-d/mission/m"]]
+                :disch []
+                :entry-refs {"c-entry/correction/pair-x" {:kind :preference :id ""}}})]
+      (is (not-any? #(= "" %) (apply concat (vals adv)))
+          "a blank-id entry contributes only its name tokens, never \"\""))))
+
+(deftest build-durable-adv-test
+  (let [adv (cv/build-durable-adv durable-join-fixture)]
+    (testing "an :outcome-ref edge keys the mission's every id-token to the entry's tokens"
+      (is (contains? adv "M-opaque-mission"))
+      (is (contains? adv "futon9-d/mission/opaque-mission"))
+      (is (contains? (get adv "M-opaque-mission") "c-entry/reach/pair-1")))
+    (testing "a c-entry→method :discharged-by edge keys the method class"
+      (is (contains? adv "centre-mess"))
+      (is (contains? (get adv "centre-mess") "M-opaque-mission")))
+    (testing "the mission→commit grain (evidence) is NOT compiled into the forward map"
+      (is (not (contains? adv "sha/abc1234"))))
+    (testing "durable-join-stats separates the grains"
+      (let [s (cv/durable-join-stats durable-join-fixture)]
+        (is (= 1 (:outcome-ref s)))
+        (is (= 1 (:disch-entry->method s)))
+        (is (= 1 (:disch-mission->commit s)))))))
+
+(deftest advanced-outcome-ids-durable-expansion-test
+  (let [adv (cv/build-durable-adv durable-join-fixture)]
+    (testing "an action targeting the mission advances the joined entry's tokens"
+      (let [ids (cv/advanced-outcome-ids {:type :pursue :target :M-opaque-mission} nil adv)]
+        (is (contains? ids "c-entry/reach/pair-1"))
+        (is (contains? ids "pair-1") "the opaque referent token the join alone supplies")))
+    (testing "the action's method/:type keys the method-class edges"
+      (let [ids (cv/advanced-outcome-ids {:type :centre-mess} nil adv)]
+        (is (contains? ids "M-opaque-mission"))))
+    (testing "nil join ⇒ exactly the pre-durable base set (the uncovered fallback)"
+      (is (= #{"a"} (cv/advanced-outcome-ids {:type :pursue :target :a} nil nil))))
+    (testing "the 2-arity reads the c-state cache (empty atom ⇒ no expansion)"
+      (is (= #{"a"} (cv/advanced-outcome-ids {:type :pursue :target :a} nil))))))
+
+(deftest predictive-risk-through-durable-join-test
+  (testing "an entry ONLY the durable join can reach re-ranks through predictive risk"
+    (let [adv    (cv/build-durable-adv durable-join-fixture)
+          _      (swap! cv/c-state assoc :durable-adv adv)
+          entries [entry-unmatchable]
+          r-noop (pm-risk entries {:type :no-op})
+          r-miss (pm-risk entries {:type :pursue :target :M-opaque-mission})]
+      (is (pos? r-noop) "unadvanced, the entry carries its full risk")
+      (is (= 0.0 r-miss) "the durable join predicts the mission action satisfies it")
+      (is (< r-miss r-noop) "⇒ the join re-ranks where token-match alone could not"))))
+
 ;; ---- exit-4: the freshness guard fires loudly on a stale C -----------------
 
 (deftest corpus-signature-detects-change-test

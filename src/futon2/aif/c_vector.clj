@@ -190,6 +190,9 @@
   (:entries @c-state))
 
 (declare merge-entries)
+(declare !durable-join-fn)
+(declare build-durable-adv)
+(declare durable-join-stats)
 
 ;; The non-stated channels (mess / incompleteness / 應-voice) are produced by
 ;; futon6/scripts/c_vector.bb into overlay EDN. The stated channel is derived
@@ -215,18 +218,29 @@
                overlay-files)))
 
 (defn refresh!
-  "Re-derive the live C-vector (stated channel from :7071) and FOLD the overlay
-   channels (mess/incompleteness/應-voice), then swap the atom. OFF-CYCLE only
-   (watcher / periodic probe) — never the per-action tick (§5 derive-and-cache).
-   On an empty stated derive (store down) the atom is left UNCHANGED — the
-   last-good C stays in force; the belly is never clobbered to empty."
+  "Re-derive the live C-vector (stated channel from :7071), FOLD the overlay
+   channels (mess/incompleteness/應-voice), and re-pull the DURABLE
+   discharged-by join (§11 step 4 — compiled to the `:durable-adv` forward-model
+   lookup), then swap the atom. OFF-CYCLE only (watcher / periodic probe) —
+   never the per-action tick (§5 derive-and-cache). On an empty stated derive
+   (store down) the atom is left UNCHANGED — the last-good C stays in force;
+   likewise a failed join fetch keeps the last-good `:durable-adv` (the belly
+   is never clobbered to empty). NB the corpus signature does not observe
+   relation-only changes, so the join's staleness is bounded by the refresh
+   cadence (any corpus change, or `ensure-belly-fresh!`'s debounce window),
+   not detected by `stale?`."
   []
   (let [{:keys [entries signature n-source]} (derive-stated)]
     (if (seq entries)
       (let [overlay (read-overlay-channels)
-            folded  (merge-entries entries overlay)]
+            folded  (merge-entries entries overlay)
+            join    (try (@!durable-join-fn) (catch Throwable _ nil))
+            adv     (when join (build-durable-adv join))]
         (reset! c-state {:entries folded :signature signature
                          :derived-at (java.time.Instant/now)
+                         :durable-adv (or adv (:durable-adv @c-state))
+                         :durable-join-meta (or (durable-join-stats join)
+                                                (:durable-join-meta @c-state))
                          :n-source (assoc n-source :overlay (count overlay)
                                           :stated (count entries) :total (count folded))}))
       @c-state)))
@@ -350,11 +364,14 @@
    stand-in; canonical identity is the durable join's job (§11)."
   [x]
   (when-let [s (norm-id x)]
-    (let [tail (peek (str/split s #"[/|]"))]   ; devmap sorries are |-delimited
-      (cond-> #{s}
-        (and tail (not= tail s)) (conj tail)
-        ;; canonical <repo>-d/mission/<stem> ↔ M-<stem>
-        (re-find #"(?:^|/)mission/" s) (conj (str "M-" tail))))))
+    ;; blank ids (e.g. a correction entry's empty :ref-id) yield NO tokens —
+    ;; a \"\" token would make every blank-id entry match every join expansion
+    (when-not (str/blank? s)
+      (let [tail (peek (str/split s #"[/|]"))]   ; devmap sorries are |-delimited
+        (cond-> #{s}
+          (and tail (not= tail s)) (conj tail)
+          ;; canonical <repo>-d/mission/<stem> ↔ M-<stem>
+          (re-find #"(?:^|/)mission/" s) (conj (str "M-" tail)))))))
 
 (defn- ref-tokens
   "All match tokens of a C-entry's :outcome-ref, across the CHANNEL SHAPES
@@ -366,21 +383,135 @@
   (into #{} (mapcat id-tokens)
         (keep outcome-ref [:id :mission :referent])))
 
+;; ---------------------------------------------------------------------------
+;; The DURABLE discharged-by join (E-C-vector-live §11 step 4) — read at refresh
+;; time from substrate-2's persisted relations, cached in c-state, consulted by
+;; `advanced-outcome-ids` with the token-match as the uncovered-slice fallback.
+;; ---------------------------------------------------------------------------
+
+(def ^:private uuid-re
+  #"(?i)^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
+
+(defn- fetch-durable-join*
+  "Read the persisted join from substrate-2: the `:outcome-ref` relations
+   (c-entry → canonical mission node, 189 as of 2026-07-02) and the
+   `:discharged-by` relations (c-entry → method/class ∪ mission → commit, the
+   proof-mine grain). Relations are `:relation/*` docs with NO HTTP read route
+   (the 2026-07-02 claude-3 finding), so this reads the in-JVM XTDB node via
+   requiring-resolve — the same dynamic-resolve discipline as
+   `credit-satisfy-prob`: in the live serving JVM (where the WM scheduler and
+   the store cohabit) it resolves; in bb / futon2's own test JVM it returns nil
+   and the belly degrades to the in-memory token-match. Zero writes.
+
+   Returns {:oref [[c-entry-name mission-name] …]
+            :disch [[from-name to-name] …]
+            :entry-refs {c-entry-name outcome-ref-map}} or nil."
+  []
+  (try
+    (when-let [sysvar (try (requiring-resolve 'futon3c.dev/!f1-sys)
+                           (catch Throwable _ nil))]
+      (when-let [node (:node @@sysvar)]
+        (let [dbf  @(requiring-resolve 'xtdb.api/db)
+              q    @(requiring-resolve 'xtdb.api/q)
+              db   (dbf node)
+              rel  (fn [ty] (q db '{:find [f t] :in [ty]
+                                    :where [[r :relation/type ty]
+                                            [r :relation/from f] [r :relation/to t]]}
+                               ty))
+              oref  (rel :outcome-ref)
+              disch (rel :discharged-by)
+              uuid? (fn [x] (and (string? x) (re-matches uuid-re x)))
+              ids   (into #{} (filter uuid?)
+                          (mapcat identity (concat oref disch)))
+              named (into {} (keep (fn [i]
+                                     (when-let [[n p] (first (q db '{:find [n p] :in [i]
+                                                                     :where [[e :entity/id i]
+                                                                             [e :entity/name n]
+                                                                             [e :entity/props p]]}
+                                                                i))]
+                                       [i {:name n :props p}])))
+                          ids)
+              nm    (fn [x] (get-in named [x :name] x))
+              entry-refs (into {} (keep (fn [[_ {ename :name props :props}]]
+                                          (when-let [ee (:entry-edn props)]
+                                            (when-let [r (try (:outcome-ref (edn/read-string (str ee)))
+                                                              (catch Throwable _ nil))]
+                                              [ename r]))))
+                               named)]
+          {:oref  (mapv (fn [[f t]] [(nm f) (nm t)]) oref)
+           :disch (mapv (fn [[f t]] [(nm f) (nm t)]) disch)
+           :entry-refs entry-refs})))
+    (catch Throwable _ nil)))
+
+(defonce ^{:doc "Injectable source of the durable join (0-arity → the
+  fetch-durable-join* shape, or nil). A seam so tests inject fixture relations
+  and other hosts can supply their own store access."}
+  !durable-join-fn
+  (atom fetch-durable-join*))
+
+(defn build-durable-adv
+  "Pure: compile the fetched durable join into the forward-model lookup
+   {advancer-token → #{c-entry ref tokens}}. Two edge families feed it:
+   - `:outcome-ref` (c-entry → mission): an action reaching the mission (by any
+     of its id-tokens) advances that c-entry — this is what covers entries whose
+     own :outcome-ref vocabulary the token-match cannot correlate.
+   - `:discharged-by` where the FROM side is a c-entry (c-entry → method/class):
+     an action of that method class advances the entry — the \"which C-entries
+     does this policy's method discharge?\" read (§11 step 4).
+   Mission → commit `:discharged-by` rows (the proof-mine grain) are past
+   discharge EVIDENCE, not a forward mapping — they are not compiled in (they
+   feed the step-5 reconcile report), which `durable-join-stats` counts."
+  [{:keys [oref disch entry-refs]}]
+  (let [etoks (fn [cname]
+                (into (or (some-> (get entry-refs cname) ref-tokens) #{})
+                      (id-tokens cname)))
+        add   (fn [m advancer cname]
+                (let [ts (etoks cname)]
+                  (reduce (fn [m tok] (update m tok (fnil into #{}) ts))
+                          m (id-tokens advancer))))]
+    (as-> {} m
+      (reduce (fn [m [c mission]] (add m mission c)) m oref)
+      (reduce (fn [m [f t]] (if (contains? entry-refs f) (add m t f) m)) m disch))))
+
+(defn durable-join-stats
+  "The reconcile numbers (§11 step 5) of one fetched join: edge counts by
+   family + grain, and how many c-entries the compiled forward map can reach."
+  [{:keys [oref disch entry-refs] :as join}]
+  (when join
+    {:outcome-ref        (count oref)
+     :disch-entry->method (count (filter #(contains? entry-refs (first %)) disch))
+     :disch-mission->commit (count (remove #(contains? entry-refs (first %)) disch))
+     :c-entries-resolved (count entry-refs)
+     :advancer-tokens    (count (build-durable-adv join))}))
+
 (defn advanced-outcome-ids
   "The set of match tokens for the C-entry outcomes a candidate action is
-   predicted to advance — the IN-MEMORY core of the discharged-by join (the
-   durable PROOF-store version is M-populate-substrate-2 D4, out of scope). It
-   reuses the existing action / star-map structure rather than a parallel map:
-   an explicit `:advances-outcomes` on the action (the override seam) ∪ the
-   action's `:target` ∪ (for `:open-mission`) the mission's `:produces` caps
-   from the capability graph. Tokenised (id-tokens) on both sides so keyword /
-   alias / canonical vocabularies correlate."
-  [action capability-graph]
-  (let [target   (:target action)
-        produced (when (= :open-mission (:type action))
-                   (get-in capability-graph [:missions target :produces]))]
-    (into #{} (mapcat id-tokens)
-          (concat (:advances-outcomes action) [target] produced))))
+   predicted to advance. The base set reuses the existing action / star-map
+   structure rather than a parallel map: an explicit `:advances-outcomes` on
+   the action (the override seam) ∪ the action's `:target` ∪ (for
+   `:open-mission`) the mission's `:produces` caps from the capability graph.
+   Tokenised (id-tokens) on both sides so keyword / alias / canonical
+   vocabularies correlate.
+
+   The base set is then EXPANDED through the durable discharged-by join
+   (§11 step 4): every base token — plus the action's method/`:type` tokens,
+   which is how a method-class edge fires — that keys the compiled
+   {advancer-token → #{entry tokens}} map unions in the c-entries substrate-2
+   says that mission/method discharges. The 2-arity reads the join cached in
+   `c-state` by `refresh!` (nil ⇒ no expansion ⇒ the pre-durable behaviour,
+   which stays the fallback for the uncovered slice)."
+  ([action capability-graph]
+   (advanced-outcome-ids action capability-graph (:durable-adv @c-state)))
+  ([action capability-graph durable-adv]
+   (let [target   (:target action)
+         produced (when (= :open-mission (:type action))
+                    (get-in capability-graph [:missions target :produces]))
+         base     (into #{} (mapcat id-tokens)
+                        (concat (:advances-outcomes action) [target] produced))]
+     (if (seq durable-adv)
+       (into base (mapcat #(get durable-adv %))
+             (into base (id-tokens (:type action))))
+       base))))
 
 (defn ref-advanced?
   "Does the action's advanced-token set intersect this outcome-ref's tokens?
@@ -416,8 +547,9 @@
    case `(constantly 1.0)` ⇒ advanced entries contribute 0. With no advanced
    entries (e.g. :no-op) it reduces to `goal-outcome-risk`; [] ⇒ 0.0 (floor).
 
-   Deferred refinement (named): the durable `discharged-by` PROOF join
-   (M-populate-substrate-2 D4) replacing the in-memory id-match — §11."
+   The advanced set now reads the DURABLE discharged-by join for the covered
+   slice (§11 step 4, via the `:durable-adv` cache in `c-state`); the in-memory
+   token-match remains the fallback for the uncovered entries."
   ([entries action capability-graph]
    (predictive-goal-outcome-risk entries action capability-graph default-goal-outcome-weight credit-satisfy-prob))
   ([entries action capability-graph weight]
