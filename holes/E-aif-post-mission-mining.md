@@ -36,6 +36,15 @@ mission; anything that grows gets its own E-note.
   readout so every quantity permanently carries its provenance badge (0 FEP-derived · 7
   principled-approx · 9 analogical today — and each badge's `:repair` field is a costed upgrade
   path; the sharpest, :G-goal-outcome's non-KL, is exactly the named W1).
+- **#6.6 — The two cheap honesty discharges from the R18 audit** (green-path items 2-3;
+  no new math): (a) **rename the 8-term G-total blend** — it is risk+ambiguity (canonical core)
+  plus six heuristic terms in incommensurate units; a struct split (`:G-efe-core` vs
+  `:G-heuristic-terms`) + rename makes the selection honest ("multi-objective score with an EFE
+  core", which is what the paper should say); NB γ is already INSULATED from this (its perf pair
+  is coverage-ΔG vs coverage-ΔG by the claude-10 review fix — the blend never enters γ's
+  calibration). (b) **real EIG for G-info** — today it double-counts the ambiguity variance
+  vector; the audit notes working futon3c siblings to copy. Belly's real predictive-KL = W1,
+  already tracked.
 - **#6 — The shelf** (in view, not urgent): **R15** — the last open forward-sweep criterion;
   design-shaped (nested model: mission-level belief priors entity-level belief) — charter fresh as
   its own excursion. The DarkTower pair (③ fold-wiring instance + Coverage live gate — both have
