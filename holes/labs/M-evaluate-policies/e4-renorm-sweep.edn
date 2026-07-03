@@ -1,0 +1,155 @@
+{:generated-by
+ "scripts/wm_e4_renorm.bb (M-evaluate-policies E4, D7 experimental series)",
+ :question
+ "§3.3 empirically: does any commensuration/renormalisation change winners?",
+ :limitation
+ "Renormalisation varies weights over PERSISTED term values only; the hidden (graph-pragmatic - gap) residual is held fixed unless dropped, and forward-model modes are not re-run (per §8.7).",
+ :corpus
+ {:files 41,
+  :lane-valid-ticks 677,
+  :note "live corpus; read-only; determinism verified by re-run"},
+ :term-stats
+ {:ambiguity
+  {:n-present 90083,
+   :mu 0.027247,
+   :sd 0.004728,
+   :one-over-sd 211.5189},
+  :goal-outcome
+  {:n-present 3240, :mu 0.296156, :sd 4.47E-4, :one-over-sd 2236.511},
+  :info
+  {:n-present 89931,
+   :mu 13.972725,
+   :sd 0.004677,
+   :one-over-sd 213.7951},
+  :risk
+  {:n-present 90083, :mu 0.367156, :sd 0.184954, :one-over-sd 5.4068},
+  :structural-pressure
+  {:n-present 67362, :mu 0.011245, :sd 0.088007, :one-over-sd 11.3628},
+  :survival
+  {:n-present 89931, :mu 0.880234, :sd 0.234483, :one-over-sd 4.2647}},
+ :znorm-weights
+ {:ambiguity 211.5189,
+  :goal-outcome 2236.511,
+  :info 213.7951,
+  :risk 5.4068,
+  :structural-pressure 11.3628,
+  :survival 4.2647},
+ :configs
+ [{:cfg "default",
+   :desc "sanity: I1 replay-equality — must flip nothing",
+   :spec {:name "e4-default", :weights {}, :exclude #{}},
+   :flip-rate-pct 0.0,
+   :n-flips 0,
+   :winner-net-delta
+   {:address-sorry 0, :learn-action-class 0, :open-mission 0},
+   :type-flow {}}
+  {:cfg "z-norm",
+   :desc
+   "per-term 1/σ scaling (= z-norm for selection; μ cancels), residual kept",
+   :spec
+   {:name "e4-z-norm",
+    :weights
+    {:risk 5.4068,
+     :ambiguity 211.5189,
+     :info 213.7951,
+     :survival 4.2647,
+     :structural-pressure 11.3628,
+     :goal-outcome 2236.511},
+    :exclude #{}},
+   :flip-rate-pct 34.4,
+   :n-flips 233,
+   :winner-net-delta
+   {:address-sorry -40,
+    :learn-action-class 208,
+    :no-op 25,
+    :open-mission -193},
+   :type-flow
+   {[:address-sorry :learn-action-class] 15,
+    [:address-sorry :no-op] 25,
+    [:open-mission :learn-action-class] 193}}
+  {:cfg "z-norm-drop-hidden",
+   :desc "z-norm on visible terms, hidden residual also removed",
+   :spec
+   {:name "e4-z-norm-drop-hidden",
+    :weights
+    {:risk 5.4068,
+     :ambiguity 211.5189,
+     :info 213.7951,
+     :survival 4.2647,
+     :structural-pressure 11.3628,
+     :goal-outcome 2236.511},
+    :exclude #{:hidden}},
+   :flip-rate-pct 34.4,
+   :n-flips 233,
+   :winner-net-delta
+   {:address-sorry -40,
+    :learn-action-class 208,
+    :no-op 25,
+    :open-mission -193},
+   :type-flow
+   {[:address-sorry :learn-action-class] 15,
+    [:address-sorry :no-op] 25,
+    [:open-mission :learn-action-class] 193}}
+  {:cfg "ambiguity-audible",
+   :desc
+   "scale only G-ambiguity by 1/σ_ambiguity (rest default), residual kept",
+   :spec
+   {:name "e4-ambiguity-audible",
+    :weights {:ambiguity 211.5189},
+    :exclude #{}},
+   :flip-rate-pct 93.8,
+   :n-flips 635,
+   :winner-net-delta
+   {:address-sorry -442,
+    :learn-action-class 453,
+    :no-op 182,
+    :open-mission -193},
+   :type-flow
+   {[:address-sorry :learn-action-class] 260,
+    [:address-sorry :no-op] 182,
+    [:open-mission :learn-action-class] 193}}
+  {:cfg "equal-unit",
+   :desc "naive commensuration: all six terms weight 1, residual kept",
+   :spec
+   {:name "e4-equal-unit",
+    :weights
+    {:risk 1.0,
+     :ambiguity 1.0,
+     :info 1.0,
+     :survival 1.0,
+     :structural-pressure 1.0,
+     :goal-outcome 1.0},
+    :exclude #{}},
+   :flip-rate-pct 11.4,
+   :n-flips 77,
+   :winner-net-delta
+   {:address-sorry -8, :learn-action-class 77, :open-mission -69},
+   :type-flow
+   {[:address-sorry :learn-action-class] 8,
+    [:open-mission :learn-action-class] 69}}
+  {:cfg "core-only",
+   :desc "canonical EFE core: select on G-risk + G-ambiguity alone",
+   :spec
+   {:name "e4-core-only",
+    :weights {},
+    :exclude
+    #{:survival :goal-outcome :hidden :info :structural-pressure}},
+   :flip-rate-pct 64.8,
+   :n-flips 439,
+   :winner-net-delta
+   {:address-sorry -318, :learn-action-class 374, :open-mission -56},
+   :type-flow
+   {[:address-sorry :learn-action-class] 260,
+    [:address-sorry :open-mission] 58,
+    [:open-mission :learn-action-class] 114,
+    [:open-mission :open-mission] 7}}],
+ :findings
+ ["Corpus at run time: 677 lane-valid ticks (wm-trace is appended hourly; frozen early-day flip counts reproduce q1-census-v2 exactly, later day-files have grown since the 10:41 snapshot)."
+  "default spec flips 0.0% — I1 replay-equality holds (recomputed total == persisted :G-total), so the harness reproduces the actual winner exactly."
+  "Mean-centring is argmin-invariant: subtracting a per-term corpus constant shifts every candidate in a tick equally, so per-term z-normalisation reduces EXACTLY to 1/σ term-scaling for selection. The μ column is reported for the record but plays no part in winners."
+  "MAGNITUDE vs VARIATION. G-info has by far the largest MEAN (μ=13.972725) but a near-zero σ=0.004677 — a nearly-uniform bonus, hence argmin-inert (census G-info flip-rate 0%). G-ambiguity is small in BOTH (μ=0.027247, σ=0.004728). So reading 2's 'inaudible ambiguity' is a MEAN-magnitude fact; z-normalisation instead rescales by σ (variation)."
+  "The naturally-decisive terms are the high-σ ones: G-survival (σ=0.234483) and G-risk (σ=0.184954). z-normalisation (all 1/σ, residual kept) shrinks those toward the tiny-σ terms and moves 34.4% of winners; dropping the hidden residual as well leaves it unchanged (34.4%) — under z-norm the raw-scale residual is argmin-inert."
+  "ambiguity-audible (G-ambiguity × 1/σ≈211.5189 alone, rest default) = 93.8%: 1/σ scaling OVERSHOOTS — ambiguity's scaled σ ≈ 1 now exceeds every other term's, so it does not merely gain a vote, it dominates. 'Audible' at 1/σ means 'decisive'."
+  "equal-unit (all six weights = 1, residual kept) = 11.4% — the mildest commensuration; core-only (G-risk + G-ambiguity, all else excluded) = 64.8%, the replay complement of census core-only agreement (35.3%)."
+  "CAVEAT: near-constant terms get extreme 1/σ weights (G-goal-outcome 1/σ≈2236.511, present in ~3240 rows only; G-info 1/σ≈213.7951) — z-norm amplifies them enormously but, being near-uniform (or sparse/young), they stay largely argmin-inert. The 1/σ weights are recorded in :znorm-weights for scrutiny."
+  "Which action-types gain/lose is per-config in :winner-net-delta (spec winner-count minus actual winner-count, by :action :type); positive = the renormalised formula would pick that type more often."]}
