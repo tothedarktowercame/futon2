@@ -1197,16 +1197,40 @@ verification-time discoveries, per the lifecycle's decision-log slot)
   E/Π terms back in their slots — not σ-scaling. Decision-log entry per the lifecycle:
   C4 = decided + now evidence-backed. One design note carried forward: argmin hears
   *within-tick* dispersion; corpus-σ is the wrong normalisation unit if anyone revisits.
-- **Remaining VERIFY items:** D5a sim spike / E6 shadow comparison (now unblocked on
-  the E4 side; still needs the W1 driver for the c-distribution boundary); live-tick
-  I-checks (watcher re-armed after session cycle killed the first one); the exhibit
+- **Remaining VERIFY items:** D5a sim spike / E6 shadow comparison (E4 side unblocked;
+  W1 boundary bell out to claude-4); live-tick I-checks (watcher armed); the exhibit
   could gain E4/E5 panels at DOCUMENT.
-- **W1 boundary note (D5a):** `E-C-vector-live` is still a charter-for-handoff — *no
-  driver assigned yet* (authored claude-2, scoping only; "Joe assigns"). So the D5a
-  `c-distribution` module boundary (§8.6: shared home in `futon2.aif.preferences`,
-  belly imports it) currently has no counterparty to negotiate with — recorded here so
-  D5a's build doesn't silently assume an agreement nobody made. When Joe assigns the
-  W1 driver, the §8.6 boundary paragraph is the opening position.
+- **E6 hypothesis sharpened (analytic, from the E4 review):** the D5c
+  `:gaussian-entropy` mode changes ambiguity's *dispersion*, not just its magnitude —
+  entropy differences are ½·ln(σ²ᵢ/σ²ⱼ), so within-tick variance ratios of ~6× become
+  ~0.9-unit spreads (vs ~0.03 raw). Unlike E4's external 1/σ scaling, the canonical
+  formula may make ambiguity audible *intrinsically*. Untestable from traces
+  (per-channel σ² not persisted; only the sum is) ⇒ this is exactly what the E6
+  shadow run must measure before any flip — and a caution that D5c is NOT
+  behaviourally-neutral-if-flipped, despite being a "one-liner".
+- **W1 boundary (D5a): AGREED 2026-07-03** — claude-4 (new W1 driver), durably at
+  `E-C-vector-live.md:230`. Ownership: **`c-distribution` lives in
+  `futon2.aif.preferences`, owned by this mission's D5a; W1 consumes** — neither builds
+  a private C. Ratified consumer requirements, adopted into the D5a spec as its
+  interface contract:
+  1. **Bernoulli/point-mass form** for binary `:becomes` goal-outcome entries (Q = the
+     policy's predicted satisfaction prob via `credit-satisfy-prob`); continuous
+     density only for range channels. Expose `(log-preference dist x)` + `(kl q dist)`
+     for both Gaussian and Bernoulli Q.
+  2. **KL in nats, densities normalised over [0,1], stated in one place** — so D5a's
+     Σ Π_ch·KL and W1's goal-outcome term add honestly into G-total. Temperature:
+     higher = softer; temp→0 = hard hinge/point-mass; default documented.
+  3. **Degrade-safe:** flag off / density absent ⇒ exactly current hinge behaviour.
+  4. **bb-loadable** (pure Clojure or dynamic-resolve; `c_vector.clj` keeps loading
+     under babashka).
+  Faithfulness via the dcbe021 badge layer + the D8 formulas (exhibit pp. 8–9).
+  **D5a is now fully specified and unblocked** — build can be dispatched or done
+  owner-side once VERIFY's live checks close.
+- **Live I-check baseline (13:52):** last tick on disk = 12:04Z (pre-deploy, correct):
+  new keys absent, provenance nil, residual mean 7.4e-2 / max 4.0 on that tick — the
+  "before" snapshot the first post-deploy tick will be diffed against. Watcher re-armed
+  (3rd arm; the prior two died with session cycles — known bg-shell lifecycle, not a
+  defect).
 
 ### PUR-3: logic-model-before-code (I1–I5 model)
 
