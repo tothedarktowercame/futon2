@@ -3795,6 +3795,10 @@
                                             :cascade {:shown (:shown cp) :wholeness (:wholeness cp)}
                                             :act-gate {:delta-F dF :delta-G dG :pass? pass?}}
                                    :G-total (or dG 0.0)
+                                   ;; D1b (M-evaluate-policies §8.2): the 0.0 fallback is
+                                   ;; load-bearing (IHTB-2) — the marker makes the constant
+                                   ;; self-describing instead of silently rank-neutral.
+                                   :score-provenance (if dG :rollout-dG :placeholder)
                                    :held-for-arming? true}))
                               cascade-policies)
         wm-ranked+cascades (vec (map-indexed (fn [i e] (assoc e :rank (inc i)))

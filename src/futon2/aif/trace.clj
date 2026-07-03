@@ -68,8 +68,13 @@
   ;; :G-goal-outcome (R19, 2026-07-02): the belly's predictive-risk term was
   ;; computed per action but STRIPPED here — so no flight could show the belly
   ;; steering. Persist it: the R19 analog of R16's :act-gate-verdicts audit.
+  ;; :G-gap :G-graph-pragmatic :G-core (M-evaluate-policies D1a/D2, 2026-07-03):
+  ;; same fix, same reason — these terms ENTER :G-total but were stripped, so
+  ;; recomputing the total from persisted terms carried a hidden residual
+  ;; (census: mean-abs 0.324). Whitelist ⊇ terms entering :G-total (invariant I4).
   (select-keys r [:action :G-risk :G-ambiguity :G-info :G-survival
                   :G-structural-pressure :G-goal-outcome
+                  :G-gap :G-graph-pragmatic :G-core
                   :G-total :rank :time-pressure :horizon-steps]))
 
 (defn- strip-decision

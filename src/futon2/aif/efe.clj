@@ -36,10 +36,28 @@
             [futon2.aif.c-vector :as cv]))
 
 (defn- ambiguity
-  "Sum of per-channel predicted variances. Higher = more uncertain
-   predicted outcome → higher EFE contribution → less preferred action."
-  [variance-map]
-  (reduce + (vals variance-map)))
+  "R5b epistemic term over per-channel predicted variances.
+
+   Modes (M-evaluate-policies D5c — dark flag, nothing flips it on):
+     :variance-sum      (DEFAULT) — sum of per-channel predicted variance;
+                        byte-identical to the historical behaviour.
+     :gaussian-entropy  — Σ_ch ½·ln(2πe·σ²), the audit's repair toward the
+                        canonical E_Q(s|π)[H[P(o|s)]] under a Gaussian channel
+                        model (r18-badges :G-ambiguity :repair). Variance is
+                        floored at 1e-9 so a zero-variance channel yields a
+                        large-negative finite entropy, never -Inf.
+
+   Higher = more uncertain predicted outcome → higher EFE contribution →
+   less preferred action."
+  ([variance-map] (ambiguity variance-map :variance-sum))
+  ([variance-map mode]
+   (case mode
+     :gaussian-entropy
+     (reduce + 0.0 (map (fn [v]
+                          (* 0.5 (Math/log (* 2.0 Math/PI Math/E
+                                              (max (double v) 1e-9)))))
+                        (vals variance-map)))
+     (reduce + (vals variance-map)))))
 
 ;; ---------------------------------------------------------------------------
 ;; v0.13 R5 augmentation: info-gain + survival-cost terms ported from
@@ -384,7 +402,8 @@
                          pre-registered-goal graph-applicability-penalty
                          graph-body-weight graph-ascent-weight graph-off-map-penalty
                          graph-body-mode graph-ascent-status-aware? mission-gap-view
-                         gap-weight goal-outcome-weight goal-outcome-entries goal-outcome-prob-fn]
+                         gap-weight goal-outcome-weight goal-outcome-entries goal-outcome-prob-fn
+                         ambiguity-mode]
                   :or {info-weight default-info-weight
                        survival-weight default-survival-weight
                        structural-pressure-weight default-structural-pressure-weight
@@ -397,7 +416,8 @@
                        graph-body-mode :whole
                        graph-ascent-status-aware? false
                        gap-weight default-gap-weight
-                       goal-outcome-weight cv/default-goal-outcome-weight}}]
+                       goal-outcome-weight cv/default-goal-outcome-weight
+                       ambiguity-mode :variance-sum}}]
    (let [single-prediction (fm/predict state action)
          ;; v0.15: opt-in multi-horizon trajectory; final-state observation
          ;; drives G-risk + G-survival. Ambiguity + info still use the
@@ -413,7 +433,7 @@
          fe-on-predicted (fe/compute-free-energy next-mean)
          intrinsic (double (or (:intrinsic-value action) 0))
          g-risk-base (- (:G-pragmatic fe-on-predicted) intrinsic)
-         g-ambig (ambiguity next-var)
+         g-ambig (ambiguity next-var ambiguity-mode)
          g-info (info-gain next-var)
          g-survival-base (survival-cost next-mean)
          g-structural-pressure (double (or (:structural-pressure-per-action action) 0.0))
@@ -465,6 +485,10 @@
         :G-survival g-survival
         :G-structural-pressure g-structural-pressure
         :G-goal-outcome g-goal-outcome
+        ;; D2 (M-evaluate-policies §8.3): the canonical EFE CORE, reported
+        ;; separately from the multi-objective blend — :G-core = risk +
+        ;; ambiguity exactly (invariant I3). Pure addition; :G-total unchanged.
+        :G-core (+ g-risk g-ambig)
         :G-total g-total
         :time-pressure (double time-pressure)
         :horizon-steps (when multi (:horizon-steps multi))

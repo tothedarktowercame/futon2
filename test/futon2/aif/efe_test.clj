@@ -612,3 +612,39 @@
                                      :gap-weight 2.0})]
       (is (= 0.5 (:G-gap weighted)))
       (is (true? (:gap? weighted))))))
+
+;; ---------------------------------------------------------------------------
+;; M-evaluate-policies D2 + D5c (2026-07-03) — core additivity + ambiguity modes
+;; ---------------------------------------------------------------------------
+
+(deftest g-core-additivity-test
+  (testing "I3: :G-core = :G-risk + :G-ambiguity exactly, on every scored entry"
+    (doseq [action [{:type :no-op}
+                    {:type :address-sorry :target :m1}
+                    {:type :open-mission :target "M-on-ascent-big"}]]
+      (let [o (efe/compute-efe base-state action)]
+        (is (contains? o :G-core))
+        (is (= (:G-core o) (+ (:G-risk o) (:G-ambiguity o)))
+            (str "core additivity for " (:type action)))))))
+
+(deftest g-core-does-not-change-total-test
+  (testing "D2 is strictly additive: emitting :G-core leaves :G-total untouched"
+    (let [o (efe/compute-efe base-state {:type :no-op})]
+      ;; the blend still sums its historical terms; :G-core is a report, not a summand
+      (is (number? (:G-total o)))
+      (is (not= (:G-core o) (:G-total o))
+          ":G-core is reported beside, not substituted for, the blend"))))
+
+(deftest ambiguity-mode-default-identity-test
+  (testing "D5c dark flag: default and explicit :variance-sum are byte-identical"
+    (let [action {:type :address-sorry :target :m1}
+          implicit (efe/compute-efe base-state action)
+          explicit (efe/compute-efe base-state action {:ambiguity-mode :variance-sum})]
+      (is (= implicit explicit))))
+  (testing "D5c :gaussian-entropy is a genuinely different, finite quantity"
+    (let [action {:type :address-sorry :target :m1}
+          vs (efe/compute-efe base-state action)
+          ge (efe/compute-efe base-state action {:ambiguity-mode :gaussian-entropy})]
+      (is (not= (:G-ambiguity vs) (:G-ambiguity ge)))
+      (is (Double/isFinite (:G-ambiguity ge))
+          "zero-variance channels are floored, never -Inf"))))

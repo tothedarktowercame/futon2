@@ -159,3 +159,23 @@
         (is (= 42.0 (get-in record [:precision-state :annotation-health :precision])))
         (is (= [0.1 0.2]
                (get-in record [:precision-state :annotation-health :error-history])))))))
+
+;; ---------------------------------------------------------------------------
+;; M-evaluate-policies D1a (2026-07-03) — whitelist covers the blend's terms
+;; ---------------------------------------------------------------------------
+
+(deftest strip-ranked-action-whitelist-test
+  (testing "I4: every term entering :G-total survives the trace strip"
+    (let [entry {:action {:type :no-op}
+                 :G-risk 1.0 :G-ambiguity 2.0 :G-info 0.1 :G-survival 0.2
+                 :G-structural-pressure 0.3 :G-goal-outcome 0.4
+                 :G-gap 0.5 :G-graph-pragmatic 0.6 :G-core 3.0
+                 :G-total 7.1 :rank 1
+                 :prediction {:dropme true}}
+          rec (trace/trace-record {:belief {} :observation {} :free-energy {}
+                                   :ranked-actions [entry]
+                                   :decision {:action :abstain} :mode :test})
+          kept (first (:ranked-actions rec))]
+      (doseq [k [:G-gap :G-graph-pragmatic :G-core :G-goal-outcome :G-total]]
+        (is (contains? kept k) (str k " must survive the strip")))
+      (is (not (contains? kept :prediction)) "the deep :prediction still drops"))))
