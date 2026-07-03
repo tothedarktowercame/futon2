@@ -52,8 +52,8 @@ mission; anything that grows gets its own E-note.
 - **#6 — The shelf** (in view, not urgent): **R15** — the last open forward-sweep criterion;
   design-shaped (nested model: mission-level belief priors entity-level belief) — charter fresh as
   its own excursion. The DarkTower pair (③ fold-wiring instance + Coverage live gate — both have
-  live material now: enacted wirings flow hourly). The Upgrades shelf stays gated (GFN
-  reward-shaping/conditioning before compute). M2C "Nelson move" (named the most *available*
+  live material now: enacted wirings flow hourly). The Upgrades shelf's GFN lane is now REOPENED as `E-gflownets-fold.md`
+  (2026-07-03 — executable reward unblocked it; CPU rungs first, kill criterion armed). M2C "Nelson move" (named the most *available*
   substrate-2 improvement, still true). fold-classical ↔ fold_engine rule-table convergence
   (after #1, the predictor is deliberately behind the executor — reconcile in the §6b bake-off).
 
