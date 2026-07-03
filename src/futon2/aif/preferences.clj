@@ -121,7 +121,11 @@
 ;; ---------------------------------------------------------------------------
 
 (def default-c-temperature
-  "Contract pt 2: documented default. Higher = softer tails; → 0 = hard."
+  "Contract pt 2: documented default. Higher = softer tails; → 0 = hard.
+   Deliberately UNFITTED/dark (the E6 evidence is anchored to 0.1). Calibration
+   apparatus: `scripts/wm_t_calibration.clj`; fitted T* recorded in
+   `holes/labs/M-evaluate-policies/t-calibration.edn` (E-KL-refinements item 3).
+   The flip to a fitted T is the operator's decision, not this default."
   0.1)
 
 (defn- sq [x] (* (double x) (double x)))

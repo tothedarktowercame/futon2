@@ -449,6 +449,13 @@
          parity? (= kl-channel-weights :pragmatic-parity)
          kcw (if parity? pref/pragmatic-weights kl-channel-weights)
          kcw-default (if parity? 0.0 1.0)
+         ;; item 3 (E-KL-refinements) plumbing: :c-temperature is a SCALAR (the
+         ;; default path — byte-identical) OR a map ch→T (per-channel; missing
+         ;; channels fall back to pref/default-c-temperature). Enables the
+         ;; per-channel-T candidate without committing to it; default stays 0.1.
+         ch-temp (if (map? c-temperature)
+                   (fn [ch] (get c-temperature ch pref/default-c-temperature))
+                   (constantly c-temperature))
          g-risk-base (case risk-mode
                        :kl
                        (- (reduce +
@@ -460,7 +467,7 @@
                                     (* (double (get kcw ch kcw-default))
                                        (pref/kl {:kind :gaussian :mu mu :sigma2 s2}
                                                 (pref/c-distribution spec
-                                                                     :temperature c-temperature)))))
+                                                                     :temperature (ch-temp ch))))))
                           intrinsic)
                        (- (:G-pragmatic fe-on-predicted) intrinsic))
          g-ambig (ambiguity next-var ambiguity-mode)

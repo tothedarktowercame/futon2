@@ -71,3 +71,19 @@
       (is (not= parity (risk (assoc explicit :mathematics-pct 1.0)))))
     (testing "explicit map form unchanged: uniform default still 1.0/channel"
       (is (Double/isFinite (double (risk {})))))))
+
+(deftest kl-per-channel-temperature
+  ;; item 3 (E-KL-refinements) plumbing: :c-temperature accepts scalar OR map.
+  (let [cc   (keys (pref/current-C))
+        risk (fn [ct] (:G-risk (efe/compute-efe state action
+                                                {:risk-mode :kl :c-temperature ct})))]
+    (testing "scalar path byte-identical (default scalar ≡ no :c-temperature opt)"
+      (is (= (risk pref/default-c-temperature)
+             (:G-risk (efe/compute-efe state action {:risk-mode :kl})))))
+    (testing "a UNIFORM map equals the scalar it mirrors"
+      (is (< (Math/abs (- (double (risk (zipmap cc (repeat 0.5)))) (double (risk 0.5)))) 1e-9)))
+    (testing "missing-channel fallback = default-c-temperature ({} map ⇒ all default ⇒ scalar default)"
+      (is (< (Math/abs (- (double (risk {})) (double (risk pref/default-c-temperature)))) 1e-9)))
+    (testing "map form MOVES G-risk when a channel's T differs from the scalar"
+      ;; raise :mission-health's T only; others fall back to the default 0.1
+      (is (not= (risk 0.1) (risk {:mission-health 2.0}))))))

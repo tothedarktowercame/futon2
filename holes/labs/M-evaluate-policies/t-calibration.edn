@@ -1,0 +1,155 @@
+{:dispersion-floor
+ {:uniform
+  {:softest-T-sd 2.1529505399956284,
+   :ratio-to-hinge 20.258753745726953,
+   :crosses-grid? false},
+  :pragmatic-parity
+  {:softest-T-sd 0.2470586233799742,
+   :ratio-to-hinge 2.324763025825647,
+   :crosses-grid? false}},
+ :T-grid
+ [0.02
+  0.02344204595066961
+  0.027476475917665256
+  0.03220524055121879
+  0.03774783644270195
+  0.044244325821409
+  0.05185887594809335
+  0.06078390764626393
+  0.07124495780524884
+  0.08350637873120803
+  0.09787801836954989
+  0.11472305020897357
+  0.13446715072998675
+  0.15760925631339825
+  0.1847341714374772
+  0.21652734677481086
+  0.2537922006335843
+  0.2974704214587022
+  0.3486657644399976
+  0.4086719435713882
+  0.4790053239974972
+  0.5614432407882354
+  0.6580689124625334
+  0.7713240842326942
+  0.9040707312720485
+  1.0596633812567413
+  1.2420338837831233
+  1.4557907687966292
+  1.7063357048345609
+  1.9999999999999993],
+ :days 14,
+ :caveats
+ ["SINGLE-TICK snapshot — within-tick dispersion only (E4 lesson); re-run on later ticks before a flip."
+  "default-c-temperature stays 0.1 (unfitted/dark); this is data for the operator's flip decision, not a changed default."
+  "kl-sd assumed monotone-decreasing in T for the bisection; the full curve is emitted so the operator can eyeball it."
+  "no exact T* here ⇒ per-channel-T is anchored on the CLOSEST-achievable T and is ILLUSTRATIVE plumbing, not a fit."
+  ":pragmatic-parity is a comparability tool (Σw·KL is joint-KL only at uniform weights); uniform is the canonical flip candidate."],
+ :sigma-bar 0.016710473322615205,
+ :per-channel-T-PROPOSAL
+ {:formula
+  "T_ch = anchor-T · (σ_ch_mean / σ̄),  σ̄ = mean over channels of σ_ch_mean",
+  :anchor-T 1.9999999999999993,
+  :anchor-is-exact-T*? false,
+  :applied? false,
+  :table
+  {:mathematics-pct 0.0,
+   :coupling-density 0.0,
+   :support-coverage 0.0,
+   :loop-health 0.0,
+   :mission-health 14.249067960397847,
+   :portfolio-pct 0.0,
+   :annotation-health 0.0,
+   :ticks-firing-ratio 0.0,
+   :active-repo-ratio 0.4352197051704506,
+   :attack-coverage 0.0,
+   :consulting-pct 0.0,
+   :sorry-count-norm 11.315712334431693,
+   :stack-pct 0.0}},
+ :cascade-rows-excluded 2,
+ :per-channel-sigma
+ {:mathematics-pct {:mean 0.0, :max 0.0},
+  :coupling-density {:mean 0.0, :max 0.0},
+  :support-coverage {:mean 0.0, :max 0.0},
+  :loop-health {:mean 0.0, :max 0.0},
+  :mission-health {:mean 0.11905433501217969, :max 0.1414213562373095},
+  :portfolio-pct {:mean 0.0, :max 0.0},
+  :annotation-health {:mean 0.0, :max 0.0},
+  :ticks-firing-ratio {:mean 0.0, :max 0.0},
+  :active-repo-ratio {:mean 0.0036363636363636364, :max 0.1},
+  :attack-coverage {:mean 0.0, :max 0.0},
+  :consulting-pct {:mean 0.0, :max 0.0},
+  :sorry-count-norm {:mean 0.09454545454545435, :max 0.1},
+  :stack-pct {:mean 0.0, :max 0.0}},
+ :headline-finding
+ "NO T matches hinge dispersion (sd 0.1063). kl-sd floors at uniform×20.3 / parity×2.3 even at the softest T — the gap is STRUCTURAL (the entropy term -H[Q~] disperses across candidates independent of T), not a T-choice. :pragmatic-parity (×2.3) is far closer than uniform (×20.3).",
+ :closest-achievable-T
+ {:uniform 1.9999999999999993, :pragmatic-parity 1.9999999999999993},
+ :kl-risk-sd-curves
+ {:uniform
+  [4.135709462103643
+   3.7474505475701494
+   3.430104925543336
+   3.1725508688213973
+   2.964953229440062
+   2.798665759697856
+   2.666171100109309
+   2.561029984054078
+   2.477818935883505
+   2.4120474762955872
+   2.3600564394134267
+   2.318905269888284
+   2.286257783285404
+   2.260274339160513
+   2.2395155517936742
+   2.2228598849272463
+   2.209435376810734
+   2.1985644400365483
+   2.1897200407951556
+   2.182491376146485
+   2.1765572484920868
+   2.171665547514191
+   2.1676175052316102
+   2.164255641249334
+   2.1614545395736005
+   2.1591137873056363
+   2.157152558948633
+   2.1555054515874352
+   2.154119270809707
+   2.1529505399956284],
+  :pragmatic-parity
+  [0.4923214979983222
+   0.4446517963410459
+   0.40558691785853584
+   0.3737973199310459
+   0.34810669472352807
+   0.32747842634779195
+   0.3110075021360419
+   0.29791454248251353
+   0.2875392122419345
+   0.27933152093084523
+   0.2728408217473412
+   0.2677032186599768
+   0.2636284441220605
+   0.2603871954434376
+   0.25779962740735923
+   0.25572536990836
+   0.2540551704666943
+   0.25270408292240626
+   0.25160602727020187
+   0.2507095090967345
+   0.24997428772030814
+   0.24936880233643272
+   0.24886819359230655
+   0.2484527872255264
+   0.24810693321716107
+   0.24781811689711392
+   0.24757627732439813
+   0.2473732833449813
+   0.2472025295379575
+   0.2470586233799742]},
+ :reference {:hinge-within-tick-risk-sd 0.10627260526574771},
+ :T-star {:uniform nil, :pragmatic-parity nil},
+ :n-candidates 108,
+ :sim-only true,
+ :generated-by "scripts/wm_t_calibration.clj (E-KL-refinements item 3)"}
