@@ -1235,9 +1235,18 @@ verification-time discoveries, per the lifecycle's decision-log slot)
   owner-side once VERIFY's live checks close.
 - **Live I-check baseline (13:52):** last tick on disk = 12:04Z (pre-deploy, correct):
   new keys absent, provenance nil, residual mean 7.4e-2 / max 4.0 on that tick — the
-  "before" snapshot the first post-deploy tick will be diffed against. Watcher re-armed
-  (3rd arm; the prior two died with session cycles — known bg-shell lifecycle, not a
-  defect).
+  "before" snapshot the first post-deploy tick will be diffed against.
+- **LIVE I-CHECKS RUN (14:51, on the 13:03:52Z post-deploy tick): 3/4 PASS + 1 spec
+  gap caught and fixed.** I3: 0 violations/108 (`:G-core` exact, live). I1/I4:
+  **residual mean AND max = 0.000e0** (pre-deploy 7.4e-2/4.0; corpus mean 0.324) —
+  no silent steering, in production. New keys on 108/108 entries. The fourth check
+  caught a **reviewer-side spec omission**: `:score-provenance` was attached
+  (war_machine.clj, per D1b) but stripped — the D1a whitelist spec never listed it.
+  claude-11 built exactly what was specified; the gap was mine. Fixed same-day
+  (`5ec720c`, whitelist + comment naming the catch; suite 414/1322/0, kondo 0/0);
+  marker-presence verifies at the next tick. Decision-log lesson recorded: **the live
+  post-deploy check earns its place in C9 — unit tests validated the specified
+  whitelist, and only the deployed-tick diff could catch the spec itself being short.**
 
 ### PUR-3: logic-model-before-code (I1–I5 model)
 
