@@ -1,0 +1,11 @@
+digraph cascade {
+  rankdir=TB; bgcolor="transparent"; ranksep=0.5; nodesep=0.35;
+  node [shape=box, style="filled,rounded", fontname="DejaVu Sans", fontsize=13, color="#3F5B54", fontcolor="#2A3E39", penwidth=1.1, margin="0.12,0.06"];
+  edge [color="#9CB2AA", arrowsize=0.65];
+  "learning-event-detection" [label="1. learning-event-detection\nrel 0.36", fillcolor="#EAF1EE"];
+  "pattern-as-strategy" [label="2. pattern-as-strategy\nrel 0.30", fillcolor="#EAF1EE"];
+  "proof-as-social-process" [label="3. proof-as-social-process\nrel 0.27", fillcolor="#F3EEDA"];
+  "proof-as-social-process" -> "pattern-as-strategy" [color="#5E7E73", penwidth=1.8];
+  "learning-event-detection" -> "pattern-as-strategy" [dir=none, penwidth=1.25];
+  "learning-event-detection" -> "proof-as-social-process" [dir=none, penwidth=1.25];
+}

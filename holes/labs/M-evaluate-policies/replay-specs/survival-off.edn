@@ -1,0 +1,5 @@
+;; Drop G-survival entirely. Cross-check: this reproduces the Q1 census
+;; "remove G-survival" flip-rate (47.9%) via the independent replay path.
+{:name "survival-off"
+ :weights {}
+ :exclude #{:survival}}

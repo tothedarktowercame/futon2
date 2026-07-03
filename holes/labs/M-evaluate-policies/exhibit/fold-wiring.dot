@@ -1,0 +1,20 @@
+digraph fold {
+  rankdir=TB; bgcolor="transparent"; ranksep=0.45; nodesep=0.3;
+  node [shape=box, style="filled,rounded", fontname="DejaVu Sans", fontsize=12, color="#3F5B54", fontcolor="#2A3E39", penwidth=1.1, margin="0.14,0.08"];
+  edge [color="#5E7E73", fontname="DejaVu Sans", fontsize=10, fontcolor="#6B7F78", arrowsize=0.7];
+  "s1" [label="s1: structured-observation-vector\nevery G-term persisted as a typed vector (D1a+D2)", fillcolor="#EAF1EE"];
+  "s2" [label="s2: candidate-pattern-action-space\narena as bounded legible candidate set; provenance-marked rows (D1b)", fillcolor="#EAF1EE"];
+  "s3" [label="s3: task-shape-validation\nI2 admission gate on score rows  ⌀ sorry", fillcolor="#F6E3DF", penwidth=2.0];
+  "s4" [label="s4: budget-bounds-exploration\nbounded replay/renorm experiments (D6/D3); Joe-gated flips", fillcolor="#EAF1EE"];
+  "s5" [label="s5: session-durability-check\nC9: no flip without archived before/after evidence", fillcolor="#EAF1EE"];
+  "s6" [label="s6: par-as-obligation\nPUR/PAR close; meta-patterns flow back to the library  ⌀ sorry", fillcolor="#F6E3DF", penwidth=2.0];
+  "s1" -> "s2" [label=" typed-score-vector"];
+  "s2" -> "s3" [label=" legible-arena"];
+  "s3" -> "s4" [label=" typed-arena-admission"];
+  "s4" -> "s5" [label=" bounded-experiment-loop"];
+  "s5" -> "s6" [label=" durable-evidence-trail"];
+  "h1" [label="policy-hole 1\nvalue-currency commensuration (exchange rate before any cross-lane merge)", shape=note, fillcolor="#F9F3E0", color="#B08D3E", fontcolor="#7A6228"];
+  "h1" -> "s6" [style=dotted, color="#B08D3E", dir=none];
+  "h2" [label="policy-hole 2\nprobabilistic term constructions (distributional C for risk-KL; belief-grade EIG)", shape=note, fillcolor="#F9F3E0", color="#B08D3E", fontcolor="#7A6228"];
+  "h2" -> "s6" [style=dotted, color="#B08D3E", dir=none];
+}

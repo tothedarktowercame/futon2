@@ -1,0 +1,59 @@
+{:per-day
+ [{:file "wm-trace-2026-05-18.edn", :ticks 7, :flips 0}
+  {:file "wm-trace-2026-05-19.edn", :ticks 9, :flips 3}
+  {:file "wm-trace-2026-05-21.edn", :ticks 13, :flips 0}
+  {:file "wm-trace-2026-05-22.edn", :ticks 24, :flips 0}
+  {:file "wm-trace-2026-05-23.edn", :ticks 24, :flips 0}
+  {:file "wm-trace-2026-05-24.edn", :ticks 24, :flips 0}
+  {:file "wm-trace-2026-05-25.edn", :ticks 21, :flips 1}
+  {:file "wm-trace-2026-05-26.edn", :ticks 17, :flips 8}
+  {:file "wm-trace-2026-05-27.edn", :ticks 9, :flips 0}
+  {:file "wm-trace-2026-05-30.edn", :ticks 2, :flips 0}
+  {:file "wm-trace-2026-05-31.edn", :ticks 19, :flips 0}
+  {:file "wm-trace-2026-06-01.edn", :ticks 12, :flips 1}
+  {:file "wm-trace-2026-06-02.edn", :ticks 14, :flips 14}
+  {:file "wm-trace-2026-06-03.edn", :ticks 24, :flips 24}
+  {:file "wm-trace-2026-06-04.edn", :ticks 24, :flips 24}
+  {:file "wm-trace-2026-06-05.edn", :ticks 15, :flips 6}
+  {:file "wm-trace-2026-06-06.edn", :ticks 24, :flips 0}
+  {:file "wm-trace-2026-06-07.edn", :ticks 23, :flips 0}
+  {:file "wm-trace-2026-06-08.edn", :ticks 24, :flips 0}
+  {:file "wm-trace-2026-06-09.edn", :ticks 23, :flips 0}
+  {:file "wm-trace-2026-06-10.edn", :ticks 22, :flips 0}
+  {:file "wm-trace-2026-06-12.edn", :ticks 7, :flips 7}
+  {:file "wm-trace-2026-06-13.edn", :ticks 24, :flips 21}
+  {:file "wm-trace-2026-06-14.edn", :ticks 20, :flips 20}
+  {:file "wm-trace-2026-06-15.edn", :ticks 8, :flips 8}
+  {:file "wm-trace-2026-06-16.edn", :ticks 14, :flips 11}
+  {:file "wm-trace-2026-06-17.edn", :ticks 15, :flips 10}
+  {:file "wm-trace-2026-06-18.edn", :ticks 12, :flips 12}
+  {:file "wm-trace-2026-06-21.edn", :ticks 3, :flips 3}
+  {:file "wm-trace-2026-06-22.edn", :ticks 17, :flips 7}
+  {:file "wm-trace-2026-06-23.edn", :ticks 13, :flips 4}
+  {:file "wm-trace-2026-06-24.edn", :ticks 10, :flips 8}
+  {:file "wm-trace-2026-06-25.edn", :ticks 15, :flips 9}
+  {:file "wm-trace-2026-06-26.edn", :ticks 12, :flips 10}
+  {:file "wm-trace-2026-06-27.edn", :ticks 11, :flips 8}
+  {:file "wm-trace-2026-06-28.edn", :ticks 14, :flips 14}
+  {:file "wm-trace-2026-06-29.edn", :ticks 18, :flips 18}
+  {:file "wm-trace-2026-06-30.edn", :ticks 18, :flips 18}
+  {:file "wm-trace-2026-07-01.edn", :ticks 23, :flips 17}
+  {:file "wm-trace-2026-07-02.edn", :ticks 34, :flips 25}
+  {:file "wm-trace-2026-07-03.edn", :ticks 15, :flips 15}],
+ :limitation
+ "Replay varies weights/terms over PERSISTED values only; the hidden (graph-pragmatic - gap) residual is held fixed per candidate and forward-model modes cannot be re-run (need sim-first spikes in VERIFY).",
+ :n-flips 326,
+ :corpus {:files 41, :ticks 677},
+ :spec {:name "survival-off", :weights {}, :exclude #{:survival}},
+ :winner-types
+ {:actual
+  {:address-sorry 442, :learn-action-class 42, :open-mission 193},
+  :spec
+  {:address-sorry 185, :learn-action-class 368, :open-mission 124},
+  :net-delta
+  {:address-sorry -257, :learn-action-class 326, :open-mission -69}},
+ :flip-rate-pct 48.2,
+ :generated-by "scripts/wm_replay_blend.bb (M-evaluate-policies D6)",
+ :type-flow
+ {[:address-sorry :learn-action-class] 257,
+  [:open-mission :learn-action-class] 69}}

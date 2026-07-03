@@ -1,0 +1,18 @@
+{
+  "provenance": "Recorded LLM-turn fold (futon2.aif.fold-llm impl #2), Fable, 2026-07-03. Canonical EDN: fold-turn.edn; CLean: m-evaluate-policies.clean.edn; DarkTower render: darktower-check.lean.",
+  "coverage": 0.75,
+  "delta_g": -0.75,
+  "lean_check": "PASS — 0 errors, core lean, --mode standalone (structural soundness: boxes compose, spine is a valid BV.seq, discharge polarities valid)",
+  "boxes": [
+    {"id": "s1", "method": "structured-observation-vector", "gloss": "every G-term persisted as a typed vector (D1a+D2)", "produces": "typed-score-vector", "hole": null},
+    {"id": "s2", "method": "candidate-pattern-action-space", "gloss": "arena as bounded legible candidate set; provenance-marked rows (D1b)", "produces": "legible-arena", "hole": null},
+    {"id": "s3", "method": "task-shape-validation", "gloss": "I2 admission gate on score rows", "produces": "typed-arena-admission", "hole": "sorry/queryAnswer/parse: gate enforced in the production judge path, not only census-asserted"},
+    {"id": "s4", "method": "budget-bounds-exploration", "gloss": "bounded replay/renorm experiments (D6/D3); Joe-gated flips", "produces": "bounded-experiment-loop", "hole": null},
+    {"id": "s5", "method": "session-durability-check", "gloss": "C9: no flip without archived before/after evidence", "produces": "durable-evidence-trail", "hole": null},
+    {"id": "s6", "method": "par-as-obligation", "gloss": "PUR/PAR close; meta-patterns flow back to the library", "produces": "library-updating-close", "hole": "sorry/sorryProof/payoff: the three meta-patterns written into futon3/library (DOCUMENT)"}
+  ],
+  "policy_holes": [
+    {"free": "value-currency commensuration (exchange rate before any cross-lane merge)", "why": "no pattern in the cascade — nor, we believe, in the library — grounds cross-lane unit exchange; the fold independently surfaces the gap the mission named candidate pattern currency-before-merge"},
+    {"free": "probabilistic term constructions (distributional C for risk-KL; belief-grade EIG)", "why": "the cascade covers evaluation-loop hygiene, not generative-model repair; D5a/D5b stay grounded by belly-W1 + the portfolio template"}
+  ]
+}

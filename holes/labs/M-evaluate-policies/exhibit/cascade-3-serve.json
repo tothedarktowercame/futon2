@@ -1,0 +1,45 @@
+{
+ "psi": "evaluate policies \u2014 want: Evaluate policies honestly \u2014 make R5's score what it says it is. have: HEAD + IDENTIFY complete 2026-07-03 (operator gates passed in-session);",
+ "size": 14,
+ "wholeness": 4.33,
+ "H-coherence": 0.895,
+ "T-intensity": 4.84,
+ "accuracy": 6.242,
+ "complexity": 5.524,
+ "F-free-energy": 4.861,
+ "lambda": 0.25,
+ "budget": 6,
+ "shown": [
+  {
+   "pattern": "coordination/task-shape-validation",
+   "rel": 0.398,
+   "mc": 0.119
+  },
+  {
+   "pattern": "coordination/session-durability-check",
+   "rel": 0.32,
+   "mc": 0.288
+  },
+  {
+   "pattern": "coordination/par-as-obligation",
+   "rel": 0.317,
+   "mc": 0.476
+  },
+  {
+   "pattern": "agent/budget-bounds-exploration",
+   "rel": 0.313,
+   "mc": 0.282
+  },
+  {
+   "pattern": "aif/structured-observation-vector",
+   "rel": 0.387,
+   "mc": 0.194
+  },
+  {
+   "pattern": "aif/candidate-pattern-action-space",
+   "rel": 0.374,
+   "mc": 0.562
+  }
+ ],
+ "truncated": true
+}

@@ -1,0 +1,249 @@
+{
+ "summary": {
+  "n": 13,
+  "damping": 0.85,
+  "spearman": {
+   "potential-sum vs wholeness": 0.747,
+   "potential-sum vs F": 0.885,
+   "potential-mean vs wholeness": 0.566,
+   "potential-mean vs F": 0.808,
+   "size vs wholeness (confound check)": 0.847,
+   "size vs potential-sum (confound check)": 0.882
+  },
+  "reading": "high rho => additive field-lift carries the ordering (cheap menu prior); low rho => non-additive terms dominate => bounds/priors only (mission \u00a79.6 caveat, measured)"
+ },
+ "cascades": [
+  {
+   "target": "M-evaluate-policies",
+   "size-shown": 6,
+   "size-saturated": 14,
+   "wholeness": 4.33,
+   "F": 4.861,
+   "potential-sum": 0.031711409660095176,
+   "potential-mean": 0.005285234943349196,
+   "patterns": [
+    "coordination/task-shape-validation",
+    "coordination/session-durability-check",
+    "coordination/par-as-obligation",
+    "agent/budget-bounds-exploration",
+    "aif/structured-observation-vector",
+    "aif/candidate-pattern-action-space"
+   ]
+  },
+  {
+   "target": "M-G-over-cascades",
+   "size-shown": 6,
+   "size-saturated": 7,
+   "wholeness": 2.3,
+   "F": 0.786,
+   "potential-sum": 0.03399902107885256,
+   "potential-mean": 0.005666503513142094,
+   "patterns": [
+    "invariant-coherence/shape-first-identify",
+    "pattern-discipline/patterns-as-categorical-objects",
+    "aif/expected-free-energy-scorecard",
+    "realtime/learn-as-you-go",
+    "coordination/par-as-obligation",
+    "iching/hexagram-53-jian"
+   ]
+  },
+  {
+   "target": "M-aif2",
+   "size-shown": 6,
+   "size-saturated": 13,
+   "wholeness": 3.788,
+   "F": 3.13,
+   "potential-sum": 0.037309039123105694,
+   "potential-mean": 0.006218173187184282,
+   "patterns": [
+    "war-machine/ideal-actual-gap",
+    "aif/candidate-pattern-action-space",
+    "futon-theory/structural-tension-as-observation",
+    "gauntlet/aif-as-environment-not-instruction",
+    "gauntlet/modeline-persists-across-worlds",
+    "aif/hierarchical-budget-aware-action-selection"
+   ]
+  },
+  {
+   "target": "M-fold-ansatz",
+   "size-shown": 2,
+   "size-saturated": 2,
+   "wholeness": 0.374,
+   "F": 0.255,
+   "potential-sum": 0.005791078516832804,
+   "potential-mean": 0.002895539258416402,
+   "patterns": [
+    "math-informal/parametric-tension-dissolution",
+    "math-strategy/constraint-tension-resolution"
+   ]
+  },
+  {
+   "target": "M-typed-bells",
+   "size-shown": 1,
+   "size-saturated": 1,
+   "wholeness": 0.392,
+   "F": -0.272,
+   "potential-sum": 0.0006472340651227289,
+   "potential-mean": 0.0006472340651227289,
+   "patterns": [
+    "orchestration/state-in-substrate-deltas-in-messages"
+   ]
+  },
+  {
+   "target": "M-first-flights",
+   "size-shown": 1,
+   "size-saturated": 1,
+   "wholeness": 0.269,
+   "F": -0.023,
+   "potential-sum": 0.0031360414059260528,
+   "potential-mean": 0.0031360414059260528,
+   "patterns": [
+    "portal/first-class-query-interface"
+   ]
+  },
+  {
+   "target": "M-apm-solutions",
+   "size-shown": 2,
+   "size-saturated": 2,
+   "wholeness": 0.443,
+   "F": -0.694,
+   "potential-sum": 0.0007986719490036867,
+   "potential-mean": 0.0003993359745018433,
+   "patterns": [
+    "ai4ci/project-summary-core",
+    "ai4ci/ai-core-function"
+   ]
+  },
+  {
+   "target": "M-invariant-queue-unstuck",
+   "size-shown": 6,
+   "size-saturated": 16,
+   "wholeness": 5.365,
+   "F": 2.171,
+   "potential-sum": 0.02608757838489352,
+   "potential-mean": 0.004347929730815586,
+   "patterns": [
+    "mission-coherence/logic-model-before-code",
+    "social/tension-before-code",
+    "budgeted-action-selection/mana-gated-work",
+    "futon-theory/stop-the-line",
+    "structure/block-as-futonic-revolution",
+    "coordination/par-as-obligation"
+   ]
+  },
+  {
+   "target": "M-futonzero-grounding",
+   "size-shown": 6,
+   "size-saturated": 9,
+   "wholeness": 3.605,
+   "F": 0.177,
+   "potential-sum": 0.025015655102355563,
+   "potential-mean": 0.004169275850392594,
+   "patterns": [
+    "stack-coherence/futon-bridge-health",
+    "futon-theory/mission-interface-signature",
+    "futon-theory/theory-as-exotype",
+    "futon-theory/structural-tension-as-observation",
+    "ants/baseline-cyber-ant",
+    "devmap-coherence/ifr-f1-dhammavicaya"
+   ]
+  },
+  {
+   "target": "M-differentiable-substrate",
+   "size-shown": 6,
+   "size-saturated": 17,
+   "wholeness": 4.317,
+   "F": 0.993,
+   "potential-sum": 0.015587377989406393,
+   "potential-mean": 0.002597896331567732,
+   "patterns": [
+    "devmap-coherence/prototype-alignment-bridge",
+    "devmap-coherence/prototype-structure-checklist",
+    "stack-coherence/stack-blocker-detection",
+    "devmap-coherence/devmap-scope-discipline",
+    "devmap-coherence/prototype-alignment-tension",
+    "devmap-coherence/prototype-maturity-lifecycle"
+   ]
+  },
+  {
+   "target": "M-efe-bge-followon-actions",
+   "size-shown": 1,
+   "size-saturated": 1,
+   "wholeness": 0.487,
+   "F": -0.453,
+   "potential-sum": 0.0023318889022000623,
+   "potential-mean": 0.0023318889022000623,
+   "patterns": [
+    "iching/hexagram-17-sui"
+   ]
+  },
+  {
+   "target": "M-canon-fingerprint-store",
+   "size-shown": 1,
+   "size-saturated": 1,
+   "wholeness": 0.464,
+   "F": -0.122,
+   "potential-sum": 0.001026590080587459,
+   "potential-mean": 0.001026590080587459,
+   "patterns": [
+    "sidecar/artifact-entity-mention-grounding"
+   ]
+  },
+  {
+   "target": "M-bayesian-structure-learning",
+   "size-shown": 3,
+   "size-saturated": 3,
+   "wholeness": 0.792,
+   "F": 0.209,
+   "potential-sum": 0.005894516772699242,
+   "potential-mean": 0.0019648389242330807,
+   "patterns": [
+    "f6/learning-event-detection",
+    "f6/pattern-as-strategy",
+    "f6/proof-as-social-process"
+   ]
+  }
+ ],
+ "top-10-potentials": [
+  [
+   "stop-the-line",
+   0.012174102403727682
+  ],
+  [
+   "candidate-pattern-action-space",
+   0.011870255976589899
+  ],
+  [
+   "expected-free-energy-scorecard",
+   0.011222969949509448
+  ],
+  [
+   "structural-tension-as-observation",
+   0.010603398789711097
+  ],
+  [
+   "framework-spine-with-empirical-ribs",
+   0.00972354428822221
+  ],
+  [
+   "reduce-to-known-result",
+   0.009592083220757016
+  ],
+  [
+   "structured-observation-vector",
+   0.009378557796291851
+  ],
+  [
+   "construct-an-explicit-witness",
+   0.009176259113821587
+  ],
+  [
+   "coherence-first-when-using-npt",
+   0.008763453897998137
+  ],
+  [
+   "learn-as-you-go",
+   0.008631266151302427
+  ]
+ ]
+}

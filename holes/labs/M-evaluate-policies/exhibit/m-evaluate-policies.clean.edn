@@ -1,0 +1,59 @@
+;; CLean — CT treatment of MISSION M-evaluate-policies (make R5's score what it says
+;; it is). Folded 2026-07-03 (Fable, recorded LLM-turn fold — fold-turn.edn alongside)
+;; from the ARGUE-exhibit cascade-3 (budget-6 shown of saturated size 14). The spine is
+;; the evaluation-layer hygiene loop the DERIVE D-stages build; two typed holes remain
+;; (I2 enforcement in the judge path; the DOCUMENT-phase library write-back), and two
+;; cascade-level policy holes are recorded in fold-turn.edn (commensuration; D5
+;; probabilistic constructions) — the fold's complementary sorries.
+
+{:clean/proof  "m-evaluate-policies"
+ :clean/title  "Evaluation-layer honesty loop: typed scores, gated arena, bounded experiments, durable evidence, PAR close"
+ :clean/source {:mission "futon2-d/mission/M-evaluate-policies"
+                :cascade [:aif/structured-observation-vector
+                          :aif/candidate-pattern-action-space
+                          :coordination/task-shape-validation
+                          :agent/budget-bounds-exploration
+                          :coordination/session-durability-check
+                          :coordination/par-as-obligation]}
+
+ :clean/seq [:structured-observation-vector   ;; s1 — every G-term persisted as a typed vector (D1a+D2)
+             :candidate-pattern-action-space  ;; s2 — the arena as bounded legible candidate set (D1b)
+             :task-shape-validation           ;; s3 — I2 admission gate on score rows
+             :budget-bounds-exploration       ;; s4 — bounded replay/renorm experiments (D6/D3)
+             :session-durability-check        ;; s5 — C9: no flip without archived before/after
+             :par-as-obligation]              ;; s6 — PUR/PAR close; meta-patterns to library
+
+ :clean/boxes
+ [{:id :s1 :method :structured-observation-vector
+   :text "Persist EVERY term entering G-total (risk, ambiguity, info, survival, structural-pressure, goal-outcome, gap, graph-pragmatic) plus G-core as a normalized typed map per candidate per tick (D1a whitelist + D2 core emit). Typing the score vector is the prerequisite for any cross-lane comparison."
+   :produces :typed-score-vector}
+
+  {:id :s2 :method :candidate-pattern-action-space
+   :text "The arena as a bounded, legible candidate set: ranked-actions carry explicit inclusion reasons; cascade rows enter with declared :score-provenance (D1b) instead of a smuggled 0.0 constant that competed in every 5th tick."
+   :consumes [:typed-score-vector] :produces :legible-arena}
+
+  {:id :s3 :method :task-shape-validation
+   :text "Admission gate (invariant I2): a row enters the argmin only with a full typed decomposition OR an explicit provenance marker; malformed rows rejected with gate attribution. Census v3 asserts post-hoc; the judge should enforce at scoring time."
+   :consumes [:legible-arena] :produces :typed-arena-admission
+   :hole {:kind :sorry :discharge :queryAnswer :satiety :parse
+          :wanted "the I2 gate enforced in the production judge path (not only asserted post-hoc by the census): every arena row well-typed or provenance-marked at scoring time"}}
+
+  {:id :s4 :method :budget-bounds-exploration
+   :text "Bounded blend experiments: D6 replay harness + D3 renormalisation sweeps under explicit budgets (tick windows, config counts) with forced commit/escalate; weight changes move only on replay evidence, live flips Joe-gated (PSR-1)."
+   :consumes [:typed-arena-admission] :produces :bounded-experiment-loop}
+
+  {:id :s5 :method :session-durability-check
+   :text "C9 durability gate: no flag-flip acknowledged without archived before/after census + counterfactual artifacts (the R14 burn-in shape); success rejected when the evidence trail is not persisted — computed-then-stripped terms were exactly this loss mode."
+   :consumes [:bounded-experiment-loop] :produces :durable-evidence-trail}
+
+  {:id :s6 :method :par-as-obligation
+   :text "PUR/PAR close-out: every D-stage lands with a PUR; mission close gated on QA + the paper sentence (C6); the three candidate meta-patterns (currency-before-merge, placeholder-is-load-bearing, valuation-reads-the-paperwork) are the PAR yield flowing back into futon3/library."
+   :consumes [:durable-evidence-trail] :produces :library-updating-close
+   :hole {:kind :sorry :discharge :sorryProof :satiety :payoff
+          :wanted "the three candidate meta-patterns written into futon3/library as flexiargs with PSR/PUR linkage (DOCUMENT phase)"}}]
+
+ :clean/wires [{:from :s1 :to :s2 :carries :typed-score-vector}
+               {:from :s2 :to :s3 :carries :legible-arena}
+               {:from :s3 :to :s4 :carries :typed-arena-admission}
+               {:from :s4 :to :s5 :carries :bounded-experiment-loop}
+               {:from :s5 :to :s6 :carries :durable-evidence-trail}]}

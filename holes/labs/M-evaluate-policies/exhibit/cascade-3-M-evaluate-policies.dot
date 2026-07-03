@@ -1,0 +1,20 @@
+digraph cascade {
+  rankdir=TB; bgcolor="transparent"; ranksep=0.5; nodesep=0.35;
+  node [shape=box, style="filled,rounded", fontname="DejaVu Sans", fontsize=13, color="#3F5B54", fontcolor="#2A3E39", penwidth=1.1, margin="0.12,0.06"];
+  edge [color="#9CB2AA", arrowsize=0.65];
+  "task-shape-validation" [label="1. task-shape-validation\nrel 0.40", fillcolor="#EAF1EE"];
+  "session-durability-check" [label="2. session-durability-check\nrel 0.32", fillcolor="#EAF1EE"];
+  "par-as-obligation" [label="3. par-as-obligation\nrel 0.32", fillcolor="#F3EEDA"];
+  "budget-bounds-exploration" [label="4. budget-bounds-exploration\nrel 0.31", fillcolor="#F3EEDA"];
+  "structured-observation-vector" [label="5. structured-observation-v…\nrel 0.39", fillcolor="#F4EEF2"];
+  "candidate-pattern-action-space" [label="6. candidate-pattern-action…\nrel 0.37", fillcolor="#F4EEF2"];
+  "candidate-pattern-action-space" -> "structured-observation-vector" [dir=none, penwidth=2.60];
+  "par-as-obligation" -> "session-durability-check" [dir=none, penwidth=2.15];
+  "par-as-obligation" -> "task-shape-validation" [dir=none, penwidth=2.15];
+  "session-durability-check" -> "task-shape-validation" [dir=none, penwidth=2.15];
+  "budget-bounds-exploration" -> "par-as-obligation" [dir=none, penwidth=1.25];
+  "budget-bounds-exploration" -> "session-durability-check" [dir=none, penwidth=1.25];
+  "budget-bounds-exploration" -> "task-shape-validation" [dir=none, penwidth=1.25];
+  "candidate-pattern-action-space" -> "par-as-obligation" [dir=none, penwidth=1.25];
+  "par-as-obligation" -> "structured-observation-vector" [dir=none, penwidth=1.25];
+}

@@ -1,0 +1,61 @@
+;; fold-turn.edn — recorded LLM-turn fold (futon2.aif.fold-llm impl #2 contract).
+;; Turn performed by Fable (claude-code session), 2026-07-03, over the ARGUE-exhibit
+;; cascade-3 (M-evaluate-policies, budget-6 shown of saturated size 14; see
+;; cascade-3-serve.json). Circumstance = the mission's have→want ψ. Boxes are
+;; DarkTower-shaped (:method :consumes :produces + typed :hole) so fold-clean /
+;; clean_to_lean.py can render the structural check. Evaluation: SHARED
+;; fold-eval coverage→rollout — coverage = boxes/(boxes+policy-holes) = 6/8 = 0.75,
+;; ΔG = G(π) of one discharge move with g = −coverage at t=0 ⇒ ΔG = −0.75.
+{:circumstance "evaluate policies — want: Evaluate policies honestly — make R5's score what it says it is. have: HEAD + IDENTIFY complete 2026-07-03 (operator gates passed in-session);"
+ :cascade [:coordination/task-shape-validation
+           :coordination/session-durability-check
+           :coordination/par-as-obligation
+           :agent/budget-bounds-exploration
+           :aif/structured-observation-vector
+           :aif/candidate-pattern-action-space]
+ :boxes
+ [{:id :s1 :method :structured-observation-vector
+   :role "Typed per-candidate score decomposition: persist EVERY term entering G-total (risk, ambiguity, info, survival, structural-pressure, goal-outcome, gap, graph-pragmatic) plus G-core as a normalized typed map per candidate per tick — D1a whitelist + D2 core emit."
+   :fits-pattern :aif/structured-observation-vector
+   :addresses-however "Heterogeneous lanes (blend terms, cascade wholeness/F, rollout ΔG) arrive incomparable; typing the score vector is the prerequisite for ANY cross-lane comparison — prose-grade 0.0s are what made 674 ticks partially unauditable."
+   :produces :typed-score-vector}
+  {:id :s2 :method :candidate-pattern-action-space
+   :role "The arena as a bounded, legible candidate set: ranked-actions carry explicit inclusion reasons; cascade rows enter with declared provenance (D1b :score-provenance) instead of a smuggled constant."
+   :fits-pattern :aif/candidate-pattern-action-space
+   :addresses-however "When the action space silently mixes scored and unscored rows, selection at the lane boundary is arbitrary — the 0.0 placeholder competed in (and structured) every 5th tick."
+   :consumes [:typed-score-vector] :produces :legible-arena}
+  {:id :s3 :method :task-shape-validation
+   :role "Admission gate (invariant I2): a row enters the argmin only with a full typed decomposition OR an explicit provenance marker; malformed rows rejected with gate attribution. Census v3 asserts it post-hoc; the judge should enforce it at scoring time."
+   :fits-pattern :coordination/task-shape-validation
+   :addresses-however "Underspecified score rows are exactly the 'do stuff' inputs of the evaluation layer: accepted bare 0.0s made later evidence unverifiable and failure attribution ambiguous."
+   :consumes [:legible-arena] :produces :typed-arena-admission
+   :hole {:kind :sorry :discharge :queryAnswer :satiety :parse
+          :wanted "the I2 gate enforced in the production judge path (not only asserted post-hoc by the census): every arena row well-typed or provenance-marked at scoring time"}}
+  {:id :s4 :method :budget-bounds-exploration
+   :role "Bounded blend experiments: the D6 replay harness and D3 renormalisation sweeps run under explicit budgets (tick windows, config counts) with forced commit/escalate — weight changes move only on replay evidence; live flips are Joe-gated (PSR-1)."
+   :fits-pattern :agent/budget-bounds-exploration
+   :addresses-however "Unbounded parameter exploration over a live hourly objective wanders: hand-set weights silently absorbed the units problem for weeks precisely because there was no bounded, logged experiment loop."
+   :consumes [:typed-arena-admission] :produces :bounded-experiment-loop}
+  {:id :s5 :method :session-durability-check
+   :role "C9 durability gate: no flag-flip is acknowledged without archived before/after census + counterfactual artifacts (the R14 burn-in shape); 'success' is rejected when the evidence trail is not persisted."
+   :fits-pattern :coordination/session-durability-check
+   :addresses-however "Accepted-but-not-stored is the evaluation layer's silent loss mode: terms were being computed-then-stripped, and ψ-driven valuation drift had no changelog — coordination theater, per the pattern."
+   :consumes [:bounded-experiment-loop] :produces :durable-evidence-trail}
+  {:id :s6 :method :par-as-obligation
+   :role "PUR/PAR close-out: every D-stage lands with a PUR; mission close is gated on QA + the paper sentence (C6); the three candidate meta-patterns (currency-before-merge, placeholder-is-load-bearing, valuation-reads-the-paperwork) are the PAR yield flowing back into futon3/library."
+   :fits-pattern :coordination/par-as-obligation
+   :addresses-however "Execution without retrospective produced no tension records: the R5 mislabel persisted for months because no close-out asked what G-total had actually become."
+   :consumes [:durable-evidence-trail] :produces :library-updating-close
+   :hole {:kind :sorry :discharge :sorryProof :satiety :payoff
+          :wanted "the three candidate meta-patterns written into futon3/library as flexiargs with PSR/PUR linkage (DOCUMENT phase) — until then the learning-loop edge of this construction is open"}}]
+ :wires [[:s1 :s2] [:s2 :s3] [:s3 :s4] [:s4 :s5] [:s5 :s6]]
+ :terminals [:library-updating-close]
+ :policy-holes
+ [{:unfolded-pattern nil
+   :free "value-currency commensuration — an exchange rate before any cross-lane merge (D3's core question)"
+   :why "no pattern in the six (nor, we believe, in the library) grounds cross-lane unit exchange; the fold SURFACES the gap the mission independently named as candidate pattern currency-before-merge — D3 is currently warranted by IHTB-1, not by a pattern"}
+  {:unfolded-pattern nil
+   :free "probabilistic term constructions — distributional C for risk-KL (D5a), belief-grade EIG (D5b)"
+   :why "this cascade covers the evaluation loop's HYGIENE (typing, admission, budgets, durability, retrospective), not generative-model repair; D5a/D5b stay grounded by belly-W1 + the futon3c portfolio template, outside this pattern halo"}]
+ :evaluation {:coverage 0.75 :delta-g -0.75
+              :method "fold-eval coverage->rollout (shared): single :fold/discharge move, g = -coverage, gamma^0 = 1"}}

@@ -1,0 +1,6 @@
+digraph cascade {
+  rankdir=TB; bgcolor="transparent"; ranksep=0.5; nodesep=0.35;
+  node [shape=box, style="filled,rounded", fontname="DejaVu Sans", fontsize=13, color="#3F5B54", fontcolor="#2A3E39", penwidth=1.1, margin="0.12,0.06"];
+  edge [color="#9CB2AA", arrowsize=0.65];
+  "artifact-entity-mention-grounding" [label="1. artifact-entity-mention-…\nrel 0.46", fillcolor="#EAF1EE"];
+}

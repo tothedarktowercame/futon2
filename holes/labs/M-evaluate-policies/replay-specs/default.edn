@@ -1,0 +1,5 @@
+;; Default-weights, all-terms spec. Invariant I1 (replay-equality): recomputed
+;; total == persisted :G-total, so this must flip NOTHING (harness sanity check).
+{:name "default"
+ :weights {}
+ :exclude #{}}
