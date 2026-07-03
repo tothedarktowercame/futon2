@@ -6,7 +6,11 @@ claude-5 — gates re-run independently, ledger M-evaluate-policies §10 row E. 
 badge re-audited: `kl` = `:derived-from-FEP` under the declared Gaussian channel model;
 consumer caveat: Σw·KL is joint-KL only at uniform weights, so `:pragmatic-parity` is a
 comparability tool, not the canonical config. Items 3+5 remain open. The `:kl` flip is
-now UNBLOCKED — operator decision, informed by the post-truncation E6 re-run.)
+now UNBLOCKED — operator decision, informed by the post-truncation E6 re-run.
+2026-07-03 later: Joe → "do the rest of the implementation, then discuss turning it on."
+Item 3 dispatched to claude-10 (…d7a8439a: calibration apparatus + per-channel-T
+plumbing; default T stays 0.1). Item 5 dispatched to claude-4 (…ed2f2ac5: W1-lane
+Bernoulli round-trip). Flip discussion queued behind both reviews.)
 **Parent:** `holes/M-evaluate-policies.md` §12 (D5a built dark, `f6451ba`; refinements
 deliberately deferred — Joe: "we can come back to the KL issues after [E6]").
 **Consumers:** M-evaluate-policies (any future `:risk-mode :kl` flip) · W1/claude-4
