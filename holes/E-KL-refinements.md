@@ -1,16 +1,18 @@
 # E-KL-refinements
 
-**Date:** 2026-07-03 · **Status:** ITEMS 1+2+4 LANDED & REVIEWED (owner: claude-5,
-Joe-assigned 2026-07-03; built by claude-10 `0f8d5c6`, job …e60b4474; reviewed-PASS by
-claude-5 — gates re-run independently, ledger M-evaluate-policies §10 row E. In-source
-badge re-audited: `kl` = `:derived-from-FEP` under the declared Gaussian channel model;
-consumer caveat: Σw·KL is joint-KL only at uniform weights, so `:pragmatic-parity` is a
-comparability tool, not the canonical config. Items 3+5 remain open. The `:kl` flip is
-now UNBLOCKED — operator decision, informed by the post-truncation E6 re-run.
-2026-07-03 later: Joe → "do the rest of the implementation, then discuss turning it on."
-Item 3 dispatched to claude-10 (…d7a8439a: calibration apparatus + per-channel-T
-plumbing; default T stays 0.1). Item 5 dispatched to claude-4 (…ed2f2ac5: W1-lane
-Bernoulli round-trip). Flip discussion queued behind both reviews.)
+**Date:** 2026-07-03 · **Status:** ✅ **EXIT CRITERIA MET** (owner: claude-5,
+Joe-assigned 2026-07-03). All five items resolved same-day: 1+2 built claude-10
+`0f8d5c6` (reviewed-PASS, §10 row E); 4 discharged-by-1; 3 apparatus built + measured
+claude-10 `22b0024` (reviewed-PASS, row F — headline: NO T matches hinge dispersion,
+the gap is structural, ×20.3 uniform / ×2.3 parity; reviewer addendum: ~×13 of the
+uniform gap is weight MASS, 13×1.0 vs pragmatic Σ=1.0); 5 round-tripped claude-4
+`eb06565` (reviewed-PASS, row G — no contract friction; W1-side scale ×9.6 named).
+Badge re-audited per the exit clause: in-source `kl` = `:derived-from-FEP` under the
+declared Gaussian channel model; production `:G-risk` stays `:analogical` while the
+live lane is the hinge — Σw·KL is joint-KL only at UNIFORM weights, so the canonical
+flip config is uniform; `:pragmatic-parity` is a comparability tool. The `:kl` flip is
+UNBLOCKED and is the operator's decision (evidence: e6-shadow.edn + e6-shadow-post-KLref.edn
++ t-calibration.edn). Excursion close = Joe's read.
 **Parent:** `holes/M-evaluate-policies.md` §12 (D5a built dark, `f6451ba`; refinements
 deliberately deferred — Joe: "we can come back to the KL issues after [E6]").
 **Consumers:** M-evaluate-policies (any future `:risk-mode :kl` flip) · W1/claude-4
