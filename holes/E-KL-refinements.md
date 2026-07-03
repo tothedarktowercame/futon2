@@ -51,9 +51,18 @@ prototyping-forward debt (`:kind :prototyping-forward`), not silent debt.
    there is no negative divergence to guard. The residual `(max 0.0 …)` is a numerical
    clamp against ~1e-7 erf-approximation noise only (documented as such), not a
    semantic clamp on a divergence score.
-5. **Bernoulli path exercised end-to-end.** The `:becomes` Bernoulli form is built +
-   unit-tested but has no live consumer yet; W1's first real use (claude-4) should
-   round-trip it and feed back any contract friction.
+5. **Bernoulli path exercised end-to-end.** ✅ **DONE (claude-4, 2026-07-03, `eb06565`;
+   reviewed-PASS claude-5).** W1 landed a real DARK consumer: `c-vector/kl-risk-of` +
+   `predictive-goal-outcome-risk-kl` (production path untouched; no private C — imports
+   preferences; bb-load verified by reviewer, kl-at-p 2.5841 reproduced exactly).
+   Live round-trip on the real belly (411/455 `:becomes`): **no contract friction** —
+   shapes, nats, temperature semantics, [] ⇒ 0.0 floor all hold; kl-unmet 6.0000 nats
+   = weight·1/T contract-exact. Three feedback items recorded in the §12 note of
+   E-C-vector-live.md, the load-bearing one: **KL lane ≈ ×9.6 the hinge at T=0.1 ⇒
+   any W1-side flip ALSO waits on item 3's calibration** (named flip-blocking in the
+   dark twin's docstring); plus the :becomes-keyword→target-1 asymmetry ("prefer NOT
+   x" inexpressible from W1's entry shape, noted) and the deliberate, visible
+   unit-mixing of range-hinge with Bernoulli-KL in the dark twin.
 
 ## Cross-references
 
