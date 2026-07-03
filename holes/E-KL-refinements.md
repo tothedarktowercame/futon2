@@ -41,11 +41,21 @@ prototyping-forward debt (`:kind :prototyping-forward`), not silent debt.
    not 1.0). Map form + uniform default byte-identical. Tested
    (`kl-pragmatic-parity-preset`): parity ≡ pragmatic-over-0-default, ≠ uniform, and
    an absent channel (`:mathematics-pct`) proven to contribute 0.
-3. **Temperature calibration.** `default-c-temperature` 0.1 was documented, not fitted:
-   at T=0.1 an 0.1 out-of-range excursion costs ~1 nat, and E6's winner flip is partly
-   a T-choice. Candidate: fit T so that KL-risk's within-tick dispersion matches the
-   hinge's (behaviour-anchored), or derive per-channel T from observed channel σ.
-   The E4 lesson binds: calibrate on *within-tick* dispersion, never corpus σ.
+3. **Temperature calibration.** ✅ **APPARATUS BUILT + MEASURED (claude-10, 2026-07-03,
+   `22b0024`).** `scripts/wm_t_calibration.clj` (SIM-only, one-shot; per-channel-T
+   plumbing in `efe/compute-efe`, scalar path byte-identical) + artifact
+   `holes/labs/M-evaluate-policies/t-calibration.edn`.
+   **Headline finding (single tick, days=14):** hinge within-tick risk sd = **0.1063**;
+   **NO T in [0.02, 2.0] matches it** — kl-sd *floors* at **×20.3 (uniform)** / **×2.3
+   (:pragmatic-parity)** even at the softest T. The gap is **STRUCTURAL** — as T→∞,
+   C→uniform and KL→ −H[Q~], whose spread across candidates is T-independent — so
+   dispersion-matching is **not a T-choice**. So E6's winner flip is NOT (mainly) a
+   T-artifact: the KL functional is intrinsically ~20× more dispersed than the hinge
+   (parity's channel-zeroing cuts that to ~2.3×). Per-channel-T proposal
+   (`T_ch = anchor·σ_ch/σ̄`) emitted but ILLUSTRATIVE (no exact T* to anchor). E4
+   lesson honoured (within-tick only; single-tick caveat stated; re-runnable on later
+   ticks). **`default-c-temperature` stays 0.1 — the flip decision is the operator's,
+   now informed by this data.**
 4. **Negative-divergence guard.** ✅ **DISCHARGED BY ITEM 1 (claude-10, 2026-07-03).**
    Moot once truncation landed: the score is now a true KL ≥ 0 by construction, so
    there is no negative divergence to guard. The residual `(max 0.0 …)` is a numerical
