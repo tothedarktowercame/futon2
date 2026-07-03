@@ -439,8 +439,16 @@
          ;; :risk-mode :kl scores risk as Σ_ch w_ch · KL(N(μ_ch,σ²_ch) ‖ C_ch)
          ;; in nats over the preference densities (pref/c-distribution).
          ;; DARK by default (:hinge = byte-identical historical behaviour).
-         ;; w_ch from :kl-channel-weights (default 1.0/channel — parity with
-         ;; the hinge's pragmatic weights is E6's comparison, not assumed).
+         ;; w_ch from :kl-channel-weights. A MAP (default {}) ⇒ per-channel weight,
+         ;; missing = 1.0 (uniform) — byte-identical historical behaviour. The
+         ;; keyword :pragmatic-parity (item 2, E-KL-refinements) ⇒ the SAME
+         ;; `pref/pragmatic-weights` the hinge's g-pragmatic reduces over, with
+         ;; missing channels contributing 0.0 (parity = zero-weight, not 1.0). This
+         ;; preset lets E6-style hinge-vs-kl comparisons isolate the FUNCTIONAL
+         ;; change from the WEIGHT change.
+         parity? (= kl-channel-weights :pragmatic-parity)
+         kcw (if parity? pref/pragmatic-weights kl-channel-weights)
+         kcw-default (if parity? 0.0 1.0)
          g-risk-base (case risk-mode
                        :kl
                        (- (reduce +
@@ -449,7 +457,7 @@
                                         :let [mu (get next-mean ch)
                                               s2 (get next-var ch)]
                                         :when (and mu s2)]
-                                    (* (double (get kl-channel-weights ch 1.0))
+                                    (* (double (get kcw ch kcw-default))
                                        (pref/kl {:kind :gaussian :mu mu :sigma2 s2}
                                                 (pref/c-distribution spec
                                                                      :temperature c-temperature)))))

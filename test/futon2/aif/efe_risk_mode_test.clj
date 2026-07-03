@@ -3,7 +3,8 @@
    one: the default MUST be byte-identical to the historical behaviour."
   (:require [clojure.test :refer [deftest is testing]]
             [futon2.aif.belief :as belief]
-            [futon2.aif.efe :as efe]))
+            [futon2.aif.efe :as efe]
+            [futon2.aif.preferences :as pref]))
 
 (def ^:private obs
   {:loop-health 0.9 :support-coverage 0.9 :attack-coverage 0.9
@@ -48,3 +49,25 @@
                                    :kl-channel-weights
                                    (zipmap (keys obs) (repeat 0.0))})]
       (is (< (Math/abs (- (double (:G-risk zeroed)) -0.1)) 1e-9)))))
+
+(deftest kl-pragmatic-parity-preset
+  ;; item 2 (E-KL-refinements): :kl-channel-weights :pragmatic-parity resolves to
+  ;; pref/pragmatic-weights with MISSING channels contributing 0.0 (not 1.0).
+  (let [cc-keys      (keys (pref/current-C))
+        zero-base    (zipmap cc-keys (repeat 0.0))
+        explicit     (merge zero-base pref/pragmatic-weights)   ; pragmatic values, 0 elsewhere
+        risk         (fn [w] (:G-risk (efe/compute-efe state action
+                                                       {:risk-mode :kl :kl-channel-weights w})))
+        parity       (risk :pragmatic-parity)]
+    (testing "parity ≡ pragmatic-weights over a 0.0 default (byte-identical G-risk)"
+      (is (< (Math/abs (- (double parity) (double (risk explicit)))) 1e-9)))
+    (testing "parity ≠ uniform default (the 0-default genuinely bites)"
+      (is (not= parity (risk {}))))
+    (testing "a channel absent from pragmatic-weights contributes 0 under parity"
+      ;; :mathematics-pct ∈ current-C but ∉ pragmatic-weights ⇒ weight 0 under
+      ;; parity; giving it weight 1.0 explicitly must move G-risk.
+      (is (contains? (set cc-keys) :mathematics-pct))
+      (is (not (contains? pref/pragmatic-weights :mathematics-pct)))
+      (is (not= parity (risk (assoc explicit :mathematics-pct 1.0)))))
+    (testing "explicit map form unchanged: uniform default still 1.0/channel"
+      (is (Double/isFinite (double (risk {})))))))

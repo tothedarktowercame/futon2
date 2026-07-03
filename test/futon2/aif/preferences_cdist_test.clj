@@ -54,3 +54,59 @@
              (pref/kl {:kind :gaussian :mu 0.9 :sigma2 1e-4} dist))))
     (testing "zero-variance guard: floored, finite"
       (is (Double/isFinite (pref/kl {:kind :gaussian :mu 0.5 :sigma2 0.0} dist))))))
+
+;; --- item 1 (E-KL-refinements): truncated KL — the quadrature gate ----------
+
+(defn- quad-kl
+  "Numeric KL(Q~‖C) = ∫₀¹ Q~ ln(Q~/C), Q~ = N(mu,s2) truncated+renormalised to
+   [0,1]. Returns nil in the degenerate M→0 regime (mu far outside + tiny sigma:
+   Q~ has ~no support mass on [0,1]) — there is no valid quadrature oracle there,
+   only the closed form's clamp."
+  [mu s2 lo hi t]
+  (let [sig (Math/sqrt (max s2 1e-9)) n 4000 dx (/ 1.0 n)
+        d (pref/c-distribution [lo hi] :temperature t)
+        phi (fn [x] (/ (Math/exp (* -0.5 (Math/pow (/ (- x mu) sig) 2)))
+                       (* sig (Math/sqrt (* 2.0 Math/PI)))))
+        xs (map #(* (+ % 0.5) dx) (range n))
+        mass (* dx (reduce + (map phi xs)))]
+    (when (> mass 1e-6)
+      (* dx (reduce + (map (fn [x]
+                             (let [qx (/ (phi x) mass) cx (Math/exp (pref/log-preference d x))]
+                               (if (> qx 1e-300) (* qx (Math/log (/ qx cx))) 0.0)))
+                           xs))))))
+
+(def ^:private kl-sweep
+  (for [mu [-0.5 0.0 0.3 0.5 0.8 1.5]
+        s2 [1e-4 0.01 0.25 4.0]
+        [lo hi] [[0.0 1.0] [0.2 0.4] [0.1 0.9]]
+        t [0.1 1.0]]
+    [mu s2 lo hi t]))
+
+(deftest truncated-kl-matches-quadrature
+  (testing "LOAD-BEARING: closed form agrees with Riemann quadrature (tol 1e-3)"
+    (let [checked (atom 0)]
+      (doseq [[mu s2 lo hi t] kl-sweep]
+        (when-let [qd (quad-kl mu s2 lo hi t)]
+          (swap! checked inc)
+          (let [cf (pref/kl {:kind :gaussian :mu mu :sigma2 s2}
+                            (pref/c-distribution [lo hi] :temperature t))]
+            (is (< (Math/abs (- cf qd)) 1e-3)
+                (format "closed=%.6f quad=%.6f @ mu=%s s2=%s [%s %s] T=%s" cf qd mu s2 lo hi t)))))
+      (is (> @checked 40) "gate should cover a broad non-degenerate sweep"))))
+
+(deftest truncated-kl-non-negative
+  (testing "named regression case (mu 0.5, s2 1.0, [0,1], T 1.0) — was < 0 pre-item-1"
+    (is (>= (pref/kl {:kind :gaussian :mu 0.5 :sigma2 1.0}
+                     (pref/c-distribution [0.0 1.0] :temperature 1.0))
+            0.0)))
+  (testing "≥ 0 across the whole sweep (true KL on shared support)"
+    (doseq [[mu s2 lo hi t] kl-sweep]
+      (is (>= (pref/kl {:kind :gaussian :mu mu :sigma2 s2}
+                       (pref/c-distribution [lo hi] :temperature t))
+              0.0)))))
+
+(deftest truncated-kl-monotone-outside
+  (testing "fixed sigma2/T: KL rises as mu moves further outside [lo,hi]"
+    (let [dist (pref/c-distribution [0.3 0.5] :temperature 0.1)
+          k (fn [mu] (pref/kl {:kind :gaussian :mu mu :sigma2 0.01} dist))]
+      (is (< (k 0.5) (k 0.6) (k 0.7) (k 0.8) (k 0.95))))))

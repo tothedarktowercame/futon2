@@ -106,10 +106,11 @@
 ;; (contract pt 4).
 ;;
 ;; HONESTY (badge discipline, dcbe021 layer): `kl` for a Gaussian Q against a
-;; [0,1]-supported density is a *divergence score*, not a strict KL — Q's tail
-;; mass outside [0,1] is not truncated (small for channel-scale σ; the closed
-;; form keeps it analytic). Badge as :principled-approximation, not
-;; :derived-from-FEP, until the truncated form lands.
+;; [0,1]-supported density is now a TRUE KL — Q is truncated+renormalised to
+;; [0,1] (item 1, E-KL-refinements, landed), so both densities share the support
+;; and KL ≥ 0 (the untruncated form was a divergence score that could dip < 0).
+;; Badge CANDIDATE :derived-from-FEP under the Gaussian channel model — but the
+;; badge re-audit is the owner's (claude-5) review step; NOT claimed here.
 ;; ---------------------------------------------------------------------------
 
 (def default-c-temperature
@@ -176,38 +177,57 @@
              (- (- (/ gap temperature)) log-z))
     :bernoulli (Math/log (max 1e-12 (if (or (= 0 x) (false? x)) (- 1.0 p1) p1)))))
 
-(defn- expected-hinge
-  "E[max(0, X-hi)] + E[max(0, lo-X)] for X ~ N(mu, sigma2), closed form."
-  [mu sigma2 lo hi]
-  (let [sigma (Math/sqrt (max (double sigma2) 1e-9))
-        above (let [z (/ (- (double mu) hi) sigma)]
-                (+ (* (- (double mu) hi) (std-normal-cdf z))
-                   (* sigma (std-normal-pdf z))))
-        below (let [z (/ (- lo (double mu)) sigma)]
-                (+ (* (- lo (double mu)) (std-normal-cdf z))
-                   (* sigma (std-normal-pdf z))))]
-    (+ (max 0.0 above) (max 0.0 below))))
+(defn- kl-gaussian-range
+  "Item 1 (E-KL-refinements): KL(Q~ ‖ C) for Q~ = N(mu,sigma2) TRUNCATED and
+   renormalised to [0,1], against a `:range` preference density C on [0,1]. A true
+   KL between densities on the SAME support ⇒ ≥ 0 (the untruncated form was a
+   divergence score that could dip below 0). All closed-form in Φ/φ.
+
+   With sigma=√s2, alpha=(0-mu)/sigma, beta=(1-mu)/sigma, M=Φ(beta)-Φ(alpha):
+     -H[Q~] = -½ln(2πe s2) - ln M - (alpha·φ(alpha) - beta·φ(beta))/(2M)
+     E_Q~[gap] = (E_below + E_above)/M   (gap = max(0, lo-x, x-hi))
+   Degenerate regime: mu far outside [0,1] with tiny sigma ⇒ M→0; clamped at
+   1e-12 (Q~ is then ~a point mass just outside the support; the score stays
+   finite and large). Final result clamped `(max 0.0 …)` — a NUMERICAL clamp only,
+   guarding ~1e-7 erf-approximation noise, since KL ≥ 0 exactly."
+  [mu sigma2 lo hi temperature log-z]
+  (let [mu    (double mu)
+        s2    (max (double sigma2) 1e-9)
+        sigma (Math/sqrt s2)
+        lo    (double lo) hi (double hi)
+        alpha (/ (- 0.0 mu) sigma)
+        beta  (/ (- 1.0 mu) sigma)
+        pa    (std-normal-pdf alpha) pb (std-normal-pdf beta)
+        m     (max 1e-12 (- (std-normal-cdf beta) (std-normal-cdf alpha)))
+        neg-h (- (+ (* 0.5 (Math/log (* 2.0 Math/PI Math/E s2)))
+                    (Math/log m)
+                    (/ (- (* alpha pa) (* beta pb)) (* 2.0 m))))
+        zlo   (/ (- lo mu) sigma) zhi (/ (- hi mu) sigma)
+        e-below (- (* (- lo mu) (- (std-normal-cdf zlo) (std-normal-cdf alpha)))
+                   (* sigma (- pa (std-normal-pdf zlo))))
+        e-above (+ (* (- mu hi) (- (std-normal-cdf beta) (std-normal-cdf zhi)))
+                   (* sigma (- (std-normal-pdf zhi) pb)))
+        e-gap   (/ (+ e-below e-above) m)]
+    (max 0.0 (+ neg-h (/ e-gap (double temperature)) log-z))))
 
 (defn kl
   "Divergence of predicted outcome Q from the preference density, in nats.
 
    Q forms (contract pt 1):
    - `{:kind :gaussian :mu m :sigma2 s2}` vs a `:range` dist:
-       KL ≈ -H[Q] + E_Q[gap]/T + ln Z,  H[Q] = ½ln(2πe σ²)
-     (closed form via the expected hinge; see the HONESTY note above —
-     :principled-approximation, Q not truncated to [0,1]).
+       KL(Q~ ‖ C) = -H[Q~] + E_Q~[gap]/T + ln Z,  Q~ = N truncated+renormalised
+     to [0,1] (item 1, E-KL-refinements) — a TRUE KL on the shared support ⇒ ≥ 0.
+     Closed-form in Φ/φ; see `kl-gaussian-range`. Badge candidate
+     :derived-from-FEP under the Gaussian channel model — **badge re-audit
+     pending** (owner's step; not claimed here).
    - `{:kind :bernoulli :p q}` vs a `:bernoulli` dist: exact
        q·ln(q/c) + (1-q)·ln((1-q)/(1-c)), c = mass on outcome 1."
   [{qkind :kind :as q} {ckind :kind :as dist}]
   (cond
     (and (= qkind :gaussian) (= ckind :range))
     (let [{:keys [mu sigma2]} q
-          {:keys [lo hi temperature log-z]} dist
-          s2 (max (double sigma2) 1e-9)
-          neg-entropy (- (* 0.5 (Math/log (* 2.0 Math/PI Math/E s2))))]
-      (+ neg-entropy
-         (/ (expected-hinge mu s2 lo hi) temperature)
-         log-z))
+          {:keys [lo hi temperature log-z]} dist]
+      (kl-gaussian-range mu sigma2 lo hi temperature log-z))
 
     (and (= qkind :bernoulli) (= ckind :bernoulli))
     (let [qq (min (max (double (:p q)) 1e-9) (- 1.0 1e-9))
