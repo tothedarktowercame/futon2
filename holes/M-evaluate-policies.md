@@ -1160,8 +1160,10 @@ entered the arena — menu quality bounds selection quality, illustrated.
   (ΔF = 4.861 > 0 ∧ ΔG = −0.75 < 0); the arena has never evaluated that conjunction —
   strengthens C10 (score cascades for real via M-G-over-cascades).
 
-## 11. VERIFY (opened incrementally 2026-07-03, per operator "go ahead incrementally";
-ARGUE's formal exit — Joe's read of the exhibit PDF — remains open in parallel)
+## 11. VERIFY (opened incrementally 2026-07-03; **ARGUE gate PASSED same day** — Joe:
+"Broadly we are OK to proceed into VERIFY." The exhibit PDF stands as the ARGUE record;
+"broadly" noted — any specific ARGUE objections Joe raises later are folded here as
+verification-time discoveries, per the lifecycle's decision-log slot)
 
 - **Structural verification:** wiring diagram deliberately absent (§8.9 records why);
   the DarkTower CLean render (§9.5, core-lean PASS) stands in as the structural check
@@ -1185,8 +1187,26 @@ ARGUE's formal exit — Joe's read of the exhibit PDF — remains open in parall
   · C6 language drafted (D2/D8), paper edit pending · C7 ✓ exhibit (10 pp) · C8 declared
   senses ✓ (§6.3 + D8), badge re-check at DOCUMENT · C9 mechanism built (census/replay
   comparators), archive discipline live · C10 candidate, Joe's call.
-- **Remaining VERIFY items:** D5a/D5c sim spikes (E6 shadow comparison; gated on
-  E4 + W1 coordination); live-tick I-checks (next tick); E4 review when claude-8 lands.
+- **E4 REVIEWED + C4/D3 EMPIRICALLY CLOSED (2026-07-03):** the sweep (ledger row B)
+  shows every commensuration config just moves winners toward `learn-action-class` —
+  the same starved-input attractor as core-only — at rates from 11.4% (equal-unit) to
+  93.8% (naive 1/σ ambiguity). No config has a warrant for "better"; renormalisation
+  alone is a *different arbitrary weighting*, not a repair. **§8.4's D3 decision
+  (document units, decline live renorm) is vindicated by its own experiment**: the
+  honest units fix remains the canonical-slot restoration (D8) — strengthen C, put
+  E/Π terms back in their slots — not σ-scaling. Decision-log entry per the lifecycle:
+  C4 = decided + now evidence-backed. One design note carried forward: argmin hears
+  *within-tick* dispersion; corpus-σ is the wrong normalisation unit if anyone revisits.
+- **Remaining VERIFY items:** D5a sim spike / E6 shadow comparison (now unblocked on
+  the E4 side; still needs the W1 driver for the c-distribution boundary); live-tick
+  I-checks (watcher re-armed after session cycle killed the first one); the exhibit
+  could gain E4/E5 panels at DOCUMENT.
+- **W1 boundary note (D5a):** `E-C-vector-live` is still a charter-for-handoff — *no
+  driver assigned yet* (authored claude-2, scoping only; "Joe assigns"). So the D5a
+  `c-distribution` module boundary (§8.6: shared home in `futon2.aif.preferences`,
+  belly imports it) currently has no counterparty to negotiate with — recorded here so
+  D5a's build doesn't silently assume an agreement nobody made. When Joe assigns the
+  W1 driver, the §8.6 boundary paragraph is the opening position.
 
 ### PUR-3: logic-model-before-code (I1–I5 model)
 
@@ -1212,7 +1232,7 @@ idle (only Codex), claude-1/2/8/10/11 idle.
 | parcel | to | job-id (suffix) | contents | gates asked |
 |---|---|---|---|---|
 | A (code) | ~~codex-1~~ → **claude-11** | ~~…c612645b~~ …19f4c9e6 | D1a whitelist + D1b `:score-provenance` + D2 `:G-core` + D5c dark `:ambiguity-mode`. *(codex-1 failed: OpenAI usage limit until 2026-07-18; re-routed.)* **✓ REVIEWED — PASS. Commit `2d6533e`.** Diff read in full: all four edits per spec — whitelist + I4 comment (R19 precedent cited); `:G-core (+ g-risk g-ambig)` ⇒ I3 holds by construction (same vars as the emitted `:G-risk`/`:G-ambiguity`); two-arity `ambiguity` with byte-identical `:variance-sum` default and 1e-9-floored `:gaussian-entropy`; `:score-provenance` beside the untouched load-bearing 0.0. **Reviewer re-ran the gates independently:** `clojure -X:test` → 404 tests / 1297 assertions / 0 failures (matches claim); clj-kondo 0 errors 0 warnings on the 3 source files; paren-balance read OK; no conflict markers; tree clean. Note: live persistence of the new keys begins only when the serving JVM next picks up futon2 code — deploy/reload is an operator-visible step, not part of this parcel. **D1+D2+D5c LANDED ⇒ E5's successor probes and I4's residual→0 check unblock on the next fresh ticks** | ✓ all gates re-run |
-| B (apparatus+experiment) | **claude-8** | …74576ec9 | D6 `wm_replay_blend.bb` per §8.7 + E4 renorm sweep → `e4-renorm-sweep.edn` (facts only; D3 decision stays here) | clj-kondo · check-parens · determinism |
+| B (apparatus+experiment) | **claude-8** | …74576ec9 | D6 `wm_replay_blend.bb` (+ sweep driver `wm_e4_renorm.bb`) + E4 → `e4-renorm-sweep.edn`. **✓ REVIEWED — PASS. Commit `be716e6`.** E4 headline: identity spec flips 0.0% (harness-level I1 + third independent formula validation); **z-norm flips 34.4%** (hidden residual argmin-inert under it); **1/σ on ambiguity alone OVERSHOOTS to 93.8%** — "audible" at 1/σ means *dominant*; equal-unit mildest at 11.4%; core-only replay 64.8% = exact complement of census 35.3% (Q2 cross-validated by an independent implementation). Best finding: **magnitude vs variation** — argmin hears σ, not μ (G-info's μ=13.97 is a uniform bonus; decisive terms are high-σ survival/risk) — refines §7.4's reading 2. Review checks: artifact + findings read; **reviewer re-ran identity spec → 0.0% flips, winners bit-identical**; kondo 0/0 per-file (the 2 warnings in a joint lint = ns-less-script artifact, dissolved); determinism re-verified. Reviewer note for D3: their σ is corpus-wide; selection is *within-tick* — any future normalisation should use within-tick dispersion | ✓ all gates re-run |
 | C (experiment) | **claude-10** | …2471e292 | E5 conditioned-cascade probe → `e5-conditioned-probe.json` | **✓ REVIEWED — PASS.** Commit 57ae720. **E5 answer: prose-grain conditioning nearly rebuilds cascades** — mean Jaccard(base, cond) 0.128, 11/13 top-pattern flips, mean \|ΔF\| 1.95, F-ordering ρ 0.566. §9.7's sensitivity claim empirically confirmed. Author added a third caveat unprompted (homogenization: inter-mission Jaccard 0.006→0.091 — part of the shift is convergence on the shared situation). Review checks: commit+artifact read; dilution flag verified false; **signed-ΔF bias check run by reviewer** — F rises only 6/13, gains concentrated in AIF-register missions (+5.2..+5.7) ⇒ uniform length-inflation ruled out, *topical-affinity confound* named instead. Interpretation carries claude-2's slice-2a qualifier: conditioning is necessary-not-sufficient. Full rerun not performed (determinism rests on recorded tick + pure pipeline — stated, not hidden). Bonus: this mission's conditioned cascade pulled `expected-free-energy-scorecard` / `policy-precision-commitment-temperature` / `belief-state-operational-hypotheses` — the situated constructor reached for the evaluation-layer patterns |
 | D (coordination) | **claude-2** | …281ab605 → …c1ee82b4 | defect report + §9.6/9.7 requirements + C10 FYI. **✓ COMPLETE** — durable ack at `M-G-over-cascades.md:833`: (a) mechanism ACCEPTED, folded as first-class coverage gap (ties to their T1 typed-link direction); (b) boundary MATCHES — their slice-2a robust negative *qualifies* our conditioning axis: **richer conditioning is likely necessary-not-sufficient** (carry into E5's interpretation at review); (c) all three DERIVE declarations ACCEPTED as requirements. Return-offer: reuse the badged faithfulness layer (cascade-F + coverage→ΔG both `:principled-approximation`, `dcbe021`) rather than re-deriving — adopted for D5/D7 | ✓ |
 
