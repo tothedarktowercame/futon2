@@ -1288,10 +1288,33 @@ apparatus, D1/D2/D5c via parcel A, exhibit, logic model). Built this phase, dire
   `:score-provenance` lesson applied prospectively.
 - Gates: suite 421/1351/0 (7 new tests); clj-kondo 0/0 × 5 files; bb-load check run.
 
-**Remaining INSTANTIATE:** E6 shadow comparison (`:hinge` vs `:kl` over live candidate
-sets — the flip-decision evidence; also measures D5c's intrinsic-audibility
-hypothesis); then DOCUMENT (meta-pattern flexiargs, explainer embed, exhibit E4/E5
-panels, C6 paper sentence, C10 coordination).
+**E6 RUN (2026-07-03, same day) — `scripts/wm_e6_shadow.clj` →
+`holes/labs/M-evaluate-policies/e6-shadow.edn`.** Sim-only, one read-only production
+judge run; re-ranked the judge's own stashed inputs (110 ordinary candidates, identical
+state) under four configs. Sanity: A0 re-rank reproduces the production winner exactly.
+
+| config | winner | vs A0 |
+|---|---|---|
+| A0 `:hinge`+`:variance-sum` | address-sorry pudding-g1 *(= production)* | — |
+| B `:kl` risk | **advance-mission M-futonzero-generative** | ρ 0.841 · top-10 J 0.33 · 110/110 ranks move |
+| C `:gaussian-entropy` ambiguity | **learn-action-class** | ρ 0.978 · top-10 J 0.82 · 71 ranks move |
+| D both | advance-mission M-futonzero-generative | ρ 0.946 |
+
+**Dispersion (within-tick sd — the argmin-relevant unit):** ambiguity 0.0039 → **2.18
+(×554)** under the Gaussian-entropy formula — §11's intrinsic-audibility hypothesis
+confirmed, larger than predicted: **D5c's "one-liner" flips the live production winner
+by itself.** Risk 0.106 → 2.34 (×22) under KL. **Flip-decision evidence, stated:** both
+canonical repairs are winner-changing TODAY; neither may flip without this shadow
+evidence being weighed (Joe-gated, as designed) — the dark-flag discipline is not
+caution theater. Substantive note: config C's winner is learn-action-class *again* —
+the canonical epistemic formula, given its real voice, points at the same
+starved-input attractor as every other honesty-increasing intervention (Q2/E4): the
+prosthetic-C diagnosis holds from yet a third angle. KL-formula refinements
+(truncation to [0,1], channel-weight parity) deliberately deferred — operator: "come
+back to the KL issues after."
+
+**Remaining:** DOCUMENT (meta-pattern flexiargs, explainer embed, exhibit E4/E5/E6
+panels, C6 paper sentence, C10 coordination) + the deferred KL issues.
 
 ## 10. Coordination ledger (2026-07-03 — session on Agency as claude-5)
 
