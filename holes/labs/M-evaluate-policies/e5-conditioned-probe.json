@@ -1,0 +1,378 @@
+{
+  "experiment": "M-evaluate-policies E5 \u2014 conditioned-cascade probe",
+  "spec": "M-evaluate-policies.md \u00a78.13 (E5), \u00a79.7 (value-is-conditional)",
+  "conditioned-on-tick": "2026-07-03T12:04:06.647101170Z",
+  "observation-summary": "Current situation: 9/13 belief channels out of preferred range \u2014 ticks-firing-ratio (val 1.00, want [0.0 0.0], gap 1.00); sorry-count-norm (val 0.80, want [0.0 0.3], gap 0.50); stack-pct (val 0.71, want [0.15 0.25], gap 0.46); mission-health (val 0.21, want [0.5 1.0], gap 0.29); portfolio-pct (val 0.00, want [0.2 0.35], gap 0.20); consulting-pct (val 0.03, want [0.2 0.35], gap 0.17).",
+  "budget": 6,
+  "epsilon": 0.15,
+  "honesty-caveats": {
+    "a-prose-conditioning": "Enriches the PROSE conditioning (situation-in-psi); NOT the full repair, which conditions the SCORE on the belief state directly.",
+    "b-embedding-dilution": "MiniLM cosine over longer text can dilute relevance. If size/relevance collapse uniformly, that is an embedding artifact, not situatedness. dilution-artifact-suspected? = False.",
+    "c-homogenization": "The observation is GLOBAL (identical suffix on all missions), so some shift is missions converging on shared situation-patterns, not per-mission situatedness. homogenization (\u0394 inter-mission Jaccard) = 0.085 (base 0.006 \u2192 cond 0.091); large +ve \u21d2 read the shift partly as convergence."
+  },
+  "aggregate": {
+    "n-missions": 13,
+    "mean-abs-d-wholeness": 1.4096,
+    "mean-abs-d-F": 1.9538,
+    "mean-d-size": -0.308,
+    "top-pattern-flips": 11,
+    "mean-jaccard": 0.128,
+    "F-ordering-spearman": 0.566,
+    "dilution-artifact-suspected?": false,
+    "inter-mission-jaccard-baseline": 0.006,
+    "inter-mission-jaccard-conditioned": 0.091,
+    "homogenization": 0.085
+  },
+  "per-mission": [
+    {
+      "mission": "M-evaluate-policies",
+      "base": {
+        "shown": [
+          "coordination/task-shape-validation",
+          "coordination/session-durability-check",
+          "coordination/par-as-obligation",
+          "agent/budget-bounds-exploration",
+          "aif/structured-observation-vector",
+          "aif/candidate-pattern-action-space"
+        ],
+        "wholeness": 4.33,
+        "F": 4.861
+      },
+      "cond": {
+        "shown": [
+          "aif/expected-free-energy-scorecard",
+          "gauntlet/aif-as-environment-not-instruction",
+          "aif/structured-observation-vector",
+          "aif/candidate-pattern-action-space",
+          "aif/policy-precision-commitment-temperature",
+          "aif/belief-state-operational-hypotheses"
+        ],
+        "wholeness": 4.119,
+        "F": 10.569
+      },
+      "d-wholeness": -0.211,
+      "d-F": 5.708,
+      "d-size": 0,
+      "jaccard": 0.2,
+      "top-changed": true
+    },
+    {
+      "mission": "M-G-over-cascades",
+      "base": {
+        "shown": [
+          "invariant-coherence/shape-first-identify",
+          "pattern-discipline/patterns-as-categorical-objects",
+          "aif/expected-free-energy-scorecard",
+          "realtime/learn-as-you-go",
+          "coordination/par-as-obligation",
+          "iching/hexagram-53-jian"
+        ],
+        "wholeness": 2.3,
+        "F": 0.786
+      },
+      "cond": {
+        "shown": [
+          "aif/expected-free-energy-scorecard",
+          "aif/term-to-channel-traceability",
+          "aif/belief-state-operational-hypotheses",
+          "aif/free-energy-as-tick-scalar",
+          "musn/plan-before-tool",
+          "realtime/loop-recovery-actions"
+        ],
+        "wholeness": 2.401,
+        "F": 2.335
+      },
+      "d-wholeness": 0.101,
+      "d-F": 1.549,
+      "d-size": 0,
+      "jaccard": 0.091,
+      "top-changed": true
+    },
+    {
+      "mission": "M-aif2",
+      "base": {
+        "shown": [
+          "war-machine/ideal-actual-gap",
+          "aif/candidate-pattern-action-space",
+          "futon-theory/structural-tension-as-observation",
+          "gauntlet/aif-as-environment-not-instruction",
+          "gauntlet/modeline-persists-across-worlds",
+          "aif/hierarchical-budget-aware-action-selection"
+        ],
+        "wholeness": 3.788,
+        "F": 3.13
+      },
+      "cond": {
+        "shown": [
+          "aif/expected-free-energy-scorecard",
+          "aif/candidate-pattern-action-space",
+          "aif/policy-precision-commitment-temperature",
+          "gauntlet/aif-as-environment-not-instruction",
+          "aif/structured-observation-vector",
+          "aif/belief-state-operational-hypotheses"
+        ],
+        "wholeness": 3.775,
+        "F": 8.629
+      },
+      "d-wholeness": -0.013,
+      "d-F": 5.499,
+      "d-size": 0,
+      "jaccard": 0.2,
+      "top-changed": true
+    },
+    {
+      "mission": "M-fold-ansatz",
+      "base": {
+        "shown": [
+          "math-informal/parametric-tension-dissolution",
+          "math-strategy/constraint-tension-resolution"
+        ],
+        "wholeness": 0.374,
+        "F": 0.255
+      },
+      "cond": {
+        "shown": [
+          "iching/hexagram-15-qian",
+          "iching/hexagram-16-yu"
+        ],
+        "wholeness": 0.588,
+        "F": -0.652
+      },
+      "d-wholeness": 0.214,
+      "d-F": -0.907,
+      "d-size": 0,
+      "jaccard": 0.0,
+      "top-changed": true
+    },
+    {
+      "mission": "M-typed-bells",
+      "base": {
+        "shown": [
+          "orchestration/state-in-substrate-deltas-in-messages"
+        ],
+        "wholeness": 0.392,
+        "F": -0.272
+      },
+      "cond": {
+        "shown": [
+          "iching/hexagram-16-yu",
+          "iching/hexagram-15-qian"
+        ],
+        "wholeness": 0.631,
+        "F": -0.595
+      },
+      "d-wholeness": 0.239,
+      "d-F": -0.323,
+      "d-size": 1,
+      "jaccard": 0.0,
+      "top-changed": true
+    },
+    {
+      "mission": "M-first-flights",
+      "base": {
+        "shown": [
+          "portal/first-class-query-interface"
+        ],
+        "wholeness": 0.269,
+        "F": -0.023
+      },
+      "cond": {
+        "shown": [
+          "iching/hexagram-16-yu",
+          "iching/hexagram-15-qian"
+        ],
+        "wholeness": 0.562,
+        "F": -0.661
+      },
+      "d-wholeness": 0.293,
+      "d-F": -0.638,
+      "d-size": 1,
+      "jaccard": 0.0,
+      "top-changed": true
+    },
+    {
+      "mission": "M-apm-solutions",
+      "base": {
+        "shown": [
+          "ai4ci/project-summary-core",
+          "ai4ci/ai-core-function"
+        ],
+        "wholeness": 0.443,
+        "F": -0.694
+      },
+      "cond": {
+        "shown": [
+          "iching/hexagram-05-xu",
+          "iching/hexagram-06-song"
+        ],
+        "wholeness": 0.582,
+        "F": -0.679
+      },
+      "d-wholeness": 0.139,
+      "d-F": 0.015,
+      "d-size": 0,
+      "jaccard": 0.0,
+      "top-changed": true
+    },
+    {
+      "mission": "M-invariant-queue-unstuck",
+      "base": {
+        "shown": [
+          "mission-coherence/logic-model-before-code",
+          "social/tension-before-code",
+          "budgeted-action-selection/mana-gated-work",
+          "futon-theory/stop-the-line",
+          "structure/block-as-futonic-revolution",
+          "coordination/par-as-obligation"
+        ],
+        "wholeness": 5.365,
+        "F": 2.171
+      },
+      "cond": {
+        "shown": [
+          "iching/hexagram-05-xu",
+          "iching/hexagram-10-lu"
+        ],
+        "wholeness": 0.738,
+        "F": -0.567
+      },
+      "d-wholeness": -4.627,
+      "d-F": -2.738,
+      "d-size": -4,
+      "jaccard": 0.0,
+      "top-changed": true
+    },
+    {
+      "mission": "M-futonzero-grounding",
+      "base": {
+        "shown": [
+          "stack-coherence/futon-bridge-health",
+          "futon-theory/mission-interface-signature",
+          "futon-theory/theory-as-exotype",
+          "futon-theory/structural-tension-as-observation",
+          "ants/baseline-cyber-ant",
+          "devmap-coherence/ifr-f1-dhammavicaya"
+        ],
+        "wholeness": 3.605,
+        "F": 0.177
+      },
+      "cond": {
+        "shown": [
+          "stack-coherence/futon-bridge-health"
+        ],
+        "wholeness": 0.417,
+        "F": -0.136
+      },
+      "d-wholeness": -3.188,
+      "d-F": -0.313,
+      "d-size": -5,
+      "jaccard": 0.167,
+      "top-changed": false
+    },
+    {
+      "mission": "M-differentiable-substrate",
+      "base": {
+        "shown": [
+          "devmap-coherence/prototype-alignment-bridge",
+          "devmap-coherence/prototype-structure-checklist",
+          "stack-coherence/stack-blocker-detection",
+          "devmap-coherence/devmap-scope-discipline",
+          "devmap-coherence/prototype-alignment-tension",
+          "devmap-coherence/prototype-maturity-lifecycle"
+        ],
+        "wholeness": 4.317,
+        "F": 0.993
+      },
+      "cond": {
+        "shown": [
+          "exotic/semi-robust-baselines"
+        ],
+        "wholeness": 0.43,
+        "F": -0.47
+      },
+      "d-wholeness": -3.887,
+      "d-F": -1.463,
+      "d-size": -5,
+      "jaccard": 0.0,
+      "top-changed": true
+    },
+    {
+      "mission": "M-efe-bge-followon-actions",
+      "base": {
+        "shown": [
+          "iching/hexagram-17-sui"
+        ],
+        "wholeness": 0.487,
+        "F": -0.453
+      },
+      "cond": {
+        "shown": [
+          "iching/hexagram-17-sui"
+        ],
+        "wholeness": 0.444,
+        "F": -0.466
+      },
+      "d-wholeness": -0.043,
+      "d-F": -0.013,
+      "d-size": 0,
+      "jaccard": 1.0,
+      "top-changed": false
+    },
+    {
+      "mission": "M-canon-fingerprint-store",
+      "base": {
+        "shown": [
+          "sidecar/artifact-entity-mention-grounding"
+        ],
+        "wholeness": 0.464,
+        "F": -0.122
+      },
+      "cond": {
+        "shown": [
+          "war-machine/ideal-actual-gap",
+          "aif/expected-free-energy-scorecard",
+          "aif/candidate-pattern-action-space",
+          "aif/belief-state-operational-hypotheses",
+          "devmap-coherence/prototype-alignment-tension",
+          "devmap-coherence/prototype-structure-checklist"
+        ],
+        "wholeness": 3.233,
+        "F": 0.935
+      },
+      "d-wholeness": 2.769,
+      "d-F": 1.057,
+      "d-size": 5,
+      "jaccard": 0.0,
+      "top-changed": true
+    },
+    {
+      "mission": "M-bayesian-structure-learning",
+      "base": {
+        "shown": [
+          "f6/learning-event-detection",
+          "f6/pattern-as-strategy",
+          "f6/proof-as-social-process"
+        ],
+        "wholeness": 0.792,
+        "F": 0.209
+      },
+      "cond": {
+        "shown": [
+          "aif/belief-state-operational-hypotheses",
+          "aif/expected-free-energy-scorecard",
+          "aif/structured-observation-vector",
+          "aif/candidate-pattern-action-space",
+          "realtime/learn-as-you-go",
+          "agent/state-is-hypothesis"
+        ],
+        "wholeness": 3.393,
+        "F": 5.386
+      },
+      "d-wholeness": 2.601,
+      "d-F": 5.177,
+      "d-size": 3,
+      "jaccard": 0.0,
+      "top-changed": true
+    }
+  ]
+}
