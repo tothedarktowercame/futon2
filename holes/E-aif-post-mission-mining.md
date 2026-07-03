@@ -36,7 +36,11 @@ mission; anything that grows gets its own E-note.
   readout so every quantity permanently carries its provenance badge (0 FEP-derived · 7
   principled-approx · 9 analogical today — and each badge's `:repair` field is a costed upgrade
   path; the sharpest, :G-goal-outcome's non-KL, is exactly the named W1).
-- **#6.6 — The two cheap honesty discharges from the R18 audit** (green-path items 2-3;
+- **#6.6 — ABSORBED into `M-evaluate-policies.md` (IDENTIFY, 2026-07-03)** — Joe: the R5 items
+  are mission-shaped, not fix-shaped. The mission carries all 8 R5 verdicts + the structural
+  questions (what does the blend actually optimize; core/overlay split; commensurability;
+  per-term dispositions; the feasibility-mask question). Original note kept for context:
+  (green-path items 2-3;
   no new math): (a) **rename the 8-term G-total blend** — it is risk+ambiguity (canonical core)
   plus six heuristic terms in incommensurate units; a struct split (`:G-efe-core` vs
   `:G-heuristic-terms`) + rename makes the selection honest ("multi-objective score with an EFE
