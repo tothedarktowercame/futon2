@@ -40,9 +40,9 @@
    :repair
    "predict outcome distribution Q(o|π) and KL against a normalised preference C",
    :note
-   "M-evaluate-policies 2026-07-03: flips 35.9% (live hinge). D5a :risk-mode :kl BUILT DARK (f6451ba): c-distribution densities in preferences.clj per the W1 contract (E-C-vector-live.md:230). E6: winner-changing (ρ.841, sd ×22). Open refinements → holes/E-KL-refinements.md.",
+   "M-evaluate-policies 2026-07-03: flips 35.9% (live hinge). D5a :risk-mode :kl BUILT DARK (f6451ba): c-distribution densities in preferences.clj per the W1 contract (E-C-vector-live.md:230). E6: winner-changing (ρ.841, sd ×22). E-KL-refinements items 1+2 LANDED & REVIEWED (0f8d5c6): Q truncated+renormalised to [0,1] ⇒ TRUE KL (quadrature-verified, ≥0; in-source badge :derived-from-FEP under the declared Gaussian channel model) + :pragmatic-parity weight preset. E6 re-run post-truncation (e6-shadow-post-KLref.edn): behaviourally negligible (kl sd 2.3439→2.3432, ratio ×22.16→×22.15, winner/ρ unchanged) — the repair buys honesty, not behaviour change; pre-truncation flip evidence stands. Items 3 (T-calibration) + 5 (Bernoulli round-trip w/ W1) open → holes/E-KL-refinements.md.",
    :repair-built
-   ":risk-mode :kl (f6451ba) — dark; E6: winner-changing; flip BLOCKED until E-KL-refinements 1+2, then operator decision"},
+   ":risk-mode :kl (f6451ba + 0f8d5c6 truncated) — dark; TRUE KL per channel; flip UNBLOCKED (E-KL-refinements 1+2 landed, reviewed) — operator decision. Canonical flip config = UNIFORM channel weights (Σ KL_ch = joint KL under independence); :pragmatic-parity is a comparability preset, :principled-approximation at best"},
   :G-info
   {:badge :analogical,
    :claims "epistemic info-gain (EIG)",

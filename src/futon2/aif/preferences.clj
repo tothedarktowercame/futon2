@@ -109,8 +109,15 @@
 ;; [0,1]-supported density is now a TRUE KL — Q is truncated+renormalised to
 ;; [0,1] (item 1, E-KL-refinements, landed), so both densities share the support
 ;; and KL ≥ 0 (the untruncated form was a divergence score that could dip < 0).
-;; Badge CANDIDATE :derived-from-FEP under the Gaussian channel model — but the
-;; badge re-audit is the owner's (claude-5) review step; NOT claimed here.
+;; RE-AUDITED 2026-07-03 (claude-5, dcbe021 adversarial rules): this function
+;; badges :derived-from-FEP UNDER THE DECLARED GAUSSIAN CHANNEL MODEL (Q
+;; truncated to the channel support; erf noise ~1.5e-7 clamped, numerical only).
+;; SCOPE CAVEAT — the badge is the function's, not the consumer's: efe.clj's
+;; Σ w_ch·KL_ch equals the joint KL (channel independence) only at UNIFORM
+;; weights 1.0; any non-uniform weighting (incl. :pragmatic-parity, which
+;; exists for hinge-vs-kl comparability) is a weighted aggregate —
+;; :principled-approximation at best. The production :G-risk badge tracks the
+;; LIVE lane (hinge) in data/r18-badges.edn.
 ;; ---------------------------------------------------------------------------
 
 (def default-c-temperature
@@ -217,9 +224,9 @@
    - `{:kind :gaussian :mu m :sigma2 s2}` vs a `:range` dist:
        KL(Q~ ‖ C) = -H[Q~] + E_Q~[gap]/T + ln Z,  Q~ = N truncated+renormalised
      to [0,1] (item 1, E-KL-refinements) — a TRUE KL on the shared support ⇒ ≥ 0.
-     Closed-form in Φ/φ; see `kl-gaussian-range`. Badge candidate
-     :derived-from-FEP under the Gaussian channel model — **badge re-audit
-     pending** (owner's step; not claimed here).
+     Closed-form in Φ/φ; see `kl-gaussian-range`. Badge :derived-from-FEP under
+     the declared Gaussian channel model (re-audited 2026-07-03; see the HONESTY
+     block for the consumer-side weighted-sum caveat).
    - `{:kind :bernoulli :p q}` vs a `:bernoulli` dist: exact
        q·ln(q/c) + (1-q)·ln((1-q)/(1-c)), c = mass on outcome 1."
   [{qkind :kind :as q} {ckind :kind :as dist}]

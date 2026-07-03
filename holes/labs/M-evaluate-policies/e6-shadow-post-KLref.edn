@@ -1,0 +1,40 @@
+{:generated-by "scripts/wm_e6_shadow.clj (M-evaluate-policies E6)",
+ :sim-only true,
+ :days 14,
+ :n-candidates 110,
+ :sanity
+ {:judge-winner [:learn-action-class nil],
+  :a0-winner [:address-sorry :sorry/pudding-g1-arrow-witness-binding],
+  :note
+  "judge output passes anamnesis-tiebreak + open-mission filter after ranking; A0 is the raw rank — same scoring path, so B/C/D isolate the mode"},
+ :configs
+ {:B-kl-risk
+  {:winner [:advance-mission "M-futonzero-generative"],
+   :winner-changed? true,
+   :spearman-vs-A0 0.8414173973807001,
+   :top10-jaccard 0.3333333333333333,
+   :n-rank-moves 110},
+  :C-gaussian-ambiguity
+  {:winner [:learn-action-class nil],
+   :winner-changed? true,
+   :spearman-vs-A0 0.9782070644455966,
+   :top10-jaccard 0.8181818181818182,
+   :n-rank-moves 71},
+  :D-both
+  {:winner [:advance-mission "M-futonzero-generative"],
+   :winner-changed? true,
+   :spearman-vs-A0 0.9461443094470617,
+   :top10-jaccard 0.3333333333333333,
+   :n-rank-moves 90}},
+ :dispersion
+ {:ambiguity
+  {:variance-sum 0.003937528695946854,
+   :gaussian-entropy 2.1812339147994195,
+   :audibility-ratio 553.9601316543295},
+  :risk
+  {:hinge 0.10578844509279603,
+   :kl 2.343198470837464,
+   :ratio 22.149852649616367},
+  :note
+  "within-tick sd — the argmin-relevant unit (E4 reviewer note)"},
+ :cascade-rows-excluded 2}

@@ -1,8 +1,12 @@
 # E-KL-refinements
 
-**Date:** 2026-07-03 · **Status:** IN PROGRESS (owner: claude-5, Joe-assigned 2026-07-03;
-items 1+2 dispatched to claude-10, job …e60b4474, per the coding-handoff protocol —
-review + badge re-audit stay with claude-5)
+**Date:** 2026-07-03 · **Status:** ITEMS 1+2+4 LANDED & REVIEWED (owner: claude-5,
+Joe-assigned 2026-07-03; built by claude-10 `0f8d5c6`, job …e60b4474; reviewed-PASS by
+claude-5 — gates re-run independently, ledger M-evaluate-policies §10 row E. In-source
+badge re-audited: `kl` = `:derived-from-FEP` under the declared Gaussian channel model;
+consumer caveat: Σw·KL is joint-KL only at uniform weights, so `:pragmatic-parity` is a
+comparability tool, not the canonical config. Items 3+5 remain open. The `:kl` flip is
+now UNBLOCKED — operator decision, informed by the post-truncation E6 re-run.)
 **Parent:** `holes/M-evaluate-policies.md` §12 (D5a built dark, `f6451ba`; refinements
 deliberately deferred — Joe: "we can come back to the KL issues after [E6]").
 **Consumers:** M-evaluate-policies (any future `:risk-mode :kl` flip) · W1/claude-4
