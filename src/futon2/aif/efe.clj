@@ -403,7 +403,7 @@
                          graph-body-weight graph-ascent-weight graph-off-map-penalty
                          graph-body-mode graph-ascent-status-aware? mission-gap-view
                          gap-weight goal-outcome-weight goal-outcome-entries goal-outcome-prob-fn
-                         ambiguity-mode]
+                         ambiguity-mode risk-mode kl-channel-weights c-temperature]
                   :or {info-weight default-info-weight
                        survival-weight default-survival-weight
                        structural-pressure-weight default-structural-pressure-weight
@@ -417,7 +417,10 @@
                        graph-ascent-status-aware? false
                        gap-weight default-gap-weight
                        goal-outcome-weight cv/default-goal-outcome-weight
-                       ambiguity-mode :variance-sum}}]
+                       ambiguity-mode :variance-sum
+                       risk-mode :hinge
+                       kl-channel-weights {}
+                       c-temperature pref/default-c-temperature}}]
    (let [single-prediction (fm/predict state action)
          ;; v0.15: opt-in multi-horizon trajectory; final-state observation
          ;; drives G-risk + G-survival. Ambiguity + info still use the
@@ -432,7 +435,26 @@
          next-var (get-in single-prediction [:next-observation :variance])
          fe-on-predicted (fe/compute-free-energy next-mean)
          intrinsic (double (or (:intrinsic-value action) 0))
-         g-risk-base (- (:G-pragmatic fe-on-predicted) intrinsic)
+         ;; D5a (M-evaluate-policies §8.6; contract E-C-vector-live.md:230):
+         ;; :risk-mode :kl scores risk as Σ_ch w_ch · KL(N(μ_ch,σ²_ch) ‖ C_ch)
+         ;; in nats over the preference densities (pref/c-distribution).
+         ;; DARK by default (:hinge = byte-identical historical behaviour).
+         ;; w_ch from :kl-channel-weights (default 1.0/channel — parity with
+         ;; the hinge's pragmatic weights is E6's comparison, not assumed).
+         g-risk-base (case risk-mode
+                       :kl
+                       (- (reduce +
+                                  0.0
+                                  (for [[ch spec] (pref/current-C)
+                                        :let [mu (get next-mean ch)
+                                              s2 (get next-var ch)]
+                                        :when (and mu s2)]
+                                    (* (double (get kl-channel-weights ch 1.0))
+                                       (pref/kl {:kind :gaussian :mu mu :sigma2 s2}
+                                                (pref/c-distribution spec
+                                                                     :temperature c-temperature)))))
+                          intrinsic)
+                       (- (:G-pragmatic fe-on-predicted) intrinsic))
          g-ambig (ambiguity next-var ambiguity-mode)
          g-info (info-gain next-var)
          g-survival-base (survival-cost next-mean)
@@ -489,6 +511,9 @@
         ;; separately from the multi-objective blend — :G-core = risk +
         ;; ambiguity exactly (invariant I3). Pure addition; :G-total unchanged.
         :G-core (+ g-risk g-ambig)
+        ;; D5a: which risk functional produced :G-risk — whitelisted in
+        ;; trace.clj AT BIRTH (the :score-provenance lesson).
+        :risk-mode risk-mode
         :G-total g-total
         :time-pressure (double time-pressure)
         :horizon-steps (when multi (:horizon-steps multi))

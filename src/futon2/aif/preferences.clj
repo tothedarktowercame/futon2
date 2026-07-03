@@ -87,3 +87,133 @@
    :sorry-count-norm   -1   ; high = many open sorrys (unhealthier)
    :mission-health     +1   ; high = mission triage healthy
    :active-repo-ratio  +1}) ; high = entities non-dormant (active)
+
+;; ---------------------------------------------------------------------------
+;; c-distribution — preferences as NORMALISED DENSITIES (M-evaluate-policies
+;; D5a; interface contract ratified with W1/claude-4, E-C-vector-live.md:230).
+;;
+;; UNITS, STATED ONCE (contract pt 2): all log-preferences and KLs below are in
+;; NATS; continuous densities are normalised over [0,1] (the channel scale);
+;; Bernoulli forms are normalised over {0,1}. Temperature: HIGHER = SOFTER;
+;; temperature → 0 recovers the hard hinge (range) / point-mass (binary).
+;; Default `default-c-temperature` = 0.1 (on [0,1]-scaled channels: an
+;; out-of-range excursion of 0.1 costs ~1 nat of log-preference).
+;;
+;; Owned by M-evaluate-policies D5a; W1 (E-C-vector-live §11) is a consumer —
+;; neither mission builds a private C. Degrade-safe (contract pt 3): nothing in
+;; this section is consulted unless a caller opts in (:risk-mode :kl in
+;; compute-efe, or W1's own call sites). Pure Clojure — bb-loadable
+;; (contract pt 4).
+;;
+;; HONESTY (badge discipline, dcbe021 layer): `kl` for a Gaussian Q against a
+;; [0,1]-supported density is a *divergence score*, not a strict KL — Q's tail
+;; mass outside [0,1] is not truncated (small for channel-scale σ; the closed
+;; form keeps it analytic). Badge as :principled-approximation, not
+;; :derived-from-FEP, until the truncated form lands.
+;; ---------------------------------------------------------------------------
+
+(def default-c-temperature
+  "Contract pt 2: documented default. Higher = softer tails; → 0 = hard."
+  0.1)
+
+(defn- sq [x] (* (double x) (double x)))
+
+(defn- std-normal-cdf
+  "Φ(z) via the Abramowitz–Stegun 7.1.26 erf approximation (|err| < 1.5e-7).
+   Pure; bb-safe."
+  [z]
+  (let [z (double z)
+        t (/ 1.0 (+ 1.0 (* 0.2316419 (Math/abs z))))
+        d (* 0.3989422804014327 (Math/exp (* -0.5 (sq z))))
+        p (* d t (+ 0.319381530
+                    (* t (+ -0.356563782
+                            (* t (+ 1.781477937
+                                    (* t (+ -1.821255978
+                                            (* t 1.330274429)))))))))]
+    (if (pos? z) (- 1.0 p) p)))
+
+(defn- std-normal-pdf [z] (* 0.3989422804014327 (Math/exp (* -0.5 (sq z)))))
+
+(defn c-distribution
+  "Build a normalised preference density for one channel.
+
+   `spec`:
+   - `[lo hi]`        → `{:kind :range}` — density 1 on [lo,hi], exponential
+                        tails exp(-gap/T) outside, normalised over [0,1].
+   - `{:becomes b}`   → `{:kind :bernoulli}` — target outcome b ∈ {0,1} (or
+                        truthy/falsey); preference mass c* = 1/(1+e^(-1/T))
+                        on the target (T→0 ⇒ c*→1, point-mass; T→∞ ⇒ 0.5).
+
+   Opts: `:temperature` (default `default-c-temperature`)."
+  [spec & {:keys [temperature] :or {temperature default-c-temperature}}]
+  (let [t (double temperature)]
+    (cond
+      (and (map? spec) (contains? spec :becomes))
+      (let [target (if (or (= 0 (:becomes spec)) (false? (:becomes spec))) 0 1)
+            c* (/ 1.0 (+ 1.0 (Math/exp (- (/ 1.0 (max t 1e-9))))))]
+        {:kind :bernoulli :target target :temperature t
+         ;; mass assigned to outcome 1
+         :p1 (if (= 1 target) c* (- 1.0 c*))})
+
+      (sequential? spec)
+      (let [[lo hi] spec
+            lo (double lo) hi (double hi)
+            t* (max t 1e-9)
+            ;; ∫ exp(-gap/T) over [0,lo] + (hi-lo) + ∫ over [hi,1]
+            z (+ (- hi lo)
+                 (* t* (- 1.0 (Math/exp (- (/ lo t*)))))
+                 (* t* (- 1.0 (Math/exp (- (/ (- 1.0 hi) t*))))))]
+        {:kind :range :lo lo :hi hi :temperature t* :log-z (Math/log z)})
+
+      :else (throw (ex-info "c-distribution: spec must be [lo hi] or {:becomes b}"
+                            {:spec spec})))))
+
+(defn log-preference
+  "ln C(x) in nats. Range: -(gap/T) - ln Z. Bernoulli: ln of the mass on x."
+  [{:keys [kind lo hi temperature log-z p1] :as _dist} x]
+  (case kind
+    :range (let [gap (max 0.0 (- lo (double x)) (- (double x) hi))]
+             (- (- (/ gap temperature)) log-z))
+    :bernoulli (Math/log (max 1e-12 (if (or (= 0 x) (false? x)) (- 1.0 p1) p1)))))
+
+(defn- expected-hinge
+  "E[max(0, X-hi)] + E[max(0, lo-X)] for X ~ N(mu, sigma2), closed form."
+  [mu sigma2 lo hi]
+  (let [sigma (Math/sqrt (max (double sigma2) 1e-9))
+        above (let [z (/ (- (double mu) hi) sigma)]
+                (+ (* (- (double mu) hi) (std-normal-cdf z))
+                   (* sigma (std-normal-pdf z))))
+        below (let [z (/ (- lo (double mu)) sigma)]
+                (+ (* (- lo (double mu)) (std-normal-cdf z))
+                   (* sigma (std-normal-pdf z))))]
+    (+ (max 0.0 above) (max 0.0 below))))
+
+(defn kl
+  "Divergence of predicted outcome Q from the preference density, in nats.
+
+   Q forms (contract pt 1):
+   - `{:kind :gaussian :mu m :sigma2 s2}` vs a `:range` dist:
+       KL ≈ -H[Q] + E_Q[gap]/T + ln Z,  H[Q] = ½ln(2πe σ²)
+     (closed form via the expected hinge; see the HONESTY note above —
+     :principled-approximation, Q not truncated to [0,1]).
+   - `{:kind :bernoulli :p q}` vs a `:bernoulli` dist: exact
+       q·ln(q/c) + (1-q)·ln((1-q)/(1-c)), c = mass on outcome 1."
+  [{qkind :kind :as q} {ckind :kind :as dist}]
+  (cond
+    (and (= qkind :gaussian) (= ckind :range))
+    (let [{:keys [mu sigma2]} q
+          {:keys [lo hi temperature log-z]} dist
+          s2 (max (double sigma2) 1e-9)
+          neg-entropy (- (* 0.5 (Math/log (* 2.0 Math/PI Math/E s2))))]
+      (+ neg-entropy
+         (/ (expected-hinge mu s2 lo hi) temperature)
+         log-z))
+
+    (and (= qkind :bernoulli) (= ckind :bernoulli))
+    (let [qq (min (max (double (:p q)) 1e-9) (- 1.0 1e-9))
+          c (min (max (double (:p1 dist)) 1e-9) (- 1.0 1e-9))]
+      (+ (* qq (Math/log (/ qq c)))
+         (* (- 1.0 qq) (Math/log (/ (- 1.0 qq) (- 1.0 c))))))
+
+    :else (throw (ex-info "kl: unsupported Q/dist pairing"
+                          {:q qkind :dist ckind}))))

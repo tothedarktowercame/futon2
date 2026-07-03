@@ -1263,6 +1263,36 @@ verification-time discoveries, per the lifecycle's decision-log slot)
   falsifies the total fires both — the model made that coupling visible, which is
   itself a small design insight: observability defects masquerade as arithmetic ones).
 
+## 12. INSTANTIATE (opened 2026-07-03 — operator gate: "Let's INSTANTIATE, please
+build directly"; VERIFY exited with E6 attached to the future flip decision)
+
+Most INSTANTIATE items landed incrementally during MAP/DERIVE/VERIFY (census + replay
+apparatus, D1/D2/D5c via parcel A, exhibit, logic model). Built this phase, directly
+(operator opt-out of handoff):
+
+- **D5a — `c-distribution` + `:risk-mode :kl` (dark).** `preferences.clj` gains the
+  contract module: range densities (uniform-on-[lo,hi], exponential tails, normalised
+  over [0,1] — numerically verified ∫≈1 across 5 configs) and Bernoulli point-mass
+  forms for binary `:becomes`; `(log-preference dist x)` + `(kl q dist)` for Gaussian
+  and Bernoulli Q; nats throughout; temperature soft→hard limits tested;
+  `default-c-temperature` 0.1 documented. `efe.clj` gains `:risk-mode` (`:hinge`
+  default, byte-identity unit-tested) with `:kl` = Σ w_ch·KL(N(μ_ch,σ²_ch)‖C_ch) −
+  intrinsic, × urgency; `:kl-channel-weights` hook (uniform default — parity with the
+  hinge's pragmatic weights is E6's comparison, not assumed); `c-temperature` opt.
+  Gaussian-vs-range KL badged honestly in-source: divergence score,
+  `:principled-approximation` (Q not truncated to [0,1]).
+  **Contract compliance:** pt 1 ✓ (both Q families) · pt 2 ✓ (nats/[0,1]/temperature
+  stated once, in the ns) · pt 3 ✓ (degrade-safe, unit-tested byte-identity) · pt 4 ✓
+  (bb-loads, KL computed under babashka).
+- **`:risk-mode` emitted + whitelisted at birth** (trace.clj) — the
+  `:score-provenance` lesson applied prospectively.
+- Gates: suite 421/1351/0 (7 new tests); clj-kondo 0/0 × 5 files; bb-load check run.
+
+**Remaining INSTANTIATE:** E6 shadow comparison (`:hinge` vs `:kl` over live candidate
+sets — the flip-decision evidence; also measures D5c's intrinsic-audibility
+hypothesis); then DOCUMENT (meta-pattern flexiargs, explainer embed, exhibit E4/E5
+panels, C6 paper sentence, C10 coordination).
+
 ## 10. Coordination ledger (2026-07-03 — session on Agency as claude-5)
 
 Operator brought the session onto the Agency mesh; handoffs cut per the coding-handoff
