@@ -406,13 +406,16 @@ hardening the same day: the retired v0 `:error-history` schema had pinned γ at 
 degenerate samples for 5 days (fixed: `coerce-state`); the expected leg is pinned to coverage-ΔG
 at both the enact caller and the `realized-outcome-of` contract so no rollout-vs-coverage scale
 mismatch can recur (claude-10 review must-fix).
-**Tracked-open follow-on — VARIANCE EVIDENCE (Joe, 2026-07-02: taken up INSIDE the mining run).**
-All 8 samples to date are the same construction reproduced identically (perf 0.0 ×8) — γ has
-never been *driven* off 1.0 by data, so the commit/hedge behaviour is machinery-tested but not
-outcome-tested in vivo. The mining pilot (claude-3, R19-PROOF-JOIN lane) carries the workstream:
-recovered discharge methods → executor reach (rule entries / mined-moves) → diverse realized-G →
-a non-degenerate perf distribution → γ demonstrably moving off 1.0 in both directions. Checkable
-form for closure: γ ≠ 1.0 in a live trace record, traceable to a non-zero perf sample.
+**Variance evidence — CLOSED (v0.23, 2026-07-03T00:18Z).** The closure record exists:
+**γ = 1.01576** in a live trace record (19 samples, mean-perf 0.0226), traceable to the first
+non-zero perf sample **+0.4286** — produced when the executor's honest reach extension
+(fold_engine +6 rules, NL→rule from the live-lane patterns' own THEN clauses, futon3a `ce2b153`;
+the sweep's 72 rule-candidates were REVIEWED AND REJECTED for this purpose — E-aif-post-mission-mining)
+made the enacted construction over-deliver against futon2's independent predictor: realized −0.5
+vs expected −0.2 on M-bayesian-structure-learning. The WM observed a plan beat its prediction and
+COMMITTED HARDER (τ_eff sharpened). Confidence earned from outcomes, in production, end to end —
+the R14 story complete. (Both directions: the hedge side arrives naturally with the first
+under-delivering pass; the machinery is symmetric and now demonstrably live.)
 **Checkable form (original, for the record).** A γ scaling policy-selection sharpness in
 `futon2.aif.rollout/select-policy`, updated from realized policy-outcome history (the R13 return
 channel is the natural feed). ✓
