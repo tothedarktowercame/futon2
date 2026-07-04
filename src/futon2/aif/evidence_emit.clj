@@ -20,8 +20,12 @@
                      str/lower-case)))
 
 (defn evidence-base
+  "Where WM tick evidence is POSTed. FUTON2_WM_EMIT_BASE takes precedence so the emit
+   target can differ from the WM's READ base (FUTON3C_EVIDENCE_BASE) — e.g. emit to the
+   server the web viewer reads, while the tick still reads its own local store."
   []
-  (or (not-empty (System/getenv "FUTON3C_EVIDENCE_BASE"))
+  (or (not-empty (System/getenv "FUTON2_WM_EMIT_BASE"))
+      (not-empty (System/getenv "FUTON3C_EVIDENCE_BASE"))
       "http://localhost:7070"))
 
 (defn- evidence-url
