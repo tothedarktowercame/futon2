@@ -54,6 +54,37 @@ So the operator drags k down and *watches the retraction*: a leaf that peels *an
 dead = trim; nodes that fold onto the same anchor = coalesce; the k=1 core = hands
 off. The decision becomes a gesture along the slider, not a grep.
 
+## Node source, the repo level, and the ≤20 budget (Joe, 2026-07-04)
+
+The node set isn't invented — it's already written in the **feature devmaps** (the
+futon3-lineage `.devmap` files; 18 today, e.g. `futon5a/futon5a.devmap`,
+`futon3/holes/strategy/globe*.devmap`; `mcb/read-all-devmaps` already parses them).
+Each `!`-entry is a feature carrying exactly what the constellation needs:
+
+- `:maturity` (`:active`/…) → **standing**
+- `:depends-on [...]` → the **`depends-on` edges, already explicit** (no require-graph
+  derivation needed at this altitude — the devmap states them)
+- the IFR + IF/HOWEVER/THEN/BECAUSE argument → the **qualifiers**. This is where
+  "futon1a isn't *just* storage — it's a bitemporal graph DB with invariants, and all
+  of that turns out to matter" lives; a one-line label would drop it.
+- `:evidence-for-settled` → the completion criterion.
+
+So the devmaps *are* a partial feature constellation already, in text; the build reads
+them rather than inventing nodes.
+
+**Repos are the coarsest k-level.** Each futonX repo is a feature cluster — at very low
+k the constellation retracts to repo anchors ("futon1a = storage", "futon2 = strategic
+AIF", "futon3c = coordination"). Features accrete at a level over time (XTDB 2 → a
+native query-layer feature joins the futon1 cluster).
+
+**The ≤20-features/repo budget is a first-class health signal — and a trim trigger.**
+Joe's estimate: no futonX repo should carry more than ~20 features. Over budget is not
+a display problem, it's a governance signal — the completeness 3-vector flags the repo,
+and the k-retraction shows *which* features to coalesce (fold onto an anchor) or trim
+(dead leaves) to get back under. **The map that shows the overflow is the same map that
+shows the fix** — the closed loop this whole session ran by hand (futon3c was at ~16
+peripherals + AIF features; we just took it down by three).
+
 ## Sources feeding in (Joe named the first two)
 
 - **VSATARCS** (`futon4/dev/arxana-browser-vsatarcs.el`) — machine-generated feature
