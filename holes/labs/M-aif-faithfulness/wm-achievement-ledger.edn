@@ -9,7 +9,10 @@
    :mean-scored-candidates 8.857142857142858,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 7},
+   :ticks 7,
+   :span
+   ["2026-05-18T19:42:49.284838608Z"
+    "2026-05-18T22:26:06.115947653Z"]},
   "2026-05-19"
   {:decisions 9,
    :mean-oor-channels 9.222222222222221,
@@ -20,7 +23,10 @@
    :mean-scored-candidates 15.0,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 9},
+   :ticks 9,
+   :span
+   ["2026-05-19T11:24:24.836298386Z"
+    "2026-05-19T12:04:15.080079890Z"]},
   "2026-05-21"
   {:decisions 13,
    :mean-oor-channels 9.0,
@@ -31,7 +37,10 @@
    :mean-scored-candidates 153.69230769230768,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 13},
+   :ticks 13,
+   :span
+   ["2026-05-21T11:40:29.439629748Z"
+    "2026-05-21T23:00:24.509061479Z"]},
   "2026-05-22"
   {:decisions 24,
    :mean-oor-channels 9.0,
@@ -42,7 +51,10 @@
    :mean-scored-candidates 154.29166666666666,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 24},
+   :ticks 24,
+   :span
+   ["2026-05-22T00:00:22.980821347Z"
+    "2026-05-22T23:00:24.996361837Z"]},
   "2026-05-23"
   {:decisions 24,
    :mean-oor-channels 8.708333333333334,
@@ -53,7 +65,10 @@
    :mean-scored-candidates 157.16666666666666,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 24},
+   :ticks 24,
+   :span
+   ["2026-05-23T00:00:24.123959658Z"
+    "2026-05-23T23:00:30.021694583Z"]},
   "2026-05-24"
   {:decisions 24,
    :mean-oor-channels 8.0,
@@ -64,7 +79,10 @@
    :mean-scored-candidates 160.5,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 24},
+   :ticks 24,
+   :span
+   ["2026-05-24T00:00:31.385092985Z"
+    "2026-05-24T23:00:38.992544827Z"]},
   "2026-05-25"
   {:decisions 21,
    :mean-oor-channels 8.285714285714286,
@@ -75,7 +93,10 @@
    :mean-scored-candidates 173.23809523809524,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 21},
+   :ticks 21,
+   :span
+   ["2026-05-25T00:00:41.258913049Z"
+    "2026-05-25T23:00:36.832825759Z"]},
   "2026-05-26"
   {:decisions 17,
    :mean-oor-channels 8.176470588235293,
@@ -86,7 +107,10 @@
    :mean-scored-candidates 213.76470588235293,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 17},
+   :ticks 17,
+   :span
+   ["2026-05-26T00:00:36.056525280Z"
+    "2026-05-26T16:00:46.833485647Z"]},
   "2026-05-27"
   {:decisions 9,
    :mean-oor-channels 9.0,
@@ -97,7 +121,10 @@
    :mean-scored-candidates 214.11111111111111,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 9},
+   :ticks 9,
+   :span
+   ["2026-05-27T10:00:42.257186210Z"
+    "2026-05-27T18:00:50.622908910Z"]},
   "2026-05-30"
   {:decisions 2,
    :mean-oor-channels 9.0,
@@ -108,7 +135,10 @@
    :mean-scored-candidates 196.5,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 2},
+   :ticks 2,
+   :span
+   ["2026-05-30T22:00:35.546696405Z"
+    "2026-05-30T23:00:47.735164408Z"]},
   "2026-05-31"
   {:decisions 19,
    :mean-oor-channels 9.421052631578947,
@@ -119,7 +149,10 @@
    :mean-scored-candidates 183.1578947368421,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 19},
+   :ticks 19,
+   :span
+   ["2026-05-31T00:00:38.972057710Z"
+    "2026-05-31T18:00:40.104983514Z"]},
   "2026-06-01"
   {:decisions 12,
    :mean-oor-channels 9.333333333333334,
@@ -130,7 +163,10 @@
    :mean-scored-candidates 185.58333333333334,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 12},
+   :ticks 12,
+   :span
+   ["2026-06-01T09:01:08.952325930Z"
+    "2026-06-01T20:00:35.960872598Z"]},
   "2026-06-02"
   {:decisions 14,
    :mean-oor-channels 9.142857142857142,
@@ -141,7 +177,10 @@
    :mean-scored-candidates 195.78571428571428,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 14},
+   :ticks 14,
+   :span
+   ["2026-06-02T09:00:45.126998985Z"
+    "2026-06-02T23:00:32.023481144Z"]},
   "2026-06-03"
   {:decisions 24,
    :mean-oor-channels 9.25,
@@ -152,7 +191,10 @@
    :mean-scored-candidates 196.375,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 24},
+   :ticks 24,
+   :span
+   ["2026-06-03T00:00:32.915442038Z"
+    "2026-06-03T23:01:25.461060614Z"]},
   "2026-06-04"
   {:decisions 24,
    :mean-oor-channels 9.541666666666666,
@@ -163,7 +205,10 @@
    :mean-scored-candidates 197.29166666666666,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 24},
+   :ticks 24,
+   :span
+   ["2026-06-04T00:01:16.833223450Z"
+    "2026-06-04T23:01:27.167452889Z"]},
   "2026-06-05"
   {:decisions 15,
    :mean-oor-channels 9.133333333333333,
@@ -174,7 +219,10 @@
    :mean-scored-candidates 198.33333333333334,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 15},
+   :ticks 15,
+   :span
+   ["2026-06-05T00:01:11.655426266Z"
+    "2026-06-05T23:01:09.430066569Z"]},
   "2026-06-06"
   {:decisions 24,
    :mean-oor-channels 9.541666666666666,
@@ -185,7 +233,10 @@
    :mean-scored-candidates 173.54166666666666,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 24},
+   :ticks 24,
+   :span
+   ["2026-06-06T00:01:08.963240426Z"
+    "2026-06-06T23:01:14.221221078Z"]},
   "2026-06-07"
   {:decisions 23,
    :mean-oor-channels 9.391304347826088,
@@ -196,7 +247,10 @@
    :mean-scored-candidates 83.04347826086956,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 23},
+   :ticks 23,
+   :span
+   ["2026-06-07T00:01:22.235527245Z"
+    "2026-06-07T23:01:11.641132258Z"]},
   "2026-06-08"
   {:decisions 24,
    :mean-oor-channels 10.166666666666666,
@@ -207,7 +261,10 @@
    :mean-scored-candidates 85.875,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 24},
+   :ticks 24,
+   :span
+   ["2026-06-08T00:01:16.704095041Z"
+    "2026-06-08T23:01:18.185436101Z"]},
   "2026-06-09"
   {:decisions 23,
    :mean-oor-channels 10.434782608695652,
@@ -218,7 +275,10 @@
    :mean-scored-candidates 87.82608695652173,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 23},
+   :ticks 23,
+   :span
+   ["2026-06-09T00:01:17.149874853Z"
+    "2026-06-09T23:01:38.034905111Z"]},
   "2026-06-10"
   {:decisions 22,
    :mean-oor-channels 9.772727272727273,
@@ -229,7 +289,10 @@
    :mean-scored-candidates 103.95454545454545,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 22},
+   :ticks 22,
+   :span
+   ["2026-06-10T00:01:31.932684297Z"
+    "2026-06-10T21:01:50.874450552Z"]},
   "2026-06-12"
   {:decisions 7,
    :mean-oor-channels 9.714285714285714,
@@ -240,7 +303,10 @@
    :mean-scored-candidates 121.0,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 7},
+   :ticks 7,
+   :span
+   ["2026-06-12T17:02:42.317974217Z"
+    "2026-06-12T23:02:33.669216229Z"]},
   "2026-06-13"
   {:decisions 24,
    :mean-oor-channels 9.25,
@@ -251,7 +317,10 @@
    :mean-scored-candidates 122.08333333333333,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 24},
+   :ticks 24,
+   :span
+   ["2026-06-13T00:02:43.679602640Z"
+    "2026-06-13T23:02:39.725278597Z"]},
   "2026-06-14"
   {:decisions 20,
    :mean-oor-channels 9.2,
@@ -262,7 +331,10 @@
    :mean-scored-candidates 126.8,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 20},
+   :ticks 20,
+   :span
+   ["2026-06-14T00:02:40.644982225Z"
+    "2026-06-14T21:04:44.352820147Z"]},
   "2026-06-15"
   {:decisions 8,
    :mean-oor-channels 10.0,
@@ -273,7 +345,10 @@
    :mean-scored-candidates 117.625,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 8},
+   :ticks 8,
+   :span
+   ["2026-06-15T11:02:47.606704948Z"
+    "2026-06-15T20:04:16.077527615Z"]},
   "2026-06-16"
   {:decisions 14,
    :mean-oor-channels 10.428571428571429,
@@ -284,7 +359,10 @@
    :mean-scored-candidates 112.57142857142857,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 14},
+   :ticks 14,
+   :span
+   ["2026-06-16T08:03:53.514929788Z"
+    "2026-06-16T22:01:34.235196122Z"]},
   "2026-06-17"
   {:decisions 15,
    :mean-oor-channels 10.066666666666666,
@@ -295,7 +373,10 @@
    :mean-scored-candidates 106.66666666666667,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 15},
+   :ticks 15,
+   :span
+   ["2026-06-17T09:02:22.064743664Z"
+    "2026-06-17T23:04:45.013917759Z"]},
   "2026-06-18"
   {:decisions 12,
    :mean-oor-channels 10.75,
@@ -306,7 +387,10 @@
    :mean-scored-candidates 106.0,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 12},
+   :ticks 12,
+   :span
+   ["2026-06-18T00:04:16.764152378Z"
+    "2026-06-18T15:03:46.777871556Z"]},
   "2026-06-21"
   {:decisions 3,
    :mean-oor-channels 10.0,
@@ -317,7 +401,10 @@
    :mean-scored-candidates 106.0,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 3},
+   :ticks 3,
+   :span
+   ["2026-06-21T21:01:56.172252724Z"
+    "2026-06-21T23:01:22.926931677Z"]},
   "2026-06-22"
   {:decisions 17,
    :mean-oor-channels 9.588235294117647,
@@ -328,7 +415,10 @@
    :mean-scored-candidates 107.17647058823529,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 17},
+   :ticks 17,
+   :span
+   ["2026-06-22T06:01:26.369352022Z"
+    "2026-06-22T22:01:43.844468876Z"]},
   "2026-06-23"
   {:decisions 13,
    :mean-oor-channels 9.0,
@@ -339,7 +429,10 @@
    :mean-scored-candidates 108.38461538461539,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 13},
+   :ticks 13,
+   :span
+   ["2026-06-23T08:01:59.439157147Z"
+    "2026-06-23T20:01:56.454851354Z"]},
   "2026-06-24"
   {:decisions 10,
    :mean-oor-channels 9.4,
@@ -350,7 +443,10 @@
    :mean-scored-candidates 107.4,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 10},
+   :ticks 10,
+   :span
+   ["2026-06-24T09:01:52.737615172Z"
+    "2026-06-24T22:04:58.775815594Z"]},
   "2026-06-25"
   {:decisions 15,
    :mean-oor-channels 9.466666666666667,
@@ -361,7 +457,10 @@
    :mean-scored-candidates 108.66666666666667,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 15},
+   :ticks 15,
+   :span
+   ["2026-06-25T08:01:16.526424411Z"
+    "2026-06-25T22:02:06.100299818Z"]},
   "2026-06-26"
   {:decisions 12,
    :mean-oor-channels 9.166666666666666,
@@ -372,7 +471,10 @@
    :mean-scored-candidates 108.33333333333333,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 12},
+   :ticks 12,
+   :span
+   ["2026-06-26T09:02:23.457584185Z"
+    "2026-06-26T20:02:44.387496522Z"]},
   "2026-06-27"
   {:decisions 11,
    :mean-oor-channels 9.0,
@@ -388,7 +490,10 @@
     :min 0.5000000001423435,
     :max 1.0,
     :max-samples 8},
-   :ticks 11},
+   :ticks 11,
+   :span
+   ["2026-06-27T13:02:22.610699430Z"
+    "2026-06-27T23:02:41.970467660Z"]},
   "2026-06-28"
   {:decisions 14,
    :mean-oor-channels 9.0,
@@ -404,7 +509,10 @@
     :min 0.5000000001423888,
     :max 0.5000000001423888,
     :max-samples 8},
-   :ticks 14},
+   :ticks 14,
+   :span
+   ["2026-06-28T10:02:56.834817372Z"
+    "2026-06-28T23:02:29.685278945Z"]},
   "2026-06-29"
   {:decisions 18,
    :mean-oor-channels 8.722222222222221,
@@ -420,7 +528,10 @@
     :min 0.5000000001423888,
     :max 0.5000000001423888,
     :max-samples 8},
-   :ticks 18},
+   :ticks 18,
+   :span
+   ["2026-06-29T00:02:23.071070846Z"
+    "2026-06-29T17:03:01.697807432Z"]},
   "2026-06-30"
   {:decisions 18,
    :mean-oor-channels 8.055555555555555,
@@ -436,7 +547,10 @@
     :min 0.5000000001423888,
     :max 0.5000000001423888,
     :max-samples 8},
-   :ticks 18},
+   :ticks 18,
+   :span
+   ["2026-06-30T03:03:13.770927119Z"
+    "2026-06-30T23:02:57.420069498Z"]},
   "2026-07-01"
   {:decisions 23,
    :mean-oor-channels 8.0,
@@ -452,7 +566,10 @@
     :min 0.5000000001423888,
     :max 0.5000000001423888,
     :max-samples 8},
-   :ticks 23},
+   :ticks 23,
+   :span
+   ["2026-07-01T00:02:49.784523480Z"
+    "2026-07-01T23:01:50.984615922Z"]},
   "2026-07-02"
   {:decisions 34,
    :mean-oor-channels 8.647058823529411,
@@ -531,7 +648,10 @@
     :min 0.5000000001423888,
     :max 1.0,
     :max-samples 16},
-   :ticks 34},
+   :ticks 34,
+   :span
+   ["2026-07-02T00:01:51.870434634Z"
+    "2026-07-02T23:03:04.955955537Z"]},
   "2026-07-03"
   {:decisions 20,
    :mean-oor-channels 9.0,
@@ -609,7 +729,127 @@
     :min 1.0,
     :max 1.2682658076960074,
     :max-samples 34},
-   :ticks 20}},
+   :ticks 20,
+   :span
+   ["2026-07-03T00:03:07.951189035Z"
+    "2026-07-03T17:03:55.680143568Z"]},
+  "2026-07-04"
+  {:decisions 31,
+   :mean-oor-channels 8.483870967741936,
+   :act-gates
+   {:evaluated 60,
+    :pass 30,
+    :fail 30,
+    :abstain 0,
+    :missions-passed ["M-bayesian-structure-learning"]},
+   :modes {:stop-the-line 31},
+   :enactments
+   {:count 30, :missions {"M-bayesian-structure-learning" 30}},
+   :mean-scored-candidates 112.51612903225806,
+   :realized-outcomes
+   {:count 30,
+    :mean-abs-error 0.3,
+    :samples
+    ({:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5})},
+   :gamma
+   {:first 1.287244150067791,
+    :last 1.3459001920611886,
+    :min 1.287244150067791,
+    :max 1.3459001920611886,
+    :max-samples 63},
+   :ticks 31,
+   :span
+   ["2026-07-04T07:03:48.095349930Z"
+    "2026-07-04T14:02:52.344069944Z"]}},
  :per-week
  {"2026-W21"
   {:decisions 101,
@@ -621,7 +861,10 @@
    :mean-scored-candidates 133.88118811881188,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 101},
+   :ticks 101,
+   :span
+   ["2026-05-18T19:42:49.284838608Z"
+    "2026-05-24T23:00:38.992544827Z"]},
   "2026-W22"
   {:decisions 68,
    :mean-oor-channels 8.691176470588236,
@@ -632,7 +875,10 @@
    :mean-scored-candidates 192.23529411764707,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 68},
+   :ticks 68,
+   :span
+   ["2026-05-25T00:00:41.258913049Z"
+    "2026-05-31T18:00:40.104983514Z"]},
   "2026-W23"
   {:decisions 136,
    :mean-oor-channels 9.360294117647058,
@@ -643,7 +889,10 @@
    :mean-scored-candidates 172.5441176470588,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 136},
+   :ticks 136,
+   :span
+   ["2026-06-01T09:01:08.952325930Z"
+    "2026-06-07T23:01:11.641132258Z"]},
   "2026-W24"
   {:decisions 120,
    :mean-oor-channels 9.775,
@@ -654,7 +903,10 @@
    :mean-scored-candidates 105.675,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 120},
+   :ticks 120,
+   :span
+   ["2026-06-08T00:01:16.704095041Z"
+    "2026-06-14T21:04:44.352820147Z"]},
   "2026-W25"
   {:decisions 52,
    :mean-oor-channels 10.307692307692308,
@@ -665,7 +917,10 @@
    :mean-scored-candidates 109.75,
    :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
    :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
-   :ticks 52},
+   :ticks 52,
+   :span
+   ["2026-06-15T11:02:47.606704948Z"
+    "2026-06-21T23:01:22.926931677Z"]},
   "2026-W26"
   {:decisions 92,
    :mean-oor-channels 9.25,
@@ -681,27 +936,30 @@
     :min 0.5000000001423435,
     :max 1.0,
     :max-samples 8},
-   :ticks 92},
+   :ticks 92,
+   :span
+   ["2026-06-22T06:01:26.369352022Z"
+    "2026-06-28T23:02:29.685278945Z"]},
   "2026-W27"
-  {:decisions 113,
-   :mean-oor-channels 8.495575221238939,
+  {:decisions 144,
+   :mean-oor-channels 8.493055555555555,
    :act-gates
-   {:evaluated 78,
-    :pass 36,
-    :fail 35,
+   {:evaluated 138,
+    :pass 66,
+    :fail 65,
     :abstain 7,
     :missions-passed
     ["M-canon-fingerprint-store" "M-bayesian-structure-learning"]},
-   :modes {:multiplied 47, :stagnant 1, :stop-the-line 44, :hermit 21},
+   :modes {:multiplied 47, :stagnant 1, :stop-the-line 75, :hermit 21},
    :enactments
-   {:count 36,
+   {:count 66,
     :missions
     {"M-canon-fingerprint-store" 1,
-     "M-bayesian-structure-learning" 35}},
-   :mean-scored-candidates 108.26548672566372,
+     "M-bayesian-structure-learning" 65}},
+   :mean-scored-candidates 109.18055555555556,
    :realized-outcomes
-   {:count 35,
-    :mean-abs-error 0.14571428571428569,
+   {:count 65,
+    :mean-abs-error 0.2169230769230771,
     :samples
     ({:policy "M-bayesian-structure-learning",
       :expected-G -0.2,
@@ -807,22 +1065,115 @@
       :realized-G -0.5}
      {:policy "M-bayesian-structure-learning",
       :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
       :realized-G -0.5})},
    :gamma
    {:first 0.5000000001423888,
-    :last 1.2682658076960074,
+    :last 1.3459001920611886,
     :min 0.5000000001423888,
-    :max 1.2682658076960074,
-    :max-samples 34},
-   :ticks 113}},
- :corpus {:files 41, :ticks 682, :span ["2026-05-18" "2026-07-03"]},
+    :max 1.3459001920611886,
+    :max-samples 63},
+   :ticks 144,
+   :span
+   ["2026-06-29T00:02:23.071070846Z"
+    "2026-07-04T14:02:52.344069944Z"]}},
+ :corpus {:files 42, :ticks 713, :span ["2026-05-18" "2026-07-04"]},
  :summary
- {:decisions 682,
-  :mean-oor-channels 9.175953079178885,
+ {:decisions 713,
+  :mean-oor-channels 9.14586255259467,
   :act-gates
-  {:evaluated 78,
-   :pass 36,
-   :fail 35,
+  {:evaluated 138,
+   :pass 66,
+   :fail 65,
    :abstain 7,
    :missions-passed
    ["M-canon-fingerprint-store" "M-bayesian-structure-learning"]},
@@ -830,17 +1181,17 @@
   {:multiplied 284,
    :depositing 4,
    :stagnant 22,
-   :stop-the-line 152,
+   :stop-the-line 183,
    :hermit 220},
   :enactments
-  {:count 36,
+  {:count 66,
    :missions
    {"M-canon-fingerprint-store" 1,
-    "M-bayesian-structure-learning" 35}},
-  :mean-scored-candidates 132.8782991202346,
+    "M-bayesian-structure-learning" 65}},
+  :mean-scored-candidates 131.9929873772791,
   :realized-outcomes
-  {:count 35,
-   :mean-abs-error 0.14571428571428569,
+  {:count 65,
+   :mean-abs-error 0.2169230769230771,
    :samples
    ({:policy "M-bayesian-structure-learning",
      :expected-G -0.2,
@@ -946,14 +1297,106 @@
      :realized-G -0.5}
     {:policy "M-bayesian-structure-learning",
      :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
      :realized-G -0.5})},
   :gamma
   {:first 1.0,
-   :last 1.2682658076960074,
+   :last 1.3459001920611886,
    :min 0.5000000001423435,
-   :max 1.2682658076960074,
-   :max-samples 34},
-  :ticks 682},
+   :max 1.3459001920611886,
+   :max-samples 63},
+  :ticks 713,
+  :span
+  ["2026-05-18T19:42:49.284838608Z" "2026-07-04T14:02:52.344069944Z"]},
  :suspend-gaps
  [{:from "2026-05-18T22:26:06.115947653Z",
    :to "2026-05-19T11:24:24.836298386Z",
@@ -1044,7 +1487,296 @@
    :hours 10.0}
   {:from "2026-06-30T07:01:58.017350359Z",
    :to "2026-06-30T11:01:56.952442966Z",
-   :hours 4.0}],
+   :hours 4.0}
+  {:from "2026-07-03T17:03:55.680143568Z",
+   :to "2026-07-04T07:03:48.095349930Z",
+   :hours 14.0}],
+ :by-basis
+ {:pre-stamp-wallclock
+  {:decisions 685,
+   :mean-oor-channels 9.173722627737225,
+   :act-gates
+   {:evaluated 82,
+    :pass 38,
+    :fail 37,
+    :abstain 7,
+    :missions-passed
+    ["M-canon-fingerprint-store" "M-bayesian-structure-learning"]},
+   :modes
+   {:multiplied 284,
+    :depositing 4,
+    :stagnant 22,
+    :stop-the-line 155,
+    :hermit 220},
+   :enactments
+   {:count 38,
+    :missions
+    {"M-canon-fingerprint-store" 1,
+     "M-bayesian-structure-learning" 37}},
+   :mean-scored-candidates 132.76934306569342,
+   :realized-outcomes
+   {:count 37,
+    :mean-abs-error 0.154054054054054,
+    :samples
+    ({:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5})},
+   :gamma
+   {:first 1.0,
+    :last 1.3065064845467453,
+    :min 0.5000000001423435,
+    :max 1.3065064845467453,
+    :max-samples 36},
+   :ticks 685,
+   :span
+   ["2026-05-18T19:42:49.284838608Z"
+    "2026-07-04T08:03:54.452678908Z"]},
+  :click-duree
+  {:decisions 22,
+   :mean-oor-channels 8.545454545454545,
+   :act-gates
+   {:evaluated 44,
+    :pass 22,
+    :fail 22,
+    :abstain 0,
+    :missions-passed ["M-bayesian-structure-learning"]},
+   :modes {:stop-the-line 22},
+   :enactments
+   {:count 22, :missions {"M-bayesian-structure-learning" 22}},
+   :mean-scored-candidates 108.27272727272727,
+   :realized-outcomes
+   {:count 22,
+    :mean-abs-error 0.2999999999999999,
+    :samples
+    ({:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5})},
+   :gamma
+   {:first 1.3260570607936344,
+    :last 1.3459001920611886,
+    :min 1.3260570607936344,
+    :max 1.3459001920611886,
+    :max-samples 59},
+   :ticks 22,
+   :span
+   ["2026-07-04T08:37:15.371709244Z"
+    "2026-07-04T10:07:59.661515373Z"]},
+  :cron-tick
+  {:decisions 6,
+   :mean-oor-channels 8.166666666666666,
+   :act-gates
+   {:evaluated 12,
+    :pass 6,
+    :fail 6,
+    :abstain 0,
+    :missions-passed ["M-bayesian-structure-learning"]},
+   :modes {:stop-the-line 6},
+   :enactments
+   {:count 6, :missions {"M-bayesian-structure-learning" 6}},
+   :mean-scored-candidates 130.33333333333334,
+   :realized-outcomes
+   {:count 6,
+    :mean-abs-error 0.3,
+    :samples
+    ({:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5})},
+   :gamma
+   {:first 1.3459001920611886,
+    :last 1.3459001920611886,
+    :min 1.3459001920611886,
+    :max 1.3459001920611886,
+    :max-samples 63},
+   :ticks 6,
+   :span
+   ["2026-07-04T09:03:56.784734886Z"
+    "2026-07-04T14:02:52.344069944Z"]}},
  :notes
  ["risk-mode not persisted per tick (production :hinge; :kl lane dark/scheduled) — segmented by date+mode."
   ":wm-version segmentation designed-for (B-0a) but not yet persisted; date+mode is the current fallback."

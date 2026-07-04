@@ -58,6 +58,7 @@
     {:ts ts
      :day (when (>= (count ts) 10) (subs ts 0 10))
      :instant (try (.toEpochMilli (java.time.Instant/parse ts)) (catch Throwable _ nil))
+     :trigger (get-in t [:wm-version :trigger])
      :mode (:mode t)
      :decided? (some? (get-in t [:decision :action]))
      :gamma (get-in t [:decision :policy-precision])
@@ -99,7 +100,8 @@
              :min (when (seq gammas) (apply min gammas)) :max (when (seq gammas) (apply max gammas))
              :max-samples (apply max 0 (keep :gamma-samples recs))}
      :mean-oor-channels (when (pos? n) (/ (reduce + (map :oor-channels recs)) (double n)))
-     :mean-scored-candidates (when (pos? n) (/ (reduce + (map :n-scored recs)) (double n)))}))
+     :mean-scored-candidates (when (pos? n) (/ (reduce + (map :n-scored recs)) (double n)))
+     :span [(:ts (first recs)) (:ts (last recs))]}))
 
 (defn- suspend-gaps [recs]                  ; inter-tick gaps > 2h = machine suspended, NOT failures
   (->> (map vector recs (rest recs))
@@ -119,6 +121,17 @@
 (def by-day (into (sorted-map) (update-vals (group-by :day recs) summarise)))
 (def by-week (into (sorted-map) (update-vals (group-by #(when (:day %) (iso-week (:day %))) recs) summarise)))
 
+;; --- clock BASIS: distinguish wall-clock ticks from durée/click rows -----------
+;; :trigger is stamped in :wm-version since B-0a (2026-07-04). Pre-stamp rows
+;; (the ≤07-03 corpus) are all wall-clock cron/manual runs; post-stamp rows carry
+;; :wallclock-cron (a tick) or :duree-click-regulated (an engagement-time click).
+(defn- basis [r] (case (:trigger r)
+                   :duree-click-regulated :click-duree
+                   :wallclock-cron        :cron-tick
+                   :pre-stamp-wallclock))
+(def basis-order [:pre-stamp-wallclock :cron-tick :click-duree])
+(def by-basis (update-vals (group-by basis recs) summarise))
+
 (def ledger
   {:generated-by "scripts/wm_achievement_ledger.bb (M-aif-faithfulness B-0c)"
    :sim-only true :read-only true
@@ -129,6 +142,7 @@
            "suspend-gaps (>2h between ticks) are machine-suspended, NOT liveness failures (wm-baseline.md Clocks caveat)."
            "cascade-lane placeholder ranked-actions (no :G-risk) excluded from scored-candidate counts."]
    :summary (summarise recs)
+   :by-basis by-basis
    :suspend-gaps (suspend-gaps recs)
    :per-week by-week
    :per-day by-day})
@@ -164,6 +178,17 @@
                                ["γ (latest)" (f2 (get-in s [:gamma :last]))]]]
                     (str "<div class=tile><div class=v>" (h v) "</div><div class=k>" (h k) "</div></div>")))
        "</div>"
+       "<h2>By clock basis <span class=muted>— wall-clock ticks vs engagement clicks (durée). :trigger stamped since B-0a (2026-07-04); the pre-stamp corpus is all wall-clock.</span></h2>"
+       "<table><tr><th>basis</th><th>ticks</th><th>decisions</th><th>enacted</th><th>realized γ</th><th>γ last</th><th>span</th></tr>"
+       (apply str (for [bk basis-order :let [b (get by-basis bk)] :when b]
+                    (str "<tr><td>" (h ({:pre-stamp-wallclock "wall-clock (pre-B-0a, ≤07-03)"
+                                         :cron-tick "wall-clock tick (cron)"
+                                         :click-duree "click / durée (engagement-time)"} bk))
+                         "</td><td>" (h (:ticks b)) "</td><td>" (h (:decisions b))
+                         "</td><td>" (h (get-in b [:enactments :count])) "</td><td>" (h (get-in b [:realized-outcomes :count]))
+                         "</td><td>" (f2 (get-in b [:gamma :last]))
+                         "</td><td class=muted>" (h (some-> (first (:span b)) (subs 0 19))) " → " (h (some-> (last (:span b)) (subs 0 19))) "</td></tr>")))
+       "</table>"
        "<h2>Per week</h2><table><tr><th>week</th><th>ticks</th><th>decisions</th>"
        "<th>gate pass</th><th>gate fail</th><th>enacted</th><th>realized</th><th>γ last</th><th>mean OOR ch</th></tr>"
        (apply str (for [[wk w] (:per-week ledger)]
@@ -198,5 +223,8 @@
 (println (format "gamma: %.3f → %.3f over %d samples | mean realized error %.3f nats"
                  (double (or (get-in s [:gamma :first]) 0)) (double (or (get-in s [:gamma :last]) 0))
                  (get-in s [:gamma :max-samples]) (double (or (get-in s [:realized-outcomes :mean-abs-error]) 0))))
+(println "by clock basis:"
+         (str/join " · " (for [bk basis-order :let [b (get by-basis bk)] :when b]
+                           (format "%s=%d ticks" (name bk) (:ticks b)))))
 (println "suspend-gaps (>2h, not failures):" (count (:suspend-gaps ledger)))
 (println "wrote" out-edn "and" out-html)
