@@ -568,3 +568,142 @@
           p (belief/predict-ticks-firing-ratio b tick-tags tick-results)]
       (is (> (:mean p) 0.9)
           (str "non-selected tick entity should not affect cohort; got " (:mean p))))))
+
+;; ---------------------------------------------------------------------------
+;; v0.24 (M-aif-faithfulness B-3a): explicit observation model A.
+;; Witness discipline: the default path must be BYTE-IDENTICAL to the
+;; historical (1+w) update; the legacy-reduction theorem must hold exactly;
+;; the channel block must agree with the live predict-* helpers.
+;; ---------------------------------------------------------------------------
+
+(defn- some-posteriors
+  "A spread of posterior shapes to quantify over: uniform, mildly peaked,
+   sharply peaked, near-degenerate."
+  []
+  [(belief/uniform-prior)
+   (belief/update-entity-belief (belief/uniform-prior) {:type :refined :weight 0.5})
+   (reduce belief/update-entity-belief (belief/uniform-prior)
+           (repeat 5 {:type :addressed :weight 2.0}))
+   (reduce belief/update-entity-belief (belief/uniform-prior)
+           (repeat 20 {:type :falsified :weight 5.0}))])
+
+(deftest a-matrix-witness-default-path-test
+  (testing "2-arity ≡ 3-arity with empty opts ≡ explicit :legacy — the dark-flag witness"
+    (doseq [p (some-posteriors)
+            w [0.0 0.5 1.0 2.7]
+            t belief/status-set]
+      (let [e {:type t :weight w}]
+        (is (= (belief/update-entity-belief p e)
+               (belief/update-entity-belief p e {})
+               (belief/update-entity-belief p e {:likelihood-mode :legacy}))
+            (str "default path drifted for " t " w=" w)))))
+  (testing "batch 2-arity ≡ batch with empty opts"
+    (let [b0 (belief/initial-belief-state [:m1 :m2])
+          events [{:entity-id :m1 :type :strengthened :weight 1.5}
+                  {:entity-id :m2 :type :foreclosed :weight 0.8}]]
+      (is (= (belief/update-belief-batch b0 events)
+             (belief/update-belief-batch b0 events {}))))))
+
+(deftest a-matrix-legacy-reduction-theorem-test
+  (testing ":a-matrix mode with a-matrix-identity reproduces :legacy exactly, all weights"
+    (doseq [p (some-posteriors)
+            w [0.0 0.3 1.0 2.0 4.5]
+            t belief/status-set]
+      (let [e {:type t :weight w}
+            legacy (belief/update-entity-belief p e)
+            via-a (belief/update-entity-belief
+                   p e {:likelihood-mode :a-matrix
+                        :a-matrix belief/a-matrix-identity})]
+        (doseq [s belief/status-set]
+          (is (< (Math/abs (- (double (get legacy s))
+                              (double (get via-a s))))
+                 1e-12)
+              (str "reduction theorem violated at " t " w=" w " status " s)))))))
+
+(deftest a-matrix-well-formed-test
+  (testing "a-matrix-v0 is dense over status-set × status-set with positive entries"
+    (is (= belief/status-set (set (keys belief/a-matrix-v0))))
+    (doseq [[o row] belief/a-matrix-v0]
+      (is (= belief/status-set (set (keys row)))
+          (str "row " o " incomplete"))
+      (is (every? pos? (vals row))
+          (str "row " o " has non-positive likelihood"))))
+  (testing "diagonal carries the default gain"
+    (doseq [s belief/status-set]
+      (is (= belief/a-matrix-default-gain (get-in belief/a-matrix-v0 [s s]))))))
+
+(deftest a-matrix-mode-behaviour-test
+  (testing "posteriors remain valid distributions in :a-matrix mode"
+    (doseq [p (some-posteriors)
+            t belief/status-set]
+      (is (valid-posterior?
+           (belief/update-entity-belief p {:type t :weight 1.0}
+                                        {:likelihood-mode :a-matrix})))))
+  (testing "unknown event types pass through unchanged in :a-matrix mode"
+    (let [p (belief/uniform-prior)]
+      (is (= p (belief/update-entity-belief p {:type :not-a-status :weight 1.0}
+                                            {:likelihood-mode :a-matrix})))))
+  (testing "w=0 is a no-op up to renormalisation round-off, in both modes
+            (κ(0)=0 ⇒ L≡1; the legacy path renormalises even at w=0, so
+            strict = fails at the ULP level — that legacy behaviour is
+            preserved, not repaired, here)"
+    (doseq [p (some-posteriors)
+            mode-opts [{} {:likelihood-mode :a-matrix}]]
+      (let [e {:type :refined :weight 0.0}
+            p' (belief/update-entity-belief p e mode-opts)]
+        (doseq [s belief/status-set]
+          (is (< (Math/abs (- (double (get p s))
+                              (double (get p' s 0.0))))
+                 1e-12)
+              (str "w=0 moved " s " in mode " mode-opts))))))
+  (testing "contradiction expressiveness: observing :strengthened suppresses :falsified
+            relative to the legacy update (the capability the diagonal-only form lacks)"
+    (let [p (belief/uniform-prior)
+          e {:type :strengthened :weight 1.0}
+          legacy (belief/update-entity-belief p e)
+          via-a (belief/update-entity-belief p e {:likelihood-mode :a-matrix})]
+      (is (< (:falsified via-a) (:falsified legacy))
+          "A[strengthened][falsified] = 0.7 should push falsified below its legacy mass")
+      (is (> (:strengthened via-a) (:strengthened p))
+          "matched status still gains")))
+  (testing ":a-matrix updates commute (docstring claim on update-belief-batch)"
+    (let [opts {:likelihood-mode :a-matrix}
+          e1 {:entity-id :m1 :type :strengthened :weight 1.0}
+          e2 {:entity-id :m1 :type :refined :weight 0.5}
+          b0 (belief/initial-belief-state [:m1])
+          b12 (belief/update-belief-batch b0 [e1 e2] opts)
+          b21 (belief/update-belief-batch b0 [e2 e1] opts)]
+      (doseq [s belief/status-set]
+        (is (< (Math/abs (- (double (get-in b12 [:m1 s]))
+                            (double (get-in b21 [:m1 s]))))
+               1e-12))))))
+
+(defn- row-dot
+  [row posterior]
+  (reduce + (for [[s p] posterior] (* (double p) (double (get row s 0.0))))))
+
+(deftest channel-emission-matrix-consistency-test
+  (testing "the channel block covers exactly channels-with-likelihood"
+    (is (= belief/channels-with-likelihood
+           (set (keys belief/channel-emission-matrix)))))
+  (testing "each row agrees with the live predict-* arithmetic it names"
+    (doseq [p (some-posteriors)]
+      ;; :annotation-health row + the documented [-1,1]→[0,1] rescale
+      (let [raw (row-dot (:annotation-health belief/channel-emission-matrix) p)
+            rescaled (max 0.0 (min 1.0 (/ (+ raw 1.0) 2.0)))]
+        (is (< (Math/abs (- rescaled (belief/entity-expected-health p))) 1e-12)))
+      ;; indicator rows vs the mass-based predictor means (single-entity belief)
+      (let [b {:e p}]
+        (is (< (Math/abs (- (row-dot (:mission-health belief/channel-emission-matrix) p)
+                            (:mean (belief/predict-mission-health b))))
+               1e-12)
+            "healthy row ≠ predict-mission-health")
+        (is (< (Math/abs (- (row-dot (:active-repo-ratio belief/channel-emission-matrix) p)
+                            (:mean (belief/predict-active-repo-ratio b))))
+               1e-12)
+            "nondormant row ≠ predict-active-repo-ratio")
+        (is (< (Math/abs (- (min 1.0 (/ (row-dot (:sorry-count-norm belief/channel-emission-matrix) p)
+                                        10.0))
+                            (:mean (belief/predict-sorry-count-norm b))))
+               1e-12)
+            "open row (÷10, capped) ≠ predict-sorry-count-norm")))))

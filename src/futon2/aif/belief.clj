@@ -65,6 +65,107 @@
   [entity-ids]
   (into {} (for [id entity-ids] [id (uniform-prior)])))
 
+;; ---------------------------------------------------------------------------
+;; v0.24 (M-aif-faithfulness B-3a, 2026-07-04): explicit observation model A —
+;; the EVENT BLOCK. Design note: holes/E-r1-a-matrix-design.md.
+;;
+;; The legacy update multiplies p(s) by (1+w) when s = event type, else 1.
+;; That is ALREADY an A-matrix update in disguise:
+;;
+;;   p'(s) ∝ p(s) · (1+w)^δ(o,s)  =  p(s) · A₀[o][s]^κ(w)
+;;
+;; with A₀[o][s] = 2^δ(o,s) (diagonal 2, off-diagonal 1) and precision
+;; exponent κ(w) = log₂(1+w). So "no A-matrix" was really "an IMPLICIT A
+;; asserting every event type perfectly discriminates its own status and
+;; says nothing about the others." v0 makes A explicit and hand-set
+;; (learned-A is out of scope), which buys two things the diagonal-only
+;; form cannot express: lifecycle-adjacent confusability (an event can be
+;; mildly compatible with a neighbouring status) and contradiction (an
+;; event can be mild evidence AGAINST an opposed status).
+;;
+;; HONESTY: A is HAND-SET in v0 — a declared observation model, not a
+;; learned or derived one. Entries are likelihood RATIOS against an
+;; uninformative baseline of 1.0 (scale-free: normalisation kills
+;; constants). The update path is DARK behind :likelihood-mode (default
+;; :legacy, byte-identical); the flip is the operator's (arena-*-mode
+;; idiom, same discipline as efe.clj's :risk-mode). Badge disposition is
+;; the reviewer's call, not claimed here.
+;; ---------------------------------------------------------------------------
+
+(def a-matrix-default-gain
+  "Diagonal likelihood ratio of the v0 A-matrix. 2.0 matches the legacy
+   gain at w = 1 ((1+w) = 2), so the identity-structured A reproduces the
+   legacy update exactly under κ(w) = log₂(1+w) (see `likelihood-vector`)."
+  2.0)
+
+(def a-matrix-overrides
+  "Sparse off-diagonal structure of the v0 hand-set A, as
+   {[observed-event true-status] likelihood-ratio}. Unlisted off-diagonal
+   pairs are 1.0 (uninformative). Two entry classes:
+
+   ADJACENT (1.3) — the observed event is mildly compatible with a
+   lifecycle-neighbouring true status (belief-label lag):
+     [:refined :spawned]      refine events arrive while belief still says spawned
+     [:strengthened :refined] strengthening surfaces mid-refinement
+     [:addressed :refined]    the closing edit is itself a refinement
+     [:reopened :addressed]   a reopen presupposes a recent addressed
+     [:refined :reopened]     reopened entities emit refinements as rework begins
+
+   CONTRADICTORY (0.7) — the observed event is mild evidence AGAINST a
+   semantically opposed closure status (inexpressible in the legacy
+   diagonal-only form):
+     strengthened ⟂ falsified · addressed ⟂ foreclosed (both directions)."
+  {[:refined :spawned]        1.3
+   [:strengthened :refined]   1.3
+   [:addressed :refined]      1.3
+   [:reopened :addressed]     1.3
+   [:refined :reopened]       1.3
+   [:strengthened :falsified] 0.7
+   [:falsified :strengthened] 0.7
+   [:addressed :foreclosed]   0.7
+   [:foreclosed :addressed]   0.7})
+
+(defn- materialise-a-matrix
+  "Build a dense {observed-event {true-status likelihood}} matrix over
+   status-set from a diagonal gain and a sparse override map."
+  [gain overrides]
+  (into {}
+        (for [o status-set]
+          [o (into {}
+                   (for [s status-set]
+                     [s (double (get overrides [o s]
+                                     (if (= o s) gain 1.0)))]))])))
+
+(def a-matrix-v0
+  "The v0 hand-set observation model A (event block): 7×7,
+   {observed-event {true-status likelihood-ratio}}. Rows are observed
+   M-INC state/* event types; columns are true statuses; each entry is
+   P-ratio(observe o | true s) against the 1.0 uninformative baseline."
+  (materialise-a-matrix a-matrix-default-gain a-matrix-overrides))
+
+(def a-matrix-identity
+  "The identity-structured A (diagonal `a-matrix-default-gain`, all
+   off-diagonal 1.0) — the legacy update's implicit A. Kept as a def so
+   the legacy-reduction theorem is directly testable:
+   :a-matrix mode with THIS matrix ≡ the :legacy path, for every weight."
+  (materialise-a-matrix a-matrix-default-gain {}))
+
+(defn likelihood-vector
+  "Likelihood over true statuses for one observed event of type
+   `observed` with weight `w`, under observation model A:
+
+     L(s) = A[observed][s]^κ(w),  κ(w) = log₂(1+w)
+
+   κ is the precision exponent (tempered likelihood): w = 0 ⇒ κ = 0 ⇒
+   L ≡ 1 (no-op, as legacy); w = 1 ⇒ κ = 1 ⇒ L = the A row as-is;
+   larger w sharpens the row. With A = `a-matrix-identity` this equals
+   the legacy (1+w)-on-the-diagonal likelihood exactly."
+  [A observed w]
+  (let [kappa (/ (Math/log (+ 1.0 (double w))) (Math/log 2.0))]
+    (into {}
+          (for [[s l] (get A observed)]
+            [s (Math/pow (double l) kappa)]))))
+
 (defn update-entity-belief
   "Apply one evidence event to a single entity's posterior.
 
@@ -76,33 +177,59 @@
    Returns a new normalised posterior. Events whose :type is not in
    status-set are ignored (posterior unchanged) — this keeps the
    update step total over a wider event stream (e.g. link/asserted
-   events that aren't per-entity-status)."
-  [posterior event]
-  (let [{:keys [type weight]} event
-        w (double (or weight 1.0))]
-    (if (contains? status-set type)
-      (normalise
-       (into {} (for [[k v] posterior]
-                  [k (if (= k type) (* v (+ 1.0 w)) v)])))
-      posterior)))
+   events that aren't per-entity-status).
+
+   Opts (v0.24, M-aif-faithfulness B-3a — dark; design note
+   holes/E-r1-a-matrix-design.md):
+     :likelihood-mode  :legacy (default) — the historical
+                       (1+w)-on-the-diagonal update, byte-identical.
+                       :a-matrix — Bayes with the explicit observation
+                       model: p'(s) ∝ p(s)·A[o][s]^κ(w), κ(w) = log₂(1+w).
+     :a-matrix         observation model to use in :a-matrix mode
+                       (default `a-matrix-v0`). With `a-matrix-identity`
+                       the :a-matrix path reproduces :legacy exactly.
+   The flip to :a-matrix is the operator's (arena-*-mode idiom)."
+  ([posterior event] (update-entity-belief posterior event {}))
+  ([posterior event {:keys [likelihood-mode a-matrix]
+                     :or {likelihood-mode :legacy}}]
+   (let [{:keys [type weight]} event
+         w (double (or weight 1.0))]
+     (if (contains? status-set type)
+       (case likelihood-mode
+         :legacy
+         (normalise
+          (into {} (for [[k v] posterior]
+                     [k (if (= k type) (* v (+ 1.0 w)) v)])))
+         :a-matrix
+         (let [L (likelihood-vector (or a-matrix a-matrix-v0) type w)]
+           (normalise
+            (into {} (for [[k v] posterior]
+                       [k (* v (double (get L k 1.0)))])))))
+       posterior))))
 
 (defn update-belief
   "Apply an evidence event (carrying :entity-id) to the full belief
    state. If the entity-id is not yet tracked, initialise it with a
-   uniform prior before applying the event."
-  [belief event]
-  (let [eid (:entity-id event)
-        current (get belief eid (uniform-prior))]
-    (assoc belief eid (update-entity-belief current event))))
+   uniform prior before applying the event. Opts (optional) are passed
+   through to `update-entity-belief`."
+  ([belief event] (update-belief belief event {}))
+  ([belief event opts]
+   (let [eid (:entity-id event)
+         current (get belief eid (uniform-prior))]
+     (assoc belief eid (update-entity-belief current event opts)))))
 
 (defn update-belief-batch
   "Reduce a sequence of evidence events into the belief state. Order
    within a single entity's events is irrelevant for the final posterior
    because multiplicative likelihood updates commute under
-   normalisation; order across entities is irrelevant because updates
-   to different entities don't interact."
-  [belief events]
-  (reduce update-belief belief events))
+   normalisation (this holds in BOTH likelihood modes — the :a-matrix
+   path is also a product of per-event likelihoods); order across
+   entities is irrelevant because updates to different entities don't
+   interact. Opts (optional) are passed through to
+   `update-entity-belief`."
+  ([belief events] (update-belief-batch belief events {}))
+  ([belief events opts]
+   (reduce (fn [b e] (update-belief b e opts)) belief events)))
 
 (defn most-likely-status
   "Return the argmax status of a posterior. The discrete analogue of
@@ -577,6 +704,56 @@
    prerequisites; the 6 reclassified on cg-18b7831b were `:n-a-by-design`."
   #{:annotation-health :sorry-count-norm :mission-health :active-repo-ratio
     :support-coverage :attack-coverage :coupling-density :ticks-firing-ratio})
+
+;; ---------------------------------------------------------------------------
+;; v0.24 (M-aif-faithfulness B-3a): the CHANNEL BLOCK of A.
+;;
+;; The predict-* likelihood models above ARE the channel half of the
+;; observation model — each channel's mean is a per-entity dot product of
+;; the posterior with a fixed status→emission row, aggregated over a
+;; cohort. Those rows were scattered (annotation-health-status-weights +
+;; the open/healthy/nondormant mass helpers); this matrix names them in
+;; one place so R3's "gm: A" label has an explicit referent covering the
+;; channel dimension too.
+;;
+;; HONESTY: this is a documentation-grade UNIFICATION, consistency-tested
+;; against the live helpers (belief-test), NOT the executing path — the
+;; predict-* fns keep their own arithmetic so live prediction is
+;; byte-identical. Rewiring them to read from this matrix is a follow-on,
+;; gated like any behaviour-touching change. Channels outside
+;; `channels-with-likelihood` have no emission row (no likelihood model
+;; exists — callers fall back to preference-gap scoring), which is why
+;; the block is 8 of the 13–14 schema channels, stated rather than hidden.
+;; ---------------------------------------------------------------------------
+
+(def ^:private open-status-row
+  {:spawned 1.0 :refined 1.0 :reopened 1.0
+   :strengthened 0.0 :addressed 0.0 :falsified 0.0 :foreclosed 0.0})
+
+(def ^:private healthy-status-row
+  {:strengthened 1.0 :addressed 1.0
+   :spawned 0.0 :refined 0.0 :reopened 0.0 :falsified 0.0 :foreclosed 0.0})
+
+(def ^:private nondormant-status-row
+  {:spawned 1.0 :refined 1.0 :reopened 1.0 :strengthened 1.0 :addressed 1.0
+   :falsified 0.0 :foreclosed 0.0})
+
+(def channel-emission-matrix
+  "The channel block of the explicit observation model A:
+   {channel {status emission-weight}} for every channel in
+   `channels-with-likelihood`. Each row is the status→value projection
+   the corresponding predict-* fn computes its mean from (per entity,
+   dot product with the posterior; :annotation-health additionally
+   rescales its raw [-1,1] row to [0,1], see `entity-expected-health`).
+   Read-only view — see the HONESTY block above."
+  {:annotation-health  annotation-health-status-weights
+   :sorry-count-norm   open-status-row
+   :mission-health     healthy-status-row
+   :active-repo-ratio  nondormant-status-row
+   :support-coverage   healthy-status-row
+   :attack-coverage    healthy-status-row
+   :coupling-density   nondormant-status-row
+   :ticks-firing-ratio open-status-row})
 
 (defn predict-observation
   "Predict observation distributions across all channels for which a
