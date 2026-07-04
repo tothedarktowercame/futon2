@@ -441,7 +441,8 @@
                          graph-body-mode graph-ascent-status-aware? mission-gap-view
                          gap-weight goal-outcome-weight goal-outcome-entries goal-outcome-prob-fn
                          goal-outcome-mode
-                         ambiguity-mode risk-mode kl-channel-weights c-temperature]
+                         ambiguity-mode risk-mode kl-channel-weights c-temperature
+                         structural-pressure-mode]
                   :or {info-weight default-info-weight
                        survival-weight default-survival-weight
                        structural-pressure-weight default-structural-pressure-weight
@@ -458,6 +459,7 @@
                        ambiguity-mode :variance-sum
                        risk-mode :hinge
                        goal-outcome-mode :hinge
+                       structural-pressure-mode :g-summand
                        kl-channel-weights default-kl-channel-weights
                        c-temperature pref/default-c-temperature}}]
    (let [single-prediction (fm/predict state action)
@@ -568,20 +570,36 @@
          ;; below only NAMES the same quantities (float associativity means
          ;; :G-core + :G-augmentation matches :G-total to ~1e-15, not to the
          ;; bit — asserted at 1e-9 in efe_struct_split_test).
-         augmentation-terms {:info (- (* (double info-weight) g-info))
-                             :survival (* (double survival-weight) g-survival)
-                             :structural-pressure
-                             (- (* (double structural-pressure-weight)
-                                   g-structural-pressure))
-                             :graph-pragmatic (:G-graph-pragmatic graph-terms)
-                             :gap (- (:G-gap gap-terms))
-                             :goal-outcome g-goal-outcome}
+         ;; D-1d (M-aif-faithfulness §2.1, relocation RATIFIED 2026-07-04, flip
+         ;; = Joe's): G-structural-pressure is a documented EXOGENOUS WEIGHT
+         ;; whose canonical seat is the habit prior ln E(π) (R12), not a
+         ;; G-summand. :structural-pressure-mode:
+         ;;   :g-summand (DEFAULT) — the historical position: the (negative,
+         ;;     preference-increasing) contribution stays in :G-total and in
+         ;;     the :structural-pressure slot of the augmentation layer.
+         ;;     Byte-identical.
+         ;;   :habit-prior (DARK) — the term LEAVES :G-total and the layer;
+         ;;     :habit-prior-bias (= +w·sp, in ln-E-units-by-declaration) is
+         ;;     emitted instead, consumed by policy/select-action's log-prior
+         ;;     seam (the R12 seat). Semantic difference, documented for the
+         ;;     flip memo: as ln E the term stops being scaled by 1/τ_eff (γ)
+         ;;     — precision no longer modulates habit; and it stops moving
+         ;;     :G-total, so census/argmin views of G no longer see it.
+         sp-contribution (- (* (double structural-pressure-weight)
+                               g-structural-pressure))
+         habit-prior? (= structural-pressure-mode :habit-prior)
+         augmentation-terms (cond-> {:info (- (* (double info-weight) g-info))
+                                     :survival (* (double survival-weight) g-survival)
+                                     :structural-pressure sp-contribution
+                                     :graph-pragmatic (:G-graph-pragmatic graph-terms)
+                                     :gap (- (:G-gap gap-terms))
+                                     :goal-outcome g-goal-outcome}
+                              habit-prior? (dissoc :structural-pressure))
          g-total (+ g-risk
                     g-ambig
                     (- (* (double info-weight) g-info))
                     (* (double survival-weight) g-survival)
-                    (- (* (double structural-pressure-weight)
-                          g-structural-pressure))
+                    (if habit-prior? 0.0 sp-contribution)
                     (:G-graph-pragmatic graph-terms)
                     (- (:G-gap gap-terms))
                     g-goal-outcome)]
@@ -612,6 +630,8 @@
         ;; D-1e: which functional produced :G-goal-outcome — whitelisted in
         ;; trace.clj AT BIRTH, same lesson as :risk-mode.
         :goal-outcome-mode goal-outcome-mode
+        ;; D-1d: where structural pressure sits — whitelisted at birth.
+        :structural-pressure-mode structural-pressure-mode
         :G-total g-total
         :time-pressure (double time-pressure)
         :horizon-steps (when multi (:horizon-steps multi))
@@ -622,7 +642,13 @@
        (assoc :star-map? true)
 
        (gap-contribution? gap-terms)
-       (assoc :gap? true)))))
+       (assoc :gap? true)
+
+       ;; D-1d dark lane: the relocated term, as a log-prior bias for the R12
+       ;; habit-prior seam in policy/select-action. Positive = preference-
+       ;; increasing (it was SUBTRACTED from G; ln E is ADDED to the score).
+       habit-prior?
+       (assoc :habit-prior-bias (- sp-contribution))))))
 
 (defn rank-actions
   "Score a sequence of candidate actions and order them by G-total

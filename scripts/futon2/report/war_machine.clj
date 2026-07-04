@@ -195,12 +195,29 @@
     :gamma-only
     :spread))
 
+(defn- arena-structural-pressure-mode
+  "D-1d DARK BUILD (M-aif-faithfulness §2.1, relocation ratified 2026-07-04)
+   — NOT flipped. G-structural-pressure's canonical seat is the habit prior
+   ln E(π) (R12), not a G-summand (D8; the r18 audit's EXOGENOUS WEIGHT
+   verdict). DEFAULT = :g-summand — byte-identical historical behaviour
+   (witness: efe_structural_pressure_mode_test.clj goldens).
+   `FUTON_WM_STRUCTURAL_PRESSURE_MODE=habit-prior` turns the dark path ON
+   (B-2c/B-2d opt-IN hatch polarity): the term LEAVES :G-total and enters
+   selection through policy/select-action's log-prior seam (the R12 seat) —
+   unscaled by τ_eff, so precision stops modulating it. The flip is Joe's
+   (§2.1 verdict ledger); evidence = E6-style shadow, queued with the
+   B-2c/B-2d shadows."
+  []
+  (if (= "habit-prior" (System/getenv "FUTON_WM_STRUCTURAL_PRESSURE_MODE"))
+    :habit-prior
+    :g-summand))
+
 (defn arena-mode-flags
   "B-0a tick provenance (M-aif-faithfulness §2.0): the RESOLVED mode/flag set
    the arena rank lanes score with THIS tick, for the trace's :wm-version
    stamp. Resolved via the SAME fns the lanes call (arena-risk-mode /
    arena-ambiguity-mode / arena-goal-outcome-mode / arena-salience-mode /
-   arena-tau-mode) — never a separate env
+   arena-tau-mode / arena-structural-pressure-mode) — never a separate env
    read, so the stamp cannot drift from the behaviour it describes.
    :kl-channel-weights and :c-temperature are the compute-efe defaults because
    the arena opts (wm-efe-opts, rollout-snapshot-under-weights) pass neither;
@@ -211,6 +228,7 @@
    :goal-outcome-mode (arena-goal-outcome-mode)
    :salience-mode (arena-salience-mode)
    :tau-mode (arena-tau-mode)
+   :structural-pressure-mode (arena-structural-pressure-mode)
    :kl-channel-weights efe/default-kl-channel-weights
    :c-temperature pref/default-c-temperature})
 
@@ -500,7 +518,9 @@
                         ;; :kl flip (§15) — same coherence for the risk lane
                         :risk-mode (arena-risk-mode)
                         ;; D-1e flip — the W1 goal-outcome lane, same boundary
-                        :goal-outcome-mode (arena-goal-outcome-mode)}))
+                        :goal-outcome-mode (arena-goal-outcome-mode)
+                        ;; D-1d dark — see arena-structural-pressure-mode
+                        :structural-pressure-mode (arena-structural-pressure-mode)}))
                      (select-keys structure
                                   [:capability-graph :pre-registered-goal
                                    :mission-gap-view :mission-domain-view])
@@ -3875,7 +3895,9 @@
                        ;; :kl flip (§15) — see arena-risk-mode docstring
                        :risk-mode (arena-risk-mode)
                        ;; D-1e flip — see arena-goal-outcome-mode docstring
-                       :goal-outcome-mode (arena-goal-outcome-mode)}))
+                       :goal-outcome-mode (arena-goal-outcome-mode)
+                       ;; D-1d dark — see arena-structural-pressure-mode
+                       :structural-pressure-mode (arena-structural-pressure-mode)}))
         wm-ranked (->> (efe/rank-actions wm-state wm-enriched-candidates wm-efe-opts)
                        apply-anamnesis-tiebreak
                        (filter-live-open-mission-ranked-actions wm-missions))

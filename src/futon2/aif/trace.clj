@@ -93,12 +93,17 @@
   ;; whitelisted AT BIRTH (same lesson); values are relabels of quantities
   ;; already entering :G-total, so I4 (whitelist ⊇ terms entering :G-total)
   ;; is preserved and the persisted-total residual stays 0.
+  ;; :structural-pressure-mode :habit-prior-bias (D-1d dark build, 2026-07-04):
+  ;; where structural pressure sits (always emitted, self-describing like
+  ;; :risk-mode) + the relocated term's ln-E bias (dark mode only) —
+  ;; whitelisted AT BIRTH.
   (select-keys r [:action :G-risk :G-ambiguity :G-info :G-survival
                   :G-structural-pressure :G-goal-outcome
                   :G-gap :G-graph-pragmatic :G-core :score-provenance :risk-mode
                   :goal-outcome-mode
                   :G-augmentation :augmentation-terms
                   :G-graph-feasibility :G-graph-pragmatic-proxy
+                  :structural-pressure-mode :habit-prior-bias
                   :G-total :rank :time-pressure :horizon-steps]))
 
 (defn- strip-decision
@@ -126,8 +131,12 @@
      2 — adds :wm-version (B-0a, 2026-07-04).
      3 — adds :G-augmentation + :augmentation-terms (B-2a) and
          :G-graph-feasibility + :G-graph-pragmatic-proxy (B-2b) per ranked
-         action — the struct-split relabels, additive only (2026-07-04)."
-  3)
+         action — the struct-split relabels, additive only (2026-07-04).
+     4 — adds :structural-pressure-mode (always) + :habit-prior-bias (dark
+         :habit-prior mode only) per ranked action (D-1d, 2026-07-04). The
+         ledger rule (any key-set change bumps) is broader than the D-1d
+         parcel's top-level-only wording; the ledger rule wins."
+  4)
 
 (defn- futon2-git-version
   "Git identity of the futon2 checkout this JVM loaded its code from:

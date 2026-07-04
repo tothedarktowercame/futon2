@@ -80,15 +80,29 @@
                        {:tau-mode tau-mode}))))))
 
 (defn softmax-weights
-  "P(a) ∝ exp(−G(a) / τ), normalised to sum to 1.0. Numerically stable
-   via the standard log-sum-exp trick."
-  [g-totals tau]
-  (when (seq g-totals)
-    (let [neg-g-over-tau (mapv #(/ (- (double %)) (double tau)) g-totals)
-          max-x (apply max neg-g-over-tau)
-          exps (mapv #(Math/exp (- % max-x)) neg-g-over-tau)
-          z (reduce + exps)]
-      (mapv #(/ % z) exps))))
+  "P(a) ∝ exp(ln E(a) − G(a) / τ), normalised to sum to 1.0. Numerically
+   stable via the standard log-sum-exp trick.
+
+   The 2-arity form is the historical σ(−G/τ) — equivalently ln E ≡ 0 — and
+   is byte-identical to its pre-D-1d behaviour. The 3-arity form is the R12
+   HABIT-PRIOR SEAM (M-aif-faithfulness D-1d): `log-priors` aligns with
+   `g-totals` and enters the score UNSCALED by τ — that is the canonical
+   σ(ln E − γ·G) shape, and the semantic point of relocating a term here:
+   precision (γ = 1/τ_eff) modulates G, never the habit prior. This seam is
+   THE place a future real ln E(π) (R12 per-action-class posteriors) enters —
+   do not add a second prior site."
+  ([g-totals tau]
+   (softmax-weights g-totals tau nil))
+  ([g-totals tau log-priors]
+   (when (seq g-totals)
+     (let [lps (or log-priors (repeat (count g-totals) 0.0))
+           scores (mapv (fn [g lp] (+ (/ (- (double g)) (double tau))
+                                      (double lp)))
+                        g-totals lps)
+           max-x (apply max scores)
+           exps (mapv #(Math/exp (- % max-x)) scores)
+           z (reduce + exps)]
+       (mapv #(/ % z) exps)))))
 
 (defn- find-no-op
   "Locate the :no-op entry in a ranked-action list, or nil."
@@ -202,25 +216,63 @@
       :ranked-actions ranked-actions}
 
      :else
-     (let [best (first ranked-actions)
+     ;; D-1d habit-prior seam: entries MAY carry :habit-prior-bias (ln E
+     ;; contribution, emitted by compute-efe only under the dark
+     ;; :structural-pressure-mode :habit-prior). When every bias is zero —
+     ;; the production default — the historical code path below runs
+     ;; UNTOUCHED (byte-identity is structural, not numeric luck). When a
+     ;; bias exists, choice becomes argmax(ln E − G/τ_eff) — the canonical
+     ;; σ(ln E − γG) selection — and the abstain margin is applied to the
+     ;; prior-adjusted CHOICE, still in G units (documented flip-memo item:
+     ;; abstain semantics keep their G-unit ε; only who gets compared moves).
+     (let [log-priors (mapv #(double (or (:habit-prior-bias %) 0.0))
+                            ranked-actions)
+           priors? (boolean (some #(not (zero? (double %))) log-priors))
+           g-totals (mapv :G-total ranked-actions)
            no-op-entry (find-no-op ranked-actions)
-           best-g (:G-total best)
-           no-op-g (when no-op-entry (:G-total no-op-entry))
-           abstain? (and no-op-entry
-                         (< (- no-op-g best-g) abstain-epsilon))]
-       (if abstain?
-         {:action :abstain
-          :reason :no-action-beats-no-op
-          :gap-report (gap-report ranked-actions)
-          :ranked-actions ranked-actions}
-         (let [g-totals (mapv :G-total ranked-actions)
-               tau-spread (adaptive-temperature g-totals temperature-opts)
+           no-op-g (when no-op-entry (:G-total no-op-entry))]
+       (if-not priors?
+         (let [best (first ranked-actions)
+               best-g (:G-total best)
+               abstain? (and no-op-entry
+                             (< (- no-op-g best-g) abstain-epsilon))]
+           (if abstain?
+             {:action :abstain
+              :reason :no-action-beats-no-op
+              :gap-report (gap-report ranked-actions)
+              :ranked-actions ranked-actions}
+             (let [tau-spread (adaptive-temperature g-totals temperature-opts)
+                   tau (effective-temperature g-totals policy-precision temperature-opts)
+                   weights (softmax-weights g-totals tau)]
+               {:action (:action best)
+                :rank 1
+                :G-total best-g
+                :tau tau
+                :tau-spread tau-spread
+                :policy-precision (double policy-precision)
+                :softmax-weights (zipmap (mapv :action ranked-actions) weights)})))
+         (let [tau-spread (adaptive-temperature g-totals temperature-opts)
                tau (effective-temperature g-totals policy-precision temperature-opts)
-               weights (softmax-weights g-totals tau)]
-           {:action (:action best)
-            :rank 1
-            :G-total best-g
-            :tau tau
-            :tau-spread tau-spread
-            :policy-precision (double policy-precision)
-            :softmax-weights (zipmap (mapv :action ranked-actions) weights)}))))))
+               scores (mapv (fn [g lp] (+ (/ (- (double g)) (double tau))
+                                          (double lp)))
+                            g-totals log-priors)
+               chosen-idx (apply max-key scores (range (count scores)))
+               chosen (nth ranked-actions chosen-idx)
+               chosen-g (:G-total chosen)
+               abstain? (and no-op-entry
+                             (< (- no-op-g chosen-g) abstain-epsilon))]
+           (if abstain?
+             {:action :abstain
+              :reason :no-action-beats-no-op
+              :gap-report (gap-report ranked-actions)
+              :ranked-actions ranked-actions}
+             (let [weights (softmax-weights g-totals tau log-priors)]
+               {:action (:action chosen)
+                :rank (:rank chosen)
+                :G-total chosen-g
+                :tau tau
+                :tau-spread tau-spread
+                :policy-precision (double policy-precision)
+                :habit-prior-applied? true
+                :softmax-weights (zipmap (mapv :action ranked-actions)
+                                         weights)}))))))))
