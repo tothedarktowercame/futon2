@@ -74,6 +74,14 @@
 (def default-graph-off-map-penalty 0.0)
 (def default-gap-weight 6.0)
 
+;; B-0a tick provenance (M-aif-faithfulness §2.0): exposed as a def — not an
+;; inline :or literal — so the :wm-version stamp records the value compute-efe
+;; actually resolves when the caller passes no :kl-channel-weights, instead of
+;; a re-typed literal that could silently drift. {} ⇒ every channel weight 1.0
+;; (UNIFORM — the joint KL under channel independence, the canonical config;
+;; :pragmatic-parity is a comparability preset only).
+(def default-kl-channel-weights {})
+
 ;; v0.14: anticipation-driven scaling. When opts carries :time-pressure
 ;; in [0,1], G-risk and G-survival are multiplied by
 ;; (1 + time-pressure × default-time-pressure-scale). G-info is NOT
@@ -421,7 +429,7 @@
                        ambiguity-mode :variance-sum
                        risk-mode :hinge
                        goal-outcome-mode :hinge
-                       kl-channel-weights {}
+                       kl-channel-weights default-kl-channel-weights
                        c-temperature pref/default-c-temperature}}]
    (let [single-prediction (fm/predict state action)
          ;; v0.15: opt-in multi-horizon trajectory; final-state observation

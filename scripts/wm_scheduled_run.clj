@@ -81,10 +81,20 @@
           ;; record rides the trace to R14's γ next tick. Tick = epoch-ms
           ;; (γ dedups on it). Guarded inside close-loop!: any failure
           ;; returns the judgement unchanged.
-          judgement (if (live-wire?)
+          wired? (live-wire?)
+          judgement (if wired?
                       (binding [fr/*live-wire?* true]
                         (enact/close-loop! judgement (System/currentTimeMillis)))
                       judgement)
+          ;; B-0a tick provenance (M-aif-faithfulness §2.0): stamp WHICH code
+          ;; + WHICH config produced this tick — git sha/dirty of this one-shot
+          ;; JVM's checkout, the arena-resolved mode flags (the same fns the
+          ;; rank lanes call), this runner's live-wire switch, and the trace
+          ;; schema version. `(trace/wm-version-of record)` recovers it.
+          judgement (assoc judgement :wm-version
+                           (trace/wm-version-stamp
+                            (assoc (wm/arena-mode-flags)
+                                   :live-wire? wired?)))
           trace-path (trace/write-trace! judgement)]
       (println (str (summarise judgement trace-path)
                     " belly=" (count (:entries belly))

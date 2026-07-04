@@ -158,6 +158,22 @@
     :hinge
     :kl))
 
+(defn arena-mode-flags
+  "B-0a tick provenance (M-aif-faithfulness §2.0): the RESOLVED mode/flag set
+   the arena rank lanes score with THIS tick, for the trace's :wm-version
+   stamp. Resolved via the SAME fns the lanes call (arena-risk-mode /
+   arena-ambiguity-mode / arena-goal-outcome-mode) — never a separate env
+   read, so the stamp cannot drift from the behaviour it describes.
+   :kl-channel-weights and :c-temperature are the compute-efe defaults because
+   the arena opts (wm-efe-opts, rollout-snapshot-under-weights) pass neither;
+   if a lane ever starts passing them, build this map from those same opts."
+  []
+  {:risk-mode (arena-risk-mode)
+   :ambiguity-mode (arena-ambiguity-mode)
+   :goal-outcome-mode (arena-goal-outcome-mode)
+   :kl-channel-weights efe/default-kl-channel-weights
+   :c-temperature pref/default-c-temperature})
+
 (def ^:private mission-api-timeout-ms
   ;; The substrate-backed mission endpoint can take several seconds while it
   ;; projects substrate-2 mission-doc hyperedges. The previous 5s default made

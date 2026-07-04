@@ -179,3 +179,50 @@
       (doseq [k [:G-gap :G-graph-pragmatic :G-core :G-goal-outcome :G-total]]
         (is (contains? kept k) (str k " must survive the strip")))
       (is (not (contains? kept :prediction)) "the deep :prediction still drops"))))
+
+;; ---------------------------------------------------------------------------
+;; B-0a (M-aif-faithfulness §2.0) — tick provenance stamp
+;; ---------------------------------------------------------------------------
+
+(def ^:private sample-resolved-flags
+  "A resolved mode/flag set as the scheduled runner assembles it (the arena
+   fns + the live-wire switch); values here are fixtures, not env reads."
+  {:risk-mode :kl
+   :ambiguity-mode :gaussian-entropy
+   :goal-outcome-mode :kl
+   :kl-channel-weights {}
+   :c-temperature 0.1
+   :live-wire? true})
+
+(deftest wm-version-stamp-shape-test
+  (testing "stamp = git identity + resolved flags + schema version"
+    (let [stamp (trace/wm-version-stamp sample-resolved-flags)]
+      (is (or (= :unknown (:git-sha stamp))
+              (and (string? (:git-sha stamp))
+                   (re-matches #"[0-9a-f]{40}" (:git-sha stamp))))
+          "full 40-char sha (or :unknown when git is unavailable)")
+      (is (contains? stamp :git-dirty?))
+      (is (= trace/trace-schema-version (:trace-schema-version stamp))
+          "the record-shape version rides inside the stamp")
+      (is (= :kl (:risk-mode stamp)))
+      (is (true? (:live-wire? stamp))
+          "caller-resolved flags pass through unmodified"))))
+
+(deftest wm-version-roundtrips-through-trace-test
+  (testing "acceptance: (wm-version-of tick) recovers sha+flags from a record"
+    (let [stamp (trace/wm-version-stamp sample-resolved-flags)
+          out (assoc sample-judge-output :wm-version stamp)]
+      (trace/write-trace! out :dir *tmpdir* :date-str "2026-07-04")
+      (let [[r] (trace/read-trace :dir *tmpdir* :date-str "2026-07-04")
+            v (trace/wm-version-of r)]
+        (is (= stamp v) "the stamp survives write → read intact")
+        (is (some? (:git-sha v)) "which code — answerable from the record")
+        (is (= :kl (:risk-mode v)) "which config — answerable from the record")))))
+
+(deftest wm-version-absent-when-not-stamped-test
+  (testing "purely additive: un-stamped records don't grow a nil :wm-version"
+    (let [r (trace/trace-record sample-judge-output)]
+      (is (not (contains? r :wm-version))
+          "present-only, so bare judge calls and old records are unchanged")
+      (is (nil? (trace/wm-version-of r))
+          "the accessor answers nil, not a throw, for pre-B-0a records"))))

@@ -32,9 +32,17 @@
 
    Honest gap: prediction errors (ε per R8) are not yet recorded because
    R3a (predicted-observation likelihood model) is still partial. The
-  trace schema will gain `:prediction-errors` when R3a lands."
+  trace schema will gain `:prediction-errors` when R3a lands.
+
+   B-0a (M-aif-faithfulness §2.0, 2026-07-04): records written by the
+   scheduled runner additionally carry `:wm-version` — the tick provenance
+   stamp (git sha + dirty flag, the resolved mode/flag set, and
+   `trace-schema-version`). Present-only; see `wm-version-stamp` /
+   `wm-version-of`."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
+            [clojure.string :as str]
             [futon2.aif.policy-precision :as policy-precision])
   (:import (java.io PushbackReader)
            (java.time Instant LocalDate ZoneId)
@@ -96,6 +104,57 @@
       ;; operator-facing output of the abstain branch).
       ))
 
+;; ---------------------------------------------------------------------------
+;; B-0a tick provenance (M-aif-faithfulness §2.0, V-1) — which code, which
+;; config produced this tick, answerable from the record alone.
+;; ---------------------------------------------------------------------------
+
+(def trace-schema-version
+  "Monotonic integer version of the trace RECORD SHAPE. Bump on any change to
+   the record's key set or key semantics (the append-only discipline means
+   bumps are additive). Ledger:
+     1 — the accreted pre-provenance shape: everything up to and including
+         :goal-outcome-mode per ranked action (fb15d66, 2026-07-04).
+     2 — adds :wm-version (B-0a, 2026-07-04)."
+  2)
+
+(defn- futon2-git-version
+  "Git identity of the futon2 checkout this JVM loaded its code from:
+   {:git-sha <full sha> :git-dirty? <bool>}. `:git-dirty?` counts TRACKED
+   modifications only (`--untracked-files=no`) — the build-stamp convention:
+   untracked holes/-docs churn doesn't change which code ran, a modified
+   tracked source does. Only trustworthy from a one-shot JVM (the scheduled
+   runner): a long-running JVM's loaded code can predate the working tree.
+   Non-throwing: any git failure ⇒ {:git-sha :unknown :git-dirty? :unknown}
+   (a stamp that can kill the tick would invert B-0a's purpose)."
+  []
+  (try
+    (let [dir (str (System/getProperty "user.home") "/code/futon2")
+          sha (shell/sh "git" "-C" dir "rev-parse" "HEAD")
+          dirty (shell/sh "git" "-C" dir "status" "--porcelain" "--untracked-files=no")]
+      (if (and (zero? (:exit sha)) (zero? (:exit dirty)))
+        {:git-sha (str/trim (:out sha))
+         :git-dirty? (not (str/blank? (:out dirty)))}
+        {:git-sha :unknown :git-dirty? :unknown}))
+    (catch Exception _ {:git-sha :unknown :git-dirty? :unknown})))
+
+(defn wm-version-stamp
+  "Build the `:wm-version` provenance map: the futon2 git identity merged with
+   the caller-RESOLVED mode/flag set (the arena fns + the runner's switches —
+   see `wm-scheduled-run`; resolution stays with the fns the tick actually
+   uses, never a second env read here) plus `:trace-schema-version`. The
+   scheduled runner assocs this onto the judgement before `write-trace!`."
+  [resolved-flags]
+  (merge (futon2-git-version)
+         resolved-flags
+         {:trace-schema-version trace-schema-version}))
+
+(defn wm-version-of
+  "B-0a acceptance accessor: recover the provenance stamp (sha + flags) from a
+   trace record — no human correlation step. Nil for pre-B-0a records."
+  [record]
+  (:wm-version record))
+
 (defn trace-record
   "Pure: construct a v1 trace record from a `judge`-style output map.
    Accepts a map carrying at minimum `:belief`, `:observation`,
@@ -151,7 +210,12 @@
     (seq (:act-gate-verdicts judge-output))
     (assoc :act-gate-verdicts (:act-gate-verdicts judge-output))
     (:enactment judge-output)
-    (assoc :enactment (:enactment judge-output))))
+    (assoc :enactment (:enactment judge-output))
+    ;; B-0a tick provenance (present-only, schema v2): the scheduled runner
+    ;; stamps it via `wm-version-stamp`; bare judge calls don't — purely
+    ;; additive, no nil seam in un-stamped records.
+    (:wm-version judge-output)
+    (assoc :wm-version (:wm-version judge-output))))
 
 (defn write-trace!
   "Append one trace record (constructed from a judge-style output) to
