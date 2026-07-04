@@ -33,7 +33,28 @@
    `futon2/docs/futon-aif-completeness.md`. Cross-maps to F10 (dual-loop
    fitness) at stack scope. v0.13 reference: `futon2/docs/ants-aif-audit.md`
    §'Patterns worth porting' #1 (the cyberants `modulate-precisions`
-   pattern is the structural source for the need-component term)."
+   pattern is the structural source for the need-component term).
+
+   HONESTY (R18 badge discipline; M-aif-faithfulness B-2c): only the
+   variance leg 1/max(var,ε) is canonical AIF precision (inverse expected
+   uncertainty of the channel's error stream). The summed-in need term is
+   an AFFECT/SALIENCE modulation — attention allocated by preference gap,
+   not by uncertainty — wearing precision's name in the v0.13 sum. B-2c
+   builds the separation DARK behind `:salience-mode`:
+
+     :summed   (DEFAULT, live) — Π = variance-component + need-component,
+               byte-identical to v0.13 (witness:
+               test/resources/goldens/r7_default_path_witness.edn).
+     :separate (dark)          — Π = bounded variance-component ONLY; the
+               need term is reported under the named `:salience` key
+               (and retained as `:need-component` for readers), never
+               summed into Π.
+
+   The arena resolves the flag via `arena-salience-mode` in
+   `scripts/futon2/report/war_machine.clj` (`FUTON_WM_SALIENCE_MODE=separate`
+   turns the dark path ON; unset/other = `:summed`). The production flip is
+   Joe's, recorded in the M-aif-faithfulness §2.1 verdict ledger — not
+   claimed here."
   (:require [futon2.aif.belief :as belief]
             [futon2.aif.preferences :as pref]))
 
@@ -48,6 +69,12 @@
 (def default-need-scale 5.0)
 (def default-precision-floor 0.1)
 (def default-precision-cap 200.0)
+
+;; B-2c (M-aif-faithfulness §2.2): how the need term relates to Π.
+;; :summed = v0.13 behaviour (need term added into Π) — the live default.
+;; :separate = dark path: Π keeps only the canonical variance leg; the need
+;; term travels under the named :salience key. Flip is Joe's (§2.1 ledger).
+(def default-salience-mode :summed)
 
 (defn- variance
   "Sample variance of a sequence of numbers. Returns 0.0 for sequences
@@ -91,14 +118,21 @@
 
 (defn- update-channel-precision
   "Apply one new (error, observed) to a single channel's precision-state.
-   v0.13 combines variance-component + need-component, bounded."
+
+   :salience-mode :summed (default) — v0.13 behaviour: Π = bounded
+   (variance-component + need-component). Output map byte-identical to
+   pre-B-2c code.
+   :salience-mode :separate (dark) — Π = bounded variance-component only;
+   the need term is emitted under the named `:salience` key (kept under
+   `:need-component` too, so cross-mode readers see one schema for it)."
   [channel-id channel-state new-error observed
-   & {:keys [window-size min-variance need-scale floor cap]
+   & {:keys [window-size min-variance need-scale floor cap salience-mode]
       :or {window-size default-window-size
            min-variance default-min-variance
            need-scale default-need-scale
            floor default-precision-floor
-           cap default-precision-cap}}]
+           cap default-precision-cap
+           salience-mode default-salience-mode}}]
   (let [prev-history (:error-history channel-state [])
         appended (conj prev-history (double new-error))
         bounded (if (> (count appended) window-size)
@@ -106,20 +140,31 @@
                   (vec appended))
         v (variance bounded)
         variance-component (/ 1.0 (max v min-variance))
-        need-component (need-component-for channel-id observed need-scale)
-        raw-precision (+ variance-component need-component)
-        precision (-> raw-precision (max floor) (min cap))]
-    {:precision precision
-     :variance-component variance-component
-     :need-component need-component
-     :error-history bounded}))
+        need-component (need-component-for channel-id observed need-scale)]
+    (case salience-mode
+      :separate
+      (let [precision (-> variance-component (max floor) (min cap))]
+        {:precision precision
+         :variance-component variance-component
+         :need-component need-component
+         :salience need-component
+         :error-history bounded})
+      ;; :summed — the v0.13 live path, byte-identical (witness-tested).
+      (let [raw-precision (+ variance-component need-component)
+            precision (-> raw-precision (max floor) (min cap))]
+        {:precision precision
+         :variance-component variance-component
+         :need-component need-component
+         :error-history bounded}))))
 
 (defn update-precision-state
   "Given previous precision-state (map of channel-id → channel-state) and
    a prediction-errors map (channel-id → error-map carrying `:error` and
    `:observed`), return updated precision-state. v0.13 each channel's
    precision is recomputed as `variance-component + need-component`,
-   bounded by precision-floor/cap.
+   bounded by precision-floor/cap. B-2c: pass `{:salience-mode :separate}`
+   in opts for the dark path (canonical variance-only Π + named
+   `:salience`); omitted/`:summed` = v0.13 behaviour, byte-identical.
 
    Channels in errors-map without a previous state entry are initialised
    from defaults; channels in previous state without a new error are
@@ -145,6 +190,17 @@
    Returns the default precision (1.0) if the channel isn't tracked."
   [precision-state channel-id]
   (get-in precision-state [channel-id :precision] default-initial-precision))
+
+(defn salience-for
+  "Look up the named salience (need-term) for a channel in a
+   precision-state map (B-2c). Present under `:salience` when the state
+   was built with `:salience-mode :separate`; falls back to
+   `:need-component` (the same quantity's v0.13 home) so callers can read
+   one accessor across modes. Returns 0.0 for untracked channels."
+  [precision-state channel-id]
+  (or (get-in precision-state [channel-id :salience])
+      (get-in precision-state [channel-id :need-component])
+      0.0))
 
 (defn weighted-error
   "Re-weight a prediction-error map using a channel's history-tracked

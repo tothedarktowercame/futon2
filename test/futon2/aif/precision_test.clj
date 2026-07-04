@@ -1,7 +1,9 @@
 (ns futon2.aif.precision-test
   "Tests for R7 adaptive precision (per-channel Π tracked across calls
    via prediction-error history)."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str]
+            [clojure.test :refer [deftest is testing]]
             [futon2.aif.belief :as belief]
             [futon2.aif.precision :as precision]))
 
@@ -183,3 +185,91 @@
           s1 (precision/update-precision-state s0 errors)]
       (is (= 0.0 (get-in s1 [:not-a-real-channel :need-component]))
           "unknown channels get zero need-component (no preference to compare to)"))))
+
+;; ---------------------------------------------------------------------------
+;; B-2c (M-aif-faithfulness §2.2): salience-mode gating of the need term.
+;; Default :summed = v0.13, witnessed byte-identical below. :separate is the
+;; DARK path: Π = canonical variance leg only; need term under :salience.
+;; ---------------------------------------------------------------------------
+
+(defn- witness-sequence
+  "The exact deterministic 3-channel × 25-step sequence the golden
+   test/resources/goldens/r7_default_path_witness.edn was generated from
+   (pre-B-2c code, 2026-07-04). Exercises window bounding (>20 steps),
+   need-term on/off, and a no-preference channel. Do not edit without
+   regenerating the golden."
+  []
+  (vec (for [i (range 25)]
+         {:annotation-health {:error (* 0.05 (- (mod i 7) 3)) :observed (+ 0.3 (* 0.03 i))}
+          :sorry-count-norm  {:error (* 0.02 (mod i 5))       :observed (- 1.2 (* 0.06 i))}
+          :wm-witness-nopref {:error (* 0.11 (Math/sin (double i))) :observed 42.0}})))
+
+(defn- run-witness-sequence [opts]
+  (reduce (fn [s errs] (precision/update-precision-state s errs opts))
+          (precision/initial-precision-state
+           #{:annotation-health :sorry-count-norm :wm-witness-nopref})
+          (witness-sequence)))
+
+(deftest default-path-byte-identical-witness-test
+  (testing "default path reproduces the pre-B-2c golden byte-for-byte (pr-str)"
+    (let [golden (-> (io/file "test" "resources" "goldens"
+                              "r7_default_path_witness.edn")
+                     slurp
+                     str/trim)]
+      (is (= golden (pr-str (run-witness-sequence {})))
+          "no-opts default must be byte-identical to pre-B-2c output")
+      (is (= golden (pr-str (run-witness-sequence {:salience-mode :summed})))
+          "explicit :summed must be byte-identical to pre-B-2c output"))))
+
+(deftest separate-mode-precision-excludes-need-term-test
+  (testing ":separate — Π is the bounded variance leg only; need term lives under :salience"
+    ;; observed 0.4 is 0.3 below :annotation-health preference [0.7 1.0];
+    ;; tiny error → variance < min-variance → variance-component = 100.0
+    (let [s0 (precision/initial-precision-state #{:annotation-health})
+          errors {:annotation-health {:error 0.001 :observed 0.4}}
+          s1 (precision/update-precision-state s0 errors {:salience-mode :separate})
+          ch (get s1 :annotation-health)]
+      (is (= 100.0 (:precision ch))
+          "Π = bounded variance-component; the 1.5 need term is NOT summed in")
+      (is (< (Math/abs (- 1.5 (:salience ch))) 1e-6)
+          ":salience carries need-scale × gap = 5 × 0.3 = 1.5")
+      (is (= (:salience ch) (:need-component ch))
+          ":need-component retained as the same quantity for cross-mode readers"))))
+
+(deftest separate-mode-extreme-gap-does-not-inflate-precision-test
+  (testing ":separate — an extreme preference gap no longer drives Π to the cap"
+    (let [errors {:annotation-health {:error 0.0 :observed -100.0}}
+          summed (-> (precision/initial-precision-state #{:annotation-health})
+                     (precision/update-precision-state errors {:salience-mode :summed})
+                     (get :annotation-health))
+          separate (-> (precision/initial-precision-state #{:annotation-health})
+                       (precision/update-precision-state errors {:salience-mode :separate})
+                       (get :annotation-health))]
+      (is (= 200.0 (:precision summed))
+          "summed mode: the huge need term drives Π to the cap (v0.13)")
+      (is (= 100.0 (:precision separate))
+          "separate mode: Π stays at the variance leg (1/min-variance)")
+      (is (> (:salience separate) 100.0)
+          "the gap signal is preserved — as named salience, not as Π"))))
+
+(deftest separate-mode-bounds-still-apply-to-variance-leg-test
+  (testing ":separate — floor/cap bound the variance leg itself"
+    (let [s0 (precision/initial-precision-state #{:ch})
+          high-var-errors [50.0 -50.0 50.0 -50.0 50.0 -50.0]
+          s (reduce (fn [s e]
+                      (precision/update-precision-state
+                       s {:ch {:error e}} {:salience-mode :separate}))
+                    s0 high-var-errors)]
+      ;; variance = 2500 → raw variance-component = 4e-4, below floor 0.1
+      (is (= 0.1 (get-in s [:ch :precision]))
+          "floor applies to the variance-only Π"))))
+
+(deftest salience-for-lookup-test
+  (testing "salience-for reads :salience when present (:separate states)"
+    (let [s {:ch {:precision 100.0 :salience 1.5 :need-component 1.5}}]
+      (is (= 1.5 (precision/salience-for s :ch)))))
+  (testing "salience-for falls back to :need-component (:summed states)"
+    (let [s {:ch {:precision 101.5 :need-component 1.5}}]
+      (is (= 1.5 (precision/salience-for s :ch)))))
+  (testing "salience-for returns 0.0 for untracked channels"
+    (is (= 0.0 (precision/salience-for {} :unknown)))))
