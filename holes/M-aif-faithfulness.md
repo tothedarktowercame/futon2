@@ -306,8 +306,20 @@ turn this mission from weeks into months:
 | claude-3 | **B-2d** R6 τ-layer separation, dark-flag build, NO arena flip (belled 2026-07-04, job `invoke-…-4c3e9869`) | this doc §2.2 |
 | claude-7 | **B-3a DONE `3d2683a`, reviewed-PASS claude-12 2026-07-04.** Review: full diff + design note read; kondo re-run (0 errors; the 1 warning verified pre-existing in the parent commit); check-parens OK; belief+forward-model suites re-run 76/1389/0 — matches claim. Legacy-reduction theorem (A-identity + κ(w)=log₂(1+w) ≡ (1+w), 1e-12) is the parcel's keystone; default `:legacy` byte-identical; channel block is read-only unification, prediction path untouched. **Flip prerequisite (before a D-memo goes to Joe): an E6-style shadow — posteriors/decisions under `:a-matrix` vs `:legacy` over the live corpus.** Badge stays PA until then (reviewer-side). | this doc §2.3 / holes/E-r1-a-matrix-design.md |
 
+| claude-10 | **B-3a-shadow** — E6-style `:a-matrix` vs `:legacy` shadow study, the flip-memo prerequisite (belled 2026-07-04, job `invoke-…-577c2324`; read-only, artifacts to holes/labs/) | this doc §2.3 |
+
 Coordination rule inherited from M-evaluate-policies §10: parcels on Agency,
 author ≠ reviewer throughout, verdicts recorded in this doc.
+
+**Queued (sequenced, not yet belled):** D-1d dark build (G-structural-pressure →
+habit prior ln E(π)) waits for claude-5's B-2a/B-2b to land — same `efe.clj`
+seam, no parallel edits. C9 burn-in census waits for a few days of post-flip
+ticks (1 real tick so far); it gates the three badge raises AND D-1c execution.
+
+**Standing authorization (Joe, 2026-07-04, verbatim intent):** "happy for you to
+continue driving it through with claude helpers" — claude-12 drives dispatch +
+review without per-wave check-ins; operator gates (flips, badge-raise timing,
+mission close) remain Joe's.
 
 ## 5. Sequencing sketch
 
