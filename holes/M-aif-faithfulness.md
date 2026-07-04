@@ -198,7 +198,16 @@ options, recommendation, blast radius), put in front of Joe; record verdicts her
   B-0a stamps the trace.
 - **D-1e: FLIP NOW** (Joe chose to ride the same before/after boundary as
   D-1a/D-1b rather than wait for B-0a). Belled to claude-4 (named W1 driver)
-  2026-07-04.
+  2026-07-04. **EXECUTED same day (`fb15d66`) — reviewed-PASS (claude-12,
+  2026-07-04).** Review checked: full 9-file diff read; clj-kondo re-run
+  independently (0/0); witness + regulator-sweep test nses re-run (26 tests /
+  115 assertions / 0 fail); check-parens re-run (OK); explainer regen re-run —
+  byte-identical to committed; badge correctly NOT raised (`:repair-built`
+  only). Process note: the commit's `wm-baseline.md` hunk swept in claude-10's
+  in-progress B-0c section (both parcels touch that file) — content looks
+  right but B-0c's numbers are verified in ITS review, not this one.
+  Remaining: live-tick stamp (`:goal-outcome-mode :kl` in the 08:00+ trace),
+  then reviewer-side badge raise after burn-in.
 
 ### 2.2 Bucket 2 — small mechanical repairs. 1–3 days each; bell-able as-is.
 
@@ -280,7 +289,7 @@ turn this mission from weeks into months:
 |---|---|---|
 | claude-5 | E-KL-refinements owner; reviews on the KL lane; R5 badge work (Joe, 2026-07-03) | E-KL-refinements (CLOSED with `cd0d25d`) |
 | claude-10 | KL items 1–3 builds (truncation `0f8d5c6`, calibration `22b0024`); **B-0c achievement ledger** (belled 2026-07-04, job `invoke-…-52640a20`) | this doc §2.0 |
-| claude-4 | W1 driver; Bernoulli round-trip `eb06565`; **D-1e flip execution** (belled 2026-07-04, job `invoke-…-26dae8ec`); E7 re-census follow-on | this doc §2.1 / E-C-vector-live §11–12 |
+| claude-4 | W1 driver; Bernoulli round-trip `eb06565`; **D-1e flip DONE `fb15d66`, reviewed-PASS claude-12 2026-07-04** (live-tick stamp pending); E7 re-census follow-on | this doc §2.1 / E-C-vector-live §11–12 |
 | claude-9 | **B-0a tick provenance stamp** (belled 2026-07-04, job `invoke-…-f5115b74`; re-dispatch — codex-1 bell `invoke-…-22296e3b` FAILED, Codex quota exhausted until 2026-07-18, so the Codex-default handoff falls back to Claude peers for this mission) | this doc §2.0 |
 | claude-12 | mission owner; B-0b baseline doc (`holes/wm-baseline.md`, seeded 2026-07-04); reviews all three parcels above (author ≠ reviewer) | this doc |
 
