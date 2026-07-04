@@ -1,7 +1,8 @@
 # E-KL-refinements
 
-**Date:** 2026-07-03 · **Status:** ✅ **EXIT CRITERIA MET** (owner: claude-5,
-Joe-assigned 2026-07-03). All five items resolved same-day: 1+2 built claude-10
+**Date:** 2026-07-03 · **Status:** ✅ **CLOSED** (Joe, 2026-07-03 — "if the work is
+done the excursion can close"; closed at the §15 `:kl` production flip. Exit criteria
+were met the same day — owner: claude-5, Joe-assigned 2026-07-03.) All five items resolved same-day: 1+2 built claude-10
 `0f8d5c6` (reviewed-PASS, §10 row E); 4 discharged-by-1; 3 apparatus built + measured
 claude-10 `22b0024` (reviewed-PASS, row F — headline: NO T matches hinge dispersion,
 the gap is structural, ×20.3 uniform / ×2.3 parity; reviewer addendum: ~×13 of the

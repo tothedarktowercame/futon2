@@ -42,9 +42,17 @@
      :live-weights {:gap-weight 6.0}}))
 
 (defn- without-live-io [f]
+  ;; Pin the arena mode flips too (D5c ambiguity, §15 risk-KL): these tests
+  ;; exercise the GAP-WEIGHT regulator axis ceteris paribus, and the fixture's
+  ;; expectations are calibrated against the historical hinge/variance-sum
+  ;; units. Under :risk-mode :kl the risk term is in nats (×20 dispersion) and
+  ;; gap-weight 10.0 no longer dominates — a REAL post-flip regulator-range
+  ;; question (E-possible-world-regulator), not a defect in the sweep.
   (with-redefs-fn {#'wm/capability-star-map (fn [] nil)
                    #'wm/mission-gap-view (fn [] nil)
-                   #'wm/mission-domain-ratified (fn [] nil)}
+                   #'wm/mission-domain-ratified (fn [] nil)
+                   #'wm/arena-risk-mode (fn [] :hinge)
+                   #'wm/arena-ambiguity-mode (fn [] :variance-sum)}
     f))
 
 (defn- targets [rollout]

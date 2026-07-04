@@ -1,0 +1,21 @@
+{:placeholder-totals [],
+ :winner
+ {:action [:advance-mission "M-futonzero-generative"],
+  :G-total 1.6771348257034377,
+  :placeholder? false},
+ :config
+ {:risk-mode :kl,
+  :kl-channel-weights :uniform-default,
+  :c-temperature :default-0.1,
+  :ambiguity-mode :gaussian-entropy},
+ :ihtb2-pass? true,
+ :days 14,
+ :n-ordinary 110,
+ :n-ordinary-above-placeholder nil,
+ :n-placeholders 0,
+ :sim-only true,
+ :generated-by "scripts/wm_ihtb2_check.clj (pre-flip IHTB-2)",
+ :ordinary-totals
+ {:min 1.6771348257034377,
+  :max 6.667899958931288,
+  :mean 3.0045565733677253}}

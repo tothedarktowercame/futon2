@@ -42,7 +42,7 @@
    :note
    "M-evaluate-policies 2026-07-03: flips 35.9% (live hinge). D5a :risk-mode :kl BUILT DARK (f6451ba): c-distribution densities in preferences.clj per the W1 contract (E-C-vector-live.md:230). E6: winner-changing (ρ.841, sd ×22). E-KL-refinements items 1+2 LANDED & REVIEWED (0f8d5c6): Q truncated+renormalised to [0,1] ⇒ TRUE KL (quadrature-verified, ≥0; in-source badge :derived-from-FEP under the declared Gaussian channel model) + :pragmatic-parity weight preset. E6 re-run post-truncation (e6-shadow-post-KLref.edn): behaviourally negligible (kl sd 2.3439→2.3432, ratio ×22.16→×22.15, winner/ρ unchanged) — the repair buys honesty, not behaviour change; pre-truncation flip evidence stands. Items 3 (T-calibration) + 5 (Bernoulli round-trip w/ W1) open → holes/E-KL-refinements.md.",
    :repair-built
-   ":risk-mode :kl (f6451ba + 0f8d5c6 truncated) — dark; TRUE KL per channel; flip UNBLOCKED (E-KL-refinements 1+2 landed, reviewed) — operator decision. Canonical flip config = UNIFORM channel weights (Σ KL_ch = joint KL under independence); :pragmatic-parity is a comparability preset, :principled-approximation at best"},
+   ":risk-mode :kl FLIPPED LIVE 2026-07-03 (operator decision; arena-risk-mode, uniform weights = the canonical joint-KL config, T 0.1; FUTON_WM_RISK_MODE=hinge escape hatch). Badge raise to :derived-from-FEP PENDING LIVE-TICK EVIDENCE + C9 burn-in — the next cron tick deploys (fresh process). IHTB-2 resolved structurally: cascade placeholders never enter the selection pool (appended after wm-decision); post-flip ordinary totals go positive (≈ canonical −E[ln C], ihtb2-flip-check.edn)"},
   :G-info
   {:badge :analogical,
    :claims "epistemic info-gain (EIG)",
@@ -77,7 +77,7 @@
    :note
    "M-evaluate-policies 2026-07-03: influence MEASURED 0% flips/674 ticks (within-tick sd 0.0039 — argmin hears σ not μ, E4). Canonical repair BUILT DARK (:ambiguity-mode :gaussian-entropy, 2d6533e). E6 shadow: sd ×554, FLIPS the live winner alone ⇒ enabling is Joe-gated on e6-shadow.edn evidence.",
    :repair-built
-   ":ambiguity-mode :gaussian-entropy (2d6533e) — the audit's named repair, dark; E6: flips live winner; flip = operator decision"},
+   ":ambiguity-mode :gaussian-entropy FLIPPED LIVE 2026-07-03 (§14, operator decision; arena-ambiguity-mode, FUTON_WM_AMBIGUITY_MODE=variance-sum escape hatch). Badge raise to :derived-from-FEP PENDING LIVE-TICK EVIDENCE + C9 burn-in — the sim via the production path realised E6's prediction (winner → learn-action-class); live-tick confirmation is the remaining step"},
   :effective-temperature-softmax
   {:badge :principled-approximation,
    :claims "policy selection P(π) = σ(−γ·G)",

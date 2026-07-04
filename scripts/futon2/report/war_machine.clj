@@ -118,6 +118,27 @@
     :variance-sum
     :gaussian-entropy))
 
+(defn- arena-risk-mode
+  "E-KL-refinements PRODUCTION FLIP (Joe, 2026-07-03, M-evaluate-policies §15):
+   risk = Σ_ch KL(truncated-Gaussian Q̃_ch ‖ C_ch density) in nats — a TRUE KL
+   (0f8d5c6), UNIFORM channel weights (= the joint KL under channel
+   independence, the canonical config; :pragmatic-parity is a comparability
+   preset only), T = default-c-temperature 0.1 (deliberately unfitted —
+   t-calibration.edn: no T matches the hinge's dispersion; the gap is
+   structural). `FUTON_WM_RISK_MODE=hinge` is the operator escape hatch back
+   to the historical weighted hinge (mirrors FUTON_WM_AMBIGUITY_MODE).
+   Evidence weighed at flip time: e6-shadow(+post-KLref).edn (winner-changing,
+   ρ .841) + t-calibration.edn + ihtb2-flip-check.edn (ordinary totals go
+   POSITIVE ≈ +1.7..+6.7 — the KL entropy terms cancel gaussian-entropy
+   ambiguity, leaving ≈ canonical −E[ln C]; SAFE because cascade placeholder
+   rows are appended AFTER wm-decision and never enter the selection pool —
+   downstream stats must keep excluding placeholder rows when comparing
+   G-totals)."
+  []
+  (if (= "hinge" (System/getenv "FUTON_WM_RISK_MODE"))
+    :hinge
+    :kl))
+
 (def ^:private mission-api-timeout-ms
   ;; The substrate-backed mission endpoint can take several seconds while it
   ;; projects substrate-2 mission-doc hyperedges. The previous 5s default made
@@ -400,7 +421,9 @@
                       (live-gap-view-efe-opts
                        {:time-pressure 0
                         ;; D5c flip — keep the re-rank lane mode-coherent
-                        :ambiguity-mode (arena-ambiguity-mode)}))
+                        :ambiguity-mode (arena-ambiguity-mode)
+                        ;; :kl flip (§15) — same coherence for the risk lane
+                        :risk-mode (arena-risk-mode)}))
                      (select-keys structure
                                   [:capability-graph :pre-registered-goal
                                    :mission-gap-view :mission-domain-view])
@@ -3765,7 +3788,9 @@
                       {:time-pressure wm-time-pressure
                        :horizon-steps wm-horizon-steps
                        ;; D5c flip — see arena-ambiguity-mode docstring
-                       :ambiguity-mode (arena-ambiguity-mode)}))
+                       :ambiguity-mode (arena-ambiguity-mode)
+                       ;; :kl flip (§15) — see arena-risk-mode docstring
+                       :risk-mode (arena-risk-mode)}))
         wm-ranked (->> (efe/rank-actions wm-state wm-enriched-candidates wm-efe-opts)
                        apply-anamnesis-tiebreak
                        (filter-live-open-mission-ranked-actions wm-missions))

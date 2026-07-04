@@ -1420,3 +1420,44 @@ meta-pattern flexiargs (DOCUMENT phase); all reviews of bells-back (each reviewe
 against its gates before anything is accepted — diff read, verify step rerun, checks
 stated). Phase note: parcels A–C are D7 experimental apparatus + behaviour-identical
 observability, i.e. DERIVE-internal per §8.13; nothing semantic flips anywhere.
+
+## 15. PRODUCTION FLIP — risk = :kl live (2026-07-03, operator decision)
+
+Joe: "let's flip on :kl following your recommendation" (uniform weights, T 0.1,
+D5c-style hatch, IHTB-2 sim first). E-KL-refinements exit criteria were met the same
+day (§10 rows E/F/G); the excursion is CLOSED with this flip.
+
+**Pre-flip IHTB-2 sim** (`scripts/wm_ihtb2_check.clj` → `ihtb2-flip-check.edn`):
+post-flip ordinary G-totals go POSITIVE (min +1.68 / mean +3.00 / max +6.67) — the
+13-channel KL entropy terms (+~9.4 nats each, tiny-σ regime) cancel gaussian-entropy
+ambiguity's (−~9.4 each), leaving ≈ the canonical −E[ln C]: the flip lands G-core at
+the D8 endpoint shape. **IHTB-2 resolved STRUCTURALLY, not numerically**: cascade
+placeholder rows never enter the selection pool — `efe/rank-actions` doesn't emit
+them; the arena appends them AFTER `wm-decision` (Car-3 seam, "wm-admissible/
+wm-decision … unaffected"), `:held-for-arming?`, WM-I4-gated. Consequence for
+consumers: downstream stats MUST keep excluding placeholder rows when comparing
+G-totals (E6/census convention). The check script stays as a regression tripwire.
+
+**The flip** (`arena-risk-mode`, mirrors D5c): `:risk-mode :kl` ON by default in both
+rank lanes; `FUTON_WM_RISK_MODE=hinge` escape hatch (live-wire pattern). Uniform
+channel weights (= joint KL under independence — the canonical config; parity is a
+comparability preset) at `default-c-temperature` 0.1 (unfitted by design —
+t-calibration.edn: no T matches, the gap is structural). Verified: default → :kl,
+hatch → :hinge, suite 428/1639/0, kondo 0/0, strengthened check-parens OK.
+
+**Suite finding worth keeping** (real, not incidental): `swept-gap-weight-changes-
+ranking` failed under the flip — at nats-scale risk, `gap-weight 10.0` no longer
+dominates the ranking. Fixture now pins both arena modes (hinge/variance-sum) since
+it tests the gap axis ceteris paribus; but the finding is operational: **regulator
+dynamic ranges (gap-weight, and by extension the E-possible-world-regulator sweeps)
+are calibrated against hinge-era units and need re-examination post-flip.**
+
+**Explainer/badges** (Joe: "update the explainer to say that evidence is still
+pending"): `:G-risk` AND `:G-ambiguity` `repair-built` now read FLIPPED LIVE
+2026-07-03, badge raise to `:derived-from-FEP` PENDING LIVE-TICK EVIDENCE + C9
+burn-in; badges themselves unchanged until then (dcbe021 discipline). Explainer
+regenerated line-exact.
+
+**Deploy**: next hourly cron tick (fresh process) self-deploys; rollback = env hatch.
+Remaining evidence steps: live-tick confirmation for BOTH flips → badge raise + regen;
+C9 before/after burn-in census; E7; C10.
