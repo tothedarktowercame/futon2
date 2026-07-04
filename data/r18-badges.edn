@@ -30,17 +30,17 @@
    :note
    "M-evaluate-policies 2026-07-03: flips 44.5%. Documented as EXOGENOUS WEIGHT; canonical seat = the habit prior ln E(π), not a G-summand (D8)."},
   :G-risk
-  {:badge :analogical,
+  {:badge :principled-approximation,
    :claims "EFE risk = D_KL[Q(o|π) ‖ C]",
    :cite
    "Da Costa et al. 2020, risk = KL of predicted outcomes from preferences C",
    :code-ref "futon2/src/futon2/aif/free_energy.clj:44",
    :computes
-   "weighted L1 hinge-distance of predicted point-estimate from preference ranges; no distribution/log/KL",
+   "LIVE :kl (cd0d25d): truncated+renormalised per-channel Gaussian KL vs C — TRUE KL, ≥0, quadrature-verified (0f8d5c6) — uniform weights, ×urgency multiplier (the non-canonical residue keeping this PA, not derived); FUTON_WM_RISK_MODE=hinge hatch → historical weighted-L1 hinge",
    :repair
    "predict outcome distribution Q(o|π) and KL against a normalised preference C",
    :note
-   "M-evaluate-policies 2026-07-03: flips 35.9% (live hinge). D5a :risk-mode :kl BUILT DARK (f6451ba): c-distribution densities in preferences.clj per the W1 contract (E-C-vector-live.md:230). E6: winner-changing (ρ.841, sd ×22). E-KL-refinements items 1+2 LANDED & REVIEWED (0f8d5c6): Q truncated+renormalised to [0,1] ⇒ TRUE KL (quadrature-verified, ≥0; in-source badge :derived-from-FEP under the declared Gaussian channel model) + :pragmatic-parity weight preset. E6 re-run post-truncation (e6-shadow-post-KLref.edn): behaviourally negligible (kl sd 2.3439→2.3432, ratio ×22.16→×22.15, winner/ρ unchanged) — the repair buys honesty, not behaviour change; pre-truncation flip evidence stands. Items 3 (T-calibration) + 5 (Bernoulli round-trip w/ W1) open → holes/E-KL-refinements.md.",
+   "M-evaluate-policies 2026-07-03: flips 35.9% (live hinge). D5a :risk-mode :kl BUILT DARK (f6451ba): c-distribution densities in preferences.clj per the W1 contract (E-C-vector-live.md:230). E6: winner-changing (ρ.841, sd ×22). E-KL-refinements items 1+2 LANDED & REVIEWED (0f8d5c6): Q truncated+renormalised to [0,1] ⇒ TRUE KL (quadrature-verified, ≥0; in-source badge :derived-from-FEP under the declared Gaussian channel model) + :pragmatic-parity weight preset. E6 re-run post-truncation (e6-shadow-post-KLref.edn): behaviourally negligible (kl sd 2.3439→2.3432, ratio ×22.16→×22.15, winner/ρ unchanged) — the repair buys honesty, not behaviour change; pre-truncation flip evidence stands. Items 3 (T-calibration) + 5 (Bernoulli round-trip w/ W1) open → holes/E-KL-refinements.md. · RAISED :analogical→:principled-approximation 2026-07-04, reviewer claude-12 (adversarial rule applied): live-tick evidence (every scored candidate mode-stamped since the 07:00Z tick) + C9 first-pass census (holes/labs/M-aif-faithfulness/c9-burn-in.edn — sane, γ-continuous 1.268→1.287, abstain unchanged; n=28/one-day caveat on record).",
    :repair-built
    ":risk-mode :kl FLIPPED LIVE 2026-07-03 (operator decision; arena-risk-mode, uniform weights = the canonical joint-KL config, T 0.1; FUTON_WM_RISK_MODE=hinge escape hatch). Badge raise to :derived-from-FEP PENDING LIVE-TICK EVIDENCE + C9 burn-in — the next cron tick deploys (fresh process). IHTB-2 resolved structurally: cascade placeholders never enter the selection pool (appended after wm-decision); post-flip ordinary totals go positive (≈ canonical −E[ln C], ihtb2-flip-check.edn)"},
   :G-info
@@ -66,16 +66,16 @@
    :note
    "M-evaluate-policies 2026-07-03: now PERSISTED (2d6533e; was stripped). Disposition: split — the 1000·mask is a domain restriction (Π_feasible), not a value; ascent = pragmatic proxy (D8/§3.5)."},
   :G-ambiguity
-  {:badge :principled-approximation,
+  {:badge :derived-from-FEP,
    :claims "EFE ambiguity  E_Q(s|π)[H[P(o|s)]]",
    :cite
    "Da Costa et al. 2020 (arXiv:2001.07203), G = risk + ambiguity",
    :code-ref "futon2/src/futon2/aif/efe.clj:38",
    :computes
-   "sum of per-channel predicted variance (monotone Gaussian-entropy proxy)",
+   "LIVE :gaussian-entropy (8ae1090): Σ_ch ½·ln(2πe·σ²) under Q(s|π) — exact under the declared Gaussian channel model, unscaled; FUTON_WM_AMBIGUITY_MODE=variance-sum hatch → historical variance-sum proxy",
    :repair "use ½ln(2πe σ²) under Q(s|π) → :derived-from-FEP",
    :note
-   "M-evaluate-policies 2026-07-03: influence MEASURED 0% flips/674 ticks (within-tick sd 0.0039 — argmin hears σ not μ, E4). Canonical repair BUILT DARK (:ambiguity-mode :gaussian-entropy, 2d6533e). E6 shadow: sd ×554, FLIPS the live winner alone ⇒ enabling is Joe-gated on e6-shadow.edn evidence.",
+   "M-evaluate-policies 2026-07-03: influence MEASURED 0% flips/674 ticks (within-tick sd 0.0039 — argmin hears σ not μ, E4). Canonical repair BUILT DARK (:ambiguity-mode :gaussian-entropy, 2d6533e). E6 shadow: sd ×554, FLIPS the live winner alone ⇒ enabling is Joe-gated on e6-shadow.edn evidence. · RAISED :principled-approximation→:derived-from-FEP 2026-07-04, reviewer claude-12 (adversarial rule applied): live-tick evidence (every scored candidate mode-stamped since the 07:00Z tick) + C9 first-pass census (holes/labs/M-aif-faithfulness/c9-burn-in.edn — sane, γ-continuous 1.268→1.287, abstain unchanged; n=28/one-day caveat on record).",
    :repair-built
    ":ambiguity-mode :gaussian-entropy FLIPPED LIVE 2026-07-03 (§14, operator decision; arena-ambiguity-mode, FUTON_WM_AMBIGUITY_MODE=variance-sum escape hatch). Badge raise to :derived-from-FEP PENDING LIVE-TICK EVIDENCE + C9 burn-in — the sim via the production path realised E6's prediction (winner → learn-action-class); live-tick confirmation is the remaining step"},
   :effective-temperature-softmax
@@ -163,16 +163,16 @@
    :note
    "borderline — the estimator is a substitution, not an approximation of the β-update"},
   :G-goal-outcome
-  {:badge :analogical,
+  {:badge :principled-approximation,
    :claims "\"the CANONICAL EFE goal-outcome risk … KL\" (docstring)",
    :cite "Da Costa et al. 2020, risk = KL[Q(o|π) ‖ C]",
    :code-ref "futon2/src/futon2/aif/c_vector.clj:406",
    :computes
-   "mean over open C-entries of (mostly binary) goal-satisfaction divergences; p=1 default ⇒ deterministic",
+   "LIVE :kl (fb15d66): :becomes entries scored by exact Bernoulli KL vs pref/c-distribution (nats, T 0.1 unfitted — structural, 22b0024); range entries keep hinge inside the mean (unit-mixing residue keeping this PA); FUTON_WM_GOAL_OUTCOME_MODE=hinge hatch → historical hinge",
    :repair
    "the named W1: predict goal-outcome distribution under π and KL against a normalised C-vector",
    :note
-   "SHARPEST relabel — a non-KL explicitly labelled canonical/KL; ns docstring concedes it is deferred · M-evaluate-policies 2026-07-03: 0% flips so far (young, 4% of corpus). W1 driver now claude-4 (2315d49 durable join makes it livelier) — E7 = post-merge re-census. Bernoulli KL path for :becomes entries provided by the D5a c-distribution contract.",
+   "SHARPEST relabel — a non-KL explicitly labelled canonical/KL; ns docstring concedes it is deferred · M-evaluate-policies 2026-07-03: 0% flips so far (young, 4% of corpus). W1 driver now claude-4 (2315d49 durable join makes it livelier) — E7 = post-merge re-census. Bernoulli KL path for :becomes entries provided by the D5a c-distribution contract. · RAISED :analogical→:principled-approximation 2026-07-04, reviewer claude-12 (adversarial rule applied): live-tick evidence (every scored candidate mode-stamped since the 07:00Z tick) + C9 first-pass census (holes/labs/M-aif-faithfulness/c9-burn-in.edn — sane, γ-continuous 1.268→1.287, abstain unchanged; n=28/one-day caveat on record).",
    :repair-built
    ":goal-outcome-mode :kl FLIPPED LIVE 2026-07-04 (D-1e, operator decision, M-aif-faithfulness §2.1; arena-goal-outcome-mode, FUTON_WM_GOAL_OUTCOME_MODE=hinge escape hatch; same boundary as the §15 :risk-mode flip cd0d25d). :becomes entries score by the exact Bernoulli KL (predictive-goal-outcome-risk-kl eb06565, item-5 round-trip reviewed-PASS); range entries keep the hinge inside the KL form (their Gaussian Q is the channel lane's). T 0.1 unfitted — 22b0024: no T matches the hinge, structural. Known scale ≈ ×9.6 hinge on the live belly. Badge raise PENDING LIVE-TICK EVIDENCE + burn-in (reviewer-side); the p=1-deterministic fault in :computes is now conditional on the R12 credit burn-in, not the scoring form"},
   :G-survival

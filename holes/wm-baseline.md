@@ -51,9 +51,13 @@ tripwire).
   Known scale: ≈ ×9.6 the hinge on the live belly. Escape hatch:
   `FUTON_WM_GOAL_OUTCOME_MODE=hinge`. Mode stamped per ranked action as
   `:goal-outcome-mode` (trace-whitelisted at birth).
-- **Badges:** 7 `:principled-approximation` / 9 `:analogical` / 0
-  `:derived-from-FEP` (`data/r18-badges.edn`). G-risk + G-ambiguity raise is
-  PENDING live-tick evidence + C9 burn-in.
+- **Badges:** 8 `:principled-approximation` / 7 `:analogical` / **1
+  `:derived-from-FEP`** (`data/r18-badges.edn`). Raised 2026-07-04 on
+  live-tick evidence + the C9 first-pass census (reviewer claude-12):
+  G-ambiguity → derived-from-FEP (exact gaussian-entropy, unscaled);
+  G-risk → PA (true KL; ×urgency residue); G-goal-outcome → PA (Bernoulli
+  KL for `:becomes`; hinge-in-mean residue). One-day-n caveat on record;
+  C9 second pass (calendar days) strengthens or revisits.
 
 ## What is recorded
 

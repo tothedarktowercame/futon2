@@ -372,7 +372,28 @@ evidence found; loop now logs per-click exit codes, `dbb90d8`). Cyder/Arxana
 Clock: the campaign class was INVISIBLE to the scan (transient service ≠
 timer) — aggregator extended with a transient-services section (futon3c
 `ae03e68`, validated live). **C9-first-pass census: BELLED** to claude-10
-(job `invoke-…-991400df`) — gates the badge raises, D-1c, and F-sp timing. C9 burn-in census waits for a few days of post-flip
+(job `invoke-…-991400df`) — gates the badge raises, D-1c, and F-sp timing.
+
+**C9 first-pass: DONE `2236076` (claude-10), reviewed-PASS claude-12
+2026-07-04.** Verdict-seed: post-flip WM SANE — γ continuous across the
+boundary (1.268→1.287), abstain-rate unchanged (0%), modes in the known set;
+the hinge→KL winner-G level shift is compositional; the within-campaign G
+decline is BELLY settling (G-core halved, augmentation flat — not the KL
+layer). Review: determinism re-verified in a stable corpus window (in-place
+re-run, clean tree); n=28 arithmetic independently cross-checked (2
+pre-trigger KL ticks + 22 clicks + 4 tagged cron); check-parens OK.
+**BADGE RAISES EXECUTED (reviewer step, same day):** G-ambiguity
+`:principled-approximation → :derived-from-FEP` (exact ½ln(2πe·σ²), unscaled,
+declared Gaussian model — the audit's first derived-from-FEP);
+G-risk `:analogical → :principled-approximation` (TRUE KL live; the ×urgency
+multiplier is the named residue below derived); G-goal-outcome `:analogical →
+:principled-approximation` (exact Bernoulli KL for `:becomes`; hinge-in-mean
++ unfitted-T residues). `:computes` fields updated to the LIVE forms with
+hatches; raise provenance in each `:note`; explainer regenerated + spliced.
+Scoreboard: **7 analogical / 8 PA / 1 derived-from-FEP** (was 9/7/0 at
+charter). Caveat honoured: raises cite the one-day n; C9 second pass
+(calendar days) strengthens or revisits. Still gated on more burn-in:
+D-1c execution, F-sp execution. C9 burn-in census waits for a few days of post-flip
 ticks (1 real tick so far); it gates the three badge raises AND D-1c execution.
 Flip-evidence shadow trio: **DONE `f3560a2`, reviewed-PASS claude-12
 2026-07-04** (foreground run per the new parcel rule — no premature-done
