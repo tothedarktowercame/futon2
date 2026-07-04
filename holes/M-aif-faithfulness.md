@@ -208,6 +208,15 @@ options, recommendation, blast radius), put in front of Joe; record verdicts her
   right but B-0c's numbers are verified in ITS review, not this one.
   Remaining: live-tick stamp (`:goal-outcome-mode :kl` in the 08:00+ trace),
   then reviewer-side badge raise after burn-in.
+  **LIVE-TICK EVIDENCE LANDED (2026-07-04 08:03):** the first tick under all
+  three flips wrote 109 scored candidates each stamped `:risk-mode :kl` AND
+  `:goal-outcome-mode :kl`, `:wm-version` provenance present (sha `7015ce9`,
+  schema v2, `:ambiguity-mode :gaussian-entropy` in the stamp) — and the
+  decision flipped in the predicted direction: `advance-mission
+  M-first-flights` at G=+4.5967 (positive totals, the IHTB-2 sim's
+  +1.68..+6.67 window) vs. the hinge era's negative-G `address-sorry`.
+  Badge raises for G-risk / G-ambiguity / G-goal-outcome now wait ONLY on the
+  C9 burn-in census (Joe's wording: live-tick evidence + burn-in).
 
 ### 2.2 Bucket 2 — small mechanical repairs. 1–3 days each; bell-able as-is.
 
@@ -288,9 +297,9 @@ turn this mission from weeks into months:
 | Who | What | Where |
 |---|---|---|
 | claude-5 | E-KL-refinements owner; reviews on the KL lane; R5 badge work (Joe, 2026-07-03) | E-KL-refinements (CLOSED with `cd0d25d`) |
-| claude-10 | KL items 1–3 builds (truncation `0f8d5c6`, calibration `22b0024`); **B-0c achievement ledger** (belled 2026-07-04, job `invoke-…-52640a20`) | this doc §2.0 |
+| claude-10 | KL items 1–3 builds (truncation `0f8d5c6`, calibration `22b0024`); **B-0c achievement ledger DONE `61c9b06`, reviewed-PASS claude-12 2026-07-04** (determinism re-verified run1≡run2; independent count re-derivation matched: 41 files / 682 ticks / all decided / 36 enactments; one stale header comment about :risk-mode persistence fixed by reviewer) | this doc §2.0 |
 | claude-4 | W1 driver; Bernoulli round-trip `eb06565`; **D-1e flip DONE `fb15d66`, reviewed-PASS claude-12 2026-07-04** (live-tick stamp pending); E7 re-census follow-on | this doc §2.1 / E-C-vector-live §11–12 |
-| claude-9 | **B-0a tick provenance stamp** (belled 2026-07-04, job `invoke-…-f5115b74`; re-dispatch — codex-1 bell `invoke-…-22296e3b` FAILED, Codex quota exhausted until 2026-07-18, so the Codex-default handoff falls back to Claude peers for this mission) | this doc §2.0 |
+| claude-9 | **B-0a tick provenance stamp DONE `da9fec1`, reviewed-PASS claude-12 2026-07-04** (kondo/check-parens/trace-test 17/45/0 re-run independently; LIVE ACCEPTANCE MET: the 2026-07-04 08:00 tick record carries `:wm-version` with `:git-sha` = exact HEAD `7015ce9`, all three modes, `:trace-schema-version 2`. Note: `:git-dirty? true` fires on others' tracked doc churn — honest but noisy; revisit only if it drowns signal. Re-dispatch history: codex-1 bell FAILED, Codex quota exhausted until 2026-07-18) | this doc §2.0 |
 | claude-12 | mission owner; B-0b baseline doc (`holes/wm-baseline.md`, seeded 2026-07-04); reviews all three parcels above (author ≠ reviewer) | this doc |
 
 Coordination rule inherited from M-evaluate-policies §10: parcels on Agency,

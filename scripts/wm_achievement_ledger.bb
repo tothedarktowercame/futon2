@@ -18,9 +18,11 @@
 ;; futon2/holes/wm-baseline.md Clocks caveat; large inter-tick gaps are listed,
 ;; not counted against liveness.
 ;;
-;; :wm-version segmentation is designed-for (B-0a) but not yet persisted; today's
-;; fallback is date + :mode. :risk-mode is likewise not persisted per tick
-;; (production is :hinge; the :kl lane is dark/scheduled) — noted in the artifact.
+;; :wm-version segmentation is designed-for (B-0a — live in records from
+;; 2026-07-04 08:00 onward); the pre-stamp corpus falls back to date + :mode.
+;; :risk-mode IS persisted per ranked action since 2d6533e; the swept corpus
+;; (≤ 2026-07-03) predates the cd0d25d production :kl flip, so it reads
+;; uniformly :hinge — noted in the artifact.
 ;;
 ;; Deterministic: same trace corpus in ⇒ same artifact out.
 ;; Usage: bb scripts/wm_achievement_ledger.bb [trace-dir] [out-edn]
