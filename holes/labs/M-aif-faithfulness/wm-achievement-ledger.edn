@@ -1,0 +1,1056 @@
+{:per-day
+ {"2026-05-18"
+  {:decisions 7,
+   :mean-oor-channels 8.142857142857142,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:multiplied 3, :depositing 4},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 8.857142857142858,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 7},
+  "2026-05-19"
+  {:decisions 9,
+   :mean-oor-channels 9.222222222222221,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:stagnant 4, :multiplied 5},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 15.0,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 9},
+  "2026-05-21"
+  {:decisions 13,
+   :mean-oor-channels 9.0,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:multiplied 13},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 153.69230769230768,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 13},
+  "2026-05-22"
+  {:decisions 24,
+   :mean-oor-channels 9.0,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:multiplied 24},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 154.29166666666666,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 24},
+  "2026-05-23"
+  {:decisions 24,
+   :mean-oor-channels 8.708333333333334,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:multiplied 24},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 157.16666666666666,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 24},
+  "2026-05-24"
+  {:decisions 24,
+   :mean-oor-channels 8.0,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:multiplied 24},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 160.5,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 24},
+  "2026-05-25"
+  {:decisions 21,
+   :mean-oor-channels 8.285714285714286,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:multiplied 9, :stagnant 6, :stop-the-line 6},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 173.23809523809524,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 21},
+  "2026-05-26"
+  {:decisions 17,
+   :mean-oor-channels 8.176470588235293,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:stop-the-line 17},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 213.76470588235293,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 17},
+  "2026-05-27"
+  {:decisions 9,
+   :mean-oor-channels 9.0,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:stop-the-line 9},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 214.11111111111111,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 9},
+  "2026-05-30"
+  {:decisions 2,
+   :mean-oor-channels 9.0,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:hermit 2},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 196.5,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 2},
+  "2026-05-31"
+  {:decisions 19,
+   :mean-oor-channels 9.421052631578947,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:hermit 19},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 183.1578947368421,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 19},
+  "2026-06-01"
+  {:decisions 12,
+   :mean-oor-channels 9.333333333333334,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:hermit 12},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 185.58333333333334,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 12},
+  "2026-06-02"
+  {:decisions 14,
+   :mean-oor-channels 9.142857142857142,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:hermit 14},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 195.78571428571428,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 14},
+  "2026-06-03"
+  {:decisions 24,
+   :mean-oor-channels 9.25,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:hermit 16, :stop-the-line 8},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 196.375,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 24},
+  "2026-06-04"
+  {:decisions 24,
+   :mean-oor-channels 9.541666666666666,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:hermit 24},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 197.29166666666666,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 24},
+  "2026-06-05"
+  {:decisions 15,
+   :mean-oor-channels 9.133333333333333,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:hermit 15},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 198.33333333333334,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 15},
+  "2026-06-06"
+  {:decisions 24,
+   :mean-oor-channels 9.541666666666666,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:hermit 24},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 173.54166666666666,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 24},
+  "2026-06-07"
+  {:decisions 23,
+   :mean-oor-channels 9.391304347826088,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:hermit 16, :stop-the-line 7},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 83.04347826086956,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 23},
+  "2026-06-08"
+  {:decisions 24,
+   :mean-oor-channels 10.166666666666666,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:stop-the-line 24},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 85.875,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 24},
+  "2026-06-09"
+  {:decisions 23,
+   :mean-oor-channels 10.434782608695652,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:stop-the-line 12, :hermit 11},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 87.82608695652173,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 23},
+  "2026-06-10"
+  {:decisions 22,
+   :mean-oor-channels 9.772727272727273,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:hermit 22},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 103.95454545454545,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 22},
+  "2026-06-12"
+  {:decisions 7,
+   :mean-oor-channels 9.714285714285714,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:hermit 7},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 121.0,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 7},
+  "2026-06-13"
+  {:decisions 24,
+   :mean-oor-channels 9.25,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:hermit 17, :multiplied 7},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 122.08333333333333,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 24},
+  "2026-06-14"
+  {:decisions 20,
+   :mean-oor-channels 9.2,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:multiplied 18, :stagnant 2},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 126.8,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 20},
+  "2026-06-15"
+  {:decisions 8,
+   :mean-oor-channels 10.0,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:multiplied 6, :stagnant 2},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 117.625,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 8},
+  "2026-06-16"
+  {:decisions 14,
+   :mean-oor-channels 10.428571428571429,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:stagnant 4, :multiplied 10},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 112.57142857142857,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 14},
+  "2026-06-17"
+  {:decisions 15,
+   :mean-oor-channels 10.066666666666666,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:multiplied 15},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 106.66666666666667,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 15},
+  "2026-06-18"
+  {:decisions 12,
+   :mean-oor-channels 10.75,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:stop-the-line 7, :multiplied 4, :stagnant 1},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 106.0,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 12},
+  "2026-06-21"
+  {:decisions 3,
+   :mean-oor-channels 10.0,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:multiplied 3},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 106.0,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 3},
+  "2026-06-22"
+  {:decisions 17,
+   :mean-oor-channels 9.588235294117647,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:multiplied 17},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 107.17647058823529,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 17},
+  "2026-06-23"
+  {:decisions 13,
+   :mean-oor-channels 9.0,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:multiplied 13},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 108.38461538461539,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 13},
+  "2026-06-24"
+  {:decisions 10,
+   :mean-oor-channels 9.4,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:multiplied 9, :stagnant 1},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 107.4,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 10},
+  "2026-06-25"
+  {:decisions 15,
+   :mean-oor-channels 9.466666666666667,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:multiplied 14, :stagnant 1},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 108.66666666666667,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 15},
+  "2026-06-26"
+  {:decisions 12,
+   :mean-oor-channels 9.166666666666666,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:multiplied 5, :stop-the-line 7},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 108.33333333333333,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 12},
+  "2026-06-27"
+  {:decisions 11,
+   :mean-oor-channels 9.0,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:stop-the-line 11},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 108.54545454545455,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma
+   {:first 1.0,
+    :last 0.5000000001423888,
+    :min 0.5000000001423435,
+    :max 1.0,
+    :max-samples 8},
+   :ticks 11},
+  "2026-06-28"
+  {:decisions 14,
+   :mean-oor-channels 9.0,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:multiplied 14},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 108.0,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma
+   {:first 0.5000000001423888,
+    :last 0.5000000001423888,
+    :min 0.5000000001423888,
+    :max 0.5000000001423888,
+    :max-samples 8},
+   :ticks 14},
+  "2026-06-29"
+  {:decisions 18,
+   :mean-oor-channels 8.722222222222221,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:multiplied 18},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 108.0,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma
+   {:first 0.5000000001423888,
+    :last 0.5000000001423888,
+    :min 0.5000000001423888,
+    :max 0.5000000001423888,
+    :max-samples 8},
+   :ticks 18},
+  "2026-06-30"
+  {:decisions 18,
+   :mean-oor-channels 8.055555555555555,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:multiplied 18},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 108.0,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma
+   {:first 0.5000000001423888,
+    :last 0.5000000001423888,
+    :min 0.5000000001423888,
+    :max 0.5000000001423888,
+    :max-samples 8},
+   :ticks 18},
+  "2026-07-01"
+  {:decisions 23,
+   :mean-oor-channels 8.0,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:multiplied 10, :stagnant 1, :stop-the-line 12},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 108.52173913043478,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma
+   {:first 0.5000000001423888,
+    :last 0.5000000001423888,
+    :min 0.5000000001423888,
+    :max 0.5000000001423888,
+    :max-samples 8},
+   :ticks 23},
+  "2026-07-02"
+  {:decisions 34,
+   :mean-oor-channels 8.647058823529411,
+   :act-gates
+   {:evaluated 42,
+    :pass 18,
+    :fail 17,
+    :abstain 7,
+    :missions-passed
+    ["M-canon-fingerprint-store" "M-bayesian-structure-learning"]},
+   :modes {:stop-the-line 32, :hermit 2},
+   :enactments
+   {:count 18,
+    :missions
+    {"M-canon-fingerprint-store" 1,
+     "M-bayesian-structure-learning" 17}},
+   :mean-scored-candidates 108.52941176470588,
+   :realized-outcomes
+   {:count 17,
+    :mean-abs-error 0.0,
+    :samples
+    ({:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2})},
+   :gamma
+   {:first 0.5000000001423888,
+    :last 1.0,
+    :min 0.5000000001423888,
+    :max 1.0,
+    :max-samples 16},
+   :ticks 34},
+  "2026-07-03"
+  {:decisions 20,
+   :mean-oor-channels 9.0,
+   :act-gates
+   {:evaluated 36,
+    :pass 18,
+    :fail 18,
+    :abstain 0,
+    :missions-passed ["M-bayesian-structure-learning"]},
+   :modes {:multiplied 1, :hermit 19},
+   :enactments
+   {:count 18, :missions {"M-bayesian-structure-learning" 18}},
+   :mean-scored-candidates 108.0,
+   :realized-outcomes
+   {:count 18,
+    :mean-abs-error 0.28333333333333327,
+    :samples
+    ({:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5})},
+   :gamma
+   {:first 1.0,
+    :last 1.2682658076960074,
+    :min 1.0,
+    :max 1.2682658076960074,
+    :max-samples 34},
+   :ticks 20}},
+ :per-week
+ {"2026-W21"
+  {:decisions 101,
+   :mean-oor-channels 8.653465346534654,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:multiplied 93, :depositing 4, :stagnant 4},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 133.88118811881188,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 101},
+  "2026-W22"
+  {:decisions 68,
+   :mean-oor-channels 8.691176470588236,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:multiplied 9, :stagnant 6, :stop-the-line 32, :hermit 21},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 192.23529411764707,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 68},
+  "2026-W23"
+  {:decisions 136,
+   :mean-oor-channels 9.360294117647058,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:hermit 121, :stop-the-line 15},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 172.5441176470588,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 136},
+  "2026-W24"
+  {:decisions 120,
+   :mean-oor-channels 9.775,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:stop-the-line 36, :hermit 57, :multiplied 25, :stagnant 2},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 105.675,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 120},
+  "2026-W25"
+  {:decisions 52,
+   :mean-oor-channels 10.307692307692308,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:multiplied 38, :stagnant 7, :stop-the-line 7},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 109.75,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma {:first nil, :last nil, :min nil, :max nil, :max-samples 0},
+   :ticks 52},
+  "2026-W26"
+  {:decisions 92,
+   :mean-oor-channels 9.25,
+   :act-gates
+   {:evaluated 0, :pass 0, :fail 0, :abstain 0, :missions-passed []},
+   :modes {:multiplied 72, :stagnant 2, :stop-the-line 18},
+   :enactments {:count 0, :missions {}},
+   :mean-scored-candidates 108.05434782608695,
+   :realized-outcomes {:count 0, :mean-abs-error nil, :samples ()},
+   :gamma
+   {:first 1.0,
+    :last 0.5000000001423888,
+    :min 0.5000000001423435,
+    :max 1.0,
+    :max-samples 8},
+   :ticks 92},
+  "2026-W27"
+  {:decisions 113,
+   :mean-oor-channels 8.495575221238939,
+   :act-gates
+   {:evaluated 78,
+    :pass 36,
+    :fail 35,
+    :abstain 7,
+    :missions-passed
+    ["M-canon-fingerprint-store" "M-bayesian-structure-learning"]},
+   :modes {:multiplied 47, :stagnant 1, :stop-the-line 44, :hermit 21},
+   :enactments
+   {:count 36,
+    :missions
+    {"M-canon-fingerprint-store" 1,
+     "M-bayesian-structure-learning" 35}},
+   :mean-scored-candidates 108.26548672566372,
+   :realized-outcomes
+   {:count 35,
+    :mean-abs-error 0.14571428571428569,
+    :samples
+    ({:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.2}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5}
+     {:policy "M-bayesian-structure-learning",
+      :expected-G -0.2,
+      :realized-G -0.5})},
+   :gamma
+   {:first 0.5000000001423888,
+    :last 1.2682658076960074,
+    :min 0.5000000001423888,
+    :max 1.2682658076960074,
+    :max-samples 34},
+   :ticks 113}},
+ :corpus {:files 41, :ticks 682, :span ["2026-05-18" "2026-07-03"]},
+ :summary
+ {:decisions 682,
+  :mean-oor-channels 9.175953079178885,
+  :act-gates
+  {:evaluated 78,
+   :pass 36,
+   :fail 35,
+   :abstain 7,
+   :missions-passed
+   ["M-canon-fingerprint-store" "M-bayesian-structure-learning"]},
+  :modes
+  {:multiplied 284,
+   :depositing 4,
+   :stagnant 22,
+   :stop-the-line 152,
+   :hermit 220},
+  :enactments
+  {:count 36,
+   :missions
+   {"M-canon-fingerprint-store" 1,
+    "M-bayesian-structure-learning" 35}},
+  :mean-scored-candidates 132.8782991202346,
+  :realized-outcomes
+  {:count 35,
+   :mean-abs-error 0.14571428571428569,
+   :samples
+   ({:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.2}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.2}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.2}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.2}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.2}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.2}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.2}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.2}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.2}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.2}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.2}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.2}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.2}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.2}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.2}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.2}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.2}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.2}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5}
+    {:policy "M-bayesian-structure-learning",
+     :expected-G -0.2,
+     :realized-G -0.5})},
+  :gamma
+  {:first 1.0,
+   :last 1.2682658076960074,
+   :min 0.5000000001423435,
+   :max 1.2682658076960074,
+   :max-samples 34},
+  :ticks 682},
+ :suspend-gaps
+ [{:from "2026-05-18T22:26:06.115947653Z",
+   :to "2026-05-19T11:24:24.836298386Z",
+   :hours 13.0}
+  {:from "2026-05-19T12:04:15.080079890Z",
+   :to "2026-05-21T11:40:29.439629748Z",
+   :hours 47.6}
+  {:from "2026-05-25T11:01:01.196624154Z",
+   :to "2026-05-25T14:01:17.767244963Z",
+   :hours 3.0}
+  {:from "2026-05-25T17:01:03.497285349Z",
+   :to "2026-05-25T19:01:05.344194278Z",
+   :hours 2.0}
+  {:from "2026-05-26T16:00:46.833485647Z",
+   :to "2026-05-27T10:00:42.257186210Z",
+   :hours 18.0}
+  {:from "2026-05-27T18:00:50.622908910Z",
+   :to "2026-05-30T22:00:35.546696405Z",
+   :hours 76.0}
+  {:from "2026-05-31T18:00:40.104983514Z",
+   :to "2026-06-01T09:01:08.952325930Z",
+   :hours 15.0}
+  {:from "2026-06-01T20:00:35.960872598Z",
+   :to "2026-06-02T09:00:45.126998985Z",
+   :hours 13.0}
+  {:from "2026-06-02T16:00:37.140300719Z",
+   :to "2026-06-02T18:01:54.753739407Z",
+   :hours 2.0}
+  {:from "2026-06-05T00:01:11.655426266Z",
+   :to "2026-06-05T10:01:29.639010082Z",
+   :hours 10.0}
+  {:from "2026-06-09T09:01:17.619527143Z",
+   :to "2026-06-09T11:01:19.325797752Z",
+   :hours 2.0}
+  {:from "2026-06-10T21:01:50.874450552Z",
+   :to "2026-06-12T17:02:42.317974217Z",
+   :hours 44.0}
+  {:from "2026-06-14T17:04:35.923238746Z",
+   :to "2026-06-14T20:04:56.020334978Z",
+   :hours 3.0}
+  {:from "2026-06-14T21:04:44.352820147Z",
+   :to "2026-06-15T11:02:47.606704948Z",
+   :hours 14.0}
+  {:from "2026-06-15T11:02:47.606704948Z",
+   :to "2026-06-15T14:04:00.856144904Z",
+   :hours 3.0}
+  {:from "2026-06-15T20:04:16.077527615Z",
+   :to "2026-06-16T08:03:53.514929788Z",
+   :hours 12.0}
+  {:from "2026-06-16T22:01:34.235196122Z",
+   :to "2026-06-17T09:02:22.064743664Z",
+   :hours 11.0}
+  {:from "2026-06-18T09:03:55.105607947Z",
+   :to "2026-06-18T14:04:28.894088810Z",
+   :hours 5.0}
+  {:from "2026-06-18T15:03:46.777871556Z",
+   :to "2026-06-21T21:01:56.172252724Z",
+   :hours 78.0}
+  {:from "2026-06-21T23:01:22.926931677Z",
+   :to "2026-06-22T06:01:26.369352022Z",
+   :hours 7.0}
+  {:from "2026-06-22T22:01:43.844468876Z",
+   :to "2026-06-23T08:01:59.439157147Z",
+   :hours 10.0}
+  {:from "2026-06-23T20:01:56.454851354Z",
+   :to "2026-06-24T09:01:52.737615172Z",
+   :hours 13.0}
+  {:from "2026-06-24T16:02:16.694984259Z",
+   :to "2026-06-24T18:03:39.242661925Z",
+   :hours 2.0}
+  {:from "2026-06-24T18:03:39.242661925Z",
+   :to "2026-06-24T21:58:26.205186217Z",
+   :hours 3.9}
+  {:from "2026-06-24T22:04:58.775815594Z",
+   :to "2026-06-25T08:01:16.526424411Z",
+   :hours 9.9}
+  {:from "2026-06-25T22:02:06.100299818Z",
+   :to "2026-06-26T09:02:23.457584185Z",
+   :hours 11.0}
+  {:from "2026-06-26T20:02:44.387496522Z",
+   :to "2026-06-27T13:02:22.610699430Z",
+   :hours 17.0}
+  {:from "2026-06-27T23:02:41.970467660Z",
+   :to "2026-06-28T10:02:56.834817372Z",
+   :hours 11.0}
+  {:from "2026-06-29T17:03:01.697807432Z",
+   :to "2026-06-30T03:03:13.770927119Z",
+   :hours 10.0}
+  {:from "2026-06-30T07:01:58.017350359Z",
+   :to "2026-06-30T11:01:56.952442966Z",
+   :hours 4.0}],
+ :notes
+ ["risk-mode not persisted per tick (production :hinge; :kl lane dark/scheduled) — segmented by date+mode."
+  ":wm-version segmentation designed-for (B-0a) but not yet persisted; date+mode is the current fallback."
+  "suspend-gaps (>2h between ticks) are machine-suspended, NOT liveness failures (wm-baseline.md Clocks caveat)."
+  "cascade-lane placeholder ranked-actions (no :G-risk) excluded from scored-candidate counts."],
+ :sim-only true,
+ :generated-by
+ "scripts/wm_achievement_ledger.bb (M-aif-faithfulness B-0c)",
+ :read-only true}

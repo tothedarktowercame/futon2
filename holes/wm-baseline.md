@@ -63,18 +63,29 @@ before/after · `:free-energy` decomposition · `:ranked-actions` with ALL EFE
 summands per candidate (post-`2d6533e` whitelist; `:risk-mode` and
 `:score-provenance` stamped per action) · `:decision` + `:mode` ·
 `:act-gate-verdicts` · `:enactment` audit · `:realized-outcome` when the executor
-reproduces · `:precision-state` / `:policy-precision` (γ). Enactment flights also
-log to `p4ng/sequel-notebook.org`.
+reproduces · `:precision-state` / `:policy-precision` (γ) · `:wm-version`
+provenance stamp. Enactment flights also log to `p4ng/sequel-notebook.org`.
 
-**Not yet recorded:** `:wm-version` provenance stamp (git sha + dirty flag +
-resolved flag set + trace schema version) — B-0a, IN FLIGHT (codex-1). Until it
-lands, "which WM produced this tick" = correlate tick timestamps against futon2
-commit times by hand.
+**`:wm-version` (B-0a) — LIVE since 2026-07-04 (claude-9).** Each scheduled-tick
+record answers "which code, which config" with no human correlation step:
+`{:git-sha :git-dirty? :risk-mode :ambiguity-mode :goal-outcome-mode
+:kl-channel-weights :c-temperature :live-wire? :trace-schema-version}` — the
+git identity of the one-shot JVM's checkout (`:git-dirty?` counts tracked
+modifications only), the mode flags resolved via the SAME fns the rank lanes
+call (`arena-mode-flags` in `war_machine.clj` — never a second env read), the
+runner's live-wire switch, and the monotonic record-shape version
+(`futon2.aif.trace/trace-schema-version`, now 2). Accessor:
+`(futon2.aif.trace/wm-version-of record)`. Present-only: records written before
+2026-07-04 (and bare `judge` calls) carry no stamp — for those, "which WM" is
+still hand-correlation of timestamps against commit times. NOTE the known
+attribution caveats inside the stamped era: the `cd0d25d` (:risk-mode) and D-1e
+flips landed hours BEFORE B-0a; their boundary is recoverable via commit times +
+the per-action `:risk-mode`/`:goal-outcome-mode` keys.
 
 ## Achievement readout
 
 B-0c ledger **LANDED** (claude-10, 2026-07-04): `scripts/wm_achievement_ledger.bb`
-→ `data/labs/M-aif-faithfulness/wm-achievement-ledger.{edn,html}` (deterministic,
+→ `holes/labs/M-aif-faithfulness/wm-achievement-ledger.{edn,html}` (deterministic,
 read-only; re-run at mission close = the before/after exhibit). Per-day AND
 per-week census of ticks · decisions/modes · act-gate passes/fails (with missions)
 · enactments + realized outcomes (expected vs realized ΔG) · γ samples + value
