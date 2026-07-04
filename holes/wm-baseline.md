@@ -82,6 +82,14 @@ attribution caveats inside the stamped era: the `cd0d25d` (:risk-mode) and D-1e
 flips landed hours BEFORE B-0a; their boundary is recoverable via commit times +
 the per-action `:risk-mode`/`:goal-outcome-mode` keys.
 
+**Trace hygiene (norm, 2026-07-04):** the production trace is the audit corpus —
+**manual/verification runs of the scheduled runner must NOT write to it** (pass
+`:dir` to `trace/write-trace!` / point at a temp dir). One known manual record
+exists: 2026-07-04 07:09:54Z, identifiable by `:live-wire? false` + off-cron
+cadence + `:git-sha 515a5936…` (left in place, append-only discipline).
+Until an explicit `:invocation` field exists, consumers can discriminate
+cron ticks by hourly cadence + `:live-wire? true`.
+
 ## Achievement readout
 
 B-0c ledger **LANDED** (claude-10, 2026-07-04): `scripts/wm_achievement_ledger.bb`
