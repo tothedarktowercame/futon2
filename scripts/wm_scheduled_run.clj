@@ -76,7 +76,17 @@
           ;; commit would otherwise shift the recorded sha off the loaded code
           ;; (observed on the first stamped tick, 2026-07-04 07:00Z).
           ;; :live-wire? joins below once resolved.
-          version-stamp (trace/wm-version-stamp (wm/arena-mode-flags))
+          ;; :trigger (README-clicks-and-ticks): which clock fired this run —
+          ;; :wallclock-cron (tick, set in the crontab line), :duree-click-*
+          ;; (click, set by the click-loop driver), else :unspecified. Lets
+          ;; consumers (C9 census, R7 v0.14 perceived-time) segment tick-era
+          ;; vs click-era rows; also supersedes cadence-based manual-run
+          ;; detection in the trace-hygiene norm (wm-baseline.md).
+          version-stamp (trace/wm-version-stamp
+                         (assoc (wm/arena-mode-flags)
+                                :trigger (if-let [t (System/getenv "FUTON_WM_TRIGGER")]
+                                           (keyword t)
+                                           :unspecified)))
           ;; E-C-vector-live: keep the belly fresh BEFORE scoring. Off-cycle
           ;; (once per scheduled tick, not per candidate action) — derive the
           ;; live C only when the goal/hole corpus changed (maybe-refresh!).

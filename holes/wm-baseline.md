@@ -16,6 +16,7 @@ files, and code, not recited from other docs.
 | Hourly, `0 * * * *` | scheduled judgement tick — `clojure -M:wm-scheduled` (`scripts/wm_scheduled_run.clj`), one-shot JVM, never the serving JVM | `logs/wm-scheduled.log` |
 | Daily 04:00 UTC | outer loop `-M:wm-outer-loop` — R12 hyperparameter take-up | `logs/wm-outer-loop.log` |
 | Daily 04:30 UTC | shared-corpus embedding refresh (futon3a `index_patterns.sh`) | `logs/shared-corpus-refresh.log` |
+| On demand (operator) | **regulated click campaign** — `scripts/wm_click_loop.sh [N] [settle]`: sequential full runs, bounded, stop-file `data/.wm-clicks-stop`, each stamped `:trigger :duree-click-regulated` (README-clicks-and-ticks; adopted 2026-07-04 for evidence acceleration) | `logs/wm-clicks.log` |
 
 **Caveat — the WM sleeps when Dionysus sleeps.** Cron doesn't fire while the
 machine is suspended; e.g. no ticks 2026-07-03 18:04 → 2026-07-04 08:00. A gap in
@@ -87,13 +88,16 @@ attribution caveats inside the stamped era: the `cd0d25d` (:risk-mode) and D-1e
 flips landed hours BEFORE B-0a; their boundary is recoverable via commit times +
 the per-action `:risk-mode`/`:goal-outcome-mode` keys.
 
-**Trace hygiene (norm, 2026-07-04):** the production trace is the audit corpus —
-**manual/verification runs of the scheduled runner must NOT write to it** (pass
-`:dir` to `trace/write-trace!` / point at a temp dir). One known manual record
-exists: 2026-07-04 07:09:54Z, identifiable by `:live-wire? false` + off-cron
-cadence + `:git-sha 515a5936…` (left in place, append-only discipline).
-Until an explicit `:invocation` field exists, consumers can discriminate
-cron ticks by hourly cadence + `:live-wire? true`.
+**Trace hygiene (norm, 2026-07-04; refined same day):** the production trace is
+the audit corpus. The `:wm-version` stamp now carries **`:trigger`** —
+`:wallclock-cron` (tick; set in the crontab line), `:duree-click-regulated`
+(sanctioned click-campaign run; DOES belong in the corpus), `:unspecified`
+(untagged manual invocation). The norm: **verification/debug runs must NOT
+write here** (pass `:dir` to `trace/write-trace!`); sanctioned evidence runs
+must carry a `:duree-click-*` trigger. Consumers segment by `:trigger`;
+pre-trigger records (before 2026-07-04 ~09:30) fall back to cadence +
+`:live-wire?`. One known untagged manual record: 2026-07-04 07:09:54Z
+(`:live-wire? false`, `:git-sha 515a5936…`; left in place).
 
 ## Achievement readout
 
