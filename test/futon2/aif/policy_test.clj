@@ -254,3 +254,55 @@
           out (policy/default-mode-select state candidates)]
       (is (= :address-sorry (-> out :action :type))
           "even at low pressure, addressable work beats no-op"))))
+
+;; ---------------------------------------------------------------------------
+;; B-2d: τ-layer separation (M-aif-faithfulness §2.2) — dark build.
+;; Default :spread must be byte-identical to the historical stacked form;
+;; :gamma-only is the canonical γ-carries-sharpness form, dark until Joe flips.
+;; ---------------------------------------------------------------------------
+
+(deftest effective-temperature-default-mode-witness-test
+  (testing "WITNESS: no :tau-mode == explicit :spread == historical formula, exactly"
+    (doseq [g-totals [[] [0.5] [0.0 0.5 1.0] [0.10 0.11 0.12] [0.0 1.0]]
+            gamma [0.0 0.5 1.0 1.7 25.0]]
+      (let [historical (/ (policy/adaptive-temperature g-totals)
+                          (max 0.01 (double gamma)))]
+        (is (= historical (policy/effective-temperature g-totals gamma))
+            "bare arity = historical")
+        (is (= historical
+               (policy/effective-temperature g-totals gamma {:tau-mode :spread}))
+            "explicit :spread = historical")))))
+
+(deftest select-action-default-mode-witness-test
+  (testing "WITNESS: select-action decision map is identical with and without
+            an explicit {:tau-mode :spread} — the dark flag changes nothing
+            by default, at the decision level"
+    (let [ranked (ranked-with-actions
+                  [[{:type :address-sorry :target :sorry/x} 0.2]
+                   [{:type :learn-action-class :target-class :a} 0.5]
+                   [{:type :no-op} 0.9]])]
+      (doseq [gamma [0.5 1.0 2.0]]
+        (is (= (policy/select-action ranked {:policy-precision gamma})
+               (policy/select-action ranked {:policy-precision gamma
+                                             :temperature-opts {:tau-mode :spread}}))
+            "byte-identical decision under default vs explicit :spread")))))
+
+(deftest effective-temperature-gamma-only-test
+  (testing ":gamma-only → τ_eff = 1/γ; the spread layer is OFF"
+    (let [opts {:tau-mode :gamma-only}]
+      (is (= 1.0 (policy/effective-temperature [0.0 1.0] 1.0 opts))
+          "γ = 1 → τ_eff = 1 regardless of spread")
+      (is (= (policy/effective-temperature [0.0 99.0] 2.0 opts)
+             (policy/effective-temperature [0.10 0.11] 2.0 opts))
+          "spread does not enter :gamma-only at all")
+      (is (< (Math/abs (- 0.5 (policy/effective-temperature [0.0 1.0] 2.0 opts)))
+             1e-12)
+          "τ_eff = 1/γ exactly")
+      (is (= (/ 1.0 0.01) (policy/effective-temperature [0.0 1.0] 0.0 opts))
+          "degenerate γ still floored at tau-min"))))
+
+(deftest effective-temperature-unknown-mode-throws-test
+  (testing "an unknown :tau-mode is a loud config error, not a silent default"
+    (is (thrown? clojure.lang.ExceptionInfo
+                 (policy/effective-temperature [0.0 1.0] 1.0
+                                               {:tau-mode :typo-mode})))))

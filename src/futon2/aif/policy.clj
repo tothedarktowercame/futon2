@@ -33,24 +33,51 @@
        (max tau-min (/ spread k))))))
 
 (defn effective-temperature
-  "The selection temperature actually used, after R14 precision-over-policies
-   (γ) modulation:
+  "The selection temperature actually used. TWO layers, separated per the R6
+   faithfulness audit (M-aif-faithfulness §2.2 B-2d):
 
-       τ_eff = adaptive-temperature(g-totals) / γ
+     γ        — R14 precision-over-policies: the agent's learned confidence in
+                its own decision-making (`futon2.aif.policy-precision`). In the
+                canonical AIF form P(π) = σ(−γ·G), γ ALONE carries selection
+                sharpness. High γ ⇒ lower τ_eff ⇒ sharper commitment; low γ ⇒
+                flatter / abstain-leaning.
+     τ_spread — `adaptive-temperature` = range(G)/k: an adaptive-calibration
+                heuristic (tight spread → diffuse selection → abstain trips)
+                historically STACKED on γ. Not part of the canonical form; now
+                a separately-justified layer that can be switched off.
 
-   where γ (`policy-precision`) is the agent's learned confidence in its own
-   decision-making (`futon2.aif.policy-precision`). High γ ⇒ lower τ_eff ⇒
-   sharper commitment; low γ ⇒ higher τ_eff ⇒ flatter / abstain-leaning. γ = 1.0
-   (the default and the burn-in prior) reduces this EXACTLY to today's spread-only
-   temperature, so the change is reduction-safe.
+   `:tau-mode` in the opt-map selects the layering:
 
-   γ is floored at `tau-min` defensively so a degenerate γ can never divide τ to
-   zero or flip its sign."
+     :spread (DEFAULT)   τ_eff = τ_spread / γ — byte-identical to the
+                         historical stacked behaviour.
+     :gamma-only         τ_eff = 1 / γ — the canonical form; the spread
+                         calibration layer is OFF.
+
+   γ is floored at `tau-min` defensively in both modes so a degenerate γ can
+   never divide τ to zero or flip its sign. γ = 1.0 (the default and burn-in
+   prior) reduces :spread EXACTLY to the spread-only temperature, and
+   :gamma-only to τ_eff = 1.
+
+   HONESTY (B-2d dark build, 2026-07-04): the arena default is :spread — live
+   selection behaviour is UNCHANGED by this separation. :gamma-only is built
+   dark behind `arena-tau-mode` (scripts/futon2/report/war_machine.clj; env
+   hatch FUTON_WM_TAU_MODE=gamma-only). The flip is Joe's (§2.1 verdict
+   ledger). Evidence a flip decision needs: an E6-style shadow comparison over
+   the trace corpus — chosen action, abstain rate, and softmax entropy under
+   both modes side by side — decided JOINTLY with B-3b (R14 γ β-update): both
+   layers shape selection sharpness, so the spread layer should not switch off
+   in the same step γ starts moving off 1.0, or the two effects on selection
+   are unattributable."
   ([g-totals gamma] (effective-temperature g-totals gamma {}))
-  ([g-totals gamma {:keys [tau-min] :or {tau-min 0.01} :as temperature-opts}]
-   (let [tau (adaptive-temperature g-totals temperature-opts)
-         g (max (double tau-min) (double gamma))]
-     (/ tau g))))
+  ([g-totals gamma {:keys [tau-min tau-mode]
+                    :or {tau-min 0.01 tau-mode :spread}
+                    :as temperature-opts}]
+   (let [g (max (double tau-min) (double gamma))]
+     (case tau-mode
+       :spread (/ (adaptive-temperature g-totals temperature-opts) g)
+       :gamma-only (/ 1.0 g)
+       (throw (ex-info "unknown :tau-mode (expected :spread or :gamma-only)"
+                       {:tau-mode tau-mode}))))))
 
 (defn softmax-weights
   "P(a) ∝ exp(−G(a) / τ), normalised to sum to 1.0. Numerically stable
@@ -135,7 +162,10 @@
    Optional kwargs:
      :abstain-epsilon — minimum (no-op.G-total − best.G-total) required
                         to NOT abstain. Default 0.01.
-     :temperature-opts — passed to `adaptive-temperature`.
+     :temperature-opts — passed to `adaptive-temperature` AND
+                        `effective-temperature`; may carry `:tau-mode`
+                        (:spread default | :gamma-only — see
+                        `effective-temperature`, B-2d τ-layer separation).
      :policy-precision — γ, the R14 learned inverse-temperature
                         (`futon2.aif.policy-precision`). τ_eff = τ_spread / γ.
                         Default 1.0 ⇒ behaviour identical to the spread-only path.

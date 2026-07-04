@@ -158,11 +158,49 @@
     :hinge
     :kl))
 
+(defn- arena-salience-mode
+  "B-2c DARK BUILD (M-aif-faithfulness §2.2) — NOT flipped. R7's summed-in
+   need term is an affect/salience modulation wearing precision's name;
+   the separated form (Π = canonical 1/max(var,ε) leg only; need term
+   under the named :salience key) is built dark in
+   `futon2.aif.precision`. DEFAULT = :summed — the historical v0.13
+   behaviour, byte-identical (witness:
+   test/resources/goldens/r7_default_path_witness.edn).
+   `FUTON_WM_SALIENCE_MODE=separate` turns the dark path ON (inverse of
+   the escape-hatch pattern: here the env var opts INTO the new form
+   because the flip has not been taken). The production flip is Joe's,
+   recorded in the §2.1 verdict ledger."
+  []
+  (if (= "separate" (System/getenv "FUTON_WM_SALIENCE_MODE"))
+    :separate
+    :summed))
+
+(defn- arena-tau-mode
+  "B-2d DARK BUILD (M-aif-faithfulness §2.2, 2026-07-04) — NOT flipped. R6
+   τ-layer separation: today's selection temperature stacks the adaptive
+   spread calibration on γ (τ_eff = τ_spread/γ). The separated, canonical
+   form — γ alone carries selection sharpness, τ_eff = 1/γ — is built dark
+   in `futon2.aif.policy/effective-temperature` under `:tau-mode`.
+   DEFAULT = :spread — the historical behaviour, byte-identical (witness:
+   effective-temperature-default-mode-witness-test in policy_test.clj).
+   `FUTON_WM_TAU_MODE=gamma-only` turns the dark path ON (B-2c inverse-hatch
+   polarity: the env var opts INTO the new form because the flip has not
+   been taken). The production flip is Joe's (§2.1 verdict ledger); evidence
+   a flip decision needs: an E6-style shadow comparison of selections /
+   abstain rate / softmax entropy under both modes over the trace corpus,
+   decided jointly with B-3b (R14 γ β-update — the two share the
+   selection-sharpness seam)."
+  []
+  (if (= "gamma-only" (System/getenv "FUTON_WM_TAU_MODE"))
+    :gamma-only
+    :spread))
+
 (defn arena-mode-flags
   "B-0a tick provenance (M-aif-faithfulness §2.0): the RESOLVED mode/flag set
    the arena rank lanes score with THIS tick, for the trace's :wm-version
    stamp. Resolved via the SAME fns the lanes call (arena-risk-mode /
-   arena-ambiguity-mode / arena-goal-outcome-mode) — never a separate env
+   arena-ambiguity-mode / arena-goal-outcome-mode / arena-salience-mode /
+   arena-tau-mode) — never a separate env
    read, so the stamp cannot drift from the behaviour it describes.
    :kl-channel-weights and :c-temperature are the compute-efe defaults because
    the arena opts (wm-efe-opts, rollout-snapshot-under-weights) pass neither;
@@ -171,6 +209,8 @@
   {:risk-mode (arena-risk-mode)
    :ambiguity-mode (arena-ambiguity-mode)
    :goal-outcome-mode (arena-goal-outcome-mode)
+   :salience-mode (arena-salience-mode)
+   :tau-mode (arena-tau-mode)
    :kl-channel-weights efe/default-kl-channel-weights
    :c-temperature pref/default-c-temperature})
 
@@ -3704,7 +3744,13 @@
                                    [ch (fe/compute-prediction-error
                                         (get observation ch 0.0)
                                         (get predictions ch))]))
-                prec-state' (precision/update-precision-state prec-state raw-errors)
+                ;; B-2c: salience-mode resolved via the same fn the
+                ;; :wm-version stamp reads (arena-salience-mode), so the
+                ;; stamp cannot drift from the behaviour. Default :summed
+                ;; = pre-B-2c byte-identical path.
+                prec-state' (precision/update-precision-state
+                             prec-state raw-errors
+                             {:salience-mode (arena-salience-mode)})
                 weighted-errors (into {}
                                       (for [[ch err-map] raw-errors]
                                         [ch (precision/weighted-error
@@ -3856,7 +3902,12 @@
         ;; deliberative select-action with default-mode-select as a
         ;; try/catch fallback for I6 compositional closure.
         wm-admissible (filterv #(fm/can-execute? wm-state (:action %)) wm-ranked)
-        wm-decision (try (policy/select-action wm-admissible {:policy-precision gamma})
+        wm-decision (try (policy/select-action
+                          wm-admissible
+                          {:policy-precision gamma
+                           ;; B-2d τ-layer separation — arena-resolved, default
+                           ;; :spread (dark; see arena-tau-mode docstring)
+                           :temperature-opts {:tau-mode (arena-tau-mode)}})
                          (catch Exception _
                            (policy/default-mode-select wm-state wm-admissible)))
         ;; Car-3 (R16) seam 1: lift the acquired cascade-policies out of the read-only lane
