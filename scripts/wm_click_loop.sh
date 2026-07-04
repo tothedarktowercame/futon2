@@ -38,6 +38,11 @@ for i in $(seq 1 "$MAX_CLICKS"); do
   fi
   echo "$(date -u +%FT%TZ) click $i/$MAX_CLICKS starting" >> "$LOG"
   FUTON_WM_TRIGGER=duree-click-regulated /usr/local/bin/clojure -M:wm-scheduled >> "$LOG" 2>&1
+  rc=$?
+  # A killed JVM (e.g. OOM SIGKILL) writes nothing — record the exit code so
+  # silent click loss is visible in the log (clicks 14+15 of campaign 1 died
+  # rc-unlogged with no trace record; cause unconfirmed).
+  [ "$rc" -ne 0 ] && echo "$(date -u +%FT%TZ) click $i/$MAX_CLICKS FAILED rc=$rc (no trace record written)" >> "$LOG"
   sleep "$SETTLE"
 done
 
