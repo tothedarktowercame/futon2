@@ -139,7 +139,7 @@
    :winner-flips (count (filter :winner-flip? sp-recs))
    :winner-flip-rate (frac :winner-flip? sp-recs)
    :flips-toward-sp-action (count (filter :flip-toward-sp? sp-recs))
-   :recommendation-seed "structural-pressure :habit-prior makes high-sp actions PREFERRED (habit) instead of penalised; winner-flip-rate is the fraction of decisions it would change. Direction: flips move toward the high-sp action."})
+   :recommendation-seed "REVIEWER-CORRECTED (claude-12): structural-pressure ALREADY enters G-total as a preference (−w·sp; efe.clj docstring: higher sp reduces G) — :habit-prior does NOT invert a penalty. What changes: the preference moves OUTSIDE the τ division (argmin(G′ − τ_eff·w·sp) vs argmin(G′ − w·sp)), so its effective strength becomes τ_eff-scaled and precision no longer modulates it. winner-flip-rate = decisions the RESCALING changes; all observed flips moved toward the high-sp action (τ_eff > 1 amplifies the prior there)."})
 
 (def combined
   {:generated-by "scripts/dark_mode_shadow.bb (M-aif-faithfulness dark-mode-shadow-trio)"

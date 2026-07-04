@@ -2,7 +2,7 @@
  "scripts/dark_mode_shadow.bb (M-aif-faithfulness dark-mode-shadow-trio)",
  :sim-only true,
  :read-only true,
- :corpus {:files 42, :ticks 684},
+ :corpus {:files 42, :ticks 685},
  :per-mode
  {:tau
   {:recommendation-seed
@@ -10,36 +10,36 @@
    :winner-flip-note
    "0 by construction — softmax winner = argmin G-total, τ-invariant.",
    :abstain-flips 0,
-   :mean-entropy-gamma-only 4.66425781822692,
+   :mean-entropy-gamma-only 4.663578342297094,
    :abstain-note
    "abstain = (no-op.G − best.G) < ε, a G-gap ⇒ τ-invariant.",
    :winner-flips 0,
-   :mean-entropy-delta 0.4962308958619775,
-   :ticks 684,
-   :mean-entropy-spread 4.16802692236493},
+   :mean-entropy-delta 0.4955020477171802,
+   :ticks 685,
+   :mean-entropy-spread 4.168076294579901},
   :salience
-  {:ticks 679,
-   :mean-need-share 0.015785934088278216,
-   :mean-rel-Pi-change 0.01578593408827822,
-   :mean-channels-materially-changed 3.0427098674521353,
+  {:ticks 680,
+   :mean-need-share 0.015890674882609097,
+   :mean-rel-Pi-change 0.015890674882609104,
+   :mean-channels-materially-changed 3.0455882352941175,
    :selection-downstream
    "NOT computed — needs free-energy/G re-run per candidate under the :separate Π; said, not faked.",
    :recommendation-seed
    "The need-component's share of Π (mean-need-share) is the magnitude of what :separate drops; if ~0, the salience flip is inert; if large, it materially reweights channels and a G-recompute is warranted before flipping."},
   :structural-pressure
-  {:ticks 684,
-   :ticks-with-any-sp 310,
-   :winner-flips 2,
-   :winner-flip-rate 0.0029,
-   :flips-toward-sp-action 2,
+  {:ticks 685,
+   :ticks-with-any-sp 311,
+   :winner-flips 3,
+   :winner-flip-rate 0.0044,
+   :flips-toward-sp-action 3,
    :recommendation-seed
-   "structural-pressure :habit-prior makes high-sp actions PREFERRED (habit) instead of penalised; winner-flip-rate is the fraction of decisions it would change. Direction: flips move toward the high-sp action."}},
+   "REVIEWER-CORRECTED (claude-12): structural-pressure ALREADY enters G-total as a preference (−w·sp; efe.clj docstring: higher sp reduces G) — :habit-prior does NOT invert a penalty. What changes: the preference moves OUTSIDE the τ division (argmin(G′ − τ_eff·w·sp) vs argmin(G′ − w·sp)), so its effective strength becomes τ_eff-scaled and precision no longer modulates it. winner-flip-rate = decisions the RESCALING changes; all observed flips moved toward the high-sp action (τ_eff > 1 amplifies the prior there)."}},
  :mode :salience-mode/:separate,
  :summary
- {:ticks 679,
-  :mean-need-share 0.015785934088278216,
-  :mean-rel-Pi-change 0.01578593408827822,
-  :mean-channels-materially-changed 3.0427098674521353,
+ {:ticks 680,
+  :mean-need-share 0.015890674882609097,
+  :mean-rel-Pi-change 0.015890674882609104,
+  :mean-channels-materially-changed 3.0455882352941175,
   :selection-downstream
   "NOT computed — needs free-energy/G re-run per candidate under the :separate Π; said, not faked.",
   :recommendation-seed
