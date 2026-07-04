@@ -25,29 +25,34 @@ Implementation substrate to reuse (read-only, recomputable, no in-place mutation
 | node = interest-territory | **node = feature/subsystem** (the ~16 futon3c peripherals, the WM, the cascade, sorry-registry, evidence-bus, mcb, …) |
 | node **standing** = interest-event posterior (lived signal) | **standing = liveness × load-bearing** — consumer-count (require graph) × landscape activity × recency |
 | edge = bipartite fit / friction | **edge = `depends-on` (require graph) + `overlaps-with` (functional redundancy)** |
-| `k` collapses toward **core interests** | `k` collapses toward **core features** (the load-bearing backbone) |
+| `k` = chain expansion/retraction radius (KNN-rooted; k↓ peels leaf rings, k=1 → core interests) | same on features: k↓ peels leaf features ring-by-ring; k=1 = the core (load-bearing anchors) |
 | completeness 3-vector | completeness over the feature set (coverage: how much of the stack is mapped) |
 
 ## The key insight: the k-slider *is* the trim/coalesce instrument
 
-Trim and coalesce are relational judgments (they live in the edges, not the nodes —
-see the upgrade note). The k-collapse surfaces both **for free**:
+`k` is a **chain expansion/retraction radius** (rooted in the KNN cache —
+`futon4/docs/prototype-1-links-plan.org`: top-k neighbours per node). In the diagram:
+high k shows full chains; **k↓ peels leaf rings** (k=3→2 removes leaves); **k=1
+retracts every chain to its core anchor**. Over a feature graph, that retraction
+surfaces both decisions:
 
-- **Coalesce candidates = what MERGES as k decreases.** Two features with high
-  `overlaps-with` fold into the *same* node under collapse. That merge *is* the
-  "these two can coalesce" signal — e.g. the hole trio (sorries ≈ issue_holes ≈
-  cascade-holes) would collapse to one node at low k; portfolio-inference and the WM
-  (two AIF loops) would collapse together.
-- **Trim candidates = what DROPS OUT as k decreases.** A feature with low standing
-  (no live consumers, dormant, stale) never joins the core — it falls away first
-  under collapse. That fall-out *is* the "that needs trimming" signal — issue_holes
-  (0 consumers, last-touched March) drops immediately; mission-control does NOT
-  (many consumers → high standing → stays in the core even at low k, which is exactly
-  why we *didn't* trim it).
+- **Trim candidates = leaf features that peel early AND carry low standing.** The
+  first ring to fall (k=3→2) is the leaves; a leaf that is *also* dormant (no live
+  consumers, stale) is the "that needs trimming" signal — issue_holes (leaf: nothing
+  depends on it; dormant: last-touched March) peels immediately. A *live* leaf is just
+  a peripheral feature — it peels for reach, not removal (standing keeps it legible).
+- **Coalesce candidates = features that retract into the SAME core anchor.** As chains
+  contract toward k=1, features on one chain fold into their anchor; two that land on
+  the same anchor are the "these two can coalesce" signal — the hole trio
+  (sorries ≈ issue_holes ≈ cascade-holes) contracting to one hole-node; portfolio-
+  inference folding toward the WM (same AIF-loop chain).
+- **The core = what survives to k=1** — the load-bearing anchors everything retracts
+  to (mission-control, the WM, the evidence-bus). Untouchables. That mission-control
+  sits here (many consumers → deep anchor) is exactly why we did NOT trim it.
 
-So the operator drags k down and *watches*: nodes that merge are coalesce
-candidates; nodes that vanish are trim candidates; nodes that persist to k=1 are the
-core you must not touch. The decision becomes a gesture, not a grep.
+So the operator drags k down and *watches the retraction*: a leaf that peels *and* is
+dead = trim; nodes that fold onto the same anchor = coalesce; the k=1 core = hands
+off. The decision becomes a gesture along the slider, not a grep.
 
 ## Sources feeding in (Joe named the first two)
 
@@ -87,9 +92,12 @@ fly-through you admire but can't act on.
 
 ## Open questions for Joe
 
-- Exact `k` semantics to reuse: is Interest-Network `k` a standing-rank cutoff, a
-  hop-radius from the core, or a community-resolution? (Determines how "merge under
-  collapse" is computed — confirm against `interest_network.clj`.)
+- `k` semantics CONFIRMED (Joe, 2026-07-04): KNN-rooted **chain expansion/retraction**
+  — k↓ peels leaf rings, k=1 retracts each chain to its core anchor. The exact
+  diagram-retraction algorithm (how a chain contracts to its anchor, and what counts
+  as a chain over `depends-on` vs `overlaps-with`) is a diagram convention to read
+  from the arxana-browser rendering code at build time; the KNN cache is in
+  `links-plan.org`.
 - Node granularity: peripheral-level, or finer (per-tool / per-endpoint)?
 - Where it lives: extend the WebArxana Interest Network surface (`arxana://view/…`),
   or a sibling surface reusing the same projection?
