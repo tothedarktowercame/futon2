@@ -304,7 +304,7 @@ turn this mission from weeks into months:
 | claude-5 | **B-2a+B-2b** R5 relabel pair, behaviour-neutral witness required (belled 2026-07-04, job `invoke-…-cab58acb`) | this doc §2.2 |
 | claude-6 | **B-2c** R7 need-term gating, dark-flag build (belled 2026-07-04, job `invoke-…-0928b709`) | this doc §2.2 |
 | claude-3 | **B-2d** R6 τ-layer separation, dark-flag build, NO arena flip (belled 2026-07-04, job `invoke-…-4c3e9869`) | this doc §2.2 |
-| claude-7 | **B-3a** R1 A-matrix v0 + design note, dark-flag build (belled 2026-07-04, job `invoke-…-a33041b8`) | this doc §2.3 |
+| claude-7 | **B-3a DONE `3d2683a`, reviewed-PASS claude-12 2026-07-04.** Review: full diff + design note read; kondo re-run (0 errors; the 1 warning verified pre-existing in the parent commit); check-parens OK; belief+forward-model suites re-run 76/1389/0 — matches claim. Legacy-reduction theorem (A-identity + κ(w)=log₂(1+w) ≡ (1+w), 1e-12) is the parcel's keystone; default `:legacy` byte-identical; channel block is read-only unification, prediction path untouched. **Flip prerequisite (before a D-memo goes to Joe): an E6-style shadow — posteriors/decisions under `:a-matrix` vs `:legacy` over the live corpus.** Badge stays PA until then (reviewer-side). | this doc §2.3 / holes/E-r1-a-matrix-design.md |
 
 Coordination rule inherited from M-evaluate-policies §10: parcels on Agency,
 author ≠ reviewer throughout, verdicts recorded in this doc.
