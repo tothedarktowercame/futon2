@@ -237,6 +237,34 @@
       (is (< (Math/abs (- r (cv/goal-outcome-risk [range-entry]))) 1e-9)
           "a range-only belly scores identically to the production hinge term"))))
 
+;; ---- D-1e: :goal-outcome-mode wiring through compute-efe (witness) ----------
+
+(deftest efe-goal-outcome-mode-test
+  (let [st   {:observation {} :belief (belief/initial-belief-state [:m1])}
+        opts {:goal-outcome-entries c-heavy :goal-outcome-prob-fn point-mass}
+        g    (fn [mode act] (:G-goal-outcome
+                             (efe/compute-efe st act (assoc opts :goal-outcome-mode mode))))]
+    (testing "library default stays :hinge — byte-identical to the pre-D-1e term"
+      (is (= (:G-goal-outcome (efe/compute-efe st {:type :no-op} opts))
+             (cv/goal-outcome-risk c-heavy))
+          "no mode passed ⇒ hinge, the historical value")
+      (is (= :hinge (:goal-outcome-mode (efe/compute-efe st {:type :no-op} opts)))
+          "and the mode is stamped on the result at birth"))
+    (testing ":kl mode scores :becomes entries in nats (the ~1/T scale)"
+      (let [k (g :kl {:type :no-op})
+            h (g :hinge {:type :no-op})]
+        (is (= :kl (:goal-outcome-mode (efe/compute-efe st {:type :no-op}
+                                                        (assoc opts :goal-outcome-mode :kl)))))
+        (is (> k (* 5.0 h)) "nats scale ≫ hinge scale at T=0.1")))
+    (testing ":kl mode re-ranks: the goal-advancing action wins in both modes"
+      (is (< (g :kl {:type :pursue :target :a}) (g :kl {:type :no-op})))
+      (is (< (g :hinge {:type :pursue :target :a}) (g :hinge {:type :no-op}))))
+    (testing "a per-channel c-temperature MAP falls back to the default scalar for goal-outcomes"
+      (is (= (g :kl {:type :no-op})
+             (:G-goal-outcome (efe/compute-efe st {:type :no-op}
+                                               (assoc opts :goal-outcome-mode :kl
+                                                      :c-temperature {:some-channel 0.5}))))))))
+
 ;; ---- §11 step 4: the durable discharged-by join feeds the advanced set ------
 
 (def ^:private durable-join-fixture

@@ -52,6 +52,7 @@
                    #'wm/mission-gap-view (fn [] nil)
                    #'wm/mission-domain-ratified (fn [] nil)
                    #'wm/arena-risk-mode (fn [] :hinge)
+                   #'wm/arena-goal-outcome-mode (fn [] :hinge)
                    #'wm/arena-ambiguity-mode (fn [] :variance-sum)}
     f))
 

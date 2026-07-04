@@ -403,6 +403,7 @@
                          graph-body-weight graph-ascent-weight graph-off-map-penalty
                          graph-body-mode graph-ascent-status-aware? mission-gap-view
                          gap-weight goal-outcome-weight goal-outcome-entries goal-outcome-prob-fn
+                         goal-outcome-mode
                          ambiguity-mode risk-mode kl-channel-weights c-temperature]
                   :or {info-weight default-info-weight
                        survival-weight default-survival-weight
@@ -419,6 +420,7 @@
                        goal-outcome-weight cv/default-goal-outcome-weight
                        ambiguity-mode :variance-sum
                        risk-mode :hinge
+                       goal-outcome-mode :hinge
                        kl-channel-weights {}
                        c-temperature pref/default-c-temperature}}]
    (let [single-prediction (fm/predict state action)
@@ -496,10 +498,26 @@
          ;; Source defaults to the maintained live C-vector; [] (never derived /
          ;; store down) ⇒ 0.0 ⇒ EFE reduces to the static floor (regression-
          ;; safe). Reduces to the static term when the action advances nothing.
-         g-goal-outcome (cv/predictive-goal-outcome-risk
-                         (or goal-outcome-entries (cv/current-c-vector))
-                         action capability-graph goal-outcome-weight
-                         (or goal-outcome-prob-fn cv/credit-satisfy-prob))
+         ;; D-1e (M-aif-faithfulness §2.1, operator flip 2026-07-04):
+         ;; :goal-outcome-mode :kl scores the :becomes entries by the exact
+         ;; Bernoulli KL against pref/c-distribution (nats; range entries keep
+         ;; the hinge — their Gaussian Q is the channel lane above). :hinge =
+         ;; byte-identical historical behaviour (the library default; the
+         ;; ARENA resolves the live mode — arena-goal-outcome-mode in
+         ;; war_machine.clj, FUTON_WM_GOAL_OUTCOME_MODE=hinge escape hatch).
+         ;; The Bernoulli T is the scalar :c-temperature; a per-channel MAP
+         ;; falls back to the default (goal-outcomes are not channels).
+         g-goal-outcome (let [entries (or goal-outcome-entries (cv/current-c-vector))
+                              prob-fn (or goal-outcome-prob-fn cv/credit-satisfy-prob)]
+                          (case goal-outcome-mode
+                            :kl (cv/predictive-goal-outcome-risk-kl
+                                 entries action capability-graph goal-outcome-weight
+                                 prob-fn (if (map? c-temperature)
+                                           pref/default-c-temperature
+                                           c-temperature))
+                            (cv/predictive-goal-outcome-risk
+                             entries action capability-graph goal-outcome-weight
+                             prob-fn)))
          urgency (+ 1.0 (* (double time-pressure) (double time-pressure-scale)))
          g-risk (* g-risk-base urgency)
          g-survival (* g-survival-base urgency)
@@ -529,6 +547,9 @@
         ;; D5a: which risk functional produced :G-risk — whitelisted in
         ;; trace.clj AT BIRTH (the :score-provenance lesson).
         :risk-mode risk-mode
+        ;; D-1e: which functional produced :G-goal-outcome — whitelisted in
+        ;; trace.clj AT BIRTH, same lesson as :risk-mode.
+        :goal-outcome-mode goal-outcome-mode
         :G-total g-total
         :time-pressure (double time-pressure)
         :horizon-steps (when multi (:horizon-steps multi))

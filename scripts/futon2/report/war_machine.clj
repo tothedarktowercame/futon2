@@ -139,6 +139,25 @@
     :hinge
     :kl))
 
+(defn- arena-goal-outcome-mode
+  "D-1e PRODUCTION FLIP (Joe, 2026-07-04, M-aif-faithfulness §2.1 verdict
+   ledger): the W1 G-goal-outcome lane scores :becomes entries by the exact
+   Bernoulli KL (nats) against pref/c-distribution — c-vector's
+   predictive-goal-outcome-risk-kl (eb06565, item-5 round-trip reviewed-PASS)
+   — instead of the hinge. Rides the same before/after boundary as the §15
+   :risk-mode flip (cd0d25d). T = default-c-temperature 0.1, deliberately
+   unfitted: t-calibration (22b0024) showed NO T matches the hinge's
+   dispersion — the gap is structural, the same evidence class that unblocked
+   D-1a. Known scale: the KL lane runs ≈ ×9.6 the hinge on the live belly
+   (item-5 round-trip numbers). Range entries keep the hinge inside the KL
+   form (their Gaussian Q is the channel lane's). `FUTON_WM_GOAL_OUTCOME_MODE=hinge`
+   is the operator escape hatch back to the historical form (live-wire
+   pattern, mirrors FUTON_WM_RISK_MODE)."
+  []
+  (if (= "hinge" (System/getenv "FUTON_WM_GOAL_OUTCOME_MODE"))
+    :hinge
+    :kl))
+
 (def ^:private mission-api-timeout-ms
   ;; The substrate-backed mission endpoint can take several seconds while it
   ;; projects substrate-2 mission-doc hyperedges. The previous 5s default made
@@ -423,7 +442,9 @@
                         ;; D5c flip — keep the re-rank lane mode-coherent
                         :ambiguity-mode (arena-ambiguity-mode)
                         ;; :kl flip (§15) — same coherence for the risk lane
-                        :risk-mode (arena-risk-mode)}))
+                        :risk-mode (arena-risk-mode)
+                        ;; D-1e flip — the W1 goal-outcome lane, same boundary
+                        :goal-outcome-mode (arena-goal-outcome-mode)}))
                      (select-keys structure
                                   [:capability-graph :pre-registered-goal
                                    :mission-gap-view :mission-domain-view])
@@ -3790,7 +3811,9 @@
                        ;; D5c flip — see arena-ambiguity-mode docstring
                        :ambiguity-mode (arena-ambiguity-mode)
                        ;; :kl flip (§15) — see arena-risk-mode docstring
-                       :risk-mode (arena-risk-mode)}))
+                       :risk-mode (arena-risk-mode)
+                       ;; D-1e flip — see arena-goal-outcome-mode docstring
+                       :goal-outcome-mode (arena-goal-outcome-mode)}))
         wm-ranked (->> (efe/rank-actions wm-state wm-enriched-candidates wm-efe-opts)
                        apply-anamnesis-tiebreak
                        (filter-live-open-mission-ranked-actions wm-missions))

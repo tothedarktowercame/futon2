@@ -82,6 +82,7 @@
   (select-keys r [:action :G-risk :G-ambiguity :G-info :G-survival
                   :G-structural-pressure :G-goal-outcome
                   :G-gap :G-graph-pragmatic :G-core :score-provenance :risk-mode
+                  :goal-outcome-mode
                   :G-total :rank :time-pressure :horizon-steps]))
 
 (defn- strip-decision

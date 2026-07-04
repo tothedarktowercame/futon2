@@ -41,9 +41,15 @@ tripwire).
 - **`:ambiguity-mode :gaussian-entropy`** — LIVE (D5c flip `8ae1090`, operator
   decision). Both flags resolve in both rank lanes via `arena-risk-mode` /
   `arena-ambiguity-mode` in `scripts/futon2/report/war_machine.clj`.
-- **W1 `G-goal-outcome` KL** — flip IN FLIGHT (D-1e verdict, Joe 2026-07-04;
-  claude-4 executing). Until that parcel lands, the non-KL predictive form is
-  live; `predictive-goal-outcome-risk-kl` (`c_vector.clj`) is the dark twin.
+- **`:goal-outcome-mode :kl`** — LIVE since 2026-07-04 (D-1e flip, operator
+  decision, M-aif-faithfulness §2.1; claude-4). `:becomes` entries score by the
+  exact Bernoulli KL (`predictive-goal-outcome-risk-kl`, nats, T 0.1 unfitted —
+  the 22b0024 structural-gap evidence); range entries keep the hinge inside the
+  KL form. Resolves in both rank lanes via `arena-goal-outcome-mode`
+  (`war_machine.clj`); library default in `compute-efe` stays `:hinge`.
+  Known scale: ≈ ×9.6 the hinge on the live belly. Escape hatch:
+  `FUTON_WM_GOAL_OUTCOME_MODE=hinge`. Mode stamped per ranked action as
+  `:goal-outcome-mode` (trace-whitelisted at birth).
 - **Badges:** 7 `:principled-approximation` / 9 `:analogical` / 0
   `:derived-from-FEP` (`data/r18-badges.edn`). G-risk + G-ambiguity raise is
   PENDING live-tick evidence + C9 burn-in.
@@ -67,10 +73,20 @@ commit times by hand.
 
 ## Achievement readout
 
-B-0c ledger IN FLIGHT (claude-10): per-day/per-week census of ticks · decisions
-vs. abstains · act-gate passes · enactments + realized outcomes · γ samples ·
-channel-gap trajectories. Until it lands, the raw trace plus
-`scripts/wm_trace_census.bb` is the only readout.
+B-0c ledger **LANDED** (claude-10, 2026-07-04): `scripts/wm_achievement_ledger.bb`
+→ `data/labs/M-aif-faithfulness/wm-achievement-ledger.{edn,html}` (deterministic,
+read-only; re-run at mission close = the before/after exhibit). Per-day AND
+per-week census of ticks · decisions/modes · act-gate passes/fails (with missions)
+· enactments + realized outcomes (expected vs realized ΔG) · γ samples + value
+trajectory · channel-gap trajectory. Cascade placeholders excluded; suspend-gaps
+(>2h) listed as machine-suspend, NOT failures.
+
+**First readout (2026-05-18 → 2026-07-03, 41 files):** **682 ticks, all decided**;
+**78 act-gates** (36 pass / 35 fail / 7 abstain); **36 enactments**, **35 numeric
+realized outcomes** (mean |expected − realized| = 0.15 nats); **γ 1.00 → 1.27 over
+34 samples**; modes multiplied 284 · hermit 220 · stop-the-line 152 · stagnant 22 ·
+depositing 4; 30 suspend-gaps (not failures). (`:risk-mode`/`:wm-version` not yet
+persisted per tick → date+mode segmentation; upgrades when B-0a lands.)
 
 ## Where the faithfulness ledger lives
 

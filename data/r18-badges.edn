@@ -172,7 +172,9 @@
    :repair
    "the named W1: predict goal-outcome distribution under π and KL against a normalised C-vector",
    :note
-   "SHARPEST relabel — a non-KL explicitly labelled canonical/KL; ns docstring concedes it is deferred · M-evaluate-policies 2026-07-03: 0% flips so far (young, 4% of corpus). W1 driver now claude-4 (2315d49 durable join makes it livelier) — E7 = post-merge re-census. Bernoulli KL path for :becomes entries provided by the D5a c-distribution contract."},
+   "SHARPEST relabel — a non-KL explicitly labelled canonical/KL; ns docstring concedes it is deferred · M-evaluate-policies 2026-07-03: 0% flips so far (young, 4% of corpus). W1 driver now claude-4 (2315d49 durable join makes it livelier) — E7 = post-merge re-census. Bernoulli KL path for :becomes entries provided by the D5a c-distribution contract.",
+   :repair-built
+   ":goal-outcome-mode :kl FLIPPED LIVE 2026-07-04 (D-1e, operator decision, M-aif-faithfulness §2.1; arena-goal-outcome-mode, FUTON_WM_GOAL_OUTCOME_MODE=hinge escape hatch; same boundary as the §15 :risk-mode flip cd0d25d). :becomes entries score by the exact Bernoulli KL (predictive-goal-outcome-risk-kl eb06565, item-5 round-trip reviewed-PASS); range entries keep the hinge inside the KL form (their Gaussian Q is the channel lane's). T 0.1 unfitted — 22b0024: no T matches the hinge, structural. Known scale ≈ ×9.6 hinge on the live belly. Badge raise PENDING LIVE-TICK EVIDENCE + burn-in (reviewer-side); the p=1-deterministic fault in :computes is now conditional on the R12 credit burn-in, not the scoring form"},
   :G-survival
   {:badge :analogical,
    :claims "survival-pressure EFE term",

@@ -575,9 +575,12 @@
 ;; ---------------------------------------------------------------------------
 ;; KL form of the goal-outcome risk — the item-5 Bernoulli consumer
 ;; (E-KL-refinements item 5; contract E-C-vector-live §12 boundary note).
-;; DARK: nothing in the production scoring path calls these; the live lane
-;; stays the hinge forms above. Exercised by tests + the recorded live
-;; round-trip. W1 CONSUMES pref/c-distribution + pref/kl — no private C.
+;; LIVE since 2026-07-04 (D-1e operator flip, M-aif-faithfulness §2.1): the
+;; arena resolves :goal-outcome-mode :kl by default (arena-goal-outcome-mode
+;; in war_machine.clj; FUTON_WM_GOAL_OUTCOME_MODE=hinge escape hatch); the
+;; library default in compute-efe stays :hinge, so tests and non-arena
+;; callers are byte-identical. W1 CONSUMES pref/c-distribution + pref/kl —
+;; no private C.
 ;; ---------------------------------------------------------------------------
 
 (defn kl-risk-of
@@ -601,15 +604,21 @@
      0.0)))
 
 (defn predictive-goal-outcome-risk-kl
-  "DARK twin of `predictive-goal-outcome-risk` with the `:becomes` entries
+  "KL twin of `predictive-goal-outcome-risk` with the `:becomes` entries
    scored by the exact Bernoulli KL (item 5) instead of the hinge: an advanced
    entry's q-sat = (satisfy-prob-fn action); a non-advanced entry's q-sat = 0.0
    (still unmet under this policy; `pref/kl` clamps to 1e-9). Range entries
    keep their hinge divergence — mixing nats (:becomes, scale ~1/T) with the
-   hinge's [0,1] in one mean is UNIT-MIXING, deliberate and visible here so the
-   flip decision confronts it (feeds E-KL-refinements item 3); do not flip this
-   in as-is without a temperature/weight calibration. Same fixed denominator
-   and [] ⇒ 0.0 floor as the production form."
+   hinge's [0,1] in one mean is UNIT-MIXING, deliberate and visible. Same
+   fixed denominator and [] ⇒ 0.0 floor as the hinge form.
+
+   HONESTY: LIVE in the arena since 2026-07-04 (D-1e operator flip; was the
+   dark twin, eb06565). The flip was taken WITH the known ≈×9.6 nats-vs-hinge
+   scale and WITHOUT a fitted T — t-calibration (22b0024) showed no T matches
+   the hinge's dispersion (structural gap), so calibration could not gate it.
+   T = pref/default-c-temperature 0.1; escape hatch
+   FUTON_WM_GOAL_OUTCOME_MODE=hinge (arena-goal-outcome-mode,
+   war_machine.clj)."
   ([entries action capability-graph]
    (predictive-goal-outcome-risk-kl entries action capability-graph
                                     default-goal-outcome-weight credit-satisfy-prob
