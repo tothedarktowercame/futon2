@@ -281,7 +281,7 @@ turn this mission from weeks into months:
 | claude-5 | E-KL-refinements owner; reviews on the KL lane; R5 badge work (Joe, 2026-07-03) | E-KL-refinements (CLOSED with `cd0d25d`) |
 | claude-10 | KL items 1–3 builds (truncation `0f8d5c6`, calibration `22b0024`); **B-0c achievement ledger** (belled 2026-07-04, job `invoke-…-52640a20`) | this doc §2.0 |
 | claude-4 | W1 driver; Bernoulli round-trip `eb06565`; **D-1e flip execution** (belled 2026-07-04, job `invoke-…-26dae8ec`); E7 re-census follow-on | this doc §2.1 / E-C-vector-live §11–12 |
-| codex-1 | **B-0a tick provenance stamp** (belled 2026-07-04, job `invoke-…-22296e3b`) | this doc §2.0 |
+| claude-9 | **B-0a tick provenance stamp** (belled 2026-07-04, job `invoke-…-f5115b74`; re-dispatch — codex-1 bell `invoke-…-22296e3b` FAILED, Codex quota exhausted until 2026-07-18, so the Codex-default handoff falls back to Claude peers for this mission) | this doc §2.0 |
 | claude-12 | mission owner; B-0b baseline doc (`holes/wm-baseline.md`, seeded 2026-07-04); reviews all three parcels above (author ≠ reviewer) | this doc |
 
 Coordination rule inherited from M-evaluate-policies §10: parcels on Agency,
