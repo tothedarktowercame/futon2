@@ -330,9 +330,11 @@ author ≠ reviewer throughout, verdicts recorded in this doc.
 built by claude-5 same-day, immediately after B-2a/B-2b. Reviewer follow-ups
 applied: baseline schema passage 3→4 (claude-5's own flag). C9 burn-in census waits for a few days of post-flip
 ticks (1 real tick so far); it gates the three badge raises AND D-1c execution.
-Flip-evidence shadow studies for B-2c (`:salience-mode`) and B-2d (`:tau-mode`,
-jointly with B-3b) queue behind the in-flight parcels — one dark-mode shadow
-harness can likely serve all three (A-matrix shadow is the template).
+Flip-evidence shadow trio (`:tau-mode` / `:salience-mode` /
+`:structural-pressure-mode`): **BELLED** to claude-10 2026-07-04 (job
+`invoke-…-1d43b342`) — one selection-level harness, three artifacts, the
+flip-memo evidence Joe decides on. (A-matrix shadow is the method template;
+its own flip is DEFERRED per §3 R8 boundary.)
 
 **Standing authorization (Joe, 2026-07-04, verbatim intent):** "happy for you to
 continue driving it through with claude helpers" — claude-12 drives dispatch +
