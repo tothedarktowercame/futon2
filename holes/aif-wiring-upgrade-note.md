@@ -100,11 +100,17 @@ query instead of a private trace file.
 - [x] Successor confirmed (Joe, 2026-07-04): `portfolio-inference` → futon2 WM;
       `mission-control` → **C-cascade-real / `pipeline-pattern-cascade-live.html`**
       (lifecycle-layer gap catalogued above).
-- [ ] **Portfolio flood halt** (step 1) — reversible `scheduler/stop!`; safe now,
-      independent of the mission-control gap. *Awaiting Joe's go.*
+- [x] **`portfolio-inference` RETIRED** (Joe's go, 2026-07-04, claude-10):
+      (a) LIVE `scheduler/stop!` over Drawbridge — `running? false` (was already
+      stopped; on-demand flood had ceased ~14:02Z); (b) NEXT-START deregister from
+      futon3c `registry.clj` (`d43323c`, off next JVM boot, reference ns retained);
+      (c) wiring-claims `:peripheral/…` + `:daemon/…-scheduler` marked `:deprecated`
+      (`a256aca`). Gates: check-parens + clj-kondo clean.
 - [ ] Resolve the 4 lifecycle-gap rows (port / route-to-adjacent-surface / drop)
-      before the **durable** mission-control deregister (step 4).
+      before the **durable** mission-control deregister.
 - [x] `issue_holes` disposition (Joe, 2026-07-04): **RETIRE** — dormant one-off;
-      removes mission-control's last external consumer.
-- [ ] Owner: futon3c agent lands the registry/README change; the reversible `stop!`
-      can be run from the hub REPL on Joe's go.
+      removes mission-control's last external consumer. *(drop not yet executed)*
+- [ ] Remaining to execute: drop `issue_holes` + `scripts/gh-issue-holes`; resolve
+      mission-control lifecycle gap → deregister mission-control (same pattern as
+      portfolio-inference above). Optional: disable the `/api/alpha/portfolio/*`
+      HTTP endpoints (on-demand path; requires a caller, so lower urgency).
