@@ -15,6 +15,7 @@ coupled peripherals, and it is being **superseded**:
 |---|---|---|
 | `portfolio-inference` | A scheduled AIF loop (`scheduler.clj`, `portfolio.core/portfolio-step!`) depositing `:portfolio/observation/belief/policy/step` evidence on a cadence | the **futon2 WM** — the live belief/EFE/preferences loop over the actual stack |
 | `mission-control` | Mission-doc **lifecycle** tracking — status classification (in-progress / blocked / stale-in-progress), `:mission/blocked-by` dependency edges, coverage-vs-devmap, snapshot-to-snapshot diff; *feeds* portfolio-inference its review | **C-cascade-real / `pipeline-pattern-cascade-live.html`** — substrate-2-backed per-mission view (cited patterns · holes · held items · clock · cascade). Close to switchover; see the gap below. |
+| `issue_holes` (+ `scripts/gh-issue-holes`) | Dormant **one-off library** (last touched **2026-03-08**, never scheduled, no output artifacts) — projects open GitHub issues into the hole/tension vocabulary, anchored to missions/claims | the **unified hole vocabulary** — sorry-registry (in-code proof-holes) + the cascade's per-mission holes. Retire. It was mission-control's *only* external consumer (one `scan-mission-files` call), so retiring it dissolves the last coupling. |
 
 They are **one subsystem**: `mission-control` produces the mission review;
 `portfolio-inference` runs `:pi-step` — "live aif-step using mission-control
@@ -65,8 +66,12 @@ de-noises the bus and removes the decoy.
 2. **Acknowledge the coupled consumer:** `mission-control`'s `portfolio-diff` /
    coverage-diff goes **dormant** (stale, not crashing) once the loop stops
    depositing. Fine if both are being retired together.
-3. **Check `issue_holes`** — it requires `mission-control-backend`; confirm it is
-   also being retired or is repointed before deregistering mission-control.
+3. **`issue_holes` retires too** (Joe, 2026-07-04) — a dormant one-off (last used
+   2026-03-08, unscheduled, no artifacts). Nothing to stop; drop
+   `scripts/gh-issue-holes` + the ns. Its single `mcb/scan-mission-files` call was
+   mission-control's *only* external consumer, so this removes the last coupling and
+   mission-control can then deregister cleanly. (Its GitHub-issue-as-hole idea, if
+   ever wanted again, re-homes onto the unified sorry/cascade hole vocabulary.)
 4. **Durable deprecate (futon3c change):** remove `:portfolio-inference` and
    `:mission-control` from `peripheral/registry.clj` (`all-peripheral-ids` +
    `factories`), mark deprecated in `README-mission-peripheral.md`. **Keep the
@@ -99,6 +104,7 @@ query instead of a private trace file.
       independent of the mission-control gap. *Awaiting Joe's go.*
 - [ ] Resolve the 4 lifecycle-gap rows (port / route-to-adjacent-surface / drop)
       before the **durable** mission-control deregister (step 4).
-- [ ] Confirm `issue_holes` disposition (repoint off `mission-control-backend`?).
+- [x] `issue_holes` disposition (Joe, 2026-07-04): **RETIRE** — dormant one-off;
+      removes mission-control's last external consumer.
 - [ ] Owner: futon3c agent lands the registry/README change; the reversible `stop!`
       can be run from the hub REPL on Joe's go.
