@@ -393,7 +393,18 @@ hatches; raise provenance in each `:note`; explainer regenerated + spliced.
 Scoreboard: **7 analogical / 8 PA / 1 derived-from-FEP** (was 9/7/0 at
 charter). Caveat honoured: raises cite the one-day n; C9 second pass
 (calendar days) strengthens or revisits. Still gated on more burn-in:
-D-1c execution, F-sp execution. C9 burn-in census waits for a few days of post-flip
+D-1c execution, F-sp execution.
+
+**Visual evidence surface (Joe's ask, 2026-07-04 afternoon): `wm-clicks-exhibit`
+BELLED** to claude-10 (job `invoke-…-b9b25896`) — one self-contained HTML
+exhibit (G-trajectory with trigger-shaped markers + campaign band, γ
+continuity, decision distribution before/after, badge scoreboard, data
+table), deterministic generator, sibling of argue-exhibit + the census
+tooling. Design spec pre-validated per the dataviz method (palette CVD ΔE
+47.2 PASS, relief rule → direct labels + table). Rationale: Cyder answers
+"what drives the clocks," sequel-notebook answers "what flew," this answers
+"what did the WM decide and why, visually" — one surface per question, no
+redundant formats. C9 burn-in census waits for a few days of post-flip
 ticks (1 real tick so far); it gates the three badge raises AND D-1c execution.
 Flip-evidence shadow trio: **DONE `f3560a2`, reviewed-PASS claude-12
 2026-07-04** (foreground run per the new parcel rule — no premature-done
