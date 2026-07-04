@@ -1,0 +1,302 @@
+{:gamma-continuity
+ {:last-before
+  {:ts "2026-07-03T17:03:55.680143568Z", :gamma 1.2682658076960074},
+  :first-after
+  {:ts "2026-07-04T07:03:48.095349930Z", :gamma 1.287244150067791}},
+ :caveats
+ ["FIRST-PASS: KL-era n is SMALL and confined to ONE calendar day (2026-07-04). A later pass adds days."
+  "Manual record excluded (:git-sha 515a5936…)."
+  "Clicks (:duree-click-regulated) sample engagement-time; reported SEPARATELY from cron ticks, not pooled."
+  "Cascade placeholders (no :G-risk) excluded from pool/winner G stats."],
+ :segments
+ {:before-hinge
+  {:n 682,
+   :act-gates {:pass 36, :fail 35, :abstain 7},
+   :G-core {:mean -49.98226409375533},
+   :modes
+   {:multiplied 284,
+    :depositing 4,
+    :stagnant 22,
+    :stop-the-line 152,
+    :hermit 220},
+   :pool-G {:mean -4.204876217052463, :sd 5.563431479486987, :n 90623},
+   :abstain-rate 0.0,
+   :gamma
+   {:first 1.0, :last 1.2682658076960074, :mean 0.6735420767498063},
+   :decision-targets
+   [[:sorry/pudding-g1-arrow-witness-binding 306]
+    [nil 141]
+    [:sorry/wm-aif-substrate-addressability 108]
+    ["M-canon-fingerprint-store" 44]
+    ["M-capability-star-map" 29]
+    ["M-emacs-cursor-peripheral" 21]
+    [:sorry/r3a-likelihood-coupling-density 17]
+    [:sorry/r3a-likelihood-loop-health 13]],
+   :decision-types
+   {:learn-action-class 141, :address-sorry 445, :open-mission 96},
+   :G-augmentation {:mean nil},
+   :span
+   ["2026-05-18T19:42:49.284838608Z" "2026-07-03T17:03:55.680143568Z"],
+   :winner-G
+   {:mean -5.209033036984169,
+    :median -4.817540512709659,
+    :sd 6.837080023032095,
+    :min -129.66414826958462,
+    :max 0.06506944379297727}},
+  :after-kl-all
+  {:n 28,
+   :act-gates {:pass 28, :fail 28, :abstain 0},
+   :G-core {:mean 18.386182929012985},
+   :modes {:stop-the-line 28},
+   :pool-G {:mean 17.44722131732335, :sd 8.401209392010932, :n 3096},
+   :abstain-rate 0.0,
+   :gamma
+   {:first 1.287244150067791,
+    :last 1.3459001920611886,
+    :mean 1.341689732033495},
+   :decision-targets [["M-first-flights" 28]],
+   :decision-types {:advance-mission 28},
+   :G-augmentation {:mean -2.0098169417867657},
+   :span
+   ["2026-07-04T07:03:48.095349930Z" "2026-07-04T12:01:09.480507525Z"],
+   :winner-G
+   {:mean 16.375392516252763,
+    :median 24.367124543468513,
+    :sd 8.486969181364442,
+    :min 4.596723291621137,
+    :max 26.555159638902985}},
+  :after-kl-click
+  {:n 22,
+   :act-gates {:pass 22, :fail 22, :abstain 0},
+   :G-core {:mean 19.43200846037852},
+   :modes {:stop-the-line 22},
+   :pool-G {:mean 18.68480398050044, :sd 8.048441750324196, :n 2382},
+   :abstain-rate 0.0,
+   :gamma
+   {:first 1.3260570607936344,
+    :last 1.3459001920611886,
+    :mean 1.3449982315490265},
+   :decision-targets [["M-first-flights" 22]],
+   :decision-types {:advance-mission 22},
+   :G-augmentation {:mean -2.0036221265010417},
+   :span
+   ["2026-07-04T08:37:15.371709244Z" "2026-07-04T10:07:59.661515373Z"],
+   :winner-G
+   {:mean 17.42838633387749,
+    :median 24.386067230401743,
+    :sd 8.175284066349167,
+    :min 7.2371957494988575,
+    :max 26.555159638902985}},
+  :after-kl-cron
+  {:n 4,
+   :act-gates {:pass 4, :fail 4, :abstain 0},
+   :G-core {:mean 13.567734947714666},
+   :modes {:stop-the-line 4},
+   :pool-G {:mean 12.254045546096473, :sd 7.12633913217719, :n 498},
+   :abstain-rate 0.0,
+   :gamma
+   {:first 1.3459001920611886,
+    :last 1.3459001920611886,
+    :mean 1.3459001920611886},
+   :decision-targets [["M-first-flights" 4]],
+   :decision-types {:advance-mission 4},
+   :G-augmentation {:mean -2.0370741290439534},
+   :span
+   ["2026-07-04T09:03:56.784734886Z" "2026-07-04T12:01:09.480507525Z"],
+   :winner-G
+   {:mean 11.530660818670714,
+    :median 7.249690147391126,
+    :sd 8.570272965074999,
+    :min 7.2371957494988575,
+    :max 24.386067230401743}}},
+ :corpus
+ {:files 42,
+  :last-file "wm-trace-2026-07-04.edn",
+  :last-tick "2026-07-04T12:01:09.480507525Z",
+  :total-ticks 711},
+ :verdict-seed
+ "SANITY VERDICT-SEED: post-flip WM appears SANE. BEHAVIOURAL continuity holds — decisions still resolve (abstain-rate 0.00% after vs 0.00% before), modes stay in the known set, and γ is continuous across the boundary (1.268→1.287). The hinge→KL winner-G LEVEL shift (mean -5.21→16.38) is a COMPOSITION change, not a pathology: the KL goal-outcome term + the ac60874 G-core/G-augmentation split change the G formula (G-aug mean ~-2.01). SEPARATELY, WITHIN the KL campaign the winner-G declines (~26.6 peak→7.2 end), and :g-decline-analysis attributes it to G-CORE (belly) halving (24.2→12.6 first→second half) while G-augmentation stays flat — i.e. belly free-energy settling, NOT the KL layer. n(after)=28, ONE calendar DAY — directional only, not a burn-in claim.",
+ :g-decline-analysis
+ {:enacted-missions {"M-bayesian-structure-learning" 28},
+  :interpretation
+  "Compare G-core (belly free-energy) vs G-augmentation (KL goal-outcome + channel layers) across the two halves: whichever moves more DRIVES the winner-G change. Repeated enacted-missions ⇒ repeated-enactment effect on the belly.",
+  :winner-G-range [4.596723291621137 26.555159638902985],
+  :G-aug-mean-first-half -2.037074129043954,
+  :G-aug-mean-second-half -1.984506696476521,
+  :winner-G-last 7.249690147391126,
+  :winner-G-first 4.596723291621137,
+  :G-core-mean-first-half 24.20878927540134,
+  :G-core-mean-second-half 12.563576582624645},
+ :sim-only true,
+ :generated-by
+ "scripts/c9_burn_in.bb (M-aif-faithfulness C9 first-pass)",
+ :read-only true,
+ :g-decline-timeline
+ [{:ts "2026-07-04T07:03:48.095349930Z",
+   :winner-G 4.596723291621137,
+   :G-core 6.63379742066509,
+   :G-augmentation nil,
+   :enacted "M-bayesian-structure-learning",
+   :trigger nil}
+  {:ts "2026-07-04T08:03:54.452678908Z",
+   :winner-G 24.367124543468513,
+   :G-core 26.404198672512464,
+   :G-augmentation -2.0370741290439534,
+   :enacted "M-bayesian-structure-learning",
+   :trigger nil}
+  {:ts "2026-07-04T08:37:15.371709244Z",
+   :winner-G 24.386067230401743,
+   :G-core 26.423141359445694,
+   :G-augmentation -2.0370741290439534,
+   :enacted "M-bayesian-structure-learning",
+   :trigger :duree-click-regulated}
+  {:ts "2026-07-04T08:41:28.455634654Z",
+   :winner-G 13.193424679494546,
+   :G-core 15.2304988085385,
+   :G-augmentation -2.0370741290439534,
+   :enacted "M-bayesian-structure-learning",
+   :trigger :duree-click-regulated}
+  {:ts "2026-07-04T08:45:41.723729135Z",
+   :winner-G 24.386067230401743,
+   :G-core 26.423141359445694,
+   :G-augmentation -2.0370741290439534,
+   :enacted "M-bayesian-structure-learning",
+   :trigger :duree-click-regulated}
+  {:ts "2026-07-04T08:49:59.139173278Z",
+   :winner-G 24.386067230401743,
+   :G-core 26.423141359445694,
+   :G-augmentation -2.0370741290439534,
+   :enacted "M-bayesian-structure-learning",
+   :trigger :duree-click-regulated}
+  {:ts "2026-07-04T08:54:15.894690491Z",
+   :winner-G 24.386067230401743,
+   :G-core 26.423141359445694,
+   :G-augmentation -2.0370741290439534,
+   :enacted "M-bayesian-structure-learning",
+   :trigger :duree-click-regulated}
+  {:ts "2026-07-04T08:58:36.241027254Z",
+   :winner-G 24.386067230401743,
+   :G-core 26.423141359445694,
+   :G-augmentation -2.0370741290439534,
+   :enacted "M-bayesian-structure-learning",
+   :trigger :duree-click-regulated}
+  {:ts "2026-07-04T09:03:17.014782080Z",
+   :winner-G 24.386067230401743,
+   :G-core 26.423141359445694,
+   :G-augmentation -2.0370741290439534,
+   :enacted "M-bayesian-structure-learning",
+   :trigger :duree-click-regulated}
+  {:ts "2026-07-04T09:03:56.784734886Z",
+   :winner-G 24.386067230401743,
+   :G-core 26.423141359445694,
+   :G-augmentation -2.0370741290439534,
+   :enacted "M-bayesian-structure-learning",
+   :trigger :wallclock-cron}
+  {:ts "2026-07-04T09:07:49.326146955Z",
+   :winner-G 24.386067230401743,
+   :G-core 26.423141359445694,
+   :G-augmentation -2.0370741290439534,
+   :enacted "M-bayesian-structure-learning",
+   :trigger :duree-click-regulated}
+  {:ts "2026-07-04T09:12:13.303653272Z",
+   :winner-G 24.386067230401743,
+   :G-core 26.423141359445694,
+   :G-augmentation -2.0370741290439534,
+   :enacted "M-bayesian-structure-learning",
+   :trigger :duree-click-regulated}
+  {:ts "2026-07-04T09:16:25.072482997Z",
+   :winner-G 24.386067230401743,
+   :G-core 26.423141359445694,
+   :G-augmentation -2.0370741290439534,
+   :enacted "M-bayesian-structure-learning",
+   :trigger :duree-click-regulated}
+  {:ts "2026-07-04T09:20:31.596955764Z",
+   :winner-G 24.386067230401743,
+   :G-core 26.423141359445694,
+   :G-augmentation -2.0370741290439534,
+   :enacted "M-bayesian-structure-learning",
+   :trigger :duree-click-regulated}
+  {:ts "2026-07-04T09:24:36.117924058Z",
+   :winner-G 24.386067230401743,
+   :G-core 26.423141359445694,
+   :G-augmentation -2.0370741290439534,
+   :enacted "M-bayesian-structure-learning",
+   :trigger :duree-click-regulated}
+  {:ts "2026-07-04T09:28:43.222444840Z",
+   :winner-G 13.193424679494546,
+   :G-core 15.2304988085385,
+   :G-augmentation -2.0370741290439534,
+   :enacted "M-bayesian-structure-learning",
+   :trigger :duree-click-regulated}
+  {:ts "2026-07-04T09:34:25.269771725Z",
+   :winner-G 26.555159638902985,
+   :G-core 28.346919082632255,
+   :G-augmentation -1.7917594437292679,
+   :enacted "M-bayesian-structure-learning",
+   :trigger :duree-click-regulated}
+  {:ts "2026-07-04T09:38:40.433805177Z",
+   :winner-G 9.406288158000104,
+   :G-core 11.198047601729371,
+   :G-augmentation -1.7917594437292679,
+   :enacted "M-bayesian-structure-learning",
+   :trigger :duree-click-regulated}
+  {:ts "2026-07-04T09:42:23.272271669Z",
+   :winner-G 7.2371957494988575,
+   :G-core 9.27426987854281,
+   :G-augmentation -2.0370741290439534,
+   :enacted "M-bayesian-structure-learning",
+   :trigger :duree-click-regulated}
+  {:ts "2026-07-04T09:46:01.354057734Z",
+   :winner-G 7.2371957494988575,
+   :G-core 9.27426987854281,
+   :G-augmentation -2.0370741290439534,
+   :enacted "M-bayesian-structure-learning",
+   :trigger :duree-click-regulated}
+  {:ts "2026-07-04T09:49:38.807422624Z",
+   :winner-G 7.2371957494988575,
+   :G-core 9.27426987854281,
+   :G-augmentation -2.0370741290439534,
+   :enacted "M-bayesian-structure-learning",
+   :trigger :duree-click-regulated}
+  {:ts "2026-07-04T09:53:27.937826735Z",
+   :winner-G 7.2371957494988575,
+   :G-core 9.27426987854281,
+   :G-augmentation -2.0370741290439534,
+   :enacted "M-bayesian-structure-learning",
+   :trigger :duree-click-regulated}
+  {:ts "2026-07-04T09:57:50.566340716Z",
+   :winner-G 7.2371957494988575,
+   :G-core 9.27426987854281,
+   :G-augmentation -2.0370741290439534,
+   :enacted "M-bayesian-structure-learning",
+   :trigger :duree-click-regulated}
+  {:ts "2026-07-04T10:03:07.959312489Z",
+   :winner-G 7.2371957494988575,
+   :G-core 9.27426987854281,
+   :G-augmentation -2.0370741290439534,
+   :enacted "M-bayesian-structure-learning",
+   :trigger :duree-click-regulated}
+  {:ts "2026-07-04T10:05:23.175038588Z",
+   :winner-G 7.2371957494988575,
+   :G-core 9.27426987854281,
+   :G-augmentation -2.0370741290439534,
+   :enacted "M-bayesian-structure-learning",
+   :trigger :wallclock-cron}
+  {:ts "2026-07-04T10:07:59.661515373Z",
+   :winner-G 9.406288158000104,
+   :G-core 11.198047601729371,
+   :G-augmentation -1.7917594437292679,
+   :enacted "M-bayesian-structure-learning",
+   :trigger :duree-click-regulated}
+  {:ts "2026-07-04T11:01:13.107726676Z",
+   :winner-G 7.249690147391126,
+   :G-core 9.286764276435079,
+   :G-augmentation -2.0370741290439534,
+   :enacted "M-bayesian-structure-learning",
+   :trigger :wallclock-cron}
+  {:ts "2026-07-04T12:01:09.480507525Z",
+   :winner-G 7.249690147391126,
+   :G-core 9.286764276435079,
+   :G-augmentation -2.0370741290439534,
+   :enacted "M-bayesian-structure-learning",
+   :trigger :wallclock-cron}]}
