@@ -195,7 +195,14 @@ options, recommendation, blast radius), put in front of Joe; record verdicts her
   sim shows post-flip G-core already lands ≈ canonical −E[ln C].
 - **D-1d: RATIFIED — relocate G-structural-pressure to the habit prior ln E(π)
   (R12).** Build dark behind a mode flag (D5a pattern); the flip is Joe's, after
-  B-0a stamps the trace.
+  B-0a stamps the trace. **DARK BUILD LANDED `776b2f0` (claude-5), reviewed-PASS
+  claude-12 2026-07-04:** the ln E seam is now first-class in `softmax-weights`
+  (3-arity, priors UNSCALED by τ — the canonical σ(ln E − γG) shape; docstring
+  marks it THE single prior entry point); structural byte-identity (zero-bias ⇒
+  historical code path); goldens at both G-total and selection level under both
+  option eras; schema v3→4 per the ledger rule. Reviewer re-ran kondo/parens +
+  FULL suite (453/3040/0). Flip memo seed captured in-test (G-total −w·sp, bias
+  +w·sp direction-preserving, precision no longer modulates the term).
 - **D-1e: FLIP NOW** (Joe chose to ride the same before/after boundary as
   D-1a/D-1b rather than wait for B-0a). Belled to claude-4 (named W1 driver)
   2026-07-04. **EXECUTED same day (`fb15d66`) — reviewed-PASS (claude-12,
@@ -291,6 +298,14 @@ turn this mission from weeks into months:
   the scope): the `cd0d25d` suite finding — gap-weight (and the regulator sweeps
   generally) are calibrated in hinge-era units and no longer dominate under
   nats-scale KL risk → E-possible-world-regulator, not this mission.
+- **R8 belief persistence + event-stream diversity** (added 2026-07-04, from the
+  B-3a-shadow finding): belief re-inits uniform every tick (documented interim,
+  R8 named in-code) and only `:strengthened` events reach the update — so R1's
+  evidence accumulation is structurally idle and the A-matrix is inert in
+  practice. Completeness work, not label-honesty → the R8 lane. THIS mission's
+  residue: the A-matrix flip memo is DEFERRED until R8 persistence + a diverse
+  event feed exist (flipping now would be safe but meaningless — recorded so the
+  deferral is a decision, not a stall).
 
 ## 4. In-flight registry — do not double-bell
 
@@ -306,14 +321,14 @@ turn this mission from weeks into months:
 | claude-3 | **B-2d DONE `7fbaf8b`, reviewed-PASS claude-12 2026-07-04.** Dark behind `:tau-mode` (default `:spread` byte-identical, witnessed at both effective-temperature and select-action level; `:gamma-only` = canonical). Correct opt-IN hatch polarity; both new modes stamped into `:wm-version` via the same resolver fns the behaviour uses. Review: diff read; kondo/check-parens re-run OK; policy+precision+policy-precision suites re-run 73/211/0. Flip decided jointly with B-3b (shared sharpness seam); needs E6-style shadow (queued). | this doc §2.2 |
 | claude-7 | **B-3a DONE `3d2683a`, reviewed-PASS claude-12 2026-07-04.** Review: full diff + design note read; kondo re-run (0 errors; the 1 warning verified pre-existing in the parent commit); check-parens OK; belief+forward-model suites re-run 76/1389/0 — matches claim. Legacy-reduction theorem (A-identity + κ(w)=log₂(1+w) ≡ (1+w), 1e-12) is the parcel's keystone; default `:legacy` byte-identical; channel block is read-only unification, prediction path untouched. **Flip prerequisite (before a D-memo goes to Joe): an E6-style shadow — posteriors/decisions under `:a-matrix` vs `:legacy` over the live corpus.** Badge stays PA until then (reviewer-side). | this doc §2.3 / holes/E-r1-a-matrix-design.md |
 
-| claude-10 | **B-3a-shadow** — E6-style `:a-matrix` vs `:legacy` shadow study, the flip-memo prerequisite (belled 2026-07-04, job `invoke-…-577c2324`; read-only, artifacts to holes/labs/) | this doc §2.3 |
+| claude-10 | **B-3a-shadow DONE `f31ed97`, reviewed-PASS claude-12 2026-07-04** (delivery was rocky: job "done" with no artifact, agent wedged "invoking", whistle timed out — resolved by reading the session transcript, after which the session recovered and committed). **THE FINDING: the A-matrix flip is behaviourally inert under current wiring** — 247,019 entity-updates replayed via legacy-inversion (100% invertible, self-checked), 0 argmax flips, KL ≈ 0.001 nats flat. Root causes, both verified in code: (1) belief is bootstrapped uniform EVERY tick — documented interim, `war_machine.clj` "R8 trace persistence will carry belief across calls"; (2) the recovered event stream is 100% `:strengthened` — no event diversity ever reaches the update. Channel block explicitly NOT shadowed (said, not faked). Method sound; reviewer determinism re-run noted in-flight at verdict time. **Consequence: A-matrix flip memo DEFERRED** — see §2.1 addendum + §3. | this doc §2.3 / holes/labs/M-aif-faithfulness/a-matrix-shadow.edn |
 
 Coordination rule inherited from M-evaluate-policies §10: parcels on Agency,
 author ≠ reviewer throughout, verdicts recorded in this doc.
 
-**D-1d dark build: BELLED** to claude-5 2026-07-04 (job `invoke-…-82f10c9c`)
-immediately after B-2a/B-2b landed — the `efe.clj` seam is free and the
-augmentation naming makes the relocation surgical. C9 burn-in census waits for a few days of post-flip
+**D-1d dark build: DONE `776b2f0`, reviewed-PASS** (see §2.1 ledger entry) —
+built by claude-5 same-day, immediately after B-2a/B-2b. Reviewer follow-ups
+applied: baseline schema passage 3→4 (claude-5's own flag). C9 burn-in census waits for a few days of post-flip
 ticks (1 real tick so far); it gates the three badge raises AND D-1c execution.
 Flip-evidence shadow studies for B-2c (`:salience-mode`) and B-2d (`:tau-mode`,
 jointly with B-3b) queue behind the in-flight parcels — one dark-mode shadow

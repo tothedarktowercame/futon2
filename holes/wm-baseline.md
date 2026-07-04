@@ -74,7 +74,9 @@ git identity of the one-shot JVM's checkout (`:git-dirty?` counts tracked
 modifications only), the mode flags resolved via the SAME fns the rank lanes
 call (`arena-mode-flags` in `war_machine.clj` — never a second env read), the
 runner's live-wire switch, and the monotonic record-shape version
-(`futon2.aif.trace/trace-schema-version`, now 3 — v3 = the B-2a/B-2b
+(`futon2.aif.trace/trace-schema-version`, now 4 — v4 = D-1d's
+`:structural-pressure-mode`/`:habit-prior-bias` per ranked action, dark,
+default-inert; v3 = the B-2a/B-2b
 struct-split relabels: `:G-augmentation`/`:augmentation-terms` +
 `:G-graph-feasibility`/`:G-graph-pragmatic-proxy` per ranked action, additive
 only, G-totals byte-identical). Accessor:
