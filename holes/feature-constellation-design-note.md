@@ -151,6 +151,31 @@ The point (same lesson as the availability thread): structure the feature
 cool 3D — renders the trim/coalesce affordance from the k-collapse, instead of a
 fly-through you admire but can't act on.
 
+## The collapse principle generalizes (2026-07-04)
+
+The feature constellation is one instance of a stack-wide principle, surfaced by the
+futon1a#5 evidence-store incident (agents scanning the whole evidence store to check
+"what's already done" → 15s timeouts, blocked attach): **accumulated substrate is
+reached through a collapsed / bounded projection, never full materialization.**
+
+- **Features** → collapse by `k` (this note): peel leaves, retract to the core.
+- **Evidence** → collapse by recency: a bounded recent read (e.g. `:query/limit 10`,
+  newest-first) for "what's in progress" — never a whole-store scan.
+- **Completion / derived state** → the strongest collapse: don't re-derive from
+  history at all — maintain a cheap incremental projection (a done-set). `k` pushed
+  all the way to O(1).
+
+The **≤20-features/repo budget** is this same discipline aimed at the feature set:
+keep the working set small/collapsed by trimming, so you never *need* to expand the
+whole thing to reason about it.
+
+**Corollary — a trim heuristic:** *anything reachable only by full materialization is
+a trim (or redesign) candidate.* The #5 completion-scan is the exhibit — full
+expansion, and self-worsening (each completion grows the store that slows the next
+check). In the constellation it flags as a trim candidate → coalesce into "maintained
+done-set." That the trim/coalesce lens catches a real design smell (not just
+tidiness) is evidence the constellation is pointed at something true.
+
 ## Open questions for Joe
 
 - `k` semantics RESOLVED (2026-07-04) — the real code is `webarxana/client/graph.cljs`
