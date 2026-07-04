@@ -219,6 +219,19 @@ surface over the system's time-drivers — in
   clicks driver (the `:turn` subclass above), polling the invoke-jobs ledger;
   its first rider keeps the serving-JVM C-vector (belly) fresh.
 
+### WM Evidence Landscape emission
+
+`scripts/wm_scheduled_run.clj` can also publish one compact `war-machine`
+evidence entry per completed tick. It is disabled by default; enable it with:
+
+```bash
+FUTON2_WM_EMIT_EVIDENCE=1 FUTON3C_EVIDENCE_BASE=http://localhost:7070 \
+  clojure -M scripts/wm_scheduled_run.clj
+```
+
+The POST is best-effort with a short timeout. The private EDN trace remains the
+source of truth and is written regardless of Evidence Landscape availability.
+
 **Outstanding issues (named here, deferred — tracked in E-arxana-clock):**
 
 - **Completeness is bounded, not absolute.** The thread scan is ground-truth-

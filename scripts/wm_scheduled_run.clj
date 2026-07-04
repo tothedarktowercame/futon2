@@ -19,7 +19,8 @@
    doesn't break the schedule. Failure modes print to stderr with a
    non-zero exit code so cron can surface them via its standard
    error-mail mechanism."
-  (:require [futon2.aif.trace :as trace]
+  (:require [futon2.aif.evidence-emit :as evidence-emit]
+            [futon2.aif.trace :as trace]
             [futon2.aif.c-vector :as cv]
             [futon2.aif.enact :as enact]
             [futon2.aif.fold-realized :as fr]
@@ -110,6 +111,9 @@
           judgement (assoc judgement :wm-version
                            (assoc version-stamp :live-wire? wired?))
           trace-path (trace/write-trace! judgement)]
+      (when (evidence-emit/enabled?)
+        (evidence-emit/emit! (assoc (trace/trace-record judgement)
+                                    :belly (count (:entries belly)))))
       (println (str (summarise judgement trace-path)
                     " belly=" (count (:entries belly))
                     (when (:derived-at belly) (str " derived=" (:derived-at belly)))
