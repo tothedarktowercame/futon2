@@ -361,7 +361,18 @@ whistle→transcript-read, per the bells-vs-whistles protocol.
 
 **D-1d dark build: DONE `776b2f0`, reviewed-PASS** (see §2.1 ledger entry) —
 built by claude-5 same-day, immediately after B-2a/B-2b. Reviewer follow-ups
-applied: baseline schema passage 3→4 (claude-5's own flag). C9 burn-in census waits for a few days of post-flip
+applied: baseline schema passage 3→4 (claude-5's own flag).
+
+**Click campaign 1 (2026-07-04 09:33–11:08): COMPLETE** — 24 regulated clicks
+(`687e705`, README-clicks-and-ticks adopted; crontab tick line trigger-tagged;
+hourly tick KEPT as calendar baseline). 22/24 wrote trace records, all
+`:trigger :duree-click-regulated`, all `advance-mission M-first-flights`
+(G 24.4 → 7.2 → 9.4). Clicks 14+15 died silently (no rc, no record, no OOM
+evidence found; loop now logs per-click exit codes, `dbb90d8`). Cyder/Arxana
+Clock: the campaign class was INVISIBLE to the scan (transient service ≠
+timer) — aggregator extended with a transient-services section (futon3c
+`ae03e68`, validated live). **C9-first-pass census: BELLED** to claude-10
+(job `invoke-…-991400df`) — gates the badge raises, D-1c, and F-sp timing. C9 burn-in census waits for a few days of post-flip
 ticks (1 real tick so far); it gates the three badge raises AND D-1c execution.
 Flip-evidence shadow trio: **DONE `f3560a2`, reviewed-PASS claude-12
 2026-07-04** (foreground run per the new parcel rule — no premature-done
