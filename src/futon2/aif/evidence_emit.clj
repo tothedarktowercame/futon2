@@ -77,8 +77,11 @@
   {:type "coordination"
    :claim-type "step"
    :author "war-machine"
-   :subject {:ref/type "war-machine"
-             :ref/id "futon2"}
+   ;; ref/type must be a value the EvidenceEntry shape enum accepts ("war-machine"
+   ;; is rejected with invalid-entry). The WM is semantically an agent; ref/id +
+   ;; author + the wm-tick tag keep it cleanly filterable. (Review fix, claude-10.)
+   :subject {:ref/type "agent"
+             :ref/id "war-machine"}
    :tags (cond-> ["wm-tick"]
            (basis-tag tick) (conj (basis-tag tick)))
    :body (compact-body tick)})

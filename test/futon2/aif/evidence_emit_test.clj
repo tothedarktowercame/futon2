@@ -24,7 +24,7 @@
       (is (= "coordination" (:type entry)))
       (is (= "step" (:claim-type entry)))
       (is (= "war-machine" (:author entry)))
-      (is (= {:ref/type "war-machine" :ref/id "futon2"} (:subject entry)))
+      (is (= {:ref/type "agent" :ref/id "war-machine"} (:subject entry)))
       (is (= ["wm-tick" "wm-click"] (:tags entry)))
       (is (= {:mode :multiplied
               :decision :address-sorry
