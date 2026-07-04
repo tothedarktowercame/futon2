@@ -67,6 +67,16 @@
   [& args]
   (try
     (let [days (if (seq args) (Integer/parseInt (first args)) 14)
+          ;; B-0a tick provenance (M-aif-faithfulness §2.0): stamp WHICH code
+          ;; + WHICH config produced this tick — git sha/dirty of this one-shot
+          ;; JVM's checkout, the arena-resolved mode flags (the same fns the
+          ;; rank lanes call), and the trace schema version. Computed FIRST —
+          ;; at JVM start, closest to what this JVM actually loaded — not at
+          ;; trace-write time minutes later: in the shared live tree a mid-run
+          ;; commit would otherwise shift the recorded sha off the loaded code
+          ;; (observed on the first stamped tick, 2026-07-04 07:00Z).
+          ;; :live-wire? joins below once resolved.
+          version-stamp (trace/wm-version-stamp (wm/arena-mode-flags))
           ;; E-C-vector-live: keep the belly fresh BEFORE scoring. Off-cycle
           ;; (once per scheduled tick, not per candidate action) — derive the
           ;; live C only when the goal/hole corpus changed (maybe-refresh!).
@@ -86,15 +96,9 @@
                       (binding [fr/*live-wire?* true]
                         (enact/close-loop! judgement (System/currentTimeMillis)))
                       judgement)
-          ;; B-0a tick provenance (M-aif-faithfulness §2.0): stamp WHICH code
-          ;; + WHICH config produced this tick — git sha/dirty of this one-shot
-          ;; JVM's checkout, the arena-resolved mode flags (the same fns the
-          ;; rank lanes call), this runner's live-wire switch, and the trace
-          ;; schema version. `(trace/wm-version-of record)` recovers it.
+          ;; `(trace/wm-version-of record)` recovers the stamp built above.
           judgement (assoc judgement :wm-version
-                           (trace/wm-version-stamp
-                            (assoc (wm/arena-mode-flags)
-                                   :live-wire? wired?)))
+                           (assoc version-stamp :live-wire? wired?))
           trace-path (trace/write-trace! judgement)]
       (println (str (summarise judgement trace-path)
                     " belly=" (count (:entries belly))
