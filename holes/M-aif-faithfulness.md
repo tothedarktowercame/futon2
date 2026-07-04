@@ -325,6 +325,12 @@ turn this mission from weeks into months:
 
 Coordination rule inherited from M-evaluate-policies §10: parcels on Agency,
 author ≠ reviewer throughout, verdicts recorded in this doc.
+**Parcel-execution rule (B-3a-shadow lesson, 2026-07-04): long runs inside a
+belled parcel must run FOREGROUND** — session teardown between turns kills
+background processes, and a completion bell sent after launching (not
+finishing) background work mislabels an interrupted run as "done." claude-10's
+premature bell + wedged-invoking state traced to exactly this; reconciled by
+whistle→transcript-read, per the bells-vs-whistles protocol.
 
 **D-1d dark build: DONE `776b2f0`, reviewed-PASS** (see §2.1 ledger entry) —
 built by claude-5 same-day, immediately after B-2a/B-2b. Reviewer follow-ups
