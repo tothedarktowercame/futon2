@@ -180,6 +180,33 @@ The decision queue, each with its evidence already gathered:
 **Mission deliverable for this bucket:** one decision memo per switch (evidence,
 options, recommendation, blast radius), put in front of Joe; record verdicts here.
 
+### 2.1.1 Second decision queue — the dark-build flips (memos ready 2026-07-04)
+
+Evidence: `holes/labs/M-aif-faithfulness/dark-mode-shadow-*.edn` (claude-10,
+`f3560a2` + `b2b20c7`; 685 ticks, cascade placeholders excluded, deterministic).
+
+- **F-τ (`:tau-mode :gamma-only`, B-2d):** 0 winner-flips AND 0 abstain-flips
+  by construction (winner = argmin G, abstain = G-gap — both τ-invariant); the
+  only live effect is softmax entropy (+0.50 nats flatter). **Recommendation:
+  HOLD, decide jointly with B-3b** as designed — flipping now changes nothing
+  observable and forfeits a clean joint decision on the sharpness seam.
+- **F-salience (`:salience-mode :separate`, B-2c):** need-component ≈ 1.6% of
+  Π on average (~3 channels materially touched/tick); selection-downstream not
+  computed (needs G re-sim — said, not faked). **Recommendation: FLIP** — the
+  honesty gain is real (precision stops wearing affect), the magnitude is
+  within noise, the hatch + `:wm-version` stamp give instant rollback and
+  attribution. Alternative if zero-surprise wanted: commission the G-recompute
+  study first.
+- **F-sp (`:structural-pressure-mode :habit-prior`, D-1d):** NOT inert —
+  3/685 winner-flips (0.44%), all toward the high-sp action, and the 09:00
+  KL-era tick is itself one of them (the new regime is sp-sensitive). Sign
+  clarified in review: the term is ALREADY a preference (−w·sp); the move
+  rescales it by τ_eff outside the temperature division and removes precision
+  modulation. **Recommendation: DECIDE NOW, EXECUTE AFTER ~48h C9 burn-in** —
+  same rhythm as D-1c, so the flip lands on an attributable baseline.
+
+Verdicts (Joe): F-τ ______ · F-salience ______ · F-sp ______
+
 **VERDICT LEDGER (Joe, 2026-07-04, decisions taken in one sitting via claude-12):**
 - **D-1a: DONE before this ledger** — `:risk-mode :kl` production-flipped
   2026-07-04 07:33 (`cd0d25d`; record = M-evaluate-policies §15; E-KL-refinements
@@ -336,11 +363,15 @@ whistle→transcript-read, per the bells-vs-whistles protocol.
 built by claude-5 same-day, immediately after B-2a/B-2b. Reviewer follow-ups
 applied: baseline schema passage 3→4 (claude-5's own flag). C9 burn-in census waits for a few days of post-flip
 ticks (1 real tick so far); it gates the three badge raises AND D-1c execution.
-Flip-evidence shadow trio (`:tau-mode` / `:salience-mode` /
-`:structural-pressure-mode`): **BELLED** to claude-10 2026-07-04 (job
-`invoke-…-1d43b342`) — one selection-level harness, three artifacts, the
-flip-memo evidence Joe decides on. (A-matrix shadow is the method template;
-its own flip is DEFERRED per §3 R8 boundary.)
+Flip-evidence shadow trio: **DONE `f3560a2`, reviewed-PASS claude-12
+2026-07-04** (foreground run per the new parcel rule — no premature-done
+repeat). Review: artifacts + script read; determinism verified (in-place
+re-run byte-identical on the same corpus); τ's by-construction claims checked
+against the actual `select-action` semantics; **reviewer sign-correction
+applied at source** (`b2b20c7`): the sp seed wrongly framed the term as a
+penalty — it already enters G as a preference; the flip τ_eff-rescales it.
+Memos live in §2.1.1; Joe's verdict slots open. (A-matrix shadow: method
+template; its flip DEFERRED per §3 R8 boundary.)
 
 **Standing authorization (Joe, 2026-07-04, verbatim intent):** "happy for you to
 continue driving it through with claude helpers" — claude-12 drives dispatch +
