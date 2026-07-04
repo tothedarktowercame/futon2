@@ -54,16 +54,92 @@
       (:policy action)
       (:mission action)))
 
-(defn compact-body
-  "Return the compact WM tick summary sent to the shared evidence bus."
+;; --- policy/cascade grain (claude-16's emitter-upgrade, 2026-07-04) -------------
+;; The ranking machinery rates cascades under :risk-mode (M-evaluate-policies /
+;; M-G-over-cascades are live in the rank lanes; cd0d25d flipped :risk-mode :kl into
+;; production). But the emitter only ever wrote action-grain fields (:G/:candidates),
+;; so a reader of the Evidence Landscape sees "top actions by G" — the cascade grain
+;; vanished before evidence. These helpers carry it through. Additive; the live-efe-map
+;; WM-attention layer (C5) inherits cascade-level pulses at the same time.
+
+(defn- winner
+  "Rank-1 ranked action. It carries the policy-grain EFE decomposition and the
+   :risk-mode that actually scored the tick — the decision's :action holds only
+   type/target/rationale, so the scoring provenance has to come from here."
+  [tick]
+  (first (:ranked-actions tick)))
+
+(defn- g-breakdown
+  "The winning action's EFE decomposition — the *why* behind :G, not just the total.
+   Short keys; nil/non-numeric legs dropped."
+  [w]
+  (not-empty
+   (into {} (keep (fn [[in out]] (when (number? (get w in)) [out (get w in)]))
+                  {:G-core :core :G-risk :risk :G-ambiguity :ambiguity :G-info :info
+                   :G-goal-outcome :goal-outcome :G-survival :survival
+                   :G-augmentation :augmentation :G-gap :gap}))))
+
+(defn- cascade-lane
+  "The cascade-lane verdicts (record's :act-gate-verdicts): per candidate mission, the
+   cascade's pass/fail, the ΔG its cascade rollout achieves, and the ΔG source. This is
+   the cascade grain M-G-over-cascades put under the ranking — computed upstream in the
+   live loop (close_loop/enact cascade-lane) and previously dropped before evidence."
+  [tick]
+  (mapv (fn [e] {:mission (:mission e)
+                 :verdict (:verdict e)
+                 :delta-G (:delta-G e)
+                 :source (:delta-G-source e)})
+        (:act-gate-verdicts tick)))
+
+(defn- nm [x] (cond (keyword? x) (name x) (nil? x) "?" :else (str x)))
+(defn- r2 [x] (when (number? x) (/ (Math/round (* 100.0 (double x))) 100.0)))
+
+(defn- tick-text
+  "Human-readable account of the tick: mode, the chosen policy + its rationale, the G
+   with its risk-mode regime, the cascade-lane verdicts, and realized-vs-expected. This
+   is what a reader opens to understand what the WM did and why — not a metrics row."
   [tick]
   (let [decision (:decision tick)
         action (:action decision)
-        outcome (:realized-outcome tick)]
+        w (winner tick)
+        outcome (:realized-outcome tick)
+        target (when (map? action) (action-target action))
+        dtype (if (map? action) (:type action) action)
+        rationale (when (map? action) (:rationale action))
+        lane (cascade-lane tick)
+        lane-str (when (seq lane)
+                   (str/join "; "
+                             (map (fn [e] (str (:mission e) " "
+                                               (case (:verdict e) :pass "✓" :fail "✗" "·")
+                                               (when (number? (:delta-G e)) (str " (ΔG " (r2 (:delta-G e)) ")"))))
+                                  lane)))]
+    (str "War Machine · " (nm (:mode tick)) " · " (nm dtype)
+         (when target (str " → " target))
+         " (G " (r2 (or (:G-total decision) (:G-total w))) ", risk-mode " (nm (:risk-mode w)) ")."
+         (when rationale (str "\nWhy: " rationale))
+         (when lane-str (str "\nCascade lane: " lane-str))
+         (when-let [en (or (get-in tick [:enactment :mission]) (get-in tick [:enactment :policy]))]
+           (str "\nEnacted: " en))
+         (when (number? (:realized-G outcome))
+           (str "\nRealized G " (r2 (:realized-G outcome)) " vs expected " (r2 (:expected-G outcome)))))))
+
+(defn compact-body
+  "Return the compact WM tick summary sent to the shared evidence bus.
+   Carries both action-grain fields (back-compat) AND the policy/cascade grain the
+   ranking actually used: :risk-mode regime, the :G-breakdown decomposition, and the
+   :cascade-lane verdicts — plus a readable :text. (claude-16 emitter-upgrade.)"
+  [tick]
+  (let [decision (:decision tick)
+        action (:action decision)
+        outcome (:realized-outcome tick)
+        w (winner tick)]
     {:mode (:mode tick)
      :decision (if (map? action) (:type action) action)
      :target (when (map? action) (action-target action))
-     :G (or (:G-total decision) (:G-total action))
+     :G (or (:G-total decision) (:G-total action) (:G-total w))
+     :risk-mode (:risk-mode w)
+     :G-breakdown (g-breakdown w)
+     :cascade-lane (cascade-lane tick)
      :belly (:belly tick)
      :gates (gate-summary tick)
      :enacted (or (get-in tick [:enactment :mission])
@@ -73,6 +149,7 @@
      :expected-G (:expected-G outcome)
      :trigger (get-in tick [:wm-version :trigger])
      :candidates (or (:candidates tick) (count (:ranked-actions tick)))
+     :text (tick-text tick)
      :at (or (:timestamp tick) (str (Instant/now)))}))
 
 (defn evidence-entry
