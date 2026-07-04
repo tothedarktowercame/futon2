@@ -25,65 +25,64 @@ Implementation substrate to reuse (read-only, recomputable, no in-place mutation
 | node = interest-territory | **node = feature/subsystem** (the ~16 futon3c peripherals, the WM, the cascade, sorry-registry, evidence-bus, mcb, …) |
 | node **standing** = interest-event posterior (lived signal) | **standing = liveness × load-bearing** — consumer-count (require graph) × landscape activity × recency |
 | edge = bipartite fit / friction | **edge = `depends-on` (require graph) + `overlaps-with` (functional redundancy)** |
-| `k` = chain expansion/retraction radius (KNN-rooted; k↓ peels leaf rings, k=1 → core interests) | same on features: k↓ peels leaf features ring-by-ring; k=1 = the core (load-bearing anchors) |
+| `k` = BFS-ring depth over pinned focus (`graph.cljs`): k=3 all rings; k=2 `restrict-to-pins`; k=1 `restrict-to-super-core` (above-median magnitude) + largest-component | same on features: k=2 keeps the pinned core; k=1 keeps above-median-**standing** features (the super-core) in the focus's component |
 | completeness 3-vector | completeness over the feature set (coverage: how much of the stack is mapped) |
 
-## The key insight: the k-slider *is* the trim/coalesce instrument
+## The k-slider is the TRIM instrument; coalesce is an overlay
 
-`k` is a **chain expansion/retraction radius** (rooted in the KNN cache —
-`futon4/docs/prototype-1-links-plan.org`: top-k neighbours per node). In the diagram:
-high k shows full chains; **k↓ peels leaf rings** (k=3→2 removes leaves); **k=1
-retracts every chain to its core anchor**. Over a feature graph, that retraction
-surfaces both decisions:
+Reading the real algorithm (below) sharpens *and corrects* the earlier framing. The
+retraction is a **magnitude threshold**, not a chain-merge — so it gives one axis
+cleanly and the other by overlay:
 
-- **Trim candidates = leaf features that peel early AND carry low standing.** The
-  first ring to fall (k=3→2) is the leaves; a leaf that is *also* dormant (no live
-  consumers, stale) is the "that needs trimming" signal — issue_holes (leaf: nothing
-  depends on it; dormant: last-touched March) peels immediately. A *live* leaf is just
-  a peripheral feature — it peels for reach, not removal (standing keeps it legible).
-- **Coalesce candidates = features that retract into the SAME core anchor.** As chains
-  contract toward k=1, features on one chain fold into their anchor; two that land on
-  the same anchor are the "these two can coalesce" signal — the hole trio
-  (sorries ≈ issue_holes ≈ cascade-holes) contracting to one hole-node; portfolio-
-  inference folding toward the WM (same AIF-loop chain).
-- **The core = what survives to k=1** — the load-bearing anchors everything retracts
-  to (mission-control, the WM, the evidence-bus). Untouchables. That mission-control
-  sits here (many consumers → deep anchor) is exactly why we did NOT trim it.
+- **Trim candidates fall out of the k=1 cut directly.** `restrict-to-super-core` keeps
+  only stars ABOVE the median magnitude; **everything below the median drops.**
+  Magnitude = standing (consumer-count × liveness × recency), so a dormant feature with
+  no live consumers has low magnitude and is the *first thing to vanish* at k=1.
+  issue_holes (0 consumers, last-touched March) → below median → drops; mission-control
+  (many consumers) → above median → stays in the super-core, which is *exactly* why we
+  didn't trim it. **Drag to k=1; whatever vanishes is a trim candidate.**
+- **Coalesce is NOT what the k-collapse gives** (the earlier note was wrong here — the
+  algorithm *drops* nodes, it never *merges* them). Coalesce is a **separate overlay**
+  on the `overlaps-with` edges: two high-overlap features that survive *adjacent* in
+  the super-core are the "these two can coalesce" candidates (the hole trio; the two
+  AIF loops). The slider surfaces trim for free; coalesce needs the overlap edges drawn.
+- **The core = the super-core** — above-median-magnitude survivors in the focus's
+  connected component (mission-control, the WM, the evidence-bus). Untouchables.
 
-So the operator drags k down and *watches the retraction*: a leaf that peels *and* is
-dead = trim; nodes that fold onto the same anchor = coalesce; the k=1 core = hands
-off. The decision becomes a gesture along the slider, not a grep.
+So: drag k to 1 and *what vanishes is a trim candidate*; light up the overlap edges and
+*adjacent survivors are coalesce candidates*. Trim is the retraction; coalesce is the
+overlay — not one gesture, but two cheap reads instead of a session of grepping.
 
-## The retraction algorithm, pinned (2026-07-04)
+## The retraction algorithm, pinned — from the actual k-handler (2026-07-04)
 
-Traced through the code, `k`-retraction is **not** a k-core/coreness algorithm (there
-is no such impl in the stack — searches for k-core/shell/leaf-prune hit only noise).
-It is **depth-truncation over the VSATARCS lift hierarchy** `frame ⊃ devmap ⊃ leaf`
-(`arxana-vsatarcs-lifting-queue.el`, kind order `'(:leaf :devmap :frame …)`):
+Corrected after reading what the `—` control *runs* (`webarxana/client/graph.cljs`,
+the interest-star graph) rather than reasoning about hierarchies (Joe's redirect:
+read the handler). It is **neither** k-core **nor** the VSATARCS leaf/devmap/frame
+tiers. The graph is a **BFS neighbourhood of pinned/focus nodes**; each node ("star")
+carries a **magnitude** = its per-node coreness weight (also its radius). `k`
+dispatches three operations:
 
-| tier | VSATARCS kind | naming convention | feature-constellation meaning |
-|---|---|---|---|
-| fine | `leaf` | `leaf-6-4-5` (dotted-decimal lineage) | a **feature** (+ its internal chain) |
-| mid  | `devmap` | `devmap-futon3` (**named by repo**) | a **repo** (the ≤20-feature cluster) |
-| core | `frame` | `frame-*` | the **core concept** (k=1 anchor) |
+| k | function | what it does |
+|---|---|---|
+| **3** show all | full BFS | all rings + subscopes (`scope-fold-depth` re-fetches the focus at full depth) |
+| **2** fold to main | `restrict-to-pins` | keep only pinned-core nodes + links whose **both** endpoints are pins; drop the depth-0 "gray" neighbour ring and every edge touching it. **← Joe's "removing leaf nodes"** |
+| **1** retraction | `restrict-to-super-core` → `keep-largest-component` | keep only stars whose magnitude is **strictly above the core's MEDIAN magnitude** (+ the always-keep focus) and the links between kept stars; then drop disconnected fragments, keeping the focus's connected component. Islands fall away. **← Joe's "retracts to a core"** |
 
-Joe's semantics map exactly: **k=3→2 "removes leaf nodes"** = peel the `leaf` tier →
-devmaps (repos); **k=2→1 "retracts to a core"** = peel the `devmap` tier → frames
-(cores). The KNN `k` (`arxana-links` / `links-plan.org` embedding cache) is the *base
-graph within a tier*; the dotted-decimal `6-4-5 → 6-4 → 6` is the within-leaf
-sub-chain that truncates further at high k.
+Two design choices to carry over verbatim: the k=1 cut is **median-relative** — scale-
+adaptive to each constellation's own weight spread, not a hardcoded threshold (the
+code notes: *"tune the comparator: median → mean → top-N → fixed"*), and the final
+**largest-connected-component** pass makes the super-core read as one cluster.
 
-**So: k-bounded depth-truncation over `frame ⊃ devmap ⊃ leaf`** — formally iterative
-leaf-pruning on that hierarchy (general-graph generalisation = k-shell/coreness, but
-here the tiers are explicit, so it's plain tier-depth truncation). This is why the
-Interest-Network reuse is "almost exactly the same thing": `devmap-futonX` already
-*is* the repo node, leaves already *are* features, frames already *are* cores.
+**Magnitude is the whole game.** It's the per-node coreness weight that the k=1 cut
+thresholds on — i.e. exactly the **standing** this note has been calling "liveness ×
+load-bearing." So the feature port is: compute a magnitude per feature (consumer-
+count / landscape-activity / recency), pin the focus/anchor, and reuse
+`restrict-to-pins` (k=2) + `restrict-to-super-core` (k=1) unchanged.
 
-**Caveat (honest):** the *structure* (three tiers + KNN base + dotted-decimal
-sub-chains) and *semantics* (peel-to-core) are pinned; a single render `defun` that
-takes `k` and emits the retracted diagram was **not** found — the tier-collapse is a
-convention over the hierarchy. A build writes that renderer (or extends the VSATARCS
-reader chrome), reading nodes from the devmaps.
+(The VSATARCS `frame ⊃ devmap ⊃ leaf` hierarchy — `devmap-futonX` = repo, `leaf-*` =
+feature — is still the right *node taxonomy* and the repo/coarse level; it is just
+NOT the collapse mechanism. Node taxonomy from VSATARCS/devmaps; collapse mechanism
+from `graph.cljs`.)
 
 ## Node source, the repo level, and the ≤20 budget (Joe, 2026-07-04)
 
@@ -154,11 +153,12 @@ fly-through you admire but can't act on.
 
 ## Open questions for Joe
 
-- `k` semantics RESOLVED (2026-07-04): see "The retraction algorithm, pinned" above —
-  depth-truncation over the `frame ⊃ devmap ⊃ leaf` lift hierarchy (leaf=feature,
-  devmap=repo, frame=core), KNN as the within-tier base. Remaining sub-question for a
-  build: the render `defun` applying `k` was not found (convention, not code) — write
-  it, or extend the VSATARCS reader chrome.
+- `k` semantics RESOLVED (2026-07-04) — the real code is `webarxana/client/graph.cljs`
+  (`restrict-to-pins` at k=2, `restrict-to-super-core` + `keep-largest-component` at
+  k=1; median-magnitude cut). See "The retraction algorithm, pinned" above. The port is
+  small: supply a **magnitude per feature** (= standing) and reuse those functions; the
+  render already exists (unlike my earlier guess, this is located code, not a
+  convention). VSATARCS/devmaps supply the node taxonomy + repo level, not the collapse.
 - Node granularity: peripheral-level, or finer (per-tool / per-endpoint)?
 - Where it lives: extend the WebArxana Interest Network surface (`arxana://view/…`),
   or a sibling surface reusing the same projection?
