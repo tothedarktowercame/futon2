@@ -54,6 +54,37 @@ So the operator drags k down and *watches the retraction*: a leaf that peels *an
 dead = trim; nodes that fold onto the same anchor = coalesce; the k=1 core = hands
 off. The decision becomes a gesture along the slider, not a grep.
 
+## The retraction algorithm, pinned (2026-07-04)
+
+Traced through the code, `k`-retraction is **not** a k-core/coreness algorithm (there
+is no such impl in the stack — searches for k-core/shell/leaf-prune hit only noise).
+It is **depth-truncation over the VSATARCS lift hierarchy** `frame ⊃ devmap ⊃ leaf`
+(`arxana-vsatarcs-lifting-queue.el`, kind order `'(:leaf :devmap :frame …)`):
+
+| tier | VSATARCS kind | naming convention | feature-constellation meaning |
+|---|---|---|---|
+| fine | `leaf` | `leaf-6-4-5` (dotted-decimal lineage) | a **feature** (+ its internal chain) |
+| mid  | `devmap` | `devmap-futon3` (**named by repo**) | a **repo** (the ≤20-feature cluster) |
+| core | `frame` | `frame-*` | the **core concept** (k=1 anchor) |
+
+Joe's semantics map exactly: **k=3→2 "removes leaf nodes"** = peel the `leaf` tier →
+devmaps (repos); **k=2→1 "retracts to a core"** = peel the `devmap` tier → frames
+(cores). The KNN `k` (`arxana-links` / `links-plan.org` embedding cache) is the *base
+graph within a tier*; the dotted-decimal `6-4-5 → 6-4 → 6` is the within-leaf
+sub-chain that truncates further at high k.
+
+**So: k-bounded depth-truncation over `frame ⊃ devmap ⊃ leaf`** — formally iterative
+leaf-pruning on that hierarchy (general-graph generalisation = k-shell/coreness, but
+here the tiers are explicit, so it's plain tier-depth truncation). This is why the
+Interest-Network reuse is "almost exactly the same thing": `devmap-futonX` already
+*is* the repo node, leaves already *are* features, frames already *are* cores.
+
+**Caveat (honest):** the *structure* (three tiers + KNN base + dotted-decimal
+sub-chains) and *semantics* (peel-to-core) are pinned; a single render `defun` that
+takes `k` and emits the retracted diagram was **not** found — the tier-collapse is a
+convention over the hierarchy. A build writes that renderer (or extends the VSATARCS
+reader chrome), reading nodes from the devmaps.
+
 ## Node source, the repo level, and the ≤20 budget (Joe, 2026-07-04)
 
 The node set isn't invented — it's already written in the **feature devmaps** (the
@@ -123,12 +154,11 @@ fly-through you admire but can't act on.
 
 ## Open questions for Joe
 
-- `k` semantics CONFIRMED (Joe, 2026-07-04): KNN-rooted **chain expansion/retraction**
-  — k↓ peels leaf rings, k=1 retracts each chain to its core anchor. The exact
-  diagram-retraction algorithm (how a chain contracts to its anchor, and what counts
-  as a chain over `depends-on` vs `overlaps-with`) is a diagram convention to read
-  from the arxana-browser rendering code at build time; the KNN cache is in
-  `links-plan.org`.
+- `k` semantics RESOLVED (2026-07-04): see "The retraction algorithm, pinned" above —
+  depth-truncation over the `frame ⊃ devmap ⊃ leaf` lift hierarchy (leaf=feature,
+  devmap=repo, frame=core), KNN as the within-tier base. Remaining sub-question for a
+  build: the render `defun` applying `k` was not found (convention, not code) — write
+  it, or extend the VSATARCS reader chrome.
 - Node granularity: peripheral-level, or finer (per-tool / per-endpoint)?
 - Where it lives: extend the WebArxana Interest Network surface (`arxana://view/…`),
   or a sibling surface reusing the same projection?
