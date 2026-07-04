@@ -74,7 +74,10 @@ git identity of the one-shot JVM's checkout (`:git-dirty?` counts tracked
 modifications only), the mode flags resolved via the SAME fns the rank lanes
 call (`arena-mode-flags` in `war_machine.clj` — never a second env read), the
 runner's live-wire switch, and the monotonic record-shape version
-(`futon2.aif.trace/trace-schema-version`, now 2). Accessor:
+(`futon2.aif.trace/trace-schema-version`, now 3 — v3 = the B-2a/B-2b
+struct-split relabels: `:G-augmentation`/`:augmentation-terms` +
+`:G-graph-feasibility`/`:G-graph-pragmatic-proxy` per ranked action, additive
+only, G-totals byte-identical). Accessor:
 `(futon2.aif.trace/wm-version-of record)`. Present-only: records written before
 2026-07-04 (and bare `judge` calls) carry no stamp — for those, "which WM" is
 still hand-correlation of timestamps against commit times. NOTE the known

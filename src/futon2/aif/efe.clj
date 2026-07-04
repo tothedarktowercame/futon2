@@ -144,7 +144,18 @@
 (defn graph-efe-terms
   "Graph-functional EFE terms for a mission action. Lower total remains better:
    unbound :requires adds a high applicability gate; body-size is a penalty;
-   ascent progress toward the pre-registered goal is a credit."
+   ascent progress toward the pre-registered goal is a credit.
+
+   B-2b struct split (M-aif-faithfulness §2.2; D8/§3.5): the applicability
+   penalty (1000·[not-applicable], and the off-map penalty) is a DOMAIN
+   RESTRICTION — canonical seat Π_feasible, a mask on the policy domain, not a
+   value judgment — while body/ascent are a PRAGMATIC PROXY (value-flavoured).
+   The split is exposed as `:G-graph-feasibility` (mask component) +
+   `:G-graph-pragmatic-proxy` (value component); `:G-graph-pragmatic` keeps its
+   historical expression and value BYTE-IDENTICALLY (it still carries both,
+   summed, into :G-total — actually unbundling the mask into a feasibility
+   filter is a semantic change and stays a flagged future flip, not this
+   relabel)."
   [graph goal action {:keys [graph-applicability-penalty graph-body-weight graph-ascent-weight
                              graph-off-map-penalty graph-body-mode
                              graph-ascent-status-aware?]
@@ -173,16 +184,26 @@
            :G-body-size body
            :G-ascent-progress ascent
            :G-graph-pragmatic (+ applicability body (- ascent))
+           ;; B-2b: mask vs value, split (see docstring). Additive keys only —
+           ;; :G-graph-pragmatic's expression above is untouched (byte-identity).
+           :G-graph-feasibility applicability
+           :G-graph-pragmatic-proxy (- body ascent)
            :graph/applicable? applicable?
            :graph/single-cycle-leaf? (mission-single-cycle-leaf? graph mission-id)})
         {:G-applicability 0.0
          :G-body-size 0.0
          :G-ascent-progress 0.0
-         :G-graph-pragmatic (double graph-off-map-penalty)})
+         :G-graph-pragmatic (double graph-off-map-penalty)
+         ;; B-2b: the off-map penalty is feasibility-class (a domain gate on
+         ;; "not on the star map"), not a value — proxy carries none of it.
+         :G-graph-feasibility (double graph-off-map-penalty)
+         :G-graph-pragmatic-proxy 0.0})
       {:G-applicability 0.0
        :G-body-size 0.0
        :G-ascent-progress 0.0
-       :G-graph-pragmatic 0.0})))
+       :G-graph-pragmatic 0.0
+       :G-graph-feasibility 0.0
+       :G-graph-pragmatic-proxy 0.0})))
 
 (defn- star-map-contribution?
   [graph-terms]
@@ -403,6 +424,14 @@
    `:graph-ascent-status-aware?` is true, ascent credit ignores produced
    capabilities already marked `:satisfied`.
 
+   Result shape (B-2a honest labelling, M-aif-faithfulness §2.2): the output
+   is a MULTI-OBJECTIVE ACTION SCORE WITH AN EFE CORE. `:G-core` (= risk +
+   ambiguity, invariant I3) is the canonical G; `:augmentation-terms` names
+   the six demoted non-core contributions exactly as they enter `:G-total`
+   (signed, weighted), and `:G-augmentation` is their sum. `:G-total` — the
+   ranking key — is the historical blend, byte-identical across this
+   relabelling; do not read it as canonical EFE (R18/D8).
+
    Pure: same (state, action, opts) → same output."
   ([state action] (compute-efe state action {}))
   ([state action {:keys [info-weight survival-weight structural-pressure-weight time-pressure
@@ -529,6 +558,24 @@
          urgency (+ 1.0 (* (double time-pressure) (double time-pressure-scale)))
          g-risk (* g-risk-base urgency)
          g-survival (* g-survival-base urgency)
+         ;; HONESTY (D8 reconciliation; C6 wording; B-2a struct split): what
+         ;; follows is a MULTI-OBJECTIVE SCORE WITH AN EFE CORE, not canonical
+         ;; EFE. The core (risk + ambiguity — :G-core, invariant I3) is the
+         ;; canonical G; the six remaining contributions are the augmentation
+         ;; layer — a flattened generative model (C-terms, E-term, Π-mask
+         ;; projected into one sum; argue-exhibit pp. 8–9). :G-total keeps its
+         ;; historical summation order and value BYTE-IDENTICALLY; the layer
+         ;; below only NAMES the same quantities (float associativity means
+         ;; :G-core + :G-augmentation matches :G-total to ~1e-15, not to the
+         ;; bit — asserted at 1e-9 in efe_struct_split_test).
+         augmentation-terms {:info (- (* (double info-weight) g-info))
+                             :survival (* (double survival-weight) g-survival)
+                             :structural-pressure
+                             (- (* (double structural-pressure-weight)
+                                   g-structural-pressure))
+                             :graph-pragmatic (:G-graph-pragmatic graph-terms)
+                             :gap (- (:G-gap gap-terms))
+                             :goal-outcome g-goal-outcome}
          g-total (+ g-risk
                     g-ambig
                     (- (* (double info-weight) g-info))
@@ -552,6 +599,13 @@
         ;; separately from the multi-objective blend — :G-core = risk +
         ;; ambiguity exactly (invariant I3). Pure addition; :G-total unchanged.
         :G-core (+ g-risk g-ambig)
+        ;; B-2a (M-aif-faithfulness §2.2): the multi-objective augmentation
+        ;; layer, named — the six non-core contributions AS THEY ENTER
+        ;; :G-total (signed, weighted). :G-augmentation is their sum. Additive
+        ;; keys; whitelisted in trace.clj AT BIRTH (:score-provenance lesson);
+        ;; trace-schema-version bumped 2→3.
+        :G-augmentation (reduce + 0.0 (vals augmentation-terms))
+        :augmentation-terms augmentation-terms
         ;; D5a: which risk functional produced :G-risk — whitelisted in
         ;; trace.clj AT BIRTH (the :score-provenance lesson).
         :risk-mode risk-mode

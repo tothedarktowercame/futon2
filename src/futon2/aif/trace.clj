@@ -87,10 +87,18 @@
   ;; :risk-mode (D5a, 2026-07-03): whitelisted AT BIRTH with the key itself —
   ;; the :score-provenance lesson: a key that isn't persisted the day it is
   ;; emitted becomes a silent spec gap later.
+  ;; :G-augmentation :augmentation-terms :G-graph-feasibility
+  ;; :G-graph-pragmatic-proxy (B-2a/B-2b struct split, 2026-07-04): the named
+  ;; multi-objective layer + the mask/value split of the graph term —
+  ;; whitelisted AT BIRTH (same lesson); values are relabels of quantities
+  ;; already entering :G-total, so I4 (whitelist ⊇ terms entering :G-total)
+  ;; is preserved and the persisted-total residual stays 0.
   (select-keys r [:action :G-risk :G-ambiguity :G-info :G-survival
                   :G-structural-pressure :G-goal-outcome
                   :G-gap :G-graph-pragmatic :G-core :score-provenance :risk-mode
                   :goal-outcome-mode
+                  :G-augmentation :augmentation-terms
+                  :G-graph-feasibility :G-graph-pragmatic-proxy
                   :G-total :rank :time-pressure :horizon-steps]))
 
 (defn- strip-decision
@@ -115,8 +123,11 @@
    bumps are additive). Ledger:
      1 — the accreted pre-provenance shape: everything up to and including
          :goal-outcome-mode per ranked action (fb15d66, 2026-07-04).
-     2 — adds :wm-version (B-0a, 2026-07-04)."
-  2)
+     2 — adds :wm-version (B-0a, 2026-07-04).
+     3 — adds :G-augmentation + :augmentation-terms (B-2a) and
+         :G-graph-feasibility + :G-graph-pragmatic-proxy (B-2b) per ranked
+         action — the struct-split relabels, additive only (2026-07-04)."
+  3)
 
 (defn- futon2-git-version
   "Git identity of the futon2 checkout this JVM loaded its code from:
