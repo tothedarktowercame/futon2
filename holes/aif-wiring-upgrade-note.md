@@ -108,9 +108,13 @@ query instead of a private trace file.
       (`a256aca`). Gates: check-parens + clj-kondo clean.
 - [ ] Resolve the 4 lifecycle-gap rows (port / route-to-adjacent-surface / drop)
       before the **durable** mission-control deregister.
-- [x] `issue_holes` disposition (Joe, 2026-07-04): **RETIRE** — dormant one-off;
-      removes mission-control's last external consumer. *(drop not yet executed)*
-- [ ] Remaining to execute: drop `issue_holes` + `scripts/gh-issue-holes`; resolve
-      mission-control lifecycle gap → deregister mission-control (same pattern as
-      portfolio-inference above). Optional: disable the `/api/alpha/portfolio/*`
-      HTTP endpoints (on-demand path; requires a caller, so lower urgency).
+- [x] **`issue_holes` RETIRED** (Joe's go, 2026-07-04, claude-10, `ec6026e`):
+      deleted the projector + `scripts/gh-issue-holes` + its test; unwired its only
+      consumer (mission-control's `:mc-issue-holes` tool — require, dispatch case,
+      spec entry, test). Removes the last outside coupling into mission-control-
+      backend. Gates clean; mission-control-test failure-neutral (5F/8E pre-existing,
+      unrelated env drift). Source-only → running JVM untouched (I-0).
+- [ ] Remaining: resolve the mission-control lifecycle gap (4 rows above) against the
+      cascade → then deregister mission-control (same pattern as portfolio-inference).
+      Optional/low-urgency: disable the `/api/alpha/portfolio/*` HTTP endpoints
+      (on-demand path; needs a caller to fire).
