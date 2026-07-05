@@ -1,0 +1,140 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>E-live-loop-2 — the recovery, audited</title>
+<style>
+body{font:15px/1.55 system-ui,sans-serif;max-width:980px;margin:2rem auto;padding:0 1rem;color:#223}
+h1{font-size:22px} h2{font-size:17px;border-bottom:1px solid #dde;padding-bottom:4px;margin-top:2rem}
+.summary{background:#f5f7f6;border:1px solid #dde;border-radius:8px;padding:12px 16px}
+.card{border:1px solid #dde;border-radius:8px;padding:12px 16px;margin:14px 0}
+.rpin{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:10px;color:#fff;background:#5a6a8a;margin-right:6px}
+.ok{color:#3f8b57;font-weight:700}.part{color:#a07f2a;font-weight:700}.warn{color:#b1543a;font-weight:700}
+.ev{font-size:13px;color:#667;border-left:3px solid #ccd;padding-left:10px;margin:8px 0}
+table{border-collapse:collapse;font-size:13px;width:100%} th,td{border:1px solid #dde;padding:4px 8px;text-align:left}
+code{background:#f2f4f3;padding:0 4px;border-radius:4px;font-size:13px}
+.foot{color:#99a;font-size:11px;margin-top:2rem}
+blockquote{color:#667;border-left:3px solid #ccd;margin:8px 0;padding-left:10px;font-size:13px}
+</style></head><body>
+
+<h1>E-live-loop-2: the recovery, audited</h1>
+
+<div class="summary">
+Companion to <a href="live-loop-1-explainer.html">the deficiency explainer</a> (six R-contract
+pins) and <a href="aif-wiring-explainer.html">the R1–R18 wiring explainer</a>. Twenty-six hours
+after "this seems like a <em>waste</em> of energy, not a minimization of energy," the full
+gate board reads green — <b>audited this morning by independent re-run of all 8 gates
+(S1, 2a–2g: PASS)</b> — and on the 675th round of the cascade lane's recorded history,
+<b>a plan counted</b>: the act-gate consumed escrowed ΔG −4/9 with provenance
+<code>:delta-G/source :fold-escrow</code>, verdict <code>:pass</code> (ΔF +0.813 ∧ ΔG &lt; 0).
+This page is the audit: what got fixed, what the evidence is, and — its most important
+section — what is <em>not yet</em> shown.
+</div>
+
+<h2>The apparatus (the operator's design, and its first catches)</h2>
+<div class="card">
+Microsteps with machine-checkable gates; a step's action is unrunnable until every
+prerequisite gate is green; gates re-run forever as standing evidence checks
+(green→red = regression alarm feeding the <code>mistakes-remedies-ledger</code>);
+⚠ARMED steps additionally demand the operator's recorded word. Scoreboard:
+<code>bb futon2/scripts/live_loop_step.bb status</code>.
+<div class="ev">The apparatus earned trust immediately: its first-ever gate run FAILED on the
+reviewer's own case-sensitive grep (a bad gate spec, caught by the machine before it could
+mislead); its second catch was real — 2a/2b honestly red until the seeds actually landed.
+A scoreboard that can embarrass its author is a scoreboard worth reading.</div>
+</div>
+
+<h2>The six pins, revisited</h2>
+<table>
+<tr><th>pin</th><th>was (loop-1 explainer)</th><th>now</th><th>evidence</th></tr>
+<tr><td><span class="rpin">R2</span></td><td>observation = stale banner prose</td><td class="ok">FIXED, twice</td>
+<td>S1: rel ↑ 12/12, F discriminates; recipe v2 (+<code>:hungry-for</code>): F +1.623 → +2.027 despite 2.4× complexity — the enriched question pays its own Occam cost</td></tr>
+<tr><td><span class="rpin">R17</span></td><td>repertoire frozen (3 gates barred new patterns)</td><td class="ok">FIXED</td>
+<td>seeds embedded + phylogeny-registered + prior-floored at 0.647 nats (vs the 2.398 fine); gates 2a–2c standing</td></tr>
+<tr><td><span class="rpin">R16</span></td><td>closure arc bypassed the only real constructor</td><td class="ok">FIXED (pinned seam)</td>
+<td>escrow contract (2d) + replay seam (2e, flag-off invariance proven with a throwing turn-fn) + deposit (2f) + first live read (2g); flag now ON in source — live state = boot state</td></tr>
+<tr><td><span class="rpin">R13</span></td><td>two currencies never met (0-for-674)</td><td class="ok">FIRST CROSSING</td>
+<td>trace <code>2026-07-05T07:56:19</code>: ΔG −4/9 consumed, ΔF +0.813, verdict :pass, all 5 policy-holes intact through replay, K2 asserts held</td></tr>
+<tr><td><span class="rpin">R14</span></td><td>no γ over the lane</td><td class="part">UNLOCKED, unbuilt</td>
+<td>3b (γ simulated on the 674-tick census) is now runnable; nothing learned yet</td></tr>
+<tr><td><span class="rpin">R18</span></td><td>decision terms unobservable</td><td class="part">HALF</td>
+<td>the witness trace is inspectable with provenance; the agent-tool-visible futility counter (3a) and the emitter upgrade remain open (ledger §13)</td></tr>
+</table>
+
+<h2>The golden run — a reward with witnesses</h2>
+<div class="card">
+Deposit <code>ft-autoclock-in-001</code>, authored by a fresh Fable instance working from
+documents alone, <b>blinded</b> (the sealed answer key provably unopened; author ≠ scorer).
+Blind score vs the seal: read-side codomain and endpoint grounding RECOVERED — both missed
+by the 2026-07-01 cascade-only baseline; the sealed hard holes missed <em>diagnostically</em>,
+one traced to the ψ recipe dropping <code>:hungry-for</code> (fixed and confirmed by deposit 002).
+Tamper-rejection demonstrated (dropped hole ⇒ <code>delta-g-mismatch</code>; stripped arming ⇒
+<code>missing-arming</code>). The operator's verbatim arming word is a field of the record.
+<div class="ev">Read as FutonZero: labor + arrow + fruit — the peradam's three witnesses, run as
+a ritual with receipts. Mechanizing it without corrupting it is chartered
+(M-peradam-mechanization), with the operator's mana economy as the consent successor.</div>
+</div>
+
+<h2>Deposit 002 — the experiment inside the exemplar</h2>
+<div class="card">
+Controlled comparison on a second sealed sorry (<code>live-geometric-stack</code>), both recipe
+versions in one process:
+<table><tr><th></th><th>v1 (S1 recipe)</th><th>v2 (+ hungry-for)</th></tr>
+<tr><td>size</td><td>9</td><td>16</td></tr>
+<tr><td>F</td><td>+1.623</td><td><b>+2.027</b></td></tr>
+<tr><td>acc / cx</td><td>3.10 / 5.90</td><td>5.52 / 13.97</td></tr></table>
+<b>Split verdict, itself the finding:</b> invariant-class patterns surfaced at retrieval exactly
+as predicted (<code>live-sync-source-truth</code>, <code>world-is-hypergraph</code>,
+<code>shape-first-identify</code>, <code>stack-blocker-detection</code>) — <span class="warn">but
+the most invariant-flavored arrivals sit at greedy ranks 10–16, outside the budget-6 fold
+window.</span> The ψ bottleneck is fixed; the budget is the next one.
+<blockquote>futonzero-alphazero.md §5, a month earlier: "the budget <em>is</em> the regularizer…
+labeled here as a tunable constant… <em>exactly</em> the kind of unexamined constant where the
+next degeneracy could hide." It hid there. Found, with ranks attached.</blockquote>
+</div>
+
+<h2>What this audit does NOT show (the teeth)</h2>
+<div class="card">
+<ol>
+<li><b>The live read was a witnessed lane-entry evaluation in the serving JVM — not a scheduled
+tick.</b> Honest reason, from the runner's own audit: the scheduled caller
+(<code>enact.clj:91</code>) never injects the escrow turn-fn, and the live lane's ψ is still
+banner-grain, so the sha pin would rightly abstain against any prompt the lane can currently
+build. That is the pin working — and it means <b>ledger §10's falsifier ("post-S2 ticks still
+0-for-N") has not yet had its real test.</b> Named follow-on: wire the scheduled caller +
+sorry-grain lane ψ.</li>
+<li><b>There are TWO escrow seams.</b> An older <code>:llm-escrow</code> branch in the scheduled
+path reads un-pinned wiring EDN with no arming, no sha, no ΔG re-assert — currently empty but
+reachable: <span class="warn">a consent-bypass-shaped hole.</span> Deprecation recommended
+before the caller wiring lands.</li>
+<li><b>γ has learned nothing yet.</b> The 3-series is unlocked, not built; the lane still cannot
+lose precision by failing to pay. One crossing is an existence proof, not a habit.</li>
+<li><b>Two baseline re-pins in one day</b> (F +0.046→+0.051; +1.461→+1.623), both from the
+seed-registration prior shift — benign, mechanistically explained, and both caught by controls
+narrower claims had missed. Standing lesson, now in the ledger: <em>"identical" claims must name
+the exact pipeline stage they were checked at.</em></li>
+<li><b>The witness trace lives in a quarantined directory on purpose</b>
+(<code>data/wm-trace-escrow-witness/</code>): the WM reads γ-state back from its own daily trace,
+and a witness record with default precision could have silently reset learned γ. The hazard was
+found by reading the read-back path before writing — barely.</li>
+</ol>
+</div>
+
+<h2>What's next (all operator-gated)</h2>
+<table>
+<tr><th>item</th><th>state</th></tr>
+<tr><td>3a futility counter · 3b γ simulation · 3c operator bulletin</td><td>unlocked, undriven</td></tr>
+<tr><td>M-fold-self-play · M-peradam-mechanization · M-action-vocabulary · E-rollout-kill-test</td><td>chartered at IDENTIFY, awaiting ratification</td></tr>
+<tr><td>budget-6 revisit · un-pinned seam deprecation · scheduled-caller wiring</td><td>suggestions on record (deposit-002 PAR)</td></tr>
+</table>
+
+<p>The one-line audit verdict: <b>live-loop-1 diagnosed six unwired obligations; live-loop-2
+wired four, unlocked the other two, and — by design — left every claim it makes re-runnable
+by anyone.</b> The era that ended is small: one plan, read once, passing one gate. But it ended
+with provenance, a sealed score, an operator's word in the file, and a machine that will alarm
+if any of it silently regresses. That is what recovery looks like when it has to survive audit.</p>
+
+<p class="foot">Sources: E-live-loop-2.md (2f/2g/002 logs + PARs) · e-live-loop-2-steps.edn
+(gate history, armings verbatim) · futon6/data/fold-turns/ (both deposits) ·
+data/wm-trace-escrow-witness/wm-trace-2026-07-05.edn (the crossing) ·
+p4ng/flights/ (runners + results JSON) · mistakes-remedies-ledger.md ·
+live-loop-1-explainer.html (the before-picture). All 8 gates independently re-run PASS at
+audit time, 2026-07-05 morning. Compiled by claude-16 at operator direction.</p>
+</body></html>
