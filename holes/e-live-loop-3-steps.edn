@@ -52,4 +52,11 @@
    :status :pass,
    :history
    [{:at "2026-07-05T10:33:40.343388621Z", :pass false, :out ""}
-    {:at "2026-07-05T11:06:46.548444792Z", :pass true, :out ""}]}]}
+    {:at "2026-07-05T11:06:46.548444792Z", :pass true, :out ""}]}
+   {:id "F2",
+   :title "Finding-2: superseded missions filtered from lane (classifier prefix match)",
+   :needs [],
+   :gate
+   {:cmd
+    "cd /home/joe/code/futon2 && clojure -M scripts/gate_f2_supersession.clj 2>&1 | grep -q 'GATE F2 PASS'"},
+   :status :pass}]}

@@ -77,13 +77,16 @@
   [status-line]
   (let [upper (str/upper-case (or status-line ""))
         lead  (-> upper (str/replace #"^[\s>*#`_~-]+" "") str/trim)
-        head  (or (re-find #"[A-Z][A-Z-]*" lead) "")]
+        head  (or (re-find #"[A-Z][A-Z-]*" lead) "")
+        prefix? (fn [coll] (some #(str/starts-with? head %) coll))]
     (cond
       (str/includes? upper "SPECIFIED, NOT YET IMPLEMENTED")            :draft
       (= "DRAFT" head)                                                  :draft
-      (#{"ARCHIVED" "PARKED" "SUPERSEDED" "ABANDONED" "DEFERRED"} head) :inactive
-      (#{"COMPLETE" "COMPLETED" "CLOSED" "DONE" "DISCHARGED"
-         "ANSWERED" "DISSOLVED"} head)                                  :complete
+      ;; Finding-2 (E-live-loop-3): prefix match catches compound forms
+      ;; like SUPERSEDED-AS-MISSION that the old exact-match missed.
+      (prefix? #{"ARCHIVED" "PARKED" "SUPERSEDED" "ABANDONED" "DEFERRED"}) :inactive
+      (prefix? #{"COMPLETE" "COMPLETED" "CLOSED" "DONE" "DISCHARGED"
+                 "ANSWERED" "DISSOLVED"})                                :complete
       (= "ACTIVE" head)                                                 :active
       (= "OPEN" head)                                                   :open
       (= "PARTIAL" head)                                                :partial

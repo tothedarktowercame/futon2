@@ -226,3 +226,33 @@
     (is (contains? open-ids "M-partial-deferred"))
     (is (contains? open-ids "M-map-lead-draft"))
     (is (not (contains? open-ids "M-really-complete")))))
+
+(deftest finding-2-compound-superseded-status-classifies-inactive
+  "Finding-2 (E-live-loop-3): SUPERSEDED-AS-MISSION must classify as :inactive.
+   The old exact-match missed compound forms; prefix matching catches them."
+  (write-mission! "futon0/holes/missions/M-superseded-compound.md"
+                  (str "**Status:** SUPERSEDED-AS-MISSION toward Campaign-bayesian\n"
+                       "# Superseded Compound\n"))
+  (write-mission! "futon0/holes/missions/M-superseded-plain.md"
+                  (str "**Status:** SUPERSEDED\n"
+                       "# Superseded Plain\n"))
+  (write-mission! "futon0/holes/missions/M-archived-compound.md"
+                  (str "**Status:** ARCHIVED-LEGACY\n"
+                       "# Archived Legacy\n"))
+  (let [by-id (->> (:missions (mr/load-missions *tmpdir*))
+                   (map (juxt :id :status-class))
+                   (into {}))]
+    (is (= :inactive (get by-id "M-superseded-compound"))
+        "SUPERSEDED-AS-MISSION classifies :inactive (the Finding-2 bug)")
+    (is (= :inactive (get by-id "M-superseded-plain"))
+        "SUPERSEDED still classifies :inactive (unchanged)")
+    (is (= :inactive (get by-id "M-archived-compound"))
+        "ARCHIVED-LEGACY classifies :inactive (prefix match catches compounds)")))
+
+(deftest finding-2-bayesian-structure-learning-filtered-from-live-missions
+  "The real mission that triggered Finding-2: M-bayesian-structure-learning
+   has SUPERSEDED-AS-MISSION status and must be filtered from the live set."
+  (let [missions (mr/open-missions)
+        ids (set (map :id missions))]
+    (is (not (contains? ids "M-bayesian-structure-learning"))
+        "M-bayesian-structure-learning is NOT in the live mission set")))
