@@ -392,3 +392,138 @@ passing regime) and claude-16's GO.
 > unification path is chartered in M-peradam-mechanization §"Operator
 > ruling on unification" — trust moves from social separation into
 > machinery (pins, gates, seals, mana).
+
+## deposit-003 log — the L4 enabler (runner: claude-20, 2026-07-05)
+
+**DEPOSITED and gate-verified:**
+`futon6/data/fold-turns/ft-bayesian-structure-learning-003.edn` — the
+escrow holds three deposits, all passing the standing 2f gate. Arming =
+the 07:49 blanket grant, cited verbatim. No live-path touches; zai-2
+owns the tick.
+
+- **No seal exists** (no A-next lab for this mission) — ψ AUTHORED from
+  the mission doc's resolved decisions (§7b) + first artifact (§8),
+  recorded as `:psi-recipe {:version "2-adapted-mission-doc" …}` with
+  the no-blind-scoring consequence stated in the record. The HUNGRY-FOR
+  gloss is the doc's own codomain language (posteriors-not-counters;
+  EIG in nats; model reduction; "hungry for a scope").
+- **Cascade (budget 20, commit fe8acea):** size 15, UNTRUNCATED — the
+  002 window fix means the whole cascade is in the fold for the first
+  time. F **+7.76** (strongest yet), halo dominated by aif/* patterns.
+  Constructor output: `p4ng/flights/e-live-loop-3-003-constructor.json`.
+- **The turn:** 14 boxes / 14 wires / terminals [:b7 :b2] / 6 holes,
+  coverage 14/20 ⇒ **ΔG = −0.7** (hand-derived = loader-recomputed).
+  Notable holes: the value-per-nat exchange rate (the decision rule's
+  unset constant); the corroboration-bootstrap circularity; and the
+  **mission-status tension** — the doc says SUPERSEDED-AS-MISSION / not
+  WM-pickable (Campaign recast 2026-06-08) while the live lane ranks it
+  ΔF +1.049; which surface is authoritative for L4's natural tick is
+  surfaced as a hole, not decided by the fold.
+- **L4-consumability CONFIRMED pre-tick** (local JVM, live path
+  untouched): enact.clj's `deposit-for-mission` matching replicated
+  verbatim finds 003 from the lane id `M-bayesian-structure-learning`;
+  deposit-grain circumstance reconstruction replays ΔG −0.7 with
+  `:delta-G/source :fold-escrow`; with the lane's ΔF +1.049 the preview
+  verdict is **:pass**. Both legs live — L4 needs only the GO + one
+  scheduled run.
+
+**PAR (claude-20, 003):** worked — reading zai-2's L3 code before
+authoring (the stem-match rule + circumstance reconstruction told me
+exactly what makes a deposit consumable, so consumability could be
+proven pre-tick rather than hoped); the budget-20 window turned the 002
+lesson into 15/15 patterns folded. Prediction error — expected the
+mission doc to yield a thin ψ next to the sealed EMPIRICAL recipes;
+instead §7b's resolved decisions carried MORE invariant-class content
+than either sealed file surfaced (the gloss is only as good as the
+document's own self-knowledge). Surfaced, not resolved: the
+lane-vs-doc mission-status authority question (hole 5) — reviewer/
+operator ruling wanted before the natural tick's PASS is celebrated as
+fully-armed rather than technically-armed.
+
+## L4 log -- the natural tick ran, escrow superseded by classical (driver: zai-2, 2026-07-05)
+
+**L4 RED (honestly held).** The scheduled tick ran at 10:17 UTC -- the
+machinery is wired and live -- but the escrow was correctly superseded by
+the classical fold. The exit criterion (`:fold-escrow` in the daily
+trace) was not met. This is data, not failure.
+
+- **The tick:** `FUTON_WM_TRIGGER=manual-l4-go clojure -M:wm-scheduled`
+  (one-shot JVM, 54 min to next cron boundary, so manual per the
+  refinement). Trace written to `data/wm-trace/wm-trace-2026-07-05.edn`.
+
+- **Act-gate verdicts (verbatim from the trace):**
+
+  | mission | verdict | dF | dG | dG source |
+  |---|---|---|---|---|
+  | M-canon-fingerprint-store | :fail | -0.598 | -0.2 | :fold |
+  | M-bayesian-structure-learning | :pass | 1.463 | -0.077 | :fold |
+
+  `ENACTED=M-bayesian-structure-learning src=classical-engine boxes=2
+  holes=10 realizedG=-0.167 expectedG=-0.077`.
+
+- **Why no `:fold-escrow`:** the classical fold resolved the dG leg
+  (-0.077, non-nil), so the escrow was never consulted. The
+  reconciliation order (rollout -> classical -> escrow -> nil) means the
+  escrow fires ONLY when the classical fold abstains. For
+  M-bayesian-structure-learning, the classical fold succeeded -- the
+  escrow trigger condition (fold-g nil) was not met. The accurate
+  taxonomy of deposited missions: bayesian = classical-resolves (escrow
+  correctly skipped -- the tick's finding); autoclock-in +
+  live-geometric-stack = classical-abstains + deposited (escrow WOULD
+  fire when on-lane, proven by the 2g witness which fired :fold-escrow
+  with dG -4/9 for autoclock-in -- that can only happen when the
+  classical fold abstains on its contentful patterns: musn/realtime, not
+  in the 10-entry rule table). The blocker for L4 is that neither
+  classical-abstaining deposited mission is on the lane today; both
+  current lane missions have classical-resolving cascades.
+
+- **The dG comparison (the heart of the design question):** the
+  classical fold resolved bayesian at **-0.077** while the armed,
+  reviewer-verified deposit carries **-0.7** -- a **9x difference**
+  between the rule-table sketch and the reviewed construction. The gate
+  ANDed dF +1.463 > 0 AND dG -0.077 < 0 and passed -- but with the weaker
+  classical leg, not the richer escrow leg. The escrow wiring is proven
+  correct (the 2g witness fired :fold-escrow for autoclock-in at dG -4/9
+  because the classical fold abstains on its contentful patterns); the
+  exit criterion depends on a classical-abstaining deposited mission
+  rotating onto the lane.
+
+- **Escrow trigger conditions (empirically characterized):** the escrow
+  fires when ALL THREE hold: (1) a deposit matches the mission (id-stem
+  substring); (2) the classical fold abstains (nil dG -- the
+  contentful-library case); (3) the sha pin matches (deposit-grain
+  circumstance reconstruction). Condition (2) is the gating constraint
+  on this tick -- the current lane has only classical-resolving
+  missions. Autoclock-in and live-geometric-stack satisfy all three
+  conditions (proven by 2g for autoclock-in); they are simply not on the
+  lane today.
+
+- **The design question surfaced (operator authority):** the tick
+  exposed a genuine question that was invisible until both sources could
+  fire: **should a sha-pinned, operator-armed, reviewer-verified deposit
+  outrank the classical rule table when both can supply dG?** The
+  current order treats escrow as last-resort -- conservative and correct
+  for the unarmed world we wired it in. But an armed deposit is a
+  strictly richer construction than a generic table entry, and the
+  -0.077 vs -0.7 gap shows what the gate is ignoring. If Joe rules
+  escrow-first-when-pinned, the swap is a small ordered-branch change
+  plus test updates, and the next hourly tick fires `:fold-escrow` for
+  bayesian legitimately. If he rules keep-the-order, L4's gate becomes
+  a standing watch that exits when the judge rotates a contentful-
+  cascade mission with a deposit onto the lane. The question goes to
+  Joe.
+
+- **Finding -- the loop now has two plan sources.** The excursion set out
+  to prove the loop reads its plans. The tick demonstrated something
+  subtler: the loop now has two plan sources and an implicit preference
+  between them that nobody had ever had to decide before. Surfacing a
+  decision nobody knew existed is what all this machinery is for.
+
+- **Mission-status authority conflict (awareness note, routes to
+  operator):** the doc says M-bayesian-structure-learning is
+  SUPERSEDED-AS-MISSION, not WM-pickable, while the lane ranks it
+  dF +1.463 and the gate verdicts :pass. Enactment is held (WM-I4), so
+  the :pass stays a preview. This is the stale-banner/selector class
+  again (ledger section 9), seen from a new angle -- the mission is on
+  the lane with a strong cascade despite its doc status. Routes to the
+  operator, not to the driver.
