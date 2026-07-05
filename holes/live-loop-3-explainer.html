@@ -1,0 +1,115 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>E-live-loop-3 — making the ticks real, audited</title>
+<style>
+body{font:15px/1.55 system-ui,sans-serif;max-width:980px;margin:2rem auto;padding:0 1rem;color:#223}
+h1{font-size:22px} h2{font-size:17px;border-bottom:1px solid #dde;padding-bottom:4px;margin-top:2rem}
+.summary{background:#f5f7f6;border:1px solid #dde;border-radius:8px;padding:12px 16px}
+.card{border:1px solid #dde;border-radius:8px;padding:12px 16px;margin:14px 0}
+.ok{color:#3f8b57;font-weight:700}.red{color:#b1543a;font-weight:700}.hold{color:#a07f2a;font-weight:700}
+.ev{font-size:13px;color:#667;border-left:3px solid #ccd;padding-left:10px;margin:8px 0}
+table{border-collapse:collapse;font-size:13px;width:100%} th,td{border:1px solid #dde;padding:4px 8px;text-align:left}
+code{background:#f2f4f3;padding:0 4px;border-radius:4px;font-size:13px}
+.foot{color:#99a;font-size:11px;margin-top:2rem}
+blockquote{color:#667;border-left:3px solid #ccd;margin:8px 0;padding-left:10px;font-size:13px}
+</style></head><body>
+
+<h1>E-live-loop-3: making the ticks real — audited</h1>
+
+<div class="summary">
+Third panel of the trilogy (<a href="live-loop-1-explainer.html">what wasn't wired</a> ·
+<a href="live-loop-2-explainer.html">the recovery</a>). Loop-3's charter: natural ticks,
+sorry-grain ψ, pinned escrow — the loop reading its plans in the ordinary course of business.
+Verdict of this audit: <b>four gates green, the fifth honestly red — and the red is the most
+valuable result of the arc.</b> The tick ran, the machinery worked, the escrow was <em>correctly
+skipped</em> — and in being skipped it exposed a decision nobody knew existed: the loop now has
+TWO plan sources and an implicit preference between them that had never needed deciding.
+That decision sits with the operator, where it belongs.
+</div>
+
+<h2>The board (driver: zai-2; deposits: claude-20; review: claude-16)</h2>
+<table>
+<tr><th>step</th><th>state</th><th>what the gate proves</th></tr>
+<tr><td>L0 budget window</td><td class="ok">PASS</td><td>6→20 (operator ruling): the 002 invariant arrivals (greedy ranks 10–16) now INSIDE the fold window; deposit 003's size-15 cascade folded untruncated — the first full-window construction</td></tr>
+<tr><td>L1 legacy seam cold</td><td class="ok">PASS</td><td>the un-pinned <code>:llm-escrow</code> branch loud-ignores planted files (consent-bypass hole closed); the WARN also surfaced claude-11's 2026-07-02 pre-contract deposit, archived with provenance</td></tr>
+<tr><td>L2 sorry-grain lane ψ</td><td class="ok">PASS</td><td>the live lane's ψ now builds from the held-work ledger (140 mission-linked items — the stack's record of deferred work becomes its source of tension); banner fallback byte-identical; Flight-1 control at the named F +0.051 stage</td></tr>
+<tr><td>L3 pinned seam on the scheduled path</td><td class="ok">PASS</td><td>deposit-grain circumstance reconstruction reproduces the pinned prompt sha BYTE-EXACT (5597da91…); flag-on dry-run fired <code>:fold-escrow</code> ΔG −4/9 through the scheduled path; prompt-drift abstention tested</td></tr>
+<tr><td>L4 natural tick consumes escrow ΔG</td><td class="red">RED — correctly</td><td>the tick ran (10:17 UTC, gates {1 pass, 1 fail}): M-bayesian-structure-learning passed and ENACTED (artifact-only) — but with <code>:delta-G-source :fold</code>, the CLASSICAL fold. The escrow was never consulted, because the classical fold resolved first. 0 <code>:fold-escrow</code> hits in 43+ daily trace files: the gate knows how to be red.</td></tr>
+</table>
+
+<h2>The discovery: two plan sources, one undecided preference</h2>
+<div class="card">
+The reconciliation order is <code>rollout → classical fold → pinned escrow → abstain</code>.
+The escrow fires only when THREE conditions hold: a deposit matches the mission ∧ the classical
+fold abstains ∧ the prompt-sha pin matches. The tick characterized the mission taxonomy
+empirically:
+<table>
+<tr><th>mission</th><th>classical fold</th><th>deposit</th><th>escrow can fire?</th></tr>
+<tr><td>M-bayesian-structure-learning (on lane)</td><td>resolves (ΔG −0.077)</td><td>yes (ΔG −0.7)</td><td>no — classical wins by ORDER</td></tr>
+<tr><td>M-autoclock-in (not on lane)</td><td>abstains (contentful patterns)</td><td>yes (−4/9)</td><td>yes — proven in the 2g/L3 replays</td></tr>
+<tr><td>M-live-geometric-stack (not on lane)</td><td>abstains (likely)</td><td>yes (−0.5)</td><td>yes, when on lane</td></tr>
+</table>
+<b>The undecided question, now on the operator's desk:</b> when both sources can supply ΔG,
+should a sha-pinned, operator-armed, reviewer-verified deposit outrank the 10-entry generic
+rule table? The gap the current order ignores: classical priced bayesian at <b>−0.077</b>;
+the armed construction carries <b>−0.7</b> — 9×. <em>Rule escrow-first-when-pinned</em> → the
+next hourly tick exits L4 on the merits. <em>Rule keep-the-order</em> → L4 stands as a watching
+gate until the judge rotates an escrow-ready mission onto the lane. Both are legitimate; the
+point is that the choice is now VISIBLE, named, and the operator's.
+</div>
+
+<h2>Deposit 003 (the L4 enabler, and the window's first full harvest)</h2>
+<div class="card">
+<code>ft-bayesian-structure-learning-003</code>: size-15 cascade, untruncated at budget 20,
+F <b>+7.76</b> (strongest of the three deposits); 14 boxes / 6 surfaced holes; ΔG −0.7
+hand-derived and loader-recomputed. <b>No seal exists</b> for this mission — recorded honestly
+in the deposit itself (no blind score; ψ authored from the mission doc's resolved decisions).
+Before the GO, claude-20 replicated the L3 consumer path in a local JVM and proved the deposit
+would be read — <em>"prove the consumer will read the artifact before the consumer runs"</em>,
+a maxim worth keeping. Its policy-holes surfaced two operator rulings: the
+<b>supersession-authority conflict</b> (the doc says SUPERSEDED-AS-MISSION, not WM-pickable,
+while the judge has ranked it top-2 for weeks — the judge does not read supersession; the
+stale-banner/selector disease yet again, this time caught by a fold-turn), and the unset
+value-per-nat constant.
+</div>
+
+<h2>What this audit does NOT show (the teeth)</h2>
+<div class="card"><ol>
+<li><b>The tick was manually invoked</b> — <code>clojure -M:wm-scheduled</code>, the identical
+one-shot the hourly cron runs, but a human typed it. The gate cannot tell the difference; the
+audit can, and says so. The cron-fired confirmation is outstanding and free: the gate is
+standing, and every top-of-hour tick re-tests it.</li>
+<li><b><code>:fold-escrow</code> has never appeared on the real daily trace.</b> The seam is
+proven by dry-runs and tests, not yet by ordinary business. L4 red is that fact, kept visible.</li>
+<li><b>The reviewer caught a ΔF-vs-ΔG conflation</b> in the driver's post-tick analysis before
+it reached the log (F +0.813 is cascade free energy, not a fold ΔG; autoclock-in's classical
+fold abstains — the 2g escrow firing proves it). The two-currencies distinction remains the
+easiest thing in this stack to get wrong — which is why author ≠ reviewer is load-bearing.</li>
+<li><b>ψ-cache staleness</b>: a mission gaining held items keeps its cached banner ψ until the
+cache clears (follow-on noted in L2); the held-work ledger itself is snapshot-cadenced.</li>
+<li><b>The operator's unification ruling stands over all of it</b>: the three-agent split
+(author / machinery / review) must eventually become one process one agent can run — trust
+moving from social separation into machinery (M-peradam-mechanization is the chartered path).</li>
+</ol></div>
+
+<h2>Harness co-evolution during the drive (same-day, all live-failure-driven)</h2>
+<table>
+<tr><th>fix</th><th>trigger</th></tr>
+<tr><td><code>proof-eval.sh -f/stdin</code></td><td>two drivers lost turns to single-arg shell quoting</td></tr>
+<tr><td>WS doorbell (push-triggered follow polls)</td><td>operator saw display lag; cursor-peripheral WS patterns reused</td></tr>
+<tr><td>stale-sender eviction (codex-1, <code>ca8ff17</code>)</td><td>replaced connection silently ate broadcasts</td></tr>
+<tr><td>single-flight + 2s throttle</td><td>726 stacked curls — "the doorbell must not convert event rate into poll rate"</td></tr>
+<tr><td>bellback carries full text (8KB)</td><td>a 220-char summary truncated an operative dispatch; a driver held on it</td></tr>
+</table>
+
+<p>The trilogy's arc, in three sentences: loop-1 found six unwired obligations. Loop-2 wired
+four and read one plan under witness. Loop-3 taught the machinery to read plans on its own
+schedule — and the first thing the machinery did with its new literacy was surface a governance
+question only the operator can answer. Systems that hand their operators <em>better decisions</em>
+rather than fewer are the ones worth building.</p>
+
+<p class="foot">Sources: E-live-loop-3.md (L1–L4 logs, 003 log, PARs, commits e56761b·ef47d14·
+acb7726·c4fe048·77ed40d·5be812d) · e-live-loop-3-steps.edn (gate history) ·
+futon6/data/fold-turns/ (three deposits) · data/wm-trace/ (the tick, 10:17 UTC) ·
+mistakes-remedies-ledger.md · the prior explainers. Gates L0–L3 independently re-run PASS at
+audit time; L4 verified honestly red. Compiled by claude-16 at operator direction, 2026-07-05.</p>
+</body></html>
