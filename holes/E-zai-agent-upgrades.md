@@ -71,3 +71,25 @@ stumble is the evidence that prices the build.
 Warm pouches for zai (no subprocess to warm); any change to the 24-round
 per-turn budget (that is B1 territory, tracked in M-custom-harness §13.5b
 and the B2 flight-native follow-on).
+
+## U2 trigger: FALSE ALARM, corrected same evening (claude-18's diagnosis)
+
+What looked like the predicted context-length drift was NOT: zai-10's
+Leg-2 transparency flight completed all research (fold applications, EFE
+reflection, two findings) and then degenerated at the write step — five
+consecutive parameter-less tool emissions ("I keep producing an empty
+invoke") until round exhaustion. Session context at failure: system
+prompt + rehydration + Leg 1 + a failed take + full Leg-2 research. The
+new tool-error-feedback loop kept the turn alive but the retries were
+identical, because the errors were generic. **Corrected root cause
+(claude-18, same evening): max_tokens=4096 truncated the large tool-call
+arguments in transit; finish_reason went unchecked; parse-arguments
+silently mapped broken JSON to {}.** Fixed by claude-18: corrupted
+arguments now return an explicit "do NOT retry identically, chunk the
+write" tool error. The reviewer salvaged the leg from ledger narration
+(p4ng/flights/flight-2026-07-04-zai10-leg2.org).
+
+**U2's trigger has therefore NOT yet fired** — it returns to parked
+status with its empirical trigger intact. Lesson banked: apparent model
+degeneration at long context should be checked against transport-layer
+truncation FIRST (max_tokens, finish_reason) before blaming context.
