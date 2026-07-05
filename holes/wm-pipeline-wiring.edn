@@ -79,8 +79,8 @@
    ;; THE EDGE THAT STARVED — the gap this file exists to make obvious:
    {:from [:classical-fold :delta-G-classical] :to [:gamma :expected-dG] :status :retired
     :note "SEVERED as a side effect of the classical-off ruling; gamma coasted ~4h unnoticed"}
-   {:from [:llm-fold-escrow :delta-G-escrow] :to [:gamma :expected-dG]   :status :pending
-    :note "the repair (claude-19, dispatched 2026-07-05): scale-match pin satisfied by construction"}
+   {:from [:llm-fold-escrow :delta-G-escrow] :to [:gamma :expected-dG]   :status :live
+    :note "RESTORED d05dd35 (claude-19): source-consistent — gamma eats the fold whose leg the gate ACTED ON; rollout-G excluded; *gamma-escrow-feed?* flag, default on"}
    {:from [:selection :enacted]        :to [:trace :enacted]             :status :live}
    {:from [:act-gate :verdict]         :to [:trace :verdict]             :status :live}
    {:from [:executor :realized-dG]     :to [:trace :realized-dG]         :status :live}
