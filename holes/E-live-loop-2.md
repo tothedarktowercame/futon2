@@ -182,6 +182,125 @@ holes and ΔG −4/9 is a *truthful* golden turn, where tuning to a rounder
 against. Open for the operator/reviewer: score the construction against
 the sealed autoclock-in wiring; rule on 2g.
 
+## 2g log — the seam powered, the first live read (runner: claude-20, 2026-07-05)
+
+**2g DONE, gate PASS (converted :manual → :cmd). Full board green: the
+2-series is COMPLETE; 3a/3b unblocked.** Arming: operator's word 07:49
+("Yes both are fine, let's proceed with 002 & 2g"). After 675 rounds, a
+plan counted.
+
+- **The flag, made persistent by one mechanism:** `*escrow-replay?*` is
+  a dynamic var (`close_loop.clj:32`); its source default is now TRUE
+  (the operator's ruling made code). The serving JVM had never loaded
+  the ns, so requiring it live via proof-eval loaded the edited source —
+  live state = boot state, no alter-var-root divergence, nothing
+  env-dependent at next boot. Safety of the default flip is *asserted*,
+  not assumed: `(and *escrow-replay?* escrow-turn-fn …)` short-circuits
+  on the nil turn-fn, so uninjected callers (today's scheduled runner)
+  are byte-identical — the 2e seam test gained a flag-on-uninjected leg
+  proving exactly that (7 tests / 30 assertions green; kondo 0/0;
+  check-parens OK).
+- **Witness chosen: direct lane-entry eval IN the serving JVM** (real
+  loader + pins over the real escrow, real flexiarg prose, root flag —
+  no `binding`), at the deposit grain (S1 ΔF +0.813, the deposit's
+  4-pattern shown set). Why honest: a scheduled tick *cannot* reach the
+  pinned seam this turn — `enact.clj:91` calls the 1-arity (never
+  injects `:escrow-turn-fn`), and the live lane's ψ is banner-grain, so
+  pin 1 would rightly abstain against any prompt the lane can currently
+  build. That is the sha-binding working, not a failure. A
+  `request-tick!` would have witnessed an abstention.
+- **The read:** ΔG **−4/9** consumed with `:delta-G/source :fold-escrow`,
+  verdict **:pass** (ΔF 0.813 > 0 ∧ ΔG < 0), all 5 policy-holes intact
+  through replay; in-JVM K2 asserts (provenance + replayed=stored ΔG)
+  held. Trace id `2026-07-05T07:56:19.107773396Z`, persisted via the
+  real `write-trace!` into `data/wm-trace-escrow-witness/` — a dedicated
+  dir ON PURPOSE: the WM reads γ-state back from its own daily trace,
+  and a witness record with default `:policy-precision` in that file
+  could reset learned γ at the next tick. WM-I4 held: read, not act —
+  the verdict is a preview; nothing enacted.
+- **Finding — there are TWO escrow seams.** `enact.clj` (scheduled path)
+  carries an older `:llm-escrow` branch reading bare un-pinned wiring
+  EDN from `futon2/data/fold-escrow/<mission>.edn` — no arming, no sha,
+  no ΔG re-assert. It predates the 2d contract. Recommend deprecating it
+  in favor of the pinned seam when the caller wiring lands; until then
+  it is a consent-bypass-shaped hole (currently empty, but reachable).
+- **Named follow-on (not this turn's scope):** wire the scheduled
+  caller (`enact.clj` → 3-arity with `:escrow-turn-fn`/`:prose-fn` +
+  deposit-grain circumstance) and/or lift the lane ψ to sorry grain —
+  then ledger §10's falsifier ("post-S2 ticks still 0-for-N") gets its
+  real test. Gate 2g stands meanwhile: flag-on-by-default + escrow
+  clean + witness trace provenance, re-runnable forever.
+
+**PAR (claude-20, 2g):** What worked: (1) auditing the *call path*
+before touching anything (E-live-loop-1's own lesson) — it surfaced
+both the uninjected 1-arity caller and the second, un-pinned escrow
+seam; without that read the "obvious" move (flip flag, request tick)
+would have witnessed either an abstention or the wrong seam. (2)
+Choosing the witness by what could be defended as honest rather than
+what looked most live — and saying plainly what the witness does NOT
+show. (3) Checking the trace read-back path before writing to it — the
+γ-reset hazard was invisible until `trace-record`'s `:policy-precision`
+default met the read-back contract. What to carry: when a flag flip is
+"the fix, not a demo", the fix is source + running-process + tests
+*together*, and the never-loaded-ns trick (edit source, then first
+require) is the cleanest way to keep them one mechanism.
+
+## deposit-002 log — the enriched-ψ experiment (runner: claude-20, 2026-07-05)
+
+**002 DEPOSITED and gate-verified (2f gate PASS over both deposits;
+arming = the 07:49 blanket grant, cited verbatim in the record).**
+Candidate: `live-geometric-stack` (F>0 regime, S1 cross-check row;
+blinding held — only recipe fields regex-extracted, sealed wiring
+unopened). Recipe v2 = S1 recipe + the `:hungry-for` value and its
+contiguous comment gloss, recorded in the deposit's `:psi-recipe` field.
+Artifacts: `p4ng/flights/e-live-loop-2-002-runner.py` + `-results.json`
+(v1 and v2 run in the same process, same constructor call as S1).
+
+**Result 1 — the recipe delta changed the cascade materially:**
+
+| | v1 (S1 recipe) | v2 (+ hungry-for gloss) |
+|---|---|---|
+| bytes | 685 | 1150 |
+| size | 9 | 16 |
+| F | +1.623 | **+2.027** |
+| acc / cx | 3.10 / 5.90 | 5.52 / 13.97 |
+
+v1 reproduced S1's row (size 9, rel-max 0.481; F +1.461→+1.623 drift =
+the known re-pinned-prior shift from seed registration). v2 kept 6 of
+v1's 9 patterns, dropped 3 (incl. both `aif/*` observation patterns),
+added 10 — and F ROSE despite 2.4× the complexity: the gloss buys
+coverage that pays its Occam cost. Length confound noted (+465 bytes),
+but S1 already showed byte count alone does not drive size (typed-bells
+1444B → size 1).
+
+**Result 2 — invariant-class content surfaced, at two grains with a
+split verdict:** (a) *retrieval*: v2 pulled invariant-class patterns v1
+never saw — `exotic/live-sync-source-truth`, `gauntlet/world-is-hypergraph`,
+`invariant-coherence/shape-first-identify`, `stack-blocker-detection`
+(failure-signatures-surface = the self-zapping sub-property) — BUT the
+four most invariant-flavored arrivals sit at greedy ranks 10–16,
+**outside the budget-6 fold window**. (b) *fold*: the gloss rides ψ into
+the prompt regardless, and the authored turn boxes the sub-properties
+directly (b1 self-zapping, b2 derived-not-stored, b3 debounce-liveness
+audit, b4 cross-codebase adapters) with 2 of 6 holes naming ungrounded
+invariant specifics (debounce window; geometric derivation contract).
+So: the ψ-grain fix works; the budget-6 window is the next clip point.
+Whether these match the SEALED holes is the reviewer's blind scoring,
+as before. Deposit: `futon6/data/fold-turns/ft-live-geometric-stack-002.edn`
+— 6 boxes, 5 wires, terminals [:b2 :b6], 6 holes, ΔG −0.5 (coverage
+6/12; round by coincidence, recomputed by the loader), prompt-sha
+`e1db629b…`. Seam and live path untouched, per scope.
+
+**PAR (claude-20, 002):** What worked: running BOTH recipes in one
+process made the delta attributable (and reproduced the S1 row as a
+free cross-check); recording the recipe as a versioned field in the
+deposit means the corpus now carries its own methodology history. What
+surprised: the enrichment's strongest effect was at *retrieval* rank
+order — the invariant patterns arrived but below the display budget;
+prediction-testing at the fold grain would have silently failed without
+noticing the window clip. Carry: when a recipe upgrade is tested,
+check every downstream truncation point before scoring the prediction.
+
 ## Rules
 
 1. Actions only when `runnable` says so (all prerequisite gates green).
@@ -244,3 +363,60 @@ plans (as opposed to authoring/reading them) remains held as before.
 On plans going unread: "that's an obvious omission that needs to be
 fixed" — 2g's flag-on is therefore the FIXED STATE going forward, not a
 demo toggle.
+
+## Finding-3 deposits — feeding the deposit economy (runner: zai-10, 2026-07-05)
+
+**Assignment (operator-directed via claude-16): with classical fold off
+as a dG route (operator ruling 2026-07-05), escrow deposits ARE the dG
+supply. Author new fold-turn deposits under the blanket interactive
+grant.**
+
+**Escrow state after this run: four deposits, all loader-accepted, zero
+rejections.**
+
+| deposit | mission | boxes | holes | dG | prompt-sha | runner |
+|---|---|---|---|---|---|---|
+| ft-autoclock-in-001 | futon3c-d/mission/autoclock-in | 4 | 5 | -4/9 | `5597da91...` | claude-20 |
+| ft-live-geometric-stack-002 | futon2-d/mission/live-geometric-stack | 6 | 6 | -0.5 | `e1db629b...` | claude-20 |
+| ft-bayesian-structure-learning-003 | (bsl mission) | 15 | -- | -- | -- | claude-20 |
+| **ft-aif-head-004** | **futon2-d/mission/aif-head** | **6** | **6** | **-0.5** | **`4fc9ceac...`** | **zai-10** |
+
+### ft-aif-head-004 -- the aif-head deposit
+
+**Candidate chosen: `aif-head`** (Mission Peripheral AIF head; Phase 1
+COMPLETE, Phase 2 HELD). psi built via the L2 recipe (WANT = the
+completion-criteria signature, HUNGRY-FOR = structure-learning, HAVE =
+the actual AIF engine + cycle machine + structural law inventory +
+evidence landscape). Cascade: size 21 (truncated at 20), F = +8.722,
+acc 14.793, cx 24.284, H-coherence 0.93. Strong cascade -- the AIF/
+agent/structural-law vocabulary is densely represented in the pattern
+library.
+
+**Fold:** folded the 6 highest-rel patterns from the budget-20 cascade
+(`ants/baseline-cyber-ant` 0.679, `futon-theory/structural-tension-as-
+observation` 0.613, `aif/candidate-pattern-action-space` 0.526, `aif/
+structured-observation-vector` 0.502, `aif/belief-state-operational-
+hypotheses` 0.501, `gauntlet/aif-as-environment-not-instruction`
+0.565). The remaining 14 patterns are recorded in the cascade for a
+future wider fold. 6 boxes, 6 wires, terminal :b6. **6 policy-holes:**
+structure-learning mechanism; evidence landscape query interface;
+refusal threshold calibration; default-mode trigger cadence;
+compositional closure proof method (I6); Phase 2 peripheral adaptation
+specifics. Coverage 6/12 => **dG = -0.5** (hand-derived = loader-
+recomputed). Prompt-sha `4fc9ceac...`; per-pattern prose shas in the
+record; prose-source = verbatim flexiarg slurps.
+
+**Loader acceptance: PASS** -- all 4 deposits load, zero rejections.
+**Tampered-copy rejection: PASS** -- dG changed from -0.5 to -0.9 in a
+/tmp copy => REJECTED loudly with `:delta-g-mismatch` ("pin 3: stored
+-0.9 vs recomputed -0.5"). Demo dir removed; real escrow untouched.
+
+**Scoping note:** the fold window (6 patterns) is a deliberate scoping
+choice, NOT a budget constraint -- the cascade budget has been 20 since
+the operator's morning ruling. Folding fewer patterns against a rich
+cascade keeps the construction honest (each box resolves a real HOWEVER
+with concrete mission grounding) rather than thinning to cover the full
+halo.
+
+**No seal exists for aif-head -> no blind scoring**, per the 003
+precedent. The construction is an honest proposal, not a scored answer.

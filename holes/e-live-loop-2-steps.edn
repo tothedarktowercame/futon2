@@ -11,7 +11,9 @@
    :history
    [{:at "2026-07-05T06:39:06.434594089Z", :pass false, :out ""}
     {:at "2026-07-05T06:39:21.214496438Z", :pass true, :out ""}
-    {:at "2026-07-05T07:28:43.525399977Z", :pass true, :out ""}]}
+    {:at "2026-07-05T07:28:43.525399977Z", :pass true, :out ""}
+    {:at "2026-07-05T07:58:01.342546290Z", :pass true, :out ""}
+    {:at "2026-07-05T08:23:42.770035210Z", :pass true, :out ""}]}
   {:id "2a",
    :title "seed patterns in embeddings artifact",
    :needs ["S1"],
@@ -34,6 +36,12 @@
      :pass true,
      :out "missing: set()"}
     {:at "2026-07-05T07:28:45.694928111Z",
+     :pass true,
+     :out "missing: set()"}
+    {:at "2026-07-05T07:58:02.002522592Z",
+     :pass true,
+     :out "missing: set()"}
+    {:at "2026-07-05T08:23:43.776511052Z",
      :pass true,
      :out "missing: set()"}]}
   {:id "2b",
@@ -58,6 +66,12 @@
      :out "missing: []"}
     {:at "2026-07-05T07:28:50.754963631Z",
      :pass true,
+     :out "missing: []"}
+    {:at "2026-07-05T07:58:02.658599669Z",
+     :pass true,
+     :out "missing: []"}
+    {:at "2026-07-05T08:23:45.542974050Z",
+     :pass true,
      :out "missing: []"}]}
   {:id "2c",
    :title "seed prior treatment (no 2.398-nat fine)",
@@ -78,6 +92,14 @@
      :out
      "cx: {'is-this-even-a-problem': 0.647, 'status-refresh-before-work': 0.647, 'stuck-means-signal': 0.647} EMB-missing: [] nonseed-drift: [] wired: True"}
     {:at "2026-07-05T07:28:53.520456737Z",
+     :pass true,
+     :out
+     "cx: {'is-this-even-a-problem': 0.647, 'status-refresh-before-work': 0.647, 'stuck-means-signal': 0.647} EMB-missing: [] nonseed-drift: [] wired: True"}
+    {:at "2026-07-05T07:58:03.292929164Z",
+     :pass true,
+     :out
+     "cx: {'is-this-even-a-problem': 0.647, 'status-refresh-before-work': 0.647, 'stuck-means-signal': 0.647} EMB-missing: [] nonseed-drift: [] wired: True"}
+    {:at "2026-07-05T08:23:47.103332943Z",
      :pass true,
      :out
      "cx: {'is-this-even-a-problem': 0.647, 'status-refresh-before-work': 0.647, 'stuck-means-signal': 0.647} EMB-missing: [] nonseed-drift: [] wired: True"}]}
@@ -102,7 +124,15 @@
     {:at "2026-07-05T07:29:15.848923808Z",
      :pass true,
      :out
-     "Running tests in #{\"test\"}\n\nTesting futon2.aif.fold-escrow-test\n\nRan 3 tests containing 6 assertions.\n0 failures, 0 errors.\nfold-turn REJECTED [delta-g-mismatch] /tmp/fold-turns-test4550508765309224407/ft-dg-drift.edn: pin 3: stored -0.9 vs recomputed -0.5\nfold-turn REJECTED [missing-arming] /tmp/f"}]}
+     "Running tests in #{\"test\"}\n\nTesting futon2.aif.fold-escrow-test\n\nRan 3 tests containing 6 assertions.\n0 failures, 0 errors.\nfold-turn REJECTED [delta-g-mismatch] /tmp/fold-turns-test4550508765309224407/ft-dg-drift.edn: pin 3: stored -0.9 vs recomputed -0.5\nfold-turn REJECTED [missing-arming] /tmp/f"}
+    {:at "2026-07-05T07:58:07.433229736Z",
+     :pass true,
+     :out
+     "Running tests in #{\"test\"}\n\nTesting futon2.aif.fold-escrow-test\n\nRan 3 tests containing 6 assertions.\n0 failures, 0 errors.\nfold-turn REJECTED [delta-g-mismatch] /tmp/fold-turns-test455826049033324785/ft-dg-drift.edn: pin 3: stored -0.9 vs recomputed -0.5\nfold-turn REJECTED [missing-arming] /tmp/fo"}
+    {:at "2026-07-05T08:23:59.190632626Z",
+     :pass true,
+     :out
+     "Running tests in #{\"test\"}\n\nTesting futon2.aif.fold-escrow-test\n\nRan 3 tests containing 6 assertions.\n0 failures, 0 errors.\nfold-turn REJECTED [delta-g-mismatch] /tmp/fold-turns-test15741487074907444032/ft-dg-drift.edn: pin 3: stored -0.9 vs recomputed -0.5\nfold-turn REJECTED [missing-arming] /tmp/"}]}
   {:id "2e",
    :title "replay seam built dark (flag off, mock replay test)",
    :needs ["2d"],
@@ -124,7 +154,15 @@
     {:at "2026-07-05T07:29:38.943138914Z",
      :pass true,
      :out
-     "Running tests in #{\"test\"}\n\nTesting futon2.aif.close-loop-test\n\nTesting futon2.aif.fold-escrow-seam-test\n\nRan 4 tests containing 22 assertions.\n0 failures, 0 errors."}]}
+     "Running tests in #{\"test\"}\n\nTesting futon2.aif.close-loop-test\n\nTesting futon2.aif.fold-escrow-seam-test\n\nRan 4 tests containing 22 assertions.\n0 failures, 0 errors."}
+    {:at "2026-07-05T07:58:11.221427288Z",
+     :pass true,
+     :out
+     "Running tests in #{\"test\"}\n\nTesting futon2.aif.close-loop-test\n\nTesting futon2.aif.fold-escrow-seam-test\n\nRan 4 tests containing 24 assertions.\n0 failures, 0 errors."}
+    {:at "2026-07-05T08:24:11.167461384Z",
+     :pass true,
+     :out
+     "Running tests in #{\"test\"}\n\nTesting futon2.aif.close-loop-test\n\nTesting futon2.aif.fold-escrow-seam-test\n\nRan 4 tests containing 24 assertions.\n0 failures, 0 errors."}]}
   {:id "2f",
    :title "one real fold-turn deposit",
    :armed true,
@@ -133,7 +171,7 @@
    {:cmd
     "cd /home/joe/code/futon2 && clojure -M scripts/gate_2f_deposit.clj",
     :note
-    "probe attached by claude-20 2026-07-05 (2f action, GOLDEN RUN): real deposit = futon6/data/fold-turns/ft-autoclock-in-001.edn (autoclock-in cascade, 4 boxes / 5 holes, dG -4/9). Gate = load-deposits ZERO rejections (pins 2+3: arming word + stored dG re-asserted vs coverage-delta-g) + prompt REBUILT from the record's cascade+psi+verbatim flexiarg prose hashes to stored :prompt :sha256 (pin 1) + escrow-turn-fn replays the recorded answer on that prompt. Reject-loudly demonstrated on tampered copies (delta-g-mismatch, missing-arming) in /tmp, never in the real escrow."},
+    "probe attached by claude-20 2026-07-05 (2f action, GOLDEN RUN): real deposit = futon6/data/fold-turns/ft-autoclock-in-001.edn (autoclock-in cascade, 4 boxes / 5 holes, dG -4/9). Gate = load-deposits ZERO rejections (pins 2+3: arming word + stored dG re-asserted vs coverage-delta-g) + prompt REBUILT from the record's cascade+psi+verbatim flexiarg prose hashes to stored :prompt :sha256 (pin 1) + escrow-turn-fn replays the recorded answer on that prompt. Reject-loudly demonstrated on tampered copies (delta-g-mismatch, missing-arming) in /tmp, never in the real escrow. The cmd is GENERIC over every ft-*.edn in the escrow: deposit 002 (ft-live-geometric-stack-002, 6 boxes / 6 holes, dG -0.5, enriched psi-recipe v2 with the :hungry-for gloss; blanket-armed 07:49) is checked by the same gate — verified PASS over both deposits 2026-07-05. Deposit 003 (ft-bayesian-structure-learning-003, 14 boxes / 6 holes, dG -0.7, psi authored from the mission doc, no seal, budget-20 untruncated; the E-live-loop-3 L4 enabler) likewise — verified PASS over all three deposits 2026-07-05."},
    :status :pass,
    :history
    [{:at "2026-07-05T07:15:10.385955651Z",
@@ -153,14 +191,45 @@
     {:at "2026-07-05T07:31:32.676863432Z",
      :pass true,
      :out
-     "ft-autoclock-in-001: sha-match + replay + dG re-assert OK (dG -0.4444444444444444; arming word \"OK, if you agree then I think we can run\")\nGATE 2f PASS — 1 deposit(s) load cleanly, sha-matched, replayable"}]}
+     "ft-autoclock-in-001: sha-match + replay + dG re-assert OK (dG -0.4444444444444444; arming word \"OK, if you agree then I think we can run\")\nGATE 2f PASS — 1 deposit(s) load cleanly, sha-matched, replayable"}
+    {:at "2026-07-05T07:58:13.870388811Z",
+     :pass true,
+     :out
+     "ft-autoclock-in-001: sha-match + replay + dG re-assert OK (dG -0.4444444444444444; arming word \"OK, if you agree then I think we can run\")\nGATE 2f PASS — 1 deposit(s) load cleanly, sha-matched, replayable"}
+    {:at "2026-07-05T08:09:46.652113953Z",
+     :pass true,
+     :out
+     "ft-autoclock-in-001: sha-match + replay + dG re-assert OK (dG -0.4444444444444444; arming word \"OK, if you agree then I think we can run\")\n  ft-live-geometric-stack-002: sha-match + replay + dG re-assert OK (dG -0.5; arming word \"Yes both are fine, lets proceed with 002\")\nGATE 2f PASS — 2 deposit("}
+    {:at "2026-07-05T08:10:48.885498947Z",
+     :pass true,
+     :out
+     "ft-autoclock-in-001: sha-match + replay + dG re-assert OK (dG -0.4444444444444444; arming word \"OK, if you agree then I think we can run\")\n  ft-live-geometric-stack-002: sha-match + replay + dG re-assert OK (dG -0.5; arming word \"Yes both are fine, lets proceed with 002\")\nGATE 2f PASS — 2 deposit("}
+    {:at "2026-07-05T08:16:43.717036883Z",
+     :pass true,
+     :out
+     "ft-autoclock-in-001: sha-match + replay + dG re-assert OK (dG -0.4444444444444444; arming word \"OK, if you agree then I think we can run\")\n  ft-live-geometric-stack-002: sha-match + replay + dG re-assert OK (dG -0.5; arming word \"Yes both are fine, lets proceed with 002\")\nGATE 2f PASS — 2 deposit("}
+    {:at "2026-07-05T08:24:15.877908197Z",
+     :pass true,
+     :out
+     "ft-autoclock-in-001: sha-match + replay + dG re-assert OK (dG -0.4444444444444444; arming word \"OK, if you agree then I think we can run\")\n  ft-live-geometric-stack-002: sha-match + replay + dG re-assert OK (dG -0.5; arming word \"Yes both are fine, lets proceed with 002\")\nGATE 2f PASS — 2 deposit("}
+    {:at "2026-07-05T10:04:09.559021571Z",
+     :pass true,
+     :out
+     "ft-autoclock-in-001: sha-match + replay + dG re-assert OK (dG -0.4444444444444444; arming word \"OK, if you agree then I think we can run\")\n  ft-bayesian-structure-learning-003: sha-match + replay + dG re-assert OK (dG -0.7; arming word \"Yes both are fine, lets proceed with 002\")\n  ft-live-geometri"}
+    {:at "2026-07-05T10:06:13.868862714Z",
+     :pass true,
+     :out
+     "ft-autoclock-in-001: sha-match + replay + dG re-assert OK (dG -0.4444444444444444; arming word \"OK, if you agree then I think we can run\")\n  ft-bayesian-structure-learning-003: sha-match + replay + dG re-assert OK (dG -0.7; arming word \"Yes both are fine, lets proceed with 002\")\n  ft-live-geometri"}]}
   {:id "2g",
    :title "live replay consumed on path",
    :armed true,
    :needs ["2f"],
    :gate
-   {:manual "trace shows act-gate dG leg with escrow provenance"},
-   :status :pending,
+   {:cmd
+    "cd /home/joe/code/futon2 && clojure -M scripts/gate_2g_provenance.clj",
+    :note
+    "probe attached by claude-20 2026-07-05 (2g action): seam POWERED — *escrow-replay?* default true in close_loop.clj (operator word 07:49; live serving JVM loaded it from source via proof-eval, so live state = boot state, nothing env-dependent). Witness = direct lane-entry eval IN the serving JVM (real loader+pins over the real escrow, real flexiarg prose, root flag) at the deposit grain: dG -4/9 consumed with :delta-G-source :fold-escrow, verdict :pass (S1 delta-F 0.813). Trace record in data/wm-trace-escrow-witness/ (SEPARATE from the live daily trace: the WM reads gamma-state back from its trace; witness records must not enter that read-back). A scheduled tick cannot yet reach the pinned seam: enact.clj:91 calls the 1-arity (no :escrow-turn-fn) and the lane psi is banner-grain, so pin 1 would rightly abstain — the caller wiring + sorry-grain lane psi is the named follow-on. Gate = flag-on-by-default + escrow clean + witness trace verdict with :fold-escrow provenance matching the stored deposit dG."},
+   :status :pass,
    :history
    [{:at "2026-07-05T07:49:04.703597347Z",
      :armed-by "joe",
@@ -168,7 +237,31 @@
      "Yes both are fine, lets proceed with 002 & 2g. ... Right now, while we are testing it interactive, it has my blanket consent.",
      :scope :blanket-interactive-phase,
      :note
-     "also approves deposit 002; mana-economy design recorded in doc"}]}
+     "also approves deposit 002; mana-economy design recorded in doc"}
+    {:at "2026-07-05T07:58:01.146977479Z",
+     :pass true,
+     :out
+     "ft-autoclock-in-001 @ 2026-07-05T07:56:19.107773396Z: dG -0.4444444444444444 from :fold-escrow, verdict :pass\nGATE 2g PASS — 1 trace verdict(s) with escrow provenance matching stored deposit dG"}
+    {:at "2026-07-05T07:58:16.658808838Z",
+     :pass true,
+     :out
+     "ft-autoclock-in-001 @ 2026-07-05T07:56:19.107773396Z: dG -0.4444444444444444 from :fold-escrow, verdict :pass\nGATE 2g PASS — 1 trace verdict(s) with escrow provenance matching stored deposit dG"}
+    {:at "2026-07-05T08:00:51.477281129Z",
+     :pass true,
+     :out
+     "ft-autoclock-in-001 @ 2026-07-05T07:56:19.107773396Z: dG -0.4444444444444444 from :fold-escrow, verdict :pass\nGATE 2g PASS — 1 trace verdict(s) with escrow provenance matching stored deposit dG"}
+    {:at "2026-07-05T08:09:51.276141871Z",
+     :pass true,
+     :out
+     "ft-autoclock-in-001 @ 2026-07-05T07:56:19.107773396Z: dG -0.4444444444444444 from :fold-escrow, verdict :pass\nGATE 2g PASS — 1 trace verdict(s) with escrow provenance matching stored deposit dG"}
+    {:at "2026-07-05T08:24:18.690076831Z",
+     :pass true,
+     :out
+     "ft-autoclock-in-001 @ 2026-07-05T07:56:19.107773396Z: dG -0.4444444444444444 from :fold-escrow, verdict :pass\nGATE 2g PASS — 1 trace verdict(s) with escrow provenance matching stored deposit dG"}
+    {:at "2026-07-05T10:04:18.065172891Z",
+     :pass true,
+     :out
+     "ft-autoclock-in-001 @ 2026-07-05T07:56:19.107773396Z: dG -0.4444444444444444 from :fold-escrow, verdict :pass\nGATE 2g PASS — 1 trace verdict(s) with escrow provenance matching stored deposit dG"}]}
   {:id "3a",
    :title "per-lane futility observable (0-for-N counter)",
    :needs ["2a" "2b" "2c" "2d" "2e" "2f" "2g"],
