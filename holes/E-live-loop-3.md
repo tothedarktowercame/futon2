@@ -591,3 +591,104 @@ armed. After 675 rounds, a plan counted -- on a natural tick.
 proving it, the machinery surfaced a decision nobody knew existed --
 which plan source to trust first. The operator ruled, the code changed,
 and the next cron tick read the armed deposit. That is the loop working.
+
+## Finding-2 proposal (driver: zai-2, 2026-07-05 -- PROPOSAL ONLY, no implementation)
+
+**The problem:** M-bayesian-structure-learning was ENACTED (artifact-only)
+on every hourly tick for 3+ days despite its doc saying
+`SUPERSEDED-AS-MISSION, NOT WM-pickable`. The judge did not read the
+status because the status classifier failed to recognize the leading
+token `SUPERSEDED-AS-MISSION`.
+
+### 1. Where the candidate/open-mission set comes from
+
+The chain: `wm_scheduled_run.clj` -> `wm/generate-war-machine` ->
+`wm/judge` -> the AIF head produces `ranked-actions` including
+`:open-mission` candidates -> `filter-live-open-mission-ranked-actions`
+filters by `live-open-mission-ranked-entry?` -> `mission-registry/
+live-mission-target?` -> `live-mission?` -> `classify-status`.
+
+The filter ALREADY EXISTS. `live-mission?` returns false for
+`:inactive`, `:complete`, `:draft`. The `:open-mission` candidates that
+survive this filter are the ones the lane processes. The bug is that
+`classify-status` misclassifies `SUPERSEDED-AS-MISSION` as `:unknown`
+(kept live) instead of `:inactive` (filtered out).
+
+### 2. Where supersession is recorded (and why the classifier misses it)
+
+**Status line pattern:** `**Status:** <text>` in the first ~20 lines of
+the mission doc, extracted by `status-line-pattern` regex.
+
+**The classifier (`classify-status`):** strips leading markdown, finds
+the head token `[A-Z][A-Z-]*`, then exact-matches against sets:
+- `:inactive` set: `#{ARCHIVED PARKED SUPERSEDED ABANDONED DEFERRED}`
+- `:complete` set: `#{COMPLETE COMPLETED CLOSED DONE ...}`
+
+**The bug:** `SUPERSEDED-AS-MISSION` is a hyphenated all-caps run. The
+regex `[A-Z][A-Z-]*` captures the ENTIRE run (`SUPERSEDED-AS-MISSION`),
+not just `SUPERSEDED`. The exact-match `("SUPERSEDED" head)` fails
+because `head` is `"SUPERSEDED-AS-MISSION"`. Result: `:unknown` (kept
+live). The mission stays on the lane.
+
+**Scope of the bug:** only ONE mission in the corpus uses this form
+(`M-bayesian-structure-learning`). All other superseded missions use
+`COMPLETE (SUPERSEDED)` (head = `COMPLETE`, correctly classified as
+`:complete`). But the bug is structural — any future
+`SUPERSEDED-AS-{something}` or `ARCHIVED-{something}` status would
+trigger it.
+
+**No new marker convention needed:** the existing convention
+(`**Status:** <keyword> ...`) is fine. The classifier just needs to
+match keywords as prefixes, not exact head tokens.
+
+### 3. The intervention point + shape
+
+**Intervention point:** `classify-status` in `mission_registry.clj`.
+One fix: change the matching from exact `(#{...} head)` to prefix
+matching `some #(str/starts-with? head %) #{...}`. This catches
+`SUPERSEDED-AS-MISSION`, `ARCHIVED-FOO`, `DEFERRED-UNTIL-X`, etc.
+
+**Recommended shape: DEMOTE, not filter.** The filter already works for
+correctly-classified missions (they vanish from the lane). But the
+operator-better-than-silent-absence principle (from the dispatch)
+suggests: when a mission that WAS on the lane gets demoted to inactive,
+the judge's output should note it (`demoted: M-foo (SUPERSEDED)`). This
+is a logging/provenance concern, not a filter change — the filter stays
+(exclude inactive), but a diagnostic line in the judge's trace records
+what was excluded and why.
+
+However, for the MINIMAL fix: just fix `classify-status` to recognize
+prefix matches. The filter already does the right thing once the
+classifier is correct. The demote-with-reason is a follow-on that
+requires a change to the judge's output format.
+
+### 4. Regression control + standing gate design
+
+**Regression control:**
+1. `classify-status` unit test: `SUPERSEDED-AS-MISSION` -> `:inactive`,
+   `SUPERSEDED` -> `:inactive`, `COMPLETE (SUPERSEDED)` -> `:complete`
+   (unchanged), `ACTIVE` -> `:active` (unchanged).
+2. `live-mission?` integration: M-bayesian-structure-learning's entry
+   has `:status-class :inactive` -> `live-mission?` returns false ->
+   filtered from the lane.
+3. The existing mission registry tests stay green (no status that was
+   correctly classified changes).
+
+**Standing gate design:**
+- A script that loads the mission registry, classifies all missions,
+  and asserts: (a) M-bayesian-structure-learning is `:inactive`; (b)
+  no mission with `SUPERSEDED` in its status line (case-insensitive)
+  classifies as `:active`, `:open`, `:partial`, `:identify`, or
+  `:unknown` (the "kept live" classes).
+- This is the stale-banner/selector guardrail (ledger section 9): a
+  mission whose doc says superseded but whose status-class is live is a
+  regression alarm.
+
+### What Finding-2 does NOT do (scope boundaries)
+
+- Does not change the judge's ranking or scoring.
+- Does not add new status markers or conventions.
+- Does not change the filter logic (only the classifier).
+- Does not address the broader supersession question (what to DO with
+  superseded missions that have open holes -- that's an operator
+  design question, not a classifier fix).
