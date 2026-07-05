@@ -13,7 +13,9 @@
     {:at "2026-07-05T06:39:21.214496438Z", :pass true, :out ""}
     {:at "2026-07-05T07:28:43.525399977Z", :pass true, :out ""}
     {:at "2026-07-05T07:58:01.342546290Z", :pass true, :out ""}
-    {:at "2026-07-05T08:23:42.770035210Z", :pass true, :out ""}]}
+    {:at "2026-07-05T08:23:42.770035210Z", :pass true, :out ""}
+    {:at "2026-07-05T20:23:20.915482714Z", :pass true, :out ""}
+    {:at "2026-07-05T20:30:41.675949538Z", :pass true, :out ""}]}
   {:id "2a",
    :title "seed patterns in embeddings artifact",
    :needs ["S1"],
@@ -114,6 +116,10 @@
     {:at "2026-07-05T19:15:40.896941028Z",
      :pass true,
      :out
+     "cx: {'extend-library-not-proof': 0.647, 'is-this-even-a-problem': 0.647, 'sorry-boundary-clustering': 0.647, 'status-refresh-before-work': 0.647, 'stuck-means-signal': 0.647, 'typed-hole-as-frontier': 0.647} EMB-missing: [] nonseed-drift: [] wired: True"}
+    {:at "2026-07-05T19:18:19.742949308Z",
+     :pass true,
+     :out
      "cx: {'extend-library-not-proof': 0.647, 'is-this-even-a-problem': 0.647, 'sorry-boundary-clustering': 0.647, 'status-refresh-before-work': 0.647, 'stuck-means-signal': 0.647, 'typed-hole-as-frontier': 0.647} EMB-missing: [] nonseed-drift: [] wired: True"}]}
   {:id "2d",
    :title "escrow ft-*.edn record contract + reject-loudly loader",
@@ -183,7 +189,7 @@
    {:cmd
     "cd /home/joe/code/futon2 && clojure -M scripts/gate_2f_deposit.clj",
     :note
-    "probe attached by claude-20 2026-07-05 (2f action, GOLDEN RUN): real deposit = futon6/data/fold-turns/ft-autoclock-in-001.edn (autoclock-in cascade, 4 boxes / 5 holes, dG -4/9). Gate = load-deposits ZERO rejections (pins 2+3: arming word + stored dG re-asserted vs coverage-delta-g) + prompt REBUILT from the record's cascade+psi+verbatim flexiarg prose hashes to stored :prompt :sha256 (pin 1) + escrow-turn-fn replays the recorded answer on that prompt. Reject-loudly demonstrated on tampered copies (delta-g-mismatch, missing-arming) in /tmp, never in the real escrow. The cmd is GENERIC over every ft-*.edn in the escrow: deposit 002 (ft-live-geometric-stack-002, 6 boxes / 6 holes, dG -0.5, enriched psi-recipe v2 with the :hungry-for gloss; blanket-armed 07:49) is checked by the same gate — verified PASS over both deposits 2026-07-05. Deposit 003 (ft-bayesian-structure-learning-003, 14 boxes / 6 holes, dG -0.7, psi authored from the mission doc, no seal, budget-20 untruncated; the E-live-loop-3 L4 enabler) likewise — verified PASS over all three deposits 2026-07-05."},
+    "probe attached by claude-20 2026-07-05 (2f action, GOLDEN RUN): real deposit = futon6/data/fold-turns/ft-autoclock-in-001.edn (autoclock-in cascade, 4 boxes / 5 holes, dG -4/9). Gate = load-deposits ZERO rejections (pins 2+3: arming word + stored dG re-asserted vs coverage-delta-g) + prompt REBUILT from the record's cascade+psi+verbatim flexiarg prose hashes to stored :prompt :sha256 (pin 1) + escrow-turn-fn replays the recorded answer on that prompt. Reject-loudly demonstrated on tampered copies (delta-g-mismatch, missing-arming) in /tmp, never in the real escrow. The cmd is GENERIC over every ft-*.edn in the escrow: deposit 002 (ft-live-geometric-stack-002, 6 boxes / 6 holes, dG -0.5, enriched psi-recipe v2 with the :hungry-for gloss; blanket-armed 07:49) is checked by the same gate — verified PASS over both deposits 2026-07-05. Deposit 003 (ft-bayesian-structure-learning-003, 14 boxes / 6 holes, dG -0.7, psi authored from the mission doc, no seal, budget-20 untruncated; the E-live-loop-3 L4 enabler) likewise — verified PASS over all three deposits 2026-07-05. Deposit 005 (ft-action-vocabulary-005, FIRST V2 SHAPE: 17 boxes / 6 holes, dG -17/23, connectives {:tensor 3 :copar 4 :seq 2}, terminal :discharges :want-signature, pin-4 attempted-passes-linearized via clean_to_lean standalone 0-sorry; M-action-vocabulary P1 plan of record) — verified PASS over all deposits incl. ft-aif-head-004, 2026-07-05 evening. NOTE: the v1 pins 1-3 apply unchanged to v2 records (the gate reads :prompt/:sha256, :arming, :eval regardless of wire shape); pin-4 is per-deposit recorded, not yet gate-enforced. Deposit 006 (ft-peradam-mechanization-006, v2 per v2.1 rulings: 11 boxes / 6 holes, dG -11/17, connectives {:copar 4 :tensor 2 :seq 3}, dual :discharges terminals, pin-4 passes-linearized ALL 6 holes typed; the certificate/mana/refusal plan — the machinery that will replace the blanket grant these deposits are armed under) — verified PASS over all six deposits 2026-07-05 late evening; tamper proofs delta-g-mismatch + missing-arming in /tmp."},
    :status :pass,
    :history
    [{:at "2026-07-05T07:15:10.385955651Z",
@@ -235,7 +241,23 @@
     {:at "2026-07-05T18:36:10.073381555Z",
      :pass true,
      :out
-     "ft-aif-head-004: sha-match + replay + dG re-assert OK (dG -0.5; arming word \"the planning gate has Joe's blanket cons\")\n  ft-autoclock-in-001: sha-match + replay + dG re-assert OK (dG -0.4444444444444444; arming word \"OK, if you agree then I think we can run\")\n  ft-bayesian-structure-learning-003:"}]}
+     "ft-aif-head-004: sha-match + replay + dG re-assert OK (dG -0.5; arming word \"the planning gate has Joe's blanket cons\")\n  ft-autoclock-in-001: sha-match + replay + dG re-assert OK (dG -0.4444444444444444; arming word \"OK, if you agree then I think we can run\")\n  ft-bayesian-structure-learning-003:"}
+    {:at "2026-07-05T20:08:22.050473349Z",
+     :pass true,
+     :out
+     "ft-action-vocabulary-005: sha-match + replay + dG re-assert OK (dG -0.7391304347826086; arming word \"Yes both are fine, lets proceed with 002\")\n  ft-aif-head-004: sha-match + replay + dG re-assert OK (dG -0.5; arming word \"the planning gate has Joe's blanket cons\")\n  ft-autoclock-in-001: sha-match"}
+    {:at "2026-07-05T20:16:09.847353888Z",
+     :pass true,
+     :out
+     "ft-action-vocabulary-005: sha-match + replay + dG re-assert OK (dG -0.7391304347826086; arming word \"Yes both are fine, lets proceed with 002\")\n  ft-aif-head-004: sha-match + replay + dG re-assert OK (dG -0.5; arming word \"the planning gate has Joe's blanket cons\")\n  ft-autoclock-in-001: sha-match"}
+    {:at "2026-07-05T21:45:52.635675137Z",
+     :pass true,
+     :out
+     "ft-action-vocabulary-005: sha-match + replay + dG re-assert OK (dG -0.7391304347826086; arming word \"Yes both are fine, lets proceed with 002\")\n  ft-aif-head-004: sha-match + replay + dG re-assert OK (dG -0.5; arming word \"the planning gate has Joe's blanket cons\")\n  ft-autoclock-in-001: sha-match"}
+    {:at "2026-07-05T21:48:16.477738842Z",
+     :pass true,
+     :out
+     "ft-action-vocabulary-005: sha-match + replay + dG re-assert OK (dG -0.7391304347826086; arming word \"Yes both are fine, lets proceed with 002\")\n  ft-aif-head-004: sha-match + replay + dG re-assert OK (dG -0.5; arming word \"the planning gate has Joe's blanket cons\")\n  ft-autoclock-in-001: sha-match"}]}
   {:id "2g",
    :title "live replay consumed on path",
    :armed true,
@@ -275,6 +297,14 @@
      :out
      "ft-autoclock-in-001 @ 2026-07-05T07:56:19.107773396Z: dG -0.4444444444444444 from :fold-escrow, verdict :pass\nGATE 2g PASS — 1 trace verdict(s) with escrow provenance matching stored deposit dG"}
     {:at "2026-07-05T10:04:18.065172891Z",
+     :pass true,
+     :out
+     "ft-autoclock-in-001 @ 2026-07-05T07:56:19.107773396Z: dG -0.4444444444444444 from :fold-escrow, verdict :pass\nGATE 2g PASS — 1 trace verdict(s) with escrow provenance matching stored deposit dG"}
+    {:at "2026-07-05T20:08:34.103264210Z",
+     :pass true,
+     :out
+     "ft-autoclock-in-001 @ 2026-07-05T07:56:19.107773396Z: dG -0.4444444444444444 from :fold-escrow, verdict :pass\nGATE 2g PASS — 1 trace verdict(s) with escrow provenance matching stored deposit dG"}
+    {:at "2026-07-05T21:45:56.180758561Z",
      :pass true,
      :out
      "ft-autoclock-in-001 @ 2026-07-05T07:56:19.107773396Z: dG -0.4444444444444444 from :fold-escrow, verdict :pass\nGATE 2g PASS — 1 trace verdict(s) with escrow provenance matching stored deposit dG"}]}

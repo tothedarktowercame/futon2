@@ -73,14 +73,25 @@
           (is (nil? (:delta-G ag')))
           (is (not (contains? ag' :fold-escrow))))))))
 
-(deftest flag-off-live-path-byte-identical
-  (let [throwing-turn-fn (fn [_] (throw (ex-info "escrow consulted with flag OFF" {})))
-        with-seam (cl/act-gate-from-lane-entry
-                   entry circumstance {:escrow-turn-fn throwing-turn-fn :prose-fn prose-fn})
-        pre-seam  (cl/act-gate-from-lane-entry entry circumstance)]
-    (testing "flag off (default false): escrow never consulted, even when injected"
-      (is (false? cl/*escrow-replay?*))
-      (is (= pre-seam with-seam) "key-for-key identical to the 2-arity path"))
-    (testing "output shape is the pre-seam contract exactly"
-      (is (= #{:delta-F :delta-G :delta-G/source :fold} (set (keys with-seam))))
-      (is (nil? (:delta-G with-seam)) "classical abstains on a contentful pattern; no escrow ⇒ abstain"))))
+(deftest flag-default-on-flag-off-restores-pre-seam
+  ;; 2g (operator-armed 2026-07-05): the seam is POWERED by default. The
+  ;; pre-seam contract is preserved two ways, both asserted here: bound off,
+  ;; the escrow is never consulted even when injected; and on-but-uninjected,
+  ;; the nil turn-fn short-circuits — which is what keeps the default flip
+  ;; byte-identical for callers (e.g. the scheduled runner) that pass no opts.
+  (testing "2g: the seam is powered by default"
+    (is (true? cl/*escrow-replay?*)))
+  (binding [cl/*escrow-replay?* false]
+    (let [throwing-turn-fn (fn [_] (throw (ex-info "escrow consulted with flag OFF" {})))
+          with-seam (cl/act-gate-from-lane-entry
+                     entry circumstance {:escrow-turn-fn throwing-turn-fn :prose-fn prose-fn})
+          pre-seam  (cl/act-gate-from-lane-entry entry circumstance)]
+      (testing "flag bound off: escrow never consulted, even when injected"
+        (is (= pre-seam with-seam) "key-for-key identical to the 2-arity path"))
+      (testing "output shape is the pre-seam contract exactly"
+        (is (= #{:delta-F :delta-G :delta-G/source :fold} (set (keys with-seam))))
+        (is (nil? (:delta-G with-seam)) "classical abstains on a contentful pattern; no escrow ⇒ abstain"))))
+  (testing "flag ON, no turn-fn injected: seam inert, pre-seam shape exactly"
+    (let [ag (cl/act-gate-from-lane-entry entry circumstance)]
+      (is (= #{:delta-F :delta-G :delta-G/source :fold} (set (keys ag))))
+      (is (nil? (:delta-G ag)) "no injection ⇒ no escrow leg, honest abstain"))))

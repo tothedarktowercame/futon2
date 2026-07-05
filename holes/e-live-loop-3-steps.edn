@@ -31,7 +31,8 @@
    :status :pass,
    :history
    [{:at "2026-07-05T09:32:46.958750416Z", :pass true, :out ""}
-    {:at "2026-07-05T09:37:32.819928770Z", :pass true, :out ""}]}
+    {:at "2026-07-05T09:37:32.819928770Z", :pass true, :out ""}
+    {:at "2026-07-05T19:15:27.997002600Z", :pass true, :out ""}]}
   {:id "L3",
    :title "scheduled caller injects pinned seam (3-arity + turn-fn)",
    :needs ["L1" "L2"],
@@ -53,8 +54,9 @@
    :history
    [{:at "2026-07-05T10:33:40.343388621Z", :pass false, :out ""}
     {:at "2026-07-05T11:06:46.548444792Z", :pass true, :out ""}]}
-   {:id "F2",
-   :title "Finding-2: superseded missions filtered from lane (classifier prefix match)",
+  {:id "F2",
+   :title
+   "Finding-2: superseded missions filtered from lane (classifier prefix match)",
    :needs [],
    :gate
    {:cmd
