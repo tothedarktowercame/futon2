@@ -1,0 +1,128 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>One flight, in order — the pipeline cards</title>
+<style>
+body{font:15px/1.55 system-ui,sans-serif;max-width:980px;margin:2rem auto;padding:0 1rem;color:#223}
+h1{font-size:22px}
+.summary{background:#f5f7f6;border:1px solid #dde;border-radius:8px;padding:12px 16px}
+.card{border:1px solid #dde;border-radius:8px;padding:12px 16px;margin:14px 0}
+.card h3{margin:0 0 4px 0;font-size:15px}
+.n{display:inline-block;background:#5a6a8a;color:#fff;border-radius:50%;width:22px;height:22px;text-align:center;line-height:22px;font-size:12px;font-weight:700;margin-right:8px}
+.live{color:#3f8b57;font-weight:700;font-size:11px}.swap{color:#a07f2a;font-weight:700;font-size:11px}.ret{color:#99a;font-weight:700;font-size:11px}
+.io{font-size:13px;margin:6px 0}
+.io b{display:inline-block;width:64px;color:#667}
+details{margin:6px 0;font-size:13px}
+summary{cursor:pointer;color:#5a6a8a;font-weight:600}
+pre{background:#f7f8f7;border:1px solid #e3e6e3;border-radius:6px;padding:8px;font-size:12px;overflow-x:auto;white-space:pre-wrap}
+code{background:#f2f4f3;padding:0 4px;border-radius:4px;font-size:13px}
+.foot{color:#99a;font-size:11px;margin-top:2rem}
+</style></head><body>
+
+<h1>One flight, in order — the pipeline cards</h1>
+<div class="summary">
+What ACTUALLY happens, stage by stage, when the War Machine flies one tick.
+Linear list-of-cards (after futon6's pre-superpod-pipeline-readiness page) — but
+where that page listed things TO BUILD, these stages are BUILT and marked
+<span class="live">LIVE</span> / <span class="swap">SWAPPABLE</span> /
+<span class="ret">RETIRED</span>. Each card: input → what happens (with the real
+code location) → output, and a click-through EXAMPLE using real data from the
+2026-07-05 11:00Z tick — the first tick in history where a deposited plan was
+read unattended. Theory + expectations: sequel-notebook.org §5. Diagnosis
+history: the live-loop explainer trilogy.
+</div>
+
+<div class="card"><h3><span class="n">1</span>Wake <span class="live">LIVE</span></h3>
+<div class="io"><b>input</b> the wall clock; the crontab</div>
+<div class="io"><b>happens</b> cron (<code>0 * * * *</code>) launches a one-shot JVM: <code>clojure -M:wm-scheduled</code> (<code>wm_scheduled_run.clj</code>). No server touched; loads source fresh from disk (rulings land at the next tick automatically).</div>
+<div class="io"><b>output</b> one judged, gated, traced, logged tick; JVM exits</div>
+<details><summary>example — the tick's log line (11:00Z)</summary><pre>2026-07-05T11:04:11Z mode=hermit candidates=145 decision=advance-mission
+target=M-first-flights G=8.7112 gates={:abstain-missing-leg 1, :pass 1}
+ENACTED=M-bayesian-structure-learning ... realizedG=-0.1666...</pre></details>
+</div>
+
+<div class="card"><h3><span class="n">2</span>Scan &amp; judge <span class="live">LIVE</span></h3>
+<div class="io"><b>input</b> the mission corpus (~145 candidates) + capability/scope state (substrate-2)</div>
+<div class="io"><b>happens</b> candidates are filtered to LIVE missions (<code>mission_registry.clj classify-status</code> — the supersession fix, finding 2) and ranked by the 8-term G blend under the current mode (hermit/stop-the-line); the judge emits ranked actions.</div>
+<div class="io"><b>output</b> ranked actions: <code>[{:action :advance-mission :target M-… :G …} …]</code></div>
+<details><summary>example — what the filter now catches</summary><pre>M-bayesian-structure-learning status: "SUPERSEDED-AS-MISSION (Campaign recast 2026-06-08)"
+old classifier: head token "SUPERSEDED-AS-MISSION" ∉ #{"SUPERSEDED"…} → :unknown → KEPT (ranked top-2 for weeks)
+fixed classifier: prefix match → :inactive → filtered from the lane</pre></details>
+</div>
+
+<div class="card"><h3><span class="n">3</span>Build the circumstance ψ <span class="live">LIVE</span></h3>
+<div class="io"><b>input</b> one mission target (e.g. <code>M-diagramprover</code>)</div>
+<div class="io"><b>happens</b> <code>cascade_lane.clj mission-&gt;psi</code>: if the mission has held-work items (140 mission-linked items in <code>held-work-ledger.edn</code>), build SORRY-GRAIN ψ — <code>WANT:</code> reason/evidence-condition, <code>HUNGRY-FOR:</code> kind, <code>HAVE:</code> re-entry — capped 1KB; else fall back to the banner (title+status), else the id-stem. Cache invalidatable via <code>clear-psi-cache!</code>.</div>
+<div class="io"><b>output</b> ψ: a short text stating want / hungry-for / have</div>
+<details><summary>example — a real sorry-grain ψ (autoclock-in, from the golden deposit)</summary><pre>WANT: clock-in : (agent, session, target) -> DurableLineage. reconstitute output —
+{missions [{:target :agents :sessions :held-count}]} surviving teardown.
+HAVE: agent nodes (agent:&lt;id&gt;); canonical mission nodes …; clock/clocked-on hyperedge
+(the durable clock record); clock_store ns (RAM per-agent session clocks +
+set-dispatch-mission!); agent-chat.el …; held/on-mission hyperedges (109).</pre>
+<p><b>known gap (ψ-v3 pending):</b> ψ describes what the mission WANTS, never how the
+process is FAILING — inject the futility line ("selected N ticks, 0 wins") and the
+process-coherence seed patterns retrieve at rank 1 (seed-check, finding 6).</p></details>
+</div>
+
+<div class="card"><h3><span class="n">4</span>Condense the cascade (the argument) <span class="live">LIVE</span> <span class="swap">budget=constant</span></h3>
+<div class="io"><b>input</b> ψ (text)</div>
+<div class="io"><b>happens</b> <code>cascade_serve.py</code> → <code>construct_cascade(ψ)</code>: embed ψ (MiniLM), rank the ~1,180-pattern library by relevance, then phylogeny-greedy coverage-saturation assembles the best small ARGUMENT — seeds prior-floored (0.647 nats), budget 20 as the parsimony ceiling. Scored F = accuracy − λ·complexity.</div>
+<div class="io"><b>output</b> the cascade: patterns + rel + shown window + F</div>
+<details><summary>example — the aif-head cascade (deposit 004, real run)</summary><pre>size 21 (shown 20, budget 20), F = +8.722
+top: ants/baseline-cyber-ant (rel .679) · futon-theory/structural-tension-as-observation (.613)
+aif/candidate-pattern-action-space (.526) · aif/structured-observation-vector (.502)
+gauntlet/aif-as-environment-not-instruction (.565) · aif/belief-state-operational-hypotheses (.501) …</pre>
+<p><b>counter-example (library gap, finding 3):</b> diagramprover's well-formed ψ → size 1,
+F −0.443 — the library has no proof-search vocabulary; remedy = author patterns via the
+seeds pipeline, not enrich ψ.</p></details>
+</div>
+
+<div class="card"><h3><span class="n">5</span>Price the plan (ΔG reconciliation) <span class="live">LIVE</span></h3>
+<div class="io"><b>input</b> the mission + its cascade</div>
+<div class="io"><b>happens</b> <code>close_loop.clj act-gate-from-lane-entry</code> consults plan sources IN ORDER:
+(1) <b>rollout valuation</b> — <code>project-policy</code> prices a move if one exists (the depth&gt;1 SEARCH is <span class="ret">RETIRED — level error</span>, see notebook §5.2);
+(2) <b>classical fold</b> — <span class="ret">RETIRED as a route</span> (<code>*classical-fold-dG?*</code> false; rule-table prices weren't staked beliefs);
+(3) <b>LLM fold via ESCROW</b> — if a deposit matches the mission, reconstruct the deposit's own circumstance, verify the prompt-sha pin + re-assert stored ΔG, and REPLAY the plan.</div>
+<div class="io"><b>output</b> ΔG + provenance (<code>:delta-G/source</code>), or nil (honest abstention)</div>
+<details><summary>example — the first natural escrow read (11:00Z tick, trace verbatim)</summary><pre>:delta-G-source :fold-escrow, :gate-delta-G -0.7   ; ft-bayesian-structure-learning-003
+; ΔG = −(boxes/(boxes+holes)) = −(14/20) = −0.7 — hand-derivable from the deposit
+; canon-fingerprint, no deposit → ΔG nil → :abstain-missing-leg (the ruling working)</pre></details>
+</div>
+
+<div class="card"><h3><span class="n">6</span>The act-gate (∧) <span class="live">LIVE</span></h3>
+<div class="io"><b>input</b> ΔF (the argument's quality) and ΔG (the plan's promise)</div>
+<div class="io"><b>happens</b> pass ⇔ ΔF &gt; 0 ∧ ΔG &lt; 0. Rhetoric without a plan abstains; a plan without an argument abstains.</div>
+<div class="io"><b>output</b> verdict per lane entry: <code>:pass</code> / <code>:fail</code> / <code>:abstain-missing-leg</code></div>
+<details><summary>example — both branches on one tick</summary><pre>M-bayesian-structure-learning: ΔF +1.049 ∧ ΔG −0.7 (escrow) → :pass
+M-canon-fingerprint-store:     ΔF −0.874 ∧ ΔG nil          → :abstain-missing-leg
+; and the gate REFUSED our own golden deposit earlier (ΔF −0.69) — no favoritism</pre></details>
+</div>
+
+<div class="card"><h3><span class="n">7</span>Select &amp; enact <span class="live">LIVE</span> <span class="swap">γ coasting</span></h3>
+<div class="io"><b>input</b> ranked actions + gate verdicts + γ (per-lane precision)</div>
+<div class="io"><b>happens</b> selection takes the G-argmin (WM-I4 abstains on flat fields); enactment is CONSENT-GATED and artifact-only — the deterministic executor realizes the passed plan and records realized ΔG. γ should weight selection by which lanes' plans PAY — currently coasting (its expected-G leg was the classical fold; diet decision with the operator).</div>
+<div class="io"><b>output</b> the ENACTED line + realized ΔG</div>
+<details><summary>example — expected vs realized (11:00Z)</summary><pre>expected (deposit): -0.7      realized (executor): -0.1666…
+; the gap is the learning signal γ SHOULD eat (3b sim: paying lane γ→1.26, futile γ→0.50)</pre></details>
+</div>
+
+<div class="card"><h3><span class="n">8</span>Trace, observe thyself, learn <span class="live">LIVE</span> <span class="swap">learning half pending</span></h3>
+<div class="io"><b>input</b> everything the tick did</div>
+<div class="io"><b>happens</b> <code>write-trace!</code> appends the daily trace (γ-state reads BACK from it — witness records stay quarantined); the futility observable (<code>wm_futility.clj summary</code>) computes strict per-lane 0-for-N; the nag bulletin fires on thresholded futility (dry-run). Library growth (new patterns via the seeds pipeline; co-app accrual) closes R17 — the miner does not yet scan cascade usage.</div>
+<div class="io"><b>output</b> the trace record; queryable futility; (dry-run) operator bulletins</div>
+<details><summary>example — the futility board (real, 733 ticks)</summary><pre>address-sorry/pudding-g1-arrow-witness-binding  0-for-306
+learn-action-class                              0-for-141
+advance-mission/M-first-flights                 0-for-51
+; 11 lanes, ALL 0-for-N under strict credit: the selected action has never
+; passed its own gate. γ, once fed, would learn to doubt exactly this.</pre></details>
+</div>
+
+<p>That is one flight. The loop in one line:
+<b>wake → scan/judge → ψ → cascade (F) → plan (ΔG) → gate (∧) → select/enact → trace/learn.</b>
+Swappable parts are marked; every stage's expectation and gap is sequel-notebook.org §5.1;
+every retirement carries its ruling (classical fold, arrow-level search) with the theory
+that retired it.</p>
+
+<p class="foot">Real data sources: wm-scheduled.log (11:00Z line) · data/wm-trace/wm-trace-2026-07-05.edn ·
+futon6/data/fold-turns/ (4 deposits) · E-live-loop-3.md logs · wm_futility.clj output.
+Compiled 2026-07-05 by claude-16 at operator direction; example snippets are verbatim or
+lightly elided (…), never invented.</p>
+</body></html>
