@@ -692,3 +692,154 @@ requires a change to the judge's output format.
 - Does not address the broader supersession question (what to DO with
   superseded missions that have open holes -- that's an operator
   design question, not a classifier fix).
+
+## Finding-3 log — feeding the deposit economy (runner: zai-10, 2026-07-05)
+
+**Assignment (operator-directed via claude-16): with classical fold off
+as a dG route (operator ruling 2026-07-05), escrow deposits ARE the dG
+supply. Author new fold-turn deposits from held-work-ledger missions
+under the blanket interactive grant.**
+
+### Mission-selection doctrine
+
+Three candidates were considered from the held-work ledger:
+`diagramprover` (6 items), `self-documenting-stack` (23 items), and
+`aif-head` (4 items).
+
+**Selection reasoning (quality over quantity):**
+
+`self-documenting-stack` (23 items) was REJECTED despite the highest
+item count. Its held items are predominantly UI polish tickets -- CLJS
+sliders, search-filter affordances, state-model unification for a web
+graph view. These are engineering tasks, not the kind of have-want
+construction gap that produces an honest fold with substantive boxes and
+policy-holes. **Quantity does not equal deposit quality.** A fold-turn
+needs a construction gap (what the mission wants to build vs what it
+has), not a task list.
+
+`diagramprover` (6 items) and `aif-head` (4 items) were chosen because
+their held items name construction gaps -- readiness conditions with
+real numbers, capability gaps against named invariants, deferred
+design questions that map to the fold contract's ports. Both have rich
+mission-doc architecture sections that ground the HAVE side of psi in
+actual artifacts.
+
+### Deposit: ft-aif-head-004 (the aif-head fold-turn)
+
+**Deposited at** `futon6/data/fold-turns/ft-aif-head-004.edn`.
+Full details in E-live-loop-2.md "Finding-3 deposits" section. Summary:
+
+- **psi:** L2 recipe from M-aif-head (WANT = AIF head signature, HUNGRY-
+  FOR = structure-learning, HAVE = futon2 AIF engine + cycle machine +
+  structural law inventory + evidence landscape). psi-sha
+  `b9c15315...`, 1901 bytes.
+- **Cascade:** size 21 (truncated at 20), F = +8.722, acc 14.793, cx
+  24.284, H-coherence 0.93. Top pattern `ants/baseline-cyber-ant` rel
+  0.679.
+- **Fold:** 6 boxes (folded the 6 highest-rel patterns -- a deliberate
+  scoping choice, not a budget constraint; budget is 20 since the
+  operator's morning ruling; remaining 14 patterns recorded for a
+  future wider fold), 6 wires, terminal :b6.
+- **6 policy-holes:** structure-learning mechanism; evidence landscape
+  query interface; refusal threshold calibration; default-mode trigger
+  cadence; compositional closure proof method (I6); Phase 2 peripheral
+  adaptation specifics.
+- **dG = -0.5** (coverage 6/12; hand-derived = loader-recomputed).
+- **Loader: PASS** (4/4 deposits, zero rejections). **Tamper: PASS**
+  (dG -0.5 -> -0.9 rejected as `:delta-g-mismatch`).
+- **No seal exists -> no blind scoring** (003 precedent). Honest
+  proposal, not a scored answer.
+
+### Finding: diagramprover is a library-gap, not a deposit candidate
+
+**diagramprover was attempted first.** psi built via the L2 recipe from
+M-diagramprover (WANT = sorry-boundary atlas + Bayesian pattern model,
+HUNGRY-FOR = pattern-transfer-structure, HAVE = 489 problems / 19
+proofs / 30 partials / 12 patterns / futon5 TPG / LeanDojo-v2). psi-sha
+`a664701e...` (different from the autoclock-in exemplar -- this is the
+diagramprover-specific psi), 1710 bytes.
+
+**Constructor result:** size **1**, F **-0.443**, accuracy 0.156,
+complexity 2.398. Single pattern: `agent/hypothetical-proof-
+architecture` (rel 0.519, mc 0.156).
+
+**Diagnosis:** a well-formed sorry-grain psi returns near-zero cascade.
+The pattern library has no proof-search, Lean, sorry-boundary, or
+Mathlib-extension vocabulary. The constructor cannot argue about the
+domain at all -- the one pattern it surfaced is generic
+("hypothetical-proof-architecture") with marginal cost exceeding
+accuracy (negative F). This is not a psi defect; it is a library
+coverage gap.
+
+**Recommendation:** author proof-search patterns through the SEEDS
+pipeline BEFORE diagramprover gets a deposit. Steps 2a-2c (E-live-loop-2)
+made the library growable -- `pattern-seeds.json` + MiniLM embeddings
+regen + phylogeny registration is the exact path. Candidate seed
+patterns: sorry-boundary-clustering, cross-problem-impact-ranking,
+pattern-to-wiring-diagram-translation, Bayesian-intervention-ranking.
+Once these are in the library and registered, a diagramprover psi will
+produce a cascade with real coverage, and the deposit will be an honest
+plan rather than a 1-box formality.
+
+**A 1-box plan would be a weak dG source and a worse exemplar; the gap
+is worth more reported than papered over.** (claude-16 ruling, verbatim
+in substance.)
+
+## psi-v3 log -- the futility-line experiment (driver: zai-2, 2026-07-05)
+
+**psi-v3 IMPLEMENTED. The registered experiment is an HONEST NEGATIVE.**
+
+### Implementation
+
+- `cascade_lane.clj`: after the sorry-grain/banner psi is built, APPENDS a
+  futility line when the target's lane is stuck: `" STUCK: selected N ticks,
+  0 passes"` where N comes from `lane-futility/futility-summary` (the 3a
+  ns). Threshold: N >= 10. The futility counts are loaded once via an atom
+  (`!futility-state`), invalidatable via `clear-psi-cache!` (resets all
+  three caches: psi + held-work + futility). Reject-loudly: unreadable
+  traces -> WARN once, omit the line (never block psi). Uses the ABSOLUTE
+  trace path (`~/code/futon2/data/wm-trace`) -- see wart below.
+
+- **The wart (lane-futility's relative path):** the `lane-futility` ns
+  uses `default-trace-dir "data/wm-trace"` (relative). From the serving
+  JVM's cwd (futon3c/) this silently returns 0 records -- the futility
+  read is empty, the STUCK line never fires. The psi-v3 code uses the
+  absolute path to avoid this, but the wart remains in codex's ns.
+  Suggestion: absolute default or explicit-arg-only. NOT refactored in
+  this task (codex's ns).
+
+### Canary
+
+- M-first-flights (0-for-52): STUCK line present. `:first-flucks-stuck? true`.
+- M-canon-fingerprint-store (0-for-44): STUCK line present (also stuck).
+- M-synthetic-never-selected (not in trace): no STUCK line. Regression safe.
+- Default-budget 20 after reload. L2 gate re-run PASS.
+
+### The registered experiment (M-first-flights, budget 20)
+
+| | WITHOUT STUCK line | WITH STUCK line |
+|---|---|---|
+| size | 1 | 1 |
+| F | -0.023 | -0.523 |
+| shown | `portal/first-class-query-interface` | `iching/hexagram-03-zhun` |
+
+**(a) Seed in shown window?** NO. Neither cascade pulled a process-coherence
+seed (`stuck-means-signal` et al.). The WITH-STUCK line pulled
+`iching/hexagram-03-zhun` (Hexagram 3, Zhun -- difficulty at the beginning),
+not a process-coherence pattern.
+
+**(b) F exceeds baseline?** NO -- F got WORSE. Without-line F -0.023
+(marginal reject); with-line F -0.523 (stronger reject). The STUCK text
+shifted resonance to a worse-fitting pattern.
+
+**Honest negative interpretation:** the finding-6 probe predicted a seed at
+rank 1, but the futility text "selected 52 ticks, 0 passes" resonated with
+the iChing hexagram (stuck-energy imagery) rather than the process-
+coherence patterns. The STUCK line adds information to psi, but the
+constructor routes it to a pattern family that doesn't help F. Two possible
+reasons: (1) the seed patterns may not be embedded for "stuck"/"0 passes"
+vocabulary (the finding-6 seed-check was about seed eligibility, not
+retrieval rank); (2) the STUCK text is short and generic -- a richer
+process-state description might resonate differently. The result goes in
+the record either way: the cascade lane reads the futility state, but the
+constructor does not route it to the predicted seed.

@@ -14,6 +14,7 @@
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
+            [futon2.aif.lane-futility :as futility]
             [futon2.aif.rollout :as rollout])
   (:import [java.util.concurrent TimeUnit]))
 
@@ -186,6 +187,37 @@
 
 (defonce ^:private !psi-cache (atom {}))
 
+(def ^:private ^:const futility-threshold 10)
+
+(defonce ^:private !futility-state (atom ::unloaded))
+
+(defn- load-futility-counts
+  "Read the daily trace and build a map of target-id -> attempt-count for
+   lanes with 0 successes (stuck lanes only). Uses the absolute trace path
+   (the scheduled runner's cwd is futon2/, the serving JVM's is futon3c/)."
+  []
+  (try
+    (let [trace-dir (str (System/getProperty "user.home") "/code/futon2/data/wm-trace")
+          records (futility/trace-records trace-dir)
+          summary (futility/futility-summary records)]
+      (->> (:rows summary)
+           (filter :zero-for-n?)
+           (filter #(>= (:attempts %) futility-threshold))
+           (map (fn [r] [(str (:target r)) (:attempts r)]))
+           (into {})))
+    (catch Throwable e
+      (binding [*out* *err*]
+        (println "[cascade-lane] WARN futility trace unreadable — STUCK lines omitted."
+                 "Error:" (.getMessage e)))
+      {})))
+
+(defn- futility-count-for
+  "Return the 0-for-N count for TARGET if it's stuck (>= threshold), else nil."
+  [target]
+  (when (= ::unloaded @!futility-state)
+    (swap! !futility-state (fn [s] (if (= s ::unloaded) (load-futility-counts) s))))
+  (get @!futility-state (str target)))
+
 (defn clear-psi-cache!
   "Drop the ψ cache AND the held-work ledger snapshot (F6 hygiene: both, or a
    refreshed ledger file never lands — missions that gained held items would
@@ -193,6 +225,7 @@
    the held-work ledger is refreshed."
   []
   (reset! !held-work-state ::unloaded)
+  (reset! !futility-state ::unloaded)
   (reset! !psi-cache {}))
 
 (defn clear-all-caches!
@@ -235,7 +268,14 @@
                             (str stem " — want: " (clip title 160)
                                  (when (seq (str status)) (str ". have: " (clip status 160))))))
                         (catch Throwable _ nil)))
-                    stem)]
+                    stem)
+            ;; psi-v3 (E-live-loop-3 Finding-6): append a futility line when
+            ;; the target's lane is stuck (0-for-N, N >= 10). Additive — only
+            ;; appends; never changes the base psi for healthy missions.
+            stuck-n (futility-count-for target)
+            psi (if stuck-n
+                  (str psi " STUCK: selected " stuck-n " ticks, 0 passes")
+                  psi)]
         (swap! !psi-cache assoc target psi)
         psi)))
 
