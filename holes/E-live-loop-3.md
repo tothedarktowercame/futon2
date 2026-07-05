@@ -1673,6 +1673,43 @@ falsifiable clause) + b11 (typed consumability) is the exemplar. The
 single-terminal 005 shape remains correct for single-clause WANTs; the
 rule is one-terminal-per-clause, not one-per-deposit.
 
+## 001 v2 backfill — golden in v1 and v2 (driver: codex-1, 2026-07-05)
+
+**BACKFILLED IN PLACE:** `futon6/data/fold-turns/ft-autoclock-in-001.edn`
+remains the golden 2f deposit and now also carries the deposit-contract v2
+shape. No prompt input, arming record, answer boxes, policy-hole set, or
+stored coverage value was changed.
+
+- **Connective census {:copar 1, :tensor 1, :seq 2}.** The connective read is
+  recorded directly beside the deposit's hyperedges: b1→b2 is ⅋ because the
+  failure/recovery path is coupled to the declared durable write; b1→b3 is ⊗
+  because the lineage-gap audit is a parallel monitor over the declared
+  lineage record; b2→b3 is ◁ because recovery state feeds the gap audit; b3→b4
+  is ◁ because the acceptance probe depends on the audit result.
+- **Terminal:** single-clause WANT, so v2.2 shape is exactly
+  `{:id :b4 :discharges :want-signature}`. 001 is therefore the small
+  single-terminal v2 exemplar; 006 remains the multi-terminal exemplar.
+- **Critical invariant held:** standing 2f gate after the edit:
+  `ft-autoclock-in-001: sha-match + replay + dG re-assert OK (dG -0.4444444444444444;
+  arming word "OK, if you agree then I think we can run")`; full gate:
+  `GATE 2f PASS — 6 deposit(s) load cleanly, sha-matched, replayable`.
+  Prompt sha stayed `5597da918926a36a08619417c90c19a8f4121592d31bb07dc9cd5bdb4d957e5b`;
+  coverage arithmetic stayed −4/9. This is the pre-registered card-5
+  invariant: connectives annotate composition; they do not change coverage.
+- **Pin 4: attempted-passes-linearized.** CLean bridge over the 001 skeleton
+  (`/tmp/clean001/autoclock-in-001.clean.edn` →
+  `clean_to_lean.py --mode standalone` → `/tmp/clean001_check.lean` → `lean`)
+  compiled with exit 0 and no Lean `sorry`/`admit` tactics. Honest fidelity
+  gap: the bridge is still seq-only, so it checks composition/type-flow,
+  discharge typing, and typed-hole positions, not the :tensor/:copar structure.
+  3 of 5 policy-holes attach as typed CLean holes; clock-out/session-end
+  semantics and numeric acceptance targets remain fold-level holes in this
+  linearized check.
+- **Tamper re-proof:** `/tmp/ft-autoclock-in-001-tampered.edn` with stored
+  `:eval :delta-g -0.9` is rejected by the escrow loader:
+  `fold-turn REJECTED [delta-g-mismatch] ... stored -0.9 vs recomputed
+  -0.4444444444444444`.
+
 ## P2 mana gate — M-peradam-mechanization (driver: zai-3, 2026-07-05)
 
 **Status: P2 LANDED DARK.** Plan of record: ft-peradam-mechanization-006.edn
