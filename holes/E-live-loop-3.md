@@ -62,3 +62,196 @@ Everything loop-2 established: I-0; gates on all code; the
 mistakes-ledger gate; ⚠ARMED semantics unchanged for anything that
 ENACTS (reading stays under the blanket interactive grant; acting does
 not); baseline re-pins named by pipeline stage; docs are the record.
+
+## L1 log — the legacy seam verified cold (driver: zai-2, 2026-07-05)
+
+**L1 DONE, gate PASS (converted :manual → :cmd).** The deprecated
+`:llm-escrow` branch in `enact.clj:91-109` already loud-ignores (the
+code from E-live-loop-2's 2g finding). This step verified it and made
+the check standing.
+
+- **Manual verification via proof-eval** (serving JVM): planted a
+  valid wiring EDN at `data/fold-escrow/test-legacy.edn`, then evaluated
+  the preview path — `act-gate-from-lane-entry` on a synthetic entry
+  with `:mission "test-legacy"`, nil ΔF/ΔG, empty `:shown`. Result:
+  `:delta-G nil`, `:delta-G-nil? true`, `:verdict :abstain-missing-leg`,
+  `:legacy-wiring-found` (the planted file), `:warn-emitted true` (the
+  deprecated branch fires the WARN when the file is found + ΔG is nil).
+  The legacy file is never read into the gate; the consent-bypass-shaped
+  hole stays closed. Planted file deleted after.
+
+- **Standing gate:** `scripts/gate_l1_legacy_cold.clj` (kondo 0/0,
+  check-parens OK). Self-contained: plants a temp `gate-l1-probe.edn`,
+  exercises the deprecated branch via the actual `escrow-wiring` +
+  `act-gate-from-lane-entry` source fns, asserts (a) the file is found,
+  (b) ΔG stays nil, (c) the WARN code path fires. Cleans up in `finally`.
+  Gate command: `clojure -M scripts/gate_l1_legacy_cold.clj 2>&1 | grep -q 'GATE L1 PASS'`.
+
+## L2 proposal (driver: zai-2, 2026-07-05 — PROPOSAL ONLY, no implementation)
+
+**The change:** the live lane's ψ moves from banner grain (mission title
++ status line) to sorry grain — the S1 recipe (v2 with `:hungry-for`
+where available). The open design question: WHERE does the lane find a
+mission's sorries live?
+
+### Sorry source research (four candidates investigated)
+
+1. **Substrate-2 sorry nodes** (`/api/alpha/entities/latest?type=sorry`):
+   LIVE and structured (`:sorry/title`, `:sorry/if`, `:sorry/then`,
+   `:sorry/because`, `:sorry/however`, `:sorry/next-steps`,
+   `:sorry/status`). But these are **stack-level** sorries (devmap/futon0
+   scale — P0 through P7 prototype layers), not per-mission. There are
+   mission entities in substrate-2 (8 missions), but no mission→sorry
+   edges connect them. A sorry's `:sorry/source` points to its origin
+   file (e.g. `futon0.devmap`), not to a mission in the cascade lane's
+   target set. **Verdict: not the right grain for per-mission ψ.**
+
+2. **Held-work ledger** (`futon3c/holes/excursions/held-work-ledger.edn`,
+   produced by `scripts/held_work_ledger.bb`): 216 held/deferred items
+   across 4 registries, of which **140 carry `:missions` links** to
+   specific missions. Each item has `:held/reason`, `:held/re-entry`,
+   `:held/kind`, and — critically for ψ — `:held/evidence-condition`
+   (the want) and `:held/re-entry` (the have, a substrate pointer).
+   Missions with held items: `writing-ethics` (41), `self-documenting-stack`
+   (23), `essays-edit-cycle` (8), `diagramprover` (6), `apm-solutions` (5),
+   `aif-head` (4), `p3-rational-reconstruction` (4), and ~15 more with
+   1-3 items each. **Verdict: the ONLY live source with per-mission
+   sorry/hole associations. This is the proposed primary source.**
+
+3. **A-next EMPIRICAL corpus** (`holes/labs/A-next-*/*-sorry-EMPIRICAL.edn`):
+   10 sealed gold-standard sorries with `:want-signature`, `:hungry-for`,
+   `:endpoints` (have/want typed). These are **test data** (the S1
+   measurement corpus and the blinded scoring seal), NOT a live source.
+   **Verdict: not available at runtime; the recipe's shape is the
+   template, not the data.**
+
+4. **Mission-doc sorry/hole blocks** (prose inside `holes/missions/*.md`):
+   investigated by grepping the futon3c mission corpus. Mission docs DO
+   contain sorry/hole text, but it is **freeform prose** — no standard
+   section, no queryable block. Some missions have `### The actual sorry`
+   (M-war-machine-tuning), others have `## Phase 1: Sorry Boundary Atlas`
+   (M-diagramprover), others mention sorries inline. There is no schema,
+   no stable marker to extract, no per-hole structure. The CLean typed
+   holes (`futon6/holes/clean/*.clean.edn`) are structured but
+   proof-side, not mission-side — they're keyed to APM proofs, not to
+   missions in the cascade lane's target set. **Verdict: the text is
+   there, but it's not queryable at the grain ψ needs. Extracting it
+   would require NLP or per-mission hand-extraction — exactly the
+   folklore problem the held-work ledger was built to solve.**
+
+**Caveat on the held-work ledger's freshness:** the ledger is harvested
+by a bb script (`held_work_ledger.bb`), not a live substrate. It
+reflects a snapshot of the structured registries. This is acceptable for
+the live lane because (a) the lane already shells out to the cascade
+builder (also a snapshot-style read), and (b) the ledger can be re-
+harvested at the same cadence the lane runs. The freshness guard pattern
+from `c_vector.clj` (corpus-signature hash + stale degrade) is the
+designed follow-on if staleness becomes a problem.
+
+### Proposed sorry source
+
+**Primary:** the held-work ledger (`held-work-ledger.edn`), filtered to
+items whose `:missions` includes the target mission. Each held item's
+`:held/reason` (or `:held/evidence-condition` when present) is the want
+text; `:held/re-entry` is the have text (the substrate pointer where
+work resumes).
+
+**Query sketch:** load the EDN once (lazy memoize, same pattern as
+`!psi-cache`); filter `:items` where any `:missions` entry matches the
+target. Mission ID normalization: the lane's target is typically a bare
+`M-*` string (e.g. `"M-diagramprover"`); the ledger uses both bare `M-*`
+(rare, 4 items) and canonical `<repo>-d/mission/<id>` (majority, 136
+items). The query matches on either the bare form or the canonical
+suffix — `diagramprover` matches both `"M-diagramprover"` and
+`"futon3c-d/mission/diagramprover"`. Concretely: lowercase substring
+match on the target's id-stem against each `:missions` entry. This is
+permissive by design (a mission with a distinctive name won't
+cross-match), but a paranoid mode could require exact canonical match.
+
+**The ψ recipe (S1 v2, adapted for held-work items):**
+
+```
+WANT: <held/reason or held/evidence-condition>
+HUNGRY-FOR: <held/kind qualifier, when available>
+HAVE: <held/re-entry>
+```
+
+This mirrors the S1 recipe proven in E-live-loop-1 (`WANT: ... HAVE:
+...`) with the v2 upgrade from deposit-002 (the `:hungry-for` codomain
+qualifier). The S1 table showed rel rose 12/12 and F discriminates at
+sorry grain; the 002 experiment showed `:hungry-for` lifts F further
+(+1.623 → +2.027 for live-geometric-stack). The held-work ledger's
+`:held/kind` field (`:prototyping-forward`, `:technical-debt`,
+`:decision-debt`, etc.) maps naturally to the hungry-for qualifier.
+
+When a mission has multiple held items (e.g. `writing-ethics` has 41),
+ψ concatenates the want/have pairs (as the S1 recipe does for multi-hole
+entries), capped at a reasonable byte budget (~1KB, matching the S1
+corpus range of 455–1451 bytes).
+
+**Missing-field handling:** not every held item has every field. The
+recipe degrades gracefully:
+- `:held/evidence-condition` present → use it for WANT (it's the sharpest
+  want text); else fall back to `:held/reason` (always present — it's the
+  one-line description of what's parked).
+- `:held/re-entry` present → use it for HAVE; else omit the HAVE clause
+  (a WANT-only ψ is still richer than banner — S1 showed F>0 rows with
+  one-sided ψ).
+- `:held/kind` present → emit HUNGRY-FOR with the kind as the codomain
+  qualifier; else omit HUNGRY-FOR (the v1 recipe without the gloss — S1's
+  12/12 rel lift did not depend on it; it's the deposit-002 upgrade that
+  adds further F discrimination where available).
+A held item with only `:held/reason` produces `WANT: <reason>` — still
+sorry-grain, still richer than banner. The fallback cascade is reason →
+evidence-condition for the want, re-entry → omit for the have, kind →
+omit for hungry-for.
+
+### Fallback for missions with no sorries (additive, never regressive)
+
+**Banner ψ unchanged.** When the held-work ledger has no items for a
+mission (76/216 items have `:missions []`; many missions in the lane's
+target set may have zero), `mission->psi` returns the current banner-
+grain psi (title + status line) byte-identical to today. The sorry-grain
+ψ is an ADDITIVE upgrade — it fires when sorries are found, falls back
+to the banner when they are not. No mission's ψ regresses.
+
+**How the lane decides:** `mission->psi` already uses a cascading `or`:
+try the rich source, fall back to the simpler one, fall back to
+`id-stem-psi`. L2 inserts the sorry-grain source at the TOP of that
+cascade: (1) try held-work sorries for this mission → sorry-grain ψ;
+(2) if none found, try the mission doc → banner ψ (current behavior);
+(3) if no doc found → id-stem ψ (current fallback). The decision is a
+single `or` chain — no flag, no branch the operator must arm. A mission
+either has held-work items (sorry ψ) or it doesn't (banner ψ,
+byte-identical).
+
+### Regression control
+
+1. **Flight-1 banner control:** re-run the banner-grain ψ for the S1
+   corpus's baseline row through the modified `mission->psi` (with held-
+   work items absent for those missions). Must reproduce rel 0.346,
+   size 1, F +0.046 (byte-identical to the pre-L2 baseline — the
+   additive fallback is byte-identical by construction).
+
+2. **Re-pinned baseline check:** the F +0.051 re-pin from the 2a–2c seed
+   registration is the named pipeline stage for all regression checks
+   (E-live-loop-2 reviewer note). The Flight-1 control must still
+   reproduce at F +0.051, not drift.
+
+3. **Sorry-grain snapshot for ≥1 top mission:** the lane snapshot (gate
+   L2's check) shows sorry-grain ψ for at least one mission that HAS
+   held-work items — ψ contains `WANT:` / `HAVE:` from the held-work
+   ledger, not the banner's `want: ... have: ...` format. This is the
+   grain change visible in the cascade output.
+
+4. **No new substrate writes:** the held-work ledger is read-only;
+   `mission->psi` shells nothing new (it reads a local EDN, same as it
+   reads mission docs today). I-0 held.
+
+### What L2 does NOT do (scope boundaries)
+
+- Does not change the cascade builder or constructor — only ψ input.
+- Does not touch the scheduled caller wiring (that's L3).
+- Does not touch the escrow seam (that's L3/L4).
+- Does not add substrate-2 sorry nodes as a source — that's a future
+  follow-on once mission→sorry edges exist in substrate-2.

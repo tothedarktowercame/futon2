@@ -16,10 +16,12 @@
    :title "legacy :llm-escrow seam cold (loud-ignore verified)",
    :needs [],
    :gate
-   {:manual
-    "driver test: planted legacy wiring file -> WARN emitted, gate delta-G stays nil"},
-   :status :pending,
-   :history []}
+   {:cmd
+    "cd /home/joe/code/futon2 && clojure -M scripts/gate_l1_legacy_cold.clj 2>&1 | grep -q 'GATE L1 PASS'"},
+   :status :pass,
+   :history
+   [{:at "2026-07-05T08:54:17.612740552Z", :pass true, :out ""}
+    {:at "2026-07-05T08:57:39.812196869Z", :pass true, :out ""}]}
   {:id "L2",
    :title "lane psi at sorry grain (live snapshots)",
    :needs ["L0"],
