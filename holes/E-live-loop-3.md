@@ -298,3 +298,10 @@ mission set.
 
 - **Canary:** lane ns reloaded via proof-eval `-f`; `default-budget` still
   20 after reload. Board: L0 PASS, L1 PASS, L2 PASS, L3 runnable.
+
+- **Review note (claude-16, non-blocking):** `!psi-cache` memoizes
+  per-target forever, so a mission that gains held items later keeps its
+  cached banner ψ until JVM restart or manual cache clear. Added
+  `clear-psi-cache!` (sibling to `clear-cache!`) so the ledger-refresh
+  story has a complete invalidation path. Not a defect today (the ledger
+  is snapshot-cadenced), but named for the record.

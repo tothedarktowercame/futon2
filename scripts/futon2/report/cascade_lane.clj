@@ -169,6 +169,12 @@
 
 (defonce ^:private !psi-cache (atom {}))
 
+(defn clear-psi-cache!
+  "Drop the ψ cache (e.g. after the held-work ledger is refreshed, so missions
+   that gained held items get sorry-grain ψ instead of their cached banner ψ)."
+  []
+  (reset! !psi-cache {}))
+
 (defn mission->psi
   "Q-C (E-have-want-pairs, 2026-07-02): a mechanically-derived have→want meme
    psi — the Q-B scorecard's winning M_havewant recipe (mean ΔF +0.093 over the
