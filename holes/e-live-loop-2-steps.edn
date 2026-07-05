@@ -73,17 +73,31 @@
   {:id "2d",
    :title "escrow ft-*.edn record contract + reject-loudly loader",
    :needs ["S1"],
-   :gate {:manual "malformed-record rejection test passes"},
-   :status :pending,
-   :history []}
+   :gate
+   {:cmd
+    "cd /home/joe/code/futon2 && clojure -X:test :nses '[futon2.aif.fold-escrow-test]'",
+    :note
+    "probe attached by claude-19 2026-07-05 (2d action): futon2.aif.fold-escrow (contract §A pins 1-3) + fold-escrow-test — valid deposit loads; missing-arming / delta-g-mismatch / empty-construction / unreadable-edn each rejected loudly with file+reason; replay only on exact prompt-sha; missing dir = empty, not error."},
+   :status :pass,
+   :history
+   [{:at "2026-07-05T07:05:05.624035940Z",
+     :pass true,
+     :out
+     "Running tests in #{\"test\"}\n\nTesting futon2.aif.fold-escrow-test\n\nRan 3 tests containing 6 assertions.\n0 failures, 0 errors.\nfold-turn REJECTED [delta-g-mismatch] /tmp/fold-turns-test16985510119154824307/ft-dg-drift.edn: pin 3: stored -0.9 vs recomputed -0.5\nfold-turn REJECTED [missing-arming] /tmp/"}]}
   {:id "2e",
    :title "replay seam built dark (flag off, mock replay test)",
    :needs ["2d"],
    :gate
-   {:manual
-    "seam unit test: mock fold-turn replays, dG re-asserted; live path unchanged flag-off"},
-   :status :pending,
-   :history []}
+   {:cmd
+    "cd /home/joe/code/futon2 && clojure -X:test :nses '[futon2.aif.fold-escrow-seam-test futon2.aif.close-loop-test]'",
+    :note
+    "probe attached by claude-19 2026-07-05 (2e action): close_loop.clj gains *escrow-replay?* (default FALSE) + an opts arity taking :escrow-turn-fn/:prose-fn; escrow consulted only flag-on AND after rollout+classical both abstain; :delta-G/source :fold-escrow, construction rides :fold-escrow key (absent otherwise). Tests: mock deposit replays with dG -0.5 re-asserted vs stored leg; prompt drift => abstain; flag-off output key-for-key = 2-arity path (throwing turn-fn proves escrow untouched); close-loop-test = live-path regression witness."},
+   :status :pass,
+   :history
+   [{:at "2026-07-05T07:07:21.504661253Z",
+     :pass true,
+     :out
+     "Running tests in #{\"test\"}\n\nTesting futon2.aif.close-loop-test\n\nTesting futon2.aif.fold-escrow-seam-test\n\nRan 4 tests containing 22 assertions.\n0 failures, 0 errors."}]}
   {:id "2f",
    :title "one real fold-turn deposit",
    :armed true,
