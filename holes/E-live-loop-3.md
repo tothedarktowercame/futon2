@@ -1035,3 +1035,76 @@ identical IDs -> the "tied with itself" bug on the :3100 dashboard.
   :3100 "tied with itself" display should clear (duplicates inflated the
   tie structure). If candidates > 93 in the next tick, either the TTL
   served stale or a new mission was added -- diagnose before retrying.
+
+## deposit-005 log — the FIRST v2-shaped deposit (runner: claude-20, 2026-07-05 evening)
+
+**DEPOSITED and gate-verified:** `futon6/data/fold-turns/ft-action-vocabulary-005.edn`
+— M-action-vocabulary's P1 logic model as the plan of record (pipeline-cards-II
+card 5; blanket grant cited verbatim; ψ authored by claude-16 from the charter,
+003 no-seal precedent, no blind-scoring — recorded in `:psi-recipe`).
+
+- **v2 shape, first exercise:** 17 boxes / 9 hyperedges each carrying
+  `:connective` / terminal `{:id :b14 :discharges :want-signature}` (P3's
+  falsifiable re-test IS the acceptance terminal). **Connective census:
+  {:tensor 3, :copar 4, :seq 2}** — card 5 expectation (c) satisfied
+  honestly: the four per-class intensities are ⊗ from shared inputs; they
+  enter the bundle-merge ⅋ (one arena, the currency question live); the
+  provenance disciplines couple ⅋ to the merge; feasibility+mana gate ⊗;
+  spec→re-test→revise-or-stop are the genuine ◁ chain.
+- **ΔG = −17/23 ≈ −0.7391** (coverage 17/23, hand-derived = recomputed).
+  Tamper (dropped hole) rejected: stored −17/23 vs recomputed −17/22.
+- **Pin 4: ATTEMPTED — PASSES on the LINEARIZED skeleton.** Converter
+  `/tmp/ft005_to_clean.py` → `.clean.edn` → `clean_to_lean.py --mode
+  standalone` → `lean` compile: 0 errors, 0 sorry tactics, 0 warnings.
+  Fidelity gap recorded IN the deposit: the CLean spine is seq-only, so
+  the v2 connectives do not round-trip — this checked composition/type-flow
+  and hole typing, not connective structure; 4 of 6 policy-holes attached
+  as typed CLean holes (h4 τ and h6 exchange-rate are fold-level, no home
+  box). Connective-faithful bridge = named follow-on.
+- **THE structural hole, confirmed and named (h1):** no portfolio-composition
+  pattern exists in the cascade or (per two independent constructor runs)
+  the library — feasibility (hierarchical-budget), affordability (mana-gate)
+  and unit-merging (currency-before-merge) are all covered; WHY a mixed
+  portfolio beats a uniform one (complementarity, diminishing returns per
+  class) has no pattern grounding. AUTHORING RECOMMENDATION for the
+  doctrine card: a portfolio-composition family, folded in at vocabulary
+  revision 1. Other holes: survey/apply-cascade functional forms;
+  resolvedness/staleness operationalization; τ-over-bundles (retrieved,
+  deliberately NOT folded — E1 contest machinery, charter scopes it out);
+  the top-quartile denominator; the exchange-rate values (003's
+  value-per-nat family).
+- **Constructor pins (mine):** size 15, F +10.662, commit fe8acea, budget-20
+  untruncated. DISCREPANCY flagged: dispatcher reported F ~0 for the same
+  ψ/pattern-set — my pins govern the record; cause unknown (recorded in
+  `:psi-recipe` for review).
+
+**PAR (claude-20, 005):** worked — reading the bridge BEFORE authoring
+sized pin-4 honestly (attempt-with-named-fidelity-gap beats both skip and
+overclaim); the produces/consumes tokens added for the CLean render turned
+out to be the connective decisions' raw material (you cannot annotate an
+edge ⊗-vs-⅋ until you know what flows on it). Prediction error — expected
+the connective annotation to feel decorative on a spec-shaped fold;
+instead it forced one real design decision (per-class intensities are
+non-signalling ⊗ at computation but coupled ⅋ at the merge — which is
+exactly WHERE the currency question lives, and the wiring now shows it).
+Surfaced for review: the F discrepancy; whether pin-4's linearized check
+should count toward the eventually-mandatory pin or wait for the
+connective-faithful bridge.
+
+## Deposit-contract v2.1 — two wrinkles from the first v2 fold (reviewer rulings)
+
+From ft-action-vocabulary-005 (the first v2-shaped deposit):
+1. **Fold-level holes**: some honest holes attach to the WIRING, not to
+   any box (005's h4 tau-over-bundles, h6 exchange-rates). RULED: the v2
+   contract allows a wiring-level :holes list alongside per-box holes;
+   coverage arithmetic unchanged (holes count regardless of attachment).
+2. **Connectives don't round-trip through CLean yet**: the bridge's
+   converter linearizes to a seq-only spine, so pin 4 currently verifies
+   composition/type-flow + hole typing, NOT connective structure. The
+   BV types exist in DarkTower (laws proved); extending clean_to_lean to
+   emit BV expressions is the NAMED FOLLOW-ON for pin 4 to become full.
+   Until then pin-4 records "passes-linearized" honestly.
+3. (Reviewer's own entry, same lesson as ever): the dispatch's "F ~0"
+   was an INSTRUMENT ERROR — r.get('F',0) on a JSON whose key is
+   F-free-energy; a silent default read as a measurement. The author's
+   pins caught it. Verify the instrument before believing the reading.
