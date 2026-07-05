@@ -51,6 +51,10 @@
    {:from [:status-classifier :mission-status] :to [:judge :mission-status] :status :live
     :note "finding-2 prefix-match fix; supersession finally read"}
    {:from [:judge :ranked-actions]     :to [:psi :ranked-actions]        :status :live}
+   {:from [:judge :ranked-actions]     :to [:selection :ranked-actions]  :status :live}
+   {:from [:judge :ranked-actions]     :to [:rollout-valuation :ranked-actions] :status :live}
+   {:from [:cascade :argument]         :to [:classical-fold :argument]   :status :live
+    :note "the fold still RUNS (provenance output); only its dG output edges are retired"}
    {:from [:held-work-ledger :held-work] :to [:psi :held-work]           :status :live :note "L2 sorry grain"}
    {:from [:futility-observable :futility] :to [:psi :futility]          :status :live :note "psi-v3 STUCK line"}
    {:from [:psi :circumstance]         :to [:cascade :circumstance]      :status :live}
