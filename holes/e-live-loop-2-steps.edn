@@ -17,28 +17,49 @@
    :gate
    {:cmd
     "python3 -c \"import json; ids={r['id'] for r in json.load(open('/home/joe/code/futon3a/resources/notions/minilm_pattern_embeddings.json'))}; need={'process-coherence/status-refresh-before-work','process-coherence/is-this-even-a-problem','process-coherence/stuck-means-signal'}; missing=need-ids; print('missing:',missing); exit(1 if missing else 0)\""},
-   :status :fail,
+   :status :pass,
    :history
    [{:at "2026-07-05T06:39:06.744033984Z",
      :pass false,
      :out
-     "missing: {'process-coherence/is-this-even-a-problem', 'process-coherence/status-refresh-before-work', 'process-coherence/stuck-means-signal'}"}]}
+     "missing: {'process-coherence/is-this-even-a-problem', 'process-coherence/status-refresh-before-work', 'process-coherence/stuck-means-signal'}"}
+    {:at "2026-07-05T06:50:19.774925550Z",
+     :pass true,
+     :out "missing: set()"}
+    {:at "2026-07-05T06:52:05.040527320Z",
+     :pass true,
+     :out "missing: set()"}]}
   {:id "2b",
    :title "seed patterns registered in phylogeny",
    :needs ["S1"],
    :gate
    {:cmd
-    "python3 -c \"import json; d=json.load(open('/home/joe/code/futon6/data/pattern-phylogeny-edges.json')); pats=set(d.get('patterns',d if isinstance(d,list) else [])); need={'process-coherence/status-refresh-before-work','process-coherence/is-this-even-a-problem','process-coherence/stuck-means-signal'}; missing=need-pats; print('missing:',missing); exit(1 if missing else 0)\""},
-   :status :pending,
-   :history []}
+    "cd /home/joe/code/futon3a && .venv/bin/python -c \"import sys; sys.path.insert(0,'holes/labs/M-memes-arrows'); import cascade_construct as cc; ph=cc.load_phylogeny(); need=['process-coherence/status-refresh-before-work','process-coherence/is-this-even-a-problem','process-coherence/stuck-means-signal']; missing=[p for p in need if cc.pattern_stem(p) not in ph['patterns']]; print('missing:',missing); exit(1 if missing else 0)\"",
+    :note
+    "gate rewritten by claude-19 2026-07-05: original cmd checked full ids against the phylogeny's patterns set, which stores bare stems (schema mismatch — unsatisfiable as written); now probes the REAL eligibility path (cascade_construct.load_phylogeny + pattern_stem, incl. learned-phylogeny merge). Strengthening, not weakening: same three seeds, checked through the actual consumer."},
+   :status :pass,
+   :history
+   [{:at "2026-07-05T06:52:03.839445991Z",
+     :pass false,
+     :out
+     "missing: {'process-coherence/status-refresh-before-work', 'process-coherence/stuck-means-signal', 'process-coherence/is-this-even-a-problem'}"}
+    {:at "2026-07-05T06:52:43.118456504Z",
+     :pass true,
+     :out "missing: []"}]}
   {:id "2c",
    :title "seed prior treatment (no 2.398-nat fine)",
    :needs ["2a" "2b"],
    :gate
-   {:manual
-    "driver attaches probe: seed retrievable with per-seed cx < 2.0 nats"},
-   :status :pending,
-   :history []}
+   {:cmd
+    "cd /home/joe/code/futon3a && .venv/bin/python -c \"import sys,math,inspect; sys.path.insert(0,'holes/labs/M-memes-arrows'); import cascade_construct as cc; need=['process-coherence/status-refresh-before-work','process-coherence/is-this-even-a-problem','process-coherence/stuck-means-signal']; seeds=cc.load_seed_stems(); ph=cc.load_phylogeny(); prior,dflt=cc.base_rate_prior(ph, seed_stems=seeds); prior0,_=cc.base_rate_prior(ph); drift=[k for k in prior0 if k not in seeds and prior0[k]!=prior[k]]; missingE=[p for p in need if p not in cc.EMB]; cx={s: round(-math.log(prior[s]),3) for s in sorted(seeds)}; bad=[s for s,c in cx.items() if c>=2.0]; wired='seed_stems' in inspect.getsource(cc.construct_cascade); print('cx:',cx,'EMB-missing:',missingE,'nonseed-drift:',drift[:3],'wired:',wired); exit(0 if (len(seeds)==3 and not missingE and not bad and not drift and wired) else 1)\"",
+    :note
+    "probe attached by claude-19 2026-07-05 (2c action): registry futon6/data/pattern-seeds.json; floor = median-pattern prior in base_rate_prior(seed_stems=...), construct_cascade wired. Checks: 3 seeds loaded, all in EMB, per-seed cx < 2.0 (measured 0.647 vs 2.398 unfloored), non-seed priors identical with/without seeds, construct_cascade passes seed_stems."},
+   :status :pass,
+   :history
+   [{:at "2026-07-05T06:56:24.232051066Z",
+     :pass true,
+     :out
+     "cx: {'is-this-even-a-problem': 0.647, 'status-refresh-before-work': 0.647, 'stuck-means-signal': 0.647} EMB-missing: [] nonseed-drift: [] wired: True"}]}
   {:id "2d",
    :title "escrow ft-*.edn record contract + reject-loudly loader",
    :needs ["S1"],
