@@ -1,0 +1,95 @@
+{:excursion "E-live-loop-2",
+ :updated "2026-07-05",
+ :steps
+ [{:id "S1",
+   :title "sorry-grain measurement (imported, E-live-loop-1)",
+   :needs [],
+   :gate
+   {:cmd
+    "test -f /home/joe/code/p4ng/flights/e-live-loop-1-s1-sorry-grain.org && grep -qi 'ablation' /home/joe/code/p4ng/flights/e-live-loop-1-s1-sorry-grain.org"},
+   :status :pass,
+   :history
+   [{:at "2026-07-05T06:39:06.434594089Z", :pass false, :out ""}
+    {:at "2026-07-05T06:39:21.214496438Z", :pass true, :out ""}]}
+  {:id "2a",
+   :title "seed patterns in embeddings artifact",
+   :needs ["S1"],
+   :gate
+   {:cmd
+    "python3 -c \"import json; ids={r['id'] for r in json.load(open('/home/joe/code/futon3a/resources/notions/minilm_pattern_embeddings.json'))}; need={'process-coherence/status-refresh-before-work','process-coherence/is-this-even-a-problem','process-coherence/stuck-means-signal'}; missing=need-ids; print('missing:',missing); exit(1 if missing else 0)\""},
+   :status :fail,
+   :history
+   [{:at "2026-07-05T06:39:06.744033984Z",
+     :pass false,
+     :out
+     "missing: {'process-coherence/is-this-even-a-problem', 'process-coherence/status-refresh-before-work', 'process-coherence/stuck-means-signal'}"}]}
+  {:id "2b",
+   :title "seed patterns registered in phylogeny",
+   :needs ["S1"],
+   :gate
+   {:cmd
+    "python3 -c \"import json; d=json.load(open('/home/joe/code/futon6/data/pattern-phylogeny-edges.json')); pats=set(d.get('patterns',d if isinstance(d,list) else [])); need={'process-coherence/status-refresh-before-work','process-coherence/is-this-even-a-problem','process-coherence/stuck-means-signal'}; missing=need-pats; print('missing:',missing); exit(1 if missing else 0)\""},
+   :status :pending,
+   :history []}
+  {:id "2c",
+   :title "seed prior treatment (no 2.398-nat fine)",
+   :needs ["2a" "2b"],
+   :gate
+   {:manual
+    "driver attaches probe: seed retrievable with per-seed cx < 2.0 nats"},
+   :status :pending,
+   :history []}
+  {:id "2d",
+   :title "escrow ft-*.edn record contract + reject-loudly loader",
+   :needs ["S1"],
+   :gate {:manual "malformed-record rejection test passes"},
+   :status :pending,
+   :history []}
+  {:id "2e",
+   :title "replay seam built dark (flag off, mock replay test)",
+   :needs ["2d"],
+   :gate
+   {:manual
+    "seam unit test: mock fold-turn replays, dG re-asserted; live path unchanged flag-off"},
+   :status :pending,
+   :history []}
+  {:id "2f",
+   :title "one real fold-turn deposit",
+   :armed true,
+   :needs ["2c" "2e"],
+   :gate
+   {:manual
+    "deposit loads cleanly: sha-match + dG re-assert; Joe's arming word recorded"},
+   :status :pending,
+   :history []}
+  {:id "2g",
+   :title "live replay consumed on path",
+   :armed true,
+   :needs ["2f"],
+   :gate
+   {:manual "trace shows act-gate dG leg with escrow provenance"},
+   :status :pending,
+   :history []}
+  {:id "3a",
+   :title "per-lane futility observable (0-for-N counter)",
+   :needs ["2a" "2b" "2c" "2d" "2e" "2f" "2g"],
+   :gate
+   {:manual
+    "counter queryable via agent tool; matches historical census"},
+   :status :pending,
+   :history []}
+  {:id "3b",
+   :title "gamma update rule, simulated on 674-tick census",
+   :needs ["2a" "2b" "2c" "2d" "2e" "2f" "2g"],
+   :gate
+   {:manual
+    "simulation: historical vs synthetic paying-lane gamma trajectories diverge sensibly"},
+   :status :pending,
+   :history []}
+  {:id "3c",
+   :title "operator bulletin on lane futility (dry-run)",
+   :needs ["3a" "3b"],
+   :gate
+   {:manual "synthetic 0-for-N burst produces dry-run bulletin entry"},
+   :status :pending,
+   :history []}]}
