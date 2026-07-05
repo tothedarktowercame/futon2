@@ -10,7 +10,8 @@
    :status :pass,
    :history
    [{:at "2026-07-05T06:39:06.434594089Z", :pass false, :out ""}
-    {:at "2026-07-05T06:39:21.214496438Z", :pass true, :out ""}]}
+    {:at "2026-07-05T06:39:21.214496438Z", :pass true, :out ""}
+    {:at "2026-07-05T07:28:43.525399977Z", :pass true, :out ""}]}
   {:id "2a",
    :title "seed patterns in embeddings artifact",
    :needs ["S1"],
@@ -30,6 +31,9 @@
      :pass true,
      :out "missing: set()"}
     {:at "2026-07-05T06:58:51.734729359Z",
+     :pass true,
+     :out "missing: set()"}
+    {:at "2026-07-05T07:28:45.694928111Z",
      :pass true,
      :out "missing: set()"}]}
   {:id "2b",
@@ -51,6 +55,9 @@
      :out "missing: []"}
     {:at "2026-07-05T06:58:52.972665743Z",
      :pass true,
+     :out "missing: []"}
+    {:at "2026-07-05T07:28:50.754963631Z",
+     :pass true,
      :out "missing: []"}]}
   {:id "2c",
    :title "seed prior treatment (no 2.398-nat fine)",
@@ -69,6 +76,10 @@
     {:at "2026-07-05T06:58:54.620712080Z",
      :pass true,
      :out
+     "cx: {'is-this-even-a-problem': 0.647, 'status-refresh-before-work': 0.647, 'stuck-means-signal': 0.647} EMB-missing: [] nonseed-drift: [] wired: True"}
+    {:at "2026-07-05T07:28:53.520456737Z",
+     :pass true,
+     :out
      "cx: {'is-this-even-a-problem': 0.647, 'status-refresh-before-work': 0.647, 'stuck-means-signal': 0.647} EMB-missing: [] nonseed-drift: [] wired: True"}]}
   {:id "2d",
    :title "escrow ft-*.edn record contract + reject-loudly loader",
@@ -83,7 +94,15 @@
    [{:at "2026-07-05T07:05:05.624035940Z",
      :pass true,
      :out
-     "Running tests in #{\"test\"}\n\nTesting futon2.aif.fold-escrow-test\n\nRan 3 tests containing 6 assertions.\n0 failures, 0 errors.\nfold-turn REJECTED [delta-g-mismatch] /tmp/fold-turns-test16985510119154824307/ft-dg-drift.edn: pin 3: stored -0.9 vs recomputed -0.5\nfold-turn REJECTED [missing-arming] /tmp/"}]}
+     "Running tests in #{\"test\"}\n\nTesting futon2.aif.fold-escrow-test\n\nRan 3 tests containing 6 assertions.\n0 failures, 0 errors.\nfold-turn REJECTED [delta-g-mismatch] /tmp/fold-turns-test16985510119154824307/ft-dg-drift.edn: pin 3: stored -0.9 vs recomputed -0.5\nfold-turn REJECTED [missing-arming] /tmp/"}
+    {:at "2026-07-05T07:11:48.923721346Z",
+     :pass true,
+     :out
+     "Running tests in #{\"test\"}\n\nTesting futon2.aif.fold-escrow-test\n\nRan 3 tests containing 6 assertions.\n0 failures, 0 errors.\nfold-turn REJECTED [delta-g-mismatch] /tmp/fold-turns-test9463508286585819409/ft-dg-drift.edn: pin 3: stored -0.9 vs recomputed -0.5\nfold-turn REJECTED [missing-arming] /tmp/f"}
+    {:at "2026-07-05T07:29:15.848923808Z",
+     :pass true,
+     :out
+     "Running tests in #{\"test\"}\n\nTesting futon2.aif.fold-escrow-test\n\nRan 3 tests containing 6 assertions.\n0 failures, 0 errors.\nfold-turn REJECTED [delta-g-mismatch] /tmp/fold-turns-test4550508765309224407/ft-dg-drift.edn: pin 3: stored -0.9 vs recomputed -0.5\nfold-turn REJECTED [missing-arming] /tmp/f"}]}
   {:id "2e",
    :title "replay seam built dark (flag off, mock replay test)",
    :needs ["2d"],
@@ -97,16 +116,44 @@
    [{:at "2026-07-05T07:07:21.504661253Z",
      :pass true,
      :out
+     "Running tests in #{\"test\"}\n\nTesting futon2.aif.close-loop-test\n\nTesting futon2.aif.fold-escrow-seam-test\n\nRan 4 tests containing 22 assertions.\n0 failures, 0 errors."}
+    {:at "2026-07-05T07:12:06.376897525Z",
+     :pass true,
+     :out
+     "Running tests in #{\"test\"}\n\nTesting futon2.aif.close-loop-test\n\nTesting futon2.aif.fold-escrow-seam-test\n\nRan 4 tests containing 22 assertions.\n0 failures, 0 errors."}
+    {:at "2026-07-05T07:29:38.943138914Z",
+     :pass true,
+     :out
      "Running tests in #{\"test\"}\n\nTesting futon2.aif.close-loop-test\n\nTesting futon2.aif.fold-escrow-seam-test\n\nRan 4 tests containing 22 assertions.\n0 failures, 0 errors."}]}
   {:id "2f",
    :title "one real fold-turn deposit",
    :armed true,
    :needs ["2c" "2e"],
    :gate
-   {:manual
-    "deposit loads cleanly: sha-match + dG re-assert; Joe's arming word recorded"},
-   :status :pending,
-   :history []}
+   {:cmd
+    "cd /home/joe/code/futon2 && clojure -M scripts/gate_2f_deposit.clj",
+    :note
+    "probe attached by claude-20 2026-07-05 (2f action, GOLDEN RUN): real deposit = futon6/data/fold-turns/ft-autoclock-in-001.edn (autoclock-in cascade, 4 boxes / 5 holes, dG -4/9). Gate = load-deposits ZERO rejections (pins 2+3: arming word + stored dG re-asserted vs coverage-delta-g) + prompt REBUILT from the record's cascade+psi+verbatim flexiarg prose hashes to stored :prompt :sha256 (pin 1) + escrow-turn-fn replays the recorded answer on that prompt. Reject-loudly demonstrated on tampered copies (delta-g-mismatch, missing-arming) in /tmp, never in the real escrow."},
+   :status :pass,
+   :history
+   [{:at "2026-07-05T07:15:10.385955651Z",
+     :armed-by "joe",
+     :word
+     "OK, if you agree then I think we can run E-live-loop-2 with the the claude-20 runner",
+     :reviewer
+     "claude-16 agrees — all prerequisite gates green and independently re-verified; runner claude-20; scope = ONE fold-turn deposit (2f only; 2g remains unarmed)"}
+    {:at "2026-07-05T07:28:22.919593816Z",
+     :pass true,
+     :out
+     "ft-autoclock-in-001: sha-match + replay + dG re-assert OK (dG -0.4444444444444444; arming word \"OK, if you agree then I think we can run\")\nGATE 2f PASS — 1 deposit(s) load cleanly, sha-matched, replayable"}
+    {:at "2026-07-05T07:29:49.268679597Z",
+     :pass true,
+     :out
+     "ft-autoclock-in-001: sha-match + replay + dG re-assert OK (dG -0.4444444444444444; arming word \"OK, if you agree then I think we can run\")\nGATE 2f PASS — 1 deposit(s) load cleanly, sha-matched, replayable"}
+    {:at "2026-07-05T07:31:32.676863432Z",
+     :pass true,
+     :out
+     "ft-autoclock-in-001: sha-match + replay + dG re-assert OK (dG -0.4444444444444444; arming word \"OK, if you agree then I think we can run\")\nGATE 2f PASS — 1 deposit(s) load cleanly, sha-matched, replayable"}]}
   {:id "2g",
    :title "live replay consumed on path",
    :armed true,
