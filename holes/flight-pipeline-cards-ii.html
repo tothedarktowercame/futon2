@@ -156,6 +156,13 @@ futility board's top number goes DOWN for lanes with deposits and does not move 
 without — futility responds to plans, not to time.</div>
 </div>
 
+<div class="card"><h3><span class="n">10</span>The recommendation responds to work <span class="rul">the operator's own pre-registration</span></h3>
+<div class="io"><b>input</b> consecutive ticks bracketing real work (a deposit landing, held items closing, a status change, gamma movement)</div>
+<div class="io"><b>happens</b> the return arc at the RECOMMENDATION grain: work updates the board; the board updates G; G updates the recommendation. Today this arc is partial: the status classifier and held-work ledger DO reach the judge; deposits reach the gate; but gamma is unfed (futility never demotes a lane — advance-mission/M-first-flights has been recommended through 51 futile selections) and most work products do not yet write back to the judge's inputs.</div>
+<div class="io"><b>output</b> a recommendation that CHANGES for attributable reasons</div>
+<div class="exp"><b>EXPECT (pre-registered, operator, 2026-07-05: "we would want to actually see some change in that recommendation at the end based on the actual work that is achieved"):</b> across the v2 series, at least one top-recommendation change between consecutive ticks is ATTRIBUTABLE to work done in between — the attribution named in the series log (deposit, held-item closure, status change, or gamma divergence). Falsifier: the top recommendation is constant across the whole series despite real work landing — the return arc is not reaching the judge, and closing it becomes the next excursion's charter.</div>
+</div>
+
 <p><b>The series this page is for:</b> when the operator opens the next live-test series
 (loop-4), these expectations become its gates — each card's EXPECT is a step on the board,
 each falsifier is a legitimate exit. This page is itself a pre-registration: dated, committed,
