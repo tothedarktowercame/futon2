@@ -845,3 +845,35 @@ retrieval rank); (2) the STUCK text is short and generic -- a richer
 process-state description might resonate differently. The result goes in
 the record either way: the cascade lane reads the futility state, but the
 constructor does not route it to the predicted seed.
+
+### Probe result (seed-keyword phrasing)
+
+Re-phrased the STUCK line in the seeds' own keyword register:
+`"STUCK: tried the same action 52 times, nothing accomplished - futile
+repetition, needs unsticking"` -- one constructor run, budget 20.
+
+| phrasing | size | F | shown |
+|---|---|---|---|
+| original ("STUCK: selected 52 ticks, 0 passes") | 1 | -0.523 | `iching/hexagram-03-zhun` |
+| seed-keyword ("futile repetition, needs unsticking") | 1 | -0.503 | `iching/hexagram-03-zhun` |
+
+Same pattern, same F band. **Dilution confirmed, not phrasing.** The
+100-byte process line is buried by the 500-byte mission content in
+MiniLM's document-level embedding. The iChing hexagram (semantic match
+for "stuck/difficulty") wins the similarity market regardless of
+phrasing.
+
+### Design recommendation (routed to cascade-shaping charter, not built here)
+
+The negative confirms something bigger than a phrasing gap: **entry
+conditions shouldn't have to win a similarity market dominated by domain
+content; they should be seated by process state.** The likely right design
+is the first-slot/anchor mechanism (notebook section 5.1, the operator's
+staging doctrine): when futility >= threshold, a process-coherence seed
+is INJECTED as the opening element by construction, not fished for by
+embedding similarity. The E-live-loop-2 step 2c design (seed prior floor +
+first-slot initialization) is the charter for this -- the psi-v3 negative
+is its motivating evidence. The retrieval mechanism is the wrong seating
+for entry-condition patterns; the injection mechanism is the principled
+one.
+
