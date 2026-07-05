@@ -161,7 +161,14 @@
    :gate
    {:manual "trace shows act-gate dG leg with escrow provenance"},
    :status :pending,
-   :history []}
+   :history
+   [{:at "2026-07-05T07:49:04.703597347Z",
+     :armed-by "joe",
+     :word
+     "Yes both are fine, lets proceed with 002 & 2g. ... Right now, while we are testing it interactive, it has my blanket consent.",
+     :scope :blanket-interactive-phase,
+     :note
+     "also approves deposit 002; mana-economy design recorded in doc"}]}
   {:id "3a",
    :title "per-lane futility observable (0-for-N counter)",
    :needs ["2a" "2b" "2c" "2d" "2e" "2f" "2g"],

@@ -187,3 +187,22 @@ gate re-run PASS. Scored against the seal claude-20 never opened:
 the S1→2f improvement chain (reconstitution + endpoints recovered vs
 the pre-S1 baseline) and produces the next recipe upgrade as a testable
 claim. That is what a golden run is for.
+
+## Operator ruling on consent economics (2026-07-05, verbatim in substance)
+
+Both 2g and deposit 002 approved in one word. Standing policy for this
+interactive-testing phase: **the planning gate has Joe's blanket
+consent** — per-fold arming ceremony is retired for fold-turn AUTHORING
+while testing continues interactively. Joe's design sketch for the
+durable mechanism: a **mana economy** — the operator awards N mana to a
+gate, pre-approving N runs (e.g. "5 mana = approve 5 fold-turns"),
+consumed per use, topped up at his discretion. This connects to the
+existing mana machinery (mana-snapshot service; mana = positive
+aliveness in the aliveness synthesis) and is the designed successor to
+one-word-per-act arming. Design note belongs to the consent-gate
+lineage (WM-I4); build when the interactive phase ends. ENACTMENT of
+plans (as opposed to authoring/reading them) remains held as before.
+
+On plans going unread: "that's an obvious omission that needs to be
+fixed" — 2g's flag-on is therefore the FIXED STATE going forward, not a
+demo toggle.
