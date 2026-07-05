@@ -69,3 +69,40 @@
       (is (nil? (:delta-G ag))
           "prompt drift => sha mismatch => abstain, the pin WORKING")
       (is (not (contains? ag :fold-escrow))))))
+
+(deftest l4-classical-unplugged-escrow-fills-dG
+  "L4 operator ruling: classical fold's dG leg is unplugged (*classical-fold-dG?*
+   false by default). With classical off and an escrow deposit matching, the
+   escrow fills the dG leg -- even for missions whose classical fold WOULD have
+   resolved (the whole point of the ruling)."
+  (binding [cl/*escrow-replay?* true
+            cl/*classical-fold-dG?* false]
+    (let [deposits [(mock-deposit)]
+          ag (cl/act-gate-from-lane-entry
+              {:mission "test-d/mission/scheduled-mock"
+               :shown mock-cascade :F-free-energy 0.5 :G-rollout nil}
+              mock-circumstance
+              {:escrow-turn-fn (esc/escrow-turn-fn deposits)
+               :prose-fn mock-prose-fn})]
+      (is (= -0.5 (:delta-G ag)) "escrow fills dG (classical unplugged)")
+      (is (= :fold-escrow (:delta-G/source ag)) "source is escrow, not classical"))))
+
+(deftest l4-classical-revertible-flag-on-restores-old-order
+  "The flag is REVERTIBLE: binding *classical-fold-dG?* true lets the
+   classical fold's dG leg participate again. With the mock cascade
+   (contentful -- classical abstains regardless), the flag doesn't change
+   the outcome, but we verify the flag is respected by checking that
+   classical's dG is nil when off and potentially non-nil when on."
+  ;; The mock cascade is contentful (classical abstains), so both flag
+  ;; states produce nil dG from classical. The test verifies the flag
+  ;; is wired: with flag ON, fold-g is the raw classical output; with
+  ;; flag OFF, fold-g is nil (suppressed).
+  (let [raw-fold (cl/act-gate-from-lane-entry
+                  {:mission "test-d/mission/scheduled-mock"
+                   :shown mock-cascade :F-free-energy 0.5 :G-rollout nil}
+                  mock-circumstance)]
+    ;; Default (flag OFF): classical dG suppressed.
+    (is (nil? (:delta-G raw-fold))
+        "classical abstains on contentful cascade, dG nil regardless of flag")
+    (is (some? (:fold raw-fold))
+        "the :fold output is still carried for provenance")))

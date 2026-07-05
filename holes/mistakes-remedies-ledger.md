@@ -129,7 +129,20 @@ it working — and what would falsify it) / **Status**.
   a replayed escrow ΔG actually consumed on the live path (S2), and a
   lane-γ design (S3). Falsified by: post-S2 ticks still 0-for-N with
   a fed escrow and live seam.
-- **Status:** in flight — the excursion IS the remedy.
+- **Evidence (2026-07-05, E-live-loop-2 2g, claude-20):** the escrow ΔG
+  WAS consumed on the live path — the act-gate in the serving JVM read
+  deposit `ft-autoclock-in-001` through the pinned seam: ΔG −4/9,
+  `:delta-G/source :fold-escrow`, verdict `:pass` (ΔF +0.813). Trace id
+  `2026-07-05T07:56:19.107773396Z` in
+  `futon2/data/wm-trace-escrow-witness/wm-trace-2026-07-05.edn`; standing
+  gate = `scripts/gate_2g_provenance.clj`; seam now ON by default
+  (`close_loop.clj`). Honest scope: the witness was a direct lane-entry
+  eval at the deposit grain — SCHEDULED ticks still cannot reach the
+  pinned seam (enact.clj's 1-arity caller + banner-grain lane ψ), so
+  the falsifier "post-S2 ticks still 0-for-N" stays live until the
+  caller wiring + ψ-grain follow-on lands.
+- **Status:** in flight — S2's evidence slot now FILLED; remaining: the
+  scheduled-caller wiring + S3's lane-γ.
 
 ## 11. Futile repetition unnoticed — the keystone
 - **Mistake:** nothing at any layer notices 0-for-N: the arena (674
@@ -172,3 +185,27 @@ it working — and what would falsify it) / **Status**.
   emitter upgrade, an agent tool-query must return EFE terms. Falsified
   by: another "the data exists but no reader can see it" discovery.
 - **Status:** half done; emitter upgrade is the open half.
+
+## 14. Generic prices masked armed work -- classical-route-off
+- **Mistake:** the dG reconciliation order (rollout -> classical ->
+  escrow -> nil) let the 10-entry classical rule table fill the dG leg
+  BEFORE the sha-pinned, operator-armed, reviewer-verified escrow
+  deposit could fire. The L4 tick exposed this: M-bayesian-structure-
+  learning verdicted :pass with classical dG -0.077 while the deposit
+  carried dG -0.7 -- a 9x underestimate. The gate was honest (it
+  preferred the available source) but the richer construction was
+  silently ignored. This was invisible until both sources could fire
+  on the same mission (E-live-loop-3 L4, 2026-07-05).
+- **Remedy:** operator ruling "turn off classical fold as a route"
+  (2026-07-05). The classical fold's dG leg is unplugged from the live
+  reconciliation via `*classical-fold-dG?*` (dynamic var, default
+  false, REVERTIBLE). The new order is rollout -> pinned escrow ->
+  abstain. The classical fold code and tests stay; only the live route
+  closes. Close-loop source: `close_loop.clj`.
+- **Evidence check:** `:delta-G/source :fold-escrow` on cron ticks for
+  deposited missions; NO classical `:fold` sources in new traces for
+  missions with matching deposits. Falsified by: a new trace showing
+  `:fold` source for a deposited mission whose classical fold resolved
+  (meaning the flag regressed or the order reverted).
+- **Status:** remedy live (this commit); standing gate = L4 trace check
+  (`scripts/gate_l4_natural_tick.clj`).

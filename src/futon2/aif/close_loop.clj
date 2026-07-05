@@ -30,8 +30,26 @@
             [futon2.aif.fold-llm :as fl]))
 
 (def ^:dynamic *escrow-replay?*
-  "Off until 2g (operator-armed). Off ⇒ the escrow is never consulted and
-   `act-gate-from-lane-entry` behaves exactly as before the seam existed."
+  "ON as of 2g (operator-armed 2026-07-05, E-live-loop-2 — the ruling that
+   plans going unread was an omission to fix, not to demo). ON is the default
+   in every JVM from here; bind/set false to restore pre-seam behavior. With
+   no `:escrow-turn-fn` injected the seam stays inert (the nil turn-fn
+   short-circuits), so callers that don't opt in — including today's
+   scheduled runner — remain byte-identical to the pre-seam path."
+  true)
+
+(def ^:dynamic *classical-fold-dG?*
+  "OFF as of L4 (operator ruling 2026-07-05, E-live-loop-3 -- 'turn off
+   classical fold as a route'). The classical fold's coverage-dG is
+   UNPLUGGED from the live dG reconciliation: the order is now
+   rollout -> pinned escrow -> abstain. The classical fold code and tests
+   stay (the flag is REVERTIBLE -- bind true to restore the pre-L4
+   rollout -> classical -> escrow -> nil order). Rationale: an armed,
+   sha-pinned, reviewer-verified deposit is a strictly richer construction
+   than the 10-entry rule table; letting the generic table fill dG before
+   the escrow can fire masked the reviewed work (bayesian: classical -0.077
+   vs deposit -0.7, a 9x underestimate). The classical fold still runs for
+   its :fold output (carried for provenance) -- only its dG leg is unplugged."
   false)
 
 (defn act-gate-from-lane-entry
@@ -48,7 +66,7 @@
   ([{:keys [F-free-energy G-rollout shown] :as _entry} circumstance
     {:keys [escrow-turn-fn prose-fn]}]
    (let [fold-out   (when (seq shown) (fc/classical-fold (vec shown) circumstance))
-         fold-g     (:delta-g fold-out)
+         fold-g     (when *classical-fold-dG?* (:delta-g fold-out))
          escrow-out (when (and *escrow-replay?* escrow-turn-fn
                                (not (number? G-rollout)) (not (number? fold-g))
                                (seq shown))
