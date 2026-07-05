@@ -122,7 +122,21 @@
                       (str " ENACTED=" (:mission e) " src=" (name (:source e))
                            " boxes=" (:boxes e) " holes=" (:policy-holes e)))
                     (when-let [ro (:realized-outcome judgement)]
-                      (str " realizedG=" (:realized-G ro) " expectedG=" (:expected-G ro)))))
+                      ;; F6 cosmetic (2026-07-05): γ's :expected-G is the CLASSICAL
+                      ;; fold's coverage-ΔG and is nil when the gate's ΔG leg came
+                      ;; from elsewhere (e.g. :fold-escrow) — which printed
+                      ;; "expectedG=" empty. Fall back to the enactment audit's
+                      ;; gate ΔG, tagged with its source so the two legs are never
+                      ;; conflated in the log. γ's feed is UNTOUCHED (scale-match
+                      ;; pin, claude-10 2026-07-02) — display only.
+                      (let [e (:enactment judgement)
+                            exp (:expected-G ro)]
+                        (str " realizedG=" (:realized-G ro)
+                             (if (some? exp)
+                               (str " expectedG=" exp)
+                               (str " expectedG=" (:gate-delta-G e)
+                                    " expectedG-src="
+                                    (or (some-> (:predicted-via e) name) "unknown"))))))))
       (System/exit 0))
     (catch Throwable t
       (binding [*out* *err*]

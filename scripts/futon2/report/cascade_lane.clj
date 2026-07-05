@@ -115,23 +115,40 @@
 
 (def ^:private ^:const sorry-psi-byte-cap 1024)
 
-(defonce ^:private !held-work-ledger
-  (delay
-    (try
-      (-> held-work-ledger-path slurp edn/read-string :items)
-      (catch Throwable e
-        (binding [*out* *err*]
-          (println "[cascade-lane] WARN held-work ledger unreadable at"
-                   held-work-ledger-path "— falling back to banner ψ for all missions."
-                   "Error:" (.getMessage e)))
-        nil))))
+(defonce ^:private !held-work-state
+  ;; ::unloaded sentinel (NOT a delay — F6 hygiene, 2026-07-05): the ledger
+  ;; snapshot must be invalidatable when the ledger FILE is refreshed, or
+  ;; `clear-psi-cache!` rebuilds ψ from a stale snapshot and the "refresh"
+  ;; never lands. Fresh var name so a live `load-file` reload starts clean
+  ;; (the old realized delay is orphaned, restart-equivalent).
+  (atom ::unloaded))
+
+(defn- held-work-items
+  "The held-work ledger items, loaded once and cached in `!held-work-state`;
+   `clear-psi-cache!` resets it so a refreshed ledger file is re-read.
+   Unreadable ledger ⇒ WARN once per load, cache nil (banner-ψ fallback) —
+   same semantics as the delay this replaces."
+  []
+  (let [v @!held-work-state]
+    (if (not= ::unloaded v)
+      v
+      (let [loaded (try
+                     (-> held-work-ledger-path slurp edn/read-string :items)
+                     (catch Throwable e
+                       (binding [*out* *err*]
+                         (println "[cascade-lane] WARN held-work ledger unreadable at"
+                                  held-work-ledger-path "— falling back to banner ψ for all missions."
+                                  "Error:" (.getMessage e)))
+                       nil))]
+        (reset! !held-work-state loaded)
+        loaded))))
 
 (defn- held-items-for
   "Filter the held-work ledger to items whose :held/missions includes the
    target (id-stem substring match, case-insensitive). Returns [] when the
    ledger is nil (unreadable) or no items match."
   [target]
-  (let [items @!held-work-ledger
+  (let [items (held-work-items)
         stem (-> (str target) (str/replace #".*/" ""))
         stem-lc (str/lower-case stem)]
     (if (or (nil? items) (empty? items))
@@ -170,10 +187,23 @@
 (defonce ^:private !psi-cache (atom {}))
 
 (defn clear-psi-cache!
-  "Drop the ψ cache (e.g. after the held-work ledger is refreshed, so missions
-   that gained held items get sorry-grain ψ instead of their cached banner ψ)."
+  "Drop the ψ cache AND the held-work ledger snapshot (F6 hygiene: both, or a
+   refreshed ledger file never lands — missions that gained held items would
+   rebuild their ψ from the stale snapshot and get banner ψ again). Call after
+   the held-work ledger is refreshed."
   []
+  (reset! !held-work-state ::unloaded)
   (reset! !psi-cache {}))
+
+(defn clear-all-caches!
+  "THE cache-clear entry point (F6 hygiene, 2026-07-05): cascade memo + ψ memo
+   + held-work ledger snapshot, one call. Use after the pattern library /
+   embeddings artifact changes (cascades stale) or the held-work ledger is
+   refreshed (ψ stale). NB `!rollout-g-cache`/`!rollout-moves` are NOT cleared
+   here — the move-set file has its own lifecycle (flagged in F6, untouched)."
+  []
+  (clear-cache!)
+  (clear-psi-cache!))
 
 (defn mission->psi
   "Q-C (E-have-want-pairs, 2026-07-02): a mechanically-derived have→want meme
