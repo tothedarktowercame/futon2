@@ -82,7 +82,10 @@ corollary; ◁ made operational at retrieval time).</div>
 crosses F=0 within ONE authoring cycle (the diagramprover precedent −0.443→+0.144 is the
 prior); (b) authored clusters open their domain's cascades at rel ≥ 0.6 (precedent: 0.706);
 (c) when position-aware accretion lands, acceptance-class patterns stop appearing before
-entry-class ones (measurable on any cascade with both classes present).</div>
+entry-class ones — <b>measured ONLY on cascades where card 3's injection did NOT fire</b>
+(on stuck lanes the injected seed occupies the opening slot by construction, so position-aware
+accretion is unobservable there; scoping fixed pre-series to prevent 4(c) free-riding on
+3's mechanism).</div>
 </div>
 
 <div class="card"><h3><span class="n">5</span>Fold → deposit, contract v2 <span class="built">shape defined</span> <span class="tob">pins + backfill</span></h3>
@@ -139,12 +142,16 @@ severance-and-repair is also FORMAL: DarkTower/WMPipelineExample.lean proved the
 hungry, and the repair commit flipped the theorem — severing this feed again means re-proving
 the hunger. The 3b margins (paying γ→1.26, futile γ→0.50) are the prior.</div>
 <div class="io"><b>output</b> verdicts + a γ that CALIBRATES rather than coasts</div>
-<div class="exp"><b>EXPECT (pre-registered):</b> within 24 fed ticks, live γ for lanes with
-paying deposits diverges upward from futile lanes; the divergence direction matches 3b's
-simulation. Clock: starts at the FIRST FED TICK (the first hourly log line with numeric
-<code>expectedG=</code>); γ ≡ 1.0 for the first ~5 fed samples is burn-in, not flatness.
-Falsifier: γ stays flat past burn-in (feed is miswired) or diverges opposite (the rule's sign
-convention is wrong on live data — a finding worth the series by itself).</div>
+<div class="exp"><b>EXPECT (pre-registered; magnitude fixed pre-series):</b> within 24 fed
+ticks after burn-in, paying-lane γ ≥ <b>1.10</b> AND futile-lane γ ≤ <b>0.90</b> (direction
+AND magnitude, anchored to 3b's simulated envelope of 1.26 / 0.50 — anything inside
+(0.90, 1.10) on both lanes counts as FLAT, not "diverging slowly": the flat-vs-diverged call
+is made by these numbers, not post-hoc judgment). Clock: starts at the FIRST FED TICK (first
+hourly log line with numeric <code>expectedG=</code>); γ ≡ 1.0 for the first ~5 fed samples is
+burn-in. <b>Series shorter than burn-in + 24 fed ticks ⇒ VERDICT DEFERRED — not failed, not
+passed</b> (an underpowered window cannot fire this card's falsifier). Falsifier (only in a
+full window): γ flat by the thresholds above (feed miswired) or diverged opposite (sign
+convention wrong on live data — a finding worth the series by itself).</div>
 </div>
 
 <div class="card"><h3><span class="n">8</span>Enact, realize, score <span class="live">LIVE</span> <span class="tob">deposit scoring</span></h3>
@@ -175,7 +182,18 @@ without — futility responds to plans, not to time.</div>
 <div class="io"><b>input</b> consecutive ticks bracketing real work (a deposit landing, held items closing, a status change, gamma movement)</div>
 <div class="io"><b>happens</b> the return arc at the RECOMMENDATION grain: work updates the board; the board updates G; G updates the recommendation. Today this arc is partial: the status classifier and held-work ledger DO reach the judge; deposits reach the gate; but gamma is unfed (futility never demotes a lane — advance-mission/M-first-flights has been recommended through 51 futile selections) and most work products do not yet write back to the judge's inputs.</div>
 <div class="io"><b>output</b> a recommendation that CHANGES for attributable reasons</div>
-<div class="exp"><b>EXPECT (pre-registered, operator, 2026-07-05: "we would want to actually see some change in that recommendation at the end based on the actual work that is achieved"):</b> across the v2 series, at least one top-recommendation change between consecutive ticks is ATTRIBUTABLE to work done in between — the attribution named in the series log (deposit, held-item closure, status change, or gamma divergence). Falsifier: the top recommendation is constant across the whole series despite real work landing — the return arc is not reaching the judge, and closing it becomes the next excursion's charter.</div>
+<div class="exp"><b>EXPECT (pre-registered, operator, 2026-07-05; restructured pre-series after
+the cards-7×10 interaction was caught — γ needs burn-in + ~24 fed ticks, so a short series
+CANNOT flip a recommendation through γ, and this card's falsifier must not fire on mere
+underpowering):</b> <b>PRIMARY (fast path, valid at any series length):</b> at least one
+top-recommendation change between consecutive ticks is attributable to a FAST-ARC event —
+a deposit landing, a held-item closure, or a mission status change — with the attribution
+named in the series log. <b>SLOW CONFIRMER (only evaluable in a full γ window per card 7):</b>
+a γ-driven demotion of a futile lane visibly moves the ranking. Falsifier (fast path): the top
+recommendation is constant across the whole series despite fast-arc events landing — the
+return arc is not reaching the judge, and closing it becomes the next excursion's charter.
+A constant recommendation with NO fast-arc events and an underpowered γ window is a NULL
+SERIES, not a falsification.</div>
 </div>
 
 <p><b>The pipeline's own wiring is part of the discipline:</b> the dataflow map lives at
@@ -193,7 +211,13 @@ and not to be edited after the series starts except to record outcomes.
 started): card 2 gained the dedup + the driver's candidates-count prediction; card 3 recorded
 the ψ-v3 experiment outcome (dilution confirmed, injection settled as the design); card 5
 gained the formal precedent; card 7 flipped PENDING-RULING → REPAIRED (ruling + d05dd35 +
-the theorem-flip); this wiring-audit paragraph added.</small></p>
+the theorem-flip); this wiring-audit paragraph added.
+Second amendment batch, 2026-07-05 night (pre-registration hardening, credited to a
+frontier-model critique routed by the operator): card 7 gained pre-registered magnitude
+thresholds (1.10/0.90, anchored to 3b) + the VERDICT-DEFERRED rule for underpowered windows;
+card 10 restructured — fast-arc attribution PRIMARY, γ demotion as slow confirmer, so its
+falsifier cannot fire on mere underpowering; card 4(c) scoped to non-injected cascades so it
+cannot free-ride on card 3's mechanism.</small></p>
 
 <p class="foot">Fixed 2026-07-05, before any v2 run. Sources for the shapes: E-llm-fold.md ·
 ct-wiring-explainer.html (CLean bridge, BV laws) · E-live-loop-3.md §Deposit-contract-v2 ·
