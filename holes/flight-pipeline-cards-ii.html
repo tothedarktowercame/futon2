@@ -1,0 +1,168 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>One flight, in order — pipeline cards II (the v2 shapes, pre-registered)</title>
+<style>
+body{font:15px/1.55 system-ui,sans-serif;max-width:980px;margin:2rem auto;padding:0 1rem;color:#223}
+h1{font-size:22px}
+.summary{background:#f5f7f6;border:1px solid #dde;border-radius:8px;padding:12px 16px}
+.card{border:1px solid #dde;border-radius:8px;padding:12px 16px;margin:14px 0}
+.card h3{margin:0 0 4px 0;font-size:15px}
+.n{display:inline-block;background:#5a6a8a;color:#fff;border-radius:50%;width:22px;height:22px;text-align:center;line-height:22px;font-size:12px;font-weight:700;margin-right:8px}
+.live{color:#3f8b57;font-weight:700;font-size:11px}.built{color:#2e7d9a;font-weight:700;font-size:11px}
+.tob{color:#b1543a;font-weight:700;font-size:11px}.rul{color:#a07f2a;font-weight:700;font-size:11px}
+.io{font-size:13px;margin:6px 0}
+.io b{display:inline-block;width:64px;color:#667;vertical-align:top}
+.exp{background:#f2f6f3;border-left:3px solid #3f8b57;padding:6px 10px;font-size:13px;margin:8px 0}
+.exp b{color:#3f8b57}
+code{background:#f2f4f3;padding:0 4px;border-radius:4px;font-size:13px}
+pre{background:#f7f8f7;border:1px solid #e3e6e3;border-radius:6px;padding:8px;font-size:12px;overflow-x:auto;white-space:pre-wrap}
+.foot{color:#99a;font-size:11px;margin-top:2rem}
+</style></head><body>
+
+<h1>One flight, in order — pipeline cards II <small style="color:#99a;font-size:14px">(the v2 shapes)</small></h1>
+<div class="summary">
+Successor to <a href="flight-pipeline-cards.html">pipeline cards I</a> (which documents the
+system that RAN, with real examples — it stays as the record of v1). This page documents the
+pipeline as it SHOULD run under the upgraded discipline: meme → cascade → <b>sorry</b> →
+<b>wiring diagram</b> (E-llm-fold + the CT layer), with the day's rulings folded in. A system
+that has never run in this shape can have no examples — so each card instead carries a
+<b>PRE-REGISTERED EXPECTATION</b>, fixed 2026-07-05 BEFORE the next live-test series. When the
+series flies, each expectation is confirmed or refuted against these words, and only then do
+examples appear. Statuses: <span class="live">LIVE</span> (running now) ·
+<span class="built">BUILT-UNVERIFIED</span> (exists, not yet exercised in this role) ·
+<span class="tob">TO-BUILD</span> · <span class="rul">PENDING-RULING</span> (operator's desk).
+</div>
+
+<div class="card"><h3><span class="n">1</span>Wake <span class="live">LIVE</span></h3>
+<div class="io"><b>input</b> the wall clock; the crontab</div>
+<div class="io"><b>happens</b> unchanged from v1: hourly one-shot JVM, fresh source.</div>
+<div class="io"><b>output</b> one judged, gated, traced tick</div>
+<div class="exp"><b>EXPECT:</b> no change — this stage is settled.</div>
+</div>
+
+<div class="card"><h3><span class="n">2</span>Scan &amp; judge <span class="live">LIVE</span> <span class="built">status-aware</span></h3>
+<div class="io"><b>input</b> mission corpus + substrate-2 state</div>
+<div class="io"><b>happens</b> candidates filtered by CLASSIFIED status (prefix-matching classifier, finding 2); ranked by the G blend.</div>
+<div class="io"><b>output</b> ranked actions over LIVE missions only</div>
+<div class="exp"><b>EXPECT (pre-registered):</b> zero SUPERSEDED/ARCHIVED-classed missions appear in
+any lane from the first v2 tick onward; the excluded-mission WARN line appears in the scheduled
+log whenever the filter fires. Falsifier: any superseded mission ENACTED after the classifier
+fix lands live.</div>
+</div>
+
+<div class="card"><h3><span class="n">3</span>Build the circumstance ψ <span class="live">LIVE</span> <span class="tob">seat-by-state</span></h3>
+<div class="io"><b>input</b> one live mission target + the machine's self-observation (futility)</div>
+<div class="io"><b>happens</b> sorry-grain ψ from the held-work ledger (v1, live) + the STUCK line
+(ψ-v3, live). NEW (to-build): entry-condition patterns are SEATED BY PROCESS STATE, not fished
+for by similarity — when futility ≥ threshold, a process-coherence pattern is injected as the
+cascade's OPENING element by construction (the first-slot/anchor mechanism; the ψ-v3 honest
+negative showed retrieval cannot do this seating: line-level signal, document-level embedding).</div>
+<div class="io"><b>output</b> ψ + (when stuck) a seated entry pattern</div>
+<div class="exp"><b>EXPECT (pre-registered):</b> for a lane at 0-for-N (N≥10), the constructed
+cascade's FIRST element is a process-coherence pattern by construction, AND the seated cascade's
+F is not degraded by more than the seed's own complexity price (~0.65 nats · λ) relative to the
+unseated baseline. Falsifier: seating costs more F than that, or the seated pattern fails to
+change the fold's boxes (decoration, not entry condition).</div>
+</div>
+
+<div class="card"><h3><span class="n">4</span>Condense the cascade <span class="live">LIVE</span> <span class="tob">position-aware accretion</span></h3>
+<div class="io"><b>input</b> ψ (+ seated entry pattern when stuck)</div>
+<div class="io"><b>happens</b> retrieval + coverage-saturation as v1 (budget 20 ceiling). NEW
+DOCTRINE (live): a thin cascade on a well-formed ψ triggers AUTHORING — the library is
+incomplete by construction; missing patterns are written from real practice as a
+MUTUALLY-CITING CLUSTER (day-one phylogeny connectivity, the remedy-2 mechanism) and the run
+re-measured. NEW (to-build): accretion becomes position-aware — patterns carry process
+positions (entry / construction / acceptance), and assembly respects them (the staging
+corollary; ◁ made operational at retrieval time).</div>
+<div class="io"><b>output</b> a cascade with positions — the argument, staged</div>
+<div class="exp"><b>EXPECT (pre-registered):</b> (a) any domain-gap found by a well-formed ψ
+crosses F=0 within ONE authoring cycle (the diagramprover precedent −0.443→+0.144 is the
+prior); (b) authored clusters open their domain's cascades at rel ≥ 0.6 (precedent: 0.706);
+(c) when position-aware accretion lands, acceptance-class patterns stop appearing before
+entry-class ones (measurable on any cascade with both classes present).</div>
+</div>
+
+<div class="card"><h3><span class="n">5</span>Fold → deposit, contract v2 <span class="built">shape defined</span> <span class="tob">pins + backfill</span></h3>
+<div class="io"><b>input</b> the staged cascade + the SORRY (the typed hole: want-signature, hungry-for, endpoints)</div>
+<div class="io"><b>happens</b> the LLM fold per E-llm-fold discipline, now with the CT layer:
+boxes carry pattern provenance (v1, kept); hyperedges carry BV CONNECTIVES — ◁ sequential /
+⊗ non-signalling parallel / ⅋ coupled — so the wiring is a process expression, not a bag;
+TERMINALS structurally <code>:discharges</code> the sorry's want-signature (the diagram
+visibly closes the hole it was folded for); and PIN 4: the composition skeleton type-checks
+through the CLean bridge (<code>clean_to_lean.py</code> → DarkTower, 0-sorry on the skeleton;
+policy-holes remain honest TYPED holes). The bridge is BUILT with the BV laws proved — this
+card puts it in the pipeline.</div>
+<div class="io"><b>output</b> a v2 deposit: provably-composable wiring, terminal-discharged sorry, four pins</div>
+<pre>expected v2 shape (spec, not an example — no v2 deposit exists yet):
+:wiring {:nodes [{:id :b1 :fits-pattern … :via …} …]
+         :hyperedges [{:from :b1 :to :b2 :connective :seq}      ; ◁
+                      {:from [:b2 :b3] :to :b4 :connective :copar}] ; ⅋
+         :terminals [{:id :b4 :discharges :want-signature}]}
+:pins [:prompt-sha :arming :delta-g-recompute :clean-0-sorry]</pre>
+<div class="exp"><b>EXPECT (pre-registered):</b> (a) every v2 deposit's skeleton passes the
+CLean check 0-sorry, or the deposit is REJECTED loudly with the failing composition named;
+(b) the golden deposit (001) backfills to v2 — connectives annotated, terminal wired to its
+want-signature — WITHOUT its ΔG changing (the coverage arithmetic is connective-invariant);
+(c) at least one v2 fold uses ⊗ or ⅋ honestly (not everything is a sequence — if every edge
+comes back ◁, that is a finding about the folds or the domains, recorded either way).</div>
+</div>
+
+<div class="card"><h3><span class="n">6</span>Price the plan (ΔG) <span class="live">LIVE</span></h3>
+<div class="io"><b>input</b> mission + cascade + the escrow</div>
+<div class="io"><b>happens</b> reconciliation: rollout VALUATION (depth-1; the arrow-level
+search is retired on theory — the level error) → pinned escrow replay (v2 deposits) → honest
+abstention. Classical fold remains off.</div>
+<div class="io"><b>output</b> ΔG + provenance, or abstain</div>
+<div class="exp"><b>EXPECT (pre-registered):</b> in the v2 series, 100% of non-nil ΔG legs
+carry <code>:fold-escrow</code> or rollout-valuation provenance (zero <code>:fold</code>
+sources in new traces); missions without deposits abstain with
+<code>:abstain-missing-leg</code> — the abstention RATE is the measure of how far the deposit
+economy has to grow, reported per series, never hidden.</div>
+</div>
+
+<div class="card"><h3><span class="n">7</span>Gate, select — γ FED <span class="rul">PENDING-RULING</span></h3>
+<div class="io"><b>input</b> ΔF ∧ ΔG verdicts + γ per lane</div>
+<div class="io"><b>happens</b> the AND-gate unchanged. NEW (pending the operator's γ-diet
+ruling): escrow coverage-ΔG feeds γ's expected leg (it passes the scale-match pin by
+construction — both legs coverage-ΔG). The 3b simulation's margins (paying lane γ→1.26,
+futile γ→0.50 on the historical record) are the prior.</div>
+<div class="io"><b>output</b> verdicts + a γ that CALIBRATES rather than coasts</div>
+<div class="exp"><b>EXPECT (pre-registered):</b> within 24 fed ticks, live γ for lanes with
+paying deposits diverges upward from futile lanes; the divergence direction matches 3b's
+simulation. Falsifier: γ stays flat (feed is miswired) or diverges opposite (the rule's sign
+convention is wrong on live data — a finding worth the series by itself).</div>
+</div>
+
+<div class="card"><h3><span class="n">8</span>Enact, realize, score <span class="live">LIVE</span> <span class="tob">deposit scoring</span></h3>
+<div class="io"><b>input</b> passed verdicts (consent-gated; artifact-only)</div>
+<div class="io"><b>happens</b> deterministic executor realizes; realized-vs-expected recorded.
+NEW (to-build, M-peradam-mechanization): each consumed deposit accumulates a SCORE — the
+realized-vs-expected gap, over its replays — the peradam's "fruit" witness mechanized.</div>
+<div class="io"><b>output</b> realized ΔG + per-deposit score history</div>
+<div class="exp"><b>EXPECT (pre-registered):</b> the expected−realized gap distribution is
+reported per deposit per series; deposits whose gap grows are flagged (a plan that over-promises
+is a calibration datum, not an embarrassment).</div>
+</div>
+
+<div class="card"><h3><span class="n">9</span>Trace, observe, learn <span class="live">LIVE</span> <span class="tob">co-app from usage</span></h3>
+<div class="io"><b>input</b> the tick's full record</div>
+<div class="io"><b>happens</b> daily trace; strict-credit futility board; nag bulletin (dry-run →
+live at operator word). NEW (to-build): the phylogeny miner scans CASCADE USAGE, so patterns
+that fire together in live cascades accrue co-app edges (today only doc-citations count —
+authored clusters get day-one edges, used patterns should too).</div>
+<div class="io"><b>output</b> the machine's self-observation, feeding the next tick's ψ</div>
+<div class="exp"><b>EXPECT (pre-registered):</b> over the v2 series, at least one lane leaves
+0-for-N under strict credit (the first lane-credited pass in the machine's history); the
+futility board's top number goes DOWN for lanes with deposits and does not move for lanes
+without — futility responds to plans, not to time.</div>
+</div>
+
+<p><b>The series this page is for:</b> when the operator opens the next live-test series
+(loop-4), these expectations become its gates — each card's EXPECT is a step on the board,
+each falsifier is a legitimate exit. This page is itself a pre-registration: dated, committed,
+and not to be edited after the series starts except to record outcomes.</p>
+
+<p class="foot">Fixed 2026-07-05, before any v2 run. Sources for the shapes: E-llm-fold.md ·
+ct-wiring-explainer.html (CLean bridge, BV laws) · E-live-loop-3.md §Deposit-contract-v2 ·
+sequel-notebook.org §5 (the normative flight) · the day's rulings (classical-off, level error,
+authoring doctrine, staging corollary). Compiled by claude-16 at operator direction.</p>
+</body></html>
