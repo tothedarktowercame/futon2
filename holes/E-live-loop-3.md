@@ -1602,3 +1602,73 @@ class.** The operator's "should close" judgment is based on completion/saturatio
 multiplicative formula κ × resolvedness.
 
 The finding feeds the Joe-HUD/Bayesian-model thread as the kill criterion directs.
+
+## deposit-006 log — the peradam-mechanization fold (runner: claude-20, 2026-07-05 late evening)
+
+**DEPOSITED and gate-verified:**
+`futon6/data/fold-turns/ft-peradam-mechanization-006.edn` — M-peradam-
+mechanization P1–P3+E1 as the plan of record (cards-II flight 2; v2 shape
+per the 005 precedent + v2.1 rulings; blanket grant cited — the fold that
+plans this grant's own replacement by mana). ψ authored by claude-16 from
+the charter; no seal, no blind-scoring, recorded. **Constructor pins AGREE
+this time** (size 11, F +2.227, top no-self-certification 0.521 — the 005
+instrument error is fixed and the fix held).
+
+- **11 boxes ↔ 11 patterns, 1:1**: P1 = witness-tags-not-vigilance
+  (no-self-certification) ⅋ evidence-anchoring (evidence-over-assertion)
+  → loader-as-checks (turn-design-into-checks), with boot-reachable
+  file-first stores (reachable-from-boot) ⊗ in. **Step-0 census boxed**
+  (operational-not-decorative ⅋ honest-map): the five existing deposits
+  are P1/P3's natural corpus — 001 certifies once its witnesses are
+  structured; 003/004/005 REFUSE for missing fruit; **002 refuses too if
+  its prose-recorded score is not structurally recoverable** (refusing
+  the unearned close). P2 = mana-gated-work ⅋ session-durability (spend
+  valid only with its durable log). P3 = ward-off-boundary refusal
+  (quarantine without erasure; over-rejection = the kill criterion in
+  pattern form) ⅋ the crime-relocates witness-LADDER (refusal causes as
+  named rungs, schema extensible by rung). E1 = cross-validation-protocol
+  (certified peradam as a TYPE carrying replay-sufficient evidence).
+- **Connective census {:copar 4, :tensor 2, :seq 3}**; dual terminals
+  `[{:id :b9 :discharges :want-signature} {:id :b11 :discharges
+  :want-signature}]` (the machine refusal carries the WANT's falsifiable
+  clause; the typed reward seam its consumability clause).
+- **ΔG = −11/17 ≈ −0.6471** (coverage 11/17, hand = recomputed). Tamper
+  proofs: dropped hole ⇒ delta-g-mismatch; blanked arming word ⇒
+  missing-arming. Escrow = 6 deposits, 0 rejected, gate 2f PASS naming all.
+- **Pin 4: passes-linearized** (the honest grade per v2.1): converter →
+  CLean → lean, 0 errors / 0 sorry tactics / 25 self-verifying examples —
+  and **all 6 policy-holes attached as typed CLean holes** (b7/b1/b6/b2/
+  b9/b5), an improvement over 005's 4-of-6.
+- **Holes (6)**: mana replenishment rate (operator economics, the
+  value-per-nat family); **the scorer pool — THE unification hole** (who
+  may produce the fruit witness when one agent runs the loop; the
+  externality the ruling demands, undesigned); retroactive-certificate
+  legitimacy (001 ran before the machinery — :retroactive tag ruling
+  needed); the prose→structured-witness attestation protocol (interacts
+  with scorer-pool); the quarantine review path (ward-off gives the
+  boundary, not the un-quarantine); false-positive calibration population
+  (~2 certifiable records can't estimate a rate).
+
+**PAR (claude-20, 006):** worked — the census-as-boxes move (the
+dispatch's step-0 lesson) gave P3 real refusal cases with zero synthetic
+effort, and the honest edge (002 refusable despite "deserving") fell out
+of the pattern rather than needing a rule; the 005 pipeline (converter,
+assembly, tamper, gate) replayed on 006 in a fraction of the time —
+the flight shapes are becoming infrastructure. Prediction error —
+expected the unification ruling to be background context; instead it
+generated the fold's sharpest hole (scorer-pool): mechanizing the
+OTHER witnesses is straightforward precisely because the ritual already
+produced them, but the fruit witness's externality is a design problem
+no existing machinery covers. Flagged for review: whether the dual
+terminal is the right v2 idiom when a WANT has two independent
+discharge clauses, or whether the falsifiable clause should always be
+the single terminal (005 precedent).
+
+## Deposit-contract v2.2 — dual-terminal ruling (from 006)
+
+RULED (reviewer): multiple :discharges terminals are LEGAL when the
+WANT carries genuinely independent falsifiable clauses — each terminal
+names WHICH clause it discharges. 006's b9 (machine refusal = the
+falsifiable clause) + b11 (typed consumability) is the exemplar. The
+single-terminal 005 shape remains correct for single-clause WANTs; the
+rule is one-terminal-per-clause, not one-per-deposit.
