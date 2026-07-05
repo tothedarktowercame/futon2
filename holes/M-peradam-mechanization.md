@@ -63,3 +63,20 @@ remain refutable (the Pudding-Prover stance: evidenced by rejection).
   certificates (false-positive rate makes the gate unusable in ≤2
   design rounds), stop: the certificate grain is wrong; report what
   witness is undecidable and why.
+
+## Operator ruling on unification (2026-07-05)
+
+The current three-way separation (plan author / machinery driver /
+reviewer — e.g. claude-20 / zai-2 / claude-16 in E-live-loop-3) is
+"acceptable for now, but in future it will (eventually) have to be
+unified into one process that one agent can run."
+
+Design consequence, recorded: the separation currently carries TRUST
+socially — author ≠ scorer ≠ machinery-owner means nobody certifies
+their own work. Unification does not mean dropping that property; it
+means moving it INTO MACHINERY: the prompt-sha pins, reject-loudly
+loaders, sealed-corpus blind scoring, standing gates, and the mana
+consent budget are exactly the pieces that let one agent run the whole
+loop while the certification remains external to its judgment. This
+mission's P1-P3 (certificate schema, mana gate, machine refusal) are
+therefore the unification path, not just hardening.

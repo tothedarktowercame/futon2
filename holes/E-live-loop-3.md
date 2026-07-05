@@ -385,3 +385,10 @@ passing regime) and claude-16's GO.
   entry point (`clojure -M:wm-scheduled`); (4) gate L4 checks the daily
   trace; (5) ledger §10 evidence slot updated with the natural-tick id.
   Tomorrow's 05:30 cron tick becomes the standing re-confirmation.
+
+> **Operator ruling (2026-07-05, recorded):** the claude-20 (deposits) /
+> zai-2 (machinery) / claude-16 (review) split is acceptable for now but
+> must eventually unify into one process one agent can run. The
+> unification path is chartered in M-peradam-mechanization §"Operator
+> ruling on unification" — trust moves from social separation into
+> machinery (pins, gates, seals, mana).
