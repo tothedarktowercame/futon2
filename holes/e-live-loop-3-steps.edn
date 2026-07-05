@@ -41,12 +41,15 @@
    :status :pass,
    :history
    [{:at "2026-07-05T09:51:42.620622974Z", :pass true, :out ""}
-    {:at "2026-07-05T09:54:13.659457294Z", :pass true, :out ""}]}
+    {:at "2026-07-05T09:54:13.659457294Z", :pass true, :out ""}
+    {:at "2026-07-05T10:33:16.905977224Z", :pass true, :out ""}]}
   {:id "L4",
    :title "NATURAL tick consumes escrow dG (ledger 10 real test)",
    :needs ["L3"],
    :gate
    {:cmd
     "cd /home/joe/code/futon2 && clojure -M scripts/gate_l4_natural_tick.clj 2>&1 | grep -q 'GATE L4 PASS'"},
-   :status :pending,
-   :history []}]}
+   :status :pass,
+   :history
+   [{:at "2026-07-05T10:33:40.343388621Z", :pass false, :out ""}
+    {:at "2026-07-05T11:06:46.548444792Z", :pass true, :out ""}]}]}

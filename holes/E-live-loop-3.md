@@ -540,3 +540,54 @@ option of re-entry under a future ruling); it is unplugged from the
 live ΔG leg, revertibly. Consequence: missions without rollout moves or
 deposits abstain honestly — the ΔG supply is now deposits, which is the
 M-fold-self-play economy by design.
+
+## L4 exit -- the cron tick read the deposit (2026-07-05, 11:00Z / 12:00 BST)
+
+**L4 PASS. All GATES GREEN. The excursion exits.**
+
+The 11:00Z cron tick -- fired by the crontab, zero human involvement --
+produced the first `:fold-escrow` in the daily trace's history. The
+machine woke on its own schedule, built its lane, found the deposit,
+reconstructed the pinned circumstance, and read the plan the operator
+armed. After 675 rounds, a plan counted -- on a natural tick.
+
+- **The evidence:** `data/wm-trace/wm-trace-2026-07-05.edn` (tick stamp
+  2026-07-05T11:00:09Z) carries:
+  `:delta-G-source :fold-escrow`, `:gate-delta-G -0.7` for
+  M-bayesian-structure-learning, verdict `:pass` (dF +1.463).
+  1 `:fold-escrow` vs 10 legacy `:fold` entries. Standing gate =
+  `scripts/gate_l4_natural_tick.clj` (grep-based, robust to large EDN).
+  Gate L4 PASS via the stepper.
+
+- **The 11:00-BST race:** the classical-unplugged commit (`606077c`)
+  landed at ~10:46 UTC. The 11:00 BST (= 10:00 UTC) cron tick ran BEFORE
+  the commit -- its trace still shows `:fold` for bayesian. The 12:00 BST
+  (= 11:00 UTC) tick was the first cron-fired tick with classical
+  unplugged. The honest red (L4 FAIL on the 10:17 UTC manual tick, where
+  classical superseded escrow) preceded the green by ~50 minutes.
+
+- **Canon abstains honestly:** M-canon-fingerprint-store now verdicts
+  `:abstain-missing-leg` (classical unplugged, no deposit for this
+  mission). The ruling works: the generic table no longer fills the dG
+  leg for missions without armed deposits.
+
+- **The wrinkle (cosmetic, follow-on):** the scheduled log's `expectedG=`
+  field printed EMPTY for the escrow-sourced gate -- a log formatter gap
+  for the new source. The trace carries the correct `:gate-delta-G -0.7`
+  and `:delta-G-source :fold-escrow`; the summary-line formatter just
+  doesn't read the escrow-sourced expected-G. Cosmetic, not a data
+  integrity issue. Follow-on, not fix-now.
+
+- **Ledger section 10:** falsifier "post-S2 ticks still 0-for-N" is
+  RETIRED. Status updated to RESOLVED with the natural-tick evidence.
+
+- **The full chain:** L0 (budget 6->20) -> L1 (legacy seam cold) -> L2
+  (sorry-grain psi from held-work ledger) -> L3 (scheduled caller
+  injects pinned seam with deposit-grain circumstance) -> L4 (operator
+  ruling "classical route off" -> escrow fills the dG leg on the cron
+  tick). Five steps, one morning, one driver, zero regressions.
+
+**The excursion's point, proven:** the loop reads its plans. And in
+proving it, the machinery surfaced a decision nobody knew existed --
+which plan source to trust first. The operator ruled, the code changed,
+and the next cron tick read the armed deposit. That is the loop working.

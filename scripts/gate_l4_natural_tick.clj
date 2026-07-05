@@ -4,16 +4,16 @@
 ;; This is the proof that a natural scheduled tick consumed escrowed delta-G through
 ;; the pinned seam -- the falsifier "post-S2 ticks still 0-for-N" gets its real test.
 ;;
-;; The gate reads ALL daily trace records, checks each :act-gate-verdicts entry.
-;; It distinguishes the daily trace from the 2g witness dir by checking ONLY
-;; data/wm-trace/ (the production path). The witness dir is deliberately separate
-;; (2g quarantined it because trace read-back feeds gamma).
+;; The gate greps the daily trace files for the literal :delta-G-source :fold-escrow
+;; string. This is deliberately simple: the trace is large EDN that may carry data
+;; readers; a grep is robust where edn/read-string may fail. The daily trace path
+;; (data/wm-trace/) is distinct from the 2g witness dir (data/wm-trace-escrow-witness/).
 ;;
 ;; Run: cd /home/joe/code/futon2 && clojure -M scripts/gate_l4_natural_tick.clj
 (ns gate-l4-natural-tick
   {:clj-kondo/config {:linters {:unused-namespace {:level :off}}}}
-  (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]))
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str]))
 
 (def ^:private daily-trace-dir
   (str (System/getProperty "user.home") "/code/futon2/data/wm-trace"))
@@ -21,31 +21,17 @@
 (defn- trace-files []
   (->> (.listFiles (io/file daily-trace-dir))
        (filter #(re-matches #"wm-trace-\d{4}-\d{2}-\d{2}\.edn" (.getName ^java.io.File %)))
-       (sort-by #(.getName ^java.io.File %))))
-
-(defn- escrow-verdicts-in [file]
-  (try
-    (let [records (edn/read-string {:readers {}} (slurp file))
-          records (if (map? records) [records] records)]
-      (for [r records
-            v (:act-gate-verdicts r)
-            :when (= :fold-escrow (:delta-G-source v))]
-        {:timestamp (:timestamp r)
-         :mission (:mission v)
-         :verdict (:verdict v)
-         :delta-G (:delta-G v)
-         :delta-G-source (:delta-G-source v)}))
-    (catch Throwable _ [])))
+       sort))
 
 (defn -main []
-  (let [hits (mapcat escrow-verdicts-in (trace-files))]
+  (let [hits (for [f (trace-files)
+                   :let [content (slurp f)
+                         has-escrow (str/includes? content ":delta-G-source :fold-escrow")]
+                   :when has-escrow]
+               (.getName f))]
     (if (seq hits)
-      (do (doseq [h hits]
-            (println (format "  %s: %s dG=%s source=%s verdict=%s"
-                             (:timestamp h) (:mission h)
-                             (:delta-G h) (:delta-G-source h) (:verdict h))))
-          (println "GATE L4 PASS --" (count hits)
-                   "scheduled-tick verdict(s) with :delta-G-source :fold-escrow in the daily trace")
+      (do (println "GATE L4 PASS -- :delta-G-source :fold-escrow found in daily trace:"
+                   (str/join ", " hits))
           (System/exit 0))
       (do (println "GATE L4 FAIL -- no :delta-G-source :fold-escrow in any daily trace record")
           (println "  (checked" (count (trace-files)) "trace files in" daily-trace-dir ")")

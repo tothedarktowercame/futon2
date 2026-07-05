@@ -141,8 +141,23 @@ it working — and what would falsify it) / **Status**.
   pinned seam (enact.clj's 1-arity caller + banner-grain lane ψ), so
   the falsifier "post-S2 ticks still 0-for-N" stays live until the
   caller wiring + ψ-grain follow-on lands.
-- **Status:** in flight — S2's evidence slot now FILLED; remaining: the
-  scheduled-caller wiring + S3's lane-γ.
+- **Status:** RESOLVED -- the falsifier "post-S2 ticks still 0-for-N" is false.
+- **Evidence (2026-07-05, E-live-loop-3 L4, zai-2):** the falsifier
+  "post-S2 ticks still 0-for-N" is RETIRED. A NATURAL cron-fired tick
+  (11:00Z / 12:00 BST, zero human involvement) consumed escrow dG
+  through the pinned seam on the scheduled path:
+  `:delta-G/source :fold-escrow`, `:gate-delta-G -0.7` for
+  M-bayesian-structure-learning, verdict `:pass` (dF +1.463). Trace in
+  `data/wm-trace/wm-trace-2026-07-05.edn` (tick stamp
+  2026-07-05T11:00:09Z). The first `:fold-escrow` in the daily trace's
+  history (1 vs 10 legacy `:fold` entries). Standing gate =
+  `scripts/gate_l4_natural_tick.clj`. The full chain: L1 (legacy seam
+  cold) -> L2 (sorry-grain psi) -> L3 (scheduled caller injects pinned
+  seam with deposit-grain circumstance) -> L4 (operator ruling
+  "classical route off" -> escrow fills the dG leg on the cron tick).
+  The 2g witness was a direct eval; this is the natural tick. The
+  falsifier is false.
+
 
 ## 11. Futile repetition unnoticed — the keystone
 - **Mistake:** nothing at any layer notices 0-for-N: the arena (674
