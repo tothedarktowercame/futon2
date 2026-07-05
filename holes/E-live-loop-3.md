@@ -877,3 +877,49 @@ is its motivating evidence. The retrieval mechanism is the wrong seating
 for entry-condition patterns; the injection mechanism is the principled
 one.
 
+
+## Deposit-contract v2 — the CT conformance gap (operator finding, 2026-07-05)
+
+The operator's conformance question: does the escrow "LLM fold" actually
+follow the E-llm-fold discipline (futon3a/holes/missions/E-llm-fold.md;
+meme → cascade → sorry → wiring diagram), where the SORRY becomes the
+wiring's terminal nodes and the diagram is CT-checkable
+(ct-wiring-explainer.html)? Honest answer: PARTIALLY. The deposits are
+wiring-SHAPED but stop short of the CT layer.
+
+What conforms (all four deposits):
+- pattern provenance per box (fits-pattern + addresses-however = the
+  toy's WIRING section);
+- policy-holes surfaced honestly (= the toy's POLICY-HOLES);
+- unfired patterns recorded (004's "remaining 14 for a wider fold");
+- coverage ΔG hand-derivable; pins; arming.
+
+What does NOT yet conform (the v2 gap):
+1. CONNECTIVES: every deposit hyperedge is generic `:kind :composes` —
+   one undifferentiated edge type. The discipline's connective grammar
+   (BV: ◁ sequential / ⊗ non-signalling parallel / ⅋ coupled) is what
+   makes a wiring "a process expression, not a bag of patterns"
+   (E-llm-fold §connective-grammar; proved audible in the blues/fugue
+   A/B). The staging corollary (entry→exit positions) is ◁ waiting to
+   be written.
+2. SORRY-AS-TERMINAL: the deposits carry the sorry in a separate :hole
+   field; the :terminals are only IMPLICITLY its want (001's b4 ≈ the
+   acceptance shape). v2: terminals must reference the sorry's
+   want-signature STRUCTURALLY — the diagram visibly discharges the
+   typed hole it was folded for.
+3. THE CT CHECK, UNUSED: the CLean bridge (clean_to_lean.py →
+   DarkTower/CLeanProofs.lean) is BUILT, 0-sorry-gated, with the BV
+   laws proved and a worked MissionExample — and no deposit passes
+   through it. "Provably doable" is one pipeline step away from
+   literal: pin 4 = the deposit's wiring type-checks through the
+   bridge (0-sorry on the composition skeleton; policy-holes remain
+   honest holes, typed).
+
+v2 upgrade path (chartered, not built tonight): extend the ft-*.edn
+contract with :connective on each hyperedge + :discharges on terminals
+(→ the :hole's want-signature) + optional-then-mandatory pin 4 (CLean
+bridge check). Backfill the four existing deposits as the v2 shakedown
+(001 is small and golden — the natural first). Feeds M-fold-self-play
+(typed deposits = richer curriculum) and the cascade-level composition
+charter (the connectives ARE the composition operators the level-error
+resolution pointed at).
