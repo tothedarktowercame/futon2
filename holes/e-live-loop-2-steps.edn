@@ -173,22 +173,35 @@
    :title "per-lane futility observable (0-for-N counter)",
    :needs ["2a" "2b" "2c" "2d" "2e" "2f" "2g"],
    :gate
-   {:manual
-    "counter queryable via agent tool; matches historical census"},
-   :status :pending,
-   :history []}
+   {:cmd
+    "cd /home/joe/code/futon2 && clojure -M scripts/wm_futility.clj gate-3a"},
+   :status :pass,
+   :history
+   [{:at "2026-07-05T18:30:37.534077650Z",
+     :pass true,
+     :out
+     "GATE 3a PASS - lane futility counter queryable and hand-count matched\n  records: 733 lanes: 11 zero-for-N lanes: 11\n  top lanes:\n  address-sorry/:sorry/pudding-g1-arrow-witness-binding       306 attempts,    0 success,  306 failure\n  learn-action-class                                          141 at"}]}
   {:id "3b",
    :title "gamma update rule, simulated on 674-tick census",
    :needs ["2a" "2b" "2c" "2d" "2e" "2f" "2g"],
    :gate
-   {:manual
-    "simulation: historical vs synthetic paying-lane gamma trajectories diverge sensibly"},
-   :status :pending,
-   :history []}
+   {:cmd
+    "cd /home/joe/code/futon2 && clojure -M scripts/wm_futility.clj gate-3b"},
+   :status :pass,
+   :history
+   [{:at "2026-07-05T18:31:32.635291748Z",
+     :pass true,
+     :out
+     "GATE 3b PASS - gamma trajectories diverge sensibly\n  historical samples: 733 gamma: 0.5000000013862944 mean-perf: -0.9999999959999999\n  synthetic samples: 12 gamma: 1.2599210495067352 mean-perf: 0.33333333288888894"}]}
   {:id "3c",
    :title "operator bulletin on lane futility (dry-run)",
    :needs ["3a" "3b"],
    :gate
-   {:manual "synthetic 0-for-N burst produces dry-run bulletin entry"},
-   :status :pending,
-   :history []}]}
+   {:cmd
+    "cd /home/joe/code/futon2 && clojure -M scripts/wm_futility.clj gate-3c"},
+   :status :pass,
+   :history
+   [{:at "2026-07-05T18:31:40.021930342Z",
+     :pass true,
+     :out
+     "GATE 3c PASS - synthetic 0-for-N burst produced dry-run nag bulletin\n{:futon-important? true,\n :why\n \"Selected lane has 7 attempts and zero target-matched pass verdicts.\",\n :acknowledged? true,\n :lane :nag,\n :title \"Lane futility: advance-mission/M-synthetic-stuck is 0-for-7\",\n :dry-run? true,\n :lev"}]}]}

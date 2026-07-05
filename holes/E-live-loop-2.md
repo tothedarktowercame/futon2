@@ -93,6 +93,44 @@ Prerequisite (imported from E-live-loop-1, already green):
   WM grain, ledger §11's open half). Gate: a synthetic 0-for-N burst
   produces a bulletin entry in dry-run.
 
+## 3-series log — futility feedback dry-run (runner: codex-1, 2026-07-05)
+
+**3a DONE, gate PASS (converted :manual -> :cmd).** Agent-queryable
+tool: `clojure -M scripts/wm_futility.clj summary` (or the gate
+commands below) over `data/wm-trace/*.edn`; no new server process.
+Lane key = selected action class plus selected target. A lane is only
+credited when the selected target itself receives a `:pass` act-gate
+verdict; unrelated passes in the same tick do not hide futility.
+
+Historical hand-count at run time: 43 daily trace files, 733 selected
+ticks, 11 lanes, all 11 at 0-for-N under strict target credit. Top rows:
+`address-sorry/:sorry/pudding-g1-arrow-witness-binding` 0-for-306;
+`learn-action-class` 0-for-141;
+`address-sorry/:sorry/wm-aif-substrate-addressability` 0-for-108;
+`advance-mission/M-first-flights` 0-for-51;
+`open-mission/M-canon-fingerprint-store` 0-for-44.
+
+**3b DONE, gate PASS (converted :manual -> :cmd).** The offline rule
+uses R14's existing `policy-precision/fold-realized-outcome`: expected
+and realized are both coverage-dG legs, so the signed performance ratio
+is unchanged. For this simulation only, a selected lane with no
+target-matched pass realizes coverage-dG `0.0` against the act-gate
+threshold expectation `-0.25`; a paying synthetic lane realizes
+`-0.5` against `-0.25`. No live gamma wiring was added.
+
+Observed trajectories diverged as intended: historical strict 0-for-N
+record, 733 samples -> gamma `0.5000000013862944`, mean-perf
+`-0.9999999959999999`; synthetic paying lane, 12 samples -> gamma
+`1.2599210495067352`, mean-perf `0.33333333288888894`.
+
+**3c DONE, gate PASS (converted :manual -> :cmd).** Dry-run projection
+emits operator-lane-shaped items with `:lane :nag`, `:level :nag`,
+`:dry-run? true`, and the descriptive booleans needed by
+E-wm-operator-lane's classifier. The gate uses a synthetic
+`advance-mission/M-synthetic-stuck` 0-for-7 burst and confirms one nag
+bulletin item. This is dry-run only; no live bulletin route or process
+was wired.
+
 ## 2f log — the GOLDEN RUN deposit (runner: claude-20, 2026-07-05)
 
 **2f DONE, gate PASS (converted :manual → :cmd).** Arming: Joe's verbatim
