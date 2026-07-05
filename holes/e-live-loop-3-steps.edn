@@ -1,0 +1,46 @@
+{:excursion "E-live-loop-3",
+ :updated "2026-07-05",
+ :steps
+ [{:id "L0",
+   :title "budget window opened (6->20, ruling recorded)",
+   :needs [],
+   :gate
+   {:cmd
+    "cd /home/joe/code/futon3a && timeout 180 .venv/bin/python holes/labs/M-memes-arrows/cascade_serve.py \"$(cat /home/joe/code/p4ng/flights/e-live-loop-2-002-psi-v2.txt)\" 2>/dev/null | python3 -c \"import json,sys; r=json.load(sys.stdin); shown=[p['pattern'] if isinstance(p,dict) else p[0] for p in r['shown']]; need=['stack-blocker-detection','live-sync-source-truth','world-is-hypergraph','shape-first-identify']; missing=[n for n in need if not any(n in s for s in shown)]; print('budget',r['budget'],'missing:',missing); exit(1 if (missing or r['budget']<20) else 0)\""},
+   :status :pass,
+   :history
+   [{:at "2026-07-05T08:36:24.980429402Z",
+     :pass true,
+     :out "budget 20 missing: []"}]}
+  {:id "L1",
+   :title "legacy :llm-escrow seam cold (loud-ignore verified)",
+   :needs [],
+   :gate
+   {:manual
+    "driver test: planted legacy wiring file -> WARN emitted, gate delta-G stays nil"},
+   :status :pending,
+   :history []}
+  {:id "L2",
+   :title "lane psi at sorry grain (live snapshots)",
+   :needs ["L0"],
+   :gate
+   {:manual
+    "lane snapshot shows sorry-grain psi for >=1 top mission; Flight-1 control at re-pinned baseline"},
+   :status :pending,
+   :history []}
+  {:id "L3",
+   :title "scheduled caller injects pinned seam (3-arity + turn-fn)",
+   :needs ["L1" "L2"],
+   :gate
+   {:manual
+    "seam suite + scheduled-path leg green; flag-on dry-run reads pinned escrow"},
+   :status :pending,
+   :history []}
+  {:id "L4",
+   :title "NATURAL tick consumes escrow dG (ledger 10 real test)",
+   :needs ["L3"],
+   :gate
+   {:manual
+    "daily trace shows :fold-escrow provenance on a scheduled tick; ledger 10 updated"},
+   :status :pending,
+   :history []}]}

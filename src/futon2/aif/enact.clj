@@ -91,15 +91,19 @@
             (let [ag (cl/act-gate-from-lane-entry entry)
                   ag (if (some? (:delta-G ag))
                        ag
-                       (if-let [ew (escrow-wiring (:mission entry))]
-                         (if-let [g (fe/coverage-delta-g ew)]
-                           (assoc ag :delta-G g
-                                  :delta-G/source :llm-escrow
-                                  :fold {:wiring ew
-                                         :delta-g g
-                                         :policy-holes (vec (:policy-holes ew))})
-                           ag)
-                         ag))]
+                       ;; DEPRECATED (2026-07-05, E-live-loop-2 2g finding):
+                       ;; this branch read bare un-pinned wiring EDN — no
+                       ;; arming record, no prompt-sha, no ΔG re-assertion —
+                       ;; a consent-bypass-shaped hole. The pinned fold-turns
+                       ;; escrow (close-loop 3-arity seam) is the ONLY escrow
+                       ;; path now. Legacy files are ignored LOUDLY, never
+                       ;; read into the gate.
+                       (do (when (escrow-wiring (:mission entry))
+                             (binding [*out* *err*]
+                               (println (str "[enact] WARN legacy un-pinned :llm-escrow wiring present for "
+                                             (:mission entry)
+                                             " — IGNORED (deprecated 2026-07-05; migrate to the pinned fold-turns escrow)"))))
+                           ag))]
               {:mission (:mission entry)
                :shown (vec (:shown entry))
                :act-gate ag

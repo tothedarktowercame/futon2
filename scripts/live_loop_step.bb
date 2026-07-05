@@ -12,7 +12,10 @@
          '[clojure.java.shell :as sh]
          '[clojure.string :as str])
 
-(def state-file "/home/joe/code/futon2/holes/e-live-loop-2-steps.edn")
+(def state-file
+  ;; override with LIVE_LOOP_STEPS to drive any loop's board (added for loop-3)
+  (or (System/getenv "LIVE_LOOP_STEPS")
+      "/home/joe/code/futon2/holes/e-live-loop-2-steps.edn"))
 
 (defn load-state [] (edn/read-string (slurp state-file)))
 (defn save-state [st] (spit state-file (with-out-str (clojure.pprint/pprint st))))

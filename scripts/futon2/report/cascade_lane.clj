@@ -19,7 +19,13 @@
 (def ^:private py "/home/joe/code/futon3a/.venv/bin/python")
 (def ^:private script "/home/joe/code/futon3a/holes/labs/M-memes-arrows/cascade_serve.py")
 (def ^:private script-dir "/home/joe/code/futon3a/holes/labs/M-memes-arrows")
-(def default-budget 6)
+(def default-budget
+  ;; 6→20 (operator ruling 2026-07-05, E-live-loop-2 deposit-002 finding):
+  ;; at budget 6 the invariant-grade pattern arrivals sat at greedy ranks
+  ;; 10-16, outside the fold window. Still a tunable constant, not a
+  ;; principle — cascade shaping proper is its own project
+  ;; (E-gflownets-fold; the cascade-peripheral idea; E-live-loop-3).
+  20)
 
 (def ^:private cascade-timeout-ms
   "Hard ceiling on the Python cascade constructor (minilm cold-load + build). A hung child must NEVER
