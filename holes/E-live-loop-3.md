@@ -527,3 +527,16 @@ trace) was not met. This is data, not failure.
   again (ledger section 9), seen from a new angle -- the mission is on
   the lane with a strong cascade despite its doc status. Routes to the
   operator, not to the driver.
+
+## Operator ruling on ΔG reconciliation (2026-07-05, verbatim in substance)
+
+"I think we have to turn off classical fold as a route." The
+reconciliation becomes rollout → pinned escrow → abstain. Rationale from
+the L4 finding: the classical fold's 10-entry generic constructions
+(bayesian at ΔG −0.077 vs the armed deposit's −0.7) outranked reviewed,
+operator-armed work by ORDER alone, and its prices are noise at the
+decision grain. Classical fold code STAYS (tests, history, the L5
+option of re-entry under a future ruling); it is unplugged from the
+live ΔG leg, revertibly. Consequence: missions without rollout moves or
+deposits abstain honestly — the ΔG supply is now deposits, which is the
+M-fold-self-play economy by design.
