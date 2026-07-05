@@ -1783,3 +1783,55 @@ Full suite: 491 tests, 3190 assertions, 0 failures, 0 errors.
 - NO exchange-rate or cost-per-dispatch (operator economics — the fold's free
   variable h5).
 - NO certificate integration (that's P1/P3, not P2).
+
+## reference regression suite (driver: zai-10, 2026-07-05)
+
+The REFERENCE-OUTPUT REGRESSION SUITE — so quality does not silently drop when
+GLM-driven agents work without a frontier reviewer. Tonight's committed
+artifacts ARE the reference outputs; the script re-derives each and diffs
+against the stored reference; any drift is loud.
+
+**Script:** `futon2/scripts/reference_regression.clj` (`.clj` not `.bb` — every
+check exercises Clojure namespaces on the futon2 classpath: fold-escrow,
+fold-llm, mana-gate. The p3_retry_enriched kill-test is itself a `-M` script.)
+
+**Reference psis frozen:** `futon2/holes/reference-psis/psi-peradam-mech.txt`
+(sha `97b9de29…`, matches deposit-006) and `psi-aif-head.txt` (sha
+`b9c15315…`, matches deposit-004). Copied from /tmp so they survive.
+
+**8 named checks, each with PASS/DRIFT output:**
+
+1. **CONSTRUCTOR** — re-derives the cascade for the frozen peradam psi via
+   `cascade_serve.py` (futon3a .venv): size 11, F-free-energy +2.227 (tol
+   0.001), top `aif/no-self-certification` 0.521. Second psi (aif-head, my
+   choice from tonight's records — deposit-004 log): size 21, truncated at 20,
+   top `ants/baseline-cyber-ant` 0.679, F ~8.722 (tol 0.5 — embedding drift on
+   the 21-pattern cascade; structural pins exact). Provenance: deposit-006 log
+   + deposit-004 log.
+2. **FOLD PIN** — `ft-autoclock-in-001` prompt-sha `5597da91…` reproduces
+   byte-exact via the `fold-prompt` fn (the L3 reconstruction practice).
+   Provenance: gate_2f_deposit.clj pin 1 (replay-validity).
+3. **ESCROW** — `load-deposits` over the real dir: all 6 current deposits
+   accepted, 0 rejections. One synthetic tamper (corrupt delta-g to -0.999):
+   named rejection `:delta-g-mismatch`. Provenance: gate_2f_deposit.clj PASS.
+4. **KILL-TEST** — `clojure -M scripts/p3_retry_enriched.clj`: OVERALL `:fail`,
+   A fail/fail, B pass/pass (the verdict is a frozen fact about frozen data —
+   drift means harness or data corruption). Provenance: P3-retry results log.
+5. **MANA** — award 3 / consume / consume / consume / refuse-at-zero round-trip
+   on a throwaway gate id (temp dir, cleaned up after): balances exact (3→2→1→
+   0→refused). Provenance: mana_gate.clj (P2 mana gate, 8 tests).
+6. **PERADAM** — the refusal census: exactly the current refusal causes per
+   deposit (001/002 unstructured-witnesses, 003/004/005/006 missing-seal).
+   The certificate LOADER is the fold's PLAN (not yet runtime code); this
+   check freezes the DOCUMENTED census as a fact about the deposit corpus —
+   verifying no deposit carries a structural `:seal` field (all are refusable)
+   and the deposit-id set matches the frozen cause map. Provenance:
+   ft-peradam-mechanization-006 boxes b5/b6 (STEP-0 CENSUS).
+
+**Run once clean:**
+
+```
+8 checks, 8 pass
+```
+
+**Gates:** clj-kondo 0/0 (0 errors, 0 warnings); check-parens clean.
