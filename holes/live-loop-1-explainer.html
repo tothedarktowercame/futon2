@@ -1,0 +1,122 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>E-live-loop-1 — what it wasn't doing, on the R-contract</title>
+<style>
+body{font:15px/1.55 system-ui,sans-serif;max-width:980px;margin:2rem auto;padding:0 1rem;color:#223}
+h1{font-size:22px} h2{font-size:17px;border-bottom:1px solid #dde;padding-bottom:4px;margin-top:2rem}
+.summary{background:#f5f7f6;border:1px solid #dde;border-radius:8px;padding:12px 16px}
+.card{border:1px solid #dde;border-radius:8px;padding:12px 16px;margin:14px 0}
+.card h3{margin:0 0 6px 0;font-size:15px}
+.rpin{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:10px;color:#fff;background:#5a6a8a;vertical-align:middle;margin-right:6px}
+.was{color:#b1543a} .should{color:#3f8b57}
+.ev{font-size:13px;color:#667;border-left:3px solid #ccd;padding-left:10px;margin:8px 0}
+table{border-collapse:collapse;font-size:13px;width:100%} th,td{border:1px solid #dde;padding:4px 8px;text-align:left}
+code{background:#f2f4f3;padding:0 4px;border-radius:4px;font-size:13px}
+.foot{color:#99a;font-size:11px;margin-top:2rem}
+</style></head><body>
+
+<h1>E-live-loop-1: what it <em>wasn't</em> doing — pinned to the R-contract</h1>
+
+<div class="summary">
+Companion to <a href="aif-wiring-explainer.html">the R1–R18 wiring explainer</a>.
+E-live-loop-1 asked why the cascade lane produces <b>honest nothings at real cost</b>
+(674 arena ticks, 0 cascade wins, every live fold an abstention). The answer is not
+one bug but <b>six R-contract obligations left unwired at the policy grain</b> — each
+pinned below with its evidence and the E-live-loop-2 microstep that wires it
+(<code>bb futon2/scripts/live_loop_step.bb status</code> for the live scoreboard).
+The mission lane closed R16 and fed R14 on 2026-07-02; <b>the cascade lane got none
+of that</b> — it is a limb the loop never learned to feel.
+</div>
+
+<h2>The six pins</h2>
+
+<div class="card"><h3><span class="rpin">R2</span> Observation was a stale summary, not the live tension</h3>
+<span class="was">Wasn't:</span> the lane's whole observation of a mission was ψ = title + status
+line — a ~368-byte banner, cached prose about a state, not the state. Thin o<sub>t</sub> in,
+size-1 cascade out is arithmetic, not fate.
+<div class="ev">Evidence: Flight 1 — rel-max 0.346, size 1, F +0.046 on the banner. S1 re-measured
+with sorry-grain ψ: rel up 12/12 (median 0.485), size median 4, five budget truncations —
+the lane's first ever. Ablation held. (p4ng/flights/)</div>
+<span class="should">Live-loop-2:</span> sorry-grain ψ is the S1 result feeding all 2-series
+steps; the banner itself gets the <code>status-refresh-before-work</code> discipline so the
+cached observation is re-derived at every takeup.</div>
+
+<div class="card"><h3><span class="rpin">R13</span> Policy-grain G existed but never entered selection</h3>
+<span class="was">Wasn't:</span> cascades carry their own valuation (wholeness, F) in the lane's
+currency, and the arena ranks in the 8-term G blend — <b>the two currencies never meet</b>.
+Every cascade entered the arena at a constant placeholder 0.0.
+<div class="ev">Evidence: 0 wins in 674 ticks; the argue-exhibit's cross-tables; the act-gate ANDs
+ΔF∧ΔG precisely so the bridge exists — but ΔG arrives nil without a construction
+(canon-fingerprint: ΔF −0.874 despite fold ΔG −0.25; bayesian: +1.049 ∧ −0.2 → pass).</div>
+<span class="should">Live-loop-2:</span> the fold's ΔG is the designed bridge; steps 2d–2g give it
+something to carry (escrow records → replay seam → armed deposit → consumed on path, each gated).</div>
+
+<div class="card"><h3><span class="rpin">R16</span> The loop-closure arc bypassed the only constructor with reach</h3>
+<span class="was">Wasn't:</span> two independent sufficient causes. The LLM fold — the only fold
+that constructs for contentful patterns (the classical rule table has 10 entries) — was
+<b>unarmed</b> (consent-correct) <em>and</em> <b>had no live caller</b>:
+<code>close_loop.clj:30</code> tries rollout → classical → abstain. Feeding the escrow without
+the seam would have changed nothing.
+<div class="ev">Evidence: Flight 1 Leg 2 — classical abstain, LLM no-turn, realized nil, all
+honest, all empty; mock-armed LLM fold: 1 box, ΔG −0.5, closes? true. The no-live-caller
+finding is E-live-loop-1 finding 6 (S2 design pass).</div>
+<span class="should">Live-loop-2:</span> 2e builds the replay seam dark (flag off, mock replay
+test, ΔG re-asserted on load); 2f/2g are ⚠ARMED — one real deposit, then live consumption,
+each on Joe's word, each gated.</div>
+
+<div class="card"><h3><span class="rpin">R14</span> No precision over the lane — futility never fed back</h3>
+<span class="was">Wasn't:</span> R14's γ is live for the mission lane (fed by R16's
+realized-vs-expected since 2026-07-02) — but the <b>cascade lane has no γ at all</b>. 0-for-674
+is an observation the system never updates on; the lane cannot lose precision however long it
+fails to pay.
+<div class="ev">Evidence: the constant-placeholder finding; the memoization note (waste is
+architectural, not thermodynamic — the appendage is maintained, never doubted).</div>
+<span class="should">Live-loop-2:</span> 3b specifies and SIMULATES the γ-update rule against the
+674-tick census (historical vs synthetic paying-lane trajectories must diverge sensibly) before
+any live wiring — the learned-γ thesis applied to the lane that motivated it.</div>
+
+<div class="card"><h3><span class="rpin">R17</span> The policy repertoire was frozen — no niche for new patterns</h3>
+<span class="was">Wasn't:</span> three gates kept new patterns out of the policy space entirely:
+absent from the embeddings artifact (unretrievable), absent from the phylogeny (display-only,
+never choosable — <code>cascade_construct.py:188-197</code>), and priced at the unseen-pattern
+prior (2.398 nats ≈ an F-fine of 0.60 that seed coverage cannot pay). Structure learning at the
+pattern grain was structurally impossible.
+<div class="ev">Evidence: the three process-coherence seed patterns (the operator's own
+IF/HOWEVER/THENs) are currently invisible to the lane — stepper gates 2a/2b are honestly RED
+this morning; the 2.398-nat constant was cross-checked against S1's measured rare-singleton
+complexity.</div>
+<span class="should">Live-loop-2:</span> 2a (embeddings), 2b (phylogeny), 2c (prior floor, probe
+attached as the gate) — the machine refuses 2c until 2a+2b are green.</div>
+
+<div class="card"><h3><span class="rpin">R18</span> The system's own decision terms weren't observable</h3>
+<span class="was">Wasn't:</span> the EFE terms exist in the in-JVM trace (G-total, τ,
+policy-precision, G-pragmatic, G-epistemic) but are <b>invisible to every agent tool</b> —
+tick bodies unprojected into the evidence store. No reader can check real-vs-analogical claims
+about a quantity no reader can read; the faithfulness lens has nothing to look through.
+<div class="ev">Evidence: Flight 1 Finding 1 (tool-eye blindness), refined by the attempt-1
+transcript: trace-visible in-JVM, agent-invisible everywhere else. Third independent arrival at
+the same seam that evening (Evidence Landscape; live-efe-map C5).</div>
+<span class="should">Live-loop-2:</span> 3a makes the futility observable queryable by agent
+tools (with the wm-tick emitter upgrade, mistakes-ledger §13's open half); 3c routes
+lane-futility to the operator bulletin — <code>stuck-means-signal</code> at the WM grain.</div>
+
+<h2>The scoreboard is the recovery</h2>
+<table>
+<tr><th>pin</th><th>deficiency</th><th>live-loop-2 steps</th><th>gate state (2026-07-05 07:xx)</th></tr>
+<tr><td>R2</td><td>banner-grain observation</td><td>S1 (+ takeup discipline)</td><td>S1 <b style="color:#3f8b57">PASS</b></td></tr>
+<tr><td>R17</td><td>frozen repertoire</td><td>2a · 2b · 2c</td><td>2a <b style="color:#b1543a">FAIL</b> · 2b <b style="color:#b1543a">FAIL</b> · 2c locked</td></tr>
+<tr><td>R16</td><td>seam + arming</td><td>2d · 2e · 2f⚠ · 2g⚠</td><td>pending, ordered</td></tr>
+<tr><td>R13</td><td>currencies never meet</td><td>2g (ΔG consumed on path)</td><td>locked behind 2f</td></tr>
+<tr><td>R14</td><td>no lane-γ</td><td>3b (simulate first)</td><td>locked behind 2-series</td></tr>
+<tr><td>R18</td><td>terms unobservable</td><td>3a · 3c</td><td>locked behind 2-series</td></tr>
+</table>
+
+<p>The honest reading of the whole exercise: live-loop-1's machinery was never <em>wrong</em> —
+its abstentions were correct, its arithmetic checked out, its consent gates held. It was
+<b>unfinished in six specific, R-numbered ways</b>, and every way is now a gate someone can run:
+red until the work lands, alarmed if it ever goes red again.</p>
+
+<p class="foot">Sources: futon2/holes/E-live-loop-1.md (findings 1–6, S1 log, S2 design) ·
+E-live-loop-2.md + e-live-loop-2-steps.edn (the microsteps) · mistakes-remedies-ledger.md ·
+p4ng/flights/ (Flight 1 logs, S1 table, transcript analysis) · aif-wiring-explainer.html
+(R1–R18). Compiled 2026-07-05 by claude-16 at operator direction.</p>
+</body></html>
