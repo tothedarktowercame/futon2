@@ -256,3 +256,24 @@
         ids (set (map :id missions))]
     (is (not (contains? ids "M-bayesian-structure-learning"))
         "M-bayesian-structure-learning is NOT in the live mission set")))
+
+(deftest duplicate-scan-dedupes-worktree-copies
+  "Worktrees and directory copies under the code root produce duplicate
+   mission-doc hits with identical ids. The scan must dedupe by id,
+   keeping the primary checkout (shortest path)."
+  (write-mission! "futon3c/holes/missions/M-dup-test.md"
+                  (str "**Status:** OPEN\n"
+                       "# Dup Test\n"))
+  (write-mission! "futon3c-index-check/holes/missions/M-dup-test.md"
+                  (str "**Status:** OPEN\n"
+                       "# Dup Test (copy)\n"))
+  (write-mission! ".worktrees/futon5-x/holes/missions/M-dup-test.md"
+                  (str "**Status:** OPEN\n"
+                       "# Dup Test (worktree)\n"))
+  (let [doc (mr/load-missions *tmpdir*)
+        matches (filter #(= "M-dup-test" (:id %)) (:missions doc))]
+    (is (= 1 (count matches)) "duplicate ids deduped to one entry")
+    (is (= "OPEN" (:status-line (first matches))))
+    ;; Primary checkout (shortest path) is kept
+    (is (re-find #"futon3c/holes" (:path (first matches)))
+        "primary checkout (shortest path) kept over worktree/copy")))

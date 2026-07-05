@@ -147,6 +147,19 @@
      :status-class status-class
      :open-hole-count (open-hole-count status-class lines)}))
 
+(defn- dedupe-by-id
+  "Keep the first entry per mission id (sort order = shortest path = primary
+   checkout). Worktrees and directory copies under ~/code/ produce duplicate
+   mission-doc hits with identical ids; this removes them post-scan."
+  [entries]
+  (let [seen (atom #{})]
+    (remove (fn [e]
+              (if (contains? @seen (:id e))
+                true
+                (do (swap! seen conj (:id e))
+                    false)))
+            entries)))
+
 (defn load-missions
   "Scan the code root for top-level mission docs and return
    `{:missions [...]}` with lightweight metadata for each one.
@@ -161,9 +174,13 @@
                        (map #(.getAbsolutePath %))
                        (filter #(re-matches mission-path-pattern %))
                        (remove sandbox-path?)
-                       sort
+                       ;; Sort by path length first (shorter = primary checkout,
+                       ;; not a worktree/copy), then alphabetically. This ensures
+                       ;; dedupe-by-id keeps the primary checkout.
+                       (sort-by (juxt count identity))
                        (map mission-doc->entry)
                        (remove #(derived-mission-id? (:id %)))
+                       (dedupe-by-id)
                        vec)]
      {:missions missions})))
 

@@ -989,3 +989,49 @@ pattern); and cosmetic symptoms deserve one "is this hiding a
 starvation?" question before being filed as cosmetic — the empty
 `expectedG=` was the γ-starvation signal, triaged as formatting for
 half a day.
+
+## duplicate-scan fix -- worktree/copy dedup (driver: zai-2, 2026-07-05)
+
+**FIX DONE.** The mission scan's `file-seq` over `~/code/` found mission docs
+in worktrees and directory copies, producing duplicate candidates with
+identical IDs -> the "tied with itself" bug on the :3100 dashboard.
+
+- **Scale:** 87 duplicate IDs, 181 duplicate entries (292 total -> 198
+  unique). Sources: `futon3c-index-check/` (plain directory copy, ~80
+  dups), `.worktrees/futon5-ada2533/` + `futon5-health-main/` (git
+  worktrees, ~7 dups).
+
+- **Reviewer's `.git` discriminator was WRONG:** the reviewer suggested
+  `.git` file-vs-dir as the worktree discriminator. In practice,
+  `futon3c-index-check/` has NO `.git` at all (it's a plain copy, not a
+  git worktree), and the actual git worktrees (`.worktrees/`) are under a
+  hidden path that `file-seq` still walks. The `.git` test would have
+  missed the largest offender. Dedupe-by-id post-scan is the robust fix.
+
+- **Mechanism:** `dedupe-by-id` keeps the first entry per mission id. Sort
+  order changed from alphabetical to `(sort-by (juxt count identity))` --
+  shortest path first -- so the primary checkout (e.g.
+  `/home/joe/code/futon3c/...`) wins over the copy
+  (`/home/joe/code/futon3c-index-check/...`). Without this subtlety, the
+  index-check copy would be kept (it sorts before the primary
+  alphabetically).
+
+- **Tests:** 1 new test (duplicate-scan-dedupes-worktree-copies: three
+  copies of the same mission under different roots -> one entry, primary
+  checkout kept). All 18 registry tests green (52 assertions).
+
+- **F2 standing gate:** PASS (unaffected -- supersession classifier reads
+  the deduped set).
+
+- **Reload note:** `mission-registry` runs in the one-shot JVM (next cron
+  tick picks up the source change). The serving JVM carries a TTL-cached
+  copy (`missions-cache`); previews that call `mission-status` or
+  `load-missions-cached` will serve stale until the TTL expires. No
+  explicit serving-JVM reload needed -- the TTL handles it, and the next
+  cron tick is the production path.
+
+- **PRE-REGISTERED tick expectation:** next cron tick's candidates count
+  drops from 145 (with duplicates) to ~93 (unique live missions). The
+  :3100 "tied with itself" display should clear (duplicates inflated the
+  tie structure). If candidates > 93 in the next tick, either the TTL
+  served stale or a new mission was added -- diagnose before retrying.
