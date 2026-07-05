@@ -71,8 +71,75 @@ top: ants/baseline-cyber-ant (rel .679) · futon-theory/structural-tension-as-ob
 aif/candidate-pattern-action-space (.526) · aif/structured-observation-vector (.502)
 gauntlet/aif-as-environment-not-instruction (.565) · aif/belief-state-operational-hypotheses (.501) …</pre>
 <p><b>counter-example (library gap, finding 3):</b> diagramprover's well-formed ψ → size 1,
-F −0.443 — the library has no proof-search vocabulary; remedy = author patterns via the
-seeds pipeline, not enrich ψ.</p></details>
+F −0.443 — the library had no proof-search vocabulary. <b>Remedy (operator doctrine,
+2026-07-05): the library is incomplete by construction — AUTHOR the missing patterns</b>
+from real built practice and re-measure (proof-search/* seeds; see
+process-coherence/author-the-missing-pattern). Never enrich ψ to paper over a library gap.</p></details>
+<details open><summary>drawing — a real cascade as a semilattice (the golden deposit, ft-autoclock-in-001)</summary>
+<svg viewBox="0 0 900 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:#fcfdfc;border:1px solid #e3e6e3;border-radius:6px">
+  <defs><marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+    <path d="M0,0 L7,3 L0,6 z" fill="#5a6a8a"/></marker></defs>
+  <!-- process axis -->
+  <line x1="60" y1="330" x2="860" y2="330" stroke="#ccd" stroke-width="1"/>
+  <text x="60" y="348" font-size="11" fill="#99a">ENTRY — declare intent</text>
+  <text x="720" y="348" font-size="11" fill="#99a">EXIT — acceptance</text>
+  <!-- psi at left -->
+  <rect x="8" y="120" width="80" height="80" rx="8" fill="#f5f7f6" stroke="#dde"/>
+  <text x="48" y="150" font-size="12" text-anchor="middle" fill="#223" font-weight="700">ψ</text>
+  <text x="48" y="166" font-size="9" text-anchor="middle" fill="#667">WANT: durable</text>
+  <text x="48" y="178" font-size="9" text-anchor="middle" fill="#667">lineage, survives</text>
+  <text x="48" y="190" font-size="9" text-anchor="middle" fill="#667">teardown</text>
+  <!-- pattern nodes on the process axis (fold order b1->b4) -->
+  <g font-size="10">
+    <rect x="120" y="60" width="150" height="46" rx="8" fill="#eef1f6" stroke="#5a6a8a"/>
+    <text x="195" y="79" text-anchor="middle" fill="#223" font-weight="700">musn/plan-before-tool</text>
+    <text x="195" y="93" text-anchor="middle" fill="#667">b1 · rel .418 · ENTRY</text>
+    <rect x="330" y="24" width="170" height="46" rx="8" fill="#eef1f6" stroke="#5a6a8a"/>
+    <text x="415" y="43" text-anchor="middle" fill="#223" font-weight="700">realtime/loop-recovery</text>
+    <text x="415" y="57" text-anchor="middle" fill="#667">b2 · rel .416 · degrade path</text>
+    <rect x="430" y="96" width="170" height="46" rx="8" fill="#eef1f6" stroke="#5a6a8a"/>
+    <text x="515" y="115" text-anchor="middle" fill="#223" font-weight="700">realtime/loop-failure-signals</text>
+    <text x="515" y="129" text-anchor="middle" fill="#667">b3 · rel .362 · audit</text>
+    <rect x="670" y="60" width="180" height="46" rx="8" fill="#e7f0e9" stroke="#3f8b57"/>
+    <text x="760" y="79" text-anchor="middle" fill="#223" font-weight="700">realtime/loop-success-signals</text>
+    <text x="760" y="93" text-anchor="middle" fill="#667">b4 · rel .377 · TERMINAL</text>
+  </g>
+  <!-- fold wires (solid, the deposit's composes edges) -->
+  <g stroke="#5a6a8a" stroke-width="1.6" fill="none" marker-end="url(#arr)">
+    <path d="M270,76 C300,60 310,52 328,48"/>
+    <path d="M270,92 C330,104 380,112 428,116"/>
+    <path d="M420,70 C430,82 440,92 452,96"/>
+    <path d="M600,112 C630,100 640,88 668,82"/>
+  </g>
+  <!-- substrate-2 endpoints (the routes BETWEEN patterns run through the problem) -->
+  <g font-size="9">
+    <ellipse cx="195" cy="230" rx="78" ry="18" fill="#fff" stroke="#a07f2a"/>
+    <text x="195" y="234" text-anchor="middle" fill="#665">set-dispatch-mission! · clocked-on edge</text>
+    <ellipse cx="415" cy="270" rx="70" ry="18" fill="#fff" stroke="#a07f2a"/>
+    <text x="415" y="274" text-anchor="middle" fill="#665">RAM clock · :pending-durable</text>
+    <ellipse cx="580" cy="230" rx="80" ry="18" fill="#fff" stroke="#a07f2a"/>
+    <text x="580" y="234" text-anchor="middle" fill="#665">held/on-mission (109) · reconstitute</text>
+    <ellipse cx="780" cy="270" rx="75" ry="18" fill="#fff" stroke="#a07f2a"/>
+    <text x="780" y="274" text-anchor="middle" fill="#665">reconstitute output (= the WANT)</text>
+  </g>
+  <!-- pattern->endpoint routes (dashed): structural relation THROUGH substrate-2 -->
+  <g stroke="#a07f2a" stroke-width="1" stroke-dasharray="4 3" fill="none">
+    <path d="M195,106 L195,212"/>
+    <path d="M415,70 C415,140 415,200 415,252"/>
+    <path d="M515,142 C540,170 560,195 575,212"/>
+    <path d="M760,106 C770,160 775,210 780,252"/>
+    <path d="M270,236 C320,250 350,258 348,262"/>
+    <path d="M650,236 C690,248 710,256 708,262"/>
+  </g>
+  <text x="450" y="316" font-size="10" text-anchor="middle" fill="#99a">solid = the fold's composes-wires (process order) · dashed = routes through substrate-2 endpoints (structural relation to the problem)</text>
+</svg>
+<p><b>How to read it:</b> the patterns rarely cite each other — their relation is
+STRUCTURAL, through the problem: each pattern's box touches real substrate-2 endpoints
+(dashed), and the fold's wires (solid) give the PROCESS ORDER. Note the staging: the
+declared-intent pattern sits at ENTRY and the acceptance pattern at EXIT — a pattern's
+position in the process is part of its meaning (operator: "it won't do to put
+status-refresh-before-work at the end — it needs to come at the beginning"). This is the
+first-slot/anchor design for seed patterns, seen from the drawing side.</p></details>
 </div>
 
 <div class="card"><h3><span class="n">5</span>Price the plan (ΔG reconciliation) <span class="live">LIVE</span></h3>
