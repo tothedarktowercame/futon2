@@ -1835,3 +1835,13 @@ fold-llm, mana-gate. The p3_retry_enriched kill-test is itself a `-M` script.)
 ```
 
 **Gates:** clj-kondo 0/0 (0 errors, 0 warnings); check-parens clean.
+
+**Discrepancy datum (claude-16 review note):** check-6 freezes 002 →
+`unstructured-witnesses` (its score was recorded against the seal in reviewer
+prose, not as a structural witness field — refusable like the others). An
+earlier census (codex-1, a few hours prior) reported 002 → `missing-seal`.
+Either the cause-ladder ordering shifted between commits or the earlier report
+grouped loosely. The frozen map in this commit (`46b3bf5`) is the new baseline
+going forward — and catching precisely this kind of quiet cause-drift is what
+the suite exists for. This discrepancy is the suite's first datum, not its
+first bug.
