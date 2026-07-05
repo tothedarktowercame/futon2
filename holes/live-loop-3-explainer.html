@@ -19,11 +19,13 @@ blockquote{color:#667;border-left:3px solid #ccd;margin:8px 0;padding-left:10px;
 Third panel of the trilogy (<a href="live-loop-1-explainer.html">what wasn't wired</a> ·
 <a href="live-loop-2-explainer.html">the recovery</a>). Loop-3's charter: natural ticks,
 sorry-grain ψ, pinned escrow — the loop reading its plans in the ordinary course of business.
-Verdict of this audit: <b>four gates green, the fifth honestly red — and the red is the most
-valuable result of the arc.</b> The tick ran, the machinery worked, the escrow was <em>correctly
-skipped</em> — and in being skipped it exposed a decision nobody knew existed: the loop now has
-TWO plan sources and an implicit preference between them that had never needed deciding.
-That decision sits with the operator, where it belongs.
+Verdict of this audit (updated same day): <b>all five gates green — the fifth after being
+honestly red long enough to expose a decision nobody knew existed.</b> The first tick correctly
+skipped the escrow (the classical fold's generic price won by reconciliation order), surfacing
+the two-plan-sources preference question; the operator ruled — <em>classical fold off as a ΔG
+route</em> — and the next cron tick, unattended, read the armed deposit:
+<code>:fold-escrow, ΔG −0.7, verdict :pass</code>, first in the trace's history. The excursion
+exits COMPLETE (commit c426c7e).
 </div>
 
 <h2>The board (driver: zai-2; deposits: claude-20; review: claude-16)</h2>
@@ -33,7 +35,7 @@ That decision sits with the operator, where it belongs.
 <tr><td>L1 legacy seam cold</td><td class="ok">PASS</td><td>the un-pinned <code>:llm-escrow</code> branch loud-ignores planted files (consent-bypass hole closed); the WARN also surfaced claude-11's 2026-07-02 pre-contract deposit, archived with provenance</td></tr>
 <tr><td>L2 sorry-grain lane ψ</td><td class="ok">PASS</td><td>the live lane's ψ now builds from the held-work ledger (140 mission-linked items — the stack's record of deferred work becomes its source of tension); banner fallback byte-identical; Flight-1 control at the named F +0.051 stage</td></tr>
 <tr><td>L3 pinned seam on the scheduled path</td><td class="ok">PASS</td><td>deposit-grain circumstance reconstruction reproduces the pinned prompt sha BYTE-EXACT (5597da91…); flag-on dry-run fired <code>:fold-escrow</code> ΔG −4/9 through the scheduled path; prompt-drift abstention tested</td></tr>
-<tr><td>L4 natural tick consumes escrow ΔG</td><td class="red">RED — correctly</td><td>the tick ran (10:17 UTC, gates {1 pass, 1 fail}): M-bayesian-structure-learning passed and ENACTED (artifact-only) — but with <code>:delta-G-source :fold</code>, the CLASSICAL fold. The escrow was never consulted, because the classical fold resolved first. 0 <code>:fold-escrow</code> hits in 43+ daily trace files: the gate knows how to be red.</td></tr>
+<tr><td>L4 natural tick consumes escrow ΔG</td><td class="ok">PASS (was honestly red first)</td><td>After the operator's ruling (classical fold OFF as a ΔG route, 2026-07-05 ~11:05), the <b>11:00Z cron tick — zero human involvement</b> — logged gates {:abstain-missing-leg 1, :pass 1}: canon-fingerprint honestly abstains (no deposit, no generic price to hide behind) and bayesian PASSED with <code>:delta-G-source :fold-escrow, :gate-delta-G -0.7</code> — the first <code>:fold-escrow</code> in the daily trace's history. Ledger §10's falsifier ("post-S2 ticks still 0-for-N") RETIRED. The gate spent the morning red on 0-hits-in-43-files, which is why its green means something.</td></tr>
 </table>
 
 <h2>The discovery: two plan sources, one undecided preference</h2>
