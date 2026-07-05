@@ -11,6 +11,7 @@
    deepens at scope-grain v2 (in v1 its reachable set is 3 summits). Sim-only, read-only:
    constructs cascades over a state copy, never promotes/writes."
   (:require [cheshire.core :as json]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
             [futon2.aif.rollout :as rollout])
@@ -98,6 +99,74 @@
        (filter #(.exists ^java.io.File %))
        first))
 
+;; ---------------------------------------------------------------------------
+;; L2 (E-live-loop-3, 2026-07-05): sorry-grain ψ from the held-work ledger.
+;; ADDITIVE: fires when the target mission has held-work items; falls through
+;; to the banner ψ (the existing or-cascade) when it doesn't. The join is
+;; id-stem substring match (handles both "M-diagramprover" and
+;; "futon3c-d/mission/diagramprover"). Reject-loudly on unreadable ledger
+;; (WARN to stderr once per pass, then banner fallback) — DISTINCT from
+;; zero-items-for-mission (silent, normal, the additive fallback fires).
+;; ---------------------------------------------------------------------------
+
+(def ^:private held-work-ledger-path
+  (str (System/getProperty "user.home")
+       "/code/futon3c/holes/excursions/held-work-ledger.edn"))
+
+(def ^:private ^:const sorry-psi-byte-cap 1024)
+
+(defonce ^:private !held-work-ledger
+  (delay
+    (try
+      (-> held-work-ledger-path slurp edn/read-string :items)
+      (catch Throwable e
+        (binding [*out* *err*]
+          (println "[cascade-lane] WARN held-work ledger unreadable at"
+                   held-work-ledger-path "— falling back to banner ψ for all missions."
+                   "Error:" (.getMessage e)))
+        nil))))
+
+(defn- held-items-for
+  "Filter the held-work ledger to items whose :held/missions includes the
+   target (id-stem substring match, case-insensitive). Returns [] when the
+   ledger is nil (unreadable) or no items match."
+  [target]
+  (let [items @!held-work-ledger
+        stem (-> (str target) (str/replace #".*/" ""))
+        stem-lc (str/lower-case stem)]
+    (if (or (nil? items) (empty? items))
+      []
+      (filter (fn [item]
+                (some (fn [m]
+                        (let [m-stem (-> (str m) (str/replace #".*/" ""))
+                              m-lc (str/lower-case m-stem)]
+                          (or (str/includes? m-lc stem-lc)
+                              (str/includes? stem-lc m-lc))))
+                      (:held/missions item)))
+              items))))
+
+(defn- sorry-grain-psi
+  "Build sorry-grain ψ from held-work items for the target mission.
+   Returns nil when no items match (the or-cascade falls through to banner).
+   Recipe (S1 v2): WANT: <reason or evidence-condition>. HUNGRY-FOR: <kind>
+   when available. HAVE: <re-entry>. Multiple items concatenate, capped at
+   ~1KB (sorry-psi-byte-cap) matching the S1 corpus range."
+  [target]
+  (let [items (held-items-for target)]
+    (when (seq items)
+      (let [stem (id-stem-psi target)
+            entry-str (fn [item]
+                        (let [want (or (:held/reason item)
+                                       (:held/evidence-condition item))
+                              have (:held/re-entry item)
+                              kind (:held/kind item)]
+                          (str "WANT: " want
+                               (when kind (str " HUNGRY-FOR: " kind))
+                               (when have (str " HAVE: " have)))))
+            full (str/join " " (map entry-str items))
+            capped (subs full 0 (min sorry-psi-byte-cap (count full)))]
+        (str stem " — " capped)))))
+
 (defonce ^:private !psi-cache (atom {}))
 
 (defn mission->psi
@@ -110,7 +179,8 @@
   [target]
   (or (get @!psi-cache target)
       (let [stem (id-stem-psi target)
-            psi (or (when-let [f (mission-doc-file target)]
+            psi (or (sorry-grain-psi target)  ;; L2: sorry-grain from held-work ledger
+                    (when-let [f (mission-doc-file target)]
                       (try
                         (let [lines (str/split-lines (slurp f))
                               clip (fn [s n] (let [s (str/trim (str s))]

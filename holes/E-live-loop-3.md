@@ -255,3 +255,46 @@ byte-identical).
 - Does not touch the escrow seam (that's L3/L4).
 - Does not add substrate-2 sorry nodes as a source — that's a future
   follow-on once mission→sorry edges exist in substrate-2.
+
+## L2 log — sorry-grain ψ landed (driver: zai-2, 2026-07-05)
+
+**L2 DONE, gate PASS (converted :manual → :cmd).** The live lane's ψ now
+builds from held-work sorries when available, falling back to banner ψ
+when not. The join is alive; the current live lane just has a thin
+mission set.
+
+- **STEP 0 (empirical intersection):** the live lane's current 2 missions
+  (`M-canon-fingerprint-store`, `M-bayesian-structure-learning`) have zero
+  held-work items — but the join itself is healthy: 35 distinct ledger
+  mission targets, 15 S1-candidate matches confirmed via proof-eval
+  (`live-geometric-stack`, `diagramprover` ×2, `codex-agent-behaviour` ×2,
+  `writing-ethics`, `self-documenting-stack`, `essays-edit-cycle`,
+  `apm-solutions` ×2, `a-sorry-enterprise`, `aif-head`, `war-machine` ×3).
+  The empty live intersection is a fact about the WM's current attention,
+  not about the code. Reviewer ruled: proceed (not weather).
+
+- **Implementation:** `cascade_lane.clj` — held-work branch atop
+  `mission->psi`'s `or`-cascade: `(or (sorry-grain-psi target) (banner-psi
+  ...) stem)`. The `sorry-grain-psi` fn loads the held-work ledger
+  (`held-work-ledger.edn`) via a `delay` (cached, parsed once per JVM),
+  filters by id-stem substring match, and builds ψ from `:held/reason`
+  (WANT) + `:held/re-entry` (HAVE) + `:held/kind` (HUNGRY-FOR when present),
+  concatenated and capped at 1KB. Reject-loudly on unreadable ledger
+  (WARN to stderr once via the delay, then nil → banner fallback for all).
+  Zero-items-for-mission is silent (normal additive fallback).
+
+- **Recipe adjustment from proposal:** `:held/reason` preferred over
+  `:held/evidence-condition` for WANT — the evidence-condition is often a
+  Clojure code string (from the `:prose` source) that's worse than the
+  clean one-line reason. The S1 recipe used the want-signature (short,
+  clean); `:held/reason` is its analogue.
+
+- **Standing gate:** `scripts/gate_l2_sorry_grain.clj` (kondo 0/0,
+  check-parens OK). Two-part per reviewer: Part A (pass/fail) —
+  `M-live-geometric-stack` produces sorry-grain ψ through the real
+  `mission->psi`; `M-canon-fingerprint-store` falls back to banner ψ.
+  Part B (informational, never failing) — prints the current live-lane
+  intersection count and names (stuck-means-signal at the gate grain).
+
+- **Canary:** lane ns reloaded via proof-eval `-f`; `default-budget` still
+  20 after reload. Board: L0 PASS, L1 PASS, L2 PASS, L3 runnable.

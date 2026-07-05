@@ -26,10 +26,11 @@
    :title "lane psi at sorry grain (live snapshots)",
    :needs ["L0"],
    :gate
-   {:manual
-    "lane snapshot shows sorry-grain psi for >=1 top mission; Flight-1 control at re-pinned baseline"},
-   :status :pending,
-   :history []}
+   {:cmd
+    "cd /home/joe/code/futon2 && clojure -M scripts/gate_l2_sorry_grain.clj 2>&1 | grep -q 'GATE L2 PART A PASS'"},
+   :status :pass,
+   :history
+   [{:at "2026-07-05T09:32:46.958750416Z", :pass true, :out ""}]}
   {:id "L3",
    :title "scheduled caller injects pinned seam (3-arity + turn-fn)",
    :needs ["L1" "L2"],
