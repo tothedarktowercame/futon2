@@ -305,3 +305,46 @@ mission set.
   `clear-psi-cache!` (sibling to `clear-cache!`) so the ledger-refresh
   story has a complete invalidation path. Not a defect today (the ledger
   is snapshot-cadenced), but named for the record.
+
+## L3 log — the scheduled caller injects the pinned seam (driver: zai-2, 2026-07-05)
+
+**L3 DONE, gate PASS (converted :manual → :cmd).** The scheduled path in
+`enact.clj` now injects `:escrow-turn-fn`/`:prose-fn` with the
+**deposit-grain circumstance**, so a recorded fold-turn's ΔG can fill the
+nil leg on a natural scheduled tick. This is the wiring ledger §10's
+falsifier has been waiting for.
+
+- **The deposit-grain reconstruction (the load-bearing design):** the
+  prompt-sha pin means the lane's ψ will never match the deposit's pinned
+  prompt — the lane builds ψ from banner/sorry grain, but the deposit
+  pins the S1 sorry-grain ψ. The caller therefore reconstructs the
+  deposit's OWN circumstance (`{:mission <deposit :mission> :psi <deposit
+  :cascade :psi>}`) and passes the deposit's OWN pattern-ids as `:shown`.
+  Verified: the fold-prompt built from these matches the deposit's pinned
+  `:prompt :sha256` exactly (proof-eval in the serving JVM). The prose-fn
+  is verbatim flexiarg slurp (confirmed: all 4 prose-sha256 values match).
+
+- **Implementation:** `enact.clj`'s `act-gates-with-shown` now: (1) calls
+  the 1-arity (rollout + classical fold); (2) if ΔG is nil, checks for a
+  matching deposit via `deposit-for-mission`; (3) if found, calls the
+  3-arity with the deposit-grain circumstance + escrow-turn-fn + prose-fn;
+  (4) if no deposit, falls through to the legacy loud-ignore (L1).
+  Deposits loaded once per tick via a delay-cached `!deposits-cache`.
+
+- **Flag-on dry-run (proof-eval, serving JVM):** the real
+  `ft-autoclock-in-001` deposit was read through the scheduled path.
+  Result: `:delta-G-source :fold-escrow`, `:delta-G −4/9`,
+  `:has-fold-escrow true`. The escrow leg FIRED on the scheduled path.
+  Verdict was `:fail` because ΔF was −0.69 (the lane's cascade for
+  M-autoclock-in's banner ψ is a gap — a different cascade than the S1
+  row). This is the pin WORKING: the escrow fills ΔG correctly, but the
+  gate ANDs ΔF > 0 ∧ ΔG < 0, and the lane's ΔF comes from its own cascade.
+  When a mission's lane cascade has F > 0 AND a matching deposit, the
+  gate will pass — that's L4's test.
+
+- **Tests:** `enact_scheduled_path_test.clj` (3 tests: escrow replay for
+  matching mission, fall-through for no-deposit, prompt-drift abstention).
+  All 8 escrow-related tests green (26 assertions, 0 failures).
+
+- **Gate:** test-runner invocation covering scheduled-path + seam + escrow
+  loader suites. Board: L0–L3 PASS, L4 runnable (the exit).

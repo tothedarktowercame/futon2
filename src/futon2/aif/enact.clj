@@ -42,7 +42,9 @@
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
+            [clojure.string :as str]
             [futon2.aif.close-loop :as cl]
+            [futon2.aif.fold-escrow :as esc]
             [futon2.aif.fold-eval :as fe]
             [futon2.aif.fold-realized :as fr]))
 
@@ -61,6 +63,53 @@
         (let [w (edn/read-string (slurp f))]
           (when (and (map? w) (seq (:boxes w))) w))))
     (catch Throwable _ nil)))
+
+;; ---------------------------------------------------------------------------
+;; L3 (E-live-loop-3, 2026-07-05): the scheduled caller injects the pinned seam.
+;; Deposits are loaded once per tick (delay-cached); for each lane entry that
+;; has a matching deposit, the caller reconstructs the DEPOSIT-GRAIN circumstance
+;; (the deposit's own ψ + pattern-ids — NOT the lane's ψ, which may differ) and
+;; calls the 3-arity with escrow-turn-fn + prose-fn. Entries without deposits
+;; use the 1-arity (byte-identical to pre-L3 behavior).
+;;
+;; The prompt-sha pin means the lane's ψ will never match the deposit's pinned
+;; prompt — autoclock-in's lane ψ is banner/sorry-grain, but the deposit pins
+;; the S1 sorry-grain ψ. The caller must therefore reconstruct the deposit's own
+;; circumstance for the sha check (the deposit carries everything needed).
+;; ---------------------------------------------------------------------------
+
+(def ^:private flexiarg-dir "/home/joe/code/futon3/library")
+
+(defn- prose-fn
+  "The prose source for the fold-prompt: verbatim slurp of the pattern's
+   flexiarg file. This is the same source the deposit was constructed with
+   (per the deposit's :prose-source field)."
+  [pattern-id]
+  (try (slurp (str flexiarg-dir "/" pattern-id ".flexiarg"))
+       (catch Throwable _ nil)))
+
+(def ^:private !deposits-cache
+  (delay
+    (try
+      (:deposits (esc/load-deposits))
+      (catch Throwable _
+        (binding [*out* *err*]
+          (println "[enact] WARN fold-turns escrow unreadable — escrow replay disabled for this tick"))
+        []))))
+
+(defn- deposit-for-mission
+  "Find the first deposit whose :mission matches the target mission
+   (id-stem substring match, case-insensitive — handles both 'M-autoclock-in'
+   and 'futon3c-d/mission/autoclock-in'). Returns nil if no match."
+  [deposits mission]
+  (let [stem-lc (str/lower-case (-> (str mission) (str/replace #".*/" "")))]
+    (->> deposits
+         (filter (fn [d]
+                   (let [d-stem (-> (str (:mission d)) (str/replace #".*/" ""))
+                         d-lc (str/lower-case d-stem)]
+                     (or (str/includes? d-lc stem-lc)
+                         (str/includes? stem-lc d-lc)))))
+         first)))
 
 (defn- engine-wiring
   "The deterministic EXECUTOR: shell the futon3a fold engine (the Car-3
@@ -82,28 +131,42 @@
 
 (defn- act-gates-with-shown
   "Act-gates over the cascade lane, carrying each entry's :shown (the cascade's
-   pattern-ids). Reconciliation adds the ESCROW source (impl #2) after
-   close-loop's rollout/classical: a recorded fold turn's coverage ΔG fills a
-   nil :delta-G leg, with `:delta-G/source :llm-escrow` for the bake-off audit."
+   pattern-ids). Reconciliation order: rollout G → classical fold → PINNED
+   escrow (L3: the scheduled caller now injects :escrow-turn-fn/:prose-fn with
+   the DEPOSIT-GRAIN circumstance, so a recorded fold-turn's coverage ΔG can
+   fill a nil :delta-G leg on the live scheduled path — ledger §10's real test).
+   Entries without a matching deposit use the 1-arity (byte-identical to pre-L3).
+   Legacy :llm-escrow files are still loud-ignored (L1, deprecated)."
   [ranked-actions]
-  (let [lane ((requiring-resolve 'futon2.report.cascade-lane/cascade-lane) ranked-actions)]
+  (let [lane ((requiring-resolve 'futon2.report.cascade-lane/cascade-lane) ranked-actions)
+        deposits @!deposits-cache]
     (mapv (fn [entry]
-            (let [ag (cl/act-gate-from-lane-entry entry)
+            (let [;; First try the 1-arity (rollout + classical fold).
+                  ag (cl/act-gate-from-lane-entry entry)
                   ag (if (some? (:delta-G ag))
                        ag
-                       ;; DEPRECATED (2026-07-05, E-live-loop-2 2g finding):
-                       ;; this branch read bare un-pinned wiring EDN — no
-                       ;; arming record, no prompt-sha, no ΔG re-assertion —
-                       ;; a consent-bypass-shaped hole. The pinned fold-turns
-                       ;; escrow (close-loop 3-arity seam) is the ONLY escrow
-                       ;; path now. Legacy files are ignored LOUDLY, never
-                       ;; read into the gate.
-                       (do (when (escrow-wiring (:mission entry))
-                             (binding [*out* *err*]
-                               (println (str "[enact] WARN legacy un-pinned :llm-escrow wiring present for "
-                                             (:mission entry)
-                                             " — IGNORED (deprecated 2026-07-05; migrate to the pinned fold-turns escrow)"))))
-                           ag))]
+                       ;; ΔG nil — try the pinned escrow seam (L3).
+                       (if-let [dep (deposit-for-mission deposits (:mission entry))]
+                         ;; Reconstruct the deposit's OWN circumstance for the
+                         ;; sha pin (the lane's ψ won't match — see L3 docstring).
+                         (let [dep-circumstance {:mission (:mission dep)
+                                                 :psi (get-in dep [:cascade :psi])}
+                               dep-shown (get-in dep [:cascade :pattern-ids])
+                               ag2 (cl/act-gate-from-lane-entry
+                                    (assoc entry :shown dep-shown)
+                                    dep-circumstance
+                                    {:escrow-turn-fn (esc/escrow-turn-fn deposits)
+                                     :prose-fn prose-fn})]
+                           ;; The escrow may still abstain (sha mismatch, etc).
+                           ;; In that case ag2's delta-G is nil — same as ag.
+                           ag2)
+                         ;; No deposit for this mission. Legacy loud-ignore (L1):
+                         (do (when (escrow-wiring (:mission entry))
+                               (binding [*out* *err*]
+                                 (println (str "[enact] WARN legacy un-pinned :llm-escrow wiring present for "
+                                               (:mission entry)
+                                               " — IGNORED (deprecated 2026-07-05; migrate to the pinned fold-turns escrow)"))))
+                             ag)))]
               {:mission (:mission entry)
                :shown (vec (:shown entry))
                :act-gate ag
