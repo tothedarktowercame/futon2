@@ -74,3 +74,22 @@ that the test ran.
    post-classical ΔG reconciliation (rollout → escrow), and the
    depth-1 path is the live one.
 3. The kill-test script stands as a re-runnable gate for the re-run.
+
+## Operator resolution (2026-07-05, supersedes the recommendation above)
+
+The vacuous pass is not an encoding accident — it is a LEVEL ERROR
+(operator's reading, verbatim in substance): have→want arrows are used
+directly as moves, when their designed role is as magnets for cascades.
+Arrow-level rollout is ROUTEFINDING over a decomposition, and
+decomposition is additive by construction — iterated greedy is provably
+optimal, and the search "looks for a decomposition signal that,
+mathematically, we can never find." Dependency-edge enrichment (option
+1 above) would be better routefinding but still routefinding.
+
+RULING: the arrow-level depth>1 search is RETIRED ON THEORY, not
+pending a re-run. project-policy valuation STAYS (load-bearing in the
+post-classical ΔG reconciliation). The successor question is a rollout
+at the CASCADE level — composing pattern languages (super-additive by
+design) to address bigger problems — chartered via E-gflownets-fold
+(GFN-for-the-cascade) + the cascade-peripheral idea; registered
+criterion in sequel-notebook.org §5.3 when the machinery exists.
