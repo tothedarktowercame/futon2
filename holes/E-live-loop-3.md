@@ -1672,3 +1672,77 @@ names WHICH clause it discharges. 006's b9 (machine refusal = the
 falsifiable clause) + b11 (typed consumability) is the exemplar. The
 single-terminal 005 shape remains correct for single-clause WANTs; the
 rule is one-terminal-per-clause, not one-per-deposit.
+
+## P2 mana gate — M-peradam-mechanization (driver: zai-3, 2026-07-05)
+
+**Status: P2 LANDED DARK.** Plan of record: ft-peradam-mechanization-006.edn
+boxes P2 (mana gate) + P2-coupling (durable spend log). No wiring into the live
+fold-authoring path — the gate exists beside it, dark, ready for operator
+switchover from blanket consent.
+
+### Census (I-4: what already exists)
+
+The existing mana machinery is SESSION-LEVEL (nonstarter, futon5):
+- `nonstarter.db/record-mana!` — writes to SQLite via CLI (`bb -m scripts.nonstarter-mana sospeso`)
+- `GET /api/mana?session-id=` → `{:earned :spent :balance}` (read-side)
+- `GET /api/pool` → pool stats
+- `futon3c.logic.mana-session` — JVM read-side binding (GET only, no POST)
+- `futon3c.watcher.commit-ingest/credit-block-mana-for-commit!` — per-block +1 via nonstarter
+- `mana-snapshot.bb` — HUD feed from working-tree drain (not peradam mana)
+
+The charter's P2 is GATE-LEVEL (a different grain): award N mana to a gate = N
+pre-approved fold-authoring dispatches, consumed per use. This is consent-as-
+budget, not session-level economy. The gate-level mana is NEW machinery; the
+session-level nonstarter machinery is the HAVE the charter references as precedent.
+
+### What was built
+
+**`futon2.aif.mana-gate`** — the gate-level mana API:
+- `(award! gate-id n operator-word)` — top up; durably logged with operator word + timestamp
+- `(consume! gate-id purpose)` → `{:ok true :balance n}` or `{:ok false :refused true :reason "zero balance" :balance 0}`
+- `(balance gate-id)` — query current balance (reads fresh from disk)
+- `(ledger gate-id)` — full audit trail
+
+**Design decisions (per the fold's boxes):**
+- **File-first** (box state): EDN ledger at `futon6/data/mana-gate/<gate-id>.edn`,
+  loaded fresh per read. No in-JVM atom to reset!. Mutations only through
+  award!/consume!. The fold-escrow precedent.
+- **Write-ahead protocol** (box P2-coupling, the ⅋): the spend entry is appended +
+  flushed to disk BEFORE consume! returns :ok. Atomic write via temp-file + rename
+  (POSIX rename is atomic on same filesystem). A crash between accept and log
+  leaves either the old ledger (no spend → gate did NOT authorize → honest) or
+  the new ledger (spend logged → gate DID authorize → honest). There is no
+  intermediate consumed-but-unlogged state.
+- **One spend = one mana unit** (box P2 free variable h5: award sizing and cost
+  are operator economics — the fold fixes the LEDGER MECHANICS, the operator
+  prices them).
+- **consume REFUSES at zero** loudly: returns `{:ok false :refused true}`, does
+  NOT write a ledger entry (the inverse coupling: no authorization without a
+  durable record).
+
+### Tests (8 tests, all pass)
+
+1. `award-consume-balance-roundtrip` — award 3, consume 2, balance is 1.
+2. `refusal-at-zero` — consume on empty gate returns refused; no ledger entry.
+3. `consume-to-zero-then-refuse` — deplete to zero, next consume refuses.
+4. `spend-without-log-impossibility` (the ⅋) — after successful consume, the
+   spend entry IS on disk (read directly from file, not through API).
+5. `refused-spend-leaves-no-trace` — refused consume does not create a spend entry.
+6. `multiple-awards-accumulate` — two awards sum correctly.
+7. `award-validation` — rejects zero/negative/non-integer awards and blank words.
+8. `fresh-gate-has-zero-balance` — no ledger file → zero balance.
+
+Full suite: 491 tests, 3190 assertions, 0 failures, 0 errors.
+
+### Gates
+
+- clj-kondo: 0/0 on both source and test.
+- check-parens: clean on both.
+- Test suite: all pass.
+
+### What was NOT done (scope)
+
+- NO wiring into the live fold-authoring path (dark, per instruction).
+- NO exchange-rate or cost-per-dispatch (operator economics — the fold's free
+  variable h5).
+- NO certificate integration (that's P1/P3, not P2).
