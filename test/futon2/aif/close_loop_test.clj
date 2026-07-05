@@ -1,6 +1,7 @@
 (ns futon2.aif.close-loop-test
-  "The close-the-loop helper: ΔG reconciliation (rollout-g-for → fold fallback)
-   and the resulting gate verdict (E-close-the-loop, pure core — no python)."
+  "The close-the-loop helper: ΔG reconciliation and resulting gate verdict
+   (E-close-the-loop, pure core -- no python). Classical fold dG is off by
+   default after E-live-loop-3 L4; bind the flag when testing the old fallback."
   (:require [clojure.test :refer [deftest is testing]]
             [futon2.aif.close-loop :as cl]))
 
@@ -18,12 +19,18 @@
                                            :G-rollout -0.7 :shown foldable-shown})]
       (is (= -0.7 (:delta-G ag)))
       (is (= :rollout-g-for (:delta-G/source ag)))))
-  (testing "rollout-g nil + a foldable cascade ⇒ the FOLD rescues ΔG (impl #1's reach)"
+  (testing "rollout-g nil + a foldable cascade abstains by default after L4"
     (let [ag (cl/act-gate-from-lane-entry {:mission "M-y" :F-free-energy 0.3
                                            :G-rollout nil :shown foldable-shown})]
-      (is (number? (:delta-G ag)))
-      (is (neg? (:delta-G ag)))
-      (is (= :fold (:delta-G/source ag)))))
+      (is (nil? (:delta-G ag)))
+      (is (nil? (:delta-G/source ag)))))
+  (testing "binding the classical flag restores the pre-L4 fold fallback"
+    (binding [cl/*classical-fold-dG?* true]
+      (let [ag (cl/act-gate-from-lane-entry {:mission "M-y" :F-free-energy 0.3
+                                             :G-rollout nil :shown foldable-shown})]
+        (is (number? (:delta-G ag)))
+        (is (neg? (:delta-G ag)))
+        (is (= :fold (:delta-G/source ag))))))
   (testing "rollout-g nil + a non-foldable cascade ⇒ ΔG nil ⇒ gate abstains (honest)"
     (let [ag (cl/act-gate-from-lane-entry {:mission "M-z" :F-free-energy 0.3
                                            :G-rollout nil :shown ["foreign/a" "foreign/b"]})]
@@ -31,10 +38,11 @@
       (is (nil? (:delta-G/source ag))))))
 
 (deftest verdicts
-  (testing "ΔF>0 ∧ ΔG<0 ⇒ :pass (the loop closes — via fold fallback)"
-    (is (= :pass (cl/preview-verdict
-                  (cl/act-gate-from-lane-entry {:mission "M-y" :F-free-energy 0.3
-                                                :G-rollout nil :shown foldable-shown})))))
+  (testing "ΔF>0 and ΔG<0 passes when the pre-L4 fold fallback is explicitly bound"
+    (binding [cl/*classical-fold-dG?* true]
+      (is (= :pass (cl/preview-verdict
+                    (cl/act-gate-from-lane-entry {:mission "M-y" :F-free-energy 0.3
+                                                  :G-rollout nil :shown foldable-shown}))))))
   (testing "ΔG nil ⇒ :abstain-missing-leg (no construction)"
     (is (= :abstain-missing-leg
            (cl/preview-verdict (cl/act-gate-from-lane-entry

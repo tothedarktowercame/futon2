@@ -212,13 +212,26 @@
     :habit-prior
     :g-summand))
 
+(defn- arena-move-class-intensity-mode
+  "M-action-vocabulary P2 DARK BUILD — NOT flipped. The move-class-conditional
+   value term prices advance/close/survey/apply-cascade with the v1 formulas in
+   `futon2.aif.move-class-intensity`. DEFAULT = :off, so `efe/compute-efe`
+   takes the historical G-total path and emits no move-class contribution.
+   `FUTON_WM_MOVE_CLASS_INTENSITY=v1` opts into the dark scorer for offline
+   shadows/P3 only; no live flag flip without the operator."
+  []
+  (if (= "v1" (System/getenv "FUTON_WM_MOVE_CLASS_INTENSITY"))
+    :v1
+    :off))
+
 (defn arena-mode-flags
   "B-0a tick provenance (M-aif-faithfulness §2.0): the RESOLVED mode/flag set
    the arena rank lanes score with THIS tick, for the trace's :wm-version
    stamp. Resolved via the SAME fns the lanes call (arena-risk-mode /
    arena-ambiguity-mode / arena-goal-outcome-mode / arena-salience-mode /
-   arena-tau-mode / arena-structural-pressure-mode) — never a separate env
-   read, so the stamp cannot drift from the behaviour it describes.
+   arena-tau-mode / arena-structural-pressure-mode /
+   arena-move-class-intensity-mode) — never a separate env read, so the stamp
+   cannot drift from the behaviour it describes.
    :kl-channel-weights and :c-temperature are the compute-efe defaults because
    the arena opts (wm-efe-opts, rollout-snapshot-under-weights) pass neither;
    if a lane ever starts passing them, build this map from those same opts."
@@ -229,6 +242,7 @@
    :salience-mode (arena-salience-mode)
    :tau-mode (arena-tau-mode)
    :structural-pressure-mode (arena-structural-pressure-mode)
+   :move-class-intensity-mode (arena-move-class-intensity-mode)
    :kl-channel-weights efe/default-kl-channel-weights
    :c-temperature pref/default-c-temperature})
 
@@ -520,7 +534,9 @@
                         ;; D-1e flip — the W1 goal-outcome lane, same boundary
                         :goal-outcome-mode (arena-goal-outcome-mode)
                         ;; D-1d dark — see arena-structural-pressure-mode
-                        :structural-pressure-mode (arena-structural-pressure-mode)}))
+                        :structural-pressure-mode (arena-structural-pressure-mode)
+                        ;; M-action-vocabulary P2 dark — default :off
+                        :move-class-intensity-mode (arena-move-class-intensity-mode)}))
                      (select-keys structure
                                   [:capability-graph :pre-registered-goal
                                    :mission-gap-view :mission-domain-view])
@@ -3897,7 +3913,9 @@
                        ;; D-1e flip — see arena-goal-outcome-mode docstring
                        :goal-outcome-mode (arena-goal-outcome-mode)
                        ;; D-1d dark — see arena-structural-pressure-mode
-                       :structural-pressure-mode (arena-structural-pressure-mode)}))
+                       :structural-pressure-mode (arena-structural-pressure-mode)
+                       ;; M-action-vocabulary P2 dark — default :off
+                       :move-class-intensity-mode (arena-move-class-intensity-mode)}))
         wm-ranked (->> (efe/rank-actions wm-state wm-enriched-candidates wm-efe-opts)
                        apply-anamnesis-tiebreak
                        (filter-live-open-mission-ranked-actions wm-missions))

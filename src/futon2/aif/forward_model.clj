@@ -27,7 +27,8 @@
    set means adding both a `predict-effects` multimethod arm (below)
    and a `can-propose?` arm if the action requires substrate
    addressability."
-  #{:no-op :address-sorry :open-mission :advance-mission :fire-pattern
+  #{:no-op :address-sorry :open-mission :advance-mission :close :close-mission
+    :close-hole :survey :survey-mission :apply-cascade :fire-pattern
     :learn-action-class :pursue :decompose})
 
 (defn- valid-action?
@@ -131,6 +132,33 @@
      :obs-variance {:mission-health 0.015
                     :sorry-count-norm 0.01}
      :events [{:entity-id target :type :addressed :weight (* weight f)}]}))
+
+(defmethod predict-effects :close
+  [_state {:keys [target weight] :or {weight 1.0}}]
+  {:obs-delta {:mission-health 0.02}
+   :obs-variance {:mission-health 0.005}
+   :events [{:entity-id target :type :closed :weight weight}]})
+
+(defmethod predict-effects :close-mission [state action]
+  (predict-effects state (assoc action :type :close)))
+
+(defmethod predict-effects :close-hole [state action]
+  (predict-effects state (assoc action :type :close)))
+
+(defmethod predict-effects :survey
+  [_state {:keys [target weight] :or {weight 1.0}}]
+  {:obs-delta {}
+   :obs-variance {:mission-health 0.02}
+   :events [{:entity-id target :type :surveyed :weight weight}]})
+
+(defmethod predict-effects :survey-mission [state action]
+  (predict-effects state (assoc action :type :survey)))
+
+(defmethod predict-effects :apply-cascade
+  [_state {:keys [target weight] :or {weight 1.0}}]
+  {:obs-delta {}
+   :obs-variance {:mission-health 0.01}
+   :events [{:entity-id target :type :cascade-applied :weight weight}]})
 
 (defmethod predict-effects :fire-pattern
   [_state {:keys [target weight] :or {weight 1.0}}]

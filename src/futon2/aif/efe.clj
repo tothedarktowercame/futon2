@@ -33,7 +33,8 @@
   (:require [futon2.aif.forward-model :as fm]
             [futon2.aif.free-energy :as fe]
             [futon2.aif.preferences :as pref]
-            [futon2.aif.c-vector :as cv]))
+            [futon2.aif.c-vector :as cv]
+            [futon2.aif.move-class-intensity :as move-intensity]))
 
 (defn- ambiguity
   "R5b epistemic term over per-channel predicted variances.
@@ -442,7 +443,8 @@
                          gap-weight goal-outcome-weight goal-outcome-entries goal-outcome-prob-fn
                          goal-outcome-mode
                          ambiguity-mode risk-mode kl-channel-weights c-temperature
-                         structural-pressure-mode]
+                         structural-pressure-mode move-class-intensity-mode
+                         move-class-intensity-weight]
                   :or {info-weight default-info-weight
                        survival-weight default-survival-weight
                        structural-pressure-weight default-structural-pressure-weight
@@ -460,6 +462,8 @@
                        risk-mode :hinge
                        goal-outcome-mode :hinge
                        structural-pressure-mode :g-summand
+                       move-class-intensity-mode :off
+                       move-class-intensity-weight 1.0
                        kl-channel-weights default-kl-channel-weights
                        c-temperature pref/default-c-temperature}}]
    (let [single-prediction (fm/predict state action)
@@ -557,6 +561,11 @@
                             (cv/predictive-goal-outcome-risk
                              entries action capability-graph goal-outcome-weight
                              prob-fn)))
+         move-class-intensity (when (= :v1 move-class-intensity-mode)
+                                (move-intensity/intensity action))
+         move-class-contribution (when move-class-intensity
+                                   (- (* (double move-class-intensity-weight)
+                                         (double (:value move-class-intensity)))))
          urgency (+ 1.0 (* (double time-pressure) (double time-pressure-scale)))
          g-risk (* g-risk-base urgency)
          g-survival (* g-survival-base urgency)
@@ -594,15 +603,20 @@
                                      :graph-pragmatic (:G-graph-pragmatic graph-terms)
                                      :gap (- (:G-gap gap-terms))
                                      :goal-outcome g-goal-outcome}
-                              habit-prior? (dissoc :structural-pressure))
-         g-total (+ g-risk
-                    g-ambig
-                    (- (* (double info-weight) g-info))
-                    (* (double survival-weight) g-survival)
-                    (if habit-prior? 0.0 sp-contribution)
-                    (:G-graph-pragmatic graph-terms)
-                    (- (:G-gap gap-terms))
-                    g-goal-outcome)]
+                              habit-prior? (dissoc :structural-pressure)
+                              move-class-contribution
+                              (assoc :move-class-intensity move-class-contribution))
+         g-total-base (+ g-risk
+                         g-ambig
+                         (- (* (double info-weight) g-info))
+                         (* (double survival-weight) g-survival)
+                         (if habit-prior? 0.0 sp-contribution)
+                         (:G-graph-pragmatic graph-terms)
+                         (- (:G-gap gap-terms))
+                         g-goal-outcome)
+         g-total (if move-class-contribution
+                   (+ g-total-base move-class-contribution)
+                   g-total-base)]
      (cond->
       (merge
        {:action action
@@ -648,7 +662,12 @@
        ;; habit-prior seam in policy/select-action. Positive = preference-
        ;; increasing (it was SUBTRACTED from G; ln E is ADDED to the score).
        habit-prior?
-       (assoc :habit-prior-bias (- sp-contribution))))))
+       (assoc :habit-prior-bias (- sp-contribution))
+
+       move-class-intensity
+       (assoc :move-class-intensity-mode move-class-intensity-mode
+              :move-class-intensity move-class-intensity
+              :G-move-class-intensity move-class-contribution)))))
 
 (defn rank-actions
   "Score a sequence of candidate actions and order them by G-total

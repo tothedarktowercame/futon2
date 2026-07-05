@@ -97,6 +97,10 @@
   ;; where structural pressure sits (always emitted, self-describing like
   ;; :risk-mode) + the relocated term's ln-E bias (dark mode only) —
   ;; whitelisted AT BIRTH.
+  ;; :move-class-intensity-mode :G-move-class-intensity :move-class-intensity
+  ;; (M-action-vocabulary P2 dark build, 2026-07-05): same birth rule. If the
+  ;; dark term enters :G-total, the trace must carry both the signed G
+  ;; contribution and the conditioning bundle that produced it.
   (select-keys r [:action :G-risk :G-ambiguity :G-info :G-survival
                   :G-structural-pressure :G-goal-outcome
                   :G-gap :G-graph-pragmatic :G-core :score-provenance :risk-mode
@@ -104,6 +108,8 @@
                   :G-augmentation :augmentation-terms
                   :G-graph-feasibility :G-graph-pragmatic-proxy
                   :structural-pressure-mode :habit-prior-bias
+                  :move-class-intensity-mode :G-move-class-intensity
+                  :move-class-intensity
                   :G-total :rank :time-pressure :horizon-steps]))
 
 (defn- strip-decision
