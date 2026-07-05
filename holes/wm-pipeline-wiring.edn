@@ -1,0 +1,87 @@
+;; wm-pipeline-wiring.edn — the WM pipeline AS a wiring diagram (operator
+;; direction 2026-07-05: "we ultimately need a wiring diagram for the pipeline
+;; we are building — it would make that sort of gap obvious").
+;;
+;; Nodes = pipeline stages, with typed PORTS (:consumes / :produces).
+;; Edges = the actual dataflows, each with :status :live | :retired | :pending.
+;; The checker (scripts/check_pipeline_wiring.bb) enforces the invariant that
+;; would have caught the 2026-07-05 gamma starvation mechanically:
+;;   EVERY :consumes port has >= 1 :live producer edge (else DANGLING).
+;; Retired edges stay in the file — a wiring remembers its history; the
+;; severed-feed class (ledger: "remedies can sever adjacent feeds") is exactly
+;; a retirement that leaves a consumer dangling.
+{:wiring
+ {:nodes
+  [{:id :cron        :produces #{:tick}}
+   {:id :judge       :consumes #{:tick :mission-corpus :mission-status}
+                     :produces #{:ranked-actions}}
+   {:id :status-classifier :consumes #{:mission-corpus}
+                     :produces #{:mission-status}}
+   {:id :psi         :consumes #{:ranked-actions :held-work :futility}
+                     :produces #{:circumstance}}
+   {:id :held-work-ledger :produces #{:held-work}}
+   {:id :cascade     :consumes #{:circumstance :pattern-library}
+                     :produces #{:argument :delta-F}}
+   {:id :pattern-library :consumes #{:authored-seeds :co-app-usage}
+                     :produces #{:pattern-library}}
+   {:id :authoring   :consumes #{:library-gap-findings}
+                     :produces #{:authored-seeds}}
+   {:id :rollout-valuation :consumes #{:move-set :ranked-actions}
+                     :produces #{:delta-G-rollout}}
+   {:id :classical-fold :consumes #{:argument}
+                     :produces #{:delta-G-classical}}
+   {:id :llm-fold-escrow :consumes #{:argument :sorry :arming}
+                     :produces #{:delta-G-escrow :deposit}}
+   {:id :act-gate    :consumes #{:delta-F :delta-G-any}
+                     :produces #{:verdict}}
+   {:id :selection   :consumes #{:ranked-actions :verdict :gamma}
+                     :produces #{:enacted}}
+   {:id :executor    :consumes #{:enacted :deposit}
+                     :produces #{:realized-dG :artifact}}
+   {:id :gamma       :consumes #{:expected-dG :realized-dG}
+                     :produces #{:gamma}}
+   {:id :trace       :consumes #{:verdict :enacted :realized-dG}
+                     :produces #{:daily-trace}}
+   {:id :futility-observable :consumes #{:daily-trace}
+                     :produces #{:futility}}
+   {:id :bulletin    :consumes #{:futility} :produces #{:operator-nags}}]
+
+  :edges
+  [{:from [:cron :tick]                :to [:judge :tick]                :status :live}
+   {:from [:status-classifier :mission-status] :to [:judge :mission-status] :status :live
+    :note "finding-2 prefix-match fix; supersession finally read"}
+   {:from [:judge :ranked-actions]     :to [:psi :ranked-actions]        :status :live}
+   {:from [:held-work-ledger :held-work] :to [:psi :held-work]           :status :live :note "L2 sorry grain"}
+   {:from [:futility-observable :futility] :to [:psi :futility]          :status :live :note "psi-v3 STUCK line"}
+   {:from [:psi :circumstance]         :to [:cascade :circumstance]      :status :live}
+   {:from [:pattern-library :pattern-library] :to [:cascade :pattern-library] :status :live}
+   {:from [:authoring :authored-seeds] :to [:pattern-library :authored-seeds] :status :live
+    :note "authoring doctrine; cluster-at-birth house style"}
+   {:from [:cascade :library-gap-findings] :to [:authoring :library-gap-findings] :status :live
+    :note "thin cascade on well-formed psi => author"}
+   {:from [:cascade :delta-F]          :to [:act-gate :delta-F]          :status :live}
+   {:from [:rollout-valuation :delta-G-rollout] :to [:act-gate :delta-G-any] :status :live
+    :note "depth-1 valuation only; depth>1 search retired on theory (level error)"}
+   {:from [:classical-fold :delta-G-classical] :to [:act-gate :delta-G-any] :status :retired
+    :note "operator ruling 2026-07-05: lookups are not staked beliefs"}
+   {:from [:llm-fold-escrow :delta-G-escrow] :to [:act-gate :delta-G-any] :status :live
+    :note "the pinned seam; first natural read 11:00Z 2026-07-05"}
+   {:from [:act-gate :verdict]         :to [:selection :verdict]         :status :live}
+   {:from [:gamma :gamma]              :to [:selection :gamma]           :status :live
+    :note "gamma modulates selection (R14)"}
+   {:from [:selection :enacted]        :to [:executor :enacted]          :status :live}
+   {:from [:llm-fold-escrow :deposit]  :to [:executor :deposit]          :status :live}
+   {:from [:executor :realized-dG]     :to [:gamma :realized-dG]         :status :live}
+   ;; THE EDGE THAT STARVED — the gap this file exists to make obvious:
+   {:from [:classical-fold :delta-G-classical] :to [:gamma :expected-dG] :status :retired
+    :note "SEVERED as a side effect of the classical-off ruling; gamma coasted ~4h unnoticed"}
+   {:from [:llm-fold-escrow :delta-G-escrow] :to [:gamma :expected-dG]   :status :pending
+    :note "the repair (claude-19, dispatched 2026-07-05): scale-match pin satisfied by construction"}
+   {:from [:selection :enacted]        :to [:trace :enacted]             :status :live}
+   {:from [:act-gate :verdict]         :to [:trace :verdict]             :status :live}
+   {:from [:executor :realized-dG]     :to [:trace :realized-dG]         :status :live}
+   {:from [:trace :daily-trace]        :to [:futility-observable :daily-trace] :status :live}
+   {:from [:futility-observable :futility] :to [:bulletin :futility]     :status :live :note "dry-run"}
+   ;; Known-dangling by design (recorded, not hidden):
+   {:from [:cascade :co-app-usage]     :to [:pattern-library :co-app-usage] :status :pending
+    :note "miner does not yet scan cascade usage (cards-II card 9 TO-BUILD)"}]}}
