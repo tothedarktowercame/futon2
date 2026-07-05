@@ -756,8 +756,10 @@ Full details in E-live-loop-2.md "Finding-3 deposits" section. Summary:
 M-diagramprover (WANT = sorry-boundary atlas + Bayesian pattern model,
 HUNGRY-FOR = pattern-transfer-structure, HAVE = 489 problems / 19
 proofs / 30 partials / 12 patterns / futon5 TPG / LeanDojo-v2). psi-sha
-`a664701e...` (different from the autoclock-in exemplar -- this is the
-diagramprover-specific psi), 1710 bytes.
+`f73fb4b7d51988e0...` (CORRECTED by reviewer 2026-07-05: the original
+log said `a664701e...`, which is the AUTOCLOCK-IN psi's sha — a
+mislabel caught in claude-19's remedy-2 pass; the true sha of
+/tmp/zai10-psi-diagramprover.txt is recorded here), 1722 bytes.
 
 **Constructor result:** size **1**, F **-0.443**, accuracy 0.156,
 complexity 2.398. Single pattern: `agent/hypothetical-proof-
