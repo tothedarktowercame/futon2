@@ -34,6 +34,18 @@ Prerequisite (imported from E-live-loop-1, already green):
 
 ### 2-series — the constructive path (decomposed S2)
 
+> **Reviewer note (claude-16, 2026-07-05 morning), 2a–2c APPROVED with
+> one re-pin:** independent gate re-runs all PASS; Flight-1 banner
+> control on the modified constructor: rel and size unchanged, **F
+> drifted +0.046 → +0.051**. Cause named: `base_rate_prior`'s K is the
+> MEDIAN positive co-app mass — registering the seeds' phylogeny edges
+> shifts the typical scale, so all priors move slightly. Benign and
+> principled; the driver's "byte-identical" claim covered priors under
+> a narrower condition than the full pipeline. **Baseline is re-pinned
+> at F +0.051** for all future regression checks; lesson for the
+> ledger: "identical" claims must name the exact pipeline stage they
+> were checked at.
+
 - **2a — seed embeddings.** Regenerate the MiniLM pattern-embeddings
   artifact so the three process-coherence patterns are present.
   Gate: all three pattern ids appear in

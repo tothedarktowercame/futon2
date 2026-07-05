@@ -28,6 +28,9 @@
      :out "missing: set()"}
     {:at "2026-07-05T06:52:05.040527320Z",
      :pass true,
+     :out "missing: set()"}
+    {:at "2026-07-05T06:58:51.734729359Z",
+     :pass true,
      :out "missing: set()"}]}
   {:id "2b",
    :title "seed patterns registered in phylogeny",
@@ -45,6 +48,9 @@
      "missing: {'process-coherence/status-refresh-before-work', 'process-coherence/stuck-means-signal', 'process-coherence/is-this-even-a-problem'}"}
     {:at "2026-07-05T06:52:43.118456504Z",
      :pass true,
+     :out "missing: []"}
+    {:at "2026-07-05T06:58:52.972665743Z",
+     :pass true,
      :out "missing: []"}]}
   {:id "2c",
    :title "seed prior treatment (no 2.398-nat fine)",
@@ -57,6 +63,10 @@
    :status :pass,
    :history
    [{:at "2026-07-05T06:56:24.232051066Z",
+     :pass true,
+     :out
+     "cx: {'is-this-even-a-problem': 0.647, 'status-refresh-before-work': 0.647, 'stuck-means-signal': 0.647} EMB-missing: [] nonseed-drift: [] wired: True"}
+    {:at "2026-07-05T06:58:54.620712080Z",
      :pass true,
      :out
      "cx: {'is-this-even-a-problem': 0.647, 'status-refresh-before-work': 0.647, 'stuck-means-signal': 0.647} EMB-missing: [] nonseed-drift: [] wired: True"}]}
