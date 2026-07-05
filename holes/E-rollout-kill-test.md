@@ -42,3 +42,35 @@ any further rollout investment.
 The verdict, the distribution, and either the kill (a PR-sized removal
 proposal, operator-gated) or the standing gate added to the
 E-live-loop-2 steps file.
+
+## Verdict (claude-16, 2026-07-05 — the test ran; read both parts)
+
+**Registered test (threshold NOT adjusted): KEEP.** On the mined move-set
+(diffsub-moves-mined.edn, 232 moves, scope-grain v2), 20/20 top-ranked
+policies (100%, all depth-3) have G strictly below their 1-step prefix's
+G, and the global best rollout (−0.00284) strictly beats the global best
+1-step (−0.00108). 100% ≥ 15%. Full rows in scripts/kill_test_rollout.clj
+output (re-runnable, read-only).
+
+**Supplementary diagnostic (post-hoc, clearly labeled): the pass is
+VACUOUS.** The G magnitudes carry the additive signature (3-step ≈
+1-step × discount series), and the decisive check confirms it: the best
+depth-3 rollout is MOVE-FOR-MOVE IDENTICAL to the iterated-greedy chain
+(greedy, apply, re-greedy ×3) — same sequence, same G, search adds
+nothing over repeated greedy. Every longer policy "beats its prefix"
+because negative costs accumulate, not because step-1 unlocks step-2.
+The 2026-06-09 criterion measured accumulation, not unlocking — a
+specification error in the original pre-registration, visible only now
+that the test ran.
+
+**Recommendation (operator-gated):**
+1. RE-REGISTER the discriminating criterion: "best-rollout strictly
+   beats the iterated-greedy chain (different sequence or lower G) on
+   ≥ X% of roots" — X proposed 10%, fixed before the re-run.
+2. Pending that re-run: the multi-step SEARCH (depth>1 expansion) has
+   no demonstrated value-add; the doc's own fallback applies ("let the
+   cascade lane carry the value"). DEMOTE the search, do not delete:
+   `project-policy`/coverage-G evaluation is now LOAD-BEARING in the
+   post-classical ΔG reconciliation (rollout → escrow), and the
+   depth-1 path is the live one.
+3. The kill-test script stands as a re-runnable gate for the re-run.
