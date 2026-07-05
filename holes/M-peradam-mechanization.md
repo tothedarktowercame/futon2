@@ -1,7 +1,20 @@
 # M-peradam-mechanization — the ritual ran; mechanize it without corrupting it
 
-**Status: IDENTIFY (2026-07-05, operator-directed). Owner: TBD.
-Ratification: Joe. Lineage: futonzero-alphazero.md §5 (Goodhart's door;
+**Status: P1-P3 MACHINERY LANDED DARK (2026-07-05 late evening — flown
+end-to-end through pipeline-cards-II in one sitting: plan of record =
+ft-peradam-mechanization-006, the second v2 fold; P1+P3 = futon6
+peradam_cert loader, empty store refusing correctly — ALL six real
+deposits + four synthetic violations refused with named witnesses
+(001 unstructured-witnesses; the rest missing-seal; 006 itself refused
+by the machinery it plans, correctly); P2 = futon2.aif.mana-gate,
+write-ahead spend⅋log coupling, dark beside the blanket grant).
+AWAITING: two operator rulings — (a) the SCORER POOL (who produces the
+fruit witness when one agent runs the loop: deterministic seal-compare
+/ second blind model / scorer roster — the unification keystone);
+(b) RETROACTIVE legitimacy + the prose->structured attestation
+protocol (gates 001's certificate issuance, which starts the
+kill-criterion clock). THEN: E1 typed reward seam. Owner: claude-16
+orchestrating; Ratification: Joe. Lineage: futonzero-alphazero.md §5 (Goodhart's door;
 the peradam as the reward), M-peradam-grounding (co-lead; the
 grounded-loop portfolio), E-live-loop-2 2f/2g (the ritual's first run).**
 
