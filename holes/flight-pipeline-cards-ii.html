@@ -41,12 +41,13 @@ examples appear. Statuses: <span class="live">LIVE</span> (running now) ·
 
 <div class="card"><h3><span class="n">2</span>Scan &amp; judge <span class="live">LIVE</span> <span class="built">status-aware</span></h3>
 <div class="io"><b>input</b> mission corpus + substrate-2 state</div>
-<div class="io"><b>happens</b> candidates filtered by CLASSIFIED status (prefix-matching classifier, finding 2); ranked by the G blend.</div>
-<div class="io"><b>output</b> ranked actions over LIVE missions only</div>
+<div class="io"><b>happens</b> candidates filtered by CLASSIFIED status (prefix-matching classifier, finding 2) AND deduplicated by mission id (the scan was finding worktree/directory-copy duplicates — 87 ids, a third of the pool; dedupe keeps the primary checkout, commit <code>1550009</code>); ranked by the G blend.</div>
+<div class="io"><b>output</b> ranked actions over LIVE, UNIQUE missions only</div>
 <div class="exp"><b>EXPECT (pre-registered):</b> zero SUPERSEDED/ARCHIVED-classed missions appear in
 any lane from the first v2 tick onward; the excluded-mission WARN line appears in the scheduled
 log whenever the filter fires. Falsifier: any superseded mission ENACTED after the classifier
-fix lands live.</div>
+fix lands live. ADDITIONAL (pre-registered by the driver): the next cron tick's candidates
+count drops 145 → ~93 (unique live); the dashboard's tied-with-itself display clears.</div>
 </div>
 
 <div class="card"><h3><span class="n">3</span>Build the circumstance ψ <span class="live">LIVE</span> <span class="tob">seat-by-state</span></h3>
@@ -54,8 +55,11 @@ fix lands live.</div>
 <div class="io"><b>happens</b> sorry-grain ψ from the held-work ledger (v1, live) + the STUCK line
 (ψ-v3, live). NEW (to-build): entry-condition patterns are SEATED BY PROCESS STATE, not fished
 for by similarity — when futility ≥ threshold, a process-coherence pattern is injected as the
-cascade's OPENING element by construction (the first-slot/anchor mechanism; the ψ-v3 honest
-negative showed retrieval cannot do this seating: line-level signal, document-level embedding).</div>
+cascade's OPENING element by construction (the first-slot/anchor mechanism). EVIDENCE this is
+the right design (registered experiment, run + probed 2026-07-05): appending the STUCK line
+did NOT surface a seed (F −0.023→−0.523, an iChing near-neighbor retrieved instead), and the
+phrasing probe CONFIRMED the mechanism is dilution — line-level signal, document-level
+embedding. Retrieval is settled as the wrong seating mechanism; injection is the build.</div>
 <div class="io"><b>output</b> ψ + (when stuck) a seated entry pattern</div>
 <div class="exp"><b>EXPECT (pre-registered):</b> for a lane at 0-for-N (N≥10), the constructed
 cascade's FIRST element is a process-coherence pattern by construction, AND the seated cascade's
@@ -90,7 +94,10 @@ TERMINALS structurally <code>:discharges</code> the sorry's want-signature (the 
 visibly closes the hole it was folded for); and PIN 4: the composition skeleton type-checks
 through the CLean bridge (<code>clean_to_lean.py</code> → DarkTower, 0-sorry on the skeleton;
 policy-holes remain honest TYPED holes). The bridge is BUILT with the BV laws proved — this
-card puts it in the pipeline.</div>
+card puts it in the pipeline. PRECEDENT NOW EXISTS: the PIPELINE ITSELF is a DarkTower object
+(WMPipelineExample.lean, 0-sorry — flight as a BV seq/copar expression, γ's feeds as a
+TypedHole) and its theorem-flip contract has been exercised once live (the γ repair); pin 4
+applies the same formalism one level down, to the deposits.</div>
 <div class="io"><b>output</b> a v2 deposit: provably-composable wiring, terminal-discharged sorry, four pins</div>
 <pre>expected v2 shape (spec, not an example — no v2 deposit exists yet):
 :wiring {:nodes [{:id :b1 :fits-pattern … :via …} …]
@@ -119,16 +126,24 @@ sources in new traces); missions without deposits abstain with
 economy has to grow, reported per series, never hidden.</div>
 </div>
 
-<div class="card"><h3><span class="n">7</span>Gate, select — γ FED <span class="rul">PENDING-RULING</span></h3>
+<div class="card"><h3><span class="n">7</span>Gate, select — γ FED <span class="live">REPAIRED — first meal next tick</span></h3>
 <div class="io"><b>input</b> ΔF ∧ ΔG verdicts + γ per lane</div>
-<div class="io"><b>happens</b> the AND-gate unchanged. NEW (pending the operator's γ-diet
-ruling): escrow coverage-ΔG feeds γ's expected leg (it passes the scale-match pin by
-construction — both legs coverage-ΔG). The 3b simulation's margins (paying lane γ→1.26,
-futile γ→0.50 on the historical record) are the prior.</div>
+<div class="io"><b>happens</b> the AND-gate unchanged. RULING LANDED (operator, 2026-07-05:
+"why is γ not being fed? what are we waiting for?") and the repair is live (futon2
+<code>d05dd35</code>): escrow coverage-ΔG feeds γ's expected leg under the
+<b>source-consistency rule</b> — γ eats the fold whose leg the gate ACTUALLY ACTED ON, never
+whichever number happens to exist (classical still computes its distrusted −0.077 under the
+escrow's −0.7; a naive nil-fallback would have fed it). Rollout-G stays excluded (the
+scale-match pin's purpose). Revertible: <code>*gamma-escrow-feed?*</code>, default on. The
+severance-and-repair is also FORMAL: DarkTower/WMPipelineExample.lean proved the starved port
+hungry, and the repair commit flipped the theorem — severing this feed again means re-proving
+the hunger. The 3b margins (paying γ→1.26, futile γ→0.50) are the prior.</div>
 <div class="io"><b>output</b> verdicts + a γ that CALIBRATES rather than coasts</div>
 <div class="exp"><b>EXPECT (pre-registered):</b> within 24 fed ticks, live γ for lanes with
 paying deposits diverges upward from futile lanes; the divergence direction matches 3b's
-simulation. Falsifier: γ stays flat (feed is miswired) or diverges opposite (the rule's sign
+simulation. Clock: starts at the FIRST FED TICK (the first hourly log line with numeric
+<code>expectedG=</code>); γ ≡ 1.0 for the first ~5 fed samples is burn-in, not flatness.
+Falsifier: γ stays flat past burn-in (feed is miswired) or diverges opposite (the rule's sign
 convention is wrong on live data — a finding worth the series by itself).</div>
 </div>
 
@@ -163,10 +178,22 @@ without — futility responds to plans, not to time.</div>
 <div class="exp"><b>EXPECT (pre-registered, operator, 2026-07-05: "we would want to actually see some change in that recommendation at the end based on the actual work that is achieved"):</b> across the v2 series, at least one top-recommendation change between consecutive ticks is ATTRIBUTABLE to work done in between — the attribution named in the series log (deposit, held-item closure, status change, or gamma divergence). Falsifier: the top recommendation is constant across the whole series despite real work landing — the return arc is not reaching the judge, and closing it becomes the next excursion's charter.</div>
 </div>
 
+<p><b>The pipeline's own wiring is part of the discipline:</b> the dataflow map lives at
+<code>wm-pipeline-wiring.edn</code> (operational; checker <code>check_pipeline_wiring.bb</code>
+enforces every-consumer-port-fed) and <code>mathlib4/DarkTower/WMPipelineExample.lean</code>
+(formal; 0-sorry). <b>EXPECT (pre-registered):</b> the checker stays green through the series,
+and any ruling that retires a component updates the wiring in the same commit — "remedies can
+sever adjacent feeds" (ledger §15) never recurs silently.</p>
+
 <p><b>The series this page is for:</b> when the operator opens the next live-test series
 (loop-4), these expectations become its gates — each card's EXPECT is a step on the board,
 each falsifier is a legitimate exit. This page is itself a pre-registration: dated, committed,
-and not to be edited after the series starts except to record outcomes.</p>
+and not to be edited after the series starts except to record outcomes.
+<br><small style="color:#99a">Pre-series amendments, 2026-07-05 evening (the series has not
+started): card 2 gained the dedup + the driver's candidates-count prediction; card 3 recorded
+the ψ-v3 experiment outcome (dilution confirmed, injection settled as the design); card 5
+gained the formal precedent; card 7 flipped PENDING-RULING → REPAIRED (ruling + d05dd35 +
+the theorem-flip); this wiring-audit paragraph added.</small></p>
 
 <p class="foot">Fixed 2026-07-05, before any v2 run. Sources for the shapes: E-llm-fold.md ·
 ct-wiring-explainer.html (CLean bridge, BV laws) · E-live-loop-3.md §Deposit-contract-v2 ·
