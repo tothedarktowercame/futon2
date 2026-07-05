@@ -224,3 +224,39 @@ it working — and what would falsify it) / **Status**.
   (meaning the flag regressed or the order reverted).
 - **Status:** remedy live (this commit); standing gate = L4 trace check
   (`scripts/gate_l4_natural_tick.clj`).
+
+## 15. Remedies can sever adjacent feeds -- the gamma starvation
+- **Mistake:** the §14 remedy (classical-route-off) had an UNLOGGED
+  side effect: γ's expected-G leg was fed EXCLUSIVELY by the classical
+  fold's coverage-dG (`enact.clj gamma-expected`, per the claude-10
+  scale-match pin). Turning classical off as a dG route severed γ's
+  only live food source — every escrow-sourced enactment carried
+  `:expected-G nil`, so R14's γ held at the prior on every tick.
+  γ wasn't calibrating; it was coasting. The symptom was visible in
+  plain sight (`expectedG=` printing empty on every cron line) but was
+  triaged as COSMETIC (F6 item 3) before being recognized as
+  starvation. Pattern to name: **a remedy that unplugs a component
+  must enumerate that component's downstream consumers** — the fix
+  audited what fed the gate, not what the unplugged thing fed.
+- **Remedy:** γ-feed rewire (operator-armed 2026-07-05, edge
+  invoke-1783280248832-512-8130dc7b): `enact/gamma-fold-of` selects
+  γ's fold SOURCE-CONSISTENTLY — escrow-sourced decisions feed the
+  escrow fold's coverage-dG (satisfies the scale-match pin BY
+  CONSTRUCTION; classical's distrusted number is NOT fed even when
+  present — the §14 9x underestimate must not calibrate γ either);
+  rollout-G stays excluded (the pin's original target). Flag
+  `*gamma-escrow-feed?*`, default ON, REVERTIBLE. The decision's
+  `:fold` is the same fold γ's leg came from (realized-outcome-of
+  prefers `(:delta-g fold)` — passing a different fold would silently
+  override the fed value; trap found and tested).
+- **Evidence check:** next cron tick's log shows `expectedG=-0.7` (a
+  number, not empty) for the escrow-enacted mission; trace's
+  `:realized-outcome` carries numeric `:expected-G`; γ's `:samples`
+  starts counting. Card-7 standing check: within 24 FED ticks, live γ
+  diverges paying-vs-futile in the 3b-predicted direction (clock
+  starts at the FIRST FED TICK, not at commit). Falsified by:
+  `expectedG=` still empty on a deposited mission's enactment, or γ
+  `:samples` static across fed ticks.
+- **Status:** remedy live (this commit); tests
+  `gamma_feed_test.clj` (source-consistency, pin, feed-through,
+  3b-sim sign convention) + all existing γ/R14 suites green.

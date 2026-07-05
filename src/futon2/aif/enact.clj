@@ -173,29 +173,61 @@
                :verdict (cl/preview-verdict ag)}))
           lane)))
 
+(def ^:dynamic *gamma-escrow-feed?*
+  "γ-FEED REWIRE (operator-armed 2026-07-05, bell edge
+   invoke-1783280248832-512-8130dc7b): when the gate's ΔG leg came from the
+   pinned escrow, that same coverage-ΔG feeds γ's expected leg. Satisfies the
+   claude-10 scale-match pin BY CONSTRUCTION — `[:fold-escrow :delta-g]` is
+   fold-eval coverage-ΔG over the replayed construction, the same quantity as
+   `:realized-G`. Context: classical-off (the 2026-07-05 ruling) severed γ's
+   only expected-G source on the live path as an UNLOGGED SIDE EFFECT — γ had
+   been coasting at the prior since. Rollout-G remains EXCLUDED from γ (the
+   pin's original target). Bind false to revert to classical-only feeding."
+  true)
+
+(defn gamma-fold-of
+  "The fold output whose coverage-ΔG feeds γ — SOURCE-CONSISTENT with the
+   gate's decision:
+   - `:delta-G/source :fold-escrow` (flag-gated) ⇒ the ESCROW fold. The
+     classical fold's number — when it exists — is deliberately NOT fed for
+     escrow-sourced decisions: with classical off as a route it is the known
+     under-estimate the ruling distrusted (bayesian: −0.077 vs deposit −0.7),
+     and γ must calibrate on the prediction the gate actually acted on.
+   - otherwise ⇒ the CLASSICAL fold (unchanged pre-rewire behaviour; covers
+     `:fold` and the rollout-sourced case — the gate may verdict on
+     rollout-G, but γ's leg is never rollout-G, per the scale-match pin).
+   Returning nil/no-ΔG ⇒ γ holds (honest)."
+  [act-gate]
+  (if (and *gamma-escrow-feed?*
+           (= :fold-escrow (:delta-G/source act-gate)))
+    (:fold-escrow act-gate)
+    (:fold act-gate)))
+
 (defn enact!
   "Enact ONE passed act-gate entry via the deterministic executor. Returns
    {:enacted <wiring-or-nil> :decision {:policy :expected-G :fold}
     :enactment <audit>}. `:enacted` nil ⇒ the executor reproduced nothing —
-   the realized-outcome will carry `:realized-G` nil and γ holds (honest)."
+   the realized-outcome will carry `:realized-G` nil and γ holds (honest).
+   γ's expected leg is coverage-ΔG from `gamma-fold-of` (source-consistent;
+   never rollout-G). The `:decision`'s `:fold` is the SAME fold γ's leg came
+   from — `fold-realized/realized-outcome-of` prefers `(:delta-g fold)`, so
+   passing a different fold there would silently override the fed value."
   [{:keys [mission shown act-gate]}]
   (let [enacted (when (seq shown) (engine-wiring shown))
-        ;; γ's expected leg must be the fold's COVERAGE-ΔG — never the gate's
-        ;; reconciled :delta-G, which prefers rollout-G. realized-G is always
-        ;; coverage-ΔG, and a rollout-vs-coverage pair would re-inject the v0
-        ;; scale mismatch that pinned γ at 0.5 (claude-10 review finding,
-        ;; 2026-07-02). No fold leg ⇒ nil ⇒ γ holds (honest). The GATE still
-        ;; verdicts on its own reconciled leg; only γ's pair is constrained.
-        gamma-expected (get-in act-gate [:fold :delta-g])]
+        gfold (gamma-fold-of act-gate)
+        gamma-expected (:delta-g gfold)]
     {:enacted enacted
      :decision {:policy mission
                 :expected-G gamma-expected
-                :fold (:fold act-gate)}
+                :fold gfold}
      :enactment {:mission mission
                  :source :classical-engine
                  :predicted-via (:delta-G/source act-gate)
                  :gate-delta-G (:delta-G act-gate)
                  :gamma-expected-G gamma-expected
+                 :gamma-source (if (identical? gfold (:fold-escrow act-gate))
+                                 :fold-escrow
+                                 :fold)
                  :cascade shown
                  :boxes (count (:boxes enacted))
                  :policy-holes (count (:policy-holes enacted))}}))

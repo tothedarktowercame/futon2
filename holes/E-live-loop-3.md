@@ -923,3 +923,69 @@ bridge check). Backfill the four existing deposits as the v2 shakedown
 (typed deposits = richer curriculum) and the cascade-level composition
 charter (the connectives ARE the composition operators the level-error
 resolution pointed at).
+
+## gamma feed restored (claude-19, 2026-07-05 evening; operator-armed)
+
+**Arming:** the operator's word ("So why is gamma NOT being fed? What
+are we waiting for?"), relayed via claude-16, edge
+`invoke-1783280248832-512-8130dc7b` (cited in the commit).
+
+**The severance (ledger §15, named pattern: remedies can sever adjacent
+feeds):** γ's expected-G leg was classical-fold-only
+(`enact.clj gamma-expected`, the claude-10 scale-match pin). The §14
+classical-route-off remedy therefore starved γ as an unlogged side
+effect — every escrow-sourced enactment recorded `:expected-G nil`,
+γ held at prior 1.0, `expectedG=` printed empty hourly since arming.
+
+**The rewire:** `enact/gamma-fold-of` — γ's fold chosen
+SOURCE-CONSISTENTLY with the gate's `:delta-G/source`:
+
+- `:fold-escrow` ⇒ the escrow fold's coverage-ΔG (scale-match pin
+  satisfied BY CONSTRUCTION: both γ legs are `fold-eval`
+  coverage-ΔG). The classical fold's number, when present, is
+  deliberately NOT fed for escrow-sourced decisions — it is the §14
+  distrusted underestimate (bayesian −0.077 vs deposit −0.7), and γ
+  must calibrate on the prediction the gate actually acted on.
+- anything else ⇒ the classical fold when present (pre-rewire
+  behaviour, byte-identical); **rollout-G remains excluded from γ**
+  (the pin's original target — claude-16's "if it reaches that path"
+  resolves to: it does not, and must not).
+
+Flag `*gamma-escrow-feed?*` default ON (the operator's word is the
+arming), bind false to revert. One trap found during implementation
+and pinned in a test: `realized-outcome-of` PREFERS `(:delta-g fold)`
+over the explicit `:expected-G`, so the decision's `:fold` must be the
+same fold γ's leg came from — passing the classical fold there would
+have silently re-fed the distrusted number.
+
+**Tests** (`gamma_feed_test.clj`, + policy-precision / fold-realized /
+precision / enact-scheduled-path suites all green — 55 tests, 148
+assertions): source-consistency incl. the masked-underestimate case;
+rollout exclusion; flag-off revert; feed-through with the live shapes
+(expected −0.7, executor 2 boxes/10 holes ⇒ realized −1/6 — the exact
+`realizedG=-0.1666…` the cron log shows); sign convention against the
+3b sim — the fed sample folds through the SAME
+`policy-precision/fold-realized-outcome` the sim used: under-delivery
+perf ≈ −0.6154 ⇒ γ hedges < 1 after burn-in (gate-3b's historical
+direction), over-delivery ⇒ γ commits > 1 (synthetic direction).
+
+**Deployment path:** the recording path lives in the SCHEDULED ONE-SHOT
+only (`enact.clj` docstring; sole caller `wm_scheduled_run.clj`) — no
+serving-JVM reload needed or performed; the next hourly cron tick picks
+it up. **Card-7 clock: the 24-fed-tick window starts at the FIRST FED
+TICK** (the first hourly tick after this commit whose log shows numeric
+`expectedG=`), not at commit time. Burn-in note for readers of early
+ticks: γ stays at 1.0 by design until `default-min-history` = 5 fed
+samples accrue; divergence is only interpretable after that.
+
+**PAR:** (1) What worked — reading the CONSUMER side before rewiring
+(the `realized-outcome-of` fold-preference trap was found by reading,
+not by a failing test after the fact); source-consistency as the design
+rule rather than nil-fallback (a nil-fallback would have fed classical's
+−0.077 whenever it existed, silently re-injecting the §14 underestimate
+into γ). (2) What to carry — when a remedy unplugs a component,
+enumerate what THAT COMPONENT fed before shipping (§15's named
+pattern); and cosmetic symptoms deserve one "is this hiding a
+starvation?" question before being filed as cosmetic — the empty
+`expectedG=` was the γ-starvation signal, triaged as formatting for
+half a day.
