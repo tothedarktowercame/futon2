@@ -1,9 +1,26 @@
 # M-action-vocabulary — price all the move classes the operator actually values
 
-**Status: IDENTIFY (2026-07-05, operator-directed). Owner: TBD.
-Ratification: Joe. Lineage: futonzero-alphazero.md §5 (contest v1 +
-golden round 2 — the finding this mission discharges);
-E-cascade-sampler-sampler (parked on exactly this precondition).**
+**Status: STOPPED BY KILL CRITERION (2026-07-05, same day as charter —
+flown end-to-end through pipeline-cards-II: P1 deposit ft-action-vocabulary-005,
+P2 dark implementation f5fde3a3 [flag stays dark permanently under this
+charter], P3 negative x2). Lineage: futonzero-alphazero.md §5;
+E-cascade-sampler-sampler (stays parked — E1 precondition undischarged).**
+
+**The finding, per the kill clause ("the operator's value structure is
+not expressible at this grain"), fully mechanized:** negative #1 — the
+frozen decks were all-advance; the vocabulary was never exercised (the
+CANDIDATE GENERATOR gap; feeds M-aif2 slice 1). Negative #2 (enriched
+decks, real intra-class discrimination confirmed via metric-matrix
+kappa/resolvedness) — close-intensity = kappa x resolvedness COUPLES
+completion-value to structural importance multiplicatively, but the
+operator values close-outs by COMPLETION, independent of kappa;
+low-kappa saturated targets can never outrank high-kappa advances.
+**Routing per the criterion: the finding feeds the Joe-HUD /
+Bayesian-operator-model thread** — the missing term is an
+operator-interest signal independent of substrate curvature (decouple
+close from kappa, or model operator interest directly). Full record:
+E-live-loop-3.md "## P3-retry design" + "## P3-retry results";
+harness futon2/scripts/p3_retry_enriched.clj.
 
 ## HEAD
 
