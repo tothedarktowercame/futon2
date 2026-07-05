@@ -40,12 +40,13 @@
     "cd /home/joe/code/futon2 && clojure -A:test -m cognitect.test-runner -n futon2.aif.enact-scheduled-path-test -n futon2.aif.fold-escrow-seam-test -n futon2.aif.fold-escrow-test 2>&1 | grep -q '0 failures, 0 errors'"},
    :status :pass,
    :history
-   [{:at "2026-07-05T09:51:42.620622974Z", :pass true, :out ""}]}
+   [{:at "2026-07-05T09:51:42.620622974Z", :pass true, :out ""}
+    {:at "2026-07-05T09:54:13.659457294Z", :pass true, :out ""}]}
   {:id "L4",
    :title "NATURAL tick consumes escrow dG (ledger 10 real test)",
    :needs ["L3"],
    :gate
-   {:manual
-    "daily trace shows :fold-escrow provenance on a scheduled tick; ledger 10 updated"},
+   {:cmd
+    "cd /home/joe/code/futon2 && clojure -M scripts/gate_l4_natural_tick.clj 2>&1 | grep -q 'GATE L4 PASS'"},
    :status :pending,
    :history []}]}

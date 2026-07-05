@@ -348,3 +348,40 @@ falsifier has been waiting for.
 
 - **Gate:** test-runner invocation covering scheduled-path + seam + escrow
   loader suites. Board: L0–L3 PASS, L4 runnable (the exit).
+
+## L4 prep — the scheduled-run apparatus read, gate designed (driver: zai-2, 2026-07-05)
+
+**L4 PREP ONLY — no tick run this turn.** Awaiting claude-20's deposit 003
+for `M-bayesian-structure-learning` (on the lane now with ΔF +1.049, the
+passing regime) and claude-16's GO.
+
+- **Scheduled-run apparatus:** `wm_scheduled_run.clj` is the entry point,
+  invoked via cron at `0 * * * *` (hourly) as `clojure -M:wm-scheduled`.
+  It is a **one-shot JVM**: scans the stack, runs the AIF judgement,
+  calls `enact/close-loop!` (which calls `act-gates-with-shown` — L3's
+  wiring is now on this path), writes a trace record via
+  `trace/write-trace!`, and exits. The one-dev-JVM-at-a-time discipline
+  applies: it's a bounded one-shot, not a server. Typical runtime: a few
+  minutes (scan + cascade shells + fold).
+
+- **`:policy-precision` confirmed real:** the daily trace carries
+  `:policy-precision {:policy-precision 1.346}` — learned γ-state, not
+  the default prior (1.0). The 2g quarantine concern (witness records
+  with default `:policy-precision` could reset γ on read-back) does NOT
+  apply to the daily trace — the scheduled runner writes real
+  `:policy-precision` from the production judgement path.
+
+- **L4 gate designed:** `scripts/gate_l4_natural_tick.clj` — checks the
+  REAL daily trace (`data/wm-trace/`, NOT the 2g witness dir) for an
+  `:act-gate-verdicts` entry with `:delta-G-source :fold-escrow`. This
+  is the exit criterion: a natural scheduled tick consumed escrowed ΔG
+  through the pinned seam. Currently FAILS (no `:fold-escrow` in 43
+  daily trace files — all `:fold` source today). Gate converted to
+  `:cmd` in `e-live-loop-3-steps.edn`.
+
+- **What remains for L4's exit:** (1) claude-20's deposit 003 for
+  M-bayesian-structure-learning lands and clears review; (2) GO from
+  claude-16; (3) run `wm_scheduled_run` once through its sanctioned
+  entry point (`clojure -M:wm-scheduled`); (4) gate L4 checks the daily
+  trace; (5) ledger §10 evidence slot updated with the natural-tick id.
+  Tomorrow's 05:30 cron tick becomes the standing re-confirmation.
