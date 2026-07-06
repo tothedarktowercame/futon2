@@ -21,9 +21,9 @@
    :needs ["S1"],
    :gate
    {:cmd
-    "python3 -c \"import json; ids={r['id'] for r in json.load(open('/home/joe/code/futon3a/resources/notions/minilm_pattern_embeddings.json'))}; need={'process-coherence/status-refresh-before-work','process-coherence/is-this-even-a-problem','process-coherence/stuck-means-signal','proof-search/sorry-boundary-clustering','proof-search/extend-library-not-proof','proof-search/typed-hole-as-frontier'}; missing=need-ids; print('missing:',missing); exit(1 if missing else 0)\"",
+    "python3 -c \"import json; ids={r['id'] for r in json.load(open('/home/joe/code/futon3a/resources/notions/minilm_pattern_embeddings.json'))}; need={'process-coherence/status-refresh-before-work','process-coherence/is-this-even-a-problem','process-coherence/stuck-means-signal','proof-search/sorry-boundary-clustering','proof-search/extend-library-not-proof','proof-search/typed-hole-as-frontier','measurement/error-needs-structure-to-teach','measurement/ghost-as-typed-sorry','measurement/warrant-travels-with-the-number'}; missing=need-ids; print('missing:',missing); exit(1 if missing else 0)\"",
     :note
-    "extended to six seeds by claude-19 2026-07-05 (REMEDY 2: + the three proof-search patterns, futon3 9f0cef5, finding-3 library gap)."},
+    "extended to nine seeds by zai-8 2026-07-06 (REMEDY 3: + the three measurement patterns, futon3 de11748, first-flights library gap)."},
    :status :pass,
    :history
    [{:at "2026-07-05T06:39:06.744033984Z",
@@ -50,13 +50,16 @@
      :out "missing: set()"}
     {:at "2026-07-05T19:15:38.746182214Z",
      :pass true,
+     :out "missing: set()"}
+    {:at "2026-07-06T09:28:06.238067870Z",
+     :pass true,
      :out "missing: set()"}]}
   {:id "2b",
    :title "seed patterns registered in phylogeny",
    :needs ["S1"],
    :gate
    {:cmd
-    "cd /home/joe/code/futon3a && .venv/bin/python -c \"import sys; sys.path.insert(0,'holes/labs/M-memes-arrows'); import cascade_construct as cc; ph=cc.load_phylogeny(); need=['process-coherence/status-refresh-before-work','process-coherence/is-this-even-a-problem','process-coherence/stuck-means-signal','proof-search/sorry-boundary-clustering','proof-search/extend-library-not-proof','proof-search/typed-hole-as-frontier']; missing=[p for p in need if cc.pattern_stem(p) not in ph['patterns']]; print('missing:',missing); exit(1 if missing else 0)\"",
+    "cd /home/joe/code/futon3a && .venv/bin/python -c \"import sys; sys.path.insert(0,'holes/labs/M-memes-arrows'); import cascade_construct as cc; ph=cc.load_phylogeny(); need=['process-coherence/status-refresh-before-work','process-coherence/is-this-even-a-problem','process-coherence/stuck-means-signal','proof-search/sorry-boundary-clustering','proof-search/extend-library-not-proof','proof-search/typed-hole-as-frontier','measurement/error-needs-structure-to-teach','measurement/ghost-as-typed-sorry','measurement/warrant-travels-with-the-number']; missing=[p for p in need if cc.pattern_stem(p) not in ph['patterns']]; print('missing:',missing); exit(1 if missing else 0)\"",
     :note
     "gate rewritten by claude-19 2026-07-05: original cmd checked full ids against the phylogeny's patterns set, which stores bare stems (schema mismatch — unsatisfiable as written); now probes the REAL eligibility path (cascade_construct.load_phylogeny + pattern_stem, incl. learned-phylogeny merge). Strengthening, not weakening: same three seeds, checked through the actual consumer."},
    :status :pass,
@@ -82,15 +85,18 @@
      :out "missing: []"}
     {:at "2026-07-05T19:15:39.824588818Z",
      :pass true,
+     :out "missing: []"}
+    {:at "2026-07-06T09:28:11.830747864Z",
+     :pass true,
      :out "missing: []"}]}
   {:id "2c",
    :title "seed prior treatment (no 2.398-nat fine)",
    :needs ["2a" "2b"],
    :gate
    {:cmd
-    "cd /home/joe/code/futon3a && .venv/bin/python -c \"import sys,math,inspect; sys.path.insert(0,'holes/labs/M-memes-arrows'); import cascade_construct as cc; need=['process-coherence/status-refresh-before-work','process-coherence/is-this-even-a-problem','process-coherence/stuck-means-signal','proof-search/sorry-boundary-clustering','proof-search/extend-library-not-proof','proof-search/typed-hole-as-frontier']; seeds=cc.load_seed_stems(); ph=cc.load_phylogeny(); prior,dflt=cc.base_rate_prior(ph, seed_stems=seeds); prior0,_=cc.base_rate_prior(ph); drift=[k for k in prior0 if k not in seeds and prior0[k]!=prior[k]]; missingE=[p for p in need if p not in cc.EMB]; cx={s: round(-math.log(prior[s]),3) for s in sorted(seeds)}; bad=[s for s,c in cx.items() if c>=2.0]; wired='seed_stems' in inspect.getsource(cc.construct_cascade); print('cx:',cx,'EMB-missing:',missingE,'nonseed-drift:',drift[:3],'wired:',wired); exit(0 if (len(seeds)==6 and not missingE and not bad and not drift and wired) else 1)\"",
+    "cd /home/joe/code/futon3a && .venv/bin/python -c \"import sys,math,inspect; sys.path.insert(0,'holes/labs/M-memes-arrows'); import cascade_construct as cc; need=['process-coherence/status-refresh-before-work','process-coherence/is-this-even-a-problem','process-coherence/stuck-means-signal','proof-search/sorry-boundary-clustering','proof-search/extend-library-not-proof','proof-search/typed-hole-as-frontier','measurement/error-needs-structure-to-teach','measurement/ghost-as-typed-sorry','measurement/warrant-travels-with-the-number']; seeds=cc.load_seed_stems(); ph=cc.load_phylogeny(); prior,dflt=cc.base_rate_prior(ph, seed_stems=seeds); prior0,_=cc.base_rate_prior(ph); drift=[k for k in prior0 if k not in seeds and prior0[k]!=prior[k]]; missingE=[p for p in need if p not in cc.EMB]; cx={s: round(-math.log(prior[s]),3) for s in sorted(seeds)}; bad=[s for s,c in cx.items() if c>=2.0]; wired='seed_stems' in inspect.getsource(cc.construct_cascade); print('cx:',cx,'EMB-missing:',missingE,'nonseed-drift:',drift[:3],'wired:',wired); exit(0 if (len(seeds)==9 and not missingE and not bad and not drift and wired) else 1)\"",
     :note
-    "probe attached by claude-19 2026-07-05 (2c action): registry futon6/data/pattern-seeds.json; floor = median-pattern prior in base_rate_prior(seed_stems=...), construct_cascade wired. Checks: 3 seeds loaded, all in EMB, per-seed cx < 2.0 (measured 0.647 vs 2.398 unfloored), non-seed priors identical with/without seeds, construct_cascade passes seed_stems."},
+    "extended to nine seeds by zai-8 2026-07-06 (REMEDY 3: + the three measurement patterns, futon3 de11748, first-flights library gap). prior floor unchanged (median-pattern prior, self-retiring). Checks: 9 seeds loaded, all in EMB, per-seed cx < 2.0, non-seed priors identical with/without seeds, construct_cascade passes seed_stems."},
    :status :pass,
    :history
    [{:at "2026-07-05T06:56:24.232051066Z",
@@ -120,7 +126,11 @@
     {:at "2026-07-05T19:18:19.742949308Z",
      :pass true,
      :out
-     "cx: {'extend-library-not-proof': 0.647, 'is-this-even-a-problem': 0.647, 'sorry-boundary-clustering': 0.647, 'status-refresh-before-work': 0.647, 'stuck-means-signal': 0.647, 'typed-hole-as-frontier': 0.647} EMB-missing: [] nonseed-drift: [] wired: True"}]}
+     "cx: {'extend-library-not-proof': 0.647, 'is-this-even-a-problem': 0.647, 'sorry-boundary-clustering': 0.647, 'status-refresh-before-work': 0.647, 'stuck-means-signal': 0.647, 'typed-hole-as-frontier': 0.647} EMB-missing: [] nonseed-drift: [] wired: True"}
+    {:at "2026-07-06T09:28:12.924971889Z",
+     :pass true,
+     :out
+     "cx: {'error-needs-structure-to-teach': 0.647, 'extend-library-not-proof': 0.647, 'ghost-as-typed-sorry': 0.647, 'is-this-even-a-problem': 0.647, 'sorry-boundary-clustering': 0.647, 'status-refresh-before-work': 0.647, 'stuck-means-signal': 0.647, 'typed-hole-as-frontier': 0.647, 'warrant-travels-wit"}]}
   {:id "2d",
    :title "escrow ft-*.edn record contract + reject-loudly loader",
    :needs ["S1"],
@@ -257,7 +267,43 @@
     {:at "2026-07-05T21:48:16.477738842Z",
      :pass true,
      :out
-     "ft-action-vocabulary-005: sha-match + replay + dG re-assert OK (dG -0.7391304347826086; arming word \"Yes both are fine, lets proceed with 002\")\n  ft-aif-head-004: sha-match + replay + dG re-assert OK (dG -0.5; arming word \"the planning gate has Joe's blanket cons\")\n  ft-autoclock-in-001: sha-match"}]}
+     "ft-action-vocabulary-005: sha-match + replay + dG re-assert OK (dG -0.7391304347826086; arming word \"Yes both are fine, lets proceed with 002\")\n  ft-aif-head-004: sha-match + replay + dG re-assert OK (dG -0.5; arming word \"the planning gate has Joe's blanket cons\")\n  ft-autoclock-in-001: sha-match"}
+    {:at "2026-07-06T08:30:49.667863508Z",
+     :pass true,
+     :out
+     "ft-action-vocabulary-005: sha-match + replay + dG re-assert OK (dG -0.7391304347826086; arming word \"Yes both are fine, lets proceed with 002\")\n  ft-aif-head-004: sha-match + replay + dG re-assert OK (dG -0.5; arming word \"the planning gate has Joe's blanket cons\")\n  ft-autoclock-in-001: sha-match"}
+    {:at "2026-07-06T08:39:33.564038435Z",
+     :pass true,
+     :out
+     "ft-action-vocabulary-005: sha-match + replay + dG re-assert OK (dG -0.7391304347826086; arming word \"Yes both are fine, lets proceed with 002\")\n  ft-aif-head-004: sha-match + replay + dG re-assert OK (dG -0.5; arming word \"the planning gate has Joe's blanket cons\")\n  ft-autoclock-in-001: sha-match"}
+    {:at "2026-07-06T08:45:41.131182870Z",
+     :pass true,
+     :out
+     "ft-action-vocabulary-005: sha-match + replay + dG re-assert OK (dG -0.7391304347826086; arming word \"Yes both are fine, lets proceed with 002\")\n  ft-aif-head-004: sha-match + replay + dG re-assert OK (dG -0.5; arming word \"the planning gate has Joe's blanket cons\")\n  ft-autoclock-in-001: sha-match"}
+    {:at "2026-07-06T08:51:56.528895598Z",
+     :pass true,
+     :out
+     "ft-action-vocabulary-005: sha-match + replay + dG re-assert OK (dG -0.7391304347826086; arming word \"Yes both are fine, lets proceed with 002\")\n  ft-aif-faithfulness-001: sha-match + replay + dG re-assert OK (dG -0.5555555555555556; arming word \"Joe 2026-07-06 ~09:45: 5-agent commissio\")\n  ft-aif-"}
+    {:at "2026-07-06T08:54:06.451000710Z",
+     :pass false,
+     :out
+     "GATE 2f FAIL — rejected deposits: [:prompt-not-reconstructable]\nfold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-legacy-sorry-cleanup-001.edn: pin 1B: stored d49e4b37a70805a3bf0c82aacf9d5c605569738a86147b3653c915fc5c4be680 vs reconstructed 0b03a758bbb977dccc90"}
+    {:at "2026-07-06T08:56:30.719027737Z",
+     :pass true,
+     :out
+     "ft-action-vocabulary-005: sha-match + replay + dG re-assert OK (dG -0.7391304347826086; arming word \"Yes both are fine, lets proceed with 002\")\n  ft-aif-faithfulness-001: sha-match + replay + dG re-assert OK (dG -0.5555555555555556; arming word \"Joe 2026-07-06 ~09:45: 5-agent commissio\")\n  ft-aif-"}
+    {:at "2026-07-06T08:58:51.606981989Z",
+     :pass true,
+     :out
+     "ft-action-vocabulary-005: sha-match + replay + dG re-assert OK (dG -0.7391304347826086; arming word \"Yes both are fine, lets proceed with 002\")\n  ft-aif-faithfulness-001: sha-match + replay + dG re-assert OK (dG -0.5555555555555556; arming word \"Joe 2026-07-06 ~09:45: 5-agent commissio\")\n  ft-aif-"}
+    {:at "2026-07-06T08:59:33.057936273Z",
+     :pass true,
+     :out
+     "ft-action-vocabulary-005: sha-match + replay + dG re-assert OK (dG -0.7391304347826086; arming word \"Yes both are fine, lets proceed with 002\")\n  ft-aif-faithfulness-001: sha-match + replay + dG re-assert OK (dG -0.5555555555555556; arming word \"Joe 2026-07-06 ~09:45: 5-agent commissio\")\n  ft-aif-"}
+    {:at "2026-07-06T09:03:49.711977338Z",
+     :pass true,
+     :out
+     "ft-action-vocabulary-005: sha-match + replay + dG re-assert OK (dG -0.7391304347826086; arming word \"Yes both are fine, lets proceed with 002\")\n  ft-aif-faithfulness-001: sha-match + replay + dG re-assert OK (dG -0.5555555555555556; arming word \"Joe 2026-07-06 ~09:45: 5-agent commissio\")\n  ft-aif-"}]}
   {:id "2g",
    :title "live replay consumed on path",
    :armed true,

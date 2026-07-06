@@ -1891,3 +1891,96 @@ landed with invented pin schemes (`:sha256` + `:text-hash` instead of the real
 the single-deposit check would not have caught it. codex-1's pin-1b repair
 landed before this extension ran: 8/8 deposits now reconstruct byte-exact.
 Final suite state: **8 checks, 8 pass.**
+
+## first-flights library remedy (zai-8, 2026-07-06; claude-16 dispatched)
+
+### Context
+
+M-first-flights (the WM's top-ranked mission, 0-for-52) drew a size-1,
+F -0.446 cascade overnight — a library gap (same class as the
+diagramprover gap that motivated remedy-2). Three patterns were authored
+from the mission's real practice (futon3 `de11748`):
+`measurement/error-needs-structure-to-teach`,
+`measurement/ghost-as-typed-sorry`,
+`measurement/warrant-travels-with-the-number`. This section logs the
+ingestion + re-measurement.
+
+### §1 Ingestion
+
+- **Seeds registry**: `futon6/data/pattern-seeds.json` extended 6→9
+  (three measurement seeds, provenance: this dispatch + first-flights
+  gap, futon3 commit de11748).
+- **Embeddings regen**: `futon3a/scripts/index_patterns.sh --minilm` —
+  1202 pattern records, 1202 embeddings (parity asserted by the script).
+  All three new patterns present in the embeddings artifact.
+- **Phylogeny**: three new stems added to `pattern-phylogeny-edges.json`
+  patterns set (548→551), with descent edges from
+  `author-the-missing-pattern` (the doctrine that authored them). No
+  co-app edges yet (no mission co-application history — honest).
+- **Backups**: `pattern-phylogeny-edges.json.bak`, `pattern-seeds.json.bak`,
+  `minilm_pattern_embeddings.json.bak` in /tmp.
+
+### §2 Gates 2a/2b/2c extended to nine-seed need-lists
+
+- **2a** (seeds in embeddings): PASS — `missing: set()`
+- **2b** (seeds in phylogeny): PASS — `missing: []`
+- **2c** (prior floor + nonseed-drift): PASS — all 9 seeds at cx 0.647
+  (median-pattern floor), EMB-missing [], nonseed-drift [], wired True
+
+### §3 Controls (K-shift detection)
+
+- **Flight-1 banner psi** (`mission->psi "M-first-flights"` = banner +
+  STUCK line): pre-ingest size 0, F 0.0; post-ingest size 0, F 0.0 —
+  **byte-identical, no K-shift**.
+- **Reference regression**: 7/8 pass (same pre-existing DRIFT on check 6
+  peradam refusal census — deposit-count-sensitive, not
+  constructor-sensitive). Constructor checks 1a (peradam: size 11, F
+  +2.227, top no-self-certification 0.521) and 1b (aif-head: size 21, F
+  ~8.862, top baseline-cyber-ant 0.679) **both byte-identical to
+  pre-ingest** — no K-shift.
+
+### §4 The re-measurement (frozen first-flights psi)
+
+The frozen psi at `futon2/holes/reference-psis/psi-first-flights.txt`
+(verified to match deposit 007's `:cascade :psi`).
+
+| | BEFORE (overnight) | AFTER (post-ingest) |
+|---|---|---|
+| size | 1 | 2 |
+| F-free-energy | -0.446 | -0.446 |
+| shown | `vsatlas/proof-through-pilots` (rel 0.511, mc 0.153) | `measurement/error-needs-structure-to-teach` (rel 0.541, mc 0.162), `vsatlas/proof-through-pilots` (rel 0.511, mc 0.153) |
+
+**Card 4(a) — F crossing 0 within this one authoring cycle: MISSED.**
+F is still -0.446 (unchanged). The new measurement pattern entered the
+cascade at the HIGHEST relevance (0.541 > 0.511), so the library gap IS
+addressed — the psi now resonates with domain vocabulary. But F did not
+improve because the pattern's marginal cost (0.162) approximately equals
+its accuracy contribution — the cascade grew from 1 to 2 but the
+free-energy surface is flat at this psi. The gap is narrower (the right
+vocabulary is now IN the library) but the cascade does not yet cross 0.
+
+**Card 4(b) — cluster should open at rel >= 0.6: MISSED.**
+The top pattern `measurement/error-needs-structure-to-teach` opened at
+rel 0.541, below the 0.6 threshold. The other two measurement patterns
+(`ghost-as-typed-sorry`, `warrant-travels-with-the-number`) did not
+enter the shown window. The cluster is mutually-citing in prose
+(kin-references in the flexiarg) but the MiniLM embedding does not
+surface them as a cluster at this psi — the psi's vocabulary overlaps
+most strongly with `error-needs-structure-to-teach` alone.
+
+**Honest interpretation**: the three patterns closed the VOCABULARY gap
+(the cascade now pulls domain-relevant measurement vocabulary instead of
+only the generic `vsatlas/proof-through-pilots`), but the F improvement
+requires either (a) a richer psi that names all three pattern concerns
+(the frozen psi emphasizes error-structure and ghosts but not warrant),
+or (b) more patterns in the cluster to raise the accuracy contribution
+above the complexity cost. The remedy-2 precedent (diagramprover
+-0.443→+0.144) took a second cycle; this first cycle moved the right
+pattern into the window but did not cross F=0.
+
+### §5 Commits
+
+- futon6: pattern-seeds.json, pattern-phylogeny-edges.json
+- futon3a: minilm_pattern_embeddings.json (regenerated)
+- futon2: e-live-loop-2-steps.edn (gates extended), E-live-loop-3.md (this log)
+
