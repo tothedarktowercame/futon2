@@ -1,0 +1,145 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>Live-loop III.1 — readying the γ-fed loop</title>
+<style>
+body{font:15px/1.55 system-ui,sans-serif;max-width:980px;margin:2rem auto;padding:0 1rem;color:#223}
+h1{font-size:22px} h2{font-size:17px;border-bottom:1px solid #dde;padding-bottom:4px;margin-top:2rem}
+.summary{background:#f5f7f6;border:1px solid #dde;border-radius:8px;padding:12px 16px}
+.card{border:1px solid #dde;border-radius:8px;padding:12px 16px;margin:14px 0}
+.ok{color:#3f8b57;font-weight:700}.red{color:#b1543a;font-weight:700}.hold{color:#a07f2a;font-weight:700}
+.ev{font-size:13px;color:#667;border-left:3px solid #ccd;padding-left:10px;margin:8px 0}
+table{border-collapse:collapse;font-size:13px;width:100%} th,td{border:1px solid #dde;padding:4px 8px;text-align:left;vertical-align:top}
+code{background:#f2f4f3;padding:0 4px;border-radius:4px;font-size:13px}
+.foot{color:#99a;font-size:11px;margin-top:2rem}
+blockquote{color:#667;border-left:3px solid #ccd;margin:8px 0;padding-left:10px;font-size:13px}
+</style></head><body>
+
+<h1>Live-loop III.1: readying the γ-fed loop</h1>
+
+<div class="summary">
+Successor to <a href="live-loop-3-explainer.html">E-live-loop-3</a> and companion to
+<a href="flight-pipeline-cards-iii.html">pipeline cards III</a>. Loop-3 proved the scheduled
+path could read pinned escrow. III.1 is the pre-flight hardening pass before another live loop:
+the campaign gaps are closed or gated, the instruments are checked, and γ now receives an
+honest realized-vs-expected sample when enactment produces nothing. Verdict at compilation:
+<b class="ok">ready for a T-0 baseline rerun, then the next live loop may start.</b>
+</div>
+
+<h2>What is new since loop-3</h2>
+<table>
+<tr><th>new behaviour</th><th>what changed</th><th>why it matters</th></tr>
+<tr><td>Cards-II gaps joined into a campaign</td><td><code>flight-pipeline-cards-iii.html</code> is now the
+resolution ledger. dF last inch, γ cargo, co-app usage, candidate drift, proposer visibility, and
+dogfood sequencing are all named with commits and gates.</td><td>The loop is no longer trying to
+dogfood each WM subproblem separately; the campaign names which work is direct ground-control
+work and which can safely pass through WM enactment.</td></tr>
+<tr><td>First-flights crosses the F leg</td><td>The current <code>M-first-flights</code> lane measures
+F +0.385 with the authored devmap-coherence cluster. The older F −0.024 cards-II snapshot is
+stale.</td><td>The dF last-inch blocker is closed without deposit or library hand-editing for the
+series.</td></tr>
+<tr><td>γ has cargo</td><td>At least three replayable deposits have F &gt; 0 and ΔG &lt; 0:
+<code>ft-aif-faithfulness-001</code>, <code>ft-evaluate-policies-009</code>, and
+<code>ft-legacy-sorry-cleanup-001</code>.</td><td>The first fed tick no longer waits for
+first-flights specifically; any qualifying acted-on pass can feed γ.</td></tr>
+<tr><td>Realized zero is a sample</td><td><code>fold_realized.clj</code> now records realizedG
+<code>0.0</code> when enactment yields 0 boxes against N obligations. Nil remains reserved for
+genuinely unmeasurable cases.</td><td>γ learns from failure to realize. A plan that expected
+coverage but enacted nothing produces a real calibration error instead of holding at the prior.</td></tr>
+</table>
+
+<h2>The pre-live-loop board</h2>
+<table>
+<tr><th>item</th><th>state</th><th>evidence</th></tr>
+<tr><td>1. Disk / evidence-store instruments</td><td class="ok">PASS</td><td>All checked paths are on
+<code>/dev/nvme0n1p2</code> with 237G available. Write/remove probes passed for
+<code>futon2/data/wm-trace/</code>, <code>futon6/data/</code>,
+<code>storage/futon1a/default/doc-store/</code>, <code>futon6/data/fold-turns/</code>, and
+<code>futon6/data/mana-gate/</code>. Historical 2026-07-05 disk-full errors are resolved.</td></tr>
+<tr><td>2. γ sample tail</td><td class="ok">PASS after fix</td><td><code>2d13ef2</code> changes only the
+realized observation path. Focused tests pass: zero construction gives realizedG 0.0; covered
+devmap families still realize non-zero coverage; escrow-as-realized is guarded against; all three
+qualifying deposits now produce expected+realized pairs.</td></tr>
+<tr><td>3. Escrow mechanical standing</td><td class="ok">PASS</td><td>13 deposits loaded, 0 rejected.
+<code>bb scripts/live_loop_step.bb gate 2f</code> PASS. <code>ft-operational-vocabulary-001</code>
+is included and mechanically green; its force-add remains an ownership/durability review item,
+not a loop blocker.</td></tr>
+<tr><td>4. T-0 baseline bundle</td><td class="ok">PASS / prepared</td><td>Preflight ran green enough:
+gate 2f PASS; reference regression 8 checks, 7 pass, with only known deposit-count-sensitive
+peradam refusal-census DRIFT. The same two commands must be rerun immediately before tick 1
+with then-current SHAs.</td></tr>
+</table>
+
+<h2>The γ fix, in one picture</h2>
+<div class="card">
+Before III.1, the expected leg and realized leg could separate like this:
+<pre>expectedG = escrow fold ΔG, e.g. -0.615
+enacted wiring = fold_engine RULES result
+RULES knows no aif/* patterns -> 0 boxes
+coverage-delta-g over 0 boxes -> nil
+γ sample absent -> γ holds at prior</pre>
+The repaired semantics:
+<pre>0 boxes + N obligations = measured zero coverage
+realizedG = 0.0
+signed error = realizedG - expectedG
+example: 0.0 - (-0.615) = +0.615</pre>
+This is deliberately <b>not</b> escrow-as-realized. If realizedG copied expectedG, γ would get
+zero error by construction and learn nothing. With zero-coverage semantics, the machine sees
+that the current executor failed to realize the plan and can calibrate accordingly.
+</div>
+
+<h2>The three qualifying deposits now feed complete samples</h2>
+<table>
+<tr><th>deposit</th><th>expectedG</th><th>realizedG</th><th>signed error</th><th>interpretation</th></tr>
+<tr><td><code>ft-aif-faithfulness-001</code></td><td>-0.5556</td><td>0.0</td><td>+0.5556</td><td>plan over-promised relative to current executor reach</td></tr>
+<tr><td><code>ft-evaluate-policies-009</code></td><td>-0.6154</td><td>0.0</td><td>+0.6154</td><td>strong expected fold, zero enacted coverage today</td></tr>
+<tr><td><code>ft-legacy-sorry-cleanup-001</code></td><td>-0.5714</td><td>0.0</td><td>+0.5714</td><td>same honest calibration signal</td></tr>
+</table>
+
+<h2>What the next live loop is allowed to test</h2>
+<div class="card"><ol>
+<li><b>First fed tick:</b> a qualifying acted-on pass should write a complete
+<code>:realized-outcome</code> with expectedG and realizedG.</li>
+<li><b>γ burn-in:</b> card 7's thresholds only become interpretable after the pre-registered
+burn-in + fed-tick window. A shorter window is VERDICT-DEFERRED, not a failure.</li>
+<li><b>Executor family bias:</b> early γ movement partly measures which pattern families the
+executor can realize today. That is a fact to log, not a confound to hide.</li>
+<li><b>Fast return arc:</b> card 10's fast-path falsifier remains about whether deposits,
+held-item closures, or mission status changes alter recommendations.</li>
+</ol></div>
+
+<h2>T-0 run contract</h2>
+<div class="card">
+Immediately before tick 1, rerun and paste the outputs plus commit SHAs into the series log:
+<pre>cd /home/joe/code/futon2 && bb scripts/live_loop_step.bb gate 2f
+cd /home/joe/code/futon2 && clojure -M scripts/reference_regression.clj</pre>
+Expected shape: gate 2f PASS; reference regression may still show the known peradam
+deposit-count DRIFT, but constructor checks 1a/1b must remain byte-identical. No JVM restart,
+no live tick before the baseline, no :7071 writes, and no mid-series flag flips without an
+operator timestamp in the series log.
+</div>
+
+<h2>Open, but not T-0 blockers</h2>
+<table>
+<tr><th>item</th><th>status for this loop</th></tr>
+<tr><td>Portfolio proposer</td><td>Stays dark. Turning it on is M-aif2 slice-1 / operator-gated work, not a series preflight.</td></tr>
+<tr><td>Co-app miner integration</td><td>Usage edges are mined and the pipeline edge is live; feeding them into constructor connectivity is next-series work.</td></tr>
+<tr><td>Post-enactment re-observation</td><td>The right long-term realized semantics, but research-grade. III.1 uses honest executor output now rather than blocking on the deeper fruit witness.</td></tr>
+<tr><td>Force-added deposit ownership</td><td>Logged as a durability review item. Mechanical standing is green, so it does not block the loop.</td></tr>
+</table>
+
+<p>The shortest honest description: loop-3 proved the machine could read an armed plan on
+schedule. III.1 makes the next series measurable: storage is writable, escrow is mechanically
+green, γ has cargo, and a failed enactment now produces an informative realized value instead
+of silence. The remaining command is procedural, not conceptual: rerun the T-0 baseline, then
+let the loop produce data.</p>
+
+<p class="foot">Sources: <code>flight-pipeline-cards-iii.html</code> through commits
+<code>e36db97</code> and <code>2d13ef2</code>; claude-16 whistles
+<code>invoke-5757a4ea-4230-454a-9388-7fb76aaa89a7</code> and
+<code>invoke-c801a87f-d395-43c0-aa69-ff0efa1ea7a7</code>; preflight bells
+<code>invoke-1783338564401-656-9a327897</code>,
+<code>invoke-1783338564384-655-28553753</code>,
+<code>invoke-1783338564306-654-4c38e5c2</code>, and
+<code>invoke-1783339156385-662-9aeba715</code>; focused test
+<code>test/fold_realized_zero_coverage_test.clj</code>. Compiled by codex-1 at operator
+direction, 2026-07-06.</p>
+</body></html>
