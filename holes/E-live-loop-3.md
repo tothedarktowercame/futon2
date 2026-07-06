@@ -2157,3 +2157,61 @@ F = -0.024 (paraphrase, retained as the argmax of two measured arms).**
 - futon2: cascade_lane.clj (banner regex fix), sorrys.edn (Phase B sorry),
   held-work-ledger.edn (regenerated), E-live-loop-3.md (this log)
 
+## gate-the-decision (zai-8, 2026-07-06; claude-16 dispatched, operator ruled)
+
+### Context
+
+**Operator ruling (2026-07-06, verbatim):** "Yes, we should accept the
+decision so that the machine can act on its decision."
+
+**Operator stop-rule (verbatim, not color):** "hopefully at some point it
+might choose something other than M-first-flights. In a way, it's a bit
+strange to try and automate work on M-first-flights *with the system* that
+we are trying to automate. I get it, but if it turns out we're not actually
+able to make progress, as we have discussed, we should stop banging our
+heads against the wall. However, unblocking the gate-check is a good idea
+in any case."
+
+**Finding (claude-16):** the War Machine runs two parallel action streams
+that never meet. The **judge stream** ranks all candidates and produces the
+headline decision (e.g. `:advance-mission :target M-first-flights` at rank
+1). The **gate lane** (cascade-lane) filters for `:open-mission` type only
+— the judge's top DECISION is structurally excluded, so the gate never
+checks what the machine actually decided. Every remedy built this weekend
+feeds the gate lane, but M-first-flights only ever appeared in the judge
+stream, so the lane never evaluated it.
+
+### The change
+
+`futon2/scripts/futon2/report/cascade_lane.clj`:
+- New dynamic flag `*gate-decision-target?*` (DEFAULT ON, armed by the
+  ruling). Flag-off = old composition byte-identical.
+- New private fn `decision-entry`: extracts the rank-1 decision (any action
+  type with a :target). Returns nil when rank-1 IS :open-mission (dedup
+  automatic) or has no :target (skipped safely).
+- `cascade-lane` refactored: when flag on, prepends the decision target as
+  entry #1, then the existing top-n :open-mission entries, dedup by target,
+  cap at n+1.
+
+### Tests
+
+- (a) rank-1 :advance-mission target extracted as decision entry ✓
+- (b) rank-1 :open-mission returns nil from decision-entry (dedup) ✓
+- (c) flag default true, bindable to false ✓
+- (d) rank-1 without :target returns nil (skipped safely) ✓
+
+### Controls
+
+- **clj-kondo**: 0 errors, 0 warnings
+- **L2 gate**: PASS (sorry-grain + banner fallback — no regression)
+- **Reference regression**: 7/8 pass, constructor checks 1a/1b
+  byte-identical (no K-shift — this is lane-side, not library-side)
+
+### Next tick expectation
+
+The next cron tick (~12:04 BST) is the live confirmation. EXPECT:
+M-first-flights gated for the first time — verdict **:fail** with
+**:delta-G-source :fold-escrow** (ΔF −0.024 from the best lane ψ, ΔG −1.0
+from deposit 007, AND-gate fails on the ΔF leg honestly). The remaining
+0.024 is the constructor-dilution work already chartered on card 3.
+

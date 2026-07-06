@@ -313,31 +313,68 @@
         (swap! !rollout-g-cache assoc stem g)
         g))))
 
+(def ^:dynamic *gate-decision-target?*
+  "When true (DEFAULT, operator ruling 2026-07-06: \"Yes, we should accept
+  the decision so that the machine can act on its decision\"), the
+  cascade-lane prepends the judge's rank-1 DECISION target as entry #1 --
+  whatever its action type -- so the gate evaluates what the machine
+  actually decided, not just the open-mission side-stream. Armed by
+  claude-16 bell invoke-1783332928386-617-4f58c0cd. When false, the lane
+  is byte-identical to the pre-ruling composition (open-mission only)."
+  true)
+
+(defn- decision-entry
+  "Extract the rank-1 decision entry from ranked-actions (ANY action type
+  with a :target). Returns nil when the first ranked action has no :target
+  or when rank-1 IS an :open-mission (handled by the existing filter, so
+  dedup is automatic)."
+  [ranked-actions]
+  (let [first-entry (first ranked-actions)
+        action-type (get-in first-entry [:action :type])
+        target      (get-in first-entry [:action :target])]
+    (when (and target
+               (not (#{:open-mission "open-mission"} action-type)))
+      first-entry)))
+
 (defn cascade-lane
   "The v1 cascade lane: for the top-n :open-mission targets in ranked-actions, build the
    cascade-policy for each circumstance. Returns
-   [{:mission :psi :size :wholeness :budget :truncated :shown [pattern-ids...]} ...]."
+   [{:mission :psi :size :wholeness :budget :truncated :shown [pattern-ids...]} ...].
+   When *gate-decision-target?* is true (default, operator ruling 2026-07-06), entry #1
+   is the judge's actual top decision (any action type with a :target), so the gate
+   checks what the machine decided -- not just the open-mission side-stream."
   ([ranked-actions] (cascade-lane ranked-actions {}))
   ([ranked-actions {:keys [n budget] :or {n 3 budget default-budget}}]
-   (->> ranked-actions
-        ;; live-judgement comes through the JSON API -> :type is the STRING "open-mission";
-        ;; the in-process path uses the keyword. Accept both.
-        (filter #(#{:open-mission "open-mission"} (get-in % [:action :type])))
-        (take n)
-        (keep (fn [e]
-                (let [m (get-in e [:action :target])
-                      psi (str/trim (str (mission->psi m) " "
-                                         (or (get-in e [:action :rationale]) "")))
-                      c (cascade-policy-for psi budget)]
-                  (when c
-                    {:mission m :psi psi
-                     :size (:size c) :wholeness (:wholeness c) :budget (:budget c)
-                     :truncated (:truncated c)
-                     ;; both act-gate legs (Car-3): ΔF = cascade F-free-energy, ΔG = rollout G(π)
-                     :F-free-energy (:F-free-energy c)
-                     :G-rollout (rollout-g-for m)
-                     :shown (mapv :pattern (:shown c))}))))
-        vec)))
+   (let [build-entry (fn [e]
+                       (let [m (get-in e [:action :target])
+                             psi (str/trim (str (mission->psi m) " "
+                                                (or (get-in e [:action :rationale]) "")))
+                             c (cascade-policy-for psi budget)]
+                         (when c
+                           {:mission m :psi psi
+                            :size (:size c) :wholeness (:wholeness c) :budget (:budget c)
+                            :truncated (:truncated c)
+                            ;; both act-gate legs (Car-3): ΔF = cascade F-free-energy, ΔG = rollout G(π)
+                            :F-free-energy (:F-free-energy c)
+                            :G-rollout (rollout-g-for m)
+                            :shown (mapv :pattern (:shown c))})))
+         om-entries (->> ranked-actions
+                         ;; live-judgement comes through the JSON API -> :type is the STRING "open-mission";
+                         ;; the in-process path uses the keyword. Accept both.
+                         (filter #(#{:open-mission "open-mission"} (get-in % [:action :type])))
+                         (take n)
+                         (keep build-entry)
+                         vec)
+         decision-entries (when *gate-decision-target?*
+                            (when-let [de (decision-entry ranked-actions)]
+                              (let [dec-target (get-in de [:action :target])
+                                    already-in? (some #(= (:mission %) dec-target) om-entries)]
+                                (when-not already-in?
+                                  (when-let [built (build-entry de)]
+                                    [built])))))]
+     (if *gate-decision-target?*
+       (vec (concat decision-entries om-entries))
+       om-entries))))
 
 (def ^:private gap-free-energy-threshold
   "A cascade whose marginal-likelihood F = accuracy − λ·complexity falls at/below this is a
