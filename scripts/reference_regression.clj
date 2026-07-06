@@ -125,29 +125,49 @@
                         size (double f) top-pat (double top-rel) trunc))))))
 
 ;; =============================================================================
-;; CHECK 2: FOLD PIN — ft-autoclock-in-001 prompt-sha byte-exact
+;; CHECK 2: FOLD PINS — EVERY deposit reconstructs prompt-sha byte-exact
 ;; =============================================================================
-;; Provenance: ft-autoclock-in-001.edn :prompt :sha256 = 5597da91...
-;;             (the L3 reconstruction practice — fold-prompt fn reproduces it)
-;; Provenance: E-live-loop-2 "2f log" — pin 1 (replay-validity)
+;; Provenance: gate_2f_deposit.clj pin 1 (replay-validity) — the fold-prompt fn
+;;             over the deposit's own cascade pattern-ids + circumstance
+;;             {:mission :psi} + verbatim flexiarg prose must hash to the stored
+;;             :prompt :sha256. Extended from the single-deposit check (001) to
+;;             loop over EVERY deposit in the escrow dir, per claude-16's
+;;             overnight-flights finding (007/008 landed with invented pin
+;;             schemes; the loader accepted them, replay abstained — the suite
+;;             must catch this).
 
-(defn check-2-fold-pin []
-  (let [deposit-file "/home/joe/code/futon6/data/fold-turns/ft-autoclock-in-001.edn"
-        d (edn/read-string (slurp deposit-file))
-        stored-sha (get-in d [:prompt :sha256])
-        cascade (vec (get-in d [:cascade :pattern-ids]))
+(defn reconstruct-prompt-sha
+  "Rebuild the fold-prompt for a deposit and return its sha256."
+  [d]
+  (let [cascade (vec (get-in d [:cascade :pattern-ids]))
         circumstance {:mission (:mission d)
                       :psi (get-in d [:cascade :psi])}
         proses (into {} (for [p cascade]
                           [p (slurp (str "/home/joe/code/futon3/library/" p ".flexiarg"))]))
-        prompt (fl/fold-prompt cascade circumstance proses)
-        rebuilt-sha (esc/prompt-sha prompt)]
-    (check! "2: fold-pin ft-autoclock-in-001 prompt-sha"
-            (= stored-sha rebuilt-sha)
-            (format "stored=%s rebuilt=%s (match: %s)"
-                    (subs stored-sha 0 12)
-                    (subs rebuilt-sha 0 12)
-                    (= stored-sha rebuilt-sha)))))
+        prompt (fl/fold-prompt cascade circumstance proses)]
+    (esc/prompt-sha prompt)))
+
+(defn check-2-fold-pin []
+  (let [deposits (:deposits (esc/load-deposits))
+        results (for [d deposits
+                      :let [id (:fold-turn/id d)
+                            stored (get-in d [:prompt :sha256])
+                            rebuilt (reconstruct-prompt-sha d)
+                            match (= stored rebuilt)]]
+                  {:id id :stored stored :rebuilt rebuilt :match match})
+        all-match (every? :match results)]
+    (doseq [r results]
+      (let [status (if (:match r) "PASS" "DRIFT")]
+        (println (format "       %-42s %s stored=%s rebuilt=%s"
+                         (:id r) status
+                         (subs (:stored r) 0 12)
+                         (subs (:rebuilt r) 0 12)))))
+    (let [pass-count (count (filter :match results))
+          total (count results)]
+      (check! "2: fold-pin prompt-sha (every deposit)"
+              all-match
+              (format "%d/%d deposits reconstruct byte-exact via fold-prompt"
+                      pass-count total)))))
 
 ;; =============================================================================
 ;; CHECK 3: ESCROW — load-deposits over real dir, all accepted + tamper rejection
@@ -161,7 +181,7 @@
     (check! "3a: escrow load-deposits all accepted"
             (and (= (count rejected) 0)
                  (> (count deposits) 0))
-            (format "%d deposits, %d rejected (ref: 6 / 0)"
+            (format "%d deposits, %d rejected (ref: 8 / 0)"
                     (count deposits) (count rejected))))
   ;; 3b: one synthetic tamper => named rejection
   ;; We tamper a COPY: take deposit 001, corrupt its delta-g, write to a temp
@@ -298,13 +318,17 @@
 (def expected-refusal-census
   "The frozen refusal-cause map per deposit, from the peradam fold's STEP-0 CENSUS
   (box b5/b6). The certificate machinery is not built; this is the documented
-  expected behavior, frozen as a regression reference."
+  expected behavior, frozen as a regression reference.
+  007/008 added after the overnight flights (both no-seal, per the 003 precedent
+  — their :blind-scoring-note confirms)."
   {"ft-autoclock-in-001" :unstructured-witnesses
    "ft-live-geometric-stack-002" :unstructured-witnesses
    "ft-bayesian-structure-learning-003" :missing-seal
    "ft-aif-head-004" :missing-seal
    "ft-action-vocabulary-005" :missing-seal
-   "ft-peradam-mechanization-006" :missing-seal})
+   "ft-peradam-mechanization-006" :missing-seal
+   "ft-first-flights-007" :missing-seal
+   "ft-bounded-in-flight-state-008" :missing-seal})
 
 (defn deposit-has-seal-field?
   "True if the deposit file contains a :seal key at the top level (structural
@@ -332,7 +356,7 @@
         ids-match (= expected-ids actual-ids)]
     (check! "6: peradam refusal census"
             (and all-refusable? ids-match)
-            (format "%d deposits, all no-seal-field=%s, ids-match=%s; causes: 001/002 unstructured-witnesses, 003/004/005/006 missing-seal"
+            (format "%d deposits, all no-seal-field=%s, ids-match=%s; causes: 001/002 unstructured-witnesses, 003-008 missing-seal"
                     (count actual-census) all-refusable? ids-match))))
 
 ;; =============================================================================

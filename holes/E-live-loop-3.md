@@ -1827,8 +1827,10 @@ check exercises Clojure namespaces on the futon2 classpath: fold-escrow,
 fold-llm, mana-gate. The p3_retry_enriched kill-test is itself a `-M` script.)
 
 **Reference psis frozen:** `futon2/holes/reference-psis/psi-peradam-mech.txt`
-(sha `97b9de29…`, matches deposit-006) and `psi-aif-head.txt` (sha
-`b9c15315…`, matches deposit-004). Copied from /tmp so they survive.
+(sha `97b9de29…`, matches deposit-006), `psi-aif-head.txt` (sha `b9c15315…`,
+matches deposit-004), `psi-first-flights.txt` (sha `365e91a1…`, matches
+deposit-007), `psi-bounded-in-flight-state.txt` (sha `e0328b13…`, matches
+deposit-008). Copied from the deposit records so they survive.
 
 **8 named checks, each with PASS/DRIFT output:**
 
@@ -1839,10 +1841,14 @@ fold-llm, mana-gate. The p3_retry_enriched kill-test is itself a `-M` script.)
    top `ants/baseline-cyber-ant` 0.679, F ~8.722 (tol 0.5 — embedding drift on
    the 21-pattern cascade; structural pins exact). Provenance: deposit-006 log
    + deposit-004 log.
-2. **FOLD PIN** — `ft-autoclock-in-001` prompt-sha `5597da91…` reproduces
-   byte-exact via the `fold-prompt` fn (the L3 reconstruction practice).
+2. **FOLD PINS** — EVERY deposit in the escrow dir reconstructs its prompt-sha
+   byte-exact via the real `fold-prompt` fn (loop over `load-deposits` output;
+   report per-deposit PASS/DRIFT). Extended from the single-deposit check (001
+   only) after the overnight flights showed why one is not enough: 007/008
+   initially landed with invented pin schemes (the loader accepted them, replay
+   abstained). codex-1's pin-1b repair landed before this run — 8/8 now PASS.
    Provenance: gate_2f_deposit.clj pin 1 (replay-validity).
-3. **ESCROW** — `load-deposits` over the real dir: all 6 current deposits
+3. **ESCROW** — `load-deposits` over the real dir: all 8 current deposits
    accepted, 0 rejections. One synthetic tamper (corrupt delta-g to -0.999):
    named rejection `:delta-g-mismatch`. Provenance: gate_2f_deposit.clj PASS.
 4. **KILL-TEST** — `clojure -M scripts/p3_retry_enriched.clj`: OVERALL `:fail`,
@@ -1852,7 +1858,7 @@ fold-llm, mana-gate. The p3_retry_enriched kill-test is itself a `-M` script.)
    on a throwaway gate id (temp dir, cleaned up after): balances exact (3→2→1→
    0→refused). Provenance: mana_gate.clj (P2 mana gate, 8 tests).
 6. **PERADAM** — the refusal census: exactly the current refusal causes per
-   deposit (001/002 unstructured-witnesses, 003/004/005/006 missing-seal).
+   deposit (001/002 unstructured-witnesses, 003-008 missing-seal).
    The certificate LOADER is the fold's PLAN (not yet runtime code); this
    check freezes the DOCUMENTED census as a fact about the deposit corpus —
    verifying no deposit carries a structural `:seal` field (all are refusable)
@@ -1876,3 +1882,12 @@ grouped loosely. The frozen map in this commit (`46b3bf5`) is the new baseline
 going forward — and catching precisely this kind of quiet cause-drift is what
 the suite exists for. This discrepancy is the suite's first datum, not its
 first bug.
+
+**Suite extension (2026-07-06 morning, claude-16 dispatch):** check 2 extended
+from the single-deposit fold-pin (001 only) to loop over EVERY deposit in the
+escrow dir. The overnight flights produced deposits 007/008 which initially
+landed with invented pin schemes (`:sha256` + `:text-hash` instead of the real
+`:prose-sha256` pin-1 scheme) — the loader accepted them, replay abstained, and
+the single-deposit check would not have caught it. codex-1's pin-1b repair
+landed before this extension ran: 8/8 deposits now reconstruct byte-exact.
+Final suite state: **8 checks, 8 pass.**
