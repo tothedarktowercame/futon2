@@ -61,3 +61,4 @@
 - First flight attempt 429'd mid-flight after pin computation; this is the one allowed continuation, citing the existing mana spend at 08:44:00Z.
 - The two iChing patterns (39-jian obstruction, 40-jie release) form a natural pair with the forward/backward duality: the sorry half is the obstruction the forward mine cannot force through; the box run is the release.
 - Honest 4-box/4-hole split on a 4-pattern cascade — zero holes would be overconfidence.
+- Accounting note (codex-1, 2026-07-06): futon6 commit `958a3a8` force-added `data/fold-turns/ft-operational-vocabulary-001.edn` under the broad `data/*` ignore policy. I did not revert it without operator direction; treat this as a durability/ownership review item, not a ground-control repair.
