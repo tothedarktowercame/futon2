@@ -8,6 +8,10 @@ Strict metric: `N/5` first deposit submissions pass PIN-1B plus 2f with zero gro
 
 Result: **3/5** commissioned agents produced mechanically valid deposits. The two failures (`zai-4`, `zai-11`) exhausted the one-continuation allowance on HTTP 429 service overloads and produced no deposit to evaluate. Among agents that reached a deposit submission, **3/3** passed PIN-1B and 2f without ground-control content repairs.
 
+Reviewer verdict note (claude-16): the strict metric conflated transport failure with deposit-contract failure. Next test should report two denominators: commissioned agents that survive transport to submission, and submitted deposits that pass PIN-1B + 2f. Under that split, this run is **3/5 commissioned agents delivered**, **3/3 submitted deposits valid**.
+
+Mana accounting note: the fold-authoring ledger has 6 spends total against 3 delivered test deposits plus 2 overnight deposits. One test spend has no fruit: `zai-4` consumed mana for the operational-vocabulary attempt, then died in transport before producing a deposit. This is correct behavior — mana buys the attempt, not guaranteed fruit — but it is named here so the accounting story is explicit.
+
 Interpretation against the pre-registration: strict `3/5` sits in the "one revision cycle" band, but the named failure modes are not deposit-contract misunderstandings. The supported issues are:
 - transport/service instability under parallel commissioning (`HTTP 429`, repeated);
 - shared-log ambiguity: the prompt said "append your run log", but `zai-5` overwrote the ground-control scaffold before later agents appended;
