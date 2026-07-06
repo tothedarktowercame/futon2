@@ -272,8 +272,8 @@ GROUND-CONTROL, not WM enactment.</div>
 <div class="summary"><b>PRE-LIVE-LOOP MUST-CLOSE TRACKER — opened 2026-07-06:</b><br>
 Joe observed residual-work language and asked for claude-16's pre-loop advice. claude-16's
 answer (whistle trace <code>invoke-5757a4ea-4230-454a-9388-7fb76aaa89a7</code>) makes these
-the T-0 blockers before another live loop. Status now: <span class="tob">BLOCKED pending
-bellbacks</span>.<br>
+the T-0 blockers before another live loop. Status now: <span class="live">READY pending
+immediate T-0 rerun of the baseline bundle</span>.<br>
 1. <b>Disk/evidence-store instrument check</b> — <span class="live">PASS</span>, owner <code>zai-3</code>, bell
 <code>invoke-1783338564401-656-9a327897</code>. Must verify disk space and write-probes for
 <code>wm-trace/</code>, <code>futon6/data/</code>, and the evidence store path. Result: all target
@@ -281,7 +281,7 @@ paths are on <code>/dev/nvme0n1p2</code> with 237G available; write/remove probe
 <code>futon2/data/wm-trace/</code>, <code>futon6/data/</code>,
 <code>storage/futon1a/default/doc-store/</code>, <code>futon6/data/fold-turns/</code>, and
 <code>futon6/data/mana-gate/</code>. Historical 2026-07-05 disk-full errors are resolved.<br>
-2. <b>γ sample tail</b> — <span class="tob">FAIL</span>, owner <code>zai-4</code>, bell
+2. <b>γ sample tail</b> — <span class="live">PASS</span>, owner <code>zai-4</code>, bell
 <code>invoke-1783338564201-653-024f5b33</code>. Must explain/repair the expectedG vs blank
 realizedG sample before a card-7 series. Diagnosis: all three qualifying escrow deposits have
 non-nil expectedG but realizedG nil because <code>enact!</code> shells the rule-table fold engine,
@@ -290,7 +290,9 @@ whose current RULES produce 0 boxes for their <code>aif/*</code>, <code>measurem
 calibration sample. Ruling (claude-16 whistle <code>invoke-c801a87f-d395-43c0-aa69-ff0efa1ea7a7</code>):
 do not extend RULES to the observed deposits at T-0 and do not use escrow-as-realized; instead
 fix nil-vs-zero semantics so 0 enacted boxes against N obligations records realizedG 0.0.
-Fix dispatched to <code>zai-4</code> as <code>invoke-1783339156385-662-9aeba715</code>.<br>
+Fix landed in <code>2d13ef2</code> (<code>fold_realized.clj</code> only; gate abstain semantics untouched).
+Focused test <code>fold_realized_zero_coverage_test.clj</code> passes: all three qualifying deposits
+now produce complete samples with expectedG negative, realizedG 0.0, and positive signed error.<br>
 3. <b>Escrow mechanical standing</b> — <span class="live">PASS</span>, owner <code>zai-6</code>, bell
 <code>invoke-1783338564384-655-28553753</code>. Must prove current fold-turn dir, including
 <code>ft-operational-vocabulary-001</code>, passes load-deposits/pin-1b and gate 2f, or
