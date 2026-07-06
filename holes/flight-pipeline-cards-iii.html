@@ -290,9 +290,13 @@ realizedG sample before a card-7 series.<br>
 quarantine before T-0. Result: 13 loaded, 0 rejected; <code>bb scripts/live_loop_step.bb gate 2f</code>
 PASS; <code>ft-operational-vocabulary-001</code> included and replay/pins green. No commit from
 agent; pure gate run.<br>
-4. <b>T-0 baseline bundle</b> — owner <code>zai-8</code>, bell
+4. <b>T-0 baseline bundle</b> — <span class="live">PASS/PREPARED</span>, owner <code>zai-8</code>, bell
 <code>invoke-1783338564306-654-4c38e5c2</code>. Must identify and run/prepare the exact 2f +
-reference-regression commands and record outputs plus commit shas in the series log.</div>
+reference-regression commands and record outputs plus commit shas in the series log. Result:
+<code>bb scripts/live_loop_step.bb gate 2f</code> PASS; <code>clojure -M scripts/reference_regression.clj</code>
+ran 8 checks, 7 pass, with only known deposit-count-sensitive peradam refusal census DRIFT
+(13 deposits vs ref 8). Exact T-0 commands are those two commands, rerun immediately before
+tick 1 with then-current commit shas.</div>
 
 <p><b>The pipeline's own wiring is part of the discipline:</b> the dataflow map lives at
 <code>wm-pipeline-wiring.edn</code> (operational; checker <code>check_pipeline_wiring.bb</code>
