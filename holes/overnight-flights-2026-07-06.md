@@ -81,3 +81,72 @@ domain needs library authoring (the mission's own §1 says "the unknown is the
 specification"). The deposit unblocks the abstain-missing-leg gate by giving the
 escrow something to replay, but the replay will produce a low-confidence ΔG
 (-1.0) that abstains on most gates — which is honest.
+
+## Flight 2: ft-bounded-in-flight-state-008 (mana-gated)
+
+**Driver:** zai-3 (unattended overnight run, edge invoke-1783316701841-566-03efb02c)
+**Consent:** mana gate `fold-authoring`, spend at 2026-07-06T05:45:11Z, balance after: 2
+
+### Mission selection
+
+M-first-flights now has deposit 007. Per the instruction ("if every lane mission
+already has one, pick the highest-G candidate without a deposit"), I checked the
+golden round 2 freeze for candidates without deposits. M-bounded-in-flight-state
+has the highest |delta-g| (5.55) of any candidate without a deposit — the
+highest-G mission the operator's gold valued that the escrow cannot yet serve.
+
+### Psi
+
+Source: M-bounded-in-flight-state.md IDENTIFY section (transactional discipline
+over file-system substrate; no held-work items).
+
+```
+WANT: a structural invariant that the file-system substrate's durable state is
+reachable from completed transactions with bounded in-flight scope — graduated
+pressure (sleep-pressure analogue) that rises continuously and modulates
+priorities before stop-the-line, composing with sibling invariants without
+replacing them.
+HAVE: dirty working trees across 8+ repos with 50-500 uncommitted entries each
+— every dirty file is an in-flight transaction the system cannot reason about;
+the mana-snapshot check-fn measures pressure but cannot enforce bounded scope.
+```
+
+psi-sha256: e0328b132ad7931f8f619d6f885e840109032eaf4c8ebfb94d99b4c295ce7555
+
+### Cascade
+
+```
+size=7  wholeness=3.273  H=0.925  T=3.54  accuracy=1.552  complexity=8.649
+F-free-energy=-0.61  truncated=false
+```
+
+7 patterns: churn-as-signal (0.532), stack-scan-logging (0.531), all-or-nothing
+(0.516), invariants-vs-repair (0.482), durability-throughput-gate (0.514),
+state-in-substrate-deltas (0.451), postcommit-materialization-gate (0.513).
+RICH cascade — the transactional-discipline domain is well-covered.
+
+### Fold
+
+5 boxes (b1: invariant statement, b2: graduated pressure formula, b3: transaction
+boundary as semantic act, b4: composition with siblings, b5: Block: footer as
+transaction marker). 3 holes (h1: 10th faculty shape provisional, h2: drain-mana
+coupling deferred, h3: hinge-vs-Block unresolved).
+
+v2 wires: b1→b2 :seq, b1→b3 :copar, b2→b4 :seq, b3→b5 :tensor, b4→b5 :seq.
+Terminal: b5 :discharges :want-signature.
+
+### ΔG
+
+-1.0 (recomputed by fe/coverage-delta-g; coverage 5/8).
+
+### Pins
+
+- prompt-sha: 43025c0870919b89d8f9e108006482c2394d76ef180ba29d1d33a0783a78abe1
+- psi-sha: e0328b132ad7931f8f619d6f885e840109032eaf4c8ebfb94d99b4c295ce7555
+- arming: mana gate fold-authoring, spend at 2026-07-06T05:45:11Z, balance-after 2
+- LOADER ACCEPT: ft-bounded-in-flight-state-008 ✓
+- TAMPER REJECT: /tmp/ft-tampered-008.edn — delta-g-mismatch (-0.3 vs -1.0) ✓
+
+### Blind scoring
+
+:none — no A-next seal exists. Recorded honestly.
