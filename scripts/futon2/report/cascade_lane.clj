@@ -351,13 +351,24 @@
                                                 (or (get-in e [:action :rationale]) "")))
                              c (cascade-policy-for psi budget)]
                          (when c
-                           {:mission m :psi psi
-                            :size (:size c) :wholeness (:wholeness c) :budget (:budget c)
-                            :truncated (:truncated c)
-                            ;; both act-gate legs (Car-3): ΔF = cascade F-free-energy, ΔG = rollout G(π)
-                            :F-free-energy (:F-free-energy c)
-                            :G-rollout (rollout-g-for m)
-                            :shown (mapv :pattern (:shown c))})))
+                           (let [base-shown (mapv :pattern (:shown c))
+                                 stuck-n (futility-count-for m)
+                                 seated? (boolean stuck-n)
+                                 shown (if seated?
+                                         (vec (cons "agent/sense-deliberate-act" base-shown))
+                                         base-shown)]
+                             {:mission m :psi psi
+                              :size (if seated? (inc (:size c)) (:size c))
+                              :wholeness (:wholeness c) :budget (:budget c)
+                              :truncated (:truncated c)
+                              :F-free-energy (:F-free-energy c)
+                              :G-rollout (rollout-g-for m)
+                              :shown shown
+                              :seat-injection (when seated?
+                                                {:pattern "agent/sense-deliberate-act"
+                                                 :stuck-n stuck-n
+                                                 :mechanism :construction-not-retrieval
+                                                 :card-3 "W-constructor-df-last-inch"})}))))
          om-entries (->> ranked-actions
                          ;; live-judgement comes through the JSON API -> :type is the STRING "open-mission";
                          ;; the in-process path uses the keyword. Accept both.
