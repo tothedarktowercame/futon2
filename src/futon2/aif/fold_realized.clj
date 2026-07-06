@@ -31,6 +31,30 @@
    call). Off ⇒ no `:realized-outcome` is produced (γ stays at the prior)."
   false)
 
+(defn- realized-coverage
+  "ZERO-COVERAGE SEMANTICS (claude-16 ruling, 2026-07-06, T-0 fix for the
+   gamma realizedG=nil blocker): an executor that constructs 0 boxes against a
+   plan with N obligations (policy-holes) has produced a measured outcome of
+   ZERO coverage, not an unmeasurable nil. realized-G should be 0.0 in that
+   case — a real (if bad) sample for γ to calibrate on.
+
+   This DIFFERS from `fold-eval/coverage` deliberately: the GATE returns nil
+   for zero boxes (⇒ abstain — no construction to evaluate), which is correct
+   for the gate's decision. But the REALIZED path is post-enactment
+   observation: the enactment happened, the executor ran, it produced zero —
+   that is a measurement, not an absence.
+
+   nil is preserved ONLY for the genuinely unmeasurable case: no boxes AND no
+   holes (nothing was enacted at all, or the wiring is nil/empty)."
+  [wiring]
+  (let [folded (count (:boxes wiring))
+        holes  (count (:policy-holes wiring))
+        total  (+ folded holes)]
+    (cond
+      (pos? folded) (/ (double folded) (double total))
+      (pos? total)  0.0           ; zero boxes but obligations exist → measured zero
+      :else         nil)))        ; no boxes AND no holes → genuinely unmeasurable
+
 (defn realized-outcome-of
   "PURE: the R16→R14 `:realized-outcome` record for an enacted decision.
      `decision`       — carries `:policy` and the expected leg: either an explicit
@@ -39,8 +63,10 @@
      `enacted-wiring` — the post-enactment wiring (`:boxes`/`:policy-holes`);
                         `:realized-G` = the SHARED coverage→rollout ΔG over it.
      `tick`           — the enactment tick (γ dedups on it).
-   `:realized-G` is nil when nothing was enacted (no boxes) — γ then holds (it
-   requires a number), the honest no-op.
+   `:realized-G` is nil ONLY when nothing was enacted at all (no boxes AND no
+   holes) — γ then holds (it requires a number). When the executor produced
+   zero boxes against N obligations, realized-G is 0.0 (zero-coverage
+   semantics, claude-16 ruling 2026-07-06).
 
    SCALE-MATCH PIN (claude-10 review must-fix, 2026-07-02): `:expected-G`
    PREFERS the fold's coverage-ΔG leg whenever present — never a gate-side
@@ -52,7 +78,7 @@
   [{:keys [policy expected-G fold]} enacted-wiring tick]
   {:policy     policy
    :expected-G (or (:delta-g fold) (when (number? expected-G) expected-G))
-   :realized-G (fe/coverage-delta-g enacted-wiring)
+   :realized-G (fe/coverage->delta-g (realized-coverage enacted-wiring))
    :tick       tick})
 
 (defn with-realized-outcome
