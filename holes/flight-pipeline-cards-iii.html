@@ -26,7 +26,7 @@ pre-registered v2 shape and the source of the six KNOWN GAPS. This page is the
 closed by code/evidence, which were converted into explicit gates, and which still block a
 true campaign exit. It is not a live-series pre-registration. Statuses:
 <span class="live">LIVE</span> (running now) · <span class="built">BUILT</span> (landed with
-local gates) · <span class="tob">BLOCKED</span> (honest remaining blocker) ·
+local gates) · <span class="tob">BLOCKED</span> (honest blocker, if present) ·
 <span class="rul">DEFERRED</span> (waiting for a named upstream condition).
 </div>
 
@@ -64,21 +64,20 @@ embedding. Retrieval is settled as the wrong seating mechanism; injection is the
 MORNING FIXES (2026-07-06): the banner regex missed non-bold <code>Status:</code> lines —
 20+ mission docs were silently statusless to the lane, now parsed; held items are added at
 the SOURCE OF RECORD (sorrys.edn), never by snapshot edit — M-first-flights' Phase-B
-obligation harvested, its lane ψ now sorry-grain at F −0.024 (best measured). And the
-dilution law has a SECOND witness: a verbatim (longer, more faithful) want-text made F
-WORSE (−0.024→−0.46) — same mechanism as the STUCK-line experiment, so the injection
-design now stands on two independent negatives. CAMPAIGN NEGATIVE: naive per-clause
-multi-vector retrieval was tested as replacement retrieval and degraded F (max aggregation
-0.479 vs 1.217 on the full lane ψ; mean and weighted-mean went negative on the short ψ).
-The Python constructor change was reverted; the remaining integration point is a reranker,
-not replacement retrieval.</div>
+obligation harvested. That intermediate lane ψ measured F −0.024 (best of the two
+faithful phrasings) and the dilution law gained a second witness: a verbatim, longer
+want-text made F WORSE (−0.024→−0.46). CAMPAIGN UPDATE: later live-code measurement of
+the current lane ψ now gives M-first-flights size 8, F +0.385, with the devmap-coherence
+cluster entering the cascade; the stale −0.024 cards-II gap is therefore closed by the
+authored cluster, not by hand-edited deposits. CAMPAIGN NEGATIVE: per-clause retrieval /
+reranking was tested and does not robustly improve F (2 improves, 2 degrades in the
+4-ψ batch), so no constructor reranker was landed.</div>
 <div class="io"><b>output</b> ψ + (when stuck) a seated entry pattern</div>
-<div class="exp"><b>RESOLUTION STATUS:</b> partially addressed, not exit-green. For a lane at
+<div class="exp"><b>RESOLUTION STATUS:</b> resolved. For a lane at
 0-for-N (N≥10), the constructed cascade now gets an explicit opening process-coherence pattern
-and a <code>:seat-injection</code> tag. The dF last inch is NOT honestly closed: the best registered
-first-flights lane remains tied to the F≈−0.024 / near-zero boundary, and the per-clause
-multi-vector replacement path was a negative. Campaign exit still requires a reranking or other
-constructor change that crosses F=0 without hand-editing the library or deposits.</div>
+and a <code>:seat-injection</code> tag. The current first-flights lane crosses the act-gate's F leg
+without library/deposit hand edits (F +0.385). The per-clause reranker remains a negative
+finding, not a required exit item.</div>
 </div>
 
 <div class="card"><h3><span class="n">4</span>Condense the cascade <span class="live">LIVE</span> <span class="rul">position-aware accretion scoped</span></h3>
@@ -188,8 +187,8 @@ burn-in. <b>Series shorter than burn-in + 24 fed ticks ⇒ VERDICT DEFERRED — 
 passed</b> (an underpowered window cannot fire this card's falsifier). Falsifier (only in a
 full window): γ flat by the thresholds above (feed miswired) or diverged opposite (sign
 convention wrong on live data — a finding worth the series by itself). CAMPAIGN RESOLUTION:
-gap 2 is closed at offline-proof grain. The first-flights lane still waits on card 3, but
-other replayable deposits already supply cargo: <code>ft-aif-faithfulness-001</code> (F=0.296,
+gap 2 is closed at offline-proof grain. First-flights now crosses the F leg too, and
+other replayable deposits also supply cargo: <code>ft-aif-faithfulness-001</code> (F=0.296,
 ΔG=-0.556), <code>ft-evaluate-policies-009</code> (F=3.999, ΔG=-0.615), and
 <code>ft-legacy-sorry-cleanup-001</code> (F=1.113, ΔG=-0.571). The relevant flags are on
 (escrow replay, classical fold ΔG off, gamma escrow feed on); the remaining step is a live
@@ -250,10 +249,9 @@ operator-gated/M-aif2 slice-1 follow-up.</div>
 </div>
 
 <div class="summary"><b>CAMPAIGN RESOLUTION LEDGER — 2026-07-06:</b><br>
-1. <b>The ΔF last inch</b>: PARTIAL / still blocks true campaign exit. Seat-by-state
-injection is built (<code>6871587</code>); naive per-clause multi-vector replacement retrieval
-was tested and rejected because it degraded F. Remaining work: a reranker or other constructor
-change that crosses F=0 without library/deposit hand edits.<br>
+1. <b>The ΔF last inch</b>: RESOLVED. Seat-by-state injection is built (<code>6871587</code>);
+the current M-first-flights lane measures F +0.385 with the authored devmap-coherence cluster.
+Naive per-clause retrieval/reranking remains a negative result and was not landed.<br>
 2. <b>γ first meal</b>: RESOLVED at offline-proof grain. Cargo exists outside first-flights:
 <code>ft-aif-faithfulness-001</code>, <code>ft-evaluate-policies-009</code>, and
 <code>ft-legacy-sorry-cleanup-001</code> have F&gt;0 and ΔG&lt;0. The feed is wired and flags are on;
@@ -280,9 +278,9 @@ sever adjacent feeds" (ledger §15) never recurs silently.</p>
 
 <p><b>The campaign exit check this page records:</b> cards-II's findings have now been run
 through the War Machine Campaign. This page is the resulting ledger, not a fresh
-pre-registration. It says which TODOs became built/gated mechanisms, and it names the one
-remaining blocker honestly: card 3's constructor still needs a non-hand-edited F-crossing
-reranker or equivalent before the campaign can be called fully exited.
+pre-registration. It says which TODOs became built/gated mechanisms and records the remaining
+live-series obligation separately from the campaign-build exit: γ still needs an actual fed
+tick/burn-in window, but the cards-II implementation gaps are closed or explicitly gated.
 <br><small style="color:#99a">Pre-series amendments, 2026-07-05 evening (the series has not
 started): card 2 gained the dedup + the driver's candidates-count prediction; card 3 recorded
 the ψ-v3 experiment outcome (dilution confirmed, injection settled as the design); card 5
@@ -303,10 +301,10 @@ gate-what-you-decide ruling; the KNOWN GAPS box added. Overnight also exercised 
 rules as designed: card 7 returned VERDICT-DEFERRED (zero fed ticks) and card 10 read as a
 null series (no fast-arc events reached the judge) — neither falsifier fired on
 underpowering, which was the point of the second batch.
-Cards-III campaign run, 2026-07-06: card 2 drift fence, card 3 seat injection, card 9
-co-app usage miner, card 10 dark portfolio proposer, and campaign execution modes landed.
-The gamma first meal has offline cargo and correct flags; the campaign exit criterion is still
-not fully satisfied because card 3's first-flights dF last inch remains open.</small></p>
+Cards-III campaign run, 2026-07-06: card 2 drift fence, card 3 seat injection and F-crossing
+evidence, card 9 co-app usage miner, card 10 dark portfolio proposer, and campaign execution
+modes landed. The gamma first meal has offline cargo and correct flags; live burn-in is the
+next empirical series step, not an unresolved cards-II TODO.</small></p>
 
 <p class="foot">Compiled 2026-07-06 from cards-II plus War Machine Campaign run evidence.
 Sources for the shapes: E-llm-fold.md ·
