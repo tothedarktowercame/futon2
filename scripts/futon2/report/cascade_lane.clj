@@ -260,9 +260,9 @@
                                              (re-find #"^#\s*(?:Mission:)?\s*(.*)")
                                              second)
                               status (some->> lines
-                                              (filter #(re-find #"(?i)^\*\*Status:?\*\*" %))
+                                              (filter #(re-find #"(?i)^(?:\*\*)?Status:?(?:\*\*)?" %))
                                               first
-                                              (re-find #"(?i)^\*\*Status:?\*\*:?\s*(.*)")
+                                              (re-find #"(?i)^(?:\*\*)?Status:?(?:\*\*)?:?\s*(.*)")
                                               second)]
                           (when title
                             (str stem " — want: " (clip title 160)

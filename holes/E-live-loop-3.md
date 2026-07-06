@@ -2044,3 +2044,98 @@ cards page must carry this as a data point, not yet a law.
 - futon3a: minilm_pattern_embeddings.json (regenerated)
 - futon2: e-live-loop-2-steps.edn (gates extended), E-live-loop-3.md (this log)
 
+## psi supply fix (zai-8, 2026-07-06; claude-16 dispatched)
+
+### Context
+
+The library is fixed (measurement cluster ingested, F crosses 0 on the
+frozen reference psi). The remaining defect: the LANE builds its own ψ
+for M-first-flights (banner + STUCK line), which differs from the frozen
+reference ψ. The lane ψ gave size 1, F -0.081 — not a pass candidate.
+
+### §1 Banner miss diagnosis
+
+**Root cause:** `mission->psi`'s banner branch regex
+`^\*\*Status:?\*\*` matches only `**Status:**` (markdown bold). 20+
+mission docs use `Status:` without bold markers — M-first-flights among
+them. The status was nil, so the banner produced title-only ψ (no `have:`
+clause), falling through to id-stem quality.
+
+**Fix (additive, reduction-safe):** regex changed to
+`^(?:\*\*)?Status:?(?:\*\*)?` — optionally matches `**` before/after.
+Existing bold-format banners match identically; non-bold now parsed too.
+
+M-first-flights ψ (banner, post-fix):
+`first flights — want: M-first-flights — we have flight data (Orville);
+we need the data shapes (Wilbur). have: PHASE A COMPLETE (2026-06-12,
+operator side-by-side verdict PASS — checkpoint 20). Full lifecycle
+IDENTIFY → MAP → DERIVE → ARGUE → VERIFY → INSTANTIATE ran 202 STUCK:
+selected 66 ticks, 0 passes`
+
+### §2 Phase-B held item at the proper source
+
+M-first-flights.md line 4 explicitly defers Phase B ("Phase B
+(policy-grade G(s, π)) is the standing obligation, armed when the rollout
+engine lands; the prediction organ holds the typed ghost"). This was
+absent from the held-work ledger because the prose harvester scans for
+`## Deferred` / `## Follow-on` headings and inline gate markers — the
+Phase B text is in the Status field, not a dedicated section.
+
+**Source of record:** `futon2/resources/sorrys.edn` (the structured
+sorrys registry, the richest source shape). Added sorry
+`:sorry/first-flights-phase-b-policy-grade-G` with:
+- want: policy-grade G(s,π) records carrying derivations
+- re-entry: `futon3c/holes/missions/M-first-flights.md`
+- kind: `:prototyping-forward`
+- related-missions: `["M-first-flights"]`
+
+**Ledger refreshed:** `bb scripts/held_work_ledger.bb` — sorrys 5→6,
+total 216 items. New item in ledger with correct `:held/missions`.
+
+**Lane reads it:** `clear-all-caches!` → `mission->psi "M-first-flights"`
+now produces sorry-grain ψ:
+`first flights — WANT: Phase B policy-grade G(s, π): flight records must
+carry derivations, ghosts, and warrants HUNGRY-FOR: :prototyping-forward
+HAVE: futon3c/holes/missions/M-first-flights.md STUCK: selected 66
+ticks, 0 passes`
+
+### §3 Re-measurement (lane-grain ψ)
+
+| ψ source | size | F | shown |
+|---|---|---|---|
+| old banner (status miss) | 1 | -0.081 | (not recorded) |
+| frozen reference ψ | 4 | +0.423 | measurement cluster |
+| **lane sorry-grain ψ (post-fix)** | **3** | **-0.024** | mission-interface-signature (0.386), ifr-f1-dhammavicaya (0.329), futon-bridge-health (0.321) |
+
+**Pre-registered hope:** F positive at the lane grain. **Honest result:
+F = -0.024** — close to zero but not positive. The measurement patterns
+did not enter the cascade on the lane ψ because the lane ψ's vocabulary
+(`Phase B policy-grade G(s,π)`, `:prototyping-forward`, file paths, STUCK
+line) is less semantically aligned with the measurement patterns than
+the frozen reference ψ (which explicitly names "measurement as discharge
+judgment", "ghosts as typed sorries", "warrant for each velocity"). The
+lane ψ is richer now (sorry-grain from the held-work item), but the
+measurement cluster's embedding resonance depends on the ψ's exact
+wording matching the pattern prose.
+
+**Interpretation:** the gap between the frozen ψ (F +0.423) and the lane
+ψ (F -0.024) is a ψ-quality gap, not a library gap. The library now
+speaks the domain; the lane's ψ supply is close but not yet matching.
+The next natural tick will use this lane ψ — F -0.024 is within striking
+distance of the gap-free-energy threshold (0.0), and the sorry-grain
+content is honest and rich. Whether a tick passes depends on the full
+act-gate (ΔF + ΔG), not F alone.
+
+### §4 Controls
+
+- **L2 gate**: PASS (sorry-grain for M-live-geometric-stack, banner
+  fallback for M-canon — no regression)
+- **Reference regression**: 7/8 pass, constructor checks 1a/1b
+  byte-identical (no K-shift — this is a psi-side change)
+- **clj-kondo**: 0 errors, 0 warnings on cascade_lane.clj
+
+### §5 Commits
+
+- futon2: cascade_lane.clj (banner regex fix), sorrys.edn (Phase B sorry),
+  held-work-ledger.edn (regenerated), E-live-loop-3.md (this log)
+
