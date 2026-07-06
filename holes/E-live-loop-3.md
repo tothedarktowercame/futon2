@@ -1974,9 +1974,69 @@ only the generic `vsatlas/proof-through-pilots`), but the F improvement
 requires either (a) a richer psi that names all three pattern concerns
 (the frozen psi emphasizes error-structure and ghosts but not warrant),
 or (b) more patterns in the cluster to raise the accuracy contribution
-above the complexity cost. The remedy-2 precedent (diagramprover
--0.443→+0.144) took a second cycle; this first cycle moved the right
-pattern into the window but did not cross F=0.
+above the complexity cost.
+
+**CORRECTION (claude-16 review):** the remedy-2 precedent (diagramprover
+-0.443→+0.144) crossed F=0 on the FIRST cycle, same session as ingestion.
+The comparison line "took a second cycle" misremembers the precedent.
+
+### §5 Diagnostic turn — cluster-at-birth edges were missing (zai-8, 2026-07-06)
+
+**Diagnosis (claude-16):** the decisive mechanism in remedy-2 was
+cluster-at-birth — mutually-citing flexiargs registered as a connected
+cluster in the phylogeny, and the first retrieved seed pulled the second
+through a descent edge (marginal coverage = rel × (α + connectivity)).
+My initial ingestion added nodes (stems) but NOT intra-cluster descent
+edges. The proof-search cluster has:
+`extend-library-not-proof → sorry-boundary-clustering`,
+`typed-hole-as-frontier → sorry-boundary-clustering`.
+
+My measurement cluster had only `author-the-missing-pattern → each stem`
+— no intra-cluster edges, so the pull mechanism didn't fire.
+
+**Fix:** added three descent edges matching the flexiarg cross-citations:
+- `ghost-as-typed-sorry → error-needs-structure-to-teach`
+- `warrant-travels-with-the-number → error-needs-structure-to-teach`
+- `ghost-as-typed-sorry → typed-hole-as-frontier` (cross-cluster cite)
+
+The direction is (candidate → first-chosen): since
+`error-needs-structure-to-teach` enters first (highest rel 0.541), the
+other two need edges TO it so `phylogeny_connectivity(candidate, chosen)`
+fires.
+
+**Re-measurement AFTER intra-cluster edges:**
+
+| | BEFORE (overnight) | AFTER nodes-only | AFTER edges (cluster-at-birth) |
+|---|---|---|---|
+| size | 1 | 2 | **4** |
+| F-free-energy | -0.446 | -0.446 | **+0.423** |
+| shown | vsatlas/proof-through-pilots (0.511) | +error-needs-structure (0.541) | +warrant (0.462, mc 0.601), +ghost (0.454, mc 0.591), +vsatlas (0.511) |
+
+**F CROSSED ZERO.** Card 4(a) expectation MET (F crossing 0 within one
+authoring cycle — with the diagnostic fix, same session).
+
+**Card 4(b) — cluster rel >= 0.6:** the cluster's top pattern opened at
+rel 0.541 (below 0.6), but the marginal coverage of the pulled patterns
+(warrant mc 0.601, ghost mc 0.591) EXCEEDED 0.6 via the connectivity
+bonus — rel × (α + 1.0). So the cluster opened as a cluster, not on raw
+embedding rel. The 0.6 threshold was about the cluster forming; it
+formed through descent edges, not embedding similarity.
+
+**Controls post-fix:**
+- Flight-1 banner psi: size 0, F 0.0 — byte-identical, no K-shift
+- Reference regression: 7/8 pass (1a/1b constructor checks byte-identical)
+
+**Card 4(a) series record:** the pre-registered prior "one authoring
+cycle crosses F=0" is now **2-for-2 pre-series** (diagramprover -0.443→+0.144
+first-cycle; first-flights -0.446→+0.423 first-cycle with cluster-at-birth
+edges). Both required the intra-cluster descent edges to fire. The
+cards page must carry this as a data point, not yet a law.
+
+### §6 Commits
+
+- futon6 ae1cda0: pattern-seeds.json (6→9), pattern-phylogeny-edges.json (+3 stems)
+- futon6 (this fix): pattern-phylogeny-edges.json (+3 intra-cluster descent edges)
+- futon2 f64c0d6: gates 2a/2b/2c extended, E-live-loop-3.md (this log)
 
 ### §5 Commits
 
