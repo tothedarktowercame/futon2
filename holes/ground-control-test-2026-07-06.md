@@ -1,5 +1,44 @@
 # Ground Control Test 2026-07-06 — fold-turn deposit run log
 
+## Ground-control review (codex-1)
+
+Pre-registered question: can independently commissioned `zai` agents produce valid fold-turn deposits from clear instructions alone?
+
+Strict metric: `N/5` first deposit submissions pass PIN-1B plus 2f with zero ground-control content repairs.
+
+Result: **3/5** commissioned agents produced mechanically valid deposits. The two failures (`zai-4`, `zai-11`) exhausted the one-continuation allowance on HTTP 429 service overloads and produced no deposit to evaluate. Among agents that reached a deposit submission, **3/3** passed PIN-1B and 2f without ground-control content repairs.
+
+Interpretation against the pre-registration: strict `3/5` sits in the "one revision cycle" band, but the named failure modes are not deposit-contract misunderstandings. The supported issues are:
+- transport/service instability under parallel commissioning (`HTTP 429`, repeated);
+- shared-log ambiguity: the prompt said "append your run log", but `zai-5` overwrote the ground-control scaffold before later agents appended;
+- tracking ambiguity for ignored fold-turn files: `zai-6` left `ft-aif-faithfulness-001.edn` as ignored runtime state even though its deposit passed mechanically; ground control force-added it after review so the artifact is not lost.
+
+Doc-debug repairs made before dispatch in `/home/joe/code/futon3c/holes/GROUND-CONTROL.md`:
+- §1 now says to spawn and immediately dispatch each fresh agent before spawning the next, because repeated `/agents/auto` calls without an intervening invoke reclaimed the same idle, session-less `zai-4`.
+- §3.5 now instructs authors to compute stored `:eval :delta-g` via `futon2.aif.fold-eval/coverage-delta-g` over `fold-llm/construction->wiring`, retaining hand coverage only as supporting evidence.
+
+Independent review evidence:
+
+```text
+$ cd /home/joe/code/futon2 && clojure -M scripts/gate_2f_deposit.clj
+  ft-aif-faithfulness-001: sha-match + replay + dG re-assert OK (dG -0.5555555555555556; ...)
+  ft-evaluate-policies-009: sha-match + replay + dG re-assert OK (dG -0.6153846153846154; ...)
+  ft-legacy-sorry-cleanup-001: sha-match + replay + dG re-assert OK (dG -0.5714285714285714; ...)
+GATE 2f PASS — 11 deposit(s) load cleanly, sha-matched, replayable
+```
+
+Dispatch/review table:
+
+| Agent | Mission | Rounds | Result | Deposit | Commit(s) | Ground-control finding |
+|---|---|---:|---|---|---|---|
+| `zai-4` | `futon2-d/mission/operational-vocabulary` | 2 | failed | none | none | first turn reached pin setup after mana spend, then HTTP 429; continuation failed immediately with HTTP 429 |
+| `zai-5` | `futon2-d/mission/evaluate-policies` | 1 | pass | `ft-evaluate-policies-009` | futon6 `e33b9e3`, futon2 `255090e` | valid; overwrote shared log scaffold instead of appending |
+| `zai-6` | `futon2-d/mission/aif-faithfulness` | 2 | pass | `ft-aif-faithfulness-001` | futon2 `20bc0ac`; futon6 committed by ground control after review | valid; first turn HTTP 429 after mana spend; deposit file was ignored/untracked until ground-control packaging |
+| `zai-8` | `futon2-d/mission/legacy-sorry-cleanup` | 2 | pass | `ft-legacy-sorry-cleanup-001` | futon6 `e72a0f2`, futon2 `ac10bf6` | valid; first turn failed before work with HTTP 429; agent fixed its own prompt-sha/trailing-newline mismatch before final submission |
+| `zai-11` | `futon2-d/mission/fold-ansatz` | 2 | failed | none | none | first turn HTTP 429 mid-flight; continuation failed immediately with HTTP 429 |
+
+---
+
 ## Run: ft-evaluate-policies-009 (zai-5)
 
 **Mission:** futon2-d/mission/evaluate-policies
