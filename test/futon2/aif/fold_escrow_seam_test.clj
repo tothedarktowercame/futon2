@@ -16,7 +16,8 @@
 ;; the exact honest-nothing regime the escrow exists to repair.
 (def cascade ["invariant-coherence/state-snapshot-witness"])
 (def circumstance {:mission "test-d/mission/mock" :psi "WANT: w. HAVE: h."})
-(def prose-fn (constantly "IF mock. HOWEVER mock. THEN mock. BECAUSE mock."))
+(defn prose-fn [pattern-id]
+  (slurp (str "/home/joe/code/futon3/library/" pattern-id ".flexiarg")))
 
 (def mock-answer
   {:boxes        [{:id :b1 :role "mock construction step"

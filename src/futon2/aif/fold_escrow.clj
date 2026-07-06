@@ -8,11 +8,16 @@
    arming; the live path replays it as a hash-gated table lookup — never an LLM
    call (fold-llm's INCIDENT-SAFE clause, unchanged).
 
-   Three pins, enforced here (all K2-class, reject-loudly):
+   Pins, enforced here (all K2-class, reject-loudly):
      1. REPLAY-VALIDITY — a deposit binds to the sha-256 of the EXACT
         `fold-prompt` string it answered; replay fires only on hash match, so
         any drift in cascade/circumstance/prose ⇒ nil ⇒ the fold abstains
         exactly as today.
+     1B. REPLAY-RECONSTRUCTABILITY — the loader rebuilds that exact prompt from
+        the deposit's own fields (pattern ids + ψ + verbatim flexiarg prose)
+        and rejects if the stored prompt sha does not match. Loader acceptance
+        therefore means replay is guaranteed, not merely that the sha is shaped
+        like a hash.
      2. NO ARMING, NO DEPOSIT — `:arming` (operator, verbatim word, timestamp,
         scope) is a required field of the record, not ambient context.
      3. ΔG RECOMPUTABLE — the stored `:eval :delta-g` must equal
@@ -35,6 +40,10 @@
    NOT a substrate-2 write (design §B)."
   "/home/joe/code/futon6/data/fold-turns")
 
+(def ^:private flexiarg-dir
+  "The prose source used by enact.clj's L3 replay reconstruction."
+  "/home/joe/code/futon3/library")
+
 (defn prompt-sha
   "Lowercase hex sha-256 of the exact prompt string (pin 1's binding)."
   [^String s]
@@ -47,6 +56,29 @@
                   {:file (str file) :reason reason})))
 
 (defn- present-string? [x] (and (string? x) (not (str/blank? x))))
+
+(defn- flexiarg-prose [file pattern-id]
+  (try
+    (slurp (str flexiarg-dir "/" pattern-id ".flexiarg"))
+    (catch Throwable e
+      (reject! file :prompt-not-reconstructable
+               (str "pin 1B: cannot slurp flexiarg prose for " (pr-str pattern-id)
+                    " from " flexiarg-dir ": " (ex-message e))))))
+
+(defn reconstruct-prompt
+  "Rebuild the exact fold prompt a deposit should replay against.
+   Public for tests/gates; throws reject-loudly if any prose input is missing."
+  [file d]
+  (let [cascade (vec (get-in d [:cascade :pattern-ids]))
+        circumstance {:mission (:mission d)
+                      :psi (get-in d [:cascade :psi])}
+        proses (into {} (for [p cascade] [p (flexiarg-prose file p)]))]
+    (fl/fold-prompt cascade circumstance proses)))
+
+(defn reconstructed-prompt-sha
+  "The pin-1B sha computed from a deposit's own fields."
+  [file d]
+  (prompt-sha (reconstruct-prompt file d)))
 
 (defn validate-deposit
   "PURE given the record: the ft-record contract. Returns the deposit map or
@@ -63,7 +95,11 @@
       (reject! file :bad-cascade (str ":cascade :pattern-ids must be a non-empty vector of strings, got " (pr-str pids)))))
   (let [sha (get-in d [:prompt :sha256])]
     (when-not (and (string? sha) (re-matches #"[0-9a-f]{64}" sha))
-      (reject! file :bad-prompt-sha (pr-str sha))))
+      (reject! file :bad-prompt-sha (pr-str sha)))
+    (let [recomputed (reconstructed-prompt-sha file d)]
+      (when-not (= sha recomputed)
+        (reject! file :prompt-not-reconstructable
+                 (str "pin 1B: stored " sha " vs reconstructed " recomputed)))))
   (let [{:keys [operator word at]} (:arming d)]
     (when-not (and (present-string? operator) (present-string? word)
                    (present-string? at) (contains? (:arming d) :scope))

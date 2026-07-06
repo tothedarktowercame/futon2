@@ -1710,6 +1710,37 @@ stored coverage value was changed.
   `fold-turn REJECTED [delta-g-mismatch] ... stored -0.9 vs recomputed
   -0.4444444444444444`.
 
+## PIN-1B — replay-reconstruction pin (driver: codex-1, 2026-07-06)
+
+**DEFECT FOUND OVERNIGHT:** unattended zai authoring produced
+`ft-first-flights-007.edn` and `ft-bounded-in-flight-state-008.edn` with
+invented prompt pins (`{:sha256 :text-hash}`) rather than the deposit-grain
+fold-prompt convention (`{:sha256 :prose-sha256 :prose-source}`). The loader's
+old pin-1 check accepted any 64-hex sha, but scheduled replay reconstructed the
+real prompt and abstained on sha mismatch. The loop was defended at replay
+time, but the record was allowed into the deposit set too late.
+
+**FIX:** `fold_escrow/load-deposit` now performs PIN-1B: reconstruct the exact
+fold prompt from the deposit's own cascade `:pattern-ids`, `:cascade :psi`,
+mission, and verbatim `futon3/library/<pattern>.flexiarg` prose, then reject
+loudly with `:prompt-not-reconstructable` when the recomputed sha differs from
+the stored pin. Loader acceptance now implies replay guarantee.
+
+**REPAIR:** 007 and 008 kept their psi/cascade/wiring/arming/eval unchanged;
+only their prompt maps were repaired to the real fold-prompt sha plus
+`:prose-sha256` and `:prose-source`, with `:text-hash` removed. Recomputed
+pins: 007 `a7de215eb3823510bb14bf14225a22bce7bdb8b9c6d218ce83dabc480c52a42b`;
+008 `e6f0fad491d6e67d1bf7020bd959b9c751da5aa81e7d43291619e67d0de1d362`.
+
+**PROOF:** pre-repair compatibility check showed 001-006 all reconstructed to
+their stored shas, so the recipe is stable across the known good deposits.
+Post-repair gate 2f passes over all eight deposits. The synthetic bad-pin test
+now rejects with `fold-turn REJECTED [prompt-not-reconstructable] ... stored
+0000... vs reconstructed ...`. A non-live enact-style replay check for 007
+uses the close-loop 3-arity with the real prose function and receives the
+escrow dG/source (`:fold-escrow`) from the repaired deposit; no live tick was
+run.
+
 ## P2 mana gate — M-peradam-mechanization (driver: zai-3, 2026-07-05)
 
 **Status: P2 LANDED DARK.** Plan of record: ft-peradam-mechanization-006.edn
