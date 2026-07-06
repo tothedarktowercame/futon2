@@ -281,9 +281,13 @@ paths are on <code>/dev/nvme0n1p2</code> with 237G available; write/remove probe
 <code>futon2/data/wm-trace/</code>, <code>futon6/data/</code>,
 <code>storage/futon1a/default/doc-store/</code>, <code>futon6/data/fold-turns/</code>, and
 <code>futon6/data/mana-gate/</code>. Historical 2026-07-05 disk-full errors are resolved.<br>
-2. <b>γ sample tail</b> — owner <code>zai-4</code>, bell
+2. <b>γ sample tail</b> — <span class="tob">FAIL</span>, owner <code>zai-4</code>, bell
 <code>invoke-1783338564201-653-024f5b33</code>. Must explain/repair the expectedG vs blank
-realizedG sample before a card-7 series.<br>
+realizedG sample before a card-7 series. Diagnosis: all three qualifying escrow deposits have
+non-nil expectedG but realizedG nil because <code>enact!</code> shells the rule-table fold engine,
+whose current RULES produce 0 boxes for their <code>aif/*</code>, <code>measurement/*</code>, and
+<code>data-mining/*</code> patterns. This is a T-0 blocker; γ would hold at prior with no
+calibration sample.<br>
 3. <b>Escrow mechanical standing</b> — <span class="live">PASS</span>, owner <code>zai-6</code>, bell
 <code>invoke-1783338564384-655-28553753</code>. Must prove current fold-turn dir, including
 <code>ft-operational-vocabulary-001</code>, passes load-deposits/pin-1b and gate 2f, or
