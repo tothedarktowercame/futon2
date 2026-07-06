@@ -169,3 +169,79 @@ Agent: zai-6. Mission: `futon2-d/mission/aif-faithfulness`. Continuation of `inv
 **Gate 2f (my deposit):**
 - `[2f] gate FAIL` at the DIR level — but the failure is on `ft-legacy-sorry-cleanup-001.edn` (zai-8's deposit), NOT mine. My deposit passes all 2f checks individually: (a) load OK, (b) prompt-sha match (stored 4cea... = rebuilt 4cea...), (c) replay match (recorded answer = turn-fn output), (d) delta-g -0.5556.
 - The dir-level gate cannot PASS while legacy-sorry-cleanup-001 is broken; that is zai-8's repair, not mine.
+
+---
+
+## zai-8 run log — ft-legacy-sorry-cleanup-001
+
+Agent: zai-8. Mission: `futon2-d/mission/legacy-sorry-cleanup`. Continuation of `invoke-1783327385437-583-18a2dfc7` (first invoke `invoke-1783327321228-579-470b6606` failed before work with HTTP 429; one continuation sent).
+
+### §0 Mana
+
+- Consumed FIRST per §0: `(mg/consume! "fold-authoring" "ground-control-test-2026-07-06: ft-legacy-sorry-cleanup deposit authoring")` → `{:ok true, :balance 3}`
+- Spend entry: `{:type :spend, :gate-id "fold-authoring", :purpose "ground-control-test-2026-07-06: ft-legacy-sorry-cleanup deposit authoring", :at "2026-07-06T08:45:48.724953313Z"}`
+- Balance after spend: 3.
+
+### §1 ψ
+
+- ψ-sha256: `b7b62cc38b77361ff3210e37213287a5c93d80971f9469eb4e9de89f600eeddb`
+- ψ-recipe: no-blind-scoring — no sealed corpus exists for this mission's sorries; the ψ is distilled from the mission doc's actual tension (§1 IDENTIFY the gap, §3 review protocol) and the snapshot's enumerated kind/status distribution. Stated honestly.
+
+### §2 Cascade
+
+- Constructor commit: `fe8acea` (futon3a HEAD)
+- Size: 11, truncated: false, F-free-energy: 1.113, budget: 20, lambda: 0.25
+- Shown pattern-ids + rel:
+  - `contributing/stack-scan-logging-protocol` (rel 0.543, mc 0.163)
+  - `futon-theory/mission-interface-signature` (rel 0.526, mc 0.158)
+  - `futon-theory/local-gain-persistence` (rel 0.485, mc 0.339)
+  - `stack-coherence/commit-intent-alignment` (rel 0.478, mc 0.335)
+  - `devmap-coherence/ifr-f1-dhammavicaya` (rel 0.46, mc 0.414)
+  - `storage/durability-throughput-gate` (rel 0.437, mc 0.306)
+  - `coordination/session-durability-check` (rel 0.437, mc 0.218)
+  - `invariant-coherence/shape-first-identify` (rel 0.437, mc 0.218)
+  - `futon-theory/derive-exits-on-a-minted-sorry` (rel 0.47, mc 0.235)
+  - `sidecar/append-only-semantic-audit` (rel 0.458, mc 0.229)
+  - `exotic/tri-store-lineage` (rel 0.445, mc 0.311)
+
+### §3-4 Fold + Wiring (v2)
+
+- 8 boxes (folded from 8 of 11 patterns; 3 scoped out as policy-holes — storage/durability-throughput-gate, coordination/session-durability-check, exotic/tri-store-lineage — all honest scope-outs per the charter).
+- 6 policy-holes total (3 scope-outs with `:free nil` + 3 genuine ungroundable policy questions).
+- Terminals: `[{:id :b4 :discharges :want-signature} {:id :b7 :discharges :want-signature}]` — two terminals for the scan-log output and the disposition-alignment output.
+- Wiring connectives: b1->b2 :seq, b2->b5 :seq, b2->b6 :copar, b1->b3 :tensor, b3->b4 :seq, b5->b8 :seq, b6->b7 :seq, b8->b7 :seq.
+- Finding: mostly :seq (the shape-first -> derive -> interface-recovery chain is genuinely sequential). One :copar (b2->b6: the typed-exit and local-gain-persistence dispositions are coupled — only-valid-together). One :tensor (b1->b3: the shape-first enumeration and the append-only audit trail are parallel, non-signalling).
+
+### §5 ΔG (real fold-eval path)
+
+- Boxes: 8, Holes: 6, Coverage: 8/14 = 0.5714285714285714
+- **ΔG: -0.5714285714285714** (via `futon2.aif.fold-eval/coverage-delta-g` over `fold-llm/construction->wiring`)
+- Hand coverage derivation matches: 8/14 = 0.5714.
+
+### §6 PINS (computed via REAL functions)
+
+- `:prompt :sha256` = `0b03a758bbb977dccc9077aa7b35092d901422cc03239db2e2c95f6849e209a9`
+  - Computed via `futon2.aif.fold-llm/fold-prompt` with cascade pattern-ids, circumstance `{:mission "futon2-d/mission/legacy-sorry-cleanup" :psi <exact ψ>}`, prose-fn = verbatim flexiarg slurp.
+  - Reconstructed by loader: MATCH (pin-1b verified).
+  - **Correction during authoring**: initial prompt-sha `d49e4b37...` was computed from ψ WITHOUT trailing newline (the raw `/tmp/psi.txt` file). The EDN stores the ψ WITH trailing `\n` (the final newline before the closing quote in the EDN literal). The loader reads the EDN-ψ (with newline) and reconstructs a DIFFERENT prompt, causing pin-1b mismatch. Fixed by recomputing the sha from the exact EDN-ψ as the loader reads it. The ψ text is canonical; the trailing newline is part of it.
+- `:prompt :prose-sha256` = 11 per-pattern sha256 values (see deposit file for all)
+- `:prompt :prose-source` = `"verbatim futon3/library/<pattern-id>.flexiarg"`
+- `:arming` = mana gate spend (gate fold-authoring, spend at 2026-07-06T08:45:48.724953313Z, balance-after 3; operator word from claude-16 award).
+
+### §7 Deposit
+
+- Path: `/home/joe/code/futon6/data/fold-turns/ft-legacy-sorry-cleanup-001.edn`
+- Contract: v2
+
+### §8 Proofs
+
+**load-deposits (acceptance):**
+- 11 deposits loaded, 0 rejected
+- ft-legacy-sorry-cleanup-001 found with delta-g -0.5714285714285714, prompt-sha 0b03a758...
+
+**tamper-copy (rejection):**
+- Tampered copy in /tmp/tamper-test with ΔG changed to -0.1234567890123456
+- REJECTED: `:delta-g-mismatch` — pin 3: stored -0.1234567890123456 vs recomputed -0.5714285714285714
+
+**Gate 2f:**
+- `[2f] gate PASS`
