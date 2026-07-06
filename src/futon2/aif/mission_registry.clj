@@ -53,6 +53,35 @@
   [path]
   (str/includes? path "/.state/"))
 
+(def ^:private non-primary-path-patterns
+  "Patterns that identify non-primary checkout paths — git worktrees,
+   directory copies, and other sources of duplicate mission-doc hits.
+
+   Each entry is [pattern source-name]. The scan-root fence (non-primary-path?)
+   excludes these BEFORE dedupe, so the path-length sort heuristic in dedupe-by-id
+   is a defense-in-depth fallback, not the sole guard against re-pollution.
+
+   The patterns are deliberately structural (not per-directory-name):
+     - /.worktrees/    — the standard git worktree location
+     - -health-main    — futon5's health-check worktree
+     - -index-check    — futon3c's index-check directory copy
+     - futon3b/        — futon3b is a separate repo that duplicates some futon3 docs
+
+   Adding a new drift source = adding a pattern here with its source name.
+   The census script (scripts/mission_scan_census.bb) reports which patterns fire
+   so future drift has a one-line explanation."
+  [[#"/\.worktrees/" "git-worktree"]
+   [#"-health-main/" "health-main-worktree"]
+   [#"-index-check/" "index-check-copy"]
+   [#"futon3b/holes/missions/" "futon3b-cross-repo"]])
+
+(defn- non-primary-path?
+  "True when PATH is a non-primary checkout (worktree, directory copy, or
+   cross-repo duplicate). These are excluded at scan time so the candidate
+   pool reflects only the primary checkout of each repo."
+  [path]
+  (some (fn [[pattern _]] (re-find pattern path)) non-primary-path-patterns))
+
 (defn- derived-mission-id?
   [mission-id]
   (str/includes? (or mission-id "") "."))
@@ -174,6 +203,12 @@
                        (map #(.getAbsolutePath %))
                        (filter #(re-matches mission-path-pattern %))
                        (remove sandbox-path?)
+                       ;; Scan-root fence (W-candidate-drift-fence): exclude
+                       ;; non-primary checkouts BEFORE dedupe, so worktrees and
+                       ;; directory copies never enter the candidate pool. The
+                       ;; path-length sort + dedupe-by-id below is now
+                       ;; defense-in-depth, not the sole guard.
+                       (remove non-primary-path?)
                        ;; Sort by path length first (shorter = primary checkout,
                        ;; not a worktree/copy), then alphabetically. This ensures
                        ;; dedupe-by-id keeps the primary checkout.
