@@ -1,0 +1,375 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>One flight, in order — pipeline cards IV (ready-state ledger)</title>
+<style>
+body{font:15px/1.55 system-ui,sans-serif;max-width:980px;margin:2rem auto;padding:0 1rem;color:#223}
+h1{font-size:22px}
+.summary{background:#f5f7f6;border:1px solid #dde;border-radius:8px;padding:12px 16px}
+.card{border:1px solid #dde;border-radius:8px;padding:12px 16px;margin:14px 0}
+.card h3{margin:0 0 4px 0;font-size:15px}
+.n{display:inline-block;background:#5a6a8a;color:#fff;border-radius:50%;width:22px;height:22px;text-align:center;line-height:22px;font-size:12px;font-weight:700;margin-right:8px}
+.live{color:#3f8b57;font-weight:700;font-size:11px}.built{color:#2e7d9a;font-weight:700;font-size:11px}
+.tob{color:#b1543a;font-weight:700;font-size:11px}.rul{color:#a07f2a;font-weight:700;font-size:11px}
+.io{font-size:13px;margin:6px 0}
+.io b{display:inline-block;width:64px;color:#667;vertical-align:top}
+.exp{background:#f2f6f3;border-left:3px solid #3f8b57;padding:6px 10px;font-size:13px;margin:8px 0}
+.exp b{color:#3f8b57}
+code{background:#f2f4f3;padding:0 4px;border-radius:4px;font-size:13px}
+pre{background:#f7f8f7;border:1px solid #e3e6e3;border-radius:6px;padding:8px;font-size:12px;overflow-x:auto;white-space:pre-wrap}
+.foot{color:#99a;font-size:11px;margin-top:2rem}
+</style></head><body>
+
+<h1>One flight, in order — pipeline cards IV <small style="color:#99a;font-size:14px">(ready-state ledger)</small></h1>
+<div class="summary">
+Successor to <a href="flight-pipeline-cards-iii.html">pipeline cards III</a>, which remains the
+campaign-run resolution ledger. This page is the 2026-07-06 ready-state ledger after the
+M-first-flights close/transfer and typed-grounds closure. The cards-II findings have either
+closed by code/evidence or become explicit live-series gates. <b>No known implementation
+blocker or omission remains before another live-loop run</b>; the remaining work is empirical
+series observation. Statuses:
+<span class="live">LIVE</span> (running now) · <span class="built">BUILT</span> (landed with
+local gates) · <span class="tob">WATCH</span> (series observation item) ·
+<span class="rul">GATED</span> (operator or series-window gate, not a blocker).
+</div>
+
+<div class="card"><h3><span class="n">1</span>Wake <span class="live">LIVE</span></h3>
+<div class="io"><b>input</b> the wall clock; the crontab</div>
+<div class="io"><b>happens</b> unchanged from v1: hourly one-shot JVM, fresh source.</div>
+<div class="io"><b>output</b> one judged, gated, traced tick</div>
+<div class="exp"><b>EXPECT:</b> no change — this stage is settled.</div>
+</div>
+
+<div class="card"><h3><span class="n">2</span>Scan &amp; judge <span class="live">LIVE</span> <span class="built">drift-fenced</span></h3>
+<div class="io"><b>input</b> mission corpus + substrate-2 state</div>
+<div class="io"><b>happens</b> candidates filtered by CLASSIFIED status (prefix-matching classifier, finding 2) AND fenced before dedupe: non-primary checkout paths (<code>.worktrees</code>, <code>-health-main</code>, <code>-index-check</code>, and the known futon3b cross-repo duplicate source) are excluded before mission-id dedupe; ranked by the G blend.</div>
+<div class="io"><b>output</b> ranked actions over LIVE, UNIQUE missions only</div>
+<div class="exp"><b>EXPECT (pre-registered):</b> zero SUPERSEDED/ARCHIVED-classed missions appear in
+any lane from the first v2 tick onward; the excluded-mission WARN line appears in the scheduled
+log whenever the filter fires. Falsifier: any superseded mission ENACTED after the classifier
+fix lands live. CAMPAIGN RESOLUTION: gap 4 is closed by <code>24a4c8c</code> + test
+<code>0f7db4e</code>. The census reports 307 raw mission files, 99 non-primary files excluded,
+208 primary files after the fence, 198 unique non-derived mission ids, and 93 live candidates;
+future drift now has a per-source explanation via <code>scripts/mission_scan_census.bb</code>.</div>
+</div>
+
+<div class="card"><h3><span class="n">3</span>Build the circumstance ψ <span class="live">LIVE</span> <span class="built">seat-by-state injection</span></h3>
+<div class="io"><b>input</b> one live mission target + the machine's self-observation (futility)</div>
+<div class="io"><b>happens</b> sorry-grain ψ from the held-work ledger (v1, live) + the STUCK line
+(ψ-v3, live). CAMPAIGN CHANGE: entry-condition patterns are SEATED BY PROCESS STATE, not fished
+for by similarity — when futility ≥ threshold, a process-coherence pattern is injected as the
+cascade's OPENING element by construction (the first-slot/anchor mechanism), landed in
+<code>6871587</code>. EVIDENCE this is
+the right design (registered experiment, run + probed 2026-07-05): appending the STUCK line
+did NOT surface a seed (F −0.023→−0.523, an iChing near-neighbor retrieved instead), and the
+phrasing probe CONFIRMED the mechanism is dilution — line-level signal, document-level
+embedding. Retrieval is settled as the wrong seating mechanism; injection is the build.
+MORNING FIXES (2026-07-06): the banner regex missed non-bold <code>Status:</code> lines —
+20+ mission docs were silently statusless to the lane, now parsed; held items are added at
+the SOURCE OF RECORD (sorrys.edn), never by snapshot edit — M-first-flights' Phase-B
+obligation harvested. That intermediate lane ψ measured F −0.024 (best of the two
+faithful phrasings) and the dilution law gained a second witness: a verbatim, longer
+want-text made F WORSE (−0.024→−0.46). CAMPAIGN UPDATE: later live-code measurement of
+the current lane ψ now gives M-first-flights size 8, F +0.385, with the devmap-coherence
+cluster entering the cascade; the stale −0.024 cards-II gap is therefore closed by the
+authored cluster, not by hand-edited deposits. CAMPAIGN NEGATIVE: per-clause retrieval /
+reranking was tested and does not robustly improve F (2 improves, 2 degrades in the
+4-ψ batch), so no constructor reranker was landed.</div>
+<div class="io"><b>output</b> ψ + (when stuck) a seated entry pattern</div>
+<div class="exp"><b>RESOLUTION STATUS:</b> resolved. For a lane at
+0-for-N (N≥10), the constructed cascade now gets an explicit opening process-coherence pattern
+and a <code>:seat-injection</code> tag. The current first-flights lane crosses the act-gate's F leg
+without library/deposit hand edits (F +0.385). The per-clause reranker remains a negative
+finding, not a required exit item. <code>M-first-flights</code> itself has since closed/transferred
+as a WM target; the F-crossing is retained here as the evidence that the former dF blocker is
+not live.</div>
+</div>
+
+<div class="card"><h3><span class="n">4</span>Condense the cascade <span class="live">LIVE</span> <span class="rul">position-aware accretion scoped</span></h3>
+<div class="io"><b>input</b> ψ (+ seated entry pattern when stuck)</div>
+<div class="io"><b>happens</b> retrieval + coverage-saturation as v1 (budget 20 ceiling). NEW
+DOCTRINE (live): a thin cascade on a well-formed ψ triggers AUTHORING — the library is
+incomplete by construction; missing patterns are written from real practice as a
+MUTUALLY-CITING CLUSTER (day-one phylogeny connectivity, the remedy-2 mechanism) and the run
+re-measured. FUTURE GATE (not one of the six cards-II campaign gaps): accretion becomes position-aware — patterns carry process
+positions (entry / construction / acceptance), and assembly respects them (the staging
+corollary; ◁ made operational at retrieval time).</div>
+<div class="io"><b>output</b> a cascade with positions — the argument, staged</div>
+<div class="exp"><b>EXPECT (pre-registered):</b> (a) any domain-gap found by a well-formed ψ
+crosses F=0 within ONE authoring cycle — <b>2-for-2 pre-series</b> (diagramprover
+−0.443→+0.144; first-flights −0.446→+0.423, 2026-07-06) <b>with a mechanism refinement both
+runs required: cluster-at-birth is an EDGE phenomenon — ingestion must register intra-cluster
+descent edges matching the [[kin]] cites; stems alone leave F flat</b> (the first-flights run
+proved this by doing it wrong then right in one session); (b) authored clusters open their
+domain's cascades at rel ≥ 0.6 (precedent: 0.706; nuance from run 2: the first-flights cluster
+formed via connectivity bonus mc &gt; 0.6 rather than raw embedding rel — the edges, not
+similarity, made the cluster);
+(c) when position-aware accretion lands, acceptance-class patterns stop appearing before
+entry-class ones — <b>measured ONLY on cascades where card 3's injection did NOT fire</b>
+(on stuck lanes the injected seed occupies the opening slot by construction, so position-aware
+accretion is unobservable there; scoping fixed pre-series to prevent 4(c) free-riding on
+3's mechanism).</div>
+</div>
+
+<div class="card"><h3><span class="n">5</span>Fold → deposit, contract v2 <span class="built">v2 deposits live</span></h3>
+<div class="io"><b>input</b> the staged cascade + the SORRY (the typed hole: want-signature, hungry-for, endpoints)</div>
+<div class="io"><b>happens</b> the LLM fold per E-llm-fold discipline, now with the CT layer:
+boxes carry pattern provenance (v1, kept); hyperedges carry BV CONNECTIVES — ◁ sequential /
+⊗ non-signalling parallel / ⅋ coupled — so the wiring is a process expression, not a bag;
+TERMINALS structurally <code>:discharges</code> the sorry's want-signature (the diagram
+visibly closes the hole it was folded for); and PIN 4: the composition skeleton type-checks
+through the CLean bridge (<code>clean_to_lean.py</code> → DarkTower, 0-sorry on the skeleton;
+policy-holes remain honest TYPED holes). The bridge is BUILT with the BV laws proved — this
+card puts it in the pipeline. NEW (2026-07-06): <b>PIN-1B is live — the loader reconstructs
+each deposit's fold prompt at load time, so loader acceptance mechanically implies
+replayability.</b> Motivating incident: two unattended overnight deposits landed with invented
+pin schemes; the replay seam refused them silently all night (the pin defending the loop);
+pin-1b moves that refusal to deposit time, loudly. Escrow now holds 13 replayable deposits
+on disk (11 campaign-relevant plus two off-task deposits from misrouted agents);
+the ground-control commissioning test measured 3/3 valid deposits first-submission from
+written instructions alone. PRECEDENT NOW EXISTS: the PIPELINE ITSELF is a DarkTower object
+(WMPipelineExample.lean, 0-sorry — flight as a BV seq/copar expression, γ's feeds as a
+TypedHole) and its theorem-flip contract has been exercised once live (the γ repair); pin 4
+applies the same formalism one level down, to the deposits.</div>
+<div class="io"><b>output</b> a v2 deposit: provably-composable wiring, terminal-discharged sorry, four pins</div>
+<pre>reference v2 shape:
+:wiring {:nodes [{:id :b1 :fits-pattern … :via …} …]
+         :hyperedges [{:from :b1 :to :b2 :connective :seq}      ; ◁
+                      {:from [:b2 :b3] :to :b4 :connective :copar}] ; ⅋
+         :terminals [{:id :b4 :discharges :want-signature}]}
+:pins [:prompt-sha :arming :delta-g-recompute :clean-0-sorry]</pre>
+<div class="exp"><b>EXPECT (pre-registered):</b> (a) every v2 deposit's skeleton passes the
+CLean check 0-sorry, or the deposit is REJECTED loudly with the failing composition named;
+(b) the golden deposit (001) backfills to v2 — connectives annotated, terminal wired to its
+want-signature — WITHOUT its ΔG changing (the coverage arithmetic is connective-invariant)
+— <b>CONFIRMED 2026-07-05 night, pre-series</b> (codex-1, futon6 3b03ae2: census
+{:copar 1 :tensor 1 :seq 2} derived from box semantics; ΔG −4/9 and prompt-sha 5597da91…
+byte-identical post-annotation; 2f gate green over six; pin-4 passes-linearized — the first
+cards-II expectation to convert, and the golden deposit is now golden in both contracts);
+(c) at least one v2 fold uses ⊗ or ⅋ honestly (not everything is a sequence — if every edge
+comes back ◁, that is a finding about the folds or the domains, recorded either way).</div>
+</div>
+
+<div class="card"><h3><span class="n">6</span>Price the plan (ΔG) <span class="live">LIVE</span></h3>
+<div class="io"><b>input</b> mission + cascade + the escrow</div>
+<div class="io"><b>happens</b> reconciliation: rollout VALUATION (depth-1; the arrow-level
+search is retired on theory — the level error) → pinned escrow replay (v2 deposits) → honest
+abstention. Classical fold remains off. <b>ARCHITECTURAL FINDING (2026-07-06, the
+two-streams defect):</b> the gate lane filtered ranked actions for :open-mission type only —
+the judge's top DECISION (typed :advance-mission) was structurally excluded, so the machine
+never gated what it decided; every escrow-read prediction failed on this, not on pins.
+<b>RULED (operator, verbatim): "we should accept the decision so that the machine can act on
+its decision"</b> — lane entry #1 becomes the rank-1 decision target regardless of action
+type (flagged, default on, revertible; implementation in flight at amendment time).</div>
+<div class="io"><b>output</b> ΔG + provenance, or abstain</div>
+<div class="exp"><b>EXPECT (pre-registered):</b> in the v2 series, 100% of non-nil ΔG legs
+carry <code>:fold-escrow</code> or rollout-valuation provenance (zero <code>:fold</code>
+sources in new traces); missions without deposits abstain with
+<code>:abstain-missing-leg</code> — the abstention RATE is the measure of how far the deposit
+economy has to grow, reported per series, never hidden.</div>
+</div>
+
+<div class="card"><h3><span class="n">7</span>Gate, select — γ feed <span class="live">wired</span> <span class="built">cargo found offline</span></h3>
+<div class="io"><b>input</b> ΔF ∧ ΔG verdicts + γ per lane</div>
+<div class="io"><b>happens</b> the AND-gate unchanged. RULING LANDED (operator, 2026-07-05:
+"why is γ not being fed? what are we waiting for?") and the repair is live (futon2
+<code>d05dd35</code>): escrow coverage-ΔG feeds γ's expected leg under the
+<b>source-consistency rule</b> — γ eats the fold whose leg the gate ACTUALLY ACTED ON, never
+whichever number happens to exist (classical still computes its distrusted −0.077 under the
+escrow's −0.7; a naive nil-fallback would have fed it). Rollout-G stays excluded (the
+scale-match pin's purpose). Revertible: <code>*gamma-escrow-feed?*</code>, default on. The
+severance-and-repair is also FORMAL: DarkTower/WMPipelineExample.lean proved the starved port
+hungry, and the repair commit flipped the theorem — severing this feed again means re-proving
+the hunger. The 3b margins (paying γ→1.26, futile γ→0.50) are the prior.</div>
+<div class="io"><b>output</b> verdicts + a γ that CALIBRATES rather than coasts once a qualifying gated mission supplies cargo</div>
+<div class="exp"><b>EXPECT (pre-registered; magnitude fixed pre-series):</b> within 24 fed
+ticks after burn-in, paying-lane γ ≥ <b>1.10</b> AND futile-lane γ ≤ <b>0.90</b> (direction
+AND magnitude, anchored to 3b's simulated envelope of 1.26 / 0.50 — anything inside
+(0.90, 1.10) on both lanes counts as FLAT, not "diverging slowly": the flat-vs-diverged call
+is made by these numbers, not post-hoc judgment). Clock: starts at the FIRST FED TICK (first
+hourly log line with numeric <code>expectedG=</code> from the acted-on source); γ ≡ 1.0 for the first ~5 fed samples is
+burn-in. <b>Series shorter than burn-in + 24 fed ticks ⇒ VERDICT DEFERRED — not failed, not
+passed</b> (an underpowered window cannot fire this card's falsifier). Falsifier (only in a
+full window): γ flat by the thresholds above (feed miswired) or diverged opposite (sign
+convention wrong on live data — a finding worth the series by itself). CAMPAIGN RESOLUTION:
+gap 2 is closed at offline-proof grain. First-flights now crosses the F leg too, and
+other replayable deposits also supply cargo: <code>ft-aif-faithfulness-001</code> (F=0.296,
+ΔG=-0.556), <code>ft-evaluate-policies-009</code> (F=3.999, ΔG=-0.615), and
+<code>ft-legacy-sorry-cleanup-001</code> (F=1.113, ΔG=-0.571). The relevant flags are on
+(escrow replay, classical fold ΔG off, gamma escrow feed on). The remaining step is the live
+series itself: a qualifying mission must be selected by a tick so the feed can begin burning in.</div>
+</div>
+
+<div class="card"><h3><span class="n">8</span>Enact, realize, score <span class="live">LIVE</span> <span class="rul">deposit scoring ruled</span></h3>
+<div class="io"><b>input</b> passed verdicts (consent-gated; artifact-only)</div>
+<div class="io"><b>happens</b> deterministic executor realizes; realized-vs-expected recorded.
+M-peradam-mechanization has the reject-loudly certificate loader and refusal corpus; certificate
+issuance remains deliberately operator-gated. Typed grounds are now producer-side structured
+fields: <code>futon3c.aif.flight-record</code> emits <code>:ground/kind</code> maps, the flight spec
+documents the vocabulary, and <code>flight-typed-ground-witness.edn</code> conforms. The
+realized-vs-expected score history remains the fruit witness to record when a deposit is
+actually consumed.</div>
+<div class="io"><b>output</b> realized ΔG + per-deposit score history</div>
+<div class="exp"><b>EXPECT (pre-registered):</b> the expected−realized gap distribution is
+reported per deposit per series; deposits whose gap grows are flagged (a plan that over-promises
+is a calibration datum, not an embarrassment).</div>
+</div>
+
+<div class="card"><h3><span class="n">9</span>Trace, observe, learn <span class="live">LIVE</span> <span class="built">co-app from usage</span></h3>
+<div class="io"><b>input</b> the tick's full record</div>
+<div class="io"><b>happens</b> daily trace; strict-credit futility board; nag bulletin (dry-run →
+live at operator word). CAMPAIGN CHANGE: live cascade usage is now mined from replayable
+fold-turn deposits, so patterns that fire together in actual deposits accrue co-app edges with
+deposit-level provenance; authored clusters no longer get the only day-one edges.</div>
+<div class="io"><b>output</b> the machine's self-observation, feeding the next tick's ψ</div>
+<div class="exp"><b>EXPECT (pre-registered):</b> over the v2 series, at least one lane leaves
+0-for-N under strict credit (the first lane-credited pass in the machine's history); the
+futility board's top number goes DOWN for lanes with deposits and does not move for lanes
+without — futility responds to plans, not to time.</div>
+<div class="exp"><b>CAMPAIGN RESOLUTION:</b> gap 3 is closed by futon6 <code>d63ba48</code> and
+futon2 <code>2093caa</code>. <code>scripts/coapp_live_usage_miner.py --test</code> scans 11 deposits,
+finds 10 cascades with at least two patterns, emits 382 co-app pairs with complete provenance,
+and recomputes byte-identically. The pipeline wiring checker now reports pending: 0 and
+"CHECK PASS: every consumer port fed".</div>
+</div>
+
+<div class="card"><h3><span class="n">10</span>The recommendation responds to work <span class="rul">the operator's own pre-registration</span></h3>
+<div class="io"><b>input</b> consecutive ticks bracketing real work (a deposit landing, held items closing, a status change, gamma movement)</div>
+<div class="io"><b>happens</b> the return arc at the RECOMMENDATION grain: work updates the board; the board updates G; G updates the recommendation. Campaign update: status classifier, held-work ledger, deposits, scan-root fence, live-usage co-app, and dark portfolio candidates now all have explicit paths. Gamma demotion remains gated on the first fed tick; portfolio candidates are dark by default until operator release.</div>
+<div class="io"><b>output</b> a recommendation that CHANGES for attributable reasons</div>
+<div class="exp"><b>EXPECT (pre-registered, operator, 2026-07-05; restructured pre-series after
+the cards-7×10 interaction was caught — γ needs burn-in + ~24 fed ticks, so a short series
+CANNOT flip a recommendation through γ, and this card's falsifier must not fire on mere
+underpowering):</b> <b>PRIMARY (fast path, valid at any series length):</b> at least one
+top-recommendation change between consecutive ticks is attributable to a FAST-ARC event —
+a deposit landing, a held-item closure, or a mission status change — with the attribution
+named in the series log. <b>SLOW CONFIRMER (only evaluable in a full γ window per card 7):</b>
+a γ-driven demotion of a futile lane visibly moves the ranking. Falsifier (fast path): the top
+recommendation is constant across the whole series despite fast-arc events landing — the
+return arc is not reaching the judge, and closing it becomes the next excursion's charter.
+A constant recommendation with NO fast-arc events and an underpowered γ window is a NULL
+SERIES, not a falsification. CAMPAIGN RESOLUTION: gap 5 is closed at dark/proposable grain by futon2
+<code>39492fa</code>. <code>portfolio_action_proposer.clj</code> creates priceable close/survey/apply-cascade
+families dark-by-default; the dry-run emits advance-mission: 3, close-mission: 1,
+survey-mission: 3, apply-cascade: 1, with 5/5 checks passing. Live composition is an
+operator release choice/M-aif2 slice-1 follow-up, not a pre-loop blocker.</div>
+</div>
+
+<div class="summary"><b>CAMPAIGN RESOLUTION LEDGER — 2026-07-06:</b><br>
+1. <b>The ΔF last inch</b>: RESOLVED. Seat-by-state injection is built (<code>6871587</code>);
+the current M-first-flights lane measures F +0.385 with the authored devmap-coherence cluster.
+Naive per-clause retrieval/reranking remains a negative result and was not landed.<br>
+2. <b>γ first meal</b>: RESOLVED at offline-proof grain. Cargo exists outside first-flights:
+<code>ft-aif-faithfulness-001</code>, <code>ft-evaluate-policies-009</code>, and
+<code>ft-legacy-sorry-cleanup-001</code> have F&gt;0 and ΔG&lt;0. The feed is wired and flags are on;
+the live first meal waits only for a qualifying mission to be selected by a tick.<br>
+3. <b>Co-app from usage</b>: RESOLVED. <code>d63ba48</code> mines fold-turn deposits into
+<code>coapp-live-usage.v1</code>; <code>2093caa</code> flips the pipeline edge live; wiring checker
+pending count is 0.<br>
+4. <b>Candidates drift</b>: RESOLVED. <code>24a4c8c</code> fences non-primary scan roots and
+<code>0f7db4e</code> adds the regression test. Census: 307 raw files, 99 excluded
+non-primary, 208 primary, 198 unique, 93 live.<br>
+5. <b>The proposer gap</b>: RESOLVED at dark/proposable grain. <code>39492fa</code> adds
+priceable close/survey/apply-cascade families behind a default-off proposer; live composition
+waits on operator/M-aif2 release.<br>
+6. <b>The dogfood question</b>: RESOLVED at campaign-governance grain. <code>aa9b7cb</code>
+adds the 26-row execution-mode table: self-referential members/workstreams start under
+GROUND-CONTROL, not WM enactment.<br>
+7. <b>M-first-flights residual tail</b>: RESOLVED. <code>M-first-flights</code> is
+<code>SUPERSEDED-AS-MISSION toward E-first-flights-transferred-work</code>; W1 policy-grade
+G closed; W2 typed-grounds closed by futon3c <code>12b9745</code> with producer-side
+<code>:ground/kind</code> maps and a conforming typed-ground witness.</div>
+
+<div class="summary"><b>PRE-LIVE-LOOP MUST-CLOSE TRACKER — opened 2026-07-06, now clear:</b><br>
+Joe observed residual-work language and asked for claude-16's pre-loop advice. claude-16's
+answer (whistle trace <code>invoke-5757a4ea-4230-454a-9388-7fb76aaa89a7</code>) makes these
+the T-0 checks before another live loop. Status now: <span class="live">READY</span>; no known
+must-close blocker remains. Re-run the baseline bundle immediately before tick 1 to pin
+then-current shas, as ordinary preflight discipline.<br>
+1. <b>Disk/evidence-store instrument check</b> — <span class="live">PASS</span>, owner <code>zai-3</code>, bell
+<code>invoke-1783338564401-656-9a327897</code>. Must verify disk space and write-probes for
+<code>wm-trace/</code>, <code>futon6/data/</code>, and the evidence store path. Result: all target
+paths are on <code>/dev/nvme0n1p2</code> with 237G available; write/remove probes passed for
+<code>futon2/data/wm-trace/</code>, <code>futon6/data/</code>,
+<code>storage/futon1a/default/doc-store/</code>, <code>futon6/data/fold-turns/</code>, and
+<code>futon6/data/mana-gate/</code>. Historical 2026-07-05 disk-full errors are resolved.<br>
+2. <b>γ sample tail</b> — <span class="live">PASS</span>, owner <code>zai-4</code>, bell
+<code>invoke-1783338564201-653-024f5b33</code>. Must explain/repair the expectedG vs blank
+realizedG sample before a card-7 series. Diagnosis: all three qualifying escrow deposits have
+non-nil expectedG but realizedG nil because <code>enact!</code> shells the rule-table fold engine,
+whose current RULES produce 0 boxes for their <code>aif/*</code>, <code>measurement/*</code>, and
+<code>data-mining/*</code> patterns. This was the T-0 blocker; without the repair γ would have
+held at prior with no calibration sample. Ruling (claude-16 whistle <code>invoke-c801a87f-d395-43c0-aa69-ff0efa1ea7a7</code>):
+do not extend RULES to the observed deposits at T-0 and do not use escrow-as-realized; instead
+fix nil-vs-zero semantics so 0 enacted boxes against N obligations records realizedG 0.0.
+Fix landed in <code>2d13ef2</code> (<code>fold_realized.clj</code> only; gate abstain semantics untouched).
+Focused test <code>fold_realized_zero_coverage_test.clj</code> passes: all three qualifying deposits
+now produce complete samples with expectedG negative, realizedG 0.0, and positive signed error.<br>
+3. <b>Escrow mechanical standing</b> — <span class="live">PASS</span>, owner <code>zai-6</code>, bell
+<code>invoke-1783338564384-655-28553753</code>. Must prove current fold-turn dir, including
+<code>ft-operational-vocabulary-001</code>, passes load-deposits/pin-1b and gate 2f, or
+quarantine before T-0. Result: 13 loaded, 0 rejected; <code>bb scripts/live_loop_step.bb gate 2f</code>
+PASS; <code>ft-operational-vocabulary-001</code> included and replay/pins green. No commit from
+agent; pure gate run.<br>
+4. <b>T-0 baseline bundle</b> — <span class="live">PASS/PREPARED</span>, owner <code>zai-8</code>, bell
+<code>invoke-1783338564306-654-4c38e5c2</code>. Must identify and run/prepare the exact 2f +
+reference-regression commands and record outputs plus commit shas in the series log. Result:
+<code>bb scripts/live_loop_step.bb gate 2f</code> PASS; <code>clojure -M scripts/reference_regression.clj</code>
+ran 8 checks, 7 pass, with only known deposit-count-sensitive peradam refusal census DRIFT
+(13 deposits vs ref 8). Exact T-0 commands are those two commands, rerun immediately before
+tick 1 with then-current commit shas.<br>
+5. <b>M-first-flights / typed-grounds closure</b> — <span class="live">PASS</span>. Mission
+close/transfer landed in futon3c <code>4425876</code> and futon2 <code>2665779</code>; W1 closed in
+<code>b88a81f</code>; W2 initially held in <code>7b37d67</code>, then closed interactively in
+futon3c <code>12b9745</code>. Producer-derived flight grounds are typed maps, the spec records the
+vocabulary, and the typed-ground witness conforms.</div>
+
+<p><b>The pipeline's own wiring is part of the discipline:</b> the dataflow map lives at
+<code>wm-pipeline-wiring.edn</code> (operational; checker <code>check_pipeline_wiring.bb</code>
+enforces every-consumer-port-fed) and <code>mathlib4/DarkTower/WMPipelineExample.lean</code>
+(formal; 0-sorry). <b>EXPECT (pre-registered):</b> the checker stays green through the series,
+and any ruling that retires a component updates the wiring in the same commit — "remedies can
+sever adjacent feeds" (ledger §15) never recurs silently.</p>
+
+<p><b>The campaign exit check this page records:</b> cards-II's findings have now been run
+through the War Machine Campaign and the post-campaign first-flights closure. This page is the
+resulting ready-state ledger, not a fresh pre-registration. It says which TODOs became
+built/gated mechanisms and records the remaining live-series obligation separately from the
+campaign-build exit: γ still needs an actual fed tick/burn-in window, but there are no known
+implementation blockers or omissions left in the cards-II/III pipeline.
+<br><small style="color:#99a">Pre-series amendments, 2026-07-05 evening (the series has not
+started): card 2 gained the dedup + the driver's candidates-count prediction; card 3 recorded
+the ψ-v3 experiment outcome (dilution confirmed, injection settled as the design); card 5
+gained the formal precedent; card 7 flipped PENDING-RULING → REPAIRED (ruling + d05dd35 +
+the theorem-flip); this wiring-audit paragraph added.
+Second amendment batch, 2026-07-05 night (pre-registration hardening, credited to a
+frontier-model critique routed by the operator): card 7 gained pre-registered magnitude
+thresholds (1.10/0.90, anchored to 3b) + the VERDICT-DEFERRED rule for underpowered windows;
+card 10 restructured — fast-arc attribution PRIMARY, γ demotion as slow confirmer, so its
+falsifier cannot fire on mere underpowering; card 4(c) scoped to non-injected cascades so it
+cannot free-ride on card 3's mechanism.
+Third amendment batch, 2026-07-06 midday (the morning's fixes and findings; the series has
+still not started): card 3 gained the banner-regex fix, source-of-record held items, and the
+dilution law's second witness; card 4(a) updated to 2-for-2 with the edges-not-stems
+mechanism requirement; card 5 gained pin-1b (acceptance = replay guarantee) and the 3/3
+commissioning result; card 6 gained the two-streams finding and the operator's
+gate-what-you-decide ruling; the KNOWN GAPS box added. Overnight also exercised two hardening
+rules as designed: card 7 returned VERDICT-DEFERRED (zero fed ticks) and card 10 read as a
+null series (no fast-arc events reached the judge) — neither falsifier fired on
+underpowering, which was the point of the second batch.
+Cards-III campaign run, 2026-07-06: card 2 drift fence, card 3 seat injection and F-crossing
+evidence, card 9 co-app usage miner, card 10 dark portfolio proposer, and campaign execution
+modes landed. The gamma first meal has offline cargo and correct flags; live burn-in is the
+next empirical series step, not an unresolved cards-II TODO.
+Cards-IV closure, 2026-07-06: M-first-flights stopped being a WM target; transferred W1/W2 work
+closed in Excursions; producer-derived flight grounds became typed <code>:ground/kind</code> maps with a
+conforming witness. This removes the last known residual-work blocker named during the
+post-campaign review.</small></p>
+
+<p class="foot">Compiled 2026-07-06 from cards-III plus War Machine Campaign run evidence and
+post-campaign first-flights/typed-grounds closure.
+Sources for the shapes: E-llm-fold.md ·
+ct-wiring-explainer.html (CLean bridge, BV laws) · E-live-loop-3.md §Deposit-contract-v2 ·
+sequel-notebook.org §5 (the normative flight) · the day's rulings (classical-off, level error,
+authoring doctrine, staging corollary) · C-war-machine-campaign.md ·
+E-first-flights-transferred-work.md. Drafted by codex-1 at
+operator direction.</p>
+</body></html>
