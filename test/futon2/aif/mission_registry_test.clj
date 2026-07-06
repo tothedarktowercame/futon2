@@ -277,3 +277,25 @@
     ;; Primary checkout (shortest path) is kept
     (is (re-find #"futon3c/holes" (:path (first matches)))
         "primary checkout (shortest path) kept over worktree/copy")))
+
+(deftest scan-root-fence-excludes-non-primary-checkouts
+  "W-candidate-drift-fence: the scan-root fence excludes non-primary checkouts
+   (worktrees, directory copies, cross-repo duplicates) BEFORE dedupe, so they
+   never enter the candidate pool. This is structural, not heuristic."
+  (write-mission! "futon3c/holes/missions/M-fence-test.md"
+                  (str "**Status:** OPEN\n"
+                       "# Fence Test\n"))
+  (write-mission! "futon3c-index-check/holes/missions/M-fence-test.md"
+                  (str "**Status:** OPEN\n"
+                       "# Fence Test (index-check copy)\n"))
+  (write-mission! "futon5-health-main/holes/missions/M-fence-test.md"
+                  (str "**Status:** OPEN\n"
+                       "# Fence Test (health-main worktree)\n"))
+  (write-mission! ".worktrees/futon5-x/holes/missions/M-fence-test.md"
+                  (str "**Status:** OPEN\n"
+                       "# Fence Test (git worktree)\n"))
+  (let [doc (mr/load-missions *tmpdir*)
+        matches (filter #(= "M-fence-test" (:id %)) (:missions doc))]
+    (is (= 1 (count matches)) "only the primary checkout appears")
+    (is (re-find #"futon3c/holes" (:path (first matches)))
+        "the primary checkout path is kept, not a worktree or copy")))
