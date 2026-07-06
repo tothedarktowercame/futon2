@@ -26,7 +26,7 @@ No closure edits have been made in this demonstration yet.
 |---|---|---|---|---|
 | A. Acceptance/evidence census | `zai-3` | `invoke-1783340554873-667-9addef69` | Do the mission's own Phase A/Phase B criteria justify closure or hold? | Done — HOLD |
 | B. Phase-B transfer proof | `zai-5` | `invoke-1783340554876-668-c4311be0` | Is Phase B transferable to named successor machinery, and how should the sorry registry be marked? | Done — TRANSFERABLE |
-| C. Mechanical stop-recommending path | `zai-6` | `invoke-1783340555059-669-93538532` | Which source-of-record edits/gates stop recommendations without special-casing the mission name? | Running |
+| C. Mechanical stop-recommending path | `zai-6` | `invoke-1783340555059-669-93538532` | Which source-of-record edits/gates stop recommendations without special-casing the mission name? | Done — SOURCE-OF-RECORD PATH |
 
 ## Stop Conditions
 
@@ -91,3 +91,52 @@ Recommendation from the proof: mark
 `:sorry/first-flights-phase-b-policy-grade-G` as `:addressed`, not
 `:foreclosed` and not `:open`, because the stated "judgments without
 derivations" rationale is no longer true at the fold-realized grain.
+
+### Task C — Mechanical Stop-Recommending Path (`zai-6`)
+
+Verdict: **SOURCE-OF-RECORD PATH EXISTS**.
+
+Evidence note: `futon2/holes/evidence/M-first-flights-closure-mechanical-path.md`,
+commit `27ef946`.
+
+Findings:
+
+- `M-first-flights` remains recommendable because the mission registry's
+  status classifier reads the leading status token `PHASE`, not the later
+  word `COMPLETE`, so the mission classifies as `:unknown` and stays live.
+- This is intentional classifier behavior: mid-line completion words must not
+  hide missions whose current leading state is still open or ambiguous.
+- The non-special-case fix is to change the mission doc's source-of-record
+  leading status token to a terminal/inactive state.
+- Recommended status:
+  `SUPERSEDED-AS-MISSION toward M-fold-ansatz`, because Phase A is complete
+  and the remaining Phase-B-shaped obligation transfers to successor
+  fold/gamma machinery rather than remaining native `M-first-flights` work.
+- Hygiene edits, if the transfer is accepted: mark
+  `:sorry/first-flights-phase-b-policy-grade-G` `:addressed` in
+  `futon2/resources/sorrys.edn`; optionally align the held-work ledger entry.
+
+## Ground-Control Verdict
+
+Evidence supports **CLOSE/TRANSFER**, but only if the operator accepts the
+Phase-B transfer as the discharge for this mission.
+
+What is established:
+
+- Phase A has evidence-complete exits and an operator PASS.
+- The old dF blocker is stale; the current first-flights lane crosses the F
+  gate.
+- Phase B has named successor machinery (`fold-realized` -> γ calibration) and
+  a passing evidence proof that covers the policy-grade `G(s,π)` shape.
+- There is a clean source-of-record path to stop recommendations without a
+  name-based recommender exclusion.
+
+What remains an operator decision:
+
+- Whether `M-first-flights` should be marked
+  `SUPERSEDED-AS-MISSION toward M-fold-ansatz` now, with the Phase-B sorry
+  marked `:addressed`, or held open as the tracking vehicle for
+  typed-grounds / return-channel debt.
+
+No closure edits were made in this demo, because Task A explicitly surfaced the
+transfer as an operator acceptance point.
