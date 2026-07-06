@@ -25,7 +25,7 @@ No closure edits have been made in this demonstration yet.
 | Task | Owner | Bell job | Question | Status |
 |---|---|---|---|---|
 | A. Acceptance/evidence census | `zai-3` | `invoke-1783340554873-667-9addef69` | Do the mission's own Phase A/Phase B criteria justify closure or hold? | Done — HOLD |
-| B. Phase-B transfer proof | `zai-5` | `invoke-1783340554876-668-c4311be0` | Is Phase B transferable to named successor machinery, and how should the sorry registry be marked? | Running |
+| B. Phase-B transfer proof | `zai-5` | `invoke-1783340554876-668-c4311be0` | Is Phase B transferable to named successor machinery, and how should the sorry registry be marked? | Done — TRANSFERABLE |
 | C. Mechanical stop-recommending path | `zai-6` | `invoke-1783340555059-669-93538532` | Which source-of-record edits/gates stop recommendations without special-casing the mission name? | Running |
 
 ## Stop Conditions
@@ -66,3 +66,28 @@ Findings:
 Open operator question from the census: accept Phase B transfer to the
 gamma/fold-ansatz workstreams, or keep `M-first-flights` open as the tracking
 vehicle until typed-grounds migration lands?
+
+### Task B — Phase-B Transfer Proof (`zai-5`)
+
+Verdict: **TRANSFERABLE**.
+
+Evidence note: `futon2/holes/phase-b-transfer-proof-2026-07-06.md`, commit
+`652a676`.
+
+Findings:
+
+- Named successor machinery: `futon2.aif.fold-realized`, the fold-realized
+  -> γ calibration seam documented in live-loop III.1.
+- The successor produces the Phase-B shape at policy grain:
+  `{:policy :expected-G :realized-G :tick}` with both G legs on the same
+  coverage-to-ΔG scale.
+- Zero-coverage semantics makes policy-holes/ghosts measurable: 0 enacted
+  boxes against N obligations is realizedG 0.0, while genuinely missing
+  wiring remains nil.
+- `fold_realized_zero_coverage_test.clj` passes and produces complete samples
+  for the three qualifying deposits.
+
+Recommendation from the proof: mark
+`:sorry/first-flights-phase-b-policy-grade-G` as `:addressed`, not
+`:foreclosed` and not `:open`, because the stated "judgments without
+derivations" rationale is no longer true at the fold-realized grain.
