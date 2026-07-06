@@ -670,7 +670,21 @@
   {:id :sorry/first-flights-phase-b-policy-grade-G
    :title "Phase B policy-grade G(s, π): flight records must carry derivations, ghosts, and warrants"
    :raised-at "2026-06-11"
-   :status :open
+   :status :addressed
+   :addressed-at "2026-07-06"
+   :addressed-by-excursion "futon3c/holes/excursions/E-first-flights-transferred-work.md"
+   :resolution
+   (str
+    "Ground-control closure demo accepted by Joe on 2026-07-06: "
+    "M-first-flights Phase A is complete, and the Phase-B policy-grade "
+    "G(s, pi) obligation has a named successor in futon2.aif.fold-realized "
+    "and the fold-realized -> gamma calibration seam. The successor emits "
+    "{:policy :expected-G :realized-G :tick} on the same coverage-to-delta-G "
+    "scale, with typed policy-holes and recomputable warrants. This sorry is "
+    "therefore addressed by transfer to E-first-flights-transferred-work, "
+    "not kept open under M-first-flights and not made a dependency of "
+    "M-fold-ansatz. Residual typed-grounds / return-channel work is tracked "
+    "inside the Excursion until independently closed or held.")
    :kind :prototyping-forward
    :rationale
    (str
