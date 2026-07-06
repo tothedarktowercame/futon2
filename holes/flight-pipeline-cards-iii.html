@@ -165,7 +165,7 @@ sources in new traces); missions without deposits abstain with
 economy has to grow, reported per series, never hidden.</div>
 </div>
 
-<div class="card"><h3><span class="n">7</span>Gate, select — γ feed <span class="live">wired</span> <span class="rul">awaiting first meal</span></h3>
+<div class="card"><h3><span class="n">7</span>Gate, select — γ feed <span class="live">wired</span> <span class="built">cargo found offline</span></h3>
 <div class="io"><b>input</b> ΔF ∧ ΔG verdicts + γ per lane</div>
 <div class="io"><b>happens</b> the AND-gate unchanged. RULING LANDED (operator, 2026-07-05:
 "why is γ not being fed? what are we waiting for?") and the repair is live (futon2
@@ -188,10 +188,12 @@ burn-in. <b>Series shorter than burn-in + 24 fed ticks ⇒ VERDICT DEFERRED — 
 passed</b> (an underpowered window cannot fire this card's falsifier). Falsifier (only in a
 full window): γ flat by the thresholds above (feed miswired) or diverged opposite (sign
 convention wrong on live data — a finding worth the series by itself). CAMPAIGN RESOLUTION:
-gap 2 is not an implementation gap after the campaign; it is a cargo gate. July 6 trace/log
-evidence still shows <code>:abstain-missing-leg</code> on the current first-flights lane and no
-positive-dF replayable gated mission. The first meal is therefore explicitly deferred until
-card 3 crosses F=0 or another mission crosses first.</div>
+gap 2 is closed at offline-proof grain. The first-flights lane still waits on card 3, but
+other replayable deposits already supply cargo: <code>ft-aif-faithfulness-001</code> (F=0.296,
+ΔG=-0.556), <code>ft-evaluate-policies-009</code> (F=3.999, ΔG=-0.615), and
+<code>ft-legacy-sorry-cleanup-001</code> (F=1.113, ΔG=-0.571). The relevant flags are on
+(escrow replay, classical fold ΔG off, gamma escrow feed on); the remaining step is a live
+tick where one qualifying mission is the acted-on pass.</div>
 </div>
 
 <div class="card"><h3><span class="n">8</span>Enact, realize, score <span class="live">LIVE</span> <span class="rul">deposit scoring ruled</span></h3>
@@ -252,10 +254,10 @@ operator-gated/M-aif2 slice-1 follow-up.</div>
 injection is built (<code>6871587</code>); naive per-clause multi-vector replacement retrieval
 was tested and rejected because it degraded F. Remaining work: a reranker or other constructor
 change that crosses F=0 without library/deposit hand edits.<br>
-2. <b>γ first meal</b>: DEFERRED by named upstream condition, not hidden. The feed is wired
-and tested, but July 6 traces still show <code>:abstain-missing-leg</code>; no replayable
-positive-ΔF gated mission has supplied cargo yet. It starts when gap 1 or another mission
-crosses first.<br>
+2. <b>γ first meal</b>: RESOLVED at offline-proof grain. Cargo exists outside first-flights:
+<code>ft-aif-faithfulness-001</code>, <code>ft-evaluate-policies-009</code>, and
+<code>ft-legacy-sorry-cleanup-001</code> have F&gt;0 and ΔG&lt;0. The feed is wired and flags are on;
+the live first meal waits only for a qualifying mission to be selected by a tick.<br>
 3. <b>Co-app from usage</b>: RESOLVED. <code>d63ba48</code> mines fold-turn deposits into
 <code>coapp-live-usage.v1</code>; <code>2093caa</code> flips the pipeline edge live; wiring checker
 pending count is 0.<br>
@@ -303,8 +305,8 @@ null series (no fast-arc events reached the judge) — neither falsifier fired o
 underpowering, which was the point of the second batch.
 Cards-III campaign run, 2026-07-06: card 2 drift fence, card 3 seat injection, card 9
 co-app usage miner, card 10 dark portfolio proposer, and campaign execution modes landed.
-The gamma first meal remains deferred because the positive-ΔF cargo condition has not fired;
-the campaign exit criterion is therefore not fully satisfied.</small></p>
+The gamma first meal has offline cargo and correct flags; the campaign exit criterion is still
+not fully satisfied because card 3's first-flights dF last inch remains open.</small></p>
 
 <p class="foot">Compiled 2026-07-06 from cards-II plus War Machine Campaign run evidence.
 Sources for the shapes: E-llm-fold.md ·
