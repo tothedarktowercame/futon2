@@ -288,3 +288,60 @@ Agent: zai-8. Mission: `futon2-d/mission/legacy-sorry-cleanup`. Continuation of 
 
 **Gate 2f:**
 - `[2f] gate PASS`
+
+---
+
+## zai-11: ft-fold-ansatz-001 deposit (ground-control-test-2026-07-06, RETRY after 429)
+
+**Mission:** futon2-d/mission/fold-ansatz
+**Agent:** zai-11
+**Deposit:** futon6/data/fold-turns/ft-fold-ansatz-001.edn
+
+### Mana spend (FIRST act, per §0)
+- Gate: fold-authoring
+- Purpose: `ground-control-test-2026-07-06: ft-fold-ansatz-001 deposit authoring`
+- Spend at: `2026-07-06T10:43:03.659771219Z`
+- Balance after: 2
+- Award ref: Joe 2026-07-06 ~09:45 (5-agent commissioning test), 5 mana awarded at `2026-07-06T08:37:50.536122772Z`
+- Note: the 429 crash on the first attempt occurred BEFORE mana consumption (verified: balance was 3, no prior fold-ansatz spend in the ledger); this is the first and only spend for this deposit.
+
+### ψ (sorry-grain from M-fold-ansatz.md HEAD/MAP M1-M4)
+- ψ-sha256: `0ffc4c6f977692b16fb821f45a33e6521adefe3bceee7c1100d9397f12686858`
+- ψ length: 1500 chars
+- Source: mission doc's actual tension (WANT: verdict on the embedding-fold ansatz; HUNGRY-FOR: efficiency frontier earned honestly; HAVE: impl #2 works, DarkTower CT is production, corpus doesn't exist)
+- no-blind-scoring: NOT POSSIBLE — no sealed corpus; the ψ is adapted from the mission doc's own tension
+
+### Cascade
+- Constructor commit: `fe8aceab21c48783d0721c4ccb19e3806bb12f45`
+- Size: 6, Budget: 20, Truncated: false
+- F-free-energy: -0.829
+- Shown patterns (all data-mining/* — a THIN cascade finding, recorded honestly):
+  1. data-mining/constrain-extraction-to-the-downstream-vocabulary (rel=0.469, mc=0.141)
+  2. data-mining/smoke-before-the-paid-run (rel=0.415, mc=0.539)
+  3. data-mining/seed-the-run-for-a-fair-ablation (rel=0.413, mc=0.537)
+  4. data-mining/the-first-checkpoint-is-a-quality-probe (rel=0.404, mc=0.526)
+  5. data-mining/classify-over-one-clean-source (rel=0.401, mc=0.521)
+  6. data-mining/gates-as-code (rel=0.387, mc=0.504)
+
+### Fold (LLM turn — zai-11 judgment)
+- 7 boxes (6 fitting retrieved patterns + 1 HOLE box for the thin cascade)
+- 4 policy-holes (corpus blocker not dissolved, flat-reward risk unresolved, efficiency metric undefined, wiring graph representation unspecified)
+- Wiring: 7 hyperedges — 6 :seq, 1 :tensor. No :copar. Finding recorded.
+- Terminal: b5 (discharges :want-signature)
+
+### ΔG (computed via real fold-eval path)
+- delta-g: -0.6363636363636364 (coverage 0.6364 = 7 boxes / 11 total)
+
+### Pins (computed via real functions in /tmp/pin.clj)
+- prompt sha256: `d802ed03a4f437c1715e07d50c1a608009ae5db7a35ff4cbd5f2c43d8b4b9e14`
+- prose-source: verbatim futon3/library/<id>.flexiarg
+
+### Proof: both directions
+- **load-deposits ACCEPTS**: 12 deposits loaded, 0 rejected. ft-fold-ansatz-001 accepted.
+- **Tamper copy REJECTED**: /tmp/ft-fold-ansatz-tamper.edn (delta-g changed to -0.5) rejected with `:delta-g-mismatch`.
+
+### Gate 2f
+- `[2f] gate PASS`
+
+### Finding: the thin cascade
+The cascade returned 6 `data-mining/*` patterns — all experimental-discipline patterns, none about embedding folds or wiring generation. This is a **library gap** (per GROUND-CONTROL §2). The fold records this honestly: 6 boxes apply the experimental-discipline frame, 1 HOLE box names the thin cascade, 4 policy-holes surface what the patterns cannot reach.
