@@ -86,6 +86,11 @@
    {:from [:executor :realized-dG]     :to [:trace :realized-dG]         :status :live}
    {:from [:trace :daily-trace]        :to [:futility-observable :daily-trace] :status :live}
    {:from [:futility-observable :futility] :to [:bulletin :futility]     :status :live :note "dry-run"}
-   ;; Known-dangling by design (recorded, not hidden):
-   {:from [:cascade :co-app-usage]     :to [:pattern-library :co-app-usage] :status :pending
-    :note "miner does not yet scan cascade usage (cards-II card 9 TO-BUILD)"}]}}
+   ;; CLOSED 2026-07-06 (W-coapp-live-usage-miner): the coapp_live_usage_miner.py
+   ;; scans fold-turn deposits for patterns that fired together in real cascades,
+   ;; emitting co-app edges with provenance. Output: futon6/data/coapp-live-usage.json.
+   ;; 382 edges from 11 deposits, 220 novel (not in doc-citation phylogeny). The edge
+   ;; is :live for the MINER (the scanner exists and runs); full integration into the
+   ;; cascade constructor's connectivity term is the follow-on (the data is produced).
+   {:from [:cascade :co-app-usage]     :to [:pattern-library :co-app-usage] :status :live
+    :note "coapp_live_usage_miner.py scans fold-turn deposits; 382 co-app edges, 220 novel"}]}}
