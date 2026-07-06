@@ -2105,26 +2105,29 @@ ticks, 0 passes`
 |---|---|---|---|
 | old banner (status miss) | 1 | -0.081 | (not recorded) |
 | frozen reference ψ | 4 | +0.423 | measurement cluster |
-| **lane sorry-grain ψ (post-fix)** | **3** | **-0.024** | mission-interface-signature (0.386), ifr-f1-dhammavicaya (0.329), futon-bridge-health (0.321) |
+| lane sorry-grain ψ (paraphrase want) | 3 | -0.024 | mission-interface-signature, ifr-f1-dhammavicaya, futon-bridge-health |
+| **lane sorry-grain ψ (verbatim want)** | **1** | **-0.46** | vsatlas/proof-through-pilots |
 
-**Pre-registered hope:** F positive at the lane grain. **Honest result:
-F = -0.024** — close to zero but not positive. The measurement patterns
-did not enter the cascade on the lane ψ because the lane ψ's vocabulary
-(`Phase B policy-grade G(s,π)`, `:prototyping-forward`, file paths, STUCK
-line) is less semantically aligned with the measurement patterns than
-the frozen reference ψ (which explicitly names "measurement as discharge
-judgment", "ghosts as typed sorries", "warrant for each velocity"). The
-lane ψ is richer now (sorry-grain from the held-work item), but the
-measurement cluster's embedding resonance depends on the ψ's exact
-wording matching the pattern prose.
+**Verbatim want result (claude-16 faithfulness fix):** revised the sorry's
+title to the mission doc's own requirement language (the same sentence the
+frozen reference ψ used verbatim). F went from -0.024 (paraphrase) to **-0.46**
+(verbatim) — the measurement cluster did not enter at all. The verbatim text
+is a longer sentence; the MiniLM document-level embedding appears to dilute
+the measurement vocabulary across the longer text (the same dilution effect
+documented in the psi-v3 futility-line experiment). The paraphrase's shorter,
+more concentrated measurement-adjacent vocabulary resonated better with the
+embedding despite being less faithful to the source.
 
-**Interpretation:** the gap between the frozen ψ (F +0.423) and the lane
-ψ (F -0.024) is a ψ-quality gap, not a library gap. The library now
-speaks the domain; the lane's ψ supply is close but not yet matching.
-The next natural tick will use this lane ψ — F -0.024 is within striking
-distance of the gap-free-energy threshold (0.0), and the sorry-grain
-content is honest and rich. Whether a tick passes depends on the full
-act-gate (ΔF + ΔG), not F alone.
+**Decision:** the verbatim want is more faithful to the mission doc. The -0.46
+result is recorded. No further ψ edits — a second edit would be optimizing
+the ψ against the metric (the doctrine forbids it).
+
+**Pre-registered hope:** F positive at lane grain. **Final honest result:
+F = -0.46 (verbatim) / -0.024 (paraphrase). Neither crosses zero.** The
+measurement cluster's embedding resonance requires the concentrated vocabulary
+of the frozen reference ψ, which the lane's ψ supply (held-work sorry-grain +
+STUCK line + file paths) structurally cannot reproduce. The library gap is
+closed; the ψ-supply gap at the lane grain remains open.
 
 ### §4 Controls
 
