@@ -101,7 +101,9 @@
        "Write artifacts to the substrate endpoints the typespec names and advance "
        "the mission doc only when backed by real artifact evidence.\n\n"
        "Return, for each claimed closed hole, an :evidence-ref that the executor "
-       "can independently rerun. No evidence-ref means the closure will be rejected.\n\n"
+       "can independently rerun, plus :closes-mission-hole with the verbatim "
+       "mission-doc marker text you claim is closed. Do NOT edit the mission doc; "
+       "only the executor may advance the doc after the witness resolves.\n\n"
        "BUILD PACKAGE EDN:\n"
        (pr-str package)
        "\n\nAllowed evidence-ref shapes:\n"
@@ -192,22 +194,129 @@
 
 (defn verify-builder-result
   "Verify builder-returned closures and apply the witness-gated dial rule.
-  Dial counts only when at least one closure has a resolved witness AND the
-  independently re-parsed open-hole-count decreased."
-  [{:keys [closures before-open-hole-count after-open-hole-count] :as result} opts]
+  Dial counts only when executor-owned mission-doc advancement closed at least
+  one declared hole. A builder-side doc edit, or a bare open-hole-count drop,
+  is not enough."
+  [{:keys [closures doc-advancement] :as result} opts]
   (let [verified (mapv #(verify-closure % opts) (or closures []))
         accepted (filterv :closure/accepted? verified)
-        dial-moved? (and (seq accepted)
-                         (number? before-open-hole-count)
-                         (number? after-open-hole-count)
-                         (< (long after-open-hole-count)
-                            (long before-open-hole-count)))]
+        closed (vec (:holes-closed doc-advancement))
+        dial-moved? (seq closed)]
     (assoc result
            :closures verified
            :accepted-closures accepted
            :rejected-closures (filterv (complement :closure/accepted?) verified)
            :dial-moved? (boolean dial-moved?)
-           :dial-counted-closures (if dial-moved? (count accepted) 0))))
+           :dial-counted-closures (if dial-moved? (count closed) 0))))
+
+(defn doc-open-hole-count
+  "Small file-local dial for executor-owned advancement. The live WM mission
+  count still comes from mission-registry; this counts the concrete unchecked
+  task markers the executor is allowed to close in a doc fixture or doc file."
+  [text]
+  (count (re-seq #"(?m)^\s*[-*]\s+\[\s\]\s+" text)))
+
+(defn open-hole-lines
+  [text]
+  (->> (str/split-lines text)
+       (filter #(re-find #"^\s*[-*]\s+\[\s\]\s+" %))
+       vec))
+
+(defn- close-marker-line [line marker]
+  (when (and (str/includes? line marker)
+             (re-find #"^\s*[-*]\s+\[\s\]\s+" line))
+    (str/replace-first line #"\[\s\]" "[x]")))
+
+(defn advance-mission-doc!
+  "Executor-only doc advancement. A closure closes a mission-doc hole iff:
+  1. its evidence-ref resolves via the existing witness gate, and
+  2. :closes-mission-hole appears verbatim on an unchecked mission-doc line.
+
+  The builder never gets to move this dial directly."
+  [mission-doc-path closures opts]
+  (let [before-text (slurp mission-doc-path)
+        before-count (doc-open-hole-count before-text)]
+    (loop [remaining closures
+           text before-text
+           closed []
+           rejected []]
+      (if-not (seq remaining)
+        (do
+          (spit mission-doc-path text)
+          {:mission-doc-path mission-doc-path
+           :before-open-hole-count before-count
+           :after-open-hole-count (doc-open-hole-count text)
+           :holes-closed (vec closed)
+           :rejected (vec rejected)})
+        (let [closure (first remaining)
+              verified (verify-closure closure opts)
+              marker (:closes-mission-hole closure)
+              reject (fn [reason]
+                       (assoc (select-keys closure [:hole-id :closes-mission-hole :evidence-ref])
+                              :reason reason))]
+          (cond
+            (not (:witness/resolved? verified))
+            (recur (rest remaining)
+                   text
+                   closed
+                   (conj rejected (reject (:closure/reject-reason verified))))
+
+            (not (and (string? marker) (not (str/blank? marker))))
+            (recur (rest remaining)
+                   text
+                   closed
+                   (conj rejected (reject :missing-closes-mission-hole)))
+
+            (not (str/includes? text marker))
+            (recur (rest remaining)
+                   text
+                   closed
+                   (conj rejected (reject :hole-text-not-in-doc)))
+
+            :else
+            (let [lines (str/split-lines text)
+                  idx (first (keep-indexed (fn [i line]
+                                             (when (close-marker-line line marker)
+                                               i))
+                                           lines))]
+              (if (nil? idx)
+                (recur (rest remaining)
+                       text
+                       closed
+                       (conj rejected (reject :hole-already-closed)))
+                (let [new-line (close-marker-line (nth lines idx) marker)
+                      new-text (str (str/join "\n" (assoc (vec lines) idx new-line))
+                                    (when (str/ends-with? text "\n") "\n"))]
+                  (recur (rest remaining)
+                         new-text
+                         (conj closed (assoc (select-keys closure [:hole-id :closes-mission-hole :evidence-ref])
+                                             :line-before (nth lines idx)
+                                             :line-after new-line))
+                         rejected))))))))))
+
+(defn next-feedback [rejected holes-remaining]
+  (str "A3 review-partial retry input. The executor did not count rejected "
+       "closures toward the dial. Return machine-checkable evidence only.\n\n"
+       "Rejected closures EDN:\n"
+       (pr-str (vec rejected))
+       "\n\nRemaining unchecked mission-doc holes EDN:\n"
+       (pr-str (vec holes-remaining))
+       "\n\nFor each retry closure include :evidence-ref that resolves and "
+       ":closes-mission-hole copied verbatim from one remaining unchecked line."))
+
+(defn review-partial
+  [{:keys [mission-doc-path closures]} opts]
+  (let [adv (advance-mission-doc! mission-doc-path closures opts)
+        after-text (slurp mission-doc-path)
+        holes-remaining (open-hole-lines after-text)
+        report {:resolved (:holes-closed adv)
+                :rejected (:rejected adv)
+                :holes-closed (:holes-closed adv)
+                :holes-remaining holes-remaining
+                :before-open-hole-count (:before-open-hole-count adv)
+                :after-open-hole-count (:after-open-hole-count adv)
+                :dial-moved? (boolean (seq (:holes-closed adv)))}]
+    (assoc report :next-feedback (next-feedback (:rejected report) holes-remaining))))
 
 (defn mission-open-hole-count [mission-id]
   (:open-hole-count (missions/mission-status mission-id)))

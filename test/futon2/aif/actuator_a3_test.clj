@@ -1,7 +1,10 @@
 (ns futon2.aif.actuator-a3-test
   (:require [clojure.test :refer [deftest is testing]]
+            [clojure.java.io :as io]
             [clojure.string :as str]
-            [futon2.aif.actuator-a3 :as a3]))
+            [futon2.aif.actuator-a3 :as a3])
+  (:import [java.nio.file Files]
+           [java.nio.file.attribute FileAttribute]))
 
 (deftest extracts-all-a3-corpus-deposits
   (let [by-id (a3/deposits-by-id)
@@ -32,37 +35,99 @@
       (is (false? (:ok? pkg)))
       (is (= :missing-structure (-> pkg :missing first :reason))))))
 
-(deftest witness-gate-rejects-no-or-unresolved-evidence
-  (let [base {:before-open-hole-count 3
-              :after-open-hole-count 2}]
-    (testing "no evidence-ref rejects and dial does not move"
-      (let [r (a3/verify-builder-result
-               (assoc base :closures [{:hole-id :h1}])
-               {:resolver (constantly true)})]
-        (is (false? (-> r :closures first :closure/accepted?)))
-        (is (= :missing-evidence-ref (-> r :closures first :closure/reject-reason)))
-        (is (false? (:dial-moved? r)))
-        (is (zero? (:dial-counted-closures r)))))
-    (testing "unresolved evidence-ref rejects and dial does not move"
-      (let [r (a3/verify-builder-result
-               (assoc base :closures [{:hole-id :h1
-                                        :evidence-ref {:kind :file-exists
-                                                       :path "/tmp/no-such-a3-witness"}}])
-               {:resolver (constantly false)})]
-        (is (false? (-> r :closures first :closure/accepted?)))
-        (is (= :unresolved-evidence-ref (-> r :closures first :closure/reject-reason)))
-        (is (false? (:dial-moved? r)))))))
+(defn- tmp-doc! [text]
+  (let [dir (.toFile (Files/createTempDirectory "a3-doc-test"
+                                                (make-array FileAttribute 0)))
+        f (io/file dir "M-fixture.md")]
+    (spit f text)
+    (.getPath f)))
 
-(deftest resolving-witness-accepts-and-counts-dial-decrement
-  (let [r (a3/verify-builder-result
-           {:closures [{:hole-id :h1
-                        :evidence-ref {:kind :file-exists :path "/tmp/fake"}}]
-            :before-open-hole-count 3
-            :after-open-hole-count 2}
-           {:resolver (constantly true)})]
-    (is (true? (-> r :closures first :closure/accepted?)))
+(def marker-a "build the capability vocabulary")
+(def marker-b "wire typed capability observations")
+
+(defn closure
+  ([hole-id marker] (closure hole-id marker true))
+  ([hole-id marker resolved?]
+   {:hole-id hole-id
+    :evidence-ref {:kind :file-exists :path (str "/tmp/" (name hole-id))}
+    :closes-mission-hole marker
+    :resolved? resolved?}))
+
+(defn resolver-from-closure-flag [ref]
+  (boolean (:resolved? ref)))
+
+(deftest advance-mission-doc-closes-only-on-resolving-witness-and-present-hole
+  (let [doc (tmp-doc! (str "# Fixture\n\n- [ ] " marker-a "\n- [ ] " marker-b "\n"))
+        r (a3/review-partial
+           {:mission-doc-path doc
+            :closures [(closure :h1 marker-a true)]}
+           {:resolver (fn [_] true)})]
     (is (true? (:dial-moved? r)))
-    (is (= 1 (:dial-counted-closures r)))))
+    (is (= 2 (:before-open-hole-count r)))
+    (is (= 1 (:after-open-hole-count r)))
+    (is (= [marker-a] (mapv :closes-mission-hole (:holes-closed r))))
+    (is (str/includes? (slurp doc) (str "- [x] " marker-a)))))
+
+(deftest resolving-witness-with-absent-hole-does-not-move-dial
+  (let [doc (tmp-doc! (str "# Fixture\n\n- [ ] " marker-a "\n"))
+        r (a3/review-partial
+           {:mission-doc-path doc
+            :closures [(closure :h1 "not present in doc" true)]}
+           {:resolver (fn [_] true)})]
+    (is (false? (:dial-moved? r)))
+    (is (= 1 (:before-open-hole-count r)))
+    (is (= 1 (:after-open-hole-count r)))
+    (is (= :hole-text-not-in-doc (-> r :rejected first :reason)))
+    (is (str/includes? (slurp doc) (str "- [ ] " marker-a)))))
+
+(deftest missing-or-unresolved-witness-with-present-hole-does-not-move-dial
+  (testing "missing evidence"
+    (let [doc (tmp-doc! (str "# Fixture\n\n- [ ] " marker-a "\n"))
+          r (a3/review-partial
+             {:mission-doc-path doc
+              :closures [{:hole-id :h1 :closes-mission-hole marker-a}]}
+             {:resolver (fn [_] true)})]
+      (is (false? (:dial-moved? r)))
+      (is (= :missing-evidence-ref (-> r :rejected first :reason)))
+      (is (str/includes? (slurp doc) (str "- [ ] " marker-a)))))
+  (testing "unresolved evidence"
+    (let [doc (tmp-doc! (str "# Fixture\n\n- [ ] " marker-a "\n"))
+          r (a3/review-partial
+             {:mission-doc-path doc
+              :closures [(closure :h1 marker-a false)]}
+             {:resolver (fn [_] false)})]
+      (is (false? (:dial-moved? r)))
+      (is (= :unresolved-evidence-ref (-> r :rejected first :reason)))
+      (is (str/includes? (slurp doc) (str "- [ ] " marker-a))))))
+
+(deftest advance-mission-doc-is-idempotent
+  (let [doc (tmp-doc! (str "# Fixture\n\n- [ ] " marker-a "\n"))
+        c [(closure :h1 marker-a true)]
+        first-run (a3/review-partial {:mission-doc-path doc :closures c}
+                                     {:resolver (fn [_] true)})
+        second-run (a3/review-partial {:mission-doc-path doc :closures c}
+                                      {:resolver (fn [_] true)})]
+    (is (true? (:dial-moved? first-run)))
+    (is (false? (:dial-moved? second-run)))
+    (is (= 0 (:after-open-hole-count first-run)))
+    (is (= 0 (:after-open-hole-count second-run)))
+    (is (= :hole-already-closed (-> second-run :rejected first :reason)))))
+
+(deftest review-partial-breaks-down-mixed-set
+  (let [doc (tmp-doc! (str "# Fixture\n\n- [ ] " marker-a "\n- [ ] " marker-b "\n"))
+        r (a3/review-partial
+           {:mission-doc-path doc
+            :closures [(closure :h1 marker-a true)
+                       (closure :h2 "absent marker" true)
+                       (closure :h3 marker-b false)]}
+           {:resolver (fn [ref] (not= "/tmp/h3" (:path ref)))})]
+    (is (true? (:dial-moved? r)))
+    (is (= [marker-a] (mapv :closes-mission-hole (:resolved r))))
+    (is (= [:hole-text-not-in-doc :unresolved-evidence-ref]
+           (mapv :reason (:rejected r))))
+    (is (= [(str "- [ ] " marker-b)] (:holes-remaining r)))
+    (is (str/includes? (:next-feedback r) ":hole-text-not-in-doc"))
+    (is (str/includes? (:next-feedback r) marker-b))))
 
 (deftest dry-run-over-corpus-is-deterministic
   (let [a (with-out-str
