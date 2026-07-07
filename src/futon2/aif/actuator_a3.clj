@@ -30,6 +30,14 @@
      :type :capability/*
      :endpoint-types [:capability :mission/doc]}]})
 
+(def reviewed-box-bindings
+  {"futon5a-d/mission/learning-loop"
+   {:b1 {:kind :entity
+         :type :capability}
+    :b7 {:kind :hyperedge
+         :type :capability/*
+         :endpoint-types [:capability :mission/doc]}}})
+
 (defn- admin-token []
   (try (str/trim (slurp default-admin-token-path))
        (catch Throwable _ nil)))
@@ -99,6 +107,13 @@
 
 (defn bindings-for-mission [mission-id]
   (vec (get reviewed-endpoint-bindings mission-id [])))
+
+(defn box-bindings
+  [deposit]
+  (or (:box-bindings deposit)
+      (get reviewed-box-bindings (:mission deposit))
+      (get reviewed-box-bindings (:fold-turn/id deposit))
+      {}))
 
 (defn extract-build-package
   [deposit]
@@ -206,6 +221,55 @@
            :dial-moved? (boolean (seq newly-inhabited))
            :newly-inhabited newly-inhabited
            :endpoints after)))
+
+(defn clean-validation
+  [deposit]
+  (try
+    (esc/validate-deposit "build-match" deposit {:strict-clean? true})
+    {:clean-pass? true}
+    (catch clojure.lang.ExceptionInfo e
+      {:clean-pass? false
+       :reason (-> e ex-data :reason)
+       :message (ex-message e)})))
+
+(defn box-match-snapshot
+  ([deposit] (box-match-snapshot deposit {}))
+  ([deposit opts]
+   (let [clean-boxes (into {} (map (juxt :id identity) (get-in deposit [:clean :clean/boxes])))]
+     (mapv (fn [[box-id binding]]
+             (let [clean-box (get clean-boxes box-id)
+                   row (endpoint-inhabitation (assoc binding
+                                                     :endpoint (name box-id))
+                                             opts)]
+               (assoc row
+                      :box box-id
+                      :produces (:produces clean-box))))
+           (sort-by (comp str key) (box-bindings deposit))))))
+
+(defn build-match
+  ([deposit] (build-match deposit {}))
+  ([deposit opts]
+   (let [clean (clean-validation deposit)]
+     (if-not (:clean-pass? clean)
+       {:clean-pass? false
+        :refused? true
+        :reason (:reason clean)
+        :message (:message clean)
+        :dial {:inhabited 0
+               :bound (count (box-bindings deposit))
+               :clean-pass? false
+               :discharged? false}}
+       (let [snapshot (box-match-snapshot deposit opts)
+             inhabited (count (filter :inhabited? snapshot))
+             bound (count snapshot)
+             missing (filterv (complement :inhabited?) snapshot)]
+         {:clean-pass? true
+          :box-snapshot snapshot
+          :missing-boxes (mapv :box missing)
+          :dial {:inhabited inhabited
+                 :bound bound
+                 :clean-pass? true
+                 :discharged? (and (pos? bound) (= inhabited bound))}})))))
 
 (defn- file-safe [s]
   (-> (str s)

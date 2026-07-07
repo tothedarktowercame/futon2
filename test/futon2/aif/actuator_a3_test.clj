@@ -1,5 +1,6 @@
 (ns futon2.aif.actuator-a3-test
   (:require [clojure.test :refer [deftest is testing]]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
             [futon2.aif.actuator-a3 :as a3])
@@ -155,6 +156,75 @@
                     :entity/source "actuator-a3-test"
                     :entity/props {:a4-test? true
                                    :evict-after-proof true}}]]))
+
+(defn- write-test-hyperedge! [hx-id type endpoints]
+  (a3/drawbridge-submit-tx!
+   [[:xtdb.api/put {:xt/id hx-id
+                    :hx/id hx-id
+                    :hx/type type
+                    :hx/endpoints endpoints
+                    :a4-test? true
+                    :a4-test/evict-after-proof true}]]))
+
+(defn- learning-loop-clean []
+  (edn/read-string (slurp "/home/joe/code/futon6/holes/clean/M-learning-loop.clean.edn")))
+
+(defn- learning-loop-deposit-with-clean []
+  (assoc (get (a3/deposits-by-id) "ft-learning-loop-010")
+         :clean (learning-loop-clean)))
+
+(deftest build-match-learning-loop-dial-is-one-of-two
+  (let [match (a3/build-match (learning-loop-deposit-with-clean))
+        by-box (into {} (map (juxt :box identity) (:box-snapshot match)))]
+    (is (true? (:clean-pass? match)))
+    (is (= {:inhabited 1
+            :bound 2
+            :clean-pass? true
+            :discharged? false}
+           (:dial match)))
+    (is (true? (get-in by-box [:b1 :inhabited?])))
+    (is (= :capability (get-in by-box [:b1 :type])))
+    (is (false? (get-in by-box [:b7 :inhabited?])))
+    (is (= [:b7] (:missing-boxes match)))))
+
+(deftest build-match-catches-missing-interior-when-terminal-inhabited
+  (let [suffix (uuid-suffix)
+        hx-id (str "a4-test/hyperedge/build-match-" suffix)
+        missing-type (keyword "a4-test" (str "missing-interior-" suffix))
+        deposit (assoc (learning-loop-deposit-with-clean)
+                       :box-bindings {:b1 {:kind :entity :type missing-type}
+                                      :b7 {:kind :hyperedge
+                                           :type :capability/*
+                                           :endpoint-types [:capability :mission/doc]}})]
+    (try
+      (write-test-hyperedge! hx-id
+                             :capability/*
+                             ["scope/capability/distributed-proofreaders"
+                              "futon3c-d/mission/typed-holes-lean-handoffs"])
+      (let [terminal (a3/endpoint-inhabitation {:kind :hyperedge
+                                                :type :capability/*
+                                                :endpoint-types [:capability :mission/doc]})
+            match (a3/build-match deposit)
+            by-box (into {} (map (juxt :box identity) (:box-snapshot match)))]
+        (is (true? (:inhabited? terminal)) "boundary-only terminal proof would pass")
+        (is (true? (get-in by-box [:b7 :inhabited?])))
+        (is (false? (get-in by-box [:b1 :inhabited?])))
+        (is (= [:b1] (:missing-boxes match)))
+        (is (false? (get-in match [:dial :discharged?]))))
+      (finally
+        (evict-ids! hx-id)))))
+
+(deftest build-match-refuses-invalid-clean
+  (let [bad-clean (assoc-in (learning-loop-clean)
+                            [:clean/wires 0 :carries]
+                            :not-produced-or-consumed)
+        match (a3/build-match (assoc (get (a3/deposits-by-id) "ft-learning-loop-010")
+                                     :clean bad-clean))]
+    (is (false? (:clean-pass? match)))
+    (is (true? (:refused? match)))
+    (is (= :clean-invalid (:reason match)))
+    (is (str/includes? (:message match) "G5"))
+    (is (false? (get-in match [:dial :discharged?])))))
 
 (deftest record-discharge-writes-provable-entity
   (let [suffix (uuid-suffix)
