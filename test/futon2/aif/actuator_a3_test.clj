@@ -134,6 +134,99 @@
     (spit f text)
     (.getPath f)))
 
+(defn- tmp-dir-path! [prefix]
+  (.getPath (.toFile (Files/createTempDirectory prefix
+                                                (make-array FileAttribute 0)))))
+
+(defn- uuid-suffix []
+  (str (java.util.UUID/randomUUID)))
+
+(defn- evict-ids! [& ids]
+  (let [ids (filterv some? ids)]
+    (when (seq ids)
+      (a3/drawbridge-submit-tx! (mapv (fn [id] [:xtdb.api/evict id]) ids)))))
+
+(defn- write-test-entity! [entity-id type]
+  (a3/drawbridge-submit-tx!
+   [[:xtdb.api/put {:xt/id entity-id
+                    :entity/id entity-id
+                    :entity/name entity-id
+                    :entity/type type
+                    :entity/source "actuator-a3-test"
+                    :entity/props {:a4-test? true
+                                   :evict-after-proof true}}]]))
+
+(deftest record-discharge-writes-provable-entity
+  (let [suffix (uuid-suffix)
+        mission "futon-test-d/mission/a4-record"
+        binding {:endpoint (str "Endpoint-" suffix)
+                 :kind :entity
+                 :type (keyword "a4-test" (str "record-" suffix))}
+        recorded (a3/record-discharge! mission binding)
+        discharge-id (get-in recorded [:doc :xt/id])]
+    (try
+      (is (a3/discharge-recorded? mission (:endpoint binding)))
+      (is (= :discharge (get-in recorded [:doc :entity/type])))
+      (is (= (pr-str (a3/proof-query binding))
+             (get-in recorded [:doc :discharge/proof-query])))
+      (finally
+        (evict-ids! discharge-id)))))
+
+(deftest finalize-discharge-records-only-newly-inhabited-endpoint
+  (let [suffix (uuid-suffix)
+        mission (str "futon-test-d/mission/a4-finalize-" suffix)
+        before-dir (tmp-dir-path! "a4-before-test")
+        endpoint (str "Endpoint-" suffix)
+        type (keyword "a4-test" (str "finalize-" suffix))
+        entity-id (str "a4-test/entity/" suffix)
+        binding {:endpoint endpoint :kind :entity :type type}
+        discharge-id (atom nil)]
+    (try
+      (let [before (a3/capture-before-snapshot! mission [binding]
+                                                {:before-dir before-dir})]
+        (is (false? (-> before :before first :inhabited?)))
+        (write-test-entity! entity-id type)
+        (let [first-finalize (a3/finalize-discharge! mission {:before-dir before-dir})
+              second-finalize (a3/finalize-discharge! mission {:before-dir before-dir})]
+          (reset! discharge-id (get-in first-finalize [:recorded 0 :doc :xt/id]))
+          (is (= [endpoint] (get-in first-finalize [:dial-review :newly-inhabited])))
+          (is (= 1 (count (:recorded first-finalize))))
+          (is (empty? (:already-recorded first-finalize)))
+          (is (empty? (:recorded second-finalize)))
+          (is (= [endpoint] (:already-recorded second-finalize)))))
+      (finally
+        (evict-ids! entity-id @discharge-id)))))
+
+(deftest finalize-discharge-does-not-record-already-inhabited-before
+  (let [suffix (uuid-suffix)
+        mission (str "futon-test-d/mission/a4-already-" suffix)
+        before-dir (tmp-dir-path! "a4-before-test")
+        endpoint (str "Endpoint-" suffix)
+        type (keyword "a4-test" (str "already-" suffix))
+        entity-id (str "a4-test/entity/" suffix)
+        binding {:endpoint endpoint :kind :entity :type type}]
+    (try
+      (write-test-entity! entity-id type)
+      (let [before (a3/capture-before-snapshot! mission [binding]
+                                                {:before-dir before-dir})
+            finalized (a3/finalize-discharge! mission {:before-dir before-dir})]
+        (is (true? (-> before :before first :inhabited?)))
+        (is (empty? (get-in finalized [:dial-review :newly-inhabited])))
+        (is (empty? (:recorded finalized)))
+        (is (empty? (:already-recorded finalized))))
+      (finally
+        (evict-ids! entity-id)))))
+
+(deftest finalize-discharge-rejects-missing-before-snapshot
+  (let [mission (str "futon-test-d/mission/a4-missing-" (uuid-suffix))
+        before-dir (tmp-dir-path! "a4-before-test")]
+    (try
+      (a3/finalize-discharge! mission {:before-dir before-dir})
+      (is false "expected missing before-snapshot failure")
+      (catch clojure.lang.ExceptionInfo e
+        (is (= :missing-before-snapshot (-> e ex-data :reason)))
+        (is (str/includes? (ex-message e) "missing A4 before snapshot"))))))
+
 (def marker-a "build the capability vocabulary")
 (def marker-b "wire typed capability observations")
 

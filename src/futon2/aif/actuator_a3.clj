@@ -18,6 +18,7 @@
 (def default-agency-send "/home/joe/code/futon3c/scripts/agency_send.py")
 (def default-drawbridge-url "http://localhost:6768/eval")
 (def default-admin-token-path "/home/joe/code/futon3c/.admintoken")
+(def default-a4-before-dir "/home/joe/code/futon2/logs/a4-before")
 
 (def reviewed-endpoint-bindings
   {"futon5a-d/mission/learning-loop"
@@ -33,7 +34,7 @@
   (try (str/trim (slurp default-admin-token-path))
        (catch Throwable _ nil)))
 
-(declare evidence-resolves?)
+(declare evidence-resolves? result-truthy? drawbridge-eval drawbridge-submit-tx!)
 
 (def a3-corpus-ids
   ["ft-learning-loop-010"
@@ -95,6 +96,9 @@
            (get reviewed-endpoint-bindings (:mission deposit))
            (get reviewed-endpoint-bindings (:fold-turn/id deposit))
            [])))
+
+(defn bindings-for-mission [mission-id]
+  (vec (get reviewed-endpoint-bindings mission-id [])))
 
 (defn extract-build-package
   [deposit]
@@ -203,6 +207,112 @@
            :newly-inhabited newly-inhabited
            :endpoints after)))
 
+(defn- file-safe [s]
+  (-> (str s)
+      (str/replace #"[^A-Za-z0-9._-]+" "-")
+      (str/replace #"^-|-$" "")))
+
+(defn a4-before-path
+  ([mission-id] (a4-before-path mission-id {}))
+  ([mission-id {:keys [before-dir] :or {before-dir default-a4-before-dir}}]
+   (.getPath (io/file before-dir (str (file-safe (mission-key mission-id)) ".edn")))))
+
+(defn capture-before-snapshot!
+  ([mission-id endpoint-bindings] (capture-before-snapshot! mission-id endpoint-bindings {}))
+  ([mission-id endpoint-bindings opts]
+   (let [snapshot (endpoint-snapshot endpoint-bindings opts)
+         path (a4-before-path mission-id opts)
+         record {:mission mission-id
+                 :mission-key (mission-key mission-id)
+                 :endpoint-bindings (vec endpoint-bindings)
+                 :before snapshot
+                 :at (str (Instant/now))}]
+     (.mkdirs (.getParentFile (io/file path)))
+     (spit path (pr-str record))
+     (assoc record :path path))))
+
+(defn load-before-snapshot
+  [mission-id opts]
+  (let [path (a4-before-path mission-id opts)]
+    (if (.exists (io/file path))
+      (assoc (edn/read-string (slurp path)) :path path)
+      (throw (ex-info "missing A4 before snapshot"
+                      {:reason :missing-before-snapshot
+                       :mission mission-id
+                       :path path
+                       :remedy "run capture-before-snapshot! before dispatch, then finalize after the builder returns"})))))
+
+(defn discharge-id [mission-id endpoint at]
+  (keyword "discharge" (str (file-safe (mission-key mission-id))
+                            "--" (file-safe endpoint)
+                            "--" (file-safe at))))
+
+(defn discharge-query []
+  {:find '[e]
+   :in '[mission endpoint]
+   :where '[[e :entity/type :discharge]
+            [e :discharge/mission mission]
+            [e :discharge/endpoint endpoint]]
+   :limit 1})
+
+(defn discharge-query-form
+  [mission-id endpoint]
+  (pr-str `(do
+             (require (quote xtdb.api))
+             (xtdb.api/q (xtdb.api/db (:node @futon3c.dev/!f1-sys))
+                         (quote ~(discharge-query))
+                         ~mission-id
+                         ~endpoint))))
+
+(defn discharge-recorded?
+  ([mission-id endpoint] (discharge-recorded? mission-id endpoint {}))
+  ([mission-id endpoint opts]
+   (result-truthy? (drawbridge-eval (discharge-query-form mission-id endpoint) opts))))
+
+(defn discharge-doc
+  [mission-id binding at]
+  (let [endpoint (:endpoint binding)]
+    {:xt/id (discharge-id mission-id endpoint at)
+     :entity/type :discharge
+     :discharge/mission mission-id
+     :discharge/endpoint endpoint
+     :discharge/type (:type binding)
+     :discharge/proof-query (pr-str (proof-query binding))
+     :discharge/at at}))
+
+(defn record-discharge!
+  ([mission-id binding] (record-discharge! mission-id binding {}))
+  ([mission-id binding opts]
+   (let [at (or (:at opts) (str (Instant/now)))
+         doc (discharge-doc mission-id binding at)
+         tx (drawbridge-submit-tx! [[:xtdb.api/put doc]] opts)]
+     {:doc doc
+      :tx tx})))
+
+(defn finalize-discharge!
+  ([mission-id] (finalize-discharge! mission-id {}))
+  ([mission-id opts]
+   (let [before-record (load-before-snapshot mission-id opts)
+         bindings (:endpoint-bindings before-record)
+         before (:before before-record)
+         after (or (:after opts) (endpoint-snapshot bindings opts))
+         review (endpoint-dial-review {:before before :after after})
+         by-endpoint (into {} (map (juxt :endpoint identity) after))
+         results (reduce
+                  (fn [acc endpoint]
+                    (if (discharge-recorded? mission-id endpoint opts)
+                      (update acc :already-recorded conj endpoint)
+                      (let [recorded (record-discharge! mission-id
+                                                         (get by-endpoint endpoint)
+                                                         opts)]
+                        (update acc :recorded conj recorded))))
+                  {:recorded [] :already-recorded []}
+                  (:newly-inhabited review))]
+     (assoc results
+            :mission mission-id
+            :before-path (:path before-record)
+            :dial-review review))))
+
 (defn build-prompt [package]
   (str "A3 BUILDER TASK — content-free fold blueprint execution.\n\n"
        "Build this reviewed fold-turn blueprint. Use handoffs as needed.\n\n"
@@ -266,24 +376,47 @@
     (coll? v) (boolean (seq v))
     :else true))
 
+(defn drawbridge-eval
+  ([form] (drawbridge-eval form {}))
+  ([form {:keys [drawbridge-url] :or {drawbridge-url default-drawbridge-url}}]
+   (let [tok (admin-token)
+         resp (http/post drawbridge-url
+                         {:headers (cond-> {"Content-Type" "text/plain"}
+                                     tok (assoc "x-admin-token" tok))
+                          :body form
+                          :throw false
+                          :timeout 10000})
+         body (try (edn/read-string (:body resp))
+                   (catch Throwable _ (:body resp)))]
+     (if (and (= 200 (:status resp))
+              (map? body)
+              (not (false? (:ok body))))
+       (:value body)
+       (throw (ex-info "drawbridge eval failed"
+                       {:status (:status resp)
+                        :body body
+                        :form form}))))))
+
+(defn drawbridge-submit-tx!
+  ([tx-ops] (drawbridge-submit-tx! tx-ops {}))
+  ([tx-ops opts]
+   (drawbridge-eval
+    (pr-str `(do
+               (require (quote xtdb.api))
+               (let [node# (:node @futon3c.dev/!f1-sys)
+                     tx# (xtdb.api/submit-tx node# (quote ~tx-ops))]
+                 (xtdb.api/await-tx node# tx#)
+                 tx#)))
+    opts)))
+
 (defn drawbridge-resolves?
   ([ref] (drawbridge-resolves? ref default-drawbridge-url))
   ([{:keys [form]} drawbridge-url]
    (if-not (and (string? form) (not (str/blank? form)))
      false
-     (let [tok (admin-token)
-           resp (http/post drawbridge-url
-                           {:headers (cond-> {"Content-Type" "text/plain"}
-                                       tok (assoc "x-admin-token" tok))
-                            :body form
-                            :throw false
-                            :timeout 10000})]
-       (and (= 200 (:status resp))
-            (let [body (try (edn/read-string (:body resp))
-                            (catch Throwable _ (:body resp)))]
-              (if (map? body)
-                (and (not (false? (:ok body))) (result-truthy? (:value body)))
-                (result-truthy? body))))))))
+     (try
+       (result-truthy? (drawbridge-eval form {:drawbridge-url drawbridge-url}))
+       (catch Throwable _ false)))))
 
 (defn evidence-resolves?
   ([evidence-ref] (evidence-resolves? evidence-ref {}))
@@ -532,9 +665,15 @@
       {:mode :dry-run :packages packages}
       (let [dispatches (mapv (fn [pkg]
                                (if (:ok? pkg)
-                                 (assoc (dispatch! (assoc opts :package pkg))
-                                        :fold-turn/id (:fold-turn/id pkg)
-                                        :mission (:mission pkg))
+                                 (let [before (when (seq (:endpoint-bindings pkg))
+                                                (capture-before-snapshot!
+                                                 (:mission pkg)
+                                                 (:endpoint-bindings pkg)
+                                                 opts))]
+                                   (assoc (dispatch! (assoc opts :package pkg))
+                                          :fold-turn/id (:fold-turn/id pkg)
+                                          :mission (:mission pkg)
+                                          :a4-before before))
                                  {:fold-turn/id (:fold-turn/id pkg)
                                   :skipped true
                                   :missing (:missing pkg)}))
