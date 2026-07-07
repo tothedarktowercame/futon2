@@ -1,74 +1,54 @@
-# Selection-Authoring Flights — 2026-07-07
+# Selection Authoring Flights 2026-07-07
 
-## ft-learning-loop-010 (runner: zai-10, dispatched by claude-4)
+## zai-4 deposit: ft-chipwitz-corps-001
 
-**Mission:** M-learning-loop (capability mining across ~25 missions)
-**Mission doc:** `futon5a/holes/missions/M-learning-loop.md`
-**No prior deposit existed** — verified via escrow dir scan before authoring.
+**Mission:** futon3c-d/mission/chipwitz-corps
+**Agent:** zai-4
+**Edge:** invoke-1783424561911-697-6bc5c75c
+**Arming:** OPERATOR-DIRECT (Joe, engineering handoff — NOT mana-gated)
 
-### Mana (consent)
+### ψ
+- sha256: `303d7a07534680517124853bb31d86b09677bcd3160ed911ce1d47d022e4563a`
+- Source: hand-authored sorry-grain from M-chipwitz-corps mission doc tension (§1 cycle-5 consent fork, §2 warrant-finder protocol, §3 anti-laundering guards)
+- ψ-recipe: no sealed corpus; no blind scoring — honest statement
 
-- Gate: `fold-authoring`
-- Spend: `selection-authoring deposit for M-learning-loop` at `2026-07-07T10:54:04.546921367Z`
-- Result: `{:ok true, :balance 3}`
-- Authorised under: Joe 2026-07-06 evening top-up (`:n 2`, "step-by-step verified flight")
+### Cascade (cascade_serve.py, futon3a commit fe8acea)
+- Size: 3 (untruncated, budget 20)
+- F-free-energy: -0.409
+- Shown patterns:
+  0. collaboration-coherence/determined-fork-proto-psr (rel 0.576, mc 0.173)
+  1. futon-theory/honest-map-over-flattering-counter (rel 0.429, mc 0.214)
+  2. orchestration/pattern-warranted-choice-point (rel 0.568, mc 0.17)
 
-### Psi
+### Fold (LLM judgment)
+- 3 boxes, each with :fits-pattern and :addresses-however engaging the actual circumstance
+- 4 honest policy-holes (warrant threshold, autopen-rate measurement protocol, typed PXR channel wiring, no-warrant→sorry-mining hook)
+- Policy-holes placed in BOTH :turn :answer :policy-holes AND :wiring :holes (the REVIEW FIX)
+- Coverage: 3/7 ≈ 0.4286
+- ΔG: -0.4286 (via fold-eval/coverage-delta-g)
 
-L2 recipe from M-learning-loop's IDENTIFY section — the actual sorry: 25 active
-missions generate landscape intelligence faster than any flat ledger can surface,
-no condensed navigable capability model exists. WANT/HUNGRY-FOR/HAVE structure
-from the mission doc's tension + checkpoint-1 diagnostics.
+### Wiring (v2)
+- b1->b2 :seq (determined-fork test feeds the autopen-rate metric)
+- b1->b3 :copar (the NAG is coupled with the determined-fork test — only-valid-together)
+- b2->b3 :tensor (the autopen-rate monitor runs parallel to the NAG output, non-signalling)
+- Terminal: b3 (discharges :want-signature)
 
-- psi-sha256: `444a338a98f755c398f801ef99f885871a8eeea9fc0914b44388a9ee7db60c1d`
-- No seal exists → no blind scoring (003 precedent, recorded honestly).
+### Pins (computed via real functions, /tmp/pin-chipwitz.clj)
+- prompt sha256: `62aa0ec4d4b86d6a7d31d39058b36b43462a5e101cd9d38376237e1ec9160879`
+- reconstructed prompt sha256: `62aa0ec4d4b86d6a7d31d39058b36b43462a5e101cd9d38376237e1ec9160879` (MATCH)
+- prose-sha256:
+  - collaboration-coherence/determined-fork-proto-psr => dbd7454d61b5e30aba88ec4fc4aa9304d93f54ee99b2cafa788c29b25dce560f
+  - futon-theory/honest-map-over-flattering-counter => 766563b29ccd37d2f52c83a0c595490973e8f2800b828f238d0171e5298f7ae4
+  - orchestration/pattern-warranted-choice-point => b62b00deb1415fa9e25dfa986e16254a4d9497bb0d934ec2642b380227c00fe9
 
-### Cascade
+### Arming
+- OPERATOR-DIRECT: {:operator "Joe" :word "Let's do the ones you selected via Zai handoffs as suggested. This isn't really a mana spend b/c we are engineering, mana would apply to automated runs." :at "2026-07-07T12:00:00Z" :scope :one-fold}
+- NO mana consumed (operator-directed engineering, not autonomous)
 
-Constructor: `cascade_serve.py` (futon3a .venv, budget 20, epsilon 0.15, commit `fe8acea`)
+### Proofs
+1. **load-deposits** over futon6/data/fold-turns/: 15 deposits loaded, mine accepted (delta-g -0.4286, prompt-sha 62aa0ec4...). 1 rejected: ft-pattern-mining-011 (pre-existing pin-1b mismatch, NOT mine).
+2. **Tamper rejection**: /tmp copy with delta-g -0.999 → REJECTED [delta-g-mismatch] pin 3: stored -0.999 vs recomputed -0.4286.
+3. **Gate 2f**: FAIL — but caused by ft-pattern-mining-011 (another agent's deposit with a pin-1b prompt reconstruction mismatch). My deposit loads cleanly. The gate regression is NOT from my deposit.
 
-- **Size:** 15 (not truncated)
-- **F-free-energy:** +1.6
-- **Accuracy:** 4.301, **Complexity:** 10.802
-- **H-coherence:** 0.884, **T-intensity:** 7.013
-- **Top patterns:**
-  1. `data-mining/constrain-extraction-to-the-downstream-vocabulary` (rel 0.513, mc 0.154)
-  2. `devmap-coherence/ifr-f3a-piti-audit` (rel 0.509, mc 0.153)
-  3. `sidecar/tri-store-separation` (rel 0.507, mc 0.152)
-  4. `aif/structured-observation-vector` (rel 0.465, mc 0.233)
-  5. `aif/term-to-channel-traceability` (rel 0.466, mc 0.512)
-  6. `structure/interest-event-vocabulary` (rel 0.472, mc 0.330)
-  7. `agent/trail-enables-return` (rel 0.464, mc 0.325)
-  8. `hdm/deep-storage-to-active-graph` (rel 0.459, mc 0.413)
-
-### Fold
-
-8 boxes, each fitting a pattern with `:addresses-however` against the real
-flexiarg prose. The cascade aligned well — data-mining vocabulary constraint,
-tri-store separation, structured observation, traceability, event vocabulary,
-trail, deep-storage-to-active-graph, and audit all map to the mission's
-capability mining pipeline design.
-
-- **Wires:** 7 hyperedges (`:seq` 4, `:copar` 2, `:tensor` 1)
-- **Terminal:** `{:id :b7 :discharges :want-signature}` (the active capability graph)
-- **dG:** -8/13 ≈ **-0.6154** (hand: -(boxes/(boxes+holes)) = -(8/13); loader-recomputed = -0.6153846153846154; match confirmed)
-
-### Policy holes (5)
-
-1. **The capability vocabulary itself** — the ~8-12 dimensions are the mission's central bet; no pattern grounds what they should BE
-2. **Mission-scale vs turn-scale aggregation grain** — the event vocabulary doesn't decide the unit
-3. **Contrast-pair selection methodology** — checkpoint-1 found contrast is load-bearing, but pair selection is undesignable from the patterns
-4. **The downstream consumer's vocabulary boundary** — who IS the downstream (operator, Click/Tick, gamma)?
-5. **Articulation vs silent competence** — unarticulated capabilities are invisible; no diagnostic exists
-
-### Pins
-
-- **prompt-sha256:** `279664f0030d06f005ce555b9769b677486481eaf41e1e791049a1cc379b3b29`
-- **prose-sha256:** 8 pattern shas, all via verbatim `futon3/library/<id>.flexiarg`
-- **arming:** mana spend (gate `fold-authoring`, balance-after 3)
-
-### Proof
-
-- **Loader acceptance:** 14 deposits loaded, 0 rejected (including ft-learning-loop-010)
-- **Tamper rejection:** delta-g changed to -0.999 → `:delta-g-mismatch` (stored -0.999 vs recomputed -0.6154)
-- **Gate 2f:** PASS
+### Deposit path
+/home/joe/code/futon6/data/fold-turns/ft-chipwitz-corps-001.edn
