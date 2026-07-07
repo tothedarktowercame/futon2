@@ -1,49 +1,56 @@
 # Selection Authoring Flights — 2026-07-07
 
-## Run: ft-futonzero-generative-011 (zai-5, operator-directed via claude-4)
+## ft-pattern-mining-011 (operator-directed, NOT mana-gated)
 
-**Mission:** futon0-d/mission/futonzero-generative
-**Primary doc:** /home/joe/code/futon0/holes/missions/M-futonzero-generative.md
-**Agent:** zai-5
-**Edge:** invoke-1783424563290-698-31aac3a4
-**Arming:** OPERATOR-DIRECT (Joe via claude-4 — NOT mana-gated; engineering, not autonomous run)
+**Driver:** zai-3 (operator-directed engineering handoff from claude-4, edge invoke-1783424560443-696-23610a13)
+**Arming:** operator-direct — Joe: "This isn't really a mana spend b/c we are engineering, mana would apply to automated runs."
+**Mission:** M-pattern-mining (no prior deposit existed)
 
-### Step 1 — Pre-check
+### Psi
 
-- No existing deposit for M-futonzero-generative in fold-turns dir. Proceed.
+Source: M-pattern-mining.md IFR + path verdict + lineage sections (no held-work items).
 
-### Step 2 — ψ (sorry-grain from mission doc)
+```
+WANT: retire the futon3a MiniLM-cosine pattern-mining substrate (confirmed
+artifact) and specify its hypergraph-first replacement: each turn coded as
+an activation of a well-specified, repeatable pattern with demonstrable
+value, where pattern means context → tension → ameliorating-move.
+HAVE: MiniLM cosine top-3 (brittle, no structural claim, opaque provenance);
+four partial projections growing toward the IFR without a seam.
+```
 
-Authored from M-futonzero-generative §1 (IDENTIFY) + §2 (Hard Gates) + §4 (Safe Work Products).
-
-- ψ-sha256: `c795c9c27a480afc26322865df679bd0f51bd66dd651ae8bf692355bcccb6c18`
-- No sealed corpus → no-blind-scoring stated honestly in `:psi-recipe`
+psi-sha256 (reconstructed): c00d458411b346c1c042b62601b71365432ef3774097c10f8f182746c954e747
 
 ### Cascade
 
-- Constructor commit: `fe8aceab21c48783d0721c4ccb19e3806bb12f45`
-- Size: 15 (budget 20, untruncated)
-- F-free-energy: 2.378
-- 15 shown patterns (top rel: aif/no-self-certification 0.584)
+```
+size=9  wholeness=4.283  H=0.971  F=0.002  acc=4.591  comp=18.357
+```
+
+9 patterns: piti-audit (0.58), dhammavicaya (0.563), viriya (0.447),
+futon-bridge-health (0.52), plus 5 devmap-coherence factors. Rich cascade.
 
 ### Fold
 
-- 8 boxes / 5 policy-holes
-- v2 wiring: `{:copar 2 :seq 7 :tensor 1}`
-- Dual terminals: b5 (toy-field-validation) + b7 (evidence-gated-design)
-- Policy-holes in BOTH `:turn :answer :policy-holes` AND `:wiring :holes` (REVIEW FIX applied)
-- ΔG: -0.6153846153846154 (8/13 coverage)
+6 boxes (retire-with-witness, hypergraph-first, IFR five properties,
+four-lineage seam, consumer triage, pipeline audit). 3 policy-holes in
+BOTH :turn :answer :policy-holes AND :wiring :holes (the ft-learning-loop-010
+review fix).
 
-### Step 3 — Pins
+v2 wires: b1→b2 :seq, b2→b3 :seq, b3+b4→b5 :copar, b5→b6 :tensor, b1→b4 :seq.
+Terminal: b6 :discharges :want-signature.
 
-- prompt-sha256: `3ce849372f4d382c3205a1a9fa701f11a607ea4217cc7b79d8b4982971483df3`
-- pin-1b reconstructed: MATCH
-- arming: operator-direct (Joe word via claude-4 bell; NOT mana-gated)
+### ΔG
 
-### Step 4 — Proofs
+-0.667 (recomputed by fe/coverage-delta-g; 6 boxes / 9 total = -6/9).
 
-**Loader acceptance:** 16 deposits loaded, ours found (dG -0.6153846153846154). 1 pre-existing rejection (ft-pattern-mining-011, not ours).
+### Pins
 
-**Tamper rejection:** tampered copy in /tmp with ΔG changed to -0.5 → REJECTED `:delta-g-mismatch`.
+- prompt-sha: c00d458411b346c1c042b62601b71365432ef3774097c10f8f182746c954e747 (pin 1B via fold-prompt reconstruction)
+- arming: operator-direct, Joe's word verbatim, scope :one-fold, no mana-ref
+- LOADER ACCEPT: ft-pattern-mining-011 ✓
+- TAMPER REJECT: /tmp/ft-tampered-011.edn — delta-g-mismatch (-0.42 vs -0.667) ✓
 
-**Gate 2f:** PASS.
+### Blind scoring
+
+:none — no A-next seal exists. Recorded honestly.
