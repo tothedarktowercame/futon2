@@ -44,6 +44,9 @@
   "The prose source used by enact.clj's L3 replay reconstruction."
   "/home/joe/code/futon3/library")
 
+(def ^:private clean-argcheck-script
+  "/home/joe/code/futon6/scripts/clean_argcheck.bb")
+
 (defn prompt-sha
   "Lowercase hex sha-256 of the exact prompt string (pin 1's binding)."
   [^String s]
@@ -56,6 +59,44 @@
                   {:file (str file) :reason reason})))
 
 (defn- present-string? [x] (and (string? x) (not (str/blank? x))))
+
+(defn- first-clean-gate [s]
+  (when-let [[_ gate msg] (re-find #"(G[0-9]+): ([^\n]+)" s)]
+    {:gate gate :message msg}))
+
+(defn- run-clean-argcheck [clean]
+  (let [tmp (java.io.File/createTempFile "fold-escrow-clean-" ".clean.edn")]
+    (try
+      (spit tmp (pr-str clean))
+      (let [pb (ProcessBuilder. ^java.util.List ["bb" clean-argcheck-script (.getPath tmp)])]
+        (.directory pb (io/file "/home/joe/code"))
+        (.redirectErrorStream pb true)
+        (let [p (.start pb)
+              out (slurp (.getInputStream p))
+              exit (.waitFor p)]
+          (merge {:exit exit :output out}
+                 (first-clean-gate out))))
+      (finally
+        (.delete tmp)))))
+
+(defn- validate-clean [file d strict-clean?]
+  (cond
+    (contains? d :clean)
+    (let [r (run-clean-argcheck (:clean d))]
+      (if (zero? (:exit r))
+        (assoc d :clean/status :clean-pass
+                 :clean/argcheck-output (:output r))
+        (reject! file :clean-invalid
+                 (str "CLean argcheck failed"
+                      (when-let [g (:gate r)] (str " " g))
+                      ": " (or (:message r) (:output r))))))
+
+    strict-clean?
+    (reject! file :clean-missing
+             "strict-clean? requires an embedded :clean block")
+
+    :else
+    (assoc d :clean/status :clean-missing)))
 
 (defn- flexiarg-prose [file pattern-id]
   (try
@@ -83,7 +124,8 @@
 (defn validate-deposit
   "PURE given the record: the ft-record contract. Returns the deposit map or
    throws ex-info {:file :reason} (reject-loudly). `file` is for the message."
-  [file d]
+  ([file d] (validate-deposit file d {}))
+  ([file d {:keys [strict-clean?] :or {strict-clean? false}}]
   (when-not (map? d)
     (reject! file :not-a-map (pr-str (type d))))
   (when-not (present-string? (:fold-turn/id d))
@@ -120,27 +162,29 @@
                 (> (Math/abs (- (double recomputed) (double stored))) 1e-9))
         (reject! file :delta-g-mismatch
                  (str "pin 3: stored " stored " vs recomputed " recomputed)))))
-  d)
+  (validate-clean file d strict-clean?)))
 
 (defn load-deposit
   "One ft-*.edn file → validated deposit, or throws (reject-loudly)."
-  [file]
+  ([file] (load-deposit file {}))
+  ([file opts]
   (let [d (try (edn/read-string (slurp file))
                (catch Exception e
                  (reject! file :unreadable-edn (ex-message e))))]
-    (validate-deposit file d)))
+    (validate-deposit file d opts))))
 
 (defn load-deposits
   "Dir → {:deposits [valid…] :rejected [{:file :reason :message}…]}.
    Rejections go to stderr (loud) AND the return value (auditable); valid
-   deposits still serve. Missing dir ⇒ {:deposits [] :rejected []}."
+  deposits still serve. Missing dir ⇒ {:deposits [] :rejected []}."
   ([] (load-deposits default-deposit-dir))
-  ([dir]
+  ([dir] (load-deposits dir {}))
+  ([dir opts]
    (let [files (->> (.listFiles (io/file dir))
                     (filter #(re-matches #"ft-.*\.edn" (.getName ^java.io.File %)))
                     (sort-by #(.getName ^java.io.File %)))]
      (reduce (fn [acc f]
-               (try (update acc :deposits conj (load-deposit f))
+               (try (update acc :deposits conj (load-deposit f opts))
                     (catch clojure.lang.ExceptionInfo e
                       (binding [*out* *err*]
                         (println (ex-message e)))

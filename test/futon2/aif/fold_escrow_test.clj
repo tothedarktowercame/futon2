@@ -3,6 +3,7 @@
    malformed deposit must be REJECTED loudly (reason + file, in :rejected and
    on stderr) while a valid deposit still loads and replays on exact sha."
   (:require [clojure.test :refer [deftest is testing]]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.close-loop :as cl]
             [futon2.aif.fold-escrow :as esc]
@@ -36,6 +37,24 @@
             :scope :one-fold}
    :eval {:delta-g -0.5 :g-grain :coverage}})
 
+(defn- learning-loop-clean []
+  (edn/read-string (slurp "/home/joe/code/futon6/holes/clean/M-learning-loop.clean.edn")))
+
+(defn- cycle-clean []
+  {:clean/proof "cycle-fixture"
+   :clean/seq [:one :two]
+   :clean/boxes [{:id :b1 :method :one :text "one"
+                  :consumes [:b] :produces :a}
+                 {:id :b2 :method :two :text "two"
+                  :consumes [:a] :produces :b}]
+   :clean/wires [{:from :b1 :to :b2 :carries :a}
+                 {:from :b2 :to :b1 :carries :b}]
+   :clean/copar []
+   :clean/shape {:macro :cycle-fixture
+                 :holes-at []
+                 :discharges-at []
+                 :note "cycle fixture"}})
+
 (defn- tmp-deposit-dir!
   "Write {filename → edn-string|record} into a fresh temp dir; return its path."
   [files]
@@ -56,7 +75,8 @@
         {:keys [deposits rejected]} (esc/load-deposits dir)
         reasons (into {} (map (juxt #(-> % :file io/file .getName) :reason)) rejected)]
     (testing "the valid deposit loads"
-      (is (= ["ft-test-001"] (map :fold-turn/id deposits))))
+      (is (= ["ft-test-001"] (map :fold-turn/id deposits)))
+      (is (= [:clean-missing] (map :clean/status deposits))))
     (testing "each malformed record is rejected with its own loud reason"
       (is (= {"ft-no-arming.edn"  :missing-arming
               "ft-dg-drift.edn"   :delta-g-mismatch
@@ -66,6 +86,41 @@
              reasons)))
     (testing "rejection messages carry the file (auditable, not just a boolean)"
       (is (every? #(re-find #"fold-turn REJECTED \[" (:message %)) rejected)))))
+
+(deftest clean-block-is-validated-when-present
+  (let [dir (tmp-deposit-dir!
+             {"ft-clean.edn" (assoc (valid-record) :clean (learning-loop-clean))})
+        {:keys [deposits rejected]} (esc/load-deposits dir)]
+    (is (empty? rejected) (pr-str rejected))
+    (is (= ["ft-test-001"] (map :fold-turn/id deposits)))
+    (is (= :clean-pass (-> deposits first :clean/status)))
+    (is (re-find #"PASS" (-> deposits first :clean/argcheck-output)))))
+
+(deftest malformed-clean-block-is-rejected-with-gate-reason
+  (testing "G5 port mismatch"
+    (let [bad-clean (assoc-in (learning-loop-clean)
+                              [:clean/wires 0 :carries]
+                              :not-produced-or-consumed)
+          dir (tmp-deposit-dir! {"ft-bad-clean.edn" (assoc (valid-record) :clean bad-clean)})
+          {:keys [deposits rejected]} (esc/load-deposits dir)]
+      (is (empty? deposits))
+      (is (= [:clean-invalid] (mapv :reason rejected)))
+      (is (re-find #"G5" (-> rejected first :message)))))
+  (testing "G7 cycle"
+    (let [dir (tmp-deposit-dir! {"ft-cycle-clean.edn" (assoc (valid-record) :clean (cycle-clean))})
+          {:keys [deposits rejected]} (esc/load-deposits dir)]
+      (is (empty? deposits))
+      (is (= [:clean-invalid] (mapv :reason rejected)))
+      (is (re-find #"G7" (-> rejected first :message))))))
+
+(deftest clean-missing-is-grandfathered-unless-strict
+  (let [dir (tmp-deposit-dir! {"ft-no-clean.edn" (valid-record)})
+        loose (esc/load-deposits dir)
+        strict (esc/load-deposits dir {:strict-clean? true})]
+    (is (= ["ft-test-001"] (map :fold-turn/id (:deposits loose))))
+    (is (= :clean-missing (-> loose :deposits first :clean/status)))
+    (is (empty? (:deposits strict)))
+    (is (= [:clean-missing] (mapv :reason (:rejected strict))))))
 
 (deftest replay-only-on-exact-sha
   (let [dir     (tmp-deposit-dir! {"ft-valid.edn" (valid-record)})
