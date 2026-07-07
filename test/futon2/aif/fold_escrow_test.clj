@@ -87,7 +87,12 @@
     "ft-action-vocabulary-005"
     "ft-peradam-mechanization-006"
     "ft-first-flights-007"
-    "ft-bounded-in-flight-state-008"})
+    "ft-bounded-in-flight-state-008"
+    "ft-evaluate-policies-009"
+    "ft-aif-faithfulness-001"
+    "ft-legacy-sorry-cleanup-001"
+    "ft-fold-ansatz-001"
+    "ft-operational-vocabulary-001"})
 
 (defn- real-prose-fn [pattern-id]
   (slurp (str "/home/joe/code/futon3/library/" pattern-id ".flexiarg")))
