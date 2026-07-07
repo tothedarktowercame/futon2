@@ -114,7 +114,7 @@
     :or {builder "zai-3"
          reviewer "claude-4"
          agency-send default-agency-send}}]
-  (let [cmd [agency-send "--to" builder "--kind" "bell" "--from" reviewer
+  (let [cmd ["python3" agency-send "--to" builder "--kind" "bell" "--from" reviewer
              "--mission" (:mission package)]
         pb (ProcessBuilder. ^java.util.List cmd)]
     (.directory pb (io/file "/home/joe/code"))
