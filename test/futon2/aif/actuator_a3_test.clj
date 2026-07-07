@@ -35,6 +35,98 @@
       (is (false? (:ok? pkg)))
       (is (= :missing-structure (-> pkg :missing first :reason))))))
 
+(deftest derives-proof-query-from-endpoint-binding
+  (is (= '{:find [e]
+           :where [[e :entity/type :capability]]
+           :limit 1}
+         (a3/proof-query {:endpoint "CapabilityVocabulary"
+                          :kind :entity
+                          :type :capability})))
+  (is (= '{:find [e]
+           :where [[e :hx/type :capability/*]
+                   [e :hx/endpoints ep0]
+                   [ep0 :entity/type :capability]
+                   [e :hx/endpoints ep1]
+                   [ep1 :entity/type :mission/doc]]
+           :limit 1}
+         (a3/proof-query {:endpoint "CapabilityHypergraph"
+                          :kind :hyperedge
+                          :type :capability/*
+                          :endpoint-types [:capability :mission/doc]}))))
+
+(deftest live-inhabitation-checks-use-executor-derived-drawbridge-query
+  (let [capability (a3/endpoint-inhabitation {:endpoint "CapabilityVocabulary"
+                                              :kind :entity
+                                              :type :capability})
+        capability-hypergraph (a3/endpoint-inhabitation
+                               {:endpoint "CapabilityHypergraph"
+                                :kind :hyperedge
+                                :type :capability/*
+                                :endpoint-types [:capability :mission/doc]})]
+    (is (true? (:inhabited? capability)))
+    (is (false? (:inhabited? capability-hypergraph)))))
+
+(deftest m-learning-loop-endpoint-dial-is-one-of-two
+  (let [deposit (get (a3/deposits-by-id) "ft-learning-loop-010")
+        bindings (a3/endpoint-bindings deposit)
+        snapshot (a3/endpoint-snapshot bindings)
+        dial (a3/endpoint-dial snapshot)]
+    (is (= ["CapabilityVocabulary" "CapabilityHypergraph"]
+           (mapv :endpoint bindings)))
+    (is (= 1 (:inhabited dial)))
+    (is (= 2 (:total dial)))
+    (is (false? (:discharged? dial)))))
+
+(deftest builder-claim-cannot-inhabit-absent-binding
+  (let [absent {:endpoint "BuilderClaimedEndpoint"
+                :kind :entity
+                :type :a3-provable-witness/absent-test}
+        builder-claim {:closures [{:hole-id :h1
+                                   :evidence-ref {:kind :file-exists
+                                                  :path "/tmp/builder-claim"}}]}
+        snapshot (a3/endpoint-snapshot [absent])
+        dial (a3/endpoint-dial snapshot)]
+    (is (seq (:closures builder-claim)))
+    (is (= 0 (:inhabited dial)))
+    (is (= 1 (:total dial)))
+    (is (false? (:discharged? dial)))
+    (is (false? (-> snapshot first :inhabited?)))))
+
+(deftest review-partial-reports-endpoint-breakdown
+  (let [before [{:endpoint "CapabilityVocabulary" :inhabited? false}
+                {:endpoint "CapabilityHypergraph" :inhabited? false}]
+        after [{:endpoint "CapabilityVocabulary"
+                :kind :entity
+                :type :capability
+                :query (a3/proof-query {:kind :entity :type :capability})
+                :inhabited? true}
+               {:endpoint "CapabilityHypergraph"
+                :kind :hyperedge
+                :type :capability/*
+                :endpoint-types [:capability :mission/doc]
+                :query (a3/proof-query {:kind :hyperedge
+                                         :type :capability/*
+                                         :endpoint-types [:capability :mission/doc]})
+                :inhabited? false
+                :reason :not-inhabited}]
+        r (a3/review-partial {:before before :after after} {})]
+    (is (true? (:dial-moved? r)))
+    (is (= 1 (:inhabited r)))
+    (is (= 2 (:total r)))
+    (is (= ["CapabilityVocabulary"] (:newly-inhabited r)))
+    (is (= ["CapabilityVocabulary"] (mapv :endpoint (:resolved r))))
+    (is (= [{:endpoint "CapabilityHypergraph"
+             :kind :hyperedge
+             :type :capability/*
+             :endpoint-types [:capability :mission/doc]
+             :query (a3/proof-query {:kind :hyperedge
+                                      :type :capability/*
+                                      :endpoint-types [:capability :mission/doc]})
+             :reason :not-inhabited}]
+           (:rejected r)))
+    (is (= 1 (:endpoints-remaining r)))
+    (is (str/includes? (:next-feedback r) "CapabilityHypergraph"))))
+
 (defn- tmp-doc! [text]
   (let [dir (.toFile (Files/createTempDirectory "a3-doc-test"
                                                 (make-array FileAttribute 0)))

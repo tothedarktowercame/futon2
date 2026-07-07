@@ -92,7 +92,11 @@
     "ft-aif-faithfulness-001"
     "ft-legacy-sorry-cleanup-001"
     "ft-fold-ansatz-001"
-    "ft-operational-vocabulary-001"})
+    "ft-operational-vocabulary-001"
+    "ft-learning-loop-010"
+    "ft-chipwitz-corps-001"
+    "ft-futonzero-generative-011"
+    "ft-pattern-mining-011"})
 
 (defn- real-prose-fn [pattern-id]
   (slurp (str "/home/joe/code/futon3/library/" pattern-id ".flexiarg")))

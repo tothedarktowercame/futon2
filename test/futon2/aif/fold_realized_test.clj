@@ -21,9 +21,9 @@
       (is (= 7 (:tick ro)))))
   (testing "expected-G falls back to the fold output's :delta-g (the gate-consumed leg)"
     (is (= -0.6 (:expected-G (fr/realized-outcome-of {:policy "M-y" :fold {:delta-g -0.6}} enacted 3)))))
-  (testing "nothing enacted (no boxes) ⇒ :realized-G nil ⇒ γ holds (honest no-op)"
-    (is (nil? (:realized-G (fr/realized-outcome-of {:policy "M-z" :expected-G -0.1}
-                                                   {:boxes [] :policy-holes [{:free "x"}]} 1))))))
+  (testing "no boxes against obligations ⇒ :realized-G 0.0 (measured zero coverage)"
+    (is (= 0.0 (:realized-G (fr/realized-outcome-of {:policy "M-z" :expected-G -0.1}
+                                                    {:boxes [] :policy-holes [{:free "x"}]} 1))))))
 
 (deftest staging-is-off-by-default
   (testing "staged-off ⇒ judge-output UNCHANGED ⇒ no :realized-outcome key ⇒ γ holds"

@@ -8,6 +8,7 @@
   (:require [babashka.http-client :as http]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.set :as set]
             [clojure.string :as str]
             [futon2.aif.fold-escrow :as esc]
             [futon2.aif.mission-registry :as missions])
@@ -18,9 +19,21 @@
 (def default-drawbridge-url "http://localhost:6768/eval")
 (def default-admin-token-path "/home/joe/code/futon3c/.admintoken")
 
+(def reviewed-endpoint-bindings
+  {"futon5a-d/mission/learning-loop"
+   [{:endpoint "CapabilityVocabulary"
+     :kind :entity
+     :type :capability}
+    {:endpoint "CapabilityHypergraph"
+     :kind :hyperedge
+     :type :capability/*
+     :endpoint-types [:capability :mission/doc]}]})
+
 (defn- admin-token []
   (try (str/trim (slurp default-admin-token-path))
        (catch Throwable _ nil)))
+
+(declare evidence-resolves?)
 
 (def a3-corpus-ids
   ["ft-learning-loop-010"
@@ -74,10 +87,20 @@
       {:wiring wiring
        :policy-holes holes})))
 
+(defn endpoint-bindings
+  "Endpoint bindings are authored by the deposit or reviewed grounding map, never
+  by the builder result. These bindings determine the substrate proof queries."
+  [deposit]
+  (vec (or (:endpoint-bindings deposit)
+           (get reviewed-endpoint-bindings (:mission deposit))
+           (get reviewed-endpoint-bindings (:fold-turn/id deposit))
+           [])))
+
 (defn extract-build-package
   [deposit]
   (let [ts (typespec deposit)
         ss (structure-spec deposit)
+        bindings (endpoint-bindings deposit)
         missing (cond-> []
                   (nil? ts) (conj {:field :typespec
                                    :reason :missing-typespec
@@ -98,27 +121,102 @@
        :mission-key (mission-key (:mission deposit))
        :typespec ts
        :structure-spec ss
-       :policy-holes (:policy-holes ss)})))
+       :policy-holes (:policy-holes ss)
+       :endpoint-bindings bindings})))
+
+(defn proof-query
+  "Derive the datalog query from an upstream endpoint binding. Builder claims do
+  not participate in this derivation."
+  [{:keys [kind type endpoint-types]}]
+  (case kind
+    :entity
+    {:find '[e]
+     :where [['e :entity/type type]]
+     :limit 1}
+
+    :hyperedge
+    (let [endpoint-syms (mapv #(symbol (str "ep" %))
+                              (range (count endpoint-types)))]
+      {:find '[e]
+       :where (vec (concat [['e :hx/type type]]
+                           (mapcat (fn [ep-sym ep-type]
+                                     [['e :hx/endpoints ep-sym]
+                                      [ep-sym :entity/type ep-type]])
+                                   endpoint-syms
+                                   endpoint-types)))
+       :limit 1})
+
+    (throw (ex-info "unknown endpoint binding kind"
+                    {:kind kind
+                     :type type
+                     :endpoint-types endpoint-types}))))
+
+(defn proof-form [query]
+  (pr-str `(do
+             (require (quote xtdb.api))
+             (xtdb.api/q (xtdb.api/db (:node @futon3c.dev/!f1-sys))
+                         (quote ~query)))))
+
+(defn endpoint-proof-ref [binding]
+  {:kind :drawbridge
+   :form (proof-form (proof-query binding))})
+
+(defn endpoint-inhabitation
+  ([binding] (endpoint-inhabitation binding {}))
+  ([binding opts]
+   (let [query (proof-query binding)
+         ref {:kind :drawbridge :form (proof-form query)}
+         inhabited? (evidence-resolves? ref opts)]
+     (assoc binding
+            :query query
+            :evidence-ref ref
+            :inhabited? inhabited?
+            :reason (when-not inhabited? :not-inhabited)))))
+
+(defn endpoint-snapshot
+  ([bindings] (endpoint-snapshot bindings {}))
+  ([bindings opts]
+   (mapv #(endpoint-inhabitation % opts) bindings)))
+
+(defn endpoint-dial
+  [snapshot]
+  (let [total (count snapshot)
+        inhabited (count (filter :inhabited? snapshot))]
+    {:inhabited inhabited
+     :total total
+     :discharged? (and (pos? total) (= inhabited total))}))
+
+(defn endpoint-name-set [snapshot pred]
+  (set (keep (fn [{:keys [endpoint] :as row}]
+               (when (pred row) endpoint))
+             snapshot)))
+
+(defn endpoint-dial-review
+  [{:keys [before after] :or {before [] after []}}]
+  (let [before-inhabited (endpoint-name-set before :inhabited?)
+        after-inhabited (endpoint-name-set after :inhabited?)
+        newly-inhabited (vec (sort (set/difference after-inhabited
+                                                   before-inhabited)))
+        dial (endpoint-dial after)]
+    (assoc dial
+           :dial-moved? (boolean (seq newly-inhabited))
+           :newly-inhabited newly-inhabited
+           :endpoints after)))
 
 (defn build-prompt [package]
   (str "A3 BUILDER TASK — content-free fold blueprint execution.\n\n"
-       "Build this reviewed fold-turn blueprint. Use handoffs as needed. "
-       "Write artifacts to the substrate endpoints the typespec names and advance "
-       "the mission doc only when backed by real artifact evidence.\n\n"
-       "Return, for each claimed closed hole, an :evidence-ref that the executor "
-       "can independently rerun, plus :closes-mission-hole. Do NOT edit the mission "
-       "doc; only the executor may advance the doc after the witness resolves.\n\n"
-       ":closes-mission-hole MUST be the VERBATIM text of an existing UNCHECKED "
-       "'- [ ] ...' line in the mission doc for :mission (read the mission doc "
-       "under /home/joe/code/futon*/holes/missions/). The executor closes only "
-       "such lines; a non-checkbox or absent marker is rejected and moves no dial.\n\n"
-       "WITNESS ADVICE: :drawbridge witnesses ARE supported — the executor "
-       "authenticates to :6768 (x-admin-token). Prove a substrate-2 endpoint with "
-       "an xtdb.api/q form that returns a truthy/non-empty result iff the artifact "
-       "exists. :file-exists / :file-contains also work for on-disk artifacts.\n\n"
+       "Build this reviewed fold-turn blueprint. Use handoffs as needed.\n\n"
+       "ACCEPTANCE DIAL: write the bound endpoints into substrate-2. The executor "
+       "will derive Drawbridge xtdb.api/q proofs from :endpoint-bindings below; "
+       "builder-supplied evidence refs or file-exists claims do not move this "
+       "dial. Use the sanctioned Drawbridge write form: xtdb.api/submit-tx on "
+       "(:node @futon3c.dev/!f1-sys), then xtdb.api/await-tx.\n\n"
+       "Optional downstream bookkeeping: you may declare :closes-mission-hole "
+       "with a resolving :evidence-ref, but do NOT edit the mission doc. Only the "
+       "executor may close doc markers after the substrate endpoint dial moves.\n\n"
        "BUILD PACKAGE EDN:\n"
        (pr-str package)
-       "\n\nAllowed evidence-ref shapes:\n"
+       "\n\nOptional evidence-ref shapes for doc bookkeeping only:\n"
        "  {:kind :file-exists :path \"/abs/path\"}\n"
        "  {:kind :file-contains :path \"/abs/path\" :pattern \"literal text\"}\n"
        "  {:kind :drawbridge :form \"(read-only-clojure-form)\"}\n"))
@@ -207,21 +305,35 @@
                                     :else nil))))
 
 (defn verify-builder-result
-  "Verify builder-returned closures and apply the witness-gated dial rule.
-  Dial counts only when executor-owned mission-doc advancement closed at least
-  one declared hole. A builder-side doc edit, or a bare open-hole-count drop,
-  is not enough."
-  [{:keys [closures doc-advancement] :as result} opts]
+  "Verify builder output and apply the endpoint-gated dial rule. Endpoint
+  bindings are executor/fold supplied; builder evidence refs are optional
+  bookkeeping and cannot move the endpoint dial."
+  [{:keys [closures doc-advancement endpoint-bindings before-snapshot
+           after-snapshot]
+    :as result} opts]
   (let [verified (mapv #(verify-closure % opts) (or closures []))
         accepted (filterv :closure/accepted? verified)
-        closed (vec (:holes-closed doc-advancement))
-        dial-moved? (seq closed)]
-    (assoc result
-           :closures verified
-           :accepted-closures accepted
-           :rejected-closures (filterv (complement :closure/accepted?) verified)
-           :dial-moved? (boolean dial-moved?)
-           :dial-counted-closures (if dial-moved? (count closed) 0))))
+        endpoint-mode? (or (seq endpoint-bindings) (seq before-snapshot)
+                           (seq after-snapshot))]
+    (if endpoint-mode?
+      (let [after (or after-snapshot (endpoint-snapshot endpoint-bindings opts))
+            review (endpoint-dial-review {:before (or before-snapshot [])
+                                          :after after})]
+        (assoc result
+               :closures verified
+               :accepted-closures accepted
+               :rejected-closures (filterv (complement :closure/accepted?) verified)
+               :endpoint-review review
+               :dial-moved? (:dial-moved? review)
+               :dial-counted-closures (:inhabited review)))
+      (let [closed (vec (:holes-closed doc-advancement))
+            dial-moved? (seq closed)]
+        (assoc result
+               :closures verified
+               :accepted-closures accepted
+               :rejected-closures (filterv (complement :closure/accepted?) verified)
+               :dial-moved? (boolean dial-moved?)
+               :dial-counted-closures (if dial-moved? (count closed) 0))))))
 
 (defn doc-open-hole-count
   "Small file-local dial for executor-owned advancement. The live WM mission
@@ -318,19 +430,46 @@
        "\n\nFor each retry closure include :evidence-ref that resolves and "
        ":closes-mission-hole copied verbatim from one remaining unchecked line."))
 
+(defn next-endpoint-feedback [endpoints]
+  (let [remaining (filterv (complement :inhabited?) endpoints)]
+    (str "A3 review-partial retry input. The executor did not count builder "
+         "claims toward the dial. The remaining endpoints must be made "
+         "inhabited in substrate-2 so the executor-derived Drawbridge queries "
+         "return non-empty results.\n\n"
+         "Remaining endpoint proofs EDN:\n"
+         (pr-str (mapv #(select-keys % [:endpoint :kind :type :endpoint-types
+                                        :query :reason])
+                       remaining)))))
+
 (defn review-partial
-  [{:keys [mission-doc-path closures]} opts]
-  (let [adv (advance-mission-doc! mission-doc-path closures opts)
-        after-text (slurp mission-doc-path)
-        holes-remaining (open-hole-lines after-text)
-        report {:resolved (:holes-closed adv)
-                :rejected (:rejected adv)
-                :holes-closed (:holes-closed adv)
-                :holes-remaining holes-remaining
-                :before-open-hole-count (:before-open-hole-count adv)
-                :after-open-hole-count (:after-open-hole-count adv)
-                :dial-moved? (boolean (seq (:holes-closed adv)))}]
-    (assoc report :next-feedback (next-feedback (:rejected report) holes-remaining))))
+  [{:keys [mission-doc-path closures endpoint-bindings before after]} opts]
+  (if (or (seq endpoint-bindings) (seq before) (seq after))
+    (let [before-snapshot (or before [])
+          after-snapshot (or after (endpoint-snapshot endpoint-bindings opts))
+          dial (endpoint-dial-review {:before before-snapshot
+                                      :after after-snapshot})
+          resolved (filterv :inhabited? after-snapshot)
+          rejected (mapv (fn [{:keys [reason] :as row}]
+                           (assoc (select-keys row [:endpoint :kind :type
+                                                    :endpoint-types :query])
+                                  :reason (or reason :not-inhabited)))
+                         (remove :inhabited? after-snapshot))
+          report (assoc dial
+                        :resolved resolved
+                        :rejected rejected
+                        :endpoints-remaining (count rejected))]
+      (assoc report :next-feedback (next-endpoint-feedback after-snapshot)))
+    (let [adv (advance-mission-doc! mission-doc-path closures opts)
+          after-text (slurp mission-doc-path)
+          holes-remaining (open-hole-lines after-text)
+          report {:resolved (:holes-closed adv)
+                  :rejected (:rejected adv)
+                  :holes-closed (:holes-closed adv)
+                  :holes-remaining holes-remaining
+                  :before-open-hole-count (:before-open-hole-count adv)
+                  :after-open-hole-count (:after-open-hole-count adv)
+                  :dial-moved? (boolean (seq (:holes-closed adv)))}]
+      (assoc report :next-feedback (next-feedback (:rejected report) holes-remaining)))))
 
 (defn mission-open-hole-count [mission-id]
   (:open-hole-count (missions/mission-status mission-id)))
@@ -343,7 +482,8 @@
 (defn render-package [package]
   (pr-str (select-keys package
                        [:fold-turn/id :mission :mission-key :typespec
-                        :structure-spec :policy-holes :ok? :missing])))
+                        :structure-spec :policy-holes :endpoint-bindings
+                        :ok? :missing])))
 
 (defn parse-args [args]
   (loop [args args
