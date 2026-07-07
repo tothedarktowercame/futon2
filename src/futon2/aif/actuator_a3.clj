@@ -134,22 +134,36 @@
        (string? pattern)
        (str/includes? (slurp path) pattern)))
 
+(defn result-truthy?
+  "A witness query resolves only if its RESULT witnesses existence: reject
+  nil/false/0/empty-collection/blank-string. A query that 'ran fine' but found
+  nothing (count 0, empty seq) must NOT count as a resolved witness — else the
+  dial can be gamed with a valid query that finds no artifact."
+  [v]
+  (cond
+    (nil? v) false
+    (false? v) false
+    (number? v) (not (zero? v))
+    (string? v) (not (str/blank? v))
+    (coll? v) (boolean (seq v))
+    :else true))
+
 (defn drawbridge-resolves?
   ([ref] (drawbridge-resolves? ref default-drawbridge-url))
   ([{:keys [form]} drawbridge-url]
-   (when-not (and (string? form) (not (str/blank? form)))
-     false)
-   (let [resp (http/post drawbridge-url
-                         {:headers {"Content-Type" "text/plain"}
-                          :body form
-                          :throw false
-                          :timeout 10000})]
-     (and (= 200 (:status resp))
-          (let [body (try (edn/read-string (:body resp))
-                          (catch Throwable _ (:body resp)))]
-            (if (map? body)
-              (not (false? (:ok body)))
-              (some? body)))))))
+   (if-not (and (string? form) (not (str/blank? form)))
+     false
+     (let [resp (http/post drawbridge-url
+                           {:headers {"Content-Type" "text/plain"}
+                            :body form
+                            :throw false
+                            :timeout 10000})]
+       (and (= 200 (:status resp))
+            (let [body (try (edn/read-string (:body resp))
+                            (catch Throwable _ (:body resp)))]
+              (if (map? body)
+                (and (not (false? (:ok body))) (result-truthy? (:value body)))
+                (result-truthy? body))))))))
 
 (defn evidence-resolves?
   ([evidence-ref] (evidence-resolves? evidence-ref {}))

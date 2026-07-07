@@ -74,3 +74,19 @@
     (is (= a b))
     (is (str/includes? a "ft-learning-loop-010"))
     (is (str/includes? a "ft-pattern-mining-011"))))
+
+(deftest result-truthy-rejects-empty-witness-values
+  ;; the Drawbridge gaming-vector fix: a query that "ran fine" but found nothing
+  ;; (count 0, empty seq, nil, false, blank) must NOT count as a resolved witness.
+  (testing "falsy / empty results do not witness existence"
+    (is (false? (a3/result-truthy? nil)))
+    (is (false? (a3/result-truthy? false)))
+    (is (false? (a3/result-truthy? 0)))
+    (is (false? (a3/result-truthy? [])))
+    (is (false? (a3/result-truthy? "")))
+    (is (false? (a3/result-truthy? "  "))))
+  (testing "genuine existence results witness"
+    (is (true? (a3/result-truthy? 1)))
+    (is (true? (a3/result-truthy? true)))
+    (is (true? (a3/result-truthy? [:x])))
+    (is (true? (a3/result-truthy? "found")))))
