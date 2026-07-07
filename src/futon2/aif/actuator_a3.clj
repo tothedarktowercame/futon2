@@ -16,6 +16,11 @@
 (def default-log-file "/home/joe/code/futon2/logs/actuator-a3.log")
 (def default-agency-send "/home/joe/code/futon3c/scripts/agency_send.py")
 (def default-drawbridge-url "http://localhost:6768/eval")
+(def default-admin-token-path "/home/joe/code/futon3c/.admintoken")
+
+(defn- admin-token []
+  (try (str/trim (slurp default-admin-token-path))
+       (catch Throwable _ nil)))
 
 (def a3-corpus-ids
   ["ft-learning-loop-010"
@@ -107,9 +112,10 @@
        "'- [ ] ...' line in the mission doc for :mission (read the mission doc "
        "under /home/joe/code/futon*/holes/missions/). The executor closes only "
        "such lines; a non-checkbox or absent marker is rejected and moves no dial.\n\n"
-       "WITNESS ADVICE: prefer file-based witnesses. Drawbridge (:6768) FORBIDS "
-       "slurp/load-file, so :drawbridge witnesses reading files will NOT resolve — "
-       "use :file-exists / :file-contains against the artifact you wrote.\n\n"
+       "WITNESS ADVICE: :drawbridge witnesses ARE supported — the executor "
+       "authenticates to :6768 (x-admin-token). Prove a substrate-2 endpoint with "
+       "an xtdb.api/q form that returns a truthy/non-empty result iff the artifact "
+       "exists. :file-exists / :file-contains also work for on-disk artifacts.\n\n"
        "BUILD PACKAGE EDN:\n"
        (pr-str package)
        "\n\nAllowed evidence-ref shapes:\n"
@@ -161,8 +167,10 @@
   ([{:keys [form]} drawbridge-url]
    (if-not (and (string? form) (not (str/blank? form)))
      false
-     (let [resp (http/post drawbridge-url
-                           {:headers {"Content-Type" "text/plain"}
+     (let [tok (admin-token)
+           resp (http/post drawbridge-url
+                           {:headers (cond-> {"Content-Type" "text/plain"}
+                                       tok (assoc "x-admin-token" tok))
                             :body form
                             :throw false
                             :timeout 10000})]
