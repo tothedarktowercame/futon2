@@ -4,7 +4,8 @@
    A6 owns only :capability-star-status. A4a owns :capability-star identity."
   (:require [clojure.string :as str]
             [futon2.aif.actuator-a3 :as a3]
-            [futon2.aif.efe :as efe])
+            [futon2.aif.efe :as efe]
+            [futon2.aif.operational-witness :as ow])
   (:import (java.time Instant)
            (java.util Date)))
 
@@ -161,3 +162,38 @@
       :moved? (not= before-order after-order)
       :flip flip
       :graph after-graph})))
+
+(defn- ranked-targets
+  [ranked]
+  (mapv #(get-in % [:action :target]) ranked))
+
+(defn- produces-facts
+  [capability-graph]
+  (->> (:missions capability-graph)
+       (mapcat (fn [[mission {:keys [produces]}]]
+                 (map (fn [cap] [mission cap]) produces)))
+       (sort-by (juxt first second))
+       vec))
+
+(defn- discharge-facts
+  [opts]
+  (->> (discharge-capability-rows opts)
+       (mapv (juxt :discharge :capability))
+       (sort-by first)
+       vec))
+
+(defn witness-live
+  "Read-only operational witness driver. Gathers the live substrate discharge
+   facts and current A6 status rows, then runs the pure operational witness
+   register over the observed before/discharges/after transition."
+  ([capability-graph] (witness-live capability-graph {}))
+  ([capability-graph opts]
+   (let [before-order (ranked-targets (rank-graph capability-graph opts))
+         after-graph (apply-star-status capability-graph opts)
+         after-order (ranked-targets (rank-graph after-graph opts))
+         observation {:discharges (discharge-facts opts)
+                      :produces (produces-facts capability-graph)
+                      :before-order before-order
+                      :after-order after-order}]
+     {:observation observation
+      :witness (ow/run-register observation)})))

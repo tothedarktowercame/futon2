@@ -144,3 +144,48 @@
         (is (= before-order after-order)))
       (finally
         (evict-ids! (:star ids) (:status ids))))))
+
+(deftest witness-live-positive-uses-real-substrate-facts-test
+  (let [ids (fixture-ids)
+        opts (rank-opts (:cap ids))
+        g (graph (:cap ids))]
+    (try
+      (put-docs! (star-doc ids) (discharge-doc ids))
+      (a6/flip-star-status-on-discharge! opts)
+      (let [status-before (a6/status-rows opts)
+            result (a6/witness-live g opts)
+            status-after (a6/status-rows opts)
+            closure (get-in result [:witness :closure])]
+        (is (= status-before status-after)
+            "witness-live is read-only; it observes the status written by A6")
+        (is (= [[(:discharge ids) (:cap ids)]]
+               (get-in result [:observation :discharges]))
+            "discharge fact came from the real substrate")
+        (is (= ["M-a" "M-b"] (get-in result [:observation :before-order])))
+        (is (= ["M-b" "M-a"] (get-in result [:observation :after-order])))
+        (is (true? (:witnessed? closure)))
+        (is (= [[(:discharge ids) (:cap ids) "M-a" "M-b"]]
+               (:bindings closure))))
+      (finally
+        (evict-ids! (:discharge ids) (:star ids) (:status ids))))))
+
+(deftest witness-live-negative-mirror-test
+  (let [ids (fixture-ids)
+        opts (rank-opts (:cap ids))
+        g (graph (:cap ids))]
+    (try
+      (put-docs! (star-doc ids) (discharge-doc ids))
+      (let [result (a6/witness-live g opts)
+            closure (get-in result [:witness :closure])]
+        (is (= [[(:discharge ids) (:cap ids)]]
+               (get-in result [:observation :discharges])))
+        (is (= (get-in result [:observation :before-order])
+               (get-in result [:observation :after-order])))
+        (is (false? (:witnessed? closure)))
+        (is (empty? (:bindings closure))))
+      (finally
+        (evict-ids! (:discharge ids) (:star ids) (:status ids))))))
+
+(deftest operational-witness-remains-pure-test
+  (let [source (slurp "/home/joe/code/futon2/src/futon2/aif/operational_witness.clj")]
+    (is (not (re-find #"drawbridge|submit-tx|slurp|http|actuator-a6|actuator-a3" source)))))
