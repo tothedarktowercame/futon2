@@ -38,7 +38,12 @@
     {:endpoint "ReconstitutableLineage"
      :kind :hyperedge
      :type :held/on-mission
-     :endpoint-types [:held/item :mission/doc]}]})
+     :endpoint-types [:held/item :mission/doc]}]
+
+   "futon3c-d/mission/state-snapshot-witness"
+   [{:endpoint "SnapshotEvidence"
+     :kind :entity
+     :type :evidence}]})
 
 (def reviewed-box-bindings
   {"futon5a-d/mission/learning-loop"
@@ -59,7 +64,17 @@
     ;; s5 :witnessed-clock — unbound: abstract (witness is a prop on the s2 edge, not a separate type)
     :s6 {:kind :hyperedge
          :type :held/on-mission
-         :endpoint-types [:held/item :mission/doc]}}})
+         :endpoint-types [:held/item :mission/doc]}}
+
+   "futon3c-d/mission/state-snapshot-witness"
+   {:s2 {:kind :entity
+         :type :evidence}
+    ;; s1 :snapshot-event-shape — unbound: abstract (type-decision/shape, not an instance)
+    ;; s3 :cycle-witness — unbound: abstract (projection payload within s2's evidence, not a distinct type)
+    :s4 {:kind :entity
+         :type :evidence}
+    :s5 {:kind :entity
+         :type :evidence}}})
 
 (defn- admin-token []
   (try (str/trim (slurp default-admin-token-path))
