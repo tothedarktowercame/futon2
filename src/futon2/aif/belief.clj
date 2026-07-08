@@ -755,6 +755,29 @@
    :coupling-density   nondormant-status-row
    :ticks-firing-ratio open-status-row})
 
+(def channel-health-signs
+  "PROPOSED (DARK, NOT WIRED — R3d sign-aggregation design, for claude-4 review).
+   Per-channel health direction: +1 if high observed = healthy (positive
+   error = system better than predicted → strengthen belief), −1 if high
+   observed = unhealthy (positive error = system worse than predicted →
+   weaken belief).
+
+   The R3d belief-update currently draws from :annotation-health alone
+   because the channels differ on health direction and a naive error sum
+   cancels conflicting signals (the 2026-05-18 run: +0.37/−0.15/−0.24/−0.20).
+   This map annotates each channel's direction so the aggregated R3d driver
+   = mean(sign_c × weighted-error_c) combines them coherently.
+
+   Design note: futon2/holes/r1-r3-disaggregation-bridge.md."
+  {:annotation-health  1   ; high = more healthy
+   :sorry-count-norm  -1   ; high = more sorrys = less healthy
+   :mission-health     1   ; high = more missions addressed
+   :active-repo-ratio  1   ; high = more active development
+   :support-coverage   1   ; high = more evidence coverage
+   :attack-coverage    1   ; high = more evidence coverage
+   :coupling-density   1   ; high = more interconnected
+   :ticks-firing-ratio 1}) ; high = more ticks passing
+
 (defn predict-observation
   "Predict observation distributions across all channels for which a
    likelihood model exists. Returns a map of channel-id → `{:mean :variance}`.
