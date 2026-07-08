@@ -46,7 +46,18 @@
      :type :evidence}]
 
    "futon3c-d/mission/single-entry-point"
-   []})
+   []
+
+   "futon3-d/mission/pattern-ingest"
+   [{:endpoint "InferenceDemonstration"
+     :kind :hyperedge
+     :type "code/v05/related-to"
+     :endpoint-types [:pattern/component :pattern/component]}]
+
+   "futon3c-d/mission/invariant-queue-unstuck"
+   [{:endpoint "LiveFireRecords"
+     :kind :entity
+     :type :evidence}]})
 
 (def reviewed-box-bindings
   {"futon5a-d/mission/learning-loop"
@@ -85,7 +96,33 @@
    ;; manifestations. Cyder is an in-JVM atom registry, not substrate-2.
    ;; Build-match on this CLean has 0 bound boxes by honest spec-derivation.
    "futon3c-d/mission/single-entry-point"
-   {}})
+   {}
+
+   "futon3-d/mission/pattern-ingest"
+   {:s2 {:kind :entity
+         :type :pattern/component}
+    :s3 {:kind :entity
+         :type :pattern/sigil}
+    :s4 {:kind :hyperedge
+         :type "code/v05/pattern-origin"
+         :endpoint-types [:pattern/component :source/commit]}
+    ;; s1 :shape-checked-pattern — unbound: abstract (validation gate, not entity)
+    ;; s5 :substrate-authoritative-record — unbound: abstract (governance inversion claim)
+    :s6 {:kind :hyperedge
+         :type "code/v05/related-to"
+         :endpoint-types [:pattern/component :pattern/component]}}
+
+   "futon3c-d/mission/invariant-queue-unstuck"
+   {:s2 {:kind :entity
+         :type :evidence}
+    ;; NOTE: s2/s4 both bind to generic :evidence — coarseness risk (state-snapshot lesson).
+    ;; The substrate does not distinguish evidence subtypes by entity/type.
+    ;; s4's :family-fired records are :evidence entities with event-tag props, not a distinct type.
+    ;; s1 :single-evidence-boundary — unbound: abstract (code-structure invariant)
+    ;; s3 :ratcheted-inventory — unbound: abstract (pre-commit enforcement mechanism)
+    ;; s5 :live-projection — unbound: abstract (projection architecture)
+    :s4 {:kind :entity
+         :type :evidence}}})
 
 (defn- admin-token []
   (try (str/trim (slurp default-admin-token-path))
