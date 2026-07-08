@@ -151,7 +151,8 @@
     "ft-learning-loop-010"
     "ft-chipwitz-corps-001"
     "ft-futonzero-generative-011"
-    "ft-pattern-mining-011"})
+    "ft-pattern-mining-011"
+    "ft-war-machine-pilot-001"})
 
 (defn- real-prose-fn [pattern-id]
   (slurp (str "/home/joe/code/futon3/library/" pattern-id ".flexiarg")))

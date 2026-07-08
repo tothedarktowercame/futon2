@@ -11,6 +11,7 @@
   :war-machine-text {:main-opts ["-m" "futon2.report.war-machine"]}
   :wm-scheduled {:main-opts ["-m" "wm-scheduled-run"]}
   :wm-preflight {:main-opts ["-m" "wm-preflight"]}
+  :fold-author {:main-opts ["-m" "fold-author"]}
   :wm-outer-loop {:main-opts ["-m" "wm-outer-loop"]}
   :run-m {:main-opts ["-m" "ants.clj-ants-aif"]}
   :build {:deps {io.github.clojure/tools.build
