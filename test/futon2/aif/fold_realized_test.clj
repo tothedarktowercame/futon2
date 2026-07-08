@@ -131,6 +131,31 @@
       (is (contains? (fr/with-realized-outcome {:belief {}} {:policy "M-x" :expected-G -0.5} enacted 7)
                      :realized-outcome)))))
 
+(deftest gamma-grounded-feed-routes-the-producer
+  ;; R14 live-wire migration: *gamma-grounded-feed?* selects WHICH realized
+  ;; outcome feeds γ, orthogonally to *live-wire?*. Stub both producers so the
+  ;; branch is exercised without a live substrate read.
+  (with-redefs [fr/realized-outcome-of       (fn [_ _ _] {:src :coverage})
+                fr/realized-outcome-grounded (fn [mid _ opts]
+                                               {:src :substrate-dial :mission-id mid :opts opts})]
+    (let [jo {:belief {}}
+          decision {:policy "M-p" :expected-G -0.5}]
+      (testing "grounded-feed OFF (default) ⇒ coverage producer even under live-wire"
+        (binding [fr/*live-wire?* true]
+          (is (= :coverage (get-in (fr/with-realized-outcome jo decision enacted 7)
+                                   [:realized-outcome :src])))))
+      (testing "grounded-feed ON (+ live-wire) ⇒ substrate-dial, mission-id = (:policy decision)"
+        (binding [fr/*live-wire?* true
+                  fr/*gamma-grounded-feed?* true]
+          (let [ro (:realized-outcome (fr/with-realized-outcome jo decision enacted 7))]
+            (is (= :substrate-dial (:src ro)))
+            (is (= "M-p" (:mission-id ro)) "mission-id derived from (:policy decision)")
+            (is (= 7 (get-in ro [:opts :tick])) "tick threaded through opts"))))
+      (testing "grounded-feed ON but live-wire OFF ⇒ still no realized-outcome (live-wire gates first)"
+        (binding [fr/*gamma-grounded-feed?* true]
+          (is (not (contains? (fr/with-realized-outcome jo decision enacted 7)
+                              :realized-outcome))))))))
+
 (deftest end-to-end-producer-to-trace-to-gamma
   (testing "producer → trace-record → reader → γ updates; then dedups on :tick"
     (binding [fr/*live-wire?* true]

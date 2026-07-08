@@ -33,6 +33,18 @@
    call). Off ⇒ no `:realized-outcome` is produced (γ stays at the prior)."
   false)
 
+(def ^:dynamic *gamma-grounded-feed?*
+  "R14 live-wire migration (flag-gated, default OFF ⇒ byte-identical; a SEPARATE
+   arm from `*live-wire?*`). When ON — and only when `*live-wire?*` is also ON —
+   the `:realized-outcome` feeding γ is the A5 SUBSTRATE DIAL
+   (`realized-outcome-grounded`, bound−inhabited endpoint counts) instead of
+   `realized-outcome-of` (coverage→ΔG, the reproduction mirror the R16 exhibit
+   named). Dark until armed because the grounded producer reads an A3
+   build-match snapshot — a live substrate read per enactment; the enact path is
+   `try`-wrapped so a read failure returns the judgement unchanged. Two arms, two
+   decisions (Joe): enactment-on, then grounded-feed-on."
+  false)
+
 (defn- realized-coverage
   "ZERO-COVERAGE SEMANTICS (claude-16 ruling, 2026-07-06, T-0 fix for the
    gamma realizedG=nil blocker): an executor that constructs 0 boxes against a
@@ -168,8 +180,15 @@
    flows through `trace-record` (claude-11's reader picks it up from
    `latest-trace-record` next tick). No-op unless `*live-wire?*` — enactment isn't
    wired (Joe's call). Returns `judge-output` UNCHANGED when staged-off, so the
-   field stays ABSENT and γ holds at the prior."
+   field stays ABSENT and γ holds at the prior.
+
+   Under `*gamma-grounded-feed?*` (the R14 migration, also armed) the realized
+   outcome is the A5 substrate dial (`realized-outcome-grounded`) rather than
+   `realized-outcome-of` (coverage). mission-id = `(:policy decision)`."
   [judge-output decision enacted-wiring tick]
   (if *live-wire?*
-    (assoc judge-output :realized-outcome (realized-outcome-of decision enacted-wiring tick))
+    (assoc judge-output :realized-outcome
+           (if *gamma-grounded-feed?*
+             (realized-outcome-grounded (:policy decision) decision {:tick tick})
+             (realized-outcome-of decision enacted-wiring tick)))
     judge-output))
