@@ -4,12 +4,21 @@
    judge→trace→γ round-trip claude-11 integration-tests against (E-close-the-loop
    × E-precision-over-policies, committed contract)."
   (:require [clojure.test :refer [deftest is testing]]
+            [clojure.edn :as edn]
+            [futon2.aif.actuator-a3 :as a3]
             [futon2.aif.fold-realized :as fr]
             [futon2.aif.fold-eval :as fe]
             [futon2.aif.trace :as trace]
             [futon2.aif.policy-precision :as pp]))
 
 (def ^:private enacted {:boxes [{:id :a} {:id :b}] :policy-holes [{:free "metric"}]})
+
+(defn- learning-loop-clean []
+  (edn/read-string (slurp "/home/joe/code/futon6/holes/clean/M-learning-loop.clean.edn")))
+
+(defn- learning-loop-deposit-with-clean []
+  (assoc (get (a3/deposits-by-id) "ft-learning-loop-010")
+         :clean (learning-loop-clean)))
 
 (deftest realized-outcome-of-builds-the-contract-record
   (testing "the four committed keys; both G legs the same EFE quantity"
@@ -24,6 +33,45 @@
   (testing "no boxes against obligations ⇒ :realized-G 0.0 (measured zero coverage)"
     (is (= 0.0 (:realized-G (fr/realized-outcome-of {:policy "M-z" :expected-G -0.1}
                                                     {:boxes [] :policy-holes [{:free "x"}]} 1))))))
+
+(deftest realized-outcome-grounded-uses-substrate-dial
+  (testing "M-learning-loop produces a grounded partial-discharge sample"
+    (let [ro (fr/realized-outcome-grounded
+              "futon5a-d/mission/learning-loop"
+              {:policy "futon5a-d/mission/learning-loop" :tick 101})]
+      (is (= 0 (:expected-G ro)))
+      (is (= 1 (:realized-G ro)))
+      (is (= :substrate-dial (:realized-source ro)))
+      (is (= :endpoint-count (:scale ro)))
+      (is (= {:inhabited 1 :bound 2 :remaining 1 :discharged? false}
+             (:dial ro)))
+      (is (= 101 (:tick ro)))))
+  (testing "fully inhabited bound boxes produce realized-G 0"
+    (let [deposit (assoc (learning-loop-deposit-with-clean)
+                         :box-bindings {:b1 {:kind :entity :type :capability}
+                                        :b7 {:kind :entity :type :capability}})
+          ro (fr/realized-outcome-grounded (:mission deposit)
+                                           {:policy (:mission deposit)}
+                                           {:deposit deposit})]
+      (is (= 0 (:expected-G ro)))
+      (is (= 0 (:realized-G ro)))
+      (is (= {:inhabited 2 :bound 2 :remaining 0 :discharged? true}
+             (:dial ro)))
+      (is (= :exact-grounded-discharge (:anti-tautology-flag ro)))))
+  (testing "A5 is falsified if it reports reproduction coverage instead of substrate state"
+    (let [deposit (learning-loop-deposit-with-clean)
+          grounded (fr/realized-outcome-grounded (:mission deposit)
+                                                 {:policy (:mission deposit)}
+                                                 {:deposit deposit})
+          reproduction (fr/realized-outcome-of {:policy (:mission deposit)
+                                                :fold {:delta-g -1.0}}
+                                               {:boxes [{:id :b1} {:id :b7}]
+                                                :policy-holes []}
+                                               :coverage-tick)]
+      (is (= 1 (:realized-G grounded)))
+      (is (= -1.0 (:realized-G reproduction)))
+      (is (not= (:realized-G reproduction) (:realized-G grounded))
+          "grounded realized-G must be the substrate dial, not coverage over reproduced wiring"))))
 
 (deftest staging-is-off-by-default
   (testing "staged-off ⇒ judge-output UNCHANGED ⇒ no :realized-outcome key ⇒ γ holds"

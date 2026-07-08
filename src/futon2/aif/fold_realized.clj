@@ -24,7 +24,9 @@
 
    Pure + no I/O + no loop + flag-gated: `fold.clj`'s expected-only invariant is
    untouched (this ns is the OBSERVE-side producer, not a fold-contract term)."
-  (:require [futon2.aif.fold-eval :as fe]))
+  (:require [clojure.edn :as edn]
+            [futon2.aif.actuator-a3 :as a3]
+            [futon2.aif.fold-eval :as fe]))
 
 (def ^:dynamic *live-wire?*
   "Off until enactment (`apply-cascade!`) is live-wired into the pilot (Joe's
@@ -80,6 +82,64 @@
    :expected-G (or (:delta-g fold) (when (number? expected-G) expected-G))
    :realized-G (fe/coverage->delta-g (realized-coverage enacted-wiring))
    :tick       tick})
+
+(defn- deposit-for-mission
+  [mission-id]
+  (let [target (a3/mission-key mission-id)]
+    (->> (vals (a3/deposits-by-id))
+         (filter #(= target (a3/mission-key (:mission %))))
+         first)))
+
+(defn- reviewed-clean-for
+  [mission-id deposit]
+  (let [mission (:mission deposit mission-id)
+        path (or (get a3/reviewed-candidate-cleans mission)
+                 (get a3/reviewed-candidate-cleans mission-id))]
+    (when path
+      (edn/read-string (slurp path)))))
+
+(defn- grounded-deposit
+  [mission-id {:keys [deposit clean box-bindings] :as _opts}]
+  (let [base (or deposit
+                 (deposit-for-mission mission-id)
+                 {:mission mission-id})
+        clean' (or clean
+                   (:clean base)
+                   (reviewed-clean-for mission-id base))
+        mission (or (:mission base) mission-id)]
+    (cond-> (assoc base :mission mission)
+      clean' (assoc :clean clean')
+      box-bindings (assoc :box-bindings box-bindings))))
+
+(defn realized-outcome-grounded
+  "A5 grounded realized outcome: read the WORLD dial via A3 build-match.
+
+   `:realized-G` is the remaining count of bound CLean boxes whose reviewed
+   substrate endpoints are not inhabited: `bound - inhabited`. `:expected-G` is
+   0 for the discharge action target: fully discharged. Both legs are endpoint
+   counts, never coverage-ΔG mixed with substrate state."
+  ([mission-id decision] (realized-outcome-grounded mission-id decision {}))
+  ([mission-id {:keys [policy tick] :as _decision} opts]
+   (let [deposit (grounded-deposit mission-id opts)
+         snapshot (a3/box-match-snapshot deposit opts)
+         bound (count snapshot)
+         inhabited (count (filter :inhabited? snapshot))
+         remaining (when (pos? bound) (- bound inhabited))
+         expected 0
+         exact? (and (number? remaining) (= expected remaining))]
+     (cond-> {:policy (or policy mission-id)
+              :mission (:mission deposit mission-id)
+              :expected-G expected
+              :realized-G remaining
+              :realized-source :substrate-dial
+              :scale :endpoint-count
+              :dial {:inhabited inhabited
+                     :bound bound
+                     :remaining remaining
+                     :discharged? (and (pos? bound) (zero? remaining))}
+              :box-snapshot snapshot
+              :anti-tautology-flag (when exact? :exact-grounded-discharge)}
+       (or tick (:tick opts)) (assoc :tick (or tick (:tick opts)))))))
 
 (defn with-realized-outcome
   "STAGED seam: thread the `:realized-outcome` onto a `judge`-style output so it
