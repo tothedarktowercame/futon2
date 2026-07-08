@@ -150,3 +150,100 @@ Terminal: b5 :discharges :want-signature.
 ### Blind scoring
 
 :none — no A-next seal exists. Recorded honestly.
+
+## Flight 3: ft-canon-fingerprint-store-001 (mana-gated)
+
+**Driver:** zai-3 (unattended overnight run, edge invoke-1783553401219-850-34fb6554)
+**Consent:** mana gate `fold-authoring`, spend "overnight deposit run", balance after: 2
+  - `{:ok true, :balance 2}` — gate authorized the fold-authoring dispatch
+
+### Mission selection
+
+Latest tick (2026-07-06T20:04:39Z): target=M-learning-loop (G=2.08),
+gates={:abstain-missing-leg 2}. M-learning-loop already has ft-learning-loop-010
+in the escrow. The other abstain-missing-leg mission is M-canon-fingerprint-store
+— it has NO deposit. Cross-checked futon6/data/fold-turns/: no ft-canon-fingerprint-*
+file exists. This is the top-ranked lane mission without a deposit.
+
+### Psi
+
+Source: M-canon-fingerprint-store.md sections 1-9 (the actual tension: knowledge
+accumulated in one Stage 5 run does not carry forward; §8 decisions RESOLVED:
+SQLite, scope bindings, frequency-ordered, strategy-anchor not position).
+
+```
+WANT: a canon fingerprint store that makes the symbol-grounding engine improve
+with each Stage 5 batch — a SQLite-backed store of {symbol, canon, paper_id,
+strategy, strategy_anchor, role, scope} records aggregated into CanonAggregate,
+queried in-run by symbol, where the canon distribution IS the prior for the next
+batch's Bayesian arbitration...
+```
+
+psi-sha256: c85e219dacf02b397b13f03fe880d6b8fc55c08ed9969fa29d1e23e45faf67cc
+
+### Cascade
+
+```
+size=1  wholeness=0.559  H=1.0  T=0.559  accuracy=0.168  complexity=2.398
+F-free-energy=-0.431  truncated=false
+```
+
+Cascade surfaced 1 pattern: `library-coherence/library-evidence-ledger` (rel=0.559).
+THIN from the model — augmented via psr_search with 3 additional fitting patterns
+(all with verified flexiarg prose):
+- `agent/handoff-preserves-context` (ephemeral→persistent cross-batch state)
+- `aif/declare-the-conditioning` (the store IS the prior; conditioning must be declared)
+- `peripherals/canonical-typed-event-vs-side-channel` (fingerprint schema = canonical taxonomy vs side-channel JSONL)
+
+### Fold
+
+5 boxes:
+- b1: SQLite canon_store.db as canonical typed fingerprint record (fits canonical-typed-event)
+- b2: MAP-REDUCE pipeline — write_batch_fingerprints + incremental aggregate (fits library-evidence-ledger)
+- b3: in-run query interface — canon_distribution IS the declared prior (fits declare-the-conditioning)
+- b4: cross-batch persistence — file-first SQLite survives teardown (fits handoff-preserves-context)
+- b5: frequency-ordered seed — mathematical genome (fits library-evidence-ledger)
+
+5 holes:
+- h1: bibliographic citation-count source (ungrounded external data-source decision)
+- h2: reliability-weight formula in per-binding posterior (M-bayesian-structure-learning §3.2, not recoverable here)
+- h3: held-out gold partition and precision metric (calibration choices not in pattern halo)
+- h4: literature-graph construction for strategy-merge F4 (explicitly deferred scope)
+- h5: scope-binding extraction — how role/scope fields are populated (schema decidable, population not)
+
+v2 wires: b1→b2 :seq, b2→b3 :seq, b2→b4 :copar, b1→b5 :tensor, b5→b3 :seq.
+Terminals: b3 :discharges :want-signature, b4 :discharges :want-signature.
+
+### ΔG
+
+-0.5 (hand-shown: dG = -(boxes/(boxes+holes)) = -(5/10) = -0.5; loader pin-3 recomputed and confirmed)
+
+### Pins
+
+- prompt-sha: 9217e5289eec1a8412fcea558e361ffc739e87e74dce9963119d9b437699b629
+- psi-sha: c85e219dacf02b397b13f03fe880d6b8fc55c08ed9969fa29d1e23e45faf67cc
+- prose-sha256:
+  - library-coherence/library-evidence-ledger: 20bff107f17d473cb714dfd5539dd05183dcd6ec1c95abefab6149cda48ddc23
+  - agent/handoff-preserves-context: 5c5e1b948075e8168205808c1c3f51fef3306612eb81e107bb99e3b9b5ad433e
+  - aif/declare-the-conditioning: 954b803dd9ebf20a91e0a37704aba630886f0e4e58a7485e2b5ae84a79502131
+  - peripherals/canonical-typed-event-vs-side-channel: 020b272ec5b4d9aedf8142ccaf7f60ed539d7c8041a5a854c235c7ad8dbc355c
+- arming: mana gate fold-authoring, spend-purpose "overnight deposit run", balance-after 2
+- LOADER ACCEPT: ft-canon-fingerprint-store-001 ✓ (delta-g -0.5)
+- TAMPER REJECT: /tmp/ft-tampered-test.edn — delta-g-mismatch (-0.99 vs -0.5) ✓
+
+### Blind scoring
+
+:none — no A-next seal exists for M-canon-fingerprint-store. Recorded honestly per
+the 003 no-seal precedent. The fold author IS the scorer (same agent, unattended
+overnight) — the mana gate is the consent mechanism, not separation of powers.
+
+### Honest assessment
+
+This deposit addresses the mission's core tension (knowledge doesn't carry forward
+across batches) with a coherent 5-box construction spanning the SQLite schema, the
+MAP-REDUCE pipeline, the in-run prior query, cross-batch persistence, and the
+frequency-ordered genome seed. The 5 honest policy-holes (half the total) keep dG
+at -0.5 — moderate confidence. The holes are genuine: the citation-count source,
+reliability formula, gold metric, F4 literature graph, and scope-binding extraction
+are all ungroundable from the pattern halo + mission prose. The deposit unblocks
+the abstain-missing-leg gate by giving the escrow a replayable construction.
