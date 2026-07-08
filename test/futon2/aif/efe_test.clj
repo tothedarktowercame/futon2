@@ -170,7 +170,8 @@
     (let [o (efe/compute-efe base-state
                              {:type :address-sorry
                               :target :m1
-                              :structural-pressure-per-action 1.0})]
+                              :structural-pressure-per-action 1.0}
+                             {:ambiguity-mode :variance-sum})]
       (is (>= (:G-risk o) 0.0))
       (is (>= (:G-ambiguity o) 0.0))
       (is (>= (:G-info o) 0.0))
@@ -186,7 +187,7 @@
 
 (deftest no-op-zero-ambiguity-test
   (testing ":no-op has zero predicted variance → zero ambiguity"
-    (let [o (efe/compute-efe base-state {:type :no-op})]
+    (let [o (efe/compute-efe base-state {:type :no-op} {:ambiguity-mode :variance-sum})]
       (is (zero? (:G-ambiguity o))
           ":no-op preserves state with no predicted variance"))))
 
@@ -252,15 +253,15 @@
 
 (deftest intrinsic-value-credits-g-risk-test
   (testing "absent :intrinsic-value defaults to 0 — G-risk equals predicted G-pragmatic"
-    (let [out (efe/compute-efe base-state {:type :no-op})
+    (let [out (efe/compute-efe base-state {:type :no-op} {:risk-mode :hinge})
           fe-on-current (fe/compute-free-energy (:observation base-state))]
       (is (< (Math/abs (- (:G-risk out) (:G-pragmatic fe-on-current))) 1e-9)
           ":no-op preserves obs → G-risk == compute-free-energy(current).G-pragmatic")))
   (testing ":intrinsic-value subtracts from G-risk"
     (let [base-action {:type :no-op}
             credited-action {:type :no-op :intrinsic-value 0.1}
-          base-out (efe/compute-efe base-state base-action)
-          credited-out (efe/compute-efe base-state credited-action)]
+          base-out (efe/compute-efe base-state base-action {:risk-mode :hinge})
+          credited-out (efe/compute-efe base-state credited-action {:risk-mode :hinge})]
       (is (< (Math/abs (- (:G-risk credited-out)
                           (- (:G-risk base-out) 0.1)))
              1e-9)
@@ -688,16 +689,16 @@
       (is (not= (:G-core o) (:G-total o))
           ":G-core is reported beside, not substituted for, the blend"))))
 
-(deftest ambiguity-mode-default-identity-test
-  (testing "D5c dark flag: default and explicit :variance-sum are byte-identical"
+(deftest ambiguity-mode-default-and-escape-hatch-test
+  (testing "default is now :gaussian-entropy (canonical, 2026-07-08); explicit matches"
     (let [action {:type :address-sorry :target :m1}
           implicit (efe/compute-efe base-state action)
-          explicit (efe/compute-efe base-state action {:ambiguity-mode :variance-sum})]
+          explicit (efe/compute-efe base-state action {:ambiguity-mode :gaussian-entropy})]
       (is (= implicit explicit))
-      (is (= :variance-sum (:ambiguity-mode implicit)))))
-  (testing "D5c :gaussian-entropy matches the closed-form Gaussian entropy sum"
+      (is (= :gaussian-entropy (:ambiguity-mode implicit)))))
+  (testing "D5c :gaussian-entropy matches the closed-form Gaussian entropy sum; :variance-sum is the escape hatch"
     (let [action {:type :address-sorry :target :m1}
-          vs (efe/compute-efe base-state action)
+          vs (efe/compute-efe base-state action {:ambiguity-mode :variance-sum})
           ge (efe/compute-efe base-state action {:ambiguity-mode :gaussian-entropy})
           variances (vals (get-in ge [:prediction :next-observation :variance]))
           expected (reduce + 0.0

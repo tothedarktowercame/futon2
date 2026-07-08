@@ -39,7 +39,9 @@
 (defn- ambiguity
   "R5b epistemic term over per-channel predicted variances.
 
-   Modes (M-evaluate-policies D5c — dark flag, nothing flips it on):
+   Modes (M-evaluate-policies D5c — compute-efe's default flipped to
+   :gaussian-entropy on 2026-07-08; this fn's own arity-1 default stays
+   :variance-sum):
      :variance-sum      (DEFAULT) — sum of per-channel predicted variance;
                         byte-identical to the historical behaviour.
      :gaussian-entropy  — Σ_ch ½·ln(2πe·σ²), the audit's repair toward the
@@ -474,8 +476,13 @@
                        eig-weight default-eig-weight
                        gap-weight default-gap-weight
                        goal-outcome-weight cv/default-goal-outcome-weight
-                       ambiguity-mode :variance-sum
-                       risk-mode :hinge
+                       ;; 2026-07-08 (Joe-directed): code default aligned to the live-arena
+                       ;; canonical modes — a WINNER-CHANGING faithfulness upgrade (real KL /
+                       ;; Gaussian-entropy replace the analogical hinge / variance-sum). The
+                       ;; arena (war_machine.clj) already defaulted here since 2026-07-03; env
+                       ;; FUTON_WM_{RISK,AMBIGUITY}_MODE=hinge/variance-sum is the escape hatch.
+                       ambiguity-mode :gaussian-entropy
+                       risk-mode :kl
                        goal-outcome-mode :hinge
                        structural-pressure-mode :g-summand
                        move-class-intensity-mode :off

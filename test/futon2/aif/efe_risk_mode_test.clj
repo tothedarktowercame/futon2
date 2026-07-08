@@ -1,6 +1,7 @@
 (ns futon2.aif.efe-risk-mode-test
-  "D5a :risk-mode flag tests — contract pt 3 (degrade-safe) is the load-bearing
-   one: the default MUST be byte-identical to the historical behaviour."
+  "D5a :risk-mode flag tests. NOTE: the default flipped to :kl (canonical) on
+   2026-07-08 (Joe-directed); :risk-mode :hinge is now the escape hatch back to
+   the historical behaviour."
   (:require [clojure.test :refer [deftest is testing]]
             [futon2.aif.belief :as belief]
             [futon2.aif.efe :as efe]
@@ -18,16 +19,18 @@
 
 (def ^:private action {:type :address-sorry :target :m1 :intrinsic-value 0.1})
 
-(deftest default-risk-mode-byte-identical
-  (testing "no opts ≡ explicit :risk-mode :hinge ≡ historical output (I1)"
+(deftest default-risk-mode-is-kl-canonical
+  (testing "no opts ≡ explicit :risk-mode :kl — canonical is the default (2026-07-08)"
     (let [bare (efe/compute-efe state action)
-          hinge (efe/compute-efe state action {:risk-mode :hinge})]
-      (is (= (:G-risk bare) (:G-risk hinge)))
-      (is (= (:G-total bare) (:G-total hinge)))
-      (is (= :hinge (:risk-mode bare))))))
+          kl (efe/compute-efe state action {:risk-mode :kl})]
+      (is (= (:G-risk bare) (:G-risk kl)))
+      (is (= (:G-total bare) (:G-total kl)))
+      (is (= :kl (:risk-mode bare)))))
+  (testing ":risk-mode :hinge is the escape hatch back to the historical hinge"
+    (is (= :hinge (:risk-mode (efe/compute-efe state action {:risk-mode :hinge}))))))
 
 (deftest kl-mode-changes-only-risk
-  (let [hinge (efe/compute-efe state action)
+  (let [hinge (efe/compute-efe state action {:risk-mode :hinge})
         kl (efe/compute-efe state action {:risk-mode :kl})]
     (testing "kl risk is finite and different from hinge"
       (is (Double/isFinite (:G-risk kl)))

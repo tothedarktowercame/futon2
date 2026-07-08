@@ -111,8 +111,10 @@
      Acceptance criterion: G-risk(stressed) > 5x G-risk(healthy)."
     (let [state-s {:observation stressed-obs :belief {}}
           state-h {:observation healthy-obs :belief {}}
-          g-s (:G-risk (efe/compute-efe state-s {:type :no-op}))
-          g-h (:G-risk (efe/compute-efe state-h {:type :no-op}))]
+          ;; the 5x criterion is calibrated for the hinge risk (now the escape
+          ;; hatch since the default flipped to :kl on 2026-07-08)
+          g-s (:G-risk (efe/compute-efe state-s {:type :no-op} {:risk-mode :hinge}))
+          g-h (:G-risk (efe/compute-efe state-h {:type :no-op} {:risk-mode :hinge}))]
       (is (> g-s (* 5.0 g-h))
           (str "EFE-stress: stressed G-risk = " g-s
                ", healthy G-risk = " g-h

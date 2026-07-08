@@ -48,6 +48,7 @@
    :mission-gap-view {"M-app" 0.5 "M-inapp" 0.9 "M-off" 0.2}
    :goal-outcome-entries entries
    :goal-outcome-prob-fn (constantly 0.7)
+   :risk-mode :hinge :ambiguity-mode :variance-sum  ; pin historical modes (system default flipped to canonical 2026-07-08)
    :time-pressure 0.5})
 
 (def ^:private kl-opts
