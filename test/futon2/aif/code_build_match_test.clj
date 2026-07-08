@@ -24,7 +24,10 @@
     (is (false? (get-in boxes [:b6 :ready?])))
     (is (false? (get-in boxes [:b7 :ready?])))
     (is (false? (get-in boxes [:b7 :code-present?])) "R12 accumulate has no resolved key var")
-    (is (= [:b2] (:faithfulness-gaps result)))))
+    (is (true? (get-in boxes [:b1 :faithfulness-gap])) "R1 belief coverage has no recording sorry")
+    (is (true? (get-in boxes [:b4 :faithfulness-gap])) "R13 policy tie-floor has no recording sorry")
+    (is (= [:b1 :b2 :b4] (:faithfulness-gaps result))
+        "3 of 5 not-ready stages lack a recording sorry — the registry is itself unfaithful about the pipeline")))
 
 (deftest sorry-discharge-flips-readiness-without-checker-edit-test
   (let [clean (assoc (cbm/load-clean)

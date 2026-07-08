@@ -27,7 +27,9 @@
    faithfulness gap instead of passing silently."
   {:b1 {:code-ns ['futon2.aif.belief]
         :code-var 'futon2.aif.belief/update-belief
-        :gating-sorries [:sorry/pattern-typed-theme-liberates-the-solo]}
+        :gating-sorries []
+        :known-not-ready? true
+        :faithfulness-note "R1 belief covers only ~4/14 channels; no open registry sorry records that incompleteness."}
    :b2 {:code-ns ['futon2.aif.forward-model]
         :code-var 'futon2.aif.forward-model/predict
         :gating-sorries []
@@ -38,7 +40,9 @@
         :gating-sorries []}
    :b4 {:code-ns ['futon2.aif.policy]
         :code-var 'futon2.aif.policy/select-action
-        :gating-sorries [:sorry/pattern-measure-never-target]}
+        :gating-sorries []
+        :known-not-ready? true
+        :faithfulness-note "R13 policy has the tie-floor and acting is HELD; no open registry sorry records that incompleteness."}
    :b5 {:code-ns ['futon2.aif.actuator-a3]
         :code-var 'futon2.aif.actuator-a3/build-match
         :gating-sorries []}
