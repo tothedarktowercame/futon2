@@ -755,18 +755,23 @@
    :coupling-density   nondormant-status-row
    :ticks-firing-ratio open-status-row})
 
+(def ^:dynamic *r3d-multichannel?*
+  "FLAG (default OFF): when true, the R3d belief-update driver aggregates
+   signed precision-weighted errors across all 8 likelihood channels
+   (using channel-health-signs). When false (default), the driver draws
+   from :annotation-health alone — byte-identical to pre-v0.25 behavior.
+   Flip is the operator's (arena-*-mode idiom)."
+  false)
+
 (def channel-health-signs
-  "PROPOSED (DARK, NOT WIRED — R3d sign-aggregation design, for claude-4 review).
-   Per-channel health direction: +1 if high observed = healthy (positive
+  "Per-channel health direction: +1 if high observed = healthy (positive
    error = system better than predicted → strengthen belief), −1 if high
    observed = unhealthy (positive error = system worse than predicted →
    weaken belief).
 
-   The R3d belief-update currently draws from :annotation-health alone
-   because the channels differ on health direction and a naive error sum
-   cancels conflicting signals (the 2026-05-18 run: +0.37/−0.15/−0.24/−0.20).
-   This map annotates each channel's direction so the aggregated R3d driver
-   = mean(sign_c × weighted-error_c) combines them coherently.
+   Used by r3d-aggregate-driver for the 8-channel signed aggregation.
+   When *r3d-multichannel?* is OFF, only :annotation-health drives the
+   update (this map is unused in that path).
 
    Design note: futon2/holes/r1-r3-disaggregation-bridge.md."
   {:annotation-health  1   ; high = more healthy
@@ -777,6 +782,43 @@
    :attack-coverage    1   ; high = more evidence coverage
    :coupling-density   1   ; high = more interconnected
    :ticks-firing-ratio 1}) ; high = more ticks passing
+
+(defn r3d-aggregate-driver
+  "Aggregate per-channel prediction errors into a single signed R3d driver.
+
+   WEIGHTED-ERRORS is a map: channel-id → {:weighted-error <num> :precision <num> ...}
+   (as produced by free-energy/compute-prediction-error + precision/weighted-error).
+
+   Returns a single signed scalar:
+   - Positive = system healthier than predicted across channels
+   - Negative = system less healthy than predicted
+   - Near zero = accurate predictions or balanced signals
+
+   Uses the PRECISION-WEIGHTED AVERAGE (canonical predictive coding):
+   driver = Σ(sign_c × precision_c × error_c) / Σ(precision_c)
+   so low-precision channels dilute proportionally.
+
+   When *r3d-multichannel?* is OFF, returns the :annotation-health
+   weighted-error alone (the pre-v0.25 behavior, byte-identical)."
+  [weighted-errors]
+  (if *r3d-multichannel?*
+    ;; 8-channel signed precision-weighted average
+    (let [signed-sum (reduce +
+                             (for [[ch err-map] weighted-errors
+                                   :let [sign (double (get channel-health-signs ch 0))
+                                         we (double (:weighted-error err-map 0.0))]]
+                               (* sign we)))
+          total-precision (reduce +
+                                  (for [[ch err-map] weighted-errors
+                                        :let [sign (double (get channel-health-signs ch 0))
+                                              prec (double (:precision err-map 0.0))]
+                                        :when (not (zero? sign))]
+                                    prec))]
+      (if (pos? total-precision)
+        (/ signed-sum total-precision)
+        0.0))
+    ;; OFF: annotation-health weighted-error alone (pre-v0.25 byte-identical)
+    (double (:weighted-error (get weighted-errors :annotation-health {}) 0.0))))
 
 (defn predict-observation
   "Predict observation distributions across all channels for which a

@@ -707,3 +707,78 @@
                             (:mean (belief/predict-sorry-count-norm b))))
                1e-12)
             "open row (÷10, capped) ≠ predict-sorry-count-norm")))))
+
+;; ---------------------------------------------------------------------------
+;; v0.25: R3d sign-aggregation tests (flag-gated *r3d-multichannel?*)
+;; ---------------------------------------------------------------------------
+
+(deftest r3d-flag-off-byte-identical
+  (testing "*r3d-multichannel?* OFF (default) => annotation-health weighted-error alone"
+    (let [weighted-errors
+          {:annotation-health {:weighted-error 0.37 :precision 10.0}
+           :sorry-count-norm  {:weighted-error -0.20 :precision 5.0}
+           :mission-health    {:weighted-error -0.15 :precision 8.0}}]
+      (binding [belief/*r3d-multichannel?* false]
+        (is (< (Math/abs (- (belief/r3d-aggregate-driver weighted-errors) 0.37)) 1e-9)
+            "OFF should return annotation-health weighted-error alone (0.37)")))))
+
+(deftest r3d-flag-on-multichannel
+  (testing "*r3d-multichannel?* ON => 8-channel signed precision-weighted average"
+    (let [weighted-errors
+          {:annotation-health {:weighted-error 0.37 :precision 10.0}
+           :sorry-count-norm  {:weighted-error -0.20 :precision 5.0}
+           :mission-health    {:weighted-error -0.15 :precision 8.0}
+           :active-repo-ratio {:weighted-error -0.24 :precision 6.0}}]
+      (binding [belief/*r3d-multichannel?* true]
+        (let [driver (belief/r3d-aggregate-driver weighted-errors)
+              ;; manual: sum(sign * weighted-error) / sum(precision)
+              ;; = (1*0.37 + (-1)*(-0.20) + 1*(-0.15) + 1*(-0.24)) / (10+5+8+6)
+              ;; = (0.37 + 0.20 - 0.15 - 0.24) / 29 = 0.18 / 29 ≈ 0.00621
+              expected (/ (+ 0.37 0.20 -0.15 -0.24) 29.0)]
+          (is (< (Math/abs (- driver expected)) 1e-9)
+              (format "ON should return precision-weighted average: expected %.6f, got %.6f"
+                      expected driver)))))))
+
+(deftest r3d-sorry-count-norm-sign-flip
+  (testing "sign alignment: :sorry-count-norm (−1) flips correctly"
+    ;; sorry-count-norm high = unhealthy. A POSITIVE weighted-error for
+    ;; sorry-count-norm (observed > predicted = MORE sorrys than expected)
+    ;; should contribute NEGATIVELY (system less healthy).
+    (let [weighted-errors
+          {:annotation-health {:weighted-error 0.0  :precision 10.0}
+           :sorry-count-norm  {:weighted-error 0.50 :precision 10.0}}]
+      (binding [belief/*r3d-multichannel?* true]
+        (let [driver (belief/r3d-aggregate-driver weighted-errors)]
+          ;; sign(-1) * 0.50 = -0.50; / (10+10) = -0.025
+          (is (neg? driver)
+              "positive sorry-count-norm error with sign -1 must yield negative driver")
+          (is (< (Math/abs (- driver -0.025)) 1e-9)
+              (format "expected -0.025, got %.6f" driver)))))))
+
+(deftest r3d-non-cancellation-2026-05-18
+  (testing "the 2026-05-18 case: signed aggregate does NOT cancel (naive sum ~ −0.22)"
+    ;; The empirical run: annotation-health +0.37, mission-health −0.15,
+    ;; active-repo-ratio −0.24, sorry-count-norm −0.20.
+    ;; Naive sum = 0.37 − 0.15 − 0.24 − 0.20 = −0.22 (near-cancel, misleading).
+    ;; Signed aggregate: sign(sorry) = −1, so sorry's error flips:
+    ;;   1*(0.37) + (−1)*(−0.20) + 1*(−0.15) + 1*(−0.24)
+    ;;   = 0.37 + 0.20 − 0.15 − 0.24 = 0.18
+    ;; Precision-weighted: 0.18 / Σ(precision) — a coherent POSITIVE driver
+    ;; (system slightly healthier than predicted), NOT the near-cancel −0.22.
+    (let [weighted-errors
+          {:annotation-health {:weighted-error 0.37 :precision 10.0}
+           :sorry-count-norm  {:weighted-error -0.20 :precision 5.0}
+           :mission-health    {:weighted-error -0.15 :precision 8.0}
+           :active-repo-ratio {:weighted-error -0.24 :precision 6.0}}]
+      (binding [belief/*r3d-multichannel?* true]
+        (let [driver (belief/r3d-aggregate-driver weighted-errors)
+              naive-sum (+ 0.37 -0.15 -0.24 -0.20)]
+          (is (pos? driver)
+              (format "signed aggregate must be POSITIVE (coherent healthy signal), got %.6f" driver))
+          (is (neg? naive-sum)
+              "naive sum should be negative (−0.22, the near-cancel)")
+          (is (pos? (Math/signum (double driver)))
+              "signed aggregate is positive — system slightly healthier")
+          (is (neg? (Math/signum (double naive-sum)))
+              "naive sum is negative — misleading near-cancel")))))
+)

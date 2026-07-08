@@ -86,7 +86,11 @@
   {:annotation-health  +1   ; high = more in-range entities, fewer anomalies
    :sorry-count-norm   -1   ; high = many open sorrys (unhealthier)
    :mission-health     +1   ; high = mission triage healthy
-   :active-repo-ratio  +1}) ; high = entities non-dormant (active)
+   :active-repo-ratio  +1   ; high = entities non-dormant (active)
+   :support-coverage   +1   ; high = more evidence coverage
+   :attack-coverage    +1   ; high = more evidence coverage
+   :coupling-density   +1   ; high = more interconnected
+   :ticks-firing-ratio +1}) ; high = more ticks passing
 
 ;; ---------------------------------------------------------------------------
 ;; c-distribution — preferences as NORMALISED DENSITIES (M-evaluate-policies

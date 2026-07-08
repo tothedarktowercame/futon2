@@ -3791,16 +3791,11 @@
                                       (for [[ch err-map] raw-errors]
                                         [ch (precision/weighted-error
                                              prec-state' ch err-map)]))
-                ;; v0.16 multi-channel R3d sign-aggregation: aggregate
-                ;; signed weighted-errors across all R3a-covered channels
-                ;; using per-channel :health-sign so sign-direction is
-                ;; coherent (high :sorry-count-norm = unhealthier vs high
-                ;; :annotation-health = healthier).
+                ;; v0.25 R3d sign-aggregation: flag-gated.
+                ;; OFF (default): annotation-health weighted-error alone (byte-identical pre-v0.16).
+                ;; ON: 8-channel signed precision-weighted average (belief/r3d-aggregate-driver).
                 aggregated-signed-error
-                (reduce + (for [[ch err-map] weighted-errors
-                                :let [sign (double (get pref/channel-health-signs ch 0))
-                                      we (double (:weighted-error err-map 0.0))]]
-                            (* sign we)))
+                (belief/r3d-aggregate-driver weighted-errors)
                 aggregated-magnitude (Math/abs aggregated-signed-error)
                 ann-error (get weighted-errors :annotation-health)
                 error-mag (Math/abs (double (:error ann-error 0.0)))
