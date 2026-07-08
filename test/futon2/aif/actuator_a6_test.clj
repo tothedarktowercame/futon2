@@ -122,29 +122,31 @@
   (let [ids (fixture-ids)
         opts (rank-opts (:cap ids))
         g (graph (:cap ids))]
-    (try
-      (put-docs! (star-doc ids) (discharge-doc ids))
-      (let [result (a6/closure-falsifier g opts)]
-        (is (= ["M-a" "M-b"] (:before-order result)))
-        (is (= ["M-b" "M-a"] (:after-order result)))
-        (is (true? (:moved? result))))
-      (finally
-        (evict-ids! (:discharge ids) (:star ids) (:status ids))))))
+    (binding [a6/*pattern-grain-eig?* false]
+      (try
+        (put-docs! (star-doc ids) (discharge-doc ids))
+        (let [result (a6/closure-falsifier g opts)]
+          (is (= ["M-a" "M-b"] (:before-order result)))
+          (is (= ["M-b" "M-a"] (:after-order result)))
+          (is (true? (:moved? result))))
+        (finally
+          (evict-ids! (:discharge ids) (:star ids) (:status ids)))))))
 
 (deftest closure-falsifier-negative-control-rank-stable-test
   (let [ids (fixture-ids)
         opts (rank-opts (:cap ids))
         g (graph (:cap ids))]
-    (try
-      (put-docs! (star-doc ids))
-      (let [before (a6/rank-graph g opts)
-            after (a6/rank-graph (a6/apply-star-status g opts) opts)
-            before-order (mapv #(get-in % [:action :target]) before)
-            after-order (mapv #(get-in % [:action :target]) after)]
-        (is (= ["M-a" "M-b"] before-order))
-        (is (= before-order after-order)))
-      (finally
-        (evict-ids! (:star ids) (:status ids))))))
+    (binding [a6/*pattern-grain-eig?* false]
+      (try
+        (put-docs! (star-doc ids))
+        (let [before (a6/rank-graph g opts)
+              after (a6/rank-graph (a6/apply-star-status g opts) opts)
+              before-order (mapv #(get-in % [:action :target]) before)
+              after-order (mapv #(get-in % [:action :target]) after)]
+          (is (= ["M-a" "M-b"] before-order))
+          (is (= before-order after-order)))
+        (finally
+          (evict-ids! (:star ids) (:status ids)))))))
 
 (def ^:private pattern-eig-graph
   {:capabilities {"goal" {:scope []}}
@@ -158,25 +160,25 @@
    :graph-ascent-weight 0.0
    :goal-outcome-entries []})
 
-(deftest pattern-grain-eig-default-off-does-not-load-test
+(deftest pattern-grain-eig-explicit-off-does-not-load-test
   (with-redefs [a4a-substrate/load-pattern-grain-eig
                 (fn [& _] (throw (ex-info "should not load when flag is off" {})))]
-    (let [ranked (a6/rank-graph pattern-eig-graph pattern-eig-rank-opts)]
-      (is (every? zero? (map :G-eig-bmr ranked)))
-      (is (= (mapv :G-total ranked)
-             (mapv :G-total (a6/rank-graph pattern-eig-graph
-                                            (assoc pattern-eig-rank-opts
-                                                   :pattern-grain-eig? false))))))))
+    (let [explicit-off (a6/rank-graph pattern-eig-graph
+                                      (assoc pattern-eig-rank-opts
+                                             :pattern-grain-eig? false))
+          bound-off (binding [a6/*pattern-grain-eig?* false]
+                      (a6/rank-graph pattern-eig-graph pattern-eig-rank-opts))]
+      (is (every? zero? (map :G-eig-bmr explicit-off)))
+      (is (= explicit-off bound-off)))))
 
-(deftest pattern-grain-eig-flag-injects-ranker-eig-test
+(deftest pattern-grain-eig-default-armed-injects-ranker-eig-test
   (with-redefs [a4a-substrate/load-pattern-grain-eig
                 (fn [_]
                   {:eig-fn (fn [mission-id _mission]
                              (if (= "M-b" mission-id) 1.5 0.0))})]
-    (let [without (a6/rank-graph pattern-eig-graph pattern-eig-rank-opts)
-          with (a6/rank-graph pattern-eig-graph
-                              (assoc pattern-eig-rank-opts
-                                     :pattern-grain-eig? true))
+    (let [without (binding [a6/*pattern-grain-eig?* false]
+                    (a6/rank-graph pattern-eig-graph pattern-eig-rank-opts))
+          with (a6/rank-graph pattern-eig-graph pattern-eig-rank-opts)
           by-target (into {} (map (juxt #(get-in % [:action :target]) identity) with))]
       (is (= (:G-total (first without))
              (:G-total (second without)))
@@ -186,46 +188,56 @@
       (is (< (:G-total (by-target "M-b"))
              (:G-total (by-target "M-a")))))))
 
+(deftest pattern-grain-eig-missing-files-degrades-to-zero-test
+  (let [missing (str "/tmp/futon2-missing-pattern-grain-eig-" (uuid-suffix))
+        loaded (a4a-substrate/load-pattern-grain-eig
+                {:semilattice-clusters-path missing
+                 :mission-pattern-scopes-path (str missing "-scopes")})]
+    (is (= {} (:mission->eig loaded)))
+    (is (= 0.0 ((:eig-fn loaded) "M-missing" {})))))
+
 (deftest witness-live-positive-uses-real-substrate-facts-test
   (let [ids (fixture-ids)
         opts (rank-opts (:cap ids))
         g (graph (:cap ids))]
-    (try
-      (put-docs! (star-doc ids) (discharge-doc ids))
-      (a6/flip-star-status-on-discharge! opts)
-      (let [status-before (a6/status-rows opts)
-            result (a6/witness-live g opts)
-            status-after (a6/status-rows opts)
-            closure (get-in result [:witness :closure])]
-        (is (= status-before status-after)
-            "witness-live is read-only; it observes the status written by A6")
-        (is (= [[(:discharge ids) (:cap ids)]]
-               (get-in result [:observation :discharges]))
-            "discharge fact came from the real substrate")
-        (is (= ["M-a" "M-b"] (get-in result [:observation :before-order])))
-        (is (= ["M-b" "M-a"] (get-in result [:observation :after-order])))
-        (is (true? (:witnessed? closure)))
-        (is (= [[(:discharge ids) (:cap ids) "M-a" "M-b"]]
-               (:bindings closure))))
-      (finally
-        (evict-ids! (:discharge ids) (:star ids) (:status ids))))))
+    (binding [a6/*pattern-grain-eig?* false]
+      (try
+        (put-docs! (star-doc ids) (discharge-doc ids))
+        (a6/flip-star-status-on-discharge! opts)
+        (let [status-before (a6/status-rows opts)
+              result (a6/witness-live g opts)
+              status-after (a6/status-rows opts)
+              closure (get-in result [:witness :closure])]
+          (is (= status-before status-after)
+              "witness-live is read-only; it observes the status written by A6")
+          (is (= [[(:discharge ids) (:cap ids)]]
+                 (get-in result [:observation :discharges]))
+              "discharge fact came from the real substrate")
+          (is (= ["M-a" "M-b"] (get-in result [:observation :before-order])))
+          (is (= ["M-b" "M-a"] (get-in result [:observation :after-order])))
+          (is (true? (:witnessed? closure)))
+          (is (= [[(:discharge ids) (:cap ids) "M-a" "M-b"]]
+                 (:bindings closure))))
+        (finally
+          (evict-ids! (:discharge ids) (:star ids) (:status ids)))))))
 
 (deftest witness-live-negative-mirror-test
   (let [ids (fixture-ids)
         opts (rank-opts (:cap ids))
         g (graph (:cap ids))]
-    (try
-      (put-docs! (star-doc ids) (discharge-doc ids))
-      (let [result (a6/witness-live g opts)
-            closure (get-in result [:witness :closure])]
-        (is (= [[(:discharge ids) (:cap ids)]]
-               (get-in result [:observation :discharges])))
-        (is (= (get-in result [:observation :before-order])
-               (get-in result [:observation :after-order])))
-        (is (false? (:witnessed? closure)))
-        (is (empty? (:bindings closure))))
-      (finally
-        (evict-ids! (:discharge ids) (:star ids) (:status ids))))))
+    (binding [a6/*pattern-grain-eig?* false]
+      (try
+        (put-docs! (star-doc ids) (discharge-doc ids))
+        (let [result (a6/witness-live g opts)
+              closure (get-in result [:witness :closure])]
+          (is (= [[(:discharge ids) (:cap ids)]]
+                 (get-in result [:observation :discharges])))
+          (is (= (get-in result [:observation :before-order])
+                 (get-in result [:observation :after-order])))
+          (is (false? (:witnessed? closure)))
+          (is (empty? (:bindings closure))))
+        (finally
+          (evict-ids! (:discharge ids) (:star ids) (:status ids)))))))
 
 (deftest operational-witness-remains-pure-test
   (let [source (slurp "/home/joe/code/futon2/src/futon2/aif/operational_witness.clj")]

@@ -4,6 +4,7 @@
    This namespace reads the substrate corpus and can mint capability-star
    identity docs, guarded by :write? false by default."
   (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [futon2.aif.a4a :as a4a]
             [futon2.aif.actuator-a3 :as a3]))
 
@@ -97,6 +98,20 @@
   [path]
   (edn/read-string (slurp path)))
 
+(defn- readable-file?
+  [path]
+  (let [file (io/file path)]
+    (and (.isFile file) (.canRead file))))
+
+(defn- zero-pattern-grain-eig
+  []
+  {:pattern->constellation (sorted-map)
+   :mission->patterns (sorted-map)
+   :corpus-edges []
+   :constellation->eig (sorted-map)
+   :mission->eig (sorted-map)
+   :eig-fn (constantly 0.0)})
+
 (defn pattern->constellation
   [semilattice-clusters]
   (into (sorted-map)
@@ -120,25 +135,45 @@
               pattern applied]
           [(a4a/normalize-mission-id mission) (a4a/pattern-stem pattern)])))
 
-(defn load-pattern-grain-eig
+(defn- load-pattern-grain-eig*
   "Load the pattern-grain constellation EIG maps from EDN files.
 
    Pure file reads only: no Drawbridge. Returns the mission->eig table plus a
    two-argument EIG closure for efe/graph-efe-terms."
-  ([] (load-pattern-grain-eig {}))
   ([{:keys [semilattice-clusters-path mission-pattern-scopes-path]
      :or {semilattice-clusters-path default-semilattice-clusters-path
           mission-pattern-scopes-path default-mission-pattern-scopes-path}}]
-   (let [clusters (read-edn-file semilattice-clusters-path)
-         scopes (read-edn-file mission-pattern-scopes-path)
-         p->c (pattern->constellation clusters)
-         m->patterns (mission->patterns scopes)
-         edges (corpus-edges scopes)
-         c->eig (a4a/constellation->eig p->c edges)
-         m->eig (a4a/mission->eig m->patterns p->c c->eig)]
-     {:pattern->constellation p->c
-      :mission->patterns m->patterns
-      :corpus-edges edges
-      :constellation->eig c->eig
-      :mission->eig m->eig
-      :eig-fn (a4a/make-eig-fn m->eig)})))
+   (if (and (readable-file? semilattice-clusters-path)
+            (readable-file? mission-pattern-scopes-path))
+     (try
+       (let [clusters (read-edn-file semilattice-clusters-path)
+             scopes (read-edn-file mission-pattern-scopes-path)
+             p->c (pattern->constellation clusters)
+             m->patterns (mission->patterns scopes)
+             edges (corpus-edges scopes)
+             c->eig (a4a/constellation->eig p->c edges)
+             m->eig (a4a/mission->eig m->patterns p->c c->eig)]
+         {:pattern->constellation p->c
+          :mission->patterns m->patterns
+          :corpus-edges edges
+          :constellation->eig c->eig
+          :mission->eig m->eig
+          :eig-fn (a4a/make-eig-fn m->eig)})
+       (catch Exception _
+         (zero-pattern-grain-eig)))
+     (zero-pattern-grain-eig))))
+
+(def ^:private memoized-load-pattern-grain-eig
+  (memoize load-pattern-grain-eig*))
+
+(defn load-pattern-grain-eig
+  "Load the pattern-grain constellation EIG maps from EDN files.
+
+   Results are memoized by path options. If the static files are absent or
+   unreadable, returns a zero EIG closure so default-armed ranking remains
+   hermetic."
+  ([] (load-pattern-grain-eig {}))
+  ([opts]
+   (memoized-load-pattern-grain-eig
+    (select-keys opts [:semilattice-clusters-path
+                       :mission-pattern-scopes-path]))))

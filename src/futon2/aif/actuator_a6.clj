@@ -10,6 +10,12 @@
   (:import (java.time Instant)
            (java.util Date)))
 
+(def ^:dynamic *pattern-grain-eig?*
+  "Operator arm for pattern-grain constellation EIG in A6 ranking.
+   Default true: R13 pattern-grain EIG is armed. Explicit
+   :pattern-grain-eig? opts override this var."
+  true)
+
 (defn- q-form
   [query & args]
   (pr-str `(do
@@ -116,9 +122,15 @@
            capability-graph
            (status-rows opts))))
 
+(defn- pattern-grain-eig-enabled?
+  [opts]
+  (if (contains? (or opts {}) :pattern-grain-eig?)
+    (:pattern-grain-eig? opts)
+    *pattern-grain-eig?*))
+
 (defn- with-pattern-grain-eig
   [rank-opts opts]
-  (if (and (:pattern-grain-eig? opts)
+  (if (and (pattern-grain-eig-enabled? opts)
            (not (:eig-fn rank-opts)))
     (assoc rank-opts :eig-fn (:eig-fn (a4a-substrate/load-pattern-grain-eig opts)))
     rank-opts))
