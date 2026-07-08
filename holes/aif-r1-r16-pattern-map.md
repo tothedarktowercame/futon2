@@ -8,18 +8,23 @@
 implementation"** and show exactly where the seam is.
 
 **Status legend:** ✓ real (built + load-bearing) · ◐ half (present but partial / apparatus-only /
-starved) · ○ aspirational (claimed or N/A, not actually there).
+starved) · **◐→ built (dark)** = code exists + reviewed, flag-gated OFF, awaiting an operator arm
+(built but not yet load-bearing) · ○ aspirational (claimed or N/A, not actually there). **The sweep
+this session moved most R10–R16 rows from ◐/○ to ◐→ built (dark)** — every code box now exists;
+arming is the operator surface between built and live.
 
 **The shape of the honesty:** R1–R9 (the *deliberation* core) are largely ✓. R10–R16 (the
 *loop* — live operation, hierarchy, accumulation, policy discrimination, precision-with-real-
-variance, closure) degrade from ◐ to ○. **R16 is the exhibit** — it was announced *closed*
-and was in fact a mirror.
+variance, closure) were where the loop degraded to ○; **this session they were BUILT (dark)** —
+every code box now exists, flag-gated, arms pending (only R10 live-operation and R11 multi-agent
+stay ○). **R16 is the exhibit** — it was announced *closed* and was in fact a mirror; it is now
+grounded (actuation + closure built dark), which is a very different claim from *live*.
 
 | R | requirement | pattern (`library/aif/…`) | status | the honest reality |
 |---|---|---|---|---|
 | **R1** | Explicit belief state | `belief-state-operational-hypotheses` | ◐→ **easy half done** | Disaggregated (`3347575`): doc's "4/14" is STALE — **8** channels have likelihood models; the other 6 are **N/A-by-design** (externally-measured, no per-entity belief substrate — a fake mapping would be needed). So channel coverage is COMPLETE for the belief-derivable half. |
 | **R2** | Observation channel schema | `structured-observation-vector` | ✓ | 13 harmonized channels. Real. |
-| **R3** | Predictive-coding belief update | `predictive-coding-belief-update`, `status-gated-belief-update`, `decomposed-prediction-noise` | ◐→ **hard box BUILT (dark)** | R3a–d wired for 8 channels ✓. The hard half — R3d sign-aggregation — is now **WIRED** (`1d330fa`): `*r3d-multichannel?*` flag (default OFF, byte-identical) → 8-channel **signed precision-weighted average** `Σ(sign·prec·err)/Σ(prec)`. Tested (58/1330): the 2026-05-18 case aggregates to **+0.006** (coherent) vs naive **−0.22** (cancels) — the fix works. Residual: per-entity attribution + the flip-on decision (still dark). |
+| **R3** | Predictive-coding belief update | `predictive-coding-belief-update`, `status-gated-belief-update`, `decomposed-prediction-noise` | ◐→ **hard box BUILT (dark)** | R3a–d wired for 8 channels ✓. The hard half — R3d sign-aggregation — is now **WIRED** (`1d330fa`): `*r3d-multichannel?*` flag (default OFF, byte-identical) → 8-channel **signed precision-weighted average** `Σ(sign·prec·err)/Σ(prec)`. Tested (58/1330): the 2026-05-18 case aggregates to **+0.006** (coherent) vs naive **−0.22** (cancels) — the fix works. Residual: only the **fine per-channel** per-entity attribution (research-level — global channels have no per-entity decomposition) + the flip-on; the **coarse per-entity attribution is already BUILT + LIVE** in the judge (`war_machine.clj:3806-3833`, `e5be48f`). No unbuilt code. |
 | **R4** | Predictive forward model | `shared-kernel-predictive-forward-model` | ✓ | Shape is real. |
 | **R5** | EFE with ≥2 principled terms | `expected-free-energy-scorecard`, `belief-aware-risk-term`, `predictive-entropy-as-ambiguity` | ◐→ **EIG wired (BUILT dark)** | Disaggregated (`b28ebf3`): NOT ◐-in-the-middle. **nats-risk** (`:kl`, the hard part, arena-flipped 2026-07-04) ✓ · **nats-ambiguity** (`:gaussian-entropy`, built/validated/provenance-ready, library-default dark) ✓ · **EIG** = the open third — now **BUILT (dark, `25b1b8f`, codex-2/claude-5)**: `{constellation→stddev} → mission-EIG → −λ·EIG` at pattern grain (194 missions resolve to non-zero EIG). `G = risk + ambiguity − EIG` has all three legs; the hard part of R5 is done. Flag-gated `:pattern-grain-eig?` (default OFF; arm = Joe). Caveat: the EIG is the coarse ~1/√evidence signal (not fine-grained). |
 | **R6** | Softmax selection with abstain | `candidate-pattern-action-space` | ✓ | Real. |
@@ -32,7 +37,7 @@ and was in fact a mirror.
 | **R13** | Policy adequacy (multi-step G(π)) | `hierarchical-budget-aware-action-selection` (+ `futon2.aif.rollout`) | ◐→ **G-ties BROKEN (dark)** | Rollout witness passes (2-step beats greedy), but live-ranking integration is partial, acting is HELD, and the **G-ties false-floor** left ranks 2+ tied at 2.09. **FIXED (BUILT dark, `25b1b8f`): the pattern-grain EIG wire (`− λ·EIG`) BREAKS the tie — two missions tied at G-total 0.543 separate to 0.39445 vs 0.41766 (higher EIG → lower G → explores). Discrimination proof holds (≥1 real tie separated; minimal by design). Flag-gated `:pattern-grain-eig?`, arm = Joe.** |
 | **R14** | Precision over policies (γ) | `policy-precision-commitment-temperature` | ◐→ **live-wire BUILT (dark)** | The grounding half is done and the **live-wire migration is now coded** (`d36086f`): `*gamma-grounded-feed?*` (default OFF, byte-identical) routes γ's realized feed to the A5 **substrate dial** instead of coverage-ΔG. What remains is **not code** — the two operator arms (`*live-wire?*`, then `*gamma-grounded-feed?*`) + real fold-variance data. γ stays starved of variance until armed. |
 | **R15** | Hierarchical / temporal depth | `temporal-depth-beyond-greedy` ✎new | ◐→ **hierarchy SLICE built** | depth-1 apparatus ✓; horizon-H + temporal discount ✓ (`056dcc5`); and the fast/slow **hierarchy now has a built scoped slice** (`32b9429`, `futon2.aif.temporal-hierarchy`): a slow-loop strategic mode parameterizes the fast loop's priors + costs (−ln(weight) KL penalty), flipping the fast-loop decision (exploitation→close-fast, exploration→advance-cap) **horizon-independently** — proved compositional, not sequential depth (`hierarchy-is-not-rollout-depth`). Remainder (research-level): full nested generative model — slow-loop EFE, learned transitions, multi-level. |
-| **R16** | Closed action–perception loop | `grounded-actuation-not-reobservation` ✎new | ○→◐ | **THE EXHIBIT.** Announced *closed* 2026-07-02; was **artifact-only** — the executor re-observed the diagram it had just built and called the coverage-ΔG "realized." This session grounded the *actuation* half (provable substrate witness + CLean structure check + build-match), moving it ○→◐. The *closure* half — re-observation changing the next decision — is still deferred (it needs R12 + R13). |
+| **R16** | Closed action–perception loop | `grounded-actuation-not-reobservation` ✎new | ○→◐→ **built dark** | **THE EXHIBIT.** Announced *closed* 2026-07-02; was **artifact-only** — the executor re-observed the diagram it had just built and called the coverage-ΔG "realized." This session grounded the *actuation* half (provable substrate witness + CLean structure check + build-match), moving it ○→◐. The *closure* half — re-observation changing the next decision — needed R12 + R13, and **both are now BUILT (dark) this session**: R12 filled (embedding + BMR-EIG), R13's G-ties broken by the EIG wire (`25b1b8f`), plus the A6 re-rank (discharge → EIG → re-rank) and an **operational witness** (a `core.logic` relation proving discharge inverts the ranking, `false` on a mirror). So the closure is **built dark** too — what remains is the operator arms, not code. **R16: ○→◐→ built dark (arms pending).** |
 
 ## The three new patterns (now written, `library/aif/`)
 
@@ -53,10 +58,11 @@ and was in fact a mirror.
 ## R17 — Structure Learning: the sequel mechanism (in design)
 
 R1–R16 above is the deliberator and its gaps. **R17 (structure learning) is not a 17th row of the
-same table** — it is the *mechanism now being built* to move four of the ◐/○ rows above from
-*dreamed* to *real*. Written as **design patterns** (the design is proposable before the wiring
-lands), with honest, **now partly-resolved** status (see the honest-status note below — the
-pattern-grain run reframed this section).
+same table** — it is the *mechanism that has now MOVED* four of the ◐/○ rows above from *dreamed* to
+**built (dark)**: R12 (filled), R13 (G-ties broken), R5 (EIG wired), R14 (γ variance leg) — all
+flag-gated, arms pending. Written as **design patterns** (the design was proposable before the wiring
+landed), with honest, **now-resolved** status (see the honest-status note below — the pattern-grain
+run reframed this section, and `25b1b8f` wired it).
 
 | R17 asset | pattern (`library/aif/…`) | status | what it targets above |
 |---|---|---|---|
@@ -103,36 +109,39 @@ EFE term now carries real epistemic value and the G-ties floor is broken (≥1 t
 
 Each ◐ requirement is decomposed into a **`clean_argcheck`-valid CLean**; the unbuilt boxes are
 typed holes (build-match-checkable). The ◐ stops being a glyph and points at *exactly* what remains —
-and it captures statuses the glyph cannot, like R13's **built-but-inert** box. (This is the structural
+and it captures statuses the glyph cannot, like R14's **built-but-arm-gated** box or R15's **slice-built, remainder-named** box. (This is the structural
 form of the preregistration: the unbuilt boxes are the precise committed remaining work.)
 
 | R | decomposition | unbuilt boxes | the box that remains |
 |---|---|---|---|
 | **R1** | `R1-decomposition` | **0** | done-for-derivable — the 6 remaining channels are N/A-by-design (out of scope, not holes) |
-| **R3** | `R3-decomposition` | 1 | `sign-aggregation` — approved design, DARK; flag-gated live wiring remains |
+| **R3** | `R3-decomposition` | **0** | `sign-aggregation` BUILT (`1d330fa`, dark) + per-entity attribution BUILT+LIVE (`e5be48f`); only fine per-channel (research-level) + the flip remain — no unbuilt code |
 | **R5** | `R5-decomposition` | **0** | `EIG` — **BUILT dark** (`25b1b8f`): pattern-grain `{constellation→stddev} → mission-EIG → −λ·EIG`; flag-gated `:pattern-grain-eig?`, arm = Joe |
 | **R12** | `R12-decomposition` | **0** | FILLED — `accumulate` ✓ (pattern corpus exists) + `concept-formation` ✓ (embedding + BMR-EIG); the ranker-wire is R5/R13's box, not R12's |
 | **R13** | `R13-decomposition` | **0** | `discrimination` — **BUILT dark** (`25b1b8f`): the pattern-grain EIG breaks the G-ties floor (≥1 tie separated); flag-gated, arm = Joe |
 | **R14** | `R14-decomposition` | **1** (+arm) | `live-wire` **BUILT dark** (`d36086f`); only `accumulate` (a data dependency) + the operator arms remain — no unbuilt code |
 | **R15** | `R15-decomposition` | 1 (partial) | `hierarchy` — **SLICE built** (`32b9429`: slow→fast prior/cost parameterization, horizon-independent); remainder = full nested generative model (slow-loop EFE, learned transitions, multi-level) |
 
-**Of the original 7 unbuilt boxes: 2 are now BUILT dark** (R3 `sign-aggregation` `ced3aec`, R14
-`live-wire` `d36086f`, both flag-gated default-OFF), **R12 is FILLED** (embedding-clustering +
-BMR-EIG at pattern grain — see R17 below), R13 `discrimination` is built-but-inert, and **R15's
-hierarchy SLICE is built** (`32b9429`; only its research-level nested-model remainder is open). The
-**the last unbuilt code box (R5-EIG / R13-signal) is now BUILT** (`25b1b8f`, codex-2/claude-5,
-2026-07-08): {constellation → EIG} wired into the pattern-grain ranker via claude-4's grain-agnostic
-`:eig-fn` — the EFE term carries real epistemic value and the G-ties floor is broken (a real tie
-separated 0.543 → 0.39445 vs 0.41766). Flag-gated `:pattern-grain-eig?` (arm = Joe). **So the entire
-R1–R16 loop now has ZERO unbuilt code boxes** — every box is built; what remains is operator arms
-(the flag flips: `:pattern-grain-eig?`, `*gamma-grounded-feed?*`, `*live-wire?*`, `*r3d-multichannel?*`)
-and named research-level remainders (R15 nested model, R3 fine per-channel attribution). Caveat: the
-EIG is the coarse ~1/√evidence signal; the discrimination proof is the minimal ≥1 separation.
+**Of the original 7 unbuilt boxes, ALL are now built or filled** (dark, flag-gated): R1
+done-for-derivable; R3 `sign-aggregation` (`1d330fa`) + per-entity attribution (`e5be48f`); R5 + R13
+`EIG`/`discrimination` (`25b1b8f` — the last box, a real tie separated 0.543 → 0.39445 vs 0.41766);
+R12 FILLED (embedding + BMR-EIG); R14 `live-wire` (`d36086f`); R15 hierarchy SLICE (`32b9429`). **So
+the entire R1–R16 loop now has ZERO unbuilt code boxes** — every box is built. What remains is (a) the
+operator **ARM surface** — the flag flips (`:pattern-grain-eig?`, `*gamma-grounded-feed?*`,
+`*live-wire?*`, `*r3d-multichannel?*`), each Joe's call; and (b) named research-level remainders (R15
+full nested model, R3 fine per-channel attribution). **Built, not live** — the honest distinction: the
+loop is fully constructed and dark; arming it is the remaining operator decision, not a coding task.
+Per-box caveats stand (the EIG is coarse ~1/√evidence; the R13 discrimination proof is the minimal ≥1
+separation).
 
 ## The headline for the paper
 
-R1–R9 are a real active-inference **deliberator**. R10–R16 are where the loop was **dreamed**:
-live operation disabled, no hierarchy, no accumulation, a policy that doesn't discriminate, a γ
-starved of variance, and a closure that was a mirror. The honest sequel is *not* "we closed the
-loop" — it is **"here are 16 named requirements; here is which ones are real, which are half, and
-which we mistook a reflection for."** The half-way state is the contribution.
+R1–R9 are a real active-inference **deliberator**. R10–R16 are where the loop was **dreamed** — and
+this session **built** (dark): a hierarchy slice, accumulation filled, a policy that now discriminates
+(the G-ties floor broken), a γ with a grounded substrate feed, and a closure grounded against an
+ungameable witness. But **built is not live**: every box is flag-gated dark, and arming them is the
+operator's call (only R10 live-operation and R11 multi-agent remain ○). So the honest sequel is *not*
+"we closed the loop" and *not yet* "the loop runs" — it is **"here are 16 named requirements; here is
+which ones are real, which are built-but-dark, and which we mistook a reflection for — and here is the
+single operator surface (the arms) between built and live."** The half-way-to-armed state is the
+contribution.
