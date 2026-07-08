@@ -28,7 +28,17 @@
     {:endpoint "CapabilityHypergraph"
      :kind :hyperedge
      :type :capability/*
-     :endpoint-types [:capability :mission/doc]}]})
+     :endpoint-types [:capability :mission/doc]}]
+
+   "futon3c-d/mission/autoclock-in"
+   [{:endpoint "DurableClockEdge"
+     :kind :hyperedge
+     :type :clock/clocked-on
+     :endpoint-types [:person :mission/doc]}
+    {:endpoint "ReconstitutableLineage"
+     :kind :hyperedge
+     :type :held/on-mission
+     :endpoint-types [:held/item :mission/doc]}]})
 
 (def reviewed-box-bindings
   {"futon5a-d/mission/learning-loop"
@@ -36,7 +46,20 @@
          :type :capability}
     :b7 {:kind :hyperedge
          :type :capability/*
-         :endpoint-types [:capability :mission/doc]}}})
+         :endpoint-types [:capability :mission/doc]}}
+
+   "futon3c-d/mission/autoclock-in"
+   {:s1 {:kind :entity
+         :type :mission/doc}
+    :s2 {:kind :hyperedge
+         :type :clock/clocked-on
+         :endpoint-types [:person :mission/doc]}
+    ;; s3 :single-active-spoiled — unbound: abstract (spoiled guard / process invariant)
+    ;; s4 :single-active-invariant — unbound: abstract (order-independence theorem)
+    ;; s5 :witnessed-clock — unbound: abstract (witness is a prop on the s2 edge, not a separate type)
+    :s6 {:kind :hyperedge
+         :type :held/on-mission
+         :endpoint-types [:held/item :mission/doc]}}})
 
 (defn- admin-token []
   (try (str/trim (slurp default-admin-token-path))
