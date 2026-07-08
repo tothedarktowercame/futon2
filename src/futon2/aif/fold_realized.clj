@@ -111,13 +111,32 @@
       clean' (assoc :clean clean')
       box-bindings (assoc :box-bindings box-bindings))))
 
+(defn- fold-plan-coverage
+  [deposit]
+  (some (fn [[source wiring]]
+          (when-let [coverage (fe/coverage wiring)]
+            {:expected-source source
+             :predicted-coverage coverage}))
+        [[:fold-coverage (get-in deposit [:turn :answer])]
+         [:fold-coverage (:wiring deposit)]]))
+
+(defn- expected-remaining
+  [bound deposit]
+  (if-let [{:keys [expected-source predicted-coverage]} (fold-plan-coverage deposit)]
+    {:expected-G (long (Math/round (double (* bound (- 1.0 predicted-coverage)))))
+     :expected-source expected-source
+     :predicted-coverage predicted-coverage}
+    {:expected-G 0
+     :expected-source :perfection-target}))
+
 (defn realized-outcome-grounded
   "A5 grounded realized outcome: read the WORLD dial via A3 build-match.
 
    `:realized-G` is the remaining count of bound CLean boxes whose reviewed
    substrate endpoints are not inhabited: `bound - inhabited`. `:expected-G` is
-   0 for the discharge action target: fully discharged. Both legs are endpoint
-   counts, never coverage-ΔG mixed with substrate state."
+   the fold's predicted remaining endpoint count when a fold plan is present,
+   otherwise an explicitly labelled perfection-target fallback. Both legs are
+   endpoint counts, never coverage-ΔG mixed with substrate state."
   ([mission-id decision] (realized-outcome-grounded mission-id decision {}))
   ([mission-id {:keys [policy tick] :as _decision} opts]
    (let [deposit (grounded-deposit mission-id opts)
@@ -125,11 +144,14 @@
          bound (count snapshot)
          inhabited (count (filter :inhabited? snapshot))
          remaining (when (pos? bound) (- bound inhabited))
-         expected 0
-         exact? (and (number? remaining) (= expected remaining))]
+         expected (expected-remaining bound deposit)
+         expected-g (:expected-G expected)
+         exact? (and (number? remaining) (= expected-g remaining))]
      (cond-> {:policy (or policy mission-id)
               :mission (:mission deposit mission-id)
-              :expected-G expected
+              :expected-G expected-g
+              :expected-source (:expected-source expected)
+              :predicted-coverage (:predicted-coverage expected)
               :realized-G remaining
               :realized-source :substrate-dial
               :scale :endpoint-count
@@ -138,7 +160,7 @@
                      :remaining remaining
                      :discharged? (and (pos? bound) (zero? remaining))}
               :box-snapshot snapshot
-              :anti-tautology-flag (when exact? :exact-grounded-discharge)}
+              :anti-tautology-flag (when exact? :exact-grounded-forecast)}
        (or tick (:tick opts)) (assoc :tick (or tick (:tick opts)))))))
 
 (defn with-realized-outcome

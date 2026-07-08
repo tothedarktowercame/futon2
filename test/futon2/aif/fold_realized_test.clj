@@ -20,6 +20,12 @@
   (assoc (get (a3/deposits-by-id) "ft-learning-loop-010")
          :clean (learning-loop-clean)))
 
+(defn- with-fold-forecast
+  [deposit box-count hole-count]
+  (assoc-in deposit [:turn :answer]
+            {:boxes (mapv (fn [i] {:id (keyword (str "f" i))}) (range box-count))
+             :policy-holes (mapv (fn [i] {:free (str "h" i)}) (range hole-count))}))
+
 (deftest realized-outcome-of-builds-the-contract-record
   (testing "the four committed keys; both G legs the same EFE quantity"
     (let [ro (fr/realized-outcome-of {:policy "M-x" :expected-G -0.5} enacted 7)]
@@ -39,12 +45,14 @@
     (let [ro (fr/realized-outcome-grounded
               "futon5a-d/mission/learning-loop"
               {:policy "futon5a-d/mission/learning-loop" :tick 101})]
-      (is (= 0 (:expected-G ro)))
+      (is (= 1 (:expected-G ro)))
+      (is (= :fold-coverage (:expected-source ro)))
       (is (= 1 (:realized-G ro)))
       (is (= :substrate-dial (:realized-source ro)))
       (is (= :endpoint-count (:scale ro)))
       (is (= {:inhabited 1 :bound 2 :remaining 1 :discharged? false}
              (:dial ro)))
+      (is (= :exact-grounded-forecast (:anti-tautology-flag ro)))
       (is (= 101 (:tick ro)))))
   (testing "fully inhabited bound boxes produce realized-G 0"
     (let [deposit (assoc (learning-loop-deposit-with-clean)
@@ -53,11 +61,9 @@
           ro (fr/realized-outcome-grounded (:mission deposit)
                                            {:policy (:mission deposit)}
                                            {:deposit deposit})]
-      (is (= 0 (:expected-G ro)))
       (is (= 0 (:realized-G ro)))
       (is (= {:inhabited 2 :bound 2 :remaining 0 :discharged? true}
-             (:dial ro)))
-      (is (= :exact-grounded-discharge (:anti-tautology-flag ro)))))
+             (:dial ro)))))
   (testing "A5 is falsified if it reports reproduction coverage instead of substrate state"
     (let [deposit (learning-loop-deposit-with-clean)
           grounded (fr/realized-outcome-grounded (:mission deposit)
@@ -72,6 +78,47 @@
       (is (= -1.0 (:realized-G reproduction)))
       (is (not= (:realized-G reproduction) (:realized-G grounded))
           "grounded realized-G must be the substrate dial, not coverage over reproduced wiring"))))
+
+(deftest realized-outcome-grounded-expected-leg-is-two-sided
+  (testing "low fold forecast plus high build gives positive performance"
+    (let [deposit (-> (learning-loop-deposit-with-clean)
+                      (assoc :box-bindings {:b1 {:kind :entity :type :capability}
+                                            :b7 {:kind :entity :type :capability}})
+                      (with-fold-forecast 1 3))
+          ro (fr/realized-outcome-grounded (:mission deposit)
+                                           {:policy (:mission deposit)}
+                                           {:deposit deposit})
+          perf (pp/policy-performance (:expected-G ro) (:realized-G ro))]
+      (is (= 2 (:expected-G ro)))
+      (is (= 0 (:realized-G ro)))
+      (is (= :fold-coverage (:expected-source ro)))
+      (is (pos? perf) "build beat forecast, so gamma can commit")))
+  (testing "high fold forecast plus low build gives negative performance"
+    (let [absent-type :a5-test/no-such-grounded-endpoint
+          deposit (-> (learning-loop-deposit-with-clean)
+                      (assoc :box-bindings {:b1 {:kind :entity :type absent-type}
+                                            :b7 {:kind :entity :type absent-type}})
+                      (with-fold-forecast 3 0))
+          ro (fr/realized-outcome-grounded (:mission deposit)
+                                           {:policy (:mission deposit)}
+                                           {:deposit deposit})
+          perf (pp/policy-performance (:expected-G ro) (:realized-G ro))]
+      (is (= 0 (:expected-G ro)))
+      (is (= 2 (:realized-G ro)))
+      (is (= :fold-coverage (:expected-source ro)))
+      (is (neg? perf) "build missed forecast, so gamma can hedge")))
+  (testing "hand-authored CLean without fold plan falls back loudly"
+    (let [deposit (-> (learning-loop-deposit-with-clean)
+                      (dissoc :turn :wiring)
+                      (assoc :box-bindings {:b1 {:kind :entity :type :capability}
+                                            :b7 {:kind :entity :type :capability}}))
+          ro (fr/realized-outcome-grounded (:mission deposit)
+                                           {:policy (:mission deposit)}
+                                           {:deposit deposit})]
+      (is (= 0 (:expected-G ro)))
+      (is (= :perfection-target (:expected-source ro)))
+      (is (nil? (:predicted-coverage ro)))
+      (is (= :exact-grounded-forecast (:anti-tautology-flag ro))))))
 
 (deftest staging-is-off-by-default
   (testing "staged-off ⇒ judge-output UNCHANGED ⇒ no :realized-outcome key ⇒ γ holds"
