@@ -56,14 +56,16 @@
     (is (every? #(<= 0.0 %) (vals pref/pragmatic-weights)))))
 
 (deftest channel-health-signs-test
-  (testing "v0.16: channel-health-signs covers the 4 R3a-likelihood channels"
-    (is (= #{:annotation-health :sorry-count-norm :mission-health :active-repo-ratio}
+  (testing "R3d (1d330fa): channel-health-signs covers all 8 R3-aggregation channels"
+    (is (= #{:annotation-health :sorry-count-norm :mission-health :active-repo-ratio
+             :support-coverage :attack-coverage :coupling-density :ticks-firing-ratio}
            (set (keys pref/channel-health-signs)))
-        "signs declared for the 4 R3a-covered channels"))
+        "signs declared for the 8 channels the R3d multi-channel aggregation combines"))
   (testing "signs are +1 or -1"
     (is (every? #{1 -1} (vals pref/channel-health-signs))))
   (testing ":sorry-count-norm is inverted (-1) because high values = unhealthy"
     (is (= -1 (get pref/channel-health-signs :sorry-count-norm))))
-  (testing "other 3 channels are +1 (high = healthy)"
-    (doseq [ch [:annotation-health :mission-health :active-repo-ratio]]
+  (testing "the other 7 channels are +1 (high = healthy)"
+    (doseq [ch [:annotation-health :mission-health :active-repo-ratio
+                :support-coverage :attack-coverage :coupling-density :ticks-firing-ratio]]
       (is (= +1 (get pref/channel-health-signs ch))))))

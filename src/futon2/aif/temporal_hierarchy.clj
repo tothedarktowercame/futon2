@@ -114,11 +114,13 @@
   Two effects (both make the hierarchy REAL, not cosmetic):
   1. PRIOR shaping — the `:prior` field is multiplied by the mode weight
      (affects which moves the rollout explores via `renormalize-priors`).
-  2. COST modulation — the effective `:delta-g` gets a prior-bonus term:
-     `delta-g + ln(weight)` (negative bonus for favored classes). This is
-     the AIF KL-divergence intuition: moves aligned with the prior get a
-     free-energy bonus. The original `:delta-g` is preserved as
-     `:delta-g-base` for traceability.
+  2. COST modulation — the effective `:delta-g` gets a prior-penalty term:
+     `delta-g - ln(weight)` (a POSITIVE penalty when weight < 1, smaller for
+     favored classes). This is the AIF KL-divergence intuition: deviating
+     from the slow loop's prior costs free energy, and favored classes pay
+     less — so a HIGH-weight class ends up with the LOWER effective G (more
+     desirable). The original `:delta-g` is preserved as `:delta-g-base` for
+     traceability.
 
   A move whose class has no mode-weight is left untouched. This is honest:
   the slow loop shapes the classes it knows about, not all classes.
