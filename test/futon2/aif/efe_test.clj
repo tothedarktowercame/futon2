@@ -556,16 +556,17 @@
               :graph-ascent-weight 0.0}
         action-a {:type :open-mission :target "M-a"}
         action-b {:type :open-mission :target "M-b"}
+        eig-of (fn [m] (fn [produces] (reduce + 0.0 (map #(double (get m % 0.0)) produces))))
         no-eig (efe/compute-efe base-state action-a opts)
-        empty-eig (efe/compute-efe base-state action-a (assoc opts :eig-lookup {}))
+        empty-eig (efe/compute-efe base-state action-a (assoc opts :eig-fn (eig-of {})))
         high-eig (efe/compute-efe base-state action-a
-                                  (assoc opts :eig-lookup {:cap-a 2.5}))
+                                  (assoc opts :eig-fn (eig-of {:cap-a 2.5})))
         absent-eig (efe/compute-efe base-state
                                     {:type :open-mission :target "M-missing"}
-                                    (assoc opts :eig-lookup {:cap-a 2.5}))
+                                    (assoc opts :eig-fn (eig-of {:cap-a 2.5})))
         tie-before (efe/rank-star-map-actions base-state [action-a action-b] opts)
         tie-after (efe/rank-star-map-actions base-state [action-a action-b]
-                                             (assoc opts :eig-lookup {:cap-b 3.0}))]
+                                             (assoc opts :eig-fn (eig-of {:cap-b 3.0})))]
     (testing "default empty lookup preserves G-total while surfacing a zero distinct leg"
       (is (= (:G-total no-eig) (:G-total empty-eig)))
       (is (zero? (:G-eig-bmr empty-eig)))

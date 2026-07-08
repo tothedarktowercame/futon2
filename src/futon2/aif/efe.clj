@@ -160,14 +160,14 @@
    relabel)."
   [graph goal action {:keys [graph-applicability-penalty graph-body-weight graph-ascent-weight
                              graph-off-map-penalty graph-body-mode
-                             graph-ascent-status-aware? eig-lookup eig-weight]
+                             graph-ascent-status-aware? eig-fn eig-weight]
                       :or {graph-applicability-penalty default-graph-applicability-penalty
                            graph-body-weight default-graph-body-weight
                            graph-ascent-weight default-graph-ascent-weight
                            graph-off-map-penalty default-graph-off-map-penalty
                            graph-body-mode :whole
                            graph-ascent-status-aware? false
-                           eig-lookup {}
+                           eig-fn (constantly 0.0)
                            eig-weight default-eig-weight}}]
   (let [mission-id (:target action)
         mission (mission-node graph mission-id)]
@@ -178,9 +178,7 @@
               progress (double (mission-ascent-progress graph goal mission-id
                                                         graph-ascent-status-aware?))
               eig-bmr (* (double eig-weight)
-                         (reduce + 0.0
-                                 (map #(double (get eig-lookup % 0.0))
-                                      (:produces mission))))
+                         (double (eig-fn (:produces mission))))
               applicability (if applicable? 0.0 (double graph-applicability-penalty))
               body (case graph-body-mode
                      :leaf (* (double graph-body-weight)
@@ -433,8 +431,9 @@
    `:open-mission` actions when graph + goal are present. `:graph-body-mode`
    defaults to `:whole`; `:leaf` scores a bounded next-step body term. When
    `:graph-ascent-status-aware?` is true, ascent credit ignores produced
-   capabilities already marked `:satisfied`. `:eig-lookup` contributes a
-   distinct BMR epistemic-value leg over produced capabilities.
+   capabilities already marked `:satisfied`. `:eig-fn` is a function of a
+   mission's `:produces` returning its BMR epistemic-value leg (the injected
+   fn does resolve→distinct→sum internally); defaults to `(constantly 0.0)`.
 
    Result shape (B-2a honest labelling, M-aif-faithfulness §2.2): the output
    is a MULTI-OBJECTIVE ACTION SCORE WITH AN EFE CORE. `:G-core` (= risk +
@@ -450,7 +449,7 @@
                          time-pressure-scale horizon-steps capability-graph
                          pre-registered-goal graph-applicability-penalty
                          graph-body-weight graph-ascent-weight graph-off-map-penalty
-                         graph-body-mode graph-ascent-status-aware? eig-lookup eig-weight
+                         graph-body-mode graph-ascent-status-aware? eig-fn eig-weight
                          mission-gap-view
                          gap-weight goal-outcome-weight goal-outcome-entries goal-outcome-prob-fn
                          goal-outcome-mode
@@ -468,7 +467,7 @@
                        graph-off-map-penalty default-graph-off-map-penalty
                        graph-body-mode :whole
                        graph-ascent-status-aware? false
-                       eig-lookup {}
+                       eig-fn (constantly 0.0)
                        eig-weight default-eig-weight
                        gap-weight default-gap-weight
                        goal-outcome-weight cv/default-goal-outcome-weight
@@ -546,7 +545,7 @@
                                        graph-body-mode
                                        :graph-ascent-status-aware?
                                        graph-ascent-status-aware?
-                                       :eig-lookup eig-lookup
+                                       :eig-fn eig-fn
                                        :eig-weight eig-weight})
          gap-terms (gap-efe-terms mission-gap-view action
                                   {:gap-weight gap-weight})
