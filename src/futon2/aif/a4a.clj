@@ -200,6 +200,39 @@
                  [concept (rms (map :stddev (bmr/dirichlet-moments row)))]))
           (:concept-concentrations reduced))))
 
+(defn capability->concept
+  "Return {member-capability -> representative-concept} from reduced concepts.
+
+   In the no-merge case this is the identity map over singleton classes."
+  [reduced-concepts]
+  (into (sorted-map)
+        (mapcat (fn [[concept members]]
+                  (map (fn [member] [member concept]) members)))
+        (:equivalence-classes reduced-concepts)))
+
+(defn- resolve-capability
+  [resolver capability]
+  (or (get resolver capability)
+      (get resolver (stable-id capability))))
+
+(defn eig-for-produces
+  "Return epistemic value for a mission's produced capabilities.
+
+   Produced capabilities resolve through BMR equivalence classes; each distinct
+   concept contributes its stddev once, in endpoint-count units. Unknown
+   capabilities contribute 0."
+  [reduced-concepts produces-set]
+  (let [resolver (capability->concept reduced-concepts)
+        stddevs (concept->stddev reduced-concepts)
+        concepts (set (keep #(resolve-capability resolver %) produces-set))]
+    (reduce + 0.0 (map #(get stddevs % 0.0) concepts))))
+
+(defn make-eig-fn
+  "Return a pure EIG resolver closure suitable for injection by the A1 caller."
+  [reduced-concepts]
+  (fn [produces-set]
+    (eig-for-produces reduced-concepts produces-set)))
+
 (defn- uri-token
   [s]
   (URLEncoder/encode (str s) "UTF-8"))

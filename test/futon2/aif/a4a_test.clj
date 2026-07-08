@@ -101,6 +101,43 @@
     (is (= (select-keys reduced-1 [:concepts :equivalence-classes :concept-concentrations])
            (select-keys reduced-3 [:concepts :equivalence-classes :concept-concentrations])))))
 
+(deftest eig-for-produces-identity-no-merge
+  (let [reduced {:equivalence-classes {"c1" ["c1"]
+                                       "c2" ["c2"]
+                                       "c3" ["c3"]}
+                 :concept-concentrations {"c1" [3.1 1.1 0.1]
+                                          "c2" [0.1 2.1 2.1]
+                                          "c3" [1.1 0.1 4.1]}}
+        stddevs (a4a/concept->stddev reduced)]
+    (is (= {"c1" "c1" "c2" "c2" "c3" "c3"}
+           (a4a/capability->concept reduced)))
+    (is (= (+ (get stddevs "c1") (get stddevs "c2"))
+           (a4a/eig-for-produces reduced ["c1" "c2"])))))
+
+(deftest eig-for-produces-counts-merged-concept-once
+  (let [reduced (a4a/reduce-concepts synthetic-merge-corpus)
+        stddevs (a4a/concept->stddev reduced)]
+    (is (= {"A" "A" "B" "A" "C" "C"}
+           (a4a/capability->concept reduced)))
+    (is (= (get stddevs "A")
+           (a4a/eig-for-produces reduced ["A" "B"])))
+    (is (= (+ (get stddevs "A") (get stddevs "C"))
+           (a4a/eig-for-produces reduced ["A" "B" "C"])))))
+
+(deftest eig-for-produces-absent-and-empty
+  (let [reduced (a4a/reduce-concepts synthetic-merge-corpus)]
+    (is (= 0.0 (a4a/eig-for-produces reduced ["unknown"])))
+    (is (= 0.0 (a4a/eig-for-produces reduced [])))
+    (is (= 0.0 (a4a/eig-for-produces reduced nil)))))
+
+(deftest make-eig-fn-returns-deterministic-closure
+  (let [reduced (a4a/reduce-concepts synthetic-merge-corpus)
+        eig-fn (a4a/make-eig-fn reduced)
+        expected (a4a/eig-for-produces reduced ["A" "B" "C"])]
+    (is (= expected (eig-fn ["A" "B" "C"])))
+    (is (= (eig-fn ["A" "B" "C"])
+           (eig-fn ["A" "B" "C"])))))
+
 (deftest mint-stars-dry-run-does-not-write
   (let [called? (atom false)]
     (with-redefs [a3/drawbridge-submit-tx! (fn [& _]
