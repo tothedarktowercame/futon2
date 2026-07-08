@@ -103,9 +103,11 @@ The honest verb is <b>recovery + epistemic-quantification + candidate coarser-me
 </div>
 <p class="note">A clean fact for the roadmap: this all ran on <b>existing</b> co-application data with <b>zero substrate writes</b> — no operator "arm the write" was needed. The only remaining step to feed the ranker is a build (wire <code>{concept → EIG}</code> into the pattern-grain ranker), not an arm.</p>
 
-<h2>The next experiment — validate a single coarser merge</h2>
+<h2>The validation experiment — resolved: overreach</h2>
 <div class="next">
-<b>The experiment.</b> Take the one coarser merge BMR+embedding proposed that the constellations split — the <b>AIF-12</b> cluster spanning C2+C8+C1 — and test whether that boundary is <em>principled</em> against a signal independent of the embedding: a held-out split (do the C8/C1 members behave like the C2 core on missions the clustering didn't see?) or a discharge/usage signal (do they get used together in practice?).
+<b>Result (2026-07-08): OVERREACH.</b> The AIF-12 coarser merge did <b>not</b> validate — the recovery ceiling is <b>confirmed</b> and the constellation granularity is <b>vindicated</b>. Two embedding-independent signals weakened it (both verified independently): cross-boundary co-occurrence was <b>2.5× weaker</b> than within-core (mission Jaccard 0.163 vs 0.400), and cross-boundary live-cascade co-application was <b>8.6% vs 57.1%</b> within-core. The 5 added members were pulled in by cosine, not evidence. <b>Methodological payoff:</b> embedding-gated merges over-reach on cosine alone — a merge is real only when co-occurrence backs it, which is exactly why the constellations (embedding + citation-overlap, <em>jointly</em>) work. So this <em>sharpens</em> "AIF and Embeddings": not embedding-instead-of-co-occurrence, but the two together, with co-occurrence as the veto.
+<br><br>
+<b>The experiment (for the record).</b> We took the one coarser merge BMR+embedding proposed that the constellations split — the <b>AIF-12</b> cluster spanning C2+C8+C1 — and tested whether that boundary is <em>principled</em> against signals independent of the embedding: raw co-occurrence (do the C8/C1 members co-occur across missions with the C2 core as much as the core does with itself?) and live-cascade co-application (do they get used together in practice?).
 <br><br>
 <b>What we expect to take away.</b> One of two clean outcomes, either of which is worth having:
 <ul>
@@ -121,8 +123,8 @@ Either way we convert a <em>candidate</em> into a <em>fact</em> — which is the
 <tr><td>Concepts on real data (constellations)</td><td><span class="tag t-done">real</span></td><td>P0–P17, embedding + citation-overlap; cover the 118-pattern corpus.</td></tr>
 <tr><td>EIG per concept (BMR)</td><td><span class="tag t-done">real, verified</span></td><td><code>{constellation → posterior stddev}</code>, ~1/√evidence. The epistemic layer the constellations lacked.</td></tr>
 <tr><td>Naive count-BMR merges</td><td><span class="tag t-gap">fails at scale</span></td><td>over-merges to 1 concept at 94-dim; the empirical spine of "embedding is necessary."</td></tr>
-<tr><td>Coarser-merge learning (AIF-12)</td><td><span class="tag t-partial">candidate</span></td><td>a coherent cross-constellation merge; <b>next experiment validates it.</b></td></tr>
-<tr><td>Ranker integration (pattern grain)</td><td><span class="tag t-parked">ready to build</span></td><td>grain-agnostic <code>:eig-fn</code> injection landed; the <code>eig-for-patterns</code> re-key is the one remaining build (no operator arm).</td></tr>
+<tr><td>Coarser-merge learning (AIF-12)</td><td><span class="tag t-gap">overreach (validated)</span></td><td>cross-boundary co-occurrence 0.163 vs 0.400 within-core; live co-application 8.6% vs 57.1%. Cosine over-reach — constellation granularity vindicated, recovery ceiling confirmed.</td></tr>
+<tr><td>Ranker integration (pattern grain)</td><td><span class="tag t-done">BUILT (flag-off)</span></td><td><code>{constellation → EIG}</code> wired into the forward ranker (<code>25b1b8f</code>, reviewed); the <b>R13 tie-break is proven</b> — two missions tied at 0.543 separate to 0.394/0.418 by epistemic value. Flag <code>:pattern-grain-eig?</code> default-off; arm = operator (one flip, like the γ live-wire).</td></tr>
 </table>
 
 <p class="note">Reproduce: BMR/EIG numbers from <code>futon2.aif.bmr</code> + <code>futon2.aif.a4a</code> and <code>futon2/holes/labs/slush-demo/bmr_constellation_experiment.py</code> (over the real pattern-scopes corpus); constellations from <code>futon3c/holes/excursions/pipeline-semilattice-clusters.edn</code>; embeddings from <code>futon3a/resources/notions/bge_pattern_embeddings.json</code>.</p>
