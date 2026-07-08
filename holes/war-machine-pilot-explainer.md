@@ -35,33 +35,31 @@ every cycle ("tick"):
       yardstick every candidate is measured against
     • drift-fence: drop candidates that target already-superseded work
 
-  EVAL    ── score every candidate POLICY by Expected Free Energy G(π) ──
-    for each candidate policy π (a short action sequence, via a rollout of horizon H):
-        G_efe(π) = RISK(π)  +  AMBIGUITY(π)  −  EIG(π)      ← the faithful core
-              RISK      = how far π's predicted outcome sits from the belly's preferences
-              AMBIGUITY = how much uncertainty π's outcome would carry
-              EIG       = expected information gained (sought, so it SUBTRACTS)
-        G_total(π) = G_efe(π) + augmentation(π)             ← the controller's blend
+  EVAL    ── SELECT the task: score candidate ACTIONS by G(a) ──────
+    propose candidate actions a (advance a mission, address a hole, open one, abstain)
+    for each candidate action a:
+        G_efe(a)   = RISK(a) + AMBIGUITY(a) − EIG(a)        ← the faithful core   [G #1]
+        G_total(a) = G_efe(a) + augmentation(a)             ← the controller's blend
               augmentation = extra objectives (survival pressure, structural pressure, …)
-    rank policies by G_total; τ = temperature, sharpened by precision γ (τ_eff = τ/γ)
+    rank by G_total; SELECT via a γ-tempered softmax that abstains on a flat field
 
-  PRINT   ── recommend, with its reasons ──────────────────────────
-    pick = head of the argmin-G_total policy (softmax over policy scores) ← the recommended next task
-    surface: the task + its G_efe and G_total + why (the term breakdown)
-
-  ACT     ── (optional, gated) actually do it ─────────────────────
-    if enactment is armed AND a fitted plan ("fold") exists for the task:
-        build it into the real substrate; then re-observe the WORLD (not the plan)
-    otherwise: recommend only, and record why it didn't act
+  PRINT   ── recommend the selected task, then (if armed) act ──────
+    recommend = the SELECTED task; surface its G_efe and G_total + why (the breakdown)
+    if armed:  build a cascade of PATTERNS for that task; fold it → candidate wiring;
+               price the wiring with a SECOND, different G — a rollout G(π) over the
+               cascade (R13)                                                    [G #2]
+               act-gate on (ΔF > 0  ∧  ΔG < 0); enact the first pass into the
+               substrate, re-observing the WORLD (not the plan)
 
   LOOP    ── learn, then tick again ───────────────────────────────
-    observe the realized outcome; fold it into precision γ (confidence in the policy)
-    persist the trace; next tick starts from READ again
+    fold the realized outcome into precision γ (confidence in the policy)
+    persist the trace; belief μ is re-derived next tick, NOT carried (the R8 gap)
 ```
 
 Two things are worth naming against the FuLab original:
-- FuLab scored *patterns* by `softmax(−G/τ)`; the WM scores *policies* (short action
-  sequences, via rollout) the same way, over a much richer belief and a live preference belly.
+- There are **two G's**, at two stages: `G(a)` over candidate *actions* selects the task
+  (G #1, in EVAL); a separate rollout `G(π)` over the chosen task's *pattern-cascade*
+  act-gates it (G #2, in PRINT). FuLab had only the selection G; the act-gating G(π) is new.
 - FuLab's "belief update" tuned a single precision `τ` from an error proxy. The WM's
   learning is **γ (precision over policies)**, fed by a *grounded* realized outcome (see §4).
 
@@ -69,9 +67,10 @@ Two things are worth naming against the FuLab original:
 
 ## 3. What "recommended next task" means — and its AIF backing
 
-The recommendation is **not a heuristic pick**. It is the `softmax(−G/τ)` choice over ranked
-**policies** (short action sequences, scored by rollout); the task shown is the head of the
-best-scoring policy. Because the score decomposes,
+The recommendation is **not a heuristic pick**. It is the γ-tempered `softmax(−G/τ)` choice
+over ranked candidate **actions** (scored by `G(a)`), with a no-op abstain guard rather than a
+naive top-pick. (Whether it then *acts* on that task is a separate decision, priced by the
+*other* G — the rollout `G(π)` over the task's pattern-cascade; see §2.) Because the score decomposes,
 the recommendation carries its own justification, and you can read it straight off the trace:
 
 - **`:G-efe`** — the faithful Expected Free Energy (risk + ambiguity − EIG). This is the
