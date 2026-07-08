@@ -756,12 +756,13 @@
    :ticks-firing-ratio open-status-row})
 
 (def ^:dynamic *r3d-multichannel?*
-  "FLAG (default OFF): when true, the R3d belief-update driver aggregates
-   signed precision-weighted errors across all 8 likelihood channels
-   (using channel-health-signs). When false (default), the driver draws
-   from :annotation-health alone — byte-identical to pre-v0.25 behavior.
-   Flip is the operator's (arena-*-mode idiom)."
-  false)
+  "FLAG (default ON as of 2026-07-08, Joe-directed): when true, the R3d
+   belief-update driver aggregates signed precision-weighted errors across all 8
+   likelihood channels (using channel-health-signs). When false, the driver draws
+   from :annotation-health alone — byte-identical to pre-v0.25 behavior (bind
+   false to restore). Deliberation-side, world-inert: changes how belief updates
+   when the ranker runs; latent until R10 (the live loop) runs."
+  true)
 
 (def channel-health-signs
   "Per-channel health direction: +1 if high observed = healthy (positive

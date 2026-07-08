@@ -29,21 +29,25 @@
             [futon2.aif.fold-eval :as fe]))
 
 (def ^:dynamic *live-wire?*
-  "Off until enactment (`apply-cascade!`) is live-wired into the pilot (Joe's
-   call). Off ⇒ no `:realized-outcome` is produced (γ stays at the prior)."
-  false)
+  "Default ON as of 2026-07-08 (Joe-directed): enactment is live-wired. When ON,
+   the `:realized-outcome` is produced and rides the trace to γ. LATENT until R10
+   (the live loop) runs — arming this makes enactment live-CAPABLE, not
+   live-RUNNING; real substrate writes happen only when the loop is invoked. Bind
+   false to restore the no-op (γ stays at the prior)."
+  true)
 
 (def ^:dynamic *gamma-grounded-feed?*
-  "R14 live-wire migration (flag-gated, default OFF ⇒ byte-identical; a SEPARATE
+  "R14 live-wire migration (default ON as of 2026-07-08, Joe-directed; a SEPARATE
    arm from `*live-wire?*`). When ON — and only when `*live-wire?*` is also ON —
    the `:realized-outcome` feeding γ is the A5 SUBSTRATE DIAL
    (`realized-outcome-grounded`, bound−inhabited endpoint counts) instead of
    `realized-outcome-of` (coverage→ΔG, the reproduction mirror the R16 exhibit
-   named). Dark until armed because the grounded producer reads an A3
-   build-match snapshot — a live substrate read per enactment; the enact path is
-   `try`-wrapped so a read failure returns the judgement unchanged. Two arms, two
-   decisions (Joe): enactment-on, then grounded-feed-on."
-  false)
+   named). INERT UNTIL DATA: γ stays starved until real fold-variance flows, so
+   arming has no effect until a run produces grounded samples. The grounded
+   producer reads an A3 build-match snapshot (a live substrate read per
+   enactment); the enact path is `try`-wrapped so a read failure returns the
+   judgement unchanged. Bind false to restore coverage-ΔG."
+  true)
 
 (defn- realized-coverage
   "ZERO-COVERAGE SEMANTICS (claude-16 ruling, 2026-07-06, T-0 fix for the

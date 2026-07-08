@@ -120,16 +120,16 @@
       (is (nil? (:predicted-coverage ro)))
       (is (= :exact-grounded-forecast (:anti-tautology-flag ro))))))
 
-(deftest staging-is-off-by-default
-  (testing "staged-off ⇒ judge-output UNCHANGED ⇒ no :realized-outcome key ⇒ γ holds"
-    (let [jo {:belief {} :free-energy 0.0}]
-      (is (= jo (fr/with-realized-outcome jo {:policy "M-x" :expected-G -0.5} enacted 7)))
-      (is (not (contains? (fr/with-realized-outcome jo {:policy "M-x" :expected-G -0.5} enacted 7)
-                          :realized-outcome)))))
-  (testing "live-wired ⇒ the field is threaded on"
-    (binding [fr/*live-wire?* true]
-      (is (contains? (fr/with-realized-outcome {:belief {}} {:policy "M-x" :expected-G -0.5} enacted 7)
-                     :realized-outcome)))))
+(deftest staging-gates-on-live-wire
+  (testing "disarmed (*live-wire?* false) ⇒ judge-output UNCHANGED ⇒ no :realized-outcome ⇒ γ holds"
+    (binding [fr/*live-wire?* false]
+      (let [jo {:belief {} :free-energy 0.0}]
+        (is (= jo (fr/with-realized-outcome jo {:policy "M-x" :expected-G -0.5} enacted 7)))
+        (is (not (contains? (fr/with-realized-outcome jo {:policy "M-x" :expected-G -0.5} enacted 7)
+                            :realized-outcome))))))
+  (testing "armed (default ON as of 2026-07-08) ⇒ the field is threaded on"
+    (is (contains? (fr/with-realized-outcome {:belief {}} {:policy "M-x" :expected-G -0.5} enacted 7)
+                   :realized-outcome))))
 
 (deftest gamma-grounded-feed-routes-the-producer
   ;; R14 live-wire migration: *gamma-grounded-feed?* selects WHICH realized
@@ -140,8 +140,9 @@
                                                {:src :substrate-dial :mission-id mid :opts opts})]
     (let [jo {:belief {}}
           decision {:policy "M-p" :expected-G -0.5}]
-      (testing "grounded-feed OFF (default) ⇒ coverage producer even under live-wire"
-        (binding [fr/*live-wire?* true]
+      (testing "grounded-feed OFF (explicit) ⇒ coverage producer even under live-wire"
+        (binding [fr/*live-wire?* true
+                  fr/*gamma-grounded-feed?* false]
           (is (= :coverage (get-in (fr/with-realized-outcome jo decision enacted 7)
                                    [:realized-outcome :src])))))
       (testing "grounded-feed ON (+ live-wire) ⇒ substrate-dial, mission-id = (:policy decision)"
@@ -152,13 +153,17 @@
             (is (= "M-p" (:mission-id ro)) "mission-id derived from (:policy decision)")
             (is (= 7 (get-in ro [:opts :tick])) "tick threaded through opts"))))
       (testing "grounded-feed ON but live-wire OFF ⇒ still no realized-outcome (live-wire gates first)"
-        (binding [fr/*gamma-grounded-feed?* true]
+        (binding [fr/*gamma-grounded-feed?* true
+                  fr/*live-wire?* false]
           (is (not (contains? (fr/with-realized-outcome jo decision enacted 7)
                               :realized-outcome))))))))
 
 (deftest end-to-end-producer-to-trace-to-gamma
   (testing "producer → trace-record → reader → γ updates; then dedups on :tick"
-    (binding [fr/*live-wire?* true]
+    ;; pins the COVERAGE producer (realized-outcome-of) round-trip; grounded-feed
+    ;; is default-on since 2026-07-08, so bind it off to exercise this path.
+    (binding [fr/*live-wire?* true
+              fr/*gamma-grounded-feed?* false]
       (let [judge-output {:belief {} :observation {} :free-energy 0.0
                           :ranked-actions [] :decision nil :mode :sim}
             decision     {:policy "M-x" :expected-G -0.5}
