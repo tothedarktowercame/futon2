@@ -82,8 +82,18 @@ lacked — {constellation → posterior stddev}, ∝ 1/√α0, singletons 0.029 
 across; hub patterns bridge and weaken it). **This is the "AIF and Embeddings" thesis, empirically:
 the metric space makes structure learning tractable where pure BMR-over-counts collapses.** The
 honest verb is *structure-recovery + epistemic-quantification*, not *structure-learned-from-scratch*
-(the constellations are embedding-derived, semi-authored by Joe's semilattice). **In progress
-(control passed to claude-5, 2026-07-08):** wiring {constellation → EIG} into the ranker at pattern
+(the constellations are embedding-derived, semi-authored by Joe's semilattice). **This recovery
+ceiling is now EVIDENCED, not asserted:** the one candidate coarser-merge (the "AIF-12" cluster
+spanning C2+C8+C1, from cosine-gated BMR) was falsification-tested (claude-5/zai-13) and **rejected**
+by two embedding-independent signals — raw mission-Jaccard co-occurrence (within-C2 0.400 vs
+cross-boundary 0.163, 2.5× weaker) and live cascade co-application (57.1% vs 8.6%; added members
+0/10). Cosine adjacency ≠ co-occurrence ("titles AIF-wash"). The constellation granularity is
+**vindicated** — the clustering was right to split them. **Methodological payoff (this sharpens the
+thesis):** cosine-gated BMR *over-merges*; the right method is embedding + co-occurrence *jointly* —
+which is exactly what Joe's constellations already are (embedding + citation-overlap). So "AIF and
+Embeddings" is not "embedding replaces co-occurrence" but "the two together; cosine alone over-merges."
+
+**In progress (control passed to claude-5, 2026-07-08):** wiring {constellation → EIG} into the ranker at pattern
 grain — claude-4's grain-agnostic `:eig-fn` (seam widened to `(eig-fn mission-id mission)`, `d3533ed`)
 + claude-5's `eig-for-produces` re-keyed to constellations. Inhabits the R5-EIG / R13-signal boxes.
 
