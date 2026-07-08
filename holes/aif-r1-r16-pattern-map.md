@@ -21,7 +21,7 @@ and was in fact a mirror.
 | **R2** | Observation channel schema | `structured-observation-vector` | ✓ | 13 harmonized channels. Real. |
 | **R3** | Predictive-coding belief update | `predictive-coding-belief-update`, `status-gated-belief-update`, `decomposed-prediction-noise` | ◐→ **hard box BUILT (dark)** | R3a–d wired for 8 channels ✓. The hard half — R3d sign-aggregation — is now **WIRED** (`1d330fa`): `*r3d-multichannel?*` flag (default OFF, byte-identical) → 8-channel **signed precision-weighted average** `Σ(sign·prec·err)/Σ(prec)`. Tested (58/1330): the 2026-05-18 case aggregates to **+0.006** (coherent) vs naive **−0.22** (cancels) — the fix works. Residual: per-entity attribution + the flip-on decision (still dark). |
 | **R4** | Predictive forward model | `shared-kernel-predictive-forward-model` | ✓ | Shape is real. |
-| **R5** | EFE with ≥2 principled terms | `expected-free-energy-scorecard`, `belief-aware-risk-term`, `predictive-entropy-as-ambiguity` | ◐ **⅔ (hard third done)** | Disaggregated (`b28ebf3`): NOT ◐-in-the-middle. **nats-risk** (`:kl`, the hard part, arena-flipped 2026-07-04) ✓ · **nats-ambiguity** (`:gaussian-entropy`, built/validated/provenance-ready, library-default dark) ✓ · **EIG** = the open third — now the **pattern-grain ranker-wire, in progress with claude-5** (seam ready: `(eig-fn mission-id mission)`, `d3533ed`). So `G = risk + ambiguity − EIG` is ⅔ built with the hard part done; the EIG third is being wired at pattern grain. |
+| **R5** | EFE with ≥2 principled terms | `expected-free-energy-scorecard`, `belief-aware-risk-term`, `predictive-entropy-as-ambiguity` | ◐→ **EIG wired (BUILT dark)** | Disaggregated (`b28ebf3`): NOT ◐-in-the-middle. **nats-risk** (`:kl`, the hard part, arena-flipped 2026-07-04) ✓ · **nats-ambiguity** (`:gaussian-entropy`, built/validated/provenance-ready, library-default dark) ✓ · **EIG** = the open third — now **BUILT (dark, `25b1b8f`, codex-2/claude-5)**: `{constellation→stddev} → mission-EIG → −λ·EIG` at pattern grain (194 missions resolve to non-zero EIG). `G = risk + ambiguity − EIG` has all three legs; the hard part of R5 is done. Flag-gated `:pattern-grain-eig?` (default OFF; arm = Joe). Caveat: the EIG is the coarse ~1/√evidence signal (not fine-grained). |
 | **R6** | Softmax selection with abstain | `candidate-pattern-action-space` | ✓ | Real. |
 | **R7** | Adaptive precision | `evidence-precision-registry`, `two-layer-calibration`, `measurement-window-hygiene` | ✓ | Π = 1/max(var, ε). Real. |
 | **R8** | Per-tick trace | `free-energy-as-tick-scalar` | ✓ | Persisted trace. Real. |
@@ -29,7 +29,7 @@ and was in fact a mirror.
 | **R10** | Live operation | `scheduled-observer-entrypoint` ✎new | ○ | Scheduled-execution-*ready*, but the deliberation cron was **DISABLED** (2026-07-06, cached no-op runs). It is not actually running. |
 | **R11** | Hierarchical / multi-agent composition | `hierarchical-budget-aware-action-selection` | ○ | N/A in the WM. The Agency (futon3c) is multi-agent but **not wired as an AIF hierarchy**. No coordination layer. |
 | **R12** | Dual-loop / hyperparameter inference | `two-layer-calibration` | ◐→ **FILLED (honest)** | The apparatus exists, and the accumulation now RESOLVES at **pattern grain** (claude-5, verified): the pattern co-application corpus is dense-real, so structure learning is real — but via **embedding-clustering + BMR-EIG**, NOT naive BMR merges. Naive count-BMR **over-merges** at 94-dim (all 6903 pairs accept, collapse to 1 — even disjoint patterns). Concepts = Joe's semilattice **constellations** (embedding); BMR contributes the **EIG** layer {constellation→stddev}; count-BMR corroborates weakly (within>across by 1.55 ΔF), insufficient alone. |
-| **R13** | Policy adequacy (multi-step G(π)) | `hierarchical-budget-aware-action-selection` (+ `futon2.aif.rollout`) | ◐ | Rollout witness passes (2-step beats greedy), but live-ranking integration is partial, acting is HELD, and the **G-ties false-floor** leaves ranks 2+ tied at 2.09 — the policy doesn't actually discriminate. **The fix = the pattern-grain EIG wire (`− λ·EIG` breaks the tie), now in progress with claude-5 (seam `d3533ed`).** |
+| **R13** | Policy adequacy (multi-step G(π)) | `hierarchical-budget-aware-action-selection` (+ `futon2.aif.rollout`) | ◐→ **G-ties BROKEN (dark)** | Rollout witness passes (2-step beats greedy), but live-ranking integration is partial, acting is HELD, and the **G-ties false-floor** left ranks 2+ tied at 2.09. **FIXED (BUILT dark, `25b1b8f`): the pattern-grain EIG wire (`− λ·EIG`) BREAKS the tie — two missions tied at G-total 0.543 separate to 0.39445 vs 0.41766 (higher EIG → lower G → explores). Discrimination proof holds (≥1 real tie separated; minimal by design). Flag-gated `:pattern-grain-eig?`, arm = Joe.** |
 | **R14** | Precision over policies (γ) | `policy-precision-commitment-temperature` | ◐→ **live-wire BUILT (dark)** | The grounding half is done and the **live-wire migration is now coded** (`d36086f`): `*gamma-grounded-feed?*` (default OFF, byte-identical) routes γ's realized feed to the A5 **substrate dial** instead of coverage-ΔG. What remains is **not code** — the two operator arms (`*live-wire?*`, then `*gamma-grounded-feed?*`) + real fold-variance data. γ stays starved of variance until armed. |
 | **R15** | Hierarchical / temporal depth | `temporal-depth-beyond-greedy` ✎new | ◐→ **hierarchy SLICE built** | depth-1 apparatus ✓; horizon-H + temporal discount ✓ (`056dcc5`); and the fast/slow **hierarchy now has a built scoped slice** (`32b9429`, `futon2.aif.temporal-hierarchy`): a slow-loop strategic mode parameterizes the fast loop's priors + costs (−ln(weight) KL penalty), flipping the fast-loop decision (exploitation→close-fast, exploration→advance-cap) **horizon-independently** — proved compositional, not sequential depth (`hierarchy-is-not-rollout-depth`). Remainder (research-level): full nested generative model — slow-loop EFE, learned transitions, multi-level. |
 | **R16** | Closed action–perception loop | `grounded-actuation-not-reobservation` ✎new | ○→◐ | **THE EXHIBIT.** Announced *closed* 2026-07-02; was **artifact-only** — the executor re-observed the diagram it had just built and called the coverage-ΔG "realized." This session grounded the *actuation* half (provable substrate witness + CLean structure check + build-match), moving it ○→◐. The *closure* half — re-observation changing the next decision — is still deferred (it needs R12 + R13). |
@@ -60,7 +60,7 @@ pattern-grain run reframed this section).
 
 | R17 asset | pattern (`library/aif/…`) | status | what it targets above |
 |---|---|---|---|
-| Structure Learning by Bayesian Model Reduction | `structure-learning-by-model-reduction` ✎new | ◐ **reframed (pattern grain)** | naive count-BMR MISCALIBRATED in high-dim (over-merges → collapse-to-1); structure comes from **embedding-clustering** (constellations), count-BMR corroborates weakly. Targets **R12** ✓, **R13** (ranker-wire in progress, claude-5) |
+| Structure Learning by Bayesian Model Reduction | `structure-learning-by-model-reduction` ✎new | ◐ **reframed (pattern grain)** | naive count-BMR MISCALIBRATED in high-dim (over-merges → collapse-to-1); structure comes from **embedding-clustering** (constellations), count-BMR corroborates weakly. Targets **R12** ✓, **R13** (ranker-wire BUILT dark, `25b1b8f`) |
 | Posterior variance as **epistemic value (EIG)** | `posterior-variance-as-epistemic-value` ✎new | ✓ **computed** | BMR-EIG {constellation→stddev} real (∝1/√α0; singletons 0.029 → P2/AIF 0.009) — the epistemic layer. Feeds **R13**/**R5** (`− λ·EIG`) once wired to the pattern-grain ranker; **R14** γ variance |
 
 **A4a is the R17 node** in the actuator (`futon2/holes/aif-wiring-actuator.html` +
@@ -93,9 +93,11 @@ thesis):** cosine-gated BMR *over-merges*; the right method is embedding + co-oc
 which is exactly what Joe's constellations already are (embedding + citation-overlap). So "AIF and
 Embeddings" is not "embedding replaces co-occurrence" but "the two together; cosine alone over-merges."
 
-**In progress (control passed to claude-5, 2026-07-08):** wiring {constellation → EIG} into the ranker at pattern
-grain — claude-4's grain-agnostic `:eig-fn` (seam widened to `(eig-fn mission-id mission)`, `d3533ed`)
-+ claude-5's `eig-for-produces` re-keyed to constellations. Inhabits the R5-EIG / R13-signal boxes.
+**BUILT (dark, `25b1b8f`, codex-2/claude-5, 2026-07-08):** {constellation → EIG} is wired into the ranker
+at pattern grain — claude-4's grain-agnostic `:eig-fn` (seam `(eig-fn mission-id mission)`, `d3533ed`)
++ claude-5's `eig-for-produces` re-keyed to constellations. Inhabits the R5-EIG / R13-signal boxes: the
+EFE term now carries real epistemic value and the G-ties floor is broken (≥1 tie separated). Flag-gated
+`:pattern-grain-eig?` (default OFF; arm = Joe). Caveat: coarse ~1/√evidence EIG, minimal-discrimination proof.
 
 ## ◐ → box-pointers (the fine version — `futon6/holes/clean/R*-decomposition.clean.edn`)
 
@@ -108,9 +110,9 @@ form of the preregistration: the unbuilt boxes are the precise committed remaini
 |---|---|---|---|
 | **R1** | `R1-decomposition` | **0** | done-for-derivable — the 6 remaining channels are N/A-by-design (out of scope, not holes) |
 | **R3** | `R3-decomposition` | 1 | `sign-aggregation` — approved design, DARK; flag-gated live wiring remains |
-| **R5** | `R5-decomposition` | 1 | `EIG` — the pattern-grain ranker-wire, **in progress (claude-5)**; seam ready `d3533ed` |
+| **R5** | `R5-decomposition` | **0** | `EIG` — **BUILT dark** (`25b1b8f`): pattern-grain `{constellation→stddev} → mission-EIG → −λ·EIG`; flag-gated `:pattern-grain-eig?`, arm = Joe |
 | **R12** | `R12-decomposition` | **0** | FILLED — `accumulate` ✓ (pattern corpus exists) + `concept-formation` ✓ (embedding + BMR-EIG); the ranker-wire is R5/R13's box, not R12's |
-| **R13** | `R13-decomposition` | 1 | `discrimination` — **built (3a) but INERT** until the pattern-grain EIG signal wires in (**in progress, claude-5**) |
+| **R13** | `R13-decomposition` | **0** | `discrimination` — **BUILT dark** (`25b1b8f`): the pattern-grain EIG breaks the G-ties floor (≥1 tie separated); flag-gated, arm = Joe |
 | **R14** | `R14-decomposition` | **1** (+arm) | `live-wire` **BUILT dark** (`d36086f`); only `accumulate` (a data dependency) + the operator arms remain — no unbuilt code |
 | **R15** | `R15-decomposition` | 1 (partial) | `hierarchy` — **SLICE built** (`32b9429`: slow→fast prior/cost parameterization, horizon-independent); remainder = full nested generative model (slow-loop EFE, learned transitions, multi-level) |
 
@@ -118,11 +120,14 @@ form of the preregistration: the unbuilt boxes are the precise committed remaini
 `live-wire` `d36086f`, both flag-gated default-OFF), **R12 is FILLED** (embedding-clustering +
 BMR-EIG at pattern grain — see R17 below), R13 `discrimination` is built-but-inert, and **R15's
 hierarchy SLICE is built** (`32b9429`; only its research-level nested-model remainder is open). The
-one remaining **unbuilt code box is R5-EIG**. And **R5-EIG + R13-signal converge on one piece —
-now IN PROGRESS with claude-5** (control passed 2026-07-08): wiring {constellation → EIG} into the
-pattern-grain ranker. The grain-agnostic `:eig-fn` seam is built + widened for pattern grain
-(`(eig-fn mission-id mission)`, `d3533ed`); claude-5 builds `eig-for-produces` re-keyed to
-constellations + injects it.
+**the last unbuilt code box (R5-EIG / R13-signal) is now BUILT** (`25b1b8f`, codex-2/claude-5,
+2026-07-08): {constellation → EIG} wired into the pattern-grain ranker via claude-4's grain-agnostic
+`:eig-fn` — the EFE term carries real epistemic value and the G-ties floor is broken (a real tie
+separated 0.543 → 0.39445 vs 0.41766). Flag-gated `:pattern-grain-eig?` (arm = Joe). **So the entire
+R1–R16 loop now has ZERO unbuilt code boxes** — every box is built; what remains is operator arms
+(the flag flips: `:pattern-grain-eig?`, `*gamma-grounded-feed?*`, `*live-wire?*`, `*r3d-multichannel?*`)
+and named research-level remainders (R15 nested model, R3 fine per-channel attribution). Caveat: the
+EIG is the coarse ~1/√evidence signal; the discrimination proof is the minimal ≥1 separation.
 
 ## The headline for the paper
 
