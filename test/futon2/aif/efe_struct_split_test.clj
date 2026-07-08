@@ -90,13 +90,13 @@
                             (+ (double (:G-core r))
                                (double (:G-augmentation r)))))
                1e-9)))
-      (testing (str label " — :G-augmentation = Σ of the six named layer terms")
+      (testing (str label " — :G-augmentation = Σ of the seven named layer terms")
         (is (< (Math/abs (- (double (:G-augmentation r))
                             (reduce + 0.0 (vals (:augmentation-terms r)))))
                1e-9)))
-      (testing (str label " — the layer names exactly the six demoted terms")
+      (testing (str label " — the layer names exactly the seven demoted terms")
         (is (= #{:info :survival :structural-pressure :graph-pragmatic
-                 :gap :goal-outcome}
+                 :eig-bmr :gap :goal-outcome}
                (set (keys (:augmentation-terms r)))))))))
 
 (deftest graph-pragmatic-split

@@ -536,6 +536,57 @@
       (is (= 4.0 (:G-graph-pragmatic off-map)))
       (is (< (:G-total on-ascent) (:G-total off-map))))))
 
+(deftest graph-efe-bmr-eig-leg-test
+  (let [graph {:capabilities {:goal {:scope [:cap-a :cap-b]}
+                              :cap-a {}
+                              :cap-b {}}
+               :missions {"M-a" {:scope []
+                                  :produces [:cap-a]
+                                  :open-hole-count 1}
+                          "M-b" {:scope []
+                                  :produces [:cap-b]
+                                  :open-hole-count 1}
+                          "M-missing" {:scope []
+                                       :produces [:cap-missing]
+                                       :open-hole-count 1}}}
+        opts {:capability-graph graph
+              :pre-registered-goal :goal
+              :graph-applicability-penalty 0.0
+              :graph-body-weight 0.0
+              :graph-ascent-weight 0.0}
+        action-a {:type :open-mission :target "M-a"}
+        action-b {:type :open-mission :target "M-b"}
+        no-eig (efe/compute-efe base-state action-a opts)
+        empty-eig (efe/compute-efe base-state action-a (assoc opts :eig-lookup {}))
+        high-eig (efe/compute-efe base-state action-a
+                                  (assoc opts :eig-lookup {:cap-a 2.5}))
+        absent-eig (efe/compute-efe base-state
+                                    {:type :open-mission :target "M-missing"}
+                                    (assoc opts :eig-lookup {:cap-a 2.5}))
+        tie-before (efe/rank-star-map-actions base-state [action-a action-b] opts)
+        tie-after (efe/rank-star-map-actions base-state [action-a action-b]
+                                             (assoc opts :eig-lookup {:cap-b 3.0}))]
+    (testing "default empty lookup preserves G-total while surfacing a zero distinct leg"
+      (is (= (:G-total no-eig) (:G-total empty-eig)))
+      (is (zero? (:G-eig-bmr empty-eig)))
+      (is (= -0.0 (get-in empty-eig [:augmentation-terms :eig-bmr])))
+      (is (contains? empty-eig :G-eig-bmr))
+      (is (not= (:G-eig-bmr empty-eig) (:G-info empty-eig)))
+      (is (not= (:G-eig-bmr empty-eig) (:G-ambiguity empty-eig))))
+    (testing "high BMR stddev is epistemic value, so it lowers G-total"
+      (is (= 2.5 (:G-eig-bmr high-eig)))
+      (is (= (- (:G-total no-eig) 2.5)
+             (:G-total high-eig)))
+      (is (= -2.5 (get-in high-eig [:augmentation-terms :eig-bmr]))))
+    (testing "absent produced concept contributes zero"
+      (is (zero? (:G-eig-bmr absent-eig))))
+    (testing "R13 tie floor breaks when one produced concept has EIG"
+      (is (= (:G-total (first tie-before))
+             (:G-total (second tie-before))))
+      (is (= "M-b" (get-in (first tie-after) [:action :target])))
+      (is (< (:G-total (first tie-after))
+             (:G-total (second tie-after)))))))
+
 (deftest star-map-live-blend-activation-and-provenance-test
   (testing "graph-known mission receives conservative graph terms and provenance"
     (let [graph {:capabilities {:goal {:status :held :scope [:cap-done]}

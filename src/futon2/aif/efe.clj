@@ -74,6 +74,7 @@
 (def default-graph-ascent-weight 20.0)
 (def default-graph-off-map-penalty 0.0)
 (def default-gap-weight 6.0)
+(def default-eig-weight 1.0)
 
 ;; B-0a tick provenance (M-aif-faithfulness §2.0): exposed as a def — not an
 ;; inline :or literal — so the :wm-version stamp records the value compute-efe
@@ -159,13 +160,15 @@
    relabel)."
   [graph goal action {:keys [graph-applicability-penalty graph-body-weight graph-ascent-weight
                              graph-off-map-penalty graph-body-mode
-                             graph-ascent-status-aware?]
+                             graph-ascent-status-aware? eig-lookup eig-weight]
                       :or {graph-applicability-penalty default-graph-applicability-penalty
                            graph-body-weight default-graph-body-weight
                            graph-ascent-weight default-graph-ascent-weight
                            graph-off-map-penalty default-graph-off-map-penalty
                            graph-body-mode :whole
-                           graph-ascent-status-aware? false}}]
+                           graph-ascent-status-aware? false
+                           eig-lookup {}
+                           eig-weight default-eig-weight}}]
   (let [mission-id (:target action)
         mission (mission-node graph mission-id)]
     (if (and graph goal (= :open-mission (:type action)))
@@ -174,6 +177,10 @@
               body-size (double (or (:open-hole-count mission) 0))
               progress (double (mission-ascent-progress graph goal mission-id
                                                         graph-ascent-status-aware?))
+              eig-bmr (* (double eig-weight)
+                         (reduce + 0.0
+                                 (map #(double (get eig-lookup % 0.0))
+                                      (:produces mission))))
               applicability (if applicable? 0.0 (double graph-applicability-penalty))
               body (case graph-body-mode
                      :leaf (* (double graph-body-weight)
@@ -184,6 +191,7 @@
           {:G-applicability applicability
            :G-body-size body
            :G-ascent-progress ascent
+           :G-eig-bmr eig-bmr
            :G-graph-pragmatic (+ applicability body (- ascent))
            ;; B-2b: mask vs value, split (see docstring). Additive keys only —
            ;; :G-graph-pragmatic's expression above is untouched (byte-identity).
@@ -194,6 +202,7 @@
         {:G-applicability 0.0
          :G-body-size 0.0
          :G-ascent-progress 0.0
+         :G-eig-bmr 0.0
          :G-graph-pragmatic (double graph-off-map-penalty)
          ;; B-2b: the off-map penalty is feasibility-class (a domain gate on
          ;; "not on the star map"), not a value — proxy carries none of it.
@@ -202,6 +211,7 @@
       {:G-applicability 0.0
        :G-body-size 0.0
        :G-ascent-progress 0.0
+       :G-eig-bmr 0.0
        :G-graph-pragmatic 0.0
        :G-graph-feasibility 0.0
        :G-graph-pragmatic-proxy 0.0})))
@@ -423,12 +433,13 @@
    `:open-mission` actions when graph + goal are present. `:graph-body-mode`
    defaults to `:whole`; `:leaf` scores a bounded next-step body term. When
    `:graph-ascent-status-aware?` is true, ascent credit ignores produced
-   capabilities already marked `:satisfied`.
+   capabilities already marked `:satisfied`. `:eig-lookup` contributes a
+   distinct BMR epistemic-value leg over produced capabilities.
 
    Result shape (B-2a honest labelling, M-aif-faithfulness §2.2): the output
    is a MULTI-OBJECTIVE ACTION SCORE WITH AN EFE CORE. `:G-core` (= risk +
    ambiguity, invariant I3) is the canonical G; `:augmentation-terms` names
-   the six demoted non-core contributions exactly as they enter `:G-total`
+   the seven demoted non-core contributions exactly as they enter `:G-total`
    (signed, weighted), and `:G-augmentation` is their sum. `:G-total` — the
    ranking key — is the historical blend, byte-identical across this
    relabelling; do not read it as canonical EFE (R18/D8).
@@ -439,7 +450,8 @@
                          time-pressure-scale horizon-steps capability-graph
                          pre-registered-goal graph-applicability-penalty
                          graph-body-weight graph-ascent-weight graph-off-map-penalty
-                         graph-body-mode graph-ascent-status-aware? mission-gap-view
+                         graph-body-mode graph-ascent-status-aware? eig-lookup eig-weight
+                         mission-gap-view
                          gap-weight goal-outcome-weight goal-outcome-entries goal-outcome-prob-fn
                          goal-outcome-mode
                          ambiguity-mode risk-mode kl-channel-weights c-temperature
@@ -456,6 +468,8 @@
                        graph-off-map-penalty default-graph-off-map-penalty
                        graph-body-mode :whole
                        graph-ascent-status-aware? false
+                       eig-lookup {}
+                       eig-weight default-eig-weight
                        gap-weight default-gap-weight
                        goal-outcome-weight cv/default-goal-outcome-weight
                        ambiguity-mode :variance-sum
@@ -531,7 +545,9 @@
                                        :graph-body-mode
                                        graph-body-mode
                                        :graph-ascent-status-aware?
-                                       graph-ascent-status-aware?})
+                                       graph-ascent-status-aware?
+                                       :eig-lookup eig-lookup
+                                       :eig-weight eig-weight})
          gap-terms (gap-efe-terms mission-gap-view action
                                   {:gap-weight gap-weight})
          ;; E-C-vector-live: the LIVE goal-outcome half of C contributes an
@@ -572,7 +588,7 @@
          ;; HONESTY (D8 reconciliation; C6 wording; B-2a struct split): what
          ;; follows is a MULTI-OBJECTIVE SCORE WITH AN EFE CORE, not canonical
          ;; EFE. The core (risk + ambiguity — :G-core, invariant I3) is the
-         ;; canonical G; the six remaining contributions are the augmentation
+         ;; canonical G; the seven remaining contributions are the augmentation
          ;; layer — a flattened generative model (C-terms, E-term, Π-mask
          ;; projected into one sum; argue-exhibit pp. 8–9). :G-total keeps its
          ;; historical summation order and value BYTE-IDENTICALLY; the layer
@@ -601,6 +617,7 @@
                                      :survival (* (double survival-weight) g-survival)
                                      :structural-pressure sp-contribution
                                      :graph-pragmatic (:G-graph-pragmatic graph-terms)
+                                     :eig-bmr (- (:G-eig-bmr graph-terms))
                                      :gap (- (:G-gap gap-terms))
                                      :goal-outcome g-goal-outcome}
                               habit-prior? (dissoc :structural-pressure)
@@ -612,6 +629,7 @@
                          (* (double survival-weight) g-survival)
                          (if habit-prior? 0.0 sp-contribution)
                          (:G-graph-pragmatic graph-terms)
+                         (- (:G-eig-bmr graph-terms 0.0))
                          (- (:G-gap gap-terms))
                          g-goal-outcome)
          g-total (if move-class-contribution
@@ -632,7 +650,7 @@
         ;; ambiguity exactly (invariant I3). Pure addition; :G-total unchanged.
         :G-core (+ g-risk g-ambig)
         ;; B-2a (M-aif-faithfulness §2.2): the multi-objective augmentation
-        ;; layer, named — the six non-core contributions AS THEY ENTER
+        ;; layer, named — the seven non-core contributions AS THEY ENTER
         ;; :G-total (signed, weighted). :G-augmentation is their sum. Additive
         ;; keys; whitelisted in trace.clj AT BIRTH (:score-provenance lesson);
         ;; trace-schema-version bumped 2→3.
