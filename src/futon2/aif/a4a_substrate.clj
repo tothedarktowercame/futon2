@@ -77,6 +77,45 @@
       :edges (vec edges)
       :discharges (vec discharges)})))
 
+(declare load-pattern-grain-eig)
+
+(defn- parse-long-safe
+  [s]
+  (try
+    (Long/parseLong s)
+    (catch NumberFormatException _
+      nil)))
+
+(defn- constellation-key
+  [concept]
+  (cond
+    (integer? concept) concept
+    (keyword? concept) (constellation-key (name concept))
+    (string? concept) (or (parse-long-safe concept)
+                          (some-> (re-matches #"P([0-9]+)" concept)
+                                  second
+                                  parse-long-safe))
+    :else nil))
+
+(defn- add-constellation-eig
+  [constellation->eig doc]
+  (let [concept (:star/capability doc)
+        ckey (constellation-key concept)]
+    (if (contains? constellation->eig ckey)
+      (assoc doc
+             :star/constellation-eig (double (get constellation->eig ckey))
+             :star/eig-unit :endpoint-count-stddev
+             :star/eig-source :a4a-constellation-stddev)
+      doc)))
+
+(defn- star-docs
+  [concepts opts]
+  (let [constellation->eig (or (:constellation->eig opts)
+                               (:constellation->eig (load-pattern-grain-eig opts)))]
+    (mapv #(add-constellation-eig constellation->eig
+                                  (a4a/concept->star-doc %))
+          concepts)))
+
 (defn mint-stars!
   "Build or write capability-star identity docs.
 
@@ -85,7 +124,7 @@
    through the A3 Drawbridge transaction helper; callers must use a quiet window."
   ([concepts] (mint-stars! concepts {}))
   ([concepts {:keys [write?] :as opts}]
-   (let [docs (mapv a4a/concept->star-doc concepts)]
+   (let [docs (star-docs concepts opts)]
      (if write?
        {:write? true
         :docs docs

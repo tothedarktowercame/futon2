@@ -169,3 +169,17 @@
       (is (= [(a4a/concept->star-doc "A")]
              (substrate/mint-stars! ["A"])))
       (is (false? @called?)))))
+
+(deftest mint-stars-exposes-constellation-eig
+  (with-redefs [substrate/load-pattern-grain-eig
+                (fn [_] {:constellation->eig {2 0.0125}})]
+    (is (= [(assoc (a4a/concept->star-doc 2)
+                   :star/constellation-eig 0.0125
+                   :star/eig-unit :endpoint-count-stddev
+                   :star/eig-source :a4a-constellation-stddev)]
+           (substrate/mint-stars! [2])))
+    (is (= [(assoc (a4a/concept->star-doc "P2")
+                   :star/constellation-eig 0.0125
+                   :star/eig-unit :endpoint-count-stddev
+                   :star/eig-source :a4a-constellation-stddev)]
+           (substrate/mint-stars! ["P2"])))))

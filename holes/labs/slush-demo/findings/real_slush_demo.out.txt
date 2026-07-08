@@ -1,0 +1,91 @@
+========================================================================
+GFN SLUSH — real P0-P17 constellation reward
+========================================================================
+Target mission: M-self-documenting-stack
+Selection: 5-of-18 constellations (8568 candidates)
+Target constellations (9): ['P0', 'P1', 'P2', 'P5', 'P6', 'P8', 'P10', 'P12', 'P16']
+Reward: exp(2.0*coverage + 1.0*EIG)
+A3-pass proxy: coverage >= 5 target constellations
+
+--- Constellation EIG (A4a Dirichlet stddev, real corpus) ---
+ * P0  eig=0.013096  writing / pattern discipline / categorical objects
+ * P1  eig=0.009707  futon-theory / storage / coordination / invariants
+ * P2  eig=0.007987  AIF / operator / surface inhabitation
+   P3  eig=0.027757  small cluster
+   P4  eig=0.016928  small cluster
+ * P5  eig=0.017718  small cluster
+ * P6  eig=0.013078  runtime invariants / boot reachability / snapshots
+   P7  eig=0.028912  small cluster
+ * P8  eig=0.014402  agency / coordination law / routing
+   P9  eig=0.028912  small cluster
+ * P10 eig=0.026277  small cluster
+   P11 eig=0.031812  small cluster
+ * P12 eig=0.025839  small cluster
+   P13 eig=0.009242  math proof strategy / rational reconstruction
+   P14 eig=0.025054  small cluster
+   P15 eig=0.031812  small cluster
+ * P16 eig=0.020443  small cluster
+   P17 eig=0.031812  small cluster
+
+--- Negative result retained: why embeddings, not count-BMR ---
+  count-BMR accepted 6903/6903 pairs on 118 multi-mission patterns
+  count-BMR collapsed to 1 concept; delta-F mean -11.41, range [-33.70, -6.45]
+  embedding-gate sweep had no clean 5-30 concept setting
+  AIF-12 merge adjudication: OVERREACH (co-occ Jaccard ratio 0.41; live co_app 8.6% cross vs 57.1% within)
+
+--- Training TB GFlowNet (100 steps, CPU) ---
+	Important: offline trajectories will NOT be sampled. In order to  sample offline trajectories, the train configuration of the buffer  should be provided.
+	Important: test metrics will NOT be computed. In order to compute test metrics, the test configuration of the buffer should be provided.
+Trained in 13.6s, sampled 1024 terminal states
+
+========================================================================
+(i) DISTRIBUTION MATCH
+========================================================================
+  JSD (pre/uniform  vs true):  0.841704 bits
+  JSD (post/trained vs true):  0.832555 bits
+  JSD drop:                    +0.009149 bits
+  L1  (post/trained vs true):  1.8214
+  Pearson corr (post vs true): -0.0001
+
+========================================================================
+(ii) MODE SPREAD / A3-PASSING CANDIDATES
+========================================================================
+  Distinct candidates sampled:        971 / 8568
+  Distinct A3-passing candidates:     14
+    (P0 P5 P10 P12 P16) cov=5 eig=0.103373 reward=24425.2591
+    (P0 P5 P8 P10 P12) cov=5 eig=0.097333 reward=24278.1650
+    (P1 P5 P6 P10 P12) cov=5 eig=0.092619 reward=24163.9922
+    (P5 P6 P8 P12 P16) cov=5 eig=0.091480 reward=24136.4850
+    (P0 P5 P6 P8 P10) cov=5 eig=0.084571 reward=23970.2978
+    (P0 P1 P8 P10 P16) cov=5 eig=0.083924 reward=23954.8071
+    (P1 P2 P6 P10 P16) cov=5 eig=0.077491 reward=23801.1949
+    (P0 P1 P2 P12 P16) cov=5 eig=0.077072 reward=23791.2302
+    (P0 P1 P2 P5 P10) cov=5 eig=0.074785 reward=23736.8821
+    (P0 P2 P5 P8 P16) cov=5 eig=0.073646 reward=23709.8611
+
+========================================================================
+(iii) GREEDY BASELINE
+========================================================================
+  Greedy candidate: (P5 P8 P10 P12 P16)
+  Greedy cov=5 eig=0.104679 reward=24457.1791
+  Greedy A3-passing? True
+  Greedy cutoff tie count: 1
+  High-reward modes (top 10%): 859
+  GFN covers 101 / 859 top modes
+  Greedy covers 1 / 859 top modes
+
+========================================================================
+(iv) REAL EIG PULL
+========================================================================
+  Avg coverage, GFN samples:  2.4844  (uniform 2.5000)
+  Avg EIG, GFN samples:       0.106229  (uniform 0.105775)
+  Sign check: EIG is subtracted in EFE, so higher EIG increases reward.
+
+========================================================================
+SUMMARY
+========================================================================
+  JSD post-train: 0.832555 bits (pre 0.841704, drop +0.009149)
+  Distinct sampled: 971 / 8568
+  Distinct A3-passing sampled: 14
+  GFN top-mode coverage / greedy: 101 / 1
+  Greedy tie count at cutoff: 1
