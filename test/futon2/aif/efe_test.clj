@@ -556,7 +556,8 @@
               :graph-ascent-weight 0.0}
         action-a {:type :open-mission :target "M-a"}
         action-b {:type :open-mission :target "M-b"}
-        eig-of (fn [m] (fn [produces] (reduce + 0.0 (map #(double (get m % 0.0)) produces))))
+        eig-of (fn [m] (fn [_mission-id mission]
+                         (reduce + 0.0 (map #(double (get m % 0.0)) (:produces mission)))))
         no-eig (efe/compute-efe base-state action-a opts)
         empty-eig (efe/compute-efe base-state action-a (assoc opts :eig-fn (eig-of {})))
         high-eig (efe/compute-efe base-state action-a

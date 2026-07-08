@@ -178,7 +178,7 @@
               progress (double (mission-ascent-progress graph goal mission-id
                                                         graph-ascent-status-aware?))
               eig-bmr (* (double eig-weight)
-                         (double (eig-fn (:produces mission))))
+                         (double (eig-fn mission-id mission)))
               applicability (if applicable? 0.0 (double graph-applicability-penalty))
               body (case graph-body-mode
                      :leaf (* (double graph-body-weight)
@@ -431,9 +431,12 @@
    `:open-mission` actions when graph + goal are present. `:graph-body-mode`
    defaults to `:whole`; `:leaf` scores a bounded next-step body term. When
    `:graph-ascent-status-aware?` is true, ascent credit ignores produced
-   capabilities already marked `:satisfied`. `:eig-fn` is a function of a
-   mission's `:produces` returning its BMR epistemic-value leg (the injected
-   fn does resolve→distinct→sum internally); defaults to `(constantly 0.0)`.
+   capabilities already marked `:satisfied`. `:eig-fn` is called
+   `(eig-fn mission-id mission-node)` and returns that mission's BMR
+   epistemic-value leg: at capability grain the injected fn reads
+   `(:produces mission-node)`; at pattern grain it keys on `mission-id`
+   (mission → patterns → constellation → stddev, resolve→distinct→sum
+   internally). Defaults to `(constantly 0.0)` (variadic, ignores both).
 
    Result shape (B-2a honest labelling, M-aif-faithfulness §2.2): the output
    is a MULTI-OBJECTIVE ACTION SCORE WITH AN EFE CORE. `:G-core` (= risk +
