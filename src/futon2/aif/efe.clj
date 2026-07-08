@@ -658,6 +658,13 @@
         ;; separately from the multi-objective blend — :G-core = risk +
         ;; ambiguity exactly (invariant I3). Pure addition; :G-total unchanged.
         :G-core (+ g-risk g-ambig)
+        ;; Labelling honesty (2026-07-08, Joe): the TRUE three-leg Expected Free
+        ;; Energy = risk + ambiguity − EIG — the FEP-faithful AIF quantity the
+        ;; multi-objective :G-total wraps. :G-efe = :G-core − :G-eig-bmr (EIG is
+        ;; canonically a core epistemic leg, not augmentation). Pure readout;
+        ;; :G-total and ranking unchanged. Backs the true-EFE node in the wiring
+        ;; explainer, distinct from the multi-objective controller box.
+        :G-efe (- (+ g-risk g-ambig) (:G-eig-bmr graph-terms 0.0))
         ;; B-2a (M-aif-faithfulness §2.2): the multi-objective augmentation
         ;; layer, named — the seven non-core contributions AS THEY ENTER
         ;; :G-total (signed, weighted). :G-augmentation is their sum. Additive

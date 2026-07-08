@@ -105,7 +105,7 @@
   ;; contribution and the conditioning bundle that produced it.
   (select-keys r [:action :G-risk :G-ambiguity :G-info :G-survival
                   :G-structural-pressure :G-goal-outcome
-                  :G-gap :G-graph-pragmatic :G-core :score-provenance :risk-mode
+                  :G-gap :G-graph-pragmatic :G-core :G-efe :score-provenance :risk-mode
                   :ambiguity-mode
                   :goal-outcome-mode
                   :G-augmentation :augmentation-terms
@@ -146,8 +146,10 @@
          ledger rule (any key-set change bumps) is broader than the D-1d
          parcel's top-level-only wording; the ledger rule wins.
      5 — adds :ambiguity-mode per ranked action (D5c provenance for the
-         gaussian-entropy nats ambiguity lane)."
-  5)
+         gaussian-entropy nats ambiguity lane).
+     6 — adds :G-efe per ranked action — the true three-leg EFE readout
+         (risk + ambiguity − EIG), additive; labelling honesty (2026-07-08)."
+  6)
 
 (defn- futon2-git-version
   "Git identity of the futon2 checkout this JVM loaded its code from:

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>AIF wiring — the ambiguity / unfaithfulness explainer (the analogical surface)</title>
+<style>
+  :root{
+    --done:#2e7d32; --done-bg:#e3f5e3; --partial:#b8860b; --partial-bg:#fff5d6;
+    --gap:#c62828; --gap-bg:#fbe0e2; --sibling:#1565c0; --sibling-bg:#e0ecfa;
+    --ink:#1a1a1a; --mut:#6b6b6b; --code:#0b3d0b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:#fafafa;line-height:1.5}
+  header{padding:16px 26px;border-bottom:1px solid #e3e3e3;background:#fff}
+  header h1{margin:0 0 4px;font-size:19px}
+  header p{margin:0;color:var(--mut);font-size:13px}
+  main{max-width:960px;margin:0 auto;padding:22px 26px 60px}
+  h2{font-size:17px;margin:30px 0 8px;padding-bottom:5px;border-bottom:2px solid #eee}
+  p{margin:8px 0}
+  code{background:#eef2ee;padding:1px 5px;border-radius:4px;font-size:12.5px}
+  .lead{font-size:14.5px;background:#fff;border:1px solid #e3e3e3;border-radius:8px;padding:13px 16px}
+  table{border-collapse:collapse;width:100%;font-size:12.5px;margin:12px 0}
+  th,td{border:1px solid #e0e0e0;padding:7px 9px;text-align:left;vertical-align:top}
+  th{background:#f2f2f2}
+  .name{font-family:"SF Mono",Menlo,Consolas,monospace;font-weight:700;white-space:nowrap}
+  .tag{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:9px;white-space:nowrap}
+  .t-dead{color:var(--gap);background:var(--gap-bg)}
+  .t-load{color:var(--partial);background:var(--partial-bg)}
+  .t-minor{color:var(--mut);background:#eee}
+  .note{color:var(--mut);font-size:12.5px;font-style:italic}
+  .faithful{border-left:3px solid var(--done);background:var(--done-bg);border-radius:6px;padding:10px 14px;margin:12px 0}
+  .honest{border-left:3px solid var(--gap);background:var(--gap-bg);border-radius:6px;padding:10px 14px;margin:12px 0}
+</style>
+</head>
+<header>
+  <h1>AIF wiring — the ambiguity / unfaithfulness explainer</h1>
+  <p>The <b>analogical surface</b>: quantities that wear an Active-Inference name but are heuristics. Companion to <code>aif-wiring-explainer.html</code> (the faithful loop) · source of truth: <code>data/r18-badges.edn</code> (E-r18-faithfulness-audit). Drafted 2026-07-08 (claude-5).</p>
+</header>
+<main>
+
+<p class="lead"><b>Why a separate page.</b> The main wiring explainer describes the loop that <em>is</em> faithful Active Inference. This page <b>quarantines the parts that are not</b> — the quantities the R18 faithfulness audit badged <b>analogical</b> ("a heuristic wearing the name"). Keeping them here lets the main explainer's labels stay trustworthy, and gives us one honest place to decide, later, which of these actually need resolving. <b>It is a short list — seven items.</b></p>
+
+<div class="faithful">
+<b>For contrast — the FEP-faithful core is only three legs:</b> <code>G = risk + ambiguity − EIG</code> — <code>:kl</code> risk (principled approximation) <b>+</b> <code>:gaussian-entropy</code> ambiguity (the one <em>derived-from-FEP</em> quantity) <b>−</b> the pattern-grain <code>EIG</code> leg (epistemic value, sought). As of 2026-07-08 all three are armed/faithful. <b>Everything below is augmentation</b> — real controller behaviour, but not Expected Free Energy.
+</div>
+
+<h2>The short list — seven analogical quantities</h2>
+<table>
+<tr><th>quantity</th><th>load?</th><th>claims to be</th><th>actually computes</th><th>honest repair</th></tr>
+
+<tr>
+<td class="name">:G-total</td>
+<td><span class="tag t-load">the frame</span></td>
+<td>Expected Free Energy</td>
+<td>a <b>linear sum of 8 terms in incommensurate units at hand-set weights</b>; the risk+ambiguity core is diluted</td>
+<td>expose canonical <code>G = risk + ambiguity</code> separately; label the blend a <b>multi-objective score, not EFE</b></td>
+</tr>
+
+<tr>
+<td class="name">:G-survival</td>
+<td><span class="tag t-load">47.9% flip</span></td>
+<td>survival-pressure EFE term</td>
+<td>unweighted Σ hinge-gap over 4 critical channels — <b>a second G-risk on a subset</b></td>
+<td>fold into risk, or rename "homeostatic pressure" and drop the EFE framing</td>
+</tr>
+
+<tr>
+<td class="name">:G-structural-pressure</td>
+<td><span class="tag t-load">44.5% flip</span></td>
+<td>weighted EFE term</td>
+<td><b>pass-through of a caller-injected scalar × 0.35</b>; not a computed quantity</td>
+<td>derive from the generative model (novelty/salience), or rename as an exogenous weight — canonical seat is the habit prior <code>ln E(π)</code>, not a G-summand</td>
+</tr>
+
+<tr>
+<td class="name">:G-graph-pragmatic</td>
+<td><span class="tag t-load">dominant</span></td>
+<td>pragmatic value</td>
+<td><code>1000·[not-applicable] + 3·holes − 20·ascent-progress</code> — graph heuristic counts/gates</td>
+<td>split: applicability = a feasibility mask; ascent = a pragmatic proxy toward the preferences C</td>
+</tr>
+
+<tr>
+<td class="name">:G-gap</td>
+<td><span class="tag t-minor">minor</span></td>
+<td>epistemic "room to grow"</td>
+<td><code>6.0 × caller-supplied gap-score lookup</code>; <b>no expected-information computation</b></td>
+<td>compute expected uncertainty-reduction from filling the gap</td>
+</tr>
+
+<tr>
+<td class="name">:policy-performance-ratio</td>
+<td><span class="tag t-minor">γ feed</span></td>
+<td>(γ's learning signal — not itself labelled an AIF quantity)</td>
+<td><code>(expected − realized)/(|expected|+|realized|+ε)</code> — signed, scale-free control-loop feedback</td>
+<td>replace/augment with the <code>E[G]</code>-over-policies signal to feed γ canonically</td>
+</tr>
+
+<tr>
+<td class="name">:G-info</td>
+<td><span class="tag t-dead">DEAD · 0% flip</span></td>
+<td>epistemic info-gain (EIG)</td>
+<td><code>Σ max(0, 1 − variance)</code> = complement of ambiguity; <b>no belief-entropy reduction</b></td>
+<td><b>prune it</b> — 0% flip-rate (never changes a decision) <em>and</em> now superseded by the real pattern-grain EIG leg</td>
+</tr>
+</table>
+
+<h2>What the list says, honestly</h2>
+<p><b>The headline unfaithfulness is <code>:G-total</code> itself</b> — the score is labelled "Expected Free Energy" but is a hand-weighted blend of eight incommensurate terms. Faithful EFE is the three-leg core; the blend is a <em>multi-objective controller</em> with an EFE core inside it. That is a real thing to be — it just is not what the label claims.</p>
+<p><b>Two of these are dead or nearly so.</b> <code>:G-info</code> has a <b>0% flip-rate</b> — it never changes a decision — and it duplicated the epistemic role that the new pattern-grain EIG now fills properly. It is a clean delete. <code>:G-gap</code> is a small caller-supplied lookup with no information-theoretic content.</p>
+<p><b>The load-bearing ones are real controllers wearing the wrong name.</b> <code>:G-survival</code> (47.9% flip) and <code>:G-structural-pressure</code> (44.5%) and <code>:G-graph-pragmatic</code> genuinely drive the War Machine's choices — but as homeostatic / habit / feasibility heuristics, not as Expected Free Energy. The honest repair for these is almost never "delete"; it is "<b>rename to what it is</b>" (exogenous weight, homeostatic pressure) or "<b>move to its canonical AIF seat</b>" (the habit prior <code>ln E(π)</code>, a feasibility mask).</p>
+
+<div class="honest">
+<b>Do we need to resolve them?</b> Open question, deliberately deferred. Faithfulness does <em>not</em> require deleting the augmentation — a multi-objective controller with an honest EFE core is a legitimate design. The minimum honest move is <b>truth-in-labelling</b>: stop calling the blend "EFE," and badge each term for what it is (which <code>r18-badges.edn</code> already does). Beyond that: <b>prune <code>:G-info</code></b> (free — it does nothing), and the canonical-seat repairs are worthwhile but not urgent. Whether the WM should become a purer EFE agent, or stay an honestly-labelled multi-objective one, is a design decision for later.
+</div>
+
+<p class="note">Machine-readable badges: <code>data/r18-badges.edn</code>. Faithful-loop companion: <code>aif-wiring-explainer.html</code>. Structure-learning / EIG: <code>structure-learning-explainer.html</code>.</p>
+
+</main>
+</html>
