@@ -659,6 +659,10 @@
         ;; D5a: which risk functional produced :G-risk — whitelisted in
         ;; trace.clj AT BIRTH (the :score-provenance lesson).
         :risk-mode risk-mode
+        ;; D5c: which ambiguity functional produced :G-ambiguity — same
+        ;; provenance rule as :risk-mode; the arena may run the nats lane while
+        ;; library defaults stay byte-identical.
+        :ambiguity-mode ambiguity-mode
         ;; D-1e: which functional produced :G-goal-outcome — whitelisted in
         ;; trace.clj AT BIRTH, same lesson as :risk-mode.
         :goal-outcome-mode goal-outcome-mode

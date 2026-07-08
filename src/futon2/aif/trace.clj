@@ -87,6 +87,8 @@
   ;; :risk-mode (D5a, 2026-07-03): whitelisted AT BIRTH with the key itself —
   ;; the :score-provenance lesson: a key that isn't persisted the day it is
   ;; emitted becomes a silent spec gap later.
+  ;; :ambiguity-mode (D5c, 2026-07-08): same provenance rule for the dark/live
+  ;; nats ambiguity lane. If :G-ambiguity is gaussian entropy, the trace says so.
   ;; :G-augmentation :augmentation-terms :G-graph-feasibility
   ;; :G-graph-pragmatic-proxy (B-2a/B-2b struct split, 2026-07-04): the named
   ;; multi-objective layer + the mask/value split of the graph term —
@@ -104,6 +106,7 @@
   (select-keys r [:action :G-risk :G-ambiguity :G-info :G-survival
                   :G-structural-pressure :G-goal-outcome
                   :G-gap :G-graph-pragmatic :G-core :score-provenance :risk-mode
+                  :ambiguity-mode
                   :goal-outcome-mode
                   :G-augmentation :augmentation-terms
                   :G-graph-feasibility :G-graph-pragmatic-proxy
@@ -141,8 +144,10 @@
      4 — adds :structural-pressure-mode (always) + :habit-prior-bias (dark
          :habit-prior mode only) per ranked action (D-1d, 2026-07-04). The
          ledger rule (any key-set change bumps) is broader than the D-1d
-         parcel's top-level-only wording; the ledger rule wins."
-  4)
+         parcel's top-level-only wording; the ledger rule wins.
+     5 — adds :ambiguity-mode per ranked action (D5c provenance for the
+         gaussian-entropy nats ambiguity lane)."
+  5)
 
 (defn- futon2-git-version
   "Git identity of the futon2 checkout this JVM loaded its code from:

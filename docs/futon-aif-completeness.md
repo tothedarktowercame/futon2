@@ -128,7 +128,7 @@ Expected Free Energy decomposes into at minimum: (R5a) pragmatic / risk and (R5b
 
 **Operational check.** Find the EFE computation. Verify both pragmatic and epistemic terms are present and computed against the predictive forward model.
 
-**This implementation.** **Satisfied as of v0.4 (2026-05-17).** `futon2.aif.efe/compute-efe` scores a `(state, action)` pair by composing R4's forward model with the R3c free-energy decomposition. The two principled terms required by R5:
+**This implementation.** **Satisfied for the R5 minimum as of v0.4 (2026-05-17); disaggregated for nats-EFE on 2026-07-08.** `futon2.aif.efe/compute-efe` scores a `(state, action)` pair by composing R4's forward model with the R3c free-energy decomposition. The two principled terms required by R5:
 - **R5a — G-risk**: pragmatic / risk term. Uses `compute-free-energy`'s :G-pragmatic on the *predicted* next-observation mean, not the current observation. Captures "how far the predicted state is from preferences."
 - **R5b — G-ambiguity**: epistemic / ambiguity term. Sum of per-channel predicted variances from `forward-model/predict.next-observation.variance`. Captures "how uncertain the predicted outcome is" (high-variance actions are higher EFE).
 - **G-total** = G-risk + G-ambiguity.
@@ -137,7 +137,12 @@ Expected Free Energy decomposes into at minimum: (R5a) pragmatic / risk and (R5b
 
 Tests at `futon2/test/futon2/aif/efe_test.clj` (9 tests / 22 assertions) verify: purity, documented output shape, G-total = G-risk + G-ambiguity by name, :no-op has zero G-ambiguity (deterministic prediction), risk reflects PREDICTED state not current state, ambiguity strictly orders actions by their declared variance, rank-actions returns ascending G-totals with sequential ranks, decomposition properties hold under stressed state.
 
-**The proper information-gain epistemic term** (negative of expected entropy reduction in belief, vs. ambiguity's expected entropy under the action) is a future R7-related deliverable; ambiguity is the principled R5b minimum and is what the predecessor `ukrn-services-simulation v3` uses ("ambiguity is predictive entropy over the next-state distribution" per its README). **Action proposal** (where candidate actions come from) is intentionally out-of-scope for R5 — `compute-efe` and `rank-actions` take candidates as input; action proposal lands with R6 (action-space enumeration) or is provided externally.
+**Nats-EFE status (audit 2026-07-08).** Canonical scoring target here is `G = risk + ambiguity - EIG`, all in nats. That is **2/3 built and ready in futon2.aif**, with the remaining **1/3 (EIG feed/caller injection) landing on the separate A4a/A1 strand**:
+- **Risk in nats — built and arena-flipped.** `:risk-mode :kl` scores `Σ_ch KL(Q~_ch || C_ch)` using the truncated-Gaussian KL repaired in `holes/E-KL-refinements.md`. The hard part was here: true KL on shared support, channel-weight semantics, and T-calibration. Library default remains `:hinge` for byte-identity; the WM arena resolves `:kl` unless the operator uses `FUTON_WM_RISK_MODE=hinge`.
+- **Ambiguity in nats — built, validated, and provenance-ready.** `:ambiguity-mode :gaussian-entropy` scores `Σ_ch 0.5*ln(2*pi*e*sigma2_ch)` with a finite variance floor. This is the easier bridge once R4 predicted variances exist, but it is now buildable: exact-formula tests pin the value, `compute-efe` emits `:ambiguity-mode`, and trace records preserve it. Library default remains `:variance-sum`; the WM arena resolves `:gaussian-entropy` unless the operator uses `FUTON_WM_AMBIGUITY_MODE=variance-sum`.
+- **EIG — separate/open for this R5 accounting.** The BMR/A4a read-point and `:G-eig-bmr` bridge are distinct from ambiguity and are intentionally not counted as a completed default R5 core leg here. The A1 caller injects the EIG lookup/closure; absent injection contributes 0.0.
+
+So the honest status is: **historical blend done; nats risk done and flipped in the arena; nats ambiguity dark/library-default-off but ready and arena-resolved; EIG is the remaining third and is owned by the separate 3a/A4a-A1 path.** The hard work was the risk KL repair/calibration and the EIG concept-resolution feed; the ambiguity nats form is technically smaller but still operator-gated because it changes rankings and units.
 
 ### R6 — Softmax action selection with abstain
 
@@ -336,7 +341,7 @@ F3 (coherent structure) and F9 (feed-readable annotation graph) are stack-level 
 | R2 — Observation channel schema | ✓ | — |
 | R3 — Predictive-coding belief update | **✓ as of v0.11** | 4 of 14 channels carry likelihood (`:annotation-health`, `:sorry-count-norm`, `:mission-health`, `:active-repo-ratio`); remaining 10 logged as `:prototyping-forward` sorries; multi-channel R3d sign-aggregation deferred |
 | R4 — Predictive forward model | **✓ as of v0.3** | — (`futon2.aif.forward-model/predict`; shared-kernel discipline aspirational until R6) |
-| R5 — Principled EFE terms | **✓ as of v0.4** | — (`futon2.aif.efe/compute-efe`; G-risk + G-ambiguity decomposed; rank-actions ranks by G-total) |
+| R5 — Principled EFE terms | **✓ minimum; nats-EFE 2/3 ready as of 2026-07-08** | Historical blend done. Nats risk `:kl` built and arena-flipped; nats ambiguity `:gaussian-entropy` built/validated/provenance-ready with library default still dark; EIG is the separate A4a/A1 leg. |
 | R6 — Softmax + abstain | **✓ as of v0.5** | — (`futon2.aif.policy/select-action`; adaptive τ; abstain with gap-report) |
 | R7 — Adaptive precision | **✓ as of v0.12** | — (`futon2.aif.precision`; rolling-variance over per-channel error history; carried in trace records across calls) |
 | R8 — Per-tick trace | **✓ as of v0.7** | — (`futon2.aif.trace`; EDN-lines daily-rotated; judge writes when `:trace?` opts) |
@@ -364,6 +369,12 @@ live C-vector; predictive risk re-ranks per action after the vocabulary-correlat
 outcomes — a named workstream inside the mining run), R15 (now the last open forward-sweep
 criterion), R17, R18, and R19's durable-join steps 4–5. The remaining distance is measured, small,
 and each piece has an owner.
+
+**v0.23 R5 disaggregation (2026-07-08):** the old "R5 half-done" shorthand is retired.
+Minimum R5 remains satisfied, but canonical nats-EFE is now accounted as `risk + ambiguity - EIG`:
+2/3 built/ready in futon2.aif (risk KL + Gaussian-entropy ambiguity) and 1/3 separated to the
+A4a/A1 EIG feed. This update also pins `:ambiguity-mode :gaussian-entropy` with an exact-formula
+test and persists `:ambiguity-mode` in trace records; no live-mode flip is made here.
 
 ## Are R1–R13 enough? — known-unknowns (E-aif2-partB triangulation, first-pass 2026-06-24)
 

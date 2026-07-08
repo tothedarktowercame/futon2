@@ -170,6 +170,7 @@
                  :G-risk 1.0 :G-ambiguity 2.0 :G-info 0.1 :G-survival 0.2
                  :G-structural-pressure 0.3 :G-goal-outcome 0.4
                  :G-gap 0.5 :G-graph-pragmatic 0.6 :G-core 3.0
+                 :risk-mode :kl :ambiguity-mode :gaussian-entropy
                  :G-total 7.1 :rank 1
                  :prediction {:dropme true}}
           rec (trace/trace-record {:belief {} :observation {} :free-energy {}
@@ -178,6 +179,8 @@
           kept (first (:ranked-actions rec))]
       (doseq [k [:G-gap :G-graph-pragmatic :G-core :G-goal-outcome :G-total]]
         (is (contains? kept k) (str k " must survive the strip")))
+      (is (= :gaussian-entropy (:ambiguity-mode kept))
+          "ambiguity-mode provenance survives the strip")
       (is (not (contains? kept :prediction)) "the deep :prediction still drops"))))
 
 ;; ---------------------------------------------------------------------------

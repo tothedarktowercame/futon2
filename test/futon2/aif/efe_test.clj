@@ -691,11 +691,21 @@
     (let [action {:type :address-sorry :target :m1}
           implicit (efe/compute-efe base-state action)
           explicit (efe/compute-efe base-state action {:ambiguity-mode :variance-sum})]
-      (is (= implicit explicit))))
-  (testing "D5c :gaussian-entropy is a genuinely different, finite quantity"
+      (is (= implicit explicit))
+      (is (= :variance-sum (:ambiguity-mode implicit)))))
+  (testing "D5c :gaussian-entropy matches the closed-form Gaussian entropy sum"
     (let [action {:type :address-sorry :target :m1}
           vs (efe/compute-efe base-state action)
-          ge (efe/compute-efe base-state action {:ambiguity-mode :gaussian-entropy})]
+          ge (efe/compute-efe base-state action {:ambiguity-mode :gaussian-entropy})
+          variances (vals (get-in ge [:prediction :next-observation :variance]))
+          expected (reduce + 0.0
+                           (map (fn [v]
+                                  (* 0.5
+                                     (Math/log (* 2.0 Math/PI Math/E
+                                                  (max (double v) 1e-9)))))
+                                variances))]
       (is (not= (:G-ambiguity vs) (:G-ambiguity ge)))
+      (is (= :gaussian-entropy (:ambiguity-mode ge)))
+      (is (< (Math/abs (- expected (:G-ambiguity ge))) 1e-12))
       (is (Double/isFinite (:G-ambiguity ge))
-          "zero-variance channels are floored, never -Inf"))))
+          "the entropy lane is finite in nats"))))
