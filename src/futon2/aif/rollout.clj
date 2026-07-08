@@ -163,76 +163,97 @@
         state' (meme-step/step state (assoc move :to-state :constructed))]
     (update state' :write-count (fnil + 0) 0)))
 
+(defn- rollout-horizon
+  "R15 bridge: name the temporal search depth as a horizon H while preserving
+   the older :depth option. This is still flat temporal rollout, not nested
+   fast/slow hierarchy."
+  [{:keys [horizon depth] :or {depth 2}}]
+  (long (or horizon depth)))
+
+(defn- rollout-discount
+  "R15 bridge: name the temporal discount while preserving the older :gamma
+   option used by the R13 rollout apparatus."
+  [{:keys [temporal-discount gamma] :or {gamma 0.9}}]
+  (double (or temporal-discount gamma)))
+
 (defn project-policy
   "Port of ukrn's path accumulator shape: G(pi)=sum gamma^t g(s_t).
    :truncated is sticky: terminal moves carry their local cost and stop expansion."
-  [state policy & {:keys [gamma]
-                   :or {gamma 0.9}}]
-  (loop [state (normalize-state state)
-         remaining (seq policy)
-         discount 1.0
-         total 0.0
-         steps []]
-    (if (or (nil? remaining) (:truncated? state))
-      {:G total
-       :final-state state
-       :steps (vec steps)
-       :policy (mapv #(select-keys % [:move/id :move/class :have :want
-                                      :advances-cap :prior :delta-g
-                                      :move/terminal?])
-                     policy)
-       :truncated? (boolean (:truncated? state))}
-      (let [move (first remaining)
-            g (move-cost state move)
-            state' (apply-move state move)]
-        (recur state'
-               (next remaining)
-               (* discount gamma)
-               (+ total (* discount g))
-               (conj steps {:move/id (:move/id move)
-                            :g g
-                            :discount discount
-                            :discounted-g (* discount g)
-                            :prior (:prior move)
-                            :truncated? (:truncated? state')}))))))
+  [state policy & {:as opts}]
+  (let [gamma (rollout-discount opts)]
+    (loop [state (normalize-state state)
+           remaining (seq policy)
+           discount 1.0
+           total 0.0
+           steps []]
+      (if (or (nil? remaining) (:truncated? state))
+        {:G total
+         :final-state state
+         :steps (vec steps)
+         :policy (mapv #(select-keys % [:move/id :move/class :have :want
+                                        :advances-cap :prior :delta-g
+                                        :move/terminal?])
+                       policy)
+         :truncated? (boolean (:truncated? state))}
+        (let [move (first remaining)
+              g (move-cost state move)
+              state' (apply-move state move)]
+          (recur state'
+                 (next remaining)
+                 (* discount gamma)
+                 (+ total (* discount g))
+                 (conj steps {:move/id (:move/id move)
+                              :g g
+                              :discount discount
+                              :discounted-g (* discount g)
+                              :prior (:prior move)
+                              :truncated? (:truncated? state')})))))))
 
 (defn expand-policies
-  [state moves & {:keys [depth top-k]
-                  :or {depth 2 top-k 5}}]
-  (letfn [(expand [state prefix remaining-depth]
-            (if (zero? remaining-depth)
-              [{:state state :policy prefix}]
-              (let [survivors (ranked-survivors state moves :top-k top-k)]
-                (if (empty? survivors)
-                  [{:state state :policy prefix}]
-                  (mapcat
-                   (fn [move]
-                     (let [state' (apply-move state move)
-                           prefix' (conj prefix move)]
-                       (if (or (:truncated? state') (:move/terminal? move))
-                         [{:state state' :policy prefix'}]
-                         (expand state' prefix' (dec remaining-depth)))))
-                   survivors)))))]
-    (vec (expand (normalize-state state) [] depth))))
+  [state moves & {:as opts :keys [top-k]
+                  :or {top-k 5}}]
+  (let [horizon (rollout-horizon opts)]
+    (letfn [(expand [state prefix remaining-depth]
+              (if (zero? remaining-depth)
+                [{:state state :policy prefix}]
+                (let [survivors (ranked-survivors state moves :top-k top-k)]
+                  (if (empty? survivors)
+                    [{:state state :policy prefix}]
+                    (mapcat
+                     (fn [move]
+                       (let [state' (apply-move state move)
+                             prefix' (conj prefix move)]
+                         (if (or (:truncated? state') (:move/terminal? move))
+                           [{:state state' :policy prefix'}]
+                           (expand state' prefix' (dec remaining-depth)))))
+                     survivors)))))]
+      (vec (expand (normalize-state state) [] horizon)))))
 
 (defn score-policies
-  [state moves & {:keys [depth top-k gamma]
-                  :or {depth 2 top-k 5 gamma 0.9}}]
-  (->> (expand-policies state moves :depth depth :top-k top-k)
+  [state moves & {:as opts :keys [top-k]
+                  :or {top-k 5}}]
+  (let [horizon (rollout-horizon opts)
+        gamma (rollout-discount opts)]
+    (->> (expand-policies state moves :horizon horizon :top-k top-k)
        (mapv (fn [{:keys [policy]}]
                (project-policy state policy :gamma gamma)))
        (sort-by :G)
-       vec))
+       vec)))
 
 (defn greedy-one-step
-  [state moves & {:keys [top-k gamma]
-                  :or {top-k 20 gamma 0.9}}]
-  (first (score-policies state moves :depth 1 :top-k top-k :gamma gamma)))
+  [state moves & {:as opts :keys [top-k]
+                  :or {top-k 20}}]
+  (first (score-policies state moves
+                         :depth 1
+                         :top-k top-k
+                         :temporal-discount (rollout-discount opts))))
 
 (defn best-rollout
-  [state moves & {:keys [depth top-k gamma]
-                  :or {depth 2 top-k 5 gamma 0.9}}]
-  (first (score-policies state moves :depth depth :top-k top-k :gamma gamma)))
+  [state moves & {:as opts :keys [top-k]
+                  :or {top-k 5}}]
+  (let [horizon (rollout-horizon opts)
+        gamma (rollout-discount opts)]
+    (first (score-policies state moves :horizon horizon :top-k top-k :gamma gamma))))
 
 (defn softmax
   [scores tau]

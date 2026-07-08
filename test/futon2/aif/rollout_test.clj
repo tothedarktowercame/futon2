@@ -49,6 +49,34 @@
     (is (= ["a" "b"] (mapv :move/id (:policy best))))
     (is (< (:G best) (:G greedy)))))
 
+(deftest horizon-h-unlocks-delayed-temporal-payoff
+  (let [moves [{:move/id "a" :move/class :close-hole
+                :have "root" :want "bridge" :score 3.0 :delta-g -0.05
+                :rank 1 :move/terminal? false}
+               {:move/id "b" :move/class :close-hole
+                :have "bridge" :want "ledge" :score 3.0 :delta-g -0.05
+                :rank 2 :move/terminal? false}
+               {:move/id "c" :move/class :advance-capability
+                :have "ledge" :want "goal" :advances-cap "agency"
+                :score 3.0 :delta-g -10.0 :rank 3 :move/terminal? false}
+               {:move/id "greedy" :move/class :close-hole
+                :have "root" :want "small" :score 2.0 :delta-g -0.5
+                :rank 4 :move/terminal? false}]
+        state {:arrows {}
+               :cap-overlay cap-snapshot
+               :reachable #{"root"}}
+        depth-2 (rollout/best-rollout state moves :horizon 2 :top-k 4 :temporal-discount 0.9)
+        horizon-3 (rollout/best-rollout state moves :horizon 3 :top-k 4 :temporal-discount 0.9)
+        legacy-alias (rollout/best-rollout state moves :depth 3 :top-k 4 :gamma 0.5)
+        horizon-alias (rollout/best-rollout state moves :horizon 3 :top-k 4 :temporal-discount 0.5)]
+    ;; H=2 cannot see the delayed third-step payoff, so the local shortcut wins first.
+    (is (= "greedy" (-> depth-2 :policy first :move/id)))
+    ;; H=3 sees the delayed payoff under the same flat rollout model.
+    (is (= ["a" "b" "c"] (mapv :move/id (:policy horizon-3))))
+    ;; The R15 names are API aliases for the existing R13 depth/gamma mechanics.
+    (is (= (:G legacy-alias) (:G horizon-alias)))
+    (is (not= (:G horizon-3) (:G horizon-alias)))))
+
 (deftest root-seed-ignites-phase-chain
   ;; claude-3's hypergraph-operator example (v2 scope-grain seam): one
   ;; mission-entity seed -> the full depth-5 detached-phase chain unrolls.
