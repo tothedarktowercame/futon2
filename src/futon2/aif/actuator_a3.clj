@@ -43,7 +43,10 @@
    "futon3c-d/mission/state-snapshot-witness"
    [{:endpoint "SnapshotEvidence"
      :kind :entity
-     :type :evidence}]})
+     :type :evidence}]
+
+   "futon3c-d/mission/single-entry-point"
+   []})
 
 (def reviewed-box-bindings
   {"futon5a-d/mission/learning-loop"
@@ -74,7 +77,15 @@
     :s4 {:kind :entity
          :type :evidence}
     :s5 {:kind :entity
-         :type :evidence}}})
+         :type :evidence}}
+
+   ;; futon3c-d/mission/single-entry-point — ALL boxes unbound: abstract.
+   ;; This mission is operational/process-level (JVM lifecycle, process groups,
+   ;; shutdown hooks, cyder registration). No substrate-2 entity or hyperedge
+   ;; manifestations. Cyder is an in-JVM atom registry, not substrate-2.
+   ;; Build-match on this CLean has 0 bound boxes by honest spec-derivation.
+   "futon3c-d/mission/single-entry-point"
+   {}})
 
 (defn- admin-token []
   (try (str/trim (slurp default-admin-token-path))
