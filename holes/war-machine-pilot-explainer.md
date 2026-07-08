@@ -35,18 +35,18 @@ every cycle ("tick"):
       yardstick every candidate is measured against
     • drift-fence: drop candidates that target already-superseded work
 
-  EVAL    ── score every candidate move by Expected Free Energy G ──
-    for each candidate action a:
-        G_efe(a) = RISK(a)  +  AMBIGUITY(a)  −  EIG(a)      ← the faithful core
-              RISK      = how far a's predicted outcome sits from the belly's preferences
-              AMBIGUITY = how much uncertainty a's outcome would carry
+  EVAL    ── score every candidate POLICY by Expected Free Energy G(π) ──
+    for each candidate policy π (a short action sequence, via a rollout of horizon H):
+        G_efe(π) = RISK(π)  +  AMBIGUITY(π)  −  EIG(π)      ← the faithful core
+              RISK      = how far π's predicted outcome sits from the belly's preferences
+              AMBIGUITY = how much uncertainty π's outcome would carry
               EIG       = expected information gained (sought, so it SUBTRACTS)
-        G_total(a) = G_efe(a) + augmentation(a)             ← the controller's blend
+        G_total(π) = G_efe(π) + augmentation(π)             ← the controller's blend
               augmentation = extra objectives (survival pressure, structural pressure, …)
-    rank all candidates by G_total; τ = temperature, sharpened by precision γ (τ_eff = τ/γ)
+    rank policies by G_total; τ = temperature, sharpened by precision γ (τ_eff = τ/γ)
 
   PRINT   ── recommend, with its reasons ──────────────────────────
-    pick = softmax(−G_total / τ_eff)         ← the recommended next task
+    pick = head of the argmin-G_total policy (softmax over policy scores) ← the recommended next task
     surface: the task + its G_efe and G_total + why (the term breakdown)
 
   ACT     ── (optional, gated) actually do it ─────────────────────
@@ -60,8 +60,8 @@ every cycle ("tick"):
 ```
 
 Two things are worth naming against the FuLab original:
-- FuLab scored *patterns* by `softmax(−G/τ)`; the WM scores *missions/actions* the same
-  way, over a much richer belief and a live preference belly.
+- FuLab scored *patterns* by `softmax(−G/τ)`; the WM scores *policies* (short action
+  sequences, via rollout) the same way, over a much richer belief and a live preference belly.
 - FuLab's "belief update" tuned a single precision `τ` from an error proxy. The WM's
   learning is **γ (precision over policies)**, fed by a *grounded* realized outcome (see §4).
 
@@ -69,8 +69,9 @@ Two things are worth naming against the FuLab original:
 
 ## 3. What "recommended next task" means — and its AIF backing
 
-The recommendation is **not a heuristic pick**. It is the `softmax(−G/τ)` choice over the
-**full ranked list of candidates** (a live run ranks ~100+). Because the score decomposes,
+The recommendation is **not a heuristic pick**. It is the `softmax(−G/τ)` choice over ranked
+**policies** (short action sequences, scored by rollout); the task shown is the head of the
+best-scoring policy. Because the score decomposes,
 the recommendation carries its own justification, and you can read it straight off the trace:
 
 - **`:G-efe`** — the faithful Expected Free Energy (risk + ambiguity − EIG). This is the
@@ -105,14 +106,15 @@ next step — the "R8 seam" — a decision, not a bug: either wire it, or state 
 
 ---
 
-## 5. The following step: G-over-policies
+## 5. The following step: deeper policies
 
-Right now the machine scores G over single **actions** and recommends the best one. The next
-development is to score G over **policies** — short *sequences* of actions — and present the
-recommendation as **the head of a ranked plan**: *"work on this next; it's step 1 of this
-trajectory, chosen because the whole trajectory minimises G."* Same G, same softmax, one grain
-up. The single-task recommendation stays (it's what tells you what to do now); the plan view
-makes *why* legible and is where a more developed, more self-referential AIF process will live.
+The machine **already** scores G over **policies** — short action *sequences*, via rollout —
+and recommends the head of the best-scoring plan. What remains is *depth*: today's rollout is
+flat and shallow-horizon, so the next development is a longer horizon and a two-timescale
+(strategic/tactical) hierarchy, plus **surfacing the whole ranked plan** — not just its head —
+so the recommendation reads as *"work on this next; it's step 1 of this trajectory, chosen
+because the whole trajectory minimises G."* That plan view is where a more developed, more
+self-referential AIF process will live.
 
 ---
 
