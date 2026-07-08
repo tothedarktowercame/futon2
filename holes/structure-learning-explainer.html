@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Structure-learning explainer — A4a / R17: what we learned making it real at the pattern grain</title>
+<style>
+  :root{
+    --done:#2e7d32; --done-bg:#e3f5e3; --partial:#b8860b; --partial-bg:#fff5d6;
+    --gap:#c62828; --gap-bg:#fbe0e2; --sibling:#1565c0; --sibling-bg:#e0ecfa;
+    --ink:#1a1a1a; --mut:#6b6b6b; --code:#0b3d0b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:#fafafa;line-height:1.5}
+  header{padding:16px 26px;border-bottom:1px solid #e3e3e3;background:#fff}
+  header h1{margin:0 0 4px;font-size:19px}
+  header p{margin:0;color:var(--mut);font-size:13px}
+  main{max-width:900px;margin:0 auto;padding:22px 26px 60px}
+  h2{font-size:17px;margin:30px 0 8px;padding-bottom:5px;border-bottom:2px solid #eee}
+  h3{font-size:14px;margin:20px 0 6px;color:#333}
+  p{margin:8px 0}
+  pre{background:#f4f7f4;border:1px solid #dbe6db;border-left:3px solid var(--done);
+      border-radius:6px;padding:11px 13px;font-size:12.5px;color:var(--code);overflow-x:auto;
+      font-family:"SF Mono",Menlo,Consolas,monospace}
+  pre.neg{border-left-color:var(--gap);background:#fdf3f3;color:#5a1a1a}
+  pre .c{color:var(--mut)}
+  code{background:#eef2ee;padding:1px 5px;border-radius:4px;font-size:12.5px}
+  .tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:9px;vertical-align:middle}
+  .t-done{color:var(--done);background:var(--done-bg)}
+  .t-demo{color:var(--sibling);background:var(--sibling-bg)}
+  .t-gap{color:var(--gap);background:var(--gap-bg)}
+  .t-parked{color:var(--partial);background:var(--partial-bg)}
+  .lead{font-size:14.5px;background:#fff;border:1px solid #e3e3e3;border-radius:8px;padding:13px 16px}
+  table{border-collapse:collapse;width:100%;font-size:13px;margin:10px 0}
+  th,td{border:1px solid #e0e0e0;padding:6px 9px;text-align:left;vertical-align:top}
+  th{background:#f2f2f2}
+  .note{color:var(--mut);font-size:12.5px;font-style:italic}
+  .win{color:var(--done);font-weight:700}
+  .neg-c{color:var(--gap);font-weight:700}
+  .honest{border-left:3px solid var(--gap);background:var(--gap-bg);border-radius:6px;padding:10px 14px;margin:12px 0}
+  .next{border-left:3px solid var(--sibling);background:var(--sibling-bg);border-radius:6px;padding:10px 14px;margin:12px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>Structure-learning explainer — A4a / R17</h1>
+  <p>What we learned making it real at the pattern grain · siblings: aif-wiring-explainer · aif-r1-r16-pattern-map · pipeline-pattern-cascade. Updated 2026-07-08 (claude-5, with Joe) — verified numbers, honest verbs.</p>
+</header>
+<main>
+
+<p class="lead"><b>The one-sentence result.</b> Structure learning (forming concepts and scoring their epistemic value from real evidence) <b>is real at the pattern grain</b> — but the working mechanism is <b>embedding-based clustering + Bayesian-Model-Reduction epistemic value (EIG)</b>, <em>not</em> naive Bayesian Model Reduction over co-occurrence counts. Naive count-BMR turned out to be miscalibrated at scale; the co-embedded metric space is what makes structure learning tractable. That negative-and-positive, on one real dataset, is the empirical spine of the "AIF <b>and</b> Embeddings" thesis.</p>
+
+<h2>What we're aiming for</h2>
+<p>Active inference has three optimisation levels (after Neacsu 2024, Friston lab): <b>inference</b> (infer states/policies), <b>parametric learning</b> (accumulate Dirichlet counts = Hebbian), and <b>structure learning</b> (reorganise the model — merge look-alike concepts, prune redundant structure). Only the third forms concepts. A4a is the structure-learning node: from accumulated evidence, (a) group units into concepts, (b) score each concept's <b>epistemic value</b> (how much is left to learn), and (c) let a diverse candidate set be re-ranked to prefer what's worth exploring.</p>
+<pre><span class="c">;; evidence                concepts             epistemic value        selection</span>
+co-occurrence + embedding ──▶ <b>concepts</b> ──▶ <b>EIG</b> (posterior spread) ──▶ ranker (<code>G = risk − λ·EIG</code>)
+</pre>
+
+<h2>What happened when we made it real</h2>
+<p>We stopped trusting the synthetic demo and ran on the real stack. Five findings, each with verified numbers:</p>
+
+<h3>1 — The capability-star grain was the wrong shape <span class="tag t-gap">dead end, informative</span></h3>
+<p>The first candidate corpus — the capability star-map (<code>capability → the mission that minted it</code>) — is <b>bijective</b>: each capability is minted once, by one mission. Zero co-occurrence, so BMR had nothing to compare and <b>collapsed all 30 capabilities into 1 concept</b>. Lesson: structure learning needs units that <em>co-occur</em>. We pivoted to the <b>pattern grain</b>, where co-occurrence (missions apply many patterns) and a co-embedding both genuinely exist.</p>
+
+<h3>2 — Naive count-BMR is miscalibrated at high dimension <span class="tag t-gap">the key negative</span></h3>
+<pre class="neg">real corpus: 118 patterns × 94-mission outcome space, 6903 pairs
+<b>ALL 6903 pairs accepted (ΔF −6.5 … −33.7). ZERO rejections. → 1 concept.</b>
+even two patterns sharing ZERO missions score ΔF ≈ −3.4 (passes the −3 cutoff)
+</pre>
+<p>The BMR complexity term scales with the outcome dimension, so at 94 missions <em>every</em> pair looks mergeable — the ΔF ≤ −3 rule is meaningless at scale. <b class="neg-c">Pure Bayesian Model Reduction over raw co-occurrence counts does not work for real structure learning.</b> (A tiny 5-mission case behaves correctly — merges identical, rejects disjoint — so it's specifically a high-dimensional effect. Independently verified.)</p>
+
+<h3>3 — The embedding is load-bearing, not enrichment <span class="tag t-done">the AIF-and-Embeddings result</span></h3>
+<p>On the <em>same data</em> where count-BMR collapses, the existing <b>semilattice constellation clustering</b> (patterns grouped by embedding proximity + citation-overlap — <code>pipeline-pattern-cascade.html</code>, constellations P0–P17) produces coherent, labelled concepts. The metric space is what regularises the sparse high-dimensional counts. Embedding-gated BMR (cosine floor 0.7 + a stricter ΔF cutoff −20) recovers clusters matching the constellations. So the embedding isn't a nod to how we started — it is <b>necessary</b> for structure learning to work here.</p>
+<p class="note">The concepts already existed as the constellations. We use them; we do not re-derive them.</p>
+
+<h3>4 — The EIG layer, computed over the real constellations <span class="tag t-done">the new contribution</span></h3>
+<p>The constellations have structure but not <em>epistemic value</em>. BMR supplies it — the posterior spread of each concept's Dirichlet row:</p>
+<pre>constellation   size   EIG (posterior stddev)   label
+P3/P7/P12/P14      1        <b>0.029</b>   singletons — MOST uncertain (least evidence)
+P0                 8        0.018   writing / pattern discipline
+P8                 7        0.015   agency / coordination / routing
+P6                11        0.014   runtime invariants / boot reachability
+P1                19        0.011   futon-theory / storage
+P13               25        0.010   math proof / rational reconstruction
+P2                28        <b>0.009</b>   AIF / operator — MOST settled (most evidence)
+</pre>
+<p>EIG scales as <code>1/√(evidence)</code>: concepts we've seen least carry the most epistemic value — the "explore what you know least" signal a ranker needs. <span class="note">(Verified the singleton value by hand: α₀=11.4, RMS of the per-component Dirichlet stddevs = 0.0289.) It is a coarse signal — inverse-evidence — but the right direction.</span></p>
+
+<h3>5 — BMR proposes <em>candidate</em> coarser merges the clustering split <span class="tag t-partial">a real signal, unvalidated</span></h3>
+<p>Does embedding-gated BMR ever see structure the constellations don't have? Checked directly:</p>
+<pre>tightest merges (cosine ≥ 0.8): all WITHIN one constellation  <span class="c">→ pure recovery</span>
+working-setting 12-pattern "AIF" cluster spans <b>THREE</b> constellations:
+   C2 (core AIF, 7) + C8 (learn-as-you-go, loop-failure-signals, structured-events-only, 3) + C1 (2)
+   <span class="c">→ a coherent "AIF-and-its-loop" concept the hard clustering split apart</span>
+the 8-pattern math-proof cluster: all C13  <span class="c">→ pure recovery</span>
+also: within-constellation pairs merge 1.55 ΔF more strongly than across (weak corroboration;
+      hub patterns like `stop-the-line` bridge constellations and confound it)
+</pre>
+<p>So BMR+embedding <em>does</em> propose coarser concepts than the constellations — but at the setting where over-merge creep begins, and with no validation yet that the coarser boundary is principled.</p>
+
+<h2>What we can — and can't — claim</h2>
+<div class="honest">
+The honest verb is <b>recovery + epistemic-quantification + candidate coarser-merges</b> — <b>not</b> "learned structure from scratch." BMR (a) recovers the constellations at fine grain, (b) quantifies their epistemic value (the EIG layer, genuinely new), and (c) proposes candidate coarser merges (e.g. AIF-core + loop-signals across 3 constellations). The coarser merges are a real <em>signal</em>, but they appear near the over-merge threshold and carry no held-out validation, so they are candidates, not confirmed concepts. We do not claim more than the evidence supports.
+</div>
+<p class="note">A clean fact for the roadmap: this all ran on <b>existing</b> co-application data with <b>zero substrate writes</b> — no operator "arm the write" was needed. The only remaining step to feed the ranker is a build (wire <code>{concept → EIG}</code> into the pattern-grain ranker), not an arm.</p>
+
+<h2>The next experiment — validate a single coarser merge</h2>
+<div class="next">
+<b>The experiment.</b> Take the one coarser merge BMR+embedding proposed that the constellations split — the <b>AIF-12</b> cluster spanning C2+C8+C1 — and test whether that boundary is <em>principled</em> against a signal independent of the embedding: a held-out split (do the C8/C1 members behave like the C2 core on missions the clustering didn't see?) or a discharge/usage signal (do they get used together in practice?).
+<br><br>
+<b>What we expect to take away.</b> One of two clean outcomes, either of which is worth having:
+<ul>
+<li><b>If the coarser merge validates</b> → it is a genuine <em>learned</em> structure the prior clustering missed. That upgrades the verb from "recovery + candidate" to "structure learning proper," and drops the "recovery" hedge — the strongest form of the A4a claim.</li>
+<li><b>If it does not</b> → the honest ceiling is confirmed at "recovery + epistemic-quantification," the constellation granularity is vindicated as correct, and the AIF-12 was over-merge creep — which itself sharpens where the embedding-gate thresholds should sit.</li>
+</ul>
+Either way we convert a <em>candidate</em> into a <em>fact</em> — which is the whole discipline this line of work runs on.
+</div>
+
+<h2>Status</h2>
+<table>
+<tr><th>piece</th><th>status</th><th>what's true</th></tr>
+<tr><td>Concepts on real data (constellations)</td><td><span class="tag t-done">real</span></td><td>P0–P17, embedding + citation-overlap; cover the 118-pattern corpus.</td></tr>
+<tr><td>EIG per concept (BMR)</td><td><span class="tag t-done">real, verified</span></td><td><code>{constellation → posterior stddev}</code>, ~1/√evidence. The epistemic layer the constellations lacked.</td></tr>
+<tr><td>Naive count-BMR merges</td><td><span class="tag t-gap">fails at scale</span></td><td>over-merges to 1 concept at 94-dim; the empirical spine of "embedding is necessary."</td></tr>
+<tr><td>Coarser-merge learning (AIF-12)</td><td><span class="tag t-partial">candidate</span></td><td>a coherent cross-constellation merge; <b>next experiment validates it.</b></td></tr>
+<tr><td>Ranker integration (pattern grain)</td><td><span class="tag t-parked">ready to build</span></td><td>grain-agnostic <code>:eig-fn</code> injection landed; the <code>eig-for-patterns</code> re-key is the one remaining build (no operator arm).</td></tr>
+</table>
+
+<p class="note">Reproduce: BMR/EIG numbers from <code>futon2.aif.bmr</code> + <code>futon2.aif.a4a</code> and <code>futon2/holes/labs/slush-demo/bmr_constellation_experiment.py</code> (over the real pattern-scopes corpus); constellations from <code>futon3c/holes/excursions/pipeline-semilattice-clusters.edn</code>; embeddings from <code>futon3a/resources/notions/bge_pattern_embeddings.json</code>.</p>
+
+</main>
+</body>
+</html>
