@@ -3,6 +3,7 @@
 
    A6 owns only :capability-star-status. A4a owns :capability-star identity."
   (:require [clojure.string :as str]
+            [futon2.aif.a4a-substrate :as a4a-substrate]
             [futon2.aif.actuator-a3 :as a3]
             [futon2.aif.efe :as efe]
             [futon2.aif.operational-witness :as ow])
@@ -115,14 +116,23 @@
            capability-graph
            (status-rows opts))))
 
+(defn- with-pattern-grain-eig
+  [rank-opts opts]
+  (if (and (:pattern-grain-eig? opts)
+           (not (:eig-fn rank-opts)))
+    (assoc rank-opts :eig-fn (:eig-fn (a4a-substrate/load-pattern-grain-eig opts)))
+    rank-opts))
+
 (defn rank-with-star-status
   [state candidate-actions capability-graph opts]
   (efe/rank-star-map-actions
    state
    candidate-actions
-   (merge {:capability-graph (apply-star-status capability-graph opts)
-           :graph-ascent-status-aware? true}
-          opts)))
+   (with-pattern-grain-eig
+     (merge {:capability-graph (apply-star-status capability-graph opts)
+             :graph-ascent-status-aware? true}
+            opts)
+     opts)))
 
 (defn- open-mission-actions
   [graph]
@@ -143,7 +153,9 @@
      (efe/rank-star-map-actions
       (or (:state opts) {:observation {} :belief {}})
       (or (:candidate-actions opts) (open-mission-actions graph))
-      (assoc rank-opts :capability-graph graph)))))
+      (with-pattern-grain-eig
+        (assoc rank-opts :capability-graph graph)
+        opts)))))
 
 (defn closure-falsifier
   "E-pur-si-muove gate: a discharge must move the status-aware ranking."

@@ -1,5 +1,6 @@
 (ns futon2.aif.actuator-a6-test
   (:require [clojure.test :refer [deftest is]]
+            [futon2.aif.a4a-substrate :as a4a-substrate]
             [futon2.aif.actuator-a3 :as a3]
             [futon2.aif.actuator-a6 :as a6]))
 
@@ -144,6 +145,46 @@
         (is (= before-order after-order)))
       (finally
         (evict-ids! (:star ids) (:status ids))))))
+
+(def ^:private pattern-eig-graph
+  {:capabilities {"goal" {:scope []}}
+   :missions {"M-a" {:scope [] :produces [] :open-hole-count 0}
+              "M-b" {:scope [] :produces [] :open-hole-count 0}}})
+
+(def ^:private pattern-eig-rank-opts
+  {:pre-registered-goal "goal"
+   :graph-applicability-penalty 0.0
+   :graph-body-weight 0.0
+   :graph-ascent-weight 0.0
+   :goal-outcome-entries []})
+
+(deftest pattern-grain-eig-default-off-does-not-load-test
+  (with-redefs [a4a-substrate/load-pattern-grain-eig
+                (fn [& _] (throw (ex-info "should not load when flag is off" {})))]
+    (let [ranked (a6/rank-graph pattern-eig-graph pattern-eig-rank-opts)]
+      (is (every? zero? (map :G-eig-bmr ranked)))
+      (is (= (mapv :G-total ranked)
+             (mapv :G-total (a6/rank-graph pattern-eig-graph
+                                            (assoc pattern-eig-rank-opts
+                                                   :pattern-grain-eig? false))))))))
+
+(deftest pattern-grain-eig-flag-injects-ranker-eig-test
+  (with-redefs [a4a-substrate/load-pattern-grain-eig
+                (fn [_]
+                  {:eig-fn (fn [mission-id _mission]
+                             (if (= "M-b" mission-id) 1.5 0.0))})]
+    (let [without (a6/rank-graph pattern-eig-graph pattern-eig-rank-opts)
+          with (a6/rank-graph pattern-eig-graph
+                              (assoc pattern-eig-rank-opts
+                                     :pattern-grain-eig? true))
+          by-target (into {} (map (juxt #(get-in % [:action :target]) identity) with))]
+      (is (= (:G-total (first without))
+             (:G-total (second without)))
+          "fixture starts with the R13 tie floor")
+      (is (= 1.5 (:G-eig-bmr (by-target "M-b"))))
+      (is (= "M-b" (get-in (first with) [:action :target])))
+      (is (< (:G-total (by-target "M-b"))
+             (:G-total (by-target "M-a")))))))
 
 (deftest witness-live-positive-uses-real-substrate-facts-test
   (let [ids (fixture-ids)

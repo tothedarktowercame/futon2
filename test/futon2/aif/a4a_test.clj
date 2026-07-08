@@ -131,12 +131,35 @@
     (is (= 0.0 (a4a/eig-for-produces reduced nil)))))
 
 (deftest make-eig-fn-returns-deterministic-closure
-  (let [reduced (a4a/reduce-concepts synthetic-merge-corpus)
-        eig-fn (a4a/make-eig-fn reduced)
-        expected (a4a/eig-for-produces reduced ["A" "B" "C"])]
-    (is (= expected (eig-fn ["A" "B" "C"])))
-    (is (= (eig-fn ["A" "B" "C"])
-           (eig-fn ["A" "B" "C"])))))
+  (let [mission->eig {"M-a" 0.25 "M-b" 0.5}
+        eig-fn (a4a/make-eig-fn mission->eig)]
+    (is (= 0.25 (eig-fn "M-a" {:produces ["ignored"]})))
+    (is (= 0.25 (eig-fn "M-a@futon0" {}))
+        "mission IDs resolve across @repo suffixes")
+    (is (= 0.0 (eig-fn "M-absent" {})))
+    (is (= (eig-fn "M-b" {})
+           (eig-fn "M-b" {})))))
+
+(deftest constellation-eig-and-mission-eig
+  (let [pattern->constellation {"ns/p1" 1
+                                "ns/p2" 1
+                                "other/p3" 2}
+        edges [["p1" "M-a"]
+               ["p2" "M-a"]
+               ["p2" "M-b"]
+               ["p3" "M-b"]]
+        c->eig (a4a/constellation->eig pattern->constellation edges)
+        m->patterns {"M-a@futon0" ["p1" "p2" "unknown"]
+                     "M-b" ["p2" "p3"]
+                     "M-empty" []}
+        m->eig (a4a/mission->eig m->patterns pattern->constellation c->eig)]
+    (is (= #{1 2} (set (keys c->eig))))
+    (is (every? pos? (vals c->eig)))
+    (is (= (get c->eig 1) (get m->eig "M-a"))
+        "p1 and p2 share a constellation, so M-a counts it once")
+    (is (= (+ (get c->eig 1) (get c->eig 2))
+           (get m->eig "M-b")))
+    (is (= 0.0 (get m->eig "M-empty")))))
 
 (deftest mint-stars-dry-run-does-not-write
   (let [called? (atom false)]

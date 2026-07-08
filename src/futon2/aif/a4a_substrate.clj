@@ -3,8 +3,15 @@
 
    This namespace reads the substrate corpus and can mint capability-star
    identity docs, guarded by :write? false by default."
-  (:require [futon2.aif.a4a :as a4a]
+  (:require [clojure.edn :as edn]
+            [futon2.aif.a4a :as a4a]
             [futon2.aif.actuator-a3 :as a3]))
+
+(def default-semilattice-clusters-path
+  "/home/joe/code/futon3c/holes/excursions/pipeline-semilattice-clusters.edn")
+
+(def default-mission-pattern-scopes-path
+  "/home/joe/code/futon6/data/mission-pattern-scopes.edn")
 
 (defn capability-query
   []
@@ -85,3 +92,53 @@
              (mapv (fn [doc] [:xtdb.api/put doc]) docs)
              opts)}
        docs))))
+
+(defn- read-edn-file
+  [path]
+  (edn/read-string (slurp path)))
+
+(defn pattern->constellation
+  [semilattice-clusters]
+  (into (sorted-map)
+        (map (fn [{:keys [pattern cluster]}]
+               [(a4a/pattern-stem pattern) cluster]))
+        (:pattern-membership semilattice-clusters)))
+
+(defn mission->patterns
+  [mission-pattern-scopes]
+  (into (sorted-map)
+        (map (fn [{:keys [mission applied]}]
+               [(a4a/normalize-mission-id mission)
+                (mapv a4a/pattern-stem applied)]))
+        (:missions mission-pattern-scopes)))
+
+(defn corpus-edges
+  [mission-pattern-scopes]
+  (mapv (fn [[mission pattern]]
+          [pattern mission])
+        (for [{:keys [mission applied]} (:missions mission-pattern-scopes)
+              pattern applied]
+          [(a4a/normalize-mission-id mission) (a4a/pattern-stem pattern)])))
+
+(defn load-pattern-grain-eig
+  "Load the pattern-grain constellation EIG maps from EDN files.
+
+   Pure file reads only: no Drawbridge. Returns the mission->eig table plus a
+   two-argument EIG closure for efe/graph-efe-terms."
+  ([] (load-pattern-grain-eig {}))
+  ([{:keys [semilattice-clusters-path mission-pattern-scopes-path]
+     :or {semilattice-clusters-path default-semilattice-clusters-path
+          mission-pattern-scopes-path default-mission-pattern-scopes-path}}]
+   (let [clusters (read-edn-file semilattice-clusters-path)
+         scopes (read-edn-file mission-pattern-scopes-path)
+         p->c (pattern->constellation clusters)
+         m->patterns (mission->patterns scopes)
+         edges (corpus-edges scopes)
+         c->eig (a4a/constellation->eig p->c edges)
+         m->eig (a4a/mission->eig m->patterns p->c c->eig)]
+     {:pattern->constellation p->c
+      :mission->patterns m->patterns
+      :corpus-edges edges
+      :constellation->eig c->eig
+      :mission->eig m->eig
+      :eig-fn (a4a/make-eig-fn m->eig)})))

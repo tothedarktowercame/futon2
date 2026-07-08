@@ -26,6 +26,27 @@
   [x]
   (str (raw-id x)))
 
+(defn- id-string
+  [x]
+  (cond
+    (keyword? x) (if-let [ns-part (namespace x)]
+                   (str ns-part "/" (name x))
+                   (name x))
+    (symbol? x) (if-let [ns-part (namespace x)]
+                  (str ns-part "/" (name x))
+                  (name x))
+    :else (str (raw-id x))))
+
+(defn normalize-mission-id
+  "Normalise mission IDs across graph keys and mission-pattern-scopes rows."
+  [mission-id]
+  (str/replace (id-string mission-id) #"@.*$" ""))
+
+(defn pattern-stem
+  "Return the last path/name segment of a pattern id such as ns/stem."
+  [pattern-id]
+  (last (str/split (id-string pattern-id) #"/")))
+
 (defn- capability-discharge?
   [discharge]
   (= "capability" (if (keyword? (:type discharge))
@@ -228,10 +249,79 @@
     (reduce + 0.0 (map #(get stddevs % 0.0) concepts))))
 
 (defn make-eig-fn
-  "Return a pure EIG resolver closure suitable for injection by the A1 caller."
-  [reduced-concepts]
-  (fn [produces-set]
-    (eig-for-produces reduced-concepts produces-set)))
+  "Return a pure two-argument EIG closure for efe/graph-efe-terms.
+
+   The mission node is accepted for arity compatibility; this pattern-grain
+   resolver keys on the normalised mission id."
+  [mission->eig]
+  (fn [mission-id _mission]
+    (double (or (get mission->eig mission-id)
+                (get mission->eig (normalize-mission-id mission-id))
+                0.0))))
+
+(defn- add-edge-count
+  [matrix outcomes-by-id [pattern mission]]
+  (let [outcome-index (get outcomes-by-id mission)]
+    (if (and (contains? matrix pattern) outcome-index)
+      (update-in matrix [pattern outcome-index] + 1.0)
+      matrix)))
+
+(defn- aggregate-rows
+  [rows]
+  (if (seq rows)
+    (mapv (fn [values]
+            (+ prior (reduce + (map #(- % prior) values))))
+          (apply map vector rows))
+    []))
+
+(defn constellation->eig
+  "Return {constellation -> aggregate posterior stddev} from pattern co-occurrence.
+
+   `pattern->constellation` maps pattern stems to constellation ids.
+   `corpus-edges` is a seq of [pattern mission] observations."
+  [pattern->constellation corpus-edges]
+  (let [pattern->constellation (into {} (map (fn [[pattern constellation]]
+                                               [(pattern-stem pattern) constellation]))
+                                     pattern->constellation)
+        edges (mapv (fn [[pattern mission]]
+                      [(pattern-stem pattern) (normalize-mission-id mission)])
+                    corpus-edges)
+        patterns (vec (sort (keys pattern->constellation)))
+        missions (vec (sort (distinct (map second edges))))
+        outcomes-by-id (into {} (map-indexed (fn [i mission] [mission i]) missions))
+        empty-row (vec (repeat (count missions) prior))
+        pattern-rows (reduce #(add-edge-count %1 outcomes-by-id %2)
+                             (into {} (map (fn [pattern] [pattern empty-row]) patterns))
+                             edges)
+        constellation-rows (reduce-kv
+                            (fn [acc pattern constellation]
+                              (update acc constellation conj (get pattern-rows pattern empty-row)))
+                            (sorted-map)
+                            pattern->constellation)]
+    (into (sorted-map)
+          (map (fn [[constellation rows]]
+                 (let [row (aggregate-rows rows)]
+                   [constellation (if (seq row)
+                                    (rms (map :stddev
+                                              (bmr/dirichlet-moments row)))
+                                    0.0)])))
+          constellation-rows)))
+
+(defn mission->eig
+  "Return {mission-id -> sum of distinct constellation stddevs for its patterns}."
+  [mission->patterns pattern->constellation constellation->eig]
+  (let [pattern->constellation (into {} (map (fn [[pattern constellation]]
+                                               [(pattern-stem pattern) constellation]))
+                                     pattern->constellation)]
+    (into (sorted-map)
+          (map (fn [[mission patterns]]
+                 (let [constellations (set (keep #(get pattern->constellation
+                                                        (pattern-stem %))
+                                                   patterns))]
+                   [(normalize-mission-id mission)
+                    (reduce + 0.0 (map #(double (get constellation->eig % 0.0))
+                                       constellations))])))
+          mission->patterns)))
 
 (defn- uri-token
   [s]
