@@ -44,7 +44,7 @@ from slush_proxy import (  # noqa: E402
 )
 
 K_SAMPLES = 1024
-N_STEPS_DEFAULT = 1200
+N_STEPS_DEFAULT = 3000  # converges (Pearson 0.73); 100-step runs are undertrained (~uniform)
 SEED = 20260709
 
 

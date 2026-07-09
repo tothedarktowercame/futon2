@@ -1,3 +1,5 @@
+/home/joe/code/gflownet/.venv/lib/python3.12/site-packages/torch/_compile.py:32: UserWarning: optimizer contains a parameter group with duplicate parameters; in future, this will cause an error; see github.com/pytorch/pytorch/issues/40967 for more information
+  return disable_fn(*args, **kwargs)
 ========================================================================
 GFN SLUSH — real P0-P17 constellation reward
 ========================================================================
@@ -33,35 +35,36 @@ A3-pass proxy: coverage >= 5 target constellations
   embedding-gate sweep had no clean 5-30 concept setting
   AIF-12 merge adjudication: OVERREACH (co-occ Jaccard ratio 0.41; live co_app 8.6% cross vs 57.1% within)
 
---- Training TB GFlowNet (100 steps, CPU) ---
+--- Training TB GFlowNet (3000 steps, CPU) ---
 	Important: offline trajectories will NOT be sampled. In order to  sample offline trajectories, the train configuration of the buffer  should be provided.
 	Important: test metrics will NOT be computed. In order to compute test metrics, the test configuration of the buffer should be provided.
-Trained in 13.6s, sampled 1024 terminal states
+
+Trained in 539.1s, sampled 1024 terminal states
 
 ========================================================================
 (i) DISTRIBUTION MATCH
 ========================================================================
   JSD (pre/uniform  vs true):  0.841704 bits
-  JSD (post/trained vs true):  0.832555 bits
-  JSD drop:                    +0.009149 bits
-  L1  (post/trained vs true):  1.8214
-  Pearson corr (post vs true): -0.0001
+  JSD (post/trained vs true):  0.408470 bits
+  JSD drop:                    +0.433234 bits
+  L1  (post/trained vs true):  1.1419
+  Pearson corr (post vs true): 0.7270
 
 ========================================================================
 (ii) MODE SPREAD / A3-PASSING CANDIDATES
 ========================================================================
-  Distinct candidates sampled:        971 / 8568
-  Distinct A3-passing candidates:     14
+  Distinct candidates sampled:        674 / 8568
+  Distinct A3-passing candidates:     120
+    (P5 P8 P10 P12 P16) cov=5 eig=0.104679 reward=24457.1791
     (P0 P5 P10 P12 P16) cov=5 eig=0.103373 reward=24425.2591
-    (P0 P5 P8 P10 P12) cov=5 eig=0.097333 reward=24278.1650
-    (P1 P5 P6 P10 P12) cov=5 eig=0.092619 reward=24163.9922
-    (P5 P6 P8 P12 P16) cov=5 eig=0.091480 reward=24136.4850
-    (P0 P5 P6 P8 P10) cov=5 eig=0.084571 reward=23970.2978
-    (P0 P1 P8 P10 P16) cov=5 eig=0.083924 reward=23954.8071
-    (P1 P2 P6 P10 P16) cov=5 eig=0.077491 reward=23801.1949
-    (P0 P1 P2 P12 P16) cov=5 eig=0.077072 reward=23791.2302
-    (P0 P1 P2 P5 P10) cov=5 eig=0.074785 reward=23736.8821
-    (P0 P2 P5 P8 P16) cov=5 eig=0.073646 reward=23709.8611
+    (P5 P6 P10 P12 P16) cov=5 eig=0.103355 reward=24424.8064
+    (P0 P8 P10 P12 P16) cov=5 eig=0.100057 reward=24344.3955
+    (P6 P8 P10 P12 P16) cov=5 eig=0.100038 reward=24343.9444
+    (P1 P5 P10 P12 P16) cov=5 eig=0.099984 reward=24342.6156
+    (P0 P6 P10 P12 P16) cov=5 eig=0.098732 reward=24312.1721
+    (P2 P5 P10 P12 P16) cov=5 eig=0.098264 reward=24300.7958
+    (P5 P6 P8 P10 P12) cov=5 eig=0.097314 reward=24277.7151
+    (P1 P8 P10 P12 P16) cov=5 eig=0.096668 reward=24262.0257
 
 ========================================================================
 (iii) GREEDY BASELINE
@@ -71,21 +74,21 @@ Trained in 13.6s, sampled 1024 terminal states
   Greedy A3-passing? True
   Greedy cutoff tie count: 1
   High-reward modes (top 10%): 859
-  GFN covers 101 / 859 top modes
+  GFN covers 342 / 859 top modes
   Greedy covers 1 / 859 top modes
 
 ========================================================================
 (iv) REAL EIG PULL
 ========================================================================
-  Avg coverage, GFN samples:  2.4844  (uniform 2.5000)
-  Avg EIG, GFN samples:       0.106229  (uniform 0.105775)
+  Avg coverage, GFN samples:  4.1357  (uniform 2.5000)
+  Avg EIG, GFN samples:       0.090733  (uniform 0.105775)
   Sign check: EIG is subtracted in EFE, so higher EIG increases reward.
 
 ========================================================================
 SUMMARY
 ========================================================================
-  JSD post-train: 0.832555 bits (pre 0.841704, drop +0.009149)
-  Distinct sampled: 971 / 8568
-  Distinct A3-passing sampled: 14
-  GFN top-mode coverage / greedy: 101 / 1
+  JSD post-train: 0.408470 bits (pre 0.841704, drop +0.433234)
+  Distinct sampled: 674 / 8568
+  Distinct A3-passing sampled: 120
+  GFN top-mode coverage / greedy: 342 / 1
   Greedy tie count at cutoff: 1
