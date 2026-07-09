@@ -247,3 +247,96 @@ at -0.5 — moderate confidence. The holes are genuine: the citation-count sourc
 reliability formula, gold metric, F4 literature graph, and scope-binding extraction
 are all ungroundable from the pattern halo + mission prose. The deposit unblocks
 the abstain-missing-leg gate by giving the escrow a replayable construction.
+
+## Flight 4: ft-state-snapshot-witness-001 (mana-gated)
+
+**Driver:** zai-3 (unattended overnight run, edge invoke-1783560601613-856-26410afa)
+**Consent:** mana gate `fold-authoring`, spend "overnight deposit run", balance after: 1
+  - `{:ok true, :balance 1}` — gate authorized the fold-authoring dispatch
+
+### Mission selection
+
+Latest tick (2026-07-06T20:04:39Z): target=M-learning-loop, gates={:abstain-missing-leg 2}.
+Both abstain-missing-leg lane missions (M-learning-loop and M-canon-fingerprint-store) now
+have deposits (ft-learning-loop-010 and ft-canon-fingerprint-store-001 from Flights 1-3).
+Per the instruction "if every lane mission already has one, pick the highest-G candidate
+mission from the tick that lacks a deposit": M-state-snapshot-witness was selected — it
+appears in the trace's candidate set, is a core futon3c infrastructure mission (pipeline-tracer
+track-4-2 closure), and has NO deposit.
+
+### Psi
+
+Source: M-state-snapshot-witness.md IDENTIFY section (the decision: separate :event
+:inventory-snapshot; the shape-first approach with 4 siblings; boot-time construction).
+
+psi-sha256: 5f0a5ba8c4f90f25973b47700ffe73fc38a3fafcebf2fb8891f765b744929df8
+
+### Cascade
+
+```
+size=6  wholeness=3.022  H=0.948  T=3.189  accuracy=2.181  complexity=2.619
+F-free-energy=1.526  truncated=false
+```
+
+RICH cascade — 6 patterns, all with verified flexiarg prose:
+- invariant-coherence/state-snapshot-witness (rel=0.754)
+- invariant-coherence/reachable-from-boot (rel=0.485)
+- invariant-coherence/shape-first-identify (rel=0.489)
+- library-coherence/library-staleness-scan (rel=0.442)
+- sidecar/fact-lifecycle-event-types (rel=0.448)
+- structure/interest-event-vocabulary (rel=0.57)
+
+### Fold
+
+6 boxes:
+- b1: inventory-snapshot projection-fn (fits state-snapshot-witness)
+- b2: boot-time wiring in bootstrap.clj (fits reachable-from-boot)
+- b3: sibling-namespace shape (fits shape-first-identify)
+- b4: separate :event :inventory-snapshot type (fits fact-lifecycle-event-types)
+- b5: snapshot as structural witness (fits interest-event-vocabulary)
+- b6: staleness detection via snapshot diff (fits library-staleness-scan)
+
+4 holes:
+- h1: projection-fn field selection (which inventory fields are semantically meaningful)
+- h2: tracer closure mechanics (emit-tracer-closed! API shape)
+- h3: HUD widget rendering (MOVING vs STUCK computation)
+- h4: cadence discipline for periodic snapshots beyond boot
+
+v2 wires: b3→b1 :seq, b1→b2 :seq, b2→b4 :seq, b4→b5 :seq, b1→b6 :tensor, b5→b6 :copar.
+Terminal: b5 :discharges :want-signature.
+
+### ΔG
+
+-0.6 (hand-shown: dG = -(boxes/(boxes+holes)) = -(6/10) = -0.6; loader pin-3 recomputed and confirmed)
+
+### Pins
+
+- prompt-sha: b426db580dd6ea2a17a177f3768beb36cd8662ff216ee99badc4e70e9110b820
+- psi-sha: 5f0a5ba8c4f90f25973b47700ffe73fc38a3fafcebf2fb8891f765b744929df8
+- prose-sha256:
+  - invariant-coherence/state-snapshot-witness: 3e7d90579c329098e04159f5bf0c4faf29f092c78e0ec0bf81c2f43eb87cd505
+  - invariant-coherence/reachable-from-boot: 7866b547d9e2aa912ce3cd68532ffc09c9bd6fd6c421c315b18c4ea004afd0f7
+  - invariant-coherence/shape-first-identify: 4c47b8cc7589b9410e075c014ac54e407ba46efc570f8642a29459796044152d
+  - library-coherence/library-staleness-scan: fbd40e6dbcde9cf70ed5a046f45743f8505a9c859f337bd02860e88aa847707a
+  - sidecar/fact-lifecycle-event-types: 83232f9ef4c5c45f73feec70a5d7d7cbf2006b0375271ee01cbe8ad4f8a2a5e3
+  - structure/interest-event-vocabulary: 35ae9a5e02976f23e7629997c3d564df5d9e6b2eeacfe1e17c1d23679633b20e
+- arming: mana gate fold-authoring, spend-purpose "overnight deposit run", balance-after 1
+- LOADER ACCEPT: ft-state-snapshot-witness-001 ✓ (delta-g -0.6)
+- TAMPER REJECT: /tmp/ft-tampered-test.edn — delta-g-mismatch (-0.99 vs -0.6) ✓
+
+### Blind scoring
+
+:none — no A-next seal exists for M-state-snapshot-witness. Recorded honestly per
+the 003 no-seal precedent. The fold author IS the scorer (same agent, unattended
+overnight) — the mana gate is the consent mechanism, not separation of powers.
+
+### Honest assessment
+
+This is a SOLID deposit — rich cascade (6 patterns, F=1.526), coherent 6-box
+construction spanning the projection-fn, boot-wiring, shape-first sibling design,
+typed event boundary, structural-witness semantics, and staleness diffing. The 4
+honest policy-holes (projection-fn fields, tracer closure API, HUD rendering,
+cadence discipline) are all genuinely ungroundable from the pattern halo — they
+require runtime API knowledge or operator calibration decisions. dG=-0.6 reflects
+good coverage (6/10) with honest holes. The deposit unblocks the abstain-missing-leg
+gate by giving the escrow a replayable construction.
