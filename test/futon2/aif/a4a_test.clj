@@ -183,3 +183,82 @@
                    :star/eig-unit :endpoint-count-stddev
                    :star/eig-source :a4a-constellation-stddev)]
            (substrate/mint-stars! ["P2"])))))
+
+(def synthetic-slush-deposit
+  {:source :gfn-slush-lambda-4
+   :missions {"M-a" {:mission "M-a"
+                     :candidates [{:constellations [1 2 3 4 5]
+                                   :coverage 5
+                                   :eig 0.1
+                                   :reward 10.0}
+                                  {:constellations [2 3 4 5 6]
+                                   :coverage 5
+                                   :eig 0.09
+                                   :reward 9.0}]}}})
+
+(deftest slush-candidates-read-point-is-normalized-and-top-k
+  (is (= [{:constellations [1 2 3 4 5]
+           :coverage 5
+           :eig 0.1
+           :reward 10.0}]
+         (substrate/slush-candidates
+          "M-a@futon0"
+          {:top-k 1
+           :slush-candidate-deposit synthetic-slush-deposit})))
+  (is (= [] (substrate/slush-candidates
+             "M-absent"
+             {:slush-candidate-deposit synthetic-slush-deposit}))))
+
+(deftest slush-candidates-doc-records-honest-scope
+  (let [doc (substrate/slush-candidates-doc
+             "M-a@futon0"
+             (substrate/slush-candidates
+              "M-a"
+              {:top-k 1
+               :slush-candidate-deposit synthetic-slush-deposit}))]
+    (is (= "a4a-slush/candidates/M-a" (:xt/id doc)))
+    (is (= :slush-candidates (:entity/type doc)))
+    (is (= "M-a" (:slush/mission doc)))
+    (is (= :coverage-a3-driven (:slush/status doc)))
+    (is (= :deferred-per-mission-signal (:slush/eig-steering doc)))
+    (is (= 1 (:slush/candidate-count doc)))
+    (is (= [{:rank 1
+             :constellations [1 2 3 4 5]
+             :coverage 5
+             :eig 0.1
+             :reward 10.0}]
+           (:slush/candidates doc)))))
+
+(deftest mint-slush-candidates-dry-run-does-not-write
+  (let [called? (atom false)]
+    (with-redefs [a3/drawbridge-submit-tx! (fn [& _]
+                                             (reset! called? true)
+                                             (throw (ex-info "should not write in dry-run" {})))]
+      (let [doc (substrate/mint-slush-candidates!
+                 "M-a"
+                 {:top-k 1
+                  :slush-candidate-deposit synthetic-slush-deposit})]
+        (is (= :slush-candidates (:entity/type doc)))
+        (is (= 1 (:slush/candidate-count doc)))
+        (is (false? @called?))))))
+
+(deftest mint-slush-candidates-write-is-guarded-and-explicit
+  (let [submitted (atom nil)]
+    (with-redefs [a3/drawbridge-submit-tx! (fn [tx opts]
+                                             (reset! submitted {:tx tx :opts opts})
+                                             {:tx-id "synthetic"})]
+      (let [result (substrate/mint-slush-candidates!
+                    "M-a"
+                    {:write? true
+                     :top-k 1
+                     :slush-candidate-deposit synthetic-slush-deposit})]
+        (is (= true (:write? result)))
+        (is (= {:tx-id "synthetic"} (:tx result)))
+        (is (= [[:xtdb.api/put (:doc result)]]
+               (:tx @submitted)))
+        (is (= true (get-in @submitted [:opts :write?])))))))
+
+(deftest slush-candidate-loader-gracefully-degrades
+  (is (= [] (substrate/slush-candidates
+             "M-a"
+             {:slush-candidates-path "/path/that/does/not/exist.edn"}))))

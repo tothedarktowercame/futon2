@@ -1,0 +1,109 @@
+{:source :gfn-slush-lambda-4
+ :generated-from [:slush-proxy :slush-sweep-findings]
+ :validated-commits ["26e8901" "6e03453"]
+ :lambda 4
+ :selection-size 5
+ :candidate-policy :top-distinct-a3-passing-offline-frontier
+ :honest-scope "The slush core is coverage/A3-driven at lambda=4. Corpus-global EIG is exposed for inspection, but the validated sweep showed avg EIG stayed below uniform on every tested mission; per-mission EIG steering is deferred."
+ :validation-summary {:pearson-range [0.7099 0.8555]
+                      :coverage-vs-uniform "1.6-1.65x"
+                      :top-mode-spread "338-396 top modes vs greedy 1"
+                      :distinct-a3-passing "6-119 sampled candidates vs greedy 1"}
+ :missions
+ {"M-self-documenting-stack"
+  {:mission "M-self-documenting-stack"
+   :target-constellations [0 1 2 5 6 8 10 12 16]
+   :validated {:pearson 0.7099
+               :avg-coverage 4.1074
+               :uniform-coverage 2.5
+               :avg-eig 0.091724
+               :uniform-eig 0.1058
+               :a3-passing-sampled 119
+               :gfn-top-modes 371
+               :greedy-top-modes 1}
+   :candidates [{:constellations [5 8 10 12 16] :coverage 5 :eig 0.104679076430 :reward 33480.427915}
+                {:constellations [0 5 10 12 16] :coverage 5 :eig 0.103373084015 :reward 33305.983219}
+                {:constellations [5 6 10 12 16] :coverage 5 :eig 0.103354551476 :reward 33303.514332}
+                {:constellations [0 8 10 12 16] :coverage 5 :eig 0.100056939103 :reward 32867.110517}
+                {:constellations [6 8 10 12 16] :coverage 5 :eig 0.100038406564 :reward 32864.674163}
+                {:constellations [1 5 10 12 16] :coverage 5 :eig 0.099983821992 :reward 32857.499330}
+                {:constellations [0 6 10 12 16] :coverage 5 :eig 0.098732414149 :reward 32693.437759}
+                {:constellations [2 5 10 12 16] :coverage 5 :eig 0.098264378094 :reward 32632.288187}
+                {:constellations [0 5 8 10 12] :coverage 5 :eig 0.097332665073 :reward 32510.898816}
+                {:constellations [5 6 8 10 12] :coverage 5 :eig 0.097314132534 :reward 32508.488868}]}
+  "M-three-column-stack"
+  {:mission "M-three-column-stack"
+   :target-constellations [1 2 4 5 8 9 13 16]
+   :validated {:pearson 0.7806
+               :avg-coverage 3.9639
+               :uniform-coverage 2.2222
+               :avg-eig 0.088762
+               :uniform-eig 0.1058
+               :a3-passing-sampled 55
+               :gfn-top-modes 396
+               :greedy-top-modes 1}
+   :candidates [{:constellations [4 5 8 9 16] :coverage 5 :eig 0.098402617363 :reward 32650.337431}
+                {:constellations [1 4 5 9 16] :coverage 5 :eig 0.093707362926 :reward 32042.853306}
+                {:constellations [4 5 9 13 16] :coverage 5 :eig 0.093243012660 :reward 31983.392115}
+                {:constellations [2 4 5 9 16] :coverage 5 :eig 0.091987919027 :reward 31823.225891}
+                {:constellations [1 5 8 9 16] :coverage 5 :eig 0.091181229105 :reward 31720.705482}
+                {:constellations [5 8 9 13 16] :coverage 5 :eig 0.090716878839 :reward 31661.842093}
+                {:constellations [1 4 8 9 16] :coverage 5 :eig 0.090391218014 :reward 31620.624858}
+                {:constellations [4 8 9 13 16] :coverage 5 :eig 0.089926867748 :reward 31561.947187}
+                {:constellations [2 5 8 9 16] :coverage 5 :eig 0.089461785207 :reward 31503.286126}
+                {:constellations [2 4 8 9 16] :coverage 5 :eig 0.088671774115 :reward 31403.891472}]}
+  "M-capability-star-map"
+  {:mission "M-capability-star-map"
+   :target-constellations [0 1 2 4 6 8 13]
+   :validated {:pearson 0.7832
+               :avg-coverage 3.6270
+               :uniform-coverage 1.9444
+               :avg-eig 0.080978
+               :uniform-eig 0.1058
+               :a3-passing-sampled 21
+               :gfn-top-modes 360
+               :greedy-top-modes 1}
+   :candidates [{:constellations [0 1 4 6 8] :coverage 5 :eig 0.067210810954 :reward 28820.529551}
+                {:constellations [0 4 6 8 13] :coverage 5 :eig 0.066746460689 :reward 28767.047953}
+                {:constellations [0 2 4 6 8] :coverage 5 :eig 0.065491367056 :reward 28622.988517}
+                {:constellations [0 1 4 8 13] :coverage 5 :eig 0.063375731205 :reward 28381.787261}
+                {:constellations [1 4 6 8 13] :coverage 5 :eig 0.063357198666 :reward 28379.683393}
+                {:constellations [0 1 2 4 8] :coverage 5 :eig 0.062120637573 :reward 28239.657131}
+                {:constellations [1 2 4 6 8] :coverage 5 :eig 0.062102105033 :reward 28237.563799}
+                {:constellations [0 1 4 6 13] :coverage 5 :eig 0.062051206251 :reward 28231.815353}
+                {:constellations [0 2 4 8 13] :coverage 5 :eig 0.061656287307 :reward 28187.253445}
+                {:constellations [2 4 6 8 13] :coverage 5 :eig 0.061637754768 :reward 28185.163996}]}
+  "M-structural-law"
+  {:mission "M-structural-law"
+   :target-constellations [1 2 10 13 14 16]
+   :validated {:pearson 0.8555
+               :avg-coverage 3.3994
+               :uniform-coverage 1.6667
+               :avg-eig 0.094119
+               :uniform-eig 0.1058
+               :a3-passing-sampled 6
+               :gfn-top-modes 338
+               :greedy-top-modes 1}
+   :candidates [{:constellations [1 10 13 14 16] :coverage 5 :eig 0.090722573221 :reward 31662.563280}
+                {:constellations [1 2 10 14 16] :coverage 5 :eig 0.089467479588 :reward 31504.003701}
+                {:constellations [2 10 13 14 16] :coverage 5 :eig 0.089003129322 :reward 31445.542441}
+                {:constellations [1 2 10 13 14] :coverage 5 :eig 0.078267455943 :reward 30123.769509}
+                {:constellations [1 2 10 13 16] :coverage 5 :eig 0.073655985018 :reward 29573.203410}
+                {:constellations [1 2 13 14 16] :coverage 5 :eig 0.072433200272 :reward 29428.909929}]}
+  "M-categorical-code"
+  {:mission "M-categorical-code"
+   :target-constellations [0 1 2 6 12 13]
+   :validated {:pearson 0.7786
+               :avg-coverage 3.3184
+               :uniform-coverage 1.6667
+               :avg-eig 0.086410
+               :uniform-eig 0.1058
+               :a3-passing-sampled 6
+               :gfn-top-modes 352
+               :greedy-top-modes 1}
+   :candidates [{:constellations [0 1 6 12 13] :coverage 5 :eig 0.070962461454 :reward 29256.289226}
+                {:constellations [0 1 2 6 12] :coverage 5 :eig 0.069707367821 :reward 29109.779770}
+                {:constellations [0 2 6 12 13] :coverage 5 :eig 0.069243017556 :reward 29055.761417}
+                {:constellations [0 1 2 12 13] :coverage 5 :eig 0.065872288072 :reward 28666.634151}
+                {:constellations [1 2 6 12 13] :coverage 5 :eig 0.065853755533 :reward 28664.509167}
+                {:constellations [0 1 2 6 13] :coverage 5 :eig 0.053110374095 :reward 27239.992812}]}}}

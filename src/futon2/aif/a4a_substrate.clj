@@ -5,14 +5,19 @@
    identity docs, guarded by :write? false by default."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.string :as str]
             [futon2.aif.a4a :as a4a]
-            [futon2.aif.actuator-a3 :as a3]))
+            [futon2.aif.actuator-a3 :as a3])
+  (:import [java.net URLEncoder]))
 
 (def default-semilattice-clusters-path
   "/home/joe/code/futon3c/holes/excursions/pipeline-semilattice-clusters.edn")
 
 (def default-mission-pattern-scopes-path
   "/home/joe/code/futon6/data/mission-pattern-scopes.edn")
+
+(def default-slush-candidates-path
+  "/home/joe/code/futon2/holes/labs/slush-demo/findings/slush_candidates.edn")
 
 (defn capability-query
   []
@@ -133,6 +138,14 @@
              opts)}
        docs))))
 
+(defn- uri-token
+  [value]
+  (URLEncoder/encode (str value) "UTF-8"))
+
+(defn slush-candidates-id
+  [mission-id]
+  (str "a4a-slush/candidates/" (uri-token (a4a/normalize-mission-id mission-id))))
+
 (defn- read-edn-file
   [path]
   (edn/read-string (slurp path)))
@@ -150,6 +163,100 @@
    :constellation->eig (sorted-map)
    :mission->eig (sorted-map)
    :eig-fn (constantly 0.0)})
+
+(defn- zero-slush-candidates
+  []
+  {:source :gfn-slush-lambda-4
+   :missions (sorted-map)
+   :notes ["No offline slush candidate deposit was readable."]})
+
+(defn load-slush-candidate-deposit
+  "Load the offline lambda=4 slush candidate deposit.
+
+   This is a pure file read. It does not train or sample a GFlowNet at live-loop
+   time; the slush is an offline candidate producer whose outputs are deposited
+   for later A1 consumption."
+  ([] (load-slush-candidate-deposit {}))
+  ([{:keys [slush-candidates-path]
+     :or {slush-candidates-path default-slush-candidates-path}}]
+   (if (readable-file? slush-candidates-path)
+     (try
+       (read-edn-file slush-candidates-path)
+       (catch Exception _
+         (zero-slush-candidates)))
+     (zero-slush-candidates))))
+
+(defn- mission-entry
+  [deposit mission-id]
+  (let [mission (a4a/normalize-mission-id mission-id)
+        missions (:missions deposit)]
+    (or (get missions mission)
+        (some (fn [[k v]]
+                (when (= mission (a4a/normalize-mission-id k))
+                  v))
+              missions))))
+
+(defn slush-candidates
+  "Return top-k distinct A3-passing slush candidate constellation selections.
+
+   Candidates are the offline lambda=4 coverage/A3 frontier from the validated
+   slush run. The :eig field is the corpus-global constellation EIG carried for
+   inspection; the known-open point is that it is not yet a per-mission steering
+   signal."
+  ([mission-id] (slush-candidates mission-id {}))
+  ([mission-id {:keys [top-k] :as opts}]
+   (let [deposit (or (:slush-candidate-deposit opts)
+                     (load-slush-candidate-deposit opts))
+         candidates (vec (:candidates (mission-entry deposit mission-id)))]
+     (if top-k
+       (subvec candidates 0 (min top-k (count candidates)))
+       candidates))))
+
+(defn slush-candidates-doc
+  "Assemble the stable live-loop read-point doc for deposited slush candidates."
+  ([mission-id] (slush-candidates-doc mission-id (slush-candidates mission-id)))
+  ([mission-id candidates]
+   (let [mission (a4a/normalize-mission-id mission-id)
+         cands (mapv (fn [rank candidate]
+                       (-> candidate
+                           (update :constellations #(mapv int %))
+                           (assoc :rank rank)))
+                     (range 1 (inc (count candidates)))
+                     candidates)]
+     {:xt/id (slush-candidates-id mission)
+      :entity/type :slush-candidates
+      :slush/mission mission
+      :slush/source :gfn-slush-lambda-4
+      :slush/lambda 4
+      :slush/selection-size 5
+      :slush/status :coverage-a3-driven
+      :slush/eig-unit :endpoint-count-stddev
+      :slush/eig-steering :deferred-per-mission-signal
+      :slush/notes (str/join
+                    " "
+                    ["Candidates are coverage/A3-driven offline slush outputs."
+                     "Corpus-global EIG is exposed for inspection but stayed below uniform in the validated sweep."
+                     "Do not treat this deposit as an online GFN training call."])
+      :slush/candidate-count (count cands)
+      :slush/candidates cands
+      :slush/updated-by :a4a-slush})))
+
+(defn mint-slush-candidates!
+  "Build or write a :slush-candidates read-point doc for one mission.
+
+   With :write? false, the default, returns the doc that would be written and
+   performs no Drawbridge transaction. With :write? true, submits one ::xt/put
+   through the A3 Drawbridge transaction helper; callers must use a quiet window."
+  ([mission-id] (mint-slush-candidates! mission-id {}))
+  ([mission-id {:keys [write?] :as opts}]
+   (let [doc (slush-candidates-doc mission-id (slush-candidates mission-id opts))]
+     (if write?
+       {:write? true
+        :doc doc
+        :tx (a3/drawbridge-submit-tx!
+             [[:xtdb.api/put doc]]
+             opts)}
+       doc))))
 
 (defn pattern->constellation
   [semilattice-clusters]
