@@ -780,5 +780,19 @@
           (is (pos? (Math/signum (double driver)))
               "signed aggregate is positive — system slightly healthier")
           (is (neg? (Math/signum (double naive-sum)))
-              "naive sum is negative — misleading near-cancel")))))
-)
+              "naive sum is negative — misleading near-cancel"))))))
+
+(deftest reconcile-belief-carry-r8
+  (testing "R8 carry: survivors keep carried posterior, new get fresh prior, vanished drop"
+    (let [fresh   (belief/initial-belief-state ["a" "b" "c"])   ; this tick's domain
+          carried {"a" ::carried-a "z" ::carried-z}             ; a survives, z vanished
+          out     (belief/reconcile-belief-carry fresh carried)]
+      (is (= #{"a" "b" "c"} (set (keys out)))
+          "domain is exactly this tick's entities (vanished dropped, new present)")
+      (is (= ::carried-a (get out "a")) "survivor keeps its carried posterior")
+      (is (= (get fresh "b") (get out "b")) "new entity gets the fresh uniform prior")
+      (is (not (contains? out "z")) "vanished entity is dropped")))
+  (testing "cold start: nil/empty carried returns fresh bootstrap unchanged"
+    (let [fresh (belief/initial-belief-state ["a" "b"])]
+      (is (= fresh (belief/reconcile-belief-carry fresh nil)))
+      (is (= fresh (belief/reconcile-belief-carry fresh {}))))))

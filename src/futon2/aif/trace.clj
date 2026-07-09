@@ -20,8 +20,10 @@
    Schema (v1):
      {:timestamp        <ISO-8601 string>
       :mu-pre           <belief map: entity-id → posterior>
-      :mu-post          <belief map; identical to mu-pre until R3d wires
-                          observation-driven belief update>
+      :mu-post          <belief map: entity-id → posterior, after this tick's
+                          R3d belief update; carried forward as the next tick's
+                          :mu-pre prior (reconciled to the new entity domain)
+                          when belief/*carry-belief?* is on>
       :observation      <obs channel map>
       :free-energy      {:G-pragmatic :G-epistemic :G-total
                           :per-channel :avoided-active}

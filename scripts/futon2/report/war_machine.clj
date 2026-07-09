@@ -3692,15 +3692,28 @@
         override-suppressed-reason (when (and metabolic-stale?
                                               (= :stop-the-line metabolic-max-tier))
                                      :stale-data)
-        ;; AIF action selection (v0.5+):
-        ;; uniform-prior belief over empty entity set today; R8 trace
-        ;; persistence will carry belief across calls.
+        ;; AIF action selection (v0.5+): the strategic belief map mu carries
+        ;; across ticks (R8) — this tick's prior is the previous tick's
+        ;; posterior, reconciled to the current entity domain (guarded by
+        ;; belief/*carry-belief?*; falls back to the fresh bootstrap when off
+        ;; or on a cold start with no prior trace).
         wm-sorrys (try (sorry-registry/open-sorrys) (catch Exception _ []))
+        prev-trace-record
+        (try (trace/latest-trace-record
+              :dir (or trace-dir
+                       (str (System/getProperty "user.home")
+                            "/code/futon2/data/wm-trace")))
+             (catch Exception _ nil))
         ;; v0.9 symmetric bootstrap: belief domain = stack-annotations.edn
         ;; :sections[] :id ∪ sorry-registry ids. Mirrors VSATARCS-side
         ;; bootstrap so per-entity comparison reduces to alist-lookup
         ;; equality on shared string entity-ids.
-        wm-belief-pre (belief/bootstrap-from-stack-annotations (map :id wm-sorrys))
+        wm-belief-pre (let [fresh (belief/bootstrap-from-stack-annotations
+                                   (map :id wm-sorrys))]
+                        (if belief/*carry-belief?*
+                          (belief/reconcile-belief-carry
+                           fresh (:mu-post prev-trace-record))
+                          fresh))
         ;; E-support-coverage Cycle 4 (cg-a5d2e756, 2026-05-26): static
         ;; entity-tags from stack-annotations.edn :ref classification.
         ;; WM pilot cycle 2 (cg-7fa6aec3, 2026-05-30): static entity-repos
@@ -3726,12 +3739,6 @@
         ;; ants/aif/perceive.clj.
         r3-max-steps 3
         r3-error-eps 1.0e-3
-        prev-trace-record
-        (try (trace/latest-trace-record
-              :dir (or trace-dir
-                       (str (System/getProperty "user.home")
-                            "/code/futon2/data/wm-trace")))
-             (catch Exception _ nil))
         prev-precision-state
         (or (:precision-state prev-trace-record)
             (precision/initial-precision-state))

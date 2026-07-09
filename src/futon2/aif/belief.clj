@@ -294,6 +294,20 @@
                           (catch Exception _ []))]
      (initial-belief-state (distinct (concat section-ids extra-ids))))))
 
+(defn reconcile-belief-carry
+  "R8 belief carry: seed this tick's prior from the previous tick's posterior
+   `carried-mu-post`, reconciled to the current entity domain given by
+   `fresh-bootstrap` (a fresh uniform belief state over this tick's entities).
+   Survivors (entities in both) keep their carried posterior; new entities (in
+   `fresh-bootstrap` only) get the fresh uniform prior; vanished entities (in
+   `carried-mu-post` only) are dropped. Pure and deterministic; a nil/empty
+   `carried-mu-post` (cold start, no prior trace) returns `fresh-bootstrap`."
+  [fresh-bootstrap carried-mu-post]
+  (if (seq carried-mu-post)
+    (into {} (for [[eid prior] fresh-bootstrap]
+               [eid (get carried-mu-post eid prior)]))
+    fresh-bootstrap))
+
 ;; ---------------------------------------------------------------------------
 ;; E-support-coverage Cycle 2 (cg-17bbaa01, 2026-05-26):
 ;; Entity-tag classification at bootstrap.  Decision (operator-approved
@@ -762,6 +776,14 @@
    from :annotation-health alone — byte-identical to pre-v0.25 behavior (bind
    false to restore). Deliberation-side, world-inert: changes how belief updates
    when the ranker runs; latent until R10 (the live loop) runs."
+  true)
+
+(def ^:dynamic *carry-belief?*
+  "FLAG (default ON): when true, the strategic belief map mu carries across
+   ticks (R8) — this tick's prior is the previous tick's posterior, reconciled
+   to the current entity domain via `reconcile-belief-carry`. When false, each
+   tick starts from a fresh uniform bootstrap (bind false to restore that).
+   Deterministic; deliberation-side."
   true)
 
 (def channel-health-signs
