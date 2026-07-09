@@ -340,3 +340,98 @@ cadence discipline) are all genuinely ungroundable from the pattern halo — the
 require runtime API knowledge or operator calibration decisions. dG=-0.6 reflects
 good coverage (6/10) with honest holes. The deposit unblocks the abstain-missing-leg
 gate by giving the escrow a replayable construction.
+
+## Flight 5: ft-reachable-from-boot-001 (mana-gated — LAST fold-authoring unit)
+
+**Driver:** zai-3 (unattended overnight run, edge invoke-1783568701660-858-53426b03)
+**Consent:** mana gate `fold-authoring`, spend "overnight deposit run", balance after: 0
+  - `{:ok true, :balance 0}` — gate authorized the LAST fold-authoring dispatch; budget now exhausted
+
+### Mission selection
+
+Both abstain-missing-leg lane missions (M-learning-loop, M-canon-fingerprint-store) have
+deposits. M-state-snapshot-witness was deposited in Flight 4. Per the fallback rule,
+selected M-reachable-from-boot — the foundational stop-the-line hot-fix mission that
+M-state-snapshot-witness depends on. It closes the evidence-loss anti-pattern (the
+"loaded gun on Chekhov's desk" problem where !store was reset to in-memory). This is
+the dependency chain: reachable-from-boot (state is boot-reconstructible) → state-snapshot-
+witness (snapshot IS the witness that boot-construction worked).
+
+### Psi
+
+Source: M-reachable-from-boot.md IDENTIFY section (two failure classes: evidence-store
+reset losing ~2 weeks of data + registry not bootstrapped after JVM restart; the
+watchdog-vs-invariant distinction; the stop-the-line trigger from HUD STUCK).
+
+psi-sha256: 9812c92075b3241f6f99baeb08df68989a333934707f9640b071954857211cd0
+
+### Cascade
+
+```
+size=19  wholeness=10.019  H=0.961  T=10.426  accuracy=7.38  complexity=27.765
+F-free-energy=0.439  truncated=false
+```
+
+VERY RICH cascade — 19 patterns shown (the richest of all 5 flights). Selected 6:
+- invariant-coherence/reachable-from-boot (rel=0.77)
+- futon-theory/stop-the-line (rel=0.527)
+- system-coherence/turn-design-into-checks (rel=0.545)
+- storage/invariants-vs-repair (rel=0.588)
+- futon-theory/all-or-nothing (rel=0.524)
+- eight-gates/ward-off-boundary (rel=0.493)
+
+### Fold
+
+6 boxes:
+- b1: grep-verifiable static check with ^:durable metadata (fits reachable-from-boot)
+- b2: pre-commit hook as strong-mode binding — synthesized-violation falsification (fits turn-design-into-checks)
+- b3: construction-path allowlist as design-turned-into-check (fits reachable-from-boot)
+- b4: repair pathway alongside enforcement — allowlist extension via code review (fits invariants-vs-repair)
+- b5: startup completes or fails loudly — no silent in-memory fallback (fits all-or-nothing)
+- b6: quarantine without erasure — commit refused, working tree preserved (fits ward-off-boundary)
+
+4 holes:
+- h1: metadata convention adoption scope (which other defonces get ^:durable vs ^:cache)
+- h2: symlink installation across 14 repos (per-repo path differences)
+- h3: grep regex precision (catch violations without false-positives on comments/strings/tests)
+- h4: sibling-mission handoff scope (Codex issue #65 for family-check-fns, agent-registry, dev-evidence-store)
+
+v2 wires: b3→b1 :seq, b1→b2 :seq, b2→b4 :copar, b2→b6 :tensor, b1→b5 :copar, b4→b5 :seq.
+Terminals: b2 :discharges :want-signature, b5 :discharges :want-signature.
+
+### ΔG
+
+-0.6 (hand-shown: dG = -(boxes/(boxes+holes)) = -(6/10) = -0.6; loader pin-3 recomputed and confirmed)
+
+### Pins
+
+- prompt-sha: 9d227517968b4667e2ecf7138741c01dbbcb739db67fa0c9adc52a842257a94e
+- psi-sha: 9812c92075b3241f6f99baeb08df68989a333934707f9640b071954857211cd0
+- prose-sha256:
+  - invariant-coherence/reachable-from-boot: 7866b547d9e2aa912ce3cd68532ffc09c9bd6fd6c421c315b18c4ea004afd0f7
+  - futon-theory/stop-the-line: 7502a8955d7dd166e630d80c035c6109bcfb9c36b571b738b7a1c4151754bb63
+  - system-coherence/turn-design-into-checks: f374859ba56ef2f19b98b4cdb8b01d08ca87eca11543b21adc5d306a956dacd8
+  - storage/invariants-vs-repair: bec5cf332435b5a81ec53f14887ac0c7cc70ccd92eab7d8656b055612af56593
+  - futon-theory/all-or-nothing: 1b3d73578e00c37c7c4681f8f3cea04562fd3a66b6ead5dbd373267881bc1c87
+  - eight-gates/ward-off-boundary: 2130e67d723d16f4910a70dbd8b8105c37babb59309e254735084eafbcf4805a
+- arming: mana gate fold-authoring, spend-purpose "overnight deposit run", balance-after 0 (LAST unit)
+- LOADER ACCEPT: ft-reachable-from-boot-001 ✓ (delta-g -0.6)
+- TAMPER REJECT: /tmp/ft-tampered-test.edn — delta-g-mismatch (-0.42 vs -0.6) ✓
+
+### Blind scoring
+
+:none — no A-next seal exists for M-reachable-from-boot. Recorded honestly per
+the 003 no-seal precedent. The fold author IS the scorer (same agent, unattended
+overnight) — the mana gate is the consent mechanism, not separation of powers.
+
+### Honest assessment
+
+This is the STRONGEST deposit of the overnight series — very rich cascade (19 patterns,
+F=0.439, the lowest free-energy of all 5 flights), coherent 6-box construction that
+maps the mission's watchdog-vs-invariant distinction onto concrete enforcement
+mechanisms (grep check → pre-commit hook → repair pathway → all-or-nothing boot →
+quarantine semantics). The 4 honest holes are all genuinely ungroundable: per-container
+metadata classification, per-repo symlink mechanics, grep regex precision, and Codex
+sibling scoping all require implementation-level knowledge not in the pattern halo.
+dG=-0.6 reflects strong coverage (6/10). The mana gate is now EXHAUSTED (balance 0) —
+no further fold-authoring deposits possible without operator top-up.
