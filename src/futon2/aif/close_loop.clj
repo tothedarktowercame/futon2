@@ -27,6 +27,7 @@
    (or no turn-fn injected) the output map is unchanged, key-for-key —
    finding 6's repair stays dark until 2g arming (Joe's word)."
   (:require [futon2.aif.fold-classical :as fc]
+            [futon2.aif.fold-semilattice :as fs]
             [futon2.aif.fold-llm :as fl]))
 
 (def ^:dynamic *escrow-replay?*
@@ -52,6 +53,17 @@
    its :fold output (carried for provenance) -- only its dG leg is unplugged."
   false)
 
+(def ^:dynamic *semilattice-fold?*
+  "When true, a cascade-lane entry carrying a non-empty :semilattice uses the
+   semilattice fold as the preferred live ΔG construction. Bind false to disarm
+   R11 and fall through to the existing rollout/classical/escrow path unchanged."
+  true)
+
+(defn- non-empty-semilattice? [semilattice]
+  (boolean (or (seq (:descent semilattice))
+               (seq (:co-app semilattice))
+               (seq (:co_app semilattice)))))
+
 (defn act-gate-from-lane-entry
   "PURE: a cascade-lane entry → the act-gate map.
    Entry: {:mission :F-free-energy :G-rollout :shown [pattern-ids…] …}.
@@ -63,27 +75,38 @@
    key is ABSENT whenever the escrow was not consulted or returned nothing)."
   ([entry] (act-gate-from-lane-entry entry {}))
   ([entry circumstance] (act-gate-from-lane-entry entry circumstance {}))
-  ([{:keys [F-free-energy G-rollout shown] :as _entry} circumstance
+  ([{:keys [F-free-energy G-rollout shown semilattice] :as _entry} circumstance
     {:keys [escrow-turn-fn prose-fn]}]
-   (let [fold-out   (when (seq shown) (fc/classical-fold (vec shown) circumstance))
+   (let [semilattice-out (when (and *semilattice-fold?*
+                                    (seq shown)
+                                    (non-empty-semilattice? semilattice))
+                           (fs/semilattice-fold
+                            (vec shown)
+                            (assoc circumstance :semilattice semilattice)))
+         semilattice-g   (:delta-g semilattice-out)
+         fold-out   (when (and (nil? semilattice-out) (seq shown))
+                      (fc/classical-fold (vec shown) circumstance))
          fold-g     (when *classical-fold-dG?* (:delta-g fold-out))
          escrow-out (when (and *escrow-replay?* escrow-turn-fn
+                               (nil? semilattice-out)
                                (not (number? G-rollout)) (not (number? fold-g))
                                (seq shown))
                       (fl/llm-fold (vec shown) circumstance
                                    {:turn-fn escrow-turn-fn :prose-fn prose-fn}))
          escrow-g   (:delta-g escrow-out)
-         delta-G    (cond (number? G-rollout) G-rollout
+         delta-G    (cond (number? semilattice-g) semilattice-g
+                          (number? G-rollout) G-rollout
                           (number? fold-g)    fold-g
                           (number? escrow-g)  escrow-g
                           :else               nil)]
      (cond-> {:delta-F F-free-energy
               :delta-G delta-G
-              :delta-G/source (cond (number? G-rollout) :rollout-g-for
+              :delta-G/source (cond (number? semilattice-g) :fold-semilattice
+                                    (number? G-rollout) :rollout-g-for
                                     (number? fold-g)    :fold
                                     (number? escrow-g)  :fold-escrow
                                     :else               nil)
-              :fold fold-out}
+              :fold (or semilattice-out fold-out)}
        (number? escrow-g) (assoc :fold-escrow escrow-out)))))
 
 (defn preview-verdict

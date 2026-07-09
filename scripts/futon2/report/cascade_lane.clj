@@ -364,6 +364,7 @@
                               :F-free-energy (:F-free-energy c)
                               :G-rollout (rollout-g-for m)
                               :shown shown
+                              :semilattice (:semilattice c)
                               :seat-injection (when seated?
                                                 {:pattern "agent/sense-deliberate-act"
                                                  :stuck-n stuck-n
