@@ -159,6 +159,40 @@ Substantial build legs follow the coding-handoff protocol (belled to Codex, revi
 here); probes P1/P3/P4 are likely carve-out (b) work since the context lives in
 this mission and the migration excursion.
 
+## CHECKPOINT — 2026-07-10 end of day
+
+Where the mission stands after day one (detail in the dated log below):
+
+**P1 (the car) is ANSWERED**, on the full population, via a store copy on lucy
+— no quiet window needed, ever. Headline numbers for the D2 packet:
+
+- Ever-held posting inflation: **1.028 aggregate** on entities (chalk notes
+  guessed 1.5–2×); **1.000 on evidence** (append-only, 0 text changes in
+  90,770 docs).
+- The cost is a **heavy tail, not a multiplier**: 4.5% of entities ever change
+  text; ratio p50=p90=1.00, p99=3.80, max=90.5; only 38 docs exceed 8× and
+  ALL are mission-phase nodes (wholesale-replaced text — the chalk notes'
+  "rewritten not edited" case, class-concentrated).
+- Two dynamics findings: store migrations flatten ever-held accumulation
+  (our numbers are a ~5-month lower bound), and current-state fields cannot
+  predict write history (seen-count sampled the wrong population).
+- Token economics: stop words only 12.8% of postings, hot terms are domain
+  vocabulary; HUD screen-captures would ~2.5× the evidence index from a
+  2,952-token vocabulary — EXCLUDE, now measured.
+
+**Assets:** probe scripts `futon1b/textprobe_*.clj` (census, updates, sample,
+divergence, tokens, shared stream reader); extractors
+`futon1a/scripts/textprobe-history-{sample,standalone}.clj`; measured outputs
+`futon1b/textprobe/*.edn`; 12G store copy at
+`lucy:~/code/storage/futon1a-copy/` (reusable for re-runs and possibly the
+sidecar build; raw full-history extract also there and on the laptop, 95M,
+kept out of git).
+
+**Next, in order:** D2 comment draft for #5637 from the measured numbers
+(posting gated on Joe's read) → P4 query-surface check with the migration
+session → P2 engine choice (now informed by the hot-term/HUD findings) → P3
+sync contract. Loose end: lucy's git key cannot reach the futon1b GitHub repo.
+
 ## Log
 
 - 2026-07-10 — mission authored (Fable session) from the #5637 assessment
@@ -205,3 +239,89 @@ this mission and the migration excursion.
   08:45) contains 90,583 evidence docs of which 56,379 carry
   `:evidence/session-id` — i.e. ~34k sessionless docs ARE present in that
   export file, which may bear on finding F5.
+
+- 2026-07-10 (afternoon) — **quiet-window constraint dissolved: P1 history leg
+  ran on lucy.** Joe's call: put the material on lucy rather than wait for a
+  quiet window. The sync commits (other session) had already pushed all the
+  probe code; what git couldn't carry was the store. Findings on the way there:
+  the 29G store dir is mostly proof-path log (15G) and snapshots (2G) — the
+  database is 12.1G and the golden stores (tx-log + doc-store) just 2.4G.
+  Shipped tx-log + doc-store + index-store to `lucy:~/code/storage/futon1a-copy/`
+  by double-pass rsync (pass 2 moved 3 files — converged); the copied node
+  opened and synced cleanly under XTDB 1.24.4 (matching the writer version —
+  futon1a/deps.edn pins 1.24.0 but the live JVM runs 1.24.4; override via
+  -Sdeps). New standalone runner `futon1a/scripts/textprobe-history-standalone.clj`
+  (commit c03d5a6): opens a private copy directly, no Drawbridge, sample-bands
+  or FULL mode. metameso was ruled out (996M disk free). Loose end: lucy's git
+  key cannot reach the new futon1b GitHub repo (auth error) — ids file was
+  scp'd around it.
+
+  **Sample-run results (8,170 ids, `textprobe_divergence.clj`) — two findings
+  that reshape P1:**
+
+  1. **Migration flattens ever-held accumulation.** 6,712/6,713 of the
+     high-seen-count "updated" band have exactly ONE version in futon1a;
+     earliest valid-time 2026-02-08 = the store's birth. Their seen-counts
+     were inherited from futon1 (LMDB) — the futon1→futon1a migration
+     flattened revision history. For #5637 this is a real-world dynamic the
+     chalk notes don't model: an "ever held" index resets to current at every
+     store migration, so divergence accrues from migration day, not corpus
+     age. (The same will happen at futon1a→futon1b.)
+  2. **Current-state fields cannot predict write history.** The seen-count=1
+     "stable" control band is actually the update-rich population: 779/984
+     multi-version, versions up to n=108, 51 docs with real text changes,
+     ever/current ratio p99=3.75 max=6.40. `:entity/seen-count` counts an
+     application event, not writes — so the sample keyed on the wrong signal,
+     and the honest measurement is the full population.
+  3. Evidence is append-only in practice: all 473 sampled evidence docs
+     single-version, zero text changes. The sidecar's evidence index needs no
+     update-staleness machinery (deletes/erasure aside).
+
+  FULL-population extraction (~41k source entities + ~90k evidence) launched
+  on lucy immediately after; results land in this log next.
+
+- 2026-07-10 (evening) — **P1 MEASURED, full population.** Lucy walked all
+  131,807 histories (41,037 source-bearing entities + 90,770 evidence docs);
+  `textprobe_divergence.clj` over the result (`textprobe/divergence-full.edn`,
+  raw versions in `textprobe/history-versions-full.edn`, 95M):
+
+  **Ever-held vs current divergence (the #5637 headline):**
+  - Aggregate posting inflation on entities: **1.028** — the "ever held" index
+    costs 2.8% extra postings on this corpus, far below the chalk notes'
+    1.5–2× estimate. Evidence: exactly 1.000 (append-only — 58 multi-version
+    docs out of 90,770, zero text changes).
+  - But the cost is a **heavy tail, not a multiplier**: 64.8% of entities have
+    multiple versions, yet only 4.5% (1,861) ever changed text; ratio
+    p50=p90=1.00, p99=3.80, max=90.5. Only 38 docs exceed 8×.
+  - The extreme tail is one identifiable document class: **mission phase
+    nodes** (`ukrns/ARGUMENT` 90.5×, `interest-network-coupling/*` 33×,
+    `expressions-of-interest/*` 17×) whose text is wholesale-replaced each
+    phase update — the chalk notes' "rewritten rather than edited" case,
+    concrete and class-concentrated. Design implication for #5637: per-class /
+    per-field handling (or reindex-on-rewrite) targets the tail; corpus-wide
+    mitigation is unnecessary.
+  - Caveat to carry into the packet: this measures ~5 months of accrual (the
+    futon1→futon1a migration flattened prior history), so it is a lower bound
+    per unit corpus-age; the flattening finding itself (log entry above) is
+    part of the story.
+
+  **Posting-list economics (`textprobe_tokens.clj`, current-state exports):**
+  - Graph index fields: 44,620 docs, vocab 16,572, 788k postings; docs/token
+    p50=4, p99=768, max=15,997. Stop words only 12.8% of postings — hot terms
+    are DOMAIN vocabulary ("scope", "mission", "pattern"), which stock stop
+    lists never remove: hot-term skew is corpus-structural, as the chalk notes
+    suspected.
+  - Evidence prose (`:evidence/body :text`): 12,349 docs, vocab 38,452, 1.45M
+    postings, docs/token p50=2 — healthy long tail.
+  - HUD screen-captures: vocab 2,952 but **2.19M postings** (docs/token
+    p50=92, p90=2,045, max=8,850 = every doc). 1.5× the postings of all real
+    prose from a 13×-smaller vocabulary ⇒ indexing them would ~2.5× the
+    evidence index for near-zero discriminative power. **EXCLUDE decision is
+    now measured, not a hunch** — and it doubles as a live example of why
+    #5637 needs per-field analyser/exclusion config.
+
+  P1 is answered. Remaining DERIVE probes: P2 (engine), P3 (sync contract),
+  P4 (query-surface check with the migration session). D2 (evidence packet →
+  #5637 comment draft, gated on Joe) can now be assembled from
+  `textprobe/divergence-full.edn` + `tokens-graph.edn` + `tokens-evidence.edn`
+  + the two migration-dynamics findings.
