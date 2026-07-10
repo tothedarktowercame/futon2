@@ -90,6 +90,28 @@ def train_and_sample(mission, pool, reward_fn, *, steps, batch, lr, eps,
     return out
 
 
+def greedy_proposal(pool, rfn: SetReward, max_len: int):
+    """The COUNTERFACTUAL arm (batch-4 pilot, Joe 2026-07-11): greedy argmax of
+    the SAME memoized reward the GFN samples from — generated and SEALED but
+    not flown; exists so mechanism attribution (sampler vs reward) can be
+    studied retrospectively at zero flight cost."""
+    state = frozenset()
+    cur = rfn(state)
+    while len(state) < max_len:
+        best, best_gain = None, 0.0
+        for i in range(len(pool)):
+            if i in state:
+                continue
+            gain = rfn(frozenset(state | {i})) - cur
+            if gain > best_gain:
+                best, best_gain = i, gain
+        if best is None:
+            break
+        state = frozenset(state | {best})
+        cur += best_gain
+    return sorted(pool[i] for i in state), cur
+
+
 def proposal_hash(mission, patterns):
     return hashlib.sha256((mission + "|" + "|".join(sorted(patterns)))
                           .encode()).hexdigest()[:16]
@@ -130,6 +152,9 @@ def main(argv=None):
         entries = [(pats, "gfn", lr_) for pats, lr_ in gfn_props]
         if inc_pats:
             entries.append((inc_pats, "incumbent", None))
+        greedy_pats, greedy_lr = greedy_proposal(pool, rfn, args.max_len)
+        if greedy_pats:
+            entries.append((greedy_pats, "greedy-rhat", greedy_lr))
         for pats, who, lr_ in entries:
             h = proposal_hash(mission, pats)
             blinded.append({"proposal": h, "mission": mission, "patterns": pats})

@@ -477,3 +477,31 @@ data-starved until this is decided.
 
 zai-3 relieved with honors: 6 folds + 6 flights, 0 fixes, 2 discoveries,
 2 conventions/insights codified.
+
+## Design note — 2026-07-11 (run-off protocol + counterfactual pilot; Joe's steers)
+
+Three decisions from the late-night design conversation, recorded before
+batch 4 runs:
+
+1. **S2 claim clarified to SYSTEM grain (labeled preregistration amendment,
+   pending transfer to sec:prereg):** the two-arm run-off tests the whole
+   learning system (GFN + learned R̂ + retraining) against the FROZEN legacy
+   proposer. R̂ improvements flowing only to the GFN arm are the intervention,
+   not contamination, under this claim. Downstream symmetry (blind folding,
+   flight discipline, adjudication) is unchanged and is what keeps the
+   comparison fair. Sampler-only attribution is deferred to the counterfactual
+   study. PROPOSED stopping rule (pending Joe's confirmation): paired
+   per-mission outcomes; decisive at two-sided sign-test p<0.05; at 30 pairs
+   undecided → declare practical equivalence, move to mechanism study.
+2. **Counterfactual arm — ONE-BATCH PILOT (Joe's compromise, not a standing
+   commitment):** batch 4 generates greedy-argmax-of-R̂ proposals from the
+   SAME pool and reward snapshot (gfn_live greedy_proposal), sealed as
+   "greedy-rhat", NOT flown, NOT in the fold worklist. Batch 4 gets studied
+   intensively (structural gallery, R̂ scores, arm-overlap) and THEN we decide
+   whether maintaining the archive is worth it. Not useful-in-general by
+   default.
+3. Gallery finding feeding this: semilattice-vs-list does NOT separate arms
+   (zero chains anywhere); the visible differentiator is composition-size
+   distribution (GFN consistently mid-size; incumbent bimodal with
+   structureless singles). Composition-size as an R̂ feature is DEFERRED until
+   it can be applied under the system-grain claim without muddying the pilot.
