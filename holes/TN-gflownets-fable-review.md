@@ -210,3 +210,35 @@ two prerequisites are reward science: (a) a *dense* discharge-accuracy signal
 that stays discharge (not relevance); (b) a success/fail ground-truth set large
 and balanced enough that discrimination is demonstrable even in principle
 (10 records at 8/2 gives AUC granularity 0.0625 — no reward could pass).
+
+## Checkpoint — 2026-07-10 (Fable: Slice 1.5 + Task B, direct)
+
+**Slice 1.5 — accuracy limb rebuilt; validity mostly recovered; measure LOCKED.**
+The v3 lexical limb's median-0 on known dischargers was a validity failure with
+four miss classes (M1 missing-flexiarg / M2 morphology / M3 synonymy / M4
+interface-underspecification). New `obligation_accuracy.py` + `aliveness_v3_gate2.py`
+(futon3a lab): directional want-atom coverage, produces = THEN + conclusion
+(`parse()["action"]`), tiers exact/stem/per-atom-MiniLM @ τ=0.60 a priori;
+missing flexiargs = MISSING, never 0. Result: 6/7 measurable positives > 0
+(was 4/7), per-atom witnesses auditable, anti-`1=1` still PASS, negatives held
+at 0 under the THEN-only variant and gain one topical atom (`operator`) under
+the locked variant — residuals R1 (interface-underspecified patterns: a library
+authoring gap) and R2 (single-atom topical leakage ±0.1, expected to average
+out at scale) documented in `labs/slush-demo/findings/slice1_5_validity_findings.md`.
+Measure locked at n=9 precisely to stop variant-fishing.
+
+**Task B — expansion attempted; mission grain proven INVALID; the real unlock
+located.** The procedural expansion (wholeness labels × :applied, 83 records)
+is dense at every tier (even strict T1: 82/83 nonzero) and discriminates at NO
+tier (AUC 0.399–0.449 vs null-95 ≈ 0.63): grain mismatch, proven, not measure
+failure. Valid ground truth is fold-grain only; current stock 16 closure-folds
+records + 4 CH2 events. Bottleneck found: `meme.ch2`'s schema hardcodes
+`:discharged? true` — failed folds are unrepresentable, violating closure-folds'
+own recording discipline. Unlock = CH2 negative-event schema + live-loop
+emission (operator decision; touches production code + gates_test), plus
+optional retro-curation. `findings/ground_truth_expansion_findings.md`;
+artifact `findings/ground_truth_mission_grain.json` kept as a
+relevance/selection corpus.
+
+**Net standing:** Slice 2 remains gated — now on exactly one thing: fold-grain
+ground truth at n≈60+ (CH2 negatives + emission wiring). Measure design is done.
