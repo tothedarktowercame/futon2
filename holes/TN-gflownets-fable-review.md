@@ -134,3 +134,51 @@ failed — write that up and stop; do not reach for scale as a rescue.
   (steps 6–12, GFN ≈ untrained prior ≈ null).
 - `labs/slush-demo/findings/slush_sweep_findings.md` — the 3000-step run that beat
   greedy on mode-spread across all 5 missions (the existence proof for training scale).
+
+## Checkpoint — 2026-07-10 (claude-4)
+
+**Slice 0 — DONE, both gates PASS.** Built `labs/slush-demo/slice2/gfn_core.py`
+(pure-numpy tabular GFlowNet; no torch). Trajectory balance with **conditional
+logZ(m)** and the standard **uniform backward policy P_B(parent)=1/|S|** for set
+generation — the latter is the |S|!-orderings term the original slice-2 TB
+dropped (a latent third defect, now surfaced). Trained deterministically
+full-batch over the enumerable DAG; the terminal marginal is computed exactly by
+DP (no Monte-Carlo noise in the gate).
+
+- **G0a (trainer correctness):** conditional-logZ recovers the exact Gibbs
+  sampler — max TV 0.0125 (gate 0.05), max |learned logZ − true logZ| 0.029 nat
+  (gate 0.1) across 4 synthetic submodular-coverage missions.
+- **G0b (F2 pinned):** the shared-scalar-logZ arm fails — max TV 0.986 vs the
+  conditional arm's 0.012 — on missions whose true logZ spans 5.64 nats. The
+  warp is largest on the low-Z missions and smallest on the high-Z one (the one
+  scalar settles near the high-Z end), an interpretable signature of F2.
+- Tests: `slice2/test_gfn_core.py` (9, green). Findings:
+  `findings/slice0_trainer_findings.md`.
+- **Design note vs the dispatch plan:** built numpy-tabular rather than reusing
+  the torch `slice2/` harness *on purpose* — Slice 0 is a trainer-correctness
+  test, so removing the function approximator makes a failed G0a diagnostic of
+  the objective/logZ alone. The same core scales to Slice 2 (pool ≤ 240), which
+  would let the whole line drop torch.
+
+**Slice 1 — reward gate runs; anti-gaming PASS, discrimination INCONCLUSIVE.**
+`futon3a/holes/labs/M-memes-arrows/aliveness_v3_gate.py` (graduated with
+`rollout_execute.py`) now runs. The anti-`1=1` control PASSES (substantive
++0.414 > trivial −0.078 > bloated-shell −0.491 — the accuracy−λ·complexity
+structure is sound). But discrimination against the shuffle null is **weak for
+two independent reasons**, and this is robust to swapping in the canonical
+1207-pattern `minilm_pattern_embeddings.json` (the gate's accuracy comes from
+`rollout_execute` text move-chaining, not the embeddings):
+  1. **Discharge accuracy is sparse** — median 0 want-coverage across records;
+     most cascades score zero, so accuracy can't separate success from fail
+     (accuracy AUC 0.750 == null-95 0.750). Matches the committed corpus-gate
+     finding: semantic coverage is dense but is *relevance, not discharge*.
+  2. **Ground truth is tiny/imbalanced** — 10 records, 8 success / 2 fail →
+     AUC granularity 0.0625, null-95 sitting exactly on the observed value.
+     Even a perfect reward could not demonstrate discrimination on this set.
+
+**Slice 2 — correctly gated, NOT started.** Per the reward-before-generator /
+G1-comp discipline ("if the reward has no teeth, STOP; do not run the sampler"),
+training the GFN now would reproduce the v1/v2 null. `gfn_core.py` is ready to be
+its trainer once the reward passes. **Prerequisites before Slice 2:** (a) a
+discharge accuracy signal dense enough to have teeth without collapsing into
+relevance; (b) a larger, better-balanced success/fail ground-truth set.
