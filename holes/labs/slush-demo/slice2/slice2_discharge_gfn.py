@@ -1,21 +1,23 @@
 #!/usr/bin/env python3
-"""Slice-2a discharge-trained pattern GFlowNet recovery experiment.
+"""Slice-2a v2: mission-conditioned discharge GFlowNet recovery.
 
-Standalone lab script.  It trains a small trajectory-balance-style policy over
-pattern sets with reward
+V1 was an honest null because the reward was global:
 
-    log R(S) = beta * sum_{p in S} bonus(p) + eig_lambda * EIG(S)
+    log R(S) = beta * sum bonus(p)
 
-where ``bonus`` is fit on the leave-one-out TRAIN split by
-``pattern_aliveness_reward.fit_credits``.  Held-out recovery never adds the
-held-out answers to the candidate pool: candidates are retrieval hits plus their
-one-hop phylogeny neighbours.
+V2 makes the reward mission-conditioned:
+
+    log R(S | m) = sum_p alpha * rel(m, p) + beta * bonus(p)
+
+``bonus`` is the validated TRAIN-only alive-vs-mess log-odds from
+``pattern_aliveness_reward.fit_credits(train)[1]``. ``rel`` is propagated from a
+mission's cosine seed patterns through the phylogeny graph so targets can be
+reachable even when ``applied ∩ try_candidates = ∅``.
 """
 from __future__ import annotations
 
 import argparse
 import json
-import math
 import random
 import re
 import sys
@@ -38,11 +40,10 @@ import slush_proxy as sp  # noqa: E402
 
 SCOPES_PATH = Path("/home/joe/code/futon6/data/mission-pattern-scopes.edn")
 PHYLOGENY_PATH = Path("/home/joe/code/futon6/data/pattern-phylogeny-edges.json")
-FINDINGS_PATH = SLUSH_DIR / "findings" / "slice2_recovery_findings.md"
-RESULTS_PATH = SLUSH_DIR / "findings" / "slice2_recovery_results.json"
+FINDINGS_PATH = SLUSH_DIR / "findings" / "slice2_v2_recovery_findings.md"
+RESULTS_PATH = SLUSH_DIR / "findings" / "slice2_v2_recovery_results.json"
 
-SLICE1_RECALL = 0.25
-DEFAULT_SEEDS = (20260710, 20260711, 20260712)
+DEFAULT_SEEDS = (20260710, 20260711)
 
 
 @dataclass(frozen=True)
@@ -58,6 +59,7 @@ class EvalCase:
     target: Set[str]
     seeds: List[str]
     cos: Dict[str, float]
+    rel: Dict[str, float]
     pool: List[str]
 
 
@@ -65,11 +67,12 @@ class PatternPolicy(nn.Module):
     def __init__(self, n_patterns: int, dim: int = 32):
         super().__init__()
         self.emb = nn.Embedding(n_patterns + 1, dim)
-        self.scorer = nn.Sequential(
-            nn.Linear(dim * 2, 64),
-            nn.ReLU(),
-            nn.Linear(64, 1),
-        )
+        self.scorer = nn.Linear(dim * 2 + 2, 1)
+        with torch.no_grad():
+            self.scorer.weight.zero_()
+            self.scorer.bias.zero_()
+            self.scorer.weight[0, -2] = 1.0
+            self.scorer.weight[0, -1] = 1.0
         self.log_z = nn.Parameter(torch.zeros(1))
 
     def state_vec(self, selected: Sequence[int]) -> torch.Tensor:
@@ -77,12 +80,19 @@ class PatternPolicy(nn.Module):
             return torch.zeros(self.emb.embedding_dim)
         return self.emb(torch.tensor(selected, dtype=torch.long)).mean(0)
 
-    def logits(self, selected: Sequence[int], options: Sequence[int]) -> torch.Tensor:
+    def logits(
+        self,
+        selected: Sequence[int],
+        options: Sequence[int],
+        features: Dict[int, Tuple[float, float]],
+    ) -> torch.Tensor:
         state = self.state_vec(selected)
-        feats = torch.stack(
-            [torch.cat([self.emb(torch.tensor(opt, dtype=torch.long)), state]) for opt in options]
-        )
-        return self.scorer(feats).squeeze(1)
+        feats = []
+        for opt in options:
+            rel_x, bonus_x = features.get(opt, (0.0, 0.0))
+            scalar = torch.tensor([rel_x, bonus_x], dtype=torch.float32)
+            feats.append(torch.cat([self.emb(torch.tensor(opt, dtype=torch.long)), state, scalar]))
+        return self.scorer(torch.stack(feats)).squeeze(1)
 
 
 def parse_mission_scopes(path: Path = SCOPES_PATH) -> Dict[str, MissionScope]:
@@ -100,29 +110,64 @@ def parse_mission_scopes(path: Path = SCOPES_PATH) -> Dict[str, MissionScope]:
             (sp.pattern_stem(p), float(c))
             for p, c in re.findall(r'\{:pattern\s+"([^"]+)"\s+:cos\s+([-0-9.]+)\}', m.group(3))
         )
-        scopes[mission] = MissionScope(mission=mission, applied=applied, try_candidates=tries)
+        scopes[mission] = MissionScope(mission, applied, tries)
     return scopes
 
 
-def load_neighbours(path: Path = PHYLOGENY_PATH) -> Dict[str, Set[str]]:
+def load_weighted_graph(path: Path = PHYLOGENY_PATH) -> Tuple[Dict[str, Dict[str, float]], List[str]]:
     data = json.loads(path.read_text())
-    neigh: Dict[str, Set[str]] = defaultdict(set)
-    for key in ("co_app", "descent"):
-        for edge in data.get(key, []):
-            a, b = sp.pattern_stem(edge[0]), sp.pattern_stem(edge[1])
-            neigh[a].add(b)
-            neigh[b].add(a)
-    return dict(neigh)
+    graph: Dict[str, Dict[str, float]] = defaultdict(dict)
+    for edge in data.get("co_app", []):
+        a, b = sp.pattern_stem(edge[0]), sp.pattern_stem(edge[1])
+        w = float(edge[2]) if len(edge) > 2 else 1.0
+        graph[a][b] = max(graph[a].get(b, 0.0), w)
+        graph[b][a] = max(graph[b].get(a, 0.0), w)
+    for edge in data.get("descent", []):
+        a, b = sp.pattern_stem(edge[0]), sp.pattern_stem(edge[1])
+        graph[a][b] = max(graph[a].get(b, 0.0), 0.5)
+        graph[b][a] = max(graph[b].get(a, 0.0), 0.5)
+    library = sorted(sp.pattern_stem(p) for p in data.get("patterns", []))
+    return dict(graph), library
 
 
 def labelled_by_mission() -> Dict[str, Dict]:
     return {sp.normalize_mission_id(m["mission"]): m for m in par.labelled_missions()}
 
 
+def propagated_relevance(
+    seeds: Sequence[Tuple[str, float]],
+    graph: Dict[str, Dict[str, float]],
+    *,
+    hops: int,
+    decay: float,
+) -> Dict[str, float]:
+    scores: Dict[str, float] = defaultdict(float)
+    frontier: Dict[str, float] = {p: max(0.0, cos) for p, cos in seeds}
+    for p, v in frontier.items():
+        scores[p] += v
+    for hop in range(1, hops + 1):
+        nxt: Dict[str, float] = defaultdict(float)
+        for p, score in frontier.items():
+            for q, w in graph.get(p, {}).items():
+                nxt[q] += score * float(w) * (decay ** hop)
+        for p, v in nxt.items():
+            scores[p] += v
+        frontier = nxt
+    if not scores:
+        return {}
+    mx = max(scores.values()) or 1.0
+    return {p: float(v / mx) for p, v in scores.items() if v > 0.0}
+
+
 def build_cases(
     scopes: Dict[str, MissionScope],
     labelled: Dict[str, Dict],
-    neighbours: Dict[str, Set[str]],
+    graph: Dict[str, Dict[str, float]],
+    library: Sequence[str],
+    *,
+    hops: int,
+    decay: float,
+    pool_top_n: int,
 ) -> List[EvalCase]:
     cases: List[EvalCase] = []
     for mission in sorted(set(scopes) & set(labelled)):
@@ -132,18 +177,14 @@ def build_cases(
             continue
         seeds = [p for p, _ in scope.try_candidates]
         cos = {p: c for p, c in scope.try_candidates}
+        rel = propagated_relevance(scope.try_candidates, graph, hops=hops, decay=decay)
+        ranked_rel = [p for p, _ in sorted(rel.items(), key=lambda kv: (-kv[1], kv[0]))]
         pool = set(seeds)
+        pool.update(ranked_rel[:pool_top_n])
         for p in seeds:
-            pool.update(neighbours.get(p, set()))
-        cases.append(
-            EvalCase(
-                mission=mission,
-                target=target,
-                seeds=seeds,
-                cos=cos,
-                pool=sorted(pool),
-            )
-        )
+            pool.update(graph.get(p, {}).keys())
+        pool = {p for p in pool if p in library}
+        cases.append(EvalCase(mission, target, seeds, cos, rel, sorted(pool)))
     return cases
 
 
@@ -152,19 +193,37 @@ def admissible_indices(
     case: EvalCase,
     pattern_to_idx: Dict[str, int],
     idx_to_pattern: Sequence[str],
-    neighbours: Dict[str, Set[str]],
+    graph: Dict[str, Dict[str, float]],
 ) -> List[int]:
     selected_set = set(selected)
-    pool = [pattern_to_idx[p] for p in case.pool if p in pattern_to_idx]
     if not selected:
-        seed_opts = [pattern_to_idx[p] for p in case.seeds if p in pattern_to_idx]
-        return [i for i in seed_opts if i not in selected_set]
+        opts = [pattern_to_idx[p] for p in case.seeds if p in pattern_to_idx]
+        if opts:
+            return [i for i in opts if i not in selected_set]
     selected_patterns = [idx_to_pattern[i] for i in selected]
-    neigh = set(case.seeds)
+    allowed = set(case.seeds)
     for p in selected_patterns:
-        neigh.update(neighbours.get(p, set()))
-    allowed = [pattern_to_idx[p] for p in case.pool if p in neigh and p in pattern_to_idx]
-    return [i for i in allowed if i not in selected_set] or [i for i in pool if i not in selected_set]
+        allowed.update(graph.get(p, {}).keys())
+    opts = [pattern_to_idx[p] for p in case.pool if p in allowed and p in pattern_to_idx]
+    opts = [i for i in opts if i not in selected_set]
+    if opts:
+        return opts
+    return [pattern_to_idx[p] for p in case.pool if p in pattern_to_idx and pattern_to_idx[p] not in selected_set]
+
+
+def feature_map(
+    case: EvalCase,
+    bonus: Dict[str, float],
+    pattern_to_idx: Dict[str, int],
+    *,
+    alpha: float,
+    beta: float,
+) -> Dict[int, Tuple[float, float]]:
+    return {
+        pattern_to_idx[p]: (alpha * case.rel.get(p, 0.0), beta * bonus.get(p, 0.0))
+        for p in case.pool
+        if p in pattern_to_idx
+    }
 
 
 def sample_trajectory(
@@ -172,23 +231,20 @@ def sample_trajectory(
     case: EvalCase,
     pattern_to_idx: Dict[str, int],
     idx_to_pattern: Sequence[str],
-    neighbours: Dict[str, Set[str]],
+    graph: Dict[str, Dict[str, float]],
+    features: Dict[int, Tuple[float, float]],
     max_len: int,
-    rng: random.Random,
     greedy: bool = False,
 ) -> Tuple[List[str], torch.Tensor]:
     stop_idx = len(idx_to_pattern)
     selected: List[int] = []
     log_pf = torch.zeros(1)
     for _ in range(max_len + 1):
-        add_opts = admissible_indices(selected, case, pattern_to_idx, idx_to_pattern, neighbours)
+        add_opts = admissible_indices(selected, case, pattern_to_idx, idx_to_pattern, graph)
         opts = add_opts + [stop_idx]
-        logits = policy.logits(selected, opts)
+        logits = policy.logits(selected, opts, features)
         lp = F.log_softmax(logits, dim=0)
-        if greedy:
-            choice = int(torch.argmax(lp))
-        else:
-            choice = int(torch.distributions.Categorical(logits=logits).sample())
+        choice = int(torch.argmax(lp)) if greedy else int(torch.distributions.Categorical(logits=logits).sample())
         log_pf = log_pf + lp[choice]
         picked = opts[choice]
         if picked == stop_idx:
@@ -199,33 +255,22 @@ def sample_trajectory(
     return [idx_to_pattern[i] for i in selected], log_pf
 
 
-def log_reward(
-    selected: Iterable[str],
-    bonus: Dict[str, float],
-    beta: float,
-    eig_lambda: float,
-) -> float:
-    score = beta * sum(bonus.get(p, 0.0) for p in selected)
-    if eig_lambda:
-        score += eig_lambda * sum(
-            sp.CONSTELLATION_EIG.get(sp.PATTERN_TO_CONSTELLATION.get(p), 0.0)
-            for p in selected
-            if p in sp.PATTERN_TO_CONSTELLATION
-        )
+def log_reward(selected: Iterable[str], case: EvalCase, bonus: Dict[str, float], alpha: float, beta: float) -> float:
+    score = sum(alpha * case.rel.get(p, 0.0) + beta * bonus.get(p, 0.0) for p in selected)
     return float(max(-30.0, min(30.0, score)))
 
 
 def train_policy(
     train_cases: Sequence[EvalCase],
     bonus: Dict[str, float],
-    neighbours: Dict[str, Set[str]],
+    graph: Dict[str, Dict[str, float]],
     idx_to_pattern: Sequence[str],
     pattern_to_idx: Dict[str, int],
     *,
     seed: int,
     steps: int,
+    alpha: float,
     beta: float,
-    eig_lambda: float,
     max_len: int,
 ) -> PatternPolicy:
     torch.manual_seed(seed)
@@ -235,11 +280,11 @@ def train_policy(
     usable = [c for c in train_cases if c.pool]
     for _ in range(steps):
         case = rng.choice(usable)
+        features = feature_map(case, bonus, pattern_to_idx, alpha=alpha, beta=beta)
         selected, log_pf = sample_trajectory(
-            policy, case, pattern_to_idx, idx_to_pattern, neighbours, max_len, rng
+            policy, case, pattern_to_idx, idx_to_pattern, graph, features, max_len
         )
-        target_log_r = log_reward(selected, bonus, beta, eig_lambda)
-        loss = (policy.log_z + log_pf - target_log_r) ** 2
+        loss = (policy.log_z + log_pf - log_reward(selected, case, bonus, alpha, beta)) ** 2
         opt.zero_grad()
         loss.backward()
         opt.step()
@@ -249,49 +294,43 @@ def train_policy(
 def ranked_by_gfn(
     policy: PatternPolicy,
     case: EvalCase,
-    neighbours: Dict[str, Set[str]],
+    bonus: Dict[str, float],
+    graph: Dict[str, Dict[str, float]],
     idx_to_pattern: Sequence[str],
     pattern_to_idx: Dict[str, int],
     *,
+    alpha: float,
+    beta: float,
     seed: int,
     k_samples: int,
     max_len: int,
 ) -> List[str]:
-    rng = random.Random(seed)
+    torch.manual_seed(seed)
     counts: Counter[str] = Counter()
+    features = feature_map(case, bonus, pattern_to_idx, alpha=alpha, beta=beta)
     for _ in range(k_samples):
         selected, _ = sample_trajectory(
-            policy, case, pattern_to_idx, idx_to_pattern, neighbours, max_len, rng
+            policy, case, pattern_to_idx, idx_to_pattern, graph, features, max_len
         )
         counts.update(set(selected))
-    return [
-        p
-        for p, _ in sorted(
-            counts.items(),
-            key=lambda kv: (-kv[1], -case.cos.get(kv[0], 0.0), kv[0]),
-        )
-    ]
+    return [p for p, _ in sorted(counts.items(), key=lambda kv: (-kv[1], -case.rel.get(kv[0], 0.0), kv[0]))]
 
 
 def recall_at_budget(ranked: Sequence[str], target: Set[str], budget: int) -> float:
-    if not target:
-        return 0.0
-    picked = set(ranked[:budget])
-    return len(picked & target) / len(target)
+    return len(set(ranked[:budget]) & target) / len(target) if target else 0.0
 
 
 def random_expected_recall(case: EvalCase, budget: int) -> float:
-    reachable = len(set(case.pool) & case.target)
     if not case.pool or not case.target:
         return 0.0
-    return (min(budget, len(case.pool)) / len(case.pool)) * (reachable / len(case.target))
+    return (min(budget, len(case.pool)) / len(case.pool)) * (len(set(case.pool) & case.target) / len(case.target))
 
 
-def popularity_rank(train_labelled: Sequence[Dict]) -> List[str]:
+def popularity_rank(train_labelled: Sequence[Dict], pool: Set[str]) -> List[str]:
     counts: Counter[str] = Counter()
     for m in train_labelled:
         counts.update(m["applied"])
-    return [p for p, _ in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))]
+    return [p for p, _ in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0])) if p in pool]
 
 
 def shuffled_train(train_labelled: Sequence[Dict], seed: int) -> List[Dict]:
@@ -303,16 +342,21 @@ def shuffled_train(train_labelled: Sequence[Dict], seed: int) -> List[Dict]:
     ]
 
 
-def evaluate_config(
+def mean(xs: Iterable[float]) -> float:
+    vals = list(xs)
+    return float(np.mean(vals)) if vals else 0.0
+
+
+def evaluate_condition(
     cases: Sequence[EvalCase],
     labelled: Dict[str, Dict],
-    neighbours: Dict[str, Set[str]],
+    graph: Dict[str, Dict[str, float]],
     *,
     seed: int,
     steps: int,
     k_samples: int,
+    alpha: float,
     beta: float,
-    eig_lambda: float,
     max_len: int,
     shuffle_labels: bool = False,
 ) -> Dict:
@@ -324,131 +368,137 @@ def evaluate_config(
         if shuffle_labels:
             train_labelled = shuffled_train(train_labelled, seed + 1009 * held_idx)
         _, bonus = par.fit_credits(train_labelled)
-        train_cases = [c for c in cases if c.mission != held.mission]
         policy = train_policy(
-            train_cases,
+            [c for c in cases if c.mission != held.mission],
             bonus,
-            neighbours,
+            graph,
             all_patterns,
             pattern_to_idx,
             seed=seed + held_idx,
             steps=steps,
+            alpha=alpha,
             beta=beta,
-            eig_lambda=eig_lambda,
             max_len=max_len,
         )
         budget = max(1, len(held.target))
         gfn_rank = ranked_by_gfn(
             policy,
             held,
-            neighbours,
+            bonus,
+            graph,
             all_patterns,
             pattern_to_idx,
+            alpha=alpha,
+            beta=beta,
             seed=seed + 7919 + held_idx,
             k_samples=k_samples,
             max_len=max_len,
         )
-        retrieval_rank = [
-            p for p, _ in sorted(held.cos.items(), key=lambda kv: (-kv[1], kv[0]))
-        ] + [p for p in held.pool if p not in held.cos]
-        pop_rank_all = popularity_rank(train_labelled)
-        pop_rank = [p for p in pop_rank_all if p in held.pool]
+        pool = set(held.pool)
+        rel_rank = [p for p, _ in sorted(held.rel.items(), key=lambda kv: (-kv[1], kv[0])) if p in pool]
+        pop_rank = popularity_rank(train_labelled, pool)
         rows.append(
             {
                 "mission": held.mission,
                 "target_n": len(held.target),
                 "pool_n": len(held.pool),
-                "reachable_n": len(set(held.pool) & held.target),
+                "reachable_n": len(pool & held.target),
                 "budget": budget,
                 "gfn_recall": recall_at_budget(gfn_rank, held.target, budget),
-                "retrieval_recall": recall_at_budget(retrieval_rank, held.target, budget),
+                "rel_rank_recall": recall_at_budget(rel_rank, held.target, budget),
                 "popularity_recall": recall_at_budget(pop_rank, held.target, budget),
                 "random_expected_recall": random_expected_recall(held, budget),
+                "proposal_bonus": sum(bonus.get(p, 0.0) for p in gfn_rank[:budget]),
             }
         )
-    return summarize_rows(rows, seed, steps, k_samples, beta, eig_lambda, shuffle_labels)
-
-
-def mean(xs: Iterable[float]) -> float:
-    vals = list(xs)
-    return float(np.mean(vals)) if vals else 0.0
-
-
-def summarize_rows(
-    rows: List[Dict],
-    seed: int,
-    steps: int,
-    k_samples: int,
-    beta: float,
-    eig_lambda: float,
-    shuffle_labels: bool,
-) -> Dict:
-    keys = ("gfn_recall", "retrieval_recall", "popularity_recall", "random_expected_recall")
+    keys = ("gfn_recall", "rel_rank_recall", "popularity_recall", "random_expected_recall", "proposal_bonus")
     return {
         "seed": seed,
         "steps": steps,
         "k_samples": k_samples,
+        "alpha": alpha,
         "beta": beta,
-        "eig_lambda": eig_lambda,
         "shuffle_labels": shuffle_labels,
         "n": len(rows),
         "mean": {k: mean(r[k] for r in rows) for k in keys},
-        "micro": {
-            k: (
-                sum(r[k] * r["target_n"] for r in rows) / max(1, sum(r["target_n"] for r in rows))
-            )
-            for k in keys
-        },
         "reachable_mean": mean(r["reachable_n"] / r["target_n"] for r in rows),
         "rows": rows,
     }
 
 
+def condition_name(alpha: float, beta: float) -> str:
+    if alpha > 0 and beta > 0:
+        return "rel+aliveness"
+    if alpha > 0:
+        return "rel-only"
+    return "aliveness-only"
+
+
+def aggregate(runs: Sequence[Dict], alpha: float | None = None, beta: float | None = None, metric: str = "gfn_recall") -> float:
+    filt = [
+        r for r in runs
+        if (alpha is None or abs(r["alpha"] - alpha) < 1e-12)
+        and (beta is None or abs(r["beta"] - beta) < 1e-12)
+    ]
+    return mean(r["mean"][metric] for r in filt)
+
+
 def run_suite(args: argparse.Namespace) -> Dict:
     scopes = parse_mission_scopes()
     labelled = labelled_by_mission()
-    neighbours = load_neighbours()
-    cases = build_cases(scopes, labelled, neighbours)
+    graph, library = load_weighted_graph()
+    cases = build_cases(
+        scopes,
+        labelled,
+        graph,
+        library,
+        hops=args.hops,
+        decay=args.decay,
+        pool_top_n=args.pool_top_n,
+    )
     real_runs = []
     shuffle_runs = []
-    for steps, k_samples in args.variants:
+    for alpha, beta in args.ratios:
         for seed in args.seeds:
             real_runs.append(
-                evaluate_config(
+                evaluate_condition(
                     cases,
                     labelled,
-                    neighbours,
+                    graph,
                     seed=seed,
-                    steps=steps,
-                    k_samples=k_samples,
-                    beta=args.beta,
-                    eig_lambda=args.eig_lambda,
+                    steps=args.steps,
+                    k_samples=args.k,
+                    alpha=alpha,
+                    beta=beta,
                     max_len=args.max_len,
                     shuffle_labels=False,
                 )
             )
-            shuffle_runs.append(
-                evaluate_config(
-                    cases,
-                    labelled,
-                    neighbours,
-                    seed=seed,
-                    steps=steps,
-                    k_samples=k_samples,
-                    beta=args.beta,
-                    eig_lambda=args.eig_lambda,
-                    max_len=args.max_len,
-                    shuffle_labels=True,
+            if alpha > 0 and beta > 0:
+                shuffle_runs.append(
+                    evaluate_condition(
+                        cases,
+                        labelled,
+                        graph,
+                        seed=seed,
+                        steps=args.steps,
+                        k_samples=args.k,
+                        alpha=alpha,
+                        beta=beta,
+                        max_len=args.max_len,
+                        shuffle_labels=True,
+                    )
                 )
-            )
     return {
         "config": {
-            "variants": [{"steps": s, "k": k} for s, k in args.variants],
-            "beta": args.beta,
-            "eig_lambda": args.eig_lambda,
+            "steps": args.steps,
+            "k": args.k,
             "max_len": args.max_len,
+            "hops": args.hops,
+            "decay": args.decay,
+            "pool_top_n": args.pool_top_n,
+            "ratios": [{"alpha": a, "beta": b} for a, b in args.ratios],
             "seeds": list(args.seeds),
-            "slice1_recall": SLICE1_RECALL,
         },
         "n_cases": len(cases),
         "real_runs": real_runs,
@@ -457,19 +507,26 @@ def run_suite(args: argparse.Namespace) -> Dict:
     }
 
 
-def aggregate_runs(runs: Sequence[Dict], metric: str) -> float:
-    return mean(run["mean"][metric] for run in runs)
-
-
 def headline(real_runs: Sequence[Dict], shuffle_runs: Sequence[Dict]) -> Dict:
+    rel_only = aggregate(real_runs, alpha=1.0, beta=0.0)
+    alive_only = aggregate(real_runs, alpha=0.0, beta=1.0)
+    rel_alive_runs = [r for r in real_runs if r["alpha"] > 0 and r["beta"] > 0]
+    rel_alive = mean(r["mean"]["gfn_recall"] for r in rel_alive_runs)
+    rel_alive_quality = mean(r["mean"]["proposal_bonus"] for r in rel_alive_runs)
+    rel_only_quality = aggregate(real_runs, alpha=1.0, beta=0.0, metric="proposal_bonus")
+    shuffle_rel_alive = mean(r["mean"]["gfn_recall"] for r in shuffle_runs)
     return {
-        "gfn": aggregate_runs(real_runs, "gfn_recall"),
-        "retrieval": aggregate_runs(real_runs, "retrieval_recall"),
-        "popularity": aggregate_runs(real_runs, "popularity_recall"),
-        "random": aggregate_runs(real_runs, "random_expected_recall"),
-        "shuffle_null_gfn": aggregate_runs(shuffle_runs, "gfn_recall"),
-        "slice1": SLICE1_RECALL,
-        "reachable": mean(run["reachable_mean"] for run in real_runs),
+        "rel_plus_aliveness": rel_alive,
+        "rel_only": rel_only,
+        "aliveness_only": alive_only,
+        "popularity": aggregate(real_runs, metric="popularity_recall"),
+        "random": aggregate(real_runs, metric="random_expected_recall"),
+        "ceiling": mean(r["reachable_mean"] for r in real_runs),
+        "shuffle_rel_plus_aliveness": shuffle_rel_alive,
+        "real_gap_vs_rel_only": rel_alive - rel_only,
+        "shuffle_gap_vs_rel_only": shuffle_rel_alive - rel_only,
+        "rel_plus_aliveness_quality": rel_alive_quality,
+        "rel_only_quality": rel_only_quality,
     }
 
 
@@ -479,86 +536,95 @@ def pct(x: float) -> str:
 
 def write_findings(result: Dict, path: Path = FINDINGS_PATH) -> None:
     h = result["headline"]
-    variant_label = ", ".join(
-        f"{v['steps']}/{v['k']}" for v in result["config"]["variants"]
+    ratio_label = ", ".join(
+        f"{r['alpha']}:{r['beta']}" for r in result["config"]["ratios"]
     )
     lines = [
-        "# Slice-2a Discharge-GFN Held-Out Recovery",
+        "# Slice-2a v2 Mission-Conditioned Recovery",
         "",
-        "Standalone exploratory DERIVE lab. Reward uses TRAIN-only "
-        "`pattern_aliveness_reward.fit_credits(...)[1]` (`bonus`, alive-vs-mess log-odds). "
-        "Held-out `:applied` is never added to the candidate pool.",
+        "Standalone exploratory DERIVE lab. V2 reward is mission-conditioned: "
+        "`alpha * rel(mission,p) + beta * bonus(p)`. `bonus` is fit TRAIN-only; "
+        "`rel` is 1-2/3-hop phylogeny propagation from cosine seed patterns. "
+        "Held-out `:applied` is never inserted into the pool.",
         "",
         "## Headline",
         "",
         f"- N held-out missions: {result['n_cases']}",
         f"- Seeds: {', '.join(map(str, result['config']['seeds']))}",
-        f"- Step/K variants: {variant_label}",
-        f"- Max selected patterns per trajectory: {result['config']['max_len']}",
-        f"- Reachable ceiling from retrieval+one-hop pool: {pct(h['reachable'])}",
+        f"- Ratios alpha:beta: {ratio_label}",
+        f"- steps/K/max_len: {result['config']['steps']} / {result['config']['k']} / {result['config']['max_len']}",
+        f"- hops/decay/pool_top_n: {result['config']['hops']} / {result['config']['decay']} / {result['config']['pool_top_n']}",
         "",
         "| condition | mean recall@|applied| |",
         "|---|---:|",
-        f"| discharge GFN | {pct(h['gfn'])} |",
-        f"| slice-1 reference | {pct(h['slice1'])} |",
-        f"| retrieval-prior beam | {pct(h['retrieval'])} |",
+        f"| rel+aliveness | {pct(h['rel_plus_aliveness'])} |",
+        f"| rel-only | {pct(h['rel_only'])} |",
+        f"| aliveness-only | {pct(h['aliveness_only'])} |",
         f"| popularity-only | {pct(h['popularity'])} |",
         f"| random expected | {pct(h['random'])} |",
-        f"| label-shuffle null GFN | {pct(h['shuffle_null_gfn'])} |",
+        f"| reachability ceiling | {pct(h['ceiling'])} |",
+        f"| shuffle-null rel+aliveness | {pct(h['shuffle_rel_plus_aliveness'])} |",
         "",
-        "## Per-Seed Summary",
+        "## Marginal Aliveness Readout",
         "",
-        "| labels | steps | K | seed | GFN | retrieval | popularity | random |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|",
+        f"- Real rel+alive minus rel-only recovery gap: {pct(h['real_gap_vs_rel_only'])}",
+        f"- Shuffle-null rel+alive minus rel-only recovery gap: {pct(h['shuffle_gap_vs_rel_only'])}",
+        f"- Proposal quality (sum TRAIN bonus): rel+alive {h['rel_plus_aliveness_quality']:.3f} vs rel-only {h['rel_only_quality']:.3f}",
+        "",
+        "## Ratio / Seed Table",
+        "",
+        "| labels | alpha | beta | seed | recall | rel-rank | popularity | random | proposal bonus |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for run in result["real_runs"] + result["shuffle_runs"]:
-        label = "shuffle-null" if run["shuffle_labels"] else "real"
+        label = "shuffle-null" if run["shuffle_labels"] else condition_name(run["alpha"], run["beta"])
         m = run["mean"]
         lines.append(
-            f"| {label} | {run['steps']} | {run['k_samples']} | {run['seed']} | "
-            f"{pct(m['gfn_recall'])} | "
-            f"{pct(m['retrieval_recall'])} | {pct(m['popularity_recall'])} | "
-            f"{pct(m['random_expected_recall'])} |"
+            f"| {label} | {run['alpha']} | {run['beta']} | {run['seed']} | "
+            f"{pct(m['gfn_recall'])} | {pct(m['rel_rank_recall'])} | "
+            f"{pct(m['popularity_recall'])} | {pct(m['random_expected_recall'])} | "
+            f"{m['proposal_bonus']:.3f} |"
         )
     verdict = "PASS" if (
-        h["gfn"] > h["slice1"]
-        and h["gfn"] > h["retrieval"]
-        and h["gfn"] > h["popularity"]
-        and h["shuffle_null_gfn"] < h["gfn"]
+        h["rel_plus_aliveness"] > h["rel_only"]
+        and h["rel_plus_aliveness"] > h["popularity"]
+        and abs(h["shuffle_gap_vs_rel_only"]) < abs(h["real_gap_vs_rel_only"])
     ) else "HONEST NULL / NO PASS"
     lines += [
         "",
         "## Verdict",
         "",
-        f"{verdict}. Acceptance requires GFN > 25%, > retrieval, > popularity, "
-        "stable across seeds, and destroyed by label shuffle.",
+        f"{verdict}. Success requires rel+aliveness > rel-only and popularity, "
+        "stable across ratios/seeds, and the rel+alive minus rel-only gap destroyed by label shuffle.",
         "",
-        "Full machine-readable rows are in `slice2_recovery_results.json`.",
+        "Full machine-readable rows are in `slice2_v2_recovery_results.json`.",
         "",
     ]
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(lines))
 
 
+def parse_ratios(raw: Sequence[str]) -> List[Tuple[float, float]]:
+    out = []
+    for item in raw:
+        a, b = str(item).split(":", 1)
+        out.append((float(a), float(b)))
+    return out
+
+
 def parse_args(argv: Sequence[str]) -> argparse.Namespace:
     p = argparse.ArgumentParser()
-    p.add_argument(
-        "--variants",
-        nargs="+",
-        default=["12:12", "12:24", "24:12"],
-        help="Step/K variants, e.g. 12:24 24:24.",
-    )
-    p.add_argument("--beta", type=float, default=4.0)
-    p.add_argument("--eig-lambda", type=float, default=0.0)
+    p.add_argument("--steps", type=int, default=12)
+    p.add_argument("--k", type=int, default=24)
     p.add_argument("--max-len", type=int, default=5)
+    p.add_argument("--hops", type=int, default=2)
+    p.add_argument("--decay", type=float, default=0.35)
+    p.add_argument("--pool-top-n", type=int, default=180)
+    p.add_argument("--ratios", nargs="+", default=["1:0", "1:0.5", "1:1", "0:1"])
     p.add_argument("--seeds", type=int, nargs="+", default=list(DEFAULT_SEEDS))
     p.add_argument("--write-findings", action="store_true")
     args = p.parse_args(argv)
-    parsed = []
-    for item in args.variants:
-        steps_s, k_s = str(item).split(":", 1)
-        parsed.append((int(steps_s), int(k_s)))
-    args.variants = parsed
+    args.ratios = parse_ratios(args.ratios)
     return args
 
 
