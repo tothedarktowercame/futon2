@@ -1,0 +1,107 @@
+{
+ "0ad620d68d3a9b35": {
+  "proposer": "gfn",
+  "log_reward": 0.7264188220398865
+ },
+ "ffaa52f8c5185cf8": {
+  "proposer": "gfn",
+  "log_reward": 0.5890957786473847
+ },
+ "885be9059b971d82": {
+  "proposer": "gfn",
+  "log_reward": 0.20048047271015942
+ },
+ "63ad417adb2734a0": {
+  "proposer": "gfn",
+  "log_reward": 0.14192989322823596
+ },
+ "5dbae7f7d53e5c35": {
+  "proposer": "gfn",
+  "log_reward": 0.12667650816306972
+ },
+ "99cdf57b00a79d7d": {
+  "proposer": "gfn",
+  "log_reward": 0.12039916260168139
+ },
+ "f5466fb1d470c9f8": {
+  "proposer": "gfn",
+  "log_reward": 0.09246531649544536
+ },
+ "535ee47677358e6b": {
+  "proposer": "gfn",
+  "log_reward": -0.09188931334124302
+ },
+ "e5bd3c89c552b896": {
+  "proposer": "incumbent"
+ },
+ "729ce862326934ee": {
+  "proposer": "gfn",
+  "log_reward": 0.3952229180825234
+ },
+ "d227b6251225cd58": {
+  "proposer": "gfn",
+  "log_reward": 0.3488062314943707
+ },
+ "7fa388bd44de5b54": {
+  "proposer": "gfn",
+  "log_reward": 0.22813992701530011
+ },
+ "278e67e17be81cd2": {
+  "proposer": "gfn",
+  "log_reward": 0.2250831494657337
+ },
+ "eb0975c3b7228f48": {
+  "proposer": "gfn",
+  "log_reward": 0.18308553100705957
+ },
+ "7d5ad083557bced6": {
+  "proposer": "gfn",
+  "log_reward": 0.13511214662825563
+ },
+ "50eebf78f29c0b64": {
+  "proposer": "gfn",
+  "log_reward": 0.05266791022888798
+ },
+ "dbf327e2f759e46b": {
+  "proposer": "gfn",
+  "log_reward": -0.20400154363436887
+ },
+ "e51ddfc1f634829e": {
+  "proposer": "incumbent"
+ },
+ "0f0d0b0ef8906309": {
+  "proposer": "gfn",
+  "log_reward": 0.36297907908154264
+ },
+ "ae8d0daea7bd3897": {
+  "proposer": "gfn",
+  "log_reward": 0.27018722700973313
+ },
+ "62161e133476f27c": {
+  "proposer": "gfn",
+  "log_reward": 0.15545992814545334
+ },
+ "911d09cf765f3956": {
+  "proposer": "gfn",
+  "log_reward": 0.13713213387633097
+ },
+ "f1c5569ecc3303c8": {
+  "proposer": "gfn",
+  "log_reward": 0.046046958770991034
+ },
+ "7f81b4430c5ed384": {
+  "proposer": "gfn",
+  "log_reward": -0.0258202060891902
+ },
+ "cedff1805995b2cf": {
+  "proposer": "gfn",
+  "log_reward": -0.05741774048464305
+ },
+ "cdf7857d2ee36c99": {
+  "proposer": "gfn",
+  "log_reward": -0.1900788125253594
+ },
+ "47385246a68934e2": {
+  "proposer": "incumbent"
+ }
+}

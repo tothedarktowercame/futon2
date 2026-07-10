@@ -1,0 +1,290 @@
+[
+ {
+  "proposal": "0ad620d68d3a9b35",
+  "mission": "M-chipwitz-corps",
+  "patterns": [
+   "collaboration-coherence/determined-fork-proto-psr"
+  ]
+ },
+ {
+  "proposal": "50eebf78f29c0b64",
+  "mission": "M-learning-loop",
+  "patterns": [
+   "devmap-coherence/prototype-alignment-bridge",
+   "or2/ukrn-horizon-bridge",
+   "p4ng/bridge-before-portal",
+   "scan-coherence/mission-anchored-scan",
+   "storage/graph-memory-contract"
+  ]
+ },
+ {
+  "proposal": "ae8d0daea7bd3897",
+  "mission": "M-futonzero-generative",
+  "patterns": [
+   "f6/self-play-loop",
+   "iching/hexagram-04-meng",
+   "t3/capability-not-functioning",
+   "war-machine/dynamic-over-static",
+   "war-machine/ideal-actual-gap"
+  ]
+ },
+ {
+  "proposal": "cdf7857d2ee36c99",
+  "mission": "M-futonzero-generative",
+  "patterns": [
+   "aif/candidate-pattern-action-space",
+   "devmap-coherence/status-keywords",
+   "futon-theory/mission-lifecycle",
+   "iching/hexagram-07-shi",
+   "war-machine/advanceability"
+  ]
+ },
+ {
+  "proposal": "0f0d0b0ef8906309",
+  "mission": "M-futonzero-generative",
+  "patterns": [
+   "agent/state-is-hypothesis",
+   "agent/trail-enables-return",
+   "ants/baseline-cyber-ant",
+   "devmap-coherence/status-keywords",
+   "futon-theory/mission-lifecycle"
+  ]
+ },
+ {
+  "proposal": "f1c5569ecc3303c8",
+  "mission": "M-futonzero-generative",
+  "patterns": [
+   "aif/candidate-pattern-action-space",
+   "coordination/ARGUMENT",
+   "devmap-coherence/ifr-f3-piti",
+   "t3/capability-not-functioning",
+   "war-machine/state-capture"
+  ]
+ },
+ {
+  "proposal": "63ad417adb2734a0",
+  "mission": "M-chipwitz-corps",
+  "patterns": [
+   "career-coherence/free-solo-vs-rope",
+   "collaboration-coherence/determined-fork-proto-psr",
+   "futon-theory/reverse-morphogenesis",
+   "futon-theory/task-as-arrow",
+   "orchestration/consent-gate"
+  ]
+ },
+ {
+  "proposal": "535ee47677358e6b",
+  "mission": "M-chipwitz-corps",
+  "patterns": [
+   "ants/baseline-cyber-ant",
+   "career-coherence/free-solo-vs-rope",
+   "fulab/tradeoff-record",
+   "orchestration/consent-gate",
+   "p4ng/agent-pattern-triad"
+  ]
+ },
+ {
+  "proposal": "eb0975c3b7228f48",
+  "mission": "M-learning-loop",
+  "patterns": [
+   "agency/invariants",
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "or2/ukrn-horizon-bridge",
+   "storage/graph-memory-contract",
+   "structure/hinge-entry-slots"
+  ]
+ },
+ {
+  "proposal": "7d5ad083557bced6",
+  "mission": "M-learning-loop",
+  "patterns": [
+   "devmap-coherence/ifr-f1-dhammavicaya",
+   "hdm/simulation-beats-reality",
+   "p4ng/bridge-before-portal",
+   "storage/graph-memory-contract",
+   "structure/hinge-point"
+  ]
+ },
+ {
+  "proposal": "dbf327e2f759e46b",
+  "mission": "M-learning-loop",
+  "patterns": [
+   "data-mining/constrain-extraction-to-the-downstream-vocabulary",
+   "hdm/simulation-beats-reality",
+   "invariant-coherence/bounded-disposition",
+   "or2/ukrn-horizon-bridge",
+   "paramitas/endurance"
+  ]
+ },
+ {
+  "proposal": "d227b6251225cd58",
+  "mission": "M-learning-loop",
+  "patterns": [
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "hdm/deep-storage-to-active-graph",
+   "hdm/simulation-beats-reality",
+   "structure/hinge-entry-slots",
+   "structure/whose-question-is-this"
+  ]
+ },
+ {
+  "proposal": "99cdf57b00a79d7d",
+  "mission": "M-chipwitz-corps",
+  "patterns": [
+   "budgeted-action-selection/mana-gated-work",
+   "devmap-coherence/prototype-alignment-bridge",
+   "futon-theory/proof-path",
+   "social/ARGUMENT"
+  ]
+ },
+ {
+  "proposal": "ffaa52f8c5185cf8",
+  "mission": "M-chipwitz-corps",
+  "patterns": [
+   "coordination/ARGUMENT",
+   "coordination/task-shape-validation",
+   "futon-theory/task-as-arrow"
+  ]
+ },
+ {
+  "proposal": "e5bd3c89c552b896",
+  "mission": "M-chipwitz-corps",
+  "patterns": [
+   "orchestration/pattern-warranted-choice-point",
+   "collaboration-coherence/determined-fork-proto-psr",
+   "futon-theory/derive-exits-on-a-minted-sorry",
+   "budgeted-action-selection/mana-gated-work",
+   "futon-theory/task-as-arrow",
+   "coordination/task-shape-validation",
+   "futon-theory/curry-howard-operational",
+   "agent/intent-handshake-is-binding",
+   "ants/baseline-cyber-ant"
+  ]
+ },
+ {
+  "proposal": "47385246a68934e2",
+  "mission": "M-futonzero-generative",
+  "patterns": [
+   "iching/hexagram-07-shi"
+  ]
+ },
+ {
+  "proposal": "7fa388bd44de5b54",
+  "mission": "M-learning-loop",
+  "patterns": [
+   "budgeted-action-selection/mana-gated-work",
+   "devmap-coherence/ifr-f5-samadhi",
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "hdm/deep-storage-to-active-graph",
+   "scan-coherence/mission-anchored-scan"
+  ]
+ },
+ {
+  "proposal": "885be9059b971d82",
+  "mission": "M-chipwitz-corps",
+  "patterns": [
+   "collaboration-coherence/determined-fork-proto-psr",
+   "futon-theory/curry-howard-operational",
+   "futon-theory/derive-exits-on-a-minted-sorry",
+   "social/ARGUMENT",
+   "system-coherence/name-the-decision-before-the-framework"
+  ]
+ },
+ {
+  "proposal": "7f81b4430c5ed384",
+  "mission": "M-futonzero-generative",
+  "patterns": [
+   "aif/admissibility",
+   "t3/capability-not-functioning",
+   "war-machine/dynamic-over-static",
+   "war-machine/inhabitation-threshold",
+   "war-machine/state-capture"
+  ]
+ },
+ {
+  "proposal": "f5466fb1d470c9f8",
+  "mission": "M-chipwitz-corps",
+  "patterns": [
+   "ants/baseline-cyber-ant",
+   "devmap-coherence/ifr-f3-piti",
+   "futon-theory/derive-exits-on-a-minted-sorry",
+   "orchestration/consent-gate",
+   "p4ng/agent-pattern-triad"
+  ]
+ },
+ {
+  "proposal": "278e67e17be81cd2",
+  "mission": "M-learning-loop",
+  "patterns": [
+   "contributing/stack-scan-logging-protocol",
+   "invariant-coherence/bounded-disposition",
+   "paramitas/endurance",
+   "storage/graph-memory-contract",
+   "structure/whose-question-is-this"
+  ]
+ },
+ {
+  "proposal": "729ce862326934ee",
+  "mission": "M-learning-loop",
+  "patterns": [
+   "agency/invariants",
+   "devmap-coherence/ifr-f5-samadhi",
+   "hdm/deep-storage-to-active-graph",
+   "structure/interest-event-vocabulary",
+   "structure/whose-question-is-this"
+  ]
+ },
+ {
+  "proposal": "e51ddfc1f634829e",
+  "mission": "M-learning-loop",
+  "patterns": [
+   "structure/hinge-entry-slots",
+   "structure/whose-question-is-this",
+   "structure/interest-event-vocabulary"
+  ]
+ },
+ {
+  "proposal": "5dbae7f7d53e5c35",
+  "mission": "M-chipwitz-corps",
+  "patterns": [
+   "agent/sense-deliberate-act",
+   "collaboration-coherence/determined-fork-proto-psr",
+   "coordination/ARGUMENT",
+   "social/ARGUMENT",
+   "system-coherence/name-the-decision-before-the-framework"
+  ]
+ },
+ {
+  "proposal": "cedff1805995b2cf",
+  "mission": "M-futonzero-generative",
+  "patterns": [
+   "ants/baseline-cyber-ant",
+   "devmap-coherence/ifr-f3-piti",
+   "devmap-coherence/status-keywords",
+   "iching/hexagram-07-shi",
+   "war-machine/advanceability"
+  ]
+ },
+ {
+  "proposal": "911d09cf765f3956",
+  "mission": "M-futonzero-generative",
+  "patterns": [
+   "aif/candidate-pattern-action-space",
+   "aif/structured-observation-vector",
+   "ants/baseline-cyber-ant",
+   "coordination/ARGUMENT",
+   "devmap-coherence/ifr-f3-piti"
+  ]
+ },
+ {
+  "proposal": "62161e133476f27c",
+  "mission": "M-futonzero-generative",
+  "patterns": [
+   "agent/trail-enables-return",
+   "aif/shared-kernel-predictive-forward-model",
+   "aif/structured-observation-vector",
+   "futon-theory/mission-lifecycle",
+   "iching/hexagram-04-meng"
+  ]
+ }
+]
