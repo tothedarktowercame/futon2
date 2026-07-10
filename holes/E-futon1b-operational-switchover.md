@@ -174,6 +174,31 @@ at export (88.5% of the old store, bug fixed 2026-07-10); evidence
 duplicate-id guard means backfill must use the duplicate-free snapshot-scope
 export (F8).
 
+## 2026-07-10 (late) — A1+A2 landed (futon1b `d171150`)
+
+Evidence routes (POST/get/query/count/sessions/chain) + the gate layer
+(layered error envelope, penholder L3 with FUTON1B_ALLOWED_PENHOLDERS,
+canonical-id L4 with the :mission/doc contract seeded at boot) are live in
+futon1b_server. 26/26 HTTP smoke assertions PASS (`test_a1a2.clj`);
+clj-kondo 0/0. Two findings from the work:
+
+- **XTDB 2.1.0 + dual-stack**: 2.1.0 submits txs over an internal pgwire
+  loopback to "localhost"; the node binds 127.0.0.1 but lucy resolves
+  localhost to ::1 → every xt/q/execute-tx dies with ConnectException.
+  Fixed with `-Djava.net.preferIPv4Stack=true` in the :node alias — **any
+  box running futon1b needs this** (the laptop presumably resolves
+  localhost IPv4-first, masking it there).
+- **`[*]` projection works on 2.1.0** (returned full docs, composes with
+  `where`) — it bound nothing on 2.0.0. The evidence query layer uses it
+  with exact-match pushdown.
+- Hyperedge POST is now penholder-gated (contract-faithful). If the
+  dormant watcher dual-write hook is ever revived, it sends no x-penholder
+  — set FUTON1B_COMPAT_PENHOLDER=api or add the header. The
+  operational-first writers send x-penholder via FUTON1A_PENHOLDER already.
+
+Next: A3 (entities/relations — the gate machinery they need is in place),
+A4 (graph reads), A5 (census/types), then B1 (the futon3c EDN backend).
+
 ## Rollback
 
 At any gate failure: stop futon1b JVM, unset the env flips, boot as before
