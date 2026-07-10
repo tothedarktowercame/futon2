@@ -252,6 +252,49 @@ not exist yet**; Gate 1 can be *approximated* today by booting with
 (evidence goes to futon1b, everything else stays on futon1a — a true
 shadow-mode intermediate). Next: B3 disable gate + B4 URL flips.
 
+## 2026-07-10 (night) — B3+B4 landed (futon3c `739472e`); PHASE B COMPLETE
+
+- **B3**: `FUTON1A_PORT=0` disables futon1a entirely (the house
+  `(pos? port)` gate — no new env var). Cyder registration guarded,
+  direct-xtdb-with-no-node falls back loudly, WebArxana follows
+  `FUTON4_BASE_URL` → `FUTON1A_URL` → port-derived.
+- **B4**: all hardcoded `:7071` sites are `FUTON1A_URL`-aware
+  (mission_scope_ingest, enrichment/query, arxana_bridge, fm-conductor,
+  scope-view clj+sh, o4/o5/e1 python). `portfolio/heartbeat.clj`'s stale
+  `:7071` default fixed as the separate bug it was (futon5 nonstarter
+  client → `FUTON5_URL`, default `:7072`).
+- **Verified on the real dev classpath** (not unit stubs): booting with
+  `FUTON1A_PORT=0` prints the DISABLED path and start-futon1a! returns
+  nil; adding `FUTON3C_EVIDENCE_BACKEND=futon1b FUTON1B_URL=…:17074`
+  selects the backend, passes the I-evidence-per-turn boot check against
+  the live server, and a real `boundary/append!` → `verify-persisted`
+  round trip succeeds — **the Gate-1 evidence leg holds with futon1a
+  fully absent**.
+- Accidental extra datum: a stray full-stack boot with `FUTON1A_PORT=0`
+  ran all the way to `start-irc!` before dying on the 6667 bind (already
+  held on lucy). I.e. nothing between evidence-store and IRC blocks a
+  futon1a-less boot. **Phase C precondition**: decide the IRC port story
+  on lucy before Gate 1 proper (something already holds :6667 here —
+  set `FUTON3C_IRC_PORT`/`IRC_PORT` appropriately or gate it off).
+
+### The full Gate-1 boot recipe (Phase C)
+
+```
+# terminal 1 — the store JVM
+cd ~/code/futon1b
+clojure -M:node -m futon1b-server --store-dir switchover-store --port 7074
+
+# terminal 2 — the stack, futon1a-less
+FUTON1A_PORT=0 \
+FUTON3C_EVIDENCE_BACKEND=futon1b \
+FUTON1B_URL=http://localhost:7074 \
+FUTON1A_URL=http://localhost:7074 \
+make dev
+```
+
+Phase B complete. Remaining: Phase C gates 1-4 (boot-and-iterate on
+lucy), then Phase D backfill.
+
 ## Rollback
 
 At any gate failure: stop futon1b JVM, unset the env flips, boot as before
