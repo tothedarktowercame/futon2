@@ -46,6 +46,15 @@ clj-kondo --lint src/meme/ch2.clj test/meme/ch2_test.clj   # 0 / 0
 clojure -M:test -n meme.ch2-test                            # 9 tests green
 ```
 
+On a RAM-tight box running live services (e.g. lucy, ~4G with the evidence
+stack resident): run the MiniLM gates under a cgroup cap so an OOM kills the
+gate and not the services —
+`systemd-run --user --scope -q -p MemoryMax=1500M -p MemorySwapMax=0 .venv/bin/python3 holes/labs/M-memes-arrows/aliveness_v3_gate2.py`.
+(A `ulimit -v` cap does NOT work: torch needs several GB of virtual address
+space just to mmap `libtorch_cpu.so`, even though RSS stays under 1G.)
+Verified on lucy 2026-07-10: gfn_core 9 tests green; aliveness_v3_gate2
+reproduces the laptop numbers exactly under the 1500M cap.
+
 Headline numbers to expect are in `findings/slice1_5_validity_findings.md`,
 `findings/ground_truth_expansion_findings.md`, and the checkpoints in
 `futon2/holes/TN-gflownets-fable-review.md`.
