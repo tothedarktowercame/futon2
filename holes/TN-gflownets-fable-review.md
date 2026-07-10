@@ -351,3 +351,34 @@ subsumption). CH2 emission still awaits B4 (and B4 needs a deposit-ref variant
 of the sorry-ref check — flights have no meme-arrow refs). Flight-3's inversion
 finding is the coverage-Goodhart result at the warrant grain: third independent
 sighting of text-similarity ≠ semantic warrant.
+
+## Checkpoint — 2026-07-10 (claude-2: Batch 2 folding COMPLETE, zai-1 shift ends)
+
+Six blinded folds (3 GFN + 3 incumbent, identities sealed from the folder;
+worklist rule pre-committed at 548c451), all reviewed and ACCEPTED, zero
+reviewer fixes needed after run 4 — the contract has converged. The full 3×3
+deposit grid now stands (012/013/014 × three missions), all with
+:proposal/hash attribution.
+
+Reviewer-verified per deposit: check-parens; psi-sha256 recomputed; hash at
+both sites; pins truthful; ids vs worklist; psi freshness diffed against
+same-mission predecessors. Convergent findings across the grid, per mission:
+- learning-loop: the h1 base-rate hole now has THREE faces (formula ungrounded;
+  data-side anti-pattern spec via hinge-entry-slots; inhabited-vs-consultant
+  voice as calibration PRECONDITION via whose-question-is-this) — the
+  base-rate mint candidate now has a BECAUSE clause waiting.
+- futonzero: G-SIM/G-REWARD confirmed ungrounded by a 5th and 6th independent
+  cascade; run-8's advanceability terminal renders Flight 2's :discharged?
+  false as the same verdict via independent machinery (governance-vs-clearing
+  distinction protects future adjudication from a category error).
+- chipwitz: threshold/channel/wiring/sorry-mining stable across 3 cascades;
+  run-4's task-as-arrow sharpens h1 to "a warrant must DETERMINE, not be
+  consistent-with" — the constructive statement of Flight 3's TF-IDF inversion.
+
+New contract elements minted by the folder itself: honest-overlap flag (run 5
+h6), source-side/governance cascade characterization (runs 7/8). zai-1 shift
+totals: 9 folds + 3 flights, all accepted; relieved with honors.
+
+**NEXT: batch-2 FLIGHTS (need preregistered acceptance per fold — successor
+runner flies them; Joe starts the fresh zai), then adjudication → labels →
+R̂ retrain → S2's first data → batch-3 proposals under the retrained reward.**
