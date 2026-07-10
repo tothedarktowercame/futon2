@@ -221,6 +221,37 @@ patterns/activation, valid-time puts, relations/batch). Next: **B1** —
 `futon3c.evidence.futon1b-backend` (EDN HTTP EvidenceBackend) + B2
 bootstrap branch, then B3 disable gate and B4 URL flips.
 
+## 2026-07-10 (evening) — B1+B2 landed (futon3c `28032c3`, futon1b `b7a94a2`)
+
+- **B1** `futon3c.evidence.futon1b-backend`: full 8-method EvidenceBackend
+  over HTTP/EDN. Design: the server pushes down narrowing filters
+  (type/claim-type/author/session-id/since/before/fork-of), and
+  -query/-count re-apply the shared `filter-and-sort-entries` LOCALLY with
+  full params — protocol semantics decided by the shared code, pushdown
+  only narrows transfer. -append maps 409→:duplicate-id and enforces
+  reply/fork existence client-side; -delete! is a logged no-op
+  (append-only store, no live compaction callers); reads throw loud (R4).
+- **B2**: `make-evidence-store` selects it via
+  `FUTON3C_EVIDENCE_BACKEND=futon1b` + `FUTON1B_URL` (dormant otherwise);
+  `check-store-backing` recognizes the backend and probes `/health` —
+  the boot check now verifies live reachability of the store JVM, which
+  is stronger than the in-process kinds get. futon1b grew a `fork-of`
+  evidence query param for -forks-of.
+- **Verified end-to-end** against a live futon1b server JVM on a fresh
+  store: 18/18 (EDN fidelity incl. keyword-keyed subject maps, ephemeral
+  default, subject/tags semantics, count-ignores-limit, forks-of, -all,
+  `estore/query*` through the protocol front, invariant ok + unreachable
+  paths). futon1b suites still 26/26 + 31/31.
+- Housekeeping: the Makefile CLAUDE_BIN absolute-path fix (staged since
+  the boundary) rode along in `28032c3` — intentional, it was due.
+
+Phase C Gate 1 is now attemptable: start futon1b_server on :7074, boot
+futon3c with `FUTON1A_DISABLE`... — except **B3 (the disable gate) does
+not exist yet**; Gate 1 can be *approximated* today by booting with
+`FUTON3C_EVIDENCE_BACKEND=futon1b` while futon1a still runs embedded
+(evidence goes to futon1b, everything else stays on futon1a — a true
+shadow-mode intermediate). Next: B3 disable gate + B4 URL flips.
+
 ## Rollback
 
 At any gate failure: stop futon1b JVM, unset the env flips, boot as before
