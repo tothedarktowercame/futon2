@@ -297,3 +297,31 @@ modes/mission at mean Jaccard distance 0.88–0.90 vs incumbent's 1.
 **Next:** fly proposals from the blinded batch (arming = Joe); B4 CH2 wiring at
 the fold_escrow seam on JVM-window lift — S1/S2 light up from its stream; B5
 mint hook. The loop is now waiting on folds, not on code.
+
+## Checkpoint — 2026-07-10 (claude-2: Fold Runs 1–3, first coverage COMPLETE)
+
+The loop's propose→fold stage ran live for the first time: zai-1 (Emacs REPL,
+operator-observable) folded one blinded proposal per open mission, claude-2
+reviewed each against the escrow contract (check-parens, verbatim ids + hash,
+independently recomputed :psi-sha256, truthful :pins):
+
+| run | deposit | proposal | shape | verdict |
+|---|---|---|---|---|
+| 1 | ft-learning-loop-012 | 50eebf78… | 5 boxes / 10 edges / 4 holes | ACCEPTED (2 reviewer fixes: truthful pins, real psi-sha — now contract) |
+| 2 | ft-futonzero-generative-012 | ae8d0dae… | 5 boxes / 10 edges / 4 holes | ACCEPTED, no fixes |
+| 3 | ft-chipwitz-corps-012 | 0ad620d6… | 1 box / 0 edges / 5 holes | ACCEPTED, no fixes (honest single-pattern fold, no padding) |
+
+All three carry :proposal/hash (the S1/S2 attribution seam); proposer
+identities remain sealed — the folder never opened the sidecar, so fold
+quality is blind to proposer by construction. Satiety convention codified:
+:partial = needed part unavailable; :full + policy-hole = excluded part
+inapplicable-by-judgment. **Mint-lane candidates from the holes:** base-rate
+discrimination mechanism (R1/h1), operator-scale horizon-bridge (R1/h2),
+G-REWARD positive substance (R2/h2 → M-pudding-peradams), warrant-threshold
+calibration (R3/h1). Run-3 genealogical note: determined-fork-proto-psr's
+canonical instance IS M-chipwitz-corps' motivating example — whichever
+proposer picked it had the easiest possible fit; the seal will tell.
+
+**State: 3 deposits await arming (= Joe). 24 blinded proposals outstanding.
+Adjudication of flown folds → CH2 labels → the S-curves move. Paused for
+operator steer: batch-fold the remaining 24, or fly these three first.**
