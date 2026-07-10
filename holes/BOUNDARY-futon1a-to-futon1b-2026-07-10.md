@@ -33,11 +33,11 @@ core repos above were deliberately synced for the boundary.
 | futon3 | main | `fb51b62` | 2026-07-10 | in sync | 0 |
 | futon3a | main | `32dcb09` | 2026-07-10 | behind 2 | 0 |
 | futon3b | main | `ad7c824` | 2026-05-03 | in sync | 0 |
-| futon4 | main | `022c6e5` | 2026-05-30 | behind 76 | 4 |
+| futon4 | main | `6d457c9` | 2026-07-10 | in sync (pulled for boundary 17:30) | 4 |
 | futon5 | main | `2e0b1be` | 2026-05-30 | behind 7 | 0 |
 | futon5a | master | `08260a7` | 2026-05-31 | in sync | 0 |
 | futon6 | master | `ffa6f85` | 2026-07-10 | behind 2 | 0 |
-| futon7 | master | `f71edc6` | 2026-06-07 | in sync | 0 |
+| futon7 | master | `f71edc6` | 2026-06-07 | in sync (re-verified 17:30) | 0 |
 | futon7a | master | `136b8fc` | 2026-06-12 | behind 1 | 0 |
 
 Full SHAs: futon0 `e9254e2614b6051fb7f4d63887b1dab8f9be6562` ·
@@ -45,7 +45,7 @@ futon1 `26ab382e6721342483403e37d4e2ab59cea47e06` ·
 futon3 `fb51b6256aaca74acf5b84f1d3c15f2c09bfbe79` ·
 futon3a `32dcb097bc1107fa6caba162d562bac097aa24b8` ·
 futon3b `ad7c8247bebe9c42a033fee5276d109763ea839c` ·
-futon4 `022c6e53888d026188e9a8824882801c13e30bc2` ·
+futon4 `6d457c9a5681919d4bf2f248419272d74df6dd96` ·
 futon5 `2e0b1bec110d111a825ec51a1748885a62beb18e` ·
 futon5a `08260a792e0c25546791a3c35b60fb93f17af439` ·
 futon6 `ffa6f85a9ae045569603933a7b5339b743411448` ·
