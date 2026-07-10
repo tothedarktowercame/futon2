@@ -1,0 +1,66 @@
+[
+ {
+  "proposal": "63ad417adb2734a0",
+  "mission": "M-chipwitz-corps",
+  "patterns": [
+   "career-coherence/free-solo-vs-rope",
+   "collaboration-coherence/determined-fork-proto-psr",
+   "futon-theory/reverse-morphogenesis",
+   "futon-theory/task-as-arrow",
+   "orchestration/consent-gate"
+  ]
+ },
+ {
+  "proposal": "e5bd3c89c552b896",
+  "mission": "M-chipwitz-corps",
+  "patterns": [
+   "orchestration/pattern-warranted-choice-point",
+   "collaboration-coherence/determined-fork-proto-psr",
+   "futon-theory/derive-exits-on-a-minted-sorry",
+   "budgeted-action-selection/mana-gated-work",
+   "futon-theory/task-as-arrow",
+   "coordination/task-shape-validation",
+   "futon-theory/curry-howard-operational",
+   "agent/intent-handshake-is-binding",
+   "ants/baseline-cyber-ant"
+  ]
+ },
+ {
+  "proposal": "eb0975c3b7228f48",
+  "mission": "M-learning-loop",
+  "patterns": [
+   "agency/invariants",
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "or2/ukrn-horizon-bridge",
+   "storage/graph-memory-contract",
+   "structure/hinge-entry-slots"
+  ]
+ },
+ {
+  "proposal": "e51ddfc1f634829e",
+  "mission": "M-learning-loop",
+  "patterns": [
+   "structure/hinge-entry-slots",
+   "structure/whose-question-is-this",
+   "structure/interest-event-vocabulary"
+  ]
+ },
+ {
+  "proposal": "cdf7857d2ee36c99",
+  "mission": "M-futonzero-generative",
+  "patterns": [
+   "aif/candidate-pattern-action-space",
+   "devmap-coherence/status-keywords",
+   "futon-theory/mission-lifecycle",
+   "iching/hexagram-07-shi",
+   "war-machine/advanceability"
+  ]
+ },
+ {
+  "proposal": "47385246a68934e2",
+  "mission": "M-futonzero-generative",
+  "patterns": [
+   "iching/hexagram-07-shi"
+  ]
+ }
+]
