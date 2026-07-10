@@ -1,0 +1,136 @@
+# TN — GFlowNets review (Fable): why the slice-2 nulls were guaranteed, and a path that can work
+
+**Author:** Fable (session 2026-07-10) · **Status:** REVIEW + PROPOSED PLAN (Joe to approve dispatch)
+**Scope:** review of the slush-demo GFN line — `futon2/holes/labs/slush-demo/` slices 1–2
+(v1/v2 nulls, v3 spec) against the one positive run (`findings/slush_sweep_findings.md`).
+**Relation to prior docs:** the v3 reward spec
+(`labs/slush-demo/HANDOFF-slice2-v3-aliveness-selfevidencing.md`) stands unchanged; this
+note explains why the *samplers* kept nulling and what to build so the next null (or pass)
+is informative. Sibling context: `E-gflownets-fold.md`, `E-cascade-sampler-sampler.md`.
+
+## Findings — three defects, each alone sufficient for the observed nulls
+
+I read the slice-2 code and findings. **None of the three is a data-scale problem.**
+
+### F1. The GFN was never trained (training-scale bug)
+`train_policy` (`labs/slush-demo/slice2/slice2_discharge_gfn.py:263-291`) runs `steps`
+gradient updates with **one trajectory per step, batch size 1**, and the eval configs used
+`steps ∈ {6, 8, 12}` (default 12, line 617). With ~80 training missions, most missions
+were *never sampled even once* during training. The one run in this lab that ever showed
+life — the slush sweep — used **3000 steps**. Slice-2 used **250× less** training than the
+configuration already known to work.
+
+Corroborating detail: `PatternPolicy.scorer` is zero-initialized except for unit weights
+on the (rel, bonus) scalar features (lines 66–95), so the *initial* policy is already a
+Boltzmann ranking of `rel + bonus`. At 12 steps the "GFN" evaluated in slice-2 v1/v2 was
+effectively that untrained prior — which is exactly what the numbers show (v1: GFN 1.2% ≈
+retrieval beam 1.0%; v2: rel+aliveness 3.9% ≈ rel-only 3.6%).
+
+### F2. Trajectory balance with a single shared scalar logZ is mis-specified for
+### mission-conditioned rewards
+The TB loss `(log_z + log_pf − log R(S|m))²` (line 287) uses one global `self.log_z`
+(line 76), but the true partition function Z(m) = Σ_S R(S|m) **differs per mission**,
+plausibly by orders of magnitude. One scalar cannot satisfy TB for two missions with
+different Z; the gradients fight and the policy converges to nothing meaningful even with
+ample steps. Standard fixes:
+- logZ(m): a per-mission learned table (train missions) or a small MLP over mission
+  features; or
+- a logZ-free objective (Detailed Balance / Sub-Trajectory Balance), which also gives
+  denser credit assignment on short trajectories like ours.
+
+### F3. The v1/v2 rewards were additive over patterns — a GFN could not have helped
+`log_reward = Σ_{p∈S} (α·rel(p) + β·bonus(p))` (lines 258–260). When log-reward is
+additive over items, the Gibbs distribution over sets factorizes and **per-pattern ranking
+is already the optimal sampler**. There is no compositional structure for a GFN to learn;
+the null was structural, not empirical. The v3 reward is the first one that is genuinely
+set-compositional: want-coverage is submodular (a pattern's marginal accuracy depends on
+what is already selected), and the complexity term makes over-selection costly. **v3 is
+the first reward where building a GFN is even a meaningful experiment.**
+
+### F4. (Already recognized in v3) The eval metric was wrong
+Recovery-of-`:applied` measures base-rate/mission-conditioning, which is why
+popularity-only (8.9%) beat everything trained. v3's held-out-quality eval is the right
+replacement; keep it.
+
+### On "possibly this is a scale issue"
+Not data scale — training scale (F1), objective correctness (F2), and reward structure
+(F3). All three are cheap to fix; none requires more corpus, bigger models, or GPUs.
+Data/model scale becomes the question only at Slice 3 below, after a sound trainer shows
+signal on a validated reward.
+
+## The plan — four slices, each with a hard gate
+
+Ordering principle: **never debug the sampler and the reward at the same time.** Slice 0
+validates the trainer on synthetic rewards with enumerable ground truth; Slice 1 (= the
+v3 gate, unchanged) validates the reward with no sampler; only Slice 2 combines them.
+
+### Slice 0 — trusted trainer harness (bell → codex)
+Build `gfn_core.py`: batched TB **and** SubTB losses, conditional logZ(m), replay buffer
+(optional), loss/reward/mode-coverage curves logged every run. Validate on synthetic
+problems small enough to enumerate exactly:
+- pool n=12–16, max_len 4 → full set-space enumerable; synthetic **submodular** reward
+  (coverage-style, so it rehearses the v3 shape).
+- **Gate G0a (correctness):** total-variation distance between the trained sampler's
+  distribution and the exact Gibbs distribution < 0.05; learned logZ within 0.1 nat of
+  the enumerated true logZ.
+- **Gate G0b (bug demonstration):** ≥3 synthetic "missions" with Z differing by ≥e³;
+  shared-scalar-logZ variant must *fail* G0a while conditional-logZ (or SubTB) passes.
+  This pins F2 as real and fixed, auditable forever.
+- Deterministic given seed; CPU; pytest green.
+
+### Slice 1 — v3 reward gate (claude-1, exactly as specced in HANDOFF-slice2-v3)
+Run the reward-before-generator gate as written (spread, LOO-AUC vs alive/mess beating
+shuffle null, mandatory anti-`1=1` and bloated-shell controls). Two additions:
+- **Precompute coverage bitsets:** run `rollout_execute` once per (mission, pattern) to
+  get the covered want-atom set; store as bitmasks. Set-level accuracy = popcount of the
+  OR. This makes reward evaluation ~µs, which is what makes 3000–10000 training steps
+  affordable later. (If per-pattern discharge does not compose as union-of-atoms, measure
+  the gap on a sample and decide: exact-but-slow with memoization vs bitset surrogate for
+  training + exact reward for final eval.)
+- **Gate G1-comp (compositionality):** verify marginal coverage gains actually interact
+  (submodularity is doing work) on real missions. If accuracy turns out ~additive over
+  patterns, STOP: ranking suffices and no sampler experiment is warranted (F3 lesson).
+
+### Slice 2 — the real GFN (bell → codex; only after G0 and G1 both pass)
+Train the Slice-0 trainer on the Slice-1 reward. Config floor: ≥3000 steps, batch 16–64
+trajectories/step, conditional logZ or SubTB, lr sweep {1e-3, 3e-3}, β and λ ablations
+per the v3 spec.
+- **Baselines that matter:** (a) **greedy submodular maximization on the same reward** —
+  the honest baseline for coverage rewards, not popularity; (b) simulated annealing /
+  MCMC at *matched reward-evaluation budget*; (c) retrieval-prior beam; (d) popularity.
+- **Eval (v3's, made precise):** held-out mean aliveness_v3 of proposals AND diversity
+  (# distinct above-threshold modes per mission). The GFN's value proposition is
+  *matching greedy's reward while beating everything on diverse high-reward modes* —
+  exactly what the slush sweep showed at 3000 steps (338–396 top-modes vs greedy's 1).
+- **Nulls:** label-shuffle destroys the lift; anti-gaming controls (trivial cascade,
+  bloated shell) score dead end-to-end.
+- HONEST NULL reportable. But note: for the first time, a null here would actually be
+  *informative about the idea*, because trainer and reward were validated independently.
+
+### Slice 3 — scale, only now
+If Slice 2 shows signal: grow pool_top_n (240 → full library), max_len, model dim, and
+corpus; consider per-mission fine-tuning from a shared backbone. If Slice 2 nulls with a
+validated trainer and reward: the compositional-cascade-proposal thesis itself is what
+failed — write that up and stop; do not reach for scale as a rescue.
+
+## Dispatch mapping (per CLAUDE.md handoff protocol)
+- Slice 0 → idle codex agent, bell, with G0a/G0b acceptance bar (pure Python lab;
+  pytest + deterministic-seed gate). Bell back with SHAs + gate table.
+- Slice 1 → claude-1 (it authored the v3 spec and owns the reward gate); bitset
+  precompute can be belled to a second codex in parallel — it is independent of the gate.
+- Slice 2 → codex, after both gates; Claude owner reviews diff + re-runs the headline
+  table before accepting.
+- Reviews stay with the Claude owner; fix-don't-re-bell for findings.
+
+## What was checked (audit trail)
+- `labs/slush-demo/slice2/slice2_discharge_gfn.py:263-291` — train loop: 1
+  trajectory/step, batch 1, default `--steps 12` (line 617); shared scalar `self.log_z`
+  (line 76) in TB loss (line 287).
+- `labs/slush-demo/slice2/slice2_discharge_gfn.py:258-260` — additive log-reward.
+- `labs/slush-demo/slice2/slice2_discharge_gfn.py:66-95` — zero-init scorer ⇒ initial
+  policy ≈ Boltzmann(rel+bonus).
+- `labs/slush-demo/findings/slice2_recovery_findings.md`,
+  `labs/slush-demo/findings/slice2_v2_recovery_findings.md` — the two honest nulls
+  (steps 6–12, GFN ≈ untrained prior ≈ null).
+- `labs/slush-demo/findings/slush_sweep_findings.md` — the 3000-step run that beat
+  greedy on mode-spread across all 5 missions (the existence proof for training scale).
