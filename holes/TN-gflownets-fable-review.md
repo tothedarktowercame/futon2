@@ -276,3 +276,24 @@ scoreboard S1–S4 with today's baselines, kill criterion, build list B1–B5,
 mint lane for new patterns). Preregistered in `~/code/p4ng/main-2026.tex`
 §Preregistration (dated 2026-07-10, S3 baseline AUC 0.542 @ n=12 vs null-95
 0.854): the paper is the preregistration; the SPEC is its operational twin.
+
+## Checkpoint — 2026-07-10 (Fable: B1–B3 BUILT AND RUNNING, local box)
+
+The Slice-2-live loop's non-JVM organs are live. **B1** `reward_v0.py`
+(futon3a lab): learned R̂ = reliability posteriors (Beta(2,1), flown-fold
+outcomes only) + Slice-1.5 coverage feature + complexity; first preregistered
+S3 point **0.630** LOO (null-95 0.870, n=12) — up from pure-coverage 0.542,
+cosine-artifact negatives now rank bottom; hard anti-gaming checks PASS and sit
+outside the learned weights. **B2** `slice2/gfn_live.py`: the slush proposes
+live — per-mission top-24 cosine pool, memoized β·R̂ reward, gfn_core
+conditional-logZ TB (3000 steps × batch 16, β=0.5); first blinded batch = 27
+proposals over three OPEN missions (M-chipwitz-corps, M-learning-loop,
+M-futonzero-generative), proposer identities sealed by proposal hash —
+adjudicators read the blinded file only. **B3** `scoreboard.py`: S1–S4 one
+command, append-only `findings/scoreboard-history.jsonl`; row 1: S1/S2
+awaiting flown folds, S3 0.630 below null (the preregistered start), S4 = 8
+modes/mission at mean Jaccard distance 0.88–0.90 vs incumbent's 1.
+
+**Next:** fly proposals from the blinded batch (arming = Joe); B4 CH2 wiring at
+the fold_escrow seam on JVM-window lift — S1/S2 light up from its stream; B5
+mint hook. The loop is now waiting on folds, not on code.
