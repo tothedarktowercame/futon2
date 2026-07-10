@@ -1,0 +1,286 @@
+[
+ {
+  "proposal": "d157be7b848343ca",
+  "mission": "M-canon-fingerprint-store",
+  "patterns": [
+   "agent/handoff-preserves-context",
+   "iching/hexagram-63-jiji",
+   "invariant-coherence/state-snapshot-witness",
+   "structure/interest-event-vocabulary",
+   "ukrns/publication-cadence"
+  ]
+ },
+ {
+  "proposal": "6a5d81ccab989066",
+  "mission": "M-autoclock-in",
+  "patterns": [
+   "aif/scheduled-observer-entrypoint",
+   "futon-theory/event-protocol",
+   "iching/hexagram-17-sui",
+   "iching/hexagram-43-guai",
+   "iching/hexagram-57-xun"
+  ]
+ },
+ {
+  "proposal": "0649e22fc124bc6d",
+  "mission": "M-state-snapshot-witness",
+  "patterns": [
+   "invariant-coherence/protocol-family-naming",
+   "realtime/structured-events-only",
+   "structure/interest-event-vocabulary",
+   "ukrns/design-state-lineage"
+  ]
+ },
+ {
+  "proposal": "2edd617153666fdc",
+  "mission": "M-state-snapshot-witness",
+  "patterns": [
+   "devmap-coherence/ifr-f3-piti",
+   "fulab/session-resume",
+   "futon-theory/mission-lifecycle",
+   "realtime/structured-events-only",
+   "ukrns/publication-cadence"
+  ]
+ },
+ {
+  "proposal": "f5647d2a5f1a4009",
+  "mission": "M-state-snapshot-witness",
+  "patterns": [
+   "invariant-coherence/shape-first-identify",
+   "musn/use-requires-evidence"
+  ]
+ },
+ {
+  "proposal": "2ec661b62a855e43",
+  "mission": "M-state-snapshot-witness",
+  "patterns": [
+   "campaign-coherence/cross-mission-escrow",
+   "devmap-coherence/ifr-f3-piti",
+   "musn/use-requires-evidence",
+   "ukrns/design-state-lineage",
+   "ukrns/model-recompute-schedule"
+  ]
+ },
+ {
+  "proposal": "ab8226b2b1d6484d",
+  "mission": "M-canon-fingerprint-store",
+  "patterns": [
+   "contributing/stack-scan-logging-protocol",
+   "storage/deterministic-substrate",
+   "structure/interest-event-vocabulary",
+   "ukrns/reader-run-path",
+   "ukrns/scale-register"
+  ]
+ },
+ {
+  "proposal": "7acb6c018535a27a",
+  "mission": "M-canon-fingerprint-store",
+  "patterns": [
+   "contributing/stack-scan-logging-protocol",
+   "control/agential-pattern-hygiene",
+   "ukrns/design-state-lineage",
+   "ukrns/publication-cadence",
+   "ukrns/reader-run-path"
+  ]
+ },
+ {
+  "proposal": "0a9aa10b9182b35a",
+  "mission": "M-autoclock-in",
+  "patterns": [
+   "aif/grounded-actuation-not-reobservation",
+   "fulab/clock-out",
+   "iching/hexagram-17-sui",
+   "system-coherence/turn-design-into-checks",
+   "war-machine/advanceability"
+  ]
+ },
+ {
+  "proposal": "c1d0eda91482a170",
+  "mission": "M-autoclock-in",
+  "patterns": [
+   "iching/hexagram-21-shihe",
+   "iching/hexagram-44-gou",
+   "musn/plan-before-tool",
+   "orchestration/pattern-warranted-choice-point",
+   "war-machine/advanceability"
+  ]
+ },
+ {
+  "proposal": "c609a91a24620c67",
+  "mission": "M-autoclock-in",
+  "patterns": [
+   "futon-theory/event-protocol",
+   "iching/hexagram-20-guan",
+   "iching/hexagram-49-ge",
+   "paramitas/discernment",
+   "war-machine/advanceability"
+  ]
+ },
+ {
+  "proposal": "c223b98fa2c7bc15",
+  "mission": "M-autoclock-in",
+  "patterns": [
+   "eight-gates/elbow-immediate",
+   "iching/hexagram-21-shihe",
+   "invariant-coherence/shape-first-identify"
+  ]
+ },
+ {
+  "proposal": "d9aa03c5eb9472bb",
+  "mission": "M-canon-fingerprint-store",
+  "patterns": [
+   "data-mining/the-first-checkpoint-is-a-quality-probe",
+   "devmap-coherence/baseline-freeze",
+   "library-coherence/library-staleness-scan",
+   "ukrns/design-state-lineage",
+   "war-machine/ambient-pattern-retrieval"
+  ]
+ },
+ {
+  "proposal": "e5135b3801986dca",
+  "mission": "M-canon-fingerprint-store",
+  "patterns": [
+   "agent/handoff-preserves-context",
+   "control/agential-pattern-hygiene",
+   "enrichment/layer-as-evidence",
+   "ukrns/model-recompute-schedule",
+   "ukrns/publication-cadence"
+  ]
+ },
+ {
+  "proposal": "b661f0cb20315323",
+  "mission": "M-canon-fingerprint-store",
+  "patterns": [
+   "library-coherence/library-evidence-ledger"
+  ]
+ },
+ {
+  "proposal": "59fc540364657a55",
+  "mission": "M-state-snapshot-witness",
+  "patterns": [
+   "invariant-coherence/state-snapshot-witness",
+   "invariant-coherence/shape-first-identify",
+   "invariant-coherence/protocol-family-naming",
+   "sidecar/append-only-semantic-audit",
+   "exotic/tri-store-lineage",
+   "sidecar/fact-lifecycle-event-types",
+   "structure/interest-event-vocabulary"
+  ]
+ },
+ {
+  "proposal": "e7c2970317484164",
+  "mission": "M-autoclock-in",
+  "patterns": [
+   "agent/sense-deliberate-act",
+   "fulab/clock-out",
+   "futon-theory/stop-the-line",
+   "iching/hexagram-43-guai"
+  ]
+ },
+ {
+  "proposal": "987c7c2a45f10d34",
+  "mission": "M-canon-fingerprint-store",
+  "patterns": [
+   "enrichment/layer-as-evidence",
+   "structure/interest-event-vocabulary",
+   "ukrns/publication-cadence",
+   "ukrns/reader-run-path",
+   "ukrns/scale-register"
+  ]
+ },
+ {
+  "proposal": "10f2a7fa28eea529",
+  "mission": "M-state-snapshot-witness",
+  "patterns": [
+   "coordination/ARGUMENT",
+   "fulab/tradeoff-record",
+   "invariant-coherence/bounded-disposition",
+   "ukrns/cycle-position-publication",
+   "ukrns/model-recompute-schedule"
+  ]
+ },
+ {
+  "proposal": "e30df71e56a65276",
+  "mission": "M-canon-fingerprint-store",
+  "patterns": [
+   "iching/hexagram-63-jiji",
+   "library-coherence/library-evidence-ledger",
+   "library-coherence/library-readme-sync",
+   "ukrns/model-recompute-schedule",
+   "ukrns/scale-register"
+  ]
+ },
+ {
+  "proposal": "b20502f688cf0064",
+  "mission": "M-autoclock-in",
+  "patterns": [
+   "futon-theory/event-protocol",
+   "futon-theory/stop-the-line",
+   "iching/hexagram-03-zhun",
+   "iching/hexagram-49-ge",
+   "iching/hexagram-57-xun"
+  ]
+ },
+ {
+  "proposal": "da629fedef2ea353",
+  "mission": "M-autoclock-in",
+  "patterns": [
+   "agent/sense-deliberate-act",
+   "futon-theory/event-protocol",
+   "iching/hexagram-43-guai",
+   "invariant-coherence/shape-first-identify",
+   "system-coherence/turn-design-into-checks"
+  ]
+ },
+ {
+  "proposal": "f2ccba63041e1879",
+  "mission": "M-autoclock-in",
+  "patterns": [
+   "orchestration/pattern-warranted-choice-point"
+  ]
+ },
+ {
+  "proposal": "a22e35b007d75802",
+  "mission": "M-canon-fingerprint-store",
+  "patterns": [
+   "devmap-coherence/baseline-freeze",
+   "invariant-coherence/state-snapshot-witness",
+   "library-coherence/library-readme-sync",
+   "ukrns/anchor-case-maintenance",
+   "ukrns/publication-cadence"
+  ]
+ },
+ {
+  "proposal": "6d71c51c6c1599c5",
+  "mission": "M-state-snapshot-witness",
+  "patterns": [
+   "coordination/ARGUMENT",
+   "devmap-coherence/ifr-f3a-piti-audit",
+   "fulab/session-resume",
+   "invariant-coherence/bounded-disposition",
+   "ukrns/model-recompute-schedule"
+  ]
+ },
+ {
+  "proposal": "0e9c9bfae831162b",
+  "mission": "M-state-snapshot-witness",
+  "patterns": [
+   "devmap-coherence/ifr-f3a-piti-audit",
+   "enrichment/layered-ingestion",
+   "invariant-coherence/shape-first-identify",
+   "realtime/structured-events-only",
+   "sidecar/per-id-audit-timeline-linkage"
+  ]
+ },
+ {
+  "proposal": "cf023366ff532a00",
+  "mission": "M-state-snapshot-witness",
+  "patterns": [
+   "contributing/stack-scan-logging-protocol",
+   "enrichment/layered-ingestion",
+   "invariant-coherence/protocol-family-naming",
+   "invariant-coherence/shape-first-identify",
+   "ukrns/design-state-lineage"
+  ]
+ }
+]

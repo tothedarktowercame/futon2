@@ -1,0 +1,107 @@
+{
+ "d157be7b848343ca": {
+  "proposer": "gfn",
+  "log_reward": 0.06010324169820175
+ },
+ "e5135b3801986dca": {
+  "proposer": "gfn",
+  "log_reward": -0.15254698800012875
+ },
+ "987c7c2a45f10d34": {
+  "proposer": "gfn",
+  "log_reward": -0.24571240554812454
+ },
+ "ab8226b2b1d6484d": {
+  "proposer": "gfn",
+  "log_reward": -0.43978769751812397
+ },
+ "a22e35b007d75802": {
+  "proposer": "gfn",
+  "log_reward": -0.44817701032431895
+ },
+ "d9aa03c5eb9472bb": {
+  "proposer": "gfn",
+  "log_reward": -0.4690958354012811
+ },
+ "e30df71e56a65276": {
+  "proposer": "gfn",
+  "log_reward": -0.5431584749909424
+ },
+ "7acb6c018535a27a": {
+  "proposer": "gfn",
+  "log_reward": -0.7325899765862157
+ },
+ "b661f0cb20315323": {
+  "proposer": "incumbent"
+ },
+ "da629fedef2ea353": {
+  "proposer": "gfn",
+  "log_reward": 0.34239350397014895
+ },
+ "c223b98fa2c7bc15": {
+  "proposer": "gfn",
+  "log_reward": 0.25878543499627854
+ },
+ "e7c2970317484164": {
+  "proposer": "gfn",
+  "log_reward": 0.17081313648010468
+ },
+ "b20502f688cf0064": {
+  "proposer": "gfn",
+  "log_reward": -0.44976908584523184
+ },
+ "0a9aa10b9182b35a": {
+  "proposer": "gfn",
+  "log_reward": -0.5028080504912937
+ },
+ "c1d0eda91482a170": {
+  "proposer": "gfn",
+  "log_reward": -0.6590507531203401
+ },
+ "6a5d81ccab989066": {
+  "proposer": "gfn",
+  "log_reward": -0.7970355658775965
+ },
+ "c609a91a24620c67": {
+  "proposer": "gfn",
+  "log_reward": -0.9023743163601504
+ },
+ "f2ccba63041e1879": {
+  "proposer": "incumbent"
+ },
+ "f5647d2a5f1a4009": {
+  "proposer": "gfn",
+  "log_reward": 0.8573627815452526
+ },
+ "0649e22fc124bc6d": {
+  "proposer": "gfn",
+  "log_reward": 0.6872742074709269
+ },
+ "cf023366ff532a00": {
+  "proposer": "gfn",
+  "log_reward": 0.021806327590069348
+ },
+ "0e9c9bfae831162b": {
+  "proposer": "gfn",
+  "log_reward": -0.07929754336060992
+ },
+ "2ec661b62a855e43": {
+  "proposer": "gfn",
+  "log_reward": -0.23310218923051043
+ },
+ "10f2a7fa28eea529": {
+  "proposer": "gfn",
+  "log_reward": -0.3853103255441484
+ },
+ "6d71c51c6c1599c5": {
+  "proposer": "gfn",
+  "log_reward": -0.3920977959703605
+ },
+ "2edd617153666fdc": {
+  "proposer": "gfn",
+  "log_reward": -0.6079832574859492
+ },
+ "59fc540364657a55": {
+  "proposer": "incumbent"
+ }
+}

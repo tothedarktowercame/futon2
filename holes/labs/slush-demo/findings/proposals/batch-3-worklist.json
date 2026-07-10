@@ -1,0 +1,61 @@
+[
+ {
+  "proposal": "d157be7b848343ca",
+  "mission": "M-canon-fingerprint-store",
+  "patterns": [
+   "agent/handoff-preserves-context",
+   "iching/hexagram-63-jiji",
+   "invariant-coherence/state-snapshot-witness",
+   "structure/interest-event-vocabulary",
+   "ukrns/publication-cadence"
+  ]
+ },
+ {
+  "proposal": "b661f0cb20315323",
+  "mission": "M-canon-fingerprint-store",
+  "patterns": [
+   "library-coherence/library-evidence-ledger"
+  ]
+ },
+ {
+  "proposal": "6a5d81ccab989066",
+  "mission": "M-autoclock-in",
+  "patterns": [
+   "aif/scheduled-observer-entrypoint",
+   "futon-theory/event-protocol",
+   "iching/hexagram-17-sui",
+   "iching/hexagram-43-guai",
+   "iching/hexagram-57-xun"
+  ]
+ },
+ {
+  "proposal": "f2ccba63041e1879",
+  "mission": "M-autoclock-in",
+  "patterns": [
+   "orchestration/pattern-warranted-choice-point"
+  ]
+ },
+ {
+  "proposal": "0649e22fc124bc6d",
+  "mission": "M-state-snapshot-witness",
+  "patterns": [
+   "invariant-coherence/protocol-family-naming",
+   "realtime/structured-events-only",
+   "structure/interest-event-vocabulary",
+   "ukrns/design-state-lineage"
+  ]
+ },
+ {
+  "proposal": "59fc540364657a55",
+  "mission": "M-state-snapshot-witness",
+  "patterns": [
+   "invariant-coherence/state-snapshot-witness",
+   "invariant-coherence/shape-first-identify",
+   "invariant-coherence/protocol-family-naming",
+   "sidecar/append-only-semantic-audit",
+   "exotic/tri-store-lineage",
+   "sidecar/fact-lifecycle-event-types",
+   "structure/interest-event-vocabulary"
+  ]
+ }
+]
