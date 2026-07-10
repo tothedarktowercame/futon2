@@ -382,3 +382,37 @@ totals: 9 folds + 3 flights, all accepted; relieved with honors.
 **NEXT: batch-2 FLIGHTS (need preregistered acceptance per fold — successor
 runner flies them; Joe starts the fresh zai), then adjudication → labels →
 R̂ retrain → S2's first data → batch-3 proposals under the retrained reward.**
+
+## Checkpoint — 2026-07-10 (claude-2: BATCH 2 COMPLETE — flights, unsealing, S2's first pair)
+
+Six flights flown by zai-2 (successor runner), all ACCEPTED; preregistered
+acceptance in FLIGHTS-BATCH2-2026-07-10.md. Reviewer fixes: 2 (B2-F4 emitter
+one brace short + false parens claim, writer fixed at root; B2-F5 same
+brace-short disease + gate claim was a NON-RUN — library loaded, checker never
+invoked). Gate-discipline correction issued after B2-F5 (exact invocation +
+"paste the OK line") and HELD at B2-F6: zai-2 self-reported a first-run FAIL,
+fixed, pasted the real OK. Runner comparison for the record: zai-1 12/12
+honest gate claims; zai-2 4/6 — the review gate (re-run everything) is
+load-bearing, not ceremonial.
+
+**Unsealing (3 GFN / 3 incumbent, as constructed):** the futonzero want-grain
+pair is **S2's first paired comparison: GFN FAIL + INCUMBENT FAIL — a tie of
+honest negatives** on a gate-blocked mission (informative about the mission,
+not yet about the proposers). Four slice-passes (chipwitz + learning-loop
+pairs) remain want-grain-pending.
+
+**S3: 0.907 vs null-95 0.769 (LOO, n=15, 9+/6−) — second consecutive PASS,
+climbing: 0.630 → 0.889 → 0.907.** Scoreboard row 3 appended.
+
+Tool yield of the batch: chipwitz three-gate stack (shape → warrant-find →
+determination-audit, each with honest limits; determination test re-derives
+Flight-3 judgments; POST-HOC-only finding splits h1 into retrospective vs
+choice-time); learning-loop contract now carries A0–A5 evidence invariants +
+source-noise filter + a tag-dominated inhabitation gate awaiting I-1
+calibration data; futonzero triage (0 advanceable / 4 blocked / 8 safe,
+PROGRESS-TOWARD-BLOCKED-CLEARANCE proposed as 4th class) + shi sequencing
+plan (owners, 5 restraints, kill criteria carried from sec:prereg).
+
+**NEXT (operator steer):** batch 3 proposals generated under the RETRAINED R̂
+(the learning loop's first genuine turn) — recommend targeting missions whose
+wants are dischargeable so S1/S2 accrue non-tie labels; B4 at JVM window.
