@@ -505,3 +505,39 @@ batch 4 runs:
    distribution (GFN consistently mid-size; incumbent bimodal with
    structureless singles). Composition-size as an R̂ feature is DEFERRED until
    it can be applied under the system-grain claim without muddying the pilot.
+
+## Checkpoint — 2026-07-11 (claude-2: BATCH 4 folding complete + THE COUNTERFACTUAL STUDY)
+
+Six folds by zai-4 (runner #3 on the converged contract): 5 accepted clean,
+1 revision — the 16-pattern giant (run 19) imported two patterns from the
+runner's OWN earlier fold of the same mission (cross-fold contamination inside
+a session; :pattern-ids was correct, the BOXES diverged). New rule minted and
+self-applied by the runner within one iteration: box-set ⊆ proposal-set,
+non-contributors drop to holes, nothing added. Contamination sweep across all
+21 proposal-linked deposits: run-19 was the ONLY instance. The revised giant
+is the lane's sharpest verdict yet: the incumbent's 16-pattern proposal both
+OVER-INCLUDES (2 named non-contributions) and UNDER-SUPPLIES (2 needed
+patterns it never proposed).
+
+**THE COUNTERFACTUAL STUDY (the one-batch pilot, Joe's compromise) — VERDICT:
+KEEP. It exposed a reward vulnerability in one batch that neither flown arm
+shows:** greedy-argmax of R̂ produces SINGLE-PATTERN proposals on all three
+missions, scoring R̂ 2.77–2.82 — far above the GFN picks (−0.40…1.13) and
+incumbents (−0.28…1.64) — with near-zero overlap to either (maxJ ≤ 0.33 vs
+the GFN's 8 samples; ≈0 vs incumbents). Reading: at n=15 the fitted reward's
+heavy reliability weight + mean-over-patterns aggregation makes a lone
+high-reliability pattern the argmax — composition is penalized. The GFN's
+low-β sampling has been MASKING this degeneracy (it explores mid-sized
+compositions that score lower but produce all the qualitative value); raise β
+or train to convergence and the GFN would collapse to the same degenerate
+singles. The hard anti-gaming checks (trivial-want, bloated-shell) do NOT
+catch this third failure mode. **Queued design decision: fix R̂'s aggregation
+(size-aware reliability / composition-aware coverage) BEFORE the next retrain
+— applied symmetrically per the system-grain claim (both R̂-consuming arms
+inherit it automatically).** The counterfactual lane is the reward's canary:
+generation-only, zero flight cost, and it found this on day one.
+
+Gallery re-rendered with batch 4 (21 deposits). Altitude finding (run 20):
+the pattern that transposes at the altitude of the risk carries the most
+specific contribution. Second provenance-echo observed (run 17, incumbent arm
+— both arms echo). zai-4 shift: 6 folds + 1 revision, honest throughout.

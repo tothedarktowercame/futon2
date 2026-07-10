@@ -1,0 +1,16 @@
+<svg width="335pt" height="109pt"
+ viewBox="0.00 0.00 335.20 109.20" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(21.6 87.6)">
+<title>ft&#45;legacy&#45;sorry&#45;cleanup&#45;003</title>
+<polygon fill="#fcfcfb" stroke="transparent" points="-21.6,21.6 -21.6,-87.6 313.6,-87.6 313.6,21.6 -21.6,21.6"/>
+<text text-anchor="middle" x="146" y="-51.6" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="13.00" fill="#d67e2a">ft&#45;legacy&#45;sorry&#45;cleanup&#45;003 &#160;· &#160;INCUMBENT</text>
+<!-- b1 -->
+<g id="node1" class="node">
+<title>b1</title>
+<path fill="#ffffff" stroke="#52514e" stroke-dasharray="5,2" d="M183,-40C183,-40 109,-40 109,-40 103,-40 97,-34 97,-28 97,-28 97,-16 97,-16 97,-10 103,-4 109,-4 109,-4 183,-4 183,-4 189,-4 195,-10 195,-16 195,-16 195,-28 195,-28 195,-34 189,-40 183,-40"/>
+<path fill="none" stroke="#52514e" stroke-dasharray="5,2" d="M187,-44C187,-44 105,-44 105,-44 99,-44 93,-38 93,-32 93,-32 93,-12 93,-12 93,-6 99,0 105,0 105,0 187,0 187,0 193,0 199,-6 199,-12 199,-12 199,-32 199,-32 199,-38 193,-44 187,-44"/>
+<text text-anchor="middle" x="146" y="-25.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b1</text>
+<text text-anchor="middle" x="146" y="-13.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">hinge&#45;entry&#45;slots</text>
+</g>
+</g>
+</svg>

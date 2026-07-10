@@ -38,6 +38,9 @@ BATCHES = {  # deposit stem -> (mission, batch)
     "ft-canon-fingerprint-store-002": 3, "ft-canon-fingerprint-store-003": 3,
     "ft-autoclock-in-002": 3, "ft-autoclock-in-003": 3,
     "ft-state-snapshot-witness-002": 3, "ft-state-snapshot-witness-003": 3,
+    "ft-operational-vocabulary-002": 4, "ft-operational-vocabulary-003": 4,
+    "ft-pattern-mining-012": 4, "ft-pattern-mining-013": 4,
+    "ft-legacy-sorry-cleanup-002": 4, "ft-legacy-sorry-cleanup-003": 4,
 }
 
 

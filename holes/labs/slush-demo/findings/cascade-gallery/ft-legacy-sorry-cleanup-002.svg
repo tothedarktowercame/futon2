@@ -1,0 +1,65 @@
+<svg width="660pt" height="135pt"
+ viewBox="0.00 0.00 660.20 135.20" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(21.6 113.6)">
+<title>ft&#45;legacy&#45;sorry&#45;cleanup&#45;002</title>
+<polygon fill="#fcfcfb" stroke="transparent" points="-21.6,21.6 -21.6,-113.6 638.6,-113.6 638.6,21.6 -21.6,21.6"/>
+<text text-anchor="middle" x="308.5" y="-77.6" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="13.00" fill="#2a78d6">ft&#45;legacy&#45;sorry&#45;cleanup&#45;002 &#160;· &#160;GFN</text>
+<!-- b1 -->
+<g id="node1" class="node">
+<title>b1</title>
+<path fill="#ffffff" stroke="#52514e" d="M329,-70C329,-70 205,-70 205,-70 199,-70 193,-64 193,-58 193,-58 193,-46 193,-46 193,-40 199,-34 205,-34 205,-34 329,-34 329,-34 335,-34 341,-40 341,-46 341,-46 341,-58 341,-58 341,-64 335,-70 329,-70"/>
+<text text-anchor="middle" x="267" y="-55.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b1</text>
+<text text-anchor="middle" x="267" y="-43.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">stack&#45;scan&#45;logging&#45;protoco</text>
+</g>
+<!-- b2 -->
+<g id="node2" class="node">
+<title>b2</title>
+<path fill="#ffffff" stroke="#52514e" stroke-dasharray="5,2" d="M439,-40C439,-40 405,-40 405,-40 399,-40 393,-34 393,-28 393,-28 393,-16 393,-16 393,-10 399,-4 405,-4 405,-4 439,-4 439,-4 445,-4 451,-10 451,-16 451,-16 451,-28 451,-28 451,-34 445,-40 439,-40"/>
+<text text-anchor="middle" x="422" y="-25.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b2</text>
+<text text-anchor="middle" x="422" y="-13.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">ifr&#45;f3&#45;piti</text>
+</g>
+<!-- b1&#45;&gt;b2 -->
+<g id="edge1" class="edge">
+<title>b1&#45;&gt;b2</title>
+<path fill="none" stroke="#52514e" d="M341.36,-37.62C355.62,-34.82 370.03,-31.99 382.59,-29.53"/>
+<polygon fill="#52514e" stroke="#52514e" points="383.53,-32.91 392.67,-27.55 382.18,-26.04 383.53,-32.91"/>
+<text text-anchor="middle" x="367" y="-35.8" font-family="Helvetica,sans-Serif" font-size="9.00">seq</text>
+</g>
+<!-- b3 -->
+<g id="node3" class="node">
+<title>b3</title>
+<path fill="#ffffff" stroke="#52514e" stroke-dasharray="5,2" d="M601,-40C601,-40 519,-40 519,-40 513,-40 507,-34 507,-28 507,-28 507,-16 507,-16 507,-10 513,-4 519,-4 519,-4 601,-4 601,-4 607,-4 613,-10 613,-16 613,-16 613,-28 613,-28 613,-34 607,-40 601,-40"/>
+<path fill="none" stroke="#52514e" stroke-dasharray="5,2" d="M605,-44C605,-44 515,-44 515,-44 509,-44 503,-38 503,-32 503,-32 503,-12 503,-12 503,-6 509,0 515,0 515,0 605,0 605,0 611,0 617,-6 617,-12 617,-12 617,-32 617,-32 617,-38 611,-44 605,-44"/>
+<text text-anchor="middle" x="560" y="-25.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b3</text>
+<text text-anchor="middle" x="560" y="-13.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">ifr&#45;f7&#45;upa&#45;upekkha</text>
+</g>
+<!-- b2&#45;&gt;b3 -->
+<g id="edge3" class="edge">
+<title>b2&#45;&gt;b3</title>
+<path fill="none" stroke="#52514e" d="M451.18,-22C463.32,-22 478.07,-22 492.71,-22"/>
+<polygon fill="#52514e" stroke="#52514e" points="492.8,-25.5 502.8,-22 492.8,-18.5 492.8,-25.5"/>
+<text text-anchor="middle" x="477" y="-24.8" font-family="Helvetica,sans-Serif" font-size="9.00">seq</text>
+</g>
+<!-- b4 -->
+<g id="node4" class="node">
+<title>b4</title>
+<path fill="#ffffff" stroke="#52514e" d="M121,-43C121,-43 12,-43 12,-43 6,-43 0,-37 0,-31 0,-31 0,-19 0,-19 0,-13 6,-7 12,-7 12,-7 121,-7 121,-7 127,-7 133,-13 133,-19 133,-19 133,-31 133,-31 133,-37 127,-43 121,-43"/>
+<text text-anchor="middle" x="66.5" y="-28.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b4</text>
+<text text-anchor="middle" x="66.5" y="-16.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">commit&#45;intent&#45;alignment</text>
+</g>
+<!-- b4&#45;&gt;b1 -->
+<g id="edge2" class="edge">
+<title>b4&#45;&gt;b1</title>
+<path fill="none" stroke="#52514e" stroke-dasharray="5,2" d="M133.05,-33.92C148.34,-36 164.85,-38.24 180.87,-40.42"/>
+<polygon fill="none" stroke="#52514e" points="181.09,-40.45 187.58,-37.3 192.98,-42.07 186.5,-45.22 181.09,-40.45"/>
+<text text-anchor="middle" x="163" y="-41.8" font-family="Helvetica,sans-Serif" font-size="9.00">copar</text>
+</g>
+<!-- b4&#45;&gt;b2 -->
+<g id="edge4" class="edge">
+<title>b4&#45;&gt;b2</title>
+<path fill="none" stroke="#52514e" stroke-dasharray="5,2" d="M133.23,-18.77C152.47,-17.22 173.56,-15.77 193,-15 258.73,-12.39 275.28,-12.13 341,-15 353.95,-15.57 368.05,-16.64 380.76,-17.79"/>
+<polygon fill="none" stroke="#52514e" points="380.95,-17.81 387.31,-14.39 392.9,-18.94 386.55,-22.35 380.95,-17.81"/>
+<text text-anchor="middle" x="267" y="-17.8" font-family="Helvetica,sans-Serif" font-size="9.00">copar</text>
+</g>
+</g>
+</svg>

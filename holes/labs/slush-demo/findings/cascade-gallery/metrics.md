@@ -17,53 +17,38 @@
 | ft-canon-fingerprint-store-003 | 3 | incumbent | 1 | 0 | 0 | 0.0 | 1 | 0 | single | 5 |
 | ft-state-snapshot-witness-002 | 3 | gfn | 4 | 2 | 2 | 0.5 | 3 | 4 | lattice | 5 |
 | ft-state-snapshot-witness-003 | 3 | incumbent | 7 | 4 | 3 | 0.43 | 4 | 5 | lattice | 6 |
+| ft-legacy-sorry-cleanup-002 | 4 | gfn | 4 | 2 | 2 | 0.5 | 3 | 3 | lattice | 4 |
+| ft-legacy-sorry-cleanup-003 | 4 | incumbent | 1 | 0 | 0 | 0.0 | 1 | 0 | single | 1 |
+| ft-operational-vocabulary-002 | 4 | gfn | 3 | 1 | 2 | 0.67 | 2 | 3 | lattice | 4 |
+| ft-operational-vocabulary-003 | 4 | incumbent | 1 | 0 | 0 | 0.0 | 1 | 0 | single | 1 |
+| ft-pattern-mining-012 | 4 | gfn | 4 | 2 | 2 | 0.5 | 3 | 4 | lattice | 1 |
+| ft-pattern-mining-013 | 4 | incumbent | 14 | 6 | 6 | 0.5 | 5 | 7 | lattice | 9 |
 
 ## Per-arm means
 
 ```
 {
  "gfn": {
-  "boxes": 4.44,
-  "seq": 1.89,
-  "copar": 2.22,
-  "copar_frac": 0.48,
-  "depth": 2.78,
-  "meets": 3.0,
-  "holes": 4.78,
-  "n": 9,
+  "boxes": 4.25,
+  "seq": 1.83,
+  "copar": 2.17,
+  "copar_frac": 0.5,
+  "depth": 2.75,
+  "meets": 3.08,
+  "holes": 4.33,
+  "n": 12,
   "chains": 0
  },
  "incumbent": {
-  "boxes": 3.67,
-  "seq": 1.5,
-  "copar": 1.5,
-  "copar_frac": 0.23,
-  "depth": 2.0,
-  "meets": 2.17,
-  "holes": 5.5,
-  "n": 6,
+  "boxes": 4.22,
+  "seq": 1.67,
+  "copar": 1.67,
+  "copar_frac": 0.21,
+  "depth": 2.11,
+  "meets": 2.22,
+  "holes": 4.89,
+  "n": 9,
   "chains": 0
  }
 }
 ```
-
-## Arm comparison — the honest reading (2026-07-11)
-
-Raw means mislead (GFN copar_frac 0.48 vs incumbent 0.23): the gap is driven by
-the incumbent's SINGLE-PATTERN cascades, which have no structure to draw.
-Multi-pattern only (boxes >= 3): GFN 0.54 (n=8) vs incumbent 0.46 (n=3) — both
-arms fold as lattices when they compose at all. ZERO pure chains in either arm.
-
-So "semilattice vs list" does NOT differentiate the arms — the folder (same
-blind runner per batch) found co-application structure wherever there was
-anything to wire. The visible differentiator is COMPOSITION-SIZE DISTRIBUTION:
-  gfn        8 lattices + 1 single   (consistently mid-sized: 4-5 boxes)
-  incumbent  3 lattices + 3 singles  (bimodal: minimal or large)
-A 1-box wiring is the degenerate case nearest the "list that folds empty" —
-no meets, nothing to chain. The incumbent's greedy coverage-saturation stop
-produces that degenerate case half the time on these psis; the GFN never
-stopped below 4 boxes except once.
-
-Caveats: n=15; wiring is authored by the folder from the pattern set (same
-folder per batch, blind to arm — folder bias controlled, but this measures
-what the pattern set AFFORDS, filtered through one folder's judgment).
