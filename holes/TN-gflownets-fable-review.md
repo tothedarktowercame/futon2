@@ -182,3 +182,31 @@ training the GFN now would reproduce the v1/v2 null. `gfn_core.py` is ready to b
 its trainer once the reward passes. **Prerequisites before Slice 2:** (a) a
 discharge accuracy signal dense enough to have teeth without collapsing into
 relevance; (b) a larger, better-balanced success/fail ground-truth set.
+
+## Review verification — 2026-07-10 (Fable, reviewer per handoff protocol)
+
+Checked the claude-4 checkpoint above; all claims verified.
+
+- **Slice 0 tests:** re-ran `slice2/test_gfn_core.py` — 9 passed.
+- **Slice 0 determinism + gate numbers:** re-ran `slice2/gfn_core.py --iters 700`
+  (the findings config, seed 20260710) — exact reproduction: conditional max TV
+  0.012509 / max logZ err 0.028944, shared-arm max TV 0.986547; G0a PASS, G0b
+  PASS. Also passes at CLI defaults (800 iters: TV 0.0104, logZ err 0.0242).
+- **Slice 1 gate:** re-ran `futon3a/holes/labs/M-memes-arrows/aliveness_v3_gate.py`.
+  One environment fix was needed: this machine's futon3a checkout lacked the
+  `resources/notions → ~/code/data/notions` symlink (per futon3a commit
+  `6b6d9ad` / README-data.md); restored it. Gate then reproduces the checkpoint:
+  10 records (8 success / 2 fail); accuracy AUC 0.750 == null-95; aliveness AUC
+  0.875 == null-95; anti-`1=1` PASS with substantive +0.417 > trivial −0.078 >
+  bloated-shell −0.350 (magnitudes shift slightly under the canonical
+  1207-pattern embeddings vs the checkpoint's +0.414/−0.491; ordering and
+  verdicts unchanged, consistent with the checkpoint's robustness claim).
+- **Stale status corrected:** `labs/slush-demo/PLAN-gfn-development.md`'s Status
+  said Slice 1 was BLOCKED on a missing `rollout_execute.py`; it exists on
+  futon3a main (`8cf687e`, merged 2026-07-10) and the gate runs. Fixed in place.
+
+**Standing verdict:** Slice 0 accepted. Slice 2 remains correctly gated — the
+two prerequisites are reward science: (a) a *dense* discharge-accuracy signal
+that stays discharge (not relevance); (b) a success/fail ground-truth set large
+and balanced enough that discrimination is demonstrable even in principle
+(10 records at 8/2 gives AUC granularity 0.0625 — no reward could pass).
