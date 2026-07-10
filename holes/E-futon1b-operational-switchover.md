@@ -199,6 +199,28 @@ clj-kondo 0/0. Two findings from the work:
 Next: A3 (entities/relations — the gate machinery they need is in place),
 A4 (graph reads), A5 (census/types), then B1 (the futon3c EDN backend).
 
+## 2026-07-10 (later) — A3+A4+A5 landed (futon1b `f2f56bc`); Phase A complete
+
+Entities (ensure-by-name, canonical-id gate live over HTTP), relations
+(stable rel| ids), hyperedge reads (true-total count semantics, props
+filters), census, and the type registry (auto-registration on writes,
+parent/merge) are all up. 31/31 new + 26/26 prior smoke assertions PASS.
+Findings ledger now lives in futon1b/README.md. One more switchover-
+critical find:
+
+- **Fresh-store first-touch queries error**: XTDB 2.1.0 throws "Not all
+  variables in expression are in scope" for queries against tables no doc
+  has ever reached — on an operational-first empty store that is EVERY
+  first read (incl. the hyperedge no-op guard's read-before-first-write
+  and /health). `futon1b-xt/safe-q` maps exactly that error to an empty
+  result; all server query paths use it. Without this, Phase C Gate 1
+  would have failed at boot in obscure ways.
+
+Phase A v1 surface complete (deferred as planned: snapshot/restore,
+patterns/activation, valid-time puts, relations/batch). Next: **B1** —
+`futon3c.evidence.futon1b-backend` (EDN HTTP EvidenceBackend) + B2
+bootstrap branch, then B3 disable gate and B4 URL flips.
+
 ## Rollback
 
 At any gate failure: stop futon1b JVM, unset the env flips, boot as before
