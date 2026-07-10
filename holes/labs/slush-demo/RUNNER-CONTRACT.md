@@ -52,7 +52,10 @@ reviewer; warrants cover which/how within the envelope, never whether-outward.
   size (holes carry the story); large cascades earn their wiring (seq = real
   order dependency, copar = co-active lenses).
 - Psi is authored FRESH from the mission doc per deposit (resolver-blind,
-  first-contact discipline), `:psi-sha256` = real sha256 of the psi string,
+  first-contact discipline), `:psi-sha256` = real sha256 of the psi string
+  **as the EDN reader decodes it** (escapes like `\n` resolved to real
+  characters — hash the value, not the source text; convention settled at
+  Fold Run 10, where the runner was right and the reviewer's checker wasn't),
   `:pins [:psi-sha256]` only for blinded folds.
 - Bell-backs end with one PUR-style prediction-error line: what surprised you.
   These have been the highest-value lines of every shift.
