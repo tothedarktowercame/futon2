@@ -1,0 +1,135 @@
+<svg width="1089pt" height="225pt"
+ viewBox="0.00 0.00 1089.20 225.20" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(21.6 203.6)">
+<title>ft&#45;chipwitz&#45;corps&#45;014</title>
+<polygon fill="#fcfcfb" stroke="transparent" points="-21.6,21.6 -21.6,-203.6 1067.6,-203.6 1067.6,21.6 -21.6,21.6"/>
+<text text-anchor="middle" x="523" y="-167.6" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="13.00" fill="#d67e2a">ft&#45;chipwitz&#45;corps&#45;014 &#160;· &#160;INCUMBENT</text>
+<!-- b1 -->
+<g id="node1" class="node">
+<title>b1</title>
+<path fill="#ffffff" stroke="#52514e" d="M513,-52C513,-52 388,-52 388,-52 382,-52 376,-46 376,-40 376,-40 376,-28 376,-28 376,-22 382,-16 388,-16 388,-16 513,-16 513,-16 519,-16 525,-22 525,-28 525,-28 525,-40 525,-40 525,-46 519,-52 513,-52"/>
+<text text-anchor="middle" x="450.5" y="-37.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b1</text>
+<text text-anchor="middle" x="450.5" y="-25.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">pattern&#45;warranted&#45;choice&#45;p</text>
+</g>
+<!-- b2 -->
+<g id="node2" class="node">
+<title>b2</title>
+<path fill="#ffffff" stroke="#52514e" d="M716.5,-52C716.5,-52 598.5,-52 598.5,-52 592.5,-52 586.5,-46 586.5,-40 586.5,-40 586.5,-28 586.5,-28 586.5,-22 592.5,-16 598.5,-16 598.5,-16 716.5,-16 716.5,-16 722.5,-16 728.5,-22 728.5,-28 728.5,-28 728.5,-40 728.5,-40 728.5,-46 722.5,-52 716.5,-52"/>
+<text text-anchor="middle" x="657.5" y="-37.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b2</text>
+<text text-anchor="middle" x="657.5" y="-25.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">determined&#45;fork&#45;proto&#45;psr</text>
+</g>
+<!-- b1&#45;&gt;b2 -->
+<g id="edge3" class="edge">
+<title>b1&#45;&gt;b2</title>
+<path fill="none" stroke="#52514e" stroke-dasharray="5,2" d="M525.22,-34C541.04,-34 557.87,-34 574,-34"/>
+<polygon fill="none" stroke="#52514e" points="574.17,-34 580.17,-30 586.17,-34 580.17,-38 574.17,-34"/>
+<text text-anchor="middle" x="555" y="-36.8" font-family="Helvetica,sans-Serif" font-size="9.00">copar</text>
+</g>
+<!-- b5 -->
+<g id="node5" class="node">
+<title>b5</title>
+<path fill="#ffffff" stroke="#52514e" d="M867,-106C867,-106 806,-106 806,-106 800,-106 794,-100 794,-94 794,-94 794,-82 794,-82 794,-76 800,-70 806,-70 806,-70 867,-70 867,-70 873,-70 879,-76 879,-82 879,-82 879,-94 879,-94 879,-100 873,-106 867,-106"/>
+<path fill="none" stroke="#52514e" d="M871,-110C871,-110 802,-110 802,-110 796,-110 790,-104 790,-98 790,-98 790,-78 790,-78 790,-72 796,-66 802,-66 802,-66 871,-66 871,-66 877,-66 883,-72 883,-78 883,-78 883,-98 883,-98 883,-104 877,-110 871,-110"/>
+<text text-anchor="middle" x="836.5" y="-91.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b5</text>
+<text text-anchor="middle" x="836.5" y="-79.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">task&#45;as&#45;arrow</text>
+</g>
+<!-- b2&#45;&gt;b5 -->
+<g id="edge4" class="edge">
+<title>b2&#45;&gt;b5</title>
+<path fill="none" stroke="#52514e" d="M717.93,-52.13C738.03,-58.26 760.39,-65.09 780.16,-71.12"/>
+<polygon fill="#52514e" stroke="#52514e" points="779.36,-74.53 789.94,-74.1 781.4,-67.83 779.36,-74.53"/>
+<text text-anchor="middle" x="760" y="-70.8" font-family="Helvetica,sans-Serif" font-size="9.00">seq</text>
+</g>
+<!-- b3 -->
+<g id="node3" class="node">
+<title>b3</title>
+<path fill="#ffffff" stroke="#52514e" d="M304,-90C304,-90 184,-90 184,-90 178,-90 172,-84 172,-78 172,-78 172,-66 172,-66 172,-60 178,-54 184,-54 184,-54 304,-54 304,-54 310,-54 316,-60 316,-66 316,-66 316,-78 316,-78 316,-84 310,-90 304,-90"/>
+<text text-anchor="middle" x="244" y="-75.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b3</text>
+<text text-anchor="middle" x="244" y="-63.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">derive&#45;exits&#45;on&#45;a&#45;minted&#45;s</text>
+</g>
+<!-- b3&#45;&gt;b1 -->
+<g id="edge2" class="edge">
+<title>b3&#45;&gt;b1</title>
+<path fill="none" stroke="#52514e" d="M316.24,-58.76C332.18,-55.8 349.23,-52.63 365.63,-49.58"/>
+<polygon fill="#52514e" stroke="#52514e" points="366.55,-52.97 375.74,-47.71 365.27,-46.09 366.55,-52.97"/>
+<text text-anchor="middle" x="346" y="-58.8" font-family="Helvetica,sans-Serif" font-size="9.00">seq</text>
+</g>
+<!-- b4 -->
+<g id="node4" class="node">
+<title>b4</title>
+<path fill="#ffffff" stroke="#52514e" d="M1034,-106C1034,-106 955,-106 955,-106 949,-106 943,-100 943,-94 943,-94 943,-82 943,-82 943,-76 949,-70 955,-70 955,-70 1034,-70 1034,-70 1040,-70 1046,-76 1046,-82 1046,-82 1046,-94 1046,-94 1046,-100 1040,-106 1034,-106"/>
+<text text-anchor="middle" x="994.5" y="-91.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b4</text>
+<text text-anchor="middle" x="994.5" y="-79.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">mana&#45;gated&#45;work</text>
+</g>
+<!-- b4&#45;&gt;b5 -->
+<g id="edge7" class="edge">
+<title>b4&#45;&gt;b5</title>
+<path fill="none" stroke="#52514e" stroke-dasharray="5,2" d="M942.72,-74.64C929.2,-72.49 914.57,-71.42 901,-73 898.99,-73.23 896.95,-73.51 894.89,-73.82"/>
+<polygon fill="none" stroke="#52514e" points="894.88,-73.82 889.66,-78.8 883.06,-75.9 888.27,-70.92 894.88,-73.82"/>
+<text text-anchor="middle" x="913" y="-75.8" font-family="Helvetica,sans-Serif" font-size="9.00">copar</text>
+</g>
+<!-- b5&#45;&gt;b4 -->
+<g id="edge9" class="edge">
+<title>b5&#45;&gt;b4</title>
+<path fill="none" stroke="#52514e" stroke-dasharray="5,2" d="M883.04,-88C898.02,-88 914.94,-88 930.96,-88"/>
+<polygon fill="none" stroke="#52514e" points="930.98,-88 936.98,-84 942.98,-88 936.98,-92 930.98,-88"/>
+<text text-anchor="middle" x="913" y="-90.8" font-family="Helvetica,sans-Serif" font-size="9.00">copar</text>
+</g>
+<!-- b6 -->
+<g id="node6" class="node">
+<title>b6</title>
+<path fill="#ffffff" stroke="#52514e" d="M108,-90C108,-90 12,-90 12,-90 6,-90 0,-84 0,-78 0,-78 0,-66 0,-66 0,-60 6,-54 12,-54 12,-54 108,-54 108,-54 114,-54 120,-60 120,-66 120,-66 120,-78 120,-78 120,-84 114,-90 108,-90"/>
+<text text-anchor="middle" x="60" y="-75.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b6</text>
+<text text-anchor="middle" x="60" y="-63.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">task&#45;shape&#45;validation</text>
+</g>
+<!-- b6&#45;&gt;b3 -->
+<g id="edge1" class="edge">
+<title>b6&#45;&gt;b3</title>
+<path fill="none" stroke="#52514e" d="M120.09,-72C133.37,-72 147.69,-72 161.7,-72"/>
+<polygon fill="#52514e" stroke="#52514e" points="161.82,-75.5 171.82,-72 161.82,-68.5 161.82,-75.5"/>
+<text text-anchor="middle" x="146" y="-74.8" font-family="Helvetica,sans-Serif" font-size="9.00">seq</text>
+</g>
+<!-- b7 -->
+<g id="node7" class="node">
+<title>b7</title>
+<path fill="#ffffff" stroke="#52514e" d="M715,-160C715,-160 600,-160 600,-160 594,-160 588,-154 588,-148 588,-148 588,-136 588,-136 588,-130 594,-124 600,-124 600,-124 715,-124 715,-124 721,-124 727,-130 727,-136 727,-136 727,-148 727,-148 727,-154 721,-160 715,-160"/>
+<text text-anchor="middle" x="657.5" y="-145.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b7</text>
+<text text-anchor="middle" x="657.5" y="-133.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">curry&#45;howard&#45;operational</text>
+</g>
+<!-- b7&#45;&gt;b5 -->
+<g id="edge6" class="edge">
+<title>b7&#45;&gt;b5</title>
+<path fill="none" stroke="#52514e" stroke-dasharray="5,2" d="M717.93,-123.87C737.39,-117.93 758.96,-111.35 778.26,-105.46"/>
+<polygon fill="none" stroke="#52514e" points="778.46,-105.4 783.04,-99.82 789.94,-101.9 785.37,-107.48 778.46,-105.4"/>
+<text text-anchor="middle" x="760" y="-115.8" font-family="Helvetica,sans-Serif" font-size="9.00">copar</text>
+</g>
+<!-- b8 -->
+<g id="node8" class="node">
+<title>b8</title>
+<path fill="#ffffff" stroke="#52514e" d="M718,-106C718,-106 597,-106 597,-106 591,-106 585,-100 585,-94 585,-94 585,-82 585,-82 585,-76 591,-70 597,-70 597,-70 718,-70 718,-70 724,-70 730,-76 730,-82 730,-82 730,-94 730,-94 730,-100 724,-106 718,-106"/>
+<text text-anchor="middle" x="657.5" y="-91.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b8</text>
+<text text-anchor="middle" x="657.5" y="-79.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">intent&#45;handshake&#45;is&#45;bindin</text>
+</g>
+<!-- b8&#45;&gt;b5 -->
+<g id="edge5" class="edge">
+<title>b8&#45;&gt;b5</title>
+<path fill="none" stroke="#52514e" d="M730.24,-88C746.75,-88 764.06,-88 779.77,-88"/>
+<polygon fill="#52514e" stroke="#52514e" points="779.84,-91.5 789.84,-88 779.84,-84.5 779.84,-91.5"/>
+<text text-anchor="middle" x="760" y="-90.8" font-family="Helvetica,sans-Serif" font-size="9.00">seq</text>
+</g>
+<!-- b9 -->
+<g id="node9" class="node">
+<title>b9</title>
+<path fill="#ffffff" stroke="#52514e" stroke-dasharray="5,2" d="M285.5,-36C285.5,-36 202.5,-36 202.5,-36 196.5,-36 190.5,-30 190.5,-24 190.5,-24 190.5,-12 190.5,-12 190.5,-6 196.5,0 202.5,0 202.5,0 285.5,0 285.5,0 291.5,0 297.5,-6 297.5,-12 297.5,-12 297.5,-24 297.5,-24 297.5,-30 291.5,-36 285.5,-36"/>
+<text text-anchor="middle" x="244" y="-21.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b9</text>
+<text text-anchor="middle" x="244" y="-9.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">baseline&#45;cyber&#45;ant</text>
+</g>
+<!-- b9&#45;&gt;b1 -->
+<g id="edge8" class="edge">
+<title>b9&#45;&gt;b1</title>
+<path fill="none" stroke="#52514e" stroke-dasharray="5,2" d="M297.66,-22.12C317.83,-23.7 341.38,-25.54 363.84,-27.3"/>
+<polygon fill="none" stroke="#52514e" points="363.86,-27.3 370.15,-23.78 375.82,-28.24 369.53,-31.76 363.86,-27.3"/>
+<text text-anchor="middle" x="346" y="-29.8" font-family="Helvetica,sans-Serif" font-size="9.00">copar</text>
+</g>
+</g>
+</svg>

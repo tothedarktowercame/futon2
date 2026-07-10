@@ -1,0 +1,80 @@
+<svg width="677pt" height="161pt"
+ viewBox="0.00 0.00 677.20 161.20" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(21.6 139.6)">
+<title>ft&#45;autoclock&#45;in&#45;002</title>
+<polygon fill="#fcfcfb" stroke="transparent" points="-21.6,21.6 -21.6,-139.6 655.6,-139.6 655.6,21.6 -21.6,21.6"/>
+<text text-anchor="middle" x="317" y="-103.6" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="13.00" fill="#2a78d6">ft&#45;autoclock&#45;in&#45;002 &#160;· &#160;GFN</text>
+<!-- b1 -->
+<g id="node1" class="node">
+<title>b1</title>
+<path fill="#ffffff" stroke="#52514e" d="M145,-46C145,-46 16,-46 16,-46 10,-46 4,-40 4,-34 4,-34 4,-22 4,-22 4,-16 10,-10 16,-10 16,-10 145,-10 145,-10 151,-10 157,-16 157,-22 157,-22 157,-34 157,-34 157,-40 151,-46 145,-46"/>
+<path fill="none" stroke="#52514e" d="M149,-50C149,-50 12,-50 12,-50 6,-50 0,-44 0,-38 0,-38 0,-18 0,-18 0,-12 6,-6 12,-6 12,-6 149,-6 149,-6 155,-6 161,-12 161,-18 161,-18 161,-38 161,-38 161,-44 155,-50 149,-50"/>
+<text text-anchor="middle" x="80.5" y="-31.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b1</text>
+<text text-anchor="middle" x="80.5" y="-19.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">scheduled&#45;observer&#45;entrypo</text>
+</g>
+<!-- b2 -->
+<g id="node2" class="node">
+<title>b2</title>
+<path fill="#ffffff" stroke="#52514e" d="M292,-80C292,-80 229,-80 229,-80 223,-80 217,-74 217,-68 217,-68 217,-56 217,-56 217,-50 223,-44 229,-44 229,-44 292,-44 292,-44 298,-44 304,-50 304,-56 304,-56 304,-68 304,-68 304,-74 298,-80 292,-80"/>
+<path fill="none" stroke="#52514e" d="M296,-84C296,-84 225,-84 225,-84 219,-84 213,-78 213,-72 213,-72 213,-52 213,-52 213,-46 219,-40 225,-40 225,-40 296,-40 296,-40 302,-40 308,-46 308,-52 308,-52 308,-72 308,-72 308,-78 302,-84 296,-84"/>
+<text text-anchor="middle" x="260.5" y="-65.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b2</text>
+<text text-anchor="middle" x="260.5" y="-53.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">event&#45;protocol</text>
+</g>
+<!-- b1&#45;&gt;b2 -->
+<g id="edge1" class="edge">
+<title>b1&#45;&gt;b2</title>
+<path fill="none" stroke="#52514e" d="M161.13,-43.21C175.14,-45.89 189.47,-48.62 202.7,-51.15"/>
+<polygon fill="#52514e" stroke="#52514e" points="202.1,-54.6 212.58,-53.04 203.42,-47.72 202.1,-54.6"/>
+<text text-anchor="middle" x="187" y="-51.8" font-family="Helvetica,sans-Serif" font-size="9.00">seq</text>
+</g>
+<!-- b3 -->
+<g id="node3" class="node">
+<title>b3</title>
+<path fill="#ffffff" stroke="#52514e" d="M456,-80C456,-80 380,-80 380,-80 374,-80 368,-74 368,-68 368,-68 368,-56 368,-56 368,-50 374,-44 380,-44 380,-44 456,-44 456,-44 462,-44 468,-50 468,-56 468,-56 468,-68 468,-68 468,-74 462,-80 456,-80"/>
+<text text-anchor="middle" x="418" y="-65.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b3</text>
+<text text-anchor="middle" x="418" y="-53.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">hexagram&#45;17&#45;sui</text>
+</g>
+<!-- b2&#45;&gt;b3 -->
+<g id="edge2" class="edge">
+<title>b2&#45;&gt;b3</title>
+<path fill="none" stroke="#52514e" d="M308.16,-62C323.79,-62 341.43,-62 357.88,-62"/>
+<polygon fill="#52514e" stroke="#52514e" points="357.95,-65.5 367.95,-62 357.95,-58.5 357.95,-65.5"/>
+<text text-anchor="middle" x="338" y="-64.8" font-family="Helvetica,sans-Serif" font-size="9.00">seq</text>
+</g>
+<!-- b4 -->
+<g id="node4" class="node">
+<title>b4</title>
+<path fill="#ffffff" stroke="#52514e" d="M622,-36C622,-36 540,-36 540,-36 534,-36 528,-30 528,-24 528,-24 528,-12 528,-12 528,-6 534,0 540,0 540,0 622,0 622,0 628,0 634,-6 634,-12 634,-12 634,-24 634,-24 634,-30 628,-36 622,-36"/>
+<text text-anchor="middle" x="581" y="-21.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b4</text>
+<text text-anchor="middle" x="581" y="-9.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">hexagram&#45;43&#45;guai</text>
+</g>
+<!-- b3&#45;&gt;b4 -->
+<g id="edge3" class="edge">
+<title>b3&#45;&gt;b4</title>
+<path fill="none" stroke="#52514e" stroke-dasharray="5,2" d="M468.18,-48.56C483.21,-44.45 499.97,-39.87 515.85,-35.53"/>
+<polygon fill="none" stroke="#52514e" points="516.19,-35.44 520.93,-30 527.77,-32.27 523.04,-37.71 516.19,-35.44"/>
+<text text-anchor="middle" x="498" y="-44.8" font-family="Helvetica,sans-Serif" font-size="9.00">copar</text>
+</g>
+<!-- b5 -->
+<g id="node5" class="node">
+<title>b5</title>
+<path fill="#ffffff" stroke="#52514e" d="M620.5,-96C620.5,-96 541.5,-96 541.5,-96 535.5,-96 529.5,-90 529.5,-84 529.5,-84 529.5,-72 529.5,-72 529.5,-66 535.5,-60 541.5,-60 541.5,-60 620.5,-60 620.5,-60 626.5,-60 632.5,-66 632.5,-72 632.5,-72 632.5,-84 632.5,-84 632.5,-90 626.5,-96 620.5,-96"/>
+<text text-anchor="middle" x="581" y="-81.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b5</text>
+<text text-anchor="middle" x="581" y="-69.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">hexagram&#45;57&#45;xun</text>
+</g>
+<!-- b3&#45;&gt;b5 -->
+<g id="edge4" class="edge">
+<title>b3&#45;&gt;b5</title>
+<path fill="none" stroke="#52514e" stroke-dasharray="5,2" d="M468.18,-66.89C483.66,-68.43 500.96,-70.15 517.24,-71.76"/>
+<polygon fill="none" stroke="#52514e" points="517.51,-71.79 523.88,-68.4 529.45,-72.98 523.09,-76.36 517.51,-71.79"/>
+<text text-anchor="middle" x="498" y="-72.8" font-family="Helvetica,sans-Serif" font-size="9.00">copar</text>
+</g>
+<!-- b4&#45;&gt;b1 -->
+<g id="edge5" class="edge">
+<title>b4&#45;&gt;b1</title>
+<path fill="none" stroke="#52514e" stroke-dasharray="5,2" d="M527.85,-19.05C443.81,-20.73 277.3,-24.07 173.11,-26.16"/>
+<polygon fill="none" stroke="#52514e" points="173.04,-26.16 167.12,-30.28 161.04,-26.4 166.96,-22.28 173.04,-26.16"/>
+<text text-anchor="middle" x="338" y="-25.8" font-family="Helvetica,sans-Serif" font-size="9.00">copar</text>
+</g>
+</g>
+</svg>

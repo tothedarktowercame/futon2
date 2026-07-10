@@ -1,0 +1,51 @@
+<svg width="526pt" height="135pt"
+ viewBox="0.00 0.00 526.20 135.20" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(21.6 113.6)">
+<title>ft&#45;learning&#45;loop&#45;014</title>
+<polygon fill="#fcfcfb" stroke="transparent" points="-21.6,21.6 -21.6,-113.6 504.6,-113.6 504.6,21.6 -21.6,21.6"/>
+<text text-anchor="middle" x="241.5" y="-77.6" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="13.00" fill="#d67e2a">ft&#45;learning&#45;loop&#45;014 &#160;· &#160;INCUMBENT</text>
+<!-- b1 -->
+<g id="node1" class="node">
+<title>b1</title>
+<path fill="#ffffff" stroke="#52514e" d="M272,-70C272,-70 198,-70 198,-70 192,-70 186,-64 186,-58 186,-58 186,-46 186,-46 186,-40 192,-34 198,-34 198,-34 272,-34 272,-34 278,-34 284,-40 284,-46 284,-46 284,-58 284,-58 284,-64 278,-70 272,-70"/>
+<text text-anchor="middle" x="235" y="-55.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b1</text>
+<text text-anchor="middle" x="235" y="-43.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">hinge&#45;entry&#45;slots</text>
+</g>
+<!-- b3 -->
+<g id="node3" class="node">
+<title>b3</title>
+<path fill="#ffffff" stroke="#52514e" d="M467,-40C467,-40 352,-40 352,-40 346,-40 340,-34 340,-28 340,-28 340,-16 340,-16 340,-10 346,-4 352,-4 352,-4 467,-4 467,-4 473,-4 479,-10 479,-16 479,-16 479,-28 479,-28 479,-34 473,-40 467,-40"/>
+<path fill="none" stroke="#52514e" d="M471,-44C471,-44 348,-44 348,-44 342,-44 336,-38 336,-32 336,-32 336,-12 336,-12 336,-6 342,0 348,0 348,0 471,0 471,0 477,0 483,-6 483,-12 483,-12 483,-32 483,-32 483,-38 477,-44 471,-44"/>
+<text text-anchor="middle" x="409.5" y="-25.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b3</text>
+<text text-anchor="middle" x="409.5" y="-13.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">interest&#45;event&#45;vocabulary</text>
+</g>
+<!-- b1&#45;&gt;b3 -->
+<g id="edge2" class="edge">
+<title>b1&#45;&gt;b3</title>
+<path fill="none" stroke="#52514e" d="M284.05,-43.64C297.09,-41.38 311.59,-38.85 325.96,-36.36"/>
+<polygon fill="#52514e" stroke="#52514e" points="326.61,-39.8 335.86,-34.63 325.41,-32.9 326.61,-39.8"/>
+<text text-anchor="middle" x="310" y="-41.8" font-family="Helvetica,sans-Serif" font-size="9.00">seq</text>
+</g>
+<!-- b2 -->
+<g id="node2" class="node">
+<title>b2</title>
+<path fill="#ffffff" stroke="#52514e" d="M114,-43C114,-43 12,-43 12,-43 6,-43 0,-37 0,-31 0,-31 0,-19 0,-19 0,-13 6,-7 12,-7 12,-7 114,-7 114,-7 120,-7 126,-13 126,-19 126,-19 126,-31 126,-31 126,-37 120,-43 114,-43"/>
+<text text-anchor="middle" x="63" y="-28.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b2</text>
+<text text-anchor="middle" x="63" y="-16.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">whose&#45;question&#45;is&#45;this</text>
+</g>
+<!-- b2&#45;&gt;b1 -->
+<g id="edge1" class="edge">
+<title>b2&#45;&gt;b1</title>
+<path fill="none" stroke="#52514e" stroke-dasharray="5,2" d="M126.34,-34.9C141.81,-37.36 158.37,-39.99 173.75,-42.43"/>
+<polygon fill="none" stroke="#52514e" points="173.93,-42.46 180.49,-39.45 185.78,-44.34 179.23,-47.35 173.93,-42.46"/>
+<text text-anchor="middle" x="156" y="-42.8" font-family="Helvetica,sans-Serif" font-size="9.00">copar</text>
+</g>
+<!-- b2&#45;&gt;b3 -->
+<g id="edge3" class="edge">
+<title>b2&#45;&gt;b3</title>
+<path fill="none" stroke="#52514e" d="M126,-18.93C145.21,-17.32 166.46,-15.8 186,-15 232.2,-13.11 283.81,-14.52 325.69,-16.55"/>
+<polygon fill="#52514e" stroke="#52514e" points="325.67,-20.05 335.84,-17.06 326.03,-13.06 325.67,-20.05"/>
+<text text-anchor="middle" x="235" y="-17.8" font-family="Helvetica,sans-Serif" font-size="9.00">seq</text>
+</g>
+</g>
+</svg>

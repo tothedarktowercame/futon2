@@ -1,0 +1,108 @@
+<svg width="713pt" height="217pt"
+ viewBox="0.00 0.00 713.20 217.20" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(21.6 195.6)">
+<title>ft&#45;state&#45;snapshot&#45;witness&#45;003</title>
+<polygon fill="#fcfcfb" stroke="transparent" points="-21.6,21.6 -21.6,-195.6 691.6,-195.6 691.6,21.6 -21.6,21.6"/>
+<text text-anchor="middle" x="335" y="-159.6" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="13.00" fill="#d67e2a">ft&#45;state&#45;snapshot&#45;witness&#45;003 &#160;· &#160;INCUMBENT</text>
+<!-- b1 -->
+<g id="node1" class="node">
+<title>b1</title>
+<path fill="#ffffff" stroke="#52514e" d="M280,-148C280,-148 175,-148 175,-148 169,-148 163,-142 163,-136 163,-136 163,-124 163,-124 163,-118 169,-112 175,-112 175,-112 280,-112 280,-112 286,-112 292,-118 292,-124 292,-124 292,-136 292,-136 292,-142 286,-148 280,-148"/>
+<path fill="none" stroke="#52514e" d="M284,-152C284,-152 171,-152 171,-152 165,-152 159,-146 159,-140 159,-140 159,-120 159,-120 159,-114 165,-108 171,-108 171,-108 284,-108 284,-108 290,-108 296,-114 296,-120 296,-120 296,-140 296,-140 296,-146 290,-152 284,-152"/>
+<text text-anchor="middle" x="227.5" y="-133.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b1</text>
+<text text-anchor="middle" x="227.5" y="-121.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">state&#45;snapshot&#45;witness</text>
+</g>
+<!-- b4 -->
+<g id="node4" class="node">
+<title>b4</title>
+<path fill="#ffffff" stroke="#52514e" d="M496,-90C496,-90 369,-90 369,-90 363,-90 357,-84 357,-78 357,-78 357,-66 357,-66 357,-60 363,-54 369,-54 369,-54 496,-54 496,-54 502,-54 508,-60 508,-66 508,-66 508,-78 508,-78 508,-84 502,-90 496,-90"/>
+<text text-anchor="middle" x="432.5" y="-75.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b4</text>
+<text text-anchor="middle" x="432.5" y="-63.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">append&#45;only&#45;semantic&#45;audit</text>
+</g>
+<!-- b1&#45;&gt;b4 -->
+<g id="edge3" class="edge">
+<title>b1&#45;&gt;b4</title>
+<path fill="none" stroke="#52514e" d="M296.1,-110.69C316.12,-104.97 338.13,-98.68 358.48,-92.86"/>
+<polygon fill="#52514e" stroke="#52514e" points="359.66,-96.16 368.32,-90.05 357.74,-89.43 359.66,-96.16"/>
+<text text-anchor="middle" x="327" y="-106.8" font-family="Helvetica,sans-Serif" font-size="9.00">seq</text>
+</g>
+<!-- b2 -->
+<g id="node2" class="node">
+<title>b2</title>
+<path fill="#ffffff" stroke="#52514e" d="M94,-118C94,-118 12,-118 12,-118 6,-118 0,-112 0,-106 0,-106 0,-94 0,-94 0,-88 6,-82 12,-82 12,-82 94,-82 94,-82 100,-82 106,-88 106,-94 106,-94 106,-106 106,-106 106,-112 100,-118 94,-118"/>
+<text text-anchor="middle" x="53" y="-103.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b2</text>
+<text text-anchor="middle" x="53" y="-91.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">shape&#45;first&#45;identify</text>
+</g>
+<!-- b2&#45;&gt;b1 -->
+<g id="edge1" class="edge">
+<title>b2&#45;&gt;b1</title>
+<path fill="none" stroke="#52514e" d="M106.22,-109.08C119.68,-111.42 134.45,-113.99 148.89,-116.5"/>
+<polygon fill="#52514e" stroke="#52514e" points="148.37,-119.96 158.82,-118.23 149.57,-113.07 148.37,-119.96"/>
+<text text-anchor="middle" x="132" y="-116.8" font-family="Helvetica,sans-Serif" font-size="9.00">seq</text>
+</g>
+<!-- b3 -->
+<g id="node3" class="node">
+<title>b3</title>
+<path fill="#ffffff" stroke="#52514e" d="M279,-90C279,-90 176,-90 176,-90 170,-90 164,-84 164,-78 164,-78 164,-66 164,-66 164,-60 170,-54 176,-54 176,-54 279,-54 279,-54 285,-54 291,-60 291,-66 291,-66 291,-78 291,-78 291,-84 285,-90 279,-90"/>
+<text text-anchor="middle" x="227.5" y="-75.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b3</text>
+<text text-anchor="middle" x="227.5" y="-63.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">protocol&#45;family&#45;naming</text>
+</g>
+<!-- b2&#45;&gt;b3 -->
+<g id="edge2" class="edge">
+<title>b2&#45;&gt;b3</title>
+<path fill="none" stroke="#52514e" d="M106.22,-91.52C121.25,-89.08 137.92,-86.38 153.94,-83.78"/>
+<polygon fill="#52514e" stroke="#52514e" points="154.5,-87.23 163.81,-82.18 153.38,-80.32 154.5,-87.23"/>
+<text text-anchor="middle" x="132" y="-90.8" font-family="Helvetica,sans-Serif" font-size="9.00">seq</text>
+</g>
+<!-- b3&#45;&gt;b4 -->
+<g id="edge7" class="edge">
+<title>b3&#45;&gt;b4</title>
+<path fill="none" stroke="#52514e" stroke-dasharray="5,2" d="M291.06,-72C307.99,-72 326.63,-72 344.63,-72"/>
+<polygon fill="none" stroke="#52514e" points="344.66,-72 350.66,-68 356.66,-72 350.66,-76 344.66,-72"/>
+<text text-anchor="middle" x="327" y="-74.8" font-family="Helvetica,sans-Serif" font-size="9.00">copar</text>
+</g>
+<!-- b5 -->
+<g id="node5" class="node">
+<title>b5</title>
+<path fill="#ffffff" stroke="#52514e" d="M654,-117C654,-117 584,-117 584,-117 578,-117 572,-111 572,-105 572,-105 572,-93 572,-93 572,-87 578,-81 584,-81 584,-81 654,-81 654,-81 660,-81 666,-87 666,-93 666,-93 666,-105 666,-105 666,-111 660,-117 654,-117"/>
+<path fill="none" stroke="#52514e" d="M658,-121C658,-121 580,-121 580,-121 574,-121 568,-115 568,-109 568,-109 568,-89 568,-89 568,-83 574,-77 580,-77 580,-77 658,-77 658,-77 664,-77 670,-83 670,-89 670,-89 670,-109 670,-109 670,-115 664,-121 658,-121"/>
+<text text-anchor="middle" x="619" y="-102.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b5</text>
+<text text-anchor="middle" x="619" y="-90.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">tri&#45;store&#45;lineage</text>
+</g>
+<!-- b4&#45;&gt;b5 -->
+<g id="edge4" class="edge">
+<title>b4&#45;&gt;b5</title>
+<path fill="none" stroke="#52514e" d="M508.01,-82.9C524.5,-85.32 541.78,-87.85 557.62,-90.16"/>
+<polygon fill="#52514e" stroke="#52514e" points="557.4,-93.67 567.81,-91.65 558.42,-86.74 557.4,-93.67"/>
+<text text-anchor="middle" x="538" y="-90.8" font-family="Helvetica,sans-Serif" font-size="9.00">seq</text>
+</g>
+<!-- b6 -->
+<g id="node6" class="node">
+<title>b6</title>
+<path fill="#ffffff" stroke="#52514e" d="M488.5,-144C488.5,-144 376.5,-144 376.5,-144 370.5,-144 364.5,-138 364.5,-132 364.5,-132 364.5,-120 364.5,-120 364.5,-114 370.5,-108 376.5,-108 376.5,-108 488.5,-108 488.5,-108 494.5,-108 500.5,-114 500.5,-120 500.5,-120 500.5,-132 500.5,-132 500.5,-138 494.5,-144 488.5,-144"/>
+<text text-anchor="middle" x="432.5" y="-129.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b6</text>
+<text text-anchor="middle" x="432.5" y="-117.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">fact&#45;lifecycle&#45;event&#45;types</text>
+</g>
+<!-- b6&#45;&gt;b5 -->
+<g id="edge5" class="edge">
+<title>b6&#45;&gt;b5</title>
+<path fill="none" stroke="#52514e" stroke-dasharray="5,2" d="M500.63,-116.18C518.71,-113.53 538.19,-110.68 555.98,-108.08"/>
+<polygon fill="none" stroke="#52514e" points="556.11,-108.06 561.47,-103.23 567.99,-106.32 562.63,-111.15 556.11,-108.06"/>
+<text text-anchor="middle" x="538" y="-113.8" font-family="Helvetica,sans-Serif" font-size="9.00">copar</text>
+</g>
+<!-- b7 -->
+<g id="node7" class="node">
+<title>b7</title>
+<path fill="#ffffff" stroke="#52514e" stroke-dasharray="5,2" d="M285,-36C285,-36 170,-36 170,-36 164,-36 158,-30 158,-24 158,-24 158,-12 158,-12 158,-6 164,0 170,0 170,0 285,0 285,0 291,0 297,-6 297,-12 297,-12 297,-24 297,-24 297,-30 291,-36 285,-36"/>
+<text text-anchor="middle" x="227.5" y="-21.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">b7</text>
+<text text-anchor="middle" x="227.5" y="-9.2" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#0b0b0b">interest&#45;event&#45;vocabulary</text>
+</g>
+<!-- b7&#45;&gt;b4 -->
+<g id="edge6" class="edge">
+<title>b7&#45;&gt;b4</title>
+<path fill="none" stroke="#52514e" stroke-dasharray="5,2" d="M296.38,-36.06C314.24,-40.81 333.66,-45.97 352.07,-50.87"/>
+<polygon fill="none" stroke="#52514e" points="352.09,-50.88 358.92,-48.55 363.69,-53.96 356.86,-56.28 352.09,-50.88"/>
+<text text-anchor="middle" x="327" y="-49.8" font-family="Helvetica,sans-Serif" font-size="9.00">copar</text>
+</g>
+</g>
+</svg>
