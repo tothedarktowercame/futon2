@@ -242,3 +242,26 @@ relevance/selection corpus.
 
 **Net standing:** Slice 2 remains gated — now on exactly one thing: fold-grain
 ground truth at n≈60+ (CH2 negatives + emission wiring). Measure design is done.
+
+## Checkpoint — 2026-07-10 (Fable: fold-grain expansion, run-here pass)
+
+Mined the 21 escrow deposits (`futon6/data/fold-turns/`) as fold-grain ground
+truth: full census in `futon6/holes/fold-turn-adjudications.edn`. 19/21 are
+plans whose outcomes were never realized (not ground truth — the census makes
+the gap visible); 2 adjudicate with quoted evidence: ft-action-vocabulary-005
+FAIL (P3 negative ×2, kill criterion) and ft-peradam-mechanization-006 PASS
+(machinery landed per plan, refusal census correct). Merged loader
+`fold_ground_truth.py`; gate2 now runs on n=12 (9/3).
+
+**Decisive negative: the adjudicated FAILURE scores accuracy 0.45 — above 6 of
+9 true positives.** Interface coverage measures plan–want vocabulary alignment,
+which a well-authored doomed plan maximizes (witnesses: picks←pick,
+targets←target). Text-side accuracy has a Goodhart ceiling that no measure
+engineering clears — *works* vs *well-formed* is information the texts do not
+contain. **Reward gate NOT PASSED; Slice 2 stays gated.** Route sharpened:
+(1) labels from flown folds (CH2 wiring at the fold_escrow seam — schema
+already landed, futon3a 32dcb09); (2) LEARN the reward from fold outcomes
+(reliability posteriors, M-bayesian-structure-learning line) with Slice-1.5
+coverage as a feature, not the reward; (3) coverage keeps the anti-gaming
+controls (still PASS at n=12). Full analysis:
+`labs/slush-demo/findings/fold_grain_expansion_findings.md`.
