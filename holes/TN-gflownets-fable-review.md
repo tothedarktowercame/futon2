@@ -325,3 +325,29 @@ proposer picked it had the easiest possible fit; the seal will tell.
 **State: 3 deposits await arming (= Joe). 24 blinded proposals outstanding.
 Adjudication of flown folds → CH2 labels → the S-curves move. Paused for
 operator steer: batch-fold the remaining 24, or fly these three first.**
+
+## Checkpoint — 2026-07-10 (claude-2: FLIGHTS complete — the loop's first full revolution)
+
+All three reviewed deposits flew (zai-1, serial, operator-observable; preregistered
+acceptance in FLIGHTS-2026-07-10.md; every claim re-verified by reviewer including
+one caught defect per flight-1 — cwd-dependent test path, fixed in place):
+
+| flight | deposit | verdict | the finding |
+|---|---|---|---|
+| 1 | ft-learning-loop-012 | slice PASS (want grain pending) | salience-rule = where fold-h1's base-rate hunger lives (convergent mint evidence) |
+| 2 | ft-futonzero-generative-012 | **want-grain FAIL** (preregistered honest negative) | `:degenerate? true` — 13/15 calibration pairs are censored-fallback copies, not measurements |
+| 3 | ft-chipwitz-corps-012 | slice PASS (want grain pending) | TF-IDF score-ordering INVERTS warrant quality (semantic 0.19 < keyword 0.27) — h1 live |
+
+**Unsealing:** all three flown proposals were GFN-proposed (8-to-1 odds per
+mission made this likely; S2 still has no flown incumbent folds). **S3 crossed
+its null for the first time: 0.889 vs null-95 0.806 (LOO, n=13)** — up from
+0.630 below-null, moved by ONE well-evidenced negative label (F2). Small-n
+caveat stands; but the preregistered curve moved exactly the way the design
+says it should: labels in, discrimination up. Scoreboard row 2 appended.
+
+Notes: adjudications recorded in fold-turn-adjudications.edn (F1/F3 as
+:flight-slice-pass — deliberately NOT ingested as want-grain labels; no
+subsumption). CH2 emission still awaits B4 (and B4 needs a deposit-ref variant
+of the sorry-ref check — flights have no meme-arrow refs). Flight-3's inversion
+finding is the coverage-Goodhart result at the warrant grain: third independent
+sighting of text-similarity ≠ semantic warrant.
