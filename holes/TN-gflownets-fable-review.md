@@ -437,3 +437,43 @@ Exact gate invocations with "a pass PRINTS OK, paste that line", blinding,
 scope, stop-on-blocker, and the honesty conventions the runners themselves
 minted. Every future runner receives it in the WELCOME bell before any
 assignment.
+
+## Checkpoint — 2026-07-10 (claude-2: BATCH 3 COMPLETE — zai-3's perfect shift, two discoveries, and the label-grain finding)
+
+Six folds + six flights by zai-3, ALL accepted, ZERO reviewer fixes — the
+contract-first handoff validated end-to-end (RUNNER-CONTRACT.md given before
+any work; the runner arrived with the gate discipline its predecessors learned
+mid-shift, self-reported its own first-run FAILs, and once out-audited the
+reviewer: psi-sha over the decoded EDN value, now the codified convention).
+New convention minted: :honest-genealogy (run 15 — one pattern's output IS
+another; 7 patterns, 6 contributions).
+
+**Unsealing (3 GFN / 3 incumbent):** GFN arm = the three mid-sized coherent
+cascades (canon 5-pat near-1:1 coherence; autoclock 5-pat hexagram
+failure-mode warrants; snapshot 4-pat design-state-lineage); incumbent arm
+bimodal (two 1-pat minimal + the 7-pat tri-store). The abstraction-level-
+crossing phenomenon appeared in BOTH arms. First executable
+pattern-claim chain completed (B3-F3): orientational pattern → fold :via →
+named risk → failing test → implementation.
+
+**Two doc-drift discoveries (both reviewer-confirmed):** autoclock implements
+a FOURTH rule (explicit-switch-arrow) absent from its mission doc; snapshot
+implements ALL FOUR siblings against a doc saying "three handed to Codex."
+The flight-lane's stop clause (read landed code, never reconstruct) is a
+doc-drift detector; recommend a :doc-vs-code-delta field in flight reports.
+
+**THE HONEST BOTTOM LINE — the label-grain finding:** all six flights passed
+their preregistered slice acceptance, and NONE yields a mission-want-grain
+label: these missions' completion criteria are not met by evening-scale
+slices, and two are confounded by stale docs. R̂'s label set is UNCHANGED
+(n=15); no retrain, no transfer recheck — recomputing on unchanged data would
+be theater. The batch answered a different question than designed: the loop's
+binding constraint is not fold rate, flight rate, or even adjudication rate —
+it is the GRAIN of the want being adjudicated. **Operator decision queued:
+adopt the deposit-psi as the adjudication unit** (it is what R̂ actually scores
+against; flights then adjudicate the psi's discharge directly), or keep
+mission-want grain and accept mission-timescale label accrual. S1/S2 stay
+data-starved until this is decided.
+
+zai-3 relieved with honors: 6 folds + 6 flights, 0 fixes, 2 discoveries,
+2 conventions/insights codified.
