@@ -302,3 +302,182 @@ clojure -J-Xmx2g -M:node -m migration.verify --input-dir migration-export --stor
 Next dispatch after the window: thin futon1b query server (second JVM
 approved by Joe 2026-07-10) exposing `memory-search` over HTTP for the
 futon3c seam — good Codex bell candidate.
+
+## 2026-07-10 (quiet window, part 2) — F9/F10: the 5.74M hyperedges explained; no-op write guard LIVE
+
+- **F9 — duplicate WRITES root cause + fix (Joe's question):** the futon3c
+  file watcher re-POSTs unchanged hyperedges every pass; server put them
+  unconditionally (sampled: 63 versions / 2 distinct contents). Fixed
+  server-side in `routes/compat-upsert-hyperedge`: fetch current doc, skip
+  identical plain puts, return `:no-op? true` (retracts + explicit
+  valid-time puts unaffected; no entity-history consumers exist).
+  **Reloaded + verified live**: repeat POST → no-op, version count stable.
+  Test hazard worth remembering: POSTing FLAT endpoints for a doc stored
+  with ROLE-carrying `:hx/ends` REPLACES it role-less (upsert-REPLACES);
+  restored byte-identically with rich endpoint maps.
+- **F10 — the hyperedge population, measured** (`hx-id-type.tsv`, 1GB,
+  streaming drain — snapshots dir): 5,745,489 DISTINCT ids, of which
+  **5,087,183 (88.5%) are `:code/v05/watcher-event`** — watcher telemetry
+  indexed as graph docs (Joe: should have gone to ~/data/storage
+  unindexed). Real graph ≈ 658k (edits 230k · var 128k · calls 92k ·
+  contains 76k · tests 30k · …). Census's "dead names" (edits, var) were
+  in fact the 2nd/3rd biggest types. NOT version-duplication (open-q dups
+  ≈ 2.6k only). Unfiltered snapshot fetch OOM'd the serving JVM at ~2.5M
+  docs (JVM survived, future contained it) — full-fetch is off the table.
+- **Migration decision needed (recommended): exclude watcher-event.**
+  Migrate the ~658k real-graph docs via CHUNKED export: filter
+  `hx-id-type.tsv` offline → id list; server-side future fetches in 10k
+  batches, streams `hyperedges-NNN.edn` chunk files (~50k docs each,
+  edn-safe instants); ingest.clj learns to glob `hyperedges-*.edn`. One
+  700MB single-form EDN cannot be read at any sane heap.
+- **Still open:** stop the watcher writing watcher-event hyperedges into
+  the indexed store going forward (route to flat storage) — futon3c
+  watcher change, good Codex bell. Also: erase/expire the existing 5.09M
+  watcher-event docs in futon1a? (erasure = `erase.bb`, penholder joe,
+  dry-run first — operator decision, big win for store size + the ~30s
+  query timeouts.)
+- Evidence leg re-ingested from the scope export (90,583 incl. 34,204
+  sessionless) — fresh single-run store rebuild in progress at write time.
+
+## 2026-07-10 (part 3) — watcher fixed at source; REINDEX-NOT-PORT decision; bulk erase running
+
+Joe's decisions: (1) watcher must not spam the DB — fixed at source;
+(2) erase ALL 5.09M watcher-events; (3) **hyperedge migration leg is
+CANCELLED — replaced by one-time reindex**: the code graph is derived
+data (source + git), so futon1b gets it by pointing ingestion at it
+once, not by porting 658k rows. The chunked-export design above is
+therefore moot (kept for the record).
+
+- **Watcher heartbeat fixed** (`futon3c.watcher.multi/heartbeat!`,
+  reloaded live, cycle 1311, `defonce` state intact): emits only on
+  cycles with activity, under a STABLE per-root id (endpoints no longer
+  carry cycle-n → server-derived id is constant → replace-in-place).
+  Liveness = process-watchdog's job (CYDER), per the README's own design.
+  Idle-heartbeat spam (~10 roots × 12 cycles/min ≈ measured ~900/10min)
+  → ~0. Real file events (ingest/deletion/rename/move) keep per-event
+  records. Client cache in file_ingest + server no-op guard remain as
+  backstops (three layers, each verified).
+- **Bulk erase RUNNING**: 5,087,183 watcher-event ids (filtered from
+  hx-id-type.tsv → watcher-event-ids.txt) through
+  `pipeline/run-erase!` as penholder joe, 5k/batch (~1,018 audited txs),
+  reason recorded, 3-id CLI dry-run + 100-id live pilot verified first
+  (erased + gone + server healthy). Progress via
+  `futon1a.api.snapshot/!progress`.
+- Follow-ups: re-measure hyperedge growth in ~a day (expect ≈ real
+  activity only); the erase leaves ~658k real-graph docs — decide
+  whether futon1a keeps serving those or the reindex strategy applies
+  there too when futon1b becomes primary.
+
+## 2026-07-10 (part 4) — futon1b server + watcher dual-write BUILT & smoke-tested
+
+The reindex-not-port seam is now real code:
+
+- **`futon1b/futon1b_server.clj`** — the approved second JVM. One XTDB2 node
+  owning the store, HTTP/EDN on **:7073** (7072 taken). Endpoints:
+  `GET /health` (table counts) · `POST /api/alpha/hyperedge`
+  (watcher-compatible EDN; stable ids identical to futon1a's scheme;
+  server-side no-op guard; VERIFIED put via the rescue ladder — immune to
+  the XTDB 2.0.0 silent batch-drop) · `GET /api/alpha/memory/search`
+  (§12.3 Zai envelope — THE out-of-process memory seam).
+  Run: `clojure -M:node -m futon1b-server --store-dir migration-store --port 7073`
+  (single-process store: never while a dev JVM holds migration-store).
+  Smoke-tested on a scratch store: health / put / no-op re-put / changed
+  put / retract / memory-search all PASS.
+- **Watcher dual-write** (`file-ingest/post-futon1b!`, wired into BOTH
+  write paths — file_ingest post-hx* and multi post-hyperedge!): posts EDN
+  to futon1b after a successful primary write. Gated on
+  `file-ingest/!futon1b-url` (nil = off; RELOADED LIVE dormant).
+  Enable: `(reset! futon3c.watcher.file-ingest/!futon1b-url "http://localhost:7073")`.
+  futon1a stays primary; futon1b failures log, never fail the write.
+  Valid-time replays are primary-only (v1).
+- **Switch-over sequence** (when rebuild+verify done): start server on
+  migration-store → enable dual-write → cold-scan tick
+  (`futon3c.watcher.multi/tick!` after start! with :cold-scan? true, or a
+  replay) = the one-time reindex → futon1b hyperedges fresh, no port.
+- **Ops finding: erase batches stall :7071 writes** (~2.5 min per 5k-evict
+  tx; a simple hyperedge POST wedged behind it). Erase PAUSED via the
+  armed watch at the next batch boundary — resume from
+  `snapshots/erase-checkpoint.txt` (idempotent, redoes ≤2 batches) via the
+  relaunch script in scratchpad / this doc's part-3 section, ideally
+  overnight and with SMALLER batches (500/tx ≈ ~15 s stalls instead of
+  2.5 min).
+- Dual-write e2e test was inconclusive ONLY because the smoke server's
+  150 s self-timeout expired while the test's primary POST sat behind an
+  erase batch — re-verify e2e at real deployment (step 2 above).
+
+## 2026-07-10 (part 5) — F11: XTDB 2.0.0 DURABILITY LOSS — switch-over BLOCKED pending engine upgrade
+
+**F11 (supersedes the F-series' "silent batch-drop" reading):** rows verified
+present during the writing JVM's lifetime are ABSENT after reopen.
+Evidence: verified-put rebuild logged ZERO silently-dropped (every id
+point-verified present right after its batch, only ~30 batches even needed
+the rescue ladder), yet the reopened store scans 84,403–84,404 of 90,583
+evidence docs (~7% loss); the count DRIFTS between reads/reopens
+(84,615 → 84,404 → 84,403); point-lookups confirm true absence; losses are
+scattered uniformly (not tail batches); entities/relations/type-catalog
+(smaller, simpler docs) are untouched. Every node close throws the Arrow
+"Memory was leaked by query … Allocator(live-index)" IllegalStateException
+— now presumed the smoking gun: incomplete live-index flush at shutdown.
+Earlier "silent batch-drop" observations were most likely THIS bug seen
+through reopens.
+
+**Consequences:** futon1b on XTDB **2.0.0** is NOT trustworthy for
+switch-over. The pipeline itself is sound (verified-put proves the writes
+land; the loss is at persist/replay). Next actions, in order:
+1. Bump `futon1b/deps.edn` to the latest XTDB 2.x and re-run: slice gates →
+   full rebuild → reopen-verify (the same three-layer verify). If the loss
+   vanishes, proceed to server deploy + dual-write + cold-scan reindex.
+2. If it persists on latest: minimal repro (write N docs w/ large nested
+   bodies, close, reopen, count) → report upstream; consider the XTDB2
+   remote/server module (different persistence path) instead of :local.
+3. Until then: futon1a remains the store of record; the Zai seam demo
+   remains valid as a READ demo, but no live memory writes to futon1b.
+
+NB the verified-put ingest + rescue ladder remain necessary regardless —
+they are the reason F11 could be isolated to the persistence layer at all.
+
+## 2026-07-10 (part 6) — F11 RESOLVED: XTDB 2.1.0 fixes the durability loss
+
+Upgrade `2.0.0 → 2.1.0` (Joe was right to expect newer; 2.1.0 + 2.2.0-beta1
+exist on Maven). Drop-in compatible: 12/12 slice gates unchanged. The acid
+test — evidence-only ingest into a fresh store, close, REOPEN in a separate
+JVM — comes back **90,583/90,583, missing-vs-file 0**, stable across reads.
+The whole pathology family vanished together on 2.1.0: no "Unknown type:
+NULL" batch failures (0 rescues where 2.0.0 needed 5,827), no silent drops,
+no Arrow live-index allocator leak at close. This triangulates F11 to a
+fixed-in-2.1.0 engine bug around live-index flush; no upstream PR needed,
+though the repro (large nested-body docs → batch put → close → reopen →
+count, on 2.0.0) is documented here if a regression report is ever useful.
+Verified-put ingest + rescue ladder stay in the pipeline as regression
+sentinels (cheap insurance; they now no-op).
+
+**Switch-over UNBLOCKED.** Store of record for futon1b = `migration-store-21`
+(XTDB 2.1.0). Remaining sequence: graph+types ingest (running) → full
+three-layer verify → Zai examples (E5 mission-sync recall) → futon1b-server
+on :7073 over migration-store-21 → enable dual-write → cold-scan reindex.
+
+## 2026-07-10 (part 7) — SWITCH-OVER EXECUTED
+
+- **Full S5 verify on migration-store-21: PASS** — all four populations,
+  counts exact (evidence 90,583/90,583 incl. 34,204 sessionless),
+  checksums 0 mismatches after two verify refinements: (i) **H5, new
+  hazard: XTDB 2 case-folds nested struct keys** — `:G` is stored/returned
+  as `:g` (verified on e-portfolio-* bodies); key case is NOT a preserved
+  property; consumers beware. (ii) double-slash keys
+  (`:futon1a/backfill/orig-type`) are unprojectable in XTQL → reported
+  UNVERIFIABLE, not failed.
+- **Zai examples: E5 flipped** — mission-sync (sessionless) memories
+  recalled through the seam; E6 parity 3/3 vs live :7071.
+- **futon1b-server DEPLOYED**: systemd user unit `futon1b-server`
+  (survives sessions) on :7073 over migration-store-21;
+  `systemctl --user status futon1b-server`. Health + memory-search over
+  HTTP verified against the full corpus.
+- **Dual-write ENABLED** (`!futon1b-url` → http://localhost:7073) and
+  **cold-scan reindex TRIGGERED** (per-root cache cleared at cycle 1661 —
+  the next cycle re-dispatches every watched file; hyperedges flow to
+  futon1b as the re-mine proceeds; futon1a re-posts are absorbed by the
+  no-op guards).
+- Remaining background: the 5.09M watcher-event erase (~28h, checkpointed)
+  and the reindex itself (watcher pace). Store `migration-store` (2.0.0,
+  lossy) is superseded by `migration-store-21` and can be deleted in any
+  cleanup pass.
