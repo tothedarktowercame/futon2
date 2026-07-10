@@ -1,0 +1,67 @@
+[
+ {
+  "proposal": "c7bcfcf8ee6674e9",
+  "mission": "M-operational-vocabulary",
+  "patterns": [
+   "futon-theory/mission-interface-signature",
+   "social/explicit-exit-over-abandonment",
+   "stack-coherence/stack-blocker-detection"
+  ]
+ },
+ {
+  "proposal": "ab1e77e5de2fc3a2",
+  "mission": "M-operational-vocabulary",
+  "patterns": [
+   "data-mining/constrain-extraction-to-the-downstream-vocabulary"
+  ]
+ },
+ {
+  "proposal": "4dae731fd2ec629a",
+  "mission": "M-pattern-mining",
+  "patterns": [
+   "enrichment/layered-ingestion",
+   "exotic/live-sync-source-truth",
+   "futon-theory/structural-tension-as-observation",
+   "invariant-coherence/shape-first-identify"
+  ]
+ },
+ {
+  "proposal": "b0a514c4a91017ae",
+  "mission": "M-pattern-mining",
+  "patterns": [
+   "futon-theory/mission-interface-signature",
+   "storage/deterministic-ingest-pipeline",
+   "p4ng/agent-pattern-triad",
+   "pattern-discipline/patterns-as-categorical-objects",
+   "futon-theory/structural-tension-as-observation",
+   "social/tension-before-code",
+   "futon-theory/task-as-arrow",
+   "coordination/par-as-obligation",
+   "coordination/task-shape-validation",
+   "invariant-coherence/shape-first-identify",
+   "exotic/full-lift-registry",
+   "structure/what-problem-is-this-actually-solving",
+   "structure/interest-event-vocabulary",
+   "peripherals/read-existing-seam-before-implementing",
+   "peripherals/pattern-becomes-peripheral",
+   "futon-theory/derive-exits-on-a-minted-sorry"
+  ]
+ },
+ {
+  "proposal": "94bf96d06a24e008",
+  "mission": "M-legacy-sorry-cleanup",
+  "patterns": [
+   "contributing/stack-scan-logging-protocol",
+   "devmap-coherence/ifr-f3-piti",
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "stack-coherence/commit-intent-alignment"
+  ]
+ },
+ {
+  "proposal": "835f1303ba31b9e5",
+  "mission": "M-legacy-sorry-cleanup",
+  "patterns": [
+   "structure/hinge-entry-slots"
+  ]
+ }
+]

@@ -1,0 +1,315 @@
+[
+ {
+  "proposal": "c7bcfcf8ee6674e9",
+  "mission": "M-operational-vocabulary",
+  "patterns": [
+   "futon-theory/mission-interface-signature",
+   "social/explicit-exit-over-abandonment",
+   "stack-coherence/stack-blocker-detection"
+  ]
+ },
+ {
+  "proposal": "4dae731fd2ec629a",
+  "mission": "M-pattern-mining",
+  "patterns": [
+   "enrichment/layered-ingestion",
+   "exotic/live-sync-source-truth",
+   "futon-theory/structural-tension-as-observation",
+   "invariant-coherence/shape-first-identify"
+  ]
+ },
+ {
+  "proposal": "0eff91d4857f410f",
+  "mission": "M-legacy-sorry-cleanup",
+  "patterns": [
+   "futon-theory/mission-interface-signature"
+  ]
+ },
+ {
+  "proposal": "b0a514c4a91017ae",
+  "mission": "M-pattern-mining",
+  "patterns": [
+   "futon-theory/mission-interface-signature",
+   "storage/deterministic-ingest-pipeline",
+   "p4ng/agent-pattern-triad",
+   "pattern-discipline/patterns-as-categorical-objects",
+   "futon-theory/structural-tension-as-observation",
+   "social/tension-before-code",
+   "futon-theory/task-as-arrow",
+   "coordination/par-as-obligation",
+   "coordination/task-shape-validation",
+   "invariant-coherence/shape-first-identify",
+   "exotic/full-lift-registry",
+   "structure/what-problem-is-this-actually-solving",
+   "structure/interest-event-vocabulary",
+   "peripherals/read-existing-seam-before-implementing",
+   "peripherals/pattern-becomes-peripheral",
+   "futon-theory/derive-exits-on-a-minted-sorry"
+  ]
+ },
+ {
+  "proposal": "835f1303ba31b9e5",
+  "mission": "M-legacy-sorry-cleanup",
+  "patterns": [
+   "structure/hinge-entry-slots"
+  ]
+ },
+ {
+  "proposal": "e17ed8ab74a3a816",
+  "mission": "M-pattern-mining",
+  "patterns": [
+   "futon-theory/mission-interface-signature"
+  ]
+ },
+ {
+  "proposal": "92cb10787c684dfe",
+  "mission": "M-pattern-mining",
+  "patterns": [
+   "coordination/mandatory-psr",
+   "exotic/full-lift-registry",
+   "futon-theory/futonic-logic",
+   "storage/deterministic-ingest-pipeline",
+   "structure/interest-event-vocabulary"
+  ]
+ },
+ {
+  "proposal": "553d75f941320382",
+  "mission": "M-operational-vocabulary",
+  "patterns": [
+   "coordination/ARGUMENT",
+   "devmap-coherence/ifr-f3-piti",
+   "iching/hexagram-07-shi",
+   "iching/hexagram-43-guai",
+   "ukrns/worked-contrast"
+  ]
+ },
+ {
+  "proposal": "b1c70102e17107cf",
+  "mission": "M-operational-vocabulary",
+  "patterns": [
+   "coordination/task-shape-validation",
+   "futon-theory/futonic-logic",
+   "stack-coherence/stack-blocker-detection",
+   "war-machine/inhabitation-threshold",
+   "war-machine/state-capture"
+  ]
+ },
+ {
+  "proposal": "94bf96d06a24e008",
+  "mission": "M-legacy-sorry-cleanup",
+  "patterns": [
+   "contributing/stack-scan-logging-protocol",
+   "devmap-coherence/ifr-f3-piti",
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "stack-coherence/commit-intent-alignment"
+  ]
+ },
+ {
+  "proposal": "ab1e77e5de2fc3a2",
+  "mission": "M-operational-vocabulary",
+  "patterns": [
+   "data-mining/constrain-extraction-to-the-downstream-vocabulary"
+  ]
+ },
+ {
+  "proposal": "fd141381d75f8914",
+  "mission": "M-pattern-mining",
+  "patterns": [
+   "coordination/task-shape-validation",
+   "devmap-coherence/prototype-alignment-bridge",
+   "futon-theory/structural-tension-as-observation",
+   "pattern-discipline/patterns-as-categorical-objects",
+   "structure/interest-event-vocabulary"
+  ]
+ },
+ {
+  "proposal": "5cfc499f76ecffee",
+  "mission": "M-legacy-sorry-cleanup",
+  "patterns": [
+   "futon-theory/minimum-viable-events",
+   "invariant-coherence/bounded-disposition",
+   "invariant-coherence/single-locus",
+   "portal/portal-command-surface",
+   "structure/interest-event-vocabulary"
+  ]
+ },
+ {
+  "proposal": "405b75a10465d860",
+  "mission": "M-pattern-mining",
+  "patterns": [
+   "coordination/ARGUMENT",
+   "futon-theory/mission-interface-signature",
+   "futon-theory/task-as-arrow",
+   "pattern-discipline/patterns-as-categorical-objects",
+   "structure/interest-event-vocabulary"
+  ]
+ },
+ {
+  "proposal": "7cd20b990ee7486c",
+  "mission": "M-operational-vocabulary",
+  "patterns": [
+   "futon-theory/derive-exits-on-a-minted-sorry",
+   "futon-theory/mission-dependency",
+   "futon-theory/mission-lifecycle",
+   "futon-theory/rapid-debugging",
+   "iching/hexagram-39-jian"
+  ]
+ },
+ {
+  "proposal": "1a6dc3d299b5dd65",
+  "mission": "M-operational-vocabulary",
+  "patterns": [
+   "futon-theory/futonic-logic",
+   "iching/hexagram-21-shihe",
+   "iching/hexagram-39-jian",
+   "structure/interest-event-vocabulary",
+   "war-machine/inhabitation-threshold"
+  ]
+ },
+ {
+  "proposal": "f66f0843bc67cf3c",
+  "mission": "M-pattern-mining",
+  "patterns": [
+   "coordination/ARGUMENT",
+   "coordination/mandatory-psr",
+   "futon-theory/proof-path",
+   "pattern-discipline/patterns-as-categorical-objects",
+   "stack-coherence/stack-blocker-detection"
+  ]
+ },
+ {
+  "proposal": "106b3db5d628ff2d",
+  "mission": "M-legacy-sorry-cleanup",
+  "patterns": [
+   "devmap-coherence/ifr-f3-piti",
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "futon-theory/minimum-viable-events",
+   "futon-theory/mission-interface-signature",
+   "stack-coherence/commit-intent-alignment"
+  ]
+ },
+ {
+  "proposal": "c7d93c1ca380c186",
+  "mission": "M-pattern-mining",
+  "patterns": [
+   "coordination/task-shape-validation",
+   "peripherals/read-existing-seam-before-implementing",
+   "social/ARGUMENT"
+  ]
+ },
+ {
+  "proposal": "0ca02d41e153511e",
+  "mission": "M-operational-vocabulary",
+  "patterns": [
+   "futon-theory/futonic-logic",
+   "futon-theory/mission-lifecycle",
+   "iching/hexagram-43-guai"
+  ]
+ },
+ {
+  "proposal": "9b95cf396432d373",
+  "mission": "M-legacy-sorry-cleanup",
+  "patterns": [
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "exotic/graded-naturality",
+   "futon-theory/minimum-viable-events",
+   "portal/portal-command-surface",
+   "structure/interest-event-vocabulary"
+  ]
+ },
+ {
+  "proposal": "5b3461565a6384a0",
+  "mission": "M-operational-vocabulary",
+  "patterns": [
+   "futon-theory/futonic-logic",
+   "futon-theory/rapid-debugging",
+   "iching/hexagram-07-shi",
+   "iching/hexagram-43-guai",
+   "structure/interest-event-vocabulary"
+  ]
+ },
+ {
+  "proposal": "1d05fec32b469e49",
+  "mission": "M-pattern-mining",
+  "patterns": [
+   "exotic/full-lift-registry",
+   "futon-theory/structural-tension-as-observation",
+   "futon-theory/task-as-arrow",
+   "invariant-coherence/shape-first-identify",
+   "social/ARGUMENT"
+  ]
+ },
+ {
+  "proposal": "5ffbb802c92e4bd6",
+  "mission": "M-operational-vocabulary",
+  "patterns": [
+   "futon-theory/mission-interface-signature"
+  ]
+ },
+ {
+  "proposal": "f49b4f2ed2325936",
+  "mission": "M-pattern-mining",
+  "patterns": [
+   "control/agential-pattern-hygiene",
+   "coordination/ARGUMENT",
+   "coordination/mandatory-psr",
+   "coordination/task-shape-validation",
+   "p4ng/agent-pattern-triad"
+  ]
+ },
+ {
+  "proposal": "0cdb0e3bd8ae6b3b",
+  "mission": "M-operational-vocabulary",
+  "patterns": [
+   "control/agential-pattern-hygiene",
+   "coordination/task-shape-validation",
+   "ukrns/worked-contrast",
+   "war-machine/advanceability",
+   "war-machine/state-capture"
+  ]
+ },
+ {
+  "proposal": "0a0526074254d2a7",
+  "mission": "M-legacy-sorry-cleanup",
+  "patterns": [
+   "devmap-coherence/ifr-f3-piti",
+   "devmap-coherence/ifr-f3a-piti-audit",
+   "futon-theory/mission-interface-signature",
+   "invariant-coherence/bounded-disposition",
+   "storage/canonical-interface"
+  ]
+ },
+ {
+  "proposal": "df412c6cbcab628b",
+  "mission": "M-legacy-sorry-cleanup",
+  "patterns": [
+   "agency/identifier-separation",
+   "ants/hunger-precision-coupling",
+   "futon-theory/mission-interface-signature",
+   "invariant-coherence/bounded-disposition",
+   "stack-coherence/commit-intent-alignment"
+  ]
+ },
+ {
+  "proposal": "f8dc69a7a426573d",
+  "mission": "M-legacy-sorry-cleanup",
+  "patterns": [
+   "ants/hunger-precision-coupling",
+   "contributing/stack-scan-logging-protocol",
+   "futon-theory/mission-interface-signature",
+   "structure/interest-event-vocabulary",
+   "vsatlas/facilitation-scaffolds"
+  ]
+ },
+ {
+  "proposal": "9f4aceb778d743b4",
+  "mission": "M-legacy-sorry-cleanup",
+  "patterns": [
+   "contributing/stack-scan-logging-protocol",
+   "devmap-coherence/ifr-f5-samadhi",
+   "exotic/graded-naturality",
+   "portal/portal-command-surface",
+   "sidecar/sense-shift-gate"
+  ]
+ }
+]
