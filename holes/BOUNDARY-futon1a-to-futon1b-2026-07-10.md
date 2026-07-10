@@ -19,6 +19,44 @@ records" questions later.
 Short forms: futon1a `a71c399` · futon1b `b619cd2` · futon2 `a3f4c38` ·
 futon3c `2641302`.
 
+## Other futon* repos on lucy at the boundary (recorded as-found; not pulled)
+
+Sync = lucy's checkout vs its origin at recording time (2026-07-10
+~17:15). "Dirty" counts `git status --porcelain` lines (uncommitted /
+untracked paths). These repos are logged just in case; only the four
+core repos above were deliberately synced for the boundary.
+
+| Repo | Branch | Commit | Last commit date | Sync | Dirty |
+|---|---|---|---|---|---|
+| futon0 | classical-nlp/2026-06-08-affect-and-autoclock | `e9254e2` | 2026-07-04 | behind 1 | 4 |
+| futon1 | main | `26ab382` | 2026-03-20 | in sync | 0 |
+| futon3 | main | `fb51b62` | 2026-07-10 | in sync | 0 |
+| futon3a | main | `32dcb09` | 2026-07-10 | behind 2 | 0 |
+| futon3b | main | `ad7c824` | 2026-05-03 | in sync | 0 |
+| futon4 | main | `022c6e5` | 2026-05-30 | behind 76 | 4 |
+| futon5 | main | `2e0b1be` | 2026-05-30 | behind 7 | 0 |
+| futon5a | master | `08260a7` | 2026-05-31 | in sync | 0 |
+| futon6 | master | `ffa6f85` | 2026-07-10 | behind 2 | 0 |
+| futon7 | master | `f71edc6` | 2026-06-07 | in sync | 0 |
+| futon7a | master | `136b8fc` | 2026-06-12 | behind 1 | 0 |
+
+Full SHAs: futon0 `e9254e2614b6051fb7f4d63887b1dab8f9be6562` ·
+futon1 `26ab382e6721342483403e37d4e2ab59cea47e06` ·
+futon3 `fb51b6256aaca74acf5b84f1d3c15f2c09bfbe79` ·
+futon3a `32dcb097bc1107fa6caba162d562bac097aa24b8` ·
+futon3b `ad7c8247bebe9c42a033fee5276d109763ea839c` ·
+futon4 `022c6e53888d026188e9a8824882801c13e30bc2` ·
+futon5 `2e0b1bec110d111a825ec51a1748885a62beb18e` ·
+futon5a `08260a792e0c25546791a3c35b60fb93f17af439` ·
+futon6 `ffa6f85a9ae045569603933a7b5339b743411448` ·
+futon7 `f71edc62a833006187a8a9bee9bcd54f76e70bfa` ·
+futon7a `136b8fc0a2f3f6a1b4afbe00969f3ef5380b965a`.
+
+(`futon1b-sqlite-2026-02` — the relocated pre-XTDB project — has a git
+dir but no commits; nothing to pin. futon2's dirty:1 is the untracked
+`src/futon2/aif/head.clj`; futon3c's dirty:2 are the local Makefile
+CLAUDE_BIN tweak and a bridge .bak file.)
+
 ## Data state at the boundary (lucy)
 
 - **Lucy's futon1a store** (`~/code/storage/futon1a/default`, 6.4G:
