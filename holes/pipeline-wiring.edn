@@ -1,0 +1,79 @@
+;; pipeline-wiring.edn — THE PIPELINE ITSELF AS A WIRING DIAGRAM
+;; (operator direction 2026-07-05: "this is why we ultimately need a wiring
+;; diagram for the pipeline we are building — it would make that sort of gap
+;; obvious." The gap: classical-off severed gamma's expected-leg feed and no
+;; artifact showed the dangling consumer.)
+;;
+;; Same shape as the deposit-contract wirings (boxes/hyperedges/terminals,
+;; :connective per edge) — deliberately: the reflexive pin (§rule 3) is that
+;; this diagram eventually type-checks through the same CLean bridge as the
+;; deposits. Edges are DATAFLOWS ("A feeds B"), the thing the pipeline cards
+;; do not carry. Maintenance rules at the bottom are binding.
+{:wiring/id :wm-flight-pipeline-v2
+ :updated "2026-07-05"
+ :nodes
+ [{:id :cron        :role "wake: hourly one-shot JVM (wm_scheduled_run)"}
+  {:id :registry    :role "scan+classify: mission corpus -> live candidates (mission_registry)"}
+  {:id :judge       :role "rank: G blend over candidates -> ranked actions"}
+  {:id :held-ledger :role "held-work ledger (snapshot; re-harvested)"}
+  {:id :futility    :role "strict per-lane 0-for-N (lane_futility over traces)"}
+  {:id :psi         :role "circumstance builder (mission->psi: sorry-grain + STUCK line)"}
+  {:id :library     :role "pattern library (~1198; flexiargs + embeddings)"}
+  {:id :seeds       :role "seed registry + prior floor (pattern-seeds.json)"}
+  {:id :phylogeny   :role "co-app/citation edges (mined; cluster-at-birth for authored sets)"}
+  {:id :cascade     :role "constructor: retrieval + coverage-saturation -> argument, F"}
+  {:id :rollout-val :role "rollout VALUATION (project-policy; depth>1 search retired)"}
+  {:id :escrow      :role "fold-turn deposits (LLM fold's delivery; 4 pins)"}
+  {:id :recon       :role "dG reconciliation (close_loop: rollout -> escrow -> abstain)"}
+  {:id :act-gate    :role "dF>0 AND dG<0 -> verdict"}
+  {:id :gamma       :role "R14 precision per lane (learned from realized-vs-expected)"}
+  {:id :select      :role "selection: argmin G, gamma-modulated, WM-I4 abstain"}
+  {:id :enact       :role "consent-gated artifact-only executor; realized dG"}
+  {:id :trace       :role "daily trace (write-trace!; gamma state reads back)"}
+  {:id :authoring   :role "pattern authoring (domain-gap response; human/agent)"}
+  {:id :operator    :role "Joe: rulings, arming, mana (chartered)"}]
+ :hyperedges
+ [{:from :cron        :to :registry    :connective :seq   :carries "tick"}
+  {:from :registry    :to :judge       :connective :seq   :carries "live candidates"}
+  {:from :held-ledger :to :psi         :connective :par   :carries "want/have items (140 mission-linked)"}
+  {:from :futility    :to :psi         :connective :par   :carries "STUCK line (0-for-N, threshold 10)"}
+  {:from :judge       :to :psi         :connective :seq   :carries "per-mission targets"}
+  {:from :psi         :to :cascade     :connective :seq   :carries "circumstance text"}
+  {:from :library     :to :cascade     :connective :par   :carries "patterns + embeddings"}
+  {:from :seeds       :to :cascade     :connective :par   :carries "prior floor (0.647 nats)"}
+  {:from :phylogeny   :to :cascade     :connective :par   :carries "connectivity bonus (accretion)"}
+  {:from :cascade     :to :act-gate    :connective :seq   :carries "dF (the argument's F)"}
+  {:from :cascade     :to :escrow      :connective :seq   :carries "fold input (offline, consent-gated authoring)"}
+  {:from :rollout-val :to :recon       :connective :par   :carries "move valuation when a move exists"}
+  {:from :escrow      :to :recon       :connective :par   :carries "pinned replay: dG + provenance"}
+  {:from :recon       :to :act-gate    :connective :seq   :carries "dG leg (or nil -> abstain)"}
+  {:from :act-gate    :to :select      :connective :seq   :carries "verdicts"}
+  {:from :gamma       :to :select      :connective :par   :carries "precision weights"}
+  {:from :select      :to :enact       :connective :seq   :carries "the selected passed action"}
+  {:from :enact       :to :trace       :connective :seq   :carries "realized dG + audit"}
+  ;; THE EDGE THAT WAS SEVERED INVISIBLY (2026-07-05, classical-off) and
+  ;; restored the same day (escrow-sourced expected leg). If a future ruling
+  ;; unplugs :escrow or :recon, THIS EDGE DANGLES — check here first.
+  {:from :recon       :to :gamma       :connective :seq   :carries "EXPECTED dG (was: classical fold; now: escrow-sourced)"
+   :history "severed 2026-07-05 by classical-off side effect; restored same day (operator word)"}
+  {:from :enact       :to :gamma       :connective :seq   :carries "REALIZED dG (executor)"}
+  {:from :trace       :to :futility    :connective :seq   :carries "tick records (the self-observation loop)"}
+  {:from :trace       :to :gamma       :connective :seq   :carries "gamma state read-back (witness records quarantined!)"}
+  {:from :authoring   :to :library     :connective :par   :carries "new flexiargs (mutually-citing clusters)"}
+  {:from :authoring   :to :seeds       :connective :par   :carries "registry entries + provenance"}
+  {:from :authoring   :to :phylogeny   :connective :par   :carries "cluster-at-birth citation edges"}
+  {:from :operator    :to :escrow      :connective :par   :carries "arming / blanket grant / mana (chartered)"}
+  {:from :operator    :to :enact       :connective :par   :carries "WM-I4: acting is separately held"}]
+ :terminals
+ [{:id :select :discharges "the recommendation (what the operator sees at :3100)"}
+  {:id :trace  :discharges "the record (what every audit reads)"}]
+ :rules
+ ["1. UNPLUG RULE: before any ruling turns a node off, enumerate its
+   outgoing edges here — every consumer either gets a replacement feed
+   (named in the ruling) or is explicitly accepted as starved (logged).
+   The gamma severance is the canonical instance of skipping this."
+  "2. NEW-FEED RULE: any new dataflow between stages lands here in the
+   same commit that wires it, or the wiring is not done."
+  "3. REFLEXIVE PIN (chartered): this diagram type-checks through the
+   same CLean bridge as deposit-contract v2 — the pipeline held to the
+   standard it holds its plans to."]}

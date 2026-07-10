@@ -1,0 +1,40 @@
+{
+ "session": "313c376e",
+ "target": "E-precision-over-policies",
+ "control": "M-cold-chain",
+ "n_turns": 10,
+ "overall": "THIN",
+ "checks": {
+  "C1 per-turn sigils populate": {
+   "pass": true,
+   "value": "5/10 turns resolve a sigil (50%)",
+   "n_turns": 10,
+   "thin_ok": false
+  },
+  "C2 threads compose into a line": {
+   "pass": true,
+   "value": "1 threads (recurrence>=3)",
+   "thin_ok": true
+  },
+  "C3 comb engages target above chance": {
+   "pass": false,
+   "value": "target 10% vs control(M-cold-chain) 0%  (+10pp) — under-powered at 10<12 turns",
+   "thin_ok": true
+  },
+  "C4 field non-degenerate + specific": {
+   "pass": false,
+   "value": "0 orbits covering 0/11 scopes (the target's own)",
+   "thin_ok": true
+  },
+  "C5 recogniser tags w/o paid mining": {
+   "pass": true,
+   "value": "6 turns tagged via move-basins (deterministic, no mining)",
+   "thin_ok": true
+  },
+  "C6 WebArxana follow-along surface": {
+   "pass": true,
+   "value": "#/dev/focus/E-precision-over-policies -> 11 scope/frames render in WebArxana",
+   "thin_ok": false
+  }
+ }
+}

@@ -1,0 +1,139 @@
+;; operational-readiness-sorry-EMPIRICAL.edn — the GROUND-TRUTH interface for the
+;; operational-readiness DIAGNOSTIC, recovered POST-HOC from doc + code + git + XTDB
+;; (A-next method, Joe 2026-07-02). #14 in the A-next gold corpus (M-fold-ansatz phase-2 ground truth).
+;; SIBLING of invariant-queue-unstuck / state-snapshot-witness — it reads the SAME
+;; probe/family-check-fns registry the invariant-queue mission built, and turns it into a
+;; "is the stack operationally ready when enabled?" proof (D-06).
+;;
+;; ⚠ NAME-CONFLATION FINDING (see :reconstruction-gap). Two distinct things carry the
+;;   "operational readiness" name in futon3c. The CODE the prompt names
+;;   (src/futon3c/logic/operational_readiness.clj) is NOT the mission in
+;;   M-operational-readiness.md. Git is decisive: the code file was authored by ONE commit,
+;;   ac0dfb5, whose subject is "M-bounded-in-flight-state INSTANTIATE D-06". The
+;;   "all 8 issues / all 4 gates" doc (M-operational-readiness.md, 2026-02-20) is a
+;;   SEPARATE Agency-API-CRUD mission that shares the name and touches none of this code.
+;;   This sorry recovers the CODE sense (the D-06 diagnostic), per the prompt's own
+;;   description ("a diagnostic over the operational-invariant families") + code path +
+;;   sibling-of-invariant-queue-unstuck relationship.
+;;
+;; Sources (all inspected this session, not remembered):
+;;   git commits:
+;;     ac0dfb5 (2026-05-04, Joe) "M-bounded-in-flight-state INSTANTIATE D-06:
+;;              operational-readiness diagnostic (proof of operational-when-enabled)"
+;;              — the SOLE commit creating operational_readiness.clj (5 deftests / 11 assertions)
+;;     557efe4 "M-invariant-queue-unstuck: invariant-queue meta-infrastructure" — the sibling
+;;              commit that first shipped probe/family-check-fns (the registry this diagnostic reads)
+;;     1bf1f81 "Snapshot logic + multi-watcher + 5 lab dirs + inventories" — later probe.clj touch
+;;   code (public surface): futon3c/src/futon3c/logic/operational_readiness.clj
+;;     (snapshot · ready? · enabled-but-not-firing-cleanly; private safe-fire) ·
+;;     futon3c/src/futon3c/logic/probe.clj (family-check-fns registry · register-family-check! ·
+;;     run-family-check/run-check-fn — the sibling normalizer)
+;;   tests: futon3c/test/futon3c/logic/operational_readiness_test.clj (5 deftests, verified)
+;;   XTDB / substrate-2: census dumps /tmp/_calls.edn + /tmp/_contains.edn (live :7071 is up,
+;;     404 at root; read confirmed via census). 4 op-rd code nodes present; registry atom ABSENT.
+;;   doc: futon3c/holes/missions/M-bounded-in-flight-state.md §D-06 ("derive don't author":
+;;     :operational-when-enabled must come with proof it is in fact operational when enabled) —
+;;     NOT M-operational-readiness.md (the conflated Agency-CRUD mission).
+
+{:id :sorry/operational-readiness-when-enabled
+ :hx-type "code/v05/sorry"
+ :state :empirical                        ; recovered from ground truth, not proposed
+ :derivation :post-hoc-reconstruction
+
+ :want-signature "operational-ready? : (registered-family-checks, stub-store) -> OperationalReadinessReport"
+ :hungry-for "OperationalReadinessReport" ; the codomain: a FRESH-FIRED per-family outcome table proving
+                                          ; every :operational-when-enabled invariant is in fact operational
+                                          ; when enabled (or naming EXACTLY which registered families are not) —
+                                          ; computed on demand, NOT read from stored last-fire history
+
+ ;; ENDPOINTS — real substrate-2 / code entities. :in-substrate2 from the /tmp census
+ ;; (grep _calls.edn + _contains.edn); node-id is the canonical futon3c-d/<ns>/<fn> form.
+ :endpoints
+ [{:role :have :ref "futon3c.logic.probe/family-check-fns (defonce ^:durable atom: family-id → check-fn)"
+   :type "code/v05/def (registry atom)"
+   :node-id "futon3c-d/futon3c.logic.probe/family-check-fns"
+   :in-substrate2 false
+   :note "THE load-bearing input — the durable registry the diagnostic re-fires. 0 hits in the census: the code-graph indexes defns and value-defs (I-family-canary, default-cadence-ms present) but NOT this defonce atom. Reconstruction gap #2."}
+  {:role :have :ref "futon3c.logic.probe/register-family-check! (the ^:durable-allowlisted registrar that populates the registry at boot)"
+   :type "code/v05/namespace fn"
+   :node-id "futon3c-d/futon3c.logic.probe/register-family-check!"
+   :in-substrate2 true
+   :note "domain code registers each family here (reachable-from-boot); 'enabled' == 'has a registered check-fn'"}
+  {:role :have :ref "the registered invariant families themselves (e.g. metabolic-balance/working-tree — the only graduated-drive family shipped)"
+   :type "family-id keywords + their check-fns (runtime atom state)"
+   :in-substrate2 false
+   :note "these are DATA keys in the runtime atom, not code nodes; what is actually enabled is knowable only by querying the live registry, not the static graph. Reconstruction gap #3."}
+  {:role :have :ref "futon3c.logic.probe/run-family-check + run-check-fn (the sibling normalizer producing :ok/:violation/:inactive)"
+   :type "code/v05/namespace fn"
+   :node-id "futon3c-d/futon3c.logic.probe/run-family-check"
+   :in-substrate2 true
+   :note "the probe's OWN normalizer; op-rd re-implements a thinner wrapper (safe-fire) rather than reusing it, because it needs the extra :error outcome and a nil (stub) store"}
+  {:role :have :ref "futon3c.logic.operational-readiness/safe-fire (private: run one check-fn against a nil stub store, catch Throwable → :error)"
+   :type "code/v05/namespace fn (private)"
+   :node-id "futon3c-d/futon3c.logic.operational-readiness/safe-fire"
+   :in-substrate2 true
+   :note "the fault-isolation primitive; substrate-2 records snapshot→safe-fire and ready?→safe-fire call edges"}
+  {:role :want :ref "futon3c.logic.operational-readiness/snapshot — the report producer: [{:family-id :outcome :detail :tier?} ...], one row per registered family, outcome ∈ #{:ok :violation :inactive :error}"
+   :type "code/v05/namespace fn"
+   :node-id "futon3c-d/futon3c.logic.operational-readiness/snapshot"
+   :in-substrate2 true
+   :note "the codomain producer (OperationalReadinessReport). Census confirms snapshot→safe-fire"}
+  {:role :want :ref "futon3c.logic.operational-readiness/ready? — per-family boolean: true iff a fresh fire of family-id returns :ok, nil if unregistered"
+   :type "code/v05/namespace fn"
+   :node-id "futon3c-d/futon3c.logic.operational-readiness/ready?"
+   :in-substrate2 true
+   :note "the point query over the report; census confirms ready?→safe-fire"}
+  {:role :want :ref "futon3c.logic.operational-readiness/enabled-but-not-firing-cleanly — the operator's go-to: family-ids that are registered (enabled) but whose fresh fire is not :ok; empty in steady state; the pre-flight before flipping :operational-when-enabled → :operational"
+   :type "code/v05/namespace fn"
+   :node-id "futon3c-d/futon3c.logic.operational-readiness/enabled-but-not-firing-cleanly"
+   :in-substrate2 true
+   :note "the D-06 proof read-out — names exactly the invariants that FAIL the operational-when-enabled claim right now. Census confirms enabled-but-not-firing-cleanly→snapshot"}]
+
+ ;; The load-bearing typed holes the construction had to discharge (the HARD parts):
+ :typed-holes
+ [{:at :derive-dont-author
+   :wanted "the operational-when-enabled proof must be COMPUTED on demand by re-firing each registered check against a stub store — NOT stored as a last-fire-status field in the inventory schema; the running snapshot IS the proof"
+   :discharged-by "ac0dfb5 (Joe's 'derive don't author', same as D-05; stub nil store, no futon1a read). Richer history-based version (last-N-fires, transition counts) deferred to M-the-futon-stack Q-19."}
+  {:at :fault-isolation
+   :wanted "a single bad family (a check-fn that throws) must NOT sink the whole snapshot — one broken invariant can't blind the operator to all the others"
+   :discharged-by "ac0dfb5 (safe-fire wraps each fire in try/catch Throwable → {:outcome :error ...}); test snapshot-fires-each-registered-check asserts :test/throws → :error, not propagation"}
+  {:at :error-vs-violation-taxonomy
+   :wanted "distinguish a check that THREW (:error — the check itself is broken) from a check that RAN and reported a breach (:violation) and from an unverified family (:inactive) — the probe's normalizer only produces :ok/:violation/:inactive; the diagnostic adds :error"
+   :discharged-by "ac0dfb5 (op-rd/safe-fire mints :error; outcome ∈ #{:ok :violation :inactive :error} — a strict superset of probe/run-check-fn's taxonomy)"}
+  {:at :graduated-tier-surfacing
+   :wanted "for graduated-drive families (the metabolic-balance/working-tree channel from M-bounded-in-flight-state ARGUE-3), surface the :max-tier so a :violation reports HOW overdue (advisory/high/stop-the-line), not just that-it-fired"
+   :discharged-by "ac0dfb5 (snapshot cond-> assoc :tier from (:max-tier detail)); test snapshot-surfaces-graduated-tier asserts :tier = :high"}]
+
+ :kind {:predecessor-shape :probe-sweep-persists-to-evidence   ; the sibling probe writes :family-fired
+                                                               ; entries to futon1a over time (a history)
+        :whats-new         :on-demand-fresh-fire-proof         ; stateless, stub store, no persistence;
+                                                               ; + :error outcome + fault-isolation + go-to violators list
+        :target-territory  :mostly-known                       ; D-06 was an explicit Joe ask with an explicit
+                                                               ; design constraint ('derive don't author, switch-flip away')
+        :fill-mechanism    :safe-fire-wrap+re-fire-registry+tier-surface+filter-non-ok}
+
+ :title "operational-when-enabled, proven on demand — re-fire every registered invariant family against a stub store and name exactly which ones aren't :ok (fault-isolated · :error-distinguished · tier-surfacing · derive-not-author)"
+ :provenance {:mission "futon3c/holes/missions/M-bounded-in-flight-state.md §D-06 (the CODE's real home)"
+              :mislabeled-as "futon3c/holes/missions/M-operational-readiness.md (a DIFFERENT Agency-CRUD mission, 2026-02-20, 8 issues/4 gates — shares the name only; see :reconstruction-gap)"
+              :campaign "C-cascade-real (invariant-family diagnostics; sibling of invariant-queue-unstuck)"
+              :method "post-hoc empirical (doc + code + git + XTDB census), A-next, Joe 2026-07-02"
+              :sealed-by "claude (this session)"
+              :sibling-of ["futon3c-d/mission/invariant-queue-unstuck (built the probe/family-check-fns registry this reads)"
+                           "futon3c-d/mission/state-snapshot-witness"]
+              :commit "ac0dfb5 (sole authoring commit; 5 deftests, 11 assertions)"}
+
+ ;; What RAW code/git/doc could answer that a substrate-2 QUERY alone could not (enrichment backlog):
+ :reconstruction-gap
+ {:name-conflation
+  "SEVERE. The corpus header (#14, 'canonical futon3c-d/mission/operational-readiness, Status Complete — all 8 issues done, all 4 gates met') describes M-operational-readiness.md — a 2026-02-20 Agency-API-CRUD-robustness mission (deregister/health/uptime/evidence-count, commits 520604c/4d7f876/610c85a/fac1779/f3114b3/a06a38b/020d876). That mission touches NONE of operational_readiness.clj. The code the prompt actually names was authored by ac0dfb5 under M-bounded-in-flight-state INSTANTIATE D-06 (2026-05-04). Only GIT (the commit subject linking file→mission) disambiguates this; neither the shared name nor a substrate-2 mission-id query would. This sorry recovers the CODE (D-06 diagnostic) per the prompt's description + file path + sibling relationship."
+  :registry-atom-invisible
+  "The load-bearing input — probe/family-check-fns, the ^:durable defonce atom every fire reads — is ABSENT from the substrate-2 code census (0 hits in both _calls.edn and _contains.edn), even though the fns around it and value-defs like I-family-canary/default-cadence-ms are present. The code-graph indexes defns and simple value-defs but not the registry atom. Recovered only from RAW code."
+  :registered-population-is-runtime
+  "WHICH families are actually enabled (registered) — and therefore what 'operational when enabled' even ranges over — is live atom state, not static graph. The census shows metabolic-balance/working-tree exists as a graduated-drive family (from M-bounded-in-flight-state), but the true registered set is knowable only by querying the running JVM registry, not substrate-2."
+  :no-gates-in-the-code
+  "The corpus's 'all 4 gates met' has NO referent in this code: operational_readiness.clj has no gates — it is 3 public fns + 1 private + 5 tests. The gates (G0 API-surface / G1 test / G2 evidence / G3 operational) belong to the conflated M-operational-readiness.md. Recovered by reading both files; substrate-2 has no notion of either mission's gates."}
+
+ ;; Nothing left :open or :unverified: the code file is a single-commit, fully-tested, discharged
+ ;; diagnostic (5/5 tests present in the tree; ac0dfb5 is the sole touch). The only caveat is the
+ ;; name-conflation above, which is a CORPUS-METADATA issue, not an undischarged hole in the sorry.
+ }

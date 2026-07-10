@@ -48,3 +48,4 @@ web/war-machine/resources/public/index.html
 scripts/__pycache__/
 
 __pycache__/
+.cache/

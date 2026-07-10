@@ -1,0 +1,62 @@
+;; autoclock-in-sorry-EMPIRICAL.edn — the GROUND-TRUTH interface for M-autoclock-in,
+;; recovered POST-HOC from the mission doc + code + git before/after + XTDB endpoints
+;; (Joe's method, 2026-07-01). #1/10 in the A-next gold corpus (M-fold-ansatz phase-2 ground truth). Also the SEALED reference for the A-next blinded study:
+;; a fresh agent will reconstruct the sorry from ONLY the cascade, and we score against THIS.
+;;
+;; Sources (all inspected, not remembered):
+;;   git commits: 8a23ec9 (durable lineage persist+reconstitute) · 6c70742 (edit-activity clock) ·
+;;     a977bed (server->buffer sync + guard) · 84d4d04 (order-independent retract — the repair) ·
+;;     b855cd5 (re-key to canonical <repo>-d/mission/<id>) · f409de9 (held-work join into reconstitute)
+;;   code: futon3c/src/futon3c/agency/{clock_lineage,clock_store}.clj  (public fns = the surface)
+;;   XTDB: clock/clocked-on hyperedges (durable lineage) · held/on-mission hyperedges (109)
+;;   doc: futon3c/holes/missions/M-autoclock-in.md (want: durable, single-active, reconstitutable)
+
+{:id :sorry/autoclock-in-durable-lineage
+ :hx-type "code/v05/sorry"
+ :state :empirical                       ; recovered from ground truth, not proposed
+ :derivation :post-hoc-reconstruction
+
+ :want-signature "clock-in : (agent, session, target) -> DurableLineage"
+ :hungry-for "DurableLineage"            ; the codomain: single-active, witnessed, reconstitutable-after-teardown
+
+ ;; ENDPOINTS — real substrate-2 / code entities. :in-map from the XTDB census + source queries.
+ :endpoints
+ [{:role :have :ref "agent nodes (agent:<id>)" :type "entity" :in-map true}
+  {:role :have :ref "canonical mission/excursion/campaign nodes <repo>-d/<kind>/<id>"
+   :type "mission/doc etc." :in-map true
+   :note "the clock TARGET must be canonical — b855cd5 re-keyed to these"}
+  {:role :have :ref "clock/clocked-on hyperedge (the durable clock record)"
+   :type "hyperedge" :in-map true :note "the persistence substrate; XTDB census confirms live"}
+  {:role :have :ref "clock_store ns (RAM per-agent session clocks + set-dispatch-mission!)"
+   :type "code/v05/namespace" :in-map true}
+  {:role :have :ref "agent-chat.el (the repl surface that displays/sets the clock)"
+   :type "elisp" :in-map false :note "the operator-facing surface; the sync target of a977bed"}
+  {:role :have :ref "held/on-mission hyperedges (109)"
+   :type "hyperedge" :in-map true :note "joined into reconstitute by f409de9 for Exit-criterion-2"}
+  {:role :want :ref "reconstitute output — {missions [{:target :agents :sessions :held-count}] } surviving teardown"
+   :type "DurableLineage value" :in-map false
+   :note "Exit criterion 2; the codomain the whole construction produces"}]
+
+ ;; The load-bearing typed holes the construction had to discharge (the HARD parts):
+ :typed-holes
+ [{:at :single-active-order-independence
+   :wanted "retract the agent's prior target by QUERYING durable prior targets, not RAM old-clock — order-independent"
+   :discharged-by "84d4d04 (the Gu repair)"}
+  {:at :canonical-identity
+   :wanted "clock targets resolve to the canonical node, never a bare alias, never mint an island"
+   :discharged-by "b855cd5 + canonical-endpoint (returns nil rather than mint)"}
+  {:at :repl-sync
+   :wanted "the repl clock reflects the DURABLE clock (no manual set)"
+   :discharged-by "a977bed (server->buffer sync)"}]
+
+ :kind {:predecessor-shape :manual-clock->durable   ; a manual single-active clock existed (agent-chat.el)
+        :whats-new         :durable-witnessed-reconstitutable
+        :target-territory  :mostly-known            ; the sub-hole was order-independence, found mid-build
+        :fill-mechanism    :write-ns+persist+retract+join}
+
+ :title "durable single-active witnessed agent-session-mission lineage — 'no sheet of paper'"
+ :provenance {:mission "futon3c/holes/missions/M-autoclock-in.md"
+              :campaign "C-cascade-real (D1/O3)"
+              :method "post-hoc empirical (doc + code + git + XTDB), Joe 2026-07-01"
+              :sealed-by "claude-4"
+              :for-blinded-study "A-next: reconstruct from cascade alone, score against this"}}

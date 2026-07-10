@@ -1,0 +1,3252 @@
+{
+ "mission": "M-points-de-fuite",
+ "session": "9aaeeeb0",
+ "thresh": 0.3,
+ "n_turns": 143,
+ "n_engaged": 74,
+ "engaged_turns": [
+  9,
+  10,
+  12,
+  14,
+  15,
+  17,
+  19,
+  20,
+  21,
+  23,
+  25,
+  26,
+  28,
+  30,
+  31,
+  32,
+  34,
+  36,
+  37,
+  38,
+  39,
+  44,
+  46,
+  48,
+  49,
+  54,
+  58,
+  59,
+  63,
+  65,
+  71,
+  72,
+  73,
+  74,
+  75,
+  76,
+  77,
+  78,
+  79,
+  80,
+  81,
+  83,
+  86,
+  87,
+  88,
+  90,
+  91,
+  93,
+  94,
+  96,
+  101,
+  104,
+  106,
+  107,
+  109,
+  113,
+  114,
+  117,
+  118,
+  119,
+  120,
+  121,
+  122,
+  124,
+  125,
+  126,
+  129,
+  130,
+  133,
+  135,
+  139,
+  140,
+  141,
+  143
+ ],
+ "turns": [
+  {
+   "turn": 1,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.185,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 2,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.187,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 3,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.296,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 4,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.224,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 5,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.3,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 6,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.149,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 7,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.235,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 8,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.218,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 9,
+   "best_scope": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight",
+   "best_scope_name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+   "score": 0.428,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.428
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.418
+    },
+    {
+     "id": "points-de-fuite/identify-exit",
+     "name": "IDENTIFY exit",
+     "score": 0.382
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.367
+    },
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-already-exists-sigils-the-gap-is-the-flow-into-a-control-layer",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.366
+    },
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-alr-3a2f3aa6--a47d3c0b",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.366
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.36
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-tod-5e9b51e5--d7151509",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.351
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-the-operator-and-the-pilot-are-the-same-case--7bb0d573",
+     "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+     "score": 0.318
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-t-462cae6e--adc2f549",
+     "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+     "score": 0.318
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-the-operator-and-the-pilot-are-the-same-case",
+     "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+     "score": 0.318
+    },
+    {
+     "id": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+     "name": "The futon, doubled — the promise this mission makes good on",
+     "score": 0.308
+    }
+   ]
+  },
+  {
+   "turn": 10,
+   "best_scope": "points-de-fuite/pattern/the-woven-form",
+   "best_scope_name": "pattern: the-woven-form",
+   "score": 0.39,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/pattern/the-woven-form",
+     "name": "pattern: the-woven-form",
+     "score": 0.39
+    },
+    {
+     "id": "points-de-fuite/seed-coding-joe-s-proposal-2026-06-25-code-the-attentional-artefacts-with-the-2014-apparatus-and-see-where-it-runs-out",
+     "name": "Seed-coding (Joe's proposal, 2026-06-25): code the attentional artefacts with the 2014 apparatus — and see where it runs out",
+     "score": 0.323
+    },
+    {
+     "id": "points-de-fuite/seed-coding-joe-s-proposal-2026-06-25-code-the-attentional-arte-2e0b658b--da023361",
+     "name": "Seed-coding (Joe's proposal, 2026-06-25): code the attentional artefacts with the 2014 apparatus — and see where it runs out",
+     "score": 0.323
+    }
+   ]
+  },
+  {
+   "turn": 11,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.195,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 12,
+   "best_scope": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+   "best_scope_name": "The futon, doubled — the promise this mission makes good on",
+   "score": 0.393,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+     "name": "The futon, doubled — the promise this mission makes good on",
+     "score": 0.393
+    },
+    {
+     "id": "points-de-fuite/refinement-joe-2026-06-25-symbolic-acts-not-just-symbols",
+     "name": "Refinement (Joe, 2026-06-25): symbolic ACTS, not just symbols",
+     "score": 0.33
+    },
+    {
+     "id": "points-de-fuite/head",
+     "name": "HEAD",
+     "score": 0.307
+    }
+   ]
+  },
+  {
+   "turn": 13,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.29,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 14,
+   "best_scope": "points-de-fuite/pattern/the-woven-form",
+   "best_scope_name": "pattern: the-woven-form",
+   "score": 0.365,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/pattern/the-woven-form",
+     "name": "pattern: the-woven-form",
+     "score": 0.365
+    },
+    {
+     "id": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+     "name": "The futon, doubled — the promise this mission makes good on",
+     "score": 0.357
+    },
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-alr-3a2f3aa6--a47d3c0b",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.347
+    },
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-already-exists-sigils-the-gap-is-the-flow-into-a-control-layer",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.347
+    }
+   ]
+  },
+  {
+   "turn": 15,
+   "best_scope": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-already-exists-sigils-the-gap-is-the-flow-into-a-control-layer",
+   "best_scope_name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+   "score": 0.317,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-already-exists-sigils-the-gap-is-the-flow-into-a-control-layer",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.317
+    },
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-alr-3a2f3aa6--a47d3c0b",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.317
+    }
+   ]
+  },
+  {
+   "turn": 16,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.298,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 17,
+   "best_scope": "points-de-fuite/the-shape",
+   "best_scope_name": "The shape",
+   "score": 0.326,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/the-shape",
+     "name": "The shape",
+     "score": 0.326
+    }
+   ]
+  },
+  {
+   "turn": 18,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.226,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 19,
+   "best_scope": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+   "best_scope_name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+   "score": 0.438,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.438
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.417
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-tod-5e9b51e5--d7151509",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.415
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.393
+    },
+    {
+     "id": "points-de-fuite/refinement-joe-2026-06-25-symbolic-acts-not-just-symbols",
+     "name": "Refinement (Joe, 2026-06-25): symbolic ACTS, not just symbols",
+     "score": 0.368
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.36
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-the-operator-and-the-pilot-are-the-same-case--7bb0d573",
+     "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+     "score": 0.322
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-t-462cae6e--adc2f549",
+     "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+     "score": 0.322
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-the-operator-and-the-pilot-are-the-same-case",
+     "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+     "score": 0.322
+    },
+    {
+     "id": "points-de-fuite/identify-exit",
+     "name": "IDENTIFY exit",
+     "score": 0.32
+    }
+   ]
+  },
+  {
+   "turn": 20,
+   "best_scope": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+   "best_scope_name": "The futon, doubled — the promise this mission makes good on",
+   "score": 0.451,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+     "name": "The futon, doubled — the promise this mission makes good on",
+     "score": 0.451
+    },
+    {
+     "id": "points-de-fuite/pattern/the-woven-form",
+     "name": "pattern: the-woven-form",
+     "score": 0.311
+    }
+   ]
+  },
+  {
+   "turn": 21,
+   "best_scope": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck",
+   "best_scope_name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+   "score": 0.386,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.386
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-the-operator-and-the-pilot-are-the-same-case--7bb0d573",
+     "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+     "score": 0.374
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-the-operator-and-the-pilot-are-the-same-case",
+     "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+     "score": 0.374
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-t-462cae6e--adc2f549",
+     "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+     "score": 0.374
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-tod-5e9b51e5--d7151509",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.374
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.369
+    }
+   ]
+  },
+  {
+   "turn": 22,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.288,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 23,
+   "best_scope": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+   "best_scope_name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+   "score": 0.347,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.347
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.307
+    },
+    {
+     "id": "points-de-fuite/the-example-table-25-a-critical-apparatus-with-mnemonics-an-example-not-a-suggestion",
+     "name": "The example — Table 25, \"A critical apparatus, with mnemonics\" (an example, not a suggestion)",
+     "score": 0.307
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.302
+    }
+   ]
+  },
+  {
+   "turn": 24,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.266,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 25,
+   "best_scope": "points-de-fuite/identify-exit",
+   "best_scope_name": "IDENTIFY exit",
+   "score": 0.341,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/identify-exit",
+     "name": "IDENTIFY exit",
+     "score": 0.341
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-the-operator-and-the-pilot-are-the-same-case--7bb0d573",
+     "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+     "score": 0.321
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-the-operator-and-the-pilot-are-the-same-case",
+     "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+     "score": 0.321
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-t-462cae6e--adc2f549",
+     "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+     "score": 0.321
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.321
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.307
+    },
+    {
+     "id": "points-de-fuite/identify",
+     "name": "IDENTIFY — shape-first",
+     "score": 0.3
+    }
+   ]
+  },
+  {
+   "turn": 26,
+   "best_scope": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+   "best_scope_name": "The futon, doubled — the promise this mission makes good on",
+   "score": 0.497,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+     "name": "The futon, doubled — the promise this mission makes good on",
+     "score": 0.497
+    },
+    {
+     "id": "points-de-fuite/pattern/the-woven-form",
+     "name": "pattern: the-woven-form",
+     "score": 0.363
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.352
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-tod-5e9b51e5--d7151509",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.345
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.338
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.317
+    },
+    {
+     "id": "points-de-fuite/phases-ahead",
+     "name": "Phases ahead",
+     "score": 0.31
+    },
+    {
+     "id": "points-de-fuite/identify-exit",
+     "name": "IDENTIFY exit",
+     "score": 0.306
+    }
+   ]
+  },
+  {
+   "turn": 27,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.246,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 28,
+   "best_scope": "points-de-fuite/pattern/the-woven-form",
+   "best_scope_name": "pattern: the-woven-form",
+   "score": 0.331,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/pattern/the-woven-form",
+     "name": "pattern: the-woven-form",
+     "score": 0.331
+    },
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-already-exists-sigils-the-gap-is-the-flow-into-a-control-layer",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.327
+    },
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-alr-3a2f3aa6--a47d3c0b",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.327
+    }
+   ]
+  },
+  {
+   "turn": 29,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.23,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 30,
+   "best_scope": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+   "best_scope_name": "The futon, doubled — the promise this mission makes good on",
+   "score": 0.552,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+     "name": "The futon, doubled — the promise this mission makes good on",
+     "score": 0.552
+    },
+    {
+     "id": "points-de-fuite/pattern/the-woven-form",
+     "name": "pattern: the-woven-form",
+     "score": 0.458
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.387
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-tod-5e9b51e5--d7151509",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.381
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.378
+    },
+    {
+     "id": "points-de-fuite/phases-ahead",
+     "name": "Phases ahead",
+     "score": 0.322
+    }
+   ]
+  },
+  {
+   "turn": 31,
+   "best_scope": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck",
+   "best_scope_name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+   "score": 0.378,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.378
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.375
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-tod-5e9b51e5--d7151509",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.373
+    },
+    {
+     "id": "points-de-fuite/map-finding-2026-06-25-flight-is-the-aggregate-concentration-fi-a0e1c793--9a2af2dd",
+     "name": "MAP finding (2026-06-25): flight is the aggregate CONCENTRATION FIELD, not arrow-chains — studied on the full 1393-record run",
+     "score": 0.343
+    },
+    {
+     "id": "points-de-fuite/map-finding-2026-06-25-flight-is-the-aggregate-concentration-field-not-arrow-chains-studied-on-the-full-1393-record-run--77251da3",
+     "name": "MAP finding (2026-06-25): flight is the aggregate CONCENTRATION FIELD, not arrow-chains — studied on the full 1393-record run",
+     "score": 0.343
+    },
+    {
+     "id": "points-de-fuite/map-finding-2026-06-25-flight-is-the-aggregate-concentration-field-not-arrow-chains-studied-on-the-full-1393-record-run",
+     "name": "MAP finding (2026-06-25): flight is the aggregate CONCENTRATION FIELD, not arrow-chains — studied on the full 1393-record run",
+     "score": 0.343
+    },
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-already-exists-sigils-the-gap-is-the-flow-into-a-control-layer",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.337
+    },
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-alr-3a2f3aa6--a47d3c0b",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.337
+    }
+   ]
+  },
+  {
+   "turn": 32,
+   "best_scope": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-already-exists-sigils-the-gap-is-the-flow-into-a-control-layer",
+   "best_scope_name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+   "score": 0.32,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-already-exists-sigils-the-gap-is-the-flow-into-a-control-layer",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.32
+    },
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-alr-3a2f3aa6--a47d3c0b",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.32
+    }
+   ]
+  },
+  {
+   "turn": 33,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.211,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 34,
+   "best_scope": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-tod-5e9b51e5--d7151509",
+   "best_scope_name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+   "score": 0.385,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-tod-5e9b51e5--d7151509",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.385
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.376
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.372
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.37
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.358
+    },
+    {
+     "id": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+     "name": "The futon, doubled — the promise this mission makes good on",
+     "score": 0.305
+    }
+   ]
+  },
+  {
+   "turn": 35,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.292,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 36,
+   "best_scope": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+   "best_scope_name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+   "score": 0.322,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.322
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.313
+    },
+    {
+     "id": "points-de-fuite/map-finding-2026-06-25-flight-is-the-aggregate-concentration-fi-a0e1c793--9a2af2dd",
+     "name": "MAP finding (2026-06-25): flight is the aggregate CONCENTRATION FIELD, not arrow-chains — studied on the full 1393-record run",
+     "score": 0.312
+    },
+    {
+     "id": "points-de-fuite/map-finding-2026-06-25-flight-is-the-aggregate-concentration-field-not-arrow-chains-studied-on-the-full-1393-record-run",
+     "name": "MAP finding (2026-06-25): flight is the aggregate CONCENTRATION FIELD, not arrow-chains — studied on the full 1393-record run",
+     "score": 0.312
+    },
+    {
+     "id": "points-de-fuite/map-finding-2026-06-25-flight-is-the-aggregate-concentration-field-not-arrow-chains-studied-on-the-full-1393-record-run--77251da3",
+     "name": "MAP finding (2026-06-25): flight is the aggregate CONCENTRATION FIELD, not arrow-chains — studied on the full 1393-record run",
+     "score": 0.312
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.304
+    },
+    {
+     "id": "points-de-fuite/sibling-instances",
+     "name": "Sibling instances",
+     "score": 0.301
+    }
+   ]
+  },
+  {
+   "turn": 37,
+   "best_scope": "points-de-fuite/the-tension",
+   "best_scope_name": "The tension",
+   "score": 0.319,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/the-tension",
+     "name": "The tension",
+     "score": 0.319
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.311
+    }
+   ]
+  },
+  {
+   "turn": 38,
+   "best_scope": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+   "best_scope_name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+   "score": 0.377,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.377
+    },
+    {
+     "id": "points-de-fuite/refinement-joe-2026-06-25-symbolic-acts-not-just-symbols",
+     "name": "Refinement (Joe, 2026-06-25): symbolic ACTS, not just symbols",
+     "score": 0.339
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.333
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.32
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-tod-5e9b51e5--d7151509",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.31
+    },
+    {
+     "id": "points-de-fuite/map",
+     "name": "MAP — the lineage of attention-organizations",
+     "score": 0.303
+    }
+   ]
+  },
+  {
+   "turn": 39,
+   "best_scope": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-tod-5e9b51e5--d7151509",
+   "best_scope_name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+   "score": 0.419,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-tod-5e9b51e5--d7151509",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.419
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.405
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.405
+    },
+    {
+     "id": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+     "name": "The futon, doubled — the promise this mission makes good on",
+     "score": 0.396
+    },
+    {
+     "id": "points-de-fuite/identify-exit",
+     "name": "IDENTIFY exit",
+     "score": 0.364
+    }
+   ]
+  },
+  {
+   "turn": 40,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.26,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 41,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.204,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 42,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.278,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 43,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.209,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 44,
+   "best_scope": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-tod-5e9b51e5--d7151509",
+   "best_scope_name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+   "score": 0.44,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-tod-5e9b51e5--d7151509",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.44
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.401
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.398
+    },
+    {
+     "id": "points-de-fuite/identify-exit",
+     "name": "IDENTIFY exit",
+     "score": 0.372
+    },
+    {
+     "id": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+     "name": "The futon, doubled — the promise this mission makes good on",
+     "score": 0.37
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.34
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.334
+    }
+   ]
+  },
+  {
+   "turn": 45,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.274,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 46,
+   "best_scope": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+   "best_scope_name": "The futon, doubled — the promise this mission makes good on",
+   "score": 0.378,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+     "name": "The futon, doubled — the promise this mission makes good on",
+     "score": 0.378
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.307
+    }
+   ]
+  },
+  {
+   "turn": 47,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.255,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 48,
+   "best_scope": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-tod-5e9b51e5--d7151509",
+   "best_scope_name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+   "score": 0.328,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-tod-5e9b51e5--d7151509",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.328
+    }
+   ]
+  },
+  {
+   "turn": 49,
+   "best_scope": "points-de-fuite/refinement-joe-2026-06-25-symbolic-acts-not-just-symbols",
+   "best_scope_name": "Refinement (Joe, 2026-06-25): symbolic ACTS, not just symbols",
+   "score": 0.317,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/refinement-joe-2026-06-25-symbolic-acts-not-just-symbols",
+     "name": "Refinement (Joe, 2026-06-25): symbolic ACTS, not just symbols",
+     "score": 0.317
+    },
+    {
+     "id": "points-de-fuite/phases-ahead",
+     "name": "Phases ahead",
+     "score": 0.314
+    }
+   ]
+  },
+  {
+   "turn": 50,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.277,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 51,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.26,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 52,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.265,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 53,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.206,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 54,
+   "best_scope": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-tod-5e9b51e5--d7151509",
+   "best_scope_name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+   "score": 0.353,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-tod-5e9b51e5--d7151509",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.353
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.325
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.311
+    }
+   ]
+  },
+  {
+   "turn": 55,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.162,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 56,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.29,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 57,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.29,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 58,
+   "best_scope": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-already-exists-sigils-the-gap-is-the-flow-into-a-control-layer",
+   "best_scope_name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+   "score": 0.318,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-already-exists-sigils-the-gap-is-the-flow-into-a-control-layer",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.318
+    },
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-alr-3a2f3aa6--a47d3c0b",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.318
+    }
+   ]
+  },
+  {
+   "turn": 59,
+   "best_scope": "points-de-fuite/identify",
+   "best_scope_name": "IDENTIFY — shape-first",
+   "score": 0.405,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/identify",
+     "name": "IDENTIFY — shape-first",
+     "score": 0.405
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-tod-5e9b51e5--d7151509",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.399
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.389
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.358
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-the-operator-and-the-pilot-are-the-same-case--7bb0d573",
+     "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+     "score": 0.319
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-t-462cae6e--adc2f549",
+     "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+     "score": 0.319
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-the-operator-and-the-pilot-are-the-same-case",
+     "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+     "score": 0.319
+    },
+    {
+     "id": "points-de-fuite/the-tension",
+     "name": "The tension",
+     "score": 0.311
+    }
+   ]
+  },
+  {
+   "turn": 60,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.277,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 61,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.282,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 62,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.21,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 63,
+   "best_scope": "points-de-fuite/pattern/the-woven-form",
+   "best_scope_name": "pattern: the-woven-form",
+   "score": 0.442,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/pattern/the-woven-form",
+     "name": "pattern: the-woven-form",
+     "score": 0.442
+    },
+    {
+     "id": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+     "name": "The futon, doubled — the promise this mission makes good on",
+     "score": 0.34
+    },
+    {
+     "id": "points-de-fuite/seed-coding-joe-s-proposal-2026-06-25-code-the-attentional-arte-2e0b658b--da023361",
+     "name": "Seed-coding (Joe's proposal, 2026-06-25): code the attentional artefacts with the 2014 apparatus — and see where it runs out",
+     "score": 0.332
+    },
+    {
+     "id": "points-de-fuite/seed-coding-joe-s-proposal-2026-06-25-code-the-attentional-artefacts-with-the-2014-apparatus-and-see-where-it-runs-out",
+     "name": "Seed-coding (Joe's proposal, 2026-06-25): code the attentional artefacts with the 2014 apparatus — and see where it runs out",
+     "score": 0.332
+    }
+   ]
+  },
+  {
+   "turn": 64,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.278,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 65,
+   "best_scope": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+   "best_scope_name": "The futon, doubled — the promise this mission makes good on",
+   "score": 0.357,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+     "name": "The futon, doubled — the promise this mission makes good on",
+     "score": 0.357
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-tod-5e9b51e5--d7151509",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.328
+    },
+    {
+     "id": "points-de-fuite/pattern/the-woven-form",
+     "name": "pattern: the-woven-form",
+     "score": 0.318
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.317
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.302
+    }
+   ]
+  },
+  {
+   "turn": 66,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.261,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 67,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.285,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 68,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.299,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 69,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.238,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 70,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.164,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 71,
+   "best_scope": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+   "best_scope_name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+   "score": 0.371,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.371
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.362
+    },
+    {
+     "id": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+     "name": "The futon, doubled — the promise this mission makes good on",
+     "score": 0.35
+    },
+    {
+     "id": "points-de-fuite/m-points-de-fuite-a-tiny-dsl-for-minting-structure-on-the-line-of-flight",
+     "name": "M-points-de-fuite — a tiny DSL for minting structure on the line of flight",
+     "score": 0.342
+    },
+    {
+     "id": "points-de-fuite/phases-ahead",
+     "name": "Phases ahead",
+     "score": 0.32
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.305
+    }
+   ]
+  },
+  {
+   "turn": 72,
+   "best_scope": "points-de-fuite/the-example-table-25-a-critical-apparatus-with-mnemonics-an-example-not-a-suggestion",
+   "best_scope_name": "The example — Table 25, \"A critical apparatus, with mnemonics\" (an example, not a suggestion)",
+   "score": 0.449,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/the-example-table-25-a-critical-apparatus-with-mnemonics-an-example-not-a-suggestion",
+     "name": "The example — Table 25, \"A critical apparatus, with mnemonics\" (an example, not a suggestion)",
+     "score": 0.449
+    },
+    {
+     "id": "points-de-fuite/refinement-joe-2026-06-25-symbolic-acts-not-just-symbols",
+     "name": "Refinement (Joe, 2026-06-25): symbolic ACTS, not just symbols",
+     "score": 0.381
+    },
+    {
+     "id": "points-de-fuite/identify",
+     "name": "IDENTIFY — shape-first",
+     "score": 0.321
+    }
+   ]
+  },
+  {
+   "turn": 73,
+   "best_scope": "points-de-fuite/refinement-joe-2026-06-25-symbolic-acts-not-just-symbols",
+   "best_scope_name": "Refinement (Joe, 2026-06-25): symbolic ACTS, not just symbols",
+   "score": 0.56,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/refinement-joe-2026-06-25-symbolic-acts-not-just-symbols",
+     "name": "Refinement (Joe, 2026-06-25): symbolic ACTS, not just symbols",
+     "score": 0.56
+    },
+    {
+     "id": "points-de-fuite/phases-ahead",
+     "name": "Phases ahead",
+     "score": 0.406
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.381
+    },
+    {
+     "id": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+     "name": "The futon, doubled — the promise this mission makes good on",
+     "score": 0.38
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.368
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-tod-5e9b51e5--d7151509",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.36
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-the-operator-and-the-pilot-are-the-same-case",
+     "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+     "score": 0.346
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-the-operator-and-the-pilot-are-the-same-case--7bb0d573",
+     "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+     "score": 0.346
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-t-462cae6e--adc2f549",
+     "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+     "score": 0.346
+    },
+    {
+     "id": "points-de-fuite/identify-exit",
+     "name": "IDENTIFY exit",
+     "score": 0.338
+    },
+    {
+     "id": "points-de-fuite/map-derive-convergence-joe-2026-06-26-the-control-layer-is-a-mo-1d317670--3d8a580f",
+     "name": "MAP→DERIVE convergence (Joe, 2026-06-26): the control layer is a mode-family, and most of it already exists",
+     "score": 0.309
+    },
+    {
+     "id": "points-de-fuite/map-derive-convergence-joe-2026-06-26-the-control-layer-is-a-mode-family-and-most-of-it-already-exists",
+     "name": "MAP→DERIVE convergence (Joe, 2026-06-26): the control layer is a mode-family, and most of it already exists",
+     "score": 0.309
+    }
+   ]
+  },
+  {
+   "turn": 74,
+   "best_scope": "points-de-fuite/pattern/the-woven-form",
+   "best_scope_name": "pattern: the-woven-form",
+   "score": 0.58,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/pattern/the-woven-form",
+     "name": "pattern: the-woven-form",
+     "score": 0.58
+    },
+    {
+     "id": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+     "name": "The futon, doubled — the promise this mission makes good on",
+     "score": 0.539
+    },
+    {
+     "id": "points-de-fuite/refinement-joe-2026-06-25-symbolic-acts-not-just-symbols",
+     "name": "Refinement (Joe, 2026-06-25): symbolic ACTS, not just symbols",
+     "score": 0.411
+    },
+    {
+     "id": "points-de-fuite/phases-ahead",
+     "name": "Phases ahead",
+     "score": 0.362
+    },
+    {
+     "id": "points-de-fuite/the-gap-stated-as-evidence-question-hypothesis",
+     "name": "The gap — stated as evidence · question · hypothesis",
+     "score": 0.304
+    }
+   ]
+  },
+  {
+   "turn": 75,
+   "best_scope": "points-de-fuite/the-gap-stated-as-evidence-question-hypothesis",
+   "best_scope_name": "The gap — stated as evidence · question · hypothesis",
+   "score": 0.373,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/the-gap-stated-as-evidence-question-hypothesis",
+     "name": "The gap — stated as evidence · question · hypothesis",
+     "score": 0.373
+    },
+    {
+     "id": "points-de-fuite/m-points-de-fuite-a-tiny-dsl-for-minting-structure-on-the-line-of-flight",
+     "name": "M-points-de-fuite — a tiny DSL for minting structure on the line of flight",
+     "score": 0.318
+    }
+   ]
+  },
+  {
+   "turn": 76,
+   "best_scope": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+   "best_scope_name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+   "score": 0.458,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.458
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.444
+    }
+   ]
+  },
+  {
+   "turn": 77,
+   "best_scope": "points-de-fuite/seed-coding-joe-s-proposal-2026-06-25-code-the-attentional-artefacts-with-the-2014-apparatus-and-see-where-it-runs-out",
+   "best_scope_name": "Seed-coding (Joe's proposal, 2026-06-25): code the attentional artefacts with the 2014 apparatus — and see where it runs out",
+   "score": 0.458,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/seed-coding-joe-s-proposal-2026-06-25-code-the-attentional-artefacts-with-the-2014-apparatus-and-see-where-it-runs-out",
+     "name": "Seed-coding (Joe's proposal, 2026-06-25): code the attentional artefacts with the 2014 apparatus — and see where it runs out",
+     "score": 0.458
+    },
+    {
+     "id": "points-de-fuite/seed-coding-joe-s-proposal-2026-06-25-code-the-attentional-arte-2e0b658b--da023361",
+     "name": "Seed-coding (Joe's proposal, 2026-06-25): code the attentional artefacts with the 2014 apparatus — and see where it runs out",
+     "score": 0.458
+    },
+    {
+     "id": "points-de-fuite/map",
+     "name": "MAP — the lineage of attention-organizations",
+     "score": 0.449
+    },
+    {
+     "id": "points-de-fuite/map-the-lineage-of-attention-organizations--b5df1621",
+     "name": "MAP — the lineage of attention-organizations",
+     "score": 0.43
+    },
+    {
+     "id": "points-de-fuite/the-example-table-25-a-critical-apparatus-with-mnemonics-an-example-not-a-suggestion",
+     "name": "The example — Table 25, \"A critical apparatus, with mnemonics\" (an example, not a suggestion)",
+     "score": 0.345
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-t-462cae6e--adc2f549",
+     "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+     "score": 0.301
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-the-operator-and-the-pilot-are-the-same-case--7bb0d573",
+     "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+     "score": 0.301
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-the-operator-and-the-pilot-are-the-same-case",
+     "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+     "score": 0.301
+    }
+   ]
+  },
+  {
+   "turn": 78,
+   "best_scope": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+   "best_scope_name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+   "score": 0.413,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.413
+    },
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-already-exists-sigils-the-gap-is-the-flow-into-a-control-layer",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.412
+    },
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-alr-3a2f3aa6--a47d3c0b",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.412
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.388
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-the-operator-and-the-pilot-are-the-same-case--7bb0d573",
+     "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+     "score": 0.382
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-t-462cae6e--adc2f549",
+     "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+     "score": 0.382
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-the-operator-and-the-pilot-are-the-same-case",
+     "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+     "score": 0.382
+    },
+    {
+     "id": "points-de-fuite/identify-exit",
+     "name": "IDENTIFY exit",
+     "score": 0.363
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.333
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.312
+    }
+   ]
+  },
+  {
+   "turn": 79,
+   "best_scope": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+   "best_scope_name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+   "score": 0.476,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.476
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.459
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-tod-5e9b51e5--d7151509",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.439
+    },
+    {
+     "id": "points-de-fuite/why-it-matters-the-payoff-that-closes-the-session-s-loop",
+     "name": "Why it matters — the payoff that closes the session's loop",
+     "score": 0.324
+    },
+    {
+     "id": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+     "name": "The futon, doubled — the promise this mission makes good on",
+     "score": 0.321
+    },
+    {
+     "id": "points-de-fuite/pattern/the-woven-form",
+     "name": "pattern: the-woven-form",
+     "score": 0.315
+    }
+   ]
+  },
+  {
+   "turn": 80,
+   "best_scope": "points-de-fuite/refinement-joe-2026-06-25-symbolic-acts-not-just-symbols",
+   "best_scope_name": "Refinement (Joe, 2026-06-25): symbolic ACTS, not just symbols",
+   "score": 0.395,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/refinement-joe-2026-06-25-symbolic-acts-not-just-symbols",
+     "name": "Refinement (Joe, 2026-06-25): symbolic ACTS, not just symbols",
+     "score": 0.395
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-arxana-is-the-operator-s-weaving-lay-71614ce4--c4c4ca66",
+     "name": "MAP finding (Joe, 2026-06-25): Arxana is the operator's weaving-layer (since 2005) — and the WM's is empty",
+     "score": 0.352
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-arxana-is-the-operator-s-weaving-layer-since-2005-and-the-wm-s-is-empty",
+     "name": "MAP finding (Joe, 2026-06-25): Arxana is the operator's weaving-layer (since 2005) — and the WM's is empty",
+     "score": 0.352
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-the-operator-and-the-pilot-are-the-same-case--7bb0d573",
+     "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+     "score": 0.345
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-t-462cae6e--adc2f549",
+     "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+     "score": 0.345
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-the-operator-and-the-pilot-are-the-same-case",
+     "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+     "score": 0.345
+    }
+   ]
+  },
+  {
+   "turn": 81,
+   "best_scope": "points-de-fuite/map-finding-joe-2026-06-25-arxana-is-the-operator-s-weaving-lay-71614ce4--c4c4ca66",
+   "best_scope_name": "MAP finding (Joe, 2026-06-25): Arxana is the operator's weaving-layer (since 2005) — and the WM's is empty",
+   "score": 0.6,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-arxana-is-the-operator-s-weaving-lay-71614ce4--c4c4ca66",
+     "name": "MAP finding (Joe, 2026-06-25): Arxana is the operator's weaving-layer (since 2005) — and the WM's is empty",
+     "score": 0.6
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-arxana-is-the-operator-s-weaving-layer-since-2005-and-the-wm-s-is-empty",
+     "name": "MAP finding (Joe, 2026-06-25): Arxana is the operator's weaving-layer (since 2005) — and the WM's is empty",
+     "score": 0.6
+    },
+    {
+     "id": "points-de-fuite/map-the-lineage-of-attention-organizations--b5df1621",
+     "name": "MAP — the lineage of attention-organizations",
+     "score": 0.503
+    },
+    {
+     "id": "points-de-fuite/seed-coding-joe-s-proposal-2026-06-25-code-the-attentional-arte-2e0b658b--da023361",
+     "name": "Seed-coding (Joe's proposal, 2026-06-25): code the attentional artefacts with the 2014 apparatus — and see where it runs out",
+     "score": 0.364
+    },
+    {
+     "id": "points-de-fuite/seed-coding-joe-s-proposal-2026-06-25-code-the-attentional-artefacts-with-the-2014-apparatus-and-see-where-it-runs-out",
+     "name": "Seed-coding (Joe's proposal, 2026-06-25): code the attentional artefacts with the 2014 apparatus — and see where it runs out",
+     "score": 0.364
+    }
+   ]
+  },
+  {
+   "turn": 82,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.161,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 83,
+   "best_scope": "points-de-fuite/seed-coding-joe-s-proposal-2026-06-25-code-the-attentional-artefacts-with-the-2014-apparatus-and-see-where-it-runs-out",
+   "best_scope_name": "Seed-coding (Joe's proposal, 2026-06-25): code the attentional artefacts with the 2014 apparatus — and see where it runs out",
+   "score": 0.525,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/seed-coding-joe-s-proposal-2026-06-25-code-the-attentional-artefacts-with-the-2014-apparatus-and-see-where-it-runs-out",
+     "name": "Seed-coding (Joe's proposal, 2026-06-25): code the attentional artefacts with the 2014 apparatus — and see where it runs out",
+     "score": 0.525
+    },
+    {
+     "id": "points-de-fuite/seed-coding-joe-s-proposal-2026-06-25-code-the-attentional-arte-2e0b658b--da023361",
+     "name": "Seed-coding (Joe's proposal, 2026-06-25): code the attentional artefacts with the 2014 apparatus — and see where it runs out",
+     "score": 0.525
+    },
+    {
+     "id": "points-de-fuite/map-the-lineage-of-attention-organizations--b5df1621",
+     "name": "MAP — the lineage of attention-organizations",
+     "score": 0.49
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-arxana-is-the-operator-s-weaving-layer-since-2005-and-the-wm-s-is-empty",
+     "name": "MAP finding (Joe, 2026-06-25): Arxana is the operator's weaving-layer (since 2005) — and the WM's is empty",
+     "score": 0.369
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-arxana-is-the-operator-s-weaving-lay-71614ce4--c4c4ca66",
+     "name": "MAP finding (Joe, 2026-06-25): Arxana is the operator's weaving-layer (since 2005) — and the WM's is empty",
+     "score": 0.369
+    },
+    {
+     "id": "points-de-fuite/map",
+     "name": "MAP — the lineage of attention-organizations",
+     "score": 0.306
+    }
+   ]
+  },
+  {
+   "turn": 84,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.289,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 85,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.267,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 86,
+   "best_scope": "points-de-fuite/refinement-joe-2026-06-25-symbolic-acts-not-just-symbols",
+   "best_scope_name": "Refinement (Joe, 2026-06-25): symbolic ACTS, not just symbols",
+   "score": 0.433,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/refinement-joe-2026-06-25-symbolic-acts-not-just-symbols",
+     "name": "Refinement (Joe, 2026-06-25): symbolic ACTS, not just symbols",
+     "score": 0.433
+    },
+    {
+     "id": "points-de-fuite/identify-exit",
+     "name": "IDENTIFY exit",
+     "score": 0.354
+    },
+    {
+     "id": "points-de-fuite/seed-coding-joe-s-proposal-2026-06-25-code-the-attentional-artefacts-with-the-2014-apparatus-and-see-where-it-runs-out",
+     "name": "Seed-coding (Joe's proposal, 2026-06-25): code the attentional artefacts with the 2014 apparatus — and see where it runs out",
+     "score": 0.329
+    },
+    {
+     "id": "points-de-fuite/seed-coding-joe-s-proposal-2026-06-25-code-the-attentional-arte-2e0b658b--da023361",
+     "name": "Seed-coding (Joe's proposal, 2026-06-25): code the attentional artefacts with the 2014 apparatus — and see where it runs out",
+     "score": 0.329
+    },
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-already-exists-sigils-the-gap-is-the-flow-into-a-control-layer",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.307
+    },
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-alr-3a2f3aa6--a47d3c0b",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.307
+    }
+   ]
+  },
+  {
+   "turn": 87,
+   "best_scope": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-already-exists-sigils-the-gap-is-the-flow-into-a-control-layer",
+   "best_scope_name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+   "score": 0.595,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-already-exists-sigils-the-gap-is-the-flow-into-a-control-layer",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.595
+    },
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-alr-3a2f3aa6--a47d3c0b",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.595
+    },
+    {
+     "id": "points-de-fuite/map-derive-convergence-joe-2026-06-26-the-control-layer-is-a-mode-family-and-most-of-it-already-exists",
+     "name": "MAP→DERIVE convergence (Joe, 2026-06-26): the control layer is a mode-family, and most of it already exists",
+     "score": 0.324
+    },
+    {
+     "id": "points-de-fuite/map-derive-convergence-joe-2026-06-26-the-control-layer-is-a-mo-1d317670--3d8a580f",
+     "name": "MAP→DERIVE convergence (Joe, 2026-06-26): the control layer is a mode-family, and most of it already exists",
+     "score": 0.324
+    },
+    {
+     "id": "points-de-fuite/refinement-joe-2026-06-25-symbolic-acts-not-just-symbols",
+     "name": "Refinement (Joe, 2026-06-25): symbolic ACTS, not just symbols",
+     "score": 0.307
+    },
+    {
+     "id": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+     "name": "The futon, doubled — the promise this mission makes good on",
+     "score": 0.305
+    }
+   ]
+  },
+  {
+   "turn": 88,
+   "best_scope": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+   "best_scope_name": "The futon, doubled — the promise this mission makes good on",
+   "score": 0.439,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+     "name": "The futon, doubled — the promise this mission makes good on",
+     "score": 0.439
+    },
+    {
+     "id": "points-de-fuite/pattern/the-woven-form",
+     "name": "pattern: the-woven-form",
+     "score": 0.341
+    }
+   ]
+  },
+  {
+   "turn": 89,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.232,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 90,
+   "best_scope": "points-de-fuite/map-the-lineage-of-attention-organizations--b5df1621",
+   "best_scope_name": "MAP — the lineage of attention-organizations",
+   "score": 0.381,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map-the-lineage-of-attention-organizations--b5df1621",
+     "name": "MAP — the lineage of attention-organizations",
+     "score": 0.381
+    },
+    {
+     "id": "points-de-fuite/identify-exit",
+     "name": "IDENTIFY exit",
+     "score": 0.367
+    },
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-already-exists-sigils-the-gap-is-the-flow-into-a-control-layer",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.341
+    },
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-alr-3a2f3aa6--a47d3c0b",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.341
+    },
+    {
+     "id": "points-de-fuite/map-derive-convergence-joe-2026-06-26-the-control-layer-is-a-mode-family-and-most-of-it-already-exists",
+     "name": "MAP→DERIVE convergence (Joe, 2026-06-26): the control layer is a mode-family, and most of it already exists",
+     "score": 0.317
+    },
+    {
+     "id": "points-de-fuite/map-derive-convergence-joe-2026-06-26-the-control-layer-is-a-mo-1d317670--3d8a580f",
+     "name": "MAP→DERIVE convergence (Joe, 2026-06-26): the control layer is a mode-family, and most of it already exists",
+     "score": 0.317
+    },
+    {
+     "id": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+     "name": "The futon, doubled — the promise this mission makes good on",
+     "score": 0.311
+    }
+   ]
+  },
+  {
+   "turn": 91,
+   "best_scope": "points-de-fuite/map-derive-convergence-joe-2026-06-26-the-control-layer-is-a-mode-family-and-most-of-it-already-exists",
+   "best_scope_name": "MAP→DERIVE convergence (Joe, 2026-06-26): the control layer is a mode-family, and most of it already exists",
+   "score": 0.362,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map-derive-convergence-joe-2026-06-26-the-control-layer-is-a-mode-family-and-most-of-it-already-exists",
+     "name": "MAP→DERIVE convergence (Joe, 2026-06-26): the control layer is a mode-family, and most of it already exists",
+     "score": 0.362
+    },
+    {
+     "id": "points-de-fuite/map-derive-convergence-joe-2026-06-26-the-control-layer-is-a-mo-1d317670--3d8a580f",
+     "name": "MAP→DERIVE convergence (Joe, 2026-06-26): the control layer is a mode-family, and most of it already exists",
+     "score": 0.362
+    }
+   ]
+  },
+  {
+   "turn": 92,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.272,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 93,
+   "best_scope": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+   "best_scope_name": "The futon, doubled — the promise this mission makes good on",
+   "score": 0.494,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+     "name": "The futon, doubled — the promise this mission makes good on",
+     "score": 0.494
+    },
+    {
+     "id": "points-de-fuite/map-derive-convergence-joe-2026-06-26-the-control-layer-is-a-mode-family-and-most-of-it-already-exists",
+     "name": "MAP→DERIVE convergence (Joe, 2026-06-26): the control layer is a mode-family, and most of it already exists",
+     "score": 0.352
+    },
+    {
+     "id": "points-de-fuite/map-derive-convergence-joe-2026-06-26-the-control-layer-is-a-mo-1d317670--3d8a580f",
+     "name": "MAP→DERIVE convergence (Joe, 2026-06-26): the control layer is a mode-family, and most of it already exists",
+     "score": 0.352
+    },
+    {
+     "id": "points-de-fuite/pattern/the-woven-form",
+     "name": "pattern: the-woven-form",
+     "score": 0.305
+    }
+   ]
+  },
+  {
+   "turn": 94,
+   "best_scope": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+   "best_scope_name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+   "score": 0.335,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.335
+    },
+    {
+     "id": "points-de-fuite/m-points-de-fuite-a-tiny-dsl-for-minting-structure-on-the-line-of-flight",
+     "name": "M-points-de-fuite — a tiny DSL for minting structure on the line of flight",
+     "score": 0.323
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.321
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.32
+    },
+    {
+     "id": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+     "name": "The futon, doubled — the promise this mission makes good on",
+     "score": 0.313
+    },
+    {
+     "id": "points-de-fuite/identify-exit",
+     "name": "IDENTIFY exit",
+     "score": 0.312
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.302
+    }
+   ]
+  },
+  {
+   "turn": 95,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.187,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 96,
+   "best_scope": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+   "best_scope_name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+   "score": 0.353,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.353
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.323
+    },
+    {
+     "id": "points-de-fuite/m-points-de-fuite-a-tiny-dsl-for-minting-structure-on-the-line-of-flight",
+     "name": "M-points-de-fuite — a tiny DSL for minting structure on the line of flight",
+     "score": 0.313
+    },
+    {
+     "id": "points-de-fuite/map-finding-2026-06-25-flight-is-the-aggregate-concentration-field-not-arrow-chains-studied-on-the-full-1393-record-run",
+     "name": "MAP finding (2026-06-25): flight is the aggregate CONCENTRATION FIELD, not arrow-chains — studied on the full 1393-record run",
+     "score": 0.305
+    },
+    {
+     "id": "points-de-fuite/map-finding-2026-06-25-flight-is-the-aggregate-concentration-fi-a0e1c793--9a2af2dd",
+     "name": "MAP finding (2026-06-25): flight is the aggregate CONCENTRATION FIELD, not arrow-chains — studied on the full 1393-record run",
+     "score": 0.305
+    },
+    {
+     "id": "points-de-fuite/map-finding-2026-06-25-flight-is-the-aggregate-concentration-field-not-arrow-chains-studied-on-the-full-1393-record-run--77251da3",
+     "name": "MAP finding (2026-06-25): flight is the aggregate CONCENTRATION FIELD, not arrow-chains — studied on the full 1393-record run",
+     "score": 0.305
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-tod-5e9b51e5--d7151509",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.303
+    }
+   ]
+  },
+  {
+   "turn": 97,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.296,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 98,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.274,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 99,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.277,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 100,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.288,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 101,
+   "best_scope": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+   "best_scope_name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+   "score": 0.42,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.42
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.391
+    },
+    {
+     "id": "points-de-fuite/m-points-de-fuite-a-tiny-dsl-for-minting-structure-on-the-line-of-flight",
+     "name": "M-points-de-fuite — a tiny DSL for minting structure on the line of flight",
+     "score": 0.312
+    },
+    {
+     "id": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+     "name": "The futon, doubled — the promise this mission makes good on",
+     "score": 0.307
+    }
+   ]
+  },
+  {
+   "turn": 102,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.282,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 103,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.27,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 104,
+   "best_scope": "points-de-fuite/identify-exit",
+   "best_scope_name": "IDENTIFY exit",
+   "score": 0.325,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/identify-exit",
+     "name": "IDENTIFY exit",
+     "score": 0.325
+    },
+    {
+     "id": "points-de-fuite/map",
+     "name": "MAP — the lineage of attention-organizations",
+     "score": 0.304
+    }
+   ]
+  },
+  {
+   "turn": 105,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.298,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 106,
+   "best_scope": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-already-exists-sigils-the-gap-is-the-flow-into-a-control-layer",
+   "best_scope_name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+   "score": 0.456,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-already-exists-sigils-the-gap-is-the-flow-into-a-control-layer",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.456
+    },
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-alr-3a2f3aa6--a47d3c0b",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.456
+    },
+    {
+     "id": "points-de-fuite/map-the-lineage-of-attention-organizations--b5df1621",
+     "name": "MAP — the lineage of attention-organizations",
+     "score": 0.351
+    },
+    {
+     "id": "points-de-fuite/identify-exit",
+     "name": "IDENTIFY exit",
+     "score": 0.332
+    },
+    {
+     "id": "points-de-fuite/refinement-joe-2026-06-25-symbolic-acts-not-just-symbols",
+     "name": "Refinement (Joe, 2026-06-25): symbolic ACTS, not just symbols",
+     "score": 0.318
+    },
+    {
+     "id": "points-de-fuite/map-derive-convergence-joe-2026-06-26-the-control-layer-is-a-mode-family-and-most-of-it-already-exists",
+     "name": "MAP→DERIVE convergence (Joe, 2026-06-26): the control layer is a mode-family, and most of it already exists",
+     "score": 0.306
+    },
+    {
+     "id": "points-de-fuite/map-derive-convergence-joe-2026-06-26-the-control-layer-is-a-mo-1d317670--3d8a580f",
+     "name": "MAP→DERIVE convergence (Joe, 2026-06-26): the control layer is a mode-family, and most of it already exists",
+     "score": 0.306
+    }
+   ]
+  },
+  {
+   "turn": 107,
+   "best_scope": "points-de-fuite/identify-exit",
+   "best_scope_name": "IDENTIFY exit",
+   "score": 0.339,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/identify-exit",
+     "name": "IDENTIFY exit",
+     "score": 0.339
+    }
+   ]
+  },
+  {
+   "turn": 108,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.272,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 109,
+   "best_scope": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-tod-5e9b51e5--d7151509",
+   "best_scope_name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+   "score": 0.385,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-tod-5e9b51e5--d7151509",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.385
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.37
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.36
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.324
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.305
+    }
+   ]
+  },
+  {
+   "turn": 110,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.131,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 111,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.229,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 112,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.237,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 113,
+   "best_scope": "points-de-fuite/the-tension",
+   "best_scope_name": "The tension",
+   "score": 0.393,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/the-tension",
+     "name": "The tension",
+     "score": 0.393
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.35
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.338
+    },
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-already-exists-sigils-the-gap-is-the-flow-into-a-control-layer",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.332
+    },
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-alr-3a2f3aa6--a47d3c0b",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.332
+    }
+   ]
+  },
+  {
+   "turn": 114,
+   "best_scope": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-already-exists-sigils-the-gap-is-the-flow-into-a-control-layer",
+   "best_scope_name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+   "score": 0.319,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-already-exists-sigils-the-gap-is-the-flow-into-a-control-layer",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.319
+    },
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-alr-3a2f3aa6--a47d3c0b",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.319
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.319
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.316
+    }
+   ]
+  },
+  {
+   "turn": 115,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.275,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 116,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.143,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 117,
+   "best_scope": "points-de-fuite/m-points-de-fuite-a-tiny-dsl-for-minting-structure-on-the-line-of-flight",
+   "best_scope_name": "M-points-de-fuite — a tiny DSL for minting structure on the line of flight",
+   "score": 0.301,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/m-points-de-fuite-a-tiny-dsl-for-minting-structure-on-the-line-of-flight",
+     "name": "M-points-de-fuite — a tiny DSL for minting structure on the line of flight",
+     "score": 0.301
+    },
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-alr-3a2f3aa6--a47d3c0b",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.3
+    },
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-already-exists-sigils-the-gap-is-the-flow-into-a-control-layer",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.3
+    }
+   ]
+  },
+  {
+   "turn": 118,
+   "best_scope": "points-de-fuite/map-the-lineage-of-attention-organizations--b5df1621",
+   "best_scope_name": "MAP — the lineage of attention-organizations",
+   "score": 0.325,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map-the-lineage-of-attention-organizations--b5df1621",
+     "name": "MAP — the lineage of attention-organizations",
+     "score": 0.325
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-arxana-is-the-operator-s-weaving-lay-71614ce4--c4c4ca66",
+     "name": "MAP finding (Joe, 2026-06-25): Arxana is the operator's weaving-layer (since 2005) — and the WM's is empty",
+     "score": 0.305
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-arxana-is-the-operator-s-weaving-layer-since-2005-and-the-wm-s-is-empty",
+     "name": "MAP finding (Joe, 2026-06-25): Arxana is the operator's weaving-layer (since 2005) — and the WM's is empty",
+     "score": 0.305
+    }
+   ]
+  },
+  {
+   "turn": 119,
+   "best_scope": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+   "best_scope_name": "The futon, doubled — the promise this mission makes good on",
+   "score": 0.447,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+     "name": "The futon, doubled — the promise this mission makes good on",
+     "score": 0.447
+    },
+    {
+     "id": "points-de-fuite/pattern/the-woven-form",
+     "name": "pattern: the-woven-form",
+     "score": 0.379
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.366
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.345
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.318
+    }
+   ]
+  },
+  {
+   "turn": 120,
+   "best_scope": "points-de-fuite/m-points-de-fuite-a-tiny-dsl-for-minting-structure-on-the-line-of-flight",
+   "best_scope_name": "M-points-de-fuite — a tiny DSL for minting structure on the line of flight",
+   "score": 0.411,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/m-points-de-fuite-a-tiny-dsl-for-minting-structure-on-the-line-of-flight",
+     "name": "M-points-de-fuite — a tiny DSL for minting structure on the line of flight",
+     "score": 0.411
+    },
+    {
+     "id": "points-de-fuite/map-the-lineage-of-attention-organizations--b5df1621",
+     "name": "MAP — the lineage of attention-organizations",
+     "score": 0.34
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-arxana-is-the-operator-s-weaving-lay-71614ce4--c4c4ca66",
+     "name": "MAP finding (Joe, 2026-06-25): Arxana is the operator's weaving-layer (since 2005) — and the WM's is empty",
+     "score": 0.338
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-arxana-is-the-operator-s-weaving-layer-since-2005-and-the-wm-s-is-empty",
+     "name": "MAP finding (Joe, 2026-06-25): Arxana is the operator's weaving-layer (since 2005) — and the WM's is empty",
+     "score": 0.338
+    }
+   ]
+  },
+  {
+   "turn": 121,
+   "best_scope": "points-de-fuite/map",
+   "best_scope_name": "MAP — the lineage of attention-organizations",
+   "score": 0.312,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map",
+     "name": "MAP — the lineage of attention-organizations",
+     "score": 0.312
+    }
+   ]
+  },
+  {
+   "turn": 122,
+   "best_scope": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight",
+   "best_scope_name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+   "score": 0.324,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.324
+    }
+   ]
+  },
+  {
+   "turn": 123,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.254,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 124,
+   "best_scope": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight",
+   "best_scope_name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+   "score": 0.338,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.338
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.336
+    }
+   ]
+  },
+  {
+   "turn": 125,
+   "best_scope": "points-de-fuite/sibling-instances",
+   "best_scope_name": "Sibling instances",
+   "score": 0.356,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/sibling-instances",
+     "name": "Sibling instances",
+     "score": 0.356
+    }
+   ]
+  },
+  {
+   "turn": 126,
+   "best_scope": "points-de-fuite/why-it-matters-the-payoff-that-closes-the-session-s-loop",
+   "best_scope_name": "Why it matters — the payoff that closes the session's loop",
+   "score": 0.308,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/why-it-matters-the-payoff-that-closes-the-session-s-loop",
+     "name": "Why it matters — the payoff that closes the session's loop",
+     "score": 0.308
+    }
+   ]
+  },
+  {
+   "turn": 127,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.196,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 128,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.287,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 129,
+   "best_scope": "points-de-fuite/map-finding-joe-2026-06-25-arxana-is-the-operator-s-weaving-lay-71614ce4--c4c4ca66",
+   "best_scope_name": "MAP finding (Joe, 2026-06-25): Arxana is the operator's weaving-layer (since 2005) — and the WM's is empty",
+   "score": 0.351,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-arxana-is-the-operator-s-weaving-lay-71614ce4--c4c4ca66",
+     "name": "MAP finding (Joe, 2026-06-25): Arxana is the operator's weaving-layer (since 2005) — and the WM's is empty",
+     "score": 0.351
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-arxana-is-the-operator-s-weaving-layer-since-2005-and-the-wm-s-is-empty",
+     "name": "MAP finding (Joe, 2026-06-25): Arxana is the operator's weaving-layer (since 2005) — and the WM's is empty",
+     "score": 0.351
+    },
+    {
+     "id": "points-de-fuite/m-points-de-fuite-a-tiny-dsl-for-minting-structure-on-the-line-of-flight",
+     "name": "M-points-de-fuite — a tiny DSL for minting structure on the line of flight",
+     "score": 0.329
+    }
+   ]
+  },
+  {
+   "turn": 130,
+   "best_scope": "points-de-fuite/map-finding-joe-2026-06-25-arxana-is-the-operator-s-weaving-lay-71614ce4--c4c4ca66",
+   "best_scope_name": "MAP finding (Joe, 2026-06-25): Arxana is the operator's weaving-layer (since 2005) — and the WM's is empty",
+   "score": 0.316,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-arxana-is-the-operator-s-weaving-lay-71614ce4--c4c4ca66",
+     "name": "MAP finding (Joe, 2026-06-25): Arxana is the operator's weaving-layer (since 2005) — and the WM's is empty",
+     "score": 0.316
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-arxana-is-the-operator-s-weaving-layer-since-2005-and-the-wm-s-is-empty",
+     "name": "MAP finding (Joe, 2026-06-25): Arxana is the operator's weaving-layer (since 2005) — and the WM's is empty",
+     "score": 0.316
+    }
+   ]
+  },
+  {
+   "turn": 131,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.274,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 132,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.291,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 133,
+   "best_scope": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+   "best_scope_name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+   "score": 0.38,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.38
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.338
+    },
+    {
+     "id": "points-de-fuite/seed-coding-joe-s-proposal-2026-06-25-code-the-attentional-artefacts-with-the-2014-apparatus-and-see-where-it-runs-out",
+     "name": "Seed-coding (Joe's proposal, 2026-06-25): code the attentional artefacts with the 2014 apparatus — and see where it runs out",
+     "score": 0.323
+    },
+    {
+     "id": "points-de-fuite/seed-coding-joe-s-proposal-2026-06-25-code-the-attentional-arte-2e0b658b--da023361",
+     "name": "Seed-coding (Joe's proposal, 2026-06-25): code the attentional artefacts with the 2014 apparatus — and see where it runs out",
+     "score": 0.323
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-tod-5e9b51e5--d7151509",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.319
+    },
+    {
+     "id": "points-de-fuite/map-finding-2026-06-25-flight-is-the-aggregate-concentration-field-not-arrow-chains-studied-on-the-full-1393-record-run",
+     "name": "MAP finding (2026-06-25): flight is the aggregate CONCENTRATION FIELD, not arrow-chains — studied on the full 1393-record run",
+     "score": 0.313
+    },
+    {
+     "id": "points-de-fuite/map-finding-2026-06-25-flight-is-the-aggregate-concentration-fi-a0e1c793--9a2af2dd",
+     "name": "MAP finding (2026-06-25): flight is the aggregate CONCENTRATION FIELD, not arrow-chains — studied on the full 1393-record run",
+     "score": 0.313
+    },
+    {
+     "id": "points-de-fuite/map-finding-2026-06-25-flight-is-the-aggregate-concentration-field-not-arrow-chains-studied-on-the-full-1393-record-run--77251da3",
+     "name": "MAP finding (2026-06-25): flight is the aggregate CONCENTRATION FIELD, not arrow-chains — studied on the full 1393-record run",
+     "score": 0.313
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.309
+    }
+   ]
+  },
+  {
+   "turn": 134,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.298,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 135,
+   "best_scope": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-already-exists-sigils-the-gap-is-the-flow-into-a-control-layer",
+   "best_scope_name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+   "score": 0.456,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-already-exists-sigils-the-gap-is-the-flow-into-a-control-layer",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.456
+    },
+    {
+     "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-alr-3a2f3aa6--a47d3c0b",
+     "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+     "score": 0.456
+    }
+   ]
+  },
+  {
+   "turn": 136,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.225,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 137,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.286,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 138,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.221,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 139,
+   "best_scope": "points-de-fuite/map-finding-joe-2026-06-25-arxana-is-the-operator-s-weaving-lay-71614ce4--c4c4ca66",
+   "best_scope_name": "MAP finding (Joe, 2026-06-25): Arxana is the operator's weaving-layer (since 2005) — and the WM's is empty",
+   "score": 0.332,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-arxana-is-the-operator-s-weaving-lay-71614ce4--c4c4ca66",
+     "name": "MAP finding (Joe, 2026-06-25): Arxana is the operator's weaving-layer (since 2005) — and the WM's is empty",
+     "score": 0.332
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-arxana-is-the-operator-s-weaving-layer-since-2005-and-the-wm-s-is-empty",
+     "name": "MAP finding (Joe, 2026-06-25): Arxana is the operator's weaving-layer (since 2005) — and the WM's is empty",
+     "score": 0.332
+    }
+   ]
+  },
+  {
+   "turn": 140,
+   "best_scope": "points-de-fuite/identify-exit",
+   "best_scope_name": "IDENTIFY exit",
+   "score": 0.322,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/identify-exit",
+     "name": "IDENTIFY exit",
+     "score": 0.322
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.322
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.312
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.309
+    },
+    {
+     "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+     "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+     "score": 0.308
+    }
+   ]
+  },
+  {
+   "turn": 141,
+   "best_scope": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight",
+   "best_scope_name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+   "score": 0.364,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.364
+    },
+    {
+     "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+     "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+     "score": 0.335
+    }
+   ]
+  },
+  {
+   "turn": 142,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.219,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 143,
+   "best_scope": "points-de-fuite/m-points-de-fuite-a-tiny-dsl-for-minting-structure-on-the-line-of-flight",
+   "best_scope_name": "M-points-de-fuite — a tiny DSL for minting structure on the line of flight",
+   "score": 0.394,
+   "engages": true,
+   "engaged": [
+    {
+     "id": "points-de-fuite/m-points-de-fuite-a-tiny-dsl-for-minting-structure-on-the-line-of-flight",
+     "name": "M-points-de-fuite — a tiny DSL for minting structure on the line of flight",
+     "score": 0.394
+    }
+   ]
+  }
+ ],
+ "scopes": [
+  {
+   "id": "points-de-fuite/m-points-de-fuite-a-tiny-dsl-for-minting-structure-on-the-line-of-flight",
+   "name": "M-points-de-fuite — a tiny DSL for minting structure on the line of flight",
+   "binder": "loose-section",
+   "turns": [
+    117,
+    120,
+    143
+   ]
+  },
+  {
+   "id": "points-de-fuite/map",
+   "name": "MAP — the lineage of attention-organizations",
+   "binder": "eightfold-phase",
+   "turns": [
+    121
+   ]
+  },
+  {
+   "id": "points-de-fuite/map-derive-convergence-joe-2026-06-26-the-control-layer-is-a-mo-1d317670--3d8a580f",
+   "name": "MAP→DERIVE convergence (Joe, 2026-06-26): the control layer is a mode-family, and most of it already exists",
+   "binder": "map-item",
+   "turns": []
+  },
+  {
+   "id": "points-de-fuite/map-derive-convergence-joe-2026-06-26-the-control-layer-is-a-mode-family-and-most-of-it-already-exists",
+   "name": "MAP→DERIVE convergence (Joe, 2026-06-26): the control layer is a mode-family, and most of it already exists",
+   "binder": "loose-section",
+   "turns": [
+    91
+   ]
+  },
+  {
+   "id": "points-de-fuite/seed-coding-joe-s-proposal-2026-06-25-code-the-attentional-arte-2e0b658b--da023361",
+   "name": "Seed-coding (Joe's proposal, 2026-06-25): code the attentional artefacts with the 2014 apparatus — and see where it runs out",
+   "binder": "map-item",
+   "turns": []
+  },
+  {
+   "id": "points-de-fuite/seed-coding-joe-s-proposal-2026-06-25-code-the-attentional-artefacts-with-the-2014-apparatus-and-see-where-it-runs-out",
+   "name": "Seed-coding (Joe's proposal, 2026-06-25): code the attentional artefacts with the 2014 apparatus — and see where it runs out",
+   "binder": "loose-section",
+   "turns": [
+    77,
+    83
+   ]
+  },
+  {
+   "id": "points-de-fuite/map-finding-joe-2026-06-25-arxana-is-the-operator-s-weaving-lay-71614ce4--c4c4ca66",
+   "name": "MAP finding (Joe, 2026-06-25): Arxana is the operator's weaving-layer (since 2005) — and the WM's is empty",
+   "binder": "map-item",
+   "turns": [
+    81,
+    129,
+    130,
+    139
+   ]
+  },
+  {
+   "id": "points-de-fuite/map-finding-joe-2026-06-25-arxana-is-the-operator-s-weaving-layer-since-2005-and-the-wm-s-is-empty",
+   "name": "MAP finding (Joe, 2026-06-25): Arxana is the operator's weaving-layer (since 2005) — and the WM's is empty",
+   "binder": "loose-section",
+   "turns": []
+  },
+  {
+   "id": "points-de-fuite/map-finding-2026-06-25-flight-is-the-aggregate-concentration-field-not-arrow-chains-studied-on-the-full-1393-record-run--77251da3",
+   "name": "MAP finding (2026-06-25): flight is the aggregate CONCENTRATION FIELD, not arrow-chains — studied on the full 1393-record run",
+   "binder": "capability-scope",
+   "turns": []
+  },
+  {
+   "id": "points-de-fuite/map-finding-2026-06-25-flight-is-the-aggregate-concentration-fi-a0e1c793--9a2af2dd",
+   "name": "MAP finding (2026-06-25): flight is the aggregate CONCENTRATION FIELD, not arrow-chains — studied on the full 1393-record run",
+   "binder": "map-item",
+   "turns": []
+  },
+  {
+   "id": "points-de-fuite/map-finding-2026-06-25-flight-is-the-aggregate-concentration-field-not-arrow-chains-studied-on-the-full-1393-record-run",
+   "name": "MAP finding (2026-06-25): flight is the aggregate CONCENTRATION FIELD, not arrow-chains — studied on the full 1393-record run",
+   "binder": "loose-section",
+   "turns": []
+  },
+  {
+   "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-alr-3a2f3aa6--a47d3c0b",
+   "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+   "binder": "map-item",
+   "turns": []
+  },
+  {
+   "id": "points-de-fuite/map-verdict-derive-pivot-joe-2026-06-26-the-per-turn-coding-already-exists-sigils-the-gap-is-the-flow-into-a-control-layer",
+   "name": "MAP VERDICT / DERIVE pivot (Joe, 2026-06-26): the per-turn coding already EXISTS (sigils) — the gap is the flow into a control layer",
+   "binder": "loose-section",
+   "turns": [
+    15,
+    32,
+    58,
+    87,
+    106,
+    114,
+    135
+   ]
+  },
+  {
+   "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-t-462cae6e--adc2f549",
+   "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+   "binder": "map-item",
+   "turns": []
+  },
+  {
+   "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-the-operator-and-the-pilot-are-the-same-case",
+   "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+   "binder": "loose-section",
+   "turns": []
+  },
+  {
+   "id": "points-de-fuite/map-finding-joe-2026-06-25-the-recognizer-is-author-invariant-the-operator-and-the-pilot-are-the-same-case--7bb0d573",
+   "name": "MAP finding (Joe, 2026-06-25): the recognizer is author-invariant — the operator and the Pilot are the same case",
+   "binder": "capability-scope",
+   "turns": []
+  },
+  {
+   "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-tod-5e9b51e5--d7151509",
+   "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+   "binder": "map-item",
+   "turns": [
+    34,
+    39,
+    44,
+    48,
+    54,
+    109
+   ]
+  },
+  {
+   "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck",
+   "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+   "binder": "loose-section",
+   "turns": [
+    21,
+    31
+   ]
+  },
+  {
+   "id": "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd",
+   "name": "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck",
+   "binder": "capability-scope",
+   "turns": [
+    19,
+    71,
+    79,
+    94,
+    96,
+    133
+   ]
+  },
+  {
+   "id": "points-de-fuite/identify",
+   "name": "IDENTIFY — shape-first",
+   "binder": "eightfold-phase",
+   "turns": [
+    59
+   ]
+  },
+  {
+   "id": "points-de-fuite/the-gap-stated-as-evidence-question-hypothesis",
+   "name": "The gap — stated as evidence · question · hypothesis",
+   "binder": "loose-section",
+   "turns": [
+    75
+   ]
+  },
+  {
+   "id": "points-de-fuite/the-example-table-25-a-critical-apparatus-with-mnemonics-an-example-not-a-suggestion",
+   "name": "The example — Table 25, \"A critical apparatus, with mnemonics\" (an example, not a suggestion)",
+   "binder": "loose-section",
+   "turns": [
+    72
+   ]
+  },
+  {
+   "id": "points-de-fuite/identify-exit",
+   "name": "IDENTIFY exit",
+   "binder": "loose-section",
+   "turns": [
+    25,
+    104,
+    107,
+    140
+   ]
+  },
+  {
+   "id": "points-de-fuite/refinement-joe-2026-06-25-symbolic-acts-not-just-symbols",
+   "name": "Refinement (Joe, 2026-06-25): symbolic ACTS, not just symbols",
+   "binder": "loose-section",
+   "turns": [
+    49,
+    73,
+    80,
+    86
+   ]
+  },
+  {
+   "id": "points-de-fuite/sibling-instances",
+   "name": "Sibling instances",
+   "binder": "loose-section",
+   "turns": [
+    125
+   ]
+  },
+  {
+   "id": "points-de-fuite/why-it-matters-the-payoff-that-closes-the-session-s-loop",
+   "name": "Why it matters — the payoff that closes the session's loop",
+   "binder": "loose-section",
+   "turns": [
+    126
+   ]
+  },
+  {
+   "id": "points-de-fuite/the-shape",
+   "name": "The shape",
+   "binder": "loose-section",
+   "turns": [
+    17
+   ]
+  },
+  {
+   "id": "points-de-fuite/the-tension",
+   "name": "The tension",
+   "binder": "loose-section",
+   "turns": [
+    37,
+    113
+   ]
+  },
+  {
+   "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight",
+   "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+   "binder": "loose-section",
+   "turns": [
+    9,
+    122,
+    124,
+    141
+   ]
+  },
+  {
+   "id": "points-de-fuite/sharpening-joe-2026-06-25-winding-is-not-yet-flight--2e763cc0",
+   "name": "Sharpening (Joe, 2026-06-25): winding is not yet flight",
+   "binder": "capability-scope",
+   "turns": [
+    23,
+    36,
+    38,
+    76,
+    78,
+    101
+   ]
+  },
+  {
+   "id": "points-de-fuite/map-the-lineage-of-attention-organizations--b5df1621",
+   "name": "MAP — the lineage of attention-organizations",
+   "binder": "capability-scope",
+   "turns": [
+    90,
+    118
+   ]
+  },
+  {
+   "id": "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on",
+   "name": "The futon, doubled — the promise this mission makes good on",
+   "binder": "loose-section",
+   "turns": [
+    12,
+    20,
+    26,
+    30,
+    46,
+    65,
+    88,
+    93,
+    119
+   ]
+  },
+  {
+   "id": "points-de-fuite/phases-ahead",
+   "name": "Phases ahead",
+   "binder": "loose-section",
+   "turns": []
+  },
+  {
+   "id": "points-de-fuite/head",
+   "name": "HEAD",
+   "binder": "eightfold-phase",
+   "turns": []
+  },
+  {
+   "id": "points-de-fuite/pattern/the-woven-form",
+   "name": "pattern: the-woven-form",
+   "binder": "pattern",
+   "turns": [
+    10,
+    14,
+    28,
+    63,
+    74
+   ]
+  }
+ ]
+}

@@ -1,0 +1,2008 @@
+{
+ "session": "9aaeeeb0",
+ "session_id": "9aaeeeb0-1a4f-4a23-9e9b-c78cac4e99de",
+ "n_turns": 134,
+ "min_recurrence": 3,
+ "topk": 3,
+ "n_threads": 44,
+ "thread-hyperedges": [
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/devmap-coherence--ifr-f1-dhammavicaya",
+   "pattern": "devmap-coherence/ifr-f1-dhammavicaya",
+   "collection": "devmap-coherence",
+   "sigil": {
+    "okipona": "oko",
+    "truth": "乃"
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 2,
+     "rank": 2,
+     "score": 0.3124
+    },
+    {
+     "role": "turn",
+     "turn": 6,
+     "rank": 2,
+     "score": 0.2549
+    },
+    {
+     "role": "turn",
+     "turn": 8,
+     "rank": 1,
+     "score": 0.3098
+    },
+    {
+     "role": "turn",
+     "turn": 20,
+     "rank": 2,
+     "score": 0.4889
+    },
+    {
+     "role": "turn",
+     "turn": 26,
+     "rank": 3,
+     "score": 0.4862
+    },
+    {
+     "role": "turn",
+     "turn": 46,
+     "rank": 1,
+     "score": 0.5924
+    },
+    {
+     "role": "turn",
+     "turn": 47,
+     "rank": 2,
+     "score": 0.3482
+    },
+    {
+     "role": "turn",
+     "turn": 48,
+     "rank": 3,
+     "score": 0.3367
+    },
+    {
+     "role": "turn",
+     "turn": 50,
+     "rank": 3,
+     "score": 0.387
+    },
+    {
+     "role": "turn",
+     "turn": 99,
+     "rank": 1,
+     "score": 0.353
+    },
+    {
+     "role": "turn",
+     "turn": 103,
+     "rank": 1,
+     "score": 0.5208
+    }
+   ],
+   "recurrence": 11,
+   "span": [
+    2,
+    103
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/social--ARGUMENT",
+   "pattern": "social/ARGUMENT",
+   "collection": "social",
+   "sigil": {
+    "okipona": "",
+    "truth": ""
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 21,
+     "rank": 3,
+     "score": 0.3597
+    },
+    {
+     "role": "turn",
+     "turn": 26,
+     "rank": 2,
+     "score": 0.4932
+    },
+    {
+     "role": "turn",
+     "turn": 28,
+     "rank": 2,
+     "score": 0.4262
+    },
+    {
+     "role": "turn",
+     "turn": 30,
+     "rank": 2,
+     "score": 0.5222
+    },
+    {
+     "role": "turn",
+     "turn": 65,
+     "rank": 3,
+     "score": 0.3853
+    },
+    {
+     "role": "turn",
+     "turn": 74,
+     "rank": 3,
+     "score": 0.4601
+    },
+    {
+     "role": "turn",
+     "turn": 79,
+     "rank": 1,
+     "score": 0.4771
+    },
+    {
+     "role": "turn",
+     "turn": 88,
+     "rank": 1,
+     "score": 0.5544
+    },
+    {
+     "role": "turn",
+     "turn": 96,
+     "rank": 2,
+     "score": 0.4026
+    },
+    {
+     "role": "turn",
+     "turn": 131,
+     "rank": 2,
+     "score": 0.3641
+    }
+   ],
+   "recurrence": 10,
+   "span": [
+    21,
+    131
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/stack-coherence--futon1-determinism",
+   "pattern": "stack-coherence/futon1-determinism",
+   "collection": "stack-coherence",
+   "sigil": {
+    "okipona": "lawa",
+    "truth": "申"
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 2,
+     "rank": 3,
+     "score": 0.3012
+    },
+    {
+     "role": "turn",
+     "turn": 6,
+     "rank": 1,
+     "score": 0.2751
+    },
+    {
+     "role": "turn",
+     "turn": 20,
+     "rank": 1,
+     "score": 0.4913
+    },
+    {
+     "role": "turn",
+     "turn": 32,
+     "rank": 3,
+     "score": 0.3545
+    },
+    {
+     "role": "turn",
+     "turn": 41,
+     "rank": 2,
+     "score": 0.4464
+    },
+    {
+     "role": "turn",
+     "turn": 46,
+     "rank": 2,
+     "score": 0.53
+    },
+    {
+     "role": "turn",
+     "turn": 50,
+     "rank": 2,
+     "score": 0.4025
+    },
+    {
+     "role": "turn",
+     "turn": 99,
+     "rank": 3,
+     "score": 0.3407
+    },
+    {
+     "role": "turn",
+     "turn": 115,
+     "rank": 3,
+     "score": 0.4374
+    }
+   ],
+   "recurrence": 9,
+   "span": [
+    2,
+    115
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/futon-theory--mission-interface-signature",
+   "pattern": "futon-theory/mission-interface-signature",
+   "collection": "futon-theory",
+   "sigil": {
+    "okipona": "",
+    "truth": ""
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 15,
+     "rank": 3,
+     "score": 0.3797
+    },
+    {
+     "role": "turn",
+     "turn": 26,
+     "rank": 1,
+     "score": 0.5062
+    },
+    {
+     "role": "turn",
+     "turn": 67,
+     "rank": 3,
+     "score": 0.3814
+    },
+    {
+     "role": "turn",
+     "turn": 93,
+     "rank": 3,
+     "score": 0.4796
+    },
+    {
+     "role": "turn",
+     "turn": 94,
+     "rank": 1,
+     "score": 0.407
+    },
+    {
+     "role": "turn",
+     "turn": 96,
+     "rank": 1,
+     "score": 0.4462
+    },
+    {
+     "role": "turn",
+     "turn": 97,
+     "rank": 1,
+     "score": 0.393
+    }
+   ],
+   "recurrence": 7,
+   "span": [
+    15,
+    97
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/ants--baseline-cyber-ant",
+   "pattern": "ants/baseline-cyber-ant",
+   "collection": "ants",
+   "sigil": {
+    "okipona": "taso",
+    "truth": "三"
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 21,
+     "rank": 2,
+     "score": 0.3726
+    },
+    {
+     "role": "turn",
+     "turn": 30,
+     "rank": 1,
+     "score": 0.5385
+    },
+    {
+     "role": "turn",
+     "turn": 54,
+     "rank": 2,
+     "score": 0.4014
+    },
+    {
+     "role": "turn",
+     "turn": 63,
+     "rank": 3,
+     "score": 0.4972
+    },
+    {
+     "role": "turn",
+     "turn": 65,
+     "rank": 1,
+     "score": 0.4452
+    },
+    {
+     "role": "turn",
+     "turn": 93,
+     "rank": 1,
+     "score": 0.4853
+    },
+    {
+     "role": "turn",
+     "turn": 103,
+     "rank": 2,
+     "score": 0.4996
+    }
+   ],
+   "recurrence": 7,
+   "span": [
+    21,
+    103
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/musn--plan-before-tool",
+   "pattern": "musn/plan-before-tool",
+   "collection": "musn",
+   "sigil": {
+    "okipona": "ilo",
+    "truth": "计"
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 39,
+     "rank": 3,
+     "score": 0.4019
+    },
+    {
+     "role": "turn",
+     "turn": 40,
+     "rank": 3,
+     "score": 0.3813
+    },
+    {
+     "role": "turn",
+     "turn": 56,
+     "rank": 3,
+     "score": 0.3654
+    },
+    {
+     "role": "turn",
+     "turn": 76,
+     "rank": 2,
+     "score": 0.306
+    },
+    {
+     "role": "turn",
+     "turn": 108,
+     "rank": 1,
+     "score": 0.3599
+    },
+    {
+     "role": "turn",
+     "turn": 109,
+     "rank": 1,
+     "score": 0.5491
+    },
+    {
+     "role": "turn",
+     "turn": 128,
+     "rank": 1,
+     "score": 0.3777
+    }
+   ],
+   "recurrence": 7,
+   "span": [
+    39,
+    128
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/stack-coherence--stack-blocker-detection",
+   "pattern": "stack-coherence/stack-blocker-detection",
+   "collection": "stack-coherence",
+   "sigil": {
+    "okipona": "len",
+    "truth": "示"
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 3,
+     "rank": 1,
+     "score": 0.4783
+    },
+    {
+     "role": "turn",
+     "turn": 5,
+     "rank": 3,
+     "score": 0.3863
+    },
+    {
+     "role": "turn",
+     "turn": 40,
+     "rank": 2,
+     "score": 0.3882
+    },
+    {
+     "role": "turn",
+     "turn": 51,
+     "rank": 3,
+     "score": 0.3084
+    },
+    {
+     "role": "turn",
+     "turn": 67,
+     "rank": 1,
+     "score": 0.3964
+    },
+    {
+     "role": "turn",
+     "turn": 70,
+     "rank": 2,
+     "score": 0.2987
+    }
+   ],
+   "recurrence": 6,
+   "span": [
+    3,
+    70
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/futon-theory--derive-exits-on-a-minted-sorry",
+   "pattern": "futon-theory/derive-exits-on-a-minted-sorry",
+   "collection": "futon-theory",
+   "sigil": {
+    "okipona": "",
+    "truth": ""
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 12,
+     "rank": 2,
+     "score": 0.3748
+    },
+    {
+     "role": "turn",
+     "turn": 33,
+     "rank": 1,
+     "score": 0.3835
+    },
+    {
+     "role": "turn",
+     "turn": 34,
+     "rank": 2,
+     "score": 0.3953
+    },
+    {
+     "role": "turn",
+     "turn": 75,
+     "rank": 1,
+     "score": 0.5028
+    },
+    {
+     "role": "turn",
+     "turn": 85,
+     "rank": 1,
+     "score": 0.3554
+    },
+    {
+     "role": "turn",
+     "turn": 91,
+     "rank": 3,
+     "score": 0.3674
+    }
+   ],
+   "recurrence": 6,
+   "span": [
+    12,
+    91
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/contributing--devmap-contribution-protocol",
+   "pattern": "contributing/devmap-contribution-protocol",
+   "collection": "contributing",
+   "sigil": {
+    "okipona": "mute",
+    "truth": "工"
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 18,
+     "rank": 1,
+     "score": 0.3573
+    },
+    {
+     "role": "turn",
+     "turn": 44,
+     "rank": 2,
+     "score": 0.4176
+    },
+    {
+     "role": "turn",
+     "turn": 51,
+     "rank": 1,
+     "score": 0.3591
+    },
+    {
+     "role": "turn",
+     "turn": 55,
+     "rank": 2,
+     "score": 0.3857
+    },
+    {
+     "role": "turn",
+     "turn": 86,
+     "rank": 3,
+     "score": 0.4194
+    },
+    {
+     "role": "turn",
+     "turn": 105,
+     "rank": 3,
+     "score": 0.3239
+    }
+   ],
+   "recurrence": 6,
+   "span": [
+    18,
+    105
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/library-coherence--library-embedding-refresh",
+   "pattern": "library-coherence/library-embedding-refresh",
+   "collection": "library-coherence",
+   "sigil": {
+    "okipona": "sin",
+    "truth": "归"
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 18,
+     "rank": 2,
+     "score": 0.3481
+    },
+    {
+     "role": "turn",
+     "turn": 87,
+     "rank": 3,
+     "score": 0.4567
+    },
+    {
+     "role": "turn",
+     "turn": 90,
+     "rank": 3,
+     "score": 0.432
+    },
+    {
+     "role": "turn",
+     "turn": 105,
+     "rank": 1,
+     "score": 0.361
+    },
+    {
+     "role": "turn",
+     "turn": 106,
+     "rank": 1,
+     "score": 0.5193
+    },
+    {
+     "role": "turn",
+     "turn": 116,
+     "rank": 2,
+     "score": 0.3853
+    }
+   ],
+   "recurrence": 6,
+   "span": [
+    18,
+    116
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/futon-theory--mission-lifecycle",
+   "pattern": "futon-theory/mission-lifecycle",
+   "collection": "futon-theory",
+   "sigil": {
+    "okipona": "sike",
+    "truth": "马"
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 25,
+     "rank": 3,
+     "score": 0.4672
+    },
+    {
+     "role": "turn",
+     "turn": 91,
+     "rank": 2,
+     "score": 0.385
+    },
+    {
+     "role": "turn",
+     "turn": 92,
+     "rank": 3,
+     "score": 0.4072
+    },
+    {
+     "role": "turn",
+     "turn": 97,
+     "rank": 3,
+     "score": 0.344
+    },
+    {
+     "role": "turn",
+     "turn": 125,
+     "rank": 1,
+     "score": 0.3652
+    },
+    {
+     "role": "turn",
+     "turn": 134,
+     "rank": 2,
+     "score": 0.4278
+    }
+   ],
+   "recurrence": 6,
+   "span": [
+    25,
+    134
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/futon-theory--structural-tension-as-observation",
+   "pattern": "futon-theory/structural-tension-as-observation",
+   "collection": "futon-theory",
+   "sigil": {
+    "okipona": "",
+    "truth": ""
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 28,
+     "rank": 1,
+     "score": 0.5051
+    },
+    {
+     "role": "turn",
+     "turn": 79,
+     "rank": 3,
+     "score": 0.4553
+    },
+    {
+     "role": "turn",
+     "turn": 113,
+     "rank": 2,
+     "score": 0.4101
+    },
+    {
+     "role": "turn",
+     "turn": 114,
+     "rank": 1,
+     "score": 0.4187
+    },
+    {
+     "role": "turn",
+     "turn": 118,
+     "rank": 2,
+     "score": 0.3383
+    },
+    {
+     "role": "turn",
+     "turn": 129,
+     "rank": 1,
+     "score": 0.343
+    }
+   ],
+   "recurrence": 6,
+   "span": [
+    28,
+    129
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/coordination--ARGUMENT",
+   "pattern": "coordination/ARGUMENT",
+   "collection": "coordination",
+   "sigil": {
+    "okipona": "",
+    "truth": ""
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 9,
+     "rank": 3,
+     "score": 0.457
+    },
+    {
+     "role": "turn",
+     "turn": 58,
+     "rank": 2,
+     "score": 0.418
+    },
+    {
+     "role": "turn",
+     "turn": 60,
+     "rank": 1,
+     "score": 0.4475
+    },
+    {
+     "role": "turn",
+     "turn": 62,
+     "rank": 3,
+     "score": 0.3205
+    },
+    {
+     "role": "turn",
+     "turn": 88,
+     "rank": 2,
+     "score": 0.5378
+    }
+   ],
+   "recurrence": 5,
+   "span": [
+    9,
+    88
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/structure--backwards-induction",
+   "pattern": "structure/backwards-induction",
+   "collection": "structure",
+   "sigil": {
+    "okipona": "",
+    "truth": ""
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 12,
+     "rank": 1,
+     "score": 0.3968
+    },
+    {
+     "role": "turn",
+     "turn": 14,
+     "rank": 1,
+     "score": 0.4548
+    },
+    {
+     "role": "turn",
+     "turn": 23,
+     "rank": 1,
+     "score": 0.4021
+    },
+    {
+     "role": "turn",
+     "turn": 47,
+     "rank": 1,
+     "score": 0.3756
+    },
+    {
+     "role": "turn",
+     "turn": 84,
+     "rank": 1,
+     "score": 0.3857
+    }
+   ],
+   "recurrence": 5,
+   "span": [
+    12,
+    84
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/coordination--task-shape-validation",
+   "pattern": "coordination/task-shape-validation",
+   "collection": "coordination",
+   "sigil": {
+    "okipona": "",
+    "truth": ""
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 1,
+     "rank": 3,
+     "score": 0.3809
+    },
+    {
+     "role": "turn",
+     "turn": 58,
+     "rank": 3,
+     "score": 0.4074
+    },
+    {
+     "role": "turn",
+     "turn": 59,
+     "rank": 3,
+     "score": 0.4
+    },
+    {
+     "role": "turn",
+     "turn": 60,
+     "rank": 2,
+     "score": 0.3973
+    }
+   ],
+   "recurrence": 4,
+   "span": [
+    1,
+    60
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/transition--f0-f4-boundary",
+   "pattern": "transition/f0-f4-boundary",
+   "collection": "transition",
+   "sigil": {
+    "okipona": "seme",
+    "truth": "生"
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 2,
+     "rank": 1,
+     "score": 0.392
+    },
+    {
+     "role": "turn",
+     "turn": 44,
+     "rank": 3,
+     "score": 0.4153
+    },
+    {
+     "role": "turn",
+     "turn": 54,
+     "rank": 3,
+     "score": 0.3874
+    },
+    {
+     "role": "turn",
+     "turn": 74,
+     "rank": 2,
+     "score": 0.4729
+    }
+   ],
+   "recurrence": 4,
+   "span": [
+    2,
+    74
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/iching--hexagram-49-ge",
+   "pattern": "iching/hexagram-49-ge",
+   "collection": "iching",
+   "sigil": {
+    "okipona": "pimeja",
+    "truth": "二"
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 12,
+     "rank": 3,
+     "score": 0.3605
+    },
+    {
+     "role": "turn",
+     "turn": 61,
+     "rank": 1,
+     "score": 0.3771
+    },
+    {
+     "role": "turn",
+     "turn": 78,
+     "rank": 3,
+     "score": 0.4037
+    },
+    {
+     "role": "turn",
+     "turn": 122,
+     "rank": 1,
+     "score": 0.2795
+    }
+   ],
+   "recurrence": 4,
+   "span": [
+    12,
+    122
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/enrichment--ARGUMENT",
+   "pattern": "enrichment/ARGUMENT",
+   "collection": "enrichment",
+   "sigil": {
+    "okipona": "",
+    "truth": ""
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 13,
+     "rank": 1,
+     "score": 0.4928
+    },
+    {
+     "role": "turn",
+     "turn": 22,
+     "rank": 1,
+     "score": 0.3807
+    },
+    {
+     "role": "turn",
+     "turn": 118,
+     "rank": 3,
+     "score": 0.3308
+    },
+    {
+     "role": "turn",
+     "turn": 119,
+     "rank": 1,
+     "score": 0.4512
+    }
+   ],
+   "recurrence": 4,
+   "span": [
+    13,
+    119
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/devmap-coherence--ifr-f2-viriya",
+   "pattern": "devmap-coherence/ifr-f2-viriya",
+   "collection": "devmap-coherence",
+   "sigil": {
+    "okipona": "lili",
+    "truth": "己"
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 20,
+     "rank": 3,
+     "score": 0.4567
+    },
+    {
+     "role": "turn",
+     "turn": 28,
+     "rank": 3,
+     "score": 0.4201
+    },
+    {
+     "role": "turn",
+     "turn": 48,
+     "rank": 2,
+     "score": 0.3616
+    },
+    {
+     "role": "turn",
+     "turn": 65,
+     "rank": 2,
+     "score": 0.4064
+    }
+   ],
+   "recurrence": 4,
+   "span": [
+    20,
+    65
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/math-strategy--clarification-meta",
+   "pattern": "math-strategy/clarification-meta",
+   "collection": "math-strategy",
+   "sigil": {
+    "okipona": "",
+    "truth": ""
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 24,
+     "rank": 1,
+     "score": 0.3725
+    },
+    {
+     "role": "turn",
+     "turn": 34,
+     "rank": 1,
+     "score": 0.4104
+    },
+    {
+     "role": "turn",
+     "turn": 38,
+     "rank": 3,
+     "score": 0.4315
+    },
+    {
+     "role": "turn",
+     "turn": 49,
+     "rank": 1,
+     "score": 0.4842
+    }
+   ],
+   "recurrence": 4,
+   "span": [
+    24,
+    49
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/stack-coherence--futon-bridge-health",
+   "pattern": "stack-coherence/futon-bridge-health",
+   "collection": "stack-coherence",
+   "sigil": {
+    "okipona": "nasin",
+    "truth": "门"
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 30,
+     "rank": 3,
+     "score": 0.5063
+    },
+    {
+     "role": "turn",
+     "turn": 46,
+     "rank": 3,
+     "score": 0.5208
+    },
+    {
+     "role": "turn",
+     "turn": 79,
+     "rank": 2,
+     "score": 0.4617
+    },
+    {
+     "role": "turn",
+     "turn": 93,
+     "rank": 2,
+     "score": 0.4847
+    }
+   ],
+   "recurrence": 4,
+   "span": [
+    30,
+    93
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/devmap-coherence--ifr-f6-upekkha",
+   "pattern": "devmap-coherence/ifr-f6-upekkha",
+   "collection": "devmap-coherence",
+   "sigil": {
+    "okipona": "supa",
+    "truth": "十"
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 33,
+     "rank": 2,
+     "score": 0.3575
+    },
+    {
+     "role": "turn",
+     "turn": 49,
+     "rank": 3,
+     "score": 0.4293
+    },
+    {
+     "role": "turn",
+     "turn": 63,
+     "rank": 2,
+     "score": 0.5408
+    },
+    {
+     "role": "turn",
+     "turn": 73,
+     "rank": 1,
+     "score": 0.4611
+    }
+   ],
+   "recurrence": 4,
+   "span": [
+    33,
+    73
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/realtime--mode-gate",
+   "pattern": "realtime/mode-gate",
+   "collection": "realtime",
+   "sigil": {
+    "okipona": "musi",
+    "truth": "下"
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 37,
+     "rank": 3,
+     "score": 0.3439
+    },
+    {
+     "role": "turn",
+     "turn": 89,
+     "rank": 2,
+     "score": 0.4898
+    },
+    {
+     "role": "turn",
+     "turn": 92,
+     "rank": 1,
+     "score": 0.458
+    },
+    {
+     "role": "turn",
+     "turn": 111,
+     "rank": 1,
+     "score": 0.355
+    }
+   ],
+   "recurrence": 4,
+   "span": [
+    37,
+    111
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/musn--aif-live-scores",
+   "pattern": "musn/aif-live-scores",
+   "collection": "musn",
+   "sigil": {
+    "okipona": "nanpa",
+    "truth": "计"
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 64,
+     "rank": 1,
+     "score": 0.3846
+    },
+    {
+     "role": "turn",
+     "turn": 78,
+     "rank": 1,
+     "score": 0.456
+    },
+    {
+     "role": "turn",
+     "turn": 108,
+     "rank": 3,
+     "score": 0.3366
+    },
+    {
+     "role": "turn",
+     "turn": 113,
+     "rank": 3,
+     "score": 0.3986
+    }
+   ],
+   "recurrence": 4,
+   "span": [
+    64,
+    113
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/realtime--loop-failure-signals",
+   "pattern": "realtime/loop-failure-signals",
+   "collection": "realtime",
+   "sigil": {
+    "okipona": "lete",
+    "truth": "示"
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 69,
+     "rank": 2,
+     "score": 0.4273
+    },
+    {
+     "role": "turn",
+     "turn": 99,
+     "rank": 2,
+     "score": 0.3451
+    },
+    {
+     "role": "turn",
+     "turn": 105,
+     "rank": 2,
+     "score": 0.3295
+    },
+    {
+     "role": "turn",
+     "turn": 110,
+     "rank": 3,
+     "score": 0.3976
+    }
+   ],
+   "recurrence": 4,
+   "span": [
+    69,
+    110
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/vsatelier--projection-independence",
+   "pattern": "vsatelier/projection-independence",
+   "collection": "vsatelier",
+   "sigil": {
+    "okipona": "",
+    "truth": ""
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 80,
+     "rank": 2,
+     "score": 0.3408
+    },
+    {
+     "role": "turn",
+     "turn": 83,
+     "rank": 2,
+     "score": 0.2311
+    },
+    {
+     "role": "turn",
+     "turn": 119,
+     "rank": 3,
+     "score": 0.438
+    },
+    {
+     "role": "turn",
+     "turn": 124,
+     "rank": 1,
+     "score": 0.2544
+    }
+   ],
+   "recurrence": 4,
+   "span": [
+    80,
+    124
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/library-coherence--pattern-differentiation-alarms",
+   "pattern": "library-coherence/pattern-differentiation-alarms",
+   "collection": "library-coherence",
+   "sigil": {
+    "okipona": "kute",
+    "truth": "习"
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 87,
+     "rank": 2,
+     "score": 0.5012
+    },
+    {
+     "role": "turn",
+     "turn": 90,
+     "rank": 2,
+     "score": 0.4722
+    },
+    {
+     "role": "turn",
+     "turn": 106,
+     "rank": 2,
+     "score": 0.5006
+    },
+    {
+     "role": "turn",
+     "turn": 116,
+     "rank": 1,
+     "score": 0.4255
+    }
+   ],
+   "recurrence": 4,
+   "span": [
+    87,
+    116
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/iching--hexagram-30-li",
+   "pattern": "iching/hexagram-30-li",
+   "collection": "iching",
+   "sigil": {
+    "okipona": "ma",
+    "truth": "火"
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 101,
+     "rank": 2,
+     "score": 0.3219
+    },
+    {
+     "role": "turn",
+     "turn": 102,
+     "rank": 2,
+     "score": 0.346
+    },
+    {
+     "role": "turn",
+     "turn": 127,
+     "rank": 2,
+     "score": 0.369
+    },
+    {
+     "role": "turn",
+     "turn": 130,
+     "rank": 1,
+     "score": 0.3962
+    }
+   ],
+   "recurrence": 4,
+   "span": [
+    101,
+    130
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/mission-coherence--logic-model-before-code",
+   "pattern": "mission-coherence/logic-model-before-code",
+   "collection": "mission-coherence",
+   "sigil": {
+    "okipona": "",
+    "truth": ""
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 1,
+     "rank": 2,
+     "score": 0.3825
+    },
+    {
+     "role": "turn",
+     "turn": 36,
+     "rank": 1,
+     "score": 0.5272
+    },
+    {
+     "role": "turn",
+     "turn": 41,
+     "rank": 1,
+     "score": 0.4702
+    }
+   ],
+   "recurrence": 3,
+   "span": [
+    1,
+    41
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/stack-coherence--maturity-evidence-audit",
+   "pattern": "stack-coherence/maturity-evidence-audit",
+   "collection": "stack-coherence",
+   "sigil": {
+    "okipona": "suli",
+    "truth": "升"
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 4,
+     "rank": 2,
+     "score": 0.3784
+    },
+    {
+     "role": "turn",
+     "turn": 5,
+     "rank": 2,
+     "score": 0.4043
+    },
+    {
+     "role": "turn",
+     "turn": 40,
+     "rank": 1,
+     "score": 0.4101
+    }
+   ],
+   "recurrence": 3,
+   "span": [
+    4,
+    40
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/exotic--live-sync-source-truth",
+   "pattern": "exotic/live-sync-source-truth",
+   "collection": "exotic",
+   "sigil": {
+    "okipona": "wile",
+    "truth": "本"
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 9,
+     "rank": 1,
+     "score": 0.4779
+    },
+    {
+     "role": "turn",
+     "turn": 21,
+     "rank": 1,
+     "score": 0.4027
+    },
+    {
+     "role": "turn",
+     "turn": 47,
+     "rank": 3,
+     "score": 0.3282
+    }
+   ],
+   "recurrence": 3,
+   "span": [
+    9,
+    47
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/orchestration--recorded-handoff",
+   "pattern": "orchestration/recorded-handoff",
+   "collection": "orchestration",
+   "sigil": {
+    "okipona": "",
+    "truth": ""
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 15,
+     "rank": 1,
+     "score": 0.472
+    },
+    {
+     "role": "turn",
+     "turn": 16,
+     "rank": 1,
+     "score": 0.5361
+    },
+    {
+     "role": "turn",
+     "turn": 56,
+     "rank": 2,
+     "score": 0.4103
+    }
+   ],
+   "recurrence": 3,
+   "span": [
+    15,
+    56
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/futon-theory--stop-the-line",
+   "pattern": "futon-theory/stop-the-line",
+   "collection": "futon-theory",
+   "sigil": {
+    "okipona": "pini",
+    "truth": "止"
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 16,
+     "rank": 3,
+     "score": 0.3894
+    },
+    {
+     "role": "turn",
+     "turn": 109,
+     "rank": 2,
+     "score": 0.3581
+    },
+    {
+     "role": "turn",
+     "turn": 114,
+     "rank": 3,
+     "score": 0.3984
+    }
+   ],
+   "recurrence": 3,
+   "span": [
+    16,
+    114
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/peripherals--read-existing-seam-before-implementing",
+   "pattern": "peripherals/read-existing-seam-before-implementing",
+   "collection": "peripherals",
+   "sigil": {
+    "okipona": "",
+    "truth": ""
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 19,
+     "rank": 3,
+     "score": 0.4106
+    },
+    {
+     "role": "turn",
+     "turn": 92,
+     "rank": 2,
+     "score": 0.4239
+    },
+    {
+     "role": "turn",
+     "turn": 134,
+     "rank": 1,
+     "score": 0.4346
+    }
+   ],
+   "recurrence": 3,
+   "span": [
+    19,
+    134
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/devmap-coherence--devmap-scope-discipline",
+   "pattern": "devmap-coherence/devmap-scope-discipline",
+   "collection": "devmap-coherence",
+   "sigil": {
+    "okipona": "supa",
+    "truth": "工"
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 31,
+     "rank": 1,
+     "score": 0.3845
+    },
+    {
+     "role": "turn",
+     "turn": 86,
+     "rank": 1,
+     "score": 0.4557
+    },
+    {
+     "role": "turn",
+     "turn": 120,
+     "rank": 1,
+     "score": 0.3422
+    }
+   ],
+   "recurrence": 3,
+   "span": [
+    31,
+    120
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/devmap-coherence--ifr-f3-piti",
+   "pattern": "devmap-coherence/ifr-f3-piti",
+   "collection": "devmap-coherence",
+   "sigil": {
+    "okipona": "alasa",
+    "truth": "心"
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 39,
+     "rank": 2,
+     "score": 0.4289
+    },
+    {
+     "role": "turn",
+     "turn": 42,
+     "rank": 2,
+     "score": 0.36
+    },
+    {
+     "role": "turn",
+     "turn": 51,
+     "rank": 2,
+     "score": 0.3384
+    }
+   ],
+   "recurrence": 3,
+   "span": [
+    39,
+    51
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/war-machine--advanceability",
+   "pattern": "war-machine/advanceability",
+   "collection": "war-machine",
+   "sigil": {
+    "okipona": "",
+    "truth": ""
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 43,
+     "rank": 1,
+     "score": 0.4693
+    },
+    {
+     "role": "turn",
+     "turn": 76,
+     "rank": 1,
+     "score": 0.3576
+    },
+    {
+     "role": "turn",
+     "turn": 94,
+     "rank": 3,
+     "score": 0.3598
+    }
+   ],
+   "recurrence": 3,
+   "span": [
+    43,
+    94
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/realtime--transport-pivot",
+   "pattern": "realtime/transport-pivot",
+   "collection": "realtime",
+   "sigil": {
+    "okipona": "nasin",
+    "truth": "丁"
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 45,
+     "rank": 1,
+     "score": 0.3686
+    },
+    {
+     "role": "turn",
+     "turn": 71,
+     "rank": 1,
+     "score": 0.3245
+    },
+    {
+     "role": "turn",
+     "turn": 89,
+     "rank": 3,
+     "score": 0.4887
+    }
+   ],
+   "recurrence": 3,
+   "span": [
+    45,
+    89
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/aif--measurement-window-hygiene",
+   "pattern": "aif/measurement-window-hygiene",
+   "collection": "aif",
+   "sigil": {
+    "okipona": "",
+    "truth": ""
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 52,
+     "rank": 1,
+     "score": 0.4348
+    },
+    {
+     "role": "turn",
+     "turn": 62,
+     "rank": 2,
+     "score": 0.3386
+    },
+    {
+     "role": "turn",
+     "turn": 112,
+     "rank": 3,
+     "score": 0.395
+    }
+   ],
+   "recurrence": 3,
+   "span": [
+    52,
+    112
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/coordination--artifact-registration",
+   "pattern": "coordination/artifact-registration",
+   "collection": "coordination",
+   "sigil": {
+    "okipona": "",
+    "truth": ""
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 57,
+     "rank": 2,
+     "score": 0.4192
+    },
+    {
+     "role": "turn",
+     "turn": 58,
+     "rank": 1,
+     "score": 0.4487
+    },
+    {
+     "role": "turn",
+     "turn": 62,
+     "rank": 1,
+     "score": 0.3664
+    }
+   ],
+   "recurrence": 3,
+   "span": [
+    57,
+    62
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/iching--hexagram-35-jin",
+   "pattern": "iching/hexagram-35-jin",
+   "collection": "iching",
+   "sigil": {
+    "okipona": "mun",
+    "truth": "内"
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 61,
+     "rank": 3,
+     "score": 0.3671
+    },
+    {
+     "role": "turn",
+     "turn": 68,
+     "rank": 3,
+     "score": 0.363
+    },
+    {
+     "role": "turn",
+     "turn": 84,
+     "rank": 2,
+     "score": 0.3422
+    }
+   ],
+   "recurrence": 3,
+   "span": [
+    61,
+    84
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/or2--xiangqi-decorators",
+   "pattern": "or2/xiangqi-decorators",
+   "collection": "or2",
+   "sigil": {
+    "okipona": "nimi",
+    "truth": "艺"
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 68,
+     "rank": 1,
+     "score": 0.382
+    },
+    {
+     "role": "turn",
+     "turn": 121,
+     "rank": 1,
+     "score": 0.3212
+    },
+    {
+     "role": "turn",
+     "turn": 123,
+     "rank": 3,
+     "score": 0.267
+    }
+   ],
+   "recurrence": 3,
+   "span": [
+    68,
+    123
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/agency--identifier-separation",
+   "pattern": "agency/identifier-separation",
+   "collection": "agency",
+   "sigil": {
+    "okipona": "",
+    "truth": ""
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 71,
+     "rank": 2,
+     "score": 0.2985
+    },
+    {
+     "role": "turn",
+     "turn": 117,
+     "rank": 2,
+     "score": 0.4374
+    },
+    {
+     "role": "turn",
+     "turn": 131,
+     "rank": 1,
+     "score": 0.4005
+    }
+   ],
+   "recurrence": 3,
+   "span": [
+    71,
+    131
+   ]
+  },
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "9aaeeeb0:thread/meta--sigil-differentiation",
+   "pattern": "meta/sigil-differentiation",
+   "collection": "meta",
+   "sigil": {
+    "okipona": "kute",
+    "truth": "归"
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 87,
+     "rank": 1,
+     "score": 0.5175
+    },
+    {
+     "role": "turn",
+     "turn": 90,
+     "rank": 1,
+     "score": 0.4922
+    },
+    {
+     "role": "turn",
+     "turn": 106,
+     "rank": 3,
+     "score": 0.5003
+    }
+   ],
+   "recurrence": 3,
+   "span": [
+    87,
+    106
+   ]
+  }
+ ]
+}

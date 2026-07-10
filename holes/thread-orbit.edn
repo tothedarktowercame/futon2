@@ -1,0 +1,73 @@
+;; thread orbit (retracted onto the mission scope-surface) — for WebArxana
+{
+  :thread {
+    :pattern "social/ARGUMENT"
+    :sigil {
+      :okipona ""
+      :truth ""
+    }
+    :recurrence 10
+    :span [
+      21
+      131
+    ]
+  }
+  :mission "M-points-de-fuite"
+  :n-orbit-points 9
+  :orbit [
+    {
+      :turn 21
+      :scope "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck"
+      :name "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck"
+      :score 0.386
+    }
+    {
+      :turn 26
+      :scope "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on"
+      :name "The futon, doubled — the promise this mission makes good on"
+      :score 0.497
+    }
+    {
+      :turn 28
+      :scope "points-de-fuite/pattern/the-woven-form"
+      :name "pattern: the-woven-form"
+      :score 0.331
+    }
+    {
+      :turn 30
+      :scope "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on"
+      :name "The futon, doubled — the promise this mission makes good on"
+      :score 0.552
+    }
+    {
+      :turn 65
+      :scope "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on"
+      :name "The futon, doubled — the promise this mission makes good on"
+      :score 0.357
+    }
+    {
+      :turn 74
+      :scope "points-de-fuite/pattern/the-woven-form"
+      :name "pattern: the-woven-form"
+      :score 0.58
+    }
+    {
+      :turn 79
+      :scope "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd"
+      :name "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck"
+      :score 0.476
+    }
+    {
+      :turn 88
+      :scope "points-de-fuite/the-futon-doubled-the-promise-this-mission-makes-good-on"
+      :name "The futon, doubled — the promise this mission makes good on"
+      :score 0.439
+    }
+    {
+      :turn 96
+      :scope "points-de-fuite/map-finding-joe-2026-06-25-the-pilot-s-only-reliable-notice-today-is-that-it-is-stuck--ad38fecd"
+      :name "MAP finding (Joe, 2026-06-25): the Pilot's only reliable \"notice\" today is that it is stuck"
+      :score 0.353
+    }
+  ]
+}

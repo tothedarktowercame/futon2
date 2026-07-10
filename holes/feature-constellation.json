@@ -1,0 +1,3082 @@
+{
+ "provenance": {
+  "generated-at": "2026-07-06T11:51:57+0100",
+  "seed": "cascade-real/graph mission clusters (live)",
+  "missions-clustered": 172,
+  "road-edges-joined": 440,
+  "magnitude": "applied-warrants + log1p(sum incident road attestation)",
+  "median-cut": 0.0,
+  "core-after-retraction": 72,
+  "edges-after-retraction": 439,
+  "clusters-fully-retracted": [
+   "07-essays-arxana",
+   "10-substrate-metric"
+  ],
+  "algorithm": "graph.cljs restrict-to-super-core (strict>median) + keep-largest-component",
+  "layout": "futon6 mission-carpet-pos-embed.json (BGE-derived Futon City coords)",
+  "outward-names": "cluster ids relabeled for presentation; see OUTWARD map in this script"
+ },
+ "nodes": [
+  {
+   "id": "futon0-d/mission/capability-star-map",
+   "stem": "M-capability-star-map",
+   "cluster": "01-invariant-queue",
+   "applied": 13,
+   "road-strength": 83,
+   "magnitude": 17.431,
+   "xy": [
+    2269.2,
+    2120.3
+   ]
+  },
+  {
+   "id": "futon0-d/mission/futonzero-capability",
+   "stem": "M-futonzero-capability",
+   "cluster": "06-stack-futonzero",
+   "applied": 4,
+   "road-strength": 8,
+   "magnitude": 6.197,
+   "xy": [
+    968.2,
+    983.9
+   ]
+  },
+  {
+   "id": "futon0-d/mission/futonzero-mvp",
+   "stem": "M-futonzero-mvp",
+   "cluster": "06-stack-futonzero",
+   "applied": 13,
+   "road-strength": 12,
+   "magnitude": 15.565,
+   "xy": [
+    535.0,
+    808.6
+   ]
+  },
+  {
+   "id": "futon0-d/mission/futonzero-prelim-practice",
+   "stem": "M-futonzero-prelim-practice",
+   "cluster": "06-stack-futonzero",
+   "applied": 1,
+   "road-strength": 32,
+   "magnitude": 4.497,
+   "xy": [
+    1324.5,
+    477.2
+   ]
+  },
+  {
+   "id": "futon0-d/mission/patterns-done-right",
+   "stem": "M-patterns-done-right",
+   "cluster": "05-pattern-stack",
+   "applied": 2,
+   "road-strength": 2,
+   "magnitude": 3.099,
+   "xy": [
+    1660.4,
+    995.1
+   ]
+  },
+  {
+   "id": "futon0-d/mission/the-futon-stack",
+   "stem": "M-the-futon-stack",
+   "cluster": "05-pattern-stack",
+   "applied": 4,
+   "road-strength": 75,
+   "magnitude": 8.331,
+   "xy": [
+    1540.6,
+    1056.2
+   ]
+  },
+  {
+   "id": "futon2-d/mission/aif-head",
+   "stem": "M-aif-head",
+   "cluster": "06-stack-futonzero",
+   "applied": 17,
+   "road-strength": 145,
+   "magnitude": 21.984,
+   "xy": [
+    694.1,
+    570.6
+   ]
+  },
+  {
+   "id": "futon3-d/mission/agency-rebuild",
+   "stem": "M-agency-rebuild",
+   "cluster": "05-pattern-stack",
+   "applied": 2,
+   "road-strength": 13,
+   "magnitude": 4.639,
+   "xy": [
+    1230.4,
+    1367.1
+   ]
+  },
+  {
+   "id": "futon3-d/mission/agency-unified-routing",
+   "stem": "M-agency-unified-routing",
+   "cluster": "11-codex-agency",
+   "applied": 1,
+   "road-strength": 0,
+   "magnitude": 1.0,
+   "xy": [
+    302.7,
+    1981.0
+   ]
+  },
+  {
+   "id": "futon3-d/mission/f6-agents",
+   "stem": "M-f6-agents",
+   "cluster": "08-peripheral-plan",
+   "applied": 10,
+   "road-strength": 0,
+   "magnitude": 10.0,
+   "xy": [
+    522.2,
+    1854.1
+   ]
+  },
+  {
+   "id": "futon3-d/mission/f6-arxiv",
+   "stem": "M-f6-arxiv",
+   "cluster": "02-coupling-rational",
+   "applied": 4,
+   "road-strength": 0,
+   "magnitude": 4.0,
+   "xy": [
+    2420.7,
+    1089.8
+   ]
+  },
+  {
+   "id": "futon3-d/mission/f6-eval",
+   "stem": "M-f6-eval",
+   "cluster": "02-coupling-rational",
+   "applied": 3,
+   "road-strength": 0,
+   "magnitude": 3.0,
+   "xy": [
+    2509.2,
+    954.1
+   ]
+  },
+  {
+   "id": "futon3-d/mission/f6-ingest",
+   "stem": "M-f6-ingest",
+   "cluster": "08-peripheral-plan",
+   "applied": 1,
+   "road-strength": 0,
+   "magnitude": 1.0,
+   "xy": [
+    514.2,
+    2013.3
+   ]
+  },
+  {
+   "id": "futon3-d/mission/f6-recursive",
+   "stem": "M-f6-recursive",
+   "cluster": "08-peripheral-plan",
+   "applied": 3,
+   "road-strength": 0,
+   "magnitude": 3.0,
+   "xy": [
+    1126.1,
+    2872.5
+   ]
+  },
+  {
+   "id": "futon3-d/mission/futon1a-evidence",
+   "stem": "M-futon1a-evidence",
+   "cluster": "06-stack-futonzero",
+   "applied": 2,
+   "road-strength": 5,
+   "magnitude": 3.792,
+   "xy": [
+    749.1,
+    1289.7
+   ]
+  },
+  {
+   "id": "futon3-d/mission/futon1a-rebuild",
+   "stem": "M-futon1a-rebuild",
+   "cluster": "06-stack-futonzero",
+   "applied": 19,
+   "road-strength": 92,
+   "magnitude": 23.533,
+   "xy": [
+    277.5,
+    1154.6
+   ]
+  },
+  {
+   "id": "futon3-d/mission/futon1a-workplan",
+   "stem": "M-futon1a-workplan",
+   "cluster": "06-stack-futonzero",
+   "applied": 2,
+   "road-strength": 5,
+   "magnitude": 3.792,
+   "xy": [
+    865.9,
+    1281.3
+   ]
+  },
+  {
+   "id": "futon3-d/mission/live-geometric-stack",
+   "stem": "M-live-geometric-stack",
+   "cluster": "01-invariant-queue",
+   "applied": 3,
+   "road-strength": 55,
+   "magnitude": 7.025,
+   "xy": [
+    1843.6,
+    2032.9
+   ]
+  },
+  {
+   "id": "futon3-d/mission/pattern-application-diagnostic",
+   "stem": "M-pattern-application-diagnostic",
+   "cluster": "01-invariant-queue",
+   "applied": 6,
+   "road-strength": 70,
+   "magnitude": 10.263,
+   "xy": [
+    2427.0,
+    2425.3
+   ]
+  },
+  {
+   "id": "futon3-d/mission/pattern-ingest",
+   "stem": "M-pattern-ingest",
+   "cluster": "05-pattern-stack",
+   "applied": 2,
+   "road-strength": 8,
+   "magnitude": 4.197,
+   "xy": [
+    2183.6,
+    792.1
+   ]
+  },
+  {
+   "id": "futon3-d/mission/pattern-mining",
+   "stem": "M-pattern-mining",
+   "cluster": "01-invariant-queue",
+   "applied": 2,
+   "road-strength": 21,
+   "magnitude": 5.091,
+   "xy": [
+    2077.1,
+    1787.5
+   ]
+  },
+  {
+   "id": "futon3-d/mission/weird-modernism",
+   "stem": "M-weird-modernism",
+   "cluster": "02-coupling-rational",
+   "applied": 4,
+   "road-strength": 71,
+   "magnitude": 8.277,
+   "xy": [
+    1303.1,
+    224.6
+   ]
+  },
+  {
+   "id": "futon3b-d/mission/coordination-rewrite",
+   "stem": "M-coordination-rewrite",
+   "cluster": "08-peripheral-plan",
+   "applied": 9,
+   "road-strength": 121,
+   "magnitude": 13.804,
+   "xy": [
+    331.8,
+    2495.8
+   ]
+  },
+  {
+   "id": "futon3c-d/mission/agency-refactor",
+   "stem": "M-agency-refactor",
+   "cluster": "09-peripheral-refactor",
+   "applied": 1,
+   "road-strength": 0,
+   "magnitude": 1.0,
+   "xy": [
+    639.8,
+    1024.9
+   ]
+  },
+  {
+   "id": "futon3c-d/mission/bounded-disposition",
+   "stem": "M-bounded-disposition",
+   "cluster": "01-invariant-queue",
+   "applied": 1,
+   "road-strength": 0,
+   "magnitude": 1.0,
+   "xy": [
+    2678.1,
+    2325.9
+   ]
+  },
+  {
+   "id": "futon3c-d/mission/bounded-in-flight-state",
+   "stem": "M-bounded-in-flight-state",
+   "cluster": "02-coupling-rational",
+   "applied": 7,
+   "road-strength": 78,
+   "magnitude": 11.369,
+   "xy": [
+    2953.6,
+    2188.3
+   ]
+  },
+  {
+   "id": "futon3c-d/mission/codex-agent-behaviour",
+   "stem": "M-codex-agent-behaviour",
+   "cluster": "11-codex-agency",
+   "applied": 3,
+   "road-strength": 22,
+   "magnitude": 6.135,
+   "xy": [
+    584.2,
+    2565.3
+   ]
+  },
+  {
+   "id": "futon3c-d/mission/codex-irc-execution",
+   "stem": "M-codex-irc-execution",
+   "cluster": "11-codex-agency",
+   "applied": 1,
+   "road-strength": 0,
+   "magnitude": 1.0,
+   "xy": [
+    741.2,
+    2656.9
+   ]
+  },
+  {
+   "id": "futon3c-d/mission/cyder",
+   "stem": "M-cyder",
+   "cluster": "05-pattern-stack",
+   "applied": 1,
+   "road-strength": 6,
+   "magnitude": 2.946,
+   "xy": [
+    720.1,
+    1858.8
+   ]
+  },
+  {
+   "id": "futon3c-d/mission/diagramprover",
+   "stem": "M-diagramprover",
+   "cluster": "02-coupling-rational",
+   "applied": 13,
+   "road-strength": 8,
+   "magnitude": 15.197,
+   "xy": [
+    2389.0,
+    757.7
+   ]
+  },
+  {
+   "id": "futon3c-d/mission/forum-refactor",
+   "stem": "M-forum-refactor",
+   "cluster": "09-peripheral-refactor",
+   "applied": 3,
+   "road-strength": 0,
+   "magnitude": 3.0,
+   "xy": [
+    1088.6,
+    564.7
+   ]
+  },
+  {
+   "id": "futon3c-d/mission/improve-irc",
+   "stem": "M-improve-irc",
+   "cluster": "11-codex-agency",
+   "applied": 1,
+   "road-strength": 5,
+   "magnitude": 2.792,
+   "xy": [
+    940.7,
+    1887.3
+   ]
+  },
+  {
+   "id": "futon3c-d/mission/invariant-queue-unstuck",
+   "stem": "M-invariant-queue-unstuck",
+   "cluster": "01-invariant-queue",
+   "applied": 1,
+   "road-strength": 8,
+   "magnitude": 3.197,
+   "xy": [
+    1122.4,
+    1511.1
+   ]
+  },
+  {
+   "id": "futon3c-d/mission/mission-scopes-into-substrate-2",
+   "stem": "M-mission-scopes-into-substrate-2",
+   "cluster": "01-invariant-queue",
+   "applied": 0,
+   "road-strength": 9,
+   "magnitude": 2.303,
+   "xy": [
+    2133.3,
+    1893.6
+   ]
+  },
+  {
+   "id": "futon3c-d/mission/operational-readiness",
+   "stem": "M-operational-readiness",
+   "cluster": "01-invariant-queue",
+   "applied": 1,
+   "road-strength": 0,
+   "magnitude": 1.0,
+   "xy": [
+    1725.8,
+    3400.0
+   ]
+  },
+  {
+   "id": "futon3c-d/mission/peripheral-gauntlet",
+   "stem": "M-peripheral-gauntlet",
+   "cluster": "08-peripheral-plan",
+   "applied": 7,
+   "road-strength": 5,
+   "magnitude": 8.792,
+   "xy": [
+    753.7,
+    1965.2
+   ]
+  },
+  {
+   "id": "futon3c-d/mission/peripheral-phenomenology",
+   "stem": "M-peripheral-phenomenology",
+   "cluster": "02-coupling-rational",
+   "applied": 3,
+   "road-strength": 18,
+   "magnitude": 5.944,
+   "xy": [
+    2399.2,
+    705.6
+   ]
+  },
+  {
+   "id": "futon3c-d/mission/portfolio-inference",
+   "stem": "M-portfolio-inference",
+   "cluster": "01-invariant-queue",
+   "applied": 17,
+   "road-strength": 30,
+   "magnitude": 20.434,
+   "xy": [
+    2950.4,
+    2446.1
+   ]
+  },
+  {
+   "id": "futon3c-d/mission/reachable-from-boot",
+   "stem": "M-reachable-from-boot",
+   "cluster": "01-invariant-queue",
+   "applied": 2,
+   "road-strength": 55,
+   "magnitude": 6.025,
+   "xy": [
+    1716.8,
+    2359.8
+   ]
+  },
+  {
+   "id": "futon3c-d/mission/single-entry-point",
+   "stem": "M-single-entry-point",
+   "cluster": "06-stack-futonzero",
+   "applied": 2,
+   "road-strength": 0,
+   "magnitude": 2.0,
+   "xy": [
+    1028.3,
+    1648.9
+   ]
+  },
+  {
+   "id": "futon3c-d/mission/single-locus",
+   "stem": "M-single-locus",
+   "cluster": "01-invariant-queue",
+   "applied": 1,
+   "road-strength": 8,
+   "magnitude": 3.197,
+   "xy": [
+    1529.2,
+    1727.9
+   ]
+  },
+  {
+   "id": "futon3c-d/mission/state-snapshot-witness",
+   "stem": "M-state-snapshot-witness",
+   "cluster": "01-invariant-queue",
+   "applied": 2,
+   "road-strength": 25,
+   "magnitude": 5.258,
+   "xy": [
+    2096.1,
+    2410.0
+   ]
+  },
+  {
+   "id": "futon3c-d/mission/stepper-calibration",
+   "stem": "M-stepper-calibration",
+   "cluster": "02-coupling-rational",
+   "applied": 1,
+   "road-strength": 8,
+   "magnitude": 3.197,
+   "xy": [
+    3184.4,
+    1787.1
+   ]
+  },
+  {
+   "id": "futon3c-d/mission/structural-law",
+   "stem": "M-structural-law",
+   "cluster": "05-pattern-stack",
+   "applied": 10,
+   "road-strength": 55,
+   "magnitude": 14.025,
+   "xy": [
+    2097.1,
+    942.6
+   ]
+  },
+  {
+   "id": "futon3c-d/mission/transport-adapters",
+   "stem": "M-transport-adapters",
+   "cluster": "09-peripheral-refactor",
+   "applied": 3,
+   "road-strength": 16,
+   "magnitude": 5.833,
+   "xy": [
+    543.0,
+    1006.6
+   ]
+  },
+  {
+   "id": "futon3c-d/mission/war-machine-pilot",
+   "stem": "M-war-machine-pilot",
+   "cluster": "00-war-machine",
+   "applied": 12,
+   "road-strength": 83,
+   "magnitude": 16.431,
+   "xy": [
+    1180.0,
+    567.0
+   ]
+  },
+  {
+   "id": "futon3c-d/mission/war-machine-tuning",
+   "stem": "M-war-machine-tuning",
+   "cluster": "00-war-machine",
+   "applied": 7,
+   "road-strength": 82,
+   "magnitude": 11.419,
+   "xy": [
+    2168.2,
+    1463.0
+   ]
+  },
+  {
+   "id": "futon4-d/mission/evidence-viewer-refinements",
+   "stem": "M-evidence-viewer-refinements",
+   "cluster": "01-invariant-queue",
+   "applied": 1,
+   "road-strength": 0,
+   "magnitude": 1.0,
+   "xy": [
+    946.2,
+    2186.8
+   ]
+  },
+  {
+   "id": "futon4-d/mission/futon-enrichment",
+   "stem": "M-futon-enrichment",
+   "cluster": "01-invariant-queue",
+   "applied": 9,
+   "road-strength": 14,
+   "magnitude": 11.708,
+   "xy": [
+    1625.1,
+    459.5
+   ]
+  },
+  {
+   "id": "futon4-d/mission/or-training-as-learning-system",
+   "stem": "M-or-training-as-learning-system",
+   "cluster": "04-learning-system",
+   "applied": 8,
+   "road-strength": 85,
+   "magnitude": 12.454,
+   "xy": [
+    2851.0,
+    1006.7
+   ]
+  },
+  {
+   "id": "futon4-d/mission/self-representing-stack",
+   "stem": "M-self-representing-stack",
+   "cluster": "05-pattern-stack",
+   "applied": 3,
+   "road-strength": 0,
+   "magnitude": 3.0,
+   "xy": [
+    2694.1,
+    2156.0
+   ]
+  },
+  {
+   "id": "futon4-d/mission/simulating-or-training-as-learning-system",
+   "stem": "M-simulating-or-training-as-learning-system",
+   "cluster": "04-learning-system",
+   "applied": 7,
+   "road-strength": 4,
+   "magnitude": 8.609,
+   "xy": [
+    2853.0,
+    1172.8
+   ]
+  },
+  {
+   "id": "futon4-d/mission/three-column-stack",
+   "stem": "M-three-column-stack",
+   "cluster": "06-stack-futonzero",
+   "applied": 25,
+   "road-strength": 67,
+   "magnitude": 29.22,
+   "xy": [
+    1302.8,
+    962.1
+   ]
+  },
+  {
+   "id": "futon4-d/mission/vsatarcs-invariants-integration",
+   "stem": "M-vsatarcs-invariants-integration",
+   "cluster": "03-vsatarcs-invariants",
+   "applied": 10,
+   "road-strength": 66,
+   "magnitude": 14.205,
+   "xy": [
+    962.5,
+    2642.7
+   ]
+  },
+  {
+   "id": "futon4-d/mission/vsatarcs-writer",
+   "stem": "M-vsatarcs-writer",
+   "cluster": "03-vsatarcs-invariants",
+   "applied": 6,
+   "road-strength": 10,
+   "magnitude": 8.398,
+   "xy": [
+    1184.7,
+    1540.5
+   ]
+  },
+  {
+   "id": "futon4-d/mission/web-arxana-ui-improvements",
+   "stem": "M-web-arxana-ui-improvements",
+   "cluster": "01-invariant-queue",
+   "applied": 0,
+   "road-strength": 26,
+   "magnitude": 3.296,
+   "xy": [
+    1773.2,
+    232.8
+   ]
+  },
+  {
+   "id": "futon5-d/mission/categorical-code",
+   "stem": "M-categorical-code",
+   "cluster": "05-pattern-stack",
+   "applied": 8,
+   "road-strength": 92,
+   "magnitude": 12.533,
+   "xy": [
+    1603.2,
+    1153.0
+   ]
+  },
+  {
+   "id": "futon5a-d/mission/a-sorry-enterprise",
+   "stem": "M-a-sorry-enterprise",
+   "cluster": "06-stack-futonzero",
+   "applied": 2,
+   "road-strength": 44,
+   "magnitude": 5.807,
+   "xy": [
+    1355.8,
+    857.1
+   ]
+  },
+  {
+   "id": "futon5a-d/mission/explore-aiqa",
+   "stem": "M-explore-aiqa",
+   "cluster": "01-invariant-queue",
+   "applied": 0,
+   "road-strength": 2,
+   "magnitude": 1.099,
+   "xy": [
+    877.7,
+    3113.2
+   ]
+  },
+  {
+   "id": "futon5a-d/mission/self-improvement-loop",
+   "stem": "M-self-improvement-loop",
+   "cluster": "06-stack-futonzero",
+   "applied": 1,
+   "road-strength": 0,
+   "magnitude": 1.0,
+   "xy": [
+    1464.1,
+    1400.5
+   ]
+  },
+  {
+   "id": "futon5a-d/mission/stack-geometry",
+   "stem": "M-stack-geometry",
+   "cluster": "06-stack-futonzero",
+   "applied": 2,
+   "road-strength": 21,
+   "magnitude": 5.091,
+   "xy": [
+    1365.6,
+    796.3
+   ]
+  },
+  {
+   "id": "futon5a-d/mission/stack-stereolithography",
+   "stem": "M-stack-stereolithography",
+   "cluster": "02-coupling-rational",
+   "applied": 7,
+   "road-strength": 32,
+   "magnitude": 10.497,
+   "xy": [
+    2590.4,
+    764.4
+   ]
+  },
+  {
+   "id": "futon5a-d/mission/trip-journal",
+   "stem": "M-trip-journal",
+   "cluster": "01-invariant-queue",
+   "applied": 6,
+   "road-strength": 6,
+   "magnitude": 7.946,
+   "xy": [
+    2742.8,
+    2630.5
+   ]
+  },
+  {
+   "id": "futon5a-d/mission/war-machine-wiring",
+   "stem": "M-war-machine-wiring",
+   "cluster": "00-war-machine",
+   "applied": 1,
+   "road-strength": 0,
+   "magnitude": 1.0,
+   "xy": [
+    1558.1,
+    2346.3
+   ]
+  },
+  {
+   "id": "futon6-d/mission/artificial-stack-exchange",
+   "stem": "M-artificial-stack-exchange",
+   "cluster": "06-stack-futonzero",
+   "applied": 4,
+   "road-strength": 0,
+   "magnitude": 4.0,
+   "xy": [
+    1317.2,
+    1279.4
+   ]
+  },
+  {
+   "id": "futon6-d/mission/superpod-mark3",
+   "stem": "M-superpod-mark3",
+   "cluster": "02-coupling-rational",
+   "applied": 9,
+   "road-strength": 70,
+   "magnitude": 13.263,
+   "xy": [
+    2201.7,
+    1185.5
+   ]
+  },
+  {
+   "id": "futon7-d/mission/autonomous-doc-maintenance",
+   "stem": "M-autonomous-doc-maintenance",
+   "cluster": "03-vsatarcs-invariants",
+   "applied": 1,
+   "road-strength": 0,
+   "magnitude": 1.0,
+   "xy": [
+    1459.4,
+    2028.5
+   ]
+  },
+  {
+   "id": "futon7-d/mission/f7-lead-report",
+   "stem": "M-f7-lead-report",
+   "cluster": "06-stack-futonzero",
+   "applied": 2,
+   "road-strength": 0,
+   "magnitude": 2.0,
+   "xy": [
+    761.7,
+    651.2
+   ]
+  },
+  {
+   "id": "futon7-d/mission/interim-director",
+   "stem": "M-interim-director",
+   "cluster": "00-war-machine",
+   "applied": 1,
+   "road-strength": 12,
+   "magnitude": 3.565,
+   "xy": [
+    2421.6,
+    2939.3
+   ]
+  },
+  {
+   "id": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "stem": "M-interim-director-proxy-metric-inventory",
+   "cluster": "01-invariant-queue",
+   "applied": 32,
+   "road-strength": 29,
+   "magnitude": 35.401,
+   "xy": [
+    2098.6,
+    322.1
+   ]
+  },
+  {
+   "id": "futon7-d/mission/self-documenting-stack",
+   "stem": "M-self-documenting-stack",
+   "cluster": "06-stack-futonzero",
+   "applied": 14,
+   "road-strength": 40,
+   "magnitude": 17.714,
+   "xy": [
+    1540.6,
+    1455.2
+   ]
+  },
+  {
+   "id": "futon7-d/mission/war-machine-frontend-upgrade1",
+   "stem": "M-war-machine-frontend-upgrade1",
+   "cluster": "00-war-machine",
+   "applied": 1,
+   "road-strength": 55,
+   "magnitude": 5.025,
+   "xy": [
+    1334.4,
+    2137.5
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "a": "futon5-d/mission/categorical-code",
+   "b": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "attestation": 2
+  },
+  {
+   "a": "futon5-d/mission/categorical-code",
+   "b": "futon6-d/mission/superpod-mark3",
+   "attestation": 10
+  },
+  {
+   "a": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "b": "futon6-d/mission/superpod-mark3",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/agency-unified-routing",
+   "b": "futon3-d/mission/futon1a-evidence",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/agency-unified-routing",
+   "b": "futon3-d/mission/futon1a-rebuild",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/agency-unified-routing",
+   "b": "futon7-d/mission/self-documenting-stack",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/agency-unified-routing",
+   "b": "futon3c-d/mission/structural-law",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/agency-unified-routing",
+   "b": "futon4-d/mission/vsatarcs-invariants-integration",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/futon1a-evidence",
+   "b": "futon3-d/mission/futon1a-rebuild",
+   "attestation": 1
+  },
+  {
+   "a": "futon3-d/mission/futon1a-evidence",
+   "b": "futon7-d/mission/self-documenting-stack",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/futon1a-evidence",
+   "b": "futon3c-d/mission/structural-law",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/futon1a-evidence",
+   "b": "futon4-d/mission/vsatarcs-invariants-integration",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/futon1a-rebuild",
+   "b": "futon7-d/mission/self-documenting-stack",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/futon1a-rebuild",
+   "b": "futon3c-d/mission/structural-law",
+   "attestation": 5
+  },
+  {
+   "a": "futon3-d/mission/futon1a-rebuild",
+   "b": "futon4-d/mission/vsatarcs-invariants-integration",
+   "attestation": 5
+  },
+  {
+   "a": "futon7-d/mission/self-documenting-stack",
+   "b": "futon3c-d/mission/structural-law",
+   "attestation": 0
+  },
+  {
+   "a": "futon7-d/mission/self-documenting-stack",
+   "b": "futon4-d/mission/vsatarcs-invariants-integration",
+   "attestation": 2
+  },
+  {
+   "a": "futon3c-d/mission/structural-law",
+   "b": "futon4-d/mission/vsatarcs-invariants-integration",
+   "attestation": 5
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon0-d/mission/capability-star-map",
+   "attestation": 10
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon5-d/mission/categorical-code",
+   "attestation": 10
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon3b-d/mission/coordination-rewrite",
+   "attestation": 10
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon4-d/mission/or-training-as-learning-system",
+   "attestation": 10
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon3-d/mission/pattern-application-diagnostic",
+   "attestation": 10
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon6-d/mission/superpod-mark3",
+   "attestation": 10
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon3-d/mission/weird-modernism",
+   "attestation": 10
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon5-d/mission/categorical-code",
+   "attestation": 10
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon3b-d/mission/coordination-rewrite",
+   "attestation": 10
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon4-d/mission/or-training-as-learning-system",
+   "attestation": 10
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon3-d/mission/pattern-application-diagnostic",
+   "attestation": 10
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon6-d/mission/superpod-mark3",
+   "attestation": 10
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon3-d/mission/weird-modernism",
+   "attestation": 10
+  },
+  {
+   "a": "futon5-d/mission/categorical-code",
+   "b": "futon3b-d/mission/coordination-rewrite",
+   "attestation": 10
+  },
+  {
+   "a": "futon5-d/mission/categorical-code",
+   "b": "futon4-d/mission/or-training-as-learning-system",
+   "attestation": 10
+  },
+  {
+   "a": "futon5-d/mission/categorical-code",
+   "b": "futon3-d/mission/pattern-application-diagnostic",
+   "attestation": 10
+  },
+  {
+   "a": "futon5-d/mission/categorical-code",
+   "b": "futon3-d/mission/weird-modernism",
+   "attestation": 10
+  },
+  {
+   "a": "futon3b-d/mission/coordination-rewrite",
+   "b": "futon4-d/mission/or-training-as-learning-system",
+   "attestation": 10
+  },
+  {
+   "a": "futon3b-d/mission/coordination-rewrite",
+   "b": "futon3-d/mission/pattern-application-diagnostic",
+   "attestation": 10
+  },
+  {
+   "a": "futon3b-d/mission/coordination-rewrite",
+   "b": "futon6-d/mission/superpod-mark3",
+   "attestation": 10
+  },
+  {
+   "a": "futon3b-d/mission/coordination-rewrite",
+   "b": "futon3-d/mission/weird-modernism",
+   "attestation": 10
+  },
+  {
+   "a": "futon4-d/mission/or-training-as-learning-system",
+   "b": "futon3-d/mission/pattern-application-diagnostic",
+   "attestation": 10
+  },
+  {
+   "a": "futon4-d/mission/or-training-as-learning-system",
+   "b": "futon6-d/mission/superpod-mark3",
+   "attestation": 10
+  },
+  {
+   "a": "futon4-d/mission/or-training-as-learning-system",
+   "b": "futon3-d/mission/weird-modernism",
+   "attestation": 10
+  },
+  {
+   "a": "futon3-d/mission/pattern-application-diagnostic",
+   "b": "futon6-d/mission/superpod-mark3",
+   "attestation": 10
+  },
+  {
+   "a": "futon3-d/mission/pattern-application-diagnostic",
+   "b": "futon3-d/mission/weird-modernism",
+   "attestation": 10
+  },
+  {
+   "a": "futon6-d/mission/superpod-mark3",
+   "b": "futon3-d/mission/weird-modernism",
+   "attestation": 10
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon3-d/mission/f6-agents",
+   "attestation": 0
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/f6-agents",
+   "b": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/f6-agents",
+   "b": "futon3-d/mission/pattern-application-diagnostic",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/f6-agents",
+   "b": "futon6-d/mission/superpod-mark3",
+   "attestation": 0
+  },
+  {
+   "a": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "b": "futon3-d/mission/pattern-application-diagnostic",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/f6-agents",
+   "b": "futon7-d/mission/f7-lead-report",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/f6-agents",
+   "b": "futon4-d/mission/futon-enrichment",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/f6-agents",
+   "b": "futon3c-d/mission/mission-scopes-into-substrate-2",
+   "attestation": 0
+  },
+  {
+   "a": "futon7-d/mission/f7-lead-report",
+   "b": "futon4-d/mission/futon-enrichment",
+   "attestation": 0
+  },
+  {
+   "a": "futon7-d/mission/f7-lead-report",
+   "b": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "attestation": 0
+  },
+  {
+   "a": "futon7-d/mission/f7-lead-report",
+   "b": "futon3c-d/mission/mission-scopes-into-substrate-2",
+   "attestation": 0
+  },
+  {
+   "a": "futon4-d/mission/futon-enrichment",
+   "b": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "attestation": 0
+  },
+  {
+   "a": "futon4-d/mission/futon-enrichment",
+   "b": "futon3c-d/mission/mission-scopes-into-substrate-2",
+   "attestation": 1
+  },
+  {
+   "a": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "b": "futon3c-d/mission/mission-scopes-into-substrate-2",
+   "attestation": 0
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon3c-d/mission/diagramprover",
+   "attestation": 1
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon3c-d/mission/mission-scopes-into-substrate-2",
+   "attestation": 0
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon3c-d/mission/portfolio-inference",
+   "attestation": 4
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon4-d/mission/simulating-or-training-as-learning-system",
+   "attestation": 1
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon4-d/mission/three-column-stack",
+   "attestation": 4
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon4-d/mission/vsatarcs-writer",
+   "attestation": 1
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon3c-d/mission/diagramprover",
+   "attestation": 0
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon3c-d/mission/mission-scopes-into-substrate-2",
+   "attestation": 1
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon3c-d/mission/portfolio-inference",
+   "attestation": 0
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon4-d/mission/simulating-or-training-as-learning-system",
+   "attestation": 0
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon4-d/mission/three-column-stack",
+   "attestation": 1
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon4-d/mission/vsatarcs-writer",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/diagramprover",
+   "b": "futon3c-d/mission/mission-scopes-into-substrate-2",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/diagramprover",
+   "b": "futon3c-d/mission/portfolio-inference",
+   "attestation": 1
+  },
+  {
+   "a": "futon3c-d/mission/diagramprover",
+   "b": "futon4-d/mission/simulating-or-training-as-learning-system",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/diagramprover",
+   "b": "futon4-d/mission/three-column-stack",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/diagramprover",
+   "b": "futon4-d/mission/vsatarcs-writer",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/mission-scopes-into-substrate-2",
+   "b": "futon3c-d/mission/portfolio-inference",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/mission-scopes-into-substrate-2",
+   "b": "futon4-d/mission/simulating-or-training-as-learning-system",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/mission-scopes-into-substrate-2",
+   "b": "futon4-d/mission/three-column-stack",
+   "attestation": 1
+  },
+  {
+   "a": "futon3c-d/mission/mission-scopes-into-substrate-2",
+   "b": "futon4-d/mission/vsatarcs-writer",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/portfolio-inference",
+   "b": "futon4-d/mission/simulating-or-training-as-learning-system",
+   "attestation": 1
+  },
+  {
+   "a": "futon3c-d/mission/portfolio-inference",
+   "b": "futon4-d/mission/three-column-stack",
+   "attestation": 7
+  },
+  {
+   "a": "futon3c-d/mission/portfolio-inference",
+   "b": "futon4-d/mission/vsatarcs-writer",
+   "attestation": 1
+  },
+  {
+   "a": "futon4-d/mission/simulating-or-training-as-learning-system",
+   "b": "futon4-d/mission/three-column-stack",
+   "attestation": 0
+  },
+  {
+   "a": "futon4-d/mission/simulating-or-training-as-learning-system",
+   "b": "futon4-d/mission/vsatarcs-writer",
+   "attestation": 1
+  },
+  {
+   "a": "futon4-d/mission/three-column-stack",
+   "b": "futon4-d/mission/vsatarcs-writer",
+   "attestation": 0
+  },
+  {
+   "a": "futon3b-d/mission/coordination-rewrite",
+   "b": "futon0-d/mission/futonzero-capability",
+   "attestation": 0
+  },
+  {
+   "a": "futon3b-d/mission/coordination-rewrite",
+   "b": "futon0-d/mission/futonzero-mvp",
+   "attestation": 1
+  },
+  {
+   "a": "futon3b-d/mission/coordination-rewrite",
+   "b": "futon3c-d/mission/portfolio-inference",
+   "attestation": 0
+  },
+  {
+   "a": "futon0-d/mission/futonzero-capability",
+   "b": "futon0-d/mission/futonzero-mvp",
+   "attestation": 1
+  },
+  {
+   "a": "futon0-d/mission/futonzero-capability",
+   "b": "futon3c-d/mission/portfolio-inference",
+   "attestation": 0
+  },
+  {
+   "a": "futon0-d/mission/futonzero-mvp",
+   "b": "futon3c-d/mission/portfolio-inference",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/f6-agents",
+   "b": "futon3-d/mission/f6-arxiv",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/f6-arxiv",
+   "b": "futon7-d/mission/f7-lead-report",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/f6-arxiv",
+   "b": "futon4-d/mission/futon-enrichment",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/f6-arxiv",
+   "b": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/f6-arxiv",
+   "b": "futon3-d/mission/pattern-application-diagnostic",
+   "attestation": 0
+  },
+  {
+   "a": "futon7-d/mission/f7-lead-report",
+   "b": "futon3-d/mission/pattern-application-diagnostic",
+   "attestation": 0
+  },
+  {
+   "a": "futon4-d/mission/futon-enrichment",
+   "b": "futon3-d/mission/pattern-application-diagnostic",
+   "attestation": 0
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon3c-d/mission/bounded-in-flight-state",
+   "attestation": 5
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon3-d/mission/futon1a-rebuild",
+   "attestation": 5
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon3-d/mission/live-geometric-stack",
+   "attestation": 5
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon3c-d/mission/reachable-from-boot",
+   "attestation": 5
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon3c-d/mission/structural-law",
+   "attestation": 5
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon0-d/mission/the-futon-stack",
+   "attestation": 5
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon4-d/mission/vsatarcs-invariants-integration",
+   "attestation": 5
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon7-d/mission/war-machine-frontend-upgrade1",
+   "attestation": 5
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon3c-d/mission/war-machine-pilot",
+   "attestation": 5
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon3c-d/mission/war-machine-tuning",
+   "attestation": 5
+  },
+  {
+   "a": "futon3c-d/mission/bounded-in-flight-state",
+   "b": "futon3b-d/mission/coordination-rewrite",
+   "attestation": 5
+  },
+  {
+   "a": "futon3c-d/mission/bounded-in-flight-state",
+   "b": "futon3-d/mission/futon1a-rebuild",
+   "attestation": 5
+  },
+  {
+   "a": "futon3c-d/mission/bounded-in-flight-state",
+   "b": "futon3-d/mission/live-geometric-stack",
+   "attestation": 5
+  },
+  {
+   "a": "futon3c-d/mission/bounded-in-flight-state",
+   "b": "futon3c-d/mission/reachable-from-boot",
+   "attestation": 5
+  },
+  {
+   "a": "futon3c-d/mission/bounded-in-flight-state",
+   "b": "futon3c-d/mission/structural-law",
+   "attestation": 5
+  },
+  {
+   "a": "futon3c-d/mission/bounded-in-flight-state",
+   "b": "futon0-d/mission/the-futon-stack",
+   "attestation": 5
+  },
+  {
+   "a": "futon3c-d/mission/bounded-in-flight-state",
+   "b": "futon4-d/mission/vsatarcs-invariants-integration",
+   "attestation": 5
+  },
+  {
+   "a": "futon3c-d/mission/bounded-in-flight-state",
+   "b": "futon7-d/mission/war-machine-frontend-upgrade1",
+   "attestation": 5
+  },
+  {
+   "a": "futon3c-d/mission/bounded-in-flight-state",
+   "b": "futon3c-d/mission/war-machine-pilot",
+   "attestation": 5
+  },
+  {
+   "a": "futon3c-d/mission/bounded-in-flight-state",
+   "b": "futon3c-d/mission/war-machine-tuning",
+   "attestation": 5
+  },
+  {
+   "a": "futon3b-d/mission/coordination-rewrite",
+   "b": "futon3-d/mission/futon1a-rebuild",
+   "attestation": 5
+  },
+  {
+   "a": "futon3b-d/mission/coordination-rewrite",
+   "b": "futon3-d/mission/live-geometric-stack",
+   "attestation": 5
+  },
+  {
+   "a": "futon3b-d/mission/coordination-rewrite",
+   "b": "futon3c-d/mission/reachable-from-boot",
+   "attestation": 5
+  },
+  {
+   "a": "futon3b-d/mission/coordination-rewrite",
+   "b": "futon3c-d/mission/structural-law",
+   "attestation": 5
+  },
+  {
+   "a": "futon3b-d/mission/coordination-rewrite",
+   "b": "futon0-d/mission/the-futon-stack",
+   "attestation": 5
+  },
+  {
+   "a": "futon3b-d/mission/coordination-rewrite",
+   "b": "futon4-d/mission/vsatarcs-invariants-integration",
+   "attestation": 5
+  },
+  {
+   "a": "futon3b-d/mission/coordination-rewrite",
+   "b": "futon7-d/mission/war-machine-frontend-upgrade1",
+   "attestation": 5
+  },
+  {
+   "a": "futon3b-d/mission/coordination-rewrite",
+   "b": "futon3c-d/mission/war-machine-pilot",
+   "attestation": 5
+  },
+  {
+   "a": "futon3b-d/mission/coordination-rewrite",
+   "b": "futon3c-d/mission/war-machine-tuning",
+   "attestation": 5
+  },
+  {
+   "a": "futon3-d/mission/futon1a-rebuild",
+   "b": "futon3-d/mission/live-geometric-stack",
+   "attestation": 5
+  },
+  {
+   "a": "futon3-d/mission/futon1a-rebuild",
+   "b": "futon3c-d/mission/reachable-from-boot",
+   "attestation": 5
+  },
+  {
+   "a": "futon3-d/mission/futon1a-rebuild",
+   "b": "futon0-d/mission/the-futon-stack",
+   "attestation": 5
+  },
+  {
+   "a": "futon3-d/mission/futon1a-rebuild",
+   "b": "futon7-d/mission/war-machine-frontend-upgrade1",
+   "attestation": 5
+  },
+  {
+   "a": "futon3-d/mission/futon1a-rebuild",
+   "b": "futon3c-d/mission/war-machine-pilot",
+   "attestation": 5
+  },
+  {
+   "a": "futon3-d/mission/futon1a-rebuild",
+   "b": "futon3c-d/mission/war-machine-tuning",
+   "attestation": 5
+  },
+  {
+   "a": "futon3-d/mission/live-geometric-stack",
+   "b": "futon3c-d/mission/reachable-from-boot",
+   "attestation": 5
+  },
+  {
+   "a": "futon3-d/mission/live-geometric-stack",
+   "b": "futon3c-d/mission/structural-law",
+   "attestation": 5
+  },
+  {
+   "a": "futon3-d/mission/live-geometric-stack",
+   "b": "futon0-d/mission/the-futon-stack",
+   "attestation": 5
+  },
+  {
+   "a": "futon3-d/mission/live-geometric-stack",
+   "b": "futon4-d/mission/vsatarcs-invariants-integration",
+   "attestation": 5
+  },
+  {
+   "a": "futon3-d/mission/live-geometric-stack",
+   "b": "futon7-d/mission/war-machine-frontend-upgrade1",
+   "attestation": 5
+  },
+  {
+   "a": "futon3-d/mission/live-geometric-stack",
+   "b": "futon3c-d/mission/war-machine-pilot",
+   "attestation": 5
+  },
+  {
+   "a": "futon3-d/mission/live-geometric-stack",
+   "b": "futon3c-d/mission/war-machine-tuning",
+   "attestation": 5
+  },
+  {
+   "a": "futon3c-d/mission/reachable-from-boot",
+   "b": "futon3c-d/mission/structural-law",
+   "attestation": 5
+  },
+  {
+   "a": "futon3c-d/mission/reachable-from-boot",
+   "b": "futon0-d/mission/the-futon-stack",
+   "attestation": 5
+  },
+  {
+   "a": "futon3c-d/mission/reachable-from-boot",
+   "b": "futon4-d/mission/vsatarcs-invariants-integration",
+   "attestation": 5
+  },
+  {
+   "a": "futon3c-d/mission/reachable-from-boot",
+   "b": "futon7-d/mission/war-machine-frontend-upgrade1",
+   "attestation": 5
+  },
+  {
+   "a": "futon3c-d/mission/reachable-from-boot",
+   "b": "futon3c-d/mission/war-machine-pilot",
+   "attestation": 5
+  },
+  {
+   "a": "futon3c-d/mission/reachable-from-boot",
+   "b": "futon3c-d/mission/war-machine-tuning",
+   "attestation": 5
+  },
+  {
+   "a": "futon3c-d/mission/structural-law",
+   "b": "futon0-d/mission/the-futon-stack",
+   "attestation": 5
+  },
+  {
+   "a": "futon3c-d/mission/structural-law",
+   "b": "futon7-d/mission/war-machine-frontend-upgrade1",
+   "attestation": 5
+  },
+  {
+   "a": "futon3c-d/mission/structural-law",
+   "b": "futon3c-d/mission/war-machine-pilot",
+   "attestation": 5
+  },
+  {
+   "a": "futon3c-d/mission/structural-law",
+   "b": "futon3c-d/mission/war-machine-tuning",
+   "attestation": 5
+  },
+  {
+   "a": "futon0-d/mission/the-futon-stack",
+   "b": "futon4-d/mission/vsatarcs-invariants-integration",
+   "attestation": 5
+  },
+  {
+   "a": "futon0-d/mission/the-futon-stack",
+   "b": "futon7-d/mission/war-machine-frontend-upgrade1",
+   "attestation": 5
+  },
+  {
+   "a": "futon0-d/mission/the-futon-stack",
+   "b": "futon3c-d/mission/war-machine-pilot",
+   "attestation": 5
+  },
+  {
+   "a": "futon0-d/mission/the-futon-stack",
+   "b": "futon3c-d/mission/war-machine-tuning",
+   "attestation": 5
+  },
+  {
+   "a": "futon4-d/mission/vsatarcs-invariants-integration",
+   "b": "futon7-d/mission/war-machine-frontend-upgrade1",
+   "attestation": 5
+  },
+  {
+   "a": "futon4-d/mission/vsatarcs-invariants-integration",
+   "b": "futon3c-d/mission/war-machine-pilot",
+   "attestation": 5
+  },
+  {
+   "a": "futon4-d/mission/vsatarcs-invariants-integration",
+   "b": "futon3c-d/mission/war-machine-tuning",
+   "attestation": 5
+  },
+  {
+   "a": "futon7-d/mission/war-machine-frontend-upgrade1",
+   "b": "futon3c-d/mission/war-machine-pilot",
+   "attestation": 5
+  },
+  {
+   "a": "futon7-d/mission/war-machine-frontend-upgrade1",
+   "b": "futon3c-d/mission/war-machine-tuning",
+   "attestation": 5
+  },
+  {
+   "a": "futon3c-d/mission/war-machine-pilot",
+   "b": "futon3c-d/mission/war-machine-tuning",
+   "attestation": 8
+  },
+  {
+   "a": "futon3-d/mission/live-geometric-stack",
+   "b": "futon3c-d/mission/portfolio-inference",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/live-geometric-stack",
+   "b": "futon4-d/mission/simulating-or-training-as-learning-system",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/live-geometric-stack",
+   "b": "futon4-d/mission/three-column-stack",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/live-geometric-stack",
+   "b": "futon3-d/mission/weird-modernism",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/portfolio-inference",
+   "b": "futon3-d/mission/weird-modernism",
+   "attestation": 0
+  },
+  {
+   "a": "futon4-d/mission/simulating-or-training-as-learning-system",
+   "b": "futon3-d/mission/weird-modernism",
+   "attestation": 0
+  },
+  {
+   "a": "futon4-d/mission/three-column-stack",
+   "b": "futon3-d/mission/weird-modernism",
+   "attestation": 0
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon3c-d/mission/war-machine-pilot",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/portfolio-inference",
+   "b": "futon3c-d/mission/war-machine-pilot",
+   "attestation": 1
+  },
+  {
+   "a": "futon4-d/mission/simulating-or-training-as-learning-system",
+   "b": "futon3c-d/mission/war-machine-pilot",
+   "attestation": 0
+  },
+  {
+   "a": "futon4-d/mission/vsatarcs-writer",
+   "b": "futon3c-d/mission/war-machine-pilot",
+   "attestation": 0
+  },
+  {
+   "a": "futon4-d/mission/vsatarcs-writer",
+   "b": "futon3-d/mission/weird-modernism",
+   "attestation": 1
+  },
+  {
+   "a": "futon3c-d/mission/war-machine-pilot",
+   "b": "futon3-d/mission/weird-modernism",
+   "attestation": 0
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon3c-d/mission/codex-agent-behaviour",
+   "attestation": 4
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon3c-d/mission/transport-adapters",
+   "attestation": 4
+  },
+  {
+   "a": "futon3c-d/mission/codex-agent-behaviour",
+   "b": "futon3c-d/mission/portfolio-inference",
+   "attestation": 7
+  },
+  {
+   "a": "futon3c-d/mission/codex-agent-behaviour",
+   "b": "futon4-d/mission/three-column-stack",
+   "attestation": 7
+  },
+  {
+   "a": "futon3c-d/mission/codex-agent-behaviour",
+   "b": "futon3c-d/mission/transport-adapters",
+   "attestation": 4
+  },
+  {
+   "a": "futon3c-d/mission/portfolio-inference",
+   "b": "futon3c-d/mission/transport-adapters",
+   "attestation": 4
+  },
+  {
+   "a": "futon4-d/mission/three-column-stack",
+   "b": "futon3c-d/mission/transport-adapters",
+   "attestation": 4
+  },
+  {
+   "a": "futon3c-d/mission/codex-irc-execution",
+   "b": "futon3c-d/mission/transport-adapters",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/agency-rebuild",
+   "b": "futon3c-d/mission/codex-irc-execution",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/agency-rebuild",
+   "b": "futon3c-d/mission/transport-adapters",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/f6-agents",
+   "b": "futon3-d/mission/f6-recursive",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/f6-agents",
+   "b": "futon0-d/mission/futonzero-mvp",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/f6-recursive",
+   "b": "futon0-d/mission/futonzero-mvp",
+   "attestation": 0
+  },
+  {
+   "a": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "b": "futon3c-d/mission/structural-law",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/structural-law",
+   "b": "futon6-d/mission/superpod-mark3",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/diagramprover",
+   "b": "futon3-d/mission/f6-agents",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/diagramprover",
+   "b": "futon3-d/mission/f6-arxiv",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/diagramprover",
+   "b": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "attestation": 0
+  },
+  {
+   "a": "futon5a-d/mission/a-sorry-enterprise",
+   "b": "futon0-d/mission/futonzero-prelim-practice",
+   "attestation": 8
+  },
+  {
+   "a": "futon5a-d/mission/a-sorry-enterprise",
+   "b": "futon5a-d/mission/stack-stereolithography",
+   "attestation": 8
+  },
+  {
+   "a": "futon5a-d/mission/a-sorry-enterprise",
+   "b": "futon3c-d/mission/war-machine-pilot",
+   "attestation": 8
+  },
+  {
+   "a": "futon5a-d/mission/a-sorry-enterprise",
+   "b": "futon3c-d/mission/war-machine-tuning",
+   "attestation": 8
+  },
+  {
+   "a": "futon0-d/mission/futonzero-prelim-practice",
+   "b": "futon5a-d/mission/stack-stereolithography",
+   "attestation": 8
+  },
+  {
+   "a": "futon0-d/mission/futonzero-prelim-practice",
+   "b": "futon3c-d/mission/war-machine-pilot",
+   "attestation": 8
+  },
+  {
+   "a": "futon0-d/mission/futonzero-prelim-practice",
+   "b": "futon3c-d/mission/war-machine-tuning",
+   "attestation": 8
+  },
+  {
+   "a": "futon5a-d/mission/stack-stereolithography",
+   "b": "futon3c-d/mission/war-machine-pilot",
+   "attestation": 8
+  },
+  {
+   "a": "futon5a-d/mission/stack-stereolithography",
+   "b": "futon3c-d/mission/war-machine-tuning",
+   "attestation": 8
+  },
+  {
+   "a": "futon5a-d/mission/a-sorry-enterprise",
+   "b": "futon7-d/mission/interim-director",
+   "attestation": 12
+  },
+  {
+   "a": "futon5a-d/mission/a-sorry-enterprise",
+   "b": "futon5-d/mission/categorical-code",
+   "attestation": 0
+  },
+  {
+   "a": "futon5a-d/mission/a-sorry-enterprise",
+   "b": "futon5a-d/mission/trip-journal",
+   "attestation": 0
+  },
+  {
+   "a": "futon5-d/mission/categorical-code",
+   "b": "futon5a-d/mission/stack-stereolithography",
+   "attestation": 0
+  },
+  {
+   "a": "futon5-d/mission/categorical-code",
+   "b": "futon5a-d/mission/trip-journal",
+   "attestation": 0
+  },
+  {
+   "a": "futon5-d/mission/categorical-code",
+   "b": "futon3c-d/mission/war-machine-pilot",
+   "attestation": 0
+  },
+  {
+   "a": "futon5-d/mission/categorical-code",
+   "b": "futon3c-d/mission/war-machine-tuning",
+   "attestation": 0
+  },
+  {
+   "a": "futon5a-d/mission/stack-stereolithography",
+   "b": "futon5a-d/mission/trip-journal",
+   "attestation": 0
+  },
+  {
+   "a": "futon5a-d/mission/trip-journal",
+   "b": "futon3c-d/mission/war-machine-pilot",
+   "attestation": 0
+  },
+  {
+   "a": "futon5a-d/mission/trip-journal",
+   "b": "futon3c-d/mission/war-machine-tuning",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/agency-rebuild",
+   "b": "futon3c-d/mission/invariant-queue-unstuck",
+   "attestation": 2
+  },
+  {
+   "a": "futon3-d/mission/agency-rebuild",
+   "b": "futon3c-d/mission/peripheral-phenomenology",
+   "attestation": 2
+  },
+  {
+   "a": "futon3-d/mission/agency-rebuild",
+   "b": "futon7-d/mission/self-documenting-stack",
+   "attestation": 2
+  },
+  {
+   "a": "futon3-d/mission/agency-rebuild",
+   "b": "futon3c-d/mission/single-locus",
+   "attestation": 2
+  },
+  {
+   "a": "futon3c-d/mission/invariant-queue-unstuck",
+   "b": "futon3c-d/mission/peripheral-phenomenology",
+   "attestation": 2
+  },
+  {
+   "a": "futon3c-d/mission/invariant-queue-unstuck",
+   "b": "futon7-d/mission/self-documenting-stack",
+   "attestation": 2
+  },
+  {
+   "a": "futon3c-d/mission/invariant-queue-unstuck",
+   "b": "futon3c-d/mission/single-locus",
+   "attestation": 2
+  },
+  {
+   "a": "futon3c-d/mission/peripheral-phenomenology",
+   "b": "futon7-d/mission/self-documenting-stack",
+   "attestation": 2
+  },
+  {
+   "a": "futon3c-d/mission/peripheral-phenomenology",
+   "b": "futon3c-d/mission/single-locus",
+   "attestation": 2
+  },
+  {
+   "a": "futon7-d/mission/self-documenting-stack",
+   "b": "futon3c-d/mission/single-locus",
+   "attestation": 2
+  },
+  {
+   "a": "futon3-d/mission/agency-rebuild",
+   "b": "futon3-d/mission/futon1a-evidence",
+   "attestation": 1
+  },
+  {
+   "a": "futon3-d/mission/agency-rebuild",
+   "b": "futon3-d/mission/futon1a-rebuild",
+   "attestation": 1
+  },
+  {
+   "a": "futon3-d/mission/agency-rebuild",
+   "b": "futon3-d/mission/futon1a-workplan",
+   "attestation": 1
+  },
+  {
+   "a": "futon3-d/mission/agency-rebuild",
+   "b": "futon3c-d/mission/improve-irc",
+   "attestation": 1
+  },
+  {
+   "a": "futon3-d/mission/agency-rebuild",
+   "b": "futon3c-d/mission/peripheral-gauntlet",
+   "attestation": 1
+  },
+  {
+   "a": "futon3-d/mission/futon1a-evidence",
+   "b": "futon3-d/mission/futon1a-workplan",
+   "attestation": 1
+  },
+  {
+   "a": "futon3-d/mission/futon1a-evidence",
+   "b": "futon3c-d/mission/improve-irc",
+   "attestation": 1
+  },
+  {
+   "a": "futon3-d/mission/futon1a-evidence",
+   "b": "futon3c-d/mission/peripheral-gauntlet",
+   "attestation": 1
+  },
+  {
+   "a": "futon3-d/mission/futon1a-rebuild",
+   "b": "futon3-d/mission/futon1a-workplan",
+   "attestation": 1
+  },
+  {
+   "a": "futon3-d/mission/futon1a-rebuild",
+   "b": "futon3c-d/mission/improve-irc",
+   "attestation": 1
+  },
+  {
+   "a": "futon3-d/mission/futon1a-rebuild",
+   "b": "futon3c-d/mission/peripheral-gauntlet",
+   "attestation": 1
+  },
+  {
+   "a": "futon3-d/mission/futon1a-workplan",
+   "b": "futon3c-d/mission/improve-irc",
+   "attestation": 1
+  },
+  {
+   "a": "futon3-d/mission/futon1a-workplan",
+   "b": "futon3c-d/mission/peripheral-gauntlet",
+   "attestation": 1
+  },
+  {
+   "a": "futon3c-d/mission/improve-irc",
+   "b": "futon3c-d/mission/peripheral-gauntlet",
+   "attestation": 1
+  },
+  {
+   "a": "futon3c-d/mission/agency-refactor",
+   "b": "futon2-d/mission/aif-head",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/agency-refactor",
+   "b": "futon7-d/mission/autonomous-doc-maintenance",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/agency-refactor",
+   "b": "futon3c-d/mission/bounded-disposition",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/agency-refactor",
+   "b": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/agency-refactor",
+   "b": "futon3c-d/mission/operational-readiness",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/agency-refactor",
+   "b": "futon3c-d/mission/peripheral-gauntlet",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/agency-refactor",
+   "b": "futon7-d/mission/self-documenting-stack",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/agency-refactor",
+   "b": "futon3c-d/mission/structural-law",
+   "attestation": 0
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon7-d/mission/autonomous-doc-maintenance",
+   "attestation": 0
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon3c-d/mission/bounded-disposition",
+   "attestation": 0
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "attestation": 0
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon3c-d/mission/operational-readiness",
+   "attestation": 0
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon3c-d/mission/peripheral-gauntlet",
+   "attestation": 0
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon7-d/mission/self-documenting-stack",
+   "attestation": 0
+  },
+  {
+   "a": "futon7-d/mission/autonomous-doc-maintenance",
+   "b": "futon3c-d/mission/bounded-disposition",
+   "attestation": 0
+  },
+  {
+   "a": "futon7-d/mission/autonomous-doc-maintenance",
+   "b": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "attestation": 0
+  },
+  {
+   "a": "futon7-d/mission/autonomous-doc-maintenance",
+   "b": "futon3c-d/mission/operational-readiness",
+   "attestation": 0
+  },
+  {
+   "a": "futon7-d/mission/autonomous-doc-maintenance",
+   "b": "futon3c-d/mission/peripheral-gauntlet",
+   "attestation": 0
+  },
+  {
+   "a": "futon7-d/mission/autonomous-doc-maintenance",
+   "b": "futon7-d/mission/self-documenting-stack",
+   "attestation": 0
+  },
+  {
+   "a": "futon7-d/mission/autonomous-doc-maintenance",
+   "b": "futon3c-d/mission/structural-law",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/bounded-disposition",
+   "b": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/bounded-disposition",
+   "b": "futon3c-d/mission/operational-readiness",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/bounded-disposition",
+   "b": "futon3c-d/mission/peripheral-gauntlet",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/bounded-disposition",
+   "b": "futon7-d/mission/self-documenting-stack",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/bounded-disposition",
+   "b": "futon3c-d/mission/structural-law",
+   "attestation": 0
+  },
+  {
+   "a": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "b": "futon3c-d/mission/operational-readiness",
+   "attestation": 0
+  },
+  {
+   "a": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "b": "futon3c-d/mission/peripheral-gauntlet",
+   "attestation": 0
+  },
+  {
+   "a": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "b": "futon7-d/mission/self-documenting-stack",
+   "attestation": 5
+  },
+  {
+   "a": "futon3c-d/mission/operational-readiness",
+   "b": "futon3c-d/mission/peripheral-gauntlet",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/operational-readiness",
+   "b": "futon7-d/mission/self-documenting-stack",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/operational-readiness",
+   "b": "futon3c-d/mission/structural-law",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/peripheral-gauntlet",
+   "b": "futon7-d/mission/self-documenting-stack",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/peripheral-gauntlet",
+   "b": "futon3c-d/mission/structural-law",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/peripheral-gauntlet",
+   "b": "futon3c-d/mission/portfolio-inference",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/peripheral-gauntlet",
+   "b": "futon3c-d/mission/war-machine-pilot",
+   "attestation": 0
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon3c-d/mission/peripheral-phenomenology",
+   "attestation": 2
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon3c-d/mission/codex-irc-execution",
+   "attestation": 0
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon4-d/mission/evidence-viewer-refinements",
+   "attestation": 0
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon3c-d/mission/forum-refactor",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/codex-agent-behaviour",
+   "b": "futon3c-d/mission/codex-irc-execution",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/codex-agent-behaviour",
+   "b": "futon4-d/mission/evidence-viewer-refinements",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/codex-agent-behaviour",
+   "b": "futon3c-d/mission/forum-refactor",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/codex-irc-execution",
+   "b": "futon4-d/mission/evidence-viewer-refinements",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/codex-irc-execution",
+   "b": "futon3c-d/mission/forum-refactor",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/codex-irc-execution",
+   "b": "futon4-d/mission/three-column-stack",
+   "attestation": 0
+  },
+  {
+   "a": "futon4-d/mission/evidence-viewer-refinements",
+   "b": "futon3c-d/mission/forum-refactor",
+   "attestation": 0
+  },
+  {
+   "a": "futon4-d/mission/evidence-viewer-refinements",
+   "b": "futon4-d/mission/three-column-stack",
+   "attestation": 0
+  },
+  {
+   "a": "futon4-d/mission/evidence-viewer-refinements",
+   "b": "futon3c-d/mission/transport-adapters",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/forum-refactor",
+   "b": "futon4-d/mission/three-column-stack",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/forum-refactor",
+   "b": "futon3c-d/mission/transport-adapters",
+   "attestation": 0
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon3c-d/mission/cyder",
+   "attestation": 1
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon4-d/mission/futon-enrichment",
+   "attestation": 1
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon3-d/mission/pattern-ingest",
+   "attestation": 1
+  },
+  {
+   "a": "futon2-d/mission/aif-head",
+   "b": "futon5a-d/mission/trip-journal",
+   "attestation": 1
+  },
+  {
+   "a": "futon3c-d/mission/cyder",
+   "b": "futon3c-d/mission/diagramprover",
+   "attestation": 1
+  },
+  {
+   "a": "futon3c-d/mission/cyder",
+   "b": "futon4-d/mission/futon-enrichment",
+   "attestation": 1
+  },
+  {
+   "a": "futon3c-d/mission/cyder",
+   "b": "futon3-d/mission/pattern-ingest",
+   "attestation": 1
+  },
+  {
+   "a": "futon3c-d/mission/cyder",
+   "b": "futon3c-d/mission/portfolio-inference",
+   "attestation": 1
+  },
+  {
+   "a": "futon3c-d/mission/cyder",
+   "b": "futon5a-d/mission/trip-journal",
+   "attestation": 1
+  },
+  {
+   "a": "futon3c-d/mission/diagramprover",
+   "b": "futon4-d/mission/futon-enrichment",
+   "attestation": 1
+  },
+  {
+   "a": "futon3c-d/mission/diagramprover",
+   "b": "futon3-d/mission/pattern-ingest",
+   "attestation": 1
+  },
+  {
+   "a": "futon3c-d/mission/diagramprover",
+   "b": "futon5a-d/mission/trip-journal",
+   "attestation": 1
+  },
+  {
+   "a": "futon4-d/mission/futon-enrichment",
+   "b": "futon3-d/mission/pattern-ingest",
+   "attestation": 1
+  },
+  {
+   "a": "futon4-d/mission/futon-enrichment",
+   "b": "futon3c-d/mission/portfolio-inference",
+   "attestation": 1
+  },
+  {
+   "a": "futon4-d/mission/futon-enrichment",
+   "b": "futon5a-d/mission/trip-journal",
+   "attestation": 1
+  },
+  {
+   "a": "futon3-d/mission/pattern-ingest",
+   "b": "futon3c-d/mission/portfolio-inference",
+   "attestation": 1
+  },
+  {
+   "a": "futon3-d/mission/pattern-ingest",
+   "b": "futon5a-d/mission/trip-journal",
+   "attestation": 1
+  },
+  {
+   "a": "futon3c-d/mission/portfolio-inference",
+   "b": "futon5a-d/mission/trip-journal",
+   "attestation": 1
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon5a-d/mission/explore-aiqa",
+   "attestation": 1
+  },
+  {
+   "a": "futon5a-d/mission/explore-aiqa",
+   "b": "futon3c-d/mission/mission-scopes-into-substrate-2",
+   "attestation": 1
+  },
+  {
+   "a": "futon6-d/mission/artificial-stack-exchange",
+   "b": "futon4-d/mission/self-representing-stack",
+   "attestation": 0
+  },
+  {
+   "a": "futon6-d/mission/artificial-stack-exchange",
+   "b": "futon4-d/mission/three-column-stack",
+   "attestation": 0
+  },
+  {
+   "a": "futon4-d/mission/self-representing-stack",
+   "b": "futon4-d/mission/three-column-stack",
+   "attestation": 0
+  },
+  {
+   "a": "futon6-d/mission/artificial-stack-exchange",
+   "b": "futon0-d/mission/capability-star-map",
+   "attestation": 0
+  },
+  {
+   "a": "futon6-d/mission/artificial-stack-exchange",
+   "b": "futon3c-d/mission/peripheral-gauntlet",
+   "attestation": 0
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon3c-d/mission/peripheral-gauntlet",
+   "attestation": 0
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon4-d/mission/self-representing-stack",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/peripheral-gauntlet",
+   "b": "futon4-d/mission/self-representing-stack",
+   "attestation": 0
+  },
+  {
+   "a": "futon6-d/mission/artificial-stack-exchange",
+   "b": "futon3-d/mission/f6-recursive",
+   "attestation": 0
+  },
+  {
+   "a": "futon6-d/mission/artificial-stack-exchange",
+   "b": "futon5a-d/mission/self-improvement-loop",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/f6-recursive",
+   "b": "futon5a-d/mission/self-improvement-loop",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/f6-recursive",
+   "b": "futon4-d/mission/self-representing-stack",
+   "attestation": 0
+  },
+  {
+   "a": "futon5a-d/mission/self-improvement-loop",
+   "b": "futon4-d/mission/self-representing-stack",
+   "attestation": 0
+  },
+  {
+   "a": "futon6-d/mission/artificial-stack-exchange",
+   "b": "futon3-d/mission/f6-eval",
+   "attestation": 0
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon3-d/mission/f6-eval",
+   "attestation": 0
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon3-d/mission/f6-recursive",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/f6-eval",
+   "b": "futon3-d/mission/f6-recursive",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/bounded-in-flight-state",
+   "b": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "attestation": 5
+  },
+  {
+   "a": "futon3c-d/mission/bounded-in-flight-state",
+   "b": "futon7-d/mission/self-documenting-stack",
+   "attestation": 5
+  },
+  {
+   "a": "futon3c-d/mission/bounded-in-flight-state",
+   "b": "futon3c-d/mission/state-snapshot-witness",
+   "attestation": 5
+  },
+  {
+   "a": "futon3c-d/mission/bounded-in-flight-state",
+   "b": "futon4-d/mission/web-arxana-ui-improvements",
+   "attestation": 5
+  },
+  {
+   "a": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "b": "futon3c-d/mission/state-snapshot-witness",
+   "attestation": 5
+  },
+  {
+   "a": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "b": "futon0-d/mission/the-futon-stack",
+   "attestation": 5
+  },
+  {
+   "a": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "b": "futon4-d/mission/web-arxana-ui-improvements",
+   "attestation": 5
+  },
+  {
+   "a": "futon7-d/mission/self-documenting-stack",
+   "b": "futon3c-d/mission/state-snapshot-witness",
+   "attestation": 5
+  },
+  {
+   "a": "futon7-d/mission/self-documenting-stack",
+   "b": "futon0-d/mission/the-futon-stack",
+   "attestation": 5
+  },
+  {
+   "a": "futon7-d/mission/self-documenting-stack",
+   "b": "futon4-d/mission/web-arxana-ui-improvements",
+   "attestation": 5
+  },
+  {
+   "a": "futon3c-d/mission/state-snapshot-witness",
+   "b": "futon0-d/mission/the-futon-stack",
+   "attestation": 5
+  },
+  {
+   "a": "futon3c-d/mission/state-snapshot-witness",
+   "b": "futon4-d/mission/web-arxana-ui-improvements",
+   "attestation": 5
+  },
+  {
+   "a": "futon0-d/mission/the-futon-stack",
+   "b": "futon4-d/mission/web-arxana-ui-improvements",
+   "attestation": 5
+  },
+  {
+   "a": "futon3c-d/mission/bounded-in-flight-state",
+   "b": "futon3c-d/mission/single-entry-point",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/bounded-in-flight-state",
+   "b": "futon3c-d/mission/mission-scopes-into-substrate-2",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/bounded-in-flight-state",
+   "b": "futon5a-d/mission/war-machine-wiring",
+   "attestation": 0
+  },
+  {
+   "a": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "b": "futon3-d/mission/live-geometric-stack",
+   "attestation": 0
+  },
+  {
+   "a": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "b": "futon3c-d/mission/reachable-from-boot",
+   "attestation": 0
+  },
+  {
+   "a": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "b": "futon3c-d/mission/single-entry-point",
+   "attestation": 0
+  },
+  {
+   "a": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "b": "futon4-d/mission/vsatarcs-invariants-integration",
+   "attestation": 0
+  },
+  {
+   "a": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "b": "futon5a-d/mission/war-machine-wiring",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/live-geometric-stack",
+   "b": "futon3c-d/mission/mission-scopes-into-substrate-2",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/live-geometric-stack",
+   "b": "futon3c-d/mission/single-entry-point",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/live-geometric-stack",
+   "b": "futon3c-d/mission/state-snapshot-witness",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/live-geometric-stack",
+   "b": "futon5a-d/mission/war-machine-wiring",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/mission-scopes-into-substrate-2",
+   "b": "futon3c-d/mission/reachable-from-boot",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/mission-scopes-into-substrate-2",
+   "b": "futon3c-d/mission/single-entry-point",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/mission-scopes-into-substrate-2",
+   "b": "futon3c-d/mission/state-snapshot-witness",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/mission-scopes-into-substrate-2",
+   "b": "futon0-d/mission/the-futon-stack",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/mission-scopes-into-substrate-2",
+   "b": "futon4-d/mission/vsatarcs-invariants-integration",
+   "attestation": 1
+  },
+  {
+   "a": "futon3c-d/mission/mission-scopes-into-substrate-2",
+   "b": "futon5a-d/mission/war-machine-wiring",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/reachable-from-boot",
+   "b": "futon3c-d/mission/single-entry-point",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/reachable-from-boot",
+   "b": "futon3c-d/mission/state-snapshot-witness",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/reachable-from-boot",
+   "b": "futon5a-d/mission/war-machine-wiring",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/single-entry-point",
+   "b": "futon3c-d/mission/state-snapshot-witness",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/single-entry-point",
+   "b": "futon0-d/mission/the-futon-stack",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/single-entry-point",
+   "b": "futon4-d/mission/vsatarcs-invariants-integration",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/single-entry-point",
+   "b": "futon5a-d/mission/war-machine-wiring",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/state-snapshot-witness",
+   "b": "futon4-d/mission/vsatarcs-invariants-integration",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/state-snapshot-witness",
+   "b": "futon5a-d/mission/war-machine-wiring",
+   "attestation": 0
+  },
+  {
+   "a": "futon0-d/mission/the-futon-stack",
+   "b": "futon5a-d/mission/war-machine-wiring",
+   "attestation": 0
+  },
+  {
+   "a": "futon4-d/mission/vsatarcs-invariants-integration",
+   "b": "futon5a-d/mission/war-machine-wiring",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/bounded-in-flight-state",
+   "b": "futon0-d/mission/capability-star-map",
+   "attestation": 3
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon4-d/mission/futon-enrichment",
+   "attestation": 1
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon0-d/mission/futonzero-capability",
+   "attestation": 1
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon0-d/mission/futonzero-mvp",
+   "attestation": 1
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon3c-d/mission/peripheral-phenomenology",
+   "attestation": 1
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon3c-d/mission/stepper-calibration",
+   "attestation": 1
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon4-d/mission/vsatarcs-invariants-integration",
+   "attestation": 1
+  },
+  {
+   "a": "futon4-d/mission/futon-enrichment",
+   "b": "futon0-d/mission/futonzero-capability",
+   "attestation": 1
+  },
+  {
+   "a": "futon4-d/mission/futon-enrichment",
+   "b": "futon0-d/mission/futonzero-mvp",
+   "attestation": 1
+  },
+  {
+   "a": "futon4-d/mission/futon-enrichment",
+   "b": "futon3c-d/mission/peripheral-phenomenology",
+   "attestation": 1
+  },
+  {
+   "a": "futon4-d/mission/futon-enrichment",
+   "b": "futon3c-d/mission/stepper-calibration",
+   "attestation": 1
+  },
+  {
+   "a": "futon4-d/mission/futon-enrichment",
+   "b": "futon4-d/mission/three-column-stack",
+   "attestation": 1
+  },
+  {
+   "a": "futon4-d/mission/futon-enrichment",
+   "b": "futon4-d/mission/vsatarcs-invariants-integration",
+   "attestation": 1
+  },
+  {
+   "a": "futon0-d/mission/futonzero-capability",
+   "b": "futon3c-d/mission/mission-scopes-into-substrate-2",
+   "attestation": 1
+  },
+  {
+   "a": "futon0-d/mission/futonzero-capability",
+   "b": "futon3c-d/mission/peripheral-phenomenology",
+   "attestation": 1
+  },
+  {
+   "a": "futon0-d/mission/futonzero-capability",
+   "b": "futon3c-d/mission/stepper-calibration",
+   "attestation": 1
+  },
+  {
+   "a": "futon0-d/mission/futonzero-capability",
+   "b": "futon4-d/mission/three-column-stack",
+   "attestation": 1
+  },
+  {
+   "a": "futon0-d/mission/futonzero-capability",
+   "b": "futon4-d/mission/vsatarcs-invariants-integration",
+   "attestation": 1
+  },
+  {
+   "a": "futon0-d/mission/futonzero-mvp",
+   "b": "futon3c-d/mission/mission-scopes-into-substrate-2",
+   "attestation": 1
+  },
+  {
+   "a": "futon0-d/mission/futonzero-mvp",
+   "b": "futon3c-d/mission/peripheral-phenomenology",
+   "attestation": 1
+  },
+  {
+   "a": "futon0-d/mission/futonzero-mvp",
+   "b": "futon3c-d/mission/stepper-calibration",
+   "attestation": 1
+  },
+  {
+   "a": "futon0-d/mission/futonzero-mvp",
+   "b": "futon4-d/mission/three-column-stack",
+   "attestation": 4
+  },
+  {
+   "a": "futon0-d/mission/futonzero-mvp",
+   "b": "futon4-d/mission/vsatarcs-invariants-integration",
+   "attestation": 1
+  },
+  {
+   "a": "futon3c-d/mission/mission-scopes-into-substrate-2",
+   "b": "futon3c-d/mission/peripheral-phenomenology",
+   "attestation": 1
+  },
+  {
+   "a": "futon3c-d/mission/mission-scopes-into-substrate-2",
+   "b": "futon3c-d/mission/stepper-calibration",
+   "attestation": 1
+  },
+  {
+   "a": "futon3c-d/mission/peripheral-phenomenology",
+   "b": "futon3c-d/mission/stepper-calibration",
+   "attestation": 1
+  },
+  {
+   "a": "futon3c-d/mission/peripheral-phenomenology",
+   "b": "futon4-d/mission/three-column-stack",
+   "attestation": 1
+  },
+  {
+   "a": "futon3c-d/mission/peripheral-phenomenology",
+   "b": "futon4-d/mission/vsatarcs-invariants-integration",
+   "attestation": 1
+  },
+  {
+   "a": "futon3c-d/mission/stepper-calibration",
+   "b": "futon4-d/mission/three-column-stack",
+   "attestation": 1
+  },
+  {
+   "a": "futon3c-d/mission/stepper-calibration",
+   "b": "futon4-d/mission/vsatarcs-invariants-integration",
+   "attestation": 1
+  },
+  {
+   "a": "futon4-d/mission/three-column-stack",
+   "b": "futon4-d/mission/vsatarcs-invariants-integration",
+   "attestation": 1
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon3c-d/mission/structural-law",
+   "attestation": 0
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon3-d/mission/futon1a-rebuild",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/futon1a-rebuild",
+   "b": "futon3c-d/mission/mission-scopes-into-substrate-2",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/mission-scopes-into-substrate-2",
+   "b": "futon3c-d/mission/structural-law",
+   "attestation": 0
+  },
+  {
+   "a": "futon0-d/mission/capability-star-map",
+   "b": "futon4-d/mission/web-arxana-ui-improvements",
+   "attestation": 1
+  },
+  {
+   "a": "futon4-d/mission/three-column-stack",
+   "b": "futon4-d/mission/web-arxana-ui-improvements",
+   "attestation": 0
+  },
+  {
+   "a": "futon5-d/mission/categorical-code",
+   "b": "futon7-d/mission/self-documenting-stack",
+   "attestation": 2
+  },
+  {
+   "a": "futon5-d/mission/categorical-code",
+   "b": "futon4-d/mission/vsatarcs-writer",
+   "attestation": 2
+  },
+  {
+   "a": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "b": "futon4-d/mission/vsatarcs-writer",
+   "attestation": 2
+  },
+  {
+   "a": "futon7-d/mission/self-documenting-stack",
+   "b": "futon4-d/mission/vsatarcs-writer",
+   "attestation": 2
+  },
+  {
+   "a": "futon5-d/mission/categorical-code",
+   "b": "futon0-d/mission/patterns-done-right",
+   "attestation": 0
+  },
+  {
+   "a": "futon5-d/mission/categorical-code",
+   "b": "futon3-d/mission/pattern-mining",
+   "attestation": 7
+  },
+  {
+   "a": "futon5-d/mission/categorical-code",
+   "b": "futon5a-d/mission/stack-geometry",
+   "attestation": 7
+  },
+  {
+   "a": "futon4-d/mission/or-training-as-learning-system",
+   "b": "futon3-d/mission/pattern-mining",
+   "attestation": 7
+  },
+  {
+   "a": "futon4-d/mission/or-training-as-learning-system",
+   "b": "futon5a-d/mission/stack-geometry",
+   "attestation": 7
+  },
+  {
+   "a": "futon3-d/mission/pattern-mining",
+   "b": "futon5a-d/mission/stack-geometry",
+   "attestation": 7
+  },
+  {
+   "a": "futon5-d/mission/categorical-code",
+   "b": "futon4-d/mission/simulating-or-training-as-learning-system",
+   "attestation": 0
+  },
+  {
+   "a": "futon5-d/mission/categorical-code",
+   "b": "futon3-d/mission/futon1a-rebuild",
+   "attestation": 0
+  },
+  {
+   "a": "futon5-d/mission/categorical-code",
+   "b": "futon0-d/mission/futonzero-capability",
+   "attestation": 0
+  },
+  {
+   "a": "futon5-d/mission/categorical-code",
+   "b": "futon0-d/mission/futonzero-mvp",
+   "attestation": 0
+  },
+  {
+   "a": "futon5-d/mission/categorical-code",
+   "b": "futon4-d/mission/three-column-stack",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/futon1a-rebuild",
+   "b": "futon0-d/mission/futonzero-capability",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/futon1a-rebuild",
+   "b": "futon0-d/mission/futonzero-mvp",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/futon1a-rebuild",
+   "b": "futon4-d/mission/three-column-stack",
+   "attestation": 32
+  },
+  {
+   "a": "futon5-d/mission/categorical-code",
+   "b": "futon3c-d/mission/diagramprover",
+   "attestation": 2
+  },
+  {
+   "a": "futon7-d/mission/interim-director",
+   "b": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "attestation": 0
+  },
+  {
+   "a": "futon7-d/mission/interim-director",
+   "b": "futon4-d/mission/or-training-as-learning-system",
+   "attestation": 0
+  },
+  {
+   "a": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "b": "futon4-d/mission/or-training-as-learning-system",
+   "attestation": 0
+  },
+  {
+   "a": "futon4-d/mission/or-training-as-learning-system",
+   "b": "futon0-d/mission/patterns-done-right",
+   "attestation": 1
+  },
+  {
+   "a": "futon3-d/mission/f6-arxiv",
+   "b": "futon3-d/mission/f6-ingest",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/f6-eval",
+   "b": "futon0-d/mission/futonzero-mvp",
+   "attestation": 0
+  },
+  {
+   "a": "futon4-d/mission/futon-enrichment",
+   "b": "futon3c-d/mission/structural-law",
+   "attestation": 0
+  },
+  {
+   "a": "futon7-d/mission/interim-director-proxy-metric-inventory",
+   "b": "futon4-d/mission/three-column-stack",
+   "attestation": 0
+  },
+  {
+   "a": "futon4-d/mission/simulating-or-training-as-learning-system",
+   "b": "futon4-d/mission/vsatarcs-invariants-integration",
+   "attestation": 1
+  },
+  {
+   "a": "futon4-d/mission/or-training-as-learning-system",
+   "b": "futon4-d/mission/simulating-or-training-as-learning-system",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/pattern-ingest",
+   "b": "futon4-d/mission/three-column-stack",
+   "attestation": 2
+  },
+  {
+   "a": "futon3-d/mission/pattern-mining",
+   "b": "futon0-d/mission/patterns-done-right",
+   "attestation": 0
+  },
+  {
+   "a": "futon3-d/mission/pattern-mining",
+   "b": "futon3c-d/mission/war-machine-pilot",
+   "attestation": 0
+  },
+  {
+   "a": "futon0-d/mission/patterns-done-right",
+   "b": "futon3c-d/mission/war-machine-pilot",
+   "attestation": 0
+  },
+  {
+   "a": "futon0-d/mission/patterns-done-right",
+   "b": "futon7-d/mission/self-documenting-stack",
+   "attestation": 1
+  },
+  {
+   "a": "futon5a-d/mission/stack-stereolithography",
+   "b": "futon4-d/mission/three-column-stack",
+   "attestation": 0
+  },
+  {
+   "a": "futon4-d/mission/three-column-stack",
+   "b": "futon3c-d/mission/war-machine-tuning",
+   "attestation": 0
+  },
+  {
+   "a": "futon3c-d/mission/structural-law",
+   "b": "futon4-d/mission/three-column-stack",
+   "attestation": 0
+  }
+ ]
+}

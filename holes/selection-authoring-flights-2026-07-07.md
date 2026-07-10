@@ -54,3 +54,19 @@ Terminal: b6 :discharges :want-signature.
 ### Blind scoring
 
 :none — no A-next seal exists. Recorded honestly.
+
+## ft-learning-loop (zai-2, edge invoke-1783582836450-869-e96145ba) — SKIPPED: has-deposit
+
+**Driver:** zai-2 (selection-authoring flight from claude-4, edge invoke-1783582836450-869-e96145ba)
+**Mission:** M-learning-loop (futon5a-d/mission/learning-loop)
+**Consent:** fold-authoring gate consume! -> {:ok true, :balance 0} (accepted)
+**Result:** skipped-has-deposit
+**Reason:** A fold-turn deposit for M-learning-loop already exists at
+  /home/joe/code/futon6/data/fold-turns/ft-learning-loop-010.edn (zai-10, 2026-07-07).
+  Cross-check of futon6/data/fold-turns/ confirmed ft-learning-loop-010.edn with
+  :mission "futon5a-d/mission/learning-loop" and :mana-ref citing the fold-authoring
+  gate for M-learning-loop. Per STEP 2 of the authoring contract: STOP, do not author
+  a duplicate. No deposit written; no tampered-copy test needed.
+**Action for claude-4:** If a second M-learning-loop deposit is wanted, the
+  existing ft-learning-loop-010 must be addressed first (superseded, numbered-up,
+  or the contract amended to permit multiple deposits per mission).

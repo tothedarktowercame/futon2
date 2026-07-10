@@ -1,0 +1,158 @@
+{
+ "mission": "M-cold-chain",
+ "session": "313c376e",
+ "thresh": 0.42,
+ "n_turns": 10,
+ "n_engaged": 0,
+ "engaged_turns": [],
+ "turns": [
+  {
+   "turn": 2,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.371,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 3,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.226,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 4,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.232,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 5,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.244,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 6,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.204,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 7,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.404,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 8,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.244,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 9,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.378,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 10,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.244,
+   "engages": false,
+   "engaged": []
+  },
+  {
+   "turn": 11,
+   "best_scope": null,
+   "best_scope_name": null,
+   "score": 0.33,
+   "engages": false,
+   "engaged": []
+  }
+ ],
+ "scopes": [
+  {
+   "id": "cold-chain/m-cold-chain-ground-the-four-cold-stars-as-one-ladder",
+   "name": "M-cold-chain — ground the four cold- stars as one ladder",
+   "binder": "loose-section",
+   "turns": []
+  },
+  {
+   "id": "cold-chain/next",
+   "name": "Next",
+   "binder": "loose-section",
+   "turns": []
+  },
+  {
+   "id": "cold-chain/checkpoint-1-2026-06-16",
+   "name": "Checkpoint 1 — 2026-06-16",
+   "binder": "loose-section",
+   "turns": []
+  },
+  {
+   "id": "cold-chain/checkpoint-0-2026-06-12",
+   "name": "Checkpoint 0 — 2026-06-12",
+   "binder": "loose-section",
+   "turns": []
+  },
+  {
+   "id": "cold-chain/identify",
+   "name": "IDENTIFY — the tension",
+   "binder": "eightfold-phase",
+   "turns": []
+  },
+  {
+   "id": "cold-chain/identify-the-tension--92248e07",
+   "name": "IDENTIFY — the tension",
+   "binder": "capability-scope",
+   "turns": []
+  },
+  {
+   "id": "cold-chain/scope",
+   "name": "Scope",
+   "binder": "loose-section",
+   "turns": []
+  },
+  {
+   "id": "cold-chain/scope--b2aae59c",
+   "name": "Scope",
+   "binder": "capability-scope",
+   "turns": []
+  },
+  {
+   "id": "cold-chain/exit-conditions",
+   "name": "Exit conditions",
+   "binder": "loose-section",
+   "turns": []
+  },
+  {
+   "id": "cold-chain/exit-conditions--9fdf3d28",
+   "name": "Exit conditions",
+   "binder": "capability-scope",
+   "turns": []
+  },
+  {
+   "id": "cold-chain/head",
+   "name": "HEAD",
+   "binder": "eightfold-phase",
+   "turns": []
+  }
+ ]
+}

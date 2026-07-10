@@ -1,0 +1,78 @@
+;; invariant-queue-unstuck-sorry-EMPIRICAL.edn — the GROUND-TRUTH interface for
+;; M-invariant-queue-unstuck, recovered POST-HOC from the mission doc + code + git + XTDB
+;; (A-next method, Joe 2026-07-01). #2/10 in the A-next gold corpus (M-fold-ansatz phase-2 ground truth).
+;; Pairs with the existing A-small wiring futon6/holes/clean/invariant-queue-unstuck.clean.edn
+;; → this completes a full (cascade, sorry, wiring) TRIPLE.
+;;
+;; Sources (all inspected this session, not remembered):
+;;   git commits: 557efe4 (invariant-queue meta-infrastructure — boundary+ratchet+probe+probe_taps) ·
+;;     c6f2c32 (the PRE-EXISTING I-evidence-per-turn defn = a :have) · 9598fa8 (quiet dup receipts) ·
+;;     1bf1f81 (snapshot + inventories). Mission CLOSED (INSTANTIATE-1..4 + DOCUMENT) 2026-04-29.
+;;   code (public surface): futon3c/src/futon3c/evidence/boundary.clj (append!) ·
+;;     logic/{ratchet,probe,probe_taps}.clj · evidence/{store,invariant,xtdb_backend}.clj
+;;   XTDB / durability: futon1a store at storage/futon1a/default/ (verify-persisted read-back target);
+;;     :family-fired + :family-demoted evidence entries written THROUGH the boundary (recursive).
+;;   doc: futon3c/holes/missions/M-invariant-queue-unstuck.md (want: "fatberg → flowing stream";
+;;     queue-as-projection reframe, Joe 2026-04-29); docs/structural-law-inventory.sexp
+;;     (4 new :scope :stack families: single-boundary / evidence-per-turn / coverage-ratchet / family-canary)
+
+{:id :sorry/invariant-queue-flowing-projection
+ :hx-type "code/v05/sorry"
+ :state :empirical                        ; recovered from ground truth, not proposed
+ :derivation :post-hoc-reconstruction
+
+ :want-signature "unstick-queue : (scattered-evidence-writes, invariant-inventory, live-stack) -> FlowingInvariantStream"
+ :hungry-for "FlowingInvariantStream"     ; the codomain: single-boundaried · durably-verified · coverage-ratcheted ·
+                                          ; canary-probed · a projection that surfaces what's alive, not a hand-curated list
+
+ ;; ENDPOINTS — real substrate-2 / code entities. :in-map from source + git + XTDB inspection.
+ :endpoints
+ [{:role :have :ref "~30 estore/append* call sites across ~15 namespaces (transport/{irc,ws}, social/{bells,whistles,dispatch}, agents/tickle*, peripheral/*, blackboard)"
+   :type "code call-sites" :in-map true
+   :note "THE fatberg: parallel write paths with silent shape-rejection — the loss substrate the mission unifies"}
+  {:role :have :ref "futon3c.evidence.store/append* + !store"
+   :type "code/v05/namespace" :in-map true :note "the store the single boundary wraps"}
+  {:role :have :ref "futon3c.evidence.invariant/I-evidence-per-turn + verify-persisted"
+   :type "invariant + fn" :in-map true :note "PRE-EXISTING (commit c6f2c32); the read-back check the boundary enforces"}
+  {:role :have :ref "futon1a XTDB durable store (storage/futon1a/default/) via evidence/xtdb_backend"
+   :type "durable backend" :in-map true :note "the persistence substrate verify-persisted reads back from"}
+  {:role :have :ref "docs/structural-law-inventory.sexp (10 operational families, static list)"
+   :type "inventory file" :in-map true :note "the un-flowing queue — the 1-d projection target to make live"}
+  {:role :have :ref "3 operational core.logic layers: agency/logic · agents/tickle_logic · portfolio/logic"
+   :type "code/v05/namespace" :in-map true :note "already binding for months; tapped into the probe by probe_taps"}
+  {:role :want :ref "FlowingInvariantStream — the live projection: every :operational family has a live-fire-record within its staleness window; coverage cannot decrease without a reconciling demotion-event; all writes route through one boundary"
+   :type "FlowingInvariantStream value" :in-map false
+   :note "the codomain the whole construction produces; realized by the four new :scope :stack families"}]
+
+ ;; The load-bearing typed holes the construction had to discharge (the HARD parts):
+ :typed-holes
+ [{:at :exhaustive-single-boundary
+   :wanted "EVERY append routes through boundary/append! — partial single-boundary is structurally indistinguishable from none, so all ~30 sites must convert; grep for direct */append* outside boundary returns zero"
+   :discharged-by "557efe4 + INSTANTIATE-2 (26 sites/15 files converted; static check holds)"}
+  {:at :verify-persisted-no-false-positive
+   :wanted "resolve the backend ONCE so append* and verify-persisted see the SAME store — else a nil-store gives a false-positive I-evidence-per-turn violation (success reported, nothing landed)"
+   :discharged-by "557efe4 (resolve-backend in boundary/append!)"}
+  {:at :coverage-ratchet-reconciliation
+   :wanted "a family :status decrease is IMPOSSIBLE without a matching :family-demoted evidence entry (itself written through the boundary, recursive) — the (b)-test: an agent can't silently work around an invariant"
+   :discharged-by "557efe4 (logic/ratchet: status-ordering + unreconciled-demotions + pre-commit hook)"}
+  {:at :canary-staleness-projection
+   :wanted "'operational' ⟺ a live-fire-record inside the staleness window, else surfaces distinctly as :inactive — the projection surfaces what's alive rather than enumerating claims"
+   :discharged-by "557efe4 (logic/probe: run-probe-sweep! + run-family-check → :inactive fallback; probe_taps factory taps)"}]
+
+ :kind {:predecessor-shape :static-inventory+scattered-writes   ; a fatberg: 10 static claims, ~30 silent write paths
+        :whats-new         :single-boundary+ratchet+canary+projection-taps
+        :target-territory  :mostly-known                        ; the sub-holes (exhaustiveness, ratchet-reconciliation,
+                                                                ; projection-not-enumeration) surfaced in DERIVE, not mid-build
+        :fill-mechanism    :wrap-boundary+verify-readback+ratchet-diff+probe-sweep+factory-taps}
+
+ :title "the operational-invariant queue flows again — fatberg → stream (single boundary · durable-verified · coverage ratchet · live canary · projection-not-enumeration)"
+ :provenance {:mission "futon3c/holes/missions/M-invariant-queue-unstuck.md"
+              :campaign "C-cascade-real"
+              :method "post-hoc empirical (doc + code + git + XTDB), A-next, 2026-07-01"
+              :sealed-by "claude (this session)"
+              :cascade [:agency/single-routing-authority        ; :applied (the realized cascade, from the wiring)
+                        :storage/error-layer-hierarchy :stack-coherence/futon1-storage-coherence
+                        :stack-coherence/futon-bridge-health :ants/baseline-cyber-ant]
+              :pairs-with-wiring "futon6/holes/clean/invariant-queue-unstuck.clean.edn"
+              :acceptance-terminals=endpoints
+              "wiring s1 :consumes (scattered writes) = sorry :have (append* sites); wiring s5 :discharges :four-meta-invariants-bound / :live-projection = sorry :want (FlowingInvariantStream). MATCH."}}

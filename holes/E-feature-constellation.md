@@ -58,6 +58,54 @@ A scoping/ARGUE pass would decide: node granularity (peripheral vs finer); how
 one repo's devmap → feature nodes + magnitudes → the existing pins/super-core path →
 render, with the ≤20 budget flagged). No build until that pass.
 
+## IDENTIFY addendum — a fifth asset: the pattern-road graph (2026-07-04, Joe via claude-18)
+
+Operator observation from the live EFE map session: the **mission × applied-pattern
+bipartite graph** (surface form: `futon6/data/mission-carpet-roads.json`, 711
+attestation-weighted roads; computed in `mission_carpet.py` from `.flexiarg` names in
+mission texts × `pattern-attestation.json`) could be **folded in to find features
+structurally** — used *with* the other sources, not instead of them.
+
+What it adds that devmaps/VSATARCS/substrate-2 don't:
+- **Enacted features.** Pattern clusters that co-travel across missions are
+  features-of-practice — what activity treats as a unit vs what authors declared.
+  Declared-but-never-enacted vs enacted-but-never-declared are both diagnostics
+  (disagreement between sources IS the signal).
+- **Magnitude input.** Turn-attestation is a ready-made liveness/recency term for the
+  design note's `magnitude` computation.
+- **Overlap edges.** Pattern co-application supplies `overlaps-with` candidates where
+  devmap `:depends-on`/overlap data is too sparse — the named kill-risk of this
+  excursion.
+
+Retro-diction check (one data point, but it is this excursion's own exhibit):
+**portfolio-inference**, hand-trimmed in the 2026-07-04 decommission session, shows the
+exact "much-cited hub, faint fan" signature on the map — 27 roads, best shared-pattern
+attestation 16, four roads at 0. The structural signal flags at a glance what the
+decommission session established by grep-archaeology.
+
+For the scoping/ARGUE pass this implies a fourth open question: how pattern-cluster
+(enacted) granularity aligns with devmap `!`-entry (declared) granularity.
+
+## v0 addendum — first computed constellation (2026-07-05, Joe + Claude, live session)
+
+Joe redirected the seed away from devmaps ("I wonder if the devmaps are out of
+date") to the **live cascade's mission clusters** as the core to grow from /
+retract to. `feature_constellation.py` (this dir) now computes, zero hand-typed
+rows: seed = `GET :7070/api/alpha/cascade-real/graph` clusters (172 missions,
+12 clusters); grow = `futon6/data/mission-carpet-roads.json` attestation-weighted
+pattern roads (440 joined); magnitude = :applied warrants + log1p(incident road
+attestation) — *enacted only*; retract = faithful `graph.cljs`
+`restrict-to-super-core` (strictly > median) + largest component → **72-mission
+core, 439 roads**; hub layout = BGE semantic centroids (Futon City coords) +
+repulsion. Outputs: `feature-constellation.{json,png}` — a two-level feature
+network (10 surviving cluster-features, aggregated inter-feature attestation
+edges). Honest retro-diction: **07-essays-arxana and 10-substrate-metric retract
+away entirely** (10 = the cascade's hole-basin; 0 confirmed warrants — the
+structural signal and the dashboard agree). First consumer: the expanded skills
+summary (`powerbi-tui/skills-expanded.pdf`, Figure 3). Open (unchanged from
+IDENTIFY): devmap alignment, magnitude refinement, live/browseable surface —
+this v0 is a static projection, not the browseable map.
+
 ## Scope boundary (bounded excursion)
 
 - Read-only over the existing stack; reuse `graph.cljs`, don't reinvent it.

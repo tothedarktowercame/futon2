@@ -1,0 +1,934 @@
+;; legacy-sorries-snapshot.edn — the 23 pre-existing code/v05/sorry hyperedges
+;; pulled from substrate-2 (:7071) 2026-07-02, BEFORE any eviction. Input to M-legacy-sorry-cleanup.
+;; These are the LOGGED-issue sense (single self-endpoint + prose :sorry/title), NOT interface-sorries.
+;; The mission reviews each: improve→interface | keep-as-logged | evict. XTDB originals untouched here.
+
+[#:hx{:id
+      "hx:code/v05/sorry:futon2-d/sorry/handler-closure-route-rebinding",
+      :type :code/v05/sorry,
+      :endpoints ["futon2-d/sorry/handler-closure-route-rebinding"],
+      :props
+      {:sorry/related-missions ["M-drawbridge-multi-agent"],
+       :sorry/raised-at "2026-05-27",
+       :sorry/title
+       "Handler closures captured at server-start time don't see hot-swapped vars after Drawbridge :reload",
+       :sorry/kind ":prototyping-forward",
+       :sorry/resolved-by-cg "cg-6965e5e6-ba14-4a6b-8690-bbf29bbd2a38",
+       :phase 4.5,
+       :sorry/resolved-by-pilot
+       "claude-5 (war-machine-pilot, run live-00c07332)",
+       :sorry/status ":addressed",
+       :sorry/resolution
+       ["str"
+        "Resolution candidates (a)+(c) executed — the pairing the sorry's own "
+        "text named as cheapest. AUDIT (a): the futon3c serving path dispatches "
+        "via DIRECT SYMBOL CALLS inside fn bodies — `make-handler`'s cond "
+        "(`(handle-dispatch request config)`), the watcher "
+        "(`(file-ingest/dispatch! ...)`), the scheduler's recurring Runnable "
+        "(`(fn [] (tick!))`, scheduler.clj:265). A bare top-level symbol in a fn "
+        "body compiles to a CALL-TIME var dereference, so handler BODIES are "
+        "reload-safe by construction; the `(#'var ...)` idiom is redundant there. "
+        "The genuine stale-closure hazard is narrower than the original framing: "
+        "it bites only when a fn is CAPTURED AS A VALUE (stored in a dispatch "
+        "map, registered once as a callback, or closed over by a thread started "
+        "once). No such site exists in the current request path. The one "
+        "non-reload-safe case is ROUTE-TABLE STRUCTURE change (adding a cond "
+        "branch), which needs a handler re-wire — distinct from var hot-swap. "
+        "DOC (c): documented the full taxonomy in README-drawbridge.md "
+        "(section 'Reload-safety: what a reload picks up, and what it doesn''t'), "
+        "replacing the prior imprecise note that claimed reloads don't refresh "
+        "handlers at all. (b) the `defhandler` macro is NOT needed — there is no "
+        "data-driven route map to protect. Reload-safety = reconstructibility "
+        "from disk per feedback_reload_safety; this gap is now closed as scoped."],
+       :sorry/rationale
+       ["str"
+        "Observed during the rapid review-code cycle for "
+        "E-substrate-2-sorry-typing (codex-5 INSTANTIATE 2026-05-27): when a "
+        "watcher-integrated ingest path is added by editing "
+        "`futon3c/src/futon3c/watcher/file_ingest.clj` and reloaded via "
+        "Drawbridge nREPL, the route handlers in the running JVM may still "
+        "hold closures over the prior var values. The route table dispatch "
+        "is correct, but the captured handler function is the pre-reload "
+        "one.\n\n"
+        "Workaround currently in use: handler bodies that do `(#'ns/var "
+        "args)` instead of `(ns/var args)` so the var is re-resolved at "
+        "each call. This is the standard idiom but it's not consistently "
+        "applied across the futon3c route layer; some handlers were authored "
+        "before the Drawbridge-reload pattern was canonical.\n\n"
+        "Resolution candidates: (a) audit pass on "
+        "`futon3c/src/futon3c/server.clj` and the handler-registration sites "
+        "to ensure all production handlers go through the `#'var` indirection; "
+        "(b) helper macro `defhandler` that emits the indirection automatically; "
+        "(c) document the discipline in `README-drawbridge.md` so new handlers "
+        "are authored correctly from the start. (c) is the cheapest and "
+        "should be paired with (a) on the next route-layer touch. "
+        "Reload-safety = reconstructibility from disk per "
+        "feedback_reload_safety; this sorry tracks the partial gap."],
+       :source-file "/home/joe/code/futon2/resources/sorrys.edn",
+       :sorry/endpoint
+       "futon2-d/sorry/handler-closure-route-rebinding",
+       :repo "futon2-d",
+       :sorry/t 0,
+       :sorry/registry-id ":sorry/handler-closure-route-rebinding",
+       :sorry/resolved-at "2026-05-30",
+       :sorry/links
+       ["~/code/futon3c/src/futon3c/transport/http.clj"
+        "~/code/futon3c/src/futon3c/wm/scheduler.clj"
+        "~/code/futon3c/README-drawbridge.md"]}}
+ #:hx{:id
+      "hx:code/v05/sorry:futon2-d/sorry/mission-aif-head-not-served",
+      :type :code/v05/sorry,
+      :endpoints ["futon2-d/sorry/mission-aif-head-not-served"],
+      :props
+      {:sorry/related-missions
+       ["M-action-cost-modelling"
+        "M-live-geometric-stack"
+        "M-war-machine-wiring"],
+       :sorry/raised-at "2026-05-27",
+       :sorry/title
+       "Mission-AIF head computes locally but is not yet a typed surface readable by the WM head",
+       :sorry/kind ":prototyping-forward",
+       :sorry/resolved-by-cg "cg-a4eaabf8-c0a1-4b07-b295-c73e5d683365",
+       :phase 4.5,
+       :sorry/resolved-by-pilot "claude-2",
+       :sorry/status ":addressed",
+       :sorry/resolution
+       ["str"
+        "Addressed via bridge candidate (c): the WM head now READS the mission-AIF "
+        "head's local computation in-process. Root cause first: futon3c.aif.mission-head "
+        "was dead code in the serving JVM — its dep futon3c.aif.invariant threw an "
+        "ArityException (a docstring passed to defonce) and never loaded, so the head "
+        "did not actually 'compute locally' at all. Fixed that defonce; the head now "
+        "computes locally for real. scan-aif-heads (futon2 war_machine.clj) un-stubbed "
+        "to surface the head's reading → mission-aif-head :available? true, missing-count "
+        "0. The head is now a typed surface readable by the WM head — the literal gap "
+        "this sorry named.\n\n"
+        "Scope: bridge (c) done; richer forms remain available if a future mission needs "
+        "them — (a) per-mission mission/v01/aif-snapshot hyperedge, (b) substrate-2 "
+        "anamnesis T-projection. Discharged through the differential-operator REPL "
+        "(futon3c/holes/specs/repl.spec.edn) as the first substantive live cycle; fork "
+        "resolved via §8 fork-resolution (pattern warrant → A)."],
+       :sorry/rationale
+       ["str"
+        "M-action-cost-modelling §3.8 (aliveness synthesis) and the R5 EFE "
+        "augmentation establish a Mission-AIF head — a per-mission scoring "
+        "surface combining G-risk + G-amb − 0.4·G-info + 1.2·G-survival over "
+        "anamnesis-bearing artifacts. The head computes locally during mission "
+        "lifecycle phases (codex-5 + claude-1 cycle 2026-05-26/27) but its "
+        "outputs are not yet a queryable substrate-2 surface.\n\n"
+        "Consequence: the WM head (`/api/alpha/war-machine/ranked-actions`) "
+        "cannot consume mission-AIF deltas as evidence in its own scoring; "
+        "the two AIF surfaces live on different timescales without a typed "
+        "bridge. The aliveness synthesis is one quantity; the surfaces should "
+        "be projections of it, not unrelated heads.\n\n"
+        "Bridge candidates: (a) per-mission AIF snapshot as a "
+        "`mission/v01/aif-snapshot` hyperedge written at phase exits; (b) "
+        "anamnesis-region T-projection on substrate-2 (this is what "
+        "E-substrate-2-sorry-typing partially supplies for sorry-anamnesis "
+        "only); (c) WM head reads mission-AIF as a peripheral evidence-kind "
+        "rather than a substrate read. Pick at next mission-spawn that needs "
+        "cross-head reasoning — likely the M-action-cost-modelling INSTANTIATE "
+        "phase or a sibling mission that explicitly consumes mission-aliveness "
+        "as input."],
+       :source-file "/home/joe/code/futon2/resources/sorrys.edn",
+       :sorry/endpoint "futon2-d/sorry/mission-aif-head-not-served",
+       :repo "futon2-d",
+       :sorry/t 0,
+       :sorry/registry-id ":sorry/mission-aif-head-not-served",
+       :sorry/resolved-at "2026-05-29",
+       :sorry/links
+       ["~/code/futon3c/holes/missions/M-action-cost-modelling.md#section-3.8"
+        "~/code/futon3c/holes/missions/E-substrate-2-sorry-typing.md"]}}
+ #:hx{:id
+      "hx:code/v05/sorry:futon2-d/sorry/pattern-measure-never-target",
+      :type :code/v05/sorry,
+      :endpoints ["futon2-d/sorry/pattern-measure-never-target"],
+      :props
+      {:sorry/related-missions ["M-memes-arrows-patterns-diagrams"],
+       :sorry/raised-at "2026-06-10",
+       :sorry/title
+       "Mint the A1 discipline as a library pattern (third live instance today)",
+       :phase 4.5,
+       :sorry/status ":open",
+       :sorry/rationale
+       ["str"
+        "GAP (meme.db arrow arr-4f917cf2-fc2, cascade/E-mission-head-argue): "
+        "amendment A1 (readout never gates, never optimized — Goodhart "
+        "discipline) recurs across peradams, health-readouts, attestation — "
+        "and now a third live instance: calibration verdicts computed over "
+        "independent pairs only (2026-06-10). No library pattern captures it. "
+        "Closes by minting the flexiarg with the scope condition "
+        "(externally-discharged targetable / self-estimated observation-only) "
+        "and promoting the arrow."],
+       :source-file "/home/joe/code/futon2/resources/sorrys.edn",
+       :sorry/endpoint "futon2-d/sorry/pattern-measure-never-target",
+       :repo "futon2-d",
+       :sorry/t 1,
+       :sorry/registry-id ":sorry/pattern-measure-never-target",
+       :sorry/links
+       ["~/code/futon6/holes/missions/E-mission-head.aif.edn"]}}
+ #:hx{:id
+      "hx:code/v05/sorry:futon2-d/sorry/pattern-two-projections-of-one-quantity",
+      :type :code/v05/sorry,
+      :endpoints
+      ["futon2-d/sorry/pattern-two-projections-of-one-quantity"],
+      :props
+      {:sorry/addressed-at "2026-06-11",
+       :sorry/related-missions ["M-memes-arrows-patterns-diagrams"],
+       :sorry/raised-at "2026-06-10",
+       :sorry/title
+       "Mint structure/two-projections-of-one-quantity — cited in ARGUE, absent from the library",
+       :phase 4.5,
+       :sorry/status ":addressed",
+       :sorry/resolution
+       ["str"
+        "Pattern minted: futon3/library/structure/"
+        "two-projections-of-one-quantity.flexiarg (futon3 c1c0325, Turn-3 "
+        "2026-06-10). Provenance arrow arr-4d50ce67-10b promotion = store-side "
+        "half, ground-control follow-up."],
+       :sorry/rationale
+       ["str"
+        "GAP (meme.db arrow arr-4d50ce67-10b, cascade/E-mission-head-argue): "
+        "prose HEAD and compiled sigil are two projections of one intent — "
+        "cited as structure/two-projections-of-one-quantity in the M-memes PSR "
+        "but NEVER MINTED in the library; the argument leans on a pattern that "
+        "does not exist on disk. The anatomy preprint's §5 synthesis is the "
+        "worked construction. Closes by writing the flexiarg and promoting the "
+        "arrow."],
+       :source-file "/home/joe/code/futon2/resources/sorrys.edn",
+       :sorry/endpoint
+       "futon2-d/sorry/pattern-two-projections-of-one-quantity",
+       :repo "futon2-d",
+       :sorry/t 0,
+       :sorry/registry-id
+       ":sorry/pattern-two-projections-of-one-quantity",
+       :sorry/links
+       ["~/code/futon6/holes/anatomy-of-a-futonic-mission.md"]}}
+ #:hx{:id
+      "hx:code/v05/sorry:futon2-d/sorry/pattern-typed-theme-liberates-the-solo",
+      :type :code/v05/sorry,
+      :endpoints
+      ["futon2-d/sorry/pattern-typed-theme-liberates-the-solo"],
+      :props
+      {:sorry/related-missions ["M-memes-arrows-patterns-diagrams"],
+       :sorry/raised-at "2026-06-10",
+       :sorry/title
+       "Mint the Gantt-ification defense — load-bearing in two missions, not in the library",
+       :phase 4.5,
+       :sorry/status ":open",
+       :sorry/rationale
+       ["str"
+        "GAP (meme.db arrow arr-69f9c0d3-333, cascade/E-mission-head-argue): "
+        "the core defense against the Gantt-ification objection — a typed "
+        "theme LIBERATES the solo (the ants animate BECAUSE of their sigils; "
+        "charting the head is not charting the improvisation) — is "
+        "load-bearing in two missions and absent from the library. Closes by "
+        "minting the flexiarg and promoting the arrow."],
+       :source-file "/home/joe/code/futon2/resources/sorrys.edn",
+       :sorry/endpoint
+       "futon2-d/sorry/pattern-typed-theme-liberates-the-solo",
+       :repo "futon2-d",
+       :sorry/t 1,
+       :sorry/registry-id
+       ":sorry/pattern-typed-theme-liberates-the-solo",
+       :sorry/links
+       ["~/code/futon6/holes/missions/E-mission-head.md"]}}
+ #:hx{:id
+      "hx:code/v05/sorry:futon2-d/sorry/pudding-g1-arrow-witness-binding",
+      :type :code/v05/sorry,
+      :endpoints ["futon2-d/sorry/pudding-g1-arrow-witness-binding"],
+      :props
+      {:sorry/related-missions
+       ["M-futonzero-generative" "M-pudding-peradams"],
+       :sorry/raised-at "2026-06-08",
+       :sorry/title
+       "G-REWARD's named open home: bind arrow-witness to the per-turn affect detector",
+       :sorry/kind ":external-dependency",
+       :phase 4.5,
+       :sorry/status ":open",
+       :sorry/rationale
+       ["str"
+        "M-futonzero-generative §2 G-REWARD names its open home explicitly: "
+        "M-pudding-peradams G1 — the arrow-witness stays false until bound to "
+        "live affect evidence; until then no reward signal may train the "
+        "learner and 'reward' remains a labelled evaluation artifact. "
+        "Construction that closes this: the G1 binding of arrow-witness to the "
+        "per-turn affect detector on the Pudding Prover channel (three-witness "
+        "certificate discipline). External-dependency kind because the arming "
+        "conditions are operator-held (Joe-confirm + cert-half + "
+        "STANDARD-VERIFY per M-peradam-grounding)."],
+       :source-file "/home/joe/code/futon2/resources/sorrys.edn",
+       :sorry/endpoint
+       "futon2-d/sorry/pudding-g1-arrow-witness-binding",
+       :repo "futon2-d",
+       :sorry/t 1,
+       :sorry/registry-id ":sorry/pudding-g1-arrow-witness-binding",
+       :sorry/links
+       ["~/code/futon0/holes/missions/M-futonzero-generative.md"]}}
+ #:hx{:id
+      "hx:code/v05/sorry:futon2-d/sorry/r3a-likelihood-attack-coverage",
+      :type :code/v05/sorry,
+      :endpoints ["futon2-d/sorry/r3a-likelihood-attack-coverage"],
+      :props
+      {:sorry/addressed-at "2026-05-26",
+       :sorry/related-missions ["M-war-machine-aif-completion"],
+       :sorry/raised-at "2026-05-18",
+       :sorry/title "R3a likelihood model for :attack-coverage",
+       :sorry/addressed-by-cg-chain
+       ["cg-17bbaa01-33fc-4a31-bcc6-568cc047f093"
+        "cg-a5d2e756-b28b-44c3-8b8d-dc2548034f48"],
+       :phase 4.5,
+       :sorry/status ":addressed",
+       :sorry/resolution
+       "Sibling to :sorry/r3a-likelihood-support-coverage; addressed in the same excursion via predict-attack-coverage filtering belief by the attacks-tagged cohort.  See that sorry's :resolution for the cg-chain details.",
+       :sorry/rationale
+       "A1-A4 attack claim coverage [0,1] from holistic argument. Sibling to :support-coverage — same entity-tag prerequisite.",
+       :source-file "/home/joe/code/futon2/resources/sorrys.edn",
+       :sorry/endpoint "futon2-d/sorry/r3a-likelihood-attack-coverage",
+       :repo "futon2-d",
+       :sorry/addressed-by-pilot "claude-1",
+       :sorry/t 0,
+       :sorry/addressed-by-excursion
+       "futon3c/holes/missions/E-support-coverage.md",
+       :sorry/registry-id ":sorry/r3a-likelihood-attack-coverage",
+       :sorry/links
+       ["futon2/docs/futon-aif-completeness.md#r3-predictive-coding-belief-update"]}}
+ #:hx{:id
+      "hx:code/v05/sorry:futon2-d/sorry/r3a-likelihood-consulting-pct",
+      :type :code/v05/sorry,
+      :endpoints ["futon2-d/sorry/r3a-likelihood-consulting-pct"],
+      :props
+      {:sorry/related-missions ["M-war-machine-aif-completion"],
+       :sorry/raised-at "2026-05-18",
+       :sorry/title "R3a likelihood model for :consulting-pct",
+       :sorry/kind ":n-a-by-design",
+       :sorry/resolved-by-cg "cg-18b7831b-9936-4fec-8d54-216daa3d9ccd",
+       :phase 4.5,
+       :sorry/resolved-by-pilot "claude-1",
+       :sorry/status ":n-a-by-design",
+       :sorry/resolution
+       "Reclassified per rationale's explicit flag ('same candidate-for-reclassification analysis as :stack-pct').  Externally measured (commit-pct via JSDQ); belief-independent.  Note: this channel's :semantic-mismatch caveat (consulting=0% measures git commits only, doesn't capture invoice/calendar/uncommitted-vsat work) is being addressed separately by M-interim-director-proxy-metric-inventory Arm D + E-wm-metric-redesign's workstream-classifier extension point — those are about the measurand, not about R3a-likelihood.",
+       :sorry/rationale
+       "Consulting commit % [0,1] from JSDQ. Externally measured; same candidate-for-reclassification analysis as :stack-pct.",
+       :source-file "/home/joe/code/futon2/resources/sorrys.edn",
+       :sorry/endpoint "futon2-d/sorry/r3a-likelihood-consulting-pct",
+       :repo "futon2-d",
+       :sorry/t 0,
+       :sorry/registry-id ":sorry/r3a-likelihood-consulting-pct",
+       :sorry/resolved-at "2026-05-26",
+       :sorry/links
+       ["futon2/docs/futon-aif-completeness.md#r3-predictive-coding-belief-update"]}}
+ #:hx{:id
+      "hx:code/v05/sorry:futon2-d/sorry/r3a-likelihood-coupling-density",
+      :type :code/v05/sorry,
+      :endpoints ["futon2-d/sorry/r3a-likelihood-coupling-density"],
+      :props
+      {:sorry/related-missions ["M-war-machine-aif-completion"],
+       :sorry/raised-at "2026-05-18",
+       :sorry/title "R3a likelihood model for :coupling-density",
+       :sorry/kind ":prototyping-forward",
+       :sorry/resolved-by-cg "cg-7fa6aec3-7a1b-4ada-b087-879bd850f80f",
+       :phase 4.5,
+       :sorry/resolved-by-pilot "codex-2",
+       :sorry/status ":addressed",
+       :sorry/resolution
+       ["str"
+        "Addressed by bridging repo-level temporal coupling to entity-level "
+        "belief. `classify-entity-repos-from-stack-annotations` maps each "
+        "stack-annotation section to a repo from its provenance/source path "
+        "(including devmap-futonN files); `predict-coupling-density` selects "
+        "entities whose repo participates in a temporal-coupling edge and "
+        "averages non-dormant belief mass across that cohort; and "
+        "`judge` passes both entity repos and `[:graph :edges :temporal-coupling]` "
+        "into `predict-observation`. `:coupling-density` is now included in "
+        "`channels-with-likelihood` and in the R3 prediction-error loop."],
+       :sorry/rationale
+       "Coupling edges / max edges [0,1] from temporal analysis. Could derive from belief mass on entities-with-cross-section-edges if edge-entities exist; currently doesn't.",
+       :source-file "/home/joe/code/futon2/resources/sorrys.edn",
+       :sorry/endpoint
+       "futon2-d/sorry/r3a-likelihood-coupling-density",
+       :repo "futon2-d",
+       :sorry/t 0,
+       :sorry/registry-id ":sorry/r3a-likelihood-coupling-density",
+       :sorry/resolved-at "2026-05-30",
+       :sorry/links
+       ["futon2/docs/futon-aif-completeness.md#r3-predictive-coding-belief-update"]}}
+ #:hx{:id
+      "hx:code/v05/sorry:futon2-d/sorry/r3a-likelihood-depositing-signal",
+      :type :code/v05/sorry,
+      :endpoints ["futon2-d/sorry/r3a-likelihood-depositing-signal"],
+      :props
+      {:sorry/related-missions ["M-war-machine-aif-completion"],
+       :sorry/raised-at "2026-05-18",
+       :sorry/title "R3a likelihood model for :depositing-signal",
+       :sorry/kind ":n-a-by-design",
+       :sorry/resolved-by-cg "cg-18b7831b-9936-4fec-8d54-216daa3d9ccd",
+       :phase 4.5,
+       :sorry/resolved-by-pilot "claude-1",
+       :sorry/status ":n-a-by-design",
+       :sorry/resolution
+       "Reclassified per rationale's explicit flag ('same candidate-for-reclassification analysis as commit-percentages').  Externally measured (cardinal-direction signal from daily-scan frames); belief-independent.",
+       :sorry/rationale
+       "Depositing cardinal-direction signal [0,1] from daily-scan frames. Externally measured; same candidate-for-reclassification analysis as commit-percentages.",
+       :source-file "/home/joe/code/futon2/resources/sorrys.edn",
+       :sorry/endpoint
+       "futon2-d/sorry/r3a-likelihood-depositing-signal",
+       :repo "futon2-d",
+       :sorry/t 0,
+       :sorry/registry-id ":sorry/r3a-likelihood-depositing-signal",
+       :sorry/resolved-at "2026-05-26",
+       :sorry/links
+       ["futon2/docs/futon-aif-completeness.md#r3-predictive-coding-belief-update"]}}
+ #:hx{:id
+      "hx:code/v05/sorry:futon2-d/sorry/r3a-likelihood-loop-health",
+      :type :code/v05/sorry,
+      :endpoints ["futon2-d/sorry/r3a-likelihood-loop-health"],
+      :props
+      {:sorry/related-missions ["M-war-machine-aif-completion"],
+       :sorry/raised-at "2026-05-18",
+       :sorry/title "R3a likelihood model for :loop-health",
+       :sorry/kind ":n-a-by-design",
+       :sorry/resolved-by-cg "cg-18b7831b-9936-4fec-8d54-216daa3d9ccd",
+       :phase 4.5,
+       :sorry/resolved-by-pilot "claude-1",
+       :sorry/status ":n-a-by-design",
+       :sorry/resolution
+       "Structural review (pilot cycle, 2026-05-26) confirms the rationale's flagged disposition: 'loop signal is structural over an external graph.'  loop-health is computed structurally from the holistic-argument loop, not derived from a per-entity belief state.  R3a-likelihood is not applicable; the channel keeps reading its existing structural value via the loop-health computation.  Reclassified per the registry's batch comment (lines 99-104): 'Some may turn out to be belief-independent by design... in which case they get reclassified to a future :n-a-by-design kind when their R3a-design work happens.'",
+       :sorry/rationale
+       "Loop-health is the overall holistic-argument loop score in [0,1]. A belief-derived predictor would aggregate per-entity beliefs about arrow-state if arrows are entities — but arrows aren't currently entity-typed in stack-annotations.edn. May ultimately be belief-independent (loop signal is structural over an external graph).",
+       :source-file "/home/joe/code/futon2/resources/sorrys.edn",
+       :sorry/endpoint "futon2-d/sorry/r3a-likelihood-loop-health",
+       :repo "futon2-d",
+       :sorry/t 0,
+       :sorry/registry-id ":sorry/r3a-likelihood-loop-health",
+       :sorry/resolved-at "2026-05-26",
+       :sorry/links
+       ["futon2/docs/futon-aif-completeness.md#r3-predictive-coding-belief-update"]}}
+ #:hx{:id
+      "hx:code/v05/sorry:futon2-d/sorry/r3a-likelihood-mathematics-pct",
+      :type :code/v05/sorry,
+      :endpoints ["futon2-d/sorry/r3a-likelihood-mathematics-pct"],
+      :props
+      {:sorry/related-missions ["M-war-machine-aif-completion"],
+       :sorry/raised-at "2026-05-18",
+       :sorry/title "R3a likelihood model for :mathematics-pct",
+       :sorry/kind ":n-a-by-design",
+       :sorry/resolved-by-cg "cg-18b7831b-9936-4fec-8d54-216daa3d9ccd",
+       :phase 4.5,
+       :sorry/resolved-by-pilot "claude-1",
+       :sorry/status ":n-a-by-design",
+       :sorry/resolution
+       "Reclassified per rationale's explicit flag ('same candidate-for-reclassification analysis as :stack-pct').  Externally measured commit-pct; belief-independent.",
+       :sorry/rationale
+       "Mathematics commit % [0,1] from JSDQ. Externally measured; same candidate-for-reclassification analysis as :stack-pct.",
+       :source-file "/home/joe/code/futon2/resources/sorrys.edn",
+       :sorry/endpoint "futon2-d/sorry/r3a-likelihood-mathematics-pct",
+       :repo "futon2-d",
+       :sorry/t 0,
+       :sorry/registry-id ":sorry/r3a-likelihood-mathematics-pct",
+       :sorry/resolved-at "2026-05-26",
+       :sorry/links
+       ["futon2/docs/futon-aif-completeness.md#r3-predictive-coding-belief-update"]}}
+ #:hx{:id
+      "hx:code/v05/sorry:futon2-d/sorry/r3a-likelihood-portfolio-pct",
+      :type :code/v05/sorry,
+      :endpoints ["futon2-d/sorry/r3a-likelihood-portfolio-pct"],
+      :props
+      {:sorry/related-missions ["M-war-machine-aif-completion"],
+       :sorry/raised-at "2026-05-18",
+       :sorry/title "R3a likelihood model for :portfolio-pct",
+       :sorry/kind ":n-a-by-design",
+       :sorry/resolved-by-cg "cg-18b7831b-9936-4fec-8d54-216daa3d9ccd",
+       :phase 4.5,
+       :sorry/resolved-by-pilot "claude-1",
+       :sorry/status ":n-a-by-design",
+       :sorry/resolution
+       "Reclassified per rationale's explicit flag ('same candidate-for-reclassification analysis as :stack-pct').  Externally measured commit-pct; belief-independent.",
+       :sorry/rationale
+       "Portfolio commit % [0,1] from JSDQ. Externally measured; same candidate-for-reclassification analysis as :stack-pct.",
+       :source-file "/home/joe/code/futon2/resources/sorrys.edn",
+       :sorry/endpoint "futon2-d/sorry/r3a-likelihood-portfolio-pct",
+       :repo "futon2-d",
+       :sorry/t 0,
+       :sorry/registry-id ":sorry/r3a-likelihood-portfolio-pct",
+       :sorry/resolved-at "2026-05-26",
+       :sorry/links
+       ["futon2/docs/futon-aif-completeness.md#r3-predictive-coding-belief-update"]}}
+ #:hx{:id "hx:code/v05/sorry:futon2-d/sorry/r3a-likelihood-stack-pct",
+      :type :code/v05/sorry,
+      :endpoints ["futon2-d/sorry/r3a-likelihood-stack-pct"],
+      :props
+      {:sorry/related-missions ["M-war-machine-aif-completion"],
+       :sorry/raised-at "2026-05-18",
+       :sorry/title "R3a likelihood model for :stack-pct",
+       :sorry/kind ":n-a-by-design",
+       :sorry/resolved-by-cg "cg-18b7831b-9936-4fec-8d54-216daa3d9ccd",
+       :phase 4.5,
+       :sorry/resolved-by-pilot "claude-1",
+       :sorry/status ":n-a-by-design",
+       :sorry/resolution
+       "Structural review (pilot cycle, 2026-05-26) confirms the rationale's explicit flag: 'Externally measured (git commit counts) — likely belief-independent by design. Candidate for reclassification to :n-a-by-design once the structural review happens.'  stack-pct reads git commit counts from logic-model / joe-hud directly; no belief-derived predictor would change what the channel measures.  Reclassified.",
+       :sorry/rationale
+       "Stack commit % [0,1] from logic-model / joe-hud. Externally measured (git commit counts) — likely belief-independent by design. Candidate for reclassification to :n-a-by-design once the structural review happens.",
+       :source-file "/home/joe/code/futon2/resources/sorrys.edn",
+       :sorry/endpoint "futon2-d/sorry/r3a-likelihood-stack-pct",
+       :repo "futon2-d",
+       :sorry/t 0,
+       :sorry/registry-id ":sorry/r3a-likelihood-stack-pct",
+       :sorry/resolved-at "2026-05-26",
+       :sorry/links
+       ["futon2/docs/futon-aif-completeness.md#r3-predictive-coding-belief-update"]}}
+ #:hx{:id
+      "hx:code/v05/sorry:futon2-d/sorry/r3a-likelihood-support-coverage",
+      :type :code/v05/sorry,
+      :endpoints ["futon2-d/sorry/r3a-likelihood-support-coverage"],
+      :props
+      {:sorry/addressed-at "2026-05-26",
+       :sorry/related-missions ["M-war-machine-aif-completion"],
+       :sorry/raised-at "2026-05-18",
+       :sorry/title "R3a likelihood model for :support-coverage",
+       :sorry/addressed-by-cg-chain
+       ["cg-17bbaa01-33fc-4a31-bcc6-568cc047f093"
+        "cg-a5d2e756-b28b-44c3-8b8d-dc2548034f48"],
+       :phase 4.5,
+       :sorry/status ":addressed",
+       :sorry/resolution
+       "E-support-coverage Cycle 2 (cg-17bbaa01) shipped entity-tag classification at bootstrap (futon2.aif.belief/classify-entity-tags-from-stack-annotations).  Cycle 3 (cg-a5d2e756) shipped predict-support-coverage filtering belief by the supports-tagged cohort.  Both sorries (support- and attack-coverage) addressed together since they share the entity-tag prerequisite.  channels-with-likelihood now 6 of 14.",
+       :sorry/rationale
+       "S1-S5 support claim coverage [0,1] from holistic argument. Could derive from belief mass on entities tagged as supporting evidence; needs entity-tag classification in the bootstrap.",
+       :source-file "/home/joe/code/futon2/resources/sorrys.edn",
+       :sorry/endpoint
+       "futon2-d/sorry/r3a-likelihood-support-coverage",
+       :repo "futon2-d",
+       :sorry/addressed-by-pilot "claude-1",
+       :sorry/t 0,
+       :sorry/addressed-by-excursion
+       "futon3c/holes/missions/E-support-coverage.md",
+       :sorry/registry-id ":sorry/r3a-likelihood-support-coverage",
+       :sorry/links
+       ["futon2/docs/futon-aif-completeness.md#r3-predictive-coding-belief-update"]}}
+ #:hx{:id
+      "hx:code/v05/sorry:futon2-d/sorry/r3a-likelihood-ticks-firing-ratio",
+      :type :code/v05/sorry,
+      :endpoints ["futon2-d/sorry/r3a-likelihood-ticks-firing-ratio"],
+      :props
+      {:sorry/related-missions ["M-war-machine-aif-completion"],
+       :sorry/raised-at "2026-05-18",
+       :sorry/title "R3a likelihood model for :ticks-firing-ratio",
+       :sorry/decomposition
+       ["str"
+        "DECOMPOSED, not discharged. The coupling-density bridge pattern does "
+        "not currently hold for ticks: stack-logic-model tick definitions and "
+        "scan-graph tick results expose warning ids and evaluator outputs, but "
+        "no stack-annotation entity ids, entity tags, or canonical tick-to-entity "
+        "mapping. A real likelihood needs a first-class tick/entity bridge; "
+        "otherwise the predictor would be an ad hoc proxy over warning prose or "
+        "workstream names."],
+       :sorry/kind ":prototyping-forward",
+       :sorry/resolved-by-cg "cg-77efb863-dff7-40d5-8c87-45025d32628d",
+       :phase 4.5,
+       :sorry/has-excursion
+       "futon3c/holes/missions/E-ticks-firing-ratio-likelihood.md",
+       :sorry/resolved-by-pilot "codex-2",
+       :sorry/decomposed-at "2026-05-30",
+       :sorry/status ":addressed",
+       :sorry/resolution
+       ["str"
+        "Addressed by executing the tick/entity bridge scoped in "
+        "E-ticks-firing-ratio-likelihood.md. `stack-annotations.edn` now carries "
+        "four first-class `:logic-model-tick` sections sourced from "
+        "`stack-logic-model.edn :pocketwatch :ticks`; "
+        "`classify-entity-ticks-from-stack-annotations` maps those sections to "
+        "`:tick/<id>` tags; `predict-ticks-firing-ratio` selects the tick-entity "
+        "cohort corresponding to evaluated tick results and averages open/active "
+        "belief mass; and `judge` threads entity-ticks + tick-results into "
+        "`predict-observation`. `:ticks-firing-ratio` is now included in "
+        "`channels-with-likelihood` and the R3 prediction-error loop."],
+       :sorry/rationale
+       "Firing ticks / total ticks [0,1] from logic-model. Could derive from belief mass on entities representing ticks if ticks are entity-typed; currently aren't.",
+       :source-file "/home/joe/code/futon2/resources/sorrys.edn",
+       :sorry/endpoint
+       "futon2-d/sorry/r3a-likelihood-ticks-firing-ratio",
+       :sorry/decomposed-by-cg
+       "cg-bf2f9b00-f3a3-47cc-9859-e3c7c0e68671",
+       :repo "futon2-d",
+       :sorry/t 0,
+       :sorry/registry-id ":sorry/r3a-likelihood-ticks-firing-ratio",
+       :sorry/resolved-at "2026-05-30",
+       :sorry/links
+       ["futon2/docs/futon-aif-completeness.md#r3-predictive-coding-belief-update"
+        "futon3c/holes/missions/E-ticks-firing-ratio-likelihood.md"]}}
+ #:hx{:id
+      "hx:code/v05/sorry:futon2-d/sorry/r3d-per-entity-attribution",
+      :type :code/v05/sorry,
+      :endpoints ["futon2-d/sorry/r3d-per-entity-attribution"],
+      :props
+      {:sorry/predecessor-satisfied-by
+       "M-INC step (b) committed by claude-3 as futon3/library/structure/interest-event-vocabulary.flexiarg; the typed event vocabulary that was the named prerequisite for per-entity attribution now exists on disk.  Re-typing this sorry from :campaign-scale (its earlier classification in M-action-cost-modelling §3.2) to :mission-scale follows.  Still :open at the implementation level — the R3d rewiring to consume per-entity events hasn't yet landed — but the architectural blocker is gone.",
+       :sorry/related-missions
+       ["M-war-machine-aif-completion"
+        "M-stack-essay-code-alignment"
+        "M-interest-network-coupling"],
+       :sorry/raised-at "2026-05-18",
+       :sorry/title
+       "R3d wiring uses crude global attribution; refine to per-entity once real per-entity event streams arrive",
+       :sorry/kind ":prototyping-forward",
+       :sorry/resolved-by-cg "cg-d9630a32-3b28-45ac-a733-bc84afc31204",
+       :phase 4.5,
+       :sorry/resolved-by-pilot
+       "claude-5 (war-machine-pilot, run live-d2068cc1) — the WM's own rank-1 recommendation (structural-pressure 0.9), followed",
+       :sorry/status ":addressed",
+       :sorry/partial-closure-notes
+       "v0.16 (2026-05-19) addressed the MULTI-CHANNEL limitation of this\n    sorry: judge's R3 inner-loop now aggregates signed weighted-errors\n    across all 4 R3a-covered channels (using channel-health-signs in\n    preferences) rather than driving from :annotation-health alone.\n    What REMAINS open: the same aggregated event is still applied\n    UNIFORMLY to every entity in the belief domain. Per-entity\n    attribution awaits real per-entity event streams (M-INC step (b)).",
+       :sorry/resolution
+       ["str"
+        "v0.17: judge's R3d belief-update is now PER-ENTITY BY CONTRIBUTION, not "
+        "uniform. The stated defect — 'the aggregate signal can't legitimately be "
+        "attributed equally to every entity' — is fixed: each entity's update is "
+        "weighted by how INCONSISTENT its current belief is with the error "
+        "direction (entities the signal is actually about move most; consistent "
+        "entities barely move), normalised so the mean weight = the prior uniform "
+        "event-weight (aggregate magnitude preserved). Uses the per-entity "
+        "expected-health predict-annotation-health already computes — no new event "
+        "streams required. Verified: weights differentiate ~6.7x on a 3-entity "
+        "sample, mean preserved exactly. Code: scripts/futon2/report/war_machine.clj "
+        "(events synthesis) + belief.clj entity-expected-health made public. "
+        "ENHANCEMENT (not a defect) still possible: full per-entity OBSERVATION "
+        "streams (vs re-attributed aggregate) per E-r3d-per-entity-attribution.md "
+        "— recorded there, not blocking."
+        "\n\n"
+        "[Earlier excursion: E-r3d-per-entity-attribution.md was authored inline "
+        "2026-05-30 (cg-f32696ac) as a ∇-deform when the path looked deeper than it "
+        "was; following the WM's #1 then surfaced the contribution-attribution fix "
+        "above, which discharges the stated gap.]"],
+       :sorry/rationale
+       ["str"
+        "v0.10 R3d wiring in `futon2.report.war-machine/judge` synthesises a "
+        "single global belief-update event from the :annotation-health "
+        "prediction-error and applies it uniformly to every entity in the "
+        "belief domain (positive error → :strengthened on all entities; "
+        "negative → :foreclosed on all entities; weight = min(1, |weighted-error|) * 0.1). "
+        "This is honest as a v1 placeholder — it lets :mu-post ≠ :mu-pre on "
+        "every call so the bilateral comparison with VSATARCS-side can "
+        "witness drift — but it is NOT honest as per-entity Bayesian update: "
+        "the aggregate signal can't legitimately be attributed equally to "
+        "every entity. "
+        "\n\n"
+        "Refinement path: when real per-entity event streams arrive (M-INC "
+        "step (b), or a substrate adapter that surfaces per-entity state "
+        "changes), the global synthetic event gets replaced by per-entity "
+        "events that carry the attribution honestly. Until then, the v0.10 "
+        "wiring stays — it's a prototype that lets downstream components "
+        "(trace, bilateral bridge, R9 properties) be exercised against real "
+        "non-zero belief evolution. "
+        "\n\n"
+        "Classified as :prototyping-forward (per Joe 2026-05-18): we knew "
+        "the v0.10 shape was incomplete when we shipped it, but the "
+        "refinement IS the work — not technical debt accrued from cutting "
+        "corners. The distinction matters because the WM's intrinsic-value "
+        "credit on :address-sorry actions could eventually be tuned by "
+        ":kind, recognising that :prototyping-forward sorries are progress "
+        "indicators rather than failure indicators."],
+       :source-file "/home/joe/code/futon2/resources/sorrys.edn",
+       :sorry/endpoint "futon2-d/sorry/r3d-per-entity-attribution",
+       :repo "futon2-d",
+       :sorry/predecessor-satisfied-at "2026-05-26",
+       :sorry/t 0,
+       :sorry/registry-id ":sorry/r3d-per-entity-attribution",
+       :sorry/resolved-at "2026-05-30",
+       :sorry/links
+       ["futon2/docs/futon-aif-completeness.md#r3-predictive-coding-belief-update"
+        "futon2/scripts/futon2/report/war_machine.clj"]}}
+ #:hx{:id "hx:code/v05/sorry:futon2-d/sorry/sorry-first-outing-probe",
+      :type :code/v05/sorry,
+      :endpoints ["futon2-d/sorry/sorry-first-outing-probe"],
+      :props
+      {:sorry/related-missions ["M-war-machine-first-outing"],
+       :sorry/raised-at "2026-05-30",
+       :sorry/title
+       "SMOKE-TEST PROBE (M-war-machine-first-outing INSTANTIATE) — reversible synthetic sorry",
+       :sorry/kind ":meta",
+       :sorry/resolved-by-cg "cg-ae3de1a1-d24e-4f72-b9b2-32cb727bc179",
+       :phase 4.5,
+       :sorry/resolved-by-pilot
+       "claude-5 (war-machine-pilot, run live-9536b3ce)",
+       :sorry/status ":addressed",
+       :sorry/resolution
+       "SMOKE-TEST discharge — flipped :open->:addressed to exercise the first-outing cycle (R-E gates) + ledger (R-A.1). Synthetic; reversed at run-end.",
+       :sorry/rationale
+       ["str"
+        "Synthetic, REVERSIBLE test artefact for verifying the first-outing "
+        "machinery end-to-end: ledger commit (R-A.1), the G1/G2/G3 cycle gates "
+        "(R-E), the :sorry-closures-stick regression invariant (R-A.2), and "
+        "git-level reversal. This is NOT real work — it carries :probe? true so it "
+        "is never confused with a genuine sorry and is DELETED at run-end. :kind "
+        ":meta gives it the highest intrinsic-value (0.4) to promote it toward "
+        "ranked-actions[0], per the operator's 'promote to the front of the queue' "
+        "directive. Discharge = flip :status :open -> :addressed; regression-test = "
+        "re-open keeping :resolved-at and adding :reopened-at."],
+       :source-file "/home/joe/code/futon2/resources/sorrys.edn",
+       :sorry/endpoint "futon2-d/sorry/sorry-first-outing-probe",
+       :repo "futon2-d",
+       :sorry/t 0,
+       :sorry/probe? true,
+       :sorry/registry-id ":sorry/sorry-first-outing-probe",
+       :sorry/resolved-at "2026-05-30"}}
+ #:hx{:id
+      "hx:code/v05/sorry:futon2-d/sorry/stub-lifts-pending-aif-edn",
+      :type :code/v05/sorry,
+      :endpoints ["futon2-d/sorry/stub-lifts-pending-aif-edn"],
+      :props
+      {:sorry/partial-progress
+       [{:at "2026-05-30",
+         :by-cg "cg-258e00b2-6855-47da-be88-11b830762e34",
+         :story "futon5a/holes/stories/leaf-1.md",
+         :aif-edn "futon5a/holes/stories/leaf-1.aif.edn",
+         :result
+         "Authored the singleton leaf's AIF+ graph and upgraded its stack-annotation stub to a composite parent plus child claim entities; 31 linked story stubs remain."}],
+       :sorry/related-missions [],
+       :sorry/raised-at "2026-05-23",
+       :sorry/title
+       "Story stubs have companion .aif.edn decompositions",
+       :sorry/kind ":prototyping-forward",
+       :sorry/resolved-by-cg "cg-1abf150b-93a6-487b-a439-fbadb4c3c7a4",
+       :phase 4.5,
+       :sorry/resolved-by-pilot "codex-2",
+       :sorry/status ":addressed",
+       :sorry/resolution
+       ["str"
+        "Addressed by authoring genuine companion .aif.edn decompositions "
+        "for every remaining story still lifted as :stub-no-aif after the "
+        "leaf-1 pilot slice, then running lift_unlifted_stories.bb --only "
+        "for each story. stack-annotations.edn now has zero :stub-no-aif "
+        "sections, the sorry's story-path links are drained, and the only "
+        "remaining links are the lift script plus stack annotations registry."],
+       :sorry/rationale
+       ["str"
+        "lift_unlifted_stories.bb (2026-05-23) registered parent :sections[] "
+        "entries in stack-annotations.edn for every story in "
+        "~/code/futon5a/holes/stories/ that wasn't yet lifted — draining the "
+        "'Alignment status: not yet lifted' marginnote queue. "
+        "\n\n"
+        "Of the 46 unlifted candidates, 14 had companion .aif.edn files and "
+        "got full decomposition (parent entity + child claim entities mapped "
+        "from .aif.edn :nodes, preserving :content/:status/:role/:ref/:gap/"
+        ":aif-region/:note).  The remaining 32 did NOT have .aif.edn and were "
+        "lifted as stubs: parent entity registered with empty :decomposes-into "
+        "and :lifted-from :stub-no-aif. "
+        "\n\n"
+        "Discharge procedure (per story): (1) author <slug>.aif.edn alongside "
+        "the .md with the :nodes graph describing the story's claims, "
+        "statuses, references, and spine members.  (2) Re-run "
+        "lift_unlifted_stories.bb — currently it only adds missing entries; "
+        "extending it to upgrade existing stubs to full decompositions is a "
+        "small follow-on.  (3) Remove the story's path from :links below, "
+        "or mark this sorry :addressed when :links has no story paths left. "
+        "\n\n"
+        "Classified as :prototyping-forward (per Joe 2026-05-18): the "
+        "stub-lift is a knowingly-incomplete v1 step that drains the queue at "
+        "the registration level.  The decomposition work IS the next layer of "
+        "refinement, not technical debt accrued from cutting corners.  Each "
+        "discharged stub deepens the hypergraph; the queue's existence keeps "
+        "the work visible."],
+       :source-file "/home/joe/code/futon2/resources/sorrys.edn",
+       :sorry/endpoint "futon2-d/sorry/stub-lifts-pending-aif-edn",
+       :repo "futon2-d",
+       :sorry/t 0,
+       :sorry/registry-id ":sorry/stub-lifts-pending-aif-edn",
+       :sorry/resolved-at "2026-05-30",
+       :sorry/links
+       ["futon4/scripts/lift_unlifted_stories.bb"
+        "futon5a/holes/stack-annotations.edn"]}}
+ #:hx{:id
+      "hx:code/v05/sorry:futon2-d/sorry/wm-aif-substrate-addressability",
+      :type :code/v05/sorry,
+      :endpoints ["futon2-d/sorry/wm-aif-substrate-addressability"],
+      :props
+      {:sorry/related-missions
+       ["M-war-machine-aif-completion"
+        "M-stack-essay-code-alignment"
+        "M-live-geometric-stack"],
+       :sorry/raised-at "2026-05-17",
+       :sorry/title
+       "WM action types need addressable substrate; meta-sorry registers itself as the first sorry",
+       :sorry/kind ":meta",
+       :sorry/resolved-by-cg "cg-5b03db29-b636-4368-88ee-a7c8df23ef55",
+       :phase 4.5,
+       :sorry/resolved-by-pilot "claude-1",
+       :sorry/status ":acknowledged-v1-in-force",
+       :sorry/resolution
+       ["str"
+        "Acknowledged that the v1 hand-curated futon2/data/sorrys.edn IS the "
+        "currently-canonical addressable substrate for :sorry entities and is in "
+        "active use (forward-model/can-propose? :address-sorry returns true and "
+        "the WM is surfacing :address-sorry actions on this substrate, including "
+        "this meta-sorry itself).  The bootstrap loop is closed reflexively as the "
+        "original rationale predicted.  "
+        "\n\n"
+        "Long-term substrate canonicality (substrate-2, stack-annotations.edn, "
+        "M-INC events post step (b), or this hand-curated registry permanently) "
+        "remains an operator-authority decision; that decision is intentionally "
+        "deferred to M-live-geometric-stack maturity, not pre-empted here.  "
+        "Reclassifying this meta-sorry from :open to :acknowledged-v1-in-force "
+        "(rather than :resolved) preserves the operator-authority discharge "
+        "boundary: the v1 IS in force, AND the canonical-substrate decision is "
+        "still open. "
+        "\n\n"
+        "Pilot citation: cg-5b03db29-b636-4368-88ee-a7c8df23ef55, claude-1 "
+        "inhabiting :war-machine-pilot via emacs-repl 2026-05-25, following "
+        "the live WM ranked-action[0] (G=-4.99) surfaced by "
+        "E-wm-live-recommendation."],
+       :sorry/rationale
+       ["str"
+        "After R6 landed (v0.5 of futon2/docs/futon-aif-completeness.md) the WM's "
+        "bootstrap-proposer surfaced :learn-action-class actions for every concrete "
+        "action class (:address-sorry, :open-mission, :fire-pattern) because "
+        "forward-model/can-propose? returned false for all of them: substrate-2 at "
+        "localhost:7071 responded with {:hyperedges [], :count 0} to type probes "
+        "for :sorry / :mission / :pattern / :evidence / etc., and "
+        "futon5a/holes/stack-annotations.edn is a static EDN with rich content but "
+        "no programmatic enumerator wired into futon2. "
+        "\n\n"
+        "This sorry registers ITSELF as the first :sorry — closing the bootstrap "
+        "loop reflexively: by writing this entry, the WM's can-propose? :address-sorry "
+        "becomes true (the sorry-registry adapter ships alongside), and the next "
+        "WM call surfaces :address-sorry :target :sorry/wm-aif-substrate-addressability "
+        "as a concrete recommendation. The recommendation is to decide which "
+        "substrate (substrate-2, stack-annotations.edn, M-INC events post step (b), "
+        "or this hand-curated registry permanently) should be canonical for "
+        ":sorry entities going forward. "
+        "\n\n"
+        "Until that decision is made, this hand-curated registry is the v1 "
+        "addressable substrate for sorrys. Honest scope: hand-curated, not "
+        "ingested; new sorrys join by operator hand-edit. The interface "
+        "(load-sorrys / open-sorrys / can-propose? :address-sorry) is the swap "
+        "target for richer substrates when they mature."],
+       :source-file "/home/joe/code/futon2/resources/sorrys.edn",
+       :sorry/endpoint
+       "futon2-d/sorry/wm-aif-substrate-addressability",
+       :repo "futon2-d",
+       :sorry/t 0,
+       :sorry/registry-id ":sorry/wm-aif-substrate-addressability",
+       :sorry/resolved-at "2026-05-25",
+       :sorry/links
+       ["futon2/docs/futon-aif-completeness.md#capability-gap-modeling-as-endogenous-action"
+        "futon7/holes/M-war-machine-aif-completion.md"
+        "futon5a/holes/stack-annotations.edn"]}}
+ #:hx{:id
+      "hx:code/v05/sorry:futon2-d/sorry/wm-realised-on-merge-binding",
+      :type :code/v05/sorry,
+      :endpoints ["futon2-d/sorry/wm-realised-on-merge-binding"],
+      :props
+      {:sorry/related-missions ["M-futonzero-generative"],
+       :sorry/raised-at "2026-06-10",
+       :sorry/title
+       "γ loss stream needs realised-G bound to EXECUTED actions, tagged independent",
+       :sorry/kind ":prototyping-forward",
+       :phase 4.5,
+       :sorry/status ":open",
+       :sorry/rationale
+       ["str"
+        "The pilot γ stream computes realised-discharge by re-reading the next "
+        "scan after a PROPOSAL — so predicted≈realised by construction and the "
+        "calibration evidence is degenerate (15 paired records, 13 exact-zero "
+        "errors; futon3c.aif.calibration verdict :degenerate). G-SIM "
+        "(M-futonzero-generative §2) cannot clear on self-referential pairs. "
+        "Construction that closes this: close-live-cycle! (or a sibling) binds "
+        "realised-G only when an action EXECUTES (operator merge / substantive "
+        "mode), and tags such pairs distinguishable (e.g. :independent? true) "
+        "so the calibration verdict is computed over independent pairs ONLY — "
+        "the gate that diagnoses degeneracy must not be clearable by more "
+        "degeneracy (fable-1 G-SIM verdict, 2026-06-10)."],
+       :source-file "/home/joe/code/futon2/resources/sorrys.edn",
+       :sorry/endpoint "futon2-d/sorry/wm-realised-on-merge-binding",
+       :repo "futon2-d",
+       :sorry/t 1,
+       :sorry/registry-id ":sorry/wm-realised-on-merge-binding",
+       :sorry/links
+       ["~/code/futon3c/src/futon3c/peripheral/war_machine_pilot.clj"
+        "~/code/futon3c/src/futon3c/aif/calibration.clj"
+        "~/code/futon3c/holes/PILOTS-LOG.md"]}}
+ #:hx{:id
+      "hx:code/v05/sorry:futon2-d/sorry/wm-ui-hud-mode-rationale-hardcode",
+      :type :code/v05/sorry,
+      :endpoints ["futon2-d/sorry/wm-ui-hud-mode-rationale-hardcode"],
+      :props
+      {:sorry/related-missions
+       ["M-war-machine-frontend-upgrade1"
+        "M-war-machine-vsatarcs-interop"],
+       :sorry/raised-at "2026-05-24",
+       :sorry/title
+       "WM UI HUD Mode tooltip rationale is hardcoded; should be sourced dynamically from strategic-vocabulary :μ/modes",
+       :sorry/kind ":prototyping-forward",
+       :sorry/resolved-by-cg "cg-f1203497-547c-4818-839c-408b70f509c3",
+       :phase 4.5,
+       :sorry/resolved-by-pilot "codex-2",
+       :sorry/status ":addressed",
+       :sorry/resolution
+       ["str"
+        "Addressed by making the HUD Mode tooltip read mode records from the "
+        "live War Machine payload instead of a duplicated CLJS map. "
+        "`war-machine-strategic-vocabulary.edn` now carries first-class "
+        "`:μ/mode-rationales` data adjacent to `:μ/modes`; "
+        "`futon2.report.war-machine/scan-strategic-vocabulary` projects the "
+        "mode ids + rationales into `:strategic-vocabulary :mu :modes`; and "
+        "`war-machine.client.hud/mode-tooltip-text` looks up the current mode "
+        "there. The vocabulary file is not strict-EDN parseable as a whole "
+        "(`:snapshot/2026-04-12`), so the backend reader intentionally reads "
+        "only the named vocabulary forms needed by this surface."],
+       :sorry/rationale
+       ["str"
+        "Anchor 0004 of `~/code/futon5a/data/wm-ui-anchors.edn` discharged "
+        "2026-05-24 via a v1 tooltip on the HUD Mode span "
+        "(`futon2/web/war-machine/src/war_machine/client/hud.cljs`). The per-mode "
+        "rationale text is hardcoded as a small map (`mode-rationale`) at the top "
+        "of `hud.cljs`, sourced from `war-machine-strategic-vocabulary.edn` "
+        "`:μ/modes` lines 147-159 (the 6-mode taxonomy with one-line "
+        "rationales per mode).\n\n"
+        "v1 hardcode is the right call because vocab changes are rare and "
+        "dynamic EDN read is substrate-side work that wasn't in the anchor-0004 "
+        "scope. But the duplication is real: if the vocab updates its "
+        "mode-rationale prose, the hud.cljs map has to re-sync manually. "
+        "Drift surface is small but tracked.\n\n"
+        "Resolution path (either-or): (a) dynamic vocab read — have the WM "
+        "UI fetch the vocab EDN at boot and parse it client-side; (b) "
+        "vocab-to-cljs codegen on substrate-side build — a small `bb` script "
+        "generates the `mode-rationale` map from the vocab during the shadow-cljs "
+        "release pipeline. (b) keeps the runtime free of EDN parsing; (a) keeps "
+        "the build pipeline simple. Pick at v2 when at least one of the other "
+        "HUD anchors (0001/0003/0005/0006/0007) hits the same hardcode "
+        "pattern and the duplication compounds.\n\n"
+        "Authored co-located with the anchor-0004 landing per claude-10's "
+        "M-war-machine-vsatarcs-interop bell-protocol point #2 (2026-05-24)."],
+       :source-file "/home/joe/code/futon2/resources/sorrys.edn",
+       :sorry/endpoint
+       "futon2-d/sorry/wm-ui-hud-mode-rationale-hardcode",
+       :repo "futon2-d",
+       :sorry/t 0,
+       :sorry/registry-id ":sorry/wm-ui-hud-mode-rationale-hardcode",
+       :sorry/resolved-at "2026-05-30",
+       :sorry/links
+       ["~/code/futon2/web/war-machine/src/war_machine/client/hud.cljs"
+        "~/code/futon5a/data/war-machine-strategic-vocabulary.edn"
+        "~/code/futon5a/data/wm-ui-anchors.edn#0004"]}}
+ #:hx{:id
+      "hx:code/v05/sorry:futon3a/sorry/meme-arrow-6b69271667003880",
+      :type :code/v05/sorry,
+      :endpoints ["futon3a/sorry/meme-arrow-6b69271667003880"],
+      :props
+      {:sorry/title
+       "belief-mass-on-supports-tagged-cohort -> support-coverage-channel",
+       :meme/arrow-id "arr-6a061594-641",
+       :meme/want "support-coverage-channel",
+       :phase 4.5,
+       :sorry/status ":constructed",
+       :meme/have "belief-mass-on-supports-tagged-cohort",
+       :source-file "meme.db",
+       :sorry/endpoint "futon3a/sorry/meme-arrow-6b69271667003880",
+       :repo "futon3a",
+       :meme/mode "construction",
+       :sorry/t 0,
+       :promoted-from
+       ["belief-mass-on-supports-tagged-cohort"
+        "support-coverage-channel"],
+       :sorry/registry-id "meme/arrow/arr-6a061594-641"}}]

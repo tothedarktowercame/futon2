@@ -1,0 +1,9 @@
+;; thread orbits — full phase portrait of the mission scope-surface
+{
+  :mission "E-precision-over-policies"
+  :n-orbits 0
+  :scopes-covered 0
+  :scopes-total 11
+  :backfilled 0
+  :orbits []
+}

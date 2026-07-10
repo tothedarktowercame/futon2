@@ -1,0 +1,138 @@
+;; IRC-stability-sorry-EMPIRICAL.edn — the GROUND-TRUTH interface for M-IRC-stability,
+;; recovered POST-HOC from the mission doc + code + git + XTDB (A-next method, Joe 2026-07-01).
+;; #12 in the A-next gold corpus (M-fold-ansatz phase-2 ground truth).
+;; CLOSED mission (Status Complete, all 6 failure modes fixed, 16 stability tests, 2026-02-23) —
+;; so the sorry should be FULLY discharged and endpoints should resolve in substrate-2. They do
+;; (as code-graph hyperedge endpoints), with one addressability gap noted in :reconstruction-gap.
+;;
+;; Sources (all inspected this session, not remembered):
+;;   git commits: 2b36fe6 (original IRC transport + Emacs chat + transport-pivot gate, 2026-02-15 —
+;;     the fragile predecessor: 449 lines, 26 tests) ·
+;;     6ce7ad7 (THE repair: "Implement M-IRC-stability: all 6 failure modes fixed", Joe/Opus-4.6,
+;;     2026-02-17; +465/-32 across irc.clj + irc_test.clj; 14 new tests at commit time) ·
+;;     follow-on relay hardening: 776e7c6 (send-to-channel! scope fix, 2026-02-21) ·
+;;     5298949 (agent-to-agent IRC visibility, 2026-02-21) · 4246237 (codex relay + invoke
+;;     continuity, 2026-02-21) · 1530126 (delivery after in-channel nick changes, 2026-02-24) ·
+;;     29d18a9 (relay responses always deliverable, 2026-03-05) ·
+;;     bac7422 (M-invariant-queue-extend: F3 evidence RE-ROUTED estore/append* → boundary/append!)
+;;   code: futon3c/src/futon3c/transport/irc.clj (706 lines now; 652 at mission-close) ·
+;;     test/futon3c/transport/irc_test.clj (732 lines, sections 11–16 = 16 stability tests)
+;;   patterns: futon3/library/realtime/{liveness-heartbeats,loop-failure-signals,single-line-transport}.flexiarg
+;;     (the futon3c copies are a 6-file subset; these three live in futon3 — a location gap)
+;;   XTDB / substrate-2 (:7071 live + code-graph dumps /tmp/_calls.edn + /tmp/_contains.edn):
+;;     mission node futon3c-d/mission/IRC-stability (:mission/doc, status "complete") resolves LIVE (200);
+;;     14 irc top-level code nodes present as code/v05/contains + code/v05/calls hyperedge endpoints.
+;;   doc: futon3c/holes/missions/M-IRC-stability.md (want: "Joe can talk with agents on IRC WHENEVER
+;;     he wants" — survive laptop sleep/wake, network switches, idle periods, misbehaving agents).
+
+{:id :sorry/irc-always-on-duplex-channel
+ :hx-type "code/v05/sorry"
+ :state :empirical                        ; recovered from ground truth, not proposed
+ :derivation :post-hoc-reconstruction
+
+ :want-signature "harden-irc : (functional-but-fragile-irc-adapter, {F1..F6 failure-modes}) -> AlwaysOnDuplexChannel"
+ :hungry-for "AlwaysOnDuplexChannel"      ; the codomain: server-probed liveness · timeout-bounded reads ·
+                                          ; no silently-swallowed errors · ghost-reclaiming nicks ·
+                                          ; non-head-of-line-blocking relay · clean coordinated shutdown —
+                                          ; the MUSN↔IRC bridge that survives sleep/wake, net-switch,
+                                          ; idle, and a misbehaving agent, so Joe↔agents chat is always-on.
+
+ ;; ENDPOINTS — real substrate-2 / code entities. :in-substrate2 from live :7071 read + code-graph dumps.
+ ;; NOTE: the code-graph nodes are present as hyperedge ENDPOINTS (code/v05/contains + code/v05/calls)
+ ;; but are NOT standalone entity docs — live /entity/<id> returns 404 for them (see :reconstruction-gap).
+ :endpoints
+ [{:role :have :ref "futon3c.transport.irc/start-irc-server!"
+   :type "code/v05/namespace-fn" :in-map true
+   :substrate2-id "futon3c-d/futon3c.transport.irc/start-irc-server!"
+   :in-substrate2 true
+   :note "carries F1 keepalive-loop (single future), F2 (.setSoTimeout + SocketTimeoutException catch), F6 !reader-futures tracking + stop-fn future-cancel; 16 outgoing call-edges in code-graph; standalone /entity/ read = 404"}
+  {:role :have :ref "futon3c.transport.irc/make-irc-callbacks"
+   :type "code/v05/namespace-fn" :in-map true
+   :substrate2-id "futon3c-d/futon3c.transport.irc/make-irc-callbacks"
+   :in-substrate2 true
+   :note "hosts F1 reap-dead!/ping-idle! + touch! (any line resets :last-activity-at) and F4 nick-ghost?/kill-ghost! as inner let-closures; 20 outgoing call-edges; the closures themselves are NOT individually addressable in substrate-2"}
+  {:role :have :ref "futon3c.transport.irc/make-relay-bridge"
+   :type "code/v05/namespace-fn" :in-map true
+   :substrate2-id "futon3c-d/futon3c.transport.irc/make-relay-bridge"
+   :in-substrate2 true
+   :note "the MUSN↔IRC relay bridge; F5 relay-fn does per-agent (future (ws-send-fn …)) with (deref f relay-timeout-ms ::timeout) + future-cancel on stall; 12 call-edges; relay-timeout-ms default 5000"}
+  {:role :have :ref "futon3c.transport.irc/emit-error-evidence!"
+   :type "code/v05/namespace-fn" :in-map true
+   :substrate2-id "futon3c-d/futon3c.transport.irc/emit-error-evidence!"
+   :in-substrate2 true
+   :note "F3 sink: every catch block emits a :claim-type :tension evidence entry; code-graph has the calls-edge emit-error-evidence! → evidence.boundary/append! (confirmed in _calls.edn)"}
+  {:role :have :ref "futon3c.evidence.boundary/append!"
+   :type "code/v05/namespace-fn" :in-map true
+   :substrate2-id "futon3c-d/futon3c.evidence.boundary/append!"
+   :in-substrate2 true
+   :note "the SINGLE-BOUNDARY from #2 M-invariant-queue-unstuck; F3 error-evidence writes were re-routed here (estore/append* → boundary/append!) by bac7422 — a cross-corpus tie: #12's error evidence now flows through #2's boundary"}
+  {:role :have :ref "futon3c.transport.irc/parse-irc-line + send-line! (RFC 1459 line codec)"
+   :type "code/v05/namespace-fn" :in-map true
+   :substrate2-id "futon3c-d/futon3c.transport.irc/parse-irc-line"
+   :in-substrate2 true
+   :note "realtime/single-line-transport substrate; unchanged by the repair but the surface the failure modes act on"}
+  {:role :have :ref "the fragile predecessor: 2b36fe6 IRC adapter (449 lines, 26 tests, 6 failure modes)"
+   :type "git-state" :in-map false
+   :in-substrate2 false
+   :note "the pre-repair code state; recoverable only from git, not a substrate-2 node"}
+  {:role :want :ref "AlwaysOnDuplexChannel — the always-on Joe↔agent IRC channel: dead connections detected ≤90s via server PING; no reader thread blocks indefinitely (SO_TIMEOUT 120s); no exception silently discarded; reconnecting clients reclaim their nick from ghosts; one slow agent cannot block relay for the rest; shutdown stops every thread + closes every socket"
+   :type "AlwaysOnDuplexChannel value" :in-map false
+   :in-substrate2 false
+   :note "the codomain the whole construction produces; realized by the F1..F6 fixes together; the mission node futon3c-d/mission/IRC-stability (status \"complete\") is its substrate-2 witness"}]
+
+ ;; The load-bearing typed holes the construction had to discharge (the 6 failure modes = the HARD parts).
+ ;; Grading is honest: F1/F3/F4/F5 have isolated unit tests; F2/F6 are structural (verified by inspection,
+ ;; no isolated unit test) — graded :discharged-by with an explicit :verified note, NOT fabricated tests.
+ :typed-holes
+ [{:at :F1-server-initiated-liveness
+   :wanted "the server must PROBE clients, not merely PONG-reply — a half-open TCP (sleep/wake, WiFi→ethernet) leaves a zombie nick receiving into the void; ANY received line (not just PONG) must reset liveness, and idle clients past the timeout must be reaped"
+   :discharged-by "6ce7ad7 (keepalive-loop single future → reap-dead! + ping-idle!; touch! on every :on-line; :last-activity-at/:ping-pending? client state; ping-interval 30s / ping-timeout 90s)"
+   :verified "7 tests §11 (ping-after-interval, not-to-active, pong-clears-pending, any-message-resets, reap-removes/preserves, reap-emits-evidence)"}
+  {:at :F2-bounded-read
+   :wanted ".readLine() must not block forever on a stalled half-open socket (each stall permanently leaks one thread + one socket); a read timeout must fire, and a bare SocketTimeoutException must be distinguished from a real error (keepalive reaps, reader does not treat it as disconnect-error)"
+   :discharged-by "6ce7ad7 ((.setSoTimeout socket 120000) in accept loop; reader (catch SocketTimeoutException _ nil) separate from (catch Exception e …emit-error-evidence!))"
+   :verified :inspection                  ; structural — no isolated unit test (timing-dependent); confirmed in code
+   :note "socket-timeout-ms configurable; SO_TIMEOUT set BEFORE reader/writer construction"}
+  {:at :F3-no-silent-swallow
+   :wanted "every (catch Exception _) must be replaced so NO exception is silently discarded — reader-loop, send-fn, relay, accept, keepalive, send-to-channel all surface a :tension evidence entry; errors must surface at the layer that caused them (realtime/loop-failure-signals)"
+   :discharged-by "6ce7ad7 (emit-error-evidence! at all catch sites: reader-error, send-error, relay-timeout, relay-error, keepalive-error, accept-error, keepalive-reap) — later hardened: bac7422 re-routed the sink estore/append* → evidence.boundary/append! (single-boundary)"
+   :verified "1 test §14 (send-errors-logged-to-evidence) + reap-emits-evidence §11 + relay-timeout-emits-evidence §13"}
+  {:at :F4-ghost-nick-reclaim
+   :wanted "a reconnecting client (ERC auto-reconnect after a blip) must reclaim its nick from the stale ghost entry, else nick-collision or coexisting entries cause duplicate/missing messages; but a LIVE collision must still return ERR_NICKNAMEINUSE (433) — ghost-ness is decided by the F1 liveness timer, not guessed"
+   :discharged-by "6ce7ad7 (nick-ghost? = :ping-pending? OR elapsed > ping-timeout-ms; kill-ghost! QUITs + dissocs + close-fn; NICK handler reclaims-or-433) — later 1530126 fixed delivery after in-channel nick changes"
+   :verified "3 tests §12 (nick-reclaim-from-ghost, nick-collision-for-live-client, ghost-detection-uses-timeout)"}
+  {:at :F5-relay-head-of-line-blocking
+   :wanted "relay-fn iterating agents and calling ws-send-fn SYNCHRONOUSLY means one stalled/slow/dead-but-undetected agent WS blocks every other agent in the channel from receiving; each per-agent send must have a deadline, stalls must be skipped and surfaced"
+   :discharged-by "6ce7ad7 (per-agent (future (ws-send-fn …)) + (deref f relay-timeout-ms ::timeout) + future-cancel + :tension evidence on timeout; default 5000ms) — later 29d18a9/5298949/776e7c6 hardened deliverability/visibility of relay responses"
+   :verified "2 tests §13 (relay-timeout-skips-stalled-agent, relay-timeout-emits-evidence)"}
+  {:at :F6-clean-coordinated-shutdown
+   :wanted "the accept loop spawns untracked reader futures; stop-fn closes writers but never joins/cancels readers or the keepalive future — orphaned threads survive shutdown; shutdown must stop EVERY thread and close EVERY socket"
+   :discharged-by "6ce7ad7 (!reader-futures atom {client-id → future}; stop-fn (reset! !running false) + (future-cancel) over all reader futures + keepalive-loop + accept-loop + close all writers)"
+   :verified :inspection                  ; structural — no isolated unit test (thread-lifecycle); confirmed in code
+   :note "reader future self-removes from !reader-futures on exit; keepalive loop guards on @!running"}]
+
+ :kind {:predecessor-shape :functional-but-fragile-adapter   ; 2b36fe6: works in short sessions, 6 known failure modes
+        :whats-new         :always-on-hardened               ; keepalive + timeout + evidence + ghost-reclaim + relay-timeout + clean-shutdown
+        :target-territory  :fully-known                       ; the 6 failure modes were enumerated up-front in VERIFY (doc lists F1..F6 by line number); no sub-hole surfaced mid-build
+        :fill-mechanism    :server-ping+so-timeout+error-evidence+ghost-reclaim+per-agent-relay-timeout+reader-future-tracking}
+
+ :title "the IRC transport is always-on — fragile adapter → hardened duplex channel (server-probed liveness · bounded reads · no silent errors · ghost-reclaim · non-blocking relay · clean shutdown)"
+
+ ;; What RAW code/git/doc gave that a live substrate-2 query could NOT answer (the enrichment backlog):
+ :reconstruction-gap
+ {:code-nodes-not-standalone-entities
+  "The 14 irc top-level defns (incl. start-irc-server!, make-relay-bridge, emit-error-evidence!) are present in substrate-2 ONLY as code/v05/contains + code/v05/calls hyperedge ENDPOINTS (confirmed in /tmp/_contains.edn + /tmp/_calls.edn). Live /entity/<url-encoded-id> on :7071 returns 404 for every one of them — they have no queryable standalone entity doc. Only the mission node (futon3c-d/mission/IRC-stability) resolves via the live read surface. So substrate-2 CAN confirm 'this fn exists and calls that fn', but CANNOT hand you the fn's doc/source/props by id."
+  :failure-mode-machinery-invisible
+  "The load-bearing repair logic — keepalive-loop, reap-dead!, ping-idle!, touch!, nick-ghost?, kill-ghost!, and the F5 relay timeout — are inner let-closures inside make-irc-callbacks / make-relay-bridge / start-irc-server!, NOT top-level defns. The code graph only nodes top-level defns, so NONE of F1/F4/F6's actual mechanism is individually addressable in substrate-2. The 6-failure-mode↔fix mapping exists ONLY in the mission doc + git diff of 6ce7ad7; it is not derivable from substrate-2."
+  :git-only-history
+  "The estore/append* → boundary/append! re-route (F3 evidence now flowing through #2's single boundary, bac7422) and the fragile 2b36fe6 predecessor state are recoverable only from git; substrate-2 holds the current call-edge (→ boundary/append!) but no temporal record that it USED to be estore/append*."
+  :patterns-in-futon3
+  "The three cited patterns (liveness-heartbeats, loop-failure-signals, single-line-transport) are NOT in futon3c/library/realtime/ (which has a 6-flexiarg subset); they live in futon3/library/realtime/. Pattern→mission linkage came from the doc, not from a substrate-2 edge."}
+
+ :provenance {:mission "futon3c/holes/missions/M-IRC-stability.md"
+              :mission-node "futon3c-d/mission/IRC-stability"   ; :mission/doc, status "complete", resolves live on :7071
+              :campaign "C-cascade-real (transport hardening)"
+              :method "post-hoc empirical (doc + code + git + XTDB live :7071 + code-graph dumps), A-next, Joe 2026-07-01"
+              :sealed-by "claude (this session)"
+              :repair-commit "6ce7ad7 (all 6 failure modes; 14→16 tests; author Joe/Opus-4.6, reviewed)"
+              :for-blinded-study "A-next: reconstruct from cascade alone, score against this"}}

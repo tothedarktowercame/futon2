@@ -1,0 +1,95 @@
+;; single-entry-point-sorry-EMPIRICAL.edn — GROUND-TRUTH interface for M-single-entry-point,
+;; recovered POST-HOC from the mission doc + code + git (A-next method, Joe 2026-07-01).
+;; #8/10 in the A-next gold corpus (M-fold-ansatz phase-2 ground truth).
+;; Pairs with the A-small wiring futon6/holes/clean/single-entry-point.clean.edn → completes a TRIPLE.
+;;
+;; KEY CORRECTION vs the wiring/stub: the DERIVE fork (A in-JVM vs B managed sub-process) is
+;; NOT still open on the live machine. The code + Joe's machine-local config show it RESOLVED:
+;; A (in-JVM) for the Ring server AND for shadow-cljs (embedded), satisfying CLAUDE.md I-0
+;; ("one JVM at rest"). Path B (setsid sidecars) is built and is the committed script default
+;; for other machines, but is disabled on Joe's box. Represented honestly below.
+;;
+;; Sources (all inspected this session, not remembered):
+;;   git commits (verified sha + date + subject):
+;;     5f18bc2 (2026-05-03) "2026-05-02 invariant session: ... M-single-entry-point ... labs" — mission birth + orphan audit
+;;     89cf69b (2026-05-04) "M-single-entry-point: war-machine path moved to futon2" — scope update
+;;     d2bc483 (2026-05-27) "dev: embed webarxana + shadow-cljs into futon3c JVM (CLAUDE.md I-0)" — THE Path-A discharge
+;;                          (+159 lines bootstrap.clj: start-webarxana! in-JVM Ring mount; new dev/futon3c/dev/shadow.clj
+;;                           embedded shadow; shadow-drain-FIRST shutdown ordering)
+;;     2e5a2fd (2026-05-27) "scripts: operator bulk-approve (sweep close-out)" — added preflight_futon1a_lock
+;;                          (double-launch guard, criterion #4) + start_shadow_watch_sidecar setsid Path-B sidecars
+;;     2835618 (2026-06-03) "Default dev shadow watches to embedded runtime" — Makefile default toward embedded
+;;     45366d7 (2026-03-10) "Refactor Tickle startup and add watchdog invariants" — origin of the .addShutdownHook block
+;;                          (predates the mission; the shadow-drain refinement is d2bc483)
+;;   code (public surface): futon3c/dev/futon3c/dev/bootstrap.clj (start-webarxana! · start-shadow! ·
+;;     run-main! .addShutdownHook · cyder/register! calls) · dev/futon3c/dev/shadow.clj
+;;     (ensure-server!/start!/stop!/status via shadow.cljs.devtools.{api,server}) ·
+;;     scripts/dev-laptop-env (preflight_futon1a_lock · start_shadow_watch_sidecar setsid · start_web_sidecars) ·
+;;     scripts/dev-laptop-env.local (the config that RESOLVES the fork to A: sidecars off, embedded shadow on)
+;;   doc: futon3c/holes/missions/M-single-entry-point.md (IDENTIFY 2026-05-02; the 3-orphan audit table) ·
+;;     futon3c/CLAUDE.md I-0 "One JVM Is Plenty" (consolidation completed 2026-05-23)
+;;   XTDB: NOT relevant to this mission (JVM/process-lifecycle, not a substrate-2 hyperedge construction) — skipped.
+
+{:id :sorry/single-entry-point-owned-dev-stack
+ :hx-type "code/v05/sorry"
+ :state :empirical                       ; recovered from ground truth, not proposed
+ :derivation :post-hoc-reconstruction
+
+ :want-signature "single-launcher : (orphan-jvms, dev-laptop-env) -> owned-tear-downable-dev-stack"
+ :hungry-for "owned-tear-downable-dev-stack"   ; one launcher owns every long-running JVM; SIGINT tears them all
+                                               ; down; no child can reparent to systemd; second launch fails fast
+
+ ;; ENDPOINTS — real code / config / process entities. :in-map = grounded in an inspected repo artifact.
+ :endpoints
+ [{:role :have :ref "the orphan JVMs (M-single-entry-point.md 2026-05-02 audit): webarxana Ring :3100 (84 MB, orphaned to systemd) + two shadow-cljs 'watch app' watchers (webarxana-UI 431 MB, war-machine-UI 978 MB, both REPARENTED to systemd after their node parent died), ~1.5 GB resident, survived multiple dev-laptop-env restarts"
+   :type "orphan processes" :in-map true
+   :note "JVM-level state (ports, RSS, process trees) = the boot-invariants' blind spot; none owned by the futon3c lifecycle"}
+  {:role :have :ref "scripts/dev-laptop-env (the SOLE launcher; ends in `exec make dev`; sources dev-laptop-env.local)"
+   :type "launcher script" :in-map true
+   :note "preflight_futon1a_lock + start_web_sidecars + start_multi_watcher run before the JVM exec"}
+  {:role :have :ref "bootstrap.clj/start-webarxana! — mounts webarxana.server.core/start! IN-JVM on :3100, cyder-registered :server with :stop-fn (Path A for Ring)"
+   :type "code/v05/fn" :in-map true :note "d2bc483; default on via FUTON3C_WEBARXANA_SERVER_AUTOSTART"}
+  {:role :have :ref "bootstrap.clj/start-shadow! + dev/futon3c/dev/shadow.clj — embedded shadow-cljs watches IN-JVM via shadow.cljs.devtools.{api,server}, cyder-registered :daemon (Path A for shadow-cljs)"
+   :type "code/v05/namespace" :in-map true
+   :note "d2bc483; gated FUTON3C_SHADOW_AUTOSTART (repo default false, but =true in Joe's dev-laptop-env.local)"}
+  {:role :have :ref "scripts/dev-laptop-env/start_shadow_watch_sidecar — the alternative Path B: `setsid bash -lc \"... exec npm run dev\" &`, PID-file + health-port (8710/9631) tracked, idempotent re-adoption on relaunch"
+   :type "shell fn" :in-map true
+   :note "2e5a2fd; repo default ON (WAR_MACHINE/WEBARXANA_AUTOSTART=true) but DISABLED in dev-laptop-env.local"}
+  {:role :have :ref "bootstrap.clj/run-main! (Runtime .addShutdownHook): on SIGTERM/SIGINT stops embedded shadow FIRST (avoids RejectedExecutionException race), then multi-watcher, agents, drawbridge, irc, futon5, futon1a"
+   :type "code/v05/shutdown-hook" :in-map true :note "block origin 45366d7; shadow-drain-first refinement d2bc483"}
+  {:role :have :ref "cyder/register! (bootstrap.clj) → (dev/status): futon1a, multi-watcher, futon5, irc-server, webarxana, shadow-cljs, drawbridge all registered"
+   :type "process registry" :in-map true :note "criterion #3 — each subsystem visible in (dev/status)/HUD"}
+  {:role :have :ref "scripts/dev-laptop-env/preflight_futon1a_lock + show_futon1a_lock_conflict_and_exit — reads futon1a index-store/LOCK, resolves holder PID via lsof/fuser, prints active dev ports (7070/7071/7072/6768), `exit 1`"
+   :type "shell fn" :in-map true :note "2e5a2fd; the fail-fast double-launch guard (criterion #4), keyed on the RocksDB LOCK"}
+  {:role :want :ref "owned-dev-stack: the shutdown hook tears down every managed subsystem before futon1a goes down; each shows in (dev/status); a second dev-laptop-env fails fast on the shared lock/port rather than silently double-launching; no child JVM reparents to systemd"
+   :type "owned-tear-downable-dev-stack value" :in-map false
+   :note "the codomain the whole construction produces; the completion criteria #1-4"}]
+
+ ;; The load-bearing typed holes the construction had to discharge (the HARD parts):
+ :typed-holes
+ [{:at :integration-strategy-per-subsystem
+   :wanted "resolve Q-classpath-compat (does thheller/shadow-cljs conflict with futon3c deps?) and Q-shadow-cljs-shared-server (two watch :app in one JVM, different CWD configs) to pick A (in-JVM) or B (managed sub-process) per subsystem"
+   :discharged-by "d2bc483 (in-JVM embedding of BOTH webarxana Ring and shadow-cljs landed and works — Q-classpath-compat answered green in practice) + dev-laptop-env.local (Path B sidecars OFF, FUTON3C_SHADOW_AUTOSTART=true): on the live machine the fork resolved to A for BOTH, matching CLAUDE.md I-0. NOT the mission's 'A-for-Ring / B-for-shadow' default lean — B is retained only as the committed fallback."}
+  {:at :escape-proof-process-group
+   :wanted "no child JVM can reparent to systemd: on launcher death every spawned process is in a killable group, verified by a parent==1 check returning empty after SIGINT (Q-orphan-survival: the audit found shadow-cljs JVMs REPARENTING to systemd)"
+   :discharged-by :dissolved-by-path-A
+   :note "Under the live Path-A resolution the obligation is MOOT by construction: there are no child JVMs, so the JVM's own shutdown hook (d2bc483) tears everything down and nothing can outlive the launcher. It is DISSOLVED, not discharged by a process-group capture. For the fallback Path B this hole is :OPEN/:unverified — start_shadow_watch_sidecar uses `setsid` in the orphan-CREATING direction (new session) with NO teardown in any shutdown hook, relying on PID-file/health-port RE-ADOPTION rather than kill; criterion #2 (no orphan after SIGINT) is deliberately sidestepped, not met, on Path B."}
+  {:at :fail-fast-double-launch
+   :wanted "a second ./scripts/dev-laptop-env while one runs fails fast with a recognizable error, no silent double-launch on shared ports (criterion #4)"
+   :discharged-by "2e5a2fd (preflight_futon1a_lock: futon1a index-store/LOCK holder detected via lsof/fuser → show_futon1a_lock_conflict_and_exit prints proc + active dev ports → exit 1)"}]
+
+ :kind {:predecessor-shape :hand-started-orphan-jvms
+        :whats-new :single-launcher-owned+tear-downable+no-reparent
+        :target-territory :resolved-toward-A-on-live-box    ; the mission-doc fork is closed in practice, not open
+        ;; process-group Path-B built but not the live path
+        :fill-mechanism :audit+in-JVM-embed-A+shutdown-hook+lock-preflight}
+
+ :title "one dev-laptop-env launcher owns every long-running JVM; SIGINT tears them all down; no orphans — resolved to in-JVM embedding (Path A) on the live box (audit-derive-then-discharge)"
+ :provenance {:mission "futon3c-d/mission/single-entry-point"
+              :campaign "C-cascade-real"
+              :method "post-hoc empirical (doc + code + git; XTDB n/a), A-next 2026-07-01"
+              :sealed-by "claude (this session)"
+              :cascade [:invariant-coherence/reachable-from-boot]
+              :pairs-with-wiring "futon6/holes/clean/single-entry-point.clean.edn"
+              :acceptance-terminals=endpoints
+              "wiring s1 :produces :orphan-jvm-audit (the 3 orphan JVMs = sorry :have); s5 :discharges :single-entry-point-completion-criteria (= sorry :want owned-tear-downable-dev-stack). MATCH. NOTE the wiring marks s3 (integration fork) + s4 (process-group escape) as OPEN holes; the empirical recovery finds s3 RESOLVED to A on the live box (d2bc483 + dev-laptop-env.local) and s4 DISSOLVED under A / still :open under the fallback Path B."}}

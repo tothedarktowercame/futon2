@@ -13,6 +13,7 @@
   :wm-preflight {:main-opts ["-m" "wm-preflight"]}
   :fold-author {:main-opts ["-m" "fold-author"]}
   :wm-outer-loop {:main-opts ["-m" "wm-outer-loop"]}
+  :manual-overnight-flights {:main-opts ["scripts/manual_overnight_flights.clj"]}
   :run-m {:main-opts ["-m" "ants.clj-ants-aif"]}
   :build {:deps {io.github.clojure/tools.build
                  {:mvn/version "0.9.6"}}

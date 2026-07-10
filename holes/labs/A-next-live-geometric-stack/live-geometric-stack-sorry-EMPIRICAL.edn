@@ -1,0 +1,161 @@
+;; live-geometric-stack-sorry-EMPIRICAL.edn — the GROUND-TRUTH interface for
+;; M-live-geometric-stack (canonical futon3-d/mission/live-geometric-stack),
+;; recovered POST-HOC from the mission doc + code + git + XTDB/dumps
+;; (A-next method, Joe 2026-07-01). #15 in the A-next gold corpus
+;; (M-fold-ansatz phase-2 ground truth).
+;;
+;; META-CASE for the substrate-2 audit: THIS mission BUILT substrate-2 itself
+;; (the ~360k-hyperedge XTDB hypergraph every other #N in the corpus is audited
+;; against). So the pointed question — "does substrate-2 contain its own
+;; builder's interface?" — is answered here directly, and the answer is
+;; PARTIAL-AND-SYSTEMATIC (see :endpoints :in-substrate2 + :reconstruction-gap).
+;;
+;; Sources (all inspected this session, not remembered):
+;;   git (futon3): b205c06 "substrate-2 / live-geometric-stack: ingest pipeline
+;;     + projections + v0 hypergraph" (Joe, 2026-05-03, Co-Authored-By Claude
+;;     Opus 4.7). THE ENTIRE mission — all 7 phases + 3 cleanup sessions —
+;;     landed in this ONE squashed commit (the granular per-phase history from
+;;     the 2026-04-27/28 build sessions was committed en masse a week later;
+;;     there are NO per-phase shas in futon3). The JVM in-process watcher variant
+;;     landed separately as futon3c.watcher.multi / futon3c.watcher.commit-ingest.
+;;   code (read-side + projectors, all bb scripts under futon3/scripts/):
+;;     geometric_layer_phase2.clj (T/∇T/ΔT/drift derived layer) ·
+;;     ingest_v05_to_futon1a.clj (phase-1 projector) · v0_codebase_hypergraph.clj
+;;     (the bb regression ORACLE) · commit_ingest_lib.clj + ingest_commits_to_futon1a.clj
+;;     (phase-3) · multi_watcher.clj + watcher_daemon.clj (phase-4) ·
+;;     phase_5_signatures.clj (satisficing signatures) · flexiarg/python/elisp projections.
+;;   tests: futon3/holes/labs/M-live-geometric-stack/tests/phase_{1,2,3,4,4_6}_*.clj
+;;     (phase_1_invariants_test.clj = L1 stable-id/idempotency/counter-ratchet +
+;;     L2 endpoint/vocab resolution + regression-vs-bb-v0.5; phase_2_geometric_test.clj
+;;     = geometric quantities must equal bb-v0.5 byte-for-byte + determinism).
+;;   doc: futon3/holes/missions/M-live-geometric-stack.md (Status COMPLETE 2026-04-28,
+;;     all 7 phases) + labs/M-live-geometric-stack/CLEANUP-CHECKPOINT-2026-04-27.md
+;;     (the 3-session dispatch ledger: ~360k hyperedges, 16 labels, 6/8 signatures) +
+;;     5 PSRs + 13 PURs + diagram/phase-1-mission-diagram.edn.
+;;   XTDB / substrate-2: :7071 was DOWN this session; used the live code-graph
+;;     dumps /tmp/_calls.edn (code/v05/calls) + /tmp/_contains.edn (code/v05/contains,
+;;     ~2026-07-01). 21 :repo labels present incl. futon3-d (8294 contains — matches
+;;     the ~8286 calibration), futon3c-d, futon5-d2 (largest, ~27k), futon6-py-d,
+;;     futon1a-d, etc.
+
+{:id :sorry/live-geometric-stack
+ :hx-type "code/v05/sorry"
+ :state :empirical                        ; recovered from ground truth, not proposed
+ :derivation :post-hoc-reconstruction
+
+ :want-signature "substrate-2 : (source-corpus × git-history × existing-math-hg) -> LiveGeometricStack"
+ :hungry-for "LiveGeometricStack"         ; the codomain, per the mission's 5 sub-properties:
+                                          ; (1) Coverage — every code/doc/mission unit ingested;
+                                          ; (2) Geometric — T,∇T,ΔT,drift DERIVED from typed edges, not stored;
+                                          ; (3) Live — filesystem events update the store within the debounce window;
+                                          ; (4) Cross-codebase — ONE abstract schema over futon0..7 + math, per-repo :repo label;
+                                          ; (5) Self-zapping — satisficing-failure signatures surface as first-class hyperedges.
+
+ ;; ENDPOINTS — real substrate-2 / code entities. Each carries :in-substrate2 with the
+ ;; ACTUAL node-id evidence from the live dumps (or the reason it is absent). The
+ ;; meta-twist: this mission's OUTPUT *is* substrate-2, so some endpoints are the
+ ;; SCHEMA (hyperedge TYPES) rather than code vars — recorded distinctly.
+ :endpoints
+ [{:role :have :ref "substrate-1: M-three-column-stack closure (code/namespace, code/var, code/requires, project/devmap, math/post ... 1,524+ claimed static edges) + ingest-three-columns.py"
+   :type "legacy hyperedge schema + python pipeline"
+   :in-substrate2 false
+   :node-id nil
+   :note "the predecessor. Claimed 1,524+ persistent edges but found ZERO live in futon1a at phase-1 pre-flight (2026-04-27) — the INAUGURAL completion-rot detection, and the motivating defect. R-3 decision: substrate-2 SUPERSEDES these; the legacy code/* types are intentionally left EMPTY."}
+
+  {:role :have :ref "futon1a XTDB bitemporal store @ :7071 (the persistence substrate; supports T(v,c) valid-time queries)"
+   :type "durable backend"
+   :in-substrate2 true
+   :node-id "label futon1a-d (1145 code/v05/calls, 792 code/v05/contains in dumps)"
+   :note "the store substrate-2 writes into AND the codebase is itself ingested. Server :7071 was DOWN this session (see :reconstruction-gap)."}
+
+  {:role :have :ref "v0_codebase_hypergraph.clj — the bb v0.5 projection from source; the REGRESSION ORACLE both phase-1 and phase-2 tests must match"
+   :type "bb script (code/v05 projector, read-side reference)"
+   :in-substrate2 false
+   :node-id nil
+   :note "ns-less bb script (opens with (require ...), no (ns ...) form) → the phase-1 var-extraction invariant keys on (ns ...) forms, so the ORACLE FOR substrate-2 is itself INVISIBLE to substrate-2. Meta-gap; see :reconstruction-gap."}
+
+  {:role :have :ref "E-cross-prototype-geometry.md v0.5 numbers (futon2 paired-vars / coverage / call / vocab / drift / top-±ΔT)"
+   :type "empirical baseline (doc)"
+   :in-substrate2 false
+   :node-id nil
+   :note "the regression TARGET; phase-2 invariant = XTDB-derived geometry equals these byte-for-byte (modulo the distinct-qname L1-dedupe correction)."}
+
+  {:role :want :ref "code/v05/var · code/v05/test · code/v05/namespace · code/v05/term"
+   :type "substrate-2 VERTEX-TYPE schema (:hx/type tag, NOT a vertex)"
+   :in-substrate2 :as-type-tag-not-vertex
+   :node-id "no describing node exists; the type lives as the :hx/type value on ~10^5 instances"
+   :note "SCHEMA-SELF-DESCRIPTION answer: substrate-2 does NOT contain a queryable node describing 'code/v05/var' as a concept — the schema is IMPLICIT in the type tags carried by instances, not reified as first-class entities."}
+
+  {:role :want :ref "code/v05/calls (var→var) · code/v05/coverage (test→var) · code/v05/vocabulary-use (ns→term) · code/v05/term-defines (doc→term) · code/v05/contains (ns→var)"
+   :type "substrate-2 EDGE-TYPE schema (phase-1 taxonomy lift; :hx/type tags)"
+   :in-substrate2 true
+   :node-id "code/v05/calls + code/v05/contains ARE the dumped types (millions of instances across 21 labels); dir:src→dst synthetic 3rd endpoint disambiguates direction (E-substrate-2-directed-edge-id)"
+   :note "the phase-1 :new edge classes. GRADIENT SIGNAL lives here: coverage-only edges have ∇T≡0, so ≥2 disagreeing edge classes are required — the reason the taxonomy lift is load-bearing, not cosmetic."}
+
+  {:role :want :ref "code/v05/commit · code/v05/authored · code/v05/edits · code/v05/precedes"
+   :type "substrate-2 TIME-AXIS schema (phase-3 commits-as-first-class; :hx/type tags)"
+   :in-substrate2 :unverified-this-session
+   :node-id "NOT present in the calls/contains dumps; :7071 down → could not query. Recovered from CODE (commit_ingest_lib.clj + ingest_commits_to_futon1a.clj) + PUR + phase_3_commits_test.clj"
+   :note "phase-3 promotes the commit DAG to a spanning structure. E-live-means-live (2026-05-01) flagged commit-coverage as MANUAL-BATCH, not real-time — the 'live' predicate is partial for this vertex class specifically."}
+
+  {:role :want :ref "code/v05/satisficing-signature ({:signature :evidence-vertices :evidence-commit-range :severity})"
+   :type "substrate-2 DIAGNOSTIC schema (phase-5 futonic-zapper; :hx/type tag)"
+   :in-substrate2 :unverified-this-session
+   :node-id "NOT in calls/contains dumps; :7071 down. Recovered from phase_5_signatures.clj + CLEANUP checkpoint (228 emitted on a 4-label subset; 6 of 8 signature detectors live)"
+   :note "the self-zapping sub-property. 6/8 emit (adapter-shim, work-around-drift, concept-used-without-def, completion-rot, coverage-retreat, concept-introduced-without-attachment); quick-fix + load-bearing-under-tested closed as not-pain-driven."}
+
+  {:role :want :ref "the live multi-repo watcher daemon (phase-4 liveness): fs-event → hyperedge update within debounce, no silent drops"
+   :type "code/v05/namespace (JVM production impl)"
+   :in-substrate2 true
+   :node-id "futon3c-d/futon3c.watcher.multi/* + futon3c-d/futon3c.watcher.commit-ingest/* (present in _contains dump)"
+   :note "the phase-4 deliverable IS self-described: the running watcher, being ns'd JVM Clojure in futon3c, gets ingested by itself. Substrate is self-aware — it caught the creation of phase_5_signatures.clj within one cycle (checkpoint P-2)."}
+
+  {:role :want :ref "LiveGeometricStack — the substrate itself: ~360,000 hyperedges, 16 active labels, 12 codebases, watcher live, T-field queryable in O(query)"
+   :type "LiveGeometricStack value (the whole substrate)"
+   :in-substrate2 :is-substrate2
+   :node-id "not a node — it IS the store (21 :repo labels observed in the calls/contains dumps alone)"
+   :note "the codomain the whole construction produces; the manifold. PSR/PUR/PAR (tangent-bundle / motion) explicitly MOVED OUT to M-reflective-discipline ('we are still just building the manifold')."}]
+
+ ;; The load-bearing typed holes the construction had to discharge (the HARD parts,
+ ;; most of which surfaced mid-build, not in the spec):
+ :typed-holes
+ [{:at :geometry-is-derived-not-ingested
+   :wanted "T,∇T,ΔT,drift must be QUERY-BACKED derived properties over typed edges (T(var)=1 iff no incident :coverage edge), NOT an ad-hoc ingestion pipeline like substrate-1's tension_surface"
+   :discharged-by "geometric_layer_phase2.clj (compute-T / compute-grad / compute-laplacian / connected-components / jaccard drift), read-side over futon1a"}
+  {:at :regression-equals-oracle-byte-for-byte
+   :wanted "XTDB-derived geometry must EQUAL the fresh bb-v0.5 projection (paired-vars, coverage/call/vocab counts, top-±ΔT, drift hotspots, component sizes) AND be deterministic across re-runs"
+   :discharged-by "phase_2_geometric_test.clj; required the distinct-qname L1-dedupe correction (bb over-counts duplicate defns — itself a real code-coherence finding)"}
+  {:at :directed-edge-stable-id-collision
+   :wanted ":calls src→dst and dst→src must NOT collide under the substrate-1 sorted-endpoint stable-ID scheme (hx:{type}:{sorted-endpoints})"
+   :discharged-by "synthetic 3rd endpoint dir:src→dst (E-substrate-2-directed-edge-id); visible in every dumped edge id"}
+  {:at :cross-codebase-counter-ratchet
+   :wanted "a var qname shared across repos must not let a foreign ingest DECREASE another label's count (B-2: futon7 saw calls 128→100); per-type count is monotonic per repo"
+   :discharged-by "per-repo qname-prefix, option (d): futon7-d3/f7.core/intersect not f7.core/intersect. Verified structural on -d3 labels (futon4-elisp-d3, futon7-d3 in dumps)"}
+  {:at :liveness-not-re-derivability
+   :wanted "the substrate's deliverables must be QUERYABLE from the store, not merely re-derivable by re-running a script (completion-rot: substrate-1 claimed 1,524+ edges, 0 live)"
+   :discharged-by "phase-4 multi-watcher (fs-event → hyperedge within ~5s debounce, SHA-256 no-op skip, typed watcher-event on delete/rename); PARTIAL for commits (E-live-means-live: manual-batch)"}]
+
+ :kind {:predecessor-shape :static-3-column+re-runnable-script+completion-rot  ; substrate-1: right plumbing, wrong shape, zero-live
+        :whats-new         :var-granular-edges+derived-geometry+live-watcher+cross-codebase-schema+satisficing-signatures
+        :target-territory  :mostly-known                 ; 7 phases spec'd up front; the sub-holes (directed-id
+                                                          ; collision, cross-repo counter-ratchet, distinct-qname
+                                                          ; dedupe, commit-liveness) surfaced DURING the build
+        :fill-mechanism    :edge-taxonomy-lift+xtdb-derived-geometry+commit-vertices+multi-watcher+signature-emitters}
+
+ :title "the futon stack as one live geometrically-readable object — substrate-2 (var-granular typed edges · derived T/∇T/ΔT/drift · live watcher · one cross-codebase schema · self-zapping satisficing signatures)"
+
+ ;; ENHANCEMENT (2): what RAW code/git/doc had to answer that substrate-2 could NOT
+ ;; return by query — the enrichment backlog for this meta-case.
+ :reconstruction-gap
+ {:server-down ":7071 was not responding this session; only the /tmp/_calls.edn (code/v05/calls) + /tmp/_contains.edn (code/v05/contains) dumps were available. Phase-3 (:commit/:authored/:edits/:precedes) and phase-5 (:satisficing-signature) vertices could therefore NOT be verified live — recovered from CODE + PUR + tests only (marked :unverified-this-session above)."
+  :git-squash "The 7 phases + 3 cleanup sessions collapsed into ONE futon3 commit (b205c06, 2026-05-03). There are NO per-phase shas to cite; the phase structure was recovered from the mission doc + 5 PSRs + 13 PURs + the CLEANUP-CHECKPOINT dispatch ledger, not from git granularity. The JVM watcher landed separately (futon3c.watcher.multi)."
+  :schema-not-self-described "substrate-2 carries NO queryable node describing its own hyperedge TYPES (code/v05/var, /calls, :edits, etc.) — the schema is implicit in :hx/type tags on instances. Answering 'what is the type taxonomy?' requires reading the projector/mission source, not querying the store."
+  :builder-invisible-to-itself "THE pointed meta-finding. Does substrate-2 contain its own builder's interface? PARTIALLY: the JVM watcher (futon3c.watcher.multi/commit-ingest) and commit_ingest_lib (futon3-d/commit-ingest-lib/*, has an (ns ...) form) ARE ingested; but the core bb read-side + projector scripts — geometric_layer_phase2.clj, ingest_v05_to_futon1a.clj, v0_codebase_hypergraph.clj, phase_5_signatures.clj, multi_watcher.clj (bb), ingest_one_file.clj — produce ZERO vertices, because they open with (require ...) not (ns ...) and the phase-1 var-extraction invariant keys on (ns ...) forms. So substrate-2 is BLIND to the very scripts that build and read it. A type-query alone can't distinguish 'absent' from 'present under an odd qname'; the script HEADERS (ns vs require) had to be read to explain the absence. This is an enrichment-backlog item: teach the projector to ingest ns-less bb scripts under a filename-derived namespace (as it already does for commit_ingest_lib)."}
+
+ :provenance {:mission "futon3/holes/missions/M-live-geometric-stack.md"
+              :canonical-id "futon3-d/mission/live-geometric-stack"
+              :campaign "substrate-2 / M-live-geometric-stack (parent of M-reflective-discipline tangent-bundle)"
+              :method "post-hoc empirical (doc + code + git + XTDB-dumps), A-next, 2026-07-01"
+              :git-sha "b205c06 (futon3; Joe, 2026-05-03; Co-Authored-By Claude Opus 4.7) — single squashed commit for all 7 phases"
+              :sealed-by "claude (this session)"
+              :corpus-position "#15 in the A-next gold corpus (M-fold-ansatz phase-2 ground truth); THE meta-case — this mission built the substrate every other #N is audited against"}}

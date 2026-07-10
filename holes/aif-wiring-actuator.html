@@ -1,0 +1,203 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>The actuator — closing the loop for real (E pur si muove)</title>
+<style>
+body{font:15px/1.55 system-ui,sans-serif;max-width:980px;margin:2rem auto;padding:0 1rem;color:#223}
+h1{font-size:22px}
+h2{font-size:16px;margin:1.8rem 0 .4rem}
+.summary{background:#f5f7f6;border:1px solid #dde;border-radius:8px;padding:12px 16px}
+.card{border:1px solid #dde;border-radius:8px;padding:12px 16px;margin:14px 0}
+.card h3{margin:0 0 4px 0;font-size:15px}
+.n{display:inline-block;background:#5a6a8a;color:#fff;border-radius:50%;width:22px;height:22px;text-align:center;line-height:22px;font-size:12px;font-weight:700;margin-right:8px}
+.fwd{color:#2e7d9a;font-weight:700;font-size:11px}    /* FORWARD — reused from enact.clj, not rebuilt */
+.gap{color:#b1543a;font-weight:700;font-size:11px}    /* GAP — where artifact-only stops */
+.new{color:#7a4fb0;font-weight:700;font-size:11px}    /* NEW — new construction */
+.gate{color:#a07f2a;font-weight:700;font-size:11px}   /* GATED — WM-I4 / mana consent */
+.io{font-size:13px;margin:6px 0}
+.io b{display:inline-block;width:70px;color:#667;vertical-align:top}
+.exp{background:#f2f6f3;border-left:3px solid #3f8b57;padding:6px 10px;font-size:13px;margin:8px 0}
+.exp b{color:#3f8b57}
+.lin{background:#faf6f2;border-left:3px solid #b1543a;padding:6px 10px;font-size:12.5px;margin:8px 0}
+.lin b{color:#b1543a}
+code{background:#f2f4f3;padding:0 4px;border-radius:4px;font-size:12.5px}
+.foot{color:#99a;font-size:11px;margin-top:2rem}
+.dial{display:inline-block;border:1px solid #cdd;border-radius:6px;padding:4px 10px;margin:4px 6px 0 0;font-size:12.5px;background:#fafbfa}
+.thesis{background:#fbf7ff;border:1px solid #e5daf3;border-radius:8px;padding:12px 16px;margin:12px 0}
+.rref{display:inline-block;background:#eef1f7;border:1px solid #cdd6e6;color:#3a4a6a;border-radius:4px;padding:0 5px;font-size:11px;font-weight:700;margin-left:6px;vertical-align:middle}
+.kgap{border:1px solid #e6cdbf;background:#fdf6f2;border-radius:8px;padding:12px 16px;margin:14px 0}
+.kgap h3{margin:0 0 4px 0;font-size:15px;color:#a04a2a}
+</style>
+
+<h1>The actuator — closing the loop <em>for real</em> <small style="color:#99a;font-size:14px">(E pur si muove)</small></h1>
+
+<div class="summary">
+<b>Sibling of</b> <code>aif-wiring-explainer.html</code> (the R1–R18 contract) and
+<code>flight-pipeline-cards-iv.html</code> (the deliberation pipeline). Those two
+cover <em>choosing</em> what to do and <em>announcing</em> it. This card-set covers the
+missing arc: <b>actually doing it, so the mission substrate moves.</b><br><br>
+<span class="fwd">FORWARD</span> reused from <code>futon2/aif/enact.clj</code>, not rebuilt ·
+<span class="gap">GAP</span> where artifact-only stops — the byte never written ·
+<span class="new">NEW</span> new construction ·
+<span class="gate">GATED</span> WM-I4 / per-fold mana consent.
+</div>
+
+<h2>Why this exists — the honest read of R16 today</h2>
+<div class="thesis">
+R16 (&ldquo;close the loop&rdquo;) is marked <b>closed live, 2026-07-02</b>, and that is
+<em>not a lie</em> — but it is a truth about the wrong quantity.
+<code>enact.clj</code>&rsquo;s own docstring says it plainly: <b>&ldquo;ENACTMENT IS
+ARTIFACT-ONLY … NO substrate write, NO outward action.&rdquo;</b> Its
+&ldquo;executor&rdquo; (<code>engine-wiring</code>, L114&ndash;130) shells the futon3a
+fold engine and <b>re-observes the construction it just built</b>; its
+<code>:realized-G</code> is coverage-ΔG over <em>how faithfully the diagram-builder
+reproduced the diagram</em> (L26&ndash;32). That signal is genuinely honest — the code
+even refuses to launder the escrow prediction as its own realization (L28&ndash;30, the
+anti-tautology cross-check) — <b>but it is causally sealed from the mission.</b> No hole
+closes; <code>open-hole-count</code> never moves; so the recommendation repeats forever
+(the observed tic). <b>Honesty about a quantity that cannot move is still inertia.</b>
+<br><br>
+So we do <em>not</em> acquiesce to &ldquo;what exists is enough.&rdquo; We also do not
+throw it away: <code>enact.clj</code> carries four load-bearing assets we take forward
+verbatim (below). The actuator changes exactly one thing — the <b>executor&rsquo;s
+target</b>: instead of re-running the fold engine to reproduce a diagram, we
+<b>apply the construction to the world</b> — do the work the diagram describes, write the
+substrate, and measure realized-G against the <em>real</em> Δ, under your per-fold consent.
+</div>
+
+<h2>Design update — the provable-witness pivot (2026-07-07)</h2>
+<div class="thesis" style="background:#f2fff6;border-color:#cbe8d4">
+The cards below were first drafted around <code>open-hole-count</code> (a mission-doc parse) as the dial.
+<b>We changed the dial.</b> Two live runs showed why: a builder can produce real artifacts yet leave
+<code>open-hole-count</code> untouched, and &mdash; worse &mdash; a builder <em>could</em> move a checkbox dial by
+declaring a closure its <code>file-exists</code>/<code>file-contains</code> witness happens to satisfy.
+zai-5 declined to do exactly that on M-chipwitz-corps <b>out of honesty</b> &mdash; proving the weak witness
+rests on trust, not proof.
+<br><br>
+So (Joe, 2026-07-07): <b>a witness is not gameable if it is the fold&rsquo;s own provable output.</b> The
+dial is now &mdash; <b>are the sorry&rsquo;s typed substrate-2 endpoints provably inhabited?</b> &mdash; checked by the
+executor via authed Drawbridge <code>xtdb.api/q</code> queries <em>derived from authored
+<code>:endpoint-bindings</code></em>, never builder claims. You cannot <code>touch</code> a typed
+<code>:capability/*</code> hyperedge over real <code>:capability</code>&times;<code>:mission/doc</code>
+nodes into existence &mdash; producing the structure <em>is</em> the work. The mission-doc checkbox becomes
+<b>optional downstream bookkeeping</b> gated on the provable dial (now A4), not a witness in itself.
+<br><br>
+<b>Sharpening (Joe, 2026-07-07) &mdash; boundary vs structure:</b> endpoint-inhabitation proves the
+<b>boundary</b> (the interface types are inhabited), <em>not</em> the <b>structure</b> (that the internal
+wiring is well-formed and non-degenerate). A <em>single trivial</em> <code>:capability/*</code> edge over one
+capability and one mission satisfies the boundary proof &mdash; so &ldquo;ungameable&rdquo; was too strong:
+it is boundary-ungameable, structure-blind. The <b>clean-structure check</b> is the next witness layer:
+(1) the fold&rsquo;s wiring is a well-formed typed composition (wires connect existing boxes, connectives
+compose, the terminal discharges the want-signature, no orphans) &mdash; static, on the deposit; and (2) the
+built substrate satisfies authored <b>structural invariants</b> (cardinality / non-degeneracy / cross-mission
+connectivity), not just &ldquo;&exist; one instance.&rdquo; Not a Lean proof &mdash; a checkable
+homomorphism-shaped guard.
+</div>
+
+<h2>What we take forward (non-greenfield)</h2>
+<div class="card">
+<div class="io"><b>intake</b> <span class="fwd">FORWARD</span> the <b>escrow LLM-turn</b> path
+— out-of-process agent labor (&ldquo;no LLM in any JVM&rdquo;), recorded at
+<code>data/fold-escrow/&lt;mission&gt;.edn</code>, replayed via <code>esc/escrow-turn-fn</code>.
+First act-gate pass was M-canon-fingerprint-store. <b>This is A3&rsquo;s engine.</b></div>
+<div class="io"><b>thread</b> <span class="fwd">FORWARD</span> <code>close-loop!</code>&rsquo;s tick
+harness + <code>fold-realized/with-realized-outcome</code> seam (honours
+<code>fr/*live-wire?*</code>) + its resilience discipline (any failure ⇒ judgement
+unchanged, never throws). <b>A5 feeds a grounded number through this same seam.</b></div>
+<div class="io"><b>γ-honesty</b> <span class="fwd">FORWARD</span> <code>gamma-fold-of</code> /
+<code>*gamma-escrow-feed?*</code> — source-consistent expected leg, never rollout-G,
+holds on nil. <b>We keep the discipline; we change what &ldquo;realized&rdquo; measures.</b></div>
+<div class="io"><b>gate</b> <span class="fwd">FORWARD</span> WM-I4 / R16-ARM as the governance
+location. <b>A2 spends mana <em>at</em> this gate rather than inventing a new one.</b></div>
+</div>
+
+<h2>The actuator pipeline — A1 → A7</h2>
+
+<div class="card"><h3><span class="n">A1</span>Resolve policy → dispatchable unit <span class="new">NEW</span></h3>
+<div class="io"><b>input</b> the WM&rsquo;s chosen policy (<code>advance-mission M-learning-loop</code>, a named open hole)</div>
+<div class="io"><b>happens</b> resolve &ldquo;advance open holes&rdquo; into a concrete <b>work-order</b> — <code>{mission, hole-id, acceptance-criterion, verify-step}</code>. The abstract loses to the specific.</div>
+<div class="io"><b>output</b> a work-order with a <b>checkable</b> acceptance bar</div>
+<div class="lin"><b>vs enact.clj:</b> today policy resolves to a cascade→wiring (<code>act-gates-with-shown</code>); there is no work-order and no acceptance bar. The escrow file is the closest existing artifact — we give it a contract.</div>
+<div class="exp"><b>FALSIFIER:</b> if the policy cannot resolve to a unit with a checkable bar, the actuator <b>refuses</b> — no vague work reaches the arm.</div></div>
+
+<div class="card"><h3><span class="n">A2</span>Consent gate = spend one mana <span class="gate">GATED</span></h3>
+<div class="io"><b>input</b> the work-order + your mana balance</div>
+<div class="io"><b>happens</b> check per-fold consent at WM-I4; decrement one mana. <b>This is &ldquo;5 mana = 5 runs to completion, no deferrals.&rdquo;</b></div>
+<div class="io"><b>output</b> an armed work-order, or a defer if balance is 0</div>
+<div class="lin"><b>vs enact.clj:</b> the gate exists (WM-I4 / <code>fr/*live-wire?*</code> is the live toggle) but consent is a boolean, not a spendable, counted token. We wire mana to the same location — no new governance surface.</div>
+<div class="exp"><b>FALSIFIER:</b> any fire without a consent token, or without decrementing mana, is a hard stop.</div></div>
+
+<div class="card" style="border-color:#3f8b57"><h3><span class="n">A3</span>Build + prove the substrate endpoints <span class="rref">R16-EXEC-REACH</span> <span style="color:#3f8b57;font-weight:700;font-size:11px">✓ CLOSED (mechanism) 2026-07-08</span></h3>
+<div class="io"><b>input</b> a reviewed fold-turn blueprint (deposit) + its authored <code>:endpoint-bindings</code></div>
+<div class="io"><b>happens</b> dispatch &ldquo;build this&rdquo; to a builder (out-of-process); the builder <b>writes the bound typed endpoints into substrate-2</b> via authed Drawbridge <code>submit-tx</code>; the executor <b>proves inhabitation</b> with <code>xtdb.api/q</code> proofs <em>derived from the bindings</em> (not from builder claims).</div>
+<div class="io"><b>output</b> a per-endpoint dial — <code>inhabited / total</code>, <code>dial-moved?</code>, <code>discharged?</code></div>
+<div class="lin"><b>vs the old A3/A4:</b> &ldquo;apply to substrate&rdquo; is now the builder&rsquo;s <code>submit-tx</code> write, <em>inside</em> A3; the executor no longer re-runs the fold engine to reproduce a diagram — it queries the store. Code: <code>futon2/aif/actuator_a3.clj</code> (<code>c9e1dbc</code> + review fixes).</div>
+<div class="exp"><b>FALSIFIER:</b> a builder that writes nothing leaves the dial unmoved; a binding whose type is absent reads &ldquo;not inhabited&rdquo; regardless of any claim. <b>Ungameable — verified: a written <code>:capability/*</code> hyperedge is matched; an absent one is not.</b></div>
+<div class="exp" style="border-left-color:#3f8b57"><b>CLOSED 2026-07-08 — the mechanism, not the live run.</b> Built + reviewed + verified end-to-end on fixtures + live substrate queries; A3 is now the <b>terminal special-case of build-match</b> (below): the boundary witness inside the full structure witness. The <b>structure witness</b> is also built + reviewed — the fold emits a <code>clean_argcheck</code>-gated CLean (<code>8bdff65</code>/<code>4ecf5eb</code>) and <b>build-match</b> checks every box&rsquo;s <code>:produces</code> against it (<code>fdbc527</code>; the discriminating case — terminal inhabited, interior missing — is caught). <b>Still open (→ A4):</b> the live builder dispatch + durable write has never fired. Proof that a real build can <em>pass through</em> A3 is the live discharge, and needs diverse candidates threaded to this point.</div></div>
+
+<div class="card"><h3><span class="n">A4</span>The write — short-term memory <span class="rref">R16</span> <span class="rref">R16-EXEC-REACH</span> <span class="new">NEXT (the missing byte)</span></h3>
+<div class="io"><b>input</b> an armed blueprint whose endpoint-bindings are known-uninhabited</div>
+<div class="io"><b>happens</b> the builder performs the <b>durable</b> substrate write — <code>submit-tx</code> the bound typed endpoints (persistent, not the evicted smoke test) — and A3 proves inhabitation. Optionally A4 records a small <b>discharge record</b> (&ldquo;mission / endpoint discharged at T&rdquo;) as the mission&rsquo;s realized short-term state.</div>
+<div class="io"><b>output</b> the endpoint <b>durably present in substrate-2</b> + proven (dial &rarr; 2/2)</div>
+<div class="lin"><b>this is exactly R16-EXEC-REACH:</b> R16 (&ldquo;close the loop&rdquo;) is live but artifact-only — the executor re-observes instead of reaching the world. A4 pays that debt: the byte lands in the store. <b>Short-term memory only</b> — the substrate remembers the change.</div>
+<div class="exp"><b>ACCEPTANCE = the live M-learning-loop discharge:</b> builder writes <code>:capability/*</code> (string entity-id endpoints, durable) &rarr; A3 proves dial <b>1/2 &rarr; 2/2</b> &rarr; the endpoint is queryable next tick. <b>The write persists. That is the whole of A4.</b> Whether the WM re-ranks on it is the long-term-memory gap below.</div></div>
+
+<div class="card"><h3><span class="n">A5</span>Measure the <em>real</em> realized outcome <span class="rref">R14</span> <span class="new">NEW leg</span> <span class="fwd">via the existing seam</span></h3>
+<div class="io"><b>input</b> pre/post substrate state</div>
+<div class="io"><b>happens</b> compute actual Δ(hole-count) / ΔF from the <em>real</em> mutation — grounded, not coverage-over-reproduction — and thread it through <code>with-realized-outcome</code>.</div>
+<div class="io"><b>output</b> a <code>:realized-outcome</code> record with a <b>variance-≠-0</b> sample for γ</div>
+<div class="lin"><b>vs enact.clj:</b> <code>:realized-G</code> is coverage-ΔG over what the executor reproduced (L26&ndash;32). We keep the anti-tautology <em>discipline</em> (don&rsquo;t launder prediction as realization) but ground the number in the world. The seam (<code>fold-realized</code>) is unchanged; the quantity fed through it is real.</div>
+<div class="exp"><b>FALSIFIER:</b> realized ≡ expected <em>exactly</em> (the tautology signature) ⇒ flag — enactment was still a mirror.</div></div>
+
+<div class="card"><h3><span class="n">A6</span>Re-observe → recommendation moves <span class="rref">R16 (observe)</span> <span class="rref">R12/R13 (move)</span> <span class="fwd">FORWARD</span></h3>
+<div class="io"><b>input</b> the mutated substrate</div>
+<div class="io"><b>happens</b> next tick re-parses; the endpoint is now queryable (<b>observe leg — R16, works once A4 lands the write</b>). Whether the <em>recommendation itself moves</em> depends on the substrate feeding the EFE ranking — which it does <b>not</b> yet (see the long-term-memory gap).</div>
+<div class="io"><b>output</b> next tick&rsquo;s observation reflects the write; ranking-shift deferred</div>
+<div class="lin"><b>the split:</b> the <em>observe</em> half is short-term (R16) — a re-parse sees the durable write. The <em>recommendation-moves</em> half needs capability-status &rarr; <code>mission-ascent-progress</code> &rarr; G, i.e. <b>R12 (accumulated learning) + R13 (policy adequacy)</b> — the long-term store. We do not block A4 on it.</div>
+<div class="exp"><b>FALSIFIER (short-term):</b> the write is not visible to a fresh Drawbridge query next tick ⇒ the write did not persist.</div></div>
+
+<div class="card"><h3><span class="n">A7</span>&ldquo;E pur si muove&rdquo; — proof-of-life gate <span class="new">NEW</span></h3>
+<div class="io"><b>input</b> the tick sequence across the spent mana</div>
+<div class="io"><b>happens</b> read the three dials at once:</div>
+<div style="margin:6px 0 8px 70px">
+<span class="dial"><b>1.</b> <code>substrate-2 endpoints provably inhabited</code> moved <span class="rref">R16</span> <span style="color:#99a">(M-learning-loop 1/2 &rarr; 2/2 — real, typed, ungameable) — <b>the short-term dial</b></span></span>
+<span class="dial"><b>2.</b> γ got a variance-≠-0 sample <span class="rref">R14</span> <span style="color:#99a">(the tautology broke)</span></span>
+<span class="dial"><b>3.</b> grounded-g still reconciles with F <span class="rref">R14</span> <span style="color:#99a">(the &ldquo;same EFE quantity&rdquo; invariant survives contact)</span></span>
+</div>
+<div class="io"><b>output</b> verdict — <b>the substrate moved for real</b></div>
+<div class="exp"><b>FALSIFIER:</b> N mana spent, no dial moved ⇒ the actuator is still a mirror, and we iterate on which card lied. <b>Any one dial moving is more information than the machine has produced in its entire history of green rows.</b></div></div>
+
+<h2>Known gaps (deferred, on purpose)</h2>
+<div class="kgap"><h3>The write feeds capability, and capability re-ranks the WM <span class="rref">R12</span> <span class="rref">R13</span> <span class="rref">R17</span> <span class="gap" style="background:#e8f0e0;color:#3f6b2a">IN DESIGN — A4a (claude-5)</span></h3>
+<div class="io"><b>the gap</b> A4 lands the durable write (short-term memory). What is <em>not</em> wired: the write flowing back so the WM&rsquo;s <b>decision</b> changes — provable endpoint discharge &rarr; capability-star <code>:status :satisfied</code> &rarr; <code>mission-ascent-progress</code> (status-aware) drops its credit &rarr; EFE re-ranks the mission. The <code>efe.clj</code> lever already exists; the star-map is just sparse.</div>
+<div class="io"><b>the design — A4a, the R17 structure-learning node</b> (with claude-5): a SLOW loop between A4 and A5 — <b>BMR concept-formation</b> over the accumulated <code>:capability/*</code> counts + a <b>candidate-slush proposer</b>. Two arrows: <b>&rarr; A5-ambiguity</b> — the BMR posterior&rsquo;s <b>STDDEV</b> (not variance — sqrt, to stay in <code>:endpoint-count</code> and honour SCALE-MATCH) over predicted-remaining <em>is</em> the open R5b epistemic leg; <b>&rarr; A1-candidate</b> — proposals re-rank the next decision (the R12/R13 loop-closure). <b>Trigger:</b> N new <code>:capability/*</code> writes (data-driven), gated to a quiet window (BMR is heavy). <b>Validates on the 31 <code>demo-provenance</code> counts</b> until the real <code>:capability/*</code> write fires — mechanism real, data demo (the session pattern).</div>
+<div class="io"><b>why deferred</b> the missing thing was a <em>write</em>, not a re-ranking. Solving the ranking now means solving the capability-star population + the <b>G-ties false-floor</b> (ranks 2+ tied at 2.09) — that is <b>R13 (policy adequacy)</b> — and the accumulation-of-capability curriculum (&ldquo;peradam-as-currency-upon-descent&rdquo;) — that is <b>R12 (dual-loop / accumulated learning; the R12-flip is claimed on the apparatus, NOT on accumulated learning)</b>. Long-term store; comes back later.</div>
+<div class="io"><b>where it reconnects</b> A6&rsquo;s <em>recommendation-moves</em> half; the capability star-map (<code>project_capability_star_map</code>); the G-ties false-floor (<code>reference_wm_g_ties_false_floor</code>).</div>
+<div class="exp" style="background:#fdf3ee;border-left-color:#a04a2a"><b>WHEN WE RETURN:</b> the acceptance is that a discharged endpoint measurably lowers its mission&rsquo;s <code>mission-ascent-progress</code> and moves the ranked-actions order — R12+R13 together.</div></div>
+
+<div class="kgap"><h3>Operational verification as a standing register <span class="rref">R9</span> <span class="rref">R18</span> <span class="gap">SEED ONLY</span></h3>
+<div class="io"><b>what exists</b> build-match / <code>a3-live-tests</code> / <code>code-build-match</code> are re-runnable <b>operational</b> verifications — &ldquo;does the LIVE build match the spec, right now?&rdquo; A distinct KIND from formal proof: a <em>revisable live reading</em> (autoclock-in 2/3 flips to 3/3 the moment agents become typed <code>:person</code>), not a timeless theorem. Joe (2026-07-08): a verification the system <em>incorporates</em>, not proves once.</div>
+<div class="io"><b>the gap</b> these are ad-hoc dashboards, not a <b>standing register</b> the system tracks over time — the analogue of the sorry-registry for proof-holes. A drift (autoclock-in slipping; M-learning-loop 1/2 → 2/2 when the discharge fires) should be a <em>watched, recorded</em> event, not an ad-hoc query.</div>
+<div class="io"><b>where it reconnects</b> R9 (named validation properties, extended to a standing apparatus) + R18 (faithfulness — the <b>faithfulness-gap</b> is exactly where an operational verification demands a formal marker that isn&rsquo;t there; operational and formal are complementary, meeting there).</div>
+<div class="exp" style="background:#fdf3ee;border-left-color:#a04a2a"><b>WHEN WE RETURN:</b> an operational-verification register alongside the proof-hole register — the two honesty apparatuses, one for &ldquo;not proved,&rdquo; one for &ldquo;doesn&rsquo;t match, live.&rdquo;</div></div>
+
+<h2>Status of the loop — 2026-07-08</h2>
+<div class="card">
+<div class="io"><b>2026-07-06</b> deliberation cron (<code>-M:wm-scheduled</code>, hourly) <b>DISABLED</b> — cached no-op runs suffice; re-enable when the loop does real work.</div>
+<div class="io"><b>BUILT + reviewed</b> selection→authoring coupling (<code>085aee6</code>, so a stuck mission pulls its own blueprint); a <b>4-blueprint generality corpus</b> (forward-model-selected, operator-armed: learning-loop / chipwitz-corps / futonzero-generative / pattern-mining); <b>A3 provable-witness</b> executor (<code>c9e1dbc</code> + fixes <code>08391af</code>/<code>6f9312d</code>/<code>8b61295</code>/<code>4d1c3de</code>) — reviewed, ungameable, verified end-to-end. Review caught 5 real bugs the bellbacks reported as done.</div>
+<div class="io"><b>access facts</b> write via authed Drawbridge <code>submit-tx</code> + prove via <code>q</code>, same node :6768, needs <code>x-admin-token</code> (<code>futon3c/.admintoken</code>); <code>:7071</code> HTTP read is blind (futon1a#6) — use Drawbridge. Hyperedge proof matches <b>string</b> entity-id <code>:hx/endpoints</code>, not the map form.</div>
+<div class="io"><b>current dial</b> M-learning-loop = <b>1/2</b> (<code>:capability</code> inhabited = 31; <code>:capability/*</code> not yet declared).</div>
+<div class="io"><b>A3 CLOSED (mechanism) 2026-07-08</b> — boundary witness built/reviewed/verified, now the terminal case of <b>build-match</b> (structure witness, <code>fdbc527</code>) gated by the fold-emitted CLean (<code>8bdff65</code>/<code>4ecf5eb</code>). 11 mission-grain CLeans exist, all pass <code>clean_argcheck</code>.</div>
+<div class="io"><b>A3 sweep DONE</b> — 6 missions bound + build-matched (zai-10 spec-derived, claude-4 reviewed), mapping build-match&rsquo;s applicability: <b>discriminating</b> (autoclock-in 2/3, pattern-ingest 2/4 — specific typed edges catch real drift) · <b>coarse</b> (state-snapshot 3/3, invariant-queue 2/2 — generic <code>:evidence</code> passes trivially → instance-predicate build-match v2) · <b>domain-mismatch</b> (single-entry-point 0/0 — process-level, no substrate). Durable <code>a3-live-tests</code> suite (<code>6ceadc4</code>) re-runs it all.</div>
+<div class="io"><b>A4 DONE 2026-07-08</b> — three durable <code>:discharge</code> records written (ReconstitutableLineage, SnapshotEvidence, CapabilityVocabulary), drifts honestly excluded. First real durable output — the loop&rsquo;s write leg persists.</div>
+<div class="io"><b>A5 DONE</b> — realized outcome grounded in the substrate dial (<code>723cacf</code>) + <b>two-sided expected leg</b> (<code>a3cbc56</code>, the fold&rsquo;s coverage forecast as <code>:expected-G</code>). γ now moves BOTH ways on grounded data: the 5-sample set gives γ <b>0.912</b> with autoclock-in a genuine <em>commit</em> (build beat its forecast) — not the one-sided 0.66. R5a risk leg grounded both ways.</div>
+<div class="io"><b>A6 + A7 DONE 2026-07-08 — THE LOOP CLOSES</b> (<code>4da9346</code>, <code>actuator_a6</code>). Discharge → <code>:capability-star-status</code> flip → status-aware ascent drops the mission&rsquo;s credit → EFE re-ranks → <b>the queue re-orders</b> (verified live: M-a ascent 0.5→0.0, order [M-a M-b]→[M-b M-a]). The <b>A7 falsifier</b> IS the E-pur-si-muove gate: a discharge that does NOT move the recommendation FAILS. Built against the locked capability-star contract with claude-5; stays off the live enact path.</div>
+<div class="io" style="background:#e6faf4;padding:6px 8px;border-radius:6px"><b>PIPELINE COMPLETE (mechanism):</b> A3 prove · A4 write · A5 grounded→γ · A6 re-rank · A7 falsifier — all built + reviewed, proven on fixtures. <b>The tautology is dead in a runnable form.</b></div>
+<div class="io"><b>Frontier (makes it REAL):</b> (1) arm <code>*live-wire?*</code> — turn the mechanism into a running loop (joint/operator decision); (2) real data — claude-5&rsquo;s <b>A4a/R17</b> mints real stars + the R5b ambiguity leg (in-flight, I review); (3) a real discharge — real mission work moves a real dial (a builder flight). <b>Deferred:</b> R9+R18 operational-verification register; build-match v2 (instance predicates for the coarse regime).</div>
+<div class="io"><b>arming</b> mana gates <em>autonomous</em> runs only; operator-directed engineering handoffs are operator-armed (no mana-spend). The live discharge is operator-gated.</div>
+</div>
+
+<div class="foot">
+futon2/holes/aif-wiring-actuator.html · drafted 2026-07-06, updated 2026-07-07 (provable-witness pivot, A3 built) by claude-4 with Joe ·
+positions against futon2/src/futon2/aif/enact.clj (R16, artifact-only, live 2026-07-02) ·
+A3 = futon2/src/futon2/aif/actuator_a3.clj · series: aif-wiring-explainer ↗ · flight-pipeline-cards-iv ↗
+</div>

@@ -1,0 +1,112 @@
+;; state-snapshot-witness-sorry-EMPIRICAL.edn — the GROUND-TRUTH interface for
+;; M-state-snapshot-witness, recovered POST-HOC from mission doc + code + git + XTDB
+;; (A-next method, Joe 2026-07-01). #9/10 in the A-next gold corpus (M-fold-ansatz phase-2 ground truth).
+;; The SIBLING of invariant-queue-unstuck: per-cycle full-state projection that
+;; REUSES that mission's single evidence boundary + the family-canary. Pairs with
+;; the A-small wiring futon6/holes/clean/state-snapshot-witness.clean.edn → completes
+;; a full (cascade, sorry, wiring) TRIPLE.
+;;
+;; Sources (all inspected this session, not remembered):
+;;   git: 1bf1f81 (full 1bf1f81a59ab0d43217e73caa9666a7b25a396c4, 2026-05-03) — the SINGLE
+;;     commit that built the whole thing: src/futon3c/logic/snapshot.clj (352 lines),
+;;     test/futon3c/logic/snapshot_test.clj (195 lines), holes/missions/M-state-snapshot-witness.md,
+;;     and the 4 state-snapshot-witness/* families in docs/structural-law-inventory.sexp.
+;;     No repair commit follows — a genuine LINEAR build (git log -- snapshot.clj = 1 commit).
+;;     d2bc483 later touched dev/…/bootstrap.clj (webarxana embed), not the snapshot logic.
+;;   code (public surface): futon3c/src/futon3c/logic/snapshot.clj
+;;     (project-inventory L60-87 · emit-snapshot! L222-236 · snapshot-inventory! L238-255 ·
+;;      snapshot-inventory-on-load! L289-312) · futon3c/src/futon3c/evidence/boundary.clj (append!) ·
+;;     futon3c/src/futon3c/logic/probe.clj (family-canary :family-fired) ·
+;;     futon3c/src/futon3c/logic/tracer.clj (emit-tracer-closed! L101) ·
+;;     dev/futon3c/dev/bootstrap.clj (snapshot-inventory-on-load! wired L407-425, after archaeology/locus block).
+;;   inventory: docs/structural-law-inventory.sexp L186-215 — state-snapshot-witness/inventory
+;;     at :status operational-when-enabled :scope :stack (+ registry/repo-refs/hud-render siblings).
+;;   XTDB: futon1a store on :7071 responding (root 404 = up); the code path writes :event
+;;     :inventory-snapshot through the boundary, but the durable entry was NOT independently
+;;     query-confirmed this session (no evidence-query API call run) → see :unverified below.
+;;
+;; TWO honest corrections vs the wiring/stub (the reason we recover the sorry INDEPENDENTLY):
+;;   (1) snapshot-inventory-now! DOES NOT EXIST in the code. Operator-on-demand is
+;;       snapshot-inventory! itself; boot path is snapshot-inventory-on-load!. The stub/prompt
+;;       name is a fabrication — corrected here.
+;;   (2) The tracer closure (completion criterion 5) is NOT discharged in committed code. The
+;;       MECHANISM (emit-tracer-closed!) exists + is test-exercised, but NO committed call closes
+;;       track-4-2-snapshot-as-evidence; it survives only as an :open item in the unhooked
+;;       prototype dataset (tracer_test L123). So the wiring's s5 :discharges :tracer-track-4-2-closed
+;;       and criterion 6 (HUD STUCK→MOVING) are optative, not realized — flagged :unverified.
+
+{:id :sorry/state-snapshot-per-cycle-projection
+ :hx-type "code/v05/sorry"
+ :state :empirical                         ; recovered from ground truth, not proposed
+ :derivation :post-hoc-reconstruction
+
+ :want-signature "snapshot-inventory! : (structural-law-inventory, evidence-store) -> queryable-snapshot-evidence"
+ :hungry-for "queryable-snapshot-evidence"  ; exactly one well-shaped per-boot full-state projection entry,
+                                            ; reachable-from-boot, routed through the single boundary, composing
+                                            ; with the family-canary's per-family deltas to reconstruct full history
+
+ ;; ENDPOINTS — real code / substrate-2 entities. :in-map from source + git + inventory inspection.
+ :endpoints
+ [{:role :have :ref "docs/structural-law-inventory.sexp — state-snapshot-witness/inventory (L191-197, :status operational-when-enabled, :scope :stack) + families it projects"
+   :type "inventory file + entry" :in-map true
+   :note "the state projected each cycle; also the mission's registered inventory entry (completion criterion 1)"}
+  {:role :have :ref "futon3c.evidence.boundary/append! (the single evidence-write boundary)"
+   :type "code/v05/namespace" :in-map true
+   :note "the sole emit path, INHERITED from the invariant-queue-unstuck sibling; emit-snapshot! (snapshot.clj L222-236) routes through it"}
+  {:role :have :ref "futon3c.logic.snapshot/project-inventory (L60-87) + snapshot-inventory! (L238-255)"
+   :type "code/v05/namespace" :in-map true
+   :note "the projection (families→flat records, tolerant: catch Throwable → nil) + the emit fn; on read-failure returns {:ok false :error/code :inventory-unreadable}, never throws"}
+  {:role :have :ref "dev/futon3c/dev/bootstrap.clj — snapshot-inventory-on-load! wired L407-425 (after the archaeology/locus block)"
+   :type "code/v05/namespace (dev boot path)" :in-map true
+   :note "the reachable-from-boot construction path; wrapped in try, boot continues on failure and records it as evidence"}
+  {:role :have :ref "futon3c.logic.probe (the family-canary: :family-fired per-family deltas)"
+   :type "code/v05/namespace" :in-map true
+   :note "the composition partner: canary = per-family deltas, this = per-boot full state ⇒ full reconstructible history"}
+  {:role :have :ref "futon3c.logic.tracer/emit-tracer-closed! (L101) + track-4-2-snapshot-as-evidence"
+   :type "tracer namespace + track-id" :in-map true
+   :note "the tracer the mission set out to CLOSE (criterion 5); the mechanism exists but NO committed call closes this track — see typed-hole :tracer-track-4-2-closure below"}
+  {:role :want :ref "reconstructable-history — exactly one :event :inventory-snapshot evidence entry per JVM boot through the boundary (empty/unreadable-input handled, no throw on a clean stack), tagged [:invariant-queue :state-snapshot :inventory], composing with canary deltas to reconstruct full state history"
+   :type "queryable-snapshot-evidence value" :in-map false
+   :note "the codomain the whole construction produces; the queryable projection the HUD and time-travel queries read"}]
+
+ ;; The load-bearing typed holes the construction had to discharge (the HARD parts):
+ :typed-holes
+ [{:at :shape-first-separate-event
+   :wanted "a SEPARATE :event :inventory-snapshot subtype, NOT an extension of :family-fired — conflating per-event deltas with cycle-boundary state muddies downstream consumers (HUD, time-travel, inventory diff), and per-event snapshots would be wasteful"
+   :discharged-by "mission IDENTIFY decision (M-state-snapshot-witness §1) + 1bf1f81 (emit-snapshot! emits :event :inventory-snapshot as a distinct subtype); a design decision fixed BEFORE code, hence no repair"}
+  {:at :one-well-shaped-entry-per-cycle
+   :wanted "exactly one well-shaped :event :inventory-snapshot entry emits per boot through the boundary — no throw on a clean stack; an unreadable/empty inventory degrades to {:ok false :error/code :inventory-unreadable} rather than crashing boot"
+   :discharged-by "1bf1f81 (snapshot-inventory! + project-inventory's catch-Throwable→nil); tested in snapshot_test.clj — project-inventory-real-stack-yields-records (real-stack-pass, ≥10 records), project-inventory-nonexistent-path-is-nil (tolerant read-failure = the 'empty-input' case), snapshot-emits-queryable-evidence-for-all-siblings (emit-shape asserts :event :inventory-snapshot)"}
+  {:at :reachable-from-boot
+   :wanted "snapshot creation is on the bootstrap construction path (not an operator afterthought), so the snapshot evidence is the structural witness that boot-time construction actually worked"
+   :discharged-by "1bf1f81 wiring in dev/futon3c/dev/bootstrap.clj L407-425 (snapshot-inventory-on-load! after the archaeology/locus block, try-guarded so boot survives); snapshot-on-load-wrappers-return-receipts test confirms the wrapper contract"}
+  {:at :tracer-track-4-2-closure
+   :wanted "the pipeline-tracer track-4-2-snapshot-as-evidence CLOSES via emit-tracer-closed! (completion criterion 5), flipping the HUD STUCK→MOVING (criterion 6)"
+   :discharged-by :unverified
+   :note "MECHANISM exists (tracer/emit-tracer-closed! L101, exercised in tracer_test + archaeology_test) but grep finds NO committed call closing track-4-2-snapshot-as-evidence; the track survives only as an :open item in the unhooked prototype dataset (tracer_test L123). Criterion-5 closure and criterion-6 HUD-MOVING are optative, not realized in committed code."}]
+
+ :kind {:predecessor-shape :per-event-deltas-only            ; :family-fired / :family-demoted deltas existed; no cycle-boundary state
+        :whats-new         :per-cycle-full-state-projection
+        :target-territory  :known                            ; the shape-first decision was fixed in IDENTIFY, no mid-build surprise
+        :fill-mechanism    :new-event-subtype+boot-wire+project-inventory+emit-through-boundary
+        :build-macro       :linear-build-then-discharge       ; ONE commit (1bf1f81), no repair — matches the wiring
+        :inherits          "single evidence boundary + family-canary from invariant-queue-unstuck (the sibling)"}
+
+ :title "per-cycle full-state projection as one queryable evidence entry (clean linear build; the inventory sibling of invariant-queue-unstuck)"
+ :provenance {:mission "futon3c-d/mission/state-snapshot-witness"
+              :mission-doc "futon3c/holes/missions/M-state-snapshot-witness.md"
+              :campaign "C-cascade-real"
+              :method "post-hoc empirical (doc + code + git + XTDB), A-next, 2026-07-01"
+              :sealed-by "claude (this session)"
+              :built-by-commit "1bf1f81 (single linear commit, 2026-05-03) — snapshot.clj + snapshot_test.clj + mission doc + inventory entry"
+              :cascade [:invariant-coherence/reachable-from-boot]
+              :sibling "invariant-queue-unstuck (shares the single evidence boundary + the family-canary)"
+              :pairs-with-wiring "futon6/holes/clean/state-snapshot-witness.clean.edn"
+              :acceptance-terminals=endpoints
+              "wiring s1 :produces :snapshot-event-shape (the separate :event :inventory-snapshot over the inventory = sorry :have) MATCHES; wiring s4 :produces :snapshot-evidence (one witnessed entry through the boundary = sorry :want core) MATCHES. BUT wiring s5 :discharges :tracer-track-4-2-closed is EMPIRICALLY UNVERIFIED — no committed emit-tracer-closed! call closes track-4-2 (see typed-hole :tracer-track-4-2-closure); the wiring is optimistic there, the empirical sorry is not."
+              :unverified [{:item :snapshot-inventory-now!
+                            :finding "does not exist in code; operator-on-demand is snapshot-inventory! (boot path snapshot-inventory-on-load!). Stub/prompt name corrected."}
+                           {:item :tracer-track-4-2-closure
+                            :finding "criterion 5 (tracer closes) + criterion 6 (HUD STUCK→MOVING) not discharged by any committed call; mechanism exists but is uninvoked for this track."}
+                           {:item :xtdb-durable-entry
+                            :finding "futon1a :7071 reachable but the durable :inventory-snapshot evidence entry was not independently query-confirmed this session; code write-path is grounded."}]}}

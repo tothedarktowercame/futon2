@@ -1,0 +1,112 @@
+;; a-sorry-enterprise-sorry-EMPIRICAL.edn — the GROUND-TRUTH interface for M-a-sorry-enterprise,
+;; recovered POST-HOC from the mission doc + code + git + evidence store (A-next method, Joe 2026-07-01).
+;; #3/10 in the A-next gold corpus (M-fold-ansatz phase-2 ground truth).
+;; Pairs with futon6/holes/clean/a-sorry-enterprise.clean.edn → completes a (cascade, sorry, wiring) TRIPLE.
+;;
+;; HONEST FRAMING (this is what the sources actually show): this is a DESIGN/RESEARCH mission, status
+;; IDENTIFY. The Active-Inference closure loop (sorrys=prediction-errors · pattern-activation=action ·
+;; Beta-binomial posterior=action-model · HUD=loop-close) is SPECIFIED end-to-end, but only its bootstrap
+;; DATA + one adjacent mechanical lift are built. The sorry-proximity scorer and the per-sorry closure
+;; posterior are NOT built (grep for affinity/proximity scoring code returns zero). Several holes below are
+;; therefore honestly :open / :discharged-by :unverified — NOT fabricated as closed.
+;;
+;; Sources (all inspected this session, not remembered):
+;;   git commits:
+;;     futon5a 497f461 (Checkpoint — partial lift of sorry-mining into the REPL LOOP turn; mission stays IDENTIFY) ·
+;;     futon5a HEAD da26ee1 (working tree; data/*.edn are UNTRACKED live working files — no commit sha to cite) ·
+;;     futon3c eb76eba (auto-mine LOOP learning from WM gap-signals = loop_learning.clj introduced) ·
+;;       bd3a2a9 (E-cheesemonger: rate candidates, gate promotion — the anti-backdoor promotion gate) ·
+;;       403eb55 (derive-pattern-activations: per-turn :context-retrieval activation aggregation, by collection) ·
+;;     futon0 bc9b39e (Stack-HUD refactor: pattern-activation report — joe_hud scan-operator/render) ·
+;;       acc0802 (Joe HUD introduced) · 71a75d8 (recording_model.clj — the Click-1 Beta-binomial template)
+;;   code (public surface):
+;;     futon5a/data/alignment.edn :sorry-topology (8 typed holes; SORRY-market-interface :critical :absent,
+;;       SORRY-policy-transition :critical :in-progress) — UNTRACKED live data ·
+;;     futon5a/data/stack-logic-model.edn edge :sorry-pattern-affinity (:type :click-candidate :status :designed;
+;;       :affinity-sets = bootstrap-patterns per sorry; :posterior :beta-binomial declared) — UNTRACKED live data ·
+;;     futon3c/src/futon3c/transport/http.clj derive-pattern-activations (walks :context-retrieval evidence,
+;;       groups activations BY COLLECTION — not yet by sorry-affinity) ·
+;;     futon3c/src/futon3c/aif/loop_learning.clj (auto-miner: mines candidate sorries from WM judgement
+;;       gap-signals — a DIFFERENT, adjacent source from the affinity/transcript model; candidates only, no posterior) ·
+;;     futon0/scripts/futon0/report/joe_hud.clj scan-operator + render (surfaces :sorry-topology + raw feeding
+;;       signals: commit ratios, topic counts, cargo file-existence — NOT proximity scores or posteriors) ·
+;;     futon0/analysis/notebooks/recording_model.clj (posterior / credible-interval / run-click-1 — real
+;;       Beta-binomial code, but bound to CLICK 1 = evening-commit→morning-recording, NOT sorry-closure)
+;;   doc: futon5a/holes/missions/M-a-sorry-enterprise.md (IDENTIFY; §"live tests" 1-3; completion criteria 1-5)
+;;   filesystem cargo check: ~/vsat.wiki/ukrn-demo/UKRN_WP_draft_v2.md EXISTS ; ~/vsat.wiki/prospectus.md ABSENT
+;;     (the mission's own cargo-signal is still live — Test-2 sorry is still open at recovery time).
+;;   NOTE ON A DISCREPANCY (kept honest, not smoothed): the mission-doc Test-1 affinity list
+;;     (pacspine/channel-upgrade, f0/p7, or/peripheral-to-core-pathways) DIFFERS from the actual data artifact
+;;     stack-logic-model.edn :SORRY-market-interface (pacspine/channel-upgrade, f1/p12, t4r/supplement).
+;;     The .edn is the machine-read source (joe_hud reads it); the doc list is prose. Both cited; the .edn is
+;;     the acceptance ground truth for s1's affinity sets.
+
+{:id :sorry/a-sorry-enterprise-closure-posteriors
+ :hx-type "code/v05/sorry"
+ :state :empirical                        ; recovered from ground truth, not proposed
+ :derivation :post-hoc-reconstruction
+
+ :want-signature "sorry-proximity : (live-test-sorries, per-turn-retrieval-certificates) -> surfaced-closure-posteriors"
+ :hungry-for "surfaced-closure-posteriors"   ; per-sorry Beta-binomial P(closure progress | patterns activated),
+                                             ; updated from activation trajectories, surfaced live in the joe-hud so
+                                             ; the operator inhabits the signal rather than re-deriving it. AIF loop:
+                                             ; sorrys=prediction-errors, activation=error-reducing action, posterior=
+                                             ; learned action-model, HUD surface=loop-close back to the operator.
+
+ ;; ENDPOINTS — real substrate / code entities. :in-map = does the entity exist in the ground truth today.
+ :endpoints
+ [{:role :have :ref "futon5a/data/alignment.edn :sorry-topology — the live-test sorries (SORRY-market-interface :critical :absent; SORRY-policy-transition :critical :in-progress; prospectus = missing-artifact sub-sorry of market-interface, closes-by 'Bristol + prospectus + the sentence')"
+   :type "sorry topology (EDN data)" :in-map true
+   :note "REAL and read by the HUD (joe_hud scan-operator). UNTRACKED live working file — no commit sha. These are the s1 targets = the prediction-errors of the AIF loop."}
+  {:role :have :ref "futon5a/data/stack-logic-model.edn edge :sorry-pattern-affinity — per-sorry :affinity-sets (bootstrap-patterns + embedding query), :type :click-candidate :status :designed, :posterior :beta-binomial declared"
+   :type "affinity-set spec (EDN data)" :in-map true
+   :note "DESIGN-ONLY: bootstrap patterns from sorry descriptions, NOT trained on closure events; :status :designed. This is the DATA for s1/s3, not the scorer. Discrepancy with mission-doc Test-1 list noted in header — the .edn governs."}
+  {:role :have :ref "the per-turn context-retrieval certificate — evidence entries tagged :context-retrieval whose :evidence/body :results carry the top-k retrieved patterns (id = collection/pattern); aggregated by futon3c http/derive-pattern-activations (403eb55)"
+   :type "retrieval certificate + activation aggregator" :in-map true
+   :note "REAL per-turn activation signal. BUT derive-pattern-activations groups BY COLLECTION, not by sorry-affinity overlap — the semantic-content signal exists, the sorry-scoped scoring does not yet consume it."}
+  {:role :have :ref "futon0/analysis/notebooks/recording_model.clj — posterior / credible-interval / run-click-1 (the Beta-binomial 'Click' template)"
+   :type "Bayesian model (Clojure)" :in-map true
+   :note "REAL Beta-binomial code, but bound to CLICK 1 (evening-commit → morning-recording). The per-sorry P(closure | activation) application is a template-reuse that is NOT yet instantiated."}
+  {:role :have :ref "futon0/scripts/futon0/report/joe_hud.clj scan-operator + render (bc9b39e) — the joe-hud Operator panel; renders :sorry-topology + feeding signals (commit ratios per workstream, evidence topic counts, cargo file-existence: prospectus.md absent / WP present)"
+   :type "HUD/notification surface" :in-map true
+   :note "The inhabitation surface EXISTS and surfaces the RAW signals that would feed proximity — but it does NOT render a sorry-proximity score or a closure posterior. The loop-close render (s5) is unbuilt on top of a built panel."}
+  {:role :have :ref "futon3c/src/futon3c/aif/loop_learning.clj (eb76eba) + E-cheesemonger promotion gate (bd3a2a9) — the one LANDED lift (checkpoint 497f461): auto-mines candidate sorries from WM judgement gap-signals"
+   :type "code/v05/namespace" :in-map true
+   :note "ADJACENT, not the affinity model: mines from WM missing-head/channel-gap priorities, NOT from transcript activation trajectories. Candidates only (advisory, not persisted, no posterior). The mission checkpoint explicitly calls this the FLOOR the real interactive pass back-fits to."}
+  {:role :want :ref "evaluated-closure-model — increasing affinity-pattern activation actually predicted a real sorry's closure trajectory, with ONE sorry (Bristol / Test 1, SORRY-market-interface) closing on its recorded evidence trajectory; the warrant to scale to every JSDQ engagement"
+   :type "evaluated-closure-model value" :in-map false
+   :note "GENUINELY OPEN. Mission completion criteria 3-5 (≥5-session data, post-Bristol evaluation, ≥1 recorded closure) are unmet at recovery: no proximity scorer, no per-sorry posterior, no evaluation record; mission still IDENTIFY. Bristol was 2026-05-12; no closure-trajectory artifact found."}]
+
+ ;; The load-bearing typed holes the construction must discharge. Honest :discharged-by:
+ ;; real sha/mechanism where built; :open / :unverified where the sources show it is not.
+ :typed-holes
+ [{:at :inline-zero-latency-activation
+   :wanted "affinity scoring runs in the per-turn pipeline WITHOUT adding latency — the retrieved-vs-affinity overlap is computable inline from the :context-retrieval certificate the turn already produces (no new life-logging)"
+   :discharged-by "PARTIAL: the certificate + per-turn activation aggregation are real (futon3c derive-pattern-activations, 403eb55; reuses existing :context-retrieval evidence — zero new instrumentation). But the retrieved-vs-affinity OVERLAP is computed by-collection, not by-sorry — the inline sorry-scoped scorer itself is :open."}
+  {:at :discriminating-proximity
+   :wanted "proximity discriminates: turns that genuinely activate a sorry's affinity patterns score high, pure-stack turns flatten — the model detects the trend before the operator notices it"
+   :discharged-by :unverified
+   :note ":open — no sorry-proximity scoring code exists (grep across futon5a/futon3c/futon0 src returns zero). Only the affinity-set DATA (stack-logic-model.edn :status :designed) is present. Discrimination is a design claim, not a measured result."}
+  {:at :coherent-closure-posterior
+   :wanted "the posterior over each sorry's closure updates coherently from activation trajectories, starting from embedding-based priors and moving on observed closure events (Beta-binomial, ≥5 sessions; sorries=prediction errors)"
+   :discharged-by "PARTIAL: the Beta-binomial 'Click' template is real (futon0 recording_model.clj, 71a75d8: posterior/credible-interval), and the auto-miner (loop_learning.clj eb76eba + E-cheesemonger gate bd3a2a9) is the landed candidate-mining floor. But the per-sorry closure posterior is NOT instantiated (recording_model is bound to Click 1; the auto-miner emits candidates with no posterior). The coherent per-sorry model is :open — gated on real closure events."}
+  {:at :surfaced-legibly
+   :wanted "sorry-proximity is live in HUD and/or notification each turn, legible enough that the operator acts on the trajectory rather than re-deriving it"
+   :discharged-by "PARTIAL: the joe-hud Operator panel is real (futon0 joe_hud.clj, bc9b39e) and surfaces :sorry-topology + the raw feeding signals (commit ratios, topic counts, cargo file-existence). But it renders NO proximity score and NO posterior — the specific sorry-proximity surface is :open on top of a built panel."}]
+
+ :kind {:predecessor-shape :sorries-as-static-registry+scattered-repeat-signals
+        :whats-new         :activation-driven-closure-posteriors-surfaced-in-hud
+        :target-territory  :partly-open        ; loop SPECIFIED end-to-end; only bootstrap data + adjacent
+                                               ; auto-miner built; scorer + posterior + proximity-surface + the
+                                               ; live-test evaluation are genuinely open (mission IDENTIFY)
+        :fill-mechanism    :affinity-sets+per-turn-overlap+beta-binomial+hud-surface}
+
+ :title "sorry-driven organisation: pattern activation as work signal, Bayesian closure posteriors (active-inference-closure-loop)"
+ :provenance {:mission "futon5a-d/mission/a-sorry-enterprise"   ; doc: futon5a/holes/missions/M-a-sorry-enterprise.md
+              :campaign "C-cascade-real"
+              :method "post-hoc empirical (doc + code + git + evidence store + filesystem cargo check), A-next, Joe 2026-07-01"
+              :sealed-by "claude (this session)"
+              :cascade [:peripherals/surface-earns-inhabitation]   ; preserved from stub (the load-bearing APPLIED pattern)
+              :pairs-with-wiring "futon6/holes/clean/a-sorry-enterprise.clean.edn"
+              :acceptance-terminals=endpoints
+              "wiring s1 :produces :sorry-affinity-sets (from live-test sorries + affinity spec = sorry :have alignment.edn + stack-logic-model.edn); wiring s6 :discharges :live-test-1-closure-evaluation (= sorry :want evaluated-closure-model). MATCH — and BOTH the wiring's honest-notes and this sorry's :want agree the final discharge is genuinely OPEN (Bristol/Test-1 is the first closure event, unrecorded at recovery)."}}

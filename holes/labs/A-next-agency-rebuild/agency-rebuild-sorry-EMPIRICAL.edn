@@ -1,0 +1,100 @@
+;; agency-rebuild-sorry-EMPIRICAL.edn — the GROUND-TRUTH interface for M-agency-rebuild,
+;; recovered POST-HOC from the mission doc + code + git before/after (A-next method, 2026-07-01).
+;; #4/10 in the A-next gold corpus (M-fold-ansatz phase-2 ground truth).
+;; Pairs with the A-small wiring futon6/holes/clean/agency-rebuild.clean.edn
+;; → this completes a full (cascade, sorry, wiring) TRIPLE. The sorry is recovered
+;; INDEPENDENTLY of the wiring (from doc + code + git), so terminals=endpoints is a real cross-check.
+;;
+;; Sources (all inspected this session, not remembered — repo = futon3, NOT futon3c):
+;;   git commits (verified `git -C futon3 show <sha> --oneline -s`; real subjects captured):
+;;     5f85287 "Phase 2: A0 — explicit delivery receipts for bells/whistles" (http.clj +61/-29) ·
+;;     c5b5929 "Phase 2: A1 — enforce single routing authority across stores" (http.clj +60) ·
+;;     804fe8f "Phase 2: A2 — atomic state (no silent corruption, atomic writes, non-nil continuity)" (service.clj +30/-10) ·
+;;     3f0aa3a "Phase 2: A3 — loud failure status checks + eliminate catch _ nil" (codex_mirror.clj+http.clj+service.clj +56/-40) ·
+;;     5dcb28b "Phase 2: A5 — bounded lifecycle (acks bound, TTL enforced, disconnect cascades)" (http.clj +66/-8).
+;;   code (public surface, all in futon3): src/futon3/agency/http.clj (six state atoms + send-to-agent! +
+;;     handle-whistle/handle-ring-bell/handle-ack + the A1 add-watch machinery) · service.clj (!state/!config,
+;;     run-peripheral!, ensure-agent-state!, atomic EDN state writes) · codex_mirror.clj (A3 catch cleanup) ·
+;;     registry.clj (agent-registry atom, register-agent!/get-agent/agent-registered?/unregister-agent!).
+;;   tests: test/futon3/agency/invariants/{a0_delivery,a1_identity,a2_atomicity,a3_loud_failure,a5_bounded,soak}_test.clj
+;;     + util.clj (resets the six atoms by name) + test/futon3/agency/integration_test.clj.
+;;   XTDB: NOT used — Agency state is in-process atoms + on-disk EDN state files (service.clj spit temp+rename),
+;;     never the futon1a XTDB store. Confirmed by inspecting the persistence path in 804fe8f. (code-only mission)
+;;   doc: futon3/holes/missions/M-agency-rebuild.md (want: A0-A5 explicit·testable·enforced; Phase 0 inventories
+;;     the six atoms + the page-vs-whistle wire mismatch; Phase 1 = 134 tests / 18 failures + 1 error RED suite;
+;;     header notes the invariants were later re-ported into futon3c registry, but THIS rebuild + all cited shas
+;;     + the proof suite live in futon3).
+
+{:id :sorry/agency-rebuild-single-routing
+ :hx-type "code/v05/sorry"
+ :state :empirical                        ; recovered from ground truth, not proposed
+ :derivation :post-hoc-reconstruction
+
+ :want-signature "rebuild-agency : (multi-store-routing, six-state-atoms, red-invariant-suite) -> A0..A5-green-agency"
+ :hungry-for "A0..A5-green-agency"        ; the codomain: single authoritative route per agent-id (A1) ·
+                                          ; all-or-nothing atomic state, continuity id never nil (A2) ·
+                                          ; explicit delivery receipts, never a bare boolean (A0) ·
+                                          ; loud failure attributed to layer+agent-id+cause, no catch-and-swallow (A3) ·
+                                          ; bounded lifecycle, deterministic cleanup, disconnect cascade (A5) ·
+                                          ; diagnosable from logs alone (A4) — the whole A0-A5 proof suite green
+
+ ;; ENDPOINTS — real futon3 code entities. :in-map from source + git + test inspection.
+ :endpoints
+ [{:role :have :ref "the Agency transport boundary in futon3.agency.http: HTTP run/rollover/whistle/bell/ack/secret/rendezvous handlers + WS message types (bell/whistle/whistle-response) + Drawbridge paths"
+   :type "transport surface" :in-map true
+   :note "page-vs-whistle wire-protocol mismatch — Phase 0 decided whistle canonical, /agency/page kept as receive-side alias"}
+  {:role :have :ref "six state atoms in futon3.agency.http: secrets · acks · rendezvous-state · connected-agents · local-handlers · pending-whistles (all defonce ^:private (atom {}))"
+   :type "code state atoms" :in-map true
+   :note "the A5 hole surface: acks unbounded, secrets on async-future TTL, disconnect doesn't cascade to pending-whistles"}
+  {:role :have :ref "the A1 split-brain: one agent-id simultaneously in registry (futon3.agency.registry/agent-registry) + local-handlers + connected-agents; connected-agent-ids concat/distincts across stores"
+   :type "routing defect" :in-map true
+   :note "no unique addressee to receipt against — the core tension; proven RED by a1_identity_test no-dual-authority-for-same-agent-id"}
+  {:role :have :ref "futon3.agency.http/send-to-agent! (pre-repair: returns boolean true/false via catch->false)"
+   :type "code/v05/fn" :in-map true :note "the A0 hole: best-effort boolean send, no receipt, whistle failure omits :agent-id"}
+  {:role :have :ref "futon3.agency.service state persistence: !state/!config atoms + ensure-agent-state! writing agent EDN capsules to :state-dir"
+   :type "code/v05/namespace" :in-map true
+   :note "the A2 hole: corruption swallowed to nil on read, :agent/current-thread-id settable to nil, spit not atomic (no temp+rename)"}
+  {:role :have :ref "A0-A5 proof-test suite test/futon3/agency/invariants/{a0..a5,soak}_test.clj + util.clj + integration_test.clj — Phase 1 RED: 134 tests, 18 failures + 1 error"
+   :type "test-invariants" :in-map true
+   :note "the gaps named as failing tests, not prose; the acceptance oracle for :want"}
+  {:role :have :ref "contrib/fubar-agency.el + src/futon3/drawbridge/core.clj (agent boundary: reconnect-with-backoff, Drawbridge single-registration)"
+   :type "elisp + clj agent surface" :in-map false
+   :note "Phase 3 pre-validation fixes so agents correctly participate in the A0/A1 contracts; HIGH finding = no WS reconnect"}
+  {:role :want :ref "validated-agency: resolve(agent-id) yields exactly ONE authoritative route; state all-or-nothing (continuity id never nil, corruption loud, atomic writes); resources bounded with deterministic cleanup; failure loud with layer+agent-id+cause; A0-A5 proof suite green under clj -M:test"
+   :type "A0..A5-green-agency value" :in-map false
+   :note "Success Criteria 1-5; the codomain the whole build-then-repair-then-discharge construction produces"}]
+
+ ;; The load-bearing typed holes the construction had to discharge (the HARD parts):
+ :typed-holes
+ [{:at :single-routing-authority
+   :wanted "for any agent-id EXACTLY ONE authoritative route exists at a time; multi-store concat/distinct across registry+local-handlers+connected-agents is not that — a message send has no unique addressee to receipt against"
+   :discharged-by "c5b5929 (A1: enforce-single-routing-authority! installed as add-watch on all three routing store atoms — WS/registration wins, other stores evicted via evict-from-registry!/dissoc, with a routing-eviction-guard against re-entrant loops)"}
+  {:at :all-or-nothing-state
+   :wanted "state transitions are all-or-nothing — no partial writes, :agent/current-thread-id never nil; corruption must surface loudly rather than load as nil"
+   :discharged-by "804fe8f (A2: EDN state written temp+fsync+rename atomically; edn/read-string corruption no longer caught->nil; continuity slot defaults to \"\" (blank) and update-fn guards nil back to prev-or-blank)"}
+  {:at :explicit-delivery-receipt
+   :wanted "every send returns a receipt map {:ok true ...} / {:ok false :err ... :agent-id ...}, never a bare boolean; broadcast to zero agents is :ok false; whistle failure carries the :agent-id"
+   :discharged-by "5f85287 (A0: send-to-agent! returns explicit receipt with :transport, failures carry :agent-id; handle-ring-bell to zero agents returns :ok false)"}
+  {:at :loud-failure-attribution
+   :wanted "no silent catch-and-return-nil; :throw-exceptions false call sites must check :status; failures surface at the causing layer with layer+agent-id+cause"
+   :discharged-by "3f0aa3a (A3: catch _ nil sites reworked, HTTP :status checked >=400 and logged with agent-id/room; spans codex_mirror.clj + http.clj + service.clj)"}
+  {:at :bounded-lifecycle
+   :wanted "no Agency atom grows without bound; secret TTL enforced deterministically (lazy-on-read, not fire-and-forget future); disconnect cascades cleanup to pending whistles"
+   :discharged-by "5dcb28b (A5: acks capped at max-acks=10 evicting oldest; secret expiry computed on read from created+ttl-ms; disconnect cascades to pending-whistles)"}]
+
+ :kind {:predecessor-shape :multi-store-ambiguous-routing+best-effort-send   ; split-brain across 3 stores; boolean send; unbounded atoms; swallowed failure
+        :whats-new         :single-authority+atomic+receipted+loud+bounded   ; A0-A5 enforced, not aspirational
+        :target-territory  :mostly-known                                     ; the sub-holes were named as RED tests in Phase 1 (DERIVE), not discovered mid-build
+        :fill-mechanism    :add-watch-eviction+temp-rename-write+receipt-map+status-check+ack-cap-and-ttl-on-read}
+
+ :title "Agency A0-A5 proven green — split-brain routing → single routing authority (build-then-repair-then-discharge)"
+ :provenance {:mission "futon3-d/mission/agency-rebuild"
+              :mission-doc "futon3/holes/missions/M-agency-rebuild.md"
+              :repo "futon3 (all five cited shas + the invariant proof suite live here)"
+              :campaign "C-cascade-real"
+              :method "post-hoc empirical (doc + code + git; no XTDB — code-only), A-next, 2026-07-01"
+              :sealed-by "claude (this session)"
+              :cascade [:agency/single-routing-authority]
+              :pairs-with-wiring "futon6/holes/clean/agency-rebuild.clean.edn"
+              :acceptance-terminals=endpoints
+              "wiring s1 :produces :agency-boundary-inventory (the transport boundary + six state atoms = sorry :have); s6 :discharges :a0-a5-proof-suite-green (= sorry :want validated-agency). The wiring's load-bearing repair (s3 spoiled routing-split-brain → s4 single-routing-authority) = the sorry's :single-routing-authority typed-hole discharged by c5b5929. MATCH."}}

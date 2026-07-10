@@ -1,0 +1,96 @@
+;; f6-ingest-sorry-EMPIRICAL.edn — the GROUND-TRUTH interface for M-f6-ingest,
+;; recovered POST-HOC from the mission doc + code + git + the real run manifest
+;; (A-next method, Joe 2026-07-01, deepened 2026-07-02). #5/10 in the A-next gold corpus (M-fold-ansatz phase-2 ground truth). This is a GPU/superpod
+;; mission (the no-SPOF math.SE annotation fan-out); its :want is a VALIDATED
+;; ANNOTATED CORPUS, not a code interface.
+;; Pairs with futon6/holes/clean/f6-ingest.clean.edn → completes a full
+;; (cascade, sorry, wiring) TRIPLE.
+;;
+;; Sources (all inspected this session, not remembered):
+;;   git commits (futon6):
+;;     4edb135 (f6/P7: StackExchange processing pipeline w/ GPU-ready embeddings — the C-parse+C-embed core) ·
+;;     97a88fa (Fix SE pipeline: pipe-delimited tags, STREAMING two-pass QA builder — the constant-memory fan-out root) ·
+;;     bb88789 (f6/P7: self-contained superpod batch job — stages 1-4 parse/embed/tag/cluster) ·
+;;     44b0ad5 (Stage 5 NER+scopes, hyperreal dictionary, golden-50 suite — the C-ner + C-scope discharge) ·
+;;     09fd370 (NER kernel: 19,236 terms from 63 PlanetMath MSC repos + SE tags — the C-ner input AND the bootstrap merge) ·
+;;     e32b206 (--dry-run: execution plan, processes nothing — the s1 budget-bounds move) ·
+;;     c1c97ed (site-aware SE IDs + harden superpod flow)
+;;   code (public surface, inspected):
+;;     futon6/scripts/process-stackexchange.py (187 ln; streaming parse + embeddings, BAAI/bge-large-en-v1.5) ·
+;;     futon6/scripts/superpod-job.py (9142 ln; docstring stages 0-10; Stage 5 = run_stage5_ner_scopes at L1527,
+;;       ner-terms.json L1644 + scopes.json L1645; scope opener regexes L499-512 Let/Define/Assume/Consider;
+;;       ner_coverage/scope_coverage computed L2328/L2331; manifest built L8928) ·
+;;     futon6/scripts/build-ner-kernel.bb (208 ln; extract-se-tags L83 --se-json → merge SE tags into kernel = bootstrap)
+;;   REAL RUN MANIFEST (ground truth, inspected):
+;;     storage/futon6/se-data/math-processed/manifest.json (generated 2026-02-11; source=math.stackexchange;
+;;       entity_count=805200; relation_count=1985936; tag_count=1983; llm_model=meta-llama/Meta-Llama-3-8B-Instruct;
+;;       stage5 ner_coverage=0.9958 (>95% ✓); stage5 scope_coverage=0.3769 (>30% ✓); total_scopes=907288)
+;;   doc: futon3/holes/missions/M-f6-ingest.md (status archived; 5-stage pipeline; 8 success criteria;
+;;       wiring futon5/data/missions/f6-ingest.edn validated by futon5.ct.mission/validate, all 8 CT-checks pass)
+
+{:id :sorry/f6-ingest-annotated-corpus
+ :hx-type "code/v05/sorry"
+ :state :empirical                        ; recovered from ground truth, not proposed
+ :derivation :post-hoc-reconstruction
+
+ :want-signature "ingest-f6 : (mathSE-XML-dump, 19236-term-NER-kernel, scope-patterns, embed-model, llm-model) -> validated-annotated-manifest"
+ :hungry-for "validated-annotated-manifest"   ; entities + relations + embeddings + LLM pattern-tags + HDBSCAN clusters
+                                              ; + NER hits + scope/binding records + expanded kernel, aggregated into one
+                                              ; manifest.json, produced by a fan-out with NO single point of failure and
+                                              ; re-validated locally against the mission's 8 success criteria
+
+ ;; ENDPOINTS — real code entities + data artifacts. :in-map from source + git + the run manifest.
+ :endpoints
+ [{:role :have :ref "math.SE Posts.xml dump (build_qa_pairs_streaming, constant-memory two-pass; C-parse — the SOLE fan-out root)"
+   :type "corpus dump" :in-map true
+   :note "streamed by process-stackexchange.py / superpod-job.py Stage 1; 97a88fa made it a streaming two-pass builder so multi-GB dumps don't OOM"}
+  {:role :have :ref "the 19,236-term NER kernel (data/ner-kernel/terms.tsv; classical term spotter, C-ner)"
+   :type "term dictionary" :in-map true
+   :note "built by build-ner-kernel.bb from 63 PlanetMath MSC repos + SE tags (09fd370); the C-ner input"}
+  {:role :have :ref "scope-opener regexes (Let/Define/Assume/Consider, superpod-job.py L499-512) + LaTeX symbol-binding extractor (detect_scopes_entity L1283) → scopes.json (C-scope, the APPLIED pattern)"
+   :type "scope-binding records" :in-map true
+   :note "the one non-candidate move: informal proof variable-scope → machine-legible binding records"}
+  {:role :have :ref "the parallel annotation channels off the parse: C-embed (BAAI/bge-large-en-v1.5) · C-tag (meta-llama/Meta-Llama-3-8B-Instruct pattern classification) · C-ner · C-cluster (HDBSCAN on embeddings)"
+   :type "annotation stages" :in-map true
+   :note "each a pure fn of parsed entities — the no-SPOF property; superpod-job.py docstring stages 2-4 + Stage 5"}
+  {:role :have :ref "build-ner-kernel.bb extract-se-tags (--se-json): absorb produced math.SE tags back INTO the kernel"
+   :type "bootstrap merge" :in-map true
+   :note "the open-world-continuity step (mission Phase 3 step 10-11); monotone kernel growth"}
+  {:role :want :ref "validated manifest.json aggregating all channels (entity_count, relation_count, tag_count, stage5_stats{ner_coverage,scope_coverage,scope_type_freq}, expanded kernel) — downloads and re-validates locally against the mission's 8 success criteria"
+   :type "validated-annotated-manifest value" :in-map false
+   :note "REALIZED: storage/futon6/se-data/math-processed/manifest.json — 805200 entities, ner_coverage 0.9958, scope_coverage 0.3769 (both acceptance thresholds MET)"}]
+
+ ;; The load-bearing typed holes the construction had to discharge (the HARD parts):
+ :typed-holes
+ [{:at :no-single-point-of-failure
+   :wanted "each annotation channel (embed/tag/ner/scope/cluster) is a pure function of the PARSED entities alone — no cross-channel dependency — so removing any one stage disconnects only its own output channel; the fan-out has one root (C-parse) and no SPOF"
+   :discharged-by "bb88789 (self-contained stages 1-4 fan out off Stage 1) + 44b0ad5 (Stage 5 NER+scope added as independent CPU channels); manifest 'each stage writes its output independently' + --skip-embeddings/--skip-llm/--skip-clustering flags prove channel-independence"}
+  {:at :faithful-scope-projection
+   :wanted "scope openers (Let/Define/Assume/Consider) found in >30% of answers AND each opener's LaTeX symbol bindings extracted correctly — the scope chain is a faithful projection of the answer's variable-introduction structure"
+   :discharged-by "44b0ad5 (Stage 5 scope detection); VERIFIED in run manifest: scope_coverage=0.3769 (>0.30 ✓), total_scopes=907288 over 805200 entities, scope_type_freq spans let-binding/define/assume/consider"}
+  {:at :high-ner-entity-coverage
+   :wanted "classical term spotting against the 19K kernel achieves >95% entity coverage on the real corpus (not a toy subset)"
+   :discharged-by "09fd370 (19,236-term kernel) + 44b0ad5 (Stage 5 spotter); VERIFIED in run manifest: ner_coverage=0.9958 (>0.95 ✓) over 805200 entities"}
+  {:at :monotone-kernel-expansion
+   :wanted "kernel expansion is monotone: absorbing freshly-produced math.SE tags only ADDS terms, and re-spotting on the expanded kernel does not drop earlier hits (open-world bootstrap)"
+   :discharged-by :unverified
+   :note "MECHANISM built (build-ner-kernel.bb extract-se-tags --se-json, freq>=5 filter, merge; 09fd370), but the mission Phase-3 re-spot loop measuring the coverage delta on the expanded kernel is not evidenced in the inspected manifest — the run captured did not record a bootstrap re-spot pass"}
+  {:at :local-8-check-revalidation
+   :wanted "the output blob downloads and re-validates locally against the mission's 8 success criteria (200K+ parsed; 25 patterns fire; embeddings for all entities; NER >95%; scope >30%; blob validates; kernel +1000 terms; run within 4h window)"
+   :discharged-by :partial
+   :note "VERIFIED from manifest: 805200 parsed (>200K ✓), ner 0.9958 ✓, scope 0.3769 ✓, elapsed 983s (<<4h ✓), llm pattern tags present (moist). NOT verified in THIS manifest: embed_model=None (embeddings/HDBSCAN clustering SKIPPED for the captured moist-run) and the +1000-term kernel-expansion criterion. So the corpus is NER+scope+tag-validated but the embedding/cluster channels are :unverified for this artifact"}]
+
+ :kind {:predecessor-shape :raw-mathSE-XML-dump           ; a 3.4GB dump, no annotations
+        :whats-new         :no-spof-annotated-corpus
+        :target-territory  :mostly-known                  ; the sub-hole was scope symbol-binding extraction (the APPLIED move)
+        :fill-mechanism    :stream-parse+fan-out-annotate+scope-extract+bootstrap-kernel+aggregate-manifest}
+
+ :title "math.SE annotated corpus via a no-SPOF fan-out NLP pipeline (fan-out-then-aggregate; superpod run, 805K QA pairs)"
+ :provenance {:mission "futon3-d/mission/f6-ingest (source: futon3/holes/missions/M-f6-ingest.md, archived)"
+              :campaign "C-cascade-real"
+              :method "post-hoc empirical (doc + code + git + run-manifest), A-next, 2026-07-01/02"
+              :sealed-by "claude (this session)"
+              :cascade [:f6/scope-chain-tracking]         ; the one :applied cascade move (from the wiring)
+              :pairs-with-wiring "futon6/holes/clean/f6-ingest.clean.edn"
+              :acceptance-terminals=endpoints
+              "wiring s1 :budget-bounds-exploration :produces :bounded-run-plan over the XML dump (= sorry :have, the C-parse root); wiring s2 :deterministic-ingest is that root; wiring s6 :state-snapshot-witness :discharges :manifest-validation-8-checks = sorry :want (validated-annotated-manifest). MATCH. (The wiring's 8-checks refer to the mission's 8 success criteria; note the DISTINCT futon5.ct.mission/validate 8-check pass is on the wiring DIAGRAM, not the corpus.)"}}

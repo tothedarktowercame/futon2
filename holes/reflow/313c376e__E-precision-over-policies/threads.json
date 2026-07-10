@@ -1,0 +1,46 @@
+{
+ "session": "313c376e",
+ "session_id": "313c376e-9e22-4436-b493-72937011133d",
+ "n_turns": 10,
+ "min_recurrence": 3,
+ "topk": 3,
+ "n_threads": 1,
+ "thread-hyperedges": [
+  {
+   "hx/type": "thread/pattern",
+   "binder-type": "thread/pattern",
+   "thread-id": "313c376e:thread/social--idempotent-handoff",
+   "pattern": "social/idempotent-handoff",
+   "collection": "social",
+   "sigil": {
+    "okipona": "",
+    "truth": ""
+   },
+   "ends": [
+    {
+     "role": "turn",
+     "turn": 3,
+     "rank": 3,
+     "score": 0.2862
+    },
+    {
+     "role": "turn",
+     "turn": 8,
+     "rank": 2,
+     "score": 0.4059
+    },
+    {
+     "role": "turn",
+     "turn": 10,
+     "rank": 3,
+     "score": 0.3541
+    }
+   ],
+   "recurrence": 3,
+   "span": [
+    3,
+    10
+   ]
+  }
+ ]
+}

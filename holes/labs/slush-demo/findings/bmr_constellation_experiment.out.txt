@@ -1,0 +1,84 @@
+Corpus: 560 edges, 232 patterns, 94 missions
+Multi-mission patterns: 118
+Constellation coverage: 118 / 118
+
+========================================================================
+EXPERIMENT 1: BMR over-merge reproduction (count-only reduce-concepts)
+========================================================================
+Patterns (in >=2 missions): 118
+Outcome dim (missions): 94
+Pairs scored: 6903
+Accepted (dF <= -3): 6903 / 6903
+Rejected: 0
+delta-F range: [-33.70, -6.45]
+delta-F mean: -11.41
+Concepts after merge: 1 (all 118 patterns collapse)
+
+KEY NEGATIVE RESULT: pure co-occurrence BMR collapses in 94-dim.
+Even disjoint patterns score dF=-6.45, passing the -3 threshold.
+The embedding-based constellation clustering succeeds where BMR alone fails
+→ embeddings are NECESSARY for concept formation, not just enrichment.
+
+========================================================================
+EXPERIMENT 2: EIG (posterior stddev) per constellation
+========================================================================
+
+  P size  alpha0 EIG_stddev  label
+------------------------------------------------------------------------
+P3     1    11.4     0.0289  (small cluster)
+P7     1    11.4     0.0289  (small cluster)
+P12    1    11.4     0.0289  (small cluster)
+P14    1    11.4     0.0289  (small cluster)
+P16    3    15.4     0.0248  (small cluster)
+P5     6    23.4     0.0199  (small cluster)
+P4     7    31.4     0.0177  (small cluster)
+P0     8    31.4     0.0177  writing / pattern discipline / categorical objects
+P8     7    42.4     0.0152  agency / coordination law / routing
+P6    11    54.4     0.0135  runtime invariants / boot reachability / snapshots
+P1    19    92.4     0.0105  futon-theory / storage / coordination / invariants
+P13   25    97.4     0.0099  math proof strategy / rational reconstruction
+P2    28   134.4     0.0087  AIF / operator / surface inhabitation
+
+Interpretation: higher EIG_stddev = more epistemic uncertainty about
+which missions this constellation serves. Low EIG = well-determined role.
+
+========================================================================
+EXPERIMENT 3: Within-constellation vs across-constellation ΔF
+========================================================================
+
+Within-constellation pairs:  992
+  mean ΔF = -12.73
+  range: [-32.62, -6.45]
+
+Across-constellation pairs:  5911
+  mean ΔF = -11.19
+  range: [-33.70, -6.45]
+
+Difference (within − across): -1.55
+→ Within-constellation pairs ARE more mergeable (more negative ΔF)
+  The AIF measure (BMR ΔF) PARTIALLY validates the embedding clustering:
+  it agrees that within-constellation pairs are more similar, even though
+  the absolute threshold is miscalibrated for high-dim.
+
+Most-mergeable WITHIN pairs (most negative ΔF):
+  dF= -32.62  P13  construct-an-explicit-witness + reduce-to-known-result
+  dF= -31.85  P1  stop-the-line + structural-tension-as-observation
+  dF= -29.20  P2  inhabitation-feeds-evolution + surface-earns-inhabitation
+  dF= -28.49  P1  single-source-of-truth + stop-the-line
+  dF= -27.98  P2  candidate-pattern-action-space + expected-free-energy-scorecard
+
+Most-mergeable ACROSS pairs (most negative ΔF):
+  dF= -33.70  P6×P1  reachable-from-boot + stop-the-line
+  dF= -32.49  P2×P1  expected-free-energy-scorecard + stop-the-line
+  dF= -31.28  P1×P2  stop-the-line + surface-earns-inhabitation
+  dF= -30.97  P2×P1  scope-bounded-handoff + stop-the-line
+  dF= -30.36  P2×P1  inhabitation-feeds-evolution + stop-the-line
+
+Least-mergeable WITHIN pairs (least negative ΔF):
+  dF=  -6.45  P13  route-exploration-and-pivot + the-diagonal-argument
+  dF=  -6.45  P13  route-exploration-and-pivot + use-probabilistic-method
+  dF=  -6.45  P4  scope-chain-tracking + shared-kernel-predictive-forward-model
+
+========================================================================
+DONE — exploratory findings, not a committed artifact
+========================================================================

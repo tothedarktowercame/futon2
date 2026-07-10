@@ -98,10 +98,15 @@ example : answers binderQuery binderStore
     <p>Symbol grounding <b>is</b> a typed-hole discharge — the third member of DarkTower's discharge duality (sorry/proof · query/answer · symbol/binder).</p>
   </div>
   <div class="excard fold">
-    <h3>③ A fold's wiring <span class="badge b-build" style="margin:0">to build</span></h3>
-    <div class="sub">the R16 fold (E-close-the-loop) · "a useful third example for a later file" — Examples.lean</div>
-    <p>Examples.lean explicitly names our fold — <b>M-first-flights cascade → temporary-gap → wiring</b> — as the intended third instance. A fold's wiring is a <b>comb of typed holes</b>: boxes consume/produce, the fold <b>fills</b> them, <code>:policy-holes</code> are the <b>un-discharged</b> directions, and a closing ΔG is a <b>discharge</b>. Same interface as ① and ②.</p>
-    <p>This is the bridge back to R16: the <code>futon2.aif.fold</code> contract (<code>{:wiring :delta-g :policy-holes}</code>) is the operational shadow of <code>TypedHole</code>/<code>Fill</code>/<code>Discharge</code>. Making the corpus DarkTower-shaped makes it <b>Lean-checkable</b> (0-sorry iff well-formed).</p>
+    <h3>③ A fold's wiring <span class="tag">0-sorry ✓</span></h3>
+    <div class="sub">DarkTower/FirstFlightsExample.lean · the R16 fold (E-close-the-loop)</div>
+    <p>The first-flights fold instance has landed in Lean: <b>M-first-flights cascade → temporary-gap → wiring</b> is typed as a <b>BV</b> checkpoint chain, a cascade <code>ScopeQuery</code>, a hungry <code>wantPortHole</code>, and a selection-conditioned <code>fold</code> that re-grades the port from <code>payoff</code> to <code>canon</code>.</p>
+    <pre>theorem fold_selected :
+  fold selectedQuery cascadeStore wantPortHole = foldedPort := rfl
+theorem fold_selected_not_hungry :
+  Not (IsHungry (fold selectedQuery cascadeStore wantPortHole)
+       Checkpoint.wantPort) := by simp</pre>
+    <p>This is the bridge back to R16: the <code>futon2.aif.fold</code> contract (<code>{:wiring :delta-g :policy-holes}</code>) is the operational shadow of <code>TypedHole</code>/<code>Fill</code>/<code>Discharge</code>. The dynamic corpus bridge is now the CLean/L2 gate: fold output → <code>.clean.edn</code> → DarkTower-shaped Lean render.</p>
   </div>
 </div>
 
@@ -230,11 +235,11 @@ const NODES = [
    ground:"arXiv 0809.2517 golden graph, the 'Let H be a Hopf algebra' binder → §PaperExample.",
    concept:"A <b>paper fragment</b> as the interface: the ungrounded symbol <code>H</code> = a <code>TypedHole</code> hungry for a concept (satiety <code>role</code>); the binder grounds it via <code>ScopeQuery</code>; the polarity is <code>ungroundedBinder</code>. <b>0-sorry in Lean.</b> See the worked card below.",
    st:"done"},
-  {id:"Fold", cls:"inst", t:"③ Fold wiring", s:"the R16 target (to build)", x:690,y:430,
-   lean:"-- the intended third instance (Examples.lean note)\n-- futon2.aif.fold : (cascade,circumstance)\n--   → {:wiring :delta-g :policy-holes}\n-- :wiring = comb of TypedHoles ; ΔG = discharge",
-   ground:"M-first-flights cascade→gap→wiring; the R16 fold (E-close-the-loop). Named in Examples.lean as the third example for a later file.",
-   concept:"A <b>fold's wiring</b> as the interface — the bridge to R16. The <code>:wiring</code> is a comb of typed holes; <code>:policy-holes</code> are directions left as <code>I</code> (unfilled, surfaced); a descending ΔG is a <code>Discharge</code>. This is the one instance <b>not yet typed in Lean</b> — building it (DarkTower-shaping the fold corpus) makes the corpus 0-sorry-checkable. The work of E-darktower-wiring + E-wiring-diagram-corpus.",
-   st:"build"},
+  {id:"Fold", cls:"inst", t:"③ Fold wiring", s:"the first-flights R16 instance", x:690,y:430,
+   lean:"-- §FirstFlightsExample (0-sorry)\nwantPortHole : TypedHole  (wantPort = payoff)\nfold selectedQuery cascadeStore wantPortHole = foldedPort\nfold_selected_not_hungry : ¬ IsHungry … wantPort\nfoldDischargeKind = DischargeKind.queryAnswer",
+   ground:"DarkTower/FirstFlightsExample.lean, commits 58fb0b7 and 6d47cd0: M-first-flights cascade→gap→wiring. The earlier Examples.lean note has been discharged by the later file.",
+   concept:"A <b>fold's wiring</b> as the interface — the bridge to R16. The first-flights instance is now typed in Lean: a selected cascade answer drives the graph-rewrite fold, closes the payoff-hungry want-port, and records the discharge reading as <code>queryAnswer</code>. The larger corpus bridge is the CLean/L2 gate: fold output becomes a DarkTower-shaped typed-hole comb and must render 0-sorry to count as structurally well-formed.",
+   st:"done"},
 ];
 const EDGES = [
   ["TypedHole","Comb","wire"],["Comb","Fill","substitute"],["Fill","Discharge","close"],
@@ -267,7 +272,7 @@ for(const n of NODES){const g=el("g",{class:"node "+n.cls,"data-id":n.id});
   g.addEventListener("click",()=>select(n.id));svg.appendChild(g);}
 
 const panel=document.getElementById("panel");
-const BADGE={done:["b-done","BUILT — 0-sorry in Lean"],build:["b-build","TO BUILD"],belly:["b-belly","derived"]};
+const BADGE={done:["b-done","BUILT — 0-sorry in Lean"],build:["b-build","OPEN"],belly:["b-belly","derived"]};
 function select(id){
   document.querySelectorAll(".node").forEach(e=>e.classList.toggle("sel",e.getAttribute("data-id")===id));
   const n=NById[id];const [bc,bt]=BADGE[n.st];
@@ -284,11 +289,11 @@ const RB=[
   ["① MissionExample — a mission as typed holes","done","Examples.lean §MissionExample: lifecycle BV.seq, scope‖organism copar, unwritten-phase hole. 0-sorry."],
   ["② PaperExample — symbol grounding as discharge","done","Examples.lean §PaperExample: ungrounded H, binder store, ungroundedBinder polarity; answer by rfl. 0-sorry."],
   ["CLean render gate (.clean.edn → Lean)","done","CLeanProofs.lean via clean_to_lean.py: APM proofs render to BV/TypedHole/DischargeKind, builds 0-sorry iff well-formed (E-clean.md). The pipeline also ran on Linode over 102 math.CT arXiv papers (mark5-ct100-run) — 98/102 share the construct-exploit-discharge macro; a ~10-tag method vocabulary."],
-  ["③ Fold-wiring as a DarkTower instance","build","VERIFIED STILL UNBUILT (claude-11 check, 2026-07-02): Examples.lean has only MissionExample + PaperExample namespaces; no fold instance in any DarkTower/*.lean. The MATERIAL now exists though — R16 closed live 2026-07-02, so every enacted :wiring in the trace is a candidate instance to type. E-close-the-loop × E-darktower-wiring."],
+  ["③ Fold-wiring as a DarkTower instance","done","VERIFIED BUILT: DarkTower/FirstFlightsExample.lean types the M-first-flights cascade→gap→wiring fold. It proves the selected cascade fold rewrites the hungry want-port to foldedPort, that the selected port is no longer payoff-hungry, and that the operational discharge polarity is queryAnswer. The older Examples.lean note was the pointer; FirstFlightsExample is the discharge."],
   ["Port CLean from APM-proofs to missions/code","done","VERIFIED BUILT (claude-11 check, 2026-07-02 — this landed with the A-next gold corpus, 2026-07-01/02): 10 mission .clean.edn in futon6/holes/clean/ beside the APM proofs; clean_to_lean.py handles mission ids explicitly; re-verified live — autoclock-in renders (--mode standalone) and COMPILES with core lean, 0 real sorries (the 4 'sorry' greps are the DischargeKind.sorryProof constructor + comments). The 'Rob's pipeline ingests them' tail remains open (the deferred Matrix/Rob thread), but the corpus bridge itself works end-to-end."],
-  ["Coverage as a live gate over real wirings","build","VERIFIED STILL UNBUILT (claude-11 check, 2026-07-02): no script invokes the DarkTower Coverage cert over produced wirings (the only grep hits are unrelated report headings). Natural build point: the enacted wirings now flowing hourly are exactly the population to gate."],
+  ["L2 structural gate over fold-generated wirings","done","VERIFIED BUILT: futon2.aif.fold-clean adapts a fold's :wiring to CLean, pre-flights comb composition, and scripts/l2-darktower-verify.sh runs cascade→fold→CLean→clean_to_lean.py→Lean. The green generated wiring renders 0-sorry; the red typed-hole case is rejected. Honest boundary: this is a structural soundness floor, not semantic correctness or ΔG accuracy."],
 ];
-const RBBADGE={done:["#1d7a3a","#e7f6ec","built — 0-sorry"],build:["#0e7490","#e2f4f7","to build"]};
+const RBBADGE={done:["#1d7a3a","#e7f6ec","built — 0-sorry"],build:["#0e7490","#e2f4f7","open"]};
 const rb=document.getElementById("rb");
 for(const [t,s,n] of RB){const [c,bg,lbl]=RBBADGE[s];
   const d=document.createElement("div");d.className="excard";d.style.borderTopColor=c;

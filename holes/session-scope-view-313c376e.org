@@ -1,0 +1,15 @@
+#+TITLE: Session scope view — 313c376e (live · 6 operator scopes)
+#+TODO: SCOPE | GHOST
+# regenerate: futon6/scripts/session_scope_view.py   ·   the weak-scope reflow (M-points-de-fuite)
+
+* Session 313c376e   :session:
+  :built: 
+  :wanted: 
+  :field: ▶0 build · ◀0 reach · ✎0 steer
+** SCOPE arc 1: scope  (6 turns)  :scope:E-precision-over-policies:
+*** «Hi, I would like you to work on this excursion that has been…»   :scope:E-precision-over-policies:
+*** «So I will ask you to do all the building directly this time …»   :out-of-band:
+*** «Please continue we ran into a usage limitation but should be…»   :out-of-band:
+*** «Please commit…»   :out-of-band:
+*** «Now R14/γ is committed — can you give a quick deterministic …»   :out-of-band:
+*** «Performance reading is correct — it matches the excursion HE…»   :out-of-band:

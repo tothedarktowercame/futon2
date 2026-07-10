@@ -1,0 +1,113 @@
+;; flight-log.spec.edn  —  the paper-grade organ on a War-Machine flight
+;; ---------------------------------------------------------------------------
+;; PURPOSE.  The sequel paper ("Closing the Loop", ~/code/p4ng/sequel-notebook.org)
+;;   is a MAP-REDUCE over the burn-in period, not a hand-written artifact:
+;;     map    : each flight -> one flight-log (this schema), emitted by the PILOT
+;;              as protocol (part of the LOOP turn) — NOT recorded by hand.
+;;     reduce : N burn-in logs -> the paper's empirical sections (the γ-curve,
+;;              the claims-ledger states, the documented flights).
+;;
+;; RELATION TO EXISTING MACHINERY (extend, don't rebuild).
+;;   The pilot already composes a flight-as-derivation record at close time —
+;;   `futon3c/src/futon3c/aif/flight_record.clj`, spec `futon3c/holes/specs/flight.spec.edn`
+;;   (`:wm-flight v0.4`), verified by `scripts/flight_spec_verify.clj`. This schema is a
+;;   PAPER ORGAN that hangs on that record via :flight/base — it adds the fields the
+;;   paper reduces, and NOTHING the pilot doesn't already have or judge.
+;;
+;; CROSS-REFERENCE, NOT TRANSCLUDE (Joe, 2026-07-01).  Fields carry :card-refs =
+;;   stable card-IDs from `futon2/holes/aif-wiring-explainer.html` (e.g. :R14-GAMMA).
+;;   These are POINTERS (resolve to `aif-wiring-explainer.html#<id>`), not live pulls.
+;;   Live transclusion is deferred to E-aif-docs-live; the card-IDs are the seam that
+;;   makes that upgrade a no-op later. Authoritative card vocabulary (24), from the
+;;   explainer: R14-GAMMA R14-FEED · R16-ROLLOUT R16-GATE R16-IMPL-SELECT R16-ARM
+;;   R16-ARROWS · FOLD-MINILM FOLD-DIFFSUB FOLD-EXOTYPE FOLD-GAE FOLD-GFLOWNET
+;;   FOLD-JAXREFINE FOLD-ANSATZ · R19-CHANNELS R19-CURRENT-C R19-DERIVE R19-FRESH
+;;   R19-KL R19-PRED R19-PROOF-JOIN R19-RISK R19-UNIFY R19-WM-LOOP R19-YING-RERUN.
+;;
+;; STATUS: v0.1 design spec (claude-4). NOT yet wired into flight_record.clj — that
+;;   wiring waits for a pilot pause point (E-aif-docs-live sequencing). Extends
+;;   M-first-flights' flight-as-derivation (Phase B adjacent).
+;; ---------------------------------------------------------------------------
+
+{:spec/id      :flight-log
+ :spec/version "v0.1"
+ :spec/extends {:spec :wm-flight :version "v0.4"
+                :file "futon3c/holes/specs/flight.spec.edn"}
+ :spec/card-vocab-source "futon2/holes/aif-wiring-explainer.html"
+
+ ;; ---- the record the pilot emits per flight ----
+ :flight-log
+ {;; identity / provenance
+  :flight/id      {:type :string  :doc "run-id; keys the substrate-2 record AND the reduce"}
+  :flight/at-ms   {:type :int}
+  :flight/pilot   {:type :string  :doc "agent id inhabiting the pilot seat"}
+  :flight/mission {:type :string  :doc "canonical <repo>-d/mission/<id> the flight ran on"}
+  :flight/base    {:type :ref     :doc ":wm-flight v0.4 flight-as-derivation record this organ hangs on"}
+
+  ;; intent — the (have -> want)
+  :intent {:have {:type :string} :want {:type :string}
+           :card-refs [:R16-ARROWS]}
+
+  ;; cascade — magnet condenses patterns (the generative input)
+  :cascade {:magnet-psi {:type :string}
+            :patterns   {:type [:string] :doc "pattern/library ids the cascade condensed"}
+            :size       {:type :int}
+            :F          {:type :float  :doc "war-machine cascade-quality score"}
+            :wholeness  {:type :float}
+            :on-topic?  {:type :bool   :doc "PILOT judgment: genuinely on-topic vs F-gaming (Q-B lesson — F alone is not sufficient)"}
+            :card-refs  [:FOLD-MINILM]}
+
+  ;; PSR — pattern selection (front half of a PAR; old paper §4)
+  :psr {:pattern-chosen {:type :string}
+        :candidates     {:type [:string]}
+        :rationale      {:type :string}
+        :confidence     {:type :keyword :doc "maturity prior: :active|:greenfield|:settled|:stub"}}
+
+  ;; act-gate — expected-G decision
+  :act-gate {:decision       {:type :keyword :doc ":pass | :abstain | :fail"}
+             :delta-g        {:type :float   :doc "expected-free-energy leg; nil under :abstain-missing-leg"}
+             :delta-f        {:type :float}
+             :abstain-reason {:type :keyword :optional true}
+             :card-refs      [:R16-ROLLOUT :R16-GATE]}
+
+  ;; realized-outcome — the closing feedback (STAGED until *live-wire?* flips)
+  :realized-outcome {:present? {:type :bool  :doc "false while *live-wire?* OFF (staged); true once enactment flows"}
+                     :outcome  {:type :any   :optional true}
+                     :perf     {:type :float :optional true :doc "signed, scale-free performance ratio vs expectation"}
+                     :card-refs [:R14-FEED]}
+
+  ;; gamma — the LEARNED precision move (the paper's key figure)
+  :gamma {:before    {:type :float}
+          :after     {:type :float}
+          :mean-perf {:type :float :optional true :doc "trace :policy-precision :mean-perf; nil during burn-in"}
+          :sample-n  {:type :int   :doc "realized samples accrued"}
+          :burn-in?  {:type :bool  :doc "true until sample-n >= 5 (γ pinned at 1.0; README-gamma)"}
+          :card-refs [:R14-GAMMA]}
+
+  ;; holes encountered — incl. virtual-pattern seeds (hole-basin -> suggest a pattern)
+  :holes {:type [:map]
+          :doc  "per hole: {:hole id :kind k :basin b :virtual-pattern? bool :seed-name s}"
+          :card-refs [:R19-PROOF-JOIN]}
+
+  ;; PUR — pattern use (back half of a PAR)
+  :pur {:pattern {:type :string} :actions {:type :string}
+        :outcome {:type :keyword :doc ":success|:partial|:failure"}
+        :prediction-error {:type :keyword :doc ":low|:med|:high"}}
+
+  ;; the flight's whole card-exercise set — the reduce GROUPS BY this
+  :card-refs {:type [:keyword] :doc "every aif-wiring card this flight exercised"}
+
+  ;; narrative organ — the prose the paper quotes (old paper's honest register)
+  :narrative {:type :string :doc "paper-grade prose: what happened; honest, not triumphal"}
+
+  ;; links — Nelson provenance (cross-ref, not transclude)
+  :links {:substrate-2 {:type :string :doc "the flight record node id"}
+          :commit      {:type :string :optional true}
+          :cards       {:type [:keyword] :doc "card-IDs -> aif-wiring-explainer.html#<id>"}}}
+
+ ;; ---- the reduce contract: map (flight->log) then reduce (logs->paper) ----
+ :reduce
+ {:by-card            {:doc "group logs by :card-refs -> per-card evidence set (which flights exercised R14-GAMMA, R16-ROLLOUT, ...) — this is also how the claims-ledger and the explainer cards get their live state"}
+  :gamma-curve        {:doc "reduce :gamma/:mean-perf over burn-in logs ordered by :flight/at-ms -> the learning curve (the figure the old paper could not print). Card: R14-GAMMA"}
+  :claims-ledger      {:doc "each Appendix-A claim's state = f(the logs that demonstrate it); DONE when a real flight exercised it, HOLE otherwise"}
+  :documented-flights {:doc "select representative logs (e.g. first :pass after burn-in) -> the FuLab Fig 2 successors, generated not transcribed"}}}

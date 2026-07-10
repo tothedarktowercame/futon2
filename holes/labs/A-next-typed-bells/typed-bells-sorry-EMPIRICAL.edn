@@ -1,0 +1,185 @@
+;; typed-bells-sorry-EMPIRICAL.edn — the GROUND-TRUTH interface for M-typed-bells,
+;; recovered POST-HOC from the mission doc + code + git + substrate-2 (A-next method, 2026-07-01).
+;; #13 in the A-next gold corpus (M-fold-ansatz phase-2 ground truth).
+;; CLOSED mission (IDENTIFY→…→DOCUMENT, 2026-06-11); flag FUTON3C_TYPED_BELLS default OFF, but
+;; ACTIVATED on the laptop JVM 2026-06-11 (scripts/dev-laptop-env) — so this sorry is not only
+;; discharged in code, it is discharged LIVE (real query→answer round-trips in the ArSE store).
+;;
+;; Sources (all inspected this session, not remembered):
+;;   git commits (verified shas + subjects, `git show -s`):
+;;     b4ed15f "Instantiate typed bells" (Joseph Corneli, 2026-06-11 11:06; Codex-authored per the
+;;             mission doc's author≠reviewer note, committed by Joe) — the full INSTANTIATE:
+;;             transport/http.clj (+496/-...), agency/bell_router.clj (+73), agency/mesh_qa.clj (+21),
+;;             logic/typed_bells_invariants.clj (+272 new), scripts/agency_send.py (--type/--ref),
+;;             tests (bell_router_test +59, auto_bellback_test +222, typed_bells_invariants_test +25),
+;;             docs (CLAUDE.md, README-arse.md, README-bells-and-whistles.md, E-typed-bells.md).
+;;     e012115 "Typed bells: fix synthetic mislabel, activate flag, finish lifecycle docs"
+;;             (Joseph Corneli, 2026-06-11 15:17) — the LIVE-ACTIVATION follow-up: arse-ask! synthetic
+;;             mislabel fix (transport/http.clj +7/-2), FUTON3C_TYPED_BELLS=true in scripts/dev-laptop-env,
+;;             T-typed-bell-arse-write-async.md ticket, DOCUMENT/live-checkpoint prose in the mission.
+;;   code (public surface): src/futon3c/transport/http.clj — the typed-bell impl is HERE, not in
+;;     src/futon3c/social/bells.clj (that file is the standup/test-bell dispatcher — a different "bell").
+;;     Regions: allowed-bell-types+typed-bells-enabled?+normalize-bell-type §399-418;
+;;     arse-ask!/arse-answer! §1560-1649; bell-type/ref payload extract + maybe-typed-bell-arse-bridge!
+;;     §3061-3096; handle-bell dispatch (TB-1/TB-3 door guards, replay reuse, send-time bridge) §3167-3296.
+;;     Also agency/bell_router.clj (graph carries :type/:ref, :answer-with-:ref resolves an edge → TB-6);
+;;     agency/mesh_qa.clj (job->edge projects :type/:ref); logic/typed_bells_invariants.clj (TB-1…7 model).
+;;   ArSE store: ~/code/storage/arse/entities.json (filesystem JSON, QAPair entities) — a SEPARATE store,
+;;     NOT substrate-2/XTDB (see :reconstruction-gap + the ArSE endpoint notes below).
+;;   substrate-2 code-graph: confirmed via /tmp/_calls.edn + /tmp/_contains.edn (the live code-graph dumps);
+;;     :7071 is live but its L4 canonical-id gate (E-futon1a-archivist: requires :source+:external-id)
+;;     rejects a bare code-id GET, so the dumps are the sanctioned confirmation path.
+;;   doc: futon3c/holes/missions/M-typed-bells.md (COMPLETE through DOCUMENT; IATC/Corneli-2017 the spec).
+
+{:id :sorry/typed-bells-illocutionary-channel
+ :hx-type "code/v05/sorry"
+ :state :empirical                        ; recovered from ground truth, not proposed
+ :derivation :post-hoc-reconstruction
+
+ :want-signature "send-bell : (agent-id, prompt, :type ∈ IAT-seven+:request, :ref?) -> TypedCoordinationEdge"
+ :hungry-for "TypedCoordinationEdge"      ; the codomain: a coordination edge carrying illocutionary force,
+                                          ; whose :query/:answer types populate ArSE LOSSLESSLY AT BIRTH (no mining),
+                                          ; whose type disambiguates false A↔B crossings, and whose OFF path is
+                                          ; byte-identical to the legacy untyped bell.
+
+ ;; ENDPOINTS — real code / substrate-2 / store entities.
+ ;; :in-substrate2 checked against the live code-graph dumps (/tmp/_{calls,contains}.edn); code node ids
+ ;; carry the canonical `futon3c-d/` repo prefix. The ArSE endpoints are the audit's key finding.
+ :endpoints
+ [{:role :have :ref "handle-bell — POST /api/alpha/bell dispatch: extracts :type/:ref (gated), runs the
+                     TB-1/TB-3 door guards, replay-reuse, and the send-time ArSE bridge"
+   :type "code/v05/fn"
+   :substrate2-id "futon3c-d/futon3c.transport.http/handle-bell" :in-substrate2 true
+   :note "the single dispatch site; §3167-3296. Mission doc's MAP §2756 insertion point"}
+  {:role :have :ref "typed-bells-enabled? — the FUTON3C_TYPED_BELLS flag gate (D6, independent of bell-router)"
+   :type "code/v05/fn"
+   :substrate2-id "futon3c-d/futon3c.transport.http/typed-bells-enabled?" :in-substrate2 true
+   :note "default OFF; ACTIVATED true on the laptop JVM via scripts/dev-laptop-env (e012115)"}
+  {:role :have :ref "normalize-bell-type + allowed-bell-types — TB-1/D3: absent→:request, unknown→nil (→400)"
+   :type "code/v05/fn+def"
+   :substrate2-id "futon3c-d/futon3c.transport.http/normalize-bell-type"
+   :in-substrate2 true
+   :note "allowed set = {:query :answer :assert :challenge :agree :define :retract :suggest :request};
+          allowed-bell-types also a node: futon3c-d/futon3c.transport.http/allowed-bell-types"}
+  {:role :have :ref "maybe-typed-bell-arse-bridge! — the S3 KEYSTONE: :query→arse-ask! (stamp :ref), :answer→
+                     arse-answer! against :ref, all other types inert (TB-4 dispatch boundary)"
+   :type "code/v05/fn"
+   :substrate2-id "futon3c-d/futon3c.transport.http/maybe-typed-bell-arse-bridge!" :in-substrate2 true
+   :note "inline bridge, not the separate agency/arse_bridge.clj DERIVE sketched (accepted deviation, review note)"}
+  {:role :have :ref "arse-ask! / arse-answer! — reusable in-process ArSE write helpers the bridge calls"
+   :type "code/v05/fn"
+   :substrate2-id "futon3c-d/futon3c.transport.http/arse-ask!" :in-substrate2 true
+   :note "arse-answer! also a node (…/arse-answer!). arse-ask! writes :synthetic false — this is the line the
+          live-activation bug e012115 fixed (was hard-coded :synthetic true, mislabeling real asks as seed)"}
+  {:role :have :ref "bell_router/graph — the conversation graph; rows carry :type/:ref; an :answer whose :ref
+                     names a prior bell resolves that edge so it never enters :crossings (TB-6)"
+   :type "code/v05/fn"
+   :substrate2-id "futon3c-d/futon3c.agency.bell-router/graph" :in-substrate2 true
+   :note "parent = E-crossed-bells; FUTON3C_BELL_ROUTER default-ON since 8d3f2f2 (2026-06-27)"}
+  {:role :have :ref "mesh_qa/job->edge — projects :type/:ref onto each mesh edge"
+   :type "code/v05/fn"
+   :substrate2-id "futon3c-d/futon3c.agency.mesh-qa/job->edge" :in-substrate2 true}
+  {:role :have :ref "create-invoke-job! — the job ledger; carries :bell-type/:ref only on the typed path (TB-2)"
+   :type "code/v05/fn"
+   :substrate2-id "futon3c-d/futon3c.transport.http/create-invoke-job!" :in-substrate2 true
+   :note "the durable transport receipt the type rides on; untyped legacy ≡ {:bell-type :request :ref nil}"}
+  {:role :have :ref "ArSE store — peripheral/arse.clj + the filesystem ~/code/storage/arse/entities.json
+                     (QAPair entities). The Q&A substrate the typed bells back onto."
+   :type "peripheral + filesystem JSON store"
+   :substrate2-id nil :in-substrate2 false
+   :note "KEY AUDIT FINDING: ArSE is a SEPARATE filesystem store, NOT a substrate-2/XTDB collection.
+          arse-store-dir = (user.home)/code/storage/arse; arse-load/save-entities slurp/spit entities.json.
+          arse-ask!/arse-answer! ALSO dual-write :arse-qa evidence entries (subject {:ref/type :arse-thread},
+          in-reply-to threading) via boundary/append! into config's :evidence-store — whose backend defaults
+          to an in-memory AtomBackend (evidence/backend), so that path is not substrate-2/XTDB either."}
+  {:role :want :ref "populated ArSE thread — a QAPair (question+answer, tags [\"typed-bell\"], :synthetic false)
+                     minted at bell-send-time (D5), lossless, no !ask, no mining step"
+   :type "ArSE QAPair (filesystem)"
+   :substrate2-id nil :in-substrate2 false
+   :note "LIVE: 10 typed-bell QAPairs in the store (2 claude-3 at 2026-06-11 activation + 8 claude-6 since),
+          ALL answered, ALL :synthetic false — the C-adopt behavioural criterion met and expanding.
+          Lives in the filesystem ArSE store, NOT substrate-2."}
+  {:role :want :ref "typed conversation edge — bell_router/graph edge with :type/:ref, with typed replies
+                     excluded from :crossings (TB-6)"
+   :type "in-memory graph projection"
+   :substrate2-id nil :in-substrate2 false
+   :note "a read-only projection over the job ledger, recomputed on demand — not a persisted substrate-2 node"}]
+
+ ;; The load-bearing typed holes the construction had to discharge (the HARD parts):
+ :typed-holes
+ [{:at :type-on-the-wire-not-inferred
+   :wanted "illocutionary force is a first-class declared payload field (:type/:ref), NEVER inferred from
+            prompt text — inference reintroduces the lossy side-channel/schema-drift the mission deletes"
+   :discharged-by "b4ed15f (D1 / PSR-1 canonical-typed-event-vs-side-channel; bell-type-payload + handle-bell)"}
+  {:at :off-inertness-fidelity-tripwire
+   :wanted "flag OFF ⇒ job map carries no :bell-type/:ref, no Type: header, graph byte-identical, NO ArSE write
+            — OFF is the legacy system exactly (TB-2)"
+   :discharged-by "b4ed15f (typed? gates every extraction/guard/bridge/field; explicit OFF-path test)"}
+  {:at :arse-iff-qa-dispatch-boundary
+   :wanted "an ArSE write happens IFF :type ∈ {:query :answer}; the other five performatives stay ambient
+            — the Evidence ⊇ ArSE ⊋ ambient boundary as a dispatch invariant, not a doc paragraph (TB-4)"
+   :discharged-by "b4ed15f (maybe-typed-bell-arse-bridge! case: only :query/:answer write; default inert)"}
+  {:at :ref-in-reply-to-fidelity+idempotent
+   :wanted "a :query stamps the job :ref with the new ArSE thread-id; the matching :answer posts with
+            in-reply-to == :ref (TB-5); replay of a bell reuses the job BEFORE the bridge runs → no second
+            thread (TB-7)"
+   :discharged-by "b4ed15f (bridge stamps :ref via ref'; existing-job 202 reused-branch precedes the bridge)"}
+  {:at :crossing-soundness
+   :wanted "any crossing remaining in graph has NO :answer-with-:ref linking the two directions; typed
+            replies are never reported as crossings — only genuine both-asking cases survive (TB-6)"
+   :discharged-by "b4ed15f (bell_router/graph reply-of treats :answer whose :ref ∈ bell-ids as a reply)"}
+  {:at :send-time-write-speech-act-is-the-send
+   :wanted "the ArSE write fires at SEND-time in handle-bell, not at the recipient's drain — asking is asking
+            regardless of whether B answers; an unanswered :query is a legible durable gap (D5)"
+   :discharged-by "b4ed15f (bridge called in handle-bell before create-invoke-job!, off the concurrency drain path)"}
+  {:at :real-asks-not-mislabeled-synthetic
+   :wanted "genuine agent/human :query bells must NOT be filed as generated seed data (:synthetic true) —
+            latent, but corrupts S4's synthetic-keyed work-queue"
+   :discharged-by "e012115 (arse-ask! now writes :synthetic false; the 2 already-affected entries corrected;
+                   found + fixed live during the flag-ON activation checkpoint)"}]
+
+ :kind {:predecessor-shape :untyped-bell+starved-arse      ; every bell an untyped imperative; ArSE built but empty
+        :whats-new         :illocutionary-type+at-birth-arse-population+crossing-disambiguation
+        :target-territory  :mostly-known                   ; MAP hit exact line numbers; the sub-holes that
+                                                           ; surfaced were TB-4a/4b safety/liveness split (VERIFY)
+                                                           ; and the :synthetic mislabel (live activation)
+        :fill-mechanism    :first-class-payload-field+flag-gate+send-time-arse-bridge+graph-type-guard}
+
+ :title "type the coordination channel — illocutionary force as a first-class field on the bell; :query/:answer
+         populate ArSE losslessly at birth (IATC live), typed replies collapse false crossings, OFF byte-identical"
+ :provenance {:mission "futon3c/holes/missions/M-typed-bells.md"
+              :campaign "E-crossed-bells (parent) → M-typed-bells; M-agency-hardening grand-parent"
+              :prior-art "Corneli, Martin, Murray-Rust & Pease 2017 — IATC (Inference Anchoring Theory + content);
+                          the paper analysed frozen human traces, this GENERATES the typed dialogues live"
+              :method "post-hoc empirical (doc + code + git + substrate-2 code-graph), A-next, 2026-07-01"
+              :sealed-by "claude (this session)"
+              :for-blinded-study "A-next: reconstruct from cascade alone, score against this"
+              :verification {:commits-verified ["b4ed15f" "e012115"]
+                             :logic-model "logic/typed_bells_invariants.clj — TB-1…7, 3 tests/25 assertions/0 fail;
+                                           conforming witness clean, all 7 adversarial traces caught"
+                             :instantiate-gate "31 tests / 101 assertions / 0 failures (typed-bell invariants +
+                                                bell-router graph + auto-bellback/transport); clj-kondo 0 errors"
+                             :live-adoption "10 typed-bell QAPairs in ~/code/storage/arse/entities.json, all
+                                             answered, all :synthetic false (2 claude-3 + 8 claude-6)"}}
+
+ ;; What RAW code/git/doc answered that substrate-2 could NOT answer by query (enrichment backlog):
+ :reconstruction-gap
+ {:code-graph-resolves "All CODE :have endpoints resolve as substrate-2 code-graph nodes under the futon3c-d/
+                        prefix (handle-bell, typed-bells-enabled?, normalize-bell-type, maybe-typed-bell-arse-bridge!,
+                        arse-ask!, arse-answer!, bell-router/graph, mesh-qa/job->edge, create-invoke-job!,
+                        allowed-bell-types) — confirmed in /tmp/_calls.edn + /tmp/_contains.edn."
+  :arse-not-in-substrate2 "The ArSE Q&A substrate — the thing this mission's WANT actually produces — is NOT in
+                           substrate-2. Question/answer entities are QAPairs in a plain filesystem JSON
+                           (~/code/storage/arse/entities.json); the :arse-qa evidence dual-write goes to the
+                           config evidence-store (default in-memory AtomBackend). Neither is the XTDB hyperedge
+                           store at :7071. So the mission's semantic payload lives entirely OFF substrate-2 —
+                           an enrichment backlog item: to query 'which typed bells populated ArSE' you must read
+                           the filesystem store, not the hypergraph."
+  :7071-gate "The live :7071 store answered nothing directly: its L4 canonical-id gate (E-futon1a-archivist)
+              rejects a bare code-id GET (needs :source + :external-id). Confirmation came from the code-graph
+              DUMPS, not a live entity fetch — a projection/query-ergonomics gap, not a data gap."
+  :flag-state "The FUTON3C_TYPED_BELLS flag state (OFF-by-default, but ON on this JVM via scripts/dev-laptop-env)
+               is a runtime/env fact recoverable only from git (e012115) + the env script — not queryable from
+               substrate-2 at all."
+  :authorship "The Codex-authored / Joe-committed / Claude-reviewed provenance of b4ed15f (author≠reviewer) is in
+               the mission prose + git metadata; substrate-2 carries the code nodes but not this social provenance."}}

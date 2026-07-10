@@ -1,0 +1,160 @@
+;; codex-agent-behaviour-sorry-EMPIRICAL.edn — the GROUND-TRUTH interface for
+;; M-codex-agent-behaviour, recovered POST-HOC from the mission doc + code + git + substrate-2
+;; (A-next method, Joe 2026-07-01). #11 in the A-next gold corpus (M-fold-ansatz phase-2 ground truth).
+;; Mission Status COMPLETE (2026-03-08) — so the sorry is fully discharged; endpoints resolve in substrate-2.
+;;
+;; Sources (all inspected this session, not remembered):
+;;   git commits:
+;;     e41d771 2026-03-08 "M-codex-agent-behaviour VERIFY+INSTANTIATE: enforcement retry in WS bridge"
+;;       — THE repair; 4 files / +1160: scripts/codex_ws_invoke_bridge.clj (+205),
+;;         test/futon3c/agents/codex_enforcement_test.clj (+304, NEW),
+;;         scripts/test_enforcement_live.clj (+221, NEW), holes/missions/M-codex-agent-behaviour.md (+442).
+;;     aa8b24a 2026-02-21 "Add WS invoke bridge path and route IRC relay through agency invoke"
+;;       — created PATH B (the WS bridge IRC actually uses) that LACKED enforcement = the gap.
+;;     235d96c 2026-02-21 "Inline invoke-fns with evidence emission, agency topology docs"
+;;       — make-codex-invoke-fn: the PATH A (local invoke-fn) enforcement reference ported here.
+;;     083065e 2026-02-24 "Default Codex invokes to full access and forbid IRC_SEND wrappers"
+;;       — --sandbox danger-full-access + approval_policy=never (completion criterion #4).
+;;     f5c3e25 2026-02-21 "Enforce explicit surface contracts for Codex replies"
+;;       — irc-invoke-prompt surface contract (dev.clj); behavioural sibling of the enforcement retry.
+;;   code (public surface, read this session):
+;;     scripts/codex_ws_invoke_bridge.clj (parse-codex-output + tool-event?/command-event? +
+;;       enforcement predicates + execution/format-followup-prompt + handle-invoke-frame! retry wiring) ·
+;;     src/futon3c/agents/codex_cli.clj (run-codex-stream! / tool-event? / command-event? /
+;;       execution-evidence? — the ported classification logic) ·
+;;     dev/futon3c/dev.clj (make-codex-invoke-fn L4151 = PATH A reference; irc-invoke-prompt L4837) ·
+;;     src/futon3c/transport/http.clj (codex-task-no-execution? L2759 = aligned downstream check).
+;;   substrate-2 (:7071 code-graph, via cached calls/contains dumps /tmp/_calls.edn + /tmp/_contains.edn,
+;;     the live extract dated 2026-07-01): every endpoint node below resolves as a code/v05 var/namespace.
+;;   doc: futon3c/holes/missions/M-codex-agent-behaviour.md (want: harness upholds the Q→A contract
+;;     codex already satisfies natively; two invariants H-1 completeness + H-2 diagnosability).
+
+{:id :sorry/codex-agent-behaviour-enforced-invoke
+ :hx-type "code/v05/sorry"
+ :state :empirical                        ; recovered from ground truth, not proposed
+ :derivation :post-hoc-reconstruction
+
+ :want-signature "enforce-execution : (invoke-frame Q, codex-session) -> EnforcedInvokeResult"
+ :hungry-for "EnforcedInvokeResult"       ; the codomain: Q→A-complete (carries execution evidence,
+                                          ; or a structured error explaining why not) AND diagnosable
+                                          ; (structured execution evidence on EVERY outcome). = H-1 + H-2.
+
+ ;; ENDPOINTS — real substrate-2 code entities. :in-substrate2 confirmed against the :7071 code-graph
+ ;; (calls/contains dumps). Node ids are the canonical futon3c-d/<ns>/<fn> scheme actually present.
+ :endpoints
+ [{:role :have
+   :ref "scripts/codex_ws_invoke_bridge.clj — the WS bridge (PATH B), the locus of the fix"
+   :substrate2-id "futon3c-d/scripts.codex-ws-invoke-bridge"
+   :type "code/v05/namespace" :in-substrate2 true
+   :note "PATH B: registry has no invoke-fn → falls through to WS bridge → bare invoke-codex! with NO enforcement. This is the path IRC actually uses (aa8b24a); the whole mission fills the gap here."}
+  {:role :have
+   :ref "invoke-codex! — bare sh/sh `codex exec` call (the function being wrapped)"
+   :substrate2-id "futon3c-d/scripts.codex-ws-invoke-bridge/invoke-codex!"
+   :type "code/v05/var" :in-substrate2 true :note "substrate-2: calls=84 contains=12. Now returns :execution alongside :ok/:result/:session-id."}
+  {:role :have
+   :ref "parse-codex-output — NDJSON parser, expanded to COUNT tool/command events (H-2 precondition)"
+   :substrate2-id "futon3c-d/scripts.codex-ws-invoke-bridge/parse-codex-output"
+   :type "code/v05/var" :in-substrate2 true :note "calls=48 contains=12. Before: extracted only session-id + text. After e41d771: returns :execution {:tool-events N :command-events N :executed? bool}."}
+  {:role :have
+   :ref "tool-event? / command-event? — event classifiers ported from codex_cli.clj"
+   :substrate2-id "futon3c-d/scripts.codex-ws-invoke-bridge/tool-event? , /command-event?"
+   :type "code/v05/var (x2)" :in-substrate2 true :note "classify command_execution / tool_call NDJSON items; verbatim ports of codex-cli L165-186."}
+  {:role :have
+   :ref "enforcement-needed? / enforcement-reason + work-claim-without-execution? / task-reply-without-execution? / format-refusal? / no-execution-evidence? — H-1 detection predicates"
+   :substrate2-id "futon3c-d/scripts.codex-ws-invoke-bridge/{enforcement-needed?,enforcement-reason,work-claim-without-execution?,task-reply-without-execution?,format-refusal?,no-execution-evidence?}"
+   :type "code/v05/var (x6)" :in-substrate2 true :note "enforcement-needed? calls=48 contains=12; regexes copied verbatim from dev.clj (work-claim-re, task-mode-re, mission-work-re, format-excuse-re)."}
+  {:role :have
+   :ref "handle-invoke-frame! — the retry-wiring locus (detect → one retry → cap → return)"
+   :substrate2-id "futon3c-d/scripts.codex-ws-invoke-bridge/handle-invoke-frame!"
+   :type "code/v05/var" :in-substrate2 true :note "calls=132 contains=12. THE integration point: after invoke-codex!, checks enforcement-needed?, re-invokes with a followup prompt (one retry max), emits enforcement-retry + invoke-complete evidence."}
+  {:role :have
+   :ref "futon3c.dev/make-codex-invoke-fn — PATH A (local invoke-fn) enforcement REFERENCE that was ported"
+   :substrate2-id "futon3c-d/futon3c.dev/make-codex-invoke-fn"
+   :type "code/v05/var" :in-substrate2 true :note "calls=390 contains=12 (dev.clj L4151). The enforcement that ONLY ran on the :laptop local path (235d96c). The mission ports its logic to PATH B for parity."}
+  {:role :have
+   :ref "futon3c.agents.codex-cli/{run-codex-stream!, execution-evidence?, tool-event?, command-event?} — source of the ported classification logic"
+   :substrate2-id "futon3c-d/futon3c.agents.codex-cli/{run-codex-stream!,execution-evidence?}"
+   :type "code/v05/var" :in-substrate2 true :note "run-codex-stream! calls=114 contains=12. execution-evidence? contains=12 calls=0 — resolves as a var but the ingested code-graph shows no in-graph caller (see :reconstruction-gap)."}
+  {:role :have
+   :ref "futon3c.transport.http/codex-task-no-execution? — aligned downstream no-execution check"
+   :substrate2-id "futon3c-d/futon3c.transport.http/codex-task-no-execution?"
+   :type "code/v05/var" :in-substrate2 true :note "calls=84 contains=12 (http.clj L2759). The HTTP-invoke-path check the bridge enforcement is designed to align with (same standard: task-mode reply with no execution evidence)."}
+  {:role :have
+   :ref "futon3c.dev/irc-invoke-prompt — surface-contract prompt (behavioural sibling)"
+   :substrate2-id "futon3c-d/futon3c.dev/irc-invoke-prompt"
+   :type "code/v05/var" :in-substrate2 true :note "calls=24 contains=12 (dev.clj L4837, f5c3e25). The prompt-side complement: tells the agent not to claim work without artifact refs / not to invent line caps — the same two failure modes enforcement catches structurally."}
+  {:role :have
+   :ref "/api/alpha/evidence store (coordination evidence) — the diagnosability sink"
+   :type "HTTP evidence endpoint" :in-substrate2 false
+   :note "H-2 sink. Not a code node; the bridge POSTs invoke-start / enforcement-retry / invoke-complete entries with executed/tool-events/command-events/enforced-retry. Confirmed by reading emit-evidence! (bridge L345), not queryable as a code/v05 node."}
+  {:role :want
+   :ref "EnforcedInvokeResult — {:ok bool :result str :session-id str :execution {:tool-events N :command-events N :executed? bool :enforced-retry? bool}} on success, OR {:ok false :error str} on cap; every outcome emits invoke-complete evidence"
+   :type "EnforcedInvokeResult value" :in-substrate2 false
+   :note "the codomain the whole construction produces (H-1 completeness + H-2 diagnosability); a value-level shape, not a graph node."}]
+
+ ;; The load-bearing typed holes the construction had to discharge (the HARD parts):
+ :typed-holes
+ [{:at :execution-evidence-extraction
+   :wanted "parse-codex-output must COUNT tool/command events from the batch NDJSON — the original discarded the event stream, and with no counts NO enforcement decision is possible (this is the precondition for everything else, H-2)"
+   :discharged-by "e41d771 (parse-codex-output returns :execution map; tool-event?/command-event? ported verbatim from codex_cli.clj)"}
+  {:at :enforcement-parity-across-paths
+   :wanted "the same detect+retry that already guarded PATH A (make-codex-invoke-fn, local invoke-fn) must guard PATH B (WS bridge) — the path IRC actually uses; partial enforcement on one path is structurally indistinguishable from none (H-1)"
+   :discharged-by "e41d771 (predicates + retry wiring ported into handle-invoke-frame!; WS bridge now mirrors dev.clj L4395-4439)"}
+  {:at :bounded-retry-no-fake-done
+   :wanted "exactly ONE enforcement retry, then return a structured :error rather than surfacing non-evidenced 'done' text on IRC — unbounded retry loops forever, zero retries leaks fake completions"
+   :discharged-by "e41d771 (single retry cap in handle-invoke-frame!; second enforcement failure returns {:ok false :error ...:enforced-retry? true})"}
+  {:at :diagnosability-every-outcome
+   :wanted "every outcome — success, enforcement retry, terminal failure — emits structured evidence (executed?, tool-events, command-events, enforced-retry?, reason keyword) sufficient to diagnose the failure mode without reading bridge code (H-2)"
+   :discharged-by "e41d771 (emit-evidence! invoke-start / enforcement-retry / invoke-complete enriched with execution fields)"}
+  {:at :enforcement-retry-live-fire
+   :wanted "the enforcement-RETRY path fires end-to-end against a real codex that returned no execution (not just the happy path)"
+   :discharged-by "e41d771 in CODE + unit tests (test/futon3c/agents/codex_enforcement_test.clj: 16 tests / 103 assertions, 0 failures)"
+   :live-verification :mock-only
+   :note "The mission's live INSTANTIATE (Test 1/2/3, 2026-03-08) verified the HAPPY path live (codex executed, executed?=true, enforcement NOT triggered). The retry FIRING was verified only via dev.clj mock tests (dev-irc-summary-test) with simulated no-execution replies, and the modified bridge running against Linode with a live no-execution reproduction is a DEFERRED operational step. Grade: logic discharged + unit-verified; live retry-fire unverified."}]
+
+ ;; Deferred items recorded in the mission (NOT discharged — enrichment/hardening backlog):
+ :deferred
+ [{:item :option-c-consolidation
+   :status :open
+   :what "detection predicates + enforcement logic are DUPLICATED across scripts/codex_ws_invoke_bridge.clj, dev.clj (make-codex-invoke-fn), and the test file. Proper fix = move them into the codex-cli adapter so all invoke paths get enforcement automatically."
+   :why-open "acknowledged in the DERIVE trade-off summary + VERIFY decision log; the bridge script is not on the test classpath, so the test copies the pure fns. Option A (port) shipped; Option C (consolidate) did not."}
+  {:item :full-irc-end-to-end-modified-bridge
+   :status :open
+   :what "run the MODIFIED bridge against Linode Agency and send @codex <task> on IRC to exercise the retry path live; requires restarting the bridge with the new code (operational, not a code change)."}
+  {:item :enforcement-metrics
+   :status :open
+   :what "track enforcement trigger-rate over time to see if codex native execution improves/regresses."}]
+
+ :kind {:predecessor-shape :enforcement-on-one-path-only     ; PATH A (local invoke-fn) had it; PATH B (WS bridge) did not
+        :whats-new         :parity+evidence-extraction+bounded-retry+diagnosability
+        :target-territory  :mostly-known                     ; the reference impl existed (make-codex-invoke-fn); the
+                                                             ; sub-hole was that parse-codex-output discarded the event
+                                                             ; stream, surfaced in DERIVE §3.1, not mid-build
+        :fill-mechanism    :port-predicates+expand-parser+wrap-invoke+enrich-evidence}
+
+ :title "the harness upholds Q→A on the WS bridge path too — codex-behaviour enforcement (execution-evidence extraction · cross-path parity · bounded retry · diagnosable evidence)"
+ :provenance {:mission "futon3c/holes/missions/M-codex-agent-behaviour.md"
+              :status "COMPLETE (2026-03-08)"
+              :predecessor "M-codex-irc-execution (job state machine + evidence gating)"
+              :campaign "C-cascade-real"
+              :method "post-hoc empirical (doc + code + git + substrate-2), A-next, 2026-07-01"
+              :sealed-by "claude (this session)"
+              :for-blinded-study "A-next: reconstruct from cascade alone, score against this"}
+
+ ;; ENHANCEMENT (2): what substrate-2 could NOT answer by query alone — the enrichment backlog.
+ :reconstruction-gap
+ {:substrate2-answered
+  "The code-graph (calls/contains) confirmed EVERY endpoint node exists and resolves as a code/v05 var/namespace under the futon3c-d/<ns>/<fn> scheme (incl. scripts.* and futon3c.dev/* — the scripts and dev tree ARE ingested), plus the call topology (e.g. handle-invoke-frame! calls=132, make-codex-invoke-fn calls=390). So 'do the endpoints resolve?' is fully answerable from substrate-2."
+  :had-to-reconstruct-from-raw
+  [{:from :git
+    :what "WHICH commit introduced vs repaired each node (e41d771 the fix vs aa8b24a the gap-introducing WS-bridge add vs 235d96c the PATH-A reference). The code-graph is a single snapshot with no temporal/authorship provenance — :discharged-by shas are unrecoverable from substrate-2."}
+   {:from :code-body
+    :what "the regex CONTENT of the detection predicates (work-claim-re, format-excuse-re, task-mode-re) and the :execution map SHAPE {:tool-events :command-events :executed? :enforced-retry?}. substrate-2 carries the var NODE and its edges, not its body or the value-level types it produces."}
+   {:from :doc-prose
+    :what "the H-1/H-2 invariant semantics, the PATH-A-vs-PATH-B enforcement-gap diagnosis, and the 'partial enforcement ≡ none' argument. These are the mission's reasoning, not queryable structure."}
+   {:from :doc+test
+    :what "the verification GRADE — 16 tests / 103 assertions, and the crucial distinction that the retry FIRING is mock-verified only while the happy path is live-verified. substrate-2 has no test-outcome or verification-status facet."}
+   {:from :code-body
+    :what "WHY execution-evidence? shows calls=0 in the graph (defined + a var node, but no in-graph caller). Cannot tell dead-code from called-by-an-uningested-path without reading source — a genuine code-graph completeness gap."}]
+  :query-surface-gap
+  "The live /api/alpha/entity?id=<canonical> endpoint rejected every canonical id with {:layer 4 :reason :missing-required (:source :external-id)} — resolution-by-canonical-id is not exposed on that route; I confirmed resolution via the calls/contains dumps (the provided :7071 code-graph extract) and /api/alpha/hyperedges?type=code/v05/var instead. Worth a per-node canonical-id lookup route."}}

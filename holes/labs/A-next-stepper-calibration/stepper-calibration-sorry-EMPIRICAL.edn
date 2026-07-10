@@ -1,0 +1,108 @@
+;; stepper-calibration-sorry-EMPIRICAL.edn — the GROUND-TRUTH interface for
+;; M-stepper-calibration, recovered POST-HOC from the mission doc + code + git
+;; (A-next method, Joe 2026-07-01/02). #10/10 in the A-next gold corpus (M-fold-ansatz phase-2 ground truth). Pairs with the A-small wiring
+;; futon6/holes/clean/stepper-calibration.clean.edn → completes a full (cascade, sorry, wiring) TRIPLE.
+;;
+;; Sources (all inspected this session, not remembered):
+;;   git commits (futon3c, verified `git log -1`):
+;;     cc54f75 (Add M-stepper-calibration mission — the charter + triage table) ·
+;;     3412cb2 (Add proof peripheral: mode tracking / TryHarder / FM problem states — the stepper substrate) ·
+;;     11db0b2 (Add :corpus-check tool to proof peripheral — the retrieval endpoint) ·
+;;     9d36c5e (Wire corpus-check to futon3a venv + fix ProcessBuilder CWD — MiniLM text search live) ·
+;;     6c4f74a (Pin corpus-check sources in P1 stepper script) ·
+;;     dedd510 (Add arXiv escalation path to corpus-check for unresolved runs) ·
+;;     12005ba (Add P1 stepper golden path script) · 9bbac22 (Refactor P1 around framing-first strategy) ·
+;;     8c21423 (Fix corpus-check futon3a parsing + calibrate issue #11 → P1 RED) ·
+;;     1d17dd5 (Add P7 stepper golden path: framing-first gate for CW→manifold conflation) ·
+;;     66f0977 (Document P7 stepper calibration as RED) · e06673b (Fix 6 Codex review findings + regression tests)
+;;   code (public surface, futon3c):
+;;     src/futon3c/peripheral/proof_backend.clj — tool-corpus-check (l.1018; sources
+;;       :futon3a/:stackexchange-local/:arxiv-live, fail-closed) · search-futon3a (l.948; MiniLM
+;;       notions_search.py) · search-arxiv-live (l.919; escalation) · tool-failed-route-add (l.382; SR-8
+;;       append-only, requires :route/structural-obstruction) · tool-dag-check (l.196; SR-3 acyclicity) ·
+;;       gate-check G2 DAG (l.571)
+;;     src/futon3c/proof/bridge.clj — pb/corpus-check, pb/failed-route!, pb/ledger-upsert!, pb/cycle-begin!
+;;       (the /eval bridge exposing the tools to CLI agents)
+;;     scripts/proof-p1-stepper-golden-path.clj + scripts/proof-p7-stepper-golden-path.clj — the ONLY two
+;;       golden-path scripts that exist; each mints the L-* ledger obligations via upsert-obligation!
+;;       (L-claim-type → {L-preconditions, L-obstruction-scan} → L-bridge → L-conclusion) and runs the
+;;       two-layer (discipline vs domain) framing checkpoint. scripts/proof-p4-observe.clj tracks the P4
+;;       obligation DAG only (NOT the strategy-search calibration). scripts/proof-p10-{full-cycle,cycle2}.clj
+;;       are the P10 baseline. NO proof-p3 / proof-p6 script exists — Class B/C traces are SPEC, not run.
+;;   reports: futon3c/holes/qa/issue-11-stepper-calibration.md (P1 RED) ·
+;;     futon3c/holes/qa/p7-stepper-calibration.md (P7 RED)
+;;   doc: futon3c/holes/missions/M-stepper-calibration.md (Status: archived; IN PROGRESS —
+;;     P1 RED done, P7 RED done, P3 next; the 10-problem triage table + three error classes + exit criteria)
+;;   XTDB: not used — this calibration has no substrate-2 endpoints; the durable side is the futon1a
+;;     evidence-facet sink (docs/evidence-facets.md) that stepper traces feed, out of scope here.
+;;
+;; HONESTY NOTE (matches the wiring's "not linear-clean" framing): only Class A (P1,P7) was actually
+;; run to a RED calibration. Class B (P3) mechanism is specified in the mission but no script was written
+;; (:unverified). Class C (P4,P6) is OPEN pending the superpod structural-embeddings upgrade to corpus-check.
+;; The discharges below are graded accordingly — no fabricated closure.
+
+{:id :sorry/stepper-calibration-report
+ :hx-type "code/v05/sorry"
+ :state :empirical                        ; recovered from ground truth, not proposed
+ :derivation :post-hoc-reconstruction
+
+ :want-signature "calibrate-stepper : (10-first-proof-problems, framing-first-gate) -> calibration-report+arxiv-seed"
+ :hungry-for "calibration-report+arxiv-seed"   ; per problem, per corpus query: a GREEN/YELLOW/RED verdict;
+                                               ; the UNION of the RED cells across all 10 names the minimum
+                                               ; ArXiv seed set handed to the ArXiv pipeline (the mission's
+                                               ; aggregate exit criterion #7)
+
+ ;; ENDPOINTS — real code entities. :in-map = present in the inspected source/mission (there is no
+ ;; substrate-2 census for this mission; grounding is code + doc + git, not XTDB).
+ :endpoints
+ [{:role :have :ref "the 10 First Proof problems triaged by known official answer (mission §Problem Triage): Class A foundational P1,P7 (false premise) · Class B substitution P3 (standard→interpolation ASEP) · Class C missing-technique P4,P6 (hyperbolic-poly Hessians / modified BSS barrier) · baselines P2,P5,P8,P9,P10"
+   :type "problem set + triage table" :in-map true
+   :note "the triage table is authored in M-stepper-calibration.md (cc54f75); per-problem writeups live in futon6/data/first-proof/"}
+  {:role :have :ref "the framing-first gate as a per-problem ledger DAG: L-claim-type → {L-preconditions, L-obstruction-scan} → L-bridge → L-conclusion, minted by upsert-obligation! in the golden-path scripts; ordering enforced by :item/depends-on / :item/unlocks + tool-dag-check (SR-3) / gate-check G2"
+   :type "stepper gate (ledger obligations + DAG)" :in-map true
+   :note "NOT a standalone gate fn — the gate is the ledger dependency DAG, instantiated per problem in proof-p1/p7 scripts; the discipline signal (evidence-over-assertion) fires even with zero domain corpus data"}
+  {:role :have :ref "tool-corpus-check (proof_backend.clj l.1018) — sources :futon3a (MiniLM notions_search.py, l.948) + :stackexchange-local + :arxiv-live escalation (l.919); fail-closed on source availability; exposed to agents via proof/bridge.clj pb/corpus-check"
+   :type "corpus retrieval tool" :in-map true
+   :note "TEXT-ONLY today (MiniLM sentence embeddings over pattern/SE text); the text→wiring-diagram upgrade via superpod structural embeddings is the OPEN dependency (mission §Relationship to other work)"}
+  {:role :have :ref "tool-failed-route-add (proof_backend.clj l.382) — SR-8 append-only, requires :route/structural-obstruction; via pb/failed-route!"
+   :type "obstruction signal" :in-map true
+   :note "the recorded :route/structural-obstruction becomes the propose-phase corpus query (Class C mechanism)"}
+  {:role :have :ref "the propose/observe phase of a proof cycle (pb/cycle-begin! → observe checkpoint) where corpus-check fires against the structural obstruction"
+   :type "stepper cycle phase" :in-map true}
+  {:role :want :ref "calibration-report: every problem carries a stepper trace with a GREEN/YELLOW/RED verdict per corpus query, and the union of RED cells = the minimum ArXiv seed set handed to the ArXiv pipeline (exit criterion #7)"
+   :type "calibration-report+arxiv-seed value" :in-map false
+   :note "the codomain; realized fully only for P1+P7 (RED, seeds named); P2..P10 traces are partial/planned"}]
+
+ ;; The load-bearing typed holes, graded by what actually discharged them (P1/P7 real; P3 spec-only; P4/P6 open):
+ :typed-holes
+ [{:at :class-a-false-premise-caught
+   :wanted "the framing gate would have caught the P1/P7 false premise — at least at discipline level, keeping L-bridge blocked (L-preconditions open) while the premise is unverified"
+   :discharged-by "REAL: scripts/proof-p1-stepper-golden-path.clj (12005ba, 9bbac22) + scripts/proof-p7-stepper-golden-path.clj (1d17dd5); calibration reports holes/qa/issue-11-stepper-calibration.md (8c21423) + holes/qa/p7-stepper-calibration.md (66f0977). RED at DOMAIN level (0 framing-hits: no Hairer/Novikov corpus signal, P7 observed neighbors=35 hit-rate=0.00) but the DISCIPLINE-level gate correctly holds L-preconditions open and blocks L-bridge promotion."
+   :state :discharged}
+  {:at :class-b-variant-typed
+   :wanted "claim typing catches the variant mismatch: L-claim-type distinguishes F*_mu (asked) from F_eta (solved) before the bridge is built (standard vs interpolation ASEP polynomials)"
+   :discharged-by "SPEC ONLY — mechanism specified in M-stepper-calibration.md §Class B / §Planned P3 (L-claim-type + L-variant-match + standard-vs-interpolation corpus queries), but NO proof-p3 golden-path script was written and no calibration was run. Mission status: 'P3 next'."
+   :state :unverified}
+  {:at :class-c-missing-technique
+   :wanted "propose-phase search surfaces the missing technique (hyperbolic-polynomial Hessians for P4; modified BSS barrier for P6) from the :route/structural-obstruction recorded by :failed-route-add"
+   :discharged-by "OPEN — corpus-check is text-only (MiniLM); it does NOT surface the missing technique, it can at best name the minimum ArXiv seed. proof-p4-observe.clj tracks the P4 obligation DAG only; the strategy-search calibration (proof-p4/p6-stepper-strategy-search.clj) is planned, not written. Blocked on the superpod structural-embeddings upgrade of corpus-check from text to wiring-diagram search (mission §Relationship to other work / §Superpod run)."
+   :state :open}]
+
+ :kind {:predecessor-shape :uncalibrated-stepper
+        :whats-new         :error-class-calibrated+arxiv-seed-named
+        :target-territory  :partly-open      ; Class A closed at discipline level; Class B spec-only; Class C open
+        :fill-mechanism    :triage+per-class-gate-trace+aggregate-RED→arxiv-seed}
+
+ :title "calibrating the framing-first proof stepper on First Proof's 10 problems (gate-then-triage-then-discharge)"
+ :provenance {:mission "futon3c-d/mission/stepper-calibration"
+              :campaign "C-cascade-real"
+              :method "post-hoc empirical (doc + code + git; no XTDB), A-next, 2026-07-01/02"
+              :sealed-by "claude (this session)"
+              :cascade [:agent/evidence-over-assertion]   ; preserved from stub (the applied discipline pattern);
+                                                          ; the wiring folds 4 further candidates (hypothetical-proof-
+                                                          ; architecture, route-exploration-and-pivot, verify-before-
+                                                          ; compose, outline-first-detail-later) across s1..s6
+              :pairs-with-wiring "futon6/holes/clean/stepper-calibration.clean.edn"
+              :acceptance-terminals=endpoints "wiring s1 :produces :problem-triage (over the 10 problems = sorry :have); s6 :discharges :minimum-arxiv-seed-set (= sorry :want). MATCH. The wiring's open RED holes at s3/s5 correspond to sorry :typed-holes :state :discharged (discipline-level) / :open respectively; s4 is :unverified (spec-only)."}}
+</content>
+</invoke>

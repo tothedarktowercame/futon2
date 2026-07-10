@@ -1,0 +1,125 @@
+;; autoclock-in-sorry-CASCADE.edn — BLINDED reconstruction of M-autoclock-in's INTERFACE ("sorry")
+;; inferred FROM ITS PATTERN CASCADE ONLY (10 patterns), without reading the mission.
+;;
+;; Method mirror of E-fold-engine-sorry.edn: a sorry is a hyperedge over real substrate-2 endpoints.
+;; Here every endpoint is INFERRED from what the cascade patterns imply, not confirmed against the map.
+;; :in-map is therefore :unconfirmed almost everywhere by construction (the point of the blinding).
+;;
+;; CASCADE READ (what each pattern contributed):
+;;   on-demand (drivers):
+;;     coordination/session-durability-check .......... gate success on DURABLE persistence of the
+;;         proof-path + evidence; audit trail replayable after the session ends -> receipted records.
+;;     iching/hexagram-18-gu (Gǔ / repair decay) ...... morphism :degraded-state -> :repaired-state;
+;;         the mission REPAIRS a drift: clock-in state that was manual/missing/spoiled -> automatic.
+;;     invariant-coherence/state-snapshot-witness ..... periodic point-in-time projection of a
+;;         long-lived container as :event :state-snapshot evidence, one per boot/cycle, queryable.
+;;     sidecar/per-id-audit-timeline-linkage .......... per-id contiguous timeline across linked
+;;         records (proposal->promotion->fact); the clock records must be a per-id inspectable history.
+;;     social/tension-before-code ..................... invariants (delivery receipts, atomic
+;;         transitions, bounded lifecycle) written as proof-tests BEFORE the code they constrain.
+;;     storage/durability-throughput-gate ............. block success on durable commit; watchdog
+;;         ordering as invariant; write durable proof events to an audit log.
+;;   candidate (secondary):
+;;     agent/sense-deliberate-act ..................... the clock-in fires at an agent CYCLE BOUNDARY,
+;;         with scope/budget/confidence gates at phase edges (sense->deliberate->act).
+;;     invariant-coherence/shape-first-identify ....... treat clock-in as a SHAPE with >=2 instances
+;;         (namespace-discriminated siblings), not a one-off check.
+;;     library-coherence/library-readme-sync .......... coherence hygiene: keep the canon/README in
+;;         sync (weak signal; doc-freshness discipline around the shipped mechanism).
+;;     ukrns/model-recompute-schedule ................. WHEN the mechanism fires: event-driven vs
+;;         cadence-driven trigger; every output carries a timestamp + evidence-revision id.
+;;
+;; CONVERGENT INTERPRETATION:
+;;   "autoclock-in" = an automatic, trigger-scheduled mechanism that, at a session/agent-cycle
+;;   boundary, mints a DURABLE, WITNESSED, PER-ID clock/attendance record (a state-snapshot linked
+;;   into a per-id audit timeline), gated on durable commit — repairing the drift where clock-in
+;;   was previously manual, silent, or missing.
+
+{:id :sorry/autoclock-in-cascade-to-interface
+ :hx-type "code/v05/sorry"
+ :state :cascade-reconstructed
+ :derivation :blinded-from-cascade
+
+ ;; domain = the boundary event that should trigger a clock-in (a session/agent-cycle boot boundary);
+ ;; codomain = a durable, per-id, witnessed clock-in record committed through the evidence boundary.
+ :want-signature "autoclock-in : session-cycle-boundary -> DurableClockInRecord"
+ :hungry-for "DurableClockInRecord"   ; a per-id :event :clock-in snapshot, durably committed + timeline-linked
+
+ ;; ENDPOINTS — INFERRED substrate-2 endpoints. :in-map mostly :unconfirmed by blinding discipline.
+ :endpoints
+ [;; ---- HAVE (inputs the cascade implies already exist) ----
+  {:role :have
+   :ref "session/agent-cycle boundary signal (boot / sense-deliberate-act phase edge) that should trigger a clock-in"
+   :type "runtime-state-container / cycle-boundary event"
+   :in-map :unconfirmed
+   :note "driven by agent/sense-deliberate-act (act-at-boundary) + state-snapshot-witness (boot/cycle cadence)"}
+  {:role :have
+   :ref "trigger policy: event-driven vs cadence-driven recompute schedule (what makes autoclock-in fire, and how often)"
+   :type "schedule/trigger policy"
+   :in-map :unconfirmed
+   :note "driven by ukrns/model-recompute-schedule; every emitted record must carry timestamp + evidence-revision id"}
+  {:role :have
+   :ref "durable evidence store / write boundary (the single boundary all clock-in writes traverse)"
+   :type "evidence-store hyperedge sink (durable, XTDB-backed)"
+   :in-map :unconfirmed
+   :note "driven by session-durability-check (G0) + storage/durability-throughput-gate (block on durable commit)"}
+  {:role :have
+   :ref "sidecar per-id store (store.clj / inspect.clj) carrying per-id linked timelines"
+   :type "code/v05/namespace (sidecar/store, sidecar/inspect)"
+   :in-map :unconfirmed
+   :note "driven by sidecar/per-id-audit-timeline-linkage; clock-in records get threaded into a per-id history"}
+  {:role :have
+   :ref "prior drifted/manual clock-in state (the :degraded-state to be repaired)"
+   :type "runtime-state-container (spoiled / manual / silent)"
+   :in-map :unconfirmed
+   :note "driven by iching/hexagram-18-gu — the repair morphism's source object"}
+
+  ;; ---- WANT (the codomain to pin) ----
+  {:role :want
+   :ref "durable per-id clock-in record: :event :clock-in (state-snapshot-shaped) committed through the boundary + linked into the per-id audit timeline"
+   :type "evidence entry / hyperedge (:event :clock-in) — codomain type to pin"
+   :in-map :unconfirmed
+   :note "state-snapshot-witness gives the :event shape + per-cycle cadence; session-durability-check makes it durable+receipted; per-id-audit-timeline-linkage makes it a queryable per-id history; hexagram-18-gu makes it the :repaired-state"}]
+
+ ;; TYPED HOLES — the hard sub-obligations the cascade implies must be discharged.
+ :typed-holes
+ [{:at :durable-commit-gate
+   :wanted "the clock-in is acknowledged/success ONLY after the record is durably committed + receipted; a persistence failure rejects success (no accepted-but-not-stored silent loss)"
+   :from "coordination/session-durability-check + storage/durability-throughput-gate"}
+  {:at :snapshot-shape
+   :wanted "the clock-in record is a full point-in-time state projection tagged :event :clock-in (state-snapshot subtype), EDN-serialisable, filtered to semantically-meaningful state — one query returns one snapshot"
+   :from "invariant-coherence/state-snapshot-witness"}
+  {:at :per-id-timeline-linkage
+   :wanted "each clock-in is threaded into a contiguous per-id audit timeline (linked to related lifecycle records), not an isolated append-only log entry"
+   :from "sidecar/per-id-audit-timeline-linkage"}
+  {:at :trigger-schedule
+   :wanted "declare WHEN autoclock-in fires (event-driven at cycle boundary vs cadence vs hybrid); every emitted record carries a timestamp + evidence-revision id; maintain a recompute/fire log"
+   :from "ukrns/model-recompute-schedule"}
+  {:at :repair-of-drift
+   :wanted "the mechanism converts the prior :degraded-state (manual/missing/silent clock-in) into the :repaired-state (automatic, witnessed) — clear the corruption before progress resumes"
+   :from "iching/hexagram-18-gu"}
+  {:at :invariants-before-code
+   :wanted "the guarantees (durable delivery receipt, atomic clock-in state transition, bounded lifecycle, loud failure) are specified as failing proof-tests BEFORE the implementation they constrain"
+   :from "social/tension-before-code"}
+  {:at :cycle-boundary-fire
+   :wanted "the clock-in is emitted as the ACT phase of a sense-deliberate-act cycle boundary, with scope/budget/confidence gates checked at the phase edge"
+   :from "agent/sense-deliberate-act"}
+  {:at :shape-not-instance
+   :wanted "treat clock-in as a SHAPE (>=2 namespace-discriminated instances of who/what clocks in) or record :special-case true explicitly — do not ship the literal one-off"
+   :from "invariant-coherence/shape-first-identify"}]
+
+ ;; KIND — derived from the hole typology implied by the cascade (repair + durable-record-minting).
+ :kind {:predecessor-shape :manual->automatic        ; hexagram-18-gu: repair a drifted/manual state
+        :whats-new         :boundary-triggered-durable-writer  ; a mechanism, not a pure function
+        :target-territory  :mostly-known              ; shapes exist (snapshot/sidecar/durability); wiring is the hole
+        :fill-mechanism    :write-gated-emitter}      ; emit-through-boundary + durable-commit gate
+ :rating 0.6                                          ; blinded; endpoints unconfirmed against the map
+
+ :title "autoclock-in — automatic cycle-boundary emitter of durable, witnessed, per-id clock-in records (repair of manual/missing clock-in drift)"
+ :provenance {:derivation :blinded-from-cascade
+              :by "claude (Opus 4.8), blinded reconstruction experiment"
+              :inputs-used "10-pattern cascade only (6 on-demand + 4 candidate) + their flexiarg definitions + E-fold-engine-sorry.edn template"
+              :blinding "did NOT read M-autoclock-in.md, *autoclock* files, clock_lineage.clj, clock_store.clj, the A-next-autoclock-in ground truth, or their git history"
+              :template "futon3a/holes/labs/M-memes-arrows/E-fold-engine-sorry.edn"
+              :uncertainty ":in-map is :unconfirmed by design — endpoints are inferred, not queried against /api/alpha/hyperedges"
+              :minted-at "2026-07-01"}}

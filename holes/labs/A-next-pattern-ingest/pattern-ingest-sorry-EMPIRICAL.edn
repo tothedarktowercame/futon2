@@ -1,0 +1,119 @@
+;; pattern-ingest-sorry-EMPIRICAL.edn — the GROUND-TRUTH interface for M-pattern-ingest,
+;; recovered POST-HOC from the mission doc + code + git + XTDB (A-next method, 2026-07-01).
+;; #6/10 in the A-next gold corpus (M-fold-ansatz phase-2 ground truth). Pairs with the
+;; A-small wiring futon6/holes/clean/pattern-ingest.clean.edn → completes a (cascade, sorry,
+;; wiring) TRIPLE.
+;;
+;; HONEST HEADLINE (the distinguishing find, verified this session): unlike the n=2 CLOSED
+;; missions sealed before it, M-pattern-ingest is at **IDENTIFY (2026-05-26)** — ARGUE is empty,
+;; VERIFY/INSTANTIATE are optative. So the want-signature is REAL (the mission specifies it) and
+;; ONE hole is substantially discharged by the live ingest, but the three load-bearing holes
+;; (sigil canonicaliser · provenance witness · TSV-demotion) are UNBUILT in the live substrate.
+;; The :discharged-by fields below say :open + are marked :unverified rather than fabricating a
+;; commit — this is the correction over the wiring-grounded stub, which invented "v1 projector",
+;; "learn-as-you-go canonicaliser", "deterministic pattern-origin emit", "TSV demotion" as if done.
+;;
+;; Sources (all inspected this session, not remembered):
+;;   git commits: 50866d6 (D3 slice 2 — shared structural emitter; the code that WRITES
+;;     code/v05/pattern-slot in futon3c/watcher/file_ingest.clj) · 5664147 (canonical flexiarg
+;;     parser futon.flexiarg.projection, "flexiarg-v0") · f19f7b4 (patterns census: pattern/library
+;;     4635 + pattern/clause 6299 landed, keyed by pattern/id) · a85d4cb (sigil cleanup + allowlist
+;;     enforcement) · c0a6f08 (印章 chops sigil-validation service) · 12f73e7/8f9a413 (build_pattern_index
+;;     generator — STILL reject-on-invalid, the predecessor the mission wants to replace).
+;;   code (public surface): futon3c/src/futon3c/watcher/file_ingest.clj (pattern-slot-edge-doc L1088-1095,
+;;     slot-text-props L1086) · futon3c/src/futon3c/watcher/projections/flexiarg.clj (packet->var,
+;;     packet-slots, :pattern/sigil-pending) · futon3a/src/futon/flexiarg/projection.clj (parse-block,
+;;     "flexiarg-v0") · futon3/scripts/build_pattern_index.clj (parse-inline-sigils = reject-on-invalid) ·
+;;     futon3/scripts/sigil_allowlist.clj + futon3/holes/tokipona.org (the allowlist ground truth) ·
+;;     futon3/src/futon3/chops.clj (sigil validation).
+;;   XTDB (localhost:7071, queried live this session):
+;;     code/v05/pattern-slot   → count 1600  (LIVE; endpoints [pattern-qname slot/<name>],
+;;                                            props :slot/text :slot/name :slot/index :source-file :repo)
+;;     code/v05/pattern-origin → count 0     (EMPTY — no emitter exists in code anywhere; hole OPEN)
+;;     code/v05/related-to     → count 0     (EMPTY — pilot inference move never run; hole OPEN)
+;;   TSV: futon3/resources/sigils/patterns-index.tsv — 1259 rows, **385 with literal unknown/unknown**
+;;     in the rationale column (NOT the "~144" the stub carried: 144 was one build run's count of
+;;     invalid sigil *tokens*, logged as "Ignored 144 invalid sigil tokens"; the current count of
+;;     unknown/unknown *rows* is 385).
+;;   doc: futon3/holes/missions/M-pattern-ingest.md (IFR: "the flexiarg file system is a checked-out
+;;     projection of an XTDB record authoritative for pattern semantics"; status IDENTIFY 2026-05-26;
+;;     M-1..M-5 open in MAP; Joe's 2026-05-26 call: sigil canonicalisation is MECHANICAL not consent-gated).
+
+{:id :sorry/pattern-ingest-substrate-authority
+ :hx-type "code/v05/sorry"
+ :state :empirical                        ; recovered from ground truth, not proposed
+ :derivation :post-hoc-reconstruction
+ :mission-maturity :identify              ; ← the honest distinguisher: mission barely started;
+                                          ;   most holes below are OPEN, not discharged
+
+ :want-signature "ingest-pattern : (flexiarg, patterns-index-tsv, sigil-allowlist) -> substrate-authoritative-vertex"
+ :hungry-for "substrate-authoritative-vertex"   ; the codomain: rich Toulmin-slotted vertex ·
+                                                ; canonical-or-pending sigil · provenance-linked ·
+                                                ; XTDB the single authority (the TSV a derived checkout)
+
+ ;; ENDPOINTS — real substrate-2 / code entities. :in-map from live XTDB census + source + git inspection.
+ :endpoints
+ [{:role :have :ref "the flexiarg: Toulmin-slotted structure (IF/HOWEVER/THEN/BECAUSE + orchestration-namespace RELATED/DOES-NOT-APPLY/INSTANCES extensions), parsed by futon.flexiarg.projection/parse-block"
+   :type "pattern source" :in-map true
+   :note "the shape-check precondition; parser at futon3a/src/futon/flexiarg/projection.clj (5664147)"}
+  {:role :have :ref "code/v05/var vertex + code/v05/pattern-slot edges (one per named clause, props :slot/text :slot/name :slot/index :source-file :repo)"
+   :type "substrate-2 hyperedge" :in-map true
+   :note "LIVE: pattern-slot count 1600 on :7071 (verified this session). Emitted by futon3c/watcher/file_ingest.clj pattern-slot-edge-doc (L1088-1095), fed by projections/flexiarg.clj packet-slots. This is schema choice M-1(a) — hyperedge-per-slot, individually queryable — realized, NOT the M-1(b) single-content-doc alternative"}
+  {:role :have :ref "the sigil allowlist (emoji-set from tokipona.org, hanzi-set) via futon3/scripts/sigil_allowlist.clj + futon3/holes/tokipona.org + chops validation service (chops.clj)"
+   :type "canonicalisation ground truth" :in-map true
+   :note "REAL and present (a85d4cb, c0a6f08). Sigil validity is checkable against this → mechanical, NOT consent-gated (Joe's 2026-05-26 call, mission out-of-band note). This is the ground truth a canonicaliser WOULD verify against — but the canonicaliser is not yet built"}
+  {:role :have :ref "code/v05/pattern-origin hyperedge (introducing commit-sha + first-proposing Evidence entry)"
+   :type "provenance hyperedge" :in-map false
+   :note ":unverified / OPEN — count 0 on :7071, and grep finds NO emitter in futon3c/futon3 source. This is mission open-question M-3 (how to link the retroactively-true case); the schema is named in Scope-IN 3 but nothing writes it"}
+  {:role :have :ref "patterns-index.tsv (385 unknown/unknown rationale rows — the lost-authority artifact)"
+   :type "TSV file" :in-map true
+   :note "futon3/resources/sigils/patterns-index.tsv, 1259 rows, 385 unknown/unknown (verified via grep; corrects stub's ~144 = one run's invalid-token log). Built by build_pattern_index.clj which STILL rejects-on-invalid (parse-inline-sigils → note-invalid! → nil). The mission demotes this to a DERIVED view; today it is still an independent (broken) authority"}
+  {:role :want :ref "substrate-authoritative-record: zero unknown/unknown rationale rows, fully reconstructible from substrate-2 props, plus one cross-pattern inference move (code/v05/related-to edges) impossible against v0 props"
+   :type "substrate-authoritative-vertex value" :in-map false
+   :note "the codomain the whole construction produces; related-to count 0 on :7071 → the inference move (M-5 opt ii) is NOT yet run. This :want is the mission's VERIFY invariant set, currently unrealized"}]
+
+ ;; The load-bearing typed holes. :discharged-by cites a REAL commit/mechanism where one exists;
+ ;; :open + :unverified where the mission has not built it (verified against code + live XTDB).
+ :typed-holes
+ [{:at :lossless-toulmin-projection
+   :wanted "the projected vertex + slot edges are a faithful, lossless projection of the flexiarg's Toulmin structure — every authored clause round-trips as an individually-queryable pattern-slot edge"
+   :status :partially-discharged
+   :discharged-by "50866d6 (file_ingest shared structural emitter — pattern-slot-edge-doc) + projections/flexiarg.clj packet-slots; LIVE, 1600 pattern-slot edges on :7071"
+   :caveat "the projector self-reports :pattern/projection-version \"flexiarg-v0\" — the stub's \"v1 projector\" is aspirational naming; slots+title+conclusion ARE on the vertex, so this hole is substantially the closest to discharged of the four"}
+  {:at :sigil-canonical-or-pending
+   :wanted "for each invalid sigil, assign a defensible canonical (emoji,hanzi) with ≥2 agreeing signals (auto-rewrite + git-commit, original preserved) OR fall through to explicit :sigil/pending — never a forced guess, never unknown/unknown"
+   :status :open
+   :discharged-by :open
+   :unverified true
+   :caveat "NOT built. build_pattern_index.clj still does reject-on-invalid (parse-inline-sigils returns nil + note-invalid!). The projector computes only a WEAK :pattern/sigil-pending = (sigil contains \"?\"), which is \"?\"-detection, not allowlist canonicalisation. The allowlist ground truth (sigil_allowlist.clj + tokipona.org) exists; the verified three-step canonicaliser (mission Scope-IN 2, M-2 settled) does not. This is the mission's headline sub-hole and its success metric (fraction of 385 confidently canonicalised)"}
+  {:at :provenance-witness
+   :wanted "each newly-ingested pattern carries a code/v05/pattern-origin edge with a non-trivial witness (introducing commit-sha + first-proposing Evidence entry, or operator-asserted origin for legacy patterns)"
+   :status :open
+   :discharged-by :open
+   :unverified true
+   :caveat "NOT built. pattern-origin count 0 on :7071; no emitter in source. Open mission question M-3 (retroactively-true case: the orchestration patterns were authored in chat, outside a flexiarg-proposed evidence event)"}
+  {:at :substrate-is-authority
+   :wanted "post-mission the TSV carries zero unknown/unknown rows and is reconstructible entirely from substrate-2 props — the file system becomes a checkout of the vertex"
+   :status :open
+   :discharged-by :open
+   :unverified true
+   :caveat "NOT done. 385 unknown/unknown rows remain in patterns-index.tsv; the TSV is still built by an independent reject-on-invalid script, not regenerated from substrate props. Depends on the sigil-canonical hole first"}]
+
+ :kind {:predecessor-shape :tsv-authority+unknown-sigils+bare-vertex   ; reject-on-invalid TSV (385 unknown/unknown) + partial vertex
+        :whats-new         :rich-vertex+canonical-sigil+provenance+substrate-authority
+        :target-territory  :largely-unexplored                         ; IDENTIFY-stage: M-1 slot-schema SETTLED to (a) & live;
+                                                                       ; M-2 auto-rewrite bar settled in doc but UNBUILT;
+                                                                       ; M-3 provenance, M-4 shape-rejection, M-5 inference-move OPEN
+        :fill-mechanism    :shape-gate+project-slots+canonicalise-sigil+link-origin+demote-tsv
+        :fill-status       :first-step-live-rest-unbuilt}              ; only project-slots is realized
+
+ :title "rich pattern projection with mechanical sigil canonicalisation — XTDB as authority (shape-gate-then-enrich-then-demote-authority)"
+ :provenance {:mission "futon3-d/mission/pattern-ingest (futon3/holes/missions/M-pattern-ingest.md)"
+              :mission-status "IDENTIFY (2026-05-26); ARGUE empty; VERIFY/INSTANTIATE optative"
+              :campaign "C-cascade-real"
+              :method "post-hoc empirical (doc + code + git + XTDB), A-next, 2026-07-01"
+              :sealed-by "claude (this session)"
+              :cascade [:realtime/learn-as-you-go]                     ; PRESERVED from stub (the applied wiring cascade)
+              :pairs-with-wiring "futon6/holes/clean/pattern-ingest.clean.edn"
+              :acceptance-terminals=endpoints
+              "wiring s1 :produces :shape-checked-pattern (from the flexiarg = sorry :have); s6 :discharges :substrate-query-cross-pattern-inference (= sorry :want, the related-to inference move). MATCH on the endpoints. CAVEAT (honest): the wiring holes at s3/s4/s5 (canonicalise / provenance / TSV-demote) are typed but, per live XTDB (pattern-origin=0, related-to=0) and code (reject-on-invalid still live), UNDISCHARGED — the wiring is a fold of the mission's INTENT, not of shipped code"}}

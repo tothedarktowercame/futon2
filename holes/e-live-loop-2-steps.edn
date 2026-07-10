@@ -88,6 +88,9 @@
      :out "missing: []"}
     {:at "2026-07-06T09:28:11.830747864Z",
      :pass true,
+     :out "missing: []"}
+    {:at "2026-07-06T09:33:51.894029822Z",
+     :pass true,
      :out "missing: []"}]}
   {:id "2c",
    :title "seed prior treatment (no 2.398-nat fine)",
@@ -128,6 +131,10 @@
      :out
      "cx: {'extend-library-not-proof': 0.647, 'is-this-even-a-problem': 0.647, 'sorry-boundary-clustering': 0.647, 'status-refresh-before-work': 0.647, 'stuck-means-signal': 0.647, 'typed-hole-as-frontier': 0.647} EMB-missing: [] nonseed-drift: [] wired: True"}
     {:at "2026-07-06T09:28:12.924971889Z",
+     :pass true,
+     :out
+     "cx: {'error-needs-structure-to-teach': 0.647, 'extend-library-not-proof': 0.647, 'ghost-as-typed-sorry': 0.647, 'is-this-even-a-problem': 0.647, 'sorry-boundary-clustering': 0.647, 'status-refresh-before-work': 0.647, 'stuck-means-signal': 0.647, 'typed-hole-as-frontier': 0.647, 'warrant-travels-wit"}
+    {:at "2026-07-06T09:33:53.501593128Z",
      :pass true,
      :out
      "cx: {'error-needs-structure-to-teach': 0.647, 'extend-library-not-proof': 0.647, 'ghost-as-typed-sorry': 0.647, 'is-this-even-a-problem': 0.647, 'sorry-boundary-clustering': 0.647, 'status-refresh-before-work': 0.647, 'stuck-means-signal': 0.647, 'typed-hole-as-frontier': 0.647, 'warrant-travels-wit"}]}
@@ -301,6 +308,46 @@
      :out
      "ft-action-vocabulary-005: sha-match + replay + dG re-assert OK (dG -0.7391304347826086; arming word \"Yes both are fine, lets proceed with 002\")\n  ft-aif-faithfulness-001: sha-match + replay + dG re-assert OK (dG -0.5555555555555556; arming word \"Joe 2026-07-06 ~09:45: 5-agent commissio\")\n  ft-aif-"}
     {:at "2026-07-06T09:03:49.711977338Z",
+     :pass true,
+     :out
+     "ft-action-vocabulary-005: sha-match + replay + dG re-assert OK (dG -0.7391304347826086; arming word \"Yes both are fine, lets proceed with 002\")\n  ft-aif-faithfulness-001: sha-match + replay + dG re-assert OK (dG -0.5555555555555556; arming word \"Joe 2026-07-06 ~09:45: 5-agent commissio\")\n  ft-aif-"}
+    {:at "2026-07-06T10:49:29.245004888Z",
+     :pass true,
+     :out
+     "ft-action-vocabulary-005: sha-match + replay + dG re-assert OK (dG -0.7391304347826086; arming word \"Yes both are fine, lets proceed with 002\")\n  ft-aif-faithfulness-001: sha-match + replay + dG re-assert OK (dG -0.5555555555555556; arming word \"Joe 2026-07-06 ~09:45: 5-agent commissio\")\n  ft-aif-"}
+    {:at "2026-07-06T11:02:50.548494226Z",
+     :pass true,
+     :out
+     "ft-action-vocabulary-005: sha-match + replay + dG re-assert OK (dG -0.7391304347826086; arming word \"Yes both are fine, lets proceed with 002\")\n  ft-aif-faithfulness-001: sha-match + replay + dG re-assert OK (dG -0.5555555555555556; arming word \"Joe 2026-07-06 ~09:45: 5-agent commissio\")\n  ft-aif-"}
+    {:at "2026-07-06T11:50:10.108576410Z",
+     :pass true,
+     :out
+     "ft-action-vocabulary-005: sha-match + replay + dG re-assert OK (dG -0.7391304347826086; arming word \"Yes both are fine, lets proceed with 002\")\n  ft-aif-faithfulness-001: sha-match + replay + dG re-assert OK (dG -0.5555555555555556; arming word \"Joe 2026-07-06 ~09:45: 5-agent commissio\")\n  ft-aif-"}
+    {:at "2026-07-06T11:50:17.707888149Z",
+     :pass true,
+     :out
+     "ft-action-vocabulary-005: sha-match + replay + dG re-assert OK (dG -0.7391304347826086; arming word \"Yes both are fine, lets proceed with 002\")\n  ft-aif-faithfulness-001: sha-match + replay + dG re-assert OK (dG -0.5555555555555556; arming word \"Joe 2026-07-06 ~09:45: 5-agent commissio\")\n  ft-aif-"}
+    {:at "2026-07-06T14:12:11.949804293Z",
+     :pass true,
+     :out
+     "ft-action-vocabulary-005: sha-match + replay + dG re-assert OK (dG -0.7391304347826086; arming word \"Yes both are fine, lets proceed with 002\")\n  ft-aif-faithfulness-001: sha-match + replay + dG re-assert OK (dG -0.5555555555555556; arming word \"Joe 2026-07-06 ~09:45: 5-agent commissio\")\n  ft-aif-"}
+    {:at "2026-07-06T14:45:21.441319389Z",
+     :pass true,
+     :out
+     "ft-action-vocabulary-005: sha-match + replay + dG re-assert OK (dG -0.7391304347826086; arming word \"Yes both are fine, lets proceed with 002\")\n  ft-aif-faithfulness-001: sha-match + replay + dG re-assert OK (dG -0.5555555555555556; arming word \"Joe 2026-07-06 ~09:45: 5-agent commissio\")\n  ft-aif-"}
+    {:at "2026-07-06T14:50:31.099778263Z",
+     :pass true,
+     :out
+     "ft-action-vocabulary-005: sha-match + replay + dG re-assert OK (dG -0.7391304347826086; arming word \"Yes both are fine, lets proceed with 002\")\n  ft-aif-faithfulness-001: sha-match + replay + dG re-assert OK (dG -0.5555555555555556; arming word \"Joe 2026-07-06 ~09:45: 5-agent commissio\")\n  ft-aif-"}
+    {:at "2026-07-07T11:00:30.419286889Z",
+     :pass true,
+     :out
+     "ft-action-vocabulary-005: sha-match + replay + dG re-assert OK (dG -0.7391304347826086; arming word \"Yes both are fine, lets proceed with 002\")\n  ft-aif-faithfulness-001: sha-match + replay + dG re-assert OK (dG -0.5555555555555556; arming word \"Joe 2026-07-06 ~09:45: 5-agent commissio\")\n  ft-aif-"}
+    {:at "2026-07-07T11:46:36.663634064Z",
+     :pass false,
+     :out
+     "GATE 2f FAIL — rejected deposits: [:prompt-not-reconstructable]\nfold-turn REJECTED [prompt-not-reconstructable] /home/joe/code/futon6/data/fold-turns/ft-pattern-mining-011.edn: pin 1B: stored c24682258308eac0e41bcd61dce154c3cfa18c0cb8050cb7a393ff9b3e0e44c6 vs reconstructed c00d458411b346c1c042b62601"}
+    {:at "2026-07-07T11:47:48.159213119Z",
      :pass true,
      :out
      "ft-action-vocabulary-005: sha-match + replay + dG re-assert OK (dG -0.7391304347826086; arming word \"Yes both are fine, lets proceed with 002\")\n  ft-aif-faithfulness-001: sha-match + replay + dG re-assert OK (dG -0.5555555555555556; arming word \"Joe 2026-07-06 ~09:45: 5-agent commissio\")\n  ft-aif-"}]}

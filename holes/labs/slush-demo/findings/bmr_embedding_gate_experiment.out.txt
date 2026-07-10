@@ -1,0 +1,135 @@
+Corpus: 560 edges, 232 patterns, 94 missions
+Multi-mission patterns: 118
+Embeddings loaded: 1055 patterns
+
+========================================================================
+EXPERIMENT 1: Reproduce the BMR over-merge
+========================================================================
+Patterns (in >=2 missions): 118
+Outcome dim (missions): 94
+Pairs to score: 6903
+Accepted (dF <= -3): 6903
+Rejected: 0
+delta-F range: [-33.70, -6.45]
+delta-F mean: -11.41
+Concepts after merge: 1
+Largest concept: 118 patterns
+→ OVER-MERGE CONFIRMED
+
+========================================================================
+EXPERIMENT 2: Embedding-gated merge (cosine floor sweep)
+========================================================================
+Computing pairwise cosines...
+
+  Floor=0.4: pairs_above_floor=6902 accepted=6902 concepts=1 (1 multi-member, 0 singletons)
+    [118] aif-as-environment-not-instruction, all-or-nothing, append-only-semantic-audit, argue-by-contradiction, argue-empirically-not-persuasively, baldwin-ratchet-defeats-darkroom, baseline-cyber-ant, belief-aware-risk-term, ... (118 total)
+         avg intra-cos=0.580
+
+  Floor=0.5: pairs_above_floor=6444 accepted=6444 concepts=1 (1 multi-member, 0 singletons)
+    [118] aif-as-environment-not-instruction, all-or-nothing, append-only-semantic-audit, argue-by-contradiction, argue-empirically-not-persuasively, baldwin-ratchet-defeats-darkroom, baseline-cyber-ant, belief-aware-risk-term, ... (118 total)
+         avg intra-cos=0.580
+
+  Floor=0.6: pairs_above_floor=2363 accepted=2363 concepts=1 (1 multi-member, 0 singletons)
+    [118] aif-as-environment-not-instruction, all-or-nothing, append-only-semantic-audit, argue-by-contradiction, argue-empirically-not-persuasively, baldwin-ratchet-defeats-darkroom, baseline-cyber-ant, belief-aware-risk-term, ... (118 total)
+         avg intra-cos=0.580
+
+  Floor=0.7: pairs_above_floor=172 accepted=172 concepts=31 (7 multi-member, 24 singletons)
+    [80] aif-as-environment-not-instruction, argue-by-contradiction, baldwin-ratchet-defeats-darkroom, baseline-cyber-ant, belief-aware-risk-term, belief-state-operational-hypotheses, block-as-futonic-revolution, candidate-pattern-action-space, ... (80 total)
+         avg intra-cos=0.591
+    [3] interest-event-vocabulary, reachable-from-boot, state-snapshot-witness
+         avg intra-cos=0.682
+    [3] negative-space-duality, pattern-as-strategy, scope-chain-tracking
+         avg intra-cos=0.703
+    [2] append-only-semantic-audit, explicit-promotion-to-facts
+         avg intra-cos=0.779
+    [2] hierarchical-budget-aware-action-selection, mana-gated-work
+         avg intra-cos=0.731
+
+  Floor=0.8: pairs_above_floor=7 accepted=7 concepts=111 (6 multi-member, 105 singletons)
+    [3] loop-failure-signals, loop-recovery-actions, loop-success-signals
+         avg intra-cos=0.810
+    [2] baseline-cyber-ant, hunger-precision-coupling
+         avg intra-cos=0.831
+    [2] belief-state-operational-hypotheses, state-is-hypothesis
+         avg intra-cos=0.804
+    [2] constraint-tension-resolution, parametric-tension-dissolution
+         avg intra-cos=0.917
+    [2] maturity-evidence-audit, prototype-maturity-lifecycle
+         avg intra-cos=0.907
+
+========================================================================
+EXPERIMENT 3: Threshold sensitivity (cosine floor=0.6)
+========================================================================
+  cutoff=  -3: pairs_scored=2363 accepted=2363 concepts=1 (multi=1, largest=118)
+  cutoff= -10: pairs_scored=2363 accepted=1427 concepts=1 (multi=1, largest=118)
+  cutoff= -20: pairs_scored=2363 accepted=163 concepts=43 (multi=1, largest=76)
+  cutoff= -30: pairs_scored=2363 accepted=5 concepts=113 (multi=2, largest=5)
+
+  --- floor=0.7 ---
+  cutoff=  -3: pairs_scored=172 accepted=172 concepts=31 (multi=7, largest=80)
+  cutoff= -10: pairs_scored=172 accepted=129 concepts=44 (multi=7, largest=65)
+  cutoff= -20: pairs_scored=172 accepted=24 concepts=96 (multi=5, largest=12)
+  cutoff= -30: pairs_scored=172 accepted=0 concepts=118 (multi=0, largest=1)
+
+  --- floor=0.8 ---
+  cutoff=  -3: pairs_scored=7 accepted=7 concepts=111 (multi=6, largest=3)
+  cutoff= -10: pairs_scored=7 accepted=6 concepts=112 (multi=5, largest=3)
+  cutoff= -20: pairs_scored=7 accepted=0 concepts=118 (multi=0, largest=1)
+  cutoff= -30: pairs_scored=7 accepted=0 concepts=118 (multi=0, largest=1)
+
+========================================================================
+EXPERIMENT 4: Recommended (floor, cutoff)
+========================================================================
+
+  Full grid (floor × cutoff → #concepts / #multi / largest):
+  floor cutoff concepts multi largest accepted
+    0.4     -3        1     1     118     6902
+    0.4    -10        1     1     118     3785
+    0.4    -20        1     1     118      336
+    0.4    -30      110     2       8        8
+    0.5     -3        1     1     118     6444
+    0.5    -10        1     1     118     3536
+    0.5    -20        6     1     113      314
+    0.5    -30      110     2       8        8
+    0.6     -3        1     1     118     2363
+    0.6    -10        1     1     118     1427
+    0.6    -20       43     1      76      163
+    0.6    -30      113     2       5        5
+    0.7     -3       31     7      80      172
+    0.7    -10       44     7      65      129
+    0.7    -20       96     5      12       24
+    0.7    -30      118     0       1        0
+    0.8     -3      111     6       3        7
+    0.8    -10      112     5       3        6
+    0.8    -20      118     0       1        0
+    0.8    -30      118     0       1        0
+
+  NO (floor, cutoff) gives 5-30 concepts without a degenerate mega-cluster.
+  → The count representation IS the wrong substrate for BMR at this dimension.
+  → Lean harder on embeddings for concept formation.
+
+  Best available (floor=0.8, cutoff=-3):
+  → 111 concepts (6 multi-member clusters)
+    [3] (avg cos=0.810)
+        loop-failure-signals
+        loop-recovery-actions
+        loop-success-signals
+    [2] (avg cos=0.831)
+        baseline-cyber-ant
+        hunger-precision-coupling
+    [2] (avg cos=0.804)
+        belief-state-operational-hypotheses
+        state-is-hypothesis
+    [2] (avg cos=0.917)
+        constraint-tension-resolution
+        parametric-tension-dissolution
+    [2] (avg cos=0.907)
+        maturity-evidence-audit
+        prototype-maturity-lifecycle
+    [2] (avg cos=0.858)
+        protocol-family-naming
+        shape-first-identify
+
+========================================================================
+DONE — exploratory findings, not a committed artifact
+========================================================================

@@ -1,0 +1,89 @@
+12 patterns: 7 C2-core + 3 C8-added + 2 C1-added
+Mission sets loaded for 12/12
+
+========================================================================
+TEST 1: Raw co-occurrence (embedding-INDEPENDENT mission overlap)
+========================================================================
+
+  WITHIN-C2 (core AIF, baseline) (21 pairs):
+    Jaccard:  mean=0.4004  median=0.4167  range=[0.1818, 0.6667]
+    Shared:   mean=3.62  median=4.0  range=[2, 5]
+
+  CROSS-BOUNDARY (C2×C8/C1, the merge ADDS these) (35 pairs):
+    Jaccard:  mean=0.1628  median=0.1538  range=[0.0667, 0.3750]
+    Shared:   mean=1.89  median=2.0  range=[1, 3]
+
+  WITHIN-ADDED (among the 5 added members) (10 pairs):
+    Jaccard:  mean=0.1186  median=0.0774  range=[0.0000, 0.4444]
+    Shared:   mean=1.40  median=1.0  range=[0, 4]
+
+  Cross-boundary / within-C2 Jaccard ratio: 0.41
+  VERDICT: cross-boundary moderately below within-C2 → PARTIAL support
+  → Some added members co-occur genuinely; others may be overreach
+
+  Cross-boundary pairs (sorted by Jaccard desc):
+    J=0.375 shared=3  evidence-precision-registry × loop-failure-signals
+    J=0.300 shared=3  aif-as-environment-not-instruction × learn-as-you-go
+    J=0.273 shared=3  candidate-pattern-action-space × loop-failure-signals
+    J=0.273 shared=3  structured-observation-vector × loop-failure-signals
+    J=0.231 shared=3  candidate-pattern-action-space × learn-as-you-go
+    J=0.231 shared=3  structured-observation-vector × learn-as-you-go
+    J=0.222 shared=2  aif-as-environment-not-instruction × loop-failure-signals
+    J=0.222 shared=2  policy-precision-commitment-temperature × loop-failure-signals
+    J=0.222 shared=2  term-to-channel-traceability × loop-failure-signals
+    J=0.214 shared=3  expected-free-energy-scorecard × learn-as-you-go
+  ...
+    J=0.083 shared=1  structured-observation-vector × par-as-obligation
+    J=0.077 shared=1  expected-free-energy-scorecard × par-as-obligation
+    J=0.067 shared=1  aif-as-environment-not-instruction × structural-tension-as-observation
+    J=0.067 shared=1  expected-free-energy-scorecard × structured-events-only
+    J=0.067 shared=1  term-to-channel-traceability × structural-tension-as-observation
+
+========================================================================
+TEST 2: Live usage (co_app edges from real cascades)
+========================================================================
+  Total live co_app edges: 382
+
+  WITHIN-C2:     12/21 pairs appear (57.1%)
+  CROSS-BOUNDARY: 3/35 pairs appear (8.6%)
+  WITHIN-ADDED:  0/10 pairs appear
+  Patterns of the 12 appearing in ANY live edge: 8/12
+    ['aif-as-environment-not-instruction', 'candidate-pattern-action-space', 'expected-free-energy-scorecard', 'loop-failure-signals', 'policy-precision-commitment-temperature', 'structural-tension-as-observation', 'structured-observation-vector', 'term-to-channel-traceability']
+
+  Cross/within rate ratio: 0.15
+  VERDICT: cross-boundary pairs rarely co-apply
+  → WEAKENS the merge claim
+
+========================================================================
+TEST 3: Qualitative — flexiarg titles for the 5 ADDED members
+========================================================================
+
+  C2 CORE (7) — for reference:
+    aif-as-environment-not-instruction: AIF as Environment, Not Instruction
+    candidate-pattern-action-space: Candidate Pattern Action Space
+    evidence-precision-registry: Evidence Precision Registry
+    expected-free-energy-scorecard: Expected Free Energy as Multi-Term Scorecard
+    policy-precision-commitment-temperature: Policy Precision as Commitment Temperature
+    structured-observation-vector: Structured Observation Vector
+    term-to-channel-traceability: Term-to-Channel Traceability
+
+  ADDED (5) — do these read as AIF/active-inference?
+    learn-as-you-go: Capture Realtime Learnings as Patterns  ← AIF-adjacent
+    loop-failure-signals: Realtime Loop Failure Signals  ← AIF-adjacent
+    structured-events-only: Prefer Structured PSR/PUR Events  ← AIF-adjacent
+    structural-tension-as-observation: Structural Tension Is the Observation Vector for Library Evolution  ← AIF-adjacent
+    par-as-obligation: PAR as Obligation (G0)  ← NOT obviously AIF
+
+  4/5 added members read as AIF-adjacent by title
+
+========================================================================
+OVERALL VERDICT
+========================================================================
+  Test 1 (co-occurrence ratio 0.41): WEAKENS
+  Test 2 (live usage 8.6% vs 57.1%): WEAKENS
+  Test 3 (4/5 AIF-adjacent): SUPPORTS
+
+  → AIF-12 merge is OVERREACH (2/3 signals weaken)
+  → Recovery ceiling confirmed; constellation granularity vindicated.
+
+[Exploratory findings, not committed]
