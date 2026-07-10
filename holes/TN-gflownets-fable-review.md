@@ -265,3 +265,14 @@ already landed, futon3a 32dcb09); (2) LEARN the reward from fold outcomes
 coverage as a feature, not the reward; (3) coverage keeps the anti-gaming
 controls (still PASS at n=12). Full analysis:
 `labs/slush-demo/findings/fold_grain_expansion_findings.md`.
+
+## Plan of record — 2026-07-10 (Joe ratified): Slice 2-live, the full loop
+
+The reward-before-generator gating is retired for the live loop (it remains the
+right rule for offline claims): the GFN goes on NOW as the loop's diverse
+proposer at low β, with every flown proposal externally adjudicated. Full spec:
+`labs/slush-demo/SPEC-full-loop-gfn.md` (loop diagram, learned reward R̂,
+scoreboard S1–S4 with today's baselines, kill criterion, build list B1–B5,
+mint lane for new patterns). Preregistered in `~/code/p4ng/main-2026.tex`
+§Preregistration (dated 2026-07-10, S3 baseline AUC 0.542 @ n=12 vs null-95
+0.854): the paper is the preregistration; the SPEC is its operational twin.
