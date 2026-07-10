@@ -416,3 +416,24 @@ plan (owners, 5 restraints, kill criteria carried from sec:prereg).
 **NEXT (operator steer):** batch 3 proposals generated under the RETRAINED R̂
 (the learning loop's first genuine turn) — recommend targeting missions whose
 wants are dischargeable so S1/S2 accrue non-tie labels; B4 at JVM window.
+
+## Checkpoint — 2026-07-10 (claude-2: the mission-transfer ablation + runner contract)
+
+**Ablation (introduced POST-HOC, after seeing batch-2 data — labeled as such
+per the preregistration's honesty rule; S3's definition is unchanged, this is
+a reported secondary curve): leave-one-MISSION-out AUC = 0.722, below its
+null-95 (0.769), vs leave-one-record-out 0.907.** Reading: a substantial part
+of S3's climb is mission-signature learning — R̂ generalizes within missions
+it has labels for but does not yet transfer to unseen missions. Small-n
+caveats apply (n=15 over 10 mission groups), but the design implication is
+immediate and changes batch-3 shape: LABEL BREADTH ACROSS MISSIONS now matters
+more than label depth on the current three. Both curves get reported from now
+on; the research question is answered only when the TRANSFER curve clears its
+null.
+
+**RUNNER-CONTRACT.md added** (operator feedback: the gate-discipline
+correction reached zai-2 at flight 5 of 6 — it belongs in the first bell).
+Exact gate invocations with "a pass PRINTS OK, paste that line", blinding,
+scope, stop-on-blocker, and the honesty conventions the runners themselves
+minted. Every future runner receives it in the WELCOME bell before any
+assignment.
