@@ -282,8 +282,50 @@ the evidence slice: poll-since; state the entity-slice bound). The zaif
 harness doc now exists: `M-zaif-harness.md`. M-a-sorry-enterprise remains
 on the critical path for *auditable* γ (v1), not for the working v0.
 
+## D1 ACCEPTANCE — VERIFIED 2026-07-11 (built live on lucy, claude-5)
+
+**D1 is INSTANTIATED and accepted.** FTS5 embedded in the futon1b store
+JVM per the decided P2: `futon1b_text.clj` (candidate pre-filter +
+per-candidate XTDB re-check — the chalk-note semantics at the app
+layer), route `GET /api/alpha/evidence/text-search` (+`?stats=true`,
+penholder-gated POST catch-up), `memory-search` `:text` filter (envelope
+unchanged, items gain BM25 `:score`), refresh riding the append path.
+unicode61 tokenizer, no stemming — chosen so the oracle stays exact.
+
+**Acceptance bar, item by item:**
+- *Oracle agreement:* `fts_oracle.clj` — exhaustive scan over the
+  author=joe since-2026-06-01 subset (1,525 docs) vs sidecar answers:
+  **10/10 queries AGREE exactly** (5 single-term across frequency bands
+  incl. a zero-hit negative control, 3 AND, 2 OR).
+- *Deterministic rebuild:* compound (at, id) keyset checkpoint; the
+  sidecar file is derived data, delete-and-rebuild safe. Proven live —
+  the build survived two JVM restarts (one deliberate WAL fix, one
+  GC-spiral ratchet) resuming exactly at checkpoint both times.
+- *Seam preserved:* structured memory-search calls untouched; `:text`
+  optional.
+- *Sync contract (P3, decided):* refresh rides the append path; measured
+  staleness ≈ 4s (nonce append → BM25-ranked hit). on-append never
+  advances the catch-up checkpoint (interrupted-build skip hazard).
+
+**Build ledger (findings committed to futon1b README):** :at-only keyset
+pagination spun on bulk-import tie plateaus → compound (at, id);
+rollback-journal mode let writers block readers (SQLITE_BUSY on a stats
+read) → WAL; full-build page scans heat XTDB caches over the whole table
+→ 1536m heap GC spiral at ~73% → checkpoint-ratchet restarts, no heap
+bumps (stop-rule honored). Final: **94,430 rows** over the full evidence
+corpus; live appends index in steady state (≈4s; errors flat post-build).
+
+The two zaif consumers named in P4 are unblocked — ranked C-inference
+retrieval (`text+author+since`, BM25) and retroactive correction-lexicon
+scans — plus the foundry's issue-text matching (M-a-sorry-enterprise
+checkpoint 2026-07-11). Remaining here: **D2** (the #5637 evidence
+packet, Joe-gated) and the deferred follow-on scope (prefix/phrase/
+relevance-beyond-BM25).
+
 ## Log
 
+- 2026-07-11 (night) — **D1 ACCEPTED** (section above): oracle 10/10,
+  94,430 rows, live-append staleness ≈4s. futon1b `ea696ce`…`706f16d`.
 - 2026-07-11 — P4 answered from the zaif frame; P2 lean recorded; zaif seed
   design + p4ng linkage logged (checkpoint above).
 - 2026-07-11 (later) — **P2 DECIDED: FTS5** (Joe). Harness doc spun out to
