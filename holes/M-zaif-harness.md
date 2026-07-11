@@ -533,6 +533,56 @@ Design guidance from PZ1's own findings:
   vocabulary: **✘ correction · ✓ approval** — the two halves of the γ
   precision ledger, operator-authored, precision 1.0 by construction.
 
+## U1 — transcript persistence (started 2026-07-11, Joe's go)
+
+**What:** persist the agent side of the loop — zai's per-round self-talk
+and tool calls — as typed evidence. The `sink!` stream in zai_api.clj
+already carries exactly the right events, but it feeds the in-memory
+invoke-jobs ring buffer (display-grade, gone on restart): that is why
+zai-1's claims about its own past tool args were unadjudicable in the
+first live demo. U1 is a persistence tee beside the sink.
+
+**Design (implemented in `futon3c.agents.zai-api`):**
+- One evidence entry per tool ROUND (not per call): `:event :turn-round`,
+  `:round N`, `:final bool`, `:text` (assistant self-talk, 4KB cap),
+  `:calls [{:tool :args :result} …]` — args as pr-str EDN (2KB cap),
+  results as **digest only** (sha256-16 + char count + 240-char preview):
+  semantic act records, never raw transport envelopes (the
+  emit-invoke-evidence! policy respected).
+- Shape: `:type :coordination`, `:claim-type :step`, author = agent-id,
+  session-id = zai sid, tags `[:transcript :turn-round]`. Volume bounded
+  by the round budget (~1–25 entries/turn; the watcher-event lesson).
+- Fire-and-forget future; store resolved dynamically via
+  `futon3c.dev/!evidence-store` + `boundary/append!` (requiring-resolve),
+  so (a) a persistence failure can never hurt a turn, (b) a namespace
+  reload hot-swaps it into already-registered invoke closures, (c) a
+  swapped backend is honoured. Kill switch: `FUTON3C_ZAI_TRANSCRIPT=0`.
+- Pollution check done before building: rehydration reads the
+  invoke-jobs ledger, boot-packet reads identity/clock/git — neither
+  touches evidence by session-id, so transcripts cannot flood the
+  prompt path.
+
+**Why it's the zaif prerequisite:** adjudication gets a second leg (audit
+what the worker DID, not just rerun what it claimed); the operator's ✘
+gets a referent (correction edges need the agent's act in the store);
+Z2/Z3 score from the record (asks per outcome, corrections per act need
+both sides of the transcript).
+
+**Acceptance:** scripted zai-1 probe (read a known file + echo a nonce),
+then verify from the store that the recorded rounds carry the expected
+tool names, args, and the nonce in the result digest — the store's
+account of the turn, not the agent's.
+
+**VERIFIED (2026-07-11):** hot-reloaded into the running JVM (Drawbridge;
+no restart, zai-1's session preserved — run-tool-rounds! is a top-level
+var precisely so reloads reach registered closures). Probe ran; the store
+shows round 1 = `read_file {:path "/home/joe/code/futon1b/README.md"
+:limit 40}` + `run_shell {:command "echo u1-transcript-probe-2026-07-11"}`
+with result digests (nonce visible in the preview), round 2 = final reply,
+no calls. The question that was unadjudicable in the first demo — "what
+did you actually run?" — is now answered by the store. v0 CLOSED; the ✘
+referent and the Z2/Z3 scoring substrate exist from this point forward.
+
 ## Log
 
 - 2026-07-11 (later still) — **retry PASSED on the original unpinned
