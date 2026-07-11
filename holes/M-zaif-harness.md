@@ -269,6 +269,46 @@ futon3c `limit/ephemeral pushdown when membership is server-decidable`
    the operator said" — the controller's channel taxonomy should mark
    which tools can bear on which beliefs.
 
+## HANDOFF LOG (claude-5 driving via checked handoffs to zai-1 — Joe, 2026-07-11)
+
+Protocol: each handoff is a :have→:want packet, pre-flighted against five
+checks (capability / closure / external adjudicator / size / blast radius)
+before the bell; outcomes adjudicated externally by claude-5 and recorded
+as tagged evidence — each adjudication is itself a claimed-vs-verified
+pair, i.e. the γ-ledger's event stream, generated while building its
+consumer.
+
+### H1 — PZ1 slice 1: correction-lexicon sample scan (dispatched 2026-07-11)
+
+**:have** — the futon1b evidence API on 127.0.0.1:7074 (read-only GETs;
+windowed; author/type/claim-type/since/before/limit params); bb on PATH;
+the v0 lexicon (in the packet, three ledger routes: :gamma policy markers,
+:c-channel intent markers, :actand world-model markers); operator chat
+turns identifiable as type=coordination, claim-type=question, author=joe,
+tags incl. chat/turn/user.
+
+**:want** — two files under `futon2/holes/labs/M-zaif-harness/`:
+`pz1_lexicon_scan.clj` (bb script, args: --since --max-docs, pages the
+API by :at cursor, extracts all string values from :evidence/body, scans
+case-insensitively, no writes elsewhere) and `pz1-sample-scan.edn`
+(`{:sample {…params :docs-scanned n} :counts {marker→n per route}
+:hits [{:id :at :route :marker :snippet≤120ch} …]}`) from a run with
+--since 2026-06-01 --max-docs 2000.
+
+**Acceptance (external):** `bb pz1_lexicon_scan.clj --since … --max-docs
+50` exits 0 rerun by claude-5; EDN parses; ≥5 random :hits ids re-fetched
+from the store and the marker verified present in that doc's body; counts
+= hits aggregation; `git status` shows only the two files. **No commits**
+(operator-directed commits only).
+
+**Pre-flight:** capability PASS (shell+files+HTTP GET only) · closure
+PASS (endpoint, params, lexicon, shapes all in-packet) · adjudicator PASS
+(rerun + spot re-fetch, independent of zai's report) · size PASS (one
+script + one run) · blast radius PASS (read-only API; writes confined to
+two named lab files).
+
+Adjudication: pending bellback.
+
 ## Log
 
 - 2026-07-11 (later still) — **retry PASSED on the original unpinned
