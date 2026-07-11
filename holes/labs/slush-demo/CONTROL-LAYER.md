@@ -133,11 +133,16 @@ to act on, the action is a NEW preregistered proposer arm, not a quiet edit.
   must produce the psi's EXACT expression (zai-7, B6-F8). Design acceptance
   accordingly: TRUE flights get correctness bars, FALSE flights get
   evidence bars.
-- Psi-ambition confound (OPEN operator decision, batch 7): richer cascades
-  draw more conjunctive psis from blind folders, which discharge less at
-  flight scale — S1/S2 partly measures psi ambition. Mitigations on the
-  table: obligation-count covariate in the paired test; fixed psi-scope
-  budget in the folder contract; per-obligation discharge rates.
+- Psi-ambition confound — RESOLVED (Joe, 2026-07-11, batch 7 onward):
+  PER-OBLIGATION DISCHARGE ACCOUNTING. Psis enumerate their obligations as
+  an explicit list (folder contract); adjudication records carry
+  :obligations-total and :obligations-discharged alongside the boolean
+  (booleans still feed R̂ unchanged); the PAIRED comparison uses
+  discharge-rate-per-obligation, neutralizing psi ambition without
+  constraining psi authorship. Rejected: fixed scope budget (flattens real
+  signal), covariate model (overkill at small n). Note: batch-6 flight
+  reports already adjudicated per-conjunct — this formalizes existing
+  practice.
 - Instrument flights (probes/monitors) must CALIBRATE against known truth
   before reporting (B6-F3: a port probe declared dead the very port carrying
   its own bell traffic). A monitoring artifact's acceptance includes one

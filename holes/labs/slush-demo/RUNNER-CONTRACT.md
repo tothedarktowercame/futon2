@@ -96,3 +96,7 @@ reviewer; warrants cover which/how within the envelope, never whether-outward.
   ABSTRACTION absorbs to ONE :full box (neither pattern alone is complete);
   same-move-different-PHASE absorbs to one :partial box (the earlier phase is
   met, the later is not).
+- Psi obligations ENUMERATED (batch 7 onward): the psi's HUNGRY-FOR states
+  its obligations as an explicit numbered list (mechanical counting for
+  per-obligation adjudication). Author the want honestly first, then
+  enumerate — the list expresses the psi, it does not budget it.
