@@ -193,7 +193,98 @@ kept out of git).
 session → P2 engine choice (now informed by the hot-term/HUD findings) → P3
 sync contract. Loose end: lucy's git key cannot reach the futon1b GitHub repo.
 
+## CHECKPOINT — 2026-07-11: P4 answered from the zaif frame; sidecar moves to the critical path
+
+Joe + claude (Fable, lucy session, while the futon1b operational switchover's
+Phase C ran in the background). The discussion that answered P4 also produced
+the seed design for a **zaif profile** (AIF within a known-to-be-interactive
+loop) — recorded here because the sidecar turns out to be its perception
+substrate; the harness design gets its own doc when Joe calls for it.
+
+### P4 — query surface (ANSWERED)
+
+The first consumers are the zaif controller's needs, in order:
+
+1. **C-inference retrieval**: `text + author + since` composition
+   ("operator-authored evidence matching these terms, recency-weighted"),
+   small k, **ranked** — retrieval is a G-scored epistemic action, so scores
+   matter, not just membership.
+2. **The γ event stream**: correction detection is *lexical/semantic over
+   turn text* ("not", "instead"; agent self-talk "I should have used…"), not
+   a formal claim-type (Joe, one of the key ideas in M-a-sorry-enterprise).
+   Session-mode tags give turn boundaries; the index makes the lexicon
+   runnable — including **retroactively over the 90k-turn corpus**, so
+   precision bootstraps from history instead of cold-starting.
+3. **Sorry prose**: text within `:sorry/title` / `:want` descriptions and
+   terminal names/docstrings (see backoff note below).
+
+Composition with existing seam filters (tags, session-id) required; phrase/
+prefix/relevance beyond BM25 stay out of POC scope as before.
+
+### P2 — lean recorded (decision still open)
+
+FTS5 embedded **in the futon1b store JVM** (a route beside
+`/api/alpha/memory/search`; lucy stays at two JVMs, the §12.3 envelope stays
+the single recall surface, index refresh rides the write path — safe because
+evidence is append-only, P1's 1.000 finding). BM25 is not a later nicety in
+the zaif frame; ranked retrieval is what the controller consumes. D2 caveat
+to state for JUXT: FTS5 tokenizer findings transfer less directly than a
+Lucene analysis chain would.
+
+### The zaif seed (discussion record, 2026-07-11)
+
+- Per-turn controller arms: **retrieve / act / ask / yield**, G-compared.
+  Retrieve is the new arm the sidecar creates: EIG about the operator's
+  latent C priced in tokens, not attention. EIG estimable pre-query from
+  index statistics (posting-list sizes ≈ IDF).
+- **Three precision ledgers**, routed by the correction lexicon + sorry
+  typing: γ(cascade) policy precision (R14 — cascades not atomic patterns:
+  the WM trades in cascades, and they are semilattices, seq + copar);
+  C-channel precision (R7 on the operator model — "not what I meant");
+  actand-indexed error precision (R7 on the world model — "that doc was
+  stale"; actands become first-class under M-a-sorry-enterprise).
+- **Asymmetric admissibility**: agent self-talk may only *lower* its own
+  precisions (self-criticism); only operator text or a discharged sorry may
+  raise them — preserves no-self-certification.
+- **Event streams**: v0 = lexical corrections over session-tagged turns
+  (available now, retro-bootstrappable); v1 = interface-sorry discharge
+  ledger (`:have→:want`+`:hungry`) once M-a-sorry-enterprise is worked
+  through — upgrades γ from proxy-graded to auditable.
+- **Backoff for sparse cells**, in trial order: (1) sorry **terminal
+  overlap** (Jaccard over have/want endpoint sets — free, auditable; Joe:
+  structural embeddings have disappointed before, so earn them); (2) shared
+  prose-embedding space (sorry titles/wants + terminal docstrings into the
+  same space as pattern→mission); (3) learned structural embedding only on
+  demonstrated residual.
+- **Cold start**: γ0 from the operator lane (silent/brief/nag); new cells at
+  the uniform prior, matching the WM mint lane.
+- **Update rule**: port the R14 fold from the WM — do not invent math.
+
+### p4ng linkage (post da7389b — "armed but latent" is stale)
+
+The updated paper binds this thread to the WM line three ways:
+
+1. The §Preregistration **stopping rule routes here**: if S3 fails its null
+   after two reward revisions (≥40 flown folds), "the question routes to
+   explicit operator-interest modelling" — i.e., zaif is the preregistered
+   continuation, not a side quest.
+2. **Label rate is the binding constraint** (2 of the first 21 escrowed
+   deposits ever flown). Operator turns are the dense adjudication channel;
+   zaif feeds the same fold with orders more labels.
+3. The paper's Zai future-work paragraph names the next transplant:
+   "the harness does not yet compute G; preferences and selection are the
+   natural next transplant" — with recall-as-typed-query already validated
+   against the live corpus through this mission's seam.
+
+**Next, revised:** D2 comment draft (unchanged, Joe-gated) → P2 decision
+(FTS5-in-store-JVM lean above) → D1 build → zaif harness doc when Joe calls
+it. M-a-sorry-enterprise remains on the critical path for *auditable* γ
+(v1), not for the working v0.
+
 ## Log
+
+- 2026-07-11 — P4 answered from the zaif frame; P2 lean recorded; zaif seed
+  design + p4ng linkage logged (checkpoint above).
 
 - 2026-07-10 — mission authored (Fable session) from the #5637 assessment
   conversation with Joe. P1 is the car; nothing dispatched yet.
