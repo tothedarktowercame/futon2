@@ -346,6 +346,16 @@ where external adjudication caught what the worker's report obscured.
 First negative event in the γ stream. Remediation: H2b (regenerate probe
 half in-window; hits half retained).
 
+**H2b adjudication (2026-07-11): PASS.** Full re-verification (worker's
+"verified locally" given no weight): 120 items; hits half byte-stable
+(43/9/8, all ∈ H1, 18/18 markers); probes 60/60 in-window
+(2026-06-01T10:41 → 2026-07-10T09:36, 17 days); disjoint from hits; 5/5
+store spot-checks VERIFIED. Worker's root-cause account (missing :since
+param; fix adds param + defensive local filter + assertion) is consistent
+with the observed failure mode. Sheet committed. H3 dispatched: zai-1
+labels blind from :context only; claude-5 labels independently; gold pass
+to Joe on disagreements + random slice.
+
 Plan to PZ1 close: H3 = independent blind labels (zai-1 by handoff, claude-5
 directly), mechanical agreement, disagreements + random slice (~20) to Joe as
 the gold pass (operator labels decide; agent labels propose — admissibility
