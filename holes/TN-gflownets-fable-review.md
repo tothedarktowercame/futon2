@@ -623,3 +623,57 @@ Mission yields shipped: watcher-coverage bimodality (V-1 = fix watcher, not
 recompute); D-7.5 vocabulary = computation not design; Q-classpath GREEN;
 P-framework already embedded in hinge-log (DR-3 → one use-data question);
 trip-journal protective apparatus fully expressed (the TRUE).
+
+## Checkpoint — 2026-07-12 early (claude-2 overnight): BATCH 7 COMPLETE — THE FLIP-THRESHOLD VERDICT, and the run-off tilts
+
+Overnight execution under operator delegation (Joe, 2026-07-11 late). Batch 7:
+5 prose-and-code missions, 10 folds (zai-9/zai-10 parallel lanes, zero
+reviewer fixes incl. the 19->12 LANE RECORD that broke the compression curve
+UPWARD with zero non-contributors — the counter-evidence fold), 10 cross-lane
+flights (one revision total across the batch: none — batch 6's F3 was the
+last), ALL 20 artifacts matching preregistration. First full per-obligation
+accounting: adjudication rulings logged both directions (two runners ruled
+DOWN on strictness, one ruled UP on citation-discharge — doctrine, not mood).
+
+**THE TRANSFER VERDICT (the batch's purpose): LOMO below null for the FOURTH
+consecutive time — 0.666 vs 0.667 at n=39/22 groups. The flip threshold is
+reached; the mission-conditional-features diagnosis is now OFFICIAL.** Honest
+texture: the gap has collapsed (0.047 -> 0.059 -> 0.047 -> 0.001) — labels
+ARE slowly buying transfer, but converging too slowly to wait on. The
+features slice (pattern-mission affinity; per-mission wiring priors; the
+wiring corpus conditioned on mission group) is now the justified next reward
+revision — AND minting continues regardless; they compose. PROPOSAL FOR JOE,
+not started: M-mission-conditional-reward, drafted on request.
+
+**THE RUN-OFF (first de-confounded pairs): batch-7 discharge-rate pairs go
+4-1 INCUMBENT** (weird-modernism 1.00-0.00, cold-chain 0.67-0.60,
+a-sorry-enterprise 0.09-0.00, peeragogy 0.50-0.20 to the incumbent;
+hypergraph-operator 0.60-0.17 to the GFN). Cumulative sign test: 8
+informative pairs, 6-2 incumbent, 6 ties — two-sided p ~= 0.29, NOT decisive,
+but leaning. RESIDUAL CONFOUND (honest): rate normalizes obligation COUNT,
+not FEASIBILITY CLASS — the wm pair's GFN psi was 4/5 scholar-practice vs the
+incumbent's 5/5 artifact obligations. Flyable-only view of batch 7: 3 INC /
+2 ties / 0 GFN — same lean. Queued for Joe: whether to add feasibility-class
+tagging (artifact/practice/outward) to the enumeration convention.
+
+**S3 margin now razor-thin: 0.683 vs null 0.661 at n=39** (v0 ref 0.760) —
+passing, 5th consecutive, but the heterogeneous-label squeeze continues.
+Kill-criterion arithmetic: 36 flown folds of 40; revision 1 banked; S3
+passing. One more batch crosses 40 flown — if S3 still passes there, the
+criterion retires un-tripped.
+
+Mission yields (10 flights, every one left a tool or a diagnosis): the first
+person-facing JSDQ operator view; the S4-craft no-sorry confirming-negative;
+the two-sorry-populations discovery; the registry-was-already-an-event-log
+finding; the cold-chain honest-counter WITNESSED + the T2.2 retroactive
+under-report correction documented; recurrence-as-ratification computable;
+the corpus-yield-vs-author-hopes finding (6 hoped candidates -> 2 real);
+2 quarantined flexiarg candidates; anchor stewardship 5/5 TRUE with the
+Parr-Friston-reinforces-anchors THEORETICAL RESULT; tiered handoff drafts.
+Prose-mission thesis CONFIRMED: library covers hermeneutic/organisational
+surfaces, missing the formal-physics surface (mint queue: generalised-free-
+energy-grounding, double-witnessed).
+
+Runners: zai-10 = first double-shift in loop history (6 folds + 4 flights,
+zero fixes); zai-9 = 4 folds + 6 flights, zero fixes. The contract survived
+its second consecutive batch unchanged.
