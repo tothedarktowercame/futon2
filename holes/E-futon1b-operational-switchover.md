@@ -308,6 +308,47 @@ make dev
 Phase B complete. Remaining: Phase C gates 1-4 (boot-and-iterate on
 lucy), then Phase D backfill.
 
+## 2026-07-11 — Phase C live on lucy: the stack is RUNNING on futon1b
+
+futon1b server on :7074 (`switchover-store`, fresh) + `make dev-linode`
+with the Gate-1 env. Iteration log, in order:
+
+1. **localhost strikes again**: first boot's check failed "unreachable"
+   — the store JVM binds IPv4-only (preferIPv4Stack), the dev JVM
+   resolved localhost→::1. Use `127.0.0.1` URLs everywhere; backend
+   default fixed (futon3c `882fb3f`).
+2. **Gate 1 PASS** (second boot): futon1a DISABLED, futon1b backend, boot
+   check OK, zero exceptions. The boot's own invariant checks
+   (coverage-ratchet, archaeology, inventory snapshot) immediately wrote
+   evidence through the boundary into futon1b — the write path proved
+   itself before any probe.
+3. **Gate 3 PASS (core)**: `/api/alpha/missions` renders the inventory.
+   `mc/tensions` NPEs ("Named.getName() ... x is null") — looks like an
+   empty-corpus edge, on the iterate list, not blocking.
+4. **Gate 2 found the first real gap — the watchers speak JSON.** Every
+   commit/file hyperedge write 500ed silently (`:throw false`).
+   futon1b server is now Content-Type-aware both directions (futon1b
+   `cfc8607`, test_json.clj). After the server restart (same store,
+   survived cleanly), the watcher's writes poured in: **1000+ commit-
+   vertex hyperedges** landed as cycle 1's commit-ingest reached the
+   later repos. Note: cycle 1 attempts FULL commit history per repo on
+   an empty store (cursor query returns nil) — repos processed before
+   the JSON fix recorded in-memory head cursors, so their histories
+   skipped this run; they arrive via Phase D backfill or the next JVM
+   restart (cursor re-derives from the store).
+5. **Cold-scan semantics** (relevant to Gate 2 probes): cycle 1 with
+   `cold-scan? false` builds the file baseline WITHOUT dispatching;
+   changed-file ingest starts cycle 2. Commit-ingest runs on cycle 1
+   regardless.
+6. **Memory**: dev JVM ~600MB RSS futon1a-less (vs 3-4GB historical with
+   embedded RocksDB) + futon1b ~500MB — the two-JVM split is net LIGHTER
+   on lucy, comfortable in 3.8GB.
+
+Open items to close Phase C: file-change ingest proof once cycle 2
+starts (cycle 1 is a marathon: full commit histories), mc/tensions NPE,
+and a durable service arrangement for the two JVMs (systemd units /
+fdev integration) — currently both are setsid orphans from this session.
+
 ## Rollback
 
 At any gate failure: stop futon1b JVM, unset the env flips, boot as before
