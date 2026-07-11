@@ -226,8 +226,54 @@ harness language* — queries as perception, aggregations as ledgers,
 bitemporal reads as audit. The port to XTDB 2 was justified by XTQL;
 zaif is the first consumer that uses all of it at once.
 
+## DEMO RECORD — 2026-07-11: first live recall, and the thesis in miniature
+
+First zai-1 session on lucy (Joe via `cz`; futon1b-backed corpus, 94k
+evidence docs). claude-5 belled zai-1 (typed query) to recall the 5 most
+recent joe-authored entries and orient on the clocked mission.
+
+**What happened:** zai-1 replied — articulate, internally coherent, and
+wrong: "the store is near-empty," supported by a zero-result
+memory_search and its recent_coordination tool (which by design shows
+live invoke jobs only). External check: the store held **8,882
+joe-authored docs** at that moment. A re-bell with pinned args returned
+5 items (newest `e-def1d82a`, a recorded operator chat turn). zai-1 then
+disputed the arg-mismatch diagnosis, claiming byte-identical args — a
+claim nothing can adjudicate, because U1 (transcript persistence) is
+parked and the job recorded `tool-events: 0`.
+
+**Root cause (established after the dispute):** the evidence backend
+passed no `limit` through, so the 5-item recall hydrated all 8,882 docs
+(10MB); cold, that exceeded the 30s timeout, and memory-backend's
+`safe-call` swallowed the exception into a silent empty — the
+default-atom fallback then showed only live-session entries. Fixed:
+futon3c `limit/ephemeral pushdown when membership is server-decidable`
+(see commit of the same name).
+
+**Why this is the mission's own argument, live, on day one:**
+
+1. *Queries-as-provenance* (§XTQL-2) would have made the first failure
+   self-diagnosing: the observation would carry its query AND its
+   error — a swallowed timeout could not masquerade as an empty result.
+2. *Asymmetric admissibility* would have blocked the bad inference: "the
+   store is near-empty" is a self-generated conclusion that RAISES
+   effective confidence about the world; under the rule it can only
+   lower precisions, never establish facts.
+3. *U1 is not optional for zaif.* Without the transcript, the agent's
+   claim about its own past tool args was unfalsifiable — the dispute
+   was settled only by stepping outside the loop (direct store count).
+   A zaif agent must be able to settle such disputes itself; U1
+   (transcript persistence) moves from parked-upgrade to prerequisite.
+4. The failing sub-tool matters for C-inference too:
+   `recent_coordination` answers "what is happening now," not "what has
+   the operator said" — the controller's channel taxonomy should mark
+   which tools can bear on which beliefs.
+
 ## Log
 
+- 2026-07-11 (later) — first live demo run + failure analysis (DEMO
+  RECORD above); backend limit-pushdown fix committed; U1 promoted to
+  prerequisite.
 - 2026-07-11 — mission authored (Fable session) from the zaif discussion
   with Joe (recorded in M-text-sidecar §CHECKPOINT 2026-07-11). P2=FTS5
   decided the same day. Nothing dispatched; PZ1 is the car when this
