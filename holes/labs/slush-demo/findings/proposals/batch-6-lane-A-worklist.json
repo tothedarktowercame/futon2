@@ -1,0 +1,56 @@
+[
+ {
+  "proposal": "87cd07aecff2035e",
+  "mission": "M-daily-scan",
+  "patterns": [
+   "devmap-coherence/ifr-f0-sati",
+   "devmap-coherence/ifr-f3-piti",
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "storage/rapid-debugging",
+   "workflow-coherence/weekly-rhythm"
+  ]
+ },
+ {
+  "proposal": "7c06581d9af3e776",
+  "mission": "M-daily-scan",
+  "patterns": [
+   "agent/budget-bounds-exploration",
+   "agent/trail-enables-return",
+   "devmap-coherence/ifr-f1-dhammavicaya",
+   "devmap-coherence/ifr-f2-viriya",
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "stack-coherence/futon-bridge-health"
+  ]
+ },
+ {
+  "proposal": "a4494a8636aaa4b3",
+  "mission": "M-single-entry-point",
+  "patterns": [
+   "devmap-coherence/baseline-freeze",
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "futon-theory/mission-interface-signature",
+   "futon-theory/proof-path",
+   "invariant-coherence/bounded-disposition"
+  ]
+ },
+ {
+  "proposal": "ebff8c1d932a5314",
+  "mission": "M-single-entry-point",
+  "patterns": [
+   "budgeted-action-selection/mana-gated-work",
+   "invariant-coherence/reachable-from-boot",
+   "invariant-coherence/state-snapshot-witness",
+   "futon-theory/theory-as-exotype",
+   "futon-theory/structural-tension-as-observation",
+   "ants/baseline-cyber-ant",
+   "exotic/live-sync-source-truth",
+   "futon-theory/mission-interface-signature",
+   "devmap-coherence/ifr-f1-dhammavicaya",
+   "stack-coherence/futon-bridge-health",
+   "storage/deterministic-ingest-pipeline",
+   "structure/interest-event-vocabulary",
+   "peripherals/read-existing-seam-before-implementing",
+   "peripherals/hot-reload-as-default-fix-path"
+  ]
+ }
+]

@@ -1,0 +1,459 @@
+[
+ {
+  "proposal": "87cd07aecff2035e",
+  "mission": "M-daily-scan",
+  "patterns": [
+   "devmap-coherence/ifr-f0-sati",
+   "devmap-coherence/ifr-f3-piti",
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "storage/rapid-debugging",
+   "workflow-coherence/weekly-rhythm"
+  ]
+ },
+ {
+  "proposal": "5b32802bf04f366a",
+  "mission": "M-trip-journal",
+  "patterns": [
+   "structure/interest-event-vocabulary",
+   "futon-theory/stop-the-line",
+   "peripherals/read-existing-seam-before-implementing",
+   "futon-theory/mission-interface-signature",
+   "campaign-coherence/cross-mission-escrow",
+   "campaign-coherence/campaign-as-temporary-institution"
+  ]
+ },
+ {
+  "proposal": "4eeb16716731d90c",
+  "mission": "M-trip-journal",
+  "patterns": [
+   "enrichment/ARGUMENT",
+   "futon-theory/mission-interface-signature",
+   "proof-search/typed-hole-as-frontier",
+   "ukrns/worked-contrast",
+   "war-machine/state-capture"
+  ]
+ },
+ {
+  "proposal": "a4494a8636aaa4b3",
+  "mission": "M-single-entry-point",
+  "patterns": [
+   "devmap-coherence/baseline-freeze",
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "futon-theory/mission-interface-signature",
+   "futon-theory/proof-path",
+   "invariant-coherence/bounded-disposition"
+  ]
+ },
+ {
+  "proposal": "3a4f13a506b2ad59",
+  "mission": "M-trip-journal",
+  "patterns": [
+   "invariant-coherence/subsumption-witness",
+   "math-strategy/clarification-meta",
+   "peripherals/read-existing-seam-before-implementing",
+   "proof-search/typed-hole-as-frontier",
+   "ukrns/worked-contrast"
+  ]
+ },
+ {
+  "proposal": "40a136568ebd5bf5",
+  "mission": "M-daily-scan",
+  "patterns": [
+   "devmap-coherence/ifr-f0-sati",
+   "p4ng/timebox-the-core-agent",
+   "storage/rapid-debugging",
+   "war-machine/state-capture",
+   "workflow-coherence/weekly-rhythm"
+  ]
+ },
+ {
+  "proposal": "62c2b50a4c923ea0",
+  "mission": "M-single-entry-point",
+  "patterns": [
+   "devmap-coherence/baseline-freeze",
+   "exotic/live-sync-source-truth",
+   "futon-theory/theory-as-exotype",
+   "social/ARGUMENT",
+   "stack-coherence/futon1-determinism"
+  ]
+ },
+ {
+  "proposal": "762530ab85315eb6",
+  "mission": "M-daily-scan",
+  "patterns": [
+   "agent/budget-bounds-exploration",
+   "control/effort-estimation",
+   "devmap-coherence/ifr-f0-sati",
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "war-machine/state-capture"
+  ]
+ },
+ {
+  "proposal": "8db1a785227715bc",
+  "mission": "M-daily-scan",
+  "patterns": [
+   "ai4ci/pilot-feasibility",
+   "or/tune-audits-quarterly",
+   "stack-coherence/futon-bridge-health",
+   "war-machine/state-capture",
+   "workflow-coherence/weekly-rhythm"
+  ]
+ },
+ {
+  "proposal": "40600a7582f03c92",
+  "mission": "M-trip-journal",
+  "patterns": [
+   "campaign-coherence/cross-mission-escrow",
+   "futon-theory/mission-interface-signature",
+   "invariant-coherence/shape-first-identify",
+   "social/explicit-exit-over-abandonment",
+   "ukrns/anchor-case-maintenance"
+  ]
+ },
+ {
+  "proposal": "05f18c4c7fd74eae",
+  "mission": "M-trip-journal",
+  "patterns": [
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "devmap-coherence/prototype-alignment-bridge",
+   "orchestration/recorded-handoff",
+   "peripherals/read-existing-seam-before-implementing",
+   "ukrns/worked-contrast"
+  ]
+ },
+ {
+  "proposal": "59f11f159546142b",
+  "mission": "M-war-machine-wiring",
+  "patterns": [
+   "futon-theory/theory-as-exotype",
+   "futon-theory/the-woven-form",
+   "futon-theory/mission-interface-signature",
+   "stack-coherence/futon-bridge-health",
+   "devmap-coherence/ifr-f1-dhammavicaya",
+   "devmap-coherence/ifr-state-convergence",
+   "futon-theory/structural-tension-as-observation",
+   "ants/baseline-cyber-ant",
+   "budgeted-action-selection/mana-gated-work",
+   "gauntlet/world-is-hypergraph",
+   "structure/block-as-futonic-revolution",
+   "peripherals/read-existing-seam-before-implementing",
+   "peripherals/hot-reload-as-default-fix-path"
+  ]
+ },
+ {
+  "proposal": "de9d02eb343e7db4",
+  "mission": "M-daily-scan",
+  "patterns": [
+   "devmap-coherence/ifr-f0-sati",
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "p4ng/timebox-the-core-agent-prime",
+   "stack-coherence/futon1-determinism",
+   "transition/prototype1a-workbench"
+  ]
+ },
+ {
+  "proposal": "57bb8ef4d560df9f",
+  "mission": "M-trip-journal",
+  "patterns": [
+   "futon-theory/mission-interface-signature",
+   "invariant-coherence/bounded-disposition",
+   "proof-search/typed-hole-as-frontier",
+   "social/explicit-exit-over-abandonment",
+   "structure/hinge-entry-slots"
+  ]
+ },
+ {
+  "proposal": "5ed9447506d8b7bd",
+  "mission": "M-war-machine-wiring",
+  "patterns": [
+   "devmap-coherence/ifr-f0-sati",
+   "futon-theory/proof-path",
+   "p4ng/agent-pattern-triad",
+   "social/ARGUMENT",
+   "stack-coherence/futon1-determinism"
+  ]
+ },
+ {
+  "proposal": "8487db9853dc295c",
+  "mission": "M-war-machine-wiring",
+  "patterns": [
+   "futon-theory/theory-as-exotype",
+   "p4ng/agent-pattern-triad",
+   "social/ARGUMENT",
+   "stack-coherence/futon1-determinism",
+   "structure/block-as-futonic-revolution"
+  ]
+ },
+ {
+  "proposal": "cf806c63869a510e",
+  "mission": "M-daily-scan",
+  "patterns": [
+   "control/effort-estimation",
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "enrichment/ARGUMENT",
+   "or/tune-audits-quarterly",
+   "p4ng/timebox-the-core-agent-prime"
+  ]
+ },
+ {
+  "proposal": "d1868a33267d1fab",
+  "mission": "M-war-machine-wiring",
+  "patterns": [
+   "ants/baseline-cyber-ant",
+   "futon-theory/structural-tension-as-observation",
+   "futon-theory/the-woven-form",
+   "structure/backwards-induction",
+   "transition/f0-f4-boundary"
+  ]
+ },
+ {
+  "proposal": "02eb10e78542408b",
+  "mission": "M-single-entry-point",
+  "patterns": [
+   "devmap-coherence/ifr-f1-dhammavicaya",
+   "devmap-coherence/ifr-f4-passaddhi",
+   "invariant-coherence/bounded-disposition",
+   "invariant-coherence/reachable-from-boot",
+   "stack-coherence/futon1-determinism"
+  ]
+ },
+ {
+  "proposal": "02b12f4e8670a5eb",
+  "mission": "M-trip-journal",
+  "patterns": [
+   "devmap-coherence/ifr-f3a-piti-audit",
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "invariant-coherence/subsumption-witness",
+   "peripherals/read-existing-seam-before-implementing",
+   "structure/hinge-entry-slots"
+  ]
+ },
+ {
+  "proposal": "7e6b438414369fd3",
+  "mission": "M-single-entry-point",
+  "patterns": [
+   "ants/baseline-cyber-ant",
+   "devmap-coherence/baseline-freeze",
+   "exotic/live-sync-source-truth",
+   "invariant-coherence/reachable-from-boot",
+   "stack-coherence/stack-blocker-detection"
+  ]
+ },
+ {
+  "proposal": "9025f0f83d1c8b31",
+  "mission": "M-war-machine-wiring",
+  "patterns": [
+   "devmap-coherence/ifr-f1-dhammavicaya",
+   "futon-theory/mission-interface-signature",
+   "futon-theory/proof-path",
+   "futon-theory/structural-tension-as-observation",
+   "structure/block-as-futonic-revolution"
+  ]
+ },
+ {
+  "proposal": "16fc45d0b5a6b893",
+  "mission": "M-war-machine-wiring",
+  "patterns": [
+   "ants/baseline-cyber-ant",
+   "exotic/live-sync-source-truth",
+   "futon-theory/theory-as-exotype",
+   "structure/backwards-induction",
+   "transition/f0-f4-boundary"
+  ]
+ },
+ {
+  "proposal": "ebff8c1d932a5314",
+  "mission": "M-single-entry-point",
+  "patterns": [
+   "budgeted-action-selection/mana-gated-work",
+   "invariant-coherence/reachable-from-boot",
+   "invariant-coherence/state-snapshot-witness",
+   "futon-theory/theory-as-exotype",
+   "futon-theory/structural-tension-as-observation",
+   "ants/baseline-cyber-ant",
+   "exotic/live-sync-source-truth",
+   "futon-theory/mission-interface-signature",
+   "devmap-coherence/ifr-f1-dhammavicaya",
+   "stack-coherence/futon-bridge-health",
+   "storage/deterministic-ingest-pipeline",
+   "structure/interest-event-vocabulary",
+   "peripherals/read-existing-seam-before-implementing",
+   "peripherals/hot-reload-as-default-fix-path"
+  ]
+ },
+ {
+  "proposal": "bc67719643aeeaad",
+  "mission": "M-single-entry-point",
+  "patterns": [
+   "ants/baseline-cyber-ant",
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "p4ng/agent-pattern-triad",
+   "peripherals/hot-reload-as-default-fix-path",
+   "social/ARGUMENT"
+  ]
+ },
+ {
+  "proposal": "3b0b30fe2cb23136",
+  "mission": "M-war-machine-wiring",
+  "patterns": [
+   "devmap-coherence/ifr-f5-samadhi",
+   "futon-theory/mission-interface-signature",
+   "futon-theory/theory-as-exotype",
+   "hdm/bootstrap-kernel",
+   "structure/block-as-futonic-revolution"
+  ]
+ },
+ {
+  "proposal": "a4bbe25a08eaefce",
+  "mission": "M-trip-journal",
+  "patterns": [
+   "agency/invariants",
+   "campaign-coherence/campaign-as-temporary-institution",
+   "invariant-coherence/subsumption-witness",
+   "orchestration/recorded-handoff",
+   "war-machine/state-capture"
+  ]
+ },
+ {
+  "proposal": "2337ee61d3d7d726",
+  "mission": "M-war-machine-wiring",
+  "patterns": [
+   "devmap-coherence/ifr-f0-sati",
+   "exotic/live-sync-source-truth",
+   "hdm/bootstrap-kernel",
+   "stack-coherence/futon1-determinism",
+   "structure/block-as-futonic-revolution"
+  ]
+ },
+ {
+  "proposal": "73580d9a7a20ce18",
+  "mission": "M-single-entry-point",
+  "patterns": [
+   "futon-theory/mission-interface-signature",
+   "futon-theory/proof-path",
+   "invariant-coherence/bounded-disposition",
+   "invariant-coherence/reachable-from-boot",
+   "peripherals/hot-reload-as-default-fix-path"
+  ]
+ },
+ {
+  "proposal": "6abd9f471f341d4d",
+  "mission": "M-daily-scan",
+  "patterns": [
+   "agent/budget-bounds-exploration",
+   "control/effort-estimation",
+   "enrichment/ARGUMENT",
+   "futon-theory/progress-signal",
+   "scan-coherence/mission-anchored-scan"
+  ]
+ },
+ {
+  "proposal": "17e7c26f7030ab61",
+  "mission": "M-single-entry-point",
+  "patterns": [
+   "devmap-coherence/baseline-freeze",
+   "devmap-coherence/ifr-f3-piti",
+   "social/ARGUMENT",
+   "stack-coherence/futon1-determinism"
+  ]
+ },
+ {
+  "proposal": "bc112719317f1f75",
+  "mission": "M-trip-journal",
+  "patterns": [
+   "agency/invariants",
+   "campaign-coherence/cross-mission-escrow",
+   "devmap-coherence/ifr-f3a-piti-audit",
+   "math-strategy/clarification-meta",
+   "structure/interest-event-vocabulary"
+  ]
+ },
+ {
+  "proposal": "db24933d267a1a90",
+  "mission": "M-war-machine-wiring",
+  "patterns": [
+   "devmap-coherence/ifr-f1-dhammavicaya",
+   "devmap-coherence/ifr-f3a-piti-audit",
+   "devmap-coherence/ifr-f5-samadhi",
+   "futon-stack/argument",
+   "futon-theory/the-woven-form"
+  ]
+ },
+ {
+  "proposal": "5c10f8ec6156f9c3",
+  "mission": "M-daily-scan",
+  "patterns": [
+   "agent/budget-bounds-exploration",
+   "devmap-coherence/ifr-f3-piti",
+   "storage/rapid-debugging",
+   "workflow-coherence/weekly-rhythm"
+  ]
+ },
+ {
+  "proposal": "7c06581d9af3e776",
+  "mission": "M-daily-scan",
+  "patterns": [
+   "agent/budget-bounds-exploration",
+   "agent/trail-enables-return",
+   "devmap-coherence/ifr-f1-dhammavicaya",
+   "devmap-coherence/ifr-f2-viriya",
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "stack-coherence/futon-bridge-health"
+  ]
+ },
+ {
+  "proposal": "ba791c881114c490",
+  "mission": "M-single-entry-point",
+  "patterns": [
+   "ants/baseline-cyber-ant",
+   "devmap-coherence/ifr-f1-dhammavicaya",
+   "devmap-coherence/ifr-f4-passaddhi",
+   "invariant-coherence/reachable-from-boot",
+   "social/ARGUMENT"
+  ]
+ },
+ {
+  "proposal": "657e4bc88c8fd235",
+  "mission": "M-war-machine-wiring",
+  "patterns": [
+   "devmap-coherence/ifr-f0-sati",
+   "devmap-coherence/ifr-f3a-piti-audit",
+   "futon-theory/structural-tension-as-observation",
+   "social/ARGUMENT",
+   "stack-coherence/futon1-determinism"
+  ]
+ },
+ {
+  "proposal": "4dd3c0cec61f4e8d",
+  "mission": "M-single-entry-point",
+  "patterns": [
+   "devmap-coherence/ifr-f1-dhammavicaya",
+   "devmap-coherence/ifr-f3-piti",
+   "futon-theory/mission-interface-signature",
+   "futon-theory/proof-path",
+   "invariant-coherence/reachable-from-boot"
+  ]
+ },
+ {
+  "proposal": "f33c1e22fab853b4",
+  "mission": "M-trip-journal",
+  "patterns": [
+   "campaign-coherence/campaign-as-temporary-institution",
+   "enrichment/ARGUMENT",
+   "futon-theory/mission-dependency",
+   "orchestration/recorded-handoff",
+   "proof-search/typed-hole-as-frontier"
+  ]
+ },
+ {
+  "proposal": "6141510c89e4639b",
+  "mission": "M-daily-scan",
+  "patterns": [
+   "ai4ci/pilot-feasibility",
+   "devmap-coherence/ifr-f3-piti",
+   "futon-theory/progress-signal",
+   "scan-coherence/mission-anchored-scan",
+   "storage/rapid-debugging"
+  ]
+ }
+]

@@ -1,0 +1,55 @@
+[
+ {
+  "proposal": "5ed9447506d8b7bd",
+  "mission": "M-war-machine-wiring",
+  "patterns": [
+   "devmap-coherence/ifr-f0-sati",
+   "futon-theory/proof-path",
+   "p4ng/agent-pattern-triad",
+   "social/ARGUMENT",
+   "stack-coherence/futon1-determinism"
+  ]
+ },
+ {
+  "proposal": "59f11f159546142b",
+  "mission": "M-war-machine-wiring",
+  "patterns": [
+   "futon-theory/theory-as-exotype",
+   "futon-theory/the-woven-form",
+   "futon-theory/mission-interface-signature",
+   "stack-coherence/futon-bridge-health",
+   "devmap-coherence/ifr-f1-dhammavicaya",
+   "devmap-coherence/ifr-state-convergence",
+   "futon-theory/structural-tension-as-observation",
+   "ants/baseline-cyber-ant",
+   "budgeted-action-selection/mana-gated-work",
+   "gauntlet/world-is-hypergraph",
+   "structure/block-as-futonic-revolution",
+   "peripherals/read-existing-seam-before-implementing",
+   "peripherals/hot-reload-as-default-fix-path"
+  ]
+ },
+ {
+  "proposal": "4eeb16716731d90c",
+  "mission": "M-trip-journal",
+  "patterns": [
+   "enrichment/ARGUMENT",
+   "futon-theory/mission-interface-signature",
+   "proof-search/typed-hole-as-frontier",
+   "ukrns/worked-contrast",
+   "war-machine/state-capture"
+  ]
+ },
+ {
+  "proposal": "5b32802bf04f366a",
+  "mission": "M-trip-journal",
+  "patterns": [
+   "structure/interest-event-vocabulary",
+   "futon-theory/stop-the-line",
+   "peripherals/read-existing-seam-before-implementing",
+   "futon-theory/mission-interface-signature",
+   "campaign-coherence/cross-mission-escrow",
+   "campaign-coherence/campaign-as-temporary-institution"
+  ]
+ }
+]
