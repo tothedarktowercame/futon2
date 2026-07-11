@@ -1,0 +1,68 @@
+;; f1-outputs.edn — the LANDED f1 outputs (embedding-fold endpoint predictions)
+;; Captured from M-fold-ansatz.md f1-v0/v1/codegraph RESULTS (claude-4, 2026-07-01).
+;; These are the actual predicted endpoints produced by the structural-embedding
+;; experiments (labs/f1_structural_embed.py, labs/f1_curve.py, labs/f1_codegraph.py).
+;;
+;; The verify_fold_outputs.py gate operates on THIS file: it twin-checks each
+;; predicted endpoint against the code-graph snapshot and flags popularity-flattery.
+;;
+;; Graph stats (from the f1-v0 run on /api/alpha/cascade-real/graph):
+;;   231 missions x 550 items, 2333 edges
+;;
+;; Degree baseline: popularity = column-sum of the mission×item incidence matrix.
+;; The degree-percentile of each item is computed over all 550 items.
+
+{:experiment "f1-v0"
+ :source-script "labs/f1_structural_embed.py"
+ :source-doc "futon2/holes/M-fold-ansatz.md § f1-v0 RESULT"
+ :graph-stats {:missions 231 :items 550 :edges 2333}
+ :auc-results {:svd-auc 0.769 :popularity-auc 0.698}
+
+ ;; The autoclock-in endpoint recovery: 3 true non-pattern endpoints, their ranks.
+ ;; From the f1-v0 result: "rank 0 / 14 / 16 of 550 — top-20 hit-rate 1.00"
+ :predictions
+ [{:mission "futon3c-d/mission/autoclock-in"
+   :predicted-endpoint "clu:01-invariant-queue"
+   :rank 0
+   :degree 202                          ; targets 202 missions (the mega-hole/cluster)
+   :degree-percentile 0.998             ; ~top 0.2% of 550 items by degree
+   :popularity-flagged true             ; degree percentile > 0.90 → popularity-flattered
+   :twin-exists true                    ; present in the cascade-real graph snapshot
+   :twin-ref "cluster 01-invariant-queue in /api/alpha/cascade-real/graph"}
+
+  {:mission "futon3c-d/mission/autoclock-in"
+   :predicted-endpoint "arw:autoclock-in-argue"
+   :rank 14
+   :degree 15
+   :degree-percentile 0.78
+   :popularity-flagged false
+   :twin-exists true
+   :twin-ref "arrow →autoclock-in-argue in /api/alpha/cascade-real/graph"}
+
+  {:mission "futon3c-d/mission/autoclock-in"
+   :predicted-endpoint "hol:autoclock-in"
+   :rank 16
+   :degree 12
+   :degree-percentile 0.72
+   :popularity-flagged false
+   :twin-exists true
+   :twin-ref "hole target autoclock-in in /api/alpha/cascade-real/graph"}]
+
+ ;; The f1-v1 CURVE result (honest correction): popularity beats SVD on endpoint recovery.
+ :curve-result
+ {:experiment "f1-v1"
+  :source-script "labs/f1_curve.py"
+  :svd-recall-at-20 0.26
+  :popularity-recall-at-20 0.39
+  :svd-mrr 0.16
+  :finding "naive structural embedding does NOT beat popularity for endpoint recovery; autoclock-in n=1 (top-20 1.00) was unrepresentative — flattered by popular endpoints"}
+
+ ;; The code-graph f1 result (third negative): shallow embedding loses to degree.
+ :codegraph-result
+ {:experiment "f1-codegraph"
+  :source-script "labs/f1_codegraph.py"
+  :svd-auc 0.591
+  :degree-auc 0.775
+  :svd-recall-at-10 0.17
+  :graph-nodes 9560
+  :finding "shallow structural embedding loses to degree/popularity on the real code-graph (AUC 0.591 vs 0.775)"}}
