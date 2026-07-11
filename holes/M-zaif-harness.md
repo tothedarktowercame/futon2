@@ -526,9 +526,12 @@ Design guidance from PZ1's own findings:
   stamp a :correction tag on the chat-turn evidence entry so the γ
   stream is queryable without content scans; session-mode can render it.
 - **Grow the vocabulary slowly** (Table-25 stance: roadsigns,
-  revisable). Obvious next candidate: ✓ for explicit confirmation — the
-  other half of the γ precision ledger. Add it only after ✘ marking
-  rate is observed.
+  revisable). **✓ RATIFIED same day** (Joe: "OK, that's good ✓ (maybe we
+  can add a ✓ for approval)") — and that turn is itself the first mark
+  minted in the flow, already stored and greppable:
+  `e-63c25e11-ac8b-4287-966e-bdc7f007bc78` (2026-07-11T12:39Z). v0
+  vocabulary: **✘ correction · ✓ approval** — the two halves of the γ
+  precision ledger, operator-authored, precision 1.0 by construction.
 
 ## Log
 
