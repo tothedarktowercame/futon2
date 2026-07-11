@@ -580,3 +580,46 @@ NEXT: batch 6 continues the mint (target: informative pairs for the sign
 test; transfer needs mission breadth above all); retrain cadence per
 CONTROL-LAYER; the 40-fold checkpoint approaches with S3 passing and the
 kill criterion not in play.
+
+## Checkpoint — 2026-07-11 (claude-2: BATCH 6 COMPLETE — parallel lanes, 8 labels, and the transfer question sharpens)
+
+First parallel batch: 4 missions, 2 folder lanes (zai-7/zai-8), CROSS-LANE
+flights (each flew the other's psis). 8 folds (zero reviewer fixes; the two
+giants audited 14→8 and 13→~6) + 8 flights (one revision: F3's port-probe
+regex produced false negatives on live ports — caught against same-session
+evidence, fixed to curl-based liveness). ALL 8 labels matched
+preregistration (1 TRUE / 7 honest FALSE).
+
+**Taxonomy yield (the batch was a species factory):** absorption split into
+two subspecies (same-move-different-ABSTRACTION → one full box vs
+same-move-different-PHASE → one :partial box); STRATIFICATION (patterns as
+levels of one discipline); INVERSION (principle transposes, dynamic runs
+backward); payoff-forbidden partial; sequence-overlap (bojjhanga). Doc-drift
+species #4: the QUESTION that outlives its answer. 4 more doc-drift finds
+(9 total); retrieval-recall data #2-#4.
+
+**Numbers: S1 = 0.11 (1/9 GFN), S2 = 0.25 (2/8 incumbent). Pairs: 3 ties +
+trip-journal → INCUMBENT. Sign-test tally: 3 informative pairs, 2-1
+incumbent, 6 ties — far from decisive. S3 v1.2 = 0.706 vs null 0.694 — PASS
+but the margin is narrowing as label heterogeneity grows (0.845 → 0.706).
+LOMO transfer n=29/18 groups: 0.642 vs 0.689 — BELOW NULL, third
+consecutive** (0.722 → 0.655 → 0.642: not closing with labels). The
+label-poverty hypothesis for transfer failure is weakening; the
+mission-conditional-features hypothesis (reliability posteriors are global
+per-pattern by construction) strengthens. Flip threshold per CONTROL-LAYER
+reasoning: n≈40-50 over 25+ groups — ONE more scaled batch settles it.
+
+**VALIDITY CONCERN NOW LOADING (operator attention):** the psi-ambition
+confound is no longer hypothetical — richer (GFN) cascades draw more
+conjunctive psis from blind folders, which discharge less at flight scale.
+S1 vs S2 partly measures PSI AMBITION, not proposal quality. Candidate
+mitigations for batch 7 (operator choice): (a) obligation-count as a
+covariate/stratifier in the paired comparison; (b) folder instruction pinning
+psi scope to a fixed obligation budget; (c) adjudicate discharge-RATE per
+obligation rather than boolean-per-psi. Do not run many more batches before
+deciding — ties are cheap but 2-1 splits under a confound are not evidence.
+
+Mission yields shipped: watcher-coverage bimodality (V-1 = fix watcher, not
+recompute); D-7.5 vocabulary = computation not design; Q-classpath GREEN;
+P-framework already embedded in hinge-log (DR-3 → one use-data question);
+trip-journal protective apparatus fully expressed (the TRUE).
