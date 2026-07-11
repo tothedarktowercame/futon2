@@ -393,6 +393,28 @@ both agents' labels propose. After the gold pass: score both agents +
 the raw lexicon against gold → precision/recall/routing-accuracy → PZ1
 verdict.
 
+### H4 — PZ1 slice 4: provisional score from agreed labels (dispatched 2026-07-11)
+
+Gold pass still pending with Joe; the agreed 101 items support a provisional
+measurement now, with disputed items as bounds. **:have** — the three frozen
+label artifacts (`pz1-labeling-sheet.edn`, `pz1-labels-zai1.edn`,
+`pz1-labels-claude5.edn`, all positional/id-aligned) + H1 population
+constants (N=1,437 operator turns in-window; H=153 hits; NH=1,284 non-hits;
+sheet = 60/153 hits route-proportional + 60 probes uniform from non-hits).
+**:want** — `pz1_provisional_score.clj` (bb) + `pz1-provisional-score.edn`
+computing, for each basis ∈ {zai1, claude5, agreed}: lexicon precision
+(true hits / labeled hits; agreed basis restricts the denominator to agreed
+items), estimated recall = (precision × 153) / (precision × 153 +
+probe-true-rate × 1,284), and routing accuracy (among true hits:
+route-claimed == labeled route; agreed basis = mutual-true hits with agreed
+route). Plus disputed-all-true / disputed-all-false bounds on the agreed
+basis. **Acceptance:** numbers must match claude-5's fully independent
+recomputation (script written without reference to the worker's); writes
+confined to those two lab files; no commits. **Pre-flight:** all five PASS
+(pure mechanical computation over frozen committed inputs; zai-1's own
+labels are an input but no judgment is exercised, so self-scoring bias
+doesn't arise; blast radius two files).
+
 ## Log
 
 - 2026-07-11 (later still) — **retry PASSED on the original unpinned
