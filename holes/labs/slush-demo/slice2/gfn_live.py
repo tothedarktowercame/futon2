@@ -135,6 +135,16 @@ def main(argv=None):
     args = p.parse_args(argv)
 
     reward = RewardV1(load_records())
+    # provenance stamp (2026-07-11): under v1.2 a score depends on weights,
+    # labels, AND the wiring corpus — pin all three so sealed scores are
+    # recomputable after the corpus moves (escrow-grade, like the dG pins)
+    corpus_path = Path(LAB3A) / "wiring-corpus.json"
+    provenance = {
+        "reward": "v1.2",
+        "wiring_corpus_sha256": hashlib.sha256(corpus_path.read_bytes()).hexdigest()
+                                 if corpus_path.exists() else None,
+        "n_labels": len(load_records()),
+    }
     blinded, sealed = [], {}
     for mission in args.missions:
         doc = locate_doc(mission)
@@ -171,6 +181,7 @@ def main(argv=None):
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     stamp = args.tag
     (OUT_DIR / f"proposals-{stamp}.json").write_text(json.dumps(blinded, indent=1))
+    sealed["_provenance"] = provenance
     (OUT_DIR / f"proposals-{stamp}.SEALED.json").write_text(json.dumps(sealed, indent=1))
     print(f"\nwrote {len(blinded)} blinded proposals -> proposals-{stamp}.json "
           f"(+ sealed identities; adjudicators read the blinded file ONLY)")
