@@ -541,3 +541,42 @@ Gallery re-rendered with batch 4 (21 deposits). Altitude finding (run 20):
 the pattern that transposes at the altitude of the risk carries the most
 specific contribution. Second provenance-echo observed (run 17, incumbent arm
 — both arms echo). zai-4 shift: 6 folds + 1 revision, honest throughout.
+
+## Checkpoint — 2026-07-11 (claude-2: BATCH 5 COMPLETE — the first psi-grain labels, and the run-off opens 1–1)
+
+The loop's first full revolution under ALL of this week's machinery: v1.2
+reward (field canary composed 5×3), fold/flight runner split (zai-5 authored
+psis, zai-6 flew them), preregistered per-flight expected outcomes, boolean
+adjudication at each psi's own text.
+
+**Flights: 6/6, every label matching its preregistration** (2 TRUE, 4 honest
+FALSE). zai-6's debut: six accepted flights, zero fixes, two reviewer
+recounts resolved IN the runner's favor (f1 extraction; the strict-regex
+prose rejection). Real artifacts left behind: the fold-verification gate
+(runs on real f1 outputs), the Q-21 guidance note (every citation
+line-verified), the open-blocks view (21 real blocks), the ArSE run-report
+and triadic skeleton (5 tests green).
+
+**UNSEALING — the run-off's first scoreline: 1 GFN win, 1 incumbent win, 1
+tie.** fold-ansatz → incumbent (verification-gate psi TRUE vs verdict psi
+honest FALSE); bounded-in-flight-state → GFN (Q-21 psi TRUE vs conjunctive
+giant FALSE); ArSE → tie of negatives. Stopping-rule tally: 2 informative
+pairs, split — nowhere near p<0.05; the race is genuinely open.
+
+**Scoreboard (row appended): S1 = 0.20 (1/5 flown GFN), S2 = 0.25 (1/4
+incumbent) — the first populated discharge rates, near-identical. S3 v1.2 =
+0.845 vs null 0.75 PASS at n=21** (v0 ref 0.891). **LOMO transfer recheck:
+0.655 vs null 0.714 — STILL BELOW NULL.** Six new labels across three new
+missions did not lift cross-mission transfer; the decisive curve for the
+research question remains unresolved at n=21/14 groups. The label mint works;
+the labels are not yet numerous enough for the reward to generalize.
+
+Mission-level yields shipped to owners: fold-ansatz's fair-test bar is far
+lower than its shallow negatives implied (zero shared endpoints → popularity
+near-random on gold); bounded's Q-21 reframed as attribution-not-detection;
+ArSE's true prerequisite is the proof-wiring pipeline, not loop code.
+
+NEXT: batch 6 continues the mint (target: informative pairs for the sign
+test; transfer needs mission breadth above all); retrain cadence per
+CONTROL-LAYER; the 40-fold checkpoint approaches with S3 passing and the
+kill criterion not in play.
