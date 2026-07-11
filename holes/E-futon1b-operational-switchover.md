@@ -76,9 +76,22 @@ shutdown hook and cyder's process registry reference futon1a.
 futon3c's I-0 invariant says "one serving JVM". The futon1b server is a
 **second JVM by operator decision** (Joe, 2026-07-10, recorded in
 E-futon1a-to-futon1b §"Architecture constraint") — forced by the XTDB 1/2
-classpath exclusion, not convenience. When the switchover lands, I-0's text
-must be amended: one *coordination* JVM (futon3c) + one *store* JVM
-(futon1b); `pgrep java` returns two at rest.
+classpath exclusion, not convenience. **The split is transitional, not the
+end state** (Joe, 2026-07-11): the classpath exclusion vanishes the moment
+futon1a leaves futon3c's dependency tree, i.e., after full cutover +
+backfill when nothing imports futon1a code. Fold-in path, planned as
+**Phase E**:
+
+1. Drop futon1a from futon3c deps; add XTDB 2 coordinates.
+2. Embed the node in the futon3c JVM; mount the futon1b server namespaces
+   (gates/evidence/graph are plain functions over a node handle; the HTTP
+   layer is a thin shell) in-process on the same routes.
+3. Swap the evidence store from Futon1bBackend (HTTP) to an in-process
+   XTDB2 backend behind the same EvidenceBackend protocol; the
+   `FUTON1A_URL` clients keep working against the in-JVM server.
+4. I-0 restored verbatim: one serving JVM, `pgrep java` → 1.
+
+Until Phase E, `pgrep java` returns two at rest on a switched-over box.
 
 ### Lucy-specific
 
