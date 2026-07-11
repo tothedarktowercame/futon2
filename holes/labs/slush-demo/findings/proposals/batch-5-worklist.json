@@ -1,0 +1,84 @@
+[
+ {
+  "proposal": "213f965e403c7c19",
+  "mission": "M-fold-ansatz",
+  "patterns": [
+   "coordination/ARGUMENT",
+   "iiching/exotype-024",
+   "iiching/exotype-094",
+   "iiching/exotype-201",
+   "social/ARGUMENT"
+  ]
+ },
+ {
+  "proposal": "00581e6ed2196867",
+  "mission": "M-fold-ansatz",
+  "patterns": [
+   "devmap-coherence/ifr-f1-dhammavicaya"
+  ]
+ },
+ {
+  "proposal": "4ccaa1db5a58b78a",
+  "mission": "M-bounded-in-flight-state",
+  "patterns": [
+   "coordination/ARGUMENT",
+   "devmap-coherence/ifr-f3-piti",
+   "futon-theory/proof-path",
+   "futon-theory/rapid-debugging",
+   "stack-coherence/readme-devmap-sync"
+  ]
+ },
+ {
+  "proposal": "918d4fcfc34c7d4a",
+  "mission": "M-bounded-in-flight-state",
+  "patterns": [
+   "enrichment/churn-as-signal",
+   "contributing/stack-scan-logging-protocol",
+   "stack-coherence/commit-intent-alignment",
+   "code-coherence/dead-code-hygiene",
+   "realtime/loop-recovery-actions",
+   "musn/use-requires-evidence",
+   "orchestration/state-in-substrate-deltas-in-messages",
+   "futon-theory/all-or-nothing",
+   "storage/invariants-vs-repair",
+   "futon-theory/stop-the-line",
+   "peripherals/read-existing-seam-before-implementing",
+   "social/tension-before-code",
+   "structure/interest-event-vocabulary",
+   "library-coherence/library-staleness-scan",
+   "stack-coherence/readme-devmap-sync",
+   "stack-coherence/stack-blocker-detection",
+   "musn/plan-before-tool"
+  ]
+ },
+ {
+  "proposal": "c8ba0db7e1d88eed",
+  "mission": "M-artificial-stack-exchange",
+  "patterns": [
+   "ai4ci/umbrella",
+   "control/agential-oss-infrastructure",
+   "gauntlet/teaching-inversion",
+   "gauntlet/world-is-hypergraph",
+   "transition/f0-f4-boundary"
+  ]
+ },
+ {
+  "proposal": "79fb55e7378fc0d1",
+  "mission": "M-artificial-stack-exchange",
+  "patterns": [
+   "p4ng/agent-pattern-triad",
+   "ants/baseline-cyber-ant",
+   "agent/environment-over-optimization",
+   "devmap-coherence/ifr-f6-upekkha",
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "f6/graph-enhanced-evaluation",
+   "gauntlet/world-is-hypergraph",
+   "f6/self-play-loop",
+   "hdm/deep-storage-to-active-graph",
+   "control/agential-pattern-hygiene",
+   "devmap-coherence/ifr-f2-viriya",
+   "control/agential-oss-infrastructure",
+   "devmap-coherence/prototype-alignment-embedding"
+  ]
+ }
+]

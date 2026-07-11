@@ -1,0 +1,342 @@
+[
+ {
+  "proposal": "213f965e403c7c19",
+  "mission": "M-fold-ansatz",
+  "patterns": [
+   "coordination/ARGUMENT",
+   "iiching/exotype-024",
+   "iiching/exotype-094",
+   "iiching/exotype-201",
+   "social/ARGUMENT"
+  ]
+ },
+ {
+  "proposal": "4ccaa1db5a58b78a",
+  "mission": "M-bounded-in-flight-state",
+  "patterns": [
+   "coordination/ARGUMENT",
+   "devmap-coherence/ifr-f3-piti",
+   "futon-theory/proof-path",
+   "futon-theory/rapid-debugging",
+   "stack-coherence/readme-devmap-sync"
+  ]
+ },
+ {
+  "proposal": "877fea2292e5491c",
+  "mission": "M-artificial-stack-exchange",
+  "patterns": [
+   "agency/invariants",
+   "f6/graph-enhanced-evaluation",
+   "gauntlet/world-is-hypergraph",
+   "social/ARGUMENT",
+   "structure/backwards-induction"
+  ]
+ },
+ {
+  "proposal": "918d4fcfc34c7d4a",
+  "mission": "M-bounded-in-flight-state",
+  "patterns": [
+   "enrichment/churn-as-signal",
+   "contributing/stack-scan-logging-protocol",
+   "stack-coherence/commit-intent-alignment",
+   "code-coherence/dead-code-hygiene",
+   "realtime/loop-recovery-actions",
+   "musn/use-requires-evidence",
+   "orchestration/state-in-substrate-deltas-in-messages",
+   "futon-theory/all-or-nothing",
+   "storage/invariants-vs-repair",
+   "futon-theory/stop-the-line",
+   "peripherals/read-existing-seam-before-implementing",
+   "social/tension-before-code",
+   "structure/interest-event-vocabulary",
+   "library-coherence/library-staleness-scan",
+   "stack-coherence/readme-devmap-sync",
+   "stack-coherence/stack-blocker-detection",
+   "musn/plan-before-tool"
+  ]
+ },
+ {
+  "proposal": "79fb55e7378fc0d1",
+  "mission": "M-artificial-stack-exchange",
+  "patterns": [
+   "p4ng/agent-pattern-triad",
+   "ants/baseline-cyber-ant",
+   "agent/environment-over-optimization",
+   "devmap-coherence/ifr-f6-upekkha",
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "f6/graph-enhanced-evaluation",
+   "gauntlet/world-is-hypergraph",
+   "f6/self-play-loop",
+   "hdm/deep-storage-to-active-graph",
+   "control/agential-pattern-hygiene",
+   "devmap-coherence/ifr-f2-viriya",
+   "control/agential-oss-infrastructure",
+   "devmap-coherence/prototype-alignment-embedding"
+  ]
+ },
+ {
+  "proposal": "9307f2e63cef6016",
+  "mission": "M-bounded-in-flight-state",
+  "patterns": [
+   "agency/bounded-lifecycle",
+   "coordination/ARGUMENT",
+   "invariant-coherence/bounded-disposition",
+   "orchestration/recorded-handoff",
+   "structure/interest-event-vocabulary"
+  ]
+ },
+ {
+  "proposal": "8dab415798fa17be",
+  "mission": "M-bounded-in-flight-state",
+  "patterns": [
+   "code-coherence/dead-code-hygiene",
+   "data-mining/checkpoint-the-long-run",
+   "devmap-coherence/ifr-f3-piti",
+   "orchestration/recorded-handoff",
+   "storage/rapid-debugging"
+  ]
+ },
+ {
+  "proposal": "ee3fd0b37821b2e4",
+  "mission": "M-fold-ansatz",
+  "patterns": [
+   "devmap-coherence/ifr-f1-dhammavicaya",
+   "iiching/exotype-024",
+   "iiching/exotype-054",
+   "iiching/exotype-225"
+  ]
+ },
+ {
+  "proposal": "2289117e472c4108",
+  "mission": "M-fold-ansatz",
+  "patterns": [
+   "devmap-coherence/ifr-f1-dhammavicaya",
+   "iiching/exotype-014",
+   "iiching/exotype-094",
+   "iiching/exotype-212",
+   "iiching/exotype-214"
+  ]
+ },
+ {
+  "proposal": "c8ba0db7e1d88eed",
+  "mission": "M-artificial-stack-exchange",
+  "patterns": [
+   "ai4ci/umbrella",
+   "control/agential-oss-infrastructure",
+   "gauntlet/teaching-inversion",
+   "gauntlet/world-is-hypergraph",
+   "transition/f0-f4-boundary"
+  ]
+ },
+ {
+  "proposal": "00581e6ed2196867",
+  "mission": "M-fold-ansatz",
+  "patterns": [
+   "devmap-coherence/ifr-f1-dhammavicaya"
+  ]
+ },
+ {
+  "proposal": "a139d1406dd20162",
+  "mission": "M-bounded-in-flight-state",
+  "patterns": [
+   "agency/loud-failure",
+   "code-coherence/dead-code-hygiene",
+   "contributing/stack-scan-logging-protocol",
+   "devmap-coherence/baseline-freeze",
+   "orchestration/recorded-handoff"
+  ]
+ },
+ {
+  "proposal": "7a0304439879ba54",
+  "mission": "M-artificial-stack-exchange",
+  "patterns": [
+   "ai4ci/umbrella",
+   "devmap-coherence/ifr-f2-viriya",
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "gauntlet/teaching-inversion"
+  ]
+ },
+ {
+  "proposal": "bc49f77674d208b7",
+  "mission": "M-bounded-in-flight-state",
+  "patterns": [
+   "contributing/stack-scan-logging-protocol",
+   "data-mining/checkpoint-the-long-run",
+   "devmap-coherence/ifr-f3-piti",
+   "futon-theory/proof-path",
+   "invariant-coherence/bounded-disposition"
+  ]
+ },
+ {
+  "proposal": "84b32da60737b210",
+  "mission": "M-fold-ansatz",
+  "patterns": [
+   "iiching/exotype-011",
+   "iiching/exotype-024",
+   "iiching/exotype-202",
+   "iiching/exotype-212",
+   "iiching/exotype-245"
+  ]
+ },
+ {
+  "proposal": "2c2f8f317392fee2",
+  "mission": "M-fold-ansatz",
+  "patterns": [
+   "iiching/exotype-011",
+   "iiching/exotype-031",
+   "iiching/exotype-202",
+   "iiching/exotype-226",
+   "iiching/exotype-229"
+  ]
+ },
+ {
+  "proposal": "e4ff26e3431f6ffc",
+  "mission": "M-bounded-in-flight-state",
+  "patterns": [
+   "futon-theory/event-protocol",
+   "social/tension-before-code",
+   "stack-coherence/commit-intent-alignment",
+   "stack-coherence/readme-devmap-sync",
+   "war-machine/state-capture"
+  ]
+ },
+ {
+  "proposal": "ba08580917d844d5",
+  "mission": "M-artificial-stack-exchange",
+  "patterns": [
+   "ants/baseline-cyber-ant",
+   "control/agential-pattern-hygiene",
+   "futon-theory/agent-contract",
+   "p4ng/shared-memory-architecture",
+   "social/ARGUMENT"
+  ]
+ },
+ {
+  "proposal": "11fa116817c497d8",
+  "mission": "M-bounded-in-flight-state",
+  "patterns": [
+   "coordination/ARGUMENT",
+   "data-mining/checkpoint-the-long-run",
+   "devmap-coherence/ifr-f3-piti",
+   "futon-theory/minimum-viable-events",
+   "stack-coherence/staleness-scan"
+  ]
+ },
+ {
+  "proposal": "d3f4e0ce890262a2",
+  "mission": "M-fold-ansatz",
+  "patterns": [
+   "iiching/exotype-081",
+   "iiching/exotype-094",
+   "iiching/exotype-202",
+   "iiching/exotype-211",
+   "iiching/exotype-229"
+  ]
+ },
+ {
+  "proposal": "cf709e12ae896d2b",
+  "mission": "M-artificial-stack-exchange",
+  "patterns": [
+   "ants/baseline-cyber-ant",
+   "control/agential-pattern-hygiene",
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "p4ng/call-a-synthesizer",
+   "p4ng/outcome-synthesizer"
+  ]
+ },
+ {
+  "proposal": "dab46eb7cbecc9d3",
+  "mission": "M-fold-ansatz",
+  "patterns": [
+   "iiching/exotype-011",
+   "iiching/exotype-014",
+   "iiching/exotype-024",
+   "iiching/exotype-094",
+   "iiching/exotype-202"
+  ]
+ },
+ {
+  "proposal": "a652af7ff71f18cb",
+  "mission": "M-bounded-in-flight-state",
+  "patterns": [
+   "devmap-coherence/ifr-f3-piti",
+   "futon-theory/event-protocol",
+   "futon-theory/proof-path",
+   "stack-coherence/readme-devmap-sync",
+   "structure/interest-event-vocabulary"
+  ]
+ },
+ {
+  "proposal": "f8da01c6ae290b62",
+  "mission": "M-fold-ansatz",
+  "patterns": [
+   "coordination/ARGUMENT",
+   "devmap-coherence/ifr-f1-dhammavicaya",
+   "futon-theory/structural-tension-as-observation",
+   "iiching/exotype-202",
+   "social/ARGUMENT"
+  ]
+ },
+ {
+  "proposal": "1f86250905c64988",
+  "mission": "M-bounded-in-flight-state",
+  "patterns": [
+   "agency/loud-failure",
+   "contributing/stack-scan-logging-protocol",
+   "futon-theory/event-protocol"
+  ]
+ },
+ {
+  "proposal": "84c6f943af7cff79",
+  "mission": "M-fold-ansatz",
+  "patterns": [
+   "iiching/exotype-054",
+   "iiching/exotype-081",
+   "iiching/exotype-201",
+   "iiching/exotype-211",
+   "iiching/exotype-226"
+  ]
+ },
+ {
+  "proposal": "9cc7e66ae6458931",
+  "mission": "M-artificial-stack-exchange",
+  "patterns": [
+   "ants/baseline-cyber-ant",
+   "devmap-coherence/ifr-f2-viriya",
+   "futon-theory/proof-path",
+   "p4ng/agent-pattern-triad",
+   "transition/f0-f4-boundary"
+  ]
+ },
+ {
+  "proposal": "5aa24aeddc7ca114",
+  "mission": "M-artificial-stack-exchange",
+  "patterns": [
+   "ants/baseline-cyber-ant",
+   "control/agential-oss-infrastructure",
+   "futon-theory/proof-path",
+   "p4ng/agent-pattern-triad",
+   "structure/backwards-induction"
+  ]
+ },
+ {
+  "proposal": "7687db2bf68546fa",
+  "mission": "M-artificial-stack-exchange",
+  "patterns": [
+   "ai4ci/umbrella",
+   "gauntlet/world-is-hypergraph",
+   "p4ng/agent-pattern-triad",
+   "p4ng/meta-reflection-loop-agent",
+   "social/ARGUMENT"
+  ]
+ },
+ {
+  "proposal": "bc72f1c826fd9ffa",
+  "mission": "M-artificial-stack-exchange",
+  "patterns": [
+   "control/agential-pattern-hygiene",
+   "f6/self-play-loop",
+   "gauntlet/teaching-inversion"
+  ]
+ }
+]

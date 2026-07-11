@@ -1,0 +1,125 @@
+{
+ "213f965e403c7c19": {
+  "proposer": "gfn",
+  "log_reward": -0.4869549030760915
+ },
+ "2289117e472c4108": {
+  "proposer": "gfn",
+  "log_reward": -0.5749738232346349
+ },
+ "d3f4e0ce890262a2": {
+  "proposer": "gfn",
+  "log_reward": -0.5885151955667185
+ },
+ "2c2f8f317392fee2": {
+  "proposer": "gfn",
+  "log_reward": -0.5885151955667185
+ },
+ "84c6f943af7cff79": {
+  "proposer": "gfn",
+  "log_reward": -0.5885151955667185
+ },
+ "84b32da60737b210": {
+  "proposer": "gfn",
+  "log_reward": -0.5885151955667185
+ },
+ "dab46eb7cbecc9d3": {
+  "proposer": "gfn",
+  "log_reward": -0.5885151955667185
+ },
+ "ee3fd0b37821b2e4": {
+  "proposer": "gfn",
+  "log_reward": -0.7146824985311228
+ },
+ "00581e6ed2196867": {
+  "proposer": "incumbent"
+ },
+ "f8da01c6ae290b62": {
+  "proposer": "greedy-rhat",
+  "log_reward": -0.41247735524963175
+ },
+ "bc49f77674d208b7": {
+  "proposer": "gfn",
+  "log_reward": -0.903509758044974
+ },
+ "11fa116817c497d8": {
+  "proposer": "gfn",
+  "log_reward": -0.9436650879242456
+ },
+ "a652af7ff71f18cb": {
+  "proposer": "gfn",
+  "log_reward": -0.9651055941167113
+ },
+ "a139d1406dd20162": {
+  "proposer": "gfn",
+  "log_reward": -0.9704657206648277
+ },
+ "4ccaa1db5a58b78a": {
+  "proposer": "gfn",
+  "log_reward": -0.9811859737610606
+ },
+ "8dab415798fa17be": {
+  "proposer": "gfn",
+  "log_reward": -0.9865461003091771
+ },
+ "e4ff26e3431f6ffc": {
+  "proposer": "gfn",
+  "log_reward": -1.0294271126941084
+ },
+ "1f86250905c64988": {
+  "proposer": "gfn",
+  "log_reward": -1.282043830546502
+ },
+ "918d4fcfc34c7d4a": {
+  "proposer": "incumbent"
+ },
+ "9307f2e63cef6016": {
+  "proposer": "greedy-rhat",
+  "log_reward": -0.84718281005815
+ },
+ "7687db2bf68546fa": {
+  "proposer": "gfn",
+  "log_reward": -0.384005751884738
+ },
+ "5aa24aeddc7ca114": {
+  "proposer": "gfn",
+  "log_reward": -0.41039406719854193
+ },
+ "ba08580917d844d5": {
+  "proposer": "gfn",
+  "log_reward": -0.4169911460269929
+ },
+ "c8ba0db7e1d88eed": {
+  "proposer": "gfn",
+  "log_reward": -0.4301853036838949
+ },
+ "9cc7e66ae6458931": {
+  "proposer": "gfn",
+  "log_reward": -0.5027531707968558
+ },
+ "cf709e12ae896d2b": {
+  "proposer": "gfn",
+  "log_reward": -0.5423356437675617
+ },
+ "7a0304439879ba54": {
+  "proposer": "gfn",
+  "log_reward": -0.6293978150971613
+ },
+ "bc72f1c826fd9ffa": {
+  "proposer": "gfn",
+  "log_reward": -0.9923206643998258
+ },
+ "79fb55e7378fc0d1": {
+  "proposer": "incumbent"
+ },
+ "877fea2292e5491c": {
+  "proposer": "greedy-rhat",
+  "log_reward": -0.2784524906295223
+ },
+ "_provenance": {
+  "reward": "v1.2",
+  "wiring_corpus_sha256": "47e7cd094f12428aeb03593e2ea71dc9bac0dbf0057a95fd3846a9185220d97f",
+  "n_labels": 15,
+  "note": "stamped post-generation same-day; wiring corpus not rebuilt during the run"
+ }
+}
