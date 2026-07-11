@@ -71,15 +71,22 @@ checker at Run 10; sixteen deposits never box-checked until Run 19):
   fixtures — fixture quality itself is unaudited
 - gallery/metrics parsing is regex-based, not an EDN reader
 
-## Open operator decisions (blocking, in leverage order)
+## Operator decisions — RESOLVED 2026-07-11 (Joe)
 
-1. **R̂ aggregation fix** — mean-pooled reliability makes single patterns the
-   argmax (batch-4 canary finding). Must land BEFORE the next retrain and
-   BEFORE psi-grain labels flow (else the loop entrenches the degeneracy).
-   Candidate: composition-aware term learned from the wiring corpus (below).
-2. **Label grain** — deposit-psi vs mission-want. Interacts with (1).
-3. **Run-off stopping rule** — proposed: paired sign-test p<0.05, practical
-   equivalence at 30 undecided pairs. Pending confirmation.
+1. **R̂ aggregation: FIXED** — M-composition-aware-reward closed; reward_v1.2
+   (top-k, wireability, fitted size-mismatch, permanent degeneracy gate).
+   Scoreboard S3 primary = v1.2 (v0 kept as reference column). Proposal
+   generation (gfn_live) consumes v1.2 — both R̂ arms symmetric.
+2. **Label grain: DEPOSIT-PSI is the primary unit** (mission-want kept as a
+   slower parallel ledger where determinable). Safeguards REQUIRED:
+   (a) psi-author ≠ flight-flyer (different runners — batch 3 collapsed this;
+   restored as a hard rule); (b) pre-fold doc-freshness check (stale psi =
+   corrupted label); (c) v1.2's size-match + degeneracy gate guard the
+   narrow-psi Goodhart. Adjudication records carry :grain :deposit-psi with
+   success true/false; the loader ingests them.
+3. **Run-off stopping rule: CONFIRMED** — paired per-mission outcomes at
+   deposit-psi grain; decisive at two-sided sign-test p<0.05; practical
+   equivalence declared at 30 undecided pairs; ties count as ties.
 
 ## Wiring-feedback roadmap (design sketch, 2026-07-11 conversation)
 
