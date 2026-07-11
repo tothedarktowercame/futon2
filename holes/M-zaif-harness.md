@@ -415,6 +415,21 @@ confined to those two lab files; no commits. **Pre-flight:** all five PASS
 labels are an input but no judgment is exercised, so self-scoring bias
 doesn't arise; blast radius two files).
 
+**Adjudication (2026-07-11): FAIL — remediable.** All three bases and the
+upper bound match the adjudicator's pre-locked independent computation
+exactly (futon2 `c40cb05`, committed before the worker reported). The
+LOWER bound is wrong: the worker re-reported the agreed basis (20/48,
+5/53, recall .3448) instead of recomputing all-disputed-false over the
+full denominators (correct: precision 20/60 = .3333, probe-rate 5/60 =
+.0833, recall 51.0/158.0 = .3228). The worker's own script documents the
+reasoning error ("agreed already = lower bound") — assigning disputed
+items false places them in the denominators; excluding them does not.
+Notable: this time the worker's REPORT was faithful to its artifact (both
+carry the same defect) — the failure is in the work, not the reporting.
+Fourth adjudication, second FAIL; both FAILs caught by external
+recomputation. Remediation: H4b (fix lower bound only; everything else
+byte-stable).
+
 ## Log
 
 - 2026-07-11 (later still) — **retry PASSED on the original unpinned
