@@ -75,6 +75,7 @@ def s4_diversity(batch, sealed):
 def main():
     from fold_ground_truth import load_records
     from reward_v0 import loo_s3
+    from reward_v1 import loo_s3_v1
     records = load_records()
     y = [r["success"] for r in records]
 
@@ -87,7 +88,8 @@ def main():
     flown_gfn = [e for e in events if any(h in e["move_id"] for h in gfn_hashes)]
     flown_inc = [e for e in events if any(h in e["move_id"] for h in inc_hashes)]
 
-    s3_auc, s3_null, _ = loo_s3(records)
+    s3_auc, s3_null, _ = loo_s3_v1(records)  # primary = v1.2 (operator flip 2026-07-11)
+    s3v0_auc, s3v0_null, _ = loo_s3(records)  # v0 kept as reference column
     batch, batch_name = latest_batch()
     s4 = s4_diversity(batch, sealed)
 
@@ -104,6 +106,9 @@ def main():
         "S3_auc": round(s3_auc, 3),
         "S3_null95": round(s3_null, 3),
         "S3_clears_null": s3_auc > s3_null,
+        "S3_reward": "v1.2",
+        "S3_v0_auc": round(s3v0_auc, 3),
+        "S3_v0_null95": round(s3v0_null, 3),
         "S4_per_mission": s4,
         "proposal_batch": batch_name,
         "n_proposals_outstanding": len(batch),
@@ -119,8 +124,9 @@ def main():
           f"{row['S1_discharge_rate'] if row['S1_n_flown_gfn'] else 'no flown GFN folds yet'}")
     print(f"  S2 vs incumbent                     : "
           f"{row['S2_incumbent_rate'] if row['S2_n_flown_incumbent'] else 'no flown incumbent folds yet'}")
-    print(f"  S3 discrimination (LOO AUC vs null) : {row['S3_auc']} "
-          f"(null-95 {row['S3_null95']}) {'PASS' if row['S3_clears_null'] else 'below'}")
+    print(f"  S3 discrimination v1.2 (LOO vs null): {row['S3_auc']} "
+          f"(null-95 {row['S3_null95']}) {'PASS' if row['S3_clears_null'] else 'below'}"
+          f"   [v0 ref: {row['S3_v0_auc']} vs {row['S3_v0_null95']}]")
     print(f"  S4 diversity                        : " +
           (", ".join(f"{m}: {v['distinct']} modes (J̄ {v['mean_jaccard_dist']})"
                      for m, v in s4.items()) if s4 else "no batch yet"))

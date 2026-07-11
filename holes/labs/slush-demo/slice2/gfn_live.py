@@ -31,7 +31,9 @@ from offramp_cascade import identify_psi
 from aliveness_v3_gate2 import MATCHER, DROP, produces_of
 from aliveness_v3_corpus_gate2 import locate_doc
 from fold_ground_truth import load_records
-from reward_v0 import RewardV0
+# operator flip 2026-07-11: generation consumes reward v1.2 (top-k,
+# wireability, size-match) — both R-hat arms symmetric by construction
+from reward_v1 import RewardV1
 from gfn_core import GFN
 
 OUT_DIR = Path("/home/joe/code/futon2/holes/labs/slush-demo/findings/proposals")
@@ -51,7 +53,7 @@ def build_pool(psi, m=24):
 class SetReward:
     """Memoized log-reward over pattern-index sets: beta * R̂(S|m)."""
 
-    def __init__(self, pool, want, reward: RewardV0, beta: float):
+    def __init__(self, pool, want, reward, beta: float):
         self.pool, self.want, self.rw, self.beta = pool, want, reward, beta
         self.produces = {}
         for i, pid in enumerate(pool):
@@ -132,7 +134,7 @@ def main(argv=None):
     p.add_argument("--tag", default="batch")
     args = p.parse_args(argv)
 
-    reward = RewardV0(load_records())
+    reward = RewardV1(load_records())
     blinded, sealed = [], {}
     for mission in args.missions:
         doc = locate_doc(mission)
