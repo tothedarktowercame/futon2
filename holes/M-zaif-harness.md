@@ -320,6 +320,25 @@ a hit/miss sample for precision/recall before trusting the
 retro-bootstrap. This adjudication is also the first recorded
 claimed-vs-verified pair of the γ event stream.
 
+### H2 — PZ1 slice 2: labeling sheet (dispatched 2026-07-11)
+
+**:have** — `labs/M-zaif-harness/pz1-sample-scan.edn` (153 hits, H1-verified);
+the evidence API (H1's paging pattern); bb. **:want** — `pz1-labeling-sheet.edn`
+(`{:items [{:id :at :kind :hit|:probe :route-claimed :marker :context≤600 :label nil}…]}`):
+60 hit items stratified by route proportionally (each firing marker represented
+where possible) + 60 probe items sampled uniformly from H1's window with ids
+NOT among the hits; plus `pz1-labeling-sheet.md` (readable table). **Acceptance:**
+EDN parses; 120 items; every hit id ∈ H1 hits; ≥5 spot-checked probe ids
+in-window and not-in-hits via the store; stratification counts verified; writes
+confined to the two files; no commits. **Pre-flight:** all five PASS (same
+profile as H1 — read-only API + two lab files). Adjudication: pending.
+
+Plan to PZ1 close: H3 = independent blind labels (zai-1 by handoff, claude-5
+directly), mechanical agreement, disagreements + random slice (~20) to Joe as
+the gold pass (operator labels decide; agent labels propose — admissibility
+applied to the measurement). Then precision/recall/routing-accuracy and the
+PZ1 verdict.
+
 ## Log
 
 - 2026-07-11 (later still) — **retry PASSED on the original unpinned
