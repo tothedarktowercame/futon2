@@ -1,0 +1,60 @@
+{:population {:N 1437, :H 153, :NH 1284},
+ :disputed {:disputed-hits 12, :disputed-probes 7},
+ :bases
+ {:zai1
+  {:basis :zai1,
+   :precision
+   {:ratio 0.48333333333333334, :true-hits 29, :labeled-hits 60},
+   :probe-true-rate {:ratio 0.1, :true-probes 6, :labeled-probes 60},
+   :est-true-all-hits 73.95,
+   :est-true-non-hits 128.4,
+   :recall
+   {:ratio 0.36545589325426237,
+    :est-true-all-hits 73.95,
+    :est-total-true 202.35000000000002},
+   :routing-accuracy
+   {:ratio 0.896551724137931, :correct 26, :total 29}},
+  :claude5
+  {:basis :claude5,
+   :precision
+   {:ratio 0.38333333333333336, :true-hits 23, :labeled-hits 60},
+   :probe-true-rate
+   {:ratio 0.18333333333333332, :true-probes 11, :labeled-probes 60},
+   :est-true-all-hits 58.650000000000006,
+   :est-true-non-hits 235.39999999999998,
+   :recall
+   {:ratio 0.19945587485121583,
+    :est-true-all-hits 58.650000000000006,
+    :est-total-true 294.04999999999995},
+   :routing-accuracy
+   {:ratio 0.8695652173913043, :correct 20, :total 23}},
+  :agreed
+  {:basis :agreed,
+   :precision
+   {:ratio 0.4166666666666667, :true-hits 20, :labeled-hits 48},
+   :probe-true-rate
+   {:ratio 0.09433962264150944, :true-probes 5, :labeled-probes 53},
+   :est-true-all-hits 63.75,
+   :est-true-non-hits 121.13207547169812,
+   :recall
+   {:ratio 0.34481438959050903,
+    :est-true-all-hits 63.75,
+    :est-total-true 184.8820754716981},
+   :routing-accuracy {:ratio 1.0, :correct 18, :total 18}}},
+ :agreed-bounds
+ {:upper
+  {:description "all disputed = true",
+   :precision {:ratio 0.5333333333333333, :num 32, :den 60},
+   :probe-true-rate {:ratio 0.2, :num 12, :den 60},
+   :recall
+   {:ratio 0.24113475177304963,
+    :est-true-all-hits 81.6,
+    :est-total-true 338.4}},
+  :lower
+  {:description "all disputed = false",
+   :precision {:ratio 0.3333333333333333, :num 20, :den 60},
+   :probe-true-rate {:ratio 0.08333333333333333, :num 5, :den 60},
+   :recall
+   {:ratio 0.3227848101265823,
+    :est-true-all-hits 51.0,
+    :est-total-true 158.0}}}}

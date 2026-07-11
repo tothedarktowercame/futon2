@@ -430,6 +430,23 @@ Fourth adjudication, second FAIL; both FAILs caught by external
 recomputation. Remediation: H4b (fix lower bound only; everything else
 byte-stable).
 
+**H4b adjudication (2026-07-11): PASS.** Delivered EDN verified against
+the adjudicator's pre-locked computation: 14/14 values match to 1e-9
+(three bases + upper bound unchanged; lower bound now full-denominator:
+precision 20/60 = .3333, probe-rate 5/60 = .0833, recall .3228). Ledger
+stands at H1 PASS · H2 FAIL→H2b PASS · H3 PASS · H4 FAIL→H4b PASS.
+
+**PZ1 provisional result (adjudicated; final pending Joe's gold pass):**
+lexicon precision .42 agreed-basis (bounds .33–.53); recall .32–.34
+agreed-basis (.20 on claude-5's labels, .37 on zai-1's — the gold pass
+decides this axis); routing accuracy 1.00 on agreed trues (.87–.90 per
+labeler). Reading: the correction lexicon is a high-routing-fidelity,
+low-recall, mediocre-precision detector — a cheap γ-stream seeder, not a
+measurement instrument. Incidental finding during H4: futon1b JVM heap
+OOM stopped XTDB ingestion (node survives, reads fail with
+system-time-after-tx); restart + ~60s replay recovered, no data loss;
+see futon1b README `da65915`.
+
 ## Log
 
 - 2026-07-11 (later still) — **retry PASSED on the original unpinned
