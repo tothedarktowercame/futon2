@@ -533,6 +533,47 @@ Design guidance from PZ1's own findings:
   vocabulary: **✘ correction · ✓ approval** — the two halves of the γ
   precision ledger, operator-authored, precision 1.0 by construction.
 
+## PZ3 — WM R14-fold portability (CLOSED 2026-07-11, read while D1's index built)
+
+Read `futon2/src/futon2/aif/policy_precision.clj` (the R14 γ fold: signed
+scale-free perf ∈ [−1,1] → rolling window → γ = clamp(2^(gain·perf̄),
+0.5, 2.0), burn-in ≡ 1.0 under 5 samples) against the zaif event shape
+(adjudication + ✘/✓ mark evidence entries). **Verdict: adapter-only,
+CONFIRMED** — the fold core (`update-policy-precision`) is pure and
+signal-agnostic; the ns docstring itself pins the seam ("swapping the
+realized term is a one-line change at the feed, never here"). The deltas,
+all adapter-side:
+
+1. **Event shape.** WM consumes `{:policy :expected-G :realized-G :tick}`;
+   zaif consumes evidence entries (tags `[:handoff :adjudication …]`,
+   `[:transcript …]`-adjacent marks). Adapter: entry →
+   `{:cell k :perf signed :dedup-key evidence-id}`.
+2. **Dedup.** WM dedups on a single `:last-outcome-tick`; zaif processes
+   the event stream in `:at` order with an (at, id) cursor — the same
+   checkpoint pattern D1's catch-up just proved. Adapter state, not fold
+   state.
+3. **Cell structure.** WM γ is one scalar (global decisiveness); zaif
+   needs a per-cell map γ(cascade|mission) (grain decided by PZ2). The
+   fold applies per cell unchanged; wrap in a map.
+4. **Signal magnitude — the one real calibration decision.** WM perf is
+   continuous (expected-G vs realized-G); zaif v0 events are binary
+   (✓/PASS vs ✘/FAIL). v0: fixed magnitudes (e.g. ±0.5 so a single mark
+   cannot slam γ to a bound), fixed before Z1 in the prereg spirit. The
+   v1 sorry-discharge ledger restores a continuous signal (coverage).
+5. **Admissibility filter (zaif-only, pre-fold).** Operator-authored
+   events (and discharged sorries) may carry positive perf; agent-
+   authored events only negative — asymmetric admissibility as an
+   adapter predicate over `:evidence/author` + tags. The WM needs no
+   analogue (its witness is R16-external by construction).
+6. **Ports verbatim:** window 20 / burn-in 5 / floor-cap [0.5, 2.0], and
+   crucially `coerce-state` — the 2026-07-02 lesson (a retired schema's
+   degenerate state rode the persisted trace for days, pinning γ to the
+   floor) maps directly to zaif persisting γ-states as evidence: guard
+   the schema on every read, reconstruct the prior on mismatch.
+7. **Wiring point.** WM divides spread-τ by γ at policy selection; zaif
+   divides at the arm-selection softmax (retrieve/act/ask/yield). Same
+   junction, different selector.
+
 ## U1 — transcript persistence (started 2026-07-11, Joe's go)
 
 **What:** persist the agent side of the loop — zai's per-round self-talk
