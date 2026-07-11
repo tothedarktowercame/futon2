@@ -100,3 +100,31 @@ Artifact-only (no JVM, no meme.db, no substrate-2); tests green from a
 DIFFERENT cwd, summary line pasted verbatim; file-relative paths;
 stop-on-blocker (if the fold corpus is unparseable or the labels won't load,
 report — never synthesize); prediction-error line in the bell-back.
+
+## INSTANTIATE — OUTCOME (2026-07-11, three reviewed slices: v1.0 → v1.1 → v1.2.1)
+
+Built and verified (futon3a/holes/labs/M-memes-arrows/, committed):
+wiring_corpus.py + wiring-corpus.json (132 edges, 118 positive / 255 negative
+pairs), reward_v1.py (top-k reliability with k=obligation count, wireability,
+FITTED size-mismatch, NEW permanent degeneracy hard gate, persisted --canary
+with retrieval|proposals pool modes), 22 tests.
+
+- A2 MET: LOO S3 = 0.889 > null 0.787 (v0 = 0.907 for reference).
+- A3 MET: all hard checks green incl. the new degeneracy gate.
+- A4 MET: reward_v0 untouched; scoreboard reads v0 until the operator flips.
+- **A1 NOT MET: 1/3 on true retrieval pools** — and the residual mechanism is
+  the mission's real product. Two failure modes were successively eliminated
+  (two-size-terms pathology at v1.1; pool-poverty artifact at v1.2.1),
+  leaving **label poverty in final form**: exactly one pool pattern carries a
+  training success (Beta(3,1), log-odds 1.099) against everyone else's
+  Beta(2,1) prior (0.693); the 0.406 cliff × w_rel 2.333 costs any second
+  pattern −0.473, and wireability + size-match recover +0.439 — **short by
+  0.034, one label wide.** Cross-check: on the proposal-union pools the same
+  pattern is absent from one mission's pool and that mission composes — the
+  cliff tracks the pattern, confirming the mechanism.
+
+VERDICT: the reward's SHAPE is fixed (it composes wherever the labels contain
+any composition evidence); its VALUES await labels. No further reward-side
+iteration is warranted — the 0.034 gap is closed by fold outcomes, not
+features. Routed to the operator's open decisions: label grain + batch 5
+under v1.2 (which both mints labels AND field-tests the shape).
