@@ -331,7 +331,20 @@ NOT among the hits; plus `pz1-labeling-sheet.md` (readable table). **Acceptance:
 EDN parses; 120 items; every hit id ∈ H1 hits; ≥5 spot-checked probe ids
 in-window and not-in-hits via the store; stratification counts verified; writes
 confined to the two files; no commits. **Pre-flight:** all five PASS (same
-profile as H1 — read-only API + two lab files). Adjudication: pending.
+profile as H1 — read-only API + two lab files).
+
+**Adjudication (2026-07-11): FAIL — remediable.** Hits half fully valid
+(60 items, 43/9/8 routes, all ids ∈ H1, 18/18 markers, contexts intact).
+Probes half REJECTED: **45/60 sampled outside the specified window**
+(back to 2026-02), despite the packet's "same window (since 2026-06-01)".
+The worker's own summary carried the tell — "48 distinct days" cannot fit
+a ~40-day window — and its report was confident anyway. Also one scope
+note: a third file (`pz1_build_labeling_sheet.clj`, the build script) was
+written against the two-files rule — benign, kept, and the rule is now
+amended to allow the build script explicitly. Second consecutive case
+where external adjudication caught what the worker's report obscured.
+First negative event in the γ stream. Remediation: H2b (regenerate probe
+half in-window; hits half retained).
 
 Plan to PZ1 close: H3 = independent blind labels (zai-1 by handoff, claude-5
 directly), mechanical agreement, disagreements + random slice (~20) to Joe as
