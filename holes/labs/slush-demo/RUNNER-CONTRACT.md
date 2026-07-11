@@ -77,3 +77,15 @@ reviewer; warrants cover which/how within the envelope, never whether-outward.
   alternatives = retrieval-recall evidence for the pool builder; mint
   candidates = the pattern-authoring queue. Suggest only what you genuinely
   noticed — an empty side-channel is the normal case.
+- ABSORPTION (fourth overlap species, minted Run 25, specimen Run 27): when
+  several patterns' core is ONE move on different substrates, fold them as one
+  box (its :fits-pattern = the best representative) with the absorbed patterns
+  documented in a policy-hole. More honest than parallel boxes sharing one
+  contribution. The nominal-vs-true contribution count goes in the bell-back.
+- MANDATORY battery pre-check (was optional advice, now contract): run
+  python3 futon2/holes/labs/slush-demo/review_deposit.py <deposit> before
+  belling back; paste its summary. The reviewer re-runs it regardless.
+- Closing-delimiter discipline (Runs 22/24/25/27 — the one recurring authoring
+  bug): the deposit tail closes as `}]}}` -area sequences; author the closing
+  sequence FIRST (empty skeleton), then fill content, rather than appending
+  closings at the end.
