@@ -362,6 +362,37 @@ the gold pass (operator labels decide; agent labels propose — admissibility
 applied to the measurement). Then precision/recall/routing-accuracy and the
 PZ1 verdict.
 
+### H3 — PZ1 slice 3: independent blind labels + agreement (2026-07-11)
+
+**H3a (zai-1, by handoff): PASS.** `pz1-labels-zai1.edn` structurally
+verified before claude-5 labeled (count 120, ids in sheet order, all
+`:correction?` booleans) — per-item values NOT inspected until claude-5's
+labels were frozen, preserving mutual blindness. zai-1: 35 corrections
+(22 γ / 11 C / 2 actand); only 4/60 probes marked.
+
+**H3b (claude-5, direct): DONE.** Labeled from `:context` only, ignoring
+`:marker`/`:route-claimed`; judgment rule recorded in
+`pz1_write_claude5_labels.clj` (correction = pushes back on / negates /
+redirects something the agent did, claimed, planned, or believed inside
+the loop; γ = approach redirect, C = intent-model repair, actand =
+world/artifact-state correction). claude-5: 34 corrections (19 γ / 9 C /
+6 actand); duplicate docs labeled consistently.
+
+**Mechanical agreement (`pz1_agreement.clj`):** 101/120 (84.2%) on
+`:correction?`, Cohen's κ = 0.614; mutual trues 25, route agreement
+22/25. The disagreement structure is itself a finding: zai-1 said yes on
+10 hits claude-5 judged non-corrections (marker-anchored over-credit:
+"revert"/"stale" firing inside expository prose), while claude-5 marked
+6 probes zai-1 missed (unmarked corrections — e.g. "G is supposed to be
+defined over policies not actions" — exactly the recall blind spot the
+probe half exists to expose). Gold pass built: 32 items = 19
+correction-disagreements + 3 route-disagreements + 10 seeded-random
+agreed calibration items, mixed unmarked in `pz1-gold-sheet.md` (contexts
+only — neither agent's labels shown, no markers). Joe's labels decide;
+both agents' labels propose. After the gold pass: score both agents +
+the raw lexicon against gold → precision/recall/routing-accuracy → PZ1
+verdict.
+
 ## Log
 
 - 2026-07-11 (later still) — **retry PASSED on the original unpinned
