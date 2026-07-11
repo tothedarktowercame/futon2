@@ -146,6 +146,42 @@ futon1b/README.md.
 - **Retiring futon1a from the deps** — Phase E (one JVM again) comes only
   after cutover + backfill, when nothing imports futon1a code.
 
+### Bring-up VERIFIED (2026-07-11, lucy) — the boundary is now history
+
+The switchover this document froze the boundary for is **done on lucy**:
+`fdev` boots the stack futon1a-less by default and the full corpus is
+served. Verified end state:
+
+- Boot (via fdev → dev-linode-env → make dev, in tmux futon-dev:server):
+  `futon1a DISABLED` → `evidence backend: futon1b (http://127.0.0.1:7074)`
+  → `I-evidence-per-turn boot check: OK (futon1b)` → 8 agents; **zero
+  errors after settle**.
+- Store (switchover-store, futon1b-server.service): **hyperedges 323,147 ·
+  evidence 94,180 · entities 1,598 · types 29**, live writes flowing on
+  top of the Phase D backfill (zero ingest failures, zero F4 rescues;
+  `watcher-event` spam deliberately not migrated).
+- Code pins for the verified state: futon1b `c8b565d` (adds, beyond the
+  table above: JSON wire support `cfc8607`, query-layer-at-scale fix —
+  pushdown/projection/windowed hydration; both found live during
+  bring-up) and futon3c `a39abdd` (adds: dual-write self-fire guard +
+  penholder, 30s backend timeout, dev-linode-env switchover defaults
+  `d20387a`).
+- Data provenance: everything before this boundary lives in the futon1a
+  cold backup (sha256 above) and remains queryable by restoring it;
+  everything after lives in futon1b. The backfill migrated the before-side
+  in (evidence via the duplicate-free snapshot scope, sessionless
+  included), so futon1b now holds both sides EXCEPT watcher-event.
+
+**Bring-up gotchas for the next box** (full ledger in
+E-futon1b-operational-switchover + futon1b/README.md): the watchers speak
+JSON (server must be ≥ `cfc8607` or every watcher write 500s silently);
+the query layer needs the scale fix at real corpus size (≥ the futon1b
+pin above); unset stale `FUTON1B_URL` expectations — the dual-write hook
+now self-guards when primary == futon1b; restarts must kill the java PID
+before respawning the tmux pane (`ss -tlnp | grep 7070`), or the orphan
+keeps the ports and the old code; and cap every migration-window JVM with
+systemd-run MemoryMax (uncapped exporters OOM-killed two agent sessions).
+
 ### Rollback (any point)
 
 Stop the stack, unset the four env vars, boot as before — the embedded
