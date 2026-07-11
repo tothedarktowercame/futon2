@@ -307,7 +307,18 @@ PASS (endpoint, params, lexicon, shapes all in-packet) · adjudicator PASS
 script + one run) · blast radius PASS (read-only API; writes confined to
 two named lab files).
 
-Adjudication: pending bellback.
+**Adjudication (2026-07-11): PASS — verified, not believed.** Claimed:
+1,437 docs scanned, 153 hits (γ 109 / C-channel 24 / actand 20), 0
+errors, two files. Verified externally: independent rerun exits 0 (50
+docs → 4 hits, sane); EDN parses and per-marker counts equal the hits
+aggregation (4 zero-count markers explicitly present — good practice);
+5/5 randomly sampled hit ids re-fetched from the store with the claimed
+marker confirmed in the body; writes confined to the two named files; no
+commits. First data point for PZ1: the v0 lexicon fires on ~10.6% of
+operator turns (153/1437), γ-route dominant — next slice is hand-labeling
+a hit/miss sample for precision/recall before trusting the
+retro-bootstrap. This adjudication is also the first recorded
+claimed-vs-verified pair of the γ event stream.
 
 ## Log
 

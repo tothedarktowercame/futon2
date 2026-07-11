@@ -1,0 +1,941 @@
+{:sample {:since "2026-06-01", :max-docs 2000, :docs-scanned 1437},
+ :counts
+ {:gamma
+  {"revert" 2,
+   "let's not" 9,
+   "not that" 4,
+   "rather than" 59,
+   "undo" 1,
+   "no need" 4,
+   "instead" 23,
+   "don't do" 3,
+   "actually," 4,
+   "wrong approach" 0},
+  :c-channel
+  {"not what i meant" 0,
+   "i meant" 4,
+   "what i want" 6,
+   "to be clear" 7,
+   "misread" 2,
+   "misunderstood" 0,
+   "the point is" 5},
+  :actand
+  {"stale" 12,
+   "out of date" 2,
+   "doesn't exist" 4,
+   "already done" 2,
+   "was wrong about" 0}},
+ :hits
+ [{:route :gamma,
+   :marker "no need",
+   :snippet "You can draft it and log it, no need to show it to me",
+   :id "e-be247f23-ce15-40a8-8723-cdad4eaab161",
+   :at "2026-07-11T10:54:06.184162634Z"}
+  {:route :gamma,
+   :marker "instead",
+   :snippet
+   "…illing your evidence services instead.\n\n  The one deliberately-open item (documented in the READM…",
+   :id "e-4b278e98-6bd9-4030-88db-e12080af49b2",
+   :at "2026-07-10T10:32:06.785651857Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…ing like a fishing expedition rather than a rigorous improvement process.  I've been working with Cla…",
+   :id "e-a6e400e6-c90e-4618-9a06-6b29f2f63fe2",
+   :at "2026-07-10T08:17:47.412122053Z"}
+  {:route :gamma,
+   :marker "not that",
+   :snippet
+   "…gorithm you are looking for.  Not that the leaves are uninteresting!  Just that the algorithm is s…",
+   :id "e-e425ece0-680c-46f0-bb5f-91fc60fd191b",
+   :at "2026-07-04T15:46:26.187587721Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…— that's for my Brookes email rather than hyperreal.enterprises email but the same concepts would app…",
+   :id "e-024e0e2b-4e6d-4557-939e-791d00277e75",
+   :at "2026-06-16T13:16:01.063017593Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…lden eval set**, in parallel, rather than for building the detectors.\n\nNet: I'm not spinning the Lino…",
+   :id "e-872c86e7-abe0-415b-a4f2-41a1e1861fb4",
+   :at "2026-06-16T12:37:46.678711382Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…similar interests.  So, maybe rather than just saying \"we noticed you work on llm.el\" we could either…",
+   :id "e-78c7f01f-cd77-4113-ab97-b8d43588710e",
+   :at "2026-06-16T09:52:56.290217214Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "… the \"eoi-new\" tooling — just rather than *me* filling in *the eoi essay* it would be *you* drafting …",
+   :id "e-3ec1a55c-c982-499d-8ae3-2c4fe5dc9a75",
+   :at "2026-06-16T09:33:27.315050653Z"}
+  {:route :c-channel,
+   :marker "what i want",
+   :snippet
+   "…he pgvector.  So it really is what I wanted to do but done out of necessity than done out of curiosit…",
+   :id "e-fe9c4c7f-efbb-476e-977f-5ecaeb9b9a4e",
+   :at "2026-06-15T19:00:22.627067422Z"}
+  {:route :c-channel,
+   :marker "to be clear",
+   :snippet
+   "So, just to be clear, the substrate-2a is a \"first cut\" and might improve.  But …",
+   :id "e-27fe526d-4314-4163-ac32-b993e8a959a4",
+   :at "2026-06-15T18:57:19.114790754Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…pes by processing ≈200 papers rather than 5000 papers.  Since the codex agents were fast, I reckon we…",
+   :id "e-b77c3ab7-a742-4672-b740-7442f52fcfc5",
+   :at "2026-06-15T17:48:57.941282321Z"}
+  {:route :c-channel,
+   :marker "i meant",
+   :snippet
+   "… wrong thing b/c I am tired.  I meant HEAD to IDENTIFY to DERIVE and so on.",
+   :id "e-f2c8d557-2b02-4941-b5f6-7daac6fbe0ce",
+   :at "2026-06-14T21:04:02.565804706Z"}
+  {:route :gamma,
+   :marker "instead",
+   :snippet
+   "…that's the raw \"input\" — look instead in ./storage/superpod-mo-processed.tar.gz",
+   :id "e-3f46c2a9-266e-4ac1-b874-92951890d506",
+   :at "2026-06-14T12:55:58.993139069Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet "…n6 first rung\" but by example rather than a rollout",
+   :id "e-2954ff42-b98a-4406-b739-28c672214e25",
+   :at "2026-06-14T11:54:04.792931182Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "So, I think rather than just thinking of it as outreach letters, we could think of …",
+   :id "e-15e8c44a-5da7-4cdd-8310-48db60467922",
+   :at "2026-06-13T12:20:22.548626761Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…s around AI self-improvement. Rather than trying to reason these matters through from first principle…",
+   :id "e-9a52f708-bfe7-4cc1-9b29-3125a76714c9",
+   :at "2026-06-13T11:01:37.734565819Z"}
+  {:route :gamma,
+   :marker "revert",
+   :snippet
+   "…it, I forgot that I'd have to revert the buffer and refresh.  (I hadn't made edits directly.)",
+   :id "e-2829566a-0be7-468b-82fd-930df9f992a7",
+   :at "2026-06-11T16:19:28.831116116Z"}
+  {:route :c-channel,
+   :marker "i meant",
+   :snippet
+   "So, no, I mis-typed.  I meant that we should make the analogue of mission-mode.el for fli…",
+   :id "e-6acf6b98-a358-416d-b3d4-8c597c0d17c4",
+   :at "2026-06-11T15:26:28.213403108Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…'s the *really* clever thing: rather than just saying \"these are the things that can be learned\" full…",
+   :id "e-7fff6216-f43b-4021-94ca-373c30ba6e8b",
+   :at "2026-06-10T16:02:22.444242834Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…arget vs calibration anchor — rather than pre-answered. Completion criteria include a rejection witne…",
+   :id "e-c5e2a32b-95a0-45ab-9e2e-6f5c0dc0ed0b",
+   :at "2026-06-10T13:57:14.193711804Z"}
+  {:route :actand,
+   :marker "stale",
+   :snippet
+   "…very hour or so?  I.e. remove stale buffers?  I genuinely think 6502 buffers is too many",
+   :id "e-f48e640a-832f-42fe-8722-d67dd92f7f6e",
+   :at "2026-06-10T13:46:40.414765585Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…arget vs calibration anchor — rather than pre-answered. Completion criteria include a rejection witne…",
+   :id "e-b10e6666-b2d4-4852-9c10-d9a70a97b58c",
+   :at "2026-06-10T09:15:21.598756154Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…gical (what counts as a hole) rather than algorithmic. It's also a nice instance of the typed-sorry d…",
+   :id "e-fdbd1fc7-32bd-4429-b56b-4cb30f437c10",
+   :at "2026-06-09T21:10:39.276829142Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…make the metric hot-swappable rather than trying to \"fix\" it blind — then we can run a side-by side e…",
+   :id "e-efa2f766-d636-4a89-ab4c-50afecd55f17",
+   :at "2026-06-09T20:11:36.819375926Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…ubstrate being woven together rather than closed\" — that's concerning.  I had other things to focus o…",
+   :id "e-56a2aec4-e67f-4d07-ad6f-6c399c20447d",
+   :at "2026-06-09T19:21:03.889114650Z"}
+  {:route :gamma,
+   :marker "let's not",
+   :snippet
+   "OK, let's not worry too much about the Emacs cursor, it's a curiosity but…",
+   :id "e-5eedfe60-967c-4677-9190-dc7de304eb8d",
+   :at "2026-06-09T15:53:17.138837926Z"}
+  {:route :gamma,
+   :marker "instead",
+   :snippet
+   "…failure that clears the entry instead of wedging. That makes the drainer robust regardless of any…",
+   :id "e-190e6fad-485f-40c2-b7c4-4cf67b895bab",
+   :at "2026-06-09T15:33:43.825215123Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…ps (the freezing in progress) rather than claim it done. Updating the row with the resolution:\n[Edit]…",
+   :id "e-190e6fad-485f-40c2-b7c4-4cf67b895bab",
+   :at "2026-06-09T15:33:43.825215123Z"}
+  {:route :gamma,
+   :marker "don't do",
+   :snippet
+   "…e — worth flagging so the two don't double-count \"where\" (gap *and* C).\n\n5. **Patterns-as-backdrop…",
+   :id "e-190e6fad-485f-40c2-b7c4-4cf67b895bab",
+   :at "2026-06-09T15:33:43.825215123Z"}
+  {:route :gamma,
+   :marker "actually,",
+   :snippet
+   "…\n\nsystem: [interrupted]\n\njoe: Actually, this is pretty much perfect.  There are so many obvious win…",
+   :id "e-190e6fad-485f-40c2-b7c4-4cf67b895bab",
+   :at "2026-06-09T15:33:43.825215123Z"}
+  {:route :c-channel,
+   :marker "misread",
+   :snippet
+   "…iggering on my edits\" was the misread of codex-4's processes. Cleaning up and reporting honestly:…",
+   :id "e-190e6fad-485f-40c2-b7c4-4cf67b895bab",
+   :at "2026-06-09T15:33:43.825215123Z"}
+  {:route :actand,
+   :marker "stale",
+   :snippet
+   "…0` and `last-drain-at` 23 min stale, yet a child JVM is still running. That could be a slow run…",
+   :id "e-190e6fad-485f-40c2-b7c4-4cf67b895bab",
+   :at "2026-06-09T15:33:43.825215123Z"}
+  {:route :gamma,
+   :marker "actually,",
+   :snippet
+   "Actually, this is pretty much perfect.  There are so many obvious win…",
+   :id "e-1a35ec6d-5512-463e-95b0-b79b87d02d91",
+   :at "2026-06-09T15:23:40.197158324Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "… let's *liaise* with claude-4 rather than hand off a bell.  We can use a short whistle salvo to coord…",
+   :id "e-a638f142-543c-4e63-964c-6c3b6c8da035",
+   :at "2026-06-09T15:13:15.887689640Z"}
+  {:route :gamma,
+   :marker "instead",
+   :snippet
+   "…eat.  Let's *empty* SVG stars instead of ⭐ (it's a bit semantically clearer).  Also it occurs to …",
+   :id "e-325c373a-fb7b-4989-863e-6984f964a0be",
+   :at "2026-06-09T15:04:59.068122297Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…are still kind of rectilinear rather than being smooth curves like you'd find on a topo map... and it…",
+   :id "e-3eed83d3-17d2-424b-a295-8043b9f76cf0",
+   :at "2026-06-09T14:55:30.305010504Z"}
+  {:route :gamma,
+   :marker "not that",
+   :snippet
+   "…ken-maturation is *possible*, not that the cross-source *mechanism* works.\n2. **The `:correlated` …",
+   :id "e-0cae94f2-9ca8-4863-9251-44278445a5f7",
+   :at "2026-06-09T14:49:38.197379292Z"}
+  {:route :gamma,
+   :marker "instead",
+   :snippet
+   "…hat puts things *into* it. So instead of buying a fancier cabinet, we dust that one off and pair …",
+   :id "e-0cae94f2-9ca8-4863-9251-44278445a5f7",
+   :at "2026-06-09T14:49:38.197379292Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…a the futon5 wiring renderer) rather than ASCII?\n\nCooked for 2m 53s\n─────────────────────────────────…",
+   :id "e-0cae94f2-9ca8-4863-9251-44278445a5f7",
+   :at "2026-06-09T14:49:38.197379292Z"}
+  {:route :gamma,
+   :marker "revert",
+   :snippet
+   "…ero further touches**.\n- **No revert/remove/abandon** commit anywhere.\n- **No writer was ever wi…",
+   :id "e-0cae94f2-9ca8-4863-9251-44278445a5f7",
+   :at "2026-06-09T14:49:38.197379292Z"}
+  {:route :actand,
+   :marker "stale",
+   :snippet
+   "…_pattern_embedding\nThat's the stale `storage/` path (still the old empty symlink target) — code…",
+   :id "e-0cae94f2-9ca8-4863-9251-44278445a5f7",
+   :at "2026-06-09T14:49:38.197379292Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…ology from claude-1.  I guess rather than a big Akira bomb I personally would expect to see something…",
+   :id "e-5ed146a9-406e-44d4-b59e-5a12d11c9b6c",
+   :at "2026-06-09T14:37:59.090021145Z"}
+  {:route :actand,
+   :marker "stale",
+   :snippet
+   "…ffect-live that clears up the stale remarks and goes further to get the affect material wired u…",
+   :id "e-eb176d11-ea80-4e06-a5cf-2e150795043e",
+   :at "2026-06-09T13:46:55.210312437Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…*field* on our Futon City map rather than just think about how to feed C into an argmax selector.  Do…",
+   :id "e-de53a3ec-3cc2-41cd-9fa1-d54be187bc1d",
+   :at "2026-06-09T13:45:08.061255737Z"}
+  {:route :c-channel,
+   :marker "i meant",
+   :snippet
+   "So, what I meant is to keep working mission-lifecycle.md for M-memes-arrows-…",
+   :id "e-0d3c4a1c-2e85-4460-a45a-1c330d2222f6",
+   :at "2026-06-09T12:05:22.694538820Z"}
+  {:route :actand,
+   :marker "doesn't exist",
+   :snippet
+   "… missions* but the discipline doesn't exist yet, much less a Hawkins style signal we can use.  I think,…",
+   :id "e-f2e7f7ff-d5c2-405b-bd9f-95728c64f6df",
+   :at "2026-06-09T12:03:19.312954375Z"}
+  {:route :gamma,
+   :marker "instead",
+   :snippet "…t's try sending it to codex-2 instead",
+   :id "e-24f5b8b3-1a1a-43e8-9232-e3b4cc97a14f",
+   :at "2026-06-09T10:52:37.101493925Z"}
+  {:route :gamma,
+   :marker "instead",
+   :snippet
+   "…about using the futon3a store instead?  It's worth a consideration to see whether than having \"on…",
+   :id "e-712bc271-1c3c-41eb-9a10-ca9179998fe4",
+   :at "2026-06-09T08:48:31.360401295Z"}
+  {:route :actand,
+   :marker "stale",
+   :snippet
+   "…g the relevance of turns like staleness-scan — like not \"are they good\" but \"what are they good…",
+   :id "e-3faa6869-5405-49d7-b68e-496885d68054",
+   :at "2026-06-09T08:17:57.368423159Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…use whistles in a short salvo rather than long deep exchanges, those take too long and timeout",
+   :id "e-3de0accf-7b84-43ad-8cea-c59ec3bc8540",
+   :at "2026-06-09T08:08:01.679673429Z"}
+  {:route :c-channel,
+   :marker "to be clear",
+   :snippet
+   "OK, just to be clear, substrate-2 is not code.  substrate-1 is code / filesystem…",
+   :id "e-7112f306-034c-4a43-9066-640e57458ca1",
+   :at "2026-06-08T20:24:57.337239274Z"}
+  {:route :actand,
+   :marker "stale",
+   :snippet
+   "…am — I wouldn't *just* demote staleness-scan and say \"well, that didn't work, let's try somethi…",
+   :id "e-401c9464-b48b-4ff4-a563-69a5041cd86c",
+   :at "2026-06-08T19:36:08.260499681Z"}
+  {:route :actand,
+   :marker "stale",
+   :snippet
+   "…e is not just in saying it is stale but in the references that show that it's largely supersede…",
+   :id "e-4130ec7f-b595-418a-b882-8378c3f5def9",
+   :at "2026-06-08T19:28:22.510738921Z"}
+  {:route :gamma,
+   :marker "instead",
+   :snippet
+   "…ith M-pudding-peradams — then instead of me just trying to sort through a big list of branches, t…",
+   :id "e-62802c1c-32b7-4835-906a-c79b8966d241",
+   :at "2026-06-08T18:43:20.579730883Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…ive the WM that ability too?  Rather than nagging me — just try something.  Make it warranted by a pa…",
+   :id "e-128e9262-8277-4b18-a6d1-5e035398f6f1",
+   :at "2026-06-08T18:35:17.818111949Z"}
+  {:route :c-channel,
+   :marker "the point is",
+   :snippet
+   "…that I shared with claude-3.  The point is, so far we've been building the WM in a very serious mode —…",
+   :id "e-128e9262-8277-4b18-a6d1-5e035398f6f1",
+   :at "2026-06-08T18:35:17.818111949Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…tter make good real progress\" rather than \"try something\".  But the way we work interactively is very…",
+   :id "e-13d0cf14-7653-44b1-8ada-6474eb4bba67",
+   :at "2026-06-08T18:31:45.762142190Z"}
+  {:route :gamma,
+   :marker "instead",
+   :snippet
+   "…nk this is starting to work.  Instead of using the Pudding Prover as a \"brake\" (is it ready yet),…",
+   :id "e-3d80abf3-e6bd-49d8-8cf3-bfe90ede8e3e",
+   :at "2026-06-08T18:00:57.260283911Z"}
+  {:route :gamma,
+   :marker "not that",
+   :snippet
+   "… think the sunflower thing is not that useful.  Rather than focusing on centrality, let's think in…",
+   :id "e-0ca30163-0906-42c0-b376-e8d056e6db4b",
+   :at "2026-06-08T17:58:14.047711581Z"}
+  {:route :gamma,
+   :marker "instead",
+   :snippet
+   "…ng on centrality, let's think instead about phylogeny.  The cross-references you mentioned would …",
+   :id "e-0ca30163-0906-42c0-b376-e8d056e6db4b",
+   :at "2026-06-08T17:58:14.047711581Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…er thing is not that useful.  Rather than focusing on centrality, let's think instead about phylogeny…",
+   :id "e-0ca30163-0906-42c0-b376-e8d056e6db4b",
+   :at "2026-06-08T17:58:14.047711581Z"}
+  {:route :gamma,
+   :marker "actually,",
+   :snippet
+   "…tarting to get somewhere, but actually, I think the sunflower thing is not that useful.  Rather tha…",
+   :id "e-0ca30163-0906-42c0-b376-e8d056e6db4b",
+   :at "2026-06-08T17:58:14.047711581Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…h changes to v5 overwrite v5, rather than being stored in a compositional way.",
+   :id "e-dd375a0d-4db4-4ce6-9353-84b4df53988c",
+   :at "2026-06-08T16:43:23.500682499Z"}
+  {:route :gamma,
+   :marker "no need",
+   :snippet
+   "…6-06-07) ← HEAD* — #2 there's no need to have HEAD in the title now that we know that the latest …",
+   :id "e-dd375a0d-4db4-4ce6-9353-84b4df53988c",
+   :at "2026-06-08T16:43:23.500682499Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…gs in a possible-world model, rather than shooting in the dark?  What we'd want would be the equivale…",
+   :id "e-ce907fcf-c7e1-4272-a4a2-13def7aaaa50",
+   :at "2026-06-08T15:26:51.274850972Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…'d *confirm* a wiring diagram rather than building it from raw text.  In terms of phase view vs whole…",
+   :id "e-11f65574-e0cf-4753-b2f3-860bbf9d76e0",
+   :at "2026-06-08T15:23:20.671346074Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "… but, things like that).  So, rather than expecting the entire wiring diagram for a mission to fit on…",
+   :id "e-77455ba4-858e-4dfa-8463-c5a37362967e",
+   :at "2026-06-08T15:15:04.029934383Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…k we'd be \"striking a chord\", rather than \"whistling in the dark\".  That said, it is 14:40 on a *Mond…",
+   :id "e-772727a0-b3a6-48f6-9ed3-3a42d9883de2",
+   :at "2026-06-08T13:42:02.527228889Z"}
+  {:route :gamma,
+   :marker "instead",
+   :snippet
+   "…this becomes the path forward INSTEAD of P4–P6 in the\n    scaling plan. The scaling plan's gates …",
+   :id "e-db4b8c90-ae44-402e-b750-48aa884750d2",
+   :at "2026-06-08T13:32:44.850275216Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…nge / Math Overflow contents, rather than trying to do an end-to-end symbol grounding in Arxiv papers…",
+   :id "e-db4b8c90-ae44-402e-b750-48aa884750d2",
+   :at "2026-06-08T13:32:44.850275216Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…esumable CLI loop with Codex, rather than running it through Agency.",
+   :id "e-515e1983-3f8c-43a8-accc-7e50bd91afe5",
+   :at "2026-06-08T12:43:45.455207976Z"}
+  {:route :gamma,
+   :marker "don't do",
+   :snippet
+   "…s\" or \"edge of chaos\".  If we don't do the anamnesis part, we won't have anything to build *from*.",
+   :id "e-fb961ac3-981a-4916-b097-7207faa355a9",
+   :at "2026-06-08T12:05:32.800805657Z"}
+  {:route :c-channel,
+   :marker "to be clear",
+   :snippet
+   "So, just to be clear, \"scope\" in the mission lexicon sense, and \"scope\" in the f…",
+   :id "e-f74e1ea4-7242-4af9-9c77-229d50c7cc4f",
+   :at "2026-06-08T11:38:11.743117152Z"}
+  {:route :gamma,
+   :marker "instead",
+   :snippet
+   "…lost the thread of attention. Instead of trying to remember the text I came back to the Work, bac…",
+   :id "e-e7b6cc25-63e6-4179-adfe-b58190ac9781",
+   :at "2026-06-08T11:04:29.297626184Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…Work becoming ‘a way of life’ rather than ‘a way in life.’\n\nIf I do not strive to integrate the pract…",
+   :id "e-e7b6cc25-63e6-4179-adfe-b58190ac9781",
+   :at "2026-06-08T11:04:29.297626184Z"}
+  {:route :gamma,
+   :marker "no need",
+   :snippet
+   "…ows this about me, and I feel no need to speak of it. But as far as my clients are concerned, I’m…",
+   :id "e-e7b6cc25-63e6-4179-adfe-b58190ac9781",
+   :at "2026-06-08T11:04:29.297626184Z"}
+  {:route :gamma,
+   :marker "undo",
+   :snippet
+   "…sten my dress, which had come undone in the back.\n\nSomehow—I understand much better now, how—h…",
+   :id "e-e7b6cc25-63e6-4179-adfe-b58190ac9781",
+   :at "2026-06-08T11:04:29.297626184Z"}
+  {:route :c-channel,
+   :marker "what i want",
+   :snippet
+   "… didn’t know why I was there, what I wanted, what anything meant. I only knew that my life did not se…",
+   :id "e-e7b6cc25-63e6-4179-adfe-b58190ac9781",
+   :at "2026-06-08T11:04:29.297626184Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "… smooshed into one ≈eightfold rather than distributed across elements.",
+   :id "e-512a1a76-2f0a-4d57-9026-229038bc71c3",
+   :at "2026-06-07T21:22:09.216212278Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…ts the right foreign evidence rather than merely rejecting everything.* A panel reads that as an assu…",
+   :id "e-de6a0d84-2179-4dca-86bd-d202c6a4f80e",
+   :at "2026-06-07T20:25:26.905267074Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…on AI development.  So, maybe rather than saying \"I can help you do exactly what you said you don't w…",
+   :id "e-462e431e-00ff-4475-ac48-396a496bd284",
+   :at "2026-06-07T14:30:17.989527113Z"}
+  {:route :c-channel,
+   :marker "to be clear",
+   :snippet
+   "…n a mission.  However, I want to be clear that the experiments from \"Patterns for a new generation\" s…",
+   :id "e-2c08f406-b06d-4144-8357-e1dc1f2e21e9",
+   :at "2026-06-07T13:09:05.779449435Z"}
+  {:route :c-channel,
+   :marker "the point is",
+   :snippet
+   "…e progress on this *at all*.  The point is not the specific ratio millions or hundreds-of-thousands of…",
+   :id "e-1118b60f-c1e1-44c6-aea2-7611e08573c1",
+   :at "2026-06-07T12:04:33.398649897Z"}
+  {:route :gamma,
+   :marker "instead",
+   :snippet
+   "…t we had to go this direction instead\").  As for today, happy for you to just to one watched life…",
+   :id "e-7007baf8-3c0f-44b3-b8ed-95bbabee8c2a",
+   :at "2026-06-07T11:55:01.330958838Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "… brief of what will be built, rather than just saying trust the AIF.  I'm assuming that before starti…",
+   :id "e-7007baf8-3c0f-44b3-b8ed-95bbabee8c2a",
+   :at "2026-06-07T11:55:01.330958838Z"}
+  {:route :c-channel,
+   :marker "the point is",
+   :snippet
+   "…ake progress on this at all.  The point is not the specific ratio millions or hundreds-of-thousands of…",
+   :id "e-abc95709-772e-42a5-b13b-de3a38e4eaca",
+   :at "2026-06-07T11:47:46.457018777Z"}
+  {:route :c-channel,
+   :marker "to be clear",
+   :snippet
+   "OK, just to be clear, I'd expect something like \"I've read your latest draft\" — …",
+   :id "e-b1b53fab-f20f-4d3b-a4a7-fb0d76d4ac7b",
+   :at "2026-06-06T19:01:50.374506780Z"}
+  {:route :gamma,
+   :marker "let's not",
+   :snippet
+   "…ck to work on the WM stuff.   Let's not use codex-1 for now, use codex-2 and codex-4",
+   :id "e-79af5df3-507f-4d06-a12a-1f7281f58741",
+   :at "2026-06-06T19:00:46.361979505Z"}
+  {:route :c-channel,
+   :marker "what i want",
+   :snippet
+   "…right into WebArxana.  That's what I want to.  He says he does Hebbian and Anti-Hebbian learning to l…",
+   :id "e-0d1d4d3c-382f-4c96-88d3-7e6a70d04754",
+   :at "2026-06-06T18:44:47.962491048Z"}
+  {:route :gamma,
+   :marker "no need",
+   :snippet
+   "No need to hand it off to claude-3 as they are deregistered right n…",
+   :id "e-bdbf86b2-4f6a-4556-bd7c-36d60c45d0e7",
+   :at "2026-06-06T18:23:37.267438633Z"}
+  {:route :c-channel,
+   :marker "the point is",
+   :snippet
+   "…uldn't use it as \"leverage\" — the point is not a personal one but a direct hit on their \"economic diff…",
+   :id "e-e25bd803-274a-44fc-ae80-aee1c9708366",
+   :at "2026-06-06T18:18:03.519171964Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…going to look at T-inf, maybe rather than speculate about a distant future, we could import the main …",
+   :id "e-e453579c-6fa4-46a0-8c0e-89f02182b331",
+   :at "2026-06-06T17:02:24.299850103Z"}
+  {:route :c-channel,
+   :marker "the point is",
+   :snippet
+   "…t unfunded EPSRC proposal\"\n\n— The point is, that these 0.* series items give me the material that are …",
+   :id "e-575784b9-8c60-4e03-9728-1fde48e1d251",
+   :at "2026-06-06T16:11:17.156280729Z"}
+  {:route :gamma,
+   :marker "let's not",
+   :snippet
+   "Let's not rush ahead yet, as I have to get going soon and we are not …",
+   :id "e-187004af-626d-4bd4-a52a-46d3de4960b3",
+   :at "2026-06-05T17:36:39.002982620Z"}
+  {:route :gamma,
+   :marker "instead",
+   :snippet "…uld go into the Forward Model instead?",
+   :id "e-566bf6f5-4485-4945-b0ab-25c08062beab",
+   :at "2026-06-05T17:08:56.239175540Z"}
+  {:route :c-channel,
+   :marker "what i want",
+   :snippet
+   "…me in with a strong vision of what I want to do than if I just try to \"fit in\" with their existing wo…",
+   :id "e-7d2eac35-9266-46a9-b769-5473cf642701",
+   :at "2026-06-05T14:23:54.401598091Z"}
+  {:route :actand,
+   :marker "stale",
+   :snippet
+   "…**floating blue link** to the stale `/interest-network` bipartite view is a small `graph.cljs`/…",
+   :id "e-b224d508-4384-4f41-b666-9baf6b302b6f",
+   :at "2026-06-05T14:18:32.995850550Z"}
+  {:route :c-channel,
+   :marker "misread",
+   :snippet
+   "…ther represents a fundamental misreading of Bayesian mathematics, or of my ability to follow-thro…",
+   :id "e-1791adb9-8e19-4043-8d35-c09cbf444b21",
+   :at "2026-06-05T14:16:09.185106830Z"}
+  {:route :actand,
+   :marker "out of date",
+   :snippet
+   "… that is, by now, pretty much out of date.  But, before we do that, we could make sure that the new I…",
+   :id "e-e969095d-adca-4af7-bfad-906f774fda98",
+   :at "2026-06-05T13:58:37.689795299Z"}
+  {:route :gamma,
+   :marker "instead",
+   :snippet
+   "…the code domain — except now, instead of just looking for code-level annotations — like (let [F n…",
+   :id "e-81ccb710-4c93-48b7-8f40-0178dfb0c61b",
+   :at "2026-06-05T13:50:12.012403764Z"}
+  {:route :gamma,
+   :marker "let's not",
+   :snippet
+   "Good, let's note *that* into M-differentiable-code b/c my guess is that we'…",
+   :id "e-81ccb710-4c93-48b7-8f40-0178dfb0c61b",
+   :at "2026-06-05T13:50:12.012403764Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "… unstructured bag of contents rather than a network/hypergraph thereof",
+   :id "e-7524fd90-781a-46c6-a8bc-53068b9d4b3b",
+   :at "2026-06-05T13:40:17.186797407Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…ing scopes *on substrate-2* — rather than, or rather than exclusively, on subtrate-1 (Clojure code). …",
+   :id "e-906d06c9-7429-4987-af8a-6b70e390e6b3",
+   :at "2026-06-05T13:33:10.740658286Z"}
+  {:route :gamma,
+   :marker "let's not",
+   :snippet
+   "… itself runs out of road, and let's not make opportunities reseed (unless there's a good reason).  …",
+   :id "e-beda0835-06f6-4cc1-a242-4f352fa197d2",
+   :at "2026-06-05T11:32:47.175049809Z"}
+  {:route :gamma,
+   :marker "instead",
+   :snippet
+   "…rowser Dinosaur Game - except instead of jumping over cactuses, we'd see gaussians coming our way…",
+   :id "e-f1fba07c-e80f-4494-b54c-66b926c2c24c",
+   :at "2026-06-05T11:13:19.389078507Z"}
+  {:route :actand,
+   :marker "doesn't exist",
+   :snippet
+   "… one (for this purpose) if it doesn't exist.  We had \"corpus\" and \"tickle\" so it should be possible to …",
+   :id "e-947b96e5-0cfc-41a5-827e-9406117e5db4",
+   :at "2026-06-05T10:14:38.082409800Z"}
+  {:route :c-channel,
+   :marker "what i want",
+   :snippet "…I with Emacsclient.  \"? r\" is what I want to run",
+   :id "e-4eee3fe5-2990-4250-9d69-49d8ee148ccc",
+   :at "2026-06-05T10:10:16.675487154Z"}
+  {:route :gamma,
+   :marker "actually,",
+   :snippet
+   "This, actually, would be another opportunity to deploy another Anthropic In…",
+   :id "e-959249fd-5692-4723-83c6-17bf78fb7613",
+   :at "2026-06-04T21:34:58.641893145Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "… actually flips their result, rather than just hoping it does? Right now the caveat is carrying the e…",
+   :id "e-c31fa114-a84c-4c9f-9759-78a7953986e4",
+   :at "2026-06-04T20:57:31.040895986Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "… why I need a short link form rather than the mega-deeplink extension — nevertheless it does exist.  …",
+   :id "e-f24e518b-3cd1-4261-90c6-7821cd56b3dc",
+   :at "2026-06-04T20:09:12.196905800Z"}
+  {:route :c-channel,
+   :marker "to be clear",
+   :snippet
+   "…t the pattern now.  The thing to be clear is the eoi-next runner needs to have an argument model runn…",
+   :id "e-c5c2e599-f482-4efd-8d39-022b9f980a06",
+   :at "2026-06-04T17:38:22.331609107Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…g., use Codex for Lean coding rather than Claude) are kind of easy to spot organically.  Sure, if I w…",
+   :id "e-cfa92a42-523b-4508-9e4c-07c202d7d868",
+   :at "2026-06-04T17:09:31.813415551Z"}
+  {:route :gamma,
+   :marker "instead",
+   :snippet
+   "… just make me frustrated — we instead go through a second interview round, where you take my eoi-…",
+   :id "e-2bb361f5-5e40-4fa5-a921-992f9192962e",
+   :at "2026-06-04T17:03:47.820198855Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…rm hidden layer.  What about, rather than asking you to generate stuff for me — which will just make …",
+   :id "e-2bb361f5-5e40-4fa5-a921-992f9192962e",
+   :at "2026-06-04T17:03:47.820198855Z"}
+  {:route :actand,
+   :marker "doesn't exist",
+   :snippet
+   "… can't fire on a mission that doesn't exist yet.\n- **Design twist:** creation-clock should **switch** t…",
+   :id "e-5c6c3bb9-0a96-4603-9a6f-ed7b6e1531b8",
+   :at "2026-06-04T16:13:04.886808956Z"}
+  {:route :gamma,
+   :marker "instead",
+   :snippet
+   "… where you would to work from instead.\n\n    Berkeley: for the entire program\n    Berkeley: for 25…",
+   :id "e-ef656814-114f-4884-9ca1-64231708ba0e",
+   :at "2026-06-04T14:11:57.052196113Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…ward improvement to eoi-new — rather than asking the Operator to import the contents into Emacs, we'd…",
+   :id "e-1fa4090c-b893-4b2e-b9e9-487ad715b20a",
+   :at "2026-06-04T14:03:21.346177964Z"}
+  {:route :actand,
+   :marker "doesn't exist",
+   :snippet
+   "…  I can find the pro forma if doesn't exist yet.  NB. the eoi-next \"engine\" is going to be interesting …",
+   :id "e-1fa4090c-b893-4b2e-b9e9-487ad715b20a",
+   :at "2026-06-04T14:03:21.346177964Z"}
+  {:route :c-channel,
+   :marker "what i want",
+   :snippet
+   "So what I wanted to add is that my experience of eoi-new is that it works,…",
+   :id "e-98898b05-2c24-4010-a4c0-3cce2455b485",
+   :at "2026-06-04T13:44:13.567610372Z"}
+  {:route :gamma,
+   :marker "let's not",
+   :snippet
+   "…me management dimensions, but let's not assume that's for sure.  I think we need to confirm a \"star…",
+   :id "e-44d80da1-922f-4e97-a3d3-70d603d4b7c3",
+   :at "2026-06-04T12:54:33.497656177Z"}
+  {:route :actand,
+   :marker "already done",
+   :snippet "…tation in M-pilot-appearance (already done).",
+   :id "e-7aee053c-8e96-4c6c-a5c3-7c1439894709",
+   :at "2026-06-04T12:04:24.724188082Z"}
+  {:route :gamma,
+   :marker "not that",
+   :snippet
+   "…r reading books, etc.).  It's not that I have no *other* hobbies, just to say, that there's a clea…",
+   :id "e-5cb447e4-64fd-4f69-8ee3-4f0792bc0c1a",
+   :at "2026-06-04T11:32:42.283507428Z"}
+  {:route :gamma,
+   :marker "instead",
+   :snippet
+   "…rough-the-looking-glass.  Now instead of working with a LISP REPL, I wrote REPLs for agents.  Ins…",
+   :id "e-5cb447e4-64fd-4f69-8ee3-4f0792bc0c1a",
+   :at "2026-06-04T11:32:42.283507428Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…raging — one hour a day, skip rather than half-attempt — is exactly what the *send-and-convert* step …",
+   :id "e-e01e2408-1767-44d1-b829-7b1a142733ce",
+   :at "2026-06-04T11:24:07.376194108Z"}
+  {:route :c-channel,
+   :marker "i meant",
+   :snippet
+   "… included in the model.\n\nWhat I meant was\n\njoe> It's also *possible* that jobs with lower salary …",
+   :id "e-456bb0b8-7ecb-487d-a79e-37b44f56138b",
+   :at "2026-06-04T11:05:41.048172654Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…out making *demos on the web* rather than just blog posts?",
+   :id "e-fcd4a574-0b38-469b-af45-7601955d5aae",
+   :at "2026-06-03T20:01:11.345737249Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…-autoclock-in its own mission rather than trying to wing it.  Still, exposing the UI via an in-REPL h…",
+   :id "e-6baceb3c-4571-452c-b8d9-4d7a450804d0",
+   :at "2026-06-03T15:39:33.932493375Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "… whole clock-in/flair surface rather than patch-by-patch. I'll see what this round clears first.\n[Rea…",
+   :id "e-c903cf11-c509-4903-a8dd-1c19c1c81c76",
+   :at "2026-06-03T12:55:16.578522042Z"}
+  {:route :actand,
+   :marker "stale",
+   :snippet
+   "…`cr new M-foo` clock-in + the stale turn count.\n[Bash] cd /home/joe/code\necho \"=== how is 'cr n…",
+   :id "e-c903cf11-c509-4903-a8dd-1c19c1c81c76",
+   :at "2026-06-03T12:55:16.578522042Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "… type-theory *into the turns* rather than into function names BTW",
+   :id "e-7640e7d6-a64f-494f-bc18-2387f4c6001a",
+   :at "2026-06-03T12:17:06.595583304Z"}
+  {:route :gamma,
+   :marker "instead",
+   :snippet
+   "…ctly what we can do here.  So instead of getting lost in abstractions, the TN-joe-dt-explainer ca…",
+   :id "e-d5d26410-af33-41b8-839e-3d503929ffef",
+   :at "2026-06-03T10:00:44.834378550Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…peration :greenfield future.  Rather than saying \"it works on my laptop\" thep pitch is \"we've built t…",
+   :id "e-71b1893d-e5be-4872-8a87-b462b4063048",
+   :at "2026-06-03T09:24:45.681949641Z"}
+  {:route :gamma,
+   :marker "don't do",
+   :snippet
+   "…ed on the turn embedding?  We don't do turn embedding yet, but maybe we should start.",
+   :id "e-5a7ff7f7-8198-4cd9-a47e-98cf184eee9f",
+   :at "2026-06-02T14:58:19.450943571Z"}
+  {:route :gamma,
+   :marker "instead",
+   :snippet
+   "…is that *Missions* correspond instead to iiching patterns — more bits, more structure, more possi…",
+   :id "e-4cf4bc93-6a8a-46f4-8bea-766404e3f28b",
+   :at "2026-06-02T13:05:45.045471125Z"}
+  {:route :gamma,
+   :marker "instead",
+   :snippet
+   "…ather than as a one-off.  So, instead of the \"curves\" from the PDF that look at \"correction→edit\"…",
+   :id "e-8f2c6679-1d89-40e7-a7c5-0cea04ae6344",
+   :at "2026-06-02T12:30:23.645469866Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…p in a more *progressive* way rather than as a one-off.  So, instead of the \"curves\" from the PDF tha…",
+   :id "e-8f2c6679-1d89-40e7-a7c5-0cea04ae6344",
+   :at "2026-06-02T12:30:23.645469866Z"}
+  {:route :c-channel,
+   :marker "to be clear",
+   :snippet
+   "… does make a bit more sense.  To be clear, don't confuse iching patterns (lifted directly from the cl…",
+   :id "e-251899fa-68be-448e-af00-4da0258723bf",
+   :at "2026-06-02T11:07:56.999573078Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…nd that's OK.  I suggest that rather than going on a big fishing expedition trying to find \"what work…",
+   :id "e-c95388ea-8499-48da-8369-ee9dd70aed92",
+   :at "2026-06-02T10:52:18.016322285Z"}
+  {:route :actand,
+   :marker "out of date",
+   :snippet
+   "…ng to see a card that is that out of date!  The ideal \"invariant\" is that the WM would always be curr…",
+   :id "e-b78c3d3b-a530-40c7-a333-ec4e6b258fe4",
+   :at "2026-06-02T10:09:41.804314258Z"}
+  {:route :actand,
+   :marker "already done",
+   :snippet
+   "… later.  Indeed, maybe you've already done that.  Let's have a review of M-aif2 and it's remaining clo…",
+   :id "e-2cde3c6f-dd5e-4f1f-829f-7e8b33df3d2b",
+   :at "2026-06-02T09:40:34.118304100Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…isticated date mechanism.  So rather than thinking about \"good and bad edits\" we have at our disposal…",
+   :id "e-6bbbc573-248f-4463-b5c9-a8b22b0e82ef",
+   :at "2026-06-01T20:09:30.833220689Z"}
+  {:route :gamma,
+   :marker "let's not",
+   :snippet
+   "Well, let's not worry too much about closure — there are still many next st…",
+   :id "e-3a5430d8-3452-4826-8d09-4e2bd0c9ecd3",
+   :at "2026-06-01T19:46:49.745235421Z"}
+  {:route :actand,
+   :marker "stale",
+   :snippet
+   "….  For now, it's sourced from stale data, overridden by out-of-date priorities, and generally n…",
+   :id "e-4b4737d0-3c96-4f1f-82b6-833f4e1a7291",
+   :at "2026-06-01T18:48:50.644625569Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "… is actually up to date!  So, rather than \"fix these\" — we have a stop the line situation.  In fact, …",
+   :id "e-94648ed6-7ec4-4539-89bf-89312b852ff4",
+   :at "2026-06-01T18:38:44.023133286Z"}
+  {:route :actand,
+   :marker "stale",
+   :snippet
+   "…now this queue I am seeing is stale but seems to have upwards of 75 items in it.  Clearly the I…",
+   :id "e-94648ed6-7ec4-4539-89bf-89312b852ff4",
+   :at "2026-06-01T18:38:44.023133286Z"}
+  {:route :gamma,
+   :marker "instead",
+   :snippet
+   "What if instead of refactoring the code in a super heavy way, we set about …",
+   :id "e-ac7cbc08-c660-4863-ad5d-e4b1694a1e66",
+   :at "2026-06-01T16:51:21.681501043Z"}
+  {:route :gamma,
+   :marker "let's not",
+   :snippet
+   "Let's note this as a checkpoint, commit the code and mission — curvat…",
+   :id "e-c5b40db0-76fd-45e4-8528-e433cccd4335",
+   :at "2026-06-01T16:44:53.903087840Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…rom an oblique angle, because rather than thinking about M-differentiable-code we are going to think …",
+   :id "e-e5e6113d-4987-4642-9b3c-048935dfbc84",
+   :at "2026-06-01T16:28:44.051042856Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "… I have found the content, so rather than just removing the placeholder we could make it connect to a…",
+   :id "e-9a0b4556-0627-4043-b779-f49763504641",
+   :at "2026-06-01T14:24:55.526869118Z"}
+  {:route :actand,
+   :marker "stale",
+   :snippet
+   "… supplement.  In terms of the stale reference, I have found the content, so rather than just re…",
+   :id "e-9a0b4556-0627-4043-b779-f49763504641",
+   :at "2026-06-01T14:24:55.526869118Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…the same header functionality rather than reinventing it",
+   :id "e-a295670e-0932-45d2-9792-695a5f750364",
+   :at "2026-06-01T12:06:05.752269610Z"}
+  {:route :gamma,
+   :marker "let's not",
+   :snippet
+   "Let's not worry too much about fixing this section's content, I've sa…",
+   :id "e-308c2ce9-ecb4-48e3-a759-7da379a6aff9",
+   :at "2026-06-01T11:18:59.244234281Z"}
+  {:route :gamma,
+   :marker "rather than",
+   :snippet
+   "…way to do what you just did — rather than depending on python work-arounds.  You could spin up a sepa…",
+   :id "e-5900e426-9f6e-447a-90e8-00775715629a",
+   :at "2026-06-01T11:02:13.525000795Z"}],
+ :errors []}
