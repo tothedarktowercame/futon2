@@ -59,3 +59,7 @@ reviewer; warrants cover which/how within the envelope, never whether-outward.
   `:pins [:psi-sha256]` only for blinded folds.
 - Bell-backs end with one PUR-style prediction-error line: what surprised you.
   These have been the highest-value lines of every shift.
+- Psi staleness guard: the psi is authored from the doc's CURRENT state, not
+  IDENTIFY alone (IDENTIFY is the mission's FIRST phase — an attested want
+  goes stale as later phases land). If your assignment flags doc-vs-code
+  divergence, the landed work is HAVE and the psi covers what REMAINS.
