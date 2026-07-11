@@ -447,6 +447,47 @@ OOM stopped XTDB ingestion (node survives, reads fail with
 system-time-after-tx); restart + ~60s replay recovered, no data loss;
 see futon1b README `da65915`.
 
+### PZ1 VERDICT (2026-07-11 — gold pass complete, probe closed)
+
+Joe coded all 32 gold items (18 yes / 14 no). Final truth = gold on
+those rows, agreed agent labels on the other 88 (`pz1-final-truth.edn`;
+computation `pz1_gold_close.clj`).
+
+**Final numbers: precision 0.417 (25/60 hits are real corrections);
+recall 0.186 (est. 64 lexicon-caught vs 278 uncaught corrections in the
+window); routing accuracy 1.000 (25/25 true hits with a settled route).**
+
+Findings:
+1. **The lexicon is disqualified as the γ measurement instrument** — it
+   misses ~4 of 5 real corrections. It survives as a high-routing-
+   fidelity candidate *seeder*. The zaif harness needs a stronger
+   detector (D1/FTS5 + model-assisted detection over operator turns).
+2. **The correction base rate is ~24%** of operator turns (est. 342 of
+   1,437 in the window) — the operator-interest signal is far richer
+   than the lexicon sees, which strengthens the p4ng label-rate thesis:
+   labels are the binding constraint, and most of them are latent in
+   turns the lexicon never fires on.
+3. **The gold pass settled the recall axis against zai-1's reading and
+   below claude-5's** (zai .37, c5 .20, gold .186): Joe marked 10 of 15
+   gold probes as corrections. Operator threshold for "that was a
+   correction" is looser than either agent's.
+4. **Route taxonomy caveat:** Joe routed all 18 gold yeses γ — the
+   C-channel/actand distinction, clean between agents (route agreement
+   22/25), may not be operator-salient. Routing accuracy 1.000 should
+   be read with that flattening in mind.
+5. **Calibration 11/13** (agreed labels re-checked by gold, one flip
+   each way) — residual uncertainty on the 88 agreed-filled rows exists
+   but looks unbiased. One operator inconsistency surfaced honestly:
+   e-0cae94f2 appears twice (rows 0/59, different markers) and got
+   yes+no; kept as coded, nets out in precision.
+6. **Agent accuracy on the (dispute-heavy) gold-32:** claude-5 24/32,
+   zai-1 17/32 on correction?; both 6/18 on route. Agent labels
+   propose, operator labels decide — measurably so.
+
+PZ1 is CLOSED. The handoff ledger that produced it: H1 PASS · H2
+FAIL→H2b PASS · H3 PASS · H4 FAIL→H4b PASS — six dispatches, two
+failures caught by external adjudication, both remediated first-try.
+
 ## Log
 
 - 2026-07-11 (later still) — **retry PASSED on the original unpinned
