@@ -308,6 +308,58 @@ make dev
 Phase B complete. Remaining: Phase C gates 1-4 (boot-and-iterate on
 lucy), then Phase D backfill.
 
+## 2026-07-11 — PHASE D COMPLETE: lucy fully switched, corpus and all
+
+Final state: the fdev-launched stack (dev-linode-env carries the switchover
+env; futon1b-server.service enabled) runs futon1a-less against the
+backfilled store. Boot: futon1a DISABLED → evidence backend futon1b →
+I-evidence-per-turn OK (futon1b) → 8 agents. Store:
+**hyperedges 322,289 · evidence 94,128+ (climbing live) · entities 1,598 ·
+types 29** — zero ingest failures, zero F4 rescues, shape-log empty.
+Organic pre-backfill writes merged via stable ids. Evidence via the
+F5/F8-fixed snapshot scope (sessionless included: 94,086 > the ~90k the
+session-scoped path would have found). `code/v05/watcher-event` (heartbeat
+spam, millions, census itself times out) deliberately NOT migrated —
+recorded here as the standing decision.
+
+### The backfill failure ledger (each contained, each now mitigated)
+
+1. **Box-level OOM** took the agent session + tmux pane twice: two
+   uncapped 2G-heap JVMs on the 3.8G box (0.5G swap, chronically full).
+   Mitigation now standard: every migration JVM runs under
+   `systemd-run --user -p MemoryMax=… -p MemorySwapMax=1M` — worst case
+   is a dead unit with a journal line ('oom-kill'), never collateral.
+   Proven: the first capped retry died contained, session untouched.
+2. **The futon1a hyperedges HTTP query wedges on the big type**
+   (code/v05/edits, 259k): even limit=300 hung 10min and left the server
+   unresponsive — the same known behavior that got commit catch-up
+   disabled on one watcher path. Remedy: **direct-node streaming export**
+   (lazy open-q cursor over the RocksDB store, per-doc EDN round-trip
+   check, Instant→Date normalization): 259,474 docs, 0 skips, flat memory.
+3. **F12 (new corpus pathology)**: mission-doc PSR fields carry keywords
+   keywordized from prose — `:psr-(trac…` — which pr-str emits as
+   unreadable EDN (paren opens a list, map parity breaks). No string
+   sanitizer fixes this. Remedy: per-type EDN-first export with **JSON
+   fallback** (weird keys become strings; transform stringifies those
+   subtrees, loudly). Only mission-doc needed it (50 docs).
+4. **Whole-form EDN reads OOM on big files**: `read-edn-file` parses
+   259MB as one form. Remedy: streaming vector reader (element-wise
+   PushbackReader walk, 200-doc batches through transform + rescue) —
+   now the pattern for any big export file.
+
+Meta-lesson, banked: the quick-script path around the migration pipeline
+forfeits its accumulated fixes (the F1 sanitizer caught this attempt);
+and workload-sized JVMs must be re-sized to the BOX (the deps.edn warning
+existed; it applies to exporters too).
+
+Residual items, all small: mc/tensions NPE (empty-corpus edge, may
+self-resolve now the corpus is in); relations table 0 (lucy's graph
+snapshot carried entities only — verify against futon1a if relations are
+expected here); formal migration.verify pass (counts verified manually;
+the layered verify wants the single-file layout — port it to per-type
+files if a formal pass is wanted); Phase E when futon1a can leave the
+deps.
+
 ## 2026-07-11 — Phase C live on lucy: the stack is RUNNING on futon1b
 
 futon1b server on :7074 (`switchover-store`, fresh) + `make dev-linode`
