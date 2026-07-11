@@ -87,6 +87,71 @@ dir but no commits; nothing to pin.)
 - nginx holds :7073 on lucy — the futon1b server needs a non-default
   port here (e.g. `--port 7074`).
 
+## The switchover changes, as actually executed (recorded 2026-07-11, lucy live)
+
+Lucy now runs futon1a-less. Everything below is what another box needs;
+narrative + findings live in E-futon1b-operational-switchover and
+futon1b/README.md.
+
+### One-time code changes (DONE — just pull)
+
+- **futon1b** ≥ `cfc8607`: full v1 API surface (evidence, entities,
+  relations, hyperedge reads, census, types) with penholder + canonical-id
+  gates, F4 rescue ladder on every write, `safe-q` fresh-store tolerance,
+  **JSON request/response support** (the watchers POST JSON — servers
+  older than `cfc8607` silently 500 every watcher write), and
+  `-Djava.net.preferIPv4Stack=true` in the `:node` alias (XTDB 2.1.0
+  pgwire loopback dies on dual-stack boxes without it).
+- **futon3c** ≥ `882fb3f` (branch agency-fixes-2026-06-11): the futon1b
+  EvidenceBackend (B1), the `make-evidence-store` selection branch +
+  live-probing boot check (B2), the `FUTON1A_PORT=0` disable gate with
+  nil-safe consumers (B3), and every hardcoded `:7071` made
+  `FUTON1A_URL`-aware (B4).
+
+### Per-box setup (repeat on each box)
+
+1. **Store server JVM** (the transitional second JVM — Phase E folds it
+   back): pick a free port (lucy: 7074; nginx owns 7073 there), fresh
+   gitignored store dir, run as a systemd user unit
+   (`~/.config/systemd/user/futon1b-server.service` on lucy is the
+   template — auto-restart matters: setsid orphans die with agent
+   sessions). XTDB 2 stores are single-process: one JVM per store dir,
+   ever.
+2. **Boot env for the futon3c stack** — all four, pre-boot (the URL defs
+   are captured at namespace load):
+
+   ```
+   FUTON1A_PORT=0                                # disable embedded futon1a
+   FUTON3C_EVIDENCE_BACKEND=futon1b              # evidence -> futon1b
+   FUTON1B_URL=http://127.0.0.1:<port>           # 127.0.0.1, NOT localhost
+   FUTON1A_URL=http://127.0.0.1:<port>           # substrate HTTP -> futon1b
+   ```
+
+   `127.0.0.1` is load-bearing: the store JVM binds IPv4-only
+   (preferIPv4Stack), and boxes that resolve localhost to ::1 get
+   "unreachable" from a healthy server. Plus box-specifics: on lucy
+   `FUTON3C_IRC_PORT=0` (ngircd owns 6667) via `make dev-linode`.
+3. **Acceptance**: the boot log must show `futon1a DISABLED` →
+   `evidence backend: futon1b (…)` → `I-evidence-per-turn boot check: OK
+   (futon1b)` — the boot check live-probes the store server's /health.
+   Then watch `/health` counts climb as the watcher's first cycles run
+   (cycle 1 = baseline + full commit-history backfill on an empty store;
+   file-change dispatch starts cycle 2).
+
+### Not part of the operational switch (deliberate)
+
+- **Data backfill (Phase D)** — the store starts empty by design; the
+  proven migration pipeline fills it in a convenient window. Until then
+  entity-dependent reads run thin.
+- **Retiring futon1a from the deps** — Phase E (one JVM again) comes only
+  after cutover + backfill, when nothing imports futon1a code.
+
+### Rollback (any point)
+
+Stop the stack, unset the four env vars, boot as before — the embedded
+futon1a and its store were never touched. Lucy's store additionally has
+the cold sha256-pinned backup above.
+
 ## What "conversion" means from here
 
 1. Grow `futon1b_server.clj` to the ~15-route substrate surface the
