@@ -1,0 +1,122 @@
+;; ansatz-attempt-report.edn — B5-F2 flight (ft-fold-ansatz-002, the ansatz-verdict psi)
+;;
+;; PSI ADJUDICATION: FALSE (the preregistered honest negative).
+;; The psi asks for the trained-embedding VERDICT (Linode Stages C+D); that run is
+;; out of flight scope BY DESIGN. This report is the ATTEMPT EVIDENCE:
+;; the degree/popularity baseline reproduced on the A-next gold corpus + the gap.
+;;
+;; Produced by: zai-6 (flight runner), 2026-07-11
+;; Deposit psi-sha256: 860af8f3e37c604c51d61cb81b18140339c3fafd882025b1a697a9b787ada71e
+
+{:fold-turn/id "ft-fold-ansatz-002"
+ :flight "B5-F2"
+ :psi-adjudication false                       ; the trained-embedding verdict is NOT reached
+ :psi-adjudication-reason
+ "the psi asks for the fair verdict from a TRAINED relational GNN (R-GCN/SAGE with BGE text features, hard negatives, degree-correction) over the 125k-node code-graph — that is E-fold-embed-pipeline Stages C+D, authored but UNRUN (torch absent locally; needs the commissioned 4-GPU Linode). The baseline reproduced here confirms the psi's HAVE-side finding (three shallow negatives all lose to popularity/degree), but the verdict itself requires the Linode run."
+
+ ;; ============================================================
+ ;; BASELINE REPRODUCED (degree/popularity on the A-next gold corpus)
+ ;; ============================================================
+ :baseline
+ {:corpus "A-next gold corpus — 10 real (cascade, sorry, wiring) triples"
+  :corpus-pin "futon2/holes/labs/A-next-gold-corpus.md"
+  :triples-dir "futon2/holes/labs/A-next-*/"
+  :loader "futon6/scripts/fold_embed/gfn_gold_loader.py"
+  :loader-output
+  {:pool-size 70                                ; union of deduped :ref strings across 10 missions
+   :n-missions 10
+   :gold-sizes {"autoclock-in" 7
+                "invariant-queue-unstuck" 7
+                "a-sorry-enterprise" 7
+                "agency-rebuild" 8
+                "f6-ingest" 6
+                "pattern-ingest" 6
+                "patterns-done-right" 7
+                "single-entry-point" 9
+                "state-snapshot-witness" 7
+                "stepper-calibration" 6}
+   :shared-refs {}                              ; ZERO endpoint overlap between missions
+   :reward-beta 6.0                             ; the 0-sorry adapter steepness (403.4x range)
+   :reward-range-x 403.4}
+
+  ;; The degree/popularity baseline on the gold corpus.
+  ;; Method: rank the 70-endpoint pool by cross-mission degree (how many missions
+  ;; reference each endpoint), measure recall@k + MRR for each mission's gold set.
+  :popularity-baseline
+  {:method "rank pool by cross-mission degree (popularity); measure recall@20 + MRR vs gold"
+   :shared-endpoints 0                          ; all 70 endpoints have degree 1 (unique to their mission)
+   :max-degree 1
+   :overall-recall-at-20 0.279
+   :overall-mrr 0.067
+   :random-baseline-recall-at-20 0.239          ; for comparison (seed 42)
+   :random-baseline-mrr 0.048
+   :finding
+   "the A-next gold corpus has ZERO endpoint overlap between missions (all 70 endpoints are unique to their mission). The degree/popularity baseline therefore degenerates to near-uniform-random (recall@20 0.279 vs random 0.239). This is structurally different from the f1 experiments on the cascade-real graph (231 missions x 550 items, where popular clusters/holes dominated) — the gold corpus is a focused, non-overlapping eval set where popularity CANNOT distinguish gold from non-gold. The fair test (trained embedding) must find STRUCTURAL signal that popularity cannot, which is exactly what Stages C+D are designed to measure."}
+
+  ;; The fold-embed dataset gate (the pre-spend check on the LINODE-READY bundle).
+  :dataset-gate
+  {:script "futon6/scripts/fold_embed/check_fold_embed_gates.py"
+   :data "futon6/data/fold-embed/"
+   :nodes 78278
+   :edges 263761
+   :pairs 23
+   :gate-result "PASS"
+   :splits {:train 13 :val 5 :test 5}
+   :degree-stats {:min 0 :median 3 :max 3719 :zero-degree-nodes 1}
+   :note
+   "the LINODE-READY bundle (Stage A+B output) passes all dataset gates. BUT per the 2026-07-02 STATUS UPDATE, this bundle's ground truth was RETIRED — its pos labels are coarse used-var proxies, not the mission's real sorry endpoints. The A-next gold corpus is the correct eval set. The bundle provides training volume (the GNN needs it); the gold corpus provides the honest eval."}}
+
+ ;; ============================================================
+ ;; THE GAP — what the verdict still needs (unrun stages, authored locations)
+ ;; ============================================================
+ :gap
+ {:missing-verdict "the fair BGE-vs-structure-vs-hybrid ablation on held-out gold-corpus missions — unrun"
+  :unrun-stages
+  [{:stage "C — Embedding training (GPU)"
+    :status "AUTHORED, NOT RUN"
+    :script "futon6/scripts/fold_embed/train_fold_embed.py"
+    :description "relational GNN (lean torch SAGE) with BGE text features; text/struct/hybrid ablation; link-prediction / endpoint-recovery objective; hard-negative sampling; degree-correction in loss"
+    :blocking-factor "torch absent locally; needs the commissioned 4-GPU Linode"
+    :linode-doc "futon0/README-linode.md"
+    :target-box "g2-gpu-rtx4000a4-s (RTX4000 Ada ×4) via StackScript 2142757"
+    :run-command "python scripts/fold_embed/train_fold_embed.py --mode {text,struct,hybrid} --epochs 40"
+    :output "three scorecard-{mode}.json files with recall@20 + MRR vs popularity + random"}
+
+   {:stage "D — Evaluation (CPU, post-training)"
+    :status "AUTHORED IN train_fold_embed.py, NOT RUN (depends on C)"
+    :script "futon6/scripts/fold_embed/train_fold_embed.py (eval section)"
+    :description "endpoint-recovery on held-out test missions: recall@k, MRR, degree-corrected, vs three baselines (popularity/degree, BGE-text-only, random); per-mission recovery distribution"
+    :output-gate "futon6/scripts/fold_embed/check_fold_embed_gates.py --scorecards"
+    :gate-hard-rule "G-beats-popularity: the ablation winner must clear popularity recall@20 (else the ansatz shows nothing on this task)"
+    :gate-soft-rule "G-structure-adds: does struct/hybrid beat BGE-text-only? (the excursion's actual question)"}
+
+   {:stage "E — Laptop export (CPU, post-training)"
+    :status "NOT YET AUTHORED"
+    :description "freeze trained node embeddings → fold at runtime is laptop-only dot-products (train once on GPU, infer sub-second); laptop-index.npz + fold_phase2(cascade) → ranked endpoints"}]
+
+  :prerequisite "the 4-GPU Linode must be spun up (futon0/README-linode.md); rsync futon6; run train_fold_embed.py in three modes"
+  :excursion-doc "futon2/holes/E-fold-embed-pipeline.md (STATUS: LINODE-READY — Stages A+B built, C+D authored)"
+
+  ;; The shallow negatives (the HAVE-side evidence the psi references)
+  :shallow-negatives
+  [{:experiment "f1-v0 (thin-slice SVD)"
+    :svd-auc 0.769
+    :popularity-auc 0.698
+    :finding "SVD beats popularity on bulk link-prediction, but n=1 endpoint recovery was popularity-flattered (autoclock-in cluster at rank 0, degree 202)"}
+   {:experiment "f1-v1 (thin-slice curve)"
+    :svd-recall-at-20 0.26
+    :popularity-recall-at-20 0.39
+    :finding "corrected the n=1 over-read: naive embedding LOSES to popularity for endpoint recovery"}
+   {:experiment "f1-codegraph (real code-graph spectral)"
+    :svd-auc 0.591
+    :degree-auc 0.775
+    :finding "shallow structural embedding loses to degree on the real 9560-node code-graph"}]
+
+  :verdict-needed
+  "does a TRAINED embedding (R-GCN/SAGE with BGE text features, hard negatives, degree-correction) beat popularity/degree at endpoint-recovery on the held-out gold-corpus missions? The three shallow negatives say 'the cheap version fails'; only the Linode run can say whether a fair trained version succeeds or hits a measured ceiling."}
+
+ ;; ============================================================
+ ;; ATTEMPT SUMMARY
+ ;; ============================================================
+ :attempt-summary
+ "reproduced the degree/popularity baseline on the A-next gold corpus (the psi's HAVE-side): popularity recall@20 0.279 vs random 0.239 — the corpus has zero endpoint overlap, so popularity degenerates to near-random. Confirmed the LINODE-READY dataset (78,278 nodes, 263,761 edges, 23 pairs) passes all pre-spend gates. Enumerated the gap: Stages C+D (train_fold_embed.py) are authored but unrun (torch absent, needs Linode); Stage E (laptop export) is not yet authored. The verdict the psi asks for — 'does a trained embedding beat popularity?' — is unrun by design (out of flight scope). This is the preregistered honest FALSE with attempt evidence."}
