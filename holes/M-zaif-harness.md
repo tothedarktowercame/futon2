@@ -156,6 +156,34 @@ store.
   uniform prior (matches the WM mint lane).
 - Update rule: the WM's R14 fold, ported not reinvented.
 
+## Boundaries (what zaif refuses) — and the mission-parameterization refinement
+
+1. **Strategy is received, not computed** (refined 2026-07-11 from "no
+   strategic G(a)", Joe): zaif never picks the mission — the operator,
+   M-autoclock-in, or the WM's strategic loop does — but **G is
+   mission-parameterized**, like the WM's inner loop pinned to the judge's
+   pick. Clock-in swaps in the clocked mission's G parameterization: the
+   C-belief slice, the γ slice, and the mission's `:want`s + open
+   interface-sorries as partial preferences. The auto-clock witness is the
+   provenance of which G governed each decision. Empirical warrant: the
+   p4ng prereg S3 result — reward discrimination clears its null *within*
+   missions but not across — mission scope is where the operator's value
+   structure is demonstrably recoverable. Consequences: γ becomes
+   γ(cascade|mission) with the pattern→mission embedding as the bridge
+   between the two indexes (PZ2 tests which index is primary); retrieval
+   scopes via the existing mission_orientation tool; **autoclock ambiguity
+   is itself C-uncertainty feeding the ask arm** ("still on X, or moved to
+   Y?"). Mid-session re-clock rule: in-flight acts complete under the old
+   mission's G; the next turn deliberates under the new. Gating condition:
+   M-autoclock-in working (the clock-store read tool is already in
+   zai_api.clj's tool specs).
+2. **No autonomous scheduling.** Known-to-be-interactive is a premise, not
+   a degraded mode — it keeps yield always available and the safety story
+   simple. The WM keeps the autonomous lane.
+3. **No in-band formalism.** G, γ, C live in Clojure around the API call;
+   the model sees retrieved context and instructions, never its own belief
+   arithmetic (the FuLab lesson).
+
 ## Deliverables
 
 - **Z1 — the query library + retro-bootstrap.** The named XTQL forms for
