@@ -221,7 +221,7 @@ The first consumers are the zaif controller's needs, in order:
 Composition with existing seam filters (tags, session-id) required; phrase/
 prefix/relevance beyond BM25 stay out of POC scope as before.
 
-### P2 — lean recorded (decision still open)
+### P2 — DECIDED 2026-07-11: FTS5 (Joe)
 
 FTS5 embedded **in the futon1b store JVM** (a route beside
 `/api/alpha/memory/search`; lucy stays at two JVMs, the §12.3 envelope stays
@@ -276,15 +276,18 @@ The updated paper binds this thread to the WM line three ways:
    natural next transplant" — with recall-as-typed-query already validated
    against the live corpus through this mission's seam.
 
-**Next, revised:** D2 comment draft (unchanged, Joe-gated) → P2 decision
-(FTS5-in-store-JVM lean above) → D1 build → zaif harness doc when Joe calls
-it. M-a-sorry-enterprise remains on the critical path for *auditable* γ
-(v1), not for the working v0.
+**Next, revised:** D2 comment draft (unchanged, Joe-gated) → D1 build
+(FTS5 in the store JVM, per the decided P2) → P3 sync contract (trivial for
+the evidence slice: poll-since; state the entity-slice bound). The zaif
+harness doc now exists: `M-zaif-harness.md`. M-a-sorry-enterprise remains
+on the critical path for *auditable* γ (v1), not for the working v0.
 
 ## Log
 
 - 2026-07-11 — P4 answered from the zaif frame; P2 lean recorded; zaif seed
   design + p4ng linkage logged (checkpoint above).
+- 2026-07-11 (later) — **P2 DECIDED: FTS5** (Joe). Harness doc spun out to
+  `M-zaif-harness.md`.
 
 - 2026-07-10 — mission authored (Fable session) from the #5637 assessment
   conversation with Joe. P1 is the car; nothing dispatched yet.
