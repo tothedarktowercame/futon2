@@ -488,6 +488,48 @@ PZ1 is CLOSED. The handoff ledger that produced it: H1 PASS · H2
 FAIL→H2b PASS · H3 PASS · H4 FAIL→H4b PASS — six dispatches, two
 failures caught by external adjudication, both remediated first-try.
 
+### Post-PZ1 decision (Joe, 2026-07-11): ✘ mint-at-the-point via M-points-de-fuite
+
+Joe's response to the verdict: mark corrections inline with **✘** going
+forward (and similarly for other relevant signals) — i.e. route the
+correction signal through [[M-points-de-fuite]]'s declare-don't-guess
+layer instead of detecting it after the fact. The two missions meet
+precisely: M-points-de-fuite §1 lists `"not X but Y" → a correction` as
+its middle recognition tier, graded "partly recognizable"; **PZ1
+measured "partly" = recall .186 / precision .417**, which is exactly the
+mission's stated condition for adding an explicit symbol (override only
+where recognition is insufficient).
+
+What ✘ buys the zaif harness:
+1. **Operator-gold γ events, live.** A ✘-marked turn is a gold label by
+   definition — no lexicon, no model pass, no gold-pass session. At the
+   measured ~24% correction base rate, even 50% marking compliance
+   yields ~2.5× the lexicon's recall at precision 1.0.
+2. **The label-rate constraint (p4ng) dissolves for this signal.** Every
+   ✘ accumulates into a training/eval corpus for the stronger detector
+   (D1/FTS5 + model-assisted), which can then be measured against
+   ✘-marked turns instead of bespoke gold passes.
+3. **Marking discipline is itself measurable**: observed ✘-rate vs the
+   24% base rate estimates marking recall; an occasional ~10-item
+   mini-gold-pass audits it cheaply.
+
+Design guidance from PZ1's own findings:
+- **One bit, not three.** Joe routed all 18 gold yeses γ — the
+  C/actand distinction is not operator-salient, so don't ask for
+  ✘γ/✘C/✘actand. Operator marks THAT (one keystroke); agents assign
+  WHICH route downstream (route assignment was the one thing the
+  agents/lexicon did well: route agreement 22/25, routing accuracy 1.0).
+- **Zero build to start.** ✘ in turn text is deterministically
+  greppable at precision 1.0 (the sheet's own contexts prove turn text
+  round-trips through the evidence store). Later, a turn-end recognizer
+  step (sibling to the §6.5 clocking recognizer in agent-chat.el) can
+  stamp a :correction tag on the chat-turn evidence entry so the γ
+  stream is queryable without content scans; session-mode can render it.
+- **Grow the vocabulary slowly** (Table-25 stance: roadsigns,
+  revisable). Obvious next candidate: ✓ for explicit confirmation — the
+  other half of the γ precision ledger. Add it only after ✘ marking
+  rate is observed.
+
 ## Log
 
 - 2026-07-11 (later still) — **retry PASSED on the original unpinned
