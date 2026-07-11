@@ -349,6 +349,25 @@ starts (cycle 1 is a marathon: full commit histories), mc/tensions NPE,
 and a durable service arrangement for the two JVMs (systemd units /
 fdev integration) — currently both are setsid orphans from this session.
 
+### 2026-07-11 (morning) — services made durable the hard way
+
+A session restart reaped both setsid'd JVMs (the exact reaping mode
+futon3c's CLAUDE.md documents for agent-spawned processes). Two results:
+
+- **The switchover store survived an ungraceful JVM death** — reopened
+  clean with 739 hyperedges + 24 evidence intact. Durability datum banked.
+- **Service arrangement resolved**: `futon1b-server.service` is now an
+  enabled systemd user unit (auto-restart, survives sessions/reboots);
+  the dev stack runs as transient unit `futon3c-switchover.service` with
+  the Gate-1 env (IRC off — ngircd owns 6667 on lucy). Reboot under
+  systemd: futon1a DISABLED, futon1b backend, boot check OK. When the
+  rehearsal graduates, fold the dev-stack env into the operator's fdev
+  launcher; the store unit is already its long-term shape.
+
+Fresh-JVM note: commit-ingest cursors re-derive from the store on boot,
+so repos whose histories failed before the JSON fix now backfill fully —
+the organic commit backfill resumes itself.
+
 ## Rollback
 
 At any gate failure: stop futon1b JVM, unset the env flips, boot as before
