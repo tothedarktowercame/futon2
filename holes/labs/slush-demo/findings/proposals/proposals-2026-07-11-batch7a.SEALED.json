@@ -1,0 +1,124 @@
+{
+ "6968af7f00db80c5": {
+  "proposer": "gfn",
+  "log_reward": -1.9131537459243781
+ },
+ "176fb73cded76c4e": {
+  "proposer": "gfn",
+  "log_reward": -2.0098254675362397
+ },
+ "08898b60346f7aab": {
+  "proposer": "gfn",
+  "log_reward": -2.016066267387593
+ },
+ "48ef41bdb20daada": {
+  "proposer": "gfn",
+  "log_reward": -2.1494985075158657
+ },
+ "7f7d525a1db4a257": {
+  "proposer": "gfn",
+  "log_reward": -2.1638521094352083
+ },
+ "b4724cb8110257f2": {
+  "proposer": "gfn",
+  "log_reward": -2.209431103199282
+ },
+ "1a70650b94152520": {
+  "proposer": "gfn",
+  "log_reward": -2.232500907800092
+ },
+ "c1c0c3e75ed0bad8": {
+  "proposer": "gfn",
+  "log_reward": -2.288668106462269
+ },
+ "a800524301199a8a": {
+  "proposer": "incumbent"
+ },
+ "e292761866e7c1d5": {
+  "proposer": "greedy-rhat",
+  "log_reward": -1.7196889505324342
+ },
+ "b91a1a670df4920a": {
+  "proposer": "gfn",
+  "log_reward": -1.4438534988889749
+ },
+ "ed3bc058079fa12f": {
+  "proposer": "gfn",
+  "log_reward": -1.5278651032091342
+ },
+ "27ca6cbb1f6917dc": {
+  "proposer": "gfn",
+  "log_reward": -1.6104735171081863
+ },
+ "0e44846be97ce7fe": {
+  "proposer": "gfn",
+  "log_reward": -1.6261555269910735
+ },
+ "3522bb2b3fd90f4b": {
+  "proposer": "gfn",
+  "log_reward": -1.8256086592782186
+ },
+ "0d80b56dc957a41a": {
+  "proposer": "gfn",
+  "log_reward": -1.8523505813627175
+ },
+ "bd21569b6e5728e4": {
+  "proposer": "gfn",
+  "log_reward": -1.856495513024944
+ },
+ "518d4557371c07bf": {
+  "proposer": "gfn",
+  "log_reward": -1.9332091823037607
+ },
+ "c4937fe6ad61e2b7": {
+  "proposer": "incumbent"
+ },
+ "57592e387afe8634": {
+  "proposer": "greedy-rhat",
+  "log_reward": -0.9946822974058551
+ },
+ "45b4cf18c0f6c16c": {
+  "proposer": "gfn",
+  "log_reward": -1.1800993274643339
+ },
+ "ac4f3211c0c932c6": {
+  "proposer": "gfn",
+  "log_reward": -1.1946611937841576
+ },
+ "29e986193fbb753f": {
+  "proposer": "gfn",
+  "log_reward": -1.2165039932638932
+ },
+ "6b5147269e9e2922": {
+  "proposer": "gfn",
+  "log_reward": -1.223784926423805
+ },
+ "941b498a9bb4b83e": {
+  "proposer": "gfn",
+  "log_reward": -1.2456277259035407
+ },
+ "5cecc0fa63493a22": {
+  "proposer": "gfn",
+  "log_reward": -1.2747514585431883
+ },
+ "821483b8d374c8c8": {
+  "proposer": "gfn",
+  "log_reward": -1.2747514585431883
+ },
+ "4132f151f3b36a32": {
+  "proposer": "gfn",
+  "log_reward": -1.4646490628539204
+ },
+ "017cd4b768c8d37d": {
+  "proposer": "incumbent"
+ },
+ "ca45d46e82656077": {
+  "proposer": "greedy-rhat",
+  "log_reward": -1.1072899958652151
+ },
+ "_provenance": {
+  "reward": "v1.2",
+  "wiring_corpus_sha256": "47e7cd094f12428aeb03593e2ea71dc9bac0dbf0057a95fd3846a9185220d97f",
+  "n_labels": 29
+ }
+}

@@ -1,0 +1,347 @@
+[
+ {
+  "proposal": "6968af7f00db80c5",
+  "mission": "M-hypergraph-operator",
+  "patterns": [
+   "iching/hexagram-06-song",
+   "iching/hexagram-15-qian",
+   "iching/hexagram-20-guan",
+   "iching/hexagram-60-jie",
+   "scan-coherence/mission-anchored-scan"
+  ]
+ },
+ {
+  "proposal": "3522bb2b3fd90f4b",
+  "mission": "M-a-sorry-enterprise",
+  "patterns": [
+   "ants/baseline-cyber-ant",
+   "devmap-coherence/ifr-f6-upekkha",
+   "p4ng/pattern-priming",
+   "social/ARGUMENT",
+   "war-machine/ambient-pattern-retrieval"
+  ]
+ },
+ {
+  "proposal": "ca45d46e82656077",
+  "mission": "M-peeragogy-rewrite",
+  "patterns": [
+   "collaboration-coherence/isolation",
+   "collaboration-coherence/weak-tie-conflation",
+   "peeragogy/creating-a-guide",
+   "peeragogy/curating-not-experting",
+   "peeragogy/par"
+  ]
+ },
+ {
+  "proposal": "c4937fe6ad61e2b7",
+  "mission": "M-a-sorry-enterprise",
+  "patterns": [
+   "war-machine/ambient-pattern-retrieval",
+   "control/agential-pattern-hygiene",
+   "devmap-coherence/ifr-f3a-piti-audit",
+   "pattern-discipline/patterns-as-categorical-objects",
+   "ants/baseline-cyber-ant",
+   "futon-theory/structural-tension-as-observation",
+   "aif/candidate-pattern-action-space",
+   "invariant-coherence/shape-first-identify",
+   "futon-theory/theory-as-exotype",
+   "exotic/full-lift-registry",
+   "structure/interest-event-vocabulary",
+   "devmap-coherence/ifr-f1-dhammavicaya",
+   "devmap-coherence/ifr-state-convergence",
+   "devmap-coherence/ifr-f6-upekkha",
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "devmap-coherence/ifr-f5-samadhi",
+   "devmap-coherence/ifr-f4-passaddhi",
+   "peripherals/pattern-becomes-peripheral",
+   "exotic/live-sync-source-truth"
+  ]
+ },
+ {
+  "proposal": "017cd4b768c8d37d",
+  "mission": "M-peeragogy-rewrite",
+  "patterns": [
+   "peeragogy/creating-a-guide",
+   "peeragogy/discerning-a-pattern",
+   "peeragogy/curating-not-experting",
+   "collaboration-coherence/weak-tie-conflation",
+   "peeragogy/polling-for-ideas",
+   "ai4ci/collective-intelligence-framing"
+  ]
+ },
+ {
+  "proposal": "57592e387afe8634",
+  "mission": "M-a-sorry-enterprise",
+  "patterns": [
+   "devmap-coherence/ifr-f3a-piti-audit",
+   "math-strategy/clarification-meta",
+   "orchestration/state-in-substrate-deltas-in-messages",
+   "peripherals/pattern-becomes-peripheral",
+   "war-machine/ambient-pattern-retrieval"
+  ]
+ },
+ {
+  "proposal": "0d80b56dc957a41a",
+  "mission": "M-a-sorry-enterprise",
+  "patterns": [
+   "devmap-coherence/ifr-f6-upekkha",
+   "enrichment/ARGUMENT",
+   "fulab/pattern-propose",
+   "peripherals/pattern-becomes-peripheral",
+   "social/ARGUMENT"
+  ]
+ },
+ {
+  "proposal": "c1c0c3e75ed0bad8",
+  "mission": "M-hypergraph-operator",
+  "patterns": [
+   "devmap-coherence/ifr-f2-viriya",
+   "iching/hexagram-15-qian",
+   "iching/hexagram-19-lin",
+   "iching/hexagram-43-guai",
+   "iching/hexagram-60-jie"
+  ]
+ },
+ {
+  "proposal": "176fb73cded76c4e",
+  "mission": "M-hypergraph-operator",
+  "patterns": [
+   "aif/admissibility",
+   "devmap-coherence/ifr-f3a-piti-audit",
+   "iching/hexagram-27-yi",
+   "iching/hexagram-43-guai",
+   "math-strategy/clarification-meta"
+  ]
+ },
+ {
+  "proposal": "6b5147269e9e2922",
+  "mission": "M-peeragogy-rewrite",
+  "patterns": [
+   "peeragogy/newcomer",
+   "peeragogy/roadmap",
+   "relationship-coherence/lexicon-minting",
+   "t4r/training",
+   "vsatlas/askew-layer"
+  ]
+ },
+ {
+  "proposal": "a800524301199a8a",
+  "mission": "M-hypergraph-operator",
+  "patterns": [
+   "devmap-coherence/ifr-f2-viriya",
+   "ants/baseline-cyber-ant",
+   "futon-theory/structural-tension-as-observation",
+   "gauntlet/aif-as-environment-not-instruction",
+   "agent/sense-deliberate-act",
+   "structure/interest-event-vocabulary"
+  ]
+ },
+ {
+  "proposal": "0e44846be97ce7fe",
+  "mission": "M-a-sorry-enterprise",
+  "patterns": [
+   "devmap-coherence/ifr-f0-sati",
+   "enrichment/ARGUMENT",
+   "fulab/pattern-propose",
+   "math-strategy/clarification-meta",
+   "pattern-discipline/patterns-as-categorical-objects"
+  ]
+ },
+ {
+  "proposal": "821483b8d374c8c8",
+  "mission": "M-peeragogy-rewrite",
+  "patterns": [
+   "peeragogy/creating-a-guide",
+   "peeragogy/pattern-language",
+   "t4r/exec-summary-tree",
+   "t4r/rationale",
+   "vsatlas/askew-layer"
+  ]
+ },
+ {
+  "proposal": "b91a1a670df4920a",
+  "mission": "M-a-sorry-enterprise",
+  "patterns": [
+   "devmap-coherence/ifr-f3-piti",
+   "devmap-coherence/ifr-f5-samadhi",
+   "enrichment/ARGUMENT",
+   "p4ng/pattern-activation",
+   "pattern-discipline/patterns-as-categorical-objects"
+  ]
+ },
+ {
+  "proposal": "b4724cb8110257f2",
+  "mission": "M-hypergraph-operator",
+  "patterns": [
+   "agent/sense-deliberate-act",
+   "ants/baseline-cyber-ant",
+   "gauntlet/placenta-transfer",
+   "iching/hexagram-06-song",
+   "iching/hexagram-10-lu"
+  ]
+ },
+ {
+  "proposal": "48ef41bdb20daada",
+  "mission": "M-hypergraph-operator",
+  "patterns": [
+   "aif/admissibility",
+   "futon-theory/structural-tension-as-observation",
+   "gauntlet/placenta-transfer",
+   "iching/hexagram-27-yi",
+   "iching/hexagram-43-guai"
+  ]
+ },
+ {
+  "proposal": "bd21569b6e5728e4",
+  "mission": "M-a-sorry-enterprise",
+  "patterns": [
+   "devmap-coherence/ifr-f0-sati",
+   "devmap-coherence/ifr-f6-upekkha",
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "pattern-discipline/patterns-as-categorical-objects",
+   "peripherals/pattern-becomes-peripheral"
+  ]
+ },
+ {
+  "proposal": "29e986193fbb753f",
+  "mission": "M-peeragogy-rewrite",
+  "patterns": [
+   "ai4ci/collective-intelligence-framing",
+   "collaboration-coherence/weak-tie-conflation",
+   "peeragogy/use-or-make",
+   "repository-transition/counterstrawman",
+   "t4r/exec-summary-tree"
+  ]
+ },
+ {
+  "proposal": "ed3bc058079fa12f",
+  "mission": "M-a-sorry-enterprise",
+  "patterns": [
+   "devmap-coherence/ifr-f0-sati",
+   "devmap-coherence/ifr-f3a-piti-audit",
+   "exotic/live-sync-source-truth",
+   "orchestration/state-in-substrate-deltas-in-messages",
+   "war-machine/ambient-pattern-retrieval"
+  ]
+ },
+ {
+  "proposal": "08898b60346f7aab",
+  "mission": "M-hypergraph-operator",
+  "patterns": [
+   "agent/sense-deliberate-act",
+   "iching/hexagram-10-lu",
+   "iching/hexagram-19-lin",
+   "iching/hexagram-39-jian",
+   "musn/aif-live-scores"
+  ]
+ },
+ {
+  "proposal": "5cecc0fa63493a22",
+  "mission": "M-peeragogy-rewrite",
+  "patterns": [
+   "collaboration-coherence/weak-tie-conflation",
+   "peeragogy/use-or-make",
+   "t4r/rationale",
+   "t4r/training",
+   "vsatlas/askew-layer"
+  ]
+ },
+ {
+  "proposal": "1a70650b94152520",
+  "mission": "M-hypergraph-operator",
+  "patterns": [
+   "devmap-coherence/ifr-f2-viriya",
+   "gauntlet/placenta-transfer",
+   "iching/hexagram-19-lin",
+   "iching/hexagram-39-jian",
+   "musn/aif-live-scores"
+  ]
+ },
+ {
+  "proposal": "27ca6cbb1f6917dc",
+  "mission": "M-a-sorry-enterprise",
+  "patterns": [
+   "devmap-coherence/ifr-f0-sati",
+   "devmap-coherence/ifr-f3a-piti-audit",
+   "math-strategy/clarification-meta",
+   "social/ARGUMENT",
+   "war-machine/ambient-pattern-retrieval"
+  ]
+ },
+ {
+  "proposal": "e292761866e7c1d5",
+  "mission": "M-hypergraph-operator",
+  "patterns": [
+   "agency/invariants",
+   "agent/sense-deliberate-act",
+   "gauntlet/placenta-transfer",
+   "musn/aif-live-scores",
+   "scan-coherence/mission-anchored-scan"
+  ]
+ },
+ {
+  "proposal": "518d4557371c07bf",
+  "mission": "M-a-sorry-enterprise",
+  "patterns": [
+   "control/agential-pattern-hygiene",
+   "devmap-coherence/ifr-f3-piti",
+   "devmap-coherence/ifr-f6-upekkha",
+   "enrichment/ARGUMENT",
+   "social/ARGUMENT"
+  ]
+ },
+ {
+  "proposal": "7f7d525a1db4a257",
+  "mission": "M-hypergraph-operator",
+  "patterns": [
+   "agency/invariants",
+   "aif/admissibility",
+   "ants/baseline-cyber-ant",
+   "devmap-coherence/ifr-f3a-piti-audit",
+   "iching/hexagram-06-song"
+  ]
+ },
+ {
+  "proposal": "941b498a9bb4b83e",
+  "mission": "M-peeragogy-rewrite",
+  "patterns": [
+   "peeragogy/discerning-a-pattern",
+   "peeragogy/roadmap",
+   "peeragogy/wrapper",
+   "t4r/rationale",
+   "t4r/training"
+  ]
+ },
+ {
+  "proposal": "ac4f3211c0c932c6",
+  "mission": "M-peeragogy-rewrite",
+  "patterns": [
+   "collaboration-coherence/isolation",
+   "collaboration-coherence/magical-thinking",
+   "collaboration-coherence/weak-tie-conflation",
+   "peeragogy/discerning-a-pattern",
+   "vsatlas/peeragogical-infrastructures"
+  ]
+ },
+ {
+  "proposal": "45b4cf18c0f6c16c",
+  "mission": "M-peeragogy-rewrite",
+  "patterns": [
+   "collaboration-coherence/magical-thinking",
+   "collaboration-coherence/weak-tie-conflation",
+   "peeragogy/creating-a-guide",
+   "repository-transition/counterstrawman",
+   "vsatlas/peeragogical-infrastructures"
+  ]
+ },
+ {
+  "proposal": "4132f151f3b36a32",
+  "mission": "M-peeragogy-rewrite",
+  "patterns": [
+   "collaboration-coherence/magical-thinking",
+   "equity/visible-impact-merged",
+   "peeragogy/pattern-language",
+   "vsatlas/askew-layer"
+  ]
+ }
+]

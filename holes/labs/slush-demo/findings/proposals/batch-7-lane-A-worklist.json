@@ -1,0 +1,84 @@
+[
+ {
+  "proposal": "6968af7f00db80c5",
+  "mission": "M-hypergraph-operator",
+  "patterns": [
+   "iching/hexagram-06-song",
+   "iching/hexagram-15-qian",
+   "iching/hexagram-20-guan",
+   "iching/hexagram-60-jie",
+   "scan-coherence/mission-anchored-scan"
+  ]
+ },
+ {
+  "proposal": "a800524301199a8a",
+  "mission": "M-hypergraph-operator",
+  "patterns": [
+   "devmap-coherence/ifr-f2-viriya",
+   "ants/baseline-cyber-ant",
+   "futon-theory/structural-tension-as-observation",
+   "gauntlet/aif-as-environment-not-instruction",
+   "agent/sense-deliberate-act",
+   "structure/interest-event-vocabulary"
+  ]
+ },
+ {
+  "proposal": "3522bb2b3fd90f4b",
+  "mission": "M-a-sorry-enterprise",
+  "patterns": [
+   "ants/baseline-cyber-ant",
+   "devmap-coherence/ifr-f6-upekkha",
+   "p4ng/pattern-priming",
+   "social/ARGUMENT",
+   "war-machine/ambient-pattern-retrieval"
+  ]
+ },
+ {
+  "proposal": "c4937fe6ad61e2b7",
+  "mission": "M-a-sorry-enterprise",
+  "patterns": [
+   "war-machine/ambient-pattern-retrieval",
+   "control/agential-pattern-hygiene",
+   "devmap-coherence/ifr-f3a-piti-audit",
+   "pattern-discipline/patterns-as-categorical-objects",
+   "ants/baseline-cyber-ant",
+   "futon-theory/structural-tension-as-observation",
+   "aif/candidate-pattern-action-space",
+   "invariant-coherence/shape-first-identify",
+   "futon-theory/theory-as-exotype",
+   "exotic/full-lift-registry",
+   "structure/interest-event-vocabulary",
+   "devmap-coherence/ifr-f1-dhammavicaya",
+   "devmap-coherence/ifr-state-convergence",
+   "devmap-coherence/ifr-f6-upekkha",
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "devmap-coherence/ifr-f5-samadhi",
+   "devmap-coherence/ifr-f4-passaddhi",
+   "peripherals/pattern-becomes-peripheral",
+   "exotic/live-sync-source-truth"
+  ]
+ },
+ {
+  "proposal": "6b5147269e9e2922",
+  "mission": "M-peeragogy-rewrite",
+  "patterns": [
+   "peeragogy/newcomer",
+   "peeragogy/roadmap",
+   "relationship-coherence/lexicon-minting",
+   "t4r/training",
+   "vsatlas/askew-layer"
+  ]
+ },
+ {
+  "proposal": "017cd4b768c8d37d",
+  "mission": "M-peeragogy-rewrite",
+  "patterns": [
+   "peeragogy/creating-a-guide",
+   "peeragogy/discerning-a-pattern",
+   "peeragogy/curating-not-experting",
+   "collaboration-coherence/weak-tie-conflation",
+   "peeragogy/polling-for-ideas",
+   "ai4ci/collective-intelligence-framing"
+  ]
+ }
+]
