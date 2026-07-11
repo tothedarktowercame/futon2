@@ -271,6 +271,13 @@ futon3c `limit/ephemeral pushdown when membership is server-decidable`
 
 ## Log
 
+- 2026-07-11 (later still) — **retry PASSED on the original unpinned
+  ask** after the limit-pushdown fix was hot-swapped (Drawbridge reload +
+  fresh backend instance; no JVM restart, zai-1's session preserved):
+  5 joe-authored entries, correctly ordered, coherent types/tags, and a
+  correct reading of the null mission target ("nothing is clocked").
+  Query verified on the windowed path: include-ephemeral=false&limit=5,
+  4.4s. Demo closed green.
 - 2026-07-11 (later) — first live demo run + failure analysis (DEMO
   RECORD above); backend limit-pushdown fix committed; U1 promoted to
   prerequisite.
