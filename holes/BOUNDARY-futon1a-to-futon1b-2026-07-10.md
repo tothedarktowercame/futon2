@@ -152,6 +152,36 @@ Stop the stack, unset the four env vars, boot as before — the embedded
 futon1a and its store were never touched. Lucy's store additionally has
 the cold sha256-pinned backup above.
 
+## Dionysus readiness (recorded 2026-07-11; switchover NOT executed)
+
+Prep done so the laptop switchover is a short exercise at a quiet juncture:
+
+- **Code at required versions**: futon1b pulled to `6b941c0` (≥ `cfc8607`),
+  futon3c pulled to `882fb3f` on agency-fixes-2026-06-11. Env-gated, so the
+  running stack and any pre-juncture restart behave exactly as before.
+- **Store server ALREADY RUNNING on this box** — inverse of lucy's path:
+  Dionysus is data-first (store populated, stack not switched), lucy was
+  operational-first (stack switched, store empty). A transient systemd unit
+  `futon1b-server` (started 2026-07-10 12:52 by the migration session) serves
+  `migration-store-21` on **port 7073** with the full migrated corpus:
+  44,700 entities · 46,685 relations · 90,583 evidence (sessionless included)
+  · 1,581 hyperedges (partial) · 207 types. Note 7073 is nginx on lucy but
+  free-for-futon1b here; laptop keeps 7073.
+- **Durable unit staged**: `~/.config/systemd/user/futon1b-server.service`
+  now exists as a static twin of the transient unit (same store-dir + port),
+  NOT enabled/started — it takes over cleanly at the juncture (or after a
+  reboot). Footgun it fixes: the lucy-template defaults (switchover-store,
+  7074) under the same unit name would have silently started an empty store.
+- **At the juncture, the whole switchover is**: stop stack →
+  `systemctl --user enable --now futon1b-server` (transient gone after
+  reboot; otherwise let the transient keep running) → export
+  `FUTON1A_PORT=0 FUTON3C_EVIDENCE_BACKEND=futon1b`
+  `FUTON1B_URL=http://127.0.0.1:7073 FUTON1A_URL=http://127.0.0.1:7073`
+  → `fdev` → check boot log for `futon1a DISABLED` → `evidence backend:
+  futon1b` → `I-evidence-per-turn boot check: OK (futon1b)`.
+- Open question for the juncture (not prep): whether Dionysus's remaining
+  hyperedge backfill (1,581 of ~246k) lands before or after the stack switch.
+
 ## What "conversion" means from here
 
 1. Grow `futon1b_server.clj` to the ~15-route substrate surface the
