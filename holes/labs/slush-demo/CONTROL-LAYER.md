@@ -113,3 +113,15 @@ Three rungs, cheapest first:
   the natural GFlowNet formulation (DAG construction is what GFNs are for)
   and makes "cascade = sketch of the eventual wiring diagram" literal. Bigger
   lift; do R1/R2 first and let their residuals argue for R3.
+
+## Side-channel quarantine (operator design point, 2026-07-11)
+
+Folders may record `:library-alternatives` (existing patterns that would fit
+better) and `:mint-candidate` holes (patterns that do not exist). QUARANTINE
+RULE: this channel never influences the batch that produced it — not the
+proposals, not the adjudication, not R̂'s features — because a folder feeding
+proposals is a third, unblinded proposer. Downstream uses only:
+(a) alternatives accumulate as RETRIEVAL-RECALL evidence (each one is a
+measured build_pool miss that cosine metrics cannot see); (b) mint candidates
+feed the pattern-authoring queue; (c) if alternatives ever look strong enough
+to act on, the action is a NEW preregistered proposer arm, not a quiet edit.

@@ -66,3 +66,14 @@ reviewer; warrants cover which/how within the envelope, never whether-outward.
   IDENTIFY alone (IDENTIFY is the mission's FIRST phase — an attested want
   goes stale as later phases land). If your assignment flags doc-vs-code
   divergence, the landed work is HAVE and the psi covers what REMAINS.
+- OPTIONAL side-channel — library alternatives & mint candidates (operator
+  request, 2026-07-11): during overlap/hole analysis you may add
+  `:library-alternatives [{:for :bN :suggest "ns/pattern" :why "..."}]` for
+  EXISTING library patterns that would ground a box better than the proposed
+  one, and mark mint-shaped holes `:mint-candidate true` for patterns that do
+  not exist. STRICTLY a side-channel: it is never scored, never adjudicated,
+  and never feeds the current batch's proposals (that would make the folder a
+  third proposer and break the blind A/B). Its uses are downstream:
+  alternatives = retrieval-recall evidence for the pool builder; mint
+  candidates = the pattern-authoring queue. Suggest only what you genuinely
+  noticed — an empty side-channel is the normal case.
