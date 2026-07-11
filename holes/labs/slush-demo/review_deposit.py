@@ -74,6 +74,15 @@ def review(path, worklist=None):
     check("check-parens prints OK", r.stdout.strip().endswith("OK"),
           "B2-F4/F5: claimed pass on unbalanced file; 'no output' read as pass")
 
+    # 1b. real EDN parse — Fold Run 22 (zai-5): check-parens tracks AGGREGATE
+    #     balance, so a missing } compensated by an extra } elsewhere passes it
+    #     while the structural nesting is wrong. The EDN reader is stricter.
+    r = subprocess.run(["bb", "-e",
+                        f'(do (clojure.edn/read-string (slurp "{path}")) (println "EDN-OK"))'],
+                       capture_output=True, text=True)
+    check("EDN reader parses", "EDN-OK" in r.stdout,
+          "Run 22: aggregate-balanced but structurally mis-nested EDN passes check-parens")
+
     # 2. psi-sha over DECODED value — Fold Run 10.
     ok = (d["psi"] is not None and d["psi_sha_claimed"] is not None and
           hashlib.sha256(d["psi"].encode()).hexdigest() == d["psi_sha_claimed"])
