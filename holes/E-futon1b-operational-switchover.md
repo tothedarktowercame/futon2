@@ -352,6 +352,15 @@ forfeits its accumulated fixes (the F1 sanitizer caught this attempt);
 and workload-sized JVMs must be re-sized to the BOX (the deps.edn warning
 existed; it applies to exporters too).
 
+**Ops note (2026-07-11, cost one confusing hour):** `tmux respawn-window
+-k` does NOT kill the JVM under the `make → clojure → java` chain — the
+java detaches, keeps the ports, and keeps running the old code while the
+new boot dies on BindException; meanwhile the pane looks healthy because
+the orphan's output stops. A stack restart must kill the java PID
+explicitly first (find it via `ss -tlnp | grep 7070`), then respawn.
+Post-fix boot verified fully clean (0 errors after settle) on the
+scale-fixed server.
+
 Residual items, all small: mc/tensions NPE (empty-corpus edge, may
 self-resolve now the corpus is in); relations table 0 (lucy's graph
 snapshot carried entities only — verify against futon1a if relations are
