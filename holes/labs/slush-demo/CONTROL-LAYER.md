@@ -125,3 +125,20 @@ proposals is a third, unblinded proposer. Downstream uses only:
 measured build_pool miss that cosine metrics cannot see); (b) mint candidates
 feed the pattern-authoring queue; (c) if alternatives ever look strong enough
 to act on, the action is a NEW preregistered proposer arm, not a quiet edit.
+
+## Flight-design notes (batch-6 doctrine)
+
+- The bar is HIGHER on expected-TRUE flights than expected-FALSE ones: FALSE
+  flights produce evidence toward a psi they cannot discharge; TRUE flights
+  must produce the psi's EXACT expression (zai-7, B6-F8). Design acceptance
+  accordingly: TRUE flights get correctness bars, FALSE flights get
+  evidence bars.
+- Psi-ambition confound (OPEN operator decision, batch 7): richer cascades
+  draw more conjunctive psis from blind folders, which discharge less at
+  flight scale — S1/S2 partly measures psi ambition. Mitigations on the
+  table: obligation-count covariate in the paired test; fixed psi-scope
+  budget in the folder contract; per-obligation discharge rates.
+- Instrument flights (probes/monitors) must CALIBRATE against known truth
+  before reporting (B6-F3: a port probe declared dead the very port carrying
+  its own bell traffic). A monitoring artifact's acceptance includes one
+  cross-check against an independently verified fact.

@@ -89,3 +89,10 @@ reviewer; warrants cover which/how within the envelope, never whether-outward.
   bug): the deposit tail closes as `}]}}` -area sequences; author the closing
   sequence FIRST (empty skeleton), then fill content, rather than appending
   closings at the end.
+- Shared patterns across same-mission folds: COPY the pattern-id from the
+  worklist, never reconstruct from recall — false familiarity drifts a vowel
+  while your prose stays correct (batch 6, lane A: upekkha/upekkaha).
+- Absorption satiety rule (batch 6 species theory): same-move-different-
+  ABSTRACTION absorbs to ONE :full box (neither pattern alone is complete);
+  same-move-different-PHASE absorbs to one :partial box (the earlier phase is
+  met, the later is not).
