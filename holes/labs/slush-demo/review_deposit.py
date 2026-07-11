@@ -74,14 +74,23 @@ def review(path, worklist=None):
     check("check-parens prints OK", r.stdout.strip().endswith("OK"),
           "B2-F4/F5: claimed pass on unbalanced file; 'no output' read as pass")
 
-    # 1b. real EDN parse — Fold Run 22 (zai-5): check-parens tracks AGGREGATE
-    #     balance, so a missing } compensated by an extra } elsewhere passes it
-    #     while the structural nesting is wrong. The EDN reader is stricter.
+    # 1b. real EDN parse, EXACTLY ONE form then EOF — Fold Run 22 (zai-5):
+    #     check-parens tracks AGGREGATE balance, so compensating braces pass it
+    #     while nesting is wrong; the EDN reader is stricter. Refined during
+    #     Run 25 (zai-5 again): read-string reads only the FIRST form and
+    #     ignores trailing content — mismatched brackets AFTER a valid form are
+    #     invisible to it. So: first read must yield a form, second read must
+    #     hit clean EOF (a trailing bracket makes it throw; a second form makes
+    #     it non-EOF; both FAIL).
     r = subprocess.run(["bb", "-e",
-                        f'(do (clojure.edn/read-string (slurp "{path}")) (println "EDN-OK"))'],
+                        '(with-open [rd (java.io.PushbackReader. '
+                        f'(clojure.java.io/reader "{path}"))] '
+                        '(let [a (clojure.edn/read {:eof ::eof} rd) '
+                        '      b (clojure.edn/read {:eof ::eof} rd)] '
+                        '(when (and (not= a ::eof) (= b ::eof)) (println "EDN-OK"))))'],
                        capture_output=True, text=True)
-    check("EDN reader parses", "EDN-OK" in r.stdout,
-          "Run 22: aggregate-balanced but structurally mis-nested EDN passes check-parens")
+    check("EDN reads as exactly one form", "EDN-OK" in r.stdout,
+          "Run 22/25: mis-nesting or trailing garbage invisible to weaker gates")
 
     # 2. psi-sha over DECODED value — Fold Run 10.
     ok = (d["psi"] is not None and d["psi_sha_claimed"] is not None and
