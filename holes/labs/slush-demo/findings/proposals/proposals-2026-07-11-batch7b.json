@@ -1,0 +1,218 @@
+[
+ {
+  "proposal": "407ea73f5abd51c4",
+  "mission": "M-weird-modernism",
+  "patterns": [
+   "iching/hexagram-38-kui",
+   "iching/hexagram-49-ge",
+   "peeragogy/stewardship-succession",
+   "relationship-coherence/lexicon-minting",
+   "ukrns/anchor-case-maintenance"
+  ]
+ },
+ {
+  "proposal": "9736922c69790f59",
+  "mission": "M-cold-chain",
+  "patterns": [
+   "invariant-coherence/reachable-from-boot",
+   "invariant-coherence/state-snapshot-witness",
+   "invariant-coherence/shape-first-identify",
+   "futon-theory/honest-map-over-flattering-counter",
+   "war-machine/operational-not-decorative",
+   "structure/interest-event-vocabulary"
+  ]
+ },
+ {
+  "proposal": "5dcc7b5f0c2ce00f",
+  "mission": "M-weird-modernism",
+  "patterns": [
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "iching/hexagram-49-ge",
+   "relationship-coherence/lexicon-minting",
+   "structure/interest-event-vocabulary",
+   "ukrns/publication-cadence"
+  ]
+ },
+ {
+  "proposal": "efac76e7fe1cbc7d",
+  "mission": "M-weird-modernism",
+  "patterns": [
+   "futon-theory/wyrd",
+   "iching/hexagram-53-jian",
+   "library-coherence/library-evidence-ledger",
+   "peeragogy/roadmap",
+   "t4r/exec-summary-tree"
+  ]
+ },
+ {
+  "proposal": "e5cc17c7d67dca2e",
+  "mission": "M-cold-chain",
+  "patterns": [
+   "aif/grounded-actuation-not-reobservation",
+   "invariant-coherence/shape-first-identify",
+   "orchestration/recorded-handoff",
+   "ukrns/reader-run-path",
+   "war-machine/operational-not-decorative"
+  ]
+ },
+ {
+  "proposal": "80b3798f22b080bb",
+  "mission": "M-cold-chain",
+  "patterns": [
+   "aif/grounded-actuation-not-reobservation",
+   "devmap-coherence/status-keywords",
+   "futon-theory/honest-map-over-flattering-counter",
+   "orchestration/recorded-handoff",
+   "war-machine/state-capture"
+  ]
+ },
+ {
+  "proposal": "4aea85b6a0758b62",
+  "mission": "M-cold-chain",
+  "patterns": [
+   "futon-theory/honest-map-over-flattering-counter",
+   "iching/hexagram-39-jian",
+   "invariant-coherence/shape-first-identify",
+   "stack-coherence/stack-blocker-detection"
+  ]
+ },
+ {
+  "proposal": "d109b810156788f5",
+  "mission": "M-cold-chain",
+  "patterns": [
+   "aif/grounded-actuation-not-reobservation",
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "futon-theory/mission-interface-signature",
+   "orchestration/recorded-handoff",
+   "ukrns/worked-contrast"
+  ]
+ },
+ {
+  "proposal": "1559f778d0f2ce8e",
+  "mission": "M-weird-modernism",
+  "patterns": [
+   "ukrns/anchor-case-maintenance"
+  ]
+ },
+ {
+  "proposal": "5025f7d81c18a94c",
+  "mission": "M-cold-chain",
+  "patterns": [
+   "aif/grounded-actuation-not-reobservation",
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "devmap-coherence/next-steps-to-done",
+   "futon-theory/mission-interface-signature",
+   "structure/interest-event-vocabulary"
+  ]
+ },
+ {
+  "proposal": "f5662036bc2fc381",
+  "mission": "M-weird-modernism",
+  "patterns": [
+   "gauntlet/ARGUMENT",
+   "iching/hexagram-43-guai",
+   "library-coherence/library-readme-sync",
+   "ukrns/publication-cadence",
+   "ukrns/self-application"
+  ]
+ },
+ {
+  "proposal": "16f5d58e4c26e1b2",
+  "mission": "M-cold-chain",
+  "patterns": [
+   "ants/cargo-return-discipline",
+   "coordination/ARGUMENT",
+   "invariant-coherence/shape-first-identify",
+   "orchestration/recorded-handoff",
+   "structure/interest-event-vocabulary"
+  ]
+ },
+ {
+  "proposal": "df30488ca6bca41d",
+  "mission": "M-weird-modernism",
+  "patterns": [
+   "futon-theory/wyrd",
+   "iching/hexagram-46-sheng",
+   "library-coherence/library-evidence-ledger",
+   "repository-transition/strawman",
+   "ukrns/anchor-case-maintenance"
+  ]
+ },
+ {
+  "proposal": "52e4a6b6447a2db5",
+  "mission": "M-weird-modernism",
+  "patterns": [
+   "iching/hexagram-49-ge",
+   "pattern-discipline/conclusion-required-others-recommended",
+   "peeragogy/roadmap",
+   "peeragogy/stewardship-succession",
+   "peripherals/pattern-becomes-peripheral"
+  ]
+ },
+ {
+  "proposal": "52a568a0091a65d0",
+  "mission": "M-cold-chain",
+  "patterns": [
+   "aif/grounded-actuation-not-reobservation",
+   "devmap-coherence/ifr-f3-piti",
+   "iching/hexagram-39-jian",
+   "ukrns/worked-contrast",
+   "war-machine/state-capture"
+  ]
+ },
+ {
+  "proposal": "08a377df69ddb4d5",
+  "mission": "M-weird-modernism",
+  "patterns": [
+   "gauntlet/ARGUMENT",
+   "iching/hexagram-43-guai",
+   "library-coherence/library-evidence-ledger",
+   "library-coherence/library-readme-sync",
+   "relationship-coherence/lexicon-minting"
+  ]
+ },
+ {
+  "proposal": "bb199fc760afcb07",
+  "mission": "M-cold-chain",
+  "patterns": [
+   "ants/cargo-return-discipline",
+   "stack-coherence/evidence-ledger",
+   "stack-coherence/stack-blocker-detection",
+   "ukrns/reader-run-path",
+   "ukrns/worked-contrast"
+  ]
+ },
+ {
+  "proposal": "4c42746766cf0a72",
+  "mission": "M-weird-modernism",
+  "patterns": [
+   "futon-theory/wyrd",
+   "library-coherence/library-readme-sync",
+   "pattern-discipline/conclusion-required-others-recommended",
+   "peeragogy/roadmap",
+   "peripherals/pattern-becomes-peripheral"
+  ]
+ },
+ {
+  "proposal": "db279dac693f1044",
+  "mission": "M-cold-chain",
+  "patterns": [
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "orchestration/recorded-handoff",
+   "stack-coherence/evidence-ledger",
+   "ukrns/worked-contrast",
+   "war-machine/state-capture"
+  ]
+ },
+ {
+  "proposal": "c6c22d1396927851",
+  "mission": "M-weird-modernism",
+  "patterns": [
+   "futon-theory/wyrd",
+   "gauntlet/ARGUMENT",
+   "peeragogy/roadmap",
+   "peeragogy/stewardship-succession",
+   "peripherals/pattern-becomes-peripheral"
+  ]
+ }
+]

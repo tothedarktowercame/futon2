@@ -1,0 +1,43 @@
+[
+ {
+  "proposal": "407ea73f5abd51c4",
+  "mission": "M-weird-modernism",
+  "patterns": [
+   "iching/hexagram-38-kui",
+   "iching/hexagram-49-ge",
+   "peeragogy/stewardship-succession",
+   "relationship-coherence/lexicon-minting",
+   "ukrns/anchor-case-maintenance"
+  ]
+ },
+ {
+  "proposal": "1559f778d0f2ce8e",
+  "mission": "M-weird-modernism",
+  "patterns": [
+   "ukrns/anchor-case-maintenance"
+  ]
+ },
+ {
+  "proposal": "80b3798f22b080bb",
+  "mission": "M-cold-chain",
+  "patterns": [
+   "aif/grounded-actuation-not-reobservation",
+   "devmap-coherence/status-keywords",
+   "futon-theory/honest-map-over-flattering-counter",
+   "orchestration/recorded-handoff",
+   "war-machine/state-capture"
+  ]
+ },
+ {
+  "proposal": "9736922c69790f59",
+  "mission": "M-cold-chain",
+  "patterns": [
+   "invariant-coherence/reachable-from-boot",
+   "invariant-coherence/state-snapshot-witness",
+   "invariant-coherence/shape-first-identify",
+   "futon-theory/honest-map-over-flattering-counter",
+   "war-machine/operational-not-decorative",
+   "structure/interest-event-vocabulary"
+  ]
+ }
+]
