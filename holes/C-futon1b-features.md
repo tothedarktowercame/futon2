@@ -33,6 +33,7 @@ referents, labels — that downstream consumers can query and learn from.**
 | labels | M-marks-to-labels (drafted 2026-07-12) | DRAFT, not armed | L1 referent resolution; L2 label adapter; **L3 measurement gate** | arming = Joe; flag flip = Joe |
 | zaif runners | M-zaif-harness | PZ1–3 closed; U1 done; B1 γ(mission) built | **Z1 query library** (pure XTQL); Z2 controller; Z3 A/B | Z-lane arming = Joe |
 | reward (consumer) | M-mission-conditional-reward CLOSED (honest negative) + the batch loop | verdict = label mass binding | consume labels when L3 passes; batch-8 continues under v1.2 | scoreboard flips = Joe |
+| reflection (consumer) | M-joe-reflection (drafted 2026-07-12) + N-peircean-codebook | IDENTIFY draft; CANDIDATE lane (added by claude-2, awaiting ratification like the rest) | J0 self-evidence census; J1 operator-corpus retrospective (no-life-logging: the turns ARE the stream, read via D1) | arming + lane ratification = Joe; operator-corpus reads Joe-consented per slice |
 
 Supporting, already live: autoclock witness (attribution of record) ·
 U1 transcripts (the ✘ referent substrate) · B1 marks→γ(mission) fold ·
@@ -106,3 +107,7 @@ The Campaign dissolves when:
 - 2026-07-12 — Campaign assembled at RALLY (claude-5 laptop) from the
   operator memo; orientation table + shared standard + draft criterion
   written. **← Joe: ratify lanes + criterion (→ CHARTERED), or reshape.**
+- 2026-07-12 (claude-2): added CANDIDATE reflection lane — M-joe-reflection
+  (chartered by Joe this session: "what's-in-it-for-me" as HEAD; no-life-
+  logging constraint; composes N-peircean-codebook + the Joe-loop R-audit).
+  Ratification Joe's, with the other lanes at RALLY.
