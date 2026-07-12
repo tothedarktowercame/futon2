@@ -136,9 +136,9 @@ on the keystone contract; no sequential chain between consumers).
 
 | from | on | requirement | status |
 |---|---|---|---|
-| M-marks-to-labels L1/L2 | tag shape (a) via L0 | tags queryable, refs parsed | **contract-released** (operator, 2026-07-12 "we could advance it"; L0 live+reviewed) — dispatched to codex-2 |
+| M-marks-to-labels L1/L2 | tag shape (a) via L0 | tags queryable, refs parsed | **DELIVERED + REVIEWED** (2026-07-12: futon2 0bb26e0 / futon3a 2fffe77; flag-off byte-identity verified, 39 records; 0 mark-labels yet — awaits real marks) |
 | M-marks-to-labels L3 | L1/L2 delivered + mark accrual | the preregistered gate | **held** |
-| zaif Z2 controller | Z1 views + shapes (a,c) | events readable through the envelope | **contract-released** — queued behind L2 (its (c) consumption wants real label records to read) |
+| zaif Z2 controller | Z1 views + shapes (a,c) | events readable through the envelope | **dispatched** (codex-2, 2026-07-12, job …db3d6d08) — pure controller core + :profile wiring, kill-switched |
 | B2 kernel-vs-marks triangulation | mark accrual (L0 live) | B1 cells ∩ reward missions populated | **held** (marks are hours old) |
 | R̂ label-channel ingestion | L3 gate PASS | agreement + S3/LOMO non-degradation | **held** |
 | reward follow-on (LOGO τ) | label mass accruing | else it re-fights the last war | **held** |
