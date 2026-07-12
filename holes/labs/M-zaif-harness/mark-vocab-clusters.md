@@ -7,197 +7,197 @@
 
 *Joe: write a NAME (or "skip") next to each cluster. Each cluster is described mechanically — no semantic labels proposed.*
 
-## Cluster 1 — [your name here]
-**Size:** 888 turns (14.6% of corpus) · **mark-hit share:** 0.4% (4 turns)
-**Distinguishing terms:** `endpoint-extraction`, `worked-examples`, `h5`, `h6`, `endpoint-identity`, `futon5a-d`, `gallery`, `h4`, `h2`, `m-memes-arrows`
-**Top missions:** M-operational-vocabulary (43), M-learning-loop (37), M-capability-star-map (23)
-**Representative turns:**
-  > Going back to your outline above, we're trying to do VERIFY step by step — I'm not sure which of these are fully tick...
-  > — `e-d3fe8d32-db28-4768-8532-011101cffbbf` (2026-05-27)
-  > No need I see that it did work out.  I now think the paper is an increasingly OK summary and the question is: can we ...
-  > — `e-91f89806-118d-4eef-8a06-ae99bcfc7c33` (2026-07-08)
-  > No need I see that it did work out.  I now think the paper is an increasingly OK summary and the question is: can we ...
-  > — `e-7b1fcfde-958e-4a74-a679-3f6c1fc307cd` (2026-07-08)
-  > Yeah, I guess I can see how hooking up daily scan and the interest network should allow the system to identify things...
-  > — `e-a0affe84-5115-4009-b0f1-3fb509a63558` (2026-06-05)
-  > OK, can you push through implementations of the remaining INSTANTIATE steps?  With the candidate Invariant Queue it's...
-  > — `e-345f13da-0413-4d53-8b28-fdf0f4979851` (2026-06-02)
-
-## Cluster 2 — [your name here]
-**Size:** 667 turns (11.0% of corpus) · **mark-hit share:** 0.4% (3 turns)
-**Distinguishing terms:** `drainer`, `epistemic`, `executor`, `pxr`, `concentration`, `build-match`, `enqueue`, `pgrep`, `diffuse`, `cleans`
-**Top missions:** M-wm-policies (62), M-learning-loop (27), M-typed-holes (27)
-**Representative turns:**
-  > OK, so that seems like a good plan — to think about this in terms of ~/code/futon4/holes/mission-lifecycle.md I'd say...
-  > — `e-75b9a29d-7599-419b-a5dd-a68466c47604` (2026-06-23)
-  > OK, so that seems like a good plan — to think about this in terms of ~/code/futon4/holes/mission-lifecycle.md I'd say...
-  > — `e-2de4ee91-1157-48d3-b81b-6d04e2e7a0f9` (2026-06-23)
-  > Yeah, so, having recently completed a mining run, having ingested mission scopes, and having populated substrate-2 we...
-  > — `e-bdf1f42a-5af5-4fbf-959f-86fb22c6112d` (2026-06-27)
-  > Hm... so, the fact is we already have beed doing some "downstream" work with patterns, and the quality isn't great.  ...
-  > — `e-0e24bd3a-7554-4f08-9af3-c6b5d40258d4` (2026-05-20)
-  > OK, so, I think what should happen in such cases is: see if we can write new patterns.  We've been using "existing li...
-  > — `e-cc9e4bc0-4f36-4b85-81bf-4241f52f4609` (2026-07-05)
-
-## Cluster 3 — [your name here]
-**Size:** 633 turns (10.4% of corpus) · **mark-hit share:** 0.0% (0 turns)
-**Distinguishing terms:** `let`, `ok`, `commit`, `sure`, `yes`, `like`, `derive`, `work`, `plan`, `good`
-**Top missions:** M-learning-loop (29), M-wm-policies (25), M-operational-vocabulary (18)
-**Representative turns:**
-  > OK, let's follow this plan
-  > — `e-38f34b00-8da6-47f6-9929-d9207dc53f86` (2026-06-09)
-  > OK, let's commit it
-  > — `e-d0f866f9-35ce-4116-8428-800762a8e3d3` (2026-04-29)
-  > OK let's do this plan
-  > — `e-0e954047-3590-4dd1-b1db-4a3315f76926` (2026-06-08)
-  > Yes, let's do (1)
-  > — `e-25ff240f-b492-4025-b42a-101d0e0dbad7` (2026-07-01)
-  > OK let's continue with this plan
-  > — `e-7c2b6e86-6ca9-4e7b-86dd-a7cdbfd230e0` (2026-06-30)
-
-## Cluster 4 — [your name here]
-**Size:** 628 turns (10.3% of corpus) · **mark-hit share:** 0.3% (2 turns)
-**Distinguishing terms:** `nbaseline`, `fg2b-p1`, `fg1-p1`, `fg3-c`, `syn1`, `fg3-b`, `fg1-p2`, `fg2a-p1`, `syn2`, `syn3`
-**Top missions:** M-operational-vocabulary (27), M-learning-loop (18), M-custom-harness (17)
-**Representative turns:**
-  > OK, rehome it, but it is resolved in any case.  Let's log the technical issue for fixing later.
-  > — `e-45dbfd75-5cbe-4780-8b8b-3ee6db68b88f` (2026-06-01)
-  > OK, let's fix the issue you found
-  > — `e-c7e60ec0-2c00-440c-b33c-9fe1a21b85a0` (2026-05-03)
-  > No, that was just a debug from an Orchestrating Codex who is helping us get the repl working again
-  > — `e-ffc85a97-de0a-4384-aafd-cce8be755bd6` (2026-02-18)
-  > Let's check on the output from the other agents.  They might need restarting.
-  > — `e-2a4c0e92-7fbf-46cc-a17f-d8129c5fac49` (2026-06-30)
-  > OK, I restarted the JVM.  I saw you were chatting with Codex so please debrief me.
-  > — `e-b6a86743-647f-40ba-a327-55e82d81bb31` (2026-05-25)
-
-## Cluster 5 — [your name here]
-**Size:** 560 turns (9.2% of corpus) · **mark-hit share:** 0.0% (0 turns)
-**Distinguishing terms:** `amer`, `tab`, `icon`, `emea`, `engineer`, `full-time`, `salary`, `egain`, `september`, `mentors`
-**Top missions:** M-futon-forward-model (36), M-buyer-discovery (12), M-explore-aiqa (10)
-**Representative turns:**
-  > OK, this time let's turn their application questions into a *scorable* set of criteria.  I'm not quite sure what's in...
-  > — `e-700560a5-e52a-4c9b-a9ed-c7bd68e98e65` (2026-06-06)
-  > I know that the Anthropic Institute are looking for "Deep experience using Claude as a tool for research and organiza...
-  > — `e-2d5d2c56-2a85-4dfa-b3dd-f11a202841a2` (2026-06-04)
-  > 1. So, I love b+e, personally.  2. This does seem like a general-purpose "method" note for now — my thesis ./futon6/r...
-  > — `e-55721c52-8194-407e-bf51-22ff8abb1301` (2026-05-01)
-  > So, about the "community governance over core curriculum" — we didn't really have that during ORP, so it's not a "dro...
-  > — `e-137f0fec-d1a1-474b-b06c-6824660013eb` (2026-05-04)
-  > That's good — it keeps it general but is pretty clear.  But, we might improve it in a second or third pass.  We have ...
-  > — `e-a36c6882-0b2f-4e50-b1e5-92da72e50e0a` (2026-05-11)
-
-## Cluster 6 — [your name here]
-**Size:** 549 turns (9.0% of corpus) · **mark-hit share:** 0.2% (1 turns)
+## Cluster 1 — [Guidance]
+**Size:** 888 turns (14.6% of corpus) · **mark-hit share:** 0.1% (1 turns)
 **Distinguishing terms:** `jar`, `omni`, `ja`, `apr`, `snap`, `contentproc`, `ipchandle`, `initialchannelid`, `parentpid`, `crashhelper`
-**Top missions:** M-futon-forward-model (26), M-wm-policies (21), M-operational-vocabulary (20)
+**Top missions:** M-futon-forward-model (25), M-wm-policies (23), M-learning-loop (19)
 **Representative turns:**
-  > Let's draft it, I'll comment here before you insert it, but it sounds like you've got a good idea of what needs to be...
-  > — `e-e3bf4739-5421-464e-b214-745bebb1fc7f` (2026-06-02)
-  > OK, draft campaign-lifecycle.md in futon4 holes — and let's back it by some new patterns in a new ~/code/futon3/libra...
-  > — `e-e61f5c44-b9a3-436e-9439-3648f6662eae` (2026-05-31)
-  > Well, this is too long, but it's an OK first draft.  It is not supported by design patterns from the standard library...
-  > — `e-a4cd56f5-072f-498d-8870-f61c92ddbfd7` (2026-05-24)
-  > Ah, OK, so interesting — Synthesis should take into account the patterns from the research paper — ~/code/futon3/libr...
-  > — `e-0312bf8a-a647-4b08-a59f-f1363538f529` (2026-05-08)
-  > It doesn't look as though /home/joe/code/futon3/library/aif/ contains a niche-construction pattern — we could add the...
-  > — `e-93031565-3ecd-4d3f-8881-aecb5b12fc0f` (2026-05-27)
+  > Right, D2 is definitely interesting and I think it would be good if we could build on the mission-local work we just ...
+  > — `e-de53a3ec-3cc2-41cd-9fa1-d54be187bc1d` (2026-06-09)
+  > OK; can you make an attempt at answering the MAP questions based on this framing?
+  > — `e-a2b71bd1-26dd-47fa-b4aa-be157fc57965` (2026-04-26)
+  > So, with regard to MAP, I'd like this to centre on the Invariants, because that is the part that needs the most upgra...
+  > — `e-17f3e612-f532-47e3-9910-50d195e51f4b` (2026-04-26)
+  > We can regenerate vsatarcs.html *after* the grind — according to our plan in M-war-machine-first-outing vsatarcs woul...
+  > — `e-2ca614f3-2828-4de1-9c0a-e9945d8d1747` (2026-05-30)
+  > Let's build it-2 now — BTW just for the record I dropped the new eoi in futon5a/essays/kissinger-dark-tower-2026/kiss...
+  > — `e-3b4cc7a2-36f2-4801-b463-bb7986a4bf76` (2026-06-03)
 
-## Cluster 7 — [your name here]
-**Size:** 517 turns (8.5% of corpus) · **mark-hit share:** 0.0% (0 turns)
-**Distinguishing terms:** `julia-chat`, `budgie`, `photo`, `p129`, `foot`, `p79`, `nonstopmode`, `plate`, `tuftescan`, `width`
-**Top missions:** M-operational-vocabulary (23), M-wm-policies (23), M-points-de-fuite (17)
+## Cluster 2 — [Tactics]
+**Size:** 667 turns (11.0% of corpus) · **mark-hit share:** 0.1% (1 turns)
+**Distinguishing terms:** `build-match`, `leg`, `m-foo`, `state-snapshot-witness`, `realized-g`, `wp2`, `autoclock-in`, `hammer`, `clock-in`, `bla`
+**Top missions:** M-learning-loop (24), M-futon-forward-model (20), M-vsatarcs-invariants-integration (17)
 **Representative turns:**
-  > No visual improvement, if you look at http://localhost:3030/12 you'll see the bottom part of the diagram is off the page
-  > — `e-8521e522-9a9f-4750-a826-1983293dc69c` (2026-03-24)
-  > This is a very strong IDENTIFY stage.  The gap is obvious, the documentation and prior work is ample.  This sets us u...
-  > — `e-5202ff55-7ec8-4c1d-8293-62fbf6216575` (2026-04-26)
-  > OK, this is interesting.  Let's see if we can push on to a graphical display like the one in ~/Pictures/Screenshots/s...
-  > — `e-e120f569-60d1-4d2c-a0be-59d766aefea4` (2026-06-16)
-  > Yes, please flesh out the new patterns in the standard style
-  > — `e-f1d069b4-8a05-4853-b652-24cb58fa7302` (2026-07-08)
-  > Alright, good, except I wish you could just *look* at the diagram and sort out the remaining overlaps
-  > — `e-0618a599-7353-42f3-b3e0-4533291d8126` (2026-03-24)
+  > Maybe we can push through to 4/14 channels now and log 10 more as SORRYs
+  > — `e-9a5bb73b-8d58-447d-ae9b-8ff90eab96ca` (2026-05-18)
+  > Is R3 still partial?
+  > — `e-9ee529e7-4518-4a85-a60f-d7e09029a64b` (2026-05-18)
+  > 1) :latent is fine ; 2) yes fix it ; 3) incremental fix is OK ; 4) per-tick makes sense to me too
+  > — `e-49d99208-4f63-4cfb-8bf1-d9aea3de89dd` (2026-05-08)
+  > I let that run overnight, I hope it is all finished up
+  > — `e-ff63cb6d-bdf6-4de3-a9c3-9124bf875572` (2026-06-18)
+  > By the way the logs in the *server*  buffer are showing some problems — can you look with Emacsclient and see what's ...
+  > — `e-71af3e7f-007b-4732-b91c-529b6857ffec` (2026-04-27)
 
-## Cluster 8 — [your name here]
+## Cluster 3 — [Concerns]
+**Size:** 633 turns (10.4% of corpus) · **mark-hit share:** 0.3% (2 turns)
+**Distinguishing terms:** `nbaseline`, `fg2b-p1`, `fg1-p1`, `fg3-c`, `syn1`, `fg3-b`, `fg1-p2`, `fg2a-p1`, `syn2`, `syn3`
+**Top missions:** M-learning-loop (22), M-wm-policies (20), M-custom-harness (19)
+**Representative turns:**
+  > OK, let's go forward in the lighter-touch way.  My concern is that E-substrate-2-sorry-typing proposes simple indicat...
+  > — `e-66934fd1-7949-46e9-b8e2-12bc63c6c025` (2026-05-27)
+  > So, I passed M-live-efe-map to codex-4 but I am not necessarily that impressed with its work.  Will you read it and s...
+  > — `e-6f5b9f28-6229-4d84-8fc2-dff23a917c01` (2026-07-04)
+  > It can't close yet b/c we are still seeing "→ 7 tied optionsG=-4.241 (each)WM has no clear preference among these — p...
+  > — `e-8be6e88b-64e1-466c-8f92-2db61412f8e3` (2026-05-27)
+  > OK, this seems like a good picture of "what happened" and why my memories were confused.  The question is what to do ...
+  > — `e-ceaae363-029d-44d7-a6e2-884d9cb2516c` (2026-05-03)
+  > Hi, I wonder if you could review /home/joe/npt/working-paper/UKRN_WP_draft_v9.md from the point of view of the ~/code...
+  > — `e-fec5fad3-83af-42f8-bc2d-e11e65719d15` (2026-05-06)
+
+## Cluster 4 — [Facts]
+**Size:** 628 turns (10.3% of corpus) · **mark-hit share:** 0.2% (1 turns)
+**Distinguishing terms:** `pattern-name`, `plist-get`, `cdr`, `server-loop`, `unmasked`, `cons`, `tail`, `arxana-browser-essays--import-manifest`, `na`, `futon5a-d`
+**Top missions:** M-learning-loop (23), M-typed-holes (14), M-wm-policies (13)
+**Representative turns:**
+  > So, I want to weigh in on the implementation plan for the NOTICE step, insofar as we already have a multi_watcher — I...
+  > — `e-c7e966a0-b104-41b5-b516-3792c509c106` (2026-06-05)
+  > It says claude-11 is INVOKING... maybe that's a bifurcated version of your session.  Let's let it finish and then kil...
+  > — `e-3d5cdb4f-a8e7-4ba0-a6ae-7a00076b97b1` (2026-07-02)
+  > So, rather than waiting 15 minutes for the tick, I think we should push a little on M-futon-forward-model and file://...
+  > — `e-408e63e5-eb3e-4d8e-ba9b-f8aaa0578343` (2026-07-12)
+  > Let's work with the Live set — "futon" is my own content, but "live" corresponds to the community content that I am w...
+  > — `e-2603d0b4-66eb-4910-b1f1-85011c636912` (2026-05-05)
+  > At this point we might look into finalising whatever version of Tickle, watchdog, autorunner or whatever will be reli...
+  > — `e-3a1093a8-1bc3-44e2-b315-27c0871c9200` (2026-06-11)
+
+## Cluster 5 — [Encouragement]
+**Size:** 560 turns (9.2% of corpus) · **mark-hit share:** 0.2% (1 turns)
+**Distinguishing terms:** `icon`, `tab`, `clojurescript`, `jank`, `calva`, `chemistry`, `vim`, `scicloj`, `neanderthal`, `logo`
+**Top missions:** M-operational-vocabulary (47), M-wm-policies (34), M-futon-forward-model (23)
+**Representative turns:**
+  > OK, let's commit these — seems like the right kind of security model is being created.  We can note jujutsu in the mi...
+  > — `e-71571d6d-3439-4513-bb96-b3c59061d671` (2026-05-30)
+  > Let's draft first so that we're writing to some kind of spec, let's ratify the ownership — I've spun up codex-3 who y...
+  > — `e-d869960f-dabf-4d79-b95b-cb735af3d876` (2026-06-01)
+  > You manifestly have way more space than you need, you're doing something incorrect.  This is not a space arithmetic i...
+  > — `e-1e231b85-5ce3-48be-a6b5-2d942c8d5feb` (2026-07-03)
+  > Sure, let's commit and then come back to our DISSOLUTION checklist and see what else we can do
+  > — `e-3dd4aa01-e0d5-4c09-9cd6-5a7b8d5f6ecb` (2026-07-01)
+  > So, I wonder what are some examples that really show off DAX ?  From a practical standpoint, just making sense of *wh...
+  > — `e-fd912ada-a4e1-4060-a462-a2cc3fadd26b` (2026-06-26)
+
+## Cluster 6 — [Requests]
+**Size:** 549 turns (9.0% of corpus) · **mark-hit share:** 0.4% (2 turns)
+**Distinguishing terms:** `endpoint-extraction`, `worked-examples`, `h5`, `h6`, `endpoint-identity`, `h4`, `m-memes-arrows`, `h1`, `logic-model`, `poller`
+**Top missions:** M-custom-harness (24), M-wm-policies (23), M-futon-forward-model (19)
+**Representative turns:**
+  > OK, can you please make a .pdf version of the .svg
+  > — `e-6d90fe1b-f42d-434c-b825-238542ca01f0` (2026-06-03)
+  > Let's capture it in E-turn-dsl
+  > — `e-4e585120-150f-4820-84ef-085b18725d08` (2026-06-05)
+  > OK, but lenses are talked a lot about by CT folks — maybe we can find them in Idris or Coq or something.  You could a...
+  > — `e-17870f8e-9960-4e4e-aca5-b6ff9867393e` (2026-06-14)
+  > OK, though I think we had managed to get shadow cljs working under the same single JVM at one point!  Anyway I have r...
+  > — `e-7f2618cd-6e47-4d80-884c-51ab619b250d` (2026-06-26)
+  > At this point I'd like you to carry out a whistle-based short conversation with claude-5 that can help you prepare fo...
+  > — `e-09760047-5fc9-4321-b0fb-c677fb222128` (2026-06-09)
+
+## Cluster 7 — [Extensions]
+**Size:** 517 turns (8.5% of corpus) · **mark-hit share:** 0.2% (1 turns)
+**Distinguishing terms:** `amer`, `drainer`, `emea`, `in-process`, `enqueue`, `engineer`, `soundness`, `dm`, `pgrep`, `seattle`
+**Top missions:** M-learning-loop (22), M-futon-forward-model (15), M-operational-vocabulary (12)
+**Representative turns:**
+  > let's commit now
+  > — `e-8b15dfd9-7878-47b7-80d3-a6a14427bf87` (2026-07-09)
+  > Well, let's source two more examples so that we can run them through the pipeline to feed A5
+  > — `e-a7aeba51-d48b-41b3-9c0f-13c765aa76ae` (2026-07-08)
+  > I have an idea inspired by your PM mechanical gold — what about taking PlanetMath, or Wikipedia, or both, or both + n...
+  > — `e-714d09c0-bceb-41c0-8a47-2127d388b10b` (2026-05-23)
+  > Let's try a few more.  We only have a relatively small number of Strategic SORRYs
+  > — `e-ee561854-b4a4-45a2-8420-26e7749203cc` (2026-04-26)
+  > OK, but it's zai-2 up now for clean testing, please fire it up
+  > — `e-5bd0fa01-3e36-45fa-9ee0-7a53b65dc91f` (2026-07-09)
+
+## Cluster 8 — [Procedural]
 **Size:** 505 turns (8.3% of corpus) · **mark-hit share:** 0.2% (1 turns)
-**Distinguishing terms:** `m-pilot-appearance`, `glob`, `war-machine`, `mission`, `agent-id`, `missions`, `m-canon-fingerprint-store`, `mission-lifecycle`, `m-learning-loop`, `machine`
-**Top missions:** M-operational-vocabulary (30), M-capability-star-map (22), M-wm-policies (19)
+**Distinguishing terms:** `felix`, `gurdjieff`, `authentic`, `bible`, `tv`, `man`, `men`, `buckman`, `reactions`, `disneyland`
+**Top missions:** M-futon-forward-model (20), M-learning-loop (17), M-capability-star-map (13)
 **Representative turns:**
-  > 1. Broadly fine, though I'd say that the "Mission Peripheral" and M-live-geometric-stack should already give us parse...
-  > — `e-23b096be-f19f-4183-904e-aabca0443a28` (2026-05-04)
-  > Let's hold these ideas in the Mission document before we dive into anything.  We have to do this carefully.  I think ...
-  > — `e-e69e0294-d013-41cb-8050-3d5c30605a8a` (2026-05-24)
-  > The steps (c) and (d) look valid and OK — they seem to be "for information only".  In terms of the concept of interes...
-  > — `e-db47c58d-d99d-4920-95fb-ced13bdf9c02` (2026-05-29)
-  > OK, but something to consider: with the majority of boxes green, with these major faithfulness questions outstanding,...
-  > — `e-79f81185-6d9c-4d82-a1a2-a629c942dffc` (2026-07-03)
-  > OK; the Mission Corpus should be accessible to us from existing aggregation surfaces like M-war-machine, M-stack-geom...
-  > — `e-a5e3f8db-a3e4-444e-a44c-cb0db47bccf0` (2026-05-11)
-
-## Cluster 9 — [your name here]
-**Size:** 490 turns (8.1% of corpus) · **mark-hit share:** 0.4% (2 turns)
-**Distinguishing terms:** `medicine`, `soundness`, `plos`, `powerbi-tui`, `manuscript`, `chemistry`, `docx`, `psychology`, `folder`, `journal`
-**Top missions:** M-buyer-discovery (15), M-points-de-fuite (10), M-typed-holes (9)
-**Representative turns:**
-  > Let's put it into the Arxana Essays reader so that we can extend the annotations / rewriting guidance and thereby imp...
-  > — `e-284e90ad-dd9d-47d5-b827-cb06029748b4` (2026-05-20)
-  > Let's emit, I can revise the other sections by hand later, or can stage a follow-up tension-surfacing pass once we ha...
-  > — `e-87525774-31ce-44e7-8d8c-745197146347` (2026-06-07)
-  > Frankly, we have futon4 README-essays.md which should be fine as a spec, I am assuming however that Codex didn't read...
-  > — `e-6c916acc-a582-4697-a4e4-f924b1fd551d` (2026-05-29)
-  > I have produced (via "eoi new") an initial compilation of three scenarios, they are viewable in Arxana Essays via Ema...
-  > — `e-10cbd7f9-f4ca-4229-a03a-064c234e6f82` (2026-05-26)
-  > OK, I have chased through to the end of the essay with a consistent revision pass.  We should take stock of the edits...
-  > — `e-f8634b37-59b4-44cc-a830-bd2cdb8f82fa` (2026-05-23)
-
-## Cluster 10 — [your name here]
-**Size:** 254 turns (4.2% of corpus) · **mark-hit share:** 0.0% (0 turns)
-**Distinguishing terms:** `m-foo`, `bla`, `clock-in`, `awaiting`, `new-session`, `turn-end`, `e-fix-cx-cr-runners-to-clock-in`, `emacs-chat`, `transports`, `cr`
-**Top missions:** M-kangaroo (12), M-wm-policies (11), M-custom-harness (9)
-**Representative turns:**
-  > I've put claude-7 onto another task, let's just work on sorting this out directly now
-  > — `e-70aa4b36-eac7-48c1-93a9-7e64a85d7992` (2026-06-05)
-  > please rejoin and message claude-1 to be brought into the loop
-  > — `e-41b53c6d-917b-49c8-8c35-ac4d8c90b9c7` (2026-06-07)
-  > OK, so, claude-4 has been working on other stuff, let's just fix directly
-  > — `e-2e5cb6f3-c069-4b9a-9320-fbb986e3771d` (2026-07-01)
-  > OK, let's continue coordination on the points above.  It sounds like claude-2 is in a key position now.
-  > — `e-eedd0253-db68-4c46-a35c-f06a380beb29` (2026-07-01)
-  > You mentioned above that claude-1 could do one of the relevant reviews, would it be possible to start that now?
-  > — `e-17728952-1ffc-47a2-a0cd-bb847486634d` (2026-06-10)
-
-## Cluster 11 — [your name here]
-**Size:** 242 turns (4.0% of corpus) · **mark-hit share:** 0.0% (0 turns)
-**Distinguishing terms:** `vacation`, `codex`, `codex-2`, `codex-3`, `codex-6`, `codex-10`, `codex-1`, `bell`, `work`, `m-foo`
-**Top missions:** M-mission-scopes-into-substrate-2 (15), M-futon-forward-model (11), M-capability-star-map (8)
-**Representative turns:**
-  > Codex-10 is done
-  > — `e-6bdfb703-9604-40bc-87da-09009db6d757` (2026-05-18)
-  > codex-1 is quiet, please check the promised work
-  > — `e-014b1fe5-58e2-4fc0-b3e0-1aa03511b47d` (2026-06-04)
   > Codex is on vacation so let's do it directly.
   > — `e-5f46080a-544d-446e-843a-8776b459f42e` (2026-07-01)
-  > codex-1 is available, please bell to them
-  > — `e-5ee3b3cf-2bbd-4762-a1d2-2e557c07d820` (2026-07-05)
-  > Let's run it past codex-2 again
-  > — `e-d8e887f3-a608-4ad4-b27a-c2e4d2c01016` (2026-05-08)
+  > OK, can you write it as a new stage that would go into the superpod pipeline, maybe with some demo examples made "by ...
+  > — `e-980f338f-0c4b-4715-a3cd-8f8585edc3ba` (2026-06-15)
+  > OK, this plan is good, and it is enough to spec an M-pudding-peradams and join it to C-pudding-prover
+  > — `e-75e9aa20-c5fe-44b3-b4c4-1f79b7b66f59` (2026-06-08)
+  > So this is a very useful representation I'd say!  We are missing futon7 (not many commits) and futon7a — maybe this i...
+  > — `e-8ae7fd72-fcda-4545-ab83-f97e82aa30df` (2026-04-30)
+  > It does in-buffer annotation but there is definitely also a Scratch style sidebar that interoperates with the in-buff...
+  > — `e-986fc8e5-75f6-401f-8038-1a0ea3a196fa` (2026-06-26)
 
-## Cluster 12 — [your name here]
-**Size:** 153 turns (2.5% of corpus) · **mark-hit share:** 0.0% (0 turns)
-**Distinguishing terms:** `rejoin`, `continue`, `hello`, `ok`, `network`, `error`, `let`, `hi`, `problem`, `server`
-**Top missions:** M-futon-forward-model (5), M-operational-vocabulary (3), M-smart-emacs-cursor (3)
+## Cluster 9 — [Hinges]
+**Size:** 490 turns (8.1% of corpus) · **mark-hit share:** 0.0% (0 turns)
+**Distinguishing terms:** `instr`, `cogito-cover-letter-final`, `cogito-neurotech-ra-formal-application-v1`, `timed`, `regulator`, `early-closures`, `let`, `degraded`, `params`, `m-value-creation-loop`
+**Top missions:** M-operational-vocabulary (43), M-wm-policies (25), M-capability-star-map (21)
 **Representative turns:**
-  > continue
-  > — `e-03930cbc-f53f-4286-bcf9-acb1932075d1` (2026-07-09)
-  > continue
-  > — `e-5390ab4e-8f59-4bea-8f2b-49a0e8a29ba3` (2026-07-09)
-  > continue
-  > — `e-2996c138-4604-4330-b959-d6442ccf62af` (2026-06-30)
-  > continue
-  > — `e-954f7904-8dee-4d84-b00f-5f831ab38f4d` (2026-06-30)
-  > continue
-  > — `e-100d1052-38ab-4e1a-8e9d-e551e91ca2df` (2026-06-30)
+  > I'd like to do the MO/SE stage — noting that ideally it should help us collect some alternative phrasings of the exis...
+  > — `e-5cf68a2f-1f20-47cd-a458-7eb0b502e510` (2026-06-17)
+  > IDENTIFY is clear, let's go to MAP
+  > — `e-099e05d7-a723-4952-a5d3-6727d7adf029` (2026-05-30)
+  > My thought was that we would get the renderer working and then move to Layer 3 so that we can inspect the outputs mea...
+  > — `e-d2cb9a45-7341-455f-940e-448399f4f253` (2026-06-07)
+  > OK, let's go live with this — no more handoffs except directly to codex.  I'll talk with claude-3 and claude-4 and ma...
+  > — `e-2a600949-1fb1-46de-a979-6a58c724002c` (2026-06-09)
+  > Can we pick up on M-value-creation-loop ?  Here's where I got to in a previous Claude session.  claude: The cold-chai...
+  > — `e-0973db45-fc64-4a8e-8030-bb94b05734cc` (2026-06-16)
+
+## Cluster 10 — [skip]
+**Size:** 254 turns (4.2% of corpus) · **mark-hit share:** 0.0% (0 turns)
+**Distinguishing terms:** `egain`, `msgs`, `gartner`, `fg3`, `dot`, `enterprise`, `government`, `leaders`, `fortune`, `architect`
+**Top missions:** M-wm-policies (15), M-futon-forward-model (5), M-learning-loop (5)
+**Representative turns:**
+  > It's fine that we have a relatively simple model right now — indeed it's not that simple because we have the R1-R12 p...
+  > — `e-bea255e2-20ec-44da-8018-81a403c06d70` (2026-05-31)
+  > What's the WebArxana localhost path so I can follow along with that aspect?  Apart from this, if Task 9 is the capsto...
+  > — `e-520667f2-3e3e-4f6d-aa3a-34e1efc7f8e2` (2026-05-30)
+  > I think futon3a (item (a)) is a better home
+  > — `e-14634032-9032-478c-bce2-78d77ec794f1` (2026-05-04)
+  > Sure I am happy to proceed with steps 1 - 3 inclusive
+  > — `e-726d385f-ce03-4daa-9024-5915a077fcbb` (2026-05-04)
+  > OK
+  > — `e-a48a297d-625f-4f82-badd-a8fc3c30ef31` (2026-05-25)
+
+## Cluster 11 — [skip]
+**Size:** 242 turns (4.0% of corpus) · **mark-hit share:** 0.8% (2 turns)
+**Distinguishing terms:** `speaker`, `concentration`, `dafiing`, `interest-articulation`, `prior-document`, `absences`, `responded`, `invariance`, `speech`, `factors`
+**Top missions:** M-wm-policies (13), M-futon-forward-model (8), M-operational-vocabulary (6)
+**Representative turns:**
+  > OK, let's try to build *that* solution then
+  > — `e-67c67d9f-92a6-4a9f-87bb-633a5480b454` (2026-06-22)
+  > OK, we can progress to DERIVE
+  > — `e-e4f59410-938b-403f-9296-fd24ce5c26ad` (2026-06-01)
+  > 1. Broadly fine, though I'd say that the "Mission Peripheral" and M-live-geometric-stack should already give us parse...
+  > — `e-23b096be-f19f-4183-904e-aabca0443a28` (2026-05-04)
+  > Hi can you please have a look at futon6/holes/excursions/E-mfuton-silver.md and help me develop a strategy for doing ...
+  > — `e-2bc52383-8c73-40b6-8bee-1acc7f651b9b` (2026-04-28)
+  > So, I preferred the old spiral layout but a lot of the issues with either layout would be solved by hiding the edge l...
+  > — `e-efde7499-cdf6-463f-a2a1-82f442253da4` (2026-06-26)
+
+## Cluster 12 — [skip]
+**Size:** 153 turns (2.5% of corpus) · **mark-hit share:** 0.7% (1 turns)
+**Distinguishing terms:** `think`, `heraclitus`, `multiplied`, `let`, `like`, `work`, `anthology`, `mission`, `ok`, `don`
+**Top missions:** M-smart-emacs-cursor (21), M-wm-policies (7), M-agency-hardening (5)
+**Representative turns:**
+  > So, in the Slide 11: I think we need the Mermaid diagram on its own slide, maybe with a yellow caption like "the jour...
+  > — `e-1a5c81c5-68e7-45ee-9471-993de127a753` (2026-03-24)
+  > It still doesn't fit on one screen, indeed even the "Next steps" node is off the page
+  > — `e-407da052-3d4a-4b21-9553-dabcaafa0bf5` (2026-03-24)
+  > Cool, let's do this plan.  I think we should include Sinking City in Anthology A because it is super interesting.   W...
+  > — `e-cac43b7a-64eb-440b-8511-12c143626835` (2026-05-05)
+  > Maybe we could develop a two or three anthology, so that I can show different features / views in the Planetarium.  I...
+  > — `e-46d28952-d718-4e62-b58e-22e0a5bdae50` (2026-05-05)
+  > OK, this is useful also for readers like Neil and Elle, because it validates the importance of the choices they are m...
+  > — `e-81bbd730-1f2d-476f-83be-19927fd319f7` (2026-05-05)
 
 ---
 
