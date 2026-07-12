@@ -178,3 +178,43 @@ slice contracts. B2 is this mission's triangulation lane: kernel-geometry
 (M1) vs operator-behavior (marks→γ(mission)) as two independent estimates
 of mission difference. One footgun found en route: ✘/✓ are stripped by the
 D1 tokenizer — the marks channel needs B0's typed tags to be queryable.
+
+## INSTANTIATE — OUTCOME (2026-07-12, futon3a e0b7972)
+
+Execution: code authored by codex-2 (the dispatched handoff hit the
+harness's 30-minute job cap mid-M3, before any run of the battery); review,
+battery run, and this report by claude-5 laptop (operator had paused Agency
+— no re-dispatch). All gates re-run from a different cwd; verbatim lines in
+`reward_v2_battery_2026-07-12.log` (committed beside the code).
+
+- **A2 MET — kill-test PASS:** within-mission want-pair cosine mean 0.3741
+  vs cross 0.1648 (medians 0.2710/0.1581), rank AUC 0.7758 over 22/719
+  pairs. The kernel separates the missions we have labels for.
+- **A3 MET, exactly:** τ→∞ max |v2 − v1.2| = 0.000e+00 across all 39
+  records (tolerance 1e-9). N-normalization = len(train) makes the uniform
+  limit algebraically identical, not approximately so.
+- **A4 MET:** trivial/bloated/degeneracy all PASS under v2.
+- **A5 MET:** reward_v0/v1, wiring_corpus, gfn_live, scoreboard untouched
+  (git-verified; only new files added).
+- **A1 NOT MET — THE HONEST NEGATIVE, and the mission's real product:
+  LOMO v2 = 0.645 (null95 0.701) vs v1.2 = 0.675 (null95 0.695), same
+  records/groups.** Kernel-conditioning did not buy transfer; it cost
+  ~0.03. LOO S3 v2 = 0.698 vs null 0.683 (within-mission still passes).
+  The mechanism is visible in the per-fold τ choices: **21/22 folds chose
+  τ = 0.15, the narrowest kernel in the predeclared grid.** Within-fold
+  record-grain LOO rewards concentrating evidence on same-mission records
+  — memorization — so selection drives τ narrow, and a narrow kernel has
+  nothing to concentrate on when the held-out mission arrives. The named
+  Risk ("effective-n shrinkage... variance may eat the bias win") landed:
+  at n=39 the kernel move trades away the pooled evidence v1.2 uses.
+  Per the preregistration this is reported verbatim, not tuned past.
+
+VERDICT: mission similarity is REAL in the embedding (A2) but exploiting
+it at n=39 makes transfer worse, not better. Both triangulation routes now
+agree: the binding constraint is label mass/breadth, not features — which
+is the zaif marks lane's case (M-zaif-harness B-slices) stated from the
+reward side. Candidate follow-on IF ever armed (a new mission, not a quiet
+fix): align the inner selection criterion with the outer objective (inner
+leave-one-GROUP-out instead of record-grain LOO — 21/22 τ=0.15 says the
+criterion, not the kernel, drove the narrowing). Scoreboard keeps reading
+v1.2; nothing flips.
