@@ -677,3 +677,19 @@ energy-grounding, double-witnessed).
 Runners: zai-10 = first double-shift in loop history (6 folds + 4 flights,
 zero fixes); zai-9 = 4 folds + 6 flights, zero fixes. The contract survived
 its second consecutive batch unchanged.
+
+## Batch 8 — THE 40-FLIGHT FINALE (armed 2026-07-12, Joe)
+
+Missions (operator-selected FROM THE BACKLOG-CASCADE BRIEF — the strategic
+plan consumed as an instrument, first time): **M-zaif-harness** (cascade box
+b4; close-end-to-end candidate) + **M-text-sidecar** (b3; cutting-edge demo).
+Both wave-1 campaign lanes: the loop folds its own label-supply front. Both
+fresh mission-groups (transfer breadth). Foundry NOT selected — the
+held-out rediscovery seal survives. Generation SERIAL + nice (batch-7
+lesson), tag=batch8, single process, both missions. 4 folds + 4 flights →
+exactly 40 flown → the preregistered 40-flight assessment (S2's own target
+judged as written; final sign test both views; kill-criterion resolution;
+recommendation). Runners: zai-9/zai-10 reuse (default; Joe may override).
+Staleness note for folders: BOTH missions are HOT (active campaign lanes,
+docs hours old) — landed-state moves faster than any batch yet; the probe
+is the long pole.
