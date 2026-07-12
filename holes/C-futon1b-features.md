@@ -136,16 +136,41 @@ on the keystone contract; no sequential chain between consumers).
 
 | from | on | requirement | status |
 |---|---|---|---|
-| M-marks-to-labels L1/L2/L3 | tag shape (a) via L0 | tags queryable, refs parsed | **held** |
-| zaif Z2 controller | Z1 views + shapes (a,c) | events readable through the envelope | **held** |
-| B2 kernel-vs-marks triangulation | mark accrual (L0 live) | B1 cells ∩ reward missions populated | **held** |
+| M-marks-to-labels L1/L2 | tag shape (a) via L0 | tags queryable, refs parsed | **contract-released** (operator, 2026-07-12 "we could advance it"; L0 live+reviewed) — dispatched to codex-2 |
+| M-marks-to-labels L3 | L1/L2 delivered + mark accrual | the preregistered gate | **held** |
+| zaif Z2 controller | Z1 views + shapes (a,c) | events readable through the envelope | **contract-released** — queued behind L2 (its (c) consumption wants real label records to read) |
+| B2 kernel-vs-marks triangulation | mark accrual (L0 live) | B1 cells ∩ reward missions populated | **held** (marks are hours old) |
 | R̂ label-channel ingestion | L3 gate PASS | agreement + S3/LOMO non-degradation | **held** |
 | reward follow-on (LOGO τ) | label mass accruing | else it re-fights the last war | **held** |
-| M-joe-reflection J-surfaces | (a) + (d) verified | contract consumed verbatim; render + consent only | **held** |
+| M-joe-reflection J-surfaces | (a) + (d) verified | contract consumed verbatim; render + consent only | **contract-released for J2 (JSDQ re-snapshot, no corpus read); J1 corpus read awaits Joe's EXPLICIT per-slice consent** |
 
 Release authority: STANDARD-VERIFY (Joe) releases contracts; live delivery
-satisfies them. Armable NOW without waiting on the standard (they produce
-it): L0 recognizer · clustering probe · Z1 first views · J0 census.
+satisfies them. The first ring (L0 · clustering probe · Z1 · J0) LANDED
+2026-07-12, all reviewed same-day.
+
+## 5a. STANDARD-ARGUE (claude-5, 2026-07-12)
+
+**IF** the contract must serve five consumers (γ ledger, label mint, zaif
+controller, session surfaces, operator reflection) from one mark channel,
+**HOWEVER** the consumers read in OPPOSITE directions (forward: marks direct
+agents and mint labels; backward: the same marks are self-model evidence),
+**THEN** the tag shape must preserve force-without-consequence events (💡
+mints no label but IS reflection evidence) and every record must carry
+grain + provenance so each consumer can filter to what it may trust,
+**BECAUSE** collapsing to the forward reading alone would discard the
+reflection lane's evidence, and to the backward alone would pollute R̂.
+
+The dual-use cross-check no single member ran — now witnessed empirically:
+Joe's 💡 charter turn is simultaneously (forward) a no-label idea event
+correctly minting no reward record, and (backward) reflection evidence
+attributed to M-joe-reflection by autoclock. One shape, both directions.
+
+Supporting evidence from the first ring: three independent instruments
+(PZ1 lexicon recall .186 · kernel LOMO negative · cluster silhouette .025)
+agree operator turn types are NOT cheaply machine-recoverable — declaration
+is the load-bearing channel, which is the campaign's premise. The split-
+store fact and the short-page fact are now normative parts of read-surface
+(d): name your store, page honestly.
 
 ## 6. Log
 
