@@ -126,3 +126,16 @@ mission selection a read off the rendered artifact (the prereg's
 time); (4) produced 4 evidence-derived holes of which one (h3, the
 WM-rank→queue seam) was VALIDATED as real within hours — the strategic
 field went blind and the seam's absence was exactly where it hurt.
+
+## §multi — several wants over one census (added 2026-07-12)
+
+Steps 4–6 re-run per WANT; steps 1–3 are shared (census/axes/clusters are
+want-independent). Each want = a sibling deposit (`…-<want>-vN.edn`), same
+gates. Roles are cast per-want (the same mission legitimately carries
+different roles across siblings — record both). Merge discipline (full
+rules in [[N-multi-cascade-strategy]]): role-vectors not overwrites;
+convergence points = the spine; tensions kept, named, priced; holes dedupe
+by derivation — a hole derived under two wants independently outranks any
+single-want hole. A want that is a sealed held-out seed must NOT be
+authored by reviewer/operator artifacts — it enters only if a mechanism
+proposes it.
