@@ -689,7 +689,7 @@ held-out rediscovery seal survives. Generation SERIAL + nice (batch-7
 lesson), tag=batch8, single process, both missions. 4 folds + 4 flights →
 exactly 40 flown → the preregistered 40-flight assessment (S2's own target
 judged as written; final sign test both views; kill-criterion resolution;
-recommendation). Runners: zai-9/zai-10 reuse (default; Joe may override).
+recommendation). Runners: **zai-11 + zai-12, fresh mints (Joe, 2026-07-12)** — the contract's tenth and eleventh runners; cross-lane as always (zai-11 folds zaif-harness pair / flies text-sidecar deposits; zai-12 the mirror).
 Staleness note for folders: BOTH missions are HOT (active campaign lanes,
 docs hours old) — landed-state moves faster than any batch yet; the probe
 is the long pole.
