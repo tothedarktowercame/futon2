@@ -231,3 +231,31 @@ Prep done so the laptop switchover is a short exercise at a quiet juncture:
 3. Backfill futon1a data whenever convenient (pipeline is proven;
    expect more F4 rescue-stage hits when backfilling into a store
    already shaped by live writes — keep the rescue logs).
+
+## Post-juncture ledger — 2026-07-12 (claude-2): the WM went strategically blind; targeted backfill fixed it
+
+**Symptom:** post-switchover, the WM strategic field collapsed to ~6 tied
+bands (per-mission G terms all zero; July-9 trace baseline = 28 distinct
+G values). The boot acceptance checks passed — evidence backend OK — while
+a downstream consumer silently lost its inputs.
+
+**Cause:** the open juncture question above ("hyperedge backfill before or
+after the switch") resolved AFTER; the WM scan's per-mission terms read
+code/v05/{sorry,mission-doc,wm-hyperparameter-update} hyperedges via
+FUTON1A_URL (now :7073), which held 0/24, 10/311, 0/108 of them.
+
+**Fix (zero downtime):** temporary read-only futon1a on :7071 against the
+untouched store (NB the real store dir is storage/futon1a/**default/**),
+443 docs re-posted through the live server's POST /api/alpha/hyperedge
+(its own transform-doc + stable ids + no-op guard + verified put; 5 docs
+needed STRING-keyed props — keywordized JSON keys with spaces pr-str to
+unreadable EDN). Acceptance: next clean tick restored **28 distinct G
+values** (= the July-9 baseline exactly). Temp futon1a decommissioned.
+
+**Residue:** (1) the bulk ~244k code-graph hyperedges (edits etc.) remain
+un-backfilled — NOT WM-blocking (the WM's whole strategic diet is 443
+docs) but owed to the campaign's substrate lane for completeness.
+(2) PROPOSED acceptance-check addition for future junctures: "WM field
+shows >20 distinct G-total values at first post-switch tick" — consumer-
+level checks, not just backend-level, or the strategic tier can go blind
+silently again.
