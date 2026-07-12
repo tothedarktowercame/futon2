@@ -3,10 +3,11 @@
  :by "claude-5 laptop (inline; consented via campaign arming, counts/dates only — no content read)"
  :sources
  {:operator-turns {:where "futon1b :7073, author=joe type=coordination"
-                   :total 6357
-                   :by-month {"2026-02" 55 "2026-03" 41 "2026-04" 516
-                              "2026-05" 2307 "2026-06" 2560 "2026-07" 878}
-                   :note "July partial (12 days). Ramp begins April. The ~8.8k figure quoted in M-points-de-fuite §6.5 was lucy all-types; this is coordination-type on the laptop store — reconcile at J1."}
+                   :total-coordination-entries "~8.8k (paged walk, zai-9 probe 2026-07-12 — authoritative method)"
+                   :text-bearing-turns 6086
+                   :by-month-lower-bounds {"2026-02" 55 "2026-03" 41 "2026-04" 516
+                                           "2026-05" 2307 "2026-06" 2560 "2026-07" 878}
+                   :correction "2026-07-12 (same day): the original :total 6357 and by-month numbers came from single big-limit requests per month window — the futon1b windowed path returns short non-final pages (Z1 review finding), so single requests UNDERCOUNT (~28% here). Paged walks are the honest method (z1_views page-all, post-fix). By-month kept as lower bounds; recount at J1. July partial (12 days); ramp begins April."}
   :marks {:events 2
           :detail "1 approval (e-63c25e11, 2026-07-11, M-points-de-fuite) + 1 idea (Joe's M-joe-reflection charter turn, 2026-07-12); ledger b1-live-marks.edn; L0 recognizer dispatched 2026-07-12"}
   :jsdq {:where "futon5a/data/*.edn" :files-dated "2026-04-09 .. 2026-05-29"

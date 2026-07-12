@@ -135,9 +135,12 @@ filed. Acceptance for J-slices should name the surface and the walk.
 
 ## MAP — J0 self-evidence census (claude-5 laptop, 2026-07-12, inline)
 
-Artifact: `labs/M-joe-reflection/j0-self-evidence-census.edn`. Headline:
-**6,357 operator turns** on the laptop store (Feb–Jul 2026; ramp begins
-April: 516 → 2,307 → 2,560 → 878-in-12-days), 2 mark events so far (the
+Artifact: `labs/M-joe-reflection/j0-self-evidence-census.edn`. Headline
+(CORRECTED same day — the first count used single big-limit requests, which
+the futon1b windowed path short-pages; Z1-review finding): **~8.8k
+operator coordination entries, of which 6,086 text-bearing turns** on the
+laptop store (Feb–Jul 2026; monthly figures kept as lower bounds pending a
+paged recount at J1), 2 mark events so far (the
 channel is hours old), JSDQ = one snapshot (Apr–May files — J2 needs a
 re-snapshot for a trajectory), γ(mission) = 18 cells/1 burned-in, peradam
 ledger census by pointer only (futon7 disclosure boundary), recordings
