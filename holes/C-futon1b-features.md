@@ -138,7 +138,7 @@ on the keystone contract; no sequential chain between consumers).
 |---|---|---|---|
 | M-marks-to-labels L1/L2 | tag shape (a) via L0 | tags queryable, refs parsed | **DELIVERED + REVIEWED** (2026-07-12: futon2 0bb26e0 / futon3a 2fffe77; flag-off byte-identity verified, 39 records; 0 mark-labels yet — awaits real marks) |
 | M-marks-to-labels L3 | L1/L2 delivered + mark accrual | the preregistered gate | **held** |
-| zaif Z2 controller | Z1 views + shapes (a,c) | events readable through the envelope | **dispatched** (codex-2, 2026-07-12, job …db3d6d08) — pure controller core + :profile wiring, kill-switched |
+| zaif Z2 controller | Z1 views + shapes (a,c) | events readable through the envelope | **DELIVERED + REVIEWED + LIVE-LOADED** (futon3c 551535e; shadow mode: decides+persists per round, never alters the turn; :zai byte-path verified in-JVM; follow-up Z2.1 = port Z1 bb views to a production seam — controller input is an injectable fn until then) |
 | B2 kernel-vs-marks triangulation | mark accrual (L0 live) | B1 cells ∩ reward missions populated | **held** (marks are hours old) |
 | R̂ label-channel ingestion | L3 gate PASS | agreement + S3/LOMO non-degradation | **held** |
 | reward follow-on (LOGO τ) | label mass accruing | else it re-fights the last war | **held** |
