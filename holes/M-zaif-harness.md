@@ -574,6 +574,37 @@ all adapter-side:
    divides at the arm-selection softmax (retrieve/act/ask/yield). Same
    junction, different selector.
 
+## PZ2 — ledger grain census (CLOSED 2026-07-11, one census + PZ1 artifacts)
+
+**Question:** does γ(cascade) have enough events per cell on the real
+record, or does v0 start coarser? **Answer: v0 starts at γ(mission).**
+(`pz2_grain_census.clj` in the lab dir; store censuses via the API.)
+
+- **Cascade grain: zero.** Lucy's store has NO cascade/fold record types
+  at all (type catalog: scope/mission/source/test families only) —
+  cascade traces live in laptop WM traces and futon6 fold-turn files,
+  not in this store. γ(cascade) has no substrate here yet.
+- **Pattern grain: zero structural.** `:scope/pattern`, `:scope/psr`,
+  `:scope/pur` exist in the type catalog but count 0 instances on lucy.
+- **Mission grain: viable but thin.** The 38 labeled true corrections
+  (PZ1 final truth) spread over 17 mission cells: **4 cells ≥3 events,
+  1 cell ≥5** (M-futon-forward-model, 10). 12/38 carry no mission token
+  in their 600-char context — token-grep attribution loses ~⅓, which is
+  the empirical case for the design's own answer: **the autoclock
+  witness, not text tokens, is the attribution of record** (the
+  mission-parameterization refinement anticipated exactly this).
+- Consequences for Z1: cells are γ(mission); R14 burn-in (5 samples)
+  means nearly every cell starts at the uniform prior — matching the
+  cold-start design — and the 1–2 actively-clocked missions reach
+  burn-in within days at the measured 24% correction base rate once ✘
+  marks flow. Cascade/pattern refinement is gated on those record types
+  actually reaching this store (Phase E / laptop sync), not on more
+  analysis.
+
+Probe ledger now: PZ1 CLOSED · PZ2 CLOSED · PZ3 CLOSED — all three
+pre-build probes done; Z1 is unblocked on every axis (D1 index live,
+grain decided, fold portability confirmed).
+
 ## U1 — transcript persistence (started 2026-07-11, Joe's go)
 
 **What:** persist the agent side of the loop — zai's per-round self-talk
