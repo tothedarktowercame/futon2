@@ -41,6 +41,12 @@ Supporting, already live: autoclock witness (attribution of record) ·
 U1 transcripts (the ✘ referent substrate) · B1 marks→γ(mission) fold ·
 30-min Agency job-cap discipline (background long verifies).
 
+**Standing fact (found 2026-07-12, Z1 review): the marks corpus is SPLIT
+across stores.** Stores do not replicate; the first ✓ (e-63c25e11) lives in
+lucy's store, the first 💡 in the laptop's. Any γ-ledger/label-mint read must
+name its store or query both; the L3 measurement gate should state which
+corpus it measured. Reconcile at the migration lane's juncture, not ad hoc.
+
 ## 1. The shared standard (the Campaign's reason to exist)
 
 **The turn-annotation & label contract:** one agreed shape for

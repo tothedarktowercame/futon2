@@ -168,18 +168,23 @@
              :pages-fetched pages
              :query-params  (conj all-params params)}
 
-            ;; Last page had fewer than page-size — likely the final page
-            (< (count entries) page-size)
-            {:entries       (take limit (into collected entries))
-             :pages-fetched (inc pages)
-             :query-params  (conj all-params params)}
-
+            ;; A short page is NOT proof of exhaustion: the futon1b windowed
+            ;; query path can return fewer than :limit per request while more
+            ;; matches remain in the window (scan-budget behavior — found
+            ;; live: since=2026-07-11 returned 1 short page covering only the
+            ;; newest hours). Keep paging; only an EMPTY page or a stalled
+            ;; cursor ends the walk. Costs one extra request on genuinely
+            ;; final pages — correct over fast.
             :else
             (let [oldest-at (:evidence/at (last entries))]
-              (recur oldest-at
-                     (into collected entries)
-                     (inc pages)
-                     (conj all-params params)))))))))
+              (if (or (nil? oldest-at) (= oldest-at cursor))
+                {:entries       (take limit (into collected entries))
+                 :pages-fetched (inc pages)
+                 :query-params  (conj all-params params)}
+                (recur oldest-at
+                       (into collected entries)
+                       (inc pages)
+                       (conj all-params params))))))))))
 
 ;; ---------------------------------------------------------------------------
 ;; View 1: operator-turns
@@ -230,10 +235,12 @@
 ;; ---------------------------------------------------------------------------
 
 (def ^:const gamma-mark-glyphs
-  "The v0 mark vocabulary (M-points-de-fuite §6.5): ✘ = correction, ✓ = approval.
+  "The v0 mark vocabulary (M-points-de-fuite §6.5): ✘ = correction, ✓ = approval,
+   💡 = idea (idea events feed the reflection lane; they mint no reward label).
    Used in fallback content-scan mode only — the primary mode queries structured tags."
   {"✘" :correction
-   "✓" :approval})
+   "✓" :approval
+   "💡" :idea})
 
 (def ^:const gamma-tags
   "The structured tags that mark γ events once L0 (B0 turn-end recognizer) lands.
