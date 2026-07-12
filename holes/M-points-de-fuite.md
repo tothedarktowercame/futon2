@@ -332,7 +332,19 @@ The per-mission **orbit / phase-portrait** — scattered turns woven and concent
       NOT done wholesale** (Table-25 stance: grow slowly; silhouette is weak):
       the named types are the registry's candidate list; a name earns a glyph
       + hydra key when Joe actually wants the keystroke. v0 vocabulary stays
-      ✘ ✓ 💡. Joe (2026-07-11): "we have enough operator turns to cluster them into types (surely)." ~8.8k joe-authored turns in the store; cluster (D1 index terms and/or the stack's MiniLM embeddings, futon6 scripts), operator names the clusters worth marking, each named cluster earns a glyph + hydra key. This replaces a-priori vocabulary growth with the same declare-don't-guess empiricism as PZ1: the types come from the record. Good zai-1 handoff once D1's index is complete (the clustering wants the text substrate). NB this is also the missing grounding for the illocutionary-force hypothesis above — if clusters align with the typed-bell forces, that vocabulary is confirmed from data; if they cut differently (like 💡, which is force+cost), the empirical cut wins.
+      ✘ ✓ 💡.
+    - **Second string MINTED (2026-07-12, Joe: "put a second string on a new
+      C-c , hydra... open to your interpretation regarding the glyphs"):**
+      all 9 named types live as a SHADOW TIER — futon3c d6d6170: registry
+      entries with :tier :second-string (tags-only: no labels, no γ events;
+      mark_labels.py and gamma-mark-glyphs both key on the core tier), hydra
+      `C-c ,` in all three repls, recognizer live in the JVM. Glyphs
+      (claude-5's interpretation): 🧭 guidance · ♟ tactics · ⚠ concern ·
+      📌 fact · 👏 encouragement · 🙏 request · 🌿 extension · 📋 procedural ·
+      ⚖ hinge. Promotion path: usage in the store argues a type into the
+      core `C-c .` hydra (and into γ/label semantics if Joe assigns them).
+      Incidental fix: the long-form regex was hardcoded ✘|✓|💡 — now built
+      from the registry. Joe (2026-07-11): "we have enough operator turns to cluster them into types (surely)." ~8.8k joe-authored turns in the store; cluster (D1 index terms and/or the stack's MiniLM embeddings, futon6 scripts), operator names the clusters worth marking, each named cluster earns a glyph + hydra key. This replaces a-priori vocabulary growth with the same declare-don't-guess empiricism as PZ1: the types come from the record. Good zai-1 handoff once D1's index is complete (the clustering wants the text substrate). NB this is also the missing grounding for the illocutionary-force hypothesis above — if clusters align with the typed-bell forces, that vocabulary is confirmed from data; if they cut differently (like 💡, which is force+cost), the empirical cut wins.
   - **Per-mission thread→pattern map-reduce** (§6.2) — improve/invalidate the binding pattern from the scopes its thread wove, at mission close. The L1 library-evolution loop's missing in-flow signal. *Candidate excursion.*
   - **Historical 蒲團 reconstruction** (§6.3) — depends on **[[M-post-mining-ingest]]** (canonical mine).
   - **Pilot/flight unification** — render `session-overview` as a `flight-mode.el` organ-sibling (optional, §6.1).
