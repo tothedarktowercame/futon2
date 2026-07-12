@@ -127,3 +127,47 @@ Artifact-only (no JVM, no meme.db, no substrate-2); tests green from a
 DIFFERENT cwd, summary line pasted verbatim; file-relative paths;
 stop-on-blocker (if adjudications won't load or the kernel kill-test fails,
 report — never synthesize); prediction-error line in the bell-back.
+
+## Checkpoint — cross-analysis from the lucy zaif line (claude-5, 2026-07-12)
+
+The lucy session (M-zaif-harness, M-text-sidecar — all pushed) closed
+PZ1/PZ2/PZ3 and built D1+U1. Four findings bear directly on this draft;
+a laptop agent picking this up should read M-zaif-harness in full, but
+the load-bearing intersections are:
+
+1. **PZ2 measured the same sparsity this mission's Risk names, from the
+   other side.** 38 operator-gold correction events spread over 17
+   mission cells: 4 cells ≥3 events, one ≥5. "At n=39 most groups carry
+   1–2 labels" is the identical structure. Consequence both ways: zaif's
+   v0 γ(mission) cells start at the uniform prior (PZ2 verdict), and
+   **this mission's kernel move is exactly the principled upgrade to
+   that cold start** — kernel-weighted borrowing from similar missions
+   instead of uniform ignorance. If M1/M2 pass, zaif inherits the
+   backoff for free.
+2. **M1's kill-test doubles as the test of zaif's backoff tier 2.** The
+   zaif design's backoff ladder for sparse cells is (1) sorry terminal
+   overlap → (2) shared prose-embedding space → (3) learned structural
+   on demonstrated residual. The mission kernel (MiniLM over want texts)
+   IS tier 2. One experiment, two missions: report the M1 distributions
+   with both consumers in mind.
+3. **The label-rate constraint has a measured relief valve.** PZ1: ~24%
+   of operator turns carry corrections (est. 342 in a 40-day window vs
+   2/21 flown folds); detection by lexicon is disqualified (recall .186)
+   but the ✘/✓ declared-mark channel is live (precision 1.0 by
+   construction, hydra on C-c .), and U1 gives agent-side acts as typed
+   evidence for marks to reference. Mission attribution for these events
+   should use the **autoclock witness, not text tokens** — PZ2 measured
+   ~⅓ attribution loss from token-grep. A future R̂ evidence channel
+   from mission-attributed marks composes with (never replaces) the
+   flown-fold channel.
+4. **Method transfer:** PZ1's shape — independent blind labels, gold
+   pass decides, detector measured before trusted — is the same
+   discipline as the M1 kill-test ("measure the guesser first"); and the
+   PZ1→PZ2→PZ3 probe sequence (measure the instrument → census the
+   grain → check the port) is a reusable template for reward-lane
+   feature work.
+
+Infrastructure now available on lucy that this mission could query if it
+ever wants the operator-turn corpus: the D1 FTS5 sidecar
+(`/api/alpha/evidence/text-search?q=…`, BM25, composes with
+author/since), and `memory-search :text` through the standard envelope.
