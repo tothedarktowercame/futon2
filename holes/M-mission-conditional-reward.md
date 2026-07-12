@@ -171,3 +171,10 @@ Infrastructure now available on lucy that this mission could query if it
 ever wants the operator-turn corpus: the D1 FTS5 sidecar
 (`/api/alpha/evidence/text-search?q=…`, BM25, composes with
 author/since), and `memory-search :text` through the standard envelope.
+
+**Laptop-side follow-up (claude-5 laptop, 2026-07-12):** port recon done —
+see M-zaif-harness.md §"Checkpoint — laptop-side port recon" for the B0–B2
+slice contracts. B2 is this mission's triangulation lane: kernel-geometry
+(M1) vs operator-behavior (marks→γ(mission)) as two independent estimates
+of mission difference. One footgun found en route: ✘/✓ are stripped by the
+D1 tokenizer — the marks channel needs B0's typed tags to be queryable.

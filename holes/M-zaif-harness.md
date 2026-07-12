@@ -655,6 +655,62 @@ no calls. The question that was unadjudicable in the first demo — "what
 did you actually run?" — is now answered by the store. v0 CLOSED; the ✘
 referent and the Z2/Z3 scoring substrate exist from this point forward.
 
+## Checkpoint — laptop-side port recon (claude-5 laptop, 2026-07-12)
+
+The laptop line picked this up via futon2 `0ed4dd1` (the lucy checkpoint in
+M-mission-conditional-reward.md). Recon done; port slices below. Note two
+registrars now hold the nick claude-5 (one per Agency roster, lucy and
+laptop) — signatures here say which.
+
+**Pulled to the laptop:** futon2 (this doc + M-text-sidecar + the PZ1
+artifacts), futon3c (marks hydra `9100a6b`, U1 transcript persistence
+`b9a5f20`, limit/ephemeral pushdown `01e97cc`; two local B5 commits rebased
+on top cleanly), futon1b (D1 FTS5 sidecar `ea696ce`, WAL mode `d186e6c`,
+heap-spiral findings). Pull only — no laptop JVM was restarted or reloaded.
+
+**Live cross-checks against lucy (thin-reader topology, ssh lucy-joe →
+127.0.0.1:7074):** D1 index answering (index-as-of 2026-07-11T22:02Z);
+the ratified first-mark doc `e-63c25e11` carries `:clocked-mission
+"M-points-de-fuite"` — autoclock attribution works as designed.
+
+**FINDING — marks are invisible to the FTS index.** `text-search?q=✘` and
+`q=✓` return 0 while prose queries hit: FTS5's unicode61 tokenizer strips
+symbol-class characters. "Deterministically greppable at precision 1.0"
+holds for content scans (verified — that is how the census below was
+counted) but NOT through D1. Consequence: the turn-end recognizer that
+stamps `:correction`/`:approval` tags on the chat-turn evidence entry is
+promoted from "later" (§Post-PZ1 design guidance) to PREREQUISITE for a
+queryable marks channel. Tokenizer reconfiguration is the inferior
+alternative (re-index cost; tags were the designed route anyway).
+
+**Marks census (content scan over joe-authored :coordination since
+2026-07-11):** 1 ✘ / 2 ✓ glyph occurrences — the channel is live but
+days-old. The retro-bootstrap corpus is PZ1 final truth: 38 labeled true
+corrections over 17 mission cells (4 cells ≥3, 1 ≥5), with the known ~⅓
+token-grep attribution loss on historical events (autoclock witnesses
+exist only going forward).
+
+**Port slices (the laptop lane; triangulates M-mission-conditional-reward):**
+- **B0 — mark recognizer → typed tags (lucy JVM/Emacs window, Joe-gated):**
+  turn-end recognizer stamps `:correction`/`:approval` on the chat-turn
+  entry (sibling to agent-chat.el's clocking recognizer). Unblocks
+  querying without content scans. Prerequisite for B1's LIVE feed, not for
+  its retro-bootstrap.
+- **B1 — marks→γ(mission) fold (laptop, artifact-only, dispatchable now):**
+  adapter per PZ3's seven deltas over (PZ1-final-truth ∪ live marks) →
+  the R14 fold (futon2/src/futon2/aif/policy_precision.clj, ported
+  constants, coerce-state guard, asymmetric admissibility) → γ(mission)
+  table with per-event provenance, recomputable by script. Burn-in (5)
+  means most cells sit at prior — expected, matches PZ2's verdict.
+- **B2 — the triangulation (laptop, after codex-2's M1 lands):** two
+  independent estimates of how missions differ — want-text geometry (the
+  M1 mission kernel) vs operator behavior (B1's γ/mark rates). Test:
+  does kernel similarity predict mark-derived correction-rate similarity?
+  Agreement = confidence in mission-conditioning; disagreement = the
+  diagnostic (method disagreement IS the signal). Either way it feeds
+  R̂'s mission-conditional evidence design: the marks channel composes
+  with, never replaces, flown-fold labels.
+
 ## Log
 
 - 2026-07-11 (later still) — **retry PASSED on the original unpinned
