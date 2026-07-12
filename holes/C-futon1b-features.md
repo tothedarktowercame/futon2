@@ -4,8 +4,10 @@
 all of it shares.*
 
 **Tier:** Campaign (TAI; spec `futon4/holes/campaign-lifecycle.md`).
-**Date:** 2026-07-12 — **Phase: RALLY (FORMING)** — lanes below await Joe's
-ratification.
+**Date:** 2026-07-12 — **Phase: CHARTERED** (RALLY ratified by Joe,
+2026-07-12, emacs-repl: "let's ratify the RALLY" — all lanes incl. the
+reflection lane; the §2 criterion stands as drafted, revisable at
+CONSTITUTION review).
 **Principal:** Joe. **Coordination + review:** claude-5 (laptop).
 **Chartered from:** operator memo (Joe, 2026-07-12, emacs-repl: "assemble a
 Campaign C-futon1b-features that rounds up everything that we're trying to do
@@ -33,7 +35,7 @@ referents, labels — that downstream consumers can query and learn from.**
 | labels | M-marks-to-labels (drafted 2026-07-12) | DRAFT, not armed | L1 referent resolution; L2 label adapter; **L3 measurement gate** | arming = Joe; flag flip = Joe |
 | zaif runners | M-zaif-harness | PZ1–3 closed; U1 done; B1 γ(mission) built | **Z1 query library** (pure XTQL); Z2 controller; Z3 A/B | Z-lane arming = Joe |
 | reward (consumer) | M-mission-conditional-reward CLOSED (honest negative) + the batch loop | verdict = label mass binding | consume labels when L3 passes; batch-8 continues under v1.2 | scoreboard flips = Joe |
-| reflection (consumer) | M-joe-reflection (drafted 2026-07-12) + N-peircean-codebook | IDENTIFY draft; CANDIDATE lane (added by claude-2, awaiting ratification like the rest) | J0 self-evidence census; J1 operator-corpus retrospective (no-life-logging: the turns ARE the stream, read via D1) | arming + lane ratification = Joe; operator-corpus reads Joe-consented per slice |
+| reflection (consumer) | M-joe-reflection (drafted 2026-07-12) + N-peircean-codebook | IDENTIFY draft; lane RATIFIED 2026-07-12 with the rest | J0 self-evidence census; J1 operator-corpus retrospective (no-life-logging: the turns ARE the stream, read via D1) | arming = Joe; operator-corpus reads Joe-consented per slice |
 
 Supporting, already live: autoclock witness (attribution of record) ·
 U1 transcripts (the ✘ referent substrate) · B1 marks→γ(mission) fold ·
@@ -78,7 +80,7 @@ The Campaign dissolves when:
 3. Z1's query library reads the same events through the standard envelope
    (proving the contract serves the zaif lane, not just the reward lane).
 
-## 3. RALLY — muster & lanes (awaiting operator ratification)
+## 3. RALLY — muster & lanes (RATIFIED by Joe, 2026-07-12)
 
 - **Joe** — operator: arming, flag flips, D2 send, quiet windows, mark
   vocabulary growth (names the clusters), gold passes.
@@ -96,24 +98,61 @@ The Campaign dissolves when:
   member slice; anything that writes to the store schema; anything outward
   (the D2 packet); scoreboard/label-flag flips; restarts.
 
-## 4. ESCROW candidates (to be registered at CONSTITUTION)
+## 4. CONSTITUTION (claude-5, 2026-07-12 — survey from the member docs, all read this session)
 
-- M-marks-to-labels L2/L3 held on: tag shape (a) verified.
-- Zaif Z2 controller held on: Z1 views + the event shapes (a,c).
-- B2 kernel-vs-marks triangulation held on: mark accrual (needs L0 live).
-- R̂ label-channel ingestion held on: L3 gate pass.
-- Reward follow-on (leave-one-GROUP-out τ) held on: label mass actually
-  accruing (else it re-fights the last war).
-- M-joe-reflection J-surfaces held on: tag shape (a) + read surfaces (d)
-  verified — it consumes the contract verbatim (zaif-transplant checkpoint
-  in its doc); its own novel pieces are render + consent gates only.
+**Dependent-mission survey** (needs-from / contributes-to the standard):
 
-## 5. Log
+| member | needs from the contract | contributes |
+|---|---|---|
+| migration (substrate) | nothing upstream — sits below the contract; schema writes remain an operator checkpoint | the store itself; append-only evidence semantics; bitemporal audit |
+| M-text-sidecar (co-keystone) | tags-not-glyphs as the search key in (a) (FTS strips ✘/✓ — the tokenizer finding is normative) | D1 index (live, both boxes); the P2 pattern; P4 query surface; D2 packet evidence |
+| M-points-de-fuite / B0 (producer) | a tag-vocabulary REGISTRY in (a) (grown by the clustering probe, operator-named) + use-vs-mention as a normative rule | the recognizer; the hydra; the vocabulary process |
+| M-marks-to-labels (keystone) | span addressing from (d) for L1's precedence rung 2 | delivers (a)–(c); the L3 measurement protocol |
+| M-zaif-harness (consumer) | (a,c) event shapes + (d) envelope for Z1's views | γ fold (B1); U1 transcripts; asymmetric admissibility; PZ1 measurements |
+| reward loop (consumer) | (c) grain-tagged labels behind a flag; L3 gate before any flip | fold_ground_truth as the label-shape authority; flown-fold labels as calibration anchor |
+| M-joe-reflection (consumer) | (a,d) verbatim + consent-scope RECORDED on operator-corpus reads; backward-readability (💡 events preserved though they mint no labels) | QA surfaces (the walk requirement); the dual-use argument that hardens (a) |
+
+**Governance:** STANDARD-VERIFY ratifier = Joe · coordination = claude-5
+(laptop) · dissolution = Joe · keystone owner = claude-5 until an armed
+handoff reassigns it. **Coordination shape: convergent** (all lanes converge
+on the keystone contract; no sequential chain between consumers).
+
+**Ready vs missing** (campaign scope):
+
+| ready (exists, verified) | missing (the campaign must produce) |
+|---|---|
+| store + D1 live on both boxes (:7073 laptop, verified 2026-07-12) | B0/L0 recognizer → typed tags |
+| marks hydra; use-vs-mention rule recorded | tag-vocabulary registry (seeded ✘ ✓ 💡; grown via clustering probe) |
+| autoclock witness; U1 transcripts; B1 γ fold | L1 referent resolution; L2 label adapter + flag |
+| loader :grain discipline; PZ1 numbers; job-cap discipline | L3 gate run; Z1 query library; consent-scope recording; Q5 render; memory-search :text envelope verified laptop-side |
+
+## 5. ESCROW ledger (registered at CONSTITUTION; release = held → contract-released → satisfied)
+
+| from | on | requirement | status |
+|---|---|---|---|
+| M-marks-to-labels L1/L2/L3 | tag shape (a) via L0 | tags queryable, refs parsed | **held** |
+| zaif Z2 controller | Z1 views + shapes (a,c) | events readable through the envelope | **held** |
+| B2 kernel-vs-marks triangulation | mark accrual (L0 live) | B1 cells ∩ reward missions populated | **held** |
+| R̂ label-channel ingestion | L3 gate PASS | agreement + S3/LOMO non-degradation | **held** |
+| reward follow-on (LOGO τ) | label mass accruing | else it re-fights the last war | **held** |
+| M-joe-reflection J-surfaces | (a) + (d) verified | contract consumed verbatim; render + consent only | **held** |
+
+Release authority: STANDARD-VERIFY (Joe) releases contracts; live delivery
+satisfies them. Armable NOW without waiting on the standard (they produce
+it): L0 recognizer · clustering probe · Z1 first views · J0 census.
+
+## 6. Log
 
 - 2026-07-12 — Campaign assembled at RALLY (claude-5 laptop) from the
   operator memo; orientation table + shared standard + draft criterion
-  written. **← Joe: ratify lanes + criterion (→ CHARTERED), or reshape.**
+  written.
 - 2026-07-12 (claude-2): added CANDIDATE reflection lane — M-joe-reflection
   (chartered by Joe this session: "what's-in-it-for-me" as HEAD; no-life-
   logging constraint; composes N-peircean-codebook + the Joe-loop R-audit).
-  Ratification Joe's, with the other lanes at RALLY.
+- 2026-07-12 — **RALLY RATIFIED by Joe (all lanes incl. reflection) →
+  CHARTERED.** CONSTITUTION survey + governance + ESCROW ledger registered
+  (claude-5). Next phase: STANDARD-ARGUE (why this contract fits every
+  consumer) — largely written across the member docs; needs assembly + the
+  one cross-check no member ran: that ONE tag shape serves both directions
+  of the dual-use read. **← Joe: arm from the armable-now list (L0 ·
+  clustering probe · Z1 first views · J0 census), any subset.**
