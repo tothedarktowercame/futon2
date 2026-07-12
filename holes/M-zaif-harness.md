@@ -702,6 +702,24 @@ exist only going forward).
   constants, coerce-state guard, asymmetric admissibility) → γ(mission)
   table with per-event provenance, recomputable by script. Burn-in (5)
   means most cells sit at prior — expected, matches PZ2's verdict.
+- **B1 OUTCOME (2026-07-12, claude-5 laptop, built directly — operator
+  paused Agency for the futon1b switchover, so no bell):**
+  `b1_gamma_mission_fold.clj` + `b1-live-marks.edn` + `b1-gamma-mission.edn`
+  in the lab dir. The R14 fold is LOADED from
+  src/futon2/aif/policy_precision.clj at run time (never copied); the
+  script is adapter-only, exactly PZ3's deltas. 46 events (36 retro docs +
+  1 live approval; the gold-conflicted doc e-0cae94f2 EXCLUDED as
+  disputed; 11 token-grep-unattributed events counted apart), 18 cells,
+  1 burned-in: M-futon-forward-model γ = 0.7071 (= 2^(−½) exactly — all
+  its events are corrections). `--check` re-derives every cell's γ by
+  plain arithmetic (1e-12), asserts burn-in cells sit exactly at the
+  prior, asserts the conflicted doc minted no event, and reproduces PZ2's
+  census verbatim ([17 4 1 12]). Live-marks census correction en route:
+  the window's ✘ is a MENTION ("I could mark corrections with ✘") — the
+  live corpus is ONE approval event, not 1✘/2✓ glyphs. Use-vs-mention is
+  now a recorded adjudication rule in b1-live-marks.edn; B0's recognizer
+  should implement it (a mark inside a description of the convention is
+  not an event).
 - **B2 — the triangulation (laptop, after codex-2's M1 lands):** two
   independent estimates of how missions differ — want-text geometry (the
   M1 mission kernel) vs operator behavior (B1's γ/mark rates). Test:

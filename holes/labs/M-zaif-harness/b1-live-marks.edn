@@ -1,0 +1,24 @@
+{:note "B1 — live declared-mark events (M-points-de-fuite v0 vocabulary: ✘ correction / ✓ approval). Hand-adjudicated use-vs-mention at this corpus size (2 candidate docs, adjudication rule recorded below); grow this file by re-running the query and adjudicating new candidates, or retire it once B0 (turn-end recognizer stamping :correction/:approval tags) makes marks queryable directly — FTS cannot find them (unicode61 strips symbol characters; M-zaif-harness §laptop-side port recon)."
+ :adjudication-rule "A mark punctuating an operator statement (terminating or standing beside the judged content) = an EVENT; a mark inside a description or proposal of the convention itself = a MENTION, not an event."
+ :attribution "Live marks use the autoclock witness (:clocked-mission on the turn doc) — the attribution of record per PZ2; never text tokens."
+ :query {:endpoint "http://127.0.0.1:7074/api/alpha/evidence"
+         :params {:author "joe" :type "coordination" :since "2026-07-11T00:00:00Z" :limit 2000}
+         :via "ssh lucy-joe (thin-reader topology; stores do not replicate)"
+         :pulled-at "2026-07-12"}
+ :candidates
+ [{:id "e-60ba3204-2266-43b2-887e-f168c0accda0"
+   :at "2026-07-11T12:29:16.206309631Z"
+   :glyph "✘"
+   :verdict :mention
+   :why "\"I could mark corrections with ✘ for example\" — describes the convention, judges nothing."}
+  {:id "e-63c25e11-ac8b-4287-966e-bdc7f007bc78"
+   :at "2026-07-11T12:39:10.693855535Z"
+   :glyph "✓"
+   :verdict :event
+   :why "\"OK, that's good ✓\" — the mark punctuates an approval of delivered work; the second ✓ in the same turn (\"add a ✓ for approval\") is a mention and mints no extra event."}]
+ :events
+ [{:id "e-63c25e11-ac8b-4287-966e-bdc7f007bc78"
+   :at "2026-07-11T12:39:10.693855535Z"
+   :mission "M-points-de-fuite"
+   :mark :approval
+   :author "joe"}]}
