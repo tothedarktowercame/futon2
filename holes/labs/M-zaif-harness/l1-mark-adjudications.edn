@@ -1,0 +1,41 @@
+{:generated-at "2026-07-12T09:31:58.452436966Z",
+ :store-scope "laptop :7073 only; lucy not queried",
+ :records
+ [{:mark
+   {:payload nil,
+    :ref nil,
+    :offset 177,
+    :type :idea,
+    :evidence-id "e-a3aa93bc-85a5-44d7-852f-246334178cf7",
+    :author "joe",
+    :at "2026-07-12T08:17:13.027077619Z",
+    :glyph "💡",
+    :verdict :event},
+   :referent
+   {:kind :evidence-turn,
+    :id "e-a3aa93bc-85a5-44d7-852f-246334178cf7"},
+   :mission "M-joe-reflection",
+   :confidence :low,
+   :provenance
+   {:queries
+    [{:source :historical-glyph-scan,
+      :rung :bare-mark,
+      :self-turn "e-a3aa93bc-85a5-44d7-852f-246334178cf7"}],
+    :store "laptop :7073",
+    :note
+    "bare mark had no in-reply-to in laptop store; resolved to marked turn itself"}}
+  {:mark
+   {:evidence-id "e-63c25e11-ac8b-4287-966e-bdc7f007bc78",
+    :at "2026-07-11T12:39:10.693855535Z",
+    :author "joe",
+    :glyph "✓",
+    :type :approval,
+    :verdict :event},
+   :referent
+   {:kind :unresolved, :id "e-63c25e11-ac8b-4287-966e-bdc7f007bc78"},
+   :mission "M-points-de-fuite",
+   :confidence :none,
+   :provenance
+   {:queries [{:source :b1-split-store-event, :rung :unresolved}],
+    :store "lucy metadata only; not queried",
+    :note "no explicit ref, payload span, or in-reply-to"}}]}
