@@ -99,6 +99,40 @@ grain he controls, in a view he actually looks at, with every narration
 marked as narration. The system's peradam ledger and the operator's stop
 being different kinds of thing.
 
+## Checkpoint — operator steer (Joe → claude-5, 2026-07-12): the zaif analogy, made structural
+
+Joe's framing: *"a Joe-facing harness linked with the Nonstarter Dashboard,
+Pudding Prover, etc. … It will use the tags that I enter here which are
+planned for directing agents to reflect back into my developing self-model —
+effectively analogous to the zaif runners' harness … worked into the same
+~/code/p4ng/main-2026.tex AIF logic."* (That message itself carried a live 💡
+— the channel demonstrating itself mid-charter.)
+
+The analogy is not decorative; it is a component-by-component transplant of
+the zaif controller (M-zaif-harness), pointed at the operator:
+
+| zaif runner harness | Joe-reflection harness |
+|---|---|
+| evidence stream: operator turns + marks (C-inference about Joe) | the SAME turns + marks, read backward (self-model evidence FOR Joe) |
+| belief state: (task, operator-C, precision) | (capability state — JSDQ/star-map, self-C, confidence marks) |
+| precision ledger: γ(mission), R14 fold | the SAME B1 fold read as investment/judgment density (§IDENTIFY sub-q 3) |
+| policy selection: retrieve/act/ask/yield softmax | the Nonstarter PERSONAL queue (propose/vote/fund = attention allocation; the portfolio/tithe design) |
+| realized reward: labels / discharge | the peradam account (Pudding-Prover-witnessed rungs) |
+| no in-band formalism (model sees context, never its own belief arithmetic — the FuLab lesson) | **the operator sees VIEWS, never his own belief arithmetic** — the FuLab lesson applies to humans too |
+| update rules: R7/R14/R19 per p4ng | the same folds, same R-contract, same tex |
+
+**Dual-use tags — the load-bearing point for the campaign:** the marks Joe
+enters serve two consumers from ONE channel: forward (directing agents —
+M-marks-to-labels) and backward (self-model evidence — this mission). No new
+notation, no new logging; the annotation contract (C-futon1b-features §1
+a–d) is consumed VERBATIM. This mission's only novel elements are the render
+(the Q5 `self/` surface, the what's-in-it-for-me panel) and its consent
+gates — everything upstream is shared standard.
+
+**QA requirement (operator-facing, per the steer):** every slice ships a
+surface Joe can walk through and *use* — a view consulted, not a report
+filed. Acceptance for J-slices should name the surface and the walk.
+
 ## Gates
 
 Arming = Joe. Corpus reads of operator turns = Joe-consented per slice (they

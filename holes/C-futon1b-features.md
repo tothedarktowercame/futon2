@@ -55,7 +55,10 @@ U1 transcripts (the ✘ referent substrate) · B1 marks→γ(mission) fold ·
 
 Why no single mission can own it (the campaign-grounding test): the zaif
 controller's C-inference, the γ(mission) ledger, R̂'s label loader, the
-session-mode surfaces, and the clustering probe ALL consume these shapes. Any
+session-mode surfaces, the clustering probe — and now M-joe-reflection,
+which consumes the SAME tags backward as self-model evidence (dual-use:
+one mark channel, forward to agents and backward to the operator) — ALL
+consume these shapes. Any
 one mission defining them alone mis-fits the others; leaving them implicit
 forks them (the thin-scalar-field failure, war-bulletin-10).
 
@@ -101,6 +104,9 @@ The Campaign dissolves when:
 - R̂ label-channel ingestion held on: L3 gate pass.
 - Reward follow-on (leave-one-GROUP-out τ) held on: label mass actually
   accruing (else it re-fights the last war).
+- M-joe-reflection J-surfaces held on: tag shape (a) + read surfaces (d)
+  verified — it consumes the contract verbatim (zaif-transplant checkpoint
+  in its doc); its own novel pieces are render + consent gates only.
 
 ## 5. Log
 
