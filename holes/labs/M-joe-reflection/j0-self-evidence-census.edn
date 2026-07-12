@@ -1,0 +1,21 @@
+{:census :j0-self-evidence
+ :date "2026-07-12"
+ :by "claude-5 laptop (inline; consented via campaign arming, counts/dates only — no content read)"
+ :sources
+ {:operator-turns {:where "futon1b :7073, author=joe type=coordination"
+                   :total 6357
+                   :by-month {"2026-02" 55 "2026-03" 41 "2026-04" 516
+                              "2026-05" 2307 "2026-06" 2560 "2026-07" 878}
+                   :note "July partial (12 days). Ramp begins April. The ~8.8k figure quoted in M-points-de-fuite §6.5 was lucy all-types; this is coordination-type on the laptop store — reconcile at J1."}
+  :marks {:events 2
+          :detail "1 approval (e-63c25e11, 2026-07-11, M-points-de-fuite) + 1 idea (Joe's M-joe-reflection charter turn, 2026-07-12); ledger b1-live-marks.edn; L0 recognizer dispatched 2026-07-12"}
+  :jsdq {:where "futon5a/data/*.edn" :files-dated "2026-04-09 .. 2026-05-29"
+         :note "one point-in-time belief state (per mission doc) — J2 needs a re-snapshot to make a trajectory"}
+  :gamma-mission {:where "futon2/holes/labs/M-zaif-harness/b1-gamma-mission.edn"
+                  :cells 18 :burned-in 1 :events 46}
+  :star-map {:where "M-capability-star-map artifacts" :status :pointer-only-this-pass}
+  :peradam-ledger {:where "pudding-prover / cold-outbox chain (futon7)" :status :pointer-only-this-pass
+                   :note "futon7 = disclosure boundary; census by pointer, content stays put"}
+  :morning-recordings {:status :not-read :note "count+dates only per mission constraint; location known to operator — J1 asks, never scans"}}
+ :coverage-gaps ["turn corpus starts 2026-02 (store birth) — earlier work invisible to this stream"
+                 "JSDQ single snapshot" "recordings unindexed by design"]}

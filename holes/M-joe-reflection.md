@@ -133,6 +133,19 @@ gates — everything upstream is shared standard.
 surface Joe can walk through and *use* — a view consulted, not a report
 filed. Acceptance for J-slices should name the surface and the walk.
 
+## MAP — J0 self-evidence census (claude-5 laptop, 2026-07-12, inline)
+
+Artifact: `labs/M-joe-reflection/j0-self-evidence-census.edn`. Headline:
+**6,357 operator turns** on the laptop store (Feb–Jul 2026; ramp begins
+April: 516 → 2,307 → 2,560 → 878-in-12-days), 2 mark events so far (the
+channel is hours old), JSDQ = one snapshot (Apr–May files — J2 needs a
+re-snapshot for a trajectory), γ(mission) = 18 cells/1 burned-in, peradam
+ledger census by pointer only (futon7 disclosure boundary), recordings
+not read (per constraint). Coverage gap worth knowing: the turn corpus
+starts at store birth (2026-02) — earlier work is invisible to this
+stream. Counts/dates only; no content read this pass. Next: J1 (content
+read) is Joe-consented separately.
+
 ## Gates
 
 Arming = Joe. Corpus reads of operator turns = Joe-consented per slice (they
