@@ -755,8 +755,16 @@ the GFN as the diversity supplier at low β** — S4 modes are its real
 demonstrated property, and the finale's 2–0 rate surge earns it the seat,
 not the crown. (d) **The binding constraint is the reward, not the
 sampler**: LOMO's five consecutive nulls say R̂ doesn't transfer across
-missions — M-mission-conditional-reward (in flight, futon1b-backed) is
-where this experiment's sequel begins. When a transferable R̂ exists, the
-run-off re-opens under the same prereg discipline; until then the question
-"which proposer?" is undecidable BY DESIGN of the evidence, and the honest
-answer is the one above.
+missions — M-mission-conditional-reward is where this experiment's sequel
+was expected to begin, and it ALREADY ANSWERED (closed 2026-07-12, honest
+negative, d9f38f3: kernel-conditioning COST −0.03 LOMO; 21/22 folds chose
+narrowest τ = record-grain selection rewards memorization; A2 proved the
+similarity structure real, rank AUC 0.776, but unexploitable at n≈40).
+CORRECTION 2026-07-13: this assessment's first draft said "in flight" —
+stale within a day; the reverse-drift lesson, applied to ourselves. Both
+triangulation routes now agree the binding constraint is LABEL
+MASS/BREADTH, not features: the sequel is the marks channel
+(M-marks-to-labels L0–L3, the campaign keystone). When the label channel
+widens, the run-off re-opens under the same prereg discipline; until then
+the question "which proposer?" is undecidable BY DESIGN of the evidence,
+and the honest answer is the one above.

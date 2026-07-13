@@ -1,9 +1,11 @@
 # M-mission-conditional-reward
 
-**Status: DRAFT 2026-07-12 (claude, on Joe's request — the TN queued "drafted
-on request" at the batch-7 flip-threshold verdict). Not armed. Arming =
-operator decision; slices then run through the zai lane per CONTROL-LAYER.md,
-reviewed per RUNNER-CONTRACT.md coding-mission form.**
+**Status: CLOSED 2026-07-12 (honest negative) — see §INSTANTIATE-OUTCOME
+(d9f38f3): A2–A5 met, A1 NOT met (LOMO v2 0.645 < v1.2 0.675; 21/22 folds
+chose narrowest τ — record-grain LOO selects for memorization). VERDICT:
+label mass/breadth is binding, not features; converges with the zaif marks
+lane. Header updated 2026-07-13 by claude-2 (was stale at DRAFT after the
+close — the reverse-drift lesson applied to our own doc).**
 
 **Compute note (asked at drafting): NO GPU. Every slice is counts, cosine
 similarities over a few hundred MiniLM embeddings, and a ≤6-feature ridge-
