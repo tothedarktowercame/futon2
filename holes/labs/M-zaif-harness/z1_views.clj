@@ -218,6 +218,8 @@
                      :at              (:evidence/at e)
                      :session-id      (:evidence/session-id e)
                      :text            (get-in e [:evidence/body :text])
+                     :tags            (:evidence/tags e)
+                     :marks           (get-in e [:evidence/body :marks])
                      :clocked-mission (get-in e [:evidence/body :clocked-mission])
                      :clocked-campaign (get-in e [:evidence/body :clocked-campaign])})
         as-of     (when (seq entries)

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Marks — the coding sheet</title>
+<style>
+  @page { size: A4 portrait; margin: 11mm 12mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "DejaVu Sans", "Noto Sans", sans-serif; color: #1a1a1a;
+         font-size: 9.5pt; line-height: 1.35; }
+  h1 { font-size: 15pt; letter-spacing: .02em; }
+  .sub { color: #555; font-size: 8.5pt; margin-bottom: 7px; }
+  h2 { font-size: 10.5pt; margin: 8px 0 3px; border-bottom: 1.5px solid #1a1a1a;
+       padding-bottom: 1px; letter-spacing: .06em; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 8pt; text-transform: uppercase; color: #555;
+       letter-spacing: .05em; padding: 2px 6px 2px 0; border-bottom: 1px solid #bbb; }
+  td { padding: 2.5px 6px 2.5px 0; border-bottom: 1px solid #e4e4e4; vertical-align: top; }
+  td.g { font-size: 13pt; width: 26px; }
+  td.k { font-family: "DejaVu Sans Mono", monospace; font-size: 8.5pt; white-space: nowrap; color:#333; }
+  td.n { font-weight: 600; white-space: nowrap; }
+  .feeds { color: #444; }
+  .core td { background: #f5f2ea; }
+  .rule { background: #f0f0f0; border-left: 3px solid #1a1a1a; padding: 5px 8px;
+          margin: 6px 0; font-size: 9pt; }
+  .rule b { letter-spacing: .02em; }
+  .cols { display: flex; gap: 14px; }
+  .cols > div { flex: 1; }
+  code { font-family: "DejaVu Sans Mono", monospace; font-size: 8.5pt;
+         background: #f4f4f4; padding: 0 2px; }
+  .targets td { border-bottom: none; padding: 1.5px 6px 1.5px 0; }
+  .targets .num { font-weight: 700; font-size: 11pt; width: 30px; }
+  .foot { margin-top: 7px; color: #777; font-size: 7.5pt; border-top: 1px solid #ccc;
+          padding-top: 3px; }
+</style>
+</head>
+<body>
+
+<h1>Marks — the coding sheet <span style="font-weight:normal;font-size:9pt;color:#555">(points-de-fuite · C-futon1b-features)</span></h1>
+<div class="sub">Declare, don’t guess: a mark punctuates the judged thing, at the moment of judging. Lowercase key = bare glyph · UPPERCASE = long form <code>(✘ :ref TARGET "why")</code> with point at the ref.</div>
+
+<h2>CORE TIER — <code>C-c .</code> &nbsp;<span class="lc">(these carry weight: γ events; ✓/✘ mint labels)</span></h2>
+<table>
+  <tr><th></th><th>key</th><th>name</th><th>use it when…</th><th>feeds</th></tr>
+  <tr class="core"><td class="g">✘</td><td class="k">x / X</td><td class="n">correction</td>
+      <td>the agent’s claim, plan, or artifact is wrong — push back</td>
+      <td class="feeds">γ(mission)↓ · label <i>success=false</i> when :ref’d to a deposit</td></tr>
+  <tr class="core"><td class="g">✓</td><td class="k">v / V</td><td class="n">approval</td>
+      <td>a delivered artifact is right — accept it</td>
+      <td class="feeds">γ(mission)↑ · label <i>success=true</i> when :ref’d to a deposit</td></tr>
+  <tr class="core"><td class="g">💡</td><td class="k">i / I</td><td class="n">idea-to-explore</td>
+      <td>“here’s an idea that shouldn’t be hard to try”</td>
+      <td class="feeds">mint queue · reflection (never a label)</td></tr>
+</table>
+
+<h2>SECOND STRING — <code>C-c ,</code> &nbsp;<span class="lc">(shadow tier: tags only — usage argues promotion)</span></h2>
+<table>
+  <tr><th></th><th>key</th><th>name</th><th>use it when…</th></tr>
+  <tr><td class="g">⚖</td><td class="k">h / H</td><td class="n">hinge</td><td>a genuine decision point — things could swing either way <i>(rare; each one is precious — the reflection lane indexes these)</i></td></tr>
+  <tr><td class="g">⚠</td><td class="k">c / C</td><td class="n">concern</td><td>early warning — a correction before the mistake completes</td></tr>
+  <tr><td class="g">🧭</td><td class="k">g / G</td><td class="n">guidance</td><td>steering: orientation, direction-setting (not a specific fix)</td></tr>
+  <tr><td class="g">♟</td><td class="k">t / T</td><td class="n">tactics</td><td>the concrete move: do X then Y</td></tr>
+  <tr><td class="g">📌</td><td class="k">f / F</td><td class="n">fact</td><td>pinning down a fact the record should hold onto</td></tr>
+  <tr><td class="g">👏</td><td class="k">e / E</td><td class="n">encouragement</td><td>applause for effort/direction — warmer than ✓, no label weight (keeps ✓ crisp)</td></tr>
+  <tr><td class="g">🙏</td><td class="k">r / R</td><td class="n">request</td><td>an explicit ask</td></tr>
+  <tr><td class="g">🌿</td><td class="k">x / X</td><td class="n">extension</td><td>a branch off existing work</td></tr>
+  <tr><td class="g">📋</td><td class="k">p / P</td><td class="n">procedural</td><td>process/checklist register</td></tr>
+</table>
+
+<div class="cols">
+<div>
+<h2>THE TWO HONEST TARGETS <span class="lc" style="font-size:8pt">(<code>?</code> in a hydra = live tally)</span></h2>
+<table class="targets">
+  <tr><td class="num">20</td><td>ref-bearing ✓/✘ on fold-deposits → unlocks the <b>L3 measurement gate</b> (does the operator channel beat the fold mint?)</td></tr>
+  <tr><td class="num">5</td><td>✓/✘ per clocked mission → that mission’s <b>γ leaves the uniform prior</b> (R14 burn-in)</td></tr>
+</table>
+<div class="rule" style="margin-top:5px">Second-string types have <b>counts, no targets</b> — no threshold was declared, so none is invented. Usage argues promotion.</div>
+</div>
+<div>
+<h2>RULES OF THE NOTATION</h2>
+<div class="rule"><b>Use vs mention.</b> A mark <i>punctuating</i> your statement is an event; a mark inside a description of the convention (“…with a ✘, for example”) is a mention and mints nothing.</div>
+<div class="rule"><b>The high-value keystroke</b> is UPPERCASE ✓/✘ on agent work: <code>(✓ :ref ft-… "…")</code> — the :ref is what turns a judgment into a reward label.</div>
+<div class="rule"><b>Impact order</b> when in doubt: ✓/✘ with :ref &nbsp;›&nbsp; bare ✓/✘ on mission work &nbsp;›&nbsp; ⚖ &nbsp;›&nbsp; ⚠ &nbsp;›&nbsp; 💡 &nbsp;›&nbsp; the rest.</div>
+</div>
+</div>
+
+<div class="foot">Vocabulary v0 + second string, 2026-07-12 · registry: futon3c.marks · sheet: futon2/holes/labs/M-zaif-harness/marks-coding-sheet.html · lineage: CORNELI thesis App. F, Table 25 (“roadsigns, regularly revised — not fundamentals”)</div>
+
+</body>
+</html>
