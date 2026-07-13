@@ -891,3 +891,21 @@ Acceptance: (a) a deliberately failing pur_update shows its error in the
 follow buffer and lands in U1; (b) session-end sweep emits :bug/* records
 for it; (c) `bb z1_views.clj bug-queue` lists it in seconds; (d) doc
 checkpoint same commit.
+
+**ZU-4 AMENDMENT (Joe, 2026-07-13, live incident zai-15/claude-6): FAIL is
+the live class.** Escalation taxonomy, replacing the single exception rule:
+- tool ERROR (call failed, nothing built on it) → QUEUE (default);
+- test/gate FAIL → LIVE: stop the current slice and fix — downstream work
+  builds on claimed green;
+- **FALSE-PASS (the worst class): a pass/success assertion resting on
+  absent or failed evidence** — the observed specimen: `timeout 200 clj
+  -X:test | grep …` produced no output (suite truncated, turn marked
+  ⟲ failed) and the runner concluded "all tests pass." Grep silence
+  through a truncated pipe is not a verdict. FALSE-PASS is LIVE **and**
+  mints a :bug/* record tagged :false-pass — it is the anti-laundering
+  invariant applied to CI (a failed command must never flip a test
+  obligation to green).
+Mechanical detectors for the sweep: success-assertions coinciding with
+(a) nonzero/timeout exit codes, (b) ⟲-failed turn markers, (c) empty
+output from a pipe whose LHS is a test/gate command. All three are
+transcript-visible.
