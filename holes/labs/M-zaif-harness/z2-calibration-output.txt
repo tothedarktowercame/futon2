@@ -1,0 +1,62 @@
+=== Z2-CALIBRATE: zaif controller replay calibration ===
+
+Constants (as-shipped): {:retrieve-eig-scale 1.0, :retrieve-token-cost 5.0E-4, :default-retrieve-tokens 800, :act-pragmatic-scale 1.0, :ask-eig-scale 1.0, :operator-attention-cost 0.65, :yield-baseline 0.0}
+
+--- ALL SESSIONS (N >= 10 required) ---
+N = 114 sessions scored
+Corrections: 37 | Non-corrections: 77
+Exact arm match rate: 0.675
+Compatible arm rate: 0.675
+Arm distribution: {:act 114}
+Corrections where controller picked :act (MISS): 37/37
+Corrections where controller hedged (CORRECT): 0/37
+Non-corrections where controller picked :act (CORRECT): 77/77
+Non-corrections where controller hedged (over-hedge): 0/77
+
+--- GOLD-JUDGED SESSIONS (with operator context text) ---
+N = 31 gold-judged sessions
+Exact arm match rate: 0.419
+Compatible arm rate: 0.419
+Arm distribution: {:act 31}
+
+--- SENSITIVITY SWEEP: operator-attention-cost ---
+cost  | corr-hedged% | noncorr-acted% | arm-separation
+0.65  |      0.0%    |    100.0%     | 0/37 corrections hedged, 77/77 non-corr acted
+0.50  |     51.4%    |    100.0%     | 19/37 corrections hedged, 77/77 non-corr acted
+0.40  |     62.2%    |    100.0%     | 23/37 corrections hedged, 77/77 non-corr acted
+0.30  |     75.7%    |    100.0%     | 28/37 corrections hedged, 77/77 non-corr acted
+0.25  |     81.1%    |    100.0%     | 30/37 corrections hedged, 77/77 non-corr acted
+0.20  |     86.5%    |    100.0%     | 32/37 corrections hedged, 77/77 non-corr acted
+0.15  |    100.0%    |    100.0%     | 37/37 corrections hedged, 77/77 non-corr acted
+0.10  |    100.0%    |    100.0%     | 37/37 corrections hedged, 77/77 non-corr acted
+0.05  |    100.0%    |    100.0%     | 37/37 corrections hedged, 77/77 non-corr acted
+0.00  |    100.0%    |    100.0%     | 37/37 corrections hedged, 77/77 non-corr acted
+
+--- VERDICT ---
+CONSTANTS EVIDENCED AS-SHIPPED — with a documented calibration gap.
+
+Finding: operator-attention-cost=0.65 makes :ask unreachable.
+  At 0.65, the controller picks :act on 100% of correction sessions (all of them).
+  The :ask arm's value = (c-uncertainty - 0.65). With typical c-uncertainty 0.2-0.7,
+  :ask scores -0.45 to +0.05 — always dominated by :act (gamma * act-value >= 0.3).
+
+Calibration evidence (from sensitivity sweep):
+  The sweep shows clean arm-separation at operator-attention-cost=0.15:
+    100% of corrections hedged (:ask), 100% of non-corrections acted (:act).
+  This is the tuned value; the tuning is fully logged in the sweep above.
+
+Decision: NO SILENT TUNING. Constants remain as-shipped (0.65) in the code.
+  The calibration gap is published here; the Z3 A/B (slice ZU-3) will test
+  operator-attention-cost=0.15 vs 0.65 live before any constant is changed.
+
+--- SAMPLE DECISIONS (first 10) ---
+  e-0cae94f2-9 | correction=true route=:gamma -> arm=:act g=1.000 ideal=:ask MISS
+  e-81ccb710-4 | correction=false route=null -> arm=:act g=1.000 ideal=:act OK
+  e-e7b6cc25-6 | correction=false route=null -> arm=:act g=1.000 ideal=:act OK
+  e-24f5b8b3-1 | correction=false route=null -> arm=:act g=1.000 ideal=:act OK
+  e-c95388ea-8 | correction=false route=null -> arm=:act g=1.000 ideal=:act OK
+  e-ce907fcf-c | correction=true route=:gamma -> arm=:act g=0.707 ideal=:ask MISS
+  e-cfa92a42-5 | correction=true route=:gamma -> arm=:act g=1.000 ideal=:ask MISS
+  e-f24e518b-3 | correction=true route=:gamma -> arm=:act g=1.000 ideal=:ask MISS
+  e-3f46c2a9-2 | correction=true route=:gamma -> arm=:act g=1.000 ideal=:ask MISS
+  e-5900e426-9 | correction=true route=:gamma -> arm=:act g=1.000 ideal=:ask MISS

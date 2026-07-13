@@ -805,3 +805,52 @@ zai-1..zai-12 REPLs cached (~/code/data/repl-caches/2026-07-13/, sha256
 manifest) and REAPED per operator instruction — runner pool is empty;
 ZU-1/ZU-2 packets staged in holes/labs/M-zaif-harness/handoffs/, ready to
 dispatch on next mint (minting = operator/terminal op).
+
+## Checkpoint ZU-2 — Z2-CALIBRATE (2026-07-13, zai-14, replay-scored)
+
+**Status: Z2 v0 constants EVIDENCED — calibration gap published, no silent tuning.**
+
+The controller's `decide()` was replay-scored against 114 labeled operator
+turns (PZ1 final truth: 37 corrections, 77 non-corrections; 31 gold-judged
+with operator context text). The replay harness (`z2_calibrate.clj` in the
+lab dir) reconstructs controller inputs from each turn's context and marks,
+runs the controller's exact arithmetic (constants inlined for auditability),
+and scores the arm choice against the realized operator judgment.
+
+### Finding: `:ask` is structurally unreachable at as-shipped constants
+
+At `operator-attention-cost = 0.65`, the controller picks `:act` on **100%
+of correction sessions** (37/37 misses). The `:ask` arm's value is
+`(c-uncertainty - 0.65)`; with typical c-uncertainty 0.2–0.7, `:ask` scores
+−0.45 to +0.05 — always dominated by `:act` (γ × act-value ≥ 0.3). This is
+not a marginal calibration issue: **the controller cannot express `:ask`
+with the as-shipped constant**. The non-correction accuracy (77/77) is
+trivially correct because `:act` is always the winner.
+
+### Sensitivity sweep (the tuning evidence)
+
+A sweep of `operator-attention-cost` from 0.65 down to 0.0 shows the
+correction-hedging rate climbing from 0% to 100%, with **clean
+arm-separation at 0.15**: all 37 corrections get `:ask`, all 77
+non-corrections get `:act`. At 0.15–0.20, the controller discriminates
+corrections from non-corrections — the exact behavior the four-arm design
+intends.
+
+### Decision: constants remain as-shipped; the gap is published
+
+No constant is changed silently. The as-shipped `0.65` remains in
+`zaif_controller.clj`; the calibration gap (the 0.65→0.15 finding) is
+published here and in `z2-calibration-output.txt`. The Z3 A/B (slice ZU-3)
+will test `operator-attention-cost=0.15` vs `0.65` live before any constant
+is changed in the runner. This is the no-silent-tuning rule transposed: the
+calibration evidence is published, not silently applied.
+
+### Artifacts
+
+- `z2_calibrate.clj` — the replay harness (self-contained, inlines the
+  controller arithmetic for auditability)
+- `z2-calibration-output.txt` — the full calibration run output
+- `calibration-sessions.edn` — the 114 replay sessions (PZ1 final truth +
+  gold-sheet context + B1 γ table)
+- Data sources: `pz1-final-truth.edn` (labels), `pz1-gold-sheet.edn`
+  (context), `b1-gamma-mission.edn` (γ table)
