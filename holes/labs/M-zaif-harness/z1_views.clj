@@ -627,10 +627,11 @@
           "--limit"  (recur rest (assoc opts :limit (parse-long v)))
           "--mission" (recur rest (assoc opts :mission v))
           "--doc-path" (recur rest (assoc opts :doc-path v))
-          ;; Positional arg: if it starts with M- and no mission set, treat as mission ID
-          (if (and (str/starts-with? k "M-") (nil? (:mission opts)))
-            (recur (cons v rest) (assoc opts :mission k))
-            (throw (ex-info (str "Unknown arg: " k) {:arg k}))))))))
+          ;; Positional arg: if it starts with M- and no mission set, treat as mission ID.
+          ;; k may be the FINAL arg (v nil) — don't cons nil back onto the queue.
+          (if (and k (str/starts-with? k "M-") (nil? (:mission opts)))
+            (recur (if (nil? v) rest (cons v rest)) (assoc opts :mission k))
+            (throw (ex-info (str "Unknown arg: " (pr-str k)) {:arg k}))))))))
 
 (defn -main [& args]
   (if (empty? args)
