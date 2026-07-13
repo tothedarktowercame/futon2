@@ -508,29 +508,12 @@
   (when (str/blank? mission)
     (throw (ex-info "mission-status requires a :mission param" {})))
   ;; --- Step 1: Use text-search to find candidates mentioning this mission ---
-  ;; text-search is a CANDIDATE GENERATOR ONLY (P2 pattern). Every candidate
-  ;; is re-fetched by ID from the store and membership re-checked.
+  ;; text-search returns full entry maps (:evidence/body, :tags, :at, :id) —
+  ;; no re-fetch needed. One BM25 query is enough; we filter client-side.
   (let [search-limit (max limit 50)  ; wider net for candidate generation
-        ;; Query 1: mission name + CLOSED (status-bearing commits)
-        closed-search (text-search-raw
-                        (str mission " CLOSED") search-limit)
-        ;; Query 2: mission name + status keywords
-        status-search (text-search-raw
-                        (str mission " DRAFT COMPLETE checkpoint") search-limit)
-        ;; Query 3: mission name alone (broadest — for chat turns)
-        mission-search (text-search-raw mission search-limit)
-        ;; Collect candidate entry IDs from all searches (deduped)
-        all-candidates (->> (concat (:results closed-search)
-                                    (:results status-search)
-                                    (:results mission-search))
-                            (map #(get-in % [:entry :evidence/id]))
-                            (filter some?)
-                            distinct)
-        ;; Re-fetch each candidate by ID and verify membership (P2 pattern)
-        verified-entries (for [eid all-candidates]
-                           (let [refetched (fetch-by-id eid)]
-                             (when refetched refetched)))
-        entries (filter some? verified-entries)
+        search-result (text-search-raw mission search-limit)
+        ;; Entries straight from the search results — full maps, no re-fetch
+        entries (map :entry (:results search-result))
         ;; --- Step 2: Find status signals in the verified entries ---
         ;; turn-commits events with commit subjects mentioning the mission
         commit-events (for [e entries
@@ -590,13 +573,11 @@
                 (:evidence/at (first (sort-by :evidence/at #(compare %2 %1) entries))))]
     {:view            :mission-status
      :query           {:endpoint  api-base
-                       :method    "text-search candidate generation + re-fetch verification (P2 pattern)"
-                       :searches  [(str mission " CLOSED")
-                                   (str mission " DRAFT COMPLETE checkpoint")
-                                   mission]
-                       :candidates-found (count all-candidates)
-                       :verified-entries (count entries)
-                       :note      "text-search generates candidates; each re-fetched by ID and membership re-checked"}
+                       :method    "single text-search query; full entries used directly (no re-fetch)"
+                       :search    mission
+                       :candidates-found (count (:results search-result))
+                       :entries-scanned (count entries)
+                       :note      "BM25 text-search returns full entry maps; client-side filter for status signals"}
      :as-of           as-of
      :mission         mission
      :derived-status  derived-status
@@ -606,7 +587,7 @@
      :stale-header?   (boolean stale?)
      :results         (vec all-signals)
      :summary         {:total-signals (count all-signals)
-                       :doc-found (some? doc-path)
+                       :doc-found (some? resolved-doc-path)
                        :stale-header? (boolean stale?)}}))
 
 ;; ---------------------------------------------------------------------------
