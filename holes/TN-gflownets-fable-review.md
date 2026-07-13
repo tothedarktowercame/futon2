@@ -693,3 +693,70 @@ recommendation). Runners: **zai-11 + zai-12, fresh mints (Joe, 2026-07-12)** —
 Staleness note for folders: BOTH missions are HOT (active campaign lanes,
 docs hours old) — landed-state moves faster than any batch yet; the probe
 is the long pole.
+
+## THE 40-FLIGHT ASSESSMENT (2026-07-13, claude-2) — the preregistered verdict, judged as written
+
+Batch 8 closed the arc: 4 folds + 4 flights (zai-11/zai-12, fresh mints,
+zero reviewer fixes — the contract finishes ELEVEN runners for eleven),
+all 4 verdicts FALSE as preregistered (3/4 in predicted ranges; F40 ruled
+UP above range with cited citation-discharge doctrine — recorded as a
+prediction miss-high, not a match). Cumulative fold-level prereg record,
+batches 5–8: 28/28 verdict matches. Label corpus final: 43 (13+/30−),
+24 mission groups.
+
+### The preregistered commitments, resolved
+
+1. **S2 target ("GFN ≥ incumbent by n(flown)≈30"): NOT MET.** At 40 flown:
+   S1 (GFN discharge) 0.0625 vs S2 (incumbent) 0.200 at fold-success grain.
+   The incumbent ends 3× higher on the primary yardstick. Judged as
+   written; no reinterpretation.
+2. **Kill criterion ("2 revisions + ≥40 flown + S3 below null → stop"):
+   RETIRES UN-TRIPPED.** S3 = 0.674 vs null 0.665 at the 40-flown gate —
+   within-mission discrimination held every batch from B1 (0.630) to the
+   end. The reward's value structure is real where it has labels.
+3. **LOMO transfer: below null, 5th consecutive and FINAL** (0.667 vs
+   0.682, n=43/24 groups; trajectory 0.722<0.769 → 0.655<0.714 →
+   0.642<0.689 → 0.666<0.667 → 0.667<0.682). The mission-conditional-
+   features diagnosis stands confirmed at the final gate: the training
+   signal is mission-local. This binds EITHER proposer.
+4. **S4 diversity: GFN's one demonstrated unique property, held
+   throughout** — 8 modes per mission at J̄ 0.84–0.89 in every batch
+   including the finale.
+
+### The run-off's late twist (honesty requires its own headline)
+
+**Batch 8's rate pairs went 2–0 GFN** — zaif-harness 0.40 vs 0.20,
+text-sidecar 0.80 vs 0.67 — on the operator-picked missions, under fresh
+runners. Cumulative sign test ends **6–4 incumbent + 6 ties (n=10
+informative, two-sided p≈0.75): statistically indistinguishable.** The
+lean that read "incumbent" at batch 7 (p≈0.29) did not survive the finale.
+Confound note stands: rate normalizes count, not feasibility class.
+
+### Batch-8 texture (for the record)
+
+Text-sidecar flights set the batch high-water rates exactly as prereg
+predicted (the D1-landed effect: 4/6, 4/5). The batch's discovery is a NEW
+DRIFT SPECIES: **reverse doc-drift** — Z2 (zaif controller) BUILT at
+futon3c e7cda30 without a mission-doc checkpoint; both folds' Z2-holes
+were honest-at-deposit-time and wrong-within-hours. Limit now on record:
+the staleness probe verifies claims, it cannot discover unclaimed
+landings. Doc checkpoint added (futon2 7b7b764). Both text-sidecar folds
+converged independently on D2 (#5637 comment, Joe-gated) as the
+undischargeable outward obligation — cross-lens hole confirmation.
+
+### Recommendation (drafted for Joe; decision his)
+
+Neither coronation nor execution. (a) **Retire the S2 claim** — the GFN
+did not beat the incumbent on preregistered success, and we say so
+plainly. (b) **Keep the apparatus entire** — contract, battery,
+per-obligation adjudication, prereg discipline, marks channel: all
+sampler-independent, all proven across 11 runners/8 batches. (c) **Hold
+the GFN as the diversity supplier at low β** — S4 modes are its real
+demonstrated property, and the finale's 2–0 rate surge earns it the seat,
+not the crown. (d) **The binding constraint is the reward, not the
+sampler**: LOMO's five consecutive nulls say R̂ doesn't transfer across
+missions — M-mission-conditional-reward (in flight, futon1b-backed) is
+where this experiment's sequel begins. When a transferable R̂ exists, the
+run-off re-opens under the same prereg discipline; until then the question
+"which proposer?" is undecidable BY DESIGN of the evidence, and the honest
+answer is the one above.
