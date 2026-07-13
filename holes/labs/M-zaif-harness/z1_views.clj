@@ -590,6 +590,54 @@
                        :doc-found (some? resolved-doc-path)
                        :stale-header? (boolean stale?)}}))
 
+;; ---------------------------------------------------------------------------;;
+;; ZU-4: bug-queue view — tool-failure events from the zaif harness
+;; ---------------------------------------------------------------------------;;
+
+(defn bug-queue
+  "Query :bug/* tagged tool-failure events from the store. Same oracle pattern
+   as mission-status: a derived view over typed events.
+
+   Params: since (ISO-8601, optional), limit (default 50), agent (optional).
+   Returns: {:view :bug-queue :query {...} :as-of <newest :at>
+             :results [{:tool :args-sha :error :count :session-id :at :agent} ...]
+             :total-count <int>}"
+  [{:keys [since limit agent]
+    :or   {limit default-limit}}]
+  (let [search-result (text-search-raw ":bug" (max limit 100))
+        entries (map :entry (:results search-result))
+        ;; Filter to :bug tagged entries (text-search is a candidate generator)
+        bug-entries (filter (fn [e]
+                              (let [tags (get e :evidence/tags [])]
+                                (some #(str/starts-with? (str %) ":bug") tags)))
+                            entries)
+        ;; Optional agent filter
+        filtered (if agent
+                   (filter #(= (str agent) (:evidence/author %)) bug-entries)
+                   bug-entries)
+        ;; Sort newest-first, take limit
+        results (->> filtered
+                     (sort-by :evidence/at)
+                     reverse
+                     (take limit)
+                     (mapv (fn [e]
+                             (let [body (:evidence/body e)]
+                               {:tool       (:tool body)
+                                :args-sha   (:args-sha body)
+                                :error      (:error body)
+                                :count      (:count body 1)
+                                :session-id (:session-id body)
+                                :at         (:evidence/at e)
+                                :agent      (:evidence/author e)
+                                :entry-id   (:evidence/id e)}))))]
+    {:view        :bug-queue
+     :query       {:text-search ":bug" :agent agent :since since :limit limit}
+     :as-of       (if (seq results)
+                    (:at (first results))
+                    (str (java.time.Instant/now)))
+     :total-count (count filtered)
+     :results     results}))
+
 ;; ---------------------------------------------------------------------------
 ;; CLI
 ;; ---------------------------------------------------------------------------
@@ -618,7 +666,7 @@
   (if (empty? args)
     (do
       (println "Usage: bb z1_views.clj <view-name> [mission-id] [--since ISO] [--limit N]")
-      (println "  Views: operator-turns | gamma-events | mission-attributed | mission-status")
+      (println "  Views: operator-turns | gamma-events | mission-attributed | mission-status | bug-queue")
       (println "  mission-status requires a mission-id (positional or --mission M-...)")
       (System/exit 1))
     (let [[view-name & rest-args] args
@@ -631,6 +679,7 @@
                      "gamma-events"     (gamma-events {:since since :limit limit})
                      "mission-attributed" (mission-attributed {:since since :limit limit})
                      "mission-status"   (mission-status {:mission mission :since since :limit limit :doc-path doc-path})
+                     "bug-queue"        (bug-queue {:since since :limit limit})
                      (do (println (str "Unknown view: " view-name))
                          (System/exit 1)))]
         (pprint/pprint result)

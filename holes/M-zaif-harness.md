@@ -922,3 +922,43 @@ claim caught behind an author≠reviewer gate = queue as evidence. The
 detector stays the same; the DISPATCH depends on the gate topology between
 claim and merge — which is the separation-of-powers argument for the
 review gate, stated as CI policy.
+
+## Checkpoint ZU-4 -- tool-failure visibility + CI-in-the-loop (2026-07-13, zai-15)
+
+**Status: IMPLEMENTED (code + tests green; activation rides next JVM restart
+for zai_api.clj).**
+
+Three parts delivered:
+
+1. **Visibility (zai_api.clj):** `execute-tool` now returns `:error? true` when
+   a tool call fails (`{:ok false :error msg}`). Failed calls surface verbatim
+   in the follow-mode display as `[tool X error-text]` via a `:text` sink event.
+   `transcript-calls` (U1 persistence) carries `:error?` + `:error-text` on
+   failed entries, so failures are first-class records, not gaps.
+
+2. **CI-in-the-loop sweep (`emit-bug-records!`):** rides the `par_punctuate`
+   seam -- when the agent PARs, the harness sweeps the session's U1 transcript
+   for `:error? true` calls, deduplicates by `(tool, args-sha)` with a count,
+   and emits each as a `:bug/:tool-failure` typed event into the evidence
+   store. Fire-and-forget (persistence failure never kills the turn).
+
+3. **Bug-queue view (`z1_views.clj`):** `bb z1_views.clj bug-queue` queries
+   `:bug/*` tagged events from the store server -- same oracle pattern as
+   `mission-status`. Returns tool, args-sha, error text, count, session-id,
+   agent, timestamp. Answers in seconds.
+
+**Policy:** errors NEVER stop the line (cache-to-queue, per Joe). The one
+exception: test/gate FAILs and FALSE-PASS detections (the ZU-4 AMENDMENT
+taxonomy) -- mechanical detectors for those are specified but not yet wired
+(this checkpoint delivers the QUEUE infrastructure; the FALSE-PASS detector
+is future work).
+
+**Activation note:** zai_api.clj is the LIVE harness -- changes are in the
+file but NOT live-patched (serving namespace). They activate on the next
+JVM restart. z1_views.clj is a bb script (no restart needed).
+
+**Acceptance:** (a) deliberately-failing pur_update carries `:error?` in U1 +
+surfaces in follow-mode -- code path verified, not yet live-activated;
+(b) sweep emits `:bug/*` -- code path, `emit-bug-records!` hooked to
+`par_punctuate`; (c) `bb z1_views.clj bug-queue` -- implemented, CLI wired;
+(d) this checkpoint.
