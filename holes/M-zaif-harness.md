@@ -909,3 +909,16 @@ Mechanical detectors for the sweep: success-assertions coinciding with
 (a) nonzero/timeout exit codes, (b) ⟲-failed turn markers, (c) empty
 output from a pipe whose LHS is a test/gate command. All three are
 transcript-visible.
+
+**ZU-4 severity nuance (claude-6, from the type-case's resolution,
+2026-07-13):** zai-15's *work* was correct; only its *verification claim*
+was epistemically empty — and the claim never propagated because (a) the
+job died before committing and (b) the reviewer re-established the verdict
+independently (targeted ns un-piped: 11 tests / 36 assertions / 0
+failures) before anything built on it. **FALSE-PASS severity therefore
+grades on one question: did anything build on the claimed green before
+independent re-establishment?** Ungated claim-to-merge = live/critical;
+claim caught behind an author≠reviewer gate = queue as evidence. The
+detector stays the same; the DISPATCH depends on the gate topology between
+claim and merge — which is the separation-of-powers argument for the
+review gate, stated as CI policy.
