@@ -1,0 +1,36 @@
+{:headline
+ "Accuracy: legacy 0.410 vs aif 0.386 | Entropy: legacy 1.689 vs aif 1.670 | KL(aif‖legacy) mean 0.0498",
+ :kl-aif-vs-legacy
+ {:mean 0.049818094712863525,
+  :max 0.1174359809746128,
+  :median 0.04814538413978748},
+ :method
+ "Synthetic simulation: 50 entities × 10 ticks, lifecycle transition kernel,\n            noisy observation confusion matrix. Compare :legacy, :aif (observation-model-v1),\n            and :aif-identity. Metrics: status accuracy, posterior entropy, true-status\n            probability, contradiction sensitivity, KL divergence.",
+ :event-type-census
+ {:spawned 68,
+  :refined 70,
+  :addressed 76,
+  :foreclosed 63,
+  :falsified 78,
+  :strengthened 100,
+  :reopened 45},
+ :sim-only true,
+ :generated-by "scripts/aif/a_matrix_simulation.bb",
+ :read-only true,
+ :parameters {:n-entities 50, :n-ticks 10, :seed 42},
+ :results
+ ({:mode :legacy,
+   :status-accuracy 0.4100000000000001,
+   :mean-entropy 1.6885312674054926,
+   :mean-true-status-prob 0.25180423606827795,
+   :contradiction-falsified-mass 0.15205026455026457}
+  {:mode :aif,
+   :status-accuracy 0.38600000000000007,
+   :mean-entropy 1.6697228440816287,
+   :mean-true-status-prob 0.24649299845030728,
+   :contradiction-falsified-mass 0.10113375519461965}
+  {:mode :aif-identity,
+   :status-accuracy 0.4100000000000001,
+   :mean-entropy 1.6885312674054926,
+   :mean-true-status-prob 0.25180423606827795,
+   :contradiction-falsified-mass 0.15205026455026457})}

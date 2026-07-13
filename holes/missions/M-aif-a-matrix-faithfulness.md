@@ -1,7 +1,7 @@
 # Mission: Make the belief-update observation model A faithful (M-aif-a-matrix-faithfulness)
 
 **Date:** 2026-07-13  
-**Status:** **INSTANTIATE (Stage 1 code landed; simulation spike and Stage 2 pending)**  
+**Status:** **INSTANTIATE (Stage 1 landed; simulation spike complete; Stage 2 exogenous corpus pending)**  
 **Owner:** Joe + unassigned implementation owner  
 **Primary repo:** futon2  
 **Related missions:** `M-aif-faithfulness` (parent badge audit),
