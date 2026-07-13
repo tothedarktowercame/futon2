@@ -962,3 +962,19 @@ surfaces in follow-mode -- code path verified, not yet live-activated;
 (b) sweep emits `:bug/*` -- code path, `emit-bug-records!` hooked to
 `par_punctuate`; (c) `bb z1_views.clj bug-queue` -- implemented, CLI wired;
 (d) this checkpoint.
+
+**ZU-4 CLOSED (2026-07-13, claude-2 as verifier; zai-14 ran the fixture).**
+Five-link acceptance chain verified live: (1) the model RECEIVES the clean
+error verbatim ("pur-update requires prior psr-select (missing psr-ref)" —
+vs zai-13's three blind retries pre-ZU-4); (2) failed calls are first-class
+U1 records (:error? true + :error-text, 5 in the fixture session — the
+inverse of the zai-13 trace gap); (3) PAR triggered the sweep; (4)
+:bug/tool-failure events landed in the store; (5) bug-queue lists them in
+~15s with tool/args-sha/error/agent/session. CAVEATS, honest: the
+follow-buffer ✗ display is code+sink-verified only (fixture ran headless;
+visual check rides the next interactive zai session); the dedup-merge path
+untested (the fixture's two calls hashed to different args-shas — identical-
+args merging remains code-verified only). BONUS FINDING: the queue's first
+ORGANIC customers are already in it — multiple edit_file failures against
+apm-lean/problems/a96J10 (old-string-not-found), live grist for the
+Zai-does-Lean probe design.
