@@ -1,0 +1,12 @@
+{:protocol/version 2,
+ :remaining 40,
+ :attempts [],
+ :closed-count 0,
+ :grounded-change-count 0,
+ :activation nil,
+ :artifact-only-count 0,
+ :attempt-count 0,
+ :grounded-no-change-count 0,
+ :target 40,
+ :outcomes {},
+ :cohort/id :wm-outer-loop-40-v1}
