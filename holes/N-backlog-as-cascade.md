@@ -63,3 +63,9 @@ check-parens + one-form gated). Waves 3–4 deliberately left as
 low-satiety frontier; the shelf stays out of the cascade (pool, not plan).
 Revision = new deposit, not edit — the prior's evolution is itself an
 append-only record.
+
+Human-readable rendering:
+`futon7/holes/M-futon-forward-model.backlog-cascade-v0-brief.html`
+(claude-2, 2026-07-12) — lane map (SVG, 16 boxes/14 wires/3 terminals/4
+holes), box-by-box cross-reference, discipline & tensions. Bound to v0;
+a new deposit gets a new rendering.

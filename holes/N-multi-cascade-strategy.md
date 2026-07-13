@@ -66,8 +66,18 @@ single-best held again and we say so.
 
 ## Next steps (operator-gated)
 
-- The merged deposit (`backlog-cascade-merged-v0.edn`) authorable on
-  request — the analysis above is its spec.
+- ~~The merged deposit (`backlog-cascade-merged-v0.edn`) authorable on
+  request — the analysis above is its spec.~~ **AUTHORED 2026-07-12
+  (claude-2, Joe's request):**
+  `futon7/holes/M-futon-forward-model.backlog-cascade-merged-v0.edn` —
+  23 boxes (7 with role-vectors), 26 wires (1 merge-derived, flagged;
+  m15→m16 dual-derived), 6 terminals (union), 7 holes (mh1 = the
+  dual-derived T2.5 conversion hole, top rank). Gates passed:
+  check-parens + single-form read + wire/terminal/spine referential
+  integrity. Human-readable renders (HOWTO step 7), each bound to its
+  deposit: `…backlog-cascade-v0-brief.html`,
+  `…backlog-cascade-stars-v0-brief.html`,
+  `…backlog-cascade-merged-v0-brief.html` (all in futon7/holes/).
 - More synthetic wants are cheap now (HOWTO §multi): candidates Joe has
   already implied — "no life logging / operator-loop first" (Q5-want),
   "tithe/commons" (SEALED — that one must come from a mechanism, not from
