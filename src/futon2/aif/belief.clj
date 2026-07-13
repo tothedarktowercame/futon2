@@ -150,6 +150,202 @@
    :a-matrix mode with THIS matrix ≡ the :legacy path, for every weight."
   (materialise-a-matrix a-matrix-default-gain {}))
 
+;; ---------------------------------------------------------------------------
+;; v0.25 (M-aif-a-matrix-faithfulness Stage 1): formal fidelity — exact
+;; categorical Bayes under a declared, normalised AIF generative model.
+;;
+;; The legacy and :a-matrix modes use likelihood RATIOS (scale-free). The
+;; formal AIF warrant requires column-normalised conditional distributions
+;; P(o|s), an explicit transition model B, and an initial prior D. This
+;; section provides those, plus validators and a categorical filter that
+;; computes the explicit A × (B × q) prediction-update cycle.
+;;
+;; The :aif likelihood mode uses these normalised models. It is DARK
+;; (default remains :legacy). The flip is the operator's, same discipline
+;; as :risk-mode and :a-matrix.
+;; ---------------------------------------------------------------------------
+
+(defn- normalise-column
+  "Normalise a likelihood-ratio column so it sums to 1.0, converting
+   from the ratio representation to a proper P(o|s) distribution."
+  [ratio-column]
+  (let [total (reduce + (vals ratio-column))]
+    (into {} (for [[k v] ratio-column]
+               [k (/ (double v) total)]))))
+
+(defn- normalise-a-matrix
+  "Convert a likelihood-ratio A matrix {obs {status ratio}} to a
+   column-normalised observation model {obs {status P(o|s)}}.
+   Each column (fixed status s) is normalised independently so that
+   Σ_o A[o,s] = 1."
+  [ratio-matrix]
+  (let [statuses (keys (first (vals ratio-matrix)))
+        ;; transpose: group by status (column), normalise, transpose back
+        columns (into {}
+                      (for [s statuses]
+                        [s (into {}
+                                 (for [o (keys ratio-matrix)]
+                                   [o (double (get-in ratio-matrix [o s]))]))]))
+        normalised-columns (into {}
+                                 (for [[s col] columns]
+                                   [s (normalise-column col)]))
+        ;; transpose back to {obs {status P(o|s)}}
+        ]
+    (into {}
+          (for [o (keys ratio-matrix)]
+            [o (into {}
+                     (for [s statuses]
+                       [s (double (get-in normalised-columns [s o]))]))]))))
+
+(def observation-model-v1
+  "The v1 normalised observation model A (event block): 7×7,
+   {observed-event {true-status P(o|s)}}. Derived from `a-matrix-v0`
+   by column normalisation, so each column s satisfies Σ_o A[o,s] = 1.
+   The off-diagonal structure (lifecycle-adjacent, contradictory) is
+   preserved in shape; only the scale changes."
+  (normalise-a-matrix a-matrix-v0))
+
+(def observation-model-identity
+  "The identity-structured normalised observation model: the
+   column-normalised form of `a-matrix-identity`. Equivalent to a
+   near-uniform matrix with a slight diagonal boost — the normalised
+   form of the legacy model."
+  (normalise-a-matrix a-matrix-identity))
+
+(def transition-model-v1
+  "The v1 transition model B (event block): 7×7 identity.
+   {predecessor-status {successor-status P(s_t|s_{t-1})}}.
+   Each column s satisfies Σ_s' B[s',s] = 1.
+   Identity means 'no explicit dynamics; the prior is the previous
+   posterior.' This is the simplest justified B — it names what the code
+   already does implicitly via *carry-belief?*. A lifecycle-constrained
+   B is a candidate for later refinement."
+  (into {}
+        (for [s status-set]
+          [s (into {}
+                   (for [s' status-set]
+                     [s' (if (= s s') 1.0 0.0)]))])))
+
+(def initial-prior-v1
+  "The v1 initial prior D: uniform over the status set.
+   This is the starting distribution q(s_0) for a cold-start entity.
+   Matches `uniform-prior` exactly."
+  (uniform-prior))
+
+;; --- Validators (C2, C3) ---
+
+(defn valid-distribution?
+  "True if m is a map from keywords to finite, non-negative doubles
+   that sum to approximately 1.0."
+  [m & {:keys [tolerance] :or {tolerance 1e-9}}]
+  (and (map? m)
+       (every? #(and (number? %)
+                     (Double/isFinite (double %))
+                     (>= (double %) 0.0))
+               (vals m))
+       (< (Math/abs (- (reduce + (vals m)) 1.0)) tolerance)))
+
+(defn valid-observation-model?
+  "True if A is a valid observation model: every column (status) is a
+   proper distribution over observations."
+  [A]
+  (and (map? A)
+       (= status-set (set (keys A)))
+       (every? (fn [s]
+                 (let [column (into {} (for [[o row] A] [o (double (get row s 0.0))]))]
+                   (valid-distribution? column)))
+               status-set)))
+
+(defn valid-transition-model?
+  "True if B is a valid transition model: every column (predecessor) is
+   a proper distribution over successor states."
+  [B]
+  (and (map? B)
+       (= status-set (set (keys B)))
+       (every? (fn [s]
+                 (valid-distribution? (get B s)))
+               status-set)))
+
+(defn valid-initial-prior?
+  "True if D is a valid initial prior distribution over the status set."
+  [D]
+  (and (map? D)
+       (= status-set (set (keys D)))
+       (valid-distribution? D)))
+
+(defn model-version
+  "Compute a content hash for a model component (A, B, or D).
+   Returns a string suitable for provenance stamping."
+  [m]
+  (format "0x%08x"
+          (hash (into (sorted-map)
+                      (for [[k v] m]
+                        [k (if (map? v)
+                             (into (sorted-map) v)
+                             v)])))))
+
+(defn model-manifest
+  "Build a provenance manifest for the declared AIF model components.
+   Returns a map with version hashes suitable for trace stamping (C9)."
+  ([] (model-manifest observation-model-v1 transition-model-v1 initial-prior-v1))
+  ([A B D]
+   {:observation-model-hash (model-version A)
+    :transition-model-hash  (model-version B)
+    :initial-prior-hash     (model-version D)}))
+
+;; --- The explicit categorical filter (C3, C12) ---
+
+(defn predict-step
+  "Prediction step of the categorical filter:
+     q⁻(s_t) = Σ_s' B(s_t | s') q(s_{t-1})
+   This is a matrix-vector product: B × q.
+   With identity B, this returns q unchanged."
+  [B q]
+  (into {}
+        (for [s' status-set]
+          [s' (reduce +
+                      (for [s status-set]
+                        (* (double (get-in B [s s'] 0.0))
+                           (double (get q s 0.0)))))])))
+
+(defn update-step
+  "Update step of the categorical filter:
+     q(s_t) ∝ A(o_t | s_t)^κ(w) · q⁻(s_t)
+   The tempered likelihood A[o|s]^κ(w) is applied as in the :a-matrix
+   mode, but A is now the normalised observation model."
+  [A observed w q-predicted]
+  (let [kappa (/ (Math/log (+ 1.0 (double w))) (Math/log 2.0))
+        likelihoods (into {}
+                          (for [s status-set]
+                            [s (Math/pow (double (get-in A [observed s] 0.0)) kappa)]))]
+    (normalise
+     (into {}
+           (for [[s prior] q-predicted]
+             [s (* (double prior) (double (get likelihoods s 0.0)))])))))
+
+(defn categorical-filter-step
+  "One complete prediction-update cycle of the categorical filter:
+     q⁻ = B × q        (prediction)
+     q  ∝ A(o|·)^κ(w) · q⁻   (tempered update)
+   This is the explicit A × (B × q) computation. Returns the new
+   posterior. Validates the model components once per call (fail-closed
+   on malformed model data per C9)."
+  ([q event] (categorical-filter-step q event
+                                       observation-model-v1
+                                       transition-model-v1
+                                       {:weight (:weight event 1.0)}))
+  ([q event A B {:keys [weight] :or {weight 1.0}}]
+   (let [observed (:type event)
+         w        (double (or weight 1.0))]
+     (when-not (valid-observation-model? A)
+       (throw (ex-info "Invalid observation model A (fail-closed)" {:A A})))
+     (when-not (valid-transition-model? B)
+       (throw (ex-info "Invalid transition model B (fail-closed)" {:B B})))
+     (if (contains? status-set observed)
+       (->> (predict-step B q)
+            (update-step A observed w))
+       q))))
+
 (defn likelihood-vector
   "Likelihood over true statuses for one observed event of type
    `observed` with weight `w`, under observation model A:
@@ -179,18 +375,25 @@
    update step total over a wider event stream (e.g. link/asserted
    events that aren't per-entity-status).
 
-   Opts (v0.24, M-aif-faithfulness B-3a — dark; design note
-   holes/E-r1-a-matrix-design.md):
+   Opts:
      :likelihood-mode  :legacy (default) — the historical
                        (1+w)-on-the-diagonal update, byte-identical.
                        :a-matrix — Bayes with the explicit observation
                        model: p'(s) ∝ p(s)·A[o][s]^κ(w), κ(w) = log₂(1+w).
+                       :aif — categorical filter with normalised A/B/D:
+                       q⁻ = B×q; q ∝ A(o|·)^κ(w)·q⁻. Validates model
+                       components on every call (fail-closed per C9).
      :a-matrix         observation model to use in :a-matrix mode
                        (default `a-matrix-v0`). With `a-matrix-identity`
                        the :a-matrix path reproduces :legacy exactly.
-   The flip to :a-matrix is the operator's (arena-*-mode idiom)."
+     :observation-model  normalised observation model A for :aif mode
+                         (default `observation-model-v1`).
+     :transition-model   transition model B for :aif mode
+                         (default `transition-model-v1`).
+   The flip to :a-matrix or :aif is the operator's (arena-*-mode idiom)."
   ([posterior event] (update-entity-belief posterior event {}))
-  ([posterior event {:keys [likelihood-mode a-matrix]
+  ([posterior event {:keys [likelihood-mode a-matrix
+                            observation-model transition-model]
                      :or {likelihood-mode :legacy}}]
    (let [{:keys [type weight]} event
          w (double (or weight 1.0))]
@@ -204,7 +407,12 @@
          (let [L (likelihood-vector (or a-matrix a-matrix-v0) type w)]
            (normalise
             (into {} (for [[k v] posterior]
-                       [k (* v (double (get L k 1.0)))])))))
+                       [k (* v (double (get L k 1.0)))]))))
+         :aif
+         (categorical-filter-step posterior event
+                                   (or observation-model observation-model-v1)
+                                   (or transition-model transition-model-v1)
+                                   {:weight w}))
        posterior))))
 
 (defn update-belief

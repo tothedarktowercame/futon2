@@ -796,3 +796,223 @@
     (let [fresh (belief/initial-belief-state ["a" "b"])]
       (is (= fresh (belief/reconcile-belief-carry fresh nil)))
       (is (= fresh (belief/reconcile-belief-carry fresh {}))))))
+
+;; ---------------------------------------------------------------------------
+;; v0.25 (M-aif-a-matrix-faithfulness Stage 1): formal fidelity tests —
+;; normalised A/B/D, validators, categorical filter, :aif mode.
+;; ---------------------------------------------------------------------------
+
+(deftest observation-model-v1-column-normalisation-test
+  (testing "every column of observation-model-v1 sums to 1.0"
+    (doseq [s belief/status-set]
+      (let [column-sum (reduce + (for [[_o row] belief/observation-model-v1]
+                                   (double (get row s 0.0))))]
+        (is (< (Math/abs (- column-sum 1.0)) 1e-12)
+            (str "column " s " sums to " column-sum ", not 1.0")))))
+  (testing "orientation: rows are observations, columns are states"
+    (is (= belief/status-set (set (keys belief/observation-model-v1))))
+    (doseq [[o row] belief/observation-model-v1]
+      (is (= belief/status-set (set (keys row)))
+          (str "row " o " does not cover all statuses"))))
+  (testing "all entries are finite and positive"
+    (doseq [[o row] belief/observation-model-v1
+            [s v] row]
+      (is (and (Double/isFinite (double v)) (pos? (double v)))
+          (str "entry [" o " " s "] is not finite/positive: " v))))
+  (testing "off-diagonal structure preserved from a-matrix-v0"
+    ;; The lifecycle-adjacent and contradictory entries should still be
+    ;; distinguishable from the uninformative baseline after normalisation.
+    (let [A belief/observation-model-v1]
+      ;; :strengthened observed should have lower P for :falsified than
+      ;; the diagonal entry (contradiction preserved)
+      (is (< (get-in A [:strengthened :falsified])
+             (get-in A [:strengthened :strengthened]))
+          "contradiction structure not preserved after normalisation"))))
+
+(deftest transition-model-v1-identity-test
+  (testing "B is identity: B[s,s'] = 1 when s=s', 0 otherwise"
+    (doseq [s belief/status-set
+            s' belief/status-set]
+      (let [v (get-in belief/transition-model-v1 [s s'] 0.0)]
+        (is (< (Math/abs (- v (if (= s s') 1.0 0.0))) 1e-12)
+            (str "B[" s " " s "] = " v ", expected identity")))))
+  (testing "every column sums to 1.0"
+    (doseq [s belief/status-set]
+      (let [col-sum (reduce + (map double (vals (get belief/transition-model-v1 s))))]
+        (is (< (Math/abs (- col-sum 1.0)) 1e-12))))))
+
+(deftest initial-prior-v1-test
+  (testing "D is uniform over status-set"
+    (is (= belief/status-set (set (keys belief/initial-prior-v1))))
+    (let [v (first (vals belief/initial-prior-v1))]
+      (doseq [p (vals belief/initial-prior-v1)]
+        (is (< (Math/abs (- p v)) 1e-12))))
+    (is (< (Math/abs (- (reduce + (vals belief/initial-prior-v1)) 1.0)) 1e-12))))
+
+(deftest validators-test
+  (testing "valid-distribution? accepts a proper distribution"
+    (is (belief/valid-distribution? {:a 0.5 :b 0.5})))
+  (testing "valid-distribution? rejects non-normalised, negative, non-finite"
+    (is (not (belief/valid-distribution? {:a 0.5 :b 0.6})))
+    (is (not (belief/valid-distribution? {:a -0.1 :b 1.1})))
+    (is (not (belief/valid-distribution? {:a Double/NaN :b 1.0}))))
+  (testing "valid-observation-model? accepts observation-model-v1"
+    (is (belief/valid-observation-model? belief/observation-model-v1)))
+  (testing "valid-observation-model? rejects malformed A"
+    (is (not (belief/valid-observation-model? {})))
+    (is (not (belief/valid-observation-model?
+              (assoc-in belief/observation-model-v1
+                        [:strengthened :falsified] -0.5)))))
+  (testing "valid-transition-model? accepts transition-model-v1"
+    (is (belief/valid-transition-model? belief/transition-model-v1)))
+  (testing "valid-initial-prior? accepts initial-prior-v1"
+    (is (belief/valid-initial-prior? belief/initial-prior-v1))))
+
+(deftest model-manifest-test
+  (testing "model-manifest returns three distinct hashes"
+    (let [m (belief/model-manifest)]
+      (is (string? (:observation-model-hash m)))
+      (is (string? (:transition-model-hash m)))
+      (is (string? (:initial-prior-hash m)))
+      (is (= 3 (count (distinct (vals m))))
+          "hashes should be distinct across the three components")))
+  (testing "model-manifest is deterministic"
+    (is (= (belief/model-manifest) (belief/model-manifest)))))
+
+(deftest predict-step-identity-test
+  (testing "predict-step with identity B returns q unchanged"
+    (doseq [p (some-posteriors)]
+      (let [predicted (belief/predict-step belief/transition-model-v1 p)]
+        (doseq [s belief/status-set]
+          (is (< (Math/abs (- (double (get p s))
+                              (double (get predicted s 0.0)))) 1e-12)))))))
+
+(deftest categorical-filter-step-test
+  (testing "categorical filter produces a valid posterior"
+    (doseq [p (some-posteriors)
+            t belief/status-set
+            w [0.0 0.5 1.0 2.0]]
+      (let [result (belief/categorical-filter-step
+                    p {:type t :weight w}
+                    belief/observation-model-v1
+                    belief/transition-model-v1
+                    {:weight w})]
+        (is (valid-posterior? result)
+            (str "invalid posterior for type=" t " w=" w)))))
+  (testing "w=0 is a no-op (κ=0, likelihood ≡ uniform)"
+    (let [p (belief/uniform-prior)
+          result (belief/categorical-filter-step
+                  p {:type :strengthened :weight 0.0}
+                  belief/observation-model-v1
+                  belief/transition-model-v1
+                  {:weight 0.0})]
+      (doseq [s belief/status-set]
+        (is (< (Math/abs (- (double (get p s))
+                            (double (get result s 0.0)))) 1e-9)))))
+  (testing "unknown event type passes through unchanged"
+    (let [p (belief/uniform-prior)]
+      (is (= p (belief/categorical-filter-step
+                p {:type :not-a-status :weight 1.0}
+                belief/observation-model-v1
+                belief/transition-model-v1
+                {:weight 1.0})))))
+  (testing "contradiction: observing :strengthened suppresses :falsified"
+    (let [p (belief/uniform-prior)
+          result (belief/categorical-filter-step
+                  p {:type :strengthened :weight 1.0}
+                  belief/observation-model-v1
+                  belief/transition-model-v1
+                  {:weight 1.0})]
+      (is (< (:falsified result) (:strengthened result))
+          "strengthened observation should rank strengthened above falsified")))
+  (testing "fail-closed: malformed A throws"
+    (let [bad-A (assoc-in belief/observation-model-v1
+                          [:strengthened :strengthened] -1.0)]
+      (is (thrown? Exception
+                   (belief/categorical-filter-step
+                    (belief/uniform-prior)
+                    {:type :strengthened :weight 1.0}
+                    bad-A
+                    belief/transition-model-v1
+                    {:weight 1.0}))))))
+
+(deftest aif-likelihood-mode-test
+  (testing ":aif mode produces valid posteriors"
+    (doseq [p (some-posteriors)
+            t belief/status-set]
+      (let [result (belief/update-entity-belief
+                    p {:type t :weight 1.0}
+                    {:likelihood-mode :aif})]
+        (is (valid-posterior? result)
+            (str "invalid posterior for type=" t)))))
+  (testing ":aif mode with unknown event passes through"
+    (let [p (belief/uniform-prior)]
+      (is (= p (belief/update-entity-belief
+                p {:type :not-a-status :weight 1.0}
+                {:likelihood-mode :aif})))))
+  (testing ":aif mode contradiction: :strengthened suppresses :falsified"
+    (let [p (belief/uniform-prior)
+          result (belief/update-entity-belief
+                  p {:type :strengthened :weight 1.0}
+                  {:likelihood-mode :aif})]
+      (is (< (:falsified result) (:strengthened result)))))
+  (testing ":aif mode default observation-model is observation-model-v1"
+    ;; If we pass observation-model-v1 explicitly, same result as default
+    (let [p (belief/uniform-prior)
+          e {:type :strengthened :weight 1.0}
+          default (belief/update-entity-belief p e {:likelihood-mode :aif})
+          explicit (belief/update-entity-belief p e {:likelihood-mode :aif
+                                                      :observation-model belief/observation-model-v1})]
+      (doseq [s belief/status-set]
+        (is (< (Math/abs (- (double (get default s))
+                            (double (get explicit s 0.0)))) 1e-12)))))
+  (testing "batch updates work in :aif mode"
+    (let [b0 (belief/initial-belief-state [:m1])
+          events [{:entity-id :m1 :type :strengthened :weight 1.0}
+                  {:entity-id :m1 :type :refined :weight 0.5}]
+          result (belief/update-belief-batch b0 events {:likelihood-mode :aif})]
+      (is (valid-posterior? (get result :m1))))))
+
+(deftest aif-mode-commutativity-test
+  (testing ":aif mode updates commute (batch order independence)"
+    (let [opts {:likelihood-mode :aif}
+          e1 {:entity-id :m1 :type :strengthened :weight 1.0}
+          e2 {:entity-id :m1 :type :refined :weight 0.5}
+          b0 (belief/initial-belief-state [:m1])
+          b12 (belief/update-belief-batch b0 [e1 e2] opts)
+          b21 (belief/update-belief-batch b0 [e2 e1] opts)]
+      (doseq [s belief/status-set]
+        (is (< (Math/abs (- (double (get-in b12 [:m1 s]))
+                            (double (get-in b21 [:m1 s]))))
+               1e-9))))))
+
+(deftest aif-mode-witness-default-path-test
+  (testing "default (no opts) is still :legacy, not :aif"
+    (doseq [p (some-posteriors)
+            t belief/status-set
+            w [0.0 0.5 1.0 2.7]]
+      (let [e {:type t :weight w}]
+        (is (= (belief/update-entity-belief p e)
+               (belief/update-entity-belief p e {:likelihood-mode :legacy}))
+            (str "default path drifted for " t " w=" w))))))
+
+(deftest aif-identity-B-reduction-test
+  (testing ":aif mode with observation-model-identity ≈ :legacy (up to
+            normalisation difference between ratio and probability forms)"
+    ;; The identity observation model in normalised form is NOT identical
+    ;; to the legacy ratio form, because normalisation redistributes mass.
+    ;; But the RELATIVE ordering should be preserved: the observed status
+    ;; gains, others lose, in both modes.
+    (doseq [p (some-posteriors)
+            t belief/status-set
+            w [0.5 1.0 2.0]]
+      (let [e {:type t :weight w}
+            legacy (belief/update-entity-belief p e)
+            aif-identity (belief/update-entity-belief
+                          p e {:likelihood-mode :aif
+                               :observation-model belief/observation-model-identity})]
+        ;; The observed status gains in both
+        (is (> (double (get legacy t)) (double (get p t)))
+            "legacy should boost observed status")
+        (is (> (double (get aif-identity t)) (double (get p t)))
+            "aif-identity should boost observed status")))))
