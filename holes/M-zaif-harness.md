@@ -755,3 +755,53 @@ zero-baseline, γ-for-mission from the R14 fold) + test file + `zai_api.clj` wir
 evidenced** (no scored live sessions; Z3 A/B untouched). Recorded here because the
 build landed without a doc checkpoint and both B8 folds honestly listed Z2 as a hole
 from the doc's stale state — landed-is-not-announced, now announced.
+
+## UPGRADE PLAN (2026-07-13, claude-2 + Joe, →M-zaif-harness working session)
+
+Inputs: the B8 flight ledger on this mission's own folds (ob-1 PARTIAL /
+ob-2 built-post-deposit / ob-3 designed-not-evidenced / ob-4 not-started /
+ob-5 corpus-days-old), the Z2 reverse-drift incident, the 40-flight
+assessment verdict (label mass/breadth binding — this mission's marks lane
+is the sequel), and the status-cache failures of 2026-07-13 (agent context
+memory asserted stale mission status twice; the store knew the truth).
+
+### Slice ZU-1 — Z1-PROMOTE + the STATUS ORACLE (highest priority; NEW)
+Promote `z1_views.clj` (436 lines, lab) to runner-grade, and ADD a
+`mission-status` view: **registry-as-projection** — status DERIVED from
+the event stream (close/checkpoint commits, fold events, mission-doc
+hyperedges), doc header demoted to one signal, with a `:stale-header?`
+flag when header and events disagree. Plain-HTTP, agent-agnostic: the
+stack-wide status oracle, not a zai-private convenience.
+**Acceptance:** (a) answers M-mission-conditional-reward = CLOSED
+2026-07-12 from events alone; (b) the `:stale-header?` flag fires on that
+doc's pre-fix state (the regression test for today's actual error);
+(c) callable by any agent with one curl.
+**Contract line shipped with it (AGENTS.md):** mission status is asserted
+only from the oracle, never from context memory.
+
+### Slice ZU-2 — Z2-CALIBRATE (designed-not-evidenced → evidenced)
+The controller (futon3c e7cda30) has untuned constants (ask-cost 0.65,
+retrieve-EIG, yield baseline). Calibrate by REPLAY: U1 transcripts + B8
+records give replayable sessions; score decide() against realized operator
+judgment (marks/γ-events where present, adjudication verdicts otherwise).
+**Acceptance:** N≥10 replayed sessions scored; constants either tuned with
+the tuning logged, or evidenced as-shipped with the score distribution
+published. No silent tuning (the no-tuning rule transposes).
+**Doc discipline (from B8's reverse-drift finding): the calibration lands
+its own doc checkpoint IN THE SAME COMMIT.**
+
+### Slice ZU-3 — Z3 A/B DESIGN (design now; run gated)
+Preregister zaif-on vs zaif-off: metrics, session sampling, blindness.
+Blocked on ZU-2 (scored sessions) + the widening label channel (campaign
+L0/B0 — codex-2's lane; NOT re-assigned here). Design doc only.
+
+### External dependencies (named, not owned here)
+B0 recognizer = campaign L0 (codex-2, armed). Marks-corpus growth =
+operator practice + L0; converges with the 40-flight verdict. M-joe-
+reflection consumes the same channel backward (dual-use tags).
+
+### Handoff state
+zai-1..zai-12 REPLs cached (~/code/data/repl-caches/2026-07-13/, sha256
+manifest) and REAPED per operator instruction — runner pool is empty;
+ZU-1/ZU-2 packets staged in holes/labs/M-zaif-harness/handoffs/, ready to
+dispatch on next mint (minting = operator/terminal op).
