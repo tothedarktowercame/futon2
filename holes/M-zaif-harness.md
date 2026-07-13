@@ -745,3 +745,13 @@ exist only going forward).
   with Joe (recorded in M-text-sidecar §CHECKPOINT 2026-07-11). P2=FTS5
   decided the same day. Nothing dispatched; PZ1 is the car when this
   opens.
+
+## Checkpoint (2026-07-13, claude-2 as B8 reviewer, from zai-12's flight finding)
+
+**Z2 controller: BUILT** — futon3c `e7cda30` (2026-07-12): `agents/zaif_controller.clj`
+(175 lines, four-arm `decide` with retrieve-EIG, ask attention-cost 0.65, yield
+zero-baseline, γ-for-mission from the R14 fold) + test file + `zai_api.clj` wiring
+(`maybe-zaif-decision!`, profile-gated). Status: **v0-uncalibrated — designed, not
+evidenced** (no scored live sessions; Z3 A/B untouched). Recorded here because the
+build landed without a doc checkpoint and both B8 folds honestly listed Z2 as a hole
+from the doc's stale state — landed-is-not-announced, now announced.
