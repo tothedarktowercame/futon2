@@ -3,7 +3,7 @@
 
    Shows HOW interest-network signals (the real eoi-derived projection) change the
    War Machine's EFE rankings, via Route-1 per-candidate enrichment
-   (:intrinsic-value -> G-risk, :structural-pressure-per-action -> G-total).
+   (:intrinsic-value -> G-risk, :structural-pressure-per-action -> controller-score).
    Uses the REAL efe (pure fns). Transient JVM only — no serving-JVM / XTDB contact.
 
    Run:  cd futon2 && clojure -M -m futon2.aif.interest-coupling-demo"
@@ -65,13 +65,13 @@
 (defn print-ranking [title ranked]
   (println (str "\n" title))
   (println (format "  %-4s %-32s %9s %9s %9s %9s %9s"
-                   "rank" "action" "G-total" "G-risk" "G-struct" "G-info" "G-ambig"))
+                   "rank" "action" "controller-score" "G-risk" "G-struct" "predictability-bonus" "G-ambig"))
   (doseq [r ranked]
     (println (format "  %-4d %-32s %9.4f %9.4f %9.4f %9.4f %9.4f"
                      (:rank r) (action-label (:action r))
-                     (double (:G-total r)) (double (:G-risk r))
-                     (double (:G-structural-pressure r))
-                     (double (:G-info r)) (double (:G-ambiguity r))))))
+                     (double (:controller-score r)) (double (:G-risk r))
+                     (double (:structural-pressure r))
+                     (double (:predictability-bonus r)) (double (:G-ambiguity r))))))
 
 (defn -main [& _]
   (let [baseline (efe/rank-actions state candidates)
@@ -94,10 +94,10 @@
           e-by (into {} (map (juxt #(action-label (:action %)) identity)) enriched)]
       (doseq [k (sort (keys b-by))]
         (let [b (b-by k) e (e-by k)]
-          (println (format "  %-32s rank %d->%d   G-total %+.4f->%+.4f  (%+.4f)"
+          (println (format "  %-32s rank %d->%d   controller-score %+.4f->%+.4f  (%+.4f)"
                            k (:rank b) (:rank e)
-                           (double (:G-total b)) (double (:G-total e))
-                           (double (- (:G-total e) (:G-total b))))))))
+                           (double (:controller-score b)) (double (:controller-score e))
+                           (double (- (:controller-score e) (:controller-score b))))))))
     (println "\nReading: the top action may be unchanged; coupling shifts the interest-touched")
-    (println "candidate's G-total (intrinsic-value -> G-risk; structural-pressure -> G-total),")
+    (println "candidate's controller-score (intrinsic-value -> G-risk; structural-pressure -> controller-score),")
     (println "re-ordering the tail and changing margins -- the forward-model effect, documented.")))

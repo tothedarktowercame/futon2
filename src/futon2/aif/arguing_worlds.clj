@@ -1,7 +1,7 @@
 (ns futon2.aif.arguing-worlds
   "Ungrounded v0 for M-arguing-worlds.
 
-  The referee yardstick is realized rollout G(pi), not cascade C. C is only used
+  The referee yardstick is realized rollout S(pi), not cascade C. C is only used
   to define the single-buildout baseline that the dialectic must beat. Diversity
   is checked before judging; a non-diverse generator returns :monotone-generator."
   (:require [cheshire.core :as json]
@@ -64,12 +64,12 @@
   (let [w (lens-weight lens move)]
     (-> move
         (update :score #(double (* w (double (or % 0.0)))))
-        (update :delta-g #(double (* w (double (or % 0.0)))))
+        (update :step-score-delta #(double (* w (double (or % 0.0)))))
         (assoc :lens/id (:lens/id lens)))))
 
 (defn score-buildout-c
   "Internal wholeness proxy for buildout construction only. Not the referee
-   yardstick. The outside yardstick is rollout/project-policy's realized :G."
+   yardstick. The outside yardstick is rollout/project-policy's realized :policy-rollout-score."
   [policy]
   (let [intensity (reduce + 0.0 (map #(double (or (:score %) 0.0)) policy))
         token-sets (mapv move-token-set policy)
@@ -102,7 +102,7 @@
      :implied-moves (mapv :move/id policy)
      :pattern-set (buildout-pattern-set policy)
      :C (score-buildout-c policy)
-     :realized-G (:G selected)
+     :realized-score (:policy-rollout-score selected)
      :argument {:selected-by :lens-varied-coherence-greedy
                 :lens (:lens/id lens)
                 :note "Buildout generated on a copied state; no live writes."}}))
@@ -143,7 +143,7 @@
   (rollout/project-policy state (:policy buildout) :gamma gamma))
 
 (defn referee-harness
-  "Judge buildouts with realized G(pi), after diversity has passed."
+  "Judge buildouts with realized S(pi), after diversity has passed."
   [state buildouts & {:keys [gamma diversity-opts]
                       :or {gamma 0.9}}]
   (let [diversity (apply diversity-report buildouts (mapcat identity diversity-opts))]
@@ -155,26 +155,26 @@
       (let [scored (->> buildouts
                         (mapv (fn [b]
                                 (let [g (realized-g-score state b :gamma gamma)]
-                                  (assoc b :yardstick :realized-G :realized-G (:G g) :rollout g))))
-                        (sort-by :realized-G)
+                                  (assoc b :yardstick :realized-score :realized-score (:policy-rollout-score g) :rollout g))))
+                        (sort-by :realized-score)
                         vec)
             winner (first scored)
             top-c (last (sort-by :C scored))
-            dialectic-wins? (< (double (:realized-G winner))
-                               (double (:realized-G top-c)))]
+            dialectic-wins? (< (double (:realized-score winner))
+                               (double (:realized-score top-c)))]
         {:verdict (if dialectic-wins? :dialectic-wins :single-best-holds)
          :diversity diversity
          :winner winner
          :top-c-buildout top-c
          :argument-record [{:finding :diversity-passed
                             :max-overlap (:max-overlap diversity)}
-                           {:finding :winner-by-realized-G
+                           {:finding :winner-by-realized-rollout-score
                             :winner (:buildout/id winner)
-                            :realized-G (:realized-G winner)}
+                            :realized-score (:realized-score winner)}
                            {:finding :single-best-C-baseline
                             :baseline (:buildout/id top-c)
                             :C (:C top-c)
-                            :realized-G (:realized-G top-c)}
+                            :realized-score (:realized-score top-c)}
                            {:finding :comparison
                             :verdict (if dialectic-wins? :dialectic-wins :single-best-holds)}]}))))
 
@@ -215,7 +215,7 @@
                                        (set (keep :want moves)))))))
 
 (defn experiment-runner
-  "Run the ungrounded v0 over real circumstances. This is the realized-G floor;
+  "Run the ungrounded v0 over real circumstances. This is the realized rollout score floor;
    grounded peradam certification remains an external seam."
   ([] (experiment-runner (rollout/moves)))
   ([moves]
@@ -227,7 +227,7 @@
                          :psi "real diffsub mission/capability roots"
                          :state (root-seeded-state moves)
                          :moves moves}]]
-     {:yardstick :realized-G
+     {:yardstick :realized-score
       :peradam-grounding :escrowed
       :results (mapv #(evaluate-circumstance % :n 4 :depth 1 :top-k 19)
                      circumstances)})))
@@ -253,7 +253,7 @@
 
 (defn action->move
   "Render a frozen ranked action as a rollout move. The move is synthetic and
-  deterministic; it gives the contest harness a realized-G yardstick without
+  deterministic; it gives the contest harness a realized rollout score yardstick without
   claiming these transitions model the live field."
   [action]
   (let [rank (long (or (:rank action) 0))
@@ -265,7 +265,7 @@
      :have "wm-freeze/root"
      :want (str "wm-freeze/action/" rank "/" target)
      :score weight
-     :delta-g (- (+ 0.1 (* 0.2 open-holes) (* 0.01 (max 0 (- 122 rank)))))
+     :step-score-delta (- (+ 0.1 (* 0.2 open-holes) (* 0.01 (max 0 (- 122 rank)))))
      :rank rank
      :move/terminal? (<= open-holes 1.0)
      :source/action action}))
@@ -322,8 +322,8 @@
   (let [g (realized-g-score state buildout :gamma gamma)]
     (assoc buildout
            :sampler/id sampler-id
-           :yardstick :realized-G
-           :realized-G (:G g)
+           :yardstick :realized-score
+           :realized-score (:policy-rollout-score g)
            :rollout g
            :move-count (buildout-move-count buildout)
            :wall-clock-ms (double (or wall-clock-ms 0.0)))))
@@ -336,7 +336,7 @@
 
 (defn referee-field-harness
   "N-contestant referee. Each sampler contributes its best buildout per
-  circumstance; the field is judged only by realized G(pi). C never enters the
+  circumstance; the field is judged only by realized S(pi). C never enters the
   verdict path. Equal G prefers fewer moves, then lower wall-clock, then reports
   a tie."
   [state sampler-results & {:keys [gamma diversity-opts]
@@ -367,10 +367,10 @@
           (let [per-sampler (->> scored
                                  (group-by :sampler/id)
                                  (mapv (fn [[sid bs]]
-                                         (first (sort-by (juxt :realized-G :move-count :wall-clock-ms)
+                                         (first (sort-by (juxt :realized-score :move-count :wall-clock-ms)
                                                          (map #(assoc % :sampler/id sid) bs))))))
-                min-g (apply min (map :realized-G per-sampler))
-                g-tied (filterv #(= min-g (:realized-G %)) per-sampler)
+                min-g (apply min (map :realized-score per-sampler))
+                g-tied (filterv #(= min-g (:realized-score %)) per-sampler)
                 min-moves (apply min (map :move-count g-tied))
                 move-tied (filterv #(= min-moves (:move-count %)) g-tied)
                 min-wall (apply min (map :wall-clock-ms move-tied))
@@ -379,14 +379,14 @@
             {:verdict (if (= 1 (count final-tied)) :sampler-wins :tie)
              :winner (when (= 1 (count final-tied)) winner)
              :ties (when (< 1 (count final-tied)) final-tied)
-             :per-sampler-best (sort-by :realized-G per-sampler)
+             :per-sampler-best (sort-by :realized-score per-sampler)
              :partials partials
              :diversity diversity
              :argument-record [{:finding :field-diversity-passed
                                 :max-overlap (:max-overlap diversity)}
-                               {:finding :winner-by-realized-G
+                               {:finding :winner-by-realized-rollout-score
                                 :winner (:sampler/id winner)
-                                :realized-G (:realized-G winner)}]}))))))
+                                :realized-score (:realized-score winner)}]}))))))
 
 (defn- sampler-buildout
   [id policy]

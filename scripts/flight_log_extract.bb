@@ -34,7 +34,7 @@
   (let [verdicts (:act-gate-verdicts r)
         en (:enactment r)
         ro (:realized-outcome r)
-        pp (:policy-precision r)
+        pp (:selection-gain r)
         gos (keep :G-goal-outcome (:ranked-actions r))
         vsum (frequencies (map :verdict verdicts))]
     {:t (:timestamp r)
@@ -45,10 +45,10 @@
                      (str/join " "))
      :pass (get vsum :pass 0)
      :enacted (some-> (:mission en) (str/replace #"^M-" ""))
-     :dg-source (some-> (or (:predicted-via en) (:delta-G-source (first verdicts))) name)
+     :dg-source (some-> (or (:predicted-via en) (:coverage-score-source (first verdicts))) name)
      :boxes (:boxes en) :holes (:policy-holes en)
-     :expected-G (:expected-G ro) :realized-G (:realized-G ro)
-     :gamma (:policy-precision pp) :samples (:samples pp) :mean-perf (:mean-perf pp)
+     :expected-score (:expected-score ro) :realized-score (:realized-score ro)
+     :gamma (:selection-gain pp) :samples (:samples pp) :mean-perf (:mean-perf pp)
      :goal-outcome-distinct (count (distinct gos))
      :decision (let [a (get-in r [:decision :action])]
                  (cond (= :abstain a) "abstain"
@@ -69,7 +69,7 @@
       "json" (println (json/generate-string {:since since :flights (count rows) :rows rows}))
       ;; org table (the notebook's native food)
       (let [cols [:t :gates :enacted :dg-source :boxes :holes
-                  :expected-G :realized-G :gamma :samples :mean-perf
+                  :expected-score :realized-score :gamma :samples :mean-perf
                   :goal-outcome-distinct :decision]]
         (println (str "| " (str/join " | " (map name cols)) " |"))
         (println "|-")
@@ -81,6 +81,6 @@
         (binding [*out* *err*]
           (println (str (count rows) " flights since " since
                         " · passes " (reduce + 0 (map :pass rows))
-                        " · realized samples visible " (count (keep :realized-G rows)))))))))
+                        " · realized samples visible " (count (keep :realized-score rows)))))))))
 
 (-main)

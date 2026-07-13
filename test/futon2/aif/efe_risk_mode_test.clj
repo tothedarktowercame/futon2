@@ -24,7 +24,7 @@
     (let [bare (efe/compute-efe state action)
           kl (efe/compute-efe state action {:risk-mode :kl})]
       (is (= (:G-risk bare) (:G-risk kl)))
-      (is (= (:G-total bare) (:G-total kl)))
+      (is (= (:controller-score bare) (:controller-score kl)))
       (is (= :kl (:risk-mode bare)))))
   (testing ":risk-mode :hinge is the escape hatch back to the historical hinge"
     (is (= :hinge (:risk-mode (efe/compute-efe state action {:risk-mode :hinge}))))))
@@ -37,21 +37,24 @@
       (is (not= (:G-risk kl) (:G-risk hinge))))
     (testing "non-risk terms untouched by the mode"
       (is (= (:G-ambiguity kl) (:G-ambiguity hinge)))
-      (is (= (:G-info kl) (:G-info hinge)))
-      (is (= (:G-survival kl) (:G-survival hinge)))
-      (is (= (:G-structural-pressure kl) (:G-structural-pressure hinge))))
+      (is (= (:predictability-bonus kl) (:predictability-bonus hinge)))
+      (is (= (:homeostatic-pressure kl) (:homeostatic-pressure hinge)))
+      (is (= (:structural-pressure kl) (:structural-pressure hinge))))
     (testing "I3 holds in kl mode too: G-core = G-risk + G-ambiguity"
       (is (= (:G-core kl) (+ (:G-risk kl) (:G-ambiguity kl)))))
     (testing "mode is self-describing in the output"
       (is (= :kl (:risk-mode kl))))))
 
 (deftest kl-mode-channel-weights-hook
-  (testing "zeroing all channel weights leaves only -intrinsic × urgency"
+  (testing "zero channel weights leave canonical risk at zero and expose intrinsic credit as a control"
     (let [zeroed (efe/compute-efe state action
                                   {:risk-mode :kl
                                    :kl-channel-weights
                                    (zipmap (keys obs) (repeat 0.0))})]
-      (is (< (Math/abs (- (double (:G-risk zeroed)) -0.1)) 1e-9)))))
+      (is (< (Math/abs (double (:G-risk zeroed))) 1e-9))
+      (is (< (Math/abs (- (double (get-in zeroed [:augmentation-terms :risk-control]))
+                          -0.1))
+             1e-9)))))
 
 (deftest kl-pragmatic-parity-preset
   ;; item 2 (E-KL-refinements): :kl-channel-weights :pragmatic-parity resolves to

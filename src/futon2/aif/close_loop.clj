@@ -4,19 +4,17 @@
    (E-close-the-loop). PURE given a cascade-lane entry; the live pilot wires
    `act-gate-for` in (a separate, careful step).
 
-   The act-gate is `{:delta-F :delta-G}`. cascade-lane already computes both:
-     ΔF = `:F-free-energy` — the cascade's marginal-likelihood F (F>0 = Bayesian-
-          Occam accept). Already solved upstream.
-     ΔG = `:G-rollout`     — best-rollout G(π) over the v2 move-set restricted to
-          the mission. **nil whenever the mission has no moves in the set** —
-          that's why the gate abstains.
+   The act-gate is `{:cascade-score :coverage-score-delta}`. These are two
+   explicitly engineering quantities: a coverage-reward-minus-prior-cost
+   model-selection score and a negative construction-coverage delta. They are
+   not variational or expected free energy. Missing either leg abstains.
 
-   This helper RECONCILES ΔG (Joe, 2026-06-26): prefer the move-set-grounded
-   `:G-rollout` when present; **fall back to the FOLD's coverage-ΔG**
+   This helper reconciles the closing score: prefer the move-set-grounded
+   `:policy-rollout-score` when present; fall back to the fold's coverage score
    (`futon2.aif.fold-classical` over the cascade's `:shown` patterns) when it is
    nil — exactly the case the classical fold (impl #1) rescues. The reconciliation
    is itself a build×evaluation grid cell; the source is recorded in
-   `:delta-G/source` for the bake-off.
+   `:coverage-score/source` for the bake-off.
 
    ESCROW SEAM (E-live-loop-2 2e, built DARK): when `*escrow-replay?*` is true
    AND the caller injects `:escrow-turn-fn` (from `fold-escrow/escrow-turn-fn`
@@ -39,7 +37,7 @@
    scheduled runner — remain byte-identical to the pre-seam path."
   true)
 
-(def ^:dynamic *classical-fold-dG?*
+(def ^:dynamic *classical-fold-score?*
   "OFF as of L4 (operator ruling 2026-07-05, E-live-loop-3 -- 'turn off
    classical fold as a route'). The classical fold's coverage-dG is
    UNPLUGGED from the live dG reconciliation: the order is now
@@ -55,7 +53,7 @@
 
 (def ^:dynamic *semilattice-fold?*
   "When true, a cascade-lane entry carrying a non-empty :semilattice uses the
-   semilattice fold as the preferred live ΔG construction. Bind false to disarm
+   semilattice fold as the preferred live construction score. Bind false to disarm
    R11 and fall through to the existing rollout/classical/escrow path unchanged."
   true)
 
@@ -66,16 +64,16 @@
 
 (defn act-gate-from-lane-entry
   "PURE: a cascade-lane entry → the act-gate map.
-   Entry: {:mission :F-free-energy :G-rollout :shown [pattern-ids…] …}.
-   Returns {:delta-F :delta-G :delta-G/source :fold} — :delta-G is the rollout
-   leg if present, else the classical fold's coverage-ΔG over :shown, else
-   (dark seam, flag-gated) an escrowed fold-turn's replayed ΔG, else nil
+   Entry: {:mission :cascade-score :policy-rollout-score :shown [pattern-ids…] …}.
+   Returns {:cascade-score :coverage-score-delta :coverage-score/source :fold} — :coverage-score-delta is the rollout
+   leg if present, else the classical fold's coverage score over :shown, else
+   an escrowed fold-turn's replayed coverage score, else nil
    (gate abstains). The fold output is carried for provenance / policy-holes;
    when the escrow leg fires, its full fold output rides `:fold-escrow` (the
    key is ABSENT whenever the escrow was not consulted or returned nothing)."
   ([entry] (act-gate-from-lane-entry entry {}))
   ([entry circumstance] (act-gate-from-lane-entry entry circumstance {}))
-  ([{:keys [F-free-energy G-rollout shown semilattice] :as _entry} circumstance
+  ([{:keys [cascade-score policy-rollout-score shown semilattice] :as _entry} circumstance
     {:keys [escrow-turn-fn prose-fn]}]
    (let [semilattice-out (when (and *semilattice-fold?*
                                     (seq shown)
@@ -83,26 +81,26 @@
                            (fs/semilattice-fold
                             (vec shown)
                             (assoc circumstance :semilattice semilattice)))
-         semilattice-g   (:delta-g semilattice-out)
+         semilattice-g   (:coverage-score-delta semilattice-out)
          fold-out   (when (and (nil? semilattice-out) (seq shown))
                       (fc/classical-fold (vec shown) circumstance))
-         fold-g     (when *classical-fold-dG?* (:delta-g fold-out))
+         fold-g     (when *classical-fold-score?* (:coverage-score-delta fold-out))
          escrow-out (when (and *escrow-replay?* escrow-turn-fn
                                (nil? semilattice-out)
-                               (not (number? G-rollout)) (not (number? fold-g))
+                               (not (number? policy-rollout-score)) (not (number? fold-g))
                                (seq shown))
                       (fl/llm-fold (vec shown) circumstance
                                    {:turn-fn escrow-turn-fn :prose-fn prose-fn}))
-         escrow-g   (:delta-g escrow-out)
-         delta-G    (cond (number? semilattice-g) semilattice-g
-                          (number? G-rollout) G-rollout
+         escrow-g   (:coverage-score-delta escrow-out)
+         coverage-score-delta    (cond (number? semilattice-g) semilattice-g
+                          (number? policy-rollout-score) policy-rollout-score
                           (number? fold-g)    fold-g
                           (number? escrow-g)  escrow-g
                           :else               nil)]
-     (cond-> {:delta-F F-free-energy
-              :delta-G delta-G
-              :delta-G/source (cond (number? semilattice-g) :fold-semilattice
-                                    (number? G-rollout) :rollout-g-for
+     (cond-> {:cascade-score cascade-score
+              :coverage-score-delta coverage-score-delta
+              :coverage-score/source (cond (number? semilattice-g) :fold-semilattice
+                                    (number? policy-rollout-score) :policy-rollout
                                     (number? fold-g)    :fold
                                     (number? escrow-g)  :fold-escrow
                                     :else               nil)
@@ -112,9 +110,9 @@
 (defn preview-verdict
   "What the act-gate WOULD decide for these legs (mirrors the pilot backend's
    gate, for previewing/tests — the live verdict stays the gate's)."
-  [{:keys [delta-F delta-G]}]
-  (cond (or (nil? delta-F) (nil? delta-G)) :abstain-missing-leg
-        (and (pos? delta-F) (neg? delta-G)) :pass
+  [{:keys [cascade-score coverage-score-delta]}]
+  (cond (or (nil? cascade-score) (nil? coverage-score-delta)) :abstain-missing-leg
+        (and (pos? cascade-score) (neg? coverage-score-delta)) :pass
         :else :fail))
 
 (defn act-gate-for

@@ -32,19 +32,19 @@
             :answer mock-answer}
      :arming {:operator "joe" :word "mock arming word - scheduled-path test fixture"
               :at "2026-07-05T00:00:00Z" :scope :one-fold}
-     :eval {:delta-g -0.5 :g-grain :coverage}}))
+     :eval {:coverage-score-delta -0.5 :g-grain :coverage}}))
 
 (deftest scheduled-path-replays-escrow-for-matching-mission
   (binding [cl/*escrow-replay?* true]
     (let [deposits [(mock-deposit)]
           ag (cl/act-gate-from-lane-entry
               {:mission "test-d/mission/scheduled-mock"
-               :shown mock-cascade :F-free-energy 0.5 :G-rollout nil}
+               :shown mock-cascade :cascade-score 0.5 :policy-rollout-score nil}
               mock-circumstance
               {:escrow-turn-fn (esc/escrow-turn-fn deposits)
                :prose-fn mock-prose-fn})]
-      (is (= -0.5 (:delta-G ag)) "escrowed delta-G leg fires")
-      (is (= :fold-escrow (:delta-G/source ag)))
+      (is (= -0.5 (:coverage-score-delta ag)) "escrowed coverage-score-delta leg fires")
+      (is (= :fold-escrow (:coverage-score/source ag)))
       (is (= :pass (cl/preview-verdict ag))
           "verdict passes: dF 0.5 > 0 and dG -0.5 < 0"))))
 
@@ -52,9 +52,9 @@
   (binding [cl/*escrow-replay?* true]
     (let [ag (cl/act-gate-from-lane-entry
               {:mission "test-d/mission/no-deposit-here"
-               :shown mock-cascade :F-free-energy 0.5 :G-rollout nil}
+               :shown mock-cascade :cascade-score 0.5 :policy-rollout-score nil}
               {:mission "test-d/mission/no-deposit-here" :psi "WANT: x. HAVE: y."})]
-      (is (nil? (:delta-G ag)) "no deposit => classical abstains => dG nil")
+      (is (nil? (:coverage-score-delta ag)) "no deposit => classical abstains => dG nil")
       (is (= :abstain-missing-leg (cl/preview-verdict ag))))))
 
 (deftest scheduled-path-prompt-drift-abstains-pin-working
@@ -62,33 +62,33 @@
     (let [deposits [(mock-deposit)]
           ag (cl/act-gate-from-lane-entry
               {:mission "test-d/mission/scheduled-mock"
-               :shown mock-cascade :F-free-energy 0.5 :G-rollout nil}
+               :shown mock-cascade :cascade-score 0.5 :policy-rollout-score nil}
               {:mission "test-d/mission/scheduled-mock" :psi "WANT: DIFFERENT. HAVE: DIFFERENT."}
               {:escrow-turn-fn (esc/escrow-turn-fn deposits)
                :prose-fn mock-prose-fn})]
-      (is (nil? (:delta-G ag))
+      (is (nil? (:coverage-score-delta ag))
           "prompt drift => sha mismatch => abstain, the pin WORKING")
       (is (not (contains? ag :fold-escrow))))))
 
 (deftest l4-classical-unplugged-escrow-fills-dG
-  "L4 operator ruling: classical fold's dG leg is unplugged (*classical-fold-dG?*
+  "L4 operator ruling: classical fold's dG leg is unplugged (*classical-fold-score?*
    false by default). With classical off and an escrow deposit matching, the
    escrow fills the dG leg -- even for missions whose classical fold WOULD have
    resolved (the whole point of the ruling)."
   (binding [cl/*escrow-replay?* true
-            cl/*classical-fold-dG?* false]
+            cl/*classical-fold-score?* false]
     (let [deposits [(mock-deposit)]
           ag (cl/act-gate-from-lane-entry
               {:mission "test-d/mission/scheduled-mock"
-               :shown mock-cascade :F-free-energy 0.5 :G-rollout nil}
+               :shown mock-cascade :cascade-score 0.5 :policy-rollout-score nil}
               mock-circumstance
               {:escrow-turn-fn (esc/escrow-turn-fn deposits)
                :prose-fn mock-prose-fn})]
-      (is (= -0.5 (:delta-G ag)) "escrow fills dG (classical unplugged)")
-      (is (= :fold-escrow (:delta-G/source ag)) "source is escrow, not classical"))))
+      (is (= -0.5 (:coverage-score-delta ag)) "escrow fills dG (classical unplugged)")
+      (is (= :fold-escrow (:coverage-score/source ag)) "source is escrow, not classical"))))
 
 (deftest l4-classical-revertible-flag-on-restores-old-order
-  "The flag is REVERTIBLE: binding *classical-fold-dG?* true lets the
+  "The flag is REVERTIBLE: binding *classical-fold-score?* true lets the
    classical fold's dG leg participate again. With the mock cascade
    (contentful -- classical abstains regardless), the flag doesn't change
    the outcome, but we verify the flag is respected by checking that
@@ -99,10 +99,10 @@
   ;; flag OFF, fold-g is nil (suppressed).
   (let [raw-fold (cl/act-gate-from-lane-entry
                   {:mission "test-d/mission/scheduled-mock"
-                   :shown mock-cascade :F-free-energy 0.5 :G-rollout nil}
+                   :shown mock-cascade :cascade-score 0.5 :policy-rollout-score nil}
                   mock-circumstance)]
     ;; Default (flag OFF): classical dG suppressed.
-    (is (nil? (:delta-G raw-fold))
+    (is (nil? (:coverage-score-delta raw-fold))
         "classical abstains on contentful cascade, dG nil regardless of flag")
     (is (some? (:fold raw-fold))
         "the :fold output is still carried for provenance")))

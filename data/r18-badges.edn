@@ -1,70 +1,135 @@
 ;; r18-badges.edn — machine-readable faithfulness badges for the WM AIF quantities.
-;; Produced by E-r18-faithfulness-audit.md (2026-07-03, claude-2). Consumed by the explainer /
-;; readout to RENDER a badge per node (that render is the follow-on build that turns R18 green).
+;; Canonical machine-readable contract for the explainer, paper figure, and R18 audit.
+;; The generator patches both R18B and R18MAP; neither block is hand-maintained.
 ;;
-;; :badge  — :derived-from-FEP | :principled-approximation | :analogical
+;; :badge  — :derived-from-FEP | :principled-approximation | :analogical |
+;;           :engineering-control
 ;; :claims — the canonical AIF quantity the code labels itself as
 ;; :cite   — the canonical literature anchor (the defining form)
 ;; :code-ref — file:line of the actual computation
 ;; :computes — what the code actually computes (plain)
 ;; :repair — what would raise the badge
 ;;
-;; Headline: 0 :derived-from-FEP (adversarial rule — refute first, default weaker), 7
-;; :principled-approximation, 9 :analogical. Sharpest fault: :G-goal-outcome (a non-KL labelled "KL").
+;; Current headline: 4 :derived-from-FEP, 1 :principled-approximation, 0
+;; :analogical, and 12 :engineering-control. Historical audit-day counts live in
+;; the audit, not in this contract.
 
 {:schema
- {:version 1,
+ {:version 2,
   :audit "futon2/holes/E-r18-faithfulness-audit.md",
   :date "2026-07-03",
-  :badges [:derived-from-FEP :principled-approximation :analogical]},
+  :badges [:derived-from-FEP :principled-approximation :analogical
+           :engineering-control]},
+ :requirements
+ {"R1" "Explicit belief state"
+  "R2" "Structured observation vector"
+  "R3" "Predictive-coding belief update"
+  "R4" "Predictive forward model"
+  "R5" "Expected free energy"
+  "R6" "Policy selection with abstention"
+  "R7" "Adaptive channel precision"
+  "R8" "Per-tick trace and variational-F diagnostic"
+  "R9" "Named validation properties"
+  "R10" "Live scheduled operation"
+  "R11" "Hierarchical / multi-agent composition"
+  "R12" "Dual-loop / hyperparameter inference"
+  "R13" "Multi-step policy adequacy"
+  "R14" "Precision over policies"
+  "R15" "Hierarchical / temporal depth"
+  "R16" "Closed action-perception loop"
+  "R17" "Structure learning / niche construction"
+  "R18" "Faithfulness of named quantities"
+  "R19" "Prior preferences (C-vector)"},
+ :nodes
+ {:SI {:requirement "R2" :quantities []}
+  :BEL {:requirement "R1" :quantities []}
+  :UPD {:requirement "R3" :quantities [:belief-update]}
+  :FM {:requirement "R4" :quantities []}
+  :G {:requirement "R5" :quantities [:G-risk :G-ambiguity]}
+  :GCTRL {:requirement "R5" :quantities [:controller-score :predictability-bonus :homeostatic-pressure
+                                         :structural-pressure
+                                         :graph-control-score :gap-exploration-bonus
+                                         :model-uncertainty-bonus]}
+  :SEL {:requirement "R6" :quantities [:effective-temperature-softmax]}
+  :PREC {:requirement "R7" :quantities [:channel-precision]}
+  ;; Predicted action is part of the forward loop, not a second R10.
+  :ACT {:requirement nil :quantities []}
+  :HABIT {:requirement "R12" :quantities []}
+  :R13 {:requirement "R13" :quantities []}
+  :R14 {:requirement "R14" :quantities [:outcome-feedback-selection-gain
+                                        :policy-performance-ratio]}
+  :R16 {:requirement "R16" :quantities [:coverage-score-delta :cascade-score]}
+  :LIVE {:requirement "R10" :quantities []}
+  :TRACE {:requirement "R8" :quantities []}
+  :VALID {:requirement "R9" :quantities []}
+  :R18 {:requirement "R18" :quantities []}
+  :STRUCT {:requirement "R17" :quantities []}
+  :L2 {:requirement "R15" :quantities []}
+  :MULTI {:requirement "R11" :quantities []}
+  :WANT {:requirement "R19" :quantities [:G-goal-outcome]}},
  :quantities
- {:G-structural-pressure
-  {:badge :analogical,
-   :claims "weighted EFE term",
-   :cite "no canonical counterpart",
+ {:structural-pressure
+  {:badge :engineering-control,
+   :claims "caller-supplied structural-pressure control",
+   :cite "engineering controller augmentation; not canonical EFE",
    :code-ref "futon2/src/futon2/aif/efe.clj:419",
    :computes
    "pass-through of a caller-injected scalar × 0.35; not a computed quantity",
    :repair
-   "derive from the generative model (novelty/salience) or rename as an exogenous weight",
+   "complete: retained as an explicitly named exogenous controller augmentation",
    :note
-   "M-evaluate-policies 2026-07-03: flips 44.5%. Documented as EXOGENOUS WEIGHT; canonical seat = the habit prior ln E(π), not a G-summand (D8)."},
+   "M-evaluate-policies 2026-07-03: flips 44.5%. Documented as EXOGENOUS WEIGHT; canonical seat = the habit prior ln E(π), not a canonical G term (D8).",
+   :repair-built
+   "B1 FLIPPED LIVE by Joe 2026-07-13: symmetric-Dirichlet policy-frequency fold supplies learned ln E(π) at the existing unscaled policy seam. The learned source is fail-closed unless structural-pressure mode is :habit-prior, and REPLACES rather than stacks with caller bias. Causal 760-record shadow: 13 learned policy identities, 323/760 winner-or-abstain flips (42.50%), 0 abstain flips; deterministic artifact habit-prior-frequency-shadow.edn. FUTON_WM_HABIT_PRIOR_SOURCE=caller plus FUTON_WM_STRUCTURAL_PRESSURE_MODE=controller-augmentation is the historical rollback; re-badge remains reviewer-side."},
+  :model-uncertainty-bonus
+  {:badge :engineering-control,
+   :claims "controller model-uncertainty bonus",
+   :cite "engineering exploration control; not canonical EFE",
+   :code-ref "futon2/src/futon2/aif/efe.clj:180",
+   :computes
+   "model-uncertainty-weight × posterior-spread(mission); the default provider is zero and the optional pattern-grain provider aggregates posterior standard deviation",
+   :repair
+   "complete: renamed and kept outside G-efe; a future EIG term must compute expected posterior entropy reduction",
+   :note
+   "Posterior standard deviation is uncertainty, not expected information gain; it lives only in the multi-objective controller augmentation.",
+   :repair-built
+   "B3 PURE KERNEL 2026-07-13: epistemic-value/expected-information-gain computes policy-conditioned Σ_o Q(o|π) KL[Q(s|o,π)||Q(s|π)] and fails closed unless the predicted posterior mixture reconstructs the prior. UNWIRED: the controller still lacks a defensible per-policy observation distribution and simulated posterior updates; no badge change claimed."},
   :G-risk
-  {:badge :principled-approximation,
+  {:badge :derived-from-FEP,
    :claims "EFE risk = D_KL[Q(o|π) ‖ C]",
    :cite
    "Da Costa et al. 2020, risk = KL of predicted outcomes from preferences C",
    :code-ref "futon2/src/futon2/aif/free_energy.clj:44",
    :computes
-   "LIVE :kl (cd0d25d): truncated+renormalised per-channel Gaussian KL vs C — TRUE KL, ≥0, quadrature-verified (0f8d5c6) — uniform weights, ×urgency multiplier (the non-canonical residue keeping this PA, not derived); FUTON_WM_RISK_MODE=hinge hatch → historical weighted-L1 hinge",
+   "truncated and renormalised per-channel Gaussian KL vs C in nats; urgency and intrinsic credit are separate controller augmentation terms",
    :repair
    "predict outcome distribution Q(o|π) and KL against a normalised preference C",
    :note
    "M-evaluate-policies 2026-07-03: flips 35.9% (live hinge). D5a :risk-mode :kl BUILT DARK (f6451ba): c-distribution densities in preferences.clj per the W1 contract (E-C-vector-live.md:230). E6: winner-changing (ρ.841, sd ×22). E-KL-refinements items 1+2 LANDED & REVIEWED (0f8d5c6): Q truncated+renormalised to [0,1] ⇒ TRUE KL (quadrature-verified, ≥0; in-source badge :derived-from-FEP under the declared Gaussian channel model) + :pragmatic-parity weight preset. E6 re-run post-truncation (e6-shadow-post-KLref.edn): behaviourally negligible (kl sd 2.3439→2.3432, ratio ×22.16→×22.15, winner/ρ unchanged) — the repair buys honesty, not behaviour change; pre-truncation flip evidence stands. Items 3 (T-calibration) + 5 (Bernoulli round-trip w/ W1) open → holes/E-KL-refinements.md. · RAISED :analogical→:principled-approximation 2026-07-04, reviewer claude-12 (adversarial rule applied): live-tick evidence (every scored candidate mode-stamped since the 07:00Z tick) + C9 first-pass census (holes/labs/M-aif-faithfulness/c9-burn-in.edn — sane, γ-continuous 1.268→1.287, abstain unchanged; n=28/one-day caveat on record).",
    :repair-built
    ":risk-mode :kl FLIPPED LIVE 2026-07-03 (operator decision; arena-risk-mode, uniform weights = the canonical joint-KL config, T 0.1; FUTON_WM_RISK_MODE=hinge escape hatch). Badge raise to :derived-from-FEP PENDING LIVE-TICK EVIDENCE + C9 burn-in — the next cron tick deploys (fresh process). IHTB-2 resolved structurally: cascade placeholders never enter the selection pool (appended after wm-decision); post-flip ordinary totals go positive (≈ canonical −E[ln C], ihtb2-flip-check.edn)"},
-  :G-info
-  {:badge :analogical,
-   :claims "epistemic info-gain (EIG)",
-   :cite "Da Costa et al. 2020, epistemic = E[KL[Q(s|o,π) ‖ Q(s|π)]]",
+  :predictability-bonus
+  {:badge :engineering-control,
+   :claims "variance-complement predictability bonus",
+   :cite "engineering controller augmentation; explicitly not EIG",
    :code-ref "futon2/src/futon2/aif/efe.clj:256",
    :computes
-   "Σ max(0,1−variance) = complement of ambiguity (same next-var); no belief-entropy reduction",
+   "Σ max(0,1−variance) = complement of ambiguity (same next-var); retained as telemetry but contributes exactly zero to live ranking in :telemetry-only mode",
    :repair
-   "compute real expected information gain over beliefs (as the futon3c portfolio sibling does)",
+   "complete for the duplicate: retired from live ranking while preserving raw telemetry and a provenance-stamped legacy comparison hatch; a future EIG term must compute expected posterior entropy reduction",
    :note
-   "M-evaluate-policies 2026-07-03: influence MEASURED 0% flips/674 (the earlier 21.8% was a cascade-placeholder artifact); affinely redundant with ambiguity (≈ N − Σσ²). Disposition: replace with real EIG (posterior-entropy template, futon3c) or delete — SEQUENCED AFTER cascade-row handling (IHTB-2: deletion would hand wins to 0.0 placeholders)."},
-  :G-graph-pragmatic
-  {:badge :analogical,
-   :claims "pragmatic value",
-   :cite "Da Costa et al. 2020, pragmatic value = E[ln C(o)]",
+   "M-evaluate-policies 2026-07-03: influence MEASURED 0% flips/674 (the earlier 21.8% was a cascade-placeholder artifact); affinely redundant with ambiguity (≈ N − Σσ²). Live disposition 2026-07-13: :telemetry-only; FUTON_WM_PREDICTABILITY_CONTROL_MODE=controller-augmentation restores the historical lane for comparison."},
+  :graph-control-score
+  {:badge :engineering-control,
+   :claims "graph feasibility/body/ascent controller score",
+   :cite "engineering graph controller augmentation; not canonical pragmatic value",
    :code-ref "futon2/src/futon2/aif/efe.clj:118",
    :computes
-   "1000·[not-applicable] + 3·holes − 20·ascent-progress (graph heuristic counts/gates)",
+   "live policy support excludes off-map and capability-inapplicable open-mission policies before scoring; the remaining controller value is 3·holes − 20·ascent-progress",
    :repair
-   "split: applicability = feasibility mask; ascent = pragmatic proxy toward C",
+   "complete for feasibility/value separation: Π_feasible is a reason-bearing domain filter; body/ascent remains an honestly named pragmatic engineering proxy",
    :note
-   "M-evaluate-policies 2026-07-03: now PERSISTED (2d6533e; was stripped). Disposition: split — the 1000·mask is a domain restriction (Π_feasible), not a value; ascent = pragmatic proxy (D8/§3.5)."},
+   "M-evaluate-policies 2026-07-03: now PERSISTED (2d6533e; was stripped). Split activated 2026-07-13 in :policy-support mode; exclusions and reasons are trace-persisted. FUTON_WM_GRAPH_FEASIBILITY_MODE=score-penalty restores historical scoring for comparison."},
   :G-ambiguity
   {:badge :derived-from-FEP,
    :claims "EFE ambiguity  E_Q(s|π)[H[P(o|s)]]",
@@ -79,121 +144,124 @@
    :repair-built
    ":ambiguity-mode :gaussian-entropy FLIPPED LIVE 2026-07-03 (§14, operator decision; arena-ambiguity-mode, FUTON_WM_AMBIGUITY_MODE=variance-sum escape hatch). Badge raise to :derived-from-FEP PENDING LIVE-TICK EVIDENCE + C9 burn-in — the sim via the production path realised E6's prediction (winner → learn-action-class); live-tick confirmation is the remaining step"},
   :effective-temperature-softmax
-  {:badge :principled-approximation,
-   :claims "policy selection P(π) = σ(−γ·G)",
+  {:badge :engineering-control,
+   :claims "spread-normalised controller softmax",
    :cite "Da Costa et al. 2020, P(π) = σ(−γ·G(π))",
    :code-ref "futon2/src/futon2/aif/policy.clj:35",
    :computes
-   "softmax(−G/τ_eff), τ_eff = τ_spread/γ, τ_spread = range(G)/k — extra adaptive-temperature layer",
+   "LIVE softmax(−G/τ_eff), τ_eff = 1/g, where g is the explicitly engineering outcome-feedback selection gain; FUTON_WM_TAU_MODE=spread restores historical τ_spread/g",
    :repair
-   "let γ carry sharpness alone; treat spread-normalisation as a separately-justified calibration"},
+   "complete for removal of the spread-normalisation residual; g remains an engineering control rather than inferred variational policy precision",
+   :repair-built
+   "B-2d :selection-gain-only FLIPPED LIVE by Joe 2026-07-13. Existing shadow established zero winner or abstain changes by construction and an entropy-only commitment effect. FUTON_WM_TAU_MODE=spread is the provenance-stamped rollback hatch; reviewer-side badge/disposition audit remains separate."},
   :policy-performance-ratio
-  {:badge :analogical,
+  {:badge :engineering-control,
    :claims
    "(γ's learning signal — not itself labelled an AIF quantity)",
-   :cite
-   "Da Costa et al. 2020 / Friston et al. 2017 (canonical γ signal = E[G] over policies)",
-   :code-ref "futon2/src/futon2/aif/policy_precision.clj:82",
+   :cite "engineering realised-versus-expected controller feedback",
+   :code-ref "futon2/src/futon2/aif/selection_gain.clj:82",
    :computes
    "(expected−realized)/(|expected|+|realized|+ε) ∈ [−1,1]; signed, scale-free control-loop feedback",
    :repair
    "replace/augment with the E[G]-over-policies signal if it is to feed γ canonically",
    :note
    "honestly named (no AIF label) ⇒ no R18 relabeling fault; :analogical only as a variational quantity"},
-  :coverage-delta-g
-  {:badge :principled-approximation,
-   :claims "rollout EFE G(π)",
-   :cite "prior-verified grain-3 rollout G(π) = expected free energy",
+  :coverage-score-delta
+  {:badge :engineering-control,
+   :claims "coverage score delta",
+   :cite "engineering fold-coverage control; not EFE",
    :code-ref "futon2/src/futon2/aif/fold_eval.clj:30",
    :computes
-   "rollout accumulator (genuine) fed a per-move cost g = −coverage (proxy)",
+   "negative coverage fraction, used as an engineering improvement score",
    :repair
-   "derive the move's g from actual ΔF/evidence, not a coverage fraction"},
-  :G-total
-  {:badge :analogical,
-   :claims "Expected Free Energy",
-   :cite
-   "Da Costa et al. 2020 / Millidge et al. 2021, EFE = risk + ambiguity",
+   "complete: removed G/ΔG/EFE naming from the API and corpus"},
+  :controller-score
+  {:badge :engineering-control,
+   :claims "multi-objective controller score with an EFE core",
+   :cite "engineering controller objective; G-efe separately reports risk + ambiguity",
    :code-ref "futon2/src/futon2/aif/efe.clj:449",
    :computes
    "linear sum of 8 terms in incommensurate units at hand-set weights; risk+ambiguity core diluted",
    :repair
-   "expose canonical G = risk+ambiguity separately; label the blend a multi-objective score, not EFE",
+   "complete: G-efe exposes risk + ambiguity and controller-score explicitly names the noncanonical blend",
    :note
    "M-evaluate-policies 2026-07-03: :G-core = risk + ambiguity now emitted + persisted per candidate (D2, I3 checked live: 0 violations). Honest label: MULTI-OBJECTIVE SCORE WITH AN EFE CORE — a flattened generative model (C/E/Π terms projected into one sum; D8 reconciliation, argue-exhibit pp. 8–9). Selection = argmin over a GENERATED MENU (§9.6), conditioning declared per surface (§9.7)."},
   :channel-precision
-  {:badge :principled-approximation,
+  {:badge :derived-from-FEP,
    :claims "AIF precision (inverse variance of prediction errors)",
    :cite "Da Costa et al. 2020; Friston precision = inverse variance",
    :code-ref "futon2/src/futon2/aif/precision.clj:92",
    :computes
-   "1/max(var,ε) (canonical) + affect-modulated need-component, clamped",
+   "regularised inverse zero-centred prediction-error variance; need/preference gap is emitted separately as salience",
    :repair
    "gate the need term as a separate salience channel, not summed into precision"},
   :belief-update
-  {:badge :principled-approximation,
-   :claims "variational / marginal message passing",
+  {:badge :derived-from-FEP,
+   :claims "categorical AIF filtering q⁻=Bq; q∝A(o|·)^κq⁻",
    :cite "Da Costa et al. 2020, belief updating Q(s)=σ(ln Aᵀo + …)",
-   :code-ref "futon2/src/futon2/aif/belief.clj:68",
+   :code-ref "futon2/src/futon2/aif/belief.clj:296",
    :computes
-   "exact categorical Bayes structure with a hand-set (1+w) likelihood; no A-matrix",
+   "LIVE :aif mode: exact categorical prediction-update under a declared column-normalised 7×7 observation model A, identity transition model B, uniform D, and tempered likelihood exponent κ(w); live posterior updates and forward-model policy rollouts share the same resolved likelihood opts, and A/B/D hashes ride in trace provenance",
    :repair
-   "derive the (1+w) likelihood from an explicit observation model A"},
-  :F-free-energy
-  {:badge :principled-approximation,
-   :claims "VFE = accuracy − complexity (Bayesian Occam)",
-   :cite
-   "Friston et al. 2023 (arXiv:2311.10300), VFE = complexity − accuracy",
+   "formal repair complete; calibrating the hand-set A entries against adjudicated exogenous outcomes remains a world-relative statistical refinement",
+   :note
+   "Raised to derived-from-FEP on the 2026-07-13 production flip. Green is model-relative: inference is exact under the declared A/B/D. It does not claim that the hand-set A probabilities are empirically calibrated. FUTON_WM_LIKELIHOOD_MODE=legacy restores the historical implicit-diagonal path for comparison."},
+  :cascade-score
+  {:badge :engineering-control,
+   :claims "cascade coverage/prior score",
+   :cite "engineering cascade-selection objective; not VFE or marginal likelihood",
    :code-ref
    "futon3a/holes/labs/M-memes-arrows/cascade_construct.py:214",
    :computes
-   "accuracy(coverage-sum) − λ·complexity(Σ−log P(include)); complexity genuine, accuracy heuristic",
-   :repair "make accuracy an actual expected log-likelihood",
-   :note "UPGRADE from the retired Salingaros L=T·H :analogical"},
-  :policy-precision-gamma
-  {:badge :principled-approximation,
-   :claims "Friston policy precision γ over policies",
+   "coverage-reward − λ·prior-cost",
+   :repair "complete: renamed the Python, Clojure, act-gate, and persisted-corpus contract",
+   :note "A separate per-tick variational-free-energy field now reports the declared Gaussian prediction-error objective."},
+  :outcome-feedback-selection-gain
+  {:badge :engineering-control,
+   :claims "outcome-feedback selection gain",
    :cite
    "Da Costa et al. 2020 (β update from E[G] over policies); Friston et al. 2017",
-   :code-ref "futon2/src/futon2/aif/policy_precision.clj:123",
+   :code-ref "futon2/src/futon2/aif/selection_gain.clj:123",
    :computes
    "γ = clamp(2^(gain·mean-perf),0.5,2.0) from realized-vs-expected outcomes, not E[G]-over-policies",
    :repair
-   "fold prospective G-spread-over-policies into γ's prior; realized loop as correction",
+   "complete: renamed namespace, state, trace, selection option, and realised-outcome fields so no variational-γ claim remains",
    :note
    "borderline — the estimator is a substitution, not an approximation of the β-update"},
   :G-goal-outcome
-  {:badge :principled-approximation,
-   :claims "\"the CANONICAL EFE goal-outcome risk … KL\" (docstring)",
+  {:badge :derived-from-FEP,
+   :claims "predictive goal-satisfaction risk KL[Q(o|π) || C]",
    :cite "Da Costa et al. 2020, risk = KL[Q(o|π) ‖ C]",
    :code-ref "futon2/src/futon2/aif/c_vector.clj:406",
    :computes
-   "LIVE :kl (fb15d66): :becomes entries scored by exact Bernoulli KL vs pref/c-distribution (nats, T 0.1 unfitted — structural, 22b0024); range entries keep hinge inside the mean (unit-mixing residue keeping this PA); FUTON_WM_GOAL_OUTCOME_MODE=hinge hatch → historical hinge",
+   "all open categorical and range goals are scored in a common Bernoulli satisfied/unsatisfied outcome space using exact KL in nats",
    :repair
-   "the named W1: predict goal-outcome distribution under π and KL against a normalised C-vector",
+   "complete for the declared binary goal-satisfaction model; calibrate temperature from outcome frequencies as a separate statistical refinement",
    :note
    "SHARPEST relabel — a non-KL explicitly labelled canonical/KL; ns docstring concedes it is deferred · M-evaluate-policies 2026-07-03: 0% flips so far (young, 4% of corpus). W1 driver now claude-4 (2315d49 durable join makes it livelier) — E7 = post-merge re-census. Bernoulli KL path for :becomes entries provided by the D5a c-distribution contract. · RAISED :analogical→:principled-approximation 2026-07-04, reviewer claude-12 (adversarial rule applied): live-tick evidence (every scored candidate mode-stamped since the 07:00Z tick) + C9 first-pass census (holes/labs/M-aif-faithfulness/c9-burn-in.edn — sane, γ-continuous 1.268→1.287, abstain unchanged; n=28/one-day caveat on record).",
    :repair-built
    ":goal-outcome-mode :kl FLIPPED LIVE 2026-07-04 (D-1e, operator decision, M-aif-faithfulness §2.1; arena-goal-outcome-mode, FUTON_WM_GOAL_OUTCOME_MODE=hinge escape hatch; same boundary as the §15 :risk-mode flip cd0d25d). :becomes entries score by the exact Bernoulli KL (predictive-goal-outcome-risk-kl eb06565, item-5 round-trip reviewed-PASS); range entries keep the hinge inside the KL form (their Gaussian Q is the channel lane's). T 0.1 unfitted — 22b0024: no T matches the hinge, structural. Known scale ≈ ×9.6 hinge on the live belly. Badge raise PENDING LIVE-TICK EVIDENCE + burn-in (reviewer-side); the p=1-deterministic fault in :computes is now conditional on the R12 credit burn-in, not the scoring form"},
-  :G-survival
-  {:badge :analogical,
-   :claims "survival-pressure EFE term",
-   :cite "no canonical EFE counterpart",
+  :homeostatic-pressure
+  {:badge :engineering-control,
+   :claims "homeostatic hinge-pressure controller term",
+   :cite "engineering homeostatic controller augmentation; not canonical EFE",
    :code-ref "futon2/src/futon2/aif/efe.clj:275",
    :computes
-   "unweighted Σ hinge-gap over 4 critical channels — a second G-risk on a subset",
+   "unweighted Σ hinge-gap over 4 critical channels — a second risk diagnostic on a subset; retained as telemetry but contributes exactly zero to live ranking in :telemetry-only mode",
    :repair
-   "fold into risk, or rename 'homeostatic pressure' and drop the EFE framing",
+   "complete for the duplicate: live preference pressure is carried by predicted-outcome KL against C; the hinge is retired from ranking but remains available as telemetry and through a provenance-stamped legacy comparison hatch",
    :note
-   "M-evaluate-policies 2026-07-03: flips 47.9% — the dominant term. Docs relabel: homeostatic pressure inside the pragmatic lane, not a distinct canonical term; canonical home = preferences C (D8: risk-KL absorbs it once C is strong). Keys unchanged (API)."},
-  :G-gap
-  {:badge :analogical,
-   :claims "epistemic 'room to grow'",
-   :cite "Da Costa et al. 2020, epistemic value (expected info gain)",
+   "M-evaluate-policies 2026-07-03: historical flips 47.9% — the dominant duplicate. Live disposition 2026-07-13: :telemetry-only; FUTON_WM_HOMEOSTATIC_CONTROL_MODE=controller-augmentation restores the historical lane for comparison. Keys and raw observations remain for longitudinal analysis."},
+  :gap-exploration-bonus
+  {:badge :engineering-control,
+   :claims "caller-supplied mission-gap exploration bonus",
+   :cite "engineering controller augmentation; explicitly not EIG",
    :code-ref "futon2/src/futon2/aif/efe.clj:176",
    :computes
    "6.0 × caller-supplied gap-score lookup; no expected-information computation",
    :repair
-   "compute expected uncertainty-reduction from filling the gap",
+   "complete: renamed and kept outside G-efe; a future EIG term must compute expected uncertainty reduction",
    :note
-   "M-evaluate-policies 2026-07-03: now PERSISTED (2d6533e whitelist; was stripped — part of the hidden 8.3%-flip residual, driven to 0.000e0 live). Disposition: real expected-uncertainty-reduction or fold into pragmatic; 6.0-weight saturation flagged (E-possible-world-regulator)."}}}
+   "M-evaluate-policies 2026-07-03: now PERSISTED (2d6533e whitelist; was stripped — part of the hidden 8.3%-flip residual, driven to 0.000e0 live). Disposition: real expected-uncertainty-reduction or fold into pragmatic; 6.0-weight saturation flagged (E-possible-world-regulator).",
+   :repair-built
+   "B3 shares the real policy-conditioned EIG kernel in epistemic_value.clj. UNWIRED: a gap label can index where to inspect, but it cannot enter EIG until each policy predicts observations and their posterior updates. The lookup remains an honestly named engineering control."}}}

@@ -20,8 +20,8 @@
         like a hash.
      2. NO ARMING, NO DEPOSIT — `:arming` (operator, verbatim word, timestamp,
         scope) is a required field of the record, not ambient context.
-     3. ΔG RECOMPUTABLE — the stored `:eval :delta-g` must equal
-        `fold-eval/coverage-delta-g` recomputed fresh from the stored answer;
+     3. ΔG RECOMPUTABLE — the stored `:eval :coverage-score-delta` must equal
+        `fold-eval/coverage-score-delta` recomputed fresh from the stored answer;
         a drifted deposit is rejected, never silently served
         (silent-wrong-results are this stack's known hazard class).
 
@@ -154,13 +154,13 @@
     (when-not (and (sequential? boxes) (seq boxes))
       (reject! file :empty-construction
                "a deposit with no boxes replays a nothing; the honest nothing is NO deposit"))
-    (let [stored     (get-in d [:eval :delta-g])
-          recomputed (fe/coverage-delta-g (fl/construction->wiring answer))]
+    (let [stored     (get-in d [:eval :coverage-score-delta])
+          recomputed (fe/coverage-score-delta (fl/construction->wiring answer))]
       (when-not (number? stored)
-        (reject! file :missing-delta-g (pr-str (:eval d))))
+        (reject! file :missing-coverage-score-delta (pr-str (:eval d))))
       (when (or (nil? recomputed)
                 (> (Math/abs (- (double recomputed) (double stored))) 1e-9))
-        (reject! file :delta-g-mismatch
+        (reject! file :coverage-score-delta-mismatch
                  (str "pin 3: stored " stored " vs recomputed " recomputed)))))
   (validate-clean file d strict-clean?)))
 

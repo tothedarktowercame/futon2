@@ -86,10 +86,9 @@
 ;; HONESTY: A is HAND-SET in v0 — a declared observation model, not a
 ;; learned or derived one. Entries are likelihood RATIOS against an
 ;; uninformative baseline of 1.0 (scale-free: normalisation kills
-;; constants). The update path is DARK behind :likelihood-mode (default
-;; :legacy, byte-identical); the flip is the operator's (arena-*-mode
-;; idiom, same discipline as efe.clj's :risk-mode). Badge disposition is
-;; the reviewer's call, not claimed here.
+;; constants). The library default remains :legacy for caller compatibility;
+;; the War Machine arena flipped production to :aif on 2026-07-13, with a
+;; provenance-stamped legacy comparison hatch.
 ;; ---------------------------------------------------------------------------
 
 (def a-matrix-default-gain
@@ -160,9 +159,9 @@
 ;; section provides those, plus validators and a categorical filter that
 ;; computes the explicit A × (B × q) prediction-update cycle.
 ;;
-;; The :aif likelihood mode uses these normalised models. It is DARK
-;; (default remains :legacy). The flip is the operator's, same discipline
-;; as :risk-mode and :a-matrix.
+;; The :aif likelihood mode uses these normalised models. The library default
+;; remains :legacy; the production arena explicitly selects :aif and stamps
+;; both the mode and A/B/D hashes into each scheduled trace.
 ;; ---------------------------------------------------------------------------
 
 (defn- normalise-column

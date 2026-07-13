@@ -5,12 +5,12 @@
 ;; see docs/futon-aif-completeness.md §R5 and the R18 audit).
 ;;
 ;; For every tick in data/wm-trace/: who wins under the full blend
-;; (persisted :G-total argmin) vs under core-only? When they disagree:
+;; (persisted :controller-score argmin) vs under core-only? When they disagree:
 ;;  - does the action TYPE change, or only the target within a type?
 ;;  - how deep in the blend's ranking did the core winner sit (blend-rank)?
 ;;  - how deep in the core ranking did the blend winner sit (core-rank)?
 ;; NOTE the feasibility-mask half of §3.2 is NOT computable from traces:
-;; :G-graph-pragmatic (which smuggles the 1000·not-applicable mask) is
+;; :graph-control-score (which smuggles the 1000·not-applicable mask) is
 ;; stripped at persist time (trace.clj strip-ranked-action) — so this is
 ;; core WITHOUT mask, the honest lower bound on core-only behaviour.
 ;;
@@ -41,7 +41,7 @@
 (defn tick-diff [tick]
   (let [ra (vec (:ranked-actions tick))]
     (when (seq ra)
-      (let [totals (mapv #(double (or (:G-total %) 0.0)) ra)
+      (let [totals (mapv #(double (or (:controller-score %) 0.0)) ra)
             cores  (mapv core-score ra)
             bw     (first (apply min-key second (map-indexed vector totals)))
             cw     (first (apply min-key second (map-indexed vector cores)))

@@ -99,9 +99,9 @@
   (or (:escrowed-dG action)
       (:escrow-dG action)
       (:coverage-dG action)
-      (get-in action [:fold-escrow :delta-g])
-      (get-in action [:fold-escrow :delta-G])
-      (:delta-G action)))
+      (get-in action [:fold-escrow :coverage-score-delta])
+      (get-in action [:fold-escrow :coverage-score-delta])
+      (:coverage-score-delta action)))
 
 (defn intensity
   "Return a self-describing intensity map for ACTION, or nil when the action
@@ -137,7 +137,7 @@
 (defn score-bundle
   "Composition-aware portfolio score for a bundle of action maps or precomputed
    intensity maps. Higher :score is better; callers that need G units subtract
-   it from G-total.
+   it from controller-score.
 
    v1 composition rule:
    - within each class, sorted values earn diminishing returns v/(rank+1);

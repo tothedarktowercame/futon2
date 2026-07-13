@@ -1,7 +1,7 @@
 # Mission: Make the belief-update observation model A faithful (M-aif-a-matrix-faithfulness)
 
 **Date:** 2026-07-13  
-**Status:** **INSTANTIATE (Stage 1 landed; simulation spike complete; Stage 2 exogenous corpus pending)**  
+**Status:** **INSTANTIATE (Stage 1 production-wired; simulation spike complete; Stage 2 exogenous calibration pending)**
 **Owner:** Joe + unassigned implementation owner  
 **Primary repo:** futon2  
 **Related missions:** `M-aif-faithfulness` (parent badge audit),
@@ -12,20 +12,22 @@ formal fidelity from behavioural evidence)
 
 ### Motivation — the gap
 
-The R18 contract still gives `belief-update` a
-`:principled-approximation` badge. That verdict is directionally right but its
-stored wording is stale: the code no longer has “no A-matrix.” It has an
-explicit, hand-set event-block observation model, `a-matrix-v0`, and an exact
-categorical Bayes update behind `:likelihood-mode :a-matrix`. Production still
-uses the default `:legacy` update, and the declared A entries are likelihood
-ratios chosen by hand rather than a calibrated conditional distribution
-`P(o|s)`.
+The earlier R18 contract gave `belief-update` a
+`:principled-approximation` badge. That verdict identified a real gap, but the
+formal part of that gap is now closed: the code has an
+explicit, hand-set, normalised event-block observation model,
+`observation-model-v1`, and an exact
+categorical Bayes update behind `:likelihood-mode :aif`. As of 2026-07-13 the
+War Machine arena explicitly selects this mode in production and trace-stamps
+the A/B/D hashes; the library default remains `:legacy` for compatibility.
+The declared A entries are normalized conditional probabilities derived from
+hand-set ratios rather than values calibrated against exogenous outcomes.
 
 The discrepancy is therefore two-dimensional:
 
-1. **Formal fidelity:** the production belief path does not yet execute an
-   explicitly declared, normalized AIF generative model with observation model
-   A, transition model B, and initial prior D.
+1. **Formal fidelity:** **closed 2026-07-13** --- the production belief path
+   executes an explicitly declared, normalized AIF generative model with
+   observation model A, identity transition model B, and uniform initial prior D.
 2. **Empirical grounding:** the available A structure and event-weight
    tempering have not been estimated or calibrated against a corpus that can
    distinguish them from the diagonal legacy model.
@@ -38,14 +40,15 @@ in code” as evidence that the matrix describes the world.
 - Hidden-state vocabulary: seven entity statuses in
   `futon2.aif.belief/status-set`.
 - Event observation vocabulary: the same seven `state/*` event types.
-- Production update:
+- Historical/compatibility update (`:legacy`):
 
   ```text
   q'(s) ∝ q(s) · (1+w)^[o=s]
   ```
 
-  This is an implicit diagonal likelihood model and remains the default.
-- Dark explicit update:
+  This is an implicit diagonal likelihood model. It remains the library
+  default for callers that omit options, but is not the arena default.
+- Earlier explicit ratio-model update (`:a-matrix`, retained for comparison):
 
   ```text
   q'(s) ∝ q(s) · A[o,s]^κ(w),   κ(w)=log₂(1+w)
@@ -54,13 +57,17 @@ in code” as evidence that the matrix describes the world.
   `a-matrix-v0` has diagonal gain 2.0, five lifecycle-adjacent entries at
   1.3, and four contradictory entries at 0.7. Its entries are declared
   likelihood ratios, not column-normalized probabilities over observations.
-- The prior is carried between ticks when `*carry-belief?*` is enabled, but no
-  explicit transition matrix B is applied before the observation update; this
-  is an implicit identity-transition assumption.
+- The prior is carried between ticks when `*carry-belief?*` is enabled. The
+  production categorical filter explicitly applies the declared identity
+  `transition-model-v1` before the observation update.
 - The separate 8×7 `channel-emission-matrix` names the status-to-strategic-
   channel mapping but is not the event-block A used by `update-entity-belief`.
-- Production caller: `scripts/futon2/report/war_machine.clj` invokes
-  `belief/update-belief-batch` without likelihood options, hence `:legacy`.
+- Production caller: `scripts/futon2/report/war_machine.clj` invokes the named
+  `apply-arena-belief-events` seam, which resolves `:aif` by default and offers
+  `FUTON_WM_LIKELIHOOD_MODE=legacy` only as a provenance-stamped comparison
+  hatch. The same resolved opts are passed through EFE into single- and
+  multi-horizon forward-model rollouts, so imagined and realised belief
+  transitions cannot silently use different likelihood models.
 
 ### Existing evidence and why it is insufficient
 
@@ -228,9 +235,9 @@ Joe has read the proposal and agrees that:
 |---|---|---|
 | Status set (7 hidden states) | `belief/status-set` | Ready. `:spawned :refined :strengthened :addressed :falsified :foreclosed :reopened` |
 | Event observation vocabulary | same 7 `state/*` event types | Ready, but only `:strengthened` fires in current traces |
-| `a-matrix-v0` (hand-set, likelihood ratios) | `belief/a-matrix-v0` | Ready as data structure; needs normalisation conversion |
+| `a-matrix-v0` (hand-set, likelihood ratios) | `belief/a-matrix-v0` | Retained as the source structure for the normalised `observation-model-v1` |
 | `a-matrix-identity` (diagonal, ≡ legacy) | `belief/a-matrix-identity` | Ready; reduction-theorem tested |
-| `:likelihood-mode :a-matrix` update path | `belief/update-entity-belief` opts arity | Ready (DARK, byte-identical default) |
+| `:likelihood-mode :aif` categorical filter | `belief/update-entity-belief` opts arity | **LIVE in the arena**; computes explicit `A × (B × q)` |
 | Belief carry across ticks | `belief/*carry-belief?*` (ON) | Ready; prior = previous posterior via `reconcile-belief-carry` |
 | Channel emission matrix (8×7) | `belief/channel-emission-matrix` | Named and consistency-tested; not yet load-bearing at runtime |
 | Fold escrow / build-test outcomes | `aif/fold_escrow.clj`, `aif/fold_eval.clj` | Ready; produces typed evidence events (parse, type-check, structure-check, compile, test) |
@@ -244,16 +251,16 @@ Joe has read the proposal and agrees that:
 |---|---|---|
 | 45 WM trace files | `data/wm-trace/` | Ready but degenerate: 100% uniform priors, only `:strengthened` |
 | A-matrix shadow results | `holes/labs/M-aif-faithfulness/a-matrix-shadow.edn` | Ready; establishes the null result |
-| R18 badge manifest | `data/r18-badges.edn` | Ready; `belief-update` = `:principled-approximation` |
+| R18 badge manifest | `data/r18-badges.edn` | Updated; `belief-update` = `:derived-from-FEP`, with empirical-calibration debt stated separately |
 | Handoff verdicts | `labs/M-zaif-harness/` | Ready; typed verdicts (pass/fail/remediated) |
 
 **Missing (the actual work):**
 
 | Gap | What is needed |
 |---|---|
-| Normalised A as `P(o\|s)` columns | Convert `a-matrix-v0` from likelihood ratios to column-normalised probabilities; add validator |
-| Declared B and D | Explicit identity-B (or lifecycle-constrained B) and uniform D, named and validated |
-| Explicit filter wiring | Wire production as `A × (B × q)` rather than implicit identity; stamp provenance |
+| Normalised A as `P(o\|s)` columns | **Closed:** `observation-model-v1`, column-normalised and validated |
+| Declared B and D | **Closed:** versioned, validated identity-B and uniform-D |
+| Explicit filter wiring | **Closed:** arena calls the exact `:aif` filter and stamps mode plus A/B/D hashes |
 | Distinguishing corpus | Assemble from exogenous sources (see MAP answers below); current traces cannot identify A |
 | Weight `w` semantics | Document as fractional/tempered likelihood; add calibration test |
 | Morning Brief QA channel | New: post-hoc operator review of developed items, producing typed entity-grain verdicts |
@@ -860,4 +867,3 @@ Structural constraints checked against completion criteria. The riskiest
 commitment (does A produce better beliefs?) is addressed by the simulation
 spike design. C11 and C12 are deferred to INSTANTIATE as integration-level
 criteria.
-

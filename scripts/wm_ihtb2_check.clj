@@ -1,13 +1,13 @@
 (ns wm-ihtb2-check
   "IHTB-2 pre-flip check for the :risk-mode :kl PRODUCTION FLIP
    (E-KL-refinements; mission §8 IHTB-2: the 0.0 cascade-placeholder rows are
-   load-bearing — a mode change that pushes ordinary G-totals ABOVE 0.0 hands
+   load-bearing — a mode change that pushes ordinary controller-scores ABOVE 0.0 hands
    the placeholders argmin wins).
 
    SIM-only, one-shot (wm_e6_shadow pattern): runs the production judge ONCE
    (read-only), then re-ranks its stashed inputs under the POST-FLIP config
    (:risk-mode :kl, uniform weights, default T; :ambiguity-mode
-   :gaussian-entropy — the D5c mode already live). Reports ordinary G-total
+   :gaussian-entropy — the D5c mode already live). Reports ordinary controller-score
    stats vs the placeholder rows' totals.
 
    PASS iff every placeholder total stays ABOVE (worse than) the ordinary
@@ -20,8 +20,8 @@
    selection pool and n-placeholders is 0 here by construction, not by tick
    luck. The check is kept as a regression tripwire should the cascade lane
    ever move ahead of selection. The measured post-flip fact that still
-   matters: ordinary G-totals go POSITIVE (≈ +1.7..+6.7) — downstream stats
-   consumers must keep excluding placeholder rows when comparing G-totals
+   matters: ordinary controller-scores go POSITIVE (≈ +1.7..+6.7) — downstream stats
+   consumers must keep excluding placeholder rows when comparing controller-scores
    (E6/census convention).
 
    Usage: clojure -M -m wm-ihtb2-check [days]
@@ -48,13 +48,13 @@
         ranked (efe/rank-actions wm-state candidates post-flip)
         ordinary (vec (filter :G-risk ranked))
         placeholders (vec (remove :G-risk ranked))
-        totals (mapv #(double (:G-total %)) ordinary)
-        ph-totals (mapv #(double (:G-total % 0.0)) placeholders)
+        totals (mapv #(double (:controller-score %)) ordinary)
+        ph-totals (mapv #(double (:controller-score % 0.0)) placeholders)
         o-min (when (seq totals) (apply min totals))
         o-max (when (seq totals) (apply max totals))
         n-above-min-ph (when (seq ph-totals)
                          (count (filter #(> % (apply min ph-totals)) totals)))
-        winner (first (sort-by :G-total ranked))
+        winner (first (sort-by :controller-score ranked))
         pass? (and (seq totals)
                    (or (empty? ph-totals)
                        ;; every placeholder is strictly worse than the winner
@@ -73,7 +73,7 @@
                 :n-ordinary-above-placeholder n-above-min-ph
                 :winner {:action [(get-in winner [:action :type])
                                   (get-in winner [:action :target])]
-                         :G-total (:G-total winner)
+                         :controller-score (:controller-score winner)
                          :placeholder? (nil? (:G-risk winner))}
                 :ihtb2-pass? pass?}]
     (spit out-file (with-out-str (pp/pprint result)))

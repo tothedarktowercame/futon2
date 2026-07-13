@@ -17,87 +17,87 @@
       "share_of_corpus": 0.14590864278672364,
       "top_terms": [
         {
-          "term": "endpoint-extraction",
-          "tfidf": 0.0553
+          "term": "jar",
+          "tfidf": 0.0887
         },
         {
-          "term": "worked-examples",
-          "tfidf": 0.0553
+          "term": "omni",
+          "tfidf": 0.0751
         },
         {
-          "term": "h5",
-          "tfidf": 0.0529
+          "term": "ja",
+          "tfidf": 0.0751
         },
         {
-          "term": "h6",
-          "tfidf": 0.0529
+          "term": "apr",
+          "tfidf": 0.0744
         },
         {
-          "term": "endpoint-identity",
-          "tfidf": 0.0515
+          "term": "snap",
+          "tfidf": 0.0726
         },
         {
-          "term": "futon5a-d",
-          "tfidf": 0.0515
+          "term": "contentproc",
+          "tfidf": 0.0674
         },
         {
-          "term": "gallery",
-          "tfidf": 0.0508
+          "term": "ipchandle",
+          "tfidf": 0.0674
         },
         {
-          "term": "h4",
-          "tfidf": 0.0507
+          "term": "initialchannelid",
+          "tfidf": 0.0674
         },
         {
-          "term": "h2",
-          "tfidf": 0.0488
+          "term": "parentpid",
+          "tfidf": 0.0674
         },
         {
-          "term": "m-memes-arrows",
-          "tfidf": 0.0476
+          "term": "crashhelper",
+          "tfidf": 0.0674
         }
       ],
       "representative_snippets": [
         {
-          "text": "Going back to your outline above, we're trying to do VERIFY step by step — I'm not sure which of these are fully tick...",
-          "id": "e-d3fe8d32-db28-4768-8532-011101cffbbf",
-          "at": "2026-05-27T10:02:23.809585592Z"
+          "text": "Right, D2 is definitely interesting and I think it would be good if we could build on the mission-local work we just ...",
+          "id": "e-de53a3ec-3cc2-41cd-9fa1-d54be187bc1d",
+          "at": "2026-06-09T13:45:08.061255737Z"
         },
         {
-          "text": "No need I see that it did work out.  I now think the paper is an increasingly OK summary and the question is: can we ...",
-          "id": "e-91f89806-118d-4eef-8a06-ae99bcfc7c33",
-          "at": "2026-07-08T23:24:44.898020356Z"
+          "text": "OK; can you make an attempt at answering the MAP questions based on this framing?",
+          "id": "e-a2b71bd1-26dd-47fa-b4aa-be157fc57965",
+          "at": "2026-04-26T14:04:37.352346625Z"
         },
         {
-          "text": "No need I see that it did work out.  I now think the paper is an increasingly OK summary and the question is: can we ...",
-          "id": "e-7b1fcfde-958e-4a74-a679-3f6c1fc307cd",
-          "at": "2026-07-08T23:28:28.670842789Z"
+          "text": "So, with regard to MAP, I'd like this to centre on the Invariants, because that is the part that needs the most upgra...",
+          "id": "e-17f3e612-f532-47e3-9910-50d195e51f4b",
+          "at": "2026-04-26T14:02:48.390941940Z"
         },
         {
-          "text": "Yeah, I guess I can see how hooking up daily scan and the interest network should allow the system to identify things...",
-          "id": "e-a0affe84-5115-4009-b0f1-3fb509a63558",
-          "at": "2026-06-05T17:32:10.352088457Z"
+          "text": "We can regenerate vsatarcs.html *after* the grind — according to our plan in M-war-machine-first-outing vsatarcs woul...",
+          "id": "e-2ca614f3-2828-4de1-9c0a-e9945d8d1747",
+          "at": "2026-05-30T22:04:30.600824888Z"
         },
         {
-          "text": "OK, can you push through implementations of the remaining INSTANTIATE steps?  With the candidate Invariant Queue it's...",
-          "id": "e-345f13da-0413-4d53-8b28-fdf0f4979851",
-          "at": "2026-06-02T13:31:14.201600802Z"
+          "text": "Let's build it-2 now — BTW just for the record I dropped the new eoi in futon5a/essays/kissinger-dark-tower-2026/kiss...",
+          "id": "e-3b4cc7a2-36f2-4801-b463-bb7986a4bf76",
+          "at": "2026-06-03T17:16:38.528464700Z"
         }
       ],
-      "mark_hit_share": 0.0045,
-      "mark_hit_count": 4,
+      "mark_hit_share": 0.0011,
+      "mark_hit_count": 1,
       "top_missions": [
         {
-          "mission": "M-operational-vocabulary",
-          "count": 43
+          "mission": "M-futon-forward-model",
+          "count": 25
+        },
+        {
+          "mission": "M-wm-policies",
+          "count": 23
         },
         {
           "mission": "M-learning-loop",
-          "count": 37
-        },
-        {
-          "mission": "M-capability-star-map",
-          "count": 23
+          "count": 19
         }
       ],
       "display_id": 1
@@ -108,87 +108,87 @@
       "share_of_corpus": 0.10959579362471246,
       "top_terms": [
         {
-          "term": "drainer",
-          "tfidf": 0.0493
-        },
-        {
-          "term": "epistemic",
-          "tfidf": 0.0425
-        },
-        {
-          "term": "executor",
-          "tfidf": 0.0404
-        },
-        {
-          "term": "pxr",
-          "tfidf": 0.0403
-        },
-        {
-          "term": "concentration",
-          "tfidf": 0.0401
-        },
-        {
           "term": "build-match",
-          "tfidf": 0.0399
+          "tfidf": 0.0585
         },
         {
-          "term": "enqueue",
-          "tfidf": 0.0393
+          "term": "leg",
+          "tfidf": 0.0548
         },
         {
-          "term": "pgrep",
-          "tfidf": 0.038
+          "term": "m-foo",
+          "tfidf": 0.0529
         },
         {
-          "term": "diffuse",
-          "tfidf": 0.038
+          "term": "state-snapshot-witness",
+          "tfidf": 0.0524
         },
         {
-          "term": "cleans",
-          "tfidf": 0.0373
+          "term": "realized-g",
+          "tfidf": 0.0511
+        },
+        {
+          "term": "wp2",
+          "tfidf": 0.0497
+        },
+        {
+          "term": "autoclock-in",
+          "tfidf": 0.0482
+        },
+        {
+          "term": "hammer",
+          "tfidf": 0.0479
+        },
+        {
+          "term": "clock-in",
+          "tfidf": 0.0479
+        },
+        {
+          "term": "bla",
+          "tfidf": 0.0479
         }
       ],
       "representative_snippets": [
         {
-          "text": "OK, so that seems like a good plan — to think about this in terms of ~/code/futon4/holes/mission-lifecycle.md I'd say...",
-          "id": "e-75b9a29d-7599-419b-a5dd-a68466c47604",
-          "at": "2026-06-23T07:24:02.333961243Z"
+          "text": "Maybe we can push through to 4/14 channels now and log 10 more as SORRYs",
+          "id": "e-9a5bb73b-8d58-447d-ae9b-8ff90eab96ca",
+          "at": "2026-05-18T21:53:27.190798122Z"
         },
         {
-          "text": "OK, so that seems like a good plan — to think about this in terms of ~/code/futon4/holes/mission-lifecycle.md I'd say...",
-          "id": "e-2de4ee91-1157-48d3-b81b-6d04e2e7a0f9",
-          "at": "2026-06-23T07:28:29.808096964Z"
+          "text": "Is R3 still partial?",
+          "id": "e-9ee529e7-4518-4a85-a60f-d7e09029a64b",
+          "at": "2026-05-18T21:49:54.624582115Z"
         },
         {
-          "text": "Yeah, so, having recently completed a mining run, having ingested mission scopes, and having populated substrate-2 we...",
-          "id": "e-bdf1f42a-5af5-4fbf-959f-86fb22c6112d",
-          "at": "2026-06-27T20:58:43.060416238Z"
+          "text": "1) :latent is fine ; 2) yes fix it ; 3) incremental fix is OK ; 4) per-tick makes sense to me too",
+          "id": "e-49d99208-4f63-4cfb-8bf1-d9aea3de89dd",
+          "at": "2026-05-08T13:00:54.512226719Z"
         },
         {
-          "text": "Hm... so, the fact is we already have beed doing some \"downstream\" work with patterns, and the quality isn't great.  ...",
-          "id": "e-0e24bd3a-7554-4f08-9af3-c6b5d40258d4",
-          "at": "2026-05-20T13:43:49.315117065Z"
+          "text": "I let that run overnight, I hope it is all finished up",
+          "id": "e-ff63cb6d-bdf6-4de3-a9c3-9124bf875572",
+          "at": "2026-06-18T06:44:29.283326695Z"
         },
         {
-          "text": "OK, so, I think what should happen in such cases is: see if we can write new patterns.  We've been using \"existing li...",
-          "id": "e-cc9e4bc0-4f36-4b85-81bf-4241f52f4609",
-          "at": "2026-07-05T19:13:53.232956707Z"
+          "text": "By the way the logs in the *server*  buffer are showing some problems — can you look with Emacsclient and see what's ...",
+          "id": "e-71af3e7f-007b-4732-b91c-529b6857ffec",
+          "at": "2026-04-27T21:21:57.044583743Z"
         }
       ],
-      "mark_hit_share": 0.0045,
-      "mark_hit_count": 3,
+      "mark_hit_share": 0.0015,
+      "mark_hit_count": 1,
       "top_missions": [
         {
-          "mission": "M-wm-policies",
-          "count": 62
-        },
-        {
           "mission": "M-learning-loop",
-          "count": 27
+          "count": 24
         },
         {
-          "mission": "M-typed-holes",
-          "count": 27
+          "mission": "M-futon-forward-model",
+          "count": 20
+        },
+        {
+          "mission": "M-vsatarcs-invariants-integration",
+          "count": 17
         }
       ],
       "display_id": 2
@@ -199,87 +199,87 @@
       "share_of_corpus": 0.1040092014459415,
       "top_terms": [
         {
-          "term": "let",
-          "tfidf": 0.1181
+          "term": "nbaseline",
+          "tfidf": 0.1552
         },
         {
-          "term": "ok",
-          "tfidf": 0.1094
+          "term": "fg2b-p1",
+          "tfidf": 0.1114
         },
         {
-          "term": "commit",
-          "tfidf": 0.0953
+          "term": "fg1-p1",
+          "tfidf": 0.1114
         },
         {
-          "term": "sure",
-          "tfidf": 0.0882
+          "term": "fg3-c",
+          "tfidf": 0.1114
         },
         {
-          "term": "yes",
-          "tfidf": 0.0864
+          "term": "syn1",
+          "tfidf": 0.1114
         },
         {
-          "term": "like",
-          "tfidf": 0.0858
+          "term": "fg3-b",
+          "tfidf": 0.1114
         },
         {
-          "term": "derive",
-          "tfidf": 0.085
+          "term": "fg1-p2",
+          "tfidf": 0.1114
         },
         {
-          "term": "work",
-          "tfidf": 0.0847
+          "term": "fg2a-p1",
+          "tfidf": 0.1114
         },
         {
-          "term": "plan",
-          "tfidf": 0.083
+          "term": "syn2",
+          "tfidf": 0.1114
         },
         {
-          "term": "good",
-          "tfidf": 0.0817
+          "term": "syn3",
+          "tfidf": 0.1114
         }
       ],
       "representative_snippets": [
         {
-          "text": "OK, let's follow this plan",
-          "id": "e-38f34b00-8da6-47f6-9929-d9207dc53f86",
-          "at": "2026-06-09T13:15:04.093754205Z"
+          "text": "OK, let's go forward in the lighter-touch way.  My concern is that E-substrate-2-sorry-typing proposes simple indicat...",
+          "id": "e-66934fd1-7949-46e9-b8e2-12bc63c6c025",
+          "at": "2026-05-27T12:03:55.787306059Z"
         },
         {
-          "text": "OK, let's commit it",
-          "id": "e-d0f866f9-35ce-4116-8428-800762a8e3d3",
-          "at": "2026-04-29T13:24:28.185919409Z"
+          "text": "So, I passed M-live-efe-map to codex-4 but I am not necessarily that impressed with its work.  Will you read it and s...",
+          "id": "e-6f5b9f28-6229-4d84-8fc2-dff23a917c01",
+          "at": "2026-07-04T19:15:27.671811684Z"
         },
         {
-          "text": "OK let's do this plan",
-          "id": "e-0e954047-3590-4dd1-b1db-4a3315f76926",
-          "at": "2026-06-08T17:34:56.949546226Z"
+          "text": "It can't close yet b/c we are still seeing \"→ 7 tied optionsG=-4.241 (each)WM has no clear preference among these — p...",
+          "id": "e-8be6e88b-64e1-466c-8f92-2db61412f8e3",
+          "at": "2026-05-27T20:31:07.462728658Z"
         },
         {
-          "text": "Yes, let's do (1)",
-          "id": "e-25ff240f-b492-4025-b42a-101d0e0dbad7",
-          "at": "2026-07-01T17:15:57.473526165Z"
+          "text": "OK, this seems like a good picture of \"what happened\" and why my memories were confused.  The question is what to do ...",
+          "id": "e-ceaae363-029d-44d7-a6e2-884d9cb2516c",
+          "at": "2026-05-03T21:12:20.133450866Z"
         },
         {
-          "text": "OK let's continue with this plan",
-          "id": "e-7c2b6e86-6ca9-4e7b-86dd-a7cdbfd230e0",
-          "at": "2026-06-30T03:49:20.958378086Z"
+          "text": "Hi, I wonder if you could review /home/joe/npt/working-paper/UKRN_WP_draft_v9.md from the point of view of the ~/code...",
+          "id": "e-fec5fad3-83af-42f8-bc2d-e11e65719d15",
+          "at": "2026-05-06T13:57:56.765890517Z"
         }
       ],
-      "mark_hit_share": 0.0,
-      "mark_hit_count": 0,
+      "mark_hit_share": 0.0032,
+      "mark_hit_count": 2,
       "top_missions": [
         {
           "mission": "M-learning-loop",
-          "count": 29
+          "count": 22
         },
         {
           "mission": "M-wm-policies",
-          "count": 25
+          "count": 20
         },
         {
-          "mission": "M-operational-vocabulary",
-          "count": 18
+          "mission": "M-custom-harness",
+          "count": 19
         }
       ],
       "display_id": 3
@@ -290,87 +290,87 @@
       "share_of_corpus": 0.10318764377259283,
       "top_terms": [
         {
-          "term": "nbaseline",
-          "tfidf": 0.1799
+          "term": "pattern-name",
+          "tfidf": 0.0693
         },
         {
-          "term": "fg2b-p1",
-          "tfidf": 0.129
+          "term": "plist-get",
+          "tfidf": 0.0669
         },
         {
-          "term": "fg1-p1",
-          "tfidf": 0.129
+          "term": "cdr",
+          "tfidf": 0.0629
         },
         {
-          "term": "fg3-c",
-          "tfidf": 0.129
+          "term": "server-loop",
+          "tfidf": 0.0609
         },
         {
-          "term": "syn1",
-          "tfidf": 0.129
+          "term": "unmasked",
+          "tfidf": 0.0609
         },
         {
-          "term": "fg3-b",
-          "tfidf": 0.129
+          "term": "cons",
+          "tfidf": 0.057
         },
         {
-          "term": "fg1-p2",
-          "tfidf": 0.129
+          "term": "tail",
+          "tfidf": 0.0563
         },
         {
-          "term": "fg2a-p1",
-          "tfidf": 0.129
+          "term": "arxana-browser-essays--import-manifest",
+          "tfidf": 0.0561
         },
         {
-          "term": "syn2",
-          "tfidf": 0.129
+          "term": "na",
+          "tfidf": 0.0556
         },
         {
-          "term": "syn3",
-          "tfidf": 0.129
+          "term": "futon5a-d",
+          "tfidf": 0.0554
         }
       ],
       "representative_snippets": [
         {
-          "text": "OK, rehome it, but it is resolved in any case.  Let's log the technical issue for fixing later.",
-          "id": "e-45dbfd75-5cbe-4780-8b8b-3ee6db68b88f",
-          "at": "2026-06-01T12:58:04.743675854Z"
+          "text": "So, I want to weigh in on the implementation plan for the NOTICE step, insofar as we already have a multi_watcher — I...",
+          "id": "e-c7e966a0-b104-41b5-b516-3792c509c106",
+          "at": "2026-06-05T09:38:26.774869612Z"
         },
         {
-          "text": "OK, let's fix the issue you found",
-          "id": "e-c7e60ec0-2c00-440c-b33c-9fe1a21b85a0",
-          "at": "2026-05-03T18:25:56.687298286Z"
+          "text": "It says claude-11 is INVOKING... maybe that's a bifurcated version of your session.  Let's let it finish and then kil...",
+          "id": "e-3d5cdb4f-a8e7-4ba0-a6ae-7a00076b97b1",
+          "at": "2026-07-02T12:25:20.314899893Z"
         },
         {
-          "text": "No, that was just a debug from an Orchestrating Codex who is helping us get the repl working again",
-          "id": "e-ffc85a97-de0a-4384-aafd-cce8be755bd6",
-          "at": "2026-02-18T15:49:56.356459874Z"
+          "text": "So, rather than waiting 15 minutes for the tick, I think we should push a little on M-futon-forward-model and file://...",
+          "id": "e-408e63e5-eb3e-4d8e-ba9b-f8aaa0578343",
+          "at": "2026-07-12T08:27:34.022347234Z"
         },
         {
-          "text": "Let's check on the output from the other agents.  They might need restarting.",
-          "id": "e-2a4c0e92-7fbf-46cc-a17f-d8129c5fac49",
-          "at": "2026-06-30T11:48:17.385842754Z"
+          "text": "Let's work with the Live set — \"futon\" is my own content, but \"live\" corresponds to the community content that I am w...",
+          "id": "e-2603d0b4-66eb-4910-b1f1-85011c636912",
+          "at": "2026-05-05T12:02:23.500160135Z"
         },
         {
-          "text": "OK, I restarted the JVM.  I saw you were chatting with Codex so please debrief me.",
-          "id": "e-b6a86743-647f-40ba-a327-55e82d81bb31",
-          "at": "2026-05-25T13:02:12.465415238Z"
+          "text": "At this point we might look into finalising whatever version of Tickle, watchdog, autorunner or whatever will be reli...",
+          "id": "e-3a1093a8-1bc3-44e2-b315-27c0871c9200",
+          "at": "2026-06-11T13:27:02.735264876Z"
         }
       ],
-      "mark_hit_share": 0.0032,
-      "mark_hit_count": 2,
+      "mark_hit_share": 0.0016,
+      "mark_hit_count": 1,
       "top_missions": [
         {
-          "mission": "M-operational-vocabulary",
-          "count": 27
-        },
-        {
           "mission": "M-learning-loop",
-          "count": 18
+          "count": 23
         },
         {
-          "mission": "M-custom-harness",
-          "count": 17
+          "mission": "M-typed-holes",
+          "count": 14
+        },
+        {
+          "mission": "M-wm-policies",
+          "count": 13
         }
       ],
       "display_id": 4
@@ -381,87 +381,87 @@
       "share_of_corpus": 0.09201445941505093,
       "top_terms": [
         {
-          "term": "amer",
-          "tfidf": 0.0552
+          "term": "icon",
+          "tfidf": 0.1054
         },
         {
           "term": "tab",
-          "tfidf": 0.0526
+          "tfidf": 0.09
         },
         {
-          "term": "icon",
-          "tfidf": 0.0466
+          "term": "clojurescript",
+          "tfidf": 0.0669
         },
         {
-          "term": "emea",
-          "tfidf": 0.0463
+          "term": "jank",
+          "tfidf": 0.066
         },
         {
-          "term": "engineer",
-          "tfidf": 0.0461
+          "term": "calva",
+          "tfidf": 0.066
         },
         {
-          "term": "full-time",
-          "tfidf": 0.0447
+          "term": "chemistry",
+          "tfidf": 0.0632
         },
         {
-          "term": "salary",
-          "tfidf": 0.0429
+          "term": "vim",
+          "tfidf": 0.0599
         },
         {
-          "term": "egain",
-          "tfidf": 0.0418
+          "term": "scicloj",
+          "tfidf": 0.058
         },
         {
-          "term": "september",
-          "tfidf": 0.0407
+          "term": "neanderthal",
+          "tfidf": 0.058
         },
         {
-          "term": "mentors",
-          "tfidf": 0.0407
+          "term": "logo",
+          "tfidf": 0.058
         }
       ],
       "representative_snippets": [
         {
-          "text": "OK, this time let's turn their application questions into a *scorable* set of criteria.  I'm not quite sure what's in...",
-          "id": "e-700560a5-e52a-4c9b-a9ed-c7bd68e98e65",
-          "at": "2026-06-06T18:04:04.799292309Z"
+          "text": "OK, let's commit these — seems like the right kind of security model is being created.  We can note jujutsu in the mi...",
+          "id": "e-71571d6d-3439-4513-bb96-b3c59061d671",
+          "at": "2026-05-30T20:03:08.722379134Z"
         },
         {
-          "text": "I know that the Anthropic Institute are looking for \"Deep experience using Claude as a tool for research and organiza...",
-          "id": "e-2d5d2c56-2a85-4dfa-b3dd-f11a202841a2",
-          "at": "2026-06-04T22:07:34.771762668Z"
+          "text": "Let's draft first so that we're writing to some kind of spec, let's ratify the ownership — I've spun up codex-3 who y...",
+          "id": "e-d869960f-dabf-4d79-b95b-cb735af3d876",
+          "at": "2026-06-01T16:20:10.635614474Z"
         },
         {
-          "text": "1. So, I love b+e, personally.  2. This does seem like a general-purpose \"method\" note for now — my thesis ./futon6/r...",
-          "id": "e-55721c52-8194-407e-bf51-22ff8abb1301",
-          "at": "2026-05-01T19:30:20.298043355Z"
+          "text": "You manifestly have way more space than you need, you're doing something incorrect.  This is not a space arithmetic i...",
+          "id": "e-1e231b85-5ce3-48be-a6b5-2d942c8d5feb",
+          "at": "2026-07-03T09:47:18.570000413Z"
         },
         {
-          "text": "So, about the \"community governance over core curriculum\" — we didn't really have that during ORP, so it's not a \"dro...",
-          "id": "e-137f0fec-d1a1-474b-b06c-6824660013eb",
-          "at": "2026-05-04T18:24:45.749480988Z"
+          "text": "Sure, let's commit and then come back to our DISSOLUTION checklist and see what else we can do",
+          "id": "e-3dd4aa01-e0d5-4c09-9cd6-5a7b8d5f6ecb",
+          "at": "2026-07-01T09:31:58.833506167Z"
         },
         {
-          "text": "That's good — it keeps it general but is pretty clear.  But, we might improve it in a second or third pass.  We have ...",
-          "id": "e-a36c6882-0b2f-4e50-b1e5-92da72e50e0a",
-          "at": "2026-05-11T12:28:48.080548044Z"
+          "text": "So, I wonder what are some examples that really show off DAX ?  From a practical standpoint, just making sense of *wh...",
+          "id": "e-fd912ada-a4e1-4060-a462-a2cc3fadd26b",
+          "at": "2026-06-26T12:43:42.748106116Z"
         }
       ],
-      "mark_hit_share": 0.0,
-      "mark_hit_count": 0,
+      "mark_hit_share": 0.0018,
+      "mark_hit_count": 1,
       "top_missions": [
         {
+          "mission": "M-operational-vocabulary",
+          "count": 47
+        },
+        {
+          "mission": "M-wm-policies",
+          "count": 34
+        },
+        {
           "mission": "M-futon-forward-model",
-          "count": 36
-        },
-        {
-          "mission": "M-buyer-discovery",
-          "count": 12
-        },
-        {
-          "mission": "M-explore-aiqa",
-          "count": 10
+          "count": 23
         }
       ],
       "display_id": 5
@@ -472,87 +472,87 @@
       "share_of_corpus": 0.09020703253368387,
       "top_terms": [
         {
-          "term": "jar",
-          "tfidf": 0.0858
+          "term": "endpoint-extraction",
+          "tfidf": 0.0661
         },
         {
-          "term": "omni",
-          "tfidf": 0.0727
+          "term": "worked-examples",
+          "tfidf": 0.0661
         },
         {
-          "term": "ja",
-          "tfidf": 0.0727
+          "term": "h5",
+          "tfidf": 0.0632
         },
         {
-          "term": "apr",
-          "tfidf": 0.072
+          "term": "h6",
+          "tfidf": 0.0632
         },
         {
-          "term": "snap",
-          "tfidf": 0.0703
+          "term": "endpoint-identity",
+          "tfidf": 0.0615
         },
         {
-          "term": "contentproc",
-          "tfidf": 0.0652
+          "term": "h4",
+          "tfidf": 0.0606
         },
         {
-          "term": "ipchandle",
-          "tfidf": 0.0652
+          "term": "m-memes-arrows",
+          "tfidf": 0.0571
         },
         {
-          "term": "initialchannelid",
-          "tfidf": 0.0652
+          "term": "h1",
+          "tfidf": 0.0557
         },
         {
-          "term": "parentpid",
-          "tfidf": 0.0652
+          "term": "logic-model",
+          "tfidf": 0.0513
         },
         {
-          "term": "crashhelper",
-          "tfidf": 0.0652
+          "term": "poller",
+          "tfidf": 0.0513
         }
       ],
       "representative_snippets": [
         {
-          "text": "Let's draft it, I'll comment here before you insert it, but it sounds like you've got a good idea of what needs to be...",
-          "id": "e-e3bf4739-5421-464e-b214-745bebb1fc7f",
-          "at": "2026-06-02T09:44:13.433895854Z"
+          "text": "OK, can you please make a .pdf version of the .svg",
+          "id": "e-6d90fe1b-f42d-434c-b825-238542ca01f0",
+          "at": "2026-06-03T19:52:42.384442241Z"
         },
         {
-          "text": "OK, draft campaign-lifecycle.md in futon4 holes — and let's back it by some new patterns in a new ~/code/futon3/libra...",
-          "id": "e-e61f5c44-b9a3-436e-9439-3648f6662eae",
-          "at": "2026-05-31T13:26:11.981255051Z"
+          "text": "Let's capture it in E-turn-dsl",
+          "id": "e-4e585120-150f-4820-84ef-085b18725d08",
+          "at": "2026-06-05T13:11:06.029651650Z"
         },
         {
-          "text": "Well, this is too long, but it's an OK first draft.  It is not supported by design patterns from the standard library...",
-          "id": "e-a4cd56f5-072f-498d-8870-f61c92ddbfd7",
-          "at": "2026-05-24T16:58:54.333703809Z"
+          "text": "OK, but lenses are talked a lot about by CT folks — maybe we can find them in Idris or Coq or something.  You could a...",
+          "id": "e-17870f8e-9960-4e4e-aca5-b6ff9867393e",
+          "at": "2026-06-14T10:56:33.147737226Z"
         },
         {
-          "text": "Ah, OK, so interesting — Synthesis should take into account the patterns from the research paper — ~/code/futon3/libr...",
-          "id": "e-0312bf8a-a647-4b08-a59f-f1363538f529",
-          "at": "2026-05-08T16:03:13.126619952Z"
+          "text": "OK, though I think we had managed to get shadow cljs working under the same single JVM at one point!  Anyway I have r...",
+          "id": "e-7f2618cd-6e47-4d80-884c-51ab619b250d",
+          "at": "2026-06-26T18:10:53.948321688Z"
         },
         {
-          "text": "It doesn't look as though /home/joe/code/futon3/library/aif/ contains a niche-construction pattern — we could add the...",
-          "id": "e-93031565-3ecd-4d3f-8881-aecb5b12fc0f",
-          "at": "2026-05-27T13:14:06.786133648Z"
+          "text": "At this point I'd like you to carry out a whistle-based short conversation with claude-5 that can help you prepare fo...",
+          "id": "e-09760047-5fc9-4321-b0fb-c677fb222128",
+          "at": "2026-06-09T12:15:57.578952521Z"
         }
       ],
-      "mark_hit_share": 0.0018,
-      "mark_hit_count": 1,
+      "mark_hit_share": 0.0036,
+      "mark_hit_count": 2,
       "top_missions": [
         {
-          "mission": "M-futon-forward-model",
-          "count": 26
+          "mission": "M-custom-harness",
+          "count": 24
         },
         {
           "mission": "M-wm-policies",
-          "count": 21
+          "count": 23
         },
         {
-          "mission": "M-operational-vocabulary",
-          "count": 20
+          "mission": "M-futon-forward-model",
+          "count": 19
         }
       ],
       "display_id": 6
@@ -563,87 +563,87 @@
       "share_of_corpus": 0.08494906342425239,
       "top_terms": [
         {
-          "term": "julia-chat",
-          "tfidf": 0.094
+          "term": "amer",
+          "tfidf": 0.072
         },
         {
-          "term": "budgie",
-          "tfidf": 0.0728
+          "term": "drainer",
+          "tfidf": 0.0665
         },
         {
-          "term": "photo",
-          "tfidf": 0.0656
+          "term": "emea",
+          "tfidf": 0.0605
         },
         {
-          "term": "p129",
-          "tfidf": 0.0636
+          "term": "in-process",
+          "tfidf": 0.0538
         },
         {
-          "term": "foot",
-          "tfidf": 0.0636
+          "term": "enqueue",
+          "tfidf": 0.0531
         },
         {
-          "term": "p79",
-          "tfidf": 0.0632
+          "term": "engineer",
+          "tfidf": 0.053
         },
         {
-          "term": "nonstopmode",
-          "tfidf": 0.0618
+          "term": "soundness",
+          "tfidf": 0.0522
         },
         {
-          "term": "plate",
-          "tfidf": 0.0603
+          "term": "dm",
+          "tfidf": 0.0513
         },
         {
-          "term": "tuftescan",
-          "tfidf": 0.0603
+          "term": "pgrep",
+          "tfidf": 0.0513
         },
         {
-          "term": "width",
-          "tfidf": 0.0592
+          "term": "seattle",
+          "tfidf": 0.0513
         }
       ],
       "representative_snippets": [
         {
-          "text": "No visual improvement, if you look at http://localhost:3030/12 you'll see the bottom part of the diagram is off the page",
-          "id": "e-8521e522-9a9f-4750-a826-1983293dc69c",
-          "at": "2026-03-24T11:59:45.690569527Z"
+          "text": "let's commit now",
+          "id": "e-8b15dfd9-7878-47b7-80d3-a6a14427bf87",
+          "at": "2026-07-09T17:50:17.965181042Z"
         },
         {
-          "text": "This is a very strong IDENTIFY stage.  The gap is obvious, the documentation and prior work is ample.  This sets us u...",
-          "id": "e-5202ff55-7ec8-4c1d-8293-62fbf6216575",
-          "at": "2026-04-26T19:27:46.242067087Z"
+          "text": "Well, let's source two more examples so that we can run them through the pipeline to feed A5",
+          "id": "e-a7aeba51-d48b-41b3-9c0f-13c765aa76ae",
+          "at": "2026-07-08T09:04:11.298405216Z"
         },
         {
-          "text": "OK, this is interesting.  Let's see if we can push on to a graphical display like the one in ~/Pictures/Screenshots/s...",
-          "id": "e-e120f569-60d1-4d2c-a0be-59d766aefea4",
-          "at": "2026-06-16T17:07:17.147311329Z"
+          "text": "I have an idea inspired by your PM mechanical gold — what about taking PlanetMath, or Wikipedia, or both, or both + n...",
+          "id": "e-714d09c0-bceb-41c0-8a47-2127d388b10b",
+          "at": "2026-05-23T10:01:34.358855246Z"
         },
         {
-          "text": "Yes, please flesh out the new patterns in the standard style",
-          "id": "e-f1d069b4-8a05-4853-b652-24cb58fa7302",
-          "at": "2026-07-08T06:24:25.338830228Z"
+          "text": "Let's try a few more.  We only have a relatively small number of Strategic SORRYs",
+          "id": "e-ee561854-b4a4-45a2-8420-26e7749203cc",
+          "at": "2026-04-26T20:16:22.756930279Z"
         },
         {
-          "text": "Alright, good, except I wish you could just *look* at the diagram and sort out the remaining overlaps",
-          "id": "e-0618a599-7353-42f3-b3e0-4533291d8126",
-          "at": "2026-03-24T13:32:46.972878241Z"
+          "text": "OK, but it's zai-2 up now for clean testing, please fire it up",
+          "id": "e-5bd0fa01-3e36-45fa-9ee0-7a53b65dc91f",
+          "at": "2026-07-09T11:29:23.126537524Z"
         }
       ],
-      "mark_hit_share": 0.0,
-      "mark_hit_count": 0,
+      "mark_hit_share": 0.0019,
+      "mark_hit_count": 1,
       "top_missions": [
         {
+          "mission": "M-learning-loop",
+          "count": 22
+        },
+        {
+          "mission": "M-futon-forward-model",
+          "count": 15
+        },
+        {
           "mission": "M-operational-vocabulary",
-          "count": 23
-        },
-        {
-          "mission": "M-wm-policies",
-          "count": 23
-        },
-        {
-          "mission": "M-points-de-fuite",
-          "count": 17
+          "count": 12
         }
       ],
       "display_id": 7
@@ -654,87 +654,87 @@
       "share_of_corpus": 0.08297732500821557,
       "top_terms": [
         {
-          "term": "m-pilot-appearance",
-          "tfidf": 0.0455
+          "term": "felix",
+          "tfidf": 0.0627
         },
         {
-          "term": "glob",
-          "tfidf": 0.0436
+          "term": "gurdjieff",
+          "tfidf": 0.0606
         },
         {
-          "term": "war-machine",
-          "tfidf": 0.0428
+          "term": "authentic",
+          "tfidf": 0.0583
         },
         {
-          "term": "mission",
-          "tfidf": 0.0422
+          "term": "bible",
+          "tfidf": 0.057
         },
         {
-          "term": "agent-id",
-          "tfidf": 0.042
+          "term": "tv",
+          "tfidf": 0.057
         },
         {
-          "term": "missions",
-          "tfidf": 0.0414
+          "term": "man",
+          "tfidf": 0.0562
         },
         {
-          "term": "m-canon-fingerprint-store",
-          "tfidf": 0.0402
+          "term": "men",
+          "tfidf": 0.0556
         },
         {
-          "term": "mission-lifecycle",
-          "tfidf": 0.0401
+          "term": "buckman",
+          "tfidf": 0.0556
         },
         {
-          "term": "m-learning-loop",
-          "tfidf": 0.0401
+          "term": "reactions",
+          "tfidf": 0.0556
         },
         {
-          "term": "machine",
-          "tfidf": 0.0391
+          "term": "disneyland",
+          "tfidf": 0.053
         }
       ],
       "representative_snippets": [
         {
-          "text": "1. Broadly fine, though I'd say that the \"Mission Peripheral\" and M-live-geometric-stack should already give us parse...",
-          "id": "e-23b096be-f19f-4183-904e-aabca0443a28",
-          "at": "2026-05-04T11:08:51.654719701Z"
+          "text": "Codex is on vacation so let's do it directly.",
+          "id": "e-5f46080a-544d-446e-843a-8776b459f42e",
+          "at": "2026-07-01T16:43:25.378981151Z"
         },
         {
-          "text": "Let's hold these ideas in the Mission document before we dive into anything.  We have to do this carefully.  I think ...",
-          "id": "e-e69e0294-d013-41cb-8050-3d5c30605a8a",
-          "at": "2026-05-24T11:07:05.755866717Z"
+          "text": "OK, can you write it as a new stage that would go into the superpod pipeline, maybe with some demo examples made \"by ...",
+          "id": "e-980f338f-0c4b-4715-a3cd-8f8585edc3ba",
+          "at": "2026-06-15T18:05:59.761883731Z"
         },
         {
-          "text": "The steps (c) and (d) look valid and OK — they seem to be \"for information only\".  In terms of the concept of interes...",
-          "id": "e-db47c58d-d99d-4920-95fb-ced13bdf9c02",
-          "at": "2026-05-29T12:54:36.415713435Z"
+          "text": "OK, this plan is good, and it is enough to spec an M-pudding-peradams and join it to C-pudding-prover",
+          "id": "e-75e9aa20-c5fe-44b3-b4c4-1f79b7b66f59",
+          "at": "2026-06-08T11:19:26.521073654Z"
         },
         {
-          "text": "OK, but something to consider: with the majority of boxes green, with these major faithfulness questions outstanding,...",
-          "id": "e-79f81185-6d9c-4d82-a1a2-a629c942dffc",
-          "at": "2026-07-03T17:04:25.176385227Z"
+          "text": "So this is a very useful representation I'd say!  We are missing futon7 (not many commits) and futon7a — maybe this i...",
+          "id": "e-8ae7fd72-fcda-4545-ab83-f97e82aa30df",
+          "at": "2026-04-30T14:21:36.220231321Z"
         },
         {
-          "text": "OK; the Mission Corpus should be accessible to us from existing aggregation surfaces like M-war-machine, M-stack-geom...",
-          "id": "e-a5e3f8db-a3e4-444e-a44c-cb0db47bccf0",
-          "at": "2026-05-11T14:09:34.174929183Z"
+          "text": "It does in-buffer annotation but there is definitely also a Scratch style sidebar that interoperates with the in-buff...",
+          "id": "e-986fc8e5-75f6-401f-8038-1a0ea3a196fa",
+          "at": "2026-06-26T11:19:46.671811373Z"
         }
       ],
       "mark_hit_share": 0.002,
       "mark_hit_count": 1,
       "top_missions": [
         {
-          "mission": "M-operational-vocabulary",
-          "count": 30
+          "mission": "M-futon-forward-model",
+          "count": 20
+        },
+        {
+          "mission": "M-learning-loop",
+          "count": 17
         },
         {
           "mission": "M-capability-star-map",
-          "count": 22
-        },
-        {
-          "mission": "M-wm-policies",
-          "count": 19
+          "count": 13
         }
       ],
       "display_id": 8
@@ -745,87 +745,87 @@
       "share_of_corpus": 0.08051265198816956,
       "top_terms": [
         {
-          "term": "medicine",
-          "tfidf": 0.0604
+          "term": "instr",
+          "tfidf": 0.0721
         },
         {
-          "term": "soundness",
-          "tfidf": 0.0604
+          "term": "cogito-cover-letter-final",
+          "tfidf": 0.0619
         },
         {
-          "term": "plos",
-          "tfidf": 0.0596
+          "term": "cogito-neurotech-ra-formal-application-v1",
+          "tfidf": 0.0619
         },
         {
-          "term": "powerbi-tui",
-          "tfidf": 0.0569
+          "term": "timed",
+          "tfidf": 0.0505
         },
         {
-          "term": "manuscript",
-          "tfidf": 0.0563
+          "term": "regulator",
+          "tfidf": 0.0473
         },
         {
-          "term": "chemistry",
-          "tfidf": 0.0558
+          "term": "early-closures",
+          "tfidf": 0.0473
         },
         {
-          "term": "docx",
-          "tfidf": 0.0539
+          "term": "let",
+          "tfidf": 0.0463
         },
         {
-          "term": "psychology",
-          "tfidf": 0.0512
+          "term": "degraded",
+          "tfidf": 0.0462
         },
         {
-          "term": "folder",
-          "tfidf": 0.0512
+          "term": "params",
+          "tfidf": 0.0462
         },
         {
-          "term": "journal",
-          "tfidf": 0.0506
+          "term": "m-value-creation-loop",
+          "tfidf": 0.0452
         }
       ],
       "representative_snippets": [
         {
-          "text": "Let's put it into the Arxana Essays reader so that we can extend the annotations / rewriting guidance and thereby imp...",
-          "id": "e-284e90ad-dd9d-47d5-b827-cb06029748b4",
-          "at": "2026-05-20T20:39:11.394670Z"
+          "text": "I'd like to do the MO/SE stage — noting that ideally it should help us collect some alternative phrasings of the exis...",
+          "id": "e-5cf68a2f-1f20-47cd-a458-7eb0b502e510",
+          "at": "2026-06-17T09:37:30.458358385Z"
         },
         {
-          "text": "Let's emit, I can revise the other sections by hand later, or can stage a follow-up tension-surfacing pass once we ha...",
-          "id": "e-87525774-31ce-44e7-8d8c-745197146347",
-          "at": "2026-06-07T14:37:36.725823072Z"
+          "text": "IDENTIFY is clear, let's go to MAP",
+          "id": "e-099e05d7-a723-4952-a5d3-6727d7adf029",
+          "at": "2026-05-30T17:16:20.899768282Z"
         },
         {
-          "text": "Frankly, we have futon4 README-essays.md which should be fine as a spec, I am assuming however that Codex didn't read...",
-          "id": "e-6c916acc-a582-4697-a4e4-f924b1fd551d",
-          "at": "2026-05-29T15:13:11.961740386Z"
+          "text": "My thought was that we would get the renderer working and then move to Layer 3 so that we can inspect the outputs mea...",
+          "id": "e-d2cb9a45-7341-455f-940e-448399f4f253",
+          "at": "2026-06-07T21:02:43.165245107Z"
         },
         {
-          "text": "I have produced (via \"eoi new\") an initial compilation of three scenarios, they are viewable in Arxana Essays via Ema...",
-          "id": "e-10cbd7f9-f4ca-4229-a03a-064c234e6f82",
-          "at": "2026-05-26T08:32:48.182302886Z"
+          "text": "OK, let's go live with this — no more handoffs except directly to codex.  I'll talk with claude-3 and claude-4 and ma...",
+          "id": "e-2a600949-1fb1-46de-a979-6a58c724002c",
+          "at": "2026-06-09T19:25:12.478902056Z"
         },
         {
-          "text": "OK, I have chased through to the end of the essay with a consistent revision pass.  We should take stock of the edits...",
-          "id": "e-f8634b37-59b4-44cc-a830-bd2cdb8f82fa",
-          "at": "2026-05-23T13:03:23.688622910Z"
+          "text": "Can we pick up on M-value-creation-loop ?  Here's where I got to in a previous Claude session.  claude: The cold-chai...",
+          "id": "e-0973db45-fc64-4a8e-8030-bb94b05734cc",
+          "at": "2026-06-16T15:44:24.408272525Z"
         }
       ],
-      "mark_hit_share": 0.0041,
-      "mark_hit_count": 2,
+      "mark_hit_share": 0.0,
+      "mark_hit_count": 0,
       "top_missions": [
         {
-          "mission": "M-buyer-discovery",
-          "count": 15
+          "mission": "M-operational-vocabulary",
+          "count": 43
         },
         {
-          "mission": "M-points-de-fuite",
-          "count": 10
+          "mission": "M-wm-policies",
+          "count": 25
         },
         {
-          "mission": "M-typed-holes",
-          "count": 9
+          "mission": "M-capability-star-map",
+          "count": 21
         }
       ],
       "display_id": 9
@@ -836,87 +836,87 @@
       "share_of_corpus": 0.04173512980611239,
       "top_terms": [
         {
-          "term": "m-foo",
-          "tfidf": 0.1019
+          "term": "egain",
+          "tfidf": 0.0938
         },
         {
-          "term": "bla",
-          "tfidf": 0.0924
+          "term": "msgs",
+          "tfidf": 0.0898
         },
         {
-          "term": "clock-in",
-          "tfidf": 0.0924
+          "term": "gartner",
+          "tfidf": 0.0864
         },
         {
-          "term": "awaiting",
-          "tfidf": 0.0894
+          "term": "fg3",
+          "tfidf": 0.0742
         },
         {
-          "term": "new-session",
-          "tfidf": 0.0894
+          "term": "dot",
+          "tfidf": 0.0629
         },
         {
-          "term": "turn-end",
-          "tfidf": 0.0855
+          "term": "enterprise",
+          "tfidf": 0.0604
         },
         {
-          "term": "e-fix-cx-cr-runners-to-clock-in",
-          "tfidf": 0.0823
+          "term": "government",
+          "tfidf": 0.0595
         },
         {
-          "term": "emacs-chat",
-          "tfidf": 0.0823
+          "term": "leaders",
+          "tfidf": 0.0595
         },
         {
-          "term": "transports",
-          "tfidf": 0.0767
+          "term": "fortune",
+          "tfidf": 0.0595
         },
         {
-          "term": "cr",
-          "tfidf": 0.0767
+          "term": "architect",
+          "tfidf": 0.0589
         }
       ],
       "representative_snippets": [
         {
-          "text": "I've put claude-7 onto another task, let's just work on sorting this out directly now",
-          "id": "e-70aa4b36-eac7-48c1-93a9-7e64a85d7992",
-          "at": "2026-06-05T17:13:34.699318704Z"
+          "text": "It's fine that we have a relatively simple model right now — indeed it's not that simple because we have the R1-R12 p...",
+          "id": "e-bea255e2-20ec-44da-8018-81a403c06d70",
+          "at": "2026-05-31T10:31:29.050493964Z"
         },
         {
-          "text": "please rejoin and message claude-1 to be brought into the loop",
-          "id": "e-41b53c6d-917b-49c8-8c35-ac4d8c90b9c7",
-          "at": "2026-06-07T20:01:21.787629462Z"
+          "text": "What's the WebArxana localhost path so I can follow along with that aspect?  Apart from this, if Task 9 is the capsto...",
+          "id": "e-520667f2-3e3e-4f6d-aa3a-34e1efc7f8e2",
+          "at": "2026-05-30T12:22:18.555388107Z"
         },
         {
-          "text": "OK, so, claude-4 has been working on other stuff, let's just fix directly",
-          "id": "e-2e5cb6f3-c069-4b9a-9320-fbb986e3771d",
-          "at": "2026-07-01T15:58:22.477124851Z"
+          "text": "I think futon3a (item (a)) is a better home",
+          "id": "e-14634032-9032-478c-bce2-78d77ec794f1",
+          "at": "2026-05-04T11:57:10.933664930Z"
         },
         {
-          "text": "OK, let's continue coordination on the points above.  It sounds like claude-2 is in a key position now.",
-          "id": "e-eedd0253-db68-4c46-a35c-f06a380beb29",
-          "at": "2026-07-01T07:13:51.335726905Z"
+          "text": "Sure I am happy to proceed with steps 1 - 3 inclusive",
+          "id": "e-726d385f-ce03-4daa-9024-5915a077fcbb",
+          "at": "2026-05-04T20:31:50.207104912Z"
         },
         {
-          "text": "You mentioned above that claude-1 could do one of the relevant reviews, would it be possible to start that now?",
-          "id": "e-17728952-1ffc-47a2-a0cd-bb847486634d",
-          "at": "2026-06-10T18:30:49.133278755Z"
+          "text": "OK",
+          "id": "e-a48a297d-625f-4f82-badd-a8fc3c30ef31",
+          "at": "2026-05-25T18:15:34.353068916Z"
         }
       ],
       "mark_hit_share": 0.0,
       "mark_hit_count": 0,
       "top_missions": [
         {
-          "mission": "M-kangaroo",
-          "count": 12
-        },
-        {
           "mission": "M-wm-policies",
-          "count": 11
+          "count": 15
         },
         {
-          "mission": "M-custom-harness",
-          "count": 9
+          "mission": "M-futon-forward-model",
+          "count": 5
+        },
+        {
+          "mission": "M-learning-loop",
+          "count": 5
         }
       ],
       "display_id": 10
@@ -927,87 +927,87 @@
       "share_of_corpus": 0.039763391390075585,
       "top_terms": [
         {
-          "term": "vacation",
-          "tfidf": 0.113
+          "term": "speaker",
+          "tfidf": 0.0827
         },
         {
-          "term": "codex",
-          "tfidf": 0.1123
+          "term": "concentration",
+          "tfidf": 0.0801
         },
         {
-          "term": "codex-2",
-          "tfidf": 0.1036
+          "term": "dafiing",
+          "tfidf": 0.0741
         },
         {
-          "term": "codex-3",
-          "tfidf": 0.0963
+          "term": "interest-articulation",
+          "tfidf": 0.0683
         },
         {
-          "term": "codex-6",
-          "tfidf": 0.0946
+          "term": "prior-document",
+          "tfidf": 0.0683
         },
         {
-          "term": "codex-10",
-          "tfidf": 0.0911
+          "term": "absences",
+          "tfidf": 0.0647
         },
         {
-          "term": "codex-1",
-          "tfidf": 0.0842
+          "term": "responded",
+          "tfidf": 0.0613
         },
         {
-          "term": "bell",
-          "tfidf": 0.0837
+          "term": "invariance",
+          "tfidf": 0.0563
         },
         {
-          "term": "work",
-          "tfidf": 0.0815
+          "term": "speech",
+          "tfidf": 0.0537
         },
         {
-          "term": "m-foo",
-          "tfidf": 0.0805
+          "term": "factors",
+          "tfidf": 0.0531
         }
       ],
       "representative_snippets": [
         {
-          "text": "Codex-10 is done",
-          "id": "e-6bdfb703-9604-40bc-87da-09009db6d757",
-          "at": "2026-05-18T22:21:45.307358694Z"
+          "text": "OK, let's try to build *that* solution then",
+          "id": "e-67c67d9f-92a6-4a9f-87bb-633a5480b454",
+          "at": "2026-06-22T20:45:47.597981054Z"
         },
         {
-          "text": "codex-1 is quiet, please check the promised work",
-          "id": "e-014b1fe5-58e2-4fc0-b3e0-1aa03511b47d",
-          "at": "2026-06-04T15:17:11.180578532Z"
+          "text": "OK, we can progress to DERIVE",
+          "id": "e-e4f59410-938b-403f-9296-fd24ce5c26ad",
+          "at": "2026-06-01T19:14:30.388112383Z"
         },
         {
-          "text": "Codex is on vacation so let's do it directly.",
-          "id": "e-5f46080a-544d-446e-843a-8776b459f42e",
-          "at": "2026-07-01T16:43:25.378981151Z"
+          "text": "1. Broadly fine, though I'd say that the \"Mission Peripheral\" and M-live-geometric-stack should already give us parse...",
+          "id": "e-23b096be-f19f-4183-904e-aabca0443a28",
+          "at": "2026-05-04T11:08:51.654719701Z"
         },
         {
-          "text": "codex-1 is available, please bell to them",
-          "id": "e-5ee3b3cf-2bbd-4762-a1d2-2e557c07d820",
-          "at": "2026-07-05T08:33:43.159989121Z"
+          "text": "Hi can you please have a look at futon6/holes/excursions/E-mfuton-silver.md and help me develop a strategy for doing ...",
+          "id": "e-2bc52383-8c73-40b6-8bee-1acc7f651b9b",
+          "at": "2026-04-28T11:32:34.298357796Z"
         },
         {
-          "text": "Let's run it past codex-2 again",
-          "id": "e-d8e887f3-a608-4ad4-b27a-c2e4d2c01016",
-          "at": "2026-05-08T20:37:00.086693088Z"
+          "text": "So, I preferred the old spiral layout but a lot of the issues with either layout would be solved by hiding the edge l...",
+          "id": "e-efde7499-cdf6-463f-a2a1-82f442253da4",
+          "at": "2026-06-26T15:10:38.927123399Z"
         }
       ],
-      "mark_hit_share": 0.0,
-      "mark_hit_count": 0,
+      "mark_hit_share": 0.0083,
+      "mark_hit_count": 2,
       "top_missions": [
         {
-          "mission": "M-mission-scopes-into-substrate-2",
-          "count": 15
+          "mission": "M-wm-policies",
+          "count": 13
         },
         {
           "mission": "M-futon-forward-model",
-          "count": 11
+          "count": 8
         },
         {
-          "mission": "M-capability-star-map",
-          "count": 8
+          "mission": "M-operational-vocabulary",
+          "count": 6
         }
       ],
       "display_id": 11
@@ -1018,87 +1018,87 @@
       "share_of_corpus": 0.025139664804469275,
       "top_terms": [
         {
-          "term": "rejoin",
-          "tfidf": 0.3628
+          "term": "think",
+          "tfidf": 0.0663
         },
         {
-          "term": "continue",
-          "tfidf": 0.2765
+          "term": "heraclitus",
+          "tfidf": 0.0648
         },
         {
-          "term": "hello",
-          "tfidf": 0.2409
-        },
-        {
-          "term": "ok",
-          "tfidf": 0.2353
-        },
-        {
-          "term": "network",
-          "tfidf": 0.2192
-        },
-        {
-          "term": "error",
-          "tfidf": 0.1893
+          "term": "multiplied",
+          "tfidf": 0.0648
         },
         {
           "term": "let",
-          "tfidf": 0.1878
+          "tfidf": 0.0642
         },
         {
-          "term": "hi",
-          "tfidf": 0.174
+          "term": "like",
+          "tfidf": 0.0625
         },
         {
-          "term": "problem",
-          "tfidf": 0.1676
+          "term": "work",
+          "tfidf": 0.0611
         },
         {
-          "term": "server",
-          "tfidf": 0.1587
+          "term": "anthology",
+          "tfidf": 0.0592
+        },
+        {
+          "term": "mission",
+          "tfidf": 0.0591
+        },
+        {
+          "term": "ok",
+          "tfidf": 0.0585
+        },
+        {
+          "term": "don",
+          "tfidf": 0.0579
         }
       ],
       "representative_snippets": [
         {
-          "text": "continue",
-          "id": "e-03930cbc-f53f-4286-bcf9-acb1932075d1",
-          "at": "2026-07-09T18:00:21.533849154Z"
+          "text": "So, in the Slide 11: I think we need the Mermaid diagram on its own slide, maybe with a yellow caption like \"the jour...",
+          "id": "e-1a5c81c5-68e7-45ee-9471-993de127a753",
+          "at": "2026-03-24T11:56:05.605558585Z"
         },
         {
-          "text": "continue",
-          "id": "e-5390ab4e-8f59-4bea-8f2b-49a0e8a29ba3",
-          "at": "2026-07-09T17:55:14.840932048Z"
+          "text": "It still doesn't fit on one screen, indeed even the \"Next steps\" node is off the page",
+          "id": "e-407da052-3d4a-4b21-9553-dabcaafa0bf5",
+          "at": "2026-03-24T11:57:48.121119499Z"
         },
         {
-          "text": "continue",
-          "id": "e-2996c138-4604-4330-b959-d6442ccf62af",
-          "at": "2026-06-30T11:47:05.772438966Z"
+          "text": "Cool, let's do this plan.  I think we should include Sinking City in Anthology A because it is super interesting.   W...",
+          "id": "e-cac43b7a-64eb-440b-8511-12c143626835",
+          "at": "2026-05-05T12:09:34.970876677Z"
         },
         {
-          "text": "continue",
-          "id": "e-954f7904-8dee-4d84-b00f-5f831ab38f4d",
-          "at": "2026-06-30T11:47:18.012689911Z"
+          "text": "Maybe we could develop a two or three anthology, so that I can show different features / views in the Planetarium.  I...",
+          "id": "e-46d28952-d718-4e62-b58e-22e0a5bdae50",
+          "at": "2026-05-05T12:07:36.906826Z"
         },
         {
-          "text": "continue",
-          "id": "e-100d1052-38ab-4e1a-8e9d-e551e91ca2df",
-          "at": "2026-06-30T11:47:28.860934520Z"
+          "text": "OK, this is useful also for readers like Neil and Elle, because it validates the importance of the choices they are m...",
+          "id": "e-81bbd730-1f2d-476f-83be-19927fd319f7",
+          "at": "2026-05-05T12:03:49.906263408Z"
         }
       ],
-      "mark_hit_share": 0.0,
-      "mark_hit_count": 0,
+      "mark_hit_share": 0.0065,
+      "mark_hit_count": 1,
       "top_missions": [
         {
-          "mission": "M-futon-forward-model",
-          "count": 5
-        },
-        {
-          "mission": "M-operational-vocabulary",
-          "count": 3
-        },
-        {
           "mission": "M-smart-emacs-cursor",
-          "count": 3
+          "count": 21
+        },
+        {
+          "mission": "M-wm-policies",
+          "count": 7
+        },
+        {
+          "mission": "M-agency-hardening",
+          "count": 5
         }
       ],
       "display_id": 12

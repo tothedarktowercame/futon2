@@ -3,8 +3,8 @@
 ;; the persistent 2g fix); (b) the real escrow loads clean (pins re-assert);
 ;; (c) a trace record in the escrow-witness trace dir carries an
 ;; :act-gate-verdicts entry whose ΔG leg came from the PINNED escrow:
-;; :delta-G-source :fold-escrow, :delta-G equal (1e-9) to the named deposit's
-;; stored :eval :delta-g, verdict :pass. The witness dir is separate from the
+;; :coverage-score-source :fold-escrow, :coverage-score-delta equal (1e-9) to the named deposit's
+;; stored :eval :coverage-score-delta, verdict :pass. The witness dir is separate from the
 ;; live daily trace ON PURPOSE: the WM reads γ-state back from its own trace;
 ;; witness records must never sit in that read-back path.
 ;; Run: cd /home/joe/code/futon2 && clojure -M scripts/gate_2g_provenance.clj
@@ -32,23 +32,23 @@
     (when (or (seq rejected) (empty? deposits))
       (println "GATE 2g FAIL — escrow not clean:" (count deposits) "deposit(s)," (mapv :reason rejected))
       (System/exit 1))
-    (let [stored (into {} (map (juxt :fold-turn/id #(get-in % [:eval :delta-g]))) deposits)
+    (let [stored (into {} (map (juxt :fold-turn/id #(get-in % [:eval :coverage-score-delta]))) deposits)
           hits (for [r (witness-records)
                      v (:act-gate-verdicts r)
-                     :when (and (= :fold-escrow (:delta-G-source v))
+                     :when (and (= :fold-escrow (:coverage-score-source v))
                                 (= :pass (:verdict v))
-                                (number? (:delta-G v))
+                                (number? (:coverage-score-delta v))
                                 (when-let [dg (stored (:fold-turn/id v))]
-                                  (< (Math/abs (- (double (:delta-G v)) (double dg))) 1e-9)))]
+                                  (< (Math/abs (- (double (:coverage-score-delta v)) (double dg))) 1e-9)))]
                  (assoc v :trace/timestamp (:timestamp r)))]
       (if (seq hits)
         (do (doseq [h hits]
               (println (format "  %s @ %s: dG %s from :fold-escrow, verdict :pass"
-                               (:fold-turn/id h) (:trace/timestamp h) (:delta-G h))))
+                               (:fold-turn/id h) (:trace/timestamp h) (:coverage-score-delta h))))
             (println "GATE 2g PASS —" (count hits)
                      "trace verdict(s) with escrow provenance matching stored deposit dG")
             (System/exit 0))
-        (do (println "GATE 2g FAIL — no trace verdict with :delta-G-source :fold-escrow matching a stored deposit dG in" witness-dir)
+        (do (println "GATE 2g FAIL — no trace verdict with :coverage-score-source :fold-escrow matching a stored deposit dG in" witness-dir)
             (System/exit 1))))))
 
 (-main)

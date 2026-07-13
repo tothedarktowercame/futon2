@@ -65,8 +65,8 @@
   (let [{:keys [records]} (load-summary dir)
         historical (futility/historical-gamma-report records)
         synthetic (futility/synthetic-paying-gamma-report)
-        historical-gamma (get-in historical [:final :policy-precision])
-        synthetic-gamma (get-in synthetic [:final :policy-precision])]
+        historical-gamma (get-in historical [:final :selection-gain])
+        synthetic-gamma (get-in synthetic [:final :selection-gain])]
     (cond
       (empty? records)
       (do (println "GATE 3b FAIL - no trace records in" dir)

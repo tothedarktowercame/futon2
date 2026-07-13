@@ -114,12 +114,12 @@
   Two effects (both make the hierarchy REAL, not cosmetic):
   1. PRIOR shaping — the `:prior` field is multiplied by the mode weight
      (affects which moves the rollout explores via `renormalize-priors`).
-  2. COST modulation — the effective `:delta-g` gets a prior-penalty term:
-     `delta-g - ln(weight)` (a POSITIVE penalty when weight < 1, smaller for
+  2. COST modulation — the effective `:step-score-delta` gets a prior-penalty term:
+     `step-score-delta - ln(weight)` (a POSITIVE penalty when weight < 1, smaller for
      favored classes). This is the AIF KL-divergence intuition: deviating
      from the slow loop's prior costs free energy, and favored classes pay
      less — so a HIGH-weight class ends up with the LOWER effective G (more
-     desirable). The original `:delta-g` is preserved as `:delta-g-base` for
+     desirable). The original `:step-score-delta` is preserved as `:step-score-delta-base` for
      traceability.
 
   A move whose class has no mode-weight is left untouched. This is honest:
@@ -142,7 +142,7 @@
                             weights)]
            (if weight
              (let [base-prior (or (:prior move) 1.0)
-                   base-dg (double (or (:delta-g move) 0.0))
+                   base-dg (double (or (:step-score-delta move) 0.0))
                    ;; -ln(weight) is POSITIVE when weight < 1 (penalty for
                    ;; disfavored classes), zero at weight = 1. A HIGH prior
                    ;; weight → small penalty; a LOW prior weight → large
@@ -152,11 +152,11 @@
                    prior-penalty (- (Math/log (max 1.0e-10 weight)))]
                (-> move
                    (assoc :prior (* base-prior weight)
-                          :delta-g-base base-dg
-                          ;; Effective delta-g gets the prior penalty:
-                          ;; positive penalty → less negative delta-g →
+                          :step-score-delta-base base-dg
+                          ;; Effective step-score-delta gets the prior penalty:
+                          ;; positive penalty → less negative step-score-delta →
                           ;; disfavored by the fast loop.
-                          :delta-g (+ base-dg prior-penalty))))
+                          :step-score-delta (+ base-dg prior-penalty))))
              move)))
        moves))))
 

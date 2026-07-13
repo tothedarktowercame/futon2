@@ -94,7 +94,7 @@
                                 (for [entry bundle
                                       :let [m (action-target entry)]]
                                   (double (or (get-in roi-map [m :expected-roi-gbp]) 0.0))))
-         discrimination (count (distinct (map :G-total (take k ranked))))]
+         discrimination (count (distinct (map :controller-score (take k ranked))))]
      {:useful useful
       :automatable (/ (double automatable-count) (double k))
       :first-autonomous-rank first-autonomous-rank

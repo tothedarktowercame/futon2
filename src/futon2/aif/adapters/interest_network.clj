@@ -15,7 +15,8 @@
   (:require [babashka.http-client :as http]
             [clojure.edn :as edn]))
 
-(def ^:private f1a (or (System/getenv "FUTON1A_URL") "http://127.0.0.1:7071"))
+(def ^:private f1a (or (System/getenv "FUTON_SUBSTRATE_URL")
+                       (System/getenv "FUTON1A_URL") "http://127.0.0.1:7071"))
 (def ^:private w-finish 0.15)   ; hand-set (Q4), tunable
 (def ^:private w-real   0.6)    ; hand-set (Q4), tunable
 

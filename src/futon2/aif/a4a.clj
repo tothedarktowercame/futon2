@@ -236,8 +236,8 @@
   (or (get resolver capability)
       (get resolver (stable-id capability))))
 
-(defn eig-for-produces
-  "Return epistemic value for a mission's produced capabilities.
+(defn model-uncertainty-for-produces
+  "Return posterior-spread uncertainty for a mission's produced capabilities.
 
    Produced capabilities resolve through BMR equivalence classes; each distinct
    concept contributes its stddev once, in endpoint-count units. Unknown
@@ -248,15 +248,15 @@
         concepts (set (keep #(resolve-capability resolver %) produces-set))]
     (reduce + 0.0 (map #(get stddevs % 0.0) concepts))))
 
-(defn make-eig-fn
-  "Return a pure two-argument EIG closure for efe/graph-efe-terms.
+(defn make-model-uncertainty-fn
+  "Return a pure two-argument model-uncertainty closure for efe/graph-control-terms.
 
    The mission node is accepted for arity compatibility; this pattern-grain
    resolver keys on the normalised mission id."
-  [mission->eig]
+  [mission->model-uncertainty]
   (fn [mission-id _mission]
-    (double (or (get mission->eig mission-id)
-                (get mission->eig (normalize-mission-id mission-id))
+    (double (or (get mission->model-uncertainty mission-id)
+                (get mission->model-uncertainty (normalize-mission-id mission-id))
                 0.0))))
 
 (defn- add-edge-count
@@ -274,7 +274,7 @@
           (apply map vector rows))
     []))
 
-(defn constellation->eig
+(defn constellation->model-uncertainty
   "Return {constellation -> aggregate posterior stddev} from pattern co-occurrence.
 
    `pattern->constellation` maps pattern stems to constellation ids.
@@ -307,9 +307,9 @@
                                     0.0)])))
           constellation-rows)))
 
-(defn mission->eig
+(defn mission->model-uncertainty
   "Return {mission-id -> sum of distinct constellation stddevs for its patterns}."
-  [mission->patterns pattern->constellation constellation->eig]
+  [mission->patterns pattern->constellation constellation->model-uncertainty]
   (let [pattern->constellation (into {} (map (fn [[pattern constellation]]
                                                [(pattern-stem pattern) constellation]))
                                      pattern->constellation)]
@@ -319,7 +319,7 @@
                                                         (pattern-stem %))
                                                    patterns))]
                    [(normalize-mission-id mission)
-                    (reduce + 0.0 (map #(double (get constellation->eig % 0.0))
+                    (reduce + 0.0 (map #(double (get constellation->model-uncertainty % 0.0))
                                        constellations))])))
           mission->patterns)))
 

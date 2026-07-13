@@ -40,7 +40,7 @@
             :answer mock-answer}
      :arming {:operator "joe" :word "mock arming word — seam test fixture" :at "2026-07-05T00:00:00Z"
               :scope :one-fold}
-     :eval {:delta-g -0.5 :g-grain :coverage}}))
+     :eval {:coverage-score-delta -0.5 :g-grain :coverage}}))
 
 (defn- loaded-deposits []
   (let [dir (.toFile (Files/createTempDirectory "seam-test" (make-array FileAttribute 0)))]
@@ -49,7 +49,7 @@
       (is (empty? rejected) "seam fixture must load clean (pin 3 re-asserts ΔG)")
       deposits)))
 
-(def entry {:mission "test-d/mission/mock" :F-free-energy 0.1 :G-rollout nil
+(def entry {:mission "test-d/mission/mock" :cascade-score 0.1 :policy-rollout-score nil
             :shown cascade})
 
 (deftest flag-on-mock-replay-with-dg-reasserted
@@ -59,9 +59,9 @@
               entry circumstance
               {:escrow-turn-fn (esc/escrow-turn-fn deposits) :prose-fn prose-fn})]
       (testing "the escrowed ΔG leg fires with escrow provenance"
-        (is (= -0.5 (:delta-G ag)))
-        (is (= :fold-escrow (:delta-G/source ag)))
-        (is (= (get-in (first deposits) [:eval :delta-g]) (:delta-G ag))
+        (is (= -0.5 (:coverage-score-delta ag)))
+        (is (= :fold-escrow (:coverage-score/source ag)))
+        (is (= (get-in (first deposits) [:eval :coverage-score-delta]) (:coverage-score-delta ag))
             "replayed ΔG re-asserted against the deposit's stored leg"))
       (testing "the replayed construction rides :fold-escrow, holes preserved"
         (is (= (:policy-holes mock-answer)
@@ -71,7 +71,7 @@
                    entry circumstance
                    {:escrow-turn-fn (esc/escrow-turn-fn deposits)
                     :prose-fn (constantly "DIFFERENT PROSE")})]
-          (is (nil? (:delta-G ag')))
+          (is (nil? (:coverage-score-delta ag')))
           (is (not (contains? ag' :fold-escrow))))))))
 
 (deftest flag-default-on-flag-off-restores-pre-seam
@@ -90,9 +90,9 @@
       (testing "flag bound off: escrow never consulted, even when injected"
         (is (= pre-seam with-seam) "key-for-key identical to the 2-arity path"))
       (testing "output shape is the pre-seam contract exactly"
-        (is (= #{:delta-F :delta-G :delta-G/source :fold} (set (keys with-seam))))
-        (is (nil? (:delta-G with-seam)) "classical abstains on a contentful pattern; no escrow ⇒ abstain"))))
+        (is (= #{:cascade-score :coverage-score-delta :coverage-score/source :fold} (set (keys with-seam))))
+        (is (nil? (:coverage-score-delta with-seam)) "classical abstains on a contentful pattern; no escrow ⇒ abstain"))))
   (testing "flag ON, no turn-fn injected: seam inert, pre-seam shape exactly"
     (let [ag (cl/act-gate-from-lane-entry entry circumstance)]
-      (is (= #{:delta-F :delta-G :delta-G/source :fold} (set (keys ag))))
-      (is (nil? (:delta-G ag)) "no injection ⇒ no escrow leg, honest abstain"))))
+      (is (= #{:cascade-score :coverage-score-delta :coverage-score/source :fold} (set (keys ag))))
+      (is (nil? (:coverage-score-delta ag)) "no injection ⇒ no escrow leg, honest abstain"))))

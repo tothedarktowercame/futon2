@@ -11,12 +11,12 @@
   {:act-gate-verdicts
    [{:mission "M-learning-loop"
      :verdict :abstain-missing-leg
-     :delta-F -0.461
-     :delta-G nil}
+     :cascade-score -0.461
+     :coverage-score-delta nil}
     {:mission "M-canon-fingerprint-store"
      :verdict :abstain-missing-leg
-     :delta-F -0.454
-     :delta-G nil}]})
+     :cascade-score -0.454
+     :coverage-score-delta nil}]})
 
 (deftest decision-fires-when-top-abstain-has-mana-and-no-deposit
   (let [d (coupling/decision {:trace-record trace

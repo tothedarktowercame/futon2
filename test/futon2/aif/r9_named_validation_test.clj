@@ -86,16 +86,16 @@
     "**F-decrease**: free energy decreases monotonically over a run trending
      from a stressed observation toward a healthy one.
 
-     Acceptance criterion: G-total is monotonically non-increasing across a
+     Acceptance criterion: controller-score is monotonically non-increasing across a
      5-point linear interpolation from stressed → healthy."
     (let [ts [0.0 0.25 0.5 0.75 1.0]
           obs-series (mapv #(interpolate-obs stressed-obs healthy-obs %) ts)
-          g-series (mapv #(:G-total (fe/compute-free-energy %)) obs-series)]
+          g-series (mapv #(:controller-score (fe/compute-controller-diagnostics %)) obs-series)]
       (is (apply >= g-series)
-          (str "F-decrease: G-total series " g-series
+          (str "F-decrease: controller-score series " g-series
                " should be non-increasing"))
       (is (> (first g-series) (* 5.0 (last g-series)))
-          (str "F-decrease (magnitude): final G-total should be at least 5x"
+          (str "F-decrease (magnitude): final controller-score should be at least 5x"
                " smaller than initial; initial = " (first g-series)
                ", final = " (last g-series))))))
 
@@ -122,36 +122,36 @@
 
 (deftest efe-stress-epistemic-test
   (testing
-    "**EFE-stress (epistemic)**: G-epistemic (in compute-free-energy) is larger
+    "**EFE-stress (epistemic)**: coverage-uncertainty-pressure (in compute-controller-diagnostics) is larger
      when the agent's structural-uncertainty channels (loop-health,
      attack-coverage, support-coverage) are darker.
 
-     Acceptance criterion: G-epistemic(low-coverage) > 3x G-epistemic(high-coverage)."
-    (let [g-s (:G-epistemic (fe/compute-free-energy stressed-obs))
-          g-h (:G-epistemic (fe/compute-free-energy healthy-obs))]
+     Acceptance criterion: coverage-uncertainty-pressure(low-coverage) > 3x coverage-uncertainty-pressure(high-coverage)."
+    (let [g-s (:coverage-uncertainty-pressure (fe/compute-controller-diagnostics stressed-obs))
+          g-h (:coverage-uncertainty-pressure (fe/compute-controller-diagnostics healthy-obs))]
       (is (> g-s (* 3.0 g-h))
-          (str "EFE-stress (epistemic): stressed G-epistemic = " g-s
-               ", healthy G-epistemic = " g-h)))))
+          (str "EFE-stress (epistemic): stressed coverage-uncertainty-pressure = " g-s
+               ", healthy coverage-uncertainty-pressure = " g-h)))))
 
 ;; ---------------------------------------------------------------------------
 ;; Abstain-fires
 ;; ---------------------------------------------------------------------------
 
 (defn- ranked
-  "Helper: build a ranked-action seq sorted ascending by G-total
+  "Helper: build a ranked-action seq sorted ascending by controller-score
    (mirroring `efe/rank-actions`'s output contract)."
   [pairs]
   (->> pairs
-       (mapv (fn [[t g]] {:action {:type t} :G-total g}))
-       (sort-by :G-total)
+       (mapv (fn [[t g]] {:action {:type t} :controller-score g}))
+       (sort-by :controller-score)
        vec))
 
 (deftest abstain-fires-property-test
   (testing
-    "**Abstain-fires**: when no action's G-total is meaningfully below :no-op's,
+    "**Abstain-fires**: when no action's controller-score is meaningfully below :no-op's,
      select-action abstains.
 
-     Acceptance criterion: across 5 test cases where (best.G-total - no-op.G-total)
+     Acceptance criterion: across 5 test cases where (best.controller-score - no-op.controller-score)
      is within abstain-epsilon (default 0.01), select-action returns :abstain in
      100% of cases. When the gap exceeds epsilon, select-action does NOT abstain."
     (let [;; cases that should abstain (gap within ε)
@@ -181,11 +181,11 @@
 
      Acceptance criterion: gap-report enumerates every :learn-action-class in the
      ranked input."
-    (let [ranked-acts [{:action {:type :no-op} :G-total 0.5}
+    (let [ranked-acts [{:action {:type :no-op} :controller-score 0.5}
                       {:action {:type :learn-action-class :target-class :a
-                                :intrinsic-value 0.1} :G-total 0.495}
+                                :intrinsic-value 0.1} :controller-score 0.495}
                       {:action {:type :learn-action-class :target-class :b
-                                :intrinsic-value 0.1} :G-total 0.499}]
+                                :intrinsic-value 0.1} :controller-score 0.499}]
           out (policy/select-action ranked-acts)]
       (is (= :abstain (:action out)))
       (is (= #{:a :b} (set (map :target-class (:gap-report out))))

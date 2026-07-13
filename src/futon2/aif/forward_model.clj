@@ -257,8 +257,9 @@
    `:observation` = previous prediction's `:next-observation :mean`;
    `:belief` = previous prediction's `:next-belief`. Other state fields
    (`:sorrys`, `:anticipation`) pass through unchanged."
-  ([state action] (predict-multi-horizon state action default-horizon-steps))
-  ([state action K]
+  ([state action] (predict-multi-horizon state action default-horizon-steps {}))
+  ([state action K] (predict-multi-horizon state action K {}))
+  ([state action K belief-update-opts]
    (loop [step 0
           current-state state
           trajectory []]
@@ -266,7 +267,7 @@
        {:trajectory trajectory
         :final-state current-state
         :horizon-steps K}
-       (let [prediction (predict current-state action)
+       (let [prediction (predict current-state action belief-update-opts)
              next-obs (get-in prediction [:next-observation :mean])
              next-belief (:next-belief prediction)
              next-state (-> current-state
@@ -291,19 +292,21 @@
 
    Throws ex-info on invalid action (unknown :type, missing :target for
    non-:no-op). Pure: same (state, action) → same output."
-  [{:keys [observation belief] :as _state} action]
-  (when-not (valid-action? action)
-    (throw (ex-info "Invalid action for forward model"
-                    {:action action :action-types action-types})))
-  (let [{:keys [obs-delta obs-variance events]} (predict-effects nil action)
-        next-mean (merge-obs-delta (or observation {}) obs-delta)
-        ;; Variance is per-channel; channels not touched by the action
-        ;; default to 0.0 (deterministic prediction).
-        next-var (into {}
-                       (for [k (keys next-mean)]
-                         [k (double (get obs-variance k 0.0))]))
-        next-belief (belief/update-belief-batch (or belief {}) events)]
-    {:next-observation {:mean next-mean :variance next-var}
-     :next-belief next-belief
-     :action action
-     :predicted-events events}))
+  ([state action] (predict state action {}))
+  ([{:keys [observation belief] :as _state} action belief-update-opts]
+   (when-not (valid-action? action)
+     (throw (ex-info "Invalid action for forward model"
+                     {:action action :action-types action-types})))
+   (let [{:keys [obs-delta obs-variance events]} (predict-effects nil action)
+         next-mean (merge-obs-delta (or observation {}) obs-delta)
+         ;; Variance is per-channel; channels not touched by the action
+         ;; default to 0.0 (deterministic prediction).
+         next-var (into {}
+                        (for [k (keys next-mean)]
+                          [k (double (get obs-variance k 0.0))]))
+         next-belief (belief/update-belief-batch (or belief {}) events
+                                                  belief-update-opts)]
+     {:next-observation {:mean next-mean :variance next-var}
+      :next-belief next-belief
+      :action action
+      :predicted-events events})))

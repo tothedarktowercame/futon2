@@ -6,14 +6,14 @@
    When a fold's `:wiring` is ENACTED (`apply-cascade!`) and we re-observe, this
    builds the record γ reads next tick:
 
-     {:policy <id> :expected-G <g> :realized-G <g'> :tick <enactment tick>}
+     {:policy <id> :expected-score <g> :realized-score <g'> :tick <enactment tick>}
 
    Both G legs are the SAME EFE quantity — the fold's coverage→rollout ΔG
-   (`futon2.aif.fold-eval`) — evaluated over the PREDICTED wiring (`:expected-G`,
-   = the `:delta-g` the act-gate consumed at decision time) vs the actually-
-   ENACTED wiring (`:realized-G`, recomputed post-enactment: holes filled / boxes
+   (`futon2.aif.fold-eval`) — evaluated over the PREDICTED wiring (`:expected-score`,
+   = the `:coverage-score-delta` the act-gate consumed at decision time) vs the actually-
+   ENACTED wiring (`:realized-score`, recomputed post-enactment: holes filled / boxes
    failed ⇒ different coverage). So γ's relative error is apples-to-apples, not a
-   ΔG-vs-ΔF mismatch. The reader is `policy-precision/fold-realized-outcome`.
+   ΔG-vs-ΔF mismatch. The reader is `selection-gain/fold-realized-outcome`.
 
    STAGED (no-live-pilot-edit discipline; the 2026-06-26 incident): enactment is
    NOT wired yet (Joe's call on touching the recovered pilot). `*live-wire?*`
@@ -36,7 +36,7 @@
    false to restore the no-op (γ stays at the prior)."
   true)
 
-(def ^:dynamic *gamma-grounded-feed?*
+(def ^:dynamic *selection-gain-grounded-feed?*
   "R14 live-wire migration (default ON as of 2026-07-08, Joe-directed; a SEPARATE
    arm from `*live-wire?*`). When ON — and only when `*live-wire?*` is also ON —
    the `:realized-outcome` feeding γ is the A5 SUBSTRATE DIAL
@@ -76,27 +76,28 @@
 (defn realized-outcome-of
   "PURE: the R16→R14 `:realized-outcome` record for an enacted decision.
      `decision`       — carries `:policy` and the expected leg: either an explicit
-                        `:expected-G`, or `:fold` (the fold output, whose `:delta-g`
+                        `:expected-score`, or `:fold` (the fold output, whose `:coverage-score-delta`
                         the gate consumed).
      `enacted-wiring` — the post-enactment wiring (`:boxes`/`:policy-holes`);
-                        `:realized-G` = the SHARED coverage→rollout ΔG over it.
+                        `:realized-score` = the SHARED coverage→rollout ΔG over it.
      `tick`           — the enactment tick (γ dedups on it).
-   `:realized-G` is nil ONLY when nothing was enacted at all (no boxes AND no
+   `:realized-score` is nil ONLY when nothing was enacted at all (no boxes AND no
    holes) — γ then holds (it requires a number). When the executor produced
    zero boxes against N obligations, realized-G is 0.0 (zero-coverage
    semantics, claude-16 ruling 2026-07-06).
 
-   SCALE-MATCH PIN (claude-10 review must-fix, 2026-07-02): `:expected-G`
+   SCALE-MATCH PIN (claude-10 review must-fix, 2026-07-02): `:expected-score`
    PREFERS the fold's coverage-ΔG leg whenever present — never a gate-side
-   rollout-G — because `:realized-G` is always coverage-ΔG, and a rollout-vs-
+   rollout-G — because `:realized-score` is always coverage-ΔG, and a rollout-vs-
    coverage pair would feed γ the same scale-mismatched junk class that pinned
    it at 0.5 (the retired v0 feed). The gate still verdicts on its own
    reconciled leg; only γ's calibration pair is constrained here, at the
    contract, so no future caller can reintroduce the mismatch."
-  [{:keys [policy expected-G fold]} enacted-wiring tick]
+  [{:keys [policy expected-score fold]} enacted-wiring tick]
   {:policy     policy
-   :expected-G (or (:delta-g fold) (when (number? expected-G) expected-G))
-   :realized-G (fe/coverage->delta-g (realized-coverage enacted-wiring))
+   :expected-score (or (:coverage-score-delta fold)
+                       (when (number? expected-score) expected-score))
+   :realized-score (fe/coverage->score-delta (realized-coverage enacted-wiring))
    :tick       tick})
 
 (defn- deposit-for-mission
@@ -139,17 +140,17 @@
 (defn- expected-remaining
   [bound deposit]
   (if-let [{:keys [expected-source predicted-coverage]} (fold-plan-coverage deposit)]
-    {:expected-G (long (Math/round (double (* bound (- 1.0 predicted-coverage)))))
+    {:expected-score (long (Math/round (double (* bound (- 1.0 predicted-coverage)))))
      :expected-source expected-source
      :predicted-coverage predicted-coverage}
-    {:expected-G 0
+    {:expected-score 0
      :expected-source :perfection-target}))
 
 (defn realized-outcome-grounded
   "A5 grounded realized outcome: read the WORLD dial via A3 build-match.
 
-   `:realized-G` is the remaining count of bound CLean boxes whose reviewed
-   substrate endpoints are not inhabited: `bound - inhabited`. `:expected-G` is
+   `:realized-score` is the remaining count of bound CLean boxes whose reviewed
+   substrate endpoints are not inhabited: `bound - inhabited`. `:expected-score` is
    the fold's predicted remaining endpoint count when a fold plan is present,
    otherwise an explicitly labelled perfection-target fallback. Both legs are
    endpoint counts, never coverage-ΔG mixed with substrate state."
@@ -161,14 +162,14 @@
          inhabited (count (filter :inhabited? snapshot))
          remaining (when (pos? bound) (- bound inhabited))
          expected (expected-remaining bound deposit)
-         expected-g (:expected-G expected)
+         expected-g (:expected-score expected)
          exact? (and (number? remaining) (= expected-g remaining))]
      (cond-> {:policy (or policy mission-id)
               :mission (:mission deposit mission-id)
-              :expected-G expected-g
+              :expected-score expected-g
               :expected-source (:expected-source expected)
               :predicted-coverage (:predicted-coverage expected)
-              :realized-G remaining
+              :realized-score remaining
               :realized-source :substrate-dial
               :scale :endpoint-count
               :dial {:inhabited inhabited
@@ -186,13 +187,13 @@
    wired (Joe's call). Returns `judge-output` UNCHANGED when staged-off, so the
    field stays ABSENT and γ holds at the prior.
 
-   Under `*gamma-grounded-feed?*` (the R14 migration, also armed) the realized
+   Under `*selection-gain-grounded-feed?*` (the R14 migration, also armed) the realized
    outcome is the A5 substrate dial (`realized-outcome-grounded`) rather than
    `realized-outcome-of` (coverage). mission-id = `(:policy decision)`."
   [judge-output decision enacted-wiring tick]
   (if *live-wire?*
     (assoc judge-output :realized-outcome
-           (if *gamma-grounded-feed?*
+           (if *selection-gain-grounded-feed?*
              (realized-outcome-grounded (:policy decision) decision {:tick tick})
              (realized-outcome-of decision enacted-wiring tick)))
     judge-output))

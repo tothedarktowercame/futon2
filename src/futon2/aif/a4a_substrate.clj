@@ -7,7 +7,8 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [futon2.aif.a4a :as a4a]
-            [futon2.aif.actuator-a3 :as a3])
+            [futon2.aif.actuator-a3 :as a3]
+            [futon2.aif.substrate :as substrate])
   (:import [java.net URLEncoder]))
 
 (def default-semilattice-clusters-path
@@ -41,48 +42,38 @@
             [e :discharge/endpoint endpoint]
             [e :discharge/type type]]})
 
-(defn q-form
-  [query & args]
-  (pr-str `(do
-             (require (quote xtdb.api))
-             (xtdb.api/q (xtdb.api/db (:node @futon3c.dev/!f1-sys))
-                         (quote ~query)
-                         ~@args))))
-
-(defn- first-col
-  [rows]
-  (mapv first rows))
-
-(defn- edge-row
-  [[capability mission]]
-  [(str capability) (str mission)])
-
-(defn- discharge-row
-  [[mission endpoint type]]
-  {:mission (str mission)
-   :endpoint (str endpoint)
-   :type type})
-
 (defn read-corpus
   "Read the A4a corpus from substrate via the A3 Drawbridge evaluator.
 
    Returns the pure corpus shape consumed by futon2.aif.a4a/corpus->concentration."
   ([] (read-corpus {}))
   ([opts]
-   (let [capabilities (sort (map str (first-col (a3/drawbridge-eval
-                                                 (q-form (capability-query))
-                                                 opts))))
-         edges (sort-by pr-str (mapv edge-row (a3/drawbridge-eval
-                                               (q-form (capability-edge-query))
-                                               opts)))
-         discharges (sort-by pr-str (mapv discharge-row (a3/drawbridge-eval
-                                                         (q-form (discharge-query))
-                                                         opts)))]
+   (let [caps (substrate/entities-by-type :capability opts)
+         missions (substrate/entities-by-type :mission/doc opts)
+         cap-ids (set (map #(str (or (:entity/id %) (:xt/id %) (:id %))) caps))
+         mission-ids (set (map #(str (or (:entity/id %) (:xt/id %) (:id %))) missions))
+         capabilities (sort cap-ids)
+         edges (->> (substrate/hyperedges-by-type :capability/* opts)
+                    (mapcat (fn [hx]
+                              (let [ends (set (map str (:hx/endpoints hx)))]
+                                (for [cap (filter ends cap-ids)
+                                      mission (filter ends mission-ids)]
+                                  [cap mission]))))
+                    (sort-by pr-str)
+                    vec)
+         discharges (->> (substrate/entities-by-type :discharge opts)
+                         (map #(merge % (:entity/props %)))
+                         (map (fn [doc]
+                                {:mission (str (:discharge/mission doc))
+                                 :endpoint (str (:discharge/endpoint doc))
+                                 :type (:discharge/type doc)}))
+                         (sort-by pr-str)
+                         vec)]
      {:capabilities (vec capabilities)
       :edges (vec edges)
       :discharges (vec discharges)})))
 
-(declare load-pattern-grain-eig)
+(declare load-pattern-grain-model-uncertainty)
 
 (defn- parse-long-safe
   [s]
@@ -102,22 +93,22 @@
                                   parse-long-safe))
     :else nil))
 
-(defn- add-constellation-eig
-  [constellation->eig doc]
+(defn- add-constellation-model-uncertainty
+  [constellation->model-uncertainty doc]
   (let [concept (:star/capability doc)
         ckey (constellation-key concept)]
-    (if (contains? constellation->eig ckey)
+    (if (contains? constellation->model-uncertainty ckey)
       (assoc doc
-             :star/constellation-eig (double (get constellation->eig ckey))
-             :star/eig-unit :endpoint-count-stddev
-             :star/eig-source :a4a-constellation-stddev)
+             :star/constellation-model-uncertainty (double (get constellation->model-uncertainty ckey))
+             :star/model-uncertainty-unit :endpoint-count-stddev
+             :star/model-uncertainty-source :a4a-constellation-stddev)
       doc)))
 
 (defn- star-docs
   [concepts opts]
-  (let [constellation->eig (or (:constellation->eig opts)
-                               (:constellation->eig (load-pattern-grain-eig opts)))]
-    (mapv #(add-constellation-eig constellation->eig
+  (let [constellation->model-uncertainty (or (:constellation->model-uncertainty opts)
+                               (:constellation->model-uncertainty (load-pattern-grain-model-uncertainty opts)))]
+    (mapv #(add-constellation-model-uncertainty constellation->model-uncertainty
                                   (a4a/concept->star-doc %))
           concepts)))
 
@@ -155,14 +146,14 @@
   (let [file (io/file path)]
     (and (.isFile file) (.canRead file))))
 
-(defn- zero-pattern-grain-eig
+(defn- zero-pattern-grain-model-uncertainty
   []
   {:pattern->constellation (sorted-map)
    :mission->patterns (sorted-map)
    :corpus-edges []
-   :constellation->eig (sorted-map)
-   :mission->eig (sorted-map)
-   :eig-fn (constantly 0.0)})
+   :constellation->model-uncertainty (sorted-map)
+   :mission->model-uncertainty (sorted-map)
+   :model-uncertainty-fn (constantly 0.0)})
 
 (defn- zero-slush-candidates
   []
@@ -200,7 +191,7 @@
   "Return top-k distinct A3-passing slush candidate constellation selections.
 
    Candidates are the offline lambda=4 coverage/A3 frontier from the validated
-   slush run. The :eig field is the corpus-global constellation EIG carried for
+   slush run. The :model-uncertainty field is the corpus-global constellation posterior spread carried for
    inspection; the known-open point is that it is not yet a per-mission steering
    signal."
   ([mission-id] (slush-candidates mission-id {}))
@@ -230,12 +221,12 @@
       :slush/lambda 4
       :slush/selection-size 5
       :slush/status :coverage-a3-driven
-      :slush/eig-unit :endpoint-count-stddev
-      :slush/eig-steering :deferred-per-mission-signal
+      :slush/model-uncertainty-unit :endpoint-count-stddev
+      :slush/model-uncertainty-steering :deferred-per-mission-signal
       :slush/notes (str/join
                     " "
                     ["Candidates are coverage/A3-driven offline slush outputs."
-                     "Corpus-global EIG is exposed for inspection but stayed below uniform in the validated sweep."
+                     "Corpus-global posterior spread is exposed for inspection but stayed below uniform in the validated sweep."
                      "Do not treat this deposit as an online GFN training call."])
       :slush/candidate-count (count cands)
       :slush/candidates cands
@@ -281,11 +272,11 @@
               pattern applied]
           [(a4a/normalize-mission-id mission) (a4a/pattern-stem pattern)])))
 
-(defn- load-pattern-grain-eig*
-  "Load the pattern-grain constellation EIG maps from EDN files.
+(defn- load-pattern-grain-model-uncertainty*
+  "Load the pattern-grain posterior-spread maps from EDN files.
 
-   Pure file reads only: no Drawbridge. Returns the mission->eig table plus a
-   two-argument EIG closure for efe/graph-efe-terms."
+   Pure file reads only: no Drawbridge. Returns the mission->model-uncertainty table plus a
+   two-argument model-uncertainty closure for efe/graph-control-terms."
   ([{:keys [semilattice-clusters-path mission-pattern-scopes-path]
      :or {semilattice-clusters-path default-semilattice-clusters-path
           mission-pattern-scopes-path default-mission-pattern-scopes-path}}]
@@ -297,29 +288,29 @@
              p->c (pattern->constellation clusters)
              m->patterns (mission->patterns scopes)
              edges (corpus-edges scopes)
-             c->eig (a4a/constellation->eig p->c edges)
-             m->eig (a4a/mission->eig m->patterns p->c c->eig)]
+             c->uncertainty (a4a/constellation->model-uncertainty p->c edges)
+             m->uncertainty (a4a/mission->model-uncertainty m->patterns p->c c->uncertainty)]
          {:pattern->constellation p->c
           :mission->patterns m->patterns
           :corpus-edges edges
-          :constellation->eig c->eig
-          :mission->eig m->eig
-          :eig-fn (a4a/make-eig-fn m->eig)})
+          :constellation->model-uncertainty c->uncertainty
+          :mission->model-uncertainty m->uncertainty
+          :model-uncertainty-fn (a4a/make-model-uncertainty-fn m->uncertainty)})
        (catch Exception _
-         (zero-pattern-grain-eig)))
-     (zero-pattern-grain-eig))))
+         (zero-pattern-grain-model-uncertainty)))
+     (zero-pattern-grain-model-uncertainty))))
 
-(def ^:private memoized-load-pattern-grain-eig
-  (memoize load-pattern-grain-eig*))
+(def ^:private memoized-load-pattern-grain-model-uncertainty
+  (memoize load-pattern-grain-model-uncertainty*))
 
-(defn load-pattern-grain-eig
-  "Load the pattern-grain constellation EIG maps from EDN files.
+(defn load-pattern-grain-model-uncertainty
+  "Load the pattern-grain posterior-spread maps from EDN files.
 
    Results are memoized by path options. If the static files are absent or
-   unreadable, returns a zero EIG closure so default-armed ranking remains
+   unreadable, returns a zero model-uncertainty closure so default-armed ranking remains
    hermetic."
-  ([] (load-pattern-grain-eig {}))
+  ([] (load-pattern-grain-model-uncertainty {}))
   ([opts]
-   (memoized-load-pattern-grain-eig
+   (memoized-load-pattern-grain-model-uncertainty
     (select-keys opts [:semilattice-clusters-path
                        :mission-pattern-scopes-path]))))

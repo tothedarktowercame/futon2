@@ -51,6 +51,20 @@ tripwire).
   Known scale: ≈ ×9.6 the hinge on the live belly. Escape hatch:
   `FUTON_WM_GOAL_OUTCOME_MODE=hinge`. Mode stamped per ranked action as
   `:goal-outcome-mode` (trace-whitelisted at birth).
+- **`:habit-prior-source :learned-frequency`** with
+  **`:structural-pressure-mode :habit-prior`** — LIVE since Joe's 2026-07-13
+  joint flip. A symmetric Dirichlet posterior over selected action identities
+  supplies $\ln E(\pi)$ after structural pressure leaves `controller-score`;
+  it replaces rather than stacks with the historical caller proxy. The first
+  enabled tick seeds counts from the chronological trace corpus; later ticks
+  persist sufficient statistics in `:habit-prior-state`. Historical rollback
+  requires both `FUTON_WM_HABIT_PRIOR_SOURCE=caller` and
+  `FUTON_WM_STRUCTURAL_PRESSURE_MODE=controller-augmentation`.
+- **`:tau-mode :selection-gain-only`** — LIVE since Joe's 2026-07-13 flip.
+  R6 no longer divides by the score-spread heuristic: $\tau_{eff}=1/g$.
+  Selection gain remains an explicitly engineering feedback control, not
+  variational policy precision. `FUTON_WM_TAU_MODE=spread` restores historical
+  $\tau_{spread}/g$ for comparison.
 - **Badges:** 8 `:principled-approximation` / 7 `:analogical` / **1
   `:derived-from-FEP`** (`data/r18-badges.edn`). Raised 2026-07-04 on
   live-tick evidence + the C9 first-pass census (reviewer claude-12):
@@ -68,23 +82,25 @@ before/after · `:free-energy` decomposition · `:ranked-actions` with ALL EFE
 summands per candidate (post-`2d6533e` whitelist; `:risk-mode` and
 `:score-provenance` stamped per action) · `:decision` + `:mode` ·
 `:act-gate-verdicts` · `:enactment` audit · `:realized-outcome` when the executor
-reproduces · `:precision-state` / `:policy-precision` (γ) · `:wm-version`
-provenance stamp. Enactment flights also log to `p4ng/sequel-notebook.org`.
+reproduces · `:precision-state` / `:selection-gain` · reason-bearing
+`:policy-support-exclusions` · `:wm-version` provenance stamp. Enactment flights
+also log to `p4ng/sequel-notebook.org`.
 
 **`:wm-version` (B-0a) — LIVE since 2026-07-04 (claude-9).** Each scheduled-tick
 record answers "which code, which config" with no human correlation step:
 `{:git-sha :git-dirty? :risk-mode :ambiguity-mode :goal-outcome-mode
+:likelihood-mode :belief-model-manifest :tau-mode :structural-pressure-mode
+:habit-prior-source
+:predictability-control-mode :homeostatic-control-mode :graph-feasibility-mode
 :kl-channel-weights :c-temperature :live-wire? :trace-schema-version}` — the
 git identity of the one-shot JVM's checkout (`:git-dirty?` counts tracked
 modifications only), the mode flags resolved via the SAME fns the rank lanes
 call (`arena-mode-flags` in `war_machine.clj` — never a second env read), the
 runner's live-wire switch, and the monotonic record-shape version
-(`futon2.aif.trace/trace-schema-version`, now 4 — v4 = D-1d's
-`:structural-pressure-mode`/`:habit-prior-bias` per ranked action, dark,
-default-inert; v3 = the B-2a/B-2b
-struct-split relabels: `:G-augmentation`/`:augmentation-terms` +
-`:G-graph-feasibility`/`:G-graph-pragmatic-proxy` per ranked action, additive
-only, G-totals byte-identical). Accessor:
+(`futon2.aif.trace/trace-schema-version`, now 12 — v10 records the three typed-
+residual dispositions per ranked action and the policy-support exclusion trail,
+v11 adds A/B/D likelihood provenance, and v12 adds present-only learned-habit
+state/source provenance; earlier schema history is maintained in `trace.clj`). Accessor:
 `(futon2.aif.trace/wm-version-of record)`. Present-only: records written before
 2026-07-04 (and bare `judge` calls) carry no stamp — for those, "which WM" is
 still hand-correlation of timestamps against commit times. NOTE the known
@@ -104,6 +120,15 @@ pre-trigger records (before 2026-07-04 ~09:30) fall back to cadence +
 (`:live-wire? false`, `:git-sha 515a5936…`; left in place).
 
 ## Achievement readout
+
+**Evidence-epoch boundary (2026-07-13):** the B-0c ledger below is now a
+**legacy historical census**, not the outer/full-loop evaluation dataset. Its
+artifact enactments and mirrored outcomes are excluded from the fresh
+`wm-outer-loop-40-v1` cohort. The preregistered protocol and empty new ledger
+live at `holes/labs/M-aif-full-loop-40/{PREREGISTRATION.md,cohort.edn,ledger.html}`.
+The cohort counts the first 40 natural wall-clock opportunities after explicit
+activation, including abstentions, unavailable agents, failures and grounded
+no-change; artifact-only output cannot count as grounded success.
 
 B-0c ledger **LANDED** (claude-10, 2026-07-04): `scripts/wm_achievement_ledger.bb`
 → `holes/labs/M-aif-faithfulness/wm-achievement-ledger.{edn,html}` (deterministic,

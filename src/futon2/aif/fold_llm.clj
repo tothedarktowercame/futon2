@@ -2,7 +2,7 @@
   "Impl #2 of the fold interface (`futon2.aif.fold`) — the LLM-TURN fold
    (E-close-the-loop §2, the build axis E-llm-fold names).
 
-       fold : (cascade, circumstance) → {:wiring :delta-g :policy-holes}
+       fold : (cascade, circumstance) → {:wiring :coverage-score-delta :policy-holes}
 
    BUILD axis (what differs from impl #1): an inhabiting agent reads the cascade
    patterns' NL prose (IF / HOWEVER / THEN / BECAUSE / NEXT-STEPS) and the
@@ -11,7 +11,7 @@
    the reach the classical rule-table lacks: it folds the contentful library
    patterns (e.g. `f6/self-play-loop`) the rule-table abstains on.
 
-   EVALUATION axis (ΔG): the SHARED `futon2.aif.fold-eval/coverage-delta-g` —
+   EVALUATION axis (ΔG): the SHARED `futon2.aif.fold-eval/coverage-score-delta` —
    identical to impl #1 — so the comparison isolates the build.
 
    DATA is solution-side (the interface names none): impl #2's data is the NL
@@ -72,7 +72,7 @@
                out-of-process / recorded). nil ⇒ no construction ⇒ ΔG nil.
      :prose-fn (fn [pattern-id] -> prose-string) — the NL halo source (INJECTED;
                solution-side). nil ⇒ patterns fold blind (prose unavailable).
-   Returns {:wiring :delta-g :policy-holes}. ΔG via the SHARED coverage→rollout
+   Returns {:wiring :coverage-score-delta :policy-holes}. ΔG via the SHARED coverage→rollout
    evaluation (`fold-eval`)."
   ([cascade circumstance] (llm-fold cascade circumstance {}))
   ([cascade circumstance {:keys [turn-fn prose-fn]}]
@@ -81,5 +81,5 @@
          constr (when turn-fn (parse-construction (turn-fn prompt)))
          wiring (construction->wiring constr)]
      {:wiring       wiring
-      :delta-g      (fe/coverage-delta-g wiring)
+      :coverage-score-delta      (fe/coverage-score-delta wiring)
       :policy-holes (:policy-holes wiring)})))

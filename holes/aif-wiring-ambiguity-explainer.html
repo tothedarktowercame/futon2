@@ -34,22 +34,22 @@
 </head>
 <header>
   <h1>AIF wiring — the ambiguity / unfaithfulness explainer</h1>
-  <p>The <b>analogical surface</b>: quantities that wear an Active-Inference name but are heuristics. Companion to <code>aif-wiring-explainer.html</code> (the faithful loop) · source of truth: <code>data/r18-badges.edn</code> (E-r18-faithfulness-audit). Drafted 2026-07-08 (claude-5).</p>
+  <p>The <b>engineering-control surface</b>: useful controls that retract toward Active-Inference roles without thereby becoming canonical AIF quantities. Companion to <code>aif-wiring-explainer.html</code> · source of truth: <code>data/r18-badges.edn</code>.</p>
 </header>
 <main>
 
-<p class="lead"><b>Why a separate page.</b> The main wiring explainer describes the loop that <em>is</em> faithful Active Inference. This page <b>quarantines the parts that are not</b> — the quantities the R18 faithfulness audit badged <b>analogical</b> ("a heuristic wearing the name"). Keeping them here lets the main explainer's labels stay trustworthy, and gives us one honest place to decide, later, which of these actually need resolving. <b>It is a short list — seven items.</b></p>
+<p class="lead"><b>Why a separate page.</b> The main wiring explainer describes the faithful AIF core. This page quarantines the non-FEP engineering controls and states their disposition. The retract identifies the AIF role that explains why a pressure of this kind is needed; it does not claim that the present control <em>is</em> that theoretical quantity.</p>
 
 <div class="faithful">
-<b>For contrast — the FEP-faithful core is only three legs:</b> <code>G = risk + ambiguity − EIG</code> — <code>:kl</code> risk (principled approximation) <b>+</b> <code>:gaussian-entropy</code> ambiguity (the one <em>derived-from-FEP</em> quantity) <b>−</b> the pattern-grain <code>EIG</code> leg (epistemic value, sought). As of 2026-07-08 all three are armed/faithful. <b>Everything below is augmentation</b> — real controller behaviour, but not Expected Free Energy.
+<b>For contrast — the implemented FEP-faithful core is:</b> <code>G = risk + ambiguity</code>, using predicted-outcome KL against C and Gaussian observation entropy. Policy-conditioned expected information gain is not yet implemented; posterior spread must not be presented as EIG. <b>Everything below is either augmentation, policy support, or telemetry</b> — not Expected Free Energy.
 </div>
 
-<h2>The short list — seven analogical quantities</h2>
+<h2>The engineering-control list</h2>
 <table>
 <tr><th>quantity</th><th>load?</th><th>claims to be</th><th>actually computes</th><th>honest repair</th></tr>
 
 <tr>
-<td class="name">:G-total</td>
+<td class="name">:controller-score</td>
 <td><span class="tag t-load">the frame</span></td>
 <td>Expected Free Energy</td>
 <td>a <b>linear sum of 8 terms in incommensurate units at hand-set weights</b>; the risk+ambiguity core is diluted</td>
@@ -57,15 +57,15 @@
 </tr>
 
 <tr>
-<td class="name">:G-survival</td>
-<td><span class="tag t-load">47.9% flip</span></td>
-<td>survival-pressure EFE term</td>
+<td class="name">:homeostatic-pressure</td>
+<td><span class="tag t-dead">telemetry-only</span></td>
+<td>homeostatic pressure</td>
 <td>unweighted Σ hinge-gap over 4 critical channels — <b>a second G-risk on a subset</b></td>
-<td>fold into risk, or rename "homeostatic pressure" and drop the EFE framing</td>
+<td><b>done:</b> live contribution is zero; preference pressure enters through KL risk against C; the raw hinge and legacy comparison mode remain auditable</td>
 </tr>
 
 <tr>
-<td class="name">:G-structural-pressure</td>
+<td class="name">:structural-pressure</td>
 <td><span class="tag t-load">44.5% flip</span></td>
 <td>weighted EFE term</td>
 <td><b>pass-through of a caller-injected scalar × 0.35</b>; not a computed quantity</td>
@@ -73,15 +73,15 @@
 </tr>
 
 <tr>
-<td class="name">:G-graph-pragmatic</td>
+<td class="name">graph support / control</td>
 <td><span class="tag t-load">dominant</span></td>
 <td>pragmatic value</td>
-<td><code>1000·[not-applicable] + 3·holes − 20·ascent-progress</code> — graph heuristic counts/gates</td>
-<td>split: applicability = a feasibility mask; ascent = a pragmatic proxy toward the preferences C</td>
+<td>reason-bearing exclusion of infeasible policies, plus <code>3·holes − 20·ascent-progress</code> for admitted policies</td>
+<td><b>split done:</b> applicability sits in Π<sub>feasible</sub>; body/ascent remains an honestly named pragmatic proxy</td>
 </tr>
 
 <tr>
-<td class="name">:G-gap</td>
+<td class="name">:gap-exploration-bonus</td>
 <td><span class="tag t-minor">minor</span></td>
 <td>epistemic "room to grow"</td>
 <td><code>6.0 × caller-supplied gap-score lookup</code>; <b>no expected-information computation</b></td>
@@ -97,21 +97,21 @@
 </tr>
 
 <tr>
-<td class="name">:G-info</td>
-<td><span class="tag t-dead">DEAD · 0% flip</span></td>
-<td>epistemic info-gain (EIG)</td>
+<td class="name">:predictability-bonus</td>
+<td><span class="tag t-dead">telemetry-only</span></td>
+<td>predictability diagnostic</td>
 <td><code>Σ max(0, 1 − variance)</code> = complement of ambiguity; <b>no belief-entropy reduction</b></td>
-<td><b>prune it</b> — 0% flip-rate (never changes a decision) <em>and</em> now superseded by the real pattern-grain EIG leg</td>
+<td><b>done:</b> zero live contribution because Gaussian ambiguity already prices the same variance; raw telemetry and a legacy comparison mode remain</td>
 </tr>
 </table>
 
 <h2>What the list says, honestly</h2>
-<p><b>The headline unfaithfulness is <code>:G-total</code> itself</b> — the score is labelled "Expected Free Energy" but is a hand-weighted blend of eight incommensurate terms. Faithful EFE is the three-leg core; the blend is a <em>multi-objective controller</em> with an EFE core inside it. That is a real thing to be — it just is not what the label claims.</p>
-<p><b>Two of these are dead or nearly so.</b> <code>:G-info</code> has a <b>0% flip-rate</b> — it never changes a decision — and it duplicated the epistemic role that the new pattern-grain EIG now fills properly. It is a clean delete. <code>:G-gap</code> is a small caller-supplied lookup with no information-theoretic content.</p>
-<p><b>The load-bearing ones are real controllers wearing the wrong name.</b> <code>:G-survival</code> (47.9% flip) and <code>:G-structural-pressure</code> (44.5%) and <code>:G-graph-pragmatic</code> genuinely drive the War Machine's choices — but as homeostatic / habit / feasibility heuristics, not as Expected Free Energy. The honest repair for these is almost never "delete"; it is "<b>rename to what it is</b>" (exogenous weight, homeostatic pressure) or "<b>move to its canonical AIF seat</b>" (the habit prior <code>ln E(π)</code>, a feasibility mask).</p>
+<p><b>The blend is now honestly named <code>:controller-score</code>.</b> It remains a multi-objective controller with an EFE core inside it, not a pure EFE minimizer.</p>
+<p><b>Two direct residuals have been retired from ranking.</b> <code>:predictability-bonus</code> duplicated ambiguity, and <code>:homeostatic-pressure</code> duplicated preference risk. Both remain raw telemetry so historical and shadow comparisons are possible, but their live signed augmentation entries are zero.</p>
+<p><b>Graph feasibility has moved to its proper structural seat.</b> Off-map and capability-inapplicable open-mission policies are excluded before value scoring with explicit reasons. The remaining body/ascent number is still a task-specific engineering proxy, not canonical pragmatic value.</p>
 
 <div class="honest">
-<b>Do we need to resolve them?</b> Open question, deliberately deferred. Faithfulness does <em>not</em> require deleting the augmentation — a multi-objective controller with an honest EFE core is a legitimate design. The minimum honest move is <b>truth-in-labelling</b>: stop calling the blend "EFE," and badge each term for what it is (which <code>r18-badges.edn</code> already does). Beyond that: <b>prune <code>:G-info</code></b> (free — it does nothing), and the canonical-seat repairs are worthwhile but not urgent. Whether the WM should become a purer EFE agent, or stay an honestly-labelled multi-objective one, is a design decision for later.
+<b>What remains?</b> Structural pressure still needs a learned/inferred prior over policies before it can occupy E; model uncertainty and gap exploration remain proxies until policy-conditioned posterior-update simulation supports genuine EIG; cascade and coverage scores remain intentionally task-specific engineering objectives. Those residuals are explicit rather than hidden behind AIF names.
 </div>
 
 <p class="note">Machine-readable badges: <code>data/r18-badges.edn</code>. Faithful-loop companion: <code>aif-wiring-explainer.html</code>. Structure-learning / EIG: <code>structure-learning-explainer.html</code>.</p>

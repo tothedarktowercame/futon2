@@ -143,13 +143,13 @@ def main():
             "size-shown": len(shown),
             "size-saturated": r["size"],
             "wholeness": r["wholeness"],
-            "F": r["F-free-energy"],
+            "F": r["cascade-score"],
             "potential-sum": sum(pots),
             "potential-mean": (sum(pots) / len(pots)) if pots else 0.0,
             "patterns": shown,
         })
         print(f"{target:38s} n={len(shown)} wholeness={r['wholeness']:.3f} "
-              f"F={r['F-free-energy']:.3f} Σπ={sum(pots)*1000:.3f}‰")
+              f"F={r['cascade-score']:.3f} Σπ={sum(pots)*1000:.3f}‰")
     ws = [r["wholeness"] for r in rows]
     fs = [r["F"] for r in rows]
     ps = [r["potential-sum"] for r in rows]

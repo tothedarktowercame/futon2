@@ -9,20 +9,20 @@
    ;; rank-1 action carries the policy-grain EFE decomposition + the :risk-mode regime
    :ranked-actions [{:action {:type :address-sorry :target :sorry/x
                               :rationale "clear the blocking sorry"}
-                     :G-total 0.25 :risk-mode :kl
-                     :G-core 0.4 :G-risk 1.2 :G-ambiguity -1.0 :G-info 0.3
-                     :G-goal-outcome 0.5 :G-survival 0.1 :G-augmentation -0.2 :G-gap 0.0}]
+                     :controller-score 0.25 :risk-mode :kl
+                     :G-core 0.4 :G-risk 1.2 :G-ambiguity -1.0 :predictability-bonus 0.3
+                     :G-goal-outcome 0.5 :homeostatic-pressure 0.1 :controller-augmentation -0.2 :gap-exploration-bonus 0.0}]
    :decision {:action {:type :address-sorry :target :sorry/x
                        :rationale "clear the blocking sorry"}
-              :G-total 0.25}
+              :controller-score 0.25}
    ;; cascade-lane verdicts: per candidate mission, the cascade's pass/fail + ΔG + source
-   :act-gate-verdicts [{:mission "M-x" :verdict :pass :delta-G -0.2 :delta-G-source :fold}
-                       {:mission "M-y" :verdict :fail :delta-G -0.25 :delta-G-source :rollout}
+   :act-gate-verdicts [{:mission "M-x" :verdict :pass :coverage-score-delta -0.2 :coverage-score-source :fold}
+                       {:mission "M-y" :verdict :fail :coverage-score-delta -0.25 :coverage-score-source :rollout}
                        {:mission "M-z" :verdict :fail}]
    :belly 3
    :enactment {:mission "M-x"}
-   :realized-outcome {:realized-G 0.1
-                      :expected-G 0.25}
+   :realized-outcome {:realized-score 0.1
+                      :expected-score 0.25}
    :wm-version {:trigger :duree-click-regulated}})
 
 (deftest evidence-entry-shape-test
@@ -41,8 +41,8 @@
         (is (= 0.25 (:G body)))
         (is (= {:pass 1 :fail 2} (:gates body)))
         (is (= "M-x" (:enacted body)))
-        (is (= 0.1 (:realized-G body)))
-        (is (= 0.25 (:expected-G body)))
+        (is (= 0.1 (:realized-score body)))
+        (is (= 0.25 (:expected-score body)))
         (is (= :duree-click-regulated (:trigger body)))
         (is (= 1 (:candidates body)))
         (is (= "2026-07-04T12:34:56Z" (:at body))))
@@ -51,9 +51,9 @@
         (is (= {:core 0.4 :risk 1.2 :ambiguity -1.0 :info 0.3
                 :goal-outcome 0.5 :survival 0.1 :augmentation -0.2 :gap 0.0}
                (:G-breakdown body)))
-        (is (= [{:mission "M-x" :verdict :pass :delta-G -0.2 :source :fold}
-                {:mission "M-y" :verdict :fail :delta-G -0.25 :source :rollout}
-                {:mission "M-z" :verdict :fail :delta-G nil :source nil}]
+        (is (= [{:mission "M-x" :verdict :pass :coverage-score-delta -0.2 :source :fold}
+                {:mission "M-y" :verdict :fail :coverage-score-delta -0.25 :source :rollout}
+                {:mission "M-z" :verdict :fail :coverage-score-delta nil :source nil}]
                (:cascade-lane body))))
       (testing "readable :text carries decision, risk-mode regime, cascade verdicts, outcome"
         (is (string? (:text body)))

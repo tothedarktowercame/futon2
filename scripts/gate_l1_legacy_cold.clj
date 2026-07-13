@@ -1,7 +1,7 @@
 ;; gate_l1_legacy_cold.clj — E-live-loop-3 gate L1 (standing evidence check).
 ;; PASS iff the deprecated :llm-escrow branch in enact.clj loud-ignores a
 ;; planted legacy wiring file: (a) the WARN fires when escrow-wiring finds a
-;; file for a nil-delta-G entry, and (b) the act-gate's :delta-G stays nil
+;; file for a nil-coverage-score-delta entry, and (b) the act-gate's :coverage-score-delta stays nil
 ;; (the legacy file is never read into the gate). The gate is self-contained:
 ;; it plants a temp file, exercises the branch via the actual source fns,
 ;; and cleans up. Run: cd /home/joe/code/futon2 && clojure -M scripts/gate_l1_legacy_cold.clj
@@ -30,21 +30,21 @@
           ;; Plant the legacy file.
           _ (do (.mkdirs (io/file escrow-dir))
                 (spit test-file legacy-wiring-edn))
-          entry {:mission test-mission :shown [] :F-free-energy nil :G-rollout nil}
+          entry {:mission test-mission :shown [] :cascade-score nil :policy-rollout-score nil}
           ag (cl/act-gate-from-lane-entry entry)
           legacy-found (escrow-wiring test-mission)
-          warn-would-fire? (and (nil? (:delta-G ag)) (some? legacy-found))
-          delta-g-nil? (nil? (:delta-G ag))]
+          warn-would-fire? (and (nil? (:coverage-score-delta ag)) (some? legacy-found))
+          step-score-delta-nil? (nil? (:coverage-score-delta ag))]
       (cond
         (not legacy-found)
         (println "GATE L1 FAIL — escrow-wiring did not find planted legacy file")
-        (not delta-g-nil?)
-        (println "GATE L1 FAIL — act-gate :delta-G is non-nil (" (:delta-G ag)
+        (not step-score-delta-nil?)
+        (println "GATE L1 FAIL — act-gate :coverage-score-delta is non-nil (" (:coverage-score-delta ag)
                  ") — legacy file was READ into the gate (regression!)")
         (not warn-would-fire?)
-        (println "GATE L1 FAIL — WARN would not fire for nil-delta-G + legacy file present")
+        (println "GATE L1 FAIL — WARN would not fire for nil-coverage-score-delta + legacy file present")
         :else
-        (println "GATE L1 PASS — legacy file loud-ignored: WARN fires, :delta-G stays nil,"
+        (println "GATE L1 PASS — legacy file loud-ignored: WARN fires, :coverage-score-delta stays nil,"
                  "verdict" (cl/preview-verdict ag))))
     (finally
       (.delete test-file))))

@@ -18,9 +18,9 @@
 
 ;; The act-gate verdict (replicated from war_machine_pilot_backend, sim-only —
 ;; we do NOT touch the live pilot backend).
-(defn- gate-verdict [delta-F delta-G]
-  (cond (or (nil? delta-F) (nil? delta-G)) :abstain-missing-leg
-        (and (pos? delta-F) (neg? delta-G)) :pass
+(defn- gate-verdict [cascade-score coverage-score-delta]
+  (cond (or (nil? cascade-score) (nil? coverage-score-delta)) :abstain-missing-leg
+        (and (pos? cascade-score) (neg? coverage-score-delta)) :pass
         :else :fail))
 
 (deftest classical-fold-satisfies-interface
@@ -29,21 +29,21 @@
       (is (fold/valid-fold-output? out))
       (is (some? (:wiring out)))
       (is (seq (get-in out [:wiring :boxes])) "the construction has boxes")
-      (is (number? (:delta-g out))))))
+      (is (number? (:coverage-score-delta out))))))
 
 (deftest classical-fold-closes-the-gate
   (testing "a complete fold gives a descending ΔG ⇒ the gate can :pass"
     (let [out (fc/classical-fold foldable-cascade {})]
       (is (fold/closes? out) "ΔG present and negative")
       ;; with a positive ΔF (Bayesian-Occam accept), the gate flips abstain→pass
-      (is (= :pass (gate-verdict 0.3 (fold/act-gate-leg out))))))
+      (is (= :pass (gate-verdict 0.3 (fold/coverage-score-leg out))))))
   (testing "a cascade that folds nothing → ΔG nil ⇒ the gate abstains (honest)"
     (let [out (fc/classical-fold foreign-cascade {})]
       (is (fold/valid-fold-output? out))
       (is (empty? (get-in out [:wiring :boxes])) "no fabricated construction")
-      (is (nil? (:delta-g out)))
+      (is (nil? (:coverage-score-delta out)))
       (is (not (fold/closes? out)))
-      (is (= :abstain-missing-leg (gate-verdict 0.3 (fold/act-gate-leg out)))
+      (is (= :abstain-missing-leg (gate-verdict 0.3 (fold/coverage-score-leg out)))
           "no construction ⇒ the gate still abstains (the loop only closes with a real fold)")))
   (testing "foreign patterns are surfaced as policy-holes, never dropped"
     (let [out (fc/classical-fold (into foldable-cascade foreign-cascade) {})]

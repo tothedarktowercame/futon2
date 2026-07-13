@@ -1,7 +1,7 @@
 (ns futon2.aif.fold-classical
   "Impl #1 of the fold interface (`futon2.aif.fold`) — the CLASSICAL fold
    (E-close-the-loop §2). Realizes
-       fold : (cascade, circumstance) → {:wiring :delta-g :policy-holes}
+       fold : (cascade, circumstance) → {:wiring :coverage-score-delta :policy-holes}
    via the deterministic rule-table fold (`meme.fold`) for the construction +
    the rollout G(π) accumulator (`futon2.aif.rollout`) for ΔG.
 
@@ -17,7 +17,7 @@
 
    ΔG evaluation is the SHARED coverage→rollout axis (`futon2.aif.fold-eval`) —
    the same path impl #2 (LLM-turn) uses, so the comparison isolates the *build*.
-   Alternative ΔG evaluations (all target the same `:delta-g` port, to compare
+   Alternative ΔG evaluations (all target the same `:coverage-score-delta` port, to compare
    later) live in `fold-eval`. See E-close-the-loop §6b."
   (:require [meme.fold :as mf]
             [futon2.aif.fold-eval :as fe]))
@@ -26,10 +26,10 @@
 
 (defn classical-fold
   "Impl #1 satisfying `futon2.aif.fold`: (cascade, circumstance) →
-   {:wiring :delta-g :policy-holes}. `circumstance` may carry `:want-signature`."
+   {:wiring :coverage-score-delta :policy-holes}. `circumstance` may carry `:want-signature`."
   [cascade circumstance]
   (let [want-sig (or (:want-signature circumstance) default-want-signature)
         wiring   (mf/fold (vec cascade) want-sig)]
     {:wiring wiring
-     :delta-g (fe/coverage-delta-g wiring)
+     :coverage-score-delta (fe/coverage-score-delta wiring)
      :policy-holes (:policy-holes wiring)}))

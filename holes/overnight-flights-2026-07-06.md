@@ -436,3 +436,11 @@ sibling scoping all require implementation-level knowledge not in the pattern ha
 dG=-0.6 reflects strong coverage (6/10). The mana gate is now EXHAUSTED (balance 0) —
 no further fold-authoring deposits possible without operator top-up.
 REFUSED - budget exhausted, run aborted
+REFUSED - budget exhausted, run aborted
+REFUSED - budget exhausted, run aborted
+REFUSED - budget exhausted, run aborted
+REFUSED - budget exhausted, run aborted
+REFUSED - budget exhausted, run aborted
+REFUSED - budget exhausted, run aborted
+REFUSED - budget exhausted, run aborted
+REFUSED - budget exhausted, run aborted

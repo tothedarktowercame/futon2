@@ -3,13 +3,13 @@
             [futon2.aif.arguing-worlds :as aw]))
 
 (defn- mv
-  [id class have want score delta-g]
+  [id class have want score step-score-delta]
   {:move/id id
    :move/class class
    :have have
    :want want
    :score score
-   :delta-g delta-g
+   :step-score-delta step-score-delta
    :rank 1
    :move/terminal? false})
 
@@ -35,7 +35,7 @@
         result (aw/referee-harness fixture-state [bad-c good-g third]
                                   :diversity-opts {:max-overlap 0.4})]
     (is (= :dialectic-wins (:verdict result)))
-    (is (= :realized-G (-> result :winner :yardstick)))
+    (is (= :realized-score (-> result :winner :yardstick)))
     (is (= :two-step-discharge (-> result :winner :buildout/id)))
     (is (= :shiny-single (-> result :top-c-buildout :buildout/id)))))
 
@@ -90,7 +90,7 @@
                (mv "mission" :close-hole "futon2-d/mission/a" "a/map" 1.0 -0.2)
                (mv "proxy" :close-hole "scope/interim-director-proxy-metric-inventory/pattern#open" "closed" 1.0 -0.2)]
         result (aw/experiment-runner moves)]
-    (is (= :realized-G (:yardstick result)))
+    (is (= :realized-score (:yardstick result)))
     (is (= :escrowed (:peradam-grounding result)))
     (is (= 2 (count (:results result))))
     (is (every? #(contains? % :verdict) (:results result)))))
@@ -137,7 +137,7 @@
                                          :diversity-opts {:max-overlap 1.0})]
     (is (= :sampler-wins (:verdict result)))
     (is (= :s-c (-> result :winner :sampler/id)))
-    (is (= :realized-G (-> result :winner :yardstick)))))
+    (is (= :realized-score (-> result :winner :yardstick)))))
 
 (deftest referee-field-harness-tie-breaks-by-moves-then-wall-clock-then-tie
   (let [one-move (bo :one [(mv "one" :close-hole "root" "one" 1 -1.0)] 1)

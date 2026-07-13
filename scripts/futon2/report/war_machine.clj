@@ -41,11 +41,12 @@
             [futon2.aif.efe :as efe]
             [futon2.aif.forward-model :as fm]
             [futon2.aif.free-energy :as fe]
+            [futon2.aif.habit-prior :as habit-prior]
             [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.observation :as obs]
             [futon2.aif.pattern-registry :as pattern-registry]
             [futon2.aif.policy :as policy]
-            [futon2.aif.policy-precision :as policy-precision]
+            [futon2.aif.selection-gain :as selection-gain]
             [futon2.aif.precision :as precision]
             [futon2.aif.preferences :as pref]
             [futon2.aif.sorry-registry :as sorry-registry]
@@ -56,6 +57,16 @@
 
 ;; ---------------------------------------------------------------------------
 ;; Config
+
+(def ^:private default-wm-trace-dir
+  (str (System/getProperty "user.home") "/code/futon2/data/wm-trace"))
+
+;; A one-shot production JVM dereferences this at most once, on the first tick
+;; after the learned-prior flip. Test/report JVMs may call judge repeatedly;
+;; memoising the immutable corpus fold prevents repeated 760-record cold reads.
+(defonce ^:private default-habit-prior-seed
+  (delay (habit-prior/fold-records
+          (trace/read-all-traces :dir default-wm-trace-dir))))
 ;; ---------------------------------------------------------------------------
 
 (def ^:private home (System/getProperty "user.home"))
@@ -133,7 +144,7 @@
    ambiguity, leaving ≈ canonical −E[ln C]; SAFE because cascade placeholder
    rows are appended AFTER wm-decision and never enter the selection pool —
    downstream stats must keep excluding placeholder rows when comparing
-   G-totals)."
+   controller-scores)."
   []
   (if (= "hinge" (System/getenv "FUTON_WM_RISK_MODE"))
     :hinge
@@ -158,65 +169,110 @@
     :hinge
     :kl))
 
-(defn- arena-salience-mode
-  "B-2c DARK BUILD (M-aif-faithfulness §2.2) — NOT flipped. R7's summed-in
-   need term is an affect/salience modulation wearing precision's name;
-   the separated form (Π = canonical 1/max(var,ε) leg only; need term
-   under the named :salience key) is built dark in
-   `futon2.aif.precision`. DEFAULT = :summed — the historical v0.13
-   behaviour, byte-identical (witness:
-   test/resources/goldens/r7_default_path_witness.edn).
-   `FUTON_WM_SALIENCE_MODE=separate` turns the dark path ON (inverse of
-   the escape-hatch pattern: here the env var opts INTO the new form
-   because the flip has not been taken). The production flip is Joe's,
-   recorded in the §2.1 verdict ledger."
+(defn- arena-likelihood-mode
+  "M-aif-a-matrix-faithfulness production flip (2026-07-13): live belief
+   updates use the declared, column-normalised A, identity B, and uniform D
+   through belief's exact categorical-filter path. The explicit env hatch
+   restores the historical implicit-diagonal likelihood for comparison."
   []
-  (if (= "separate" (System/getenv "FUTON_WM_SALIENCE_MODE"))
-    :separate
-    :summed))
+  (case (System/getenv "FUTON_WM_LIKELIHOOD_MODE")
+    "legacy" :legacy
+    "a-matrix" :a-matrix
+    :aif))
+
+(defn arena-belief-update-opts
+  "The single resolved belief-model contract shared by posterior updates and
+   policy rollouts. Keeping this map at the arena boundary prevents the live
+   filter and the forward model from drifting onto different likelihoods."
+  []
+  {:likelihood-mode (arena-likelihood-mode)})
+
+(defn apply-arena-belief-events
+  "Apply belief events through the same likelihood mode recorded by the live
+   arena provenance stamp. Kept as a named seam so production wiring is
+  directly testable rather than inferred from configuration alone."
+  [belief-state events]
+  (belief/update-belief-batch belief-state events
+                              (arena-belief-update-opts)))
+
+(defn- arena-salience-mode
+  "Production R7 semantics: precision is inverse rolling error variance;
+   preference-gap salience is a separate field. The historical summed mode
+   remains directly testable in `futon2.aif.precision`, but is not a live
+   arena configuration because it changes the meaning of Π."
+  []
+  :separate)
 
 (defn- arena-tau-mode
-  "B-2d DARK BUILD (M-aif-faithfulness §2.2, 2026-07-04) — NOT flipped. R6
-   τ-layer separation: today's selection temperature stacks the adaptive
-   spread calibration on γ (τ_eff = τ_spread/γ). The separated, canonical
-   form — γ alone carries selection sharpness, τ_eff = 1/γ — is built dark
-   in `futon2.aif.policy/effective-temperature` under `:tau-mode`.
-   DEFAULT = :spread — the historical behaviour, byte-identical (witness:
-   effective-temperature-default-mode-witness-test in policy_test.clj).
-   `FUTON_WM_TAU_MODE=gamma-only` turns the dark path ON (B-2c inverse-hatch
-   polarity: the env var opts INTO the new form because the flip has not
-   been taken). The production flip is Joe's (§2.1 verdict ledger); evidence
-   a flip decision needs: an E6-style shadow comparison of selections /
-   abstain rate / softmax entropy under both modes over the trace corpus,
-   decided jointly with B-3b (R14 γ β-update — the two share the
-   selection-sharpness seam)."
+  "B-2d R6 τ-layer separation, FLIPPED LIVE by Joe 2026-07-13.
+   `:selection-gain-only` removes the score-spread calibration heuristic so
+   the explicitly engineering selection gain alone controls commitment:
+   τ_eff = 1/g. `FUTON_WM_TAU_MODE=spread` is the provenance-stamped rollback
+   hatch to historical τ_spread/g behaviour. This does not relabel g as
+   variational policy precision."
   []
-  (if (= "gamma-only" (System/getenv "FUTON_WM_TAU_MODE"))
-    :gamma-only
-    :spread))
+  (if (= "spread" (System/getenv "FUTON_WM_TAU_MODE"))
+    :spread
+    :selection-gain-only))
 
 (defn- arena-structural-pressure-mode
-  "D-1d DARK BUILD (M-aif-faithfulness §2.1, relocation ratified 2026-07-04)
-   — NOT flipped. G-structural-pressure's canonical seat is the habit prior
-   ln E(π) (R12), not a G-summand (D8; the r18 audit's EXOGENOUS WEIGHT
-   verdict). DEFAULT = :g-summand — byte-identical historical behaviour
-   (witness: efe_structural_pressure_mode_test.clj goldens).
-   `FUTON_WM_STRUCTURAL_PRESSURE_MODE=habit-prior` turns the dark path ON
-   (B-2c/B-2d opt-IN hatch polarity): the term LEAVES :G-total and enters
-   selection through policy/select-action's log-prior seam (the R12 seat) —
-   unscaled by τ_eff, so precision stops modulating it. The flip is Joe's
-   (§2.1 verdict ledger); evidence = E6-style shadow, queued with the
-   B-2c/B-2d shadows."
+  "D-1d relocation FLIPPED LIVE by Joe 2026-07-13. Structural pressure leaves
+   `controller-score`; the policy layer receives a habit prior at the unscaled
+   ln E(π) seam. The live source is learned frequency (B1), not the historical
+   caller scalar. `FUTON_WM_STRUCTURAL_PRESSURE_MODE=controller-augmentation`
+   is the provenance-stamped rollback hatch."
   []
-  (if (= "habit-prior" (System/getenv "FUTON_WM_STRUCTURAL_PRESSURE_MODE"))
-    :habit-prior
-    :g-summand))
+  (if (= "controller-augmentation"
+         (System/getenv "FUTON_WM_STRUCTURAL_PRESSURE_MODE"))
+    :controller-augmentation
+    :habit-prior))
+
+(defn arena-habit-prior-source
+  "B1 learned E(π), FLIPPED LIVE jointly with structural relocation by Joe
+   2026-07-13. The default symmetric-Dirichlet trace-frequency posterior
+   REPLACES the caller-supplied structural proxy. `FUTON_WM_HABIT_PRIOR_SOURCE=caller`
+   is the provenance-stamped rollback hatch and remains coherent only when the
+   structural mode is explicitly rolled back too."
+  []
+  (if (= "caller" (System/getenv "FUTON_WM_HABIT_PRIOR_SOURCE"))
+    :caller
+    :learned-frequency))
+
+(defn- arena-predictability-control-mode
+  "Typed-residual remediation (2026-07-13): predictability is retained as
+   telemetry but no longer ranks policies; it is an affine duplicate of the
+   predicted-variance signal already priced by Gaussian ambiguity. The env
+   hatch restores the historical controller contribution for comparison."
+  []
+  (if (= "controller-augmentation"
+         (System/getenv "FUTON_WM_PREDICTABILITY_CONTROL_MODE"))
+    :controller-augmentation
+    :telemetry-only))
+
+(defn- arena-homeostatic-control-mode
+  "Typed-residual remediation (2026-07-13): the four-channel hinge remains
+   observable but no longer duplicates production KL risk against C. The env
+   hatch restores the historical controller contribution for comparison."
+  []
+  (if (= "controller-augmentation"
+         (System/getenv "FUTON_WM_HOMEOSTATIC_CONTROL_MODE"))
+    :controller-augmentation
+    :telemetry-only))
+
+(defn- arena-graph-feasibility-mode
+  "Typed-residual remediation (2026-07-13): graph applicability is a policy
+   support condition, not a value penalty. The env hatch restores historical
+   soft-penalty scoring for comparison."
+  []
+  (if (= "score-penalty" (System/getenv "FUTON_WM_GRAPH_FEASIBILITY_MODE"))
+    :score-penalty
+    :policy-support))
 
 (defn- arena-move-class-intensity-mode
   "M-action-vocabulary P2 DARK BUILD — NOT flipped. The move-class-conditional
    value term prices advance/close/survey/apply-cascade with the v1 formulas in
    `futon2.aif.move-class-intensity`. DEFAULT = :off, so `efe/compute-efe`
-   takes the historical G-total path and emits no move-class contribution.
+   takes the historical controller-score path and emits no move-class contribution.
    `FUTON_WM_MOVE_CLASS_INTENSITY=v1` opts into the dark scorer for offline
    shadows/P3 only; no live flag flip without the operator."
   []
@@ -229,7 +285,10 @@
    the arena rank lanes score with THIS tick, for the trace's :wm-version
    stamp. Resolved via the SAME fns the lanes call (arena-risk-mode /
    arena-ambiguity-mode / arena-goal-outcome-mode / arena-salience-mode /
+   arena-likelihood-mode /
    arena-tau-mode / arena-structural-pressure-mode /
+   arena-predictability-control-mode / arena-homeostatic-control-mode /
+   arena-graph-feasibility-mode /
    arena-move-class-intensity-mode) — never a separate env read, so the stamp
    cannot drift from the behaviour it describes.
    :kl-channel-weights and :c-temperature are the compute-efe defaults because
@@ -239,9 +298,15 @@
   {:risk-mode (arena-risk-mode)
    :ambiguity-mode (arena-ambiguity-mode)
    :goal-outcome-mode (arena-goal-outcome-mode)
+   :likelihood-mode (arena-likelihood-mode)
+   :belief-model-manifest (belief/model-manifest)
    :salience-mode (arena-salience-mode)
    :tau-mode (arena-tau-mode)
    :structural-pressure-mode (arena-structural-pressure-mode)
+   :habit-prior-source (arena-habit-prior-source)
+   :predictability-control-mode (arena-predictability-control-mode)
+   :homeostatic-control-mode (arena-homeostatic-control-mode)
+   :graph-feasibility-mode (arena-graph-feasibility-mode)
    :move-class-intensity-mode (arena-move-class-intensity-mode)
    :kl-channel-weights efe/default-kl-channel-weights
    :c-temperature pref/default-c-temperature})
@@ -533,8 +598,11 @@
                         :risk-mode (arena-risk-mode)
                         ;; D-1e flip — the W1 goal-outcome lane, same boundary
                         :goal-outcome-mode (arena-goal-outcome-mode)
-                        ;; D-1d dark — see arena-structural-pressure-mode
+                        ;; D-1d live relocation — see arena-structural-pressure-mode
                         :structural-pressure-mode (arena-structural-pressure-mode)
+                        :predictability-control-mode (arena-predictability-control-mode)
+                        :homeostatic-control-mode (arena-homeostatic-control-mode)
+                        :graph-feasibility-mode (arena-graph-feasibility-mode)
                         ;; M-action-vocabulary P2 dark — default :off
                         :move-class-intensity-mode (arena-move-class-intensity-mode)}))
                      (select-keys structure
@@ -684,8 +752,8 @@
 
 (defn- tied-g-total?
   [left right]
-  (<= (Math/abs (- (double (or (:G-total left) 0.0))
-                   (double (or (:G-total right) 0.0))))
+  (<= (Math/abs (- (double (or (:controller-score left) 0.0))
+                   (double (or (:controller-score right) 0.0))))
       g-total-tie-epsilon))
 
 (defn- partition-tied-groups
@@ -2700,13 +2768,13 @@
                        ")\n\n"))
 
       ;; Free energy
-      (let [{:keys [G-total G-pragmatic G-epistemic]} (:free-energy j)]
+      (let [{:keys [controller-score preference-gap-score coverage-uncertainty-pressure]} (:free-energy j)]
         (.append sb (render-table
                      ["Free Energy" "Value"]
                      [:left :right]
-                     [["G-total" (format "%.4f" (double G-total))]
-                      ["G-pragmatic (0.65)" (format "%.4f" (double G-pragmatic))]
-                      ["G-epistemic (0.35)" (format "%.4f" (double G-epistemic))]]))
+                     [["controller-score" (format "%.4f" (double controller-score))]
+                      ["preference-gap-score (0.65)" (format "%.4f" (double preference-gap-score))]
+                      ["coverage-uncertainty-pressure (0.35)" (format "%.4f" (double coverage-uncertainty-pressure))]]))
         (.append sb "\n"))
 
       ;; Losses (avoided states currently active)
@@ -3663,7 +3731,7 @@
   ([scan-data] (judge scan-data {}))
   ([scan-data {:keys [trace? trace-dir scan-id] :or {trace? false}}]
   (let [observation (obs/observe scan-data)
-        free-energy (fe/compute-free-energy observation)
+        free-energy (fe/compute-controller-diagnostics observation)
         ;; Base mode from equilibrium-classification of observations.
         base-mode (fe/infer-mode observation)
         ;; OVERRIDE-MODE check: when any metabolic-balance channel hits
@@ -3698,12 +3766,31 @@
         ;; belief/*carry-belief?*; falls back to the fresh bootstrap when off
         ;; or on a cold start with no prior trace).
         wm-sorrys (try (sorry-registry/open-sorrys) (catch Exception _ []))
+        wm-trace-dir (or trace-dir default-wm-trace-dir)
         prev-trace-record
         (try (trace/latest-trace-record
-              :dir (or trace-dir
-                       (str (System/getProperty "user.home")
-                            "/code/futon2/data/wm-trace")))
+              :dir wm-trace-dir)
              (catch Exception _ nil))
+        structural-pressure-mode (arena-structural-pressure-mode)
+        habit-prior-source (arena-habit-prior-source)
+        _habit-mode-coherence
+        (when (and (= :learned-frequency habit-prior-source)
+                   (not= :habit-prior structural-pressure-mode))
+          (throw (ex-info
+                  "learned habit prior requires structural pressure relocated out of controller-score"
+                  {:habit-prior-source habit-prior-source
+                   :structural-pressure-mode structural-pressure-mode})))
+        ;; B1: prefer the sufficient-statistic state persisted by the previous
+        ;; enabled tick. On the first enabled tick only, deterministically seed
+        ;; it from the complete chronological trace corpus.
+        habit-prior-pre
+        (when (= :learned-frequency habit-prior-source)
+          (if-let [persisted (:habit-prior-state prev-trace-record)]
+            (habit-prior/coerce-state persisted)
+            (if (= wm-trace-dir default-wm-trace-dir)
+              @default-habit-prior-seed
+              (habit-prior/fold-records
+               (trace/read-all-traces :dir wm-trace-dir)))))
         ;; v0.9 symmetric bootstrap: belief domain = stack-annotations.edn
         ;; :sections[] :id ∪ sorry-registry ids. Mirrors VSATARCS-side
         ;; bootstrap so per-entity comparison reduces to alist-lookup
@@ -3747,16 +3834,16 @@
         ;; coerce-state guards against the retired v0 :error-history schema
         ;; whose degenerate 8-sample state pinned γ to 0.5 for days (2026-07-02
         ;; find) — malformed/retired shapes reset to the honest prior.
-        prev-policy-precision
-        (policy-precision/coerce-state
-         (or (:policy-precision prev-trace-record)
-             (policy-precision/initial-policy-precision-state)))
+        prev-selection-gain-state
+        (selection-gain/coerce-state
+         (or (:selection-gain prev-trace-record)
+             (selection-gain/initial-selection-gain-state)))
         ;; R14 learning step: fold the REALIZED outcome of an enacted policy into
         ;; γ. The signal is R16's committed `:realized-outcome` trace contract
         ;; (paired with claude-10, E-close-the-loop), written at enactment and
         ;; READ here next tick — async-clean, never a synchronous cross-subsystem
         ;; call (cf. the 2026-06-26 freeze incident):
-        ;;   {:policy <id> :expected-G <g> :realized-G <g'> :tick <enactment tick>}
+        ;;   {:policy <id> :expected-score <g> :realized-score <g'> :tick <enactment tick>}
         ;; Both legs are the SAME EFE quantity (the fold's coverage→rollout ΔG —
         ;; expected over the PREDICTED wiring, realized over the ENACTED wiring),
         ;; so the relative error is apples-to-apples (NOT a ΔG-vs-ΔF mismatch).
@@ -3765,10 +3852,10 @@
         ;; ⇒ byte-identical to today's τ path. `:last-outcome-tick` (carried in
         ;; the γ-state) dedups: judge ticks far faster than enactment, so the
         ;; same outcome must be folded at most once.
-        policy-precision-state
-        (policy-precision/fold-realized-outcome
-         prev-policy-precision (:realized-outcome prev-trace-record))
-        gamma (policy-precision/gamma-for policy-precision-state)
+        selection-gain-state
+        (selection-gain/fold-realized-outcome
+         prev-selection-gain-state (:realized-outcome prev-trace-record))
+        selection-gain-value (selection-gain/selection-gain-for selection-gain-state)
         ;; Inner loop result
         {:keys [belief precision-state prediction-errors micro-step-trace]}
         (loop [step 0
@@ -3787,10 +3874,8 @@
                                    [ch (fe/compute-prediction-error
                                         (get observation ch 0.0)
                                         (get predictions ch))]))
-                ;; B-2c: salience-mode resolved via the same fn the
-                ;; :wm-version stamp reads (arena-salience-mode), so the
-                ;; stamp cannot drift from the behaviour. Default :summed
-                ;; = pre-B-2c byte-identical path.
+                ;; R7: the same resolver feeds behaviour and the provenance
+                ;; stamp. Precision is variance-only; need remains :salience.
                 prec-state' (precision/update-precision-state
                              prec-state raw-errors
                              {:salience-mode (arena-salience-mode)})
@@ -3839,7 +3924,7 @@
                                         {:entity-id eid :type event-type
                                          :weight (* (double (get incons eid 0.0)) norm)})))))
                 belief' (if (seq events)
-                          (belief/update-belief-batch belief events)
+                          (apply-arena-belief-events belief events)
                           belief)
                 step-entry {:step step
                             :error-magnitude error-mag
@@ -3856,6 +3941,8 @@
                :micro-step-trace micro-trace'}
               (recur (inc step) belief' prec-state' micro-trace'))))
         wm-belief belief
+        variational-free-energy
+        (fe/compute-variational-free-energy prediction-errors)
         ;; v0.13 anticipation v0.13 (read-only): expose upcoming typed
         ;; events to the trace. R5 time-conditioning and R4 multi-horizon
         ;; composition are deferred (v0.14 / v0.15 candidates).
@@ -3879,7 +3966,7 @@
                         ;; high-curvature actionable substrate-2 nodes (E1 consume).
                         (tension/tension-proposer)]
                        wm-state)
-        ;; v0.14 anticipation-driven time-pressure: scale G-risk + G-survival
+        ;; v0.14 anticipation-driven time-pressure: scale G-risk + homeostatic-pressure
         ;; by proximity to closest anticipated event in horizon. When no
         ;; events are within horizon, time-pressure = 0 (no scaling).
         wm-time-pressure (anticipation/time-pressure anticipation-snapshot
@@ -3908,17 +3995,29 @@
                      (live-gap-view-efe-opts
                       {:time-pressure wm-time-pressure
                        :horizon-steps wm-horizon-steps
+                       ;; R3 categorical-filter coherence: imagined policy
+                       ;; outcomes and live posterior updates use the same A/B/D.
+                       :belief-update-opts (arena-belief-update-opts)
                        ;; D5c flip — see arena-ambiguity-mode docstring
                        :ambiguity-mode (arena-ambiguity-mode)
                        ;; :kl flip (§15) — see arena-risk-mode docstring
                        :risk-mode (arena-risk-mode)
                        ;; D-1e flip — see arena-goal-outcome-mode docstring
                        :goal-outcome-mode (arena-goal-outcome-mode)
-                       ;; D-1d dark — see arena-structural-pressure-mode
-                       :structural-pressure-mode (arena-structural-pressure-mode)
+                       ;; D-1d live relocation — see arena-structural-pressure-mode
+                       :structural-pressure-mode structural-pressure-mode
+                       :predictability-control-mode (arena-predictability-control-mode)
+                       :homeostatic-control-mode (arena-homeostatic-control-mode)
+                       :graph-feasibility-mode (arena-graph-feasibility-mode)
                        ;; M-action-vocabulary P2 dark — default :off
                        :move-class-intensity-mode (arena-move-class-intensity-mode)}))
-        wm-ranked (->> (efe/rank-actions wm-state wm-enriched-candidates wm-efe-opts)
+        wm-ranked-domain-base (efe/rank-actions wm-state wm-enriched-candidates wm-efe-opts)
+        wm-policy-exclusions (-> wm-ranked-domain-base meta :policy-support/excluded)
+        wm-ranked-domain (if (= :learned-frequency habit-prior-source)
+                           (habit-prior/attach-log-priors habit-prior-pre
+                                                         wm-ranked-domain-base)
+                           wm-ranked-domain-base)
+        wm-ranked (->> wm-ranked-domain
                        apply-anamnesis-tiebreak
                        (filter-live-open-mission-ranked-actions wm-missions))
         ;; Dual-prediction logging (target-sensitive model, 2026-06-11): every
@@ -3930,7 +4029,7 @@
                             (into {}
                                   (map (fn [e] [[(get-in e [:action :type])
                                                  (get-in e [:action :target])]
-                                                (:G-total e)]))
+                                                (:controller-score e)]))
                                   (efe/rank-actions wm-state wm-enriched-candidates wm-efe-opts)))
         wm-ranked (mapv (fn [e]
                           (if-some [gc (get g-constant-by-key
@@ -3946,15 +4045,18 @@
         wm-admissible (filterv #(fm/can-execute? wm-state (:action %)) wm-ranked)
         wm-decision (try (policy/select-action
                           wm-admissible
-                          {:policy-precision gamma
-                           ;; B-2d τ-layer separation — arena-resolved, default
-                           ;; :spread (dark; see arena-tau-mode docstring)
+                          {:selection-gain selection-gain-value
+                           ;; B-2d τ-layer separation — arena-resolved; the live
+                           ;; default is :selection-gain-only (see resolver).
                            :temperature-opts {:tau-mode (arena-tau-mode)}})
                          (catch Exception _
                            (policy/default-mode-select wm-state wm-admissible)))
+        habit-prior-state
+        (when (= :learned-frequency habit-prior-source)
+          (habit-prior/observe-action habit-prior-pre (:action wm-decision)))
         ;; Car-3 (R16) seam 1: lift the acquired cascade-policies out of the read-only lane
         ;; into the differential as SELECTABLE :apply-cascade actions, each carrying BOTH
-        ;; act-gate legs (ΔF = cascade F-free-energy, ΔG = rollout G(π)) + the conjunction
+        ;; act-gate legs (ΔF = cascade cascade-score, ΔG = rollout G(π)) + the conjunction
         ;; verdict. They are APPENDED to the served ranked-actions (so wm-admissible/wm-decision
         ;; — the WM's own auto-selection — are unaffected) and tagged :held-for-arming? true:
         ;; the pilot can SELECT one as v and mint a consent gate over it, but EXECUTING it is
@@ -3963,14 +4065,14 @@
                                wm-ranked {:n 3 :budget 6})
                               (catch Throwable _ []))
         cascade-actions (mapv (fn [cp]
-                                (let [dF (:F-free-energy cp) dG (:G-rollout cp)
+                                (let [dF (:cascade-score cp) dG (:policy-rollout-score cp)
                                       pass? (boolean (and dF (pos? dF) dG (neg? dG)))]
                                   {:action {:type :apply-cascade
                                             :target (:mission cp)
                                             :rationale "apply the acquired cascade-policy (Car-3 / R16); execution HELD for operator arming"
                                             :cascade {:shown (:shown cp) :wholeness (:wholeness cp)}
-                                            :act-gate {:delta-F dF :delta-G dG :pass? pass?}}
-                                   :G-total (or dG 0.0)
+                                            :act-gate {:cascade-score dF :coverage-score-delta dG :pass? pass?}}
+                                   :controller-score (or dG 0.0)
                                    ;; D1b (M-evaluate-policies §8.2): the 0.0 fallback is
                                    ;; load-bearing (IHTB-2) — the marker makes the constant
                                    ;; self-describing instead of silently rank-neutral.
@@ -4033,7 +4135,7 @@
                                            " — in avoided range "
                                            (pr-str (get pref/avoided-states ch)))})
                           (:avoided-active free-energy))))
-        result {:mode mode
+        result (cond-> {:mode mode
                 :mode-prior (get pref/mode-prior mode 0.0)
                 ;; INV (2026-05-27 staleness-gate): when the metabolic
                 ;; snapshot was stale, the :stop-the-line override is
@@ -4045,6 +4147,7 @@
                 :override-suppressed-reason override-suppressed-reason
                 :metabolic-stale? (boolean metabolic-stale?)
                 :free-energy free-energy
+                :variational-free-energy variational-free-energy
                 :priorities all-priorities
                 :priority-count (count all-priorities)
                 :losses losses
@@ -4066,10 +4169,11 @@
                 ;; R14 precision-over-policies (γ): the learned, bounded inverse
                 ;; selection temperature this tick used (τ_eff = τ_spread / γ).
                 ;; Persisted so the next tick continues the rolling outcome window.
-                :policy-precision policy-precision-state
+                :selection-gain selection-gain-state
                 :micro-step-trace micro-step-trace
                 :anticipation anticipation-snapshot
                 :ranked-actions wm-ranked+cascades
+                :policy-support-exclusions (vec wm-policy-exclusions)
                 :decision wm-decision
                 ;; M-wm-policies v1: the visible cascade-policy lane (additive, defensive —
                 ;; a cascade failure can never break the scan; memoized; shell-out to minilm).
@@ -4081,7 +4185,9 @@
                 :pattern-gaps (try
                                 ((requiring-resolve 'futon2.report.cascade-lane/gap-lane)
                                  wm-ranked {:n 10 :budget 6})
-                                (catch Throwable _ []))}]
+                                (catch Throwable _ []))}
+                 habit-prior-state
+                 (assoc :habit-prior-state habit-prior-state))]
     (when trace?
       (try
         (if trace-dir
@@ -4235,7 +4341,11 @@
 
 (def ^:private wm-hp-update-type "code/v05/wm-hyperparameter-update")
 (def ^:private futon1a-base
-  (or (System/getenv "FUTON1A_BASE_URL") "http://localhost:7071/api/alpha"))
+  (or (some-> (or (System/getenv "FUTON_SUBSTRATE_URL")
+                  (System/getenv "FUTON1A_URL"))
+              (str "/api/alpha"))
+      (System/getenv "FUTON1A_BASE_URL")
+      "http://localhost:7071/api/alpha"))
 
 (defn scan-r12-apparatus
   "Query XTDB for wm-hyperparameter-update hyperedges; return per-class

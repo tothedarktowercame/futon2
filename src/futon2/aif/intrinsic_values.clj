@@ -22,7 +22,8 @@
      (apply-update! record)  → fold one update record into atom and return it"
   (:require [babashka.http-client :as http]
             [cheshire.core :as json]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [futon2.aif.substrate :as substrate]))
 
 ;; ---------------------------------------------------------------------------
 ;; Beta-posterior arithmetic
@@ -182,8 +183,7 @@
 (def ^:const hyperedge-type "code/v05/wm-hyperparameter-update")
 
 (def ^:private default-store-base
-  (or (System/getenv "FUTON1A_BASE_URL")
-      "http://localhost:7071/api/alpha"))
+  (str (substrate/configured-url) "/api/alpha"))
 
 (defn- normalise-record
   "Coerce one XTDB hyperedge response into the record shape used here.
@@ -201,24 +201,15 @@
       (assoc props :class class))))
 
 (defn fetch-records
-  "Fetch all wm-hyperparameter-update hyperedges from the store. Returns
-   a vector of records (post-`normalise-record`). On HTTP error returns []
-   so a fresh JVM with no records or an unreachable store starts at prior."
+  "Fetch all wm-hyperparameter-update hyperedges from the authoritative store.
+  Transport failure is loud; [] means the authoritative query was empty."
   ([] (fetch-records {:store-base default-store-base :limit 1000}))
   ([{:keys [store-base limit] :or {store-base default-store-base
                                    limit 1000}}]
-   (try
-     (let [url (str store-base "/hyperedges?type=" hyperedge-type
-                    "&limit=" limit)
-           resp (http/get url {:headers {"Accept" "application/json"}
-                               :timeout 5000
-                               :throw false})]
-       (if (= 200 (:status resp))
-         (let [body (json/parse-string (:body resp) true)
-               hxs (or (:hyperedges body) [])]
-           (vec (keep normalise-record hxs)))
-         []))
-     (catch Exception _ []))))
+   (let [base (str/replace store-base #"/api/alpha/?$" "")
+         hxs (substrate/hyperedges-by-type
+              hyperedge-type {:substrate-url base :limit limit})]
+     (vec (keep normalise-record hxs)))))
 
 (defn rehydrate-from-store!
   "Convenience: fetch records from XTDB and reset the atom from them.

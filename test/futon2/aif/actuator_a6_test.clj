@@ -1,16 +1,29 @@
 (ns futon2.aif.actuator-a6-test
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.a4a-substrate :as a4a-substrate]
             [futon2.aif.actuator-a3 :as a3]
-            [futon2.aif.actuator-a6 :as a6]))
+            [futon2.aif.actuator-a6 :as a6]
+            [futon2.aif.substrate :as substrate]
+            [futon2.aif.substrate-fixture :as fixture]))
+
+(def ^:dynamic *fixture-opts* nil)
+
+(use-fixtures
+  :each
+  (fn [test-fn]
+    (let [opts (fixture/make-opts)]
+      (binding [*fixture-opts* opts]
+        (with-redefs [substrate/entities-by-type
+                      (fn [type & _] ((:entities-by-type-fn opts) type))
+                      substrate/put-doc!
+                      (fn [doc & _] ((:put-doc-fn opts) doc))]
+          (test-fn))))))
 
 (defn- uuid-suffix []
   (str (java.util.UUID/randomUUID)))
 
 (defn- evict-ids! [& ids]
-  (let [ids (filterv some? ids)]
-    (when (seq ids)
-      (a3/drawbridge-submit-tx! (mapv (fn [id] [:xtdb.api/evict id]) ids)))))
+  (swap! (:store *fixture-opts*) #(apply dissoc % (filterv some? ids))))
 
 (defn- put-docs! [& docs]
   (a3/drawbridge-submit-tx! (mapv (fn [doc] [:xtdb.api/put doc]) docs)))
@@ -122,7 +135,7 @@
   (let [ids (fixture-ids)
         opts (rank-opts (:cap ids))
         g (graph (:cap ids))]
-    (binding [a6/*pattern-grain-eig?* false]
+    (binding [a6/*pattern-grain-model-uncertainty?* false]
       (try
         (put-docs! (star-doc ids) (discharge-doc ids))
         (let [result (a6/closure-falsifier g opts)]
@@ -136,7 +149,7 @@
   (let [ids (fixture-ids)
         opts (rank-opts (:cap ids))
         g (graph (:cap ids))]
-    (binding [a6/*pattern-grain-eig?* false]
+    (binding [a6/*pattern-grain-model-uncertainty?* false]
       (try
         (put-docs! (star-doc ids))
         (let [before (a6/rank-graph g opts)
@@ -148,59 +161,59 @@
         (finally
           (evict-ids! (:star ids) (:status ids)))))))
 
-(def ^:private pattern-eig-graph
+(def ^:private pattern-model-uncertainty-graph
   {:capabilities {"goal" {:scope []}}
    :missions {"M-a" {:scope [] :produces [] :open-hole-count 0}
               "M-b" {:scope [] :produces [] :open-hole-count 0}}})
 
-(def ^:private pattern-eig-rank-opts
+(def ^:private pattern-model-uncertainty-rank-opts
   {:pre-registered-goal "goal"
    :graph-applicability-penalty 0.0
    :graph-body-weight 0.0
    :graph-ascent-weight 0.0
    :goal-outcome-entries []})
 
-(deftest pattern-grain-eig-explicit-off-does-not-load-test
-  (with-redefs [a4a-substrate/load-pattern-grain-eig
+(deftest pattern-grain-model-uncertainty-explicit-off-does-not-load-test
+  (with-redefs [a4a-substrate/load-pattern-grain-model-uncertainty
                 (fn [& _] (throw (ex-info "should not load when flag is off" {})))]
-    (let [explicit-off (a6/rank-graph pattern-eig-graph
-                                      (assoc pattern-eig-rank-opts
-                                             :pattern-grain-eig? false))
-          bound-off (binding [a6/*pattern-grain-eig?* false]
-                      (a6/rank-graph pattern-eig-graph pattern-eig-rank-opts))]
-      (is (every? zero? (map :G-eig-bmr explicit-off)))
+    (let [explicit-off (a6/rank-graph pattern-model-uncertainty-graph
+                                      (assoc pattern-model-uncertainty-rank-opts
+                                             :pattern-grain-model-uncertainty? false))
+          bound-off (binding [a6/*pattern-grain-model-uncertainty?* false]
+                      (a6/rank-graph pattern-model-uncertainty-graph pattern-model-uncertainty-rank-opts))]
+      (is (every? zero? (map :model-uncertainty-bonus explicit-off)))
       (is (= explicit-off bound-off)))))
 
-(deftest pattern-grain-eig-default-armed-injects-ranker-eig-test
-  (with-redefs [a4a-substrate/load-pattern-grain-eig
+(deftest pattern-grain-model-uncertainty-default-armed-injects-ranker-model-uncertainty-test
+  (with-redefs [a4a-substrate/load-pattern-grain-model-uncertainty
                 (fn [_]
-                  {:eig-fn (fn [mission-id _mission]
+                  {:model-uncertainty-fn (fn [mission-id _mission]
                              (if (= "M-b" mission-id) 1.5 0.0))})]
-    (let [without (binding [a6/*pattern-grain-eig?* false]
-                    (a6/rank-graph pattern-eig-graph pattern-eig-rank-opts))
-          with (a6/rank-graph pattern-eig-graph pattern-eig-rank-opts)
+    (let [without (binding [a6/*pattern-grain-model-uncertainty?* false]
+                    (a6/rank-graph pattern-model-uncertainty-graph pattern-model-uncertainty-rank-opts))
+          with (a6/rank-graph pattern-model-uncertainty-graph pattern-model-uncertainty-rank-opts)
           by-target (into {} (map (juxt #(get-in % [:action :target]) identity) with))]
-      (is (= (:G-total (first without))
-             (:G-total (second without)))
+      (is (= (:controller-score (first without))
+             (:controller-score (second without)))
           "fixture starts with the R13 tie floor")
-      (is (= 1.5 (:G-eig-bmr (by-target "M-b"))))
+      (is (= 1.5 (:model-uncertainty-bonus (by-target "M-b"))))
       (is (= "M-b" (get-in (first with) [:action :target])))
-      (is (< (:G-total (by-target "M-b"))
-             (:G-total (by-target "M-a")))))))
+      (is (< (:controller-score (by-target "M-b"))
+             (:controller-score (by-target "M-a")))))))
 
-(deftest pattern-grain-eig-missing-files-degrades-to-zero-test
-  (let [missing (str "/tmp/futon2-missing-pattern-grain-eig-" (uuid-suffix))
-        loaded (a4a-substrate/load-pattern-grain-eig
+(deftest pattern-grain-model-uncertainty-missing-files-degrades-to-zero-test
+  (let [missing (str "/tmp/futon2-missing-pattern-grain-model-uncertainty-" (uuid-suffix))
+        loaded (a4a-substrate/load-pattern-grain-model-uncertainty
                 {:semilattice-clusters-path missing
                  :mission-pattern-scopes-path (str missing "-scopes")})]
-    (is (= {} (:mission->eig loaded)))
-    (is (= 0.0 ((:eig-fn loaded) "M-missing" {})))))
+    (is (= {} (:mission->model-uncertainty loaded)))
+    (is (= 0.0 ((:model-uncertainty-fn loaded) "M-missing" {})))))
 
 (deftest witness-live-positive-uses-real-substrate-facts-test
   (let [ids (fixture-ids)
         opts (rank-opts (:cap ids))
         g (graph (:cap ids))]
-    (binding [a6/*pattern-grain-eig?* false]
+    (binding [a6/*pattern-grain-model-uncertainty?* false]
       (try
         (put-docs! (star-doc ids) (discharge-doc ids))
         (a6/flip-star-status-on-discharge! opts)
@@ -225,7 +238,7 @@
   (let [ids (fixture-ids)
         opts (rank-opts (:cap ids))
         g (graph (:cap ids))]
-    (binding [a6/*pattern-grain-eig?* false]
+    (binding [a6/*pattern-grain-model-uncertainty?* false]
       (try
         (put-docs! (star-doc ids) (discharge-doc ids))
         (let [result (a6/witness-live g opts)

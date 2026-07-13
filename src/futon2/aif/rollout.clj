@@ -146,7 +146,7 @@
 (defn move-cost
   "Local g(s_t) proxy from the locked stub.
 
-   Negative :delta-g is a benefit. Already-satisfied capability steps get zero
+   Negative :step-score-delta is a benefit. Already-satisfied capability steps get zero
    pragmatic credit so a rollout cannot farm an already closed cap."
   [state move]
   (let [cap-id (:advances-cap move)
@@ -155,7 +155,7 @@
     (cond
       (:truncated? state) 0.0
       (= :satisfied status) 0.0
-      :else (double (or (:delta-g move) (- (double (or (:score move) 0.0))))))))
+      :else (double (or (:step-score-delta move) (- (double (or (:score move) 0.0))))))))
 
 (defn apply-move
   [state move]
@@ -177,7 +177,7 @@
   (double (or temporal-discount gamma)))
 
 (defn project-policy
-  "Port of ukrn's path accumulator shape: G(pi)=sum gamma^t g(s_t).
+  "Port of ukrn's path accumulator shape: S(pi)=sum gamma^t g(s_t).
    :truncated is sticky: terminal moves carry their local cost and stop expansion."
   [state policy & {:as opts}]
   (let [gamma (rollout-discount opts)]
@@ -187,11 +187,11 @@
            total 0.0
            steps []]
       (if (or (nil? remaining) (:truncated? state))
-        {:G total
+        {:policy-rollout-score total
          :final-state state
          :steps (vec steps)
          :policy (mapv #(select-keys % [:move/id :move/class :have :want
-                                        :advances-cap :prior :delta-g
+                                        :advances-cap :prior :step-score-delta
                                         :move/terminal?])
                        policy)
          :truncated? (boolean (:truncated? state))}
@@ -237,7 +237,7 @@
     (->> (expand-policies state moves :horizon horizon :top-k top-k)
        (mapv (fn [{:keys [policy]}]
                (project-policy state policy :gamma gamma)))
-       (sort-by :G)
+       (sort-by :policy-rollout-score)
        vec)))
 
 (defn greedy-one-step
@@ -258,7 +258,7 @@
 (defn softmax
   [scores tau]
   (let [tau (double (or tau 1.0))
-        weights (mapv #(Math/exp (/ (- (double (:G %))) tau)) scores)
+        weights (mapv #(Math/exp (/ (- (double (:policy-rollout-score %))) tau)) scores)
         total (reduce + 0.0 weights)]
     (mapv (fn [score weight]
             (assoc score :selection/probability (if (pos? total) (/ weight total) 0.0)))
@@ -266,14 +266,14 @@
           weights)))
 
 (defn select-policy
-  "Argmin G with WM-I4 abstain on flat fields."
+  "Argmin policy rollout score with WM-I4 abstain on flat fields."
   [scored & {:keys [tau abstain-epsilon]
              :or {tau 1.0 abstain-epsilon 1.0e-6}}]
-  (let [ranked (vec (sort-by :G scored))
+  (let [ranked (vec (sort-by :policy-rollout-score scored))
         [best second-best] ranked
         ranked' (softmax ranked tau)]
     (if (and best second-best
-             (< (Math/abs (- (double (:G second-best)) (double (:G best))))
+             (< (Math/abs (- (double (:policy-rollout-score second-best)) (double (:policy-rollout-score best))))
                 abstain-epsilon))
       {:decision :abstain
        :ranked ranked'}

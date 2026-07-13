@@ -1,0 +1,38 @@
+{:generated-by "scripts/habit_prior_shadow.clj",
+ :read-only true,
+ :deterministic true,
+ :mode-comparison
+ {:baseline
+  {:structural-pressure-mode :controller-augmentation,
+   :habit-prior-source :caller},
+  :repair
+  {:structural-pressure-mode :habit-prior,
+   :habit-prior-source :learned-frequency}},
+ :model
+ {:family :symmetric-dirichlet-multinomial,
+  :alpha 1.0,
+  :recency-decay :none,
+  :policy-identity "[action-type, target-or-target-class]",
+  :interpretation "frequency/habit, not policy quality"},
+ :corpus
+ {:trace-dir "/home/joe/code/futon2/data/wm-trace",
+  :records 760,
+  :scorable-ticks 760,
+  :decisions-folded 760,
+  :distinct-policies 13},
+ :shadow
+ {:winner-or-abstain-flips 323,
+  :flip-rate 0.425,
+  :abstain-flips 0,
+  :mean-abs-log-prior 5.693171486611164,
+  :mean-log-prior-range 5.423768483297559,
+  :fallback-structural-rows 91140},
+ :flip-memo-seed
+ {:blast-radius
+  "joint flip removes caller structural credit from controller-score and replaces it with unscaled learned ln E(pi) at policy selection",
+  :known-limitations
+  ["frequency encodes habit, not benefit"
+   "historical menus and action targets are sparse"
+   "rows lacking persisted signed structural contribution use the declared historical 0.35 weight"],
+  :operator-decision
+  "Joe: keep dark or jointly enable FUTON_WM_STRUCTURAL_PRESSURE_MODE=habit-prior and FUTON_WM_HABIT_PRIOR_SOURCE=learned-frequency"}}

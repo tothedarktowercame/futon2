@@ -15,13 +15,13 @@
 
 (deftest futility-summary-credits-only-selected-target-passes
   (let [records [(trace-record :advance-mission "M-a"
-                               [{:mission "M-b" :verdict :pass :delta-G -0.5}])
+                               [{:mission "M-b" :verdict :pass :coverage-score-delta -0.5}])
                  (trace-record :advance-mission "M-a"
-                               [{:mission "M-a" :verdict :fail :delta-G 0.0}])
+                               [{:mission "M-a" :verdict :fail :coverage-score-delta 0.0}])
                  (trace-record :advance-mission "M-a"
-                               [{:mission "M-a" :verdict :pass :delta-G -0.4}])
+                               [{:mission "M-a" :verdict :pass :coverage-score-delta -0.4}])
                  (trace-record :open-mission "M-b"
-                               [{:mission "M-b" :verdict :fail :delta-G 0.0}])]
+                               [{:mission "M-b" :verdict :fail :coverage-score-delta 0.0}])]
         summary (futility/futility-summary records)
         by-lane (into {} (map (juxt :lane identity) (:rows summary)))]
     (is (= 4 (:record-count summary)))
@@ -34,7 +34,7 @@
 (deftest hand-count-gate-agrees-with-summary
   (let [records [(trace-record :advance-mission "M-a" [])
                  (trace-record :advance-mission "M-a"
-                               [{:mission "M-a" :verdict :pass :delta-G -0.5}])]
+                               [{:mission "M-a" :verdict :pass :coverage-score-delta -0.5}])]
         summary (futility/futility-summary records)
         hand (futility/hand-counts records)]
     (is (true? (futility/summary-matches-hand-counts? summary hand)))))
@@ -46,8 +46,8 @@
                      (range 12))
         miss-final (futility/fold-gamma misses)
         pay-final (futility/fold-gamma (futility/synthetic-paying-outcomes 12))]
-    (is (< (:policy-precision miss-final) 0.75))
-    (is (> (:policy-precision pay-final) 1.25))))
+    (is (< (:selection-gain miss-final) 0.75))
+    (is (> (:selection-gain pay-final) 1.25))))
 
 (deftest dry-run-bulletin-emits-nag-for-thresholded-zero-for-n
   (let [bulletins (futility/dry-run-bulletins

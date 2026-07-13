@@ -8,7 +8,7 @@
 ;;
 ;;   :tau-mode :gamma-only (B-2d, policy/effective-temperature)
 ;;     τ_eff :spread = τ_spread/γ (recorded :tau) vs :gamma-only = 1/γ.
-;;     Selection winner = argmin G-total ⇒ τ-INVARIANT; abstain = G-gap
+;;     Selection winner = argmin controller-score ⇒ τ-INVARIANT; abstain = gap-exploration-bonus
 ;;     (no-op.G − best.G < ε) ⇒ ALSO τ-invariant. So the ONLY effect is softmax
 ;;     ENTROPY (commitment sharpness). Reported: winner-flip (0 by construction),
 ;;     abstain-delta (0 by construction), per-tick softmax-entropy delta.
@@ -22,8 +22,8 @@
 ;;     Π-vector relative change + need-share dropped, per channel + aggregate.
 ;;
 ;;   :structural-pressure-mode :habit-prior (D-1d, efe.clj)
-;;     sp term LEAVES :G-total (G − spc) and re-enters as a +spc log-prior bias
-;;     (spc = :G-structural-pressure, already w·sp in G-units). Selection becomes
+;;     sp term LEAVES :controller-score (G − spc) and re-enters as a +spc log-prior bias
+;;     (spc = :structural-pressure, already w·sp in G-units). Selection becomes
 ;;     argmin(G − spc·(1+τ)). Reported: winner-flip rate + direction.
 ;;
 ;; Deterministic. Run: bb scripts/dark_mode_shadow.bb  [trace-dir]
@@ -61,18 +61,18 @@
         :when (seq ras)]
     {:day (subs (str (:timestamp t)) 0 10)
      :ras ras
-     :gamma (get-in t [:decision :policy-precision])
+     :gamma (get-in t [:decision :selection-gain])
      :tau-spread (get-in t [:decision :tau])
      :precision-state (:precision-state t)}))
 
 ;; --- TAU ---------------------------------------------------------------------
 (def tau-recs
   (for [{:keys [day ras gamma tau-spread]} ticks
-        :let [gs (mapv #(double (:G-total %)) ras)
+        :let [gs (mapv #(double (:controller-score %)) ras)
               g (max tau-min (double (or gamma 1.0)))
               ts (double (or tau-spread (/ 1.0 g)))
               tg (/ 1.0 g)
-              noop (some #(when (= :no-op (get-in % [:action :type])) (double (:G-total %))) ras)
+              noop (some #(when (= :no-op (get-in % [:action :type])) (double (:controller-score %))) ras)
               best (apply min gs)
               gap (when noop (- noop best))
               abstain? (fn [_] (and gap (< gap abstain-eps)))]]
@@ -99,8 +99,8 @@
 ;; --- STRUCTURAL PRESSURE -----------------------------------------------------
 (def sp-recs
   (for [{:keys [day ras gamma tau-spread]} ticks
-        :let [gs (mapv #(double (:G-total %)) ras)
-              spc (mapv #(double (or (:G-structural-pressure %) 0.0)) ras)
+        :let [gs (mapv #(double (:controller-score %)) ras)
+              spc (mapv #(double (or (:structural-pressure %) 0.0)) ras)
               tau (double (or tau-spread (/ 1.0 (max tau-min (double (or gamma 1.0))))))
               live-win (argmin-idx gs)
               habit-score (mapv (fn [g s] (- g (* s (+ 1.0 tau)))) gs spc)
@@ -117,9 +117,9 @@
 (def tau-summary
   {:ticks (count tau-recs)
    :winner-flips 0
-   :winner-flip-note "0 by construction — softmax winner = argmin G-total, τ-invariant."
+   :winner-flip-note "0 by construction — softmax winner = argmin controller-score, τ-invariant."
    :abstain-flips (count (filter #(not= (:abstain-spread %) (:abstain-gamma %)) tau-recs))
-   :abstain-note "abstain = (no-op.G − best.G) < ε, a G-gap ⇒ τ-invariant."
+   :abstain-note "abstain = (no-op.G − best.G) < ε, a gap-exploration-bonus ⇒ τ-invariant."
    :mean-entropy-spread (mean :ent-spread tau-recs)
    :mean-entropy-gamma-only (mean :ent-gamma tau-recs)
    :mean-entropy-delta (mean #(- (:ent-gamma %) (:ent-spread %)) tau-recs)
@@ -139,7 +139,7 @@
    :winner-flips (count (filter :winner-flip? sp-recs))
    :winner-flip-rate (frac :winner-flip? sp-recs)
    :flips-toward-sp-action (count (filter :flip-toward-sp? sp-recs))
-   :recommendation-seed "REVIEWER-CORRECTED (claude-12): structural-pressure ALREADY enters G-total as a preference (−w·sp; efe.clj docstring: higher sp reduces G) — :habit-prior does NOT invert a penalty. What changes: the preference moves OUTSIDE the τ division (argmin(G′ − τ_eff·w·sp) vs argmin(G′ − w·sp)), so its effective strength becomes τ_eff-scaled and precision no longer modulates it. winner-flip-rate = decisions the RESCALING changes; all observed flips moved toward the high-sp action (τ_eff > 1 amplifies the prior there)."})
+   :recommendation-seed "REVIEWER-CORRECTED (claude-12): structural-pressure ALREADY enters controller-score as a preference (−w·sp; efe.clj docstring: higher sp reduces G) — :habit-prior does NOT invert a penalty. What changes: the preference moves OUTSIDE the τ division (argmin(G′ − τ_eff·w·sp) vs argmin(G′ − w·sp)), so its effective strength becomes τ_eff-scaled and precision no longer modulates it. winner-flip-rate = decisions the RESCALING changes; all observed flips moved toward the high-sp action (τ_eff > 1 amplifies the prior there)."})
 
 (def combined
   {:generated-by "scripts/dark_mode_shadow.bb (M-aif-faithfulness dark-mode-shadow-trio)"

@@ -1,10 +1,11 @@
 (ns futon2.aif.free-energy
-  "Free-energy computation and mode inference for the War Machine.
+  "Controller diagnostics and variational free-energy computation for the War Machine.
 
    The inference step between observation and render. Reads observation
    vectors from `futon2.aif.observation/observe` and preferences from
-   `futon2.aif.preferences`, produces pragmatic / epistemic / total
-   free energy plus a mode classification.
+   `futon2.aif.preferences`, producing explicitly named engineering diagnostics.
+   The distinct `compute-variational-free-energy` function reports the Gaussian
+   prediction-error objective.
 
    cf. cyberants `ants/aif/policy.clj` — EFE computation
    cf. portfolio/policy.clj — action ranking
@@ -30,14 +31,14 @@
   (let [v (double (or obs-val 0.0))]
     (and (>= v lo) (<= v hi))))
 
-(defn compute-free-energy
-  "Compute strategic free energy from observation vector.
+(defn compute-controller-diagnostics
+  "Compute legacy controller diagnostics from an observation vector.
 
-   Returns {:G-total :G-pragmatic :G-epistemic :per-channel-gaps :avoided-active}.
+   Returns {:controller-score :preference-gap-score :coverage-uncertainty-pressure :per-channel-gaps :avoided-active}.
 
-   G-pragmatic: weighted distance from preferences (dominated by workstream balance).
-   G-epistemic: uncertainty from dark arrows and unaddressed claims.
-   G-total: 0.65 * pragmatic + 0.35 * epistemic.
+   preference-gap-score: weighted distance from preferences (dominated by workstream balance).
+   coverage-uncertainty-pressure: uncertainty from dark arrows and unaddressed claims.
+   controller-score: 0.65 * preference gap + 0.35 * coverage uncertainty.
 
    cf. war-machine-terminal-vocabulary.edn :G/pragmatic-fn, :G/epistemic-fn"
   [obs]
@@ -68,9 +69,9 @@
                            :when (vector? v)
                            :when (in-avoided? (get obs k 0.0) v)]
                        k))]
-    {:G-total g-total
-     :G-pragmatic g-pragmatic
-     :G-epistemic g-epistemic
+    {:controller-score g-total
+     :preference-gap-score g-pragmatic
+     :coverage-uncertainty-pressure g-epistemic
      :per-channel per-channel
      :avoided-active avoided}))
 
@@ -103,8 +104,32 @@
       :predicted-mean pm
       :predicted-variance pv
       :error err
-      :precision precision
-      :weighted-error (* err precision)})))
+     :precision precision
+     :weighted-error (* err precision)})))
+
+(defn compute-variational-free-energy
+  "Compute the per-tick Gaussian prediction-error diagnostic
+
+     F = 1/2 mean_k(precision_k * error_k^2).
+
+   `prediction-errors` must be a non-empty map whose values carry finite,
+   numeric `:error` and non-negative `:precision`. This is deliberately a
+   distinct quantity from the strategic controller's historical
+   `compute-controller-diagnostics` map and from cascade model-selection scores."
+  [prediction-errors]
+  (when-not (seq prediction-errors)
+    (throw (ex-info "variational free energy requires prediction errors" {})))
+  (let [terms
+        (mapv (fn [[channel {:keys [error precision]}]]
+                (when-not (and (number? error) (Double/isFinite (double error))
+                               (number? precision) (Double/isFinite (double precision))
+                               (not (neg? (double precision))))
+                  (throw (ex-info "invalid prediction-error term for variational F"
+                                  {:channel channel :error error
+                                   :precision precision})))
+                (* (double precision) (double error) (double error)))
+              prediction-errors)]
+    (* 0.5 (/ (reduce + terms) (double (count terms))))))
 
 (defn infer-mode
   "Infer strategic mode from observation vector.
@@ -112,7 +137,6 @@
   [obs]
   (let [stack (get obs :stack-pct 0.0)
         consulting (get obs :consulting-pct 0.0)
-        portfolio (get obs :portfolio-pct 0.0)
         loop-h (get obs :loop-health 0.0)
         active (get obs :active-repo-ratio 0.0)
         ticks (get obs :ticks-firing-ratio 0.0)

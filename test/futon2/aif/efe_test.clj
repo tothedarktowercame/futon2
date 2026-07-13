@@ -9,7 +9,7 @@
 
 (def ^:private healthy-obs
   "In-distribution observation that falls within preferred ranges on
-   the weighted channels (so G-pragmatic is small but the action-
+   the weighted channels (so preference-gap-score is small but the action-
    dependent risk signal is still visible)."
   {:loop-health 0.9
    :support-coverage 0.9
@@ -131,23 +131,23 @@
       (is (= o1 o2)))))
 
 (deftest compute-efe-shape-test
-  (testing "compute-efe returns documented keys (v0.21 adds :G-gap)"
+  (testing "compute-efe returns documented keys (v0.21 adds :gap-exploration-bonus)"
     (let [o (efe/compute-efe base-state {:type :no-op})]
       (is (contains? o :action))
       (is (contains? o :prediction))
       (is (contains? o :G-risk))
       (is (contains? o :G-ambiguity))
-      (is (contains? o :G-info))
-      (is (contains? o :G-survival))
-      (is (contains? o :G-structural-pressure))
-      (is (contains? o :G-gap))
-      (is (contains? o :G-total))
+      (is (contains? o :predictability-bonus))
+      (is (contains? o :homeostatic-pressure))
+      (is (contains? o :structural-pressure))
+      (is (contains? o :gap-exploration-bonus))
+      (is (contains? o :controller-score))
       (is (contains? o :per-channel))))
-  (testing "G-total composes all six principled terms"
-    ;; G-total = G-risk + G-ambiguity − info-weight·G-info
-    ;;           + survival-weight·G-survival
-    ;;           − structural-pressure-weight·G-structural-pressure
-    ;;           − G-gap
+  (testing "controller-score composes all six principled terms"
+    ;; controller-score = G-risk + G-ambiguity − info-weight·predictability-bonus
+    ;;           + survival-weight·homeostatic-pressure
+    ;;           − structural-pressure-weight·structural-pressure
+    ;;           − gap-exploration-bonus
     (let [o (efe/compute-efe base-state
                              {:type :address-sorry
                               :target :m1
@@ -158,14 +158,14 @@
           struct-w 0.35
           expected (+ (:G-risk o)
                       (:G-ambiguity o)
-                      (- (* info-w (:G-info o)))
-                      (* surv-w (:G-survival o))
-                      (- (* struct-w (:G-structural-pressure o)))
-                      (- (:G-gap o)))]
-      (is (< (Math/abs (- (:G-total o) expected)) 1e-9)
-          "G-total decomposition includes the structural-pressure and gap subtractions")))
-  (testing "G-risk, G-ambiguity, G-info, G-survival, G-structural-pressure, and G-gap are individually non-negative"
-    ;; G-total CAN be negative because G-info has negative weight in G-total;
+                      (- (* info-w (:predictability-bonus o)))
+                      (* surv-w (:homeostatic-pressure o))
+                      (- (* struct-w (:structural-pressure o)))
+                      (- (:gap-exploration-bonus o)))]
+      (is (< (Math/abs (- (:controller-score o) expected)) 1e-9)
+          "controller-score decomposition includes the structural-pressure and gap subtractions")))
+  (testing "G-risk, G-ambiguity, predictability-bonus, homeostatic-pressure, structural-pressure, and gap-exploration-bonus are individually non-negative"
+    ;; controller-score CAN be negative because predictability-bonus has negative weight in controller-score;
     ;; that's by design (informative actions are preferred).
     (let [o (efe/compute-efe base-state
                              {:type :address-sorry
@@ -174,10 +174,10 @@
                              {:ambiguity-mode :variance-sum})]
       (is (>= (:G-risk o) 0.0))
       (is (>= (:G-ambiguity o) 0.0))
-      (is (>= (:G-info o) 0.0))
-      (is (>= (:G-survival o) 0.0))
-      (is (>= (:G-structural-pressure o) 0.0))
-      (is (>= (:G-gap o) 0.0)))))
+      (is (>= (:predictability-bonus o) 0.0))
+      (is (>= (:homeostatic-pressure o) 0.0))
+      (is (>= (:structural-pressure o) 0.0))
+      (is (>= (:gap-exploration-bonus o) 0.0)))))
 
 (deftest compute-efe-two-principled-terms-by-name-test
   (testing "both R5a (risk) and R5b (ambiguity) are present by name and distinct"
@@ -216,22 +216,22 @@
           "ambiguity strictly orders no-op < address-sorry < open-mission"))))
 
 (deftest rank-actions-orders-by-g-total-test
-  (testing "rank-actions returns actions in ascending G-total"
+  (testing "rank-actions returns actions in ascending controller-score"
     (let [candidates [{:type :no-op}
                       {:type :address-sorry :target :m1}
                       {:type :open-mission :target :m-new}
                       {:type :fire-pattern :target :m1}]
           ranked (efe/rank-actions stressed-state candidates)]
       (is (= 4 (count ranked)))
-      (let [gs (map :G-total ranked)]
-        (is (apply <= gs) "G-totals are non-decreasing across ranks"))
+      (let [gs (map :controller-score ranked)]
+        (is (apply <= gs) "controller-scores are non-decreasing across ranks"))
       (is (= (range 1 5) (map :rank ranked)) "ranks are 1..N in order")))
   (testing "empty candidate list returns empty vec"
     (is (= [] (efe/rank-actions base-state [])))))
 
 (deftest stressed-state-decomposition-test
   (testing "decomposition properties hold under a stressed state"
-    ;; The combined ordering by G-total depends on the variance/preference-weight
+    ;; The combined ordering by controller-score depends on the variance/preference-weight
     ;; balance (a design parameter); the decomposition properties are the
     ;; contract claim R5 enforces.
     (let [no-op-out (efe/compute-efe stressed-state {:type :no-op})
@@ -251,73 +251,72 @@
           r2 (efe/rank-actions base-state candidates)]
       (is (= r1 r2)))))
 
-(deftest intrinsic-value-credits-g-risk-test
-  (testing "absent :intrinsic-value defaults to 0 — G-risk equals predicted G-pragmatic"
+(deftest intrinsic-value-is-controller-credit-not-risk-test
+  (testing "absent :intrinsic-value defaults to 0 — G-risk equals predicted preference-gap-score"
     (let [out (efe/compute-efe base-state {:type :no-op} {:risk-mode :hinge})
-          fe-on-current (fe/compute-free-energy (:observation base-state))]
-      (is (< (Math/abs (- (:G-risk out) (:G-pragmatic fe-on-current))) 1e-9)
-          ":no-op preserves obs → G-risk == compute-free-energy(current).G-pragmatic")))
-  (testing ":intrinsic-value subtracts from G-risk"
+          fe-on-current (fe/compute-controller-diagnostics (:observation base-state))]
+      (is (< (Math/abs (- (:G-risk out) (:preference-gap-score fe-on-current))) 1e-9)
+          ":no-op preserves obs → G-risk == compute-controller-diagnostics(current).preference-gap-score")))
+  (testing ":intrinsic-value leaves canonical G-risk unchanged and lowers the controller"
     (let [base-action {:type :no-op}
             credited-action {:type :no-op :intrinsic-value 0.1}
           base-out (efe/compute-efe base-state base-action {:risk-mode :hinge})
           credited-out (efe/compute-efe base-state credited-action {:risk-mode :hinge})]
-      (is (< (Math/abs (- (:G-risk credited-out)
-                          (- (:G-risk base-out) 0.1)))
-             1e-9)
-          ":intrinsic-value 0.1 lowers G-risk by exactly 0.1"))))
+      (is (= (:G-risk base-out) (:G-risk credited-out)))
+      (is (< (Math/abs (- (:controller-score credited-out)
+                          (- (:controller-score base-out) 0.1))) 1e-9)))))
 
-(deftest no-op-info-gain-maximal-test
-  (testing ":no-op has zero predicted variance → G-info = 13 (one per channel, all 1-variance=1)"
+(deftest no-op-predictability-bonus-maximal-test
+  (testing ":no-op has zero predicted variance → predictability-bonus = 13 (one per channel, all 1-variance=1)"
     ;; :no-op predicts 13 channels with variance 0.0 (preserves observation);
-    ;; info-gain = Σ max(0, 1 − v) over channels in next-mean.
+    ;; predictability-bonus = Σ max(0, 1 − v) over channels in next-mean.
     (let [o (efe/compute-efe base-state {:type :no-op})]
-      (is (= 13.0 (:G-info o))
-          "deterministic prediction over 13 channels in next-mean → G-info = 13"))))
+      (is (= 13.0 (:predictability-bonus o))
+          "deterministic prediction over 13 channels in next-mean → predictability-bonus = 13"))))
 
-(deftest info-gain-decreases-with-predicted-variance-test
-  (testing "actions with higher predicted variance have lower G-info"
+(deftest predictability-bonus-decreases-with-predicted-variance-test
+  (testing "actions with higher predicted variance have lower predictability-bonus"
     (let [no-op (efe/compute-efe base-state {:type :no-op})
           addr (efe/compute-efe base-state {:type :address-sorry :target :m1})
           open (efe/compute-efe base-state {:type :open-mission :target :m-new})]
-      (is (>= (:G-info no-op)
-              (:G-info addr)
-              (:G-info open))
-          "high-variance actions yield less info-gain"))))
+      (is (>= (:predictability-bonus no-op)
+              (:predictability-bonus addr)
+              (:predictability-bonus open))
+          "high-variance actions yield less predictability-bonus"))))
 
-(deftest survival-cost-zero-on-in-range-state-test
-  (testing "all 4 R3a channels in preferred range → G-survival = 0"
+(deftest homeostatic-pressure-zero-on-in-range-state-test
+  (testing "all 4 R3a channels in preferred range → homeostatic-pressure = 0"
     ;; healthy-obs has annotation-health 0.9 (in [0.7 1.0]), mission-health 0.7 (in [0.5 1.0]),
     ;; sorry-count-norm 0.1 (in [0.0 0.3]), active-repo-ratio 0.8 (in [0.5 1.0])
     (let [o (efe/compute-efe base-state {:type :no-op})]
-      (is (zero? (:G-survival o)))))
-  (testing "out-of-range channel → positive G-survival"
+      (is (zero? (:homeostatic-pressure o)))))
+  (testing "out-of-range channel → positive homeostatic-pressure"
     (let [stressed-state-2 (assoc-in base-state [:observation :sorry-count-norm] 0.9)
           o (efe/compute-efe stressed-state-2 {:type :no-op})]
-      (is (pos? (:G-survival o))
+      (is (pos? (:homeostatic-pressure o))
           "sorry-count-norm 0.9 above [0.0 0.3] → positive survival pressure"))))
 
-(deftest time-pressure-scales-risk-and-survival-test
-  (testing "v0.14: time-pressure scales G-risk + G-survival but not G-info or G-ambiguity"
+(deftest time-pressure-scales-controller-risk-and-survival-test
+  (testing "time pressure leaves canonical G-risk fixed but scales controller cost and survival"
     (let [stressed-state-2 (assoc-in base-state [:observation :sorry-count-norm] 0.85)
           base (efe/compute-efe stressed-state-2 {:type :no-op})
           urgent (efe/compute-efe stressed-state-2 {:type :no-op}
                                   {:time-pressure 1.0})]
-      (is (< (:G-risk base) (:G-risk urgent))
-          "G-risk under urgency > G-risk baseline")
-      (is (< (:G-survival base) (:G-survival urgent))
-          "G-survival under urgency > G-survival baseline")
-      (is (= (:G-info base) (:G-info urgent))
-          "G-info unchanged by time-pressure")
+      (is (= (:G-risk base) (:G-risk urgent)))
+      (is (< (:controller-score base) (:controller-score urgent)))
+      (is (< (:homeostatic-pressure base) (:homeostatic-pressure urgent))
+          "homeostatic-pressure under urgency > homeostatic-pressure baseline")
+      (is (= (:predictability-bonus base) (:predictability-bonus urgent))
+          "predictability-bonus unchanged by time-pressure")
       (is (= (:G-ambiguity base) (:G-ambiguity urgent))
           "G-ambiguity unchanged by time-pressure"))))
 
 (deftest time-pressure-zero-is-identity-test
-  (testing "time-pressure 0 ⇒ G-total identical to no-time-pressure call"
+  (testing "time-pressure 0 ⇒ controller-score identical to no-time-pressure call"
     (let [base (efe/compute-efe base-state {:type :address-sorry :target :m1})
           zero (efe/compute-efe base-state {:type :address-sorry :target :m1}
                                 {:time-pressure 0.0})]
-      (is (< (Math/abs (- (:G-total base) (:G-total zero))) 1e-9)))))
+      (is (< (Math/abs (- (:controller-score base) (:controller-score zero))) 1e-9)))))
 
 (deftest compute-efe-horizon-steps-opt-test
   (testing "v0.15: :horizon-steps opt switches to multi-horizon scoring"
@@ -347,7 +346,7 @@
     ;; horizon-steps < 2 is treated as nil (single-step)
     (let [default-out (efe/compute-efe base-state {:type :no-op})
           one-out (efe/compute-efe base-state {:type :no-op} {:horizon-steps 1})]
-      (is (= (:G-total default-out) (:G-total one-out))))))
+      (is (= (:controller-score default-out) (:controller-score one-out))))))
 
 (deftest rank-actions-threads-opts-test
   (testing "rank-actions threads opts to compute-efe per candidate"
@@ -356,34 +355,34 @@
                       {:type :address-sorry :target :m1}]
           baseline (efe/rank-actions stressed candidates)
           urgent (efe/rank-actions stressed candidates {:time-pressure 1.0})
-          baseline-totals (map :G-total baseline)
-          urgent-totals (map :G-total urgent)]
+          baseline-totals (map :controller-score baseline)
+          urgent-totals (map :controller-score urgent)]
       (is (every? identity (map #(>= %2 %1) baseline-totals urgent-totals))
-          "G-totals under urgency are ≥ baseline (more pressure on risk/survival)"))))
+          "controller-scores under urgency are ≥ baseline (more pressure on risk/survival)"))))
 
 (deftest info-weight-and-survival-weight-tunable-test
   (testing "info-weight and survival-weight can be overridden via opts"
     (let [a (efe/compute-efe base-state {:type :address-sorry :target :m1})
           b (efe/compute-efe base-state {:type :address-sorry :target :m1}
                               {:info-weight 0.0 :survival-weight 0.0})]
-      (is (not= (:G-total a) (:G-total b))
-          "different weights produce different G-total")
-      (is (< (Math/abs (- (:G-total b)
+      (is (not= (:controller-score a) (:controller-score b))
+          "different weights produce different controller-score")
+      (is (< (Math/abs (- (:controller-score b)
                           (+ (:G-risk b) (:G-ambiguity b))))
              1e-9)
-          "with both new weights at 0, G-total reduces to v0.12 G-risk + G-ambiguity"))))
+          "with both new weights at 0, controller-score reduces to v0.12 G-risk + G-ambiguity"))))
 
 (deftest structural-pressure-weight-and-ordering-test
-  (testing "structural-pressure lowers G-total by exactly weight × signal"
+  (testing "structural-pressure lowers controller-score by exactly weight × signal"
     (let [base-action {:type :address-sorry :target :m1}
           pressured-action {:type :address-sorry
                             :target :m1
                             :structural-pressure-per-action 2.2}
           base-out (efe/compute-efe base-state base-action)
           pressured-out (efe/compute-efe base-state pressured-action)]
-      (is (= 2.2 (:G-structural-pressure pressured-out)))
-      (is (< (Math/abs (- (:G-total pressured-out)
-                          (- (:G-total base-out) (* 0.35 2.2))))
+      (is (= 2.2 (:structural-pressure pressured-out)))
+      (is (< (Math/abs (- (:controller-score pressured-out)
+                          (- (:controller-score base-out) (* 0.35 2.2))))
              1e-9)
           "default structural-pressure weight is applied as a subtraction")))
   (testing "rank-actions prefers otherwise-identical candidates with higher structural-pressure"
@@ -399,8 +398,8 @@
 
 (deftest intrinsic-value-can-make-learn-outrank-no-op-test
   (testing ":learn-action-class with :intrinsic-value 0.1 outranks :no-op when in-distribution"
-    ;; healthy-obs has small G-pragmatic; :intrinsic-value 0.1 credit
-    ;; should be enough to push :learn-action-class below :no-op in G-total
+    ;; healthy-obs has small preference-gap-score; :intrinsic-value 0.1 credit
+    ;; should be enough to push :learn-action-class below :no-op in controller-score
     (let [candidates [{:type :no-op}
                       {:type :learn-action-class :target-class :address-sorry
                        :intrinsic-value 0.1}]
@@ -421,8 +420,8 @@
       (is (= :M-capability-star-map (get-in selected [:action :target])))
       (is (true? (:graph/applicable? selected)))
       (is (true? (:graph/single-cycle-leaf? selected)))
-      (is (zero? (:G-applicability selected)))
-      (is (pos? (:G-applicability
+      (is (zero? (:graph-applicability-penalty selected)))
+      (is (pos? (:graph-applicability-penalty
                  (efe/compute-efe base-state
                                   {:type :open-mission :target :M-unbound-frontier}
                                   opts)))
@@ -446,28 +445,28 @@
   (testing "off-map open missions are penalised only when the opt is set"
     (let [graph (graph-efe-cleanup-fixture)
           action {:type :open-mission :target "M-off-map"}
-          default-terms (efe/graph-efe-terms graph :goal action {})
-          penalised (efe/graph-efe-terms graph :goal action
+          default-terms (efe/graph-control-terms graph :goal action {})
+          penalised (efe/graph-control-terms graph :goal action
                                          {:graph-off-map-penalty 4.0})]
-      (is (zero? (:G-graph-pragmatic default-terms))
+      (is (zero? (:graph-control-score default-terms))
           "default 0.0 preserves current off-map behaviour")
-      (is (= 4.0 (:G-graph-pragmatic penalised))
+      (is (= 4.0 (:graph-control-score penalised))
           "opted-in off-map open mission gets the configured penalty")))
 
   (testing "non-open-mission actions and absent graph/goal cases are not penalised"
     (let [graph (graph-efe-cleanup-fixture)
-          pursue (efe/graph-efe-terms graph :goal
+          pursue (efe/graph-control-terms graph :goal
                                       {:type :pursue :target :cap-held}
                                       {:graph-off-map-penalty 4.0})
-          no-graph (efe/graph-efe-terms nil :goal
+          no-graph (efe/graph-control-terms nil :goal
                                         {:type :open-mission :target "M-off-map"}
                                         {:graph-off-map-penalty 4.0})
-          no-goal (efe/graph-efe-terms graph nil
+          no-goal (efe/graph-control-terms graph nil
                                        {:type :open-mission :target "M-off-map"}
                                        {:graph-off-map-penalty 4.0})]
-      (is (zero? (:G-graph-pragmatic pursue)))
-      (is (zero? (:G-graph-pragmatic no-graph)))
-      (is (zero? (:G-graph-pragmatic no-goal))))))
+      (is (zero? (:graph-control-score pursue)))
+      (is (zero? (:graph-control-score no-graph)))
+      (is (zero? (:graph-control-score no-goal))))))
 
 (deftest graph-efe-leaf-body-mode-test
   (testing ":leaf body mode scores a bounded next-step body cost"
@@ -476,30 +475,30 @@
                 :graph-body-mode :leaf
                 :graph-ascent-weight 0.0
                 :graph-applicability-penalty 0.0}
-          leaf (efe/graph-efe-terms graph :goal
+          leaf (efe/graph-control-terms graph :goal
                                     {:type :open-mission :target "M-leaf"}
                                     opts)
-          nonleaf-small (efe/graph-efe-terms graph :goal
+          nonleaf-small (efe/graph-control-terms graph :goal
                                              {:type :open-mission :target "M-nonleaf-small"}
                                              opts)
-          nonleaf-big (efe/graph-efe-terms graph :goal
+          nonleaf-big (efe/graph-control-terms graph :goal
                                            {:type :open-mission :target "M-nonleaf-big"}
                                            opts)]
-      (is (zero? (:G-body-size leaf))
+      (is (zero? (:graph-body-penalty leaf))
           "single-cycle leaf gets zero body penalty")
-      (is (= 2.0 (:G-body-size nonleaf-small)))
-      (is (= (:G-body-size nonleaf-small) (:G-body-size nonleaf-big))
+      (is (= 2.0 (:graph-body-penalty nonleaf-small)))
+      (is (= (:graph-body-penalty nonleaf-small) (:graph-body-penalty nonleaf-big))
           "open-hole-count 1 and 30 produce the same bounded body in :leaf mode")))
 
   (testing ":whole body mode preserves weight times open-hole-count"
     (let [graph (graph-efe-cleanup-fixture)
-          big (efe/graph-efe-terms graph :goal
+          big (efe/graph-control-terms graph :goal
                                    {:type :open-mission :target "M-nonleaf-big"}
                                    {:graph-body-weight 2.0
                                     :graph-body-mode :whole
                                     :graph-ascent-weight 0.0
                                     :graph-applicability-penalty 0.0})]
-      (is (= 60.0 (:G-body-size big))))))
+      (is (= 60.0 (:graph-body-penalty big))))))
 
 (deftest graph-efe-status-aware-ascent-test
   (testing "default ascent still credits all produced capabilities in goal scope"
@@ -532,12 +531,12 @@
           on-ascent (first ranked)
           off-map (second ranked)]
       (is (= "M-on-ascent-big" (get-in on-ascent [:action :target])))
-      (is (= 3.0 (:G-body-size on-ascent))
+      (is (= 3.0 (:graph-body-penalty on-ascent))
           "leaf mode uses a bounded next-step body despite 30 open holes")
-      (is (= 4.0 (:G-graph-pragmatic off-map)))
-      (is (< (:G-total on-ascent) (:G-total off-map))))))
+      (is (= 4.0 (:graph-control-score off-map)))
+      (is (< (:controller-score on-ascent) (:controller-score off-map))))))
 
-(deftest graph-efe-bmr-eig-leg-test
+(deftest graph-model-uncertainty-controller-leg-test
   (let [graph {:capabilities {:goal {:scope [:cap-a :cap-b]}
                               :cap-a {}
                               :cap-b {}}
@@ -557,38 +556,38 @@
               :graph-ascent-weight 0.0}
         action-a {:type :open-mission :target "M-a"}
         action-b {:type :open-mission :target "M-b"}
-        eig-of (fn [m] (fn [_mission-id mission]
+        model-uncertainty-of (fn [m] (fn [_mission-id mission]
                          (reduce + 0.0 (map #(double (get m % 0.0)) (:produces mission)))))
-        no-eig (efe/compute-efe base-state action-a opts)
-        empty-eig (efe/compute-efe base-state action-a (assoc opts :eig-fn (eig-of {})))
-        high-eig (efe/compute-efe base-state action-a
-                                  (assoc opts :eig-fn (eig-of {:cap-a 2.5})))
-        absent-eig (efe/compute-efe base-state
+        no-model-uncertainty (efe/compute-efe base-state action-a opts)
+        empty-model-uncertainty (efe/compute-efe base-state action-a (assoc opts :model-uncertainty-fn (model-uncertainty-of {})))
+        high-model-uncertainty (efe/compute-efe base-state action-a
+                                  (assoc opts :model-uncertainty-fn (model-uncertainty-of {:cap-a 2.5})))
+        absent-model-uncertainty (efe/compute-efe base-state
                                     {:type :open-mission :target "M-missing"}
-                                    (assoc opts :eig-fn (eig-of {:cap-a 2.5})))
+                                    (assoc opts :model-uncertainty-fn (model-uncertainty-of {:cap-a 2.5})))
         tie-before (efe/rank-star-map-actions base-state [action-a action-b] opts)
         tie-after (efe/rank-star-map-actions base-state [action-a action-b]
-                                             (assoc opts :eig-fn (eig-of {:cap-b 3.0})))]
-    (testing "default empty lookup preserves G-total while surfacing a zero distinct leg"
-      (is (= (:G-total no-eig) (:G-total empty-eig)))
-      (is (zero? (:G-eig-bmr empty-eig)))
-      (is (= -0.0 (get-in empty-eig [:augmentation-terms :eig-bmr])))
-      (is (contains? empty-eig :G-eig-bmr))
-      (is (not= (:G-eig-bmr empty-eig) (:G-info empty-eig)))
-      (is (not= (:G-eig-bmr empty-eig) (:G-ambiguity empty-eig))))
-    (testing "high BMR stddev is epistemic value, so it lowers G-total"
-      (is (= 2.5 (:G-eig-bmr high-eig)))
-      (is (= (- (:G-total no-eig) 2.5)
-             (:G-total high-eig)))
-      (is (= -2.5 (get-in high-eig [:augmentation-terms :eig-bmr]))))
+                                             (assoc opts :model-uncertainty-fn (model-uncertainty-of {:cap-b 3.0})))]
+    (testing "default empty lookup preserves controller-score while surfacing a zero distinct leg"
+      (is (= (:controller-score no-model-uncertainty) (:controller-score empty-model-uncertainty)))
+      (is (zero? (:model-uncertainty-bonus empty-model-uncertainty)))
+      (is (= -0.0 (get-in empty-model-uncertainty [:augmentation-terms :model-uncertainty-bonus])))
+      (is (contains? empty-model-uncertainty :model-uncertainty-bonus))
+      (is (not= (:model-uncertainty-bonus empty-model-uncertainty) (:predictability-bonus empty-model-uncertainty)))
+      (is (not= (:model-uncertainty-bonus empty-model-uncertainty) (:G-ambiguity empty-model-uncertainty))))
+    (testing "high BMR stddev is an explicit controller bonus, so it lowers controller-score"
+      (is (= 2.5 (:model-uncertainty-bonus high-model-uncertainty)))
+      (is (= (- (:controller-score no-model-uncertainty) 2.5)
+             (:controller-score high-model-uncertainty)))
+      (is (= -2.5 (get-in high-model-uncertainty [:augmentation-terms :model-uncertainty-bonus]))))
     (testing "absent produced concept contributes zero"
-      (is (zero? (:G-eig-bmr absent-eig))))
-    (testing "R13 tie floor breaks when one produced concept has EIG"
-      (is (= (:G-total (first tie-before))
-             (:G-total (second tie-before))))
+      (is (zero? (:model-uncertainty-bonus absent-model-uncertainty))))
+    (testing "R13 tie floor breaks when one produced concept has a model-uncertainty bonus"
+      (is (= (:controller-score (first tie-before))
+             (:controller-score (second tie-before))))
       (is (= "M-b" (get-in (first tie-after) [:action :target])))
-      (is (< (:G-total (first tie-after))
-             (:G-total (second tie-after)))))))
+      (is (< (:controller-score (first tie-after))
+             (:controller-score (second tie-after)))))))
 
 (deftest star-map-live-blend-activation-and-provenance-test
   (testing "graph-known mission receives conservative graph terms and provenance"
@@ -606,13 +605,13 @@
                        :graph-applicability-penalty 5.0
                        :graph-ascent-weight 6.0
                        :graph-body-weight 3.0})]
-      (is (zero? (:G-graph-pragmatic no-graph)))
+      (is (zero? (:graph-control-score no-graph)))
       (is (not (:star-map? no-graph)))
       (is (true? (:star-map? with-graph)))
-      (is (zero? (:G-applicability with-graph)))
-      (is (= 3.0 (:G-body-size with-graph)))
-      (is (= 6.0 (:G-ascent-progress with-graph)))
-      (is (= -3.0 (:G-graph-pragmatic with-graph)))))
+      (is (zero? (:graph-applicability-penalty with-graph)))
+      (is (= 3.0 (:graph-body-penalty with-graph)))
+      (is (= 6.0 (:graph-ascent-credit with-graph)))
+      (is (= -3.0 (:graph-control-score with-graph)))))
 
   (testing "graph-unknown mission is score-identical to no-graph baseline"
     (let [graph {:capabilities {:goal {:status :held :scope [:cap-done]}
@@ -629,8 +628,8 @@
                        :graph-applicability-penalty 5.0
                        :graph-ascent-weight 6.0
                        :graph-body-weight 3.0})]
-      (is (= (:G-total no-graph) (:G-total with-graph)))
-      (is (= (:G-graph-pragmatic no-graph) (:G-graph-pragmatic with-graph)))
+      (is (= (:controller-score no-graph) (:controller-score with-graph)))
+      (is (= (:graph-control-score no-graph) (:graph-control-score with-graph)))
       (is (not (:star-map? with-graph))))))
 
 (deftest mission-gap-live-blend-activation-and-provenance-test
@@ -640,13 +639,13 @@
           with-gap (efe/compute-efe base-state action
                                     {:mission-gap-view {"M-gappy" 0.5}
                                      :gap-weight 6.0})]
-      (is (zero? (:G-gap no-gap)))
+      (is (zero? (:gap-exploration-bonus no-gap)))
       (is (not (:gap? no-gap)))
-      (is (= 3.0 (:G-gap with-gap)))
+      (is (= 3.0 (:gap-exploration-bonus with-gap)))
       (is (= 0.5 (:gap-score with-gap)))
       (is (true? (:gap? with-gap)))
-      (is (= (- (:G-total no-gap) 3.0)
-             (:G-total with-gap)))))
+      (is (= (- (:controller-score no-gap) 3.0)
+             (:controller-score with-gap)))))
 
   (testing "fold-view-unknown open mission gets zero gap and no provenance tag"
     (let [action {:type :open-mission :target "M-unknown"}
@@ -654,17 +653,17 @@
           with-gap (efe/compute-efe base-state action
                                     {:mission-gap-view {"M-gappy" 0.5}
                                      :gap-weight 6.0})]
-      (is (zero? (:G-gap with-gap)))
+      (is (zero? (:gap-exploration-bonus with-gap)))
       (is (zero? (:gap-score with-gap)))
       (is (not (:gap? with-gap)))
-      (is (= (:G-total no-gap) (:G-total with-gap)))))
+      (is (= (:controller-score no-gap) (:controller-score with-gap)))))
 
   (testing "gap-weight is conservative and applied linearly"
     (let [action {:type :open-mission :target :M-gappy}
           weighted (efe/compute-efe base-state action
                                     {:mission-gap-view {"M-gappy" 0.25}
                                      :gap-weight 2.0})]
-      (is (= 0.5 (:G-gap weighted)))
+      (is (= 0.5 (:gap-exploration-bonus weighted)))
       (is (true? (:gap? weighted))))))
 
 ;; ---------------------------------------------------------------------------
@@ -682,11 +681,11 @@
             (str "core additivity for " (:type action)))))))
 
 (deftest g-core-does-not-change-total-test
-  (testing "D2 is strictly additive: emitting :G-core leaves :G-total untouched"
+  (testing "D2 is strictly additive: emitting :G-core leaves :controller-score untouched"
     (let [o (efe/compute-efe base-state {:type :no-op})]
       ;; the blend still sums its historical terms; :G-core is a report, not a summand
-      (is (number? (:G-total o)))
-      (is (not= (:G-core o) (:G-total o))
+      (is (number? (:controller-score o)))
+      (is (not= (:G-core o) (:controller-score o))
           ":G-core is reported beside, not substituted for, the blend"))))
 
 (deftest ambiguity-mode-default-and-escape-hatch-test

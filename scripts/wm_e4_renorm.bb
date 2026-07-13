@@ -2,7 +2,7 @@
 ;; wm_e4_renorm.bb — M-evaluate-policies E4 (D7): replay RENORMALISATION SWEEP.
 ;; Uses the D6 harness (wm_replay_blend.bb) to answer §3.3 empirically: does any
 ;; commensuration of the blend's terms change which action wins? Reading 2 of Q1
-;; (§7.4) measured G-ambiguity as numerically inaudible (σ≈0.015 vs G-info ~14);
+;; (§7.4) measured G-ambiguity as numerically inaudible (σ≈0.015 vs predictability-bonus ~14);
 ;; this sweep re-scales terms onto comparable footings and reports the winner
 ;; movement. FACTS ONLY — the §3.3 (D3) design decision stays with the mission owner.
 ;;
@@ -89,19 +89,19 @@
 (def findings
   [(format "Corpus at run time: %d lane-valid ticks (wm-trace is appended hourly; frozen early-day flip counts reproduce q1-census-v2 exactly, later day-files have grown since the 10:41 snapshot)."
            total-ticks)
-   (format "default spec flips %s%% — I1 replay-equality holds (recomputed total == persisted :G-total), so the harness reproduces the actual winner exactly." (str (frate "default")))
+   (format "default spec flips %s%% — I1 replay-equality holds (recomputed total == persisted :controller-score), so the harness reproduces the actual winner exactly." (str (frate "default")))
    "Mean-centring is argmin-invariant: subtracting a per-term corpus constant shifts every candidate in a tick equally, so per-term z-normalisation reduces EXACTLY to 1/σ term-scaling for selection. The μ column is reported for the record but plays no part in winners."
-   (format "MAGNITUDE vs VARIATION. G-info has by far the largest MEAN (μ=%s) but a near-zero σ=%s — a nearly-uniform bonus, hence argmin-inert (census G-info flip-rate 0%%). G-ambiguity is small in BOTH (μ=%s, σ=%s). So reading 2's 'inaudible ambiguity' is a MEAN-magnitude fact; z-normalisation instead rescales by σ (variation)."
+   (format "MAGNITUDE vs VARIATION. predictability-bonus has by far the largest MEAN (μ=%s) but a near-zero σ=%s — a nearly-uniform bonus, hence argmin-inert (census predictability-bonus flip-rate 0%%). G-ambiguity is small in BOTH (μ=%s, σ=%s). So reading 2's 'inaudible ambiguity' is a MEAN-magnitude fact; z-normalisation instead rescales by σ (variation)."
            (str (:mu (st :info))) (str (:sd (st :info)))
            (str (:mu (st :ambiguity))) (str (:sd (st :ambiguity))))
-   (format "The naturally-decisive terms are the high-σ ones: G-survival (σ=%s) and G-risk (σ=%s). z-normalisation (all 1/σ, residual kept) shrinks those toward the tiny-σ terms and moves %s%% of winners; dropping the hidden residual as well leaves it unchanged (%s%%) — under z-norm the raw-scale residual is argmin-inert."
+   (format "The naturally-decisive terms are the high-σ ones: homeostatic-pressure (σ=%s) and G-risk (σ=%s). z-normalisation (all 1/σ, residual kept) shrinks those toward the tiny-σ terms and moves %s%% of winners; dropping the hidden residual as well leaves it unchanged (%s%%) — under z-norm the raw-scale residual is argmin-inert."
            (str (:sd (st :survival))) (str (:sd (st :risk)))
            (str (frate "z-norm")) (str (frate "z-norm-drop-hidden")))
    (format "ambiguity-audible (G-ambiguity × 1/σ≈%s alone, rest default) = %s%%: 1/σ scaling OVERSHOOTS — ambiguity's scaled σ ≈ 1 now exceeds every other term's, so it does not merely gain a vote, it dominates. 'Audible' at 1/σ means 'decisive'."
            (str (:one-over-sd (st :ambiguity))) (str (frate "ambiguity-audible")))
    (format "equal-unit (all six weights = 1, residual kept) = %s%% — the mildest commensuration; core-only (G-risk + G-ambiguity, all else excluded) = %s%%, the replay complement of census core-only agreement (35.3%%)."
            (str (frate "equal-unit")) (str (frate "core-only")))
-   (format "CAVEAT: near-constant terms get extreme 1/σ weights (G-goal-outcome 1/σ≈%s, present in ~%d rows only; G-info 1/σ≈%s) — z-norm amplifies them enormously but, being near-uniform (or sparse/young), they stay largely argmin-inert. The 1/σ weights are recorded in :znorm-weights for scrutiny."
+   (format "CAVEAT: near-constant terms get extreme 1/σ weights (G-goal-outcome 1/σ≈%s, present in ~%d rows only; predictability-bonus 1/σ≈%s) — z-norm amplifies them enormously but, being near-uniform (or sparse/young), they stay largely argmin-inert. The 1/σ weights are recorded in :znorm-weights for scrutiny."
            (str (:one-over-sd (st :goal-outcome))) (:n-present (st :goal-outcome))
            (str (:one-over-sd (st :info))))
    "Which action-types gain/lose is per-config in :winner-net-delta (spec winner-count minus actual winner-count, by :action :type); positive = the renormalised formula would pick that type more often."])

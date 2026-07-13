@@ -3,7 +3,8 @@
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
-            [futon2.aif.actuator-a3 :as a3])
+            [futon2.aif.actuator-a3 :as a3]
+            [futon2.aif.substrate-fixture :as fixture])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
@@ -55,22 +56,30 @@
                           :type :capability/*
                           :endpoint-types [:capability :mission/doc]}))))
 
-(deftest live-inhabitation-checks-use-executor-derived-drawbridge-query
-  (let [capability (a3/endpoint-inhabitation {:endpoint "CapabilityVocabulary"
+(defn- a3-opts []
+  (fixture/make-opts
+   [{:xt/id "cap" :entity/id "cap" :entity/type :capability}
+    {:xt/id "mission" :entity/id "mission" :entity/type :mission/doc}]))
+
+(deftest inhabitation-checks-use-executor-derived-semantic-query
+  (let [opts (a3-opts)
+        capability (a3/endpoint-inhabitation {:endpoint "CapabilityVocabulary"
                                               :kind :entity
-                                              :type :capability})
+                                              :type :capability}
+                                             opts)
         capability-hypergraph (a3/endpoint-inhabitation
                                {:endpoint "CapabilityHypergraph"
                                 :kind :hyperedge
                                 :type :capability/*
-                                :endpoint-types [:capability :mission/doc]})]
+                                :endpoint-types [:capability :mission/doc]}
+                               opts)]
     (is (true? (:inhabited? capability)))
     (is (false? (:inhabited? capability-hypergraph)))))
 
 (deftest m-learning-loop-endpoint-dial-is-one-of-two
   (let [deposit (get (a3/deposits-by-id) "ft-learning-loop-010")
         bindings (a3/endpoint-bindings deposit)
-        snapshot (a3/endpoint-snapshot bindings)
+        snapshot (a3/endpoint-snapshot bindings (a3-opts))
         dial (a3/endpoint-dial snapshot)]
     (is (= ["CapabilityVocabulary" "CapabilityHypergraph"]
            (mapv :endpoint bindings)))
@@ -85,7 +94,7 @@
         builder-claim {:closures [{:hole-id :h1
                                    :evidence-ref {:kind :file-exists
                                                   :path "/tmp/builder-claim"}}]}
-        snapshot (a3/endpoint-snapshot [absent])
+        snapshot (a3/endpoint-snapshot [absent] (a3-opts))
         dial (a3/endpoint-dial snapshot)]
     (is (seq (:closures builder-claim)))
     (is (= 0 (:inhabited dial)))
@@ -142,12 +151,7 @@
 (defn- uuid-suffix []
   (str (java.util.UUID/randomUUID)))
 
-(defn- evict-ids! [& ids]
-  (let [ids (filterv some? ids)]
-    (when (seq ids)
-      (a3/drawbridge-submit-tx! (mapv (fn [id] [:xtdb.api/evict id]) ids)))))
-
-(defn- write-test-entity! [entity-id type]
+(defn- write-test-entity! [opts entity-id type]
   (a3/drawbridge-submit-tx!
    [[:xtdb.api/put {:xt/id entity-id
                     :entity/id entity-id
@@ -155,16 +159,18 @@
                     :entity/type type
                     :entity/source "actuator-a3-test"
                     :entity/props {:a4-test? true
-                                   :evict-after-proof true}}]]))
+                                   :evict-after-proof true}}]]
+   opts))
 
-(defn- write-test-hyperedge! [hx-id type endpoints]
+(defn- write-test-hyperedge! [opts hx-id type endpoints]
   (a3/drawbridge-submit-tx!
    [[:xtdb.api/put {:xt/id hx-id
                     :hx/id hx-id
                     :hx/type type
                     :hx/endpoints endpoints
                     :a4-test? true
-                    :a4-test/evict-after-proof true}]]))
+                    :a4-test/evict-after-proof true}]]
+   opts))
 
 (defn- learning-loop-clean []
   (edn/read-string (slurp "/home/joe/code/futon6/holes/clean/M-learning-loop.clean.edn")))
@@ -174,7 +180,7 @@
          :clean (learning-loop-clean)))
 
 (deftest build-match-learning-loop-dial-is-one-of-two
-  (let [match (a3/build-match (learning-loop-deposit-with-clean))
+  (let [match (a3/build-match (learning-loop-deposit-with-clean) (a3-opts))
         by-box (into {} (map (juxt :box identity) (:box-snapshot match)))]
     (is (true? (:clean-pass? match)))
     (is (= {:inhabited 1
@@ -189,6 +195,7 @@
 
 (deftest build-match-catches-missing-interior-when-terminal-inhabited
   (let [suffix (uuid-suffix)
+        opts (a3-opts)
         hx-id (str "a4-test/hyperedge/build-match-" suffix)
         missing-type (keyword "a4-test" (str "missing-interior-" suffix))
         deposit (assoc (learning-loop-deposit-with-clean)
@@ -196,23 +203,18 @@
                                       :b7 {:kind :hyperedge
                                            :type :capability/*
                                            :endpoint-types [:capability :mission/doc]}})]
-    (try
-      (write-test-hyperedge! hx-id
-                             :capability/*
-                             ["scope/capability/distributed-proofreaders"
-                              "futon3c-d/mission/typed-holes-lean-handoffs"])
+    (write-test-hyperedge! opts hx-id :capability/* ["cap" "mission"])
       (let [terminal (a3/endpoint-inhabitation {:kind :hyperedge
                                                 :type :capability/*
-                                                :endpoint-types [:capability :mission/doc]})
-            match (a3/build-match deposit)
+                                                :endpoint-types [:capability :mission/doc]}
+                                               opts)
+            match (a3/build-match deposit opts)
             by-box (into {} (map (juxt :box identity) (:box-snapshot match)))]
         (is (true? (:inhabited? terminal)) "boundary-only terminal proof would pass")
         (is (true? (get-in by-box [:b7 :inhabited?])))
         (is (false? (get-in by-box [:b1 :inhabited?])))
         (is (= [:b1] (:missing-boxes match)))
-        (is (false? (get-in match [:dial :discharged?]))))
-      (finally
-        (evict-ids! hx-id)))))
+        (is (false? (get-in match [:dial :discharged?]))))))
 
 (deftest build-match-refuses-invalid-clean
   (let [bad-clean (assoc-in (learning-loop-clean)
@@ -228,64 +230,54 @@
 
 (deftest record-discharge-writes-provable-entity
   (let [suffix (uuid-suffix)
+        opts (a3-opts)
         mission "futon-test-d/mission/a4-record"
         binding {:endpoint (str "Endpoint-" suffix)
                  :kind :entity
                  :type (keyword "a4-test" (str "record-" suffix))}
-        recorded (a3/record-discharge! mission binding)
+        recorded (a3/record-discharge! mission binding opts)
         discharge-id (get-in recorded [:doc :xt/id])]
-    (try
-      (is (a3/discharge-recorded? mission (:endpoint binding)))
+      (is (a3/discharge-recorded? mission (:endpoint binding) opts))
       (is (= :discharge (get-in recorded [:doc :entity/type])))
       (is (= (pr-str (a3/proof-query binding))
              (get-in recorded [:doc :discharge/proof-query])))
-      (finally
-        (evict-ids! discharge-id)))))
+      (is (string? (str discharge-id)))))
 
 (deftest finalize-discharge-records-only-newly-inhabited-endpoint
   (let [suffix (uuid-suffix)
+        opts (assoc (a3-opts) :before-dir (tmp-dir-path! "a4-before-test"))
         mission (str "futon-test-d/mission/a4-finalize-" suffix)
-        before-dir (tmp-dir-path! "a4-before-test")
         endpoint (str "Endpoint-" suffix)
         type (keyword "a4-test" (str "finalize-" suffix))
         entity-id (str "a4-test/entity/" suffix)
         binding {:endpoint endpoint :kind :entity :type type}
-        discharge-id (atom nil)]
-    (try
-      (let [before (a3/capture-before-snapshot! mission [binding]
-                                                {:before-dir before-dir})]
+        before (a3/capture-before-snapshot! mission [binding] opts)]
         (is (false? (-> before :before first :inhabited?)))
-        (write-test-entity! entity-id type)
-        (let [first-finalize (a3/finalize-discharge! mission {:before-dir before-dir})
-              second-finalize (a3/finalize-discharge! mission {:before-dir before-dir})]
-          (reset! discharge-id (get-in first-finalize [:recorded 0 :doc :xt/id]))
+        (write-test-entity! opts entity-id type)
+        (let [first-finalize (a3/finalize-discharge! mission opts)
+              second-finalize (a3/finalize-discharge! mission opts)]
           (is (= [endpoint] (get-in first-finalize [:dial-review :newly-inhabited])))
           (is (= 1 (count (:recorded first-finalize))))
           (is (empty? (:already-recorded first-finalize)))
           (is (empty? (:recorded second-finalize)))
-          (is (= [endpoint] (:already-recorded second-finalize)))))
-      (finally
-        (evict-ids! entity-id @discharge-id)))))
+          (is (= [endpoint] (:already-recorded second-finalize))))))
 
 (deftest finalize-discharge-does-not-record-already-inhabited-before
   (let [suffix (uuid-suffix)
+        opts (assoc (a3-opts) :before-dir (tmp-dir-path! "a4-before-test"))
         mission (str "futon-test-d/mission/a4-already-" suffix)
-        before-dir (tmp-dir-path! "a4-before-test")
         endpoint (str "Endpoint-" suffix)
         type (keyword "a4-test" (str "already-" suffix))
         entity-id (str "a4-test/entity/" suffix)
         binding {:endpoint endpoint :kind :entity :type type}]
-    (try
-      (write-test-entity! entity-id type)
+    (write-test-entity! opts entity-id type)
       (let [before (a3/capture-before-snapshot! mission [binding]
-                                                {:before-dir before-dir})
-            finalized (a3/finalize-discharge! mission {:before-dir before-dir})]
+                                                opts)
+            finalized (a3/finalize-discharge! mission opts)]
         (is (true? (-> before :before first :inhabited?)))
         (is (empty? (get-in finalized [:dial-review :newly-inhabited])))
         (is (empty? (:recorded finalized)))
-        (is (empty? (:already-recorded finalized))))
-      (finally
-        (evict-ids! entity-id)))))
+        (is (empty? (:already-recorded finalized))))))
 
 (deftest finalize-discharge-rejects-missing-before-snapshot
   (let [mission (str "futon-test-d/mission/a4-missing-" (uuid-suffix))

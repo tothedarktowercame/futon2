@@ -281,7 +281,7 @@
 
 ;; ---------------------------------------------------------------------------
 ;; Seam 2 (M-wm-policies Car-3 / R16): join the rollout grain-3 G(π) into the lane,
-;; so the act-gate's ΔG leg sits beside ΔF (the cascade F-free-energy) at EVAL.
+;; so the act-gate's ΔG leg sits beside ΔF (the cascade cascade-score) at EVAL.
 ;; Read-only / sim-only: best-rollout does ZERO :7071 writes (MUST-B). nil when the
 ;; mission has no moves in the v2 set (no rollout path → ΔG unavailable → gate abstains).
 ;; ---------------------------------------------------------------------------
@@ -294,7 +294,7 @@
                           :props {:capability/frontier? true :capability/status :held}}]))))
 (defonce ^:private !rollout-g-cache (atom {}))
 
-(defn rollout-g-for
+(defn policy-rollout
   "grain-3 ΔG: best-rollout G(π) over the v2 move-set restricted to this mission's moves.
    Returns the (negative-better) G as a double, or nil if the mission has no moves in the
    set (no rollout path — ΔG genuinely unavailable, not zero). Memoized per stem."
@@ -308,7 +308,7 @@
                   (when (seq mv)
                     (let [seed (rollout/seed-roots {:arrows {} :cap-overlay @!rollout-cap-overlay :reachable #{}} mv)
                           best (rollout/best-rollout seed mv :depth 5 :top-k 3 :gamma 0.9)]
-                      (some-> (:G best) double))))
+                      (some-> (:policy-rollout-score best) double))))
                 (catch Throwable _ nil))]
         (swap! !rollout-g-cache assoc stem g)
         g))))
@@ -361,8 +361,8 @@
                               :size (if seated? (inc (:size c)) (:size c))
                               :wholeness (:wholeness c) :budget (:budget c)
                               :truncated (:truncated c)
-                              :F-free-energy (:F-free-energy c)
-                              :G-rollout (rollout-g-for m)
+                              :cascade-score (:cascade-score c)
+                              :policy-rollout-score (policy-rollout m)
                               :shown shown
                               :semilattice (:semilattice c)
                               :seat-injection (when seated?
@@ -388,25 +388,22 @@
        (vec (concat decision-entries om-entries))
        om-entries))))
 
-(def ^:private gap-free-energy-threshold
-  "A cascade whose marginal-likelihood F = accuracy − λ·complexity falls at/below this is a
-   defensive-driving GAP. F is the AIF-grounded grain-2 act-gate leg (M-wm-policies omission
-   2): F > 0 = the cascade's ψ-coverage outweighs the complexity of justifying its patterns
-   against the base-rate prior = a net-positive model expansion (Bayesian Occam accept). This
-   REPLACES the Salingaros-C / coverage-size heuristics — C was an analogy (L=T·H is not
-   formally a free-energy functional), size was scale-but-not-prior-aware. λ is set from data
-   in cascade_construct.py (the rich/thin F=0 knee, λ=0.25 on the 2026-06-24 spectrum)."
+(def ^:private gap-cascade-score-threshold
+  "A cascade whose engineering score = coverage-reward − λ·prior-cost is at
+   or below this threshold is a defensive-driving gap. The prior cost makes
+   the score size/base-rate aware, but coverage is not a likelihood, so this
+   threshold carries no VFE or marginal-likelihood claim."
   0.0)
 
 (defn gap-lane
   "Defensive-driving HORIZON SCAN (M-wm-policies Track 3, proactive). For the top-n
    open-mission targets, construct each circumstance's cascade and flag those whose
-   marginal-likelihood F ≤ gap-F-threshold (or no cascade) as PATTERN-GAPS — classes whose
+   cascade-score ≤ threshold (or no cascade) as PATTERN-GAPS — classes whose
    coverage does not pay for its pattern-complexity = the WM has no good-enough patterns for
    them yet, the places to seed cascades *before* it gets stuck. Reuses cascade-policy-for
-   (read-only / sim-only / never promotes — WM-I4 intact) and its memo cache. F is the
-   AIF act-gate leg; wholeness/size reported as context. Returns
-   [{:mission :psi :F-free-energy :accuracy :complexity :wholeness :size :gap? :note} ...], gaps first (lowest F)."
+   (read-only / sim-only / never promotes — WM-I4 intact) and its memo cache.
+   Returns entries with :cascade-score, :coverage-reward, and :prior-cost;
+   gaps sort first by lowest score."
   ([ranked-actions] (gap-lane ranked-actions {}))
   ([ranked-actions {:keys [n budget] :or {n 10 budget default-budget}}]
    (->> ranked-actions
@@ -417,20 +414,23 @@
                      psi (str/trim (str (mission->psi m) " "
                                         (or (get-in e [:action :rationale]) "")))
                      c   (cascade-policy-for psi budget)
-                     free-energy (:F-free-energy c)
-                     gap? (or (nil? c) (nil? free-energy) (<= free-energy gap-free-energy-threshold))]
-                 {:mission m :psi psi :F-free-energy free-energy
-                  :G-rollout (rollout-g-for m)                 ; ΔG leg beside ΔF (Car-3 seam 2)
-                  :accuracy (:accuracy c) :complexity (:complexity c)
+                     cascade-score (:cascade-score c)
+                     gap? (or (nil? c) (nil? cascade-score)
+                              (<= cascade-score gap-cascade-score-threshold))]
+                 {:mission m :psi psi :cascade-score cascade-score
+                  :policy-rollout-score (policy-rollout m)
+                  :coverage-reward (:coverage-reward c) :prior-cost (:prior-cost c)
                   :wholeness (:wholeness c) :size (:size c) :gap? gap?
                   :note (cond
                           (nil? c)
                           "no cascade constructed (constructor unavailable or no patterns — foothold needed)"
                           gap?
-                          (format "F=%.2f ≤ 0 (acc %.2f < λ·complexity) — coverage doesn't pay for its patterns; seed here"
-                                  (double (or free-energy 0.0)) (double (or (:accuracy c) 0.0)))
+                          (format "cascade-score=%.2f ≤ 0 (coverage %.2f < λ·prior-cost) — seed here"
+                                  (double (or cascade-score 0.0))
+                                  (double (or (:coverage-reward c) 0.0)))
                           :else
-                          (format "F=%.2f > 0 (acc %.2f vs λ·complexity) — net-positive cascade"
-                                  (double free-energy) (double (or (:accuracy c) 0.0))))})))
-        (sort-by (fn [r] [(if (:gap? r) 0 1) (or (:F-free-energy r) 0.0)]))
+                          (format "cascade-score=%.2f > 0 (coverage %.2f vs λ·prior-cost)"
+                                  (double cascade-score)
+                                  (double (or (:coverage-reward c) 0.0))))})))
+        (sort-by (fn [r] [(if (:gap? r) 0 1) (or (:cascade-score r) 0.0)]))
         vec)))

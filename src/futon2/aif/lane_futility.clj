@@ -8,7 +8,7 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
-            [futon2.aif.policy-precision :as policy-precision]))
+            [futon2.aif.selection-gain :as selection-gain]))
 
 (def default-trace-dir "data/wm-trace")
 (def default-expected-coverage-dg -0.25)
@@ -150,25 +150,25 @@
    (when (lane-record record)
      (let [verdict (target-verdict record)
            pass? (= :pass (:verdict verdict))
-           expected (double (or (:delta-G verdict) expected-coverage-dg))
+           expected (double (or (:coverage-score-delta verdict) expected-coverage-dg))
            realized (double (if pass?
-                              (or (:delta-G verdict) expected-coverage-dg)
+                              (or (:coverage-score-delta verdict) expected-coverage-dg)
                               0.0))]
        {:policy (:lane (lane-record record))
-        :expected-G expected
-        :realized-G realized
+        :expected-score expected
+        :realized-score realized
         :tick (:tick record)}))))
 
 (defn fold-gamma
   [outcomes]
-  (reduce policy-precision/fold-realized-outcome
-          (policy-precision/initial-policy-precision-state)
+  (reduce selection-gain/fold-realized-outcome
+          (selection-gain/initial-selection-gain-state)
           outcomes))
 
 (defn gamma-trajectory
   [outcomes]
-  (reductions policy-precision/fold-realized-outcome
-              (policy-precision/initial-policy-precision-state)
+  (reductions selection-gain/fold-realized-outcome
+              (selection-gain/initial-selection-gain-state)
               outcomes))
 
 (defn historical-gamma-report
@@ -181,16 +181,16 @@
         final-state (fold-gamma outcomes)]
     {:samples (count outcomes)
      :final final-state
-     :first-gamma (:policy-precision (first (gamma-trajectory outcomes)))
-     :last-gamma (:policy-precision final-state)}))
+     :first-gamma (:selection-gain (first (gamma-trajectory outcomes)))
+     :last-gamma (:selection-gain final-state)}))
 
 (defn synthetic-paying-outcomes
   ([] (synthetic-paying-outcomes 12))
   ([n]
    (mapv (fn [idx]
            {:policy "synthetic-paying-lane"
-            :expected-G default-expected-coverage-dg
-            :realized-G (* 2.0 default-expected-coverage-dg)
+            :expected-score default-expected-coverage-dg
+            :realized-score (* 2.0 default-expected-coverage-dg)
             :tick idx})
          (range n))))
 
@@ -200,7 +200,7 @@
         final-state (fold-gamma outcomes)]
     {:samples (count outcomes)
      :final final-state
-     :last-gamma (:policy-precision final-state)}))
+     :last-gamma (:selection-gain final-state)}))
 
 (defn dry-run-bulletins
   ([summary] (dry-run-bulletins summary default-futility-threshold))

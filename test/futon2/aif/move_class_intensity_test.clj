@@ -42,7 +42,7 @@
   (testing "apply-cascade reads escrowed coverage-dG as positive value"
     (let [i (mci/intensity {:type :apply-cascade
                             :target "M-a"
-                            :fold-escrow {:delta-g -0.7}})]
+                            :fold-escrow {:coverage-score-delta -0.7}})]
       (is (= :apply-cascade (:class i)))
       (is (< (Math/abs (- 0.7 (:value i))) 1e-9)))))
 
@@ -69,17 +69,17 @@
         explicit-off (efe/compute-efe state action {:move-class-intensity-mode :off})]
     (is (= default explicit-off))
     (is (not (contains? default :move-class-intensity)))
-    (is (not (contains? default :G-move-class-intensity)))))
+    (is (not (contains? default :move-class-intensity-contribution)))))
 
 (deftest efe-dark-mode-subtracts-intensity-from-g-total
   (let [action {:type :advance-mission :target "M-a" :open-hole-count 3}
         base (efe/compute-efe state action)
         dark (efe/compute-efe state action {:move-class-intensity-mode :v1})]
     (is (= :v1 (:move-class-intensity-mode dark)))
-    (is (< (double (:G-total dark)) (double (:G-total base))))
-    (is (< (Math/abs (- (double (:G-total dark))
-                        (+ (double (:G-total base))
-                           (double (:G-move-class-intensity dark)))))
+    (is (< (double (:controller-score dark)) (double (:controller-score base))))
+    (is (< (Math/abs (- (double (:controller-score dark))
+                        (+ (double (:controller-score base))
+                           (double (:move-class-intensity-contribution dark)))))
            1e-9))
     (is (contains? (:augmentation-terms dark) :move-class-intensity))))
 
@@ -95,7 +95,7 @@
   (let [dark (efe/compute-efe state
                               {:type :apply-cascade
                                :target "M-a"
-                               :fold-escrow {:delta-g -0.7}}
+                               :fold-escrow {:coverage-score-delta -0.7}}
                               {:move-class-intensity-mode :v1})
         record (trace/trace-record {:observation (:observation state)
                                     :belief (:belief state)
@@ -103,7 +103,7 @@
                                     :decision {:action (:action dark)}
                                     :mode :test})]
     (is (= :v1 (get-in record [:ranked-actions 0 :move-class-intensity-mode])))
-    (is (= (:G-move-class-intensity dark)
-           (get-in record [:ranked-actions 0 :G-move-class-intensity])))
+    (is (= (:move-class-intensity-contribution dark)
+           (get-in record [:ranked-actions 0 :move-class-intensity-contribution])))
     (is (= (:move-class-intensity dark)
            (get-in record [:ranked-actions 0 :move-class-intensity])))))

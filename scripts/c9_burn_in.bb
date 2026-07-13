@@ -9,10 +9,10 @@
 ;;          SEPARATELY — clicks sample engagement-time, not pooled silently).
 ;;
 ;; Compares per segment: decision target distribution · mode distribution ·
-;; G-total level/dispersion (winner + pool; cascade placeholders excluded) ·
-;; :G-core vs :G-augmentation composition · abstain rate · act-gate outcomes ·
+;; controller-score level/dispersion (winner + pool; cascade placeholders excluded) ·
+;; :G-core vs :controller-augmentation composition · abstain rate · act-gate outcomes ·
 ;; γ continuity across the boundary · the winner-G decline characterised
-;; (G-core vs G-augmentation trajectory + repeated-enactment).
+;; (G-core vs controller-augmentation trajectory + repeated-enactment).
 ;;
 ;; HONESTY: KL-era n is SMALL and ONE-DAY (2026-07-04) — first-pass exhibit; a
 ;; later pass adds calendar days. Deterministic; corpus boundary (file + last
@@ -41,7 +41,7 @@
   (let [ras (vec (filter :G-risk (:ranked-actions t)))
         kl? (some #(= :kl (:goal-outcome-mode %)) ras)
         sha (get-in t [:wm-version :git-sha])
-        winner (when (seq ras) (apply min-key #(double (:G-total %)) ras))
+        winner (when (seq ras) (apply min-key #(double (:controller-score %)) ras))
         agv (:act-gate-verdicts t)]
     {:ts (str (:timestamp t))
      :day (subs (str (:timestamp t)) 0 10)
@@ -52,11 +52,11 @@
      :decision-type (get-in t [:decision :action :type])
      :decision-target (get-in t [:decision :action :target])
      :abstain? (or (nil? (get-in t [:decision :action])) (= :abstain (get-in t [:decision :action])))
-     :winner-G (some-> (get-in t [:decision :G-total]) double)
-     :pool-Gs (mapv #(double (:G-total %)) ras)
+     :winner-G (some-> (get-in t [:decision :controller-score]) double)
+     :pool-Gs (mapv #(double (:controller-score %)) ras)
      :G-core (some-> (:G-core winner) double)
-     :G-augmentation (some-> (:G-augmentation winner) double)
-     :gamma (get-in t [:decision :policy-precision])
+     :controller-augmentation (some-> (:controller-augmentation winner) double)
+     :gamma (get-in t [:decision :selection-gain])
      :enacted (get-in t [:enactment :mission])
      :agv-pass (count (filter #(= :pass (:verdict %)) agv))
      :agv-fail (count (filter #(= :fail (:verdict %)) agv))
@@ -76,7 +76,7 @@
                 :min (when (seq winners) (apply min winners)) :max (when (seq winners) (apply max winners))}
      :pool-G {:mean (mean pool) :sd (sd pool) :n (count pool)}
      :G-core {:mean (mean (keep :G-core recs))}
-     :G-augmentation {:mean (mean (keep :G-augmentation recs))}
+     :controller-augmentation {:mean (mean (keep :controller-augmentation recs))}
      :act-gates {:pass (reduce + (map :agv-pass recs)) :fail (reduce + (map :agv-fail recs))
                  :abstain (reduce + (map :agv-abstain recs))}
      :gamma {:first (first (keep :gamma recs)) :last (last (keep :gamma recs))
@@ -100,21 +100,21 @@
   {:last-before {:ts (:ts (last before)) :gamma (:gamma (last before))}
    :first-after {:ts (:ts (first after-all)) :gamma (:gamma (first after-all))}})
 
-;; the winner-G decline: track winner-G / G-core / G-augmentation / enacted over AFTER
+;; the winner-G decline: track winner-G / G-core / controller-augmentation / enacted over AFTER
 (def g-decline-timeline
   (mapv (fn [r] {:ts (:ts r) :winner-G (:winner-G r) :G-core (:G-core r)
-                 :G-augmentation (:G-augmentation r) :enacted (:enacted r) :trigger (:trigger r)})
+                 :controller-augmentation (:controller-augmentation r) :enacted (:enacted r) :trigger (:trigger r)})
         after-all))
 (def g-decline-analysis
-  (let [ws (keep :winner-G after-all) cs (keep :G-core after-all) as (keep :G-augmentation after-all)
+  (let [ws (keep :winner-G after-all) cs (keep :G-core after-all) as (keep :controller-augmentation after-all)
         first-half (take (quot (count after-all) 2) after-all)
         second-half (drop (quot (count after-all) 2) after-all)]
     {:winner-G-first (first ws) :winner-G-last (last ws)
      :winner-G-range [(when (seq ws) (apply min ws)) (when (seq ws) (apply max ws))]
      :G-core-mean-first-half (mean (keep :G-core first-half)) :G-core-mean-second-half (mean (keep :G-core second-half))
-     :G-aug-mean-first-half (mean (keep :G-augmentation first-half)) :G-aug-mean-second-half (mean (keep :G-augmentation second-half))
+     :G-aug-mean-first-half (mean (keep :controller-augmentation first-half)) :G-aug-mean-second-half (mean (keep :controller-augmentation second-half))
      :enacted-missions (frequencies (keep :enacted after-all))
-     :interpretation "Compare G-core (belly free-energy) vs G-augmentation (KL goal-outcome + channel layers) across the two halves: whichever moves more DRIVES the winner-G change. Repeated enacted-missions ⇒ repeated-enactment effect on the belly."}))
+     :interpretation "Compare G-core (belly free-energy) vs controller-augmentation (KL goal-outcome + channel layers) across the two halves: whichever moves more DRIVES the winner-G change. Repeated enacted-missions ⇒ repeated-enactment effect on the belly."}))
 
 (def artifact
   {:generated-by "scripts/c9_burn_in.bb (M-aif-faithfulness C9 first-pass)"
@@ -142,16 +142,16 @@
     (format (str "SANITY VERDICT-SEED: post-flip WM appears %s. BEHAVIOURAL continuity holds — decisions "
                  "still resolve (abstain-rate %.2f%% after vs %.2f%% before), modes stay in the known set, and "
                  "γ is continuous across the boundary (%.3f→%.3f). The hinge→KL winner-G LEVEL shift (mean %.2f→%.2f) "
-                 "is a COMPOSITION change, not a pathology: the KL goal-outcome term + the ac60874 G-core/G-augmentation "
+                 "is a COMPOSITION change, not a pathology: the KL goal-outcome term + the ac60874 G-core/controller-augmentation "
                  "split change the G formula (G-aug mean ~%.2f). SEPARATELY, WITHIN the KL campaign the winner-G "
                  "declines (~%.1f peak→%.1f end), and :g-decline-analysis attributes it to G-CORE (belly) halving "
-                 "(%.1f→%.1f first→second half) while G-augmentation stays flat — i.e. belly free-energy settling, "
+                 "(%.1f→%.1f first→second half) while controller-augmentation stays flat — i.e. belly free-energy settling, "
                  "NOT the KL layer. n(after)=%d, ONE calendar DAY — directional only, not a burn-in claim.")
             (if (< (double (or (:abstain-rate a) 0)) 0.5) "SANE" "ANOMALOUS — review")
             (* 100.0 (double (or (:abstain-rate a) 0))) (* 100.0 (double (or (:abstain-rate b) 0)))
             (double (or (get-in boundary [:last-before :gamma]) 0)) (double (or (get-in boundary [:first-after :gamma]) 0))
             (double (or (get-in b [:winner-G :mean]) 0)) (double (or (get-in a [:winner-G :mean]) 0))
-            (double (or (get-in a [:G-augmentation :mean]) 0))
+            (double (or (get-in a [:controller-augmentation :mean]) 0))
             (double (or (get-in a [:winner-G :max]) 0)) (double (or (:winner-G-last g-decline-analysis) 0))
             (double (or (:G-core-mean-first-half g-decline-analysis) 0)) (double (or (:G-core-mean-second-half g-decline-analysis) 0))
             (:n a))))
@@ -166,7 +166,7 @@
 (defn seg-row [label s]
   (str "<tr><td>" (h label) "</td><td>" (h (:n s)) "</td><td>" (f2 (:abstain-rate s))
        "</td><td>" (f2 (get-in s [:winner-G :mean])) "</td><td>" (f2 (get-in s [:winner-G :sd]))
-       "</td><td>" (f2 (get-in s [:G-core :mean])) "</td><td>" (f2 (get-in s [:G-augmentation :mean]))
+       "</td><td>" (f2 (get-in s [:G-core :mean])) "</td><td>" (f2 (get-in s [:controller-augmentation :mean]))
        "</td><td>" (h (get-in s [:act-gates :pass])) "/" (h (get-in s [:act-gates :fail]))
        "</td><td>" (f2 (get-in s [:gamma :mean])) "</td></tr>"))
 (def html
@@ -193,10 +193,10 @@
        "<h2>γ continuity across the boundary</h2><p>last hinge tick γ="
        (f2 (get-in boundary [:last-before :gamma])) " → first KL tick γ=" (f2 (get-in boundary [:first-after :gamma]))
        " <span class=muted>(" (h (get-in boundary [:last-before :ts])) " → " (h (get-in boundary [:first-after :ts])) ")</span></p>"
-       "<h2>Winner-G decline: what drives it</h2><p class=muted>G-core (belly free-energy) vs G-augmentation (KL layer), first vs second half of the KL-era:</p>"
+       "<h2>Winner-G decline: what drives it</h2><p class=muted>G-core (belly free-energy) vs controller-augmentation (KL layer), first vs second half of the KL-era:</p>"
        "<table><tr><th></th><th>first half</th><th>second half</th></tr>"
        "<tr><td>G-core mean</td><td>" (f2 (:G-core-mean-first-half g-decline-analysis)) "</td><td>" (f2 (:G-core-mean-second-half g-decline-analysis)) "</td></tr>"
-       "<tr><td>G-augmentation mean</td><td>" (f2 (:G-aug-mean-first-half g-decline-analysis)) "</td><td>" (f2 (:G-aug-mean-second-half g-decline-analysis)) "</td></tr></table>"
+       "<tr><td>controller-augmentation mean</td><td>" (f2 (:G-aug-mean-first-half g-decline-analysis)) "</td><td>" (f2 (:G-aug-mean-second-half g-decline-analysis)) "</td></tr></table>"
        "<p class=muted>enacted missions (repeated-enactment check): " (h (:enacted-missions g-decline-analysis)) "</p>"
        "</body></html>"))
 (spit out-html html)

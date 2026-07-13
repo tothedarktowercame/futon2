@@ -7,7 +7,7 @@
    `:pass`, ENACT it, and thread the `:realized-outcome` record onto the
    judgement via the committed `fold-realized/with-realized-outcome` seam, so
    `trace/write-trace!` persists it and R14's γ folds it next tick
-   (`policy-precision/fold-realized-outcome`).
+   (`selection-gain/fold-realized-outcome`).
 
    ENACTMENT IS ARTIFACT-ONLY (read-only in apply-cascade!'s sense): the fold
    engine produces a construction — boxes + honestly-surfaced policy-holes — and
@@ -17,18 +17,18 @@
 
    PREDICTION vs EXECUTION (the build axis, live — E-close-the-loop §6b):
      The GATE's ΔG leg (prediction) reconciles three sources, in order:
-       1. rollout `:G-rollout` / classical fold — `close-loop/act-gate-from-lane-entry`;
+       1. rollout `:policy-rollout-score` / classical fold — `close-loop/act-gate-from-lane-entry`;
        2. ESCROW (impl #2 live): a recorded LLM fold turn at
           `data/fold-escrow/<mission>.edn` (`{:boxes [...] :policy-holes [...]}`),
           written by an inhabiting agent OUT-OF-PROCESS (no LLM in any JVM);
           its coverage→rollout ΔG (shared `fold-eval`) fills the missing leg.
      EXECUTION is always the deterministic executor — the futon3a fold engine
      (`fold_engine.clj apply`, the Car-3 apply-cascade! executor) over the SAME
-     cascade the gate evaluated. `:realized-G` = coverage ΔG over what the
+     cascade the gate evaluated. `:realized-score` = coverage ΔG over what the
      executor ACTUALLY reproduced. Adopting a predicted (escrow) wiring as its
      own realization would make realized ≡ expected — a tautology laundered
      into γ; the executor cross-check is the honest v1 realized signal. When
-     the executor reproduces nothing, `:realized-G` is nil and γ HOLDS (the
+     the executor reproduces nothing, `:realized-score` is nil and γ HOLDS (the
      contract's honest no-op) — γ accrues slowly rather than falsely.
 
    The two G legs are therefore the SAME EFE quantity (fold-eval coverage→
@@ -45,7 +45,6 @@
             [clojure.string :as str]
             [futon2.aif.close-loop :as cl]
             [futon2.aif.fold-escrow :as esc]
-            [futon2.aif.fold-eval :as fe]
             [futon2.aif.fold-realized :as fr]))
 
 (def ^:private futon3a-dir "/home/joe/code/futon3a")
@@ -134,7 +133,7 @@
    pattern-ids). Reconciliation order: rollout G → classical fold → PINNED
    escrow (L3: the scheduled caller now injects :escrow-turn-fn/:prose-fn with
    the DEPOSIT-GRAIN circumstance, so a recorded fold-turn's coverage ΔG can
-   fill a nil :delta-G leg on the live scheduled path — ledger §10's real test).
+   fill a nil :coverage-score-delta leg on the live scheduled path — ledger §10's real test).
    Entries without a matching deposit use the 1-arity (byte-identical to pre-L3).
    Legacy :llm-escrow files are still loud-ignored (L1, deprecated)."
   [ranked-actions]
@@ -143,7 +142,7 @@
     (mapv (fn [entry]
             (let [;; First try the 1-arity (rollout + classical fold).
                   ag (cl/act-gate-from-lane-entry entry)
-                  ag (if (some? (:delta-G ag))
+                  ag (if (some? (:coverage-score-delta ag))
                        ag
                        ;; ΔG nil — try the pinned escrow seam (L3).
                        (if-let [dep (deposit-for-mission deposits (:mission entry))]
@@ -158,7 +157,7 @@
                                     {:escrow-turn-fn (esc/escrow-turn-fn deposits)
                                      :prose-fn prose-fn})]
                            ;; The escrow may still abstain (sha mismatch, etc).
-                           ;; In that case ag2's delta-G is nil — same as ag.
+                           ;; In that case ag2's coverage-score-delta is nil — same as ag.
                            ag2)
                          ;; No deposit for this mission. Legacy loud-ignore (L1):
                          (do (when (escrow-wiring (:mission entry))
@@ -173,22 +172,22 @@
                :verdict (cl/preview-verdict ag)}))
           lane)))
 
-(def ^:dynamic *gamma-escrow-feed?*
+(def ^:dynamic *selection-gain-escrow-feed?*
   "γ-FEED REWIRE (operator-armed 2026-07-05, bell edge
    invoke-1783280248832-512-8130dc7b): when the gate's ΔG leg came from the
    pinned escrow, that same coverage-ΔG feeds γ's expected leg. Satisfies the
-   claude-10 scale-match pin BY CONSTRUCTION — `[:fold-escrow :delta-g]` is
+   claude-10 scale-match pin BY CONSTRUCTION — `[:fold-escrow :coverage-score-delta]` is
    fold-eval coverage-ΔG over the replayed construction, the same quantity as
-   `:realized-G`. Context: classical-off (the 2026-07-05 ruling) severed γ's
+   `:realized-score`. Context: classical-off (the 2026-07-05 ruling) severed γ's
    only expected-G source on the live path as an UNLOGGED SIDE EFFECT — γ had
    been coasting at the prior since. Rollout-G remains EXCLUDED from γ (the
    pin's original target). Bind false to revert to classical-only feeding."
   true)
 
-(defn gamma-fold-of
+(defn selection-gain-fold-of
   "The fold output whose coverage-ΔG feeds γ — SOURCE-CONSISTENT with the
    gate's decision:
-   - `:delta-G/source :fold-escrow` (flag-gated) ⇒ the ESCROW fold. The
+   - `:coverage-score/source :fold-escrow` (flag-gated) ⇒ the ESCROW fold. The
      classical fold's number — when it exists — is deliberately NOT fed for
      escrow-sourced decisions: with classical off as a route it is the known
      under-estimate the ruling distrusted (bayesian: −0.077 vs deposit −0.7),
@@ -198,34 +197,34 @@
      rollout-G, but γ's leg is never rollout-G, per the scale-match pin).
    Returning nil/no-ΔG ⇒ γ holds (honest)."
   [act-gate]
-  (if (and *gamma-escrow-feed?*
-           (= :fold-escrow (:delta-G/source act-gate)))
+  (if (and *selection-gain-escrow-feed?*
+           (= :fold-escrow (:coverage-score/source act-gate)))
     (:fold-escrow act-gate)
     (:fold act-gate)))
 
 (defn enact!
   "Enact ONE passed act-gate entry via the deterministic executor. Returns
-   {:enacted <wiring-or-nil> :decision {:policy :expected-G :fold}
+   {:enacted <wiring-or-nil> :decision {:policy :expected-score :fold}
     :enactment <audit>}. `:enacted` nil ⇒ the executor reproduced nothing —
-   the realized-outcome will carry `:realized-G` nil and γ holds (honest).
-   γ's expected leg is coverage-ΔG from `gamma-fold-of` (source-consistent;
+   the realized-outcome will carry `:realized-score` nil and γ holds (honest).
+   γ's expected leg is coverage-ΔG from `selection-gain-fold-of` (source-consistent;
    never rollout-G). The `:decision`'s `:fold` is the SAME fold γ's leg came
-   from — `fold-realized/realized-outcome-of` prefers `(:delta-g fold)`, so
+   from — `fold-realized/realized-outcome-of` prefers `(:coverage-score-delta fold)`, so
    passing a different fold there would silently override the fed value."
   [{:keys [mission shown act-gate]}]
   (let [enacted (when (seq shown) (engine-wiring shown))
-        gfold (gamma-fold-of act-gate)
-        gamma-expected (:delta-g gfold)]
+        gfold (selection-gain-fold-of act-gate)
+        selection-gain-expected (:coverage-score-delta gfold)]
     {:enacted enacted
      :decision {:policy mission
-                :expected-G gamma-expected
+                :expected-score selection-gain-expected
                 :fold gfold}
      :enactment {:mission mission
                  :source :classical-engine
-                 :predicted-via (:delta-G/source act-gate)
-                 :gate-delta-G (:delta-G act-gate)
-                 :gamma-expected-G gamma-expected
-                 :gamma-source (if (identical? gfold (:fold-escrow act-gate))
+                 :predicted-via (:coverage-score/source act-gate)
+                 :gate-coverage-score-delta (:coverage-score-delta act-gate)
+                 :selection-gain-expected-score selection-gain-expected
+                 :selection-gain-source (if (identical? gfold (:fold-escrow act-gate))
                                  :fold-escrow
                                  :fold)
                  :cascade shown
@@ -244,9 +243,9 @@
           verdicts (mapv (fn [g]
                            {:mission (:mission g)
                             :verdict (:verdict g)
-                            :delta-F (get-in g [:act-gate :delta-F])
-                            :delta-G (get-in g [:act-gate :delta-G])
-                            :delta-G-source (get-in g [:act-gate :delta-G/source])})
+                            :cascade-score (get-in g [:act-gate :cascade-score])
+                            :coverage-score-delta (get-in g [:act-gate :coverage-score-delta])
+                            :coverage-score-source (get-in g [:act-gate :coverage-score/source])})
                          gates)
           passed (first (filter #(= :pass (:verdict %)) gates))
           {:keys [enacted decision enactment]} (when passed (enact! passed))]

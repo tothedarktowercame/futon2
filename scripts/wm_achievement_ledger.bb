@@ -11,7 +11,7 @@
 ;;
 ;; Placeholder guard (E6/census convention, M-evaluate-policies §15 /
 ;; wm_ihtb2_check.clj): cascade-lane ranked-actions are persisted with only
-;; {:G-total 0.0 :rank :action} (no :G-risk); they never enter the selection pool
+;; {:controller-score 0.0 :rank :action} (no :G-risk); they never enter the selection pool
 ;; and are EXCLUDED from the scored-candidate counts.
 ;;
 ;; suspend-gaps are NOT failures (machine suspended, e.g. overnight) — see
@@ -61,16 +61,16 @@
      :trigger (get-in t [:wm-version :trigger])
      :mode (:mode t)
      :decided? (some? (get-in t [:decision :action]))
-     :gamma (get-in t [:decision :policy-precision])
-     :gamma-samples (get-in t [:policy-precision :samples])
+     :gamma (get-in t [:decision :selection-gain])
+     :gamma-samples (get-in t [:selection-gain :samples])
      :agv-pass (count (filter #(= :pass (:verdict %)) agv))
      :agv-fail (count (filter #(= :fail (:verdict %)) agv))
      :agv-abstain (count (filter #(not (#{:pass :fail} (:verdict %))) agv))
      :missions-passed (mapv :mission (filter #(= :pass (:verdict %)) agv))
-     :enacted (when-let [e (:enactment t)] {:mission (:mission e) :expected-G (:gamma-expected-G e)
+     :enacted (when-let [e (:enactment t)] {:mission (:mission e) :expected-score (:selection-gain-expected-score e)
                                             :boxes (:boxes e) :policy-holes (:policy-holes e)})
-     :realized (when (number? (:realized-G ro))
-                 {:policy (:policy ro) :expected-G (:expected-G ro) :realized-G (:realized-G ro)})
+     :realized (when (number? (:realized-score ro))
+                 {:policy (:policy ro) :expected-score (:expected-score ro) :realized-score (:realized-score ro)})
      :oor-channels (count (filter (fn [[_ v]] (false? (:in-range? v))) chans))
      :n-scored (count (filter #(some? (:G-risk %)) ra))
      :n-placeholder (count (filter #(nil? (:G-risk %)) ra))}))
@@ -92,8 +92,8 @@
      :enactments {:count (count enacted) :missions (frequencies (map :mission enacted))}
      :realized-outcomes {:count (count realized)
                          :mean-abs-error (when (seq realized)
-                                           (/ (reduce + (map #(Math/abs (- (double (:realized-G %))
-                                                                           (double (:expected-G %)))) realized))
+                                           (/ (reduce + (map #(Math/abs (- (double (:realized-score %))
+                                                                           (double (:expected-score %)))) realized))
                                               (count realized)))
                          :samples realized}
      :gamma {:first (first gammas) :last (last gammas)
@@ -200,8 +200,8 @@
        "<h2>Enactments &amp; realized outcomes (expected vs realized ΔG)</h2><table>"
        "<tr><th>mission (policy)</th><th>expected-G</th><th>realized-G</th><th>error</th></tr>"
        (apply str (for [r (get-in s [:realized-outcomes :samples])]
-                    (str "<tr><td>" (h (:policy r)) "</td><td>" (f2 (:expected-G r)) "</td><td>" (f2 (:realized-G r))
-                         "</td><td>" (f2 (- (double (:realized-G r)) (double (:expected-G r)))) "</td></tr>")))
+                    (str "<tr><td>" (h (:policy r)) "</td><td>" (f2 (:expected-score r)) "</td><td>" (f2 (:realized-score r))
+                         "</td><td>" (f2 (- (double (:realized-score r)) (double (:expected-score r)))) "</td></tr>")))
        "</table><p class=muted>mean |expected − realized| = " (f2 (get-in s [:realized-outcomes :mean-abs-error]))
        " nats over " (h (get-in s [:realized-outcomes :count])) " realized samples; γ spanned "
        (f2 (get-in s [:gamma :min])) "–" (f2 (get-in s [:gamma :max])) " over " (h (get-in s [:gamma :max-samples])) " samples.</p>"

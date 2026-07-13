@@ -67,9 +67,9 @@
 (defn actions-with-dg [circ]
   (for [m (:moves circ)]
     (let [sa (or (:source_action m) {:type "unknown"})
-          dg (:delta-g m)]
+          dg (:step-score-delta m)]
       (-> sa
-          (assoc :delta-g (or dg 0.0))
+          (assoc :step-score-delta (or dg 0.0))
           (update :type #(if (string? %) (keyword %) %))
           enrich-action))))
 
@@ -80,7 +80,7 @@
 ;; CANDIDATE SYNTHESIS — close and survey moves with provenance
 ;; =============================================================================
 ;; Close candidates: synthesized from saturated missions (ohc=0) in the SAME freeze.
-;;   :type :close, inherits substrate fields, delta-g = 0.0 (close has no advance delta-g).
+;;   :type :close, inherits substrate fields, step-score-delta = 0.0 (close has no advance step-score-delta).
 ;;   The metric-matrix resolvedness determines close-intensity discrimination.
 ;;
 ;; Survey candidates: synthesized from operator-marked survey-first targets.
@@ -91,7 +91,7 @@
         mm (mm-for target)]
     (-> advance-action
         (assoc :type :close)
-        (assoc :delta-g 0.0)
+        (assoc :step-score-delta 0.0)
         (assoc :synthesized {:from-freeze "same-freeze"
                              :substrate-field :open-hole-count
                              :rationale "ohc=0 saturated mission -> close candidate"
@@ -103,7 +103,7 @@
         mm (mm-for target)]
     (-> advance-action
         (assoc :type :survey)
-        (assoc :delta-g 0.0)
+        (assoc :step-score-delta 0.0)
         (assoc :staleness-days staleness-days)
         (assoc :synthesized {:from-freeze "same-freeze"
                              :substrate-field :open-hole-count
@@ -182,7 +182,7 @@
   (or (:target action) (str "no-op:" (:type action))))
 
 (defn advance-only-score [action]
-  (Math/abs (double (or (:delta-g action) 0.0))))
+  (Math/abs (double (or (:step-score-delta action) 0.0))))
 
 (defn v1-score [action]
   (let [int (mci/intensity action)]

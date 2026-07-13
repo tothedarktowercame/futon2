@@ -18,11 +18,11 @@
   advance-capability (strategic, longer payoff)."
   []
   [{:move/id "close-fast" :move/class :close-hole
-    :have "root" :want "fast-win" :score 1.0 :delta-g -0.3
+    :have "root" :want "fast-win" :score 1.0 :step-score-delta -0.3
     :rank 1 :move/terminal? false}
    {:move/id "advance-cap" :move/class :advance-capability
     :have "root" :want "cap-win" :advances-cap "agency"
-    :score 1.0 :delta-g -0.4
+    :score 1.0 :step-score-delta -0.4
     :rank 2 :move/terminal? false}])
 
 (deftest slow-mode-shifts-fast-loop-priors
@@ -92,7 +92,7 @@
                         :slow-mode nil
                         :horizon 1 :top-k 5)
         direct (rollout/best-rollout state moves :horizon 1 :top-k 5)]
-    (is (= (:G via-hierarchy) (:G direct)))
+    (is (= (:policy-rollout-score via-hierarchy) (:policy-rollout-score direct)))
     (is (= (mapv :move/id (:policy via-hierarchy))
            (mapv :move/id (:policy direct))))))
 

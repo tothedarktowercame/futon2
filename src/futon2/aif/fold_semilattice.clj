@@ -53,7 +53,7 @@
 
 (defn semilattice-fold
   "Impl #3 satisfying `futon2.aif.fold`: (cascade, circumstance) ->
-   {:wiring :delta-g :policy-holes}. `circumstance` carries `:semilattice`
+   {:wiring :coverage-score-delta :policy-holes}. `circumstance` carries `:semilattice`
    and may carry `:want-signature`."
   [cascade circumstance]
   (let [want-sig (or (:want-signature circumstance) fc/default-want-signature)
@@ -63,7 +63,7 @@
         edgeful? (or (seq descent) (seq co-app))]
     (if-not (and (seq patterns) edgeful?)
       (let [wiring (empty-wiring want-sig)]
-        {:wiring wiring :delta-g nil :policy-holes []})
+        {:wiring wiring :coverage-score-delta nil :policy-holes []})
       (let [boxes (mapv (fn [p]
                           {:id (leaf p)
                            :pattern p
@@ -96,5 +96,5 @@
                     :want-signature want-sig
                     :policy-holes policy-holes}]
         {:wiring wiring
-         :delta-g (fe/coverage-delta-g wiring)
+         :coverage-score-delta (fe/coverage-score-delta wiring)
          :policy-holes policy-holes}))))

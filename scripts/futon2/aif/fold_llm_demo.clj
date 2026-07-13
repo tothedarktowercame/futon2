@@ -23,7 +23,7 @@
 ;; ---- THIN case ----------------------------------------------------------
 (def thin-cascade ["f6/self-play-loop"])
 (def thin-circumstance {:mission "M-value-creation-loop" :psi "value creation loop self play"})
-(def thin-delta-F -0.214)   ; real, from cascade-lane (budget 12)
+(def thin-cascade-score -0.214)   ; real, from cascade-lane (budget 12)
 (def thin-turn
   (pr-str
    {:boxes
@@ -49,7 +49,7 @@
 (def rich-cascade ["f6/self-play-loop" "f6/pattern-as-strategy" "f6/q-turnstile-a" "agent/trail-enables-return"])
 (def rich-circumstance {:mission "M-value-creation-loop"
                         :psi "self-play loop asker answerer critic knowledge graph evaluate iterate"})
-(def rich-delta-F 0.707)    ; real, from cascade-lane (fuller psi, budget 20)
+(def rich-cascade-score 0.707)    ; real, from cascade-lane (fuller psi, budget 20)
 (def rich-turn
   (pr-str
    {:boxes
@@ -79,12 +79,12 @@
      {:unfolded-pattern nil :free "question-type taxonomy completeness" :why "q-turnstile-a lists proof/example/counterexample/algorithm; whether 'value-move' is a clean addition is free"}
      {:unfolded-pattern nil :free "the M-f6-eval rubric" :why "the Critic's scoring rubric is still external to the cascade"}]}))
 
-(defn run-case [label cascade circumstance delta-F turn]
+(defn run-case [label cascade circumstance cascade-score turn]
   (let [out  (llm/llm-fold cascade circumstance {:turn-fn (constantly turn) :prose-fn prose-fn})
         clas (fc/classical-fold cascade circumstance)
-        leg  (fold/act-gate-leg out)
-        verdict (cond (or (nil? delta-F) (nil? leg)) :abstain-missing-leg
-                      (and (pos? delta-F) (neg? leg)) :pass
+        leg  (fold/coverage-score-leg out)
+        verdict (cond (or (nil? cascade-score) (nil? leg)) :abstain-missing-leg
+                      (and (pos? cascade-score) (neg? leg)) :pass
                       :else :fail)]
     (println (str "\n================ " label " — M-value-creation-loop ================"))
     (println "CASCADE:" cascade)
@@ -98,14 +98,14 @@
     (println "  valid-fold-output?" (fold/valid-fold-output? out) "| closes?" (fold/closes? out))
     (println (format "  coverage %d boxes / %d holes  ⇒  ΔG = %.4f"
                      (count (get-in out [:wiring :boxes])) (count (:policy-holes out)) (double leg)))
-    (println (format "  ΔF = %+.3f   ΔG = %+.4f   ⇒  GATE: %s" delta-F (double leg) verdict))
+    (println (format "  ΔF = %+.3f   ΔG = %+.4f   ⇒  GATE: %s" cascade-score (double leg) verdict))
     (println (format "  [contrast] impl #1 classical on the SAME cascade: ΔG=%s, boxes=%d ⇒ %s"
-                     (:delta-g clas) (count (get-in clas [:wiring :boxes]))
-                     (if (nil? (:delta-g clas)) ":abstain (rule-table can't fold these)" "")))))
+                     (:coverage-score-delta clas) (count (get-in clas [:wiring :boxes]))
+                     (if (nil? (:coverage-score-delta clas)) ":abstain (rule-table can't fold these)" "")))))
 
 (defn -main [& _]
-  (run-case "THIN (budget 12, ΔF<0)" thin-cascade thin-circumstance thin-delta-F thin-turn)
-  (run-case "RICH (fuller psi, ΔF>0)" rich-cascade rich-circumstance rich-delta-F rich-turn)
+  (run-case "THIN (budget 12, ΔF<0)" thin-cascade thin-circumstance thin-cascade-score thin-turn)
+  (run-case "RICH (fuller psi, ΔF>0)" rich-cascade rich-circumstance rich-cascade-score rich-turn)
   (println (str "\n" (str/join "" (repeat 60 "─")))
            "\nThe fold supplies the ΔG leg the gate was abstaining for. THIN ⇒ :fail"
            "\n(ΔF below the knee — a cascade-richness problem, not a fold problem). RICH"

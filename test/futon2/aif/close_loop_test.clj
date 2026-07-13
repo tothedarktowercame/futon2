@@ -13,44 +13,44 @@
    "devmap-coherence/next-steps-to-done"
    "devmap-coherence/prototype-alignment-role"])
 
-(deftest delta-g-reconciliation
+(deftest step-score-delta-reconciliation
   (testing "rollout-g present ⇒ used directly (the move-set-grounded leg wins)"
-    (let [ag (cl/act-gate-from-lane-entry {:mission "M-x" :F-free-energy 0.3
-                                           :G-rollout -0.7 :shown foldable-shown})]
-      (is (= -0.7 (:delta-G ag)))
-      (is (= :rollout-g-for (:delta-G/source ag)))))
+    (let [ag (cl/act-gate-from-lane-entry {:mission "M-x" :cascade-score 0.3
+                                           :policy-rollout-score -0.7 :shown foldable-shown})]
+      (is (= -0.7 (:coverage-score-delta ag)))
+      (is (= :policy-rollout (:coverage-score/source ag)))))
   (testing "rollout-g nil + a foldable cascade abstains by default after L4"
-    (let [ag (cl/act-gate-from-lane-entry {:mission "M-y" :F-free-energy 0.3
-                                           :G-rollout nil :shown foldable-shown})]
-      (is (nil? (:delta-G ag)))
-      (is (nil? (:delta-G/source ag)))))
+    (let [ag (cl/act-gate-from-lane-entry {:mission "M-y" :cascade-score 0.3
+                                           :policy-rollout-score nil :shown foldable-shown})]
+      (is (nil? (:coverage-score-delta ag)))
+      (is (nil? (:coverage-score/source ag)))))
   (testing "binding the classical flag restores the pre-L4 fold fallback"
-    (binding [cl/*classical-fold-dG?* true]
-      (let [ag (cl/act-gate-from-lane-entry {:mission "M-y" :F-free-energy 0.3
-                                             :G-rollout nil :shown foldable-shown})]
-        (is (number? (:delta-G ag)))
-        (is (neg? (:delta-G ag)))
-        (is (= :fold (:delta-G/source ag))))))
+    (binding [cl/*classical-fold-score?* true]
+      (let [ag (cl/act-gate-from-lane-entry {:mission "M-y" :cascade-score 0.3
+                                             :policy-rollout-score nil :shown foldable-shown})]
+        (is (number? (:coverage-score-delta ag)))
+        (is (neg? (:coverage-score-delta ag)))
+        (is (= :fold (:coverage-score/source ag))))))
   (testing "rollout-g nil + a non-foldable cascade ⇒ ΔG nil ⇒ gate abstains (honest)"
-    (let [ag (cl/act-gate-from-lane-entry {:mission "M-z" :F-free-energy 0.3
-                                           :G-rollout nil :shown ["foreign/a" "foreign/b"]})]
-      (is (nil? (:delta-G ag)))
-      (is (nil? (:delta-G/source ag))))))
+    (let [ag (cl/act-gate-from-lane-entry {:mission "M-z" :cascade-score 0.3
+                                           :policy-rollout-score nil :shown ["foreign/a" "foreign/b"]})]
+      (is (nil? (:coverage-score-delta ag)))
+      (is (nil? (:coverage-score/source ag))))))
 
 (deftest verdicts
   (testing "ΔF>0 and ΔG<0 passes when the pre-L4 fold fallback is explicitly bound"
-    (binding [cl/*classical-fold-dG?* true]
+    (binding [cl/*classical-fold-score?* true]
       (is (= :pass (cl/preview-verdict
-                    (cl/act-gate-from-lane-entry {:mission "M-y" :F-free-energy 0.3
-                                                  :G-rollout nil :shown foldable-shown}))))))
+                    (cl/act-gate-from-lane-entry {:mission "M-y" :cascade-score 0.3
+                                                  :policy-rollout-score nil :shown foldable-shown}))))))
   (testing "ΔG nil ⇒ :abstain-missing-leg (no construction)"
     (is (= :abstain-missing-leg
            (cl/preview-verdict (cl/act-gate-from-lane-entry
-                                {:mission "M-z" :F-free-energy 0.3 :G-rollout nil :shown []})))))
+                                {:mission "M-z" :cascade-score 0.3 :policy-rollout-score nil :shown []})))))
   (testing "ΔF≤0 (cascade not accepted) ⇒ :fail even with a descending ΔG"
-    (is (= :fail (cl/preview-verdict {:delta-F 0.0 :delta-G -0.5}))))
+    (is (= :fail (cl/preview-verdict {:cascade-score 0.0 :coverage-score-delta -0.5}))))
   (testing "the fold's policy-holes are carried for provenance"
-    (let [ag (cl/act-gate-from-lane-entry {:mission "M-y" :F-free-energy 0.3
-                                           :G-rollout nil
+    (let [ag (cl/act-gate-from-lane-entry {:mission "M-y" :cascade-score 0.3
+                                           :policy-rollout-score nil
                                            :shown (conj foldable-shown "foreign/x")})]
       (is (some #(= "foreign/x" (:unfolded-pattern %)) (get-in ag [:fold :policy-holes]))))))

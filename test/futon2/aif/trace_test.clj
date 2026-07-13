@@ -26,19 +26,20 @@
   "Minimal judge-style output covering the trace-record fields."
   {:belief (belief/initial-belief-state [:m1])
    :observation {:loop-health 0.7 :stack-pct 0.2}
-   :free-energy {:G-pragmatic 0.05 :G-epistemic 0.10 :G-total 0.075
+   :free-energy {:preference-gap-score 0.05 :coverage-uncertainty-pressure 0.10 :controller-score 0.075
                  :per-channel {:loop-health {:value 0.7 :gap 0.0 :in-range? false}}
                  :avoided-active []}
+   :variational-free-energy 0.0125
    :ranked-actions [{:action {:type :no-op}
-                     :G-risk 0.05 :G-ambiguity 0.0 :G-structural-pressure 0.0
-                     :G-total 0.05 :rank 1
+                     :G-risk 0.05 :G-ambiguity 0.0 :structural-pressure 0.0
+                     :controller-score 0.05 :rank 1
                      :prediction {:huge :nested :map :that-should-be-stripped}}
                     {:action {:type :address-sorry :target :sorry/x}
-                     :G-risk 0.03 :G-ambiguity 0.015 :G-structural-pressure 0.7
-                     :G-total 0.045 :rank 2
+                     :G-risk 0.03 :G-ambiguity 0.015 :structural-pressure 0.7
+                     :controller-score 0.045 :rank 2
                      :prediction {:also :stripped}}]
    :decision {:action {:type :no-op}
-              :rank 1 :G-total 0.05 :tau 0.2
+              :rank 1 :controller-score 0.05 :tau 0.2
               :softmax-weights {:will-be-stripped :for-trace}}
    :mode :multiplied})
 
@@ -50,6 +51,7 @@
       (is (contains? r :mu-post))
       (is (contains? r :observation))
       (is (contains? r :free-energy))
+      (is (= 0.0125 (:variational-free-energy r)))
       (is (contains? r :ranked-actions))
       (is (contains? r :decision))
       (is (contains? r :mode)))))
@@ -62,7 +64,7 @@
           "trace ranked-actions don't carry :prediction"))
     (let [r (trace/trace-record sample-judge-output)
           rs (:ranked-actions r)]
-      (is (= [0.0 0.7] (mapv :G-structural-pressure rs))
+      (is (= [0.0 0.7] (mapv :structural-pressure rs))
           "trace preserves the structural-pressure term in ranked-actions"))))
 
 (deftest trace-record-strips-softmax-weights-test
@@ -113,32 +115,32 @@
       (is (= :multiplied (:mode r)))
       (is (map? (:observation r))))))
 
-(deftest trace-record-propagates-policy-precision-test
+(deftest trace-record-propagates-selection-gain-test
   (testing "R14 γ-state propagates through trace-record from judge output"
-    (let [gamma-state {:policy-precision 1.6 :error-history [0.2 0.1]
+    (let [gain-state {:selection-gain 1.6 :error-history [0.2 0.1]
                        :mean-error 0.15 :samples 7}
           r (trace/trace-record (assoc sample-judge-output
-                                       :policy-precision gamma-state))]
-      (is (= gamma-state (:policy-precision r)))))
+                                       :selection-gain gain-state))]
+      (is (= gain-state (:selection-gain r)))))
   (testing "absent γ-state reconstructs the prior (γ=1.0), never nil"
     (let [r (trace/trace-record sample-judge-output)]
-      (is (= 1.0 (get-in r [:policy-precision :policy-precision]))
+      (is (= 1.0 (get-in r [:selection-gain :selection-gain]))
           "trace always carries a usable γ-state for the next tick's read-back"))))
 
-(deftest policy-precision-roundtrips-through-trace-test
+(deftest selection-gain-roundtrips-through-trace-test
   (testing "γ-state survives write → read so the next tick continues the window"
-    (let [gamma-state {:policy-precision 0.75 :error-history [0.6 0.7 0.65]
+    (let [gain-state {:selection-gain 0.75 :error-history [0.6 0.7 0.65]
                        :mean-error 0.65 :samples 12}
-          out (assoc sample-judge-output :policy-precision gamma-state)]
+          out (assoc sample-judge-output :selection-gain gain-state)]
       (trace/write-trace! out :dir *tmpdir* :date-str "2026-06-26")
       (let [record (trace/latest-trace-record :dir *tmpdir*
                                               :end-date (LocalDate/parse "2026-06-26")
                                               :lookback-days 1)]
-        (is (= gamma-state (:policy-precision record)))))))
+        (is (= gain-state (:selection-gain record)))))))
 
 (deftest realized-outcome-present-only-passthrough-test
   (testing "R16 :realized-outcome is propagated when the enactor supplies it"
-    (let [outcome {:policy :p/x :expected-G 0.2 :realized-G 0.05 :tick 41}
+    (let [outcome {:policy :p/x :expected-score 0.2 :realized-score 0.05 :tick 41}
           r (trace/trace-record (assoc sample-judge-output :realized-outcome outcome))]
       (is (= outcome (:realized-outcome r)))))
   (testing "absent today (enactment not live-wired) ⇒ key not present (not nil)"
@@ -165,23 +167,37 @@
 ;; ---------------------------------------------------------------------------
 
 (deftest strip-ranked-action-whitelist-test
-  (testing "I4: every term entering :G-total survives the trace strip"
+  (testing "I4: every term entering :controller-score survives the trace strip"
     (let [entry {:action {:type :no-op}
-                 :G-risk 1.0 :G-ambiguity 2.0 :G-info 0.1 :G-survival 0.2
-                 :G-structural-pressure 0.3 :G-goal-outcome 0.4
-                 :G-gap 0.5 :G-graph-pragmatic 0.6 :G-core 3.0
+                 :G-risk 1.0 :G-ambiguity 2.0 :predictability-bonus 0.1 :homeostatic-pressure 0.2
+                 :structural-pressure 0.3 :G-goal-outcome 0.4
+                 :gap-exploration-bonus 0.5 :graph-control-score 0.6 :G-core 3.0
                  :risk-mode :kl :ambiguity-mode :gaussian-entropy
-                 :G-total 7.1 :rank 1
+                 :predictability-control-mode :telemetry-only
+                 :homeostatic-control-mode :telemetry-only
+                 :graph-feasibility-mode :policy-support
+                 :controller-score 7.1 :rank 1
                  :prediction {:dropme true}}
           rec (trace/trace-record {:belief {} :observation {} :free-energy {}
                                    :ranked-actions [entry]
                                    :decision {:action :abstain} :mode :test})
           kept (first (:ranked-actions rec))]
-      (doseq [k [:G-gap :G-graph-pragmatic :G-core :G-goal-outcome :G-total]]
+      (doseq [k [:gap-exploration-bonus :graph-control-score :G-core :G-goal-outcome :controller-score]]
         (is (contains? kept k) (str k " must survive the strip")))
       (is (= :gaussian-entropy (:ambiguity-mode kept))
           "ambiguity-mode provenance survives the strip")
+      (is (= :telemetry-only (:predictability-control-mode kept)))
+      (is (= :telemetry-only (:homeostatic-control-mode kept)))
+      (is (= :policy-support (:graph-feasibility-mode kept)))
       (is (not (contains? kept :prediction)) "the deep :prediction still drops"))))
+
+(deftest policy-support-exclusions-survive-trace-test
+  (let [exclusions [{:action {:type :open-mission :target "M-off-map"}
+                     :reason :mission-absent-from-capability-graph}]
+        rec (trace/trace-record
+             (assoc sample-judge-output :policy-support-exclusions exclusions))]
+    (is (= exclusions (:policy-support-exclusions rec))
+        "the domain restriction is inspectable without replaying the scorer")))
 
 ;; ---------------------------------------------------------------------------
 ;; B-0a (M-aif-faithfulness §2.0) — tick provenance stamp

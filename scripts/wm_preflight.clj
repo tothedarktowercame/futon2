@@ -3,7 +3,7 @@
 
    Answers: if the loop ran over mission M right now, would it actually
    deliberate AND act — or silently no-op? It surfaces the toggles + deposit
-   state that otherwise fail *silently* (γ holds, no error), which is exactly
+   state that otherwise fail *silently* (selection gain holds, no error), which is exactly
    how a fresh-mission run stalls invisibly.
 
    Usage:
@@ -35,7 +35,7 @@
   (println "══ WM readiness preflight (G4) ══")
 
   (println "\n── Deliberation arms (Tier-1, world-inert; change thinking) ──")
-  (doseq [[label v] [["pattern-grain-eig?  (R5/R13 EIG)"  a6/*pattern-grain-eig?*]
+  (doseq [[label v] [["pattern model-uncertainty bonus" a6/*pattern-grain-model-uncertainty?*]
                      ["r3d-multichannel?   (R3d 8-channel)" belief/*r3d-multichannel?*]
                      ["risk-mode           (R5a)"          (or (System/getenv "FUTON_WM_RISK_MODE") ":kl (default)")]
                      ["ambiguity-mode      (R5b)"          (or (System/getenv "FUTON_WM_AMBIGUITY_MODE") ":gaussian-entropy (default)")]]]
@@ -43,15 +43,15 @@
 
   (println "\n── Acting arms (Tier-2; move real dials on a run) ──")
   (let [live-wire   fr/*live-wire?*
-        gamma-feed  fr/*gamma-grounded-feed?*
+        selection-gain-feed fr/*selection-gain-grounded-feed?*
         escrow      cl/*escrow-replay?*
-        classical   cl/*classical-fold-dG?*
+        classical   cl/*classical-fold-score?*
         env-wire    (System/getenv "FUTON_WM_LIVE_WIRE")
         enact-armed (and live-wire escrow (not classical))]
     (doseq [[label v] [["live-wire?          (R16 enactment)"    live-wire]
-                       ["gamma-grounded-feed? (R14 γ substrate dial)" gamma-feed]
+                       ["selection-gain grounded feed (R14)" selection-gain-feed]
                        ["escrow-replay?      (fold replay seam)"  escrow]
-                       ["classical-fold-dG?  (must be OFF)"       classical]]]
+                       ["classical-fold-score?  (must be OFF)"       classical]]]
       (println (format "  %-38s %s" label (onoff v))))
     (when env-wire (println (format "  %-38s %s" "[env] FUTON_WM_LIVE_WIRE" env-wire)))
     (println (format "  → enactment ARMED (live-wire ∧ escrow-replay ∧ ¬classical): %s"

@@ -281,14 +281,17 @@ Verdicts (Joe): F-τ ______ · F-salience ______ · F-sp ______
   correction term (repair per audit #6). NOTE the data gate: γ only moves off 1.0
   when outcome VARIANCE arrives, which is R16-EXEC-REACH's cadence (out of scope,
   §3) — build the estimator now, expect it to idle until reach grows.
-- **B-3c G-info → real EIG or delete** (R5, `efe.clj:256`). Template exists (the
-  futon3c portfolio surface computes a real posterior-entropy EIG). **SEQUENCED
-  AFTER cascade-row handling per IHTB-2** (M-evaluate-policies §MAP): deletion
-  before that hands wins to 0.0 placeholders. Measured 0% flips/674, so no urgency
-  — do it last.
-- **B-3d G-gap → real expected-uncertainty-reduction** (R5, `efe.clj:176`).
-  Currently 6.0 × table lookup; saturation flagged (E-possible-world-regulator).
-  Same epistemic-pole family as B-3c; sequence together.
+- **B-3c model uncertainty → real EIG or delete** (R5, `efe.clj`). The pure,
+  coherence-checked expected-KL kernel is built in `epistemic_value.clj`, but
+  remains unwired because the policy-conditioned observation model and shared
+  simulated/real posterior updater do not yet exist. The earlier futon3c
+  action-posterior entropy is explicitly rejected as a substitute. Mission:
+  `holes/missions/M-aif-policy-conditioned-eig.md`.
+- **B-3d gap lookup → priced epistemic affordance** (R5, `efe.clj`). Currently
+  6.0 × table lookup; saturation flagged (E-possible-world-regulator). A gap may
+  restrict relevant policy support or select a latent question, but cannot be
+  called information gain. Mission:
+  `holes/missions/M-aif-gap-epistemic-affordance.md`.
 - **B-3e W1 predictive KL completion** (R19, `c_vector.clj:406`). IN FLIGHT —
   claude-4 is the named driver; dark twin landed; E7 (post-merge re-census) is the
   named follow-on. This mission TRACKS it, doesn't re-dispatch it.
@@ -338,6 +341,7 @@ turn this mission from weeks into months:
 
 | Who | What | Where |
 |---|---|---|
+| codex | **B1 learned habit prior FLIPPED LIVE by Joe 2026-07-13.** Symmetric-Dirichlet trace-frequency $E(\pi)$, fail-closed joint source/mode wiring, present-only state provenance, deterministic 760-record shadow (323 flips, 0 abstain flips), tests and baseline landed in the shared worktree. Joe simultaneously flipped B-2d to `:selection-gain-only`; R14 remains explicitly engineering selection gain, not variational $\beta$. **B3 pure EIG kernel BUILT, deliberately UNWIRED:** expected posterior/prior KL with Bayes-mixture coherence tests; current action→observation/posterior-simulation data contract remains the blocker. | this doc §2.3 / NOTE-box1-residuals B1–B3 |
 | claude-5 | E-KL-refinements owner; reviews on the KL lane; R5 badge work (Joe, 2026-07-03) | E-KL-refinements (CLOSED with `cd0d25d`) |
 | claude-10 | KL items 1–3 builds (truncation `0f8d5c6`, calibration `22b0024`); **B-0c achievement ledger DONE `61c9b06`, reviewed-PASS claude-12 2026-07-04** (determinism re-verified run1≡run2; independent count re-derivation matched: 41 files / 682 ticks / all decided / 36 enactments; one stale header comment about :risk-mode persistence fixed by reviewer) | this doc §2.0 |
 | claude-4 | W1 driver; Bernoulli round-trip `eb06565`; **D-1e flip DONE `fb15d66`, reviewed-PASS claude-12 2026-07-04** (live-tick stamp pending); E7 re-census follow-on | this doc §2.1 / E-C-vector-live §11–12 |

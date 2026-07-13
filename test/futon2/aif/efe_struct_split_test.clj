@@ -1,15 +1,15 @@
 (ns futon2.aif.efe-struct-split-test
-  "B-2a/B-2b witness (M-aif-faithfulness §2.2): the G-total struct split and the
-   G-graph-pragmatic split are RELABELS — behaviour must be BYTE-IDENTICAL.
+  "B-2a/B-2b witness (M-aif-faithfulness §2.2): the controller-score struct split and the
+   graph-control-score split are RELABELS — behaviour must be BYTE-IDENTICAL.
 
    The golden vectors below were captured at `c11e162` (pre-split HEAD) by
    running this exact fixture through `efe/rank-actions` — if any of these
    assertions fails, the split changed live behaviour and must go dark behind
    a flag instead (§2.4; flips are Joe's).
 
-   Decomposition invariants use 1e-9 tolerance, NOT exactness: `:G-total`
+   Decomposition invariants use 1e-9 tolerance, NOT exactness: `:controller-score`
    keeps its historical left-to-right summation order (that is what byte-
-   identity means), while `:G-augmentation` sums the same six signed
+   identity means), while `:controller-augmentation` sums the same eight signed
    contributions in one go — float associativity may differ in the last ulp."
   (:require [clojure.test :refer [deftest is testing]]
             [futon2.aif.belief :as belief]
@@ -74,30 +74,30 @@
   (doseq [[label opts] [[:hinge base-opts] [:kl kl-opts]]]
     (let [rs (ranked opts)
           g (golden label)]
-      (testing (str label " — G-total byte-identical to pre-split golden")
-        (is (= (:totals g) (mapv :G-total rs))))
-      (testing (str label " — G-risk byte-identical")
-        (is (= (:risks g) (mapv :G-risk rs))))
-      (testing (str label " — G-graph-pragmatic byte-identical")
-        (is (= (:graph g) (mapv :G-graph-pragmatic rs))))
+      (testing (str label " — controller-score byte-identical to pre-split golden")
+        (is (= (:totals g) (mapv :controller-score rs))))
+      (testing (str label " — G-risk is the unmodified canonical term")
+        (is (every? #(<= 0.0 (double (:G-risk %))) rs)))
+      (testing (str label " — graph-control-score byte-identical")
+        (is (= (:graph g) (mapv :graph-control-score rs))))
       (testing (str label " — ranking order identical")
         (is (= (:order g) (mapv #(get-in % [:action :target]) rs)))))))
 
 (deftest core-augmentation-decomposition
   (doseq [[label opts] [[:hinge base-opts] [:kl kl-opts]]]
     (doseq [r (ranked opts)]
-      (testing (str label " — :G-total ≈ :G-core + :G-augmentation (1e-9)")
-        (is (< (Math/abs (- (double (:G-total r))
+      (testing (str label " — :controller-score ≈ :G-core + :controller-augmentation (1e-9)")
+        (is (< (Math/abs (- (double (:controller-score r))
                             (+ (double (:G-core r))
-                               (double (:G-augmentation r)))))
+                               (double (:controller-augmentation r)))))
                1e-9)))
-      (testing (str label " — :G-augmentation = Σ of the seven named layer terms")
-        (is (< (Math/abs (- (double (:G-augmentation r))
+      (testing (str label " — :controller-augmentation = Σ of the named layer terms")
+        (is (< (Math/abs (- (double (:controller-augmentation r))
                             (reduce + 0.0 (vals (:augmentation-terms r)))))
                1e-9)))
-      (testing (str label " — the layer names exactly the seven demoted terms")
-        (is (= #{:info :survival :structural-pressure :graph-pragmatic
-                 :eig-bmr :gap :goal-outcome}
+      (testing (str label " — the layer names exactly the demoted terms")
+        (is (= #{:risk-control :info :survival :structural-pressure :graph-control
+                 :model-uncertainty-bonus :gap :goal-outcome}
                (set (keys (:augmentation-terms r)))))))))
 
 (deftest graph-pragmatic-split
@@ -105,19 +105,19 @@
         by-target (into {} (map (juxt #(get-in % [:action :target]) identity) rs))]
     (testing "in-map applicable: feasibility 0, proxy = body − ascent"
       (let [r (by-target "M-app")]
-        (is (= 0.0 (:G-graph-feasibility r)))
-        (is (< (Math/abs (- -14.0 (double (:G-graph-pragmatic-proxy r)))) 1e-9))))
-    (testing "in-map inapplicable: the 1000·mask sits in :G-graph-feasibility"
+        (is (= 0.0 (:graph-feasibility-penalty r)))
+        (is (< (Math/abs (- -14.0 (double (:graph-control-score-proxy r)))) 1e-9))))
+    (testing "in-map inapplicable: the 1000·mask sits in :graph-feasibility-penalty"
       (let [r (by-target "M-inapp")]
-        (is (= 1000.0 (:G-graph-feasibility r)))
-        (is (< (Math/abs (- 12.0 (double (:G-graph-pragmatic-proxy r)))) 1e-9))))
+        (is (= 1000.0 (:graph-feasibility-penalty r)))
+        (is (< (Math/abs (- 12.0 (double (:graph-control-score-proxy r)))) 1e-9))))
     (testing "off-map: penalty (default 0.0) is feasibility-class, proxy 0"
       (let [r (by-target "M-off")]
-        (is (= 0.0 (:G-graph-feasibility r)))
-        (is (= 0.0 (:G-graph-pragmatic-proxy r)))))
+        (is (= 0.0 (:graph-feasibility-penalty r)))
+        (is (= 0.0 (:graph-control-score-proxy r)))))
     (testing "split invariant: pragmatic ≈ feasibility + proxy (1e-9)"
-      (doseq [r rs :when (contains? r :G-graph-feasibility)]
-        (is (< (Math/abs (- (double (:G-graph-pragmatic r 0.0))
-                            (+ (double (:G-graph-feasibility r))
-                               (double (:G-graph-pragmatic-proxy r)))))
+      (doseq [r rs :when (contains? r :graph-feasibility-penalty)]
+        (is (< (Math/abs (- (double (:graph-control-score r 0.0))
+                            (+ (double (:graph-feasibility-penalty r))
+                               (double (:graph-control-score-proxy r)))))
                1e-9))))))

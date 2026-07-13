@@ -8,15 +8,15 @@
 ;; a CANDIDATE FORMULA SPEC, then reports how the argmin winner moves vs actual.
 ;;
 ;; Persisted-term formula (futon2.aif.efe/compute-efe; see wm_trace_census.bb):
-;;   G-total = G-risk + G-ambiguity - 0.4*G-info + 1.2*G-survival
-;;             - 0.35*G-structural-pressure + G-goal-outcome
-;;             + (G-graph-pragmatic - G-gap)
+;;   controller-score = G-risk + G-ambiguity - 0.4*predictability-bonus + 1.2*homeostatic-pressure
+;;             - 0.35*structural-pressure + G-goal-outcome
+;;             + (graph-control-score - gap-exploration-bonus)
 ;; The last parenthesis is STRIPPED at persist time (trace.clj strip-ranked-action)
-;; and is recoverable only as the RESIDUAL of reconstructing :G-total from the
+;; and is recoverable only as the RESIDUAL of reconstructing :controller-score from the
 ;; persisted terms at default weights. The replay keeps that residual FIXED per
 ;; candidate (it is a forward-model product we cannot re-derive) and varies only
 ;; the weights/inclusion of the persisted terms. Under the default spec the
-;; recomputed total == persisted :G-total exactly (invariant I1, replay-equality),
+;; recomputed total == persisted :controller-score exactly (invariant I1, replay-equality),
 ;; so the default spec flips nothing — the harness's built-in sanity check.
 ;;
 ;; LIMITATION (stated, per §8.7): replay can vary weights/terms over *persisted*
@@ -42,14 +42,14 @@
   {:risk 1.0 :ambiguity 1.0 :info 0.4 :survival 1.2
    :structural-pressure 0.35 :goal-outcome 1.0})
 
-;; Sign each term enters G-total with (info and structural-pressure are subtracted).
+;; Sign each term enters controller-score with (info and structural-pressure are subtracted).
 (def term-sign
   {:risk 1.0 :ambiguity 1.0 :info -1.0 :survival 1.0
    :structural-pressure -1.0 :goal-outcome 1.0})
 
 (def term->g
-  {:risk :G-risk :ambiguity :G-ambiguity :info :G-info :survival :G-survival
-   :structural-pressure :G-structural-pressure :goal-outcome :G-goal-outcome})
+  {:risk :G-risk :ambiguity :G-ambiguity :info :predictability-bonus :survival :homeostatic-pressure
+   :structural-pressure :structural-pressure :goal-outcome :G-goal-outcome})
 
 (def terms (vec (keys term->g)))
 
@@ -67,10 +67,10 @@
               (* (term-sign t) (double (default-weights t)) (term-val e t)))))
 
 (defn residual ^double [e]
-  (- (double (or (:G-total e) 0.0)) (recon-default e)))
+  (- (double (or (:controller-score e) 0.0)) (recon-default e)))
 
 (defn spec-total
-  "Replay G-total for candidate e under `spec`. The fixed hidden-term residual is
+  "Replay controller-score for candidate e under `spec`. The fixed hidden-term residual is
    kept unless :hidden is in :exclude."
   ^double [spec e]
   (let [w  (merge default-weights (:weights spec))
@@ -87,7 +87,7 @@
 
 (defn lane-valid
   "Ranked actions with a real decomposition — drops :apply-cascade placeholder
-   rows (persisted as {:G-total 0.0} with nil :G-risk), which have no scored
+   rows (persisted as {:controller-score 0.0} with nil :G-risk), which have no scored
    terms and must never win a replay."
   [tick]
   (vec (filter #(some? (:G-risk %)) (:ranked-actions tick))))
@@ -95,7 +95,7 @@
 (defn tick-replay [spec tick]
   (let [ra (lane-valid tick)]
     (when (seq ra)
-      (let [actual (winner-idx (mapv #(double (or (:G-total %) 0.0)) ra))
+      (let [actual (winner-idx (mapv #(double (or (:controller-score %) 0.0)) ra))
             specw  (winner-idx (mapv #(spec-total spec %) ra))]
         {:actual-type (get-in ra [actual :action :type])
          :spec-type   (get-in ra [specw :action :type])

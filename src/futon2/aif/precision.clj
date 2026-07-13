@@ -1,15 +1,13 @@
 (ns futon2.aif.precision
   "Adaptive precision tracking for the WM AIF apparatus (R7).
 
-   Maintains per-channel precision Π updated over time. v0.13 combines two
-   components, ported from the AIF traditions reconciled across the two
-   reference implementations:
+   Maintains per-channel precision Π updated over time:
 
-     Π = variance-component + need-component (bounded by tau-floor/tau-cap)
+     Π = 1 / max(regularized prediction-error variance, min-variance)
 
-     variance-component = 1 / max(rolling-variance, min-variance)
-       — standard Bayesian/AIF precision, sourced from prediction-error
-         history (v0.12 was variance-component-only).
+   The variance estimate is the posterior mean squared prediction error under
+   a weak variance prior. Unlike raw sample variance, it does not declare
+   certainty after one sample or after a stream of identical biased errors.
 
      need-component = need-scale × max(0, channel-gap-from-preference-range)
        — ants-style need-modulated precision (per
@@ -35,32 +33,17 @@
    §'Patterns worth porting' #1 (the cyberants `modulate-precisions`
    pattern is the structural source for the need-component term).
 
-   HONESTY (R18 badge discipline; M-aif-faithfulness B-2c): only the
-   variance leg 1/max(var,ε) is canonical AIF precision (inverse expected
-   uncertainty of the channel's error stream). The summed-in need term is
-   an AFFECT/SALIENCE modulation — attention allocated by preference gap,
-   not by uncertainty — wearing precision's name in the v0.13 sum. B-2c
-   builds the separation DARK behind `:salience-mode`:
-
-     :summed   (DEFAULT, live) — Π = variance-component + need-component,
-               byte-identical to v0.13 (witness:
-               test/resources/goldens/r7_default_path_witness.edn).
-     :separate (dark)          — Π = bounded variance-component ONLY; the
-               need term is reported under the named `:salience` key
-               (and retained as `:need-component` for readers), never
-               summed into Π.
-
-   The arena resolves the flag via `arena-salience-mode` in
-   `scripts/futon2/report/war_machine.clj` (`FUTON_WM_SALIENCE_MODE=separate`
-   turns the dark path ON; unset/other = `:summed`). The production flip is
-   Joe's, recorded in the M-aif-faithfulness §2.1 verdict ledger — not
-   claimed here."
+   Preference-gap need remains available as a separately named `:salience`
+   signal. It is never summed into production Π. `:salience-mode :summed`
+   exists only to make historical experiments explicit."
   (:require [futon2.aif.belief :as belief]
             [futon2.aif.preferences :as pref]))
 
 (def default-window-size 20)
 (def default-min-variance 0.01)
 (def default-initial-precision 1.0)
+(def default-prior-variance 1.0)
+(def default-prior-strength 1.0)
 
 ;; v0.13: ants-style bounds and need-component scaling.
 ;; tau-floor / tau-cap ported from ants/aif/affect.clj defaults
@@ -70,22 +53,23 @@
 (def default-precision-floor 0.1)
 (def default-precision-cap 200.0)
 
-;; B-2c (M-aif-faithfulness §2.2): how the need term relates to Π.
-;; :summed = v0.13 behaviour (need term added into Π) — the live default.
-;; :separate = dark path: Π keeps only the canonical variance leg; the need
-;; term travels under the named :salience key. Flip is Joe's (§2.1 ledger).
-(def default-salience-mode :summed)
+;; :summed names the historical experiment that added need to Π.
+;; Production/default :separate keeps need under the named :salience key.
+(def default-salience-mode :separate)
 
-(defn- variance
-  "Sample variance of a sequence of numbers. Returns 0.0 for sequences
-   of length 0 or 1."
-  [xs]
-  (let [n (count xs)]
-    (if (< n 2)
-      0.0
-      (let [mean (/ (reduce + xs) (double n))
-            sq-devs (map #(let [d (- % mean)] (* d d)) xs)]
-        (/ (reduce + sq-devs) (double n))))))
+(defn- regularized-error-variance
+  "Posterior mean squared prediction error under a variance prior.
+   Prediction errors are centred on their model-implied target, zero, so a
+   constant non-zero residual remains evidence of imprecision rather than
+   being erased by centring around its own sample mean."
+  [xs prior-variance prior-strength]
+  (when-not (and (pos? prior-variance) (pos? prior-strength))
+    (throw (ex-info "precision variance prior must be positive"
+                    {:prior-variance prior-variance
+                     :prior-strength prior-strength})))
+  (/ (+ (* (double prior-strength) (double prior-variance))
+        (reduce + 0.0 (map #(* (double %) (double %)) xs)))
+     (+ (double prior-strength) (double (count xs)))))
 
 (defn initial-precision-state
   "Construct an initial precision state covering every channel in
@@ -119,16 +103,19 @@
 (defn- update-channel-precision
   "Apply one new (error, observed) to a single channel's precision-state.
 
-   :salience-mode :summed (default) — v0.13 behaviour: Π = bounded
+   :salience-mode :summed — historical v0.13 behaviour: Π = bounded
    (variance-component + need-component). Output map byte-identical to
    pre-B-2c code.
-   :salience-mode :separate (dark) — Π = bounded variance-component only;
+   :salience-mode :separate (default) — Π = bounded variance-component only;
    the need term is emitted under the named `:salience` key (kept under
    `:need-component` too, so cross-mode readers see one schema for it)."
   [channel-id channel-state new-error observed
-   & {:keys [window-size min-variance need-scale floor cap salience-mode]
+   & {:keys [window-size min-variance prior-variance prior-strength
+             need-scale floor cap salience-mode]
       :or {window-size default-window-size
            min-variance default-min-variance
+           prior-variance default-prior-variance
+           prior-strength default-prior-strength
            need-scale default-need-scale
            floor default-precision-floor
            cap default-precision-cap
@@ -138,7 +125,7 @@
         bounded (if (> (count appended) window-size)
                   (vec (subvec appended (- (count appended) window-size)))
                   (vec appended))
-        v (variance bounded)
+        v (regularized-error-variance bounded prior-variance prior-strength)
         variance-component (/ 1.0 (max v min-variance))
         need-component (need-component-for channel-id observed need-scale)]
     (case salience-mode
@@ -161,10 +148,10 @@
   "Given previous precision-state (map of channel-id → channel-state) and
    a prediction-errors map (channel-id → error-map carrying `:error` and
    `:observed`), return updated precision-state. v0.13 each channel's
-   precision is recomputed as `variance-component + need-component`,
-   bounded by precision-floor/cap. B-2c: pass `{:salience-mode :separate}`
-   in opts for the dark path (canonical variance-only Π + named
-   `:salience`); omitted/`:summed` = v0.13 behaviour, byte-identical.
+   precision is recomputed from inverse rolling error variance, bounded by
+   precision-floor/cap. The preference-gap term is emitted separately as
+   `:salience`; it is never part of production precision. Pass the explicit
+   historical `{:salience-mode :summed}` only in regression tests.
 
    Channels in errors-map without a previous state entry are initialised
    from defaults; channels in previous state without a new error are

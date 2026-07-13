@@ -6,27 +6,16 @@
             [futon2.aif.a4a-substrate :as a4a-substrate]
             [futon2.aif.actuator-a3 :as a3]
             [futon2.aif.efe :as efe]
-            [futon2.aif.operational-witness :as ow])
+            [futon2.aif.operational-witness :as ow]
+            [futon2.aif.substrate :as substrate])
   (:import (java.time Instant)
            (java.util Date)))
 
-(def ^:dynamic *pattern-grain-eig?*
-  "Operator arm for pattern-grain constellation EIG in A6 ranking.
-   Default true: R13 pattern-grain EIG is armed. Explicit
-   :pattern-grain-eig? opts override this var."
+(def ^:dynamic *pattern-grain-model-uncertainty?*
+  "Operator arm for the pattern-grain posterior-spread controller bonus.
+   This is model uncertainty, not expected information gain. Explicit
+   :pattern-grain-model-uncertainty? opts override this var."
   true)
-
-(defn- q-form
-  [query & args]
-  (pr-str `(do
-             (require (quote xtdb.api))
-             (xtdb.api/q (xtdb.api/db (:node @futon3c.dev/!f1-sys))
-                         (quote ~query)
-                         ~@args))))
-
-(defn- q
-  [query opts & args]
-  (a3/drawbridge-eval (apply q-form query args) opts))
 
 (defn status-id
   [star-id]
@@ -45,11 +34,11 @@
 
 (defn discharge-capability-rows
   [opts]
-  (let [rows (q '{:find [d cap]
-                  :where [[d :entity/type :discharge]
-                          [d :discharge/type :capability]
-                          [d :discharge/endpoint cap]]}
-                opts)
+  (let [rows (for [raw (substrate/entities-by-type :discharge opts)
+                   :let [doc (merge raw (:entity/props raw))]
+                   :when (= :capability (:discharge/type doc))]
+               [(or (:entity/id doc) (:xt/id doc) (:id doc))
+                (:discharge/endpoint doc)])
         allowed (:capability-filter opts)]
     (->> rows
          (map (fn [[d cap]] {:discharge d :capability cap}))
@@ -59,12 +48,10 @@
 
 (defn stars-for-capability
   [capability opts]
-  (->> (q '{:find [star]
-            :in [cap]
-            :where [[star :entity/type :capability-star]
-                    [star :star/capability cap]]}
-          opts capability)
-       (map first)
+  (->> (substrate/entities-by-type :capability-star opts)
+       (map #(merge % (:entity/props %)))
+       (filter #(= capability (:star/capability %)))
+       (map #(or (:entity/id %) (:xt/id %) (:id %)))
        vec))
 
 (defn write-status!
@@ -98,16 +85,21 @@
 
 (defn status-rows
   [opts]
-  (let [allowed (:capability-filter opts)]
-    (->> (q '{:find [status star cap]
-              :where [[status :entity/type :capability-star-status]
-                      [status :status/status :satisfied]
-                      [status :status/star star]
-                      [star :entity/type :capability-star]
-                      [star :star/capability cap]]}
-            opts)
-         (map (fn [[status star cap]]
-                {:status status :star star :capability cap}))
+  (let [allowed (:capability-filter opts)
+        stars (into {}
+                    (map (fn [raw]
+                           (let [doc (merge raw (:entity/props raw))]
+                             [(or (:entity/id doc) (:xt/id doc) (:id doc))
+                              (:star/capability doc)])))
+                    (substrate/entities-by-type :capability-star opts))]
+    (->> (substrate/entities-by-type :capability-star-status opts)
+         (map #(merge % (:entity/props %)))
+         (filter #(= :satisfied (:status/status %)))
+         (keep (fn [doc]
+                 (let [status (or (:entity/id doc) (:xt/id doc) (:id doc))
+                       star (:status/star doc)
+                       cap (get stars star)]
+                   (when cap {:status status :star star :capability cap}))))
          (filter (fn [{:keys [capability]}]
                    (or (nil? allowed) (contains? allowed capability))))
          vec)))
@@ -122,17 +114,17 @@
            capability-graph
            (status-rows opts))))
 
-(defn- pattern-grain-eig-enabled?
+(defn- pattern-grain-model-uncertainty-enabled?
   [opts]
-  (if (contains? (or opts {}) :pattern-grain-eig?)
-    (:pattern-grain-eig? opts)
-    *pattern-grain-eig?*))
+  (if (contains? (or opts {}) :pattern-grain-model-uncertainty?)
+    (:pattern-grain-model-uncertainty? opts)
+    *pattern-grain-model-uncertainty?*))
 
-(defn- with-pattern-grain-eig
+(defn- with-pattern-grain-model-uncertainty
   [rank-opts opts]
-  (if (and (pattern-grain-eig-enabled? opts)
-           (not (:eig-fn rank-opts)))
-    (assoc rank-opts :eig-fn (:eig-fn (a4a-substrate/load-pattern-grain-eig opts)))
+  (if (and (pattern-grain-model-uncertainty-enabled? opts)
+           (not (:model-uncertainty-fn rank-opts)))
+    (assoc rank-opts :model-uncertainty-fn (:model-uncertainty-fn (a4a-substrate/load-pattern-grain-model-uncertainty opts)))
     rank-opts))
 
 (defn rank-with-star-status
@@ -140,7 +132,7 @@
   (efe/rank-star-map-actions
    state
    candidate-actions
-   (with-pattern-grain-eig
+   (with-pattern-grain-model-uncertainty
      (merge {:capability-graph (apply-star-status capability-graph opts)
              :graph-ascent-status-aware? true}
             opts)
@@ -165,7 +157,7 @@
      (efe/rank-star-map-actions
       (or (:state opts) {:observation {} :belief {}})
       (or (:candidate-actions opts) (open-mission-actions graph))
-      (with-pattern-grain-eig
+      (with-pattern-grain-model-uncertainty
         (assoc rank-opts :capability-graph graph)
         opts)))))
 

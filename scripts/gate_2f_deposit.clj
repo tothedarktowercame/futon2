@@ -1,7 +1,7 @@
 ;; gate_2f_deposit.clj — E-live-loop-2 gate 2f (standing evidence check).
 ;; PASS iff every ft-*.edn in the real escrow dir:
 ;;   (a) loads with ZERO rejections (pins 2+3 run inside load-deposits:
-;;       arming record present + stored ΔG == coverage-delta-g recomputed);
+;;       arming record present + stored ΔG == coverage-score-delta recomputed);
 ;;   (b) sha-MATCHES: the prompt REBUILT from the record's own cascade
 ;;       pattern-ids + circumstance {:mission :psi} + the verbatim flexiarg
 ;;       prose files hashes to the stored :prompt :sha256 (pin 1) — so the
@@ -40,7 +40,7 @@
           (System/exit 1))
         (println (format "  %s: sha-match + replay + dG re-assert OK (dG %s; arming word %s)"
                          (:fold-turn/id d)
-                         (get-in d [:eval :delta-g])
+                         (get-in d [:eval :coverage-score-delta])
                          (pr-str (subs (get-in d [:arming :word]) 0
                                        (min 40 (count (get-in d [:arming :word])))))))))
     (println "GATE 2f PASS —" (count deposits) "deposit(s) load cleanly, sha-matched, replayable")

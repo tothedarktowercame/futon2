@@ -62,7 +62,7 @@
 ;;             psi-sha b9c15315... (deposit 004)
 ;;
 ;; The constructor is a Python process (futon3a .venv). We shell out to
-;; cascade_serve.py and parse its JSON. The F-free-energy has minor run-to-run
+;; cascade_serve.py and parse its JSON. The cascade-score has minor run-to-run
 ;; drift from the embedding model; tolerance 0.001 on peradam (stable, small),
 ;; 0.5 on aif-head (larger cascade, more drift surface — the logged 8.722 vs
 ;; live 8.862 is within this band; the STRUCTURAL facts — size, truncation,
@@ -95,7 +95,7 @@
     (if-not peradam
       (check! "1a: constructor peradam cascade" false "no JSON from constructor")
       (let [size (:size peradam)
-            f (:F-free-energy peradam)
+            f (:cascade-score peradam)
             top-pat (get-in peradam [:shown 0 :pattern])
             top-rel (get-in peradam [:shown 0 :rel])]
         (check! "1a: constructor peradam cascade"
@@ -110,7 +110,7 @@
     (if-not aif-head
       (check! "1b: constructor aif-head cascade" false "no JSON from constructor")
       (let [size (:size aif-head)
-            f (:F-free-energy aif-head)
+            f (:cascade-score aif-head)
             top-pat (get-in aif-head [:shown 0 :pattern])
             top-rel (get-in aif-head [:shown 0 :rel])
             trunc (:truncated aif-head)]
@@ -184,21 +184,21 @@
             (format "%d deposits, %d rejected (ref: 8 / 0)"
                     (count deposits) (count rejected))))
   ;; 3b: one synthetic tamper => named rejection
-  ;; We tamper a COPY: take deposit 001, corrupt its delta-g, write to a temp
+  ;; We tamper a COPY: take deposit 001, corrupt its coverage-score-delta, write to a temp
   ;; file in a temp dir alongside a valid deposit, and load from that dir.
   (let [tmp-dir (str (System/getProperty "java.io.tmpdir") "/ref-regression-escrow-" (System/currentTimeMillis))
         _ (.mkdirs (io/file tmp-dir))
         ;; copy a valid deposit
         valid-src "/home/joe/code/futon6/data/fold-turns/ft-autoclock-in-001.edn"
         valid-d (edn/read-string (slurp valid-src))
-        ;; tamper: change stored delta-g so pin 3 (delta-g-mismatch) fires
-        tampered-d (assoc-in valid-d [:eval :delta-g] -0.999)
+        ;; tamper: change stored coverage-score-delta so pin 3 (coverage-score-delta-mismatch) fires
+        tampered-d (assoc-in valid-d [:eval :coverage-score-delta] -0.999)
         _ (spit (io/file tmp-dir "ft-tamper-test.edn") (pr-str tampered-d))
         {:keys [rejected]} (esc/load-deposits tmp-dir)
         tamper-rej (first (filter #(str/ends-with? (:file %) "ft-tamper-test.edn") rejected))]
     (check! "3b: escrow synthetic tamper rejected"
             (and (some? tamper-rej)
-                 (= :delta-g-mismatch (:reason tamper-rej)))
+                 (= :coverage-score-delta-mismatch (:reason tamper-rej)))
             (format "tamper rejection: %s (reason: %s)"
                     (:file tamper-rej) (:reason tamper-rej)))
     ;; cleanup

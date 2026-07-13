@@ -10,7 +10,7 @@ Real computations: each cascade is (re)constructed by the PRODUCTION
 constructor (futon3a cascade_serve.py — phylogeny-greedy, coverage-saturated,
 budget 6), using the PRODUCTION psi recipe (cascade_lane.clj mission->psi:
 "<stem> — want: <title[:160]>. have: <status[:160]>"). Arena facts (placeholder
-G-total 0.0, 0 wins, tick winners) come from the wm-trace corpus census
+controller-score 0.0, 0 wins, tick winners) come from the wm-trace corpus census
 (q1/q2 artifacts, 674 ticks).
 
 Outputs (holes/labs/M-evaluate-policies/exhibit/):
@@ -161,7 +161,7 @@ def main():
         name = f"cascade-{i}-{sub['target']}"
         make_dot(name, r["shown"], phylo)
         results.append({**sub, "psi": psi, "doc": doc, "serve": r, "img": f"{name}.png"})
-        print(f"  size {r['size']} wholeness {r['wholeness']} F {r['F-free-energy']}")
+        print(f"  size {r['size']} wholeness {r['wholeness']} F {r['cascade-score']}")
 
     md = [
         "---",
@@ -191,7 +191,7 @@ def main():
         "",
         "**The four senses** — (i) the canonical quantity, risk + ambiguity in nats;",
         "(ii) the design tradition (pragmatic/epistemic decomposition as a generative shape);",
-        "(iii) the deployed 8-term blend `G-total`; (iv) the per-step cost field g(s) of the",
+        "(iii) the deployed 8-term blend `controller-score`; (iv) the per-step cost field g(s) of the",
         "futon6 diagrams (the integrand, not the path quantity).",
         "",
         "*Method: each cascade below is (re)constructed by the production constructor",
@@ -207,7 +207,7 @@ def main():
     ]
     for i, r in enumerate(results, 1):
         s = r["serve"]
-        F = s["F-free-energy"]
+        F = s["cascade-score"]
         md += [
             f"\\newpage",
             f"## Cascade {i}: `{r['target']}`",
@@ -226,7 +226,7 @@ def main():
             f"| accuracy (ψ-coverage) | {fmt(s['accuracy'])} | ψ | constructor, real |",
             f"| complexity (−log prior mass) | {fmt(s['complexity'])} | corpus base-rates — unsituated | constructor, real |",
             f"| **F = accuracy − {LAMBDA}·complexity** | **{fmt(F)}** | mixed: situated − unsituated | constructor, real |",
-            f"| blend G-total (sense iii) | **not computed** — arena rows carry placeholder 0.0 | (would: live observation vector) | `war_machine.clj:3797` `(or dG 0.0)` |",
+            f"| blend controller-score (sense iii) | **not computed** — arena rows carry placeholder 0.0 | (would: live observation vector) | `war_machine.clj:3797` `(or dG 0.0)` |",
             f"| rollout ΔG(π) | **abstained** — mission outside the v2 move-set | v2 move-set + capability overlay — not the tick's observation | cascade-lane seam 2 |",
             f"| canonical core G = risk + ambiguity (sense i) | **not defined for cascades** | (would: live observation vector) | `compute-efe` |",
         ]
@@ -235,7 +235,7 @@ def main():
             md += [
                 "",
                 f"**Selection consequence (real tick {ts}):** this cascade sat in the arena at",
-                f"0.0 and lost to `{wname}` (blend G-total {wg}; its canonical core {wcore}).",
+                f"0.0 and lost to `{wname}` (blend controller-score {wg}; its canonical core {wcore}).",
                 f"It has never won in {'146' if i==1 else '147'} appearances. Under the blend it loses on a",
                 "placeholder; under wholeness/F it isn't even ranked against actions; under the",
                 "canonical core it has no score at all. **Three currencies, no exchange rate.**",
@@ -264,7 +264,7 @@ def main():
             "",
             "A cascade is only a *policy* if it folds into a construction: a wiring of concrete",
             "steps with typed holes for what it cannot ground (`futon2.aif.fold`:",
-            "`fold : (cascade, circumstance) → {:wiring :delta-g :policy-holes}`). We ran the",
+            "`fold : (cascade, circumstance) → {:wiring :step-score-delta :policy-holes}`). We ran the",
             "**LLM-turn fold (impl #2)** over Cascade 3 — the recorded agent turn is",
             "`fold-turn.edn`; the shared coverage→rollout evaluation gives **ΔG = −0.750**",
             f"(coverage 6/8 = {fold['coverage']}). The act-gate's two legs are now both real for",
@@ -331,13 +331,13 @@ def main():
         "|---|---|---|---|",
         "| G-risk (analogical) | $D_{KL}[Q(o\\mid\\pi)\\,\\|\\,C]$ | $\\sum_{ch} w_{ch}\\,\\mathrm{hinge}(\\hat\\mu_{ch})\\cdot u\\,-\\,\\mathrm{intr.}$ | L1 hinge on a point estimate; agrees near the zero-set, no distribution/log/tails |",
         "| G-ambiguity (principled-approx) | $\\mathbb{E}_{Q(s\\mid\\pi)}[H[P(o\\mid s)]]$ | $\\sum_{ch}\\sigma^2_{ch}$ | monotone Gaussian-entropy proxy; one repair ($\\tfrac12\\ln 2\\pi e\\sigma^2$) from canonical; measured influence 0% |",
-        "| G-info (analogical) | $\\mathbb{E}_{Q(o\\mid\\pi)}[D_{KL}[Q(s\\mid o,\\pi)\\|Q(s\\mid\\pi)]]$ | $\\sum_{ch}\\max(0,1-\\sigma^2_{ch}) = N - \\sum\\sigma^2$ | affine complement of ambiguity, not an information gain; measured influence 0% |",
-        "| G-survival (analogical) | — (no canonical G-term: set-points live **inside** $C$) | second hinge over 4 channels $\\times\\,1.2\\,\\times u$ | a fragment of risk under a $C$ the code doesn't have; flips 47.9% |",
-        "| G-structural-pressure (analogical) | — (closest seat: the habit/prior term $\\ln E(\\pi)$) | injected scalar $\\times\\,0.35$ inside $G$ | exogenous weight projected into the wrong slot; flips 44.5% |",
-        "| G-graph-pragmatic (analogical) | pragmatic value $-\\mathbb{E}_Q[\\ln C(o)]$; feasibility = the menu $\\Pi_{feasible}$ | $1000\\cdot[\\lnot applicable] + 3\\cdot holes - 20\\cdot ascent$ | a domain restriction smuggled in as a value; stripped from traces |",
-        "| G-gap (analogical) | expected uncertainty reduction (EIG fragment) | $6.0 \\times$ gap-score lookup | scaled lookup, no expectation; stripped from traces |",
+        "| predictability-bonus (analogical) | $\\mathbb{E}_{Q(o\\mid\\pi)}[D_{KL}[Q(s\\mid o,\\pi)\\|Q(s\\mid\\pi)]]$ | $\\sum_{ch}\\max(0,1-\\sigma^2_{ch}) = N - \\sum\\sigma^2$ | affine complement of ambiguity, not an information gain; measured influence 0% |",
+        "| homeostatic-pressure (analogical) | — (no canonical G-term: set-points live **inside** $C$) | second hinge over 4 channels $\\times\\,1.2\\,\\times u$ | a fragment of risk under a $C$ the code doesn't have; flips 47.9% |",
+        "| structural-pressure (analogical) | — (closest seat: the habit/prior term $\\ln E(\\pi)$) | injected scalar $\\times\\,0.35$ inside $G$ | exogenous weight projected into the wrong slot; flips 44.5% |",
+        "| graph-control-score (analogical) | pragmatic value $-\\mathbb{E}_Q[\\ln C(o)]$; feasibility = the menu $\\Pi_{feasible}$ | $1000\\cdot[\\lnot applicable] + 3\\cdot holes - 20\\cdot ascent$ | a domain restriction smuggled in as a value; stripped from traces |",
+        "| gap-exploration-bonus (analogical) | expected uncertainty reduction (EIG fragment) | $6.0 \\times$ gap-score lookup | scaled lookup, no expectation; stripped from traces |",
         "| G-goal-outcome (analogical, R19) | fragment of $D_{KL}[Q(o\\mid\\pi)\\|C]$ | weighted deterministic flip ($p=1$) | belongs inside distributional risk once D5a exists |",
-        "| G-total (analogical) | $G(\\pi)$ — one functional, nats | $\\sum$ 9 incommensurate terms, hand weights | multi-objective blend with an EFE-shaped core |",
+        "| controller-score (analogical) | $G(\\pi)$ — one functional, nats | $\\sum$ 9 incommensurate terms, hand weights | multi-objective blend with an EFE-shaped core |",
         "| $\\gamma$, softmax (principled-approx) | $P(\\pi)=\\sigma(-\\gamma G)$, $\\gamma$ from $\\mathbb{E}[G]$ | faithful softmax; $\\gamma$ learns from realized performance; $\\tau$-spread layer non-canonical | the honest corner (R14) |",
         "| cascade F (principled-approx) | $-F$ (ELBO): $\\mathbb{E}_Q[\\ln P(o\\mid s)] - D_{KL}[Q\\|P]$ | $\\mathrm{accuracy} - 0.25\\cdot\\mathrm{complexity}$ | right shape, fitted $\\lambda$, not nats; never enters $G$ |",
         "| fold $\\Delta G$ | rollout $G(\\pi)$ of a discharge policy | $\\gamma^0\\cdot(-\\mathrm{coverage})$ | path-integral in shape; coverage is not in nats |",
@@ -371,9 +371,9 @@ def main():
     for i, r in enumerate(results, 1):
         s = r["serve"]
         md.append(f"| {i}. {r['target']} | {s['size']} | {fmt(s['wholeness'])} | "
-                  f"{fmt(s['F-free-energy'])} | 0.0 (placeholder) | — |")
+                  f"{fmt(s['cascade-score'])} | 0.0 (placeholder) | — |")
     wh_order = sorted(range(3), key=lambda k: -results[k]["serve"]["wholeness"])
-    f_order = sorted(range(3), key=lambda k: -results[k]["serve"]["F-free-energy"])
+    f_order = sorted(range(3), key=lambda k: -results[k]["serve"]["cascade-score"])
     agree = wh_order == f_order
     md += [
         "",

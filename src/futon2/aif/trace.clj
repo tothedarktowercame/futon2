@@ -25,10 +25,11 @@
                           :mu-pre prior (reconciled to the new entity domain)
                           when belief/*carry-belief?* is on>
       :observation      <obs channel map>
-      :free-energy      {:G-pragmatic :G-epistemic :G-total
+      :free-energy      {:preference-gap-score :coverage-uncertainty-pressure :controller-score
                           :per-channel :avoided-active}
-      :ranked-actions   [{:action :G-risk :G-ambiguity :G-total :rank}]
-      :decision         {:action :rank? :G-total? :tau? :reason?
+      :variational-free-energy <F = 1/2 mean(precision * error^2)>
+      :ranked-actions   [{:action :G-risk :G-ambiguity :controller-score :rank}]
+      :decision         {:action :rank? :controller-score? :tau? :reason?
                           :gap-report? ...}
       :mode             <strategic-mode keyword>}
 
@@ -45,7 +46,7 @@
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.string :as str]
-            [futon2.aif.policy-precision :as policy-precision])
+            [futon2.aif.selection-gain :as selection-gain])
   (:import (java.io PushbackReader)
            (java.time Instant LocalDate ZoneId)
            (java.time.format DateTimeFormatter)))
@@ -72,16 +73,16 @@
   "Compact a ranked-action entry for trace — keep the EFE summary plus
    the action, drop the deeply-nested :prediction (recoverable on
    demand by re-running forward-model/predict). v0.13 added
-   `:G-info` + `:G-survival`; v0.14 added `:time-pressure`; v0.15
-   added `:horizon-steps`; v0.20 adds `:G-structural-pressure`."
+   `:predictability-bonus` + `:homeostatic-pressure`; v0.14 added `:time-pressure`; v0.15
+   added `:horizon-steps`; v0.20 adds `:structural-pressure`."
   [r]
   ;; :G-goal-outcome (R19, 2026-07-02): the belly's predictive-risk term was
   ;; computed per action but STRIPPED here — so no flight could show the belly
   ;; steering. Persist it: the R19 analog of R16's :act-gate-verdicts audit.
-  ;; :G-gap :G-graph-pragmatic :G-core (M-evaluate-policies D1a/D2, 2026-07-03):
-  ;; same fix, same reason — these terms ENTER :G-total but were stripped, so
+  ;; :gap-exploration-bonus :graph-control-score :G-core (M-evaluate-policies D1a/D2, 2026-07-03):
+  ;; same fix, same reason — these terms ENTER :controller-score but were stripped, so
   ;; recomputing the total from persisted terms carried a hidden residual
-  ;; (census: mean-abs 0.324). Whitelist ⊇ terms entering :G-total (invariant I4).
+  ;; (census: mean-abs 0.324). Whitelist ⊇ terms entering :controller-score (invariant I4).
   ;; :score-provenance (D1b follow-up, same day): the cascade-row marker was
   ;; attached in war_machine.clj but stripped HERE — the D1a spec omitted it
   ;; from the whitelist (caught by the live post-deploy I-check: markers nil in
@@ -91,31 +92,33 @@
   ;; emitted becomes a silent spec gap later.
   ;; :ambiguity-mode (D5c, 2026-07-08): same provenance rule for the dark/live
   ;; nats ambiguity lane. If :G-ambiguity is gaussian entropy, the trace says so.
-  ;; :G-augmentation :augmentation-terms :G-graph-feasibility
-  ;; :G-graph-pragmatic-proxy (B-2a/B-2b struct split, 2026-07-04): the named
+  ;; :controller-augmentation :augmentation-terms :graph-feasibility-penalty
+  ;; :graph-control-score-proxy (B-2a/B-2b struct split, 2026-07-04): the named
   ;; multi-objective layer + the mask/value split of the graph term —
   ;; whitelisted AT BIRTH (same lesson); values are relabels of quantities
-  ;; already entering :G-total, so I4 (whitelist ⊇ terms entering :G-total)
+  ;; already entering :controller-score, so I4 (whitelist ⊇ terms entering :controller-score)
   ;; is preserved and the persisted-total residual stays 0.
   ;; :structural-pressure-mode :habit-prior-bias (D-1d dark build, 2026-07-04):
   ;; where structural pressure sits (always emitted, self-describing like
   ;; :risk-mode) + the relocated term's ln-E bias (dark mode only) —
   ;; whitelisted AT BIRTH.
-  ;; :move-class-intensity-mode :G-move-class-intensity :move-class-intensity
+  ;; :move-class-intensity-mode :move-class-intensity-contribution :move-class-intensity
   ;; (M-action-vocabulary P2 dark build, 2026-07-05): same birth rule. If the
-  ;; dark term enters :G-total, the trace must carry both the signed G
+  ;; dark term enters :controller-score, the trace must carry both the signed G
   ;; contribution and the conditioning bundle that produced it.
-  (select-keys r [:action :G-risk :G-ambiguity :G-info :G-survival
-                  :G-structural-pressure :G-goal-outcome
-                  :G-gap :G-graph-pragmatic :G-core :G-efe :score-provenance :risk-mode
+  (select-keys r [:action :G-risk :G-ambiguity :predictability-bonus :homeostatic-pressure
+                  :structural-pressure :G-goal-outcome
+                  :gap-exploration-bonus :graph-control-score :G-core :G-efe :score-provenance :risk-mode
                   :ambiguity-mode
                   :goal-outcome-mode
-                  :G-augmentation :augmentation-terms
-                  :G-graph-feasibility :G-graph-pragmatic-proxy
-                  :structural-pressure-mode :habit-prior-bias
-                  :move-class-intensity-mode :G-move-class-intensity
+                  :controller-augmentation :augmentation-terms
+                  :graph-feasibility-penalty :graph-control-score-proxy
+                  :predictability-control-mode :homeostatic-control-mode
+                  :graph-feasibility-mode
+                  :structural-pressure-mode :habit-prior-bias :habit-prior-source
+                  :move-class-intensity-mode :move-class-intensity-contribution
                   :move-class-intensity
-                  :G-total :rank :time-pressure :horizon-steps]))
+                  :controller-score :rank :time-pressure :horizon-steps]))
 
 (defn- strip-decision
   "Compact the decision for trace. The full softmax-weights map is
@@ -140,8 +143,8 @@
      1 — the accreted pre-provenance shape: everything up to and including
          :goal-outcome-mode per ranked action (fb15d66, 2026-07-04).
      2 — adds :wm-version (B-0a, 2026-07-04).
-     3 — adds :G-augmentation + :augmentation-terms (B-2a) and
-         :G-graph-feasibility + :G-graph-pragmatic-proxy (B-2b) per ranked
+     3 — adds :controller-augmentation + :augmentation-terms (B-2a) and
+         :graph-feasibility-penalty + :graph-control-score-proxy (B-2b) per ranked
          action — the struct-split relabels, additive only (2026-07-04).
      4 — adds :structural-pressure-mode (always) + :habit-prior-bias (dark
          :habit-prior mode only) per ranked action (D-1d, 2026-07-04). The
@@ -149,9 +152,25 @@
          parcel's top-level-only wording; the ledger rule wins.
      5 — adds :ambiguity-mode per ranked action (D5c provenance for the
          gaussian-entropy nats ambiguity lane).
-     6 — adds :G-efe per ranked action — the true three-leg EFE readout
-         (risk + ambiguity − EIG), additive; labelling honesty (2026-07-08)."
-  6)
+     6 — adds :G-efe per ranked action — the EFE readout
+         (risk + ambiguity), additive. Model-uncertainty bonuses remain in the
+         controller augmentation rather than masquerading as EIG.
+     7 — adds the distinct per-tick :variational-free-energy diagnostic.
+     8 — atomically renames the non-variational R14 controller state to
+         :selection-gain and realised-outcome legs to :expected-score /
+         :realized-score (2026-07-13).
+     9 — atomically removes noncanonical G labels from controller augmentation,
+         graph diagnostics, move-class contribution, current-observation
+         diagnostics, and policy rollout; also renames the posterior-spread
+         exploration term to :model-uncertainty-bonus (2026-07-13).
+    10 — records the live/legacy disposition of predictability, homeostatic,
+         and graph-feasibility controls per ranked action, and adds the
+         top-level :policy-support-exclusions audit trail (2026-07-13).
+    11 — records the production belief :likelihood-mode and the A/B/D model
+         manifest hashes in :wm-version (2026-07-13).
+    12 — records learned habit-prior state per tick and its source per ranked
+         action (B1, dark build, 2026-07-13)."
+  12)
 
 (defn- futon2-git-version
   "Git identity of the futon2 checkout this JVM loaded its code from:
@@ -208,8 +227,8 @@
    window; trace-record itself is pure (read-side is `judge`'s
    responsibility).
 
-   As of R14 (precision-over-policies), `:policy-precision` is propagated
-   too — the policy-scale γ-state (`futon2.aif.policy-precision`): a single
+   As of R14 (precision-over-policies), `:selection-gain` is propagated
+   too — the policy-scale γ-state (`futon2.aif.selection-gain`): a single
    bounded inverse-temperature learned from the realized-vs-expected
    outcomes of chosen policies. Same cross-call read-back pattern as
    `:precision-state`; absent ⇒ the prior (γ=1.0) is reconstructed."
@@ -220,21 +239,23 @@
     :mu-post (:belief judge-output)
     :observation (:observation judge-output)
     :free-energy (:free-energy judge-output)
+    :variational-free-energy (:variational-free-energy judge-output)
     :prediction-errors (:prediction-errors judge-output {})
     :precision-state (:precision-state judge-output {})
     ;; R14 precision-over-policies (γ): the policy-scale sibling of
     ;; :precision-state. The next tick reads this back to continue the rolling
     ;; realized-outcome window. Absent ⇒ the prior (γ=1.0) is reconstructed.
-    :policy-precision (:policy-precision judge-output
-                                         (policy-precision/initial-policy-precision-state))
+    :selection-gain (:selection-gain judge-output
+                                         (selection-gain/initial-selection-gain-state))
     :micro-step-trace (:micro-step-trace judge-output [])
     :anticipation (:anticipation judge-output {:events-loaded? false :events []})
     :ranked-actions (mapv strip-ranked-action (:ranked-actions judge-output))
+    :policy-support-exclusions (vec (:policy-support-exclusions judge-output))
     :decision (strip-decision (:decision judge-output))
     :mode (:mode judge-output)}
     ;; R16 close-the-loop seam (interface paired with claude-10): the enactor
     ;; writes `:realized-outcome` at enactment; R14's γ reader consumes it next
-    ;; tick (see `policy-precision/fold-realized-outcome`). Present-only —
+    ;; tick (see `selection-gain/fold-realized-outcome`). Present-only —
     ;; LIVE-WIRED 2026-07-02 (Joe-ratified; `futon2.aif.enact` in the scheduled
     ;; runner); absent whenever nothing enacted, which keeps γ at its prior.
     (:realized-outcome judge-output)
@@ -246,6 +267,10 @@
     (assoc :act-gate-verdicts (:act-gate-verdicts judge-output))
     (:enactment judge-output)
     (assoc :enactment (:enactment judge-output))
+    ;; B1 learned E(π), dark and present-only: the flag-off trace shape remains
+    ;; unchanged, while enabled ticks carry the sufficient-statistic state.
+    (:habit-prior-state judge-output)
+    (assoc :habit-prior-state (:habit-prior-state judge-output))
     ;; B-0a tick provenance (present-only, schema v2): the scheduled runner
     ;; stamps it via `wm-version-stamp`; bare judge calls don't — purely
     ;; additive, no nil seam in un-stamped records.
@@ -310,6 +335,24 @@
     (vec (mapcat #(read-trace :dir dir
                               :date-str (.format % date-fmt))
                  dates))))
+
+(defn read-all-traces
+  "Read every `wm-trace-YYYY-MM-DD.edn` file in lexical/date order. This is the
+   deterministic cold-start fold used by the dark learned habit prior; callers
+   that already have persisted state should use that state instead."
+  [& {:keys [dir] :or {dir default-trace-dir}}]
+  (let [root (io/file dir)
+        files (if (.isDirectory root)
+                (->> (.listFiles root)
+                     (filter #(.isFile %))
+                     (filter #(re-matches #"wm-trace-\d{4}-\d{2}-\d{2}\.edn"
+                                          (.getName %)))
+                     (sort-by #(.getName %)))
+                [])]
+    (vec (mapcat (fn [f]
+                   (let [date-str (subs (.getName f) 9 19)]
+                     (read-trace :dir dir :date-str date-str)))
+                 files))))
 
 (defn latest-trace-record
   "Return the most recent trace record visible within a bounded UTC day

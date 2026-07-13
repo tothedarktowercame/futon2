@@ -11,7 +11,8 @@
             [clojure.set :as set]
             [clojure.string :as str]
             [futon2.aif.fold-escrow :as esc]
-            [futon2.aif.mission-registry :as missions])
+            [futon2.aif.mission-registry :as missions]
+            [futon2.aif.substrate :as substrate])
   (:import [java.time Instant]))
 
 (def default-log-file "/home/joe/code/futon2/logs/actuator-a3.log")
@@ -257,21 +258,22 @@
                      :endpoint-types endpoint-types}))))
 
 (defn proof-form [query]
-  (pr-str `(do
-             (require (quote xtdb.api))
-             (xtdb.api/q (xtdb.api/db (:node @futon3c.dev/!f1-sys))
-                         (quote ~query)))))
+  (pr-str {:operation :substrate/inhabitation
+           :derived-query query}))
 
 (defn endpoint-proof-ref [binding]
-  {:kind :drawbridge
-   :form (proof-form (proof-query binding))})
+  {:kind :substrate-inhabitation
+   :binding (select-keys binding [:kind :type :endpoint-types])
+   :derived-query (proof-query binding)})
 
 (defn endpoint-inhabitation
   ([binding] (endpoint-inhabitation binding {}))
   ([binding opts]
    (let [query (proof-query binding)
-         ref {:kind :drawbridge :form (proof-form query)}
-         inhabited? (evidence-resolves? ref opts)]
+         ref (endpoint-proof-ref binding)
+         inhabited? (if (:resolver opts)
+                      (evidence-resolves? ref opts)
+                      (:inhabited? (first (substrate/inhabitation [binding] opts))))]
      (assoc binding
             :query query
             :evidence-ref ref
@@ -281,7 +283,17 @@
 (defn endpoint-snapshot
   ([bindings] (endpoint-snapshot bindings {}))
   ([bindings opts]
-   (mapv #(endpoint-inhabitation % opts) bindings)))
+   (if (:resolver opts)
+     (mapv #(endpoint-inhabitation % opts) bindings)
+     (mapv (fn [binding result]
+             (let [inhabited? (:inhabited? result)]
+               (assoc binding
+                      :query (proof-query binding)
+                      :evidence-ref (endpoint-proof-ref binding)
+                      :inhabited? inhabited?
+                      :reason (when-not inhabited? :not-inhabited))))
+           bindings
+           (substrate/inhabitation bindings opts)))))
 
 (defn endpoint-dial
   [snapshot]
@@ -442,17 +454,23 @@
 
 (defn discharge-query-form
   [mission-id endpoint]
-  (pr-str `(do
-             (require (quote xtdb.api))
-             (xtdb.api/q (xtdb.api/db (:node @futon3c.dev/!f1-sys))
-                         (quote ~(discharge-query))
-                         ~mission-id
-                         ~endpoint))))
+  (pr-str {:operation :substrate/entities-by-type
+           :type :discharge
+           :mission mission-id
+           :endpoint endpoint}))
+
+(defn- entity-domain-fields [doc]
+  (merge doc (:entity/props doc)))
 
 (defn discharge-recorded?
   ([mission-id endpoint] (discharge-recorded? mission-id endpoint {}))
   ([mission-id endpoint opts]
-   (result-truthy? (drawbridge-eval (discharge-query-form mission-id endpoint) opts))))
+   (boolean
+    (some (fn [doc]
+            (let [doc (entity-domain-fields doc)]
+              (and (= mission-id (:discharge/mission doc))
+                   (= endpoint (:discharge/endpoint doc)))))
+          (substrate/entities-by-type :discharge opts)))))
 
 (defn discharge-doc
   [mission-id binding at]
@@ -502,10 +520,10 @@
   (str "A3 BUILDER TASK — content-free fold blueprint execution.\n\n"
        "Build this reviewed fold-turn blueprint. Use handoffs as needed.\n\n"
        "ACCEPTANCE DIAL: write the bound endpoints into substrate-2. The executor "
-       "will derive Drawbridge xtdb.api/q proofs from :endpoint-bindings below; "
+       "will derive backend-neutral inhabitation proofs from :endpoint-bindings below; "
        "builder-supplied evidence refs or file-exists claims do not move this "
-       "dial. Use the sanctioned Drawbridge write form: xtdb.api/submit-tx on "
-       "(:node @futon3c.dev/!f1-sys), then xtdb.api/await-tx.\n\n"
+       "dial. Use the configured authoritative substrate HTTP entity/hyperedge "
+       "routes; do not access an embedded XTDB node.\n\n"
        "ENDPOINT SCHEMA (required for the proof to match): write a hyperedge's "
        ":hx/endpoints as a VECTOR OF ENTITY-ID STRINGS, each the :xt/id of an "
        "entity that carries the required :entity/type — NOT maps like "
@@ -583,16 +601,11 @@
                         :form form}))))))
 
 (defn drawbridge-submit-tx!
+  "Compatibility name for existing AIF callers. Writes now cross the semantic
+  substrate boundary; raw XTDB access is deliberately unavailable."
   ([tx-ops] (drawbridge-submit-tx! tx-ops {}))
   ([tx-ops opts]
-   (drawbridge-eval
-    (pr-str `(do
-               (require (quote xtdb.api))
-               (let [node# (:node @futon3c.dev/!f1-sys)
-                     tx# (xtdb.api/submit-tx node# (quote ~tx-ops))]
-                 (xtdb.api/await-tx node# tx#)
-                 tx#)))
-    opts)))
+   (substrate/submit-puts! tx-ops opts)))
 
 (defn drawbridge-resolves?
   ([ref] (drawbridge-resolves? ref default-drawbridge-url))
@@ -605,12 +618,15 @@
 
 (defn evidence-resolves?
   ([evidence-ref] (evidence-resolves? evidence-ref {}))
-  ([evidence-ref {:keys [resolver drawbridge-url]}]
+  ([evidence-ref {:keys [resolver drawbridge-url] :as opts}]
    (cond
      (nil? evidence-ref) false
      (fn? resolver) (boolean (resolver evidence-ref))
      (= :file-exists (:kind evidence-ref)) (file-exists-resolves? evidence-ref)
      (= :file-contains (:kind evidence-ref)) (file-contains-resolves? evidence-ref)
+     (= :substrate-inhabitation (:kind evidence-ref))
+     (boolean (:inhabited?
+               (first (substrate/inhabitation [(:binding evidence-ref)] opts))))
      (= :drawbridge (:kind evidence-ref)) (drawbridge-resolves? evidence-ref
                                                                (or drawbridge-url
                                                                    default-drawbridge-url))

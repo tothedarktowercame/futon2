@@ -1,9 +1,7 @@
 (ns futon2.aif.precision-test
   "Tests for R7 adaptive precision (per-channel Π tracked across calls
    via prediction-error history)."
-  (:require [clojure.java.io :as io]
-            [clojure.string :as str]
-            [clojure.test :refer [deftest is testing]]
+  (:require [clojure.test :refer [deftest is testing]]
             [futon2.aif.belief :as belief]
             [futon2.aif.precision :as precision]))
 
@@ -38,14 +36,14 @@
              (get-in final-state [:ch :error-history]))
           "oldest dropped, newest kept"))))
 
-(deftest precision-stable-under-zero-error-test
-  (testing "history of zero errors → low variance → high precision (capped at 1/min-variance)"
+(deftest precision-rises-gradually-under-zero-error-test
+  (testing "a zero-error history raises precision without one-sample certainty"
     (let [s0 (precision/initial-precision-state #{:ch})
           s (reduce (fn [s _]
                       (precision/update-precision-state s {:ch {:error 0.0}}))
                     s0 (range 10))]
-      (is (= 100.0 (get-in s [:ch :precision]))
-          "zero error → variance 0 → precision = 1 / min-variance (0.01) = 100.0"))))
+      (is (= 11.0 (get-in s [:ch :precision]))
+          "one prior effective sample plus ten zero errors gives variance 1/11"))))
 
 (deftest precision-drops-under-sustained-high-error-test
   (testing "high-variance error history → low precision"
@@ -54,9 +52,9 @@
           s (reduce (fn [s e]
                       (precision/update-precision-state s {:ch {:error e}}))
                     s0 high-var-errors)]
-      ;; variance ≈ 0.25 → precision = 1/0.25 = 4.0
-      (is (< (Math/abs (- 4.0 (get-in s [:ch :precision]))) 1e-6)
-          (str "precision should approach 4.0 for variance 0.25; got "
+      ;; posterior MSE = (prior 1 + observed sum-of-squares 2.5) / 11
+      (is (< (Math/abs (- (/ 22.0 7.0) (get-in s [:ch :precision]))) 1e-6)
+          (str "precision should reflect regularized error variance; got "
                (get-in s [:ch :precision]))))))
 
 (deftest precision-rises-as-history-converges-test
@@ -69,9 +67,7 @@
                       (precision/update-precision-state s {:ch {:error e}}
                                                         {:window-size 15}))
                     s0 mixed-errors)]
-      ;; final history is last 15 errors; mostly 0.05 → variance ≈ 0
-      ;; → precision should be near 1/min-variance (=100)
-      (is (> (get-in s [:ch :precision]) 50.0)
+      (is (> (get-in s [:ch :precision]) 10.0)
           (str "precision should rise as channel converges; got "
                (get-in s [:ch :precision]))))))
 
@@ -120,7 +116,7 @@
       (is (= s1a s1b)))))
 
 ;; ---------------------------------------------------------------------------
-;; v0.13: need-component added — precision = variance-component + need-component
+;; Salience is computed beside precision, never inside production precision.
 ;; ---------------------------------------------------------------------------
 
 (deftest need-component-in-preferred-range-test
@@ -152,12 +148,12 @@
       (is (< (Math/abs (- (* 5.0 0.6) nc)) 1e-6)
           (str "need-component should be 5 × 0.6 = 3.0; got " nc)))))
 
-(deftest precision-combines-both-components-test
-  (testing "precision = variance-component + need-component, bounded"
+(deftest historical-summed-mode-combines-both-components-test
+  (testing "explicit historical mode sums variance and need"
     (let [s0 (precision/initial-precision-state #{:annotation-health})
           ;; observed 0.4 is below preference [0.7 1.0]; error tiny so variance ≈ 0 → variance-component = 100
           errors {:annotation-health {:error 0.001 :observed 0.4}}
-          s1 (precision/update-precision-state s0 errors)
+          s1 (precision/update-precision-state s0 errors {:salience-mode :summed})
           channel (get s1 :annotation-health)]
       (is (pos? (:variance-component channel)))
       (is (pos? (:need-component channel)))
@@ -167,14 +163,14 @@
                  (min 200.0)))
           "precision is bounded sum of components"))))
 
-(deftest precision-cap-bounds-runaway-test
-  (testing "precision capped at precision-cap"
+(deftest historical-summed-mode-cap-bounds-runaway-test
+  (testing "explicit historical summed precision is capped"
     (let [s0 (precision/initial-precision-state #{:annotation-health})
           ;; in-range observation (need = 0); variance-component will be 100 (= 1/min-variance)
           ;; cap = 200 so we'd need need + variance > 200 to hit it
           ;; force extreme gap to trigger cap: observed at -10 (impossible but tests cap)
           errors {:annotation-health {:error 0.0 :observed -100.0}}
-          s1 (precision/update-precision-state s0 errors)]
+          s1 (precision/update-precision-state s0 errors {:salience-mode :summed})]
       (is (= 200.0 (get-in s1 [:annotation-health :precision]))
           "precision capped at 200.0 even under extreme gap"))))
 
@@ -187,17 +183,14 @@
           "unknown channels get zero need-component (no preference to compare to)"))))
 
 ;; ---------------------------------------------------------------------------
-;; B-2c (M-aif-faithfulness §2.2): salience-mode gating of the need term.
-;; Default :summed = v0.13, witnessed byte-identical below. :separate is the
-;; DARK path: Π = canonical variance leg only; need term under :salience.
+;; B-2c (M-aif-faithfulness §2.2): separation of the need term.
+;; :separate is the production default; explicit :summed names historical
+;; experiments without changing the production meaning of Π.
 ;; ---------------------------------------------------------------------------
 
 (defn- witness-sequence
-  "The exact deterministic 3-channel × 25-step sequence the golden
-   test/resources/goldens/r7_default_path_witness.edn was generated from
-   (pre-B-2c code, 2026-07-04). Exercises window bounding (>20 steps),
-   need-term on/off, and a no-preference channel. Do not edit without
-   regenerating the golden."
+  "A deterministic 3-channel × 25-step sequence exercising window bounds,
+   salience on/off, and a no-preference channel."
   []
   (vec (for [i (range 25)]
          {:annotation-health {:error (* 0.05 (- (mod i 7) 3)) :observed (+ 0.3 (* 0.03 i))}
@@ -210,27 +203,21 @@
            #{:annotation-health :sorry-count-norm :wm-witness-nopref})
           (witness-sequence)))
 
-(deftest default-path-byte-identical-witness-test
-  (testing "default path reproduces the pre-B-2c golden byte-for-byte (pr-str)"
-    (let [golden (-> (io/file "test" "resources" "goldens"
-                              "r7_default_path_witness.edn")
-                     slurp
-                     str/trim)]
-      (is (= golden (pr-str (run-witness-sequence {})))
-          "no-opts default must be byte-identical to pre-B-2c output")
-      (is (= golden (pr-str (run-witness-sequence {:salience-mode :summed})))
-          "explicit :summed must be byte-identical to pre-B-2c output"))))
+(deftest default-path-is-separated-test
+  (is (= (run-witness-sequence {})
+         (run-witness-sequence {:salience-mode :separate}))
+      "the no-opts API has the same canonical semantics as explicit :separate"))
 
 (deftest separate-mode-precision-excludes-need-term-test
   (testing ":separate — Π is the bounded variance leg only; need term lives under :salience"
     ;; observed 0.4 is 0.3 below :annotation-health preference [0.7 1.0];
-    ;; tiny error → variance < min-variance → variance-component = 100.0
+    ;; The variance prior prevents one tiny error from manufacturing certainty.
     (let [s0 (precision/initial-precision-state #{:annotation-health})
           errors {:annotation-health {:error 0.001 :observed 0.4}}
           s1 (precision/update-precision-state s0 errors {:salience-mode :separate})
           ch (get s1 :annotation-health)]
-      (is (= 100.0 (:precision ch))
-          "Π = bounded variance-component; the 1.5 need term is NOT summed in")
+      (is (< (Math/abs (- (/ 1.0 0.5000005) (:precision ch))) 1e-6)
+          "Π is the regularized variance component; need is not summed in")
       (is (< (Math/abs (- 1.5 (:salience ch))) 1e-6)
           ":salience carries need-scale × gap = 5 × 0.3 = 1.5")
       (is (= (:salience ch) (:need-component ch))
@@ -247,8 +234,8 @@
                        (get :annotation-health))]
       (is (= 200.0 (:precision summed))
           "summed mode: the huge need term drives Π to the cap (v0.13)")
-      (is (= 100.0 (:precision separate))
-          "separate mode: Π stays at the variance leg (1/min-variance)")
+      (is (= 2.0 (:precision separate))
+          "one zero error plus the variance prior gives Π=2, not false certainty")
       (is (> (:salience separate) 100.0)
           "the gap signal is preserved — as named salience, not as Π"))))
 

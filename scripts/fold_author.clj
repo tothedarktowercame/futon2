@@ -195,8 +195,8 @@
         fold-turn-id (next-fold-turn-id (:deposit-dir opts)
                                         (get-in inputs [:circumstance :mission]))
         wiring (fl/construction->wiring answer)
-        delta-g (fe/coverage-delta-g wiring)]
-    (when-not (number? delta-g)
+        coverage-score-delta (fe/coverage-score-delta wiring)]
+    (when-not (number? coverage-score-delta)
       (die! "answer produced nil delta-G; deposits with no boxes are rejected"))
     {:fold-turn/id fold-turn-id
      :mission (get-in inputs [:circumstance :mission])
@@ -224,7 +224,7 @@
               :at (:at opts)
               :scope :one-fold
               :fold-turn/id fold-turn-id}
-     :eval {:delta-g delta-g
+     :eval {:coverage-score-delta coverage-score-delta
             :g-grain :coverage}
      :wiring wiring
      :arrow-candidate {:have (get-in mission-triple [:hole :have])
@@ -282,7 +282,7 @@
             (println "mission" (:mission deposit))
             (println "patterns" (pr-str (get-in deposit [:cascade :pattern-ids])))
             (println "prompt-sha" (get-in deposit [:prompt :sha256]))
-            (println "delta-g" (get-in deposit [:eval :delta-g]))
+            (println "coverage-score-delta" (get-in deposit [:eval :coverage-score-delta]))
             (println "boxes" (count (get-in deposit [:turn :answer :boxes]))
                      "policy-holes" (count (get-in deposit [:turn :answer :policy-holes])))))))))
 

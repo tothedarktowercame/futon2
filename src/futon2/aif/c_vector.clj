@@ -32,12 +32,8 @@
   (:require [clojure.string :as str]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [babashka.http-client :as http]
-            [futon2.aif.preferences :as pref]))
-
-(def ^:private default-store-base
-  (or (System/getenv "FUTON1A_BASE_URL")
-      "http://localhost:7071/api/alpha"))
+            [futon2.aif.preferences :as pref]
+            [futon2.aif.substrate :as substrate]))
 
 ;; 33 open sorries share this templated :if — the boilerplate the audit found
 ;; (143 open → 110 clean). Kept identical to c_vector.bb/BOILERPLATE-IF.
@@ -107,18 +103,15 @@
 ;; ---------------------------------------------------------------------------
 
 (defn- fetch-entities
-  "Read entities of one type from substrate-2 (EDN). Read-only. Returns [] on
-   any failure (exit-5 safe degrade — a fresh/unreachable store starts empty,
-   which reduces the belly to the static floor, never crashes the loop)."
+  "Read entities of one type from the authoritative substrate. Transport
+  failure is loud; an empty vector means the authoritative query was empty."
   [type]
-  (try
-    (let [url  (str default-store-base "/entities/latest?type=" type "&limit=2000")
-          resp (http/get url {:headers {"Accept" "application/edn"}
-                              :timeout 8000 :throw false})]
-      (if (= 200 (:status resp))
-        (or (:entities (edn/read-string (:body resp))) [])
-        []))
-    (catch Exception _ [])))
+  (mapv (fn [doc]
+          {:id (or (:entity/id doc) (:xt/id doc) (:id doc))
+           :name (or (:entity/name doc) (:name doc))
+           :type (or (:entity/type doc) (:type doc))
+           :props (or (:entity/props doc) (:props doc) {})})
+        (substrate/entities-by-type type {:limit 2000})))
 
 ;; the 2 literal meta placeholders are schema artifacts, never real goals
 (def ^:private cap-meta?
@@ -321,7 +314,7 @@
 (def default-goal-outcome-weight
   "W4 normalising weight. goal-outcome-risk is MEAN-normalised over open entries
    so N goal-outcomes stay commensurable with the 14 channel gaps (≈ mean
-   entry-weight, in [0,1]); this scalar then scales that mean into G-total."
+   entry-weight, in [0,1]); this scalar then scales that mean into controller-score."
   1.0)
 
 (defn goal-outcome-risk
@@ -390,59 +383,47 @@
 ;; `advanced-outcome-ids` with the token-match as the uncovered-slice fallback.
 ;; ---------------------------------------------------------------------------
 
-(def ^:private uuid-re
-  #"(?i)^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
-
 (defn- fetch-durable-join*
   "Read the persisted join from substrate-2: the `:outcome-ref` relations
    (c-entry → canonical mission node, 189 as of 2026-07-02) and the
    `:discharged-by` relations (c-entry → method/class ∪ mission → commit, the
-   proof-mine grain). Relations are `:relation/*` docs with NO HTTP read route
-   (the 2026-07-02 claude-3 finding), so this reads the in-JVM XTDB node via
-   requiring-resolve — the same dynamic-resolve discipline as
-   `credit-satisfy-prob`: in the live serving JVM (where the WM scheduler and
-   the store cohabit) it resolves; in bb / futon2's own test JVM it returns nil
-   and the belly degrades to the in-memory token-match. Zero writes.
+   proof-mine grain). Reads cross the semantic substrate boundary and hydrate
+   relation endpoints in the authoritative store. Zero writes.
 
    Returns {:oref [[c-entry-name mission-name] …]
             :disch [[from-name to-name] …]
             :entry-refs {c-entry-name outcome-ref-map}} or nil."
   []
   (try
-    (when-let [sysvar (try (requiring-resolve 'futon3c.dev/!f1-sys)
-                           (catch Throwable _ nil))]
-      (when-let [node (:node @@sysvar)]
-        (let [dbf  @(requiring-resolve 'xtdb.api/db)
-              q    @(requiring-resolve 'xtdb.api/q)
-              db   (dbf node)
-              rel  (fn [ty] (q db '{:find [f t] :in [ty]
-                                    :where [[r :relation/type ty]
-                                            [r :relation/from f] [r :relation/to t]]}
-                               ty))
-              oref  (rel :outcome-ref)
-              disch (rel :discharged-by)
-              uuid? (fn [x] (and (string? x) (re-matches uuid-re x)))
-              ids   (into #{} (filter uuid?)
-                          (mapcat identity (concat oref disch)))
-              named (into {} (keep (fn [i]
-                                     (when-let [[n p] (first (q db '{:find [n p] :in [i]
-                                                                     :where [[e :entity/id i]
-                                                                             [e :entity/name n]
-                                                                             [e :entity/props p]]}
-                                                                i))]
-                                       [i {:name n :props p}])))
-                          ids)
-              nm    (fn [x] (get-in named [x :name] x))
-              entry-refs (into {} (keep (fn [[_ {ename :name props :props}]]
-                                          (when-let [ee (:entry-edn props)]
-                                            (when-let [r (try (:outcome-ref (edn/read-string (str ee)))
-                                                              (catch Throwable _ nil))]
-                                              [ename r]))))
-                               named)]
-          {:oref  (mapv (fn [[f t]] [(nm f) (nm t)]) oref)
-           :disch (mapv (fn [[f t]] [(nm f) (nm t)]) disch)
-           :entry-refs entry-refs})))
-    (catch Throwable _ nil)))
+    (let [snapshot (substrate/relation-snapshot
+                    {:types [:outcome-ref :discharged-by]})
+          rows (fn [type]
+                 (->> (:relations snapshot)
+                      (filter #(= type (:relation/type %)))
+                      (mapv (fn [r] [(:relation/from r) (:relation/to r)]))))
+          oref (rows :outcome-ref)
+          disch (rows :discharged-by)
+          entities (:entities snapshot)
+          named (into {}
+                      (map (fn [e]
+                             [(or (:entity/id e) (:xt/id e))
+                              {:name (:entity/name e)
+                               :props (:entity/props e)}]))
+                      entities)
+          nm (fn [x] (get-in named [x :name] x))
+          entry-refs (into {} (keep (fn [[_ {ename :name props :props}]]
+                                      (when-let [ee (:entry-edn props)]
+                                        (when-let [r (try (:outcome-ref (edn/read-string (str ee)))
+                                                          (catch Throwable _ nil))]
+                                          [ename r]))))
+                           named)]
+      {:oref (mapv (fn [[f t]] [(nm f) (nm t)]) oref)
+       :disch (mapv (fn [[f t]] [(nm f) (nm t)]) disch)
+       :entry-refs entry-refs})
+    (catch Throwable t
+      (binding [*out* *err*]
+        (println "[c-vector] authoritative durable join failed:" (.getMessage t)))
+      nil)))
 
 (defonce ^{:doc "Injectable source of the durable join (0-arity → the
   fetch-durable-join* shape, or nil). A seam so tests inject fixture relations
@@ -584,33 +565,32 @@
 ;; ---------------------------------------------------------------------------
 
 (defn kl-risk-of
-  "One OPEN `:becomes` entry's goal-outcome risk in the KL form (nats):
+  "One OPEN entry's goal-satisfaction risk in the KL form (nats):
    weight · KL(Bernoulli(q-sat) ‖ pref/c-distribution {:becomes 1}), where
    q-sat is the policy's predicted probability the entry's outcome is MET.
    The preference target is always 1 (met) in outcome space — W1's `:becomes`
-   values are domain keywords (:attested / :closed) naming WHAT is met, not a
-   binary to hit, so the Bernoulli target is fixed and the keyword stays in
-   the entry's provenance. Non-`:becomes` / non-open entries ⇒ 0.0 (their KL
-   form needs the forward model's per-channel Gaussian Q — efe's lane, not
-   here). NB units: at temperature T an unmet entry (q≈0) costs ≈ 1/T nats
+   value names WHAT condition is met; both categorical `:becomes` and numeric
+   range predicates are represented here by the binary outcome
+   {condition-satisfied, condition-unsatisfied}. The detailed numeric channel
+   prediction remains in EFE's Gaussian lane. Non-open entries ⇒ 0.0.
+   NB units: at temperature T an unmet entry (q≈0) costs ≈ 1/T nats
    (T=0.1 ⇒ ≈10), vs the hinge form's ≤ weight·1.0 — the scale friction is
    item 3's calibration question, named in the §12 round-trip note."
   ([e q-sat] (kl-risk-of e q-sat pref/default-c-temperature))
-  ([{:keys [preferred weight status]} q-sat temperature]
-   (if (and (= status :open) (= :becomes (:op preferred)))
+  ([{:keys [weight status]} q-sat temperature]
+   (if (= status :open)
      (* (double (:value weight))
         (pref/kl {:kind :bernoulli :p (double q-sat)}
                  (pref/c-distribution {:becomes 1} :temperature temperature)))
      0.0)))
 
 (defn predictive-goal-outcome-risk-kl
-  "KL twin of `predictive-goal-outcome-risk` with the `:becomes` entries
-   scored by the exact Bernoulli KL (item 5) instead of the hinge: an advanced
+  "KL twin of `predictive-goal-outcome-risk`, with every open entry scored in
+   a common Bernoulli goal-satisfaction outcome space: an advanced
    entry's q-sat = (satisfy-prob-fn action); a non-advanced entry's q-sat = 0.0
-   (still unmet under this policy; `pref/kl` clamps to 1e-9). Range entries
-   keep their hinge divergence — mixing nats (:becomes, scale ~1/T) with the
-   hinge's [0,1] in one mean is UNIT-MIXING, deliberate and visible. Same
-   fixed denominator and [] ⇒ 0.0 floor as the hinge form.
+   (still unmet under this policy; `pref/kl` clamps to 1e-9). Thus categorical
+   and range goals are both in nats, with no hinge/KL unit mixing. Same fixed
+   denominator and [] ⇒ 0.0 floor as the hinge form.
 
    HONESTY: LIVE in the arena since 2026-07-04 (D-1e operator flip; was the
    dark twin, eb06565). The flip was taken WITH the known ≈×9.6 nats-vs-hinge
@@ -633,10 +613,9 @@
        (* (double weight)
           (/ (reduce + 0.0
                      (for [e open]
-                       (if (= :becomes (get-in e [:preferred :op]))
-                         (kl-risk-of e (if (ref-advanced? adv (:outcome-ref e)) p 0.0)
-                                     temperature)
-                         (risk-of e nil))))
+                       (kl-risk-of e
+                                   (if (ref-advanced? adv (:outcome-ref e)) p 0.0)
+                                   temperature)))
              (double n)))))))
 
 ;; ---------------------------------------------------------------------------

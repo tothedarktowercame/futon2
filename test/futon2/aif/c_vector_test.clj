@@ -108,18 +108,18 @@
 (deftest efe-goal-outcome-rerank-test
   (let [st  {:observation {} :belief (belief/initial-belief-state [:m1])}
         act {:type :no-op}
-        base  (:G-total (efe/compute-efe st act {:goal-outcome-entries []}))
-        heavy (:G-total (efe/compute-efe st act {:goal-outcome-entries c-heavy}))
-        light (:G-total (efe/compute-efe st act {:goal-outcome-entries c-light}))]
-    (testing "the belly adds risk for unmet goals (G-total rises with C present)"
+        base  (:controller-score (efe/compute-efe st act {:goal-outcome-entries []}))
+        heavy (:controller-score (efe/compute-efe st act {:goal-outcome-entries c-heavy}))
+        light (:controller-score (efe/compute-efe st act {:goal-outcome-entries c-light}))]
+    (testing "the belly adds risk for unmet goals (controller-score rises with C present)"
       (is (> heavy base)))
-    (testing "satisfying the heavy goal lowers G-total ⇒ the belly re-ranks selection"
+    (testing "satisfying the heavy goal lowers controller-score ⇒ the belly re-ranks selection"
       ;; between two real corpus states, the lighter belly wins (base = the
       ;; empty-C floor, trivially lowest — a reference, not a competing policy).
       (is (> heavy light))
       (is (= light (min heavy light)) "lighter belly ⇒ lower EFE ⇒ the selected option"))
-    (testing "with an empty C the term is 0 and G-total == the static floor"
-      (is (= base (:G-total (efe/compute-efe st act {:goal-outcome-entries []})))))))
+    (testing "with an empty C the term is 0 and controller-score == the static floor"
+      (is (= base (:controller-score (efe/compute-efe st act {:goal-outcome-entries []})))))))
 
 ;; ---- predictive-risk: the action-dependent term that re-ranks policies ------
 
@@ -213,8 +213,8 @@
              (cv/kl-risk-of e 0.0 0.5))))
     (testing "q is monotone: likelier satisfaction ⇒ lower KL risk"
       (is (> (cv/kl-risk-of e 0.1) (cv/kl-risk-of e 0.5) (cv/kl-risk-of e 0.9))))
-    (testing "non-:becomes and non-open entries contribute 0 (efe's lane, not W1's)"
-      (is (= 0.0 (cv/kl-risk-of range-entry 0.0)))
+    (testing "range predicates share the Bernoulli satisfaction space; closed entries contribute 0"
+      (is (pos? (cv/kl-risk-of range-entry 0.0)))
       (is (= 0.0 (cv/kl-risk-of (assoc (first c-heavy) :status :closed) 0.0))))))
 
 (deftest predictive-goal-outcome-risk-kl-test
@@ -231,11 +231,11 @@
       (is (< (pk :a) (pk :b)))))
   (testing "[] ⇒ 0.0 (the floor holds in the KL form)"
     (is (= 0.0 (cv/predictive-goal-outcome-risk-kl [] {:type :no-op} nil))))
-  (testing "range entries keep the hinge (unit-mixing is deliberate + visible)"
+  (testing "range entries use the same nats-valued satisfaction KL"
     (let [r (cv/predictive-goal-outcome-risk-kl [range-entry] {:type :no-op} nil
                                                 cv/default-goal-outcome-weight point-mass 0.1)]
-      (is (< (Math/abs (- r (cv/goal-outcome-risk [range-entry]))) 1e-9)
-          "a range-only belly scores identically to the production hinge term"))))
+      (is (= r (cv/kl-risk-of range-entry 0.0 0.1)))
+      (is (pos? r)))))
 
 ;; ---- D-1e: :goal-outcome-mode wiring through compute-efe (witness) ----------
 

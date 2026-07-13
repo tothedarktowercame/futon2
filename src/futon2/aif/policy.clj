@@ -2,7 +2,7 @@
   "Action selection policy for the WM AIF apparatus.
 
    `select-action` is the top-level R6 deliverable: take a ranked-action
-   list (from `efe/rank-actions`), apply softmax over G-totals with
+   list (from `efe/rank-actions`), apply softmax over controller-scores with
    adaptive temperature τ, and return either the chosen action or an
    abstain branch with a structured gap-report.
 
@@ -13,8 +13,8 @@
 
    Theory: AIF softmax selection — `P(a) ∝ exp(−G(a) / τ)`. Adaptive
    τ scales with EFE spread: tight spreads → high τ → diffuse selection
-   → abstain trips. Abstain semantics: when the best action's G-total is
-   not meaningfully below `:no-op`'s G-total, the WM declines to act
+   → abstain trips. Abstain semantics: when the best action's controller-score is
+   not meaningfully below `:no-op`'s controller-score, the WM declines to act
    and surfaces a gap-report enumerating the `:learn-action-class`
    recommendations the bootstrap proposer detected.")
 
@@ -36,47 +36,36 @@
   "The selection temperature actually used. TWO layers, separated per the R6
    faithfulness audit (M-aif-faithfulness §2.2 B-2d):
 
-     γ        — R14 precision-over-policies: the agent's learned confidence in
-                its own decision-making (`futon2.aif.policy-precision`). In the
-                canonical AIF form P(π) = σ(−γ·G), γ ALONE carries selection
-                sharpness. High γ ⇒ lower τ_eff ⇒ sharper commitment; low γ ⇒
-                flatter / abstain-leaning.
+     g        — R14 engineering outcome-feedback selection gain. High g ⇒
+                lower τ_eff ⇒ sharper commitment; low g ⇒ flatter. It is
+                not variational policy precision.
      τ_spread — `adaptive-temperature` = range(G)/k: an adaptive-calibration
                 heuristic (tight spread → diffuse selection → abstain trips)
-                historically STACKED on γ. Not part of the canonical form; now
+                historically STACKED on g. Not part of the canonical form; now
                 a separately-justified layer that can be switched off.
 
    `:tau-mode` in the opt-map selects the layering:
 
-     :spread (DEFAULT)   τ_eff = τ_spread / γ — byte-identical to the
+     :spread (DEFAULT)   τ_eff = τ_spread / g — byte-identical to the
                          historical stacked behaviour.
-     :gamma-only         τ_eff = 1 / γ — the canonical form; the spread
+     :selection-gain-only τ_eff = 1 / g — fixed-baseline controller mode; the spread
                          calibration layer is OFF.
 
-   γ is floored at `tau-min` defensively in both modes so a degenerate γ can
-   never divide τ to zero or flip its sign. γ = 1.0 (the default and burn-in
+   g is floored at `tau-min` defensively in both modes so a degenerate g can
+   never divide τ to zero or flip its sign. g = 1.0 (the default and burn-in
    prior) reduces :spread EXACTLY to the spread-only temperature, and
-   :gamma-only to τ_eff = 1.
+   :selection-gain-only to τ_eff = 1.
 
-   HONESTY (B-2d dark build, 2026-07-04): the arena default is :spread — live
-   selection behaviour is UNCHANGED by this separation. :gamma-only is built
-   dark behind `arena-tau-mode` (scripts/futon2/report/war_machine.clj; env
-   hatch FUTON_WM_TAU_MODE=gamma-only). The flip is Joe's (§2.1 verdict
-   ledger). Evidence a flip decision needs: an E6-style shadow comparison over
-   the trace corpus — chosen action, abstain rate, and softmax entropy under
-   both modes side by side — decided JOINTLY with B-3b (R14 γ β-update): both
-   layers shape selection sharpness, so the spread layer should not switch off
-   in the same step γ starts moving off 1.0, or the two effects on selection
-   are unattributable."
-  ([g-totals gamma] (effective-temperature g-totals gamma {}))
-  ([g-totals gamma {:keys [tau-min tau-mode]
+   Both modes are engineering calibration policies and are reported as such."
+  ([g-totals selection-gain] (effective-temperature g-totals selection-gain {}))
+  ([g-totals selection-gain {:keys [tau-min tau-mode]
                     :or {tau-min 0.01 tau-mode :spread}
                     :as temperature-opts}]
-   (let [g (max (double tau-min) (double gamma))]
+   (let [g (max (double tau-min) (double selection-gain))]
      (case tau-mode
        :spread (/ (adaptive-temperature g-totals temperature-opts) g)
-       :gamma-only (/ 1.0 g)
-       (throw (ex-info "unknown :tau-mode (expected :spread or :gamma-only)"
+       :selection-gain-only (/ 1.0 g)
+       (throw (ex-info "unknown :tau-mode (expected :spread or :selection-gain-only)"
                        {:tau-mode tau-mode}))))))
 
 (defn softmax-weights
@@ -86,9 +75,8 @@
    The 2-arity form is the historical σ(−G/τ) — equivalently ln E ≡ 0 — and
    is byte-identical to its pre-D-1d behaviour. The 3-arity form is the R12
    HABIT-PRIOR SEAM (M-aif-faithfulness D-1d): `log-priors` aligns with
-   `g-totals` and enters the score UNSCALED by τ — that is the canonical
-   σ(ln E − γ·G) shape, and the semantic point of relocating a term here:
-   precision (γ = 1/τ_eff) modulates G, never the habit prior. This seam is
+   `g-totals` and enters the score UNSCALED by τ. The semantic point is that
+   controller temperature modulates G, never the habit prior. This seam is
    THE place a future real ln E(π) (R12 per-action-class posteriors) enters —
    do not add a second prior site."
   ([g-totals tau]
@@ -162,7 +150,7 @@
     (if chosen
       {:action (:action chosen)
        :rank (:rank chosen)
-       :G-total (:G-total chosen)
+       :controller-score (:controller-score chosen)
        :source :default-mode}
       {:action :abstain
        :reason :no-candidates
@@ -174,14 +162,14 @@
 
    Input: ranked-actions (output of `efe/rank-actions`).
    Optional kwargs:
-     :abstain-epsilon — minimum (no-op.G-total − best.G-total) required
+     :abstain-epsilon — minimum (no-op.controller-score − best.controller-score) required
                         to NOT abstain. Default 0.01.
      :temperature-opts — passed to `adaptive-temperature` AND
                         `effective-temperature`; may carry `:tau-mode`
-                        (:spread default | :gamma-only — see
+                        (:spread default | :selection-gain-only — see
                         `effective-temperature`, B-2d τ-layer separation).
-     :policy-precision — γ, the R14 learned inverse-temperature
-                        (`futon2.aif.policy-precision`). τ_eff = τ_spread / γ.
+     :selection-gain — g, the R14 learned inverse-temperature
+                        (`futon2.aif.selection-gain`). τ_eff = τ_spread / g.
                         Default 1.0 ⇒ behaviour identical to the spread-only path.
 
    Returns one of:
@@ -189,7 +177,7 @@
    Chosen-action branch:
      {:action <action map>
       :rank 1
-      :G-total <number>
+      :controller-score <number>
       :tau <number>
       :softmax-weights {<action> → <probability>}}
 
@@ -201,13 +189,13 @@
 
    Abstain fires when:
    - ranked-actions is empty, OR
-   - :no-op is present AND (no-op.G-total − best.G-total) < ε
+   - :no-op is present AND (no-op.controller-score − best.controller-score) < ε
      (i.e. the best action isn't meaningfully better than doing nothing)."
   ([ranked-actions] (select-action ranked-actions {}))
-  ([ranked-actions {:keys [abstain-epsilon temperature-opts policy-precision]
+  ([ranked-actions {:keys [abstain-epsilon temperature-opts selection-gain]
                     :or {abstain-epsilon 0.01
                          temperature-opts {}
-                         policy-precision 1.0}}]
+                         selection-gain 1.0}}]
    (cond
      (empty? ranked-actions)
      {:action :abstain
@@ -222,18 +210,18 @@
      ;; the production default — the historical code path below runs
      ;; UNTOUCHED (byte-identity is structural, not numeric luck). When a
      ;; bias exists, choice becomes argmax(ln E − G/τ_eff) — the canonical
-     ;; σ(ln E − γG) selection — and the abstain margin is applied to the
+     ;; σ(ln E − gG) selection — and the abstain margin is applied to the
      ;; prior-adjusted CHOICE, still in G units (documented flip-memo item:
      ;; abstain semantics keep their G-unit ε; only who gets compared moves).
      (let [log-priors (mapv #(double (or (:habit-prior-bias %) 0.0))
                             ranked-actions)
            priors? (boolean (some #(not (zero? (double %))) log-priors))
-           g-totals (mapv :G-total ranked-actions)
+           g-totals (mapv :controller-score ranked-actions)
            no-op-entry (find-no-op ranked-actions)
-           no-op-g (when no-op-entry (:G-total no-op-entry))]
+           no-op-g (when no-op-entry (:controller-score no-op-entry))]
        (if-not priors?
          (let [best (first ranked-actions)
-               best-g (:G-total best)
+               best-g (:controller-score best)
                abstain? (and no-op-entry
                              (< (- no-op-g best-g) abstain-epsilon))]
            (if abstain?
@@ -242,23 +230,23 @@
               :gap-report (gap-report ranked-actions)
               :ranked-actions ranked-actions}
              (let [tau-spread (adaptive-temperature g-totals temperature-opts)
-                   tau (effective-temperature g-totals policy-precision temperature-opts)
+                   tau (effective-temperature g-totals selection-gain temperature-opts)
                    weights (softmax-weights g-totals tau)]
                {:action (:action best)
                 :rank 1
-                :G-total best-g
+                :controller-score best-g
                 :tau tau
                 :tau-spread tau-spread
-                :policy-precision (double policy-precision)
+                :selection-gain (double selection-gain)
                 :softmax-weights (zipmap (mapv :action ranked-actions) weights)})))
          (let [tau-spread (adaptive-temperature g-totals temperature-opts)
-               tau (effective-temperature g-totals policy-precision temperature-opts)
+               tau (effective-temperature g-totals selection-gain temperature-opts)
                scores (mapv (fn [g lp] (+ (/ (- (double g)) (double tau))
                                           (double lp)))
                             g-totals log-priors)
                chosen-idx (apply max-key scores (range (count scores)))
                chosen (nth ranked-actions chosen-idx)
-               chosen-g (:G-total chosen)
+               chosen-g (:controller-score chosen)
                abstain? (and no-op-entry
                              (< (- no-op-g chosen-g) abstain-epsilon))]
            (if abstain?
@@ -269,10 +257,10 @@
              (let [weights (softmax-weights g-totals tau log-priors)]
                {:action (:action chosen)
                 :rank (:rank chosen)
-                :G-total chosen-g
+                :controller-score chosen-g
                 :tau tau
                 :tau-spread tau-spread
-                :policy-precision (double policy-precision)
+                :selection-gain (double selection-gain)
                 :habit-prior-applied? true
                 :softmax-weights (zipmap (mapv :action ranked-actions)
                                          weights)}))))))))

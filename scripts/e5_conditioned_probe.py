@@ -95,7 +95,7 @@ def live_observation():
 def cascade(psi):
     r = construct_cascade(psi, epsilon=EPSILON)
     shown = [p for (p, _rel, _mc) in r["cascade"][:BUDGET]]
-    return {"shown": shown, "wholeness": r["wholeness"], "F": r["F-free-energy"]}
+    return {"shown": shown, "wholeness": r["wholeness"], "F": r["cascade-score"]}
 
 
 def jaccard(a, b):

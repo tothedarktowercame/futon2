@@ -26,18 +26,18 @@
 (deftest evaluation-axis-is-shared-with-impl-1
   (testing "ΔG is exactly the shared coverage→rollout over the built wiring"
     (let [out (llm/llm-fold ["p/x" "p/y"] {} {:turn-fn (constantly (pr-str a-construction))})]
-      (is (= (fe/coverage-delta-g (:wiring out)) (:delta-g out))))))
+      (is (= (fe/coverage-score-delta (:wiring out)) (:coverage-score-delta out))))))
 
 (deftest incident-safe-defaults
   (testing "no turn-fn ⇒ no construction ⇒ ΔG nil ⇒ the gate abstains (never blocks, spawns nothing)"
     (let [out (llm/llm-fold ["p/x"] {})]
       (is (fold/valid-fold-output? out))
       (is (empty? (get-in out [:wiring :boxes])) "no fabricated construction")
-      (is (nil? (:delta-g out)))
+      (is (nil? (:coverage-score-delta out)))
       (is (not (fold/closes? out)))))
   (testing "an unreadable turn ⇒ no construction ⇒ ΔG nil (honest, not a crash)"
     (let [out (llm/llm-fold ["p/x"] {} {:turn-fn (constantly "}{ not edn")})]
-      (is (nil? (:delta-g out)))
+      (is (nil? (:coverage-score-delta out)))
       (is (empty? (get-in out [:wiring :boxes]))))))
 
 (deftest turn-may-return-a-map-or-a-string

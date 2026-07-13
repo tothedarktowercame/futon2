@@ -5,15 +5,15 @@
   "Events recovered by legacy-inversion; :invertible? verifies pre+events under :legacy ≈ recorded mu-post (KL<1e-4). Uninvertible rows (re-init/edge cases) reported, not dropped from the count."
   "KL is KL(a-matrix-posterior ‖ legacy-posterior) per entity-update — how far the flip would pull each posterior from what shipped."
   "CHANNEL downstream (8-channel emission block) NOT shadowed — it is a separate block needing FEP-path re-simulation per tick; said, not faked."],
- :corpus {:files 42},
+ :corpus {:files 45},
  :headline-finding
- "Flip :legacy→:a-matrix is INERT on this corpus: 0/247019 argmax-status flips (0.00%), KL(a-matrix‖legacy) mean 0.00102 nats (near-constant). ROOT CAUSE: belief re-initialises to the UNIFORM prior every tick (100.0% of updates) and the evidence is the SINGLE event type [:strengthened] — so a-matrix-v0's off-diagonal (lifecycle-adjacent) structure never redistributes mass differently from legacy. It would only bite with (a) persistent non-uniform priors or (b) varied event types; NEITHER holds today. Flip is LOW-RISK but its VALUE is UNOBSERVABLE on the current belief regime — this shadow cannot distinguish the models here.",
+ "Flip :legacy→:a-matrix is INERT on this corpus: 0/278790 argmax-status flips (0.00%), KL(a-matrix‖legacy) mean 0.00102 nats (near-constant). ROOT CAUSE: belief re-initialises to the UNIFORM prior every tick (100.0% of updates) and the evidence is the SINGLE event type [:strengthened] — so a-matrix-v0's off-diagonal (lifecycle-adjacent) structure never redistributes mass differently from legacy. It would only bite with (a) persistent non-uniform priors or (b) varied event types; NEITHER holds today. Flip is LOW-RISK but its VALUE is UNOBSERVABLE on the current belief regime — this shadow cannot distinguish the models here.",
  :summary
- {:entity-updates 247019,
+ {:entity-updates 278790,
   :flip-rate 0.0,
   :argmax-status-flips 0,
   :kl
-  {:mean 0.0010227301597693454,
+  {:mean 0.0010213563429824874,
    :max 0.0010240848040654004,
    :p50 0.0010240848040652013,
    :p90 0.0010240848040652013,
@@ -61,13 +61,16 @@
    "2026-07-01" {:n 9614, :mean-kl 0.0010240848040652371, :flips 0},
    "2026-07-02" {:n 14212, :mean-kl 0.001024084804065238, :flips 0},
    "2026-07-03" {:n 8360, :mean-kl 0.0010240848040652367, :flips 0},
-   "2026-07-04" {:n 836, :mean-kl 0.0010240848040652133, :flips 0}},
+   "2026-07-04" {:n 15884, :mean-kl 0.001024084804065238, :flips 0},
+   "2026-07-05" {:n 7524, :mean-kl 0.0010240848040652365, :flips 0},
+   "2026-07-06" {:n 8781, :mean-kl 0.001024084804065237, :flips 0},
+   "2026-07-09" {:n 418, :mean-kl 4.838906056314007E-6, :flips 0}},
   :prior-regime
   {:uniform-prior-fraction 1.0, :distinct-event-types [:strengthened]},
-  :invertible 247019,
+  :invertible 278790,
   :kl-by-event-type
   {:strengthened
-   {:n 247019, :mean-kl 0.0010227301597693454, :flips 0}},
+   {:n 278790, :mean-kl 0.0010213563429824874, :flips 0}},
   :uninvertible 0},
  :sim-only true,
  :generated-by

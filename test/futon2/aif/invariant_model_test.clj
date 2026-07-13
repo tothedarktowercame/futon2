@@ -9,7 +9,7 @@
    exactly the intended check. (futon2 has no core.logic dep; plain predicates
    carry the pattern's essence — checkable propositions + adversarial cases.)
 
-   The recompute formula mirrors compute-efe's G-total assembly
+   The recompute formula mirrors compute-efe's controller-score assembly
    (efe.clj:449-457) at the default weights — the same formula the corpus
    census (scripts/wm_trace_census.bb) uses."
   (:require [clojure.test :refer [deftest is testing]]))
@@ -20,21 +20,24 @@
 (def weights {:info 0.4 :survival 1.2 :structural-pressure 0.35})
 
 (defn recompute-total
-  "G-total from persisted terms at default weights (post-D1a: gap and
+  "controller-score from persisted terms at default weights (post-D1a: gap and
    graph-pragmatic are persisted, so no hidden residual is tolerated)."
   [e]
-  (+ (double (or (:G-risk e) 0.0))
-     (double (or (:G-ambiguity e) 0.0))
-     (- (* (:info weights) (double (or (:G-info e) 0.0))))
-     (* (:survival weights) (double (or (:G-survival e) 0.0)))
-     (- (* (:structural-pressure weights)
-           (double (or (:G-structural-pressure e) 0.0))))
-     (double (or (:G-graph-pragmatic e) 0.0))
-     (- (double (or (:G-gap e) 0.0)))
-     (double (or (:G-goal-outcome e) 0.0))))
+  (if (map? (:augmentation-terms e))
+    (+ (double (or (:G-core e) 0.0))
+       (reduce + 0.0 (vals (:augmentation-terms e))))
+    (+ (double (or (:G-risk e) 0.0))
+       (double (or (:G-ambiguity e) 0.0))
+       (- (* (:info weights) (double (or (:predictability-bonus e) 0.0))))
+       (* (:survival weights) (double (or (:homeostatic-pressure e) 0.0)))
+       (- (* (:structural-pressure weights)
+             (double (or (:structural-pressure e) 0.0))))
+       (double (or (:graph-control-score e) 0.0))
+       (- (double (or (:gap-exploration-bonus e) 0.0)))
+       (double (or (:G-goal-outcome e) 0.0)))))
 
 (def decomposition-keys
-  [:G-risk :G-ambiguity :G-info :G-survival :G-structural-pressure])
+  [:G-risk :G-ambiguity :predictability-bonus :homeostatic-pressure :structural-pressure])
 
 (defn placeholder? [e] (= :placeholder (:score-provenance e)))
 (defn decomposed?  [e] (every? #(number? (get e %)) decomposition-keys))
@@ -43,11 +46,11 @@
 ;; The invariants as violation-collectors (empty seq = holds)
 
 (defn i1-replay-equality
-  "Recomputed total = persisted :G-total for every decomposed entry (tol 1e-9)."
+  "Recomputed total = persisted :controller-score for every decomposed entry (tol 1e-9)."
   [tick]
   (for [e (:ranked-actions tick)
         :when (decomposed? e)
-        :let [d (Math/abs (- (recompute-total e) (double (:G-total e))))]
+        :let [d (Math/abs (- (recompute-total e) (double (:controller-score e))))]
         :when (> d 1e-9)]
     {:invariant :i1 :entry (:id e) :residual d}))
 
@@ -94,28 +97,28 @@
 ;; Conforming witness
 
 (def full-terms
-  [:G-risk :G-ambiguity :G-info :G-survival :G-structural-pressure
-   :G-gap :G-graph-pragmatic :G-goal-outcome])
+  [:G-risk :G-ambiguity :predictability-bonus :homeostatic-pressure :structural-pressure
+   :gap-exploration-bonus :graph-control-score :G-goal-outcome])
 
 (defn entry
-  "A decomposed entry whose :G-total is derived (so I1 holds by construction)
+  "A decomposed entry whose :controller-score is derived (so I1 holds by construction)
    and whose :G-core is exact (so I3 holds by construction)."
   [id terms]
   (let [e (merge {:id id :formula-terms full-terms} terms)]
     (assoc e
-           :G-total (recompute-total e)
+           :controller-score (recompute-total e)
            :G-core (+ (double (:G-risk e)) (double (:G-ambiguity e))))))
 
 (def witness-tick
   {:ranked-actions
-   [(entry :a1 {:G-risk 0.156 :G-ambiguity 0.015 :G-info 13.985
-                :G-survival 0.758 :G-structural-pressure 1.0
-                :G-gap 0.3 :G-graph-pragmatic 0.05 :G-goal-outcome 0.0})
-    (entry :a2 {:G-risk 0.31 :G-ambiguity 0.03 :G-info 13.97
-                :G-survival 0.61 :G-structural-pressure 0.0
-                :G-gap 0.0 :G-graph-pragmatic 0.0 :G-goal-outcome 0.12})
+   [(entry :a1 {:G-risk 0.156 :G-ambiguity 0.015 :predictability-bonus 13.985
+                :homeostatic-pressure 0.758 :structural-pressure 1.0
+                :gap-exploration-bonus 0.3 :graph-control-score 0.05 :G-goal-outcome 0.0})
+    (entry :a2 {:G-risk 0.31 :G-ambiguity 0.03 :predictability-bonus 13.97
+                :homeostatic-pressure 0.61 :structural-pressure 0.0
+                :gap-exploration-bonus 0.0 :graph-control-score 0.0 :G-goal-outcome 0.12})
     ;; the cascade row: unscored but SELF-DESCRIBING (D1b)
-    {:id :casc :G-total 0.0 :score-provenance :placeholder}]})
+    {:id :casc :controller-score 0.0 :score-provenance :placeholder}]})
 
 (def witness-surfaces
   [{:id :wm-blend          :declared-sense :sense-iii :earned? true}
@@ -130,18 +133,38 @@
 (deftest conforming-witness-yields-zero-violations
   (is (empty? (all-violations witness-tick witness-surfaces))))
 
+(deftest telemetry-does-not-silently-reenter-the-score
+  (let [base (entry :retired
+                    {:G-risk 0.2 :G-ambiguity 0.1 :predictability-bonus 8.0
+                     :homeostatic-pressure 0.7 :structural-pressure 0.0
+                     :gap-exploration-bonus 0.0 :graph-control-score 0.0
+                     :G-goal-outcome 0.0})
+        retired (assoc base
+                       :augmentation-terms {:risk-control 0.0 :info 0.0
+                                            :survival 0.0 :structural-pressure 0.0
+                                            :graph-control 0.0
+                                            :model-uncertainty-bonus 0.0
+                                            :gap 0.0 :goal-outcome 0.0}
+                       :controller-score 0.3)]
+    (is (< (Math/abs (- 0.3 (recompute-total retired))) 1.0e-12))
+    (is (< (Math/abs
+            (- 0.3 (recompute-total (assoc retired
+                                           :predictability-bonus 8000.0
+                                           :homeostatic-pressure 7000.0))))
+           1.0e-12))))
+
 (defn- only-caught-by [tick surfaces expected]
   (let [vs (all-violations tick surfaces)]
     (and (seq vs) (= #{expected} (set (map :invariant vs))))))
 
 (deftest i1-catches-tampered-total
-  (let [tick (update-in witness-tick [:ranked-actions 0 :G-total] + 0.296)]
+  (let [tick (update-in witness-tick [:ranked-actions 0 :controller-score] + 0.296)]
     (testing "the pre-D1a hidden-residual failure mode, replayed abstractly"
       (is (only-caught-by tick witness-surfaces :i1)))))
 
 (deftest i2-catches-bare-constant
   (let [tick (update witness-tick :ranked-actions conj
-                     {:id :bare :G-total 0.0})] ; the OLD cascade-row shape
+                     {:id :bare :controller-score 0.0})] ; the OLD cascade-row shape
     (is (only-caught-by tick witness-surfaces :i2))))
 
 (deftest i3-catches-core-drift
@@ -149,15 +172,15 @@
     (is (only-caught-by tick witness-surfaces :i3))))
 
 (deftest i4-catches-unpersisted-formula-term
-  ;; a formula that consumed :G-gap while the whitelist dropped it —
+  ;; a formula that consumed :gap-exploration-bonus while the whitelist dropped it —
   ;; the exact pre-D1a defect (F2), as an abstract entry
-  (let [e (-> (entry :a3 {:G-risk 0.2 :G-ambiguity 0.01 :G-info 14.0
-                          :G-survival 0.7 :G-structural-pressure 0.5
-                          :G-gap 0.6 :G-graph-pragmatic 0.0 :G-goal-outcome 0.0})
-              (dissoc :G-gap)
+  (let [e (-> (entry :a3 {:G-risk 0.2 :G-ambiguity 0.01 :predictability-bonus 14.0
+                          :homeostatic-pressure 0.7 :structural-pressure 0.5
+                          :gap-exploration-bonus 0.6 :graph-control-score 0.0 :G-goal-outcome 0.0})
+              (dissoc :gap-exploration-bonus)
               ;; total still reflects the consumed gap ⇒ i1 would also fire;
               ;; persist the gap-less recomputation to isolate i4
-              ((fn [e'] (assoc e' :G-total (recompute-total e')))))
+              ((fn [e'] (assoc e' :controller-score (recompute-total e')))))
         tick (update witness-tick :ranked-actions conj e)]
     (is (only-caught-by tick witness-surfaces :i4))))
 

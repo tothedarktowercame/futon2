@@ -32,13 +32,13 @@
 
 (deftest rollout-search-unlocks-second-step
   (let [moves [{:move/id "a" :move/class :close-hole
-                :have "root" :want "bridge" :score 1.0 :delta-g -0.1
+                :have "root" :want "bridge" :score 1.0 :step-score-delta -0.1
                 :rank 1 :move/terminal? false}
                {:move/id "b" :move/class :advance-capability
                 :have "bridge" :want "goal" :advances-cap "agency"
-                :score 3.0 :delta-g -1.0 :rank 2 :move/terminal? false}
+                :score 3.0 :step-score-delta -1.0 :rank 2 :move/terminal? false}
                {:move/id "greedy" :move/class :close-hole
-                :have "root" :want "small" :score 2.0 :delta-g -0.2
+                :have "root" :want "small" :score 2.0 :step-score-delta -0.2
                 :rank 3 :move/terminal? false}]
         state {:arrows {}
                :cap-overlay cap-snapshot
@@ -47,20 +47,20 @@
         best (rollout/best-rollout state moves :depth 2 :top-k 3 :gamma 0.9)]
     (is (= ["greedy"] (mapv :move/id (:policy greedy))))
     (is (= ["a" "b"] (mapv :move/id (:policy best))))
-    (is (< (:G best) (:G greedy)))))
+    (is (< (:policy-rollout-score best) (:policy-rollout-score greedy)))))
 
 (deftest horizon-h-unlocks-delayed-temporal-payoff
   (let [moves [{:move/id "a" :move/class :close-hole
-                :have "root" :want "bridge" :score 3.0 :delta-g -0.05
+                :have "root" :want "bridge" :score 3.0 :step-score-delta -0.05
                 :rank 1 :move/terminal? false}
                {:move/id "b" :move/class :close-hole
-                :have "bridge" :want "ledge" :score 3.0 :delta-g -0.05
+                :have "bridge" :want "ledge" :score 3.0 :step-score-delta -0.05
                 :rank 2 :move/terminal? false}
                {:move/id "c" :move/class :advance-capability
                 :have "ledge" :want "goal" :advances-cap "agency"
-                :score 3.0 :delta-g -10.0 :rank 3 :move/terminal? false}
+                :score 3.0 :step-score-delta -10.0 :rank 3 :move/terminal? false}
                {:move/id "greedy" :move/class :close-hole
-                :have "root" :want "small" :score 2.0 :delta-g -0.5
+                :have "root" :want "small" :score 2.0 :step-score-delta -0.5
                 :rank 4 :move/terminal? false}]
         state {:arrows {}
                :cap-overlay cap-snapshot
@@ -74,8 +74,8 @@
     ;; H=3 sees the delayed payoff under the same flat rollout model.
     (is (= ["a" "b" "c"] (mapv :move/id (:policy horizon-3))))
     ;; The R15 names are API aliases for the existing R13 depth/gamma mechanics.
-    (is (= (:G legacy-alias) (:G horizon-alias)))
-    (is (not= (:G horizon-3) (:G horizon-alias)))))
+    (is (= (:policy-rollout-score legacy-alias) (:policy-rollout-score horizon-alias)))
+    (is (not= (:policy-rollout-score horizon-3) (:policy-rollout-score horizon-alias)))))
 
 (deftest root-seed-ignites-phase-chain
   ;; claude-3's hypergraph-operator example (v2 scope-grain seam): one
@@ -90,7 +90,7 @@
         moves (vec (map-indexed
                     (fn [i [id have want]]
                       {:move/id id :move/class :close-hole
-                       :have have :want want :score 1.0 :delta-g -0.1
+                       :have have :want want :score 1.0 :step-score-delta -0.1
                        :rank (inc i) :move/terminal? false})
                     chain))
         seeded (rollout/seed-roots {:arrows {} :cap-overlay {} :reachable #{}} moves)
@@ -116,17 +116,17 @@
         moves [;; mission chain root (close-hole)
                {:move/id "phase" :move/class :close-hole
                 :have mission :want "war-machine/derive"
-                :score 1.0 :delta-g -0.1 :rank 1 :move/terminal? false}
+                :score 1.0 :step-score-delta -0.1 :rank 1 :move/terminal? false}
                ;; reachable summit: :have = a claimed cap (achieved axiom)
                {:move/id "summit" :move/class :advance-capability
                 :have claimed-cap :want "scope/capability/wm-overnight-unsupervised"
                 :advances-cap "wm-overnight-unsupervised"
-                :score 2.0 :delta-g -1.0 :rank 2 :move/terminal? false}
+                :score 2.0 :step-score-delta -1.0 :rank 2 :move/terminal? false}
                ;; island: :have = a conjectural foothold, intended dark
                {:move/id "island" :move/class :advance-capability
                 :have island :want "scope/capability/kit-outbox"
                 :advances-cap "kit-outbox"
-                :score 2.0 :delta-g -1.0 :rank 3 :move/terminal? false}]
+                :score 2.0 :step-score-delta -1.0 :rank 3 :move/terminal? false}]
         seeded (rollout/seed-roots {:arrows {} :cap-overlay {} :reachable #{}} moves)
         reachable-ids (set (mapv :move/id (rollout/reachable-moves seeded moves)))]
     ;; the three classes partition cleanly, with no drift

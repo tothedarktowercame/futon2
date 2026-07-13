@@ -35,7 +35,7 @@
           :answer mock-answer}
    :arming {:operator "joe" :word "mock arming word — test fixture, not a real arming" :at "2026-07-05T00:00:00Z"
             :scope :one-fold}
-   :eval {:delta-g -0.5 :g-grain :coverage}})
+   :eval {:coverage-score-delta -0.5 :g-grain :coverage}})
 
 (defn- learning-loop-clean []
   (edn/read-string (slurp "/home/joe/code/futon6/holes/clean/M-learning-loop.clean.edn")))
@@ -67,7 +67,7 @@
   (let [dir (tmp-deposit-dir!
              {"ft-valid.edn"       (valid-record)
               "ft-no-arming.edn"   (dissoc (valid-record) :arming)
-              "ft-dg-drift.edn"    (assoc-in (valid-record) [:eval :delta-g] -0.9)
+              "ft-dg-drift.edn"    (assoc-in (valid-record) [:eval :coverage-score-delta] -0.9)
               "ft-bad-pin.edn"     (assoc-in (valid-record) [:prompt :sha256] (apply str (repeat 64 "0")))
               "ft-no-boxes.edn"    (assoc-in (valid-record) [:turn :answer :boxes] [])
               "ft-unreadable.edn"  "{:fold-turn/id \"ft-broken\" :never-closed"
@@ -79,7 +79,7 @@
       (is (= [:clean-missing] (map :clean/status deposits))))
     (testing "each malformed record is rejected with its own loud reason"
       (is (= {"ft-no-arming.edn"  :missing-arming
-              "ft-dg-drift.edn"   :delta-g-mismatch
+              "ft-dg-drift.edn"   :coverage-score-delta-mismatch
               "ft-bad-pin.edn"    :prompt-not-reconstructable
               "ft-no-boxes.edn"   :empty-construction
               "ft-unreadable.edn" :unreadable-edn}
@@ -139,11 +139,8 @@
     "ft-live-geometric-stack-002"
     "ft-bayesian-structure-learning-003"
     "ft-aif-head-004"
-    "ft-action-vocabulary-005"
-    "ft-peradam-mechanization-006"
     "ft-first-flights-007"
     "ft-bounded-in-flight-state-008"
-    "ft-evaluate-policies-009"
     "ft-aif-faithfulness-001"
     "ft-legacy-sorry-cleanup-001"
     "ft-fold-ansatz-001"
@@ -152,7 +149,10 @@
     "ft-chipwitz-corps-001"
     "ft-futonzero-generative-011"
     "ft-pattern-mining-011"
-    "ft-war-machine-pilot-001"})
+    "ft-war-machine-pilot-001"
+    "ft-reachable-from-boot-001"
+    "ft-state-snapshot-witness-001"
+    "ft-canon-fingerprint-store-001"})
 
 (defn- real-prose-fn [pattern-id]
   (slurp (str "/home/joe/code/futon3/library/" pattern-id ".flexiarg")))
@@ -170,17 +170,17 @@
                       :psi (get-in dep [:cascade :psi])}
         entry {:mission (:mission dep)
                :shown (get-in dep [:cascade :pattern-ids])
-               :F-free-energy 1.0
-               :G-rollout nil}]
+               :cascade-score 1.0
+               :policy-rollout-score nil}]
     (is (empty? rejected) (pr-str rejected))
     (is (some? dep) "007 deposit must be present in the real fold-turn corpus")
     (binding [cl/*escrow-replay?* true
-              cl/*classical-fold-dG?* false]
+              cl/*classical-fold-score?* false]
       (let [ag (cl/act-gate-from-lane-entry
                 entry circumstance
                 {:escrow-turn-fn (esc/escrow-turn-fn deposits)
                  :prose-fn real-prose-fn})]
-        (is (= (get-in dep [:eval :delta-g]) (:delta-G ag)))
-        (is (= :fold-escrow (:delta-G/source ag)))
+        (is (= (get-in dep [:eval :coverage-score-delta]) (:coverage-score-delta ag)))
+        (is (= :fold-escrow (:coverage-score/source ag)))
         (is (= (get-in dep [:turn :answer :boxes])
                (get-in ag [:fold-escrow :wiring :boxes])))))))

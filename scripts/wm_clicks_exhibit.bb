@@ -9,7 +9,7 @@
 ;;
 ;; Palette (dataviz method, validated both modes): series color follows the ENTITY.
 ;;   winner-G #2a78d6 (dark #3987e5) · G-core #1baf7a (dark #199e70) ·
-;;   G-augmentation #eda100 (dark #c98500). Light contrast WARN on aqua/yellow ⇒
+;;   controller-augmentation #eda100 (dark #c98500). Light contrast WARN on aqua/yellow ⇒
 ;;   RELIEF: direct line-end labels + the data table (both mandatory, present).
 ;;   Trigger encoded by SHAPE not color: click = filled dot, cron = open ring.
 ;;
@@ -40,15 +40,15 @@
               (map (fn [t]
                      (let [ras (vec (filter :G-risk (:ranked-actions t)))
                            kl? (some #(= :kl (:goal-outcome-mode %)) ras)
-                           w (when (seq ras) (apply min-key #(double (:G-total %)) ras))]
+                           w (when (seq ras) (apply min-key #(double (:controller-score %)) ras))]
                        {:ts (str (:timestamp t))
                         :sha (get-in t [:wm-version :git-sha])
                         :kl? kl?
                         :trigger (get-in t [:wm-version :trigger])
-                        :winner-G (some-> (get-in t [:decision :G-total]) double)
+                        :winner-G (some-> (get-in t [:decision :controller-score]) double)
                         :G-core (some-> (:G-core w) double)
-                        :G-aug (some-> (:G-augmentation w) double)
-                        :gamma (some-> (get-in t [:decision :policy-precision]) double)
+                        :G-aug (some-> (:controller-augmentation w) double)
+                        :gamma (some-> (get-in t [:decision :selection-gain]) double)
                         :decision-type (get-in t [:decision :action :type])
                         :decision-target (get-in t [:decision :action :target])
                         :abstain? (nil? (get-in t [:decision :action]))})))
@@ -74,7 +74,7 @@
         ys (concat (keep :winner-G recs) (keep :G-core recs) (keep :G-aug recs))
         y0 (min 0.0 (apply min ys)) y1 (* 1.08 (apply max ys))
         xf (xscale t0 t1 H) yf (yscale y0 y1 H)
-        series [["winner-G" :winner-G "var(--c-winner)"] ["G-core" :G-core "var(--c-core)"] ["G-augmentation" :G-aug "var(--c-aug)"]]
+        series [["winner-G" :winner-G "var(--c-winner)"] ["G-core" :G-core "var(--c-core)"] ["controller-augmentation" :G-aug "var(--c-aug)"]]
         first-kl (epoch-min (:ts (first recs)))
         marker (fn [r ser col]
                  (let [x (xf (epoch-min (:ts r))) y (yf (double (get r ser)))]
@@ -119,7 +119,7 @@
         ys (keep :gamma tail) y0 (* 0.98 (apply min ys)) y1 (* 1.02 (apply max ys))
         xf (xscale t0 t1 H) yf (yscale y0 y1 H)
         pts (map (fn [r] [(epoch-min (:ts r)) (:gamma r)]) tail)]
-    (str "<svg viewBox='0 0 " W " " H "' class='chart' role='img' aria-label='gamma (policy precision) trajectory'>"
+    (str "<svg viewBox='0 0 " W " " H "' class='chart' role='img' aria-label='selection gain trajectory'>"
          (apply str (for [g (range 4) :let [yv (+ y0 (* (/ g 3.0) (- y1 y0))) py (yf yv)]]
                       (str "<line x1='" PL "' x2='" (- W PR) "' y1='" (format "%.1f" py) "' y2='" (format "%.1f" py) "' class='grid'/>"
                            "<text x='" (- PL 6) "' y='" (format "%.1f" (+ py 3)) "' class='axis' text-anchor='end'>" (format "%.2f" yv) "</text>")))
@@ -190,10 +190,10 @@
        "</div>"
        ;; Panel 2 — G trajectory
        "<h2>G trajectory — KL-era, per record</h2>"
-       "<div class='legend'><span><b style='background:var(--c-winner)'></b>winner-G</span><span><b style='background:var(--c-core)'></b>G-core (belly)</span><span><b style='background:var(--c-aug)'></b>G-augmentation (KL layer)</span><span class='muted'>● click · ○ cron tick</span></div>"
+       "<div class='legend'><span><b style='background:var(--c-winner)'></b>winner-G</span><span><b style='background:var(--c-core)'></b>G-core (belly)</span><span><b style='background:var(--c-aug)'></b>controller-augmentation (KL layer)</span><span class='muted'>● click · ○ cron tick</span></div>"
        (g-chart)
        ;; Panel 3 — gamma
-       "<h2>γ (policy precision) — last hinge samples → KL era</h2>"
+       "<h2>selection gain — last hinge samples → KL era</h2>"
        (gamma-chart)
        ;; Panel 4 — decision-type distributions
        "<h2>Decision type — before (hinge) vs after (KL)</h2>"

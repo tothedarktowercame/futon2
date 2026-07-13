@@ -209,31 +209,31 @@
 
 (deftest anamnesis-tiebreak-reorders-address-sorry-groups
   (let [ranked [{:rank 1
-                 :G-total -4.2558
+                 :controller-score -4.2558
                  :action {:type :address-sorry
                           :target :sorry/r3a-likelihood-coupling-density}}
                 {:rank 2
-                 :G-total -4.2558
+                 :controller-score -4.2558
                  :action {:type :address-sorry
                           :target :sorry/r3a-likelihood-ticks-firing-ratio}}
                 {:rank 3
-                 :G-total -4.2558
+                 :controller-score -4.2558
                  :action {:type :address-sorry
                           :target :sorry/r3d-per-entity-attribution}}
                 {:rank 4
-                 :G-total -4.2558
+                 :controller-score -4.2558
                  :action {:type :address-sorry
                           :target :sorry/stub-lifts-pending-aif-edn}}
                 {:rank 5
-                 :G-total -4.2558
+                 :controller-score -4.2558
                  :action {:type :address-sorry
                           :target :sorry/wm-ui-hud-mode-rationale-hardcode}}
                 {:rank 6
-                 :G-total -4.2558
+                 :controller-score -4.2558
                  :action {:type :address-sorry
                           :target :sorry/mission-aif-head-not-served}}
                 {:rank 7
-                 :G-total -4.2558
+                 :controller-score -4.2558
                  :action {:type :address-sorry
                           :target :sorry/handler-closure-route-rebinding}}]
         sorry-idx {"sorry/r3a-likelihood-coupling-density"
@@ -363,19 +363,19 @@
         (fn []
           (let [opts (#'wm/live-gap-view-efe-opts
                       {:time-pressure 0.25 :horizon-steps 3})
-                local (efe/gap-efe-terms (:mission-gap-view opts)
+                local (efe/gap-control-terms (:mission-gap-view opts)
                                          {:type :open-mission
                                           :target "M-war-machine-tuning"}
                                          {:gap-weight (:gap-weight opts)})
-                math (efe/gap-efe-terms (:mission-gap-view opts)
+                math (efe/gap-control-terms (:mission-gap-view opts)
                                         {:type :open-mission
                                          :target "M-canon-fingerprint-store"}
                                         {:gap-weight (:gap-weight opts)})]
             (is (= {"M-war-machine-tuning" 0.491}
                    (:mission-gap-view opts)))
             (is (= 6.0 (:gap-weight opts)))
-            (is (= 2.9459999999999997 (:G-gap local)))
-            (is (= 0.0 (:G-gap math)))
+            (is (= 2.9459999999999997 (:gap-exploration-bonus local)))
+            (is (= 0.0 (:gap-exploration-bonus math)))
             (is (= 0.25 (:time-pressure opts)))
             (is (= 3 (:horizon-steps opts))))))))
 
@@ -393,24 +393,24 @@
       (fn []
         (let [opts (#'wm/live-gap-view-efe-opts
                     {:time-pressure 0.25 :horizon-steps 3})
-              local (efe/gap-efe-terms (:mission-gap-view opts)
+              local (efe/gap-control-terms (:mission-gap-view opts)
                                        {:type :open-mission
                                         :target "M-war-machine-tuning"}
                                        {:gap-weight (:gap-weight opts)})]
           (is (= {} (:mission-gap-view opts)))
-          (is (= 0.0 (:G-gap local)))))))))
+          (is (= 0.0 (:gap-exploration-bonus local)))))))))
 
 (deftest anamnesis-tiebreak-leaves-mixed-or-non-sorry-ties-alone
   (let [ranked [{:rank 1
-                 :G-total -4.2558
+                 :controller-score -4.2558
                  :action {:type :address-sorry
                           :target :sorry/r3d-per-entity-attribution}}
                 {:rank 2
-                 :G-total -4.2558
+                 :controller-score -4.2558
                  :action {:type :open-mission
                           :target "M-action-cost-modelling"}}
                 {:rank 3
-                 :G-total -4.2558
+                 :controller-score -4.2558
                  :action {:type :open-mission
                           :target "M-mission-wiring"}}]]
     (with-redefs-fn {#'wm/sorry-doc-index (fn [] (throw (ex-info "should not be called" {})))

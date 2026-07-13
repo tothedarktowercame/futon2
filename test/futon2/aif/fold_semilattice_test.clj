@@ -16,8 +16,8 @@
 (deftest semilattice-fold-satisfies-contract
   (let [out (fs/semilattice-fold cascade {:semilattice semilattice})]
     (is (fold/valid-fold-output? out))
-    (is (number? (:delta-g out)))
-    (is (neg? (:delta-g out)))))
+    (is (number? (:coverage-score-delta out)))
+    (is (neg? (:coverage-score-delta out)))))
 
 (deftest semilattice-fold-builds-nondegenerate-wiring
   (let [out (fs/semilattice-fold cascade {:semilattice semilattice})
@@ -33,7 +33,7 @@
 (deftest semilattice-fold-abstains-without-semilattice
   (let [out (fs/semilattice-fold cascade {})]
     (is (fold/valid-fold-output? out))
-    (is (nil? (:delta-g out)))
+    (is (nil? (:coverage-score-delta out)))
     (is (empty? (get-in out [:wiring :boxes])))))
 
 (deftest semilattice-fold-is-deterministic
@@ -43,11 +43,11 @@
 (deftest close-loop-prefers-semilattice-fold
   (let [ag (cl/act-gate-from-lane-entry
             {:mission "M-semilattice"
-             :F-free-energy 0.3
-             :G-rollout nil
+             :cascade-score 0.3
+             :policy-rollout-score nil
              :shown cascade
              :semilattice semilattice})]
-    (is (= :fold-semilattice (:delta-G/source ag)))
-    (is (number? (:delta-G ag)))
-    (is (neg? (:delta-G ag)))
+    (is (= :fold-semilattice (:coverage-score/source ag)))
+    (is (number? (:coverage-score-delta ag)))
+    (is (neg? (:coverage-score-delta ag)))
     (is (= (count cascade) (count (get-in ag [:fold :wiring :boxes]))))))

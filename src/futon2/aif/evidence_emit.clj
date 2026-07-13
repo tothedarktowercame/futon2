@@ -75,9 +75,9 @@
   [w]
   (not-empty
    (into {} (keep (fn [[in out]] (when (number? (get w in)) [out (get w in)]))
-                  {:G-core :core :G-risk :risk :G-ambiguity :ambiguity :G-info :info
-                   :G-goal-outcome :goal-outcome :G-survival :survival
-                   :G-augmentation :augmentation :G-gap :gap}))))
+                  {:G-core :core :G-risk :risk :G-ambiguity :ambiguity :predictability-bonus :info
+                   :G-goal-outcome :goal-outcome :homeostatic-pressure :survival
+                   :controller-augmentation :augmentation :gap-exploration-bonus :gap}))))
 
 (defn- cascade-lane
   "The cascade-lane verdicts (record's :act-gate-verdicts): per candidate mission, the
@@ -87,8 +87,8 @@
   [tick]
   (mapv (fn [e] {:mission (:mission e)
                  :verdict (:verdict e)
-                 :delta-G (:delta-G e)
-                 :source (:delta-G-source e)})
+                 :coverage-score-delta (:coverage-score-delta e)
+                 :source (:coverage-score-source e)})
         (:act-gate-verdicts tick)))
 
 (defn- nm [x] (cond (keyword? x) (name x) (nil? x) "?" :else (str x)))
@@ -111,17 +111,17 @@
                    (str/join "; "
                              (map (fn [e] (str (:mission e) " "
                                                (case (:verdict e) :pass "✓" :fail "✗" "·")
-                                               (when (number? (:delta-G e)) (str " (ΔG " (r2 (:delta-G e)) ")"))))
+                                               (when (number? (:coverage-score-delta e)) (str " (ΔG " (r2 (:coverage-score-delta e)) ")"))))
                                   lane)))]
     (str "War Machine · " (nm (:mode tick)) " · " (nm dtype)
          (when target (str " → " target))
-         " (G " (r2 (or (:G-total decision) (:G-total w))) ", risk-mode " (nm (:risk-mode w)) ")."
+         " (G " (r2 (or (:controller-score decision) (:controller-score w))) ", risk-mode " (nm (:risk-mode w)) ")."
          (when rationale (str "\nWhy: " rationale))
          (when lane-str (str "\nCascade lane: " lane-str))
          (when-let [en (or (get-in tick [:enactment :mission]) (get-in tick [:enactment :policy]))]
            (str "\nEnacted: " en))
-         (when (number? (:realized-G outcome))
-           (str "\nRealized G " (r2 (:realized-G outcome)) " vs expected " (r2 (:expected-G outcome)))))))
+         (when (number? (:realized-score outcome))
+           (str "\nRealized G " (r2 (:realized-score outcome)) " vs expected " (r2 (:expected-score outcome)))))))
 
 (defn compact-body
   "Return the compact WM tick summary sent to the shared evidence bus.
@@ -136,7 +136,7 @@
     {:mode (:mode tick)
      :decision (if (map? action) (:type action) action)
      :target (when (map? action) (action-target action))
-     :G (or (:G-total decision) (:G-total action) (:G-total w))
+     :G (or (:controller-score decision) (:controller-score action) (:controller-score w))
      :risk-mode (:risk-mode w)
      :G-breakdown (g-breakdown w)
      :cascade-lane (cascade-lane tick)
@@ -145,8 +145,8 @@
      :enacted (or (get-in tick [:enactment :mission])
                   (get-in tick [:enactment :policy])
                   (:enacted tick))
-     :realized-G (:realized-G outcome)
-     :expected-G (:expected-G outcome)
+     :realized-score (:realized-score outcome)
+     :expected-score (:expected-score outcome)
      :trigger (get-in tick [:wm-version :trigger])
      :candidates (or (:candidates tick) (count (:ranked-actions tick)))
      :text (tick-text tick)

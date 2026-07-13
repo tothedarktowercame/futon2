@@ -27,27 +27,27 @@
     (is (< (Math/abs (- 0.5 (policy/adaptive-temperature [0.0 1.0] {:k 2.0}))) 1e-9))))
 
 ;; ---------------------------------------------------------------------------
-;; effective-temperature — R14 γ modulation (τ_eff = τ_spread / γ)
+;; effective-temperature — R14 g modulation (τ_eff = τ_spread / g)
 ;; ---------------------------------------------------------------------------
 
 (deftest effective-temperature-reduces-at-unity-test
-  (testing "γ = 1.0 → τ_eff == adaptive-temperature (reduction-safe)"
+  (testing "g = 1.0 → τ_eff == adaptive-temperature (reduction-safe)"
     (let [g [0.0 0.5 1.0]]
       (is (= (policy/adaptive-temperature g)
              (policy/effective-temperature g 1.0))))))
 
-(deftest effective-temperature-monotone-in-gamma-test
-  (testing "higher γ → lower effective temperature (sharper)"
+(deftest effective-temperature-monotone-in-selection-gain-test
+  (testing "higher g → lower effective temperature (sharper)"
     (let [g [0.0 1.0]
           lo (policy/effective-temperature g 0.5)
           mid (policy/effective-temperature g 1.0)
           hi (policy/effective-temperature g 2.0)]
       (is (> lo mid))
       (is (> mid hi))
-      (is (< (Math/abs (- (/ mid 2.0) hi)) 1e-9) "τ_eff = τ_spread / γ exactly"))))
+      (is (< (Math/abs (- (/ mid 2.0) hi)) 1e-9) "τ_eff = τ_spread / g exactly"))))
 
-(deftest effective-temperature-floors-degenerate-gamma-test
-  (testing "γ ≤ 0 is floored at tau-min so τ_eff never divides by ~0 or flips sign"
+(deftest effective-temperature-floors-degenerate-selection-gain-test
+  (testing "g ≤ 0 is floored at tau-min so τ_eff never divides by ~0 or flips sign"
     (let [g [0.0 1.0]
           t (policy/effective-temperature g 0.0)]
       (is (pos? t))
@@ -78,7 +78,7 @@
 (defn- ranked
   "Helper: build a ranked list quickly."
   [pairs]
-  (mapv (fn [[t g]] {:action {:type t} :G-total g}) pairs))
+  (mapv (fn [[t g]] {:action {:type t} :controller-score g}) pairs))
 
 (deftest select-action-chooses-best-when-clearly-better-test
   (testing "best action wins by >= epsilon over :no-op → returned as chosen"
@@ -100,43 +100,43 @@
       (is (< (Math/abs (- 1.0 (reduce + weights))) 1e-9)))))
 
 ;; ---------------------------------------------------------------------------
-;; select-action — R14 γ (policy-precision) modulation of selection
+;; select-action — R14 g (selection-gain) modulation of selection
 ;; ---------------------------------------------------------------------------
 
-(deftest select-action-default-gamma-is-reduction-safe-test
-  (testing "omitting :policy-precision ⇒ τ and softmax identical to the spread path"
+(deftest select-action-default-selection-gain-is-reduction-safe-test
+  (testing "omitting :selection-gain ⇒ τ and softmax identical to the spread path"
     (let [ranked-acts (ranked [[:address-sorry 0.0]
                                [:no-op 0.5]
                                [:fire-pattern 1.0]])
           out (policy/select-action ranked-acts)
-          g-totals (mapv :G-total ranked-acts)]
+          g-totals (mapv :controller-score ranked-acts)]
       (is (= (policy/adaptive-temperature g-totals) (:tau out))
-          "effective τ equals spread-only τ at the γ=1.0 default")
-      (is (= 1.0 (:policy-precision out)))
+          "effective τ equals spread-only τ at the g=1.0 default")
+      (is (= 1.0 (:selection-gain out)))
       (is (= (policy/softmax-weights g-totals (policy/adaptive-temperature g-totals))
              (vals (:softmax-weights out)))))))
 
-(deftest select-action-high-gamma-sharpens-test
-  (testing "higher γ sharpens the softmax — more probability mass on the best action"
+(deftest select-action-high-selection-gain-sharpens-test
+  (testing "higher g sharpens the softmax — more probability mass on the best action"
     (let [ranked-acts (ranked [[:address-sorry 0.0]
                                [:fire-pattern 1.0]])
           best-w (fn [g] (apply max (vals (:softmax-weights
                                            (policy/select-action
-                                            ranked-acts {:policy-precision g})))))
+                                            ranked-acts {:selection-gain g})))))
           w-lo (best-w 0.5)
           w-mid (best-w 1.0)
           w-hi (best-w 2.0)]
-      (is (> w-hi w-mid) "γ=2 commits harder than γ=1")
-      (is (> w-mid w-lo) "γ=1 commits harder than γ=0.5 (more abstain-leaning)"))))
+      (is (> w-hi w-mid) "g=2 commits harder than g=1")
+      (is (> w-mid w-lo) "g=1 commits harder than g=0.5 (more abstain-leaning)"))))
 
 (deftest select-action-records-tau-spread-test
-  (testing "the chosen branch records both effective τ and the pre-γ spread τ"
+  (testing "the chosen branch records both effective τ and the pre-g spread τ"
     (let [ranked-acts (ranked [[:address-sorry 0.0] [:fire-pattern 1.0]])
-          out (policy/select-action ranked-acts {:policy-precision 2.0})]
-      (is (= (policy/adaptive-temperature (mapv :G-total ranked-acts))
+          out (policy/select-action ranked-acts {:selection-gain 2.0})]
+      (is (= (policy/adaptive-temperature (mapv :controller-score ranked-acts))
              (:tau-spread out)))
-      (is (< (:tau out) (:tau-spread out)) "γ=2 lowered the effective τ")
-      (is (= 2.0 (:policy-precision out))))))
+      (is (< (:tau out) (:tau-spread out)) "g=2 lowered the effective τ")
+      (is (= 2.0 (:selection-gain out))))))
 
 ;; ---------------------------------------------------------------------------
 ;; select-action — abstain branch
@@ -164,13 +164,13 @@
 
 (deftest select-action-abstain-gap-report-test
   (testing "abstain branch surfaces :learn-action-class actions as gap-report"
-    (let [ranked-acts [{:action {:type :no-op} :G-total 0.5}
+    (let [ranked-acts [{:action {:type :no-op} :controller-score 0.5}
                       {:action {:type :learn-action-class :target-class :address-sorry
                                 :intrinsic-value 0.1}
-                       :G-total 0.501}  ; barely worse than no-op
+                       :controller-score 0.501}  ; barely worse than no-op
                       {:action {:type :learn-action-class :target-class :open-mission
                                 :intrinsic-value 0.1}
-                       :G-total 0.502}]
+                       :controller-score 0.502}]
           out (policy/select-action ranked-acts)]
       (is (= :abstain (:action out)))
       (is (= 2 (count (:gap-report out))))
@@ -200,8 +200,8 @@
 
 (defn- ranked-with-actions [pairs]
   (->> pairs
-       (mapv (fn [[a g]] {:action a :G-total g}))
-       (sort-by :G-total)
+       (mapv (fn [[a g]] {:action a :controller-score g}))
+       (sort-by :controller-score)
        (map-indexed (fn [i e] (assoc e :rank (inc i))))
        vec))
 
@@ -258,19 +258,19 @@
 ;; ---------------------------------------------------------------------------
 ;; B-2d: τ-layer separation (M-aif-faithfulness §2.2) — dark build.
 ;; Default :spread must be byte-identical to the historical stacked form;
-;; :gamma-only is the canonical γ-carries-sharpness form, dark until Joe flips.
+;; :selection-gain-only is the canonical g-carries-sharpness form, dark until Joe flips.
 ;; ---------------------------------------------------------------------------
 
 (deftest effective-temperature-default-mode-witness-test
   (testing "WITNESS: no :tau-mode == explicit :spread == historical formula, exactly"
     (doseq [g-totals [[] [0.5] [0.0 0.5 1.0] [0.10 0.11 0.12] [0.0 1.0]]
-            gamma [0.0 0.5 1.0 1.7 25.0]]
+            selection-gain [0.0 0.5 1.0 1.7 25.0]]
       (let [historical (/ (policy/adaptive-temperature g-totals)
-                          (max 0.01 (double gamma)))]
-        (is (= historical (policy/effective-temperature g-totals gamma))
+                          (max 0.01 (double selection-gain)))]
+        (is (= historical (policy/effective-temperature g-totals selection-gain))
             "bare arity = historical")
         (is (= historical
-               (policy/effective-temperature g-totals gamma {:tau-mode :spread}))
+               (policy/effective-temperature g-totals selection-gain {:tau-mode :spread}))
             "explicit :spread = historical")))))
 
 (deftest select-action-default-mode-witness-test
@@ -281,25 +281,25 @@
                   [[{:type :address-sorry :target :sorry/x} 0.2]
                    [{:type :learn-action-class :target-class :a} 0.5]
                    [{:type :no-op} 0.9]])]
-      (doseq [gamma [0.5 1.0 2.0]]
-        (is (= (policy/select-action ranked {:policy-precision gamma})
-               (policy/select-action ranked {:policy-precision gamma
+      (doseq [selection-gain [0.5 1.0 2.0]]
+        (is (= (policy/select-action ranked {:selection-gain selection-gain})
+               (policy/select-action ranked {:selection-gain selection-gain
                                              :temperature-opts {:tau-mode :spread}}))
             "byte-identical decision under default vs explicit :spread")))))
 
-(deftest effective-temperature-gamma-only-test
-  (testing ":gamma-only → τ_eff = 1/γ; the spread layer is OFF"
-    (let [opts {:tau-mode :gamma-only}]
+(deftest effective-temperature-selection-gain-only-test
+  (testing ":selection-gain-only → τ_eff = 1/g; the spread layer is OFF"
+    (let [opts {:tau-mode :selection-gain-only}]
       (is (= 1.0 (policy/effective-temperature [0.0 1.0] 1.0 opts))
-          "γ = 1 → τ_eff = 1 regardless of spread")
+          "g = 1 → τ_eff = 1 regardless of spread")
       (is (= (policy/effective-temperature [0.0 99.0] 2.0 opts)
              (policy/effective-temperature [0.10 0.11] 2.0 opts))
-          "spread does not enter :gamma-only at all")
+          "spread does not enter :selection-gain-only at all")
       (is (< (Math/abs (- 0.5 (policy/effective-temperature [0.0 1.0] 2.0 opts)))
              1e-12)
-          "τ_eff = 1/γ exactly")
+          "τ_eff = 1/g exactly")
       (is (= (/ 1.0 0.01) (policy/effective-temperature [0.0 1.0] 0.0 opts))
-          "degenerate γ still floored at tau-min"))))
+          "degenerate g still floored at tau-min"))))
 
 (deftest effective-temperature-unknown-mode-throws-test
   (testing "an unknown :tau-mode is a loud config error, not a silent default"

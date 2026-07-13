@@ -101,7 +101,7 @@
     (is (= (select-keys reduced-1 [:concepts :equivalence-classes :concept-concentrations])
            (select-keys reduced-3 [:concepts :equivalence-classes :concept-concentrations])))))
 
-(deftest eig-for-produces-identity-no-merge
+(deftest model-uncertainty-for-produces-identity-no-merge
   (let [reduced {:equivalence-classes {"c1" ["c1"]
                                        "c2" ["c2"]
                                        "c3" ["c3"]}
@@ -112,35 +112,35 @@
     (is (= {"c1" "c1" "c2" "c2" "c3" "c3"}
            (a4a/capability->concept reduced)))
     (is (= (+ (get stddevs "c1") (get stddevs "c2"))
-           (a4a/eig-for-produces reduced ["c1" "c2"])))))
+           (a4a/model-uncertainty-for-produces reduced ["c1" "c2"])))))
 
-(deftest eig-for-produces-counts-merged-concept-once
+(deftest model-uncertainty-for-produces-counts-merged-concept-once
   (let [reduced (a4a/reduce-concepts synthetic-merge-corpus)
         stddevs (a4a/concept->stddev reduced)]
     (is (= {"A" "A" "B" "A" "C" "C"}
            (a4a/capability->concept reduced)))
     (is (= (get stddevs "A")
-           (a4a/eig-for-produces reduced ["A" "B"])))
+           (a4a/model-uncertainty-for-produces reduced ["A" "B"])))
     (is (= (+ (get stddevs "A") (get stddevs "C"))
-           (a4a/eig-for-produces reduced ["A" "B" "C"])))))
+           (a4a/model-uncertainty-for-produces reduced ["A" "B" "C"])))))
 
-(deftest eig-for-produces-absent-and-empty
+(deftest model-uncertainty-for-produces-absent-and-empty
   (let [reduced (a4a/reduce-concepts synthetic-merge-corpus)]
-    (is (= 0.0 (a4a/eig-for-produces reduced ["unknown"])))
-    (is (= 0.0 (a4a/eig-for-produces reduced [])))
-    (is (= 0.0 (a4a/eig-for-produces reduced nil)))))
+    (is (= 0.0 (a4a/model-uncertainty-for-produces reduced ["unknown"])))
+    (is (= 0.0 (a4a/model-uncertainty-for-produces reduced [])))
+    (is (= 0.0 (a4a/model-uncertainty-for-produces reduced nil)))))
 
-(deftest make-eig-fn-returns-deterministic-closure
-  (let [mission->eig {"M-a" 0.25 "M-b" 0.5}
-        eig-fn (a4a/make-eig-fn mission->eig)]
-    (is (= 0.25 (eig-fn "M-a" {:produces ["ignored"]})))
-    (is (= 0.25 (eig-fn "M-a@futon0" {}))
+(deftest make-model-uncertainty-fn-returns-deterministic-closure
+  (let [mission->model-uncertainty {"M-a" 0.25 "M-b" 0.5}
+        model-uncertainty-fn (a4a/make-model-uncertainty-fn mission->model-uncertainty)]
+    (is (= 0.25 (model-uncertainty-fn "M-a" {:produces ["ignored"]})))
+    (is (= 0.25 (model-uncertainty-fn "M-a@futon0" {}))
         "mission IDs resolve across @repo suffixes")
-    (is (= 0.0 (eig-fn "M-absent" {})))
-    (is (= (eig-fn "M-b" {})
-           (eig-fn "M-b" {})))))
+    (is (= 0.0 (model-uncertainty-fn "M-absent" {})))
+    (is (= (model-uncertainty-fn "M-b" {})
+           (model-uncertainty-fn "M-b" {})))))
 
-(deftest constellation-eig-and-mission-eig
+(deftest constellation-model-uncertainty-and-mission-model-uncertainty
   (let [pattern->constellation {"ns/p1" 1
                                 "ns/p2" 1
                                 "other/p3" 2}
@@ -148,18 +148,18 @@
                ["p2" "M-a"]
                ["p2" "M-b"]
                ["p3" "M-b"]]
-        c->eig (a4a/constellation->eig pattern->constellation edges)
+        c->uncertainty (a4a/constellation->model-uncertainty pattern->constellation edges)
         m->patterns {"M-a@futon0" ["p1" "p2" "unknown"]
                      "M-b" ["p2" "p3"]
                      "M-empty" []}
-        m->eig (a4a/mission->eig m->patterns pattern->constellation c->eig)]
-    (is (= #{1 2} (set (keys c->eig))))
-    (is (every? pos? (vals c->eig)))
-    (is (= (get c->eig 1) (get m->eig "M-a"))
+        m->uncertainty (a4a/mission->model-uncertainty m->patterns pattern->constellation c->uncertainty)]
+    (is (= #{1 2} (set (keys c->uncertainty))))
+    (is (every? pos? (vals c->uncertainty)))
+    (is (= (get c->uncertainty 1) (get m->uncertainty "M-a"))
         "p1 and p2 share a constellation, so M-a counts it once")
-    (is (= (+ (get c->eig 1) (get c->eig 2))
-           (get m->eig "M-b")))
-    (is (= 0.0 (get m->eig "M-empty")))))
+    (is (= (+ (get c->uncertainty 1) (get c->uncertainty 2))
+           (get m->uncertainty "M-b")))
+    (is (= 0.0 (get m->uncertainty "M-empty")))))
 
 (deftest mint-stars-dry-run-does-not-write
   (let [called? (atom false)]
@@ -170,18 +170,18 @@
              (substrate/mint-stars! ["A"])))
       (is (false? @called?)))))
 
-(deftest mint-stars-exposes-constellation-eig
-  (with-redefs [substrate/load-pattern-grain-eig
-                (fn [_] {:constellation->eig {2 0.0125}})]
+(deftest mint-stars-exposes-constellation-model-uncertainty
+  (with-redefs [substrate/load-pattern-grain-model-uncertainty
+                (fn [_] {:constellation->model-uncertainty {2 0.0125}})]
     (is (= [(assoc (a4a/concept->star-doc 2)
-                   :star/constellation-eig 0.0125
-                   :star/eig-unit :endpoint-count-stddev
-                   :star/eig-source :a4a-constellation-stddev)]
+                   :star/constellation-model-uncertainty 0.0125
+                   :star/model-uncertainty-unit :endpoint-count-stddev
+                   :star/model-uncertainty-source :a4a-constellation-stddev)]
            (substrate/mint-stars! [2])))
     (is (= [(assoc (a4a/concept->star-doc "P2")
-                   :star/constellation-eig 0.0125
-                   :star/eig-unit :endpoint-count-stddev
-                   :star/eig-source :a4a-constellation-stddev)]
+                   :star/constellation-model-uncertainty 0.0125
+                   :star/model-uncertainty-unit :endpoint-count-stddev
+                   :star/model-uncertainty-source :a4a-constellation-stddev)]
            (substrate/mint-stars! ["P2"])))))
 
 (def synthetic-slush-deposit
@@ -189,17 +189,17 @@
    :missions {"M-a" {:mission "M-a"
                      :candidates [{:constellations [1 2 3 4 5]
                                    :coverage 5
-                                   :eig 0.1
+                                   :model-uncertainty 0.1
                                    :reward 10.0}
                                   {:constellations [2 3 4 5 6]
                                    :coverage 5
-                                   :eig 0.09
+                                   :model-uncertainty 0.09
                                    :reward 9.0}]}}})
 
 (deftest slush-candidates-read-point-is-normalized-and-top-k
   (is (= [{:constellations [1 2 3 4 5]
            :coverage 5
-           :eig 0.1
+           :model-uncertainty 0.1
            :reward 10.0}]
          (substrate/slush-candidates
           "M-a@futon0"
@@ -220,12 +220,12 @@
     (is (= :slush-candidates (:entity/type doc)))
     (is (= "M-a" (:slush/mission doc)))
     (is (= :coverage-a3-driven (:slush/status doc)))
-    (is (= :deferred-per-mission-signal (:slush/eig-steering doc)))
+    (is (= :deferred-per-mission-signal (:slush/model-uncertainty-steering doc)))
     (is (= 1 (:slush/candidate-count doc)))
     (is (= [{:rank 1
              :constellations [1 2 3 4 5]
              :coverage 5
-             :eig 0.1
+             :model-uncertainty 0.1
              :reward 10.0}]
            (:slush/candidates doc)))))
 

@@ -12,7 +12,7 @@
 ;; Round 2 deck: 12 moves in wm-freeze-2026-06-12-06 (12 missions, all advance)
 ;; The no-op (centre-mess, rank 81) is a LEGITIMATE deck member — it represents
 ;; the "do nothing" option the operator could have picked. It stays in the
-;; denominator. Under advance-only it scores 0.71 (its |delta-g|); under v1 its
+;; denominator. Under advance-only it scores 0.71 (its |step-score-delta|); under v1 its
 ;; action-class is nil (mci/action-class returns nil for :no-op) so its
 ;; intensity is 0.0. This is honest — a no-op has no move-class value.
 
@@ -25,14 +25,14 @@
 (def round1-circ (get-circ "wm-freeze-2026-06-12-00"))
 (def round2-circ (get-circ "wm-freeze-2026-06-12-06"))
 
-;; Merge delta-g from move level onto action map for the advance-only baseline
+;; Merge step-score-delta from move level onto action map for the advance-only baseline
 ;; Also keywordize :type (JSON values are strings; mci/action-class expects keywords)
 (defn actions-with-dg [circ]
   (for [m (:moves circ)]
     (let [sa (or (:source_action m) {:type "unknown"})
-          dg (:delta-g m)]
+          dg (:step-score-delta m)]
       (-> sa
-          (assoc :delta-g (or dg 0.0))
+          (assoc :step-score-delta (or dg 0.0))
           (update :type #(if (string? %) (keyword %) %))))))
 
 (def r1-deck (actions-with-dg round1-circ))
@@ -58,9 +58,9 @@
 (defn target-of [action]
   (or (:target action) (str "no-op:" (:type action))))
 
-;; Baseline: advance-only score = |delta-g| (more negative delta-g = higher value)
+;; Baseline: advance-only score = |step-score-delta| (more negative step-score-delta = higher value)
 (defn advance-only-score [action]
-  (Math/abs (double (or (:delta-g action) 0.0))))
+  (Math/abs (double (or (:step-score-delta action) 0.0))))
 
 ;; v1: move-class-intensity value
 (defn v1-score [action]
@@ -138,10 +138,10 @@
 ;; Historical: advance-only could not rank operator picks well because
 ;; it prices only advancement. The saturated missions (agency-hardening with
 ;; resolvedness ~done, fulab-wiring-survey with 0 open holes) should rank LOW
-;; under advance-only because their |delta-g| is small (saturated = low advance value).
+;; under advance-only because their |step-score-delta| is small (saturated = low advance value).
 (println "\n--- BASELINE REPRODUCTION CHECK ---")
 (println "Historical finding: operator gold is portfolio-shaped (quick wins + close-outs)")
-(println "but advance-only prices only advancement. Saturated missions (low |delta-g|)")
+(println "but advance-only prices only advancement. Saturated missions (low |step-score-delta|)")
 (println "should rank poorly under advance-only despite operator valuing them as close-outs.")
 
 ;; =============================================================================
@@ -154,7 +154,7 @@
 (def r2-bundle-v1 (mci/score-bundle r2-pick-actions))
 (def r2-solo-sum-v1 (reduce + 0.0 (map v1-score r2-pick-actions)))
 
-;; For advance-only, solo-sum is just sum of |delta-g|
+;; For advance-only, solo-sum is just sum of |step-score-delta|
 (def r2-solo-sum-baseline (reduce + 0.0 (map advance-only-score r2-pick-actions)))
 
 (println "\n--- STEP 5: PORTFOLIO vs SOLO-SUM (round 2 operator picks) ---")

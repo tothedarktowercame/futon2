@@ -3,19 +3,17 @@
 ;; per-term decision-influence (flip-rate) over the wm-trace corpus.
 ;;
 ;; A wm-trace-YYYY-MM-DD.edn file holds one EDN form PER TICK (appended).
-;; Each tick's :ranked-actions entries persist a WHITELISTED subset of the
-;; EFE decomposition (futon2.aif.trace/strip-ranked-action): :G-gap and
-;; :G-graph-pragmatic are computed in production but stripped, so their
-;; combined per-candidate contribution is only recoverable here as the
-;; RESIDUAL of reconstructing :G-total from the persisted terms with the
-;; default weights (futon2.aif.efe, compute-efe):
+;; Schema >=3 records the signed `:augmentation-terms` exactly as they enter
+;; the controller score. Older traces are replayed with the historical default
+;; weights. This matters after typed-residual remediation: predictability and
+;; homeostasis remain raw telemetry but contribute zero in :telemetry-only mode.
 ;;
-;;   G-total = G-risk + G-ambiguity - 0.4*G-info + 1.2*G-survival
-;;             - 0.35*G-structural-pressure + G-graph-pragmatic - G-gap
+;;   controller-score = G-risk + G-ambiguity - 0.4*predictability-bonus + 1.2*homeostatic-pressure
+;;             - 0.35*structural-pressure + graph-control-score - gap-exploration-bonus
 ;;             + G-goal-outcome
 ;;
 ;; Flip analysis: for each persisted term, remove its weighted contribution
-;; from every candidate's G-total and ask whether the argmin (the winner)
+;; from every candidate's controller-score and ask whether the argmin (the winner)
 ;; changes. `:hidden` = removing the residual (graph-pragmatic - gap).
 ;; `:core-only` = selecting on G-risk + G-ambiguity alone (Q2 preview).
 ;;
@@ -40,15 +38,38 @@
       (let [form (edn/read {:eof ::eof :default (fn [_tag v] v)} r)]
         (if (= ::eof form) acc (recur (conj acc form)))))))
 
+(def analysis-terms
+  [:G-risk :G-ambiguity :risk-control :predictability-bonus
+   :homeostatic-pressure :structural-pressure :graph-control
+   :model-uncertainty-bonus :gap :G-goal-outcome :move-class-intensity])
+
 (defn contributions
-  "Signed contribution of each persisted term to G-total, per compute-efe."
+  "Signed contribution of each persisted term to controller-score. Prefer the
+   score's own augmentation ledger; reconstruct only pre-ledger records."
   [e]
-  {:G-risk                (double (or (:G-risk e) 0.0))
-   :G-ambiguity           (double (or (:G-ambiguity e) 0.0))
-   :G-info                (- (* w-info (double (or (:G-info e) 0.0))))
-   :G-survival            (* w-survival (double (or (:G-survival e) 0.0)))
-   :G-structural-pressure (- (* w-sp (double (or (:G-structural-pressure e) 0.0))))
-   :G-goal-outcome        (double (or (:G-goal-outcome e) 0.0))})
+  (if-let [a (:augmentation-terms e)]
+    {:G-risk (double (or (:G-risk e) 0.0))
+     :G-ambiguity (double (or (:G-ambiguity e) 0.0))
+     :risk-control (double (or (:risk-control a) 0.0))
+     :predictability-bonus (double (or (:info a) 0.0))
+     :homeostatic-pressure (double (or (:survival a) 0.0))
+     :structural-pressure (double (or (:structural-pressure a) 0.0))
+     :graph-control (double (or (:graph-control a) 0.0))
+     :model-uncertainty-bonus (double (or (:model-uncertainty-bonus a) 0.0))
+     :gap (double (or (:gap a) 0.0))
+     :G-goal-outcome (double (or (:goal-outcome a) 0.0))
+     :move-class-intensity (double (or (:move-class-intensity a) 0.0))}
+    {:G-risk (double (or (:G-risk e) 0.0))
+     :G-ambiguity (double (or (:G-ambiguity e) 0.0))
+     :risk-control 0.0
+     :predictability-bonus (- (* w-info (double (or (:predictability-bonus e) 0.0))))
+     :homeostatic-pressure (* w-survival (double (or (:homeostatic-pressure e) 0.0)))
+     :structural-pressure (- (* w-sp (double (or (:structural-pressure e) 0.0))))
+     :graph-control (double (or (:graph-control-score e) 0.0))
+     :model-uncertainty-bonus 0.0
+     :gap (- (double (or (:gap-exploration-bonus e) 0.0)))
+     :G-goal-outcome (double (or (:G-goal-outcome e) 0.0))
+     :move-class-intensity (double (or (:move-class-intensity-contribution e) 0.0))}))
 
 (defn winner-idx
   "Index of the minimum score (first on ties)."
@@ -57,16 +78,16 @@
 
 (defn tick-stats [tick]
   ;; Lane guard (found during Q2): :apply-cascade candidates are persisted
-  ;; with ONLY {:G-total 0.0 :rank :action} — a placeholder from the cascade
+  ;; with ONLY {:controller-score 0.0 :rank :action} — a placeholder from the cascade
   ;; lane, not a scored decomposition. Including them poisons flip analysis
-  ;; (any term-removal that raises ordinary G-totals past 0.0 "flips" to a
+  ;; (any term-removal that raises ordinary controller-scores past 0.0 "flips" to a
   ;; scoreless row). They are censused separately and EXCLUDED from flips.
   (let [ra-all (vec (:ranked-actions tick))
         ra (vec (filter #(some? (:G-risk %)) ra-all))
         n-laneless (- (count ra-all) (count ra))]
     (when (seq ra)
       (let [contribs   (mapv contributions ra)
-            totals     (mapv #(double (or (:G-total %) 0.0)) ra)
+            totals     (mapv #(double (or (:controller-score %) 0.0)) ra)
             recons     (mapv #(reduce + (vals %)) contribs)
             residuals  (mapv - totals recons)
             actual-w   (winner-idx totals)
@@ -80,14 +101,11 @@
         {:timestamp    (str (:timestamp tick))
          :n-candidates (count ra)
          :n-laneless   n-laneless
-         :term-keys    (into (sorted-set)
-                             (filter #(.startsWith (name %) "G-"))
-                             (mapcat keys ra))
+         :present-keys (set (mapcat keys ra))
          :residual-mean-abs (/ (reduce + (map #(Math/abs %) residuals))
                                (count residuals))
          :residual-max-abs  (apply max (map #(Math/abs %) residuals))
-         :flips        (into {} (for [t [:G-risk :G-ambiguity :G-info :G-survival
-                                         :G-structural-pressure :G-goal-outcome]]
+         :flips        (into {} (for [t analysis-terms]
                                   [t (flip? t)]))
          :hidden-flip? hidden-flip?
          :core-agrees? (= actual-w core-w)
@@ -122,24 +140,24 @@
             :last  (:timestamp (last all-ticks))}
    :term-liveness
    (into (sorted-map)
-         (for [t [:G-risk :G-ambiguity :G-info :G-survival
-                  :G-structural-pressure :G-goal-outcome :G-gap :G-graph-pragmatic]]
-           [t {:persisted-pct (pct #(contains? (:term-keys %) t))}]))
+         (for [t [:G-risk :G-ambiguity :predictability-bonus :homeostatic-pressure
+                  :structural-pressure :G-goal-outcome :gap-exploration-bonus
+                  :graph-control-score :augmentation-terms]]
+           [t {:persisted-pct (pct #(contains? (:present-keys %) t))}]))
    :flip-rate-pct
    (into (sorted-map)
          (concat
-          (for [t [:G-risk :G-ambiguity :G-info :G-survival
-                   :G-structural-pressure :G-goal-outcome]]
+          (for [t analysis-terms]
             [t (pct #(get-in % [:flips t]))])
           [[:hidden-residual (pct :hidden-flip?)]]))
    :core-only-agreement-pct (pct :core-agrees?)
    :cascade-lane {:ticks-with-laneless-candidates (count (filter #(pos? (:n-laneless %)) all-ticks))
-                  :note "apply-cascade rows: {:G-total 0.0, no decomposition}; excluded from flip analysis"}
+                  :note "apply-cascade rows: {:controller-score 0.0, no decomposition}; excluded from flip analysis"}
    :residual {:mean-abs (when (pos? n)
                           (/ (reduce + (map :residual-mean-abs all-ticks)) n))
               :max-abs (when (pos? n)
                          (apply max (map :residual-max-abs all-ticks)))
-              :note "residual = G-graph-pragmatic - G-gap (terms stripped by trace.clj strip-ranked-action)"}
+              :note "schema >=3 should replay from :G-core + :augmentation-terms with zero residual; older records use the historical reconstruction"}
    :winner-actions (frequencies (map :winner-action all-ticks))})
 
 (io/make-parents out-file)
