@@ -744,7 +744,7 @@ landings. Doc checkpoint added (futon2 7b7b764). Both text-sidecar folds
 converged independently on D2 (#5637 comment, Joe-gated) as the
 undischargeable outward obligation — cross-lens hole confirmation.
 
-### Recommendation (drafted for Joe; decision his)
+### Recommendation — RATIFIED (Joe, 2026-07-13; wiring: DECISION-2026-07-13.md + gfn_live.py --role)
 
 Neither coronation nor execution. (a) **Retire the S2 claim** — the GFN
 did not beat the incumbent on preregistered success, and we say so

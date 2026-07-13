@@ -124,7 +124,16 @@ def main(argv=None):
     p.add_argument("missions", nargs="+")
     p.add_argument("--k", type=int, default=8)
     p.add_argument("--pool", type=int, default=24)
+    # STANDING DECISION (Joe, 2026-07-13, ratifying the 40-flight assessment):
+    # the GFN is the DIVERSITY SUPPLIER at low beta, not the primary proposer
+    # (S2 not met; S4 diversity = its demonstrated property). The incumbent
+    # retrieval-prior is the default constructor. The blind run-off is DORMANT
+    # until the label channel widens (M-marks-to-labels); re-opening uses the
+    # same prereg discipline. Raising beta or re-arming the A/B = operator call.
     p.add_argument("--beta", type=float, default=0.5)
+    p.add_argument("--role", default="diversity-supplier",
+                   choices=["diversity-supplier", "ab-runoff"],
+                   help="ab-runoff re-arms the blind A/B (operator-gated; dormant since 2026-07-13)")
     p.add_argument("--steps", type=int, default=3000)
     p.add_argument("--batch", type=int, default=16)
     p.add_argument("--lr", type=float, default=0.05)
