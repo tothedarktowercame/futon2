@@ -863,3 +863,31 @@ calibration evidence is published, not silently applied.
   gold-sheet context + B1 γ table)
 - Data sources: `pz1-final-truth.edn` (labels), `pz1-gold-sheet.edn`
   (context), `b1-gamma-mission.edn` (γ table)
+
+### Slice ZU-4 — tool-failure visibility + CI-in-the-loop (chartered 2026-07-13, Joe)
+
+From the zai-13 pur_update incident (3 invisible failures → "seems to have
+an issue, let me skip it"). Three parts:
+1. **Visibility:** tool errors surface verbatim in the follow-mode display
+   (`[pur_update ✗ missing psr-ref]`) AND failed tool calls persist in U1
+   as first-class turn records (failures are records, not gaps — the fold
+   ledger's principle applied to the harness itself).
+2. **CI-in-the-loop:** a session-end check (rides the PAR punctuation
+   seam) sweeps the session's transcript for tool-call failures and emits
+   each as a TYPED BUG RECORD into the store (:bug/* events: tool, args
+   sha, error text, session, frequency).
+3. **Policy (operator decision, Joe 2026-07-13): cache-errors-to-a-
+   bug-fix-queue, NOT stop-the-line.** Errors land in the queue and work
+   continues — the quarantine philosophy (record loudly, continue on
+   other work) generalized from WM gates to tool failures. ESCALATION
+   RULE (the one exception, mirroring :quarantine vs :hard-halt): an
+   error stops the line only when it breaks the CURRENT slice's
+   acceptance path. The queue is a Z1-style view (`bug-queue`) over the
+   :bug/* events — same oracle pattern as mission-status; the
+   hierarchical loop can rank queue items as advanceable micro-missions
+   (the tithe bucket's natural inbox).
+
+Acceptance: (a) a deliberately failing pur_update shows its error in the
+follow buffer and lands in U1; (b) session-end sweep emits :bug/* records
+for it; (c) `bb z1_views.clj bug-queue` lists it in seconds; (d) doc
+checkpoint same commit.
