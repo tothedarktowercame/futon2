@@ -765,17 +765,26 @@ assessment verdict (label mass/breadth binding — this mission's marks lane
 is the sequel), and the status-cache failures of 2026-07-13 (agent context
 memory asserted stale mission status twice; the store knew the truth).
 
-### Slice ZU-1 — Z1-PROMOTE + the STATUS ORACLE (highest priority; NEW)
-Promote `z1_views.clj` (436 lines, lab) to runner-grade, and ADD a
-`mission-status` view: **registry-as-projection** — status DERIVED from
-the event stream (close/checkpoint commits, fold events, mission-doc
-hyperedges), doc header demoted to one signal, with a `:stale-header?`
-flag when header and events disagree. Plain-HTTP, agent-agnostic: the
-stack-wide status oracle, not a zai-private convenience.
+### Slice ZU-1 — Z1-PROMOTE + the STATUS ORACLE (highest priority; SHIPPED 2026-07-13)
+Promote `z1_views.clj` to runner-grade, and ADD a `mission-status` view:
+**registry-as-projection** — status DERIVED from the event stream
+(close/checkpoint commits, fold events, mission-doc hyperedges), doc
+header demoted to one signal, with a `:stale-header?` flag when header
+and events disagree. Plain-HTTP, agent-agnostic: the stack-wide status
+oracle, not a zai-private convenience.
 **Acceptance:** (a) answers M-mission-conditional-reward = CLOSED
 2026-07-12 from events alone; (b) the `:stale-header?` flag fires on that
 doc's pre-fix state (the regression test for today's actual error);
 (c) callable by any agent with one curl.
+**Checkpoint (2026-07-13, zai-13):** all three acceptance criteria met.
+(a) `mission-status` derives `:closed` from turn-commits event subjects +
+chat turns (the correction-sweep commit `c5dc800` is the key signal); (b)
+`:stale-header? true` fires when tested against the pre-fix doc (DRAFT
+header, git `d9f38f3^`); (c) one-curl callable: `bb z1_views.clj
+mission-status M-mission-conditional-reward`. Gates: clj-kondo clean
+(0 errors), bb load OK, fast tests (doc-header parsing, classify,
+stale-detection) all pass. Uses the P2 text-search-as-candidate-generator
+pattern with re-fetch verification.
 **Contract line shipped with it (AGENTS.md):** mission status is asserted
 only from the oracle, never from context memory.
 

@@ -31,6 +31,10 @@
 (def text-search-raw #'z1-views/text-search-raw)
 (def fetch-by-id #'z1-views/fetch-by-id)
 (def api-base #'z1-views/api-base)
+(def mission-status #'z1-views/mission-status)
+(def parse-doc-header-status #'z1-views/parse-doc-header-status)
+(def mission-doc-path #'z1-views/mission-doc-path)
+(def classify-status-text #'z1-views/classify-status-text)
 
 ;; ---------------------------------------------------------------------------
 ;; Test constants
@@ -145,7 +149,83 @@
         (is (str/starts-with? (:endpoint (:query r)) "http://127.0.0.1:7073")
             "endpoint is the local store server")
         (is (str/ends-with? (:endpoint (:query r)) "/api/alpha/evidence")
-            "endpoint is the evidence API path")))))
+            "endpoint is the evidence API path"))
+      ;; mission-status uses text-search candidate generation
+      (let [r4 (mission-status {:mission "M-mission-conditional-reward" :limit 1})]
+        (is (str/starts-with? (:endpoint (:query r4)) "http://127.0.0.1:7073")
+            "mission-status endpoint is the local store server")))))
+
+;; ---------------------------------------------------------------------------
+;; View 4: mission-status tests
+;; ---------------------------------------------------------------------------
+
+(def target-mission "M-mission-conditional-reward")
+
+(deftest mission-doc-path-resolves
+  (testing "mission-doc-path resolves the futon2 holes doc"
+    (let [p (mission-doc-path target-mission)]
+      (is (some? p) "path found")
+      (is (str/includes? (str p) "M-mission-conditional-reward.md")
+          "correct filename"))))
+
+(deftest doc-header-current-state
+  (testing "current doc header reads CLOSED"
+    (let [h (parse-doc-header-status (mission-doc-path target-mission))]
+      (is (some? h) "header found")
+      (is (= :closed (:keyword h)) "keyword is :closed")
+      (is (str/includes? (:status h) "CLOSED") "status string contains CLOSED"))))
+
+(deftest doc-header-prefix-state
+  (testing "pre-fix doc header (d9f38f3^) reads DRAFT — the staleness regression"
+    ;; The pre-fix state is extracted via: git show d9f38f3^:holes/M-mission-conditional-reward.md
+    ;; nil path returns nil
+    (is (nil? (parse-doc-header-status nil)) "nil path returns nil")
+    ;; Test with a temp file
+    (let [tmp (str (fs/create-temp-file) ".md")
+          _ (spit tmp "# M-test\n\n**Status: DRAFT 2026-07-12\n")
+          h (parse-doc-header-status tmp)]
+      (is (= :draft (:keyword h)) "DRAFT parsed correctly")
+      (fs/delete tmp))))
+
+(deftest classify-status-keywords
+  (testing "classify-status-text maps keywords correctly"
+    (is (= :closed (classify-status-text "M-test CLOSED yesterday" "M-test")))
+    (is (= :draft (classify-status-text "M-test is in DRAFT" "M-test")))
+    (is (= :complete (classify-status-text "M-test COMPLETE" "M-test")))
+    (is (nil? (classify-status-text "M-test is great" "M-test")))))
+
+(deftest mission-status-well-formed
+  (testing "mission-status returns well-formed EDN with required keys"
+    (let [result (mission-status {:mission target-mission :limit 5})]
+      (is (map? result) "result is a map")
+      (is (= :mission-status (:view result)) ":view is :mission-status")
+      (is (= target-mission (:mission result)) "mission id preserved")
+      (is (map? (:query result)) ":query is a map with provenance")
+      (is (contains? (:query result) :endpoint) ":query has :endpoint")
+      (is (vector? (:results result)) ":results is a vector")
+      ;; The doc header must be found
+      (is (map? (:doc-header result)) ":doc-header is a map")
+      (is (contains? (:doc-header result) :keyword) ":doc-header has :keyword")
+      ;; Derived status must be :closed (the answer to acceptance criterion a)
+      (is (= :closed (:derived-status result))
+          "derived-status is :closed from events alone")
+      ;; :stale-header? must be false on the CURRENT doc (they agree)
+      (is (false? (:stale-header? result))
+          "stale-header? is false when doc and events agree"))))
+
+(deftest mission-status-stale-detection
+  (testing ":stale-header? fires on pre-fix doc state (acceptance criterion b)"
+    ;; Use a temp file with the pre-fix DRAFT header
+    (let [tmp (str (fs/create-temp-file) ".md")
+          _ (spit tmp "# M-mission-conditional-reward\n\n**Status: DRAFT 2026-07-12\n")
+          result (mission-status {:mission target-mission :limit 5 :doc-path tmp})]
+      (is (= :closed (:derived-status result))
+          "events still say :closed")
+      (is (= :draft (get-in result [:doc-header :keyword]))
+          "doc header says :draft (pre-fix state)")
+      (is (true? (:stale-header? result))
+          ":stale-header? fires when events say closed but doc says draft")
+      (fs/delete tmp))))
 
 ;; ---------------------------------------------------------------------------
 ;; Run
