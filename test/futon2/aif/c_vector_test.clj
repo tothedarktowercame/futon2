@@ -13,6 +13,10 @@
             [futon2.aif.c-vector :as cv]
             [futon2.aif.efe :as efe]))
 
+(deftest durable-join-default-is-reload-safe
+  (is (var? @cv/!durable-join-fn)
+      "the default source must follow the reloaded fetch-durable-join* Var"))
+
 ;; Reset the live atom around each test so they don't leak state into each other
 ;; (the suite never derives from the store, so a clean empty atom is the baseline).
 (use-fixtures :each

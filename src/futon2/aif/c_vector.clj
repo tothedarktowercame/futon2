@@ -427,9 +427,17 @@
 
 (defonce ^{:doc "Injectable source of the durable join (0-arity → the
   fetch-durable-join* shape, or nil). A seam so tests inject fixture relations
-  and other hosts can supply their own store access."}
+  and other hosts can supply their own store access. The default is stored as
+  a Var, not a function value, so namespace reloads dereference the new root
+  instead of retaining stale pre-reload code."}
   !durable-join-fn
-  (atom fetch-durable-join*))
+  (atom #'fetch-durable-join*))
+
+;; Migrate a JVM that created this defonce before the reload-safe Var
+;; indirection. Reloading intentionally restores the default source; callers
+;; may inject a function again afterwards when exercising the seam.
+(when (fn? @!durable-join-fn)
+  (reset! !durable-join-fn #'fetch-durable-join*))
 
 (defn build-durable-adv
   "Pure: compile the fetched durable join into the forward-model lookup
