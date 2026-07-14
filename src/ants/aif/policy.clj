@@ -572,15 +572,21 @@
         survival (survival-cost action observation outcome survival-cfg)
         hunger (double (or (:hunger outcome) (:h outcome) 0.0))
         prior (action-prior-cost action outcome hunger (get costs action))
-        G (+ (* (:pragmatic lambda) risk)
-             (* (:ambiguity lambda) ambiguity)
-             (* (:colony lambda) colony)
-             (* (:survival lambda) survival)
-             prior
-             (- (* (:info lambda) info))
-             (or (:G pattern) 0.0))]
-    {:G G
+        augmentation-map {:colony      (* (:colony lambda) colony)
+                          :survival    (* (:survival lambda) survival)
+                          :action-cost prior
+                          :info        (- (* (:info lambda) info))
+                          :pattern     (or (:G pattern) 0.0)}
+        augmentation-total (reduce + 0.0 (vals augmentation-map))
+        g-efe-weighted (+ (* (:pragmatic lambda) risk)
+                          (* (:ambiguity lambda) ambiguity))
+        controller-score (+ g-efe-weighted augmentation-total)]
+    {:G controller-score
+     :controller-score controller-score
      :g-efe g-efe-val
+     :g-efe-weighted g-efe-weighted
+     :augmentation augmentation-total
+     :augmentation-map augmentation-map
      :risk risk
      :ambiguity ambiguity
      :info info
@@ -753,19 +759,31 @@
 ;; -- Tau policy ---------------------------------------------------------------
 
 (defn- choose-tau
-  "Your existing couple-tau + hunger clamp + nest clamps + (optional) white-space boost."
+  "Commitment temperature τ for softmax selection.
+
+   R14: τ is coupled to hunger + recent-starvation:
+   - High hunger → lower τ (exploit, return to safety)
+   - Recent starvation (high since-ingest) → higher τ (explore more urgently)
+   - Reserve deficit → lower τ (exploit known food sources)"
   [{:keys [base-tau reserve-delta survival-pressure precision-cfg
-           friendly-home cargo local-food trail-grad hunger]}]
+           friendly-home cargo local-food trail-grad hunger since-ingest]}]
   (let [computed (couple-tau base-tau reserve-delta survival-pressure precision-cfg)
+        ;; R14: hunger coupling — hungry ants exploit more (lower τ)
         high-h?  (> hunger 0.8)
         limited  (if high-h? (min computed 0.8) computed)
+        ;; R14: recent-starvation coupling — starved ants explore more (higher τ)
+        since-ingest (int (or since-ingest 0))
+        starved? (>= since-ingest 5)
+        starvation-boost (if starved? (* 0.3 (min 3.0 (/ since-ingest 5.0))) 0.0)
+        limited (if starved? (min (double (or (:tau-cap precision-cfg) 1.5))
+                                  (+ limited starvation-boost))
+                            limited)
         cap      (double (or (:tau-cap precision-cfg) 1.5))
         nest-clamp (cond
                      (and (>= friendly-home 0.95) (> cargo 0.25)) 0.60
                      (and (>= friendly-home 0.80) (> cargo 0.10)) 0.75
                      :else nil)
         clamped  (if nest-clamp (min limited nest-clamp) limited)
-        ;; your old "nest-boost" when empty & poor signals near nest:
         nest-boost (when (and (>= friendly-home 0.90)
                               (< cargo 0.10)
                               (< local-food 0.02)
@@ -878,7 +896,8 @@
                                         :cargo cargo
                                         :local-food local-food
                                         :trail-grad trail-grad
-                                        :hunger hunger})
+                                        :hunger hunger
+                                        :since-ingest (:since-ingest observation)})
 
          ;; Softmax — preferences enter ONLY through G (g-efe risk + augmentations)
          scores (map (fn [{:keys [action result] :as item}]

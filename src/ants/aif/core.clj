@@ -191,9 +191,11 @@
          perception (assoc perception-with-prec :prec prec')
          chosen (:action policy)
          action-stats (get-in policy [:policies chosen] {:G 0.0 :p 1.0})
+         pstate (:precision-state perception)
          updated-ant (-> ant
                          (assoc :mu mu
                                 :prec prec'
+                                :precision-state pstate
                                 :recent recent
                                 :last-observation observation
                                 :last-trace (:trace perception)

@@ -1,7 +1,12 @@
 (ns ants.aif.perceive
-  "Predictive coding style perceptual updates for AIF ants."
+  "Predictive coding style perceptual updates for AIF ants.
+
+   R7 precision is tracked via the shared futon2.aif.precision
+   (update-precision-state, precision-for) — per-channel Π evolved from
+   rolling prediction-error variance, not static constants."
   (:require [ants.aif.affect :as affect]
-            [ants.aif.observe :as observe]))
+            [ants.aif.observe :as observe]
+            [futon2.aif.precision :as precision]))
 
 (def ^:private sensory-keys
   [:food :pher :food-trace :pher-trace :home-prox :enemy-prox :h :ingest
@@ -64,6 +69,30 @@
                   n))
               default-precisions
               (or prec {})))
+
+(defn- ensure-precision-state
+  "Get or initialize the shared futon2.aif.precision state for the ant's channels."
+  [ant]
+  (or (:precision-state ant)
+      (precision/initial-precision-state sensory-keys)))
+
+(defn- build-precision-errors
+  "Build the errors map for update-precision-state from the perceive errors.
+   Format: {channel {:error raw-error :observed obs-value}}"
+  [errors observation]
+  (into {} (for [k sensory-keys]
+             [k {:error (double (get-in errors [k :raw] 0.0))
+                 :observed (double (get observation k 0.0))}])))
+
+(defn- precision-from-state
+  "Extract per-channel precision from the shared precision-state, returning
+   a {:Pi-o {channel precision} :tau ...} map compatible with the existing
+   prec structure. Falls back to default-precisions for missing channels."
+  [prec-state prec]
+  (let [pi-o (into {}
+                   (for [k sensory-keys]
+                     [k (precision/precision-for prec-state k)]))]
+    (assoc prec :Pi-o pi-o)))
 
 (def ^:private default-variance-floor
   "Minimum per-channel variance. Prevents zero-variance (which would make
@@ -149,16 +178,24 @@
                            :as _opts}]
    (let [max-steps (max 1 (int max-steps))
          mu0 (ensure-mu world ant observation)
-         prec0 (ensure-prec ant)]
+         prec0 (ensure-prec ant)
+         pstate0 (ensure-precision-state ant)]
      (loop [step 0
             mu mu0
             prec prec0
+            pstate pstate0
             trace []
             error-sum 0.0]
        (let [hunger (:h mu)
              prec-target (affect/modulate-precisions prec hunger observation precision-options)
              prec-step (affect/anneal-tau prec-target step max-steps)
+             ;; R7: update shared precision-state from prediction errors
              errors (compute-errors mu observation prec-step)
+             pstate' (precision/update-precision-state
+                       pstate
+                       (build-precision-errors errors observation))
+             ;; Merge variance-derived precision into prec for g-efe weights
+             prec-step (precision-from-state pstate' prec-step)
              sens' (update-sensory (:sens mu) errors alpha)
              hunger' (affect/tick-hunger
                       (observe/clamp01
@@ -179,7 +216,8 @@
         (if (>= (inc step) max-steps)
           {:mu mu'
            :prec prec-step
+           :precision-state pstate'
            :errors errors
            :free-energy (* 0.5 (/ error-sum' max-steps))
            :trace trace'}
-          (recur (inc step) mu' prec-target trace' error-sum')))))))
+          (recur (inc step) mu' prec-target pstate' trace' error-sum')))))))

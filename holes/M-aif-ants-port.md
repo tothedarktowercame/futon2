@@ -95,6 +95,16 @@ Ledger: `futon2/holes/labs/M-aif-ants-port/r-map.md`. Corrections that revise th
 - **R14 τ confirmed present** (`hunger→tau`, softmax uses `-G/τ` at `policy.clj:810`); **rollout absent**
   (purely 1-step) as expected.
 
+## Decision (2026-07-14, Joe): mode-conditioned C lives in the core
+
+S2 landed a **flat** C and deferred mode-conditioning to "augmentation." Owner ruling: cargo-dependent
+home-seeking is a **genuine preference**, so mode-conditioned C folds into the **unit-pure core** (R19),
+NOT an engineering augmentation — moving a real FEP quantity out of the audited G would invert the
+faithfulness discipline. **Correction (ants "S2b"):** make C mode-indexed (outbound/homebound/maintain);
+the *caller* (`policy.clj`) selects the mode-appropriate `c-means`/`c-variances` and passes them to the
+**unchanged** domain-agnostic `g-efe` (mode logic must NOT leak into `efe.clj` — the tokamak reuses that
+signature verbatim). Restore the 3 regression tests S2 weakened, now as real behavioral assertions.
+
 ## The build, staged as Zai handoffs
 
 Dependency order. Each slice is one handoff packet. **Gates every slice must clear** (per `AGENTS.md`):
@@ -156,6 +166,31 @@ world_test: `no-empty-return-at-home`). These tests encoded behavioral invariant
 tuned to the old 2-channel NLL + extrinsic logit. The new canonical EFE
 distributes risk across all 14 channels. Slice 3's augmentation layer
 (controller-split + residual tuning) will restore action-specific penalties.
+
+#### Slice 3 update (2026-07-14, zai-9)
+
+The controller split is done: `controller-score = g-efe + Σ augmentation`
+with separated `:g-efe`, `:augmentation`, and `:augmentation-map` fields
+(policy.clj:583-589). The augmentations are:
+
+- **colony-cost** (non-FEP-engineering): colony reserve pressure. Ablation: load-bearing (winner changes when removed).
+- **survival-cost** (non-FEP-engineering): hunger/distance homeostatic pressure. Ablation: load-bearing.
+- **action-cost** (non-FEP-engineering): per-action engineering penalty. Ablation: load-bearing.
+- **info-gain** (analogical): novelty/trail exploration bonus. Retained (subtracted from G).
+- **pattern-efe** (non-FEP-engineering): hand-coded per-pattern penalty (λ=0 default). Retained.
+
+R7 precision: the ant now consumes the shared `futon2.aif.precision`
+(update-precision-state, precision-for) for per-channel Π — variance-derived
+adaptive precision replaces the old static `default-precisions` +
+`affect/modulate-precisions` heuristics. The precision-state is persisted on
+the ant and threaded through the perceive loop.
+
+R14 τ: `choose-tau` now explicitly couples to hunger (lower τ → exploit) and
+recent-starvation via `since-ingest` (higher τ → explore when starved).
+
+No augmentation was found to be a genuine FEP quantity that belongs in the
+core (unlike mode-conditioned C in S2b). All augmentations carry their typed
+residuals as documented in the retract table above.
 
 ### Slice 3 — faithful controller split + R7 precision + R14 τ
 - **Goal:** `controller-score = g-efe + Σ augmentation`, augmentations = existing colony/survival/action
