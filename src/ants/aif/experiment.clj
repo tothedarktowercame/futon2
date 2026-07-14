@@ -49,11 +49,16 @@
   "Run one simulation. Returns {:seed :yield :starved :alive :ticks}.
    yield = colony score (food delivered home).
    starved = fraction of ants that died of starvation."
-  [species food-distribution food-seed move-seed size ticks epistemic-zeroed?]
+  [species food-distribution food-seed move-seed size ticks epistemic-zeroed? metabolism]
   (let [world (make-seeded-world species food-distribution food-seed move-seed size ticks)
-        ;; For epistemic ablation: zero the ambiguity lambda
+        ;; Harsher metabolism
+        world (assoc-in world [:config :hunger :metabolic-rate]
+                        (double (or metabolism 0.04)))
+        ;; For epistemic ablation: zero BOTH ambiguity AND epistemic lambda
         world (if epistemic-zeroed?
-                (assoc-in world [:config :aif :efe :lambda :ambiguity] 0.0)
+                (-> world
+                    (assoc-in [:config :aif :efe :lambda :ambiguity] 0.0)
+                    (assoc-in [:config :aif :efe :lambda :epistemic] 0.0))
                 world)]
     (loop [w world
            n 0]
@@ -100,14 +105,14 @@
 (defn- run-experiment-cell
   "Run n-runs independently-seeded simulations for one arm × scenario.
    Returns summary statistics."
-  [arm food-distribution n-runs size ticks]
+  [arm food-distribution n-runs size ticks metabolism]
   (let [results (vec
                   (for [i (range n-runs)]
                     (let [food-seed (+ 1000 i (* (hash (str arm food-distribution)) 1000))
                           move-seed (+ 2000 i (* (hash (str arm food-distribution)) 2000))
                           species (if (= arm :classic) :classic :aif)
                           epistemic-zeroed? (= arm :aif-no-epistemic)]
-                      (run-single species food-distribution food-seed move-seed size ticks epistemic-zeroed?))))
+                      (run-single species food-distribution food-seed move-seed size ticks epistemic-zeroed? metabolism))))
         yields (map :yield results)
         starvs (map :starved results)]
     {:arm arm
@@ -126,13 +131,13 @@
             :contrast {:patchy {:diff :ci} :sparse {...} :snowdrift {...}}}
    where diff = aif-full yield − aif-no-epistemic yield."
   ([]
-   (run-full-experiment 30 [20 20] 300))
-  ([n-runs size ticks]
+   (run-full-experiment 30 [12 12] 300 0.04))
+  ([n-runs size ticks metabolism]
    (let [arms [:aif-full :aif-no-epistemic :classic]
          scenarios [:snowdrift :patchy :sparse]
          cells (for [arm arms
                      scenario scenarios]
-                 (run-experiment-cell arm scenario n-runs size ticks))
+                 (run-experiment-cell arm scenario n-runs size ticks metabolism))
          ;; Compute pre-registered contrast
          contrast (into {}
                         (for [scenario scenarios]

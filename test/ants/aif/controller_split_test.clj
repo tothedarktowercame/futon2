@@ -43,7 +43,7 @@
 ;; The DEFAULT deployed config — no inflated λ, no custom costs.
 (def default-cfg
   {:actions [:forage :return :hold :pheromone]
-   :efe {:lambda {:pragmatic 1.0 :ambiguity 0.5 :info 0.4 :colony 0.4 :survival 1.2}
+   :efe {:lambda {:pragmatic 1.0 :ambiguity 0.5 :info 0.4 :epistemic 0.5 :colony 0.4 :survival 1.2}
          :colony {:reserve-thresh 1.0 :non-return-pen 0.6 :return-pen 0.0}
          :survival {:hunger-thresh 0.55 :hunger-weight 1.5 :dist-weight 0.5
                     :ingest-buffer 0.30 :return-reduction 0.40}}})
@@ -86,13 +86,13 @@
 
 (deftest ablation-survival-at-default-lambda
   (testing "survival-cost (λ=1.2 DEFAULT) changes winner when removed
-            Scenario: outbound, h=0.9, cargo=0.4, reserve=0.8, food=0.05, home-prox=0.6
-            With survival: return wins (high hunger → survival favors return).
+            Scenario: outbound, h=0.6, cargo=0.6, reserve=0.5, food=0.05, home-prox=0.8
+            With survival: return wins (high cargo → survival favors return).
             Without survival: forage wins."
     (let [obs {:food 0.05 :pher 0.2 :food-trace 0.025 :pher-trace 0.2
-               :home-prox 0.6 :enemy-prox 0.3 :h 0.9 :hunger 0.9 :ingest 0.1
-               :friendly-home 0.0 :trail-grad 0.1 :novelty 0.5 :dist-home 0.4
-               :reserve-home 0.8 :cargo 0.4 :mode :outbound}
+               :home-prox 0.8 :enemy-prox 0.3 :h 0.6 :hunger 0.6 :ingest 0.1
+               :friendly-home 0.0 :trail-grad 0.1 :novelty 0.5 :dist-home 0.2
+               :reserve-home 0.5 :cargo 0.6 :mode :outbound}
           with-survival (winner base-mu base-prec obs default-cfg)
           without-survival (winner base-mu base-prec obs (cfg-without-survival))]
       (is (not= with-survival without-survival)

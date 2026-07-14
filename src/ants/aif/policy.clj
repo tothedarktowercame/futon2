@@ -187,6 +187,7 @@
   {:pragmatic 1.0
    :ambiguity 0.5
    :info 0.4
+   :epistemic 0.5
    :colony 0.4
    :survival 1.2})
 
@@ -624,6 +625,14 @@
         ambiguity (:ambiguity efe-result)
         g-efe-val (:g-efe efe-result)
         info (info-gain observation outcome)
+        ;; EIG proxy: epistemic value proportional to novelty of predicted outcome.
+        ;; Higher novelty (unvisited cells) means higher expected information gain,
+        ;; which lowers controller-score and rewards exploration.
+        ;; Tagged principled-approx: the true EIG (predicted-posterior entropy
+        ;; reduction) requires simulated belief updates per policy; this
+        ;; novelty proxy captures the primary signal (unvisited = uncertain =
+        ;; informative) at much lower cost. Mirrors WM R17' honesty.
+        epistemic-value (double (or (:novelty outcome) (:novelty observation) 0.0))
         colony (colony-cost action observation colony-cfg)
         survival (survival-cost action observation outcome survival-cfg)
         hunger (double (or (:hunger outcome) (:h outcome) 0.0))
@@ -632,6 +641,7 @@
                           :survival    (* (:survival lambda) survival)
                           :action-cost prior
                           :info        (- (* (:info lambda) info))
+                          :epistemic   (- (* (get lambda :epistemic 0.5) epistemic-value))
                           :pattern     (or (:G pattern) 0.0)}
         augmentation-total (reduce + 0.0 (vals augmentation-map))
         g-efe-weighted (+ (* (:pragmatic lambda) risk)
