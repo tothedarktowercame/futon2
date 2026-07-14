@@ -19,7 +19,8 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [futon2.aif.action-proposer :as ap]
-            [futon2.aif.forward-model :as fm]))
+            [futon2.aif.forward-model :as fm])
+  (:import (java.io File)))
 
 (def ^:private default-code-root
   (str (System/getProperty "user.home") "/code"))
@@ -198,7 +199,17 @@
   ([] (load-missions default-code-root))
   ([code-root]
    (let [root (io/file code-root)
-         missions (->> (file-seq root)
+         ;; The contract admits only <code-root>/<repo>/holes/missions/M-*.md.
+         ;; Enumerate exactly those directories. Walking all of ~/code also
+         ;; traversed build trees, worktrees and node_modules before filtering
+         ;; them out, turning a single construction lookup into minutes of IO.
+         mission-files (->> (or (.listFiles root) (make-array File 0))
+                            (filter #(.isDirectory ^File %))
+                            (map #(io/file % "holes" "missions"))
+                            (filter #(.isDirectory ^File %))
+                            (mapcat #(or (.listFiles ^File %)
+                                         (make-array File 0))))
+         missions (->> mission-files
                        (filter #(.isFile %))
                        (map #(.getAbsolutePath %))
                        (filter #(re-matches mission-path-pattern %))
