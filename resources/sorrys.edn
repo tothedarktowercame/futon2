@@ -596,7 +596,19 @@
   {:id :sorry/pudding-g1-arrow-witness-binding
    :title "G-REWARD's named open home: bind arrow-witness to the per-turn affect detector"
    :raised-at "2026-06-08"
-   :status :open
+   :status :addressed
+   :addressed-at "2026-07-14"
+   :resolution
+   (str
+    "The G1 arrow witness is bound to the shared per-turn affect detector, "
+    "and the G2 provenance path is fail-closed against caller-controlled "
+    "identity. Futon7 commits c4555df, 026a7e2, and fe95754 passed 50/50 "
+    "tests plus clj-kondo/check-parens; Codex-4 independently approved "
+    "fe95754 in Agency job invoke-1784060252188-536-4be14c4d. The real "
+    "full-loop canary grounded implementation fe95754 and its discharge in "
+    "authoritative Futon1b, with resolved? and dial-moved? both true. The "
+    "broader M-pudding-peradams mission remains independently open; this "
+    "entry closes only its narrowly named G1 binding gap.")
    :kind :external-dependency
    :rationale
    (str
