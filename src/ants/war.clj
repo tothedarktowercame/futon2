@@ -1,6 +1,7 @@
 (ns ants.war
   "Scenario wiring for classic vs AIF ant skirmishes."
   (:require [ants.aif.core :as aif]
+            [ants.aif.forward :as forward]
             [ants.aif.observe :as observe]
             [ants.aif.affect :as affect]
             [ants.cyber :as cyber]
@@ -1147,109 +1148,76 @@
 
 ;; --- Action handlers (pure) --------------------------------------------------
 
-(defn- act-forage
-  [world ant]
-  (let [best        (richest-neighbour world (:loc ant) (:species ant))
-        move-res    (move-ant world ant best {:wander-when-still? true})
-        {:keys [world ant moved? wander? target]} move-res
-        gather-res  (gather-food world ant)
-        world       (:world gather-res)
-        ant         (:ant gather-res)
-        g           (double (or (:gather gather-res) 0.0))
-        ingest-res  (adjust-ingest world ant {:add g :decay 0.6})
-        world       (:world ingest-res)
-        ant-wi      (:ant ingest-res)
-        ant         (blend-recent-gather ant-wi (min 1.0 g))
-        world       (assoc-in world [:ants (:id ant)] ant)
-        ingest      (:ingest ingest-res)]
-    [world ant {:moved? moved? :wander? wander? :gather g :deposit 0.0
-                :ingest ingest :dead? false :target target}]))
-
-(defn- act-return
-  [world ant]
-  (let [home        (get-in world [:homes (:species ant)])
-        primary     (home-directed-move world ant home)
-        target      (step-toward (:loc ant) home)
-        direct      (when-not (:moved? primary)
-                      (move-ant (or (:world primary) world)
-                                (or (:ant primary) ant)
-                                target
-                                {:wander-when-still? true
-                                 :prefer-home? true}))
-        wander      (when (and (not (:moved? direct)) (not (:moved? primary)))
-                      (random-wander (or (:world direct) (:world primary) world)
-                                     (or (:ant direct) (:ant primary) ant)
-                                     {:prefer-home true}))
-        move-result (or (when (:moved? primary) primary)
-                        (when (:moved? direct)  direct)
-                        (when (:moved? wander)  wander)
-                        (or wander direct primary)
-                        {:world world :ant ant :target (:loc ant) :moved? false :wander? false})
-        {:keys [world ant moved? wander? target]} move-result
-        dep-res     (deposit-food world ant)
-        world       (:world dep-res)
-        ant         (:ant dep-res)
-        d           (double (or (:deposit dep-res) 0.0))
-        ingest-res  (adjust-ingest world ant {:add 0.0 :decay 0.55})
-        world       (:world ingest-res)
-        ant-wi      (:ant ingest-res)
-        ant         (decay-recent-gather ant-wi)
-        world       (assoc-in world [:ants (:id ant)] ant)
-        ingest      (:ingest ingest-res)]
-    [world ant {:moved? moved? :wander? wander? :gather 0.0 :deposit d
-                :ingest ingest :dead? false :target target}]))
-
-(defn- act-hold
-  [world ant]
-  (let [home        (get-in world [:homes (:species ant)])
-        at-home?    (= (:loc ant) home)
-        move-res    (if (not at-home?)
-                      (move-ant world ant (step-toward (:loc ant) home))
-                      (move-ant world ant (:loc ant)
-                                {:wander? true :wander-when-still? true}))
-        {:keys [world ant moved? wander? target]} move-res
-        ingest-res  (adjust-ingest world ant {:add 0.0 :decay 0.5})
-        world       (:world ingest-res)
-        ant-wi      (:ant ingest-res)
-        ant         (decay-recent-gather ant-wi)
-        world       (assoc-in world [:ants (:id ant)] ant)
-        ingest      (:ingest ingest-res)]
-    [world ant {:moved? moved? :wander? wander? :gather 0.0 :deposit 0.0
-                :ingest ingest :dead? false :target target}]))
-
-(defn- act-pheromone
-  [world ant]
-  (let [home        (get-in world [:homes (:species ant)])
-        goal        (or (get-in ant [:mu :goal]) home)
-        target      (step-toward (:loc ant) goal)
-        cargo       (double (or (:cargo ant) 0.0))
-        base-dep    (+ 0.25 (* 0.85 cargo))
-        world       (pheromone-drop world ant base-dep target)
-        move-res    (move-ant world ant target)
-        {:keys [world ant moved? wander? target]} move-res
-        ingest-res  (adjust-ingest world ant {:add 0.0 :decay 0.45})
-        world       (:world ingest-res)
-        ant-wi      (:ant ingest-res)
-        ant         (decay-recent-gather ant-wi)
-        world       (assoc-in world [:ants (:id ant)] ant)
-        ingest      (:ingest ingest-res)]
-    [world ant {:moved? moved? :wander? wander? :gather 0.0 :deposit 0.0
-                :ingest ingest :dead? false :target target}]))
-
-(defn- act-dead
-  [world ant]
-  [world ant {:moved? false :wander? false :gather 0.0 :deposit 0.0
-              :ingest 0.0 :dead? true :target (:loc ant)}])
+(defn- apply-kernel-effects
+  "Apply the effects returned by ant-kernel to the world.
+   Handles: occupant changes (vacate/occupy/swap), food-deltas,
+   pher-deltas, score/reserve deltas, and ant write-back."
+  [world ant effects]
+  (let [{:keys [food-deltas pher-deltas score-delta reserve-delta occupant]} effects
+        ;; --- occupant changes ---
+        world (if-let [vacate (:vacate occupant)]
+                (-> world
+                    (assoc-in [:grid :cells vacate :ant] nil))
+                world)
+        world (if-let [swap-id (:swap-id occupant)]
+                ;; ally swap: move the displaced ant to our old loc
+                (let [swap-to (:swap-to occupant)
+                      swap-ant (-> (get-in world [:ants swap-id])
+                                   (assoc :loc swap-to))]
+                  (-> world
+                      (assoc-in [:grid :cells swap-to :ant] swap-id)
+                      (assoc-in [:ants swap-id] swap-ant)))
+                world)
+        world (if-let [occupy (:occupy occupant)]
+                (-> world
+                    (assoc-in [:grid :cells occupy :ant] (:id ant)))
+                world)
+        ;; --- food deltas ---
+        world (reduce (fn [w [loc delta]]
+                        (update-in w [:grid :cells loc :food]
+                                   #(max 0.0 (- (double (or % 0.0)) (double delta)))))
+                      world
+                      (or (seq food-deltas) []))
+        ;; --- pheromone deltas ---
+        max-pher (double (or (get-in world [:grid :max-pher]) 3.0))
+        world (reduce (fn [w [loc amount]]
+                        (update-in w [:grid :cells loc :pher]
+                                   (fn [pher]
+                                     (min max-pher (+ (double (or pher 0.0))
+                                                      (double amount))))))
+                      world
+                      (or (seq pher-deltas) []))
+        ;; --- score / reserve deltas (deposit at home) ---
+        species (:species ant)
+        world (if (and score-delta (pos? (double score-delta)))
+                (-> world
+                    (update-in [:scores species] + (double score-delta))
+                    (update-in [:colonies species :reserves] (fnil + 0.0) (double reserve-delta)))
+                world)
+        ;; --- ant write-back ---
+        world (assoc-in world [:ants (:id ant)] ant)]
+    world))
 
 (defn- perform-action
+  "Execute the chosen action via the pure ant-kernel, then apply effects to world.
+  Returns [world ant effect] — same shape as the old act-* functions."
   [world ant action]
-  (case action
-    :forage    (act-forage world ant)
-    :return    (act-return world ant)
-    :hold      (act-hold world ant)
-    :pheromone (act-pheromone world ant)
-    :dead      (act-dead world ant)
-    (act-hold world ant)))
+  (let [view (forward/local-view world ant)
+        mu-goal (get-in ant [:mu :goal])
+        result (forward/ant-kernel view ant action
+                                   (cond-> {:rand-fn rand-nth}
+                                     mu-goal (assoc :mu-goal mu-goal)))
+        next-ant (:ant result)
+        effects (:effects result)
+        world (apply-kernel-effects world next-ant effects)
+        effect {:moved? (:moved? effects false)
+                :wander? (:wander? effects false)
+                :gather (double (or (:gather effects) 0.0))
+                :deposit (double (or (:deposit effects) 0.0))
+                :ingest (:ingest effects (:ingest next-ant 0.0))
+                :dead? (:dead? effects false)
+                :target (:target effects (:loc next-ant))}]
+    [world next-ant effect]))
 
 ;; --- Public: apply-action (refactored) --------------------------------------
 ;; --- Public: apply-action (now 2-arity & 3-arity) ---------------------------
