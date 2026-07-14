@@ -1,6 +1,7 @@
 (ns ants.aif.policy
   "Action evaluation via 1-step expected free energy and softmax selection."
   (:require [ants.aif.observe :as observe]
+            [ants.aif.efe :as efe]
             [ants.aif.pattern-efe :as pattern-efe]
             [clojure.math :as math]))
 
@@ -89,9 +90,53 @@
                                                  (double (or v 0.0))))))))]
     (* (double lambda) extrinsic)))
 
-(def ^:private default-preferences
-  {:hunger {:mean 0.40 :sd 0.08}
-   :ingest {:mean 0.70 :sd 0.20}})
+(def ^:private sensory-keys
+  "The 14-channel observation ABI (matches perceive/sensory-keys)."
+  [:food :pher :food-trace :pher-trace :home-prox :enemy-prox :h :ingest
+   :friendly-home :trail-grad :novelty :dist-home :reserve-home :cargo])
+
+(def ^:private default-c-vector
+  "Unified preference C-vector over the 14-channel observation ABI.
+
+   Each channel has a preference mean and sd. Channels without explicit
+   preferences use nil (KL contribution is 0 — the channel is unpreferred).
+
+   This folds the old default-preferences (hunger, ingest) AND the semantic
+   intent of C-prior (food high, cargo return, trail-following, home safety)
+   into ONE representation over the obs ABI.
+
+   Faithfulness: the KL-risk in g-efe is against THIS C. Nothing else
+   routes preferences into selection."
+  {:food         {:mean 0.50 :sd 0.20}   ; prefer food-rich cells
+   :pher         {:mean 0.40 :sd 0.25}   ; mild pheromone preference
+   :food-trace   nil                      ; no direct preference
+   :pher-trace   nil                      ; no direct preference
+   :home-prox    {:mean 0.30 :sd 0.25}   ; mild home bias (not too strong)
+   :enemy-prox   {:mean 0.10 :sd 0.15}   ; prefer away from enemies
+   :h            {:mean 0.40 :sd 0.08}   ; low hunger (from default-preferences)
+   :ingest       {:mean 0.70 :sd 0.20}   ; high ingest (from default-preferences)
+   :friendly-home nil                     ; context-dependent, not a C target
+   :trail-grad   {:mean 0.35 :sd 0.25}   ; mild trail preference
+   :novelty      nil                      ; exploration handled by ambiguity term
+   :dist-home    {:mean 0.40 :sd 0.30}   ; moderate exploration
+   :reserve-home {:mean 0.60 :sd 0.25}   ; healthy reserves
+   :cargo        {:mean 0.35 :sd 0.25}}) ; moderate cargo preference
+
+(defn- c-vectors-for-efe
+  "Extract parallel vectors (means, variances) from the C-vector for the EFE call.
+   Returns [c-means c-variances] as seqs aligned to sensory-keys.
+   Channels without preferences contribute C-mean = predicted-mean (KL=0) and
+   C-variance = predicted-variance (KL=0 for that channel)."
+  [c-vector pred-means pred-variances]
+  (let [c-means (for [k sensory-keys]
+                  (if-let [pref (get c-vector k)]
+                    (:mean pref)
+                    (get pred-means k)))  ; no pref → KL=0 for this channel
+        c-vars (for [k sensory-keys]
+                 (if-let [pref (get c-vector k)]
+                   (* (double (:sd pref)) (double (:sd pref)))
+                   (get pred-variances k 0.01)))]
+    [c-means c-vars]))
 
 (def ^:private default-action-costs
   {:pheromone {:base-cost 0.20
@@ -279,10 +324,6 @@
                   (assoc :hunger (clamp h')))]
     state))
 
-(defn- ensure-preferences
-  [prefs]
-  (merge default-preferences (or prefs {})))
-
 (defn- ensure-action-costs
   [costs]
   (merge default-action-costs (or costs {})))
@@ -298,22 +339,6 @@
 (defn- ensure-survival-config
   [cfg]
   (merge default-survival-config (or cfg {})))
-
-(defn- nll
-  [x {:keys [mean sd] :or {mean 0.0 sd 0.2}}]
-  (let [sd (double (max 1e-6 sd))
-        z (/ (- (double x) (double mean)) sd)]
-    (* 0.5 z z)))
-
-(defn- risk-from-preferences
-  [outcome prefs]
-  (let [{:keys [hunger ingest]} (ensure-preferences prefs)
-        hunger-x (double (or (:hunger outcome)
-                             (:h outcome)
-                             0.0))
-        ingest-x (double (or (:ingest outcome) 0.0))]
-    (+ (nll hunger-x hunger)
-       (nll ingest-x ingest))))
 
 (defn- action-prior-cost
   [action outcome hunger action-cfg]
@@ -470,37 +495,47 @@
         (max (double tau-floor))
         (min (double tau-cap)))))
 
-(defn- expected-ambiguity
-  [prec outcome]
-  (let [acc (reduce-kv (fn [sum k v]
-                         (if (and (number? v) (not= k :hunger))
-                           (let [precision (double (get-in prec [:Pi-o k] 1.0))
-                                 v (double (clamp (or v 0.0)))]
-                             (+ sum (* (/ 1.0 (max precision 0.2)) v (- 1.0 v))))
-                           sum))
-                       0.0
-                       outcome)]
-    (* 0.5 acc)))
-
 (defn- expected-free-energy
+  "Score an action via the canonical 2-term EFE core + named augmentation.
+
+   The core: g-efe = KL-risk + Gaussian-entropy-ambiguity, computed against
+   the unified C-vector over the obs ABI using tracked per-channel variance.
+
+   The augmentations (non-FEP, each with a typed residual):
+   - colony-cost: colony reserve pressure
+   - survival-cost: hunger/distance homeostatic pressure
+   - action-prior-cost: per-action engineering penalty
+   - info-gain: novelty/trail exploration bonus (subtracted)
+   - pattern-efe: pattern constraint penalty (if active)
+
+   controller-score = λ·g-efe + Σ λ_aug·augmentation
+   (lambda weights the EFE core and each augmentation separately)"
   [mu prec observation action {:keys [preferences action-costs efe]}]
   (let [outcome (predict-outcome mu observation action)
-        prefs (ensure-preferences preferences)
-        costs (ensure-action-costs action-costs)
         lambda (ensure-efe-lambda (get efe :lambda))
         colony-cfg (ensure-colony-config (get efe :colony))
         survival-cfg (ensure-survival-config (get efe :survival))
+        costs (ensure-action-costs action-costs)
         pattern-id (get-in observation [:pattern :pattern/active])
         pattern (when pattern-id
                   (pattern-efe/pattern-efe pattern-id action observation {:efe efe}))
-        risk (risk-from-preferences outcome prefs)
-        ambiguity (expected-ambiguity prec outcome)
+        pred-means (into {} (for [k sensory-keys]
+                              [k (double (get outcome k 0.0))]))
+        pred-variances (or (:var mu)
+                           (into {} (for [k sensory-keys] [k 0.01])))
+        pred-var-v (for [k sensory-keys] (double (get pred-variances k 0.01)))
+        pred-mean-v (for [k sensory-keys] (double (get pred-means k 0.0)))
+        [c-means c-vars] (c-vectors-for-efe default-c-vector pred-means pred-variances)
+        efe-result (efe/g-efe pred-mean-v pred-var-v c-means c-vars
+                              {:weights (for [k sensory-keys]
+                                          (double (get-in prec [:Pi-o k] 1.0)))})
+        risk (:risk efe-result)
+        ambiguity (:ambiguity efe-result)
+        g-efe-val (:g-efe efe-result)
         info (info-gain observation outcome)
         colony (colony-cost action observation colony-cfg)
         survival (survival-cost action observation outcome survival-cfg)
-        hunger (double (or (:hunger outcome)
-                           (:h outcome)
-                           0.0))
+        hunger (double (or (:hunger outcome) (:h outcome) 0.0))
         prior (action-prior-cost action outcome hunger (get costs action))
         G (+ (* (:pragmatic lambda) risk)
              (* (:ambiguity lambda) ambiguity)
@@ -510,6 +545,7 @@
              (- (* (:info lambda) info))
              (or (:G pattern) 0.0))]
     {:G G
+     :g-efe g-efe-val
      :risk risk
      :ambiguity ambiguity
      :info info
@@ -805,11 +841,10 @@
                                         :trail-grad trail-grad
                                         :hunger hunger})
 
-         ;; Softmax
+         ;; Softmax — preferences enter ONLY through G (g-efe risk + augmentations)
          scores (map (fn [{:keys [action result] :as item}]
-                       (let [base-logit (/ (- (:G result)) tau)
-                             aif-logit  (efe-tilt observation action {:lambda 0.6})]
-                         (assoc item :logit (+ base-logit aif-logit))))
+                       (let [base-logit (/ (- (:G result)) tau)]
+                         (assoc item :logit base-logit)))
                      evaluations)
          dist     (softmax scores tau)
          policies (into {} dist)

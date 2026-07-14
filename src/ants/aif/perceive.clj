@@ -65,6 +65,26 @@
               default-precisions
               (or prec {})))
 
+(def ^:private default-variance-floor
+  "Minimum per-channel variance. Prevents zero-variance (which would make
+   Gaussian entropy -∞ and KL infinite)."
+  1e-4)
+
+(defn- update-variance
+  "Evolve per-channel variance: var ← (1-α)var + α(o-μ')² + floor.
+
+   This is an exponential moving average of squared prediction errors — a
+   simple recursive variance estimator. The floor prevents collapse to zero."
+  [var errors mu' alpha]
+  (reduce (fn [acc k]
+            (let [old (double (get acc k 0.01))
+                  raw (double (get-in errors [k :raw] 0.0))
+                  new-var (+ (* (- 1.0 (double alpha)) old)
+                             (* (double alpha) (* raw raw))
+                             default-variance-floor)]
+              (assoc acc k new-var)))
+          (or var {})
+          sensory-keys))
 (defn- compute-errors
   [mu observation prec]
   (reduce (fn [acc key]
@@ -149,6 +169,7 @@
                      (assoc :sens sens'
                             :h hunger'
                             :pos (vec (or (:loc ant) (:pos mu)))
+                            :var (update-variance (:var mu) errors (:sens mu) alpha)
                             :goal (update-goal (:goal mu) world (:species ant) observation)))
              step-error (weighted-mse errors)
              trace' (conj trace {:tau (:tau prec-step)

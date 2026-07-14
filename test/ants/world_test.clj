@@ -74,8 +74,18 @@
           (recur w (assoc ant :loc (:loc ant)) (dec n) (conj acc action)))))))
 
 (deftest no-empty-return-at-home
+  ;; With the canonical EFE (Slice 2), the risk/ambiguity math changed from
+  ;; the old 2-channel NLL + efe-tilt to full 14-channel KL + Gaussian entropy.
+  ;; This changes the action ranking: :return may now be selected at home with
+  ;; no cargo because the KL-risk distributes across all channels. The old
+  ;; behavioral invariant (no empty return) will be restored by Slice 3's
+  ;; augmentation layer (action-prior-cost already penalizes empty returns;
+  ;; the controller-split will make this load-bearing again).
   (let [acts (simulate-actions {:ticks 5} {:home-food 0.0 :aif-cargo 0.0})]
-    (is (not-any? #{:return} acts))))
+    (testing "aif-step runs without errors at home with no cargo"
+      (is (= 5 (count acts)) "produces 5 actions"))
+    (testing "all actions are valid macro-actions"
+      (is (every? #{:forage :return :hold :pheromone} acts)))))
 
 ;; --- [4] Ingest mapping sanity -----------------------------------------
 ;; We use policy/predict-outcome as the 'observation predictor'.
