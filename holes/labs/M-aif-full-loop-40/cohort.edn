@@ -1,5 +1,5 @@
 {:cohort/id :wm-outer-loop-40-v1
- :protocol/version 3
+ :protocol/version 4
  :status :preregistered
  :registered-on "2026-07-13"
  :activation :separate-append-only-marker
@@ -13,6 +13,7 @@
    :abstained
    :no-selection
    :agent-unavailable
+   :substrate-unavailable
    :guardrail-refusal
    :dispatch-failed
    :build-failed

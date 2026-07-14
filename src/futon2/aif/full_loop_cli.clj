@@ -63,7 +63,7 @@
        "clicks; tick is one wall-clock opportunity. VERDICT is one of approve, "
        "confirmed, request-changes, reject, uncertain."))
 
-(defn -main [& args]
+(defn- run-command! [args]
   (let [[command & rest] args]
     (case command
       "status" (print-value {:cohort (cohort/ledger)
@@ -90,4 +90,12 @@
              (print-value (brief/review! attempt-id entity-id (keyword verdict)
                                          note (or reviewer "joe"))))
       (do (println usage)
-          (when command (System/exit 2))))))
+          (when command (throw (ex-info "Unknown command" {:command command})))))))
+
+(defn -main [& args]
+  (try
+    (run-command! args)
+    (finally
+      ;; clojure.java.shell uses the non-daemon solo-agent executor. Without
+      ;; this, completed one-shot runs visibly linger for its idle timeout.
+      (shutdown-agents))))

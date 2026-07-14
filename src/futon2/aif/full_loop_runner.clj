@@ -25,6 +25,7 @@
            [java.util UUID]))
 
 (def default-agency-base "http://127.0.0.1:7070")
+(def default-substrate-base "http://127.0.0.1:7073")
 (def default-author "zai-5")
 (def default-reviewer "codex-7")
 (def default-timeout-ms (* 90 60 1000))
@@ -38,6 +39,9 @@
                             default-agency-base)
            :author (or (System/getenv "FUTON_WM_AUTHOR_AGENT") default-author)
            :reviewer (or (System/getenv "FUTON_WM_REVIEWER_AGENT") default-reviewer)
+           :substrate-url (or (System/getenv "FUTON_SUBSTRATE_URL")
+                              (System/getenv "FUTON1B_URL")
+                              default-substrate-base)
            :timeout-ms (or (some-> (System/getenv "FUTON_WM_AGENT_TIMEOUT_MS")
                                    parse-long)
                            default-timeout-ms)
@@ -96,7 +100,7 @@
   ([raw-opts]
    (let [{:keys [agency-base author reviewer] :as opts} (config raw-opts)
          roster (agent-roster agency-base)]
-     {:configuration (select-keys opts [:agency-base :author :reviewer
+     {:configuration (select-keys opts [:agency-base :substrate-url :author :reviewer
                                         :timeout-ms :window-days])
       :agents (into {}
                     (for [agent [author reviewer]
@@ -106,6 +110,26 @@
                               :status (:status record)
                               :invoke-ready? (:invoke-ready? record)
                               :session-id (:session-id record)}]))})))
+
+(defn substrate-preflight!
+  "Prove that the configured authoritative semantic entity route is reachable.
+  A 404 for a unique sentinel is success; the substrate client returns nil."
+  [opts]
+  (let [started (System/currentTimeMillis)
+        probe-id (str "full-loop/preflight/" (UUID/randomUUID))]
+    (try
+      (substrate/entity-by-id probe-id
+                              (assoc opts :substrate-timeout-ms
+                                     (or (:substrate-preflight-timeout-ms opts) 15000)))
+      {:url (substrate/configured-url opts)
+       :route :entity-by-id
+       :latency-ms (- (System/currentTimeMillis) started)}
+      (catch Throwable e
+        (throw (ex-info "Authoritative substrate preflight failed"
+                        {:outcome :substrate-unavailable
+                         :url (substrate/configured-url opts)
+                         :cause-class (.getName (class e))}
+                        e))))))
 
 (defn- post-json! [url body]
   (let [r (http/post url {:headers {"Content-Type" "application/json"}
@@ -170,7 +194,12 @@
   (first (cascade/cascade-lane [entry] {:n 1 :budget 6})))
 
 (defn- job-text [job]
-  (str/join "\n" (keep :text (:events job))))
+  ;; The prompt itself names all verdict markers, so including it makes every
+  ;; review look approved. Agency persists the response prefix in
+  ;; :result-summary; require the reviewer to put its verdict first.
+  (str/join "\n"
+            (concat (keep identity [(:result-summary job) (:terminal-message job)])
+                    (keep :text (remove #(= "prompt" (:type %)) (:events job))))))
 
 (defn- author-prompt [{:keys [author reviewer]} target mission cascade-entry]
   (str author ": FULL-LOOP IMPLEMENTATION OPPORTUNITY. You are the author; "
@@ -203,7 +232,7 @@
        "Inspect the commit rather than trusting the summary. Verify that it is substantive "
        "rather than artifact-only, is in scope for the selected target, preserves invariants, "
        "and clears the required static checks and relevant tests. Do not edit or commit.\n\n"
-       "End with exactly one verdict line:\n"
+       "BEGIN your response with exactly one verdict line (Agency preserves the response prefix):\n"
        "FULL_LOOP_REVIEW: APPROVE\n"
        "or FULL_LOOP_REVIEW: REQUEST_CHANGES <reason>\n"
        "or FULL_LOOP_REVIEW: REJECT <reason>"))
@@ -357,6 +386,7 @@
       (when-not (and (available? roster author) (available? roster reviewer))
         (throw (ex-info "Configured author or reviewer is unavailable"
                         {:outcome :agent-unavailable :author author :reviewer reviewer})))
+      ((or (:substrate-preflight-fn opts) substrate-preflight!) opts)
       (try ((or (:refresh-fn opts) cv/maybe-refresh!)) (catch Throwable _ nil))
       (let [judgement0 (:judgement ((or (:judge-fn opts) wm/generate-war-machine)
                                     window-days))
@@ -477,4 +507,5 @@
           (close! (outcome-from e)
                   {:target (some-> @checkpoints :selection :judgment :selected-mission)
                    :error (.getMessage e)
+                   :error-class (.getName (class e))
                    :error-data (ex-data e)}))))))

@@ -24,6 +24,7 @@
                               :codex-7 {:status "idle" :invoke-ready? true}})
           :judge-fn (fn [_] {:judgement judgement})
           :refresh-fn (fn [] nil)
+          :substrate-preflight-fn (fn [_] {:route :test})
           :code-state-fn (fn [] {:repo "/futon2" :git-sha "head"
                                  :git-dirty? false :repo-heads {}})
           :mode-flags-fn (fn [] {:likelihood-mode :aif})
@@ -42,7 +43,9 @@
                        {:job-id job-id :state "done" :artifact-ref "abc123"
                         :events [{:text "FULL_LOOP_AUTHOR: DONE abc123"}]}
                        {:job-id job-id :state "done"
-                        :events [{:text "FULL_LOOP_REVIEW: APPROVE"}]}))
+                        :result-summary "FULL_LOOP_REVIEW: APPROVE\nLooks good."
+                        :events [{:type "prompt"
+                                  :text "FULL_LOOP_REVIEW: REQUEST_CHANGES"}]}))
           :resolve-build-fn (fn [_] {:repo "/repo" :files ["src/real.clj"]})
           :ground-fn (fn [& _]
                        {:before {:implementation-entity nil}
@@ -58,3 +61,9 @@
     (is (= :grounded-change (:outcome (first @queued))))
     (is (= #{:selection :construction :dispatch :build :adjudication}
            (set (keys (:checkpoints result)))))))
+
+(deftest reviewer-prompt-cannot-supply-its-own-approval
+  (let [job {:result-summary "FULL_LOOP_REVIEW: REQUEST_CHANGES live seam remains optional"
+             :events [{:type "prompt" :text "FULL_LOOP_REVIEW: APPROVE"}]}]
+    (is (not (re-find #"FULL_LOOP_REVIEW:\s*APPROVE"
+                      (#'runner/job-text job))))))

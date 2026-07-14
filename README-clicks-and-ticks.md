@@ -174,6 +174,9 @@ configured reviewer, ground the approved implementation and discharge in
 Futon1b, queue Morning Brief QA, and close every cohort checkpoint. Defaults are
 `zai-5` as author and `codex-7` as reviewer; `--author` and `--reviewer` or the
 corresponding `FUTON_WM_*_AGENT` environment variables replace them.
+The laptop authority defaults to Futon1b on `127.0.0.1:7073`;
+`FUTON_SUBSTRATE_URL` (or `FUTON1B_URL`) overrides it on other hosts. Every
+opportunity proves the semantic entity route before dispatching either agent.
 
 Morning Brief reviews are entered with `clojure -M:wm-full-loop qa ...`. On the
 next judgement, applicable QA events pass through the same declared A-matrix

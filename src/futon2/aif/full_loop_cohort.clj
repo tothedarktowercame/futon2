@@ -25,7 +25,7 @@
 (def outcome-kinds
   #{:grounded-change :grounded-no-change :artifact-only :abstained :no-selection
     :agent-unavailable :guardrail-refusal :dispatch-failed :build-failed
-    :incomplete})
+    :substrate-unavailable :incomplete})
 
 (defn read-edn [path]
   (edn/read-string (slurp path)))
