@@ -1144,8 +1144,11 @@
    The result is intentionally action-shaped rather than raw-evidence-shaped,
   so War Machine can say what needs fixing instead of only replaying boot
   banners."
-  [days]
-  (let [result (fetch-evidence-result :limit 1000 :since (since-str days))
+  ([days]
+   (scan-self-watch days
+                    (fetch-evidence-result :limit 1000 :since (since-str days))))
+  ([days result]
+  (let [_days days
         entries (:entries result)]
     (if-not (:available? result)
       {:available? false
@@ -1156,7 +1159,7 @@
        :critical-count 0
        :warning-count 0}
       (assoc (summarize-self-watch entries)
-             :available? true))))
+             :available? true)))))
 
 ;; ---------------------------------------------------------------------------
 ;; Scan 1: Loop Health
@@ -1282,9 +1285,11 @@
 
    cf. cyberants observe.clj — each arrow is a sensory channel,
    health is the normalized [0,1] observation."
-  [days]
+  ([days]
+   (scan-loop-health days
+                     (or (fetch-evidence :limit 2000 :since (since-str days)) [])))
+  ([days entries]
   (let [since (since-str days)
-        entries (or (fetch-evidence :limit 2000 :since since) [])
         ;; Filter entries to window
         window-entries (filter (fn [e]
                                  (when-let [d (parse-iso-date (:evidence/at e))]
@@ -1319,7 +1324,7 @@
      :overall overall
      :healthy-count (count healthy)
      :total-count (count arrows)
-     :loop-complete? (= (count healthy) (count arrows))}))
+     :loop-complete? (= (count healthy) (count arrows))})))
 
 ;; ---------------------------------------------------------------------------
 ;; Scan 2: Support / Attack
@@ -1361,9 +1366,9 @@
 
    Returns {:claims [...] :support-coverage :attack-coverage}.
    Coverage = fraction of claims with at least one recent evidence entry."
-  [days]
+  ([days] (scan-support-attack days (or (fetch-evidence :limit 2000) [])))
+  ([days entries]
   (let [since (since-str days)
-        entries (or (fetch-evidence :limit 2000) [])
         window-entries (filter (fn [e]
                                  (when-let [d (parse-iso-date (:evidence/at e))]
                                    (>= (compare d since) 0)))
@@ -1403,7 +1408,7 @@
      :attack-coverage (if (seq attack-claims)
                         (/ (double (count (filter covered? attack-claims)))
                            (count attack-claims))
-                        0.0)}))
+                        0.0)})))
 
 ;; ---------------------------------------------------------------------------
 ;; Scan 3: Mission Triage
@@ -1539,7 +1544,7 @@
    - :repos-touched, :missions-touched — distinct repos/missions mentioned
 
    Returns {:sessions [...] :total-sessions N}."
-  [days]
+  ([days]
   (let [since (since-str days)
         ;; Bound the fetch. The evidence store is large (60k+ entries / 100+MB) and the
         ;; API full-scans on every query (~9s); even under the 30s fetch timeout an
@@ -1552,9 +1557,11 @@
                              Long/parseLong)
                      10000)
         entries (or (fetch-evidence :since since :limit ev-limit) [])
-        ;; Get mission IDs for mission detection
-        mission-ids (when-let [missions (fetch-missions)]
-                      (vec (keep :mission/id missions)))
+        missions (fetch-missions)]
+    (scan-sessions days entries missions)))
+  ([days entries missions]
+  (let [_since (since-str days)
+        mission-ids (when missions (vec (keep :mission/id missions)))
         ;; Group by session-id
         by-session (group-by :evidence/session-id entries)
         sessions (->> by-session
@@ -1586,7 +1593,7 @@
                       (sort-by :start #(compare %2 %1))
                       vec)]
     {:sessions sessions
-     :total-sessions (count sessions)}))
+     :total-sessions (count sessions)})))
 
 ;; ---------------------------------------------------------------------------
 ;; Scan 6b: Mission Detail (for mission hex view)
@@ -1828,9 +1835,9 @@
 
    This is the core data structure consumed by the visualiser.
    cf. cyberants world grid — here the 'world' is the stack itself."
-  [days]
+  ([days] (scan-graph days (or (fetch-evidence :limit 2000) [])))
+  ([days entries]
   (let [since (since-str days)
-        entries (or (fetch-evidence :limit 2000) [])
         window-entries (filter (fn [e]
                                  (when-let [d (parse-iso-date (:evidence/at e))]
                                    (>= (compare d since) 0)))
@@ -1926,7 +1933,7 @@
                :total-sorrys (count sorrys)
                :total-workstreams (count workstreams)
                :coupling-edges (count coupling)
-               :ticks-firing (count (filter :fired? tick-results))}}))
+               :ticks-firing (count (filter :fired? tick-results))}})))
 
 ;; ---------------------------------------------------------------------------
 ;; Scan 9: Pattern Library
@@ -4453,16 +4460,24 @@
   [days]
   (let [now-zdt (ZonedDateTime/now tz)
         now (.toString (.toLocalDate now-zdt))
+        evidence-limit (or (some-> (System/getenv "FUTON3C_WM_SESSION_EVIDENCE_LIMIT")
+                                   Long/parseLong)
+                           10000)
+        ;; One evidence-store query supplies every evidence-derived scan.
+        ;; Consumers apply their own window and projection locally.
+        evidence-snapshot-result
+        (fetch-evidence-result :limit evidence-limit :since (since-str days))
+        evidence-snapshot (or (:entries evidence-snapshot-result) [])
         ;; One coherent snapshot feeds both mission consumers. The endpoint
         ;; attaches store-backed turn telemetry and is expensive under load;
         ;; fetching it twice made an opportunity pay the same query twice.
         mission-snapshot (fetch-missions)
-        self-watch (scan-self-watch days)
-        loop-health (scan-loop-health days)
-        support-attack (scan-support-attack days)
+        self-watch (scan-self-watch days evidence-snapshot-result)
+        loop-health (scan-loop-health days evidence-snapshot)
+        support-attack (scan-support-attack days evidence-snapshot)
         mission-triage (scan-mission-triage days (or mission-snapshot []))
-        graph (scan-graph days)
-        sessions (scan-sessions days)
+        graph (scan-graph days evidence-snapshot)
+        sessions (scan-sessions days evidence-snapshot mission-snapshot)
         portfolio (scan-portfolio)
         mission-detail (when mission-snapshot
                          (scan-mission-detail mission-snapshot))
