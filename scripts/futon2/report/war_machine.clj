@@ -87,6 +87,16 @@
 (def ^:private futon1a-penholder
   (or (System/getenv "FUTON1A_PENHOLDER") "api"))
 (def ^:private g-total-tie-epsilon 1.0e-6)
+(def ^:private default-session-evidence-limit 500)
+(def ^:private max-session-evidence-limit 2000)
+
+(defn- session-evidence-limit []
+  (-> (or (some-> (System/getenv "FUTON3C_WM_SESSION_EVIDENCE_LIMIT")
+                  Long/parseLong)
+          default-session-evidence-limit)
+      (max 1)
+      (min max-session-evidence-limit)))
+
 (def ^:private capability-star-map-path
   (str home "/code/futon0/holes/missions/M-capability-star-map.graph.edn"))
 (def ^:private live-star-map-goal :wm-overnight-unsupervised)
@@ -1551,11 +1561,11 @@
         ;; UNLIMITED windowed pull is a huge, slow payload. The API returns NEWEST-first,
         ;; so :limit yields the most-recent activity — degrade to "latest N entries"
         ;; rather than a slow/empty Scan window. Tunable via FUTON3C_WM_SESSION_EVIDENCE_LIMIT
-        ;; (default 10000 ≈ last ~4-5 days). (Ported from the arguing-worlds worktree WIP,
-        ;; 2026-06-12; the timeout it also added is already handled by fetch-evidence.)
-        ev-limit (or (some-> (System/getenv "FUTON3C_WM_SESSION_EVIDENCE_LIMIT")
-                             Long/parseLong)
-                     10000)
+        ;; The migrated XTDB2 store makes response size, hydration and EDN parsing the
+        ;; limiting costs. 500 recent entries is enough to build the strategic session
+        ;; surface in a few seconds on Dionysus; cap even an operator override at 2,000
+        ;; so a click can never regress into a corpus-shaped read.
+        ev-limit (session-evidence-limit)
         entries (or (fetch-evidence :since since :limit ev-limit) [])
         missions (fetch-missions)]
     (scan-sessions days entries missions)))
@@ -4460,9 +4470,9 @@
   [days]
   (let [now-zdt (ZonedDateTime/now tz)
         now (.toString (.toLocalDate now-zdt))
-        evidence-limit (or (some-> (System/getenv "FUTON3C_WM_SESSION_EVIDENCE_LIMIT")
-                                   Long/parseLong)
-                           10000)
+        ;; One bounded recent window feeds all evidence-derived scans. The hard cap is
+        ;; intentional: an operator typo must not turn selection into corpus retrieval.
+        evidence-limit (session-evidence-limit)
         ;; One evidence-store query supplies every evidence-derived scan.
         ;; Consumers apply their own window and projection locally.
         evidence-snapshot-result

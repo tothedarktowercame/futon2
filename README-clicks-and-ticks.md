@@ -177,6 +177,10 @@ corresponding `FUTON_WM_*_AGENT` environment variables replace them.
 The laptop authority defaults to Futon1b on `127.0.0.1:7073`;
 `FUTON_SUBSTRATE_URL` (or `FUTON1B_URL`) overrides it on other hosts. Every
 opportunity proves the semantic entity route before dispatching either agent.
+Selection uses the newest 500 non-ephemeral evidence entries by default rather
+than materialising the corpus. `FUTON3C_WM_SESSION_EVIDENCE_LIMIT` may tune the
+window, but the runner clamps it to 1--2,000 entries so a typo cannot turn a
+click into an unbounded operational query.
 
 Every full-loop opportunity also appends line-oriented EDN phase transitions to
 `data/wm-full-loop-phases.edn.log` and mirrors them to stdout with the
