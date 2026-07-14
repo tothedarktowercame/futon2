@@ -1,13 +1,13 @@
 {:cohort/id :wm-outer-loop-40-v1
- :protocol/version 2
+ :protocol/version 3
  :status :preregistered
  :registered-on "2026-07-13"
  :activation :separate-append-only-marker
- :population "Natural wall-clock opportunities of the full War Machine loop"
+ :population "Natural wall-clock or duree-triggered opportunities of the full War Machine loop"
  :stopping-rule
- {:unit :wall-clock-opportunity
+ {:unit :trigger-opportunity
   :target 40
-  :rule "Count the first 40 distinct wall-clock opportunities after activation, in order."
+  :rule "Count the first 40 distinct eligible trigger opportunities after activation, in order."
   :counts-as-attempt
   [:selected-and-dispatched
    :abstained
@@ -21,7 +21,9 @@
   :excluded
   [:manual-test :replay :duplicate-opportunity :pre-activation]
   :replacement "None. Failed, unavailable, abstaining, and no-change opportunities remain in the denominator."}
- :allowed-triggers #{:wallclock-cron}
+ :allowed-triggers #{:wallclock-cron
+                     :duree-click-on-demand
+                     :duree-click-continuous}
  :checkpoint-order
  [:time-step :selection :construction :dispatch :build :adjudication :closed]
  :required-before-close

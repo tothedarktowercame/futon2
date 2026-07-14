@@ -79,6 +79,21 @@
                     "&limit=" (long (or (:limit opts) 10000)))]
        (:entities (request! :get url opts nil))))))
 
+(defn entity-by-id
+  "Read one semantic entity by its canonical id. A missing entity is nil;
+  transport and server failures remain loud."
+  ([id] (entity-by-id id {}))
+  ([id opts]
+   (if-let [f (:entity-by-id-fn opts)]
+     (f id)
+     (try
+       (:entity (request! :get (str (api-url opts "/entity/") (encode id))
+                           opts nil))
+       (catch clojure.lang.ExceptionInfo e
+         (if (= 404 (:status (ex-data e)))
+           nil
+           (throw e)))))))
+
 (defn hyperedges-by-type
   ([type] (hyperedges-by-type type {}))
   ([type opts]

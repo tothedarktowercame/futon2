@@ -13,7 +13,7 @@ contracts per surface).*
 | Clock | Source | Substrate | Cadence | What fires it |
 |---|---|---|---|---|
 | `tick` | wall-clock | cron / systemd-timer / Drawbridge | Configurable; default hourly | Calendar time passing — fires whether or not anything has happened in the stack |
-| `click` | Evidence Landscape entries | `futon1a` invoke-job ledger + sibling typed-event streams | Event-driven; varies | Operator-engagement events: REPL interactions, manual `:wm-scheduled` invocations, mission-doc edits, Forum PSR/PUR/PAR posts, M-INC `state/*` events (when step (b) lands) |
+| `click` | Evidence Landscape entries | authoritative Futon1b invoke-job ledger + sibling typed-event streams | Event-driven; varies | Operator-engagement events or an explicitly requested/continuous full-loop opportunity |
 
 Ticks measure *calendar* time. Clicks measure *engagement* time. Both
 are valid temporal substrates; neither alone is sufficient.
@@ -141,11 +141,12 @@ Evidence-Landscape-typed:
 
 | Source | Substrate | Click kind | Status |
 |---|---|---|---|
-| Agency invoke-job ledger (futon1a) | `futon1a` XTDB | `:duree-click-invoke` | live (per §2.A.2.33 B-2 of the inventory) |
+| Agency invoke-job ledger | Agency routing with Futon1b as authoritative substrate | `:duree-click-invoke` | live |
 | Forum PSR/PUR/PAR posts (futon3c) | `futon3c/forum/*` | `:duree-click-forum-psr` etc. | partial; futon3c being ported |
 | Mission-doc edits | `~/code/futon{0,7,...}/holes/missions/*.md` | `:duree-click-mission-edit` | file-watch detectable |
 | M-INC `state/*` events | M-INC step (b) — not yet landed | `:duree-click-m-inc-state-*` | HEAD-as-escrow until step (b) commits |
-| Operator manual `:wm-scheduled` run | `clojure -M:wm-scheduled` (no `:tick` arg) | `:operator-manual` | live |
+| Operator on-demand full loop | `clojure -M:wm-full-loop once` | `:duree-click-on-demand` | live |
+| Continuous full loop | `clojure -M:wm-full-loop continuous` | `:duree-click-continuous` | live |
 
 The WM reads from these as-needed; it does not own any of them. Each
 source has its own retention discipline and its own typing convention.
@@ -154,14 +155,30 @@ source has its own retention discipline and its own typing convention.
 
 | Source | Substrate | Cadence | Status |
 |---|---|---|---|
-| cron entry | `crontab -u joe` | `0 * * * *` (recommended hourly) | not installed (operator action; see `futon2/docs/futon-aif-completeness.md` §R10) |
+| cron entry | `crontab -u joe` | Configurable | no authoritative full-loop cron installed; optional because the same runner supports durée mode |
 | systemd user timer | `~/.config/systemd/user/wm-scheduled.timer` | OnCalendar configurable | optional substitute for cron |
 | Drawbridge-scheduled invocation | futon3c nREPL | configurable | available if futon3c is up |
 
-`:wm-scheduled` (the `:wm-scheduled` deps alias) is the entrypoint
-script for all tick sources. It carries an optional `--trigger` arg
-(forthcoming) that names the firing source; default
-`:wallclock-cron` under cron / systemd, `:operator-manual` otherwise.
+The authoritative entrypoint is `clojure -M:wm-full-loop`. `once` enacts one
+on-demand durée click; `continuous` runs sequential durée opportunities (with
+optional `--count` and `--interval-seconds`); `tick` enacts one wall-clock
+opportunity. `clojure -M:wm-scheduled` is the same real full loop with `tick`
+preselected. The former judgement/fold-only script is retained under the
+explicitly non-actuating alias `:wm-judgement-only`; it is not a scheduler
+entrypoint.
+
+Each opportunity uses the same state machine: observe and update belief,
+select exactly one policy, construct against that selected policy, dispatch a
+configured author, require a verifiable substantive commit, dispatch a distinct
+configured reviewer, ground the approved implementation and discharge in
+Futon1b, queue Morning Brief QA, and close every cohort checkpoint. Defaults are
+`zai-5` as author and `codex-7` as reviewer; `--author` and `--reviewer` or the
+corresponding `FUTON_WM_*_AGENT` environment variables replace them.
+
+Morning Brief reviews are entered with `clojure -M:wm-full-loop qa ...`. On the
+next judgement, applicable QA events pass through the same declared A-matrix
+belief update as other typed events. Reviews outside the current belief domain
+are held and remain unconsumed rather than being silently dropped.
 
 ## The trace IS the state store
 
@@ -180,6 +197,7 @@ Concretely:
 | R3 micro-step convergence | `:micro-step-trace` field on each trace record |
 | Anticipation snapshot (read-only) | `:anticipation` field on each trace record |
 | Decision + ranked actions | `:decision` + `:ranked-actions` fields |
+| Morning Brief QA fold | `:morning-brief-events`, held events, and consumed event ids |
 
 On the VSATARCS side, the same discipline holds: the VSATARCS trace
 stores `:wm-trace-anchor` entries identifying the last WM-trace record

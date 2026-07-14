@@ -14,6 +14,8 @@
                 (mapv #(assoc % :inhabited? (= :present (:type %))) bindings))
               :entities-by-type-fn
               (fn [type] [{:entity/id "e" :entity/type type}])
+              :entity-by-id-fn
+              (fn [id] {:entity/id id :entity/type :test})
               :relations-fn
               (fn [filters] [{:relation/id "r" :relation/type (:type filters)}])
               :put-doc-fn
@@ -26,6 +28,7 @@
                   opts))))
     (is (= :capability
            (:entity/type (first (substrate/entities-by-type :capability opts)))))
+    (is (= "specific" (:entity/id (substrate/entity-by-id "specific" opts))))
     (is (= :outcome-ref
            (:relation/type (first (substrate/relations {:type :outcome-ref} opts)))))
     (is (= [{:xt/id "e" :entity/type :test}]

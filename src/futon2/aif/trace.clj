@@ -169,8 +169,11 @@
     11 — records the production belief :likelihood-mode and the A/B/D model
          manifest hashes in :wm-version (2026-07-13).
     12 — records learned habit-prior state per tick and its source per ranked
-         action (B1, dark build, 2026-07-13)."
-  12)
+         action (B1, dark build, 2026-07-13).
+    13 — records Morning Brief QA events applied through the live A-matrix
+         belief update, the consumed event ids, and any events held because
+         their entity is outside the current belief domain (2026-07-14)."
+  13)
 
 (defn- futon2-git-version
   "Git identity of the futon2 checkout this JVM loaded its code from:
@@ -248,6 +251,10 @@
     :selection-gain (:selection-gain judge-output
                                          (selection-gain/initial-selection-gain-state))
     :micro-step-trace (:micro-step-trace judge-output [])
+    :morning-brief-events (:morning-brief-events judge-output [])
+    :morning-brief-held-events (:morning-brief-held-events judge-output [])
+    :morning-brief-consumed-event-ids
+    (:morning-brief-consumed-event-ids judge-output [])
     :anticipation (:anticipation judge-output {:events-loaded? false :events []})
     :ranked-actions (mapv strip-ranked-action (:ranked-actions judge-output))
     :policy-support-exclusions (vec (:policy-support-exclusions judge-output))
@@ -370,5 +377,9 @@
            end-date (LocalDate/now utc-zone)
            lookback-days 2}}]
   (let [days (max 1 (int lookback-days))
-        start-date (.minusDays end-date (long (dec days)))]
-    (last (read-trace-range start-date end-date :dir dir))))
+        start-date (.minusDays end-date (long (dec days)))
+        recent (last (read-trace-range start-date end-date :dir dir))]
+    ;; A planned or accidental pause must not silently reset the carried
+    ;; posterior, precision, selection gain, habit prior, or consumed QA ids.
+    ;; The all-traces fallback runs only when the bounded fast path is empty.
+    (or recent (last (read-all-traces :dir dir)))))

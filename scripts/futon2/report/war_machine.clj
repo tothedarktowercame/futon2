@@ -43,6 +43,7 @@
             [futon2.aif.free-energy :as fe]
             [futon2.aif.habit-prior :as habit-prior]
             [futon2.aif.mission-registry :as mission-registry]
+            [futon2.aif.morning-brief :as morning-brief]
             [futon2.aif.observation :as obs]
             [futon2.aif.pattern-registry :as pattern-registry]
             [futon2.aif.policy :as policy]
@@ -194,6 +195,21 @@
   [belief-state events]
   (belief/update-belief-batch belief-state events
                               (arena-belief-update-opts)))
+
+(defn apply-morning-brief-events
+  "Apply only QA events whose entity belongs to the current strategic belief
+  domain. Held events remain unconsumed so an operator typo or later domain
+  migration cannot silently discard evidence."
+  [belief-state consumed-ids unseen-events]
+  (let [consumed-pre (set consumed-ids)
+        applied (filterv #(contains? belief-state (:entity-id %)) unseen-events)
+        held (filterv #(not (contains? belief-state (:entity-id %))) unseen-events)]
+    {:belief (if (seq applied)
+               (apply-arena-belief-events belief-state applied)
+               belief-state)
+     :applied applied
+     :held held
+     :consumed-ids (into consumed-pre (map :event-id applied))}))
 
 (defn- arena-salience-mode
   "Production R7 semantics: precision is inverse rolling error variance;
@@ -3801,6 +3817,18 @@
                           (belief/reconcile-belief-carry
                            fresh (:mu-post prev-trace-record))
                           fresh))
+        morning-brief-consumed-pre
+        (set (:morning-brief-consumed-event-ids prev-trace-record))
+        morning-brief-unseen
+        (try (morning-brief/unseen-belief-events morning-brief-consumed-pre)
+             (catch Exception _ []))
+        morning-brief-fold
+        (apply-morning-brief-events wm-belief-pre morning-brief-consumed-pre
+                                    morning-brief-unseen)
+        morning-brief-events (:applied morning-brief-fold)
+        morning-brief-held-events (:held morning-brief-fold)
+        morning-brief-consumed-event-ids (:consumed-ids morning-brief-fold)
+        wm-belief-after-brief (:belief morning-brief-fold)
         ;; E-support-coverage Cycle 4 (cg-a5d2e756, 2026-05-26): static
         ;; entity-tags from stack-annotations.edn :ref classification.
         ;; WM pilot cycle 2 (cg-7fa6aec3, 2026-05-30): static entity-repos
@@ -3859,7 +3887,7 @@
         ;; Inner loop result
         {:keys [belief precision-state prediction-errors micro-step-trace]}
         (loop [step 0
-               belief wm-belief-pre
+               belief wm-belief-after-brief
                prec-state prev-precision-state
                micro-trace []]
           (let [predictions (belief/predict-observation
@@ -4171,6 +4199,10 @@
                 ;; Persisted so the next tick continues the rolling outcome window.
                 :selection-gain selection-gain-state
                 :micro-step-trace micro-step-trace
+                :morning-brief-events morning-brief-events
+                :morning-brief-held-events morning-brief-held-events
+                :morning-brief-consumed-event-ids
+                (vec (sort morning-brief-consumed-event-ids))
                 :anticipation anticipation-snapshot
                 :ranked-actions wm-ranked+cascades
                 :policy-support-exclusions (vec wm-policy-exclusions)

@@ -9,7 +9,11 @@
  {:run {:main-opts ["-m" "ants.main"]}
   :war-machine {:main-opts ["-m" "futon2.report.war-machine-visual"]}
   :war-machine-text {:main-opts ["-m" "futon2.report.war-machine"]}
-  :wm-scheduled {:main-opts ["-m" "wm-scheduled-run"]}
+  ;; Authoritative real-actuation entrypoint. The historical judgement/fold
+  ;; runner remains available only under its honest diagnostic name.
+  :wm-scheduled {:main-opts ["-m" "futon2.aif.full-loop-cli" "tick"]}
+  :wm-full-loop {:main-opts ["-m" "futon2.aif.full-loop-cli"]}
+  :wm-judgement-only {:main-opts ["-m" "wm-scheduled-run"]}
   :wm-preflight {:main-opts ["-m" "wm-preflight"]}
   :fold-author {:main-opts ["-m" "fold-author"]}
   :wm-outer-loop {:main-opts ["-m" "wm-outer-loop"]}

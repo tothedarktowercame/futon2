@@ -9,6 +9,19 @@
             [futon2.aif.efe :as efe]
             [futon2.report.war-machine :as wm]))
 
+(deftest morning-brief-events-use-live-belief-update-and-hold-unknown-entities
+  (let [prior {"known" {:spawned (/ 1.0 7) :refined (/ 1.0 7)
+                         :strengthened (/ 1.0 7) :addressed (/ 1.0 7)
+                         :falsified (/ 1.0 7) :foreclosed (/ 1.0 7)
+                         :reopened (/ 1.0 7)}}
+        known {:event-id "qa-1" :entity-id "known" :type :strengthened :weight 1.0}
+        unknown {:event-id "qa-2" :entity-id "unknown" :type :falsified :weight 1.0}
+        result (wm/apply-morning-brief-events prior #{"older"} [known unknown])]
+    (is (= [known] (:applied result)))
+    (is (= [unknown] (:held result)))
+    (is (= #{"older" "qa-1"} (:consumed-ids result)))
+    (is (not= prior (:belief result)))))
+
 ;; ---------------------------------------------------------------------------
 ;; arrow-health
 ;; ---------------------------------------------------------------------------
