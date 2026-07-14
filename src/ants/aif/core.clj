@@ -182,7 +182,9 @@
                                          :preferences (:preferences cfg)
                                          :action-costs (:actions cfg)
                                          :efe (:efe cfg)
-                                         :precision precision-opts})
+                                         :precision precision-opts
+                                         :world world
+                                         :ant ant})
                   (catch Exception _e
                     ;; Deliberative policy failed — fall back to default mode
                     default-policy))

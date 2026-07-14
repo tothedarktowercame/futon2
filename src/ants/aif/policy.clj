@@ -3,6 +3,7 @@
    Supports multi-step rollout (R13) when :horizon > 1."
   (:require [ants.aif.observe :as observe]
             [ants.aif.efe :as efe]
+            [ants.aif.forward :as forward]
             [ants.aif.pattern-efe :as pattern-efe]
             [ants.aif.rollout :as rollout]
             [clojure.math :as math]))
@@ -529,6 +530,57 @@
         (max (double tau-floor))
         (min (double tau-cap)))))
 
+(defn- predict-observation
+  "Predict the next observation via the R4 forward kernel + g-observe.
+
+   Calls forward/forward-predict (the SAME kernel the live step uses),
+   applies the kernel's effects to a copy of the world, then calls
+   g-observe on the predicted next-ant in the updated world.
+
+   For :h (hunger): the kernel uses a simplified local hunger model
+   (generative belief) — the divergence from the live step's colony-coupled
+   adjust-hunger is the R4-legitimate prediction error that F measures.
+
+   Returns the predicted observation map (same shape as g-observe output)."
+  [world ant action]
+  (let [view (forward/local-view world ant)
+        mu-goal (get-in ant [:mu :goal])
+        predict-opts (cond-> {:seed 42}
+                       mu-goal (assoc :mu-goal mu-goal))
+        result (forward/forward-predict view ant action predict-opts)
+        next-ant (:mean result)
+        effects (:effects result)
+        ;; Apply effects to a copy of the world
+        food-deltas (:food-deltas effects)
+        pher-deltas (:pher-deltas effects)
+        reserve-delta (:reserve-delta effects 0.0)
+        score-delta (:score-delta effects 0.0)
+        species (:species ant)
+        ;; Update cells with food/pher deltas
+        world-pred (reduce (fn [w [loc delta]]
+                             (update-in w [:grid :cells loc :food]
+                                        #(max 0.0 (- (double (or % 0.0)) (double delta)))))
+                           world
+                           (or (seq food-deltas) []))
+        max-pher (double (or (get-in world [:grid :max-pher]) 3.0))
+        world-pred (reduce (fn [w [loc amount]]
+                             (update-in w [:grid :cells loc :pher]
+                                        (fn [p] (min max-pher (+ (double (or p 0.0))
+                                                                 (double amount))))))
+                           world-pred
+                           (or (seq pher-deltas) []))
+        ;; Update colonies with reserve-delta
+        world-pred (if (pos? reserve-delta)
+                     (update-in world-pred [:colonies species :reserves]
+                                (fnil + 0.0) (double reserve-delta))
+                     world-pred)
+        ;; Update scores
+        world-pred (if (pos? score-delta)
+                     (update-in world-pred [:scores species] (fnil + 0.0) (double score-delta))
+                     world-pred)]
+    ;; g-observe on the predicted world + next-ant
+    (observe/g-observe world-pred next-ant)))
+
 (defn- expected-free-energy
   "Score an action via the canonical 2-term EFE core + named augmentation.
 
@@ -544,8 +596,10 @@
 
    controller-score = λ·g-efe + Σ λ_aug·augmentation
    (lambda weights the EFE core and each augmentation separately)"
-  [mu prec observation action {:keys [preferences action-costs efe]}]
-  (let [outcome (predict-outcome mu observation action)
+  [mu prec observation action {:keys [preferences action-costs efe world ant]}]
+  (let [outcome (if (and world ant)
+                  (predict-observation world ant action)
+                  (predict-outcome mu observation action))
         lambda (ensure-efe-lambda (get efe :lambda))
         colony-cfg (ensure-colony-config (get efe :colony))
         survival-cfg (ensure-survival-config (get efe :survival))
@@ -798,7 +852,7 @@
   "Evaluate candidate actions and sample via softmax over -G/tau."
   ([mu prec observation]
    (choose-action mu prec observation {}))
-  ([mu prec observation {:keys [actions preferences action-costs efe efe-lambda precision horizon discount] :as _opts}]
+  ([mu prec observation {:keys [actions preferences action-costs efe efe-lambda precision horizon discount world ant] :as _opts}]
    (let [prefs         preferences
          costs         action-costs
          lambda        (ensure-efe-lambda (or efe-lambda (get-in efe [:lambda])))
@@ -832,7 +886,8 @@
                          base-actions)
 
          ;; EFE base evaluation — with optional multi-step rollout (R13)
-         efe-opts       {:preferences prefs :action-costs costs :efe efe-config}
+         efe-opts       {:preferences prefs :action-costs costs :efe efe-config
+                         :world world :ant ant}
          horizon        (or horizon 1)
          discount       (or discount 0.9)
          evaluations    (mapv (fn [action]

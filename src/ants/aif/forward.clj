@@ -342,6 +342,50 @@
       (dissoc ant :recent-gather)
       (assoc ant :recent-gather decayed))))
 
+(defn- predict-hunger
+  "Simplified local hunger model for the prediction path (generative belief).
+
+   h' = clamp01(h + burn + load_pressure*cargo - feed*food - rest*home_prox)
+
+   This mirrors affect/tick-hunger's structure but uses only locally-observable
+   quantities (no colony/queen state). The divergence between this belief-model
+   and the live step's colony-coupled adjust-hunger is the R4-legitimate
+   prediction error that F measures."
+  [ant view]
+  (let [h (double (or (:h ant) 0.5))
+        cargo (double (or (:cargo ant) 0.0))
+        loc (:loc ant)
+        cell (cell-at view loc)
+        food (double (or (:food cell) 0.0))
+        home (:home view)
+        [w h-size] (:size view)
+        max-dist (let [w-d (max 1 (dec (or w 1)))
+                       h-d (max 1 (dec (or h-size 1)))]
+                   (Math/sqrt (+ (* w-d w-d) (* h-d h-d))))
+        home-prox (if home
+                    (let [[x y] loc
+                          [hx hy] home
+                          dist (Math/sqrt (+ (* (- hx x) (- hx x))
+                                             (* (- hy y) (- hy y))))]
+                      (observe/clamp01 (- 1.0 (/ dist (max 1e-9 max-dist)))))
+                    0.0)
+        burn 0.02
+        feed 0.05
+        rest 0.03
+        load-pressure 0.25
+        delta (+ burn (* load-pressure cargo) (- (* feed food)) (- (* rest home-prox)))
+        h' (observe/clamp01 (+ h delta))]
+    (assoc ant :h h')))
+
+(defn- finalize-ant
+  "Apply post-kernel transforms: visit-count increment + hunger belief model.
+   Used by forward-predict (the prediction path); the live step applies these
+   via war.clj's track-visit + adjust-hunger."
+  [ant view]
+  (-> ant
+      (update-in [:visit-counts (:loc ant)] (fnil inc 0))
+      (predict-hunger view)))
+
 ;; --------------------------------------------------------------------------- ;;
 ;; ant-kernel: the pure single-ant transition.
 ;; --------------------------------------------------------------------------- ;;
@@ -541,7 +585,7 @@
                          (assoc :rand-fn rand-fn)
                          (select-keys [:rand-fn :mu-goal]))
          result (ant-kernel view ant action kernel-opts)
-         next-ant (:ant result)
+         next-ant (finalize-ant (:ant result) view)
          noise-map (or noise default-predict-noise)
          variance (into {}
                         (for [[ch sd] noise-map]
