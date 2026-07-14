@@ -66,8 +66,9 @@
 ;; after the learned-prior flip. Test/report JVMs may call judge repeatedly;
 ;; memoising the immutable corpus fold prevents repeated 760-record cold reads.
 (defonce ^:private default-habit-prior-seed
-  (delay (habit-prior/fold-records
-          (trace/read-all-traces :dir default-wm-trace-dir))))
+  (delay (trace/reduce-traces habit-prior/fold-record
+                              (habit-prior/initial-state)
+                              :dir default-wm-trace-dir)))
 ;; ---------------------------------------------------------------------------
 
 (def ^:private home (System/getProperty "user.home"))
@@ -3805,8 +3806,9 @@
             (habit-prior/coerce-state persisted)
             (if (= wm-trace-dir default-wm-trace-dir)
               @default-habit-prior-seed
-              (habit-prior/fold-records
-               (trace/read-all-traces :dir wm-trace-dir)))))
+              (trace/reduce-traces habit-prior/fold-record
+                                   (habit-prior/initial-state)
+                                   :dir wm-trace-dir))))
         ;; v0.9 symmetric bootstrap: belief domain = stack-annotations.edn
         ;; :sections[] :id ∪ sorry-registry ids. Mirrors VSATARCS-side
         ;; bootstrap so per-entity comparison reduces to alist-lookup

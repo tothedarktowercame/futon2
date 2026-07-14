@@ -162,6 +162,17 @@
         (is (= [0.1 0.2]
                (get-in record [:precision-state :annotation-health :error-history])))))))
 
+(deftest latest-trace-record-survives-a-long-pause-test
+  (let [old-output (assoc sample-judge-output :mode :oldest)
+        newest-output (assoc sample-judge-output :mode :newest)]
+    (trace/write-trace! old-output :dir *tmpdir* :date-str "2026-05-01")
+    (trace/write-trace! newest-output :dir *tmpdir* :date-str "2026-05-03")
+    (is (= :newest
+           (:mode (trace/latest-trace-record
+                   :dir *tmpdir* :end-date (LocalDate/parse "2026-06-01")
+                   :lookback-days 2))))
+    (is (= 2 (trace/reduce-traces (fn [n _] (inc n)) 0 :dir *tmpdir*)))))
+
 ;; ---------------------------------------------------------------------------
 ;; M-evaluate-policies D1a (2026-07-03) — whitelist covers the blend's terms
 ;; ---------------------------------------------------------------------------

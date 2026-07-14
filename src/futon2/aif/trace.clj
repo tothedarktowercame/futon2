@@ -343,23 +343,36 @@
                               :date-str (.format % date-fmt))
                  dates))))
 
+(defn- trace-files [dir]
+  (let [root (io/file dir)]
+    (if (.isDirectory root)
+      (->> (.listFiles root)
+           (filter #(.isFile %))
+           (filter #(re-matches #"wm-trace-\d{4}-\d{2}-\d{2}\.edn"
+                                (.getName %)))
+           (sort-by #(.getName %)))
+      [])))
+
 (defn read-all-traces
   "Read every `wm-trace-YYYY-MM-DD.edn` file in lexical/date order. This is the
    deterministic cold-start fold used by the dark learned habit prior; callers
    that already have persisted state should use that state instead."
   [& {:keys [dir] :or {dir default-trace-dir}}]
-  (let [root (io/file dir)
-        files (if (.isDirectory root)
-                (->> (.listFiles root)
-                     (filter #(.isFile %))
-                     (filter #(re-matches #"wm-trace-\d{4}-\d{2}-\d{2}\.edn"
-                                          (.getName %)))
-                     (sort-by #(.getName %)))
-                [])]
+  (let [files (trace-files dir)]
     (vec (mapcat (fn [f]
                    (let [date-str (subs (.getName f) 9 19)]
                      (read-trace :dir dir :date-str date-str)))
                  files))))
+
+(defn reduce-traces
+  "Chronologically reduce the trace corpus without retaining it in memory.
+  At most one daily file's parsed records is resident at a time."
+  [rf init & {:keys [dir] :or {dir default-trace-dir}}]
+  (reduce (fn [acc f]
+            (let [date-str (subs (.getName f) 9 19)]
+              (reduce rf acc (read-trace :dir dir :date-str date-str))))
+          init
+          (trace-files dir)))
 
 (defn latest-trace-record
   "Return the most recent trace record visible within a bounded UTC day
@@ -378,8 +391,15 @@
            lookback-days 2}}]
   (let [days (max 1 (int lookback-days))
         start-date (.minusDays end-date (long (dec days)))
-        recent (last (read-trace-range start-date end-date :dir dir))]
+        recent (last (read-trace-range start-date end-date :dir dir))
+        fallback-file (->> (trace-files dir)
+                           (filter #(not (pos? (compare (subs (.getName %) 9 19)
+                                                        (str end-date)))))
+                           last)
+        fallback (when fallback-file
+                   (last (read-trace :dir dir
+                                     :date-str (subs (.getName fallback-file) 9 19))))]
     ;; A planned or accidental pause must not silently reset the carried
     ;; posterior, precision, selection gain, habit prior, or consumed QA ids.
-    ;; The all-traces fallback runs only when the bounded fast path is empty.
-    (or recent (last (read-all-traces :dir dir)))))
+    ;; The fallback reads only the newest eligible daily file, not the corpus.
+    (or recent fallback)))
