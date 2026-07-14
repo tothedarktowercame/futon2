@@ -2,6 +2,7 @@
   "Top-level orchestration of the observe → perceive → policy cycle."
   (:require [ants.aif.affect :as affect]
             [ants.aif.default-mode :as default-mode]
+            [ants.aif.food-belief :as food-belief]
             [ants.aif.observe :as observe]
             [ants.aif.perceive :as perceive]
             [ants.aif.policy :as policy]
@@ -153,6 +154,12 @@
          ant (assoc ant :mode next-mode)
          observation (assoc observation :mode next-mode)
 
+         ;; R17'/EIG: update hidden-state food-location belief
+         food-belief (food-belief/update-food-belief
+                       (or (:food-belief ant) (food-belief/initial-food-belief))
+                       world observation)
+         ant (assoc ant :food-belief food-belief)
+
          ant (assoc ant :recent recent)
          
          precision-opts (merge precision-cfg (:precision-options opts))
@@ -184,7 +191,8 @@
                                          :efe (:efe cfg)
                                          :precision precision-opts
                                          :world world
-                                         :ant ant})
+                                         :ant ant
+                                         :food-belief food-belief})
                   (catch Exception _e
                     ;; Deliberative policy failed — fall back to default mode
                     default-policy))

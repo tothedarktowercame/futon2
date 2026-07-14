@@ -3,6 +3,7 @@
    Supports multi-step rollout (R13) when :horizon > 1."
   (:require [ants.aif.observe :as observe]
             [ants.aif.efe :as efe]
+            [ants.aif.food-belief :as food-belief]
             [ants.aif.forward :as forward]
             [ants.aif.pattern-efe :as pattern-efe]
             [ants.aif.rollout :as rollout]
@@ -597,7 +598,7 @@
 
    controller-score = λ·g-efe + Σ λ_aug·augmentation
    (lambda weights the EFE core and each augmentation separately)"
-  [mu prec observation action {:keys [preferences action-costs efe world ant]}]
+  [mu prec observation action {:keys [preferences action-costs efe world ant food-belief] :as opts}]
   (let [outcome (if (and world ant)
                   (predict-observation world ant action)
                   (predict-outcome mu observation action))
@@ -625,14 +626,17 @@
         ambiguity (:ambiguity efe-result)
         g-efe-val (:g-efe efe-result)
         info (info-gain observation outcome)
-        ;; EIG proxy: epistemic value proportional to novelty of predicted outcome.
-        ;; Higher novelty (unvisited cells) means higher expected information gain,
-        ;; which lowers controller-score and rewards exploration.
-        ;; Tagged principled-approx: the true EIG (predicted-posterior entropy
-        ;; reduction) requires simulated belief updates per policy; this
-        ;; novelty proxy captures the primary signal (unvisited = uncertain =
-        ;; informative) at much lower cost. Mirrors WM R17' honesty.
-        epistemic-value (double (or (:novelty outcome) (:novelty observation) 0.0))
+        ;; Directed EIG: expected info gain about food-location from this action.
+        ;; Uses the hidden-state food-belief (R17'). Higher for actions that visit
+        ;; cells that are UNCERTAIN AND PLAUSIBLY-food — directed, not blind.
+        ;; Subtracted from controller-score (rewards directed exploration).
+        ;; Faithfulness: principled-approx (true EIG = simulated posterior entropy reduction).
+        epistemic-value (if food-belief
+                          (food-belief/directed-eig-from-prediction food-belief outcome)
+                          (let [nov (double (or (:novelty outcome)
+                                                (:novelty observation) 0.0))
+                                food (double (or (:food outcome) 0.0))]
+                            (* nov food)))
         colony (colony-cost action observation colony-cfg)
         survival (survival-cost action observation outcome survival-cfg)
         hunger (double (or (:hunger outcome) (:h outcome) 0.0))
@@ -862,7 +866,7 @@
   "Evaluate candidate actions and sample via softmax over -G/tau."
   ([mu prec observation]
    (choose-action mu prec observation {}))
-  ([mu prec observation {:keys [actions preferences action-costs efe efe-lambda precision horizon discount world ant] :as _opts}]
+  ([mu prec observation {:keys [actions preferences action-costs efe efe-lambda precision horizon discount world ant food-belief] :as _opts}]
    (let [prefs         preferences
          costs         action-costs
          lambda        (ensure-efe-lambda (or efe-lambda (get-in efe [:lambda])))
@@ -897,7 +901,7 @@
 
          ;; EFE base evaluation — with optional multi-step rollout (R13)
          efe-opts       {:preferences prefs :action-costs costs :efe efe-config
-                         :world world :ant ant}
+                         :world world :ant ant :food-belief food-belief}
          horizon        (or horizon 1)
          discount       (or discount 0.9)
          evaluations    (mapv (fn [action]

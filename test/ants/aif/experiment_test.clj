@@ -42,7 +42,7 @@
 
 (deftest experiment-runs-and-produces-results
   (testing "experiment runs with all 3 arms × 3 scenarios (small N for test speed)"
-    (let [result (exp/run-full-experiment 3 [10 10] 50 0.02)]
+    (let [result (exp/run-full-experiment 3 [10 10] 50)]
       (is (= 9 (count (:results result))) "9 cells (3 arms × 3 scenarios)")
       (is (every? #(> (:n-runs %) 0) (:results result)) "all cells have runs")
       (is (every? #(number? (:yield-mean %)) (:results result)))
@@ -50,7 +50,7 @@
 
 (deftest format-results-produces-output
   (testing "format-results produces readable output"
-    (let [result (exp/run-full-experiment 2 [8 8] 30 0.02)
+    (let [result (exp/run-full-experiment 2 [8 8] 30)
           formatted (exp/format-results result)]
       (is (string? formatted))
       (is (re-find #"PER-ARM RESULTS" formatted))

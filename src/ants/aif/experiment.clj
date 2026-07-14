@@ -31,17 +31,21 @@
 (defn make-seeded-world
   "Create a single-army world with a specific food seed and movement seed.
    Single-army removes the spawn-position confound."
-  [species food-distribution food-seed move-seed size ticks]
+  [species food-distribution food-seed move-seed size ticks
+   & {:keys [metabolism initial-reserves ants-per-side]
+      :or {metabolism 0.04 initial-reserves 1.0 ants-per-side 3}}]
   (let [cfg {:size size
-             :ants-per-side 4
+             :ants-per-side ants-per-side
              :ticks ticks
              :food food-distribution
              :food-opts {:seed food-seed
-                         :num-patches (if (= food-distribution :sparse) 3 5)
-                         :patch-radius (if (= food-distribution :sparse) 2 3)}
-             :armies [species]}
+                         :num-patches (if (= food-distribution :sparse) 2 4)
+                         :patch-radius (if (= food-distribution :sparse) 1 2)}
+             :armies [species]
+             :hunger {:metabolic-rate metabolism
+                      :ant {:burn metabolism}
+                      :queen {:initial initial-reserves}}}
         world (war/new-world cfg)
-        ;; Inject seeded rand-fn for reproducible movement
         world (assoc world :rand-fn (seeded-rand-fn move-seed))]
     world))
 
@@ -49,12 +53,13 @@
   "Run one simulation. Returns {:seed :yield :starved :alive :ticks}.
    yield = colony score (food delivered home).
    starved = fraction of ants that died of starvation."
-  [species food-distribution food-seed move-seed size ticks epistemic-zeroed? metabolism]
-  (let [world (make-seeded-world species food-distribution food-seed move-seed size ticks)
-        ;; Harsher metabolism
-        world (assoc-in world [:config :hunger :metabolic-rate]
-                        (double (or metabolism 0.04)))
-        ;; For epistemic ablation: zero BOTH ambiguity AND epistemic lambda
+  [species food-distribution food-seed move-seed size ticks epistemic-zeroed?
+   & {:keys [metabolism initial-reserves ants-per-side]
+      :or {metabolism 0.04 initial-reserves 1.0 ants-per-side 3}}]
+  (let [world (make-seeded-world species food-distribution food-seed move-seed size ticks
+                                 :metabolism metabolism
+                                 :initial-reserves initial-reserves
+                                 :ants-per-side ants-per-side)
         world (if epistemic-zeroed?
                 (-> world
                     (assoc-in [:config :aif :efe :lambda :ambiguity] 0.0)
@@ -64,7 +69,7 @@
            n 0]
       (if (>= n ticks)
         (let [score (get-in w [:scores species] 0.0)
-              initial-count (* 4 1) ;; ants-per-side for single army
+              initial-count ants-per-side
               final-ants (count (filter #(= (:species (second %)) species) (:ants w)))
               grave-count (count (filter #(and (= (:species %) species)
                                                (= (:cause %) :starvation))
@@ -105,14 +110,19 @@
 (defn- run-experiment-cell
   "Run n-runs independently-seeded simulations for one arm × scenario.
    Returns summary statistics."
-  [arm food-distribution n-runs size ticks metabolism]
+  [arm food-distribution n-runs size ticks
+   & {:keys [metabolism initial-reserves ants-per-side]
+      :or {metabolism 0.06 initial-reserves 0.5 ants-per-side 3}}]
   (let [results (vec
                   (for [i (range n-runs)]
                     (let [food-seed (+ 1000 i (* (hash (str arm food-distribution)) 1000))
                           move-seed (+ 2000 i (* (hash (str arm food-distribution)) 2000))
                           species (if (= arm :classic) :classic :aif)
                           epistemic-zeroed? (= arm :aif-no-epistemic)]
-                      (run-single species food-distribution food-seed move-seed size ticks epistemic-zeroed? metabolism))))
+                      (run-single species food-distribution food-seed move-seed size ticks epistemic-zeroed?
+                                  :metabolism metabolism
+                                  :initial-reserves initial-reserves
+                                  :ants-per-side ants-per-side))))
         yields (map :yield results)
         starvs (map :starved results)]
     {:arm arm
@@ -131,13 +141,16 @@
             :contrast {:patchy {:diff :ci} :sparse {...} :snowdrift {...}}}
    where diff = aif-full yield − aif-no-epistemic yield."
   ([]
-   (run-full-experiment 30 [12 12] 300 0.04))
-  ([n-runs size ticks metabolism]
+   (run-full-experiment 30 [10 10] 300))
+  ([n-runs size ticks]
+   (run-full-experiment n-runs size ticks {}))
+  ([n-runs size ticks opts]
    (let [arms [:aif-full :aif-no-epistemic :classic]
          scenarios [:snowdrift :patchy :sparse]
          cells (for [arm arms
                      scenario scenarios]
-                 (run-experiment-cell arm scenario n-runs size ticks metabolism))
+                 (apply run-experiment-cell arm scenario n-runs size ticks
+                        (mapcat identity opts)))
          ;; Compute pre-registered contrast
          contrast (into {}
                         (for [scenario scenarios]
