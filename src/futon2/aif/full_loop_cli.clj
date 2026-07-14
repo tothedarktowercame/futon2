@@ -26,9 +26,6 @@
     (:reviewer flags) (assoc :reviewer (:reviewer flags))
     (:window-days flags) (assoc :window-days (parse-long! :window-days
                                                            (:window-days flags)))
-    (:agent-timeout-seconds flags)
-    (assoc :timeout-ms (* 1000 (parse-long! :agent-timeout-seconds
-                                            (:agent-timeout-seconds flags))))
     (:agent-inactivity-seconds flags)
     (assoc :inactivity-timeout-ms
            (* 1000 (parse-long! :agent-inactivity-seconds
@@ -68,7 +65,7 @@
        "  qa ATTEMPT-ID ENTITY-ID VERDICT NOTE [REVIEWER]\n\n"
        "once is an on-demand durée click; continuous emits sequential durée "
        "clicks; tick is one wall-clock opportunity. Agent options also include "
-       "--agent-timeout-seconds and --agent-inactivity-seconds. VERDICT is one of approve, "
+       "--agent-inactivity-seconds. VERDICT is one of approve, "
        "confirmed, request-changes, reject, uncertain."))
 
 (defn- run-command! [args]

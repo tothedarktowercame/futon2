@@ -216,7 +216,6 @@
                     {:status 200 :body "{\"ok\":true}"})]
       (try
         (runner/poll-job! {:agency-base "http://agency"
-                           :timeout-ms 60000
                            :inactivity-timeout-ms 1000
                            :poll-ms 1}
                           "job-1")
