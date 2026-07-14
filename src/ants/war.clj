@@ -1204,8 +1204,9 @@
   [world ant action]
   (let [view (forward/local-view world ant)
         mu-goal (get-in ant [:mu :goal])
+        rand-fn (or (:rand-fn world) rand-nth)
         result (forward/ant-kernel view ant action
-                                   (cond-> {:rand-fn rand-nth}
+                                   (cond-> {:rand-fn rand-fn}
                                      mu-goal (assoc :mu-goal mu-goal)))
         next-ant (:ant result)
         effects (:effects result)
