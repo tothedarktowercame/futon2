@@ -192,14 +192,13 @@
 (defonce ^:private !futility-state (atom ::unloaded))
 
 (defn- load-futility-counts
-  "Read the daily trace and build a map of target-id -> attempt-count for
-   lanes with 0 successes (stuck lanes only). Uses the absolute trace path
+  "Read the validated all-history futility index and build a map of target-id
+   -> attempt-count for lanes with 0 successes (stuck lanes only). Uses the absolute trace path
    (the scheduled runner's cwd is futon2/, the serving JVM's is futon3c/)."
   []
   (try
     (let [trace-dir (str (System/getProperty "user.home") "/code/futon2/data/wm-trace")
-          records (futility/trace-records trace-dir)
-          summary (futility/futility-summary records)]
+          summary (futility/indexed-futility-summary trace-dir)]
       (->> (:rows summary)
            (filter :zero-for-n?)
            (filter #(>= (:attempts %) futility-threshold))
@@ -207,7 +206,7 @@
            (into {})))
     (catch Throwable e
       (binding [*out* *err*]
-        (println "[cascade-lane] WARN futility trace unreadable — STUCK lines omitted."
+        (println "[cascade-lane] WARN futility index unreadable — STUCK lines omitted."
                  "Error:" (.getMessage e)))
       {})))
 

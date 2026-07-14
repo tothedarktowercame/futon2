@@ -1,6 +1,9 @@
 (ns futon2.aif.lane-futility-test
-  (:require [clojure.test :refer [deftest is]]
-            [futon2.aif.lane-futility :as futility]))
+  (:require [clojure.java.io :as io]
+            [clojure.test :refer [deftest is]]
+            [futon2.aif.lane-futility :as futility])
+  (:import (java.nio.file Files)
+           (java.nio.file.attribute FileAttribute)))
 
 (defn- trace-record
   [action-class target verdicts]
@@ -55,3 +58,29 @@
     (is (= 1 (count bulletins)))
     (is (= :nag (:lane (first bulletins))))
     (is (true? (:dry-run? (first bulletins))))))
+
+(deftest indexed-summary-is-exact-and-rebuilds-after-out-of-band-append
+  (let [dir (str (Files/createTempDirectory
+                  "lane-futility-index-test"
+                  (into-array FileAttribute [])))
+        path (str dir "/wm-trace-2099-01-01.edn")
+        miss (trace-record :advance-mission "M-a" [])
+        pass (trace-record :advance-mission "M-a"
+                           [{:mission "M-a" :verdict :pass}])]
+    (try
+      (futility/append-indexed-trace! dir path miss)
+      (futility/append-indexed-trace! dir path miss)
+      (let [summary (futility/indexed-futility-summary dir)]
+        (is (= 2 (:record-count summary)))
+        (is (= 2 (get-in summary [:rows 0 :attempts])))
+        (is (true? (get-in summary [:rows 0 :zero-for-n?]))))
+      ;; Simulate an older/external writer. The fingerprint mismatch must cause
+      ;; an exact rebuild from the authoritative trace, not use stale counts.
+      (spit path (str (pr-str pass) "\n") :append true)
+      (let [summary (futility/indexed-futility-summary dir)]
+        (is (= 3 (:record-count summary)))
+        (is (= 1 (get-in summary [:rows 0 :successes])))
+        (is (false? (get-in summary [:rows 0 :zero-for-n?]))))
+      (finally
+        (doseq [f (reverse (file-seq (io/file dir)))]
+          (.delete f))))))

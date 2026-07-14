@@ -8,7 +8,9 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
-            [futon2.aif.selection-gain :as selection-gain]))
+            [futon2.aif.selection-gain :as selection-gain])
+  (:import (java.io RandomAccessFile)
+           (java.nio.file Files StandardCopyOption)))
 
 (def default-trace-dir "data/wm-trace")
 (def default-expected-coverage-dg -0.25)
@@ -73,32 +75,53 @@
      (filter #(= target (some-> (:mission %) str))
              (:act-gate-verdicts record)))))
 
-(defn futility-summary
-  "Return per-lane 0-for-N counts from trace RECORDS."
+(def ^:private index-schema 1)
+(def ^:private index-filename ".lane-futility-index.edn")
+(def ^:private lock-filename ".lane-futility-index.lock")
+
+(defn- corpus-fingerprint
+  [trace-dir]
+  (mapv (fn [^java.io.File f]
+          [(.getName f) (.length f) (.lastModified f)])
+        (trace-files trace-dir)))
+
+(defn- empty-index-state []
+  {:schema index-schema
+   :record-count 0
+   :lanes {}})
+
+(defn- add-record-to-index
+  [state record]
+  (let [state (update state :record-count (fnil inc 0))]
+    (if-let [{:keys [lane action-class target]} (lane-record record)]
+      (update-in state [:lanes lane]
+                 (fn [row]
+                   (-> (or row {:lane lane
+                                :action-class action-class
+                                :target target
+                                :attempts 0
+                                :successes 0})
+                       (update :attempts inc)
+                       (update :successes + (if (target-pass? record) 1 0)))))
+      state)))
+
+(defn- index-state-from-records
   [records]
-  (let [attempts (keep #(when-let [lane (lane-record %)]
-                          (assoc lane :record % :success? (target-pass? %)))
-                       records)
-        rows (->> attempts
-                  (group-by :lane)
-                  (map (fn [[lane xs]]
-                         (let [first-x (first xs)
-                               attempts (count xs)
-                               successes (count (filter :success? xs))]
-                           {:lane lane
-                            :action-class (:action-class first-x)
-                            :target (:target first-x)
-                            :attempts attempts
-                            :successes successes
-                            :failures (- attempts successes)
-                            :zero-for-n? (zero? successes)})))
+  (reduce add-record-to-index (empty-index-state) records))
+
+(defn- summary-from-index-state
+  [state]
+  (let [rows (->> (vals (:lanes state))
+                  (map #(assoc %
+                               :failures (- (:attempts %) (:successes %))
+                               :zero-for-n? (zero? (:successes %))))
                   (sort-by (juxt (comp - :attempts) :lane))
                   vec)
-        class-rows (->> attempts
+        class-rows (->> rows
                         (group-by :action-class)
                         (map (fn [[class xs]]
-                               (let [attempts (count xs)
-                                     successes (count (filter :success? xs))]
+                               (let [attempts (reduce + (map :attempts xs))
+                                     successes (reduce + (map :successes xs))]
                                  {:action-class class
                                   :attempts attempts
                                   :successes successes
@@ -106,12 +129,99 @@
                                   :zero-for-n? (zero? successes)})))
                         (sort-by (juxt (comp - :attempts) (comp str :action-class)))
                         vec)]
-    {:record-count (count records)
-     :attempt-count (count attempts)
+    {:record-count (:record-count state)
+     :attempt-count (reduce + 0 (map :attempts rows))
      :lane-count (count rows)
      :zero-lane-count (count (filter :zero-for-n? rows))
      :rows rows
      :action-classes class-rows}))
+
+(defn- index-path [trace-dir]
+  (io/file trace-dir index-filename))
+
+(defn- read-index-state
+  [trace-dir]
+  (let [f (index-path trace-dir)]
+    (when (.isFile f)
+      (try
+        (edn/read-string (slurp f))
+        (catch Exception _ nil)))))
+
+(defn- valid-index-state?
+  [state fingerprint]
+  (and (= index-schema (:schema state))
+       (= fingerprint (:fingerprint state))
+       (map? (:lanes state))))
+
+(defn- write-index-state!
+  [trace-dir state]
+  (let [target (index-path trace-dir)
+        tmp (io/file trace-dir (str index-filename "." (random-uuid) ".tmp"))]
+    (io/make-parents target)
+    (spit tmp (str (pr-str state) "\n"))
+    (try
+      (Files/move (.toPath tmp)
+                  (.toPath target)
+                  (into-array StandardCopyOption
+                              [StandardCopyOption/ATOMIC_MOVE
+                               StandardCopyOption/REPLACE_EXISTING]))
+      (catch java.nio.file.AtomicMoveNotSupportedException _
+        (Files/move (.toPath tmp)
+                    (.toPath target)
+                    (into-array StandardCopyOption
+                                [StandardCopyOption/REPLACE_EXISTING]))))
+    state))
+
+(defn with-index-lock
+  "Run F while holding the cross-process trace/index lock for TRACE-DIR."
+  [trace-dir f]
+  (let [lock-file (io/file trace-dir lock-filename)]
+    (io/make-parents lock-file)
+    (with-open [raf (RandomAccessFile. lock-file "rw")
+                channel (.getChannel raf)
+                _lock (.lock channel)]
+      (f))))
+
+(defn current-index-state!
+  "Return the exact aggregate for TRACE-DIR. A missing or stale sidecar is
+   rebuilt from the authoritative traces; it is never accepted approximately."
+  [trace-dir]
+  (let [fingerprint (corpus-fingerprint trace-dir)
+        cached (read-index-state trace-dir)]
+    (if (valid-index-state? cached fingerprint)
+      cached
+      (write-index-state!
+       trace-dir
+       (assoc (index-state-from-records (trace-records trace-dir))
+              :fingerprint fingerprint)))))
+
+(defn append-indexed-trace!
+  "Append RECORD to PATH and advance the exact futility index under one
+   cross-process lock. If prior trace/index coherence is absent, reconstruct it
+   from the authoritative corpus before appending."
+  [trace-dir path record]
+  (with-index-lock
+    trace-dir
+    (fn []
+      (let [state (current-index-state! trace-dir)]
+        (spit path (str (pr-str record) "\n") :append true)
+        (write-index-state!
+         trace-dir
+         (assoc (add-record-to-index state record)
+                :fingerprint (corpus-fingerprint trace-dir))))
+      path)))
+
+(defn indexed-futility-summary
+  "Return the exact all-history summary using a validated persistent index."
+  ([] (indexed-futility-summary default-trace-dir))
+  ([trace-dir]
+   (with-index-lock trace-dir
+     #(summary-from-index-state (current-index-state! trace-dir)))))
+
+(defn futility-summary
+  "Return per-lane 0-for-N counts from trace RECORDS."
+  [records]
+  (summary-from-index-state (index-state-from-records records)))
 
 (defn hand-counts
   "Independent census used by the 3a gate."

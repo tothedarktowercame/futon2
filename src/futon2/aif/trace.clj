@@ -46,6 +46,7 @@
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.string :as str]
+            [futon2.aif.lane-futility :as lane-futility]
             [futon2.aif.selection-gain :as selection-gain])
   (:import (java.io PushbackReader)
            (java.time Instant LocalDate ZoneId)
@@ -298,8 +299,7 @@
   (let [record (trace-record judge-output)
         path (daily-path dir date-str)]
     (io/make-parents path)
-    (spit path (str (pr-str record) "\n") :append true)
-    path))
+    (lane-futility/append-indexed-trace! dir path record)))
 
 (def ^:private default-tag-reader
   "Tolerant default-tag reader: any unknown EDN tag becomes
