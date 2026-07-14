@@ -16,6 +16,7 @@
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.mission-registry :as missions]
             [futon2.aif.morning-brief :as brief]
+            [futon2.aif.repair-obligation :as repair]
             [futon2.aif.substrate :as substrate]
             [futon2.aif.trace :as trace]
             [futon2.report.cascade-lane :as cascade]
@@ -286,7 +287,16 @@
             (concat (keep identity [(:result-summary job) (:terminal-message job)])
                     (keep :text (remove #(= "prompt" (:type %)) (:events job))))))
 
-(defn- author-prompt [{:keys [author reviewer]} target mission cascade-entry]
+(defn- review-verdict [job]
+  (let [text (job-text job)]
+    (cond
+      (re-find #"FULL_LOOP_REVIEW:\s*APPROVE" text) :approve
+      (re-find #"FULL_LOOP_REVIEW:\s*REQUEST_CHANGES" text) :request-changes
+      (re-find #"FULL_LOOP_REVIEW:\s*REJECT" text) :reject
+      :else :unverifiable)))
+
+(defn- author-prompt [{:keys [author reviewer]} target mission cascade-entry
+                      stop-line]
   (str author ": FULL-LOOP IMPLEMENTATION OPPORTUNITY. You are the author; "
        reviewer " is the independent reviewer.\n\n"
        "Implement one bounded, substantive advancement of the selected War Machine action. "
@@ -296,7 +306,15 @@
        "MISSION RECORD: " (pr-str mission) "\n"
        "PATTERN CASCADE: " (pr-str (select-keys cascade-entry
                                                   [:mission :psi :shown :semilattice
-                                                   :cascade-score])) "\n\n"
+                                                   :cascade-score])) "\n"
+       (when stop-line
+         (str "STOP-THE-LINE REPAIR OBLIGATION: "
+              (pr-str (select-keys stop-line
+                                   [:repair/id :attempt-id :failed-commit
+                                    :review-verdict :review-text]))
+              "\nThis finding has priority over unrelated work. Repair it fail-closed; "
+              "do not preserve a bypass for backward compatibility.\n"))
+       "\n"
        "Requirements:\n"
        "1. Inspect the mission and repository state; choose a bounded implementation parcel "
        "that genuinely advances its open work.\n"
@@ -307,13 +325,20 @@
        "If no safe substantive parcel is possible, make no commit and finish with "
        "FULL_LOOP_AUTHOR: REFUSE <typed reason>."))
 
-(defn- reviewer-prompt [{:keys [reviewer author]} target repo commit author-job]
+(defn- reviewer-prompt [{:keys [reviewer author]} target repo commit author-job
+                        stop-line]
   (str reviewer ": FULL-LOOP INDEPENDENT REVIEW. " author " authored commit " commit
        " for selected target " (pr-str target) ".\n\n"
        "Repository: " repo "\n"
        "Author job evidence: " (pr-str (select-keys author-job
                                                      [:job-id :state :artifact-ref
-                                                      :result-summary :execution])) "\n\n"
+                                                      :result-summary :execution])) "\n"
+       (when stop-line
+         (str "Prior STOP-THE-LINE finding to discharge explicitly: "
+              (pr-str (select-keys stop-line
+                                   [:repair/id :failed-commit :review-verdict
+                                    :review-text])) "\n"))
+       "\n"
        "Inspect the commit rather than trusting the summary. Verify that it is substantive "
        "rather than artifact-only, is in scope for the selected target, preserves invariants, "
        "and clears the required static checks and relevant tests. Do not edit or commit.\n\n"
@@ -484,7 +509,11 @@
       (run-phase! opts @phase-context :preference-refresh
                   #(try ((or (:refresh-fn opts) cv/maybe-refresh!))
                         (catch Throwable _ nil)))
-      (let [selection-judge (or (:judge-fn opts)
+      (let [stop-line (first
+                       (run-phase! opts @phase-context :stop-line-memory
+                                   #((or (:repair-open-fn opts)
+                                         repair/open-obligations))))
+            selection-judge (or (:judge-fn opts)
                                 (fn [days]
                                   (wm/generate-war-machine
                                    days {:include-advisory-lanes? false})))
@@ -500,11 +529,17 @@
                                      :author author
                                      :reviewer reviewer)))
             trace-path ((or (:trace-fn opts) trace/write-trace!) judgement)
-            entry (selected-entry judgement)
+            ordinary-entry (selected-entry judgement)
+            entry (or (:selected-entry stop-line) ordinary-entry)
             target (some-> entry selected-target)
             selection-cell (if entry
                              (term {:selected-mission (str target)
                                     :selected-action (:action entry)
+                                    :stop-the-line-obligation
+                                    (some-> stop-line
+                                            (select-keys [:repair/id :attempt-id
+                                                          :failed-commit
+                                                          :review-verdict]))
                                     :ranked-candidates (mapv #(select-keys % [:rank :action
                                                                               :G-efe
                                                                               :controller-score])
@@ -544,7 +579,7 @@
                 (run-phase! opts @phase-context :author-dispatch
                             #((or (:dispatch-fn opts) dispatch!) opts author
                               "wm-full-loop" target
-                              (author-prompt opts target mission construction)))
+                              (author-prompt opts target mission construction stop-line)))
                 author-job-id (:job-id author-response)]
             (checkpoint! :dispatch
                          (term {:agent author :availability :invoke-ready
@@ -574,7 +609,8 @@
                       (run-phase! opts @phase-context :reviewer-dispatch
                                   #((or (:dispatch-fn opts) dispatch!) opts reviewer
                                     "wm-full-loop" target
-                                    (reviewer-prompt opts target repo commit author-job)))
+                                    (reviewer-prompt opts target repo commit author-job
+                                                     stop-line)))
                       review-job
                       (run-phase! opts @phase-context :reviewer-wait
                                   #((or (:poll-fn opts) poll-job!) opts
@@ -597,12 +633,24 @@
                   (when-not approved?
                     (throw (ex-info "Independent review did not approve"
                                     {:outcome :build-failed :author-job author-job
-                                     :review-job review-job :commit commit})))
+                                     :review-job review-job :commit commit
+                                     :target target
+                                     :selected-entry
+                                     (select-keys entry
+                                                  [:action :controller-score :G-efe])})))
                   (let [witness
                         (run-phase! opts @phase-context :grounding
                                     #((or (:ground-fn opts) ground-commit!)
                                       attempt-id target author reviewer repo commit files
                                       review-job opts))]
+                    (when stop-line
+                      (run-phase! opts @phase-context :stop-line-resolution
+                                  #((or (:repair-resolve-fn opts) repair/resolve!)
+                                    stop-line
+                                    {:attempt-id attempt-id :commit commit
+                                     :reviewer reviewer
+                                     :review-job (:job-id review-job)
+                                     :witness witness})))
                     (checkpoint! :adjudication
                                  (term {:before (:before witness)
                                         :after (:after witness)
@@ -621,13 +669,30 @@
       (catch Throwable e
         (if @closing?
           (throw e)
-          (let [failure (ex-data e)]
-            (close! (outcome-from e)
-                    {:target (some-> @checkpoints :selection :judgment :selected-mission)
-                     :commit (:commit failure)
-                     :witness (:witness failure)
-                     :author-job (:author-job failure)
-                     :review-job (:review-job failure)
-                     :error (.getMessage e)
-                     :error-class (.getName (class e))
-                     :error-data failure})))))))
+          (let [failure (ex-data e)
+                review-job (:review-job failure)
+                verdict (some-> review-job review-verdict)
+                finding (when (and (:commit failure)
+                                   (#{:request-changes :reject} verdict))
+                          ((or (:repair-record-fn opts)
+                               repair/record-review-failure!)
+                           {:attempt-id attempt-id
+                            :target (:target failure)
+                            :commit (:commit failure)
+                            :selected-entry (:selected-entry failure)
+                            :reviewer reviewer
+                            :review-job (:job-id review-job)
+                            :review-verdict verdict
+                            :review-text (job-text review-job)}))]
+              (close! (outcome-from e)
+                      {:target (or (:target failure)
+                                   (some-> @checkpoints :selection :judgment
+                                           :selected-mission))
+                       :commit (:commit failure)
+                       :witness (:witness failure)
+                       :author-job (:author-job failure)
+                       :review-job review-job
+                       :repair-obligation finding
+                       :error (.getMessage e)
+                       :error-class (.getName (class e))
+                       :error-data failure})))))))
