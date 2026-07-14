@@ -3764,9 +3764,14 @@
 
    Arity-1 ([scan-data]): no trace persistence.
    Arity-2 ([scan-data opts]): writes trace if `:trace?` is truthy in
-     opts; uses `:trace-dir` if provided or default."
+     opts; uses `:trace-dir` if provided or default. Set
+     `:include-advisory-lanes? false` for real actuation, where the selected
+     target is constructed once in the subsequent construction phase. This
+     does not change `wm-decision`: cascade actions are held-for-arming and
+     appended only after policy selection."
   ([scan-data] (judge scan-data {}))
-  ([scan-data {:keys [trace? trace-dir scan-id] :or {trace? false}}]
+  ([scan-data {:keys [trace? trace-dir scan-id include-advisory-lanes?]
+               :or {trace? false include-advisory-lanes? true}}]
   (let [observation (obs/observe scan-data)
         free-energy (fe/compute-controller-diagnostics observation)
         ;; Base mode from equilibrium-classification of observations.
@@ -4111,9 +4116,11 @@
         ;; — the WM's own auto-selection — are unaffected) and tagged :held-for-arming? true:
         ;; the pilot can SELECT one as v and mint a consent gate over it, but EXECUTING it is
         ;; Part B, held for operator arming (WM-I4). cascade-policies computed once, reused below.
-        cascade-policies (try ((requiring-resolve 'futon2.report.cascade-lane/cascade-lane)
-                               wm-ranked {:n 3 :budget 6})
-                              (catch Throwable _ []))
+        cascade-policies (if include-advisory-lanes?
+                           (try ((requiring-resolve 'futon2.report.cascade-lane/cascade-lane)
+                                 wm-ranked {:n 3 :budget 6})
+                                (catch Throwable _ []))
+                           [])
         cascade-actions (mapv (fn [cp]
                                 (let [dF (:cascade-score cp) dG (:policy-rollout-score cp)
                                       pass? (boolean (and dF (pos? dF) dG (neg? dG)))]
@@ -4236,10 +4243,12 @@
                 ;; gap-scan — open-mission classes with THIN pattern coverage (candidates
                 ;; for seeding cascades before the WM gets stuck in them). Additive,
                 ;; defensive (a failure never breaks the scan); shares the cascade memo.
-                :pattern-gaps (try
-                                ((requiring-resolve 'futon2.report.cascade-lane/gap-lane)
-                                 wm-ranked {:n 10 :budget 6})
-                                (catch Throwable _ []))}
+                :pattern-gaps (if include-advisory-lanes?
+                                (try
+                                  ((requiring-resolve 'futon2.report.cascade-lane/gap-lane)
+                                   wm-ranked {:n 10 :budget 6})
+                                  (catch Throwable _ []))
+                                [])}
                  habit-prior-state
                  (assoc :habit-prior-state habit-prior-state))]
     (when trace?
@@ -4468,8 +4477,10 @@
 
 (defn generate-war-machine
   "Collect all strategic scans, run judgement layer, and render.
-   Returns {:data ... :judgement ... :markdown ...}."
-  [days]
+   Returns {:data ... :judgement ... :markdown ...}. The optional second
+   argument is passed to `judge`."
+  ([days] (generate-war-machine days {}))
+  ([days judge-opts]
   (let [now-zdt (ZonedDateTime/now tz)
         now (.toString (.toLocalDate now-zdt))
         ;; One bounded recent window feeds all evidence-derived scans. The hard cap is
@@ -4526,7 +4537,7 @@
                    :capability-star-map capability-star-map
                    :vsatarcs-status vsatarcs-status}
         ;; Run the judgement layer
-        judgement (judge scan-data)]
+        judgement (judge scan-data judge-opts)]
     {:data scan-data
      :judgement judgement
      :markdown (render-war-machine {:self-watch self-watch
@@ -4542,7 +4553,7 @@
                                     :r12-apparatus r12-apparatus
                                     :vsatarcs-status vsatarcs-status
                                     :judgement judgement
-                                    :now now :days days})}))
+                                    :now now :days days})})))
 
 ;; ---------------------------------------------------------------------------
 ;; Main

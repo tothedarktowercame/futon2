@@ -484,10 +484,13 @@
       (run-phase! opts @phase-context :preference-refresh
                   #(try ((or (:refresh-fn opts) cv/maybe-refresh!))
                         (catch Throwable _ nil)))
-      (let [judgement0 (:judgement
+      (let [selection-judge (or (:judge-fn opts)
+                                (fn [days]
+                                  (wm/generate-war-machine
+                                   days {:include-advisory-lanes? false})))
+            judgement0 (:judgement
                         (run-phase! opts @phase-context :selection
-                                    #((or (:judge-fn opts) wm/generate-war-machine)
-                                      window-days)))
+                                    #(selection-judge window-days)))
             mode-flags ((or (:mode-flags-fn opts) wm/arena-mode-flags))
             judgement (assoc judgement0 :wm-version
                              ((or (:version-stamp-fn opts) trace/wm-version-stamp)
@@ -618,8 +621,13 @@
       (catch Throwable e
         (if @closing?
           (throw e)
-          (close! (outcome-from e)
-                  {:target (some-> @checkpoints :selection :judgment :selected-mission)
-                   :error (.getMessage e)
-                   :error-class (.getName (class e))
-                   :error-data (ex-data e)}))))))
+          (let [failure (ex-data e)]
+            (close! (outcome-from e)
+                    {:target (some-> @checkpoints :selection :judgment :selected-mission)
+                     :commit (:commit failure)
+                     :witness (:witness failure)
+                     :author-job (:author-job failure)
+                     :review-job (:review-job failure)
+                     :error (.getMessage e)
+                     :error-class (.getName (class e))
+                     :error-data failure})))))))

@@ -81,6 +81,40 @@
     (is (not (re-find #"FULL_LOOP_REVIEW:\s*APPROVE"
                       (#'runner/job-text job))))))
 
+(deftest rejected-review-preserves-authored-commit-in-morning-brief
+  (let [queued (atom [])
+        result
+        (runner/run-opportunity!
+         {:cohort? false
+          :phase-log-fn (fn [_])
+          :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
+                              :codex-7 {:status "idle" :invoke-ready? true}})
+          :judge-fn (fn [_] {:judgement judgement})
+          :refresh-fn (fn [])
+          :substrate-preflight-fn (fn [_] {:route :test})
+          :code-state-fn (fn [] {:repo "/futon2" :git-sha "head"
+                                 :git-dirty? false :repo-heads {}})
+          :mode-flags-fn (fn [] {})
+          :version-stamp-fn identity
+          :mission-fn (fn [target] {:id target})
+          :trace-fn (fn [_] "/tmp/test-trace.edn")
+          :construct-fn (fn [_] {:shown [:P1] :psi :psi :cascade-score 1.0
+                                 :semilattice [] :policy-holes []})
+          :dispatch-fn (fn [_ agent _ _ _]
+                         {:job-id (if (= agent "zai-5")
+                                    "author-job" "review-job")})
+          :poll-fn (fn [_ job-id]
+                     (if (= job-id "author-job")
+                       {:job-id job-id :state "done" :artifact-ref "abc123"}
+                       {:job-id job-id :state "done"
+                        :result-summary
+                        "FULL_LOOP_REVIEW: REQUEST_CHANGES fail closed"}))
+          :resolve-build-fn (fn [_] {:repo "/repo" :files ["src/real.clj"]})
+          :queue-fn #(swap! queued conj %)})]
+    (is (= :build-failed (:outcome result)))
+    (is (= "abc123" (get-in result [:data :commit])))
+    (is (= "abc123" (:commit (first @queued))))))
+
 (deftest job-activity-prefers-the-latest-parseable-agency-event
   (let [started "2026-07-14T10:00:00Z"
         latest "2026-07-14T10:02:03.456Z"]
