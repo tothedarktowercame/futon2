@@ -28,6 +28,7 @@
 (def default-substrate-base "http://127.0.0.1:7073")
 (def default-author "zai-5")
 (def default-reviewer "codex-7")
+(def default-phase-log "/home/joe/code/futon2/data/wm-full-loop-phases.edn.log")
 (def default-timeout-ms (* 30 60 1000))
 (def default-inactivity-timeout-ms (* 10 60 1000))
 (def semantic-epoch :full-loop-real-actuation-v1)
@@ -50,12 +51,44 @@
            (or (some-> (System/getenv "FUTON_WM_AGENT_INACTIVITY_TIMEOUT_MS")
                        parse-long)
                default-inactivity-timeout-ms)
+           :phase-log (or (System/getenv "FUTON_WM_PHASE_LOG") default-phase-log)
            :poll-ms 2000
            :window-days 14
            :trigger :duree-click-on-demand
            :cohort? true
            :semantic-epoch semantic-epoch}
           opts)))
+
+(defn emit-phase!
+  "Emit one line-oriented phase event to stdout and the durable operator log."
+  [opts context event]
+  (let [record (merge {:at (str (Instant/now))} context event)
+        line (pr-str record)]
+    (println "[wm-phase]" line)
+    (flush)
+    (if-let [log-fn (:phase-log-fn opts)]
+      (log-fn record)
+      (when-let [path (:phase-log opts)]
+        (io/make-parents path)
+        (spit path (str line "\n") :append true)))
+    record))
+
+(defn run-phase!
+  "Run thunk with start/end telemetry; errors are logged and rethrown."
+  [opts context phase thunk]
+  (let [started (System/currentTimeMillis)]
+    (emit-phase! opts context {:phase phase :transition :start})
+    (try
+      (let [result (thunk)]
+        (emit-phase! opts context {:phase phase :transition :end :outcome :ok
+                                   :duration-ms (- (System/currentTimeMillis) started)})
+        result)
+      (catch Throwable e
+        (emit-phase! opts context {:phase phase :transition :end :outcome :error
+                                   :duration-ms (- (System/currentTimeMillis) started)
+                                   :error-class (.getName (class e))
+                                   :error (.getMessage e)})
+        (throw e)))))
 
 (defn- sha256 [x]
   (let [bytes (.digest (MessageDigest/getInstance "SHA-256")
@@ -107,7 +140,7 @@
          roster (agent-roster agency-base)]
      {:configuration (select-keys opts [:agency-base :substrate-url :author :reviewer
                                         :timeout-ms :inactivity-timeout-ms
-                                        :window-days])
+                                        :phase-log :window-days])
       :agents (into {}
                     (for [agent [author reviewer]
                           :let [record (or (get roster (keyword agent))
@@ -378,10 +411,14 @@
         started (System/currentTimeMillis)
         opportunity-id (or (:opportunity-id opts)
                            (str (name trigger) "/" (Instant/now) "/" (UUID/randomUUID)))
+        phase-context (atom {:opportunity-id opportunity-id :trigger trigger})
+        _ (emit-phase! opts @phase-context {:phase :opportunity :transition :start})
         checkpoints (atom {})
         closing? (atom false)
-        roster ((or (:roster-fn opts) agent-roster) (:agency-base opts))
-        code-state ((or (:code-state-fn opts) stack-code-state))
+        roster (run-phase! opts @phase-context :agent-readiness
+                           #((or (:roster-fn opts) agent-roster) (:agency-base opts)))
+        code-state (run-phase! opts @phase-context :code-state
+                               #((or (:code-state-fn opts) stack-code-state)))
         time-cell (term {:opportunity-id opportunity-id
                          :trigger trigger
                          :machine-state {:started-at (str (Instant/now))}
@@ -398,6 +435,7 @@
         start-event (when cohort? (cohort/start-attempt! time-cell))
         attempt-id (or (:attempt/id start-event)
                        (str "canary-" (UUID/randomUUID)))
+        _ (swap! phase-context assoc :attempt-id attempt-id)
         checkpoint! (fn [checkpoint cell]
                       (swap! checkpoints assoc checkpoint cell)
                       (when cohort?
@@ -433,15 +471,23 @@
                      (do (io/make-parents path)
                          (spit path (with-out-str (pp/pprint result))))
                      nil)
+                   (emit-phase! opts @phase-context
+                                {:phase :opportunity :transition :end :outcome outcome
+                                 :duration-ms (- (System/currentTimeMillis) started)})
                    result))]
     (try
       (when-not (and (available? roster author) (available? roster reviewer))
         (throw (ex-info "Configured author or reviewer is unavailable"
                         {:outcome :agent-unavailable :author author :reviewer reviewer})))
-      ((or (:substrate-preflight-fn opts) substrate-preflight!) opts)
-      (try ((or (:refresh-fn opts) cv/maybe-refresh!)) (catch Throwable _ nil))
-      (let [judgement0 (:judgement ((or (:judge-fn opts) wm/generate-war-machine)
-                                    window-days))
+      (run-phase! opts @phase-context :substrate-preflight
+                  #((or (:substrate-preflight-fn opts) substrate-preflight!) opts))
+      (run-phase! opts @phase-context :preference-refresh
+                  #(try ((or (:refresh-fn opts) cv/maybe-refresh!))
+                        (catch Throwable _ nil)))
+      (let [judgement0 (:judgement
+                        (run-phase! opts @phase-context :selection
+                                    #((or (:judge-fn opts) wm/generate-war-machine)
+                                      window-days)))
             mode-flags ((or (:mode-flags-fn opts) wm/arena-mode-flags))
             judgement (assoc judgement0 :wm-version
                              ((or (:version-stamp-fn opts) trace/wm-version-stamp)
@@ -472,8 +518,12 @@
           (throw (ex-info "War Machine abstained or selected no addressable action"
                           {:outcome (if (= :abstain (get-in judgement [:decision :action]))
                                       :abstained :no-selection)})))
-        (let [mission ((or (:mission-fn opts) mission-entry) target)
-              construction ((or (:construct-fn opts) construct-for-decision) entry)]
+        (let [{:keys [mission construction]}
+              (run-phase! opts @phase-context :construction
+                          #(hash-map
+                            :mission ((or (:mission-fn opts) mission-entry) target)
+                            :construction ((or (:construct-fn opts)
+                                               construct-for-decision) entry)))]
           (when-not construction
             (throw (ex-info "No construction for selected decision"
                             {:outcome :no-selection :target target})))
@@ -487,22 +537,28 @@
                               :deposit nil}
                              {:kind :decision-pinned-construction
                               :selected-action (:action entry)}))
-          (let [author-response ((or (:dispatch-fn opts) dispatch!) opts author
-                                 "wm-full-loop" target
-                                 (author-prompt opts target mission construction))
+          (let [author-response
+                (run-phase! opts @phase-context :author-dispatch
+                            #((or (:dispatch-fn opts) dispatch!) opts author
+                              "wm-full-loop" target
+                              (author-prompt opts target mission construction)))
                 author-job-id (:job-id author-response)]
             (checkpoint! :dispatch
                          (term {:agent author :availability :invoke-ready
                                 :job-id author-job-id
                                 :prompt-ref (str "agency-job:" author-job-id)}
                                {:kind :agency-dispatch :response author-response}))
-            (let [author-job ((or (:poll-fn opts) poll-job!) opts author-job-id)]
+            (let [author-job (run-phase! opts @phase-context :author-wait
+                                         #((or (:poll-fn opts) poll-job!)
+                                           opts author-job-id))]
               (when-not (= "done" (:state author-job))
                 (throw (ex-info "Author job did not complete"
                                 {:outcome :build-failed :author-job author-job})))
               (let [commit (:artifact-ref author-job)
-                    build (when commit
-                            ((or (:resolve-build-fn opts) resolve-build) commit))
+                    build (run-phase! opts @phase-context :build-resolution
+                                      #(when commit
+                                         ((or (:resolve-build-fn opts) resolve-build)
+                                          commit)))
                     repo (:repo build)
                     files (:files build)]
                 (when-not (and commit repo (vector? files))
@@ -511,11 +567,15 @@
                 (when (or (empty? files) (artifact-only-files? files))
                   (throw (ex-info "Authored commit is artifact-only"
                                   {:outcome :artifact-only :commit commit :files files})))
-                (let [review-response ((or (:dispatch-fn opts) dispatch!) opts reviewer
-                                       "wm-full-loop" target
-                                       (reviewer-prompt opts target repo commit author-job))
-                      review-job ((or (:poll-fn opts) poll-job!) opts
-                                  (:job-id review-response))
+                (let [review-response
+                      (run-phase! opts @phase-context :reviewer-dispatch
+                                  #((or (:dispatch-fn opts) dispatch!) opts reviewer
+                                    "wm-full-loop" target
+                                    (reviewer-prompt opts target repo commit author-job)))
+                      review-job
+                      (run-phase! opts @phase-context :reviewer-wait
+                                  #((or (:poll-fn opts) poll-job!) opts
+                                    (:job-id review-response)))
                       approved? (and (= "done" (:state review-job))
                                      (boolean (re-find #"FULL_LOOP_REVIEW:\s*APPROVE"
                                                        (job-text review-job))))]
@@ -535,9 +595,11 @@
                     (throw (ex-info "Independent review did not approve"
                                     {:outcome :build-failed :author-job author-job
                                      :review-job review-job :commit commit})))
-                  (let [witness ((or (:ground-fn opts) ground-commit!)
-                                 attempt-id target author reviewer repo commit files
-                                 review-job opts)]
+                  (let [witness
+                        (run-phase! opts @phase-context :grounding
+                                    #((or (:ground-fn opts) ground-commit!)
+                                      attempt-id target author reviewer repo commit files
+                                      review-job opts))]
                     (checkpoint! :adjudication
                                  (term {:before (:before witness)
                                         :after (:after witness)

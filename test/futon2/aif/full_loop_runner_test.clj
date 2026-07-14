@@ -20,9 +20,11 @@
   (let [constructed (atom nil)
         dispatches (atom [])
         queued (atom [])
+        phases (atom [])
         result
         (runner/run-opportunity!
          {:cohort? false
+          :phase-log-fn #(swap! phases conj %)
           :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
                               :codex-7 {:status "idle" :invoke-ready? true}})
           :judge-fn (fn [_] {:judgement judgement})
@@ -62,6 +64,14 @@
     (is (= ["zai-5" "codex-7"] (mapv :agent @dispatches)))
     (is (re-find #"Do not edit or commit" (:prompt (second @dispatches))))
     (is (= :grounded-change (:outcome (first @queued))))
+    (is (= [:opportunity :agent-readiness :agent-readiness :code-state :code-state
+            :substrate-preflight :substrate-preflight
+            :preference-refresh :preference-refresh :selection :selection
+            :construction :construction :author-dispatch :author-dispatch
+            :author-wait :author-wait :build-resolution :build-resolution
+            :reviewer-dispatch :reviewer-dispatch :reviewer-wait :reviewer-wait
+            :grounding :grounding :opportunity]
+           (mapv :phase @phases)))
     (is (= #{:selection :construction :dispatch :build :adjudication}
            (set (keys (:checkpoints result)))))))
 

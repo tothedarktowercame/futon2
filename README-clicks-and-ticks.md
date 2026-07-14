@@ -178,6 +178,21 @@ The laptop authority defaults to Futon1b on `127.0.0.1:7073`;
 `FUTON_SUBSTRATE_URL` (or `FUTON1B_URL`) overrides it on other hosts. Every
 opportunity proves the semantic entity route before dispatching either agent.
 
+Every full-loop opportunity also appends line-oriented EDN phase transitions to
+`data/wm-full-loop-phases.edn.log` and mirrors them to stdout with the
+`[wm-phase]` prefix. Each start/end pair carries the opportunity and attempt ids;
+the end event carries elapsed milliseconds and a typed outcome. During a live
+run, use:
+
+```sh
+tail -f data/wm-full-loop-phases.edn.log
+```
+
+`FUTON_WM_PHASE_LOG` selects another path. The timed phases include readiness,
+code-state capture, substrate preflight, preference refresh, selection,
+construction, author dispatch/wait, build resolution, reviewer dispatch/wait,
+and grounding, so a pause is attributable without inspecting the JVM.
+
 Morning Brief reviews are entered with `clojure -M:wm-full-loop qa ...`. On the
 next judgement, applicable QA events pass through the same declared A-matrix
 belief update as other typed events. Reviews outside the current belief domain
