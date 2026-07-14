@@ -1,0 +1,30 @@
+{
+ "batch": 8,
+ "rule": "548c451 (incumbent + first-unflown-GFN, seeded shuffle 20260713)",
+ "folds": {
+  "M-zaif-harness": [
+   "ca0e53ad5b021cb3",
+   "720bfdc51b457828"
+  ],
+  "M-text-sidecar": [
+   "4baf4e74193228c0",
+   "83ed23a084e321a7"
+  ]
+ },
+ "lanes": {
+  "zai-11": {
+   "folds": [
+    "ca0e53ad5b021cb3",
+    "720bfdc51b457828"
+   ],
+   "flies": "M-text-sidecar deposits"
+  },
+  "zai-12": {
+   "folds": [
+    "4baf4e74193228c0",
+    "83ed23a084e321a7"
+   ],
+   "flies": "M-zaif-harness deposits"
+  }
+ }
+}

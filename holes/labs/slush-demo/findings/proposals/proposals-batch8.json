@@ -1,0 +1,221 @@
+[
+ {
+  "proposal": "720bfdc51b457828",
+  "mission": "M-zaif-harness",
+  "patterns": [
+   "budgeted-action-selection/mana-gated-work",
+   "exotic/dual-track-generation",
+   "fulab/tradeoff-record",
+   "structure/interest-event-vocabulary",
+   "war-machine/advanceability"
+  ]
+ },
+ {
+  "proposal": "4baf4e74193228c0",
+  "mission": "M-text-sidecar",
+  "patterns": [
+   "devmap-coherence/ifr-f1-dhammavicaya",
+   "sidecar/tri-store-separation",
+   "hdm/deep-storage-to-active-graph",
+   "sidecar/artifact-entity-mention-grounding",
+   "exotic/live-sync-source-truth",
+   "devmap-coherence/prototype-alignment-embedding",
+   "library-coherence/library-embedding-refresh",
+   "exotic/tri-store-lineage"
+  ]
+ },
+ {
+  "proposal": "964ca3cbfdbde1ca",
+  "mission": "M-zaif-harness",
+  "patterns": [
+   "aif/candidate-pattern-action-space",
+   "data-mining/constrain-extraction-to-the-downstream-vocabulary",
+   "devmap-coherence/ifr-f6-upekkha",
+   "musn/selection-before-write",
+   "war-machine/advanceability"
+  ]
+ },
+ {
+  "proposal": "4ed5e9ab7fe8d517",
+  "mission": "M-zaif-harness",
+  "patterns": [
+   "control/agential-pattern-hygiene",
+   "exotic/graded-naturality",
+   "musn/off-trail-budget",
+   "musn/selection-before-write",
+   "ukrns/exercise-response-capture"
+  ]
+ },
+ {
+  "proposal": "7be9ffdccfe324ed",
+  "mission": "M-text-sidecar",
+  "patterns": [
+   "data-mining/constrain-extraction-to-the-downstream-vocabulary",
+   "dsc/evidence-situated-log",
+   "enrichment/rational-reconstruction",
+   "invariant-coherence/bounded-disposition",
+   "stack-coherence/futon1-storage-coherence"
+  ]
+ },
+ {
+  "proposal": "3034764322d55c84",
+  "mission": "M-text-sidecar",
+  "patterns": [
+   "data-mining/constrain-extraction-to-the-downstream-vocabulary",
+   "devmap-coherence/baseline-freeze",
+   "fulab/changelog-trail",
+   "stack-coherence/futon1-determinism",
+   "storage/reproducible-mirroring"
+  ]
+ },
+ {
+  "proposal": "83ed23a084e321a7",
+  "mission": "M-text-sidecar",
+  "patterns": [
+   "devmap-coherence/baseline-freeze",
+   "exotic/live-sync-source-truth",
+   "invariant-coherence/bounded-disposition",
+   "stack-coherence/futon1-determinism",
+   "storage/durability-first"
+  ]
+ },
+ {
+  "proposal": "4b9ba2aebc87bcc1",
+  "mission": "M-text-sidecar",
+  "patterns": [
+   "devmap-coherence/ifr-f7-upa-upekkha",
+   "dsc/evidence-situated-log",
+   "exotic/live-sync-source-truth",
+   "sidecar/tri-store-separation",
+   "storage/durability-first"
+  ]
+ },
+ {
+  "proposal": "ca0e53ad5b021cb3",
+  "mission": "M-zaif-harness",
+  "patterns": [
+   "data-mining/constrain-extraction-to-the-downstream-vocabulary"
+  ]
+ },
+ {
+  "proposal": "e3870d41d16f990d",
+  "mission": "M-text-sidecar",
+  "patterns": [
+   "devmap-coherence/prototype-alignment-embedding",
+   "exotic/live-sync-source-truth",
+   "storage/graph-memory-contract",
+   "storage/postcommit-materialization-gate",
+   "storage/reproducible-mirroring"
+  ]
+ },
+ {
+  "proposal": "d97c0bca3a7032fc",
+  "mission": "M-zaif-harness",
+  "patterns": [
+   "aif/term-to-channel-traceability",
+   "devmap-coherence/ifr-f6-upekkha",
+   "iching/hexagram-20-guan",
+   "musn/selection-before-write",
+   "orchestration/pattern-warranted-choice-point"
+  ]
+ },
+ {
+  "proposal": "ec8880302945ab25",
+  "mission": "M-text-sidecar",
+  "patterns": [
+   "data-mining/constrain-extraction-to-the-downstream-vocabulary",
+   "devmap-coherence/prototype-alignment-embedding",
+   "fulab/changelog-trail",
+   "storage/graph-memory-contract",
+   "storage/postcommit-materialization-gate"
+  ]
+ },
+ {
+  "proposal": "780e8d0bb954c377",
+  "mission": "M-zaif-harness",
+  "patterns": [
+   "agent/budget-bounds-exploration",
+   "budgeted-action-selection/mana-gated-work",
+   "exotic/graded-naturality",
+   "orchestration/pattern-warranted-choice-point",
+   "war-machine/advanceability"
+  ]
+ },
+ {
+  "proposal": "4828d3642256d642",
+  "mission": "M-zaif-harness",
+  "patterns": [
+   "aif/expected-free-energy-scorecard",
+   "budgeted-action-selection/mana-gated-work",
+   "fulab/tradeoff-record",
+   "musn/use-requires-evidence",
+   "orchestration/pattern-warranted-choice-point"
+  ]
+ },
+ {
+  "proposal": "20523aa6530996ab",
+  "mission": "M-text-sidecar",
+  "patterns": [
+   "data-mining/constrain-extraction-to-the-downstream-vocabulary",
+   "devmap-coherence/prototype-alignment-embedding",
+   "invariant-coherence/bounded-disposition",
+   "storage/durability-first",
+   "war-machine/ambient-pattern-retrieval"
+  ]
+ },
+ {
+  "proposal": "bed6a3d39d373a9d",
+  "mission": "M-zaif-harness",
+  "patterns": [
+   "coordination/ARGUMENT",
+   "musn/off-trail-budget",
+   "musn/use-requires-evidence",
+   "structure/interest-event-vocabulary",
+   "ukrns/exercise-response-capture"
+  ]
+ },
+ {
+  "proposal": "f302faa7299662e3",
+  "mission": "M-text-sidecar",
+  "patterns": [
+   "enrichment/layer-as-evidence",
+   "invariant-coherence/bounded-disposition",
+   "sidecar/tri-store-separation",
+   "storage/graph-memory-contract",
+   "war-machine/ambient-pattern-retrieval"
+  ]
+ },
+ {
+  "proposal": "745aecc8e2a62325",
+  "mission": "M-zaif-harness",
+  "patterns": [
+   "data-mining/constrain-extraction-to-the-downstream-vocabulary",
+   "exotic/graded-naturality",
+   "musn/selection-before-write",
+   "orchestration/pattern-warranted-choice-point",
+   "ukrns/exercise-response-capture"
+  ]
+ },
+ {
+  "proposal": "2a4bc1e5287cef13",
+  "mission": "M-text-sidecar",
+  "patterns": [
+   "devmap-coherence/ifr-f1-dhammavicaya",
+   "exotic/live-sync-source-truth",
+   "invariant-coherence/bounded-disposition",
+   "stack-coherence/futon1-determinism",
+   "storage/durability-first"
+  ]
+ },
+ {
+  "proposal": "8b0ad58aac80c942",
+  "mission": "M-zaif-harness",
+  "patterns": [
+   "agent/budget-bounds-exploration",
+   "aif/term-to-channel-traceability",
+   "exotic/graded-naturality",
+   "fulab/tradeoff-record",
+   "iching/hexagram-20-guan"
+  ]
+ }
+]
