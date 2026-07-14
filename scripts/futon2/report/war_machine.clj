@@ -1422,9 +1422,9 @@
    to detect abandoned-in-progress missions.
 
    Returns {:total :by-status :by-repo :abandoned-missions :health}."
-  [days]
+  ([days] (scan-mission-triage days (or (fetch-missions) [])))
+  ([days missions]
   (let [since (since-str days)
-        missions (or (fetch-missions) [])
         ;; Classify by status
         by-status (frequencies (map #(or (:mission/status %) "unknown") missions))
         ;; Classify by repo
@@ -1463,7 +1463,7 @@
                      abandon-penalty (/ (double (count (or abandoned []))) (max 1 active))
                      block-penalty (/ (double blocked) total)]
                  (max 0.0 (- completion-ratio (* 0.5 abandon-penalty) (* 0.3 block-penalty))))
-               0.0)}))
+               0.0)})))
 
 ;; ---------------------------------------------------------------------------
 ;; Scan 5: Sessions
@@ -1598,8 +1598,9 @@
 (defn scan-mission-detail
   "Fetch detailed mission data for the mission hex view.
    Returns missions grouped by repo with dependency info."
-  []
-  (when-let [missions (fetch-missions)]
+  ([] (when-let [missions (fetch-missions)]
+        (scan-mission-detail missions)))
+  ([missions]
     (let [by-repo (group-by :mission/repo missions)
           ;; Extract blocked-by pairs from the portfolio structure
           step-data (try
@@ -4452,14 +4453,19 @@
   [days]
   (let [now-zdt (ZonedDateTime/now tz)
         now (.toString (.toLocalDate now-zdt))
+        ;; One coherent snapshot feeds both mission consumers. The endpoint
+        ;; attaches store-backed turn telemetry and is expensive under load;
+        ;; fetching it twice made an opportunity pay the same query twice.
+        mission-snapshot (fetch-missions)
         self-watch (scan-self-watch days)
         loop-health (scan-loop-health days)
         support-attack (scan-support-attack days)
-        mission-triage (scan-mission-triage days)
+        mission-triage (scan-mission-triage days (or mission-snapshot []))
         graph (scan-graph days)
         sessions (scan-sessions days)
         portfolio (scan-portfolio)
-        mission-detail (scan-mission-detail)
+        mission-detail (when mission-snapshot
+                         (scan-mission-detail mission-snapshot))
         patterns (scan-patterns)
         frames (scan-frames)
         metabolic-balance (scan-metabolic-balance)
