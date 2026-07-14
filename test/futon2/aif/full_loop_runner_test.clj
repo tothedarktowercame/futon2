@@ -132,11 +132,21 @@
                    :selected-entry {:action {:type :address-sorry
                                              :target :sorry/g2}
                                     :controller-score 4.0}}
+        follow-up (assoc stop-line
+                         :repair/id "repair-failed-2"
+                         :attempt-id "failed-2"
+                         :failed-commit "bad789"
+                         :review-text "caller-controlled identity is spoofable")
+        unrelated (assoc stop-line
+                         :repair/id "repair-other"
+                         :attempt-id "failed-other"
+                         :target :sorry/other
+                         :review-text "unrelated finding")
         result
         (runner/run-opportunity!
          {:cohort? false
           :phase-log-fn (fn [_])
-          :repair-open-fn (constantly [stop-line])
+          :repair-open-fn (constantly [stop-line follow-up unrelated])
           :repair-resolve-fn (fn [obligation resolution]
                                (swap! resolutions conj [obligation resolution]))
           :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
@@ -172,7 +182,10 @@
     (is (= :grounded-change (:outcome result)))
     (is (= [:sorry/g2 :sorry/g2] (mapv :target @dispatches)))
     (is (every? #(re-find #"STOP-THE-LINE" (:prompt %)) @dispatches))
-    (is (= stop-line (ffirst @resolutions)))
+    (is (every? #(re-find #"caller-controlled identity is spoofable" (:prompt %))
+                @dispatches))
+    (is (every? #(not (re-find #"unrelated finding" (:prompt %))) @dispatches))
+    (is (= [stop-line follow-up] (mapv first @resolutions)))
     (is (= "good456" (get-in @resolutions [0 1 :commit])))))
 
 (deftest job-activity-prefers-the-latest-parseable-agency-event

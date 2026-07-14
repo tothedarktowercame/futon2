@@ -295,8 +295,13 @@
       (re-find #"FULL_LOOP_REVIEW:\s*REJECT" text) :reject
       :else :unverifiable)))
 
+(defn- prompt-findings [stop-lines]
+  (mapv #(select-keys % [:repair/id :attempt-id :failed-commit
+                         :review-verdict :review-text])
+        stop-lines))
+
 (defn- author-prompt [{:keys [author reviewer]} target mission cascade-entry
-                      stop-line]
+                      stop-lines]
   (str author ": FULL-LOOP IMPLEMENTATION OPPORTUNITY. You are the author; "
        reviewer " is the independent reviewer.\n\n"
        "Implement one bounded, substantive advancement of the selected War Machine action. "
@@ -307,12 +312,11 @@
        "PATTERN CASCADE: " (pr-str (select-keys cascade-entry
                                                   [:mission :psi :shown :semilattice
                                                    :cascade-score])) "\n"
-       (when stop-line
-         (str "STOP-THE-LINE REPAIR OBLIGATION: "
-              (pr-str (select-keys stop-line
-                                   [:repair/id :attempt-id :failed-commit
-                                    :review-verdict :review-text]))
-              "\nThis finding has priority over unrelated work. Repair it fail-closed; "
+       (when (seq stop-lines)
+         (str "STOP-THE-LINE REPAIR OBLIGATIONS: "
+              (pr-str (prompt-findings stop-lines))
+              "\nThese accumulated findings have priority over unrelated work. "
+              "Repair all of them fail-closed; "
               "do not preserve a bypass for backward compatibility.\n"))
        "\n"
        "Requirements:\n"
@@ -326,23 +330,22 @@
        "FULL_LOOP_AUTHOR: REFUSE <typed reason>."))
 
 (defn- reviewer-prompt [{:keys [reviewer author]} target repo commit author-job
-                        stop-line]
+                        stop-lines]
   (str reviewer ": FULL-LOOP INDEPENDENT REVIEW. " author " authored commit " commit
        " for selected target " (pr-str target) ".\n\n"
        "Repository: " repo "\n"
        "Author job evidence: " (pr-str (select-keys author-job
                                                      [:job-id :state :artifact-ref
                                                       :result-summary :execution])) "\n"
-       (when stop-line
-         (str "Prior STOP-THE-LINE finding to discharge explicitly: "
-              (pr-str (select-keys stop-line
-                                   [:repair/id :failed-commit :review-verdict
-                                    :review-text])) "\n"))
+       (when (seq stop-lines)
+         (str "Prior STOP-THE-LINE findings to discharge explicitly: "
+              (pr-str (prompt-findings stop-lines)) "\n"))
        "\n"
        "Inspect the commit rather than trusting the summary. Verify that it is substantive "
        "rather than artifact-only, is in scope for the selected target, preserves invariants, "
        "and clears the required static checks and relevant tests. Do not edit or commit.\n\n"
-       "BEGIN your response with exactly one verdict line (Agency preserves the response prefix):\n"
+       "BEGIN your response with exactly one self-contained verdict line of at most 200 "
+       "characters (Agency durably preserves only this response prefix):\n"
        "FULL_LOOP_REVIEW: APPROVE\n"
        "or FULL_LOOP_REVIEW: REQUEST_CHANGES <reason>\n"
        "or FULL_LOOP_REVIEW: REJECT <reason>"))
@@ -509,10 +512,14 @@
       (run-phase! opts @phase-context :preference-refresh
                   #(try ((or (:refresh-fn opts) cv/maybe-refresh!))
                         (catch Throwable _ nil)))
-      (let [stop-line (first
-                       (run-phase! opts @phase-context :stop-line-memory
-                                   #((or (:repair-open-fn opts)
-                                         repair/open-obligations))))
+      (let [open-stop-lines
+            (run-phase! opts @phase-context :stop-line-memory
+                        #((or (:repair-open-fn opts) repair/open-obligations)))
+            stop-line (first open-stop-lines)
+            stop-lines (if stop-line
+                         (filterv #(= (:target stop-line) (:target %))
+                                  open-stop-lines)
+                         [])
             selection-judge (or (:judge-fn opts)
                                 (fn [days]
                                   (wm/generate-war-machine
@@ -535,11 +542,11 @@
             selection-cell (if entry
                              (term {:selected-mission (str target)
                                     :selected-action (:action entry)
-                                    :stop-the-line-obligation
-                                    (some-> stop-line
-                                            (select-keys [:repair/id :attempt-id
-                                                          :failed-commit
-                                                          :review-verdict]))
+                                    :stop-the-line-obligations
+                                    (mapv #(select-keys % [:repair/id :attempt-id
+                                                           :failed-commit
+                                                           :review-verdict])
+                                          stop-lines)
                                     :ranked-candidates (mapv #(select-keys % [:rank :action
                                                                               :G-efe
                                                                               :controller-score])
@@ -579,7 +586,7 @@
                 (run-phase! opts @phase-context :author-dispatch
                             #((or (:dispatch-fn opts) dispatch!) opts author
                               "wm-full-loop" target
-                              (author-prompt opts target mission construction stop-line)))
+                              (author-prompt opts target mission construction stop-lines)))
                 author-job-id (:job-id author-response)]
             (checkpoint! :dispatch
                          (term {:agent author :availability :invoke-ready
@@ -610,7 +617,7 @@
                                   #((or (:dispatch-fn opts) dispatch!) opts reviewer
                                     "wm-full-loop" target
                                     (reviewer-prompt opts target repo commit author-job
-                                                     stop-line)))
+                                                     stop-lines)))
                       review-job
                       (run-phase! opts @phase-context :reviewer-wait
                                   #((or (:poll-fn opts) poll-job!) opts
@@ -643,14 +650,15 @@
                                     #((or (:ground-fn opts) ground-commit!)
                                       attempt-id target author reviewer repo commit files
                                       review-job opts))]
-                    (when stop-line
+                    (when (seq stop-lines)
                       (run-phase! opts @phase-context :stop-line-resolution
-                                  #((or (:repair-resolve-fn opts) repair/resolve!)
-                                    stop-line
-                                    {:attempt-id attempt-id :commit commit
-                                     :reviewer reviewer
-                                     :review-job (:job-id review-job)
-                                     :witness witness})))
+                                  #(doseq [obligation stop-lines]
+                                     ((or (:repair-resolve-fn opts) repair/resolve!)
+                                      obligation
+                                      {:attempt-id attempt-id :commit commit
+                                       :reviewer reviewer
+                                       :review-job (:job-id review-job)
+                                       :witness witness}))))
                     (checkpoint! :adjudication
                                  (term {:before (:before witness)
                                         :after (:after witness)
