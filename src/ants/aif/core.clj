@@ -218,6 +218,7 @@
       :perception perception
       :G (:G action-stats)
       :P (:p action-stats)
+      :F (:free-energy perception)
       :diagnostics {:need need
                     :dhdt hunger-trend
                     :tau tau

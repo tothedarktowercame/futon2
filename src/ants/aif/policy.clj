@@ -1,8 +1,10 @@
 (ns ants.aif.policy
-  "Action evaluation via 1-step expected free energy and softmax selection."
+  "Action evaluation via expected free energy and softmax selection.
+   Supports multi-step rollout (R13) when :horizon > 1."
   (:require [ants.aif.observe :as observe]
             [ants.aif.efe :as efe]
             [ants.aif.pattern-efe :as pattern-efe]
+            [ants.aif.rollout :as rollout]
             [clojure.math :as math]))
 
 (def default-actions
@@ -796,7 +798,7 @@
   "Evaluate candidate actions and sample via softmax over -G/tau."
   ([mu prec observation]
    (choose-action mu prec observation {}))
-  ([mu prec observation {:keys [actions preferences action-costs efe efe-lambda precision] :as _opts}]
+  ([mu prec observation {:keys [actions preferences action-costs efe efe-lambda precision horizon discount] :as _opts}]
    (let [prefs         preferences
          costs         action-costs
          lambda        (ensure-efe-lambda (or efe-lambda (get-in efe [:lambda])))
@@ -829,11 +831,27 @@
                           :trail-grad trail-grad}
                          base-actions)
 
-         ;; EFE base evaluation
+         ;; EFE base evaluation — with optional multi-step rollout (R13)
          efe-opts       {:preferences prefs :action-costs costs :efe efe-config}
+         horizon        (or horizon 1)
+         discount       (or discount 0.9)
          evaluations    (mapv (fn [action]
-                                {:action action
-                                 :result (expected-free-energy mu prec observation action efe-opts)})
+                                (let [base-result (expected-free-energy mu prec observation action efe-opts)
+                                      ;; R13: when horizon > 1, compute rollout S(π) = Σ ρ^t · s(s_t)
+                                      ;; At H=1, S(π) = s(s_0) = the 1-step score (greedy)
+                                      rollout-result (if (> horizon 1)
+                                                       (rollout/rollout-score
+                                                         (fn [m o a opts]
+                                                           (:G (expected-free-energy m prec o a efe-opts)))
+                                                         predict-outcome
+                                                         mu observation action
+                                                         {:horizon horizon :discount discount
+                                                          :score-opts efe-opts})
+                                                       {:s (:G base-result) :steps []})]
+                                  {:action action
+                                   :result (-> base-result
+                                               (assoc :G (:s rollout-result))
+                                               (assoc :rollout rollout-result))}))
                               admissible)
 
          ;; Stack the three bias layers you had: base-adjust, situation-adjust, visit-bias

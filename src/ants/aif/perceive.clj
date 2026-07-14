@@ -51,7 +51,7 @@
                       home
                       loc))
         sens-defaults (zipmap sensory-keys (repeat 0.5))
-        sens (merge sens-defaults (:sens existing) observation)
+        sens (merge sens-defaults (:sens existing))
         hunger (observe/clamp01 (or (:h existing)
                                     (:h observation)
                                     0.5))]
