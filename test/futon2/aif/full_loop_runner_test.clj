@@ -1,6 +1,9 @@
 (ns futon2.aif.full-loop-runner-test
-  (:require [clojure.test :refer [deftest is]]
-            [futon2.aif.full-loop-runner :as runner]))
+  (:require [babashka.http-client :as http]
+            [cheshire.core :as json]
+            [clojure.test :refer [deftest is]]
+            [futon2.aif.full-loop-runner :as runner])
+  (:import [java.time Instant]))
 
 (def selected-action {:type :open-mission :target "M-selected"})
 
@@ -67,3 +70,42 @@
              :events [{:type "prompt" :text "FULL_LOOP_REVIEW: APPROVE"}]}]
     (is (not (re-find #"FULL_LOOP_REVIEW:\s*APPROVE"
                       (#'runner/job-text job))))))
+
+(deftest job-activity-prefers-the-latest-parseable-agency-event
+  (let [started "2026-07-14T10:00:00Z"
+        latest "2026-07-14T10:02:03.456Z"]
+    (is (= (.toEpochMilli (Instant/parse latest))
+           (runner/job-last-activity-ms
+            {:created-at "not-a-timestamp"
+             :started-at started
+             :events [{:at "2026-07-14T10:01:00Z"}
+                      {:at latest}
+                      {:at nil}]})))
+    (is (nil? (runner/job-last-activity-ms {:events [{:at "bad"}]})))))
+
+(deftest polling-stalled-job-requests-interrupt-and-fails-typed
+  (let [posts (atom [])
+        old-event (str (.minusSeconds (Instant/now) 120))]
+    (with-redefs [http/get
+                  (fn [_ _]
+                    {:status 200
+                     :body (json/generate-string
+                            {:job {:job-id "job-1" :agent-id "zai-5"
+                                   :state "running"
+                                   :events [{:at old-event}]}})})
+                  http/post
+                  (fn [url opts]
+                    (swap! posts conj {:url url :opts opts})
+                    {:status 200 :body "{\"ok\":true}"})]
+      (try
+        (runner/poll-job! {:agency-base "http://agency"
+                           :timeout-ms 60000
+                           :inactivity-timeout-ms 1000
+                           :poll-ms 1}
+                          "job-1")
+        (is false "stalled jobs must not remain in the polling loop")
+        (catch clojure.lang.ExceptionInfo e
+          (is (= :agent-job-stalled (:outcome (ex-data e))))
+          (is (= 200 (get-in (ex-data e) [:interrupt :status])))))
+      (is (= ["http://agency/api/alpha/agents/zai-5/interrupt-invoke"]
+             (mapv :url @posts))))))

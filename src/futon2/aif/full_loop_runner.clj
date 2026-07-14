@@ -28,7 +28,8 @@
 (def default-substrate-base "http://127.0.0.1:7073")
 (def default-author "zai-5")
 (def default-reviewer "codex-7")
-(def default-timeout-ms (* 90 60 1000))
+(def default-timeout-ms (* 30 60 1000))
+(def default-inactivity-timeout-ms (* 10 60 1000))
 (def semantic-epoch :full-loop-real-actuation-v1)
 (def required-checkpoints [:selection :construction :dispatch :build :adjudication])
 
@@ -45,6 +46,10 @@
            :timeout-ms (or (some-> (System/getenv "FUTON_WM_AGENT_TIMEOUT_MS")
                                    parse-long)
                            default-timeout-ms)
+           :inactivity-timeout-ms
+           (or (some-> (System/getenv "FUTON_WM_AGENT_INACTIVITY_TIMEOUT_MS")
+                       parse-long)
+               default-inactivity-timeout-ms)
            :poll-ms 2000
            :window-days 14
            :trigger :duree-click-on-demand
@@ -101,7 +106,8 @@
    (let [{:keys [agency-base author reviewer] :as opts} (config raw-opts)
          roster (agent-roster agency-base)]
      {:configuration (select-keys opts [:agency-base :substrate-url :author :reviewer
-                                        :timeout-ms :window-days])
+                                        :timeout-ms :inactivity-timeout-ms
+                                        :window-days])
       :agents (into {}
                     (for [agent [author reviewer]
                           :let [record (or (get roster (keyword agent))
@@ -151,8 +157,37 @@
 
 (def terminal-states #{"done" "failed" "cancelled" "timed-out"})
 
+(defn job-last-activity-ms
+  "Latest trustworthy Agency timestamp for a job, or nil when none parses."
+  [job]
+  (->> (concat (keep :at (:events job))
+               (keep job [:created-at :started-at]))
+       (keep (fn [timestamp]
+               (try
+                 (.toEpochMilli (Instant/parse timestamp))
+                 (catch Exception _ nil))))
+       (reduce (fn [latest timestamp]
+                 (if (or (nil? latest) (> timestamp latest)) timestamp latest))
+               nil)))
+
+(defn- interrupt-job!
+  [{:keys [agency-base]} job]
+  (let [agent-id (:agent-id job)
+        job-id (:job-id job)]
+    (when (and agent-id job-id)
+      (let [r (http/post (str agency-base "/api/alpha/agents/" agent-id
+                              "/interrupt-invoke")
+                         {:headers {"Content-Type" "application/json"}
+                          :body (json/generate-string {:job-id job-id})
+                          :timeout 10000
+                          :throw false})]
+        {:status (:status r)
+         :response (try
+                     (json/parse-string (:body r) true)
+                     (catch Throwable _ {:raw (:body r)}))}))))
+
 (defn poll-job!
-  [{:keys [agency-base timeout-ms poll-ms]} job-id]
+  [{:keys [agency-base timeout-ms inactivity-timeout-ms poll-ms] :as opts} job-id]
   (let [deadline (+ (System/currentTimeMillis) timeout-ms)]
     (loop []
       (let [r (http/get (str agency-base "/api/alpha/invoke/jobs/" job-id)
@@ -168,9 +203,26 @@
           (contains? terminal-states (:state job)) job
 
           (>= (System/currentTimeMillis) deadline)
-          (throw (ex-info "Agency job timed out"
-                          {:outcome :dispatch-failed :job-id job-id
-                           :timeout-ms timeout-ms}))
+          (let [interrupt (interrupt-job! opts job)]
+            (throw (ex-info "Agency job exceeded its total deadline"
+                            {:outcome :agent-job-timeout :job-id job-id
+                             :agent-id (:agent-id job)
+                             :timeout-ms timeout-ms
+                             :interrupt interrupt})))
+
+          (and inactivity-timeout-ms
+               (pos? inactivity-timeout-ms)
+               (some-> (job-last-activity-ms job)
+                       (+ inactivity-timeout-ms)
+                       (<= (System/currentTimeMillis))))
+          (let [last-activity-ms (job-last-activity-ms job)
+                interrupt (interrupt-job! opts job)]
+            (throw (ex-info "Agency job stopped reporting activity"
+                            {:outcome :agent-job-stalled :job-id job-id
+                             :agent-id (:agent-id job)
+                             :inactivity-timeout-ms inactivity-timeout-ms
+                             :last-activity (some-> last-activity-ms Instant/ofEpochMilli str)
+                             :interrupt interrupt})))
 
           :else (do (Thread/sleep poll-ms) (recur)))))))
 
