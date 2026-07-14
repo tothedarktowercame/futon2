@@ -95,32 +95,61 @@
   [:food :pher :food-trace :pher-trace :home-prox :enemy-prox :h :ingest
    :friendly-home :trail-grad :novelty :dist-home :reserve-home :cargo])
 
-(def ^:private default-c-vector
-  "Unified preference C-vector over the 14-channel observation ABI.
+(def ^:private default-c-vectors
+  "Mode-conditioned preference C-vectors over the 14-channel observation ABI.
 
-   Each channel has a preference mean and sd. Channels without explicit
-   preferences use nil (KL contribution is 0 — the channel is unpreferred).
+   Each mode has distinct preference targets. Channels without explicit
+   preferences (nil) contribute KL=0 (C-mean = predicted-mean).
 
-   This folds the old default-preferences (hunger, ingest) AND the semantic
-   intent of C-prior (food high, cargo return, trail-following, home safety)
-   into ONE representation over the obs ABI.
+   This restores the semantic of the old C-prior (mode-conditioned linear
+   weights) but now as first-class C over the obs ABI, inside the unit-pure
+   EFE core.
 
-   Faithfulness: the KL-risk in g-efe is against THIS C. Nothing else
-   routes preferences into selection."
-  {:food         {:mean 0.50 :sd 0.20}   ; prefer food-rich cells
-   :pher         {:mean 0.40 :sd 0.25}   ; mild pheromone preference
-   :food-trace   nil                      ; no direct preference
-   :pher-trace   nil                      ; no direct preference
-   :home-prox    {:mean 0.30 :sd 0.25}   ; mild home bias (not too strong)
-   :enemy-prox   {:mean 0.10 :sd 0.15}   ; prefer away from enemies
-   :h            {:mean 0.40 :sd 0.08}   ; low hunger (from default-preferences)
-   :ingest       {:mean 0.70 :sd 0.20}   ; high ingest (from default-preferences)
-   :friendly-home nil                     ; context-dependent, not a C target
-   :trail-grad   {:mean 0.35 :sd 0.25}   ; mild trail preference
-   :novelty      nil                      ; exploration handled by ambiguity term
-   :dist-home    {:mean 0.40 :sd 0.30}   ; moderate exploration
-   :reserve-home {:mean 0.60 :sd 0.25}   ; healthy reserves
-   :cargo        {:mean 0.35 :sd 0.25}}) ; moderate cargo preference
+   Faithfulness: the KL-risk in g-efe is against the mode-appropriate C.
+   Nothing else routes preferences into selection. Mode-conditioned C is
+   a genuine preference (R19), NOT an engineering augmentation."
+  {:outbound  {:food         {:mean 0.55 :sd 0.20}   ; prefer food-rich cells (gathering)
+               :pher         {:mean 0.35 :sd 0.25}   ; mild pheromone
+               :food-trace   nil
+               :pher-trace   nil
+               :home-prox    {:mean 0.20 :sd 0.25}   ; mild away-from-home (exploring)
+               :enemy-prox   {:mean 0.10 :sd 0.15}   ; prefer away from enemies
+               :h            {:mean 0.40 :sd 0.08}   ; low hunger
+               :ingest       {:mean 0.60 :sd 0.20}   ; mild ingest
+               :friendly-home nil
+               :trail-grad   {:mean 0.30 :sd 0.25}   ; mild trail
+               :novelty      nil
+               :dist-home    {:mean 0.50 :sd 0.30}   ; moderate exploration
+               :reserve-home {:mean 0.60 :sd 0.25}   ; healthy reserves
+               :cargo        {:mean 0.40 :sd 0.25}}  ; cargo accumulating
+   :homebound {:food         nil                      ; no food preference (returning)
+               :pher         {:mean 0.30 :sd 0.25}   ; mild pheromone
+               :food-trace   nil
+               :pher-trace   nil
+               :home-prox    {:mean 0.70 :sd 0.20}   ; prefer near home (delivering)
+               :enemy-prox   {:mean 0.10 :sd 0.15}   ; prefer away from enemies
+               :h            {:mean 0.40 :sd 0.08}   ; low hunger
+               :ingest       {:mean 0.65 :sd 0.20}   ; moderate ingest
+               :friendly-home nil
+               :trail-grad   {:mean 0.25 :sd 0.25}   ; very mild trail
+               :novelty      nil
+               :dist-home    {:mean 0.15 :sd 0.20}   ; prefer close to home
+               :reserve-home {:mean 0.65 :sd 0.25}   ; healthy reserves
+               :cargo        {:mean 0.10 :sd 0.15}}  ; prefer low cargo (delivered)
+   :maintain  {:food         {:mean 0.40 :sd 0.25}   ; mild food (near home)
+               :pher         {:mean 0.50 :sd 0.25}   ; prefer pheromone (trail-laying)
+               :food-trace   nil
+               :pher-trace   nil
+               :home-prox    {:mean 0.35 :sd 0.25}   ; mild home
+               :enemy-prox   {:mean 0.10 :sd 0.15}   ; prefer away from enemies
+               :h            {:mean 0.40 :sd 0.08}   ; low hunger
+               :ingest       {:mean 0.60 :sd 0.20}   ; moderate ingest
+               :friendly-home nil
+               :trail-grad   {:mean 0.45 :sd 0.25}   ; prefer trails
+               :novelty      nil
+               :dist-home    {:mean 0.40 :sd 0.30}   ; moderate
+               :reserve-home {:mean 0.65 :sd 0.25}   ; healthy reserves
+               :cargo        {:mean 0.30 :sd 0.25}}}) ; moderate cargo
 
 (defn- c-vectors-for-efe
   "Extract parallel vectors (means, variances) from the C-vector for the EFE call.
@@ -291,7 +320,10 @@
                             (update :food #(drift % 0.3 0.25))
                             (update :pher #(drift % 0.15 0.25))
                             (update :home-prox #(drift % 0.2 0.35))
-                            (update :enemy-prox #(drift % 0.7 0.3))
+                            ;; enemy-prox: no drift — holding position doesn't
+                            ;; move you toward or away from the enemy. (Bug fix:
+                            ;; was drifting toward 0.7, which disagreed with the
+                            ;; real kernel in forward.clj that keeps :loc unchanged.)
                             (update :h #(drift % 0.5 0.2))
                             (update :cargo #(drift % cargo 0.1)))
                  :ingest-target 0.35
@@ -525,7 +557,10 @@
                            (into {} (for [k sensory-keys] [k 0.01])))
         pred-var-v (for [k sensory-keys] (double (get pred-variances k 0.01)))
         pred-mean-v (for [k sensory-keys] (double (get pred-means k 0.0)))
-        [c-means c-vars] (c-vectors-for-efe default-c-vector pred-means pred-variances)
+        mode (or (:mode observation) :outbound)
+        c-vector (or (get default-c-vectors mode)
+                     (:outbound default-c-vectors))
+        [c-means c-vars] (c-vectors-for-efe c-vector pred-means pred-variances)
         efe-result (efe/g-efe pred-mean-v pred-var-v c-means c-vars
                               {:weights (for [k sensory-keys]
                                           (double (get-in prec [:Pi-o k] 1.0)))})
@@ -603,12 +638,16 @@
                   home-trimmed)
         ;; 2) NEW gate: if empty-handed, away from home, and food is here,
         ;;    don't allow :return this tick (pick up first).
+        ;;    Also: if empty-handed AND at home, :return is a no-op (nothing
+        ;;    to deliver) — drop it so the ant does something useful.
         cargo-thresh 0.05
         near-thresh  0.70
         food-here    0.10
-        bad-empty-return? (and (< cargo cargo-thresh)
-                               (< friendly-home near-thresh)
-                               (>= local-food food-here))]
+        bad-empty-return? (or (and (< cargo cargo-thresh)
+                                   (< friendly-home near-thresh)
+                                   (>= local-food food-here))
+                              (and (< cargo cargo-thresh)
+                                   on-home?))]
     (if bad-empty-return?
       (drop-actions guarded #{:return})
       guarded)))

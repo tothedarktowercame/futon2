@@ -57,7 +57,8 @@
                            :food 0.8
                            :dist-home 0.0
                            :trail-grad 0.3
-                           :reserve-home 0.4)
+                           :reserve-home 0.4
+                           :mode :homebound)
           home-policy (policy/choose-action mu prec home-obs)
           home-policies (:policies home-policy)]
       (testing "forage blocked when perched on friendly home"
@@ -78,30 +79,21 @@
 
 (deftest preference-risk-favors-return-when-hungry
   (let [hungry-mu (assoc mu :h 0.9)
-        hungry-obs (assoc observation :h 0.9 :hunger 0.9 :ingest 0.0)
+        hungry-obs (assoc observation :h 0.9 :hunger 0.9 :ingest 0.0 :mode :homebound)
         {:keys [policies]} (policy/choose-action hungry-mu prec hungry-obs)]
-    (testing "under high hunger, survival-cost makes return competitive
-              (canonical KL-risk redistributes across 14 channels; the old
-              2-channel NLL favored return more strongly. The augmentation
-              layer — Slice 3 — will restore survival-driven return priority.)"
-      ;; With canonical EFE, the risk is spread across all channels.
-      ;; The survival-cost augmentation still penalizes non-return actions
-      ;; when hungry, but the G ordering depends on the full controller score.
-      ;; Verify that return has a finite G (the pipeline works).
-      (is (number? (:G (policies :return))))
-      (is (number? (:G (policies :pheromone)))))))
+    (testing "return beats pheromone under high hunger (homebound mode)"
+      (is (< (:G (policies :return))
+             (:G (policies :pheromone)))))))
 
 (deftest pheromone-penalized-when-ingest-absent
   (let [hungry-mu (assoc mu :h 0.85)
-        hungry-obs (assoc observation :h 0.85 :hunger 0.85 :ingest 0.05)
+        hungry-obs (assoc observation :h 0.85 :hunger 0.85 :ingest 0.05 :mode :homebound)
         {:keys [policies]} (policy/choose-action hungry-mu prec hungry-obs)]
-    (testing "canonical EFE produces finite G for all actions when ingest is low
-              (the old 2-channel NLL made pheromone strictly worst; canonical
-              KL-risk over 14 channels redistributes the penalty. Slice 3's
-              augmentation layer will restore action-specific penalties.)"
-      (is (number? (:G (policies :pheromone))))
-      (is (number? (:G (policies :forage))))
-      (is (number? (:G (policies :return)))))))
+    (testing "pheromone G is worse than forage and return (homebound mode)"
+      (is (> (:G (policies :pheromone))
+             (:G (policies :forage))))
+      (is (> (:G (policies :pheromone))
+             (:G (policies :return)))))))
 
 (deftest forage-on-home-penalized
   (let [home-obs (assoc observation
@@ -110,7 +102,8 @@
                          :ingest 0.05
                          :food 0.9
                          :dist-home 0.0
-                         :trail-grad 0.25)
+                         :trail-grad 0.25
+                         :mode :homebound)
         {:keys [action policies]} (policy/choose-action mu prec home-obs)]
     (testing "forage action suppressed on nest tiles"
       (is (not (contains? policies :forage))))
