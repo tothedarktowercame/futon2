@@ -937,9 +937,11 @@
       (:entries result))))
 
 (defn- fetch-missions
-  "Fetch mission inventory from the API. Returns vec or nil."
+  "Fetch strategic mission inventory from the API. Turn-count telemetry is a
+   separate observational concern and is not consumed by WM selection."
   []
-  (when-let [data (http-get-json (str futon3c-url "/api/alpha/missions")
+  (when-let [data (http-get-json (str futon3c-url
+                                       "/api/alpha/missions?include-turn-counts=false")
                                  mission-api-timeout-ms)]
     (when (:ok data)
       (or (:missions data) []))))
