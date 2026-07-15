@@ -174,6 +174,17 @@ In particular, agent contention remains measured as `:agent-unavailable`; it
 is neither replaced nor hidden by waiting for or silently substituting another
 agent.  This preserves the preregistered denominator while preventing one
 unavailable pair from rapidly consuming the rest of a bounded batch.
+It also stops after two consecutive constructible opportunities select the
+same target, retaining both observations but emitting no third one.  This is a
+batch-level stop line for selection collapse, not a rule for deleting or
+relabeling either attempt.
+
+`--batch-id ID` attaches an operator-chosen identifier and the recorded ranked
+selection context to every Morning Brief item.  After a bounded run,
+`clojure -M:wm-full-loop brief --batch-id ID` returns one chronologically
+ordered briefing with the question “Was each choice the best available
+selection?”; unrelated historical canaries and earlier cohort items are not
+mixed into that surface.
 
 Each opportunity uses the same state machine: observe and update belief,
 select exactly one policy, construct against that selected policy, dispatch a

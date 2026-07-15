@@ -24,6 +24,7 @@
   (cond-> {:trigger trigger}
     (:author flags) (assoc :author (:author flags))
     (:reviewer flags) (assoc :reviewer (:reviewer flags))
+    (:batch-id flags) (assoc :batch-id (:batch-id flags))
     (:window-days flags) (assoc :window-days (parse-long! :window-days
                                                            (:window-days flags)))
     (:agent-inactivity-seconds flags)
@@ -42,12 +43,15 @@
 (defn- run-once! [trigger flags]
   (print-value (runner/run-opportunity! (runner-opts trigger flags))))
 
+(defn- selected-target [result]
+  (get-in result [:checkpoints :selection :judgment :selected-mission]))
+
 (defn- continuous! [flags]
   (let [interval-seconds (parse-long! :interval-seconds
                                       (get flags :interval-seconds "0"))
         count-limit (when-let [count-value (:count flags)]
                       (parse-long! :count count-value))]
-    (loop [n 0]
+    (loop [n 0 previous-target nil]
       (when (or (nil? count-limit) (< n count-limit))
         (let [result (run-once! :duree-click-continuous flags)]
           (when-not (= :grounded-change (:outcome result))
@@ -55,10 +59,44 @@
                             {:outcome :continuous-stopped
                              :completed-clicks (inc n)
                              :last-result result})))
+          (let [target (selected-target result)]
+            (when (and target (= previous-target target))
+              (throw (ex-info "Continuous full loop stopped after repeated selection"
+                              {:outcome :continuous-stopped
+                               :reason :repeated-selection
+                               :completed-clicks (inc n)
+                               :repeated-target target
+                               :last-result result})))
           (when (and (pos? interval-seconds)
                      (or (nil? count-limit) (< (inc n) count-limit)))
             (Thread/sleep (* 1000 interval-seconds)))
-          (recur (inc n)))))))
+            (recur (inc n) target)))))))
+
+(defn- batch-brief [batch-id]
+  (let [items (->> (brief/pending-items)
+                   (filter #(= batch-id (:batch-id %)))
+                   (sort-by :queued-at)
+                   vec)
+        attempt-ids (set (map :attempt-id items))
+        reviews (->> (brief/reviews)
+                     (filter #(contains? attempt-ids (:attempt-id %)))
+                     (sort-by :reviewed-at)
+                     vec)
+        item-view (fn [item]
+                    (-> (select-keys item [:attempt-id :selected-target :outcome
+                                           :author :reviewer :commit :queued-at
+                                           :selection-review])
+                        (assoc :witness
+                               (select-keys (:witness item)
+                                            [:resolved? :dial-moved?
+                                             :implementation-id :discharge-id]))))]
+    {:morning-brief/schema-version 2
+     :batch-id batch-id
+     :question "Was each choice the best available selection?"
+     :judgment-order (mapv :attempt-id items)
+     :pending-count (count items)
+     :items (mapv item-view items)
+     :reviews reviews}))
 
 (def usage
   (str "War Machine real full-loop runner\n\n"
@@ -68,7 +106,7 @@
        "  once [--author zai-5 --reviewer codex-7]\n"
        "  tick [--author zai-5 --reviewer codex-7]\n"
        "  continuous [--count N] [--interval-seconds N] [agent options]\n"
-       "  brief\n"
+       "  brief [--batch-id ID]\n"
        "  qa ATTEMPT-ID ENTITY-ID VERDICT NOTE [REVIEWER]\n\n"
        "once is an on-demand durée click; continuous emits sequential durée "
        "clicks; tick is one wall-clock opportunity. Agent options also include "
@@ -90,11 +128,14 @@
       "once" (run-once! :duree-click-on-demand (option-map rest))
       "tick" (run-once! :wallclock-cron (option-map rest))
       "continuous" (continuous! (option-map rest))
-      "brief" (let [record (trace/latest-trace-record)]
-                (print-value {:pending (brief/pending-items)
-                              :reviews (brief/reviews)
-                              :valid-belief-entity-ids
-                              (vec (sort-by str (keys (:mu-post record))))}))
+      "brief" (let [flags (option-map rest)]
+                (if-let [batch-id (:batch-id flags)]
+                  (print-value (batch-brief batch-id))
+                  (let [record (trace/latest-trace-record)]
+                    (print-value {:pending (brief/pending-items)
+                                  :reviews (brief/reviews)
+                                  :valid-belief-entity-ids
+                                  (vec (sort-by str (keys (:mu-post record))))}))))
       "qa" (let [[attempt-id entity-id verdict note reviewer & extra] rest]
              (when (or (seq extra) (some nil? [attempt-id entity-id verdict note]))
                (throw (ex-info "qa requires ATTEMPT ENTITY VERDICT NOTE [REVIEWER]"

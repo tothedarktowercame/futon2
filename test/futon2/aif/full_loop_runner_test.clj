@@ -37,6 +37,7 @@
         result
         (runner/run-opportunity!
          {:cohort? false
+          :batch-id "overnight-2026-07-16"
           :phase-log-fn #(swap! phases conj %)
           :repair-open-fn (constantly [])
           :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
@@ -78,6 +79,11 @@
     (is (= ["zai-5" "codex-7"] (mapv :agent @dispatches)))
     (is (re-find #"Do not edit or commit" (:prompt (second @dispatches))))
     (is (= :grounded-change (:outcome (first @queued))))
+    (is (= "overnight-2026-07-16" (:batch-id (first @queued))))
+    (is (= selected-action
+           (get-in (first @queued) [:selection-review :selected-action])))
+    (is (= "Was this the best available selection?"
+           (get-in (first @queued) [:selection-review :question])))
     (is (= [:opportunity :agent-readiness :agent-readiness :code-state :code-state
             :substrate-preflight :substrate-preflight
             :preference-refresh :preference-refresh

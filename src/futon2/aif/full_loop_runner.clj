@@ -32,7 +32,7 @@
 (def default-reviewer "codex-7")
 (def default-phase-log "/home/joe/code/futon2/data/wm-full-loop-phases.edn.log")
 (def default-inactivity-timeout-ms (* 10 60 1000))
-(def semantic-epoch :full-loop-real-actuation-v4)
+(def semantic-epoch :full-loop-real-actuation-v5)
 (def required-checkpoints [:selection :construction :dispatch :build :adjudication])
 
 (defn config
@@ -354,7 +354,7 @@
                          :failure-outcome :failure-error :failure-data])
         stop-lines))
 
-(defn- author-prompt [{:keys [author reviewer]} target mission cascade-entry
+(defn- author-prompt [{:keys [author reviewer batch-id]} target mission cascade-entry
                       stop-lines]
   (str author ": FULL-LOOP IMPLEMENTATION OPPORTUNITY. You are the author; "
        reviewer " is the independent reviewer.\n\n"
@@ -375,6 +375,11 @@
               "\nThese accumulated findings have priority over unrelated work. "
               "Repair all of them fail-closed; "
               "do not preserve a bypass for backward compatibility.\n"))
+       (when batch-id
+         (str "FROZEN BATCH: " batch-id " uses semantic epoch " semantic-epoch ". "
+              "Do not alter War Machine ranking, policy support, dispatch, build, "
+              "adjudication, grounding semantics, or the semantic epoch in this parcel. "
+              "If the selected work requires such a change, refuse with a typed reason.\n"))
        "\n"
        "Requirements:\n"
        "1. Inspect the mission and repository state; choose a bounded implementation parcel "
@@ -572,11 +577,25 @@
                          :when (not (contains? @checkpoints cp))]
                    (checkpoint! cp (sorry (keyword (str "not-reached-" (name cp)))
                                           {:outcome outcome})))
-                 (let [brief-ref ((or (:queue-fn opts) brief/queue-item!)
+                 (let [selection-judgment (get-in @checkpoints [:selection :judgment])
+                       brief-ref ((or (:queue-fn opts) brief/queue-item!)
                                   {:attempt-id attempt-id :opportunity-id opportunity-id
+                                   :batch-id (:batch-id opts)
                                    :trigger trigger :selected-target (:target data)
                                    :outcome outcome :author author :reviewer reviewer
-                                   :commit (:commit data) :witness (:witness data)})
+                                   :commit (:commit data) :witness (:witness data)
+                                   :selection-review
+                                   (when selection-judgment
+                                     {:question
+                                      "Was this the best available selection?"
+                                      :selected-mission
+                                      (:selected-mission selection-judgment)
+                                      :selected-action
+                                      (:selected-action selection-judgment)
+                                      :ranked-candidates
+                                      (:ranked-candidates selection-judgment)
+                                      :selection-reasons
+                                      (:selection-reasons selection-judgment)})})
                        closed (term (merge {:outcome outcome
                                             :grounded? (= :grounded-change outcome)
                                             :artifact-only? (= :artifact-only outcome)
