@@ -1,0 +1,36 @@
+{:event/schema-version 1,
+ :cohort/id :wm-outer-loop-40-v1,
+ :attempt/id "attempt-001",
+ :attempt/ordinal 1,
+ :event/sequence 3,
+ :checkpoint/type :construction,
+ :recorded-at "2026-07-14T20:23:47.700489558Z",
+ :payload
+ {:judgment
+  {:mission ":sorry/pudding-g1-arrow-witness-binding",
+   :cascade
+   {:psi
+    ":sorry/pudding g1 arrow witness binding STUCK: selected 320 ticks, 0 passes open sorry: G-REWARD's named open home: bind arrow-witness to the per-turn affect detector",
+    :cascade-score -0.555,
+    :semilattice
+    {:descent
+     [["iching/hexagram-43-guai" "iching/hexagram-44-gou"]
+      ["iching/hexagram-44-gou" "iching/hexagram-43-guai"]],
+     :co_app []}},
+   :sorries [],
+   :wiring nil,
+   :patterns
+   ["agent/sense-deliberate-act"
+    "iching/hexagram-43-guai"
+    "iching/hexagram-44-gou"],
+   :deposit nil},
+  :ground
+  {:kind :decision-pinned-construction,
+   :selected-action
+   {:type :address-sorry,
+    :target :sorry/pudding-g1-arrow-witness-binding,
+    :weight 1.0,
+    :intrinsic-value 0.15,
+    :rationale
+    "open sorry: G-REWARD's named open home: bind arrow-witness to the per-turn affect detector",
+    :structural-pressure-per-action 0.0}}}}

@@ -1,0 +1,9 @@
+{:event/schema-version 1,
+ :cohort/id :wm-outer-loop-40-v1,
+ :attempt/id "attempt-023",
+ :attempt/ordinal 23,
+ :event/sequence 2,
+ :checkpoint/type :selection,
+ :recorded-at "2026-07-15T18:00:07.035483447Z",
+ :payload
+ {:sorry {:outcome :agent-unavailable, :kind :not-reached-selection}}}

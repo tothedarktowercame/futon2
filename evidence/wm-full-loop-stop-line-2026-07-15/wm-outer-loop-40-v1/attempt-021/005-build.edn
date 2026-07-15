@@ -1,0 +1,8 @@
+{:event/schema-version 1,
+ :cohort/id :wm-outer-loop-40-v1,
+ :attempt/id "attempt-021",
+ :attempt/ordinal 21,
+ :event/sequence 5,
+ :checkpoint/type :build,
+ :recorded-at "2026-07-15T16:00:27.925445522Z",
+ :payload {:sorry {:outcome :no-selection, :kind :not-reached-build}}}

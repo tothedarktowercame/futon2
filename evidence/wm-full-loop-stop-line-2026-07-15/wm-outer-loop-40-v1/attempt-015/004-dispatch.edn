@@ -1,0 +1,9 @@
+{:event/schema-version 1,
+ :cohort/id :wm-outer-loop-40-v1,
+ :attempt/id "attempt-015",
+ :attempt/ordinal 15,
+ :event/sequence 4,
+ :checkpoint/type :dispatch,
+ :recorded-at "2026-07-15T10:00:31.337205916Z",
+ :payload
+ {:sorry {:outcome :no-selection, :kind :not-reached-dispatch}}}

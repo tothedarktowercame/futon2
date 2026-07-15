@@ -1,0 +1,18 @@
+{:event/schema-version 1,
+ :cohort/id :wm-outer-loop-40-v1,
+ :attempt/id "attempt-011",
+ :attempt/ordinal 11,
+ :event/sequence 7,
+ :checkpoint/type :closed,
+ :recorded-at "2026-07-15T06:00:12.679928680Z",
+ :payload
+ {:judgment
+  {:outcome :no-selection,
+   :grounded? false,
+   :artifact-only? false,
+   :morning-brief-ref
+   "/home/joe/code/futon2/data/wm-morning-brief/items/attempt-011.edn",
+   :duration-ms 8565,
+   :resource-use {:agent-turns 0},
+   :witness nil},
+  :ground {:kind :full-loop-outcome, :attempt-id "attempt-011"}}}

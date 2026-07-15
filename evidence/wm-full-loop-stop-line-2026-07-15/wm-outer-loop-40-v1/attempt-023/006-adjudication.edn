@@ -1,0 +1,10 @@
+{:event/schema-version 1,
+ :cohort/id :wm-outer-loop-40-v1,
+ :attempt/id "attempt-023",
+ :attempt/ordinal 23,
+ :event/sequence 6,
+ :checkpoint/type :adjudication,
+ :recorded-at "2026-07-15T18:00:07.083499263Z",
+ :payload
+ {:sorry
+  {:outcome :agent-unavailable, :kind :not-reached-adjudication}}}

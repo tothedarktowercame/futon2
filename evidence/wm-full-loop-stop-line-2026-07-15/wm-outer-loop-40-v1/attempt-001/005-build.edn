@@ -1,0 +1,25 @@
+{:event/schema-version 1,
+ :cohort/id :wm-outer-loop-40-v1,
+ :attempt/id "attempt-001",
+ :attempt/ordinal 1,
+ :event/sequence 5,
+ :checkpoint/type :build,
+ :recorded-at "2026-07-14T20:27:27.838935429Z",
+ :payload
+ {:judgment
+  {:artifacts ["holes/peradams-corpus.edn"],
+   :generated-code ["holes/peradams-corpus.edn"],
+   :commits ["f7717cb"],
+   :patterns-used
+   ["agent/sense-deliberate-act"
+    "iching/hexagram-43-guai"
+    "iching/hexagram-44-gou"],
+   :inline-improvements [],
+   :validation
+   {:author {:executed false, :tool-events 0, :command-events 0},
+    :reviewer {:executed true, :tool-events 26, :command-events 26},
+    :review-job "invoke-1784060771004-545-5ebdd78d",
+    :approved? true}},
+  :ground
+  {:kind :git-commit-and-independent-review,
+   :repository "/home/joe/code/futon7"}}}

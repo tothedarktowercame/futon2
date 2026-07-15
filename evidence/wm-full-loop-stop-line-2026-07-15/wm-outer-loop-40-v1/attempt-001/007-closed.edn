@@ -1,0 +1,39 @@
+{:event/schema-version 1,
+ :cohort/id :wm-outer-loop-40-v1,
+ :attempt/id "attempt-001",
+ :attempt/ordinal 1,
+ :event/sequence 7,
+ :checkpoint/type :closed,
+ :recorded-at "2026-07-14T20:27:28.840534153Z",
+ :payload
+ {:judgment
+  {:outcome :grounded-change,
+   :grounded? true,
+   :artifact-only? false,
+   :morning-brief-ref
+   "/home/joe/code/futon2/data/wm-morning-brief/items/attempt-001.edn",
+   :duration-ms 264631,
+   :resource-use {:agent-turns 2},
+   :witness
+   {:before {:implementation-entity nil},
+    :after
+    {:implementation-entity
+     {:id "full-loop/implementation/f7717cb",
+      :name "Reviewed implementation f7717cb",
+      :type :implementation/commit,
+      :external-id nil,
+      :source "wm-full-loop",
+      :props
+      #:implementation{:files ["holes/peradams-corpus.edn"],
+                       :review-job "invoke-1784060771004-545-5ebdd78d",
+                       :target
+                       ":sorry/pudding-g1-arrow-witness-binding",
+                       :reviewer "codex-7",
+                       :commit "f7717cb",
+                       :repository "/home/joe/code/futon7",
+                       :author "zai-5"}}},
+    :resolved? true,
+    :dial-moved? true,
+    :implementation-id "full-loop/implementation/f7717cb",
+    :discharge-id "full-loop/discharge/attempt-001"}},
+  :ground {:kind :full-loop-outcome, :attempt-id "attempt-001"}}}

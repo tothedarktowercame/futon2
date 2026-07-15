@@ -1,0 +1,26 @@
+{:event/schema-version 1,
+ :cohort/id :wm-outer-loop-40-v1,
+ :attempt/id "attempt-001",
+ :attempt/ordinal 1,
+ :event/sequence 4,
+ :checkpoint/type :dispatch,
+ :recorded-at "2026-07-14T20:23:48.717618600Z",
+ :payload
+ {:judgment
+  {:agent "zai-5",
+   :availability :invoke-ready,
+   :job-id "invoke-1784060627717-540-3aba1129",
+   :prompt-ref "agency-job:invoke-1784060627717-540-3aba1129"},
+  :ground
+  {:kind :agency-dispatch,
+   :response
+   {:status-url
+    "/api/alpha/invoke/jobs/invoke-1784060627717-540-3aba1129",
+    :job-id "invoke-1784060627717-540-3aba1129",
+    :ref nil,
+    :accepted true,
+    :mode "brief",
+    :state "queued",
+    :arse nil,
+    :ok true,
+    :bell-type "request"}}}}

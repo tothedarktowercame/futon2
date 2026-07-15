@@ -1,0 +1,53 @@
+{:event/schema-version 1,
+ :cohort/id :wm-outer-loop-40-v1,
+ :attempt/id "attempt-001",
+ :attempt/ordinal 1,
+ :event/sequence 6,
+ :checkpoint/type :adjudication,
+ :recorded-at "2026-07-14T20:27:28.781578618Z",
+ :payload
+ {:judgment
+  {:before {:implementation-entity nil},
+   :after
+   {:implementation-entity
+    {:id "full-loop/implementation/f7717cb",
+     :name "Reviewed implementation f7717cb",
+     :type :implementation/commit,
+     :external-id nil,
+     :source "wm-full-loop",
+     :props
+     #:implementation{:files ["holes/peradams-corpus.edn"],
+                      :review-job "invoke-1784060771004-545-5ebdd78d",
+                      :target
+                      ":sorry/pudding-g1-arrow-witness-binding",
+                      :reviewer "codex-7",
+                      :commit "f7717cb",
+                      :repository "/home/joe/code/futon7",
+                      :author "zai-5"}}},
+   :witness
+   {:before {:implementation-entity nil},
+    :after
+    {:implementation-entity
+     {:id "full-loop/implementation/f7717cb",
+      :name "Reviewed implementation f7717cb",
+      :type :implementation/commit,
+      :external-id nil,
+      :source "wm-full-loop",
+      :props
+      #:implementation{:files ["holes/peradams-corpus.edn"],
+                       :review-job "invoke-1784060771004-545-5ebdd78d",
+                       :target
+                       ":sorry/pudding-g1-arrow-witness-binding",
+                       :reviewer "codex-7",
+                       :commit "f7717cb",
+                       :repository "/home/joe/code/futon7",
+                       :author "zai-5"}}},
+    :resolved? true,
+    :dial-moved? true,
+    :implementation-id "full-loop/implementation/f7717cb",
+    :discharge-id "full-loop/discharge/attempt-001"},
+   :build-match {:commit "f7717cb", :review-approved? true},
+   :dial
+   {:moved? true,
+    :implementation-id "full-loop/implementation/f7717cb"}},
+  :ground {:kind :authoritative-substrate-discharge}}}

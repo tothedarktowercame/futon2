@@ -1,0 +1,9 @@
+{:event/schema-version 1,
+ :cohort/id :wm-outer-loop-40-v1,
+ :attempt/id "attempt-020",
+ :attempt/ordinal 20,
+ :event/sequence 6,
+ :checkpoint/type :adjudication,
+ :recorded-at "2026-07-15T15:00:59.204173106Z",
+ :payload
+ {:sorry {:outcome :no-selection, :kind :not-reached-adjudication}}}

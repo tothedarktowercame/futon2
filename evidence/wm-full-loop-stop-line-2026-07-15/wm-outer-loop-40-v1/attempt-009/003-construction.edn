@@ -1,0 +1,9 @@
+{:event/schema-version 1,
+ :cohort/id :wm-outer-loop-40-v1,
+ :attempt/id "attempt-009",
+ :attempt/ordinal 9,
+ :event/sequence 3,
+ :checkpoint/type :construction,
+ :recorded-at "2026-07-15T04:00:12.727690339Z",
+ :payload
+ {:sorry {:outcome :no-selection, :kind :not-reached-construction}}}

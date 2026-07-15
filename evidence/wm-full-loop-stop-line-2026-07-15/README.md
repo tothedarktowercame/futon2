@@ -1,0 +1,35 @@
+# WM full-loop stop-line archive — 2026-07-15
+
+This directory preserves the complete first activation snapshot of
+`:wm-outer-loop-40-v1` before the active cohort was rewound.
+
+The snapshot contains attempts 1–24:
+
+- 1 `grounded-change` (`attempt-001`)
+- 22 repeated `no-selection` outcomes (`attempt-002` through `attempt-022`,
+  and `attempt-024`)
+- 1 `agent-unavailable` outcome (`attempt-023`)
+
+The stop-line condition was a policy-support mismatch.  Selection admitted
+and repeatedly reinforced `{:type :learn-action-class,
+:target-class :fire-pattern}`, while the coding full-loop surface had no
+construction for that action.  `:no-selection` did not create a durable repair
+obligation, so the failure repeated instead of becoming self-healing memory.
+
+The hourly cron was disabled before the rewind.  The active cohort retains the
+original activation record and `attempt-001`; its next eligible opportunity is
+therefore `attempt-002`, after the defect is repaired, independently reviewed,
+validated by a full canary, and marked with a new semantic epoch.
+
+Deterministic tar-stream SHA-256 of the archived `wm-outer-loop-40-v1`
+snapshot before this README was added:
+
+`b98b9d7b0ba7a2ae6226f8f3bed383c5cf95177b8d5bf9f70c6c4707296af244`
+
+Hash command:
+
+```sh
+tar --sort=name --mtime='UTC 2026-07-15' --owner=0 --group=0 --numeric-owner \
+  -C data/wm-full-loop/archives/stop-line-2026-07-15 \
+  -cf - wm-outer-loop-40-v1 | sha256sum
+```

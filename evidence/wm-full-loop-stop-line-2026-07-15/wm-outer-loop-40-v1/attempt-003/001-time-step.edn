@@ -1,0 +1,124 @@
+{:event/schema-version 1,
+ :cohort/id :wm-outer-loop-40-v1,
+ :attempt/id "attempt-003",
+ :attempt/ordinal 3,
+ :event/sequence 1,
+ :checkpoint/type :time-step,
+ :recorded-at "2026-07-14T22:00:06.287831403Z",
+ :payload
+ {:judgment
+  {:opportunity-id
+   "wallclock-cron/2026-07-14T22:00:05.640536664Z/8cfeaaee-3714-4b41-aab6-93e6b2e20892",
+   :trigger :wallclock-cron,
+   :machine-state {:started-at "2026-07-14T22:00:06.176705274Z"},
+   :agent-roster
+   {:zai-5
+    {:capabilities ["explore" "edit" "test" "coordination/execute"],
+     :session-id "zai-f936619bc2e14b9ebab25d06fe657024",
+     :invoke-route "local",
+     :completion-bell-required? true,
+     :excursion-id nil,
+     :type "zai",
+     :invoke-ws-available? false,
+     :invoke-local? true,
+     :status "idle",
+     :mission-id nil,
+     :id #:id{:value "zai-5", :type "continuity"},
+     :last-active "2026-07-14T20:26:10.625060959Z",
+     :invoke-diagnostic "local invoke-fn registered",
+     :registered-at "2026-07-13T22:17:35.659363161Z",
+     :ttl-ms nil,
+     :metadata
+     {:agency/contracts {:bell-on-complete? true},
+      :auto-registered? true,
+      :cwd "/home/joe/code",
+      :emacs-socket "server"},
+     :campaign-id nil,
+     :invoke-ready? true},
+    :codex-7
+    {:capabilities ["edit" "test" "coordination/execute"],
+     :session-id "019f5d8f-05b6-7872-b6d7-6fd2999c58f8",
+     :invoke-route "local",
+     :completion-bell-required? true,
+     :excursion-id nil,
+     :type "codex",
+     :invoke-ws-available? false,
+     :invoke-local? true,
+     :status "idle",
+     :mission-id nil,
+     :id #:id{:value "codex-7", :type "continuity"},
+     :last-active "2026-07-14T20:27:27.511057627Z",
+     :invoke-diagnostic "local invoke-fn registered",
+     :registered-at "2026-07-13T22:17:59.313371264Z",
+     :ttl-ms nil,
+     :metadata
+     {:agency/contracts {:bell-on-complete? true},
+      :auto-registered? true,
+      :require-execution? true,
+      :cwd "/home/joe/code/",
+      :session-file "/tmp/futon-codex-session-id-codex-7"},
+     :campaign-id nil,
+     :invoke-ready? true}},
+   :code-state
+   {:repo "/home/joe/code/futon2",
+    :git-sha "8d7802739c873e675195da3699ada1f38a88b848",
+    :git-dirty? true,
+    :repo-heads
+    {"/home/joe/code/futon5a"
+     "2ea5bdb53bc6b1b1ee12ebd2a77d5e3b31017115",
+     "/home/joe/code/futon1a"
+     "9748a7d2d31d6ff22ad1171d4a247f2339bead1e",
+     "/home/joe/code/futon3b"
+     "77feffc89c23a7586d649e128721aec46ae95961",
+     "/home/joe/code/futon7"
+     "f7717cbcaf956157c344d201ba33ee00e85b2799",
+     "/home/joe/code/futon1bi"
+     "61cf8f88f5652fbe2a41c53e9cf712085dd48282",
+     "/home/joe/code/futon5"
+     "715a8d954c359fd5ed8ff78fe2b7c7ef9efadee7",
+     "/home/joe/code/futon3c"
+     "6a54e33d2cda576617c899265fc673996f6e1185",
+     "/home/joe/code/futon6"
+     "1d9ff5d6ac5ed6f32ae40e323203c336e5cacde7",
+     "/home/joe/code/futon0"
+     "0fb40e02c7dead84b3e3cb44b252c67be6f2becd",
+     "/home/joe/code/futon1b"
+     "472e6c704176915dda75493cf2beb59632d063cc",
+     "/home/joe/code/futon1"
+     "26ab382e6721342483403e37d4e2ab59cea47e06",
+     "/home/joe/code/futon7a"
+     "a476b68b514843e1f78edae205d3b1f18ade36bc",
+     "/home/joe/code/futon3a"
+     "2fffe77f96c2d2e11730cd23422ad413a09355ab",
+     "/home/joe/code/futon3"
+     "cf346408e3851bb7a56e0332fa5d403720a62bab",
+     "/home/joe/code/futon2"
+     "8d7802739c873e675195da3699ada1f38a88b848",
+     "/home/joe/code/futon4"
+     "5e4f8d29b25568e0ef192f39fc48fd5575520760"},
+    :resolved-mode-flags
+    {:goal-outcome-mode :kl,
+     :belief-model-manifest
+     {:observation-model-hash "0x9f0e738a",
+      :transition-model-hash "0x5351a7ad",
+      :initial-prior-hash "0xfc317074"},
+     :structural-pressure-mode :habit-prior,
+     :c-temperature 0.1,
+     :ambiguity-mode :gaussian-entropy,
+     :homeostatic-control-mode :telemetry-only,
+     :salience-mode :separate,
+     :move-class-intensity-mode :off,
+     :predictability-control-mode :telemetry-only,
+     :habit-prior-source :learned-frequency,
+     :tau-mode :selection-gain-only,
+     :risk-mode :kl,
+     :kl-channel-weights {},
+     :graph-feasibility-mode :policy-support,
+     :likelihood-mode :aif},
+    :configuration-digest
+    "e3b25e31ada8f031b174b54a22486742fe85ea0120e594f1227d131a9cd96c0b"},
+   :semantic-epoch :full-loop-real-actuation-v1},
+  :ground
+  {:kind :trigger-opportunity,
+   :id
+   "wallclock-cron/2026-07-14T22:00:05.640536664Z/8cfeaaee-3714-4b41-aab6-93e6b2e20892"}}}
