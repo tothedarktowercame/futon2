@@ -157,6 +157,7 @@
                                     :controller-score -2.0}])
                            (assoc :decision {:action action :rank 1}))
         dispatches (atom [])
+        grounded-construction (atom nil)
         result
         (runner/run-opportunity!
          {:cohort? false
@@ -183,7 +184,8 @@
                        {:job-id job-id :state "done"
                         :result-summary "FULL_LOOP_REVIEW: APPROVE"}))
           :resolve-build-fn (fn [_] {:repo "/repo" :files ["src/fire.clj"]})
-          :ground-fn (fn [& _]
+          :ground-fn (fn [_ _ _ _ _ _ _ construction _ _]
+                       (reset! grounded-construction construction)
                        {:resolved? true :dial-moved? true
                         :implementation-id "fire-pattern-impl"})
           :queue-fn identity})]
@@ -196,7 +198,62 @@
     (is (re-find #":artifact-integrity"
                  (:prompt (first @dispatches))))
     (is (re-find #":grounded-implementation"
-                 (:prompt (second @dispatches))))))
+                 (:prompt (second @dispatches))))
+    (is (= (:pattern-sha256 action)
+           (get-in @grounded-construction
+                   [:actuation-contract :pattern-sha256])))))
+
+(defn- substrate-fixture []
+  (let [docs (atom {})
+        reserved #{:xt/id :entity/type :entity/name :entity/source}]
+    {:docs docs
+     :opts {:entity-by-id-fn
+            (fn [id]
+              (when-let [doc (get @docs id)]
+                {:id id :props (apply dissoc doc reserved)}))
+            :put-doc-fn
+            (fn [doc]
+              (swap! docs assoc (:xt/id doc) doc)
+              {:ok true})}}))
+
+(deftest fire-pattern-grounding-persists-content-bound-provenance
+  (let [action (fire-pattern-action)
+        construction (runner/construct-for-decision {:action action})
+        {:keys [docs opts]} (substrate-fixture)
+        result (runner/ground-commit!
+                "attempt-fire" "coordination/capability-gate"
+                "codex-6" "claude-7" "/repo" "fireabc"
+                ["src/fire.clj"] construction {:job-id "review-fire"} opts)
+        implementation (get @docs "full-loop/implementation/fireabc")]
+    (is (:resolved? result))
+    (is (= :fire-pattern-actuation
+           (:implementation/construction-kind implementation)))
+    (is (= "coordination/capability-gate"
+           (:implementation/pattern-id implementation)))
+    (is (= (:pattern-path action)
+           (:implementation/pattern-path implementation)))
+    (is (= (:pattern-sha256 action)
+           (:implementation/pattern-sha256 implementation)))
+    (is (= ["ctx-1"]
+           (:implementation/pattern-evidence-ids implementation)))
+    (is (= (:actuation-contract construction)
+           (:implementation/actuation-contract implementation)))))
+
+(deftest fire-pattern-grounding-revalidates-before-writing
+  (let [action (fire-pattern-action)
+        construction (-> (runner/construct-for-decision {:action action})
+                         (assoc-in [:selected-action :pattern-sha256]
+                                   (apply str (repeat 64 "0"))))
+        {:keys [docs opts]} (substrate-fixture)]
+    (try
+      (runner/ground-commit!
+       "attempt-stale" "coordination/capability-gate"
+       "codex-6" "claude-7" "/repo" "staleabc"
+       ["src/fire.clj"] construction {:job-id "review-stale"} opts)
+      (is false "stale pattern content must not reach the substrate")
+      (catch clojure.lang.ExceptionInfo e
+        (is (= :grounding-failed (:outcome (ex-data e))))))
+    (is (empty? @docs) "failed revalidation writes neither implementation nor discharge")))
 
 (deftest construction-failure-opens-system-stop-line-and-does-not-write-trace
   (let [findings (atom [])

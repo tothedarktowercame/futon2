@@ -445,21 +445,56 @@
 (defn- discharge-id [attempt-id]
   (str "full-loop/discharge/" attempt-id))
 
+(defn- grounding-construction-props
+  "Return durable construction provenance, revalidating production actions at
+   the final write boundary. In particular, a fire-pattern artifact may change
+   while the author or reviewer is working; a construction-time digest is not
+   authority to ground different bytes later."
+  [target construction]
+  (let [kind (:construction-kind construction)
+        selected-action (:selected-action construction)
+        actuation-contract (:actuation-contract construction)]
+    (when (= :fire-pattern-actuation kind)
+      (let [current (patterns/actuation-construction selected-action)]
+        (when-not (and current
+                       (= target (:mission current))
+                       (= selected-action (:selected-action current))
+                       (= actuation-contract (:actuation-contract current)))
+          (throw (ex-info "Fire-pattern construction is stale or inconsistent"
+                          {:outcome :grounding-failed
+                           :target target
+                           :construction-kind kind
+                           :selected-action selected-action})))))
+    (cond-> {:implementation/construction-kind kind
+             :implementation/selected-action selected-action}
+      actuation-contract
+      (assoc :implementation/actuation-contract actuation-contract)
+
+      (= :fire-pattern-actuation kind)
+      (assoc :implementation/pattern-id (:target actuation-contract)
+             :implementation/pattern-path (:pattern-path actuation-contract)
+             :implementation/pattern-sha256 (:pattern-sha256 actuation-contract)
+             :implementation/pattern-evidence-ids
+             (:evidence-ids actuation-contract)))))
+
 (defn ground-commit!
-  [attempt-id target author reviewer repo commit files review-job opts]
+  [attempt-id target author reviewer repo commit files construction review-job opts]
   (let [impl-id (implementation-id commit)
         before (substrate/entity-by-id impl-id opts)
-        implementation {:xt/id impl-id
-                        :entity/type :implementation/commit
-                        :entity/name (str "Reviewed implementation " commit)
-                        :entity/source "wm-full-loop"
-                        :implementation/target (str target)
-                        :implementation/repository repo
-                        :implementation/commit commit
-                        :implementation/files files
-                        :implementation/author author
-                        :implementation/reviewer reviewer
-                        :implementation/review-job (:job-id review-job)}
+        construction-props (grounding-construction-props target construction)
+        implementation (merge
+                        {:xt/id impl-id
+                         :entity/type :implementation/commit
+                         :entity/name (str "Reviewed implementation " commit)
+                         :entity/source "wm-full-loop"
+                         :implementation/target (str target)
+                         :implementation/repository repo
+                         :implementation/commit commit
+                         :implementation/files files
+                         :implementation/author author
+                         :implementation/reviewer reviewer
+                         :implementation/review-job (:job-id review-job)}
+                        construction-props)
         discharge {:xt/id (discharge-id attempt-id)
                    :entity/type :discharge
                    :entity/name (str "Full-loop discharge " attempt-id)
@@ -726,7 +761,7 @@
                         (run-phase! opts @phase-context :grounding
                                     #((or (:ground-fn opts) ground-commit!)
                                       attempt-id target author reviewer repo commit files
-                                      review-job opts))]
+                                      construction review-job opts))]
                     (when (seq stop-lines)
                       (run-phase! opts @phase-context :stop-line-resolution
                                   #(doseq [obligation stop-lines]
