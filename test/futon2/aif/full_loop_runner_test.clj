@@ -86,19 +86,27 @@
 
 (deftest capability-gap-action-has-a-typed-production-construction
   (with-redefs [cascade/cascade-lane
-                (fn [entries _]
-                  (let [action (:action (first entries))]
-                    (is (= :learn-action-class (:type action)))
-                    (is (= :fire-pattern (:target action)))
-                    (is (= :capability-gap-repair (:actuation-kind action)))
-                    [{:mission (:target action) :psi "repair capability"
-                      :shown [:P1] :semilattice [] :cascade-score 1.0}]))]
+                (fn [& _]
+                  (throw (ex-info "capability repair entered ordinary cascade" {})))]
     (let [selected {:action {:type :learn-action-class
                              :target-class :fire-pattern
                              :rationale "no addressable patterns"}}
           construction (runner/construct-for-decision selected)]
       (is (= :capability-gap-repair (:construction-kind construction)))
-      (is (= (:action selected) (:selected-action construction))))))
+      (is (= (:action selected) (:selected-action construction)))
+      (is (= :fire-pattern
+             (get-in construction [:capability-contract :action-class])))
+      (is (= [:addressable-substrate-enumerator
+              :action-proposer-registration
+              :instance-executability-check
+              :production-actuation-path]
+             (get-in construction
+                     [:capability-contract :required-components])))
+      (is (= #{:proposer-support :candidate-shape :execution-support
+               :boundary-regression}
+             (set (map :check
+                       (get-in construction
+                               [:capability-contract :acceptance]))))))))
 
 (deftest construction-failure-opens-system-stop-line-and-does-not-write-trace
   (let [findings (atom [])

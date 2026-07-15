@@ -261,26 +261,58 @@
   (first (filter #(= (missions/mission-target-id target) (:id %))
                  (missions/open-missions))))
 
+(defmulti construct-selected-action
+  "Production constructor dispatch. Every selectable meta-action needs its
+  own construction contract; it must not be made to look like an ordinary
+  mission merely by renaming fields."
+  (fn [entry] (get-in entry [:action :type])))
+
+(defmethod construct-selected-action :learn-action-class
+  [entry]
+  (let [{:keys [target-class rationale] :as action} (:action entry)]
+    (when target-class
+      {:mission target-class
+       :psi (or rationale (str "make action class " target-class " addressable"))
+       :construction-kind :capability-gap-repair
+       :selected-action action
+       :capability-contract
+       {:action-class target-class
+        :observed-boundary rationale
+        :required-components
+        [:addressable-substrate-enumerator
+         :action-proposer-registration
+         :instance-executability-check
+         :production-actuation-path]
+        :acceptance
+        [{:check :proposer-support
+          :claim "can-propose? is true only when real addressable targets exist"}
+         {:check :candidate-shape
+          :claim "the proposer emits valid target-bearing action instances"}
+         {:check :execution-support
+          :claim "every emitted instance passes can-execute? and reaches actuation"}
+         {:check :boundary-regression
+          :claim "an absent substrate remains an explicit capability gap"}]}
+       ;; These are construction disciplines, not similarity-search results.
+       :shown ["agent/sense-deliberate-act"
+               "pattern-discipline/patterns-as-categorical-objects"]
+       :semilattice
+       [{:from :addressable-substrate-enumerator :to :action-proposer-registration}
+        {:from :action-proposer-registration :to :instance-executability-check}
+        {:from :instance-executability-check :to :production-actuation-path}]
+       :policy-holes []})))
+
+(defmethod construct-selected-action :default
+  [entry]
+  (some-> (first (cascade/cascade-lane [entry] {:n 1 :budget 6}))
+          (assoc :construction-kind :selected-policy
+                 :selected-action (:action entry))))
+
 (defn construct-for-decision
   "Construct only for the selected policy entry, never the pre-prior rank
-  head. Capability-gap actions retain their original action identity while a
-  typed actuation target lets the ordinary cascade constructor reason about
-  the missing action class."
+  head. Dispatch by action type so meta-actions cannot masquerade as ordinary
+  target-bearing mission actions."
   [entry]
-  (let [action (:action entry)
-        construction-entry
-        (if (= :learn-action-class (:type action))
-          (-> entry
-              (assoc-in [:action :target] (:target-class action))
-              (assoc-in [:action :actuation-kind] :capability-gap-repair))
-          entry)]
-    (some-> (first (cascade/cascade-lane [construction-entry]
-                                         {:n 1 :budget 6}))
-            (assoc :construction-kind
-                   (if (= :learn-action-class (:type action))
-                     :capability-gap-repair
-                     :selected-policy)
-                   :selected-action action))))
+  (construct-selected-action entry))
 
 (defn- mission-for-decision [entry target]
   (let [action (:action entry)]
@@ -328,7 +360,9 @@
        "MISSION RECORD: " (pr-str mission) "\n"
        "PATTERN CASCADE: " (pr-str (select-keys cascade-entry
                                                   [:mission :psi :shown :semilattice
-                                                   :cascade-score])) "\n"
+                                                   :cascade-score
+                                                   :construction-kind
+                                                   :capability-contract])) "\n"
        (when (seq stop-lines)
          (str "STOP-THE-LINE REPAIR OBLIGATIONS: "
               (pr-str (prompt-findings stop-lines))
@@ -604,7 +638,8 @@
                               :cascade (select-keys construction
                                                     [:psi :cascade-score :semilattice
                                                      :construction-kind
-                                                     :selected-action])
+                                                     :selected-action
+                                                     :capability-contract])
                               :sorries (vec (:policy-holes construction))
                               :wiring nil
                               :patterns (vec (:shown construction))
