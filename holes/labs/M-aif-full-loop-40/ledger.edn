@@ -1,12 +1,37 @@
-{:protocol/version 2,
- :remaining 40,
- :attempts [],
- :closed-count 0,
- :grounded-change-count 0,
- :activation nil,
+{:protocol/version 4,
+ :remaining 39,
+ :attempts
+ [{:typed-sorries 0,
+   :grounded? true,
+   :attempt/id "attempt-001",
+   :outcome :grounded-change,
+   :selected-mission ":sorry/pudding-g1-arrow-witness-binding",
+   :checkpoints
+   [:time-step
+    :selection
+    :construction
+    :dispatch
+    :build
+    :adjudication
+    :closed],
+   :closed? true,
+   :attempt/ordinal 1,
+   :artifact-only? false,
+   :opportunity-id
+   "wallclock-cron/2026-07-14T20:23:04.192774749Z/f9490304-835a-481f-b9bd-3c37569ff14a"}],
+ :closed-count 1,
+ :grounded-change-count 1,
+ :activation
+ {:cohort/id :wm-outer-loop-40-v1,
+  :activated-at "2026-07-14T20:18:54.513104106Z",
+  :preregistration-path
+  "/home/joe/code/futon2/holes/labs/M-aif-full-loop-40/cohort.edn",
+  :preregistration-sha256
+  "1f6c45d8be2f12de2885c4df7dbadd7fded7d77b7f8e11da85d72f1b73b4d953",
+  :stopping-target 40},
  :artifact-only-count 0,
- :attempt-count 0,
+ :attempt-count 1,
  :grounded-no-change-count 0,
  :target 40,
- :outcomes {},
+ :outcomes {:grounded-change 1},
  :cohort/id :wm-outer-loop-40-v1}
