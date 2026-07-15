@@ -31,7 +31,7 @@
 (def default-reviewer "codex-7")
 (def default-phase-log "/home/joe/code/futon2/data/wm-full-loop-phases.edn.log")
 (def default-inactivity-timeout-ms (* 10 60 1000))
-(def semantic-epoch :full-loop-real-actuation-v1)
+(def semantic-epoch :full-loop-real-actuation-v2)
 (def required-checkpoints [:selection :construction :dispatch :build :adjudication])
 
 (defn config
@@ -262,9 +262,38 @@
                  (missions/open-missions))))
 
 (defn construct-for-decision
-  "Construct only for the selected policy entry, never the pre-prior rank head."
+  "Construct only for the selected policy entry, never the pre-prior rank
+  head. Capability-gap actions retain their original action identity while a
+  typed actuation target lets the ordinary cascade constructor reason about
+  the missing action class."
   [entry]
-  (first (cascade/cascade-lane [entry] {:n 1 :budget 6})))
+  (let [action (:action entry)
+        construction-entry
+        (if (= :learn-action-class (:type action))
+          (-> entry
+              (assoc-in [:action :target] (:target-class action))
+              (assoc-in [:action :actuation-kind] :capability-gap-repair))
+          entry)]
+    (some-> (first (cascade/cascade-lane [construction-entry]
+                                         {:n 1 :budget 6}))
+            (assoc :construction-kind
+                   (if (= :learn-action-class (:type action))
+                     :capability-gap-repair
+                     :selected-policy)
+                   :selected-action action))))
+
+(defn- mission-for-decision [entry target]
+  (let [action (:action entry)]
+    (if (= :learn-action-class (:type action))
+      {:id (str "capability-gap/" (name (:target-class action)))
+       :type :capability-gap
+       :target-class (:target-class action)
+       :status :open
+       :rationale (:rationale action)
+       :required-transition
+       {:from :not-addressable
+        :to :proposable-and-executable}}
+      (mission-entry target))))
 
 (defn- job-text [job]
   ;; The prompt itself names all verdict markers, so including it makes every
@@ -283,8 +312,9 @@
       :else :unverifiable)))
 
 (defn- prompt-findings [stop-lines]
-  (mapv #(select-keys % [:repair/id :attempt-id :failed-commit
-                         :review-verdict :review-text])
+  (mapv #(select-keys % [:repair/id :repair/class :attempt-id :failed-commit
+                         :review-verdict :review-text :failure-stage
+                         :failure-outcome :failure-error :failure-data])
         stop-lines))
 
 (defn- author-prompt [{:keys [author reviewer]} target mission cascade-entry
@@ -522,7 +552,6 @@
                                      :real-actuation? true
                                      :author author
                                      :reviewer reviewer)))
-            trace-path ((or (:trace-fn opts) trace/write-trace!) judgement)
             ordinary-entry (selected-entry judgement)
             entry (or (:selected-entry stop-line) ordinary-entry)
             target (some-> entry selected-target)
@@ -542,7 +571,7 @@
                                     (select-keys (:decision judgement)
                                                  [:source :rank :controller-score :tau
                                                   :selection-gain :habit-prior-applied?])
-                                    :trace-path trace-path}
+                                    :trace-persistence :after-construction}
                                    {:kind :wm-judgement :decision (:decision judgement)})
                              (sorry :no-selection {:decision (:decision judgement)}))]
         (checkpoint! :selection selection-cell)
@@ -553,20 +582,34 @@
         (let [{:keys [mission construction]}
               (run-phase! opts @phase-context :construction
                           #(hash-map
-                            :mission ((or (:mission-fn opts) mission-entry) target)
+                            :mission (if-let [mission-fn (:mission-fn opts)]
+                                       (mission-fn target)
+                                       (mission-for-decision entry target))
                             :construction ((or (:construct-fn opts)
                                                construct-for-decision) entry)))]
           (when-not construction
             (throw (ex-info "No construction for selected decision"
-                            {:outcome :no-selection :target target})))
+                            {:outcome :construction-failed
+                             :failure-stage :construction
+                             :target target
+                             :selected-entry
+                             (select-keys entry [:action :controller-score :G-efe])})))
+          ;; A selected action enters the canonical trace—and therefore the
+          ;; learned habit prior—only after its production construction path
+          ;; has been demonstrated. Failed selections remain fully auditable
+          ;; in the cohort and stop-line finding, but cannot reinforce E(pi).
+          (let [trace-path ((or (:trace-fn opts) trace/write-trace!) judgement)]
           (checkpoint! :construction
                        (term {:mission (str target)
                               :cascade (select-keys construction
-                                                    [:psi :cascade-score :semilattice])
+                                                    [:psi :cascade-score :semilattice
+                                                     :construction-kind
+                                                     :selected-action])
                               :sorries (vec (:policy-holes construction))
                               :wiring nil
                               :patterns (vec (:shown construction))
-                              :deposit nil}
+                              :deposit nil
+                              :trace-path trace-path}
                              {:kind :decision-pinned-construction
                               :selected-action (:action entry)}))
           (let [author-response
@@ -660,14 +703,14 @@
                               :grounded-change
                               :grounded-no-change)
                             {:target target :commit commit :witness witness
-                             :author-job author-job :review-job review-job}))))))))
+                             :author-job author-job :review-job review-job})))))))))
       (catch Throwable e
         (if @closing?
           (throw e)
           (let [failure (ex-data e)
                 review-job (:review-job failure)
                 verdict (some-> review-job review-verdict)
-                finding (when (and (:commit failure)
+                review-finding (when (and (:commit failure)
                                    (#{:request-changes :reject} verdict))
                           ((or (:repair-record-fn opts)
                                repair/record-review-failure!)
@@ -678,7 +721,19 @@
                             :reviewer reviewer
                             :review-job (:job-id review-job)
                             :review-verdict verdict
-                            :review-text (job-text review-job)}))]
+                            :review-text (job-text review-job)}))
+                system-finding
+                (when (= :construction (:failure-stage failure))
+                  ((or (:repair-system-record-fn opts)
+                       repair/record-system-failure!)
+                   {:attempt-id attempt-id
+                    :target (:target failure)
+                    :selected-entry (:selected-entry failure)
+                    :failure-stage (:failure-stage failure)
+                    :outcome (outcome-from e)
+                    :error (.getMessage e)
+                    :failure-data (dissoc failure :selected-entry)}))
+                finding (or review-finding system-finding)]
               (close! (outcome-from e)
                       {:target (or (:target failure)
                                    (some-> @checkpoints :selection :judgment

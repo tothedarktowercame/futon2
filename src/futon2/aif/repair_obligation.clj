@@ -1,9 +1,10 @@
 (ns futon2.aif.repair-obligation
-  "Durable stop-the-line memory for independently rejected full-loop work.
+  "Durable stop-the-line memory for full-loop failures.
 
-  Findings and resolutions are separate immutable records. An obligation is
-  open until an approved, grounded successor run records a resolution that
-  names the original failure and its replacement commit."
+  Independent-review failures and system failures are distinct finding
+  classes. Findings and resolutions are separate immutable records. An
+  obligation is open until an approved, grounded successor run records a
+  resolution that names the original failure and its replacement commit."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.pprint :as pp]
@@ -60,6 +61,34 @@
      (write-new! (io/file root "findings" (str id ".edn")) record)
      record)))
 
+(defn record-system-failure!
+  "Record a post-selection machine failure without mis-typing it as reviewer
+  feedback. The selected entry is retained so the next opportunity repairs
+  the failed actuation path before returning to ordinary policy selection."
+  ([finding] (record-system-failure! default-root finding))
+  ([root {:keys [attempt-id target selected-entry failure-stage outcome error]
+          :as finding}]
+   (when-not (and (string? attempt-id) target (map? selected-entry)
+                  (keyword? failure-stage) (keyword? outcome)
+                  (not (str/blank? (str error))))
+     (throw (ex-info "System stop-the-line finding lacks required provenance"
+                     {:finding finding})))
+   (let [id (obligation-id attempt-id)
+         record {:repair/id id
+                 :repair/schema-version 2
+                 :repair/status :open
+                 :repair/class :system-actuation-failure
+                 :attempt-id attempt-id
+                 :target target
+                 :selected-entry selected-entry
+                 :failure-stage failure-stage
+                 :failure-outcome outcome
+                 :failure-error error
+                 :failure-data (:failure-data finding)
+                 :opened-at (str (Instant/now))}]
+     (write-new! (io/file root "findings" (str id ".edn")) record)
+     record)))
+
 (defn open-obligations
   ([] (open-obligations default-root))
   ([root]
@@ -75,7 +104,8 @@
                      :as resolution}]
    (when-not (and (:repair/id obligation) attempt-id commit reviewer review-job
                   (not= attempt-id (:attempt-id obligation))
-                  (not= commit (:failed-commit obligation))
+                  (or (nil? (:failed-commit obligation))
+                      (not= commit (:failed-commit obligation)))
                   (:resolved? witness) (:dial-moved? witness))
      (throw (ex-info "Stop-the-line resolution requires approved grounded evidence"
                      {:obligation obligation :resolution resolution})))

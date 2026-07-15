@@ -32,3 +32,22 @@
                       :reviewer "codex-7" :review-job "review-2"
                       :witness {:resolved? true :dial-moved? true}})
     (is (empty? (repair/open-obligations root)))))
+
+(deftest system-actuation-failure-is-distinct-durable-stop-line-memory
+  (let [root (temp-root)
+        finding (repair/record-system-failure!
+                 root {:attempt-id "attempt-002"
+                       :target :fire-pattern
+                       :selected-entry
+                       {:action {:type :learn-action-class
+                                 :target-class :fire-pattern}}
+                       :failure-stage :construction
+                       :outcome :construction-failed
+                       :error "No construction for selected decision"})]
+    (is (= :system-actuation-failure (:repair/class finding)))
+    (is (= [finding] (repair/open-obligations root)))
+    (repair/resolve! root finding
+                     {:attempt-id "canary-repair" :commit "good456"
+                      :reviewer "claude-1" :review-job "review-2"
+                      :witness {:resolved? true :dial-moved? true}})
+    (is (empty? (repair/open-obligations root)))))

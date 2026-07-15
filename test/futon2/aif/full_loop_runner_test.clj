@@ -2,7 +2,8 @@
   (:require [babashka.http-client :as http]
             [cheshire.core :as json]
             [clojure.test :refer [deftest is]]
-            [futon2.aif.full-loop-runner :as runner])
+            [futon2.aif.full-loop-runner :as runner]
+            [futon2.report.cascade-lane :as cascade])
   (:import [java.time Instant]))
 
 (def selected-action {:type :open-mission :target "M-selected"})
@@ -82,6 +83,57 @@
              :events [{:type "prompt" :text "FULL_LOOP_REVIEW: APPROVE"}]}]
     (is (not (re-find #"FULL_LOOP_REVIEW:\s*APPROVE"
                       (#'runner/job-text job))))))
+
+(deftest capability-gap-action-has-a-typed-production-construction
+  (with-redefs [cascade/cascade-lane
+                (fn [entries _]
+                  (let [action (:action (first entries))]
+                    (is (= :learn-action-class (:type action)))
+                    (is (= :fire-pattern (:target action)))
+                    (is (= :capability-gap-repair (:actuation-kind action)))
+                    [{:mission (:target action) :psi "repair capability"
+                      :shown [:P1] :semilattice [] :cascade-score 1.0}]))]
+    (let [selected {:action {:type :learn-action-class
+                             :target-class :fire-pattern
+                             :rationale "no addressable patterns"}}
+          construction (runner/construct-for-decision selected)]
+      (is (= :capability-gap-repair (:construction-kind construction)))
+      (is (= (:action selected) (:selected-action construction))))))
+
+(deftest construction-failure-opens-system-stop-line-and-does-not-write-trace
+  (let [findings (atom [])
+        traces (atom [])
+        gap-action {:type :learn-action-class :target-class :fire-pattern}
+        gap-judgement (-> judgement
+                          (assoc :ranked-actions [{:rank 1 :action gap-action
+                                                   :controller-score -2.0}])
+                          (assoc :decision {:action gap-action :rank 1}))
+        result (runner/run-opportunity!
+                {:cohort? false
+                 :phase-log-fn (fn [_])
+                 :repair-open-fn (constantly [])
+                 :repair-system-record-fn
+                 (fn [finding]
+                   (swap! findings conj finding)
+                   (assoc finding :repair/class :system-actuation-failure))
+                 :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
+                                     :codex-7 {:status "idle" :invoke-ready? true}})
+                 :judge-fn (fn [_] {:judgement gap-judgement})
+                 :refresh-fn (fn [])
+                 :substrate-preflight-fn (fn [_] {:route :test})
+                 :code-state-fn (fn [] {:repo "/futon2" :git-sha "head"
+                                        :git-dirty? false :repo-heads {}})
+                 :mode-flags-fn (fn [] {})
+                 :version-stamp-fn identity
+                 :mission-fn (fn [_] nil)
+                 :trace-fn #(swap! traces conj %)
+                 :construct-fn (constantly nil)
+                 :queue-fn identity})]
+    (is (= :construction-failed (:outcome result)))
+    (is (empty? @traces) "unsupported selection must not train the habit trace")
+    (is (= :system-actuation-failure
+           (:repair/class (:repair-obligation (:data result)))))
+    (is (= :construction (:failure-stage (first @findings))))))
 
 (deftest rejected-review-preserves-authored-commit-in-morning-brief
   (let [queued (atom [])
