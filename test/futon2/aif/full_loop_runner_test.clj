@@ -84,6 +84,21 @@
     (is (not (re-find #"FULL_LOOP_REVIEW:\s*APPROVE"
                       (#'runner/job-text job))))))
 
+(deftest reviewer-receives-the-capability-construction-contract
+  (let [contract {:construction-kind :capability-gap-repair
+                  :selected-action {:type :learn-action-class
+                                    :target-class :fire-pattern}
+                  :capability-contract
+                  {:action-class :fire-pattern
+                   :required-components [:action-proposer-registration]}}
+        prompt (#'runner/reviewer-prompt
+                {:author "codex-7" :reviewer "claude-7"}
+                :fire-pattern contract "/repo" "abc123"
+                {:job-id "author-job"} [])]
+    (is (re-find #"CONSTRUCTION CONTRACT" prompt))
+    (is (re-find #":capability-gap-repair" prompt))
+    (is (re-find #":action-proposer-registration" prompt))))
+
 (deftest capability-gap-action-has-a-typed-production-construction
   (with-redefs [cascade/cascade-lane
                 (fn [& _]

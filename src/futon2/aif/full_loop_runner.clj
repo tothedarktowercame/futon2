@@ -380,11 +380,15 @@
        "If no safe substantive parcel is possible, make no commit and finish with "
        "FULL_LOOP_AUTHOR: REFUSE <typed reason>."))
 
-(defn- reviewer-prompt [{:keys [reviewer author]} target repo commit author-job
-                        stop-lines]
+(defn- reviewer-prompt [{:keys [reviewer author]} target construction repo commit
+                        author-job stop-lines]
   (str reviewer ": FULL-LOOP INDEPENDENT REVIEW. " author " authored commit " commit
        " for selected target " (pr-str target) ".\n\n"
        "Repository: " repo "\n"
+       "CONSTRUCTION CONTRACT: "
+       (pr-str (select-keys construction
+                            [:construction-kind :selected-action
+                             :capability-contract :shown :semilattice])) "\n"
        "Author job evidence: " (pr-str (select-keys author-job
                                                      [:job-id :state :artifact-ref
                                                       :result-summary :execution])) "\n"
@@ -681,8 +685,8 @@
                       (run-phase! opts @phase-context :reviewer-dispatch
                                   #((or (:dispatch-fn opts) dispatch!) opts reviewer
                                     "wm-full-loop" target
-                                    (reviewer-prompt opts target repo commit author-job
-                                                     stop-lines)))
+                                    (reviewer-prompt opts target construction repo commit
+                                                     author-job stop-lines)))
                       review-job
                       (run-phase! opts @phase-context :reviewer-wait
                                   #((or (:poll-fn opts) poll-job!) opts
