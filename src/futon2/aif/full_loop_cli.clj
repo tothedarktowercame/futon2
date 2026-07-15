@@ -49,10 +49,16 @@
                       (parse-long! :count count-value))]
     (loop [n 0]
       (when (or (nil? count-limit) (< n count-limit))
-        (run-once! :duree-click-continuous flags)
-        (when (pos? interval-seconds)
-          (Thread/sleep (* 1000 interval-seconds)))
-        (recur (inc n))))))
+        (let [result (run-once! :duree-click-continuous flags)]
+          (when-not (= :grounded-change (:outcome result))
+            (throw (ex-info "Continuous full loop stopped after non-grounded outcome"
+                            {:outcome :continuous-stopped
+                             :completed-clicks (inc n)
+                             :last-result result})))
+          (when (and (pos? interval-seconds)
+                     (or (nil? count-limit) (< (inc n) count-limit)))
+            (Thread/sleep (* 1000 interval-seconds)))
+          (recur (inc n)))))))
 
 (def usage
   (str "War Machine real full-loop runner\n\n"

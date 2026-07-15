@@ -167,6 +167,14 @@ preselected. The former judgement/fold-only script is retained under the
 explicitly non-actuating alias `:wm-judgement-only`; it is not a scheduler
 entrypoint.
 
+`continuous` is fail-fast across opportunities.  The first non-grounded
+outcome is closed and retained as an ordinary cohort observation, then the
+command exits non-zero without emitting later opportunities from that batch.
+In particular, agent contention remains measured as `:agent-unavailable`; it
+is neither replaced nor hidden by waiting for or silently substituting another
+agent.  This preserves the preregistered denominator while preventing one
+unavailable pair from rapidly consuming the rest of a bounded batch.
+
 Each opportunity uses the same state machine: observe and update belief,
 select exactly one policy, construct against that selected policy, dispatch a
 configured author, require a verifiable substantive commit, dispatch a distinct

@@ -32,7 +32,7 @@
 (def default-reviewer "codex-7")
 (def default-phase-log "/home/joe/code/futon2/data/wm-full-loop-phases.edn.log")
 (def default-inactivity-timeout-ms (* 10 60 1000))
-(def semantic-epoch :full-loop-real-actuation-v3)
+(def semantic-epoch :full-loop-real-actuation-v4)
 (def required-checkpoints [:selection :construction :dispatch :build :adjudication])
 
 (defn config
