@@ -45,7 +45,8 @@
 (defn- continuous! [flags]
   (let [interval-seconds (parse-long! :interval-seconds
                                       (get flags :interval-seconds "0"))
-        count-limit (some-> (:count flags) (parse-long! :count))]
+        count-limit (when-let [count-value (:count flags)]
+                      (parse-long! :count count-value))]
     (loop [n 0]
       (when (or (nil? count-limit) (< n count-limit))
         (run-once! :duree-click-continuous flags)
