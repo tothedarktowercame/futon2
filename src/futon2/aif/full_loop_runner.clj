@@ -16,6 +16,7 @@
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.mission-registry :as missions]
             [futon2.aif.morning-brief :as brief]
+            [futon2.aif.pattern-registry :as patterns]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.substrate :as substrate]
             [futon2.aif.trace :as trace]
@@ -31,7 +32,7 @@
 (def default-reviewer "codex-7")
 (def default-phase-log "/home/joe/code/futon2/data/wm-full-loop-phases.edn.log")
 (def default-inactivity-timeout-ms (* 10 60 1000))
-(def semantic-epoch :full-loop-real-actuation-v2)
+(def semantic-epoch :full-loop-real-actuation-v3)
 (def required-checkpoints [:selection :construction :dispatch :build :adjudication])
 
 (defn config
@@ -301,6 +302,10 @@
         {:from :instance-executability-check :to :production-actuation-path}]
        :policy-holes []})))
 
+(defmethod construct-selected-action :fire-pattern
+  [entry]
+  (patterns/actuation-construction (:action entry)))
+
 (defmethod construct-selected-action :default
   [entry]
   (some-> (first (cascade/cascade-lane [entry] {:n 1 :budget 6}))
@@ -362,7 +367,8 @@
                                                   [:mission :psi :shown :semilattice
                                                    :cascade-score
                                                    :construction-kind
-                                                   :capability-contract])) "\n"
+                                                   :capability-contract
+                                                   :actuation-contract])) "\n"
        (when (seq stop-lines)
          (str "STOP-THE-LINE REPAIR OBLIGATIONS: "
               (pr-str (prompt-findings stop-lines))
@@ -388,7 +394,8 @@
        "CONSTRUCTION CONTRACT: "
        (pr-str (select-keys construction
                             [:construction-kind :selected-action
-                             :capability-contract :shown :semilattice])) "\n"
+                             :capability-contract :actuation-contract
+                             :shown :semilattice])) "\n"
        "Author job evidence: " (pr-str (select-keys author-job
                                                      [:job-id :state :artifact-ref
                                                       :result-summary :execution])) "\n"
@@ -643,7 +650,8 @@
                                                     [:psi :cascade-score :semilattice
                                                      :construction-kind
                                                      :selected-action
-                                                     :capability-contract])
+                                                     :capability-contract
+                                                     :actuation-contract])
                               :sorries (vec (:policy-holes construction))
                               :wiring nil
                               :patterns (vec (:shown construction))

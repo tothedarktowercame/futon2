@@ -30,6 +30,18 @@
 (def ^:private default-fetch-limit 200)
 (def ^:private default-top-k 3)
 
+(defn addressable-pattern?
+  "True only for a pattern candidate backed by an address and at least one
+   Evidence Landscape receipt.  Retrieval text without those two identifiers
+   is useful context, but it is not an executable WM target."
+  [pattern]
+  (and (map? pattern)
+       (string? (:id pattern))
+       (not (str/blank? (:id pattern)))
+       (seq (:evidence-ids pattern))
+       (every? #(and (string? %) (not (str/blank? %)))
+               (:evidence-ids pattern))))
+
 (defn- http-get-json
   [url]
   (try
@@ -142,6 +154,7 @@
                    :devmap? (:devmap? exemplar)}))
               grouped)]
     (->> aggregated
+         (filter addressable-pattern?)
          (sort-by (juxt (comp - :weighted-score)
                         (comp - :mentions)
                         (comp - :best-score)
@@ -161,34 +174,100 @@
 
 (defmethod fm/can-propose? :fire-pattern
   [state _action-type]
-  (boolean (seq (:patterns state))))
+  (boolean (some addressable-pattern? (:patterns state))))
 
 (defmethod fm/can-execute? :fire-pattern
   [state action]
-  (boolean (some #(= (:target action) (:id %))
-                 (:patterns state []))))
+  (boolean
+   (some (fn [pattern]
+           (and (addressable-pattern? pattern)
+                (= :pattern-enumerator (:proposer-id action))
+                (= (:target action) (:id pattern))
+                (= (:evidence-ids action) (:evidence-ids pattern))
+                (= (:pattern-title action) (:title pattern))
+                (= (:pattern-path action) (:pattern-path pattern))
+                (= (:retrieval-score action) (:weighted-score pattern))
+                (= (:retrieval-rationale action)
+                   (:retrieval-rationale pattern))
+                (= (:hotwords action) (:hotwords pattern))
+                (= (:sigils action) (:sigils pattern))
+                (= (:pattern-summary action) (:then pattern))
+                (= (:pattern-because action) (:because pattern))
+                (= (:next-steps action) (:next-steps pattern))
+                (= (:turns action) (:turns pattern))))
+         (:patterns state []))))
+
+(defn actuation-construction
+  "Build the typed production construction for a provenance-bearing
+   `:fire-pattern` instance.  The live judge has already checked this action
+   against its current pattern substrate with `fm/can-execute?`; this second
+   fail-closed shape check prevents a malformed or provenance-free instance
+   from entering author dispatch through another caller."
+  [{:keys [type target proposer-id evidence-ids pattern-title pattern-summary
+           pattern-because next-steps]
+    :as action}]
+  (when (and (= :fire-pattern type)
+             (= :pattern-enumerator proposer-id)
+             (string? target)
+             (not (str/blank? target))
+             (seq evidence-ids)
+             (every? #(and (string? %) (not (str/blank? %))) evidence-ids))
+    {:mission target
+     :psi (or pattern-summary
+              (str "instantiate addressable pattern " target))
+     :construction-kind :fire-pattern-actuation
+     :selected-action action
+     :shown [target]
+     :semilattice
+     [{:from :retrieval-certificate :to :addressable-pattern-instance}
+      {:from :addressable-pattern-instance :to :author-dispatch}
+      {:from :author-dispatch :to :independent-review}
+      {:from :independent-review :to :grounded-implementation}]
+     :policy-holes []
+     :actuation-contract
+     {:action-class :fire-pattern
+      :target target
+      :pattern-title pattern-title
+      :evidence-ids (vec evidence-ids)
+      :instruction pattern-summary
+      :because pattern-because
+      :next-steps (vec next-steps)
+      :production-route
+      [:author-dispatch :independent-review :grounded-implementation]
+      :acceptance
+      [{:check :target-bound
+        :claim "implementation applies the selected pattern target"}
+       {:check :retrieval-provenance
+        :claim "implementation retains the selected retrieval receipts"}
+       {:check :grounded-change
+        :claim "reviewed commit is recorded through the full-loop actuator"}]}}))
 
 (def pattern-enumerator-proposer
   "Proposer that emits one `:fire-pattern` action per recent aggregated
    context-retrieval candidate in the state map."
   (reify ap/ActionProposer
     (propose [_ state]
-      (for [p (:patterns state)]
-        {:type :fire-pattern
-         :target (:id p)
-         :weight 1.0
-         :pattern-title (:title p)
-         :pattern-path (:pattern-path p)
-         :retrieval-score (:weighted-score p)
-         :retrieval-rationale (:retrieval-rationale p)
-         :hotwords (:hotwords p)
-         :sigils (:sigils p)
-         :pattern-summary (:then p)
-         :pattern-because (:because p)
-         :next-steps (:next-steps p)
-         :evidence-ids (:evidence-ids p)
-         :turns (:turns p)
-         :rationale (str "context-retrieval substrate: " (:title p)
-                         " mentions=" (:mentions p)
-                         " weighted-score=" (format "%.3f" (double (:weighted-score p))))}))
+      (keep (fn [p]
+              (when (addressable-pattern? p)
+                {:type :fire-pattern
+                 :target (:id p)
+                 :weight 1.0
+                 :proposer-id :pattern-enumerator
+                 :pattern-title (:title p)
+                 :pattern-path (:pattern-path p)
+                 :retrieval-score (:weighted-score p)
+                 :retrieval-rationale (:retrieval-rationale p)
+                 :hotwords (:hotwords p)
+                 :sigils (:sigils p)
+                 :pattern-summary (:then p)
+                 :pattern-because (:because p)
+                 :next-steps (:next-steps p)
+                 :evidence-ids (:evidence-ids p)
+                 :turns (:turns p)
+                 :rationale (str "context-retrieval substrate: " (:title p)
+                                 " mentions=" (:mentions p)
+                                 " weighted-score="
+                                 (format "%.3f"
+                                         (double (:weighted-score p))))}))
+            (:patterns state)))
     (proposer-id [_] :pattern-enumerator)))

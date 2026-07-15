@@ -123,6 +123,77 @@
                        (get-in construction
                                [:capability-contract :acceptance]))))))))
 
+(deftest fire-pattern-has-a-typed-production-actuation-construction
+  (with-redefs [cascade/cascade-lane
+                (fn [& _]
+                  (throw (ex-info "fire-pattern entered ordinary cascade" {})))]
+    (let [action {:type :fire-pattern
+                  :proposer-id :pattern-enumerator
+                  :target "coordination/capability-gate"
+                  :pattern-title "Capability Gate"
+                  :pattern-summary "Make the capability boundary explicit"
+                  :evidence-ids ["ctx-1"]}
+          construction (runner/construct-for-decision {:action action})]
+      (is (= :fire-pattern-actuation (:construction-kind construction)))
+      (is (= action (:selected-action construction)))
+      (is (= "coordination/capability-gate"
+             (get-in construction [:actuation-contract :target])))
+      (is (= [:author-dispatch :independent-review :grounded-implementation]
+             (get-in construction
+                     [:actuation-contract :production-route]))))))
+
+(deftest fire-pattern-production-construction-reaches-full-loop-actuation
+  (let [action {:type :fire-pattern
+                :proposer-id :pattern-enumerator
+                :target "coordination/capability-gate"
+                :pattern-title "Capability Gate"
+                :pattern-summary "Make the capability boundary explicit"
+                :evidence-ids ["ctx-1"]}
+        fire-judgement (-> judgement
+                           (assoc :ranked-actions
+                                  [{:rank 1 :action action
+                                    :controller-score -2.0}])
+                           (assoc :decision {:action action :rank 1}))
+        dispatches (atom [])
+        result
+        (runner/run-opportunity!
+         {:cohort? false
+          :phase-log-fn (fn [_])
+          :repair-open-fn (constantly [])
+          :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
+                              :codex-7 {:status "idle" :invoke-ready? true}})
+          :judge-fn (fn [_] {:judgement fire-judgement})
+          :refresh-fn (fn [])
+          :substrate-preflight-fn (fn [_] {:route :test})
+          :code-state-fn (fn [] {:repo "/futon2" :git-sha "head"
+                                 :git-dirty? false :repo-heads {}})
+          :mode-flags-fn (fn [] {})
+          :version-stamp-fn identity
+          :mission-fn (fn [_] nil)
+          :trace-fn (fn [_] "/tmp/fire-pattern-trace.edn")
+          :dispatch-fn (fn [_ agent _ _ prompt]
+                         (swap! dispatches conj {:agent agent :prompt prompt})
+                         {:job-id (if (= agent "zai-5")
+                                    "author-job" "review-job")})
+          :poll-fn (fn [_ job-id]
+                     (if (= job-id "author-job")
+                       {:job-id job-id :state "done" :artifact-ref "fire123"}
+                       {:job-id job-id :state "done"
+                        :result-summary "FULL_LOOP_REVIEW: APPROVE"}))
+          :resolve-build-fn (fn [_] {:repo "/repo" :files ["src/fire.clj"]})
+          :ground-fn (fn [& _]
+                       {:resolved? true :dial-moved? true
+                        :implementation-id "fire-pattern-impl"})
+          :queue-fn identity})]
+    (is (= :grounded-change (:outcome result)))
+    (is (= ["zai-5" "codex-7"] (mapv :agent @dispatches)))
+    (is (re-find #":fire-pattern-actuation"
+                 (:prompt (first @dispatches))))
+    (is (re-find #":retrieval-provenance"
+                 (:prompt (first @dispatches))))
+    (is (re-find #":grounded-implementation"
+                 (:prompt (second @dispatches))))))
+
 (deftest construction-failure-opens-system-stop-line-and-does-not-write-trace
   (let [findings (atom [])
         traces (atom [])
