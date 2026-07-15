@@ -3,6 +3,7 @@
             [cheshire.core :as json]
             [clojure.test :refer [deftest is]]
             [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.pattern-registry :as patterns]
             [futon2.report.cascade-lane :as cascade])
   (:import [java.time Instant]))
 
@@ -16,6 +17,17 @@
    :belief {} :belief-pre {} :observation {} :free-energy {}
    :prediction-errors {} :precision-state {} :micro-step-trace []
    :ranked-actions-extra [] :mode :maintain})
+
+(defn fire-pattern-action []
+  (merge {:type :fire-pattern
+          :proposer-id :pattern-enumerator
+          :target "coordination/capability-gate"
+          :pattern-title "Capability Gate"
+          :pattern-summary "Make the capability boundary explicit"
+          :evidence-ids ["ctx-1"]}
+         (patterns/pattern-artifact-receipt
+          "coordination/capability-gate"
+          "/home/joe/code/futon3/library/coordination/capability-gate.flexiarg")))
 
 (deftest real-opportunity-pins-construction-and-separates-review
   (let [constructed (atom nil)
@@ -127,12 +139,7 @@
   (with-redefs [cascade/cascade-lane
                 (fn [& _]
                   (throw (ex-info "fire-pattern entered ordinary cascade" {})))]
-    (let [action {:type :fire-pattern
-                  :proposer-id :pattern-enumerator
-                  :target "coordination/capability-gate"
-                  :pattern-title "Capability Gate"
-                  :pattern-summary "Make the capability boundary explicit"
-                  :evidence-ids ["ctx-1"]}
+    (let [action (fire-pattern-action)
           construction (runner/construct-for-decision {:action action})]
       (is (= :fire-pattern-actuation (:construction-kind construction)))
       (is (= action (:selected-action construction)))
@@ -143,12 +150,7 @@
                      [:actuation-contract :production-route]))))))
 
 (deftest fire-pattern-production-construction-reaches-full-loop-actuation
-  (let [action {:type :fire-pattern
-                :proposer-id :pattern-enumerator
-                :target "coordination/capability-gate"
-                :pattern-title "Capability Gate"
-                :pattern-summary "Make the capability boundary explicit"
-                :evidence-ids ["ctx-1"]}
+  (let [action (fire-pattern-action)
         fire-judgement (-> judgement
                            (assoc :ranked-actions
                                   [{:rank 1 :action action
@@ -190,6 +192,8 @@
     (is (re-find #":fire-pattern-actuation"
                  (:prompt (first @dispatches))))
     (is (re-find #":retrieval-provenance"
+                 (:prompt (first @dispatches))))
+    (is (re-find #":artifact-integrity"
                  (:prompt (first @dispatches))))
     (is (re-find #":grounded-implementation"
                  (:prompt (second @dispatches))))))

@@ -13,10 +13,12 @@
    consumes the resulting certificates as a bounded candidate substrate."
   (:require [babashka.http-client :as http]
             [cheshire.core :as json]
+            [clojure.java.io :as io]
             [clojure.string :as str]
             [futon2.aif.action-proposer :as ap]
             [futon2.aif.forward-model :as fm])
-  (:import (java.time LocalDate ZoneId)))
+  (:import (java.security MessageDigest)
+           (java.time LocalDate ZoneId)))
 
 (def ^:private default-evidence-base
   (or (System/getenv "FUTON3C_EVIDENCE_BASE")
@@ -30,17 +32,64 @@
 (def ^:private default-fetch-limit 200)
 (def ^:private default-top-k 3)
 
+(def ^:dynamic *pattern-library-root*
+  "Canonical root for production-addressable pattern artifacts. Dynamic only
+   so tests and deployments can bind an isolated library without weakening the
+   containment check."
+  (or (System/getenv "FUTON_PATTERN_LIBRARY_ROOT")
+      "/home/joe/code/futon3/library"))
+
+(defn- sha256-file [file]
+  (let [digest (MessageDigest/getInstance "SHA-256")]
+    (with-open [in (io/input-stream file)]
+      (let [buffer (byte-array 8192)]
+        (loop []
+          (let [n (.read in buffer)]
+            (when (pos? n)
+              (.update digest buffer 0 n)
+              (recur))))))
+    (apply str (map #(format "%02x" (bit-and 0xff %)) (.digest digest)))))
+
+(defn pattern-artifact-receipt
+  "Return the canonical path and content digest when ID/PATH identify a real
+   `.flexiarg` beneath the configured pattern library; otherwise nil.
+
+   The relative artifact path (without `.flexiarg`) must equal ID. This rejects
+   receipt/path substitution as well as missing files and `..`/symlink escapes."
+  [id path]
+  (when (and (string? id) (not (str/blank? id))
+             (string? path) (not (str/blank? path)))
+    (try
+      (let [root (.getCanonicalFile (io/file *pattern-library-root*))
+            file (.getCanonicalFile (io/file path))
+            root-path (.toPath root)
+            file-path (.toPath file)
+            relative (when (.startsWith file-path root-path)
+                       (str (.relativize root-path file-path)))
+            artifact-id (some-> relative
+                                (str/replace java.io.File/separator "/")
+                                (str/replace #"\.flexiarg$" ""))]
+        (when (and (.isFile file)
+                   (str/ends-with? (.getName file) ".flexiarg")
+                   (= id artifact-id))
+          {:pattern-path (.getPath file)
+           :pattern-sha256 (sha256-file file)}))
+      (catch Exception _ nil))))
+
 (defn addressable-pattern?
-  "True only for a pattern candidate backed by an address and at least one
-   Evidence Landscape receipt.  Retrieval text without those two identifiers
-   is useful context, but it is not an executable WM target."
+  "True only for a pattern candidate backed by a current canonical artifact
+   and at least one Evidence Landscape receipt. Retrieval text or an id without
+   that content-bound address is context, not an executable WM target."
   [pattern]
-  (and (map? pattern)
-       (string? (:id pattern))
-       (not (str/blank? (:id pattern)))
-       (seq (:evidence-ids pattern))
-       (every? #(and (string? %) (not (str/blank? %)))
-               (:evidence-ids pattern))))
+  (let [receipt (when (map? pattern)
+                  (pattern-artifact-receipt (:id pattern)
+                                            (:pattern-path pattern)))]
+    (and receipt
+         (= (:pattern-path receipt) (:pattern-path pattern))
+         (= (:pattern-sha256 receipt) (:pattern-sha256 pattern))
+         (seq (:evidence-ids pattern))
+         (every? #(and (string? %) (not (str/blank? %)))
+                 (:evidence-ids pattern)))))
 
 (defn- http-get-json
   [url]
@@ -122,36 +171,48 @@
           (candidate-observation entry result (inc idx)))
         grouped (vals (group-by :id observations))
         aggregated
-        (mapv (fn [obs]
-                (let [exemplar (apply max-key :score obs)
+        (keep (fn [obs]
+                (let [addressed (keep (fn [observation]
+                                        (when-let [artifact
+                                                   (pattern-artifact-receipt
+                                                    (:id observation)
+                                                    (:pattern-path observation))]
+                                          (assoc observation
+                                                 ::artifact artifact)))
+                                      obs)
+                      exemplar (when (seq addressed)
+                                 (apply max-key :score addressed))
+                      artifact (::artifact exemplar)
                       latest-at (last (sort (or (keep :at obs) [""])))
                       best-score (apply max (map :score obs))
                       weighted-score (reduce + (map :weighted-score obs))
                       mentions (count obs)
                       evidence-ids (->> obs (keep :evidence-id) distinct sort vec)
                       turns (->> obs (keep :turn) distinct sort vec)]
-                  {:id (:id exemplar)
-                   :title (:title exemplar)
-                   :weighted-score weighted-score
-                   :best-score best-score
-                   :mentions mentions
-                   :latest-at latest-at
-                   :evidence-ids evidence-ids
-                   :turns turns
-                   :queries (->> obs (keep :query) distinct vec)
-                   :pattern-path (:pattern-path exemplar)
-                   :retrieval-rationale (:retrieval-rationale exemplar)
-                   :hotwords (:hotwords exemplar)
-                   :sigil (:sigil exemplar)
-                   :sigils (:sigils exemplar)
-                   :tokipona (:tokipona exemplar)
-                   :energy (:energy exemplar)
-                   :if (:if exemplar)
-                   :however (:however exemplar)
-                   :then (:then exemplar)
-                   :because (:because exemplar)
-                   :next-steps (:next-steps exemplar)
-                   :devmap? (:devmap? exemplar)}))
+                  (when exemplar
+                    (merge {:id (:id exemplar)
+                            :title (:title exemplar)
+                            :weighted-score weighted-score
+                            :best-score best-score
+                            :mentions mentions
+                            :latest-at latest-at
+                            :evidence-ids evidence-ids
+                            :turns turns
+                            :queries (->> obs (keep :query) distinct vec)
+                            :pattern-path (:pattern-path exemplar)
+                            :retrieval-rationale (:retrieval-rationale exemplar)
+                            :hotwords (:hotwords exemplar)
+                            :sigil (:sigil exemplar)
+                            :sigils (:sigils exemplar)
+                            :tokipona (:tokipona exemplar)
+                            :energy (:energy exemplar)
+                            :if (:if exemplar)
+                            :however (:however exemplar)
+                            :then (:then exemplar)
+                            :because (:because exemplar)
+                            :next-steps (:next-steps exemplar)
+                            :devmap? (:devmap? exemplar)}
+                           artifact))))
               grouped)]
     (->> aggregated
          (filter addressable-pattern?)
@@ -186,6 +247,7 @@
                 (= (:evidence-ids action) (:evidence-ids pattern))
                 (= (:pattern-title action) (:title pattern))
                 (= (:pattern-path action) (:pattern-path pattern))
+                (= (:pattern-sha256 action) (:pattern-sha256 pattern))
                 (= (:retrieval-score action) (:weighted-score pattern))
                 (= (:retrieval-rationale action)
                    (:retrieval-rationale pattern))
@@ -203,44 +265,51 @@
    against its current pattern substrate with `fm/can-execute?`; this second
    fail-closed shape check prevents a malformed or provenance-free instance
    from entering author dispatch through another caller."
-  [{:keys [type target proposer-id evidence-ids pattern-title pattern-summary
-           pattern-because next-steps]
+  [{:keys [type target proposer-id evidence-ids pattern-title pattern-path
+           pattern-sha256 pattern-summary pattern-because next-steps]
     :as action}]
-  (when (and (= :fire-pattern type)
-             (= :pattern-enumerator proposer-id)
-             (string? target)
-             (not (str/blank? target))
-             (seq evidence-ids)
-             (every? #(and (string? %) (not (str/blank? %))) evidence-ids))
-    {:mission target
-     :psi (or pattern-summary
-              (str "instantiate addressable pattern " target))
-     :construction-kind :fire-pattern-actuation
-     :selected-action action
-     :shown [target]
-     :semilattice
-     [{:from :retrieval-certificate :to :addressable-pattern-instance}
-      {:from :addressable-pattern-instance :to :author-dispatch}
-      {:from :author-dispatch :to :independent-review}
-      {:from :independent-review :to :grounded-implementation}]
-     :policy-holes []
-     :actuation-contract
-     {:action-class :fire-pattern
-      :target target
-      :pattern-title pattern-title
-      :evidence-ids (vec evidence-ids)
-      :instruction pattern-summary
-      :because pattern-because
-      :next-steps (vec next-steps)
-      :production-route
-      [:author-dispatch :independent-review :grounded-implementation]
-      :acceptance
-      [{:check :target-bound
-        :claim "implementation applies the selected pattern target"}
-       {:check :retrieval-provenance
-        :claim "implementation retains the selected retrieval receipts"}
-       {:check :grounded-change
-        :claim "reviewed commit is recorded through the full-loop actuator"}]}}))
+  (let [artifact (pattern-artifact-receipt target pattern-path)]
+    (when (and (= :fire-pattern type)
+               (= :pattern-enumerator proposer-id)
+               (string? target)
+               (not (str/blank? target))
+               (seq evidence-ids)
+               (every? #(and (string? %) (not (str/blank? %))) evidence-ids)
+               (= pattern-path (:pattern-path artifact))
+               (= pattern-sha256 (:pattern-sha256 artifact)))
+      {:mission target
+       :psi (or pattern-summary
+                (str "instantiate addressable pattern " target))
+       :construction-kind :fire-pattern-actuation
+       :selected-action action
+       :shown [target]
+       :semilattice
+       [{:from :retrieval-certificate :to :addressable-pattern-instance}
+        {:from :addressable-pattern-instance :to :author-dispatch}
+        {:from :author-dispatch :to :independent-review}
+        {:from :independent-review :to :grounded-implementation}]
+       :policy-holes []
+       :actuation-contract
+       {:action-class :fire-pattern
+        :target target
+        :pattern-title pattern-title
+        :pattern-path pattern-path
+        :pattern-sha256 pattern-sha256
+        :evidence-ids (vec evidence-ids)
+        :instruction pattern-summary
+        :because pattern-because
+        :next-steps (vec next-steps)
+        :production-route
+        [:author-dispatch :independent-review :grounded-implementation]
+        :acceptance
+        [{:check :target-bound
+          :claim "implementation applies the selected pattern target"}
+         {:check :retrieval-provenance
+          :claim "implementation retains the selected retrieval receipts"}
+         {:check :artifact-integrity
+          :claim "implementation uses the selected canonical pattern content"}
+         {:check :grounded-change
+          :claim "reviewed commit is recorded through the full-loop actuator"}]}})))
 
 (def pattern-enumerator-proposer
   "Proposer that emits one `:fire-pattern` action per recent aggregated
@@ -255,6 +324,7 @@
                  :proposer-id :pattern-enumerator
                  :pattern-title (:title p)
                  :pattern-path (:pattern-path p)
+                 :pattern-sha256 (:pattern-sha256 p)
                  :retrieval-score (:weighted-score p)
                  :retrieval-rationale (:retrieval-rationale p)
                  :hotwords (:hotwords p)

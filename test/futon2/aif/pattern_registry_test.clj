@@ -42,13 +42,13 @@
 
 (deftest aggregate-pattern-candidates-builds-bounded-ranking-test
   (let [patterns (pr/open-patterns sample-entries)]
-    (is (= 3 (count patterns)))
+    (is (= 1 (count patterns))
+        "retrieval ids without resolvable pattern artifacts are not targets")
     (is (= "coordination/capability-gate" (:id (first patterns))))
     (is (= 2 (:mentions (first patterns))))
     (is (= ["ctx-1" "ctx-2"] (:evidence-ids (first patterns))))
     (is (= [11 12] (:turns (first patterns))))
-    (is (> (:weighted-score (first patterns))
-           (:weighted-score (second patterns))))))
+    (is (re-matches #"[0-9a-f]{64}" (:pattern-sha256 (first patterns))))))
 
 (deftest can-propose-fire-pattern-when-state-has-patterns-test
   (is (false? (fm/can-propose? {:patterns []} :fire-pattern)))
@@ -56,45 +56,28 @@
   (is (false? (fm/can-propose? {:patterns [{:id "coordination/capability-gate"}]}
                                :fire-pattern))
       "an id without a retrieval receipt is not an addressable substrate")
-  (is (true? (fm/can-propose? {:patterns [{:id "coordination/capability-gate"
-                                            :evidence-ids ["ctx-1"]}]}
+  (is (false? (fm/can-propose? {:patterns [{:id "coordination/capability-gate"
+                                             :evidence-ids ["ctx-1"]}]}
+                               :fire-pattern))
+      "a receipt without a content-bound artifact remains non-addressable")
+  (is (true? (fm/can-propose? {:patterns (pr/open-patterns sample-entries)}
                               :fire-pattern))))
 
-(deftest can-execute-fire-pattern-requires-target-in-state-test
-  (let [state {:patterns [{:id "coordination/capability-gate"
-                           :evidence-ids ["ctx-1"]}
-                          {:id "agent/evidence-over-assertion"
-                           :evidence-ids ["ctx-2"]}]}]
-    (is (true? (fm/can-execute? state {:type :fire-pattern
-                                       :proposer-id :pattern-enumerator
-                                       :target "coordination/capability-gate"
-                                       :evidence-ids ["ctx-1"]})))
-    (is (true? (fm/can-execute? state {:type :fire-pattern
-                                       :proposer-id :pattern-enumerator
-                                       :target "agent/evidence-over-assertion"
-                                       :evidence-ids ["ctx-2"]})))
-    (is (false? (fm/can-execute? state {:type :fire-pattern
-                                        :proposer-id :pattern-enumerator
-                                        :target "missing/pattern"
-                                        :evidence-ids ["ctx-1"]})))
-    (is (false? (fm/can-execute? state {:type :fire-pattern
-                                        :proposer-id :pattern-enumerator
-                                        :target "coordination/capability-gate"
-                                        :evidence-ids []})))
-    (is (false? (fm/can-execute? state {:type :fire-pattern
-                                        :proposer-id :pattern-enumerator
-                                        :target "coordination/capability-gate"
-                                        :evidence-ids ["spoofed"]}))
+(deftest can-execute-fire-pattern-requires-current-target-in-state-test
+  (let [state {:patterns (pr/open-patterns sample-entries)}
+        action (first (ap/propose pr/pattern-enumerator-proposer state))]
+    (is (true? (fm/can-execute? state action)))
+    (is (false? (fm/can-execute? state (assoc action :target "missing/pattern"))))
+    (is (false? (fm/can-execute? state (assoc action :evidence-ids []))))
+    (is (false? (fm/can-execute? state (assoc action :evidence-ids ["spoofed"])))
         "execution provenance must match the current substrate")))
 
 (deftest pattern-enumerator-proposer-emits-candidates-test
   (let [state {:patterns (pr/open-patterns sample-entries)}
         candidates (ap/propose pr/pattern-enumerator-proposer state)]
-    (is (= 3 (count candidates)))
+    (is (= 1 (count candidates)))
     (is (every? #(= :fire-pattern (:type %)) candidates))
-    (is (= #{"coordination/capability-gate"
-             "coordination/candidate-set-hygiene"
-             "agent/evidence-over-assertion"}
+    (is (= #{"coordination/capability-gate"}
            (set (map :target candidates))))
     (is (every? :evidence-ids candidates))
     (is (every? #(fm/can-execute? state %) candidates))
@@ -103,6 +86,8 @@
                               :pattern-summary "caller-controlled rewrite")))
         "execution rejects a payload that does not match the substrate")
     (is (every? :retrieval-score candidates))
+    (is (every? :pattern-path candidates))
+    (is (every? #(re-matches #"[0-9a-f]{64}" (:pattern-sha256 %)) candidates))
     (is (every? #(string? (:rationale %)) candidates))
     (let [first-candidate (first candidates)]
       (is (= "/home/joe/code/futon3/library/coordination/capability-gate.flexiarg"
@@ -135,12 +120,26 @@
     (is (= (:target action) (get-in construction [:actuation-contract :target])))
     (is (= (:evidence-ids action)
            (get-in construction [:actuation-contract :evidence-ids])))
+    (is (= (:pattern-sha256 action)
+           (get-in construction [:actuation-contract :pattern-sha256])))
     (is (= [:author-dispatch :independent-review :grounded-implementation]
            (get-in construction [:actuation-contract :production-route])))
     (is (nil? (pr/actuation-construction
                (dissoc action :evidence-ids))))
     (is (nil? (pr/actuation-construction
-               (dissoc action :proposer-id))))))
+               (dissoc action :proposer-id))))
+    (is (nil? (pr/actuation-construction
+               (assoc action :pattern-sha256 (apply str (repeat 64 "0")))))
+        "construction rejects a stale or substituted artifact digest")))
+
+(deftest artifact-address-rejects-id-path-substitution-test
+  (let [path "/home/joe/code/futon3/library/coordination/capability-gate.flexiarg"]
+    (is (some? (pr/pattern-artifact-receipt
+                "coordination/capability-gate" path)))
+    (is (nil? (pr/pattern-artifact-receipt
+               "agent/evidence-over-assertion" path)))
+    (is (nil? (pr/pattern-artifact-receipt
+               "coordination/capability-gate" "/etc/passwd")))))
 
 (deftest integration-bootstrap-no-longer-surfaces-fire-pattern-gap-test
   (let [state-with-patterns {:patterns (pr/open-patterns sample-entries)
