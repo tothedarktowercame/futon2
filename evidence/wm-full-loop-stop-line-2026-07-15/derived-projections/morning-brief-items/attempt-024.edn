@@ -1,0 +1,12 @@
+{:selected-target :fire-pattern,
+ :witness nil,
+ :attempt-id "attempt-024",
+ :outcome :no-selection,
+ :author "zai-5",
+ :commit nil,
+ :queued-at "2026-07-15T19:00:19.073872930Z",
+ :morning-brief/schema-version 1,
+ :reviewer "codex-7",
+ :trigger :wallclock-cron,
+ :opportunity-id
+ "wallclock-cron/2026-07-15T19:00:04.819495553Z/7acd8a9c-34e7-4f40-91be-e4aba5744682"}

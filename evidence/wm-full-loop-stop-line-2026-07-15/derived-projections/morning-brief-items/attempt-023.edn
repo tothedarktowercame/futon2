@@ -1,0 +1,12 @@
+{:selected-target nil,
+ :witness nil,
+ :attempt-id "attempt-023",
+ :outcome :agent-unavailable,
+ :author "zai-5",
+ :commit nil,
+ :queued-at "2026-07-15T18:00:07.090045393Z",
+ :morning-brief/schema-version 1,
+ :reviewer "codex-7",
+ :trigger :wallclock-cron,
+ :opportunity-id
+ "wallclock-cron/2026-07-15T18:00:06.020892784Z/bcd7ac68-ef9b-4286-83db-f5b338a17b7e"}
