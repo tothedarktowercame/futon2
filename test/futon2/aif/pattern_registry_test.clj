@@ -40,15 +40,42 @@
     :evidence/body {:event "chat-turn"
                     :text "not a retrieval entry"}}])
 
+(def live-wire-entry
+  {:evidence/id "ctx-live-wire"
+   :evidence/at "2026-07-15T21:42:07Z"
+   :evidence/body
+   (pr-str {"event" "context-retrieval"
+            "at" "2026-07-15T21:42:07Z"
+            "turn" 20
+            "query" "content-bound fire pattern"
+            "results" [{:id "agent/evidence-over-assertion"
+                         :title "Evidence Over Assertion"
+                         :score 0.8
+                         :rank 1
+                         :retrieval-source "futon3a"}]})})
+
 (deftest aggregate-pattern-candidates-builds-bounded-ranking-test
   (let [patterns (pr/open-patterns sample-entries)]
-    (is (= 1 (count patterns))
+    (is (= 2 (count patterns))
         "retrieval ids without resolvable pattern artifacts are not targets")
     (is (= "coordination/capability-gate" (:id (first patterns))))
     (is (= 2 (:mentions (first patterns))))
     (is (= ["ctx-1" "ctx-2"] (:evidence-ids (first patterns))))
     (is (= [11 12] (:turns (first patterns))))
     (is (re-matches #"[0-9a-f]{64}" (:pattern-sha256 (first patterns))))))
+
+(deftest live-edn-string-body-resolves-to-content-bound-candidate-test
+  (let [pattern (first (pr/open-patterns [live-wire-entry]))]
+    (is (= "agent/evidence-over-assertion" (:id pattern)))
+    (is (= "/home/joe/code/futon3/library/agent/evidence-over-assertion.flexiarg"
+           (:pattern-path pattern)))
+    (is (= ["ctx-live-wire"] (:evidence-ids pattern)))
+    (is (re-matches #"[0-9a-f]{64}" (:pattern-sha256 pattern)))
+    (is (pr/addressable-pattern? pattern))))
+
+(deftest unreadable-wire-body-is-not-authority-test
+  (is (empty? (pr/open-patterns
+               [{:evidence/id "ctx-bad" :evidence/body "{not edn"}]))))
 
 (deftest can-propose-fire-pattern-when-state-has-patterns-test
   (is (false? (fm/can-propose? {:patterns []} :fire-pattern)))
@@ -75,9 +102,10 @@
 (deftest pattern-enumerator-proposer-emits-candidates-test
   (let [state {:patterns (pr/open-patterns sample-entries)}
         candidates (ap/propose pr/pattern-enumerator-proposer state)]
-    (is (= 1 (count candidates)))
+    (is (= 2 (count candidates)))
     (is (every? #(= :fire-pattern (:type %)) candidates))
-    (is (= #{"coordination/capability-gate"}
+    (is (= #{"coordination/capability-gate"
+             "agent/evidence-over-assertion"}
            (set (map :target candidates))))
     (is (every? :evidence-ids candidates))
     (is (every? #(fm/can-execute? state %) candidates))

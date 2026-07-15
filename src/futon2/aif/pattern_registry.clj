@@ -13,8 +13,10 @@
    consumes the resulting certificates as a bounded candidate substrate."
   (:require [babashka.http-client :as http]
             [cheshire.core :as json]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
+            [clojure.walk :as walk]
             [futon2.aif.action-proposer :as ap]
             [futon2.aif.forward-model :as fm])
   (:import (java.security MessageDigest)
@@ -29,7 +31,8 @@
   (ZoneId/of "Europe/London"))
 
 (def ^:private default-lookback-days 2)
-(def ^:private default-fetch-limit 200)
+(def ^:private default-fetch-limit 50)
+(def ^:private default-http-timeout-ms 10000)
 (def ^:private default-top-k 3)
 
 (def ^:dynamic *pattern-library-root*
@@ -95,7 +98,7 @@
   [url]
   (try
     (let [resp (http/get url {:headers {"Accept" "application/json"}
-                              :timeout 5000
+                              :timeout default-http-timeout-ms
                               :throw false})]
       (when (= 200 (:status resp))
         (json/parse-string (:body resp) true)))
@@ -109,9 +112,9 @@
   "Fetch recent evidence entries from the live Evidence Landscape.
 
    Options:
-   - :evidence-base  base URL (default local futon3c/futon1a stack)
+   - :evidence-base  base URL (default configured futon3c Evidence Landscape)
    - :lookback-days  inclusive lower bound in whole days (default 2)
-   - :limit          request limit (default 200)"
+   - :limit          request limit (default 50)"
   [& {:keys [evidence-base lookback-days limit]
       :or {evidence-base default-evidence-base
            lookback-days default-lookback-days
@@ -123,13 +126,33 @@
       (when (:ok data)
         (or (:entries data) [])))))
 
+(defn- evidence-body
+  "Normalize the Evidence Landscape wire representation. Futon1b may return
+   an EDN body as a string while older replay fixtures carry an already-decoded
+   map. Unreadable or non-map bodies are not retrieval authority."
+  [entry]
+  (let [body (:evidence/body entry)]
+    (cond
+      (map? body) body
+      (string? body) (try
+                       (let [decoded (edn/read-string body)]
+                         (when (map? decoded)
+                           (walk/keywordize-keys decoded)))
+                       (catch Exception _ nil))
+      :else nil)))
+
 (defn- context-retrieval-entry?
   [entry]
-  (= "context-retrieval" (get-in entry [:evidence/body :event])))
+  (= "context-retrieval" (:event (evidence-body entry))))
+
+(defn- candidate-pattern-path [id]
+  (when (and (string? id) (not (str/blank? id)))
+    (.getPath (io/file *pattern-library-root* (str id ".flexiarg")))))
 
 (defn- candidate-observation
   [entry result rank]
-  (let [score (double (or (:score result) 0.0))
+  (let [body (evidence-body entry)
+        score (double (or (:score result) 0.0))
         rank-weight (/ 1.0 (double rank))]
     {:id (:id result)
      :title (or (:title result) (:id result) "")
@@ -137,11 +160,12 @@
      :weighted-score (* score rank-weight)
      :rank rank
      :evidence-id (:evidence/id entry)
-     :at (or (get-in entry [:evidence/body :at])
+     :at (or (:at body)
              (:evidence/at entry))
-     :turn (get-in entry [:evidence/body :turn])
-     :query (get-in entry [:evidence/body :query])
-     :pattern-path (:pattern-path result)
+     :turn (:turn body)
+     :query (:query body)
+     :pattern-path (or (:pattern-path result)
+                       (candidate-pattern-path (:id result)))
      :retrieval-rationale (:retrieval-rationale result)
      :hotwords (:hotwords result)
      :sigil (:sigil result)
@@ -166,7 +190,8 @@
   (let [observations
         (for [entry entries
               :when (context-retrieval-entry? entry)
-              [idx result] (map-indexed vector (or (get-in entry [:evidence/body :results]) []))
+              [idx result] (map-indexed vector
+                                        (or (:results (evidence-body entry)) []))
               :when (string? (:id result))]
           (candidate-observation entry result (inc idx)))
         grouped (vals (group-by :id observations))
