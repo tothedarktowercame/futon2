@@ -1,0 +1,189 @@
+;; Anchor data for the Copycat domain probe.
+;;
+;; SOURCE: Melanie Mitchell, "Analogy-Making as Perception: A Computer Model"
+;;         (MIT Press, 1993), chapter 4, sections 4.1-4.2.
+;;         Internet Archive scan; PDF pages 94-100 = book pages 76-82.
+;;
+;; TRANSCRIBED 2026-07-16 by reading the RENDERED PAGE IMAGES, not the OCR text
+;; layer. This matters: the OCR mangles letter-strings (it produced "mirkkk" for
+;; mrrkkk, "murjjjj" for mrrjjjj) and SILENTLY DROPPED entire rows (it lost
+;; "lji (8)" from the kji survey, the third-most-common human answer). Any future
+;; extraction from this PDF must go through page images. Do not trust pdftotext here.
+;;
+;; Two DIFFERENT things live in this file. Do not conflate them:
+;;   :copycat-1000  - Copycat's own answer frequencies over 1000 runs (the bar graphs).
+;;                    This is the PORT-VALIDATION target.
+;;   :human         - Mitchell's survey of undergrad/grad students at Indiana and
+;;                    Michigan. This is NOT a distribution-matching target. See
+;;                    :methodological-warning below.
+
+{:provenance
+ {:source     "Mitchell 1993, Analogy-Making as Perception, ch.4"
+  :pdf        "~/Downloads/analogy.pdf (Internet Archive scan, 304pp)"
+  :pdf-pages  {:ijk 94, :iijjkk 97, :kji 98, :mrrjjj 99, :xyz 100}
+  :method     "read from rendered page images at 150dpi; OCR text layer is unreliable"
+  :transcribed "2026-07-16"}
+
+ ;; ---------------------------------------------------------------------------
+ ;; THE METHODOLOGICAL WARNING — read before using :human as an objective.
+ ;; ---------------------------------------------------------------------------
+ :methodological-warning
+ {:mitchell-p76
+  "The frequencies and temperatures given here are not meant to be compared
+   precisely with frequencies and preferences of answers given by people, since
+   the program is not meant to model people at such a fine grain."
+
+  :mitchell-p78
+  "The purpose of this survey was to collect all the different answers people
+   give, not just their preferred answers. ... the purpose of the survey was to
+   compare Copycat's and people's ranges of answers rather than the frequencies
+   of different answers."
+
+  :what-the-data-supports
+  "A RANGE / SET-MEMBERSHIP criterion, per Mitchell p.76: 'ideally Copycat should
+   be able to get all the answers that people get to a given problem -- as long as
+   those answers do not use knowledge that is not in the microworld -- and it
+   should never get answers that people find completely unjustified.'"
+
+  :why-frequencies-are-not-a-target
+  ["Subjects could give MULTIPLE answers each, so counts are not a distribution
+    over subjects (ijk: 38 subjects, 41 answers)."
+   "Not all subjects answered every problem."
+   "Many counts are 2nd/3rd/4th choices, deliberately elicited."
+   "For xyz the elicitation actively SHAPED the responses: subjects almost all
+    answered xya first, were then TOLD Copycat lacks circularity, and were asked
+    for alternatives. The resulting frequencies are an artifact of that procedure."
+   "Copycat itself does not match humans on kji: Copycat's mode is kjh (56.1%)
+    while the human mode is kjj (~49%) -- nearly inverted -- and Mitchell does not
+    treat this as a failure."]
+
+  :starred-answers
+  "In :human, entries marked :starred? true are Mitchell's asterisks, meaning
+   'answers Copycat cannot currently get, OR that Copycat gets for a different
+   reason than human subjects'. Note the disjunction: a star is NOT simply
+   'Copycat cannot get this'."}
+
+ ;; ---------------------------------------------------------------------------
+ ;; Copycat's own frequencies over 1000 runs. T = average final temperature.
+ ;; PORT-VALIDATION TARGET.
+ ;; ---------------------------------------------------------------------------
+ :copycat-1000
+ {"abc:abd::ijk"
+  {:total-runs 1000 :codelet-average [293 3.0]
+   :answers [{:answer "ijl" :count 969 :temp 17}
+             {:answer "ijd" :count 27  :temp 23}
+             {:answer "ijk" :count 2   :temp 72}
+             {:answer "hjk" :count 1   :temp 16}
+             {:answer "ijj" :count 1   :temp 32}]}
+
+  "abc:abd::iijjkk"
+  {:total-runs 1000 :codelet-average [585 7.5]
+   :answers [{:answer "iijjll" :count 810 :temp 27}
+             {:answer "iijjkl" :count 165 :temp 47}
+             {:answer "iijjdd" :count 9   :temp 32}
+             {:answer "iikkll" :count 9   :temp 46}
+             {:answer "iijkll" :count 3   :temp 43}
+             {:answer "iijjkd" :count 3   :temp 65}
+             {:answer "ijkkll" :count 1   :temp 43}]}
+
+  "abc:abd::kji"
+  {:total-runs 1000 :codelet-average [395 5.0]
+   :answers [{:answer "kjh" :count 561 :temp 14}
+             {:answer "kjj" :count 238 :temp 44}
+             {:answer "lji" :count 186 :temp 18}
+             {:answer "kjd" :count 11  :temp 37}
+             {:answer "kkj" :count 3   :temp 50}
+             {:answer "kji" :count 1   :temp 73}]}
+
+  "abc:abd::mrrjjj"
+  {:total-runs 1000 :codelet-average [829 15.7]
+   :answers [{:answer "mrrkkk"  :count 705 :temp 43}
+             {:answer "mrrjjk"  :count 197 :temp 49}
+             {:answer "mrrjkk"  :count 48  :temp 46}
+             {:answer "mrrjjjj" :count 42  :temp 21}
+             {:answer "mrrjjd"  :count 6   :temp 62}
+             {:answer "mrrjjj"  :count 2   :temp 82}]}
+
+  "abc:abd::xyz"
+  {:total-runs 1000 :codelet-average [3208 88.3]
+   :notes ["On 97% of runs the program tries to take the successor of Z and fails,
+            forcing restructuring. It hits the same snag ~9 times per run on average."
+           "wyz is 'a distant second in frequency, but the answer with the lowest
+            average temperature ... which many people (including myself) consider to
+            be the most elegant solution' (Mitchell p.82)."
+           "wyz REQUIRES restructuring: A and Z at opposite ends of the alphabet,
+            so spatial and alphabetic directions must both slip to opposite."]
+   :answers [{:answer "xyd"  :count 811 :temp 22}
+             {:answer "wyz"  :count 114 :temp 14}
+             {:answer "yyz"  :count 60  :temp 44}
+             {:answer "dyz"  :count 7   :temp 33}
+             {:answer "xyz"  :count 4   :temp 64}
+             {:answer "xyy"  :count 3   :temp 36}
+             {:answer "xxyz" :count 1   :temp 25}]}}
+
+ ;; ---------------------------------------------------------------------------
+ ;; Human survey. RANGE data, not a distribution. See :methodological-warning.
+ ;; ---------------------------------------------------------------------------
+ :human
+ {"abc:abd::ijk"
+  {:n-subjects 38
+   :answers [{:answer "ijl" :count 37}
+             {:answer "ijd" :count 2}
+             {:answer "ijk" :count 2}]}
+
+  "abc:abd::iijjkk"
+  {:n-subjects nil
+   :answers [{:answer "iijjll" :count 26}
+             {:answer "iijjkl" :count 12}
+             {:answer "iikjkl" :count 5 :starred? true :gloss "Replace the rightmost letter of each group of three by its successor."}
+             {:answer "iikjkk" :count 3 :starred? true :gloss "Replace the third letter by its successor."}
+             {:answer "iikkll" :count 3 :starred? true :gloss "Replace the third and following letters by their successors. Copycat gets this same answer, but for a different reason."}
+             {:answer "iijjkd" :count 3}
+             {:answer "iijjdd" :count 1}
+             {:answer "iijjkk" :count 1}
+             {:answer "ijjkkl" :count 1 :starred? true :gloss "Replace the rightmost letter of each group of two by its successor."}
+             {:answer "iijjkh" :count 1 :starred? true :gloss "justification uncertain"}]}
+
+  "abc:abd::kji"
+  {:n-subjects 26
+   :note "Copycat's mode (kjh) is NOT the human mode (kjj). Nearly inverted."
+   :answers [{:answer "kjj" :count 17}
+             {:answer "lji" :count 8}
+             {:answer "kjh" :count 6}
+             {:answer "kjd" :count 2}
+             {:answer "kji" :count 1}
+             {:answer "kjl" :count 1 :starred? true :gloss "confusion of lji and kjh, or insistence on changing the rightmost letter."}]}
+
+  "abc:abd::mrrjjj"
+  {:n-subjects 50
+   :answers [{:answer "mrrkkk"  :count 28}
+             {:answer "mrrjjk"  :count 19}
+             {:answer "mrsjjj"  :count 5 :starred? true :gloss "Replace the third letter by its successor."}
+             {:answer "mrsjjk"  :count 4 :starred? true :gloss "Parse as mrr-jjj, replace the third letter of each group by its successor."}
+             {:answer "mrrjkk"  :count 4 :starred? true :gloss "Parse as mr-rj-jj to correspond to a-b-c, replace the rightmost group by its successor."}
+             {:answer "mrrjjjj" :count 2}
+             {:answer "mrskkk"  :count 2 :starred? true :gloss "Replace each letter following the leftmost two by its successor."}
+             {:answer "mrrjjj"  :count 2}
+             {:answer "mrrjjd"  :count 1}
+             {:answer "mssjjj"  :count 1 :starred? true :gloss "Replace each instance of the third letter by its successor."}]}
+
+  "abc:abd::xyz"
+  {:n-subjects nil
+   :elicitation-warning
+   "Subjects almost all answered xya first. They were then TOLD that Copycat has no
+    concept of circularity and cannot produce it, and were asked for one or more
+    DIFFERENT answers. These frequencies are therefore an artifact of the procedure
+    and must not be used as a target distribution."
+   :answers [{:answer "xyz"  :count 14 :starred? true :gloss "If z can't be changed, leave it alone. Copycat can get this, but for a different reason."}
+             {:answer "xyy"  :count 13 :starred? true :gloss "If z can't move forward, move it backward. Copycat can get this, but for a different reason."}
+             {:answer "xy"   :count 9  :starred? true :gloss "If z has no successor, it falls off the end."}
+             {:answer "xyd"  :count 9}
+             {:answer "wxz"  :count 4  :starred? true :gloss "Imitate the alphabetic space between the two rightmost letters of abd."}
+             {:answer "wyz"  :count 2}
+             {:answer "xyzz" :count 1  :starred? true :gloss "Doubling the z as a tricky 'successor'."}
+             {:answer "xzz"  :count 1  :starred? true :gloss "Take the successor of z's neighbour y instead."}
+             {:answer "xyw"  :count 1  :starred? true :gloss "Like wyz, but insisting the rightmost letter be replaced."}
+             {:answer "zxw"  :count 1  :starred? true :gloss "Reverse the string, then replace the rightmost letter by its predecessor."}
+             {:answer "xyx"  :count 1  :starred? true :gloss "Wanted xyy but disliked the double y."}
+             {:answer "abd"  :count 1  :starred? true :gloss "Replace the whole string by abd."}
+             {:answer "wxx"  :count 1  :starred? true :gloss "justification uncertain"}]}}}
