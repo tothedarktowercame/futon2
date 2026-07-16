@@ -1,5 +1,6 @@
 (ns futon2.aif.full-loop-cohort-test
   (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.full-loop-cohort :as cohort])
   (:import [java.nio.file Files]
@@ -135,3 +136,30 @@
     (is (= 40 (:remaining value)))
     (is (.contains html "No attempts recorded"))
     (is (.contains html "Historical artifact-only ticks are excluded"))))
+
+(deftest attempt-summary-carries-fresh-repo-observation
+  (let [attempt-dir (.toFile (Files/createTempDirectory
+                              "cohort-attempt-summary"
+                              (make-array FileAttribute 0)))
+        event (fn [sequence checkpoint payload]
+                {:attempt/id "attempt-016" :attempt/ordinal 16
+                 :event/sequence sequence :checkpoint/type checkpoint
+                 :payload payload})]
+    (spit (io/file attempt-dir "001-time-step.edn")
+          (pr-str (event 1 :time-step
+                         {:judgment {:opportunity-id "clock/16"}})))
+    (spit (io/file attempt-dir "002-selection.edn")
+          (pr-str (event 2 :selection
+                         {:judgment {:selected-mission "repair-attempt-010"}})))
+    (spit (io/file attempt-dir "003-build.edn")
+          (pr-str (event 3 :build
+                         {:judgment
+                          {:validation
+                           {:artifact-binding
+                            {:fresh-author? true
+                             :pre-dispatch-head "2b912f0"
+                             :commit "bf14dca"}}}})))
+    (let [summary (cohort/attempt-summary attempt-dir)]
+      (is (= "bf14dca" (:fresh-commit summary)))
+      (is (= "2b912f0"
+             (get-in summary [:artifact-binding :pre-dispatch-head]))))))

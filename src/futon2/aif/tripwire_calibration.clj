@@ -54,9 +54,12 @@
         (alter-var-root #'repair/open-obligations (constantly original))))))
 
 (defn calibration-incidents []
-  (let [c1-history [{:attempt-id "c1-1" :selected-stop-line "repair-terminal"}
-                    {:attempt-id "c1-2" :selected-stop-line "repair-terminal"}
-                    {:attempt-id "c1-3" :selected-stop-line "repair-terminal"}]
+  (let [c1-history [{:attempt-id "c1-1" :selected-stop-line "repair-terminal"
+                     :fresh-commit nil :failure-kind :recovery-job-terminal}
+                    {:attempt-id "c1-2" :selected-stop-line "repair-terminal"
+                     :fresh-commit nil :failure-kind :recovery-job-terminal}
+                    {:attempt-id "c1-3" :selected-stop-line "repair-terminal"
+                     :fresh-commit nil :failure-kind :recovery-job-terminal}]
         duplicate (fn [id]
                     {:repair/id id :failure-kind :independent-review-rejected
                      :target "M-rejected" :failed-commit "deadbeef"})]

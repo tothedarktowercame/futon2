@@ -60,8 +60,9 @@ Immutability / lattice:
 
 Progress / liveness (cross-run, read from ledgers):
 - T7. Wedge detector: the same stop-line selected on N=3 consecutive
-  opportunities without a supersession or resolution trips (would have
-  caught C1 live).
+  opportunities without a supersession, resolution, or fresh repo-bound
+  artifact trips (would have caught C1 live). A lineage of distinct fresh
+  commits is convergent refinement, not a wedge.
 - T8. Livelock detector: >K=2 findings minted with the same
   (failure-kind, target, failed-commit) trips (would have caught C2 live).
 - T9. Wall-clock: any single phase exceeding its budget by 2x trips even if
@@ -187,3 +188,20 @@ repaired. Any breach trips. Fix direction (paired, runner-side): derive the
 authored commit from repo observation (HEAD delta across the author window),
 demote the text-extracted ref to corroboration, and mint a typed
 :artifact-binding-mismatch stop-line when they disagree.
+
+## Incident 2026-07-16: first armed T7 trip (run 8) → precision revision
+
+T7 tripped on the third consecutive selection of `repair-attempt-010`, but
+the lineage was convergent refinement: runs 7 and 8 deposited distinct fresh
+commits (`2b912f0`, then `bf14dca`), and the latter grounded. The old predicate
+observed repeated selection but not artifact progress. T7 now requires the
+three-opportunity window to contain no fresh repo-bound commit; the synthetic
+C1 terminal wedge remains identifiable because it has no artifact delta.
+
+The same trip exercised the fail-safe ladder for the first time: summon roster
+validation incorrectly treated the keywordized agent-map keys as strings, so
+`:park-and-summon` safely degraded to `:stop-line`. Roster ids are now
+normalized at that boundary. This trip is resolved by revising the invariant,
+not repairing machine behavior. A first-class model-revision discharge shape
+remains needed; the owner will discharge the live finding with implementation
+and independent-review evidence rather than rewriting its append-only record.

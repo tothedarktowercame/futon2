@@ -286,7 +286,10 @@
 (defn attempt-summary [attempt-dir]
   (let [events (attempt-events attempt-dir)
         close (last (filter #(= :closed (:checkpoint/type %)) events))
-        selection (last (filter #(= :selection (:checkpoint/type %)) events))]
+        selection (last (filter #(= :selection (:checkpoint/type %)) events))
+        build (last (filter #(= :build (:checkpoint/type %)) events))
+        artifact-binding
+        (get-in build [:payload :judgment :validation :artifact-binding])]
     {:attempt/id (:attempt/id (first events))
      :attempt/ordinal (:attempt/ordinal (first events))
      :opportunity-id (get-in (first events) [:payload :judgment :opportunity-id])
@@ -295,6 +298,12 @@
      :outcome (get-in close [:payload :judgment :outcome])
      :grounded? (true? (get-in close [:payload :judgment :grounded?]))
      :artifact-only? (true? (get-in close [:payload :judgment :artifact-only?]))
+     :artifact-binding artifact-binding
+     :fresh-commit (when (and (:fresh-author? artifact-binding)
+                              (:commit artifact-binding)
+                              (not= (:pre-dispatch-head artifact-binding)
+                                    (:commit artifact-binding)))
+                     (:commit artifact-binding))
      :typed-sorries (count (filter #(typed-sorry? (:payload %)) events))
      :checkpoints (mapv :checkpoint/type events)}))
 

@@ -1,5 +1,7 @@
 (ns futon2.aif.tripwire-test
-  (:require [clojure.edn :as edn]
+  (:require [babashka.http-client :as http]
+            [cheshire.core :as json]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
@@ -110,18 +112,42 @@
          (tripwire/evaluate-wire :T9 {:phase :author-wait :transition :end
                                      :duration-ms 2001 :phase-budget-ms 1000}))))
 
-(deftest t7-wedge-trips-on-third-unresolved-selection
-  (let [history [{:attempt-id "a1" :selected-stop-line "repair-x"}
-                 {:attempt-id "a2" :selected-stop-line "repair-x"}
-                 {:attempt-id "a3" :selected-stop-line "repair-x"}]]
+(deftest t7-no-new-work-triple-still-trips
+  (let [history [{:attempt-id "a1" :selected-stop-line "repair-x"
+                  :failure-kind :construction-failed}
+                 {:attempt-id "a2" :selected-stop-line "repair-x"
+                  :failure-kind :construction-failed}
+                 {:attempt-id "a3" :selected-stop-line "repair-x"
+                  :failure-kind :construction-failed}]]
     (is (= :consecutive-stop-line-wedge
            (:kind (first (tripwire/evaluate-wire
                           :T7 {:cohort-history history
                                :closed-repair-ids #{}
                                :tripwire/force? true})))))
+    (is (= :construction-failed
+           (:repeated-failure-kind
+            (first (tripwire/evaluate-wire
+                    :T7 {:cohort-history history
+                         :closed-repair-ids #{}
+                         :tripwire/force? true})))))
     (is (empty? (tripwire/evaluate-wire
                  :T7 {:cohort-history history
                       :closed-repair-ids #{"repair-x"}
+                      :tripwire/force? true})))))
+
+(deftest t7-run-6-7-8-convergent-lineage-does-not-trip
+  (let [history [{:attempt-id "attempt-014"
+                  :selected-stop-line "repair-attempt-010"
+                  :fresh-commit nil}
+                 {:attempt-id "attempt-015"
+                  :selected-stop-line "repair-attempt-010"
+                  :fresh-commit "2b912f04fa16c"}
+                 {:attempt-id "attempt-016"
+                  :selected-stop-line "repair-attempt-010"
+                  :fresh-commit "bf14dcafc585"}]]
+    (is (empty? (tripwire/evaluate-wire
+                 :T7 {:cohort-history history
+                      :closed-repair-ids #{}
                       :tripwire/force? true})))))
 
 (deftest t8-livelock-trips-on-third-duplicate-finding
@@ -218,6 +244,22 @@
     (is (= "claude-6" (:agent-id @bell)))
     (is (re-find #"investigate then discharge or revise the wire"
                  (:prompt @bell)))))
+
+(deftest summon-roster-accepts-real-agents-map-shape
+  (let [effects (atom [])
+        opts {:tripwire/action :park-and-summon
+              :tripwire/report-writer (fn [_] "/tmp/trip-real-roster.edn")
+              :tripwire/repair-record-fn (fn [_] (swap! effects conj :repair))
+              :tripwire/park-fn (fn [& _] (swap! effects conj :park))
+              :tripwire/bell-fn (fn [& _] (swap! effects conj :bell))}]
+    (with-redefs [http/get
+                  (fn [& _]
+                    {:status 200
+                     :body (json/generate-string
+                            {:ok true
+                             :agents {"claude-6" {:status "connected"}}})})]
+      (tripwire/observe! opts (synthetic-trip-record)))
+    (is (= [:repair :park :bell] @effects))))
 
 (deftest stop-line-failure-degrades-to-record-without-escalating
   (let [record (synthetic-trip-record)

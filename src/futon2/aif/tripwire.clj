@@ -282,18 +282,26 @@
 
 (defn wedge-violations
   "Return a T7 witness when the same unresolved stop-line occupies the last
-  three opportunities. History entries carry `:selected-stop-line`."
+  three opportunities without any fresh repository artifact. Distinct commits
+  are convergent refinement, not a wedge."
   [cohort-history closed-repair-ids]
   (let [recent (vec (take-last 3 cohort-history))
         selected (mapv :selected-stop-line recent)
-        repair-id (first selected)]
+        repair-id (first selected)
+        fresh-commits (vec (keep :fresh-commit recent))
+        failure-kinds (vec (keep :failure-kind recent))]
     (when (and (= 3 (count recent)) repair-id
                (apply = selected)
-               (not (contains? (set closed-repair-ids) repair-id)))
+               (not (contains? (set closed-repair-ids) repair-id))
+               (empty? fresh-commits))
       [{:kind :consecutive-stop-line-wedge
         :repair/id repair-id
         :attempt-ids (mapv #(or (:attempt-id %) (:attempt/id %)) recent)
-        :consecutive-count 3}])))
+        :consecutive-count 3
+        :fresh-commits fresh-commits
+        :repeated-failure-kind
+        (when (and (= 3 (count failure-kinds)) (apply = failure-kinds))
+          (first failure-kinds))}])))
 
 (defn- t7 [{:keys [phase transition cohort-history closed-repair-ids]
             :as observation}]
@@ -491,11 +499,12 @@
 
 (defn- registered-agents [opts]
   (if-let [roster-fn (:tripwire/roster-fn opts)]
-    (set (roster-fn opts))
+    (set (map #(if (keyword? %) (name %) (str %)) (roster-fn opts)))
     (let [response (http/get (str (agency-base opts) "/api/alpha/agents")
                              {:timeout 10000 :throw false})
           body (successful-response! :tripwire-roster response)]
-      (set (keys (:agents body))))))
+      (set (map #(if (keyword? %) (name %) (str %))
+                (keys (:agents body)))))))
 
 (defn- post-park! [opts payload]
   (if-let [park-fn (:tripwire/park-fn opts)]
@@ -677,11 +686,17 @@
                    (catch Throwable _ []))))
           history (mapv (fn [attempt]
                           (let [selected (or (:selected-stop-line attempt)
-                                             (:selected-mission attempt))]
+                                             (:selected-mission attempt))
+                                finding (some #(when (= selected (:repair/id %))
+                                                 %)
+                                              findings)]
                             {:attempt-id (or (:attempt-id attempt)
                                              (:attempt/id attempt))
                              :selected-stop-line
-                             (when (contains? finding-ids selected) selected)}))
+                             (when (contains? finding-ids selected) selected)
+                             :fresh-commit (:fresh-commit attempt)
+                             :artifact-binding (:artifact-binding attempt)
+                             :failure-kind (:failure-kind finding)}))
                         attempts)]
       (merge observation
              {:cohort-history history
