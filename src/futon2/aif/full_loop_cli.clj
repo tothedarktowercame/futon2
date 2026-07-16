@@ -51,11 +51,38 @@
   (pp/pprint x)
   x)
 
+(declare attempt-brief render-attempt-brief)
+
 (defn- run-once! [trigger flags]
-  (print-value (runner/run-opportunity! (runner-opts trigger flags))))
+  (let [result (runner/run-opportunity! (runner-opts trigger flags))]
+    (print-value result)
+    (when (:morning-brief-ref result)
+      (println)
+      (println (render-attempt-brief (attempt-brief (:attempt-id result)))))
+    result))
 
 (defn- selected-target [result]
   (get-in result [:checkpoints :selection :judgment :selected-mission]))
+
+(defn- normalize-brief-item [item]
+  (assoc item
+         :achievement
+         (or (:achievement item)
+             {:tier :legacy-unverified
+              :summary
+              "Legacy item: no structured achievement summary was recorded"})
+         :repair-history
+         (repair/obligation-history (:attempt-id item))))
+
+(defn- brief-item-view [item]
+  (-> (select-keys item [:attempt-id :selected-target :outcome
+                         :author :reviewer :commit :queued-at
+                         :selection-review :achievement :failure
+                         :repair-history :qa-targets :pending-objectives])
+      (assoc :witness
+             (select-keys (:witness item)
+                          [:resolved? :dial-moved?
+                           :implementation-id :discharge-id]))))
 
 (defn- continuous! [flags]
   (let [interval-seconds (parse-long! :interval-seconds
@@ -85,37 +112,18 @@
 
 (defn- batch-brief [batch-id]
   (let [all-reviews (brief/reviews)
-        normalize-item
-        (fn [item]
-          (assoc item
-                 :achievement
-                 (or (:achievement item)
-                     {:tier :legacy-unverified
-                      :summary
-                      "Legacy item: no structured achievement summary was recorded"})
-                 :repair-history
-                 (repair/obligation-history (:attempt-id item))))
         items (->> (brief/items)
                    (filter #(= batch-id (:batch-id %)))
                    (sort-by :queued-at)
                    (mapv #(brief/with-pending-objectives % all-reviews))
-                   (mapv normalize-item)
+                   (mapv normalize-brief-item)
                    vec)
         attempt-ids (set (map :attempt-id items))
         reviews (->> all-reviews
                      (filter #(contains? attempt-ids (:attempt-id %)))
                      (sort-by :reviewed-at)
                      vec)
-        item-view (fn [item]
-                    (-> (select-keys item [:attempt-id :selected-target :outcome
-                                           :author :reviewer :commit :queued-at
-                                           :selection-review :achievement :failure
-                                           :repair-history
-                                           :qa-targets :pending-objectives])
-                        (assoc :witness
-                               (select-keys (:witness item)
-                                            [:resolved? :dial-moved?
-                                             :implementation-id :discharge-id]))))]
+        item-view brief-item-view]
     {:morning-brief/schema-version 3
      :batch-id batch-id
      :judgment-order (mapv :attempt-id items)
@@ -133,8 +141,180 @@
      :items (mapv item-view items)
      :reviews reviews}))
 
+(defn attempt-brief
+  "Build the operator QA view for one attempt. The raw queue item remains the
+  append-only source of truth; this view deliberately contains only evidence
+  needed to make the pending judgments."
+  [attempt-id]
+  (let [all-reviews (brief/reviews)
+        item (some #(when (= attempt-id (:attempt-id %)) %)
+                   (brief/items))]
+    (when-not item
+      (throw (ex-info "Unknown Morning Brief attempt"
+                      {:attempt-id attempt-id})))
+    {:morning-brief/schema-version 4
+     :attempt (-> item
+                  (brief/with-pending-objectives all-reviews)
+                  normalize-brief-item
+                  brief-item-view)
+     :reviews (->> all-reviews
+                   (filter #(= attempt-id (:attempt-id %)))
+                   (sort-by :reviewed-at)
+                   vec)}))
+
 (defn- fmt [x]
   (if (nil? x) "—" (str x)))
+
+(defn- selected-rank [selection]
+  (let [selected (:selected-action selection)]
+    (or (some (fn [{:keys [rank action]}]
+                (when (= selected action) rank))
+              (:ranked-candidates selection))
+        (get-in selection [:selection-reasons :rank]))))
+
+(defn- candidate-label [{:keys [rank action G-efe]}]
+  (str "#" rank " " (or (:target action) (:type action))
+       " (G=" (fmt G-efe) ")"))
+
+(defn- artifact-repository [item]
+  (or (get-in item [:achievement :adjudication :after
+                    :implementation-entity :props
+                    :implementation/repository])
+      (get-in item [:achievement :adjudication :after
+                    :implementation-entity :props :repository])))
+
+(defn- inspection-lines [item objective]
+  (let [selection (:selection-review item)
+        candidates (:ranked-candidates selection)
+        rank (selected-rank selection)
+        repo (artifact-repository item)
+        commit (:commit item)
+        artifacts (get-in item [:achievement :build :artifacts])
+        validation (get-in item [:achievement :build :validation])
+        witness (:witness item)]
+    (case objective
+      :selection-quality
+      [(str "Evidence: selected rank " (fmt rank) " of " (count candidates)
+            "; selected " (fmt (:selected-target item)) ".")
+       (str "Compare: "
+            (if (seq candidates)
+              (str/join "; " (map candidate-label (take 3 candidates)))
+              "no ranked alternatives were recorded"))
+       "Look for: whether the chosen mission was a defensible use of this click, especially if a lower-G alternative ranked above it; distinguish justified exploration from accidental or stale preference."
+       (str "Mission record: "
+            (fmt (get-in selection [:selected-action :mission-path])))]
+
+      :substantive-achievement
+      [(str "Inspect: git -C " (fmt repo) " show --stat --oneline " (fmt commit))
+       (str "Inspect the patch: git -C " (fmt repo) " show --format=fuller "
+            (fmt commit) " -- " (str/join " " artifacts))
+       (str "Changed artifacts: " (if (seq artifacts)
+                                     (str/join ", " artifacts)
+                                     "none recorded"))
+       "Look for: an observable behavior or capability change in the selected mission, not merely prose, generated cargo, or a claim that work could be done. Check that the mission record describes the same boundary as the code."
+       (str "Recorded result: " (fmt (get-in item [:achievement :summary])))]
+
+      :evidence-sufficiency
+      [(str "Review evidence: job " (fmt (:review-job validation))
+            ", approved=" (fmt (:approved? validation))
+            ", author/reviewer=" (fmt (:author item)) "/" (fmt (:reviewer item)) ".")
+       (str "Artifact binding: repository=" (fmt repo)
+            ", commit=" (fmt commit)
+            ", fresh=" (fmt (get-in validation [:artifact-binding :fresh-author?]))
+            ", descendant=" (fmt (get-in validation [:artifact-binding :descendant?]))
+            ".")
+       (str "Grounding: resolved=" (fmt (:resolved? witness))
+            ", dial-moved=" (fmt (:dial-moved? witness))
+            ", implementation=" (fmt (:implementation-id witness)) ".")
+       "Look for: meaningful tests of the changed behavior, independent review by someone other than the author, the observed commit in the intended repository, and a grounding witness that names the same implementation. Do not accept a green label without those links."
+       "If validation claims cannot be reproduced from the commit or review job, answer insufficient even though the loop completed." ]
+
+      :machine-response
+      [(str "Failure: " (fmt (get-in item [:failure :kind]))
+            " at " (fmt (get-in item [:failure :stage])) ".")
+       (str "Repair obligation: " (fmt (get-in item [:failure :repair-id]))
+            "; requires "
+            (fmt (get-in item [:failure :discharge-contract :requires])) ".")
+       "Look for: fail-closed behavior, an append-only remembered obligation, a causal backtrace, and a discharge contract that would prove the fault repaired."
+       "Answer incorrect if ordinary mission work could proceed ahead of an unresolved blocking repair."]
+      [])))
+
+(defn render-attempt-brief
+  "Render one attempt as a readable operator QA document."
+  [{:keys [attempt reviews]}]
+  (let [lines (atom [(str "MORNING BRIEF QA — " (:attempt-id attempt))
+                     (str "Target: " (fmt (:selected-target attempt)))
+                     (str "Outcome: " (fmt (:outcome attempt))
+                          " | achievement: "
+                          (fmt (get-in attempt [:achievement :tier])))
+                     (str "Author/reviewer: " (fmt (:author attempt))
+                          " / " (fmt (:reviewer attempt)))
+                     (str "Commit: " (fmt (:commit attempt)))
+                     (str "Queued: " (fmt (:queued-at attempt)))
+                     ""])
+        add! #(swap! lines conj %)
+        reviewed-by-objective (into {} (map (juxt :objective identity) reviews))]
+    (add! "WHAT HAPPENED")
+    (add! (str "  Expected: "
+               (fmt (get-in attempt [:selection-review :selected-action
+                                     :rationale]))))
+    (add! (str "  Actual: " (fmt (get-in attempt [:achievement :summary]))))
+    (add! "")
+    (add! "OPERATOR QA")
+    (doseq [objective (brief/item-objectives attempt)
+            :let [spec (get brief/objective-specs objective)
+                  prior (get reviewed-by-objective objective)]]
+      (add! (str "  " (name objective)))
+      (add! (str "    Question: " (:question spec)))
+      (doseq [line (inspection-lines attempt objective)]
+        (add! (str "    " line)))
+      (if prior
+        (do
+          (add! (str "    ANSWERED " (:answer prior) " by " (:reviewer prior)))
+          (add! (str "    Note: " (:note prior))))
+        (do
+          (add! (str "    Answers: " (vec (sort (:answers spec)))))
+          (add! (str "    Submit here: clojure -M:wm-full-loop review "
+                     (:attempt-id attempt) " joe"))))
+      (add! ""))
+    (add! "SUBMISSION")
+    (if (seq (:pending-objectives attempt))
+      (add! (str "  Run `clojure -M:wm-full-loop review "
+                 (:attempt-id attempt)
+                 " joe` for a guided questionnaire. Answers are appended "
+                 "to the immutable Morning Brief review store."))
+      (add! "  All applicable objectives have been answered."))
+    (str/join "\n" @lines)))
+
+(defn review-interactively!
+  "Prompt for every still-pending objective and append validated answers."
+  [attempt-id reviewer]
+  (let [{:keys [attempt]} (attempt-brief attempt-id)
+        objectives (:pending-objectives attempt)]
+    (if (empty? objectives)
+      (println "All applicable QA objectives have already been answered.")
+      (doseq [objective objectives
+              :let [spec (get brief/objective-specs objective)]]
+        (println)
+        (println (str (name objective) " — " (:question spec)))
+        (doseq [line (inspection-lines attempt objective)]
+          (println (str "  " line)))
+        (println (str "Allowed answers: " (vec (sort (:answers spec)))))
+        (print "Answer: ")
+        (flush)
+        (let [answer (some-> (read-line) str/trim keyword)]
+          (when-not (contains? (:answers spec) answer)
+            (throw (ex-info "Unknown Morning Brief answer"
+                            {:objective objective :answer answer
+                             :allowed (:answers spec)})))
+          (print "Evidence note: ")
+          (flush)
+          (let [note (some-> (read-line) str/trim)]
+            (when (str/blank? note)
+              (throw (ex-info "Morning Brief evidence note must not be blank"
+                              {:objective objective})))
+            (brief/review! attempt-id objective answer note reviewer)
+            (println "Recorded.")))))))
 
 (defn render-batch-brief [report]
   (let [lines
@@ -204,7 +384,8 @@
        "  once [--author zai-5 --reviewer codex-7 --repair-reviewer codex-1]\n"
        "  tick [--author zai-5 --reviewer codex-7 --repair-reviewer codex-1]\n"
        "  continuous [--count N] [--interval-seconds N] [agent options]\n"
-       "  brief [--batch-id ID] [--format text|edn]\n"
+       "  brief [--attempt-id ID | --batch-id ID] [--format text|edn]\n"
+       "  review ATTEMPT-ID [REVIEWER]\n"
        "  qa ATTEMPT-ID OBJECTIVE ANSWER NOTE [REVIEWER]\n\n"
        "once is an on-demand durée click; continuous emits sequential durée "
        "clicks; tick is one wall-clock opportunity. Agent options also include "
@@ -212,7 +393,8 @@
        "--repair-reviewer role (default codex-1 Ground Control), while ordinary "
        "work uses --reviewer. Trip escalation is an explicit operator choice: "
        "--tripwire-action record|stop-line|park-and-summon (default: record). "
-       "The brief lists each objective's allowed answers."))
+       "An attempt brief explains what to inspect and `review` provides the "
+       "guided answer-entry surface. `qa` is the non-interactive primitive."))
 
 (defn- run-command! [args]
   (let [[command & rest] args]
@@ -230,16 +412,33 @@
       "tick" (run-once! :wallclock-cron (option-map rest))
       "continuous" (continuous! (option-map rest))
       "brief" (let [flags (option-map rest)]
-                (if-let [batch-id (:batch-id flags)]
-                  (let [report (batch-brief batch-id)]
+                (when (and (:attempt-id flags) (:batch-id flags))
+                  (throw (ex-info "brief accepts either --attempt-id or --batch-id"
+                                  {:flags flags})))
+                (cond
+                  (:attempt-id flags)
+                  (let [report (attempt-brief (:attempt-id flags))]
+                    (if (= "edn" (:format flags))
+                      (print-value report)
+                      (println (render-attempt-brief report))))
+
+                  (:batch-id flags)
+                  (let [report (batch-brief (:batch-id flags))]
                     (if (= "edn" (:format flags))
                       (print-value report)
                       (println (render-batch-brief report))))
+
+                  :else
                   (let [record (trace/latest-trace-record)]
                     (print-value {:pending (brief/pending-items)
                                   :reviews (brief/reviews)
                                   :valid-belief-entity-ids
                                   (vec (sort-by str (keys (:mu-post record))))}))))
+      "review" (let [[attempt-id reviewer & extra] rest]
+                 (when (or (seq extra) (nil? attempt-id))
+                   (throw (ex-info "review requires ATTEMPT-ID [REVIEWER]"
+                                   {:args rest})))
+                 (review-interactively! attempt-id (or reviewer "joe")))
       "qa" (let [[attempt-id objective answer note reviewer & extra] rest]
              (when (or (seq extra) (some nil? [attempt-id objective answer note]))
                (throw (ex-info "qa requires ATTEMPT OBJECTIVE ANSWER NOTE [REVIEWER]"

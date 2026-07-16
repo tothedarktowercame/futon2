@@ -238,6 +238,28 @@ they are not observations about the selected mission. Reviews outside the
 current belief domain are held and remain unconsumed rather than being silently
 dropped.
 
+Every completed `once`, `tick`, or `continuous` click prints its operator QA
+document after the machine result. To render one again later without opening
+its EDN queue record:
+
+```sh
+clojure -M:wm-full-loop brief --attempt-id attempt-022 --format text
+```
+
+The attempt document names the selected rank and leading alternatives, the
+mission record, exact repository/commit inspection commands, changed artifacts,
+independent-review job, artifact-binding facts, and grounding witness. Each QA
+objective says what evidence to inspect and what failure modes to look for.
+Submit all still-pending answers through the guided questionnaire:
+
+```sh
+clojure -M:wm-full-loop review attempt-022 joe
+```
+
+The questionnaire validates each answer against the objective's declared answer
+set, requires a non-blank evidence note, and appends through the same immutable
+Morning Brief review API as the non-interactive `qa` primitive.
+
 ## The trace IS the state store
 
 A discipline that emerged from the v0.12 R7 wiring and was reinforced

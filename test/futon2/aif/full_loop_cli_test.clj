@@ -1,5 +1,6 @@
 (ns futon2.aif.full-loop-cli-test
   (:require [clojure.test :refer [deftest is]]
+            [clojure.string :as str]
             [futon2.aif.full-loop-cli :as cli]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.morning-brief :as brief]))
@@ -99,3 +100,82 @@
       (is (= ["attempt-6" "attempt-7"] (:judgment-order report)))
       (is (= 4 (:pending-count report)))
       (is (= "night" (:batch-id report))))))
+
+(def qa-item
+  {:attempt-id "attempt-qa"
+   :selected-target "M-example"
+   :outcome :grounded-change
+   :author "author-1"
+   :reviewer "reviewer-1"
+   :commit "abc123"
+   :queued-at "2026-07-16T12:00:00Z"
+   :selection-review
+   {:selected-action {:type :advance-mission
+                      :target "M-example"
+                      :mission-path "/code/example/mission.md"
+                      :rationale "advance the open behavior"}
+    :ranked-candidates
+    [{:rank 1 :action {:target "M-other"} :G-efe 1.0}
+     {:rank 2
+      :action {:type :advance-mission
+               :target "M-example"
+               :mission-path "/code/example/mission.md"
+               :rationale "advance the open behavior"}
+      :G-efe 2.0}]
+    :selection-reasons {:rank 2}}
+   :achievement
+   {:tier :fully-grounded
+    :summary "Independently reviewed and grounded change"
+    :build {:artifacts ["src/example.clj" "test/example_test.clj"]
+            :validation {:review-job "review-job-1"
+                         :approved? true
+                         :artifact-binding {:fresh-author? true
+                                            :descendant? true}}}
+    :adjudication
+    {:after {:implementation-entity
+             {:props #:implementation{:repository "/code/example"}}}}}
+   :witness {:resolved? true
+             :dial-moved? true
+             :implementation-id "implementation/abc123"}})
+
+(deftest attempt-brief-is-a-readable-inspection-and-submission-surface
+  (with-redefs [brief/items (fn [] [qa-item])
+                brief/reviews (constantly [])]
+    (let [rendered (-> "attempt-qa" cli/attempt-brief
+                       cli/render-attempt-brief)]
+      (is (str/includes? rendered "MORNING BRIEF QA — attempt-qa"))
+      (is (str/includes? rendered "selected rank 2 of 2"))
+      (is (str/includes? rendered
+                         "git -C /code/example show --stat --oneline abc123"))
+      (is (str/includes? rendered "Look for: an observable behavior"))
+      (is (str/includes? rendered
+                         "clojure -M:wm-full-loop review attempt-qa joe")))))
+
+(deftest completed-click-prints-its-operator-qa-document
+  (with-redefs [runner/run-opportunity!
+                (fn [_]
+                  {:attempt-id "attempt-qa"
+                   :outcome :grounded-change
+                   :morning-brief-ref "/brief/attempt-qa.edn"})
+                cli/attempt-brief (fn [attempt-id]
+                                    {:attempt {:attempt-id attempt-id}})
+                cli/render-attempt-brief
+                (fn [_] "MORNING BRIEF QA — attempt-qa")]
+    (let [output (with-out-str (#'cli/run-once! :duree-click-on-demand {}))]
+      (is (str/includes? output "MORNING BRIEF QA — attempt-qa")))))
+
+(deftest interactive-review-validates-and-appends-each-answer
+  (let [recorded (atom [])
+        item (dissoc qa-item :commit :achievement)]
+    (with-redefs [brief/items (fn [] [item])
+                  brief/reviews (constantly [])
+                  brief/review! (fn [& args]
+                                  (swap! recorded conj args))]
+      (with-in-str "yes\nselection evidence\nyes\nachievement evidence\n"
+        (with-out-str
+          (cli/review-interactively! "attempt-qa" "joe"))))
+    (is (= [["attempt-qa" :selection-quality :yes
+             "selection evidence" "joe"]
+            ["attempt-qa" :substantive-achievement :yes
+             "achievement evidence" "joe"]]
+           @recorded))))
