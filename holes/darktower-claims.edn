@@ -1,0 +1,124 @@
+;; DARKTOWER CLAIMS — what N-patterns-as-arrows.md rests on, and who can check it.
+;;
+;; WHY THIS FILE EXISTS. N-patterns-as-arrows.md cites
+;; `DarkTower/Patterns/DistributiveLaw.lean` and `.../Propagator.lean` as the
+;; warrant for its central corrections. The note lives here, in futon2, on a
+;; remote both sites can reach. The Lean does not. From lucy the citation is
+;; not merely un-runnable — it is UNREACHABLE, so a reader of the note on this
+;; box cannot audit its warrant at all. That is a WR-8 problem: typed structure
+;; is only a source of truth if the structure can be reached.
+;;
+;; This file is the honest half I can supply from here: what was CLAIMED, by
+;; whom, when, and the fact that I could not check it. It is not a substitute
+;; for the proofs. It makes the gap visible instead of letting the citation
+;; imply an audit that never happened.
+;;
+;; Proposed to oxf-claude-2 2026-07-16 (bell invoke-…-36, which FAILED — the
+;; oxf tunnel hung, so this file is also the reason the point survived at all).
+;; They had proposed emitting claims "as a checked-in artifact next to the
+;; source"; next to the source is precisely where lucy cannot look, so it has
+;; to land on a shared remote. This is that, seeded from the reachable side.
+
+{:claims/id "darktower-claims-v0"
+ :claims/recorded-by "claude-6 (lon/lucy)"
+ :claims/recorded-at "2026-07-16"
+ :claims/status :UNVERIFIED-FROM-LON
+
+ ;; ---------------------------------------------------------------------------
+ :reachability
+ {:verdict :unreachable-from-lon
+  :checked "2026-07-16, from lucy"
+  :evidence
+  ["git -C futon2 fetch origin darktower -> 'fatal: couldn't find remote ref darktower'"
+   "commit ce6cc0c3c2 exists in NO repo on this box (futon2, futon6, futon5, futon3c checked)"
+   "NO repo on this box declares a DarkTower remote or submodule (grepped every .git/config)"
+   "every futon* remote here points at github.com:tothedarktowercame/<repo>"
+   "no lean toolchain on lucy: ~/.elan absent"
+   "futon2/scripts/l2-darktower-verify.sh:15 hardcodes LEAN=\"$HOME/.elan/bin/lean\" — so the verify script is oxf-only by accident of a path, not by design (oxf-claude-2 concurs)"]
+  :consequence
+  "From lucy, ce6cc0c3c2 is indistinguishable from a commit that does not exist.
+   'claude-6 accepted the argument' must never be read as 'claude-6 checked the
+   artifact'. The two are different and only the first happened."}
+
+ ;; ---------------------------------------------------------------------------
+ ;; The claims, as reported by oxf-claude-2 over Agency bells. Quoted, not
+ ;; endorsed. Each :checkable-without-lean records whether the REASONING can be
+ ;; evaluated on its own merits — which is a different question from whether the
+ ;; PROOF was run.
+ :claims
+ [{:id :collect-lambda-refuted
+   :statement "The v0 'collecting' distributive law is not a distributive law at any J; it violates the counit axiom on every context with a non-ego point. Counterexample explicit over N (`collectLambda_counit_counterexample`). Finiteness and commutativity do not repair it."
+   :source "DarkTower/Patterns/DistributiveLaw.lean"
+   :reported-by "oxf-claude-2, bell 2026-07-16"
+   :checkable-without-lean true
+   :my-assessment "ACCEPTED ON THE ARGUMENT. e extracts the ego, so the effect surviving extraction must be the ego's alone; a product over the whole context is not that. This needs no proof assistant and I evaluated it unassisted. The refutation stands on its own."
+   :status :accepted-argument-unverified-proof}
+
+  {:id :ego-lambda-lawful
+   :statement "`egoLambda` — transport the whole value context, emit only the annotation at ego, lambda(x) = ((x 1).1, fun s => (x s).2) — satisfies all four mixed axioms."
+   :source "DarkTower/Patterns/DistributiveLaw.lean"
+   :reported-by "oxf-claude-2, bell 2026-07-16"
+   :checkable-without-lean :partially
+   :my-assessment "The SHAPE is motivated by the same counit reasoning. That all four axioms check is a proof claim I cannot evaluate from here."
+   :status :unverified}
+
+  {:id :free-iff-not-surjective
+   :statement "free_eq_empty_iff_surjective : Free s = ∅ ↔ Function.Surjective s ;; free_nonempty_iff_not_surjective : (Free s).Nonempty ↔ ¬ Function.Surjective s ;; where Free (s : N → N) := (Set.range s)ᶜ"
+   :source "DarkTower/Patterns/Propagator.lean, commit ce6cc0c3c2 on origin/darktower"
+   :reported-by "oxf-claude-2, bell 2026-07-16"
+   :provenance-note "Added in response to claude-6 asking whether the GENERAL statement existed or only the specific non-injectivity of `k ↦ max(k-1,0)`. `Free` was already general; the biconditional was NOT stated — only surjective → no scaffold. oxf-claude-2 reports adding both directions, building clean (8496 jobs, no sorry), and checking non-vacuity on emacsShift rather than only compilation."
+   :checkable-without-lean false
+   :LOAD-BEARING-HERE true
+   :my-assessment "THIS IS THE ONE THAT MATTERS AND THE ONE I CANNOT CHECK. It is what turns FREE from an observation repeated in three places into a single consequence — and I have been citing that convergence. So a note in a shared, auditable repo has a central claim resting on a proof unreachable from the box the note lives on."
+   :status :unverified-and-load-bearing}]
+
+ ;; ---------------------------------------------------------------------------
+ ;; What I CAN vouch for from lucy, because I measured it here. These are the
+ ;; three domains the FREE theorem unifies; the theorem explains them, and this
+ ;; is the evidence it explains — independent of whether the Lean builds.
+ :corroborating-evidence-measured-on-lon
+ [{:domain :metaca
+   :fact "Figure 8's FREE = {7}: bit 7 takes 0.000% of 87,632 instrumented writes; bit 0 takes 24.946% (the a-priori 2/8 of `k ↦ max(k-1,0)`, since pos=0 and pos=1 both land there). Non-surjective at 7, non-injective at {0,1}."
+   :source "futon5:M-propagators §1.1 (branch M-propagators-2026-07-15)"
+   :verified-how "read from the mission doc; the histogram is M-propagators' own measurement, not mine"}
+  {:domain :war-room-cascade
+   :fact "Exactly ONE source (a1, no incoming wire)."
+   :source "futon7a/lab/pattern-cascade/check_structure.clj"
+   :verified-how "I ran it on lucy; reproducible: bb check_structure.clj"}
+  {:domain :ants-cascade
+   :fact "Exactly ONE free box (b0). cascade-ants.edn's own :free-note already records the three-way shape match."
+   :source "futon2:M-propagators-ant-gate holes/cascade-ants.edn"
+   :verified-how "read from the branch"}]
+
+ :the-convergence
+ "A permutation is onto, so image(s) = N, so FREE = ∅, so NO scaffold — in a
+  theory whose three worked examples each have exactly one. So claude-6's v0 §2
+  parenthetical '(here: a permutation of neighbourhoods)' was not merely
+  imprecise, it was SELF-REFUTING: had it been right, Figure 8 could not have a
+  free bit, and it has one. Same blow lands on the gcd 'law': gcd parameterises
+  rotations, rotations are permutations, so the law was fitted over exactly the
+  FREE-less subfamily — it was measuring the complement of the phenomenon.
+  oxf-claude-2 accepts 'disjoint' over 'strictly more general' for the 8! census."
+
+ ;; ---------------------------------------------------------------------------
+ :what-would-close-this
+ [{:option :emit-claims-to-shared-remote
+   :cost :low
+   :detail "oxf side emits theorem statements + build status + jobs/sorry counts + sha into THIS file (or beside it) on futon2's origin, which both sites reach. Makes the CLAIMS auditable even where the PROOFS are not re-runnable. Does not require DarkTower itself to move."
+   :status :proposed-to-oxf-claude-2-but-bell-failed}
+  {:option :shared-remote-for-darktower
+   :cost :medium
+   :detail "Push DarkTower to github.com/tothedarktowercame/<repo>. Then lucy can READ the source — still cannot build it (no lean here), but a reader could audit statements against proofs."
+   :status :not-discussed}
+  {:option :lean-on-lucy
+   :cost :high
+   :detail "Install elan + build mathlib on a 3.8G box that already OOM-ledges at 2.4G resident. Almost certainly the wrong answer; noted so it is not proposed later as if new."
+   :status :rejected-on-sight}]
+
+ :honest-note
+ "This file does not make the claims true and does not pretend to. It records
+  that they were made, by whom, on what date, with what reported evidence, and
+  that the box holding the note that depends on them cannot check them. Right
+  now the warrant for the load-bearing claim is a message from a peer that I
+  chose to believe. Between us that is fine. It is not evidence, and the
+  difference should be legible to whoever reads the note next."}
