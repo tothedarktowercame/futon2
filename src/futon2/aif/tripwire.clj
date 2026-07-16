@@ -5,7 +5,9 @@
   no exception from a wire or trip action is allowed to reach the runner.  The
   richer `:tripwire/snapshot` key is an observational input seam for ledgers
   whose facts are not themselves phase telemetry."
-  (:require [clojure.edn :as edn]
+  (:require [babashka.http-client :as http]
+            [cheshire.core :as json]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.pprint :as pp]
@@ -21,6 +23,10 @@
            [java.util UUID]))
 
 (def default-trip-root "/home/joe/code/futon2/data/wm-tripwires/trips")
+(def default-action :record)
+(def default-agency-base "http://127.0.0.1:7070")
+(def summon-recipient "claude-6")
+(def investigation-window-ms (* 45 60 1000))
 (def repair-children ["findings" "implementations" "resolutions"])
 (def known-job-states
   #{"queued" "pending" "running" "done" "failed" "cancelled" "timed-out"})
@@ -82,7 +88,9 @@
     :T8 {:title "duplicate-finding livelock" :enabled? true}
     :T9 {:title "phase wall-clock budget" :enabled? true}
     :T10 {:title "loaded/file code coherence" :enabled? true}
-    :T11 {:title "Agency job-state alphabet" :enabled? true}}))
+    :T11 {:title "Agency job-state alphabet" :enabled? true}
+    :T12 {:title "four-opportunity zero-grounding target wedge"
+          :enabled? false :status :chartered-stub}}))
 
 (defonce ^:private phase-snapshots (atom {}))
 (def ^:dynamic *handling-trip?* false)
@@ -367,9 +375,14 @@
                                :timestamps timestamps}))))
           jobs))))
 
+(defn- t12 [_]
+  ;; Chartered by the third shadow run. Implementation waits for a calibrated
+  ;; distinction between a productive multi-turn target and a true soft wedge.
+  nil)
+
 (def wire-evaluators
   {:T1 t1 :T2 t2 :T3 t3 :T4 t4 :T5 t5 :T6 t6 :T7 t7 :T8 t8
-   :T9 t9 :T10 t10 :T11 t11})
+   :T9 t9 :T10 t10 :T11 t11 :T12 t12})
 
 (defn evaluate-wire
   "Return this wire's violation witnesses for one complete observation."
@@ -403,23 +416,156 @@
 
 (declare observe!)
 
-(defn- record-trip! [opts report]
+(defn- response-json [response]
+  (let [body (:body response)]
+    (cond
+      (map? body) body
+      (string? body) (json/parse-string body true)
+      :else {})))
+
+(defn- successful-response! [operation response]
+  (let [status (:status response)
+        body (response-json response)]
+    (when-not (and (number? status) (<= 200 status 299)
+                   (not= false (:ok body)))
+      (throw (ex-info (str operation " failed")
+                      {:operation operation :status status :response body})))
+    body))
+
+(defn- agency-base [opts]
+  (or (:tripwire/agency-base opts) (:agency-base opts) default-agency-base))
+
+(defn- registered-agents [opts]
+  (if-let [roster-fn (:tripwire/roster-fn opts)]
+    (set (roster-fn opts))
+    (let [response (http/get (str (agency-base opts) "/api/alpha/agents")
+                             {:timeout 10000 :throw false})
+          body (successful-response! :tripwire-roster response)]
+      (set (keys (:agents body))))))
+
+(defn- post-park! [opts payload]
+  (if-let [park-fn (:tripwire/park-fn opts)]
+    (park-fn opts payload)
+    (successful-response!
+     :tripwire-park
+     (http/post (str (agency-base opts) "/api/alpha/park")
+                {:headers {"Content-Type" "application/json"}
+                 :body (json/generate-string payload)
+                 :timeout 10000 :throw false}))))
+
+(defn- post-bell! [opts payload]
+  (if-let [bell-fn (:tripwire/bell-fn opts)]
+    (bell-fn opts payload)
+    (let [body (successful-response!
+                :tripwire-bell
+                (http/post (str (agency-base opts) "/api/alpha/bell")
+                           {:headers {"Content-Type" "application/json"}
+                            :body (json/generate-string payload)
+                            :timeout 10000 :throw false}))]
+      (when-not (:accepted body)
+        (throw (ex-info "Tripwire bell was not accepted" {:response body})))
+      body)))
+
+(defn- record-finding! [opts report report-path]
+  (let [observation (:trip/observation report)
+        wire-id (:trip/wire-id report)
+        trip-id (:trip/id report)
+        finding {:attempt-id (str (or (:attempt-id observation) "unscoped")
+                                  "-" trip-id)
+                 :repair-class :machine-failure
+                 :target (or (:selected-target observation)
+                             (:target observation)
+                             (str "tripwire/" (name wire-id)))
+                 :selected-entry (:selected-entry observation)
+                 :failure-stage (or (:phase observation) :tripwire)
+                 :outcome :incomplete
+                 :failure-kind :invariant-tripped
+                 :error (str "War Machine invariant " (name wire-id) " tripped")
+                 :failure-data {:trip/id trip-id :trip/wire-id wire-id}
+                 :backtrace {:trip-report report-path}
+                 :discharge-contract
+                 {:requires [:investigate-invariant-trip
+                             :repair-machine-or-revise-wire
+                             :production-shaped-successor]}}]
+    ((or (:tripwire/repair-record-fn opts) repair/record-system-failure!) finding)))
+
+(defn- witness-summary [witness]
+  (let [rendered (pr-str witness)]
+    (subs rendered 0 (min 1000 (count rendered)))))
+
+(defn- investigation-text [report report-path]
+  (str "WAR MACHINE TRIPWIRE INVESTIGATION\n"
+       "trip: " (:trip/id report) "\n"
+       "wire: " (name (:trip/wire-id report)) "\n"
+       "witness: " (witness-summary (:trip/witness report)) "\n"
+       "report: " report-path "\n"
+       "Checklist: investigate then discharge or revise the wire per the practical contract."))
+
+(defn- summon! [opts report report-path]
+  (when-not (contains? (registered-agents opts) summon-recipient)
+    (throw (ex-info "Tripwire summon recipient is not registered"
+                    {:recipient summon-recipient})))
+  (let [text (investigation-text report report-path)
+        dependency-id (str (:trip/id report) "-investigation")]
+    (post-park! opts {:agent summon-recipient
+                      :surface "emacs-repl"
+                      :mode :background
+                      :awaiting [dependency-id]
+                      :deadline-ms (+ (System/currentTimeMillis)
+                                      investigation-window-ms)
+                      :payload text})
+    (post-bell! opts {:agent-id summon-recipient
+                      :caller "wm-full-loop"
+                      :surface "bell"
+                      :mission-id "M-wm-tripwires-investigation"
+                      :type "request"
+                      :prompt text})))
+
+(defn- handle-action! [opts report report-path]
+  (case (:trip/action report)
+    :record nil
+    :stop-line
+    (try
+      (record-finding! opts report report-path)
+      (catch Throwable e
+        (stderr! "stop-line action failed; degraded to durable :record" e)))
+    :park-and-summon
+    (try
+      (record-finding! opts report report-path)
+      (try
+        (summon! opts report report-path)
+        (catch Throwable e
+          (stderr! "park/summon action failed; degraded to :stop-line" e)))
+      (catch Throwable e
+        (stderr! "stop-line action failed; degraded to durable :record" e)))
+    (stderr! "unknown trip action; degraded to durable :record" nil)))
+
+(defn- record-trip! [opts raw-report]
   (if *handling-trip?*
     (do
       (stderr! "trip during trip handling; degraded to durable :record" nil)
       (try
         (write-trip-report! (or (:tripwire/report-root opts) default-trip-root)
-                            (assoc report :trip/action :record
-                                          :trip/degraded? true))
+                            (assoc raw-report :trip/action :record
+                                              :trip/degraded? true))
         (catch Throwable e
           (stderr! "degraded trip report failed; recursion remains contained" e))))
     (binding [*handling-trip?* true]
       (try
-        ((or (:tripwire/report-writer opts)
-             #(write-trip-report! (or (:tripwire/report-root opts)
-                                      default-trip-root)
-                                  %))
-         report)
+        (let [report (assoc raw-report
+                            :trip/id (or (:trip/id raw-report)
+                                         (str "trip-" (UUID/randomUUID)))
+                            :trip/action (or (:tripwire/action opts)
+                                             default-action))
+              report-path
+              ((or (:tripwire/report-writer opts)
+                   #(write-trip-report! (or (:tripwire/report-root opts)
+                                            default-trip-root)
+                                        %))
+               report)]
+          (when (str/blank? (str report-path))
+            (throw (ex-info "Trip report writer returned no artifact path" {})))
+          (handle-action! opts report report-path))
         (catch Throwable e
           (stderr! "trip report action failed; runner remains untouched" e))))))
 
@@ -510,7 +656,6 @@
               :when (enabled? opts wire-id)
               witness (evaluate-wire wire-id observation)]
         (record-trip! opts {:trip/wire-id wire-id
-                            :trip/action (or (:tripwire/action opts) :record)
                             :trip/witness witness
                             :trip/observation observation})))
     (catch Throwable e

@@ -22,6 +22,20 @@
     (is (every? #(= "claude-7" (:reviewer %)) @calls))
     (is (every? #(= "overnight-1" (:batch-id %)) @calls))))
 
+(deftest tripwire-action-is-an-explicit-validated-operator-flag
+  (is (= :record (:tripwire/action
+                  (#'cli/runner-opts :wallclock-cron
+                                      {:tripwire-action "record"}))))
+  (is (= :park-and-summon
+         (:tripwire/action
+          (#'cli/runner-opts :wallclock-cron
+                             {:tripwire-action "park-and-summon"}))))
+  (is (nil? (:tripwire/action (#'cli/runner-opts :wallclock-cron {})))
+      "absence preserves the tripwire namespace's compiled :record default")
+  (is (thrown? clojure.lang.ExceptionInfo
+               (#'cli/runner-opts :wallclock-cron
+                                  {:tripwire-action "promote-now"}))))
+
 (deftest continuous-stops-after-first-non-grounded-opportunity
   (let [calls (atom 0)
         outcomes [:grounded-change :agent-unavailable :grounded-change]

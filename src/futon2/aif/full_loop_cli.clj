@@ -12,6 +12,13 @@
   (or (parse-long x)
       (throw (ex-info (str label " must be an integer") {label x}))))
 
+(defn- parse-tripwire-action! [value]
+  (let [action (keyword value)]
+    (when-not (#{:record :stop-line :park-and-summon} action)
+      (throw (ex-info "--tripwire-action must be record, stop-line, or park-and-summon"
+                      {:tripwire-action value})))
+    action))
+
 (defn- option-map [args]
   (loop [xs args out {}]
     (if (empty? xs)
@@ -26,6 +33,8 @@
     (:author flags) (assoc :author (:author flags))
     (:reviewer flags) (assoc :reviewer (:reviewer flags))
     (:batch-id flags) (assoc :batch-id (:batch-id flags))
+    (:tripwire-action flags)
+    (assoc :tripwire/action (parse-tripwire-action! (:tripwire-action flags)))
     (:window-days flags) (assoc :window-days (parse-long! :window-days
                                                            (:window-days flags)))
     (:agent-budget-seconds flags)
@@ -198,7 +207,9 @@
        "  qa ATTEMPT-ID OBJECTIVE ANSWER NOTE [REVIEWER]\n\n"
        "once is an on-demand durée click; continuous emits sequential durée "
        "clicks; tick is one wall-clock opportunity. Agent options also include "
-       "--agent-budget-seconds. The brief lists each objective's allowed answers."))
+       "--agent-budget-seconds. Trip escalation is an explicit operator choice: "
+       "--tripwire-action record|stop-line|park-and-summon (default: record). "
+       "The brief lists each objective's allowed answers."))
 
 (defn- run-command! [args]
   (let [[command & rest] args]

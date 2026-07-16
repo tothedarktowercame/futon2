@@ -1,6 +1,7 @@
 (ns futon2.aif.tripwire-test
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.tripwire :as tripwire])
@@ -15,6 +16,12 @@
     (io/make-parents file)
     (spit file (pr-str value))
     file))
+
+(defn- synthetic-trip-record []
+  {:phase :synthetic
+   :attempt-id "action-test"
+   :tripwire/snapshot {:runner/dispatched-turns 2
+                       :agency/dispatch-count 1}})
 
 (deftest t1-turn-conservation-trips-on-ledger-drift
   (is (= [{:kind :turn-conservation
@@ -159,6 +166,119 @@
     (is (thrown? java.nio.file.FileAlreadyExistsException
                  (tripwire/write-trip-report!
                   (.getPath root) {:trip/id "trip-fixed" :trip/wire-id :T1})))))
+
+(deftest record-action-attempts-no-stop-line-park-or-bell-effects
+  (let [record (synthetic-trip-record)
+        reports (atom [])
+        effects (atom [])
+        opts {:tripwire/action :record
+              :tripwire/report-writer
+              (fn [report] (swap! reports conj report) "/tmp/trip-record.edn")
+              :tripwire/repair-record-fn
+              (fn [_] (swap! effects conj :repair))
+              :tripwire/roster-fn
+              (fn [_] (swap! effects conj :roster) #{"claude-6"})
+              :tripwire/park-fn
+              (fn [& _] (swap! effects conj :park))
+              :tripwire/bell-fn
+              (fn [& _] (swap! effects conj :bell))}]
+    (is (identical? record (tripwire/observe! opts record)))
+    (is (= 1 (count @reports)))
+    (is (empty? @effects)
+        ":record must not even attempt any escalation-shaped effect")))
+
+(deftest stop-line-action-records-typed-finding-linked-to-report
+  (let [finding (atom nil)
+        opts {:tripwire/action :stop-line
+              :tripwire/report-writer (fn [_] "/tmp/trip-stop.edn")
+              :tripwire/repair-record-fn #(reset! finding %)}]
+    (tripwire/observe! opts (synthetic-trip-record))
+    (is (= :machine-failure (:repair-class @finding)))
+    (is (= :invariant-tripped (:failure-kind @finding)))
+    (is (= :T1 (get-in @finding [:failure-data :trip/wire-id])))
+    (is (string? (get-in @finding [:failure-data :trip/id])))
+    (is (= "/tmp/trip-stop.edn" (get-in @finding [:backtrace :trip-report])))))
+
+(deftest park-and-summon-builds-background-join-and-roster-checked-bell
+  (let [finding (atom nil)
+        park (atom nil)
+        bell (atom nil)
+        opts {:tripwire/action :park-and-summon
+              :tripwire/report-writer (fn [_] "/tmp/trip-summon.edn")
+              :tripwire/repair-record-fn #(reset! finding %)
+              :tripwire/roster-fn (fn [_] #{"claude-6" "codex-7"})
+              :tripwire/park-fn (fn [_ payload] (reset! park payload))
+              :tripwire/bell-fn (fn [_ payload] (reset! bell payload))}]
+    (tripwire/observe! opts (synthetic-trip-record))
+    (is (= :invariant-tripped (:failure-kind @finding)))
+    (is (= {:agent "claude-6" :surface "emacs-repl" :mode :background}
+           (select-keys @park [:agent :surface :mode])))
+    (is (= 1 (count (:awaiting @park))))
+    (is (str/ends-with? (first (:awaiting @park)) "-investigation"))
+    (is (= "claude-6" (:agent-id @bell)))
+    (is (re-find #"investigate then discharge or revise the wire"
+                 (:prompt @bell)))))
+
+(deftest stop-line-failure-degrades-to-record-without-escalating
+  (let [record (synthetic-trip-record)
+        effects (atom [])
+        err (java.io.StringWriter.)
+        opts {:tripwire/action :park-and-summon
+              :tripwire/report-writer (fn [_] "/tmp/trip-degraded.edn")
+              :tripwire/repair-record-fn
+              (fn [_] (throw (ex-info "repair store unavailable" {})))
+              :tripwire/roster-fn
+              (fn [_] (swap! effects conj :roster) #{"claude-6"})
+              :tripwire/park-fn
+              (fn [& _] (swap! effects conj :park))
+              :tripwire/bell-fn
+              (fn [& _] (swap! effects conj :bell))}]
+    (binding [*err* err]
+      (is (identical? record (tripwire/observe! opts record))))
+    (is (empty? @effects))
+    (is (str/includes? (str err) "degraded to durable :record"))))
+
+(deftest park-failure-degrades-to-existing-stop-line-without-bell
+  (let [effects (atom [])
+        err (java.io.StringWriter.)
+        opts {:tripwire/action :park-and-summon
+              :tripwire/report-writer (fn [_] "/tmp/trip-park-fail.edn")
+              :tripwire/repair-record-fn
+              (fn [_] (swap! effects conj :repair))
+              :tripwire/roster-fn (fn [_] #{"claude-6"})
+              :tripwire/park-fn
+              (fn [& _] (swap! effects conj :park)
+                (throw (ex-info "park unavailable" {})))
+              :tripwire/bell-fn
+              (fn [& _] (swap! effects conj :bell))}]
+    (binding [*err* err]
+      (tripwire/observe! opts (synthetic-trip-record)))
+    (is (= [:repair :park] @effects))
+    (is (str/includes? (str err) "degraded to :stop-line"))))
+
+(deftest bell-failure-degrades-to-existing-stop-line-without-escape
+  (let [record (synthetic-trip-record)
+        effects (atom [])
+        err (java.io.StringWriter.)
+        opts {:tripwire/action :park-and-summon
+              :tripwire/report-writer (fn [_] "/tmp/trip-bell-fail.edn")
+              :tripwire/repair-record-fn
+              (fn [_] (swap! effects conj :repair))
+              :tripwire/roster-fn (fn [_] #{"claude-6"})
+              :tripwire/park-fn (fn [& _] (swap! effects conj :park))
+              :tripwire/bell-fn
+              (fn [& _] (swap! effects conj :bell)
+                (throw (ex-info "bell unavailable" {})))}]
+    (binding [*err* err]
+      (is (identical? record (tripwire/observe! opts record))))
+    (is (= [:repair :park :bell] @effects))
+    (is (str/includes? (str err) "degraded to :stop-line"))))
+
+(deftest t12-is-chartered-disabled-and-inert
+  (is (= {:title "four-opportunity zero-grounding target wedge"
+          :enabled? false :status :chartered-stub}
+         (get @tripwire/wire-registry :T12)))
+  (is (empty? (tripwire/evaluate-wire :T12 {:tripwire/force? true}))))
 
 (deftest every-wire-is-individually-disableable
   (let [reports (atom [])

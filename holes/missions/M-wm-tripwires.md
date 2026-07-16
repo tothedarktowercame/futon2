@@ -20,9 +20,9 @@ records, parks, and summons**:
 1. Capture a durable trip-report EDN: the tripped invariant, its witness
    data, the full in-flight opportunity context (phase, job snapshots,
    selected entry, stop-lines in scope).
-2. Open a typed finding (`:repair/class :invariant-tripped`) through the
-   existing repair-obligation machinery — the WM's own stop-line discipline
-   eats its own dogfood.
+2. Open a typed machine finding (`:repair/class :machine-failure`,
+   `:failure-kind :invariant-tripped`) through the existing repair-obligation
+   machinery — the WM's own stop-line discipline eats its own dogfood.
 3. PARK the opportunity on an investigation join (futon3c park, background
    mode) and bell the owner (claude-6) + surface to Joe. The "debugger" is a
    live agent session opened onto the frozen trip report while the run waits.
@@ -78,6 +78,12 @@ Environment alphabet (the boundary):
   timestamps; unknown state or unparseable time trips (unknown letters of
   the alphabet become tripwires, not silent defaults).
 
+Shadow-run observations (chartered, not yet promoted):
+- T12. Same target selected in at least four consecutive opportunities with
+  zero grounded changes. Chartered from shadow run 3 under the
+  incident→neuron rule, but registry-disabled until a calibrated detector can
+  distinguish productive multi-turn work from a true soft wedge.
+
 ## Calibration gate (before live)
 
 Shadow mode must RETRO-TRIP on the known incident corpus: replayed
@@ -98,6 +104,10 @@ with all wires in `:record`, reviewed; then promote to `:park-and-summon`.
 - S3 (claude-6 review + Joe gate): shadow-mode live run, review trip log,
   promote to `:park-and-summon`, wire the summon path to futon3c
   park/bell (background mode, per E-park-delivery-losses discipline).
+- S3b (codex): action ladder wired (`:record` → `:stop-line` →
+  `:park-and-summon`) with fail-safe degradation and a roster-checked
+  background summon. Compiled default remains `:record`; promotion is a
+  Joe-gated operator flag, not an implementation default.
 
 Constraints: the harness must be read-only with respect to WM semantics (a
 wire that changes behavior when not tripping is a bug); trip actions must be
