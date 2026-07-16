@@ -129,3 +129,31 @@ the WM runs at lowered γ (more conservative thresholds, operator confirmation
 on grounding). The noticing feeds the feeling: the eye informs the belly.
 Connects directly to the learned-γ thesis of the Closing-the-Loop sequel
 paper — trips are exactly the error signal a learned meta-precision needs.
+
+## What the framing buys (practical contract, 2026-07-16)
+
+Joe's dilemma: no theorems about the sensory system in general. The AIF
+answer: none exist for any sensorium — you verify IDENTIFIABILITY and measure
+COVERAGE, and you keep a blind-spot map. Practical consequences, binding on
+S2/S3+:
+
+1. **Coverage metric + blind-spot map.** The retro-trip corpus becomes a
+   living museum; coverage = fraction of known pathology classes with an
+   identifying wire, reported per calibration run. The blind-spot map is an
+   explicit versioned list of hidden-state classes NO wire can see (first
+   entry: semantic wrongness of a grounded commit) — it is the principled
+   statement of where independent review remains load-bearing forever.
+2. **Incident→neuron rule.** No incident postmortem closes without either a
+   new wire that retro-trips on it, or a blind-spot-map entry explaining why
+   none is possible. Hotfixes must deposit sensory neurons; the same class
+   of surprise is never silent twice.
+3. **Learned wire precision.** A trip has two resolutions: repair the machine
+   or revise the invariant (the alphabet legitimately grew). Wires whose
+   trips keep getting blessed demote down the action ladder
+   (park-and-summon → stop-line → record); the ladder is per-wire precision
+   allocation, and summons follow precision-weighted error — that is the
+   wake-budget policy.
+4. **Wire budget (anti-rumination).** Self-monitoring cost is capped as a
+   fraction of run cost, enforced as an invariant of its own; an
+   interoceptive system with over-precise internal priors spends everything
+   on self-observation, and we decline to discover that empirically.
