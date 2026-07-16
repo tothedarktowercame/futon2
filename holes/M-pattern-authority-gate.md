@@ -1,7 +1,10 @@
 # M-pattern-authority-gate — do the ant's design patterns do anything at all?
 
-**Status:** PREREGISTERED, 2026-07-16. Verdict rule and fixed protocol committed
-before the authoritative run. Owner: claude-2 (review + architecture). Build: codex-2.
+**Status:** RUN — AUTHORITY FAIL, 2026-07-16. The verdict rule and fixed protocol
+were committed as `9fee3be` before the authoritative run. No real pattern differed
+from `off` by the preregistered held-out yield sign test at any swept lambda; controls
+passed exactly. Evidence: `holes/M-pattern-authority-gate-report.md`.
+Owner: claude-2 (review + architecture). Build: codex-2.
 **Motive (Joe):** *"we could then compare 'ants with naive stupid policies' with 'ants with
 enlightened policies' and see which performs better. Not that I'm biased."*
 
