@@ -159,14 +159,35 @@ level's dynamics reads *signs* emitted from the bottom (§4).
 (§1.4 there) — σ is "copy the response for neighbourhood `u` into the
 response for neighbourhood `σ(u)`, inverted" — becomes the *definition* of
 a propagator in this substrate: an endo-operator on `[N, P]` **induced by a
-pair of maps** `s : N → N`, `ν : P → P` (here: a permutation of
-neighbourhoods and negation), never touching the bit encoding. This is
+pair of maps** `s : N → N`, `ν : P → P` (here: negation, and a map of
+neighbourhoods that is **not** a permutation — see below), never touching the
+bit encoding. This is
 what makes propagators transportable: the recipe `(s, ν)` is stated at the
 (shape, value) level, so it has a meaning over any `[N', P']` — wiring
 diagrams, an "ant rule byte" — whereas an operator defined on the encoding
 transfers only by accident. **Preregisterable transfer criterion for L5:**
 an operator is eligible for transfer iff it factors through `(s, ν)`-form;
 the transferred object is the same recipe on the new exponential.
+
+> **`s` is a map, not a permutation — and v0's parenthetical said otherwise.**
+> The Emacs bug is `k ↦ max(k-1, 0)`: both 0 and 1 land on 0, and 7 has no
+> preimage. Non-injective, non-surjective. (*Proved:
+> `emacsShift_not_injective`, `emacsShift_not_surjective` in
+> `DarkTower/Patterns/Propagator.lean`.*) The typing `s : N → N` above is right
+> and is strictly **more general than the paper's family**, which quantifies over
+> permutations and censuses all 8! = 40,320 of them — and therefore **does not
+> contain the bug it generalises**. The measurement says so independently: a
+> permutation writes every bit at 12.5%, and the instrumented histogram is bit 0
+> at 24.946% and bit 7 at 0.000%.
+>
+> **The non-injectivity is load-bearing, not incidental.** `FREE = N \ image(s)`
+> is what a rule never overwrites — the scaffold pinned by blending. **A
+> permutation is onto, so it has no FREE at all** (*`permutation_free_eq_empty`*).
+> Figure 8 needs exactly this: `FREE = {7}` pins the top of the cascade while the
+> fixed point at 0 (`g 0 = ¬ g 0`) can never settle. One given, one irreducible
+> tension. **No σ in the permutation family can produce that mechanism** — which
+> is also why the ant port, which used permutations over 10 preference channels,
+> had no scaffold by construction.
 
 **Why the conjugacy negative had to be true.** L2 found the live twin
 `(0 2 4 6)(1 3 5 7)` and dead twin `(0 1 2 3)(4 5 6 7)` exactly conjugate,
