@@ -205,3 +205,26 @@
     (is (empty? (tripwire/evaluate-wire
                  :T1 {:runner/dispatched-turns 2
                       :agency/dispatch-count 2})))))
+
+(deftest t10-empty-baseline-fingerprint-is-no-observation
+  (testing "a baseline captured mid-load (empty fingerprint) admits the first
+real fingerprint instead of tripping — but a sha mismatch still trips"
+    (let [ns-sym 'futon2.aif.tripwire-test-fixture
+          base {ns-sym {:source-path "x.clj" :source-sha256 "abc"
+                        :public-functions {}}}
+          same-sha {ns-sym {:source-path "x.clj" :source-sha256 "abc"
+                            :public-functions {'f "class$f"}}}
+          diff-sha {ns-sym {:source-path "x.clj" :source-sha256 "zzz"
+                            :public-functions {'f "class$f"}}}]
+      (with-redefs [tripwire/composition-baseline (atom base)]
+        (is (nil? (#'tripwire/t10 {:phase :opportunity :transition :start
+                                   :composition/current same-sha}))
+            "empty fingerprint + matching sha admits, no trip")
+        (is (= {'f "class$f"}
+               (get-in @@#'tripwire/composition-baseline
+                       [ns-sym :public-functions]))
+            "first real fingerprint was admitted exactly once"))
+      (with-redefs [tripwire/composition-baseline (atom base)]
+        (is (seq (#'tripwire/t10 {:phase :opportunity :transition :start
+                                  :composition/current diff-sha}))
+            "sha mismatch is real evidence even with an empty baseline fingerprint")))))

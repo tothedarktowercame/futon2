@@ -325,6 +325,19 @@
     (let [current (or current (composition-snapshot))
           missing (apply dissoc current (keys @composition-baseline))
           _ (when (seq missing) (swap! composition-baseline merge missing))
+          ;; A baseline fingerprint captured mid-load (the runner's circular
+          ;; require) is EMPTY — a missing observation, not an observation of
+          ;; emptiness. Admit the first real fingerprint exactly once, but only
+          ;; while the source hash is unchanged; a sha mismatch is real
+          ;; evidence regardless. (Shadow run 1: 15 false T10 trips against an
+          ;; empty baseline, 2026-07-16.)
+          _ (doseq [[ns-sym cur] current
+                    :let [base (get @composition-baseline ns-sym)]
+                    :when (and base
+                               (empty? (:public-functions base))
+                               (seq (:public-functions cur))
+                               (= (:source-sha256 base) (:source-sha256 cur)))]
+              (swap! composition-baseline assoc ns-sym cur))
           drift (composition-drift @composition-baseline current)]
       (when (seq drift)
         [{:kind :loaded-file-code-mismatch :drift drift}]))))
