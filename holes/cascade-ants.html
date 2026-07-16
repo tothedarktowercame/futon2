@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Ant Pattern Cascade</title>
+<style>
+  :root{
+    --bg:#f7f7f5; --panel:#ffffff; --ink:#1a1c1e; --muted:#5c6470; --line:#c9cdd3;
+    --att:#1f6f78; --att-soft:#e2f0f1; --hyp:#b5761a; --hyp-soft:#f7ecd8;
+    --accent:#6b4fbb; --term:#2e7d51; --hole:#8a8f98;
+    --edge:#9aa1ab; --edge-ext:#c08a2e; --clash:#c2402f; --clash-soft:#fbe9e6;
+    --free:#2e7d51; --free-soft:#e4f3ea;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#14161a; --panel:#1c1f25; --ink:#e8eaed; --muted:#9aa1ab; --line:#333842;
+      --att:#57c3cd; --att-soft:#123033; --hyp:#e2a94b; --hyp-soft:#33290f;
+      --accent:#a993e6; --term:#63c48c; --hole:#767c86;
+      --edge:#4c525c; --edge-ext:#8a6a2e; --clash:#e8705c; --clash-soft:#3a1a16;
+      --free:#63c48c; --free-soft:#12301f;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:1040px;margin:0 auto;padding:32px 20px 80px}
+  h1{font-size:26px;margin:0 0 4px;letter-spacing:-0.01em}
+  .sub{color:var(--muted);margin:0 0 20px;font-size:15px}
+  .psi{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--accent);
+    border-radius:10px;padding:14px 18px;margin:0 0 16px}
+  .psi b{color:var(--accent);text-transform:uppercase;font-size:11px;letter-spacing:0.08em}
+  .psi p{margin:6px 0 0;font-size:16px}
+  .verdict{background:var(--clash-soft);border:1px solid var(--clash);border-left:4px solid var(--clash);
+    border-radius:10px;padding:12px 18px;margin:0 0 22px;font-size:14px}
+  .verdict b{color:var(--clash);text-transform:uppercase;font-size:11px;letter-spacing:0.08em}
+  .verdict p{margin:6px 0 0}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin:0 0 12px;font-size:13px;color:var(--muted)}
+  .chip{display:inline-flex;align-items:center;gap:7px}
+  .sw{width:20px;height:13px;border-radius:3px;display:inline-block}
+  .sw.att{background:var(--att-soft);border:1.5px solid var(--att)}
+  .sw.hyp{background:var(--hyp-soft);border:1.5px dashed var(--hyp)}
+  .sw.free{background:var(--free-soft);border:2px solid var(--free)}
+  .sw.clash{background:var(--clash-soft);border:1.5px solid var(--clash)}
+  figure{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px}
+  svg{width:100%;height:auto;display:block}
+  .node rect{rx:11;stroke-width:1.6}
+  .node text{font-size:12.5px;fill:var(--ink)}
+  .node .tag{font-size:9.5px;letter-spacing:0.06em;text-transform:uppercase}
+  .node.att rect{fill:var(--att-soft);stroke:var(--att)}
+  .node.hyp rect{fill:var(--hyp-soft);stroke:var(--hyp);stroke-dasharray:5 4}
+  .node.free rect{fill:var(--free-soft);stroke:var(--free);stroke-width:2.6}
+  .node .ttl{font-weight:600}
+  .node:hover rect{filter:brightness(1.03)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:26px}
+  @media(max-width:720px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .card.wide{grid-column:1/-1}
+  .card.clash{border-color:var(--clash);border-left:4px solid var(--clash)}
+  .card h2{font-size:13px;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin:0 0 10px}
+  .card.clash h2{color:var(--clash)}
+  .card ul{margin:0;padding:0 0 0 18px}
+  .card li{margin:0 0 9px;font-size:14px}
+  .card .g{color:var(--muted)}
+  .card .k{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
+    background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:0 4px}
+  .foot{margin-top:28px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:14px}
+  .foot code{font-size:12.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>The Ant Pattern Cascade</h1>
+  <p class="sub">Five inherited patterns, read as a cascade — and what the reading exposes · v0 · 2026-07-16</p>
+
+  <div class="psi"><b>ψ — the want</b>
+    <p>An ant brain characterised as a pattern cascade: <b>one given at the floor</b>, a derivation of contended parameters above it, and a drive that cannot settle. The ants already hold the one thing the futon7a cascade declares a hole — an external rubric. <b>They eat.</b></p>
+  </div>
+
+  <div class="verdict"><b>Gate — AUTHORITY FAIL, and what it does and does not mean</b>
+    <p>20 paired seeds × 300 ticks, λ ∈ {0.1, 0.5, 1.0}: <b>no real pattern differed from <code>off</code></b> by the preregistered held-out yield sign test. <b>Controls sound</b> — the sham (<code>:cyber/baseline</code>) tied <code>off</code> exactly on every seed at every λ, matching full event traces, and λ=0 tied for all five ids.
+    <br><br><b>But only one of two channels was tested.</b> The gate set <code>:cyber-pattern {:id …}</code> directly, so it never merged the patterns' <code>@aif-delta</code> into <code>:aif-config</code>. So the verdict reads <em>“the hard-coded EFE terms do not move the ant”</em> — <b>not</b> <em>“the design patterns do not move the ant.”</em> Channel 1 is untested and is the cheapest live question here.</p>
+  </div>
+
+  <div class="legend">
+    <span class="chip"><span class="sw att"></span> attested · describes the code (7 goldens)</span>
+    <span class="chip"><span class="sw hyp"></span> hypothetical · helps the ant forage</span>
+    <span class="chip"><span class="sw free"></span> FREE · the given, nothing writes it</span>
+    <span class="chip"><span class="sw clash"></span> contends / conflicts</span>
+    <span class="chip">↑ hover any box or arrow for the slot-grounded reason</span>
+  </div>
+
+  <figure><svg id="cx" viewBox="0 0 1000 760" role="img" aria-label="Ant pattern cascade diagram"></svg></figure>
+
+  <div class="grid">
+    <div class="card clash wide"><h2>Contentions — why these patterns cannot compose</h2><ul id="clash"></ul></div>
+    <div class="card"><h2>Joins</h2><ul id="joins"></ul></div>
+    <div class="card"><h2>Terminals</h2><ul id="terms"></ul></div>
+    <div class="card"><h2>Holes</h2><ul id="holes"></ul></div>
+    <div class="card"><h2>Filled — the ant domain's advantage</h2><ul id="filled"></ul></div>
+    <div class="card wide"><h2>Shape</h2><ul id="shape"></ul></div>
+  </div>
+
+  <p class="foot">Source of truth: <code>futon2/holes/cascade-ants.edn</code> (this page is a rendering; the EDN is machine-checked — declared shape == computed graph). Patterns from <code>futon3/library/ants/*.flexiarg</code>. Style follows <code>futon7a lab/pattern-cascade/</code>.
+  <br><b>Bottom-to-top is not unusual — it is a Hasse diagram.</b> This is a join-semilattice: <code>b0</code> is the generator at the floor, <code>hm</code> the join at the apex, and the wires run in the direction of biKleisli composition (one pattern's THEN feeding another's IF). It only reads oddly against a proof tree, where premises sit on top.</p>
+</div>
+
+<script>
+const BOX=[
+ {id:"b0",e:"att",free:1,role:"foundation",t:"Baseline Cyber-AIF Ant",g:"The unpatterned ant. Its @aif-delta is literally EMPTY — 'no overrides; identical behavior to :aif species'. It is the identity element of the pattern algebra. FREE: the only box nothing writes. And the propagator theory says the identity has all 1-cycles, all odd, hence NO fixed point: the unpatterned ant IS the random walk."},
+ {id:"hp",e:"att",role:"precision",t:"Hunger ↔ Precision Coupling",g:"Hungrier ants lower tau; home safety lifts it; deficit reserves subtract. THE TAU SOURCE — everything downstream contends with it. @aif-delta: :precision {:need-gain 0.7 :dhdt-gain 0.9 :tau-survival-gain 0.6}, :efe {:lambda {:survival 1.4}}. Risk only, no info-gain: it can restrict, never discover."},
+ {id:"cr",e:"att",role:"discipline",t:"Cargo Return Discipline",g:"Penalise :return until a deposit fires; cap tau so the agent exploits completion. @aif-delta: :modes {:cargo-high 0.55}, :precision {:tau-cap 1.2}, :actions {:return {…}}. The only pattern touching :modes. Risk AND info-gain."},
+ {id:"pt",e:"att",role:"signalling",t:"Adaptive Trail Tuner",g:"Adapt signalling to novelty and resource pressure. @aif-delta writes :efe :lambda :info = 0.5 — see contentions. Risk only, no info-gain."},
+ {id:"ws",e:"att",role:"exploration",t:"White-Space Scout",g:"White space implies scout stance: raise :forage, tolerate uncertainty. @aif-delta writes :efe :lambda :info = 0.6 — DIRECTLY CONTENDS with the trail tuner's 0.5. Risk AND info-gain."},
+ {id:"hc",e:"hyp",role:"frontier",t:"Food-Cache Relay",g:"IF :carrying and :made-progress-homeward HOWEVER :still-far-from-home THEN :drop and :forage BECAUSE :relay-beats-the-round-trip. The FIRST pattern that would add a CAPABILITY rather than reweight the same four actions — and it cannot be written: there is no :drop. BLOCKED BY hole-vocab. (The naive 'drop when far' version is a food SINK — nothing ratchets it home.)"},
+ {id:"hg",e:"hyp",role:"loop",t:"Graduate By Yield",g:"A pattern becomes attested-as-helpful only by passing the authority gate on held-out boards. DIFFERS, not beats: a pattern that reliably harms is still a live actuator. Authority is not merit."},
+ {id:"hm",e:"hyp",role:"apex",t:"The Ant Brain Is A Pattern Cascade",g:"The join. Scaffold (FREE) + derivation (wires) + a drive that cannot settle (the holes) — Figure 8's anatomy, in an agent."},
+];
+const POS={b0:[0,0], hp:[1,0], cr:[2,0], pt:[2,1], ws:[2,2], hc:[3,0], hg:[4,0], hm:[5,0]};
+const WIRE=[
+ ["b0","hp","enables","hp's IF ('the affect layer reports hunger trends') presupposes the loop b0 describes."],
+ ["b0","cr","enables","cr's IF ('cargo >= 0.05, repeatedly chooses :return') presupposes b0's mode/action machinery."],
+ ["b0","pt","enables","pt's IF ('pheromone weak, novelty high') presupposes b0's observation ABI."],
+ ["b0","ws","enables","ws's IF ('observations satisfy the white? detector') presupposes b0's ABI."],
+ ["hp","cr","contends","hp sets the tau response curve; cr caps tau at 1.2 to stop thrash. Both write tau."],
+ ["hp","pt","contends","hp lowers tau when hungry; pt anneals tau upward to encourage signalling."],
+ ["hp","ws","contends","hp lowers tau when hungry; ws sets :tau-floor 0.12 to keep exploring."],
+ ["pt","ws","conflicts","*** THE UNSAT CORE *** Both write :efe :lambda :info. pt = 0.5, ws = 0.6. Under merge-deep the winner is ATTACHMENT ORDER — not a property of either pattern."],
+ ["cr","ws","conflicts","cr penalises :return until deposit; ws lowers :return to favour :forage. Same channel, different reasons — compatible by luck, not by design."],
+ ["cr","hc","extends","cache-relay is cargo discipline with a new action: don't just avoid thrash, avoid the round trip."],
+ ["hc","hg","candidate","the relay is a candidate that can graduate by yield."],
+ ["hp","hg","candidate","channel 1 (@aif-delta) is untested; hp can still graduate."],
+ ["cr","hg","candidate","ditto."],
+ ["pt","hg","candidate","ditto."],
+ ["ws","hg","candidate","ditto."],
+ ["hg","hm","realises","the gated loop is what realises the ant brain as a cascade."],
+];
+const CLASH=[
+ ["<span class='k'>:efe :lambda :info</span> — UNSAT",
+  "<b>pt = 0.5</b> vs <b>ws = 0.6</b>. Two patterns demand different values of ONE key. <code>merge-deep</code> makes the result depend on attachment order, which is not a property of either pattern. <code>:pattern/active</code> is singular, so they never collide today — <b>the conflict is invisible until you compose</b>. A cascade composes. This is <code>g[k] = 0.5 ∧ g[k] = 0.6</code>: unsatisfiable."],
+ ["<span class='k'>:precision</span> tau-family — contended",
+  "<b>hp</b> drives tau (<code>:need-gain</code>/<code>:dhdt-gain</code>), <b>cr</b> caps it (<code>:tau-cap 1.2</code>), <b>ws</b> floors it (<code>:tau-floor 0.12</code>). Three patterns argue about one quantity through <em>different keys</em>, so <code>merge-deep</code> cannot even detect it. Whether cap > floor is never checked."],
+ ["<span class='k'>:actions :return</span> — latent",
+  "ws's THEN says 'lower G for :return' but its <code>@aif-delta</code> has <b>no</b> <code>:actions</code> key. The behaviour is in prose, not in the delta. Channel 1 cannot express it; only the hard-coded <code>pattern_efe</code> can — and that channel just failed the gate."],
+];
+const JOINS=[
+ ["tau-is-a-shared-resource","hp ∧ cr","hunger drives tau, discipline caps it — the join is a tau budget nobody owns."],
+ ["novelty-is-double-counted","pt ∧ ws","both read novelty and both price :info. The join is a single exploration drive written twice."],
+ ["avoid-the-round-trip","cr ∧ hc","cargo discipline and cache relay are the same pattern at two strengths: stop thrashing (reweight) vs stop travelling (new action)."],
+];
+const TERMS=[
+ ["Food-Cache Relay","M-action-vocabulary (P3 FAIL ×2 → candidate generator is the gap)","the relay needs :drop; the action vocabulary is where that gap already lives."],
+ ["Graduate By Yield","scripts/pattern_authority_gate.clj","the gate exists and its controls are sound; it needs re-running on channel 1."],
+ ["The Ant Brain Is A Pattern Cascade","futon2/holes/N-patterns-as-arrows.md","the formalism that says what a cascade IS; DarkTower/Patterns/ formalises it."],
+];
+const HOLES=[
+ ["hole-vocab · BLOCKING","The action vocabulary is FOUR macro actions: <span class='k'>[:hold :forage :return :pheromone]</span>. No pattern can add one. Every inherited pattern only REWEIGHTS them, and two (hp, pt) are pure penalties with no info-gain, so they can only restrict. The relay is the first pattern wanting a capability — and it cannot be written."],
+ ["hole-compose · BLOCKING","<span class='k'>:pattern/active</span> is singular — one pattern at a time. A cascade is by definition composed. Composition is not merely unimplemented: the contentions above show it is currently <b>incoherent</b>. It needs a resolution rule, and 'last write wins' is not one."],
+ ["hole-channel1 · OPEN","The patterns' declared parameters (<span class='k'>@aif-delta</span>) have never been tested. <span class='k'>(cyber/attach-config ant :cyber/cargo-return)</span> is the untried path."],
+ ["hole-because · LATENT","Every BECAUSE in the library is about <em>generalisation</em> ('the same logic applies to graph walkers'), and every NEXT-STEPS is 'bind this to Futon5's uplift'. The agency channel points at <b>porting</b>, not foraging. These patterns were written to export the ant, not to improve it — a reason the gate found nothing, distinct from the channel-1 gap."],
+];
+const FILLED=[
+ ["hole-rubric — from futon7a, and it is a THEOREM","futon7a declares: <em>'An external evaluation rubric a third party holds (T-inf): xeno-evaluation cannot be self-supplied.'</em> <b>The ants fill it.</b> Yield is external, world-supplied, not self-reported: the ants just like to eat. That is exactly why the ant domain is grounded where the tokamak's objective is 'unanchored' — the tokamak tried to supply its own rubric. And the propagator formalism says why <em>none</em> can: a self-evaluating cascade is a fixed point of its own evaluation map, a <b>1-cycle</b>, and equivariant maps exist iff every cycle is <b>even</b>. One is odd. The ants escape it by having a world."],
+];
+const SHAPE=[
+ ["FREE = {b0}","Exactly one box with no incoming wire — the same shape as futon7a's {a1} and as Figure 8's free = {7}. <b>One given.</b>"],
+ ["UNSAT = the :info contention","The irreducible tension. In the constraint reading of the propagator: FREE = the givens, CHAIN = the derivation, <b>UNSAT = the HOWEVER</b>. A cascade with no unsat core is frozen; this one has exactly one, and it is real."],
+ ["SINKS = {hm}","Only the apex — unlike futon7a, where <code>a2</code> is an undeclared sink (a THEN no IF consumes: a mechanically-findable strategic hole)."],
+];
+
+const W=1000, NW=214, NH=58, baseY=700, rowGap=124, margin=30;
+const layerCount={}; Object.values(POS).forEach(([l])=>layerCount[l]=(layerCount[l]||0)+1);
+function xy(id){const [l,o]=POS[id]; const n=layerCount[l];
+  const x=margin+(o+1)*(W-2*margin)/(n+1); const y=baseY-l*rowGap; return [x,y];}
+const svg=document.getElementById("cx");
+const NS="http://www.w3.org/2000/svg";
+function el(t,a){const e=document.createElementNS(NS,t); for(const k in a)e.setAttribute(k,a[k]); return e;}
+
+const defs=el("defs",{});
+[["mk","var(--edge)"],["mkx","var(--edge-ext)"],["mkc","var(--clash)"]].forEach(([id,c])=>{
+  const m=el("marker",{id,markerWidth:8,markerHeight:8,refX:6,refY:3,orient:"auto"});
+  m.appendChild(el("path",{d:"M0,0 L6,3 L0,6 Z",fill:c})); defs.appendChild(m);});
+svg.appendChild(defs);
+
+WIRE.forEach(([f,t,k,why])=>{
+  const [sx,sy]=xy(f),[tx,ty]=xy(t);
+  const clash=(k==="contends"||k==="conflicts");
+  const ext=!(k==="enables"||k==="generalises")&&!clash;
+  const same=POS[f][0]===POS[t][0];
+  let d;
+  if(same){const dir=sx>tx?-1:1; d=`M${sx-dir*NW/2},${sy} L${tx+dir*NW/2},${ty}`;}
+  else{const y1=sy-NH/2, y2=ty+NH/2, my=(y1+y2)/2; d=`M${sx},${y1} C${sx},${my} ${tx},${my} ${tx},${y2}`;}
+  const col=clash?"var(--clash)":(ext?"var(--edge-ext)":"var(--edge)");
+  const p=el("path",{d,fill:"none",stroke:col,
+    "stroke-width":k==="conflicts"?2.4:(clash?1.7:1.4),
+    "stroke-dasharray":clash?"3 3":(ext?"5 4":""),
+    "marker-end":`url(#${clash?"mkc":(ext?"mkx":"mk")})`});
+  p.appendChild(el("title",{})).textContent=`${f} → ${t} (${k}): ${why}`;
+  svg.appendChild(p);
+});
+
+BOX.forEach(b=>{
+  const [x,y]=xy(b.id);
+  const g=el("g",{class:`node ${b.e}${b.free?" free":""}`});
+  g.appendChild(el("rect",{x:x-NW/2,y:y-NH/2,width:NW,height:NH,rx:11}));
+  const tag=el("text",{x:x-NW/2+12,y:y-NH/2+16,class:"tag",
+    fill:b.free?"var(--free)":(b.e==="att"?"var(--att)":"var(--hyp)")});
+  tag.textContent=b.free?b.role+" · free":b.role; g.appendChild(tag);
+  const ttl=el("text",{x:x-NW/2+12,y:y+7,class:"ttl"});
+  ttl.textContent=b.t.length>30?b.t.slice(0,29)+"…":b.t; g.appendChild(ttl);
+  g.appendChild(el("title",{})).textContent=b.t+" — "+b.g;
+  svg.appendChild(g);
+});
+
+const li=(a,b)=>`<li><b>${a}</b> <span class="g">— ${b}</span></li>`;
+document.getElementById("clash").innerHTML=CLASH.map(([p,g])=>li(p,g)).join("");
+document.getElementById("joins").innerHTML=JOINS.map(([p,m,g])=>li(p,`<span class="k">${m}</span> · ${g}`)).join("");
+document.getElementById("terms").innerHTML=TERMS.map(([p,m,g])=>li(p,`→ <span class="k">${m}</span> · ${g}`)).join("");
+document.getElementById("holes").innerHTML=HOLES.map(([p,g])=>li(p,g)).join("");
+document.getElementById("filled").innerHTML=FILLED.map(([p,g])=>li(p,g)).join("");
+document.getElementById("shape").innerHTML=SHAPE.map(([p,g])=>li(p,g)).join("");
+</script>
+</body>
+</html>
