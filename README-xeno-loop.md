@@ -18,13 +18,22 @@ alphabetically earlier, has "cyber" in the name, and is what you find first.
 **Why `cyber.clj` is a trap, concretely.** `config->aif-delta` (`cyber.clj:205-212`)
 merges **only `:precision`** (`:tau`, `:Pi-o`) into the live ant. `:policy-priors`,
 `:pattern-sense`, `:adapt-config` are stored under `:cyber-pattern → :config` via
-`select-keys` and **never read** — only `:id` and `:ticks-active` are consumed anywhere.
+`select-keys` and **never read**. Keep that `:config` warning: it is genuinely inert.
+`cyber.clj` itself remains a post-mortem subject, not an apparatus.
+
+The containing map is not wholly inert, however. `:cyber-pattern :id` is the
+**live ignition switch** for the five design-pattern EFE terms: `aif/core.clj` reads it
+into `:pattern/active`, and `aif/policy.clj` applies the selected pattern's contribution
+when `:efe :lambda :pattern` is nonzero. `:ticks-active` is also consumed for pattern
+telemetry. The pattern authority gate deliberately sets `:id`; that is modern AIF wiring,
+not a reason to return to the deprecated cyberants.
 So the old "domain transfer" experiment's `random-wiring` control permuted **inert
 fields**: it was *operationally byte-identical* to the treatment. The resulting "null" was
 a **tautology**, and it was read as refuting the hypothesis rather than the apparatus.
 
 That is the mistake this whole line of work exists to not repeat. If you find yourself
-wiring something into `:cyber-pattern`, stop.
+wiring anything into **`:cyber-pattern :config`**, stop. Setting singular `:id` for the
+pattern authority gate is the load-bearing switch; do not disable or route around it.
 
 ---
 

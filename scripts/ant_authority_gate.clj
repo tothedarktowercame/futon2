@@ -45,7 +45,8 @@
   Run:  cd futon2 && clojure -M scripts/ant_authority_gate.clj [n-seeds] [ticks]"
   (:require [ants.aif.policy :as policy]
             [ants.aif.experiment :as experiment]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [pattern-authority-gate :as pattern-gate]))
 
 (def run-single #'experiment/run-single)
 (def base-c @#'policy/default-c-vectors)
@@ -108,7 +109,7 @@
 (defn- mean [xs] (if (seq xs) (/ (reduce + xs) (double (count xs))) 0.0))
 (defn- sd [xs] (let [m (mean xs)] (Math/sqrt (mean (map #(let [d (- % m)] (* d d)) xs)))))
 
-(defn -main [& args]
+(defn- c-vector-main [& args]
   (let [n (Integer/parseInt (or (first args) "12"))
         ticks (Integer/parseInt (or (second args) "300"))
         seeds (vec (range 1 (inc n)))
@@ -164,7 +165,7 @@
                                                 (count (filter neg? nz))))
                  moves (or (> t 2.0) (< p 0.05))
                  reading (cond
-                           (= kind :identity) (if (and (< (Math/abs md) 1e-9))
+                           (= kind :identity) (if (< (Math/abs md) 1e-9)
                                                 "sham OK (exactly 0, as required)"
                                                 "*** SHAM MOVED — HARNESS BROKEN ***")
                            moves "MOVES THE ANT"
@@ -197,5 +198,13 @@
                                                  :baseline-sd (sd base-y) :arms results}))
     (println "\n  wrote /tmp/ant-authority-gate.edn")
     (flush)))
+
+(defn -main
+  "Run the historical C-vector gate by default.  `pattern` selects the
+  preregistered design-pattern authority gate from M-pattern-authority-gate."
+  [& args]
+  (if (= "pattern" (first args))
+    (apply pattern-gate/-main (rest args))
+    (apply c-vector-main args)))
 
 (apply -main *command-line-args*)

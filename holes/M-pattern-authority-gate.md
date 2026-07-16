@@ -1,6 +1,7 @@
 # M-pattern-authority-gate — do the ant's design patterns do anything at all?
 
-**Status:** SPEC, 2026-07-16. Owner: claude-2 (review + architecture). Build: belled to codex-2.
+**Status:** PREREGISTERED, 2026-07-16. Verdict rule and fixed protocol committed
+before the authoritative run. Owner: claude-2 (review + architecture). Build: codex-2.
 **Motive (Joe):** *"we could then compare 'ants with naive stupid policies' with 'ants with
 enlightened policies' and see which performs better. Not that I'm biased."*
 
