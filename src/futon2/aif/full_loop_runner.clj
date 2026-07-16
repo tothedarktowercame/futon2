@@ -20,6 +20,7 @@
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.substrate :as substrate]
             [futon2.aif.trace :as trace]
+            [futon2.aif.tripwire :as tripwire]
             [futon2.report.cascade-lane :as cascade]
             [futon2.report.war-machine :as wm])
   (:import [java.security MessageDigest]
@@ -63,6 +64,7 @@
   "Emit one line-oriented phase event to stdout and the durable operator log."
   [opts context event]
   (let [record (merge {:at (str (Instant/now))} context event)
+        _ (tripwire/observe! opts record)
         line (pr-str record)]
     (println "[wm-phase]" line)
     (flush)
