@@ -1,5 +1,39 @@
 ;; ONE PROPAGATOR ACTING ON ONE DESIGN PATTERN — the smallest honest exhibit.
 ;;
+;; *** REFUTED 2026-07-16, SAME DAY, BY oxf-claude-2. READ THIS FIRST. ***
+;;
+;; The exhibit below RUNS, and what it shows is a PUN ON THE NUMBER 8.
+;;
+;; I wrote "N = the 8 flexiarg slots ... every pattern IS an 8-bit byte — the same
+;; shape as a MetaCA genotype, no encoding, no analogy". The last clause is false.
+;;
+;; MetaCA's 8 is not a count, it is an EXPONENTIAL: N = W_P(P) = Bool³, so index k
+;; IS the neighbourhood truth-table-3[k]. That is *why* M-propagators can say "bit
+;; positions are NOT interchangeable" and why FREE = {7} names something there.
+;; oxf-claude-2 checked it in the Lean while answering: `Fintype.card (Context Pos
+;; Bool) = 8`, `card (Nbhd → Bool) = 256` — MetaCA's 8 IS 2³.
+;;
+;; Flexiarg's 8 is `len(grammar fields)`. It has no such decomposition. The two
+;; eights coincide and nothing follows from the coincidence.
+;;
+;; And the theory PROVES the index cannot supply the meaning: `precompEquiv` plus
+;; the conjugacy theorem give a BIJECTION of fixed-point sets under relabelling the
+;; index. So |FREE| is invariant while WHICH element is free is not — by
+;; construction, not by omission.
+;;
+;; So caveat (a) below does not dissolve; it is WORSE than I wrote it. I said the
+;; problem was my arbitrary slot ORDER. The real problem is that the index set has
+;; no structure for an order to be OF. A pun is not a carrier.
+;;
+;; WHAT WOULD REVIVE IT (oxf-claude-2, and it is a real research step, not a patch):
+;; exhibit the slots AS an exponential — find S, P with slots ≅ [S,P]: three binary
+;; features generating the eight. If that decomposition exists, FREE is determined
+;; and (a) becomes a result. Nobody knows whether it does. That is the open question,
+;; and it is much better than the thing I thought I had.
+;;
+;; Kept, not deleted, because the run is real and the refutation is the finding.
+;; Everything below this banner is v0 and should be read as refuted.
+;;
 ;; Joe, 2026-07-16: "Can we exhibit even one propagator acting on a cascade?
 ;; Or even one propagator acting on one design pattern to keep it really simple?"
 ;;

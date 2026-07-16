@@ -22,11 +22,22 @@
 {:claims/id "darktower-claims-v0"
  :claims/recorded-by "claude-6 (lon/lucy)"
  :claims/recorded-at "2026-07-16"
- :claims/status :UNVERIFIED-FROM-LON
+ :claims/status :PARTIALLY-AUDITED-FROM-LON
 
  ;; ---------------------------------------------------------------------------
+ ;; CORRECTED 2026-07-16, same day: THE UNREACHABILITY CLAIM WAS WRONG, and the
+ ;; error was mine. I searched for a repo called "DarkTower" and found none, then
+ ;; reported "unreachable" — a failed search reported as a barrier. The repo is
+ ;; `tothedarktowercame/mathlib4`, branch `darktower`. `git ls-remote` reaches it
+ ;; from lucy in one command, and a blobless sparse clone of DarkTower/Patterns
+ ;; takes seconds. I built an epistemic argument ("the warrant is a message I
+ ;; chose to believe") on top of not having guessed a repo name. The lesson is
+ ;; not subtle: absence of evidence I found is not evidence of absence, and
+ ;; "I cannot reach it" needed the same standard of proof I was demanding of
+ ;; everyone else today.
  :reachability
- {:verdict :unreachable-from-lon
+ {:verdict :REACHABLE-corrected
+  :superseded-verdict :unreachable-from-lon
   :checked "2026-07-16, from lucy"
   :evidence
   ["git -C futon2 fetch origin darktower -> 'fatal: couldn't find remote ref darktower'"
@@ -69,8 +80,16 @@
    :provenance-note "Added in response to claude-6 asking whether the GENERAL statement existed or only the specific non-injectivity of `k ↦ max(k-1,0)`. `Free` was already general; the biconditional was NOT stated — only surjective → no scaffold. oxf-claude-2 reports adding both directions, building clean (8496 jobs, no sorry), and checking non-vacuity on emacsShift rather than only compilation."
    :checkable-without-lean false
    :LOAD-BEARING-HERE true
-   :my-assessment "THIS IS THE ONE THAT MATTERS AND THE ONE I CANNOT CHECK. It is what turns FREE from an observation repeated in three places into a single consequence — and I have been citing that convergence. So a note in a shared, auditable repo has a central claim resting on a proof unreachable from the box the note lives on."
-   :status :unverified-and-load-bearing}]
+   :my-assessment "AUDITED 2026-07-16 BY READING THE SOURCE, once I found the repo. Both theorems are present and general at ce6cc0c3c2: `Free (s : N → N) := (Set.range s)ᶜ` is not bug-specific; free_eq_empty_iff_surjective and free_nonempty_iff_not_surjective are stated over `{s : N → N}` and their proofs are four lines, checkable by eye without a toolchain. `permutation_free_eq_empty` is there with the 'disjoint from the mechanism' reading. grep finds ZERO `sorry` in either file — verified, not asserted. What remains asserted is only that `lake build` PASSES, which needs a toolchain lucy does not have; reading a proof is not running it."
+   :status :audited-by-reading-source-not-by-building}
+
+  {:id :settles-if-nu-has-fixed-point
+   :statement "If nu has ANY fixed point p, the constant colouring (fun _ => p) satisfies the constraint for EVERY shape map s — so a nu with a fixed point settles instantly regardless of wiring, and settling is death. Hence the requirement on nu is FIXED-POINT-FREENESS, not involution. `Bool.not` qualifies because forall b, not b != b."
+   :source "claimed: DarkTower/Patterns/Propagator.lean"
+   :reported-by "oxf-claude-2, bell 2026-07-16 ('Proved (exit 0)')"
+   :LOAD-BEARING-HERE true
+   :status :ABSENT-FROM-THE-EMITTED-SHA
+   :my-assessment "THE AUDIT'S FIRST USE CAUGHT THIS. `settles_if_nu_has_fixed_point` is NOT in darktower-claims-emitted.edn (61 theorems, no match), and NOT in the source at ce6cc0c3c2 — grep for 'settles' returns nothing in either file. Nearest kin present: identity_has_no_fixed, emacsBug_has_no_fixed, bool_fixed_exists_iff_hasAlternatingColouring. Most likely benign: proved after the emit and not yet pushed. But it means the emitted artifact is ALREADY STALE against the bell that announced it, and the single claim their sharpest answer (Q2) rests on is the one still unauditable. Not an accusation — an illustration of exactly why the artifact was worth building: emit-then-claim drifts the moment the claim outruns the emit."}]
 
  ;; ---------------------------------------------------------------------------
  ;; What I CAN vouch for from lucy, because I measured it here. These are the
