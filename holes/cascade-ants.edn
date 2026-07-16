@@ -1,0 +1,164 @@
+{:cascade/id "ants-forward-pattern-cascade-v0"
+ :cascade/title "The Ant Pattern Cascade"
+ :cascade/subtitle "Five inherited patterns, read as a cascade — and what the reading exposes"
+ :cascade/psi
+ "An ant brain characterised as a pattern cascade: one given at the floor, a derivation of contended parameters above it, and a drive that cannot settle. The ants already hold the one thing the futon7a cascade declares a hole — an external rubric. They eat."
+
+ :cascade/generated
+ "Composed 2026-07-16 by claude-2 from futon3/library/ants/*.flexiarg (5 patterns, IF/HOWEVER/THEN/BECAUSE/NEXT-STEPS + @aif-delta + @status + @sigils). Wires read off slot-adjacency (one pattern's THEN feeding another's IF) AND off @aif-delta key contention (two patterns writing the same config key). Style follows futon7a lab/pattern-cascade/cascade.edn. Bottom-to-top: it is a Hasse diagram of a join-semilattice, not a proof tree — joins go up."
+
+ :cascade/epistemic-note
+ "THE EPISTEMIC AXIS IS NOT THE ONE futon7a USES. There, attested = a war-room ruling.
+  Here, every flexiarg carries @status[ready] with evidence pointing at Futon2 goldens —
+  but those goldens attest that the pattern FAITHFULLY DESCRIBES THE CODE, not that it
+  IMPROVES FORAGING. So:
+    :attested     = 'this describes what Futon2 does'   (evidence: goldens)
+    :hypothetical = 'this helps the ant forage'         (NO evidence; see :cascade/gate)
+  Reading @status[ready] as 'the pattern works' is the category error this cascade exists
+  to prevent."
+
+ :cascade/gate
+ {:ran "2026-07-16, scripts/pattern_authority_gate.clj, 20 paired seeds x 300 ticks"
+  :verdict "AUTHORITY FAIL — no real pattern differed from `off` by held-out yield sign test at any lambda in {0.1,0.5,1.0}"
+  :controls "SOUND. sham (:cyber/baseline) tied `off` exactly on every seed at every lambda, matching full event traces; lambda=0 tied for all five ids."
+  :scope-limit
+  "CRUCIAL: the gate set `:cyber-pattern {:id ...}` DIRECTLY. It did NOT call
+   `cyber/attach-config`, so it never merged the @aif-delta into :aif-config. The patterns
+   have TWO channels and only one was tested:
+     channel 1  @aif-delta -> :aif-config   (via attach-config, keyword path,
+                `cyber.clj:213` = `(update :aif-config merge-deep (:aif-delta config))`)
+                -- the patterns' DECLARED PARAMETERS.  ** NEVER TESTED **
+     channel 2  pattern_efe.clj hard-coded risk/info-gain (via :id + lambda.pattern)
+                -- a SEPARATE reimplementation.  ** TESTED, FAILED **
+   So the verdict reads: 'the hard-coded EFE terms do not move the ant.' It does NOT read
+   'the design patterns do not move the ant.' Channel 1 is untested and is the cascade's
+   first live question."
+  :readme-nuance
+  "README-xeno-loop §0 says `config->aif-delta` merges ONLY :precision (:tau,:Pi-o). TRUE —
+   but that is `apply-external-config`, the `{:config ...}` path used by the old futon5
+   cyberant configs. The FLEXIARG path (`attach-config`, keyword id) merges the WHOLE delta.
+   §0's inertness critique does not transfer to the library patterns."}
+
+ :cascade/boxes
+ [;; ---- the floor: the given ----
+  {:id "b0" :ns "ants" :epistemic :attested :role :foundation
+   :pattern "ants/baseline-cyber-ant" :title "Baseline Cyber-AIF Ant"
+   :sigils "🗿/三 🌝/四" :status :draft
+   :delta {} ;; literally empty: "no overrides; identical behavior to :aif species"
+   :gist "The unpatterned ant. Its @aif-delta is EMPTY — it is the identity element of the pattern algebra."
+   :note "FREE: the only box with no incoming wire. The scaffold. And note what the propagator theory says about the identity: all cycles length 1 = odd = NO fixed point. The unpatterned ant is the random walk."}
+
+  ;; ---- the derivation: four parameter patterns ----
+  {:id "hp" :ns "ants" :epistemic :attested :role :precision
+   :pattern "ants/hunger-precision-coupling" :title "Hunger ↔ Precision Coupling"
+   :sigils "💫/六 👴/万" :status :ready
+   :delta {:precision {:need-gain 0.7 :dhdt-gain 0.9 :tau-survival-gain 0.6}
+           :efe {:lambda {:survival 1.4}}}
+   :gist "Hungrier ants lower tau; home safety lifts it; deficit reserves subtract."
+   :role-note "The tau SOURCE. Everything downstream contends with it."}
+
+  {:id "cr" :ns "ants" :epistemic :attested :role :discipline
+   :pattern "ants/cargo-return-discipline" :title "Cargo Return Discipline"
+   :sigils "📐/归" :status :ready
+   :delta {:modes {:cargo-high 0.55}
+           :precision {:tau-cap 1.2}
+           :actions {:return {:cargo-thresh 0.1 :empty-home-pen 1.1}}}
+   :gist "Penalise :return until a deposit fires; cap tau so the agent exploits completion."
+   :role-note "Writes tau (cap) and :return cost. The only pattern touching :modes."}
+
+  {:id "pt" :ns "ants" :epistemic :attested :role :signalling
+   :pattern "ants/pheromone-trail-tuner" :title "Adaptive Trail Tuner"
+   :sigils "➰/去" :status :ready
+   :delta {:precision {:pher-scale 1.3 :trail-grad-scale 1.2}
+           :efe {:lambda {:info 0.5}}
+           :actions {:pheromone {:base-cost 0.008 :hunger-mult 0.08}}}
+   :gist "Adapt signalling to novelty and resource pressure."
+   :role-note "Writes :efe :lambda :info = 0.5. See :cascade/contentions."}
+
+  {:id "ws" :ns "ants" :epistemic :attested :role :exploration
+   :pattern "ants/white-space-scout" :title "White-Space Scout"
+   :sigils "🌹/刊 👎/二" :status :ready
+   :delta {:precision {:food-scale 1.8 :novelty-scale 1.4 :tau-floor 0.12}
+           :efe {:lambda {:info 0.6 :ambiguity 0.4}}}
+   :gist "White space implies scout stance: raise :forage, tolerate uncertainty."
+   :role-note "Writes :efe :lambda :info = 0.6. DIRECTLY CONTENDS with pt."}
+
+  ;; ---- the frontier ----
+  {:id "hc" :ns "forward-model" :epistemic :hypothetical :role :frontier
+   :pattern "forward-model/food-cache-relay" :title "Food-Cache Relay"
+   :extends "cr"
+   :gist "IF :carrying and :made-progress-homeward HOWEVER :still-far-from-home THEN :drop and :forage BECAUSE :relay-beats-the-round-trip. Joe 2026-07-16, refined: the naive version (drop when far) is a food SINK — nothing ratchets it home."
+   :blocked-by "hole-vocab"
+   :note "The FIRST pattern that would add a CAPABILITY rather than a constraint. All five inherited patterns only reweight the four fixed actions."}
+
+  {:id "hg" :ns "forward-model" :epistemic :hypothetical :role :loop
+   :pattern "forward-model/graduate-by-yield" :title "Graduate By Yield"
+   :gist "A pattern becomes attested-as-helpful only by passing the authority gate on held-out boards. Differs, not beats: a pattern that reliably harms is still a live actuator."}
+
+  {:id "hm" :ns "forward-model" :epistemic :hypothetical :role :apex
+   :pattern "forward-model/the-ant-brain-is-a-pattern-cascade" :title "The Ant Brain Is A Pattern Cascade"
+   :gist "The join. Scaffold (FREE) + derivation (wires) + a drive that cannot settle (the holes) — Figure 8's anatomy, in an agent."}]
+
+ :cascade/wires
+ [{:from "b0" :to "hp" :kind :enables :why "hp's IF ('the affect layer reports hunger trends') presupposes the loop b0 describes."}
+  {:from "b0" :to "cr" :kind :enables :why "cr's IF ('the agent has cargo >= 0.05, repeatedly chooses :return') presupposes b0's mode/action machinery."}
+  {:from "b0" :to "pt" :kind :enables :why "pt's IF ('local pheromone signal weak, novelty high') presupposes b0's observation ABI."}
+  {:from "b0" :to "ws" :kind :enables :why "ws's IF ('observations satisfy the white? detector') presupposes b0's ABI."}
+  {:from "hp" :to "cr" :kind :contends :why "hp sets the tau response curve; cr caps tau at 1.2 to stop thrash. Both write :precision tau."}
+  {:from "hp" :to "pt" :kind :contends :why "hp lowers tau when hungry; pt anneals tau upward to encourage signalling."}
+  {:from "hp" :to "ws" :kind :contends :why "hp lowers tau when hungry; ws sets :tau-floor 0.12 to keep exploring."}
+  {:from "pt" :to "ws" :kind :conflicts :why "BOTH write :efe :lambda :info. pt = 0.5, ws = 0.6. Under merge-deep the winner is ATTACHMENT ORDER — not a property of either pattern."}
+  {:from "cr" :to "ws" :kind :conflicts :why "cr penalises :return until deposit; ws lowers :return to favour :forage. Same channel, different reasons — compatible by luck, not by design."}
+  {:from "cr" :to "hc" :kind :extends :why "cache-relay is cargo discipline with a new action: don't just avoid thrash, avoid the round trip."}
+  {:from "hc" :to "hg" :kind :candidate :why "the relay is a candidate that can graduate by yield."}
+  {:from "hp" :to "hg" :kind :candidate :why "channel 1 (@aif-delta) is untested; hp can still graduate."}
+  {:from "cr" :to "hg" :kind :candidate :why "ditto."}
+  {:from "pt" :to "hg" :kind :candidate :why "ditto."}
+  {:from "ws" :to "hg" :kind :candidate :why "ditto."}
+  {:from "hg" :to "hm" :kind :realises :why "the gated loop is what realises the ant brain as a cascade."}]
+
+ :cascade/contentions
+ [{:key [:efe :lambda :info] :writers {"pt" 0.5 "ws" 0.6}
+   :severity :unsat
+   :why "Two patterns demand different values of ONE key. `merge-deep` makes the result depend on attachment order, which is not a property of either pattern. Only one pattern is active at a time today (`:pattern/active` is singular), so they never collide — the conflict is INVISIBLE until you compose. A cascade composes. This is the constraint `g[k] = 0.5 AND g[k] = 0.6`: unsatisfiable."}
+  {:key [:precision "tau-family"] :writers {"hp" ":need-gain/:dhdt-gain/:tau-survival-gain" "cr" ":tau-cap" "ws" ":tau-floor"}
+   :severity :contended
+   :why "Three patterns shape tau through DIFFERENT keys, so merge-deep does not detect the contention — but they are arguing about one quantity. cr caps it, ws floors it, hp drives it. Whether cap > floor is never checked."}
+  {:key [:actions :return] :writers {"cr" ":cargo-thresh/:empty-home-pen" "ws" "G-lowering (prose only, no delta key)"}
+   :severity :latent
+   :why "ws's THEN says 'lower G for :return' but its @aif-delta has NO :actions key. The behaviour is in prose, not in the delta. Channel 1 cannot express it; only the hard-coded pattern_efe can — and that channel just failed the gate."}]
+
+ :cascade/joins
+ [{:of ["hp" "cr"] :pattern "tau-is-a-shared-resource" :gist "hunger drives tau, discipline caps it — the join is a tau budget nobody owns."}
+  {:of ["pt" "ws"] :pattern "novelty-is-double-counted" :gist "both read novelty and both price :info. The join is a single exploration drive written twice."}
+  {:of ["cr" "hc"] :pattern "avoid-the-round-trip" :gist "cargo discipline and cache relay are the same pattern at two strengths: stop thrashing (reweight) vs stop travelling (new action)."}]
+
+ :cascade/terminals
+ [{:from "hc" :into "M-action-vocabulary (P3 FAIL x2 -> candidate generator is the gap)"
+   :gist "the relay needs :drop; the action vocabulary is where that gap already lives."}
+  {:from "hg" :into "scripts/pattern_authority_gate.clj"
+   :gist "the gate exists and its controls are sound; it needs re-running on channel 1."}
+  {:from "hm" :into "futon2/holes/N-patterns-as-arrows.md"
+   :gist "the formalism that says what a cascade IS; DarkTower/Patterns/ is being formalised now."}]
+
+ :cascade/holes
+ [{:id "hole-vocab" :severity :blocking
+   :gist "The action vocabulary is FOUR macro actions: [:hold :forage :return :pheromone] (policy.clj:12). No pattern can add one. Every inherited pattern only REWEIGHTS them; two of them (hp, pt) are pure penalties with no info-gain, so they can only restrict. `hc` (the relay) is the first pattern wanting a capability — and it cannot be written."}
+  {:id "hole-compose" :severity :blocking
+   :gist "`:pattern/active` is singular — one pattern at a time. A cascade is by definition composed. Composition is not merely unimplemented: :cascade/contentions shows it is currently INCOHERENT (info 0.5 vs 0.6). Composition needs a resolution rule, and 'last write wins' is not one."}
+  {:id "hole-channel1" :severity :open
+   :gist "The patterns' declared parameters (@aif-delta) have never been tested. The gate tested only the hard-coded EFE reimplementation. `(cyber/attach-config ant :cyber/cargo-return)` is the untried path."}
+  {:id "hole-because" :severity :latent
+   :gist "Every BECAUSE in the library is about GENERALISATION ('the same logic applies to graph walkers'), not about the ant. And every NEXT-STEPS is 'bind this to Futon5's uplift'. The patterns' agency channel points at PORTING, not at foraging. They were written to export the ant, not to improve it — which is a reason the gate found nothing, distinct from the channel-1 gap."}]
+
+ :cascade/filled-holes
+ [{:id "hole-rubric" :from "futon7a lab/pattern-cascade cascade.edn"
+   :gist "futon7a declares: 'An external evaluation rubric a third party holds (T-inf): xeno-evaluation cannot be self-supplied.' THE ANTS FILL THIS HOLE. Yield is external, world-supplied, and not self-reported: the ants just like to eat. That is precisely why the ant domain is grounded where the tokamak's objective is 'unanchored' — the tokamak tried to supply its own rubric. And the propagator theory says WHY no system can: a self-evaluating cascade is a fixed point of its own evaluation map, a 1-cycle, and equivariant maps exist iff every cycle is EVEN. One is odd. hole-rubric is a THEOREM, and the ants escape it by having a world."}]
+
+ :cascade/shape
+ {:free ["b0"]
+  :free-note "Exactly one box with no incoming wire — the same shape as futon7a's cascade (a1 alone) and as Figure 8 (free = {7}). One given."
+  :unsat ["contention :efe/:lambda/:info"]
+  :unsat-note "The irreducible tension. In the constraint reading of the propagator (F-what-the-propagator-actually-does.md): FREE = the givens, CHAIN = the derivation, UNSAT = the HOWEVER. A cascade with no unsat core is frozen; this one has exactly one, and it is real."
+  :sinks ["hm"]
+  :sinks-note "Only the apex. Unlike futon7a, where `a2` is an undeclared sink (a THEN no IF consumes — a mechanically-findable strategic hole)."}}
