@@ -201,9 +201,13 @@ hat. That happened at smoke scale (60 ticks, 3 seeds).
 - The C-vector is a **live actuator** (§3). Unlike `cyber.clj`'s wiring.
 - The board screen restores measurement (held-out baseline 0.058 → 34.7).
 
-**NOT established:** the xeno loop itself. With the *frozen* propagator, **drift (88.4)
-beat evolved (54.4)** — which we now believe was the category error (§2), not a result.
-The rewired version is under test. **Do not cite the loop as working.** It is deliberately
+**NOT established — and now measured as a NEGATIVE.** With the propagator REWIRED to fire
+live (§2), **no arm beats the baseline**: baseline 34.7 > drift 20.2 > evolved 11.3 >
+identity 8.6 on held-out boards. Every live-propagator arm is worse than no propagator.
+Likely a *third* category error — the rule byte is a mutable substrate, the C-vector is a
+goal that must persist, so propagating it is amnesia rather than evolution. Full writeup +
+the falsifying test (a cadence sweep) and candidate reformulations:
+**`holes/F-propagator-on-c-vector-NEGATIVE.md`**. **Do not cite the loop as working.** It is deliberately
 excluded from the paper draft (`futon5/holes/tech-notes/paper/`) for exactly this reason.
 
 **Known limits:** 8 train boards, pop 6, 6 generations is a small search; yield magnitudes
