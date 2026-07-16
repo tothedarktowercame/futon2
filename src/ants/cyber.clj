@@ -1,5 +1,26 @@
 (ns ants.cyber
-  "Local pattern bridge - reads from futon3 library.
+  "OLD CYBERANTS — EVIDENCE OF A FAILURE, NOT A COMPONENT. See ../../README-xeno-loop.md §0.
+
+   *** DO NOT BUILD TRANSFER / PROPAGATOR / WIRING WORK ON THIS NAMESPACE. ***
+   The current ants are `ants.aif.*` (the modern AIF forager, M-aif-ants-port Port 1).
+   This file is alphabetically earlier, has 'cyber' in the name, and is what you find
+   first — which is exactly the trap this notice exists to spring.
+
+   WHY (verified 2026-07-14, M-aif-ants-port): `config->aif-delta` below merges ONLY
+   `:precision` (`:tau`, `:Pi-o`) into the live ant. `:policy-priors`, `:pattern-sense`,
+   `:adapt-config` are stored under `:cyber-pattern -> :config` via `select-keys` and are
+   NEVER READ — only `:id` and `:ticks-active` are consumed anywhere. So the old domain-
+   transfer experiment's `random-wiring` control permuted INERT FIELDS: it was
+   operationally byte-identical to the treatment. That 'null' was a TAUTOLOGY, and it was
+   read as refuting the hypothesis rather than the apparatus.
+
+   If you are about to wire something into `:cyber-pattern`, stop and read
+   ../../README-xeno-loop.md. Any new actuator must pass an authority gate FIRST
+   (`scripts/ant_authority_gate.clj`) — prove the knob moves the ant before claiming
+   anything about what moving it means.
+
+   ---
+   Local pattern bridge - reads from futon3 library.
    Replaces futon5 dependency.
 
    Provides pattern-based configuration for cyber-ants, loading
