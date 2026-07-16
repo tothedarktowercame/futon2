@@ -31,6 +31,7 @@
 (def default-substrate-base "http://127.0.0.1:7073")
 (def default-author "zai-5")
 (def default-reviewer "codex-7")
+(def default-repair-reviewer "codex-1")
 (def default-phase-log "/home/joe/code/futon2/data/wm-full-loop-phases.edn.log")
 (def default-agent-budget-ms (* 45 60 1000))
 (def semantic-epoch :full-loop-real-actuation-v6)
@@ -46,6 +47,9 @@
                             default-agency-base)
            :author (or (System/getenv "FUTON_WM_AUTHOR_AGENT") default-author)
            :reviewer (or (System/getenv "FUTON_WM_REVIEWER_AGENT") default-reviewer)
+           :repair-reviewer
+           (or (System/getenv "FUTON_WM_REPAIR_REVIEWER_AGENT")
+               default-repair-reviewer)
            :substrate-url (or (System/getenv "FUTON_SUBSTRATE_URL")
                               (System/getenv "FUTON1B_URL")
                               default-substrate-base)
@@ -243,16 +247,18 @@
     (and a (true? (:invoke-ready? a)) (= "idle" (name (:status a))))))
 
 (defn readiness
-  "Read-only readiness view for the configured author/reviewer pair."
+  "Read-only readiness view for the configured author and reviewer roles."
   ([] (readiness {}))
   ([raw-opts]
-   (let [{:keys [agency-base author reviewer] :as opts} (config raw-opts)
+   (let [{:keys [agency-base author reviewer repair-reviewer] :as opts}
+         (config raw-opts)
          roster (agent-roster agency-base)]
      {:configuration (select-keys opts [:agency-base :substrate-url :author :reviewer
+                                        :repair-reviewer
                                         :agent-budget-ms
                                         :phase-log :window-days])
       :agents (into {}
-                    (for [agent [author reviewer]
+                    (for [agent (distinct [author reviewer repair-reviewer])
                           :let [record (or (get roster (keyword agent))
                                            (get roster agent))]]
                       [agent {:available? (available? roster agent)
@@ -804,7 +810,8 @@
   "Run one opportunity synchronously. Dependencies may be injected in opts for tests."
   [raw-opts]
   (let [phase-events (atom [])
-        {:keys [trigger cohort? semantic-epoch author reviewer window-days]
+        {:keys [trigger cohort? semantic-epoch author reviewer repair-reviewer
+                window-days]
          :as opts} (assoc (config raw-opts) :phase-events phase-events)
         started (System/currentTimeMillis)
         opportunity-id (or (:opportunity-id opts)
@@ -813,6 +820,7 @@
         _ (emit-phase! opts @phase-context {:phase :opportunity :transition :start})
         checkpoints (atom {})
         dispatched-turns (atom 0)
+        reviewer-of-record (atom reviewer)
         closing? (atom false)
         roster-result (try
                         {:value
@@ -831,14 +839,19 @@
         time-cell (term {:opportunity-id opportunity-id
                          :trigger trigger
                          :machine-state {:started-at (str (Instant/now))}
-                         :agent-roster (select-keys roster [(keyword author) (keyword reviewer)
-                                                            author reviewer])
+                         :agent-roster
+                         (select-keys roster
+                                      [(keyword author) (keyword reviewer)
+                                       (keyword repair-reviewer)
+                                       author reviewer repair-reviewer])
                          :code-state (assoc code-state
                                             :resolved-mode-flags (wm/arena-mode-flags)
                                             :configuration-digest
-                                            (sha256 (select-keys opts
-                                                                 [:author :reviewer :trigger
-                                                                  :semantic-epoch])))
+                                            (sha256
+                                             (select-keys opts
+                                                          [:author :reviewer
+                                                           :repair-reviewer :trigger
+                                                           :semantic-epoch])))
                          :semantic-epoch semantic-epoch}
                         {:kind :trigger-opportunity :id opportunity-id})
         start-event (when cohort? (cohort/start-attempt! time-cell))
@@ -902,7 +915,8 @@
                                   {:attempt-id attempt-id :opportunity-id opportunity-id
                                    :batch-id (:batch-id opts)
                                    :trigger trigger :selected-target (:target data)
-                                   :outcome outcome :author author :reviewer reviewer
+                                   :outcome outcome :author author
+                                   :reviewer @reviewer-of-record
                                    :commit (:commit data) :witness (:witness data)
                                    :achievement
                                    {:tier (cond
@@ -986,9 +1000,9 @@
                          :failure-kind :code-state-failed
                          :failure-stage :code-state}
                         e)))
-      (when-not (and (available? roster author) (available? roster reviewer))
-        (throw (ex-info "Configured author or reviewer is unavailable"
-                        {:outcome :agent-unavailable :author author :reviewer reviewer})))
+      (when-not (available? roster author)
+        (throw (ex-info "Configured author is unavailable"
+                        {:outcome :agent-unavailable :author author})))
       (run-phase! opts @phase-context :substrate-preflight
                   #((or (:substrate-preflight-fn opts) substrate-preflight!) opts))
       (run-phase! opts @phase-context :preference-refresh
@@ -1037,15 +1051,20 @@
                         (run-phase! opts @phase-context :selection
                                     #(selection-judge window-days)))
             mode-flags ((or (:mode-flags-fn opts) wm/arena-mode-flags))
+            ordinary-entry (selected-entry judgement0)
+            entry (if stop-line (repair-entry stop-line) ordinary-entry)
+            repair-action? (= :repair-machine-failure
+                              (get-in entry [:action :type]))
+            reviewer (if repair-action? repair-reviewer reviewer)
+            _ (reset! reviewer-of-record reviewer)
             judgement (assoc judgement0 :wm-version
                              ((or (:version-stamp-fn opts) trace/wm-version-stamp)
                               (assoc mode-flags
                                      :trigger trigger
                                      :real-actuation? true
                                      :author author
-                                     :reviewer reviewer)))
-            ordinary-entry (selected-entry judgement)
-            entry (if stop-line (repair-entry stop-line) ordinary-entry)
+                                     :reviewer reviewer
+                                     :repair-reviewer repair-reviewer)))
             target (some-> entry selected-target)
             ranked-for-review (if stop-line
                                 [entry]
@@ -1085,6 +1104,14 @@
           (throw (ex-info "War Machine abstained or selected no addressable action"
                           {:outcome (if (= :abstain (get-in judgement [:decision :action]))
                                       :abstained :no-selection)})))
+        (when (or (= author reviewer) (not (available? roster reviewer)))
+          (throw (ex-info "Selected reviewer is unavailable or is the author"
+                          {:outcome :agent-unavailable
+                           :failure-kind :agent-unavailable
+                           :failure-stage :agent-readiness
+                           :author author :reviewer reviewer
+                           :review-role (if repair-action?
+                                          :ground-control :ordinary)})))
         (when (and discrimination (not (:passes? discrimination)))
           (throw (ex-info "Leading feasible policies have no G discrimination"
                           {:outcome :policy-nondiscrimination
@@ -1112,9 +1139,7 @@
           ;; learned habit prior—only after its production construction path
           ;; has been demonstrated. Failed selections remain fully auditable
           ;; in the cohort and stop-line finding, but cannot reinforce E(pi).
-          (let [repair-action? (= :repair-machine-failure
-                                  (get-in entry [:action :type]))
-                trace-path (when-not repair-action?
+          (let [trace-path (when-not repair-action?
                              ((or (:trace-fn opts) trace/write-trace!) judgement))]
           (checkpoint! :construction
                        (term {:mission (str target)
@@ -1217,7 +1242,8 @@
                                  (swap! dispatched-turns inc)
                                  ((or (:dispatch-fn opts) dispatch!) opts author
                                   "wm-full-loop" target
-                                  (author-prompt opts target mission construction
+                                  (author-prompt (assoc opts :reviewer reviewer)
+                                                 target mission construction
                                                  stop-lines)))))
                 author-job-id (:job-id author-response)]
             (checkpoint! :dispatch
@@ -1343,7 +1369,8 @@
                             (swap! dispatched-turns inc)
                             ((or (:dispatch-fn opts) dispatch!) opts reviewer
                              "wm-full-loop" target
-                             (reviewer-prompt opts target construction repo commit
+                             (reviewer-prompt (assoc opts :reviewer reviewer)
+                                              target construction repo commit
                                               author-job stop-lines)))))
                       review-job
                       (if recovered-review-job
@@ -1451,7 +1478,7 @@
                           ((or (:repair-resolve-fn opts) repair/resolve!)
                            obligation
                            {:attempt-id attempt-id :commit commit
-                            :reviewer reviewer
+                            :reviewer @reviewer-of-record
                             :review-job (:job-id review-job)
                             :witness witness
                             :validation {:kind :production-shaped-successor
@@ -1487,7 +1514,7 @@
                             :target (:target failure)
                             :commit (:commit failure)
                             :selected-entry (:selected-entry failure)
-                            :reviewer reviewer
+                            :reviewer @reviewer-of-record
                             :review-job (:job-id review-job)
                             :review-verdict verdict
                             :review-text (job-text review-job)}))

@@ -32,6 +32,7 @@
   (cond-> {:trigger trigger}
     (:author flags) (assoc :author (:author flags))
     (:reviewer flags) (assoc :reviewer (:reviewer flags))
+    (:repair-reviewer flags) (assoc :repair-reviewer (:repair-reviewer flags))
     (:batch-id flags) (assoc :batch-id (:batch-id flags))
     (:tripwire-action flags)
     (assoc :tripwire/action (parse-tripwire-action! (:tripwire-action flags)))
@@ -200,14 +201,16 @@
        "  status\n"
        "  activate\n"
        "  canary [--out PATH] [agent options]\n"
-       "  once [--author zai-5 --reviewer codex-7]\n"
-       "  tick [--author zai-5 --reviewer codex-7]\n"
+       "  once [--author zai-5 --reviewer codex-7 --repair-reviewer codex-1]\n"
+       "  tick [--author zai-5 --reviewer codex-7 --repair-reviewer codex-1]\n"
        "  continuous [--count N] [--interval-seconds N] [agent options]\n"
        "  brief [--batch-id ID] [--format text|edn]\n"
        "  qa ATTEMPT-ID OBJECTIVE ANSWER NOTE [REVIEWER]\n\n"
        "once is an on-demand durée click; continuous emits sequential durée "
        "clicks; tick is one wall-clock opportunity. Agent options also include "
-       "--agent-budget-seconds. Trip escalation is an explicit operator choice: "
+       "--agent-budget-seconds. Machine-repair reviews route to the visible "
+       "--repair-reviewer role (default codex-1 Ground Control), while ordinary "
+       "work uses --reviewer. Trip escalation is an explicit operator choice: "
        "--tripwire-action record|stop-line|park-and-summon (default: record). "
        "The brief lists each objective's allowed answers."))
 

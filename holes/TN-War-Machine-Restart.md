@@ -10,10 +10,13 @@ Audience: any agent (or operator) restarting the War Machine full loop after
 ## 1. How to restart
 
 **Preflight (2 minutes, do all of it):**
-1. Pick an author and a reviewer from the live roster:
-   `GET http://localhost:7070/api/alpha/agents` — both must be `idle` with
-   `invoke-ready? true`. Author ≠ reviewer, always. Both species work in both
-   roles (proven: claude-7 author / codex-6 reviewer grounded `bf14dca`).
+1. Pick an author and an ordinary-work reviewer from the live roster; confirm
+   the standing repair reviewer (`codex-1`, Ground Control, unless explicitly
+   overridden) is connected too:
+   `GET http://localhost:7070/api/alpha/agents` — all required agents must be
+   `idle` with `invoke-ready? true`. Author ≠ effective reviewer, always. Both
+   species work in both roles (proven: claude-7 author / codex-6 reviewer
+   grounded `bf14dca`).
 2. **Never bell an agent and then immediately dispatch it work.** A busy
    agent at dispatch time yields a typed `:agent-unavailable` run (cheap, but
    wasted). If you send context/guidance by bell first, poll the roster until
@@ -36,11 +39,17 @@ Audience: any agent (or operator) restarting the War Machine full loop after
 systemd-run --user --unit wm-run-$(date +%s) --working-directory=/home/joe/code/futon2 \
   --collect bash -c 'clojure -M:wm-full-loop once \
     --author <author-agent> --reviewer <reviewer-agent> \
+    --repair-reviewer codex-1 \
     --tripwire-action park-and-summon > /tmp/wm-run.log 2>&1'
 ```
 - `--tripwire-action` ∈ `record` (shadow) | `stop-line` | `park-and-summon`
   (production default choice as of 2026-07-16; escalation is an explicit
   operator decision, compiled default is `record`).
+- `--reviewer` reviews ordinary mission work. `--repair-reviewer` is the
+  standing Ground Control review lane for every selected stop-line repair;
+  its visible compiled default is `codex-1`. The machine fails closed before
+  author dispatch if the effective reviewer is unavailable or equals the
+  author.
 - systemd-run, not a background shell: runs survive the launching session.
   `tick` instead of `once` is the cron-shaped trigger; no cron is currently
   installed (deliberate — see the paper's R10 gate discussion).

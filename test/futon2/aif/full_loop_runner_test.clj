@@ -43,7 +43,8 @@
   {:cohort? false
    :phase-log-fn (fn [_])
    :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
-                       :codex-7 {:status "idle" :invoke-ready? true}})
+                       :codex-7 {:status "idle" :invoke-ready? true}
+                       :codex-1 {:status "idle" :invoke-ready? true}})
    :judge-fn (fn [_] {:judgement judgement})
    :refresh-fn (fn [])
    :substrate-preflight-fn (fn [_] {:route :test})
@@ -79,7 +80,8 @@
           :phase-log-fn #(swap! phases conj %)
           :repair-open-fn (constantly [])
           :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
-                              :codex-7 {:status "idle" :invoke-ready? true}})
+                              :codex-7 {:status "idle" :invoke-ready? true}
+                              :codex-1 {:status "idle" :invoke-ready? true}})
           :judge-fn (fn [_] {:judgement judgement})
           :refresh-fn (fn [] nil)
           :substrate-preflight-fn (fn [_] {:route :test})
@@ -651,7 +653,8 @@
                                  (swap! implementations conj
                                         [obligation implementation]))
           :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
-                              :codex-7 {:status "idle" :invoke-ready? true}})
+                              :codex-7 {:status "idle" :invoke-ready? true}
+                              :codex-1 {:status "idle" :invoke-ready? true}})
           :judge-fn (fn [_] {:judgement judgement})
           :refresh-fn (fn [])
           :substrate-preflight-fn (fn [_] {:route :test})
@@ -684,6 +687,8 @@
     (is (= :grounded-change (:outcome result)))
     (is (= ["repair-failed-1" "repair-failed-1"]
            (mapv :target @dispatches)))
+    (is (= ["zai-5" "codex-1"] (mapv :agent @dispatches))
+        "stop-line repair review routes to standing Ground Control")
     (is (every? #(re-find #"STOP-THE-LINE" (:prompt %)) @dispatches))
     (is (every? #(re-find #"trusted provenance is mandatory" (:prompt %))
                 @dispatches))
@@ -834,7 +839,8 @@
                           :artifact-ref "late123"
                           :result-summary "FULL_LOOP_AUTHOR: DONE late123"})
           :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
-                              :codex-7 {:status "idle" :invoke-ready? true}})
+                              :codex-7 {:status "idle" :invoke-ready? true}
+                              :codex-1 {:status "idle" :invoke-ready? true}})
           :judge-fn (fn [_] {:judgement judgement})
           :refresh-fn (fn [])
           :substrate-preflight-fn (fn [_] {:route :test})
@@ -859,8 +865,8 @@
                         :implementation-id "impl"})
           :queue-fn identity})]
     (is (= :grounded-change (:outcome result)))
-    (is (= ["codex-7"] @dispatches)
-        "recovery dispatches only the independent reviewer")
+    (is (= ["codex-1"] @dispatches)
+        "recovery dispatches only the standing Ground Control reviewer")
     (is (= stop-line (ffirst @resolutions)))
     (is (= :recovered-existing-artifact
            (get-in @resolutions [0 1 :validation :kind])))))
@@ -892,7 +898,8 @@
                          {:job-id job-id :state "done"
                           :result-summary "FULL_LOOP_REVIEW: APPROVE"})
           :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
-                              :codex-7 {:status "idle" :invoke-ready? true}})
+                              :codex-7 {:status "idle" :invoke-ready? true}
+                              :codex-1 {:status "idle" :invoke-ready? true}})
           :judge-fn (fn [_] {:judgement judgement})
           :refresh-fn (fn [])
           :substrate-preflight-fn (fn [_] {:route :test})
@@ -936,7 +943,8 @@
                          {:job-id job-id :state "done"
                           :result-summary "FULL_LOOP_REVIEW: APPROVE"})
           :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
-                              :codex-7 {:status "idle" :invoke-ready? true}})
+                              :codex-7 {:status "idle" :invoke-ready? true}
+                              :codex-1 {:status "idle" :invoke-ready? true}})
           :judge-fn (fn [_] {:judgement judgement})
           :refresh-fn (fn [])
           :substrate-preflight-fn (fn [_] {:route :test})

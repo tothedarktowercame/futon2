@@ -36,6 +36,16 @@
                (#'cli/runner-opts :wallclock-cron
                                   {:tripwire-action "promote-now"}))))
 
+(deftest repair-reviewer-is-an-explicit-runner-role
+  (is (= "codex-1" runner/default-repair-reviewer))
+  (is (= "codex-1"
+         (:repair-reviewer
+          (#'cli/runner-opts :duree-click-on-demand
+                             {:repair-reviewer "codex-1"}))))
+  (is (nil? (:repair-reviewer
+             (#'cli/runner-opts :duree-click-on-demand {})))
+      "the runner config owns the visible default"))
+
 (deftest continuous-stops-after-first-non-grounded-opportunity
   (let [calls (atom 0)
         outcomes [:grounded-change :agent-unavailable :grounded-change]
