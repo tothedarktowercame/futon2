@@ -12,7 +12,9 @@
             [clojure.set :as set]
             [clojure.string :as str]
             [futon2.aif.full-loop-cohort :as cohort]
-            [futon2.aif.repair-obligation :as repair])
+            [futon2.aif.morning-brief :as brief]
+            [futon2.aif.repair-obligation :as repair]
+            [futon2.aif.trace :as trace])
   (:import [java.nio.file Files StandardOpenOption]
            [java.security MessageDigest]
            [java.time Instant]
@@ -23,6 +25,49 @@
 (def known-job-states
   #{"queued" "pending" "running" "done" "failed" "cancelled" "timed-out"})
 
+(defn- sha256-bytes [bytes]
+  (let [digest (.digest (MessageDigest/getInstance "SHA-256") bytes)]
+    (apply str (map #(format "%02x" (bit-and 0xff %)) digest))))
+
+(def runner-namespace-sources
+  {'futon2.aif.full-loop-runner "src/futon2/aif/full_loop_runner.clj"
+   'futon2.aif.full-loop-cohort "src/futon2/aif/full_loop_cohort.clj"
+   'futon2.aif.repair-obligation "src/futon2/aif/repair_obligation.clj"
+   'futon2.aif.morning-brief "src/futon2/aif/morning_brief.clj"
+   'futon2.aif.trace "src/futon2/aif/trace.clj"})
+
+(defn- source-sha256 [path]
+  (let [file (io/file path)]
+    (when (.isFile file)
+      (sha256-bytes (Files/readAllBytes (.toPath file))))))
+
+(defn- public-var-fingerprint [namespace]
+  (when-let [loaded (find-ns namespace)]
+    (into (sorted-map)
+          (keep (fn [[symbol var]]
+                  (when (and (.isBound ^clojure.lang.Var var)
+                             (fn? @var))
+                    [symbol (.getName (class @var))])))
+          (ns-publics loaded))))
+
+(defn composition-snapshot
+  "Hash the repo source and fingerprint loaded public function roots for the
+  runner's own namespaces. Missing namespaces are omitted until loaded."
+  []
+  (into {}
+        (keep (fn [[namespace path]]
+                (when (find-ns namespace)
+                  [namespace {:source-path path
+                              :source-sha256 (source-sha256 path)
+                              :public-functions
+                              (public-var-fingerprint namespace)}])))
+        runner-namespace-sources))
+
+;; Captured as this observer loads. This is the loaded-source witness against
+;; which each run-start snapshot is compared; namespaces loaded later (the
+;; runner itself during its circular require) are admitted exactly once.
+(defonce composition-baseline (atom (composition-snapshot)))
+
 (def wire-registry
   "The S1 registry. Registry toggles are process-local and independently
   addressable; all wires start enabled in the default :record mode."
@@ -30,8 +75,13 @@
    {:T1 {:title "turn conservation" :enabled? true}
     :T2 {:title "ledger closure" :enabled? true}
     :T3 {:title "exit and stop-line completeness" :enabled? true}
+    :T4 {:title "A-matrix grounding provenance" :enabled? true}
+    :T5 {:title "review commit binding" :enabled? true}
     :T6 {:title "repair-store immutability and status lattice" :enabled? true}
+    :T7 {:title "consecutive stop-line wedge" :enabled? true}
+    :T8 {:title "duplicate-finding livelock" :enabled? true}
     :T9 {:title "phase wall-clock budget" :enabled? true}
+    :T10 {:title "loaded/file code coherence" :enabled? true}
     :T11 {:title "Agency job-state alphabet" :enabled? true}}))
 
 (defonce ^:private phase-snapshots (atom {}))
@@ -48,10 +98,6 @@
 (defn- enabled? [opts wire-id]
   (and (true? (get-in @wire-registry [wire-id :enabled?]))
        (not (contains? (set (:tripwire/disabled-wire-ids opts)) wire-id))))
-
-(defn- sha256-bytes [bytes]
-  (let [digest (.digest (MessageDigest/getInstance "SHA-256") bytes)]
-    (apply str (map #(format "%02x" (bit-and 0xff %)) digest))))
 
 (defn- read-record [file]
   (try
@@ -142,6 +188,53 @@
         (conj {:kind :missing-durable-stop-line
                :attempt-id attempt-id :statuses statuses})))))
 
+(defn- t4 [{:keys [a-matrix-events grounding-witnesses]}]
+  (when (some? a-matrix-events)
+    (let [events (vec a-matrix-events)
+          witnesses (vec grounding-witnesses)
+          implementation-ids (set (keep :implementation-id witnesses))
+          ungrounded (vec (remove #(contains? implementation-ids (:entity-id %))
+                                  events))
+          unnamed (vec (remove :implementation-id witnesses))]
+      (cond-> []
+        (not= (count events) (count witnesses))
+        (conj {:kind :belief-witness-count-mismatch
+               :event-count (count events) :witness-count (count witnesses)})
+        (seq ungrounded)
+        (conj {:kind :belief-event-without-grounding
+               :event-ids (mapv :event-id ungrounded)
+               :entity-ids (mapv :entity-id ungrounded)})
+        (seq unnamed)
+        (conj {:kind :grounding-witness-without-implementation
+               :witnesses unnamed})))))
+
+(defn- reviewer-prompt [job]
+  (or (:prompt job)
+      (get-in job [:request :prompt])
+      (get-in job [:payload :prompt])
+      (some (fn [event]
+              (when (= "prompt" (name (:type event))) (:text event)))
+            (:events job))))
+
+(defn- exact-sha-in-text? [text sha]
+  (and (string? text) (string? sha)
+       (boolean
+        (re-find (re-pattern
+                  (str "(?i)(?<![0-9a-f])"
+                       (java.util.regex.Pattern/quote sha)
+                       "(?![0-9a-f])"))
+                 text))))
+
+(defn- t5 [{:keys [grounded-commit reviewer-job cohort?] :as observation}]
+  (when (and grounded-commit
+             (or cohort? (:tripwire/force? observation)))
+    (let [prompt (reviewer-prompt reviewer-job)]
+      (when-not (exact-sha-in-text? prompt grounded-commit)
+        [{:kind :review-grounding-commit-mismatch
+          :grounded-commit grounded-commit
+          :review-job-id (:job-id reviewer-job)
+          :prompt-present? (string? prompt)}]))))
+
 (defn- t6 [{:keys [repair-before repair-after]}]
   (when (and repair-before repair-after)
     (let [changed (into []
@@ -177,6 +270,65 @@
       :budget-ms phase-budget-ms :multiple (/ (double duration-ms)
                                                phase-budget-ms)}]))
 
+(defn wedge-violations
+  "Return a T7 witness when the same unresolved stop-line occupies the last
+  three opportunities. History entries carry `:selected-stop-line`."
+  [cohort-history closed-repair-ids]
+  (let [recent (vec (take-last 3 cohort-history))
+        selected (mapv :selected-stop-line recent)
+        repair-id (first selected)]
+    (when (and (= 3 (count recent)) repair-id
+               (apply = selected)
+               (not (contains? (set closed-repair-ids) repair-id)))
+      [{:kind :consecutive-stop-line-wedge
+        :repair/id repair-id
+        :attempt-ids (mapv #(or (:attempt-id %) (:attempt/id %)) recent)
+        :consecutive-count 3}])))
+
+(defn- t7 [{:keys [phase transition cohort-history closed-repair-ids]
+            :as observation}]
+  (when (or (:tripwire/force? observation)
+            (and (= :opportunity phase) (= :start transition)))
+    (wedge-violations cohort-history closed-repair-ids)))
+
+(defn livelock-violations
+  "Group immutable findings by the T8 identity and return groups above K=2."
+  [findings]
+  (->> findings
+       (group-by (juxt #(or (:failure-kind %) (:repair/class %))
+                       :target :failed-commit))
+       (keep (fn [[signature records]]
+               (when (> (count records) 2)
+                 {:kind :duplicate-finding-livelock
+                  :signature signature
+                  :repair-ids (mapv :repair/id records)
+                  :finding-count (count records)})))
+       vec))
+
+(defn- t8 [{:keys [phase transition findings] :as observation}]
+  (when (or (:tripwire/force? observation)
+            (and (= :opportunity phase) (= :start transition)))
+    (livelock-violations findings)))
+
+(defn- composition-drift [baseline current]
+  (into []
+        (keep (fn [[namespace expected]]
+                (let [actual (get current namespace)]
+                  (when (not= expected actual)
+                    {:namespace namespace :loaded expected :repo/live actual}))))
+        baseline))
+
+(defn- t10 [{:keys [phase transition composition/current]
+             :as observation}]
+  (when (or (:tripwire/force? observation)
+            (and (= :opportunity phase) (= :start transition)))
+    (let [current (or current (composition-snapshot))
+          missing (apply dissoc current (keys @composition-baseline))
+          _ (when (seq missing) (swap! composition-baseline merge missing))
+          drift (composition-drift @composition-baseline current)]
+      (when (seq drift)
+        [{:kind :loaded-file-code-mismatch :drift drift}]))))
+
 (defn- timestamp-values [job]
   (concat (keep job [:created-at :started-at :completed-at :updated-at])
           (keep :at (:events job))))
@@ -203,7 +355,8 @@
           jobs))))
 
 (def wire-evaluators
-  {:T1 t1 :T2 t2 :T3 t3 :T6 t6 :T9 t9 :T11 t11})
+  {:T1 t1 :T2 t2 :T3 t3 :T4 t4 :T5 t5 :T6 t6 :T7 t7 :T8 t8
+   :T9 t9 :T10 t10 :T11 t11})
 
 (defn evaluate-wire
   "Return this wire's violation witnesses for one complete observation."
@@ -275,6 +428,57 @@
              record)
       record)))
 
+(defn- cross-run-observation [opts observation]
+  (if (and (= :opportunity (:phase observation))
+           (= :start (:transition observation))
+           (or (:cohort? opts) (:tripwire/force? observation)))
+    (let [repair-state (repair-snapshot (or (:repair-root opts)
+                                            repair/default-root))
+          findings (->> repair-state
+                        (keep (fn [[path {:keys [record]}]]
+                                (when (str/starts-with? path "findings/")
+                                  record)))
+                        vec)
+          finding-ids (set (keep :repair/id findings))
+          statuses (effective-statuses repair-state)
+          closed-ids (into #{}
+                           (keep (fn [[id status]]
+                                   (when (#{:resolved :superseded} status) id)))
+                           statuses)
+          attempts (or (:tripwire/cohort-history opts)
+                       (try (:attempts (cohort/ledger))
+                            (catch Throwable _ [])))
+          a-matrix-events
+          (if (contains? opts :tripwire/a-matrix-events)
+            (:tripwire/a-matrix-events opts)
+            (try (:morning-brief-events (trace/latest-trace-record))
+                 (catch Throwable _ [])))
+          grounding-witnesses
+          (if (contains? opts :tripwire/grounding-witnesses)
+            (:tripwire/grounding-witnesses opts)
+            (let [entity-ids (set (keep :entity-id a-matrix-events))]
+              (try (->> (brief/items)
+                        (keep :witness)
+                        (filter #(contains? entity-ids (:implementation-id %)))
+                        vec)
+                   (catch Throwable _ []))))
+          history (mapv (fn [attempt]
+                          (let [selected (or (:selected-stop-line attempt)
+                                             (:selected-mission attempt))]
+                            {:attempt-id (or (:attempt-id attempt)
+                                             (:attempt/id attempt))
+                             :selected-stop-line
+                             (when (contains? finding-ids selected) selected)}))
+                        attempts)]
+      (merge observation
+             {:cohort-history history
+              :closed-repair-ids closed-ids
+              :findings findings
+              :a-matrix-events (vec a-matrix-events)
+              :grounding-witnesses grounding-witnesses}
+             (:tripwire/cross-run-snapshot opts)))
+    observation))
+
 (defn observe!
   "Evaluate enabled wires and perform their actions, returning `record`
   identically. No exception is permitted to escape this observational seam."
@@ -287,7 +491,8 @@
                           (assoc :phase-budget-ms (phase-budget opts record))
                           (#(if (enabled? opts :T6)
                               (with-repair-boundary opts %)
-                              %)))]
+                              %))
+                          (#(cross-run-observation opts %)))]
       (doseq [[wire-id _] @wire-registry
               :when (enabled? opts wire-id)
               witness (evaluate-wire wire-id observation)]

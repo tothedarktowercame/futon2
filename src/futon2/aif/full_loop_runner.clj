@@ -843,7 +843,13 @@
                      nil)
                    (emit-phase! opts @phase-context
                                 {:phase :opportunity :transition :end :outcome outcome
-                                 :duration-ms (- (System/currentTimeMillis) started)})
+                                 :duration-ms (- (System/currentTimeMillis) started)
+                                 :tripwire/snapshot
+                                 {:grounded-commit
+                                  (when (:witness data) (:commit data))
+                                  :reviewer-job (:review-job data)
+                                  :grounding-witnesses
+                                  (cond-> [] (:witness data) (conj (:witness data)))}})
                    result))]
     (try
       (when-let [e (:error roster-result)]

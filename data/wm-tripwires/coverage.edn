@@ -1,0 +1,33 @@
+{:tripwire-coverage/schema-version 1,
+ :generated-at "2026-07-16T10:11:23.259620463Z",
+ :metric :identified-pathology-classes/known-pathology-classes,
+ :identified 4,
+ :total 4,
+ :coverage 1.0,
+ :incidents
+ [{:incident/id :attempt-006-late-author-artifact,
+   :incident/kind :false-inactivity-timeout,
+   :source
+   {:extracted-phase-record
+    "/home/joe/code/futon2/data/wm-tripwires/incidents/attempt-006-author-wait.edn.log",
+    :source-ledger
+    "/home/joe/code/futon2/data/wm-full-loop-phases.edn.log",
+    :attempt-id "attempt-006"},
+   :expected-wires #{:T9},
+   :tripped-wires #{:T9}}
+  {:incident/id :c1-terminal-wedge,
+   :incident/kind :unresolved-stop-line-reselected,
+   :source :synthetic-from-c1-ledger,
+   :expected-wires #{:T7},
+   :tripped-wires #{:T7}}
+  {:incident/id :c2-rejection-livelock,
+   :incident/kind :duplicate-finding-mint,
+   :source :synthetic-from-c2-ledger,
+   :expected-wires #{:T8},
+   :tripped-wires #{:T8}}
+  {:incident/id :finding-7-mixed-image,
+   :incident/kind :loaded-file-code-divergence,
+   :source :synthetic-var-redefinition,
+   :expected-wires #{:T10},
+   :tripped-wires #{:T10}}],
+ :uncovered-incidents []}

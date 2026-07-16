@@ -1,0 +1,12 @@
+{:blind-spots/schema-version 1
+ :updated-at "2026-07-16"
+ :incident-to-neuron-rule
+ "Every new incident must gain an identifying wire or an explicit entry here."
+ :entries
+ [{:blind-spot/id :semantic-wrongness-of-grounded-commit
+   :hidden-state-class :semantically-wrong-but-structurally-valid-change
+   :detectable-by-current-wires? false
+   :permanent-sensor :independent-review
+   :justification
+   "Hashes, provenance, ledgers, and state-machine invariants cannot decide whether a grounded change is semantically correct; independent review remains load-bearing."}]
+ :incident-corpus-uncovered []}

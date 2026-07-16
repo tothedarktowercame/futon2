@@ -2,6 +2,7 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
+            [futon2.aif.repair-obligation :as repair]
             [futon2.aif.tripwire :as tripwire])
   (:import [java.nio.file Files]
            [java.time Instant]))
@@ -51,6 +52,32 @@
              (:kind (first (tripwire/evaluate-wire
                             :T3 (assoc observation :outcome :surprise)))))))))
 
+(deftest t4-a-matrix-provenance-trips-without-grounding-witness
+  (let [event {:event-id "qa-1" :entity-id "impl-1"}
+        violations (tripwire/evaluate-wire
+                    :T4 {:a-matrix-events [event]
+                         :grounding-witnesses []})]
+    (is (= [:belief-witness-count-mismatch
+            :belief-event-without-grounding]
+           (mapv :kind violations)))
+    (is (empty? (tripwire/evaluate-wire
+                 :T4 {:a-matrix-events [event]
+                      :grounding-witnesses [{:implementation-id "impl-1"}]})))))
+
+(deftest t5-review-commit-binding-trips-on-different-sha
+  (let [sha "0123456789abcdef"
+        base {:grounded-commit sha :tripwire/force? true}]
+    (is (= :review-grounding-commit-mismatch
+           (:kind (first (tripwire/evaluate-wire
+                          :T5 (assoc base :reviewer-job
+                                    {:job-id "review"
+                                     :prompt "Review fedcba9876543210"}))))))
+    (is (empty? (tripwire/evaluate-wire
+                 :T5 (assoc base :reviewer-job
+                            {:job-id "review"
+                             :events [{:type "prompt"
+                                       :text (str "Review commit " sha)}]}))))))
+
 (deftest t6-append-only-repair-store-trips-on-rewrite
   (let [before {"findings/r.edn"
                 {:sha256 "old" :record {:repair/id "r" :repair/status :open}}}
@@ -75,6 +102,44 @@
            :duration-ms 2001 :budget-ms 1000 :multiple 2.001}]
          (tripwire/evaluate-wire :T9 {:phase :author-wait :transition :end
                                      :duration-ms 2001 :phase-budget-ms 1000}))))
+
+(deftest t7-wedge-trips-on-third-unresolved-selection
+  (let [history [{:attempt-id "a1" :selected-stop-line "repair-x"}
+                 {:attempt-id "a2" :selected-stop-line "repair-x"}
+                 {:attempt-id "a3" :selected-stop-line "repair-x"}]]
+    (is (= :consecutive-stop-line-wedge
+           (:kind (first (tripwire/evaluate-wire
+                          :T7 {:cohort-history history
+                               :closed-repair-ids #{}
+                               :tripwire/force? true})))))
+    (is (empty? (tripwire/evaluate-wire
+                 :T7 {:cohort-history history
+                      :closed-repair-ids #{"repair-x"}
+                      :tripwire/force? true})))))
+
+(deftest t8-livelock-trips-on-third-duplicate-finding
+  (let [finding (fn [id] {:repair/id id :failure-kind :review-rejected
+                          :target "M-x" :failed-commit "abc"})]
+    (is (= :duplicate-finding-livelock
+           (:kind (first (tripwire/evaluate-wire
+                          :T8 {:findings (mapv finding ["r1" "r2" "r3"])
+                               :tripwire/force? true})))))
+    (is (empty? (tripwire/evaluate-wire
+                 :T8 {:findings (mapv finding ["r1" "r2"])
+                      :tripwire/force? true})))))
+
+(deftest t10-composition-coherence-trips-on-mixed-image
+  (let [original @#'repair/open-obligations]
+    (try
+      (alter-var-root #'repair/open-obligations
+                      (constantly (fn [& _] [:synthetic-mixed-image])))
+      (is (= :loaded-file-code-mismatch
+             (:kind (first (tripwire/evaluate-wire
+                            :T10 {:tripwire/force? true})))))
+      (finally
+        (alter-var-root #'repair/open-obligations
+                        (constantly original))))
+    (is (empty? (tripwire/evaluate-wire :T10 {:tripwire/force? true})))))
 
 (deftest t11-job-alphabet-trips-on-unknown-state-and-bad-time
   (let [violations
