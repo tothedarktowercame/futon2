@@ -38,19 +38,48 @@ need). Three parameters:
 - **Carrier** `A` — the token alphabet. MetaCA geno level: `A = G`, the 256
   rule bytes. Flexiarg corpus: `A` = the controlled vocabulary (see §5 —
   *not yet finite*, and that is the known gap, not a surprise).
-- **Context comonad** `W` on **E** — packages "a token in its context". The
-  named registers are the *presentation* of `W`: for radius-1 MetaCA,
-  `W(A) = A × A × A` with the registers as projections —
-  `IF = π_left`, `HOWEVER = π_right`, and the counit `ε = π_ego`.
+- **Context comonad** `W` on **E** — packages "a token in its context".
+  **`W(A) = [S, A]` for a shape MONOID `S`**: the unit of `S` is the ego
+  position and its multiplication composes shifts, giving
+  `ε(x) = x 1` and `δ(x)(s)(t) = x (s·t)`. The monoid requirement is not
+  decoration — it is forced. (*Formalised: `DarkTower/Patterns/DistributiveLaw.lean`,
+  where the comonad laws carry `[Monoid S]` as a typeclass; that IS the proof.
+  For 1D MetaCA, `S = Multiplicative ℤ`.*)
+
+  **The radius-1 window `A × A × A` is NOT `W`** — it is what a local rule
+  *reads* from the context, with `IF = π_left`, `HOWEVER = π_right`,
+  `ε = π_ego`. Correction to v0, which set `W(A) = A × A × A` outright: the
+  counit laws plus naturality force `δ` to be an associative operation on
+  {left, ego, right} with ego as two-sided identity — i.e. a monoid on the
+  three positions — and there are **exactly 11** of them. v0 named none, and
+  the only shift-like choice (`ℤ/3`) makes the neighbourhood **wrap**: the
+  left neighbour's left neighbour becomes the right neighbour, a width-3
+  periodic CA rather than a window on a line. Capobianco–Uustalu (cited below)
+  already use `A^ℤ` for exactly this reason.
+
   **The counit is the BECAUSE register**: what extraction returns is the
   self, and the self-state is the justification. (Same role the interface
   object `K` plays in double-pushout rewriting `L ← K → R`: the preserved
   part licenses the rewrite.) The comultiplication `δ : W ⇒ WW` (context of
   contexts) is what cascade wiring quietly uses: to compose local rules you
-  need each neighbour's context too.
+  need each neighbour's context too — which is precisely why the window
+  cannot serve as `W`: from `(a,b,c)` alone you cannot recover `a`'s own
+  left neighbour.
+
+  **Open, and it bites the MetaCA specifically.** The engine uses *fixed
+  Rule-0 boundaries* (`futon5:propagator_orbit_proof.md`), which are not
+  shift-invariant — and shift-invariance is what `δ` needs. So the actual
+  MetaCA carrier is neither `A^ℤ` nor `A^(ℤ/n)`. Note the resonance: that same
+  boundary is why the orbit proof *rejected* the 0↔1 complement quotient.
+  Whether a finite line with fixed boundaries carries a comonad at all is
+  unresolved.
 - **Effect monad** `M` on **E** — the annotation on output. Minimally the
   writer monad `M(A) = J × A` over a justification monoid `J`; unit = "no
-  justification", multiplication = composition of justifications. THEN is
+  justification", multiplication = composition of justifications. (**NB for §3**:
+  if `Σ` is folded in as `M(A) = (J × Σ) × A`, then **`Σ` must itself be a
+  monoid** — writer needs a unit and multiplication in *both* factors. `Σ =
+  {bored, interesting}` has no given multiplication, and choosing one is a
+  choice, not a discovery. Formalised with `[Monoid K]` throughout.) THEN is
   the `A`-component of the output; BECAUSE-as-produced is the `J`-component.
   (BECAUSE appears twice — as the ego register consumed and the
   justification emitted — and that is right: the rule reads a warrant and
@@ -59,9 +88,27 @@ need). Three parameters:
 **Definition (pattern).** A pattern over `(A, W, M)` is an arrow
 `f : W(A) → M(A)` in **E** — equivalently an endo-arrow on `A` in the
 biKleisli category `BiKl(W, M)`, given a distributive law
-`λ : W∘M ⇒ M∘W` (for writer over a product comonad: collect the three
-justifications and multiply in `J`; canonical when `J` is commutative
-enough, and *to be written down and checked, not waved at* — gap §6).
+`λ : W∘M ⇒ M∘W`.
+
+> **v0 proposed the wrong `λ` and it is now refuted.** v0 said: "collect the
+> three justifications and multiply in `J`; canonical when `J` is commutative
+> enough". **It is not a distributive law at any `J`.** Collecting violates the
+> **counit axiom** on every context with a non-ego point, and *finiteness and
+> commutativity do not repair it* — the counterexample is explicit over `ℕ`
+> (`collectLambda_counit_counterexample`). The intuition: `ε` extracts the ego,
+> so the effect surviving extraction must be the ego's effect alone; a product
+> over the whole context is not that.
+>
+> **The lawful `λ` is `egoLambda`**: transport the whole value context, but emit
+> **only the annotation at ego** — `λ(x) = ((x 1).1, fun s => (x s).2)`. All four
+> mixed axioms check. *Formalised and built:
+> `DarkTower/Patterns/DistributiveLaw.lean`.*
+>
+> **So neighbour signs cannot ride the writer.** They belong in a separate
+> emission/coalgebra layer — which is **§3 of this note**. The formalism refutes
+> §1 and the repair was already written in §3; the two just had not been
+> introduced. §3's `e : W(A) → Σ` is where the collection that `λ` forbids
+> actually lives.
 
 **Composition is the cascade.** `g ∘ f` in `BiKl(W, M)` is defined exactly
 when types match; one pattern's THEN feeding another's IF *is* this
@@ -201,9 +248,15 @@ more exotic than that is needed to start.
 
 ## 5. Honest gaps
 
-- The distributive law `λ : W∘M ⇒ M∘W` is asserted, not constructed;
-  writing it down for `W = (−)³`, `M = J × Σ × (−)` and checking the
-  biKleisli axioms is a finite job and should be slice 1.
+- ~~The distributive law `λ : W∘M ⇒ M∘W` is asserted, not constructed.~~
+  **CLOSED 2026-07-16 (codex-6/codex-7, reviewed claude-2) — and it closed as a
+  COUNTEREXAMPLE, which §6.1 explicitly invited.** `W = (−)³` was the wrong `W`
+  (it is a *window*, not the comonad; `W(A) = [S,A]`, `S` a monoid) and the
+  collecting `λ` was the wrong `λ` (refuted; finiteness and commutativity do not
+  save it). The lawful `egoLambda` keeps only the ego's annotation, so neighbour
+  signs must live in §3's emission layer. `DarkTower/Patterns/DistributiveLaw.lean`,
+  `lake build` clean, no `sorry`. **New gap in its place:** does a finite line
+  with *fixed boundaries* — the actual MetaCA — carry a comonad at all? See §1.
 - For corpus (1) and (3) the carrier is not finite yet — everything in §4.1
   waits on the vocabulary census. The MetaCA instance is the only one where
   the formalism currently *computes* end to end.
@@ -217,8 +270,11 @@ more exotic than that is needed to start.
 
 ## 6. First slices
 
-1. **λ and the axioms** — one page of equations, or a counterexample that
-   forces a different `M`. Cheap, load-bearing.
+1. ~~**λ and the axioms**~~ — **DONE 2026-07-16.** It was the counterexample,
+   not the equations, and it forced a different `W` as well as a different `λ`.
+   See §1 and §5. What remains from this slice: (a) the fixed-boundary comonad
+   question; (b) `Σ`-as-monoid is now an explicit hypothesis rather than a
+   discovery, and §3 should say which monoid it intends.
 2. **The substrate as a protocol** — small Clojure namespace: carrier,
    `extract`/`extend` for `W`, writer ops for `M`, `compose`, and the
    `(s, ν)` propagator constructor. Instantiate twice: MetaCA geno rules
