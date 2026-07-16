@@ -103,3 +103,29 @@ Constraints: the harness must be read-only with respect to WM semantics (a
 wire that changes behavior when not tripping is a bug); trip actions must be
 un-trippable-loops (a trip during trip handling degrades to `:record` +
 stderr, never recursion); all wires individually disableable by id.
+
+## AIF reading (Joe + claude-6, 2026-07-16)
+
+Joe: "perhaps the most AIF thing yet — the model has a hand and a belly; the
+tripwire system gives it an eye — it notices things those don't."
+
+Formally: the WM's current observation channel is task-level only (job
+outcomes, verdicts, witnesses, QA → A). Its own machinery is a HIDDEN state
+with no likelihood mapping — pathologies (wedge, livelock, mixed-image) were
+observable only through distal task effects, i.e. completed broken runs. The
+tripwires are a new sensory modality over the machine's own trajectories —
+closer to INTEROCEPTION than vision: each wire is a near-infinite-precision
+prior over machine trajectories (P(violation) ≈ 0), a trip is surprisal that
+belief-updating cannot explain away, and park-and-summon is the mandated
+epistemic action (freeze the observation, recruit a higher-capacity inference
+engine, forage before further policy execution). The dud-laser calibration is
+identifiability of the new likelihood mapping: known hidden states must
+produce distinguishable observations through the channel. In R-contract terms
+this is a step past R16 toward the R14–R18 hierarchical self-model frontier.
+
+**S4 candidate (interoceptive γ):** a trip should modulate the system's
+confidence in its own machinery — post-trip, until the finding is discharged,
+the WM runs at lowered γ (more conservative thresholds, operator confirmation
+on grounding). The noticing feeds the feeling: the eye informs the belly.
+Connects directly to the learned-γ thesis of the Closing-the-Loop sequel
+paper — trips are exactly the error signal a learned meta-precision needs.
