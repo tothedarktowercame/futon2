@@ -45,6 +45,7 @@
         finding (repair/record-system-failure!
                  root {:attempt-id "attempt-002"
                        :repair-class :machine-failure
+                       :machine-repo "/home/joe/code/futon2"
                        :target :fire-pattern
                        :selected-entry
                        {:action {:type :learn-action-class
@@ -53,6 +54,7 @@
                        :outcome :construction-failed
                        :error "No construction for selected decision"})]
     (is (= :machine-failure (:repair/class finding)))
+    (is (= "/home/joe/code/futon2" (:machine-repo finding)))
     (is (= [finding] (repair/open-obligations root)))
     (repair/record-implementation!
      root finding {:attempt-id "canary-repair" :commit "good456"

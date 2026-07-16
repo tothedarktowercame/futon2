@@ -501,6 +501,34 @@
     (is (= :artifact-binding-mismatch
            (:failure-kind (first @findings))))))
 
+(deftest machine-repair-binds-to-failed-machine-repository
+  (let [original-action {:type :advance-mission
+                         :target "M-learning-loop"
+                         :mission-path "/home/joe/code/futon5a/holes/missions/M-learning-loop.md"}
+        obligation {:repair/id "repair-attempt-021-artifact-binding-mismatch"
+                    :repair/class :machine-failure
+                    :selected-entry {:action original-action}
+                    :backtrace {:code-state {:repo "/home/joe/code/futon2"}}}
+        entry {:action {:type :repair-machine-failure
+                        :target (:repair/id obligation)
+                        :repair-obligation obligation}}]
+    (is (= "/home/joe/code/futon2"
+           (#'runner/target-repository
+            {} entry obligation {:repo "/home/joe/code/futon2"})))
+    (is (= "/explicit-machine-repo"
+           (#'runner/target-repository
+            {} (assoc-in entry [:action :repair-obligation :machine-repo]
+                         "/explicit-machine-repo")
+            obligation {:repo "/home/joe/code/futon2"})))
+    (is (= "/home/joe/code/futon5a"
+           (#'runner/target-repository
+            {} {:action original-action} nil {:repo "/home/joe/code/futon2"})))
+    (is (= "/home/joe/code/futon5a"
+           (#'runner/target-repository
+            {} (assoc-in entry [:action :repair-obligation :repair/class]
+                         :independent-review-failure)
+            obligation {:repo "/home/joe/code/futon2"})))))
+
 (defn- no-commit-author-opts
   "Runner opts whose author job completes without any observable commit;
   the job's text is supplied by the caller. Mirrors attempt-020's shape."

@@ -86,6 +86,7 @@
                  :repair/schema-version 3
                  :repair/status :open
                  :repair/class repair-class
+                 :machine-repo (:machine-repo finding)
                  :attempt-id attempt-id
                  :target (:target finding)
                  :selected-entry (:selected-entry finding)

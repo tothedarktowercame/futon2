@@ -131,8 +131,22 @@
             [(:mission-path action) (:pattern-path action)
              (:mission-path repaired-action) (:pattern-path repaired-action)])))
 
+(defn- machine-repair-repository [entry]
+  (let [action (:action entry)
+        obligation (:repair-obligation action)]
+    (when (and (= :repair-machine-failure (:type action))
+               (= :machine-failure (:repair/class obligation)))
+      (or (:machine-repo obligation)
+          (get-in obligation [:backtrace :code-state :repo])))))
+
 (defn- target-repository [opts entry mission code-state]
   (or (when-let [f (:target-repo-fn opts)] (f entry mission code-state))
+      ;; A machine repair belongs to the repository containing the failed
+      ;; machine, not necessarily the repository named by the action that
+      ;; happened to expose the fault.  The latter remains useful context in
+      ;; action-paths, but letting it win caused attempt-021 to inspect futon5a
+      ;; for a repair committed to the War Machine in futon2.
+      (machine-repair-repository entry)
       (some git-repo-for-path
             (concat (action-paths (:action entry)) [(:path mission)]))
       (:repo code-state)))
@@ -861,6 +875,7 @@
                                   repair/record-system-failure!)
                               {:attempt-id attempt-id
                                :repair-class repair-class
+                               :machine-repo (:repo code-state)
                                :target (or (:target data)
                                            (:selected-mission selection-judgment))
                                :selected-entry selected-entry
