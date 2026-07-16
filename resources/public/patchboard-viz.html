@@ -3,56 +3,70 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Patch Boards — FREE / CHAIN / UNSAT</title>
+  <title>MetaCA Patch Board — FREE / CHAIN / HOWEVER</title>
   <style>
-    :root { color-scheme: dark; --ink:#e7edf6; --muted:#92a0b4; --panel:#111827; --line:#34425a;
-      --free:#4ade80; --chain:#60a5fa; --unsat:#fb7185; --dead:#64748b; --amber:#fbbf24; }
-    * { box-sizing:border-box } body { margin:0; background:#070b12; color:var(--ink); font:14px/1.4 ui-sans-serif,system-ui,sans-serif }
-    header { padding:18px 22px 12px; border-bottom:1px solid #253147; background:#0b111d }
-    h1 { margin:0 0 5px; font-size:20px } header p { margin:0; color:var(--muted); max-width:1100px }
-    .notice { color:#fcd34d; margin-top:7px; font-size:12px }
-    .controls { display:flex; flex-wrap:wrap; gap:12px; align-items:center; padding:12px 22px; background:#0d1422; border-bottom:1px solid #253147 }
+    :root { color-scheme:dark; --ink:#e7edf6; --muted:#91a0b5; --panel:#111827;
+      --free:#4ade80; --chain:#60a5fa; --unsat:#fb7185; --amber:#fbbf24; }
+    * { box-sizing:border-box } body { margin:0; background:#070b12; color:var(--ink); font:14px/1.4 system-ui,sans-serif }
+    header { padding:17px 22px 12px; background:#0b111d; border-bottom:1px solid #26344b }
+    h1 { margin:0 0 4px; font-size:21px } header p { margin:0; color:var(--muted); max-width:1150px }
+    .controls { display:flex; flex-wrap:wrap; gap:11px; align-items:center; padding:10px 22px; background:#0d1422; border-bottom:1px solid #26344b }
     label { color:var(--muted) } input,select,button { background:#172033; color:var(--ink); border:1px solid #3b4a65; border-radius:5px; padding:5px 8px }
-    button { cursor:pointer } button:hover { border-color:#7c93b8 } input[type=number] { width:76px }
-    main { display:grid; grid-template-columns:minmax(520px,1fr) minmax(520px,1fr); gap:14px; padding:14px }
-    .board { background:var(--panel); border:1px solid #293750; border-radius:9px; overflow:hidden }
-    .board-head { padding:13px 15px 10px; border-bottom:1px solid #26344b }
-    .board-head h2 { margin:0 0 3px; font-size:17px }.board-head p { margin:0; color:var(--muted); font-size:12px }
-    .presets { padding:9px 14px; display:flex; gap:7px; flex-wrap:wrap; border-bottom:1px solid #26344b }
-    .shape { padding:10px 14px; display:grid; gap:4px; background:#0b1220; font-family:ui-monospace,monospace }
-    .shape b { display:inline-block; min-width:58px }.free-text{color:var(--free)}.chain-text{color:var(--chain)}.unsat-text{color:var(--unsat)}
-    .attractors { color:#f5d77b; overflow-wrap:anywhere }.patch-area { position:relative; padding:12px 12px 8px }
-    svg { width:100%; display:block; overflow:visible }.cable { fill:none; stroke-width:2; opacity:.72; pointer-events:none }.cable.free{stroke:var(--free)}.cable.chain{stroke:var(--chain)}.cable.unsat{stroke:var(--unsat)}
-    .jack { cursor:pointer }.jack circle { fill:#172033; stroke:#71809a; stroke-width:1.5 }.jack:hover circle,.jack.selected circle{stroke:var(--amber);stroke-width:3}
-    .jack.free circle{stroke:var(--free)}.jack.unsat circle{stroke:var(--unsat)}.jack.dead circle{fill:#252c38;stroke:var(--dead);stroke-dasharray:3 2}
-    .jack text { fill:var(--ink); font:11px ui-monospace,monospace; dominant-baseline:middle }.jack .sub { fill:var(--muted);font-size:9px }
-    .legend { display:flex; gap:15px; padding:6px 14px 12px; color:var(--muted); font-size:11px }.swatch{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px}
-    .live { border-top:1px solid #26344b; padding:11px 14px 14px }.live h3{font-size:12px;margin:0 0 8px;color:var(--muted);font-weight:500}
-    .bits,.bars { display:flex; gap:4px; align-items:flex-end; min-height:54px }.bit { width:38px; padding:8px 2px; text-align:center; background:#1b2638;border:1px solid #40516e;border-radius:4px;font:12px ui-monospace,monospace }.bit.on{background:#d4a72c;color:#111827}
-    .bar-wrap { width:30px; text-align:center; color:var(--muted); font:9px ui-monospace,monospace }.bar { height:45px;display:flex;align-items:flex-end;background:#1b2638;border:1px solid #40516e;border-radius:3px;overflow:hidden}.bar i{display:block;width:100%;background:#60a5fa}.bar-wrap.dead .bar{border-style:dashed;opacity:.45}.bar-wrap.dead i{height:0!important}
-    footer { padding:8px 20px 18px;color:var(--muted);font-size:11px }
-    @media(max-width:1100px){main{grid-template-columns:1fr}}
+    input[type=number] { width:72px } button { cursor:pointer } button:hover { border-color:#7c93b8 }
+    main { display:grid; grid-template-columns:minmax(500px,.82fr) minmax(620px,1.18fr); gap:14px; padding:14px }
+    .panel { background:var(--panel); border:1px solid #293750; border-radius:9px; overflow:hidden }
+    .panel-head { padding:12px 14px 9px; border-bottom:1px solid #26344b }.panel-head h2 { margin:0 0 3px; font-size:17px }.panel-head p { margin:0;color:var(--muted);font-size:12px }
+    .presets { padding:9px 14px; display:flex; gap:7px; border-bottom:1px solid #26344b }
+    .shape { padding:10px 14px; display:grid; gap:5px; background:#0b1220; font-family:ui-monospace,monospace }
+    .shape b { display:inline-block; min-width:67px }.free-text{color:var(--free)}.chain-text{color:var(--chain)}.unsat-text{color:var(--unsat)}.attractors{color:#f5d77b}
+    .meaning { color:var(--muted); font:11px system-ui,sans-serif; margin-left:8px }
+    .patch-area { padding:12px } svg { width:100%; display:block }.cable { fill:none;stroke-width:2;opacity:.75;pointer-events:none }.cable.free{stroke:var(--free)}.cable.chain{stroke:var(--chain)}.cable.unsat{stroke:var(--unsat)}
+    .jack { cursor:pointer }.jack circle { fill:#172033;stroke:#71809a;stroke-width:1.5 }.jack:hover circle,.jack.selected circle{stroke:var(--amber);stroke-width:3}.jack.free circle{stroke:var(--free)}.jack.unsat circle{stroke:var(--unsat)}
+    .jack text { fill:var(--ink);font:11px ui-monospace,monospace;dominant-baseline:middle }.jack .sub{fill:var(--muted);font-size:9px}
+    .legend { display:flex;gap:14px;padding:4px 14px 12px;color:var(--muted);font-size:11px }.swatch{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px}
+    .live-bits { border-top:1px solid #26344b;padding:11px 14px }.bits{display:flex;gap:4px}.bit{width:40px;padding:7px 2px;text-align:center;background:#1b2638;border:1px solid #40516e;border-radius:4px;font:11px ui-monospace,monospace}.bit.on{background:#d4a72c;color:#101827}
+    .spacetime { display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px }.layer h3{font-size:12px;margin:0 0 5px}.layer p{font-size:10px;color:var(--muted);margin:0 0 7px}
+    canvas { width:100%;height:480px;display:block;background:#000;border:1px solid #40516e;image-rendering:pixelated }
+    .run-readout { padding:9px 14px;border-top:1px solid #26344b;font:11px ui-monospace,monospace;color:var(--muted);overflow-wrap:anywhere }
+    .seam { margin:0 14px 14px;padding:10px 12px;border:1px dashed #4b5d78;border-radius:7px;color:var(--muted);font-size:12px }.seam b{color:var(--ink)}
+    footer { padding:5px 20px 16px;color:var(--muted);font-size:11px }
+    @media(max-width:1150px){main{grid-template-columns:1fr}canvas{height:360px}}
   </style>
 </head>
 <body>
 <header>
-  <h1>The middle layer: two patch boards, one shape vocabulary</h1>
-  <p>Click a source jack on the left, then any target jack on the right. Repeated targets are allowed: these are total maps, not permutations. FREE is an unwritten scaffold jack; DEAD is an inert ant preference and is different.</p>
-  <p class="notice">v0 middle-pane slice: this is the authorized control/solver instrument. It does not pretend to be the still-unwired colony or MetaCA phenotype panes.</p>
+  <h1>MetaCA pattern cascade: one given, six derivations, one HOWEVER</h1>
+  <p>Patch source <i>k</i> to target <i>j</i> to assert response[j] := NOT response[k]. Repeated targets are allowed. The genotype evolves autonomously; the phenotype is its live rendering.</p>
 </header>
 <section class="controls" aria-label="All dynamics controls">
-  <label><input id="running" type="checkbox" checked> live propagation</label>
-  <label>tick ms <input id="tick-ms" type="number" min="40" max="2000" step="20" value="180"></label>
-  <label>write order <select id="write-order"><option value="ascending">0 → N−1</option><option value="descending">N−1 → 0</option></select></label>
-  <label>ant mode <select id="ant-mode"><option value="outbound">outbound</option><option value="homebound">homebound</option></select></label>
-  <label>FREE binary pin <select id="free-pin"><option value="0">0</option><option value="1">1</option></select></label>
-  <span id="tick-readout">tick 0</span>
+  <label><input id="running" type="checkbox" checked> live</label>
+  <label>tick ms <input id="tick-ms" type="number" min="40" max="2000" value="60"></label>
+  <label>generations/tick <input id="gens-per-tick" type="number" min="1" max="20" value="2"></label>
+  <label>width <input id="width" type="number" min="24" max="180" value="80"></label>
+  <label>mutation writes/cell/gen <input id="mutation-writes" type="number" min="0" max="12" value="2"></label>
+  <label>seed <input id="seed" type="number" min="0" value="8"></label>
+  <label>FREE pin <select id="free-pin"><option value="0">0</option><option value="1">1</option></select></label>
+  <button id="reset">reset run</button><span id="tick-readout">generation 0</span>
 </section>
 <main>
-  <section class="board" id="ant-board"></section>
-  <section class="board" id="metaca-board"></section>
+  <section class="panel">
+    <div class="panel-head"><h2>Patch board · 8 genotype bit-planes</h2><p>Legacy truth-table-3 order. Each jack is the THEN response for its IF neighbourhood.</p></div>
+    <div class="presets"><button data-preset="figure8">Figure 8 · k↦max(k−1,0)</button><button data-preset="identity">identity · all HOWEVER</button></div>
+    <div id="shape"></div><div id="patch-board" class="patch-area"></div>
+    <div class="legend"><span><i class="swatch" style="background:var(--free)"></i>given</span><span><i class="swatch" style="background:var(--chain)"></i>derivation</span><span><i class="swatch" style="background:var(--unsat)"></i>HOWEVER</span></div>
+    <div id="live-bits" class="live-bits"></div>
+    <div class="seam"><b>Future ant-policy seam — intentionally unwired.</b> No C-vector terminals live here. The ant board begins only after its situation→action design-pattern object is specified.</div>
+  </section>
+  <section class="panel">
+    <div class="panel-head"><h2>MetaCA genotype → phenotype</h2><p>2014 blending-mutation structure, boundary rule 0, deterministic PRNG shown by seed. No fitness, sweep, or selection.</p></div>
+    <div class="spacetime">
+      <div class="layer"><h3>GENOTYPE · autonomous</h3><p>Rule bytes as grayscale: 42 = dark, 170 = light.</p><canvas id="genotype-canvas"></canvas></div>
+      <div class="layer"><h3>PHENOTYPE · rendering</h3><p>Each cell applies its current rule byte to the binary neighbourhood.</p><canvas id="phenotype-canvas"></canvas></div>
+    </div>
+    <div id="run-readout" class="run-readout"></div>
+  </section>
 </main>
-<footer>Each live tick performs one visible sweep of all cables against current state. Ant writes apply only when source and target preferences both exist in the selected mode (union-domain, per-mode partial application). The shape/attractor readout is analytic and does not rank a wiring.</footer>
+<footer>Every simulated generation applies the visible patch map to live genotype state. FREE/CHAIN/HOWEVER and attractors are analytic; the spacetime is operational. The instrument never ranks a wiring.</footer>
 <script src="/patchboard-viz.js"></script>
 </body>
 </html>

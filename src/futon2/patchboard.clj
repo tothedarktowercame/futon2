@@ -21,22 +21,6 @@
    {:jack 6 :condition "110"}
    {:jack 7 :condition "111"}])
 
-(def ant-terminals
-  [{:jack 0 :channel :food :outbound 0.55 :homebound nil}
-   {:jack 1 :channel :pher :outbound 0.35 :homebound 0.30}
-   {:jack 2 :channel :food-trace :outbound nil :homebound nil}
-   {:jack 3 :channel :pher-trace :outbound nil :homebound nil}
-   {:jack 4 :channel :home-prox :outbound 0.20 :homebound 0.70}
-   {:jack 5 :channel :enemy-prox :outbound 0.10 :homebound 0.10}
-   {:jack 6 :channel :h :outbound 0.40 :homebound 0.40}
-   {:jack 7 :channel :ingest :outbound 0.60 :homebound 0.65}
-   {:jack 8 :channel :friendly-home :outbound nil :homebound nil}
-   {:jack 9 :channel :trail-grad :outbound 0.30 :homebound 0.25}
-   {:jack 10 :channel :novelty :outbound nil :homebound nil}
-   {:jack 11 :channel :dist-home :outbound 0.50 :homebound 0.15}
-   {:jack 12 :channel :reserve-home :outbound 0.60 :homebound 0.65}
-   {:jack 13 :channel :cargo :outbound 0.40 :homebound 0.10}])
-
 (defn valid-wiring?
   "True when wiring is a total map [0,n) -> [0,n). Repeated targets are valid."
   [wiring]
@@ -95,9 +79,7 @@
 (defn analyse
   "Return the visible FREE/CHAIN/UNSAT shape and derived binary attractors.
 
-  Options:
-  - `:pin` fixes every FREE jack to 0 or 1 (default 0).
-  - `:derive-attractors?` may be false for the continuous ant board.
+  `:pin` fixes every FREE jack to 0 or 1 (default 0).
 
   The returned sets are sorted vectors for stable UI and test rendering."
   ([wiring] (analyse wiring {}))

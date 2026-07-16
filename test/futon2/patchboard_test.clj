@@ -1,5 +1,5 @@
 (ns futon2.patchboard-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.test :refer [deftest is]]
             [futon2.patchboard :as patchboard]))
 
 (deftest figure-eight-clamp-map-agrees-with-reference-model
@@ -12,17 +12,11 @@
            (:attractors shape)))))
 
 (deftest identity-is-all-unsat-and-has-no-scaffold
-  (testing "MetaCA identity"
-    (let [shape (patchboard/analyse (patchboard/identity-wiring 8))]
-      (is (empty? (:free shape)))
-      (is (empty? (:chain shape)))
-      (is (= (vec (range 8)) (:unsat shape)))
-      (is (= 256 (count (:attractors shape))))))
-  (testing "ant identity"
-    (let [shape (patchboard/analyse (patchboard/identity-wiring 14)
-                                    {:derive-attractors? false})]
-      (is (empty? (:free shape)))
-      (is (= (vec (range 14)) (:unsat shape))))))
+  (let [shape (patchboard/analyse (patchboard/identity-wiring 8))]
+    (is (empty? (:free shape)))
+    (is (empty? (:chain shape)))
+    (is (= (vec (range 8)) (:unsat shape)))
+    (is (= 256 (count (:attractors shape))))))
 
 (deftest non-injective-wirings-are-first-class
   (let [wiring [0 0 1 2 3 4 5 6]
@@ -40,10 +34,4 @@
 (deftest terminal-abi-is-explicit
   (is (= 8 (count patchboard/metaca-terminals)))
   (is (= ["000" "001" "010" "100" "011" "101" "110" "111"]
-         (mapv :condition patchboard/metaca-terminals)))
-  (is (= 14 (count patchboard/ant-terminals)))
-  (is (= #{:food-trace :pher-trace :friendly-home :novelty}
-         (->> patchboard/ant-terminals
-              (filter #(and (nil? (:outbound %)) (nil? (:homebound %))))
-              (map :channel)
-              set))))
+         (mapv :condition patchboard/metaca-terminals))))

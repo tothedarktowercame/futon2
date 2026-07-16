@@ -5,6 +5,8 @@
 })(typeof window !== "undefined" ? window : null, function () {
   "use strict";
 
+  const TT3 = ["000","001","010","100","011","101","110","111"];
+  const ZERO_RULE = "00000000";
   const range = n => Array.from({length:n}, (_,i) => i);
   const identity = n => range(n);
   const clampShift = n => range(n).map(k => Math.max(k - 1, 0));
@@ -23,134 +25,161 @@
     return out;
   }
 
-  function analyse(wiring, pin=0, derive=true) {
+  function analyse(wiring, pin=0) {
     assertWiring(wiring);
-    const n = wiring.length, image = new Set(wiring);
-    const free = range(n).filter(j => !image.has(j));
-    const unsat = range(n).filter(k => wiring[k] === k);
-    let values = Array(n).fill(null); free.forEach(j => values[j] = pin);
-    for (let pass=0; pass<n; pass++) {
-      for (let k=0; k<n; k++) {
-        const j = wiring[k];
-        if (values[k] !== null && j !== k && values[j] === null) values[j] = 1 - values[k];
-      }
+    const n=wiring.length, image=new Set(wiring);
+    const free=range(n).filter(j => !image.has(j));
+    const unsat=range(n).filter(k => wiring[k] === k);
+    let values=Array(n).fill(null); free.forEach(j => values[j]=pin);
+    for(let pass=0; pass<n; pass++) for(let k=0; k<n; k++) {
+      const j=wiring[k];
+      if(values[k]!==null && j!==k && values[j]===null) values[j]=1-values[k];
     }
-    const chain = range(n).filter(j => values[j] !== null && !free.includes(j) && !unsat.includes(j));
-    const attractors = derive ? choices(unsat.length).flatMap(bits => {
-      const candidate = values.slice(); unsat.forEach((j,i) => candidate[j] = bits[i]);
-      if (candidate.some(x => x === null)) return [];
-      const bitstring = candidate.join("");
-      return [{bits:bitstring, value:parseInt(bitstring, 2)}];
-    }).filter((x,i,a) => a.findIndex(y => y.bits === x.bits) === i).sort((a,b) => a.value-b.value) : [];
-    return {size:n, wiring:wiring.slice(), free, chain, unsat, pin, attractors};
+    const chain=range(n).filter(j => values[j]!==null && !free.includes(j) && !unsat.includes(j));
+    const attractors=choices(unsat.length).flatMap(bits => {
+      const candidate=values.slice(); unsat.forEach((j,i)=>candidate[j]=bits[i]);
+      if(candidate.some(x=>x===null)) return [];
+      const bitstring=candidate.join("");
+      return [{bits:bitstring,value:parseInt(bitstring,2)}];
+    }).filter((x,i,a)=>a.findIndex(y=>y.bits===x.bits)===i).sort((a,b)=>a.value-b.value);
+    return {size:n,wiring:wiring.slice(),free,chain,unsat,pin,attractors};
   }
 
-  const metacaTerminals = ["000","001","010","100","011","101","110","111"]
-    .map((condition,jack) => ({jack, condition}));
-  const antTerminals = [
-    ["food",.55,null],["pher",.35,.30],["food-trace",null,null],["pher-trace",null,null],
-    ["home-prox",.20,.70],["enemy-prox",.10,.10],["h",.40,.40],["ingest",.60,.65],
-    ["friendly-home",null,null],["trail-grad",.30,.25],["novelty",null,null],
-    ["dist-home",.50,.15],["reserve-home",.60,.65],["cargo",.40,.10]
-  ].map(([channel,outbound,homebound],jack) => ({jack,channel,outbound,homebound}));
+  // Deterministic, small PRNG so a visible seed completely specifies a replay.
+  function makeRng(seed) {
+    let a=(Number(seed) || 0) >>> 0;
+    return function () {
+      a=(a+0x6D2B79F5)>>>0;
+      let t=a; t=Math.imul(t^(t>>>15),t|1); t^=t+Math.imul(t^(t>>>7),t|61);
+      return ((t^(t>>>14))>>>0)/4294967296;
+    };
+  }
+
+  function ruleBit(rule, triple) {
+    const index=TT3.indexOf(triple);
+    if(index<0) throw new Error(`unknown legacy neighbourhood ${triple}`);
+    return rule[index];
+  }
+
+  function mutateRule(rule, wiring, rng, writes) {
+    let bits=rule.split("");
+    for(let i=0; i<writes; i++) {
+      const source=Math.floor(rng()*8), target=wiring[source];
+      bits[target]=bits[source]==="0" ? "1" : "0";
+    }
+    return bits.join("");
+  }
+
+  function stepGenotype(row, wiring, rng, writes=2) {
+    return row.map((self,x) => {
+      const left=x ? row[x-1] : ZERO_RULE;
+      const right=x<row.length-1 ? row[x+1] : ZERO_RULE;
+      let output="";
+      for(let bit=0; bit<8; bit++) {
+        if(left[bit]===right[bit]) output+=left[bit];
+        else output+=ruleBit(self,left[bit]+self[bit]+right[bit]);
+      }
+      return mutateRule(output,wiring,rng,writes);
+    });
+  }
+
+  function stepPhenotype(genotype, phenotype) {
+    return phenotype.map((self,x) => {
+      const left=x ? phenotype[x-1] : "0";
+      const right=x<phenotype.length-1 ? phenotype[x+1] : "0";
+      return ruleBit(genotype[x],left+self+right);
+    });
+  }
+
+  function createSimulation(width=80, seed=8) {
+    const rng=makeRng(seed);
+    const genotype=range(width).map(()=>range(8).map(()=>rng()<.5?"0":"1").join(""));
+    const phenotype=range(width).map(()=>rng()<.5?"0":"1");
+    return {rng,generation:0,genotype,phenotype,genHistory:[genotype],pheHistory:[phenotype]};
+  }
+
+  function advance(sim, wiring, writes=2, historyLimit=120) {
+    const phenotype=stepPhenotype(sim.genotype,sim.phenotype);
+    const genotype=stepGenotype(sim.genotype,wiring,sim.rng,writes);
+    sim.generation++; sim.genotype=genotype; sim.phenotype=phenotype;
+    sim.genHistory.push(genotype); sim.pheHistory.push(phenotype);
+    if(sim.genHistory.length>historyLimit){sim.genHistory.shift();sim.pheHistory.shift();}
+    return sim;
+  }
 
   function boot() {
-    if (typeof document === "undefined") return;
-    const state = {
-      tick:0, running:true, tickMs:180, order:"ascending", mode:"outbound", pin:0,
-      antMap:identity(14), metaMap:clampShift(8), metaBits:[0,1,1,0,1,0,0,1],
-      antValues:{outbound:antTerminals.map(x => x.outbound), homebound:antTerminals.map(x => x.homebound)},
-      pending:{ant:null, meta:null}, timer:null
-    };
+    if(typeof document==="undefined") return;
+    const terminals=TT3.map((condition,jack)=>({condition,jack}));
+    const state={wiring:clampShift(8),pin:0,pending:null,running:true,tickMs:60,
+      gensPerTick:2,writes:2,width:80,seed:8,timer:null,sim:null};
+    const byId=id=>document.getElementById(id);
+    const fmtSet=xs=>`{${xs.join(", ")}}`;
+    const kindFor=(shape,k)=>shape.unsat.includes(k)?"unsat":shape.chain.includes(k)?"chain":"free";
 
-    const setText = (id,text) => { document.getElementById(id).textContent=text; };
-    const fmtSet = xs => `{${xs.join(", ")}}`;
-    const kindFor = (shape,k) => shape.unsat.includes(k) ? "unsat" : shape.chain.includes(k) ? "chain" : "free";
-    const shapeHtml = (shape, showAttractors) => {
-      let attr = "";
-      if (showAttractors) {
-        const shown = shape.attractors.length <= 16
-          ? shape.attractors.map(x => `${x.value} · ${x.bits}`).join("  |  ")
-          : `${shape.attractors.length} states (all UNSAT assignments)`;
-        attr = `<div class="attractors"><b>ATTR</b> ${shown || "∅ (unseeded closed cycle)"}</div>`;
+    function shapeHtml(shape){
+      const attrs=shape.attractors.length<=16
+        ? shape.attractors.map(x=>`${x.value} · ${x.bits}`).join(" &nbsp;|&nbsp; ")
+        : `${shape.attractors.length} states`;
+      return `<div class="shape"><div class="free-text"><b>FREE</b>${fmtSet(shape.free)}<span class="meaning">GIVENS / AXIOMS</span></div><div class="chain-text"><b>CHAIN</b>${fmtSet(shape.chain)}<span class="meaning">DERIVATION</span></div><div class="unsat-text"><b>UNSAT</b>${fmtSet(shape.unsat)}<span class="meaning">IRREDUCIBLE TENSION / HOWEVER</span></div><div class="attractors"><b>ATTR</b>${attrs||"∅ · unseeded closed cycle"}</div></div>`;
+    }
+
+    function boardSvg(shape){
+      const row=40,left=154,right=430,height=8*row+15;
+      const cables=range(8).map(k=>{const y1=18+k*row,y2=18+state.wiring[k]*row;return `<path class="cable ${kindFor(shape,k)}" d="M${left},${y1} C${left+90},${y1} ${right-90},${y2} ${right},${y2}"/>`;}).join("");
+      const sources=terminals.map((t,k)=>{const y=18+k*row;return `<g class="jack source ${kindFor(shape,k)} ${state.pending===k?"selected":""}" data-side="source" data-jack="${k}" transform="translate(${left},${y})"><circle r="8"/><text x="-142">${k} · IF ${t.condition}</text><text class="sub" x="-142" y="12">THEN bit ${k} → ${state.wiring[k]}</text></g>`;}).join("");
+      const targets=terminals.map((t,j)=>{const y=18+j*row,incoming=state.wiring.filter(x=>x===j).length;return `<g class="jack target ${shape.free.includes(j)?"free":""}" data-side="target" data-jack="${j}" transform="translate(${right},${y})"><circle r="8"/><text x="14">${j} · in ${incoming}</text></g>`;}).join("");
+      return `<svg viewBox="0 0 570 ${height}" role="img" aria-label="MetaCA patch board">${cables}${sources}${targets}</svg>`;
+    }
+
+    function renderBoard(){
+      const shape=analyse(state.wiring,state.pin);
+      byId("shape").innerHTML=shapeHtml(shape);
+      byId("patch-board").innerHTML=boardSvg(shape);
+    }
+
+    function drawHistory(canvas,history,genotype){
+      const width=state.width,height=120; canvas.width=width;canvas.height=height;
+      const ctx=canvas.getContext("2d"),image=ctx.createImageData(width,height);
+      for(let y=0;y<height;y++) for(let x=0;x<width;x++){
+        const present=y<history.length;
+        const value=present?(genotype?parseInt(history[y][x],2):(history[y][x]==="1"?0:255)):7;
+        const p=(y*width+x)*4; image.data[p]=value;image.data[p+1]=value;image.data[p+2]=value;image.data[p+3]=255;
       }
-      return `<div class="shape"><div class="free-text"><b>FREE</b> ${fmtSet(shape.free)} · scaffold</div><div class="chain-text"><b>CHAIN</b> ${fmtSet(shape.chain)} · propagated structure</div><div class="unsat-text"><b>UNSAT</b> ${fmtSet(shape.unsat)} · motion</div>${attr}</div>`;
-    };
-
-    function boardSvg(kind, terminals, mapping, shape) {
-      const n=terminals.length, row=34, height=n*row+20, left=154, right=430;
-      const values = kind === "ant" ? state.antValues[state.mode] : null;
-      const cables = range(n).map(k => {
-        const y1=18+k*row, y2=18+mapping[k]*row, cls=kindFor(shape,k);
-        return `<path class="cable ${cls}" d="M${left},${y1} C${left+92},${y1} ${right-92},${y2} ${right},${y2}"/>`;
-      }).join("");
-      const source = terminals.map((t,k) => {
-        const y=18+k*row, dead=values && values[k]===null, label=kind==="ant"?t.channel:t.condition;
-        return `<g class="jack source ${kindFor(shape,k)} ${dead?"dead":""} ${state.pending[kind]===k?"selected":""}" data-kind="${kind}" data-side="source" data-jack="${k}" transform="translate(${left},${y})"><circle r="8"/><text x="-142">${k} · ${label}</text><text class="sub" x="-142" y="11">→ ${mapping[k]}${dead?" · DEAD":""}</text></g>`;
-      }).join("");
-      const target = terminals.map((t,j) => {
-        const y=18+j*row, dead=values && values[j]===null, incoming=mapping.filter(x=>x===j).length;
-        return `<g class="jack target ${shape.free.includes(j)?"free":""} ${dead?"dead":""}" data-kind="${kind}" data-side="target" data-jack="${j}" transform="translate(${right},${y})"><circle r="8"/><text x="14">${j} · in ${incoming}${dead?" · DEAD":""}</text></g>`;
-      }).join("");
-      return `<svg viewBox="0 0 570 ${height}" role="img" aria-label="${kind} patch board">${cables}${source}${target}</svg>`;
+      ctx.putImageData(image,0,0);
     }
 
-    function antLiveHtml() {
-      const values=state.antValues[state.mode];
-      return `<div class="live"><h3>LIVE C MEANS · current ${state.mode} state · DEAD writes skipped</h3><div class="bars">${values.map((v,k) => `<div class="bar-wrap ${v===null?"dead":""}"><div class="bar"><i style="height:${v===null?0:Math.round(v*100)}%"></i></div>${k}<br>${v===null?"nil":v.toFixed(2)}</div>`).join("")}</div></div>`;
-    }
-    function metaLiveHtml() {
-      return `<div class="live"><h3>LIVE GENOTYPE TERMINALS · analytic attractor above, operational sweep below</h3><div class="bits">${state.metaBits.map((v,k)=>`<div class="bit ${v?"on":""}">${k}<br>${v}</div>`).join("")}</div></div>`;
-    }
-
-    function render() {
-      const antShape=analyse(state.antMap,state.pin,false), metaShape=analyse(state.metaMap,state.pin,true);
-      document.getElementById("ant-board").innerHTML = `<div class="board-head"><h2>ANT · 14 observation-preference jacks</h2><p>Continuous C means. Four permanent DEAD jacks; :food is additionally DEAD homebound.</p></div><div class="presets"><button data-preset="ant-identity">identity · sham</button><button data-preset="ant-clamp">non-injective cascade</button></div>${shapeHtml(antShape,false)}<div class="patch-area">${boardSvg("ant",antTerminals,state.antMap,antShape)}</div><div class="legend"><span><i class="swatch" style="background:var(--free)"></i>FREE target</span><span><i class="swatch" style="background:var(--unsat)"></i>UNSAT source</span><span><i class="swatch" style="background:var(--dead)"></i>DEAD preference</span></div>${antLiveHtml()}`;
-      document.getElementById("metaca-board").innerHTML = `<div class="board-head"><h2>MetaCA · 8 condition→response jacks</h2><p>Binary policy entries in legacy truth-table-3 order. Default is the actual Emacs clamp map.</p></div><div class="presets"><button data-preset="meta-figure8">Figure 8 · k↦max(k−1,0)</button><button data-preset="meta-identity">identity · pure UNSAT</button></div>${shapeHtml(metaShape,true)}<div class="patch-area">${boardSvg("meta",metacaTerminals,state.metaMap,metaShape)}</div><div class="legend"><span><i class="swatch" style="background:var(--free)"></i>FREE target</span><span><i class="swatch" style="background:var(--chain)"></i>CHAIN cable</span><span><i class="swatch" style="background:var(--unsat)"></i>UNSAT self-loop</span></div>${metaLiveHtml()}`;
-      setText("tick-readout",`tick ${state.tick}`);
+    function renderLive(){
+      const center=state.sim.genotype[Math.floor(state.width/2)];
+      byId("live-bits").innerHTML=`<div style="color:var(--muted);font-size:11px;margin-bottom:7px">LIVE TERMINALS · centre cell · rule ${parseInt(center,2)}</div><div class="bits">${center.split("").map((v,k)=>`<div class="bit ${v==="1"?"on":""}">${k}<br>${v}</div>`).join("")}</div>`;
+      drawHistory(byId("genotype-canvas"),state.sim.genHistory,true);
+      drawHistory(byId("phenotype-canvas"),state.sim.pheHistory,false);
+      const counts={};state.sim.genotype.forEach(g=>counts[g]=(counts[g]||0)+1);
+      const rules=Object.entries(counts).sort((a,b)=>parseInt(a[0],2)-parseInt(b[0],2)).map(([g,n])=>`${parseInt(g,2)}:${n}`).join("  ");
+      byId("run-readout").textContent=`generation ${state.sim.generation} · terminal rule histogram ${rules}`;
+      byId("tick-readout").textContent=`generation ${state.sim.generation}`;
     }
 
-    function renderLive() {
-      const antLive=document.querySelector("#ant-board .live");
-      const metaLive=document.querySelector("#metaca-board .live");
-      if(antLive) antLive.outerHTML=antLiveHtml();
-      if(metaLive) metaLive.outerHTML=metaLiveHtml();
-      setText("tick-readout",`tick ${state.tick}`);
-    }
+    function reset(){state.sim=createSimulation(state.width,state.seed);renderLive();}
+    function tick(){if(!state.running)return;for(let i=0;i<state.gensPerTick;i++)advance(state.sim,state.wiring,state.writes);renderLive();}
+    function reschedule(){clearInterval(state.timer);state.timer=setInterval(tick,state.tickMs);}
 
-    function sweep(mapping, values, active) {
-      const order=range(mapping.length); if(state.order==="descending") order.reverse();
-      for(const k of order){ const j=mapping[k]; if(active(k,j)) values[j]=1-values[k]; }
-    }
-    function tick(){
-      if(!state.running)return;
-      sweep(state.metaMap,state.metaBits,()=>true);
-      for(const mode of ["outbound","homebound"]){ const values=state.antValues[mode]; sweep(state.antMap,values,(k,j)=>values[k]!==null&&values[j]!==null); }
-      state.tick++; renderLive();
-    }
-    function reschedule(){ clearInterval(state.timer); state.timer=setInterval(tick,state.tickMs); }
-
-    document.addEventListener("click", e => {
+    document.addEventListener("click",e=>{
       const jack=e.target.closest(".jack");
-      if(jack){ const kind=jack.dataset.kind, side=jack.dataset.side, j=Number(jack.dataset.jack);
-        if(side==="source") state.pending[kind]=j;
-        else if(state.pending[kind]!==null){ const key=kind==="ant"?"antMap":"metaMap"; state[key][state.pending[kind]]=j; state.pending[kind]=null; }
-        render(); return; }
-      const button=e.target.closest("button[data-preset]"); if(!button)return;
-      if(button.dataset.preset==="ant-identity")state.antMap=identity(14);
-      if(button.dataset.preset==="ant-clamp")state.antMap=clampShift(14);
-      if(button.dataset.preset==="meta-figure8")state.metaMap=clampShift(8);
-      if(button.dataset.preset==="meta-identity")state.metaMap=identity(8);
-      render();
+      if(jack){const side=jack.dataset.side,j=Number(jack.dataset.jack);if(side==="source")state.pending=j;else if(state.pending!==null){state.wiring[state.pending]=j;state.pending=null;}renderBoard();return;}
+      const preset=e.target.closest("button[data-preset]");if(!preset)return;
+      state.wiring=preset.dataset.preset==="figure8"?clampShift(8):identity(8);state.pending=null;renderBoard();
     });
-    document.getElementById("running").addEventListener("change",e=>state.running=e.target.checked);
-    document.getElementById("tick-ms").addEventListener("change",e=>{state.tickMs=Math.max(40,Number(e.target.value)||180);e.target.value=state.tickMs;reschedule();});
-    document.getElementById("write-order").addEventListener("change",e=>state.order=e.target.value);
-    document.getElementById("ant-mode").addEventListener("change",e=>{state.mode=e.target.value;render();});
-    document.getElementById("free-pin").addEventListener("change",e=>{state.pin=Number(e.target.value);render();});
-    render(); reschedule();
+    byId("running").addEventListener("change",e=>state.running=e.target.checked);
+    byId("tick-ms").addEventListener("change",e=>{state.tickMs=Math.max(40,Number(e.target.value)||60);e.target.value=state.tickMs;reschedule();});
+    byId("gens-per-tick").addEventListener("change",e=>state.gensPerTick=Math.max(1,Math.min(20,Number(e.target.value)||1)));
+    byId("mutation-writes").addEventListener("change",e=>state.writes=Math.max(0,Math.min(12,Number(e.target.value)||0)));
+    byId("free-pin").addEventListener("change",e=>{state.pin=Number(e.target.value);renderBoard();});
+    byId("width").addEventListener("change",e=>{state.width=Math.max(24,Math.min(180,Number(e.target.value)||80));e.target.value=state.width;reset();});
+    byId("seed").addEventListener("change",e=>{state.seed=Math.max(0,Number(e.target.value)||0);e.target.value=state.seed;reset();});
+    byId("reset").addEventListener("click",reset);
+    renderBoard();reset();reschedule();
   }
 
-  if (typeof document !== "undefined") document.addEventListener("DOMContentLoaded", boot);
-  return {identity, clampShift, analyse, metacaTerminals, antTerminals};
+  if(typeof document!=="undefined")document.addEventListener("DOMContentLoaded",boot);
+  return {TT3,identity,clampShift,analyse,makeRng,mutateRule,stepGenotype,stepPhenotype,createSimulation,advance};
 });
