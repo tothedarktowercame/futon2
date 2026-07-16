@@ -181,10 +181,14 @@ relabeling either attempt.
 
 `--batch-id ID` attaches an operator-chosen identifier and the recorded ranked
 selection context to every Morning Brief item.  After a bounded run,
-`clojure -M:wm-full-loop brief --batch-id ID` returns one chronologically
-ordered briefing with the question “Was each choice the best available
-selection?”; unrelated historical canaries and earlier cohort items are not
-mixed into that surface.
+`clojure -M:wm-full-loop brief --batch-id ID` prints one chronological,
+human-readable briefing; `--format edn` exposes the same report to programs.
+Each attempt states the expected and actual result, any stop-line cause and
+repair contract, and exact commands for its pending QA objectives.  Selection
+quality is calibration evidence only.  Only the substantive-achievement
+objective can emit an A-matrix belief event, and only when the attempt names a
+grounded entity.  Unrelated historical canaries and earlier cohort items are
+not mixed into that surface.
 
 Each opportunity uses the same state machine: observe and update belief,
 select exactly one policy, construct against that selected policy, dispatch a
@@ -195,10 +199,16 @@ Futon1b, queue Morning Brief QA, and close every cohort checkpoint. Defaults are
 corresponding `FUTON_WM_*_AGENT` environment variables replace them.
 The laptop authority defaults to Futon1b on `127.0.0.1:7073`;
 `FUTON_SUBSTRATE_URL` (or `FUTON1B_URL`) overrides it on other hosts. Agent jobs
-have no arbitrary total wall-clock deadline: they continue while Agency reports
-activity, and fail typed as stalled only after the configured inactivity window
-(`--agent-inactivity-seconds` or `FUTON_WM_AGENT_INACTIVITY_TIMEOUT_MS`). Every
-opportunity proves the semantic entity route before dispatching either agent.
+use an explicit absolute recovery budget (45 minutes by default) because Agency
+does not yet expose a trustworthy activity heartbeat. Budget expiry is typed as
+recoverable `:incomplete`: the loop never interrupts the live job, and a later
+click reuses a completed author artifact rather than spending a second author
+turn. Configure the bound with `--agent-budget-seconds` or
+`FUTON_WM_AGENT_BUDGET_MS`. Every opportunity proves the semantic entity route
+before dispatching either agent. Before any dispatch, the leading feasible
+policy set must contain at least two distinct finite `G-efe` values when it has
+more than one member; a flat or missing estimate stops the line as policy
+nondiscrimination and cannot be hidden by the habit prior.
 Selection uses the newest 500 non-ephemeral evidence entries by default rather
 than materialising the corpus. `FUTON3C_WM_SESSION_EVIDENCE_LIMIT` may tune the
 window, but the runner clamps it to 1--2,000 entries so a typo cannot turn a
@@ -219,10 +229,14 @@ code-state capture, substrate preflight, preference refresh, selection,
 construction, author dispatch/wait, build resolution, reviewer dispatch/wait,
 and grounding, so a pause is attributable without inspecting the JVM.
 
-Morning Brief reviews are entered with `clojure -M:wm-full-loop qa ...`. On the
-next judgement, applicable QA events pass through the same declared A-matrix
-belief update as other typed events. Reviews outside the current belief domain
-are held and remain unconsumed rather than being silently dropped.
+Morning Brief reviews are entered with `clojure -M:wm-full-loop qa ATTEMPT-ID
+OBJECTIVE ANSWER "NOTE" [REVIEWER]`. The briefing lists each objective's allowed
+answers. On the next judgement, grounded substantive-achievement QA events pass
+through the same declared A-matrix belief update as other typed events.
+Selection, evidence, and machine-response answers remain evaluation telemetry;
+they are not observations about the selected mission. Reviews outside the
+current belief domain are held and remain unconsumed rather than being silently
+dropped.
 
 ## The trace IS the state store
 
@@ -242,6 +256,7 @@ Concretely:
 | Anticipation snapshot (read-only) | `:anticipation` field on each trace record |
 | Decision + ranked actions | `:decision` + `:ranked-actions` fields |
 | Morning Brief QA fold | `:morning-brief-events`, held events, and consumed event ids |
+| Stop-line memory | immutable typed findings, repair implementations, and successor resolutions under `data/wm-repair-obligations/` |
 
 On the VSATARCS side, the same discipline holds: the VSATARCS trace
 stores `:wm-trace-anchor` entries identifying the last WM-trace record

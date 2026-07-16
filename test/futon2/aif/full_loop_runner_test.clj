@@ -11,8 +11,9 @@
 
 (def judgement
   {:ranked-actions [{:rank 1 :action {:type :open-mission :target "M-rank-head"}
-                     :controller-score -2.0}
-                    {:rank 2 :action selected-action :controller-score -1.0}]
+                     :G-efe -2.0 :controller-score -2.0}
+                    {:rank 2 :action selected-action
+                     :G-efe -1.0 :controller-score -1.0}]
    :decision {:action selected-action :rank 2 :source :habit-prior}
    :belief {} :belief-pre {} :observation {} :free-energy {}
    :prediction-errors {} :precision-state {} :micro-step-trace []
@@ -276,7 +277,7 @@
                  :repair-system-record-fn
                  (fn [finding]
                    (swap! findings conj finding)
-                   (assoc finding :repair/class :system-actuation-failure))
+                   (assoc finding :repair/class :machine-failure))
                  :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
                                      :codex-7 {:status "idle" :invoke-ready? true}})
                  :judge-fn (fn [_] {:judgement gap-judgement})
@@ -290,9 +291,11 @@
                  :trace-fn #(swap! traces conj %)
                  :construct-fn (constantly nil)
                  :queue-fn identity})]
-    (is (= :construction-failed (:outcome result)))
+    (is (= :incomplete (:outcome result)))
+    (is (= :construction-failed
+           (get-in result [:data :failure-kind])))
     (is (empty? @traces) "unsupported selection must not train the habit trace")
-    (is (= :system-actuation-failure
+    (is (= :machine-failure
            (:repair/class (:repair-obligation (:data result)))))
     (is (= :construction (:failure-stage (first @findings))))))
 
@@ -334,10 +337,12 @@
     (is (= "abc123" (:commit (first @queued))))
     (is (= :request-changes (:review-verdict (first @findings))))))
 
-(deftest stop-line-obligation-overrides-ordinary-selection-and-closes-after-grounding
+(deftest machine-stop-line-preempts-ordinary-selection-and-awaits-successor-validation
   (let [dispatches (atom [])
-        resolutions (atom [])
+        implementations (atom [])
         stop-line {:repair/id "repair-failed-1"
+                   :repair/status :open
+                   :repair/class :machine-failure
                    :attempt-id "failed-1"
                    :failed-commit "bad123"
                    :review-verdict :request-changes
@@ -360,8 +365,9 @@
          {:cohort? false
           :phase-log-fn (fn [_])
           :repair-open-fn (constantly [stop-line follow-up unrelated])
-          :repair-resolve-fn (fn [obligation resolution]
-                               (swap! resolutions conj [obligation resolution]))
+          :repair-implement-fn (fn [obligation implementation]
+                                 (swap! implementations conj
+                                        [obligation implementation]))
           :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
                               :codex-7 {:status "idle" :invoke-ready? true}})
           :judge-fn (fn [_] {:judgement judgement})
@@ -393,13 +399,16 @@
                         :implementation-id "impl"})
           :queue-fn identity})]
     (is (= :grounded-change (:outcome result)))
-    (is (= [:sorry/g2 :sorry/g2] (mapv :target @dispatches)))
+    (is (= ["repair-failed-1" "repair-failed-1"]
+           (mapv :target @dispatches)))
     (is (every? #(re-find #"STOP-THE-LINE" (:prompt %)) @dispatches))
-    (is (every? #(re-find #"caller-controlled identity is spoofable" (:prompt %))
+    (is (every? #(re-find #"trusted provenance is mandatory" (:prompt %))
                 @dispatches))
-    (is (every? #(not (re-find #"unrelated finding" (:prompt %))) @dispatches))
-    (is (= [stop-line follow-up] (mapv first @resolutions)))
-    (is (= "good456" (get-in @resolutions [0 1 :commit])))))
+    (is (every? #(not (re-find #"caller-controlled identity is spoofable"
+                               (:prompt %)))
+                @dispatches))
+    (is (= [stop-line] (mapv first @implementations)))
+    (is (= "good456" (get-in @implementations [0 1 :commit])))))
 
 (deftest job-activity-prefers-the-latest-parseable-agency-event
   (let [started "2026-07-14T10:00:00Z"
@@ -413,7 +422,7 @@
                       {:at nil}]})))
     (is (nil? (runner/job-last-activity-ms {:events [{:at "bad"}]})))))
 
-(deftest polling-stalled-job-requests-interrupt-and-fails-typed
+(deftest polling-budget-expiry-suspends-without-interrupting-live-work
   (let [posts (atom [])
         old-event (str (.minusSeconds (Instant/now) 120))]
     (with-redefs [http/get
@@ -422,19 +431,139 @@
                      :body (json/generate-string
                             {:job {:job-id "job-1" :agent-id "zai-5"
                                    :state "running"
+                                   :started-at old-event
                                    :events [{:at old-event}]}})})
                   http/post
                   (fn [url opts]
                     (swap! posts conj {:url url :opts opts})
                     {:status 200 :body "{\"ok\":true}"})]
-      (try
-        (runner/poll-job! {:agency-base "http://agency"
-                           :inactivity-timeout-ms 1000
-                           :poll-ms 1}
-                          "job-1")
-        (is false "stalled jobs must not remain in the polling loop")
-        (catch clojure.lang.ExceptionInfo e
-          (is (= :agent-job-stalled (:outcome (ex-data e))))
-          (is (= 200 (get-in (ex-data e) [:interrupt :status])))))
-      (is (= ["http://agency/api/alpha/agents/zai-5/interrupt-invoke"]
-             (mapv :url @posts))))))
+      (let [failure
+            (try
+              (runner/poll-job! {:agency-base "http://agency"
+                                 :agent-budget-ms 1000
+                                 :poll-ms 1}
+                                "job-1")
+              nil
+              (catch clojure.lang.ExceptionInfo e e))]
+        (is (= :incomplete (:outcome (ex-data failure))))
+        (is (= :agent-budget-expired (:failure-kind (ex-data failure))))
+        (is (empty? @posts)
+            "an untrusted timeout must never destroy live work")))))
+
+(deftest readiness-observation-failure-is-closed-and-remembered
+  (let [findings (atom [])
+        queued (atom [])
+        result
+        (runner/run-opportunity!
+         {:cohort? false
+          :phase-log-fn (fn [_])
+          :roster-fn (fn [_] (throw (ex-info "agency unavailable" {})))
+          :code-state-fn (fn [] {:repo "/futon2" :git-sha "head"
+                                 :git-dirty? false :repo-heads {}})
+          :repair-system-record-fn
+          (fn [finding]
+            (swap! findings conj finding)
+            (assoc finding :repair/id "repair-readiness"))
+          :queue-fn #(swap! queued conj %)})]
+    (is (= :agent-unavailable (:outcome result)))
+    (is (= :agent-readiness-failed (get-in result [:data :failure-kind])))
+    (is (= :environmental-hold (:repair-class (first @findings))))
+    (is (= :none (get-in (first @queued) [:achievement :tier])))
+    (is (= #{:selection :construction :dispatch :build :adjudication}
+           (set (keys (:checkpoints result)))))))
+
+(deftest flat-leading-g-stops-before-spending-an-agent-turn
+  (let [dispatches (atom [])
+        findings (atom [])
+        flat-action {:type :advance-mission :target "M-flat-a"
+                     :open-hole-count 8}
+        flat-judgement
+        (-> judgement
+            (assoc :ranked-actions
+                   [{:rank 1 :action flat-action :G-efe 4.0
+                     :controller-score 4.0}
+                    {:rank 2
+                     :action {:type :advance-mission :target "M-flat-b"
+                              :open-hole-count 9}
+                     :G-efe 4.0
+                     :controller-score 4.0}])
+            (assoc :decision {:action flat-action :rank 1
+                              :controller-score 4.0}))
+        result
+        (runner/run-opportunity!
+         {:cohort? false
+          :phase-log-fn (fn [_])
+          :repair-open-fn (constantly [])
+          :repair-system-record-fn
+          (fn [finding]
+            (swap! findings conj finding)
+            (assoc finding :repair/id "repair-flat" :repair/status :open))
+          :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
+                              :codex-7 {:status "idle" :invoke-ready? true}})
+          :judge-fn (fn [_] {:judgement flat-judgement})
+          :refresh-fn (fn [])
+          :substrate-preflight-fn (fn [_] {:route :test})
+          :code-state-fn (fn [] {:repo "/futon2" :git-sha "head"
+                                 :git-dirty? false :repo-heads {}})
+          :mode-flags-fn (fn [] {})
+          :version-stamp-fn identity
+          :dispatch-fn (fn [& args] (swap! dispatches conj args))
+          :queue-fn identity})]
+    (is (= :incomplete (:outcome result)))
+    (is (= :policy-nondiscrimination
+           (get-in result [:data :failure-kind])))
+    (is (empty? @dispatches))
+    (is (= :machine-failure (:repair-class (first @findings))))))
+
+(deftest recoverable-late-author-completion-skips-second-author-turn
+  (let [dispatches (atom [])
+        resolutions (atom [])
+        stop-line {:repair/id "repair-attempt-006-recovery"
+                   :repair/status :open
+                   :repair/class :incomplete-recoverable
+                   :attempt-id "attempt-006"
+                   :failure-stage :author-wait
+                   :failure-kind :agent-budget-expired
+                   :failure-data {:job-id "late-author-job"}}
+        result
+        (runner/run-opportunity!
+         {:cohort? false
+          :phase-log-fn (fn [_])
+          :repair-open-fn (constantly [stop-line])
+          :repair-resolve-fn (fn [obligation resolution]
+                               (swap! resolutions conj [obligation resolution]))
+          :read-job-fn (fn [_ job-id]
+                         {:job-id job-id :state "done"
+                          :artifact-ref "late123"
+                          :result-summary "FULL_LOOP_AUTHOR: DONE late123"})
+          :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
+                              :codex-7 {:status "idle" :invoke-ready? true}})
+          :judge-fn (fn [_] {:judgement judgement})
+          :refresh-fn (fn [])
+          :substrate-preflight-fn (fn [_] {:route :test})
+          :code-state-fn (fn [] {:repo "/futon2" :git-sha "head"
+                                 :git-dirty? false :repo-heads {}})
+          :mode-flags-fn (fn [] {})
+          :version-stamp-fn identity
+          :mission-fn (fn [target] {:id target})
+          :construct-fn runner/construct-for-decision
+          :dispatch-fn
+          (fn [_ agent _ _ _]
+            (swap! dispatches conj agent)
+            {:job-id "review-job"})
+          :poll-fn (fn [_ job-id]
+                     {:job-id job-id :state "done"
+                      :result-summary "FULL_LOOP_REVIEW: APPROVE"})
+          :resolve-build-fn (fn [_] {:repo "/repo" :files ["src/real.clj"]})
+          :ground-fn (fn [& _]
+                       {:before {:implementation-entity nil}
+                        :after {:implementation-entity {:id "impl"}}
+                        :resolved? true :dial-moved? true
+                        :implementation-id "impl"})
+          :queue-fn identity})]
+    (is (= :grounded-change (:outcome result)))
+    (is (= ["codex-7"] @dispatches)
+        "recovery dispatches only the independent reviewer")
+    (is (= stop-line (ffirst @resolutions)))
+    (is (= :recovered-existing-artifact
+           (get-in @resolutions [0 1 :validation :kind])))))

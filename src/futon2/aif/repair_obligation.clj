@@ -31,8 +31,12 @@
        (sort-by #(.getName %))
        (mapv #(edn/read-string (slurp %)))))
 
-(defn obligation-id [attempt-id]
-  (str "repair-" attempt-id))
+(defn obligation-id
+  ([attempt-id] (obligation-id attempt-id nil))
+  ([attempt-id discriminator]
+   (str "repair-" attempt-id
+        (when (some? discriminator)
+          (str "-" (name discriminator))))))
 
 (defn record-review-failure!
   ([finding] (record-review-failure! default-root finding))
@@ -62,51 +66,114 @@
      record)))
 
 (defn record-system-failure!
-  "Record a post-selection machine failure without mis-typing it as reviewer
-  feedback. The selected entry is retained so the next opportunity repairs
-  the failed actuation path before returning to ordinary policy selection."
+  "Record a zero-achievement stop-line without mis-typing every cause as a
+  code defect. `:repair/class` distinguishes machine failures, environmental
+  holds, and recoverable incomplete work. Selection fields are optional
+  because readiness and substrate failures can precede policy selection."
   ([finding] (record-system-failure! default-root finding))
-  ([root {:keys [attempt-id target selected-entry failure-stage outcome error]
+  ([root {:keys [attempt-id repair-id repair-class failure-stage outcome error]
           :as finding}]
-   (when-not (and (string? attempt-id) target (map? selected-entry)
+   (when-not (and (string? attempt-id)
+                  (#{:machine-failure :environmental-hold
+                     :incomplete-recoverable} repair-class)
                   (keyword? failure-stage) (keyword? outcome)
                   (not (str/blank? (str error))))
      (throw (ex-info "System stop-the-line finding lacks required provenance"
                      {:finding finding})))
-   (let [id (obligation-id attempt-id)
+   (let [id (or repair-id
+                (obligation-id attempt-id (:failure-kind finding)))
          record {:repair/id id
-                 :repair/schema-version 2
+                 :repair/schema-version 3
                  :repair/status :open
-                 :repair/class :system-actuation-failure
+                 :repair/class repair-class
                  :attempt-id attempt-id
-                 :target target
-                 :selected-entry selected-entry
+                 :target (:target finding)
+                 :selected-entry (:selected-entry finding)
                  :failure-stage failure-stage
                  :failure-outcome outcome
+                 :failure-kind (:failure-kind finding)
                  :failure-error error
                  :failure-data (:failure-data finding)
+                 :backtrace (:backtrace finding)
+                 :discharge-contract (:discharge-contract finding)
                  :opened-at (str (Instant/now))}]
      (write-new! (io/file root "findings" (str id ".edn")) record)
      record)))
 
+(defn- indexed-records [root child]
+  (into {} (map (juxt :repair/id identity)
+                (records (io/file root child)))))
+
 (defn open-obligations
   ([] (open-obligations default-root))
   ([root]
-   (let [resolved (set (map :repair/id (records (io/file root "resolutions"))))]
+   (let [resolved (set (map :repair/id (records (io/file root "resolutions"))))
+         implementations (indexed-records root "implementations")]
      (->> (records (io/file root "findings"))
           (remove #(contains? resolved (:repair/id %)))
+          (mapv (fn [finding]
+                  (if-let [implementation (get implementations (:repair/id finding))]
+                    (assoc finding
+                           :repair/status :awaiting-validation
+                           :repair/implementation implementation)
+                    finding)))
           (sort-by :opened-at)
           vec))))
+
+(defn record-implementation!
+  "Record independently reviewed, grounded implementation of a machine repair.
+  This does not clear the line: a distinct production-shaped successor must
+  still validate the repaired machine."
+  ([obligation implementation]
+   (record-implementation! default-root obligation implementation))
+  ([root obligation {:keys [attempt-id commit reviewer review-job witness]
+                     :as implementation}]
+   (when-not (and (:repair/id obligation)
+                  (#{:machine-failure :independent-review-failure}
+                   (:repair/class obligation))
+                  attempt-id commit reviewer review-job
+                  (not= attempt-id (:attempt-id obligation))
+                  (:resolved? witness) (:dial-moved? witness))
+     (throw (ex-info "Machine repair implementation lacks grounded review evidence"
+                     {:obligation obligation :implementation implementation})))
+   (let [record {:repair/id (:repair/id obligation)
+                 :repair/schema-version 1
+                 :repair/status :awaiting-validation
+                 :failed-attempt (:attempt-id obligation)
+                 :implementation-attempt attempt-id
+                 :replacement-commit commit
+                 :reviewer reviewer
+                 :review-job review-job
+                 :witness witness
+                 :implemented-at (str (Instant/now))}]
+     (write-new! (io/file root "implementations"
+                          (str (:repair/id obligation) ".edn"))
+                 record)
+     record)))
 
 (defn resolve!
   ([obligation resolution] (resolve! default-root obligation resolution))
   ([root obligation {:keys [attempt-id commit reviewer review-job witness]
                      :as resolution}]
-   (when-not (and (:repair/id obligation) attempt-id commit reviewer review-job
-                  (not= attempt-id (:attempt-id obligation))
-                  (or (nil? (:failed-commit obligation))
-                      (not= commit (:failed-commit obligation)))
-                  (:resolved? witness) (:dial-moved? witness))
+   (let [implementation (:repair/implementation obligation)
+         recoverable? (= :incomplete-recoverable (:repair/class obligation))
+         environmental? (= :environmental-hold (:repair/class obligation))
+         machine? (#{:machine-failure :independent-review-failure}
+                   (:repair/class obligation))
+         valid? (and (:repair/id obligation) attempt-id commit reviewer review-job
+                     (not= attempt-id (:attempt-id obligation))
+                     (:resolved? witness) (:dial-moved? witness)
+                     (cond
+                       recoverable? true
+                       environmental? (true? (get-in resolution
+                                                    [:validation :production-shaped?]))
+                       machine? (and implementation
+                                     (not= attempt-id
+                                           (:implementation-attempt implementation))
+                                     (true? (get-in resolution
+                                                    [:validation :production-shaped?])))
+                       :else false))]
+   (when-not valid?
      (throw (ex-info "Stop-the-line resolution requires approved grounded evidence"
                      {:obligation obligation :resolution resolution})))
    (let [record {:repair/id (:repair/id obligation)
@@ -115,12 +182,14 @@
                  :failed-attempt (:attempt-id obligation)
                  :validation-attempt attempt-id
                  :failed-commit (:failed-commit obligation)
-                 :replacement-commit commit
+                 :replacement-commit (or (:replacement-commit implementation)
+                                         commit)
                  :reviewer reviewer
                  :review-job review-job
                  :witness witness
+                 :validation (:validation resolution)
                  :resolved-at (str (Instant/now))}]
      (write-new! (io/file root "resolutions"
                           (str (:repair/id obligation) ".edn"))
                  record)
-     record)))
+     record))))

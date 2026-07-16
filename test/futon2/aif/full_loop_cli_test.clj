@@ -63,7 +63,7 @@
     (is (= "M-one" (:repeated-target (ex-data failure))))))
 
 (deftest batch-brief-is-one-ordered-surface
-  (with-redefs [brief/pending-items
+  (with-redefs [brief/items
                 (fn [] [{:attempt-id "attempt-7" :batch-id "night"
                          :queued-at "2026-07-16T02:00:00Z"}
                         {:attempt-id "attempt-6" :batch-id "night"
@@ -73,5 +73,5 @@
                 brief/reviews (constantly [])]
     (let [report (#'cli/batch-brief "night")]
       (is (= ["attempt-6" "attempt-7"] (:judgment-order report)))
-      (is (= 2 (:pending-count report)))
+      (is (= 4 (:pending-count report)))
       (is (= "night" (:batch-id report))))))

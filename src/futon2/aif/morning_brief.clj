@@ -14,11 +14,30 @@
 
 (def default-root "/home/joe/code/futon2/data/wm-morning-brief")
 
-(def verdict->event-type
-  {:approve :strengthened
-   :confirmed :strengthened
-   :request-changes :reopened
-   :reject :falsified
+(def objective-order
+  [:selection-quality :substantive-achievement :evidence-sufficiency
+   :machine-response])
+
+(def objective-specs
+  {:selection-quality
+   {:question "Was this the best available policy selection?"
+    :answers #{:yes :no :uncertain}
+    :use "Calibration evidence for the target-value model; never an A-matrix observation."}
+   :substantive-achievement
+   {:question "Did the result substantively advance the selected target?"
+    :answers #{:yes :partial :no :uncertain}
+    :use "A realized target-state judgment; projected to A only when a grounded entity target exists."}
+   :evidence-sufficiency
+   {:question "Are the commit, validation, review, and grounding evidence sufficient?"
+    :answers #{:sufficient :insufficient :uncertain}
+    :use "Audit evidence; it does not masquerade as a sensory observation."}
+   :machine-response
+   {:question "If the click failed, did the machine stop, remember, and prescribe an adequate discharge?"
+    :answers #{:correct :incorrect :uncertain}
+    :use "Control-loop evidence for stop-line calibration; not an A-matrix observation."}})
+
+(def achievement-answer->event-type
+  {:yes :strengthened :partial :refined :no :falsified
    :uncertain :refined})
 
 (defn- write-new! [path value]
@@ -49,27 +68,54 @@
                (assoc item :queued-at (str (Instant/now))
                            :morning-brief/schema-version 1))))
 
+(defn item-objectives [item]
+  (cond-> [:selection-quality :substantive-achievement]
+    (or (:commit item) (seq (get-in item [:achievement :build])))
+    (conj :evidence-sufficiency)
+    (or (and (:outcome item) (not= :grounded-change (:outcome item)))
+        (:failure item))
+    (conj :machine-response)))
+
+(defn- item-by-attempt [root attempt-id]
+  (some #(when (= attempt-id (:attempt-id %)) %)
+        (read-records (io/file root "items"))))
+
+(defn- belief-event-for [review-id item objective answer]
+  (when (= :substantive-achievement objective)
+    (when-let [entity-id (get-in item [:qa-targets :achievement :entity-id])]
+      {:event-id review-id
+       :entity-id entity-id
+       :type (get achievement-answer->event-type answer)
+       :weight 1.0
+       :source :morning-brief-qa
+       :objective objective})))
+
 (defn review!
-  ([attempt-id entity-id verdict note reviewer]
-   (review! default-root attempt-id entity-id verdict note reviewer))
-  ([root attempt-id entity-id verdict note reviewer]
-   (let [event-type (get verdict->event-type verdict)]
-     (when-not event-type
-       (throw (ex-info "Unknown Morning Brief verdict"
-                       {:verdict verdict :allowed (set (keys verdict->event-type))})))
+  ([attempt-id objective answer note reviewer]
+   (review! default-root attempt-id objective answer note reviewer))
+  ([root attempt-id objective answer note reviewer]
+   (let [item (item-by-attempt root attempt-id)
+         spec (get objective-specs objective)]
+     (when-not item
+       (throw (ex-info "Unknown Morning Brief attempt" {:attempt-id attempt-id})))
+     (when-not (some #{objective} (item-objectives item))
+       (throw (ex-info "QA objective does not apply to this attempt"
+                       {:attempt-id attempt-id :objective objective
+                        :applicable (item-objectives item)})))
+     (when-not (contains? (:answers spec) answer)
+       (throw (ex-info "Unknown Morning Brief answer"
+                       {:objective objective :answer answer
+                        :allowed (:answers spec)})))
      (let [review-id (str "mbqa-" (UUID/randomUUID))
            record {:morning-brief/review-id review-id
                    :attempt-id attempt-id
-                   :entity-id entity-id
-                   :verdict verdict
+                   :objective objective
+                   :answer answer
                    :note note
                    :reviewer reviewer
                    :reviewed-at (str (Instant/now))
-                   :belief-event {:event-id review-id
-                                  :entity-id entity-id
-                                  :type event-type
-                                  :weight 1.0
-                                  :source :morning-brief-qa}}]
+                   :qa-target (get-in item [:qa-targets objective])
+                   :belief-event (belief-event-for review-id item objective answer)}]
        (write-new! (io/file root "reviews" (str review-id ".edn")) record)
        record))))
 
@@ -77,12 +123,23 @@
   ([] (reviews default-root))
   ([root] (read-records (io/file root "reviews"))))
 
+(defn items
+  ([] (items default-root))
+  ([root] (read-records (io/file root "items"))))
+
+(defn with-pending-objectives [item review-records]
+  (let [reviewed (set (map (juxt :attempt-id :objective) review-records))]
+    (assoc item :pending-objectives
+           (filterv #(not (contains? reviewed [(:attempt-id item) %]))
+                    (item-objectives item)))))
+
 (defn pending-items
   ([] (pending-items default-root))
   ([root]
-   (let [reviewed (set (map :attempt-id (reviews root)))]
-     (->> (read-records (io/file root "items"))
-          (remove #(contains? reviewed (:attempt-id %)))
+   (let [review-records (reviews root)]
+     (->> (items root)
+          (mapv #(with-pending-objectives % review-records))
+          (filterv #(seq (:pending-objectives %)))
           vec))))
 
 (defn unseen-belief-events
@@ -91,6 +148,6 @@
   ([root consumed-ids]
    (let [seen (set consumed-ids)]
      (->> (reviews root)
-          (map :belief-event)
+          (keep :belief-event)
           (remove #(contains? seen (:event-id %)))
           vec))))

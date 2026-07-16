@@ -27,16 +27,24 @@
                                     {:attempt-id "repair-1" :commit "good456"
                                      :reviewer "codex-7" :review-job "review-2"
                                      :witness {:resolved? true :dial-moved? false}}))))
-    (repair/resolve! root finding
-                     {:attempt-id "repair-1" :commit "good456"
-                      :reviewer "codex-7" :review-job "review-2"
-                      :witness {:resolved? true :dial-moved? true}})
+    (repair/record-implementation!
+     root finding {:attempt-id "repair-1" :commit "good456"
+                   :reviewer "codex-7" :review-job "review-2"
+                   :witness {:resolved? true :dial-moved? true}})
+    (let [awaiting (first (repair/open-obligations root))]
+      (is (= :awaiting-validation (:repair/status awaiting)))
+      (repair/resolve! root awaiting
+                       {:attempt-id "successor-1" :commit "next789"
+                        :reviewer "codex-7" :review-job "review-3"
+                        :witness {:resolved? true :dial-moved? true}
+                        :validation {:production-shaped? true}}))
     (is (empty? (repair/open-obligations root)))))
 
 (deftest system-actuation-failure-is-distinct-durable-stop-line-memory
   (let [root (temp-root)
         finding (repair/record-system-failure!
                  root {:attempt-id "attempt-002"
+                       :repair-class :machine-failure
                        :target :fire-pattern
                        :selected-entry
                        {:action {:type :learn-action-class
@@ -44,10 +52,34 @@
                        :failure-stage :construction
                        :outcome :construction-failed
                        :error "No construction for selected decision"})]
-    (is (= :system-actuation-failure (:repair/class finding)))
+    (is (= :machine-failure (:repair/class finding)))
     (is (= [finding] (repair/open-obligations root)))
-    (repair/resolve! root finding
-                     {:attempt-id "canary-repair" :commit "good456"
-                      :reviewer "claude-1" :review-job "review-2"
-                      :witness {:resolved? true :dial-moved? true}})
+    (repair/record-implementation!
+     root finding {:attempt-id "canary-repair" :commit "good456"
+                   :reviewer "claude-1" :review-job "review-2"
+                   :witness {:resolved? true :dial-moved? true}})
+    (repair/resolve! root (first (repair/open-obligations root))
+                     {:attempt-id "canary-successor" :commit "next789"
+                      :reviewer "claude-1" :review-job "review-3"
+                      :witness {:resolved? true :dial-moved? true}
+                      :validation {:production-shaped? true}})
     (is (empty? (repair/open-obligations root)))))
+
+(deftest one-attempt-can-open-independent-typed-findings
+  (let [root (temp-root)
+        common {:attempt-id "attempt-006"
+                :failure-stage :author-wait
+                :outcome :incomplete
+                :error "work was incorrectly declared stalled"}
+        machine (repair/record-system-failure!
+                 root (assoc common
+                             :repair-class :machine-failure
+                             :failure-kind :false-timeout))
+        artifact (repair/record-system-failure!
+                  root (assoc common
+                              :repair-class :incomplete-recoverable
+                              :failure-kind :late-author-artifact))]
+    (is (= #{"repair-attempt-006-false-timeout"
+             "repair-attempt-006-late-author-artifact"}
+           (set (map :repair/id (repair/open-obligations root)))))
+    (is (not= (:repair/id machine) (:repair/id artifact)))))

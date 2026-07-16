@@ -91,6 +91,22 @@
         (max 0.1)
         (min (double cap)))))
 
+(defn advance-mission-ordinal-factor
+  "Bounded ordinal remaining-work factor for one `:advance-mission` step.
+
+  This is deliberately not a calibrated probability of success. It reuses the
+  already-declared move-intensity geometry N/(1+N), normalized so N=3 remains
+  the constant-model continuity point. Unlike the former hard cap at N=6, it
+  remains strictly monotone for every finite non-negative hole count, allowing
+  the controller to detect real ordinal differences without cosmetic jitter."
+  [open-hole-count]
+  (if (= :constant *effects-mode*)
+    1.0
+    (let [n (max 0.0 (double (or open-hole-count 3.0)))
+          resolvedness-complement (if (zero? n) 0.0 (/ n (inc n)))
+          continuity (/ 3.0 4.0)]
+      (max 0.1 (/ resolvedness-complement continuity)))))
+
 (defmethod predict-effects :address-sorry
   [_state {:keys [target weight intrinsic-value] :or {weight 1.0}}]
   ;; addressing a sorry reduces sorry-count-norm by ~0.1
@@ -121,12 +137,10 @@
   ;; :spawned — an in-flight mission advanced is work discharged, not a new
   ;; entity. (:open-mission predicting :spawned for already-open missions
   ;; was the WM scoring a hole that wasn't there — pilot cycle #1, 2026-06-10.)
-  ;; Target-sensitive: scaled by the candidate's :open-hole-count (3 holes =
-  ;; continuity with the v1 constant; capped at 2x = 6+ holes). A mission
-  ;; with more visible remaining work predicts more discharge per advance —
-  ;; and after one hole closes, the SAME action's prediction drops a notch,
-  ;; so settled G finally moves on hole-closure (cycles 5-7: it didn't).
-  (let [f (sensitivity-factor open-hole-count 3 2.0)]
+  ;; Target-sensitive ordinal v2: N/(1+N), normalized at N=3. This remains
+  ;; bounded but never collapses every N>=6 mission to the same prediction.
+  ;; It is an ordinal hypothesis, not a calibrated click-success probability.
+  (let [f (advance-mission-ordinal-factor open-hole-count)]
     {:obs-delta {:mission-health (* 0.04 f)
                  :sorry-count-norm (* -0.05 f)}
      :obs-variance {:mission-health 0.015

@@ -9,13 +9,17 @@
 
 (deftest queue-review-and-consumption-are-append-only
   (let [root (temp-root)
-        _ (brief/queue-item! root {:attempt-id "attempt-001" :outcome :grounded-change})
+        _ (brief/queue-item! root {:attempt-id "attempt-001"
+                                   :outcome :grounded-change
+                                   :qa-targets {:achievement {:entity-id "entity/a"}}})
         pending-before (brief/pending-items root)
-        review (brief/review! root "attempt-001" "entity/a" :approve "looks right" "joe")
+        review (brief/review! root "attempt-001" :substantive-achievement
+                              :yes "looks right" "joe")
         event-id (get-in review [:belief-event :event-id])]
     (is (= ["attempt-001"] (mapv :attempt-id pending-before)))
     (is (= :strengthened (get-in review [:belief-event :type])))
-    (is (empty? (brief/pending-items root)))
+    (is (= [:selection-quality]
+           (:pending-objectives (first (brief/pending-items root)))))
     (is (= [event-id]
            (mapv :event-id (brief/unseen-belief-events root #{}))))
     (is (empty? (brief/unseen-belief-events root #{event-id})))

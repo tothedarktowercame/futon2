@@ -241,8 +241,9 @@
     (testing "more holes -> larger predicted discharge (falsifiable per target)"
       (is (> (health 6) (health 3)))
       (is (> (health 3) (health 1))))
-    (testing "cap at 2x and floor at 0.1 (a scale is a hypothesis, not a blank check)"
-      (is (= (health 6) (health 12)))
+    (testing "bounded ordinal factor remains discriminating above six holes"
+      (is (> (health 12) (health 6)))
+      (is (< (fm/advance-mission-ordinal-factor 12) (/ 4.0 3.0)))
       (is (= (health 0) (health 0))) ; floor engages, no NaN/zero-div
       (is (pos? (- (health 1) 0.5))))
     (testing ":constant mode is hole-INsensitive (the frozen baseline)"

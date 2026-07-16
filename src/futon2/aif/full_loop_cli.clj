@@ -27,10 +27,10 @@
     (:batch-id flags) (assoc :batch-id (:batch-id flags))
     (:window-days flags) (assoc :window-days (parse-long! :window-days
                                                            (:window-days flags)))
-    (:agent-inactivity-seconds flags)
-    (assoc :inactivity-timeout-ms
-           (* 1000 (parse-long! :agent-inactivity-seconds
-                                (:agent-inactivity-seconds flags))))))
+    (:agent-budget-seconds flags)
+    (assoc :agent-budget-ms
+           (* 1000 (parse-long! :agent-budget-seconds
+                                (:agent-budget-seconds flags))))))
 
 (defn- canary-path []
   (str "/home/joe/code/futon2/data/wm-full-loop-canary/canary-"
@@ -73,30 +73,89 @@
             (recur (inc n) target)))))))
 
 (defn- batch-brief [batch-id]
-  (let [items (->> (brief/pending-items)
+  (let [all-reviews (brief/reviews)
+        items (->> (brief/items)
                    (filter #(= batch-id (:batch-id %)))
                    (sort-by :queued-at)
+                   (mapv #(brief/with-pending-objectives % all-reviews))
                    vec)
         attempt-ids (set (map :attempt-id items))
-        reviews (->> (brief/reviews)
+        reviews (->> all-reviews
                      (filter #(contains? attempt-ids (:attempt-id %)))
                      (sort-by :reviewed-at)
                      vec)
         item-view (fn [item]
                     (-> (select-keys item [:attempt-id :selected-target :outcome
                                            :author :reviewer :commit :queued-at
-                                           :selection-review])
+                                           :selection-review :achievement :failure
+                                           :qa-targets :pending-objectives])
                         (assoc :witness
                                (select-keys (:witness item)
                                             [:resolved? :dial-moved?
                                              :implementation-id :discharge-id]))))]
-    {:morning-brief/schema-version 2
+    {:morning-brief/schema-version 3
      :batch-id batch-id
-     :question "Was each choice the best available selection?"
      :judgment-order (mapv :attempt-id items)
-     :pending-count (count items)
+     :attempt-count (count items)
+     :fully-grounded-count (count (filter #(= :fully-grounded
+                                               (get-in % [:achievement :tier]))
+                                          items))
+     :partial-authored-count (count (filter #(= :partial-authored
+                                                (get-in % [:achievement :tier]))
+                                           items))
+     :no-achievement-count (count (filter #(= :none
+                                              (get-in % [:achievement :tier]))
+                                         items))
+     :pending-count (reduce + 0 (map #(count (:pending-objectives %)) items))
      :items (mapv item-view items)
      :reviews reviews}))
+
+(defn- fmt [x]
+  (if (nil? x) "—" (str x)))
+
+(defn render-batch-brief [report]
+  (let [lines
+        (atom
+         [(str "MORNING BRIEF — " (:batch-id report))
+          (str "Attempts: " (:attempt-count report)
+               " | fully grounded: " (:fully-grounded-count report)
+               " | partial authored: " (:partial-authored-count report)
+               " | no achievement: " (:no-achievement-count report))
+          (str "Pending QA objectives: " (:pending-count report))
+          ""])
+        add! #(swap! lines conj %)]
+    (doseq [[index item] (map-indexed vector (:items report))]
+      (let [selection (:selection-review item)
+            achievement (:achievement item)
+            failure (:failure item)]
+        (add! (str (inc index) ". " (:attempt-id item)
+                   " — " (fmt (:selected-target item))))
+        (add! (str "   Outcome: " (fmt (:outcome item))
+                   " | achievement: " (fmt (:tier achievement))))
+        (add! (str "   Expected: "
+                   (fmt (get-in selection [:selected-action :rationale]))))
+        (add! (str "   Actual: " (fmt (:summary achievement))))
+        (add! (str "   Author/reviewer: " (fmt (:author item))
+                   " / " (fmt (:reviewer item))
+                   " | commit: " (fmt (:commit item))))
+        (when failure
+          (add! (str "   STOP THE LINE: " (fmt (:kind failure))
+                     " at " (fmt (:stage failure))))
+          (add! (str "   Error: " (fmt (:error failure))))
+          (add! (str "   Repair: " (fmt (:repair-id failure))
+                     " requires "
+                     (fmt (get-in failure [:discharge-contract :requires])))))
+        (add! "   QA objectives:")
+        (doseq [objective (:pending-objectives item)
+                :let [spec (get brief/objective-specs objective)]]
+          (add! (str "     - " (name objective) ": " (:question spec)))
+          (add! (str "       answers " (vec (sort (:answers spec)))))
+          (add! (str "       use: " (:use spec)))
+          (add! (str "       submit: clojure -M:wm-full-loop qa "
+                     (:attempt-id item) " " (name objective)
+                     " ANSWER \"NOTE\" joe")))
+        (add! "")))
+    (str/join "\n" @lines)))
 
 (def usage
   (str "War Machine real full-loop runner\n\n"
@@ -106,12 +165,11 @@
        "  once [--author zai-5 --reviewer codex-7]\n"
        "  tick [--author zai-5 --reviewer codex-7]\n"
        "  continuous [--count N] [--interval-seconds N] [agent options]\n"
-       "  brief [--batch-id ID]\n"
-       "  qa ATTEMPT-ID ENTITY-ID VERDICT NOTE [REVIEWER]\n\n"
+       "  brief [--batch-id ID] [--format text|edn]\n"
+       "  qa ATTEMPT-ID OBJECTIVE ANSWER NOTE [REVIEWER]\n\n"
        "once is an on-demand durée click; continuous emits sequential durée "
        "clicks; tick is one wall-clock opportunity. Agent options also include "
-       "--agent-inactivity-seconds. VERDICT is one of approve, "
-       "confirmed, request-changes, reject, uncertain."))
+       "--agent-budget-seconds. The brief lists each objective's allowed answers."))
 
 (defn- run-command! [args]
   (let [[command & rest] args]
@@ -130,17 +188,20 @@
       "continuous" (continuous! (option-map rest))
       "brief" (let [flags (option-map rest)]
                 (if-let [batch-id (:batch-id flags)]
-                  (print-value (batch-brief batch-id))
+                  (let [report (batch-brief batch-id)]
+                    (if (= "edn" (:format flags))
+                      (print-value report)
+                      (println (render-batch-brief report))))
                   (let [record (trace/latest-trace-record)]
                     (print-value {:pending (brief/pending-items)
                                   :reviews (brief/reviews)
                                   :valid-belief-entity-ids
                                   (vec (sort-by str (keys (:mu-post record))))}))))
-      "qa" (let [[attempt-id entity-id verdict note reviewer & extra] rest]
-             (when (or (seq extra) (some nil? [attempt-id entity-id verdict note]))
-               (throw (ex-info "qa requires ATTEMPT ENTITY VERDICT NOTE [REVIEWER]"
+      "qa" (let [[attempt-id objective answer note reviewer & extra] rest]
+             (when (or (seq extra) (some nil? [attempt-id objective answer note]))
+               (throw (ex-info "qa requires ATTEMPT OBJECTIVE ANSWER NOTE [REVIEWER]"
                                {:args rest})))
-             (print-value (brief/review! attempt-id entity-id (keyword verdict)
+             (print-value (brief/review! attempt-id (keyword objective) (keyword answer)
                                          note (or reviewer "joe"))))
       (do (println usage)
           (when command (throw (ex-info "Unknown command" {:command command})))))))
