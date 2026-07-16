@@ -205,3 +205,5 @@ normalized at that boundary. This trip is resolved by revising the invariant,
 not repairing machine behavior. A first-class model-revision discharge shape
 remains needed; the owner will discharge the live finding with implementation
 and independent-review evidence rather than rewriting its append-only record.
+Tests subsequently leaked T13 findings into the production repair store;
+suite-wide temporary defaults now make production selection state unreachable.

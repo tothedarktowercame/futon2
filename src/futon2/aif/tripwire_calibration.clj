@@ -17,6 +17,11 @@
 (def run-5b-incident-path
   "/home/joe/code/futon2/data/wm-tripwires/incidents/run-5b-artifact-binding.edn")
 
+(defn- temp-root [prefix]
+  (.getPath (.toFile (Files/createTempDirectory
+                      prefix
+                      (make-array java.nio.file.attribute.FileAttribute 0)))))
+
 (defn- read-edn-lines [path]
   (with-open [reader (io/reader path)]
     (->> (line-seq reader)
@@ -144,11 +149,16 @@
          path)))))
 
 (defn -main [& _]
-  (let [report (coverage-report)
-        path (persist-coverage! report)]
-    (doseq [{:keys [incident/id tripped-wires]} (:incidents report)]
-      (println (str (name id) ": " (pr-str (vec (sort tripped-wires))))))
-    (println (format "COVERAGE %d/%d = %.3f"
-                     (:identified report) (:total report) (:coverage report)))
-    (println "coverage-report:" path)
-    report))
+  (let [repair-root (temp-root "wm-calibration-repair-")
+        trip-root (temp-root "wm-calibration-trips-")]
+    (with-redefs [repair/default-root repair-root
+                  tripwire/default-trip-root trip-root]
+      (let [report (coverage-report)
+            path (persist-coverage! report)]
+        (doseq [{:keys [incident/id tripped-wires]} (:incidents report)]
+          (println (str (name id) ": " (pr-str (vec (sort tripped-wires))))))
+        (println (format "COVERAGE %d/%d = %.3f"
+                         (:identified report) (:total report) (:coverage report)))
+        (println "coverage-report:" path)
+        (println "repair-root:" repair-root "(temporary)")
+        report))))

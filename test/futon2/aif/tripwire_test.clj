@@ -4,11 +4,14 @@
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
-            [clojure.test :refer [deftest is testing]]
+            [clojure.test :refer [deftest is testing use-fixtures]]
+            [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.tripwire :as tripwire])
   (:import [java.nio.file Files]
            [java.time Instant]))
+
+(use-fixtures :once hermetic/with-hermetic-stores)
 
 (defn- temp-dir []
   (.toFile (Files/createTempDirectory "wm-tripwire-test" (make-array java.nio.file.attribute.FileAttribute 0))))
@@ -24,6 +27,10 @@
    :attempt-id "action-test"
    :tripwire/snapshot {:runner/dispatched-turns 2
                        :agency/dispatch-count 1}})
+
+(deftest production-repair-root-is-unreachable-during-tripwire-suite
+  (is (not= hermetic/production-repair-root repair/default-root))
+  (is (not= hermetic/production-trip-root tripwire/default-trip-root)))
 
 (deftest t1-turn-conservation-trips-on-ledger-drift
   (is (= [{:kind :turn-conservation

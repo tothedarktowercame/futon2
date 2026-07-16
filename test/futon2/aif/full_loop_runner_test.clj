@@ -1,11 +1,20 @@
 (ns futon2.aif.full-loop-runner-test
   (:require [babashka.http-client :as http]
             [cheshire.core :as json]
-            [clojure.test :refer [deftest is]]
+            [clojure.test :refer [deftest is use-fixtures]]
+            [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.pattern-registry :as patterns]
+            [futon2.aif.repair-obligation :as repair]
+            [futon2.aif.tripwire :as tripwire]
             [futon2.report.cascade-lane :as cascade])
   (:import [java.time Instant]))
+
+(use-fixtures :once hermetic/with-hermetic-stores)
+
+(deftest production-repair-root-is-unreachable-during-runner-suite
+  (is (not= hermetic/production-repair-root repair/default-root))
+  (is (not= hermetic/production-trip-root tripwire/default-trip-root)))
 
 (def selected-action {:type :open-mission :target "M-selected"})
 
