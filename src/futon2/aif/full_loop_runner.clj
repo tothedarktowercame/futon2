@@ -994,6 +994,15 @@
 
                   recovered-review-job
                   (get-in stop-line [:failure-data :author-job]))
+                _ (when (and recovered-review-job
+                             (nil? recovered-author-job))
+                    (throw
+                     (ex-info "Reviewer recovery lacks the original author-job provenance"
+                              {:outcome :incomplete
+                               :failure-kind :recovery-provenance-missing
+                               :failure-stage :reviewer-wait
+                               :repair-obligation stop-line
+                               :job-id (:job-id recovered-review-job)})))
                 author-response
                 (run-phase! opts @phase-context :author-dispatch
                             #(if recovered-author-job

@@ -616,3 +616,38 @@
     (is (= :grounded-change (:outcome result)))
     (is (empty? @dispatches))
     (is (= stop-line (ffirst @resolutions)))))
+
+(deftest reviewer-recovery-without-author-provenance-fails-before-dispatch
+  (let [dispatches (atom [])
+        stop-line {:repair/id "repair-legacy-review"
+                   :repair/status :open
+                   :repair/class :incomplete-recoverable
+                   :attempt-id "legacy-attempt"
+                   :failure-stage :reviewer-wait
+                   :failure-kind :agent-budget-expired
+                   :failure-data {:job-id "late-review-job"}}
+        result
+        (runner/run-opportunity!
+         {:cohort? false
+          :phase-log-fn (fn [_])
+          :repair-open-fn (constantly [stop-line])
+          :read-job-fn (fn [_ job-id]
+                         {:job-id job-id :state "done"
+                          :result-summary "FULL_LOOP_REVIEW: APPROVE"})
+          :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
+                              :codex-7 {:status "idle" :invoke-ready? true}})
+          :judge-fn (fn [_] {:judgement judgement})
+          :refresh-fn (fn [])
+          :substrate-preflight-fn (fn [_] {:route :test})
+          :code-state-fn (fn [] {:repo "/futon2" :git-sha "head"
+                                 :git-dirty? false :repo-heads {}})
+          :mode-flags-fn (fn [] {})
+          :version-stamp-fn identity
+          :mission-fn (fn [target] {:id target})
+          :construct-fn runner/construct-for-decision
+          :dispatch-fn (fn [& args] (swap! dispatches conj args))
+          :queue-fn identity})]
+    (is (= :incomplete (:outcome result)))
+    (is (= :recovery-provenance-missing
+           (get-in result [:data :failure-kind])))
+    (is (empty? @dispatches))))
