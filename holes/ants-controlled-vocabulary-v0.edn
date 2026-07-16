@@ -1,0 +1,155 @@
+;; THE ANT PATTERNS IN A CONTROLLED VOCABULARY — overlay, not rewrite.
+;;
+;; Joe, 2026-07-16: "how about rewriting just the ant patterns in a controlled
+;; vocabulary? (NNexus style as overlays if needed, or just hand-translation)".
+;; Overlay. The prose is never touched — WR-2/I4 says a fast loop must not edit
+;; its own constraints, and the .flexiarg files ARE the constraint. An operator
+;; hand-translating would be fine (preferences are exogenous, that IS I4); an
+;; agent quietly rewriting the library is the thing the ruling forbids. So the
+;; text keeps its words and acquires annotations.
+;;
+;; ---------------------------------------------------------------------------
+;; INDUCED FROM THE PROSE, NOT IMPOSED. Read the five THEN slots and the
+;; vocabulary is already there, in the authors' own words:
+;;
+;;   white-space-scout : "raise G-adjustments for :forage, lower them for
+;;                        :return and :pheromone, and stretch tau"
+;;   cargo-return      : "apply negative G adjustments to :return ... slightly
+;;                        boost :hold ... cap tau"
+;;   pheromone-tuner   : "Bias :pheromone G downward ... anneal tau upward"
+;;   hunger-coupling   : "hungrier ants lower tau, home safety lifts tau,
+;;                        deficit reserves subtract from tau"
+;;
+;; Every prescription is (THING, DIRECTION). The things are the four macro
+;; actions (policy.clj:12) plus tau. The directions are up or down. That is the
+;; whole controlled vocabulary and nobody had to invent it.
+;;
+;; ---------------------------------------------------------------------------
+;; WHY THIS INDEX IS NOT MY EARLIER PUN. oxf-claude-2 refuted
+;; E-one-propagator-one-pattern.clj: flexiarg's 8 slots are `len(grammar
+;; fields)`, while MetaCA's 8 is an EXPONENTIAL (N = Bool³, so index k IS
+;; truth-table-3[k]). The slots have no structure for an order to be OF, and
+;; precompEquiv + conjugacy prove the theory cannot supply it.
+;;
+;; N = the four macro actions is DIFFERENT IN EXACTLY THAT RESPECT: index k IS
+;; action k. :forage is not "position 1", it is foraging. The index carries
+;; content the way MetaCA's does and the way the slot list does not. That is not
+;; yet a claim that it is an exponential (2² — see :open below); it is the
+;; weaker, sufficient claim that the index is SEMANTIC, which is what makes FREE
+;; name something rather than name whatever I happened to list fourth.
+;;
+;; ---------------------------------------------------------------------------
+;; THE nu TEST — run FIRST, per oxf-claude-2, and it is the sharp finding here.
+;; Their `settles_if_nu_has_fixed_point`: if nu has ANY fixed point p, the
+;; constant colouring (fun _ => p) satisfies the constraint for EVERY shape map
+;; s — so that nu settles instantly regardless of wiring, and settling is death.
+;; The requirement is FIXED-POINT-FREENESS, not involution. (Caveat: that
+;; theorem is not at the emitted sha ce6cc0c3c2 — I checked — so I am applying a
+;; result I could not audit. Recorded in darktower-claims.edn.)
+;;
+;;   P = {:up :down}, nu = swap        -> forall d, swap(d) != d.  FIXED-POINT-FREE. ALIVE.
+;;   P = {:up :down :unchanged}        -> swap(:unchanged) = :unchanged.  FIXED POINT. DEAD.
+;;
+;; THE NEUTRAL ELEMENT IS WHAT KILLS IT, and this is a real design constraint
+;; discovered by a one-line test rather than by building the thing and watching
+;; it settle. The obvious, comfortable vocabulary — "raise / lower / leave
+;; alone" — is dead on arrival for every shape map. A three-valued direction
+;; cannot host a propagator. `Bool.not` works for MetaCA for exactly this
+;; reason: there is no neutral bit.
+;;
+;; The cost is real and must not be hidden: forcing P = {:up :down} makes each
+;; pattern's prescription TOTAL over the actions — every action must be pushed
+;; one way or the other. The prose does not do that (see :silent below). So the
+;; vocabulary is not free; it demands a commitment the authors did not make.
+
+{:vocab/id "ants-controlled-v0"
+ :vocab/status :overlay-proposed          ; nothing adopted; no :by is filled
+ :vocab/provenance "Joe + claude-6, 2026-07-16. Induced from futon3/library/ants/*.flexiarg THEN slots."
+
+ ;; ---- the index set: SEMANTIC, unlike the flexiarg slot list ----
+ :vocab/N
+ {:source "futon2/src/ants/aif/policy.clj:12 — the four macro actions"
+  :elements [:hold :forage :return :pheromone]
+  :note "index k IS action k. This is the property the slot-list lacked."}
+
+ ;; ---- the value set and its nu ----
+ :vocab/P
+ {:elements [:up :down]
+  :nu :swap
+  :fixed-point-free? true
+  :rejected {:elements [:up :down :unchanged]
+             :why "swap(:unchanged) = :unchanged is a fixed point, so by settles_if_nu_has_fixed_point the constant colouring solves it for EVERY s. Dead on arrival."}}
+
+ ;; ---- the overlay: surface form -> canonical term. The text is untouched. ----
+ :overlay/directions
+ [{:surface "raise"                :maps-to :up   :in "white-space-scout THEN"}
+  {:surface "boost"                :maps-to :up   :in "cargo-return THEN ('slightly boost :hold')"}
+  {:surface "lifts"                :maps-to :up   :in "hunger-coupling THEN ('home safety lifts tau')"}
+  {:surface "anneal ... upward"    :maps-to :up   :in "pheromone-tuner THEN"}
+  {:surface "stretch"              :maps-to :up   :in "white-space-scout THEN ('stretch tau')"}
+  {:surface "lower"                :maps-to :down :in "white-space-scout, hunger-coupling"}
+  {:surface "negative G adjustments" :maps-to :down :in "cargo-return THEN"}
+  {:surface "penalise"             :maps-to :down :in "pheromone-tuner THEN"}
+  {:surface "bias ... downward"    :maps-to :down :in "pheromone-tuner THEN"}
+  {:surface "subtract from"        :maps-to :down :in "hunger-coupling THEN ('deficit reserves subtract from tau')"}
+  {:surface "cap"                  :maps-to :down :in "cargo-return THEN ('cap tau')"
+   :caveat "STRAINED. 'cap' is a BOUND, not a direction — it does nothing until tau exceeds it. Mapping it to :down is the overlay flattening a conditional into a push. Flagged, not smoothed over."}]
+
+ ;; ---- each pattern's THEN, as a partial function N -> P ----
+ ;; PARTIAL is the honest word. See :silent.
+ :patterns/then
+ [{:id :white-space-scout
+   :reading {:forage :up :return :down :pheromone :down}
+   :silent [:hold]
+   :verbatim "raise G-adjustments for :forage, lower them for :return and :pheromone, and stretch tau"}
+  {:id :cargo-return-discipline
+   :reading {:return :down :hold :up}
+   :silent [:forage :pheromone]
+   :verbatim "apply negative G adjustments to :return until a deposit event fires, slightly boost :hold when resting on the nest, and cap tau"}
+  {:id :pheromone-trail-tuner
+   :reading {:pheromone :down}
+   :silent [:hold :forage :return]
+   :verbatim "Bias :pheromone G downward when novelty is high and cargo low, but penalise it near the nest"
+   :caveat "The prose gives :pheromone BOTH directions under different conditions ('downward when novelty high' vs 'penalise near the nest'). Read as :down here, which DISCARDS the conditional. See :the-real-obstruction."}
+  {:id :hunger-precision-coupling
+   :reading {}
+   :silent [:hold :forage :return :pheromone]
+   :verbatim "hungrier ants lower tau, home safety lifts tau, deficit reserves subtract from tau"
+   :note "Touches NO action — it only moves tau. Under N = actions this pattern is EMPTY. That is a finding about N, not about the pattern: tau is a fifth thing the prose pushes, and it is not an action."}
+  {:id :baseline-cyber-ant
+   :reading {}
+   :silent [:hold :forage :return :pheromone]
+   :note "The identity. Its @aif-delta is literally {} and its THEN describes the loop rather than prescribing a push. Consistent with cascade-ants calling b0 FREE."}]
+
+ ;; ---- what the exercise actually exposed ----
+ :the-real-obstruction
+ {:what "Every prescription in the corpus is CONDITIONAL, and P = {:up :down} cannot hold a condition."
+  :evidence
+  ["cargo-return: 'negative G to :return UNTIL A DEPOSIT EVENT FIRES' — a direction with a stopping condition"
+   "cargo-return: 'boost :hold WHEN RESTING ON THE NEST'"
+   "pheromone-tuner: ':pheromone downward WHEN NOVELTY HIGH AND CARGO LOW, but penalise it NEAR THE NEST' — opposite directions under different conditions, on ONE action"
+   "white-space-scout: the whole pattern fires only when the `white?` detector holds"]
+  :so-what
+  "A pattern is not (action -> direction). It is (condition -> (action -> direction)).
+   Which is EXACTLY oxf-claude-2's Q3 answer arriving from the other side: that is
+   `rho : Sigma -> (Pat -> Pat)`, a sign-indexed family — the level-2 object, the
+   same shape as switch(:boredom, sigma_A, sigma_B) and WR-4's :gate. The ants'
+   patterns are not propagators. They are RHO, and their Sigma is the condition
+   (:bored / :near-nest / :white / :cargo-stalled).
+   So the ant vocabulary lands one level UP from where I was looking, and it lands
+   exactly where the tower said it would. That is the first thing today that
+   arrived where predicted instead of where convenient."
+  :and-the-nu-test-still-bites
+  "If Sigma is folded into the writer, N-patterns-as-arrows §1 says Sigma must be a
+   MONOID, and nothing gives {:bored :near-nest :white} a multiplication. If it
+   stays in the emission layer e : W(A) -> Sigma (which egoLambda FORCES — signs
+   cannot ride the writer), no monoid is needed. The refuted lambda and this
+   vocabulary point the same way."}
+
+ :open
+ [{:q "Is N = 4 actions an EXPONENTIAL (2^2), the way MetaCA's 8 = 2^3?"
+   :note "Two binary features generating [:hold :forage :return :pheromone] would make the index determined rather than merely semantic, and FREE would name something forced. Candidates that do NOT obviously work: moves?/stays? and outbound?/homebound? — :pheromone is neither. I do not believe it yet."}
+  {:q "Where does tau live?"
+   :note "hunger-coupling pushes ONLY tau and so is empty under N = actions. Either N is actions + tau (5, not a power of 2), or tau is a different level — a precision on the choice rather than a choice. The second is more likely and would mean the ant patterns split into two carriers."}
+  {:q "Is the totality cost acceptable?"
+   :note "P = {:up :down} with no neutral forces every pattern to push every action. Four of five patterns are SILENT on some action. Filling those silences is authoring, not translating — it is exactly the operator decision the census must not make for itself."}]}
