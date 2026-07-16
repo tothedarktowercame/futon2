@@ -19,6 +19,17 @@
    :prediction-errors {} :precision-state {} :micro-step-trace []
    :ranked-actions-extra [] :mode :maintain})
 
+(defn synthetic-artifact-binding [_repo before author-job]
+  {:fresh-author? true
+   :repo "/repo"
+   :pre-dispatch-head (:head before)
+   :observed-head (:artifact-ref author-job)
+   :author-window-start-ms 1000
+   :author-window-end-ms 2000
+   :corroborates? true
+   :disagreement? false
+   :commit (:artifact-ref author-job)})
+
 (defn isolated-runner-opts []
   {:cohort? false
    :phase-log-fn (fn [_])
@@ -33,6 +44,7 @@
    :version-stamp-fn identity
    :mission-fn (fn [target] {:id target})
    :construct-fn runner/construct-for-decision
+   :author-artifact-observer-fn synthetic-artifact-binding
    :queue-fn identity})
 
 (defn fire-pattern-action []
@@ -72,6 +84,7 @@
                           (reset! constructed entry)
                           {:shown [:P1] :psi :psi :cascade-score 1.0
                            :semilattice [] :policy-holes []})
+          :author-artifact-observer-fn synthetic-artifact-binding
           :dispatch-fn (fn [_ agent _ _ prompt]
                          (swap! dispatches conj {:agent agent :prompt prompt})
                          {:job-id (if (= agent "zai-5") "author-job" "review-job")})
@@ -198,6 +211,7 @@
           :version-stamp-fn identity
           :mission-fn (fn [_] nil)
           :trace-fn (fn [_] "/tmp/fire-pattern-trace.edn")
+          :author-artifact-observer-fn synthetic-artifact-binding
           :dispatch-fn (fn [_ agent _ _ prompt]
                          (swap! dispatches conj {:agent agent :prompt prompt})
                          {:job-id (if (= agent "zai-5")
@@ -339,6 +353,7 @@
           :trace-fn (fn [_] "/tmp/test-trace.edn")
           :construct-fn (fn [_] {:shown [:P1] :psi :psi :cascade-score 1.0
                                  :semilattice [] :policy-holes []})
+          :author-artifact-observer-fn synthetic-artifact-binding
           :dispatch-fn (fn [_ agent _ _ _]
                          {:job-id (if (= agent "zai-5")
                                     "author-job" "review-job")})
@@ -354,6 +369,128 @@
     (is (= "abc123" (get-in result [:data :commit])))
     (is (= "abc123" (:commit (first @queued))))
     (is (= :request-changes (:review-verdict (first @findings))))))
+
+(deftest fresh-author-prefers-repo-observed-head-over-narrated-artifact
+  (let [events (atom [])
+        resolved (atom nil)
+        dispatches (atom [])
+        result
+        (runner/run-opportunity!
+         (merge
+          (isolated-runner-opts)
+          {:repair-open-fn (constantly [])
+           :trace-fn (constantly "/tmp/artifact-binding-trace.edn")
+           :construct-fn (fn [_] {:shown [] :policy-holes []})
+           :target-repo-fn (fn [& _] "/repo")
+           :repo-head-observation-fn
+           (fn [repo]
+             (swap! events conj :pre-dispatch-head)
+             {:repo repo :head "base000" :observed-at-ms 1000})
+           :author-artifact-observer-fn
+           (fn [repo before author-job]
+             (swap! events conj :post-author-head)
+             {:fresh-author? true :repo repo
+              :pre-dispatch-head (:head before)
+              :observed-head "observed456"
+              :author-window-start-ms 1000
+              :author-window-end-ms 2000
+              :text-artifact-ref (:artifact-ref author-job)
+              :corroborates? false :disagreement? true
+              :commit "observed456"})
+           :dispatch-fn
+           (fn [_ agent _ _ prompt]
+             (swap! events conj (if (= agent "zai-5")
+                                  :author-dispatch :reviewer-dispatch))
+             (swap! dispatches conj {:agent agent :prompt prompt})
+             {:job-id (if (= agent "zai-5") "author-job" "review-job")})
+           :poll-fn
+           (fn [_ job-id]
+             (if (= job-id "author-job")
+               {:job-id job-id :state "done" :artifact-ref "narrated123"}
+               {:job-id job-id :state "done"
+                :result-summary "FULL_LOOP_REVIEW: APPROVE"}))
+           :resolve-build-fn
+           (fn [commit]
+             (reset! resolved commit)
+             {:repo "/repo" :files ["src/observed.clj"]})
+           :ground-fn
+           (fn [& _] {:resolved? true :dial-moved? true
+                      :implementation-id "observed-impl"})}))]
+    (is (= :grounded-change (:outcome result)))
+    (is (= "observed456" @resolved))
+    (is (= [:pre-dispatch-head :author-dispatch :post-author-head
+            :reviewer-dispatch]
+           @events))
+    (is (re-find #"authored commit observed456"
+                 (:prompt (second @dispatches))))
+    (is (true? (get-in result [:checkpoints :build :judgment :validation
+                               :artifact-binding :disagreement?])))))
+
+(deftest fresh-artifact-observation-validates-delta-ancestry-and-time-window
+  (let [base-opts {:repo-head-observation-fn
+                   (fn [repo] {:repo repo :head "observed456"
+                               :observed-at-ms 2000})
+                   :resolve-commit-sha-fn
+                   (fn [_ commit] (when (= commit "narrated123") "old123"))
+                   :ancestor-fn (fn [_ ancestor descendant]
+                                  (and (= ancestor "base000")
+                                       (= descendant "observed456")))
+                   :commit-time-ms-fn (fn [& _] 1500)}
+        before {:repo "/repo" :head "base000" :observed-at-ms 1000}
+        binding (runner/fresh-artifact-binding
+                 base-opts "/repo" before
+                 {:artifact-ref "narrated123"})]
+    (is (= "observed456" (:commit binding)))
+    (is (:descendant? binding))
+    (is (:in-author-window? binding))
+    (is (:disagreement? binding))
+    (is (nil? (:commit
+               (runner/fresh-artifact-binding
+                (assoc base-opts :commit-time-ms-fn (fn [& _] 500000))
+                "/repo" before {:artifact-ref "narrated123"})))
+        "a changed descendant outside the tolerated author window is rejected")))
+
+(deftest narrated-artifact-without-new-repo-head-stops-before-review
+  (let [dispatches (atom [])
+        findings (atom [])
+        result
+        (runner/run-opportunity!
+         (merge
+          (isolated-runner-opts)
+          {:repair-open-fn (constantly [])
+           :trace-fn (constantly "/tmp/artifact-binding-mismatch-trace.edn")
+           :construct-fn (fn [_] {:shown [] :policy-holes []})
+           :target-repo-fn (fn [& _] "/repo")
+           :repo-head-observation-fn
+           (fn [repo] {:repo repo :head "base000" :observed-at-ms 1000})
+           :author-artifact-observer-fn
+           (fn [repo before author-job]
+             {:fresh-author? true :repo repo
+              :pre-dispatch-head (:head before)
+              :observed-head (:head before)
+              :author-window-start-ms 1000
+              :author-window-end-ms 2000
+              :text-artifact-ref (:artifact-ref author-job)
+              :corroborates? false :disagreement? false :commit nil})
+           :dispatch-fn
+           (fn [_ agent & _]
+             (swap! dispatches conj agent)
+             {:job-id "author-job"})
+           :poll-fn
+           (fn [& _] {:job-id "author-job" :state "done"
+                      :artifact-ref "narrated123"})
+           :repair-system-record-fn
+           (fn [finding]
+             (swap! findings conj finding)
+             (assoc finding :repair/id "repair-artifact-binding"))}))]
+    (is (= :build-failed (:outcome result)))
+    (is (= :artifact-binding-mismatch
+           (get-in result [:data :failure-kind])))
+    (is (= ["zai-5"] @dispatches)
+        "no reviewer is dispatched for an unobserved narrated artifact")
+    (is (= :machine-failure (:repair-class (first @findings))))
+    (is (= :artifact-binding-mismatch
+           (:failure-kind (first @findings))))))
 
 (deftest machine-stop-line-preempts-ordinary-selection-and-awaits-successor-validation
   (let [dispatches (atom [])
@@ -401,6 +538,7 @@
                           {:mission (get-in entry [:action :target])
                            :shown [:P1] :psi :psi :cascade-score 1.0
                            :semilattice [] :policy-holes []})
+          :author-artifact-observer-fn synthetic-artifact-binding
           :dispatch-fn (fn [_ agent _ target prompt]
                          (swap! dispatches conj {:agent agent :target target
                                                 :prompt prompt})

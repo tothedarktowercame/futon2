@@ -37,6 +37,7 @@
 (def required-checkpoints [:selection :construction :dispatch :build :adjudication])
 (def discrimination-top-k 5)
 (def discrimination-epsilon 1.0e-6)
+(def artifact-window-tolerance-ms (* 2 60 1000))
 
 (defn config
   ([] (config {}))
@@ -110,6 +111,97 @@
      :git-dirty? (if (zero? (:exit dirty))
                    (not (str/blank? (:out dirty)))
                    :unknown)}))
+
+(defn- git-repo-for-path [path]
+  (when-not (str/blank? (str path))
+    (let [file (io/file path)
+          directory (cond
+                      (.isDirectory file) file
+                      (.exists file) (.getParentFile file)
+                      :else (.getParentFile file))
+          result (when directory
+                   (git (.getAbsolutePath directory)
+                        "rev-parse" "--show-toplevel"))]
+      (when (and result (zero? (:exit result)))
+        (str/trim (:out result))))))
+
+(defn- action-paths [action]
+  (let [repaired-action (get-in action [:repair-obligation :selected-entry :action])]
+    (remove nil?
+            [(:mission-path action) (:pattern-path action)
+             (:mission-path repaired-action) (:pattern-path repaired-action)])))
+
+(defn- target-repository [opts entry mission code-state]
+  (or (when-let [f (:target-repo-fn opts)] (f entry mission code-state))
+      (some git-repo-for-path
+            (concat (action-paths (:action entry)) [(:path mission)]))
+      (:repo code-state)))
+
+(defn- observe-repo-head [opts repo]
+  (if-let [f (:repo-head-observation-fn opts)]
+    (f repo)
+    (let [head (when repo (git repo "rev-parse" "HEAD"))]
+      {:repo repo
+       :head (when (and head (zero? (:exit head))) (str/trim (:out head)))
+       :observed-at-ms (System/currentTimeMillis)})))
+
+(defn- resolve-commit-sha [opts repo commit]
+  (when (and repo (not (str/blank? (str commit))))
+    (if-let [f (:resolve-commit-sha-fn opts)]
+      (f repo commit)
+      (let [result (git repo "rev-parse" (str commit "^{commit}"))]
+        (when (zero? (:exit result)) (str/trim (:out result)))))))
+
+(defn- commit-time-ms [opts repo commit]
+  (if-let [f (:commit-time-ms-fn opts)]
+    (f repo commit)
+    (let [result (git repo "show" "-s" "--format=%cI" commit)]
+      (when (zero? (:exit result))
+        (try (.toEpochMilli (Instant/parse (str/trim (:out result))))
+             (catch Throwable _ nil))))))
+
+(defn- ancestor? [opts repo ancestor descendant]
+  (if-let [f (:ancestor-fn opts)]
+    (boolean (f repo ancestor descendant))
+    (zero? (:exit (git repo "merge-base" "--is-ancestor" ancestor descendant)))))
+
+(defn fresh-artifact-binding
+  "Observe and validate the commit produced by one fresh author dispatch.
+  Agency narration is retained only as corroboration of the repository HEAD."
+  [opts repo before author-job]
+  (if-let [f (:author-artifact-observer-fn opts)]
+    (f repo before author-job)
+    (let [after (observe-repo-head opts repo)
+          before-head (:head before)
+          observed-head (:head after)
+          text-ref (:artifact-ref author-job)
+          start-ms (:observed-at-ms before)
+          end-ms (:observed-at-ms after)
+          changed? (and before-head observed-head (not= before-head observed-head))
+          descendant? (and changed?
+                           (ancestor? opts repo before-head observed-head))
+          timestamp-ms (when changed? (commit-time-ms opts repo observed-head))
+          in-window? (and timestamp-ms start-ms end-ms
+                          (<= (- start-ms artifact-window-tolerance-ms)
+                              timestamp-ms
+                              (+ end-ms artifact-window-tolerance-ms)))
+          observed-valid? (and changed? descendant? in-window?)
+          text-sha (resolve-commit-sha opts repo text-ref)
+          corroborates? (and observed-valid? text-sha (= observed-head text-sha))]
+      {:fresh-author? true
+       :repo repo
+       :pre-dispatch-head before-head
+       :observed-head observed-head
+       :observed-commit-time-ms timestamp-ms
+       :author-window-start-ms start-ms
+       :author-window-end-ms end-ms
+       :text-artifact-ref text-ref
+       :text-artifact-sha text-sha
+       :descendant? (boolean descendant?)
+       :in-author-window? (boolean in-window?)
+       :corroborates? (boolean corroborates?)
+       :disagreement? (and observed-valid? (not corroborates?))
+       :commit (when observed-valid? observed-head)})))
 
 (defn- primary-repos []
   (->> (or (.listFiles (io/file "/home/joe/code")) [])
@@ -496,6 +588,7 @@
                              :shown :semilattice])) "\n"
        "Author job evidence: " (pr-str (select-keys author-job
                                                      [:job-id :state :artifact-ref
+                                                      :repo-observed-artifact-ref
                                                       :result-summary :execution])) "\n"
        (when (seq stop-lines)
          (str "Prior STOP-THE-LINE findings to discharge explicitly: "
@@ -1079,6 +1172,11 @@
                                  :failure-kind :recovery-artifact-missing
                                  :failure-stage :author-wait
                                  :repair-obligation successor}))))
+                fresh-author? (nil? recovered-author-job)
+                author-repo (when fresh-author?
+                              (target-repository opts entry mission code-state))
+                pre-author-head (when fresh-author?
+                                  (observe-repo-head opts author-repo))
                 author-response
                 (run-phase! opts @phase-context :author-dispatch
                             #(if recovered-author-job
@@ -1123,22 +1221,69 @@
               (when-not (= "done" (:state author-job))
                 (throw (ex-info "Author job did not complete"
                                 {:outcome :build-failed :author-job author-job})))
-              (let [commit (:artifact-ref author-job)
+              (let [artifact-binding
+                    (when fresh-author?
+                      (fresh-artifact-binding opts author-repo pre-author-head
+                                              author-job))
+                    observed-commit (:commit artifact-binding)
+                    text-commit (:artifact-ref author-job)
+                    _ (when (and fresh-author? text-commit (nil? observed-commit))
+                        (throw
+                         (ex-info
+                          "Agency claimed an author artifact that repository observation did not validate"
+                          {:outcome :build-failed
+                           :failure-kind :artifact-binding-mismatch
+                           :failure-stage :author-wait
+                           :target target
+                           :author-job author-job
+                           :artifact-binding artifact-binding})))
+                    commit (if fresh-author? observed-commit text-commit)
+                    author-job (cond-> author-job
+                                 fresh-author?
+                                 (assoc :repo-observed-artifact-ref commit
+                                        :artifact-binding artifact-binding))
                     build (run-phase! opts @phase-context :build-resolution
                                       #(when commit
                                          ((or (:resolve-build-fn opts) resolve-build)
                                           commit)))
                     repo (:repo build)
                     files (:files build)]
+                (when (and fresh-author? repo
+                           (not= repo (:repo artifact-binding)))
+                  (throw
+                   (ex-info "Observed author artifact resolved outside the target repository"
+                            {:outcome :build-failed
+                             :failure-kind :artifact-binding-mismatch
+                             :failure-stage :build-resolution
+                             :target target :commit commit
+                             :author-job author-job
+                             :artifact-binding artifact-binding
+                             :resolved-repository repo})))
                 (when-not (and commit repo (vector? files))
                   (throw (ex-info "Author completed without a verifiable commit"
                                   {:outcome :build-failed :author-job author-job})))
                 (when (or (empty? files) (artifact-only-files? files))
                   (throw (ex-info "Authored commit is artifact-only"
                                   {:outcome :artifact-only :commit commit :files files})))
-                (let [review-response
+                (let [artifact-snapshot
+                      (when fresh-author?
+                        {:artifact-binding/fresh-author? true
+                         :artifact-binding/repo (:repo artifact-binding)
+                         :artifact-binding/reviewer-commit commit
+                         :artifact-binding/pre-dispatch-head
+                         (:pre-dispatch-head artifact-binding)
+                         :artifact-binding/author-window-start-ms
+                         (:author-window-start-ms artifact-binding)
+                         :artifact-binding/author-window-end-ms
+                         (:author-window-end-ms artifact-binding)
+                         :artifact-binding/failed-commits
+                         (vec (keep :failed-commit stop-lines))})
+                      review-response
                       (run-phase!
-                       opts @phase-context :reviewer-dispatch
+                       opts (cond-> @phase-context
+                              artifact-snapshot
+                              (assoc :tripwire/snapshot artifact-snapshot))
+                       :reviewer-dispatch
                        #(if recovered-review-job
                           {:job-id (:job-id recovered-review-job)
                            :state "done" :recovered? true
@@ -1179,7 +1324,9 @@
                                       :validation {:author (:execution author-job)
                                                    :reviewer (:execution review-job)
                                                    :review-job (:job-id review-job)
-                                                   :approved? approved?}}
+                                                   :approved? approved?
+                                                   :artifact-binding
+                                                   artifact-binding}}
                                      {:kind :git-commit-and-independent-review
                                       :repository repo}))
                   (when-not approved?
@@ -1272,7 +1419,8 @@
                               :grounded-change
                               :grounded-no-change)
                             {:target target :commit commit :witness witness
-                             :author-job author-job :review-job review-job})))))))))
+                             :author-job author-job :review-job review-job
+                             :artifact-binding artifact-binding})))))))))
       (catch Throwable e
         (if @closing?
           (throw e)

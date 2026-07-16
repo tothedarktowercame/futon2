@@ -280,6 +280,62 @@
          (get @tripwire/wire-registry :T12)))
   (is (empty? (tripwire/evaluate-wire :T12 {:tripwire/force? true}))))
 
+(def run-5b-repo "/home/joe/code/futon5a")
+
+(defn- instant-ms [timestamp]
+  (.toEpochMilli (java.time.Instant/parse timestamp)))
+
+(deftest t13-trips-when-reviewer-artifact-is-absent-from-target-repo
+  (is (= [{:kind :reviewer-artifact-absent
+           :repo run-5b-repo :reviewer-commit "ffffffffffff"}]
+         (tripwire/evaluate-wire
+          :T13 {:tripwire/force? true
+                :artifact-binding/fresh-author? true
+                :artifact-binding/repo run-5b-repo
+                :artifact-binding/reviewer-commit "ffffffffffff"
+                :artifact-binding/author-window-start-ms
+                (instant-ms "2026-07-16T12:00:13Z")
+                :artifact-binding/failed-commits []}))))
+
+(deftest t13-trips-when-reviewer-artifact-predates-author-window
+  (is (= :reviewer-artifact-predates-author-window
+         (-> (tripwire/evaluate-wire
+              :T13 {:tripwire/force? true
+                    :artifact-binding/fresh-author? true
+                    :artifact-binding/repo run-5b-repo
+                    :artifact-binding/reviewer-commit "c9e7aaf"
+                    :artifact-binding/author-window-start-ms
+                    (instant-ms "2026-07-16T12:00:13Z")
+                    :artifact-binding/failed-commits []})
+             first :kind))))
+
+(deftest t13-trips-when-reviewer-artifact-is-a-failed-predecessor
+  (is (= [{:kind :reviewer-artifact-is-failed-predecessor
+           :repo run-5b-repo :reviewer-commit "c9e7aaf"
+           :failed-commit "c9e7aaf80f1bc6576f2b1874ebb4b44d64c2c219"}]
+         (tripwire/evaluate-wire
+          :T13 {:tripwire/force? true
+                :artifact-binding/fresh-author? true
+                :artifact-binding/repo run-5b-repo
+                :artifact-binding/reviewer-commit "c9e7aaf"
+                :artifact-binding/author-window-start-ms
+                (instant-ms "2026-07-16T11:40:00Z")
+                :artifact-binding/failed-commits
+                ["c9e7aaf80f1bc6576f2b1874ebb4b44d64c2c219"]}))))
+
+(deftest t13-allows-a-fresh-repo-commit-within-the-author-window
+  (is (empty?
+       (tripwire/evaluate-wire
+        :T13 {:tripwire/force? true
+              :artifact-binding/fresh-author? true
+              :artifact-binding/repo run-5b-repo
+              :artifact-binding/reviewer-commit "099906e"
+              :artifact-binding/author-window-start-ms
+              (instant-ms "2026-07-16T12:00:13Z")
+              :artifact-binding/author-window-end-ms
+              (instant-ms "2026-07-16T12:12:12Z")
+              :artifact-binding/failed-commits ["d908b2c"]}))))
+
 (deftest every-wire-is-individually-disableable
   (let [reports (atom [])
         record {:phase :synthetic

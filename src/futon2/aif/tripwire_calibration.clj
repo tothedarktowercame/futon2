@@ -13,7 +13,9 @@
 (def attempt-006-source-ledger
   "/home/joe/code/futon2/data/wm-full-loop-phases.edn.log")
 (def default-coverage-path
-  "/home/joe/code/futon2/data/wm-tripwires/coverage.edn")
+  "/home/joe/code/futon2/data/wm-tripwires/coverage-v2.edn")
+(def run-5b-incident-path
+  "/home/joe/code/futon2/data/wm-tripwires/incidents/run-5b-artifact-binding.edn")
 
 (defn- read-edn-lines [path]
   (with-open [reader (io/reader path)]
@@ -84,7 +86,16 @@
       :incident/kind :loaded-file-code-divergence
       :source :synthetic-var-redefinition
       :expected-wires #{:T10}
-      :tripped-wires (mixed-image-wire-ids)}]))
+      :tripped-wires (mixed-image-wire-ids)}
+     {:incident/id :run-5b-author-artifact-binding
+      :incident/kind :narrated-predecessor-bound-to-review
+      :source {:extracted-incident run-5b-incident-path
+               :attempt-id "attempt-013"}
+      :expected-wires #{:T13}
+      :tripped-wires
+      (tripped-wire-ids
+       (assoc (edn/read-string (slurp run-5b-incident-path))
+              :tripwire/force? true))}]))
 
 (defn coverage-report []
   (let [incidents (calibration-incidents)

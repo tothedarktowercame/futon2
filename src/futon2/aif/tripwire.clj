@@ -27,6 +27,7 @@
 (def default-agency-base "http://127.0.0.1:7070")
 (def summon-recipient "claude-6")
 (def investigation-window-ms (* 45 60 1000))
+(def artifact-window-tolerance-ms (* 2 60 1000))
 (def repair-children ["findings" "implementations" "resolutions"])
 (def known-job-states
   #{"queued" "pending" "running" "done" "failed" "cancelled" "timed-out"})
@@ -90,7 +91,8 @@
     :T10 {:title "loaded/file code coherence" :enabled? true}
     :T11 {:title "Agency job-state alphabet" :enabled? true}
     :T12 {:title "four-opportunity zero-grounding target wedge"
-          :enabled? false :status :chartered-stub}}))
+          :enabled? false :status :chartered-stub}
+    :T13 {:title "author-artifact binding" :enabled? true}}))
 
 (defonce ^:private phase-snapshots (atom {}))
 (def ^:dynamic *handling-trip?* false)
@@ -380,9 +382,61 @@
   ;; distinction between a productive multi-turn target and a true soft wedge.
   nil)
 
+(defn- commit-sha [repo commit]
+  (when (and (string? repo) (not (str/blank? (str commit))))
+    (let [result (shell/sh "git" "-C" repo "rev-parse"
+                           (str commit "^{commit}"))]
+      (when (zero? (:exit result)) (str/trim (:out result))))))
+
+(defn- commit-time-ms [repo commit]
+  (when-let [sha (commit-sha repo commit)]
+    (let [result (shell/sh "git" "-C" repo "show" "-s" "--format=%cI" sha)]
+      (when (zero? (:exit result))
+        (try (.toEpochMilli (Instant/parse (str/trim (:out result))))
+             (catch Throwable _ nil))))))
+
+(defn- same-commit? [repo left right]
+  (let [left-sha (commit-sha repo left)
+        right-sha (commit-sha repo right)]
+    (and left-sha right-sha (= left-sha right-sha))))
+
+(defn- t13 [{:keys [phase transition]
+             fresh-author? :artifact-binding/fresh-author?
+             repo :artifact-binding/repo
+             reviewer-commit :artifact-binding/reviewer-commit
+             window-start-ms :artifact-binding/author-window-start-ms
+             failed-commits :artifact-binding/failed-commits
+             :as observation}]
+  (when (and fresh-author?
+             (or (:cohort? observation) (:tripwire/force? observation))
+             (or (:tripwire/force? observation)
+                 (and (= :reviewer-dispatch phase) (= :start transition))))
+    (let [sha (commit-sha repo reviewer-commit)
+          timestamp-ms (when sha (commit-time-ms repo sha))
+          predecessor (some #(when (same-commit? repo reviewer-commit %) %)
+                            failed-commits)]
+      (cond-> []
+        (nil? sha)
+        (conj {:kind :reviewer-artifact-absent
+               :repo repo :reviewer-commit reviewer-commit})
+
+        (and sha (number? window-start-ms)
+             (or (nil? timestamp-ms)
+                 (< timestamp-ms
+                    (- window-start-ms artifact-window-tolerance-ms))))
+        (conj {:kind :reviewer-artifact-predates-author-window
+               :repo repo :reviewer-commit reviewer-commit
+               :commit-time-ms timestamp-ms
+               :author-window-start-ms window-start-ms})
+
+        predecessor
+        (conj {:kind :reviewer-artifact-is-failed-predecessor
+               :repo repo :reviewer-commit reviewer-commit
+               :failed-commit predecessor})))))
+
 (def wire-evaluators
   {:T1 t1 :T2 t2 :T3 t3 :T4 t4 :T5 t5 :T6 t6 :T7 t7 :T8 t8
-   :T9 t9 :T10 t10 :T11 t11 :T12 t12})
+   :T9 t9 :T10 t10 :T11 t11 :T12 t12 :T13 t13})
 
 (defn evaluate-wire
   "Return this wire's violation witnesses for one complete observation."

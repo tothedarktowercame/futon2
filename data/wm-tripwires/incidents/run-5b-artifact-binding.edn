@@ -1,0 +1,21 @@
+{:incident/id :run-5b-author-artifact-binding
+ :source-log "/tmp/wm-armed-run-5b.log"
+ :attempt-id "attempt-013"
+ :phase :reviewer-dispatch
+ :transition :start
+ :artifact-binding/fresh-author? true
+ :artifact-binding/repo "/home/joe/code/futon5a"
+ :artifact-binding/pre-dispatch-head
+ "c9e7aaf80f1bc6576f2b1874ebb4b44d64c2c219"
+ :artifact-binding/reviewer-commit "c9e7aaf"
+ :artifact-binding/author-window-start-ms 1784203213173
+ :artifact-binding/author-window-end-ms 1784203932566
+ :artifact-binding/failed-commits ["d908b2c"]
+ :repo-observed-author-commit
+ "099906e8ffd052add0b184ef0bc34d2866f7c781"
+ :evidence
+ {:author-dispatch-start "2026-07-16T12:00:13.173752800Z"
+  :author-wait-end "2026-07-16T12:12:12.566039151Z"
+  :narrated-artifact "c9e7aaf"
+  :observed-head "099906e"
+  :reviewer "codex-6"}}
