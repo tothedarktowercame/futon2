@@ -526,6 +526,20 @@
       "REJECT" :reject
       :unverifiable)))
 
+(defn- author-verdict
+  "Parse the author contract's terminal marker (line-anchored, first match —
+  same conventions as review-verdict). The author prompt names REFUSE as a
+  legal no-commit ending; a runner that cannot read it misfiles every typed
+  refusal as a machine failure (attempt-020, 2026-07-16)."
+  [job]
+  (let [text (job-text job)
+        [_ marker detail] (re-find #"(?m)^FULL_LOOP_AUTHOR:\s*(DONE|REFUSE)\b[ \t]*(.*)$"
+                                   text)]
+    (case marker
+      "DONE" {:verdict :done :detail (str/trim (str detail))}
+      "REFUSE" {:verdict :refuse :reason (str/trim (str detail))}
+      {:verdict :unverifiable})))
+
 (declare recovery-job-id)
 
 (defn- prompt-findings [stop-lines]
@@ -733,7 +747,7 @@
 (defn- repair-class-for [failure-kind]
   (cond
     (#{:agent-unavailable :agent-readiness-failed :substrate-unavailable
-       :dispatch-failed :abstained :no-selection}
+       :dispatch-failed :abstained :no-selection :guardrail-refusal}
      failure-kind)
     :environmental-hold
 
@@ -1260,8 +1274,30 @@
                              :artifact-binding artifact-binding
                              :resolved-repository repo})))
                 (when-not (and commit repo (vector? files))
-                  (throw (ex-info "Author completed without a verifiable commit"
-                                  {:outcome :build-failed :author-job author-job})))
+                  ;; The author contract offers exactly one legal no-commit
+                  ;; ending: a line-anchored REFUSE with a typed reason. That
+                  ;; is an agent declining, not a broken machine — class it
+                  ;; like :abstained (environmental hold), so the line does
+                  ;; not demand a repair commit for a refusal. Fail-closed
+                  ;; boundaries: an observed commit outranks any marker (a
+                  ;; refusal cannot suppress review of real work), a bare
+                  ;; REFUSE without a reason is unverifiable, and a DONE
+                  ;; claim without a verifiable commit stays a build failure.
+                  (let [{:keys [verdict reason]} (author-verdict author-job)]
+                    (when (and (nil? commit)
+                               (= :refuse verdict)
+                               (not (str/blank? reason)))
+                      (throw (ex-info "Author refused with a typed reason"
+                                      {:outcome :guardrail-refusal
+                                       :failure-kind :guardrail-refusal
+                                       :failure-stage :build-resolution
+                                       :refusal-reason reason
+                                       :target target
+                                       :author-job author-job})))
+                    (throw (ex-info "Author completed without a verifiable commit"
+                                    {:outcome :build-failed
+                                     :author-verdict verdict
+                                     :author-job author-job}))))
                 (when (or (empty? files) (artifact-only-files? files))
                   (throw (ex-info "Authored commit is artifact-only"
                                   {:outcome :artifact-only :commit commit :files files})))

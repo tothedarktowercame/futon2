@@ -501,6 +501,96 @@
     (is (= :artifact-binding-mismatch
            (:failure-kind (first @findings))))))
 
+(defn- no-commit-author-opts
+  "Runner opts whose author job completes without any observable commit;
+  the job's text is supplied by the caller. Mirrors attempt-020's shape."
+  [dispatches findings author-job]
+  (merge
+   (isolated-runner-opts)
+   {:repair-open-fn (constantly [])
+    :trace-fn (constantly "/tmp/author-refusal-trace.edn")
+    :construct-fn (fn [_] {:shown [] :policy-holes []})
+    :target-repo-fn (fn [& _] "/repo")
+    :repo-head-observation-fn
+    (fn [repo] {:repo repo :head "base000" :observed-at-ms 1000})
+    :author-artifact-observer-fn
+    (fn [repo before _author-job]
+      {:fresh-author? true :repo repo
+       :pre-dispatch-head (:head before)
+       :observed-head (:head before)
+       :author-window-start-ms 1000
+       :author-window-end-ms 2000
+       :corroborates? false :disagreement? false :commit nil})
+    :dispatch-fn (fn [_ agent & _]
+                   (swap! dispatches conj agent)
+                   {:job-id "author-job"})
+    :poll-fn (fn [& _] author-job)
+    :repair-system-record-fn
+    (fn [finding]
+      (swap! findings conj finding)
+      (assoc finding :repair/id "repair-under-test"))}))
+
+(deftest typed-author-refusal-is-an-environmental-hold-not-a-machine-failure
+  ;; Replays the attempt-020 misclassification (2026-07-16): the author ended
+  ;; with the contract's own legal no-commit marker — REFUSE with a typed
+  ;; reason, line-anchored mid-message, not in :result-summary — and the
+  ;; runner filed it as a :build-failed machine failure demanding a repair
+  ;; commit. A typed refusal is an agent declining: environmental hold.
+  (let [dispatches (atom [])
+        findings (atom [])
+        result
+        (runner/run-opportunity!
+         (no-commit-author-opts
+          dispatches findings
+          {:job-id "author-job" :state "done" :artifact-ref nil
+           :result-summary "The loop is escalating — declining at the protocol level..."
+           :events [{:type "text"
+                     :text (str "Reasoning about why this must be declined.\n\n"
+                                "FULL_LOOP_AUTHOR: REFUSE operator-engaged-concurrent-identity"
+                                " — author is under live operator direction\n\n"
+                                "Joe — this is your call and easily reversed.")}]}))]
+    (is (= :guardrail-refusal (:outcome result)))
+    (is (= :guardrail-refusal (get-in result [:data :failure-kind])))
+    (is (= ["zai-5"] @dispatches)
+        "no reviewer is dispatched for a refusal")
+    (is (= :environmental-hold (:repair-class (first @findings)))
+        "a typed refusal must not open a machine-failure repair")
+    (is (= :guardrail-refusal (:failure-kind (first @findings))))
+    (is (= (str "operator-engaged-concurrent-identity"
+                " — author is under live operator direction")
+           (get-in result [:data :error-data :refusal-reason]))
+        "the typed reason is preserved for the morning brief")))
+
+(deftest bare-refusal-without-typed-reason-stays-build-failed
+  ;; Fail-closed: the contract demands REFUSE <typed reason>; a bare marker
+  ;; is unverifiable and keeps the machine-failure classification.
+  (let [dispatches (atom [])
+        findings (atom [])
+        result
+        (runner/run-opportunity!
+         (no-commit-author-opts
+          dispatches findings
+          {:job-id "author-job" :state "done" :artifact-ref nil
+           :events [{:type "text" :text "FULL_LOOP_AUTHOR: REFUSE"}]}))]
+    (is (= :build-failed (:outcome result)))
+    (is (= :machine-failure (:repair-class (first @findings))))))
+
+(deftest done-claim-without-verifiable-commit-stays-build-failed
+  ;; Fail-closed: a DONE claim that repository observation cannot validate is
+  ;; exactly the failure the machine-failure line exists for.
+  (let [dispatches (atom [])
+        findings (atom [])
+        result
+        (runner/run-opportunity!
+         (no-commit-author-opts
+          dispatches findings
+          {:job-id "author-job" :state "done" :artifact-ref nil
+           :events [{:type "text"
+                     :text "FULL_LOOP_AUTHOR: DONE abc123 (narrated, never pushed)"}]}))]
+    (is (= :build-failed (:outcome result)))
+    (is (= :machine-failure (:repair-class (first @findings))))
+    (is (= ["zai-5"] @dispatches))))
+
 (deftest machine-stop-line-preempts-ordinary-selection-and-awaits-successor-validation
   (let [dispatches (atom [])
         implementations (atom [])
