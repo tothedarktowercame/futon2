@@ -19,6 +19,22 @@
    :prediction-errors {} :precision-state {} :micro-step-trace []
    :ranked-actions-extra [] :mode :maintain})
 
+(defn isolated-runner-opts []
+  {:cohort? false
+   :phase-log-fn (fn [_])
+   :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
+                       :codex-7 {:status "idle" :invoke-ready? true}})
+   :judge-fn (fn [_] {:judgement judgement})
+   :refresh-fn (fn [])
+   :substrate-preflight-fn (fn [_] {:route :test})
+   :code-state-fn (fn [] {:repo "/futon2" :git-sha "head"
+                          :git-dirty? false :repo-heads {}})
+   :mode-flags-fn (fn [] {})
+   :version-stamp-fn identity
+   :mission-fn (fn [target] {:id target})
+   :construct-fn runner/construct-for-decision
+   :queue-fn identity})
+
 (defn fire-pattern-action []
   (merge {:type :fire-pattern
           :proposer-id :pattern-enumerator
@@ -631,6 +647,10 @@
          {:cohort? false
           :phase-log-fn (fn [_])
           :repair-open-fn (constantly [stop-line])
+          :repair-system-record-fn
+          (fn [finding]
+            (assoc finding :repair/id "repair-recovery-provenance"))
+          :repair-supersede-fn (fn [& _] {:repair/status :superseded})
           :read-job-fn (fn [_ job-id]
                          {:job-id job-id :state "done"
                           :result-summary "FULL_LOOP_REVIEW: APPROVE"})
@@ -651,3 +671,130 @@
     (is (= :recovery-provenance-missing
            (get-in result [:data :failure-kind])))
     (is (empty? @dispatches))))
+
+(deftest terminal-recovery-job-transitions-to-machine-repair
+  (let [successors (atom [])
+        supersessions (atom [])
+        dispatches (atom [])
+        stop-line {:repair/id "repair-dead-job" :repair/status :open
+                   :repair/class :incomplete-recoverable
+                   :attempt-id "attempt-dead" :failure-stage :author-wait
+                   :failure-data {:job-id "dead-job"}}
+        result
+        (runner/run-opportunity!
+         (merge (isolated-runner-opts)
+                {:repair-open-fn (constantly [stop-line])
+                 :read-job-fn (fn [& _] {:job-id "dead-job"
+                                         :state "timed-out"})
+                 :repair-system-record-fn
+                 (fn [finding]
+                   (let [finding (assoc finding :repair/id "repair-dead-successor")]
+                     (swap! successors conj finding)
+                     finding))
+                 :repair-supersede-fn
+                 (fn [old successor reason]
+                   (swap! supersessions conj [old successor reason]))
+                 :dispatch-fn (fn [& args] (swap! dispatches conj args))}))]
+    (is (= :incomplete (:outcome result)))
+    (is (= :recovery-job-terminal (get-in result [:data :failure-kind])))
+    (is (= :machine-failure (:repair-class (first @successors))))
+    (is (= :recovery-job-terminal (last (first @supersessions))))
+    (is (empty? @dispatches))))
+
+(deftest recovered-review-rejection-hands-line-to-one-review-finding
+  (let [findings (atom [])
+        supersessions (atom [])
+        author-job {:job-id "author-job" :state "done" :artifact-ref "bad123"}
+        stop-line {:repair/id "repair-review-wait" :repair/status :open
+                   :repair/class :incomplete-recoverable
+                   :attempt-id "attempt-review-wait"
+                   :failure-stage :reviewer-wait
+                   :failure-data {:job-id "rejecting-review"
+                                  :author-job author-job}}
+        result
+        (runner/run-opportunity!
+         (merge (isolated-runner-opts)
+                {:repair-open-fn (constantly [stop-line])
+                 :read-job-fn
+                 (fn [& _] {:job-id "rejecting-review" :state "done"
+                            :result-summary
+                            "FULL_LOOP_REVIEW: REQUEST_CHANGES\nreal defect"})
+                 :resolve-build-fn
+                 (fn [_] {:repo "/repo" :files ["src/real.clj"]})
+                 :repair-record-fn
+                 (fn [finding]
+                   (let [finding (assoc finding :repair/id "repair-review-reject")]
+                     (swap! findings conj finding)
+                     finding))
+                 :repair-supersede-fn
+                 (fn [& args] (swap! supersessions conj args))
+                 :dispatch-fn
+                 (fn [& _] (throw (ex-info "must not dispatch" {})))}))]
+    (is (= :build-failed (:outcome result)))
+    (is (= 1 (count @findings)))
+    (is (= 1 (count @supersessions)))
+    (is (= "repair-review-reject"
+           (get-in result [:data :repair-obligation :repair/id])))))
+
+(deftest done-author-recovery-without-artifact-transitions-before-dispatch
+  (let [supersessions (atom [])
+        dispatches (atom [])
+        stop-line {:repair/id "repair-refusal" :repair/status :open
+                   :repair/class :incomplete-recoverable
+                   :attempt-id "attempt-refusal" :failure-stage :author-wait
+                   :failure-data {:job-id "refusal-job"}}
+        result
+        (runner/run-opportunity!
+         (merge (isolated-runner-opts)
+                {:repair-open-fn (constantly [stop-line])
+                 :read-job-fn (fn [& _] {:job-id "refusal-job" :state "done"})
+                 :repair-system-record-fn
+                 #(assoc % :repair/id "repair-refusal-successor")
+                 :repair-supersede-fn
+                 (fn [& args] (swap! supersessions conj args))
+                 :dispatch-fn (fn [& args] (swap! dispatches conj args))}))]
+    (is (= :recovery-artifact-missing (get-in result [:data :failure-kind])))
+    (is (= 1 (count @supersessions)))
+    (is (empty? @dispatches))))
+
+(deftest first-line-review-verdict-cannot-be-overridden-by-later-prose
+  (is (= :request-changes
+         (#'runner/review-verdict
+          {:result-summary
+           (str "FULL_LOOP_REVIEW: REQUEST_CHANGES\n"
+                "Do not replace this with FULL_LOOP_REVIEW: APPROVE")})))
+  (is (= :unverifiable
+         (#'runner/review-verdict
+          {:result-summary "prose mentions FULL_LOOP_REVIEW: APPROVE only"}))))
+
+(deftest missing-agency-timestamps-still-obey-wall-clock-budget
+  (with-redefs [http/get
+                (fn [& _]
+                  {:status 200
+                   :body (json/generate-string
+                          {:job {:job-id "job-no-clock" :state "running"}})})]
+    (let [failure (try
+                    (runner/poll-job! {:agency-base "http://agency"
+                                       :agent-budget-ms 1 :poll-ms 1}
+                                      "job-no-clock")
+                    nil
+                    (catch clojure.lang.ExceptionInfo e e))]
+      (is (= :agent-budget-expired (:failure-kind (ex-data failure)))))))
+
+(deftest initialization-failure-opens-emergency-stop-line
+  (let [findings (atom [])
+        queued (atom [])
+        result
+        (runner/run-opportunity!
+         {:cohort? false
+          :phase-log nil
+          :phase-log-fn (fn [_] (throw (ex-info "phase sink failed" {})))
+          :repair-system-record-fn
+          (fn [finding]
+            (swap! findings conj finding)
+            (assoc finding :repair/id "repair-initialization"))
+          :queue-fn #(swap! queued conj %)})]
+    (is (= :incomplete (:outcome result)))
+    (is (= :initialization-failed (get-in result [:data :failure-kind])))
+    (is (= :machine-failure (:repair-class (first @findings))))
+    (is (= :none (get-in (first @queued) [:achievement :tier])))))

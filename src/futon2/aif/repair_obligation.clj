@@ -130,11 +130,15 @@
      (->> (records (io/file root "findings"))
           (remove #(contains? resolved (:repair/id %)))
           (mapv (fn [finding]
-                  (if-let [implementation (get implementations (:repair/id finding))]
-                    (assoc finding
-                           :repair/status :awaiting-validation
-                           :repair/implementation implementation)
-                    finding)))
+                  (let [finding (update finding :repair/class
+                                        #(if (= :system-actuation-failure %)
+                                           :machine-failure %))]
+                    (if-let [implementation (get implementations
+                                                    (:repair/id finding))]
+                      (assoc finding
+                             :repair/status :awaiting-validation
+                             :repair/implementation implementation)
+                      finding))))
           (sort-by :opened-at)
           vec))))
 
@@ -151,6 +155,8 @@
                    (:repair/class obligation))
                   attempt-id commit reviewer review-job
                   (not= attempt-id (:attempt-id obligation))
+                  (or (nil? (:failed-commit obligation))
+                      (not= commit (:failed-commit obligation)))
                   (:resolved? witness) (:dial-moved? witness))
      (throw (ex-info "Machine repair implementation lacks grounded review evidence"
                      {:obligation obligation :implementation implementation})))
@@ -165,6 +171,33 @@
                  :witness witness
                  :implemented-at (str (Instant/now))}]
      (write-new! (io/file root "implementations"
+                          (str (:repair/id obligation) ".edn"))
+                 record)
+     record)))
+
+(defn supersede!
+  "Close an obligation whose promised recovery has become impossible, linking
+  it to the typed successor finding that now owns the stop line. This is not a
+  successful repair resolution and requires no fabricated grounding witness."
+  ([obligation successor reason]
+   (supersede! default-root obligation successor reason))
+  ([root obligation successor reason]
+   (when-not (and (= :incomplete-recoverable (:repair/class obligation))
+                  (= :open (:repair/status obligation))
+                  (:repair/id successor)
+                  (not= (:repair/id obligation) (:repair/id successor))
+                  (keyword? reason))
+     (throw (ex-info "Invalid recoverable-obligation transition"
+                     {:obligation obligation :successor successor
+                      :reason reason})))
+   (let [record {:repair/id (:repair/id obligation)
+                 :repair/schema-version 2
+                 :repair/status :superseded
+                 :failed-attempt (:attempt-id obligation)
+                 :successor-repair-id (:repair/id successor)
+                 :supersession-reason reason
+                 :resolved-at (str (Instant/now))}]
+     (write-new! (io/file root "resolutions"
                           (str (:repair/id obligation) ".edn"))
                  record)
      record)))

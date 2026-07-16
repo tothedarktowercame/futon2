@@ -230,6 +230,7 @@
   budget. Expiry suspends the loop as recoverable `:incomplete`; it never
   interrupts or destroys a possibly productive job."
   [{:keys [agent-budget-ms poll-ms] :as opts} job-id]
+  (let [first-poll-ms (System/currentTimeMillis)]
   (loop []
     (let [job (read-job! opts job-id)]
       (cond
@@ -237,7 +238,7 @@
 
         (and agent-budget-ms
              (pos? agent-budget-ms)
-             (some-> (job-start-ms job)
+             (some-> (or (job-start-ms job) first-poll-ms)
                      (+ agent-budget-ms)
                      (<= (System/currentTimeMillis))))
         (throw (ex-info "Agency job exceeded the absolute recovery budget"
@@ -251,7 +252,7 @@
                          (some-> (job-last-activity-ms job)
                                  Instant/ofEpochMilli str)}))
 
-        :else (do (Thread/sleep poll-ms) (recur))))))
+        :else (do (Thread/sleep poll-ms) (recur)))))))
 
 (defn- selected-entry [judgement]
   (let [action (get-in judgement [:decision :action])]
@@ -421,17 +422,26 @@
                     (keep :text (remove #(= "prompt" (:type %)) (:events job))))))
 
 (defn- review-verdict [job]
-  (let [text (job-text job)]
-    (cond
-      (re-find #"FULL_LOOP_REVIEW:\s*APPROVE" text) :approve
-      (re-find #"FULL_LOOP_REVIEW:\s*REQUEST_CHANGES" text) :request-changes
-      (re-find #"FULL_LOOP_REVIEW:\s*REJECT" text) :reject
-      :else :unverifiable)))
+  (let [text (job-text job)
+        marker (some-> (re-find #"(?m)^FULL_LOOP_REVIEW:\s*(APPROVE|REQUEST_CHANGES|REJECT)\b"
+                                text)
+                       second)]
+    (case marker
+      "APPROVE" :approve
+      "REQUEST_CHANGES" :request-changes
+      "REJECT" :reject
+      :unverifiable)))
+
+(declare recovery-job-id)
 
 (defn- prompt-findings [stop-lines]
-  (mapv #(select-keys % [:repair/id :repair/class :attempt-id :failed-commit
-                         :review-verdict :review-text :failure-stage
-                         :failure-outcome :failure-error :failure-data])
+  (mapv (fn [finding]
+          (assoc (select-keys finding
+                              [:repair/id :repair/class :attempt-id
+                               :failed-commit :review-verdict :review-text
+                               :failure-stage :failure-outcome :failure-error
+                               :discharge-contract])
+                 :failure-job-id (recovery-job-id finding)))
         stop-lines))
 
 (defn- author-prompt [{:keys [author reviewer batch-id]} target mission cascade-entry
@@ -628,7 +638,7 @@
 (defn- repair-class-for [failure-kind]
   (cond
     (#{:agent-unavailable :agent-readiness-failed :substrate-unavailable
-       :abstained :no-selection}
+       :dispatch-failed :abstained :no-selection}
      failure-kind)
     :environmental-hold
 
@@ -667,7 +677,7 @@
     ((or (:read-job-fn opts) read-job!)
      opts (recovery-job-id obligation))))
 
-(defn run-opportunity!
+(defn- run-opportunity-core!
   "Run one opportunity synchronously. Dependencies may be injected in opts for tests."
   [raw-opts]
   (let [phase-events (atom [])
@@ -679,6 +689,7 @@
         phase-context (atom {:opportunity-id opportunity-id :trigger trigger})
         _ (emit-phase! opts @phase-context {:phase :opportunity :transition :start})
         checkpoints (atom {})
+        dispatched-turns (atom 0)
         closing? (atom false)
         roster-result (try
                         {:value
@@ -748,8 +759,9 @@
                                                   (last-error-phase @phase-events))
                                :outcome outcome
                                :failure-kind (or (:failure-kind data) outcome)
-                               :error (or (:error data)
-                                          (str "zero-achievement outcome " outcome))
+                               :error (if (str/blank? (str (:error data)))
+                                        (str "zero-achievement outcome " outcome)
+                                        (:error data))
                                :failure-data (:error-data data)
                                :backtrace
                                {:phase-events @phase-events
@@ -796,9 +808,8 @@
                                    :qa-targets
                                    {:selection {:policy selected-action}
                                     :achievement
-                                    {:entity-id (or (get-in data [:witness
-                                                                  :implementation-id])
-                                                    (:target data))}}
+                                    {:entity-id (get-in data [:witness
+                                                              :implementation-id])}}
                                    :selection-review
                                    (when selection-judgment
                                      {:question
@@ -816,10 +827,8 @@
                                             :artifact-only? (= :artifact-only outcome)
                                             :morning-brief-ref brief-ref
                                             :duration-ms (- (System/currentTimeMillis) started)
-                                            :resource-use {:agent-turns
-                                                           (count (filter identity
-                                                                          [(:author-job data)
-                                                                           (:review-job data)]))}}
+                                            :resource-use
+                                            {:agent-turns @dispatched-turns}}
                                            (select-keys data [:witness]))
                                     {:kind :full-loop-outcome :attempt-id attempt-id})
                        result {:attempt-id attempt-id :opportunity-id opportunity-id
@@ -863,12 +872,33 @@
                                                  (:repair/class %)))
                                      open-stop-lines))
             validation-lines
-            (filterv #(or (= :awaiting-validation (:repair/status %))
-                          (= :environmental-hold (:repair/class %)))
-                     open-stop-lines)
+            (->> open-stop-lines
+                 (filter #(or (= :awaiting-validation (:repair/status %))
+                              (= :environmental-hold (:repair/class %))))
+                 (take 1)
+                 vec)
             stop-lines (if stop-line
                          [stop-line]
                          [])
+            supersede-recovery!
+            (fn [repair-class failure-kind failure-stage error failure-data]
+              (let [successor
+                    ((or (:repair-system-record-fn opts)
+                         repair/record-system-failure!)
+                     {:attempt-id attempt-id
+                      :repair-class repair-class
+                      :target (:target stop-line)
+                      :selected-entry (:selected-entry stop-line)
+                      :failure-stage failure-stage
+                      :outcome :incomplete
+                      :failure-kind failure-kind
+                      :error error
+                      :failure-data failure-data
+                      :backtrace {:supersedes (:repair/id stop-line)}
+                      :discharge-contract (discharge-contract repair-class)})]
+                ((or (:repair-supersede-fn opts) repair/supersede!)
+                 stop-line successor failure-kind)
+                successor))
             selection-judge (or (:judge-fn opts)
                                 (fn [days]
                                   (wm/generate-war-machine
@@ -975,14 +1005,29 @@
                            (recovery-snapshot opts stop-line))
                 recovery-stage (:failure-stage stop-line)
                 _ (when (and snapshot (not= "done" (:state snapshot)))
-                    (throw
-                     (ex-info "Recovery job has not completed; no replacement turn dispatched"
-                              {:outcome :incomplete
-                               :failure-kind :recovery-job-not-complete
-                               :failure-stage recovery-stage
-                               :repair-obligation stop-line
-                               :job-id (:job-id snapshot)
-                               :job-state (:state snapshot)})))
+                    (if (contains? terminal-states (:state snapshot))
+                      (let [error (str "Recovery job terminated as "
+                                       (:state snapshot))
+                            successor
+                            (supersede-recovery!
+                             :machine-failure :recovery-job-terminal
+                             recovery-stage error
+                             {:job-id (:job-id snapshot)
+                              :job-state (:state snapshot)})]
+                        (throw (ex-info error
+                                        {:outcome :incomplete
+                                         :failure-kind :recovery-job-terminal
+                                         :failure-stage recovery-stage
+                                         :repair-obligation successor})))
+                      (throw
+                       (ex-info
+                        "Recovery job is still active; no replacement turn dispatched"
+                        {:outcome :incomplete
+                         :failure-kind :recovery-job-not-complete
+                         :failure-stage recovery-stage
+                         :repair-obligation stop-line
+                         :job-id (:job-id snapshot)
+                         :job-state (:state snapshot)}))))
                 recovered-review-job (when (and snapshot
                                                 (= :reviewer-wait recovery-stage))
                                        snapshot)
@@ -996,13 +1041,35 @@
                   (get-in stop-line [:failure-data :author-job]))
                 _ (when (and recovered-review-job
                              (nil? recovered-author-job))
-                    (throw
-                     (ex-info "Reviewer recovery lacks the original author-job provenance"
-                              {:outcome :incomplete
-                               :failure-kind :recovery-provenance-missing
-                               :failure-stage :reviewer-wait
-                               :repair-obligation stop-line
-                               :job-id (:job-id recovered-review-job)})))
+                    (let [error
+                          "Reviewer recovery lacks the original author-job provenance"
+                          successor
+                          (supersede-recovery!
+                           :machine-failure :recovery-provenance-missing
+                           :reviewer-wait error
+                           {:job-id (:job-id recovered-review-job)})]
+                      (throw
+                       (ex-info error
+                                {:outcome :incomplete
+                                 :failure-kind :recovery-provenance-missing
+                                 :failure-stage :reviewer-wait
+                                 :repair-obligation successor}))))
+                _ (when (and snapshot (= :author-wait recovery-stage)
+                             (= "done" (:state snapshot))
+                             (nil? recovered-author-job))
+                    (let [error "Recovered author job completed without an artifact"
+                          successor
+                          (supersede-recovery!
+                           :machine-failure :recovery-artifact-missing
+                           :author-wait error
+                           {:job-id (:job-id snapshot)
+                            :job-state (:state snapshot)})]
+                      (throw
+                       (ex-info error
+                                {:outcome :incomplete
+                                 :failure-kind :recovery-artifact-missing
+                                 :failure-stage :author-wait
+                                 :repair-obligation successor}))))
                 author-response
                 (run-phase! opts @phase-context :author-dispatch
                             #(if recovered-author-job
@@ -1010,10 +1077,12 @@
                                 :state "done"
                                 :recovered? true
                                 :recovers (:attempt-id stop-line)}
-                               ((or (:dispatch-fn opts) dispatch!) opts author
-                                "wm-full-loop" target
-                                (author-prompt opts target mission construction
-                                               stop-lines))))
+                               (do
+                                 (swap! dispatched-turns inc)
+                                 ((or (:dispatch-fn opts) dispatch!) opts author
+                                  "wm-full-loop" target
+                                  (author-prompt opts target mission construction
+                                                 stop-lines)))))
                 author-job-id (:job-id author-response)]
             (checkpoint! :dispatch
                          (term {:agent author
@@ -1065,10 +1134,12 @@
                           {:job-id (:job-id recovered-review-job)
                            :state "done" :recovered? true
                            :recovers (:attempt-id stop-line)}
-                          ((or (:dispatch-fn opts) dispatch!) opts reviewer
-                           "wm-full-loop" target
-                           (reviewer-prompt opts target construction repo commit
-                                            author-job stop-lines))))
+                          (do
+                            (swap! dispatched-turns inc)
+                            ((or (:dispatch-fn opts) dispatch!) opts reviewer
+                             "wm-full-loop" target
+                             (reviewer-prompt opts target construction repo commit
+                                              author-job stop-lines)))))
                       review-job
                       (if recovered-review-job
                         recovered-review-job
@@ -1089,8 +1160,7 @@
                                               :files files})
                                       e)))))
                       approved? (and (= "done" (:state review-job))
-                                     (boolean (re-find #"FULL_LOOP_REVIEW:\s*APPROVE"
-                                                       (job-text review-job))))]
+                                     (= :approve (review-verdict review-job)))]
                   (checkpoint! :build
                                (term {:artifacts files
                                       :generated-code files
@@ -1104,13 +1174,37 @@
                                      {:kind :git-commit-and-independent-review
                                       :repository repo}))
                   (when-not approved?
-                    (throw (ex-info "Independent review did not approve"
-                                    {:outcome :build-failed :author-job author-job
-                                     :review-job review-job :commit commit
-                                     :target target
-                                     :selected-entry
-                                     (select-keys entry
-                                                  [:action :controller-score :G-efe])})))
+                    (let [failure-data
+                          {:outcome :build-failed :author-job author-job
+                           :review-job review-job :commit commit
+                           :target target
+                           :selected-entry
+                           (select-keys entry
+                                        [:action :controller-score :G-efe])}
+                          recovery-rejection
+                          (when (and recovered-review-job
+                                     (= :incomplete-recoverable
+                                        (:repair/class stop-line)))
+                            (let [finding
+                                  ((or (:repair-record-fn opts)
+                                       repair/record-review-failure!)
+                                   {:attempt-id attempt-id
+                                    :target target
+                                    :commit commit
+                                    :selected-entry (:selected-entry failure-data)
+                                    :reviewer reviewer
+                                    :review-job (:job-id review-job)
+                                    :review-verdict (review-verdict review-job)
+                                    :review-text (job-text review-job)})]
+                              ((or (:repair-supersede-fn opts)
+                                   repair/supersede!)
+                               stop-line finding :recovered-review-rejected)
+                              finding))]
+                      (throw (ex-info "Independent review did not approve"
+                                      (cond-> failure-data
+                                        recovery-rejection
+                                        (assoc :repair-obligation
+                                               recovery-rejection))))))
                   (let [witness
                         (run-phase! opts @phase-context :grounding
                                     #((or (:ground-fn opts) ground-commit!)
@@ -1176,7 +1270,8 @@
           (let [failure (ex-data e)
                 review-job (:review-job failure)
                 verdict (some-> review-job review-verdict)
-                review-finding (when (and (:commit failure)
+                review-finding (when (and (nil? (:repair-obligation failure))
+                                   (:commit failure)
                                    (#{:request-changes :reject} verdict))
                           ((or (:repair-record-fn opts)
                                repair/record-review-failure!)
@@ -1204,3 +1299,54 @@
                        :error (.getMessage e)
                        :error-class (.getName (class e))
                        :error-data failure})))))))
+
+(defn run-opportunity!
+  "Run one opportunity and ensure initialization failures also become durable
+  stop-line findings. Failures after cohort start are closed by the core state
+  machine; this outer boundary covers phase-log and cohort-start failures that
+  necessarily occur before an ordinary attempt can own them."
+  [raw-opts]
+  (try
+    (run-opportunity-core! raw-opts)
+    (catch Throwable e
+      (let [attempt-id (str "initialization-" (UUID/randomUUID))
+            trigger (or (:trigger raw-opts) :duree-click-on-demand)
+            error (if (str/blank? (str (.getMessage e)))
+                    "Full-loop initialization failed"
+                    (.getMessage e))
+            finding
+            ((or (:repair-system-record-fn raw-opts)
+                 repair/record-system-failure!)
+             {:attempt-id attempt-id
+              :repair-class :machine-failure
+              :failure-stage :initialization
+              :outcome :incomplete
+              :failure-kind :initialization-failed
+              :error error
+              :failure-data (ex-data e)
+              :backtrace {:error-class (.getName (class e))}
+              :discharge-contract (discharge-contract :machine-failure)})
+            brief-ref
+            ((or (:queue-fn raw-opts) brief/queue-item!)
+             {:attempt-id attempt-id
+              :trigger trigger
+              :batch-id (:batch-id raw-opts)
+              :outcome :incomplete
+              :author (or (:author raw-opts) default-author)
+              :reviewer (or (:reviewer raw-opts) default-reviewer)
+              :achievement {:tier :none
+                            :summary "No achievement; initialization stopped the line"}
+              :failure {:kind :initialization-failed
+                        :stage :initialization
+                        :error error
+                        :repair-id (:repair/id finding)
+                        :discharge-contract (:discharge-contract finding)}})]
+        {:attempt-id attempt-id
+         :outcome :incomplete
+         :checkpoints {}
+         :morning-brief-ref brief-ref
+         :data {:repair-obligation finding
+                :failure-kind :initialization-failed
+                :failure-stage :initialization
+                :error error
+                :error-data (ex-data e)}}))))

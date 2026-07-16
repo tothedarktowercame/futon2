@@ -25,3 +25,14 @@
     (is (empty? (brief/unseen-belief-events root #{event-id})))
     (is (thrown? java.nio.file.FileAlreadyExistsException
                  (brief/queue-item! root {:attempt-id "attempt-001"})))))
+
+(deftest ungrounded-achievement-answer-remains-evaluation-telemetry
+  (let [root (temp-root)
+        _ (brief/queue-item! root {:attempt-id "attempt-failed"
+                                   :outcome :build-failed
+                                   :qa-targets {:achievement {:entity-id nil}}})
+        review (brief/review! root "attempt-failed"
+                              :substantive-achievement :yes
+                              "useful idea, no grounded result" "joe")]
+    (is (nil? (:belief-event review)))
+    (is (empty? (brief/unseen-belief-events root #{})))))

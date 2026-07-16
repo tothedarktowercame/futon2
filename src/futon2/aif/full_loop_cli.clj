@@ -80,11 +80,7 @@
           (assoc item
                  :achievement
                  (or (:achievement item)
-                     {:tier (cond
-                              (= :grounded-change (:outcome item))
-                              :fully-grounded
-                              (:commit item) :partial-authored
-                              :else :none)
+                     {:tier :legacy-unverified
                       :summary
                       "Legacy item: no structured achievement summary was recorded"})
                  :repair-history

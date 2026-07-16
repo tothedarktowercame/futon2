@@ -83,3 +83,36 @@
              "repair-attempt-006-late-author-artifact"}
            (set (map :repair/id (repair/open-obligations root)))))
     (is (not= (:repair/id machine) (:repair/id artifact)))))
+
+(deftest failed-commit-cannot-be-its-own-repair-implementation
+  (let [root (temp-root)
+        finding (repair/record-review-failure!
+                 root {:attempt-id "failed-same" :target :target/a
+                       :commit "bad123" :selected-entry {:action {:type :x}}
+                       :reviewer "reviewer" :review-job "review-1"
+                       :review-verdict :request-changes
+                       :review-text "still defective"})]
+    (is (thrown? clojure.lang.ExceptionInfo
+                 (repair/record-implementation!
+                  root finding {:attempt-id "repair-attempt"
+                                :commit "bad123"
+                                :reviewer "reviewer" :review-job "review-2"
+                                :witness {:resolved? true :dial-moved? true}})))))
+
+(deftest impossible-recovery-is-immutably-superseded-by-typed-successor
+  (let [root (temp-root)
+        old (repair/record-system-failure!
+             root {:attempt-id "old" :repair-class :incomplete-recoverable
+                   :failure-stage :author-wait :outcome :incomplete
+                   :failure-kind :agent-budget-expired :error "budget"})
+        successor (repair/record-system-failure!
+                   root {:attempt-id "new" :repair-class :machine-failure
+                         :failure-stage :author-wait :outcome :incomplete
+                         :failure-kind :recovery-job-terminal
+                         :error "job failed"})]
+    (repair/supersede! root old successor :recovery-job-terminal)
+    (is (= [(:repair/id successor)]
+           (mapv :repair/id (repair/open-obligations root))))
+    (is (thrown? java.nio.file.FileAlreadyExistsException
+                 (repair/supersede! root old successor
+                                    :recovery-job-terminal)))))
