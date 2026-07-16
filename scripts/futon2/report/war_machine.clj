@@ -4234,6 +4234,10 @@
                 (vec (sort morning-brief-consumed-event-ids))
                 :anticipation anticipation-snapshot
                 :ranked-actions wm-ranked+cascades
+                ;; The decision is drawn from this executable support, not the
+                ;; served ranked/advisory display. Full-loop discrimination
+                ;; must inspect the same Π_feasible domain.
+                :admissible-actions wm-admissible
                 :policy-support-exclusions (vec wm-policy-exclusions)
                 :decision wm-decision
                 ;; M-wm-policies v1: the visible cascade-policy lane (additive, defensive —

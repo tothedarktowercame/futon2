@@ -177,6 +177,7 @@
         fire-judgement (-> judgement
                            (assoc :ranked-actions
                                   [{:rank 1 :action action
+                                    :G-efe -2.0
                                     :controller-score -2.0}])
                            (assoc :decision {:action action :rank 1}))
         dispatches (atom [])
@@ -284,6 +285,7 @@
         gap-action {:type :learn-action-class :target-class :fire-pattern}
         gap-judgement (-> judgement
                           (assoc :ranked-actions [{:rank 1 :action gap-action
+                                                   :G-efe -2.0
                                                    :controller-score -2.0}])
                           (assoc :decision {:action gap-action :rank 1}))
         result (runner/run-opportunity!
@@ -493,16 +495,22 @@
         findings (atom [])
         flat-action {:type :advance-mission :target "M-flat-a"
                      :open-hole-count 8}
+        flat-admissible
+        [{:rank 1 :action flat-action :G-efe 4.0
+          :controller-score 4.0}
+         {:rank 2
+          :action {:type :advance-mission :target "M-flat-b"
+                   :open-hole-count 9}
+          :G-efe 4.0
+          :controller-score 4.0}]
         flat-judgement
         (-> judgement
             (assoc :ranked-actions
-                   [{:rank 1 :action flat-action :G-efe 4.0
-                     :controller-score 4.0}
-                    {:rank 2
-                     :action {:type :advance-mission :target "M-flat-b"
-                              :open-hole-count 9}
-                     :G-efe 4.0
-                     :controller-score 4.0}])
+                   (conj flat-admissible
+                         {:rank 3
+                          :action {:type :inadmissible :target "mask"}
+                          :G-efe 9.0 :controller-score 9.0}))
+            (assoc :admissible-actions flat-admissible)
             (assoc :decision {:action flat-action :rank 1
                               :controller-score 4.0}))
         result
@@ -530,6 +538,14 @@
            (get-in result [:data :failure-kind])))
     (is (empty? @dispatches))
     (is (= :machine-failure (:repair-class (first @findings))))))
+
+(deftest single-candidate-still-requires-finite-g
+  (is (false? (:passes? (runner/selection-discrimination
+                          [{:action selected-action :G-efe nil}]))))
+  (is (false? (:passes? (runner/selection-discrimination
+                          [{:action selected-action :G-efe ##NaN}]))))
+  (is (true? (:passes? (runner/selection-discrimination
+                         [{:action selected-action :G-efe -1.0}])))))
 
 (deftest recoverable-late-author-completion-skips-second-author-turn
   (let [dispatches (atom [])

@@ -171,8 +171,8 @@
           (when-let [commit (or (get-in obligation
                                         [:repair/resolution :replacement-commit])
                                 (get-in obligation
-                                        [:repair/implementation :replacement-commit])
-                                (get-in obligation [:failure-data :commit]))]
+                                        [:repair/implementation
+                                         :replacement-commit]))]
             (add! (str "   Recovered/replacement commit: " commit))))
         (add! "   QA objectives:")
         (doseq [objective (:pending-objectives item)

@@ -298,8 +298,8 @@
       :epsilon epsilon
       :top-k top-k
       :g-values g-values
-      :passes? (or (< (count leading) 2)
-                   (and (= (count valid-g) (count leading))
+      :passes? (and (= (count valid-g) (count leading))
+                    (or (< (count leading) 2)
                         (>= distinct-g 2)))})))
 
 (defn- repair-entry [obligation]
@@ -919,7 +919,8 @@
             target (some-> entry selected-target)
             ranked-for-review (if stop-line
                                 [entry]
-                                (:ranked-actions judgement))
+                                (or (:admissible-actions judgement)
+                                    (:ranked-actions judgement)))
             discrimination (when-not stop-line
                              (selection-discrimination ranked-for-review))
             selection-cell (if entry

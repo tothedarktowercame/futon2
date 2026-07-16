@@ -90,12 +90,18 @@
        :source :morning-brief-qa
        :objective objective})))
 
+(declare reviews)
+
 (defn review!
   ([attempt-id objective answer note reviewer]
    (review! default-root attempt-id objective answer note reviewer))
   ([root attempt-id objective answer note reviewer]
    (let [item (item-by-attempt root attempt-id)
-         spec (get objective-specs objective)]
+         spec (get objective-specs objective)
+         prior-review (some #(when (and (= attempt-id (:attempt-id %))
+                                         (= objective (:objective %)))
+                                %)
+                            (reviews root))]
      (when-not item
        (throw (ex-info "Unknown Morning Brief attempt" {:attempt-id attempt-id})))
      (when-not (some #{objective} (item-objectives item))
@@ -106,7 +112,14 @@
        (throw (ex-info "Unknown Morning Brief answer"
                        {:objective objective :answer answer
                         :allowed (:answers spec)})))
-     (let [review-id (str "mbqa-" (UUID/randomUUID))
+     (when prior-review
+       (throw (ex-info "Morning Brief objective was already reviewed"
+                       {:attempt-id attempt-id :objective objective
+                        :review-id (:morning-brief/review-id prior-review)})))
+     (let [review-id
+           (str "mbqa-"
+                (UUID/nameUUIDFromBytes
+                 (.getBytes (str attempt-id "\u0000" (name objective)) "UTF-8")))
            record {:morning-brief/review-id review-id
                    :attempt-id attempt-id
                    :objective objective

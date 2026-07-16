@@ -23,6 +23,10 @@
     (is (= [event-id]
            (mapv :event-id (brief/unseen-belief-events root #{}))))
     (is (empty? (brief/unseen-belief-events root #{event-id})))
+    (is (thrown? clojure.lang.ExceptionInfo
+                 (brief/review! root "attempt-001"
+                                :substantive-achievement :yes
+                                "duplicate" "joe")))
     (is (thrown? java.nio.file.FileAlreadyExistsException
                  (brief/queue-item! root {:attempt-id "attempt-001"})))))
 
