@@ -37,7 +37,7 @@
   (let [cfg {:size size
              :ants-per-side ants-per-side
              :ticks ticks
-             :food food-distribution
+             :food-distribution food-distribution
              :food-opts {:seed food-seed
                          :num-patches (if (= food-distribution :sparse) 2 4)
                          :patch-radius (if (= food-distribution :sparse) 1 2)}

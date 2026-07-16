@@ -134,15 +134,31 @@
         (+ (* 0.2 (Math/sin (+ (* 0.4 x) (* 0.3 y)))))
         (max 0.0))))
 
+(defn- rot180
+  "180-degree rotation about the grid centre. Maps anchor-left [2 2] onto
+   anchor-right [(- w 3) (- h 3)], so the two colony homes are exact images."
+  [[w h] [x y]]
+  [(- w 1 x) (- h 1 y)])
+
 (defn- initial-food-patchy
   "Patchy food distribution: isolated clusters separated by empty space.
-   Rewards exploration and novelty-seeking."
-  [[w h] [x y] food-max {:keys [num-patches patch-radius seed]
+   Rewards exploration and novelty-seeking.
+
+   With :symmetric? true the patch set is closed under `rot180`, which makes the
+   food field invariant under that rotation (rot180 is an isometry and the field
+   is a max over per-patch distance falloffs). Both homes then see identical
+   food, so a two-army run measures the brains rather than the spawn corner.
+   Mirroring doubles the patch count: :num-patches is the seed count, not the
+   final count."
+  [[w h] [x y] food-max {:keys [num-patches patch-radius seed symmetric?]
                           :or {num-patches 5 patch-radius 3 seed 42}}]
   (let [rng (java.util.Random. seed)
         ;; Generate patch centers (deterministic from seed)
-        patches (vec (for [_ (range num-patches)]
+        centers (vec (for [_ (range num-patches)]
                        [(.nextInt rng w) (.nextInt rng h)]))
+        patches (if symmetric?
+                  (vec (distinct (concat centers (map #(rot180 [w h] %) centers))))
+                  centers)
         ;; Check if [x y] is within any patch
         in-patch? (fn [[px py]]
                     (let [d (distance [x y] [px py])]
