@@ -167,3 +167,23 @@ S2/S3+:
    fraction of run cost, enforced as an invariant of its own; an
    interoceptive system with over-precise internal priors spends everything
    on self-observation, and we decline to discover that empirically.
+
+## Incident 2026-07-16: artifact-ref parsed from narration (run 5b) → T13
+
+Run 5b (armed): claude-7 authored the correct generation-flip repair (futon5a
+099906e) but the Agency's `first-artifact-ref` extracts the FIRST sha-like
+string from the author's result text — which was the rejected predecessor
+c9e7aaf under discussion. The runner reviewed and re-rejected the wrong
+commit; codex-6 caught the mismatch in prose ("the claimed generation-flip
+repair is 099906e and is not under review"). R16's lore one layer down: the
+artifact reference was parsed from narration, not measured from the world.
+Museum correctly silent (no wire watched this binding — it is a new letter).
+
+Incident→neuron: **T13 (author-artifact binding)** — the artifact-ref handed
+to the reviewer must be a commit that (a) exists in the target repo, (b) did
+not exist when the author job started (creation observed within the job
+window), and (c) differs from every :failed-commit in the stop-lines being
+repaired. Any breach trips. Fix direction (paired, runner-side): derive the
+authored commit from repo observation (HEAD delta across the author window),
+demote the text-extracted ref to corroboration, and mint a typed
+:artifact-binding-mismatch stop-line when they disagree.
