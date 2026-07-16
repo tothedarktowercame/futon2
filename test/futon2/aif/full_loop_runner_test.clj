@@ -567,3 +567,52 @@
     (is (= stop-line (ffirst @resolutions)))
     (is (= :recovered-existing-artifact
            (get-in @resolutions [0 1 :validation :kind])))))
+
+(deftest recoverable-late-review-completion-skips-both-replacement-turns
+  (let [dispatches (atom [])
+        resolutions (atom [])
+        author-job {:job-id "author-job" :state "done"
+                    :artifact-ref "late123"}
+        stop-line {:repair/id "repair-attempt-007-review-recovery"
+                   :repair/status :open
+                   :repair/class :incomplete-recoverable
+                   :attempt-id "attempt-007"
+                   :failure-stage :reviewer-wait
+                   :failure-kind :agent-budget-expired
+                   :failure-data {:job-id "late-review-job"
+                                  :author-job author-job
+                                  :commit "late123"
+                                  :repository "/repo"
+                                  :files ["src/real.clj"]}}
+        result
+        (runner/run-opportunity!
+         {:cohort? false
+          :phase-log-fn (fn [_])
+          :repair-open-fn (constantly [stop-line])
+          :repair-resolve-fn (fn [obligation resolution]
+                               (swap! resolutions conj [obligation resolution]))
+          :read-job-fn (fn [_ job-id]
+                         {:job-id job-id :state "done"
+                          :result-summary "FULL_LOOP_REVIEW: APPROVE"})
+          :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
+                              :codex-7 {:status "idle" :invoke-ready? true}})
+          :judge-fn (fn [_] {:judgement judgement})
+          :refresh-fn (fn [])
+          :substrate-preflight-fn (fn [_] {:route :test})
+          :code-state-fn (fn [] {:repo "/futon2" :git-sha "head"
+                                 :git-dirty? false :repo-heads {}})
+          :mode-flags-fn (fn [] {})
+          :version-stamp-fn identity
+          :mission-fn (fn [target] {:id target})
+          :construct-fn runner/construct-for-decision
+          :dispatch-fn (fn [& args] (swap! dispatches conj args))
+          :resolve-build-fn (fn [_] {:repo "/repo" :files ["src/real.clj"]})
+          :ground-fn (fn [& _]
+                       {:before {:implementation-entity nil}
+                        :after {:implementation-entity {:id "impl"}}
+                        :resolved? true :dial-moved? true
+                        :implementation-id "impl"})
+          :queue-fn identity})]
+    (is (= :grounded-change (:outcome result)))
+    (is (empty? @dispatches))
+    (is (= stop-line (ffirst @resolutions)))))

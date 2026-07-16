@@ -104,6 +104,24 @@
   (into {} (map (juxt :repair/id identity)
                 (records (io/file root child)))))
 
+(defn obligation-history
+  "All immutable findings for an attempt, enriched with any implementation and
+  resolution records. Unlike `open-obligations`, this is an audit view."
+  ([attempt-id] (obligation-history default-root attempt-id))
+  ([root attempt-id]
+   (let [implementations (indexed-records root "implementations")
+         resolutions (indexed-records root "resolutions")]
+     (->> (records (io/file root "findings"))
+          (filter #(= attempt-id (:attempt-id %)))
+          (mapv (fn [finding]
+                  (cond-> finding
+                    (get implementations (:repair/id finding))
+                    (assoc :repair/implementation
+                           (get implementations (:repair/id finding)))
+                    (get resolutions (:repair/id finding))
+                    (assoc :repair/resolution
+                           (get resolutions (:repair/id finding))))))))))
+
 (defn open-obligations
   ([] (open-obligations default-root))
   ([root]

@@ -659,14 +659,13 @@
       (get-in obligation [:backtrace :job-id])
       (:author-job-id obligation)))
 
-(defn- completed-recovery-job
+(defn- recovery-snapshot
+  "Read, but never restart, the Agency job named by a recoverable finding."
   [opts obligation]
   (when (and (= :incomplete-recoverable (:repair/class obligation))
              (recovery-job-id obligation))
-    (let [job ((or (:read-job-fn opts) read-job!)
-               opts (recovery-job-id obligation))]
-      (when (and (= "done" (:state job)) (:artifact-ref job))
-        job))))
+    ((or (:read-job-fn opts) read-job!)
+     opts (recovery-job-id obligation))))
 
 (defn run-opportunity!
   "Run one opportunity synchronously. Dependencies may be injected in opts for tests."
@@ -972,8 +971,29 @@
                               :trace-path trace-path}
                              {:kind :decision-pinned-construction
                               :selected-action (:action entry)}))
-          (let [recovered-author-job (when stop-line
-                                       (completed-recovery-job opts stop-line))
+          (let [snapshot (when stop-line
+                           (recovery-snapshot opts stop-line))
+                recovery-stage (:failure-stage stop-line)
+                _ (when (and snapshot (not= "done" (:state snapshot)))
+                    (throw
+                     (ex-info "Recovery job has not completed; no replacement turn dispatched"
+                              {:outcome :incomplete
+                               :failure-kind :recovery-job-not-complete
+                               :failure-stage recovery-stage
+                               :repair-obligation stop-line
+                               :job-id (:job-id snapshot)
+                               :job-state (:state snapshot)})))
+                recovered-review-job (when (and snapshot
+                                                (= :reviewer-wait recovery-stage))
+                                       snapshot)
+                recovered-author-job
+                (cond
+                  (and snapshot (= :author-wait recovery-stage)
+                       (:artifact-ref snapshot))
+                  snapshot
+
+                  recovered-review-job
+                  (get-in stop-line [:failure-data :author-job]))
                 author-response
                 (run-phase! opts @phase-context :author-dispatch
                             #(if recovered-author-job
@@ -999,11 +1019,20 @@
                                         :agency-recovered-completion
                                         :agency-dispatch)
                                 :response author-response}))
-            (let [author-job (if recovered-author-job
-                               recovered-author-job
-                               (run-phase! opts @phase-context :author-wait
-                                           #((or (:poll-fn opts) poll-job!)
-                                             opts author-job-id)))]
+            (let [author-job
+                  (if recovered-author-job
+                    recovered-author-job
+                    (try
+                      (run-phase! opts @phase-context :author-wait
+                                  #((or (:poll-fn opts) poll-job!)
+                                    opts author-job-id))
+                      (catch Throwable e
+                        (throw
+                         (ex-info (.getMessage e)
+                                  (merge (ex-data e)
+                                         {:failure-stage :author-wait
+                                          :author-job-id author-job-id})
+                                  e)))))]
               (when-not (= "done" (:state author-job))
                 (throw (ex-info "Author job did not complete"
                                 {:outcome :build-failed :author-job author-job})))
@@ -1021,15 +1050,35 @@
                   (throw (ex-info "Authored commit is artifact-only"
                                   {:outcome :artifact-only :commit commit :files files})))
                 (let [review-response
-                      (run-phase! opts @phase-context :reviewer-dispatch
-                                  #((or (:dispatch-fn opts) dispatch!) opts reviewer
-                                    "wm-full-loop" target
-                                    (reviewer-prompt opts target construction repo commit
-                                                     author-job stop-lines)))
+                      (run-phase!
+                       opts @phase-context :reviewer-dispatch
+                       #(if recovered-review-job
+                          {:job-id (:job-id recovered-review-job)
+                           :state "done" :recovered? true
+                           :recovers (:attempt-id stop-line)}
+                          ((or (:dispatch-fn opts) dispatch!) opts reviewer
+                           "wm-full-loop" target
+                           (reviewer-prompt opts target construction repo commit
+                                            author-job stop-lines))))
                       review-job
-                      (run-phase! opts @phase-context :reviewer-wait
-                                  #((or (:poll-fn opts) poll-job!) opts
-                                    (:job-id review-response)))
+                      (if recovered-review-job
+                        recovered-review-job
+                        (try
+                          (run-phase! opts @phase-context :reviewer-wait
+                                      #((or (:poll-fn opts) poll-job!) opts
+                                        (:job-id review-response)))
+                          (catch Throwable e
+                            (throw
+                             (ex-info (.getMessage e)
+                                      (merge (ex-data e)
+                                             {:failure-stage :reviewer-wait
+                                              :review-job-id
+                                              (:job-id review-response)
+                                              :author-job author-job
+                                              :commit commit
+                                              :repository repo
+                                              :files files})
+                                      e)))))
                       approved? (and (= "done" (:state review-job))
                                      (boolean (re-find #"FULL_LOOP_REVIEW:\s*APPROVE"
                                                        (job-text review-job))))]
@@ -1130,7 +1179,7 @@
                             :review-job (:job-id review-job)
                             :review-verdict verdict
                             :review-text (job-text review-job)}))
-                finding review-finding]
+                finding (or review-finding (:repair-obligation failure))]
               (close! (outcome-from e)
                       {:target (or (:target failure)
                                    (some-> @checkpoints :selection :judgment

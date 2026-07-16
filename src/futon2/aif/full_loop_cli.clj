@@ -5,6 +5,7 @@
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.morning-brief :as brief]
+            [futon2.aif.repair-obligation :as repair]
             [futon2.aif.trace :as trace]))
 
 (defn- parse-long! [label x]
@@ -74,10 +75,25 @@
 
 (defn- batch-brief [batch-id]
   (let [all-reviews (brief/reviews)
+        normalize-item
+        (fn [item]
+          (assoc item
+                 :achievement
+                 (or (:achievement item)
+                     {:tier (cond
+                              (= :grounded-change (:outcome item))
+                              :fully-grounded
+                              (:commit item) :partial-authored
+                              :else :none)
+                      :summary
+                      "Legacy item: no structured achievement summary was recorded"})
+                 :repair-history
+                 (repair/obligation-history (:attempt-id item))))
         items (->> (brief/items)
                    (filter #(= batch-id (:batch-id %)))
                    (sort-by :queued-at)
                    (mapv #(brief/with-pending-objectives % all-reviews))
+                   (mapv normalize-item)
                    vec)
         attempt-ids (set (map :attempt-id items))
         reviews (->> all-reviews
@@ -88,6 +104,7 @@
                     (-> (select-keys item [:attempt-id :selected-target :outcome
                                            :author :reviewer :commit :queued-at
                                            :selection-review :achievement :failure
+                                           :repair-history
                                            :qa-targets :pending-objectives])
                         (assoc :witness
                                (select-keys (:witness item)
@@ -145,6 +162,22 @@
           (add! (str "   Repair: " (fmt (:repair-id failure))
                      " requires "
                      (fmt (get-in failure [:discharge-contract :requires])))))
+        (doseq [obligation (:repair-history item)]
+          (add! (str "   Repair history: " (:repair/id obligation)
+                     " [" (name (:repair/class obligation)) "]"
+                     (if (:repair/resolution obligation)
+                       " resolved"
+                       (if (:repair/implementation obligation)
+                         " awaiting production validation"
+                         " open"))))
+          (add! (str "   Cause: " (fmt (:failure-kind obligation))
+                     " at " (fmt (:failure-stage obligation))))
+          (when-let [commit (or (get-in obligation
+                                        [:repair/resolution :replacement-commit])
+                                (get-in obligation
+                                        [:repair/implementation :replacement-commit])
+                                (get-in obligation [:failure-data :commit]))]
+            (add! (str "   Recovered/replacement commit: " commit))))
         (add! "   QA objectives:")
         (doseq [objective (:pending-objectives item)
                 :let [spec (get brief/objective-specs objective)]]
