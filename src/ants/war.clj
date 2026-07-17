@@ -5,6 +5,7 @@
             [ants.aif.observe :as observe]
             [ants.aif.affect :as affect]
             [ants.cyber :as cyber]
+            [ants.learning :as learning]
             [ants.ui :as ui]
             [clojure.string :as str]))
 
@@ -29,6 +30,7 @@
    :ticks 200
    :ants-per-side 6
    :armies [:classic :aif]
+   :water nil
    :ema-alpha 0.1
    :enable-termination? true
    :hunger {:initial 0.38
@@ -186,18 +188,34 @@
       ;; Default to snowdrift
       (initial-food-snowdrift [w h] [x y] food-max))))
 
+(defn- water-cell?
+  [[w h] [x y] {:keys [cells river]}]
+  (or (contains? (set cells) [x y])
+      (when-let [{:keys [axis start width]
+                  :or {axis :vertical width 1}} river]
+        (let [end (+ (long start) (long width))]
+          (case axis
+            :horizontal (and (<= 0 x) (< x w) (<= start y) (< y end))
+            :vertical (and (<= 0 y) (< y h) (<= start x) (< x end))
+            false)))))
+
 (defn- build-grid
-  [{:keys [size food-max pher-max food-distribution food-opts]}]
+  [{:keys [size food-max pher-max food-distribution food-opts water]}]
   (let [[w h] size
         food-config (assoc (or food-opts {}) :distribution (or food-distribution :snowdrift))
         cells (into {}
                     (for [x (range w)
                           y (range h)]
-                      (let [loc [x y]]
-                        [loc {:food (initial-food size loc food-max food-config)
-                              :pher 0.0
-                              :home nil
-                              :ant nil}])))
+                      (let [loc [x y]
+                            water? (water-cell? size loc water)
+                            food (if water?
+                                   (double (or (:food water) 0.0))
+                                   (initial-food size loc food-max food-config))]
+                        [loc (cond-> {:food food
+                                     :pher 0.0
+                                     :home nil
+                                     :ant nil}
+                               water? (assoc :terrain :water))])))
         max-dist (grid-max-dist size)]
     {:size size
      :max-food food-max
@@ -226,7 +244,10 @@
   (let [id (id-for species idx)
         hunger-cfg (hunger-config world)
         initial-h (double (or (get-in world [:ants id :h]) (:initial hunger-cfg) 0.35))
-        brain (if (aif-like? species) :aif :classic)
+        brain (cond
+                (= species :learning) :learning
+                (aif-like? species) :aif
+                :else :classic)
         ant {:id id
              :species species
              :brain brain
@@ -237,6 +258,9 @@
              :mu (:mu (get-in world [:ants id]))
              :prec (:prec (get-in world [:ants id]))}
         ant (cond
+              (= species :learning)
+              (learning/ensure-state ant)
+
               (= species :cyber)
               (cyber/attach-config* ant (get-in world [:config :cyber]))
 
@@ -298,6 +322,11 @@
                                 :pheromone-count 0
                                 :pheromone-trail-sum 0.0
                                 :pheromone-trail-samples 0}]))
+         water-stats (when (:water config)
+                       (into {}
+                             (for [sp armies]
+                               [sp {:encounters 0
+                                    :deaths 0}])))
          world {:tick 0
                 :config config
                 :armies armies
@@ -306,7 +335,8 @@
                 :scores score-map
                 :colonies colony-map
                 :rolling {:G nil}
-                :stats {:aif aif-stats}
+                :stats (cond-> {:aif aif-stats}
+                         water-stats (assoc :water water-stats))
                 :ants {}
                 :hero {:alice-dead? false}
                 :graveyard []
@@ -1110,36 +1140,38 @@
 ;; --- Build / finalise event --------------------------------------------------
 
 (defn- build-base-event
-  [world ant action {:keys [G P observation]}]
+  [world ant action {:keys [G P observation bin]}]
   (let [species (:species ant)
         home    (get-in world [:homes species])]
-    {:id (:id ant)
-     :species species
-     :action action
-     :mode (or (:mode ant) (:mode observation))  ;; ← add this
-     :G (double (or G 0.0))
-     :P (double (or P 0.0))
-     :cargo (double (or (:cargo ant) 0.0))
-     :ingest (double (or (:ingest ant) 0.0))
-     :h (double (or (:h ant) 0.0))
-     :tau (double (or (get-in ant [:prec :tau]) 0.0))
-     :risk (double (or (:last-risk ant) 0.0))
-     :ambiguity (double (or (:last-ambiguity ant) 0.0))
-     :action-cost (double (or (:last-action-cost ant) 0.0))
-     :info (double (or (:last-info ant) 0.0))
-     :colony (double (or (:last-colony ant) 0.0))
-     :survival (double (or (:last-survival ant) 0.0))
-     :dhdt (double (or (:dhdt ant) 0.0))
-     :need (double (or (:need-error ant) 0.0))
-     :loc (:loc ant)
-     :target (:loc ant)
-     :home home
-     :moved false
-     :wander false}))
+    (cond-> {:id (:id ant)
+             :species species
+             :action action
+             :mode (or (:mode ant) (:mode observation))  ;; ← add this
+             :G (double (or G 0.0))
+             :P (double (or P 0.0))
+             :cargo (double (or (:cargo ant) 0.0))
+             :ingest (double (or (:ingest ant) 0.0))
+             :h (double (or (:h ant) 0.0))
+             :tau (double (or (get-in ant [:prec :tau]) 0.0))
+             :risk (double (or (:last-risk ant) 0.0))
+             :ambiguity (double (or (:last-ambiguity ant) 0.0))
+             :action-cost (double (or (:last-action-cost ant) 0.0))
+             :info (double (or (:last-info ant) 0.0))
+             :colony (double (or (:last-colony ant) 0.0))
+             :survival (double (or (:last-survival ant) 0.0))
+             :dhdt (double (or (:dhdt ant) 0.0))
+             :need (double (or (:need-error ant) 0.0))
+             :loc (:loc ant)
+             :target (:loc ant)
+             :home home
+             :moved false
+             :wander false}
+      bin (assoc :tick (:tick world) :policy-bin bin))))
 
 (defn- finalise-event
   "Merge base snapshot + effect + telemetry to a loggable event."
-  [base {:keys [moved? wander? gather deposit ingest dead? target] :as _effect}
+  [base {:keys [moved? wander? gather deposit ingest dead? target
+                water-death? cargo-lost] :as _effect}
    {:keys [white? since-ingest] :as _telemetry}]
   (-> base
       (cond-> target (assoc :target target))
@@ -1150,7 +1182,10 @@
              :ingest (double (or ingest 0.0))
              :dead (boolean dead?)
              :white? (boolean white?)
-             :since-ingest (int (or since-ingest 0)))))
+             :since-ingest (int (or since-ingest 0)))
+      (cond-> water-death?
+        (assoc :water-death true
+               :cargo-lost (double (or cargo-lost 0.0))))))
 
 (defn- update-ant-post
   "Persist minimal telemetry onto the ant for next tick without fighting the
@@ -1214,11 +1249,43 @@
         world (assoc-in world [:ants (:id ant)] ant)]
     world))
 
+(defn- apply-water-failure
+  "Fold a move onto water into a strong local failure.
+
+  The POC uses the permitted cargo-loss semantics rather than removing the ant:
+  the ant is washed back to its previous cell, loses all cargo, and records a
+  drowning event.  Keeping the ant alive is essential for genuinely per-ant
+  review: the same cascade that failed must be present to revise itself."
+  [ant-before world-after ant-after effects]
+  (let [wet-loc (:loc ant-after)
+        water? (and (:moved? effects)
+                    (= :water (get-in world-after [:grid :cells wet-loc :terrain])))]
+    (if-not water?
+      {:world world-after :ant ant-after :effects effects}
+      (let [id (:id ant-before)
+            dry-loc (:loc ant-before)
+            cargo-lost (double (or (:cargo ant-after) 0.0))
+            ant' (assoc ant-after :loc dry-loc :cargo 0.0)
+            world' (-> world-after
+                       (cond-> (= id (get-in world-after [:grid :cells wet-loc :ant]))
+                         (assoc-in [:grid :cells wet-loc :ant] nil))
+                       (assoc-in [:grid :cells dry-loc :ant] id)
+                       (assoc-in [:ants id] ant')
+                       (update-in [:stats :water (:species ant-before) :deaths]
+                                  (fnil inc 0)))]
+        {:world world'
+         :ant ant'
+         :effects (assoc effects
+                         :water-death? true
+                         :cargo-lost cargo-lost
+                         :target wet-loc)}))))
+
 (defn- perform-action
   "Execute the chosen action via the pure ant-kernel, then apply effects to world.
   Returns [world ant effect] — same shape as the old act-* functions."
   [world ant action]
-  (let [view (forward/local-view world ant)
+  (let [ant-before ant
+        view (forward/local-view world ant)
         mu-goal (get-in ant [:mu :goal])
         rand-fn (or (:rand-fn world) rand-nth)
         result (forward/ant-kernel view ant action
@@ -1227,13 +1294,20 @@
         next-ant (:ant result)
         effects (:effects result)
         world (apply-kernel-effects world next-ant effects)
-        effect {:moved? (:moved? effects false)
-                :wander? (:wander? effects false)
-                :gather (double (or (:gather effects) 0.0))
-                :deposit (double (or (:deposit effects) 0.0))
-                :ingest (:ingest effects (:ingest next-ant 0.0))
-                :dead? (:dead? effects false)
-                :target (:target effects (:loc next-ant))}]
+        water-result (apply-water-failure ant-before world next-ant effects)
+        world (:world water-result)
+        next-ant (:ant water-result)
+        effects (:effects water-result)
+        effect (cond-> {:moved? (:moved? effects false)
+                        :wander? (:wander? effects false)
+                        :gather (double (or (:gather effects) 0.0))
+                        :deposit (double (or (:deposit effects) 0.0))
+                        :ingest (:ingest effects (:ingest next-ant 0.0))
+                        :dead? (:dead? effects false)
+                        :target (:target effects (:loc next-ant))}
+                 (:water-death? effects)
+                 (assoc :water-death? true
+                        :cargo-lost (double (or (:cargo-lost effects) 0.0))))]
     [world next-ant effect]))
 
 ;; --- Public: apply-action (refactored) --------------------------------------
@@ -1261,13 +1335,19 @@
          observation  (or (:last-observation ant)
                           ;; safe, cheap pre-action observation for classic
                           (observe/g-observe world ant))]
-     (apply-action world ant {:action action :G G :P P :observation observation})))
+     (apply-action world ant {:action action
+                              :G G
+                              :P P
+                              :observation observation})))
 
   ;; 3-arity core (your existing body kept intact)
-  ([world ant {:keys [action G P observation] :as policy-out}]
+  ([world ant {:keys [action G observation bin] :as policy-out}]
    ;; rolling EMA of G (AIF only) + pheromone action stats
    (let [species   (:species ant)
          ema-alpha (get-in world [:config :ema-alpha] 0.1)
+         world     (if (= bin :at-water-edge)
+                     (update-in world [:stats :water species :encounters] (fnil inc 0))
+                     world)
          world     (if (aif-like? species)
                      (let [world (update-in world [:rolling :G]
                                             (fn [prev]
@@ -1304,19 +1384,50 @@
 
 (defn- step-ant
   [world ant]
-  (if (= (:brain ant) :aif)
+  (cond
+    (= (:brain ant) :aif)
     (let [{ant1 :ant :as aif-res}  (aif/aif-step world ant)
           {:keys [world ant event]} (apply-action world ant1)]
       (assoc aif-res :world world :ant ant :event event))
 
+    (= (:brain ant) :learning)
+    (let [ant (learning/ensure-state ant)
+          bin (learning/policy-bin world ant)
+          action (learning/choose-action ant bin)
+          observation (observe/g-observe world ant)
+          ant* (-> ant
+                   (assoc :last-action action
+                          :last-bin bin
+                          :last-G 0.0)
+                   (assoc-in [:last-policy :policies action :p] 1.0))
+          {:keys [world ant event]}
+          (apply-action world ant* {:action action
+                                    :G 0.0
+                                    :P 1.0
+                                    :observation observation
+                                    :bin bin})]
+      {:world world
+       :ant ant
+       :event event
+       :action action
+       :observation observation})
+
     ;; classic must set :last-action itself
+    :else
     (let [action                     (classic-policy world ant)
+          bin                        (when (get-in world [:config :water])
+                                       (learning/policy-bin world ant))
           obs                        (observe/g-observe world ant)
           ant*                       (-> ant
                                          (assoc :last-action action
                                                 :last-G 0.0)
                                          (assoc-in [:last-policy :policies action :p] 1.0))
-          {:keys [world ant event]}  (apply-action world ant*)]
+          {:keys [world ant event]}
+          (apply-action world ant* {:action action
+                                    :G 0.0
+                                    :P 1.0
+                                    :observation obs
+                                    :bin bin})]
       {:world       world
        :ant         ant
        :event       event
@@ -1359,8 +1470,20 @@
                                 {:world world'
                                  :event event'
                                  :ant nil})
-                world-next (:world hunger-result)
-                event-next (:event hunger-result)]
+                learning? (= :learning (:brain ant))
+                review-ant (or (:ant hunger-result) ant-after)
+                reviewed (when (and learning? review-ant)
+                           (learning/review ant review-ant (:event hunger-result)))
+                ;; A starvation review is still emitted, but must not resurrect
+                ;; the ant removed by `adjust-hunger`.
+                reviewed-ant (when (:ant hunger-result) (:ant reviewed))
+                world-next (cond-> (:world hunger-result)
+                             reviewed-ant
+                             (assoc-in [:ants id] reviewed-ant))
+                event-next (cond-> (:event hunger-result)
+                             reviewed
+                             (assoc :review (:review reviewed)
+                                    :revised-to (:replacement reviewed)))]
             (recur world-next (cond-> events event-next (conj event-next)) more))
           (recur world events more))))))
 

@@ -3,7 +3,7 @@
 
    `ant-kernel` is the SINGLE-ANT local transition: position/move, food-gather,
    deposit, local pheromone-drop, ingest/cargo/recent-gather update — under a
-   chosen macro-action (:forage/:return/:hold/:pheromone).  It is a PURE
+   chosen macro-action (:forage/:return/:hold/:pheromone/:turn-back).  It is a PURE
    function: no atoms, no logging, no global world mutation.  Any randomness is
    routed through an injectable `:rand-fn` (defaults to `clojure.core/rand-nth`,
    preserving bit-identical behaviour with the historical `war.clj` live path).
@@ -79,6 +79,12 @@
   [view loc]
   (->> (neighbor-locs [(:size view) loc])
        (filter #(nil? (:ant (cell-at view %))))))
+
+(defn- water-neighbours
+  [view loc]
+  (->> (neighbor-locs [(:size view) loc])
+       (filter #(= :water (:terrain (cell-at view %))))
+       sort))
 
 (defn- step-toward
   [loc target]
@@ -396,7 +402,7 @@
    Args:
      view     local-view (from `local-view`)
      ant      the ant state map
-     action   one of :forage :return :hold :pheromone :dead
+     action   one of :forage :return :hold :pheromone :turn-back :dead
      opts     {:rand-fn     injected RNG (defaults to clojure.core/rand-nth)
                :mu-goal     goal loc for :pheromone (defaults to view :home)}
 
@@ -481,6 +487,27 @@
                     :reserve-delta (:reserve-delta dep-res 0.0)
                     :occupant (when (:moved? move-result)
                                 (select-keys move-result [:vacate :occupy :swap-to :swap-id]))}})
+
+       :turn-back
+       (let [[x y :as loc] (:loc ant)
+             [wx wy] (or (first (water-neighbours view loc)) loc)
+             target [(+ x (- x wx)) (+ y (- y wy))]
+             move-res (move-ant view ant target
+                                {:wander? false :wander-when-still? false}
+                                rand-fn)
+             ant-moved (assoc ant :loc (:loc move-res))
+             ant-ingested (adjust-ingest ant-moved {:add 0.0 :decay 0.5})
+             ant-final (decay-recent-gather ant-ingested)]
+         {:ant ant-final
+          :effects {:moved? (:moved? move-res false)
+                    :wander? false
+                    :gather 0.0
+                    :deposit 0.0
+                    :ingest (:ingest ant-final 0.0)
+                    :dead? false
+                    :target (:target move-res (:loc ant-final))
+                    :occupant (when (:moved? move-res)
+                                (select-keys move-res [:vacate :occupy :swap-to :swap-id]))}})
 
        :hold
        (let [home (:home view)
