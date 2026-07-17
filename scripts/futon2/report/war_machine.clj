@@ -792,7 +792,10 @@
   [mission-endpoint]
   (if-let [f (try (requiring-resolve 'futon3c.aif.mission-delta-t/delta-t-mission)
                   (catch Throwable _ nil))]
-    (f mission-endpoint)
+    ;; delta-t's one-arity default is 200, below the live mission-doc census;
+    ;; a truncated type fetch silently turns later missions into nil-phase
+    ;; "unknown" entries. Match the judge's complete mission-doc read.
+    (f mission-endpoint {:limit 500})
     {:delta-T 0.0}))
 
 (defn- related-mission-endpoints
@@ -862,6 +865,26 @@
 
 (def ^:private non-progress-decay-k 1.0)
 
+(def ^:private default-strategy-cascade-path
+  "/home/joe/code/futon7/holes/M-futon-forward-model.backlog-cascade-merged-v0.edn")
+
+(def ^:private default-mission-value-weights
+  {:central 0.25
+   :strategic 0.45
+   :doable 0.30})
+
+(def ^:private phase-doability
+  {"head" 0.1
+   "identify" 0.2
+   "map" 0.3
+   "derive" 0.5
+   "argue" 0.6
+   "verify" 0.8
+   "instantiate" 1.0
+   "document" 0.4
+   "complete" 0.0
+   "unknown" 0.3})
+
 (defn- previous-selection-non-progress?
   [action prev-trace-record]
   (let [previous-action (get-in prev-trace-record [:decision :action])
@@ -896,68 +919,154 @@
       (/ (double raw) (double max-raw))
       0.0)))
 
+(defn- mission-value-weights
+  [opts]
+  (let [configured (or (:mission-value-weights opts)
+                       (some-> (System/getenv "FUTON_WM_VALUE_WEIGHTS")
+                               clojure.edn/read-string)
+                       default-mission-value-weights)
+        weights (select-keys configured [:central :strategic :doable])
+        values (vals weights)
+        valid-values? (every? #(and (number? %)
+                                    (<= 0.0 (double %) 1.0))
+                              values)
+        total (when valid-values?
+                (reduce + 0.0 (map double values)))]
+    (when-not (and (= (set (keys weights))
+                      #{:central :strategic :doable})
+                   valid-values?
+                   (< (Math/abs (- 1.0 total)) 1.0e-9))
+      (throw (ex-info "Mission-value weights must be non-negative and sum to 1"
+                      {:weights configured})))
+    (update-vals weights double)))
+
+(defn- read-strategy-cascade
+  [path]
+  (clojure.edn/read-string (slurp path)))
+
+(defn- cascade-mission-tokens
+  [mission]
+  (map normalize-mission-id
+       (re-seq #"M-[A-Za-z0-9-]+" (str mission))))
+
+(defn- cascade-role-map
+  [cascade]
+  (let [id->missions (into {}
+                           (map (fn [{:keys [id mission]}]
+                                  [id (cascade-mission-tokens mission)]))
+                           (:boxes cascade))
+        missions-for #(set (mapcat id->missions %))
+        all-missions (set (mapcat val id->missions))
+        spine-missions (missions-for (:spine cascade))
+        terminal-missions (missions-for (:terminals cascade))]
+    (into {}
+          (map (fn [mission]
+                 [mission (cond
+                            (contains? spine-missions mission) 1.0
+                            (contains? terminal-missions mission) 0.7
+                            :else 0.4)]))
+          all-missions)))
+
+(defn- normalized-centrality-map
+  [centrality]
+  (let [by-mission (into {}
+                         (keep (fn [[mission value]]
+                                 (when-some [n (positive-double value)]
+                                   [(normalize-mission-id mission) n])))
+                         centrality)
+        cmax (reduce max 0.0 (vals by-mission))]
+    (if (pos? cmax)
+      (update-vals by-mission #(/ % cmax))
+      (zipmap (keys by-mission) (repeat 0.0)))))
+
+(defn- normalized-phase
+  [phase]
+  (when (some? phase)
+    (-> phase name str/lower-case)))
+
+(defn- phase-doable
+  [phase]
+  (get phase-doability (or phase "unknown") 0.3))
+
 (defn enrich-candidates-with-mission-value
   "Attach strategic value signals to mission and pattern candidates.
 
-  All substrate reads happen here, at the judge boundary. Mission value is the
-  normalized product of phase tension and load-bearing centrality, decayed
-  after a repeated non-progress selection. Pattern value uses the normalized
-  retrieval score. Actions missing their required substrate signal are left
-  unenriched so the pure forward model's compatibility fallback applies."
-  [candidates prev-trace-record]
-  (let [centrality (centrality-joint-map)
-        mission-idx (mission-doc-index)
-        delta-cache (atom {})
-        with-raw-value
-        (mapv
-         (fn [action]
-           (case (:type action)
-             :advance-mission
-             (let [target (action-target-key (:target action))
-                   endpoint (get mission-idx (normalize-mission-id target))
-                   delta-result (when endpoint
-                                  (or (get @delta-cache endpoint)
-                                      (let [result (compute-delta-t-mission endpoint)]
-                                        (swap! delta-cache assoc endpoint result)
-                                        result)))
-                   tension (positive-double (:mission-T delta-result))
-                   load-bearing (positive-double (get centrality target))]
-               (cond-> action
-                 (and (some? tension) (some? load-bearing))
-                 (assoc :tension tension
-                        :centrality load-bearing
-                        ::raw-mission-value (* tension load-bearing))))
+  All substrate reads happen here, at the judge boundary. Mission value blends
+  globally normalized centrality, active-cascade role, and phase doability,
+  then applies the completion gate and repeated-non-progress decay. Pattern
+  value continues to use the batch-normalized retrieval score.
 
-             :fire-pattern
-             (if-some [retrieval-value (positive-double (:retrieval-score action))]
-               (assoc action ::raw-pattern-value retrieval-value)
-               action)
+  Optional opts support :strategy-cascade-path and :mission-value-weights. The
+  corresponding environment variables are FUTON_WM_STRATEGY_CASCADE and
+  FUTON_WM_VALUE_WEIGHTS (an EDN map)."
+  ([candidates prev-trace-record]
+   (enrich-candidates-with-mission-value candidates prev-trace-record {}))
+  ([candidates prev-trace-record opts]
+   (let [weights (mission-value-weights opts)
+         cascade-path (or (:strategy-cascade-path opts)
+                          (System/getenv "FUTON_WM_STRATEGY_CASCADE")
+                          default-strategy-cascade-path)
+         centrality (normalized-centrality-map (centrality-joint-map))
+         strategic (cascade-role-map (read-strategy-cascade cascade-path))
+         mission-idx (mission-doc-index)
+         delta-cache (atom {})
+         with-value
+         (mapv
+          (fn [action]
+            (case (:type action)
+              :advance-mission
+              (let [mission (normalize-mission-id
+                             (action-target-key (:target action)))
+                    endpoint (get mission-idx mission)
+                    delta-result (when endpoint
+                                   (or (get @delta-cache endpoint)
+                                       (let [result (compute-delta-t-mission endpoint)]
+                                         (swap! delta-cache assoc endpoint result)
+                                         result)))
+                    phase (normalized-phase (:mission-phase delta-result))
+                    central (get centrality mission 0.0)
+                    strategic-value (get strategic mission 0.0)
+                    doable (phase-doable phase)
+                    completion-gate (if (= "complete" phase) 0.0 1.0)
+                    blended (+ (* (:central weights) central)
+                               (* (:strategic weights) strategic-value)
+                               (* (:doable weights) doable))]
+                (assoc action
+                       :central central
+                       :strategic strategic-value
+                       :doable doable
+                       :phase phase
+                       ::raw-mission-value (* blended completion-gate)))
 
-             action))
-         candidates)
-        max-mission-value (reduce max 0.0 (keep ::raw-mission-value with-raw-value))
-        max-pattern-value (reduce max 0.0 (keep ::raw-pattern-value with-raw-value))]
-    (mapv
-     (fn [action]
-       (let [raw-mission (::raw-mission-value action)
-             raw-pattern (::raw-pattern-value action)
-             non-progress-count (if (some? raw-mission)
-                                  (consecutive-non-progress-count
-                                   action prev-trace-record)
-                                  0)
-             non-progress? (pos? non-progress-count)
-             decay (if non-progress?
-                     (/ 1.0 (+ 1.0 (* non-progress-decay-k
-                                      non-progress-count)))
-                     1.0)
-             normalized (or (normalized-value raw-mission max-mission-value)
-                            (normalized-value raw-pattern max-pattern-value))]
-         (cond-> (dissoc action ::raw-mission-value ::raw-pattern-value)
-           (some? raw-mission) (assoc :non-progress-decay decay
-                                      :non-progress? non-progress?
-                                      :non-progress-count non-progress-count)
-           (some? normalized) (assoc :mission-value-factor (* normalized decay)))))
-     with-raw-value)))
+              :fire-pattern
+              (if-some [retrieval-value (positive-double (:retrieval-score action))]
+                (assoc action ::raw-pattern-value retrieval-value)
+                action)
+
+              action))
+          candidates)
+         max-pattern-value (reduce max 0.0 (keep ::raw-pattern-value with-value))]
+     (mapv
+      (fn [action]
+        (let [raw-mission (::raw-mission-value action)
+              raw-pattern (::raw-pattern-value action)
+              non-progress-count (if (some? raw-mission)
+                                   (consecutive-non-progress-count
+                                    action prev-trace-record)
+                                   0)
+              non-progress? (pos? non-progress-count)
+              decay (if non-progress?
+                      (/ 1.0 (+ 1.0 (* non-progress-decay-k
+                                       non-progress-count)))
+                      1.0)
+              value (or raw-mission
+                        (normalized-value raw-pattern max-pattern-value))]
+          (cond-> (dissoc action ::raw-mission-value ::raw-pattern-value)
+            (some? raw-mission) (assoc :non-progress-decay decay
+                                       :non-progress? non-progress?
+                                       :non-progress-count non-progress-count)
+            (some? value) (assoc :mission-value-factor (* value decay)))))
+      with-value))))
 
 (defn- apply-anamnesis-tiebreak
   [ranked-actions]

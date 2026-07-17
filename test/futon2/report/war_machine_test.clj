@@ -32,7 +32,10 @@
        #'wm/centrality-joint-map (fn [] {"M-alpha" 0.8 "M-beta" 0.4})
        #'wm/compute-delta-t-mission
        (fn [endpoint]
-         {:mission-T (if (= endpoint "repo-d/mission/alpha") 1.0 0.7)})}
+         {:mission-T (if (= endpoint "repo-d/mission/alpha") 1.0 0.7)
+          :mission-phase (if (= endpoint "repo-d/mission/alpha")
+                           "head"
+                           "derive")})}
       (fn []
         (let [hxs (#'wm/fetch-hyperedges-by-type "code/v05/mission-doc")
               mission-idx (#'wm/mission-doc-index)
@@ -67,6 +70,17 @@
         (is (= 1 (:total-records result)))
         (is (= 0.67 (get-in result [:per-class :advance-mission
                                     :intrinsic-value])))))))
+
+(deftest delta-t-wrapper-requests-complete-mission-census-test
+  (let [called (atom nil)]
+    (with-redefs [clojure.core/requiring-resolve
+                  (fn [_]
+                    (fn [endpoint opts]
+                      (reset! called [endpoint opts])
+                      {:mission-phase "instantiate"}))]
+      (is (= {:mission-phase "instantiate"}
+             (#'wm/compute-delta-t-mission "repo/mission/example")))
+      (is (= ["repo/mission/example" {:limit 500}] @called)))))
 
 (deftest morning-brief-events-use-live-belief-update-and-hold-unknown-entities
   (let [prior {"known" {:spawned (/ 1.0 7) :refined (/ 1.0 7)
@@ -390,54 +404,104 @@
           (is (= 0.7 (:structural-pressure-per-action (second enriched))))
           (is (= 2.2 (:structural-pressure-per-action (nth enriched 2)))))))))
 
-(deftest mission-value-enrichment-normalizes-and-decays-non-progress
-  (let [candidates [{:type :advance-mission :target "M-a" :open-hole-count 4}
-                    {:type :advance-mission :target "M-b" :open-hole-count 4}
+(deftest three-factor-mission-value-enrichment-and-non-progress-decay
+  (let [candidates [{:type :advance-mission :target "M-spine" :open-hole-count 4}
+                    {:type :advance-mission :target "M-head" :open-hole-count 4}
+                    {:type :advance-mission :target "M-instantiate" :open-hole-count 4}
+                    {:type :advance-mission :target "M-complete" :open-hole-count 4}
                     {:type :fire-pattern :target :pattern/high :retrieval-score 8.0}
                     {:type :fire-pattern :target :pattern/low :retrieval-score 2.0}]
-        prev {:decision {:action {:type :advance-mission :target "M-a"}}
-              :mu-pre {"M-a" {:addressed 0.2}}
-              :mu-post {"M-a" {:addressed 0.2}}
+        prev {:decision {:action {:type :advance-mission :target "M-spine"}}
+              :mu-pre {"M-spine" {:addressed 0.2}}
+              :mu-post {"M-spine" {:addressed 0.2}}
               :outcome :grounded-no-change}
-        delta-by-endpoint {"mission/a" {:mission-T 1.0}
-                           "mission/b" {:mission-T 0.5}}
-        redefs {#'wm/centrality-joint-map (fn [] {"M-a" 0.8 "M-b" 0.4})
-                #'wm/mission-doc-index (fn [] {"a" "mission/a" "b" "mission/b"})
-                #'wm/compute-delta-t-mission #(get delta-by-endpoint %)}]
+        delta-by-endpoint {"mission/spine" {:mission-phase "identify"}
+                           "mission/head" {:mission-phase "head"}
+                           "mission/instantiate" {:mission-phase "instantiate"}
+                           "mission/complete" {:mission-phase "complete"}}
+        cascades {"cascade-a"
+                  {:boxes [{:id :spine :mission "M-spine"}
+                           {:id :instant :mission "M-instantiate + M-complete"}]
+                   :spine [:spine]
+                   :terminals [:instant]}
+                  "cascade-b"
+                  {:boxes [{:id :same :mission "M-spine"}]
+                   :terminals [:same]}}
+        redefs {#'wm/centrality-joint-map
+                (fn [] {"M-spine" 0.0
+                        "M-head" 0.5
+                        "M-instantiate" 0.5
+                        "M-complete" 1.0})
+                #'wm/mission-doc-index
+                (fn [] {"spine" "mission/spine"
+                        "head" "mission/head"
+                        "instantiate" "mission/instantiate"
+                        "complete" "mission/complete"})
+                #'wm/compute-delta-t-mission #(get delta-by-endpoint %)
+                #'wm/read-strategy-cascade #(get cascades %)}]
     (with-redefs-fn
       redefs
       (fn []
-        (let [[stuck other pattern-high pattern-low]
-              (wm/enrich-candidates-with-mission-value candidates prev)
+        (let [[stuck head instantiate complete pattern-high pattern-low]
+              (wm/enrich-candidates-with-mission-value
+               candidates prev {:strategy-cascade-path "cascade-a"})
               [fresh] (wm/enrich-candidates-with-mission-value
-                       [(first candidates)] nil)]
-          (is (= 1.0 (:tension stuck)))
-          (is (= 0.8 (:centrality stuck)))
+                       [(first candidates)] nil
+                       {:strategy-cascade-path "cascade-a"})]
+          (is (= {:central 0.0
+                  :strategic 1.0
+                  :doable 0.2
+                  :phase "identify"}
+                 (select-keys stuck [:central :strategic :doable :phase])))
+          (is (pos? (:mission-value-factor fresh))
+              "a zero-centrality spine mission still has additive value")
+          (is (= 0.5 (:central instantiate))
+              "centrality uses the global cmax, not the candidate batch")
+          (is (> (:doable instantiate) (:doable head)))
+          (is (> (:mission-value-factor instantiate)
+                 (:mission-value-factor head)))
+          (is (zero? (:mission-value-factor complete)))
           (is (= 0.5 (:non-progress-decay stuck)))
           (is (true? (:non-progress? stuck)))
           (is (= 1 (:non-progress-count stuck)))
-          (is (= 0.5 (:mission-value-factor stuck)))
-          (is (= 0.25 (:mission-value-factor other)))
-          (is (= 1.0 (:mission-value-factor fresh)))
+          (is (= (* 0.5 (:mission-value-factor fresh))
+                 (:mission-value-factor stuck)))
           (is (< (:mission-value-factor stuck)
                  (:mission-value-factor fresh)))
           (is (= 1.0 (:mission-value-factor pattern-high)))
           (is (= 0.25 (:mission-value-factor pattern-low)))
+          (let [[alternate]
+                (wm/enrich-candidates-with-mission-value
+                 [(first candidates)] nil
+                 {:strategy-cascade-path "cascade-b"})]
+            (is (not= (:mission-value-factor fresh)
+                      (:mission-value-factor alternate))
+                "swapping cascades changes the same mission's value"))
+          (let [[doable-only]
+                (wm/enrich-candidates-with-mission-value
+                 [(first candidates)] nil
+                 {:strategy-cascade-path "cascade-a"
+                  :mission-value-weights {:central 0.0
+                                          :strategic 0.0
+                                          :doable 1.0}})]
+            (is (= 0.2 (:mission-value-factor doable-only))
+                "opts override the default three-factor weights"))
           (let [[stuck-again]
                 (wm/enrich-candidates-with-mission-value
                  [(first candidates)]
                  {:decision {:action stuck}
-                  :mu-pre {"M-a" {:addressed 0.2}}
-                  :mu-post {"M-a" {:addressed 0.2}}
-                  :outcome :grounded-no-change})]
+                  :mu-pre {"M-spine" {:addressed 0.2}}
+                  :mu-post {"M-spine" {:addressed 0.2}}
+                  :outcome :grounded-no-change}
+                 {:strategy-cascade-path "cascade-a"})]
             (is (= 2 (:non-progress-count stuck-again)))
             (is (= (/ 1.0 3.0) (:non-progress-decay stuck-again))))
           (let [state {:observation {:mission-health 0.3
                                      :sorry-count-norm 0.85}
                        :belief {}}
                 stuck-g (:G-efe (efe/compute-efe state stuck))
-                other-g (:G-efe (efe/compute-efe state other))]
-            (is (not= stuck-g other-g)
+                instantiate-g (:G-efe (efe/compute-efe state instantiate))]
+            (is (not= stuck-g instantiate-g)
                 "judge-enriched equal-hole candidates have distinct strategic G")))))))
 
 (deftest live-star-map-efe-opts-adds-conservative-graph-blend
