@@ -8,6 +8,7 @@
   fold executor is not an actuator here."
   (:require [babashka.http-client :as http]
             [cheshire.core :as json]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.pprint :as pp]
@@ -560,6 +561,77 @@
       "REFUSE" {:verdict :refuse :reason (str/trim (str detail))}
       {:verdict :unverifiable})))
 
+(def ^:private feature-card-keys
+  [:built :want-coverage :matches-intent? :things-to-try
+   :fold-ref :proof-ref :reviewer-note])
+
+(defn- feature-card-from-text [job]
+  (when-let [[_ encoded]
+             (re-find #"(?m)^FULL_LOOP_FEATURE_CARD:\s*(\{.*\})\s*$"
+                      (job-text job))]
+    (try
+      (edn/read-string encoded)
+      (catch Exception _ nil))))
+
+(defn- valid-feature-card [job]
+  (let [card (or (:feature-card job) (feature-card-from-text job))]
+    (when (and (map? card)
+               (not (str/blank? (str (:built card))))
+               (contains? card :want-coverage)
+               (contains? card :matches-intent?)
+               (sequential? (:things-to-try card)))
+      (-> (select-keys card feature-card-keys)
+          (update :things-to-try vec)))))
+
+(defn- reviewer-note [job]
+  (or (:reviewer-note job)
+      (some-> (re-find #"(?m)^FULL_LOOP_REVIEWER_NOTE:\s*(.+)$"
+                       (job-text job))
+              second
+              str/trim
+              not-empty)))
+
+(defn- existing-file-ref [repo ref]
+  (when-not (str/blank? (str ref))
+    (let [file (io/file (str ref))
+          resolved (if (or (.isAbsolute file) (nil? repo))
+                     file
+                     (io/file repo (str ref)))]
+      (when (.isFile resolved) (.getPath resolved)))))
+
+(defn- mission-fold-candidate [mission entry]
+  (when-let [mission-path (or (:path mission)
+                              (get-in entry [:action :mission-path]))]
+    (let [mission-path (str mission-path)]
+      (when (str/ends-with? mission-path ".md")
+        (str/replace mission-path #"\.md$" ".executed.edn")))))
+
+(defn- feature-artifact-refs [repo files mission entry card]
+  (let [fold-ref (some #(existing-file-ref repo %)
+                       [(:fold-ref card)
+                        (mission-fold-candidate mission entry)])
+        proof-candidates
+        (concat [(:proof-ref card)
+                 (:proof-ref mission)
+                 (:logic-witness mission)
+                 (:witness-path mission)]
+                (filter #(re-find #"(?i)(?:proof|witness|darktower).*\.(?:edn|clj|lean)$"
+                                  (str %))
+                        files))
+        proof-ref (some #(existing-file-ref repo %) proof-candidates)]
+    {:fold-ref fold-ref :proof-ref proof-ref}))
+
+(defn- grounded-feature-card
+  [repo files mission entry author-job review-job]
+  (when-let [card (valid-feature-card author-job)]
+    (let [{:keys [fold-ref proof-ref]}
+          (feature-artifact-refs repo files mission entry card)
+          note (reviewer-note review-job)]
+      (cond-> (dissoc card :fold-ref :proof-ref :reviewer-note)
+        fold-ref (assoc :fold-ref fold-ref)
+        proof-ref (assoc :proof-ref proof-ref)
+        note (assoc :reviewer-note note)))))
+
 (declare recovery-job-id)
 
 (defn- prompt-findings [stop-lines]
@@ -606,7 +678,12 @@
        "2. Preserve global invariants; do not special-case or bypass a gate.\n"
        "3. Run the repository-required static checks and relevant tests.\n"
        "4. Commit only your coherent changes. Do not include unrelated dirty files.\n"
-       "5. Finish with: FULL_LOOP_AUTHOR: DONE <commit-sha> and list validations.\n"
+       "5. Return a structured :feature-card with :built, :want-coverage, "
+       ":matches-intent?, and :things-to-try. Also emit it as one valid EDN map line: "
+       "FULL_LOOP_FEATURE_CARD: {...}. This is your replayable claim about the feature, "
+       "not the operator's acceptance verdict. Include :fold-ref or :proof-ref only for "
+       "artifacts that already exist; the runner will verify and discover links.\n"
+       "6. Finish with: FULL_LOOP_AUTHOR: DONE <commit-sha> and list validations.\n"
        "If no safe substantive parcel is possible, make no commit and finish with "
        "FULL_LOOP_AUTHOR: REFUSE <typed reason>."))
 
@@ -635,7 +712,9 @@
        "characters (Agency durably preserves only this response prefix):\n"
        "FULL_LOOP_REVIEW: APPROVE\n"
        "or FULL_LOOP_REVIEW: REQUEST_CHANGES <reason>\n"
-       "or FULL_LOOP_REVIEW: REJECT <reason>"))
+       "or FULL_LOOP_REVIEW: REJECT <reason>\n"
+       "You may add a second line FULL_LOOP_REVIEWER_NOTE: <short note>; it is context, "
+       "not the operator's feature verdict."))
 
 (defn- find-commit-repo [commit]
   (some (fn [repo]
@@ -911,8 +990,9 @@
                                :discharge-contract
                                (discharge-contract repair-class)})))
                        data (assoc data :repair-obligation finding)
-                       brief-ref ((or (:queue-fn opts) brief/queue-item!)
-                                  {:attempt-id attempt-id :opportunity-id opportunity-id
+                       brief-item
+                       (cond->
+                        {:attempt-id attempt-id :opportunity-id opportunity-id
                                    :batch-id (:batch-id opts)
                                    :trigger trigger :selected-target (:target data)
                                    :outcome outcome :author author
@@ -959,7 +1039,11 @@
                                       :ranked-candidates
                                       (:ranked-candidates selection-judgment)
                                       :selection-reasons
-                                      (:selection-reasons selection-judgment)})})
+                                      (:selection-reasons selection-judgment)})}
+                         (and (= :grounded-change outcome)
+                              (:feature-card data))
+                         (assoc :feature-card (:feature-card data)))
+                       brief-ref ((or (:queue-fn opts) brief/queue-item!) brief-item)
                        closed (term (merge {:outcome outcome
                                             :grounded? (= :grounded-change outcome)
                                             :artifact-only? (= :artifact-only outcome)
@@ -1493,12 +1577,21 @@
                                                :implementation-id
                                                (:implementation-id witness)}}
                                        {:kind :authoritative-substrate-discharge}))
-                    (close! (if (and (:resolved? witness) (:dial-moved? witness))
-                              :grounded-change
-                              :grounded-no-change)
-                            {:target target :commit commit :witness witness
-                             :author-job author-job :review-job review-job
-                             :artifact-binding artifact-binding})))))))))
+                    (let [grounded? (and (:resolved? witness)
+                                         (:dial-moved? witness))
+                          feature-card
+                          (when grounded?
+                            (grounded-feature-card repo files mission entry
+                                                   author-job review-job))]
+                      (close! (if grounded?
+                                :grounded-change
+                                :grounded-no-change)
+                              (cond->
+                               {:target target :commit commit :witness witness
+                                :author-job author-job :review-job review-job
+                                :artifact-binding artifact-binding}
+                                feature-card
+                                (assoc :feature-card feature-card))))))))))))
       (catch Throwable e
         (if @closing?
           (throw e)

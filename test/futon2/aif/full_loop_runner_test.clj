@@ -1,7 +1,9 @@
 (ns futon2.aif.full-loop-runner-test
   (:require [babashka.http-client :as http]
             [cheshire.core :as json]
+            [clojure.java.io :as io]
             [clojure.test :refer [deftest is use-fixtures]]
+            [futon2.aif.full-loop-cli :as cli]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.pattern-registry :as patterns]
@@ -56,6 +58,120 @@
    :construct-fn runner/construct-for-decision
    :author-artifact-observer-fn synthetic-artifact-binding
    :queue-fn identity})
+
+(def feature-card-claim
+  {:built "Build-time feature cards now survive grounding into Morning Brief."
+   :want-coverage "The grounded attempt carries the author's feature story and replay steps."
+   :matches-intent? true
+   :things-to-try ["clojure -X:test :nses '[futon2.aif.full-loop-runner-test]'"
+                   "clojure -M:wm-full-loop feature <attempt-id>"]})
+
+(defn- run-feature-card-attempt
+  [{:keys [author-card grounded? artifacts?]
+    :or {grounded? true artifacts? false}}]
+  (let [root (.toFile (java.nio.file.Files/createTempDirectory
+                       "wm-feature-card-" (make-array java.nio.file.attribute.FileAttribute 0)))
+        mission-file (io/file root "M-selected.md")
+        fold-file (io/file root "M-selected.executed.edn")
+        proof-file (io/file root "logic/feature-witness.edn")
+        queued (atom [])
+        _ (spit mission-file "# test mission\n")
+        _ (when artifacts?
+            (io/make-parents fold-file)
+            (spit fold-file (pr-str {:boxes [:author :store]
+                                     :want-coverage [:feature-card]}))
+            (io/make-parents proof-file)
+            (spit proof-file (pr-str {:witness :feature-card-persisted})))
+        commit "feature123"
+        opts (merge
+              (isolated-runner-opts)
+              {:repair-open-fn (constantly [])
+               :target-repo-fn (fn [& _] (.getPath root))
+               :repair-system-record-fn
+               (fn [finding] (assoc finding :repair/id "test-repair"))
+               :mission-fn (fn [target]
+                             {:id target :path (.getPath mission-file)})
+               :trace-fn (constantly (.getPath (io/file root "trace.edn")))
+               :author-artifact-observer-fn
+               (fn [repo before author-job]
+                 {:fresh-author? true
+                  :repo repo
+                  :pre-dispatch-head (:head before)
+                  :observed-head (:artifact-ref author-job)
+                  :corroborates? true
+                  :commit (:artifact-ref author-job)})
+               :dispatch-fn
+               (fn [_ agent _ _ _]
+                 {:job-id (if (= agent "zai-5") "feature-author" "feature-review")})
+               :poll-fn
+               (fn [_ job-id]
+                 (if (= job-id "feature-author")
+                   (cond-> {:job-id job-id :state "done" :artifact-ref commit
+                            :result-summary (str "FULL_LOOP_AUTHOR: DONE " commit)}
+                     author-card (assoc :feature-card author-card))
+                   {:job-id job-id :state "done"
+                    :result-summary (str "FULL_LOOP_REVIEW: APPROVE\n"
+                                         "FULL_LOOP_REVIEWER_NOTE: Replay steps verified.")}))
+               :resolve-build-fn
+               (fn [_]
+                 {:repo (.getPath root)
+                  :files ["src/feature.clj" "logic/feature-witness.edn"]})
+               :ground-fn
+               (fn [& _]
+                 {:before {:implementation-entity nil}
+                  :after {:implementation-entity {:id "feature-impl"}}
+                  :resolved? grounded?
+                  :dial-moved? grounded?
+                  :implementation-id "feature-impl"
+                  :discharge-id "feature-discharge"})
+               :queue-fn #(swap! queued conj %)})
+        result (runner/run-opportunity! opts)]
+    {:result result :item (first @queued)
+     :fold-file fold-file :proof-file proof-file}))
+
+(deftest grounded-author-feature-card-is-persisted-and-rendered
+  (let [{:keys [result item fold-file proof-file]}
+        (run-feature-card-attempt {:author-card feature-card-claim
+                                   :artifacts? true})
+        rendered (-> {:attempt item}
+                     cli/feature-acceptance
+                     cli/render-feature-acceptance)
+        absent-artifacts
+        (:item (run-feature-card-attempt {:author-card feature-card-claim}))]
+    (is (= :grounded-change (:outcome result)))
+    (is (= (.getPath fold-file) (get-in item [:feature-card :fold-ref])))
+    (is (= (.getPath proof-file) (get-in item [:feature-card :proof-ref])))
+    (is (= "Replay steps verified."
+           (get-in item [:feature-card :reviewer-note])))
+    (is (re-find #"4. THE SORRY / PROOF-HOLE[\s\S]*Want coverage:" rendered))
+    (is (re-find #"5. WIRING DIAGRAM[\s\S]*Fold:" rendered))
+    (is (re-find #"7. THE FEATURE[\s\S]*Build-time feature cards" rendered))
+    (is (re-find #"8. THINGS TO TRY[\s\S]*full-loop-runner-test" rendered))
+    (is (nil? (get-in absent-artifacts [:feature-card :fold-ref])))
+    (is (nil? (get-in absent-artifacts [:feature-card :proof-ref])))))
+
+(deftest grounded-attempt-without-author-card-remains-fail-open
+  (let [{:keys [result item]} (run-feature-card-attempt {})
+        rendered (-> {:attempt item}
+                     cli/feature-acceptance
+                     cli/render-feature-acceptance)]
+    (is (= :grounded-change (:outcome result)))
+    (is (nil? (:feature-card item)))
+    (is (re-find #"not rendered for this attempt ⟵ build-time gap" rendered))
+    (is (re-find #"build-time feature card pending" rendered))))
+
+(deftest non-grounded-attempt-never-persists-author-card
+  (let [{:keys [result item]}
+        (run-feature-card-attempt {:author-card feature-card-claim
+                                   :grounded? false
+                                   :artifacts? true})
+        rendered (-> {:attempt item}
+                     cli/feature-acceptance
+                     cli/render-feature-acceptance)]
+    (is (= :grounded-no-change (:outcome result)))
+    (is (nil? (:feature-card item)))
+    (is (re-find #"not rendered for this attempt ⟵ build-time gap" rendered))
+    (is (re-find #"build-time feature card pending" rendered))))
 
 (defn fire-pattern-action []
   (merge {:type :fire-pattern
@@ -118,6 +234,8 @@
     (is (= selected-action (:action @constructed))
         "construction follows the selected action, not the raw rank head")
     (is (= ["zai-5" "codex-7"] (mapv :agent @dispatches)))
+    (is (re-find #"FULL_LOOP_FEATURE_CARD:"
+                 (:prompt (first @dispatches))))
     (is (re-find #"Do not edit or commit" (:prompt (second @dispatches))))
     (is (= :grounded-change (:outcome (first @queued))))
     (is (= "overnight-2026-07-16" (:batch-id (first @queued))))
