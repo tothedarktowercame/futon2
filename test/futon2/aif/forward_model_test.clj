@@ -103,6 +103,21 @@
       (is (> (get-in out [:next-belief :m1 :strengthened])
              (get-in base-state [:belief :m1 :strengthened]))))))
 
+(deftest constant-effects-mode-ignores-strategic-mission-value-test
+  (testing "strategic enrichment cannot change the frozen constant baseline"
+    (let [advance {:type :advance-mission :target :m1
+                   :open-hole-count 9 :mission-value-factor 0.1}
+          pattern {:type :fire-pattern :target :m1 :mission-value-factor 0.1}]
+      (binding [fm/*effects-mode* :constant]
+        (is (= (dissoc (fm/predict base-state advance) :action)
+               (dissoc (fm/predict base-state
+                                   (dissoc advance :mission-value-factor))
+                       :action)))
+        (is (= (dissoc (fm/predict base-state pattern) :action)
+               (dissoc (fm/predict base-state
+                                   (dissoc pattern :mission-value-factor))
+                       :action)))))))
+
 (deftest predict-clamps-observation-to-unit-interval-test
   (testing "observation values stay in [0,1] under extreme actions"
     (let [extreme-obs (assoc base-obs :sorry-count-norm 0.05)

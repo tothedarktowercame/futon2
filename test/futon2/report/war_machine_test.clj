@@ -331,6 +331,56 @@
           (is (= 0.7 (:structural-pressure-per-action (second enriched))))
           (is (= 2.2 (:structural-pressure-per-action (nth enriched 2)))))))))
 
+(deftest mission-value-enrichment-normalizes-and-decays-non-progress
+  (let [candidates [{:type :advance-mission :target "M-a" :open-hole-count 4}
+                    {:type :advance-mission :target "M-b" :open-hole-count 4}
+                    {:type :fire-pattern :target :pattern/high :retrieval-score 8.0}
+                    {:type :fire-pattern :target :pattern/low :retrieval-score 2.0}]
+        prev {:decision {:action {:type :advance-mission :target "M-a"}}
+              :mu-pre {"M-a" {:addressed 0.2}}
+              :mu-post {"M-a" {:addressed 0.2}}
+              :outcome :grounded-no-change}
+        delta-by-endpoint {"mission/a" {:mission-T 1.0}
+                           "mission/b" {:mission-T 0.5}}
+        redefs {#'wm/centrality-joint-map (fn [] {"M-a" 0.8 "M-b" 0.4})
+                #'wm/mission-doc-index (fn [] {"a" "mission/a" "b" "mission/b"})
+                #'wm/compute-delta-t-mission #(get delta-by-endpoint %)}]
+    (with-redefs-fn
+      redefs
+      (fn []
+        (let [[stuck other pattern-high pattern-low]
+              (wm/enrich-candidates-with-mission-value candidates prev)
+              [fresh] (wm/enrich-candidates-with-mission-value
+                       [(first candidates)] nil)]
+          (is (= 1.0 (:tension stuck)))
+          (is (= 0.8 (:centrality stuck)))
+          (is (= 0.5 (:non-progress-decay stuck)))
+          (is (true? (:non-progress? stuck)))
+          (is (= 1 (:non-progress-count stuck)))
+          (is (= 0.5 (:mission-value-factor stuck)))
+          (is (= 0.25 (:mission-value-factor other)))
+          (is (= 1.0 (:mission-value-factor fresh)))
+          (is (< (:mission-value-factor stuck)
+                 (:mission-value-factor fresh)))
+          (is (= 1.0 (:mission-value-factor pattern-high)))
+          (is (= 0.25 (:mission-value-factor pattern-low)))
+          (let [[stuck-again]
+                (wm/enrich-candidates-with-mission-value
+                 [(first candidates)]
+                 {:decision {:action stuck}
+                  :mu-pre {"M-a" {:addressed 0.2}}
+                  :mu-post {"M-a" {:addressed 0.2}}
+                  :outcome :grounded-no-change})]
+            (is (= 2 (:non-progress-count stuck-again)))
+            (is (= (/ 1.0 3.0) (:non-progress-decay stuck-again))))
+          (let [state {:observation {:mission-health 0.3
+                                     :sorry-count-norm 0.85}
+                       :belief {}}
+                stuck-g (:G-efe (efe/compute-efe state stuck))
+                other-g (:G-efe (efe/compute-efe state other))]
+            (is (not= stuck-g other-g)
+                "judge-enriched equal-hole candidates have distinct strategic G")))))))
+
 (deftest live-star-map-efe-opts-adds-conservative-graph-blend
   (testing "live WM opts carry the graph and softened star-map weights when graph loads"
     (let [graph {:capabilities {:goal {:status :held}}

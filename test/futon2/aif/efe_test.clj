@@ -5,6 +5,7 @@
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.belief :as belief]
             [futon2.aif.efe :as efe]
+            [futon2.aif.forward-model :as fm]
             [futon2.aif.free-energy :as fe]))
 
 (def ^:private healthy-obs
@@ -201,6 +202,34 @@
           addr-out (efe/compute-efe stressed-state {:type :address-sorry :target :m1})]
       (is (< (:G-risk addr-out) (:G-risk no-op-out))
           "address-sorry from stressed state lowers predicted risk vs no-op"))))
+
+(deftest strategic-mission-value-distinguishes-equal-hole-count-test
+  (let [action (fn [target factor]
+                 {:type :advance-mission :target target :open-hole-count 5
+                  :mission-value-factor factor})
+        high (action :m1 1.0)
+        low (action :m2 0.25)
+        stuck (action :m1 0.5)
+        prediction #(fm/predict stressed-state %)
+        health #(get-in (prediction %) [:next-observation :mean :mission-health])
+        g #(-> (efe/compute-efe stressed-state %) :G-efe)]
+    (testing "equal hole counts no longer imply equal strategic predictions or G"
+      (is (> (health high) (health low)))
+      (is (not= (g high) (g low))))
+    (testing "non-progress decay lowers value and worsens strategic G"
+      (is (< (:mission-value-factor stuck) (:mission-value-factor high)))
+      (is (< (health stuck) (health high)))
+      (is (> (g stuck) (g high))))))
+
+(deftest fire-pattern-retrieval-value-breaks-strategic-g-tie-test
+  (let [high {:type :fire-pattern :target :m1 :mission-value-factor 1.0}
+        low {:type :fire-pattern :target :m2 :mission-value-factor 0.2}
+        g #(-> (efe/compute-efe base-state %) :G-efe)]
+    (is (not= (get-in (fm/predict base-state high)
+                      [:next-observation :mean :ticks-firing-ratio])
+              (get-in (fm/predict base-state low)
+                      [:next-observation :mean :ticks-firing-ratio])))
+    (is (not= (g high) (g low)))))
 
 (deftest higher-variance-higher-ambiguity-test
   (testing "actions with higher predicted variance have higher G-ambiguity"

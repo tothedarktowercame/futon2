@@ -70,8 +70,9 @@
   "Prediction-effects mode (target-sensitive forward model, Joe-approved
    2026-06-11, WM pilot cycles 5-7 finding):
    - :target-sensitive (default) — per-target predictions scaled by what the
-     action map carries (:open-hole-count for advance-mission,
-     :intrinsic-value for address-sorry). Falsifiable per target.
+     action map carries (`:mission-value-factor` for enriched mission/pattern
+     actions, `:intrinsic-value` for address-sorry). Unenriched mission actions
+     retain the historical `:open-hole-count` fallback. Falsifiable per target.
    - :constant — the frozen v1 per-action-type constants, kept as the
      counterfactual baseline so constant-vs-scaled discriminates on the
      SAME pairs (dual-prediction logging).
@@ -107,6 +108,23 @@
           continuity (/ 3.0 4.0)]
       (max 0.1 (/ resolvedness-complement continuity)))))
 
+(defn mission-value-factor
+  "Strategic value scale carried by an enriched action.
+
+  The judge owns all substrate reads and normalization; the forward model only
+  consumes the resulting scalar. Constant-effects mode remains the frozen 1.0
+  baseline. Unenriched `:advance-mission` callers retain the historical
+  hole-count factor, while other unenriched actions retain their constant
+  effect."
+  [{:keys [type mission-value-factor open-hole-count]}]
+  (cond
+    (= :constant *effects-mode*) 1.0
+    (number? mission-value-factor) (-> (double mission-value-factor)
+                                       (max 0.0)
+                                       (min 1.0))
+    (= :advance-mission type) (advance-mission-ordinal-factor open-hole-count)
+    :else 1.0))
+
 (defmethod predict-effects :address-sorry
   [_state {:keys [target weight intrinsic-value] :or {weight 1.0}}]
   ;; addressing a sorry reduces sorry-count-norm by ~0.1
@@ -131,16 +149,16 @@
    :events [{:entity-id target :type :spawned :weight weight}]})
 
 (defmethod predict-effects :advance-mission
-  [_state {:keys [target weight open-hole-count] :or {weight 1.0}}]
+  [_state {:keys [target weight] :or {weight 1.0} :as action}]
   ;; advancing an ALREADY-OPEN mission discharges open holes: mission-health
   ;; rises and remaining-work pressure falls. The event is :addressed, not
   ;; :spawned — an in-flight mission advanced is work discharged, not a new
   ;; entity. (:open-mission predicting :spawned for already-open missions
   ;; was the WM scoring a hole that wasn't there — pilot cycle #1, 2026-06-10.)
-  ;; Target-sensitive ordinal v2: N/(1+N), normalized at N=3. This remains
-  ;; bounded but never collapses every N>=6 mission to the same prediction.
-  ;; It is an ordinal hypothesis, not a calibrated click-success probability.
-  (let [f (advance-mission-ordinal-factor open-hole-count)]
+  ;; Enriched live actions carry the judge's normalized tension × centrality ×
+  ;; non-progress decay. Unenriched callers retain the ordinal hole-count
+  ;; model for compatibility.
+  (let [f (mission-value-factor action)]
     {:obs-delta {:mission-health (* 0.04 f)
                  :sorry-count-norm (* -0.05 f)}
      :obs-variance {:mission-health 0.015
@@ -175,12 +193,13 @@
    :events [{:entity-id target :type :cascade-applied :weight weight}]})
 
 (defmethod predict-effects :fire-pattern
-  [_state {:keys [target weight] :or {weight 1.0}}]
+  [_state {:keys [target weight] :or {weight 1.0} :as action}]
   ;; firing a pattern raises ticks-firing-ratio and shifts the target
   ;; toward :strengthened
-  {:obs-delta {:ticks-firing-ratio 0.05}
-   :obs-variance {:ticks-firing-ratio 0.02}
-   :events [{:entity-id target :type :strengthened :weight weight}]})
+  (let [f (mission-value-factor action)]
+    {:obs-delta {:ticks-firing-ratio (* 0.05 f)}
+     :obs-variance {:ticks-firing-ratio 0.02}
+     :events [{:entity-id target :type :strengthened :weight (* weight f)}]}))
 
 (defmethod predict-effects :learn-action-class
   [_state _action]

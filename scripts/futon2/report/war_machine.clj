@@ -830,6 +830,105 @@
                      (structural-pressure-for-action action ctx)))
             candidates))))
 
+(def ^:private non-progress-decay-k 1.0)
+
+(defn- previous-selection-non-progress?
+  [action prev-trace-record]
+  (let [previous-action (get-in prev-trace-record [:decision :action])
+        target (:target action)
+        same-selection? (and (= :advance-mission (:type previous-action))
+                             (= target (:target previous-action)))
+        target-mu-pre (get-in prev-trace-record [:mu-pre target])
+        target-mu-post (get-in prev-trace-record [:mu-post target])
+        mu-moved? (not= target-mu-pre target-mu-post)
+        outcome (or (:outcome prev-trace-record)
+                    (get-in prev-trace-record [:enactment :outcome])
+                    (get-in prev-trace-record [:realized-outcome :outcome]))]
+    (and same-selection?
+         (or (not mu-moved?)
+             (not= :grounded-change outcome)))))
+
+(defn- consecutive-non-progress-count
+  [action prev-trace-record]
+  (if (previous-selection-non-progress? action prev-trace-record)
+    (inc (long (or (get-in prev-trace-record
+                           [:decision :action :non-progress-count])
+                   0)))
+    0))
+
+(defn- positive-double [x]
+  (when (number? x)
+    (max 0.0 (double x))))
+
+(defn- normalized-value [raw max-raw]
+  (when (number? raw)
+    (if (pos? (double max-raw))
+      (/ (double raw) (double max-raw))
+      0.0)))
+
+(defn enrich-candidates-with-mission-value
+  "Attach strategic value signals to mission and pattern candidates.
+
+  All substrate reads happen here, at the judge boundary. Mission value is the
+  normalized product of phase tension and load-bearing centrality, decayed
+  after a repeated non-progress selection. Pattern value uses the normalized
+  retrieval score. Actions missing their required substrate signal are left
+  unenriched so the pure forward model's compatibility fallback applies."
+  [candidates prev-trace-record]
+  (let [centrality (centrality-joint-map)
+        mission-idx (mission-doc-index)
+        delta-cache (atom {})
+        with-raw-value
+        (mapv
+         (fn [action]
+           (case (:type action)
+             :advance-mission
+             (let [target (action-target-key (:target action))
+                   endpoint (get mission-idx (normalize-mission-id target))
+                   delta-result (when endpoint
+                                  (or (get @delta-cache endpoint)
+                                      (let [result (compute-delta-t-mission endpoint)]
+                                        (swap! delta-cache assoc endpoint result)
+                                        result)))
+                   tension (positive-double (:mission-T delta-result))
+                   load-bearing (positive-double (get centrality target))]
+               (cond-> action
+                 (and (some? tension) (some? load-bearing))
+                 (assoc :tension tension
+                        :centrality load-bearing
+                        ::raw-mission-value (* tension load-bearing))))
+
+             :fire-pattern
+             (if-some [retrieval-value (positive-double (:retrieval-score action))]
+               (assoc action ::raw-pattern-value retrieval-value)
+               action)
+
+             action))
+         candidates)
+        max-mission-value (reduce max 0.0 (keep ::raw-mission-value with-raw-value))
+        max-pattern-value (reduce max 0.0 (keep ::raw-pattern-value with-raw-value))]
+    (mapv
+     (fn [action]
+       (let [raw-mission (::raw-mission-value action)
+             raw-pattern (::raw-pattern-value action)
+             non-progress-count (if (some? raw-mission)
+                                  (consecutive-non-progress-count
+                                   action prev-trace-record)
+                                  0)
+             non-progress? (pos? non-progress-count)
+             decay (if non-progress?
+                     (/ 1.0 (+ 1.0 (* non-progress-decay-k
+                                      non-progress-count)))
+                     1.0)
+             normalized (or (normalized-value raw-mission max-mission-value)
+                            (normalized-value raw-pattern max-pattern-value))]
+         (cond-> (dissoc action ::raw-mission-value ::raw-pattern-value)
+           (some? raw-mission) (assoc :non-progress-decay decay
+                                      :non-progress? non-progress?
+                                      :non-progress-count non-progress-count)
+           (some? normalized) (assoc :mission-value-factor (* normalized decay)))))
+     with-raw-value)))
+
 (defn- apply-anamnesis-tiebreak
   [ranked-actions]
   (if (< (count ranked-actions) 2)
@@ -4034,6 +4133,8 @@
                            3)
         wm-enriched-candidates (->> wm-candidates
                                     enrich-candidates-with-structural-pressure
+                                    (#(enrich-candidates-with-mission-value
+                                       % prev-trace-record))
                                     ;; M-interest-network-coupling capstone:
                                     ;; bias candidates by the lived interest posterior
                                     interest-net/enrich-candidates)
