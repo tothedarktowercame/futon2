@@ -4,10 +4,69 @@
    Tests the pure data transformation functions — arrow-health,
    observation vector, and data shape contracts — without requiring
    live APIs or git repos."
-  (:require [clojure.java.shell]
+  (:require [babashka.http-client :as http]
+            [clojure.java.shell]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.efe :as efe]
             [futon2.report.war-machine :as wm]))
+
+(deftest futon1b-edn-mission-index-enables-strategic-enrichment-test
+  (let [body (pr-str
+              {:hyperedges
+               [{:hx/type "code/v05/mission-doc"
+                 :hx/endpoints ["repo-d/mission/alpha"]
+                 :hx/props (pr-str {"mission/id" "M-alpha"
+                                    "mission/phase" "head"})}
+                {:hx/type "code/v05/mission-doc"
+                 :hx/ends [{:entity-id "repo-d/mission/beta"}]
+                 :hx/props {:mission/id "M-beta"
+                            :mission/phase "derive"}}]})
+        candidates [{:type :advance-mission :target "M-alpha"
+                     :open-hole-count 4}
+                    {:type :advance-mission :target "M-beta"
+                     :open-hole-count 4}]
+        state {:observation {:mission-health 0.3 :sorry-count-norm 0.85}
+               :belief {}}]
+    (with-redefs-fn
+      {#'http/get (fn [_url _opts] {:status 200 :body body})
+       #'wm/centrality-joint-map (fn [] {"M-alpha" 0.8 "M-beta" 0.4})
+       #'wm/compute-delta-t-mission
+       (fn [endpoint]
+         {:mission-T (if (= endpoint "repo-d/mission/alpha") 1.0 0.7)})}
+      (fn []
+        (let [hxs (#'wm/fetch-hyperedges-by-type "code/v05/mission-doc")
+              mission-idx (#'wm/mission-doc-index)
+              enriched (wm/enrich-candidates-with-mission-value candidates nil)
+              factors (mapv :mission-value-factor enriched)
+              gs (mapv #(-> (efe/compute-efe state %) :G-efe) enriched)]
+          (is (= 2 (count hxs)))
+          (is (map? (:hx/props (first hxs)))
+              "EDN-string props normalize to a map")
+          (is (= ["repo-d/mission/beta"] (:hx/endpoints (second hxs)))
+              "structured :hx/ends normalize to string endpoints")
+          (is (= {"alpha" "repo-d/mission/alpha"
+                  "beta" "repo-d/mission/beta"}
+                 mission-idx))
+          (is (every? some? factors))
+          (is (apply distinct? factors))
+          (is (apply distinct? gs)))))))
+
+(deftest futon1b-edn-r12-apparatus-reader-test
+  (let [body (pr-str
+              {:hyperedges
+               [{:hx/type "code/v05/wm-hyperparameter-update"
+                 :hx/endpoints ["wm-class:advance-mission" "run:1"]
+                 :hx/props (pr-str {:class :advance-mission
+                                    :alpha-post 3.0
+                                    :beta-post 2.0
+                                    :intrinsic-value-post 0.67
+                                    :as-of "2026-07-17T12:00:00Z"})}]})]
+    (with-redefs [http/get (fn [_url _opts] {:status 200 :body body})]
+      (let [result (wm/scan-r12-apparatus)]
+        (is (true? (:available? result)))
+        (is (= 1 (:total-records result)))
+        (is (= 0.67 (get-in result [:per-class :advance-mission
+                                    :intrinsic-value])))))))
 
 (deftest morning-brief-events-use-live-belief-update-and-hold-unknown-entities
   (let [prior {"known" {:spawned (/ 1.0 7) :refined (/ 1.0 7)

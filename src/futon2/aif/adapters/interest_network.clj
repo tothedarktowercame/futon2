@@ -16,7 +16,9 @@
             [clojure.edn :as edn]))
 
 (def ^:private f1a (or (System/getenv "FUTON_SUBSTRATE_URL")
-                       (System/getenv "FUTON1A_URL") "http://127.0.0.1:7071"))
+                       (System/getenv "FUTON1B_URL")
+                       (System/getenv "FUTON1A_URL")
+                       "http://127.0.0.1:7073"))
 (def ^:private w-finish 0.15)   ; hand-set (Q4), tunable
 (def ^:private w-real   0.6)    ; hand-set (Q4), tunable
 

@@ -2,8 +2,9 @@
   "Backend-neutral semantic client for the authoritative substrate store.
 
   The public operations deliberately expose graph meanings, not XTDB query or
-  transaction forms. FUTON_SUBSTRATE_URL is canonical; FUTON1A_URL and
-  FUTON1A_BASE_URL remain read-only compatibility inputs during migration."
+  transaction forms. FUTON_SUBSTRATE_URL is canonical; FUTON1B_URL is the
+  deployment-specific fallback. FUTON1A_URL and FUTON1A_BASE_URL remain
+  read-only compatibility inputs during migration."
   (:require [babashka.http-client :as http]
             [clojure.edn :as edn]
             [clojure.string :as str])
@@ -22,9 +23,10 @@
    (strip-api-suffix
     (or (:substrate-url opts)
         (System/getenv "FUTON_SUBSTRATE_URL")
+        (System/getenv "FUTON1B_URL")
         (System/getenv "FUTON1A_URL")
         (System/getenv "FUTON1A_BASE_URL")
-        "http://127.0.0.1:7071"))))
+        "http://127.0.0.1:7073"))))
 
 (defn- api-url [opts path]
   (str (configured-url opts) "/api/alpha" path))
@@ -36,6 +38,15 @@
   (if (string? body)
     (edn/read-string {:default (fn [_tag v] v)} body)
     body))
+
+(defn- normalize-hyperedge [hx]
+  (let [props (:hx/props hx)
+        endpoints (or (:hx/endpoints hx)
+                      (some->> (:hx/ends hx) (keep :entity-id) vec))]
+    (cond-> hx
+      (string? props)
+      (assoc :hx/props (or (try (parse-body props) (catch Throwable _ nil)) {}))
+      endpoints (assoc :hx/endpoints endpoints))))
 
 (defn- request!
   [method url opts body]
@@ -101,16 +112,27 @@
      (f type)
      (let [url (str (api-url opts "/hyperedges") "?type=" (encode type)
                     "&limit=" (long (or (:limit opts) 10000)))]
-       (:hyperedges (request! :get url opts nil))))))
+       (mapv normalize-hyperedge
+             (:hyperedges (request! :get url opts nil)))))))
 
 (defn hyperedges-by-end
+  "Return hyperedges touching END by fetching explicit `:type`/`:types`
+  families and filtering locally. Futon1b does not serve the former `?end=`
+  route; callers must bound the families they intend to inspect."
   ([end] (hyperedges-by-end end {}))
   ([end opts]
    (if-let [f (:hyperedges-by-end-fn opts)]
      (f end)
-     (let [url (str (api-url opts "/hyperedges") "?end=" (encode end)
-                    "&limit=" (long (or (:limit opts) 10000)))]
-       (:hyperedges (request! :get url opts nil))))))
+     (let [types (vec (or (:types opts)
+                          (when-some [type (:type opts)] [type])))]
+       (when-not (seq types)
+         (throw (ex-info "hyperedges-by-end requires :type or :types on Futon1b"
+                         {:end end})))
+       (->> types
+            (mapcat #(hyperedges-by-type % opts))
+            (filter (fn [hx]
+                      (some #{end} (:hx/endpoints hx))))
+            vec)))))
 
 (defn relations
   ([filters] (relations filters {}))

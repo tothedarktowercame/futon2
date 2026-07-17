@@ -83,7 +83,10 @@
 (def ^:private vsatarcs-status-script
   (str home "/code/futon4/scripts/build-invariant-state-projection.bb"))
 (def ^:private futon1a-url
-  (or (System/getenv "FUTON1A_URL") "http://localhost:7071"))
+  (or (System/getenv "FUTON_SUBSTRATE_URL")
+      (System/getenv "FUTON1B_URL")
+      (System/getenv "FUTON1A_URL")
+      "http://localhost:7073"))
 (def ^:private futon1a-penholder
   (or (System/getenv "FUTON1A_PENHOLDER") "api"))
 (def ^:private g-total-tie-epsilon 1.0e-6)
@@ -651,14 +654,33 @@
       :bundle bundle
       :opts opts})))
 
-(defn- substrate-get-json [url]
+(defn- parse-substrate-edn [body]
+  (cond
+    (map? body) body
+    (string? body) (try (clojure.edn/read-string body)
+                        (catch Exception _ nil))
+    :else nil))
+
+(defn- normalize-hyperedge
+  [hx]
+  (let [props (:hx/props hx)
+        endpoints (or (:hx/endpoints hx)
+                      (some->> (:hx/ends hx) (keep :entity-id) vec))]
+    (cond-> hx
+      (string? props)
+      (assoc :hx/props (or (try (clojure.edn/read-string props)
+                                (catch Exception _ nil))
+                            {}))
+      endpoints (assoc :hx/endpoints endpoints))))
+
+(defn- substrate-get-edn [url]
   (try
-    (let [resp (http/get url {:headers {"Accept" "application/json"
+    (let [resp (http/get url {:headers {"Accept" "application/edn"
                                         "X-Penholder" futon1a-penholder}
-                              :timeout 5000
+                              :timeout 20000
                               :throw false})]
       (when (= 200 (:status resp))
-        (json/parse-string (:body resp) true)))
+        (parse-substrate-edn (:body resp))))
     (catch Exception _ nil)))
 
 (defn- url-encode [s]
@@ -666,24 +688,32 @@
 
 (defn- fetch-hyperedges-by-type
   [hx-type]
-  (vec
-   (or (:hyperedges
-        (substrate-get-json
-         (str futon1a-url "/api/alpha/hyperedges?type="
-              (url-encode hx-type)
-              "&limit=500")))
-       [])))
+  (try
+    (mapv normalize-hyperedge
+          (or (:hyperedges
+               (substrate-get-edn
+                (str futon1a-url "/api/alpha/hyperedges?type="
+                     (url-encode hx-type)
+                     "&limit=500")))
+              []))
+    (catch Exception _ [])))
 
 (defn- real-endpoints
   [hx]
   (vec (remove #(and (string? %) (str/starts-with? % "dir:"))
-               (:hx/endpoints hx))))
+               (or (:hx/endpoints hx)
+                   (some->> (:hx/ends hx) (keep :entity-id))))))
 
 (defn- hx-prop
   [hx k]
-  (or (get-in hx [:hx/props k])
-      (get-in hx [:hx/props (keyword k)])
-      (get-in hx [:hx/props (str k)])))
+  (let [string-key (if (keyword? k)
+                     (if-let [ns-part (namespace k)]
+                       (str ns-part "/" (name k))
+                       (name k))
+                     (str k))]
+    (or (get-in hx [:hx/props k])
+        (get-in hx [:hx/props (keyword string-key)])
+        (get-in hx [:hx/props string-key]))))
 
 (defn- normalize-mission-id
   [mission-name]
@@ -4508,48 +4538,35 @@
 ;; ---------------------------------------------------------------------------
 
 (def ^:private wm-hp-update-type "code/v05/wm-hyperparameter-update")
-(def ^:private futon1a-base
-  (or (some-> (or (System/getenv "FUTON_SUBSTRATE_URL")
-                  (System/getenv "FUTON1A_URL"))
-              (str "/api/alpha"))
-      (System/getenv "FUTON1A_BASE_URL")
-      "http://localhost:7071/api/alpha"))
-
 (defn scan-r12-apparatus
   "Query XTDB for wm-hyperparameter-update hyperedges; return per-class
    latest Beta posterior + intrinsic-value + emission/follow-through counts.
-   v1."
+  v1."
   []
   (try
-    (let [url (str futon1a-base "/hyperedges?type=" wm-hp-update-type "&limit=200")
-          resp (http/get url {:headers {"Accept" "application/json"}
-                              :timeout 5000 :throw false})]
-      (if (= 200 (:status resp))
-        (let [body (json/parse-string (:body resp) true)
-              hxs (or (:hyperedges body) [])
-              ;; Group by class; pick latest by :as-of per class
-              by-class (group-by #(get-in % [:hx/props :class]) hxs)
-              per-class (into {}
-                              (for [[c class-hxs] by-class
-                                    :when c
-                                    :let [latest (last (sort-by #(get-in % [:hx/props :as-of])
-                                                                class-hxs))
-                                          p (:hx/props latest)]]
-                                [c {:alpha (:alpha-post p)
-                                    :beta (:beta-post p)
-                                    :intrinsic-value (:intrinsic-value-post p)
-                                    :n-emissions (:n-emissions-in-window p)
-                                    :n-followthrough (:n-followthrough-in-window p)
-                                    :n-followthrough-observed (:n-followthrough-observed p)
-                                    :substrate-status (:substrate-status p)
-                                    :window-days (:window-days p)
-                                    :as-of (:as-of p)
-                                    :outer-loop-run-id (:outer-loop-run-id p)}]))]
-          {:available? true
-           :per-class per-class
-           :total-records (count hxs)
-           :class-count (count per-class)})
-        {:available? false :error (str "HTTP " (:status resp))}))
+    (let [hxs (fetch-hyperedges-by-type wm-hp-update-type)
+          ;; Group by class; pick latest by :as-of per class.
+          by-class (group-by #(get-in % [:hx/props :class]) hxs)
+          per-class (into {}
+                          (for [[c class-hxs] by-class
+                                :when c
+                                :let [latest (last (sort-by #(get-in % [:hx/props :as-of])
+                                                            class-hxs))
+                                      p (:hx/props latest)]]
+                            [c {:alpha (:alpha-post p)
+                                :beta (:beta-post p)
+                                :intrinsic-value (:intrinsic-value-post p)
+                                :n-emissions (:n-emissions-in-window p)
+                                :n-followthrough (:n-followthrough-in-window p)
+                                :n-followthrough-observed (:n-followthrough-observed p)
+                                :substrate-status (:substrate-status p)
+                                :window-days (:window-days p)
+                                :as-of (:as-of p)
+                                :outer-loop-run-id (:outer-loop-run-id p)}]))]
+      {:available? true
+       :per-class per-class
+       :total-records (count hxs)
+       :class-count (count per-class)})
     (catch Exception e
       {:available? false :error (.getMessage e)})))
 
