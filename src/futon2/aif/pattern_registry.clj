@@ -22,17 +22,29 @@
   (:import (java.security MessageDigest)
            (java.time LocalDate ZoneId)))
 
-(def ^:private default-evidence-base
-  (or (System/getenv "FUTON3C_EVIDENCE_BASE")
-      (System/getenv "FUTON3C_SERVER")
-      (str "http://localhost:" (or (System/getenv "FUTON3C_PORT") "7070"))))
+(defn configured-evidence-base
+  "Resolve the Evidence Landscape authority used for retrieval receipts.
+
+   A deployment-local server/port takes precedence over the externally
+   advertised evidence base: hosts behind NAT cannot necessarily hairpin to
+   their own public address. The local route uses IPv4 loopback because the
+   production http-kit listener is IPv4-bound; resolving `localhost` to `::1`
+   otherwise makes a live pattern substrate appear absent. The map arity is
+   the pure configuration seam used by tests."
+  ([] (configured-evidence-base (System/getenv)))
+  ([env]
+   (or (get env "FUTON3C_SERVER")
+       (when-let [port (get env "FUTON3C_PORT")]
+         (str "http://127.0.0.1:" port))
+       (get env "FUTON3C_EVIDENCE_BASE")
+       "http://127.0.0.1:7070")))
 
 (def ^:private default-timezone
   (ZoneId/of "Europe/London"))
 
 (def ^:private default-lookback-days 2)
-(def ^:private default-fetch-limit 50)
-(def ^:private default-http-timeout-ms 10000)
+(def ^:private default-fetch-limit 500)
+(def ^:private default-http-timeout-ms 30000)
 (def ^:private default-top-k 3)
 
 (def ^:dynamic *pattern-library-root*
@@ -114,9 +126,10 @@
    Options:
    - :evidence-base  base URL (default configured futon3c Evidence Landscape)
    - :lookback-days  inclusive lower bound in whole days (default 2)
-   - :limit          request limit (default 50)"
+   - :limit          request limit (default 500; bounded to survive ordinary
+                     coordination traffic between retrieval receipts)"
   [& {:keys [evidence-base lookback-days limit]
-      :or {evidence-base default-evidence-base
+      :or {evidence-base (configured-evidence-base)
            lookback-days default-lookback-days
            limit default-fetch-limit}}]
   (let [params [(str "since=" (since-date-str lookback-days))
