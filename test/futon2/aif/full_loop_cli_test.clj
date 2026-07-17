@@ -1,5 +1,6 @@
 (ns futon2.aif.full-loop-cli-test
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.edn :as edn]
+            [clojure.test :refer [deftest is]]
             [clojure.string :as str]
             [futon2.aif.full-loop-cli :as cli]
             [futon2.aif.full-loop-runner :as runner]
@@ -150,6 +151,67 @@
       (is (str/includes? rendered "Look for: an observable behavior"))
       (is (str/includes? rendered
                          "clojure -M:wm-full-loop review attempt-qa joe")))))
+
+(deftest feature-acceptance-renders-honest-build-time-gaps-without-card
+  (with-redefs [brief/items (fn [] [qa-item])
+                brief/reviews (constantly [])]
+    (let [sheet (-> "attempt-qa" cli/attempt-brief cli/feature-acceptance)
+          rendered (cli/render-feature-acceptance sheet)]
+      (is (= :not-rendered (get-in sheet [:sorry :status])))
+      (is (= :not-rendered (get-in sheet [:wiring :status])))
+      (is (= :pending (get-in sheet [:feature :status])))
+      (is (= :renderer-generated-evidence
+             (get-in sheet [:things-to-try :source])))
+      (is (str/includes? rendered
+                         "not rendered for this attempt ⟵ build-time gap"))
+      (is (str/includes? rendered "build-time feature card pending"))
+      (is (str/includes? rendered
+                         "git -C /code/example show --stat abc123"))
+      (doseq [section ["1. HEADER" "2. SELECTED MISSION" "3. THE CASCADE"
+                       "4. THE SORRY / PROOF-HOLE"
+                       "5. WIRING DIAGRAM (FOLD BOXES/WIRES)"
+                       "6. LOGIC PROOF"
+                       "7. THE FEATURE — DOES IT MATCH INTENT?"
+                       "8. THINGS TO TRY" "9. VERDICT"]]
+        (is (str/includes? rendered section))))))
+
+(deftest feature-acceptance-renders-card-authored-sections-and-fold
+  (let [fold-file (java.io.File/createTempFile "feature-fold-" ".executed.edn")
+        _ (spit fold-file
+                (pr-str {:boxes [{:id :sense} {:id :act}]
+                         :want-coverage [:observe :learn :reuse]}))
+        card {:built "A deterministic capability-graph ingest command"
+              :want-coverage "missions become reusable capability evidence"
+              :matches-intent? true
+              :things-to-try ["clojure -M -m ingest --help"
+                              "clojure -M:test ingest-test"]
+              :fold-ref (.getPath fold-file)
+              :proof-ref "logic/witness-22.edn"}
+        item (assoc qa-item :feature-card card)]
+    (try
+      (with-redefs [brief/items (fn [] [item])
+                    brief/reviews (constantly [])]
+        (let [attempt-view (cli/attempt-brief "attempt-qa")
+              sheet (cli/feature-acceptance attempt-view)
+              rendered (cli/render-feature-acceptance sheet)
+              edn-output (with-redefs [cli/attempt-brief (constantly attempt-view)]
+                           (with-out-str
+                             (#'cli/run-command!
+                              ["feature" "attempt-qa" "--format" "edn"])))
+              round-tripped (edn/read-string edn-output)]
+          (is (= :rendered-from-feature-card
+                 (get-in sheet [:sorry :status])))
+          (is (= :discovered (get-in sheet [:wiring :status])))
+          (is (= 2 (get-in sheet [:wiring :box-count])))
+          (is (= 3 (get-in sheet [:wiring :want-coverage-magnitude])))
+          (is (= :linked (get-in sheet [:logic-proof :behavioral :status])))
+          (is (= (:built card) (get-in sheet [:feature :built])))
+          (is (= (:things-to-try card) (get-in sheet [:things-to-try :steps])))
+          (is (str/includes? rendered (:built card)))
+          (is (str/includes? rendered "logic/witness-22.edn"))
+          (is (= sheet round-tripped))))
+      (finally
+        (.delete fold-file)))))
 
 (deftest completed-click-prints-its-operator-qa-document
   (with-redefs [runner/run-opportunity!

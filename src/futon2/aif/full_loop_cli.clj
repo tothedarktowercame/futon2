@@ -1,6 +1,9 @@
 (ns futon2.aif.full-loop-cli
   "Operator entrypoint for real War Machine ticks and durée clicks."
-  (:require [clojure.pprint :as pp]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
+            [clojure.pprint :as pp]
             [clojure.string :as str]
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.full-loop-runner :as runner]
@@ -78,7 +81,8 @@
   (-> (select-keys item [:attempt-id :selected-target :outcome
                          :author :reviewer :commit :queued-at
                          :selection-review :achievement :failure
-                         :repair-history :qa-targets :pending-objectives])
+                         :repair-history :qa-targets :pending-objectives
+                         :feature-card])
       (assoc :witness
              (select-keys (:witness item)
                           [:resolved? :dial-moved?
@@ -177,11 +181,238 @@
        " (G=" (fmt G-efe) ")"))
 
 (defn- artifact-repository [item]
-  (or (get-in item [:achievement :adjudication :after
+  (or (get-in item [:achievement :build :validation :artifact-binding :repo])
+      (get-in item [:achievement :adjudication :after
                     :implementation-entity :props
                     :implementation/repository])
       (get-in item [:achievement :adjudication :after
                     :implementation-entity :props :repository])))
+
+(defn- recursive-key-value [value target-key]
+  (cond
+    (map? value) (or (get value target-key)
+                     (some #(recursive-key-value % target-key) (vals value)))
+    (sequential? value) (some #(recursive-key-value % target-key) value)
+    :else nil))
+
+(defn- coverage-magnitude [coverage]
+  (cond
+    (number? coverage) coverage
+    (or (map? coverage) (coll? coverage)) (count coverage)
+    (nil? coverage) nil
+    :else coverage))
+
+(defn- resolve-artifact-ref [repo ref]
+  (when (and ref (not (str/blank? (str ref))))
+    (let [file (io/file (str ref))]
+      (.getPath (if (or (.isAbsolute file) (nil? repo))
+                  file
+                  (io/file repo (str ref)))))))
+
+(defn- inferred-fold-ref [attempt]
+  (when-let [mission-path (get-in attempt [:selection-review :selected-action
+                                           :mission-path])]
+    (str/replace mission-path #"\.md$" ".executed.edn")))
+
+(defn- fold-summary [attempt]
+  (let [card (:feature-card attempt)
+        repo (artifact-repository attempt)
+        ref (resolve-artifact-ref repo (or (:fold-ref card)
+                                           (inferred-fold-ref attempt)))]
+    (if (and ref (.isFile (io/file ref)))
+      (try
+        (let [fold (edn/read-string (slurp ref))
+              boxes (recursive-key-value fold :boxes)
+              box-count (or (recursive-key-value fold :box-count)
+                            (when (coll? boxes) (count boxes)))
+              coverage (recursive-key-value fold :want-coverage)]
+          {:status :discovered
+           :ref ref
+           :box-count box-count
+           :want-coverage coverage
+           :want-coverage-magnitude (coverage-magnitude coverage)})
+        (catch Exception e
+          {:status :unreadable
+           :ref ref
+           :note (str "executed fold unreadable: " (.getMessage e))}))
+      {:status :not-rendered
+       :ref ref
+       :note "not rendered ⟵ build-time gap"})))
+
+(defn- command-line? [line]
+  (boolean
+   (re-find #"^(?:clojure|bb|lein|lake|npm|pnpm|yarn|cargo|pytest|python -m pytest|make)\b"
+            line)))
+
+(defn- author-cited-commands [repo commit]
+  (if (and repo commit)
+    (try
+      (let [{:keys [exit out]} (shell/sh "git" "-C" repo "show" "-s"
+                                         "--format=%B" commit)]
+        (if (zero? exit)
+          (->> (str/split-lines out)
+               (mapcat (fn [line]
+                         (let [trimmed (-> line str/trim
+                                           (str/replace #"^[-*]\s+" ""))
+                               quoted (map second (re-seq #"`([^`]+)`" line))]
+                           (cons trimmed quoted))))
+               (filter command-line?)
+               distinct
+               vec)
+          []))
+      (catch Exception _ []))
+    []))
+
+(defn feature-acceptance
+  "Assemble one attempt's feature-acceptance sheet as EDN data. Missing
+  build-time feature evidence remains an explicit gap."
+  [{:keys [attempt]}]
+  (let [selection (:selection-review attempt)
+        candidates (or (:ranked-candidates selection)
+                       (:ranked-candidates attempt))
+        validation (get-in attempt [:achievement :build :validation])
+        binding (:artifact-binding validation)
+        card (:feature-card attempt)
+        repo (or (:repo binding) (artifact-repository attempt))
+        commit (:commit attempt)
+        authored-commands (author-cited-commands repo commit)
+        generated-commands (cond-> []
+                             (and repo commit)
+                             (conj (str "git -C " repo " show --stat " commit)))
+        dial-moved? (or (get-in attempt [:achievement :discharge :dial :moved?])
+                        (get-in attempt [:achievement :adjudication :dial :moved?])
+                        (get-in attempt [:witness :dial-moved?]))]
+    {:feature-acceptance/schema-version 1
+     :attempt-id (:attempt-id attempt)
+     :header
+     {:shipped (or (:built card) (get-in attempt [:achievement :summary]))
+      :repo repo
+      :commit commit
+      :author {:id (:author attempt)
+               :executed? (get-in validation [:author :executed])
+               :tool-events (get-in validation [:author :tool-events])}
+      :reviewer {:id (:reviewer attempt)
+                 :executed? (get-in validation [:reviewer :executed])
+                 :tool-events (get-in validation [:reviewer :tool-events])
+                 :review-job (:review-job validation)
+                 :approved? (:approved? validation)}
+      :grounding {:dial-moved? dial-moved?}}
+     :selected-mission
+     {:target (:selected-target attempt)
+      :rank (selected-rank selection)
+      :candidate-count (count candidates)
+      :note (get-in selection [:selected-action :rationale])
+      :rank-context "calibration context only; rank is not the feature verdict"}
+     :cascade
+     {:patterns-used (get-in attempt [:achievement :build :patterns-used])}
+     :sorry
+     (if card
+       {:status :rendered-from-feature-card
+        :want-coverage (:want-coverage card)}
+       {:status :not-rendered
+        :note "not rendered for this attempt ⟵ build-time gap"})
+     :wiring (fold-summary attempt)
+     :logic-proof
+     {:behavioral (if-let [proof-ref (:proof-ref card)]
+                    {:status :linked :ref proof-ref}
+                    {:status :not-rendered
+                     :note "not rendered ⟵ build-time gap"})
+      :artifact-binding (select-keys binding
+                                     [:repo :commit :fresh-author?
+                                      :descendant? :in-author-window?])
+      :grounding-witness (select-keys (:witness attempt)
+                                      [:resolved? :dial-moved?
+                                       :implementation-id :discharge-id])}
+     :feature
+     (if card
+       {:status :rendered-from-feature-card
+        :built (:built card)
+        :want-coverage (:want-coverage card)
+        :matches-intent? (:matches-intent? card)}
+       {:status :pending
+        :note "build-time feature card pending"})
+     :things-to-try
+     (if card
+       {:source :feature-card
+        :steps (vec (:things-to-try card))}
+       {:source :renderer-generated-evidence
+        :steps (vec (concat generated-commands authored-commands))
+        :author-cited-steps authored-commands
+        :note "authored try-it steps not rendered ⟵ build-time gap"})
+     :verdict {:options [:accept-feature :accept-with-follow-ups :reject]}}))
+
+(defn render-feature-acceptance
+  "Render feature-acceptance EDN as the nine-section operator sheet."
+  [sheet]
+  (let [{:keys [header selected-mission cascade sorry wiring logic-proof
+                feature things-to-try]} sheet
+        lines (atom [(str "QA — " (:attempt-id sheet) " · Feature Acceptance")])
+        add! #(swap! lines conj %)]
+    (add! (str "Shipped: " (fmt (:shipped header))))
+    (add! (str "Repo/commit: " (fmt (:repo header)) " @ " (fmt (:commit header))))
+    (add! (str "Author: " (fmt (get-in header [:author :id]))
+               " | executed=" (fmt (get-in header [:author :executed?]))
+               " | tool-events=" (fmt (get-in header [:author :tool-events]))))
+    (add! (str "Reviewer: " (fmt (get-in header [:reviewer :id]))
+               " | executed=" (fmt (get-in header [:reviewer :executed?]))
+               " | tool-events=" (fmt (get-in header [:reviewer :tool-events]))
+               " | approved=" (fmt (get-in header [:reviewer :approved?]))))
+    (add! (str "Grounding: dial moved=" (fmt (get-in header [:grounding
+                                                               :dial-moved?]))))
+    (add! "")
+    (add! "1. HEADER")
+    (add! (str "  Review job: " (fmt (get-in header [:reviewer :review-job]))))
+    (add! "")
+    (add! "2. SELECTED MISSION")
+    (add! (str "  " (fmt (:target selected-mission)) " — rank "
+               (fmt (:rank selected-mission)) " of "
+               (fmt (:candidate-count selected-mission))))
+    (add! (str "  " (fmt (:note selected-mission))))
+    (add! (str "  " (:rank-context selected-mission)))
+    (add! "")
+    (add! "3. THE CASCADE")
+    (doseq [pattern (:patterns-used cascade)]
+      (add! (str "  - " pattern)))
+    (when-not (seq (:patterns-used cascade)) (add! "  —"))
+    (add! "")
+    (add! "4. THE SORRY / PROOF-HOLE")
+    (if (= :rendered-from-feature-card (:status sorry))
+      (add! (str "  Want coverage: " (fmt (:want-coverage sorry))))
+      (add! (str "  " (:note sorry))))
+    (add! "")
+    (add! "5. WIRING DIAGRAM (FOLD BOXES/WIRES)")
+    (if (= :discovered (:status wiring))
+      (do
+        (add! (str "  Fold: " (:ref wiring)))
+        (add! (str "  Boxes: " (fmt (:box-count wiring))
+                   " | want-coverage magnitude: "
+                   (fmt (:want-coverage-magnitude wiring)))))
+      (add! (str "  " (:note wiring)
+                 (when (:ref wiring) (str " (looked for " (:ref wiring) ")")))))
+    (add! "")
+    (add! "6. LOGIC PROOF")
+    (if (= :linked (get-in logic-proof [:behavioral :status]))
+      (add! (str "  Behavioural proof: " (get-in logic-proof [:behavioral :ref])))
+      (add! (str "  Behavioural proof: " (get-in logic-proof [:behavioral :note]))))
+    (add! (str "  Artifact binding: " (pr-str (:artifact-binding logic-proof))))
+    (add! (str "  Grounding witness: " (pr-str (:grounding-witness logic-proof))))
+    (add! "")
+    (add! "7. THE FEATURE — DOES IT MATCH INTENT?")
+    (if (= :rendered-from-feature-card (:status feature))
+      (do
+        (add! (str "  Built: " (fmt (:built feature))))
+        (add! (str "  Want coverage: " (fmt (:want-coverage feature))))
+        (add! (str "  Matches intent? " (fmt (:matches-intent? feature)))))
+      (add! (str "  " (:note feature))))
+    (add! "")
+    (add! "8. THINGS TO TRY")
+    (doseq [step (:steps things-to-try)]
+      (add! (str "  - " step " [" (name (:source things-to-try)) "]")))
+    (when-let [note (:note things-to-try)] (add! (str "  " note)))
+    (add! "")
+    (add! "9. VERDICT")
+    (add! "  ▢ accept feature  ▢ accept with follow-ups  ▢ reject")
+    (str/join "\n" @lines)))
 
 (defn- inspection-lines [item objective]
   (let [selection (:selection-review item)
@@ -385,6 +616,7 @@
        "  tick [--author zai-5 --reviewer codex-7 --repair-reviewer codex-1]\n"
        "  continuous [--count N] [--interval-seconds N] [agent options]\n"
        "  brief [--attempt-id ID | --batch-id ID] [--format text|edn]\n"
+       "  feature ATTEMPT-ID [--format text|edn]\n"
        "  review ATTEMPT-ID [REVIEWER]\n"
        "  qa ATTEMPT-ID OBJECTIVE ANSWER NOTE [REVIEWER]\n\n"
        "once is an on-demand durée click; continuous emits sequential durée "
@@ -434,6 +666,19 @@
                                   :reviews (brief/reviews)
                                   :valid-belief-entity-ids
                                   (vec (sort-by str (keys (:mu-post record))))}))))
+      "feature" (let [[attempt-id & option-args] rest
+                      flags (option-map option-args)
+                      format (get flags :format "text")]
+                  (when-not attempt-id
+                    (throw (ex-info "feature requires ATTEMPT-ID"
+                                    {:args rest})))
+                  (when-not (#{"text" "edn"} format)
+                    (throw (ex-info "feature --format must be text or edn"
+                                    {:format format})))
+                  (let [sheet (feature-acceptance (attempt-brief attempt-id))]
+                    (if (= "edn" format)
+                      (print-value sheet)
+                      (println (render-feature-acceptance sheet)))))
       "review" (let [[attempt-id reviewer & extra] rest]
                  (when (or (seq extra) (nil? attempt-id))
                    (throw (ex-info "review requires ATTEMPT-ID [REVIEWER]"
