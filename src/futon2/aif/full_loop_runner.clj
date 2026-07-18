@@ -577,17 +577,24 @@
 (defn- text-feature-card [job]
   ;; Parse only the bytes Agency promises to preserve. This both tolerates
   ;; newline squashing after a complete card and rejects a map whose closing
-  ;; brace fell beyond the durable prefix, rather than mistaking later text for
-  ;; part of the claim.
-  (let [text (job-text job)]
-    (if-let [idx (str/index-of text feature-card-marker)]
-      (let [end (min (count text) (+ idx feature-card-durable-limit))
-            payload (subs text (+ idx (count feature-card-marker)) end)]
+  ;; brace fell beyond the durable prefix. Only :result-summary is authoritative
+  ;; here: job-text also contains terminal messages and event prose that may
+  ;; quote the marker without being the author's replayable response prefix.
+  (let [text (:result-summary job)]
+    (cond
+      (str/blank? text)
+      {:reason :missing-marker :source :text}
+
+      (not (str/starts-with? text feature-card-marker))
+      {:reason :marker-not-at-durable-prefix :source :text}
+
+      :else
+      (let [end (min (count text) feature-card-durable-limit)
+            payload (subs text (count feature-card-marker) end)]
         (try
           {:card (edn/read-string payload) :source :text}
           (catch Exception _
-            {:reason :truncated-or-over-durable-limit :source :text})))
-      {:reason :missing-marker :source :text})))
+            {:reason :truncated-or-over-durable-limit :source :text}))))))
 
 (defn- feature-card-validation [job]
   (let [{:keys [card source] :as candidate}

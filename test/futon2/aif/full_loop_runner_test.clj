@@ -218,6 +218,20 @@
            (:reason (#'runner/feature-card-validation
                      {:feature-card empty-steps}))))))
 
+(deftest text-feature-card-must-be-the-durable-response-prefix
+  (let [card (str "FULL_LOOP_FEATURE_CARD: "
+                  "{:built \"prefix authority\" :want-coverage \"no echoes\" "
+                  ":matches-intent? true :things-to-try [\"tests -> green\"]}")]
+    (is (= :marker-not-at-durable-prefix
+           (:reason (#'runner/feature-card-validation
+                     {:result-summary (str "Completed work. " card)}))))
+    (is (= :missing-marker
+           (:reason (#'runner/feature-card-validation
+                     {:terminal-message card}))))
+    (is (= :missing-marker
+           (:reason (#'runner/feature-card-validation
+                     {:events [{:type "done" :text card}]}))))))
+
 (deftest fresh-author-cure-rebinds-against-a-fresh-pre-cure-snapshot
   ;; Review finding on the cure loop: the first implementation passed the
   ;; original binding's bare :pre-dispatch-head sha where fresh-artifact-binding
@@ -1439,7 +1453,7 @@
     (is (= :build-failed (:outcome result)))
     (is (= :feature-card-missing-or-invalid
            (get-in result [:data :failure-kind])))
-    (is (= :missing-marker
+    (is (= :marker-not-at-durable-prefix
            (get-in result [:data :feature-card-invalid-reason])))
     (is (= :text
            (get-in result [:data :feature-card-source])))
