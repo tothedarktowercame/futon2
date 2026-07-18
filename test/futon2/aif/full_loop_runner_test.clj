@@ -2,6 +2,7 @@
   (:require [babashka.http-client :as http]
             [cheshire.core :as json]
             [clojure.java.io :as io]
+            [clojure.string :as str]
             [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.full-loop-cli :as cli]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
@@ -70,7 +71,7 @@
   {:executed true :tool-events 3 :command-events 3})
 
 (defn- run-feature-card-attempt
-  [{:keys [author-card grounded? artifacts? reviewer-execution]
+  [{:keys [author-card author-summary grounded? artifacts? reviewer-execution]
     :or {grounded? true artifacts? false}}]
   (let [root (.toFile (java.nio.file.Files/createTempDirectory
                        "wm-feature-card-" (make-array java.nio.file.attribute.FileAttribute 0)))
@@ -110,7 +111,8 @@
                (fn [_ job-id]
                  (if (= job-id "feature-author")
                    (cond-> {:job-id job-id :state "done" :artifact-ref commit
-                            :result-summary (str "FULL_LOOP_AUTHOR: DONE " commit)
+                            :result-summary (or author-summary
+                                                (str "FULL_LOOP_AUTHOR: DONE " commit))
                             :execution successful-execution}
                      author-card (assoc :feature-card author-card))
                    {:job-id job-id :state "done"
@@ -133,6 +135,28 @@
         result (runner/run-opportunity! opts)]
     {:result result :item (first @queued)
      :fold-file fold-file :proof-file proof-file}))
+
+(deftest agency-prefix-contract-preserves-a-text-feature-card
+  (let [summary (str "FULL_LOOP_FEATURE_CARD: "
+                     "{:built \"compact repair\" :want-coverage \"card survives\" "
+                     ":matches-intent? true :things-to-try [\"feature id -> card\"]}\n"
+                     "FULL_LOOP_AUTHOR: DONE feature123")
+        durable-prefix (subs summary 0 (min 200 (count summary)))
+        {:keys [result item]}
+        (run-feature-card-attempt {:author-summary durable-prefix})]
+    (is (<= (count (first (str/split-lines summary))) 200))
+    (is (= :grounded-change (:outcome result)))
+    (is (= "compact repair" (get-in item [:feature-card :built])))
+    (is (= ["feature id -> card"]
+           (get-in item [:feature-card :things-to-try])))))
+
+(deftest author-contract-names-the-durable-feature-card-boundary
+  (let [prompt (#'runner/author-prompt
+                {:author "author" :reviewer "reviewer"}
+                "target" {:id "target"} {} [])]
+    (is (re-find #"BEGIN your response with one compact" prompt))
+    (is (re-find #"at most 200 characters" prompt))
+    (is (re-find #"closing brace is inside the 200-character limit" prompt))))
 
 (deftest grounded-author-feature-card-is-persisted-and-rendered
   (let [{:keys [result item fold-file proof-file]}
