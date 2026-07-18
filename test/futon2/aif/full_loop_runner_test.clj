@@ -189,6 +189,50 @@
     (is (= ["runner tests -> green"]
            (get-in item [:feature-card :things-to-try])))))
 
+(deftest fresh-author-cure-rebinds-against-a-fresh-pre-cure-snapshot
+  ;; Review finding on the cure loop: the first implementation passed the
+  ;; original binding's bare :pre-dispatch-head sha where fresh-artifact-binding
+  ;; expects a {:head :observed-at-ms} snapshot, silently degrading cured
+  ;; commits to narrated artifact-refs. Pin the repaired contract: a FRESH
+  ;; snapshot is taken before the cure dispatch, handed to the observer, and
+  ;; the returned binding (not the stale one) rides the cured author-job.
+  (let [observer-calls (atom [])
+        good-card (str "FULL_LOOP_FEATURE_CARD: "
+                       "{:built \"cure\" :want-coverage \"bound\" "
+                       ":matches-intent? true :things-to-try [\"a -> b\"]}")
+        opts {:build-cure-retries 1
+              :phase-log (str (System/getProperty "java.io.tmpdir")
+                              "/cure-rebind-test-phase.log")
+              :repo-head-observation-fn
+              (fn [repo] {:repo repo :head "fresh-head" :observed-at-ms 42})
+              :author-artifact-observer-fn
+              (fn [repo before job]
+                (swap! observer-calls conj {:repo repo :before before :job job})
+                {:fresh-author? true :repo repo :commit "cured123"})
+              :dispatch-fn (fn [& _] {:job-id "cure-1"})
+              :poll-fn (fn [_ _] {:job-id "cure-1" :state "done"
+                                  :artifact-ref "cured123"
+                                  :result-summary
+                                  (str good-card "\nFULL_LOOP_AUTHOR: DONE cured123")})
+              :resolve-build-fn (fn [_] {:repo "/repo" :files ["src/x.clj"]})}
+        result (#'runner/build-cure-loop
+                opts {} "author-x" (atom 0)
+                "target-x" "orig123" "/repo" ["src/x.clj"]
+                {:job-id "author-1" :state "done"
+                 :result-summary "FULL_LOOP_AUTHOR: DONE orig123"}
+                true
+                {:repo "/repo" :pre-dispatch-head "stale-sha"})]
+    (is (= 1 (count @observer-calls)))
+    (is (= {:repo "/repo" :head "fresh-head" :observed-at-ms 42}
+           (select-keys (:before (first @observer-calls))
+                        [:repo :head :observed-at-ms]))
+        "the observer must receive a fresh snapshot map, never the stale sha")
+    (is (= "cured123" (:commit result)))
+    (is (= "cured123" (get-in result [:author-job :repo-observed-artifact-ref])))
+    (is (= "cured123" (get-in result [:author-job :artifact-binding :commit]))
+        "the cured author-job carries the NEW binding, not the stale one")
+    (is (true? (get-in result [:build-retries 0 :cured?])))))
+
 (deftest author-contract-names-the-durable-feature-card-boundary
   (let [prompt (#'runner/author-prompt
                 {:author "author" :reviewer "reviewer"}

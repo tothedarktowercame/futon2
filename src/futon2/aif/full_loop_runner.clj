@@ -732,7 +732,7 @@
   (str author ": FULL-LOOP BUILD CURE. Your previous author turn for selected "
        "target " (pr-str target) " produced a mechanically-detectable build "
        "failure that you can cure with a corrected re-emission.\n\n"
-       "ORIGINAL COMMIT: " (str original-commit) "\n"
+       "ORIGINAL COMMIT: " original-commit "\n"
        "EXACT VALIDATION ERROR: " error-message "\n"
        (when (= :feature-card-missing-or-invalid failure-kind)
          (str "DURABLE PREFIX TEXT (job-text) the runner extracted from your "
@@ -854,6 +854,12 @@
                 job-prefix-text (job-text author-job)
                 cure-prompt (build-cure-prompt author target commit error-message
                                                failure job-prefix-text)
+                ;; Fresh pre-cure snapshot: the original pre-dispatch window
+                ;; cannot bind a commit made during the cure turn, and
+                ;; fresh-artifact-binding needs the {:head :observed-at-ms}
+                ;; map, not the bare sha the first binding recorded.
+                cure-pre-head (when fresh-author?
+                                (observe-repo-head opts (:repo artifact-binding)))
                 cure-response
                 (run-phase! opts phase-context :build-cure-dispatch
                             #(do
@@ -866,12 +872,12 @@
                             #((or (:poll-fn opts) poll-job!) opts cure-job-id))
                 ;; Re-resolve the build: the commit may have changed.
                 cure-artifact-ref (:artifact-ref cure-job)
-                cure-observed (when (and fresh-author? cure-artifact-ref)
-                                (:commit (fresh-artifact-binding
-                                          opts
-                                          (:repo artifact-binding)
-                                          (:pre-dispatch-head artifact-binding)
-                                          cure-job)))
+                cure-binding (when fresh-author?
+                               (fresh-artifact-binding opts
+                                                       (:repo artifact-binding)
+                                                       cure-pre-head
+                                                       cure-job))
+                cure-observed (:commit cure-binding)
                 new-commit (or cure-observed cure-artifact-ref commit)
                 new-build (when (and new-commit (not= new-commit commit))
                             ((or (:resolve-build-fn opts) resolve-build)
@@ -881,7 +887,7 @@
                 new-author-job (cond-> cure-job
                                  (and fresh-author? cure-observed)
                                  (assoc :repo-observed-artifact-ref cure-observed
-                                        :artifact-binding artifact-binding))
+                                        :artifact-binding cure-binding))
                 ;; Re-run the same validations to determine if cured.
                 still-failing? (build-cure-validation new-files new-author-job
                                                        new-commit target)
