@@ -13,7 +13,13 @@
    HONESTY: this is a learned habit/frequency prior, not evidence that a policy
    is good. v1 uses α=1 and no recency decay. Abstentions and malformed trace
    decisions add no count. The dark arena wiring must replace—not add to—the
-   caller-supplied structural-pressure bias when enabled.")
+   caller-supplied structural-pressure bias when enabled.
+
+   POLICY: capability repair preempts mission work only when the capability is
+   a live prerequisite for useful mission enactment. Frequency alone cannot
+   establish that fact. Selection gain g and the prior's alpha/decay/span set
+   the numerical prior-vs-G balance; the optional span cap is default-off, and
+   flipping its default requires an explicit operator (Joe) decision.")
 
 (def default-alpha 1.0)
 (def state-version 1)
@@ -82,6 +88,15 @@
   ([records] (fold-records (initial-state) records))
   ([state records] (reduce fold-record (coerce-state state) records)))
 
+(defn state-stats
+  "Compact sufficient statistics for selection-time decision explanations."
+  [state]
+  (let [{:keys [alpha counts samples recency-decay]} (coerce-state state)]
+    {:class-count (count counts)
+     :samples samples
+     :alpha alpha
+     :recency-decay recency-decay}))
+
 (defn log-priors
   "Return a vector of ln posterior-predictive probabilities aligned with
    `actions`. Historical counts supply the concentrations; normalization is
@@ -104,11 +119,46 @@
           candidate-keys)))
 
 (defn attach-log-priors
-  "Replace candidate `:habit-prior-bias` values with learned ln E(π)."
-  [state ranked-actions]
-  (let [biases (log-priors state (mapv :action ranked-actions))]
-    (mapv (fn [entry bias]
-            (assoc entry
-                   :habit-prior-bias bias
-                   :habit-prior-source :learned-frequency))
-          ranked-actions biases)))
+  "Replace candidate `:habit-prior-bias` values with learned ln E(π).
+
+   The two-arity form is the historical/default behavior. The optional
+   `:span-ratio-cap` bounds range(ln E) to R × range(G), preserving ordering
+   and the prior maximum while compressing its span. This makes the
+   prior-vs-G balance arena-configurable without silently changing today's
+   policy. The cap is DEFAULT-OFF; changing that default is an operator (Joe)
+   decision."
+  ([state ranked-actions]
+   (let [biases (log-priors state (mapv :action ranked-actions))]
+     (mapv (fn [entry bias]
+             (assoc entry
+                    :habit-prior-bias bias
+                    :habit-prior-source :learned-frequency))
+           ranked-actions biases)))
+  ([state ranked-actions {:keys [span-ratio-cap]}]
+   (if (nil? span-ratio-cap)
+     (attach-log-priors state ranked-actions)
+     (let [ratio (double span-ratio-cap)
+           _ (when-not (and (Double/isFinite ratio) (not (neg? ratio)))
+               (throw (ex-info "habit-prior span-ratio-cap must be finite and nonnegative"
+                               {:span-ratio-cap span-ratio-cap})))
+           raw-biases (log-priors state (mapv :action ranked-actions))
+           g-values (mapv (comp double :controller-score) ranked-actions)
+           g-span (if (seq g-values)
+                    (- (apply max g-values) (apply min g-values))
+                    0.0)
+           bias-span (if (seq raw-biases)
+                       (- (apply max raw-biases) (apply min raw-biases))
+                       0.0)
+           allowed-span (* ratio g-span)
+           scale (if (pos? bias-span)
+                   (min 1.0 (/ allowed-span bias-span))
+                   1.0)
+           bias-max (if (seq raw-biases) (apply max raw-biases) 0.0)
+           biases (mapv #(+ bias-max (* scale (- (double %) bias-max)))
+                        raw-biases)]
+       (mapv (fn [entry bias]
+               (assoc entry
+                      :habit-prior-bias bias
+                      :habit-prior-source :learned-frequency
+                      :habit-prior-span-ratio-cap ratio))
+             ranked-actions biases)))))

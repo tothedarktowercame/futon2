@@ -138,6 +138,41 @@
       (is (< (:tau out) (:tau-spread out)) "g=2 lowered the effective τ")
       (is (= 2.0 (:selection-gain out))))))
 
+(deftest attempt-023-decision-explanation-is-legible-test
+  (let [top-mission {:type :advance-mission
+                     :target "M-expressions-of-interest"
+                     :central 0.8 :strategic 0.7 :doable 0.9
+                     :mission-value-factor 0.786}
+        ranked [{:action top-mission :controller-score 31.754
+                 :habit-prior-bias -5.2204 :rank 1}
+                {:action {:type :advance-mission :target "M-learning-loop"
+                          :central 0.4 :strategic 0.5 :doable 0.6
+                          :mission-value-factor 0.51}
+                 :controller-score 32.166 :habit-prior-bias -2.3300 :rank 40}
+                {:action {:type :learn-action-class :target-class :fire-pattern}
+                 :controller-score 32.837 :habit-prior-bias -1.2130 :rank 109}
+                {:action {:type :no-op}
+                 :controller-score 33.337 :habit-prior-bias -5.2204 :rank 114}]
+        stats {:class-count 13 :samples 787 :alpha 1.0 :recency-decay :none}
+        out (policy/select-action
+             ranked {:selection-gain 1.0
+                     :temperature-opts {:tau-mode :selection-gain-only}
+                     :habit-prior-stats stats})
+        explanation (:decision-explanation out)]
+    (is (= :fire-pattern (get-in out [:action :target-class])))
+    (is (= :habit-prior (:governed-by explanation)))
+    (is (= 1.0 (:tau-effective explanation)))
+    (is (= :selection-gain-only (:tau-mode explanation)))
+    (is (= stats (:habit-prior-stats explanation)))
+    (is (= 109 (get-in explanation [:winner :rank])))
+    (is (= 1 (get-in explanation [:top-G :rank])))
+    (is (= 0.786
+           (get-in explanation [:top-mission-value-factor
+                                :mission-value-factor])))
+    (is (= 0.8 (get-in explanation [:top-mission-value-factor :central])))
+    (is (> (get-in explanation [:span-diagnostics :range-lnE])
+           (get-in explanation [:span-diagnostics :range-G])))))
+
 ;; ---------------------------------------------------------------------------
 ;; select-action — abstain branch
 ;; ---------------------------------------------------------------------------

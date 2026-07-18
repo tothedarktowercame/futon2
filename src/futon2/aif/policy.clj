@@ -157,6 +157,61 @@
        :gap-report []
        :source :default-mode})))
 
+(defn- numeric-range [xs]
+  (let [xs (mapv double xs)]
+    (if (seq xs)
+      (let [lo (apply min xs)
+            hi (apply max xs)]
+        {:min lo :max hi :range (- hi lo)})
+      {:min 0.0 :max 0.0 :range 0.0})))
+
+(defn- candidate-explanation [entry idx tau ln-e]
+  (let [action (:action entry)
+        g (double (:controller-score entry))
+        neg-g-over-tau (/ (- g) (double tau))]
+    (merge {:action (select-keys action [:type :target :target-class])
+            :rank (or (:rank entry) (inc idx))
+            :G g
+            :neg-G-over-tau neg-g-over-tau
+            :lnE (double ln-e)
+            :habit-prior-bias (double ln-e)
+            :total-score (+ neg-g-over-tau (double ln-e))}
+           (select-keys action [:central :strategic :doable
+                                :mission-value-factor]))))
+
+(defn- decision-explanation
+  [ranked-actions chosen-idx tau selection-gain temperature-opts log-priors
+   habit-prior-stats]
+  (let [candidates (mapv (fn [idx entry ln-e]
+                           (candidate-explanation entry idx tau ln-e))
+                         (range)
+                         ranked-actions
+                         log-priors)
+        top-g (apply min-key :G candidates)
+        mission-candidates (filterv #(number? (:mission-value-factor %)) candidates)
+        top-mission-value (when (seq mission-candidates)
+                            (apply max-key :mission-value-factor mission-candidates))
+        winner (nth candidates chosen-idx)
+        g-span (numeric-range (mapv :G candidates))
+        ln-e-span (numeric-range (mapv :lnE candidates))
+        scaled-g-span (numeric-range (mapv :neg-G-over-tau candidates))]
+    {:winner winner
+     :top-G top-g
+     :top-mission-value-factor top-mission-value
+     :tau-mode (get temperature-opts :tau-mode :spread)
+     :tau-effective (double tau)
+     :selection-gain (double selection-gain)
+     :habit-prior-stats (or habit-prior-stats
+                            {:class-count 0 :samples 0})
+     :span-diagnostics {:G g-span
+                        :lnE ln-e-span
+                        :neg-G-over-tau scaled-g-span
+                        :range-G (:range g-span)
+                        :range-lnE (:range ln-e-span)}
+     ;; A prior that changes the argmin-G winner governed the actual choice;
+     ;; an aligned prior may have a wide span without deciding the winner.
+     :governed-by (if (= winner top-g) :G :habit-prior)}))
+
 (defn select-action
   "Top-level action selection.
 
@@ -171,6 +226,19 @@
      :selection-gain — g, the R14 learned inverse-temperature
                         (`futon2.aif.selection-gain`). τ_eff = τ_spread / g.
                         Default 1.0 ⇒ behaviour identical to the spread-only path.
+     :habit-prior-stats — optional sufficient-statistic summary for the
+                          decision explanation; it never changes selection.
+
+   Capability-gap preemption policy: a `:learn-action-class` repair may
+   preempt mission work only when the proposal/admissibility layers establish
+   a live, addressable capability gap whose repair is prerequisite to useful
+   mission enactment—the analogue of livelihood preempting cascade work.
+   Frequency (`ln E`) is habit, not evidence that a capability is broken.
+   The selector compares all admitted actions at the common
+   `-G/τ_eff + ln E` seam; operators control prior-vs-G authority through
+   selection gain `g` and the habit prior's alpha/decay/span policy. The live
+   arena's optional span cap is deliberately default-off: changing that
+   default is an operator decision, not an implementation-side rebalance.
 
    Returns one of:
 
@@ -192,7 +260,8 @@
    - :no-op is present AND (no-op.controller-score − best.controller-score) < ε
      (i.e. the best action isn't meaningfully better than doing nothing)."
   ([ranked-actions] (select-action ranked-actions {}))
-  ([ranked-actions {:keys [abstain-epsilon temperature-opts selection-gain]
+  ([ranked-actions {:keys [abstain-epsilon temperature-opts selection-gain
+                           habit-prior-stats]
                     :or {abstain-epsilon 0.01
                          temperature-opts {}
                          selection-gain 1.0}}]
@@ -231,13 +300,17 @@
               :ranked-actions ranked-actions}
              (let [tau-spread (adaptive-temperature g-totals temperature-opts)
                    tau (effective-temperature g-totals selection-gain temperature-opts)
-                   weights (softmax-weights g-totals tau)]
+                   weights (softmax-weights g-totals tau)
+                   explanation (decision-explanation
+                                ranked-actions 0 tau selection-gain
+                                temperature-opts log-priors habit-prior-stats)]
                {:action (:action best)
                 :rank 1
                 :controller-score best-g
                 :tau tau
                 :tau-spread tau-spread
                 :selection-gain (double selection-gain)
+                :decision-explanation explanation
                 :softmax-weights (zipmap (mapv :action ranked-actions) weights)})))
          (let [tau-spread (adaptive-temperature g-totals temperature-opts)
                tau (effective-temperature g-totals selection-gain temperature-opts)
@@ -254,7 +327,10 @@
               :reason :no-action-beats-no-op
               :gap-report (gap-report ranked-actions)
               :ranked-actions ranked-actions}
-             (let [weights (softmax-weights g-totals tau log-priors)]
+             (let [weights (softmax-weights g-totals tau log-priors)
+                   explanation (decision-explanation
+                                ranked-actions chosen-idx tau selection-gain
+                                temperature-opts log-priors habit-prior-stats)]
                {:action (:action chosen)
                 :rank (:rank chosen)
                 :controller-score chosen-g
@@ -262,5 +338,6 @@
                 :tau-spread tau-spread
                 :selection-gain (double selection-gain)
                 :habit-prior-applied? true
+                :decision-explanation explanation
                 :softmax-weights (zipmap (mapv :action ranked-actions)
                                          weights)}))))))))

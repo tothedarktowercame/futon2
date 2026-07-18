@@ -266,6 +266,27 @@
     :caller
     :learned-frequency))
 
+(defn arena-habit-prior-span-ratio-cap
+  "Optional F1 commensurability dial. When
+   `FUTON_WM_HABIT_PRIOR_SPAN_RATIO_CAP=R` is set to a finite nonnegative
+   number, learned lnE is compressed so range(lnE) <= R * range(G) before
+   selection. Unset means nil and takes the historical attach-log-priors path
+   byte-for-byte. This is an enabling dial, not a policy flip: changing its
+   default is an operator (Joe) decision."
+  []
+  (when-let [raw (not-empty
+                  (str/trim
+                   (or (System/getenv "FUTON_WM_HABIT_PRIOR_SPAN_RATIO_CAP")
+                       "")))]
+    (let [ratio (try
+                  (Double/parseDouble raw)
+                  (catch NumberFormatException _ Double/NaN))]
+      (when-not (and (Double/isFinite ratio) (not (neg? ratio)))
+        (throw (ex-info
+                "FUTON_WM_HABIT_PRIOR_SPAN_RATIO_CAP must be finite and nonnegative"
+                {:value raw})))
+      ratio)))
+
 (defn- arena-predictability-control-mode
   "Typed-residual remediation (2026-07-13): predictability is retained as
    telemetry but no longer ranks policies; it is an affine duplicate of the
@@ -323,21 +344,23 @@
    the arena opts (wm-efe-opts, rollout-snapshot-under-weights) pass neither;
    if a lane ever starts passing them, build this map from those same opts."
   []
-  {:risk-mode (arena-risk-mode)
-   :ambiguity-mode (arena-ambiguity-mode)
-   :goal-outcome-mode (arena-goal-outcome-mode)
-   :likelihood-mode (arena-likelihood-mode)
-   :belief-model-manifest (belief/model-manifest)
-   :salience-mode (arena-salience-mode)
-   :tau-mode (arena-tau-mode)
-   :structural-pressure-mode (arena-structural-pressure-mode)
-   :habit-prior-source (arena-habit-prior-source)
-   :predictability-control-mode (arena-predictability-control-mode)
-   :homeostatic-control-mode (arena-homeostatic-control-mode)
-   :graph-feasibility-mode (arena-graph-feasibility-mode)
-   :move-class-intensity-mode (arena-move-class-intensity-mode)
-   :kl-channel-weights efe/default-kl-channel-weights
-   :c-temperature pref/default-c-temperature})
+  (let [span-cap (arena-habit-prior-span-ratio-cap)]
+    (cond-> {:risk-mode (arena-risk-mode)
+             :ambiguity-mode (arena-ambiguity-mode)
+             :goal-outcome-mode (arena-goal-outcome-mode)
+             :likelihood-mode (arena-likelihood-mode)
+             :belief-model-manifest (belief/model-manifest)
+             :salience-mode (arena-salience-mode)
+             :tau-mode (arena-tau-mode)
+             :structural-pressure-mode (arena-structural-pressure-mode)
+             :habit-prior-source (arena-habit-prior-source)
+             :predictability-control-mode (arena-predictability-control-mode)
+             :homeostatic-control-mode (arena-homeostatic-control-mode)
+             :graph-feasibility-mode (arena-graph-feasibility-mode)
+             :move-class-intensity-mode (arena-move-class-intensity-mode)
+             :kl-channel-weights efe/default-kl-channel-weights
+             :c-temperature pref/default-c-temperature}
+      (some? span-cap) (assoc :habit-prior-span-ratio-cap span-cap))))
 
 (def ^:private mission-api-timeout-ms
   ;; The substrate-backed mission endpoint can take several seconds while it
@@ -4052,6 +4075,7 @@
              (catch Exception _ nil))
         structural-pressure-mode (arena-structural-pressure-mode)
         habit-prior-source (arena-habit-prior-source)
+        habit-prior-span-ratio-cap (arena-habit-prior-span-ratio-cap)
         _habit-mode-coherence
         (when (and (= :learned-frequency habit-prior-source)
                    (not= :habit-prior structural-pressure-mode))
@@ -4308,8 +4332,12 @@
         wm-ranked-domain-base (efe/rank-actions wm-state wm-enriched-candidates wm-efe-opts)
         wm-policy-exclusions (-> wm-ranked-domain-base meta :policy-support/excluded)
         wm-ranked-domain (if (= :learned-frequency habit-prior-source)
-                           (habit-prior/attach-log-priors habit-prior-pre
-                                                         wm-ranked-domain-base)
+                           (if (some? habit-prior-span-ratio-cap)
+                             (habit-prior/attach-log-priors
+                              habit-prior-pre wm-ranked-domain-base
+                              {:span-ratio-cap habit-prior-span-ratio-cap})
+                             (habit-prior/attach-log-priors habit-prior-pre
+                                                           wm-ranked-domain-base))
                            wm-ranked-domain-base)
         wm-ranked (->> wm-ranked-domain
                        apply-anamnesis-tiebreak
@@ -4340,6 +4368,9 @@
         wm-decision (try (policy/select-action
                           wm-admissible
                           {:selection-gain selection-gain-value
+                           :habit-prior-stats
+                           (when habit-prior-pre
+                             (habit-prior/state-stats habit-prior-pre))
                            ;; B-2d τ-layer separation — arena-resolved; the live
                            ;; default is :selection-gain-only (see resolver).
                            :temperature-opts {:tau-mode (arena-tau-mode)}})
