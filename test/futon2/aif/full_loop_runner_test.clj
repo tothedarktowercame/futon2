@@ -210,10 +210,20 @@
 (deftest feature-card-validation-requires-replayable-observations
   (let [bad-step (assoc feature-card-claim
                         :things-to-try ["run the runner tests"])
+        blank-command (assoc feature-card-claim
+                             :things-to-try [" -> tests pass"])
+        blank-observation (assoc feature-card-claim
+                                 :things-to-try ["run tests -> "])
         empty-steps (assoc feature-card-claim :things-to-try [])]
     (is (= :things-to-try-must-be-observation-shaped
            (:reason (#'runner/feature-card-validation
                      {:feature-card bad-step}))))
+    (is (= :things-to-try-must-be-observation-shaped
+           (:reason (#'runner/feature-card-validation
+                     {:feature-card blank-command}))))
+    (is (= :things-to-try-must-be-observation-shaped
+           (:reason (#'runner/feature-card-validation
+                     {:feature-card blank-observation}))))
     (is (= :things-to-try-must-be-nonempty
            (:reason (#'runner/feature-card-validation
                      {:feature-card empty-steps}))))))

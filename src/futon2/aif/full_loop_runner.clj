@@ -596,6 +596,12 @@
           (catch Exception _
             {:reason :truncated-or-over-durable-limit :source :text}))))))
 
+(defn- observation-shaped-step? [step]
+  (when (string? step)
+    (when-let [arrow (str/index-of step "->")]
+      (and (not (str/blank? (subs step 0 arrow)))
+           (not (str/blank? (subs step (+ arrow 2))))))))
+
 (defn- feature-card-validation [job]
   (let [{:keys [card source] :as candidate}
         (if (contains? job :feature-card)
@@ -616,10 +622,7 @@
       (not (and (sequential? (:things-to-try card))
                 (seq (:things-to-try card))))
       (invalid :things-to-try-must-be-nonempty)
-      (not-every? #(and (string? %)
-                        (not (str/blank? %))
-                        (str/includes? % "->"))
-                  (:things-to-try card))
+      (not-every? observation-shaped-step? (:things-to-try card))
       (invalid :things-to-try-must-be-observation-shaped)
       :else
       {:card (-> (select-keys card feature-card-keys)
