@@ -303,7 +303,7 @@
   [{:keys [agency-base]} agent caller mission prompt]
   (post-json! (str agency-base "/api/alpha/bell")
               {:agent-id agent :caller caller :mission-id (str mission)
-               :type "request" :prompt prompt}))
+               :type "request" :mode "work" :prompt prompt}))
 
 (def terminal-states #{"done" "failed" "cancelled" "timed-out"})
 
@@ -583,6 +583,24 @@
       (-> (select-keys card feature-card-keys)
           (update :things-to-try vec)))))
 
+(def ^:private code-file-pattern
+  #"(?i)\.(?:clj|cljc|cljs|bb|el|lean|py|js|jsx|ts|tsx|java|go|rs|c|cc|cpp|h|hpp|sh)$")
+
+(defn- review-execution-gate [files review-job]
+  (let [code-files (vec (filter #(re-find code-file-pattern (str %)) files))
+        required? (boolean (seq code-files))
+        execution (:execution review-job)
+        executed? (true? (:executed execution))
+        tool-events (long (or (:tool-events execution) 0))
+        passed? (or (not required?)
+                    (and executed? (pos? tool-events)))]
+    {:required? required?
+     :code-files code-files
+     :executed? executed?
+     :tool-events tool-events
+     :passed? passed?
+     :failure-kind (when-not passed? :review-execution-evidence-missing)}))
+
 (defn- reviewer-note [job]
   (or (:reviewer-note job)
       (some-> (re-find #"(?m)^FULL_LOOP_REVIEWER_NOTE:\s*(.+)$"
@@ -707,7 +725,11 @@
        "\n"
        "Inspect the commit rather than trusting the summary. Verify that it is substantive "
        "rather than artifact-only, is in scope for the selected target, preserves invariants, "
-       "and clears the required static checks and relevant tests. Do not edit or commit.\n\n"
+       "and clears the required static checks and relevant tests. Do not edit or commit.\n"
+       "For every code change you MUST execute the repository gates yourself: run clj-kondo "
+       "on every changed .clj/.cljc/.cljs file, run futon4/dev/check-parens.el on every changed "
+       "Lisp/Clojure file, and run the relevant tests in a fresh JVM. Report the exact commands "
+       "and pass/fail results. An APPROVE without executed tool evidence is invalid.\n\n"
        "BEGIN your response with exactly one self-contained verdict line of at most 200 "
        "characters (Agency durably preserves only this response prefix):\n"
        "FULL_LOOP_REVIEW: APPROVE\n"
@@ -1426,6 +1448,16 @@
                 (when (or (empty? files) (artifact-only-files? files))
                   (throw (ex-info "Authored commit is artifact-only"
                                   {:outcome :artifact-only :commit commit :files files})))
+                (when-not (valid-feature-card author-job)
+                  (throw
+                   (ex-info "Author deliverable is missing a valid feature card"
+                            {:outcome :build-failed
+                             :failure-kind :feature-card-missing-or-invalid
+                             :failure-stage :build-resolution
+                             :commit commit
+                             :target target
+                             :files files
+                             :author-job author-job})))
                 (let [artifact-snapshot
                       (when fresh-author?
                         {:artifact-binding/fresh-author? true
@@ -1475,8 +1507,10 @@
                                               :repository repo
                                               :files files})
                                       e)))))
+                      review-gate (review-execution-gate files review-job)
                       approved? (and (= "done" (:state review-job))
-                                     (= :approve (review-verdict review-job)))]
+                                     (= :approve (review-verdict review-job))
+                                     (:passed? review-gate))]
                   (checkpoint! :build
                                (term {:artifacts files
                                       :generated-code files
@@ -1487,18 +1521,25 @@
                                                    :reviewer (:execution review-job)
                                                    :review-job (:job-id review-job)
                                                    :approved? approved?
+                                                   :review-gate review-gate
                                                    :artifact-binding
                                                    artifact-binding}}
                                      {:kind :git-commit-and-independent-review
                                       :repository repo}))
                   (when-not approved?
                     (let [failure-data
-                          {:outcome :build-failed :author-job author-job
+                          (cond->
+                           {:outcome :build-failed :author-job author-job
                            :review-job review-job :commit commit
                            :target target
                            :selected-entry
                            (select-keys entry
                                         [:action :controller-score :G-efe])}
+                            (not (:passed? review-gate))
+                            (assoc :failure-kind
+                                   :review-execution-evidence-missing
+                                   :failure-stage :reviewer-wait
+                                   :review-gate review-gate))
                           recovery-rejection
                           (when (and recovered-review-job
                                      (= :incomplete-recoverable
@@ -1518,7 +1559,9 @@
                                    repair/supersede!)
                                stop-line finding :recovered-review-rejected)
                               finding))]
-                      (throw (ex-info "Independent review did not approve"
+                      (throw (ex-info (if (:passed? review-gate)
+                                        "Independent review did not approve"
+                                        "Independent review lacks execution evidence")
                                       (cond-> failure-data
                                         recovery-rejection
                                         (assoc :repair-obligation

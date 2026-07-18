@@ -66,8 +66,11 @@
    :things-to-try ["clojure -X:test :nses '[futon2.aif.full-loop-runner-test]'"
                    "clojure -M:wm-full-loop feature <attempt-id>"]})
 
+(def successful-execution
+  {:executed true :tool-events 3 :command-events 3})
+
 (defn- run-feature-card-attempt
-  [{:keys [author-card grounded? artifacts?]
+  [{:keys [author-card grounded? artifacts? reviewer-execution]
     :or {grounded? true artifacts? false}}]
   (let [root (.toFile (java.nio.file.Files/createTempDirectory
                        "wm-feature-card-" (make-array java.nio.file.attribute.FileAttribute 0)))
@@ -107,9 +110,11 @@
                (fn [_ job-id]
                  (if (= job-id "feature-author")
                    (cond-> {:job-id job-id :state "done" :artifact-ref commit
-                            :result-summary (str "FULL_LOOP_AUTHOR: DONE " commit)}
+                            :result-summary (str "FULL_LOOP_AUTHOR: DONE " commit)
+                            :execution successful-execution}
                      author-card (assoc :feature-card author-card))
                    {:job-id job-id :state "done"
+                    :execution (or reviewer-execution successful-execution)
                     :result-summary (str "FULL_LOOP_REVIEW: APPROVE\n"
                                          "FULL_LOOP_REVIEWER_NOTE: Replay steps verified.")}))
                :resolve-build-fn
@@ -150,15 +155,30 @@
     (is (nil? (get-in absent-artifacts [:feature-card :fold-ref])))
     (is (nil? (get-in absent-artifacts [:feature-card :proof-ref])))))
 
-(deftest grounded-attempt-without-author-card-remains-fail-open
-  (let [{:keys [result item]} (run-feature-card-attempt {})
-        rendered (-> {:attempt item}
-                     cli/feature-acceptance
-                     cli/render-feature-acceptance)]
-    (is (= :grounded-change (:outcome result)))
+(deftest grounded-attempt-without-author-card-is-an-incomplete-deliverable
+  (let [{:keys [result item]} (run-feature-card-attempt {})]
+    (is (= :build-failed (:outcome result)))
+    (is (= :feature-card-missing-or-invalid
+           (get-in result [:data :failure-kind])))
+    (is (= "feature123" (:commit item)))
     (is (nil? (:feature-card item)))
-    (is (re-find #"not rendered for this attempt ⟵ build-time gap" rendered))
-    (is (re-find #"build-time feature card pending" rendered))))
+    (is (= :partial-authored (get-in item [:achievement :tier])))))
+
+(deftest approving-code-review-without-execution-evidence-is-rejected
+  (let [{:keys [result item]}
+        (run-feature-card-attempt
+         {:author-card feature-card-claim
+          :reviewer-execution {:executed false :tool-events 0 :command-events 0}})
+        gate (get-in result [:checkpoints :build :judgment :validation
+                             :review-gate])]
+    (is (= :build-failed (:outcome result)))
+    (is (= :review-execution-evidence-missing
+           (get-in result [:data :failure-kind])))
+    (is (false? (:passed? gate)))
+    (is (false? (get-in result [:checkpoints :build :judgment :validation
+                                :approved?])))
+    (is (= :review-execution-evidence-missing
+           (get-in item [:failure :kind])))))
 
 (deftest non-grounded-attempt-never-persists-author-card
   (let [{:keys [result item]}
@@ -218,8 +238,11 @@
           :poll-fn (fn [_ job-id]
                      (if (= job-id "author-job")
                        {:job-id job-id :state "done" :artifact-ref "abc123"
+                        :feature-card feature-card-claim
+                        :execution successful-execution
                         :events [{:text "FULL_LOOP_AUTHOR: DONE abc123"}]}
                        {:job-id job-id :state "done"
+                        :execution successful-execution
                         :result-summary "FULL_LOOP_REVIEW: APPROVE\nLooks good."
                         :events [{:type "prompt"
                                   :text "FULL_LOOP_REVIEW: REQUEST_CHANGES"}]}))
@@ -261,6 +284,18 @@
     (is (not (re-find #"FULL_LOOP_REVIEW:\s*APPROVE"
                       (#'runner/job-text job))))))
 
+(deftest agency-dispatch-explicitly-selects-work-mode
+  (let [request (atom nil)]
+    (with-redefs-fn
+      {#'runner/post-json!
+       (fn [url body]
+         (reset! request {:url url :body body})
+         {:job-id "work-job"})}
+      #(runner/dispatch! {:agency-base "http://agency"}
+                         "codex-7" "wm" :target "do the work"))
+    (is (= "work" (get-in @request [:body :mode])))
+    (is (= "request" (get-in @request [:body :type])))))
+
 (deftest reviewer-receives-the-capability-construction-contract
   (let [contract {:construction-kind :capability-gap-repair
                   :selected-action {:type :learn-action-class
@@ -274,7 +309,19 @@
                 {:job-id "author-job"} [])]
     (is (re-find #"CONSTRUCTION CONTRACT" prompt))
     (is (re-find #":capability-gap-repair" prompt))
-    (is (re-find #":action-proposer-registration" prompt))))
+    (is (re-find #":action-proposer-registration" prompt))
+    (is (re-find #"clj-kondo" prompt))
+    (is (re-find #"check-parens\.el" prompt))
+    (is (re-find #"relevant tests in a fresh JVM" prompt))
+    (is (re-find #"Report the exact commands" prompt))))
+
+(deftest code-review-execution-gate-requires-tools-not-just-an-executed-flag
+  (let [gate (#'runner/review-execution-gate
+              ["src/example.clj"]
+              {:execution {:executed true :tool-events 0 :command-events 0}})]
+    (is (:required? gate))
+    (is (false? (:passed? gate)))
+    (is (= :review-execution-evidence-missing (:failure-kind gate)))))
 
 (deftest capability-gap-action-has-a-typed-production-construction
   (with-redefs [cascade/cascade-lane
@@ -347,8 +394,11 @@
                                     "author-job" "review-job")})
           :poll-fn (fn [_ job-id]
                      (if (= job-id "author-job")
-                       {:job-id job-id :state "done" :artifact-ref "fire123"}
+                       {:job-id job-id :state "done" :artifact-ref "fire123"
+                        :feature-card feature-card-claim
+                        :execution successful-execution}
                        {:job-id job-id :state "done"
+                        :execution successful-execution
                         :result-summary "FULL_LOOP_REVIEW: APPROVE"}))
           :resolve-build-fn (fn [_] {:repo "/repo" :files ["src/fire.clj"]})
           :ground-fn (fn [_ _ _ _ _ _ _ construction _ _]
@@ -488,8 +538,11 @@
                                     "author-job" "review-job")})
           :poll-fn (fn [_ job-id]
                      (if (= job-id "author-job")
-                       {:job-id job-id :state "done" :artifact-ref "abc123"}
+                       {:job-id job-id :state "done" :artifact-ref "abc123"
+                        :feature-card feature-card-claim
+                        :execution successful-execution}
                        {:job-id job-id :state "done"
+                        :execution successful-execution
                         :result-summary
                         "FULL_LOOP_REVIEW: REQUEST_CHANGES fail closed"}))
           :resolve-build-fn (fn [_] {:repo "/repo" :files ["src/real.clj"]})
@@ -535,8 +588,11 @@
            :poll-fn
            (fn [_ job-id]
              (if (= job-id "author-job")
-               {:job-id job-id :state "done" :artifact-ref "narrated123"}
+               {:job-id job-id :state "done" :artifact-ref "narrated123"
+                :feature-card feature-card-claim
+                :execution successful-execution}
                {:job-id job-id :state "done"
+                :execution successful-execution
                 :result-summary "FULL_LOOP_REVIEW: APPROVE"}))
            :resolve-build-fn
            (fn [commit]
@@ -794,8 +850,11 @@
                                     "author-job" "review-job")})
           :poll-fn (fn [_ job-id]
                      (if (= job-id "author-job")
-                       {:job-id job-id :state "done" :artifact-ref "good456"}
+                       {:job-id job-id :state "done" :artifact-ref "good456"
+                        :feature-card feature-card-claim
+                        :execution successful-execution}
                        {:job-id job-id :state "done"
+                        :execution successful-execution
                         :result-summary "FULL_LOOP_REVIEW: APPROVE"}))
           :resolve-build-fn (fn [_] {:repo "/repo" :files ["src/real.clj"]})
           :ground-fn (fn [& _]
@@ -955,6 +1014,8 @@
           :read-job-fn (fn [_ job-id]
                          {:job-id job-id :state "done"
                           :artifact-ref "late123"
+                          :feature-card feature-card-claim
+                          :execution successful-execution
                           :result-summary "FULL_LOOP_AUTHOR: DONE late123"})
           :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
                               :codex-7 {:status "idle" :invoke-ready? true}
@@ -974,6 +1035,7 @@
             {:job-id "review-job"})
           :poll-fn (fn [_ job-id]
                      {:job-id job-id :state "done"
+                      :execution successful-execution
                       :result-summary "FULL_LOOP_REVIEW: APPROVE"})
           :resolve-build-fn (fn [_] {:repo "/repo" :files ["src/real.clj"]})
           :ground-fn (fn [& _]
@@ -993,7 +1055,9 @@
   (let [dispatches (atom [])
         resolutions (atom [])
         author-job {:job-id "author-job" :state "done"
-                    :artifact-ref "late123"}
+                    :artifact-ref "late123"
+                    :feature-card feature-card-claim
+                    :execution successful-execution}
         stop-line {:repair/id "repair-attempt-007-review-recovery"
                    :repair/status :open
                    :repair/class :incomplete-recoverable
@@ -1014,6 +1078,7 @@
                                (swap! resolutions conj [obligation resolution]))
           :read-job-fn (fn [_ job-id]
                          {:job-id job-id :state "done"
+                          :execution successful-execution
                           :result-summary "FULL_LOOP_REVIEW: APPROVE"})
           :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
                               :codex-7 {:status "idle" :invoke-ready? true}
@@ -1111,7 +1176,9 @@
 (deftest recovered-review-rejection-hands-line-to-one-review-finding
   (let [findings (atom [])
         supersessions (atom [])
-        author-job {:job-id "author-job" :state "done" :artifact-ref "bad123"}
+        author-job {:job-id "author-job" :state "done" :artifact-ref "bad123"
+                    :feature-card feature-card-claim
+                    :execution successful-execution}
         stop-line {:repair/id "repair-review-wait" :repair/status :open
                    :repair/class :incomplete-recoverable
                    :attempt-id "attempt-review-wait"
@@ -1124,6 +1191,7 @@
                 {:repair-open-fn (constantly [stop-line])
                  :read-job-fn
                  (fn [& _] {:job-id "rejecting-review" :state "done"
+                            :execution successful-execution
                             :result-summary
                             "FULL_LOOP_REVIEW: REQUEST_CHANGES\nreal defect"})
                  :resolve-build-fn
