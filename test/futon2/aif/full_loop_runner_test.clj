@@ -175,14 +175,19 @@
   ;; Observed on attempt-026: the durable prefix replaced the author's newline
   ;; with a space, leaving trailing prose ON the card line. The parser must
   ;; read the one EDN form and ignore what follows.
-  (let [squashed (str "FULL_LOOP_FEATURE_CARD: "
-                      "{:built \"Durable compact author-card contract\" "
-                      ":want-coverage \"Cards survive Agency prefix\" "
-                      ":matches-intent? true "
-                      ":things-to-try [\"runner tests -> green\"]} "
-                      "Repaired the Agency ")
+  (let [author-response
+        (str "FULL_LOOP_FEATURE_CARD: "
+             "{:built \"Durable compact author-card contract\" "
+             ":want-coverage \"Cards survive Agency prefix\" "
+             ":matches-intent? true "
+             ":things-to-try [\"runner tests -> green\"]} "
+             "Repaired the Agency 200-character prefix contract and added "
+             "regression coverage for the full-loop runner.")
+        squashed (subs author-response 0 200)
         {:keys [result item]}
         (run-feature-card-attempt {:author-summary squashed})]
+    (is (= 200 (count squashed)))
+    (is (str/ends-with? squashed "Repaired the Agency "))
     (is (= :grounded-change (:outcome result)))
     (is (= "Durable compact author-card contract"
            (get-in item [:feature-card :built])))

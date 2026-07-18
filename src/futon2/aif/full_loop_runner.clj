@@ -574,6 +574,11 @@
 (def ^:private feature-card-marker "FULL_LOOP_FEATURE_CARD:")
 (def ^:private feature-card-durable-limit 200)
 
+(defn- read-first-edn-form [payload]
+  (with-open [reader (java.io.PushbackReader.
+                      (java.io.StringReader. payload))]
+    (edn/read {:eof nil} reader)))
+
 (defn- text-feature-card [job]
   ;; Parse only the bytes Agency promises to preserve. This both tolerates
   ;; newline squashing after a complete card and rejects a map whose closing
@@ -592,7 +597,7 @@
       (let [end (min (count text) feature-card-durable-limit)
             payload (subs text (count feature-card-marker) end)]
         (try
-          {:card (edn/read-string payload) :source :text}
+          {:card (read-first-edn-form payload) :source :text}
           (catch Exception _
             {:reason :truncated-or-over-durable-limit :source :text}))))))
 
