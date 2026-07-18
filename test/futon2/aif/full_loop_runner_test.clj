@@ -189,6 +189,35 @@
     (is (= ["runner tests -> green"]
            (get-in item [:feature-card :things-to-try])))))
 
+(deftest feature-card-validation-rejects-the-attempt-024-shape
+  ;; attempt-024 used a large nested map as :built. Besides being a poor
+  ;; replayable claim, it pushed the closing brace outside Agency's durable
+  ;; prefix. Both the structured and text forms now fail with typed reasons.
+  (let [nested {:built {:commit "abc" :feature :witness-bearing-edges}
+                :want-coverage "cross-mission witnesses"
+                :matches-intent? true
+                :things-to-try ["runner tests -> green"]}
+        truncated (str "FULL_LOOP_FEATURE_CARD: "
+                       "{:built \"compact\" :want-coverage \""
+                       (apply str (repeat 180 "x")))]
+    (is (= :built-must-be-a-nonblank-string
+           (:reason (#'runner/feature-card-validation
+                     {:feature-card nested}))))
+    (is (= :truncated-or-over-durable-limit
+           (:reason (#'runner/feature-card-validation
+                     {:result-summary truncated}))))))
+
+(deftest feature-card-validation-requires-replayable-observations
+  (let [bad-step (assoc feature-card-claim
+                        :things-to-try ["run the runner tests"])
+        empty-steps (assoc feature-card-claim :things-to-try [])]
+    (is (= :things-to-try-must-be-observation-shaped
+           (:reason (#'runner/feature-card-validation
+                     {:feature-card bad-step}))))
+    (is (= :things-to-try-must-be-nonempty
+           (:reason (#'runner/feature-card-validation
+                     {:feature-card empty-steps}))))))
+
 (deftest fresh-author-cure-rebinds-against-a-fresh-pre-cure-snapshot
   ;; Review finding on the cure loop: the first implementation passed the
   ;; original binding's bare :pre-dispatch-head sha where fresh-artifact-binding
@@ -1410,6 +1439,10 @@
     (is (= :build-failed (:outcome result)))
     (is (= :feature-card-missing-or-invalid
            (get-in result [:data :failure-kind])))
+    (is (= :missing-marker
+           (get-in result [:data :feature-card-invalid-reason])))
+    (is (= :text
+           (get-in result [:data :feature-card-source])))
     (is (= false (get-in result [:data :build-retries 0 :cured?])))
     (is (= 1 (count (:build-retries (:data result)))))))
 

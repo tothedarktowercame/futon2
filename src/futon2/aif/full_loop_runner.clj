@@ -571,28 +571,56 @@
   [:built :want-coverage :matches-intent? :things-to-try
    :fold-ref :proof-ref :reviewer-note])
 
-(defn- feature-card-from-text [job]
-  ;; No end-of-line anchor: Agency's durable response prefix can squash the
-  ;; author's next line onto the card line (observed attempt-026), so read one
-  ;; EDN form after the marker and ignore trailing prose. A card truncated
-  ;; mid-map still fails to read and stays invalid.
-  (let [text (job-text job)
-        marker "FULL_LOOP_FEATURE_CARD:"]
-    (when-let [idx (str/index-of text marker)]
-      (try
-        (let [form (edn/read-string (subs text (+ idx (count marker))))]
-          (when (map? form) form))
-        (catch Exception _ nil)))))
+(def ^:private feature-card-marker "FULL_LOOP_FEATURE_CARD:")
+(def ^:private feature-card-durable-limit 200)
+
+(defn- text-feature-card [job]
+  ;; Parse only the bytes Agency promises to preserve. This both tolerates
+  ;; newline squashing after a complete card and rejects a map whose closing
+  ;; brace fell beyond the durable prefix, rather than mistaking later text for
+  ;; part of the claim.
+  (let [text (job-text job)]
+    (if-let [idx (str/index-of text feature-card-marker)]
+      (let [end (min (count text) (+ idx feature-card-durable-limit))
+            payload (subs text (+ idx (count feature-card-marker)) end)]
+        (try
+          {:card (edn/read-string payload) :source :text}
+          (catch Exception _
+            {:reason :truncated-or-over-durable-limit :source :text})))
+      {:reason :missing-marker :source :text})))
+
+(defn- feature-card-validation [job]
+  (let [{:keys [card source] :as candidate}
+        (if (contains? job :feature-card)
+          {:card (:feature-card job) :source :structured}
+          (text-feature-card job))
+        invalid (fn [reason] {:reason reason :source source})]
+    (cond
+      (:reason candidate) candidate
+      (not (map? card)) (invalid :card-must-be-a-map)
+      (not (and (string? (:built card))
+                (not (str/blank? (:built card)))))
+      (invalid :built-must-be-a-nonblank-string)
+      (not (and (string? (:want-coverage card))
+                (not (str/blank? (:want-coverage card)))))
+      (invalid :want-coverage-must-be-a-nonblank-string)
+      (not (instance? Boolean (:matches-intent? card)))
+      (invalid :matches-intent-must-be-boolean)
+      (not (and (sequential? (:things-to-try card))
+                (seq (:things-to-try card))))
+      (invalid :things-to-try-must-be-nonempty)
+      (not-every? #(and (string? %)
+                        (not (str/blank? %))
+                        (str/includes? % "->"))
+                  (:things-to-try card))
+      (invalid :things-to-try-must-be-observation-shaped)
+      :else
+      {:card (-> (select-keys card feature-card-keys)
+                 (update :things-to-try vec))
+       :source source})))
 
 (defn- valid-feature-card [job]
-  (let [card (or (:feature-card job) (feature-card-from-text job))]
-    (when (and (map? card)
-               (not (str/blank? (str (:built card))))
-               (contains? card :want-coverage)
-               (contains? card :matches-intent?)
-               (sequential? (:things-to-try card)))
-      (-> (select-keys card feature-card-keys)
-          (update :things-to-try vec)))))
+  (:card (feature-card-validation job)))
 
 (def ^:private code-file-pattern
   #"(?i)\.(?:clj|cljc|cljs|bb|el|lean|py|js|jsx|ts|tsx|java|go|rs|c|cc|cpp|h|hpp|sh)$")
@@ -816,16 +844,21 @@
     {:failure-kind :artifact-only
      :error-message "Authored commit is artifact-only"
      :ex-data {:outcome :artifact-only :commit commit :files files}}
-    (not (valid-feature-card author-job))
-    {:failure-kind :feature-card-missing-or-invalid
-     :error-message "Author deliverable is missing a valid feature card"
-     :ex-data {:outcome :build-failed
-               :failure-kind :feature-card-missing-or-invalid
-               :failure-stage :build-resolution
-               :commit commit
-               :target target
-               :files files
-               :author-job author-job}}))
+    :else
+    (let [{:keys [card reason source]} (feature-card-validation author-job)]
+      (when-not card
+        {:failure-kind :feature-card-missing-or-invalid
+         :error-message (str "Author feature card is invalid: " (name reason)
+                             " (source " (name source) ")")
+         :ex-data {:outcome :build-failed
+                   :failure-kind :feature-card-missing-or-invalid
+                   :feature-card-invalid-reason reason
+                   :feature-card-source source
+                   :failure-stage :build-resolution
+                   :commit commit
+                   :target target
+                   :files files
+                   :author-job author-job}}))))
 
 (defn- build-cure-loop
   "Bounded cure loop wrapping the artifact-only and feature-card validations.
@@ -1814,6 +1847,9 @@
                        :review-job review-job
                        :repair-obligation finding
                        :failure-kind (failure-kind-from e)
+                       :feature-card-invalid-reason
+                       (:feature-card-invalid-reason failure)
+                       :feature-card-source (:feature-card-source failure)
                        :failure-stage (or (:failure-stage failure)
                                           (last-error-phase @phase-events))
                        :error (.getMessage e)
