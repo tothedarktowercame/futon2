@@ -355,12 +355,15 @@
                             {:seq 5 :type "tool_use" :tools ["Bash"]
                              :previews ["Bash clojure -X:test"]}
                             {:seq 6 :type "tool_use" :tools ["Read"]}]})
-        gate (get-in result [:checkpoints :build :judgment :validation
-                             :review-gate])]
+        validation (get-in result [:checkpoints :build :judgment :validation])
+        gate (:review-gate validation)]
     (is (= :grounded-change (:outcome result)))
     (is (:passed? gate))
     (is (:executed? gate))
     (is (= 2 (:tool-events gate)))
+    (is (= {:executed true :tool-events 2 :command-events 1}
+           (:reviewer validation)))
+    (is (= (:reviewer validation) (:execution gate)))
     (is (= :job-events (:execution-source gate)))
     (is (= :fully-grounded (get-in item [:achievement :tier])))))
 

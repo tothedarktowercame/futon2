@@ -644,31 +644,44 @@
   (let [reported (:execution review-job)
         reported-executed? (true? (:executed reported))
         reported-tool-events (long (or (:tool-events reported) 0))
-        ledger-tool-events (->> (:events review-job)
-                                (filter #(and (= "tool_use" (str (:type %)))
-                                              (seq (:tools %))))
-                                count
-                                long)
+        reported-command-events (long (or (:command-events reported) 0))
+        ledger-events (->> (:events review-job)
+                           (filter #(and (= "tool_use" (str (:type %)))
+                                         (seq (:tools %))))
+                           vec)
+        ledger-tool-events (long (count ledger-events))
+        ledger-command-events (->> ledger-events
+                                   (filter #(some #{"Bash"} (:tools %)))
+                                   count
+                                   long)
+        reported-valid? (and reported-executed?
+                             (pos? reported-tool-events))
         ledger-executed? (pos? ledger-tool-events)]
-    {:executed? (or (and reported-executed?
-                         (pos? reported-tool-events))
+    {:execution
+     {:executed (or reported-valid?
                     ledger-executed?)
-     :tool-events (max reported-tool-events ledger-tool-events)
-     :source (if (> ledger-tool-events reported-tool-events)
+      :tool-events (max reported-tool-events ledger-tool-events)
+      :command-events (max reported-command-events ledger-command-events)}
+     :source (if (and ledger-executed?
+                      (or (not reported-valid?)
+                          (> ledger-tool-events reported-tool-events)))
                :job-events
                :job-summary)}))
 
 (defn- review-execution-gate [files review-job]
   (let [code-files (vec (filter #(re-find code-file-pattern (str %)) files))
         required? (boolean (seq code-files))
-        {:keys [executed? tool-events source]}
+        {:keys [execution source]}
         (review-execution-evidence review-job)
+        executed? (true? (:executed execution))
+        tool-events (:tool-events execution)
         passed? (or (not required?)
                     (and executed? (pos? tool-events)))]
     {:required? required?
      :code-files code-files
      :executed? executed?
      :tool-events tool-events
+     :execution execution
      :execution-source source
      :passed? passed?
      :failure-kind (when-not passed? :review-execution-evidence-missing)}))
@@ -1732,7 +1745,7 @@
                                       :inline-improvements []
                                       :build-retries (vec build-retries)
                                       :validation {:author (:execution author-job)
-                                                   :reviewer (:execution review-job)
+                                                   :reviewer (:execution review-gate)
                                                    :review-job (:job-id review-job)
                                                    :approved? approved?
                                                    :review-gate review-gate
