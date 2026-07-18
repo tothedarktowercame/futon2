@@ -72,7 +72,7 @@
 
 (defn- run-feature-card-attempt
   [{:keys [author-card author-summary grounded? artifacts? reviewer-execution
-           cure-card cure-summary cure-commit build-cure-retries]
+           reviewer-events cure-card cure-summary cure-commit build-cure-retries]
     :or {grounded? true artifacts? false}}]
   (let [root (.toFile (java.nio.file.Files/createTempDirectory
                        "wm-feature-card-" (make-array java.nio.file.attribute.FileAttribute 0)))
@@ -133,10 +133,11 @@
                             :execution successful-execution}
                      cure-card (assoc :feature-card cure-card))
                    ;; reviewer
-                   {:job-id job-id :state "done"
-                    :execution (or reviewer-execution successful-execution)
-                    :result-summary (str "FULL_LOOP_REVIEW: APPROVE\n"
-                                         "FULL_LOOP_REVIEWER_NOTE: Replay steps verified.")}))
+                   (cond-> {:job-id job-id :state "done"
+                            :execution (or reviewer-execution successful-execution)
+                            :result-summary (str "FULL_LOOP_REVIEW: APPROVE\n"
+                                                 "FULL_LOOP_REVIEWER_NOTE: Replay steps verified.")}
+                     reviewer-events (assoc :events reviewer-events))))
                :resolve-build-fn
                (fn [_]
                  {:repo (.getPath root)
@@ -344,6 +345,24 @@
                                 :approved?])))
     (is (= :review-execution-evidence-missing
            (get-in item [:failure :kind])))))
+
+(deftest reviewer-tool-ledger-corroborates-a-stale-execution-summary
+  (let [{:keys [result item]}
+        (run-feature-card-attempt
+         {:author-card feature-card-claim
+          :reviewer-execution {:executed false :tool-events 0 :command-events 0}
+          :reviewer-events [{:seq 4 :type "text" :text "Inspecting."}
+                            {:seq 5 :type "tool_use" :tools ["Bash"]
+                             :previews ["Bash clojure -X:test"]}
+                            {:seq 6 :type "tool_use" :tools ["Read"]}]})
+        gate (get-in result [:checkpoints :build :judgment :validation
+                             :review-gate])]
+    (is (= :grounded-change (:outcome result)))
+    (is (:passed? gate))
+    (is (:executed? gate))
+    (is (= 2 (:tool-events gate)))
+    (is (= :job-events (:execution-source gate)))
+    (is (= :fully-grounded (get-in item [:achievement :tier])))))
 
 (deftest non-grounded-attempt-never-persists-author-card
   (let [{:keys [result item]}

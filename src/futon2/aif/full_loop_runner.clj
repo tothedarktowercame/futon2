@@ -640,18 +640,36 @@
 (def ^:private code-file-pattern
   #"(?i)\.(?:clj|cljc|cljs|bb|el|lean|py|js|jsx|ts|tsx|java|go|rs|c|cc|cpp|h|hpp|sh)$")
 
+(defn- review-execution-evidence [review-job]
+  (let [reported (:execution review-job)
+        reported-executed? (true? (:executed reported))
+        reported-tool-events (long (or (:tool-events reported) 0))
+        ledger-tool-events (->> (:events review-job)
+                                (filter #(and (= "tool_use" (str (:type %)))
+                                              (seq (:tools %))))
+                                count
+                                long)
+        ledger-executed? (pos? ledger-tool-events)]
+    {:executed? (or (and reported-executed?
+                         (pos? reported-tool-events))
+                    ledger-executed?)
+     :tool-events (max reported-tool-events ledger-tool-events)
+     :source (if (> ledger-tool-events reported-tool-events)
+               :job-events
+               :job-summary)}))
+
 (defn- review-execution-gate [files review-job]
   (let [code-files (vec (filter #(re-find code-file-pattern (str %)) files))
         required? (boolean (seq code-files))
-        execution (:execution review-job)
-        executed? (true? (:executed execution))
-        tool-events (long (or (:tool-events execution) 0))
+        {:keys [executed? tool-events source]}
+        (review-execution-evidence review-job)
         passed? (or (not required?)
                     (and executed? (pos? tool-events)))]
     {:required? required?
      :code-files code-files
      :executed? executed?
      :tool-events tool-events
+     :execution-source source
      :passed? passed?
      :failure-kind (when-not passed? :review-execution-evidence-missing)}))
 
