@@ -40,3 +40,29 @@
                               "useful idea, no grounded result" "joe")]
     (is (nil? (:belief-event review)))
     (is (empty? (brief/unseen-belief-events root #{})))))
+
+(deftest built-items-accept-a-feature-verdict-without-projecting-belief
+  (let [root (temp-root)
+        item {:attempt-id "attempt-feature"
+              :outcome :grounded-change
+              :commit "abc123"
+              :feature-card {:built "A usable Field Desk"}}
+        _ (brief/queue-item! root item)
+        objectives (brief/item-objectives item)
+        review (brief/review! root "attempt-feature" :feature-verdict
+                              :accept-with-follow-ups
+                              "Accept; improve empty-state copy" "joe")]
+    (is (= :feature-verdict (first objectives)))
+    (is (some #{:evidence-sufficiency} objectives))
+    (is (= :feature-verdict (:objective review)))
+    (is (= :accept-with-follow-ups (:answer review)))
+    (is (= "Accept; improve empty-state copy" (:note review)))
+    (is (nil? (:belief-event review)))
+    (is (= review (first (brief/reviews root))))))
+
+(deftest partial-authored-build-also-requires-a-feature-verdict
+  (is (some #{:feature-verdict}
+            (brief/item-objectives
+             {:attempt-id "attempt-partial"
+              :commit "partial123"
+              :achievement {:tier :partial-authored}}))))

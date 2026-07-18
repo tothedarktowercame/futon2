@@ -15,11 +15,15 @@
 (def default-root "/home/joe/code/futon2/data/wm-morning-brief")
 
 (def objective-order
-  [:selection-quality :substantive-achievement :evidence-sufficiency
-   :machine-response])
+  [:feature-verdict :selection-quality :substantive-achievement
+   :evidence-sufficiency :machine-response])
 
 (def objective-specs
-  {:selection-quality
+  {:feature-verdict
+   {:question "Accept the built feature?"
+    :answers #{:accept-feature :accept-with-follow-ups :reject}
+    :use "Feature-acceptance verdict; it does not project to the A-matrix."}
+   :selection-quality
    {:question "Was this the best available policy selection?"
     :answers #{:yes :no :uncertain}
     :use "Calibration evidence for the target-value model; never an A-matrix observation."}
@@ -69,7 +73,11 @@
                            :morning-brief/schema-version 1))))
 
 (defn item-objectives [item]
-  (cond-> [:selection-quality :substantive-achievement]
+  (cond-> []
+    (:commit item)
+    (conj :feature-verdict)
+    true
+    (conj :selection-quality :substantive-achievement)
     (or (:commit item) (seq (get-in item [:achievement :build])))
     (conj :evidence-sufficiency)
     (or (and (:outcome item) (not= :grounded-change (:outcome item)))
