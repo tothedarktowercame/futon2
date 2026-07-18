@@ -44,6 +44,11 @@
   {:yes :strengthened :partial :refined :no :falsified
    :uncertain :refined})
 
+(def addendum-kinds #{:repro :why-built :note})
+
+(defn- nonblank-string? [value]
+  (and (string? value) (not (str/blank? value))))
+
 (defn- write-new! [path value]
   (let [file (io/file path)]
     (io/make-parents file)
@@ -140,6 +145,31 @@
        (write-new! (io/file root "reviews" (str review-id ".edn")) record)
        record))))
 
+(defn addendum!
+  "Append a reproducibility or rationale note to an existing attempt."
+  ([attempt-id kind title body author]
+   (addendum! default-root attempt-id kind title body author))
+  ([root attempt-id kind title body author]
+   (when-not (item-by-attempt root attempt-id)
+     (throw (ex-info "Unknown Morning Brief attempt" {:attempt-id attempt-id})))
+   (when-not (contains? addendum-kinds kind)
+     (throw (ex-info "Unknown Morning Brief addendum kind"
+                     {:kind kind :allowed addendum-kinds})))
+   (when-not (every? nonblank-string? [title body author])
+     (throw (ex-info "Morning Brief addendum title, body, and author must be non-blank strings"
+                     {:title title :body body :author author})))
+   (let [addendum-id (str "mba-" (UUID/randomUUID))
+         record {:morning-brief/addendum-id addendum-id
+                 :attempt-id attempt-id
+                 :kind kind
+                 :title title
+                 :body body
+                 :author author
+                 :created-at (str (Instant/now))
+                 :morning-brief/schema-version 1}]
+     (write-new! (io/file root "addenda" (str addendum-id ".edn")) record)
+     record)))
+
 (defn reviews
   ([] (reviews default-root))
   ([root] (read-records (io/file root "reviews"))))
@@ -147,6 +177,13 @@
 (defn items
   ([] (items default-root))
   ([root] (read-records (io/file root "items"))))
+
+(defn addenda
+  ([] (addenda default-root))
+  ([root]
+   (->> (read-records (io/file root "addenda"))
+        (sort-by :created-at)
+        vec)))
 
 (defn with-pending-objectives [item review-records]
   (let [reviewed (set (map (juxt :attempt-id :objective) review-records))]

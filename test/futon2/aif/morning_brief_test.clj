@@ -66,3 +66,39 @@
              {:attempt-id "attempt-partial"
               :commit "partial123"
               :achievement {:tier :partial-authored}}))))
+
+(deftest addenda-are-append-only-repeatable-and-chronological
+  (let [root (temp-root)
+        _ (brief/queue-item! root {:attempt-id "attempt-notebook"})
+        first-note (brief/addendum! root "attempt-notebook" :why-built
+                                    "Why this exists" "To close the review gap." "joe")
+        second-note (brief/addendum! root "attempt-notebook" :repro
+                                     "Exercise it" "Open the desk and press n." "joe")
+        stored (brief/addenda root)]
+    (is (= 2 (count stored)))
+    (is (= [(:morning-brief/addendum-id first-note)
+            (:morning-brief/addendum-id second-note)]
+           (mapv :morning-brief/addendum-id stored)))
+    (is (every? #(re-matches #"mba-[0-9a-f-]+" %)
+                (map :morning-brief/addendum-id stored)))
+    (is (not= (:morning-brief/addendum-id first-note)
+              (:morning-brief/addendum-id second-note)))
+    (is (= [:why-built :repro] (mapv :kind stored)))
+    (is (= 1 (:morning-brief/schema-version first-note)))
+    (is (= stored (vec (sort-by :created-at stored))))))
+
+(deftest addendum-rejects-unknown-attempt-kind-and-blank-content
+  (let [root (temp-root)]
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                          #"Unknown Morning Brief attempt"
+                          (brief/addendum! root "missing" :note
+                                           "Title" "Body" "joe")))
+    (brief/queue-item! root {:attempt-id "attempt-notebook"})
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                          #"Unknown Morning Brief addendum kind"
+                          (brief/addendum! root "attempt-notebook" :other
+                                           "Title" "Body" "joe")))
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                          #"must be non-blank"
+                          (brief/addendum! root "attempt-notebook" :note
+                                           " " "Body" "joe")))))

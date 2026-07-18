@@ -63,8 +63,8 @@
   {:built "Build-time feature cards now survive grounding into Morning Brief."
    :want-coverage "The grounded attempt carries the author's feature story and replay steps."
    :matches-intent? true
-   :things-to-try ["clojure -X:test :nses '[futon2.aif.full-loop-runner-test]'"
-                   "clojure -M:wm-full-loop feature <attempt-id>"]})
+   :things-to-try ["clojure -X:test :nses '[futon2.aif.full-loop-runner-test]' -> all runner tests pass"
+                   "clojure -M:wm-full-loop feature <attempt-id> -> the grounded feature card is printed"]})
 
 (def successful-execution
   {:executed true :tool-events 3 :command-events 3})
@@ -258,6 +258,8 @@
         "construction follows the selected action, not the raw rank head")
     (is (= ["zai-5" "codex-7"] (mapv :agent @dispatches)))
     (is (re-find #"FULL_LOOP_FEATURE_CARD:"
+                 (:prompt (first @dispatches))))
+    (is (re-find #"command or action -> expected observation"
                  (:prompt (first @dispatches))))
     (is (re-find #"Do not edit or commit" (:prompt (second @dispatches))))
     (is (= :grounded-change (:outcome (first @queued))))
