@@ -150,6 +150,24 @@
     (is (= ["feature id -> card"]
            (get-in item [:feature-card :things-to-try])))))
 
+(deftest newline-squashed-agency-prefix-still-yields-the-card
+  ;; Observed on attempt-026: the durable prefix replaced the author's newline
+  ;; with a space, leaving trailing prose ON the card line. The parser must
+  ;; read the one EDN form and ignore what follows.
+  (let [squashed (str "FULL_LOOP_FEATURE_CARD: "
+                      "{:built \"Durable compact author-card contract\" "
+                      ":want-coverage \"Cards survive Agency prefix\" "
+                      ":matches-intent? true "
+                      ":things-to-try [\"runner tests -> green\"]} "
+                      "Repaired the Agency ")
+        {:keys [result item]}
+        (run-feature-card-attempt {:author-summary squashed})]
+    (is (= :grounded-change (:outcome result)))
+    (is (= "Durable compact author-card contract"
+           (get-in item [:feature-card :built])))
+    (is (= ["runner tests -> green"]
+           (get-in item [:feature-card :things-to-try])))))
+
 (deftest author-contract-names-the-durable-feature-card-boundary
   (let [prompt (#'runner/author-prompt
                 {:author "author" :reviewer "reviewer"}

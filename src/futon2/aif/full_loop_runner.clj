@@ -566,12 +566,17 @@
    :fold-ref :proof-ref :reviewer-note])
 
 (defn- feature-card-from-text [job]
-  (when-let [[_ encoded]
-             (re-find #"(?m)^FULL_LOOP_FEATURE_CARD:\s*(\{.*\})\s*$"
-                      (job-text job))]
-    (try
-      (edn/read-string encoded)
-      (catch Exception _ nil))))
+  ;; No end-of-line anchor: Agency's durable response prefix can squash the
+  ;; author's next line onto the card line (observed attempt-026), so read one
+  ;; EDN form after the marker and ignore trailing prose. A card truncated
+  ;; mid-map still fails to read and stays invalid.
+  (let [text (job-text job)
+        marker "FULL_LOOP_FEATURE_CARD:"]
+    (when-let [idx (str/index-of text marker)]
+      (try
+        (let [form (edn/read-string (subs text (+ idx (count marker))))]
+          (when (map? form) form))
+        (catch Exception _ nil)))))
 
 (defn- valid-feature-card [job]
   (let [card (or (:feature-card job) (feature-card-from-text job))]
