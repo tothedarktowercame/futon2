@@ -40,6 +40,7 @@
 (def discrimination-top-k 5)
 (def discrimination-epsilon 1.0e-6)
 (def artifact-window-tolerance-ms (* 2 60 1000))
+(def default-build-cure-retries 1)
 
 (defn config
   ([] (config {}))
@@ -61,6 +62,11 @@
            :phase-log (or (System/getenv "FUTON_WM_PHASE_LOG") default-phase-log)
            :poll-ms 2000
            :window-days 14
+           :build-cure-retries
+           (let [env-val (System/getenv "FUTON_WM_BUILD_CURE_RETRIES")
+                 parsed (when env-val (try (Integer/parseInt env-val)
+                                           (catch Exception _ nil)))]
+             (or parsed default-build-cure-retries))
            :trigger :duree-click-on-demand
            :cohort? true
            :semantic-epoch semantic-epoch}
@@ -716,6 +722,30 @@
        "If no safe substantive parcel is possible, make no commit and finish with "
        "FULL_LOOP_AUTHOR: REFUSE <typed reason>."))
 
+(defn- build-cure-prompt
+  "Construct the cure re-emission prompt sent to the SAME author agent when a
+  mechanically-detectable, author-curable build failure occurs. The prompt is
+  self-contained: it names the target, the original commit, the exact error,
+  and (for card failures) the literal durable prefix text so the author sees
+  what Agency actually preserved."
+  [author target original-commit error-message {:keys [failure-kind]} job-prefix-text]
+  (str author ": FULL-LOOP BUILD CURE. Your previous author turn for selected "
+       "target " (pr-str target) " produced a mechanically-detectable build "
+       "failure that you can cure with a corrected re-emission.\n\n"
+       "ORIGINAL COMMIT: " (str original-commit) "\n"
+       "EXACT VALIDATION ERROR: " error-message "\n"
+       (when (= :feature-card-missing-or-invalid failure-kind)
+         (str "DURABLE PREFIX TEXT (job-text) the runner extracted from your "
+              "previous response — this is what Agency's prefix actually "
+              "preserved:\n"
+              (pr-str job-prefix-text) "\n\n"))
+       "INSTRUCTION: BEGIN your response with one corrected, self-contained "
+       "FULL_LOOP_FEATURE_CARD: {...} line (one EDN map, closing brace within "
+       "the 200-char durable prefix), then FULL_LOOP_AUTHOR: DONE <sha>. "
+       "Make a new commit ONLY if files must change (artifact-only cure "
+       "requires a substantive commit; card cure usually needs no new commit "
+       "— re-emitting the card with the existing sha is valid)."))
+
 (defn- reviewer-prompt [{:keys [reviewer author]} target construction repo commit
                         author-job stop-lines]
   (str reviewer ": FULL-LOOP INDEPENDENT REVIEW. " author " authored commit " commit
@@ -775,6 +805,113 @@
                     (str/includes? % "selection-authoring-flights")
                     (str/includes? % "overnight-flights"))
                files)))
+
+(defn- build-cure-validation
+  "Run the two qualifying author-deliverable validations. Returns nil on
+  success, or a map describing the failure on failure. Only artifact-only
+  and feature-card-missing-or-invalid are curable — nothing else."
+  [files author-job commit target]
+  (cond
+    (or (empty? files) (artifact-only-files? files))
+    {:failure-kind :artifact-only
+     :error-message "Authored commit is artifact-only"
+     :ex-data {:outcome :artifact-only :commit commit :files files}}
+    (not (valid-feature-card author-job))
+    {:failure-kind :feature-card-missing-or-invalid
+     :error-message "Author deliverable is missing a valid feature card"
+     :ex-data {:outcome :build-failed
+               :failure-kind :feature-card-missing-or-invalid
+               :failure-stage :build-resolution
+               :commit commit
+               :target target
+               :files files
+               :author-job author-job}}))
+
+(defn- build-cure-loop
+  "Bounded cure loop wrapping the artifact-only and feature-card validations.
+  On a qualifying failure, if retries remain, dispatches a cure job to the
+  SAME author agent, polls it, re-resolves the build, and re-runs the same
+  validations. When retries are exhausted, throws exactly as today (same
+  outcome, same failure-kind, same repair-obligation path) with :build-retries
+  included in the ex-data. Returns a map with the final :commit, :repo,
+  :files, :author-job, and :build-retries.
+
+  When :build-cure-retries is 0, no cure is attempted and the behavior is
+  byte-identical to the pre-cure throws."
+  [opts phase-context author dispatched-turns
+   target commit repo files author-job fresh-author? artifact-binding]
+  (let [max-retries (:build-cure-retries opts 0)]
+    (loop [commit commit
+           repo repo
+           files files
+           author-job author-job
+           retries-left max-retries
+           build-retries []]
+      (if-let [failure (build-cure-validation files author-job commit target)]
+        (if (pos? retries-left)
+          ;; Bounce: dispatch cure to the same author agent.
+          (let [{:keys [failure-kind error-message]} failure
+                job-prefix-text (job-text author-job)
+                cure-prompt (build-cure-prompt author target commit error-message
+                                               failure job-prefix-text)
+                cure-response
+                (run-phase! opts phase-context :build-cure-dispatch
+                            #(do
+                               (swap! dispatched-turns inc)
+                               ((or (:dispatch-fn opts) dispatch!) opts author
+                                "wm-full-loop" target cure-prompt)))
+                cure-job-id (:job-id cure-response)
+                cure-job
+                (run-phase! opts phase-context :build-cure-wait
+                            #((or (:poll-fn opts) poll-job!) opts cure-job-id))
+                ;; Re-resolve the build: the commit may have changed.
+                cure-artifact-ref (:artifact-ref cure-job)
+                cure-observed (when (and fresh-author? cure-artifact-ref)
+                                (:commit (fresh-artifact-binding
+                                          opts
+                                          (:repo artifact-binding)
+                                          (:pre-dispatch-head artifact-binding)
+                                          cure-job)))
+                new-commit (or cure-observed cure-artifact-ref commit)
+                new-build (when (and new-commit (not= new-commit commit))
+                            ((or (:resolve-build-fn opts) resolve-build)
+                             new-commit))
+                new-repo (or (:repo new-build) repo)
+                new-files (or (:files new-build) files)
+                new-author-job (cond-> cure-job
+                                 (and fresh-author? cure-observed)
+                                 (assoc :repo-observed-artifact-ref cure-observed
+                                        :artifact-binding artifact-binding))
+                ;; Re-run the same validations to determine if cured.
+                still-failing? (build-cure-validation new-files new-author-job
+                                                       new-commit target)
+                cured? (nil? still-failing?)
+                retry-entry {:failure-kind failure-kind
+                             :error error-message
+                             :cure-job-id cure-job-id
+                             :cured? cured?}]
+            (if cured?
+              ;; Cured: proceed with the new values.
+              {:commit new-commit :repo new-repo :files new-files
+               :author-job new-author-job
+               :build-retries (conj build-retries retry-entry)}
+              ;; Not cured yet: try again if retries remain.
+              (recur new-commit new-repo new-files new-author-job
+                     (dec retries-left)
+                     (conj build-retries retry-entry))))
+          ;; Retries exhausted: throw exactly as today. When no bounces
+          ;; occurred (retries was 0), the ex-data is byte-identical to
+          ;; the pre-cure throw — :build-retries is only included when at
+          ;; least one bounce was attempted.
+          (throw
+           (ex-info (:error-message failure)
+                    (cond-> (:ex-data failure)
+                      (seq build-retries)
+                      (assoc :build-retries build-retries)))))
+        ;; No failure: pass through with empty (or accumulated) retries.
+        {:commit commit :repo repo :files files
+         :author-job author-job
+         :build-retries build-retries}))))
 
 (defn- implementation-id [commit]
   (str "full-loop/implementation/" commit))
@@ -1048,14 +1185,16 @@
                                     (get-in @checkpoints [:adjudication :judgment])}
                                    :failure
                                    (when-not (= :grounded-change outcome)
-                                     {:kind (or (:failure-kind data) outcome)
-                                      :stage (or (:failure-stage data)
-                                                 (last-error-phase @phase-events))
-                                      :error (:error data)
-                                      :backtrace (:backtrace finding)
-                                      :repair-id (:repair/id finding)
-                                      :discharge-contract
-                                      (:discharge-contract finding)})
+                                     (cond-> {:kind (or (:failure-kind data) outcome)
+                                              :stage (or (:failure-stage data)
+                                                         (last-error-phase @phase-events))
+                                              :error (:error data)
+                                              :backtrace (:backtrace finding)
+                                              :repair-id (:repair/id finding)
+                                              :discharge-contract
+                                              (:discharge-contract finding)}
+                                       (:build-retries data)
+                                       (assoc :build-retries (:build-retries data))))
                                    :qa-targets
                                    {:selection {:policy selected-action}
                                     :achievement
@@ -1456,20 +1595,11 @@
                                     {:outcome :build-failed
                                      :author-verdict verdict
                                      :author-job author-job}))))
-                (when (or (empty? files) (artifact-only-files? files))
-                  (throw (ex-info "Authored commit is artifact-only"
-                                  {:outcome :artifact-only :commit commit :files files})))
-                (when-not (valid-feature-card author-job)
-                  (throw
-                   (ex-info "Author deliverable is missing a valid feature card"
-                            {:outcome :build-failed
-                             :failure-kind :feature-card-missing-or-invalid
-                             :failure-stage :build-resolution
-                             :commit commit
-                             :target target
-                             :files files
-                             :author-job author-job})))
-                (let [artifact-snapshot
+                (let [{:keys [commit repo files author-job build-retries]}
+                      (build-cure-loop opts @phase-context author dispatched-turns
+                                       target commit repo files author-job
+                                       fresh-author? artifact-binding)
+                    artifact-snapshot
                       (when fresh-author?
                         {:artifact-binding/fresh-author? true
                          :artifact-binding/repo (:repo artifact-binding)
@@ -1528,6 +1658,7 @@
                                       :commits [commit]
                                       :patterns-used (vec (:shown construction))
                                       :inline-improvements []
+                                      :build-retries (vec build-retries)
                                       :validation {:author (:execution author-job)
                                                    :reviewer (:execution review-job)
                                                    :review-job (:job-id review-job)
@@ -1643,7 +1774,8 @@
                               (cond->
                                {:target target :commit commit :witness witness
                                 :author-job author-job :review-job review-job
-                                :artifact-binding artifact-binding}
+                                :artifact-binding artifact-binding
+                                :build-retries (vec build-retries)}
                                 feature-card
                                 (assoc :feature-card feature-card))))))))))))
       (catch Throwable e
@@ -1680,7 +1812,9 @@
                                           (last-error-phase @phase-events))
                        :error (.getMessage e)
                        :error-class (.getName (class e))
-                       :error-data failure})))))))
+                       :error-data failure
+                       :build-retries (when (seq (:build-retries failure))
+                                        (:build-retries failure))})))))))
 
 (defn run-opportunity!
   "Run one opportunity and ensure initialization failures also become durable

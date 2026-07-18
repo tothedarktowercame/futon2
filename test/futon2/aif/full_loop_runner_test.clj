@@ -71,7 +71,8 @@
   {:executed true :tool-events 3 :command-events 3})
 
 (defn- run-feature-card-attempt
-  [{:keys [author-card author-summary grounded? artifacts? reviewer-execution]
+  [{:keys [author-card author-summary grounded? artifacts? reviewer-execution
+           cure-card cure-summary cure-commit build-cure-retries]
     :or {grounded? true artifacts? false}}]
   (let [root (.toFile (java.nio.file.Files/createTempDirectory
                        "wm-feature-card-" (make-array java.nio.file.attribute.FileAttribute 0)))
@@ -79,6 +80,7 @@
         fold-file (io/file root "M-selected.executed.edn")
         proof-file (io/file root "logic/feature-witness.edn")
         queued (atom [])
+        dispatches (atom [])
         _ (spit mission-file "# test mission\n")
         _ (when artifacts?
             (io/make-parents fold-file)
@@ -87,6 +89,7 @@
             (io/make-parents proof-file)
             (spit proof-file (pr-str {:witness :feature-card-persisted})))
         commit "feature123"
+        cure-id "feature-cure"
         opts (merge
               (isolated-runner-opts)
               {:repair-open-fn (constantly [])
@@ -106,15 +109,30 @@
                   :commit (:artifact-ref author-job)})
                :dispatch-fn
                (fn [_ agent _ _ _]
-                 {:job-id (if (= agent "zai-5") "feature-author" "feature-review")})
+                 (swap! dispatches conj agent)
+                 {:job-id (if (= agent "zai-5")
+                            (if (> (count (filter #(= "zai-5" %) @dispatches)) 1)
+                              cure-id
+                              "feature-author")
+                            "feature-review")})
                :poll-fn
                (fn [_ job-id]
-                 (if (= job-id "feature-author")
+                 (condp = job-id
+                   "feature-author"
                    (cond-> {:job-id job-id :state "done" :artifact-ref commit
                             :result-summary (or author-summary
                                                 (str "FULL_LOOP_AUTHOR: DONE " commit))
                             :execution successful-execution}
                      author-card (assoc :feature-card author-card))
+                   cure-id
+                   (cond-> {:job-id job-id :state "done"
+                            :artifact-ref (or cure-commit commit)
+                            :result-summary (or cure-summary
+                                                (str "FULL_LOOP_AUTHOR: DONE "
+                                                     (or cure-commit commit)))
+                            :execution successful-execution}
+                     cure-card (assoc :feature-card cure-card))
+                   ;; reviewer
                    {:job-id job-id :state "done"
                     :execution (or reviewer-execution successful-execution)
                     :result-summary (str "FULL_LOOP_REVIEW: APPROVE\n"
@@ -131,9 +149,12 @@
                   :dial-moved? grounded?
                   :implementation-id "feature-impl"
                   :discharge-id "feature-discharge"})
-               :queue-fn #(swap! queued conj %)})
+               :queue-fn #(swap! queued conj %)}
+              (when (some? build-cure-retries)
+                {:build-cure-retries build-cure-retries}))
         result (runner/run-opportunity! opts)]
     {:result result :item (first @queued)
+     :dispatches @dispatches
      :fold-file fold-file :proof-file proof-file}))
 
 (deftest agency-prefix-contract-preserves-a-text-feature-card
@@ -1317,3 +1338,148 @@
     (is (= :initialization-failed (get-in result [:data :failure-kind])))
     (is (= :machine-failure (:repair-class (first @findings))))
     (is (= :none (get-in (first @queued) [:achievement :tier])))))
+
+;; ---------------------------------------------------------------------------
+;; Bounded build-cure loop: a mechanically-detectable, author-curable build
+;; failure bounces back to the SAME author with the exact error instead of
+;; burning the whole click. The card gate and review gate are NOT weakened:
+;; a bounce is a bounded cure window inside the attempt, not fail-open.
+;; ---------------------------------------------------------------------------
+
+(deftest card-failure-cured-on-first-bounce-grounds-the-change
+  (let [{:keys [result]}
+        (run-feature-card-attempt
+         {:author-card nil
+          :cure-card feature-card-claim
+          :artifacts? true})]
+    (is (= :grounded-change (:outcome result)))
+    (is (= :feature-card-missing-or-invalid
+           (get-in result [:data :build-retries 0 :failure-kind])))
+    (is (= true (get-in result [:data :build-retries 0 :cured?])))
+    (is (= 1 (count (:build-retries (:data result)))))))
+
+(deftest card-failure-not-cured-fails-after-exhausting-retries
+  (let [{:keys [result]}
+        (run-feature-card-attempt
+         {:author-card nil
+          :cure-card nil})]
+    (is (= :build-failed (:outcome result)))
+    (is (= :feature-card-missing-or-invalid
+           (get-in result [:data :failure-kind])))
+    (is (= false (get-in result [:data :build-retries 0 :cured?])))
+    (is (= 1 (count (:build-retries (:data result)))))))
+
+(deftest reviewer-request-changes-is-not-bounced
+  ;; A reviewer REQUEST_CHANGES must NOT trigger a cure dispatch. The cure
+  ;; loop wraps only artifact-only and feature-card checks — never the
+  ;; reviewer gate.
+  (let [{:keys [result dispatches]}
+        (run-feature-card-attempt
+         {:author-card feature-card-claim
+          :reviewer-execution {:executed false :tool-events 0
+                               :command-events 0}})]
+    (is (= :build-failed (:outcome result)))
+    (is (= :review-execution-evidence-missing
+           (get-in result [:data :failure-kind])))
+    ;; Author dispatched once, reviewer dispatched once — no cure dispatch.
+    (is (= 2 (count dispatches)))
+    (is (= ["zai-5" "codex-7"] dispatches))))
+
+(deftest build-cure-retries-zero-reproduces-todays-behavior
+  (let [{:keys [result dispatches]}
+        (run-feature-card-attempt
+         {:author-card nil
+          :build-cure-retries 0})]
+    (is (= :build-failed (:outcome result)))
+    (is (= :feature-card-missing-or-invalid
+           (get-in result [:data :failure-kind])))
+    ;; No cure dispatch — only the initial author dispatch.
+    (is (= 1 (count dispatches)))
+    (is (= ["zai-5"] dispatches))
+    ;; No build-retries recorded when retries is 0.
+    (is (empty? (:build-retries (:data result))))))
+
+(deftest artifact-only-failure-bounces-and-substantive-cure-commits-grounds
+  (let [root (.toFile (java.nio.file.Files/createTempDirectory
+                       "wm-artifact-cure-"
+                       (make-array java.nio.file.attribute.FileAttribute 0)))
+        queued (atom [])
+        dispatches (atom [])
+        _ (spit (io/file root "M-selected.md") "# test mission\n")
+        mission-file (io/file root "M-selected.md")
+        fold-file (io/file root "M-selected.executed.edn")
+        proof-file (io/file root "logic/feature-witness.edn")
+        _ (io/make-parents fold-file)
+        _ (spit fold-file (pr-str {:boxes [:author :store]
+                                   :want-coverage [:feature-card]}))
+        _ (io/make-parents proof-file)
+        _ (spit proof-file (pr-str {:witness :feature-card-persisted}))
+        resolve-call (atom 0)
+        result
+        (runner/run-opportunity!
+         (merge
+          (isolated-runner-opts)
+          {:repair-open-fn (constantly [])
+           :target-repo-fn (fn [& _] (.getPath root))
+           :repair-system-record-fn
+           (fn [finding] (assoc finding :repair/id "test-repair"))
+           :mission-fn (fn [target] {:id target :path (.getPath mission-file)})
+           :trace-fn (constantly (.getPath (io/file root "trace.edn")))
+           :author-artifact-observer-fn
+           (fn [repo before author-job]
+             {:fresh-author? true
+              :repo repo
+              :pre-dispatch-head (:head before)
+              :observed-head (:artifact-ref author-job)
+              :corroborates? true
+              :commit (:artifact-ref author-job)})
+           :dispatch-fn
+           (fn [_ agent _ _ _]
+             (swap! dispatches conj agent)
+             {:job-id (if (= agent "zai-5")
+                        (if (> (count (filter #(= "zai-5" %) @dispatches)) 1)
+                          "cure-job"
+                          "author-job")
+                        "review-job")})
+           :poll-fn
+           (fn [_ job-id]
+             (case job-id
+               "author-job"
+               {:job-id job-id :state "done" :artifact-ref "bad-commit"
+                :feature-card feature-card-claim
+                :result-summary "FULL_LOOP_AUTHOR: DONE bad-commit"
+                :execution successful-execution}
+               "cure-job"
+               {:job-id job-id :state "done" :artifact-ref "good-commit"
+                :feature-card feature-card-claim
+                :result-summary "FULL_LOOP_AUTHOR: DONE good-commit"
+                :execution successful-execution}
+               ;; reviewer
+               {:job-id job-id :state "done"
+                :execution successful-execution
+                :result-summary
+                (str "FULL_LOOP_REVIEW: APPROVE\n"
+                     "FULL_LOOP_REVIEWER_NOTE: Replay steps verified.")}))
+           :resolve-build-fn
+           (fn [_]
+             ;; First resolution (bad-commit): artifact-only files.
+             ;; Second resolution (good-commit): substantive files.
+             (swap! resolve-call inc)
+             (if (= @resolve-call 1)
+               {:repo (.getPath root)
+                :files ["data/fold-turns/selection-authoring-flights.edn"]}
+               {:repo (.getPath root)
+                :files ["src/feature.clj" "logic/feature-witness.edn"]}))
+           :ground-fn
+           (fn [& _]
+             {:before {:implementation-entity nil}
+              :after {:implementation-entity {:id "feature-impl"}}
+              :resolved? true :dial-moved? true
+              :implementation-id "feature-impl"
+              :discharge-id "feature-discharge"})
+           :queue-fn #(swap! queued conj %)}))]
+    (is (= :grounded-change (:outcome result)))
+    (is (= :artifact-only
+           (get-in result [:data :build-retries 0 :failure-kind])))
+    (is (= true (get-in result [:data :build-retries 0 :cured?])))
+    (is (= 1 (count (:build-retries (:data result)))))))
