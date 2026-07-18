@@ -25,19 +25,17 @@
 (defn configured-evidence-base
   "Resolve the Evidence Landscape authority used for retrieval receipts.
 
-   A deployment-local server/port takes precedence over the externally
-   advertised evidence base: hosts behind NAT cannot necessarily hairpin to
-   their own public address. The local route uses IPv4 loopback because the
-   production http-kit listener is IPv4-bound; resolving `localhost` to `::1`
-   otherwise makes a live pattern substrate appear absent. The map arity is
-   the pure configuration seam used by tests."
+   Resolution order is the stack-wide contract: FUTON3C_EVIDENCE_BASE,
+   FUTON3C_SERVER, then an IPv4-loopback URL using FUTON3C_PORT (default 7070).
+   The loopback is deliberately `127.0.0.1` because the production http-kit
+   listener is IPv4-bound. The map arity is the pure configuration seam used
+   by tests and sibling consumers."
   ([] (configured-evidence-base (System/getenv)))
   ([env]
-   (or (get env "FUTON3C_SERVER")
-       (when-let [port (get env "FUTON3C_PORT")]
-         (str "http://127.0.0.1:" port))
-       (get env "FUTON3C_EVIDENCE_BASE")
-       "http://127.0.0.1:7070")))
+   (or (not-empty (get env "FUTON3C_EVIDENCE_BASE"))
+       (not-empty (get env "FUTON3C_SERVER"))
+       (str "http://127.0.0.1:"
+            (or (not-empty (get env "FUTON3C_PORT")) "7070")))))
 
 (def ^:private default-timezone
   (ZoneId/of "Europe/London"))

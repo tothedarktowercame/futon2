@@ -80,7 +80,10 @@
                       {:mission-phase "instantiate"}))]
       (is (= {:mission-phase "instantiate"}
              (#'wm/compute-delta-t-mission "repo/mission/example")))
-      (is (= ["repo/mission/example" {:limit 500}] @called)))))
+      (is (= ["repo/mission/example"
+              {:limit 500
+               :families ["code/v05/mission-doc"]}]
+             @called)))))
 
 (deftest morning-brief-events-use-live-belief-update-and-hold-unknown-entities
   (let [prior {"known" {:spawned (/ 1.0 7) :refined (/ 1.0 7)

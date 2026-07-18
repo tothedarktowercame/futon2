@@ -54,23 +54,23 @@
                          :rank 1
                          :retrieval-source "futon3a"}]})})
 
-(deftest evidence-base-configuration-keeps-live-loopback-addressable-test
+(deftest evidence-base-configuration-pins-stack-wide-precedence-test
   (is (= "http://127.0.0.1:7070"
          (pr/configured-evidence-base {}))
       "the default must reach the IPv4-bound production Evidence Landscape")
-  (is (= "http://127.0.0.1:7099"
-         (pr/configured-evidence-base
-          {"FUTON3C_PORT" "7099"
-           "FUTON3C_EVIDENCE_BASE" "https://public.example"}))
-      "a declared local listener avoids an unavailable public NAT hairpin")
   (is (= "https://evidence.example"
          (pr/configured-evidence-base
-          {"FUTON3C_EVIDENCE_BASE" "https://evidence.example"})))
+          {"FUTON3C_PORT" "7099"
+           "FUTON3C_SERVER" "https://server.example"
+           "FUTON3C_EVIDENCE_BASE" "https://evidence.example"}))
+      "the historical evidence-base override wins every fallback")
   (is (= "https://server.example"
          (pr/configured-evidence-base
           {"FUTON3C_SERVER" "https://server.example"
-           "FUTON3C_EVIDENCE_BASE" "https://evidence.example"
-           "FUTON3C_PORT" "7099"}))))
+           "FUTON3C_PORT" "7099"})))
+  (is (= "http://127.0.0.1:7099"
+         (pr/configured-evidence-base
+          {"FUTON3C_PORT" "7099"}))))
 
 (deftest aggregate-pattern-candidates-builds-bounded-ranking-test
   (let [patterns (pr/open-patterns sample-entries)]

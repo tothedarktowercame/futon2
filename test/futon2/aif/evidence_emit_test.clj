@@ -25,6 +25,25 @@
                       :expected-score 0.25}
    :wm-version {:trigger :duree-click-regulated}})
 
+(deftest emit-base-keeps-its-override-and-shares-read-fallback-order-test
+  (is (= "https://emit.example"
+         (evidence-emit/evidence-base
+          {"FUTON2_WM_EMIT_BASE" "https://emit.example"
+           "FUTON3C_EVIDENCE_BASE" "https://read.example"
+           "FUTON3C_SERVER" "https://server.example"
+           "FUTON3C_PORT" "7099"})))
+  (is (= "https://read.example"
+         (evidence-emit/evidence-base
+          {"FUTON3C_EVIDENCE_BASE" "https://read.example"
+           "FUTON3C_SERVER" "https://server.example"
+           "FUTON3C_PORT" "7099"})))
+  (is (= "https://server.example"
+         (evidence-emit/evidence-base
+          {"FUTON3C_SERVER" "https://server.example"
+           "FUTON3C_PORT" "7099"})))
+  (is (= "http://127.0.0.1:7099"
+         (evidence-emit/evidence-base {"FUTON3C_PORT" "7099"}))))
+
 (deftest evidence-entry-shape-test
   (testing "WM ticks become compact coordination step evidence"
     (let [entry (evidence-emit/evidence-entry sample-tick)

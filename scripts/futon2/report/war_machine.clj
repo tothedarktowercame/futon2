@@ -73,9 +73,7 @@
 
 (def ^:private home (System/getProperty "user.home"))
 (def ^:private futon3c-url
-  (or (System/getenv "FUTON3C_EVIDENCE_BASE")
-      (System/getenv "FUTON3C_SERVER")
-      (str "http://localhost:" (or (System/getenv "FUTON3C_PORT") "7070"))))
+  (pattern-registry/configured-evidence-base))
 (def ^:private tz (ZoneId/of "Europe/London"))
 (def ^:private futon5a-root (str home "/code/futon5a"))
 (def ^:private strategic-vocabulary-path
@@ -795,7 +793,8 @@
     ;; delta-t's one-arity default is 200, below the live mission-doc census;
     ;; a truncated type fetch silently turns later missions into nil-phase
     ;; "unknown" entries. Match the judge's complete mission-doc read.
-    (f mission-endpoint {:limit 500})
+    (f mission-endpoint {:limit 500
+                         :families ["code/v05/mission-doc"]})
     {:delta-T 0.0}))
 
 (defn- related-mission-endpoints

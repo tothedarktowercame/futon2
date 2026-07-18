@@ -2,10 +2,11 @@
   "Best-effort Evidence Landscape emitter for War Machine ticks.
 
    Disabled by default. Set FUTON2_WM_EMIT_EVIDENCE to 1/true/yes/on to POST
-   compact tick summaries to {FUTON3C_EVIDENCE_BASE:-http://localhost:7070}."
+   compact tick summaries to {FUTON3C_EVIDENCE_BASE:-http://127.0.0.1:7070}."
   (:require [babashka.http-client :as http]
             [cheshire.core :as json]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [futon2.aif.pattern-registry :as pattern-registry])
   (:import (java.time Instant)))
 
 (def ^:private evidence-path "/api/alpha/evidence")
@@ -23,10 +24,10 @@
   "Where WM tick evidence is POSTed. FUTON2_WM_EMIT_BASE takes precedence so the emit
    target can differ from the WM's READ base (FUTON3C_EVIDENCE_BASE) — e.g. emit to the
    server the web viewer reads, while the tick still reads its own local store."
-  []
-  (or (not-empty (System/getenv "FUTON2_WM_EMIT_BASE"))
-      (not-empty (System/getenv "FUTON3C_EVIDENCE_BASE"))
-      "http://localhost:7070"))
+  ([] (evidence-base (System/getenv)))
+  ([env]
+   (or (not-empty (get env "FUTON2_WM_EMIT_BASE"))
+       (pattern-registry/configured-evidence-base env))))
 
 (defn- evidence-url
   [base]
