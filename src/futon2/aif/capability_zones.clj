@@ -1,9 +1,10 @@
 (ns futon2.aif.capability-zones
   "Capability-zone membership in the shared BGE embedding space.
 
-  The distance is plain cosine and is explicitly an :interim-metric while the
-  ground metric remains :held by M-substrate-metric.  This namespace consumes
-  that hold; it does not introduce a competing ground metric."
+  Raw-space distance is plain cosine and is explicitly an :interim-metric.
+  The operative pca3-v1 partition uses Euclidean distance tagged
+  :interim-metric-3d. The ground metric remains :held by M-substrate-metric;
+  this namespace consumes that hold and does not introduce a competing one."
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]))
 
@@ -77,3 +78,75 @@
          :runner-up (:class runner)
          :metric :interim-metric}
         {:metric :interim-metric}))))
+
+(defn transform-3d
+  "Apply an inspectable PCA-3 reduction artifact to EMBEDDING.
+  Pure matrix math: each coordinate is one component dot (v - mean)."
+  [reduction embedding]
+  (let [mean (or (:mean reduction) (get reduction "mean"))
+        components (or (:components reduction) (get reduction "components"))]
+    (when-not (= (count mean) (count embedding))
+      (throw (ex-info "Reduction and embedding dimensions differ"
+                      {:mean (count mean) :embedding (count embedding)})))
+    (when-not (= 3 (count components))
+      (throw (ex-info "Reduction must have exactly three components"
+                      {:components (count components)})))
+    (let [centered (mapv - embedding mean)]
+      (mapv (fn [component]
+              (when-not (= (count component) (count centered))
+                (throw (ex-info "PCA component dimension differs"
+                                {:component (count component)
+                                 :embedding (count centered)})))
+              (reduce + (map * component centered)))
+            components))))
+
+(defn operative-seed
+  "Select the S1.5 operative seed generation for one seed record."
+  [seed]
+  (let [centroid? (pos? (long (or (:centroid_evidence_count seed) 0)))]
+    {:class (keyword (:class seed))
+     :generation (if centroid? :centroid-seed :text-seed)
+     :vector (if centroid? (:centroid_seed seed) (:text_seed seed))}))
+
+(defn seeds-3d
+  "Transform operative action-class seeds into the versioned 3-D space."
+  [reduction seeds]
+  (mapv (fn [seed]
+          (let [{:keys [class generation vector]} (operative-seed seed)]
+            {:class class :generation generation
+             :point (transform-3d reduction vector)}))
+        seeds))
+
+(defn- euclidean [a b]
+  (Math/sqrt (double (reduce + (map (fn [x y]
+                                      (let [d (- (double x) (double y))]
+                                        (* d d)))
+                                    a b)))))
+
+(defn zone-of-3d
+  "Assign V to the nearest operative seed in PCA-3 Euclidean space.
+
+  SEEDS-3D are produced by `seeds-3d`. Margin is runner-up distance minus
+  nearest distance and is always reported; callers own resistance thresholds."
+  [reduction seeds-3d-records v]
+  (let [point (transform-3d reduction v)
+        version (or (:version reduction) (get reduction "version"))
+        ranked (->> seeds-3d-records
+                    (map (fn [{seed-point :point :as seed}]
+                           (assoc seed :distance (euclidean seed-point point))))
+                    (sort-by (juxt :distance (comp name :class)))
+                    vec)]
+    (when (< (count ranked) 2)
+      (throw (ex-info "At least two 3-D seeds are required"
+                      {:seed-count (count ranked)})))
+    (let [top (first ranked) runner (second ranked)]
+      (with-meta
+        {:class (:class top)
+         :distance (:distance top)
+         :margin (- (:distance runner) (:distance top))
+         :runner-up (:class runner)
+         :point point
+         :reduction-version version
+         :metric :interim-metric-3d}
+        {:metric :interim-metric-3d
+         :reduction-version version}))))
