@@ -34,12 +34,19 @@ web/war-machine/resources/public/data/affect-events.json
 !resources/
 resources/*
 !resources/sorrys.edn
+!resources/capability_zones/
 
 # local file that shouldn't be tracked here
 LICENSE
 
 # Added 2026-05-26 by street-sweeper Phase B (allostatic-relief for INV-13 rejects)
-data/
+# data/* (not data/) so the M-capability-zones harvest artifact can be
+# whitelisted below; intermediates (harvest-prepared, embed-checkpoints)
+# stay ignored.
+data/*
+!data/capability_zones/
+data/capability_zones/*
+!data/capability_zones/harvest-2026-07-19.edn
 logs/
 *~arxana~
 

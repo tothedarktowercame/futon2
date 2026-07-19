@@ -176,6 +176,13 @@
       base
       (assoc base :n-followthrough-observed n-followthrough))))
 
+(defn next-update-record
+  "Named public entry point for producing a `wm-hyperparameter-update` record.
+  This is the same pure Beta update as `next-record`; the explicit name keeps
+  artifact-producing callers separate from the persistence API."
+  [class prior-entry n-emissions n-followthrough opts]
+  (next-record class prior-entry n-emissions n-followthrough opts))
+
 ;; ---------------------------------------------------------------------------
 ;; XTDB bootstrap-replay
 ;; ---------------------------------------------------------------------------
