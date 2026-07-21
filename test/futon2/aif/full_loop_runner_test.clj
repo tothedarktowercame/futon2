@@ -1121,10 +1121,182 @@
           :queue-fn #(swap! queued conj %)})]
     (is (= :agent-unavailable (:outcome result)))
     (is (= :agent-readiness-failed (get-in result [:data :failure-kind])))
+    (is (= :unreachable (get-in result [:data :failure-detail])))
     (is (= :environmental-hold (:repair-class (first @findings))))
     (is (= :none (get-in (first @queued) [:achievement :tier])))
     (is (= #{:selection :construction :dispatch :build :adjudication}
            (set (keys (:checkpoints result)))))))
+
+(defn- readiness-run-opts [phases roster-fn]
+  {:cohort? false
+   :phase-log-fn #(swap! phases conj %)
+   :roster-fn roster-fn
+   :code-state-fn (fn [] {:repo "/futon2" :git-sha "head"
+                          :git-dirty? false :repo-heads {}})
+   :refresh-fn (fn [])
+   :repair-open-fn (constantly [])
+   :repair-system-record-fn
+   (fn [finding] (assoc finding :repair/id "repair-readiness"))
+   :queue-fn identity
+   :judge-fn
+   (fn [_]
+     {:judgement (assoc judgement
+                        :ranked-actions []
+                        :admissible-actions []
+                        :decision {:action :abstain})})})
+
+(deftest restored-agent-is-woken-once-before-readiness-proceeds
+  (let [phases (atom [])
+        roster-calls (atom 0)
+        wake-calls (atom [])
+        restored {:zai-5 {:status "restored" :invoke-ready? true}
+                  :codex-7 {:status "idle" :invoke-ready? true}}
+        idle (assoc-in restored [:zai-5 :status] "idle")
+        opts (merge
+              (readiness-run-opts
+               phases
+               (fn [_]
+                 (if (= 1 (swap! roster-calls inc)) restored idle)))
+              {:wake-agent-fn
+               (fn [_ agent]
+                 (swap! wake-calls conj agent)
+                 {:ok true})
+               :substrate-preflight-fn (fn [_] {:route :test})})
+        result (runner/run-opportunity! opts)
+        readiness-end (first (filter #(and (= :agent-readiness (:phase %))
+                                            (= :end (:transition %)))
+                                     @phases))]
+    (is (= :abstained (:outcome result))
+        "woken author passes readiness and reaches the injected abstention")
+    (is (= ["zai-5"] @wake-calls) "exactly one whistle is attempted")
+    (is (= 2 @roster-calls) "the roster is observed once, then rechecked once")
+    (is (= :ok (:outcome readiness-end)))
+    (is (true? (:readiness/wake-attempted readiness-end)))
+    (is (= :woken (:readiness/wake-result readiness-end)))))
+
+(deftest restored-agent-no-reply-retains-unavailable-vocabulary-and-detail
+  (let [phases (atom [])
+        roster-calls (atom 0)
+        wake-calls (atom 0)
+        restored {:zai-5 {:status "restored" :invoke-ready? true}
+                  :codex-7 {:status "idle" :invoke-ready? true}}
+        opts (merge
+              (readiness-run-opts
+               phases
+               (fn [_] (swap! roster-calls inc) restored))
+              {:wake-agent-fn (fn [& _] (swap! wake-calls inc) nil)})
+        result (runner/run-opportunity! opts)
+        readiness-end (first (filter #(and (= :agent-readiness (:phase %))
+                                            (= :end (:transition %)))
+                                     @phases))]
+    (is (= :agent-unavailable (:outcome result)))
+    (is (= :agent-unavailable (get-in result [:data :failure-kind])))
+    (is (= :restored-unwoken (get-in result [:data :failure-detail])))
+    (is (= 1 @wake-calls))
+    (is (= 2 @roster-calls))
+    (is (= :no-reply (:readiness/wake-result readiness-end)))))
+
+(deftest substrate-readiness-has-two-fixed-retries
+  (let [calls (atom 0)
+        sleeps (atom [])
+        phases (atom [])
+        opts {:phase-log-fn #(swap! phases conj %)
+              :substrate-preflight-fn
+              (fn [_]
+                (if (< (swap! calls inc) 3)
+                  (throw (ex-info "transient" {}))
+                  {:route :test}))
+              :readiness-sleep-fn #(swap! sleeps conj %)}
+        recovered (runner/run-phase!
+                   opts {} :substrate-preflight
+                   #(runner/substrate-readiness! opts)
+                   #(select-keys % [:readiness/substrate-transient]))
+        phase-end (last @phases)]
+    (is (= {:route :test :readiness/substrate-transient true} recovered))
+    (is (= 3 @calls))
+    (is (= [5000 5000] @sleeps))
+    (is (= :ok (:outcome phase-end)))
+    (is (true? (:readiness/substrate-transient phase-end))))
+  (let [calls (atom 0)
+        sleeps (atom [])
+        failure (try
+                  (runner/substrate-readiness!
+                   {:substrate-preflight-fn
+                    (fn [_]
+                      (swap! calls inc)
+                      (throw (ex-info "still down" {})))
+                    :readiness-sleep-fn #(swap! sleeps conj %)})
+                  nil
+                  (catch clojure.lang.ExceptionInfo e e))]
+    (is (= :substrate-unavailable (:outcome (ex-data failure))))
+    (is (= :transient-exhausted (:failure-detail (ex-data failure))))
+    (is (= 3 @calls))
+    (is (= [5000 5000] @sleeps))))
+
+(deftest exhausted-substrate-retries-close-with-existing-kind-and-new-detail
+  (let [phases (atom [])
+        calls (atom 0)
+        findings (atom [])
+        opts (merge
+              (readiness-run-opts
+               phases
+               (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
+                        :codex-7 {:status "idle" :invoke-ready? true}}))
+              {:substrate-preflight-fn
+               (fn [_]
+                 (swap! calls inc)
+                 (throw (ex-info "substrate down" {})))
+               :readiness-sleep-fn (fn [_])
+               :repair-system-record-fn
+               (fn [finding]
+                 (swap! findings conj finding)
+                 (assoc finding :repair/id "repair-substrate"))})
+        result (runner/run-opportunity! opts)]
+    (is (= :substrate-unavailable (:outcome result)))
+    (is (= :substrate-unavailable (get-in result [:data :failure-kind])))
+    (is (= :transient-exhausted (get-in result [:data :failure-detail])))
+    (is (= :transient-exhausted
+           (get-in (first @findings) [:failure-data :failure-detail])))
+    (is (= 3 @calls))))
+
+(deftest invoking-agent-remains-busy-without-a-wake-attempt
+  (let [phases (atom [])
+        wake-calls (atom 0)
+        result
+        (runner/run-opportunity!
+         (merge
+          (readiness-run-opts
+           phases
+           (fn [_] {:zai-5 {:status "invoking" :invoke-ready? true}
+                    :codex-7 {:status "idle" :invoke-ready? true}}))
+          {:wake-agent-fn (fn [& _] (swap! wake-calls inc))}))]
+    (is (= :agent-unavailable (:outcome result)))
+    (is (= :busy (get-in result [:data :failure-detail])))
+    (is (zero? @wake-calls))))
+
+(deftest healthy-readiness-paths-retain-original-values
+  (let [roster {:zai-5 {:status "idle" :invoke-ready? true}}
+        roster-calls (atom 0)
+        wake-calls (atom 0)
+        agent-result (runner/agent-readiness!
+                      {:agency-base "http://test"
+                       :roster-fn (fn [_] (swap! roster-calls inc) roster)
+                       :wake-agent-fn (fn [& _] (swap! wake-calls inc))}
+                      "zai-5")
+        healthy {:route :test}
+        substrate-calls (atom 0)
+        substrate-result
+        (runner/substrate-readiness!
+         {:substrate-preflight-fn
+          (fn [_] (swap! substrate-calls inc) healthy)
+          :readiness-sleep-fn
+          (fn [_] (throw (ex-info "healthy path must not sleep" {})))})]
+    (is (= roster (:roster agent-result)))
+    (is (= :not-needed (:readiness/wake-result agent-result)))
+    (is (= 1 @roster-calls))
+    (is (zero? @wake-calls))
+    (is (= healthy substrate-result))
+    (is (= 1 @substrate-calls))))
 
 (deftest flat-leading-g-stops-before-spending-an-agent-turn
   (let [dispatches (atom [])

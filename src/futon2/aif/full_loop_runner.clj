@@ -41,6 +41,8 @@
 (def discrimination-epsilon 1.0e-6)
 (def artifact-window-tolerance-ms (* 2 60 1000))
 (def default-build-cure-retries 1)
+(def readiness-wake-timeout-ms 30000)
+(def substrate-retry-delay-ms 5000)
 
 (defn config
   ([] (config {}))
@@ -91,20 +93,25 @@
 
 (defn run-phase!
   "Run thunk with start/end telemetry; errors are logged and rethrown."
-  [opts context phase thunk]
-  (let [started (System/currentTimeMillis)]
-    (emit-phase! opts context {:phase phase :transition :start})
-    (try
-      (let [result (thunk)]
-        (emit-phase! opts context {:phase phase :transition :end :outcome :ok
-                                   :duration-ms (- (System/currentTimeMillis) started)})
-        result)
-      (catch Throwable e
-        (emit-phase! opts context {:phase phase :transition :end :outcome :error
-                                   :duration-ms (- (System/currentTimeMillis) started)
-                                   :error-class (.getName (class e))
-                                   :error (.getMessage e)})
-        (throw e)))))
+  ([opts context phase thunk]
+   (run-phase! opts context phase thunk nil))
+  ([opts context phase thunk result->event]
+   (let [started (System/currentTimeMillis)]
+     (emit-phase! opts context {:phase phase :transition :start})
+     (try
+       (let [result (thunk)
+             detail (if result->event (or (result->event result) {}) {})]
+         (emit-phase! opts context
+                      (merge {:phase phase :transition :end :outcome :ok
+                              :duration-ms (- (System/currentTimeMillis) started)}
+                             detail))
+         result)
+       (catch Throwable e
+         (emit-phase! opts context {:phase phase :transition :end :outcome :error
+                                    :duration-ms (- (System/currentTimeMillis) started)
+                                    :error-class (.getName (class e))
+                                    :error (.getMessage e)})
+         (throw e))))))
 
 (defn- sha256 [x]
   (let [bytes (.digest (MessageDigest/getInstance "SHA-256")
@@ -249,9 +256,68 @@
                       {:outcome :agent-unavailable :status (:status r)})))
     (:agents (json/parse-string (:body r) true))))
 
+(defn- agent-record [roster agent]
+  (or (get roster (keyword agent)) (get roster agent)))
+
 (defn- available? [roster agent]
-  (let [a (or (get roster (keyword agent)) (get roster agent))]
+  (let [a (agent-record roster agent)]
     (and a (true? (:invoke-ready? a)) (= "idle" (name (:status a))))))
+
+(defn- restored? [roster agent]
+  (some-> (agent-record roster agent) :status name (= "restored")))
+
+(defn- agent-failure-detail [roster agent]
+  (let [status (some-> (agent-record roster agent) :status name)]
+    (cond
+      (= "restored" status) :restored-unwoken
+      (= "invoking" status) :busy
+      :else :unreachable)))
+
+(defn wake-agent!
+  "Send one bounded readiness whistle to an invoke-ready restored agent."
+  [opts agent]
+  (let [r (http/post (str (:agency-base opts) "/api/alpha/whistle")
+                     {:headers {"Content-Type" "application/json"}
+                      :body (json/generate-string
+                             {:agent-id agent
+                              :caller "wm-full-loop"
+                              :prompt "ping: readiness wake check - reply ok"
+                              :timeout-ms readiness-wake-timeout-ms})
+                      :timeout readiness-wake-timeout-ms
+                      :throw false})]
+    (when (<= 200 (:status r) 299)
+      (try (json/parse-string (:body r) true)
+           (catch Throwable _ {:ok true :raw (:body r)})))))
+
+(defn- wake-restored-agent!
+  "Wake `agent` only when its observed status is restored, then re-read roster."
+  [opts roster agent]
+  (if-not (restored? roster agent)
+    {:roster roster
+     :readiness/wake-attempted false
+     :readiness/wake-result :not-needed}
+    (do
+      (try
+        ((or (:wake-agent-fn opts) wake-agent!) opts agent)
+        (catch Throwable _ nil))
+      (let [refreshed (try
+                        ((or (:roster-fn opts) agent-roster) (:agency-base opts))
+                        (catch Throwable _ roster))]
+        {:roster refreshed
+         :readiness/wake-attempted true
+         :readiness/wake-result (if (available? refreshed agent)
+                                  :woken
+                                  :no-reply)}))))
+
+(defn agent-readiness!
+  "Observe one required agent and attempt one wake when it is restored."
+  [opts agent]
+  (let [roster ((or (:roster-fn opts) agent-roster) (:agency-base opts))]
+    (wake-restored-agent! opts roster agent)))
+
+(defn- readiness-event [result]
+  (select-keys result [:readiness/wake-attempted :readiness/wake-result
+                       :readiness/substrate-transient]))
 
 (defn readiness
   "Read-only readiness view for the configured author and reviewer roles."
@@ -292,6 +358,39 @@
                          :url (substrate/configured-url opts)
                          :cause-class (.getName (class e))}
                         e))))))
+
+(defn- substrate-attempt [probe-fn opts]
+  (try
+    {:value (probe-fn opts)}
+    (catch Throwable e {:error e})))
+
+(defn substrate-readiness!
+  "Run one substrate probe plus exactly two delayed retries before failing."
+  [opts]
+  (let [probe-fn (or (:substrate-preflight-fn opts) substrate-preflight!)
+        sleep-fn (or (:readiness-sleep-fn opts) #(Thread/sleep %))
+        first-attempt (substrate-attempt probe-fn opts)]
+    (if-not (:error first-attempt)
+      (:value first-attempt)
+      (do
+        (sleep-fn substrate-retry-delay-ms)
+        (let [second-attempt (substrate-attempt probe-fn opts)]
+          (if-not (:error second-attempt)
+            (assoc (:value second-attempt) :readiness/substrate-transient true)
+            (do
+              (sleep-fn substrate-retry-delay-ms)
+              (let [third-attempt (substrate-attempt probe-fn opts)]
+                (if-not (:error third-attempt)
+                  (assoc (:value third-attempt) :readiness/substrate-transient true)
+                  (let [cause (:error third-attempt)]
+                    (throw
+                     (ex-info "Authoritative substrate preflight failed after retries"
+                              (merge (ex-data cause)
+                                     {:outcome :substrate-unavailable
+                                      :failure-kind :substrate-unavailable
+                                      :failure-stage :substrate-preflight
+                                      :failure-detail :transient-exhausted})
+                              cause))))))))))))
 
 (defn- post-json! [url body]
   (let [r (http/post url {:headers {"Content-Type" "application/json"}
@@ -1187,10 +1286,10 @@
         roster-result (try
                         {:value
                          (run-phase! opts @phase-context :agent-readiness
-                                     #((or (:roster-fn opts) agent-roster)
-                                       (:agency-base opts)))}
+                                     #(agent-readiness! opts author)
+                                     readiness-event)}
                         (catch Throwable e {:error e}))
-        roster (:value roster-result)
+        roster (get-in roster-result [:value :roster])
         code-state-result (try
                             {:value
                              (run-phase! opts @phase-context :code-state
@@ -1361,7 +1460,8 @@
         (throw (ex-info "Agent readiness observation failed"
                         {:outcome :agent-unavailable
                          :failure-kind :agent-readiness-failed
-                         :failure-stage :agent-readiness}
+                         :failure-stage :agent-readiness
+                         :failure-detail :unreachable}
                         e)))
       (when-let [e (:error code-state-result)]
         (throw (ex-info "Stack code-state observation failed"
@@ -1371,9 +1471,14 @@
                         e)))
       (when-not (available? roster author)
         (throw (ex-info "Configured author is unavailable"
-                        {:outcome :agent-unavailable :author author})))
+                        {:outcome :agent-unavailable
+                         :failure-kind :agent-unavailable
+                         :failure-stage :agent-readiness
+                         :failure-detail (agent-failure-detail roster author)
+                         :author author})))
       (run-phase! opts @phase-context :substrate-preflight
-                  #((or (:substrate-preflight-fn opts) substrate-preflight!) opts))
+                  #(substrate-readiness! opts)
+                  readiness-event)
       (run-phase! opts @phase-context :preference-refresh
                   #(try ((or (:refresh-fn opts) cv/maybe-refresh!))
                         (catch Throwable _ nil)))
@@ -1473,14 +1578,26 @@
           (throw (ex-info "War Machine abstained or selected no addressable action"
                           {:outcome (if (= :abstain (get-in judgement [:decision :action]))
                                       :abstained :no-selection)})))
-        (when (or (= author reviewer) (not (available? roster reviewer)))
-          (throw (ex-info "Selected reviewer is unavailable or is the author"
-                          {:outcome :agent-unavailable
-                           :failure-kind :agent-unavailable
-                           :failure-stage :agent-readiness
-                           :author author :reviewer reviewer
-                           :review-role (if repair-action?
-                                          :ground-control :ordinary)})))
+        (let [reviewer-roster
+              (if (restored? roster reviewer)
+                (:roster
+                 (run-phase! opts @phase-context :agent-readiness
+                             #(wake-restored-agent! opts roster reviewer)
+                             readiness-event))
+                roster)]
+          (when (or (= author reviewer)
+                    (not (available? reviewer-roster reviewer)))
+            (throw (ex-info "Selected reviewer is unavailable or is the author"
+                            {:outcome :agent-unavailable
+                             :failure-kind :agent-unavailable
+                             :failure-stage :agent-readiness
+                             :failure-detail (if (= author reviewer)
+                                               :busy
+                                               (agent-failure-detail reviewer-roster
+                                                                     reviewer))
+                             :author author :reviewer reviewer
+                             :review-role (if repair-action?
+                                            :ground-control :ordinary)}))))
         (when (and discrimination (not (:passes? discrimination)))
           (throw (ex-info "Leading feasible policies have no G discrimination"
                           {:outcome :policy-nondiscrimination
@@ -1924,6 +2041,7 @@
                        :feature-card-invalid-reason
                        (:feature-card-invalid-reason failure)
                        :feature-card-source (:feature-card-source failure)
+                       :failure-detail (:failure-detail failure)
                        :failure-stage (or (:failure-stage failure)
                                           (last-error-phase @phase-events))
                        :error (.getMessage e)
