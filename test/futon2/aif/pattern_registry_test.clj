@@ -197,5 +197,5 @@
                            (map :target-class)
                            set)]
     (is (not (contains? learn-targets :fire-pattern)))
-    (is (seq learn-targets)
-        "other action classes are still gated, still surfaced as gaps")))
+    (is (contains? learn-targets :address-sorry))
+    (is (contains? learn-targets :open-mission))))

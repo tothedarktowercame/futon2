@@ -200,8 +200,8 @@
                            (map :target-class)
                            set)]
     (is (not (contains? learn-targets :open-mission)))
-    (is (seq learn-targets)
-        "other action classes are still gated, still surfaced as gaps")))
+    (is (contains? learn-targets :address-sorry))
+    (is (contains? learn-targets :fire-pattern))))
 
 (deftest sub-phase-keywords-do-not-terminally-classify-test
   ;; Mission statuses describe per-phase progress; a mid-line terminal keyword

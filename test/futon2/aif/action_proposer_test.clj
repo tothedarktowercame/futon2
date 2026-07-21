@@ -22,28 +22,17 @@
   (testing "bootstrap-proposer emits :learn-action-class for non-proposable action types"
     ;; Current state of substrate: :address-sorry, :open-mission, :fire-pattern
     ;; all return false from can-propose? → bootstrap should emit a
-    ;; :learn-action-class for at least one of them.
-    ;;
-    ;; Deduplication: when multiple gap classes share the same intrinsic-value
-    ;; (the Beta(1,1) prior = 0.5 for all), only one representative survives
-    ;; to avoid tripping the policy-nondiscrimination gate with a flat EFE
-    ;; landscape. The omitted classes are still modelled as gaps (their
-    ;; absence is the signal).
+    ;; :learn-action-class for each.
     (let [proposed (ap/propose ap/bootstrap-proposer dummy-state)
           learn-actions (filter #(= :learn-action-class (:type %)) proposed)
           target-classes (set (map :target-class learn-actions))]
-      (is (seq learn-actions)
-          "at least one :learn-action-class is surfaced")
-      (is (some #(contains? target-classes %)
-                [:address-sorry :open-mission :fire-pattern])
-          "the representative gap is one of the non-proposable classes")
+      (is (contains? target-classes :address-sorry))
+      (is (contains? target-classes :open-mission))
+      (is (contains? target-classes :fire-pattern))
       (is (not (contains? target-classes :no-op))
           ":no-op is always proposable, no gap")
       (is (not (contains? target-classes :learn-action-class))
-          ":learn-action-class is itself always proposable, no recursion")
-      ;; At prior (all 0.5), deduplication collapses to exactly one.
-      (is (= 1 (count learn-actions))
-          "at Beta(1,1) prior all gaps share 0.5; one representative remains"))))
+          ":learn-action-class is itself always proposable, no recursion"))))
 
 (deftest learn-actions-carry-intrinsic-value-test
   (testing "bootstrap-proposer assigns :intrinsic-value to :learn-action-class actions"
@@ -57,7 +46,7 @@
 (deftest learn-actions-intrinsic-value-tracks-atom-test
   (testing "R12 narrow-take-up: :intrinsic-value is sourced from the
             intrinsic-values atom, not the historical static 0.1"
-    ;; Empty atom → Beta(1,1) prior → 0.5; dedup collapses to one representative.
+    ;; Empty atom → Beta(1,1) prior → 0.5
     (let [learn-actions (->> (ap/propose ap/bootstrap-proposer dummy-state)
                              (filter #(= :learn-action-class (:type %))))]
       (is (every? #(= 0.5 (double (:intrinsic-value %))) learn-actions)
@@ -70,14 +59,14 @@
                        :alpha-post 5.0 :beta-post 1.0 :intrinsic-value-post 1.0
                        :n-emissions-in-window 4 :n-followthrough-in-window 4})
     (let [learn-actions (->> (ap/propose ap/bootstrap-proposer dummy-state)
-                             (filter #(= :learn-action-class (:type %))))]
-      ;; Now :address-sorry has 1.0 while others stay at 0.5: two distinct
-      ;; intrinsic-value bands → two gap-actions survive dedup.
-      (is (= 2 (count learn-actions))
-          "differentiated classes survive dedup: one at 1.0, one at 0.5")
-      (is (some #(= 1.0 (double (:intrinsic-value %))) learn-actions)
+                             (filter #(= :learn-action-class (:type %))))
+          by-class (into {} (map (juxt :target-class :intrinsic-value)
+                                 learn-actions))]
+      (is (= 1.0 (double (get by-class :address-sorry)))
           "atom posterior for :address-sorry is reflected in proposal")
-      (is (some #(= 0.5 (double (:intrinsic-value %))) learn-actions)
+      (is (= 0.5 (double (get by-class :open-mission)))
+          "other classes still at prior")
+      (is (= 0.5 (double (get by-class :fire-pattern)))
           "other classes still at prior"))))
 
 (deftest learn-actions-carry-rationale-test
@@ -85,33 +74,6 @@
     (let [learn-actions (->> (ap/propose ap/bootstrap-proposer dummy-state)
                              (filter #(= :learn-action-class (:type %))))]
       (is (every? string? (map :rationale learn-actions))))))
-
-(deftest gap-actions-deduplicated-by-intrinsic-value-test
-  (testing "gap-actions with identical intrinsic-value are deduplicated
-            to prevent policy-nondiscrimination (flat EFE landscape)"
-    ;; At prior (empty atom), all gap classes have intrinsic-value 0.5.
-    ;; Without dedup, N gaps × 0.5 = N identical candidates → discrimination
-    ;; gate fails. With dedup, exactly one representative survives.
-    (let [prior-actions (->> (ap/propose ap/bootstrap-proposer dummy-state)
-                             (filter #(= :learn-action-class (:type %))))]
-      (is (= 1 (count prior-actions))
-          "at Beta(1,1) prior all gaps share 0.5; one representative"))
-    ;; Differentiate two classes: now two distinct intrinsic-value bands.
-    (iv/apply-update! {:class :address-sorry
-                       :as-of "2026-06-01T00:00:00Z"
-                       :alpha-post 5.0 :beta-post 1.0 :intrinsic-value-post 0.8
-                       :n-emissions-in-window 4 :n-followthrough-in-window 4})
-    (iv/apply-update! {:class :open-mission
-                       :as-of "2026-06-01T00:00:01Z"
-                       :alpha-post 1.0 :beta-post 5.0 :intrinsic-value-post 0.2
-                       :n-emissions-in-window 4 :n-followthrough-in-window 0})
-    (let [diff-actions (->> (ap/propose ap/bootstrap-proposer dummy-state)
-                            (filter #(= :learn-action-class (:type %))))
-          values (map :intrinsic-value diff-actions)]
-      (is (= 3 (count diff-actions))
-          "three distinct bands (0.8, 0.5, 0.2) → three gap-actions")
-      (is (= (count values) (count (distinct values)))
-          "no two gap-actions share an intrinsic-value"))))
 
 ;; (The "registering can-propose?=true removes the gap" property is covered
 ;;  by `futon2.aif.sorry-registry-test/integration-bootstrap-no-longer-
