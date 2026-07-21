@@ -15,7 +15,7 @@
            [java.time Instant]))
 
 (def default-preregistration
-  "/home/joe/code/futon2/holes/labs/M-aif-full-loop-40/cohort.edn")
+  "/home/joe/code/futon2/holes/labs/M-aif-full-loop-41/cohort.edn")
 
 (def default-data-root "/home/joe/code/futon2/data/wm-full-loop")
 
