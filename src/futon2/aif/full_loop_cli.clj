@@ -7,6 +7,7 @@
             [clojure.string :as str]
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.full-loop-runner :as runner]
+            [futon2.aif.intrinsic-values :as iv]
             [futon2.aif.morning-brief :as brief]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.trace :as trace]))
@@ -695,6 +696,18 @@
 
 (defn -main [& args]
   (try
+    ;; Bootstrap-replay is the intrinsic-values ns contract ("on JVM startup
+    ;; the atom rehydrates"); without this call every fresh runner JVM scores
+    ;; gap classes at the Beta(1,1) prior regardless of deposited evidence.
+    ;; A store outage must not brick status/brief, so warn loudly instead of
+    ;; throwing — downstream, selection-discrimination catches flat posteriors.
+    (try
+      (iv/rehydrate-from-store!)
+      (catch Throwable t
+        (binding [*out* *err*]
+          (println "WARNING: intrinsic-values rehydrate-from-store! failed:"
+                   (ex-message t)
+                   "— continuing on in-memory prior; gap-class posteriors may be flat."))))
     (run-command! args)
     (finally
       ;; clojure.java.shell uses the non-daemon solo-agent executor. Without
