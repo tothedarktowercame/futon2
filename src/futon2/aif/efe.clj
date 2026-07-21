@@ -583,20 +583,38 @@
          ch-temp (if (map? c-temperature)
                    (fn [ch] (get c-temperature ch pref/default-c-temperature))
                    (constantly c-temperature))
-         g-risk (case risk-mode
-                       :kl
-                       (reduce +
-                               0.0
-                               (for [[ch spec] (pref/current-C)
-                                     :let [mu (get next-mean ch)
-                                           s2 (get next-var ch)]
-                                     :when (and mu s2)]
-                                 (* (double (get kcw ch kcw-default))
-                                    (pref/kl {:kind :gaussian :mu mu :sigma2 s2}
-                                             (pref/c-distribution spec
-                                                                  :temperature (ch-temp ch))))))
-                       (:preference-gap-score fe-on-predicted))
-         g-ambig (ambiguity next-var ambiguity-mode)
+         learn-action? (= :learn-action-class (:type action))
+         zone-evidence (when learn-action?
+                         (pref/capability-zone-evidence (:target-class action)))
+         zone-risk (if (:active? zone-evidence)
+                     (case risk-mode
+                       :kl (pref/kl
+                            {:kind :bernoulli
+                             :p (:predictive-probability zone-evidence)}
+                            (pref/c-distribution
+                             {:p1 (:load-weight zone-evidence)}
+                             :temperature (ch-temp pref/c-zone-load-key)))
+                       (Math/abs
+                        (- (double (:predictive-probability zone-evidence))
+                           (double (:load-weight zone-evidence)))))
+                     0.0)
+         channel-risk (case risk-mode
+                        :kl
+                        (reduce +
+                                0.0
+                                (for [[ch spec] (pref/current-C)
+                                      :let [mu (get next-mean ch)
+                                            s2 (get next-var ch)]
+                                      :when (and mu s2)]
+                                  (* (double (get kcw ch kcw-default))
+                                     (pref/kl {:kind :gaussian :mu mu :sigma2 s2}
+                                              (pref/c-distribution spec
+                                                                   :temperature (ch-temp ch))))))
+                        (:preference-gap-score fe-on-predicted))
+         g-risk (+ channel-risk zone-risk)
+         g-ambig (if learn-action?
+                   (:predictive-variance zone-evidence)
+                   (ambiguity next-var ambiguity-mode))
          g-info (predictability-bonus next-var)
          g-survival-base (homeostatic-pressure next-mean)
          g-structural-pressure (double (or (:structural-pressure-per-action action) 0.0))
@@ -760,7 +778,10 @@
         :controller-score g-total
         :time-pressure (double time-pressure)
         :horizon-steps (when multi (:horizon-steps multi))
-        :per-channel (:per-channel fe-on-predicted)}
+        :per-channel (cond-> (:per-channel fe-on-predicted)
+                       learn-action?
+                       (assoc pref/c-zone-load-key
+                              (assoc zone-evidence :risk zone-risk)))}
        graph-terms
        gap-terms)
        (star-map-contribution? graph-terms)
@@ -768,6 +789,10 @@
 
        (gap-contribution? gap-terms)
        (assoc :gap? true)
+
+       learn-action?
+       (assoc :c-zone-load (assoc zone-evidence :risk zone-risk)
+              :g-ambiguity-source :beta-predictive)
 
        ;; D-1d dark lane: the relocated term, as a log-prior bias for the R12
        ;; habit-prior seam in policy/select-action. Positive = preference-

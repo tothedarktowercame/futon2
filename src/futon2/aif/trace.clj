@@ -110,7 +110,7 @@
   (select-keys r [:action :G-risk :G-ambiguity :predictability-bonus :homeostatic-pressure
                   :structural-pressure :G-goal-outcome
                   :gap-exploration-bonus :graph-control-score :G-core :G-efe :score-provenance :risk-mode
-                  :ambiguity-mode
+                  :ambiguity-mode :g-ambiguity-source :c-zone-load
                   :goal-outcome-mode
                   :controller-augmentation :augmentation-terms
                   :graph-feasibility-penalty :graph-control-score-proxy
@@ -173,8 +173,10 @@
          action (B1, dark build, 2026-07-13).
     13 — records Morning Brief QA events applied through the live A-matrix
          belief update, the consumed event ids, and any events held because
-         their entity is outside the current belief domain (2026-07-14)."
-  13)
+         their entity is outside the current belief domain (2026-07-14).
+    14 — records capability-zone C load and Beta-predictive ambiguity provenance
+         for learn-action-class candidates (2026-07-21)."
+  14)
 
 (defn- futon2-git-version
   "Git identity of the futon2 checkout this JVM loaded its code from:

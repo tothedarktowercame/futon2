@@ -183,6 +183,8 @@
                  :G-risk 1.0 :G-ambiguity 2.0 :predictability-bonus 0.1 :homeostatic-pressure 0.2
                  :structural-pressure 0.3 :G-goal-outcome 0.4
                  :gap-exploration-bonus 0.5 :graph-control-score 0.6 :G-core 3.0
+                 :g-ambiguity-source :beta-predictive
+                 :c-zone-load {:class :survey :mass 4.0 :load-weight 0.75}
                  :risk-mode :kl :ambiguity-mode :gaussian-entropy
                  :predictability-control-mode :telemetry-only
                  :homeostatic-control-mode :telemetry-only
@@ -197,6 +199,11 @@
         (is (contains? kept k) (str k " must survive the strip")))
       (is (= :gaussian-entropy (:ambiguity-mode kept))
           "ambiguity-mode provenance survives the strip")
+      (is (= :beta-predictive (:g-ambiguity-source kept))
+          "learn-action ambiguity provenance survives the strip")
+      (is (= {:class :survey :mass 4.0 :load-weight 0.75}
+             (:c-zone-load kept))
+          "the named empirical C channel survives the strip")
       (is (= :telemetry-only (:predictability-control-mode kept)))
       (is (= :telemetry-only (:homeostatic-control-mode kept)))
       (is (= :policy-support (:graph-feasibility-mode kept)))

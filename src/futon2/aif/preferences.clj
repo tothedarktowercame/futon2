@@ -3,7 +3,8 @@
 
    Sourced from `war-machine-terminal-vocabulary.edn` :C/preferred,
    :C/avoided, :C/mode-prior, :G/pragmatic-fn. The data here is the
-   substrate the free-energy computation reads against.")
+   substrate the free-energy computation reads against."
+  (:require [futon2.aif.intrinsic-values :as iv]))
 
 (def preferences
   "Expected observation ranges from war-machine-terminal-vocabulary.edn :C/preferred.
@@ -132,6 +133,45 @@
    The flip to a fitted T is the operator's decision, not this default."
   0.1)
 
+(def c-zone-load-key
+  "Named preference channel for capability-zone evidence."
+  :c-zone-load)
+
+(defn capability-zone-evidence
+  "Return the native-currency inputs for a learn-action target class.
+
+   Load is posterior evidence mass alpha+beta-2, log-normalised against the
+   largest currently rehydrated class. The same posterior supplies the
+   Bernoulli predictive mean and outcome variance. An absent class degrades to
+   Beta(1,1); zero mass leaves the C channel inactive."
+  [target-class]
+  (let [posteriors (iv/current)
+        posterior (get posteriors target-class (iv/fresh-entry))
+        alpha (double (:alpha posterior))
+        beta (double (:beta posterior))
+        mass (max 0.0 (- (+ alpha beta) 2.0))
+        log-mass (Math/log1p mass)
+        max-log-mass (reduce max 0.0
+                             (map (fn [{:keys [alpha beta]}]
+                                    (Math/log1p
+                                     (max 0.0 (- (+ (double alpha)
+                                                    (double beta))
+                                                 2.0))))
+                                  (vals posteriors)))
+        load-weight (if (pos? max-log-mass)
+                      (/ log-mass max-log-mass)
+                      0.0)
+        p (/ alpha (+ alpha beta))]
+    {:channel c-zone-load-key
+     :class target-class
+     :alpha alpha
+     :beta beta
+     :mass mass
+     :load-weight load-weight
+     :predictive-probability p
+     :predictive-variance (* p (- 1.0 p))
+     :active? (pos? mass)}))
+
 (defn- sq [x] (* (double x) (double x)))
 
 (defn- std-normal-cdf
@@ -159,11 +199,20 @@
    - `{:becomes b}`   → `{:kind :bernoulli}` — target outcome b ∈ {0,1} (or
                         truthy/falsey); preference mass c* = 1/(1+e^(-1/T))
                         on the target (T→0 ⇒ c*→1, point-mass; T→∞ ⇒ 0.5).
+   - `{:p1 p}`        → `{:kind :bernoulli}` — explicit preference mass on
+                        outcome 1. Used when C itself is empirically measured.
 
    Opts: `:temperature` (default `default-c-temperature`)."
   [spec & {:keys [temperature] :or {temperature default-c-temperature}}]
   (let [t (double temperature)]
     (cond
+      (and (map? spec) (contains? spec :p1))
+      (let [p1 (double (:p1 spec))]
+        (when-not (<= 0.0 p1 1.0)
+          (throw (ex-info "c-distribution: :p1 must be in [0,1]"
+                          {:spec spec})))
+        {:kind :bernoulli :temperature t :p1 p1})
+
       (and (map? spec) (contains? spec :becomes))
       (let [target (if (or (= 0 (:becomes spec)) (false? (:becomes spec))) 0 1)
             c* (/ 1.0 (+ 1.0 (Math/exp (- (/ 1.0 (max t 1e-9))))))]
@@ -181,7 +230,7 @@
                  (* t* (- 1.0 (Math/exp (- (/ (- 1.0 hi) t*))))))]
         {:kind :range :lo lo :hi hi :temperature t* :log-z (Math/log z)})
 
-      :else (throw (ex-info "c-distribution: spec must be [lo hi] or {:becomes b}"
+      :else (throw (ex-info "c-distribution: unsupported preference specification"
                             {:spec spec})))))
 
 (defn log-preference

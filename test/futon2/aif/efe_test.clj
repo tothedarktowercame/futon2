@@ -426,13 +426,14 @@
       (is (= 0.0 (get-in (second ranked) [:action :structural-pressure-per-action]))))))
 
 (deftest intrinsic-value-can-make-learn-outrank-no-op-test
-  (testing ":learn-action-class with :intrinsic-value 0.1 outranks :no-op when in-distribution"
-    ;; healthy-obs has small preference-gap-score; :intrinsic-value 0.1 credit
-    ;; should be enough to push :learn-action-class below :no-op in controller-score
+  (testing ":learn-action-class credit can outweigh prior predictive ambiguity"
+    ;; Beta(1,1) contributes 0.25 outcome ambiguity. Credit above that amount
+    ;; still pulls the learn action below no-op in controller-score.
     (let [candidates [{:type :no-op}
                       {:type :learn-action-class :target-class :address-sorry
-                       :intrinsic-value 0.1}]
-          ranked (efe/rank-actions base-state candidates)
+                       :intrinsic-value 0.3}]
+          ranked (efe/rank-actions base-state candidates
+                                   {:ambiguity-mode :variance-sum})
           first-type (-> ranked first :action :type)]
       (is (= :learn-action-class first-type)
           "intrinsic credit should pull :learn-action-class to rank 1"))))

@@ -44,6 +44,13 @@
       (is (< (Math/abs (pref/kl {:kind :bernoulli :p c} dist)) 1e-12))
       (is (pos? (pref/kl {:kind :bernoulli :p 0.2} dist))))))
 
+(deftest empirical-bernoulli-c-distribution
+  (let [dist (pref/c-distribution {:p1 0.37})]
+    (is (= :bernoulli (:kind dist)))
+    (is (= 0.37 (:p1 dist))))
+  (is (thrown? clojure.lang.ExceptionInfo
+               (pref/c-distribution {:p1 1.1}))))
+
 (deftest gaussian-range-divergence-behaviour
   (let [dist (pref/c-distribution [0.4 0.6])]
     (testing "monotone in gap: further out-of-range ⇒ larger divergence"
