@@ -888,14 +888,23 @@
                  :failure-job-id (recovery-job-id finding)))
         stop-lines))
 
-(defn- author-prompt [{:keys [author reviewer batch-id]} target mission cascade-entry
-                      stop-lines]
+(defn- author-prompt [{:keys [author reviewer batch-id target-repository
+                             target-repository-head]}
+                      target mission cascade-entry stop-lines]
   (str author ": FULL-LOOP IMPLEMENTATION OPPORTUNITY. You are the author; "
        reviewer " is the independent reviewer.\n\n"
        "Implement one bounded, substantive advancement of the selected War Machine action. "
        "This is NOT a request for a fold-turn deposit, wiring diagram, report-only artifact, "
        "or prose claiming that work could be done. Change the actual mission/code world.\n\n"
        "SELECTED TARGET: " (pr-str target) "\n"
+       "TARGET REPOSITORY: " (pr-str target-repository) "\n"
+       "TARGET REPOSITORY BASE HEAD: " (pr-str target-repository-head) "\n"
+       "REPOSITORY ARTIFACT CONTRACT: Make and commit the complete parcel only in "
+       "TARGET REPOSITORY. The artifact gate observes only that repository. Paths and "
+       "actions nested in the mission record are context, not permission to commit in "
+       "another repository; a commit elsewhere is an artifact-binding mismatch. If the "
+       "target repository is unresolved or the parcel cannot be completed there, make no "
+       "commit and REFUSE with a typed reason.\n"
        "MISSION RECORD: " (pr-str mission) "\n"
        "PATTERN CASCADE: " (pr-str (select-keys cascade-entry
                                                   [:mission :psi :shown :semilattice
@@ -1734,7 +1743,10 @@
                 pre-author-head (when fresh-author?
                                   (observe-repo-head opts author-repo))
                 author-prompt-text
-                (author-prompt (assoc opts :reviewer reviewer)
+                (author-prompt (assoc opts
+                                      :reviewer reviewer
+                                      :target-repository author-repo
+                                      :target-repository-head (:head pre-author-head))
                                target mission construction stop-lines)
                 author-response
                 (run-phase! opts @phase-context :author-dispatch

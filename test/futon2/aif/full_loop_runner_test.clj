@@ -317,11 +317,29 @@
 
 (deftest author-contract-names-the-durable-feature-card-boundary
   (let [prompt (#'runner/author-prompt
-                {:author "author" :reviewer "reviewer"}
+                {:author "author" :reviewer "reviewer"
+                 :target-repository "/repo" :target-repository-head "base123"}
                 "target" {:id "target"} {} [])]
     (is (re-find #"BEGIN your response with one compact" prompt))
     (is (re-find #"at most 200 characters" prompt))
     (is (re-find #"closing brace is inside the 200-character limit" prompt))))
+
+(deftest author-contract-binds-work-to-the-observed-target-repository
+  (let [prompt (#'runner/author-prompt
+                {:author "author" :reviewer "reviewer"
+                 :target-repository "/home/joe/code/futon2"
+                 :target-repository-head "base123"}
+                "repair-artifact-binding"
+                {:selected-entry
+                 {:action
+                  {:mission-path
+                   "/home/joe/code/futon5a/holes/missions/M-learning-loop.md"}}}
+                {} [])]
+    (is (re-find #"TARGET REPOSITORY: \"/home/joe/code/futon2\"" prompt))
+    (is (re-find #"TARGET REPOSITORY BASE HEAD: \"base123\"" prompt))
+    (is (re-find #"nested in the mission record are context" prompt))
+    (is (re-find #"commit elsewhere is an artifact-binding mismatch" prompt))
+    (is (re-find #"make no commit and REFUSE" prompt))))
 
 (deftest grounded-author-feature-card-is-persisted-and-rendered
   (let [{:keys [result item fold-file proof-file]}
@@ -849,6 +867,7 @@
 
 (deftest narrated-artifact-without-new-repo-head-stops-before-review
   (let [dispatches (atom [])
+        author-prompts (atom [])
         findings (atom [])
         result
         (runner/run-opportunity!
@@ -870,8 +889,9 @@
               :text-artifact-ref (:artifact-ref author-job)
               :corroborates? false :disagreement? false :commit nil})
            :dispatch-fn
-           (fn [_ agent & _]
+           (fn [_ agent _caller _target prompt]
              (swap! dispatches conj agent)
+             (swap! author-prompts conj prompt)
              {:job-id "author-job"})
            :poll-fn
            (fn [& _] {:job-id "author-job" :state "done"
@@ -885,6 +905,9 @@
            (get-in result [:data :failure-kind])))
     (is (= ["zai-5"] @dispatches)
         "no reviewer is dispatched for an unobserved narrated artifact")
+    (is (re-find #"TARGET REPOSITORY: \"/repo\""
+                 (first @author-prompts))
+        "dispatch tells the author which repository the artifact gate observes")
     (is (= :machine-failure (:repair-class (first @findings))))
     (is (= :artifact-binding-mismatch
            (:failure-kind (first @findings))))))
