@@ -181,6 +181,66 @@
     (is (= "feature-author"
            (get-in result [:data :author-job :author-retries 0 :job-id])))))
 
+(deftest retry-prompt-and-artifact-gate-share-the-fresh-head
+  (let [head-observations (atom ["base-initial" "base-retry"])
+        author-prompts (atom [])
+        artifact-observer-inputs (atom [])
+        findings (atom [])
+        result
+        (runner/run-opportunity!
+         (merge
+          (isolated-runner-opts)
+          {:repair-open-fn (constantly [])
+           :trace-fn (constantly "/tmp/retry-repository-binding-trace.edn")
+           :construct-fn (fn [_] {:shown [] :policy-holes []})
+           :target-repo-fn (fn [& _] "/repo")
+           :repo-head-observation-fn
+           (fn [repo]
+             (let [head (first @head-observations)]
+               (swap! head-observations subvec 1)
+               {:repo repo :head head :observed-at-ms 1000}))
+           :author-artifact-observer-fn
+           (fn [repo before author-job]
+             (swap! artifact-observer-inputs conj
+                    {:repo repo :before before :author-job author-job})
+             {:fresh-author? true :repo repo
+              :pre-dispatch-head (:head before)
+              :observed-head (:head before)
+              :text-artifact-ref (:artifact-ref author-job)
+              :corroborates? false :disagreement? false :commit nil})
+           :dispatch-fn
+           (fn [_ agent _caller _target prompt]
+             (if (= agent "zai-5")
+               (let [n (inc (count @author-prompts))]
+                 (swap! author-prompts conj prompt)
+                 {:job-id (str "author-" n)})
+               {:job-id "unexpected-reviewer"}))
+           :poll-fn
+           (fn [_ job-id]
+             (case job-id
+               "author-1" {:job-id job-id :state "failed"
+                            :terminal-code "invoke-exception"
+                            :artifact-ref nil}
+               "author-2" {:job-id job-id :state "done"
+                            :artifact-ref "wrong-repo-commit"}
+               {:job-id job-id :state "done"}))
+           :repair-system-record-fn
+           (fn [finding]
+             (swap! findings conj finding)
+             (assoc finding :repair/id "repair-retry-binding"))}))]
+    (is (= :build-failed (:outcome result)))
+    (is (= :artifact-binding-mismatch
+           (get-in result [:data :failure-kind])))
+    (is (= 2 (count @author-prompts)))
+    (is (re-find #"TARGET REPOSITORY BASE HEAD: \"base-initial\""
+                 (first @author-prompts)))
+    (is (re-find #"TARGET REPOSITORY BASE HEAD: \"base-retry\""
+                 (second @author-prompts)))
+    (is (= "base-retry"
+           (get-in @artifact-observer-inputs [0 :before :head])))
+    (is (= :artifact-binding-mismatch
+           (:failure-kind (first @findings))))))
+
 (deftest agency-prefix-contract-preserves-a-text-feature-card
   (let [summary (str "FULL_LOOP_FEATURE_CARD: "
                      "{:built \"compact repair\" :want-coverage \"card survives\" "

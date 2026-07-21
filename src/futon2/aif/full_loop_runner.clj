@@ -1742,12 +1742,16 @@
                               (target-repository opts entry mission code-state))
                 pre-author-head (when fresh-author?
                                   (observe-repo-head opts author-repo))
+                prompt-for-head
+                (fn [head-observation]
+                  (author-prompt (assoc opts
+                                        :reviewer reviewer
+                                        :target-repository author-repo
+                                        :target-repository-head
+                                        (:head head-observation))
+                                 target mission construction stop-lines))
                 author-prompt-text
-                (author-prompt (assoc opts
-                                      :reviewer reviewer
-                                      :target-repository author-repo
-                                      :target-repository-head (:head pre-author-head))
-                               target mission construction stop-lines)
+                (prompt-for-head pre-author-head)
                 author-response
                 (run-phase! opts @phase-context :author-dispatch
                             #(if recovered-author-job
@@ -1794,6 +1798,9 @@
                        (author-infrastructure-failure? initial-author-job))
                   retry-pre-author-head
                   (when retry-author? (observe-repo-head opts author-repo))
+                  retry-author-prompt-text
+                  (when retry-author?
+                    (prompt-for-head retry-pre-author-head))
                   retry-response
                   (when retry-author?
                     (run-phase! opts @phase-context :author-retry-dispatch
@@ -1801,7 +1808,7 @@
                                    (swap! dispatched-turns inc)
                                    ((or (:dispatch-fn opts) dispatch!)
                                     opts author "wm-full-loop" target
-                                    author-prompt-text))))
+                                    retry-author-prompt-text))))
                   retry-job
                   (when retry-author?
                     (run-phase! opts @phase-context :author-retry-wait
