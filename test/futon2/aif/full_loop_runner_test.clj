@@ -72,7 +72,8 @@
 
 (defn- run-feature-card-attempt
   [{:keys [author-card author-summary grounded? artifacts? reviewer-execution
-           reviewer-events cure-card cure-summary cure-commit build-cure-retries]
+           reviewer-events cure-card cure-summary cure-commit build-cure-retries
+           initial-author-job]
     :or {grounded? true artifacts? false}}]
   (let [root (.toFile (java.nio.file.Files/createTempDirectory
                        "wm-feature-card-" (make-array java.nio.file.attribute.FileAttribute 0)))
@@ -119,11 +120,12 @@
                (fn [_ job-id]
                  (condp = job-id
                    "feature-author"
-                   (cond-> {:job-id job-id :state "done" :artifact-ref commit
-                            :result-summary (or author-summary
-                                                (str "FULL_LOOP_AUTHOR: DONE " commit))
-                            :execution successful-execution}
-                     author-card (assoc :feature-card author-card))
+                   (or initial-author-job
+                       (cond-> {:job-id job-id :state "done" :artifact-ref commit
+                                :result-summary (or author-summary
+                                                    (str "FULL_LOOP_AUTHOR: DONE " commit))
+                                :execution successful-execution}
+                         author-card (assoc :feature-card author-card)))
                    cure-id
                    (cond-> {:job-id job-id :state "done"
                             :artifact-ref (or cure-commit commit)
@@ -157,6 +159,27 @@
     {:result result :item (first @queued)
      :dispatches @dispatches
      :fold-file fold-file :proof-file proof-file}))
+
+(deftest invoke-exception-author-job-is-retried-once
+  ;; Replays attempt-043: Agency rejected transcript persistence after tool
+  ;; use. The failed job cannot count as work; a fresh dispatch must still
+  ;; produce a repository-observed commit before review can proceed.
+  (let [{:keys [result dispatches]}
+        (run-feature-card-attempt
+         {:author-card feature-card-claim
+          :cure-card feature-card-claim
+          :initial-author-job
+          {:job-id "feature-author"
+           :state "failed"
+           :artifact-ref nil
+           :terminal-code "invoke-exception"
+           :terminal-message "ZAI transcript persistence was rejected"
+           :events [{:type "failed" :code "invoke-exception"}]}})]
+    (is (= :grounded-change (:outcome result)))
+    (is (= ["zai-5" "zai-5" "codex-7"] dispatches)
+        "one replacement author is dispatched before independent review")
+    (is (= "feature-author"
+           (get-in result [:data :author-job :author-retries 0 :job-id])))))
 
 (deftest agency-prefix-contract-preserves-a-text-feature-card
   (let [summary (str "FULL_LOOP_FEATURE_CARD: "
@@ -983,6 +1006,20 @@
     (is (= :build-failed (:outcome result)))
     (is (= :machine-failure (:repair-class (first @findings))))
     (is (= ["zai-5"] @dispatches))))
+
+(deftest non-infrastructure-author-failure-is-not-retried
+  (let [dispatches (atom [])
+        findings (atom [])
+        result
+        (runner/run-opportunity!
+         (no-commit-author-opts
+          dispatches findings
+          {:job-id "author-job" :state "failed"
+           :terminal-code "agent-error"
+           :terminal-message "author process failed"}))]
+    (is (= :build-failed (:outcome result)))
+    (is (= ["zai-5"] @dispatches))
+    (is (= :build-failed (get-in result [:data :failure-kind])))))
 
 (deftest machine-stop-line-preempts-ordinary-selection-and-awaits-successor-validation
   (let [dispatches (atom [])

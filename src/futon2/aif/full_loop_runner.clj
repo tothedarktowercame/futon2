@@ -41,6 +41,7 @@
 (def discrimination-epsilon 1.0e-6)
 (def artifact-window-tolerance-ms (* 2 60 1000))
 (def default-build-cure-retries 1)
+(def default-author-infrastructure-retries 1)
 (def readiness-wake-timeout-ms 30000)
 (def substrate-retry-delay-ms 5000)
 
@@ -69,6 +70,7 @@
                  parsed (when env-val (try (Integer/parseInt env-val)
                                            (catch Exception _ nil)))]
              (or parsed default-build-cure-retries))
+           :author-infrastructure-retries default-author-infrastructure-retries
            :trigger :duree-click-on-demand
            :cohort? true
            :semantic-epoch semantic-epoch}
@@ -473,6 +475,20 @@
                                  Instant/ofEpochMilli str)}))
 
         :else (do (Thread/sleep poll-ms) (recur)))))))
+
+(defn author-infrastructure-failure?
+  "True only for an artifact-free Agency invocation failure. These failures
+  happen below the author contract, so the runner may retry them once without
+  accepting the failed job as authored work."
+  [job]
+  (let [event-code (some->> (:events job)
+                            (filter #(= "failed" (:type %)))
+                            last
+                            :code)
+        failure-code (or (:terminal-code job) event-code)]
+    (and (= "failed" (:state job))
+         (nil? (:artifact-ref job))
+         (= "invoke-exception" failure-code))))
 
 (defn- selected-entry [judgement]
   (let [action (get-in judgement [:decision :action])]
@@ -1717,6 +1733,9 @@
                               (target-repository opts entry mission code-state))
                 pre-author-head (when fresh-author?
                                   (observe-repo-head opts author-repo))
+                author-prompt-text
+                (author-prompt (assoc opts :reviewer reviewer)
+                               target mission construction stop-lines)
                 author-response
                 (run-phase! opts @phase-context :author-dispatch
                             #(if recovered-author-job
@@ -1728,9 +1747,7 @@
                                  (swap! dispatched-turns inc)
                                  ((or (:dispatch-fn opts) dispatch!) opts author
                                   "wm-full-loop" target
-                                  (author-prompt (assoc opts :reviewer reviewer)
-                                                 target mission construction
-                                                 stop-lines)))))
+                                  author-prompt-text))))
                 author-job-id (:job-id author-response)]
             (checkpoint! :dispatch
                          (term {:agent author
@@ -1745,7 +1762,7 @@
                                         :agency-recovered-completion
                                         :agency-dispatch)
                                 :response author-response}))
-            (let [author-job
+            (let [initial-author-job
                   (if recovered-author-job
                     recovered-author-job
                     (try
@@ -1758,13 +1775,47 @@
                                   (merge (ex-data e)
                                          {:failure-stage :author-wait
                                           :author-job-id author-job-id})
-                                  e)))))]
+                                  e)))))
+                  retry-author?
+                  (and fresh-author?
+                       (pos? (:author-infrastructure-retries opts 0))
+                       (author-infrastructure-failure? initial-author-job))
+                  retry-pre-author-head
+                  (when retry-author? (observe-repo-head opts author-repo))
+                  retry-response
+                  (when retry-author?
+                    (run-phase! opts @phase-context :author-retry-dispatch
+                                #(do
+                                   (swap! dispatched-turns inc)
+                                   ((or (:dispatch-fn opts) dispatch!)
+                                    opts author "wm-full-loop" target
+                                    author-prompt-text))))
+                  retry-job
+                  (when retry-author?
+                    (run-phase! opts @phase-context :author-retry-wait
+                                #((or (:poll-fn opts) poll-job!)
+                                  opts (:job-id retry-response))))
+                  author-retries
+                  (cond-> []
+                    retry-author?
+                    (conj (select-keys initial-author-job
+                                       [:job-id :state :terminal-code
+                                        :terminal-message])))
+                  author-job
+                  (cond-> (or retry-job initial-author-job)
+                    retry-author? (assoc :author-retries author-retries))
+                  effective-pre-author-head
+                  (if retry-author? retry-pre-author-head pre-author-head)]
               (when-not (= "done" (:state author-job))
                 (throw (ex-info "Author job did not complete"
-                                {:outcome :build-failed :author-job author-job})))
+                                (cond-> {:outcome :build-failed
+                                         :author-job author-job}
+                                  (seq author-retries)
+                                  (assoc :author-retries author-retries)))))
               (let [artifact-binding
                     (when fresh-author?
-                      (fresh-artifact-binding opts author-repo pre-author-head
+                      (fresh-artifact-binding opts author-repo
+                                              effective-pre-author-head
                                               author-job))
                     observed-commit (:commit artifact-binding)
                     text-commit (:artifact-ref author-job)
