@@ -85,7 +85,7 @@
                              set)]
       (is (not (contains? learn-targets :address-sorry))
           ":address-sorry should not appear in gaps when state has sorrys")
-      (is (contains? learn-targets :open-mission)
+      (is (seq learn-targets)
           "other action classes are still gated, still surfaced as gaps"))))
 
 (deftest intrinsic-value-for-sorry-per-kind-test

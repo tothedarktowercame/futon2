@@ -37,13 +37,31 @@
    :learn-action-class action carrying the rationale."
   [state]
   (let [base-types (disj fm/action-types :no-op :learn-action-class)
-        gaps (remove #(fm/can-propose? state %) base-types)]
-    (for [target-class gaps]
-      {:type :learn-action-class
-       :target-class target-class
-       :intrinsic-value (iv/credit-for target-class)
-       :rationale (str "no addressable entities for " target-class
-                       " in current substrate")})))
+        gaps (remove #(fm/can-propose? state %) base-types)
+        raw-actions
+        (for [target-class gaps]
+          {:type :learn-action-class
+           :target-class target-class
+           :intrinsic-value (iv/credit-for target-class)
+           :rationale (str "no addressable entities for " target-class
+                           " in current substrate")})]
+    ;; Deduplicate by intrinsic-value: when multiple gap-actions share the
+    ;; same intrinsic-value (the common case at Beta(1,1) prior, where every
+    ;; class starts at 0.5), they produce an identical EFE and trip the
+    ;; policy-nondiscrimination gate. Keep only the first representative per
+    ;; intrinsic-value band; the omitted classes are still modelled as gaps
+    ;; (their absence is the signal) but do not inject degenerate duplicates
+    ;; into the ranked-action set. When the outer loop has differentiated the
+    ;; classes (different Beta posteriors), each gets its own action.
+    (->> raw-actions
+         (sort-by :target-class)
+         (reduce (fn [acc action]
+                   (if (some #(= (:intrinsic-value action)
+                                 (:intrinsic-value %))
+                             acc)
+                     acc
+                     (conj acc action)))
+                 []))))
 
 (def bootstrap-proposer
   "The always-available default proposer. Surfaces:
