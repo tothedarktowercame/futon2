@@ -64,8 +64,11 @@
     (not (keyword? (:cohort/id p)))
     (conj :cohort-id-must-be-keyword)
 
-    (not= 40 (get-in p [:stopping-rule :target]))
-    (conj :target-must-be-40)
+    ;; The protocol invariant is a definite preregistered stopping target;
+    ;; its magnitude belongs to each cohort's document (was pinned to the
+    ;; first cohort's 40 before wm-outer-loop-41-v1).
+    (not (pos-int? (get-in p [:stopping-rule :target])))
+    (conj :target-must-be-positive-integer)
 
     (not= checkpoint-order (:checkpoint-order p))
     (conj :checkpoint-order-mismatch)
