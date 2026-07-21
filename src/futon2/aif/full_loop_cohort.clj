@@ -161,6 +161,21 @@
 (defn- format-attempt-id [n]
   (format "attempt-%03d" n))
 
+(defn- next-global-attempt-number
+  "Attempt ids must be unique across cohorts: every attempt-id-keyed store
+  (morning-brief items, reviews, repair obligations) is global, so a second
+  cohort reusing attempt-001 collides (observed 2026-07-21, cohort 41,
+  FileAlreadyExistsException on the brief item). Ordinals stay per-cohort;
+  only the id number is global."
+  [data-root]
+  (->> (or (.listFiles (io/file data-root)) [])
+       (filter #(.isDirectory %))
+       (mapcat #(attempt-dirs %))
+       (keep #(second (re-matches #"attempt-(\d+)" (.getName %))))
+       (map parse-long)
+       (reduce max 0)
+       inc))
+
 (defn- event-record [p attempt-id ordinal sequence checkpoint payload]
   {:event/schema-version 1
    :cohort/id (:cohort/id p)
@@ -208,7 +223,9 @@
            (when (> ordinal target)
              (throw (ex-info "cohort stopping rule reached"
                              {:target target :attempted (dec ordinal)})))
-           (let [attempt-id (format-attempt-id ordinal)
+           (let [attempt-id (format-attempt-id
+                             (max (next-global-attempt-number data-root)
+                                  (inc (count (attempt-dirs dir)))))
                  attempt-dir (io/file dir attempt-id)
                  event (event-record p attempt-id ordinal 1 :time-step cell)]
              (Files/createDirectory (.toPath attempt-dir)
