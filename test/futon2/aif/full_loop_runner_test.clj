@@ -1225,6 +1225,12 @@
                  {:action {:type :learn-action-class}
                   :G-efe nil :controller-score 11.0}])))))
 
+(deftest discharge-contracts-declare-backward-compatible-artifact-shape
+  (doseq [repair-class [:machine-failure :environmental-hold
+                        :incomplete-recoverable :unknown]]
+    (is (= :code-commit
+           (:artifact-shape (#'runner/discharge-contract repair-class))))))
+
 (deftest recoverable-late-author-completion-skips-second-author-turn
   (let [dispatches (atom [])
         resolutions (atom [])

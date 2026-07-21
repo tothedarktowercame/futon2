@@ -1142,16 +1142,18 @@
       :opportunity))
 
 (defn- discharge-contract [repair-class]
-  (case repair-class
-    :machine-failure
-    {:requires [:distinct-repair-commit :independent-review
-                :grounded-repair :distinct-production-shaped-successor]}
-    :environmental-hold
-    {:requires [:cleared-precondition :grounded-production-shaped-successor]}
-    :incomplete-recoverable
-    {:requires [:recover-existing-author-artifact :independent-review
-                :grounded-existing-commit]}
-    {:requires [:grounded-production-shaped-successor]}))
+  (assoc
+   (case repair-class
+     :machine-failure
+     {:requires [:distinct-repair-commit :independent-review
+                 :grounded-repair :distinct-production-shaped-successor]}
+     :environmental-hold
+     {:requires [:cleared-precondition :grounded-production-shaped-successor]}
+     :incomplete-recoverable
+     {:requires [:recover-existing-author-artifact :independent-review
+                 :grounded-existing-commit]}
+     {:requires [:grounded-production-shaped-successor]})
+   :artifact-shape :code-commit))
 
 (defn- recovery-job-id [obligation]
   (or (get-in obligation [:failure-data :job-id])

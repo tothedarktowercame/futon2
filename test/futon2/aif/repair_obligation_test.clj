@@ -1,5 +1,7 @@
 (ns futon2.aif.repair-obligation-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.java.shell :as shell]
+            [clojure.string :as str]
+            [clojure.test :refer [deftest is testing]]
             [futon2.aif.repair-obligation :as repair]))
 
 (defn- temp-root []
@@ -7,6 +9,18 @@
     (.delete f)
     (.mkdirs f)
     (.getPath f)))
+
+(def grounded-review
+  {:reviewer "reviewer" :review-job "review-job"
+   :witness {:resolved? true :dial-moved? true}})
+
+(defn- shaped-obligation [shape & [extra]]
+  (merge {:repair/id (str "repair-" (name shape))
+          :repair/status :open
+          :repair/class :machine-failure
+          :attempt-id "failed-attempt"
+          :discharge-contract {:artifact-shape shape}}
+         extra))
 
 (deftest finding-remains-open-until-grounded-successor-resolution
   (let [root (temp-root)
@@ -100,6 +114,115 @@
                                 :commit "bad123"
                                 :reviewer "reviewer" :review-job "review-2"
                                 :witness {:resolved? true :dial-moved? true}})))))
+
+(deftest artifact-shapes-validate-only-their-own-evidence
+  (testing "an absent shape remains the historical code-commit contract"
+    (let [root (temp-root)
+          obligation (dissoc (shaped-obligation :code-commit
+                                                {:failed-commit "bad123"})
+                             :discharge-contract)
+          record (repair/record-implementation!
+                  root obligation
+                  (merge grounded-review
+                         {:attempt-id "repair-code" :commit "good456"}))]
+      (is (= "good456" (:replacement-commit record)))
+      (is (nil? (:artifact-shape record)))))
+
+  (testing "code contracts reject deposit evidence"
+    (is (thrown? clojure.lang.ExceptionInfo
+                 (repair/record-implementation!
+                  (temp-root) (shaped-obligation :code-commit)
+                  (merge grounded-review
+                         {:attempt-id "wrong-code"
+                          :store-url "http://store" :record-type :records
+                          :count-before 1 :count-after 2
+                          :deposit-run-id "deposit-1"})))))
+
+  (testing "data contracts reject a bare commit"
+    (is (thrown? clojure.lang.ExceptionInfo
+                 (repair/record-implementation!
+                  (temp-root) (shaped-obligation :data-deposit)
+                  (merge grounded-review
+                         {:attempt-id "wrong-data" :commit "good456"})))))
+
+  (testing "spec contracts reject a bare commit"
+    (is (thrown? clojure.lang.ExceptionInfo
+                 (repair/record-implementation!
+                  (temp-root) (shaped-obligation :spec-document)
+                  (merge grounded-review
+                         {:attempt-id "wrong-spec" :commit "good456"}))))))
+
+(deftest data-deposit-validation-reads-current-count-without-writing
+  (let [root (temp-root)
+        reads (atom [])
+        obligation (shaped-obligation :data-deposit)
+        evidence {:store-url "http://read-only-store"
+                  :record-type :wm-hyperparameter-update
+                  :count-before 4 :count-after 7
+                  :deposit-run-id "deposit-run-7"}]
+    (binding [repair/*store-count-reader*
+              (fn [url record-type]
+                (swap! reads conj [url record-type])
+                7)]
+      (let [implementation
+            (repair/record-implementation!
+             root obligation
+             (merge grounded-review evidence {:attempt-id "repair-data"}))]
+        (repair/resolve!
+         root (assoc obligation
+                     :repair/status :awaiting-validation
+                     :repair/implementation implementation)
+         (merge grounded-review evidence
+                {:attempt-id "validate-data"
+                 :validation {:production-shaped? true}}))))
+    (is (= [["http://read-only-store" :wm-hyperparameter-update]
+            ["http://read-only-store" :wm-hyperparameter-update]]
+           @reads))
+    (testing "the declared after-count must match the independent store read"
+      (binding [repair/*store-count-reader* (fn [_ _] 6)]
+        (is (thrown? clojure.lang.ExceptionInfo
+                     (repair/record-implementation!
+                      (temp-root) obligation
+                      (merge grounded-review evidence
+                             {:attempt-id "stale-data-evidence"}))))))))
+
+(deftest spec-document-requires-ancestor-commit-that-touched-existing-path
+  (let [root (temp-root)
+        repo (temp-root)
+        path "repair-spec.md"
+        file (java.io.File. repo path)]
+    (is (zero? (:exit (shell/sh "git" "-C" repo "init" "-q"))))
+    (is (zero? (:exit (shell/sh "git" "-C" repo "config"
+                                "user.email" "repair-test@example.invalid"))))
+    (is (zero? (:exit (shell/sh "git" "-C" repo "config"
+                                "user.name" "Repair Test"))))
+    (spit file "declared repair contract\n")
+    (is (zero? (:exit (shell/sh "git" "-C" repo "add" path))))
+    (is (zero? (:exit (shell/sh "git" "-C" repo "commit" "-q"
+                                "-m" "Add repair spec"))))
+    (let [sha (str/trim
+               (:out (shell/sh "git" "-C" repo "rev-parse" "HEAD")))
+          obligation (shaped-obligation :spec-document {:machine-repo repo})
+          evidence {:path path :git-sha sha}
+          implementation (repair/record-implementation!
+                          root obligation
+                          (merge grounded-review evidence
+                                 {:attempt-id "repair-spec"}))]
+      (is (= evidence (:replacement-artifact implementation)))
+      (is (thrown? clojure.lang.ExceptionInfo
+                   (repair/record-implementation!
+                    (temp-root) obligation
+                    (merge grounded-review {:attempt-id "bad-spec"
+                                            :path path :git-sha "deadbeef"}))))
+      (let [resolved (repair/resolve!
+                      root (assoc obligation
+                                  :repair/status :awaiting-validation
+                                  :repair/implementation implementation)
+                      (merge grounded-review evidence
+                             {:attempt-id "validate-spec"
+                              :validation {:production-shaped? true}}))]
+        (is (= :spec-document (:artifact-shape resolved)))
+        (is (= evidence (:validation-artifact resolved)))))))
 
 (deftest impossible-recovery-is-immutably-superseded-by-typed-successor
   (let [root (temp-root)
