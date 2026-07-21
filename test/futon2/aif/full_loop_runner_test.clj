@@ -1177,11 +1177,34 @@
 
 (deftest single-candidate-still-requires-finite-g
   (is (false? (:passes? (runner/selection-discrimination
-                          [{:action selected-action :G-efe nil}]))))
+                          [{:action selected-action :controller-score nil}]))))
   (is (false? (:passes? (runner/selection-discrimination
-                          [{:action selected-action :G-efe ##NaN}]))))
+                          [{:action selected-action :controller-score ##NaN}]))))
   (is (true? (:passes? (runner/selection-discrimination
-                         [{:action selected-action :G-efe -1.0}])))))
+                         [{:action selected-action :controller-score -1.0}])))))
+
+(deftest discrimination-uses-controller-score-not-g-efe
+  ;; Flat G-efe but distinct controller-score: the policy CAN discriminate
+  ;; via intrinsic-value. Should pass.
+  (is (true? (:passes?
+              (runner/selection-discrimination
+               [{:action {:type :learn-action-class :target-class :survey}
+                 :G-efe 7.907 :controller-score 10.048}
+                {:action {:type :learn-action-class :target-class :close}
+                 :G-efe 7.907 :controller-score 10.049}
+                {:action {:type :learn-action-class :target-class :survey-mission}
+                 :G-efe 7.907 :controller-score 10.050}
+                {:action {:type :learn-action-class :target-class :apply-cascade}
+                 :G-efe 7.907 :controller-score 10.051}
+                {:action {:type :learn-action-class :target-class :close-hole}
+                 :G-efe 7.907 :controller-score 10.055}]))))
+  ;; Flat controller-score: genuine near-tie. Should fail.
+  (is (false? (:passes?
+               (runner/selection-discrimination
+                [{:action {:type :advance-mission :target "M-flat-a"}
+                  :G-efe 4.0 :controller-score 4.0}
+                 {:action {:type :advance-mission :target "M-flat-b"}
+                  :G-efe 4.0 :controller-score 4.0}])))))
 
 (deftest recoverable-late-author-completion-skips-second-author-turn
   (let [dispatches (atom [])

@@ -401,27 +401,46 @@
 (defn selection-discrimination
   "Fail-closed diagnostic for the leading feasible policy set. A single
   candidate needs no discrimination; two or more candidates must contain at
-  least two epsilon-distinct G values. Habit priors are intentionally excluded:
-  E(pi) may break a genuine near-tie but must not hide a flat estimator."
+  least two epsilon-distinct controller-score values.
+
+  Uses :controller-score (the actual policy ranking key) rather than :G-efe
+  (the pure risk+ambiguity core). Rationale: :G-efe is structurally identical
+  for actions whose forward-model predictions are identical (e.g. multiple
+  :learn-action-class gap-actions with different :intrinsic-value). The
+  :controller-score includes the intrinsic-value adjustment (via risk-control)
+  which provides genuine discrimination without habit-prior contamination:
+  in :habit-prior mode (the live config), structural pressure leaves
+  :controller-score and goes to :habit-prior-bias, so habit priors cannot
+  hide a flat estimator through :controller-score.
+
+  :G-efe values are still reported as telemetry for audit."
   ([ranked] (selection-discrimination ranked {}))
   ([ranked {:keys [top-k epsilon]
             :or {top-k discrimination-top-k
                  epsilon discrimination-epsilon}}]
    (let [leading (vec (take top-k ranked))
+         score-values (mapv :controller-score leading)
+         valid-scores (filterv #(and (number? %)
+                                     (Double/isFinite (double %)))
+                               score-values)
+         distinct-scores (epsilon-distinct-count valid-scores epsilon)
+         ;; Telemetry: also report G-efe spread for audit
          g-values (mapv :G-efe leading)
          valid-g (filterv #(and (number? %)
                                 (Double/isFinite (double %)))
                           g-values)
          distinct-g (epsilon-distinct-count valid-g epsilon)]
      {:candidate-count (count leading)
-      :valid-g-count (count valid-g)
-      :distinct-g distinct-g
+      :valid-g-count (count valid-scores)
+      :distinct-g distinct-scores
       :epsilon epsilon
       :top-k top-k
+      :score-values score-values
       :g-values g-values
-      :passes? (and (= (count valid-g) (count leading))
+      :g-efe-distinct-g distinct-g
+      :passes? (and (= (count valid-scores) (count leading))
                     (or (< (count leading) 2)
-                        (>= distinct-g 2)))})))
+                        (>= distinct-scores 2)))})))
 
 (defn- repair-entry [obligation]
   {:action {:type :repair-machine-failure
