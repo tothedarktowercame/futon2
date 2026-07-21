@@ -1175,13 +1175,25 @@
     (is (empty? @dispatches))
     (is (= :machine-failure (:repair-class (first @findings))))))
 
-(deftest single-candidate-still-requires-finite-g
+(deftest single-candidate-still-requires-finite-scores
+  ;; controller-score must be finite
   (is (false? (:passes? (runner/selection-discrimination
-                          [{:action selected-action :controller-score nil}]))))
+                          [{:action selected-action
+                            :controller-score nil :G-efe 1.0}]))))
   (is (false? (:passes? (runner/selection-discrimination
-                          [{:action selected-action :controller-score ##NaN}]))))
+                          [{:action selected-action
+                            :controller-score ##NaN :G-efe 1.0}]))))
+  ;; G-efe must also be finite (canonical EFE audit)
+  (is (false? (:passes? (runner/selection-discrimination
+                          [{:action selected-action
+                            :controller-score -1.0 :G-efe nil}]))))
+  (is (false? (:passes? (runner/selection-discrimination
+                          [{:action selected-action
+                            :controller-score -1.0 :G-efe ##NaN}]))))
+  ;; Both finite → pass
   (is (true? (:passes? (runner/selection-discrimination
-                         [{:action selected-action :controller-score -1.0}])))))
+                         [{:action selected-action
+                           :controller-score -1.0 :G-efe 0.5}])))))
 
 (deftest discrimination-uses-controller-score-not-g-efe
   ;; Flat G-efe but distinct controller-score: the policy CAN discriminate
@@ -1204,7 +1216,14 @@
                 [{:action {:type :advance-mission :target "M-flat-a"}
                   :G-efe 4.0 :controller-score 4.0}
                  {:action {:type :advance-mission :target "M-flat-b"}
-                  :G-efe 4.0 :controller-score 4.0}])))))
+                  :G-efe 4.0 :controller-score 4.0}]))))
+  ;; Finite controller-score but invalid G-efe → fail closed
+  (is (false? (:passes?
+               (runner/selection-discrimination
+                [{:action {:type :learn-action-class}
+                  :G-efe nil :controller-score 10.0}
+                 {:action {:type :learn-action-class}
+                  :G-efe nil :controller-score 11.0}])))))
 
 (deftest recoverable-late-author-completion-skips-second-author-turn
   (let [dispatches (atom [])

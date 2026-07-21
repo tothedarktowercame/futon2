@@ -404,16 +404,21 @@
   least two epsilon-distinct controller-score values.
 
   Uses :controller-score (the actual policy ranking key) rather than :G-efe
-  (the pure risk+ambiguity core). Rationale: :G-efe is structurally identical
-  for actions whose forward-model predictions are identical (e.g. multiple
-  :learn-action-class gap-actions with different :intrinsic-value). The
-  :controller-score includes the intrinsic-value adjustment (via risk-control)
-  which provides genuine discrimination without habit-prior contamination:
-  in :habit-prior mode (the live config), structural pressure leaves
-  :controller-score and goes to :habit-prior-bias, so habit priors cannot
-  hide a flat estimator through :controller-score.
+  (the pure risk+ambiguity core) for the discrimination gate. Rationale:
+  :G-efe is structurally identical for actions whose forward-model predictions
+  are identical (e.g. multiple :learn-action-class gap-actions with different
+  :intrinsic-value). The :controller-score includes the intrinsic-value
+  adjustment (via risk-control) which provides genuine discrimination without
+  habit-prior contamination: in :habit-prior mode (the live config), structural
+  pressure leaves :controller-score and goes to :habit-prior-bias, so habit
+  priors cannot hide a flat estimator through :controller-score.
 
-  :G-efe values are still reported as telemetry for audit."
+  Both :controller-score AND :G-efe must be finite for the gate to pass —
+  invalid canonical EFE on any candidate fails closed.
+
+  :G-efe spread is reported as telemetry (:valid-g-count, :distinct-g) with
+  its original G semantics; :valid-score-count / :distinct-score are the new
+  gate fields."
   ([ranked] (selection-discrimination ranked {}))
   ([ranked {:keys [top-k epsilon]
             :or {top-k discrimination-top-k
@@ -424,21 +429,23 @@
                                      (Double/isFinite (double %)))
                                score-values)
          distinct-scores (epsilon-distinct-count valid-scores epsilon)
-         ;; Telemetry: also report G-efe spread for audit
+         ;; Telemetry: also report G-efe spread for audit (original G semantics)
          g-values (mapv :G-efe leading)
          valid-g (filterv #(and (number? %)
                                 (Double/isFinite (double %)))
                           g-values)
          distinct-g (epsilon-distinct-count valid-g epsilon)]
      {:candidate-count (count leading)
-      :valid-g-count (count valid-scores)
-      :distinct-g distinct-scores
+      :valid-score-count (count valid-scores)
+      :distinct-score distinct-scores
+      :valid-g-count (count valid-g)
+      :distinct-g distinct-g
       :epsilon epsilon
       :top-k top-k
       :score-values score-values
       :g-values g-values
-      :g-efe-distinct-g distinct-g
       :passes? (and (= (count valid-scores) (count leading))
+                    (= (count valid-g) (count leading))
                     (or (< (count leading) 2)
                         (>= distinct-scores 2)))})))
 
