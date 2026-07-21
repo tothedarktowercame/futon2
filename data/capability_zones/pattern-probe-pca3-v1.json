@@ -1,0 +1,305 @@
+{
+ "schema": "capability-zone-pattern-probe.v1",
+ "reduction_version": "pca3-v1",
+ "results": [
+  {
+   "pattern": "Belief State as Operational Hypotheses (R1).",
+   "text": "pat:r1 If you want decisions to depend on tractable hypotheses (progress, blockers, pattern fit, uncertainty) rather than raw conversation history. However if the belief state is just the conversation\u2026",
+   "zone": "survey",
+   "distance": 0.09993611382795624,
+   "margin": 0.022623070691757924,
+   "runner_up": "open-mission",
+   "point_3d": [
+    -0.2075768057366374,
+    0.06432510322231223,
+    0.10756748706297267
+   ]
+  },
+  {
+   "pattern": "Structured Observation Vector (R2).",
+   "text": "If you want the agent's observation to be comparable across steps so scoring and learning do not collapse into prose interpretation. However tool output and user feedback arrive as heterogeneous artif\u2026",
+   "zone": "survey",
+   "distance": 0.0915541385031025,
+   "margin": 0.012241537890238796,
+   "runner_up": "no-op",
+   "point_3d": [
+    -0.20693448622867408,
+    0.02275348145406387,
+    0.06986411511005407
+   ]
+  },
+  {
+   "pattern": "Predictive-Coding Belief Update (R3).",
+   "text": "If you want belief updates to be principled (Bayesian-shaped under a Gaussian approximation), tunable (single learning rate; per-channel precision), and operationally robust. However without an explic\u2026",
+   "zone": "survey",
+   "distance": 0.12945963691217915,
+   "margin": 0.0272956050377455,
+   "runner_up": "open-mission",
+   "point_3d": [
+    -0.2415146575103787,
+    0.06573220368310918,
+    0.11641348776094891
+   ]
+  },
+  {
+   "pattern": "Shared Kernel for the Predictive Forward Model (R4).",
+   "text": "If you want the forward model's predictions to match what the live dynamics actually do, with one set of rules to maintain. However two implementations of the same dynamics is two places for bugs to h\u2026",
+   "zone": "open-mission",
+   "distance": 0.08539693458608709,
+   "margin": 0.002957022669159287,
+   "runner_up": "survey",
+   "point_3d": [
+    -0.15505073947103828,
+    0.05224291502939195,
+    0.1144427083995343
+   ]
+  },
+  {
+   "pattern": "Expected Free Energy Inside an Auditable Controller (R5).",
+   "text": "pat:r5 If you want selection to balance canonical outcome risk and ambiguity with operational constraints. However calling every useful controller term ``EFE'' makes tuning indistinguishable from stor\u2026",
+   "zone": "survey",
+   "distance": 0.06197843124700858,
+   "margin": 0.037700626286705535,
+   "runner_up": "open-mission",
+   "point_3d": [
+    -0.18682858774795466,
+    0.04985863728386353,
+    0.06706244429133418
+   ]
+  },
+  {
+   "pattern": "Candidate Pattern Action Space (R6).",
+   "text": "pat:r6 If you want pattern choice to be legible and comparable, and to avoid collapse into one habitual pattern. However if the action space is any pattern at any time, evaluation becomes unstructured\u2026",
+   "zone": "survey",
+   "distance": 0.08298730811723573,
+   "margin": 0.03605694321890472,
+   "runner_up": "open-mission",
+   "point_3d": [
+    -0.19558433424851063,
+    0.14400226706625419,
+    0.03508267247499363
+   ]
+  },
+  {
+   "pattern": "Evidence Precision Registry (R7).",
+   "text": "If you want the agent to discount low-trust evidence without discarding it, and to become stricter when outcomes are volatile. However without an explicit precision layer, evidence weighting becomes i\u2026",
+   "zone": "survey",
+   "distance": 0.10022342305034632,
+   "margin": 0.05606608149581366,
+   "runner_up": "open-mission",
+   "point_3d": [
+    -0.24460263646434183,
+    0.08925363869383209,
+    0.020869760709493545
+   ]
+  },
+  {
+   "pattern": "Variational Free Energy as a Per-Tick Scalar (R8).",
+   "text": "If you want a single scalar, comparable across time, that says how badly the agent's current belief explains what it just observed --- for validation, diagnostics, and alarms. However without an expli\u2026",
+   "zone": "survey",
+   "distance": 0.15486239987140263,
+   "margin": 0.039665444802079536,
+   "runner_up": "open-mission",
+   "point_3d": [
+    -0.28793210617362075,
+    0.09157494903124835,
+    0.08967398969048922
+   ]
+  },
+  {
+   "pattern": "Two-Layer Calibration (R12).",
+   "text": "If predicted-versus-realised pairs are your evidence that the model is calibrated. However when the model's own output composes the field it is scored against, the comparison is self-referential: it t\u2026",
+   "zone": "survey",
+   "distance": 0.18994567862865927,
+   "margin": 0.00834448189603157,
+   "runner_up": "pursue",
+   "point_3d": [
+    -0.29339916040544745,
+    0.12322283474366606,
+    0.14071925188100798
+   ]
+  },
+  {
+   "pattern": "Temporal Depth Beyond the Greedy Step (R13).",
+   "text": "pat:r13 If you want the agent to plan --- to score whole pattern cascades as policies, not single steps, and to prefer an action whose payoff is two or three ticks out over a greedy one-step win. Howe\u2026",
+   "zone": "survey",
+   "distance": 0.16304261240720513,
+   "margin": 0.035671849266782046,
+   "runner_up": "pursue",
+   "point_3d": [
+    -0.28864730032684843,
+    0.15116366202417086,
+    0.057558964125356625
+   ]
+  },
+  {
+   "pattern": "selection gain as Commitment Temperature (R14).",
+   "text": "pat:r14 If you want exploration versus exploitation to depend on operational pressure (deadlines, repeated failures, instability), not on randomness alone. However without an explicit the agent either\u2026",
+   "zone": "no-op",
+   "distance": 0.10146347948001705,
+   "margin": 0.008713217798305528,
+   "runner_up": "survey",
+   "point_3d": [
+    -0.22392210073102173,
+    0.009978018076522602,
+    0.06730572415273293
+   ]
+  },
+  {
+   "pattern": "Hierarchical and Temporal Depth (R15).",
+   "text": "If a fast tactical loop acts inside a slower strategic loop. However merely giving both levels a scalar score does not create a hierarchy. Then make the coupling explicit: strategic selection fixes th\u2026",
+   "zone": "survey",
+   "distance": 0.1254154697888895,
+   "margin": 0.03574139715186567,
+   "runner_up": "pursue",
+   "point_3d": [
+    -0.25471700401015174,
+    0.11998650954201658,
+    0.07556856910366055
+   ]
+  },
+  {
+   "pattern": "Grounded Actuation, Not Re-Observation (R16).",
+   "text": "pat:r16 If you want a genuinely closed action--perception loop: the agent acts, and the world it observes on the next tick is materially different because it acted. However this is seductively easy to\u2026",
+   "zone": "survey",
+   "distance": 0.10767753785506322,
+   "margin": 0.038326580424017334,
+   "runner_up": "no-op",
+   "point_3d": [
+    -0.247245382259873,
+    0.059229456289582844,
+    0.06021751707955364
+   ]
+  },
+  {
+   "pattern": "Structure Learning by Bayesian Model Reduction (R17).",
+   "text": "If you want the agent to form concepts and reorganise its generative model --- merge look-alike states, prune redundant connections, generalise across contexts --- from accumulated experience but no n\u2026",
+   "zone": "survey",
+   "distance": 0.08000618558790862,
+   "margin": 0.026647822064862353,
+   "runner_up": "open-mission",
+   "point_3d": [
+    -0.17851580872025172,
+    0.1500240412853965,
+    0.041588350165924666
+   ]
+  },
+  {
+   "pattern": "Posterior Spread as an Exploration Control (R17 .1em",
+   "text": "). If you want unresolved structural hypotheses to remain eligible for exploration. However posterior standard deviation is uncertainty, not expected information gain: it contains no expectation over \u2026",
+   "zone": "survey",
+   "distance": 0.09469162405233228,
+   "margin": 0.012483982912285002,
+   "runner_up": "pursue",
+   "point_3d": [
+    -0.1987007766406212,
+    0.1424603891060395,
+    0.07497058164885058
+   ]
+  },
+  {
+   "pattern": "Embedding-Nearness as the Structure-Learning Generator (R17 .1em",
+   "text": "). If you want to run structure learning (R17) --- merging look-alike states, pruning redundant connections --- but need a tractable set of candidate reductions to test, because the space of possible \u2026",
+   "zone": "survey",
+   "distance": 0.13709647746164547,
+   "margin": 0.026681082119557636,
+   "runner_up": "pursue",
+   "point_3d": [
+    -0.25928746818773935,
+    0.13388213395826418,
+    0.08263567606095107
+   ]
+  },
+  {
+   "pattern": "Capability Zones over the Embedded Landscape (staged; the self-model's second use of the metric).",
+   "text": "If the agent must choose among its own capability gaps --- the proposer surfaces one ``learn this action-class'' candidate per class it cannot yet enact, and the loop must rank them. However gap class\u2026",
+   "zone": "survey",
+   "distance": 0.14931819578520433,
+   "margin": 0.045693609805758734,
+   "runner_up": "no-op",
+   "point_3d": [
+    -0.29364532419027944,
+    0.09564882238966275,
+    0.024935524584232274
+   ]
+  },
+  {
+   "pattern": "Discharge-Trained Cascade Proposal (closing R16 R6).",
+   "text": "If you want the candidate cascades the agent proposes (R6) to improve with experience --- to reach for the compositions that have actually gone well, not a retrieval ranking frozen at authoring time. \u2026",
+   "zone": "survey",
+   "distance": 0.15002664915411215,
+   "margin": 0.03490009984469167,
+   "runner_up": "pursue",
+   "point_3d": [
+    -0.2736071913898513,
+    0.15186854790694318,
+    0.05568298700171897
+   ]
+  },
+  {
+   "pattern": "Interoceptive Tripwires (R20).",
+   "text": "pat:r20 If you have hardened the loop's constructed core (R1--R16) and want the machinery itself to be observable while it runs live, because every pathology so far --- wedges, livelocks, mixed code i\u2026",
+   "zone": "no-op",
+   "distance": 0.1474916124801596,
+   "margin": 0.01925726288706886,
+   "runner_up": "survey",
+   "point_3d": [
+    -0.27273007532696286,
+    -0.0027639001905362132,
+    0.10179679777006954
+   ]
+  },
+  {
+   "pattern": "No Self-Certification (R9).",
+   "text": "If an instrument issues a verdict from evidence it also produces or stages (a calibrator over its own predictions, a gate over its own outputs). However on first contact with reality every layer tries\u2026",
+   "zone": "survey",
+   "distance": 0.12186711786306473,
+   "margin": 0.04167531558309087,
+   "runner_up": "open-mission",
+   "point_3d": [
+    -0.2575367305350439,
+    0.07660480788993804,
+    0.0783488444128856
+   ]
+  },
+  {
+   "pattern": "Scheduled Observer Entrypoint (R10, the No-Op Trap).",
+   "text": "If you want the agent to run live --- to observe, deliberate, and act on a schedule, accumulating trace and precision over real time without a human pressing the button. However a scheduler that fires\u2026",
+   "zone": "no-op",
+   "distance": 0.119257860180293,
+   "margin": 0.002469014824048363,
+   "runner_up": "close",
+   "point_3d": [
+    -0.15097928477502376,
+    -0.11655645818545966,
+    0.10996932099342818
+   ]
+  },
+  {
+   "pattern": "Hierarchical, Budget-Aware Action Selection (R11).",
+   "text": "If you want collective action selection that respects budget constraints at every hierarchy level --- never recommending allocations that exceed the aggregate per-tick budget, and factoring in downstr\u2026",
+   "zone": "survey",
+   "distance": 0.08711624518643958,
+   "margin": 0.03567330622584232,
+   "runner_up": "no-op",
+   "point_3d": [
+    -0.22858255363462465,
+    0.05324609175567905,
+    0.022154633683828355
+   ]
+  },
+  {
+   "pattern": "The Semilattice-Rollout Execution Witness (R16 realised, for cascades).",
+   "text": "If you want a mission's build phase (instantiate) to close only when its selected pattern cascade has actually been constructed --- ``a live instance'', not a rich prose section describing one. Howeve\u2026",
+   "zone": "survey",
+   "distance": 0.1935820694766969,
+   "margin": 0.0184798591696691,
+   "runner_up": "pursue",
+   "point_3d": [
+    -0.29856669570361927,
+    0.07716858153461013,
+    0.14894991361039234
+   ]
+  }
+ ]
+}
