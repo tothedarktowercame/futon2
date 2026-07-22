@@ -978,3 +978,38 @@ args merging remains code-verified only). BONUS FINDING: the queue's first
 ORGANIC customers are already in it — multiple edit_file failures against
 apm-lean/problems/a96J10 (old-string-not-found), live grist for the
 Zai-does-Lean probe design.
+
+## B0 CLOSED (2026-07-22, claude-2 on Dionysus, Joe's go: "let's do the B0 fix")
+
+The turn-end mark recognizer is live: `agent-chat-emit-turn-evidence!` now
+stamps event-verdict mark tags on the OPERATOR's chat-turn evidence entry,
+and writes the full recognition (mentions included, with positions and any
+`:ref` from the hydra long form) into the body `marks` record for audit.
+Vocabulary = both tiers (✘/✓/💡 core; the nine shadow-tier cluster glyphs,
+tags-only as designed). The b1-live-marks.edn use-vs-mention rule is
+mechanized v0: hydra long form ⇒ event with ref; glyph inside a
+double-quoted span ⇒ mention; glyph preceded by an object-noun reader
+("with", "a", "add", …, `agent-chat--mark-mention-preceders`) ⇒ mention;
+else event. Both adjudicated corpus cases reproduce exactly (e-60ba3204
+mention; e-63c25e11 first-✓ event + "add a ✓" mention).
+
+- Code: futon3c `emacs/agent-chat.el` — `agent-chat-recognize-marks` +
+  helpers in the marks section, wired in the emit path. Both claude-repl
+  and codex-repl user turns flow through it (shared emit).
+- Gates: check-parens OK; 9-case batch suite PASS
+  (`/tmp/b0-recognizer-test.el` — corpus cases, turn-initial, quoted
+  mention, long-form ref, shadow tier, tag dedup, json round-trip).
+- Deployed: side-file defun reload into the live Emacs (batch pre-check
+  first, lexical-binding header, per the reload protocol); recognizer
+  verified live by direct funcall. No JVM or Emacs restart.
+- Queryable feed: `GET /api/alpha/evidence?tag=correction` / `tag=approval`
+  — `tag=` verified as a real filter (`tag=user` hits; `tag=approval`
+  empty until the first post-B0 mark). Content scans no longer needed;
+  the FTS unicode61 blindness is bypassed.
+- ACCEPTANCE PENDING one operator turn: the first ✘/✓ Joe types after
+  2026-07-22T10:05Z should surface under `tag=`; no synthetic joe-authored
+  mark was minted (the channel's precision-1.0 claim is operator-authorship
+  by construction — a fabricated probe would pollute it).
+- B1's live-marks query can now be tag-driven; b1-live-marks.edn's own
+  note says to retire hand-adjudication once B0 lands — future candidates
+  arrive pre-verdicted, with the body record as the audit trail.
