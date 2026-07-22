@@ -1127,3 +1127,41 @@ D-1 is dormant until the next JVM restart wires `:zaif-inputs-fn` to
 `(make-hydrator)` in the runner config. The Z3a activation marker
 (`tag=zaif-z3a-activation`) starts the cohort clock — separate from this
 build.
+
+### D-1 REVIEW (2026-07-22, claude-2 — the dispatch's review gate)
+
+zai-1's build ACCEPTED with one confirmed finding, fixed directly per
+protocol (futon3c `8445de9` on top of `f709a1e`).
+
+**Checked (all re-run, not trusted):** full diff of both commits read;
+tests re-run (now 26/86, 0 failures); clj-kondo 0/0 on all 5 files;
+check-parens OK; γ anchor 0.7071067811865476 asserted against the real
+B1 artifact (cells shape verified: string keys, ±0.5 perf-history);
+dual decisions paired + re-derivable via decide (determinism test);
+`_decision` still inert (no actuation); futon2 doc commit `a283a27`
+verified.
+
+**Finding (CONFIRMED empirically, then fixed):** with live task-belief
+empty and context text never blank, the unnormalized idf-ish EIG proxy
+scores 2.5–4 on any real message → :retrieve wins at BOTH constants →
+Z3a's divergent-round set would be EMPTY (moot by geometry). Invisible
+to ZU-2 because replay contexts were mostly blank (retrieve = −0.4
+there). Fix: normalize by log(total+1) into [0,1) — commensurate with
+ask/act scales; regression test with live-shaped posting-stats pins
+shipped=:retrieve vs sweep=:ask divergence at c-uncertainty 1.0. This is
+a PRE-ACTIVATION kernel amendment (prereg still DRAFT; no-silent-tuning
+attaches to the shipped attention-cost and to post-activation changes —
+the attention-cost pair 0.65/0.15 is untouched).
+
+**Caveat carried forward (not a blocker):** the hydrator extracts
+mission from ctx text (`[ME]-…` regex on the latest user message) —
+PZ2's attribution-of-record rule prefers the autoclock witness, which
+the zai runner ctx does not currently carry. The extracted mission is
+recorded in :inputs-snapshot so the Z3a scorer can audit attribution;
+wiring the clocked mission into ctx is a named improvement for the Z3a
+report to weigh.
+
+**Z3a build state: D-1 COMPLETE.** Remaining before activation: scoring
+script `z3a_score.clj` (committed-before-activation rule), runner with
+`FUTON3C_ZAI_PROFILE=zaif` + JVM restart (operator op), activation
+marker (Joe).
