@@ -979,37 +979,44 @@ ORGANIC customers are already in it — multiple edit_file failures against
 apm-lean/problems/a96J10 (old-string-not-found), live grist for the
 Zai-does-Lean probe design.
 
-## B0 CLOSED (2026-07-22, claude-2 on Dionysus, Joe's go: "let's do the B0 fix")
 
-The turn-end mark recognizer is live: `agent-chat-emit-turn-evidence!` now
-stamps event-verdict mark tags on the OPERATOR's chat-turn evidence entry,
-and writes the full recognition (mentions included, with positions and any
-`:ref` from the hydra long form) into the body `marks` record for audit.
-Vocabulary = both tiers (✘/✓/💡 core; the nine shadow-tier cluster glyphs,
-tags-only as designed). The b1-live-marks.edn use-vs-mention rule is
-mechanized v0: hydra long form ⇒ event with ref; glyph inside a
-double-quoted span ⇒ mention; glyph preceded by an object-noun reader
-("with", "a", "add", …, `agent-chat--mark-mention-preceders`) ⇒ mention;
-else event. Both adjudicated corpus cases reproduce exactly (e-60ba3204
-mention; e-63c25e11 first-✓ event + "add a ✓" mention).
+## B0 — CORRECTED RECORD (2026-07-22, claude-2 on Dionysus)
 
-- Code: futon3c `emacs/agent-chat.el` — `agent-chat-recognize-marks` +
-  helpers in the marks section, wired in the emit path. Both claude-repl
-  and codex-repl user turns flow through it (shared emit).
-- Gates: check-parens OK; 9-case batch suite PASS
-  (`labs/M-zaif-harness/b0_recognizer_test.el` — corpus cases, turn-initial, quoted
-  mention, long-form ref, shadow tier, tag dedup, json round-trip).
-- Deployed: side-file defun reload into the live Emacs (batch pre-check
-  first, lexical-binding header, per the reload protocol); recognizer
-  verified live by direct funcall. No JVM or Emacs restart.
-- Queryable feed: `GET /api/alpha/evidence?tag=correction` / `tag=approval`
-  — `tag=` verified as a real filter (`tag=user` hits; `tag=approval`
-  empty until the first post-B0 mark). Content scans no longer needed;
-  the FTS unicode61 blindness is bypassed.
-- ACCEPTANCE PENDING one operator turn: the first ✘/✓ Joe types after
-  2026-07-22T10:05Z should surface under `tag=`; no synthetic joe-authored
-  mark was minted (the channel's precision-1.0 claim is operator-authorship
-  by construction — a fabricated probe would pollute it).
-- B1's live-marks query can now be tag-driven; b1-live-marks.edn's own
-  note says to retire hand-adjudication once B0 lands — future candidates
-  arrive pre-verdicted, with the body record as the audit trail.
+**B0 was already closed on 2026-07-12, server-side, in this repo** — the
+"B0 pending, lucy-gated" state recorded in the §laptop-side port recon
+(and carried into memory and the p4ng routemap) was stale for this
+machine's lane. What exists: `futon3c.marks` (`6c7ff4d` recognizer,
+`71ed872` use-vs-mention narrowed to the immediate-token rule {a an the
+with} + mention-after patterns, WITH 10 regression tests — v1's broad
+context lexicon suppressed real approvals like "I fixed the type error
+✓"; `d6d6170` second-string tier; `c41ef33` agent self-marks channel),
+wired at the evidence ingest boundary (`evidence/boundary.clj` →
+`marks/maybe-decorate-turn`), so EVERY chat-turn from ANY transport is
+decorated — tags for event verdicts, canonical body `marks` record
+(glyph/verdict/type/ref/payload/offset), kill-switch
+`FUTON3C_MARK_RECOGNIZER`.
+
+**Incident note (honest record):** claude-2 re-implemented B0 today as an
+elisp turn-end recognizer in agent-chat.el after reading only the stale
+docs and grepping only `emacs/` — an I-4 miss (read src/ before writing).
+The duplicate had a DIVERGENT mention heuristic (the broad preceder
+lexicon that `71ed872` had already refuted). Reverted same session
+(futon3c `63fe808` → revert `6a6f7f2`); live Emacs restored to the
+original emit path; the elisp batch suite removed from this lab (the
+server suite in futon3c is authoritative).
+
+**What today actually delivered:**
+- **Live operator acceptance of the server-side B0**: Joe's first real
+  post-recon mark ("✓ interactive QA for last turn", 2026-07-22T10:08Z)
+  was decorated at ingest — `e-51c9349e`, tags
+  `[claude chat turn approval user]`, body marks
+  `[{glyph ✓, verdict event, type approval, offset 0}]` — and is
+  queryable: `GET /api/alpha/evidence?tag=approval` returns exactly it.
+  The FTS-blindness bypass is CONFIRMED WORKING on live operator data.
+- **API finding:** `tag=` is the real filter on `/api/alpha/evidence`
+  (`tag=user` hits); `tags=` is silently IGNORED (returns unfiltered
+  latest). Z1/B1 queries must use `tag=`.
+- This corrected record. The p4ng appendix routemap (tab:zaif-routemap)
+  is stale on this row too — B0/marks channel is fully landed, live-
+  accepted; next real frontier is the Z lane (z1_views.clj + z2
+  calibration exist in this lab — see their own outcomes).
