@@ -585,7 +585,10 @@
               action [grounded repair failed])))
     (is (= 4 (#'wm/consecutive-non-progress-count
               action (assoc-in failed [:decision :action :non-progress-count] 3)))
-        "the single-record API retains its carried-count behavior")))
+        "the single-record API retains its carried-count behavior")
+    (is (= 1 (#'wm/consecutive-non-progress-count
+              action [failed {:decision {:action {:type :no-op}}} failed]))
+        "a targetless record (no-op/abstain) breaks the chain without throwing")))
 
 (deftest live-star-map-efe-opts-adds-conservative-graph-blend
   (testing "live WM opts carry the graph and softened star-map weights when graph loads"

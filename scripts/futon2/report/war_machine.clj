@@ -954,7 +954,7 @@
   (let [previous-action (get-in trace-record [:decision :action])
         target (some-> (:target previous-action) name)]
     (or (= :repair-machine-failure (:type previous-action))
-        (str/starts-with? target "repair-attempt-"))))
+        (boolean (some-> target (str/starts-with? "repair-attempt-"))))))
 
 (defn- recent-non-progress-count [action trace-records]
   (let [target (:target action)]
