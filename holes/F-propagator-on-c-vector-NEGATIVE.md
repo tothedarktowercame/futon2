@@ -1,8 +1,13 @@
 # F-propagator-on-c-vector — FIRST NEGATIVE: the propagator does not transfer to the ant's C-vector
 
 **Status:** NEGATIVE, measured, 2026-07-16. Owner: claude-3.
+**Update 2026-07-16 (later):** the falsifying sweep below was RUN, widened from
+cadence-only to cadence × magnitude — **no cell beats baseline; the refutation is
+strengthened** along rate and magnitude, and the dose–response confirms amnesia as the
+mechanism. See "The sweep was run" below. Remaining outs: locus (per-ant C) and
+precision-not-preference.
 **Context:** M-propagators L5 (transfer) × M-aif-ants-port (Port 1).
-**Apparatus:** `futon2/README-xeno-loop.md`, `scripts/{ant_authority_gate,xeno_loop}.clj`.
+**Apparatus:** `futon2/README-xeno-loop.md`, `scripts/{ant_authority_gate,xeno_loop,xeno_gentle_sweep,xeno_gentle_confirm}.clj`.
 
 ---
 
@@ -109,6 +114,42 @@ fast to want anything" and "an arbitrary frozen constant".
 
 That sweep is the single cheapest next experiment and it is decisive either way.
 
+## The sweep was run (2026-07-16, later) — refutation STRENGTHENED
+
+`scripts/xeno_gentle_sweep.clj`, widened from cadence-only to **cadence × magnitude**:
+the amnesia is carried by the operator being the *largest* move a continuous C-mean
+admits (on the MetaCA's binary byte a flip is the *smallest*), so the sweep generalises to
+a rate-limited relaxation `C[σ(k)] ← (1−ε)·C[σ(k)] + ε·(1−C[k])`; ε=1 reproduces the
+original operator **bit-exactly** (per-seed replication of this run's evolved/identity
+arms verified in-script, along with the baseline audit and an ε=0 sham that ties baseline
+per-seed). Grid: (EVERY, ε) ∈ {1}×{.05,.15,.4,1} ∪ {10}×{.4,1} ∪ {50}×{1}; σ ∈
+{evolved-from-this-run, seeded-random, identity}; same 16 held-out boards; preregistered.
+
+- **No cell beats baseline** (best p among positive-Δ cells: .625). One cell is
+  significantly *worse* (evolved, EVERY 10, ε 1: wins 0/6, p .031).
+- **The dose–response confirms amnesia as the mechanism**: within evolved σ, Δ vs
+  baseline shrinks monotonically as the perturbation rate drops — −23.4 (every tick) →
+  −17.6 (EVERY 10) → −2.8 (EVERY 50). Less propagation = less damage.
+- **But the recovery only approaches baseline from below** — even ε=.05 nudges compound
+  (each channel ~30 hits/300 ticks; the C still leaves the shipped point, just slower).
+  Coupling C toward inverse-targets is unhelpful at *every* tested rate, not merely the
+  amnesic one.
+- Two cells (random σ, slow cadence) had **positive means** (+11.6, +28.6) with flat sign
+  tests. Per preregistration they were re-tested on a **fresh screened pool**
+  (`scripts/xeno_gentle_confirm.clj`, seeds 401–429): both go **negative with 0 wins**
+  (0/4 p .125; 0/5 p .0625). Board-luck, as the zero-inflation caveat predicts of means.
+
+So the "amnesia" assumption was real and is now *measured* (the dose–response), but
+removing it by tuning rate/magnitude only recovers *toward* no-propagator. The transfer
+in the global-C-over-time formulation is refuted, not untuned. What survives is the
+**locus** reformulation below — per-cell-across-space is the CA fact the port dropped —
+and **precision-not-preference**. The locus repair is scoped and small: `policy.clj:619`
+reads the global `default-c-vectors`; `core.clj:194` already threads `:ant` into
+`choose-action`, so `(or (get-in opts [:ant :c-vectors mode]) …)` is a backward-compatible
+3-line change, after which σ can couple preferences **across ants** (`C_j[σ(k)] ← 1 −
+C_i[k]`), leaving each ant's own goal persistent while the colony's preference field
+cycles.
+
 ---
 
 ## Scope, honestly
@@ -130,13 +171,17 @@ the stability its agency requires? Candidates not yet tried:
 
 - **Propagate the precision, not the preference** (`:tau`, `:Pi-o`) — that is *how strongly*
   the ant holds its goals, not *what they are*. Coupling confidence may be coherent where
-  coupling desire is not. NB this is the one channel `cyber.clj` actually read.
-- **Propagate a slower layer** — the mode-conditioning or `actions-by-mode` ranking, rather
-  than the C means. Contexts→responses is arguably the closer structural match to
-  neighbourhoods→responses.
+  coupling desire is not. NB this is the one channel `cyber.clj` actually read. **Still open.**
+- **Propagate a slower layer** — ~~cadence/magnitude on the C means~~ **TRIED (sweep above):
+  slower/gentler only recovers toward baseline, never above it.** The mode-conditioning or
+  `actions-by-mode` ranking variant is untried.
 - **Propagate over the colony, not the ant** — σ couples preferences *across ants*
   (a population, like the CA's cells), leaving each ant's own C stable. The MetaCA's rule
   byte varies *per cell across space*; our port made it vary *per ant across time*. That
-  may be the actual mis-mapping.
+  may be the actual mis-mapping. **Still open, now scoped** (3-line `policy.clj` change +
+  a colony-stepping loop; see the sweep section). **This is the strongest remaining
+  candidate** — it is the one reformulation that keeps per-agent goal persistence *and*
+  live coupling, which the sweep showed are jointly required.
 - **Accept the negative.** A rule byte is not a goal; that is a finding about what
-  propagators are, and it is worth stating.
+  propagators are, and it is worth stating. The sweep upgrades this from a reading to a
+  measurement for the global-C formulation.

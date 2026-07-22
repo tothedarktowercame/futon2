@@ -997,7 +997,7 @@ mention; e-63c25e11 first-✓ event + "add a ✓" mention).
   helpers in the marks section, wired in the emit path. Both claude-repl
   and codex-repl user turns flow through it (shared emit).
 - Gates: check-parens OK; 9-case batch suite PASS
-  (`/tmp/b0-recognizer-test.el` — corpus cases, turn-initial, quoted
+  (`labs/M-zaif-harness/b0_recognizer_test.el` — corpus cases, turn-initial, quoted
   mention, long-form ref, shadow tier, tag dedup, json round-trip).
 - Deployed: side-file defun reload into the live Emacs (batch pre-check
   first, lexical-binding header, per the reload protocol); recognizer
