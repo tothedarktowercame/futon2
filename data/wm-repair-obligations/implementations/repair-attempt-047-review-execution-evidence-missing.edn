@@ -1,0 +1,28 @@
+{:repair/status :awaiting-validation,
+ :replacement-commit "f19e38557a82642542406d328d2013e53e071ec4",
+ :witness
+ {:resolved? true,
+  :dial-moved? true,
+  :kind :root-cause-removed,
+  :evidence
+  {:diagnosis
+   "attempt-047 is a new sub-mode, not partial R9 coverage: reviewer job invoke-1784630835864-904-26deea92 failed on context-window exhaustion immediately after its prompt. Its ledger contains accepted, running, prompt, and failed events but no tool_use event, so the R9 corroboration path correctly had no execution evidence to recover.",
+   :failed-review
+   {:phase :reviewer-wait,
+    :job-id "invoke-1784630835864-904-26deea92",
+    :terminal-code "invoke-error",
+    :terminal-message
+    "Codex ran out of room in the model's context window",
+    :expected-evidence :reviewer-tool-use,
+    :observed-tool-events 0},
+   :repair
+   "f19e38557a82642542406d328d2013e53e071ec4 bounds the reviewer construction contract by retaining the typed selected action, compact repair obligation, discharge contract, and repair contract while excluding the recursively nested backtrace.",
+   :verified
+   "clj-kondo: 0 errors, 0 warnings; futon4 check-parens: OK; 4 focused full-loop runner tests, 27 assertions, 0 failures/errors."}},
+ :repair/id "repair-attempt-047-review-execution-evidence-missing",
+ :implemented-at "2026-07-22T09:51:03Z",
+ :review-job "invoke-1784713658679-5-1aeea76b",
+ :implementation-attempt "repair-attempt-047-2026-07-22",
+ :failed-attempt "attempt-047",
+ :reviewer "claude-1",
+ :repair/schema-version 1}
