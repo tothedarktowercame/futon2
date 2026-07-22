@@ -97,6 +97,29 @@
   (and (= "chat-turn" (some-> entry :evidence/body :event name))
        (= "user" (some-> entry :evidence/body :role name))))
 
+(defn turn-start? [entry]
+  (= "turn-start" (some-> entry :evidence/body :event name)))
+
+(defn turn-origin
+  "Provenance of a zai turn from its turn-start prompt's total surface
+   header (Origin: operator|agent|harness). Headerless -> \"unknown\" —
+   excluded from the cohort, never defaulted to operator."
+  [turn-start-entry]
+  (or (some->> (get-in turn-start-entry [:evidence/body :prompt])
+               (re-find #"(?m)^Origin:\s*(\S+)")
+               second
+               str/lower-case)
+      "unknown"))
+
+(defn turn-origins
+  "Map turn-id -> origin for a session's turn-start entries."
+  [session-entries]
+  (into {}
+        (for [e (filter turn-start? session-entries)
+              :let [tid (some-> (get-in e [:evidence/body :turn-id]) str)]
+              :when tid]
+          [tid (turn-origin e)])))
+
 (defn- body-inputs [entry]
   (walk/keywordize-keys (get-in entry [:evidence/body :inputs-snapshot])))
 
@@ -201,16 +224,29 @@
             (System/exit 2))
         arm-entries (filterv arm-choice?
                              (fetch-all base {:tag "zaif"} activation-at))
-        ;; operator turns fetched per cohort-candidate session (server-side
+        ;; session entries fetched per cohort-candidate session (server-side
         ;; session-id filter), never as a store-wide sweep
         sids (distinct (map :evidence/session-id arm-entries))
+        session-entries (into {}
+                              (for [sid sids]
+                                [sid (fetch-all base {:session-id sid} activation-at)]))
         op-turns (into {}
-                       (for [sid sids]
-                         [sid (->> (fetch-all base {:session-id sid} activation-at)
-                                   (filterv operator-turn?)
-                                   (sort-by :evidence/at)
-                                   vec)]))
-        pairs (pairs-by-key arm-entries)
+                       (map (fn [[sid es]]
+                              [sid (vec (sort-by :evidence/at (filterv operator-turn? es)))])
+                            session-entries))
+        ;; Round-grain provenance filter (prereg amendment 2026-07-22): only
+        ;; operator-originated turns are Z3a observations. A zai runner driven
+        ;; by another agent (bells) or the harness records dual decisions too,
+        ;; but its rounds have no operator judgment and must not be scored —
+        ;; including inside MIXED sessions where the operator is also present.
+        origins (into {} (map (fn [[sid es]] [sid (turn-origins es)]) session-entries))
+        pair-origin (fn [e] (get-in origins
+                                    [(:evidence/session-id e)
+                                     (some-> (get-in e [:evidence/body :turn-id]) str)]
+                                    "unknown"))
+        origin-counts (frequencies (map pair-origin arm-entries))
+        operator-arm-entries (filterv #(= "operator" (pair-origin %)) arm-entries)
+        pairs (pairs-by-key operator-arm-entries)
         ;; cohort: sessions with >= min operator turns, capped chronologically
         session-first-at (reduce (fn [acc [[sid _] m]]
                                    (let [at (some-> (or (get m "shipped") (get m "sweep"))
@@ -244,6 +280,8 @@
         report {:params {:base base :activation-at activation-at :dry-run (boolean dry-run)
                          :min-operator-turns min-operator-turns :max-sessions max-sessions}
                 :counts {:arm-choice-entries (count arm-entries)
+                         :arm-entries-by-origin origin-counts
+                         :operator-arm-entries (count operator-arm-entries)
                          :cohort-sessions (count cohort-sids)
                          :complete-pairs (count complete)
                          :divergent-pairs (count divergent)
@@ -259,6 +297,8 @@
                 :pairs (vec complete)}]
     (spit out (with-out-str (pprint/pprint report)))
     (println "Z3a" (if dry-run "DRY RUN (informational)" "preregistered analysis"))
+    (println "  arm entries by origin:" origin-counts
+             "-> operator-scored:" (count operator-arm-entries))
     (println "  cohort sessions:" (count cohort-sids)
              "| pairs:" (count complete)
              "| divergent:" (count divergent)

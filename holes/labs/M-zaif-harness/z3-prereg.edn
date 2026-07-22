@@ -20,6 +20,10 @@
         :secondary [:divergence-rate :input-coverage-census
                     :arm-distribution :gamma-used]
         :moot-threshold {:divergence-rate 0.05}
+        :turn-origin-filter {:scored #{"operator"}
+                             :excluded #{"agent" "harness" "unknown"}
+                             :source :turn-start-prompt-surface-header
+                             :reported :arm-entries-by-origin}
         :cohort {:n-sessions 20 :min-operator-turns 3
                  :max-days 30 :replacements false :interim-looks false}}
   :z3b {:design :actuated-vs-shadow-alternation

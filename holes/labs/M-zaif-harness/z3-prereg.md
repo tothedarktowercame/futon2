@@ -74,6 +74,22 @@ where the constant matters at all); input-coverage census (which of
 γ / c-belief / posting-stats were non-degenerate per round); arm
 distribution per constant; per-mission γ values actually used.
 
+**Round-grain provenance filter (drafted 2026-07-22, pre-activation, on
+Joe's question "can we tell the difference?"):** only rounds whose turn
+is *operator-originated* are Z3a observations. The discriminator is
+mechanical and total: every zai turn's `turn-start` evidence records the
+exact model-facing prompt, whose surface header stamps
+`Origin: operator|agent|harness` (`resolve-origin` in
+`transport/http.clj` — unrecognized callers default to agent, never
+operator; verified on live store data: bell-driven zai-1 turns read
+`Origin: agent / From: claude-2`). Agent- and harness-driven rounds
+still shadow-record dual decisions (harmless) but are excluded from
+scoring — including inside mixed sessions where the operator is also
+present. Headerless turns count as `unknown` and are excluded. The
+scorer reports arm entries by origin so the exclusion is visible, never
+silent. Consequence for ops: agent-driven zai runners may run freely
+during the cohort window without contaminating it.
+
 **Degeneracy is a result, not a failure:** if the divergence rate is
 < 5% of rounds, the constants question is moot at current input
 geometry, the finding is "inputs, not constants, are binding," and
