@@ -1181,3 +1181,22 @@ scoring, determinism match both constants, exact sign test n=10 k=9 →
 p=.0215). Runner profile flag staged in `scripts/dev-laptop-env.local`
 (untracked): `FUTON3C_ZAI_PROFILE=zaif`, comment-marked for removal at
 cohort close.
+
+### D-1 addendum — unwired-hydrator fix (2026-07-22, claude-2, caught live)
+
+Joe's first post-restart zai-2 turn recorded dual decisions with EMPTY
+input snapshots (:act both constants, retrieve −0.4 — the exact pre-D-1
+degeneracy). Cause: the hydrator existed but nothing passed it as
+:zaif-inputs-fn, so the live path fell back to default-zaif-inputs.
+A review miss: D-1's tests called the hydrator directly; the DEFAULT
+wiring was never exercised end-to-end. Fix futon3c `e849705`:
+hydrate-inputs is now the default for the :zaif profile
+(default-zaif-inputs remains the failure fallback) + a regression test
+asserting recorded inputs are hydrated with no explicit inputs-fn.
+Hot-reloaded via Drawbridge (the U1 pattern, no restart); verified live
+by whistling zai-2: snapshots now carry mission M-zaif-harness,
+c-unc 0.3, posting-stats, retrieve 0.759 ∈ [0,1). Pre-fix entries in
+the store are pre-activation and outside any cohort. NOTE the earlier
+tag=zaif census also shows transcript turn-rounds (profile keyword lands
+in transcript tags) — the scorer's arm-choice? predicate already
+excludes them.
