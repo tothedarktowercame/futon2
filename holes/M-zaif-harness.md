@@ -1049,3 +1049,81 @@ reading. Scoring scripts must be committed BEFORE activation and
 re-derive recorded decisions from recorded inputs (B1 --check
 discipline); all store queries use `tag=` (the `tags=` param is silently
 ignored — verified today).
+
+## Checkpoint D-1 — input hydration + dual-constant recording (2026-07-22, zai-1, dispatched by claude-2)
+
+**Status: D-1 BUILT — file changes + tests; activation at next JVM restart (operator op).**
+
+### What was built
+
+1. **Input hydration** (`futon3c/src/futon3c/agents/zaif_inputs.clj`): a
+   `:zaif-inputs-fn` hydrator that supplies real beliefs to `decide()`
+   instead of empty maps. Three channels:
+   - **γ(mission)**: read from the B1 fold artifact
+     (`b1-gamma-mission.edn`), cached per-JVM. Path configurable via
+     `FUTON3C_ZAIF_GAMMA_EDN`.
+   - **c-belief `:operator-c-uncertainty`**: derived from per-mission
+     correction rate via the γ table's per-cell perf-history (same
+     artifact — self-contained, no separate marks query). Formula:
+     correction-rate = corrections / total events in perf-history.
+     Missing missions get a mild prior of 0.3 (the aggregate base rate).
+   - **posting-stats**: derived from the turn's context text (IDF-ish
+     proxy, matching z2_calibrate's estimate-posting-stats).
+
+   Cadence: per-turn hydration (γ table cached once; c-uncertainty and
+   posting-stats are cheap derivations from cached data). Failure
+   discipline: any channel error degrades to empty-map default; the
+   caller wraps the whole call in try/catch as a second layer.
+
+2. **Dual-constant recording** (`zaif_controller.clj` + `zai_api.clj`):
+   every `:zaif`-profile round now computes `decide()` TWICE from the
+   same hydrated inputs — once at the shipped `operator-attention-cost`
+   0.65, once at the sweep value 0.15 — and persists both as evidence
+   entries with:
+   - `:constant` (0.65 or 0.15) and `:constant-label` (:shipped or :sweep)
+   - `:pairing-key` (turn-id + round, shared across the pair)
+   - `:inputs-snapshot` (full inputs for the scorer's determinism check)
+   - Tags remain `[:zaif :arm-choice]`
+
+   `decide` is parameterized via `:constants-override` (a merge into the
+   default `constants` map) — the shared-kernel discipline: both paths
+   use the exact same pure function.
+
+### Design choices (per dispatch latitude)
+
+- **Pairing shape**: two evidence entries per round, each carrying
+  `:constant`, `:constant-label`, and a shared `:pairing-key`. The scorer
+  pairs mechanically by `:pairing-key` and groups by `:constant-label`.
+- **c-uncertainty formula**: correction-rate from γ table perf-history
+  (the same artifact as γ, so no separate store query). Direct mapping:
+  rate IS the uncertainty proxy. New missions: prior 0.3.
+- **γ path**: configurable via `FUTON3C_ZAIF_GAMMA_EDN`, default the B1
+  artifact path resolved from workspace root.
+
+### Hard constraints respected
+
+- **NO actuation**: the `_decision` binding in `run-tool-rounds!` stays
+  unused. Round behavior is unchanged.
+- **NO live reload**: file changes + tests only. The live serving namespace
+  (`futon3c.agents.zai-api`) activates at the next JVM restart.
+- **Hydration never hurts a turn**: try/catch in `maybe-zaif-decision!`
+  degrades to `default-zaif-inputs` (empty maps) on any error.
+
+### Gates
+
+- clj-kondo: 0 errors, 0 warnings on all changed files.
+- check-parens: OK on all changed files.
+- Tests: 25 tests, 83 assertions, 0 failures (zaif-controller-test +
+  zaif-inputs-test).
+- Acceptance criterion 1: γ cell `M-futon-forward-model → 0.7071067811865476`
+  asserted; failure path (missing file) returns empty maps without throwing.
+- Acceptance criterion 2: dual-decision through stub store — both constants'
+  decisions recorded, mechanically paired, arms re-derivable from recorded
+  inputs by calling `decide` again (determinism check passes).
+
+### Activation
+
+D-1 is dormant until the next JVM restart wires `:zaif-inputs-fn` to
+`(make-hydrator)` in the runner config. The Z3a activation marker
+(`tag=zaif-z3a-activation`) starts the cohort clock — separate from this
+build.
