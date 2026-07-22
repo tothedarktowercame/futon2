@@ -73,7 +73,7 @@
 (defn- run-feature-card-attempt
   [{:keys [author-card author-summary grounded? artifacts? reviewer-execution
            reviewer-events cure-card cure-summary cure-commit build-cure-retries
-           initial-author-job]
+           initial-author-job operator-actions]
     :or {grounded? true artifacts? false}}]
   (let [root (.toFile (java.nio.file.Files/createTempDirectory
                        "wm-feature-card-" (make-array java.nio.file.attribute.FileAttribute 0)))
@@ -81,6 +81,7 @@
         fold-file (io/file root "M-selected.executed.edn")
         proof-file (io/file root "logic/feature-witness.edn")
         queued (atom [])
+        queued-operator-actions (atom [])
         dispatches (atom [])
         _ (spit mission-file "# test mission\n")
         _ (when artifacts?
@@ -94,6 +95,14 @@
         opts (merge
               (isolated-runner-opts)
               {:repair-open-fn (constantly [])
+               :judge-fn (fn [_]
+                           {:judgement (assoc judgement
+                                              :operator-actions
+                                              (vec operator-actions))})
+               :operator-gate-queue-fn
+               (fn [operator-action]
+                 (swap! queued-operator-actions conj operator-action)
+                 {:status :queued :mission (:mission operator-action)})
                :target-repo-fn (fn [& _] (.getPath root))
                :repair-system-record-fn
                (fn [finding] (assoc finding :repair/id "test-repair"))
@@ -157,8 +166,21 @@
                 {:build-cure-retries build-cure-retries}))
         result (runner/run-opportunity! opts)]
     {:result result :item (first @queued)
+     :queued-operator-actions @queued-operator-actions
      :dispatches @dispatches
      :fold-file fold-file :proof-file proof-file}))
+
+(deftest judge-operator-actions-queue-at-the-runner-persistence-boundary
+  (let [gate {:type :mission-gate
+              :mission "M-learning-loop"
+              :gate-kind "operator-acceptance"
+              :gate-text "Joe accepts the rendered graph"
+              :date "2026-07-22"}
+        {:keys [result queued-operator-actions]}
+        (run-feature-card-attempt
+         {:author-card feature-card-claim :operator-actions [gate]})]
+    (is (= :grounded-change (:outcome result)))
+    (is (= [gate] queued-operator-actions))))
 
 (deftest invoke-exception-author-job-is-retried-once
   ;; Replays attempt-043: Agency rejected transcript persistence after tool

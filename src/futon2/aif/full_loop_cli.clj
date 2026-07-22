@@ -83,7 +83,7 @@
                          :author :reviewer :commit :queued-at
                          :selection-review :achievement :failure
                          :repair-history :qa-targets :pending-objectives
-                         :feature-card])
+                         :feature-card :operator-action])
       (assoc :witness
              (select-keys (:witness item)
                           [:resolved? :dial-moved?
@@ -425,6 +425,14 @@
         validation (get-in item [:achievement :build :validation])
         witness (:witness item)]
     (case objective
+      :operator-gate
+      (let [{:keys [mission gate-kind gate-text date]} (:operator-action item)]
+        [(str "Mission: " (fmt mission))
+         (str "Gate: " (fmt gate-kind) " — " (fmt gate-text))
+         (str "Raised: " (fmt date))
+         "This mission had the highest pre-gate mission value, but its operator gate masks autonomous doability to zero."
+         "Resolve only after the named operator action has actually occurred; otherwise acknowledge or defer it."])
+
       :selection-quality
       [(str "Evidence: selected rank " (fmt rank) " of " (count candidates)
             "; selected " (fmt (:selected-target item)) ".")

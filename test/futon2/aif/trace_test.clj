@@ -173,6 +173,15 @@
                    :lookback-days 2))))
     (is (= 2 (trace/reduce-traces (fn [n _] (inc n)) 0 :dir *tmpdir*)))))
 
+(deftest recent-trace-records-reads-newest-files-to-a-record-bound
+  (spit (io/file *tmpdir* "wm-trace-2026-07-20.edn")
+        (str (pr-str {:id 1}) "\n" (pr-str {:id 2}) "\n"))
+  (spit (io/file *tmpdir* "wm-trace-2026-07-21.edn")
+        (str (pr-str {:id 3}) "\n" (pr-str {:id 4}) "\n"))
+  (is (= [2 3 4]
+         (mapv :id (trace/recent-trace-records 3 :dir *tmpdir*))))
+  (is (= [] (trace/recent-trace-records 0 :dir *tmpdir*))))
+
 ;; ---------------------------------------------------------------------------
 ;; M-evaluate-policies D1a (2026-07-03) — whitelist covers the blend's terms
 ;; ---------------------------------------------------------------------------

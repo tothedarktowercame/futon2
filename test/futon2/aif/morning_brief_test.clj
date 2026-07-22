@@ -30,6 +30,24 @@
     (is (thrown? java.nio.file.FileAlreadyExistsException
                  (brief/queue-item! root {:attempt-id "attempt-001"})))))
 
+(deftest operator-gate-items-are-typed-and-idempotent-while-open
+  (let [root (temp-root)
+        gate {:type :mission-gate
+              :mission "M-learning-loop"
+              :gate-kind "operator-acceptance"
+              :gate-text "Joe accepts the rendered graph"
+              :date "2026-07-22"}
+        first-result (brief/queue-operator-gate! root gate)
+        second-result (brief/queue-operator-gate! root gate)
+        item (first (brief/items root))]
+    (is (= :queued (:status first-result)))
+    (is (= :already-open (:status second-result)))
+    (is (= 1 (count (brief/items root))))
+    (is (= gate (:operator-action item)))
+    (is (= [:operator-gate] (brief/item-objectives item)))
+    (is (= [(:attempt-id item)]
+           (mapv :attempt-id (brief/pending-items root))))))
+
 (deftest ungrounded-achievement-answer-remains-evaluation-telemetry
   (let [root (temp-root)
         _ (brief/queue-item! root {:attempt-id "attempt-failed"

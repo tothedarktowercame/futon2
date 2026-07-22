@@ -31,6 +31,7 @@
   (:require [babashka.http-client :as http]
             [cheshire.core :as json]
             [clojure.edn]
+            [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.set]
             [clojure.string :as str]
@@ -802,12 +803,32 @@
   (reduce (fn [idx hx]
             (let [endpoint (first (real-endpoints hx))
                   mission-id (some-> (hx-prop hx :mission/id)
-                                     normalize-mission-id)]
+                                     normalize-mission-id)
+                  source-file (hx-prop hx :source-file)
+                  operator-gates
+                  (if (and (string? source-file)
+                           (.isFile (io/file source-file)))
+                    (->> (str/split-lines (slurp source-file))
+                         (keep (fn [line]
+                                 (when-let [[_ kind text]
+                                            (re-matches
+                                             #"^\s*\*\*Gate:\*\*\s+(operator-[a-z0-9]+(?:-[a-z0-9]+)*)\s+—\s+(.+?)\s*$"
+                                             line)]
+                                   {:kind kind :text text})))
+                         vec)
+                    [])]
               (if (and endpoint mission-id (not (str/blank? mission-id)))
-                (assoc idx mission-id endpoint)
+                (assoc idx mission-id {:endpoint endpoint
+                                       :operator-gates operator-gates})
                 idx)))
           {}
           (fetch-hyperedges-by-type "code/v05/mission-doc")))
+
+(defn- mission-index-endpoint [entry]
+  (if (map? entry) (:endpoint entry) entry))
+
+(defn- mission-index-operator-gates [entry]
+  (if (map? entry) (vec (:operator-gates entry)) []))
 
 (defn- compute-delta-t-mission
   [mission-endpoint]
@@ -824,7 +845,8 @@
   [sorry-doc mission-idx]
   (->> (or (hx-prop sorry-doc :sorry/related-missions) [])
        (keep (fn [mission-name]
-               (get mission-idx (normalize-mission-id mission-name))))
+               (some-> (get mission-idx (normalize-mission-id mission-name))
+                       mission-index-endpoint)))
        distinct
        vec))
 
@@ -923,13 +945,46 @@
          (or (not mu-moved?)
              (not= :grounded-change outcome)))))
 
+(defn- trace-outcome [trace-record]
+  (or (:outcome trace-record)
+      (get-in trace-record [:enactment :outcome])
+      (get-in trace-record [:realized-outcome :outcome])))
+
+(defn- repair-selection? [trace-record]
+  (let [previous-action (get-in trace-record [:decision :action])
+        target (some-> (:target previous-action) name)]
+    (or (= :repair-machine-failure (:type previous-action))
+        (str/starts-with? target "repair-attempt-"))))
+
+(defn- recent-non-progress-count [action trace-records]
+  (let [target (:target action)]
+    (loop [records (reverse (take-last 12 trace-records))
+           count 0]
+      (if-let [record (first records)]
+        (let [previous-action (get-in record [:decision :action])]
+          (cond
+            (repair-selection? record)
+            (recur (rest records) count)
+
+            (and (= :advance-mission (:type previous-action))
+                 (= target (:target previous-action)))
+            (if (= :grounded-change (trace-outcome record))
+              count
+              (recur (rest records) (inc count)))
+
+            :else count))
+        count))))
+
 (defn- consecutive-non-progress-count
-  [action prev-trace-record]
-  (if (previous-selection-non-progress? action prev-trace-record)
-    (inc (long (or (get-in prev-trace-record
-                           [:decision :action :non-progress-count])
-                   0)))
-    0))
+  [action trace-history]
+  (if (sequential? trace-history)
+    (recent-non-progress-count action trace-history)
+    ;; Backward-compatible one-record API: retain the carried count semantics.
+    (if (previous-selection-non-progress? action trace-history)
+      (inc (long (or (get-in trace-history
+                             [:decision :action :non-progress-count])
+                     0)))
+      0)))
 
 (defn- positive-double [x]
   (when (number? x)
@@ -1015,8 +1070,8 @@
 
   All substrate reads happen here, at the judge boundary. Mission value blends
   globally normalized centrality, active-cascade role, and phase doability,
-  then applies the completion gate and repeated-non-progress decay. Pattern
-  value continues to use the batch-normalized retrieval score.
+  then applies the completion/operator gates and repeated-non-progress decay.
+  Pattern value continues to use the batch-normalized retrieval score.
 
   Optional opts support :strategy-cascade-path and :mission-value-weights. The
   corresponding environment variables are FUTON_WM_STRATEGY_CASCADE and
@@ -1039,7 +1094,9 @@
               :advance-mission
               (let [mission (normalize-mission-id
                              (action-target-key (:target action)))
-                    endpoint (get mission-idx mission)
+                    mission-doc (get mission-idx mission)
+                    endpoint (mission-index-endpoint mission-doc)
+                    operator-gates (mission-index-operator-gates mission-doc)
                     delta-result (when endpoint
                                    (or (get @delta-cache endpoint)
                                        (let [result (compute-delta-t-mission endpoint)]
@@ -1048,17 +1105,28 @@
                     phase (normalized-phase (:mission-phase delta-result))
                     central (get centrality mission 0.0)
                     strategic-value (get strategic mission 0.0)
-                    doable (phase-doable phase)
+                    phase-doable-value (phase-doable phase)
+                    operator-gated (boolean (seq operator-gates))
+                    doable (if operator-gated 0.0 phase-doable-value)
                     completion-gate (if (= "complete" phase) 0.0 1.0)
+                    operator-gate-factor (if operator-gated 0.0 1.0)
                     blended (+ (* (:central weights) central)
                                (* (:strategic weights) strategic-value)
-                               (* (:doable weights) doable))]
-                (assoc action
-                       :central central
-                       :strategic strategic-value
-                       :doable doable
-                       :phase phase
-                       ::raw-mission-value (* blended completion-gate)))
+                               (* (:doable weights) phase-doable-value))]
+                (cond-> (assoc action
+                               :central central
+                               :strategic strategic-value
+                               :doable doable
+                               :phase phase
+                               :completion-gate-factor completion-gate
+                               :operator-gate-factor operator-gate-factor
+                               ::pre-operator-gate-value
+                               (* blended completion-gate)
+                               ::raw-mission-value
+                               (* blended completion-gate operator-gate-factor))
+                  operator-gated
+                  (assoc :operator-gated true
+                         :operator-gates operator-gates)))
 
               :fire-pattern
               (if-some [retrieval-value (positive-double (:retrieval-score action))]
@@ -1067,7 +1135,9 @@
 
               action))
           candidates)
-         max-pattern-value (reduce max 0.0 (keep ::raw-pattern-value with-value))]
+         max-pattern-value (reduce max 0.0 (keep ::raw-pattern-value with-value))
+         max-pre-gate-mission-value
+         (reduce max 0.0 (keep ::pre-operator-gate-value with-value))]
      (mapv
       (fn [action]
         (let [raw-mission (::raw-mission-value action)
@@ -1083,10 +1153,15 @@
                       1.0)
               value (or raw-mission
                         (normalized-value raw-pattern max-pattern-value))]
-          (cond-> (dissoc action ::raw-mission-value ::raw-pattern-value)
+          (cond-> (dissoc action ::raw-mission-value ::raw-pattern-value
+                          ::pre-operator-gate-value)
             (some? raw-mission) (assoc :non-progress-decay decay
                                        :non-progress? non-progress?
                                        :non-progress-count non-progress-count)
+            (and (:operator-gated action)
+                 (= max-pre-gate-mission-value
+                    (::pre-operator-gate-value action)))
+            (assoc :operator-gate-top-candidate true)
             (some? value) (assoc :mission-value-factor (* value decay)))))
       with-value))))
 
@@ -4069,10 +4144,10 @@
         ;; or on a cold start with no prior trace).
         wm-sorrys (try (sorry-registry/open-sorrys) (catch Exception _ []))
         wm-trace-dir (or trace-dir default-wm-trace-dir)
-        prev-trace-record
-        (try (trace/latest-trace-record
-              :dir wm-trace-dir)
-             (catch Exception _ nil))
+        recent-trace-records
+        (try (trace/recent-trace-records 12 :dir wm-trace-dir)
+             (catch Exception _ []))
+        prev-trace-record (peek recent-trace-records)
         structural-pressure-mode (arena-structural-pressure-mode)
         habit-prior-source (arena-habit-prior-source)
         habit-prior-span-ratio-cap (arena-habit-prior-span-ratio-cap)
@@ -4296,11 +4371,23 @@
         wm-enriched-candidates (->> wm-candidates
                                     enrich-candidates-with-structural-pressure
                                     (#(enrich-candidates-with-mission-value
-                                       % prev-trace-record))
+                                       % recent-trace-records))
                                     ;; M-interest-network-coupling capstone:
                                     ;; bias candidates by the lived interest posterior
                                     interest-net/enrich-candidates)
         wm-as-of (str (java.time.Instant/now))
+        operator-actions
+        (->> wm-enriched-candidates
+             (filter :operator-gate-top-candidate)
+             (mapcat (fn [action]
+                       (map (fn [{:keys [kind text]}]
+                              {:type :mission-gate
+                               :mission (str (:target action))
+                               :gate-kind kind
+                               :gate-text text
+                               :date (str (LocalDate/now tz))})
+                            (:operator-gates action))))
+             vec)
         _wm-snapshot-stash (reset! !last-wm-inputs
                                    {:wm-state wm-state
                                     :candidates wm-enriched-candidates
@@ -4502,6 +4589,7 @@
                 :morning-brief-held-events morning-brief-held-events
                 :morning-brief-consumed-event-ids
                 (vec (sort morning-brief-consumed-event-ids))
+                :operator-actions operator-actions
                 :anticipation anticipation-snapshot
                 :ranked-actions wm-ranked+cascades
                 ;; The decision is drawn from this executable support, not the

@@ -15,11 +15,15 @@
 (def default-root "/home/joe/code/futon2/data/wm-morning-brief")
 
 (def objective-order
-  [:feature-verdict :selection-quality :substantive-achievement
+  [:operator-gate :feature-verdict :selection-quality :substantive-achievement
    :evidence-sufficiency :machine-response])
 
 (def objective-specs
-  {:feature-verdict
+  {:operator-gate
+   {:question "Disposition the mission's operator gate."
+    :answers #{:acknowledged :resolved :deferred}
+    :use "Operator-only disposition; it does not project to the A-matrix."}
+   :feature-verdict
    {:question "Accept the built feature?"
     :answers #{:accept-feature :accept-with-follow-ups :reject}
     :use "Feature-acceptance verdict; it does not project to the A-matrix."}
@@ -77,17 +81,54 @@
                (assoc item :queued-at (str (Instant/now))
                            :morning-brief/schema-version 1))))
 
+(declare reviews items)
+
+(defn- open-operator-gate-item
+  [root mission gate-kind]
+  (let [reviewed-attempts (set (map :attempt-id (reviews root)))]
+    (some (fn [item]
+            (let [operator-action (:operator-action item)]
+              (when (and (= :mission-gate (:type operator-action))
+                         (= mission (:mission operator-action))
+                         (= gate-kind (:gate-kind operator-action))
+                         (not (contains? reviewed-attempts (:attempt-id item))))
+                item)))
+          (items root))))
+
+(defn queue-operator-gate!
+  "Queue one typed operator gate unless the same mission+kind is already open."
+  ([operator-action] (queue-operator-gate! default-root operator-action))
+  ([root {:keys [mission gate-kind gate-text date] :as operator-action}]
+   (when-not (and (nonblank-string? (str mission))
+                  (nonblank-string? (str gate-kind))
+                  (nonblank-string? gate-text)
+                  (nonblank-string? date))
+     (throw (ex-info "Operator gate requires mission, kind, text, and date"
+                     {:operator-action operator-action})))
+   (if-let [open-item (open-operator-gate-item root mission gate-kind)]
+     {:status :already-open
+      :attempt-id (:attempt-id open-item)}
+     (let [attempt-id (str "operator-gate-" (UUID/randomUUID))
+           item {:attempt-id attempt-id
+                 :outcome :operator-action-required
+                 :selected-target mission
+                 :operator-action (assoc operator-action :type :mission-gate)}
+           ref (queue-item! root item)]
+       {:status :queued :attempt-id attempt-id :ref ref}))))
+
 (defn item-objectives [item]
-  (cond-> []
-    (:commit item)
-    (conj :feature-verdict)
-    true
-    (conj :selection-quality :substantive-achievement)
-    (or (:commit item) (seq (get-in item [:achievement :build])))
-    (conj :evidence-sufficiency)
-    (or (and (:outcome item) (not= :grounded-change (:outcome item)))
-        (:failure item))
-    (conj :machine-response)))
+  (if (:operator-action item)
+    [:operator-gate]
+    (cond-> []
+      (:commit item)
+      (conj :feature-verdict)
+      true
+      (conj :selection-quality :substantive-achievement)
+      (or (:commit item) (seq (get-in item [:achievement :build])))
+      (conj :evidence-sufficiency)
+      (or (and (:outcome item) (not= :grounded-change (:outcome item)))
+          (:failure item))
+      (conj :machine-response))))
 
 (defn- item-by-attempt [root attempt-id]
   (some #(when (= attempt-id (:attempt-id %)) %)
@@ -102,8 +143,6 @@
        :weight 1.0
        :source :morning-brief-qa
        :objective objective})))
-
-(declare reviews)
 
 (defn review!
   ([attempt-id objective answer note reviewer]

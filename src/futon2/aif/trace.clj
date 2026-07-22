@@ -366,6 +366,23 @@
                      (read-trace :dir dir :date-str date-str)))
                  files))))
 
+(defn recent-trace-records
+  "Return at most n trace records in chronological order without reading the
+  full corpus. Daily files are visited newest-first until the bound is met."
+  [n & {:keys [dir] :or {dir default-trace-dir}}]
+  (let [limit (max 0 (long n))]
+    (if (zero? limit)
+      []
+      (loop [files (reverse (trace-files dir))
+             newest-first []]
+        (if (or (>= (count newest-first) limit) (empty? files))
+          (->> newest-first (take limit) reverse vec)
+          (let [file (first files)
+                date-str (subs (.getName file) 9 19)
+                records (read-trace :dir dir :date-str date-str)]
+            (recur (rest files)
+                   (into newest-first (reverse records)))))))))
+
 (defn reduce-traces
   "Chronologically reduce the trace corpus without retaining it in memory.
   At most one daily file's parsed records is resident at a time."

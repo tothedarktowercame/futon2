@@ -152,6 +152,24 @@
       (is (str/includes? rendered
                          "clojure -M:wm-full-loop review attempt-qa joe")))))
 
+(deftest operator-gate-brief-renders-the-blocking-action
+  (let [item {:attempt-id "operator-gate-1"
+              :outcome :operator-action-required
+              :selected-target "M-learning-loop"
+              :operator-action
+              {:type :mission-gate
+               :mission "M-learning-loop"
+               :gate-kind "operator-acceptance"
+               :gate-text "Joe accepts the rendered graph"
+               :date "2026-07-22"}}]
+    (with-redefs [brief/items (fn [] [item])
+                  brief/reviews (constantly [])]
+      (let [rendered (-> "operator-gate-1" cli/attempt-brief
+                         cli/render-attempt-brief)]
+        (is (str/includes? rendered "operator-acceptance"))
+        (is (str/includes? rendered "Joe accepts the rendered graph"))
+        (is (str/includes? rendered "autonomous doability to zero"))))))
+
 (deftest feature-acceptance-renders-honest-build-time-gaps-without-card
   (with-redefs [brief/items (fn [] [qa-item])
                 brief/reviews (constantly [])]

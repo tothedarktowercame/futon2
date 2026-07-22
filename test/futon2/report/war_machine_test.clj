@@ -5,6 +5,7 @@
    observation vector, and data shape contracts — without requiring
    live APIs or git repos."
   (:require [babashka.http-client :as http]
+            [clojure.java.io :as io]
             [clojure.java.shell]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.efe :as efe]
@@ -47,8 +48,10 @@
               "EDN-string props normalize to a map")
           (is (= ["repo-d/mission/beta"] (:hx/endpoints (second hxs)))
               "structured :hx/ends normalize to string endpoints")
-          (is (= {"alpha" "repo-d/mission/alpha"
-                  "beta" "repo-d/mission/beta"}
+          (is (= {"alpha" {:endpoint "repo-d/mission/alpha"
+                            :operator-gates []}
+                  "beta" {:endpoint "repo-d/mission/beta"
+                           :operator-gates []}}
                  mission-idx))
           (is (every? some? factors))
           (is (apply distinct? factors))
@@ -84,6 +87,35 @@
               {:limit 500
                :families ["code/v05/mission-doc"]}]
              @called)))))
+
+(deftest mission-doc-index-parses-zero-one-and-many-operator-gates
+  (let [root (.toFile (java.nio.file.Files/createTempDirectory
+                       "wm-operator-gates-"
+                       (make-array java.nio.file.attribute.FileAttribute 0)))
+        paths (mapv #(io/file root (str "M-" % ".md")) ["zero" "one" "many"])
+        _ (spit (paths 0) "# Zero\nStatus: MAP\n")
+        _ (spit (paths 1) "# One\n**Gate:** operator-acceptance — Joe accepts the view\n")
+        _ (spit (paths 2) (str "# Many\n"
+                               "**Gate:** operator-acceptance — Joe accepts the view\n"
+                               "**Gate:** operator-consent — Joe arms execution\n"
+                               "**Gate:** build — this is not an operator gate\n"))
+        hxs (mapv (fn [mission path]
+                    {:hx/endpoints [(str "repo/mission/" mission)]
+                     :hx/props {:mission/id (str "M-" mission)
+                                :source-file (str path)}})
+                  ["zero" "one" "many"] paths)]
+    (with-redefs-fn {#'wm/fetch-hyperedges-by-type (constantly hxs)}
+      (fn []
+        (let [idx (#'wm/mission-doc-index)]
+          (is (= [] (get-in idx ["zero" :operator-gates])))
+          (is (= [{:kind "operator-acceptance"
+                   :text "Joe accepts the view"}]
+                 (get-in idx ["one" :operator-gates])))
+          (is (= [{:kind "operator-acceptance"
+                   :text "Joe accepts the view"}
+                  {:kind "operator-consent"
+                   :text "Joe arms execution"}]
+                 (get-in idx ["many" :operator-gates]))))))))
 
 (deftest morning-brief-events-use-live-belief-update-and-hold-unknown-entities
   (let [prior {"known" {:spawned (/ 1.0 7) :refined (/ 1.0 7)
@@ -506,6 +538,54 @@
                 instantiate-g (:G-efe (efe/compute-efe state instantiate))]
             (is (not= stuck-g instantiate-g)
                 "judge-enriched equal-hole candidates have distinct strategic G")))))))
+
+(deftest operator-gate-is-a-multiplicative-mask-with-visible-components
+  (with-redefs-fn
+    {#'wm/centrality-joint-map
+     (fn [] {"M-gated" 1.0 "M-open" 0.5})
+     #'wm/mission-doc-index
+     (fn [] {"gated" {:endpoint "mission/gated"
+                       :operator-gates
+                       [{:kind "operator-acceptance"
+                         :text "Joe accepts the result"}]}
+             "open" {:endpoint "mission/open"
+                     :operator-gates []}})
+     #'wm/compute-delta-t-mission
+     (fn [_] {:mission-phase "instantiate"})
+     #'wm/read-strategy-cascade
+     (fn [_] {:boxes [] :spine [] :terminals []})}
+    (fn []
+      (let [[gated open]
+            (wm/enrich-candidates-with-mission-value
+             [{:type :advance-mission :target "M-gated"}
+              {:type :advance-mission :target "M-open"}]
+             [] {:strategy-cascade-path "unused"})]
+        (is (= 1.0 (:central gated)))
+        (is (= 0.0 (:strategic gated)))
+        (is (= 0.0 (:doable gated)))
+        (is (true? (:operator-gated gated)))
+        (is (= 0.0 (:operator-gate-factor gated)))
+        (is (= 1.0 (:completion-gate-factor gated)))
+        (is (zero? (:mission-value-factor gated)))
+        (is (true? (:operator-gate-top-candidate gated)))
+        (is (pos? (:mission-value-factor open)))))))
+
+(deftest non-progress-window-skips-repairs-and-resets-on-grounded-work
+  (let [action {:type :advance-mission :target "M-learning-loop"}
+        failed {:decision {:action action} :outcome :build-failed}
+        repair {:decision {:action {:type :repair-machine-failure
+                                    :target "repair-attempt-043-build-failed"}}
+                :outcome :grounded-change}
+        grounded {:decision {:action action} :outcome :grounded-change}]
+    (is (= 2 (#'wm/consecutive-non-progress-count
+              action [failed repair failed])))
+    (is (= 0 (#'wm/consecutive-non-progress-count
+              action [failed repair grounded])))
+    (is (= 1 (#'wm/consecutive-non-progress-count
+              action [grounded repair failed])))
+    (is (= 4 (#'wm/consecutive-non-progress-count
+              action (assoc-in failed [:decision :action :non-progress-count] 3)))
+        "the single-record API retains its carried-count behavior")))
 
 (deftest live-star-map-efe-opts-adds-conservative-graph-blend
   (testing "live WM opts carry the graph and softened star-map weights when graph loads"

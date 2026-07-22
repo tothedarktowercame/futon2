@@ -1569,7 +1569,13 @@
                               (get-in entry [:action :type]))
             reviewer (if repair-action? repair-reviewer reviewer)
             _ (reset! reviewer-of-record reviewer)
-            judgement (assoc judgement0 :wm-version
+            operator-action-refs
+            (mapv #((or (:operator-gate-queue-fn opts)
+                        brief/queue-operator-gate!) %)
+                  (:operator-actions judgement0))
+            judgement (assoc judgement0
+                             :operator-action-refs operator-action-refs
+                             :wm-version
                              ((or (:version-stamp-fn opts) trace/wm-version-stamp)
                               (assoc mode-flags
                                      :trigger trigger
