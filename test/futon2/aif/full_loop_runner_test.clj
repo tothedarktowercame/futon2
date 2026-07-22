@@ -605,6 +605,35 @@
     (is (re-find #"relevant tests in a fresh JVM" prompt))
     (is (re-find #"Report the exact commands" prompt))))
 
+(deftest reviewer-receives-a-bounded-repair-contract-without-the-backtrace
+  (let [contract
+        {:construction-kind :machine-stop-line-repair
+         :selected-action
+         {:type :repair-machine-failure
+          :target "repair-attempt-047-review-execution-evidence-missing"
+          :repair-obligation
+          {:repair/id "repair-attempt-047-review-execution-evidence-missing"
+           :repair/class :machine-failure
+           :repair/status :open
+           :attempt-id "attempt-047"
+           :failure-stage :reviewer-wait
+           :failure-error "Independent review lacks execution evidence"
+           :discharge-contract
+           {:requires [:distinct-repair-commit :independent-review]}
+           :backtrace {:unbounded-marker (apply str (repeat 100000 "x"))}}}
+         :repair-contract
+         {:repair-id "repair-attempt-047-review-execution-evidence-missing"
+          :failure-kind :review-execution-evidence-missing}}
+        prompt (#'runner/reviewer-prompt
+                {:author "codex-1" :reviewer "codex-2"}
+                "repair-attempt-047-review-execution-evidence-missing"
+                contract "/repo" "abc123" {:job-id "author-job"} [])]
+    (is (< (count prompt) 10000))
+    (is (re-find #":machine-stop-line-repair" prompt))
+    (is (re-find #":distinct-repair-commit" prompt))
+    (is (re-find #"repair-attempt-047-review-execution-evidence-missing" prompt))
+    (is (not (re-find #":backtrace|unbounded-marker" prompt)))))
+
 (deftest code-review-execution-gate-requires-tools-not-just-an-executed-flag
   (let [gate (#'runner/review-execution-gate
               ["src/example.clj"]

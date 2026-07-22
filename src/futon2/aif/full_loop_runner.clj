@@ -888,6 +888,22 @@
                  :failure-job-id (recovery-job-id finding)))
         stop-lines))
 
+(defn- prompt-selected-action [action]
+  (cond-> (select-keys action
+                       [:type :target :mission-path :target-class :proposer-id
+                        :pattern-title :pattern-summary :evidence-ids])
+    (:repair-obligation action)
+    (assoc :repair-obligation
+           (first (prompt-findings [(:repair-obligation action)])))))
+
+(defn- prompt-construction [construction]
+  (cond-> (select-keys construction
+                       [:construction-kind :capability-contract
+                        :actuation-contract :repair-contract :shown :semilattice])
+    (:selected-action construction)
+    (assoc :selected-action
+           (prompt-selected-action (:selected-action construction)))))
+
 (defn- author-prompt [{:keys [author reviewer batch-id target-repository
                              target-repository-head]}
                       target mission cascade-entry stop-lines]
@@ -976,10 +992,7 @@
        " for selected target " (pr-str target) ".\n\n"
        "Repository: " repo "\n"
        "CONSTRUCTION CONTRACT: "
-       (pr-str (select-keys construction
-                            [:construction-kind :selected-action
-                             :capability-contract :actuation-contract :repair-contract
-                             :shown :semilattice])) "\n"
+       (pr-str (prompt-construction construction)) "\n"
        "Author job evidence: " (pr-str (select-keys author-job
                                                      [:job-id :state :artifact-ref
                                                       :repo-observed-artifact-ref
