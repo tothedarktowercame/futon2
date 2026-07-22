@@ -1200,3 +1200,24 @@ the store are pre-activation and outside any cohort. NOTE the earlier
 tag=zaif census also shows transcript turn-rounds (profile keyword lands
 in transcript tags) — the scorer's arm-choice? predicate already
 excludes them.
+
+## Z3a ACTIVATED (2026-07-22T12:09:36.872Z, by Joe)
+
+Activation marker `e-b732cb8c-c209-45f4-8d0e-96ef6c4ab380` (subject
+M-zaif-harness, tag zaif-z3a-activation; prereg-commits bde08bc/6ed9f58/
+df85eb2/1a8a600, code-commits f709a1e/8445de9/e849705). Verified
+readable under `tag=` from the laptop store; scorer latches onto it
+(activation smoke run: 0 sessions, 0 pairs — correct baseline; NOT an
+interim analysis, no cohort data existed). z3-prereg.md is FROZEN as of
+this marker; changes now go to its Amendments section. Cohort = first
+20 operator-driven zaif sessions (≥3 operator turns) or 30 days
+(to 2026-08-21), whichever first; then ONE scorer run.
+
+Ops notes at activation: FUTON3C_ZAI_PROFILE=zaif rides
+scripts/dev-laptop-env.local (remove at cohort close); agent-driven zai
+turns are shadow-recorded but excluded by the round-grain origin filter
+— during the window, agents should whistle/bell only runners Joe is not
+actively holding. One phantom-accept incident during activation: an
+earlier "accepted" response was never found on any store we checked
+(laptop 7070/7073, lucy 7070/7074) — the working POST is the one whose
+evidence/id was verified readable. Accepted is not stored; read it back.
