@@ -1,0 +1,25 @@
+{:repair/status :awaiting-validation,
+ :replacement-commit "53612e3",
+ :witness
+ {:resolved? true,
+  :dial-moved? true,
+  :kind :root-cause-removed,
+  :evidence
+  {:diagnosis
+   "attempt-044 required a repair commit in futon2, the failed machine repository, but the author followed the nested M-learning-loop context and committed fe60edc in futon5a. The author-wait artifact gate correctly rejected that foreign-repository narration after observing futon2 unchanged at 200a850; the dispatch prompt had not exposed the repository binding that the gate enforced.",
+   :repair-commits
+   {:futon2 ["53612e3" "26c26cc"]},
+   :repair
+   "53612e3 makes the target repository and observed base HEAD explicit in the author contract; 26c26cc regenerates that contract from the fresh repository observation when an infrastructure retry occurs.",
+   :failed-artifact
+   {:claimed-commit "fe60edc",
+    :actual-repository "/home/joe/code/futon5a",
+    :expected-repository "/home/joe/code/futon2",
+    :expected-base-head "200a850c81284dccd548e3f70f67a93d68fec2ce"}}},
+ :repair/id "repair-attempt-044-artifact-binding-mismatch",
+ :implemented-at "2026-07-22T09:48:51.030610321Z",
+ :review-job "invoke-1784713640933-4-8da7cf10",
+ :implementation-attempt "repair-attempt-044-2026-07-22",
+ :failed-attempt "attempt-044",
+ :reviewer "claude-1",
+ :repair/schema-version 1}
