@@ -1020,3 +1020,32 @@ server suite in futon3c is authoritative).
   is stale on this row too — B0/marks channel is fully landed, live-
   accepted; next real frontier is the Z lane (z1_views.clj + z2
   calibration exist in this lab — see their own outcomes).
+
+## Checkpoint ZU-3 — Z3 preregistration DRAFTED (2026-07-22, claude-2)
+
+Draft at `labs/M-zaif-harness/z3-prereg.md` + machine-readable
+`z3-prereg.edn`. **Status: DRAFT — review gate = Joe; activation is a
+separate append-only store marker, clock starts there.**
+
+Two survey findings reshaped the design from the original "alternating
+profiles A/B":
+1. **Zaif decisions are recorded, not actuated** (`zai_api.clj:848`
+   `_decision`) — on/off arms would be behaviorally identical today.
+2. **Live controller inputs are empty** (`default-zaif-inputs` reads ctx
+   keys the runner never populates) — every live decide() currently
+   degenerates to `:act` by tie-break.
+
+Hence two phases: **Z3a** shadow paired dual-constant (0.65 vs 0.15
+computed per round from the SAME hydrated inputs — pure decide(), a
+within-round paired design; needs D-1 input hydration via the existing
+`:zaif-inputs-fn` hook, no behavioral change) → **Z3b** actuated-vs-
+shadow alternation (gated on Z3a report + D-2 actuation build + Joe).
+Divergence-rate < 5% is preregistered as a MOOT verdict ("inputs, not
+constants, are binding" — the honest analogue of PZ1's lexicon
+disqualification). Adoption rule: shipped constants change only after a
+completed Z3b, doc+reports+diff in one commit. Marking-recall audit
+(~10-item PZ1-H3 blind pass) bounds the "no correction = acceptance"
+reading. Scoring scripts must be committed BEFORE activation and
+re-derive recorded decisions from recorded inputs (B1 --check
+discipline); all store queries use `tag=` (the `tags=` param is silently
+ignored — verified today).

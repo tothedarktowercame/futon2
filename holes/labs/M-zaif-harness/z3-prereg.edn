@@ -1,0 +1,50 @@
+{:prereg :z3-zaif-controller
+ :status :draft
+ :drafted "2026-07-22"
+ :author "claude-2"
+ :doc "z3-prereg.md"
+ :ground-facts
+ {:decisions-actuated? false          ; zai_api.clj:848 `_decision`
+  :live-inputs-empty? true            ; zai_api.clj default-zaif-inputs
+  :zu2-finding {:ask-unreachable-at 0.65 :sweep-separates-at 0.15
+                :replay-input-circularity true}
+  :marks-channel-live "e-51c9349e"
+  :api-footgun "tags= silently ignored; use tag="}
+ :phases
+ {:z3a {:design :shadow-paired-dual-constant
+        :constants [0.65 0.15]
+        :primary :divergent-round-paired-accuracy
+        :direction "0.15 > 0.65"
+        :test [:exact-sign-test :permutation-null]
+        :alpha 0.05
+        :secondary [:divergence-rate :input-coverage-census
+                    :arm-distribution :gamma-used]
+        :moot-threshold {:divergence-rate 0.05}
+        :cohort {:n-sessions 20 :min-operator-turns 3
+                 :max-days 30 :replacements false :interim-looks false}}
+  :z3b {:design :actuated-vs-shadow-alternation
+        :gates [:z3a-report :actuation-built-and-reviewed :operator-arming]
+        :primary :corrections-per-act
+        :guard {:metric :asks-per-achieved-outcome :ceiling-vs-shadow 2.0}
+        :descriptive [:yield-timing]
+        :cohort {:n-per-arm 10 :min-operator-turns 3
+                 :assignment :alternate-by-mint-order
+                 :assignment-recorded :pre-session
+                 :operator-blind-to-assignment true}}}
+ :judgment-operationalization
+ {:correction [:tag "correction" :or :adjudicated-correction]
+  :acceptance [:tag "approval" :or :no-correction-signal]
+  :no-correction-caveat :bounded-by-marking-recall-audit
+  :ideal-arm {:correction #{:ask :yield} :acceptance #{:act}}}
+ :audits {:marking-recall {:protocol :pz1-h3-blind :n-items 10}}
+ :exclusions {:recorded-at :occurrence-time
+              :rules [:infra-failure-mid-session :under-min-operator-turns
+                      :operator-void-for-cause-before-analysis]}
+ :adoption-rule "shipped constant changes only after completed Z3b, same-commit doc+reports+diff"
+ :dependencies {:d1-input-hydration :z3a-prerequisite
+                :d2-arm-actuation :z3b-prerequisite
+                :d3-runner-minting :operator-op}
+ :activation {:z3a [:tag "zaif-z3a-activation"]
+              :z3b [:tag "zaif-z3b-activation"]
+              :frozen-at :z3a-activation
+              :amendments :logged-in-doc}}
