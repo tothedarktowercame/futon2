@@ -1165,3 +1165,19 @@ report to weigh.
 script `z3a_score.clj` (committed-before-activation rule), runner with
 `FUTON3C_ZAI_PROFILE=zaif` + JVM restart (operator op), activation
 marker (Joe).
+
+### Z3a scorer committed pre-activation (2026-07-22, claude-2)
+
+`labs/M-zaif-harness/z3a_score.clj` — the preregistered analysis,
+committed BEFORE activation per z3-prereg.md. Read-only against the
+store via server-side `tag=`/`session-id=` filters (an unfiltered sweep
+of the full store is hours — first version made exactly that mistake and
+was fixed before commit); refuses to run as the real analysis without
+the activation marker (`--dry-run` for informational passes); re-derives
+every recorded arm from its `:inputs-snapshot` through the real
+controller kernel. Verified: live dry run (clean zeros, ~1 min) +
+synthetic paired data (pairing, correction-judgment, point-to-sweep
+scoring, determinism match both constants, exact sign test n=10 k=9 →
+p=.0215). Runner profile flag staged in `scripts/dev-laptop-env.local`
+(untracked): `FUTON3C_ZAI_PROFILE=zaif`, comment-marked for removal at
+cohort close.
