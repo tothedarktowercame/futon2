@@ -41,7 +41,18 @@
                 [(:control-pattern-id witnessed-edge)]
                 [witnessed-edge blocked])]
     (is (empty? (:candidates result)))
-    (is (= 1 (get-in result [:audit :witnessed-block-count])))))
+    (is (= 1 (get-in result [:audit :witnessed-block-count])))
+    (is (= [{:mission-id "M-typed-memories"
+             :exclusion :witnessed-block
+             :blocking-relations
+             [{:control-pattern-id
+               "p4ng/R6-candidate-pattern-action-space"
+               :relation :blocked-by-control
+               :provenance
+               [{:kind :mission-text
+                 :ref "M-typed-memories.md#retrieval-gap"}]
+               :memory-ids ["e-blocker"]}]}]
+           (:excluded-missions result)))))
 
 (deftest embeddings-propose-but-do-not-certify
   (let [proposal (assoc witnessed-edge
@@ -133,7 +144,11 @@
         (is (= 1 (get-in result
                          [:audit :ineligible-witnessed-edge-count])))))
     (testing "a concrete independently witnessed counterexample blocks"
-      (is (empty?
-           (:candidates
+      (let [result
             (graph/candidate-projection
-             [pattern] [support block] [witnessed-support blocker])))))))
+             [pattern] [support block] [witnessed-support blocker])]
+        (is (empty? (:candidates result)))
+        (is (= "e-block"
+               (get-in result
+                       [:excluded-missions 0 :blocking-relations 0
+                        :memories 0 :memory/id])))))))

@@ -92,6 +92,30 @@
                     (seq (:eligible-memories edge)))))
          supporting (filterv support-eligible? enriched)
          blocking (group-by :mission-id (filter block-eligible? enriched))
+         blocker-reason
+         (fn [edge]
+           (cond->
+            (select-keys edge
+                         [:control-pattern-id :relation :provenance
+                          :memory-ids])
+             strict-memory?
+             (assoc :memories
+                    (mapv #(select-keys
+                            % [:memory/id :memory/hook :memory/body
+                               :memory/witness-status :memory/mission-ids])
+                          (:eligible-memories edge)))))
+         excluded-missions
+         (->> blocking
+              (map
+               (fn [[mission-id mission-blockers]]
+                 {:mission-id mission-id
+                  :exclusion :witnessed-block
+                  :blocking-relations
+                  (mapv blocker-reason
+                        (sort-by (juxt :control-pattern-id :relation)
+                                 mission-blockers))}))
+              (sort-by :mission-id)
+              vec)
          candidates
          (->> supporting
               (group-by :mission-id)
@@ -125,6 +149,7 @@
      {:active-control-patterns (vec (sort active))
       :candidate-count (count candidates)
       :candidates candidates
+      :excluded-missions excluded-missions
       :audit
       (cond->
        {:edge-count (count relevant)

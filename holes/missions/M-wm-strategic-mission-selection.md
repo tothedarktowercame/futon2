@@ -233,6 +233,19 @@ blocking-counterexample reductions live in futon3c under
 Acceptance: the outer cascade explains why each mission was proposed, which
 episodes were recalled, and where evidence or control structure is missing.
 
+Accepted dark on 2026-07-23 through
+`futon3c.peripheral.strategic-cascade`. Each p4ng cascade step calls the Phase
+4 query boundary; the resulting frontier carries full memory reasons,
+witnessed dependencies, concrete blockers, and explicit transition,
+dependency, policy, and budget holes. Repeated independently witnessed holes
+may deposit an R17''' pattern proposal, but its prior remains unearned and it
+cannot enter the cascade or certify itself.
+
+The paired dynamic-query checkpoint remains instrumentation only. It records
+typed relation contributions, path diversity, budget, and the fixed endpoint
+order as counterfactual; both the outer result and checkpoint carry no selected
+mission and cannot affect the production controller.
+
 ### S2b — optional embedding experiment
 
 Only after the direct path works, compare generic embedding, dedicated
