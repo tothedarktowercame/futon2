@@ -542,7 +542,7 @@
         (println (str "Allowed answers: " (vec (sort (:answers spec)))))
         (print "Answer: ")
         (flush)
-        (let [answer (some-> (read-line) str/trim keyword)]
+        (let [answer (some-> (read-line) str/trim (str/replace #"^:+" "") keyword)]
           (when-not (contains? (:answers spec) answer)
             (throw (ex-info "Unknown Morning Brief answer"
                             {:objective objective :answer answer

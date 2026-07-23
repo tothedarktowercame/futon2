@@ -65,17 +65,69 @@
 (defn cascade-policy-for
   "Construct the budget-truncated cascade-policy for a circumstance |psi> (text).
    Read-only, sim-only, memoized. Returns the parsed map or nil on failure."
-  ([psi-text] (cascade-policy-for psi-text default-budget))
-  ([psi-text budget]
-   (or (get @!cache [psi-text budget])
+  ([psi-text] (cascade-policy-for psi-text default-budget 0.15))
+  ([psi-text budget] (cascade-policy-for psi-text budget 0.15))
+  ([psi-text budget epsilon]
+   (or (get @!cache [psi-text budget epsilon])
        (let [v (try
-                 (let [{:keys [exit out]} (sh-timed [py script psi-text (str budget)]
+                 (let [{:keys [exit out]} (sh-timed [py script psi-text (str budget)
+                                                     (str epsilon)]
                                                     script-dir cascade-timeout-ms)]
                    (when (and exit (zero? exit))
                      (json/parse-string out true)))
                  (catch Exception _ nil))]
-         (when v (swap! !cache assoc [psi-text budget] v))
+         (when v (swap! !cache assoc [psi-text budget epsilon] v))
          v))))
+
+(def default-policy-menu-epsilons
+  "Coverage-saturation thresholds for the DARK cascade policy frontier. The
+   incumbent 0.15 is included; neighbouring thresholds test shorter and longer
+   complete constructions without inventing duplicate candidates."
+  [0.10 0.15 0.20])
+
+(defn cascade-policy-menu-for
+  "Construct a DARK same-mission menu of complete cascade policies.
+
+   Each epsilon changes the coverage-saturation stopping rule. Budget equals
+   the constructor pool ceiling, so only untruncated results are admitted: the
+   score, wholeness, shown patterns, and semilattice must describe the same
+   complete policy. Duplicate identities collapse; zero or one result remains
+   visibly non-selectable via `:policy-choice?`.
+
+   This function is read-only and is not called by the production lane."
+  ([mission psi-text] (cascade-policy-menu-for mission psi-text {}))
+  ([mission psi-text {:keys [epsilons pool-budget]
+                      :or {epsilons default-policy-menu-epsilons
+                           pool-budget 40}}]
+   (let [candidates
+         (->> epsilons
+              (keep (fn [epsilon]
+                      (when-let [cascade (cascade-policy-for psi-text pool-budget epsilon)]
+                        (when-not (:truncated cascade)
+                          (let [shown (mapv :pattern (:shown cascade))]
+                            (when (seq shown)
+                              (assoc cascade
+                                     :mission mission
+                                     :shown shown
+                                     :candidate-source :coverage-saturation-frontier
+                                     :coverage-saturation-epsilon epsilon
+                                     :policy-grain :pattern-cascade)))))))
+              (reduce (fn [by-policy candidate]
+                        (assoc by-policy [(:shown candidate)
+                                          (:semilattice candidate)]
+                               candidate))
+                      (array-map))
+              vals
+              vec)]
+     {:mission mission
+      :psi psi-text
+      :candidate-source :coverage-saturation-frontier
+      :candidates candidates
+      :candidate-count (count candidates)
+      :policy-choice? (>= (count candidates) 2)
+      :status (if (>= (count candidates) 2)
+                :candidate-menu
+                :no-policy-choice)})))
 
 (defn- id-stem-psi
   "The v1 psi: strip M-, hyphens->spaces. Kept as the FALLBACK when no mission

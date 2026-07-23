@@ -219,6 +219,21 @@ the falsifying test (a cadence sweep) and candidate reformulations:
 **`holes/F-propagator-on-c-vector-NEGATIVE.md`**. **Do not cite the loop as working.** It is deliberately
 excluded from the paper draft (`futon5/holes/tech-notes/paper/`) for exactly this reason.
 
+**The falsifying sweep was run (2026-07-16, later) — refutation STRENGTHENED.**
+`scripts/xeno_gentle_sweep.clj` widened it to cadence × magnitude (rate-limited relaxation,
+ε=1 replicating the original operator bit-exactly, with baseline/sham/replication audits
+in-script). No (σ, cadence, ε) cell beats baseline; the dose–response (evolved σ: Δ −23.4
+every-tick → −2.8 at EVERY 50) confirms amnesia as the *mechanism*, but gentleness only
+recovers *toward* no-propagator. The two positive-mean cells failed fresh-pool
+confirmation with 0 wins (`scripts/xeno_gentle_confirm.clj`). Rate/magnitude is dead as a
+rescue; the live reformulations are **per-ant locus** (σ across ants — scoped in the
+NEGATIVE doc) and **precision-not-preference**.
+
+**Concurrency footgun (caught 2026-07-16):** `run-live` moves C via `with-redefs` on the
+global `policy/default-c-vectors`, so live-propagator runs must be **sequential** — a
+`pmap` over seeds makes concurrent runs stomp each other's C (caught by the sweep's
+replication audit; per-seed yields silently wrong).
+
 **Known limits:** 8 train boards, pop 6, 6 generations is a small search; yield magnitudes
 are dominated by the few productive boards, so *direction* (sign test) is trustworthy and
 *effect size* is not.
@@ -231,6 +246,8 @@ are dominated by the few productive boards, so *direction* (sign test) is trustw
 |---|---|
 | `scripts/ant_authority_gate.clj` | the gate. Run first. |
 | `scripts/xeno_loop.clj` | the loop: screen → evolve → held-out verdict. |
+| `scripts/xeno_gentle_sweep.clj` | the falsifying sweep: cadence × magnitude, fixed σ, audited. NEGATIVE. |
+| `scripts/xeno_gentle_confirm.clj` | fresh-pool confirmation of the sweep's positive-mean cells. Did not confirm. |
 | `src/ants/aif/**` | **the ants.** Modern AIF forager. |
 | `src/ants/cyber.clj` | **NOT the ants.** Post-mortem subject; see §0. |
 | `holes/M-aif-ants-port.md` | the reframe + the three ground-truth findings behind §0. |

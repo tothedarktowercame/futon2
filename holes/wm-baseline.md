@@ -51,15 +51,28 @@ tripwire).
   Known scale: ≈ ×9.6 the hinge on the live belly. Escape hatch:
   `FUTON_WM_GOAL_OUTCOME_MODE=hinge`. Mode stamped per ranked action as
   `:goal-outcome-mode` (trace-whitelisted at birth).
+- **Mission enrichment is an additive engineering model** — open-mission
+  candidates carry globally normalized `:central`, active strategy-cascade
+  role `:strategic`, and phase `:doable`; the default blend is
+  `0.25*central + 0.45*strategic + 0.30*doable`, followed by completion and
+  operator support gates and non-progress decay. It is not multiplicative,
+  not habit $E$, and not part of `G-efe`. The typed p4ng-control-pattern and
+  memory route toward a principled strategic model is dark-only and specified
+  in `holes/missions/M-wm-strategic-mission-selection.md`.
 - **`:habit-prior-source :learned-frequency`** with
   **`:structural-pressure-mode :habit-prior`** — LIVE since Joe's 2026-07-13
   joint flip. A symmetric Dirichlet posterior over selected action identities
-  supplies $\ln E(\pi)$ after structural pressure leaves `controller-score`;
+  supplies scheduler-grain $\ln E_{scheduler}(a)$ after structural pressure
+  leaves `controller-score`;
   it replaces rather than stacks with the historical caller proxy. The first
   enabled tick seeds counts from the chronological trace corpus; later ticks
   persist sufficient statistics in `:habit-prior-state`. Historical rollback
   requires both `FUTON_WM_HABIT_PRIOR_SOURCE=caller` and
-  `FUTON_WM_STRUCTURAL_PRESSURE_MODE=controller-augmentation`.
+  `FUTON_WM_STRUCTURAL_PRESSURE_MODE=controller-augmentation`. This is not yet
+  the paper's cascade-grain $E(\pi)$: the live constructor runs after scheduler
+  selection and returns one cascade. The dark compliance kernel and staged
+  route to a genuine same-mission cascade menu are specified in
+  `holes/missions/M-wm-aif-policy-grain-compliance.md`.
 - **`:tau-mode :selection-gain-only`** — LIVE since Joe's 2026-07-13 flip.
   R6 no longer divides by the score-spread heuristic: $\tau_{eff}=1/g$.
   Selection gain remains an explicitly engineering feedback control, not

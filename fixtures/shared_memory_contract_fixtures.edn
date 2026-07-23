@@ -1,0 +1,75 @@
+{:mathematics
+ {:entry
+  {:evidence/id "e-math-1"
+   :evidence/type :memory
+   :evidence/claim-type :assert
+   :evidence/author "zai-3"
+   :evidence/session-id "math-session-1"
+   :evidence/body {:hook "Normalize the denominator before field_simp."}}
+  :edge
+  {:hx/id "hx-mem-math-1"
+   :hx/type :memory/assert
+   :hx/endpoints ["e-math-1" "lean/field-simp-denominator"
+                  "apm/a94A06" "M-typed-memories"]
+   :hx/props
+   {:roles {:entry "e-math-1"
+            :subjects ["apm/a94A06"]
+            :patterns ["lean/field-simp-denominator"]
+            :mission "M-typed-memories"}
+    :kind :feedback
+    :hook "Normalize the denominator before field_simp."
+    :attachment-status :reviewed
+    :volatile? false}}
+  :domain :mathematics
+  :witness-status :independently-witnessed
+  :state :current
+  :valid-time "2026-07-22T18:00:00Z"
+  :system-time "2026-07-22T18:00:01Z"}
+
+ :war-machine
+ {:entry
+  {:evidence/id "e-wm-1"
+   :evidence/type :memory
+   :evidence/claim-type :assert
+   :evidence/author "war-machine/dark"
+   :evidence/session-id "wm-shadow-1"
+   :evidence/body {:hook "A zero centrality erased strategy-spine support."}}
+  :edge
+  {:hx/id "hx-mem-wm-1"
+   :hx/type :memory/assert
+   :hx/endpoints ["e-wm-1" "p4ng/R15" "wm/mission/strategic-selection"]
+   :hx/props
+   {:roles {:entry "e-wm-1"
+            :subjects ["wm/mission/strategic-selection"]
+            :patterns ["p4ng/R15"]
+            :missions ["wm/mission/strategic-selection"]}
+    :kind :feedback
+    :hook "A zero centrality erased strategy-spine support."
+    :attachment-status :reviewed
+    :volatile? true}}
+  :domain :war-machine
+  :witness-status :self-asserted
+  :state :current
+  :valid-time "2026-07-23T09:00:00Z"
+  :system-time "2026-07-23T09:00:02Z"}
+
+ :math-receipt
+ {:decision-id "math-decision-1"
+  :session-id "math-session-2"
+  :domain :mathematics
+  :surfaced-memory-ids ["e-math-1"]
+  :used-memory-ids ["e-math-1"]
+  :inclusion-reasons {"e-math-1" "attached to selected field_simp pattern"}
+  :pattern-id "lean/field-simp-denominator"
+  :outcome-id "e-proof-check-1"
+  :recorded-at "2026-07-23T10:00:00Z"}
+
+ :wm-receipt
+ {:decision-id "wm-shadow-decision-1"
+  :session-id "wm-shadow-2"
+  :domain :war-machine
+  :surfaced-memory-ids ["e-wm-1"]
+  :used-memory-ids []
+  :inclusion-reasons {"e-wm-1" "R15 control endpoint is active"}
+  :cascade-id "wm-control-cascade-1"
+  :recorded-at "2026-07-23T10:05:00Z"}}
