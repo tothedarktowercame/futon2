@@ -355,6 +355,13 @@
              :tau-mode (arena-tau-mode)
              :structural-pressure-mode (arena-structural-pressure-mode)
              :habit-prior-source (arena-habit-prior-source)
+             ;; The learned prior is scheduler-action frequency, not the
+             ;; strategic E_S defined by the Phase 7 outer-loop model. Keep it
+             ;; visible as a counterfactual until reviewed strategic events
+             ;; have their own posterior.
+             :strategic-selection-boundary :controller-head
+             :scheduler-habit-authority :counterfactual-only
+             :strategic-memory-authority :requires-reviewed-live-trace
              :predictability-control-mode (arena-predictability-control-mode)
              :homeostatic-control-mode (arena-homeostatic-control-mode)
              :graph-feasibility-mode (arena-graph-feasibility-mode)
@@ -4452,20 +4459,35 @@
         ;; deliberative select-action with default-mode-select as a
         ;; try/catch fallback for I6 compositional closure.
         wm-admissible (filterv #(fm/can-execute? wm-state (:action %)) wm-ranked)
-        wm-decision (try (policy/select-action
-                          wm-admissible
-                          {:selection-gain selection-gain-value
-                           :habit-prior-stats
-                           (when habit-prior-pre
-                             (habit-prior/state-stats habit-prior-pre))
-                           ;; B-2d τ-layer separation — arena-resolved; the live
-                           ;; default is :selection-gain-only (see resolver).
-                           :temperature-opts {:tau-mode (arena-tau-mode)}})
-                         (catch Exception _
-                           (policy/default-mode-select wm-state wm-admissible)))
+        wm-decision
+        (assoc
+         (try (policy/select-action
+               wm-admissible
+               {:selection-gain selection-gain-value
+                ;; Mission choice is a live strategic recommendation. The
+                ;; current learned-frequency prior is scheduler-grain, so it
+                ;; remains a counterfactual rather than governing this choice.
+                ;; Downstream act gates, not no-op comparison, own enactment
+                ;; abstention.
+                :selection-boundary :strategic-recommendation
+                :habit-prior-stats
+                (when habit-prior-pre
+                  (habit-prior/state-stats habit-prior-pre))
+                ;; B-2d τ-layer separation — arena-resolved; the live default
+                ;; is :selection-gain-only (see resolver).
+                :temperature-opts {:tau-mode (arena-tau-mode)}})
+              (catch Exception _
+                (policy/default-mode-select wm-state wm-admissible)))
+         :strategic-memory
+         {:influenced? false
+          :reason :no-reviewed-live-strategic-trace
+          :authority :not-yet-live})
         habit-prior-state
         (when (= :learned-frequency habit-prior-source)
-          (habit-prior/observe-action habit-prior-pre (:action wm-decision)))
+          ;; Do not train the scheduler-grain prior on strategic
+          ;; recommendations while it is counterfactual-only. A distinct E_S
+          ;; will learn from reviewed strategic selection events.
+          habit-prior-pre)
         ;; Car-3 (R16) seam 1: lift the acquired cascade-policies out of the read-only lane
         ;; into the differential as SELECTABLE :apply-cascade actions, each carrying BOTH
         ;; act-gate legs (ΔF = cascade cascade-score, ΔG = rollout G(π)) + the conjunction

@@ -212,6 +212,80 @@
      ;; an aligned prior may have a wide span without deciding the winner.
      :governed-by (if (= winner top-g) :G :habit-prior)}))
 
+(defn- ranking-entry
+  [entry idx score]
+  {:rank (inc idx)
+   :action (select-keys (:action entry) [:type :target :target-class])
+   :controller-score (double (:controller-score entry))
+   :habit-prior-bias (double (or (:habit-prior-bias entry) 0.0))
+   :selection-score (double score)})
+
+(defn- strategic-recommendation
+  "Select the controller head at the strategic mission grain while retaining
+   the scheduler-grain habit calculation as an inspectable counterfactual.
+
+   This is a live selection, not an operator-approval request. It deliberately
+   does not authorize enactment: downstream act gates own that decision."
+  [ranked-actions g-totals log-priors selection-gain temperature-opts
+   habit-prior-stats no-op-entry]
+  (let [tau-spread (adaptive-temperature g-totals temperature-opts)
+        tau (effective-temperature g-totals selection-gain temperature-opts)
+        scores (mapv (fn [g lp] (+ (/ (- (double g)) (double tau))
+                                    (double lp)))
+                     g-totals log-priors)
+        controller-entries (filterv #(not= :no-op (get-in % [:action :type]))
+                                    ranked-actions)
+        chosen (or (first controller-entries) (first ranked-actions))
+        chosen-idx (.indexOf ranked-actions chosen)
+        habit-order (sort-by (fn [idx] (- (nth scores idx)))
+                             (range (count ranked-actions)))
+        counterfactual-idx (first habit-order)
+        no-op-g (some-> no-op-entry :controller-score double)
+        chosen-g (double (:controller-score chosen))
+        explanation (decision-explanation
+                     ranked-actions chosen-idx tau selection-gain
+                     temperature-opts log-priors habit-prior-stats)]
+    {:action (:action chosen)
+     :rank (:rank chosen)
+     :controller-score chosen-g
+     :tau tau
+     :tau-spread tau-spread
+     :selection-gain (double selection-gain)
+     :selection-boundary :strategic-recommendation
+     :recommendation-authority :live
+     :requires-operator-override? false
+     :actuation-status :pending-downstream-gates
+     :actuation-authorized? false
+     :habit-prior-applied? false
+     :habit-authority :counterfactual-only
+     :controller-ranking
+     (mapv (fn [idx entry]
+             (ranking-entry entry idx (/ (- (double (:controller-score entry)))
+                                         (double tau))))
+           (range) ranked-actions)
+     :habit-adjusted-ranking
+     (mapv (fn [rank idx]
+             (ranking-entry (nth ranked-actions idx) rank (nth scores idx)))
+           (range) habit-order)
+     :counterfactual
+     {:kind :scheduler-habit-authoritative
+      :winner (ranking-entry (nth ranked-actions counterfactual-idx)
+                             0 (nth scores counterfactual-idx))}
+     :no-op-comparison
+     {:controller-score no-op-g
+      :controller-margin (when no-op-g (- no-op-g chosen-g))
+      :blocks-recommendation? false}
+     :decision-explanation
+     (assoc explanation
+            :governed-by :G
+            :habit-counterfactual-winner
+            (get-in (ranking-entry (nth ranked-actions counterfactual-idx)
+                                   0 (nth scores counterfactual-idx))
+                    [:action]))
+     :softmax-weights
+     (zipmap (mapv :action ranked-actions)
+             (softmax-weights g-totals tau log-priors))}))
+
 (defn select-action
   "Top-level action selection.
 
@@ -228,6 +302,12 @@
                         Default 1.0 ⇒ behaviour identical to the spread-only path.
      :habit-prior-stats — optional sufficient-statistic summary for the
                           decision explanation; it never changes selection.
+     :selection-boundary — :actuation (default, historical semantics) or
+                           :strategic-recommendation. The latter emits a live
+                           non-abstaining controller-head recommendation,
+                           treats the current scheduler-grain habit as an
+                           inspectable counterfactual, and leaves enactment to
+                           downstream act gates.
 
    Capability-gap preemption policy: a `:learn-action-class` repair may
    preempt mission work only when the proposal/admissibility layers establish
@@ -261,10 +341,11 @@
      (i.e. the best action isn't meaningfully better than doing nothing)."
   ([ranked-actions] (select-action ranked-actions {}))
   ([ranked-actions {:keys [abstain-epsilon temperature-opts selection-gain
-                           habit-prior-stats]
+                           habit-prior-stats selection-boundary]
                     :or {abstain-epsilon 0.01
                          temperature-opts {}
-                         selection-gain 1.0}}]
+                         selection-gain 1.0
+                         selection-boundary :actuation}}]
    (cond
      (empty? ranked-actions)
      {:action :abstain
@@ -288,7 +369,11 @@
            g-totals (mapv :controller-score ranked-actions)
            no-op-entry (find-no-op ranked-actions)
            no-op-g (when no-op-entry (:controller-score no-op-entry))]
-       (if-not priors?
+       (if (= :strategic-recommendation selection-boundary)
+         (strategic-recommendation
+          ranked-actions g-totals log-priors selection-gain temperature-opts
+          habit-prior-stats no-op-entry)
+         (if-not priors?
          (let [best (first ranked-actions)
                best-g (:controller-score best)
                abstain? (and no-op-entry
@@ -340,4 +425,4 @@
                 :habit-prior-applied? true
                 :decision-explanation explanation
                 :softmax-weights (zipmap (mapv :action ranked-actions)
-                                         weights)}))))))))
+                                         weights)})))))))))

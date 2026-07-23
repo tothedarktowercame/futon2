@@ -341,3 +341,41 @@
     (is (thrown? clojure.lang.ExceptionInfo
                  (policy/effective-temperature [0.0 1.0] 1.0
                                                {:tau-mode :typo-mode})))))
+
+(deftest strategic-recommendation-quarantines-wrong-grain-habit-test
+  (testing "frozen 2026-07-23 regression: controller head remains the live
+            recommendation; scheduler habit and no-op stay inspectable but
+            cannot turn the recommendation into abstention"
+    (let [eoi {:action {:type :advance-mission
+                        :target "M-expressions-of-interest"}
+               :rank 1
+               :controller-score 15.006113125291307
+               :habit-prior-bias -4.304065093204169}
+          no-op {:action {:type :no-op}
+                 :rank 2
+                 :controller-score 15.62266170992065
+                 :habit-prior-bias -4.304065093204169}
+          learning {:action {:type :advance-mission
+                             :target "M-learning-loop"}
+                    :rank 113
+                    :controller-score 15.68319193474288
+                    :habit-prior-bias -1.9526898360406921}
+          out (policy/select-action
+               [eoi no-op learning]
+               {:selection-boundary :strategic-recommendation
+                :selection-gain 1.0
+                :temperature-opts {:tau-mode :selection-gain-only}})]
+      (is (= "M-expressions-of-interest" (get-in out [:action :target])))
+      (is (= :live (:recommendation-authority out)))
+      (is (false? (:requires-operator-override? out)))
+      (is (= :pending-downstream-gates (:actuation-status out)))
+      (is (false? (:actuation-authorized? out)))
+      (is (= :counterfactual-only (:habit-authority out)))
+      (is (= "M-learning-loop"
+             (get-in out [:counterfactual :winner :action :target])))
+      (is (= "M-learning-loop"
+             (get-in out [:habit-adjusted-ranking 0 :action :target])))
+      (is (= "M-expressions-of-interest"
+             (get-in out [:controller-ranking 0 :action :target])))
+      (is (false? (get-in out [:no-op-comparison
+                               :blocks-recommendation?]))))))
