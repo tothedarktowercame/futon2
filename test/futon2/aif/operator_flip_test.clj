@@ -11,9 +11,14 @@
     (testing "selection gain alone carries R6 commitment sharpness"
       (is (= :selection-gain-only (:tau-mode flags))))
     (testing "scheduler habit is visible but cannot govern strategic selection"
-      (is (= :controller-head (:strategic-selection-boundary flags)))
+      ;; Packet D (fa61e98) replaced the 191e168 controller-head bypass with
+      ;; the reviewed reason-bearing strategic policy; habit stays
+      ;; counterfactual-only and memory authority still requires the
+      ;; independently reviewed live chain.
+      (is (= :reviewed-reason-bearing-policy
+             (:strategic-selection-boundary flags)))
       (is (= :counterfactual-only (:scheduler-habit-authority flags)))
-      (is (= :requires-reviewed-live-trace
+      (is (= :reviewed-live-chain-integrity
              (:strategic-memory-authority flags))))))
 
 (deftest configured-habit-prior-span-cap-is-provenance-stamped
