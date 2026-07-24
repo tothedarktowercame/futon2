@@ -356,12 +356,14 @@
              :structural-pressure-mode (arena-structural-pressure-mode)
              :habit-prior-source (arena-habit-prior-source)
              ;; The learned prior is scheduler-action frequency, not the
-             ;; strategic E_S defined by the Phase 7 outer-loop model. Keep it
-             ;; visible as a counterfactual until reviewed strategic events
-             ;; have their own posterior.
-             :strategic-selection-boundary :controller-head
+             ;; strategic E_S defined by the Phase 7 outer-loop model. It
+             ;; remains a named counterfactual to the reviewed live
+             ;; reason-bearing strategic policy.
+             :strategic-selection-boundary
+             :reviewed-reason-bearing-policy
              :scheduler-habit-authority :counterfactual-only
-             :strategic-memory-authority :requires-reviewed-live-trace
+             :strategic-memory-authority
+             :reviewed-live-chain-integrity
              :predictability-control-mode (arena-predictability-control-mode)
              :homeostatic-control-mode (arena-homeostatic-control-mode)
              :graph-feasibility-mode (arena-graph-feasibility-mode)
@@ -4092,6 +4094,16 @@
              :summary (str b " waits on " a)})
           blocked-pairs))))
 
+(defn- invoke-strategic-selection
+  [selector request]
+  (when-not (ifn? selector)
+    (throw
+     (ex-info
+      "War Machine requires the shared reason-bearing selector"
+      {:required-option :strategic-selection-fn
+       :selection-boundary :reviewed-reason-bearing-policy})))
+  (selector request))
+
 (defn judge
   "The war machine's inference step.
 
@@ -4112,7 +4124,8 @@
      does not change `wm-decision`: cascade actions are held-for-arming and
      appended only after policy selection."
   ([scan-data] (judge scan-data {}))
-  ([scan-data {:keys [trace? trace-dir scan-id include-advisory-lanes?]
+  ([scan-data {:keys [trace? trace-dir scan-id include-advisory-lanes?
+                      strategic-selection-fn]
                :or {trace? false include-advisory-lanes? true}}]
   (let [observation (obs/observe scan-data)
         free-energy (fe/compute-controller-diagnostics observation)
@@ -4459,29 +4472,83 @@
         ;; deliberative select-action with default-mode-select as a
         ;; try/catch fallback for I6 compositional closure.
         wm-admissible (filterv #(fm/can-execute? wm-state (:action %)) wm-ranked)
+        controller-decision
+        (try (policy/select-action
+              wm-admissible
+              {:selection-gain selection-gain-value
+               :selection-boundary :strategic-recommendation
+               :habit-prior-stats
+               (when habit-prior-pre
+                 (habit-prior/state-stats habit-prior-pre))
+               :temperature-opts {:tau-mode (arena-tau-mode)}})
+             (catch Exception _
+               (policy/default-mode-select wm-state wm-admissible)))
+        strategic-candidate-ids
+        #{"M-aif-policy-conditioned-eig"
+          "M-shared-memory-control-build-test"
+          "M-wm-aif-policy-grain-compliance"}
+        scheduler-habit-ranking
+        (->> wm-admissible
+             (keep #(let [target (get-in % [:action :target])]
+                      (when (contains? strategic-candidate-ids target)
+                        target)))
+             distinct
+             vec)
+        strategic-selection
+        (invoke-strategic-selection
+         strategic-selection-fn
+         {:scheduler-habit-ranking scheduler-habit-ranking
+          :trace-id (str "wm-live-selection-" wm-as-of)})
+        selected-mission-ids (:selected-mission-ids strategic-selection)
+        strategic-action
+        (first
+         (keep
+          (fn [mission-id]
+            (some #(when (= mission-id (get-in % [:action :target])) %)
+                  wm-admissible))
+          selected-mission-ids))
+        _ (when-not (and (= :verified-live-selection
+                            (:status strategic-selection))
+                         strategic-action)
+            (throw
+             (ex-info
+              "reviewed live strategic selection is not actionable"
+              {:selection-status (:status strategic-selection)
+               :selected-mission-ids selected-mission-ids
+               :scheduler-habit-ranking scheduler-habit-ranking})))
+        selected-policy (:selected-policy strategic-selection)
         wm-decision
-        (assoc
-         (try (policy/select-action
-               wm-admissible
-               {:selection-gain selection-gain-value
-                ;; Mission choice is a live strategic recommendation. The
-                ;; current learned-frequency prior is scheduler-grain, so it
-                ;; remains a counterfactual rather than governing this choice.
-                ;; Downstream act gates, not no-op comparison, own enactment
-                ;; abstention.
-                :selection-boundary :strategic-recommendation
-                :habit-prior-stats
-                (when habit-prior-pre
-                  (habit-prior/state-stats habit-prior-pre))
-                ;; B-2d τ-layer separation — arena-resolved; the live default
-                ;; is :selection-gain-only (see resolver).
-                :temperature-opts {:tau-mode (arena-tau-mode)}})
-              (catch Exception _
-                (policy/default-mode-select wm-state wm-admissible)))
-         :strategic-memory
-         {:influenced? false
-          :reason :no-reviewed-live-strategic-trace
-          :authority :not-yet-live})
+        (assoc controller-decision
+               :action (:action strategic-action)
+               :reason :reviewed-live-reason-bearing-policy
+               :selection-boundary :reason-bearing-strategic-policy
+               :requires-operator-override? false
+               :actuation-status :pending-downstream-gates
+               :selected-policy-id (:selected-policy-id
+                                    strategic-selection)
+               :selected-mission-ids selected-mission-ids
+               :strategic-memory
+               {:influenced? true
+                :authority :live
+                :basis :chain-integrity-and-auditability
+                :demonstrated-better-selection? false
+                :memory-ids (:selected-memory-ids
+                             strategic-selection)
+                :relation-contributions
+                (:relation-contributions strategic-selection)
+                :path-diversity (:path-diversity strategic-selection)
+                :budget (:budget strategic-selection)
+                :blockers (:blockers strategic-selection)
+                :calibration (:calibration strategic-selection)
+                :serving-cache-gate
+                (:serving-cache-gate strategic-selection)
+                :e-s (:e-s selected-policy)
+                :predicted-g-s (:predicted-g-s selected-policy)
+                :hard-support (:hard-support selected-policy)
+                :provenance (:provenance selected-policy)
+                :counterfactuals
+                (:counterfactuals strategic-selection)
+                :actuation (:actuation strategic-selection)})
         habit-prior-state
         (when (= :learned-frequency habit-prior-source)
           ;; Do not train the scheduler-grain prior on strategic

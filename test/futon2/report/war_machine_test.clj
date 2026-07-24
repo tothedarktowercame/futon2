@@ -11,6 +11,17 @@
             [futon2.aif.efe :as efe]
             [futon2.report.war-machine :as wm]))
 
+(deftest strategic-selector-accepts-resolved-vars-and-rejects-absence
+  (testing "requiring-resolve returns a callable Var, not a value satisfying fn?"
+    (is (= {:probe true}
+           (#'wm/invoke-strategic-selection
+            #'identity {:probe true}))))
+  (testing "absence is a system failure, never an additive fallback"
+    (is (thrown-with-msg?
+         clojure.lang.ExceptionInfo
+         #"requires the shared reason-bearing selector"
+         (#'wm/invoke-strategic-selection nil {:probe true})))))
+
 (deftest futon1b-edn-mission-index-enables-strategic-enrichment-test
   (let [body (pr-str
               {:hyperedges
