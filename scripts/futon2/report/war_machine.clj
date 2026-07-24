@@ -4509,11 +4509,17 @@
           selected-mission-ids))
         _ (when-not (and (= :verified-live-selection
                             (:status strategic-selection))
-                         strategic-action)
+                         strategic-action
+                         (= :machine-authorized-bounded-autonomy
+                            (get-in strategic-selection
+                                    [:actuation :status]))
+                         (true? (get-in strategic-selection
+                                        [:actuation :authorized?])))
             (throw
              (ex-info
               "reviewed live strategic selection is not actionable"
               {:selection-status (:status strategic-selection)
+               :actuation (:actuation strategic-selection)
                :selected-mission-ids selected-mission-ids
                :scheduler-habit-ranking scheduler-habit-ranking})))
         selected-policy (:selected-policy strategic-selection)
@@ -4523,7 +4529,13 @@
                :reason :reviewed-live-reason-bearing-policy
                :selection-boundary :reason-bearing-strategic-policy
                :requires-operator-override? false
-               :actuation-status :pending-downstream-gates
+               ;; Operator decision evidence
+               ;; 6e6f56a1-b9d7-4f83-928f-3a211ef890a0 retires
+               ;; confirm-to-enact. All machine gates remain authoritative.
+               :actuation-status
+               (get-in strategic-selection [:actuation :status])
+               :actuation-authorized?
+               (get-in strategic-selection [:actuation :authorized?])
                :selected-policy-id (:selected-policy-id
                                     strategic-selection)
                :selected-mission-ids selected-mission-ids

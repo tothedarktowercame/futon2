@@ -5,6 +5,7 @@
             [clojure.string :as str]
             [clojure.test :refer [deftest is use-fixtures]]
             [futon2.aif.full-loop-cli :as cli]
+            [futon2.aif.delivery-qa :as delivery-qa]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.pattern-registry :as patterns]
@@ -15,9 +16,39 @@
 
 (use-fixtures :once hermetic/with-hermetic-stores)
 
+(defn- with-field-desk-stub
+  [f]
+  (with-redefs [delivery-qa/emit!
+                (fn [_ item]
+                  {:morning-brief/addendum-id
+                   (str "qa-" (:attempt-id item))})]
+    (f)))
+
+(use-fixtures :each with-field-desk-stub)
+
 (deftest production-repair-root-is-unreachable-during-runner-suite
   (is (not= hermetic/production-repair-root repair/default-root))
   (is (not= hermetic/production-trip-root tripwire/default-trip-root)))
+
+(deftest standalone-runner-uses-the-serving-strategic-selector
+  (let [seen (atom nil)
+        expected {:status :verified-live-selection
+                  :selected-mission-ids ["M-shared-memory-control-build-test"]}]
+    (with-redefs
+      [http/post
+       (fn [url opts]
+         (reset! seen {:url url
+                       :body (json/parse-string (:body opts) true)})
+         {:status 200
+          :body (json/generate-string {:ok true :selection expected})})]
+      (is (= expected
+             (runner/strategic-selection!
+              {:agency-base "http://127.0.0.1:7070"}
+              {:scheduler-habit-ranking ["M-a"]})))
+      (is (= "http://127.0.0.1:7070/api/alpha/war-machine/strategic-selection"
+             (:url @seen)))
+      (is (= ["M-a"]
+             (get-in @seen [:body :scheduler-habit-ranking]))))))
 
 (def selected-action {:type :open-mission :target "M-selected"})
 
@@ -58,6 +89,10 @@
    :mission-fn (fn [target] {:id target})
    :construct-fn runner/construct-for-decision
    :author-artifact-observer-fn synthetic-artifact-binding
+   :delivery-qa-fn
+   (fn [_ item]
+     {:morning-brief/addendum-id
+      (str "qa-" (:attempt-id item))})
    :queue-fn identity})
 
 (def feature-card-claim
@@ -73,7 +108,7 @@
 (defn- run-feature-card-attempt
   [{:keys [author-card author-summary grounded? artifacts? reviewer-execution
            reviewer-events cure-card cure-summary cure-commit build-cure-retries
-           initial-author-job operator-actions]
+           initial-author-job operator-actions delivery-qa-fn]
     :or {grounded? true artifacts? false}}]
   (let [root (.toFile (java.nio.file.Files/createTempDirectory
                        "wm-feature-card-" (make-array java.nio.file.attribute.FileAttribute 0)))
@@ -161,9 +196,11 @@
                   :dial-moved? grounded?
                   :implementation-id "feature-impl"
                   :discharge-id "feature-discharge"})
-               :queue-fn #(swap! queued conj %)}
+              :queue-fn #(swap! queued conj %)}
               (when (some? build-cure-retries)
-                {:build-cure-retries build-cure-retries}))
+                {:build-cure-retries build-cure-retries})
+              (when delivery-qa-fn
+                {:delivery-qa-fn delivery-qa-fn}))
         result (runner/run-opportunity! opts)]
     {:result result :item (first @queued)
      :queued-operator-actions @queued-operator-actions
@@ -181,6 +218,16 @@
          {:author-card feature-card-claim :operator-actions [gate]})]
     (is (= :grounded-change (:outcome result)))
     (is (= [gate] queued-operator-actions))))
+
+(deftest delivered-commit-cannot-close-without-field-desk-qa
+  (is (thrown-with-msg?
+       clojure.lang.ExceptionInfo
+       #"Delivery closed without Field Desk QA notes"
+       (run-feature-card-attempt
+        {:author-card feature-card-claim
+         :delivery-qa-fn
+         (fn [& _]
+           (throw (ex-info "Field Desk unavailable" {})))}))))
 
 (deftest invoke-exception-author-job-is-retried-once
   ;; Replays attempt-043: Agency rejected transcript persistence after tool
@@ -585,7 +632,7 @@
             :construction :construction :author-dispatch :author-dispatch
             :author-wait :author-wait :build-resolution :build-resolution
             :reviewer-dispatch :reviewer-dispatch :reviewer-wait :reviewer-wait
-            :grounding :grounding :opportunity]
+            :grounding :grounding :delivery-qa :delivery-qa :opportunity]
            (mapv :phase @phases)))
     (is (= #{:selection :construction :dispatch :build :adjudication}
            (set (keys (:checkpoints result)))))))

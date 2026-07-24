@@ -14,6 +14,7 @@
             [clojure.pprint :as pp]
             [clojure.string :as str]
             [futon2.aif.c-vector :as cv]
+            [futon2.aif.delivery-qa :as delivery-qa]
             [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.mission-registry :as missions]
             [futon2.aif.morning-brief :as brief]
@@ -72,6 +73,7 @@
              (or parsed default-build-cure-retries))
            :author-infrastructure-retries default-author-infrastructure-retries
            :trigger :duree-click-on-demand
+           :delivery-qa-fn delivery-qa/emit!
            :cohort? true
            :semantic-epoch semantic-epoch}
           opts)))
@@ -404,7 +406,44 @@
       parsed
       (throw (ex-info "Agency dispatch failed"
                       {:outcome :dispatch-failed :status (:status r)
-                       :response parsed})))))
+                      :response parsed})))))
+
+(defn strategic-selection!
+  "Request the cache-gated reason-bearing selector from the serving JVM.
+
+   Futon2 intentionally has no source dependency on Futon3c. The port-7070
+   boundary lets the standalone click runner use the same hot-loaded selector
+   as the scheduler, immediately before the local judgement is finalized."
+  [{:keys [agency-base]} request]
+  (let [url (str agency-base "/api/alpha/war-machine/strategic-selection")
+        response
+        (http/post url
+                   {:headers {"Content-Type" "application/json"}
+                    :body (json/generate-string request)
+                    :timeout 30000
+                    :throw false})
+        body
+        (try
+          (json/parse-string (str (:body response)) true)
+          (catch Throwable _ {}))]
+    (when-not (and (<= 200 (long (or (:status response) 0)) 299)
+                   (true? (:ok body))
+                   (map? (:selection body)))
+      (throw
+       (ex-info "Reason-bearing strategic selection endpoint failed"
+                {:failure-kind :strategic-selection-unavailable
+                 :failure-stage :selection
+                 :status (:status response)
+                 :response body
+                 :endpoint url})))
+    (let [selection (:selection body)]
+      (cond-> (update selection :status keyword)
+        (get-in selection [:actuation :status])
+        (update-in [:actuation :status] keyword)
+        (get-in selection [:actuation :authority])
+        (update-in [:actuation :authority] keyword)
+        (get-in selection [:calibration :status])
+        (update-in [:calibration :status] keyword)))))
 
 (defn dispatch!
   [{:keys [agency-base]} agent caller mission prompt]
@@ -1466,10 +1505,32 @@
                               (:feature-card data))
                          (assoc :feature-card (:feature-card data)))
                        brief-ref ((or (:queue-fn opts) brief/queue-item!) brief-item)
+                       delivery-qa-ref
+                       (if (str/blank? (str (:commit data)))
+                         {:status :not-a-delivery
+                          :reason :no-authored-commit}
+                         (run-phase!
+                          opts @phase-context :delivery-qa
+                          #(try
+                             ((:delivery-qa-fn opts) opts brief-item)
+                             (catch Throwable e
+                               (throw
+                                (ex-info
+                                 "Delivery closed without Field Desk QA notes"
+                                 {:failure-kind :delivery-qa-gate-failed
+                                  :failure-stage :delivery-qa
+                                  :attempt-id attempt-id
+                                  :commit (:commit data)}
+                                 e))))
+                          (fn [ref]
+                            {:delivery-qa-ref ref
+                             :field-desk-endpoint
+                             (delivery-qa/endpoint opts)})))
                        closed (term (merge {:outcome outcome
                                             :grounded? (= :grounded-change outcome)
                                             :artifact-only? (= :artifact-only outcome)
                                             :morning-brief-ref brief-ref
+                                            :delivery-qa-ref delivery-qa-ref
                                             :duration-ms (- (System/currentTimeMillis) started)
                                             :resource-use
                                             {:agent-turns @dispatched-turns}}
@@ -1477,7 +1538,9 @@
                                     {:kind :full-loop-outcome :attempt-id attempt-id})
                        result {:attempt-id attempt-id :opportunity-id opportunity-id
                                :outcome outcome :checkpoints @checkpoints
-                               :morning-brief-ref brief-ref :data data}]
+                               :morning-brief-ref brief-ref
+                               :delivery-qa-ref delivery-qa-ref
+                               :data data}]
                    (when cohort? (cohort/close-attempt! attempt-id closed))
                    (if-let [path (:canary-out opts)]
                      (do (io/make-parents path)
@@ -1558,7 +1621,11 @@
             selection-judge (or (:judge-fn opts)
                                 (fn [days]
                                   (wm/generate-war-machine
-                                   days {:include-advisory-lanes? false})))
+                                   days
+                                   {:include-advisory-lanes? false
+                                    :strategic-selection-fn
+                                    (or (:strategic-selection-fn opts)
+                                        #(strategic-selection! opts %))})))
             judgement0 (:judgement
                         (run-phase! opts @phase-context :selection
                                     #(selection-judge window-days)))
@@ -2148,6 +2215,9 @@
   (try
     (run-opportunity-core! raw-opts)
     (catch Throwable e
+      (when (= :delivery-qa-gate-failed
+               (:failure-kind (ex-data e)))
+        (throw e))
       (let [attempt-id (str "initialization-" (UUID/randomUUID))
             trigger (or (:trigger raw-opts) :duree-click-on-demand)
             error (if (str/blank? (str (.getMessage e)))
