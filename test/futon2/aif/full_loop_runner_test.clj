@@ -3,7 +3,7 @@
             [cheshire.core :as json]
             [clojure.java.io :as io]
             [clojure.string :as str]
-            [clojure.test :refer [deftest is use-fixtures]]
+            [clojure.test :refer [deftest is testing use-fixtures]]
             [futon2.aif.full-loop-cli :as cli]
             [futon2.aif.delivery-qa :as delivery-qa]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
@@ -364,6 +364,44 @@
     (is (= :truncated-or-over-durable-limit
            (:reason (#'runner/feature-card-validation
                      {:result-summary truncated}))))))
+
+(deftest complete-durable-result-cures-summary-truncation
+  ;; attempt-051 (2026-07-25): the author's valid card exceeded the 220-char
+  ;; whitespace-collapsed :result-summary window, and the cure reply put
+  ;; prose before the marker. Agency durably stores and serves the complete
+  ;; reply in :result; the parser now falls back to a line-anchored search
+  ;; there before reporting a typed failure.
+  (let [card-line (str "FULL_LOOP_FEATURE_CARD: "
+                       "{:built \"cohort stopping-rule exception now returns "
+                       ":cohort-complete instead of a spurious repair obligation\" "
+                       ":want-coverage \"stopping rule fires without depositing "
+                       "a repair obligation or morning-brief item\" "
+                       ":matches-intent? true "
+                       ":things-to-try [\"exhaust cohort -> :cohort-complete\"]}")
+        truncated-summary (subs card-line 0 200)]
+    (testing "verbose-but-valid card recovered from :result despite summary truncation"
+      (let [{:keys [card source]}
+            (#'runner/feature-card-validation
+             {:result-summary truncated-summary
+              :result (str card-line "\nFULL_LOOP_AUTHOR: DONE e8b24fa")})]
+        (is (some? card))
+        (is (= :result source))
+        (is (str/starts-with? (:built card) "cohort stopping-rule"))))
+    (testing "cure-shaped reply with prose before a line-anchored marker"
+      (let [{:keys [card source]}
+            (#'runner/feature-card-validation
+             {:result-summary "The commit is already valid. Re-emitting a shorter card:"
+              :result (str "The commit is already valid. Re-emitting a shorter card:\n"
+                           card-line "\nFULL_LOOP_AUTHOR: DONE e8b24fa")})]
+        (is (some? card))
+        (is (= :result source))))
+    (testing "a marker quoted mid-sentence is not line-anchored and does not match"
+      (is (= :marker-not-at-durable-prefix
+             (:reason (#'runner/feature-card-validation
+                       {:result-summary "prose only"
+                        :result (str "the validator looks for "
+                                     "FULL_LOOP_FEATURE_CARD: {:built \"x\"} "
+                                     "in the reply")})))))))
 
 (deftest feature-card-validation-requires-replayable-observations
   (let [bad-step (assoc feature-card-claim

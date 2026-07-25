@@ -759,27 +759,56 @@
                       (java.io.StringReader. payload))]
     (edn/read {:eof nil} reader)))
 
-(defn- text-feature-card [job]
-  ;; Parse only the bytes Agency promises to preserve. This both tolerates
-  ;; newline squashing after a complete card and rejects a map whose closing
-  ;; brace fell beyond the durable prefix. Only :result-summary is authoritative
-  ;; here: job-text also contains terminal messages and event prose that may
-  ;; quote the marker without being the author's replayable response prefix.
+(defn- summary-feature-card
+  "Fast path: the card led the reply and closed within the legacy 200-char
+  summary window."
+  [job]
   (let [text (:result-summary job)]
-    (cond
-      (str/blank? text)
-      {:reason :missing-marker :source :text}
-
-      (not (str/starts-with? text feature-card-marker))
-      {:reason :marker-not-at-durable-prefix :source :text}
-
-      :else
+    (when (and (string? text)
+               (str/starts-with? text feature-card-marker))
       (let [end (min (count text) feature-card-durable-limit)
             payload (subs text (count feature-card-marker) end)]
         (try
-          {:card (read-first-edn-form payload) :source :text}
-          (catch Exception _
-            {:reason :truncated-or-over-durable-limit :source :text}))))))
+          (when-let [card (read-first-edn-form payload)]
+            {:card card :source :text})
+          (catch Exception _ nil))))))
+
+(defn- result-feature-card
+  "Line-anchored search over the job's complete durable reply. Agency stores
+  the full reply in :result (capped at 8000 at finalize) and serves it on the
+  jobs GET; only the author's own reply payload is searched — terminal
+  messages and event prose are not — so a marker quoted there cannot
+  masquerade as the card. Line anchoring keeps a marker quoted mid-sentence
+  from matching."
+  [job]
+  (let [text (str (:result job))]
+    (when-not (str/blank? text)
+      (let [m (re-matcher #"(?m)^FULL_LOOP_FEATURE_CARD:" text)]
+        (when (.find m)
+          (try
+            (when-let [card (read-first-edn-form (subs text (.end m)))]
+              {:card card :source :result})
+            (catch Exception _ nil)))))))
+
+(defn- text-feature-card [job]
+  ;; :result-summary is a 220-char whitespace-collapsed digest and truncates
+  ;; any card whose closing brace falls past the window — attempt-051's valid
+  ;; card failed exactly there (2026-07-25), and its cure round failed on
+  ;; prose preceding the marker. Prefer the summary fast path, then fall back
+  ;; to the complete durable :result; report the legacy typed reasons only
+  ;; when no parseable card exists on either path.
+  (or (summary-feature-card job)
+      (result-feature-card job)
+      (let [summary (:result-summary job)]
+        (cond
+          (and (str/blank? summary) (str/blank? (str (:result job))))
+          {:reason :missing-marker :source :text}
+
+          (not (str/starts-with? (str summary) feature-card-marker))
+          {:reason :marker-not-at-durable-prefix :source :text}
+
+          :else
+          {:reason :truncated-or-over-durable-limit :source :text}))))
 
 (defn- observation-shaped-step? [step]
   (when (string? step)
