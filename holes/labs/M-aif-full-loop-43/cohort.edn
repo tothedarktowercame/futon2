@@ -1,0 +1,72 @@
+{:cohort/id :wm-outer-loop-43-v1
+ :protocol/version 4
+ :status :preregistered
+ :registered-on "2026-07-25"
+ :purpose "First cohort after the attempt-051 evidence-gate repair (futon2 7a5906b: feature card read from the complete durable reply; futon3c 9ca563c: jobs GET serves :result). Successor to :wm-outer-loop-42-v1 (target reached 2026-07-25; selection discriminated, author committed, build gate failed on the now-repaired card-truncation contract). Primary questions: (1) does the full loop now ground end-to-end — observe->select->author->build->review->ground — under the reviewed reason-bearing selector and delivery-QA gating; (2) does a grounded attempt discharge the open agent-unavailable and feature-card repair obligations (048/049/051 chain). Casting per operator (Joe, 2026-07-25): fresh author zai-2, fresh reviewer codex-2, passed explicitly per attempt via --author/--reviewer. Operator scope: run-by-run engagement continues; target 2 leaves room for one fail-forward repair attempt without re-chartering."
+ :activation :separate-append-only-marker
+ :population "Ground-control durée-triggered opportunities of the full War Machine loop"
+ :stopping-rule
+ {:unit :trigger-opportunity
+  :target 2
+  :rule "Count the first 2 distinct eligible trigger opportunities after activation, in order."
+  :counts-as-attempt
+  [:selected-and-dispatched
+   :abstained
+   :no-selection
+   :agent-unavailable
+   :substrate-unavailable
+   :guardrail-refusal
+   :dispatch-failed
+   :build-failed
+   :grounded-no-change
+   :grounded-change]
+  :excluded
+  [:manual-test :replay :duplicate-opportunity :pre-activation]
+  :replacement "None. Failed, unavailable, abstaining, and no-change opportunities remain in the denominator."}
+ :allowed-triggers #{:duree-click-on-demand
+                     :duree-click-continuous}
+ :checkpoint-order
+ [:time-step :selection :construction :dispatch :build :adjudication :closed]
+ :required-before-close
+ #{:selection :construction :dispatch :build :adjudication}
+ :checkpoint-contract
+ {:cell-shape "Every checkpoint payload is either {:judgment ... :ground ...} or {:sorry {:kind keyword ...}}."
+  :time-step [:opportunity-id :trigger :machine-state :agent-roster :code-state :semantic-epoch]
+  :selection [:selected-mission :selected-action :ranked-candidates :selection-reasons]
+  :construction [:mission :cascade :sorries :wiring :patterns :deposit]
+  :dispatch [:agent :availability :job-id :prompt-ref]
+  :build [:artifacts :generated-code :commits :patterns-used :inline-improvements :validation]
+  :adjudication [:before :after :witness :build-match :dial]
+  :closed [:outcome :grounded? :artifact-only? :duration-ms :resource-use]}
+ :grounded-success
+ {:outcome :grounded-change
+  :requires [:independent-before-witness
+             :independent-after-witness
+             :resolved-adjudication
+             :dial-moved]
+  :artifact-only-counts? false}
+ :machine-evolution
+ {:allowed? true
+  :rule "Normal machine development may continue during collection; it never permits dropping, replacing, or relabelling an opportunity."
+  :per-attempt-provenance [:semantic-epoch :git-sha :git-dirty? :resolved-mode-flags :configuration-digest]
+  :epoch-boundary "Increment semantic-epoch whenever ranking, policy support, dispatch, build, adjudication, or grounding semantics change. This cohort begins one commit after the feature-card parser change (7a5906b), itself a build-adjudication semantics change relative to cohort 42 — do not pool across it."
+  :analysis "Report attempts chronologically and stratified by semantic epoch; do not pool across an undocumented semantic boundary."}
+ :analysis
+ {:primary
+  [:attempt-count
+   :grounded-change-rate
+   :grounded-no-change-rate
+   :dispatch-rate
+   :completion-rate]
+  :secondary
+  [:mission-selection-frequency
+   :selection-reason-frequency
+   :expected-versus-realized-calibration
+   :agent-availability
+   :elapsed-time
+   :resource-use
+   :patterns-used
+   :inline-improvement-frequency
+   :semantic-epoch-results
+   :code-version-trajectory]
+  :reporting "Report both attempts and all typed sorries; do not analyse successes alone."}}
