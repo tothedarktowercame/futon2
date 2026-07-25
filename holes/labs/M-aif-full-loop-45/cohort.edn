@@ -1,0 +1,75 @@
+{:cohort/id :wm-outer-loop-45-v1
+ :protocol/version 4
+ :status :preregistered
+ :registered-on "2026-07-25"
+ :purpose "Successor to :wm-outer-loop-44-v1 (target 2 reached 2026-07-25: attempt-054 :build-failed at reviewer-wait — real authored work, sound REQUEST_CHANGES, no amendment path; attempt-055 :substrate-unavailable at preflight — store alive but congested, probe lost the queue race). This cohort runs on a NEW SEMANTIC EPOCH comprising four reviewed changes landed 2026-07-25 after 44 closed: (1) load-aware substrate preflight — escalating 15s/30s/60s retry timeouts plus liveness classification :alive-but-slow|:unreachable|:liveness-unknown on exhaustion (futon2 53269bb, classifier guard 545d334); (2) typed-only stopping-rule recognition via cause-chain walk, no message matching (futon2 029e6b4, implementing codex-1's review of zai-3's 6657f4c); (3) bounded revise-and-resubmit — when the independent reviewer returns a findings-bearing negative verdict, the same author gets exactly one amendment round, re-reviewed by the same reviewer; :revision-rounds defaults to 1 (futon2 001b0cf + tests 159e451, authored codex-2, reviewed claude-3). All were independently reviewed (codex-2 APPROVE chain for 1-2; claude-3 gate review for 3). Primary questions: (1) does the loop now produce :grounded-change again — the last grounded attempt was 046, and the 31-35 streak shows the capability exists when infrastructure holds; (2) does an attempt discharge repair-attempt-055-substrate-unavailable (its coding half is landed; discharge needs a production-shaped successor exercising the preflight under real store load) and ground the repair-initialization chain (048/049/051 + the 6657f4c findings now landed); (3) how often does the revision round convert a first-round rejection into a grounding, and at what turn cost. Casting per ground control (claude-3, delegated; operator may recast before first click): fresh author zai-1, fresh reviewer codex-4, repair-reviewer codex-1, passed explicitly per attempt via --author/--reviewer/--repair-reviewer. Ground-control disciplines carried in-charter from 44: no evidence-store reads inside the selection window; check-read-decide-kill as separate steps; bias against killing scarce opportunities. Target 3: room for one infra surprise and one revision-round learning without re-chartering."
+ :activation :separate-append-only-marker
+ :population "Ground-control durée-triggered opportunities of the full War Machine loop"
+ :stopping-rule
+ {:unit :trigger-opportunity
+  :target 3
+  :rule "Count the first 3 distinct eligible trigger opportunities after activation, in order."
+  :counts-as-attempt
+  [:selected-and-dispatched
+   :abstained
+   :no-selection
+   :agent-unavailable
+   :substrate-unavailable
+   :guardrail-refusal
+   :dispatch-failed
+   :build-failed
+   :grounded-no-change
+   :grounded-change]
+  :excluded
+  [:manual-test :replay :duplicate-opportunity :pre-activation]
+  :replacement "None. Failed, unavailable, abstaining, and no-change opportunities remain in the denominator."}
+ :allowed-triggers #{:duree-click-on-demand
+                     :duree-click-continuous}
+ :checkpoint-order
+ [:time-step :selection :construction :dispatch :build :adjudication :closed]
+ :required-before-close
+ #{:selection :construction :dispatch :build :adjudication}
+ :checkpoint-contract
+ {:cell-shape "Every checkpoint payload is either {:judgment ... :ground ...} or {:sorry {:kind keyword ...}}."
+  :time-step [:opportunity-id :trigger :machine-state :agent-roster :code-state :semantic-epoch]
+  :selection [:selected-mission :selected-action :ranked-candidates :selection-reasons]
+  :construction [:mission :cascade :sorries :wiring :patterns :deposit]
+  :dispatch [:agent :availability :job-id :prompt-ref]
+  :build [:artifacts :generated-code :commits :patterns-used :inline-improvements :validation]
+  :adjudication [:before :after :witness :build-match :dial]
+  :closed [:outcome :grounded? :artifact-only? :duration-ms :resource-use]
+  :revision-note "A revision round nests inside the :build payload as :revision {:round 2 :commits [...] :review {...}} with both review records under :reviews; checkpoint order and schema are unchanged from protocol 4."}
+ :grounded-success
+ {:outcome :grounded-change
+  :requires [:independent-before-witness
+             :independent-after-witness
+             :resolved-adjudication
+             :dial-moved]
+  :artifact-only-counts? false}
+ :machine-evolution
+ {:allowed? true
+  :rule "Normal machine development may continue during collection; it never permits dropping, replacing, or relabelling an opportunity."
+  :per-attempt-provenance [:semantic-epoch :git-sha :git-dirty? :resolved-mode-flags :configuration-digest]
+  :epoch-boundary "This cohort begins after futon2 159e451: preflight semantics (53269bb/545d334), stopping-rule recognition (029e6b4), and the revision round (001b0cf, :revision-rounds 1) all differ from cohort 44 — do not pool across this boundary. Selection-frequency comparisons with 44 are additionally confounded by the repair-initialization findings having landed outside an attempt."
+  :analysis "Report attempts chronologically and stratified by semantic epoch; do not pool across an undocumented semantic boundary."}
+ :analysis
+ {:primary
+  [:attempt-count
+   :grounded-change-rate
+   :grounded-no-change-rate
+   :dispatch-rate
+   :completion-rate
+   :revision-round-conversion-rate]
+  :secondary
+  [:mission-selection-frequency
+   :selection-reason-frequency
+   :expected-versus-realized-calibration
+   :agent-availability
+   :elapsed-time
+   :resource-use
+   :patterns-used
+   :inline-improvement-frequency
+   :semantic-epoch-results
+   :code-version-trajectory
+   :substrate-state-distribution]
+  :reporting "Report both attempts and all typed sorries; do not analyse successes alone."}}
