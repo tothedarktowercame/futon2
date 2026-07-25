@@ -2514,3 +2514,11 @@
               "message text alone must never classify as completion")
           (is (seq @repair-calls)
               "an untyped initialization failure must open a repair obligation"))))))
+
+(deftest cohort-complete-outcome-is-recognized
+  ":cohort-complete must be in the outcome-kinds set so downstream
+  consumers (ledger validation, outcome classification) accept it.
+  Without this registration, the repair's new outcome would be rejected
+  as :unknown-outcome, causing the same initialization-failure loop."
+  (is (contains? cohort/outcome-kinds :cohort-complete)
+      ":cohort-complete must be in outcome-kinds for ledger validation"))
