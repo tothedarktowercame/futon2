@@ -99,8 +99,12 @@
     (apply str (map #(format "%02x" (bit-and 0xff %)) digest))))
 
 (defn- write-new! [path value]
+  ;; pr-str, not pp/pprint: cohort cells are machine-read EDN, and cells that
+  ;; embed machine-state can run to megabytes — the pretty-writer's per-char
+  ;; STM transactions cost attempt-053 ~4 minutes of silent startup CPU
+  ;; (2026-07-25). pr-str round-trips identically at print cost linear in size.
   (let [^Path p (if (instance? Path path) path (.toPath (io/file path)))
-        bytes (.getBytes (with-out-str (pp/pprint value)) StandardCharsets/UTF_8)]
+        bytes (.getBytes (str (pr-str value) "\n") StandardCharsets/UTF_8)]
     (when-let [parent (.getParent p)] (Files/createDirectories parent (make-array java.nio.file.attribute.FileAttribute 0)))
     (Files/write p bytes (into-array StandardOpenOption [StandardOpenOption/CREATE_NEW
                                                          StandardOpenOption/WRITE]))
