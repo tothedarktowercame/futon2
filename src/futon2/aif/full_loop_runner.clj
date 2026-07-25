@@ -44,6 +44,7 @@
 (def artifact-window-tolerance-ms (* 2 60 1000))
 (def default-build-cure-retries 1)
 (def default-author-infrastructure-retries 1)
+(def default-revision-rounds 1)
 (def readiness-wake-timeout-ms 30000)
 (def substrate-retry-delay-ms 5000)
 
@@ -148,6 +149,7 @@
                  parsed (when env-val (try (Integer/parseInt env-val)
                                            (catch Exception _ nil)))]
              (or parsed default-build-cure-retries))
+           :revision-rounds default-revision-rounds
            :author-infrastructure-retries default-author-infrastructure-retries
            :trigger :duree-click-on-demand
            :delivery-qa-fn delivery-qa/emit!
@@ -1079,7 +1081,7 @@
         proof-ref (assoc :proof-ref proof-ref)
         note (assoc :reviewer-note note)))))
 
-(declare recovery-job-id)
+(declare recovery-job-id resolve-build)
 
 (defn- prompt-findings [stop-lines]
   (mapv (fn [finding]
@@ -1218,6 +1220,207 @@
        "or FULL_LOOP_REVIEW: REJECT <reason>\n"
        "You may add a second line FULL_LOOP_REVIEWER_NOTE: <short note>; it is context, "
        "not the operator's feature verdict."))
+
+(defn- review-findings-text
+  "Return the complete reviewer reply only when a typed negative verdict
+  carries nonblank findings. The complete reply is retained verbatim for the
+  revision author; a bare negative marker does not authorize another turn."
+  [review-job]
+  (let [text (job-text review-job)
+        [_ findings]
+        (re-find
+         #"(?ms)^FULL_LOOP_REVIEW:\s*(?:REQUEST_CHANGES|REJECT)\b[ \t]*(.*)$"
+         text)]
+    (when-not (str/blank? findings) text)))
+
+(defn- review-record [round commit review-job review-gate]
+  {:round round
+   :commit commit
+   :job-id (:job-id review-job)
+   :verdict (review-verdict review-job)
+   :text (job-text review-job)
+   :gate review-gate})
+
+(defn- revision-author-prompt
+  [author target construction prior-commits findings]
+  (str author ": FULL-LOOP REVISION ROUND 2. The independent reviewer requested "
+       "changes to your implementation. Amend the same selected target using new "
+       "commits in the existing repository.\n\n"
+       "SELECTED TARGET: " (pr-str target) "\n"
+       "CONSTRUCTION CONTRACT: " (pr-str (prompt-construction construction)) "\n"
+       "YOUR PRIOR COMMIT SHAS: " (pr-str prior-commits) "\n"
+       "REVIEWER VERDICT AND FINDINGS (VERBATIM):\n"
+       findings "\n\n"
+       "Address the findings without widening scope. Preserve existing history: "
+       "make new commits only; do not force-push, reset, amend, rebase, rewrite, "
+       "or otherwise replace prior commits. Run the repository-required gates.\n"
+       "Finish with FULL_LOOP_AUTHOR: DONE <new-commit-sha> and list validations. "
+       "If no safe correction is possible, make no commit and finish with "
+       "FULL_LOOP_AUTHOR: REFUSE <typed reason>."))
+
+(defn- revision-reviewer-prompt
+  [{:keys [reviewer author]} target construction repo prior-commit revision-commit
+   revision-author-job initial-review-job stop-lines]
+  (str reviewer ": FULL-LOOP AMENDMENT RE-REVIEW. You are the same independent "
+       "reviewer. " author " authored the bounded amendment. Review only that "
+       "amendment and whether it resolves your "
+       "original findings without regression.\n\n"
+       "SELECTED TARGET: " (pr-str target) "\n"
+       "Repository: " repo "\n"
+       "CONSTRUCTION CONTRACT: " (pr-str (prompt-construction construction)) "\n"
+       "PRIOR REVIEWED COMMIT: " prior-commit "\n"
+       "AMENDMENT COMMIT: " revision-commit "\n"
+       "ORIGINAL REVIEW (VERBATIM):\n" (job-text initial-review-job) "\n"
+       "Revision author evidence: "
+       (pr-str (select-keys revision-author-job
+                            [:job-id :state :artifact-ref
+                             :repo-observed-artifact-ref
+                             :result-summary :execution])) "\n"
+       (when (seq stop-lines)
+         (str "Prior STOP-THE-LINE findings remain in force: "
+              (pr-str (prompt-findings stop-lines)) "\n"))
+       "\nInspect the amendment commit and its delta from the prior reviewed commit. "
+       "Do not edit or commit. Execute the repository-required static checks and "
+       "relevant tests yourself; an APPROVE without executed tool evidence is invalid.\n\n"
+       "BEGIN with exactly one verdict line:\n"
+       "FULL_LOOP_REVIEW: APPROVE\n"
+       "or FULL_LOOP_REVIEW: REQUEST_CHANGES <reason>\n"
+       "or FULL_LOOP_REVIEW: REJECT <reason>\n"
+       "You may add FULL_LOOP_REVIEWER_NOTE: <short note> on a second line."))
+
+(defn- run-revision-round
+  "Run at most one revise-and-resubmit round. With no typed findings or a
+  zero revision budget, return the original artifact and review unchanged."
+  [opts phase-context author reviewer dispatched-turns target construction
+   repo commit files author-job artifact-binding review-job review-gate stop-lines]
+  (let [findings (review-findings-text review-job)
+        revise? (and (pos? (long (or (:revision-rounds opts) 0)))
+                     (= "done" (:state review-job))
+                     findings)]
+    (if-not revise?
+      {:commit commit :repo repo :files files :author-job author-job
+       :artifact-binding artifact-binding :review-job review-job
+       :review-gate review-gate}
+      (let [prior-commits [commit]
+            pre-revision-head (observe-repo-head opts repo)
+            revision-response
+            (run-phase!
+             opts phase-context :revision-dispatch
+             #(do
+                (swap! dispatched-turns inc)
+                ((or (:dispatch-fn opts) dispatch!) opts author
+                 "wm-full-loop" target
+                 (revision-author-prompt author target construction
+                                         prior-commits findings))))
+            revision-author-job
+            (run-phase!
+             opts phase-context :revision-wait
+             #((or (:poll-fn opts) poll-job!) opts (:job-id revision-response)))
+            _ (when-not (= "done" (:state revision-author-job))
+                (throw
+                 (ex-info "Revision author job did not complete"
+                          {:outcome :build-failed
+                           :failure-stage :revision-wait
+                           :author-job revision-author-job
+                           :review-job review-job
+                           :commit commit
+                           :reviews [(review-record 1 commit review-job review-gate)]})))
+            revision-build
+            (run-phase!
+             opts phase-context :revision-build
+             #(let [binding (fresh-artifact-binding
+                             opts repo pre-revision-head revision-author-job)
+                    revision-commit (:commit binding)
+                    build (when revision-commit
+                            ((or (:resolve-build-fn opts) resolve-build)
+                             revision-commit))]
+                (when-not revision-commit
+                  (let [{:keys [verdict reason]}
+                        (author-verdict revision-author-job)]
+                    (when (and (= :refuse verdict)
+                               (not (str/blank? reason)))
+                      (throw
+                       (ex-info "Revision author refused with a typed reason"
+                                {:outcome :guardrail-refusal
+                                 :failure-kind :guardrail-refusal
+                                 :failure-stage :revision-build
+                                 :refusal-reason reason
+                                 :author-job revision-author-job
+                                 :review-job review-job
+                                 :commit commit
+                                 :reviews
+                                 [(review-record
+                                   1 commit review-job review-gate)]})))))
+                (when-not (and revision-commit
+                               (not= commit revision-commit)
+                               (:repo build)
+                               (vector? (:files build)))
+                  (throw
+                   (ex-info "Revision completed without a verifiable new commit"
+                            {:outcome :build-failed
+                             :failure-kind :artifact-binding-mismatch
+                             :failure-stage :revision-build
+                             :author-job revision-author-job
+                             :review-job review-job
+                             :commit commit
+                             :artifact-binding binding
+                             :reviews
+                             [(review-record 1 commit review-job review-gate)]})))
+                (when-not (= repo (:repo binding) (:repo build))
+                  (throw
+                   (ex-info "Revision artifact resolved outside the reviewed repository"
+                            {:outcome :build-failed
+                             :failure-kind :artifact-binding-mismatch
+                             :failure-stage :revision-build
+                             :author-job revision-author-job
+                             :review-job review-job
+                             :commit commit
+                             :artifact-binding binding
+                             :resolved-repository (:repo build)
+                             :reviews
+                             [(review-record 1 commit review-job review-gate)]})))
+                {:commit revision-commit
+                 :repo (:repo build)
+                 :files (:files build)
+                 :artifact-binding binding}))
+            revision-commit (:commit revision-build)
+            effective-author-job
+            (-> (merge author-job revision-author-job)
+                (assoc :repo-observed-artifact-ref revision-commit
+                       :artifact-binding (:artifact-binding revision-build)
+                       :revision-of (:job-id author-job)))
+            re-review-response
+            (run-phase!
+             opts phase-context :re-review-dispatch
+             #(do
+                (swap! dispatched-turns inc)
+                ((or (:dispatch-fn opts) dispatch!) opts reviewer
+                 "wm-full-loop" target
+                 (revision-reviewer-prompt
+                  (assoc opts :reviewer reviewer)
+                  target construction repo commit revision-commit
+                  effective-author-job review-job stop-lines))))
+            re-review-job
+            (run-phase!
+             opts phase-context :re-review-wait
+             #((or (:poll-fn opts) poll-job!) opts (:job-id re-review-response)))
+            re-review-gate
+            (review-execution-gate (:files revision-build) re-review-job)
+            reviews [(review-record 1 commit review-job review-gate)
+                     (review-record 2 revision-commit
+                                    re-review-job re-review-gate)]]
+        {:commit revision-commit
+         :repo (:repo revision-build)
+         :files (:files revision-build)
+         :author-job effective-author-job
+         :artifact-binding (:artifact-binding revision-build)
+         :review-job re-review-job
+         :review-gate re-review-gate
+         :reviews reviews
+         :revision {:round 2
+                    :commits [commit revision-commit]
+                    :author-job (:job-id revision-author-job)
+                    :review (second reviews)}}))))
 
 (defn- find-commit-repo [commit]
   (some (fn [repo]
@@ -1667,6 +1870,9 @@
                                       (:ranked-candidates selection-judgment)
                                       :selection-reasons
                                       (:selection-reasons selection-judgment)})}
+                         (seq (:reviews data))
+                         (assoc :reviews (:reviews data))
+
                          (and (= :grounded-change outcome)
                               (:feature-card data))
                          (assoc :feature-card (:feature-card data)))
@@ -2201,23 +2407,44 @@
                                               :files files})
                                       e)))))
                       review-gate (review-execution-gate files review-job)
+                      initial-commit commit
+                      revision-state
+                      (run-revision-round
+                       opts @phase-context author reviewer dispatched-turns
+                       target construction repo commit files author-job
+                       artifact-binding review-job review-gate stop-lines)
+                      commit (:commit revision-state)
+                      repo (:repo revision-state)
+                      files (:files revision-state)
+                      author-job (:author-job revision-state)
+                      artifact-binding (:artifact-binding revision-state)
+                      review-job (:review-job revision-state)
+                      review-gate (:review-gate revision-state)
+                      reviews (:reviews revision-state)
+                      revision (:revision revision-state)
                       approved? (and (= "done" (:state review-job))
                                      (= :approve (review-verdict review-job))
                                      (:passed? review-gate))]
                   (checkpoint! :build
-                               (term {:artifacts files
-                                      :generated-code files
-                                      :commits [commit]
-                                      :patterns-used (vec (:shown construction))
-                                      :inline-improvements []
-                                      :build-retries (vec build-retries)
-                                      :validation {:author (:execution author-job)
-                                                   :reviewer (:execution review-gate)
-                                                   :review-job (:job-id review-job)
-                                                   :approved? approved?
-                                                   :review-gate review-gate
-                                                   :artifact-binding
-                                                   artifact-binding}}
+                               (term (cond->
+                                      {:artifacts files
+                                       :generated-code files
+                                       :commits (if revision
+                                                  [initial-commit commit]
+                                                  [commit])
+                                       :patterns-used (vec (:shown construction))
+                                       :inline-improvements []
+                                       :build-retries (vec build-retries)
+                                       :validation
+                                       {:author (:execution author-job)
+                                        :reviewer (:execution review-gate)
+                                        :review-job (:job-id review-job)
+                                        :approved? approved?
+                                        :review-gate review-gate
+                                        :artifact-binding artifact-binding}}
+                                       revision
+                                       (assoc :revision revision
+                                              :reviews reviews))
                                      {:kind :git-commit-and-independent-review
                                       :repository repo}))
                   (when-not approved?
@@ -2229,6 +2456,9 @@
                            :selected-entry
                            (select-keys entry
                                         [:action :controller-score :G-efe])}
+                            (seq reviews)
+                            (assoc :reviews reviews :revision revision)
+
                             (not (:passed? review-gate))
                             (assoc :failure-kind
                                    :review-execution-evidence-missing
@@ -2328,6 +2558,9 @@
                                 :author-job author-job :review-job review-job
                                 :artifact-binding artifact-binding
                                 :build-retries (vec build-retries)}
+                                (seq reviews)
+                                (assoc :reviews reviews :revision revision)
+
                                 feature-card
                                 (assoc :feature-card feature-card))))))))))))
       (catch Throwable e
@@ -2351,26 +2584,30 @@
                             :review-text (job-text review-job)}))
                 finding (or review-finding (:repair-obligation failure))]
               (close! (outcome-from e)
-                      {:target (or (:target failure)
-                                   (some-> @checkpoints :selection :judgment
-                                           :selected-mission))
-                       :commit (:commit failure)
-                       :witness (:witness failure)
-                       :author-job (:author-job failure)
-                       :review-job review-job
-                       :repair-obligation finding
-                       :failure-kind (failure-kind-from e)
-                       :feature-card-invalid-reason
-                       (:feature-card-invalid-reason failure)
-                       :feature-card-source (:feature-card-source failure)
-                       :failure-detail (:failure-detail failure)
-                       :failure-stage (or (:failure-stage failure)
-                                          (last-error-phase @phase-events))
-                       :error (.getMessage e)
-                       :error-class (.getName (class e))
-                       :error-data failure
-                       :build-retries (when (seq (:build-retries failure))
-                                        (:build-retries failure))})))))))
+                      (cond->
+                       {:target (or (:target failure)
+                                    (some-> @checkpoints :selection :judgment
+                                            :selected-mission))
+                        :commit (:commit failure)
+                        :witness (:witness failure)
+                        :author-job (:author-job failure)
+                        :review-job review-job
+                        :repair-obligation finding
+                        :failure-kind (failure-kind-from e)
+                        :feature-card-invalid-reason
+                        (:feature-card-invalid-reason failure)
+                        :feature-card-source (:feature-card-source failure)
+                        :failure-detail (:failure-detail failure)
+                        :failure-stage (or (:failure-stage failure)
+                                           (last-error-phase @phase-events))
+                        :error (.getMessage e)
+                        :error-class (.getName (class e))
+                        :error-data failure
+                        :build-retries (when (seq (:build-retries failure))
+                                         (:build-retries failure))}
+                        (seq (:reviews failure))
+                        (assoc :reviews (:reviews failure)
+                               :revision (:revision failure))))))))))
 
 (defn run-opportunity!
   "Run one opportunity and ensure initialization failures also become durable
