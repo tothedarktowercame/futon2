@@ -1542,7 +1542,14 @@
       (is (= :unreachable (:substrate-state d))))
     (let [d (exhaust nil)]
       (is (= :liveness-unknown (:substrate-state d))
-          "stubbed preflight without a liveness stub must not probe the real store"))))
+          "stubbed preflight without a liveness stub must not probe the real store"))
+    (let [d (exhaust (fn [_] (throw (ex-info "classifier broke" {}))))]
+      (is (= :substrate-unavailable (:outcome d))
+          "a throwing classifier must not mask the authoritative failure")
+      (is (= :liveness-unknown (:substrate-state d)))
+      (is (re-find #"classifier broke"
+                   (str (:classifier-error (:substrate-liveness d))))
+          "the classifier failure is retained as diagnostic data"))))
 
 (deftest exhausted-substrate-retries-close-with-existing-kind-and-new-detail
   (let [phases (atom [])

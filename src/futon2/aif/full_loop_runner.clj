@@ -505,10 +505,18 @@
                 (if-not (:error third-attempt)
                   (assoc (:value third-attempt) :readiness/substrate-transient true)
                   (let [cause (:error third-attempt)
+                        ;; The classifier must never mask the authoritative
+                        ;; failure: a throwing liveness fn degrades to
+                        ;; :liveness-unknown with the diagnostic retained.
                         liveness (when-let [f (resolve-liveness-fn opts)]
-                                   (f opts))
+                                   (try (f opts)
+                                        (catch Throwable le
+                                          {:classifier-error
+                                           (str (.getName (class le)) ": "
+                                                (.getMessage le))})))
                         state (cond
                                 (nil? liveness) :liveness-unknown
+                                (:classifier-error liveness) :liveness-unknown
                                 (:alive? liveness) :alive-but-slow
                                 :else :unreachable)]
                     (throw
