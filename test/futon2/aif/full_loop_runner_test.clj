@@ -16,6 +16,11 @@
 
 (use-fixtures :once hermetic/with-hermetic-stores)
 
+(defn- without-live-wm-status
+  [f]
+  (binding [runner/*wm-status-reporting?* false]
+    (f)))
+
 (defn- with-field-desk-stub
   [f]
   (with-redefs [delivery-qa/emit!
@@ -24,7 +29,7 @@
                    (str "qa-" (:attempt-id item))})]
     (f)))
 
-(use-fixtures :each with-field-desk-stub)
+(use-fixtures :each with-field-desk-stub without-live-wm-status)
 
 (deftest production-repair-root-is-unreachable-during-runner-suite
   (is (not= hermetic/production-repair-root repair/default-root))
@@ -1920,6 +1925,37 @@
                     nil
                     (catch clojure.lang.ExceptionInfo e e))]
       (is (= :agent-budget-expired (:failure-kind (ex-data failure)))))))
+
+(deftest wm-phase-status-is-visible-and-opportunity-end-clears-it
+  (is (= {:source "wm-full-loop"
+          :status "invoking"
+          :activity "selection attempt-052 (duree-click-on-demand)"}
+         (#'runner/wm-status-payload
+          {:attempt-id "attempt-052" :trigger :duree-click-on-demand}
+          {:phase :selection :transition :start})))
+  (is (= {:source "wm-full-loop" :status "idle"}
+         (#'runner/wm-status-payload
+          {:attempt-id "attempt-052" :trigger :duree-click-on-demand}
+          {:phase :opportunity :transition :end}))))
+
+(deftest poll-job-heartbeats-the-current-wait-phase
+  (let [reports (atom [])
+        phase-state (atom {:phase :author-wait
+                           :context {:attempt-id "attempt-052"}})]
+    (with-redefs-fn
+      {#'runner/read-job!
+       (fn [_ _] {:job-id "job-123" :state "done"})
+       #'runner/post-wm-status!
+       (fn [_ payload] (swap! reports conj payload))}
+      (fn []
+        (binding [runner/*wm-status-reporting?* true]
+          (runner/poll-job! {:agent-budget-ms 1000
+                             :poll-ms 1
+                             :wm-phase-state phase-state}
+                            "job-123"))))
+    (is (= "invoking" (:status (first @reports))))
+    (is (= "author-wait attempt-052 job job-123 0s"
+           (:activity (first @reports))))))
 
 (deftest initialization-failure-opens-emergency-stop-line
   (let [findings (atom [])

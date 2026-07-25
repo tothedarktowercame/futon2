@@ -27,7 +27,8 @@
             [futon2.report.war-machine :as wm])
   (:import [java.security MessageDigest]
            [java.time Instant]
-           [java.util UUID]))
+           [java.util UUID]
+           [java.util.concurrent Executors ThreadFactory]))
 
 (def default-agency-base "http://127.0.0.1:7070")
 (def default-substrate-base "http://127.0.0.1:7073")
@@ -45,6 +46,73 @@
 (def default-author-infrastructure-retries 1)
 (def readiness-wake-timeout-ms 30000)
 (def substrate-retry-delay-ms 5000)
+(def wm-agent-id "war-machine")
+
+(def ^:dynamic *wm-status-reporting?*
+  "Production status reporting is on. Tests bind this false so they never
+  mutate a live Agency roster."
+  true)
+
+(defonce ^:private wm-status-executor
+  (Executors/newSingleThreadExecutor
+   (reify ThreadFactory
+     (newThread [_ runnable]
+       (doto (Thread. runnable "wm-status-reporter")
+         (.setDaemon true))))))
+
+(defn- wm-status-payload
+  [context event]
+  (let [phase (:phase event)
+        transition (:transition event)
+        attempt (or (:attempt-id context) (:opportunity-id context) "pending")
+        trigger (or (:trigger context) :unknown)]
+    (cond
+      (and (= :opportunity phase) (= :end transition))
+      {:source "wm-full-loop" :status "idle"}
+
+      (= :start transition)
+      {:source "wm-full-loop"
+       :status "invoking"
+       :activity (str (name phase) " " attempt " (" (name trigger) ")")}
+
+      :else nil)))
+
+(defn- post-wm-status!
+  [{:keys [agency-base]} payload]
+  (when (and *wm-status-reporting?* payload)
+    (.execute
+     wm-status-executor
+     ^Runnable
+     (fn []
+       (try
+         (http/post (str agency-base "/api/alpha/agents/" wm-agent-id "/status")
+                    {:headers {"Content-Type" "application/json"}
+                     :body (json/generate-string payload)
+                     :timeout 1500
+                     :throw false})
+         (catch Throwable _ nil))))))
+
+(defn- report-wm-phase!
+  [opts context event]
+  (when-let [payload (wm-status-payload context event)]
+    (post-wm-status! opts payload))
+  (when (and (= :start (:transition event))
+             (:wm-phase-state opts))
+    (reset! (:wm-phase-state opts)
+            {:phase (:phase event)
+             :context context})))
+
+(defn- report-wm-wait!
+  [opts job first-poll-ms]
+  (let [{:keys [phase context]} (or (some-> opts :wm-phase-state deref) {})
+        attempt (or (:attempt-id context) (:opportunity-id context) "pending")
+        elapsed-s (quot (- (System/currentTimeMillis) first-poll-ms) 1000)]
+    (post-wm-status!
+     opts
+     {:source "wm-full-loop"
+      :status "invoking"
+      :activity (str (name (or phase :agent-wait)) " " attempt
+                     " job " (:job-id job) " " elapsed-s "s")})))
 
 (defn config
   ([] (config {}))
@@ -82,6 +150,7 @@
   "Emit one line-oriented phase event to stdout and the durable operator log."
   [opts context event]
   (let [record (merge {:at (str (Instant/now))} context event)
+        _ (report-wm-phase! opts context event)
         _ (tripwire/observe! opts record)
         line (pr-str record)]
     (println "[wm-phase]" line)
@@ -494,6 +563,7 @@
   (let [first-poll-ms (System/currentTimeMillis)]
   (loop []
     (let [job (read-job! opts job-id)]
+      (report-wm-wait! opts job first-poll-ms)
       (cond
         (contains? terminal-states (:state job)) job
 
@@ -1379,7 +1449,9 @@
   (let [phase-events (atom [])
         {:keys [trigger cohort? semantic-epoch author reviewer repair-reviewer
                 window-days]
-         :as opts} (assoc (config raw-opts) :phase-events phase-events)
+         :as opts} (assoc (config raw-opts)
+                         :phase-events phase-events
+                         :wm-phase-state (atom nil))
         started (System/currentTimeMillis)
         opportunity-id (or (:opportunity-id opts)
                            (str (name trigger) "/" (Instant/now) "/" (UUID/randomUUID)))
@@ -2303,4 +2375,7 @@
                     :failure-kind :initialization-failed
                     :failure-stage :initialization
                     :error error
-                    :error-data edata}}))))))
+                    :error-data edata}}))))
+    (finally
+      (post-wm-status! (config raw-opts)
+                       {:source "wm-full-loop" :status "idle"}))))
