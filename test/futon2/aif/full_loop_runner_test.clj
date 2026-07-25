@@ -2266,3 +2266,57 @@
             "stopping-rule-reached must not create a repair obligation")
         (is (empty? @queue-calls)
             "stopping-rule-reached must not queue a morning-brief item")))))
+
+(deftest stopping-rule-recognition-is-typed-not-textual
+  "Independent review of 6657f4c (codex-1): recognition must be typed
+  cause-chain handling. Positive: the marker survives a wrapper that buries
+  the ex-data. Negative: an untyped failure whose message merely mentions the
+  phrase must NOT be classified as normal completion."
+  (let [phases (atom [])
+        base (assoc (readiness-run-opts
+                     phases
+                     (fn [_] {:zai-1 {:status "idle" :invoke-ready? true}
+                              :codex-1 {:status "idle" :invoke-ready? true}}))
+                    :cohort? true
+                    :trigger :test-trigger
+                    :opportunity-id "test/typed-recognition"
+                    :semantic-epoch :test
+                    :author "zai-1"
+                    :reviewer "codex-1")]
+    ;; positive: typed marker buried one level down a cause chain
+    (let [repair-calls (atom [])
+          opts (assoc base
+                      :repair-system-record-fn
+                      (fn [m] (swap! repair-calls conj m)
+                        {:repair/id "should-not-fire"})
+                      :queue-fn identity)]
+      (with-redefs [cohort/start-attempt!
+                    (fn [& _]
+                      (throw (ex-info "cohort cell write failed"
+                                      {:io :telemetry-wrapper}
+                                      (ex-info "cohort stopping rule reached"
+                                               {:cohort/error :stopping-rule-reached
+                                                :target 2 :attempted 2}))))]
+        (let [result (runner/run-opportunity! opts)]
+          (is (= :cohort-complete (:outcome result))
+              "typed marker in the cause chain is normal completion")
+          (is (= 2 (get-in result [:data :target]))
+              "target/attempted come from the typed cause, not the wrapper")
+          (is (empty? @repair-calls)))))
+    ;; negative: phrase in the message, no typed marker anywhere
+    (let [repair-calls (atom [])
+          opts (assoc base
+                      :repair-system-record-fn
+                      (fn [m] (swap! repair-calls conj m)
+                        {:repair/id "repair-untyped"})
+                      :queue-fn identity)]
+      (with-redefs [cohort/start-attempt!
+                    (fn [& _]
+                      (throw (ex-info
+                              "failed to record telemetry for: cohort stopping rule reached"
+                              {:io :unrelated})))]
+        (let [result (runner/run-opportunity! opts)]
+          (is (not= :cohort-complete (:outcome result))
+              "message text alone must never classify as completion")
+          (is (seq @repair-calls)
+              "an untyped initialization failure must open a repair obligation"))))))

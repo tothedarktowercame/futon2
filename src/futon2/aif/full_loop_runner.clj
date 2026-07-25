@@ -2384,21 +2384,26 @@
       ;; Cohort stopping rule is normal completion, not a machine failure.
       ;; Repair-initialization was caused by this being treated as an
       ;; initialization-failed; it must return cleanly instead.
-      ;; Defense-in-depth: match on the structured :cohort/error key first,
-      ;; then fall back to the exception message. A wrapped exception that
-      ;; loses ex-data but preserves the message must still be recognized.
+      ;; Recognition is typed only: the {:cohort/error :stopping-rule-reached}
+      ;; marker is sought along the whole cause chain, so a wrapper that
+      ;; buries the ex-data is still recognized — but message text is never
+      ;; consulted, because substring matching would classify unrelated
+      ;; failures that merely mention the phrase as normal completion.
       (let [edata (ex-data e)
-            msg (some-> (.getMessage e) str)
-            stopping-rule?
-            (or (= :stopping-rule-reached (:cohort/error edata))
-                (and msg (str/includes? msg "cohort stopping rule reached")))]
-        (if stopping-rule?
+            stopping-rule-data
+            (loop [t ^Throwable e depth 0]
+              (when (and t (< depth 16))
+                (let [d (ex-data t)]
+                  (if (= :stopping-rule-reached (:cohort/error d))
+                    d
+                    (recur (.getCause t) (inc depth))))))]
+        (if stopping-rule-data
           {:attempt-id (str "cohort-complete-" (UUID/randomUUID))
            :outcome :cohort-complete
            :checkpoints {}
            :data {:cohort/error :stopping-rule-reached
-                  :target (:target edata)
-                  :attempted (:attempted edata)}}
+                  :target (:target stopping-rule-data)
+                  :attempted (:attempted stopping-rule-data)}}
           (let [attempt-id (str "initialization-" (UUID/randomUUID))
                 trigger (or (:trigger raw-opts) :duree-click-on-demand)
                 error (if (str/blank? (str (.getMessage e)))
