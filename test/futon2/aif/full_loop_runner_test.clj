@@ -6,13 +6,16 @@
             [clojure.test :refer [deftest is testing use-fixtures]]
             [futon2.aif.full-loop-cli :as cli]
             [futon2.aif.delivery-qa :as delivery-qa]
+            [futon2.aif.full-loop-cohort :as cohort]
             [futon2.aif.hermetic-repair-fixture :as hermetic]
             [futon2.aif.full-loop-runner :as runner]
             [futon2.aif.pattern-registry :as patterns]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.tripwire :as tripwire]
             [futon2.report.cascade-lane :as cascade])
-  (:import [java.time Instant]))
+  (:import [java.nio.file Files]
+           [java.nio.file.attribute FileAttribute]
+           [java.time Instant]))
 
 (use-fixtures :once hermetic/with-hermetic-stores)
 
@@ -2124,36 +2127,95 @@
     (is (= true (get-in result [:data :build-retries 0 :cured?])))
     (is (= 1 (count (:build-retries (:data result)))))))
 
+(defn- tmp-cohort-root []
+  (.getPath (.toFile (Files/createTempDirectory
+                      "wm-runner-cohort-test"
+                      (make-array FileAttribute 0)))))
+
+(defn- tiny-target-prereg [path]
+  ;; Write a minimal preregistration with stopping-rule target 1.
+  (let [prereg {:cohort/id :test-cohort-exhaustion
+                :protocol/version 4
+                :status :preregistered
+                :registered-on "2026-07-25"
+                :purpose "Test fixture: target 1 cohort for stopping-rule verification."
+                :activation :separate-append-only-marker
+                :population "Test"
+                :stopping-rule
+                {:unit :trigger-opportunity
+                 :target 1
+                 :rule "Count 1 distinct eligible trigger opportunity."
+                 :counts-as-attempt
+                 [:selected-and-dispatched :abstained :no-selection
+                  :agent-unavailable :substrate-unavailable :guardrail-refusal
+                  :dispatch-failed :build-failed :grounded-no-change
+                  :grounded-change]
+                 :excluded [:manual-test :replay :duplicate-opportunity :pre-activation]
+                 :replacement "None."}
+                :allowed-triggers #{:duree-click-on-demand :duree-click-continuous
+                                    :test-trigger}
+                :checkpoint-order [:time-step :selection :construction :dispatch
+                                   :build :adjudication :closed]
+                :required-before-close #{:selection :construction :dispatch :build
+                                         :adjudication}
+                :checkpoint-contract {}
+                :grounded-success {:outcome :grounded-change
+                                   :requires []
+                                   :artifact-only-counts? false}
+                :machine-evolution {:allowed? true :rule "" :per-attempt-provenance []
+                                    :epoch-boundary "" :analysis ""}
+                :analysis {:primary [] :secondary [] :reporting ""}}]
+    (io/make-parents path)
+    (spit path (pr-str prereg))
+    path))
+
+(defn- exhaust-cohort! [prereg-path data-root]
+  ;; Activate the cohort and open 1 attempt (exhausting target 1).
+  ;; Returns the attempt-id of the sole attempt.
+  (cohort/activate! prereg-path data-root)
+  (let [term {:judgment {:opportunity-id "test/exhausting-attempt"
+                         :trigger :test-trigger
+                         :machine-state {:tick 1}
+                         :agent-roster []
+                         :code-state {:git-sha "abc" :git-dirty? false
+                                      :resolved-mode-flags {}
+                                      :configuration-digest "test"}
+                         :semantic-epoch :test}
+              :ground {:kind :test-witness}}]
+    (:attempt/id (cohort/start-attempt! prereg-path data-root term))))
+
 (deftest cohort-stopping-rule-returns-cohort-complete-not-repair
   "When the cohort stopping rule is reached, run-opportunity! must return
   :cohort-complete — NOT create a repair obligation. This was the root cause
   of repair-initialization-6d5da36a: the stopping rule exception was caught
-  by the initialization-failure handler and turned into a spurious repair."
-  (let [repair-calls (atom [])
-        queue-calls (atom [])
-        result (runner/run-opportunity!
-                {:trigger :test-trigger
-                 :cohort? true
-                 :opportunity-id "test/cohort-exhausted"
-                 :semantic-epoch :test
-                 :author "zai-1"
-                 :reviewer "codex-1"
-                 :repair-system-record-fn
-                 (fn [m] (swap! repair-calls conj m)
-                   {:repair/id "should-not-fire"})
-                 :queue-fn (fn [m] (swap! queue-calls conj m)
-                              {:morning-brief/addendum-id "should-not-queue"})})]
-    ;; The core runner will throw when start-attempt! hits the stopping rule.
-    ;; The outer handler catches it and must return :cohort-complete.
-    ;; NOTE: if the cohort is NOT exhausted, this test doesn't apply —
-    ;; we'd need a pre-exhausted cohort fixture. The key invariant is:
-    ;; when :cohort/error :stopping-rule-reached appears in ex-data,
-    ;; no repair obligation is created.
-    ;;
-    ;; This test verifies the handler logic by checking that IF the result
-    ;; has :cohort-complete outcome, no repair calls were made.
-    (when (= :cohort-complete (:outcome result))
-      (is (empty? @repair-calls)
-          "stopping-rule-reached must not create a repair obligation")
-      (is (empty? @queue-calls)
-          "stopping-rule-reached must not queue a morning-brief item"))))
+  by the initialization-failure handler and turned into a spurious repair.
+
+  This test constructs a genuine exhausted cohort (target 1, 1 attempt already
+  opened) so that the NEXT run-opportunity! call hits start-attempt!'s
+  stopping rule. The assertions are unconditional — not gated on the result."
+  (let [data-root (tmp-cohort-root)
+        prereg-path (str data-root "/cohort.edn")
+        _ (tiny-target-prereg prereg-path)
+        _ (exhaust-cohort! prereg-path data-root)
+        repair-calls (atom [])
+        queue-calls (atom [])]
+    (with-redefs [cohort/default-preregistration prereg-path
+                  cohort/default-data-root data-root]
+      (let [result (runner/run-opportunity!
+                    {:trigger :test-trigger
+                     :cohort? true
+                     :opportunity-id "test/post-exhaustion"
+                     :semantic-epoch :test
+                     :author "zai-1"
+                     :reviewer "codex-1"
+                     :repair-system-record-fn
+                     (fn [m] (swap! repair-calls conj m)
+                       {:repair/id "should-not-fire"})
+                     :queue-fn (fn [m] (swap! queue-calls conj m)
+                                  {:morning-brief/addendum-id "should-not-queue"})})]
+        (is (= :cohort-complete (:outcome result))
+            "exhausted cohort must return :cohort-complete")
+        (is (empty? @repair-calls)
+            "stopping-rule-reached must not create a repair obligation")
+        (is (empty? @queue-calls)
+            "stopping-rule-reached must not queue a morning-brief item")))))

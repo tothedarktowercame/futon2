@@ -2327,8 +2327,15 @@
       ;; Cohort stopping rule is normal completion, not a machine failure.
       ;; Repair-initialization was caused by this being treated as an
       ;; initialization-failed; it must return cleanly instead.
-      (let [edata (ex-data e)]
-        (if (= :stopping-rule-reached (:cohort/error edata))
+      ;; Defense-in-depth: match on the structured :cohort/error key first,
+      ;; then fall back to the exception message. A wrapped exception that
+      ;; loses ex-data but preserves the message must still be recognized.
+      (let [edata (ex-data e)
+            msg (some-> (.getMessage e) str)
+            stopping-rule?
+            (or (= :stopping-rule-reached (:cohort/error edata))
+                (and msg (str/includes? msg "cohort stopping rule reached")))]
+        (if stopping-rule?
           {:attempt-id (str "cohort-complete-" (UUID/randomUUID))
            :outcome :cohort-complete
            :checkpoints {}
