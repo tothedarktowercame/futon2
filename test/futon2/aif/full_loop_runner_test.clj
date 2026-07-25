@@ -950,6 +950,7 @@
         result
         (runner/run-opportunity!
          {:cohort? false
+          :revision-rounds 0
           :phase-log-fn (fn [_])
           :repair-open-fn (constantly [])
           :repair-record-fn #(swap! findings conj %)
@@ -985,6 +986,191 @@
     (is (= "abc123" (get-in result [:data :commit])))
     (is (= "abc123" (:commit (first @queued))))
     (is (= :request-changes (:review-verdict (first @findings))))))
+
+(defn- run-revision-attempt
+  [review-verdicts & [{:keys [revision-rounds]}]]
+  (let [phases (atom [])
+        dispatches (atom [])
+        queued (atom [])
+        deliveries (atom [])
+        grounded (atom [])
+        author-count (atom 0)
+        reviewer-count (atom 0)
+        construction {:construction-kind :revision-test
+                      :capability-contract {:must :preserve-contract}
+                      :shown [:P1]
+                      :semilattice []}
+        opts
+        (cond->
+         (merge
+          (isolated-runner-opts)
+          {:phase-log-fn #(swap! phases conj %)
+           :repair-open-fn (constantly [])
+           :repair-record-fn
+           (fn [finding] (assoc finding :repair/id "review-finding"))
+           :repair-system-record-fn
+           (fn [finding] (assoc finding :repair/id "system-finding"))
+           :trace-fn (constantly "/tmp/revision-round-trace.edn")
+           :construct-fn (constantly construction)
+           :target-repo-fn (fn [& _] "/repo")
+           :repo-head-observation-fn
+           (fn [repo] {:repo repo :head "observed-head"
+                       :observed-at-ms 1000})
+           :author-artifact-observer-fn
+           (fn [repo before author-job]
+             {:fresh-author? true
+              :repo repo
+              :pre-dispatch-head (:head before)
+              :observed-head (:artifact-ref author-job)
+              :author-window-start-ms 1000
+              :author-window-end-ms 2000
+              :corroborates? true
+              :commit (:artifact-ref author-job)})
+           :dispatch-fn
+           (fn [_ agent _ _ prompt]
+             (let [job-id
+                   (if (= agent "zai-5")
+                     (str "author-" (swap! author-count inc))
+                     (str "review-" (swap! reviewer-count inc)))]
+               (swap! dispatches conj {:agent agent :job-id job-id
+                                       :prompt prompt})
+               {:job-id job-id}))
+           :poll-fn
+           (fn [_ job-id]
+             (case job-id
+               "author-1"
+               {:job-id job-id :state "done" :artifact-ref "abc123"
+                :feature-card feature-card-claim
+                :execution successful-execution
+                :result-summary "FULL_LOOP_AUTHOR: DONE abc123"}
+
+               "author-2"
+               {:job-id job-id :state "done" :artifact-ref "def456"
+                :execution successful-execution
+                :result-summary "FULL_LOOP_AUTHOR: DONE def456"}
+
+               "review-1"
+               {:job-id job-id :state "done"
+                :execution successful-execution
+                :result-summary (first review-verdicts)}
+
+               "review-2"
+               {:job-id job-id :state "done"
+                :execution successful-execution
+                :result-summary (second review-verdicts)}))
+           :resolve-build-fn
+           (fn [_] {:repo "/repo" :files ["src/revision.clj"]})
+           :ground-fn
+           (fn [& args]
+             (swap! grounded conj args)
+             {:before {:implementation-entity nil}
+              :after {:implementation-entity {:id "revision-impl"}}
+              :resolved? true :dial-moved? true
+              :implementation-id "revision-impl"})
+           :queue-fn #(swap! queued conj %)
+           :delivery-qa-fn
+           (fn [_ item]
+             (swap! deliveries conj item)
+             {:morning-brief/addendum-id "revision-qa"})})
+          (some? revision-rounds)
+          (assoc :revision-rounds revision-rounds))
+        result (runner/run-opportunity! opts)]
+    {:result result
+     :phases @phases
+     :dispatches @dispatches
+     :queued @queued
+     :deliveries @deliveries
+     :grounded @grounded}))
+
+(deftest rejected-review-is-revised-and-approved-once
+  (let [first-review
+        (str "FULL_LOOP_REVIEW: REQUEST_CHANGES preserve the typed gate\n"
+             "Finding: the negative path is untested.")
+        {:keys [result phases dispatches deliveries grounded]}
+        (run-revision-attempt
+         [first-review "FULL_LOOP_REVIEW: APPROVE\nAmendment verified."])
+        build (get-in result [:checkpoints :build :judgment])
+        revision-phases
+        (->> phases
+             (filter #(and (= :start (:transition %))
+                           (#{:revision-dispatch :revision-wait :revision-build
+                              :re-review-dispatch :re-review-wait}
+                            (:phase %))))
+             (mapv :phase))]
+    (is (= :grounded-change (:outcome result)))
+    (is (= 2 (get-in build [:revision :round])))
+    (is (= ["abc123" "def456"] (get-in build [:revision :commits])))
+    (is (= :approve (get-in build [:revision :review :verdict])))
+    (is (= [:request-changes :approve]
+           (mapv :verdict (:reviews build))))
+    (is (= [:revision-dispatch :revision-wait :revision-build
+            :re-review-dispatch :re-review-wait]
+           revision-phases))
+    (is (= ["zai-5" "codex-7" "zai-5" "codex-7"]
+           (mapv :agent dispatches))
+        "revision and re-review use the same author and reviewer seams")
+    (is (= 1 (count grounded))
+        "approved amendment proceeds through adjudication")
+    (is (= (:reviews build) (:reviews (first deliveries)))
+        "both verdicts reach the delivery-QA body")
+    (let [revision-prompt (:prompt (nth dispatches 2))]
+      (is (str/includes? revision-prompt "SELECTED TARGET: \"M-selected\""))
+      (is (str/includes? revision-prompt
+                         "CONSTRUCTION CONTRACT: {:construction-kind :revision-test"))
+      (is (str/includes? revision-prompt "YOUR PRIOR COMMIT SHAS: [\"abc123\"]"))
+      (is (str/includes? revision-prompt first-review)
+          "review findings are included verbatim")
+      (is (str/includes? revision-prompt "do not force-push")))))
+
+(deftest second-rejection-closes-with-both-review-records
+  (let [{:keys [result deliveries]}
+        (run-revision-attempt
+         ["FULL_LOOP_REVIEW: REQUEST_CHANGES first defect"
+          "FULL_LOOP_REVIEW: REJECT amendment still violates the contract"])
+        build (get-in result [:checkpoints :build :judgment])]
+    (is (= :build-failed (:outcome result)))
+    (is (= [:request-changes :reject]
+           (mapv :verdict (:reviews build))))
+    (is (= [:request-changes :reject]
+           (mapv :verdict (get-in result [:data :reviews]))))
+    (is (= (:reviews build) (:reviews (first deliveries))))))
+
+(deftest zero-revision-rounds-preserve-single-shot-records
+  (let [{:keys [result phases dispatches]}
+        (run-revision-attempt
+         ["FULL_LOOP_REVIEW: REQUEST_CHANGES no revision permitted"]
+         {:revision-rounds 0})
+        build (get-in result [:checkpoints :build :judgment])]
+    (is (= :build-failed (:outcome result)))
+    (is (= ["abc123"] (:commits build)))
+    (is (not (contains? build :revision)))
+    (is (not (contains? build :reviews)))
+    (is (= ["zai-5" "codex-7"] (mapv :agent dispatches)))
+    (is (empty? (filter #(str/includes? (name (:phase %)) "revision")
+                        phases)))))
+
+(deftest first-review-approval-skips-revision-machinery
+  (let [{:keys [result phases dispatches]}
+        (run-revision-attempt ["FULL_LOOP_REVIEW: APPROVE"])
+        build (get-in result [:checkpoints :build :judgment])]
+    (is (= :grounded-change (:outcome result)))
+    (is (= ["abc123"] (:commits build)))
+    (is (not (contains? build :revision)))
+    (is (= ["zai-5" "codex-7"] (mapv :agent dispatches)))
+    (is (empty? (filter #(#{:revision-dispatch :revision-wait :revision-build
+                            :re-review-dispatch :re-review-wait}
+                          (:phase %))
+                        phases)))))
+
+(deftest negative-review-without-findings-does-not-spend-revision-round
+  (let [{:keys [result phases dispatches]}
+        (run-revision-attempt ["FULL_LOOP_REVIEW: REQUEST_CHANGES"])]
+    (is (= :build-failed (:outcome result)))
+    (is (= ["zai-5" "codex-7"] (mapv :agent dispatches)))
+    (is (empty? (filter #(#{:revision-dispatch :revision-wait :revision-build
+                            :re-review-dispatch :re-review-wait}
+                          (:phase %))
+                        phases)))))
 
 (deftest fresh-author-prefers-repo-observed-head-over-narrated-artifact
   (let [events (atom [])
@@ -1915,7 +2101,8 @@
         result
         (runner/run-opportunity!
          (merge (isolated-runner-opts)
-                {:repair-open-fn (constantly [stop-line])
+                {:revision-rounds 0
+                 :repair-open-fn (constantly [stop-line])
                  :read-job-fn
                  (fn [& _] {:job-id "rejecting-review" :state "done"
                             :execution successful-execution
