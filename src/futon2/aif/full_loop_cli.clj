@@ -59,7 +59,13 @@
 
 (defn- run-once! [trigger flags]
   (let [result (runner/run-opportunity! (runner-opts trigger flags))]
-    (print-value result)
+    ;; Elide :checkpoints from the stdout echo: they are durable on disk in
+    ;; the cohort dir, and pp/pprint on a multi-MB result grinds the
+    ;; pretty-writer STM for an hour+ post-close (attempt-056, 2026-07-25 —
+    ;; same pathology as attempt-053's cell writes, different call site).
+    (print-value (cond-> result
+                   (:checkpoints result)
+                   (assoc :checkpoints :elided-see-cohort-dir)))
     (when (:morning-brief-ref result)
       (println)
       (println (render-attempt-brief (attempt-brief (:attempt-id result)))))
