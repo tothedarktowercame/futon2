@@ -46,6 +46,15 @@
 (def default-author-infrastructure-retries 1)
 (def readiness-wake-timeout-ms 30000)
 (def substrate-retry-delay-ms 5000)
+
+(def substrate-retry-timeouts-ms
+  "Escalating per-attempt preflight timeouts. A busy-but-healthy store (the
+  attempt-055 signature: shallow health in single-digit ms, entity route
+  queued behind running query portals) passes on a later, more patient
+  attempt; a dead store still fails the fast first probe."
+  [15000 30000 60000])
+
+(def default-substrate-health-url "http://127.0.0.1:7072/health")
 (def wm-agent-id "war-machine")
 
 (def ^:dynamic *wm-status-reporting?*
@@ -437,32 +446,80 @@
     {:value (probe-fn opts)}
     (catch Throwable e {:error e})))
 
+(defn substrate-liveness!
+  "Cheap liveness probe against the store's dedicated health port, used only
+  to classify a preflight exhaustion — it never rescues one. Returns
+  {:alive? bool :latency-ms n} or {:alive? false :error str}."
+  [opts]
+  (let [url (or (:substrate-health-url opts)
+                (System/getenv "FUTON_SUBSTRATE_HEALTH_URL")
+                default-substrate-health-url)
+        started (System/currentTimeMillis)]
+    (try
+      (let [r (http/get url {:timeout 2500 :throw false})]
+        {:alive? (<= 200 (:status r) 299)
+         :status (:status r)
+         :latency-ms (- (System/currentTimeMillis) started)})
+      (catch Throwable e
+        {:alive? false :error (.getMessage e)
+         :latency-ms (- (System/currentTimeMillis) started)}))))
+
+(defn- resolve-liveness-fn
+  "Real probe only when the preflight itself is real: a stubbed preflight
+  means no live substrate is in play, so a real health call would classify
+  against the wrong world."
+  [opts]
+  (or (:substrate-liveness-fn opts)
+      (when-not (:substrate-preflight-fn opts) substrate-liveness!)))
+
 (defn substrate-readiness!
-  "Run one substrate probe plus exactly two delayed retries before failing."
+  "Run one substrate probe plus exactly two delayed retries before failing.
+  Retries escalate the probe timeout (substrate-retry-timeouts-ms) so a
+  busy-but-healthy store gets a patient attempt; an explicit
+  :substrate-preflight-timeout-ms pins all attempts. On exhaustion the
+  thrown ex-data carries :substrate-liveness and :substrate-state
+  (:alive-but-slow | :unreachable | :liveness-unknown) so congestion and
+  outage stop sharing one label."
   [opts]
   (let [probe-fn (or (:substrate-preflight-fn opts) substrate-preflight!)
         sleep-fn (or (:readiness-sleep-fn opts) #(Thread/sleep %))
-        first-attempt (substrate-attempt probe-fn opts)]
+        timeout-for (fn [i]
+                      (or (:substrate-preflight-timeout-ms opts)
+                          (nth substrate-retry-timeouts-ms i
+                               (peek substrate-retry-timeouts-ms))))
+        attempt (fn [i]
+                  (substrate-attempt
+                   probe-fn (assoc opts :substrate-preflight-timeout-ms
+                                   (timeout-for i))))
+        first-attempt (attempt 0)]
     (if-not (:error first-attempt)
       (:value first-attempt)
       (do
         (sleep-fn substrate-retry-delay-ms)
-        (let [second-attempt (substrate-attempt probe-fn opts)]
+        (let [second-attempt (attempt 1)]
           (if-not (:error second-attempt)
             (assoc (:value second-attempt) :readiness/substrate-transient true)
             (do
               (sleep-fn substrate-retry-delay-ms)
-              (let [third-attempt (substrate-attempt probe-fn opts)]
+              (let [third-attempt (attempt 2)]
                 (if-not (:error third-attempt)
                   (assoc (:value third-attempt) :readiness/substrate-transient true)
-                  (let [cause (:error third-attempt)]
+                  (let [cause (:error third-attempt)
+                        liveness (when-let [f (resolve-liveness-fn opts)]
+                                   (f opts))
+                        state (cond
+                                (nil? liveness) :liveness-unknown
+                                (:alive? liveness) :alive-but-slow
+                                :else :unreachable)]
                     (throw
                      (ex-info "Authoritative substrate preflight failed after retries"
                               (merge (ex-data cause)
                                      {:outcome :substrate-unavailable
                                       :failure-kind :substrate-unavailable
                                       :failure-stage :substrate-preflight
-                                      :failure-detail :transient-exhausted})
+                                      :failure-detail :transient-exhausted
+                                      :substrate-liveness liveness
+                                      :substrate-state state})
                               cause))))))))))))
 
 (defn- post-json! [url body]

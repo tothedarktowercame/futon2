@@ -1497,6 +1497,53 @@
     (is (= 3 @calls))
     (is (= [5000 5000] @sleeps))))
 
+(deftest substrate-readiness-escalates-retry-timeouts
+  (let [timeouts (atom [])
+        failure (try
+                  (runner/substrate-readiness!
+                   {:substrate-preflight-fn
+                    (fn [opts]
+                      (swap! timeouts conj (:substrate-preflight-timeout-ms opts))
+                      (throw (ex-info "busy" {})))
+                    :readiness-sleep-fn (fn [_])})
+                  nil
+                  (catch clojure.lang.ExceptionInfo e e))]
+    (is (= [15000 30000 60000] @timeouts))
+    (is (= :substrate-unavailable (:outcome (ex-data failure)))))
+  (let [timeouts (atom [])]
+    (try
+      (runner/substrate-readiness!
+       {:substrate-preflight-timeout-ms 7000
+        :substrate-preflight-fn
+        (fn [opts]
+          (swap! timeouts conj (:substrate-preflight-timeout-ms opts))
+          (throw (ex-info "busy" {})))
+        :readiness-sleep-fn (fn [_])})
+      (catch clojure.lang.ExceptionInfo _))
+    (is (= [7000 7000 7000] @timeouts)
+        "an explicit timeout pins all attempts")))
+
+(deftest substrate-exhaustion-classifies-liveness
+  (letfn [(exhaust [liveness-fn]
+            (try
+              (runner/substrate-readiness!
+               (cond-> {:substrate-preflight-fn
+                        (fn [_] (throw (ex-info "busy" {})))
+                        :readiness-sleep-fn (fn [_])}
+                 liveness-fn (assoc :substrate-liveness-fn liveness-fn)))
+              nil
+              (catch clojure.lang.ExceptionInfo e (ex-data e))))]
+    (let [d (exhaust (fn [_] {:alive? true :latency-ms 3}))]
+      (is (= :alive-but-slow (:substrate-state d)))
+      (is (= {:alive? true :latency-ms 3} (:substrate-liveness d)))
+      (is (= :substrate-unavailable (:outcome d))
+          "classification refines the record; it does not rescue the attempt"))
+    (let [d (exhaust (fn [_] {:alive? false :error "connect refused"}))]
+      (is (= :unreachable (:substrate-state d))))
+    (let [d (exhaust nil)]
+      (is (= :liveness-unknown (:substrate-state d))
+          "stubbed preflight without a liveness stub must not probe the real store"))))
+
 (deftest exhausted-substrate-retries-close-with-existing-kind-and-new-detail
   (let [phases (atom [])
         calls (atom 0)
