@@ -184,8 +184,11 @@
             :as observation}]
   (when (and (= :opportunity phase) (= :end transition)
              (or cohort? (:tripwire/force? observation)))
-    (let [enumerated? (contains? cohort/outcome-kinds outcome)
-          zero-achievement? (not= :grounded-change outcome)
+    (let [cohort-complete? (= :cohort-complete outcome)
+          enumerated? (or cohort-complete?
+                          (contains? cohort/outcome-kinds outcome))
+          zero-achievement? (and (not= :grounded-change outcome)
+                                 (not cohort-complete?))
           statuses (when (and zero-achievement? attempt-id)
                      (attempt-finding-statuses
                       (or (:repair-root observation) repair/default-root)

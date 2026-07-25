@@ -23,14 +23,14 @@
   [:time-step :selection :construction :dispatch :build :adjudication :closed])
 
 (def outcome-kinds
-  "Valid outcome classifications for full-loop attempts.
-  :cohort-complete signals normal cohort exhaustion (all target attempts
-  consumed). It is NOT an error — it is returned by run-opportunity! when
-  start-attempt! throws the stopping-rule-reached exception, replacing the
-  spurious :initialization-failed outcome that created repair obligations."
+  "Valid outcome classifications for full-loop ATTEMPT close checkpoints.
+  These are the outcomes that can appear in a cohort attempt's :closed
+  checkpoint. :cohort-complete is NOT here — it is a scheduler-level signal
+  returned by run-opportunity! when the cohort is exhausted, not an attempt
+  outcome. See tripwire.clj for the T3 exemption."
   #{:grounded-change :grounded-no-change :artifact-only :abstained :no-selection
     :agent-unavailable :guardrail-refusal :dispatch-failed :build-failed
-    :substrate-unavailable :incomplete :cohort-complete})
+    :substrate-unavailable :incomplete})
 
 (defn read-edn [path]
   (edn/read-string (slurp path)))

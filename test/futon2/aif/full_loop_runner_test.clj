@@ -2515,10 +2515,15 @@
           (is (seq @repair-calls)
               "an untyped initialization failure must open a repair obligation"))))))
 
-(deftest cohort-complete-outcome-is-recognized
-  ":cohort-complete must be in the outcome-kinds set so downstream
-  consumers (ledger validation, outcome classification) accept it.
-  Without this registration, the repair's new outcome would be rejected
-  as :unknown-outcome, causing the same initialization-failure loop."
-  (is (contains? cohort/outcome-kinds :cohort-complete)
-      ":cohort-complete must be in outcome-kinds for ledger validation"))
+(deftest cohort-complete-is-exempt-from-t3-not-in-outcome-kinds
+  ":cohort-complete is a scheduler-level signal, NOT an attempt outcome.
+  It must NOT be in outcome-kinds (which validates close checkpoints),
+  but T3 tripwire must accept it without emitting :unknown-outcome or
+  :missing-durable-stop-line (since no attempt was opened)."
+  (is (not (contains? cohort/outcome-kinds :cohort-complete))
+      ":cohort-complete must NOT pollute outcome-kinds (attempt outcomes)")
+  (let [obs {:phase :opportunity :transition :end
+             :outcome :cohort-complete :cohort? true
+             :attempt-id "cohort-complete-test"}]
+    (is (empty? (tripwire/evaluate-wire :T3 obs))
+        "T3 must not fire on :cohort-complete (no unknown-outcome, no missing-stop-line)")))
