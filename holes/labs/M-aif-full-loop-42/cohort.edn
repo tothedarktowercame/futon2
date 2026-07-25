@@ -1,0 +1,72 @@
+{:cohort/id :wm-outer-loop-42-v1
+ :protocol/version 4
+ :status :preregistered
+ :registered-on "2026-07-25"
+ :purpose "Bounded-autonomy engagement cohort. Successor to :wm-outer-loop-41-v1 (target reached 2026-07-25). First cohort after: the reviewed reason-bearing strategic selector became authoritative (futon3c f4ee945/284da59, futon2 fa61e98), operator enactment gating was retired in favour of delivery-level Field Desk QA (operator decision evidence 6e6f56a1-b9d7-4f83-928f-3a211ef890a0; futon3c 919d975, futon2 d9e1034), and supervised job overrun landed (futon3c 26d88e1). Primary questions: (1) does the reviewed selector discriminate live — i.e. does the residual :policy-nondiscrimination stop-line kind retire under typed-memory support; (2) does a machine-authorized click produce a grounded, delivery-QA-reviewable change, discharging the open repair obligations repair-attempt-048-agent-unavailable and repair-attempt-049-agent-unavailable. Operator scope: Joe capped this validation at 1-2 runs before any larger campaign (2026-07-25); the stopping target is 2. Casting per operator: author zai-1, reviewer codex-4, passed explicitly per attempt via --author/--reviewer."
+ :activation :separate-append-only-marker
+ :population "Ground-control durée-triggered opportunities of the full War Machine loop"
+ :stopping-rule
+ {:unit :trigger-opportunity
+  :target 2
+  :rule "Count the first 2 distinct eligible trigger opportunities after activation, in order."
+  :counts-as-attempt
+  [:selected-and-dispatched
+   :abstained
+   :no-selection
+   :agent-unavailable
+   :substrate-unavailable
+   :guardrail-refusal
+   :dispatch-failed
+   :build-failed
+   :grounded-no-change
+   :grounded-change]
+  :excluded
+  [:manual-test :replay :duplicate-opportunity :pre-activation]
+  :replacement "None. Failed, unavailable, abstaining, and no-change opportunities remain in the denominator."}
+ :allowed-triggers #{:duree-click-on-demand
+                     :duree-click-continuous}
+ :checkpoint-order
+ [:time-step :selection :construction :dispatch :build :adjudication :closed]
+ :required-before-close
+ #{:selection :construction :dispatch :build :adjudication}
+ :checkpoint-contract
+ {:cell-shape "Every checkpoint payload is either {:judgment ... :ground ...} or {:sorry {:kind keyword ...}}."
+  :time-step [:opportunity-id :trigger :machine-state :agent-roster :code-state :semantic-epoch]
+  :selection [:selected-mission :selected-action :ranked-candidates :selection-reasons]
+  :construction [:mission :cascade :sorries :wiring :patterns :deposit]
+  :dispatch [:agent :availability :job-id :prompt-ref]
+  :build [:artifacts :generated-code :commits :patterns-used :inline-improvements :validation]
+  :adjudication [:before :after :witness :build-match :dial]
+  :closed [:outcome :grounded? :artifact-only? :duration-ms :resource-use]}
+ :grounded-success
+ {:outcome :grounded-change
+  :requires [:independent-before-witness
+             :independent-after-witness
+             :resolved-adjudication
+             :dial-moved]
+  :artifact-only-counts? false}
+ :machine-evolution
+ {:allowed? true
+  :rule "Normal machine development may continue during collection; it never permits dropping, replacing, or relabelling an opportunity."
+  :per-attempt-provenance [:semantic-epoch :git-sha :git-dirty? :resolved-mode-flags :configuration-digest]
+  :epoch-boundary "Increment semantic-epoch whenever ranking, policy support, dispatch, build, adjudication, or grounding semantics change. Note: this cohort begins immediately after such a boundary (reviewed selector authoritative + delivery-QA gating), so its attempts must not be pooled with cohort 41."
+  :analysis "Report attempts chronologically and stratified by semantic epoch; do not pool across an undocumented semantic boundary."}
+ :analysis
+ {:primary
+  [:attempt-count
+   :grounded-change-rate
+   :grounded-no-change-rate
+   :dispatch-rate
+   :completion-rate]
+  :secondary
+  [:mission-selection-frequency
+   :selection-reason-frequency
+   :expected-versus-realized-calibration
+   :agent-availability
+   :elapsed-time
+   :resource-use
+   :patterns-used
+   :inline-improvement-frequency
+   :semantic-epoch-results
+   :code-version-trajectory]
+  :reporting "Report both attempts and all typed sorries; do not analyse successes alone."}}
