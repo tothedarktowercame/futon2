@@ -222,7 +222,8 @@
                target (get-in p [:stopping-rule :target])]
            (when (> ordinal target)
              (throw (ex-info "cohort stopping rule reached"
-                             {:target target :attempted (dec ordinal)})))
+                             {:cohort/error :stopping-rule-reached
+                              :target target :attempted (dec ordinal)})))
            (let [attempt-id (format-attempt-id
                              (max (next-global-attempt-number data-root)
                                   (inc (count (attempt-dirs dir)))))

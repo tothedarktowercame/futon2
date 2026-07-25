@@ -2210,7 +2210,12 @@
   "Run one opportunity and ensure initialization failures also become durable
   stop-line findings. Failures after cohort start are closed by the core state
   machine; this outer boundary covers phase-log and cohort-start failures that
-  necessarily occur before an ordinary attempt can own them."
+  necessarily occur before an ordinary attempt can own them.
+
+  When the cohort stopping rule is reached (all target attempts consumed),
+  the exception is NOT a machine failure — it signals normal cohort
+  completion. Returning :cohort-complete avoids spurious repair obligations
+  that would otherwise fire every time the scheduler probes a finished cohort."
   [raw-opts]
   (try
     (run-opportunity-core! raw-opts)
@@ -2218,44 +2223,55 @@
       (when (= :delivery-qa-gate-failed
                (:failure-kind (ex-data e)))
         (throw e))
-      (let [attempt-id (str "initialization-" (UUID/randomUUID))
-            trigger (or (:trigger raw-opts) :duree-click-on-demand)
-            error (if (str/blank? (str (.getMessage e)))
-                    "Full-loop initialization failed"
-                    (.getMessage e))
-            finding
-            ((or (:repair-system-record-fn raw-opts)
-                 repair/record-system-failure!)
-             {:attempt-id attempt-id
-              :repair-class :machine-failure
-              :failure-stage :initialization
-              :outcome :incomplete
-              :failure-kind :initialization-failed
-              :error error
-              :failure-data (ex-data e)
-              :backtrace {:error-class (.getName (class e))}
-              :discharge-contract (discharge-contract :machine-failure)})
-            brief-ref
-            ((or (:queue-fn raw-opts) brief/queue-item!)
-             {:attempt-id attempt-id
-              :trigger trigger
-              :batch-id (:batch-id raw-opts)
-              :outcome :incomplete
-              :author (or (:author raw-opts) default-author)
-              :reviewer (or (:reviewer raw-opts) default-reviewer)
-              :achievement {:tier :none
-                            :summary "No achievement; initialization stopped the line"}
-              :failure {:kind :initialization-failed
-                        :stage :initialization
-                        :error error
-                        :repair-id (:repair/id finding)
-                        :discharge-contract (:discharge-contract finding)}})]
-        {:attempt-id attempt-id
-         :outcome :incomplete
-         :checkpoints {}
-         :morning-brief-ref brief-ref
-         :data {:repair-obligation finding
-                :failure-kind :initialization-failed
-                :failure-stage :initialization
-                :error error
-                :error-data (ex-data e)}}))))
+      ;; Cohort stopping rule is normal completion, not a machine failure.
+      ;; Repair-initialization was caused by this being treated as an
+      ;; initialization-failed; it must return cleanly instead.
+      (let [edata (ex-data e)]
+        (if (= :stopping-rule-reached (:cohort/error edata))
+          {:attempt-id (str "cohort-complete-" (UUID/randomUUID))
+           :outcome :cohort-complete
+           :checkpoints {}
+           :data {:cohort/error :stopping-rule-reached
+                  :target (:target edata)
+                  :attempted (:attempted edata)}}
+          (let [attempt-id (str "initialization-" (UUID/randomUUID))
+                trigger (or (:trigger raw-opts) :duree-click-on-demand)
+                error (if (str/blank? (str (.getMessage e)))
+                        "Full-loop initialization failed"
+                        (.getMessage e))
+                finding
+                ((or (:repair-system-record-fn raw-opts)
+                     repair/record-system-failure!)
+                 {:attempt-id attempt-id
+                  :repair-class :machine-failure
+                  :failure-stage :initialization
+                  :outcome :incomplete
+                  :failure-kind :initialization-failed
+                  :error error
+                  :failure-data edata
+                  :backtrace {:error-class (.getName (class e))}
+                  :discharge-contract (discharge-contract :machine-failure)})
+                brief-ref
+                ((or (:queue-fn raw-opts) brief/queue-item!)
+                 {:attempt-id attempt-id
+                  :trigger trigger
+                  :batch-id (:batch-id raw-opts)
+                  :outcome :incomplete
+                  :author (or (:author raw-opts) default-author)
+                  :reviewer (or (:reviewer raw-opts) default-reviewer)
+                  :achievement {:tier :none
+                                :summary "No achievement; initialization stopped the line"}
+                  :failure {:kind :initialization-failed
+                            :stage :initialization
+                            :error error
+                            :repair-id (:repair/id finding)
+                            :discharge-contract (:discharge-contract finding)}})]
+            {:attempt-id attempt-id
+             :outcome :incomplete
+             :checkpoints {}
+             :morning-brief-ref brief-ref
+             :data {:repair-obligation finding
+                    :failure-kind :initialization-failed
+                    :failure-stage :initialization
+                    :error error
+                    :error-data edata}}))))))
