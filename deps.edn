@@ -12,6 +12,10 @@
   ;; Authoritative real-actuation entrypoint. The historical judgement/fold
   ;; runner remains available only under its honest diagnostic name.
   :wm-scheduled {:main-opts ["-m" "futon2.aif.full-loop-cli" "tick"]}
+  ;; RETIRED for clicks (I-0 / M-omni-wm-runner 2026-07-26): do not launch
+  ;; this as a runner process — clicks run in-process in the serving JVM via
+  ;; POST :7070/api/alpha/wm/click. Alias kept for read-only CLI subcommands
+  ;; (status/brief/review) and tests only. See CLAUDE.md.
   :wm-full-loop {:main-opts ["-m" "futon2.aif.full-loop-cli"]}
   :wm-judgement-only {:main-opts ["-m" "wm-scheduled-run"]}
   :wm-preflight {:main-opts ["-m" "wm-preflight"]}
