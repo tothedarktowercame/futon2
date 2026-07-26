@@ -12,7 +12,8 @@
             [futon2.aif.pattern-registry :as patterns]
             [futon2.aif.repair-obligation :as repair]
             [futon2.aif.tripwire :as tripwire]
-            [futon2.report.cascade-lane :as cascade])
+            [futon2.report.cascade-lane :as cascade]
+            [futon2.report.war-machine :as wm])
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]
            [java.time Instant]))
@@ -57,6 +58,100 @@
              (:url @seen)))
       (is (= ["M-a"]
              (get-in @seen [:body :scheduler-habit-ranking]))))))
+
+(deftest strategic-selection-escalates-and-pins-retry-budgets
+  (let [timeouts (atom [])
+        sleeps (atom [])
+        failure
+        (with-redefs
+          [http/post
+           (fn [_ opts]
+             (swap! timeouts conj (:timeout opts))
+             (throw (ex-info "selection timed out" {})))]
+          (try
+            (runner/strategic-selection!
+             {:agency-base "http://test"
+              :strategic-selection-sleep-fn #(swap! sleeps conj %)}
+             {:scheduler-habit-ranking ["M-a"]})
+            nil
+            (catch clojure.lang.ExceptionInfo e e)))]
+    (is (= [150000 210000 270000] @timeouts))
+    (is (= [5000 5000] @sleeps))
+    (is (= :strategic-selection-unavailable
+           (:failure-kind (ex-data failure))))
+    (is (= :transient-exhausted (:failure-detail (ex-data failure)))))
+  (let [timeouts (atom [])]
+    (with-redefs
+      [http/post
+       (fn [_ opts]
+         (swap! timeouts conj (:timeout opts))
+         (throw (ex-info "selection timed out" {})))]
+      (try
+        (runner/strategic-selection!
+         {:agency-base "http://test"
+          :strategic-selection-timeout-ms 120000
+          :strategic-selection-sleep-fn (fn [_])}
+         {:scheduler-habit-ranking ["M-a"]})
+        (catch clojure.lang.ExceptionInfo _)))
+    (is (= [120000 120000 120000] @timeouts)
+        "an explicit selection timeout pins all attempts")))
+
+(deftest strategic-selection-invoke-seam-retries-without-http
+  (let [calls (atom [])
+        sleeps (atom [])
+        request {:scheduler-habit-ranking ["M-a"] :trace-id "trace-a"}
+        expected {:status :verified-live-selection
+                  :selected-mission-ids ["M-a"]}
+        invoke-fn
+        (fn [payload]
+          (swap! calls conj payload)
+          (if (= 1 (count @calls))
+            (throw (ex-info "in-process timeout" {}))
+            {:ok true :selection expected}))
+        recovered
+        (with-redefs [http/post
+                      (fn [& _]
+                        (throw (ex-info "HTTP must not be called" {})))]
+          (runner/strategic-selection!
+           {:strategic-selection-invoke-fn invoke-fn
+            :strategic-selection-sleep-fn #(swap! sleeps conj %)}
+           request))]
+    (is (= [request request] @calls)
+        "the injected seam receives the unchanged HTTP request payload")
+    (is (= [5000] @sleeps))
+    (is (true? (:readiness/selection-transient recovered))))
+  (let [result
+        (runner/strategic-selection!
+         {:strategic-selection-invoke-fn
+          (fn [_]
+            {:ok true
+             :selection {:status :verified-live-selection
+                         :selected-mission-ids ["M-a"]}})
+          :strategic-selection-sleep-fn
+          (fn [_] (throw (ex-info "first success must not sleep" {})))}
+         {:scheduler-habit-ranking ["M-a"]})]
+    (is (not (contains? result :readiness/selection-transient))
+        "first-attempt success does not acquire the transient marker")))
+
+(deftest strategic-selection-invoke-seam-enforces-budgets
+  (let [calls (atom 0)
+        failure
+        (try
+          (runner/strategic-selection!
+           {:strategic-selection-timeout-ms 100
+            :strategic-selection-invoke-fn
+            (fn [_]
+              (swap! calls inc)
+              (Thread/sleep 60000))
+            :strategic-selection-sleep-fn (fn [_])}
+           {:scheduler-habit-ranking ["M-a"]})
+          nil
+          (catch clojure.lang.ExceptionInfo e e))]
+    (is (= 3 @calls))
+    (is (= :strategic-selection-unavailable
+           (:failure-kind (ex-data failure))))
+    (is (= 100 (get-in (ex-data failure) [:timeout-ms]))
+        "the explicit per-attempt budget applies to the injected path")))
 
 (def selected-action {:type :open-mission :target "M-selected"})
 
@@ -1594,6 +1689,74 @@
                         :ranked-actions []
                         :admissible-actions []
                         :decision {:action :abstain})})})
+
+(deftest exhausted-selection-retries-close-with-typed-kind
+  (let [phases (atom [])
+        calls (atom 0)
+        selection-opts
+        {:strategic-selection-invoke-fn
+         (fn [_]
+           (swap! calls inc)
+           (throw (ex-info "selection unavailable" {})))
+         :strategic-selection-sleep-fn (fn [_])}
+        opts
+        (merge
+         (readiness-run-opts
+          phases
+          (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
+                   :codex-7 {:status "idle" :invoke-ready? true}}))
+         {:substrate-preflight-fn (fn [_] {:route :test})
+          :judge-fn
+          (fn [_]
+            (runner/strategic-selection!
+             selection-opts
+             {:scheduler-habit-ranking ["M-a"]}))})
+        result (runner/run-opportunity! opts)]
+    (is (= :incomplete (:outcome result)))
+    (is (= :strategic-selection-unavailable
+           (get-in result [:data :failure-kind])))
+    (is (= :transient-exhausted
+           (get-in result [:data :failure-detail])))
+    (is (= :selection (get-in result [:data :failure-stage])))
+    (is (= 3 @calls))))
+
+(deftest selection-checkpoint-records-only-late-success-marker
+  (letfn [(run [failures-before-success]
+            (let [calls (atom 0)
+                  opts
+                  (-> (isolated-runner-opts)
+                      (dissoc :judge-fn)
+                      (assoc
+                       :repair-open-fn (constantly [])
+                       :repair-system-record-fn
+                       (fn [finding]
+                         (assoc finding :repair/id "repair-selection-marker"))
+                       :strategic-selection-invoke-fn
+                       (fn [_]
+                         (if (<= (swap! calls inc) failures-before-success)
+                           (throw (ex-info "transient selection timeout" {}))
+                           {:ok true
+                            :selection
+                            {:status :verified-live-selection
+                             :selected-mission-ids ["M-selected"]}}))
+                       :strategic-selection-sleep-fn (fn [_])
+                       :construct-fn
+                       (fn [& _]
+                         (throw (ex-info "stop after selection"
+                                         {:outcome :incomplete})))))
+                  result
+                  (with-redefs
+                    [wm/generate-war-machine
+                     (fn [_ {:keys [strategic-selection-fn]}]
+                       (strategic-selection-fn
+                        {:scheduler-habit-ranking ["M-selected"]})
+                       {:judgement judgement})]
+                    (runner/run-opportunity! opts))]
+              (get-in result [:checkpoints :selection :judgment])))]
+    (is (true? (:readiness/selection-transient (run 1)))
+        "retry success is stamped in the durable selection judgment")
+    (is (not (contains? (run 0) :readiness/selection-transient))
+        "first-try success preserves the original judgment shape")))
 
 (deftest restored-agent-is-woken-once-before-readiness-proceeds
   (let [phases (atom [])

@@ -47,6 +47,7 @@
 (def default-revision-rounds 1)
 (def readiness-wake-timeout-ms 30000)
 (def substrate-retry-delay-ms 5000)
+(def strategic-selection-retry-delay-ms 5000)
 
 (def substrate-retry-timeouts-ms
   "Escalating per-attempt preflight timeouts. A busy-but-healthy store (the
@@ -54,6 +55,13 @@
   queued behind running query portals) passes on a later, more patient
   attempt; a dead store still fails the fast first probe."
   [15000 30000 60000])
+
+(def strategic-selection-retry-timeouts-ms
+  "Escalating per-attempt budgets for reason-bearing strategic selection.
+  The first budget clears the observed 130s loaded success; later attempts
+  tolerate a progressively busier serving JVM. An explicit
+  :strategic-selection-timeout-ms pins all attempts."
+  [150000 210000 270000])
 
 (def default-substrate-health-url "http://127.0.0.1:7072/health")
 (def wm-agent-id "war-machine")
@@ -544,42 +552,111 @@
                       {:outcome :dispatch-failed :status (:status r)
                       :response parsed})))))
 
-(defn strategic-selection!
-  "Request the cache-gated reason-bearing selector from the serving JVM.
-
-   Futon2 intentionally has no source dependency on Futon3c. The port-7070
-   boundary lets the standalone click runner use the same hot-loaded selector
-   as the scheduler, immediately before the local judgement is finalized."
-  [{:keys [agency-base]} request]
+(defn- strategic-selection-http-invoke!
+  [{:keys [agency-base strategic-selection-timeout-ms]} request]
   (let [url (str agency-base "/api/alpha/war-machine/strategic-selection")
         response
         (http/post url
                    {:headers {"Content-Type" "application/json"}
                     :body (json/generate-string request)
-                    :timeout 30000
+                    :timeout strategic-selection-timeout-ms
                     :throw false})
         body
         (try
           (json/parse-string (str (:body response)) true)
           (catch Throwable _ {}))]
-    (when-not (and (<= 200 (long (or (:status response) 0)) 299)
-                   (true? (:ok body))
-                   (map? (:selection body)))
+    (when-not (<= 200 (long (or (:status response) 0)) 299)
       (throw
        (ex-info "Reason-bearing strategic selection endpoint failed"
-                {:failure-kind :strategic-selection-unavailable
-                 :failure-stage :selection
-                 :status (:status response)
+                {:status (:status response)
                  :response body
                  :endpoint url})))
-    (let [selection (:selection body)]
-      (cond-> (update selection :status keyword)
-        (get-in selection [:actuation :status])
-        (update-in [:actuation :status] keyword)
-        (get-in selection [:actuation :authority])
-        (update-in [:actuation :authority] keyword)
-        (get-in selection [:calibration :status])
-        (update-in [:calibration :status] keyword)))))
+    body))
+
+(defn- selection-response->selection
+  [response]
+  (when-not (and (true? (:ok response))
+                 (map? (:selection response)))
+    (throw
+     (ex-info "Reason-bearing strategic selection response was invalid"
+              {:response response})))
+  (let [selection (:selection response)]
+    (cond-> (update selection :status keyword)
+      (get-in selection [:actuation :status])
+      (update-in [:actuation :status] keyword)
+      (get-in selection [:actuation :authority])
+      (update-in [:actuation :authority] keyword)
+      (get-in selection [:calibration :status])
+      (update-in [:calibration :status] keyword))))
+
+(defn- strategic-selection-attempt
+  [invoke-fn request]
+  (try
+    {:value (selection-response->selection (invoke-fn request))}
+    (catch Throwable e {:error e})))
+
+(defn- bounded-selection-invoke!
+  [invoke-fn request timeout-ms]
+  (let [timeout-sentinel (Object.)
+        task (future (invoke-fn request))
+        result (deref task timeout-ms timeout-sentinel)]
+    (if (identical? timeout-sentinel result)
+      (do
+        (future-cancel task)
+        (throw
+         (ex-info "Injected strategic selection timed out"
+                  {:timeout-ms timeout-ms})))
+      result)))
+
+(defn strategic-selection!
+  "Request the cache-gated reason-bearing selector, with two delayed retries.
+
+   The default bridge uses HTTP so Futon2 keeps no source dependency on
+   Futon3c. :strategic-selection-invoke-fn replaces only that bridge: it is
+   called with the identical request map and returns the parsed endpoint body
+   {:ok true :selection {...}}. Both paths share the retry ladder. A success
+   after the first attempt carries :readiness/selection-transient."
+  [opts request]
+  (let [sleep-fn (or (:strategic-selection-sleep-fn opts)
+                     #(Thread/sleep %))
+        timeout-for (fn [i]
+                      (or (:strategic-selection-timeout-ms opts)
+                          (nth strategic-selection-retry-timeouts-ms i
+                               (peek strategic-selection-retry-timeouts-ms))))
+        invoke-for (fn [i]
+                     (let [attempt-opts
+                           (assoc opts :strategic-selection-timeout-ms
+                                  (timeout-for i))]
+                       (if-let [invoke-fn
+                                (:strategic-selection-invoke-fn opts)]
+                         #(bounded-selection-invoke!
+                           invoke-fn % (:strategic-selection-timeout-ms
+                                        attempt-opts))
+                         #(strategic-selection-http-invoke!
+                           attempt-opts %))))
+        attempt (fn [i]
+                  (strategic-selection-attempt (invoke-for i) request))]
+    (loop [i 0]
+      (let [result (attempt i)]
+        (if-not (:error result)
+          (cond-> (:value result)
+            (pos? i)
+            (assoc :readiness/selection-transient true))
+          (if (< i (dec (count strategic-selection-retry-timeouts-ms)))
+            (do
+              (sleep-fn strategic-selection-retry-delay-ms)
+              (recur (inc i)))
+            (let [cause (:error result)]
+              (throw
+               (ex-info "Reason-bearing strategic selection failed after retries"
+                        (merge (ex-data cause)
+                               {:outcome :incomplete
+                                :failure-kind
+                                :strategic-selection-unavailable
+                                :failure-stage :selection
+                                :failure-detail :transient-exhausted
+                                :attempts (inc i)})
+                        cause)))))))))
 
 (defn dispatch!
   [{:keys [agency-base]} agent caller mission prompt]
@@ -1990,17 +2067,29 @@
                 ((or (:repair-supersede-fn opts) repair/supersede!)
                  stop-line successor failure-kind)
                 successor))
+            selection-transient? (atom false)
             selection-judge (or (:judge-fn opts)
                                 (fn [days]
                                   (wm/generate-war-machine
                                    days
                                    {:include-advisory-lanes? false
                                     :strategic-selection-fn
-                                    (or (:strategic-selection-fn opts)
-                                        #(strategic-selection! opts %))})))
-            judgement0 (:judgement
-                        (run-phase! opts @phase-context :selection
-                                    #(selection-judge window-days)))
+                                    (fn [request]
+                                      (let [selection
+                                            ((or (:strategic-selection-fn opts)
+                                                 #(strategic-selection! opts %))
+                                             request)]
+                                        (when
+                                         (:readiness/selection-transient selection)
+                                          (reset! selection-transient? true))
+                                        selection))})))
+            judgement0-base
+            (:judgement
+             (run-phase! opts @phase-context :selection
+                         #(selection-judge window-days)))
+            judgement0 (cond-> judgement0-base
+                         @selection-transient?
+                         (assoc :readiness/selection-transient true))
             mode-flags ((or (:mode-flags-fn opts) wm/arena-mode-flags))
             ordinary-entry (selected-entry judgement0)
             entry (if stop-line (repair-entry stop-line) ordinary-entry)
@@ -2030,31 +2119,37 @@
             discrimination (when-not stop-line
                              (selection-discrimination ranked-for-review))
             selection-cell (if entry
-                             (term {:selected-mission (str target)
-                                    :selected-action (:action entry)
-                                    :stop-the-line-obligations
-                                    (mapv #(select-keys % [:repair/id :attempt-id
-                                                           :failed-commit
-                                                           :review-verdict])
-                                          stop-lines)
-                                    :ranked-candidates (mapv #(select-keys % [:rank :action
-                                                                              :G-efe
-                                                                              :controller-score
-                                                                              :habit-prior-bias])
-                                                             (take 10 ranked-for-review))
-                                    :selection-reasons
-                                    (if stop-line
-                                      {:source :stop-the-line
-                                       :repair-id (:repair/id stop-line)
-                                       :repair-class (:repair/class stop-line)}
-                                      (assoc
-                                       (select-keys (:decision judgement)
-                                                    [:source :rank :controller-score :tau
-                                                     :selection-gain
-                                                     :habit-prior-applied?])
-                                       :discrimination discrimination))
-                                    :trace-persistence :after-construction}
-                                   {:kind :wm-judgement :decision (:decision judgement)})
+                             (cond->
+                              (term {:selected-mission (str target)
+                                     :selected-action (:action entry)
+                                     :stop-the-line-obligations
+                                     (mapv #(select-keys % [:repair/id :attempt-id
+                                                            :failed-commit
+                                                            :review-verdict])
+                                           stop-lines)
+                                     :ranked-candidates (mapv #(select-keys % [:rank :action
+                                                                               :G-efe
+                                                                               :controller-score
+                                                                               :habit-prior-bias])
+                                                              (take 10 ranked-for-review))
+                                     :selection-reasons
+                                     (if stop-line
+                                       {:source :stop-the-line
+                                        :repair-id (:repair/id stop-line)
+                                        :repair-class (:repair/class stop-line)}
+                                       (assoc
+                                        (select-keys (:decision judgement)
+                                                     [:source :rank :controller-score :tau
+                                                      :selection-gain
+                                                      :habit-prior-applied?])
+                                        :discrimination discrimination))
+                                     :trace-persistence :after-construction}
+                                    {:kind :wm-judgement
+                                     :decision (:decision judgement)})
+                               (:readiness/selection-transient judgement0)
+                               (assoc-in [:judgment
+                                          :readiness/selection-transient]
+                                         true))
                              (sorry :no-selection {:decision (:decision judgement)}))]
         (checkpoint! :selection selection-cell)
         (when-not entry
