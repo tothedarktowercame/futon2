@@ -725,7 +725,7 @@
                (substrate-get-edn
                 (str futon1a-url "/api/alpha/hyperedges?type="
                      (url-encode hx-type)
-                     "&limit=500")))
+                     "&limit=500&include-total=false")))
               []))
     (catch Exception _ [])))
 

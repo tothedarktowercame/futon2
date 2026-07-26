@@ -111,7 +111,8 @@
    (if-let [f (:hyperedges-by-type-fn opts)]
      (f type)
      (let [url (str (api-url opts "/hyperedges") "?type=" (encode type)
-                    "&limit=" (long (or (:limit opts) 10000)))]
+                    "&limit=" (long (or (:limit opts) 10000))
+                    "&include-total=false")]
        (mapv normalize-hyperedge
              (:hyperedges (request! :get url opts nil)))))))
 
