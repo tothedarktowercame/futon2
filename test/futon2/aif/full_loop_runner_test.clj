@@ -984,6 +984,43 @@
     (is (re-find #"relevant tests in a fresh JVM" prompt))
     (is (re-find #"Report the exact commands" prompt))))
 
+(deftest stop-line-repair-contract-never-carries-a-nil-discharge
+  ;; attempt-054's repair cascade ran with :discharge nil because schema-1
+  ;; review-failure findings minted no discharge contract. Construction now
+  ;; floors a contract-less obligation at the class-typed discharge, and a
+  ;; minted contract stays authoritative.
+  (testing "legacy review-failure finding gets the class-typed discharge"
+    (let [construction
+          (runner/construct-selected-action
+           {:action {:type :repair-machine-failure
+                     :target "repair-attempt-054"
+                     :repair-obligation
+                     {:repair/id "repair-attempt-054"
+                      :repair/class :independent-review-failure
+                      :attempt-id "attempt-054"
+                      :failed-commit "bad123"}}})]
+      (is (= [:distinct-repair-commit :independent-review
+              :grounded-repair :distinct-production-shaped-successor]
+             (get-in construction [:repair-contract :discharge :requires])))
+      (is (= :code-commit
+             (get-in construction
+                     [:repair-contract :discharge :artifact-shape])))))
+  (testing "a minted discharge contract on the obligation is authoritative"
+    (let [construction
+          (runner/construct-selected-action
+           {:action {:type :repair-machine-failure
+                     :target "repair-x"
+                     :repair-obligation
+                     {:repair/id "repair-x"
+                      :repair/class :machine-failure
+                      :attempt-id "attempt-x"
+                      :discharge-contract
+                      {:requires [:cleared-precondition]
+                       :artifact-shape :code-commit}}}})]
+      (is (= [:cleared-precondition]
+             (get-in construction
+                     [:repair-contract :discharge :requires]))))))
+
 (deftest reviewer-receives-a-bounded-repair-contract-without-the-backtrace
   (let [contract
         {:construction-kind :machine-stop-line-repair

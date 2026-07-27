@@ -54,6 +54,36 @@
                         :validation {:production-shaped? true}}))
     (is (empty? (repair/open-obligations root)))))
 
+(deftest review-failure-finding-carries-typed-discharge-contract
+  ;; repair-attempt-054: schema-1 review-failure findings carried no
+  ;; discharge contract, so the repair attempt's construction ran with
+  ;; :discharge nil and the discharge requirements were never
+  ;; machine-visible. Every new finding mints the typed contract.
+  (let [root (temp-root)
+        base {:target :target/a :commit "bad123"
+              :selected-entry {:action {:type :x}}
+              :reviewer "codex-1" :review-job "review-1"
+              :review-text "keep classification typed"}
+        requested (repair/record-review-failure!
+                   root (assoc base
+                               :attempt-id "failed-rc"
+                               :review-verdict :request-changes))
+        rejected (repair/record-review-failure!
+                  root (assoc base
+                              :attempt-id "failed-rj"
+                              :review-verdict :reject))]
+    (is (= 2 (:repair/schema-version requested)))
+    (is (= :independent-review (:failure-stage requested)))
+    (is (= :review-request-changes (:failure-kind requested)))
+    (is (= :review-rejected (:failure-kind rejected)))
+    (is (= repair/review-failure-discharge-contract
+           (:discharge-contract requested)))
+    (is (= [:distinct-repair-commit :independent-review
+            :grounded-repair :distinct-production-shaped-successor]
+           (get-in requested [:discharge-contract :requires])))
+    (is (= :code-commit
+           (get-in requested [:discharge-contract :artifact-shape])))))
+
 (deftest system-actuation-failure-is-distinct-durable-stop-line-memory
   (let [root (temp-root)
         finding (repair/record-system-failure!

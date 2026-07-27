@@ -927,6 +927,8 @@
   [entry]
   (patterns/actuation-construction (:action entry)))
 
+(declare discharge-contract)
+
 (defmethod construct-selected-action :repair-machine-failure
   [entry]
   (let [action (:action entry)
@@ -942,7 +944,11 @@
       :failed-attempt (:attempt-id obligation)
       :failure-stage (:failure-stage obligation)
       :failure-kind (:failure-kind obligation)
-      :discharge (:discharge-contract obligation)}
+      ;; Legacy findings (schema 1 review failures, attempt-054) carried no
+      ;; discharge contract; the class-typed contract is the fail-closed
+      ;; floor so :discharge is never nil in a repair construction.
+      :discharge (or (:discharge-contract obligation)
+                     (discharge-contract (:repair/class obligation)))}
      :shown ["futon-theory/stop-the-line" "musn/pause-backtrace"]
      :semilattice [{:from :failure-backtrace :to :repair-implementation}
                    {:from :repair-implementation :to :independent-review}
@@ -1838,6 +1844,12 @@
   (assoc
    (case repair-class
      :machine-failure
+     {:requires [:distinct-repair-commit :independent-review
+                 :grounded-repair :distinct-production-shaped-successor]}
+     :independent-review-failure
+     ;; Mirrors repair/review-failure-discharge-contract: a rejected commit
+     ;; is discharged exactly like a machine failure — a DISTINCT commit
+     ;; through the full gate ladder, never a resubmission of the failed one.
      {:requires [:distinct-repair-commit :independent-review
                  :grounded-repair :distinct-production-shaped-successor]}
      :environmental-hold

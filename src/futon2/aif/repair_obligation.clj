@@ -124,6 +124,15 @@
         (when (some? discriminator)
           (str "-" (name discriminator))))))
 
+(def review-failure-discharge-contract
+  "Typed discharge contract minted onto every independent-review-failure
+  finding. Schema-1 findings carried no discharge contract at all, so the
+  downstream repair contract reached construction with :discharge nil and
+  the discharge requirements were never machine-visible (attempt-054)."
+  {:requires [:distinct-repair-commit :independent-review
+              :grounded-repair :distinct-production-shaped-successor]
+   :artifact-shape :code-commit})
+
 (defn record-review-failure!
   ([finding] (record-review-failure! default-root finding))
   ([root {:keys [attempt-id target commit selected-entry reviewer review-job
@@ -136,7 +145,7 @@
                      {:finding finding})))
    (let [id (obligation-id attempt-id)
          record {:repair/id id
-                 :repair/schema-version 1
+                 :repair/schema-version 2
                  :repair/status :open
                  :repair/class :independent-review-failure
                  :attempt-id attempt-id
@@ -147,6 +156,11 @@
                  :review-job review-job
                  :review-verdict review-verdict
                  :review-text review-text
+                 :failure-stage :independent-review
+                 :failure-kind (case review-verdict
+                                 :request-changes :review-request-changes
+                                 :reject :review-rejected)
+                 :discharge-contract review-failure-discharge-contract
                  :opened-at (str (Instant/now))}]
      (write-new! (io/file root "findings" (str id ".edn")) record)
      record)))
