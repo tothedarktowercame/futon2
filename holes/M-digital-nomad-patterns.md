@@ -164,3 +164,21 @@ A SECOND embedding, distinct from the mission index but coordinated with it:
   nomad patterns=trigger-classes, letters=dispatches, replies=receipts.
   Positioning is WM-able by the demarcation criterion; Joe is the send gate
   everywhere (cold-outbox discipline).
+
+## First cross-space probe (2026-07-27): three capabilities located on the terrain
+
+Method: probe texts embedded with the same encoder, cosine-ranked against the
+106 B0 records; neighborhoods read through their pattern attachments. Stars
+overlaid on business-landscape-embed.html.
+
+| probe | top neighbors | pattern census | reading |
+|---|---|---|---|
+| Proof Sprint Batch 1 (historical demo, arXiv:2602.13587) | prover/grader orgs (qed-nano, proofgrader, deepmind) | skip-the-flood 3 | sits IN the flooded layer; its distinguishing features (provenance, math-vs-QC status) are not what the neighborhood sees |
+| Batch N autonomous prover (prospective, WM/zaif) | open-proof-corpus, motivated-proofs, **vacancy-commercial-proof-legibility** | author-the-yardstick 3 = skip-the-flood 3 | autonomy+receipts ROTATES the capability off the flood toward the yardstick/legibility vacancy — the differentiator is the audited stream, not the proving |
+| full-arxiv-mining star (if realised) | **vacancy-informal-corpus-daylight (0.644, top)**, mathbench, principled-abstention gap | author-the-yardstick 5, live-yardstick 4 | lands ON the measured hole in the terrain — the strongest product-position of the three; its top neighbor carries letter-from-the-future |
+
+Gradient: Batch-1 (in flood) → Batch-N (flood edge, rotating to yardstick) →
+arxiv-mining (vacancy bullseye). The 2019-era decline of Batch 2 reads, in
+hindsight, as declining to swim deeper into what became the flooded layer;
+the WM/zaif receipts are exactly the rotation that makes Batch-N land
+differently than Batch-1 did.
