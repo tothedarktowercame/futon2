@@ -134,3 +134,10 @@ Ground** (guard on Owner Of The Problem, as Live Yardstick guards Choose The
 Grid): engage where the convening itself licenses the conversation; arrive
 by contributing what the convening needs; letter addressee = the organizers.
 Instance: Big Proof lineage at the INI. Work items in the FINDINGS addendum.
+
+## Canonical home (2026-07-27)
+
+The patterns now live as `futon3/library/nomad/*.flexiarg` (8 files, house
+style, names generalized — this mission doc retains the sensitive instances).
+Note: futon3a's nightly index (04:30 cron, --minilm) sweeps the futon3
+library, so the nomad patterns enter the shared search corpus automatically.
