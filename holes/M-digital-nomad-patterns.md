@@ -182,3 +182,31 @@ arxiv-mining (vacancy bullseye). The 2019-era decline of Batch 2 reads, in
 hindsight, as declining to swim deeper into what became the flooded layer;
 the WM/zaif receipts are exactly the rotation that makes Batch-N land
 differently than Batch-1 did.
+
+## Bridge probe (2026-07-27): the assay office
+
+Probed a coordinating offer ("independent audit/instrumentation house for
+machine mathematics: per-grain certificates + comprehension-vs-soundness
+verdicts applied to BOTH autonomous provers (anyone's, incl. ours as
+dogfood) AND the published literature; claimed-vs-verified streams as a
+service to funders/journals/labs; the readiness benchmark published with
+honest negatives; vendors structurally cannot self-audit").
+
+Result vs single-capability probes:
+- mean-field similarity 0.388 (vs 0.321 batch-N, 0.327 arxiv-mining);
+  coverage 69/106 records warm (>0.35) vs 39 and 44.
+- CLASS SHIFT in the neighborhood: singles neighbor ORGS (competitors);
+  the bridge's top three are all YARDSTICK-GAPS (principled-abstention,
+  integrity-certificate, proof-run-durability) — closest to the holes,
+  warm to everything, competing with no org (none above 0.55).
+
+Reading: the empirical signature of a certification/platform layer — the
+coordination across offerings IS the offer. Production (batch-N) and
+digestion (arxiv-mining) are two intake doors of one assay office; the
+yardstick gaps are its product surface; the flood is its market rather
+than its competition (every funded prover needs an auditor it doesn't
+own); public warrant = the LeanAgent 0=1 incident (integrity-certificate
+gap with a public case). Live-yardstick witnesses to verify: funders
+(portfolio evaluation is measured, with money) and journals. Pattern
+composition: author-the-yardstick ∘ skip-the-flood(evaluation layer) ∘
+self-certifying-artifact(dogfood) ∘ owner-of-the-problem(funders).
