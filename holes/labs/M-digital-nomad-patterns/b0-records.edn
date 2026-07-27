@@ -1,0 +1,1794 @@
+[{:id "org-depintel"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "Depintel"
+   :capital/layer "explainable AI and formal-methods products"
+   :capital/present? :unknown
+   :builds
+   ["Silas structured-data analytics"
+    "DeepDebugger visualisation/explanation"
+    "ReaLLM"
+    "PAT formal reasoning and model checking"]
+   :exit-adjacency
+   "Enterprise interpretability and trustworthy-AI tooling; thesis-adjacent to auditable reasoning, but outside an AI-for-mathematics field roster."
+   :stack/layer "reasoning instrumentation"
+   :vacancy/checked "Held-out control followed by direct site fetch"
+   :vacancy/vacant? false
+   :complement-of "opaque machine-learning and reasoning systems"
+   :demand/signal "Products position interpretability and trustworthiness as the value proposition."}
+  :patterns ["nomad/choose-the-grid" "nomad/skip-the-flood"]
+  :source "FINDINGS §0"
+  :sensitivity :public}
+
+ {:id "org-mathlib-initiative"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "Mathlib Initiative"
+   :capital/layer "non-profit formal-library maintenance and contributor legibility"
+   :capital/present? true
+   :builds
+   ["paid maintainer capacity"
+    "documentation and educational material"
+    "Queueboard"
+    "quarterly review-queue reports"
+    "monthly goal-state and tactic-trace datasets"]
+   :exit-adjacency "Public infrastructure rather than a direct enterprise exit."
+   :stack/layer "digestion, documentation, and workflow instrumentation"
+   :vacancy/checked "Roadmap, staffing, and deliverables inspected"
+   :vacancy/vacant? false
+   :complement-of "industrial-rate formal proof production"
+   :demand/signal "Roadmap names contributor documentation gaps and commits delivery dates."}
+  :patterns ["nomad/skip-the-flood" "nomad/live-yardstick"]
+  :source "FINDINGS §1 F-1; §3 L6"
+  :sensitivity :public}
+
+ {:id "org-lean-fro"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "Lean FRO"
+   :capital/layer "formal-prover infrastructure and usability"
+   :capital/present? true
+   :builds
+   ["Verso"
+    "Lean Language Reference"
+    "literate programming and next-generation UX"
+    "computable mathematical papers"]
+   :exit-adjacency "Foundational open infrastructure with commercial prover sponsorship."
+   :stack/layer "formalization infrastructure plus mixed formal/informal authoring"
+   :vacancy/checked "Mandate, Y3 roadmap, and shipped artifacts inspected"
+   :vacancy/vacant? false
+   :complement-of "Lean prover and library growth"
+   :demand/signal "Explicit usability/documentation mandate and funded roadmap."}
+  :patterns ["nomad/skip-the-flood" "nomad/live-yardstick"]
+  :source "FINDINGS §1 F-1; §4"
+  :sensitivity :public}
+
+ {:id "org-mathlib"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "Mathlib"
+   :capital/layer "community formal library"
+   :capital/present? true
+   :builds ["Lean mathematical library" "doc-string merge gate" "docBlame lint"]
+   :exit-adjacency "Upstream dependency for commercial and academic Lean systems."
+   :stack/layer "formal knowledge substrate and legibility governance"
+   :vacancy/checked "Contribution requirements inspected"
+   :vacancy/vacant? false
+   :complement-of "automated theorem proving"
+   :demand/signal "Every definition and major theorem requires a linted doc string."}
+  :patterns ["nomad/skip-the-flood" "nomad/self-certifying-artifact"]
+  :source "FINDINGS §1 F-1"
+  :sensitivity :public}
+
+ {:id "org-google-deepmind"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "Google DeepMind"
+   :capital/layer "frontier theorem proving"
+   :capital/present? true
+   :builds ["AlphaProof-family proving systems" "hand-written prose companion layer"]
+   :exit-adjacency "Frontier-model capability and research prestige."
+   :stack/layer "prover strength; limited post-hoc digestion"
+   :vacancy/checked "Live careers scrape plus artifact census"
+   :vacancy/vacant? false
+   :complement-of "formal proof generation"
+   :demand/signal "Prose exists for 12 of 71 Lean files, while the careers check found no proof-legibility roles."}
+  :patterns ["nomad/skip-the-flood"]
+  :source "FINDINGS §1 F-1; §1 F-5"
+  :sensitivity :public}
+
+ {:id "org-harmonic"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "Harmonic"
+   :capital/layer "commercial prover strength and orchestration"
+   :capital/present? true
+   :builds ["Aristotle" "autoscaling proof-tree state distribution"]
+   :exit-adjacency "Enterprise-grade verified reasoning and large-scale inference infrastructure."
+   :stack/layer "prover orchestration"
+   :vacancy/checked "Six live roles and primary company channels fetched"
+   :vacancy/vacant? false
+   :complement-of "Lean proof search"
+   :demand/signal "Flagship engineering role targets roughly 500,000-CPU orchestration."}
+  :patterns ["nomad/skip-the-flood" "nomad/live-yardstick"]
+  :source "FINDINGS §1 F-1, F-2, F-5; §3 D3"
+  :sensitivity :public}
+
+ {:id "org-axiom"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "Axiom"
+   :capital/layer "Verified AI and Lean cloud infrastructure"
+   :capital/present? true
+   :builds ["AXLE multi-tenant Lean cloud" "14 metaprogramming tools" "MCP server"]
+   :exit-adjacency "Verification of code and other machine-generated outputs."
+   :stack/layer "commercial orchestration"
+   :vacancy/checked "Product artifacts and job board inspected"
+   :vacancy/vacant? false
+   :complement-of "AI-generated formal outputs"
+   :demand/signal "More than 500M AXLE requests served."}
+  :patterns ["nomad/skip-the-flood" "nomad/live-yardstick"]
+  :source "FINDINGS §1 F-1, F-2, F-5"
+  :sensitivity :public}
+
+ {:id "org-math-inc"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "Math Inc."
+   :capital/layer "commercial automated mathematics"
+   :capital/present? true
+   :builds ["Gauss"]
+   :exit-adjacency "Commercial mathematical reasoning."
+   :stack/layer "prover strength"
+   :vacancy/checked "Job board and company account of PNT work inspected"
+   :vacancy/vacant? false
+   :complement-of "expert mathematical guidance"
+   :demand/signal "Publishes autonomous-hours claims while acknowledging targeted human scaffolding."}
+  :patterns ["nomad/skip-the-flood"]
+  :source "FINDINGS §1 F-1, F-5; §2 durability"
+  :sensitivity :public}
+
+ {:id "org-theorem-labs"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "Theorem Labs"
+   :capital/layer "commercial theorem proving"
+   :capital/present? true
+   :builds ["theorem-proving systems"]
+   :exit-adjacency "Enterprise mathematical reasoning."
+   :stack/layer "prover strength"
+   :vacancy/checked "Live job-board census"
+   :vacancy/vacant? false
+   :complement-of "formal proof infrastructure"
+   :demand/signal "Included among commercial prover employers; no proof-legibility role found."}
+  :patterns ["nomad/skip-the-flood"]
+  :source "FINDINGS §0; §1 F-1"
+  :sensitivity :public}
+
+ {:id "org-certora"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "Certora"
+   :capital/layer "commercial formal verification"
+   :capital/present? true
+   :builds ["formal verification tooling"]
+   :exit-adjacency "Software assurance."
+   :stack/layer "verification"
+   :vacancy/checked "Live job-board census"
+   :vacancy/vacant? false
+   :complement-of "software development"
+   :demand/signal "No technical-writing, education, or proof-UX role found."}
+  :patterns ["nomad/skip-the-flood"]
+  :source "FINDINGS §1 F-1"
+  :sensitivity :public}
+
+ {:id "org-axiomatic-ai"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "Axiomatic AI"
+   :capital/layer "AI-for-mathematics commercial systems"
+   :capital/present? true
+   :builds ["product names unverified because site was unreachable"]
+   :exit-adjacency "Commercial automated reasoning."
+   :stack/layer "prover strength"
+   :vacancy/checked "Job-board census; product-site verification failed"
+   :vacancy/vacant? :unknown
+   :complement-of "formal mathematics"
+   :demand/signal "Named in the expanded roster, but product details remain verification debt."}
+  :patterns ["nomad/skip-the-flood"]
+  :source "FINDINGS §0; §1 F-1; §4"
+  :sensitivity :public}
+
+ {:id "org-numina"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "Numina"
+   :capital/layer "Lean-agent orchestration"
+   :capital/present? true
+   :builds ["numina-lean-agent built on Claude Code"]
+   :exit-adjacency "Agentic formal proof production."
+   :stack/layer "orchestration"
+   :vacancy/checked "Product pivot inspected"
+   :vacancy/vacant? false
+   :complement-of "foundation-model coding agents"
+   :demand/signal "Pivoted from a standalone prover to an agent harness."}
+  :patterns ["nomad/skip-the-flood"]
+  :source "FINDINGS §1 F-2"
+  :sensitivity :public}
+
+ {:id "org-refgrader"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "RefGrader"
+   :capital/layer "informal-proof grading research"
+   :capital/present? :unknown
+   :builds ["seven-way fallacy taxonomy at two grains" "scalar 0–7 score"]
+   :exit-adjacency "Evaluation of generated mathematical reasoning."
+   :stack/layer "proof evaluation"
+   :vacancy/checked "Four-criterion feature comparison"
+   :vacancy/vacant? false
+   :complement-of "informal proof generation"
+   :demand/signal "Nearest neighbour at three of four comprehension-gate criteria."}
+  :patterns ["nomad/skip-the-flood" "nomad/author-the-yardstick"]
+  :source "FINDINGS §2 comprehension gate"
+  :sensitivity :public}
+
+ {:id "org-proofgrader"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "ProofGrader"
+   :capital/layer "informal-proof grading research"
+   :capital/present? :unknown
+   :builds ["always-on proof scoring"]
+   :exit-adjacency "Evaluation of generated proofs."
+   :stack/layer "proof evaluation"
+   :vacancy/checked "Four-criterion feature comparison"
+   :vacancy/vacant? false
+   :complement-of "proof generation"
+   :demand/signal "Contributes to crowding of informal soundness grading but lacks principled abstention."}
+  :patterns ["nomad/skip-the-flood" "nomad/author-the-yardstick"]
+  :source "FINDINGS §2 comprehension gate"
+  :sensitivity :public}
+
+ {:id "org-open-proof-corpus"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "Open Proof Corpus"
+   :capital/layer "proof-evaluation dataset"
+   :capital/present? :unknown
+   :builds ["human-judged open proof corpus"]
+   :exit-adjacency "Benchmarking generated reasoning."
+   :stack/layer "proof evaluation"
+   :vacancy/checked "Abstention behavior compared"
+   :vacancy/vacant? false
+   :complement-of "automated proof graders"
+   :demand/signal "Only located abstention is by human judges, not a system verdict."}
+  :patterns ["nomad/author-the-yardstick"]
+  :source "FINDINGS §2 comprehension gate"
+  :sensitivity :public}
+
+ {:id "org-leanmarathon"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "LeanMarathon"
+   :capital/layer "academic long-horizon proof harness"
+   :capital/present? false
+   :builds ["durable proving methodology"]
+   :exit-adjacency "Research claim rather than enterprise product."
+   :stack/layer "proof-run durability"
+   :vacancy/checked "Paper and repository recency inspected"
+   :vacancy/vacant? false
+   :complement-of "long-running proof agents"
+   :demand/signal "One of two independent durability claims, but no falsifiable durability benchmark."}
+  :patterns ["nomad/skip-the-flood" "nomad/author-the-yardstick"]
+  :source "FINDINGS §1 F-5; §2 durability"
+  :sensitivity :public}
+
+ {:id "org-merlean-prover"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "MerLean-Prover"
+   :capital/layer "academic long-horizon proof harness"
+   :capital/present? false
+   :builds ["proof-plan externalisation for context and constraint pressure"]
+   :exit-adjacency "Research claim rather than enterprise product."
+   :stack/layer "proof-run durability"
+   :vacancy/checked "Paper mechanism inspected"
+   :vacancy/vacant? false
+   :complement-of "long-running proof agents"
+   :demand/signal "Names durability mechanisms but has no shared benchmark for them."}
+  :patterns ["nomad/skip-the-flood" "nomad/author-the-yardstick"]
+  :source "FINDINGS §0; §2 durability"
+  :sensitivity :public}
+
+ {:id "org-ace"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "ACE"
+   :capital/layer "agent-memory research"
+   :capital/present? :unknown
+   :builds ["per-item helpful/harmful counters" "same-LLM Generator/Reflector/Curator"]
+   :exit-adjacency "Self-improving agent memory."
+   :stack/layer "learning-loop memory"
+   :vacancy/checked "Mechanism-level literature comparison"
+   :vacancy/vacant? false
+   :complement-of "agent execution"
+   :demand/signal "Occupies per-item utility counters but not author/actor separation."}
+  :patterns ["nomad/skip-the-flood"]
+  :source "FINDINGS §2 learning loop"
+  :sensitivity :public}
+
+ {:id "org-attrimem"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "AttriMem"
+   :capital/layer "agent-memory causal attribution"
+   :capital/present? :unknown
+   :builds ["counterfactual per-item ablation"]
+   :exit-adjacency "Memory evaluation for agents."
+   :stack/layer "learning-loop attribution"
+   :vacancy/checked "Mechanism-level literature comparison"
+   :vacancy/vacant? false
+   :complement-of "agent memory"
+   :demand/signal "Attribution uses judge-mediated rather than mechanical witnesses."}
+  :patterns ["nomad/skip-the-flood"]
+  :source "FINDINGS §2 learning loop"
+  :sensitivity :public}
+
+ {:id "org-memaudit"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "MemAudit"
+   :capital/layer "agent-memory causal attribution"
+   :capital/present? :unknown
+   :builds ["counterfactual per-item ablation"]
+   :exit-adjacency "Memory evaluation for agents."
+   :stack/layer "learning-loop attribution"
+   :vacancy/checked "Mechanism-level literature comparison"
+   :vacancy/vacant? false
+   :complement-of "agent memory"
+   :demand/signal "Occupies causal attribution but not mechanically witnessed use receipts."}
+  :patterns ["nomad/skip-the-flood"]
+  :source "FINDINGS §2 learning loop"
+  :sensitivity :public}
+
+ {:id "org-zep"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "Zep"
+   :capital/layer "commercial agent memory"
+   :capital/present? true
+   :builds ["memory invalidation on contradiction"]
+   :exit-adjacency "Agent-memory infrastructure."
+   :stack/layer "memory lifecycle"
+   :vacancy/checked "Mechanism-level product comparison"
+   :vacancy/vacant? false
+   :complement-of "long-lived agents"
+   :demand/signal "Shipped invalidation, but not use-receipt-driven over-generality supersession."}
+  :patterns ["nomad/skip-the-flood"]
+  :source "FINDINGS §2 learning loop"
+  :sensitivity :public}
+
+ {:id "org-dreamprover"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "DreamProver"
+   :capital/layer "theorem-prover library learning"
+   :capital/present? :unknown
+   :builds ["lemma reuse" "frequency-based LRU pruning"]
+   :exit-adjacency "Automated theorem proving."
+   :stack/layer "learning-loop reuse"
+   :vacancy/checked "Receipt granularity and lifecycle mechanism compared"
+   :vacancy/vacant? false
+   :complement-of "proof search"
+   :demand/signal "Reports 58% of lemmas reused across 71% of theorems, but only as corpus rates."}
+  :patterns ["nomad/skip-the-flood"]
+  :source "FINDINGS §2 learning loop"
+  :sensitivity :public}
+
+ {:id "org-letta"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "Letta"
+   :capital/layer "commercial self-improving agents"
+   :capital/present? true
+   :builds ["self-improving AI agent"]
+   :exit-adjacency "Enterprise agent infrastructure."
+   :stack/layer "agent memory and improvement"
+   :vacancy/checked "Homepage positioning compared with literature saturation"
+   :vacancy/vacant? false
+   :complement-of "foundation-model agents"
+   :demand/signal "Commercial use of the generic self-improving claim confirms saturation."}
+  :patterns ["nomad/skip-the-flood"]
+  :source "FINDINGS §2 learning loop"
+  :sensitivity :public}
+
+ {:id "org-equational-theories-project"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "Equational Theories Project"
+   :capital/layer "open collaborative formal mathematics"
+   :capital/present? :unknown
+   :builds ["live dashboard" "raw JSON" "personal log wiki" "self-analysis paper"]
+   :exit-adjacency "Research collaboration rather than enterprise exit."
+   :stack/layer "process-observable formalization"
+   :vacancy/checked "Logging artifacts enumerated"
+   :vacancy/vacant? false
+   :complement-of "large collaborative proof projects"
+   :demand/signal "Already logs work without requiring participant behavior change."}
+  :patterns ["nomad/owner-of-the-problem" "nomad/self-certifying-artifact"]
+  :source "FINDINGS §3 L6"
+  :sensitivity :public}
+
+ {:id "org-uw-math-ai-lab"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "UW Math AI Lab"
+   :capital/layer "educational AI-for-math collaboration"
+   :capital/present? :unknown
+   :builds ["68 projects" "failure analysis" "archives of 229 prompts and 213 commits"]
+   :exit-adjacency "Research and education, not a direct enterprise exit."
+   :stack/layer "process-observable collaboration"
+   :vacancy/checked "Archived prompt and commit coverage verified"
+   :vacancy/vacant? false
+   :complement-of "student formalization projects"
+   :demand/signal "Existing logs make it a high-value collaborator without behavior change."}
+  :patterns ["nomad/owner-of-the-problem" "nomad/self-certifying-artifact"]
+  :source "FINDINGS §3 L6"
+  :sensitivity :public}
+
+ {:id "org-flt-imperial"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "FLT / Imperial"
+   :capital/layer "large formalization project"
+   :capital/present? :unknown
+   :builds ["leanblueprint" "Xena blog retrospective"]
+   :exit-adjacency "Research infrastructure rather than enterprise exit."
+   :stack/layer "formalization plus retrospective digestion"
+   :vacancy/checked "Blueprint and running retrospective enumerated"
+   :vacancy/vacant? false
+   :complement-of "large proof development"
+   :demand/signal "Already emits process artifacts suitable for observational analysis."}
+  :patterns ["nomad/owner-of-the-problem" "nomad/self-certifying-artifact"]
+  :source "FINDINGS §1 F-1; §3 L6"
+  :sensitivity :public}
+
+ {:id "org-gowers-motivated-proofs"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "Databases of Structured Motivated Proofs"
+   :capital/layer "funded structured proof-methodology research"
+   :capital/present? true
+   :builds ["database of motivated proofs" "documented origins of proof ideas"]
+   :exit-adjacency "AI-for-mathematics fund portfolio; tool and corpus construction."
+   :stack/layer "structured formal reasoning"
+   :vacancy/checked "AI for Math Fund portfolio compared at artifact and corpus grain"
+   :vacancy/vacant? false
+   :complement-of "informal-literature observation"
+   :demand/signal "Funded version of a neighboring methodology thesis."}
+  :patterns ["nomad/live-yardstick" "nomad/choose-the-grid"]
+  :source "FINDINGS §1 F-3"
+  :sensitivity :public}
+
+ {:id "org-mathbench"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "Mathbench"
+   :capital/layer "funded proof-annotation dataset"
+   :capital/present? true
+   :builds ["curated proofs with summaries, erroneous arguments, and logical-structure metadata"]
+   :exit-adjacency "AI-for-mathematics evaluation."
+   :stack/layer "proof annotation"
+   :vacancy/checked "Portfolio and artifact-class comparison"
+   :vacancy/vacant? false
+   :complement-of "informal corpus-wide residual mapping"
+   :demand/signal "Direct neighbour on unjustified-step mapping."}
+  :patterns ["nomad/live-yardstick" "nomad/author-the-yardstick"]
+  :source "FINDINGS §1 F-3"
+  :sensitivity :public}
+
+ {:id "org-polymath-plus"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "Polymath Plus"
+   :capital/layer "funded collaboration instrumentation"
+   :capital/present? true
+   :builds ["platform studying how mathematical collaboration works"]
+   :exit-adjacency "Research platform."
+   :stack/layer "constructed collaborative process"
+   :vacancy/checked "Portfolio comparison"
+   :vacancy/vacant? false
+   :complement-of "observation of existing informal corpora"
+   :demand/signal "Funded neighbouring methodology project."}
+  :patterns ["nomad/live-yardstick"]
+  :source "FINDINGS §1 F-3"
+  :sensitivity :public}
+
+ {:id "org-sketchpad"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "Sketchpad"
+   :capital/layer "funded proof decomposition"
+   :capital/present? true
+   :builds ["proofs decomposed into individual statements"]
+   :exit-adjacency "AI-for-mathematics tooling."
+   :stack/layer "formal proof structure"
+   :vacancy/checked "Portfolio comparison"
+   :vacancy/vacant? false
+   :complement-of "informal corpus-wide mapping"
+   :demand/signal "Funded overlap at statement-grain decomposition."}
+  :patterns ["nomad/live-yardstick" "nomad/author-the-yardstick"]
+  :source "FINDINGS §1 F-3"
+  :sensitivity :public}
+
+ {:id "org-ai-focused-tactic"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "An AI-Focused Tactic"
+   :capital/layer "funded AI-versus-human proof analysis"
+   :capital/present? true
+   :builds ["analysis of structural differences between AI-generated and human proofs"]
+   :exit-adjacency "AI-for-mathematics research tooling."
+   :stack/layer "proof comparison"
+   :vacancy/checked "Portfolio comparison"
+   :vacancy/vacant? false
+   :complement-of "informal literature observation"
+   :demand/signal "Funded neighboring analysis of proof structure."}
+  :patterns ["nomad/live-yardstick"]
+  :source "FINDINGS §1 F-3"
+  :sensitivity :public}
+
+ {:id "org-bridge"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "BRIDGE"
+   :capital/layer "funded mathematical-data practice research"
+   :capital/present? true
+   :builds ["tooling grounded in analysis of how mathematicians create, structure, and use data"]
+   :exit-adjacency "AI-for-mathematics research tooling."
+   :stack/layer "mathematical workflow"
+   :vacancy/checked "Portfolio comparison"
+   :vacancy/vacant? false
+   :complement-of "observational corpus instrumentation"
+   :demand/signal "Funded neighbouring practice-centered project."}
+  :patterns ["nomad/live-yardstick"]
+  :source "FINDINGS §1 F-3"
+  :sensitivity :public}
+
+ {:id "capital-mathlib-initiative-five-million"
+  :as-of "2026-07-27"
+  :kind :capital
+  :body
+  {:stack/layer "documentation, education, and maintainer capacity"
+   :capital/present? true
+   :capital/amount "$5M"
+   :capital/source "Alex Gerko / XTX via Renaissance Philanthropy"
+   :capital/date "2025-09"
+   :vacancy/checked "Grant, staffing, and roadmap inspected"
+   :vacancy/vacant? false
+   :complement-of "formal-library production"
+   :demand/signal "Nine of 28 maintainers are now paid; documentation deliverables are dated."}
+  :patterns ["nomad/skip-the-flood" "nomad/live-yardstick"]
+  :source "FINDINGS §1 F-1"
+  :sensitivity :public}
+
+ {:id "capital-lean-fro-usability"
+  :as-of "2026-07-27"
+  :kind :capital
+  :body
+  {:stack/layer "Lean infrastructure, usability, and literate authoring"
+   :capital/present? true
+   :capital/amount "$5M Simons Foundation International plus $300K Harmonic"
+   :capital/source "Simons Foundation International and Harmonic"
+   :vacancy/checked "Funder list and roadmap inspected"
+   :vacancy/vacant? false
+   :complement-of "formal theorem proving"
+   :demand/signal "Computable Mathematical Papers and next-generation UX are explicit targets."}
+  :patterns ["nomad/skip-the-flood" "nomad/live-yardstick"]
+  :source "FINDINGS §1 F-1"
+  :sensitivity :public}
+
+ {:id "capital-ai-for-math-fund"
+  :as-of "2026-07-27"
+  :kind :capital
+  :body
+  {:stack/layer "AI-for-mathematics research portfolio"
+   :capital/present? true
+   :capital/amount "$22M across 29 grants"
+   :capital/source "AI for Math Fund"
+   :vacancy/checked "Named funding categories and portfolio inspected"
+   :vacancy/vacant? false
+   :complement-of "prover–mathematician interaction"
+   :demand/signal "Interaction is one of five named funding categories."}
+  :patterns ["nomad/skip-the-flood" "nomad/live-yardstick"]
+  :source "FINDINGS §1 F-1, F-3"
+  :sensitivity :public}
+
+ {:id "capital-harmonic-rounds"
+  :as-of "2026-07-27"
+  :kind :capital
+  :body
+  {:stack/layer "commercial prover strength and orchestration"
+   :capital/present? true
+   :capital/amount "approximately $295M across three rounds"
+   :capital/source "company/press reports; $75M Series A is secondary-sourced"
+   :vacancy/checked "Primary channels checked; Series A caveat retained"
+   :vacancy/vacant? false
+   :complement-of "proof digestion and evaluation"
+   :demand/signal "Capital supports prover/orchestration roles, not proof-legibility roles."}
+  :patterns ["nomad/skip-the-flood"]
+  :source "FINDINGS §1 F-5"
+  :sensitivity :public}
+
+ {:id "capital-axiom-verified-ai"
+  :as-of "2026-07-27"
+  :kind :capital
+  :body
+  {:stack/layer "Verified AI"
+   :capital/present? true
+   :capital/amount "$64M seed; Series A at $1.6B+"
+   :capital/source "company reporting plus Forbes valuation context"
+   :vacancy/checked "Round wording and use-of-funds corrected"
+   :vacancy/vacant? false
+   :complement-of "machine-generated code and other outputs"
+   :demand/signal "Capital targets verification broadly, not code verification alone."}
+  :patterns ["nomad/skip-the-flood" "nomad/live-yardstick"]
+  :source "FINDINGS §1 F-5"
+  :sensitivity :public}
+
+ {:id "capital-darpa-expmath"
+  :as-of "2026-07-27"
+  :kind :capital
+  :body
+  {:stack/layer "DARPA experimental mathematics performers"
+   :capital/present? true
+   :capital/amount "approximately $5M per team"
+   :capital/source "DARPA expMath"
+   :vacancy/checked "Performer status inspected"
+   :vacancy/vacant? false
+   :complement-of "open grant applications"
+   :demand/signal "Thirteen university teams already selected."}
+  :patterns ["nomad/skip-the-flood" "nomad/live-yardstick"]
+  :source "FINDINGS §3 D3"
+  :sensitivity :public}
+
+ {:id "vacancy-commercial-proof-legibility"
+  :as-of "2026-07-27"
+  :kind :vacancy
+  :body
+  {:stack/layer "commercial proof documentation, DevRel, DX, education, and UX"
+   :capital/present? false
+   :vacancy/checked
+   "Direct job-board fetches across Harmonic, Axiom, Math Inc., Theorem, Certora, Axiomatic AI, and DeepMind; DeepMind live scrape for theorem prover, Lean, and formal mathematics"
+   :vacancy/vacant? true
+   :result "No relevant role; DeepMind's 119 formal-verification roles were ASIC/RTL hardware."
+   :complement-of "well-funded prover and orchestration systems"
+   :demand/signal "Non-profits fund documentation while commercial hiring does not."}
+  :patterns ["nomad/skip-the-flood" "nomad/author-the-yardstick"]
+  :source "FINDINGS §1 F-1"
+  :sensitivity :public}
+
+ {:id "vacancy-nonprofit-proof-legibility"
+  :as-of "2026-07-27"
+  :kind :vacancy
+  :body
+  {:stack/layer "non-profit proof documentation and mixed formal/informal authoring"
+   :capital/present? true
+   :vacancy/checked "Mathlib Initiative and Lean FRO funding, roadmap, and shipped-artifact review"
+   :vacancy/vacant? false
+   :result "Quietly occupied but under-resourced."
+   :complement-of "formal proof production"
+   :demand/signal "Paid roadmap work exists alongside unpaid, bus-factor-one infrastructure."}
+  :patterns ["nomad/skip-the-flood"]
+  :source "FINDINGS §1 F-1"
+  :sensitivity :public}
+
+ {:id "vacancy-legibility-tool-bus-factor"
+  :as-of "2026-07-27"
+  :kind :vacancy
+  :body
+  {:stack/layer "load-bearing legibility tools"
+   :capital/present? false
+   :vacancy/checked
+   "Maintainer and commit census for doc-gen4, Loogle, leanblueprint, LeanExplore, and Paperproof"
+   :vacancy/vacant? true
+   :result "Bus-factor-one and unpaid; standalone Mathlib Manual deprecated."
+   :complement-of "industrial formalization pipelines"
+   :demand/signal "leanblueprint underpins FLT, PFR, and Equational Theories; Paperproof has 537 stars."}
+  :patterns ["nomad/skip-the-flood" "nomad/live-yardstick"]
+  :source "FINDINGS §1 F-1"
+  :sensitivity :public}
+
+ {:id "vacancy-orchestration-crowded"
+  :as-of "2026-07-27"
+  :kind :vacancy
+  :body
+  {:stack/layer "proof orchestration and durability infrastructure"
+   :capital/present? true
+   :vacancy/checked
+   "Shipped-artifact and flagship-role comparison across Harmonic, Axiom, Numina, and Mathlib Initiative"
+   :vacancy/vacant? false
+   :result "Crowded and well-funded."
+   :complement-of "prover strength"
+   :demand/signal "Every well-capitalised player ships orchestration despite prover-strength press framing."}
+  :patterns ["nomad/skip-the-flood"]
+  :source "FINDINGS §1 F-2"
+  :sensitivity :public}
+
+ {:id "vacancy-informal-proof-soundness-grading"
+  :as-of "2026-07-27"
+  :kind :vacancy
+  :body
+  {:stack/layer "informal-proof soundness grading"
+   :capital/present? :unknown
+   :vacancy/checked "Four-criterion comparison across PRMs, ProofGrader, RefGrader, MathArena, and Open Proof Corpus"
+   :vacancy/vacant? false
+   :result "Crowded; no novelty claim survives."
+   :complement-of "proof generation"
+   :demand/signal "Multiple systems already grade informal proof soundness."}
+  :patterns ["nomad/skip-the-flood" "nomad/author-the-yardstick"]
+  :source "FINDINGS §2 comprehension gate"
+  :sensitivity :public}
+
+ {:id "vacancy-informal-proof-without-formalization"
+  :as-of "2026-07-27"
+  :kind :vacancy
+  :body
+  {:stack/layer "informal proof checking without formalization"
+   :capital/present? :unknown
+   :vacancy/checked "Beyond Compilation and BEq+ mechanism comparison"
+   :vacancy/vacant? false
+   :result "Crowded, though faithful checking remains materially harder than compilation."
+   :complement-of "formalize-first verification"
+   :demand/signal "Beyond Compilation measures 89.5% compiling versus 60.5% faithful; BEq+ needs a formal reference."}
+  :patterns ["nomad/skip-the-flood" "nomad/author-the-yardstick"]
+  :source "FINDINGS §2 comprehension gate"
+  :sensitivity :public}
+
+ {:id "vacancy-typed-informal-conformance-vector"
+  :as-of "2026-07-27"
+  :kind :vacancy
+  :body
+  {:stack/layer "typed conformance vectors over informal proofs"
+   :capital/present? false
+   :vacancy/checked "RefGrader taxonomy and formalize-first multi-axis systems compared"
+   :vacancy/vacant? true
+   :result "Narrowly unoccupied: containment-grained conformance with N/A distinct from FAIL."
+   :complement-of "defect taxonomies and scalar graders"
+   :demand/signal "RefGrader types found defects but collapses to a scalar and lacks N/A."}
+  :patterns ["nomad/skip-the-flood" "nomad/author-the-yardstick"]
+  :source "FINDINGS §2 comprehension gate"
+  :sensitivity :public}
+
+ {:id "vacancy-principled-comprehension-abstention"
+  :as-of "2026-07-27"
+  :kind :vacancy
+  :body
+  {:stack/layer "system-level comprehension-failure abstention"
+   :capital/present? false
+   :vacancy/checked
+   "System census across informal and formal graders; LeanTutor limitation and Open Proof Corpus human abstention inspected"
+   :vacancy/vacant? true
+   :result "Genuinely unoccupied."
+   :complement-of "soundness scoring"
+   :demand/signal "Existing systems conflate tool comprehension failure with proof failure or always score."}
+  :patterns ["nomad/skip-the-flood" "nomad/author-the-yardstick" "nomad/live-yardstick"]
+  :source "FINDINGS §2 comprehension gate"
+  :sensitivity :public}
+
+ {:id "vacancy-mathematical-residual-gap-map"
+  :as-of "2026-07-27"
+  :kind :vacancy
+  :body
+  {:stack/layer "corpus-wide residual-gap mapping for mathematical literature"
+   :capital/present? false
+   :vacancy/checked "Re²Math and GAPMAP+TABI analogue comparison"
+   :vacancy/vacant? true
+   :result "No mathematical corpus map; hedging-phrase gaps entirely unmined."
+   :complement-of "citation-deferred-step extraction"
+   :demand/signal "Re²Math finds 860 citation-deferred gaps in 631 papers; the complete analogue is biomedical."}
+  :patterns ["nomad/skip-the-flood" "nomad/author-the-yardstick"]
+  :source "FINDINGS §2 comprehension gate; §3 D2"
+  :sensitivity :public}
+
+ {:id "vacancy-durability-benchmark"
+  :as-of "2026-07-27"
+  :kind :vacancy
+  :body
+  {:stack/layer "benchmarking resistance to drift and bad-decision propagation in long proof runs"
+   :capital/present? false
+   :vacancy/checked
+   "LeanDojo, Pantograph, Lean Copilot, LeanMarathon, MerLean-Prover, and FormalQualBench compared"
+   :vacancy/vacant? true
+   :result "No durability benchmark; a four-hour timeout is a budget, not a property."
+   :complement-of "long-horizon prover harnesses"
+   :demand/signal "Two papers assert durability mechanisms but neither claim can be falsified."}
+  :patterns ["nomad/skip-the-flood" "nomad/author-the-yardstick"]
+  :source "FINDINGS §2 durability"
+  :sensitivity :public}
+
+ {:id "vacancy-author-actor-separation"
+  :as-of "2026-07-27"
+  :kind :vacancy
+  :body
+  {:stack/layer "learning-memory author/actor separation"
+   :capital/present? false
+   :vacancy/checked "ACE, Reflexion, ExpeL, and Voyager role assignments compared"
+   :vacancy/vacant? true
+   :result "Nobody enforces author not equal to actor by construction."
+   :complement-of "self-reflective agent memory"
+   :demand/signal "ACE explicitly uses the same LLM for Generator, Reflector, and Curator."}
+  :patterns ["nomad/skip-the-flood" "nomad/author-the-yardstick"]
+  :source "FINDINGS §2 learning loop"
+  :sensitivity :public}
+
+ {:id "vacancy-mechanical-per-item-use-receipts"
+  :as-of "2026-07-27"
+  :kind :vacancy
+  :body
+  {:stack/layer "per-item memory-use receipts coupled to a mechanical verifier"
+   :capital/present? false
+   :vacancy/checked "AttriMem, MemAudit, Lean prover reporting, and DreamProver compared"
+   :vacancy/vacant? true
+   :result "Attribution is judge-mediated; mechanical witnesses report aggregates."
+   :complement-of "agent memory and proof kernels"
+   :demand/signal "DreamProver's reuse numbers are corpus rates rather than receipts."}
+  :patterns ["nomad/skip-the-flood" "nomad/author-the-yardstick" "nomad/self-certifying-artifact"]
+  :source "FINDINGS §2 learning loop"
+  :sensitivity :public}
+
+ {:id "vacancy-use-driven-overgenerality-supersession"
+  :as-of "2026-07-27"
+  :kind :vacancy
+  :body
+  {:stack/layer "memory supersession from observed over-generality in use"
+   :capital/present? false
+   :vacancy/checked "Zep, DreamProver, and ACE lifecycle triggers compared"
+   :vacancy/vacant? true
+   :result "Contradiction, frequency, and similarity exist; receipt-driven scope correction does not."
+   :complement-of "memory invalidation and pruning"
+   :demand/signal "No system retires an item because surfaced-and-used receipts show non-help."}
+  :patterns ["nomad/skip-the-flood" "nomad/author-the-yardstick"]
+  :source "FINDINGS §2 learning loop"
+  :sensitivity :public}
+
+ {:id "vacancy-memory-formation-heldout-control"
+  :as-of "2026-07-27"
+  :kind :vacancy
+  :body
+  {:stack/layer "held-out controls excluded from memory formation"
+   :capital/present? false
+   :vacancy/checked "Learning-loop literature mechanism survey"
+   :vacancy/vacant? true
+   :result "Un-named in the field."
+   :complement-of "contamination-controlled tuning and evaluation"
+   :demand/signal "Existing held-outs concern tuning or tests, not the formation of reusable memories."}
+  :patterns ["nomad/skip-the-flood" "nomad/author-the-yardstick"]
+  :source "FINDINGS §2 learning loop"
+  :sensitivity :public}
+
+ {:id "vacancy-self-improving-agent-claim"
+  :as-of "2026-07-27"
+  :kind :vacancy
+  :body
+  {:stack/layer "generic self-improving-agent positioning"
+   :capital/present? true
+   :vacancy/checked
+   "ICLR 2026 workshop count, Awesome-Self-Improving-Agents list, survey authorship, and Letta homepage"
+   :vacancy/vacant? false
+   :result "Saturated: 110 workshop papers and 331 list entries."
+   :complement-of "mechanism-specific witnessed capability change"
+   :demand/signal "A commercial vendor uses the generic phrase as its homepage tagline."}
+  :patterns ["nomad/skip-the-flood" "nomad/choose-the-grid"]
+  :source "FINDINGS §2 learning loop"
+  :sensitivity :public}
+
+ {:id "vacancy-contamination-differential-slope"
+  :as-of "2026-07-27"
+  :kind :vacancy
+  :body
+  {:stack/layer "gain regressed against continuous per-item contamination"
+   :capital/present? false
+   :vacancy/checked "Wu et al., GSM1k, Putnam-AXIOM, and MathArena designs compared"
+   :vacancy/vacant? true
+   :result "Nearly unoccupied in the predicted direction, but not claim-ready."
+   :complement-of "binary published/unpublished contamination proxies"
+   :demand/signal "Four confounds require a continuous n-gram/Min-K%/LLM score before use."}
+  :patterns ["nomad/author-the-yardstick"]
+  :source "FINDINGS §2 contamination design"
+  :sensitivity :public}
+
+ {:id "funder-ai-for-math-seed"
+  :as-of "2026-07-27"
+  :kind :funder
+  :body
+  {:funder "AI for Math Fund"
+   :programme "SEED grant"
+   :amount "up to $100K"
+   :deadline "rolling"
+   :decision-speed "four weeks or less"
+   :duration "12 months or less"
+   :eligibility "Individuals, teams, academic institutions, nonprofits, research institutes, and industry; unaffiliated individuals eligible."
+   :requirements ["open-source licence" "arXiv preprint"]
+   :yardstick/dimension "open AI-for-mathematics research with portfolio-aware differentiation"
+   :measurer "AI for Math Fund"
+   :budget/witness "Published SEED award ceiling"
+   :problem/held "Fundable AI-for-math research and prover–mathematician interaction"
+   :witnesses/count 3
+   :bet? false}
+  :patterns ["nomad/live-yardstick" "nomad/letter-from-the-future"]
+  :source "FINDINGS §3 D3"
+  :sensitivity :public}
+
+ {:id "funder-ai-for-math-main-2026"
+  :as-of "2026-07-27"
+  :kind :funder
+  :body
+  {:funder "AI for Math Fund"
+   :programme "Main 2026 round"
+   :amount :not-stated
+   :deadline "closed 2026-03-30"
+   :decision-speed "decisions expected 2026-08"
+   :status :closed
+   :yardstick/dimension "main-round AI-for-math portfolio"
+   :measurer "AI for Math Fund"
+   :budget/witness "$22M fund portfolio"
+   :problem/held "AI-for-mathematics research"
+   :witnesses/count 3
+   :bet? false}
+  :patterns ["nomad/live-yardstick"]
+  :source "FINDINGS §3 D3"
+  :sensitivity :public}
+
+ {:id "funder-harmonic-research-programme"
+  :as-of "2026-07-27"
+  :kind :funder
+  :body
+  {:funder "Harmonic"
+   :programme "research funding programme"
+   :amount "approximately $1M total; approximately $100K per PI"
+   :deadline "none published; rolling Typeform"
+   :decision-speed :unknown
+   :status :open-or-rolling
+   :yardstick/dimension "unrevealed"
+   :measurer "Harmonic"
+   :budget/witness "Programme announced 2026-01-22"
+   :problem/held "AI-for-mathematics research"
+   :witnesses/count 2
+   :bet? true
+   :bet/reason "No deadline, grantee list, or revealed scoring function; direct contact required."}
+  :patterns ["nomad/live-yardstick" "nomad/owner-of-the-problem"]
+  :source "FINDINGS §3 D3"
+  :sensitivity :public}
+
+ {:id "funder-aimo"
+  :as-of "2026-07-27"
+  :kind :funder
+  :body
+  {:funder "AIMO"
+   :programme "AIMO competitions"
+   :deadline "none open"
+   :decision-speed :not-applicable
+   :status :closed
+   :history ["AIMO3 concluded 2026-06" "Proof Pilot concluded 2026-07" "no AIMO4 announced"]
+   :yardstick/dimension "competition performance"
+   :measurer "AIMO"
+   :budget/witness "No current programme"
+   :problem/held "Mathematical AI competition"
+   :witnesses/count 2
+   :bet? true}
+  :patterns ["nomad/live-yardstick"]
+  :source "FINDINGS §3 D3"
+  :sensitivity :public}
+
+ {:id "funder-nsf-mfai"
+  :as-of "2026-07-27"
+  :kind :funder
+  :body
+  {:funder "NSF"
+   :programme "MFAI"
+   :deadline :not-stated
+   :decision-speed :unknown
+   :status :wrong-direction
+   :eligibility "US institutional PI required"
+   :yardstick/dimension "mathematical foundations of AI"
+   :measurer "NSF"
+   :budget/witness :not-stated
+   :problem/held "Mathematics foundations of AI, not AI for mathematics"
+   :witnesses/count 2
+   :bet? false}
+  :patterns ["nomad/live-yardstick" "nomad/choose-the-grid"]
+  :source "FINDINGS §3 D3"
+  :sensitivity :public}
+
+ {:id "funder-darpa-expmath"
+  :as-of "2026-07-27"
+  :kind :funder
+  :body
+  {:funder "DARPA"
+   :programme "expMath"
+   :amount "approximately $5M per team"
+   :deadline "performers already selected"
+   :decision-speed :not-applicable
+   :status :closed
+   :yardstick/dimension "experimental mathematics"
+   :measurer "DARPA"
+   :budget/witness "13 selected university teams"
+   :problem/held "experimental mathematics research"
+   :witnesses/count 3
+   :bet? false}
+  :patterns ["nomad/live-yardstick"]
+  :source "FINDINGS §3 D3"
+  :sensitivity :public}
+
+ {:id "funder-simons"
+  :as-of "2026-07-27"
+  :kind :funder
+  :body
+  {:funder "Simons Foundation"
+   :programme "AI-for-mathematics"
+   :deadline "no programme"
+   :decision-speed :not-applicable
+   :status :ineligible-or-absent
+   :eligibility "Relevant programmes require tenure-track status."
+   :yardstick/dimension "mathematics research"
+   :measurer "Simons Foundation"
+   :budget/witness "No AI-for-math programme"
+   :problem/held "Not a live matching programme"
+   :witnesses/count 1
+   :bet? false}
+  :patterns ["nomad/live-yardstick"]
+  :source "FINDINGS §3 D3"
+  :sensitivity :public}
+
+ {:id "funder-sair-distillation-challenge"
+  :as-of "2026-07-27"
+  :kind :funder
+  :body
+  {:funder "SAIR"
+   :programme "Mathematics Distillation Challenge"
+   :amount "Stage 1 unpaid; Stage 2 modest prizes, amount undetermined"
+   :deadline :not-stated
+   :decision-speed :unknown
+   :status :not-a-legibility-fit
+   :yardstick/dimension "≤10KB prompt improving a cheap LLM"
+   :measurer "SAIR"
+   :budget/witness "Stage 2 prizes"
+   :problem/held "Machine-facing corpus compression"
+   :witnesses/count 2
+   :bet? false}
+  :patterns ["nomad/live-yardstick" "nomad/choose-the-grid"]
+  :source "FINDINGS §1 F-4"
+  :sensitivity :public}
+
+ {:id "yardstick-principled-abstention"
+  :as-of "2026-07-27"
+  :kind :yardstick-gap
+  :body
+  {:bottleneck "Distinguish comprehension failure from soundness failure when checking informal mathematics."
+   :admitted-by ["LeanTutor limitation statement" "Open Proof Corpus human-judge practice"]
+   :nearest-measure "RefGrader / ProofGrader scalar grading"
+   :gap "No system emits a typed comprehension-failure abstention; N/A is not represented separately from FAIL."
+   :artifact "proposed proofcheck-readiness typed verdict vector"
+   :systems-scored 6
+   :negatives-published? true}
+  :patterns ["nomad/author-the-yardstick" "nomad/live-yardstick"]
+  :source "FINDINGS §2 comprehension gate"
+  :sensitivity :public}
+
+ {:id "yardstick-typed-informal-conformance"
+  :as-of "2026-07-27"
+  :kind :yardstick-gap
+  :body
+  {:bottleneck "Measure conformance attained by an informal proof at multiple containment-related grains."
+   :admitted-by ["RefGrader's two-grain fallacy taxonomy"]
+   :nearest-measure "RefGrader"
+   :gap "It types defects, lacks N/A, and collapses output to a scalar; multi-axis vectors are formalize-first."
+   :artifact "typed informal conformance vector"
+   :systems-scored 1
+   :negatives-published? true}
+  :patterns ["nomad/author-the-yardstick"]
+  :source "FINDINGS §2 comprehension gate"
+  :sensitivity :public}
+
+ {:id "yardstick-mathematical-residual-gap-map"
+  :as-of "2026-07-27"
+  :kind :yardstick-gap
+  :body
+  {:bottleneck "Locate explicit and implicit residual proof gaps across a mathematical corpus."
+   :admitted-by ["Re²Math's citation-deferred-gap results"]
+   :nearest-measure "Re²Math; biomedical GAPMAP+TABI"
+   :gap "No mathematics-wide hedging-phrase map or two-grain warrant taxonomy."
+   :artifact "Mark7 map over 4,616 math.CT papers"
+   :systems-scored 2
+   :negatives-published? true}
+  :patterns ["nomad/author-the-yardstick" "nomad/self-certifying-artifact"]
+  :source "FINDINGS §2 comprehension gate; §3 D2"
+  :sensitivity :public}
+
+ {:id "yardstick-proof-run-durability"
+  :as-of "2026-07-27"
+  :kind :yardstick-gap
+  :body
+  {:bottleneck "Determine whether a long-running proof harness resists drift and contains bad decisions."
+   :admitted-by ["LeanMarathon" "MerLean-Prover"]
+   :nearest-measure "FormalQualBench four-hour timeout"
+   :gap "Timeout measures budget, not durability; existing mechanism claims are not falsifiable."
+   :artifact "durability benchmark with seeded drift and bad-decision containment tests"
+   :systems-scored 6
+   :negatives-published? true}
+  :patterns ["nomad/author-the-yardstick" "nomad/live-yardstick"]
+  :source "FINDINGS §2 durability"
+  :sensitivity :public}
+
+ {:id "yardstick-learning-loop-capability"
+  :as-of "2026-07-27"
+  :kind :yardstick-gap
+  :body
+  {:bottleneck "Attribute a mechanically witnessed capability change to a named memory under controlled compute."
+   :admitted-by ["Berlot-Attwell et al. null result on LEGO-Prover"]
+   :nearest-measure "DreamProver corpus reuse rates"
+   :gap "No per-item receipt chain joins separate authorship, use, and a mechanical witness."
+   :artifact "capability meter with named-memory receipts and independent rerun"
+   :systems-scored 5
+   :negatives-published? true}
+  :patterns ["nomad/author-the-yardstick" "nomad/self-certifying-artifact"]
+  :source "FINDINGS §2 learning loop"
+  :sensitivity :public}
+
+ {:id "yardstick-contamination-continuous-score"
+  :as-of "2026-07-27"
+  :kind :yardstick-gap
+  :body
+  {:bottleneck "Measure whether gains increase as per-item contamination decreases."
+   :admitted-by ["GSM1k" "Putnam-AXIOM" "MathArena" "Wu et al. 2507.10532"]
+   :nearest-measure "binary or matched-stratum contamination evaluations"
+   :gap "Binary publication proxies confound difficulty, baseline, and soft leakage."
+   :artifact "continuous per-item n-gram, Min-K%, or LLM-decontaminator score with regression"
+   :systems-scored 4
+   :negatives-published? true}
+  :patterns ["nomad/author-the-yardstick"]
+  :source "FINDINGS §2 contamination design"
+  :sensitivity :public}
+
+ {:id "yardstick-integrity-certificate"
+  :as-of "2026-07-27"
+  :kind :yardstick-gap
+  :body
+  {:bottleneck "Check whether a kernel-valid formal development means what its public claim says at each grain."
+   :admitted-by ["Tao" "Carneiro" "Beffara in the public LeanAgent thread"]
+   :nearest-measure "Lean kernel acceptance and aggregate theorem-count reporting"
+   :gap "Kernel validity did not catch a `0 = 1` placeholder corrupting downstream proofs or misleading theorem-count claims."
+   :artifact "typed per-grain conformance certificate with abstention"
+   :systems-scored 1
+   :negatives-published? true}
+  :patterns ["nomad/author-the-yardstick" "nomad/self-certifying-artifact"]
+  :source "FINDINGS §2 integrity reframe; §3 D1"
+  :sensitivity :public}
+
+ {:id "convening-n-category-cafe"
+  :as-of "2026-07-27"
+  :kind :convening
+  :body
+  {:convening "n-Category Café guest-post channel"
+   :lineage "category theory, mathematical practice, and Lean formalization"
+   :target/participates? true
+   :target/description "Hosts include an ∞-category formalizer and philosophers of mathematical practice."
+   :contribution "math.CT residual-gap map or proofcheck-readiness analysis"
+   :proposed/date ""
+   :invited? false
+   :conversation? false
+   :channel/after :not-started
+   :precedent "Guest post on Erdős-problem formalization, 2025-12."}
+  :patterns ["nomad/licensed-ground" "nomad/owner-of-the-problem"]
+  :source "FINDINGS §3 L6"
+  :sensitivity :private}
+
+ {:id "convening-ini-big-proof-lineage"
+  :as-of "2026-07-27"
+  :kind :convening
+  :body
+  {:convening "Isaac Newton Institute Big Proof / Big Specification lineage"
+   :lineage "Big Proof symposia and successor programmes"
+   :target/participates? :unverified
+   :contribution "proofcheck-readiness measure or learning-loop receipt demonstration"
+   :proposed/date ""
+   :invited? false
+   :conversation? false
+   :channel/after :not-started
+   :work-items
+   ["verify scheduled programmes and conveners"
+    "shape a contribution that justifies invitation"
+    "check private archive for prior support-letter evidence"]}
+  :patterns ["nomad/licensed-ground" "nomad/letter-from-the-future"]
+  :source "FINDINGS Addendum"
+  :sensitivity :private}
+
+ {:id "convening-gowers-engagement-surface"
+  :as-of "2026-07-27"
+  :kind :convening
+  :body
+  {:convening "future in-lineage programme for complementary Gowers-portfolio engagement"
+   :lineage "AI-for-mathematics motivated proofs and Big Proof"
+   :target/participates? :unknown
+   :contribution "observational informal-corpus instrumentation at scale, with machine-witnessed receipts"
+   :proposed/date ""
+   :invited? false
+   :conversation? false
+   :channel/after :warm-but-faded
+   :routing-rule "Address organizers, concede overlap on page one, and do not make an unannounced direct approach."}
+  :patterns
+  ["nomad/licensed-ground"
+   "nomad/owner-of-the-problem"
+   "nomad/self-certifying-artifact"
+   "nomad/letter-from-the-future"]
+  :source "FINDINGS Addendum"
+  :sensitivity :private}
+
+ {:id "refuted-digestion-nobody-funded"
+  :as-of "2026-07-27"
+  :kind :refuted
+  :body
+  {:claim "Nobody with major capital is working on proof digestion."
+   :verdict :partly-refuted
+   :correction "Refuted for non-profits by Mathlib Initiative, Lean FRO, and AI for Math Fund; commercially upheld by the job-board census."
+   :verification "Funding, roadmaps, shipped artifacts, and direct commercial job-board fetches."}
+  :patterns ["nomad/skip-the-flood"]
+  :source "FINDINGS §1 F-1"
+  :sensitivity :public}
+
+ {:id "refuted-orchestration-empty"
+  :as-of "2026-07-27"
+  :kind :refuted
+  :body
+  {:claim "Proof orchestration durability is an empty layer."
+   :verdict :refuted
+   :correction "It is crowded and well-funded; Harmonic, Axiom, Numina, and Mathlib Initiative ship orchestration."
+   :verification "Flagship roles and shipped systems inspected."}
+  :patterns ["nomad/skip-the-flood"]
+  :source "FINDINGS §1 F-2"
+  :sensitivity :public}
+
+ {:id "refuted-sair-human-legibility"
+  :as-of "2026-07-27"
+  :kind :refuted
+  :body
+  {:claim "SAIR mathematics distillation is a human-legibility opportunity."
+   :verdict :refuted
+   :correction "It is machine-facing compression into a ≤10KB prompt for a cheap LLM."
+   :verification "Challenge definition and prize stages inspected."}
+  :patterns ["nomad/live-yardstick" "nomad/choose-the-grid"]
+  :source "FINDINGS §1 F-4"
+  :sensitivity :public}
+
+ {:id "refuted-alphaproof-nexus-deepmind-announcement"
+  :as-of "2026-07-27"
+  :kind :refuted
+  :body
+  {:claim "Google DeepMind announced AlphaProof Nexus."
+   :verdict :refuted
+   :correction "A DeepMind-affiliated team reported it in a 2026-05-21 joint academic preprint; no DeepMind blog announcement exists."
+   :verification "arXiv authorship and DeepMind blog checked."}
+  :patterns ["nomad/self-certifying-artifact"]
+  :source "FINDINGS §1 F-5"
+  :sensitivity :public}
+
+ {:id "refuted-gauss-autonomous-strong-pnt"
+  :as-of "2026-07-27"
+  :kind :refuted
+  :body
+  {:claim "Gauss finished strong PNT after eighteen months of stalled human effort."
+   :verdict :refuted
+   :correction "The source says intermediate progress was obstructed by core difficulties and explicitly credits targeted human scaffolding and review."
+   :verification "Math Inc.'s own page checked."}
+  :patterns ["nomad/self-certifying-artifact"]
+  :source "FINDINGS §1 F-5"
+  :sensitivity :public}
+
+ {:id "refuted-harmonic-blockchain-pitch"
+  :as-of "2026-07-27"
+  :kind :refuted
+  :body
+  {:claim "Harmonic pitches Aristotle to blockchain or stablecoin developers."
+   :verdict :refuted
+   :correction "Delete the claim; no support appears in primary Harmonic channels."
+   :verification "Homepage, nine-post newsroom, Series C material, and Aristotle page checked."}
+  :patterns ["nomad/live-yardstick"]
+  :source "FINDINGS §1 F-5"
+  :sensitivity :public}
+
+ {:id "refuted-seventeen-researchers-origin"
+  :as-of "2026-07-27"
+  :kind :refuted
+  :body
+  {:claim "The company began with seventeen researchers from Meta FAIR, GenAI, and Google Brain/DeepMind."
+   :verdict :unsupported
+   :correction "Unconfirmed and in tension with a contemporaneous report of ten full-time employees."
+   :verification "Forbes contemporaneous staffing figure compared."}
+  :patterns ["nomad/live-yardstick"]
+  :source "FINDINGS §1 F-5"
+  :sensitivity :public}
+
+ {:id "refuted-axiom-company-disclosed-valuation"
+  :as-of "2026-07-27"
+  :kind :refuted
+  :body
+  {:claim "Axiom disclosed a $64M seed at roughly $300M valuation."
+   :verdict :unsupported
+   :correction "The $300M valuation is a Forbes figure, not company-disclosed."
+   :verification "Company and Forbes attribution separated."}
+  :patterns ["nomad/live-yardstick"]
+  :source "FINDINGS §1 F-5"
+  :sensitivity :public}
+
+ {:id "refuted-axiom-flat-series-a-and-code-only"
+  :as-of "2026-07-27"
+  :kind :refuted
+  :body
+  {:claim "Axiom's Series A was exactly $1.6B for code verification."
+   :verdict :refuted
+   :correction "It was $1.6B+ for Verified AI covering code and other machine-generated outputs."
+   :verification "Round wording and company category checked."}
+  :patterns ["nomad/skip-the-flood"]
+  :source "FINDINGS §1 F-5"
+  :sensitivity :public}
+
+ {:id "refuted-zyphra-intelligence-density"
+  :as-of "2026-07-27"
+  :kind :refuted
+  :body
+  {:claim "Zyphra positions on intelligence density per parameter."
+   :verdict :refuted
+   :correction "Its own phrase is intelligence efficiency and silicon performance."
+   :verification "Primary Zyphra materials checked."}
+  :patterns ["nomad/live-yardstick"]
+  :source "FINDINGS §1 F-5"
+  :sensitivity :public}
+
+ {:id "refuted-leanmarathon-origin-of-trichotomy"
+  :as-of "2026-07-27"
+  :kind :refuted
+  :body
+  {:claim "LeanMarathon originated the generation/verification/digestion trichotomy."
+   :verdict :refuted
+   :correction "LeanMarathon is real and uses the framing, but credits it to Tao (2026)."
+   :verification "arXiv 2606.05400 checked."}
+  :patterns ["nomad/self-certifying-artifact"]
+  :source "FINDINGS §1 F-5"
+  :sensitivity :public}
+
+ {:id "refuted-talia-ringer-as-methodology-gap"
+  :as-of "2026-07-27"
+  :kind :refuted
+  :body
+  {:claim "Talia Ringer's group is a target with no process methodology."
+   :verdict :refuted
+   :correction "The group is a peer: QED in Context logged every change made by eight proof engineers over a month."
+   :verification "Published PACMPL work inspected."}
+  :patterns ["nomad/owner-of-the-problem" "nomad/choose-the-grid"]
+  :source "FINDINGS §3 L6"
+  :sensitivity :private}
+
+ {:id "scope-heldout-depintel-field-vs-thesis"
+  :as-of "2026-07-27"
+  :kind :scope-finding
+  :body
+  {:control "depintel.com"
+   :result :miss
+   :declared-scope "AI for mathematics"
+   :thesis-scope "auditable, attributable instrumentation of reasoning"
+   :interpretation "Mostly a scope failure, not a within-scope recall failure."
+   :grid/venue "thesis-framed adjacent-competition landscape"
+   :grid/signals
+   ["interpretability as product"
+    "formal reasoning substrate"
+    "instrumentation of asserted outputs"]
+   :grid/winnable? :unknown
+   :grid/holder "XAI and formal-methods buyers"
+   :move/date ""
+   :move/response :not-run
+   :next-lane "commercial XAI plus model-checking/formal-methods players"}
+  :patterns ["nomad/choose-the-grid" "nomad/letter-from-the-future"]
+  :source "FINDINGS §0"
+  :sensitivity :public}
+
+ {:id "scope-within-ai-for-math-recall-strong"
+  :as-of "2026-07-27"
+  :kind :scope-finding
+  :body
+  {:scope "declared AI-for-mathematics field framing"
+   :result :strong-recall
+   :evidence
+   "Returned numerous entities absent from the seed survey and the most decision-relevant portfolio-overlap fact."
+   :limitation "Strong recall does not repair a wrongly shaped target universe."}
+  :patterns ["nomad/choose-the-grid"]
+  :source "FINDINGS §0"
+  :sensitivity :public}
+
+ {:id "scope-search-budget-exhausted"
+  :as-of "2026-07-27"
+  :kind :scope-finding
+  :body
+  {:scope "verification"
+   :result :partially-bounded
+   :limitation "The 200 WebSearch allowance was exhausted; late verification used direct fetch only."
+   :affected "Three verification items and several funder leads remain marked."
+   :refresh-rule "Do not promote unverified items without a new bounded verification pass."}
+  :patterns ["nomad/self-certifying-artifact"]
+  :source "FINDINGS run note"
+  :sensitivity :public}
+
+ {:id "scope-red-team-not-run"
+  :as-of "2026-07-27"
+  :kind :scope-finding
+  :body
+  {:scope "red-team acceptance"
+   :result :not-run
+   :limitation "Lane R has not been written or answered point by point."
+   :consequence "Findings are drafts rather than accepted conclusions under the probe spec."}
+  :patterns ["nomad/self-certifying-artifact"]
+  :source "FINDINGS §4"
+  :sensitivity :public}
+
+ {:id "scope-unverified-organizations"
+  :as-of "2026-07-27"
+  :kind :scope-finding
+  :body
+  {:scope "organization verification debt"
+   :result :unverified
+   :items
+   ["Axiomatic AI product names"
+    "Morph Labs current relevance"
+    "Ginev current KWARC role"
+    "TAC"]
+   :reasons
+   ["site unreachable"
+    "site now agent-cloud infrastructure and old artifacts unavailable"
+    "role not confirmed"
+    "site refused connection"]
+   :refresh-rule "Retain as flagged leads; do not use as positive positioning evidence."}
+  :patterns ["nomad/live-yardstick" "nomad/self-certifying-artifact"]
+  :source "FINDINGS §4"
+  :sensitivity :public}
+
+ {:id "scope-gowers-signal-grid-unplayable"
+  :as-of "2026-07-27"
+  :kind :scope-finding
+  :body
+  {:grid/venue "prestige competition against the Gowers portfolio"
+   :grid/signals ["Cambridge professorship" "Fields Medal" "KBE"]
+   :grid/winnable? false
+   :grid/holder "elite mathematical institutions and honours systems"
+   :move/date ""
+   :move/response :not-attempted
+   :alternative
+   "Engage on complementary observational informal-corpus instrumentation with self-certifying artifacts; do not compete on inherited standing."}
+  :patterns
+  ["nomad/choose-the-grid"
+   "nomad/owner-of-the-problem"
+   "nomad/self-certifying-artifact"
+   "nomad/letter-from-the-future"]
+  :source "FINDINGS Addendum"
+  :sensitivity :private}
+
+ {:id "org-mistral-leanstral"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "Mistral / Leanstral"
+   :capital/layer "AI-for-mathematics model"
+   :capital/present? :unknown
+   :builds ["Leanstral"]
+   :exit-adjacency :not-stated-in-findings
+   :stack/layer "prover model"
+   :vacancy/checked "Surfaced by within-scope roster probe"
+   :vacancy/vacant? false
+   :complement-of "Lean proof infrastructure"
+   :demand/signal "New entity absent from the seed survey; detailed capital analysis is not present in the FINDINGS."}
+  :patterns ["nomad/skip-the-flood"]
+  :source "FINDINGS §0"
+  :sensitivity :public}
+
+ {:id "org-qed-nano-lm-provers"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "QED-Nano / lm-provers"
+   :capital/layer "AI-for-mathematics prover research"
+   :capital/present? :unknown
+   :builds ["lm-provers"]
+   :exit-adjacency :not-stated-in-findings
+   :stack/layer "prover strength"
+   :vacancy/checked "Surfaced by within-scope roster probe"
+   :vacancy/vacant? false
+   :complement-of "formal proof systems"
+   :demand/signal "New roster entity; further organization-level verification is outside this corpus."}
+  :patterns ["nomad/skip-the-flood"]
+  :source "FINDINGS §0"
+  :sensitivity :public}
+
+ {:id "org-frenzymath"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "FrenzyMath"
+   :capital/layer "AI-for-mathematics"
+   :capital/present? :unknown
+   :builds [:not-stated-in-findings]
+   :exit-adjacency :not-stated-in-findings
+   :stack/layer :not-stated-in-findings
+   :vacancy/checked "Surfaced by within-scope roster probe"
+   :vacancy/vacant? false
+   :complement-of :unknown
+   :demand/signal "Roster presence only; retained as an explicit refresh target."}
+  :patterns ["nomad/skip-the-flood"]
+  :source "FINDINGS §0"
+  :sensitivity :public}
+
+ {:id "org-pythagoras-lm"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "Pythagoras-LM"
+   :capital/layer "AI-for-mathematics model"
+   :capital/present? :unknown
+   :builds ["Pythagoras-LM"]
+   :exit-adjacency :not-stated-in-findings
+   :stack/layer "prover model"
+   :vacancy/checked "Surfaced by within-scope roster probe"
+   :vacancy/vacant? false
+   :complement-of "formal proof infrastructure"
+   :demand/signal "Roster presence only; capital and exit adjacency remain verification debt."}
+  :patterns ["nomad/skip-the-flood"]
+  :source "FINDINGS §0"
+  :sensitivity :public}
+
+ {:id "org-nous-hillclimb"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "Nous / Hillclimb"
+   :capital/layer "AI-for-mathematics"
+   :capital/present? :unknown
+   :builds ["Hillclimb"]
+   :exit-adjacency :not-stated-in-findings
+   :stack/layer :not-stated-in-findings
+   :vacancy/checked "Surfaced by within-scope roster probe"
+   :vacancy/vacant? false
+   :complement-of :unknown
+   :demand/signal "Roster presence only; retained for later atomic refresh."}
+  :patterns ["nomad/skip-the-flood"]
+  :source "FINDINGS §0"
+  :sensitivity :public}
+
+ {:id "org-lean-dojo"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "LeanDojo"
+   :capital/layer "academic theorem-prover interaction harness"
+   :capital/present? :unknown
+   :builds ["LeanDojo v1" "successor repository"]
+   :exit-adjacency "Research infrastructure."
+   :stack/layer "single-theorem interaction"
+   :vacancy/checked "Repository and maintainer status inspected"
+   :vacancy/vacant? false
+   :complement-of "proof agents"
+   :demand/signal "v1 deprecated; successor has 18 commits and the original lead moved to Meta FAIR."}
+  :patterns ["nomad/skip-the-flood"]
+  :source "FINDINGS §2 durability"
+  :sensitivity :public}
+
+ {:id "org-pantograph"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "Pantograph"
+   :capital/layer "academic Lean interaction harness"
+   :capital/present? :unknown
+   :builds ["TACAS 2025 single-theorem interaction layer"]
+   :exit-adjacency "Research infrastructure."
+   :stack/layer "single-theorem interaction"
+   :vacancy/checked "Harness ownership and durability scope compared"
+   :vacancy/vacant? false
+   :complement-of "proof agents"
+   :demand/signal "Does not own long-run durability measurement."}
+  :patterns ["nomad/skip-the-flood" "nomad/author-the-yardstick"]
+  :source "FINDINGS §2 durability"
+  :sensitivity :public}
+
+ {:id "org-lean-copilot"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "Lean Copilot"
+   :capital/layer "Lean interaction tooling"
+   :capital/present? :unknown
+   :builds ["single-theorem interaction layer"]
+   :exit-adjacency "Proof-assistance tooling."
+   :stack/layer "single-theorem interaction"
+   :vacancy/checked "Harness ownership and durability scope compared"
+   :vacancy/vacant? false
+   :complement-of "Lean proof development"
+   :demand/signal "Does not consolidate long-run durability."}
+  :patterns ["nomad/skip-the-flood"]
+  :source "FINDINGS §2 durability"
+  :sensitivity :public}
+
+ {:id "org-seed-prover"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "Seed-Prover"
+   :capital/layer "frontier long-horizon proving"
+   :capital/present? :unknown
+   :builds ["multi-day IMO proof attempts"]
+   :exit-adjacency :not-stated-in-findings
+   :stack/layer "prover strength"
+   :vacancy/checked "Published durability number inspected"
+   :vacancy/vacant? false
+   :complement-of "durability measurement"
+   :demand/signal "Reports three days each on IMO P3/P4 without publishing a durability mechanism."}
+  :patterns ["nomad/skip-the-flood" "nomad/author-the-yardstick"]
+  :source "FINDINGS §2 durability"
+  :sensitivity :public}
+
+ {:id "org-morph-labs"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "Morph Labs"
+   :capital/layer "currently agent-cloud infrastructure"
+   :capital/present? :unknown
+   :builds ["current agent-cloud site; prior Trinity artifacts unavailable"]
+   :exit-adjacency "Agent infrastructure, no longer verified as an AI-for-math player."
+   :stack/layer "agent cloud"
+   :vacancy/checked "Current site fetched; Trinity blog returned 410 and repository 404"
+   :vacancy/vacant? :unknown
+   :complement-of :unknown
+   :demand/signal "Recommended for delisting from the AI-for-math roster."}
+  :patterns ["nomad/choose-the-grid" "nomad/live-yardstick"]
+  :source "FINDINGS §4"
+  :sensitivity :public}
+
+ {:id "org-zyphra"
+  :as-of "2026-07-27"
+  :kind :org
+  :body
+  {:org/name "Zyphra"
+   :capital/layer "model and silicon efficiency"
+   :capital/present? :unknown
+   :builds ["intelligence efficiency and silicon performance"]
+   :exit-adjacency "Efficient AI systems."
+   :stack/layer "model infrastructure"
+   :vacancy/checked "Primary positioning language checked"
+   :vacancy/vacant? false
+   :complement-of "compute-intensive AI"
+   :demand/signal "Not evidence for an intelligence-density-per-parameter claim."}
+  :patterns ["nomad/choose-the-grid" "nomad/live-yardstick"]
+  :source "FINDINGS §1 F-5"
+  :sensitivity :public}
+
+ {:id "vacancy-ai-for-math-fund-informal-corpus-daylight"
+  :as-of "2026-07-27"
+  :kind :vacancy
+  :body
+  {:stack/layer "observational mapping of existing informal mathematical literature at corpus scale"
+   :capital/present? false
+   :vacancy/checked
+   "Six AI for Math Fund neighbours compared by artifact type, corpus source, curation grain, and observational versus constructive method"
+   :vacancy/vacant? true
+   :result "Portfolio overlap is severe, but this three-part daylight survives."
+   :complement-of "formal-library tools and curated per-proof construction"
+   :demand/signal "The fund already pays for structured reasoning work, making the narrower gap a live rather than imaginary yardstick."}
+  :patterns
+  ["nomad/skip-the-flood"
+   "nomad/live-yardstick"
+   "nomad/author-the-yardstick"
+   "nomad/letter-from-the-future"]
+  :source "FINDINGS §1 F-3"
+  :sensitivity :public}
+
+ {:id "vacancy-learning-loop-conjunction"
+  :as-of "2026-07-27"
+  :kind :vacancy
+  :body
+  {:stack/layer "separate authorship plus per-item use receipt plus mechanical witness plus use-driven supersession"
+   :capital/present? false
+   :vacancy/checked
+   "Mechanism conjunction tested across ACE, AttriMem, MemAudit, Zep, DreamProver, prover systems, and contamination benchmarks"
+   :vacancy/vacant? true
+   :result "Individual mechanisms are occupied, but the conjunction is empty."
+   :complement-of "generic self-improving-agent claims"
+   :demand/signal "Each discriminator removes an occupied class; the full traceability sentence empties the 331-entry list."}
+  :patterns
+  ["nomad/skip-the-flood"
+   "nomad/author-the-yardstick"
+   "nomad/self-certifying-artifact"]
+  :source "FINDINGS §2 learning loop"
+  :sensitivity :public}
+
+ {:id "vacancy-collaborator-process-methodology"
+  :as-of "2026-07-27"
+  :kind :vacancy
+  :body
+  {:stack/layer "formalization teams with targets and students but no process methodology"
+   :capital/present? :unknown
+   :vacancy/checked
+   "CMU Hoskinson, EPFL, Math Inc., and Talia Ringer's group compared for existing process instrumentation"
+   :vacancy/vacant? true
+   :result "CMU Hoskinson, EPFL, and Math Inc. fit the gap; Talia Ringer is a peer, not an instance."
+   :complement-of "already instrumented proof-engineering teams"
+   :demand/signal "Candidate collaborators can produce logs without needing to invent the analysis layer."}
+  :patterns ["nomad/owner-of-the-problem" "nomad/skip-the-flood"]
+  :source "FINDINGS §3 L6"
+  :sensitivity :private}
+
+ {:id "funder-renaissance-philanthropy-mathlib"
+  :as-of "2026-07-27"
+  :kind :funder
+  :body
+  {:funder "Renaissance Philanthropy / Alex Gerko (XTX)"
+   :programme "Mathlib Initiative grant"
+   :amount "$5M"
+   :deadline :not-applicable
+   :decision-speed :not-stated
+   :status :awarded
+   :yardstick/dimension "formal-library maintenance, documentation, and education"
+   :measurer "Mathlib Initiative roadmap and funder"
+   :budget/witness "$5M award announced 2025-09"
+   :problem/held "documentation gaps and unpaid maintainer capacity"
+   :witnesses/count 3
+   :bet? false}
+  :patterns ["nomad/live-yardstick" "nomad/skip-the-flood"]
+  :source "FINDINGS §1 F-1"
+  :sensitivity :public}
+
+ {:id "scope-adjacent-ridge-network-grid"
+  :as-of "2026-07-27"
+  :kind :scope-finding
+  :body
+  {:grid/venue "iterated winnable sub-grids with upward network composition"
+   :grid/signals ["playable accolades" "demonstrated artifacts" "network composition"]
+   :grid/winnable? :unknown
+   :grid/holder "field conveners and collaborators"
+   :move/date ""
+   :move/response :not-run
+   :interpretation
+   "The adjacent-ridge archetype proposes assembling a sufficient signal stack rather than inheriting an elite one; it is an operator hypothesis, not a verified landscape fact."}
+  :patterns ["nomad/choose-the-grid" "nomad/letter-from-the-future"]
+  :source "FINDINGS Addendum"
+  :sensitivity :private}]
