@@ -141,3 +141,26 @@ The patterns now live as `futon3/library/nomad/*.flexiarg` (8 files, house
 style, names generalized — this mission doc retains the sensitive instances).
 Note: futon3a's nightly index (04:30 cron, --minilm) sweeps the futon3
 library, so the nomad patterns enter the shared search corpus automatically.
+
+## B-series: the business-landscape embedding (design, 2026-07-27)
+
+A SECOND embedding, distinct from the mission index but coordinated with it:
+
+- **Coordination = same encoder** (miniLM), distinct corpora → the spaces
+  are cross-queryable by construction (mission artifact ↔ nearest business
+  items in one call). Separate refresh cadences (business intel decays in
+  weeks; :as-of dates + staleness policy required).
+- **Cross-correlation = the evidence-shapes.** Each nomad pattern's
+  evidence-shape is the record schema for one class of business intel; the
+  corpus is built ATTACHED to patterns from birth, not correlated after.
+- **Bootstrap = a scribe pass over the FINDINGS TN** (B0): atomize into
+  typed records instantiating the shapes (org/grid/layer/vacancy/convening/
+  yardstick-gap items), each tagged with its nomad pattern(s).
+- **Staged build:** B0 atomize (codex, drafts) → B1 sibling index (biz
+  corpus JSON + same encoder; sibling of index_patterns.sh) → B2 refresh
+  discipline (probes update records, not documents; receipts = replies,
+  invitations, grants).
+- **Loop symmetry, priced:** TN=transcript, atomize=scribe, records=memories,
+  nomad patterns=trigger-classes, letters=dispatches, replies=receipts.
+  Positioning is WM-able by the demarcation criterion; Joe is the send gate
+  everywhere (cold-outbox discipline).
