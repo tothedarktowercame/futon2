@@ -261,3 +261,17 @@ institution that the mark's accumulated authority eventually capitalizes;
 the LangChain-for-math open layer distributes the mark's schema. Sequence
 implied: etik corpus first (free, observational, license-safe) →
 authority accrues → assay/audit services monetize the accrued standing.
+
+## Tempo correction (Joe, 2026-07-27): accrued standing ≠ fast money
+
+Fast lanes (from the B0 corpus itself): (1) the rolling seed grant —
+≤$100K, FOUR-WEEK decision, individuals/teams eligible; etik corpus study
+is grant-shaped; Letter addressee #1. (2) Services sold TO the flood now:
+paid prover-audit engagements (typed failure maps, claimed-vs-verified,
+integrity certificates; LeanAgent 0=1 as the one-slide case) — Owner-Of-
+The-Problem proposals to named labs, billable without standing. (3) Salary/
+contract track in parallel, venture stack as differentiator. Structure:
+CONSULTANCY FUNDS THE PRODUCT — engagements are revenue + dogfood + case
+studies + the relationships the etik corpus later capitalizes. Pattern
+tempo split, now explicit: Owner-Of-The-Problem/Live-Yardstick = weeks;
+Author-The-Yardstick = the slow asset the fast lanes pay for.
