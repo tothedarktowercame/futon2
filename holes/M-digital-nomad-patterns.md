@@ -238,3 +238,26 @@ commercial structure:
 - Open question for the Live-Yardstick check: who pays for the LangSmith
   layer in math — funders (portfolio eval), labs (their own provers), or
   journals — and in which order.
+
+## Etik probe (2026-07-27): the consumer-facing instrument
+
+Probed README-etik.md (futon6): inverse-kitemark, etic per-grain absence
+vector, comprehension-vs-soundness verdicts, "consumer reviews for
+mathematics", corpus-wide by an observer needing no certifying authority.
+
+Result: NOT a bridge (mean-field 0.311, warm 36/106 — a SPECIALIST probe)
+but the sharpest single hit on the crown-jewel gap: top neighbor
+principled-abstention (0.553), then corpus-daylight vacancy, typed-informal-
+conformance, residual-gap-map — four of top seven are yardstick-gaps.
+Nearest org = RefGrader (the 3-of-4-criteria rival that inverts the failure
+mode) — the etik is its corrective.
+
+Reading: the etik is the assay office's CONSUMER-FACING INSTRUMENT — and
+its cold-start solution. Author-the-yardstick usually needs standing; the
+etik inverts that (maps absence, refuses "verified") so it can be issued
+from day one with no chair to defend, and standing ACCRUES from the corpus
+of marks. Relationship to the stack: etik = the mark; assay office = the
+institution that the mark's accumulated authority eventually capitalizes;
+the LangChain-for-math open layer distributes the mark's schema. Sequence
+implied: etik corpus first (free, observational, license-safe) →
+authority accrues → assay/audit services monetize the accrued standing.
