@@ -127,3 +127,10 @@ climb-the-adjacent-ridge via assembled signal stack + upward network
 composition (Carina Hong archetype). This is the mission's first concrete
 acceptance test: can the pattern language generate the Gowers letter and
 the Hong-style plan, and do they differ in the ways the patterns predict?
+
+**Refinement from the test case:** the Gowers contact is warm-but-faded, and
+direct approach is the failure mode. Candidate eighth pattern — **Licensed
+Ground** (guard on Owner Of The Problem, as Live Yardstick guards Choose The
+Grid): engage where the convening itself licenses the conversation; arrive
+by contributing what the convening needs; letter addressee = the organizers.
+Instance: Big Proof lineage at the INI. Work items in the FINDINGS addendum.
