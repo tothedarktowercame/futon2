@@ -210,3 +210,31 @@ gap with a public case). Live-yardstick witnesses to verify: funders
 (portfolio evaluation is measured, with money) and journals. Pattern
 composition: author-the-yardstick ∘ skip-the-flood(evaluation layer) ∘
 self-certifying-artifact(dogfood) ∘ owner-of-the-problem(funders).
+
+## Naming pass (Joe, 2026-07-27): PlanetMath 2026 Reboot / LangChain for math
+
+The assay office identified by the bridge probe, given its lineage and its
+commercial structure:
+
+- **PlanetMath 2026 Reboot**: commons infrastructure for mathematics again,
+  but with agent fleets where volunteer encyclopedists were, and open-core
+  where commons-based peer production was. The identity is continuous (the
+  same person building the math commons layer for the new era); the
+  production model is not, deliberately.
+- **LangChain-for-math decomposition**: open framework + paid observability.
+  The open layer = the orchestration/receipt primitives (dispatch-with-
+  recall, typed receipts, certificate schemas, park protocol — already
+  running in the learning loop) that everyone adopts because they are free
+  and load-bearing. The paid layer = the LangSmith analogue: the AUDIT
+  stream — tracing, eval, claimed-vs-verified, per-grain certificates —
+  which is exactly the assay office. History note: the durable commercial
+  part of LangChain WAS the observability layer; the framework was the
+  adoption wedge. Same bet here, stated openly.
+- **The provenance grid**: on {math-commons infrastructure, since 2001},
+  the founder of PlanetMath holds signals nobody in the B0 roster holds.
+  Choose-The-Grid finally lands on a grid that is BOTH winnable and
+  plausibly live (funders love a continuity story; the PlanetMath alumni
+  network is a licensed-ground surface of its own).
+- Open question for the Live-Yardstick check: who pays for the LangSmith
+  layer in math — funders (portfolio eval), labs (their own provers), or
+  journals — and in which order.
