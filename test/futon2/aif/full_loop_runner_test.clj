@@ -541,6 +541,81 @@
            (:reason (#'runner/feature-card-validation
                      {:events [{:type "done" :text card}]}))))))
 
+(deftest attempt-051-verbose-card-grounds-without-a-cure-bounce
+  ;; Successor validation for repair-attempt-051-feature-card-missing-or-invalid:
+  ;; replay the failing author-job shape end to end — a valid card whose closing
+  ;; brace fell past the 200-char summary window, with the complete reply
+  ;; durable in :result. The attempt must ground without burning a cure bounce.
+  (let [card-line (str "FULL_LOOP_FEATURE_CARD: "
+                       "{:built \"cohort stopping-rule exception now returns "
+                       ":cohort-complete instead of a spurious repair obligation\" "
+                       ":want-coverage \"stopping rule fires without depositing a "
+                       "repair obligation or morning-brief item\" "
+                       ":matches-intent? true "
+                       ":things-to-try [\"exhaust cohort -> :cohort-complete\"]}")
+        reply (str card-line "\nFULL_LOOP_AUTHOR: DONE feature123")
+        {:keys [result item dispatches]}
+        (run-feature-card-attempt
+         {:initial-author-job
+          {:job-id "feature-author" :state "done" :artifact-ref "feature123"
+           :result-summary (subs reply 0 200)
+           :result reply
+           :execution successful-execution}})]
+    (is (= :grounded-change (:outcome result)))
+    (is (empty? (get-in result [:data :build-retries])))
+    ;; Author dispatched once, reviewer once — no cure dispatch.
+    (is (= ["zai-5" "codex-7"] dispatches))
+    (is (str/starts-with? (get-in item [:feature-card :built])
+                          "cohort stopping-rule"))))
+
+(deftest cure-claiming-an-unresolvable-commit-fails-closed
+  ;; A cure turn that claims a NEW commit the runner cannot resolve to any
+  ;; repository must not be accepted: new-repo/new-files used to fall back to
+  ;; the PRIOR file list, so a card-only validation would declare the bounce
+  ;; cured and bind the phantom sha downstream. The bounce is rejected
+  ;; wholesale and retries exhaust fail-closed on the original failure.
+  (let [good-card (str "FULL_LOOP_FEATURE_CARD: "
+                       "{:built \"cure\" :want-coverage \"bound\" "
+                       ":matches-intent? true :things-to-try [\"a -> b\"]}")
+        cure-prompts (atom [])
+        opts {:build-cure-retries 1
+              :phase-log (str (System/getProperty "java.io.tmpdir")
+                              "/cure-unresolved-test-phase.log")
+              :dispatch-fn (fn [_ _ _ _ prompt]
+                             (swap! cure-prompts conj prompt)
+                             {:job-id "cure-1"})
+              :poll-fn (fn [_ _] {:job-id "cure-1" :state "done"
+                                  :artifact-ref "phantom456"
+                                  :result-summary
+                                  (str good-card
+                                       "\nFULL_LOOP_AUTHOR: DONE phantom456")})
+              :resolve-build-fn (fn [_] nil)}
+        thrown (try
+                 (#'runner/build-cure-loop
+                  opts {} "author-x" (atom 0)
+                  "target-x" "orig123" "/repo" ["src/x.clj"]
+                  {:job-id "author-1" :state "done"
+                   :result-summary "FULL_LOOP_AUTHOR: DONE orig123"
+                   :events [{:type "text" :text "narrated event prose"}]}
+                  false
+                  {:repo "/repo" :pre-dispatch-head "base"})
+                 nil
+                 (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+    (is (some? thrown))
+    (is (= :feature-card-missing-or-invalid (:failure-kind thrown)))
+    (is (= "orig123" (:commit thrown))
+        "the phantom sha must not replace the original commit in the failure")
+    (is (= false (get-in thrown [:build-retries 0 :cured?])))
+    (is (= :cure-commit-unresolved
+           (get-in thrown [:build-retries 0 :cure-rejected])))
+    (is (= "phantom456" (get-in thrown [:build-retries 0 :claimed-commit])))
+    ;; The cure prompt quotes the actual durable prefix, not job-text: event
+    ;; narration must not be presented as what Agency preserved.
+    (is (str/includes? (first @cure-prompts)
+                       (pr-str "FULL_LOOP_AUTHOR: DONE orig123")))
+    (is (not (str/includes? (first @cure-prompts) "narrated event prose")))
+    (is (str/includes? (first @cure-prompts) "no prose before it"))))
+
 (deftest fresh-author-cure-rebinds-against-a-fresh-pre-cure-snapshot
   ;; Review finding on the cure loop: the first implementation passed the
   ;; original binding's bare :pre-dispatch-head sha where fresh-artifact-binding

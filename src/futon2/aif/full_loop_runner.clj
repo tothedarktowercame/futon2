@@ -1257,13 +1257,14 @@
        "ORIGINAL COMMIT: " original-commit "\n"
        "EXACT VALIDATION ERROR: " error-message "\n"
        (when (= :feature-card-missing-or-invalid failure-kind)
-         (str "DURABLE PREFIX TEXT (job-text) the runner extracted from your "
-              "previous response — this is what Agency's prefix actually "
-              "preserved:\n"
+         (str "DURABLE PREFIX TEXT (:result-summary) — this is what Agency's "
+              "prefix actually preserved from your previous response:\n"
               (pr-str job-prefix-text) "\n\n"))
        "INSTRUCTION: BEGIN your response with one corrected, self-contained "
        "FULL_LOOP_FEATURE_CARD: {...} line (one EDN map, closing brace within "
-       "the 200-char durable prefix), then FULL_LOOP_AUTHOR: DONE <sha>. "
+       "the 200-char durable prefix). The marker must be the very first "
+       "characters of your reply — no prose before it. Then "
+       "FULL_LOOP_AUTHOR: DONE <sha>. "
        "Make a new commit ONLY if files must change (artifact-only cure "
        "requires a substantive commit; card cure usually needs no new commit "
        "— re-emitting the card with the existing sha is valid)."))
@@ -1576,7 +1577,11 @@
         (if (pos? retries-left)
           ;; Bounce: dispatch cure to the same author agent.
           (let [{:keys [failure-kind error-message]} failure
-                job-prefix-text (job-text author-job)
+                ;; Quote the ACTUAL durable prefix (:result-summary), not
+                ;; job-text: job-text concatenates event narration, so
+                ;; attempt-051's cure prompt buried the preserved prefix in
+                ;; pages of prose and the cure reply led with prose too.
+                job-prefix-text (:result-summary author-job)
                 cure-prompt (build-cure-prompt author target commit error-message
                                                failure job-prefix-text)
                 ;; Fresh pre-cure snapshot: the original pre-dispatch window
@@ -1604,32 +1609,48 @@
                                                        cure-job))
                 cure-observed (:commit cure-binding)
                 new-commit (or cure-observed cure-artifact-ref commit)
-                new-build (when (and new-commit (not= new-commit commit))
+                commit-changed? (and new-commit (not= new-commit commit))
+                new-build (when commit-changed?
                             ((or (:resolve-build-fn opts) resolve-build)
-                             new-commit))
-                new-repo (or (:repo new-build) repo)
-                new-files (or (:files new-build) files)
-                new-author-job (cond-> cure-job
-                                 (and fresh-author? cure-observed)
-                                 (assoc :repo-observed-artifact-ref cure-observed
-                                        :artifact-binding cure-binding))
-                ;; Re-run the same validations to determine if cured.
-                still-failing? (build-cure-validation new-files new-author-job
-                                                       new-commit target)
-                cured? (nil? still-failing?)
-                retry-entry {:failure-kind failure-kind
-                             :error error-message
-                             :cure-job-id cure-job-id
-                             :cured? cured?}]
-            (if cured?
-              ;; Cured: proceed with the new values.
-              {:commit new-commit :repo new-repo :files new-files
-               :author-job new-author-job
-               :build-retries (conj build-retries retry-entry)}
-              ;; Not cured yet: try again if retries remain.
-              (recur new-commit new-repo new-files new-author-job
+                             new-commit))]
+            (if (and commit-changed? (nil? new-build))
+              ;; Fail closed: the cure turn claims a NEW commit that resolves
+              ;; to no repository. The old binding of new-repo/new-files fell
+              ;; back to the PRIOR file list here, so a card-only validation
+              ;; would have declared the bounce cured and bound the phantom
+              ;; sha downstream. Reject the bounce wholesale instead.
+              (recur commit repo files author-job
                      (dec retries-left)
-                     (conj build-retries retry-entry))))
+                     (conj build-retries
+                           {:failure-kind failure-kind
+                            :error error-message
+                            :cure-job-id cure-job-id
+                            :cured? false
+                            :cure-rejected :cure-commit-unresolved
+                            :claimed-commit new-commit}))
+              (let [new-repo (or (:repo new-build) repo)
+                    new-files (or (:files new-build) files)
+                    new-author-job (cond-> cure-job
+                                     (and fresh-author? cure-observed)
+                                     (assoc :repo-observed-artifact-ref cure-observed
+                                            :artifact-binding cure-binding))
+                    ;; Re-run the same validations to determine if cured.
+                    still-failing? (build-cure-validation new-files new-author-job
+                                                          new-commit target)
+                    cured? (nil? still-failing?)
+                    retry-entry {:failure-kind failure-kind
+                                 :error error-message
+                                 :cure-job-id cure-job-id
+                                 :cured? cured?}]
+                (if cured?
+                  ;; Cured: proceed with the new values.
+                  {:commit new-commit :repo new-repo :files new-files
+                   :author-job new-author-job
+                   :build-retries (conj build-retries retry-entry)}
+                  ;; Not cured yet: try again if retries remain.
+                  (recur new-commit new-repo new-files new-author-job
+                         (dec retries-left)
+                         (conj build-retries retry-entry))))))
           ;; Retries exhausted: throw exactly as today. When no bounces
           ;; occurred (retries was 0), the ex-data is byte-identical to
           ;; the pre-cure throw — :build-retries is only included when at
