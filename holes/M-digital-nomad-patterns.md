@@ -115,3 +115,15 @@ recorded so the option is priced.
    item from §0 of the FINDINGS).
 3. Inventory existing Self-Certifying Artifacts (the loop's receipts and
    solves; merged PRs; the p4ng appendix) against the three letters.
+
+## Test case (2026-07-27): the Gowers engagement requirement
+
+The FINDINGS addendum records the live test the patterns must pass: a
+landscape peak (Gowers: Cambridge chair, Fields, KBE) holding a funded
+version of the neighbouring thesis. Non-competable grid; the patterns must
+deliver ENGAGEMENT capability instead — engage-the-peak via complementary
+self-certifying artifacts + page-one concession (Gowers archetype), or
+climb-the-adjacent-ridge via assembled signal stack + upward network
+composition (Carina Hong archetype). This is the mission's first concrete
+acceptance test: can the pattern language generate the Gowers letter and
+the Hong-style plan, and do they differ in the ways the patterns predict?
