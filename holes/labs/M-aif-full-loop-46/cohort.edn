@@ -1,0 +1,77 @@
+{:cohort/id :wm-outer-loop-46-v1
+ :protocol/version 4
+ :status :preregistered
+ :registered-on "2026-07-27"
+ :purpose "First cohort on the omni-JVM epoch. Successor to :wm-outer-loop-45-v1 (target 3 reached 2026-07-25: attempt-056 :grounded-change — first grounding since 046, via the revision round; 057/058 :incomplete at selection under store congestion). Everything that killed 45's two selection slots has since been repaired and independently reviewed: (1) IN-PROCESS CLICKS — the runner now executes inside the serving JVM (M-omni-wm-runner: futon3c b79773c/8f4b5e6/e89e776 + futon2 9ab503b), triggered via POST /api/alpha/wm/click, single-flight, registry-direct apparatus status; click JVMs are retired per the operator's no-third-JVM ruling; (2) SELECTION PATIENCE — escalating 150s/210s/270s budgets over the in-process bounded-autonomy-validated seam, typed :strategic-selection-unavailable on exhaustion, :readiness/selection-transient on late success; (3) STORE — 4g heap (futon1b 17bc825), mutation-scoped projection coherence (4e0ae66), entity limit pushdown (d4916fa), and the WM activation full-history walk bounded server-side (futon3c 98d73e1). Revision round (001b0cf) carries over from 45's epoch. CASTING CLASS CHANGE: zai quota exhausted 2026-07-27 — the author class changes zai->claude for the first time in the series; author-performance comparisons across cohorts 42-45 vs 46+ cross a capability boundary and must not be pooled. Casting per operator (Joe, 2026-07-27): fresh author claude-7, fresh reviewer codex-7, repair-reviewer codex-1, passed per click via the endpoint payload. Primary questions: (1) grounded-change rate on the fully-repaired epoch — the 31-35 streak is the capability baseline; (2) does the in-process path hold up across a full cohort (single-flight, visibility, selection latency); (3) claude-as-author versus the zai baseline, reported but not pooled. Ground-control disciplines carried in-charter: no evidence-store reads inside the selection window; check-read-decide-kill as separate steps; bias against killing scarce opportunities. Loaded-vintage note: the serving JVM (restarted 2026-07-26 ~12:00) includes all epoch semantics above; the caller-side include-total=false sweep flags (futon3c 053e1a9 / futon2 ecfa225) are committed but not yet loaded — cost-only, not semantics. Target 3."
+ :activation :separate-append-only-marker
+ :population "Ground-control durée-triggered opportunities of the full War Machine loop, in-process via /api/alpha/wm/click"
+ :stopping-rule
+ {:unit :trigger-opportunity
+  :target 3
+  :rule "Count the first 3 distinct eligible trigger opportunities after activation, in order."
+  :counts-as-attempt
+  [:selected-and-dispatched
+   :abstained
+   :no-selection
+   :agent-unavailable
+   :substrate-unavailable
+   :guardrail-refusal
+   :dispatch-failed
+   :build-failed
+   :grounded-no-change
+   :grounded-change]
+  :excluded
+  [:manual-test :replay :duplicate-opportunity :pre-activation]
+  :replacement "None. Failed, unavailable, abstaining, and no-change opportunities remain in the denominator."}
+ :allowed-triggers #{:duree-click-on-demand
+                     :duree-click-continuous}
+ :checkpoint-order
+ [:time-step :selection :construction :dispatch :build :adjudication :closed]
+ :required-before-close
+ #{:selection :construction :dispatch :build :adjudication}
+ :checkpoint-contract
+ {:cell-shape "Every checkpoint payload is either {:judgment ... :ground ...} or {:sorry {:kind keyword ...}}."
+  :time-step [:opportunity-id :trigger :machine-state :agent-roster :code-state :semantic-epoch]
+  :selection [:selected-mission :selected-action :ranked-candidates :selection-reasons]
+  :construction [:mission :cascade :sorries :wiring :patterns :deposit]
+  :dispatch [:agent :availability :job-id :prompt-ref]
+  :build [:artifacts :generated-code :commits :patterns-used :inline-improvements :validation]
+  :adjudication [:before :after :witness :build-match :dial]
+  :closed [:outcome :grounded? :artifact-only? :duration-ms :resource-use]
+  :revision-note "A revision round nests inside the :build payload as :revision {:round 2 :commits [...] :review {...}} with both review records under :reviews; checkpoint order and schema unchanged from protocol 4."}
+ :grounded-success
+ {:outcome :grounded-change
+  :requires [:independent-before-witness
+             :independent-after-witness
+             :resolved-adjudication
+             :dial-moved]
+  :artifact-only-counts? false}
+ :machine-evolution
+ {:allowed? true
+  :rule "Normal machine development may continue during collection; it never permits dropping, replacing, or relabelling an opportunity."
+  :per-attempt-provenance [:semantic-epoch :git-sha :git-dirty? :resolved-mode-flags :configuration-digest]
+  :epoch-boundary "This cohort begins on the omni-JVM epoch (in-process clicks, selection ladder + typed timeouts, store coherence/heap fixes) AND across the zai->claude author-class boundary — do not pool with cohorts 42-45 on either machine metrics or author metrics."
+  :analysis "Report attempts chronologically and stratified by semantic epoch; do not pool across an undocumented semantic boundary."}
+ :analysis
+ {:primary
+  [:attempt-count
+   :grounded-change-rate
+   :grounded-no-change-rate
+   :dispatch-rate
+   :completion-rate
+   :revision-round-conversion-rate]
+  :secondary
+  [:mission-selection-frequency
+   :selection-reason-frequency
+   :expected-versus-realized-calibration
+   :agent-availability
+   :elapsed-time
+   :resource-use
+   :patterns-used
+   :inline-improvement-frequency
+   :semantic-epoch-results
+   :code-version-trajectory
+   :substrate-state-distribution
+   :selection-transient-frequency
+   :author-class-comparison-unpooled]
+  :reporting "Report both attempts and all typed sorries; do not analyse successes alone."}}
