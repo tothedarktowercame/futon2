@@ -1,0 +1,94 @@
+{:protocol/version 4,
+ :remaining 0,
+ :attempts
+ [{:typed-sorries 0,
+   :grounded? true,
+   :attempt/id "attempt-056",
+   :outcome :grounded-change,
+   :selected-mission
+   "repair-initialization-6d5da36a-04f0-42ee-ba91-55bee5801a01-initialization-failed",
+   :checkpoints
+   [:time-step
+    :selection
+    :construction
+    :dispatch
+    :build
+    :adjudication
+    :closed],
+   :closed? true,
+   :artifact-binding
+   {:fresh-author? true,
+    :disagreement? false,
+    :descendant? true,
+    :text-artifact-ref "087dc4d",
+    :pre-dispatch-head "7ba524f54df93b6455fe1d7a5e73fe92c9d82ad4",
+    :author-window-end-ms 1785016385341,
+    :author-window-start-ms 1785016038341,
+    :commit "087dc4d74471a4e0abc2d2a07ab3e0d64c059eb4",
+    :in-author-window? true,
+    :observed-commit-time-ms 1785016368000,
+    :repo "/home/joe/code/futon2",
+    :text-artifact-sha "087dc4d74471a4e0abc2d2a07ab3e0d64c059eb4",
+    :observed-head "087dc4d74471a4e0abc2d2a07ab3e0d64c059eb4",
+    :corroborates? true},
+   :attempt/ordinal 1,
+   :fresh-commit "087dc4d74471a4e0abc2d2a07ab3e0d64c059eb4",
+   :artifact-only? false,
+   :opportunity-id
+   "duree-click-on-demand/2026-07-25T21:29:19.890119995Z/bcdeaf16-68c4-4394-8061-8d315e088e25"}
+  {:typed-sorries 5,
+   :grounded? false,
+   :attempt/id "attempt-057",
+   :outcome :incomplete,
+   :selected-mission nil,
+   :checkpoints
+   [:time-step
+    :selection
+    :construction
+    :dispatch
+    :build
+    :adjudication
+    :closed],
+   :closed? true,
+   :artifact-binding nil,
+   :attempt/ordinal 2,
+   :fresh-commit nil,
+   :artifact-only? false,
+   :opportunity-id
+   "duree-click-on-demand/2026-07-25T22:04:44.263142952Z/8d30976c-9a03-4866-8ec0-db37bfc94704"}
+  {:typed-sorries 5,
+   :grounded? false,
+   :attempt/id "attempt-058",
+   :outcome :incomplete,
+   :selected-mission nil,
+   :checkpoints
+   [:time-step
+    :selection
+    :construction
+    :dispatch
+    :build
+    :adjudication
+    :closed],
+   :closed? true,
+   :artifact-binding nil,
+   :attempt/ordinal 3,
+   :fresh-commit nil,
+   :artifact-only? false,
+   :opportunity-id
+   "duree-click-on-demand/2026-07-25T22:20:02.990022395Z/89743c0e-3469-4e55-998c-9acf15d12c83"}],
+ :closed-count 3,
+ :grounded-change-count 1,
+ :activation
+ {:cohort/id :wm-outer-loop-45-v1,
+  :activated-at "2026-07-25T21:28:03.069380839Z",
+  :preregistration-path
+  "/home/joe/code/futon2/holes/labs/M-aif-full-loop-45/cohort.edn",
+  :preregistration-sha256
+  "c4020900d95d59077a8d52d5b4b28619c520c17772251bde05110c9d90e69b54",
+  :stopping-target 3},
+ :artifact-only-count 0,
+ :attempt-count 3,
+ :grounded-no-change-count 0,
+ :target 3,
+ :outcomes {:grounded-change 1, :incomplete 2},
+ :cohort/id :wm-outer-loop-45-v1}

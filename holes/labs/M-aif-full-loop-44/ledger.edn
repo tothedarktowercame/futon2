@@ -1,0 +1,74 @@
+{:protocol/version 4,
+ :remaining 0,
+ :attempts
+ [{:typed-sorries 1,
+   :grounded? false,
+   :attempt/id "attempt-054",
+   :outcome :build-failed,
+   :selected-mission
+   "repair-initialization-6d5da36a-04f0-42ee-ba91-55bee5801a01-initialization-failed",
+   :checkpoints
+   [:time-step
+    :selection
+    :construction
+    :dispatch
+    :build
+    :adjudication
+    :closed],
+   :closed? true,
+   :artifact-binding
+   {:fresh-author? true,
+    :disagreement? true,
+    :descendant? true,
+    :text-artifact-ref "/futon2/aif/full_loop_runner.clj",
+    :pre-dispatch-head "3c17227817e0c0ef64ed1deabd54c38bb500d18f",
+    :author-window-end-ms 1785009152117,
+    :author-window-start-ms 1785007760925,
+    :commit "6657f4c3354d5732bac93eb1e66b067c372b90f2",
+    :in-author-window? true,
+    :observed-commit-time-ms 1785009119000,
+    :repo "/home/joe/code/futon2",
+    :text-artifact-sha nil,
+    :observed-head "6657f4c3354d5732bac93eb1e66b067c372b90f2",
+    :corroborates? false},
+   :attempt/ordinal 1,
+   :fresh-commit "6657f4c3354d5732bac93eb1e66b067c372b90f2",
+   :artifact-only? false,
+   :opportunity-id
+   "duree-click-on-demand/2026-07-25T19:24:34.632087788Z/33b4fdb4-70d3-499f-81a3-b0553fa63fa2"}
+  {:typed-sorries 5,
+   :grounded? false,
+   :attempt/id "attempt-055",
+   :outcome :substrate-unavailable,
+   :selected-mission nil,
+   :checkpoints
+   [:time-step
+    :selection
+    :construction
+    :dispatch
+    :build
+    :adjudication
+    :closed],
+   :closed? true,
+   :artifact-binding nil,
+   :attempt/ordinal 2,
+   :fresh-commit nil,
+   :artifact-only? false,
+   :opportunity-id
+   "duree-click-on-demand/2026-07-25T19:59:09.830340886Z/cd5edad0-6e22-415f-a1c9-5b5c69a33d40"}],
+ :closed-count 2,
+ :grounded-change-count 0,
+ :activation
+ {:cohort/id :wm-outer-loop-44-v1,
+  :activated-at "2026-07-25T19:23:17.371036075Z",
+  :preregistration-path
+  "/home/joe/code/futon2/holes/labs/M-aif-full-loop-44/cohort.edn",
+  :preregistration-sha256
+  "a546be44f58750e76110bd879884da4ce9e37ddf1eb3501037ea3c439b842ad9",
+  :stopping-target 2},
+ :artifact-only-count 0,
+ :attempt-count 2,
+ :grounded-no-change-count 0,
+ :target 2,
+ :outcomes {:build-failed 1, :substrate-unavailable 1},
+ :cohort/id :wm-outer-loop-44-v1}
