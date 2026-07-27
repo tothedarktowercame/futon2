@@ -579,7 +579,7 @@
                  (map? (:selection response)))
     (throw
      (ex-info "Reason-bearing strategic selection response was invalid"
-              {:response response})))
+              {:selection-response-invalid true :response response})))
   (let [selection (:selection response)]
     (cond-> (update selection :status keyword)
       (get-in selection [:actuation :status])
@@ -595,6 +595,36 @@
     {:value (selection-response->selection (invoke-fn request))}
     (catch Throwable e {:error e})))
 
+(defn- selection-failure-class
+  "Classify a strategic-selection failure for retry eligibility. HTTP 5xx and
+  429 — the serving JVM failing or refusing under load, e.g. attempt-052's
+  projection-cache recheck 503 — and transport-level throws with no HTTP
+  status (connect failures, budget timeouts) are :transient. Any other HTTP
+  status and an invalid response shape are :deterministic: the endpoint will
+  reject the identical request identically, so replaying it burns the whole
+  escalating ladder (up to ~10.5 minutes) reproducing one known failure."
+  [error]
+  (let [{:keys [status] :as data} (ex-data error)]
+    (cond
+      (:selection-response-invalid data) :deterministic
+      (nil? status) :transient
+      (<= 500 (long status) 599) :transient
+      (= 429 (long status)) :transient
+      :else :deterministic)))
+
+(defn- selection-attempt-summary
+  "Small typed record of one failed ladder attempt, kept in the final
+  ex-data so a repair obligation carries the evidence of EVERY attempt
+  rather than only the last throw."
+  [i timeout-ms error]
+  (let [{:keys [status response]} (ex-data error)]
+    (cond-> {:attempt (inc i)
+             :timeout-ms timeout-ms
+             :error (ex-message error)}
+      status (assoc :status status)
+      (:err response) (assoc :err (:err response))
+      (:message response) (assoc :message (:message response)))))
+
 (defn- bounded-selection-invoke!
   [invoke-fn request timeout-ms]
   (let [timeout-sentinel (Object.)
@@ -609,7 +639,11 @@
       result)))
 
 (defn strategic-selection!
-  "Request the cache-gated reason-bearing selector, with two delayed retries.
+  "Request the cache-gated reason-bearing selector, with two delayed retries
+   for TRANSIENT failures only (see selection-failure-class): a deterministic
+   rejection fails fast with :failure-detail :deterministic-rejection instead
+   of replaying the identical request across the ladder. Either terminal
+   throw carries :attempt-failures, one typed summary per failed attempt.
 
    The default bridge uses HTTP so Futon2 keeps no source dependency on
    Futon3c. :strategic-selection-invoke-fn replaces only that bridge: it is
@@ -636,27 +670,45 @@
                            attempt-opts %))))
         attempt (fn [i]
                   (strategic-selection-attempt (invoke-for i) request))]
-    (loop [i 0]
+    (loop [i 0
+           attempt-failures []]
       (let [result (attempt i)]
         (if-not (:error result)
           (cond-> (:value result)
             (pos? i)
             (assoc :readiness/selection-transient true))
-          (if (< i (dec (count strategic-selection-retry-timeouts-ms)))
-            (do
-              (sleep-fn strategic-selection-retry-delay-ms)
-              (recur (inc i)))
-            (let [cause (:error result)]
-              (throw
-               (ex-info "Reason-bearing strategic selection failed after retries"
-                        (merge (ex-data cause)
-                               {:outcome :incomplete
-                                :failure-kind
-                                :strategic-selection-unavailable
-                                :failure-stage :selection
-                                :failure-detail :transient-exhausted
-                                :attempts (inc i)})
-                        cause)))))))))
+          (let [cause (:error result)
+                failures (conj attempt-failures
+                               (selection-attempt-summary i (timeout-for i)
+                                                          cause))
+                typed-throw
+                (fn [message failure-detail]
+                  (throw
+                   (ex-info message
+                            (merge (ex-data cause)
+                                   {:outcome :incomplete
+                                    :failure-kind
+                                    :strategic-selection-unavailable
+                                    :failure-stage :selection
+                                    :failure-detail failure-detail
+                                    :attempts (inc i)
+                                    :attempt-failures failures})
+                            cause)))]
+            (cond
+              (= :deterministic (selection-failure-class cause))
+              (typed-throw
+               "Reason-bearing strategic selection rejected deterministically"
+               :deterministic-rejection)
+
+              (< i (dec (count strategic-selection-retry-timeouts-ms)))
+              (do
+                (sleep-fn strategic-selection-retry-delay-ms)
+                (recur (inc i) failures))
+
+              :else
+              (typed-throw
+               "Reason-bearing strategic selection failed after retries"
+               :transient-exhausted))))))))
 
 (defn dispatch!
   [{:keys [agency-base]} agent caller mission prompt]

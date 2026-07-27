@@ -153,6 +153,100 @@
     (is (= 100 (get-in (ex-data failure) [:timeout-ms]))
         "the explicit per-attempt budget applies to the injected path")))
 
+(deftest attempt-052-recheck-503-is-transient-and-carries-evidence
+  ;; attempt-052 (2026-07-25): the serving projection cache failed its
+  ;; immediate recheck, the endpoint returned a typed 503, and the click died
+  ;; on the single shot. The 503 is transient — retried on the ladder — and
+  ;; an exhausted ladder carries each attempt's typed evidence rather than
+  ;; only the last throw.
+  (let [recheck-503
+        {:status 503
+         :body (json/generate-string
+                {:ok false
+                 :err "strategic-selection-failed"
+                 :message
+                 "serving projection cache failed its immediate recheck"})}
+        ok {:status 200
+            :body (json/generate-string
+                   {:ok true
+                    :selection {:status "verified-live-selection"
+                                :selected-mission-ids ["M-a"]}})}
+        calls (atom 0)]
+    (testing "the recheck 503 recovers on a later ladder attempt"
+      (let [result
+            (with-redefs [http/post (fn [_ _]
+                                      (swap! calls inc)
+                                      (if (< @calls 2) recheck-503 ok))]
+              (runner/strategic-selection!
+               {:agency-base "http://test"
+                :strategic-selection-sleep-fn (fn [_])}
+               {:scheduler-habit-ranking ["M-a"]}))]
+        (is (= 2 @calls))
+        (is (true? (:readiness/selection-transient result)))
+        (is (= :verified-live-selection (:status result)))))
+    (testing "an exhausted 503 ladder carries per-attempt evidence"
+      (let [failure
+            (with-redefs [http/post (fn [_ _] recheck-503)]
+              (try
+                (runner/strategic-selection!
+                 {:agency-base "http://test"
+                  :strategic-selection-sleep-fn (fn [_])}
+                 {:scheduler-habit-ranking ["M-a"]})
+                nil
+                (catch clojure.lang.ExceptionInfo e (ex-data e))))]
+        (is (= :transient-exhausted (:failure-detail failure)))
+        (is (= [503 503 503] (mapv :status (:attempt-failures failure))))
+        (is (= [150000 210000 270000]
+               (mapv :timeout-ms (:attempt-failures failure))))
+        (is (= "serving projection cache failed its immediate recheck"
+               (:message (first (:attempt-failures failure)))))))))
+
+(deftest deterministic-selection-rejection-fails-fast
+  ;; A request the endpoint deterministically rejects (non-transient HTTP
+  ;; status, or a malformed response body) must not replay across the
+  ;; escalating ladder: the identical request fails identically, and the
+  ;; ladder burns up to ~10.5 minutes reproducing one known failure. Fail
+  ;; closed immediately with the typed detail.
+  (testing "a 4xx rejection is not retried"
+    (let [calls (atom 0)
+          failure
+          (with-redefs [http/post
+                        (fn [_ _]
+                          (swap! calls inc)
+                          {:status 400
+                           :body (json/generate-string
+                                  {:ok false :err "bad-request"})})]
+            (try
+              (runner/strategic-selection!
+               {:agency-base "http://test"
+                :strategic-selection-sleep-fn
+                (fn [_] (throw (ex-info "must not sleep" {})))}
+               {:scheduler-habit-ranking ["M-a"]})
+              nil
+              (catch clojure.lang.ExceptionInfo e (ex-data e))))]
+      (is (= 1 @calls))
+      (is (= :strategic-selection-unavailable (:failure-kind failure)))
+      (is (= :deterministic-rejection (:failure-detail failure)))
+      (is (= 1 (:attempts failure)))
+      (is (= [400] (mapv :status (:attempt-failures failure))))))
+  (testing "an invalid response shape is not retried"
+    (let [calls (atom 0)
+          failure
+          (try
+            (runner/strategic-selection!
+             {:strategic-selection-invoke-fn
+              (fn [_]
+                (swap! calls inc)
+                {:ok true :selection "not-a-map"})
+              :strategic-selection-sleep-fn
+              (fn [_] (throw (ex-info "must not sleep" {})))}
+             {:scheduler-habit-ranking ["M-a"]})
+            nil
+            (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+      (is (= 1 @calls))
+      (is (= :deterministic-rejection (:failure-detail failure)))
+      (is (true? (:selection-response-invalid failure))))))
+
 (def selected-action {:type :open-mission :target "M-selected"})
 
 (def judgement
