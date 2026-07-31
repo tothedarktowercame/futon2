@@ -115,6 +115,11 @@
            rejected-memory-ids inclusion-reasons rejection-reasons pattern-id
            cascade-id outcome-id surfaced-at recorded-at]
     :as receipt}]
+  (when (= :war-machine domain)
+    (fail! "War Machine projection selection is not agent memory attribution"
+           {:domain domain
+            :required-receipt :wm-projection
+            :receipt receipt}))
   (let [surfaced (vec (distinct surfaced-memory-ids))
         used (vec (distinct used-memory-ids))
         rejected (vec (distinct (or rejected-memory-ids [])))
@@ -168,7 +173,8 @@
                 (fail! "memory-use timestamps must be ISO-8601 instants"
                        {:surfaced-at surfaced-at
                         :recorded-at recorded-at}))))]
-    (cond-> {:memory-use/decision-id decision-id
+    (cond-> {:memory-use/signal :agent-attribution
+             :memory-use/decision-id decision-id
              :memory-use/session-id session-id
              :memory-use/domain domain
              :memory-use/surfaced-ids surfaced
@@ -194,3 +200,77 @@
       surfaced-at (assoc :memory-use/surfaced-at surfaced-at)
       recorded-at (assoc :memory-use/recorded-at recorded-at)
       (some? latency-ms) (assoc :memory-use/retrieval-to-use-ms latency-ms)))))
+
+(def ^:private projection-forbidden-keys
+  #{:used-ids :used-memory-ids :memory-use/used-ids})
+
+(defn wm-projection-receipt
+  "Validate one War Machine algorithmic-selection receipt.
+
+   This is deliberately not a memory-use receipt. Projection-selected ids are
+   what the algorithm selected, not an agent's attribution of memories used.
+   Used-id fields are rejected rather than ignored."
+  [{:keys [decision-id session-id domain surfaced-memory-ids
+           projection-selected-memory-ids inclusion-reasons pattern-id
+           cascade-id surfaced-at recorded-at]
+    :as receipt}]
+  (let [forbidden (cset/intersection projection-forbidden-keys
+                                     (set (keys receipt)))
+        surfaced (vec (distinct surfaced-memory-ids))
+        selected (vec (distinct projection-selected-memory-ids))
+        surfaced-set (set surfaced)]
+    (when (seq forbidden)
+      (fail! "WM projection receipts structurally forbid used-id fields"
+             {:forbidden-keys forbidden :receipt receipt}))
+    (when-not (and (nonblank-string? decision-id)
+                   (nonblank-string? session-id)
+                   (= :war-machine domain)
+                   (string-vector? surfaced-memory-ids)
+                   (string-vector? projection-selected-memory-ids)
+                   (map? inclusion-reasons)
+                   (or (nonblank-string? pattern-id)
+                       (nonblank-string? cascade-id))
+                   (or (nil? surfaced-at) (nonblank-string? surfaced-at))
+                   (or (nil? recorded-at) (nonblank-string? recorded-at)))
+      (fail! "invalid WM projection receipt shape" {:receipt receipt}))
+    (when-not (every? surfaced-set selected)
+      (fail! "projection-selected memories must have been surfaced"
+             {:surfaced surfaced :projection-selected selected}))
+    (when-not (every? (fn [memory-id]
+                        (nonblank-string? (get inclusion-reasons memory-id)))
+                      surfaced)
+      (fail! "every surfaced WM memory requires an inclusion reason"
+             {:surfaced surfaced :inclusion-reasons inclusion-reasons}))
+    (cond-> {:wm-projection/signal :algorithmic-selection
+             :wm-projection/decision-id decision-id
+             :wm-projection/session-id session-id
+             :wm-projection/domain :war-machine
+             :wm-projection/surfaced-ids surfaced
+             :wm-projection/projection-selected-ids selected
+             :wm-projection/inclusion-reasons
+             (mapv (fn [memory-id]
+                     {:memory-id memory-id
+                      :reason (get inclusion-reasons memory-id)})
+                   surfaced)
+             :wm-projection/status :pending-external-check}
+      pattern-id (assoc :wm-projection/pattern-id pattern-id)
+      cascade-id (assoc :wm-projection/cascade-id cascade-id)
+      surfaced-at (assoc :wm-projection/surfaced-at surfaced-at)
+      recorded-at (assoc :wm-projection/recorded-at recorded-at))))
+
+(defn agent-attribution-corpus
+  "Construct a homogeneous corpus of agent-attribution receipts.
+
+   Algorithmic WM projection receipts fail closed instead of being pooled with
+   solver or agent self-attribution."
+  [receipts]
+  (when-not (and (sequential? receipts)
+                 (every? #(= :agent-attribution (:memory-use/signal %))
+                         receipts))
+    (fail! "agent-attribution corpus cannot contain algorithmic projection receipts"
+           {:receipt-signals
+            (mapv #(or (:memory-use/signal %)
+                       (:wm-projection/signal %)
+                       :untyped)
+                  receipts)}))
+  (vec receipts))

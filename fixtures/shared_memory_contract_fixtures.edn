@@ -64,12 +64,12 @@
   :outcome-id "e-proof-check-1"
   :recorded-at "2026-07-23T10:00:00Z"}
 
- :wm-receipt
+ :wm-projection-receipt
  {:decision-id "wm-shadow-decision-1"
   :session-id "wm-shadow-2"
   :domain :war-machine
   :surfaced-memory-ids ["e-wm-1"]
-  :used-memory-ids []
+  :projection-selected-memory-ids []
   :inclusion-reasons {"e-wm-1" "R15 control endpoint is active"}
   :cascade-id "wm-control-cascade-1"
   :recorded-at "2026-07-23T10:05:00Z"}}

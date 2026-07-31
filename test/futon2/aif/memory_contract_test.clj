@@ -43,17 +43,38 @@
                              (update-in math [:edge :hx/endpoints]
                                         #(vec (remove #{"lean/field-simp-denominator"} %)))))))))
 
-(deftest both-domains-use-the-same-use-receipt
-  (let [{:keys [math-receipt wm-receipt]} (fixtures)
+(deftest attribution-and-wm-projection-use-distinct-receipts
+  (let [{:keys [math-receipt wm-projection-receipt]} (fixtures)
         math (memory-contract/use-receipt math-receipt)
-        wm (memory-contract/use-receipt wm-receipt)]
+        wm (memory-contract/wm-projection-receipt wm-projection-receipt)]
+    (is (= :agent-attribution (:memory-use/signal math)))
     (is (= :outcome-attached (:memory-use/status math)))
     (is (= ["e-math-1"] (:memory-use/used-ids math)))
     (is (= [] (:memory-use/unused-ids math)))
-    (is (= :pending-outcome (:memory-use/status wm)))
-    (is (= [] (:memory-use/used-ids wm)))
-    (is (= ["e-wm-1"] (:memory-use/unused-ids wm)))
-    (is (= "wm-control-cascade-1" (:memory-use/cascade-id wm)))))
+    (is (= :algorithmic-selection (:wm-projection/signal wm)))
+    (is (= :pending-external-check (:wm-projection/status wm)))
+    (is (= [] (:wm-projection/projection-selected-ids wm)))
+    (is (not-any? #(= "used-ids" (name %)) (keys wm)))
+    (is (= "wm-control-cascade-1" (:wm-projection/cascade-id wm)))
+    (is (thrown-with-msg?
+         clojure.lang.ExceptionInfo
+         #"cannot contain algorithmic projection"
+         (memory-contract/agent-attribution-corpus [math wm])))))
+
+(deftest wm-used-ids-are-structurally-rejected
+  (let [{:keys [wm-projection-receipt]} (fixtures)]
+    (is (thrown-with-msg?
+         clojure.lang.ExceptionInfo
+         #"not agent memory attribution"
+         (memory-contract/use-receipt
+          (-> wm-projection-receipt
+              (dissoc :projection-selected-memory-ids)
+              (assoc :used-memory-ids [])))))
+    (is (thrown-with-msg?
+         clojure.lang.ExceptionInfo
+         #"structurally forbid used-id"
+         (memory-contract/wm-projection-receipt
+          (assoc wm-projection-receipt :used-memory-ids []))))))
 
 (deftest use-receipt-rejects-unseen-use-and-unreasoned-surface
   (let [base (:math-receipt (fixtures))]
