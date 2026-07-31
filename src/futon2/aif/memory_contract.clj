@@ -14,6 +14,9 @@
 (def witness-statuses
   #{:self-asserted :independently-witnessed :challenged :unknown})
 
+(def external-witness-statuses
+  #{:independently-witnessed :challenged})
+
 (defn- nonblank-string?
   [x]
   (and (string? x) (not (str/blank? x))))
@@ -257,6 +260,122 @@
       cascade-id (assoc :wm-projection/cascade-id cascade-id)
       surfaced-at (assoc :wm-projection/surfaced-at surfaced-at)
       recorded-at (assoc :wm-projection/recorded-at recorded-at))))
+
+(defn decision-keyed-external-check-entry
+  "Construct an independently authored outcome check for any memory client.
+
+   DOMAIN identifies the client lane and becomes an explicit evidence tag and
+   body field. Decision identity is the only supported outcome join key."
+  [{:keys [evidence-id decision-id domain author session-id at outcome
+           witness-status checker]}]
+  (when-not (and (every? nonblank-string?
+                         [evidence-id decision-id author session-id at checker])
+                 (explicit-domain? domain)
+                 (keyword? outcome)
+                 (contains? external-witness-statuses witness-status))
+    (fail! "invalid decision-keyed external memory check"
+           {:evidence-id evidence-id
+            :decision-id decision-id
+            :domain domain
+            :author author
+            :session-id session-id
+            :at at
+            :outcome outcome
+            :witness-status witness-status
+            :checker checker}))
+  {:evidence/id evidence-id
+   :evidence/subject {:ref/type :decision :ref/id decision-id}
+   :evidence/type :pattern-outcome
+   :evidence/claim-type :observation
+   :evidence/author author
+   :evidence/session-id session-id
+   :evidence/at at
+   :evidence/body {:outcome outcome
+                   :memory-outcome/domain domain
+                   :memory-outcome/witness-status witness-status
+                   :checker checker}
+   :evidence/tags [domain :external-check]})
+
+(defn- validated-decision-check
+  [check]
+  (let [decision-id (get-in check [:evidence/subject :ref/id])
+        domain (get-in check [:evidence/body :memory-outcome/domain])
+        witness-status (get-in check
+                               [:evidence/body
+                                :memory-outcome/witness-status])]
+    (when-not (and (= :decision (get-in check
+                                         [:evidence/subject :ref/type]))
+                   (nonblank-string? decision-id)
+                   (= :pattern-outcome (:evidence/type check))
+                   (= :observation (:evidence/claim-type check))
+                   (nonblank-string? (:evidence/id check))
+                   (nonblank-string? (:evidence/author check))
+                   (explicit-domain? domain)
+                   (some #{domain} (:evidence/tags check))
+                   (some #{:external-check} (:evidence/tags check))
+                   (keyword? (get-in check [:evidence/body :outcome]))
+                   (contains? external-witness-statuses witness-status))
+      (fail! "external memory checks must carry an exact decision and domain"
+             {:check-id (:evidence/id check)
+              :subject (:evidence/subject check)
+              :domain domain}))
+    check))
+
+(defn- receipt-selection
+  [receipt]
+  (case (or (:memory-use/signal receipt)
+            (:wm-projection/signal receipt))
+    :agent-attribution
+    {:signal :agent-attribution
+     :decision-id (:memory-use/decision-id receipt)
+     :domain (:memory-use/domain receipt)
+     :offered-ids (:memory-use/surfaced-ids receipt)
+     :selected-ids (:memory-use/used-ids receipt)}
+
+    :algorithmic-selection
+    {:signal :algorithmic-selection
+     :decision-id (:wm-projection/decision-id receipt)
+     :domain (:wm-projection/domain receipt)
+     :offered-ids (:wm-projection/surfaced-ids receipt)
+     :selected-ids (:wm-projection/projection-selected-ids receipt)}
+
+    (fail! "expected a typed memory-client receipt" {:receipt receipt})))
+
+(defn witnessed-memory-outcome-triple
+  "Join offered -> selected -> independently witnessed for either receipt kind.
+
+   Agent attribution uses its reported used ids; algorithmic selection uses
+   projection-selected ids. They remain distinct signals in the result."
+  [receipt external-check]
+  (let [external-check (validated-decision-check external-check)
+        {:keys [signal decision-id domain offered-ids selected-ids]}
+        (receipt-selection receipt)
+        check-decision (get-in external-check [:evidence/subject :ref/id])
+        check-domain (get-in external-check
+                             [:evidence/body :memory-outcome/domain])]
+    (when-not (= decision-id check-decision)
+      (fail! "memory receipt and external check decision ids differ"
+             {:receipt-decision-id decision-id
+              :check-decision-id check-decision}))
+    (when-not (= domain check-domain)
+      (fail! "memory receipt and external check domains differ"
+             {:receipt-domain domain :check-domain check-domain}))
+    (when-not (and (seq offered-ids) (seq selected-ids))
+      (fail! "witnessed memory outcome requires offered and selected memories"
+             {:offered offered-ids :selected selected-ids}))
+    {:memory-outcome-triple/type :offered-selected-witnessed
+     :memory-outcome-triple/selection-signal signal
+     :memory-outcome-triple/decision-id decision-id
+     :memory-outcome-triple/domain domain
+     :memory-outcome-triple/offered-ids offered-ids
+     :memory-outcome-triple/selected-ids selected-ids
+     :memory-outcome-triple/witness-evidence-id (:evidence/id external-check)
+     :memory-outcome-triple/witness-status
+     (get-in external-check [:evidence/body
+                             :memory-outcome/witness-status])
+     :memory-outcome-triple/outcome
+     (get-in external-check [:evidence/body :outcome])
+     :memory-outcome-triple/checker (:evidence/author external-check)}))
 
 (defn agent-attribution-corpus
   "Construct a homogeneous corpus of agent-attribution receipts.

@@ -76,6 +76,58 @@
          (memory-contract/wm-projection-receipt
           (assoc wm-projection-receipt :used-memory-ids []))))))
 
+(deftest one-witness-contract-joins-both-receipt-kinds
+  (let [{:keys [math-receipt wm-projection-receipt]} (fixtures)
+        math (memory-contract/use-receipt (dissoc math-receipt :outcome-id))
+        wm (memory-contract/wm-projection-receipt
+            (assoc wm-projection-receipt
+                   :projection-selected-memory-ids ["e-wm-1"]))
+        check-args
+        {:evidence-id "e-shared-witness"
+         :author "memory/test-external-checker"
+         :session-id "memory-check-session"
+         :at "2026-07-31T10:00:00Z"
+         :outcome :pass
+         :witness-status :independently-witnessed
+         :checker "test-only external checker"}
+        math-check
+        (memory-contract/decision-keyed-external-check-entry
+         (assoc check-args
+                :decision-id "math-decision-1"
+                :domain :mathematics))
+        wm-check
+        (memory-contract/decision-keyed-external-check-entry
+         (assoc check-args
+                :evidence-id "e-shared-wm-witness"
+                :decision-id "wm-shadow-decision-1"
+                :domain :war-machine))
+        math-triple
+        (memory-contract/witnessed-memory-outcome-triple math math-check)
+        wm-triple
+        (memory-contract/witnessed-memory-outcome-triple wm wm-check)]
+    (is (= :agent-attribution
+           (:memory-outcome-triple/selection-signal math-triple)))
+    (is (= ["e-math-1"]
+           (:memory-outcome-triple/selected-ids math-triple)))
+    (is (= :algorithmic-selection
+           (:memory-outcome-triple/selection-signal wm-triple)))
+    (is (= ["e-wm-1"]
+           (:memory-outcome-triple/selected-ids wm-triple)))
+    (is (thrown-with-msg?
+         clojure.lang.ExceptionInfo
+         #"domains differ"
+         (memory-contract/witnessed-memory-outcome-triple
+          math
+          (assoc-in wm-check [:evidence/subject :ref/id]
+                    "math-decision-1"))))
+    (is (thrown-with-msg?
+         clojure.lang.ExceptionInfo
+         #"decision ids differ"
+         (memory-contract/witnessed-memory-outcome-triple
+          math
+          (assoc-in math-check [:evidence/subject :ref/id]
+                    "another-decision"))))))
+
 (deftest use-receipt-rejects-unseen-use-and-unreasoned-surface
   (let [base (:math-receipt (fixtures))]
     (is (thrown-with-msg? clojure.lang.ExceptionInfo
