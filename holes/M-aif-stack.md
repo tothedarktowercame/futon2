@@ -196,3 +196,63 @@ not see what the controller was good at, because nobody had said what the
 controller was for.** This is `M-wm-capability-claim.md`'s gap arriving
 independently in the ant domain on the same day. We measured yield because yield
 was measurable, not because it was the capability.
+
+---
+
+## S1 CONFIRMATION (2026-08-01): the epistemic apparatus is inert on most seeds
+
+Registration #1 through the full pipeline. Validation fired
+(`:validated? true`), the positive control discharged before any treatment ran,
+pilot artifacts untouched (`a5caf04a…` unchanged), seeds drawn from the
+registered confirmation bases with **zero** pilot seeds present, and two
+producer runs byte-identical at `964462c7…`.
+
+### Per-seed identity — a much stronger statement than a confidence interval
+
+codex-9 reported contrasts and CIs. Reading the artifact per seed says something
+the CIs cannot: **how often ablating a term changes the run at all.**
+
+| scenario | no-directed-eig | no-info-gain | no-risk |
+|---|---:|---:|---:|
+| patchy | 28/30 identical | 28/30 | **2/30** |
+| sparse | **30/30 identical** | 27/30 | 4/30 |
+| snowdrift | **30/30 identical** | 25/30 | **0/30** |
+
+Directed-EIG is **bit-identical on every seed** in two of three scenarios, and on
+28 of 30 in the third. Info-gain is inert on 80–93% of seeds. The risk term
+changes the run on 28/30, 26/30 and 30/30.
+
+That is not "the contrast is not significant". It is: **on most runs, ablating
+the epistemic apparatus produces the identical trajectory.**
+
+### What this settles
+
+The morning's authority run showed that scoring matters enormously — replacing
+it with uniform-random over the same admissible set cost `133.63 [94.13, 173.13]`
+on patchy. This run shows which part of the score that is. **It is the risk
+term.** The epistemic half — the thing that distinguishes expected free energy
+from plain risk minimisation — contributes nothing to selection on the great
+majority of runs.
+
+So for the ants: *the implementation's "expected free energy" is, causally, its
+risk leg.* Four named epistemic quantities, and the live behaviour is
+indistinguishable without them.
+
+The survival trade replicates on independent seeds. Sparse starvation:
+`aif-full` 0.133, `no-risk` 0.633, `classic` 0.700 — ablating risk multiplies
+starvation nearly fivefold while *raising* mean yield, and `classic` beats
+`aif-full` on yield in every scenario while starving far more. The controller
+buys survival with yield, and the risk term is what buys it.
+
+### Methodological note worth carrying to the other two systems
+
+**For an ablation, report the identity rate alongside the contrast.** A
+non-significant CI is weak evidence of inertness — it is consistent with a small
+real effect and an underpowered design. A bit-identical run set is *proof* of
+inertness for those seeds, and needs no power argument at all. Our pilot reported
+CIs and called the result "not established"; the identity counts say something
+far stronger and were available in the same artifact.
+
+This is the fifth instance of the mission's class, and the cleanest: quantities
+computed, canonically named, persisted into the trace, and provably absent from
+the causal path.
