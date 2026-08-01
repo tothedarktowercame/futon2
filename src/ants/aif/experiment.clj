@@ -13,7 +13,8 @@
    Reproducibility: every run is logged with its seed; re-running from the seed
    reproduces the result bit-identically (the R4 golden)."
   (:require [ants.war :as war]
-            [ants.compare-replay :as stats]))
+            [ants.compare-replay :as stats]
+            [ants.aif.experiment-schema :as experiment-schema]))
 
 (defn- seeded-rand-fn
   "Create a deterministic rand-fn from a seed."
@@ -447,6 +448,41 @@
    :no-info-gain {:info 0.0}
    :no-risk {:pragmatic 0.0}
    :classic {}})
+
+(def slice5-confirmation-harness
+  "Prospective confirmation configuration. This is intentionally distinct
+   from the published pilot: only its seeds change, to make the replication
+   independent. It must pass the CLean registration before an executor runs."
+  {:arms [:aif-full :no-canonical-ambiguity :no-directed-eig
+          :no-info-gain :no-risk :classic]
+   :scenarios [:patchy :sparse :snowdrift]
+   :environment {:size [10 10]
+                 :food {:patchy {:num-patches 4 :patch-radius 2}
+                        :sparse {:num-patches 2 :patch-radius 1}
+                        :snowdrift {:num-patches 4 :patch-radius 2}}
+                 :ticks 300
+                 :initial-reserves 0.5
+                 :metabolism 0.06
+                 :ants-per-side 3}
+   :seeds {:runs-per-cell 30
+           :pilot {:runs-per-cell 30
+                   :food-fn "202608110 + 100000*s + 2*i"
+                   :movement-fn "202608111 + 100000*s + 2*i"
+                   :choice-fn "202658110 + 100000*s + i"}
+           :food-fn "202609110 + 100000*s + 2*i"
+           :movement-fn "202609111 + 100000*s + 2*i"
+           :choice-fn "202659110 + 100000*s + i"
+           :disjoint-from-pilot? true}})
+
+(defn run-registered-slice5-confirmation!
+  "Validate the prospective confirmation config, then hand it to `executor`.
+   Keeping the executor explicit makes registration/validation testable without
+   starting the confirmation experiment."
+  [executor]
+  (experiment-schema/validate-then-run!
+   experiment-schema/slice5-confirmation-registration
+   slice5-confirmation-harness
+   executor))
 
 (defn slice5-seeds
   "Independent seed triples shared across all Slice 5 arms for paired contrasts."

@@ -1,6 +1,7 @@
 {:paths ["src" "resources" "." "scripts"]
 :deps {org.clojure/clojure {:mvn/version "1.11.1"}
        org.clojure/core.logic {:mvn/version "1.0.1"}
+       metosin/malli {:mvn/version "0.16.3"}
        org.babashka/http-client {:mvn/version "0.4.22"}
        cheshire/cheshire {:mvn/version "5.13.0"}
        common/common {:local/root "../futon1/apps/common"}
