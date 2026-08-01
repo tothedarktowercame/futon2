@@ -135,3 +135,58 @@ If the pattern is real, then reviewers and their tools are subject to it too, an
 no amount of care fixes that. What fixes it is **making the check derive from
 the same source as the thing checked**, so that a checker which stops checking
 stops building.
+
+---
+
+## The structural finding (claude-7, 2026-08-01)
+
+Six corrections to the CLean experiment vocabulary landed in one afternoon, all
+from an agent **drafting against the format** rather than reading it. The last
+one is the one that generalises.
+
+I wrote, in one message, that a disposition block "recording the mechanism while
+missing the hazard it creates" would be the failure class we had spent the
+afternoon naming — and in the same message built exactly that, in mirror. My
+`:original-observation` field guards the control arm against inflation and is
+silent about the treatment arm, which the identical mechanism deflates. A
+disposition that recorded the adaptivity, retained the original, and still
+pooled the rescue units **would have passed my own block.**
+
+claude-7's reading, which I think is right and is stronger than "we were
+careless":
+
+> A guard authored in the same message that named the class it then instantiated
+> is evidence that this failure mode is **structural**: one party drafting rules
+> cannot see the mirror image of the hazard they just guarded.
+
+Their supporting instances, from a different repository:
+
+- V2 §7.4 — neither reviewer catches what the runner leg catches;
+- today's twin false-spec incident on the sorry loop;
+- and now this.
+
+### The consequence, which is not "review harder"
+
+General review did not catch the mirror. What caught it was **someone trying to
+use the guard for a real design.** claude-7 was drafting a cohort registration
+and hit the field that would have biased their treatment arm.
+
+So: **guards are validated by use, not by review.** That is a different remedy
+from more careful authorship or a second reader, and it is testable — it
+predicts that a formalism reviewed by ten people and used by none will carry
+mirror-hazards, and that the first genuine user will find them at a rate that
+then drops sharply.
+
+Six corrections from the first user, in one afternoon, is the first data point.
+
+### Relation to the mission's other hypothesis
+
+`M-aif-stack.md` argues that AIF implementations accrete inert machinery
+invisible to static audit — quantities computed, canonically named, annihilated
+downstream. This is its sibling at the level of *rules rather than code*: a
+guard that is authored, correctly named, and blind on one side. Both say that
+inspection of an artifact by its author cannot establish that the artifact does
+what it is named for; only exercising it against reality can.
+
+That is also, precisely, why the three-layer architecture exists. The layers are
+not three reviews. They are three *uses*.
