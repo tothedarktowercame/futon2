@@ -295,3 +295,79 @@ was in the artifact the whole time.* That is true of our pilot, which reported
 CIs and concluded "not established" while the identity counts sat unread in the
 same EDN. It is the mission's class one more level up — the analysis, not the
 code, computing something correctly named and weaker than what it had.
+
+
+---
+
+## CORRECTION (2026-08-01, Joe): the inertness finding is environment-confounded
+
+Joe questioned "classic beats AIF on yield everywhere" against the motivating
+figure in `p4ng/plop-2026.pdf`, where classics die of starvation and AIFs thrive.
+He was right to, and the resolution is not the survival-for-yield trade I
+offered.
+
+**The figure's own status bar:** `Scores Classic 0.00 vs AIF 44.16`, with
+`Classic queen starve 209` against `AIF queen starve 35`. AIF dominates on
+*both* measures. Classic scores **zero**. And the tell is on the same line —
+`Dist C:1.73 A:6.14`: the classic ants barely moved. They sit in the nest and
+starve while the AIF ants cross the map to the food.
+
+**The environment differs, and by a lot.**
+
+| | grid | cells |
+|---|---|---|
+| `war.clj:27`, the simulation's own default | `[24 24]` | 576 |
+| our authority run, pilot and confirmation | `[10 10]` | **100** |
+
+Ours is 5.8× smaller, with 2–4 patches of radius 1–2. On 100 cells food is
+never far from anything and a greedy gradient-follower cannot miss it.
+**Exploration has almost no value in the environment we tested.**
+
+### What this does and does not overturn
+
+**Stands — these are facts about the code, not the environment:**
+
+- the canonical Gaussian ambiguity term is action-independent
+  (`pred-variances = (:var mu)`), so it cancels under argmax in *any*
+  environment. Proved in Lean, and the positive control confirmed it empirically
+  at 0.0000 in all three scenarios.
+- τ is annihilated by argmax for every τ > 0.
+- `infer-mode`/`efe-tilt` is dead code.
+
+**Confounded — this was an empirical claim in one environment:**
+
+- that the *action-dependent* epistemic proxies (directed-EIG, info-gain) are
+  inert. They were bit-identical on 30/30 seeds **on a 10×10 grid**. Those terms
+  are genuinely action-dependent in the code; their inertness may be
+  environmental rather than structural. An exploration term does nothing where
+  there is nothing to explore.
+
+It may also explain the standing puzzle — that scoring matters enormously
+(`A0−A1 = 133.63`) while no single-term ablation reproduces it. Over-determination
+was one reading; a small grid where the risk leg alone suffices is another, and
+they are not exclusive.
+
+### How the confound got in
+
+The environment was inherited "verbatim from the authority run for
+comparability", and codex-9 chose it before that. Neither of us asked whether it
+was a *discriminating* environment. **The control for one thing (comparability
+across runs) destroyed the sensitivity for another (whether exploration pays).**
+
+That is today's recurring lesson once more, and the most expensive instance: the
+measurement could not see what the thing was for, because the environment was
+chosen for a property orthogonal to the hypothesis.
+
+### R-0, ahead of everything in E-aif-ants-epistemics
+
+Before any repair: **re-run the confirmation on an environment where exploration
+has value** — the simulation's own `[24 24]` default at minimum, ideally with
+patch distance from the nest as a declared axis — and check whether the
+epistemic ablations are still bit-identical.
+
+If they are, the structural reading stands and the repairs proceed. If they are
+not, then the epistemic terms work and our test could not see it, and the
+excursion's premise needs rewriting before a line of code changes.
+
+This is cheap, it is a strictly better use of the next run than any repair, and
+it was found by an operator remembering a picture.
