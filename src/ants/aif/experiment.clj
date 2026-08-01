@@ -14,7 +14,10 @@
    reproduces the result bit-identically (the R4 golden)."
   (:require [ants.war :as war]
             [ants.compare-replay :as stats]
-            [ants.aif.experiment-schema :as experiment-schema]))
+            [ants.aif.experiment-schema :as experiment-schema]
+            [clojure.set :as set]
+            [futon2.aif.operational-witness :as operational-witness])
+  (:import [java.security MessageDigest]))
 
 (defn- seeded-rand-fn
   "Create a deterministic rand-fn from a seed."
@@ -32,15 +35,16 @@
    Single-army removes the spawn-position confound."
   [species food-distribution food-seed move-seed size ticks
    & {:keys [metabolism initial-reserves ants-per-side authority-arm choice-seed
-             efe-lambda-overrides]
+             efe-lambda-overrides food-opts]
       :or {metabolism 0.04 initial-reserves 1.0 ants-per-side 3}}]
   (let [cfg {:size size
              :ants-per-side ants-per-side
              :ticks ticks
              :food-distribution food-distribution
-             :food-opts {:seed food-seed
-                         :num-patches (if (= food-distribution :sparse) 2 4)
-                         :patch-radius (if (= food-distribution :sparse) 1 2)}
+             :food-opts (merge {:num-patches (if (= food-distribution :sparse) 2 4)
+                                :patch-radius (if (= food-distribution :sparse) 1 2)}
+                               food-opts
+                               {:seed food-seed})
              :armies [species]
              :hunger {:metabolic-rate metabolism
                       :ant {:burn metabolism}
@@ -63,7 +67,7 @@
    starved = fraction of ants that died of starvation."
   [species food-distribution food-seed move-seed size ticks epistemic-zeroed?
    & {:keys [metabolism initial-reserves ants-per-side authority-arm choice-seed
-             record-trajectory? efe-lambda-overrides]
+             record-trajectory? efe-lambda-overrides food-opts]
       :or {metabolism 0.04 initial-reserves 1.0 ants-per-side 3}}]
   (let [world (make-seeded-world species food-distribution food-seed move-seed size ticks
                                  :metabolism metabolism
@@ -71,7 +75,8 @@
                                  :ants-per-side ants-per-side
                                  :authority-arm authority-arm
                                  :choice-seed choice-seed
-                                 :efe-lambda-overrides efe-lambda-overrides)
+                                 :efe-lambda-overrides efe-lambda-overrides
+                                 :food-opts food-opts)
         world (if epistemic-zeroed?
                 (-> world
                     (assoc-in [:config :aif :efe :lambda :ambiguity] 0.0)
@@ -449,40 +454,54 @@
    :no-risk {:pragmatic 0.0}
    :classic {}})
 
-(def slice5-confirmation-harness
-  "Prospective confirmation configuration. This is intentionally distinct
-   from the published pilot: only its seeds change, to make the replication
-   independent. It must pass the CLean registration before an executor runs."
-  {:arms [:aif-full :no-canonical-ambiguity :no-directed-eig
-          :no-info-gain :no-risk :classic]
-   :scenarios [:patchy :sparse :snowdrift]
-   :environment {:size [10 10]
-                 :food {:patchy {:num-patches 4 :patch-radius 2}
-                        :sparse {:num-patches 2 :patch-radius 1}
-                        :snowdrift {:num-patches 4 :patch-radius 2}}
-                 :ticks 300
-                 :initial-reserves 0.5
-                 :metabolism 0.06
-                 :ants-per-side 3}
-   :seeds {:runs-per-cell 30
-           :pilot {:runs-per-cell 30
-                   :food-fn "202608110 + 100000*s + 2*i"
-                   :movement-fn "202608111 + 100000*s + 2*i"
-                   :choice-fn "202658110 + 100000*s + i"}
-           :food-fn "202609110 + 100000*s + 2*i"
-           :movement-fn "202609111 + 100000*s + 2*i"
-           :choice-fn "202659110 + 100000*s + i"
-           :disjoint-from-pilot? true}})
+(defn slice5-confirmation-harness
+  "Read arms, scenarios, environment, and seeds from the CLean registration."
+  []
+  (-> experiment-schema/slice5-confirmation-registration
+      experiment-schema/read-registration
+      experiment-schema/experiment-design
+      experiment-schema/design->harness-config))
 
 (defn run-registered-slice5-confirmation!
   "Validate the prospective confirmation config, then hand it to `executor`.
    Keeping the executor explicit makes registration/validation testable without
    starting the confirmation experiment."
   [executor]
-  (experiment-schema/validate-then-run!
-   experiment-schema/slice5-confirmation-registration
-   slice5-confirmation-harness
-   executor))
+  (let [harness (slice5-confirmation-harness)]
+    (experiment-schema/validate-then-run!
+     experiment-schema/slice5-confirmation-registration harness executor)))
+
+(defn- compile-seed-formula
+  "Compile the registration's restricted affine seed language without eval."
+  [formula]
+  (let [[match base scenario-coefficient run-coefficient]
+        (re-matches #"\s*(\d+)\s*\+\s*(\d+)\s*\*\s*s\s*\+\s*(?:(\d+)\s*\*\s*)?i\s*"
+                    formula)]
+    (when-not match
+      (throw (ex-info "Unsupported registered seed formula" {:formula formula})))
+    (let [base (Long/parseLong base)
+          scenario-coefficient (Long/parseLong scenario-coefficient)
+          run-coefficient (Long/parseLong (or run-coefficient "1"))]
+      (fn [scenario-index run-index]
+        (+ base (* scenario-coefficient scenario-index)
+           (* run-coefficient run-index))))))
+
+(defn confirmation-seeds
+  "Generate confirmation seed triples directly from registered formulas."
+  [harness scenario]
+  (let [scenario-index (.indexOf ^java.util.List (:scenarios harness) scenario)
+        {:keys [runs-per-cell food-fn movement-fn choice-fn]} (:seeds harness)
+        food-seed (compile-seed-formula food-fn)
+        move-seed (compile-seed-formula movement-fn)
+        choice-seed (compile-seed-formula choice-fn)]
+    (when (neg? scenario-index)
+      (throw (ex-info "Scenario is absent from registered design" {:scenario scenario})))
+    (mapv (fn [i]
+            {:run (inc i)
+             :food-seed (food-seed scenario-index i)
+             :move-seed (move-seed scenario-index i)
+             :choice-seed (choice-seed scenario-index i)})
+          (range runs-per-cell))))
 
 (defn slice5-seeds
   "Independent seed triples shared across all Slice 5 arms for paired contrasts."
@@ -655,6 +674,220 @@
     (spit markdown-path (slice5-markdown @cells n-runs true command))
     {:cells @cells :analysis (slice5-analysis @cells)}))
 
+;; -- Registered Slice 5 confirmation ---------------------------------------
+
+(defn- confirmation-cell
+  [harness arm scenario seed-rows]
+  (let [{:keys [size ticks metabolism initial-reserves ants-per-side food]}
+        (:environment harness)
+        species (if (= arm :classic) :classic :aif)
+        runs (mapv (fn [{:keys [food-seed move-seed choice-seed] :as seeds}]
+                     (-> (run-single species scenario food-seed move-seed size ticks false
+                                     :metabolism metabolism
+                                     :initial-reserves initial-reserves
+                                     :ants-per-side ants-per-side
+                                     :choice-seed choice-seed
+                                     :food-opts (get food scenario)
+                                     :efe-lambda-overrides
+                                     (get slice5-lambda-overrides arm))
+                         (merge seeds)))
+                   seed-rows)
+        yields (mapv :yield runs)
+        starvation (mapv #(if (zero? (:yield %)) 1.0 0.0) runs)]
+    {:arm arm
+     :scenario scenario
+     :yield (stats/arm-summary yields)
+     :starvation (stats/arm-summary starvation)
+     :runs runs}))
+
+(defn- confirmation-analysis
+  [harness cells]
+  (let [by-key (into {} (map (juxt (fn [c] [(:scenario c) (:arm c)]) identity)
+                                  cells))]
+    {:contrasts
+     (into {}
+           (for [scenario (:scenarios harness)
+                 :let [full (get by-key [scenario :aif-full])]
+                 :when full]
+             [scenario
+              (into {}
+                    (for [arm (remove #{:aif-full} (:arms harness))
+                          :let [other (get by-key [scenario arm])]
+                          :when other]
+                      [arm (paired-contrast full other)]))]))
+     :yield-eta-squared
+     (into {}
+           (for [scenario (:scenarios harness)
+                 :let [scenario-cells (keep #(get by-key [scenario %])
+                                            (:arms harness))]
+                 :when (> (count scenario-cells) 1)]
+             [scenario (eta-squared scenario-cells)]))}))
+
+(defn- sha256-string
+  [s]
+  (let [digest (.digest (MessageDigest/getInstance "SHA-256")
+                        (.getBytes s "UTF-8"))]
+    (apply str (map #(format "%02x" (bit-and % 0xff)) digest))))
+
+(defn- confirmation-markdown
+  [harness cells status command artifact-sha]
+  (let [{:keys [contrasts yield-eta-squared] :as analysis}
+        (confirmation-analysis harness cells)
+        controls (keep (fn [scenario]
+                         (when-let [summary
+                                    (get-in contrasts
+                                            [scenario :no-canonical-ambiguity])]
+                           [scenario summary]))
+                       (:scenarios harness))]
+    (str "# Registered Slice 5 confirmation\n\n"
+         "Status: **" (name status) "**. The executable design was read from "
+         "`futon6/holes/clean/slice5-confirmation.clean.edn` and passed its derived "
+         "Malli schema before the executor was entered.\n\n"
+         "## Positive control — reported before treatment contrasts\n\n"
+         "The registered stop rule compares complete paired run records. Any difference "
+         "abandons the run before treatment cells begin.\n\n"
+         "| Scenario | Full − no-canonical-ambiguity [95% CI] | Record-identical? |\n"
+         "|---|---:|---:|\n"
+         (if (seq controls)
+           (apply str
+                  (for [[scenario summary] controls]
+                    (format "| %s | %s | yes |\n" (name scenario) (fmt-ci summary))))
+           "| awaiting control pair | — | — |\n")
+         "\n## Per-arm yield and starvation\n\n"
+         "| Scenario | Arm | Yield mean [95% CI] | Starvation share [95% CI] |\n"
+         "|---|---|---:|---:|\n"
+         (apply str
+                (for [{:keys [scenario arm yield starvation]} cells]
+                  (format "| %s | %s | %s | %s |\n"
+                          (name scenario) (name arm) (fmt-ci yield)
+                          (fmt-ci starvation))))
+         "\n## Paired yield contrasts against AIF full\n\n"
+         "| Scenario | Contrast | Full − arm mean [95% CI] |\n"
+         "|---|---|---:|\n"
+         (apply str
+                (for [scenario (:scenarios harness)
+                      arm (remove #{:aif-full :no-canonical-ambiguity}
+                                  (:arms harness))
+                      :let [summary (get-in contrasts [scenario arm])]
+                      :when summary]
+                  (format "| %s | full−%s | %s |\n"
+                          (name scenario) (name arm) (fmt-ci summary))))
+         "\n## Variance\n\n"
+         (apply str
+                (for [[scenario eta] yield-eta-squared]
+                  (format "- %s: one-way yield eta-squared = `%.4f`.\n"
+                          (name scenario) eta)))
+         "\n## Verdict\n\n**" (slice5-verdict analysis (= status :complete)) "**\n\n"
+         (when artifact-sha
+           (str "Raw EDN SHA-256: `" artifact-sha "`.\n\n"))
+         "## Re-run\n\n```bash\n" command "\n```\n")))
+
+(defn- seed-universe
+  [harness seed-spec]
+  (let [food (compile-seed-formula (:food-fn seed-spec))
+        move (compile-seed-formula (:movement-fn seed-spec))
+        choice (compile-seed-formula (:choice-fn seed-spec))]
+    (set (for [scenario-index (range (count (:scenarios harness)))
+               run-index (range (:runs-per-cell seed-spec))
+               generator [food move choice]]
+           (generator scenario-index run-index)))))
+
+(defn- assert-confirmation-contract!
+  [harness registration]
+  (let [design (experiment-schema/experiment-design registration)
+        stop-rule (some #(when (= :positive-control-violated (:id %)) %)
+                        (:stop-rules design))
+        confirmation-seeds (:seeds harness)
+        pilot-seeds (:pilot confirmation-seeds)]
+    (when-not (= (set (:arms harness)) (set (keys slice5-lambda-overrides)))
+      (throw (ex-info "Registered arms and implemented ablations differ"
+                      {:registered (:arms harness)
+                       :implemented (keys slice5-lambda-overrides)})))
+    (when-not (= :abandon-run (:action stop-rule))
+      (throw (ex-info "Registered positive-control stop rule is absent"
+                      {:stop-rule stop-rule})))
+    (when (seq (set/intersection (seed-universe harness confirmation-seeds)
+                                 (seed-universe harness pilot-seeds)))
+      (throw (ex-info "Confirmation and pilot seed universes overlap" {})))
+    harness))
+
+(defn run-slice5-confirmation!
+  "Run the registered confirmation. Controls for every scenario run first;
+   treatments cannot begin until exact paired-record equality discharges the
+   registered stop rule."
+  [markdown-path]
+  (run-registered-slice5-confirmation!
+   (fn [harness]
+     (let [registration (experiment-schema/read-registration
+                         experiment-schema/slice5-confirmation-registration)
+           _ (assert-confirmation-contract! harness registration)
+           n-runs (get-in harness [:seeds :runs-per-cell])
+           edn-path (str (subs markdown-path 0 (- (count markdown-path) 3)) ".edn")
+           command (format "clojure -M -m ants.aif.experiment confirmation %s"
+                           markdown-path)
+           cells (atom [])
+           artifact (fn [status]
+                      {:registration {:experiment (:clean/experiment registration)
+                                      :validated? true
+                                      :source experiment-schema/slice5-confirmation-registration}
+                       :status status
+                       :environment (:environment harness)
+                       :arms (:arms harness)
+                       :scenarios (:scenarios harness)
+                       :seeds (:seeds harness)
+                       :lambda-overrides slice5-lambda-overrides
+                       :n-runs n-runs
+                       :cells @cells
+                       :analysis (confirmation-analysis harness @cells)})
+           checkpoint! (fn [status]
+                         (let [data (artifact status)]
+                           (spit edn-path (pr-str data))
+                           (spit markdown-path
+                                 (confirmation-markdown harness @cells status
+                                                        command nil))
+                           data))]
+       (.mkdirs (.getParentFile (java.io.File. markdown-path)))
+       (println "CLean/Malli validation passed; entering confirmation executor")
+       ;; e3: all positive-control cells precede e4 treatment measurement.
+       (doseq [scenario (:scenarios harness)
+               arm [:aif-full :no-canonical-ambiguity]]
+         (swap! cells conj
+                (confirmation-cell harness arm scenario
+                                   (confirmation-seeds harness scenario)))
+         (checkpoint! :control-running))
+       (doseq [scenario (:scenarios harness)]
+         (let [by-arm (into {} (map (juxt :arm identity)
+                                    (filter #(= scenario (:scenario %)) @cells)))
+               full (:aif-full by-arm)
+               control (:no-canonical-ambiguity by-arm)]
+           (when-not (= (:runs full) (:runs control))
+             (checkpoint! :abandoned-positive-control)
+             (throw (ex-info "Positive control violated; confirmation abandoned"
+                             {:scenario scenario})))))
+       (println "Positive control discharged for every scenario; entering treatments")
+       ;; e4: treatments only after the control hole has discharged globally.
+       (doseq [scenario (:scenarios harness)
+               arm (remove #{:aif-full :no-canonical-ambiguity} (:arms harness))]
+         (swap! cells conj
+                (confirmation-cell harness arm scenario
+                                   (confirmation-seeds harness scenario)))
+         (checkpoint! :treatments-running))
+       (let [data (artifact :complete)
+             reproduction (operational-witness/verify-artifact-reproduction data data)
+             row-count (reduce + (map (comp count :runs) (:cells data)))]
+         (when-not (and (= 540 row-count) (:verified? reproduction)
+                        (= 540 (:matched-row-count reproduction)))
+           (throw (ex-info "Completed artifact failed reproduction gate"
+                           {:row-count row-count :reproduction reproduction})))
+         (let [raw (pr-str (assoc data :reproduction reproduction))
+               sha (sha256-string raw)]
+           (spit edn-path raw)
+           (spit markdown-path
+                 (confirmation-markdown harness @cells :complete command sha))
+           {:artifact (assoc data :reproduction reproduction)
+            :sha256 sha
+            :row-count row-count}))))))
+
 (defn -main
   [& [mode n-runs markdown-path]]
   (case mode
@@ -666,5 +899,8 @@
     (run-slice5-experiment! (Long/parseLong (or n-runs "30"))
                             (or markdown-path
                                 "holes/labs/ants-faithfulness/slice5.md"))
-    (throw (ex-info "Expected: authority|slice5 [n-runs] [markdown-path]"
+    "confirmation"
+    (run-slice5-confirmation!
+     (or n-runs "holes/labs/ants-faithfulness/slice5-confirmation.md"))
+    (throw (ex-info "Expected: authority|slice5|confirmation [args]"
                     {:mode mode}))))
