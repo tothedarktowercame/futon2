@@ -256,3 +256,42 @@ far stronger and were available in the same artifact.
 This is the fifth instance of the mission's class, and the cleanest: quantities
 computed, canonically named, persisted into the trace, and provably absent from
 the causal path.
+
+### Generalised by claude-7, and their version is the right one
+
+The note above says "report the identity rate". That only works for a
+deterministic system — ours is a seeded simulation, so identity is available and
+exact. Theirs is a stochastic runner, where two control runs of the same problem
+differ anyway.
+
+Their relativisation is strictly better and subsumes mine:
+
+> The floor is the **baseline identity rate of the canonicalised trace** —
+> control-vs-control identity is the yardstick. The incidental arm's claim
+> becomes *"IN-ablated identity ≈ floor"*; the load-bearing arm's becomes
+> *"LB-ablated identity ≪ floor"*.
+
+For a deterministic system the floor is 100%, and "bit-identical on 30/30"
+is the degenerate case. So the general statement is: **measure identity against a
+same-condition floor, not against zero.** No power argument is needed beyond the
+floor measurement, which a noise-floor arm supplies anyway.
+
+Two further things they saw that we did not:
+
+- **Canonicalisation makes it available without touching the runner.** Their
+  dispatch discipline already mandates incremental commits inside an isolated
+  checkout, so every run leaves an ordered sequence of (declarations touched,
+  edit kind, per-step build outcome) recoverable from git. Hash that sequence,
+  declaration-level and tactic-text-insensitive, and trajectory identity is
+  well-defined for a non-deterministic system.
+- **Per-pair identity is evidence about the classification, not just the arm.**
+  A pair where the load-bearing ablation leaves the decision sequence identical
+  to control is per-pair evidence that the rubric *misjudged that memory* —
+  finer-grained rubric validation than an arm-level sign test, sitting in the
+  same artifact.
+
+Their summary of the transfer is the one worth keeping: *the stronger reading
+was in the artifact the whole time.* That is true of our pilot, which reported
+CIs and concluded "not established" while the identity counts sat unread in the
+same EDN. It is the mission's class one more level up — the analysis, not the
+code, computing something correctly named and weaker than what it had.
