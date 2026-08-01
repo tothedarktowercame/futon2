@@ -30,7 +30,8 @@
   "Create a single-army world with a specific food seed and movement seed.
    Single-army removes the spawn-position confound."
   [species food-distribution food-seed move-seed size ticks
-   & {:keys [metabolism initial-reserves ants-per-side authority-arm choice-seed]
+   & {:keys [metabolism initial-reserves ants-per-side authority-arm choice-seed
+             efe-lambda-overrides]
       :or {metabolism 0.04 initial-reserves 1.0 ants-per-side 3}}]
   (let [cfg {:size size
              :ants-per-side ants-per-side
@@ -49,7 +50,10 @@
                                    (seeded-rand-fn (or choice-seed (+ 1000003 move-seed))))
                 authority-arm
                 (assoc-in [:config :aif :authority]
-                          {:arm authority-arm :tau 1.0e9}))]
+                          {:arm authority-arm :tau 1.0e9})
+                (seq efe-lambda-overrides)
+                (update-in [:config :aif :efe :lambda]
+                           #(merge (or % {}) efe-lambda-overrides)))]
     world))
 
 (defn- run-single
@@ -58,14 +62,15 @@
    starved = fraction of ants that died of starvation."
   [species food-distribution food-seed move-seed size ticks epistemic-zeroed?
    & {:keys [metabolism initial-reserves ants-per-side authority-arm choice-seed
-             record-trajectory?]
+             record-trajectory? efe-lambda-overrides]
       :or {metabolism 0.04 initial-reserves 1.0 ants-per-side 3}}]
   (let [world (make-seeded-world species food-distribution food-seed move-seed size ticks
                                  :metabolism metabolism
                                  :initial-reserves initial-reserves
                                  :ants-per-side ants-per-side
                                  :authority-arm authority-arm
-                                 :choice-seed choice-seed)
+                                 :choice-seed choice-seed
+                                 :efe-lambda-overrides efe-lambda-overrides)
         world (if epistemic-zeroed?
                 (-> world
                     (assoc-in [:config :aif :efe :lambda :ambiguity] 0.0)
@@ -426,6 +431,182 @@
     (spit markdown-path (authority-markdown @cells n-runs true command))
     {:cells @cells :analysis (authority-analysis @cells)}))
 
+;; -- Re-specified Slice 5 term-ablation experiment --------------------------
+
+(def slice5-environment
+  "Frozen to the authority experiment environment before the first Slice 5 run."
+  (-> authority-environment
+      (assoc :arms [:aif-full :no-canonical-ambiguity :no-directed-eig
+                    :no-info-gain :no-risk :classic])
+      (dissoc :a3-tau)))
+
+(def slice5-lambda-overrides
+  {:aif-full {}
+   :no-canonical-ambiguity {:ambiguity 0.0}
+   :no-directed-eig {:epistemic 0.0}
+   :no-info-gain {:info 0.0}
+   :no-risk {:pragmatic 0.0}
+   :classic {}})
+
+(defn slice5-seeds
+  "Independent seed triples shared across all Slice 5 arms for paired contrasts."
+  [scenario n-runs]
+  (let [scenario-offset (* 100000 (.indexOf ^java.util.List
+                                             (:scenarios slice5-environment)
+                                             scenario))]
+    (mapv (fn [i]
+            {:run (inc i)
+             :food-seed (+ 202608110 scenario-offset (* 2 i))
+             :move-seed (+ 202608111 scenario-offset (* 2 i))
+             :choice-seed (+ 202658110 scenario-offset i)})
+          (range n-runs))))
+
+(defn- slice5-cell
+  [arm scenario seed-rows]
+  (let [{:keys [size ticks metabolism initial-reserves ants-per-side]}
+        slice5-environment
+        species (if (= arm :classic) :classic :aif)
+        runs (mapv (fn [{:keys [food-seed move-seed choice-seed] :as seeds}]
+                     (-> (run-single species scenario food-seed move-seed size ticks false
+                                     :metabolism metabolism
+                                     :initial-reserves initial-reserves
+                                     :ants-per-side ants-per-side
+                                     :choice-seed choice-seed
+                                     :efe-lambda-overrides
+                                     (get slice5-lambda-overrides arm))
+                         (merge seeds)))
+                   seed-rows)
+        yields (mapv :yield runs)
+        starvation (mapv #(if (zero? (:yield %)) 1.0 0.0) runs)]
+    {:arm arm
+     :scenario scenario
+     :yield (stats/arm-summary yields)
+     :starvation (stats/arm-summary starvation)
+     :runs runs}))
+
+(defn- slice5-analysis
+  [cells]
+  (let [by-key (into {} (map (juxt (fn [c] [(:scenario c) (:arm c)]) identity) cells))]
+    {:contrasts
+     (into {}
+           (for [scenario (:scenarios slice5-environment)
+                 :let [full (get by-key [scenario :aif-full])]
+                 :when full]
+             [scenario
+              (into {}
+                    (for [arm (remove #{:aif-full} (:arms slice5-environment))
+                          :let [other (get by-key [scenario arm])]
+                          :when other]
+                      [arm (paired-contrast full other)]))]))
+     :yield-eta-squared
+     (into {}
+           (for [scenario (:scenarios slice5-environment)
+                 :let [scenario-cells (keep #(get by-key [scenario %])
+                                            (:arms slice5-environment))]
+                 :when (> (count scenario-cells) 1)]
+             [scenario (eta-squared scenario-cells)]))}))
+
+(defn- significant-positive?
+  [{:keys [ci95]}]
+  (and ci95 (pos? (first ci95))))
+
+(defn- slice5-verdict
+  [analysis complete?]
+  (if-not complete?
+    "The verdict will be emitted after all eighteen cells complete."
+    (let [contrasts (:contrasts analysis)
+          directed? (some #(significant-positive?
+                             (get-in contrasts [% :no-directed-eig]))
+                          [:patchy :sparse])
+          info? (some #(significant-positive?
+                         (get-in contrasts [% :no-info-gain]))
+                      [:patchy :sparse])
+          risk? (some #(significant-positive? (get-in contrasts [% :no-risk]))
+                      [:patchy :sparse])]
+      (cond
+        (or directed? info?)
+        "The ants have a live explore/exploit regulator carried by an action-dependent epistemic term."
+
+        risk?
+        "The epistemic apparatus is decorative in this run; the measurable exploration effect is carried by KL risk plus mode gating."
+
+        :else
+        "No ablated EFE term has an established positive yield contribution on patchy or sparse."))))
+
+(defn- slice5-markdown
+  [cells n-runs complete? command]
+  (let [{:keys [contrasts yield-eta-squared] :as analysis} (slice5-analysis cells)
+        positive-control (get-in contrasts [:patchy :no-canonical-ambiguity])]
+    (str "# Re-specified Slice 5: AIF term ablations\n\n"
+         "Status: " (if complete? "complete" "running; checkpointed after each cell") ".\n\n"
+         "## Frozen environment and protocol\n\n"
+         "The environment was copied verbatim from the causal-authority run before the first "
+         "simulation and was not tuned afterward: `" (pr-str slice5-environment) "`. Each cell has "
+         n-runs " independently seeded 300-tick runs; seed triples are shared across arms, and "
+         "contrasts use paired two-sided 95% t intervals. Starvation is the explicit share of "
+         "runs whose yield is exactly `0.0`.\n\n"
+         "Seeds are generated by `slice5-seeds`: for zero-based scenario index `s` and run index "
+         "`i`, food=`202608110+100000s+2i`, movement=`202608111+100000s+2i`, and "
+         "choice=`202658110+100000s+i`. Every concrete triple is logged in the raw EDN.\n\n"
+         "## Positive control — canonical ambiguity first\n\n"
+         (if positive-control
+           (str "Pre-registered prediction: `:aif-full` and `:no-canonical-ambiguity` are "
+                "bit-identical on every seed because the ambiguity addend is constant across "
+                "candidate actions. Patchy full−ablation yield: " (fmt-ci positive-control) ".\n")
+           "Awaiting the paired positive-control cells.\n")
+         "\n## Per-arm yield and starvation\n\n"
+         "| Scenario | Arm | Yield mean [95% CI] | Starvation share [95% CI] |\n"
+         "|---|---|---:|---:|\n"
+         (apply str
+                (for [{:keys [scenario arm yield starvation]} cells]
+                  (format "| %s | %s | %s | %s |\n"
+                          (name scenario) (name arm) (fmt-ci yield) (fmt-ci starvation))))
+         "\n## Paired yield contrasts against AIF full\n\n"
+         "| Scenario | Contrast | Full − arm mean [95% CI] |\n"
+         "|---|---|---:|\n"
+         (apply str
+                (for [scenario (:scenarios slice5-environment)
+                      arm (remove #{:aif-full} (:arms slice5-environment))
+                      :let [summary (get-in contrasts [scenario arm])]
+                      :when summary]
+                  (format "| %s | full−%s | %s |\n"
+                          (name scenario) (name arm) (fmt-ci summary))))
+         "\n## Variance\n\n"
+         (apply str
+                (for [[scenario eta] yield-eta-squared]
+                  (format "- %s: one-way yield eta-squared = `%.4f`.\n"
+                          (name scenario) eta)))
+         "\n## Verdict\n\n**" (slice5-verdict analysis complete?) "**\n\n"
+         "## Re-run\n\n```bash\n" command "\n```\n")))
+
+(defn run-slice5-experiment!
+  "Run and checkpoint the six-arm re-specified Slice 5 sweep."
+  [n-runs markdown-path]
+  (let [edn-path (str (subs markdown-path 0 (- (count markdown-path) 3)) ".edn")
+        command (format "clojure -M -m ants.aif.experiment slice5 %d %s"
+                        n-runs markdown-path)
+        cells (atom [])]
+    (.mkdirs (.getParentFile (java.io.File. markdown-path)))
+    (doseq [scenario (:scenarios slice5-environment)
+            arm (:arms slice5-environment)]
+      (let [cell (slice5-cell arm scenario (slice5-seeds scenario n-runs))]
+        (swap! cells conj cell)
+        (spit edn-path (pr-str {:environment slice5-environment
+                                :lambda-overrides slice5-lambda-overrides
+                                :n-runs n-runs
+                                :cells @cells
+                                :analysis (slice5-analysis @cells)}))
+        (spit markdown-path (slice5-markdown @cells n-runs false command))
+        (when (= arm :no-canonical-ambiguity)
+          (let [full (some #(and (= scenario (:scenario %))
+                                 (= :aif-full (:arm %)) %) @cells)]
+            (when-not (= (mapv :yield (:runs full))
+                         (mapv :yield (:runs cell)))
+              (throw (ex-info "Positive control failed; stopping Slice 5"
+                              {:scenario scenario})))))))
+    (spit markdown-path (slice5-markdown @cells n-runs true command))
+    {:cells @cells :analysis (slice5-analysis @cells)}))
+
 (defn -main
   [& [mode n-runs markdown-path]]
   (case mode
@@ -433,4 +614,9 @@
     (run-authority-experiment! (Long/parseLong (or n-runs "30"))
                                (or markdown-path
                                    "holes/labs/ants-faithfulness/authority.md"))
-    (throw (ex-info "Expected: authority [n-runs] [markdown-path]" {:mode mode}))))
+    "slice5"
+    (run-slice5-experiment! (Long/parseLong (or n-runs "30"))
+                            (or markdown-path
+                                "holes/labs/ants-faithfulness/slice5.md"))
+    (throw (ex-info "Expected: authority|slice5 [n-runs] [markdown-path]"
+                    {:mode mode}))))

@@ -74,3 +74,24 @@
           r (ants.aif.policy/eval-policy mu prec obs cfg)
           gs (map :G (:ranking r))]
       (is (apply not= gs) "G values differ across actions (EIG is action-differentiated)"))))
+
+(deftest slice5-ablation-arms-target-distinct-score-terms
+  (testing "each Slice 5 arm changes only its registered lambda"
+    (doseq [[arm overrides] exp/slice5-lambda-overrides]
+      (let [world (exp/make-seeded-world :aif :patchy 101 102 [8 8] 10
+                                         :efe-lambda-overrides overrides)]
+        (is (= overrides
+               (select-keys (get-in world [:config :aif :efe :lambda])
+                            (keys overrides)))
+            (str arm " installs its declared ablation"))))))
+
+(deftest canonical-ambiguity-ablation-is-bit-identical-positive-control
+  (testing "zeroing action-constant ambiguity does not change a seeded run"
+    (let [run-single (deref #'exp/run-single)
+          opts [:metabolism 0.06 :initial-reserves 0.5 :ants-per-side 3
+                :choice-seed 202658110]
+          full (apply run-single :aif :patchy 202608110 202608111 [10 10] 40 false opts)
+          no-ambiguity (apply run-single :aif :patchy 202608110 202608111 [10 10] 40 false
+                              (concat opts [:efe-lambda-overrides {:ambiguity 0.0}]))]
+      (is (= full no-ambiguity)
+          "the positive-control trajectories and yields must be bit-identical"))))
