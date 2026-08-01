@@ -72,3 +72,50 @@ boundary refuses an unregistered arm, and the checker catches a one-part-in-2.8-
 perturbation. The confirmation run is dispatchable.
 
 Pilot artifacts stay labelled pilot.
+
+---
+
+## Parent change verified (codex-8, mathlib4 `084930e` / futon6 `9a25e8c`)
+
+The limitation reported above is closed. Verified by attack, not by report.
+
+**The guard is real.** `Discharged` now reads:
+
+```lean
+| Obligation.axisNavigable a              => a.Navigable
+| Obligation.axisPredictedNonNavigable a => ¬ a.Navigable
+```
+
+A *proof obligation*, symmetric in difficulty with the treatment case — not a
+suppression. `Registration.obligations` routes by `ArmRole`: a positive control's
+axes generate the new obligation **instead of** `axisNavigable`, which is what
+made the old arrangement unsatisfiable.
+
+**The laundering attack, at the type level.** I declared a genuinely navigable
+axis (`score := fun x => x`) and tried to pass it off as a positive control:
+
+- `liveAxis.Navigable` — proves by `norm_num`. It is a real treatment.
+- `¬ liveAxis.Navigable` — requires `sorry`. **Unprovable.**
+
+So tagging a live treatment as a control swaps one proof burden for another and
+the wrong one cannot be discharged. This is stronger than the renderer's dynamic
+refusal: the *type* prevents it, so a hand-written registration bypassing the
+generator is caught too.
+
+| check | result |
+|---|---|
+| `ExperimentPreregistration` / `ExperimentalDesign` | exit 0, 0 sorries, 0 errors |
+| `CLeanSlice5Confirmation` | exit 0, 0 sorries — and constructs `prospectiveReadyToRun` at :512 |
+| `Slice5Preregistration` (hand-written predecessor) | exit 0, 0 sorries — comparison point survives |
+| refusal: non-navigable treatment | exit 1 |
+| refusal: arm tagged control without the axis | exit 1 |
+| proof-mode SHA | `db2bf812…` unchanged |
+
+`mem_obligations_axisNavigable` now requires proof that the arm is *not* a
+positive control, and all call sites were updated — the signature change is
+honest rather than papered over.
+
+**Registration #1 is now ProspectiveReadyToRun.** The confirmation run is
+dispatchable as a fully Lean-verified Clojure experiment, and registration #3
+(claude-7's E2 confirmation, whose incidental-ablation arm is a predicted-null
+contrast) is unblocked ahead of need.
