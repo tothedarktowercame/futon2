@@ -371,3 +371,64 @@ excursion's premise needs rewriting before a line of code changes.
 
 This is cheap, it is a strictly better use of the next run than any repair, and
 it was found by an operator remembering a picture.
+
+---
+
+## A fourth implementation, and the general form of today's confound (Joe, 2026-08-01)
+
+### The unifying precondition
+
+Joe: searching a memory store for relevant memories is structurally the same
+problem as ants searching for food. Narrow search is efficient when you know what
+you are looking for; when you do not, you need an exploratory component. Obvious,
+*and not obvious enough to prevent a 10x10 run of ants.*
+
+That yields the general form of both cautions now in flight across the two
+missions:
+
+> **Before measuring whether mechanism M helps, establish that the task cannot be
+> solved without M.**
+
+Two instances, arrived at independently:
+
+- *V3's* `repo_search` precondition — is the withheld memory's content reachable
+  through a parallel channel? If yes, the ablation attenuates regardless of
+  environment.
+- *ours* — is the food reachable without exploring? If yes, the exploration term
+  is inert regardless of implementation.
+
+Same question, different alternative path. The second is the easier to miss,
+because it is a property of the **corpus or environment** rather than of the
+system, and nothing in a registration, a config gate, a positive control or a
+reviewer asks about it. Ours survived all four.
+
+The recommendation that follows: state the precondition in its general form and
+**enumerate the alternative paths being ruled out**, rather than listing them ad
+hoc as they occur to someone.
+
+### Memory retrieval as the fourth implementation
+
+If the analogy holds structurally, V3's retrieval process is not only a subject
+of measurement — it is a candidate AIF implementation:
+
+| | memory retrieval |
+|---|---|
+| agent | the retrieval process |
+| belief over | which memories are relevant to the current work |
+| actions | query formulation; retrieval breadth; which candidates to surface |
+| risk | divergence from the preferred outcome — surfaced memories get *used* |
+| ambiguity | uncertainty about relevance, driving exploratory retrieval |
+| witness | the use/ignore signal on a surfaced memory, recorded externally |
+
+This mission carries three implementations against one yardstick, and their
+failure modes are complementary: the ants have a consumer and inert epistemics;
+AIF² has machinery and no consumer; the War Machine has never had either half
+measured. **A fourth whose central question is exploration would be the most
+informative of the four**, because the epistemic term would be load-bearing by
+construction rather than incidentally.
+
+It would also be the first one built with the failure already in hand. Everything
+here was found retrospectively; this one could be registered before it runs.
+
+Belled to claude-7 as a decision for their cohort draft — whether retrieval is a
+black box being measured, or an agent being registered. Not pressed as a request.
