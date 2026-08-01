@@ -126,3 +126,73 @@ more informative than describing any of them.
 - **S3:** AIF² B0 — give the scorer a consumer so its authority becomes a
   quantity at all.
 - **S4:** the comparative write-up. Only after S1–S3.
+
+---
+
+## S1 result (2026-08-01): the ants trade yield for survival, and the design could not see it
+
+**Positive control passed exactly.** `full − no-canonical-ambiguity` =
+`0.0000 [0.0000, 0.0000]` in all three scenarios, paired run records
+bit-identical. The morning's code analysis and the Lean theorem
+(`ambiguity_ablation_preserves_selection`) are empirically confirmed. The
+instrument tested itself in the same run as the hypothesis, and passed.
+
+**The dissociation failed.** No patchy/sparse explore-exploit regulator is
+established. Both epistemic proxies are exactly inert on sparse.
+
+**No single term carries the controller's authority.** This morning, replacing
+the scorer with uniform-random over the same admissible set cost `133.63
+[94.13, 173.13]` on patchy. Today, ablating any *individual* named term costs at
+most `−20.0 [−66.9, 26.9]`, not significant. The two are consistent only one
+way: **the ordering is over-determined.** Removing any one term leaves an
+ordering that performs about as well; removing the ordering entirely is
+catastrophic. The authority experiment measured *having a consistent score* and
+not *having any particular score*.
+
+That distinction was invisible until both halves ran, and it is a caution for
+any ablation study on a scorer with redundant terms.
+
+**Against the non-AIF baseline, AIF loses on yield:**
+
+| scenario | full − classic | |
+|---|---:|---|
+| patchy | −46.78 [−100.66, 7.10] | ns |
+| sparse | −12.39 [−45.62, 20.84] | ns |
+| snowdrift | **−57.45 [−67.75, −47.14]** | **significant** |
+
+**But the outcome measure is mis-specified, and that is the finding.** Starvation
+tells the opposite story on the scenario that discriminates:
+
+| sparse | yield | starvation |
+|---|---:|---:|
+| aif-full | 32.18 | **0.233** |
+| no-risk | 51.52 | **0.667** |
+| classic | 44.57 | **0.667** |
+
+Ablating the KL risk term nearly triples starvation (0.233 → 0.667) while
+*raising* mean yield. The classic baseline shows the same profile. So the AIF
+controller has a coherent behavioural signature: **it trades yield for
+survival**, which is what a risk term denominated in preferences that include
+not-starving is supposed to do.
+
+Slice 5 as designed measured yield alone. **Yield alone penalises exactly the
+behaviour the controller exists to produce.**
+
+*Caveat on snowdrift:* `classic` scores `315.00 [315.00, 315.00]` — zero
+variance, every run. That is a ceiling; the environment is saturated for a
+greedy forager. "Classic beats AIF on snowdrift" is partly "classic exhausts a
+solvable board and AIF does not".
+
+### What this contributes to the mission's claim
+
+The inert-machinery hypothesis survives and is sharpened. Three of the ants'
+named quantities are inert (`efe-tilt`/`infer-mode`, canonical ambiguity, τ),
+and now a fourth observation: the *remaining* terms are individually
+unnecessary. The controller works; almost none of its named parts are load-bearing
+in isolation.
+
+And a fifth finding, which is the one that generalises: **the experiment could
+not see what the controller was good at, because nobody had said what the
+controller was for.** This is `M-wm-capability-claim.md`'s gap arriving
+independently in the ant domain on the same day. We measured yield because yield
+was measurable, not because it was the capability.
