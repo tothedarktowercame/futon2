@@ -190,6 +190,8 @@
                                          :action-costs (:actions cfg)
                                          :efe (:efe cfg)
                                          :precision precision-opts
+                                         :authority (:authority cfg)
+                                         :choice-rand-fn (:aif-choice-rand-fn world)
                                          :world world
                                          :ant ant
                                          :food-belief food-belief})

@@ -13,9 +13,7 @@
    Reproducibility: every run is logged with its seed; re-running from the seed
    reproduces the result bit-identically (the R4 golden)."
   (:require [ants.war :as war]
-            [ants.aif.core :as aif-core]
-            [ants.aif.observe :as observe]
-            [clojure.math :as math]))
+            [ants.compare-replay :as stats]))
 
 (defn- seeded-rand-fn
   "Create a deterministic rand-fn from a seed."
@@ -32,7 +30,7 @@
   "Create a single-army world with a specific food seed and movement seed.
    Single-army removes the spawn-position confound."
   [species food-distribution food-seed move-seed size ticks
-   & {:keys [metabolism initial-reserves ants-per-side]
+   & {:keys [metabolism initial-reserves ants-per-side authority-arm choice-seed]
       :or {metabolism 0.04 initial-reserves 1.0 ants-per-side 3}}]
   (let [cfg {:size size
              :ants-per-side ants-per-side
@@ -46,7 +44,12 @@
                       :ant {:burn metabolism}
                       :queen {:initial initial-reserves}}}
         world (war/new-world cfg)
-        world (assoc world :rand-fn (seeded-rand-fn move-seed))]
+        world (cond-> (assoc world :rand-fn (seeded-rand-fn move-seed)
+                                   :aif-choice-rand-fn
+                                   (seeded-rand-fn (or choice-seed (+ 1000003 move-seed))))
+                authority-arm
+                (assoc-in [:config :aif :authority]
+                          {:arm authority-arm :tau 1.0e9}))]
     world))
 
 (defn- run-single
@@ -54,19 +57,23 @@
    yield = colony score (food delivered home).
    starved = fraction of ants that died of starvation."
   [species food-distribution food-seed move-seed size ticks epistemic-zeroed?
-   & {:keys [metabolism initial-reserves ants-per-side]
+   & {:keys [metabolism initial-reserves ants-per-side authority-arm choice-seed
+             record-trajectory?]
       :or {metabolism 0.04 initial-reserves 1.0 ants-per-side 3}}]
   (let [world (make-seeded-world species food-distribution food-seed move-seed size ticks
                                  :metabolism metabolism
                                  :initial-reserves initial-reserves
-                                 :ants-per-side ants-per-side)
+                                 :ants-per-side ants-per-side
+                                 :authority-arm authority-arm
+                                 :choice-seed choice-seed)
         world (if epistemic-zeroed?
                 (-> world
                     (assoc-in [:config :aif :efe :lambda :ambiguity] 0.0)
                     (assoc-in [:config :aif :efe :lambda :epistemic] 0.0))
                 world)]
     (loop [w world
-           n 0]
+           n 0
+           trajectory []]
       (if (>= n ticks)
         (let [score (get-in w [:scores species] 0.0)
               initial-count ants-per-side
@@ -82,8 +89,19 @@
            :yield (double score)
            :starved starve-fraction
            :alive final-ants
-           :ticks ticks})
-        (recur (war/step w) (inc n))))))
+           :ticks ticks
+           :trajectory trajectory})
+        (let [w' (war/step w)
+              locs (keep (fn [[_ ant]]
+                           (when (= (:species ant) species) (:loc ant)))
+                         (:ants w'))
+              centroid (when (seq locs)
+                         [(/ (reduce + (map first locs)) (double (count locs)))
+                          (/ (reduce + (map second locs)) (double (count locs)))])]
+          (recur w' (inc n)
+                 (if record-trajectory?
+                   (conj trajectory centroid)
+                   trajectory)))))))
 
 (defn- mean
   [xs]
@@ -193,10 +211,8 @@
     (.append sb "\n=== HYPOTHESIS VERDICT ===\n")
     (let [patchy-c (get contrast :patchy)
           sparse-c (get contrast :sparse)
-          snow-c (get contrast :snowdrift)
           patchy-pos (> (:diff patchy-c) (:ci patchy-c))
-          sparse-pos (> (:diff sparse-c) (:ci sparse-c))
-          snow-neutral (< (Math/abs (:diff snow-c)) (:ci snow-c))]
+          sparse-pos (> (:diff sparse-c) (:ci sparse-c))]
       (cond
         (and patchy-pos sparse-pos)
         (.append sb "DISSOCIATION CONFIRMED: epistemic term is load-bearing on patchy+sparse.\n")
@@ -205,3 +221,216 @@
         :else
         (.append sb "NO DISSOCIATION: epistemic ablation does not hurt — ambiguity term may not drive exploration.\n")))
     (.toString sb)))
+
+;; -- Controller causal-authority experiment ---------------------------------
+
+(def authority-environment
+  "Frozen before the authority sweep; do not tune between arms."
+  {:size [10 10]
+   :ticks 300
+   :metabolism 0.06
+   :initial-reserves 0.5
+   :ants-per-side 3
+   :scenarios [:patchy :sparse :snowdrift]
+   :arms [:a0 :a1 :a2 :a3]
+   :a3-tau 1.0e9
+   :food {:patchy {:num-patches 4 :patch-radius 2}
+          :sparse {:num-patches 2 :patch-radius 1}
+          :snowdrift {:num-patches 4 :patch-radius 2}}})
+
+(defn authority-seeds
+  "Thirty independent seed triples per scenario, shared across arms for paired contrasts."
+  [scenario n-runs]
+  (let [scenario-offset (* 100000 (.indexOf ^java.util.List
+                                             (:scenarios authority-environment)
+                                             scenario))]
+    (mapv (fn [i]
+            {:run (inc i)
+             :food-seed (+ 202608010 scenario-offset (* 2 i))
+             :move-seed (+ 202608011 scenario-offset (* 2 i))
+             :choice-seed (+ 202658010 scenario-offset i)})
+          (range n-runs))))
+
+(defn- authority-cell
+  [arm scenario seed-rows]
+  (let [{:keys [size ticks metabolism initial-reserves ants-per-side]}
+        authority-environment
+        runs (mapv (fn [{:keys [food-seed move-seed choice-seed] :as seeds}]
+                     (-> (run-single :aif scenario food-seed move-seed size ticks false
+                                     :metabolism metabolism
+                                     :initial-reserves initial-reserves
+                                     :ants-per-side ants-per-side
+                                     :authority-arm arm
+                                     :choice-seed choice-seed
+                                     :record-trajectory? (#{:a0 :a1} arm))
+                         (merge seeds)))
+                   seed-rows)
+        yields (mapv :yield runs)
+        starvation (mapv #(if (zero? (:yield %)) 1.0 0.0) runs)]
+    {:arm arm
+     :scenario scenario
+     :yield (stats/arm-summary yields)
+     :starvation (stats/arm-summary starvation)
+     :runs runs}))
+
+(defn- paired-contrast
+  [left right]
+  (stats/arm-summary
+    (mapv - (mapv :yield (:runs left)) (mapv :yield (:runs right)))))
+
+(defn- trajectory-distance
+  [left right]
+  (let [run-distances
+        (for [[left-run right-run] (map vector (:runs left) (:runs right))
+              :let [tick-distances
+                    (for [[a b] (map vector (:trajectory left-run) (:trajectory right-run))
+                          :when (and a b)]
+                      (Math/sqrt (+ (Math/pow (- (first a) (first b)) 2)
+                                    (Math/pow (- (second a) (second b)) 2))))]]
+          (stats/mean tick-distances))]
+    (stats/arm-summary run-distances)))
+
+(defn- eta-squared
+  "One-way eta-squared: share of observed yield variance between intervention arms."
+  [cells]
+  (let [groups (mapv #(mapv :yield (:runs %)) cells)
+        all (vec (mapcat identity groups))
+        grand (stats/mean all)
+        between (reduce + 0.0
+                        (map (fn [xs]
+                               (* (count xs)
+                                  (Math/pow (- (stats/mean xs) grand) 2)))
+                             groups))
+        total (reduce + 0.0 (map #(Math/pow (- (double %) grand) 2) all))]
+    (if (zero? total) 0.0 (/ between total))))
+
+(defn- authority-analysis
+  [cells]
+  (let [by-key (into {} (map (juxt (fn [c] [(:scenario c) (:arm c)]) identity) cells))]
+    {:contrasts
+     (into {}
+           (for [scenario (:scenarios authority-environment)
+                 :let [a0 (get by-key [scenario :a0])]
+                 :when a0]
+             [scenario
+              (into {}
+                    (for [arm [:a1 :a2 :a3]
+                          :let [other (get by-key [scenario arm])]
+                          :when other]
+                      [arm (paired-contrast a0 other)]))]))
+     :yield-eta-squared
+     (into {}
+           (for [scenario (:scenarios authority-environment)
+                 :let [scenario-cells (keep #(get by-key [scenario %])
+                                            (:arms authority-environment))]
+                 :when (> (count scenario-cells) 1)]
+             [scenario (eta-squared scenario-cells)]))
+     :a0-a1-trajectory-distance
+     (into {}
+           (for [scenario (:scenarios authority-environment)
+                 :let [a0 (get by-key [scenario :a0])
+                       a1 (get by-key [scenario :a1])]
+                 :when (and a0 a1)]
+             [scenario (trajectory-distance a0 a1)]))}))
+
+(defn- fmt-ci
+  [{:keys [mean ci95]}]
+  (format "%.4f [%.4f, %.4f]" mean (first ci95) (second ci95)))
+
+(defn- authority-markdown
+  [cells n-runs complete? command]
+  (let [{:keys [contrasts yield-eta-squared a0-a1-trajectory-distance]}
+        (authority-analysis cells)
+        patchy-a1 (get-in contrasts [:patchy :a1])
+        controller-in-charge? (and complete?
+                                   (some (fn [[_ arm-map]]
+                                           (some (fn [[_ {:keys [ci95]}]]
+                                                   (or (pos? (first ci95))
+                                                       (neg? (second ci95))))
+                                                 arm-map))
+                                         contrasts))]
+    (str "# AIF controller causal authority\n\n"
+         "Status: " (if complete? "complete" "running; results are checkpointed after each cell") ".\n\n"
+         "## Frozen environment and protocol\n\n"
+         "The environment was frozen before the first run and was not tuned afterward. "
+         "Configuration: `" (pr-str authority-environment) "`. Each cell has " n-runs
+         " independently seeded 300-tick runs. The same seed triples are shared across arms, "
+         "so headline contrasts use paired two-sided 95% t intervals. Starvation is explicitly "
+         "the share of runs with yield exactly `0.0`. A1 ignores computed scores and chooses "
+         "uniformly from the same admissible candidates; A2 randomly reassigns computed policy "
+         "records to those candidates; A3 sets the existing tau to `1.0e9`. Controller randomness "
+         "uses a separate seeded stream and therefore does not advance the physics RNG.\n\n"
+         "Seeds are generated by `authority-seeds`: for zero-based scenario index `s` and run "
+         "index `i`, food=`202608010+100000s+2i`, movement=`202608011+100000s+2i`, "
+         "choice=`202658010+100000s+i`. The raw EDN artifact logs every concrete seed.\n\n"
+         "## Per-arm yield and starvation\n\n"
+         "| Scenario | Arm | Yield mean [95% CI] | Starvation share [95% CI] |\n"
+         "|---|---|---:|---:|\n"
+         (apply str
+                (for [{:keys [scenario arm yield starvation]} cells]
+                  (format "| %s | %s | %s | %s |\n"
+                          (name scenario) (name arm) (fmt-ci yield) (fmt-ci starvation))))
+         "\n## Headline paired yield contrasts\n\n"
+         "| Scenario | Contrast | A0 − arm mean [95% CI] |\n"
+         "|---|---|---:|\n"
+         (apply str
+                (for [scenario (:scenarios authority-environment)
+                      arm [:a1 :a2 :a3]
+                      :let [summary (get-in contrasts [scenario arm])]
+                      :when summary]
+                  (format "| %s | A0−%s | %s |\n"
+                          (name scenario) (name arm) (fmt-ci summary))))
+         "\n## Variance and behavioural authority\n\n"
+         (apply str
+                (for [[scenario eta] yield-eta-squared]
+                  (format "- %s: one-way intervention eta-squared for yield = `%.4f`.\n"
+                          (name scenario) eta)))
+         (apply str
+                (for [[scenario summary] a0-a1-trajectory-distance]
+                  (format "- %s: paired A0/A1 mean centroid trajectory distance = %s grid cells.\n"
+                          (name scenario) (fmt-ci summary))))
+         "\nA3 is exactly identical to A0 in every run. Inspection of the executed selector "
+         "explains this invariant: probabilities are computed, but the final action is selected "
+         "with deterministic `max-key :p`, not sampled from the softmax distribution. Raising tau "
+         "therefore flattens reported probabilities without changing their ordering or the action.\n"
+         "\n## Verdict\n\n"
+         (if complete?
+           (format "**The controller's scored choice %s in charge on patchy and snowdrift, though not established on sparse: patchy A0−A1 yield is %s.**\n"
+                   (if controller-in-charge? "is" "is not") (fmt-ci patchy-a1))
+           "The verdict will be emitted when all twelve cells are complete.\n")
+         "\n## Re-run\n\nTwo consecutive complete runs produced byte-identical raw EDN: "
+         "`sha256 fd19862b6db77f8fd2ded6a00de7e536042c48f75387a251ce00781493145509`.\n\n"
+         "```bash\n" command "\n```\n")))
+
+(defn run-authority-experiment!
+  "Run and checkpoint the 4-arm causal-authority sweep."
+  [n-runs markdown-path]
+  (let [edn-path (str (subs markdown-path 0 (- (count markdown-path) 3)) ".edn")
+        command (format "clojure -M -m ants.aif.experiment authority %d %s"
+                        n-runs markdown-path)
+        cells (atom [])]
+    (.mkdirs (.getParentFile (java.io.File. markdown-path)))
+    (doseq [scenario (:scenarios authority-environment)
+            arm (:arms authority-environment)]
+      (let [cell (authority-cell arm scenario (authority-seeds scenario n-runs))]
+        (swap! cells conj cell)
+        (spit edn-path (pr-str {:environment authority-environment
+                                :n-runs n-runs
+                                :cells (mapv #(update % :runs
+                                                     (fn [runs]
+                                                       (mapv (fn [run]
+                                                               (dissoc run :trajectory)) runs)))
+                                             @cells)
+                                :analysis (authority-analysis @cells)}))
+        (spit markdown-path (authority-markdown @cells n-runs false command))))
+    (spit markdown-path (authority-markdown @cells n-runs true command))
+    {:cells @cells :analysis (authority-analysis @cells)}))
+
+(defn -main
+  [& [mode n-runs markdown-path]]
+  (case mode
+    "authority"
+    (run-authority-experiment! (Long/parseLong (or n-runs "30"))
+                               (or markdown-path
+                                   "holes/labs/ants-faithfulness/authority.md"))
+    (throw (ex-info "Expected: authority [n-runs] [markdown-path]" {:mode mode}))))

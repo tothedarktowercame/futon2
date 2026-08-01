@@ -681,6 +681,19 @@
              exp-s))
       [])))
 
+(defn- shuffle-with
+  "Deterministically shuffle `xs` using an injected collection-choice function."
+  [xs choice-fn]
+  (loop [remaining (vec xs)
+         shuffled []]
+    (if (empty? remaining)
+      shuffled
+      (let [picked (choice-fn remaining)
+            idx (.indexOf remaining picked)]
+        (recur (vec (concat (subvec remaining 0 idx)
+                            (subvec remaining (inc idx))))
+               (conj shuffled picked))))))
+
 ;; -- Action set helpers -------------------------------------------------------
 
 (defn- drop-actions
@@ -866,7 +879,9 @@
   "Evaluate candidate actions and sample via softmax over -G/tau."
   ([mu prec observation]
    (choose-action mu prec observation {}))
-  ([mu prec observation {:keys [actions preferences action-costs efe efe-lambda precision horizon discount world ant food-belief] :as _opts}]
+  ([mu prec observation {:keys [actions preferences action-costs efe efe-lambda precision horizon discount
+                                world ant food-belief authority choice-rand-fn]
+                         :as _opts}]
    (let [prefs         preferences
          costs         action-costs
          lambda        (ensure-efe-lambda (or efe-lambda (get-in efe [:lambda])))
@@ -975,7 +990,7 @@
          survival-pressure (max (survival-pressure-from-observation observation survival-cfg)
                                 (survival-pressure-from-evaluations evaluations survival-cfg))
          base-tau          (:tau prec 1.0)
-         tau               (choose-tau {:base-tau base-tau
+         computed-tau      (choose-tau {:base-tau base-tau
                                         :reserve-delta reserve-delta
                                         :survival-pressure survival-pressure
                                         :precision-cfg precision-cfg
@@ -985,20 +1000,34 @@
                                         :trail-grad trail-grad
                                         :hunger hunger
                                         :since-ingest (:since-ingest observation)})
+         authority-arm     (or (:arm authority) :a0)
+         tau               (if (= authority-arm :a3)
+                             (double (or (:tau authority) 1.0e9))
+                             computed-tau)
 
          ;; Softmax — preferences enter ONLY through G (g-efe risk + augmentations)
-         scores (map (fn [{:keys [action result] :as item}]
+         scores (map (fn [{:keys [result] :as item}]
                        (let [base-logit (/ (- (:G result)) tau)]
                          (assoc item :logit base-logit)))
                      evaluations)
-         dist     (softmax scores tau)
-         policies (into {} dist)
-         best     (if (seq dist)
-                    (->> dist (apply max-key (fn [[_ {:keys [p]}]] p)) first)
-                    (first admissible))]
+         dist      (vec (softmax scores tau))
+         rand-pick (or choice-rand-fn rand-nth)
+         policies  (if (= authority-arm :a2)
+                     (let [actions (mapv first dist)
+                           reassigned (shuffle-with (mapv second dist) rand-pick)]
+                       (into {} (map vector actions reassigned)))
+                     (into {} dist))
+         best      (cond
+                     (empty? admissible) nil
+                     (= authority-arm :a1) (rand-pick admissible)
+                     (seq policies) (->> policies
+                                         (apply max-key (fn [[_ {:keys [p]}]] p))
+                                         first)
+                     :else (first admissible))]
      {:action   best
       :policies policies
-      :tau      tau})))
+      :tau      tau
+      :authority-arm authority-arm})))
 
 (defn eval-policy
   "Return a deterministic action ranking for harness goldens.
