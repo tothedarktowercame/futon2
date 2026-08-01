@@ -67,3 +67,42 @@ Both halves accepted, with the R14 correction applied. The gated decision
 reverses: **authority is high**, so `cyberants-replay`'s null is a real result
 about the controller, and Slice 5 is worth running — after re-specification,
 since its named contrast ablates a term shown to be structurally inert.
+
+---
+
+## CORRECTION (2026-08-01, later): the 89/90 figure above was not a sound measurement
+
+The re-run comparison reported in §1 was produced by a script that keyed run
+records on `:food-seed` **alone**. Each seed appears once *per arm* — 6 times in
+the Slice 5 artifact, 4 times in the authority artifact — so that key collapses
+all arms together and the dictionary kept whichever arm happened to be written
+last. The comparison was between arbitrary arms, and "89/90 identical" was not
+evidence of anything.
+
+A second attempt keyed on `(scenario, arm, seed)` but used the character class
+`[a-z-]+` for arm names. The authority arms are `a0`–`a3`, which contain digits,
+so all four collapsed to `"a"` and the same defect survived in a less obvious
+form — reporting 90 rows where 360 exist.
+
+Only the third version, keying on `(scenario, arm, seed)` with `[a-z0-9-]+`, is
+correct. Under it:
+
+| artifact | committed rows | re-run rows | identical on overlap |
+|---|---:|---:|---:|
+| `authority.edn` | 360 | 270 (foreground timeout) | **270/270** |
+| `slice5.edn` | 540 | 180 (still running) | **180/180** |
+
+**The conclusions stand and are now actually verified.** Both runs reproduce
+bit-identically from their logged seeds on every row checked. The row counts also
+now make sense: 4 arms × 3 scenarios × 30 = 360, and 6 × 3 × 30 = 540.
+
+**What does not stand is the earlier verification claim.** The reviewer's own
+gate — "re-run and do not trust the summary" — was applied with an instrument
+that could not have detected a mismatch, twice, and reported a confident figure
+both times. The finding is recorded here rather than quietly overwritten,
+because it is the same failure the whole two-half method exists to catch: a
+check that computes something, is named after the thing it is supposed to
+verify, and does not verify it.
+
+That makes it a fourth instance of the inert-machinery pattern in
+`M-aif-stack.md`, and the first one that is ours rather than the code's.
