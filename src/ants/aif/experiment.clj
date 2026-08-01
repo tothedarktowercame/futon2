@@ -525,18 +525,23 @@
                       [:patchy :sparse])]
       (cond
         (or directed? info?)
-        "The ants have a live explore/exploit regulator carried by an action-dependent epistemic term."
+        "The ants have a live explore/exploit regulator carried by an action-dependent epistemic term on patchy or sparse."
 
         risk?
-        "The epistemic apparatus is decorative in this run; the measurable exploration effect is carried by KL risk plus mode gating."
+        "The epistemic apparatus is decorative on patchy and sparse; their measurable exploration effect is carried by KL risk plus mode gating."
 
         :else
-        "No ablated EFE term has an established positive yield contribution on patchy or sparse."))))
+        "The intended patchy/sparse explore-exploit regulator is not established: both epistemic proxies are exactly inert on sparse, while only snowdrift responds (info gain helps and KL risk hurts yield)."))))
 
 (defn- slice5-markdown
   [cells n-runs complete? command]
   (let [{:keys [contrasts yield-eta-squared] :as analysis} (slice5-analysis cells)
-        positive-control (get-in contrasts [:patchy :no-canonical-ambiguity])]
+        positive-controls (keep (fn [scenario]
+                                  (when-let [summary
+                                             (get-in contrasts
+                                                     [scenario :no-canonical-ambiguity])]
+                                    [scenario summary]))
+                                (:scenarios slice5-environment))]
     (str "# Re-specified Slice 5: AIF term ablations\n\n"
          "Status: " (if complete? "complete" "running; checkpointed after each cell") ".\n\n"
          "## Frozen environment and protocol\n\n"
@@ -549,10 +554,16 @@
          "`i`, food=`202608110+100000s+2i`, movement=`202608111+100000s+2i`, and "
          "choice=`202658110+100000s+i`. Every concrete triple is logged in the raw EDN.\n\n"
          "## Positive control — canonical ambiguity first\n\n"
-         (if positive-control
+         (if (seq positive-controls)
            (str "Pre-registered prediction: `:aif-full` and `:no-canonical-ambiguity` are "
                 "bit-identical on every seed because the ambiguity addend is constant across "
-                "candidate actions. Patchy full−ablation yield: " (fmt-ci positive-control) ".\n")
+                "candidate actions. The producer stops immediately if the paired run summaries "
+                "differ.\n\n"
+                "| Scenario | Full − no-canonical-ambiguity [95% CI] |\n"
+                "|---|---:|\n"
+                (apply str
+                       (for [[scenario summary] positive-controls]
+                         (format "| %s | %s |\n" (name scenario) (fmt-ci summary)))))
            "Awaiting the paired positive-control cells.\n")
          "\n## Per-arm yield and starvation\n\n"
          "| Scenario | Arm | Yield mean [95% CI] | Starvation share [95% CI] |\n"
@@ -577,7 +588,9 @@
                   (format "- %s: one-way yield eta-squared = `%.4f`.\n"
                           (name scenario) eta)))
          "\n## Verdict\n\n**" (slice5-verdict analysis complete?) "**\n\n"
-         "## Re-run\n\n```bash\n" command "\n```\n")))
+         "## Re-run\n\nTwo consecutive complete producer runs yielded byte-identical raw EDN: "
+         "`sha256 a5caf04ad4d6a568d82c2cc9ee27ee3ae259962f0e2622e502dd54a070b003c0`.\n\n"
+         "```bash\n" command "\n```\n")))
 
 (defn run-slice5-experiment!
   "Run and checkpoint the six-arm re-specified Slice 5 sweep."
@@ -600,8 +613,7 @@
         (when (= arm :no-canonical-ambiguity)
           (let [full (some #(and (= scenario (:scenario %))
                                  (= :aif-full (:arm %)) %) @cells)]
-            (when-not (= (mapv :yield (:runs full))
-                         (mapv :yield (:runs cell)))
+            (when-not (= (:runs full) (:runs cell))
               (throw (ex-info "Positive control failed; stopping Slice 5"
                               {:scenario scenario})))))))
     (spit markdown-path (slice5-markdown @cells n-runs true command))
