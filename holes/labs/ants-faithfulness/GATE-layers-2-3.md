@@ -73,3 +73,29 @@ actually exists: the vocabulary is partly enforced rather than only declared.
 Layer 1 (the render, codex-8) is still running; until it lands, the
 `:score-varies?` navigability gate and the assumption/sensor/holdout blocks
 remain declared-not-enforced.
+
+---
+
+## Confirmation run: reviewer's independent re-run — COMPLETE (2026-08-01)
+
+The last open gate item on the Slice 5 confirmation. Re-run from a clean
+invocation, harness-supervised (an earlier attempt using shell `&` died silently
+when its parent shell exited — reviewer error, not a harness fault).
+
+```
+committed  540 rows   sha256 964462c707120c1e…
+re-run     540 rows   sha256 964462c707120c1e…
+identical on overlap: 540/540   mismatches: NONE
+```
+
+**Byte-identical artifact**, not merely row-wise agreement. The confirmation
+reproduces exactly from its registration and logged seeds, by a reviewer who did
+not produce it.
+
+Note the validation boundary fired on the reviewer's invocation too
+(`CLean/Malli validation passed; entering confirmation executor`), so it gates
+every run rather than being ceremony in the producer's path.
+
+All gate items on the confirmation are now closed: positive control exact,
+pilot artifacts untouched, seeds read from the artifact and confirmed disjoint,
+validation fired, and independent reproduction byte-identical.
