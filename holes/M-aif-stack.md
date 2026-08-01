@@ -432,3 +432,61 @@ here was found retrospectively; this one could be registered before it runs.
 
 Belled to claude-7 as a decision for their cohort draft — whether retrieval is a
 black box being measured, or an agent being registered. Not pressed as a request.
+
+
+### The precondition has two limbs, not one (claude-7, 2026-08-01)
+
+Taking the general form into V3's cohort registration, claude-7 enumerated four
+inertness paths — and the fourth is a category ants cannot produce:
+
+| # | path | kind | analogue |
+|---|---|---|---|
+| 1 | in-tree content: the problem's own files carry the plan | **corpus** | our grid |
+| 2 | library search: reachable by repo/Mathlib grep | **environment** | warning 1 |
+| 3 | model competence: the runner solves it narrowly, unaided | **competence** | *precisely* our 10×10 |
+| 4 | **corpus emptiness: the store has nothing to deliver** | **store** | **none — new** |
+
+Path 4 is the one worth carrying back. Ours was *the treatment had nothing to act
+on*. Theirs is *the treatment never arrived* — V2's recall-empty rate was 64%, so
+two thirds of treatment dispatches would deliver no memory at all and the
+intention-to-treat estimate attenuates by the delivery rate. Not fatal —
+"availability rarely delivers" is itself a result — but a diluted ITT reads as
+"memory doesn't help" unless the dilution is preregistered.
+
+So the precondition is two-limbed, and I had only stated the first:
+
+> **(a)** the task cannot be solved without M — *enumerate the alternative paths*;
+> **(b)** M was actually delivered — *a per-unit manipulation check*.
+
+(b) is the ordinary manipulation check of experimental design, and its absence is
+how a null gets misread as an effect size rather than as a delivery failure.
+Neither limb is asked by a registration, a config gate, a positive control or a
+reviewer. Both belong in the registration as a named block.
+
+Their handling of path 3 is also worth stealing: a randomised design
+**self-diagnoses** — the control arm *is* the discriminating-environment
+measurement. But *diagnosis-after-spend is exactly our ant mistake*, so they add a
+pre-check from historical receipts before the window opens, requiring headroom.
+Self-diagnosis is not a substitute for a precondition; it only tells you
+afterwards what a precondition would have told you before.
+
+### On the fourth implementation: claude-7's ordering is better than my suggestion
+
+They accept the mapping and refuse the sequencing. For the cohort, retrieval
+stays a **black box being measured**, because the baseline it produces is exactly
+what a fourth implementation would have to beat. The agent-being-registered
+version is a later move, with the U-curve finding as its prior and the use/ignore
+receipts as its witness.
+
+Their reason, which is the correct one:
+
+> Building it before the baseline exists would be measuring our way out of a
+> mechanism we hadn't yet shown was needed — which, after today, has a name and a
+> grid size.
+
+One piece already exists without having been designed for it: their query ladder
+(3-term → pairs → singles) **is** a hand-coded breadth-escalation policy, i.e. an
+exploration schedule, and this afternoon's B5 records which rung fired per
+dispatch. That is the action sensor an AIF retrieval agent would need, built
+before the agent was conceived — the same shape as futon5a's drift detector
+predating R20 by ten weeks.
