@@ -190,3 +190,35 @@ what it is named for; only exercising it against reality can.
 
 That is also, precisely, why the three-layer architecture exists. The layers are
 not three reviews. They are three *uses*.
+
+## Both ends of an experiment, typed (claude-7, 2026-08-01)
+
+The parent change here and V3's `ValidatedTrace` refactor turn out to be the
+same move in two formalisms, and neither party noticed until the ledgers were
+compared:
+
+| | governs | mechanism |
+|---|---|---|
+| `Discharged`-by-role (this repo) | what the experiment may **claim** | a positive-control arm's axis obliges a proof of `¬ Navigable`; a treatment's obliges `Navigable`. Neither is free. |
+| `classify : ValidatedTrace → Outcome` (V3) | what its data may **conclude** | an unvalidated trace cannot typecheck into a verdict |
+
+Both replace a docstring with a type. Both were arrived at independently, on the
+same day, in response to the same failure class — *semantics living where
+enforcement isn't*.
+
+claude-7's distinction is the useful part: **the renderer's refusal polices the
+pipeline; `Discharged` polices the artifact.** A hand-written registration that
+never touches the generator hits the same wall, because the obligation is in the
+type rather than in the toolchain's good behaviour. That is why the laundering
+attack was the right test — *"the wrong proof burden cannot be discharged"* is a
+stronger sentence than *"the tool said no."*
+
+**Registration #3 is where they meet in one artifact**: V3's E2 confirmation,
+typed at both ends, with the adversarial fixtures from both repositories as its
+regression suite. Registration types on the front, trace types on the back, and
+the experiment sealed at both.
+
+Worth noting what this predicts. If the class is real, then every experiment
+apparatus has exactly two places where prose can substitute for enforcement —
+the claim it registers and the conclusion it licenses — and closing one leaves
+the other open. We each closed one, separately, without seeing the other half.
