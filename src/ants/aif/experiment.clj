@@ -586,7 +586,7 @@
         "The epistemic apparatus is decorative on patchy and sparse; their measurable exploration effect is carried by KL risk plus mode gating."
 
         :else
-        "The intended patchy/sparse explore-exploit regulator is not established: both epistemic proxies are exactly inert on sparse, while only snowdrift responds (info gain helps and KL risk hurts yield)."))))
+        "No registered ablation establishes a yield benefit on patchy or sparse; the target-environment explore/exploit regulator is not established, while snowdrift shows a mixed off-target response."))))
 
 (defn- slice5-markdown
   [cells n-runs complete? command]
