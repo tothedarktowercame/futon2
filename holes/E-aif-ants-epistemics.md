@@ -87,6 +87,74 @@ it would say the canonical epistemic term earns its place on honesty grounds and
 not on performance, which is worth knowing and is not currently known for any
 system in `M-aif-stack`.
 
+## The capability claim, supplied by Joe (2026-08-01) — and the hole it exposes
+
+> *"If it makes them honest not better, that's fine with me. Actually this is
+> pretty much Spinoza's conatus in a nutshell — it's quite obvious that an honest
+> ant is more 'free', which means that even if they aren't strictly better at the
+> task that is set them, they should be better at 'learning'."*
+
+This is not a gloss. It is the capability claim the plan above was missing, and
+`M-wm-capability-claim.md` says a capability claim must exist *before* measuring
+or the measure becomes whatever is measurable.
+
+**The mapping is exact, not analogical.** The risk term already *is* conatus in
+the narrow sense — it is the survival regulator, and the confirmation measured it:
+sparse starvation `0.133` with it, `0.633` without. What Spinoza separates is
+*passive* perseverance, determined by external causes, from *active*
+perseverance, following from one's own adequate ideas. The ants persevere
+**passively**: a hysteresis FSM over eight hardcoded thresholds does it for them.
+An epistemic term is the machinery that produces adequate ideas — it acts to
+reduce uncertainty about the agent's own model. So the repair converts passive
+perseverance into active perseverance, and *that* is what "more free" names here.
+
+### The empirical signature, and why the current design cannot see it
+
+A greedy risk minimiser optimises against a **fixed** preference and has no drive
+to improve its model. On a task it is tuned for it can be excellent — the
+confirmation shows exactly that, with `classic` beating `aif-full` on yield in
+every scenario. What it cannot do is **adapt**.
+
+An agent with a live epistemic term spends yield on uncertainty reduction. On a
+fixed task that is a cost, which is why R-a may well *lower* yield. The payoff is
+under **distribution shift**.
+
+**Our design has no shift.** Every arm runs 300 ticks in one fixed environment,
+food layout drawn once from a seed. There is no learning to be better at. So:
+
+> The current experiment is structurally incapable of detecting what the
+> epistemic term is for.
+
+That is this morning's finding — *the outcome measure may not see what the thing
+is good at* — arriving one level up. We measured yield on a fixed environment
+because yield on a fixed environment was measurable.
+
+### R-e: the regime-shift arm
+
+Registered before R-a is measured, so the capability endpoint exists before the
+faithfulness repair lands:
+
+- **Manipulation:** the food regime changes mid-run — patch locations move, or
+  `patchy → sparse` — at a fixed tick, identical across arms and seeds.
+- **Endpoints:** post-shift yield; **time-to-recovery** (ticks until yield rate
+  returns to a stated fraction of pre-shift); and starvation in the post-shift
+  window.
+- **Prediction, stated now:** risk-only arms degrade at the shift and *stay*
+  degraded, because nothing drives them to re-explore. An arm with a live
+  epistemic term recovers. `classic`'s advantage on the fixed task should shrink
+  or invert after the shift.
+- **Falsifier:** if repaired-epistemic and risk-only recover identically, the
+  epistemic term buys honesty and nothing else — which is a real finding and the
+  one the guard above already permits.
+
+**The discipline that keeps this honest:** "better at learning" is unfalsifiable
+if it floats. The shift tick, the recovery threshold and the post-shift window
+are fixed in the registration **before R-a is measured**, and the sensor
+declaration must show the trajectory data exists to compute time-to-recovery —
+which the pilot's `:selection-divergence` endpoint already flagged as
+`:coverage-check {:status :unmet :reason :sensor-absent}`. That gap is now
+load-bearing rather than decorative, and closing it is a precondition of R-e.
+
 ## Sequencing
 
 R-a first, alone. It is the root: with an action-dependent predicted variance the
@@ -102,7 +170,7 @@ baseline every repair is measured against.
 
 ## Exit condition
 
-R-a through R-d landed or explicitly abandoned with reasons; each repaired axis
+R-a through R-e landed or explicitly abandoned with reasons; each repaired axis
 either renders as a navigable treatment or is withdrawn from the catalogue with
 its non-navigability recorded as a finding; and the faithfulness and capability
 claims reported separately, whichever way each lands.
