@@ -41,7 +41,13 @@
                             #"role endpoint"
                             (memory-contract/compact-memory
                              (update-in math [:edge :hx/endpoints]
-                                        #(vec (remove #{"lean/field-simp-denominator"} %)))))))))
+                                        #(vec (remove #{"lean/field-simp-denominator"} %)))))))
+    (testing "memory-use kind has a closed vocabulary"
+      (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                            #"invalid memory-use kind"
+                            (memory-contract/compact-memory
+                             (assoc-in math [:edge :hx/props :memory-use/kind]
+                                       :mixed)))))))
 
 (deftest attribution-and-wm-projection-use-distinct-receipts
   (let [{:keys [math-receipt wm-projection-receipt]} (fixtures)
@@ -172,3 +178,25 @@
     (is (= 2250 (:memory-use/retrieval-to-use-ms receipt)))
     (is (= "2026-07-23T09:00:00Z"
            (:memory-use/surfaced-at receipt)))))
+
+(deftest memory-use-kind-is-optional-and-closed
+  (let [base (:math-receipt (fixtures))
+        classified
+        (memory-contract/use-receipt
+         (assoc base :memory-use-kinds {"e-math-1" :substitutive}))
+        unclassified (memory-contract/use-receipt base)]
+    (is (= :substitutive
+           (get-in classified
+                   [:memory-use/inclusion-reasons 0 :memory-use/kind])))
+    (is (not (contains? (first (:memory-use/inclusion-reasons unclassified))
+                        :memory-use/kind)))
+    (is (thrown-with-msg?
+         clojure.lang.ExceptionInfo
+         #"invalid memory-use kind"
+         (memory-contract/use-receipt
+          (assoc base :memory-use-kinds {"e-math-1" :mixed}))))
+    (is (thrown-with-msg?
+         clojure.lang.ExceptionInfo
+         #"only classify surfaced"
+         (memory-contract/use-receipt
+          (assoc base :memory-use-kinds {"not-surfaced" :regulative}))))))

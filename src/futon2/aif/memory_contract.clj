@@ -14,6 +14,13 @@
 (def witness-statuses
   #{:self-asserted :independently-witnessed :challenged :unknown})
 
+(def memory-use-kinds
+  "Closed vocabulary for the channel through which a memory acts.
+
+   Substitutive memories supply content; regulative memories modify policy.
+   Absence means that the memory has not yet been adjudicated."
+  #{:substitutive :regulative})
+
 (def external-witness-statuses
   #{:independently-witnessed :challenged})
 
@@ -57,6 +64,7 @@
                                         (when-let [mission (:mission roles)]
                                           [mission]))))
         subjects (vec (distinct (or (:subjects roles) [])))
+        memory-use-kind (get-in edge [:hx/props :memory-use/kind])
         provenance (cond-> {:author (:evidence/author entry)
                             :session-id (:evidence/session-id entry)}
                      (seq (:provenance roles))
@@ -78,6 +86,10 @@
       (fail! "invalid memory witness status" {:witness-status witness-status}))
     (when-not (contains? memory-states state)
       (fail! "invalid memory state" {:state state}))
+    (when-not (or (nil? memory-use-kind)
+                  (contains? memory-use-kinds memory-use-kind))
+      (fail! "invalid memory-use kind"
+             {:memory-id memory-id :memory-use/kind memory-use-kind}))
     (when-not (and (nonblank-string? (:evidence/author entry))
                    (nonblank-string? (:evidence/session-id entry)))
       (fail! "memory provenance requires author and session"
@@ -104,7 +116,8 @@
              :memory/mission-ids missions
              :memory/subject-ids subjects}
       (some? valid-time) (assoc :memory/valid-time valid-time)
-      (some? system-time) (assoc :memory/system-time system-time))))
+      (some? system-time) (assoc :memory/system-time system-time)
+      (some? memory-use-kind) (assoc :memory-use/kind memory-use-kind))))
 
 (defn use-receipt
   "Validate and normalize a controller-stamped memory-use receipt.
@@ -112,8 +125,10 @@
    Used memories must be a subset of surfaced memories. Every surfaced memory
    has a nonblank inclusion reason. Rejected memories are a disjoint subset of
    surfaced memories and require reasons; any remaining surfaced memories are
-   explicitly classified as unused. The receipt reports an outcome id only;
-   the independently witnessed outcome remains a separate record."
+   explicitly classified as unused. An optional :memory-use-kinds map adds the
+   reviewed channel classification to each corresponding per-memory inclusion
+   row; unclassified memories remain unmarked. The receipt reports an outcome
+   id only; the independently witnessed outcome remains a separate record."
   [{:keys [decision-id session-id domain surfaced-memory-ids used-memory-ids
            rejected-memory-ids inclusion-reasons rejection-reasons pattern-id
            cascade-id outcome-id surfaced-at recorded-at]
@@ -129,6 +144,7 @@
         surfaced-set (set surfaced)
         used-set (set used)
         rejected-set (set rejected)
+        kind-map (or (:memory-use-kinds receipt) {})
         unused (filterv #(and (not (contains? used-set %))
                               (not (contains? rejected-set %)))
                         surfaced)]
@@ -140,12 +156,20 @@
                    (string-vector? (or rejected-memory-ids []))
                    (map? inclusion-reasons)
                    (map? (or rejection-reasons {}))
+                   (map? kind-map)
                    (or (nonblank-string? pattern-id)
                        (nonblank-string? cascade-id))
                    (or (nil? outcome-id) (nonblank-string? outcome-id))
                    (or (nil? surfaced-at) (nonblank-string? surfaced-at))
                    (or (nil? recorded-at) (nonblank-string? recorded-at)))
       (fail! "invalid memory-use receipt shape" {:receipt receipt}))
+    (when-not (every? surfaced-set (keys kind-map))
+      (fail! "memory-use kinds may only classify surfaced memories"
+             {:surfaced surfaced :memory-use-kinds kind-map}))
+    (when-not (every? memory-use-kinds (vals kind-map))
+      (fail! "invalid memory-use kind in receipt"
+             {:memory-use-kinds kind-map
+              :allowed memory-use-kinds}))
     (when-not (every? surfaced-set used)
       (fail! "used memories must have been surfaced"
              {:surfaced surfaced :used used}))
@@ -186,8 +210,11 @@
              :memory-use/unused-ids unused
              :memory-use/inclusion-reasons
              (mapv (fn [memory-id]
-                     {:memory-id memory-id
-                      :reason (get inclusion-reasons memory-id)})
+                     (cond-> {:memory-id memory-id
+                              :reason (get inclusion-reasons memory-id)}
+                       (contains? kind-map memory-id)
+                       (assoc :memory-use/kind
+                              (get kind-map memory-id))))
                    surfaced)
              :memory-use/rejection-reasons
              (mapv (fn [memory-id]
