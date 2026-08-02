@@ -834,12 +834,12 @@
         cargo (:cargo ant)
         home (get-in world [:homes (:species ant)])
         far-from-home? (> (dist2 loc home) 100)
-        carrying-pressure? (> (double (or (:h ant) 0.0)) 0.55)
+        not-hungry? (<= (double (or (:h ant) 0.0)) 0.55)
         cache? (get-in world [:config :food-cache-enabled?])
         food-here (get-in world [:grid :cells loc :food] 0.0)
         neighbour-food (get-in world [:grid :cells (richest-neighbour world loc (:species ant)) :food] 0.0)]
     (cond
-      (and cache? (> cargo 0.2) far-from-home? carrying-pressure?
+      (and cache? (> cargo 0.2) far-from-home? not-hungry?
            (< food-here 0.10)) :drop
       (> cargo 0.2) :return
       (> food-here 0.2) :forage

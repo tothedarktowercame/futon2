@@ -11,7 +11,8 @@
 (def ^:private sensory-keys
   (vec (concat
         [:food :pher :food-trace :pher-trace :home-prox :enemy-prox :h :ingest
-         :friendly-home :trail-grad :novelty :dist-home :reserve-home :cargo]
+         :friendly-home :trail-grad :novelty :dist-home :reserve-home :cargo
+         :food-progress]
         observe/directional-sensory-keys)))
 
 (def ^:private default-precisions
@@ -28,7 +29,8 @@
           :novelty 0.6
           :dist-home 0.9
           :reserve-home 0.6
-          :cargo 1.2}
+          :cargo 1.2
+          :food-progress 1.0}
    :tau 1.6})
 
 (defn- blend

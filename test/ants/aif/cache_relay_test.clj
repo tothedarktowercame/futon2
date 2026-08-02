@@ -1,5 +1,7 @@
 (ns ants.aif.cache-relay-test
   (:require [ants.aif.forward :as forward]
+            [ants.aif.observe :as observe]
+            [ants.aif.policy :as policy]
             [ants.war :as war]
             [clojure.test :refer [deftest is testing]]))
 
@@ -20,6 +22,30 @@
     (is (zero? (get-in dropped [:mean :cargo])))
     (is (< (get-in dropped [:mean :h]) (get-in held [:mean :h]))
         "the existing cargo term, not a drop bonus, lowers predicted hunger")))
+
+(deftest cache-drop-banks-homeward-progress-without-inventing-progress
+  (let [world (war/new-world {:size [24 24] :armies [:aif] :ants-per-side 1
+                              :food-cache-enabled? true})
+        ant (-> (first (vals (:ants world)))
+                (assoc :loc [12 12] :cargo 0.7 :h 0.35))
+        before (observe/g-observe world ant)
+        dropped (#'policy/predict-observation world ant :drop)
+        held (#'policy/predict-observation world ant :hold)]
+    (testing "dropping conserves the homeward-progress mean"
+      (is (< (Math/abs (- (:food-progress dropped) (:food-progress before))) 1.0e-12))
+      (is (<= (:food-progress dropped) (:food-progress held))
+          "continuing home may make more progress; dropping only banks what exists"))
+    (testing "world-banked progress has less modeled loss variance"
+      (is (::policy/food-progress-banked? dropped))
+      (is (not (::policy/food-progress-banked? held)))
+      (is (< (::policy/food-progress-variance dropped)
+             (::policy/food-progress-variance held))))
+    (testing "the live sensor exposes the same progress quantity"
+      (let [observation before]
+        (is (pos? (:food-progress observation)))
+        (is (< (Math/abs (- (:food-progress observation)
+                            (* (:cargo ant) (:home-prox observation))))
+               1.0e-12))))))
 
 (deftest cache-food-enters-the-ordinary-cell-food-pool
   (let [a {:id :a :species :aif :loc [12 12] :cargo 0.6 :h 0.4}

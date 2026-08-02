@@ -98,7 +98,8 @@
   "The scalar observation ABI plus the food/pheromone Moore sensorium."
   (vec (concat
         [:food :pher :food-trace :pher-trace :home-prox :enemy-prox :h :ingest
-         :friendly-home :trail-grad :novelty :dist-home :reserve-home :cargo]
+         :friendly-home :trail-grad :novelty :dist-home :reserve-home :cargo
+         :food-progress]
         observe/directional-sensory-keys)))
 
 (def ^:private default-c-vectors
@@ -127,7 +128,8 @@
                :novelty      nil
                :dist-home    {:mean 0.50 :sd 0.30}   ; moderate exploration
                :reserve-home {:mean 0.60 :sd 0.25}   ; healthy reserves
-               :cargo        {:mean 0.40 :sd 0.25}}  ; cargo accumulating
+               :cargo        {:mean 0.40 :sd 0.25}
+               :food-progress nil}                   ; enabled only in cache worlds
    :homebound {:food         nil                      ; no food preference (returning)
                :pher         {:mean 0.30 :sd 0.25}   ; mild pheromone
                :food-trace   nil
@@ -141,7 +143,8 @@
                :novelty      nil
                :dist-home    {:mean 0.15 :sd 0.20}   ; prefer close to home
                :reserve-home {:mean 0.65 :sd 0.25}   ; healthy reserves
-               :cargo        {:mean 0.10 :sd 0.15}}  ; prefer low cargo (delivered)
+               :cargo        {:mean 0.10 :sd 0.15}
+               :food-progress nil}                   ; enabled only in cache worlds
    :maintain  {:food         {:mean 0.40 :sd 0.25}   ; mild food (near home)
                :pher         {:mean 0.50 :sd 0.25}   ; prefer pheromone (trail-laying)
                :food-trace   nil
@@ -155,7 +158,8 @@
                :novelty      nil
                :dist-home    {:mean 0.40 :sd 0.30}   ; moderate
                :reserve-home {:mean 0.65 :sd 0.25}   ; healthy reserves
-               :cargo        {:mean 0.30 :sd 0.25}}}) ; moderate cargo
+               :cargo        {:mean 0.30 :sd 0.25}
+               :food-progress nil}})                 ; enabled only in cache worlds
 
 (defn- c-vectors-for-efe
   "Extract parallel vectors (means, variances) from the C-vector for the EFE call.
@@ -582,13 +586,32 @@
         ;; Update scores
         world-pred (if (pos? score-delta)
                      (update-in world-pred [:scores species] (fnil + 0.0) (double score-delta))
-                     world-pred)]
+                     world-pred)
+        predicted (observe/g-observe world-pred next-ant)
+        cache-drop (double (or (:cache-drop effects) 0.0))
+        delivered (double (or (:deposit effects) 0.0))
+        carried (double (or (:cargo next-ant) 0.0))
+        progress-amount (observe/clamp01 (+ carried cache-drop delivered))
+        progress (observe/clamp01 (* progress-amount
+                                      (double (or (:home-prox predicted) 0.0))))
+        banked? (or (pos? cache-drop) (pos? delivered))
+        hunger (double (or (:h predicted) 0.0))
+        distance (double (or (:dist-home predicted) 0.0))
+        ;; Carried and cached food have the same progress mean. Banking only
+        ;; removes the modeled loss risk from starvation/diversion; it does not
+        ;; create progress or count as delivered yield.
+        progress-variance (if banked?
+                            0.0025
+                            (min 0.30 (+ 0.01 (* 0.20 hunger) (* 0.10 distance))))]
     ;; g-observe omits :loc. Keep the action-conditioned location private so
     ;; canonical ambiguity can query spatial uncertainty without changing the
     ;; observation consumed by the separate directed-EIG augmentation.
-    (assoc (observe/g-observe world-pred next-ant)
+    (assoc predicted
+           :food-progress progress
            ::predicted-loc (:loc next-ant)
-           ::forward-variance (:variance result))))
+           ::forward-variance (:variance result)
+           ::food-progress-variance progress-variance
+           ::food-progress-banked? banked?)))
 
 (defn- action-predicted-variances
   "Build per-channel predictive variance for one candidate action.
@@ -604,13 +627,21 @@
                      (let [channel-ns (namespace k)
                            direction (some-> k name keyword)
                            sensor-loc (get-in outcome [:sensorium-locs direction])
-                           variance (case channel-ns
-                                      "food" (if sensor-loc
-                                               (:uncertainty
-                                                (food-belief/food-belief-at
-                                                 spatial-food-belief sensor-loc))
-                                               0.05)
-                                      "pher" (get forward-variances :pher 0.0025)
+                           variance (cond
+                                      (= k :food-progress)
+                                      (::food-progress-variance outcome)
+
+                                      (= channel-ns "food")
+                                      (if sensor-loc
+                                        (:uncertainty
+                                         (food-belief/food-belief-at
+                                          spatial-food-belief sensor-loc))
+                                        0.05)
+
+                                      (= channel-ns "pher")
+                                      (get forward-variances :pher 0.0025)
+
+                                      :else
                                       (or (get forward-variances k)
                                           (get current-variances k)
                                           0.01))]
@@ -656,6 +687,14 @@
         mode (or (:mode observation) :outbound)
         c-vector (or (get default-c-vectors mode)
                      (:outbound default-c-vectors))
+        ;; This is a C preference, not an action bonus: value food nearer home.
+        ;; The mean is conserved by :drop; only its modeled loss variance falls
+        ;; when progress is committed to the world. Delivered score remains the
+        ;; external witness and is deliberately absent from this preference.
+        c-vector (if (and (get-in world [:config :food-cache-enabled?])
+                          (= mode :homebound))
+                   (assoc c-vector :food-progress {:mean 0.75 :sd 0.08})
+                   c-vector)
         [c-means c-vars] (c-vectors-for-efe c-vector pred-means pred-variances)
         efe-result (efe/g-efe pred-mean-v pred-var-v c-means c-vars
                               {:weights (for [k sensory-keys]

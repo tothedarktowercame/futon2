@@ -151,6 +151,7 @@
   - :novelty        inverse visit frequency (1/(1+visits))
   - :dist-home      normalized distance from home
   - :reserve-home   normalized colony reserves
+  - :food-progress  carried food weighted by proximity to home
   "
   [world {:keys [loc species] :as ant}]
   (let [loc (or loc [0 0])
@@ -219,6 +220,10 @@
      :reserve-home reserve-home
      :recent-gather recent-gather
      :cargo      (clamp01 cargo)
+     ;; Carried progress is still exposed to the ant's survival risk. The
+     ;; forward model preserves this mean across a cache drop and reduces its
+     ;; predictive variance once the food is banked in the shared grid.
+     :food-progress (clamp01 (* cargo (proximity world loc home)))
      :white? (if white? 1.0 0.0)}))
 
 (defn sense->vector
@@ -226,5 +231,6 @@
   [observation]
   (mapv #(sensory-value observation %)
         (concat [:food :pher :food-trace :pher-trace :home-prox :enemy-prox :h :ingest
-                 :friendly-home :trail-grad :novelty :dist-home :reserve-home :cargo]
+                 :friendly-home :trail-grad :novelty :dist-home :reserve-home :cargo
+                 :food-progress]
                 directional-sensory-keys)))
