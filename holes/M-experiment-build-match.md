@@ -276,3 +276,51 @@ a measured-variation-without-floor, and a one-part-in-2.8-billion perturbation.
 They did not catch: fabricated seed formulas, an unexamined environment, or an
 endpoint name that resolves to nothing. The line between those two lists is
 exactly the line between *shape* and *meaning*, and it is worth having drawn.
+
+
+## Registrations need a schema version (2026-08-01, discovered the hard way)
+
+I dispatched R-0 and the `ReplicationPlan` generalisation concurrently, into the
+same type system, with neither agent aware of the other. The consequence is now
+concrete: **R-0's registration no longer renders.**
+
+```
+refused holes/clean/r0-discriminating-environment.clean.edn:
+  positive-control axis requires :on-violation :abandon-run or :record-as-finding
+```
+
+That is the gate working correctly — `:on-violation` became required tonight,
+and R-0's registration predates it. But R-0 **is still running**, against a
+registration that validated at dispatch and does not validate now.
+
+### What I am deliberately not doing
+
+**Not editing R-0's registration while its run is in flight.** Changing a
+registration mid-experiment is the cardinal error this entire apparatus exists to
+prevent, and the fact that the edit would be small and obviously-correct is
+exactly the argument that makes it tempting. The run completes under the schema
+it was registered against; the amendment is made afterwards and recorded as an
+amendment.
+
+For the record, the disposition R-0's control should carry is `:abandon-run` —
+its positive control is `:canonical-ambiguity`, which must remain bit-identical at
+every grid size because that is a Lean-proved code fact. It was specified in the
+dispatch brief and in the park payload; it simply had no field to live in. That
+is the day's class again: the semantics existed, the enforcement slot did not.
+
+### The gap
+
+**A registration does not record the schema version it was made under.** So a
+mid-flight schema change silently either invalidates a live registration or —
+worse — a *later* schema relaxation could silently revalidate one that should
+have failed. Neither is visible in the artifact.
+
+Fix: registrations carry a schema version; the renderer records which version it
+validated against; and a registration that renders under vN and refuses under
+vN+1 is an *amendment event*, not an error. claude-7's clause from this morning
+covers exactly this and I underweighted it — *"amendments are registrations
+too"*. A schema change is an amendment to every registration it touches.
+
+Concretely, tonight's schema changed three times (`ReplicationPlan (ι)`, the
+stop-rule generalisation, `:on-violation`) while two registrations were live.
+Neither records which version it holds.
