@@ -231,6 +231,5 @@
   [observation]
   (mapv #(sensory-value observation %)
         (concat [:food :pher :food-trace :pher-trace :home-prox :enemy-prox :h :ingest
-                 :friendly-home :trail-grad :novelty :dist-home :reserve-home :cargo
-                 :food-progress]
+                 :friendly-home :trail-grad :novelty :dist-home :reserve-home :cargo]
                 directional-sensory-keys)))

@@ -98,8 +98,7 @@
   "The scalar observation ABI plus the food/pheromone Moore sensorium."
   (vec (concat
         [:food :pher :food-trace :pher-trace :home-prox :enemy-prox :h :ingest
-         :friendly-home :trail-grad :novelty :dist-home :reserve-home :cargo
-         :food-progress]
+         :friendly-home :trail-grad :novelty :dist-home :reserve-home :cargo]
         observe/directional-sensory-keys)))
 
 (def ^:private default-c-vectors
@@ -166,12 +165,12 @@
    Returns [c-means c-variances] as seqs aligned to sensory-keys.
    Channels without preferences contribute C-mean = predicted-mean (KL=0) and
    C-variance = predicted-variance (KL=0 for that channel)."
-  [c-vector pred-means pred-variances]
-  (let [c-means (for [k sensory-keys]
+  [c-vector pred-means pred-variances evaluation-keys]
+  (let [c-means (for [k evaluation-keys]
                   (if-let [pref (get c-vector k)]
                     (:mean pref)
                     (get pred-means k)))  ; no pref → KL=0 for this channel
-        c-vars (for [k sensory-keys]
+        c-vars (for [k evaluation-keys]
                  (if-let [pref (get c-vector k)]
                    (* (double (:sd pref)) (double (:sd pref)))
                    (get pred-variances k 0.01)))]
@@ -619,17 +618,21 @@
    Food uncertainty comes from the food belief at the predicted next location.
    Other forward-model channels retain their fixed noise; channels absent from
    that model fall back individually to current belief variance, then 0.01."
-  [mu outcome spatial-food-belief]
-  (let [current-variances (:var mu)
+  ([mu outcome spatial-food-belief]
+   (action-predicted-variances mu outcome spatial-food-belief sensory-keys))
+  ([mu outcome spatial-food-belief evaluation-keys]
+   (let [current-variances (:var mu)
         forward-variances (::forward-variance outcome)
         base (into {}
-                   (for [k sensory-keys]
+                   (for [k evaluation-keys]
                      (let [channel-ns (namespace k)
                            direction (some-> k name keyword)
                            sensor-loc (get-in outcome [:sensorium-locs direction])
                            variance (cond
                                       (= k :food-progress)
-                                      (::food-progress-variance outcome)
+                                      (or (::food-progress-variance outcome)
+                                          (get current-variances k)
+                                          0.01)
 
                                       (= channel-ns "food")
                                       (if sensor-loc
@@ -651,7 +654,7 @@
              (double (:uncertainty
                       (food-belief/food-belief-at
                        spatial-food-belief (::predicted-loc outcome)))))
-      base)))
+      base))))
 
 (defn- expected-free-energy
   "Score an action via the canonical 2-term EFE core + named augmentation.
@@ -679,11 +682,13 @@
         pattern-id (get-in observation [:pattern :pattern/active])
         pattern (when pattern-id
                   (pattern-efe/pattern-efe pattern-id action observation {:efe efe}))
-        pred-means (into {} (for [k sensory-keys]
+        cache-enabled? (boolean (get-in world [:config :food-cache-enabled?]))
+        evaluation-keys (cond-> sensory-keys cache-enabled? (conj :food-progress))
+        pred-means (into {} (for [k evaluation-keys]
                               [k (double (observe/sensory-value outcome k))]))
-        pred-variances (action-predicted-variances mu outcome food-belief)
-        pred-var-v (for [k sensory-keys] (double (get pred-variances k 0.01)))
-        pred-mean-v (for [k sensory-keys] (double (get pred-means k 0.0)))
+        pred-variances (action-predicted-variances mu outcome food-belief evaluation-keys)
+        pred-var-v (for [k evaluation-keys] (double (get pred-variances k 0.01)))
+        pred-mean-v (for [k evaluation-keys] (double (get pred-means k 0.0)))
         mode (or (:mode observation) :outbound)
         c-vector (or (get default-c-vectors mode)
                      (:outbound default-c-vectors))
@@ -691,13 +696,12 @@
         ;; The mean is conserved by :drop; only its modeled loss variance falls
         ;; when progress is committed to the world. Delivered score remains the
         ;; external witness and is deliberately absent from this preference.
-        c-vector (if (and (get-in world [:config :food-cache-enabled?])
-                          (= mode :homebound))
+        c-vector (if (and cache-enabled? (= mode :homebound))
                    (assoc c-vector :food-progress {:mean 0.75 :sd 0.08})
                    c-vector)
-        [c-means c-vars] (c-vectors-for-efe c-vector pred-means pred-variances)
+        [c-means c-vars] (c-vectors-for-efe c-vector pred-means pred-variances evaluation-keys)
         efe-result (efe/g-efe pred-mean-v pred-var-v c-means c-vars
-                              {:weights (for [k sensory-keys]
+                              {:weights (for [k evaluation-keys]
                                           (double (get-in prec [:Pi-o k] 1.0)))})
         risk (:risk efe-result)
         ambiguity (:ambiguity efe-result)

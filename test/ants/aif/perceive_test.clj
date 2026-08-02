@@ -65,8 +65,7 @@
     (testing "errors keyed by sensory modalities"
       (is (= (set (concat
                    [:food :pher :food-trace :pher-trace :home-prox :enemy-prox :h :ingest
-                             :friendly-home :trail-grad :novelty :dist-home :reserve-home :cargo
-                             :food-progress]
+                             :friendly-home :trail-grad :novelty :dist-home :reserve-home :cargo]
                    observe/directional-sensory-keys))
              (set (keys errors)))))))
 

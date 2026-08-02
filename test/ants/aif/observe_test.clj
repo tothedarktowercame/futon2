@@ -211,13 +211,12 @@
   (let [obs {:food 0.1 :pher 0.2 :food-trace 0.3 :pher-trace 0.4
              :home-prox 0.5 :enemy-prox 0.6 :h 0.7 :ingest 0.15
              :friendly-home 1.0 :trail-grad 0.25 :novelty 0.8
-             :dist-home 0.4 :reserve-home 0.3 :cargo 0.8
-             :food-progress 0.2}
+             :dist-home 0.4 :reserve-home 0.3 :cargo 0.8}
         sensed (observe/sense->vector obs)]
-    (is (= [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.15 1.0 0.25 0.8 0.4 0.3 0.8 0.2]
-           (subvec sensed 0 15)))
-    (is (= 33 (count sensed)))
-    (is (every? zero? (subvec sensed 15)))))
+    (is (= [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.15 1.0 0.25 0.8 0.4 0.3 0.8]
+           (subvec sensed 0 14)))
+    (is (= 32 (count sensed)))
+    (is (every? zero? (subvec sensed 14)))))
 
 (deftest border-sensorium-keeps-fixed-shape
   (let [obs (observe/g-observe base-world
