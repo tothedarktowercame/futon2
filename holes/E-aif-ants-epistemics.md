@@ -353,3 +353,99 @@ justification and its own registration.
 
 R-c (τ) and R-d (the mode gate) are untouched by this and remain live: both are
 about *reachability* and *gating*, not about competing with risk inside a sum.
+
+
+---
+
+## THE SYNTHESIS QUEUE (2026-08-02) — capability claims stated before the builds
+
+Joe's redirection: *"I don't really know why we have spent time analysing the
+ants when we could have spent the time synthesizing more interesting ants."* The
+analysis is closed. What follows is the build order, and **each slice states its
+capability claim before it is built**, because that discipline has now cost us
+twice.
+
+### S1 — 9-cell sensorium *(dispatched, codex-9)*
+
+**Defect:** `:food-trace` / `:pher-trace` are neighbourhood **means**, so
+candidates cannot differ in predicted observation. The discrimination is
+destroyed upstream of every EFE term.
+
+**Capability claim:** candidates become distinguishable, so a location-derived
+epistemic quantity has something to vary over.
+**Acceptance:** ambiguity and epistemic spreads in the decision log become
+non-zero and vary. Before: exactly 0, and 0.45 flat.
+
+### S2 — drop food anywhere (caching / bucket relays)
+
+**Half-built already:** the grid holds food in cells; `deposit-food`
+(war.clj:630-650) already moves cargo out of an ant. Only the destination is
+restricted to home.
+
+**Capability claim — and it is the first one the ants have ever had:** *a colony
+that discovers relays beats one that does not.* This is the first proposed task a
+greedy gradient-follower **cannot solve optimally**, which is why every
+measurement to date showed `classic` ≥ `aif-full`: forage-and-return is *solved*
+by gradient descent and there was nothing for a deliberative controller to be
+better at.
+
+**Confound to decide before building:** `deposit-food` teleports the ant home
+from within distance 4. A cache inside that radius is pointless. Remove the
+shortcut or place food well outside it — decide, do not discover.
+
+### S3 — two ant architectures: WM-style and Zaif-style *(Joe, 2026-08-02)*
+
+| | preferences `C` | loop |
+|---|---|---|
+| **WM-style ant** | internal, fixed — as today | closed |
+| **Zaif-style ant** | supplied by a driver per episode, in the sensorium | open |
+
+**Small at the implementation:** `c-vectors-for-efe` already takes a C-vector
+looked up by mode. A Zaif-style ant takes its C from the task instead. A
+substitution at an existing seam, like `:enemy-prox` and drop-food.
+
+**Capability claim — *being told* vs *finding out*:** under a regime shift, the
+WM-style ant must discover the change; the Zaif-style ant can be told. So the
+Zaif-style ant adapts faster when the driver knows, and **worse when the driver
+is wrong, slow, or silent.**
+
+**Why it matters beyond the ants.** It gives a principled candidate answer to the
+featuregrid's `?` on the runner's epistemic term: **runners may substitute
+instruction for exploration.** If that holds, the ants' inert epistemic apparatus
+is not purely a defect — it is partly the correct adaptation for an agent that
+receives its goals, and the wrong one for an agent that does not.
+
+**And it is L1 in miniature.** A Zaif-style ant must eventually model *how much
+to trust its driver*. L1 asks whether the adjudicator endorses the recommendation;
+this asks whether the agent trusts the instruction. Same calibration, at a scale
+that costs seconds.
+
+### S4 — fight
+
+**Half-built already:** `:enemy-prox` is sensed (channel 6 of 14) and **no action
+can respond to it.**
+
+**Capability claim:** adversaries create uncertainty that is *irreducible by
+exploration* — they move and respond, so what you learned decays. Every current
+uncertainty is resolvable by visiting, after which an epistemic drive has no
+remaining job. This is the first world feature that makes an epistemic term
+**permanently** load-bearing.
+
+### S5 — trail-age
+
+Makes uncertainty *earned* rather than visit-count bookkeeping: an old strong
+trail is less informative about current food than a fresh weak one.
+
+### The standing constraint
+
+**The ants are a toy of the runners, and whatever the runner layer gains the ant
+gains a toy of** — or the toy stops predicting anything. This week inverted that.
+The featuregrid (`FEATUREGRID-aif-systems.md`) is the artifact that should make
+the inversion visible next time.
+
+### What `classic` is for now
+
+Once these land, `classic` stops being a contrast and becomes an **instrument
+check**. Beating a controller that structurally cannot do the task tells us
+nothing; *failing* to beat it tells us the task does not require the machinery.
+That is `:mechanism-can-exhibit` — a pre-flight check, not an arm.
