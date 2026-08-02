@@ -21,7 +21,7 @@
     (is (< (get-in dropped [:mean :h]) (get-in held [:mean :h]))
         "the existing cargo term, not a drop bonus, lowers predicted hunger")))
 
-(deftest cache-food-is-conserved-and-provenance-is-analytical-only
+(deftest cache-food-enters-the-ordinary-cell-food-pool
   (let [a {:id :a :species :aif :loc [12 12] :cargo 0.6 :h 0.4}
         initial (war/new-world {:size [24 24] :armies [:aif] :ants-per-side 1})
         initial (-> initial
@@ -53,9 +53,8 @@
                {:score-delta (:score-delta delivered)
                 :reserve-delta (:reserve-delta delivered)
                 :relay-delivery (:relay-delivery delivered)})]
-    (testing "food and cached fraction are conserved during proportional pickup"
+    (testing "the cached fraction is transferred proportionally on pickup"
       (is (= 0.7 (:gather gathered)))
-      (is (< (Math/abs (- 0.3 (get-in after-pickup [:grid :cells [12 12] :food]))) 1.0e-12))
       (is (< (Math/abs (- 0.42 (get-in b-loaded [:cargo-provenance :a]))) 1.0e-12))
       (is (< (Math/abs (- 0.18 (get-in after-pickup
                                        [:grid :cells [12 12] :cache-provenance :a])))

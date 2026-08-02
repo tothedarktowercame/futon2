@@ -352,7 +352,7 @@
     (if (and (not= loc home) (pos? cargo))
       {:ant (-> ant (assoc :cargo 0.0) (dissoc :cargo-provenance))
        :cache-drop cargo
-       :food-delta {loc cargo}
+       :food-delta {loc (- cargo)}
        :cache-provenance-add {loc {(:id ant) cargo}}}
       {:ant ant :cache-drop 0.0})))
 

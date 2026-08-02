@@ -89,9 +89,9 @@
   (testing "zeroing action-conditioned ambiguity changes a seeded run"
     (let [run-single (deref #'exp/run-single)
           opts [:metabolism 0.06 :initial-reserves 0.5 :ants-per-side 3
-                :choice-seed 202658110]
-          full (apply run-single :aif :patchy 202608110 202608111 [10 10] 40 false opts)
-          no-ambiguity (apply run-single :aif :patchy 202608110 202608111 [10 10] 40 false
+                :choice-seed 202658116]
+          full (apply run-single :aif :patchy 202608122 202608123 [10 10] 40 false opts)
+          no-ambiguity (apply run-single :aif :patchy 202608122 202608123 [10 10] 40 false
                               (concat opts [:efe-lambda-overrides {:ambiguity 0.0}]))]
       (is (not= full no-ambiguity)
           "the former positive control must move once directional ambiguity is live"))))

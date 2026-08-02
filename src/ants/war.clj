@@ -1242,7 +1242,7 @@
         ;; --- food deltas ---
         world (reduce (fn [w [loc delta]]
                         (update-in w [:grid :cells loc :food]
-                                   #(max 0.0 (+ (double (or % 0.0)) (double delta)))))
+                                   #(max 0.0 (- (double (or % 0.0)) (double delta)))))
                       world
                       (or (seq food-deltas) []))
         world (reduce (fn [w [loc provenance]]
