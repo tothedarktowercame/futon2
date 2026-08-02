@@ -777,7 +777,7 @@
                                    (>= local-food food-here))
                               (and (< cargo cargo-thresh)
                                    on-home?))
-        guarded (if (or (< cargo cargo-thresh) on-home?)
+        guarded (if (or (< cargo cargo-thresh) on-home? (>= local-food food-here))
                   (drop-actions guarded #{:drop})
                   guarded)]
     (if bad-empty-return?

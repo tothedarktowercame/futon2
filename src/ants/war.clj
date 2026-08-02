@@ -839,7 +839,8 @@
         food-here (get-in world [:grid :cells loc :food] 0.0)
         neighbour-food (get-in world [:grid :cells (richest-neighbour world loc (:species ant)) :food] 0.0)]
     (cond
-      (and cache? (> cargo 0.2) far-from-home? carrying-pressure?) :drop
+      (and cache? (> cargo 0.2) far-from-home? carrying-pressure?
+           (< food-here 0.10)) :drop
       (> cargo 0.2) :return
       (> food-here 0.2) :forage
       (> neighbour-food food-here) :forage
