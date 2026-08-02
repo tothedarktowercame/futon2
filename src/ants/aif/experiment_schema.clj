@@ -11,6 +11,9 @@
 (def slice5-confirmation-registration
   "../futon6/holes/clean/slice5-confirmation.clean.edn")
 
+(def r0-discriminating-environment-registration
+  "../futon6/holes/clean/r0-discriminating-environment.clean.edn")
+
 (defn read-registration
   [path]
   (edn/read-string (slurp path)))

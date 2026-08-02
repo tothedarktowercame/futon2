@@ -44,17 +44,24 @@
 
 (defn experiment-run-key
   "The non-collapsing identity of one experiment run. `seed` is the complete
-   seed triple, not the historically ambiguous food seed alone."
-  [scenario arm run]
-  [scenario arm {:food-seed (:food-seed run)
-                 :move-seed (:move-seed run)
-                 :choice-seed (:choice-seed run)}])
+   seed triple, not the historically ambiguous food seed alone. Factorial
+   experiments also include the grid cell so paired seeds may be reused across
+   registered environmental levels without collapsing distinct runs."
+  ([scenario arm run]
+   (experiment-run-key nil scenario arm run))
+  ([grid scenario arm run]
+   (let [seed {:food-seed (:food-seed run)
+               :move-seed (:move-seed run)
+               :choice-seed (:choice-seed run)}]
+     (if grid
+       [grid scenario arm seed]
+       [scenario arm seed]))))
 
 (defn artifact-rows
   "Flatten an experiment artifact into `[full-key run-record]` rows."
   [artifact]
   (mapv (fn [[cell run]]
-          [(experiment-run-key (:scenario cell) (:arm cell) run) run])
+          [(experiment-run-key (:grid cell) (:scenario cell) (:arm cell) run) run])
         (mapcat (fn [cell]
                   (map (fn [run] [cell run]) (:runs cell)))
                 (:cells artifact))))

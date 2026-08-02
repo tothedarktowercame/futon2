@@ -8,6 +8,11 @@
 
 (def harness (experiment/slice5-confirmation-harness))
 
+(def r0-registration
+  (schema/read-registration schema/r0-discriminating-environment-registration))
+
+(def r0-harness (experiment/r0-harness))
+
 (deftest confirmation-harness-matches-registration
   (is (= harness
          (schema/validate-harness! registration
@@ -59,3 +64,20 @@
             :choice-seed 202859139}
            (last snowdrift)))
     (is (= 30 (count patchy)))))
+
+(deftest r0-factorial-harness-matches-registration
+  (is (= r0-harness
+         (schema/validate-harness! r0-registration r0-harness)))
+  (is (= [{:size [10 10] :ticks 300}
+          {:size [24 24] :ticks 720}
+          {:size [36 36] :ticks 1080}]
+         (get-in r0-harness [:environment :grid-scale]))))
+
+(deftest r0-validation-precedes-executor
+  (let [entered? (atom false)
+        bad (assoc-in r0-harness [:environment :grid-scale 1 :ticks] 300)]
+    (is (thrown? clojure.lang.ExceptionInfo
+                 (schema/validate-then-run!
+                  schema/r0-discriminating-environment-registration bad
+                  (fn [_] (reset! entered? true)))))
+    (is (false? @entered?))))

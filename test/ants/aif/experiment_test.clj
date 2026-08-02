@@ -95,3 +95,13 @@
                               (concat opts [:efe-lambda-overrides {:ambiguity 0.0}]))]
       (is (= full no-ambiguity)
           "the positive-control trajectories and yields must be bit-identical"))))
+
+(deftest r0-manipulation-check-observes-effective-ablation
+  (testing "each R-0 cell verifies the effective lambda before simulation"
+    (let [harness (exp/r0-harness)
+          seed (first (exp/confirmation-seeds harness :patchy))
+          grid (first (get-in harness [:environment :grid-scale]))
+          check (deref #'exp/r0-manipulation-check)]
+      (doseq [arm (:arms harness)]
+        (is (:delivered? (check harness arm :patchy grid seed))
+            (str arm " must install its registered override"))))))

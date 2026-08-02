@@ -16,6 +16,7 @@
             [ants.compare-replay :as stats]
             [ants.aif.experiment-schema :as experiment-schema]
             [clojure.set :as set]
+            [clojure.string :as str]
             [futon2.aif.operational-witness :as operational-witness])
   (:import [java.security MessageDigest]))
 
@@ -888,6 +889,266 @@
             :sha256 sha
             :row-count row-count}))))))
 
+;; -- R-0 discriminating-environment baseline ------------------------------
+
+(defn r0-harness
+  "Read the R-0 factorial design from its authoritative CLean registration."
+  []
+  (-> experiment-schema/r0-discriminating-environment-registration
+      experiment-schema/read-registration
+      experiment-schema/experiment-design
+      experiment-schema/design->harness-config))
+
+(defn run-registered-r0!
+  "Validate R-0 before allowing its executor to enter the simulation."
+  [executor]
+  (let [harness (r0-harness)]
+    (experiment-schema/validate-then-run!
+     experiment-schema/r0-discriminating-environment-registration harness executor)))
+
+(defn- r0-seeds
+  [harness scenario]
+  (confirmation-seeds harness scenario))
+
+(defn- assert-r0-contract!
+  [harness registration]
+  (let [design (experiment-schema/experiment-design registration)
+        seed-spec (:seeds harness)
+        current (seed-universe harness seed-spec)
+        pilot (seed-universe harness (:pilot seed-spec))
+        prior-confirmation (seed-universe harness (:prior-confirmation seed-spec))
+        grids (get-in harness [:environment :grid-scale])
+        expected-grids [{:size [10 10] :ticks 300}
+                        {:size [24 24] :ticks 720}
+                        {:size [36 36] :ticks 1080}]
+        preconditions (:preconditions design)]
+    (when-not (= (set (:arms harness)) (set (keys slice5-lambda-overrides)))
+      (throw (ex-info "R-0 registered arms and implemented ablations differ"
+                      {:registered (:arms harness)
+                       :implemented (keys slice5-lambda-overrides)})))
+    (when-not (= expected-grids grids)
+      (throw (ex-info "R-0 grid/tick scaling differs from registration"
+                      {:expected expected-grids :actual grids})))
+    (when-not (and (seq (get-in preconditions
+                                [:mechanism-necessary :alternative-paths]))
+                   (get-in preconditions [:mechanism-delivered :check]))
+      (throw (ex-info "R-0 two-limbed precondition is incomplete" {})))
+    (when (or (seq (set/intersection current pilot))
+              (seq (set/intersection current prior-confirmation)))
+      (throw (ex-info "R-0 seeds overlap a historical Slice 5 universe" {})))
+    harness))
+
+(defn- r0-manipulation-check
+  [harness arm scenario grid seed-row]
+  (let [{:keys [size ticks]} grid
+        {:keys [metabolism initial-reserves ants-per-side food]} (:environment harness)
+        species (if (= arm :classic) :classic :aif)
+        expected (get slice5-lambda-overrides arm)
+        world (make-seeded-world
+               species scenario (:food-seed seed-row) (:move-seed seed-row) size ticks
+               :metabolism metabolism
+               :initial-reserves initial-reserves
+               :ants-per-side ants-per-side
+               :choice-seed (:choice-seed seed-row)
+               :food-opts (get food scenario)
+               :efe-lambda-overrides expected)
+        effective (select-keys (get-in world [:config :aif :efe :lambda])
+                               (keys expected))
+        delivered? (= expected effective)]
+    {:expected expected :effective effective :delivered? delivered?}))
+
+(defn- r0-cell
+  [harness arm scenario grid seed-rows]
+  (let [{:keys [size ticks]} grid
+        {:keys [metabolism initial-reserves ants-per-side food]} (:environment harness)
+        species (if (= arm :classic) :classic :aif)
+        manipulation (r0-manipulation-check harness arm scenario grid (first seed-rows))
+        _ (when-not (:delivered? manipulation)
+            (throw (ex-info "R-0 ablation was not delivered"
+                            {:grid size :scenario scenario :arm arm
+                             :manipulation manipulation})))
+        runs (mapv (fn [{:keys [food-seed move-seed choice-seed] :as seeds}]
+                     (-> (run-single species scenario food-seed move-seed size ticks false
+                                     :metabolism metabolism
+                                     :initial-reserves initial-reserves
+                                     :ants-per-side ants-per-side
+                                     :choice-seed choice-seed
+                                     :food-opts (get food scenario)
+                                     :efe-lambda-overrides
+                                     (get slice5-lambda-overrides arm))
+                         (merge seeds)))
+                   seed-rows)
+        yields (mapv :yield runs)
+        starvation (mapv #(if (zero? (:yield %)) 1.0 0.0) runs)]
+    {:grid size
+     :ticks ticks
+     :arm arm
+     :scenario scenario
+     :manipulation-check manipulation
+     :yield (stats/arm-summary yields)
+     :starvation (stats/arm-summary starvation)
+     :runs runs}))
+
+(defn- r0-analysis
+  [harness cells]
+  (let [by-key (into {} (map (juxt (fn [cell]
+                                     [(:grid cell) (:scenario cell) (:arm cell)])
+                                   identity)
+                              cells))
+        rows (for [{:keys [size]} (get-in harness [:environment :grid-scale])
+                   scenario (:scenarios harness)
+                   :let [full (get by-key [size scenario :aif-full])]
+                   :when full]
+               {:grid size
+                :scenario scenario
+                :identity-counts
+                (into {}
+                      (for [arm (:arms harness)
+                            :let [cell (get by-key [size scenario arm])]
+                            :when cell]
+                        [arm (count (filter true?
+                                            (map = (:runs full) (:runs cell))))]))})]
+    {:identity rows
+     :directed-eig-survives-scaling?
+     (every? #(= 30 (get-in % [:identity-counts :no-directed-eig])) rows)
+     :manipulation-checks-passed?
+     (every? #(get-in % [:manipulation-check :delivered?]) cells)}))
+
+(defn- r0-positive-control!
+  [harness cells]
+  (doseq [{:keys [size]} (get-in harness [:environment :grid-scale])
+          scenario (:scenarios harness)]
+    (let [cell (fn [arm]
+                 (some #(when (and (= size (:grid %))
+                                   (= scenario (:scenario %))
+                                   (= arm (:arm %))) %)
+                       cells))
+          full (cell :aif-full)
+          control (cell :no-canonical-ambiguity)]
+      (when-not (= (:runs full) (:runs control))
+        (throw (ex-info "R-0 positive control violated; producer abandoned"
+                        {:grid size :scenario scenario}))))))
+
+(defn- produce-r0
+  [harness]
+  (let [registration (experiment-schema/read-registration
+                      experiment-schema/r0-discriminating-environment-registration)
+        _ (assert-r0-contract! harness registration)
+        cells (atom [])]
+    ;; The positive control is completed at every scale before any treatment.
+    (doseq [grid (get-in harness [:environment :grid-scale])
+            scenario (:scenarios harness)
+            arm [:aif-full :no-canonical-ambiguity]]
+      (swap! cells conj (r0-cell harness arm scenario grid
+                                 (r0-seeds harness scenario))))
+    (r0-positive-control! harness @cells)
+    (doseq [grid (get-in harness [:environment :grid-scale])
+            scenario (:scenarios harness)
+            arm (remove #{:aif-full :no-canonical-ambiguity} (:arms harness))]
+      (swap! cells conj (r0-cell harness arm scenario grid
+                                 (r0-seeds harness scenario))))
+    (let [analysis (r0-analysis harness @cells)]
+      {:registration {:experiment (:clean/experiment registration)
+                      :validated? true
+                      :source experiment-schema/r0-discriminating-environment-registration}
+       :status :complete
+       :environment (:environment harness)
+       :arms (:arms harness)
+       :scenarios (:scenarios harness)
+       :seeds (:seeds harness)
+       :lambda-overrides slice5-lambda-overrides
+       :n-runs (get-in harness [:seeds :runs-per-cell])
+       :cells @cells
+       :analysis analysis})))
+
+(defn- identity-cell
+  [analysis grid scenario arm]
+  (some #(when (and (= grid (:grid %)) (= scenario (:scenario %)))
+           (get-in % [:identity-counts arm]))
+        (:identity analysis)))
+
+(defn- r0-markdown
+  [artifact producer-sha artifact-sha command]
+  (let [{:keys [environment arms scenarios cells analysis]} artifact
+        by-key (into {} (map (juxt (fn [cell]
+                                     [(:grid cell) (:scenario cell) (:arm cell)])
+                                   identity)
+                              cells))]
+    (str "# R-0: discriminating-environment baseline\n\n"
+         "Status: **complete**. CLean/Malli validation fired before both producers.\n\n"
+         "## Positive control — reported first\n\n"
+         "Every `:no-canonical-ambiguity` record must equal its paired `:aif-full` "
+         "record; any mismatch stops before treatments.\n\n"
+         "| Grid | Patchy | Sparse | Snowdrift |\n|---|---:|---:|---:|\n"
+         (apply str
+                (for [{:keys [size]} (:grid-scale environment)]
+                  (format "| %sx%s | %d/30 | %d/30 | %d/30 |\n"
+                          (first size) (second size)
+                          (identity-cell analysis size :patchy :no-canonical-ambiguity)
+                          (identity-cell analysis size :sparse :no-canonical-ambiguity)
+                          (identity-cell analysis size :snowdrift :no-canonical-ambiguity))))
+         "\n## Primary readout: paired record identity\n\n"
+         "| Grid | Scenario | " (str/join " | " (map name arms)) " |\n"
+         "|---|---|" (apply str (repeat (count arms) "---:|")) "\n"
+         (apply str
+                (for [{:keys [size]} (:grid-scale environment)
+                      scenario scenarios]
+                  (str "| " (first size) "x" (second size) " | " (name scenario) " | "
+                       (str/join
+                        " | "
+                        (map #(str (identity-cell analysis size scenario %) "/30") arms))
+                       " |\n")))
+         "\nDirected-EIG 30/30 survives scaling: **"
+         (if (:directed-eig-survives-scaling? analysis) "yes" "no") "**.\n\n"
+         "## Secondary: yield and starvation\n\n"
+         "| Grid | Scenario | Arm | Yield mean [95% CI] | Starvation [95% CI] |\n"
+         "|---|---|---|---:|---:|\n"
+         (apply str
+                (for [{:keys [size]} (:grid-scale environment)
+                      scenario scenarios
+                      arm arms
+                      :let [cell (get by-key [size scenario arm])]]
+                  (format "| %sx%s | %s | %s | %s | %s |\n"
+                          (first size) (second size) (name scenario) (name arm)
+                          (fmt-ci (:yield cell)) (fmt-ci (:starvation cell)))))
+         "\n## Preconditions and reproduction\n\n"
+         "All 54 per-cell effective-lambda manipulation checks passed. Ticks scaled "
+         "300/720/1080 with grid diameter; ants and patch counts remained fixed as registered.\n\n"
+         "Two independently executed producers were byte-identical before reproduction "
+         "metadata. Producer SHA-256: `" producer-sha "`. Final EDN SHA-256: `"
+         artifact-sha "`.\n\n## Re-run\n\n```bash\n" command "\n```\n")))
+
+(defn run-r0-environment!
+  "Validate and execute two independent R-0 producers, require exact artifact
+   reproduction, then write the registered EDN and report."
+  [markdown-path]
+  (let [edn-path (str (subs markdown-path 0 (- (count markdown-path) 3)) ".edn")
+        command (format "clojure -M -m ants.aif.experiment r0 %s" markdown-path)
+        producer-a (run-registered-r0! produce-r0)
+        producer-b (run-registered-r0! produce-r0)
+        raw-a (pr-str producer-a)
+        raw-b (pr-str producer-b)
+        producer-sha (sha256-string raw-a)
+        reproduction (operational-witness/verify-artifact-reproduction
+                      producer-a producer-b)
+        row-count (reduce + (map (comp count :runs) (:cells producer-a)))]
+    (when-not (and (= raw-a raw-b) (= 1620 row-count)
+                   (:verified? reproduction)
+                   (= 1620 (:matched-row-count reproduction)))
+      (throw (ex-info "R-0 reproduction gate failed"
+                      {:byte-identical? (= raw-a raw-b)
+                       :row-count row-count :reproduction reproduction})))
+    (let [artifact (assoc producer-a :reproduction reproduction
+                          :producer-sha256 producer-sha)
+          raw (pr-str artifact)
+          artifact-sha (sha256-string raw)]
+      (.mkdirs (.getParentFile (java.io.File. markdown-path)))
+      (spit edn-path raw)
+      (spit markdown-path
+            (r0-markdown artifact producer-sha artifact-sha command))
+      {:artifact artifact :producer-sha256 producer-sha
+       :sha256 artifact-sha :row-count row-count})))
+
 (defn -main
   [& [mode n-runs markdown-path]]
   (case mode
@@ -902,5 +1163,8 @@
     "confirmation"
     (run-slice5-confirmation!
      (or n-runs "holes/labs/ants-faithfulness/slice5-confirmation.md"))
-    (throw (ex-info "Expected: authority|slice5|confirmation [args]"
+    "r0"
+    (run-r0-environment!
+     (or n-runs "holes/labs/ants-faithfulness/r0-environment.md"))
+    (throw (ex-info "Expected: authority|slice5|confirmation|r0 [args]"
                     {:mode mode}))))
