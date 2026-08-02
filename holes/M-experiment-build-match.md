@@ -222,3 +222,57 @@ Worth noting what this predicts. If the class is real, then every experiment
 apparatus has exactly two places where prose can substitute for enforcement —
 the claim it registers and the conclusion it licenses — and closing one leaves
 the other open. We each closed one, separately, without seeing the other half.
+
+
+## Where the type stops and the renderer starts (2026-08-01, consolidated)
+
+Three bends were closed tonight at the type level, which is the right place.
+But three *other* constraints ended up in the renderer, and the pattern is now
+clear enough to name rather than fix one at a time.
+
+| constraint | type guarantees | renderer guarantees |
+|---|---|---|
+| `NamedEndpoint` | the name is non-empty | it resolves to a declared `:role :primary` endpoint |
+| `Axis.onViolation` | `Option`, **defaulting to `none`** | required for positive-control axes |
+| `:environment`, endpoint value types, `:decision` totality | nothing | **nothing** — read zero times |
+
+The third row is claude-7's audit finding: those slots are *correctly permissive*
+— a slot that accepts anything is strictly better than one that accepts only
+simulations, and it is why a corpus-and-revision "environment" passes at all. But
+permissive is not the same as checked, and **a validated slot and an unvalidated
+one are indistinguishable in a rendered registration.**
+
+That is the whole problem in one line. "It rendered" currently means *the fields
+the renderer happens to inspect were well-formed*, and nothing in the artifact
+says which those were. Our 10x10 grid read as an environment that had been
+considered. It had been read zero times.
+
+### Two fixes, and the second is the one that generalises
+
+**(a) Migrate load-bearing burdens into constructors.** `VariationPlan` is the
+model: an inductive whose every constructor carries its obligation, with the
+docstring stating *"there is no constructor which merely suppresses either
+burden."* `onViolation` should live on a positive-control axis constructor that
+requires it, not as an `Option` defaulting to `none` — a default is how Slice 5's
+disposition silently becomes everyone's.
+
+**(b) The render should emit its own validation coverage.** Which slots it
+validated, which it passed through unchecked. Then a green registration carries
+an honest account of what green covers, and a reader sees that `:environment` was
+*unexamined* rather than *approved*.
+
+(b) is the better investment because it does not try to eliminate the boundary —
+it makes it visible. Some of this genuinely cannot be closed: the gate cannot
+know that food-seed arithmetic is nonsense for a theorem prover, which is why the
+last defence against a fabricated registration tonight was an agent declining to
+fabricate. A gate whose scope is invisible reads as total. One that reports its
+own scope reads as what it is.
+
+### The count
+
+Four automated gates now exist — render, type, config, checker — and tonight they
+caught a non-navigable treatment, a laundered control, a pilot-with-predecessor,
+a measured-variation-without-floor, and a one-part-in-2.8-billion perturbation.
+They did not catch: fabricated seed formulas, an unexamined environment, or an
+endpoint name that resolves to nothing. The line between those two lists is
+exactly the line between *shape* and *meaning*, and it is worth having drawn.
