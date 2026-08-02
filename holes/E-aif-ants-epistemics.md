@@ -30,6 +30,50 @@ Note there are **two** exploration channels and both are dead:
 1. the ambiguity term, which cancels because it is action-independent;
 2. the commitment temperature τ, annihilated because selection is `max-key`.
 
+## UN-GATED, 2026-08-02 (Joe): the repairs do not wait on more experiments
+
+Joe: *"you were gating E-aif-ants-epistemics on more experiments. I question
+whether that's the right angle."* He is right, and the correction matters enough
+to record at the top rather than in a footnote.
+
+**Every repair below is justified by a code-level conformance gap, not by a
+measured deficiency:**
+
+- R-a — `forward-predict` computes per-channel variance and `predict-observation`
+  discards it. Readable in the source.
+- R-b — `food-prob × uncertainty` is not an expectation over induced posteriors.
+  Definitional.
+- R-c — argmax over `−G/τ` equals argmax over `−G` for every τ>0. Proved in Lean.
+- R-d — the advertised `q(m|o)` is reachable only through dead `efe-tilt`. Static.
+
+None of these needed the authority run, Slice 5, R-0, or the density probe to
+establish. **The experiments were answering a different question** — *is the
+machinery causally inert?* — and it is now answered as well as it usefully can
+be: a Lean-proved cancellation confirmed at 9/9 cells with zero variance across
+three grid sizes, plus identical yields to two decimal places on the density-
+corrected probe.
+
+**So experiments are the POSTCONDITION of a repair, not its precondition.** The
+excursion already said this and I did not follow it: the acceptance criterion is
+*an axis flipping from non-navigable to navigable*, which the render gate tests
+in seconds. A full sweep is not the acceptance test and never was.
+
+### The generalisable version
+
+Today's measurements kept producing confounded answers — a grid too easy, a grid
+too lethal, a tick-scaling assumption declared against the wrong failure mode.
+The **code facts held up perfectly** across all of it: the one quantity we
+*proved* inert was inert in every environment, invariant to the confounds that
+wrecked everything else.
+
+> For whether machinery is **faithful**, reading and proving beat measuring.
+> For whether it **helps**, measuring is unavoidable.
+
+We spent the day using the expensive instrument on the cheap question. R-a
+through R-d are faithfulness questions and can proceed now. R-e, the regime-shift
+arm, is the capability question and is the one that genuinely needs an
+experiment — which is also why it sits outside this excursion's scope.
+
 ## Scope
 
 **IN** — four repairs, each with a machine-checkable precondition and an
