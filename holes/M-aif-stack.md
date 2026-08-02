@@ -558,3 +558,88 @@ validates against it — which is `validate-then-run!` for jobs rather than
 experiments. The apparatus built today for experiment registration applies
 unchanged: a job whose harness config does not inhabit its registered envelope
 does not start.
+
+---
+
+## R-0 RESULT (2026-08-02): the fix overshot, and the question is still open
+
+Registered, rendered, ProspectiveReadyToRun, run under `systemd-run` after three
+failed dispatches. 1620 cells.
+
+### The instrument passed at every scale
+
+`:no-canonical-ambiguity` identical to `aif-full` on **30/30 seeds in all nine
+cells** — 10x10, 24x24, 36x36, all three scenarios. The Lean-proved cancellation
+fact holds empirically at every grid size, which is exactly what a scientific
+control should do: invariant to the environment, because it is a property of the
+code.
+
+### The primary readout, and why the artifact's own headline is misleading
+
+The generated report says *"Directed-EIG 30/30 survives scaling: **no**"*. That
+rests on a single cell (23/30 at 36x36 snowdrift). The substantive pattern is
+that **directed-EIG stays at or above 23/30 — 77% identical — in every cell
+tested.** It did not come alive.
+
+### The larger grids are degenerate in a NEW way
+
+| grid | patchy yield / starvation | sparse yield / starvation |
+|---|---|---|
+| 10x10 | 173.93 / 0.000 | 34.21 / 0.267 |
+| 24x24 | 93.50 / **0.500** | 16.33 / — |
+| 36x36 | 75.37 / **0.900** | **0.35** / **0.867** |
+
+At 36x36 the colonies simply die: 87–90% starvation, and sparse yields a third of
+one food item. **All arms then behave identically because they are all dead**,
+which is why `classic` — 0/30 identical to `aif-full` at every 10x10 cell — rises
+to 27/30 at 36x36 patchy. That is not convergence, it is a shared floor.
+
+10x10 was too easy for exploration to matter. 36x36 is too lethal for anything to
+matter. Neither discriminates.
+
+### Only snowdrift stays viable, and there the signal is small but monotone
+
+Zero starvation at every scale, yield growing with the board:
+
+| grid | aif-full | no-directed-eig | cost of ablation | directed-EIG identity |
+|---|---:|---:|---:|---:|
+| 10x10 | 253.96 | 253.96 | 0.0 | 30/30 |
+| 24x24 | 510.95 | 495.13 | 15.8 | 27/30 |
+| 36x36 | 847.07 | 828.26 | 18.8 | 23/30 |
+
+So in the one scenario readable across all three scales, the epistemic term does
+become **slightly** more active as the environment grows. Suggestive. Not
+decisive, and nowhere near the risk term's 0–1/30.
+
+(`classic` scores exactly the total food every time — 315, 756, 1134, zero
+variance. It exhausts a snowdrift board; `aif-full` gets 81%, 68%, 75% of it.)
+
+### The assumption I declared, and declared wrongly
+
+R-0 registered a tick-scaling assumption with a `:breaks-when`, per the
+vocabulary. I scaled ticks with grid **diameter** to hold time-to-cross constant,
+and named traversal as the failure mode.
+
+The binding constraint is **energy**. Metabolism 0.06 and initial reserves 0.5 are
+fixed; more ticks on a bigger board means more starvation exposure without more
+food. The assumption broke, in a direction its own `:breaks-when` did not name.
+
+**Declaring an assumption does not protect you if you declare the wrong one.**
+That is a sharper lesson than the one R-0 was run to test, and it is the third
+instance today of an environment chosen for a property orthogonal to the question.
+
+### Verdict, without softening
+
+R-0 **does not** establish that the epistemic terms are structurally inert, and it
+**does not** establish that the 10x10 finding was environmental. It rules out the
+simple version of both:
+
+- inertness is not universal — 23/30 is not 30/30;
+- and the 10x10 grid was not the whole problem, because scaling up broke the
+  experiment in a different direction.
+
+What it does establish is that **there is a viability window, and we have not
+found it.** The next move is not a bigger grid. It is scaling food density and
+ant energetics with board area so the colonies survive, then re-measuring. Until
+then `E-aif-ants-epistemics` keeps its premise flagged as unconfirmed rather than
+rewritten.
