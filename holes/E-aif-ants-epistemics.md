@@ -281,3 +281,75 @@ factor is ambiguity dominated?" — 2x is a weighting problem, 2000x is structur
 
 Consistent with the un-gating principle: this is a faithfulness question, so read
 the numbers rather than run a sweep.
+
+
+---
+
+## THE MEASUREMENT (2026-08-02) — and it refutes the "third kind of inertness"
+
+codex-9 instrumented the selector (opt-in hook, off by default, `da6fdef`). One
+300-tick run, 900 decisions. Numbers below are λ-weighted and **independently
+reproduced by re-running the producer**; no λ was changed.
+
+| quantity | p25 | median | p95 | max |
+|---|---:|---:|---:|---:|
+| risk spread | 15.19 | **27.54** | 28.50 | 104.19 |
+| **ambiguity spread** | **0** | **0** | **0** | **0** |
+| epistemic spread | 0.45 | 0.45 | 0.45 | 0.45 |
+| info spread | 0 | 0 | 0.0012 | 0.067 |
+| selection margin | 14.62 | **28.10** | 29.07 | 91.67 |
+
+- **ambiguity / margin: exactly 0.0 at every percentile and at the maximum.**
+- epistemic / margin: median 0.0158, **max 0.0332**.
+
+### I was wrong about the third kind
+
+The previous section recorded a new taxonomy entry — *dominated*: a term that
+varies by action but never crosses the selection margin. **It was not observed.**
+Ambiguity's spread at the live selector is not small; it is **exactly zero**,
+across all 900 decisions.
+
+That entry was written from an *inference* — codex-9's reasonable reading of a
+null ablation — and I promoted it to a finding without measuring it. The
+measurement refutes it. Canonical ambiguity remains **structurally constant** at
+the selector even with an action-conditioned variance source upstream, which
+means the R-a variance path does not reach the ambiguity value the argmax sees.
+Why it does not is now the open question, and it is a *read* of `g-efe` and
+`c-vectors-for-efe`, not another run.
+
+Recording this rather than quietly amending the table above: the session's whole
+subject is quantities that look live and are not, and I added one to the
+taxonomy on the strength of a plausible mechanism nobody had checked.
+
+### The decisive result, which does not depend on that correction
+
+**Risk owns the margin.** Risk spread median 27.54 against margin median 28.10 —
+risk essentially *is* the selection margin.
+
+**Directed-EIG can never flip a decision.** Its maximum contribution across 895
+positive-margin decisions is **3.3% of the margin**; typically 1.6%. A perfect
+expected-information-gain implementation, weighted as shipped, would be roughly
+30x too small to change what the ant does. **R-b faces the identical wall and
+should not be built on the assumption that a better EIG will matter.**
+
+**And the epistemic term is binary, not graded.** Its spread is 0.45 at p25
+through p95 — constant. A graded information measure would produce a
+distribution; this produces a flag.
+
+### Conclusion for the excursion
+
+The pre-stated reading applies:
+
+> If both ambiguity and epistemic are structurally dominated, the honest
+> conclusion is that the ants' EFE cannot be brought online by repairing terms —
+> the selection margins are owned by risk — and that is a finding about the
+> implementation rather than a failure of the excursion.
+
+That is where we are. R-a and R-b as conceived are dead: no honest change to
+either term's *computation* can matter while risk owns ~98% of every margin.
+Making them matter requires changing the **weights**, which is a decision that
+they should matter rather than evidence that they do, and needs its own
+justification and its own registration.
+
+R-c (τ) and R-d (the mode gate) are untouched by this and remain live: both are
+about *reachability* and *gating*, not about competing with risk inside a sum.
