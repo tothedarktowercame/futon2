@@ -278,6 +278,14 @@
 ;; Pure gather / deposit / pheromone / ingest (operate on local-view)
 ;; --------------------------------------------------------------------------- ;;
 
+(defn- scale-provenance
+  [provenance fraction]
+  (into {}
+        (keep (fn [[dropper amount]]
+                (let [scaled (* (double amount) fraction)]
+                  (when (> scaled 1.0e-12) [dropper scaled]))))
+        provenance))
+
 (defn- gather-food
   "Pure food gather.  Returns updated ant + food-delta for the current cell."
   [view ant]
@@ -295,15 +303,23 @@
         min-take 0.15
         proposed (min capacity (min available 0.7))
         take (if (>= proposed min-take) proposed 0.0)
+        cache-provenance (or (:cache-provenance cell) {})
+        fraction (if (pos? available) (min 1.0 (/ take available)) 0.0)
+        cached-take (scale-provenance cache-provenance fraction)
+        cached-left (scale-provenance cache-provenance (- 1.0 fraction))
         ant (if (pos? take)
               (-> ant
                   (update :cargo + take)
+                  (update :cargo-provenance
+                          #(merge-with + (or % {}) cached-take))
                   (assoc :white-streak 0))
               (-> ant
                   (update :white-streak (fnil inc 0))))]
     {:ant ant
      :gather take
-     :food-delta (when (pos? take) {loc (- take)})}))
+     :food-delta (when (pos? take) {loc (- take)})
+     :cache-provenance (when (pos? take) {loc cached-left})
+     :cache-pickup cached-take}))
 
 (defn- deposit-food
   "Pure food deposit at home.  Returns updated ant + score/reserve deltas."
@@ -316,12 +332,29 @@
         at-home? (= loc home)
         cargo (:cargo ant)]
     (if (and at-home? (pos? cargo))
-      {:ant (assoc ant :loc loc :cargo 0.0)
+      {:ant (-> ant
+                (assoc :loc loc :cargo 0.0)
+                (dissoc :cargo-provenance))
        :deposit cargo
        :score-delta cargo
-       :reserve-delta cargo}
+       :reserve-delta cargo
+       :relay-delivery (or (:cargo-provenance ant) {})}
       {:ant (assoc ant :loc loc)
        :deposit 0.0})))
+
+(defn- cache-food
+  "Drop carried food into the current non-home cell. The food remains ordinary
+   cell food; provenance is a parallel analytical ledger only."
+  [view ant]
+  (let [loc (:loc ant)
+        home (:home view)
+        cargo (double (or (:cargo ant) 0.0))]
+    (if (and (not= loc home) (pos? cargo))
+      {:ant (-> ant (assoc :cargo 0.0) (dissoc :cargo-provenance))
+       :cache-drop cargo
+       :food-delta {loc cargo}
+       :cache-provenance-add {loc {(:id ant) cargo}}}
+      {:ant ant :cache-drop 0.0})))
 
 (defn- pheromone-drops
   "Compute pheromone deltas for a pheromone action.  Returns {loc amount}."
@@ -503,6 +536,23 @@
                     :reserve-delta (:reserve-delta dep-res 0.0)
                     :occupant (when (:moved? move-result)
                                 (select-keys move-result [:vacate :occupy :swap-to :swap-id]))}})
+
+       :drop
+       (let [cache-res (cache-food view ant)
+             ant-dropped (:ant cache-res)
+             ant-ingested (adjust-ingest ant-dropped {:add 0.0 :decay 0.55})
+             ant-final (decay-recent-gather ant-ingested)]
+         {:ant ant-final
+          :effects {:moved? false
+                    :wander? false
+                    :gather 0.0
+                    :deposit 0.0
+                    :cache-drop (:cache-drop cache-res 0.0)
+                    :ingest (:ingest ant-final 0.0)
+                    :dead? false
+                    :target (:loc ant-final)
+                    :food-deltas (:food-delta cache-res)
+                    :cache-provenance-add (:cache-provenance-add cache-res)}})
 
        :turn-back
        (let [[x y :as loc] (:loc ant)

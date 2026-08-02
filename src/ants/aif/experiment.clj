@@ -36,11 +36,12 @@
    Single-army removes the spawn-position confound."
   [species food-distribution food-seed move-seed size ticks
    & {:keys [metabolism initial-reserves ants-per-side authority-arm choice-seed
-             efe-lambda-overrides food-opts]
+             efe-lambda-overrides food-opts food-cache-enabled?]
       :or {metabolism 0.04 initial-reserves 1.0 ants-per-side 3}}]
   (let [cfg {:size size
              :ants-per-side ants-per-side
              :ticks ticks
+             :food-cache-enabled? (boolean food-cache-enabled?)
              :food-distribution food-distribution
              :food-opts (merge {:num-patches (if (= food-distribution :sparse) 2 4)
                                 :patch-radius (if (= food-distribution :sparse) 1 2)}
@@ -68,7 +69,7 @@
    starved = fraction of ants that died of starvation."
   [species food-distribution food-seed move-seed size ticks epistemic-zeroed?
    & {:keys [metabolism initial-reserves ants-per-side authority-arm choice-seed
-             record-trajectory? efe-lambda-overrides food-opts]
+             record-trajectory? efe-lambda-overrides food-opts food-cache-enabled?]
       :or {metabolism 0.04 initial-reserves 1.0 ants-per-side 3}}]
   (let [world (make-seeded-world species food-distribution food-seed move-seed size ticks
                                  :metabolism metabolism
@@ -77,7 +78,8 @@
                                  :authority-arm authority-arm
                                  :choice-seed choice-seed
                                  :efe-lambda-overrides efe-lambda-overrides
-                                 :food-opts food-opts)
+                                 :food-opts food-opts
+                                 :food-cache-enabled? food-cache-enabled?)
         world (if epistemic-zeroed?
                 (-> world
                     (assoc-in [:config :aif :efe :lambda :ambiguity] 0.0)
@@ -102,6 +104,10 @@
            :starved starve-fraction
            :alive final-ants
            :ticks ticks
+           :relays (get-in w [:stats :relays species]
+                           {:cache-drops 0 :cache-drop-amount 0.0
+                            :cross-ant-pickups 0 :pickup-amount 0.0
+                            :completed 0 :delivered-amount 0.0})
            :trajectory trajectory})
         (let [w' (war/step w)
               locs (keep (fn [[_ ant]]

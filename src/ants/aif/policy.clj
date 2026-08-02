@@ -753,7 +753,7 @@
         on-home?     (>= friendly-home 0.90)
         ;; 1) Original cargo/home shaping
         base-admissible (if (> cargo 0.6)
-                          (let [prioritized (filter #(#{:return :hold} %) base-actions)]
+                          (let [prioritized (filter #(#{:return :drop :hold} %) base-actions)]
                             (if (seq prioritized) (vec prioritized) base-actions))
                           base-actions)
         home-trimmed (if on-home?
@@ -776,7 +776,10 @@
                                    (< friendly-home near-thresh)
                                    (>= local-food food-here))
                               (and (< cargo cargo-thresh)
-                                   on-home?))]
+                                   on-home?))
+        guarded (if (or (< cargo cargo-thresh) on-home?)
+                  (drop-actions guarded #{:drop})
+                  guarded)]
     (if bad-empty-return?
       (drop-actions guarded #{:return})
       guarded)))

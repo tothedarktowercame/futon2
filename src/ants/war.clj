@@ -30,6 +30,7 @@
    :ticks 200
    :ants-per-side 6
    :armies [:classic :aif]
+   :food-cache-enabled? false
    :water nil
    :ema-alpha 0.1
    :enable-termination? true
@@ -831,9 +832,14 @@
   [world ant]
   (let [loc (:loc ant)
         cargo (:cargo ant)
+        home (get-in world [:homes (:species ant)])
+        far-from-home? (> (dist2 loc home) 100)
+        carrying-pressure? (> (double (or (:h ant) 0.0)) 0.55)
+        cache? (get-in world [:config :food-cache-enabled?])
         food-here (get-in world [:grid :cells loc :food] 0.0)
         neighbour-food (get-in world [:grid :cells (richest-neighbour world loc (:species ant)) :food] 0.0)]
     (cond
+      (and cache? (> cargo 0.2) far-from-home? carrying-pressure?) :drop
       (> cargo 0.2) :return
       (> food-here 0.2) :forage
       (> neighbour-food food-here) :forage
@@ -1199,12 +1205,21 @@
 
 ;; --- Action handlers (pure) --------------------------------------------------
 
+(defn- positive-provenance
+  [provenance exclude-id]
+  (into {}
+        (filter (fn [[dropper amount]]
+                  (and (not= dropper exclude-id) (pos? (double amount)))))
+        (or provenance {})))
+
 (defn- apply-kernel-effects
   "Apply the effects returned by ant-kernel to the world.
    Handles: occupant changes (vacate/occupy/swap), food-deltas,
    pher-deltas, score/reserve deltas, and ant write-back."
   [world ant effects]
-  (let [{:keys [food-deltas pher-deltas score-delta reserve-delta occupant]} effects
+  (let [{:keys [food-deltas pher-deltas score-delta reserve-delta occupant
+                cache-provenance cache-provenance-add cache-pickup
+                cache-drop relay-delivery]} effects
         ;; --- occupant changes ---
         world (if-let [vacate (:vacate occupant)]
                 (-> world
@@ -1226,9 +1241,19 @@
         ;; --- food deltas ---
         world (reduce (fn [w [loc delta]]
                         (update-in w [:grid :cells loc :food]
-                                   #(max 0.0 (- (double (or % 0.0)) (double delta)))))
+                                   #(max 0.0 (+ (double (or % 0.0)) (double delta)))))
                       world
                       (or (seq food-deltas) []))
+        world (reduce (fn [w [loc provenance]]
+                        (assoc-in w [:grid :cells loc :cache-provenance]
+                                  (or provenance {})))
+                      world
+                      (or (seq cache-provenance) []))
+        world (reduce (fn [w [loc provenance]]
+                        (update-in w [:grid :cells loc :cache-provenance]
+                                   #(merge-with + (or % {}) provenance)))
+                      world
+                      (or (seq cache-provenance-add) []))
         ;; --- pheromone deltas ---
         max-pher (double (or (get-in world [:grid :max-pher]) 3.0))
         world (reduce (fn [w [loc amount]]
@@ -1240,6 +1265,21 @@
                       (or (seq pher-deltas) []))
         ;; --- score / reserve deltas (deposit at home) ---
         species (:species ant)
+        cross-pickup (positive-provenance cache-pickup (:id ant))
+        relayed (positive-provenance relay-delivery (:id ant))
+        world (cond-> world
+                (pos? (double (or cache-drop 0.0)))
+                (-> (update-in [:stats :relays species :cache-drops] (fnil inc 0))
+                    (update-in [:stats :relays species :cache-drop-amount]
+                               (fnil + 0.0) (double cache-drop)))
+                (seq cross-pickup)
+                (-> (update-in [:stats :relays species :cross-ant-pickups] (fnil inc 0))
+                    (update-in [:stats :relays species :pickup-amount]
+                               (fnil + 0.0) (reduce + (vals cross-pickup))))
+                (seq relayed)
+                (-> (update-in [:stats :relays species :completed] (fnil inc 0))
+                    (update-in [:stats :relays species :delivered-amount]
+                               (fnil + 0.0) (reduce + (vals relayed)))))
         world (if (and score-delta (pos? (double score-delta)))
                 (-> world
                     (update-in [:scores species] + (double score-delta))
@@ -1265,7 +1305,9 @@
       (let [id (:id ant-before)
             dry-loc (:loc ant-before)
             cargo-lost (double (or (:cargo ant-after) 0.0))
-            ant' (assoc ant-after :loc dry-loc :cargo 0.0)
+            ant' (-> ant-after
+                     (assoc :loc dry-loc :cargo 0.0)
+                     (dissoc :cargo-provenance))
             world' (-> world-after
                        (cond-> (= id (get-in world-after [:grid :cells wet-loc :ant]))
                          (assoc-in [:grid :cells wet-loc :ant] nil))
@@ -1302,6 +1344,7 @@
                         :wander? (:wander? effects false)
                         :gather (double (or (:gather effects) 0.0))
                         :deposit (double (or (:deposit effects) 0.0))
+                        :cache-drop (double (or (:cache-drop effects) 0.0))
                         :ingest (:ingest effects (:ingest next-ant 0.0))
                         :dead? (:dead? effects false)
                         :target (:target effects (:loc next-ant))}

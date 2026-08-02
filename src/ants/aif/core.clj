@@ -180,7 +180,10 @@
          default-policy (default-mode/select-action observation)
 
          ;; Deliberative mode: full EFE evaluation (falls back to default mode)
-         action-list (vec (or actions policy/default-actions))
+         action-list (vec (or actions
+                              (cond-> policy/default-actions
+                                (get-in world [:config :food-cache-enabled?])
+                                (conj :drop))))
          policy (try
                   (policy/choose-action mu
                                         prec
