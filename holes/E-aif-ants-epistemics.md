@@ -515,3 +515,66 @@ improving the terms is provably insufficient, so the only route to a live
 epistemic drive is a world where risk's margin is not the whole story.
 
 S2 (drop-food) proceeds unchanged.
+
+
+## S2 RESULT (2026-08-02): drops yes, relays no — and the wrong mechanism was built
+
+Committed `feef8e1`…`0f2c4d6`. Report: `holes/labs/ants-faithfulness/s2-cache-relay.md`.
+
+| condition | yield | starvation | drops | pickups | relays |
+|---|---:|---:|---:|---:|---:|
+| aif-drop-disabled | 363.44 | 0.400 | 0 | 0 | 0 |
+| **aif-drop-enabled** | **471.94** | **0.200** | 16 | **0** | **0** |
+| classic (either) | 453.74 | 0.333 | 0 | 0 | 0 |
+
+### My correction did not land in time
+
+Joe's mechanism was an **overall-progress-of-food-towards-home award**: food at
+distance 10 is better than food at distance 20, so dropping *banks progress* and
+is variance-reduction on progress already made.
+
+I first briefed it wrongly as **carrying cost**, sent the correction as a separate
+bell, and it arrived after codex-9 had built. The commit is titled *"Add
+**cost-driven** food caching"*, and no progress-toward-home preference exists in
+the source. **So S2 tested my framing, not Joe's.**
+
+### What the built mechanism did achieve
+
+Carrying cost is real and visible to the model (forward hunger `0.25 × cargo`).
+Ants dropped 16 times, and **starvation halved, 0.400 → 0.200**. That is the
+conatus reading working exactly as a carrying cost predicts: shedding the load
+reduces the risk of dying with it.
+
+**And drop-enabled AIF (471.94) exceeds classic (453.74) for the first time in
+this programme.** Five seeds, CI `[-199, 416]` — directional only, nowhere near
+significant, and it must not be reported as a win. But the ordering flipped, and
+every prior measurement had classic ahead.
+
+`classic` was *exactly* unchanged, so the mechanic is AIF-specific.
+
+### Zero relays, and two independent reasons
+
+**1. There are three ants.** `:ants-per-side 3` on a 24×24 board — 576 cells. A
+bucket brigade needs traffic; the chance of ant B crossing ant A's drop point is
+small. This is the simpler explanation and the cheaper to test.
+
+**2. Cost-driven drops scatter; progress-driven drops would not.** Under a
+carrying cost, an ant drops *wherever the burden becomes unbearable* — which is
+anywhere. Under Joe's progress preference, the ant is motivated to move food
+**homeward**, which concentrates drops along the homeward route — where traffic
+already is.
+
+So the untested mechanism is also the one that would place caches where they
+could be found. That is not a rescue of a null; it is a specific, checkable
+difference between two designs, and it should have been what we tested.
+
+### S2b, and it is cheap
+
+Re-run with **both** changes: the progress-toward-home preference as Joe specified
+it, and more ants. Keep every acceptance condition — delivery is success, relays
+are not; `classic` remains the instrument check; no drop bonus.
+
+If relays still do not form with a homeward preference and real traffic, the
+capability claim is genuinely false and the ants cannot discover bucket chains.
+That would be worth knowing. Right now we know only that they cannot discover
+them *while dropping for the wrong reason with too few ants.*
