@@ -449,3 +449,69 @@ Once these land, `classic` stops being a contrast and becomes an **instrument
 check**. Beating a controller that structurally cannot do the task tells us
 nothing; *failing* to beat it tells us the task does not require the machinery.
 That is `:mechanism-can-exhibit` — a pre-flight check, not an arm.
+
+
+---
+
+## S1 RESULT (2026-08-02): the sensorium worked, and the finding got stronger
+
+Committed `de7e656`. Verified by re-running the decision-log producer; my numbers
+match codex-9's exactly. No λ changed.
+
+| weighted quantity | before | after |
+|---|---|---|
+| risk spread (median / max) | 27.5418 / 104.1905 | **27.5418 / 104.1905** — bitwise unchanged |
+| ambiguity spread | 0 / 0 | 0 / **2.1678** (p99 still 0 — sparse) |
+| epistemic spread | 0.45 / 0.45 (flat) | 0.10 / 0.1841 (now varies) |
+| ambiguity / margin | 0 / 0 | 0 / **0.0487** |
+| epistemic / margin | 0.0158 / 0.0332 | 0.0035 / **0.0076** |
+
+### Stated acceptance: met. Underlying goal: not met.
+
+Both spreads now vary where before ambiguity was exactly zero and epistemic was a
+flat 0.45. So the discrimination problem is fixed.
+
+**And nothing changed.** Risk's spread is *bitwise identical* — 27.5418 median,
+104.1905 max — and both epistemic terms remain one to two orders of magnitude
+below the margin. Ambiguity peaks at 4.9% of it; directed-EIG at 0.76%.
+
+### Why this is a stronger result than success would have been
+
+Before, the finding was contestable: *of course the ablation does nothing, the
+term is constant.* Now **the term varies and still does nothing.** The sensorium
+slice converts "the epistemic apparatus is broken" into "the epistemic apparatus
+is dominated" — with the apparatus working.
+
+That is the claim that survives attack, and it is the one worth carrying: **no
+improvement to how these terms are *computed* can matter while risk owns the
+margin.** The gap is not a modelling deficiency, it is two orders of magnitude.
+
+### A note on epistemic getting *smaller*
+
+Its spread fell from a flat 0.45 to a varying 0.10–0.18, and its share of the
+margin dropped fourfold. That is honest rather than a regression: **the old 0.45
+was a binary-flag artifact** — a term with two values has a constant spread,
+which looks like signal and is not. The new value is a real but small
+discrimination. We traded a fake large number for a true small one.
+
+### My hypothesis was wrong, again
+
+I proposed that candidates all predicted the same cell, so location-derived terms
+had nothing to vary over. codex-9 checked: **median 2 distinct predicted
+locations per decision, max 3 — already true before the change.** The zero
+ambiguity spread was never caused by identical predicted locations.
+
+Fourth inference of mine refuted by measurement in two days: `forward-predict`'s
+variance, the "dominated" taxonomy entry, this, and the neighbour-mean
+explanation which was at best incomplete. The pattern is consistent — plausible
+mechanism, stated confidently, not checked. The measurements have been right
+every time and cost minutes.
+
+### What it means for the queue
+
+The remaining slices change the **task**, not the terms — caching, fight-gated
+food, driver-supplied goals. That is the right direction, and this result is why:
+improving the terms is provably insufficient, so the only route to a live
+epistemic drive is a world where risk's margin is not the whole story.
+
+S2 (drop-food) proceeds unchanged.
