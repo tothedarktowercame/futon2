@@ -192,6 +192,7 @@
                                          :precision precision-opts
                                          :authority (:authority cfg)
                                          :choice-rand-fn (:aif-choice-rand-fn world)
+                                         :decision-log-fn (:aif-decision-log-fn world)
                                          :world world
                                          :ant ant
                                          :food-belief food-belief})

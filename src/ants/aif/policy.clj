@@ -543,7 +543,8 @@
    (generative belief) — the divergence from the live step's colony-coupled
    adjust-hunger is the R4-legitimate prediction error that F measures.
 
-   Returns the predicted observation map (same shape as g-observe output)."
+   Returns the predicted observation map (same shape as g-observe output),
+   with private keys carrying the forward-model location and variance into EFE."
   [world ant action]
   (let [view (forward/local-view world ant)
         mu-goal (get-in ant [:mu :goal])
@@ -580,8 +581,33 @@
         world-pred (if (pos? score-delta)
                      (update-in world-pred [:scores species] (fnil + 0.0) (double score-delta))
                      world-pred)]
-    ;; g-observe on the predicted world + next-ant
-    (observe/g-observe world-pred next-ant)))
+    ;; g-observe omits :loc. Keep the action-conditioned location private so
+    ;; canonical ambiguity can query spatial uncertainty without changing the
+    ;; observation consumed by the separate directed-EIG augmentation.
+    (assoc (observe/g-observe world-pred next-ant)
+           ::predicted-loc (:loc next-ant)
+           ::forward-variance (:variance result))))
+
+(defn- action-predicted-variances
+  "Build per-channel predictive variance for one candidate action.
+
+   Food uncertainty comes from the food belief at the predicted next location.
+   Other forward-model channels retain their fixed noise; channels absent from
+   that model fall back individually to current belief variance, then 0.01."
+  [mu outcome spatial-food-belief]
+  (let [current-variances (:var mu)
+        forward-variances (::forward-variance outcome)
+        base (into {}
+                   (for [k sensory-keys]
+                     [k (double (or (get forward-variances k)
+                                    (get current-variances k)
+                                    0.01))]))]
+    (if spatial-food-belief
+      (assoc base :food
+             (double (:uncertainty
+                      (food-belief/food-belief-at
+                       spatial-food-belief (::predicted-loc outcome)))))
+      base)))
 
 (defn- expected-free-energy
   "Score an action via the canonical 2-term EFE core + named augmentation.
@@ -611,8 +637,7 @@
                   (pattern-efe/pattern-efe pattern-id action observation {:efe efe}))
         pred-means (into {} (for [k sensory-keys]
                               [k (double (get outcome k 0.0))]))
-        pred-variances (or (:var mu)
-                           (into {} (for [k sensory-keys] [k 0.01])))
+        pred-variances (action-predicted-variances mu outcome food-belief)
         pred-var-v (for [k sensory-keys] (double (get pred-variances k 0.01)))
         pred-mean-v (for [k sensory-keys] (double (get pred-means k 0.0)))
         mode (or (:mode observation) :outbound)
@@ -659,6 +684,7 @@
      :augmentation-map augmentation-map
      :risk risk
      :ambiguity ambiguity
+     :epistemic epistemic-value
      :info info
      :colony colony
      :survival survival
@@ -880,7 +906,7 @@
   ([mu prec observation]
    (choose-action mu prec observation {}))
   ([mu prec observation {:keys [actions preferences action-costs efe efe-lambda precision horizon discount
-                                world ant food-belief authority choice-rand-fn]
+                                world ant food-belief authority choice-rand-fn decision-log-fn]
                          :as _opts}]
    (let [prefs         preferences
          costs         action-costs
@@ -1024,6 +1050,24 @@
                                          (apply max-key (fn [[_ {:keys [p]}]] p))
                                          first)
                      :else (first admissible))]
+     (when decision-log-fn
+       (decision-log-fn
+        {:winner best
+         :tau tau
+         :lambda lambda
+         :candidates
+         (mapv (fn [{:keys [action result]}]
+                 {:action action
+                  :G (:G result)
+                  :risk (:risk result)
+                  :ambiguity (:ambiguity result)
+                  :epistemic (:epistemic result)
+                  :info (:info result)
+                  :weighted {:risk (* (:pragmatic lambda) (:risk result))
+                             :ambiguity (* (:ambiguity lambda) (:ambiguity result))
+                             :epistemic (get-in result [:augmentation-map :epistemic])
+                             :info (get-in result [:augmentation-map :info])}})
+               evaluations)}))
      {:action   best
       :policies policies
       :tau      tau

@@ -32,6 +32,40 @@
    :reserve-home 0.5
    :cargo 0.3})
 
+(deftest predicted-food-variance-follows-action-location
+  (let [variance-for #'policy/action-predicted-variances
+        mu-with-variance {:var {:food 0.4 :home-prox 0.25}}
+        forward-variance {:food 0.0025 :pher 0.0025
+                          :cargo 0.0009 :ingest 0.0025}
+        belief {[1 1] {:food-prob 0.1 :uncertainty 0.05 :visits 18}}
+        known-outcome {::policy/predicted-loc [1 1]
+                       ::policy/forward-variance forward-variance}
+        novel-outcome {::policy/predicted-loc [4 4]
+                       ::policy/forward-variance forward-variance}
+        known-vars (variance-for mu-with-variance known-outcome belief)
+        novel-vars (variance-for mu-with-variance novel-outcome belief)]
+    (is (= 0.05 (:food known-vars)))
+    (is (= 0.9 (:food novel-vars)))
+    (is (= 0.0025 (:pher known-vars)))
+    (is (= 0.25 (:home-prox known-vars)))))
+
+(deftest decision-log-hook-captures-selector-input
+  (let [records (atom [])
+        without-hook (policy/choose-action mu prec observation
+                                           {:actions [:hold :return]})
+        result (policy/choose-action
+                mu prec observation
+                {:actions [:hold :return]
+                 :decision-log-fn #(swap! records conj %)})
+        record (first @records)]
+    (is (= without-hook result))
+    (is (= 1 (count @records)))
+    (is (= (:action result) (:winner record)))
+    (is (= #{:hold :return} (set (map :action (:candidates record)))))
+    (doseq [candidate (:candidates record)]
+      (is (every? number? (map candidate [:G :risk :ambiguity :epistemic :info])))
+      (is (every? number? (vals (:weighted candidate)))))))
+
 (deftest expected-free-energy-shapes
   (let [{:keys [action policies tau]} (policy/choose-action mu prec observation)]
     (testing "returns default action from domain"
