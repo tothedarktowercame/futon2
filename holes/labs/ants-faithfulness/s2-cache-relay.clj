@@ -88,10 +88,11 @@
               (for [[label {:keys [mean ci95]}] contrasts]
                 (format "- %s: %s [%s, %s]\n" (name label) (fmt mean)
                         (fmt (first ci95)) (fmt (second ci95)))))
-       (format "\n**Verdict:** carrying has a visible model cost and AIF selected %d cache "
+       (format "\n**Verdict:** the homeward-progress preference made AIF select %d cache "
                (:cache-drops aif-enabled))
-       "drops, but no other ant picked one up and no relay completed. The capability "
-       "claim is therefore false in this probe. Enabling drop changed mean AIF yield "
+       "drops, but no other ant picked one up and no relay completed. Banking the "
+       "progress proxy therefore did not produce delivery in this probe. Enabling "
+       "drop changed mean AIF yield "
        (format "by %s (95%% CI [%s, %s]) and starvation by %s (95%% CI [%s, %s]); "
                (fmt (:mean aif-yield)) (fmt (first (:ci95 aif-yield)))
                (fmt (second (:ci95 aif-yield))) (fmt (:mean aif-starvation))

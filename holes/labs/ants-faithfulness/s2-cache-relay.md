@@ -7,17 +7,17 @@ Seed triples `(food, move, choice)`: `(202612110, 202612111, 202662110)`, `(2026
 | condition | mean yield | starvation | cache drops | cross-ant pickups | completed relays |
 |---|---:|---:|---:|---:|---:|
 | aif-drop-disabled | 363.4400 | 0.4000 | 0 | 0 | 0 |
-| aif-drop-enabled | 471.9400 | 0.2000 | 16 | 0 | 0 |
+| aif-drop-enabled | 334.1800 | 0.4000 | 11 | 0 | 0 |
 | classic-drop-disabled | 453.7400 | 0.3333 | 0 | 0 | 0 |
 | classic-drop-enabled | 453.7400 | 0.3333 | 0 | 0 | 0 |
 
 Paired enabled−disabled differences (mean, two-sided 95% t interval):
 
-- aif-yield: 108.5000 [-199.0282, 416.0282]
-- aif-starvation: -0.2000 [-0.7552, 0.3552]
+- aif-yield: -29.2600 [-109.5365, 51.0165]
+- aif-starvation: 0.0000 [0.0000, 0.0000]
 - classic-yield: 0.0000 [0.0000, 0.0000]
 - classic-starvation: 0.0000 [0.0000, 0.0000]
 
-**Verdict:** carrying has a visible model cost and AIF selected 16 cache drops, but no other ant picked one up and no relay completed. The capability claim is therefore false in this probe. Enabling drop changed mean AIF yield by 108.5000 (95% CI [-199.0282, 416.0282]) and starvation by -0.2000 (95% CI [-0.7552, 0.3552]); both intervals include zero. Classic never selected drop and its enabled/disabled records were identical, so it did not benefit equally—but the zero-relay result prevents any AIF capability interpretation.
+**Verdict:** the homeward-progress preference made AIF select 11 cache drops, but no other ant picked one up and no relay completed. Banking the progress proxy therefore did not produce delivery in this probe. Enabling drop changed mean AIF yield by -29.2600 (95% CI [-109.5365, 51.0165]) and starvation by 0.0000 (95% CI [0.0000, 0.0000]); both intervals include zero. Classic never selected drop and its enabled/disabled records were identical, so it did not benefit equally—but the zero-relay result prevents any AIF capability interpretation.
 
 The existing within-distance-4 return teleport remains unchanged; cache drops were admitted only away from home and onto cells containing less than 0.10 food.
