@@ -70,6 +70,62 @@ what makes the ants' candidates indistinguishable. The runner correspondent —
 *"there is work available"* without *which work* — is the same defect one layer
 up, and worth checking rather than assuming.
 
+## The axis that reorganises the grid: where do preferences come from?
+
+Joe, 2026-08-02: *"a Zaif runner's sensorium includes my input, or input from
+whatever agent is driving them, not just the state of the system itself. WM is
+closer to 'just perceive the state of the system and act' because its REPL is
+more or less a closed loop."*
+
+This is not a detail about input channels. It changes what kind of agent each
+system is.
+
+| | preferences `C` | sensorium | consequence |
+|---|---|---|---|
+| **ants** | **internal, fixed** — C-vectors per mode, compiled in | world state only | closed loop |
+| **War Machine** | **internal** — central × strategic × doable | system state only | closed loop |
+| **Zaif runners** | **exogenous and time-varying** — arrive in the brief | world state **+ the driver's instructions** | open loop |
+
+### The runner is not a standard AIF agent, and that may be the finding
+
+In the canonical formulation `C` is part of the generative model: the agent has
+preferred outcomes and acts to realise them. **A runner receives its preferences
+as an observation, per job, from an agent it cannot fully observe.**
+
+So the runner carries an inference problem the ants and the War Machine do not
+have: *infer what is actually wanted from what was actually said.* That is not a
+refinement of AIF's machinery, it is a component AIF does not have a slot for —
+and it may be why the framework fits the WM more comfortably than it fits the
+runners.
+
+It is worth checking against the contract (R1–R12) whether anything constrains
+the **provenance** of `C`. My expectation is that it does not, because the
+formalism assumes `C` is given.
+
+### A concrete instance from today
+
+My R-a brief asserted that `forward-predict` produced action-dependent variance.
+It does not. codex-9 read the source, found the stated preference inconsistent
+with the world, **refused the job and said why.**
+
+That is exactly a runner doing `C`-inference correctly: the instruction was the
+observation, the observation was wrong, and the agent inferred the real goal well
+enough to know the stated one could not serve it. No closed-loop agent faces that
+situation, because no closed-loop agent's preferences can be mistaken.
+
+### This reassigns the toy relationship
+
+The ants are a toy of the **runner's embodiment** — act in a world, gather,
+survive, leave traces — but of the **War Machine's closure** — fixed internal
+preferences, system-state-only sensorium. The analogy is partial and the grid
+should say where it holds.
+
+**Design implication, and it is cheap:** an ant that receives a *task* from a
+driver each episode — *gather from the north patch*, *defend the trail* — would
+be an open-loop ant and a much better toy of a runner. That is a third source of
+irreducible uncertainty after adversaries and self-generated structure, and the
+only one that already exists in the real system today.
+
 ## Which way each lesson flows
 
 This is the point of the grid.
