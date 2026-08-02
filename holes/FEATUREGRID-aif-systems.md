@@ -164,3 +164,61 @@ visible next time.
 **Biggest open cells, in priority order:** the runner's policy selection (`?`),
 the runner's epistemic term (`?`), and whether any runner has a generative model
 at all. All three are reads, not experiments.
+
+
+---
+
+## Contest and its resolution — the row the grid was missing (Joe, 2026-08-02)
+
+Joe: *"this feeds back to the War Machine — not as a reason to be militant but
+exactly as a reason to settle differences of opinion through AIF²."*
+
+| system | contest | resolution mechanism |
+|---|---|---|
+| **ants** | `:enemy-prox` sensed; **no action can engage** | absent — the name `war.clj` is vestigial |
+| **War Machine** | **none** — it emits a single ranking | absent — only operator override |
+| **AIF²** | attack relation | **argument survival** |
+| **Zaif runners** | conflicting edits, held locks | ad hoc |
+
+### The WM's version is the more serious defect
+
+The ants at least have the *sensor*. The War Machine has neither. It produces a
+ranking, and **a single ranking cannot be wrong in a way the system can detect** —
+nothing opposes it, so nothing is ever *defeated*, only unendorsed. The sole
+corrective is the operator saying no, which is exactly the bottleneck L1 was
+supposed to relieve and instead formalises.
+
+A contested recommendation is different in kind: one that survives attack has
+**earned** its place, and the record of what attacked it is the explanation L1
+needs for informed consent.
+
+### Why the ant fight is the toy of it
+
+Two positions contest; one prevails. That decision structure is identical whether
+the contest is physical or dialectical — what differs is the resolution rule.
+So the ant fight is not a separate feature from AIF²; it is **the same mechanism
+at a scale where it costs seconds to try**.
+
+That is the featuregrid's discipline working in the direction it is meant to:
+develop the mechanism in the toy, deploy it where it matters.
+
+### The distinction Joe draws is the load-bearing one
+
+*Not militancy — resolution.* The point of contest is not that opposition is good
+but that **without it there is no way for a position to lose on its merits.**
+AIF² is the civilised form of the same structure: replace force with discourse
+and the decision procedure survives the substitution.
+
+Which is the Spinozist move from earlier in this thread, one level up. Finite
+modes necessarily oppose one another because each strives to persevere; reason is
+what lets them combine rather than destroy. **Passive opposition is force; active
+opposition is argument** — the same passive-to-active transition as the conatus
+reading of the risk term, now applied to how disagreements resolve rather than
+how an agent survives.
+
+### Consequence for the build queue
+
+S4 (fight) is no longer only about irreducible uncertainty. It is the **cheap
+prototype of the WM's missing contest mechanism**, and it should be built with
+that transfer in mind: whatever resolution rule the ants use should be one AIF²
+could adopt, not a combat formula that happens to work for ants.
