@@ -39,14 +39,18 @@
                           :cargo 0.0009 :ingest 0.0025}
         belief {[1 1] {:food-prob 0.1 :uncertainty 0.05 :visits 18}}
         known-outcome {::policy/predicted-loc [1 1]
-                       ::policy/forward-variance forward-variance}
+                       ::policy/forward-variance forward-variance
+                       :sensorium-locs {:nw [1 1] :e [4 4]}}
         novel-outcome {::policy/predicted-loc [4 4]
                        ::policy/forward-variance forward-variance}
         known-vars (variance-for mu-with-variance known-outcome belief)
         novel-vars (variance-for mu-with-variance novel-outcome belief)]
     (is (= 0.05 (:food known-vars)))
     (is (= 0.9 (:food novel-vars)))
+    (is (= 0.05 (:food/nw known-vars)))
+    (is (= 0.9 (:food/e known-vars)))
     (is (= 0.0025 (:pher known-vars)))
+    (is (= 0.0025 (:pher/nw known-vars)))
     (is (= 0.25 (:home-prox known-vars)))))
 
 (deftest decision-log-hook-captures-selector-input

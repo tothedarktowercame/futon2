@@ -1,5 +1,6 @@
 (ns ants.aif.perceive-test
   (:require [clojure.test :refer [deftest is testing]]
+            [ants.aif.observe :as observe]
             [ants.aif.perceive :as perceive]))
 
 (def world
@@ -62,8 +63,10 @@
     (testing "trace records steps"
       (is (= 3 (count trace))))
     (testing "errors keyed by sensory modalities"
-      (is (= (set [:food :pher :food-trace :pher-trace :home-prox :enemy-prox :h :ingest
-                   :friendly-home :trail-grad :novelty :dist-home :reserve-home :cargo])
+      (is (= (set (concat
+                   [:food :pher :food-trace :pher-trace :home-prox :enemy-prox :h :ingest
+                    :friendly-home :trail-grad :novelty :dist-home :reserve-home :cargo]
+                   observe/directional-sensory-keys))
              (set (keys errors)))))))
 
 (deftest perceive-defaults-lazy-state

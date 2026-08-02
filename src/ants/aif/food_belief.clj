@@ -80,7 +80,7 @@
                                                 (* 0.5 (+ (:food-prob existing 0.5) nprob))
                                                 nprob)
                                    :uncertainty (if (pos? visits)
-                                                  (max 0.05 (/ 1.0 (1.0 (inc visits))))
+                                                  (max 0.05 (/ 1.0 (inc visits)))
                                                   0.8)
                                    :visits visits})))))
                   belief
@@ -136,14 +136,25 @@
 
 (defn directed-eig-from-prediction
   "Compute directed EIG from a PREDICTED observation (the outcome from
-   predict-observation or predict-outcome). Uses the predicted food/novelty
-   to estimate the food-belief at the predicted location.
+   predict-observation or predict-outcome). When the Moore food field is
+   present, score the candidate's nine individually located observations;
+   otherwise retain the scalar compatibility path.
 
    This is the form used in the controller-score: it takes the predicted
    observation and returns a scalar EIG value."
   [belief predicted-obs]
-  (let [loc (:loc predicted-obs)
-        food-prob (double (or (:food predicted-obs) 0.0))
-        ;; Uncertainty: high when we haven't observed this cell much
-        {:keys [uncertainty]} (food-belief-at belief loc)]
-    (* food-prob uncertainty)))
+  (let [food-field (:food-field predicted-obs)
+        sensorium-locs (:sensorium-locs predicted-obs)
+        directional-values
+        (when (seq food-field)
+          (for [[direction food-prob] food-field
+                :let [loc (get sensorium-locs direction)]
+                :when loc]
+            (* (double food-prob)
+               (double (:uncertainty (food-belief-at belief loc))))))]
+    (if (seq directional-values)
+      (/ (reduce + directional-values) (double (count directional-values)))
+      (let [loc (:loc predicted-obs)
+            food-prob (double (or (:food predicted-obs) 0.0))
+            {:keys [uncertainty]} (food-belief-at belief loc)]
+        (* food-prob uncertainty)))))

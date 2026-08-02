@@ -44,3 +44,13 @@
     (let [belief {[2 2] {:food-prob 0.6 :uncertainty 0.7 :visits 1}}
           eig (fb/directed-eig-from-prediction belief {:loc [2 2] :food 0.5})]
       (is (pos? eig) "EIG is positive for uncertain-plausible prediction"))))
+
+(deftest directed-eig-uses-located-food-field
+  (let [belief {[1 1] {:food-prob 0.8 :uncertainty 0.1 :visits 4}
+                [2 1] {:food-prob 0.8 :uncertainty 0.9 :visits 0}}
+        west {:food-field {:self 1.0 :e 0.0}
+              :sensorium-locs {:self [1 1] :e [2 1]}}
+        east {:food-field {:self 0.0 :e 1.0}
+              :sensorium-locs {:self [1 1] :e [2 1]}}]
+    (is (< (fb/directed-eig-from-prediction belief west)
+           (fb/directed-eig-from-prediction belief east)))))

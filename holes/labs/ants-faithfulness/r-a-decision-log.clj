@@ -36,6 +36,8 @@
      :ambiguity (spread (map #(get-in % [:weighted :ambiguity]) candidates))
      :epistemic (spread (map #(get-in % [:weighted :epistemic]) candidates))
      :info (spread (map #(get-in % [:weighted :info]) candidates))
+     :predicted-location-count (count (distinct (map :predicted-loc candidates)))
+     :food-variance (spread (map :predicted-food-variance candidates))
      :signed-margin signed-margin
      :selection-margin selection-margin}))
 
@@ -83,8 +85,10 @@
               :zero-margin-decisions (count (remove #(pos? (:selection-margin %)) rows))
               :spread-distributions
               (into {}
-                    (for [component [:risk :ambiguity :epistemic :info]]
+                    (for [component [:risk :ambiguity :epistemic :info :food-variance]]
                       [component (distribution (map component rows))]))
+              :predicted-location-count-distribution
+              (distribution (map :predicted-location-count rows))
               :margin-distribution (distribution (map :selection-margin rows))
               :signed-margin-distribution (distribution (map :signed-margin rows))
               :ratio-distributions

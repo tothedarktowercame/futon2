@@ -105,10 +105,12 @@
 (defspec g-observe-values-clamped 200
   (prop/for-all [{:keys [world ant]} (sample-world)]
     (let [obs (observe/g-observe world ant)]
-      (every? (fn [k]
-                (let [v (double (or (get obs k) 0.0))]
-                  (<= 0.0 v 1.0)))
-              clamped-keys))))
+      (and (every? (fn [k]
+                     (let [v (double (or (get obs k) 0.0))]
+                       (<= 0.0 v 1.0)))
+                   clamped-keys)
+           (every? #(<= 0.0 (double %) 1.0) (vals (:food-field obs)))
+           (every? #(<= 0.0 (double %) 1.0) (vals (:pher-field obs)))))))
 
 (defspec g-observe-border-neighbor-means 120
   (prop/for-all [{:keys [world ant]} (sample-world {:edge? true})]
@@ -168,6 +170,13 @@
     (testing "neighbour mean handling"
       (is (< 0.0 (:food-trace obs) (:food obs)))
       (is (< 0.0 (:pher-trace obs) 1.0)))
+    (testing "nine-cell fields retain direction and self"
+      (is (= 9 (count (:food-field obs))))
+      (is (= 9 (count (:pher-field obs))))
+      (is (= 1.0 (get-in obs [:food-field :self])))
+      (is (= 0.6 (get-in obs [:food-field :w])))
+      (is (= 0.2 (get-in obs [:food-field :e])))
+      (is (= [1 2] (get-in obs [:sensorium-locs :w]))))
     (testing "home proximity computed"
       (is (> (:home-prox obs) 0.0))
       (is (<= (:enemy-prox obs) 0.5)))
@@ -202,6 +211,18 @@
   (let [obs {:food 0.1 :pher 0.2 :food-trace 0.3 :pher-trace 0.4
              :home-prox 0.5 :enemy-prox 0.6 :h 0.7 :ingest 0.15
              :friendly-home 1.0 :trail-grad 0.25 :novelty 0.8
-             :dist-home 0.4 :reserve-home 0.3 :cargo 0.8}]
+             :dist-home 0.4 :reserve-home 0.3 :cargo 0.8}
+        sensed (observe/sense->vector obs)]
     (is (= [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.15 1.0 0.25 0.8 0.4 0.3 0.8]
-           (observe/sense->vector obs)))))
+           (subvec sensed 0 14)))
+    (is (= 32 (count sensed)))
+    (is (every? zero? (subvec sensed 14)))))
+
+(deftest border-sensorium-keeps-fixed-shape
+  (let [obs (observe/g-observe base-world
+                               {:species :aif :loc [0 0] :mu {:h 0.5}})]
+    (is (= (set (map first observe/moore-directions))
+           (set (keys (:food-field obs)))))
+    (is (nil? (get-in obs [:sensorium-locs :nw])))
+    (is (zero? (get-in obs [:food-field :nw])))
+    (is (= [0 0] (get-in obs [:sensorium-locs :self])))))

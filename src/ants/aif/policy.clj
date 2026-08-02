@@ -95,9 +95,11 @@
     (* (double lambda) extrinsic)))
 
 (def ^:private sensory-keys
-  "The 14-channel observation ABI (matches perceive/sensory-keys)."
-  [:food :pher :food-trace :pher-trace :home-prox :enemy-prox :h :ingest
-   :friendly-home :trail-grad :novelty :dist-home :reserve-home :cargo])
+  "The scalar observation ABI plus the food/pheromone Moore sensorium."
+  (vec (concat
+        [:food :pher :food-trace :pher-trace :home-prox :enemy-prox :h :ingest
+         :friendly-home :trail-grad :novelty :dist-home :reserve-home :cargo]
+        observe/directional-sensory-keys)))
 
 (def ^:private default-c-vectors
   "Mode-conditioned preference C-vectors over the 14-channel observation ABI.
@@ -599,9 +601,20 @@
         forward-variances (::forward-variance outcome)
         base (into {}
                    (for [k sensory-keys]
-                     [k (double (or (get forward-variances k)
-                                    (get current-variances k)
-                                    0.01))]))]
+                     (let [channel-ns (namespace k)
+                           direction (some-> k name keyword)
+                           sensor-loc (get-in outcome [:sensorium-locs direction])
+                           variance (case channel-ns
+                                      "food" (if sensor-loc
+                                               (:uncertainty
+                                                (food-belief/food-belief-at
+                                                 spatial-food-belief sensor-loc))
+                                               0.05)
+                                      "pher" (get forward-variances :pher 0.0025)
+                                      (or (get forward-variances k)
+                                          (get current-variances k)
+                                          0.01))]
+                       [k (double variance)])))]
     (if spatial-food-belief
       (assoc base :food
              (double (:uncertainty
@@ -636,7 +649,7 @@
         pattern (when pattern-id
                   (pattern-efe/pattern-efe pattern-id action observation {:efe efe}))
         pred-means (into {} (for [k sensory-keys]
-                              [k (double (get outcome k 0.0))]))
+                              [k (double (observe/sensory-value outcome k))]))
         pred-variances (action-predicted-variances mu outcome food-belief)
         pred-var-v (for [k sensory-keys] (double (get pred-variances k 0.01)))
         pred-mean-v (for [k sensory-keys] (double (get pred-means k 0.0)))
@@ -686,6 +699,7 @@
      :ambiguity ambiguity
      :epistemic epistemic-value
      :info info
+     :predicted-variances pred-variances
      :colony colony
      :survival survival
      :pattern pattern
@@ -1063,6 +1077,8 @@
                   :ambiguity (:ambiguity result)
                   :epistemic (:epistemic result)
                   :info (:info result)
+                  :predicted-loc (get-in result [:outcome ::predicted-loc])
+                  :predicted-food-variance (get-in result [:predicted-variances :food])
                   :weighted {:risk (* (:pragmatic lambda) (:risk result))
                              :ambiguity (* (:ambiguity lambda) (:ambiguity result))
                              :epistemic (get-in result [:augmentation-map :epistemic])

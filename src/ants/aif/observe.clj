@@ -5,6 +5,26 @@
 (def ^:private default-max-food 5.0)
 (def ^:private default-max-pher 5.0)
 
+(def moore-directions
+  "Stable nine-cell Moore sensorium: eight compass neighbours plus self."
+  [[:nw [-1 -1]] [:n [0 -1]] [:ne [1 -1]]
+   [:w [-1 0]]   [:self [0 0]] [:e [1 0]]
+   [:sw [-1 1]]  [:s [0 1]]   [:se [1 1]]])
+
+(def directional-sensory-keys
+  "Scalar channel keys used by predictive coding and EFE for the 9-cell fields."
+  (vec (for [channel ["food" "pher"]
+             [direction _] moore-directions]
+         (keyword channel (name direction)))))
+
+(defn sensory-value
+  "Read a scalar or directional observation channel from an observation map."
+  [observation channel]
+  (case (namespace channel)
+    "food" (get-in observation [:food-field (keyword (name channel))] 0.0)
+    "pher" (get-in observation [:pher-field (keyword (name channel))] 0.0)
+    (get observation channel 0.0)))
+
 (defn clamp01
   "Clamp a scalar to the closed interval [0,1]."
   [x]
@@ -72,6 +92,24 @@
        (filter (partial in-bounds? world))
        (map (partial cell-at world))))
 
+(defn- directional-fields
+  [world [x y]]
+  (let [food-max (max-food world)
+        pher-max (max-pher world)
+        entries (for [[direction [dx dy]] moore-directions
+                      :let [candidate [(+ x dx) (+ y dy)]
+                            valid? (in-bounds? world candidate)
+                            cell (when valid? (cell-at world candidate))]]
+                  [direction {:loc (when valid? candidate)
+                              :food (normalize (:food cell) food-max)
+                              :pher (normalize (:pher cell) pher-max)}])]
+    {:food-field (into {} (map (fn [[direction entry]]
+                                 [direction (:food entry)])) entries)
+     :pher-field (into {} (map (fn [[direction entry]]
+                                 [direction (:pher entry)])) entries)
+     :sensorium-locs (into {} (map (fn [[direction entry]]
+                                     [direction (:loc entry)])) entries)}))
+
 (defn- mean
   [values]
   (if (seq values)
@@ -101,6 +139,8 @@
   - :pher           local pheromone strength
   - :food-trace     neighbour food mean
   - :pher-trace     neighbour pher mean
+  - :food-field     normalized food at NW/N/NE/W/self/E/SW/S/SE
+  - :pher-field     normalized pheromone at the same nine cells
   - :home-prox      closeness to friendly home
   - :enemy-prox     closeness to opposing home
   - :h              agent's felt hunger (derived from latent state)
@@ -119,6 +159,8 @@
         neighbor-cells (neighbor-cells world loc)
         neighbor-foods (map #(double (or (:food %) 0.0)) neighbor-cells)
         neighbor-phers (map #(double (or (:pher %) 0.0)) neighbor-cells)
+        {:keys [food-field pher-field sensorium-locs]}
+        (directional-fields world loc)
         food-max (max-food world)
         pher-max (max-pher world)
         home (get-in world [:homes species])
@@ -162,6 +204,9 @@
      :pher       (normalize (:pher cell) pher-max)
      :food-trace (normalize (mean neighbor-foods) food-max)
      :pher-trace (normalize (mean neighbor-phers) pher-max)
+     :food-field food-field
+     :pher-field pher-field
+     :sensorium-locs sensorium-locs
      :home-prox  (proximity world loc home)
      :enemy-prox (proximity world loc enemy)
      :h          (clamp01 hunger)
@@ -179,6 +224,7 @@
 (defn sense->vector
   "Return the observation map as a consistent vector ordering useful for ML-ish maths."
   [observation]
-  (mapv observation
-        [:food :pher :food-trace :pher-trace :home-prox :enemy-prox :h :ingest
-         :friendly-home :trail-grad :novelty :dist-home :reserve-home :cargo]))
+  (mapv #(sensory-value observation %)
+        (concat [:food :pher :food-trace :pher-trace :home-prox :enemy-prox :h :ingest
+                 :friendly-home :trail-grad :novelty :dist-home :reserve-home :cargo]
+                directional-sensory-keys)))

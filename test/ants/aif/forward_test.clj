@@ -88,6 +88,23 @@
       (doseq [[_ch v2] (:variance result)]
         (is (pos? v2) "each variance is positive")))))
 
+(deftest macro-actions-predict-directionally-distinct-locations
+  (let [view {:size [5 5]
+              :home [0 0]
+              :max-food 5.0
+              :max-pher 3.0
+              :ants {}
+              :cells {[3 2] {:food 5.0 :pher 0.0}}}
+        ant {:id :a :species :aif :loc [2 2] :cargo 0.0 :ingest 0.0
+             :h 0.4 :visit-counts {}}
+        forage (forward/forward-predict view ant :forage {:seed 1})
+        returning (forward/forward-predict view ant :return {:seed 1})]
+    (is (= [3 2] (get-in forage [:mean :loc])))
+    ;; The existing deposit rule snaps a returning ant home inside radius 2.
+    (is (= [0 0] (get-in returning [:mean :loc])))
+    (is (not= (get-in forage [:mean :loc])
+              (get-in returning [:mean :loc])))))
+
 (deftest ant-kernel-is-pure
   (testing "ant-kernel returns identical results for identical inputs"
     (let [world (war/new-world {:size [8 8]

@@ -75,6 +75,21 @@
   [view loc]
   (get-in view [:cells loc] {:food 0.0 :pher 0.0 :ant nil :home nil}))
 
+(defn- directional-field
+  "The action kernel's per-candidate Moore view, aligned with g-observe."
+  [view [x y]]
+  (for [[direction [dx dy]] observe/moore-directions
+        :let [loc [(+ x dx) (+ y dy)]]
+        :when (and (not= direction :self)
+                   (let [[w h] (:size view)
+                         [lx ly] loc]
+                     (and (<= 0 lx) (< lx w) (<= 0 ly) (< ly h))))
+        :let [cell (cell-at view loc)]]
+    {:direction direction
+     :loc loc
+     :food (double (or (:food cell) 0.0))
+     :pher (double (or (:pher cell) 0.0))}))
+
 (defn- empty-neighbours
   [view loc]
   (->> (neighbor-locs [(:size view) loc])
@@ -116,31 +131,32 @@
   ([view loc species visit-counts rand-fn]
    (richest-neighbour view loc species visit-counts rand-fn nil))
   ([view loc species visit-counts rand-fn {:keys [min-food] :or {min-food 0.1}}]
-   (let [size (:size view)
-         neighbours (neighbor-locs [size loc])
+   (let [field (directional-field view loc)
+         neighbours (map :loc field)
+         field-by-loc (into {} (map (juxt :loc identity)) field)
          home (when species (:home view))
          filtered (if (and home (seq neighbours))
                     (remove #(= % home) neighbours)
                     neighbours)
          candidates (seq filtered)
          best (when candidates
-                (apply max-key #(:food (cell-at view %) 0.0) candidates))
-         best-food (when best (double (or (:food (cell-at view best)) 0.0)))]
+                (apply max-key #(get-in field-by-loc [% :food] 0.0) candidates))
+         best-food (when best (get-in field-by-loc [best :food] 0.0))]
      (cond
        (and best (>= best-food min-food)) best
        (seq candidates)
        (let [visits visit-counts
              current-pher (double (or (:pher (cell-at view loc)) 0.0))
-             pher-best (apply max-key #(:pher (cell-at view %) 0.0) candidates)
-             pher-val (double (or (:pher (cell-at view pher-best)) 0.0))
+             pher-best (apply max-key #(get-in field-by-loc [% :pher] 0.0) candidates)
+             pher-val (get-in field-by-loc [pher-best :pher] 0.0)
              empties (vec (empty-neighbours view loc))
              least-visited (when (and visits (seq empties))
                              (apply min-key #(get visits % 0) empties))
              empties-pher (when (seq empties)
-                            (apply max-key #(:pher (cell-at view %) 0.0) empties))]
+                            (apply max-key #(get-in field-by-loc [% :pher] 0.0) empties))]
          (or (when (> pher-val (+ current-pher 0.05)) pher-best)
              (when empties-pher
-               (let [pher-empty (double (or (:pher (cell-at view empties-pher)) 0.0))]
+               (let [pher-empty (get-in field-by-loc [empties-pher :pher] 0.0)]
                  (when (> pher-empty (+ current-pher 0.02)) empties-pher)))
              least-visited
              empties-pher

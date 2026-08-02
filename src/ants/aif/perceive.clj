@@ -9,8 +9,10 @@
             [futon2.aif.precision :as precision]))
 
 (def ^:private sensory-keys
-  [:food :pher :food-trace :pher-trace :home-prox :enemy-prox :h :ingest
-   :friendly-home :trail-grad :novelty :dist-home :reserve-home :cargo])
+  (vec (concat
+        [:food :pher :food-trace :pher-trace :home-prox :enemy-prox :h :ingest
+         :friendly-home :trail-grad :novelty :dist-home :reserve-home :cargo]
+        observe/directional-sensory-keys)))
 
 (def ^:private default-precisions
   {:Pi-o {:food 1.0
@@ -82,7 +84,7 @@
   [errors observation]
   (into {} (for [k sensory-keys]
              [k {:error (double (get-in errors [k :raw] 0.0))
-                 :observed (double (get observation k 0.0))}])))
+                 :observed (double (observe/sensory-value observation k))}])))
 
 (defn- precision-from-state
   "Extract per-channel precision from the shared precision-state, returning
@@ -117,7 +119,7 @@
 (defn- compute-errors
   [mu observation prec]
   (reduce (fn [acc key]
-            (let [obs (double (get observation key 0.0))
+            (let [obs (double (observe/sensory-value observation key))
                   pred (double (get-in mu [:sens key] obs))
                   precision (double (get-in prec [:Pi-o key] 1.0))
                   raw (- obs pred)
