@@ -490,3 +490,71 @@ exploration schedule, and this afternoon's B5 records which rung fired per
 dispatch. That is the action sensor an AIF retrieval agent would need, built
 before the agent was conceived — the same shape as futon5a's drift detector
 predating R20 by ten weeks.
+
+---
+
+## The runner layer, and conatus on spec (Joe, 2026-08-02)
+
+Two observations that close a loop.
+
+**First: the ants are a toy model of the zaif runners, not an analogy.** The
+paper's motivating line already says it — *"just as simulated ants can be
+governed by an active-inference loop to gather food from their landscape, coding
+agents could be governed to move around the landscape of a software project"* —
+and the runners are the instantiation. So the ant findings are cheap diagnostic
+hypotheses about the expensive layer.
+
+**Second, and this is the actionable one: because zaif is a custom harness,
+a harness can be installed PER JOB — so the runner's conatus can be on spec.**
+
+### The evidence is today's own failures
+
+R-0 was dispatched three times. Twice it died as an Agency job with zero tool
+events, no error and no end time — reaped at the ~30-minute cap. The third
+attempt, under the harness background, died with the session. Only the fourth,
+under `systemd-run`, survived.
+
+**The runner had no representation of its own survival horizon.** It accepted a
+~2-hour sweep into a 30-minute container, twice. The cap was a hazard it was
+*subject to*, never a preference it could *act on*. That is precisely conatus in
+the passive mode — perseverance determined by external causes — and the ants have
+the same shape: their survival comes from a hardcoded hysteresis FSM rather than
+from anything they model.
+
+### What "on spec" buys, concretely
+
+Put the envelope in the preferences `C` rather than in the environment:
+
+- deadline, token budget, context headroom, commit checkpoints;
+- so expected free energy includes divergence from *complete within the
+  envelope*;
+- so the runner plans against it — chunk, checkpoint, commit per unit, or
+  **refuse the job as specified**.
+
+Refusal is the important one. A runner that can decline "this does not fit in my
+envelope; give me three jobs" is doing something no current runner can, and it is
+the single change that would have prevented all three R-0 failures.
+
+### And it yields a non-degenerate epistemic term
+
+This is the part that matters for `E-aif-ants-epistemics`. The ants' ambiguity
+term failed because it was computed from a quantity identical across candidate
+actions. At the runner layer the natural epistemic quantity is **uncertainty
+about the runner's own capacity to complete** — and reducing it is an action:
+*run one cell, time it, extrapolate.*
+
+That cannot be action-independent. Different plans probe different amounts, and a
+plan that measures before committing has different expected information than one
+that does not. **The defect the ants have is not expressible here.**
+
+It is also exactly what I failed to do: a single timed cell would have told me
+R-0 was a two-hour job before I sent it into a thirty-minute container. The
+epistemic action was cheap, available, and never valued.
+
+### It is already registerable
+
+"On spec" means the envelope is part of the job's registration, and the harness
+validates against it — which is `validate-then-run!` for jobs rather than
+experiments. The apparatus built today for experiment registration applies
+unchanged: a job whose harness config does not inhabit its registered envelope
+does not start.
