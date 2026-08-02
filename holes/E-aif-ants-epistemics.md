@@ -218,3 +218,66 @@ R-a through R-e landed or explicitly abandoned with reasons; each repaired axis
 either renders as a navigable treatment or is withdrawn from the catalogue with
 its non-navigability recorded as a finding; and the faithfulness and capability
 claims reported separately, whichever way each lands.
+
+
+---
+
+## R-a ATTEMPT 1 (2026-08-02): failed its gate, and found a third kind of inertness
+
+codex-9 implemented the re-specified R-a — `pred-variances` for the food channel
+derived from `food_belief`'s per-location `:uncertainty` at the **predicted next
+location**, which is genuinely action-conditioned. Focused tests confirm the
+variance follows the predicted location.
+
+**The ablation did not move.** 15/15 paired records identical across three grid
+sizes. codex-9 reverted the change and authored no registration, because claiming
+`:score-varies? true` would have been false. Correct on both counts.
+
+### The finding is better than a success would have been
+
+We now have **three distinct mechanisms of inertness**, not one:
+
+| kind | mechanism | instance |
+|---|---|---|
+| **structural** | the term is action-*independent*, so it cancels under argmax | canonical ambiguity as shipped; τ under `max-key` |
+| **dominated** | the term *varies* by action but never crosses the selection margin | canonical ambiguity **after** R-a |
+| **unreachable** | the code path is never taken | `infer-mode` behind dead `efe-tilt` |
+
+The second is new and it is the interesting one, because **it is invisible to
+every check we have built.** A dominated term passes a navigability inspection —
+its score genuinely varies — and a static audit sees a live quantity flowing into
+the scorer. Only an ablation reveals it, and only an ablation reported as an
+*identity rate* rather than a confidence interval.
+
+### The sign check, now measured rather than assumed
+
+Confirmed: higher destination uncertainty raises Gaussian entropy, raises `G`,
+and selection over `−G/τ` therefore prefers **lower-uncertainty, better-visited
+cells**. Canonical ambiguity is an **exploitation** pressure.
+
+This was predicted before the run and is worth keeping stated: ambiguity is not
+the exploration term. Exploration is the separate `:epistemic` lambda, which is
+R-b's target. Any account of this system claiming that its ambiguity term drives
+exploration is wrong about the sign.
+
+### The trap, named before anyone walks into it
+
+`default-efe-lambda` is `{:pragmatic 1.0 :ambiguity 0.5 :info 0.4 :epistemic 0.5}`.
+Ambiguity is weighted at half of pragmatic — **not negligible**. So the domination
+is in the *spread* of the risk term across candidates, not in the weight.
+
+Which means the obvious next move — raise `λ_ambiguity` until the ablation moves
+— **manufactures the result rather than discovering it.** Turning a dial until a
+term matters is not evidence that the term matters; it is a decision that it
+should. If we do it, it needs its own justification and its own registration, and
+it must never be reported as "the epistemic term turned out to be load-bearing."
+
+### The cheap next step, and it is a read
+
+Instrument the scorer: log per-candidate `(risk, ambiguity)` for a handful of
+decisions and compare the **spreads**, not the means. That answers "by what
+factor is ambiguity dominated?" — 2x is a weighting problem, 2000x is structural
+— and it is an inspection of internals, not a behavioural experiment.
+
+Consistent with the un-gating principle: this is a faithfulness question, so read
+the numbers rather than run a sweep.
