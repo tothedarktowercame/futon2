@@ -578,3 +578,47 @@ If relays still do not form with a homeward preference and real traffic, the
 capability claim is genuinely false and the ants cannot discover bucket chains.
 That would be worth knowing. Right now we know only that they cannot discover
 them *while dropping for the wrong reason with too few ants.*
+
+
+### S2 CORRECTED (2026-08-02): Joe's mechanism implemented, acted on, and it does not deliver
+
+`b840583` / `60b887c` / `6c47a2a`. The homebound `C` now values
+`food-progress = cargo × home-proximity`; a drop **preserves the progress mean
+exactly and lowers only its modelled loss variance** — banking food in the shared
+grid. Delivered yield stays external and unchanged; no drop or delivery bonus.
+
+| | drops | pickups | relays | yield Δ | starvation Δ |
+|---|---:|---:|---:|---:|---:|
+| cost-driven | 16 | 0 | 0 | +108.50 `[-199, 416]` | **−0.200** |
+| **progress-driven** | **11** | 0 | 0 | **−29.26** `[-109.5, 51.0]` | **0.000** `[0,0]` |
+
+**The proxy was acted upon and did not produce delivery.** That is the
+anti-Goodhart condition we wrote down before the run, firing exactly as
+specified: banking apparent progress was not success.
+
+### The comparison between the two rationales is the finding
+
+The carrying-cost version halved starvation. **The progress version's survival
+benefit is exactly zero.** So the two are not variants of one mechanic:
+
+- **load-shedding for survival** helps, and is what the cost version measured;
+- **progress-banking for relay** does nothing, and is what Joe's version isolates.
+
+Replacing the rationale removed the benefit *and* added no new one. The drop
+action pays when it is about not dying, and not at all when it is about moving
+food homeward — at this configuration.
+
+### What remains confounded, and it is the same variable in both runs
+
+**Three ants on a 576-cell board.** No relay mechanism can work at that density
+regardless of rationale — the probability of ant B crossing ant A's drop point is
+small, and neither run varied it.
+
+So the honest scope of this negative is: **Joe's mechanism does not produce relays
+at three ants.** It is not yet a negative on caching as such. Agent density is the
+one variable that has never been moved, it is a one-line change, and it is the
+last cheap thing standing between us and a real answer.
+
+If relays fail at realistic density with a homeward preference, the capability
+claim is false and the ants cannot discover bucket chains. That is the finding
+worth having, and it is one probe away.
