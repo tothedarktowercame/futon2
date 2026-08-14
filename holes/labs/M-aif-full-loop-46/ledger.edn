@@ -1,0 +1,123 @@
+{:protocol/version 4,
+ :remaining 0,
+ :attempts
+ [{:typed-sorries 0,
+   :grounded? true,
+   :attempt/id "attempt-059",
+   :outcome :grounded-change,
+   :selected-mission
+   "repair-attempt-051-feature-card-missing-or-invalid",
+   :checkpoints
+   [:time-step
+    :selection
+    :construction
+    :dispatch
+    :build
+    :adjudication
+    :closed],
+   :closed? true,
+   :artifact-binding
+   {:fresh-author? true,
+    :disagreement? false,
+    :descendant? true,
+    :text-artifact-ref "4110519b146b43880e2c9440f302bfa3009b9f6a",
+    :pre-dispatch-head "eeb5e67e8d227f1f181b66b5d6f1b3fb0440c242",
+    :author-window-end-ms 1785143128080,
+    :author-window-start-ms 1785142541909,
+    :commit "4110519b146b43880e2c9440f302bfa3009b9f6a",
+    :in-author-window? true,
+    :observed-commit-time-ms 1785143072000,
+    :repo "/home/joe/code/futon2",
+    :text-artifact-sha "4110519b146b43880e2c9440f302bfa3009b9f6a",
+    :observed-head "4110519b146b43880e2c9440f302bfa3009b9f6a",
+    :corroborates? true},
+   :attempt/ordinal 1,
+   :fresh-commit "4110519b146b43880e2c9440f302bfa3009b9f6a",
+   :artifact-only? false,
+   :opportunity-id
+   "duree-click-on-demand/2026-07-27T08:49:44.734997158Z/b45bd14a-3e8a-4743-9f93-ada9384c60f0"}
+  {:typed-sorries 0,
+   :grounded? true,
+   :attempt/id "attempt-060",
+   :outcome :grounded-change,
+   :selected-mission
+   "repair-attempt-052-strategic-selection-unavailable",
+   :checkpoints
+   [:time-step
+    :selection
+    :construction
+    :dispatch
+    :build
+    :adjudication
+    :closed],
+   :closed? true,
+   :artifact-binding
+   {:fresh-author? true,
+    :disagreement? false,
+    :descendant? true,
+    :text-artifact-ref "3bdc381e76518e69f90077397fa46495da98e61c",
+    :pre-dispatch-head "4110519b146b43880e2c9440f302bfa3009b9f6a",
+    :author-window-end-ms 1785144006139,
+    :author-window-start-ms 1785143716185,
+    :commit "3bdc381e76518e69f90077397fa46495da98e61c",
+    :in-author-window? true,
+    :observed-commit-time-ms 1785143979000,
+    :repo "/home/joe/code/futon2",
+    :text-artifact-sha "3bdc381e76518e69f90077397fa46495da98e61c",
+    :observed-head "3bdc381e76518e69f90077397fa46495da98e61c",
+    :corroborates? true},
+   :attempt/ordinal 2,
+   :fresh-commit "3bdc381e76518e69f90077397fa46495da98e61c",
+   :artifact-only? false,
+   :opportunity-id
+   "duree-click-on-demand/2026-07-27T09:09:36.982336709Z/509ec9ca-7fdc-44b6-99a8-d7f91281f260"}
+  {:typed-sorries 0,
+   :grounded? true,
+   :attempt/id "attempt-061",
+   :outcome :grounded-change,
+   :selected-mission "repair-attempt-054",
+   :checkpoints
+   [:time-step
+    :selection
+    :construction
+    :dispatch
+    :build
+    :adjudication
+    :closed],
+   :closed? true,
+   :artifact-binding
+   {:fresh-author? true,
+    :disagreement? false,
+    :descendant? true,
+    :text-artifact-ref "6c537c684a3ff2618dbc2fce915bb564bd140fd2",
+    :pre-dispatch-head "3bdc381e76518e69f90077397fa46495da98e61c",
+    :author-window-end-ms 1785149807344,
+    :author-window-start-ms 1785149489514,
+    :commit "6c537c684a3ff2618dbc2fce915bb564bd140fd2",
+    :in-author-window? true,
+    :observed-commit-time-ms 1785149784000,
+    :repo "/home/joe/code/futon2",
+    :text-artifact-sha "6c537c684a3ff2618dbc2fce915bb564bd140fd2",
+    :observed-head "6c537c684a3ff2618dbc2fce915bb564bd140fd2",
+    :corroborates? true},
+   :attempt/ordinal 3,
+   :fresh-commit "6c537c684a3ff2618dbc2fce915bb564bd140fd2",
+   :artifact-only? false,
+   :opportunity-id
+   "duree-click-on-demand/2026-07-27T10:46:43.545015068Z/94e789f6-7760-41d5-a5dc-0d05ea11d3ea"}],
+ :closed-count 3,
+ :grounded-change-count 3,
+ :activation
+ {:cohort/id :wm-outer-loop-46-v1,
+  :activated-at "2026-07-27T08:49:38.625784226Z",
+  :preregistration-path
+  "/home/joe/code/futon2/holes/labs/M-aif-full-loop-46/cohort.edn",
+  :preregistration-sha256
+  "e9031b3c66173bf10eb91cc38d43a7b750b1f3c24007c9340d506101e0c8f1ff",
+  :stopping-target 3},
+ :artifact-only-count 0,
+ :attempt-count 3,
+ :grounded-no-change-count 0,
+ :target 3,
+ :outcomes {:grounded-change 3},
+ :cohort/id :wm-outer-loop-46-v1}
