@@ -1,0 +1,135 @@
+;; THE TOKAMAK CONTROL CASCADE — five patterns, one per bin, THEN = an arm.
+;;
+;; Joe, 2026-07-16: "what I am wondering is if we could build a pattern cascade
+;; that controls the tokamak ... my old idea of 'wiring diagrams for controlling
+;; things'. If we could create a pattern language cascade that controls the
+;; tokamak, then we could apply propagators to alter it."
+;;
+;; ===========================================================================
+;; WHY THIS ONE TYPES WHERE EVERY OTHER ATTEMPT TODAY DID NOT
+;;
+;; N and P are both already in the apparatus (futon5 scripts/tokamak_advantage.clj):
+;;   N = BINS  = [:dead :collapsing :lean :mid :rich]        (:117)
+;;       phi(g) = (cond (<= n 1) :dead (<= n 4) :collapsing
+;;                      (<= n 12) :lean (<= n 24) :mid :else :rich)   (:116)
+;;       where n = distinct rules in the genotype field. Each bin IS a regime,
+;;       defined by a threshold. SEMANTIC — not a list position.
+;;   P = ACTS  = [:rotate+2 :three+five :sigma-5127 :rotate+1 :identity]  (:72-78)
+;;       each a neighbourhood sigma — a PROPAGATOR. Typed, finite, not English.
+;;
+;; So the controller's policy g : BINS -> ACTS IS [N -> P], with both sides typed.
+;;
+;; AND THE CONDITIONALITY PROBLEM DISSOLVES. The ants died because every
+;; prescription was conditional ("until a deposit fires", "when near the nest")
+;; and (action -> direction) has nowhere to put a condition — so it collapsed to
+;; rho. A POLICY'S DOMAIN *IS* THE CONDITION. `g(:collapsing) = :rotate+2` simply
+;; IS "when collapsing, use rotate+2". Nothing is smuggled; the condition is the
+;; index. That is the structural difference and it is why Joe's framing works.
+;;
+;; NOT A FOURTH CLIMB. P = propagators, so a propagator rewriting g is the theory
+;; applied to its own controller — the tower closing, not ascending. Concretely
+;; this cascade IS M-propagators §2c's exotype, `switch(condition, sigma_A,
+;; sigma_B)`, generalised from 2 branches to 5. Propagators altering it is the
+;; XENO step, which §2c names as its own open problem: "the (sigma_A, sigma_B,
+;; condition) triples here were hand-picked ... finding them is the job of the
+;; evolutionary method, not of guessing."
+;; ===========================================================================
+;;
+;; THE OBJECTIVE IS NOT INCLUDED, DELIBERATELY. §4b parked the tokamak because
+;; the OBJECTIVE is broken — EoC is a band, argmax walks to an edge the band
+;; excludes, and class membership is undecidable (Culik & Yu 1988; Kari 1992).
+;; So NO pattern below says "select the arm that maximises transport". Every THEN
+;; is grounded in a MEASURED property of the arm, and the cascade is offered as a
+;; structure to REWRITE, not a controller to SCORE. Scoring it needs a grounded
+;; objective and nobody has one. (§4b's own way out: "the ants do not detect EoC,
+;; they eat.")
+
+{:cascade/id "tokamak-control-cascade-v0"
+ :cascade/title "The Tokamak Control Cascade"
+ :cascade/subtitle "Five patterns, one per regime; THEN selects a propagator"
+ :cascade/status :structure-only
+ :cascade/psi
+ "A controller whose policy is a pattern cascade, so that rewriting the cascade
+  and rewriting the controller are the same operation."
+
+ :cascade/carrier
+ {:N {:source "futon5 scripts/tokamak_advantage.clj:117"
+      :elements [:dead :collapsing :lean :mid :rich]
+      :semantic? true
+      :note "index k IS a regime (a distinct-rule-count band), not a position."}
+  :P {:source "futon5 scripts/tokamak_advantage.clj:72-78"
+      :elements [:rotate+2 :three+five :sigma-5127 :rotate+1 :identity]
+      :note "each element is a neighbourhood sigma — a propagator. P = the thing the theory studies."}
+  :policy "g : BINS -> ACTS"}
+
+ ;; ---------------------------------------------------------------------------
+ ;; THE FIVE PATTERNS
+ ;; ---------------------------------------------------------------------------
+ :cascade/boxes
+ [{:id "tkc-dead" :bin :dead :arm :identity
+   :evidence :NONE
+   :if       "The field has collapsed to a single rule (n <= 1). It is a monoculture."
+   :however  "Every non-identity arm drives toward a fixed point, and a fixed point is where we already are. An arm with an attractor cannot leave an attractor."
+   :then     "Select :identity."
+   :because  "M-propagators §1.3: 'Ordinary mutation is sigma = identity — a random walk, NO ATTRACTOR.' From a dead field the only useful arm is the one that cannot settle. This is settles_if_nu_has_fixed_point read as advice: when you are already at the fixed point, choose the map that has none."
+   :UNEVIDENCED "The tokamak NEVER VISITED this bin — §4b: 'the :dead and :collapsing bins came back EMPTY'. This THEN is derived from §1.3's characterisation of identity, not from any run in this bin. It is AUTHORED."}
+
+  {:id "tkc-collapsing" :bin :collapsing :arm :rotate+2
+   :evidence :NONE
+   :if       "2-4 distinct rules and falling (n <= 4)."
+   :however  "Collapse is absorbing, and §4b measured that it 'is only reachable by HOLDING a propagator' — so arriving here at all means something was held too long."
+   :then     "Select :rotate+2."
+   :because  "§1.4's non-rotation table: offset +2 = (0 2 4 6)(1 3 5 7), death/seed (120 120 120 120), 31.0 terminal rules — LIVES. It is the arm measured to sustain a population rather than collapse one."
+   :UNEVIDENCED "Also never visited (§4b). AUTHORED. Note the tension with tkc-dead: both bins are unreached, so the two patterns nearest to death are the two with no evidence."}
+
+  {:id "tkc-lean" :bin :lean :arm :three+five
+   :evidence :weak
+   :if       "5-12 distinct rules (n <= 12)."
+   :however  "A lean field is recoverable but not safe; the arms that live and the arms that die are not distinguished by any sigma-only property (§L2's conjugacy negative)."
+   :then     "Select :three+five."
+   :because  "§1.4: (0 1 2)(3 4 5 6 7) — 2 orbits of length 3 and 5, death/seed (120 120 120 120), 26.8 rules — LIVES. It refutes 'length-4 orbits' as the mechanism while still living, so it is the arm whose survival is least explained by the story that failed."}
+
+  {:id "tkc-mid" :bin :mid :arm :rotate+1
+   :evidence :measured
+   :if       "13-24 distinct rules (n <= 24) — the field is active and structured."
+   :however  ":rotate+1 IS the trap. Held, it decays to EXACTLY 0 and is Figure 8's own death."
+   :then     "Select :rotate+1 — and never twice running."
+   :because  "§4b, measured: rotate+1 has the HIGHEST single-window transport in the set (.319/.273) and decays to exactly 0 when held. 'The trap is only a trap if held ... re-probing every window means it never holds anything, so it surfs the transient and leaves.' Greedy picked it 3/6 windows and WON; run 2's memory arm picked it 0/24 and LOST."
+   :NEXT-STEPS "Emit :held-last-window. If set, this pattern must not fire. THE NEXT-STEP IS THE WHOLE PATTERN — without it this box is Figure 8 and the field dies."}
+
+  {:id "tkc-rich" :bin :rich :arm :sigma-5127
+   :evidence :weak
+   :if       "More than 24 distinct rules — the field is rich."
+   :however  "A rich field is the thing we did not know how to keep; every arm risks collapsing it, and we have no measured 'do no harm' arm."
+   :then     "Select :sigma-5127."
+   :because  "§2's genotype-transport gates: the observed sigma scores mean 0.2217 across seeds, above the identity null (0.1230-0.1436) and inside the live floor (0.1962). It is the arm with the least evidence of being a trap — which is NOT the same as evidence of being good, and this BECAUSE should not be read as more than it says."}]
+
+ ;; ---------------------------------------------------------------------------
+ ;; THE POLICY, EXTRACTED
+ ;; ---------------------------------------------------------------------------
+ :cascade/policy
+ {:dead :identity, :collapsing :rotate+2, :lean :three+five, :mid :rotate+1, :rich :sigma-5127}
+
+ ;; ---------------------------------------------------------------------------
+ ;; WHAT THE CASCADE EXPOSES ABOUT ITSELF — and this is the finding
+ ;; ---------------------------------------------------------------------------
+ :cascade/self-report
+ {:unevidenced-bins [:dead :collapsing]
+  :why "§4b: 'The :dead and :collapsing bins came back EMPTY (tok4_qsa.png) — collapse is only reachable by HOLDING a propagator, and a random policy never holds. So the very states that reveal the trap are off-distribution for the policy meant to discover them.'"
+  :so-what
+  "TWO OF FIVE PATTERNS HAVE NO EVIDENCE, and they are the two nearest death.
+   Writing them was AUTHORING, and the cascade says so in the boxes rather than
+   letting a plausible BECAUSE hide it. This is not a defect of the cascade — it
+   is the cascade making TK-2 legible: 'random exploration is unbiased over
+   ACTIONS, not over STATES.' The tokamak's blind spot and the cascade's
+   unevidenced boxes are THE SAME TWO BINS. A cascade that could not show that
+   would be worth less than the prose it came from.
+   §4b's fix — 'seed exploration with hold-k trajectories' — is exactly what
+   would populate these two boxes with evidence. The cascade names its own
+   next experiment."
+  :nb "Under a propagator, an unevidenced box is not inert: s can WRITE :dead's entry from a bin that was visited. So rewriting can propagate evidence into a box that has none — which is either a feature (generalisation) or laundering (an authored guess acquiring borrowed warrant). That distinction needs deciding BEFORE anyone runs this."}
+
+ :cascade/open
+ [{:q "The objective." :note "Not included and cannot be faked. §4b parked the tokamak for it. This cascade can be REWRITTEN without one (the dynamics of the controller under propagation is a real question); it cannot be SCORED without one."}
+  {:q "Is |N| = |P| = 5 load-bearing?" :note "Both are 5. That makes g a candidate bijection and permits ν and s to be drawn from the same symmetric group — elegant, and possibly a coincidence of how many arms someone chose to test. Do not build on it."}
+  {:q "Does a propagator on g respect the bins' ORDER?" :note "The bins are ordered by rule count (dead < collapsing < lean < mid < rich). A shape map s that ignores that order is permitted by the types and may be nonsense — 'write :rich's arm into :dead's slot'. The types do not know the bins are a scale."}]}

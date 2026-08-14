@@ -1,0 +1,153 @@
+;; CONTROLLED-VOCABULARY OVERLAY — the structure, before the NNexus.
+;;
+;; WR-3 (exotype before implementation): this file is the diagram. It is
+;; validated by check_overlay.clj against TWO domains before anything is built
+;; across the 1076-pattern catalogue. Joe's pairing: one domain we know deeply
+;; (FUTON / war-room prose) and one simple and intuitive (AIF ants).
+;;
+;; THE MOVE (Joe, 2026-07-16): NNexus-style OVERLAY, not rewriting. The note
+;; N-strategy-as-computational-object originally said "rewrite each slot toward
+;; its canonical term". That is the fast loop editing the canonical library —
+;; precisely what WR-2/I4 forbids ("fast loops would be able to modify their own
+;; constraints"). An overlay never touches the text: "inhabitation" keeps its
+;; word and acquires a `maps-to :inhabit` annotation. futon6's own NNexus demo
+;; calls this "glasses" — you read THROUGH them; the page is unchanged.
+;;
+;; WHY THE OVERLAY IS ALSO THE APPEND-ONLY ANSWER. Patterns mutate, so the
+;; pattern index cannot ride catch-up! (it throws on :append-only? false). But
+;; an overlay is a ledger of :define / :retract records — append-only by
+;; construction, and `define`/`retract` are already valid illocutionary types in
+;; futon3c's typed-bell contract. The mutable thing (patterns) stays a 12-second
+;; snapshot; the thing we are actually building is append-only.
+;;
+;; ---------------------------------------------------------------------------
+;; THE CLAIM THIS STRUCTURE MUST EARN — and it is cross-domain, which is the
+;; whole point of using two examples:
+;;
+;;   In BOTH domains, the native mechanism is blind to a family of surface forms
+;;   that denote ONE quantity, and the overlay is exactly the layer that sees it.
+;;
+;;   FUTON  : {inhabit, inhabitation, inhabited} -> :inhabit
+;;            native mechanism = FTS5 unicode61, NO stemming. Measured
+;;            (first_checking.clj): THEN MATCH 'inhabit' = 0, 'inhabitation' = 6,
+;;            'inhabited' = 3. One term, three tokens, term-flow blind to it.
+;;
+;;   ANTS   : {need-gain, dhdt-gain, tau-survival-gain, tau-cap, tau-floor} -> :tau
+;;            native mechanism = merge-deep over @aif-delta keys. cascade-ants.edn
+;;            says it outright: "Three patterns shape tau through DIFFERENT keys,
+;;            so merge-deep does not detect the contention — but they are arguing
+;;            about one quantity." One quantity, five keys, merge-deep blind to it.
+;;
+;; Same failure, same fix, two surfaces. That is what makes this a substrate
+;; rather than a text-processing trick — and it is falsifiable: if the overlay
+;; does not catch the ants' tau-family, the structure is wrong.
+;;
+;; WHAT THE ANTS ADD THAT FUTON CANNOT. The ants' vocabulary ALREADY EXISTS —
+;; @aif-delta keys are finite, typed, machine-readable. So the ants show what a
+;; controlled vocabulary BUYS once you have it: contention becomes decidable.
+;; pt says [:efe :lambda :info] = 0.5, ws says 0.6 — mechanically unsat. The
+;; FUTON prose corpus cannot even ASK that question yet. So the ants are not
+;; merely a second example; they are the TARGET SHAPE. Success criterion for the
+;; futon side, stated in advance: make the prose corpus answer the query the
+;; ants already answer.
+;;
+;; TWO LAYERS, AND CONFLATING THEM WOULD BE THE ERROR:
+;;   L1 term canonicalization : surface form -> canonical term.  <- THIS FILE
+;;   L2 assertion extraction  : slot text -> (path, value).      <- NOT this file
+;; The ants have L2 done BY HAND (@aif-delta was authored, not extracted). FUTON
+;; has neither. L1 is prerequisite for L2 and is worth building alone, because
+;; L1 alone already catches the tau-family — the contention L2's own merge-deep
+;; misses. (L2 is fold_engine's job: futon3a/holes/labs/M-memes-arrows.)
+;; ---------------------------------------------------------------------------
+
+{:overlay/id "controlled-vocabulary-overlay-v0"
+ :overlay/status :structure-only     ; WR-3: validated as a diagram; NOT deployed
+ :overlay/provenance "Joe + claude-6, 2026-07-16, emacs-repl. Structure-first slice of [[N-strategy-as-computational-object]] §controlled-vocabulary, under the semantics of [[N-patterns-as-arrows]]."
+
+ ;; ---------------------------------------------------------------------------
+ ;; THE RECORD SCHEMA. Append-only. A correction is a :retract followed by a new
+ ;; :define — never an edit, so the ledger's own history is the provenance of the
+ ;; vocabulary, and a bad mapping is reversible without touching 1076 files.
+ ;; ---------------------------------------------------------------------------
+ :overlay/schema
+ {:op       #{:define :retract}
+  :scope    "Which bucket the mapping holds in. NOT global — NNexus's linkpolicy lesson, and measured: 'encoding' is in 257/257 iiching patterns and 0 elsewhere, so a corpus-wide vocabulary would be one bucket's template wearing a crown."
+  :surface  "The form as authored. NEVER rewritten. This is the whole point."
+  :maps-to  "The canonical term."
+  :evidence "What licensed it — a count, a query, a measurement. Not an opinion."
+  :by       "Who adopted it. I4: the census PROPOSES, the operator DISPOSES. A vocabulary decides what composes, so it is a constraint; an agent adopting its own is a fast loop modifying its own constraints."
+  :at       "Timestamp."}
+
+ ;; Scopes are the four measured buckets + the ants. Concentration = top-term
+ ;; document share, measured by census.clj, reproducing the earlier figures.
+ :overlay/scopes
+ {:war-room {:patterns 7    :concentration 0.571 :top-term "stack"    :kind :attested-rulings}
+  :prose    {:patterns 744  :concentration 0.234 :top-term "pattern"  :kind :free-diction}
+  :iching   {:patterns 64   :concentration 0.156 :top-term "maintain" :kind :conceptually-controlled}
+  :iiching  {:patterns 257  :concentration 1.000 :top-term "encoding" :kind :lexically-controlled
+             :note "concentration 1.0 LITERALLY: 'encoding' occurs in 257 of 257. This scope needs no overlay — it is already controlled. It is the FORMAL POLE the note points at ('like that, but for everything')."}
+  :ants     {:patterns 5    :kind :typed-delta-keys
+             :note "The vocabulary already exists as @aif-delta keys. This scope is the TARGET SHAPE, not a subject — it shows what L1+L2 together buy."}}
+
+ ;; ---------------------------------------------------------------------------
+ ;; THE RECORDS. Deliberately TWO families — one per domain — because the point
+ ;; is the cross-domain claim, not coverage. Everything here is PROPOSED: no
+ ;; :by is filled in, because no operator has adopted them yet.
+ ;; ---------------------------------------------------------------------------
+ :overlay/records
+ [;; ---- FUTON: the inhabit family (the note's own worked term-flow #1) ----
+  {:op :define :scope :prose :surface "inhabit"      :maps-to :inhabit
+   :evidence "first_checking.clj: IF slot MATCH 'inhabit' = 3 patterns" :by nil}
+  {:op :define :scope :prose :surface "inhabitation" :maps-to :inhabit
+   :evidence "THEN MATCH 'inhabitation' = 6; the token 'inhabit' = 0. WR-4's THEN says 'inhabitation'." :by nil}
+  {:op :define :scope :prose :surface "inhabited"    :maps-to :inhabit
+   :evidence "THEN MATCH 'inhabited' = 3" :by nil}
+  {:op :define :scope :war-room :surface "inhabit"   :maps-to :inhabit
+   :evidence "WR-4 title + conclusion" :by nil}
+  {:op :define :scope :war-room :surface "inhabitation" :maps-to :inhabit
+   :evidence "WR-4 THEN: 'The next phase is inhabitation, not construction.'" :by nil}
+
+  ;; ---- ANTS: the tau family (cascade-ants.edn's :contended core) ----
+  ;; These are DELTA KEYS, not prose words — which is the test that the schema
+  ;; is domain-neutral. If :surface can only be an English word, the structure
+  ;; is a text trick and does not deserve the name substrate.
+  {:op :define :scope :ants :surface [:precision :need-gain]         :maps-to :tau
+   :evidence "hp @aif-delta; cascade-ants :contentions tau-family — 'stronger hunger->precision coupling'" :by nil}
+  {:op :define :scope :ants :surface [:precision :dhdt-gain]         :maps-to :tau
+   :evidence "hp @aif-delta — 'faster tau response to hunger trend'" :by nil}
+  {:op :define :scope :ants :surface [:precision :tau-survival-gain] :maps-to :tau
+   :evidence "hp @aif-delta" :by nil}
+  {:op :define :scope :ants :surface [:precision :tau-cap]           :maps-to :tau
+   :evidence "cr @aif-delta — 'cap tau so the agent exploits completion'" :by nil}
+  {:op :define :scope :ants :surface [:precision :tau-floor]         :maps-to :tau
+   :evidence "ws @aif-delta — 'tau-floor 0.12 to keep exploring'" :by nil}
+
+  ;; The info family — already visible to merge-deep (same key), included as the
+  ;; NEGATIVE CONTROL: the overlay must not claim credit for finding this one.
+  {:op :define :scope :ants :surface [:efe :lambda :info]            :maps-to :info-weight
+   :evidence "pt=0.5, ws=0.6. merge-deep ALREADY sees this (identical key). Control: if the overlay's value is real, it must show up on tau and NOT here." :by nil}]
+
+ ;; ---------------------------------------------------------------------------
+ ;; PRE-REGISTERED PREDICTIONS. Written before check_overlay.clj runs, so the
+ ;; validation can fail. (seal-the-graduation-criteria, applied to ourselves.)
+ ;; ---------------------------------------------------------------------------
+ :overlay/predictions
+ [{:id :futon-family-invisible
+   :claim "FTS token search finds NO single token covering the inhabit family in THEN; the overlay's canonical :inhabit covers >= 8 patterns."
+   :falsifier "If some bare token already covers the family, the overlay adds nothing here."}
+  {:id :ants-tau-invisible-to-merge
+   :claim "merge-deep over the 5 @aif-deltas reports ZERO key collisions on the tau family (5 distinct key paths), while the overlay reports >= 3 patterns writing :tau."
+   :falsifier "If merge-deep already collides on tau, cascade-ants.edn's :contended claim is wrong and so is this structure."}
+  {:id :info-control
+   :claim "merge-deep DOES collide on [:efe :lambda :info] (pt 0.5 vs ws 0.6). The overlay must not be needed to see it."
+   :falsifier "If merge-deep misses this too, the comparison is not measuring what it claims."}
+  {:id :transcription-fidelity
+   :claim "cascade-ants.edn's :delta fields match the @aif-delta in the .flexiarg files they cite."
+   :falsifier "Any mismatch = the cascade drifted from its sources — WR-2's unenforced 'should not diverge', caught in the act."}]
+
+ ;; ---------------------------------------------------------------------------
+ :overlay/non-goals
+ ["L2 assertion extraction (slot text -> path+value). fold_engine's job."
+  "Semantic synonymy (dwell ~ inhabit, reward ~ reinforce). The crude stemmer produces FALSE families (it groups mission/missing/missed under :miss); only an operator settles those."
+  "Coverage of the 1076-pattern catalogue. Two examples, per Joe: enough to get started."
+  "Rewriting any pattern text, ever. That is the one thing WR-2 forbids."]}
