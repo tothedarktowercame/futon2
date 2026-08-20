@@ -2997,3 +2997,60 @@
               (java.net.http.HttpTimeoutException. "request timed out")))]
       (is (= :transport-timeout (failure-kind-from* e))
           "attempt-057 remains fixed through a deeper untyped chain"))))
+
+;; --- outer-boundary transport typing (repair-attempt-058-untyped-failure) ---
+;; attempt-058 repeated attempt-057's shape: HttpTimeoutException at :selection,
+;; recorded :untyped-failure. The classifier repair covered close! inside
+;; run-opportunity-core!, but run-opportunity!'s outer boundary HARDCODED
+;; :machine-failure / :initialization-failed for every throwable — so the same
+;; network fault arriving a moment earlier, before an attempt can own it, was
+;; still charged to the machine.
+
+(deftest initialization-transport-failure-is-environmental
+  (let [findings (atom [])
+        queued (atom [])
+        result
+        (runner/run-opportunity!
+         {:cohort? false
+          :phase-log nil
+          :phase-log-fn (fn [_]
+                          (throw (java.net.http.HttpTimeoutException.
+                                  "request timed out")))
+          :repair-system-record-fn
+          (fn [finding]
+            (swap! findings conj finding)
+            (assoc finding :repair/id "repair-initialization-transport"))
+          :queue-fn #(swap! queued conj %)})]
+    (is (= :incomplete (:outcome result)))
+    (is (= :transport-timeout (get-in result [:data :failure-kind]))
+        "a transport timeout at the outer boundary is typed, not :initialization-failed")
+    (is (= :environmental-hold (:repair-class (first @findings)))
+        "and it must not open a machine-failure repair")
+    (is (= [:cleared-precondition :grounded-production-shaped-successor]
+           (:requires (:discharge-contract (first @findings))))
+        "the discharge follows the corrected class")
+    (is (= :initialization (:failure-stage (first @findings)))
+        "the stage is still honestly :initialization")
+    (is (= :transport-timeout (get-in (first @queued) [:failure :kind]))
+        "the morning brief carries the same typed kind")))
+
+(deftest initialization-non-transport-failure-stays-machine-failure
+  ;; Fail-closed twin of the above, and of
+  ;; initialization-failure-opens-emergency-stop-line: anything that is not a
+  ;; recognised transport condition keeps the full machine-failure contract.
+  (let [findings (atom [])
+        result
+        (runner/run-opportunity!
+         {:cohort? false
+          :phase-log nil
+          :phase-log-fn (fn [_] (throw (RuntimeException. "sink exploded")))
+          :repair-system-record-fn
+          (fn [finding]
+            (swap! findings conj finding)
+            (assoc finding :repair/id "repair-initialization-unknown"))
+          :queue-fn (fn [_])})]
+    (is (= :initialization-failed (get-in result [:data :failure-kind])))
+    (is (= :machine-failure (:repair-class (first @findings))))
+    (is (= [:distinct-repair-commit :independent-review
+            :grounded-repair :distinct-production-shaped-successor]
+           (:requires (:discharge-contract (first @findings)))))))

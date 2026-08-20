@@ -2889,18 +2889,33 @@
                 error (if (str/blank? (str (.getMessage e)))
                         "Full-loop initialization failed"
                         (.getMessage e))
+                ;; This boundary used to hardcode :machine-failure /
+                ;; :initialization-failed for EVERY throwable, while capturing
+                ;; :error-class into the backtrace and then ignoring it. A
+                ;; transport timeout landing here — the same condition that
+                ;; killed attempt-057 and attempt-058 at :selection, arriving
+                ;; slightly earlier, before an attempt can own it — was
+                ;; therefore charged to the machine, demanding a repair commit
+                ;; and an independent review for a network fault.
+                ;; Only the transport carve-out applies here: the stage really
+                ;; is :initialization, so everything else keeps the existing
+                ;; :initialization-failed / :machine-failure contract. Unknown
+                ;; throwables are unchanged; this narrows, never widens.
+                failure-kind (or (transport-failure-kind e)
+                                 :initialization-failed)
+                repair-class (repair-class-for failure-kind)
                 finding
                 ((or (:repair-system-record-fn raw-opts)
                      repair/record-system-failure!)
                  {:attempt-id attempt-id
-                  :repair-class :machine-failure
+                  :repair-class repair-class
                   :failure-stage :initialization
                   :outcome :incomplete
-                  :failure-kind :initialization-failed
+                  :failure-kind failure-kind
                   :error error
                   :failure-data edata
                   :backtrace {:error-class (.getName (class e))}
-                  :discharge-contract (discharge-contract :machine-failure)})
+                  :discharge-contract (discharge-contract repair-class)})
                 brief-ref
                 ((or (:queue-fn raw-opts) brief/queue-item!)
                  {:attempt-id attempt-id
@@ -2911,7 +2926,7 @@
                   :reviewer (or (:reviewer raw-opts) default-reviewer)
                   :achievement {:tier :none
                                 :summary "No achievement; initialization stopped the line"}
-                  :failure {:kind :initialization-failed
+                  :failure {:kind failure-kind
                             :stage :initialization
                             :error error
                             :repair-id (:repair/id finding)
@@ -2921,7 +2936,7 @@
              :checkpoints {}
              :morning-brief-ref brief-ref
              :data {:repair-obligation finding
-                    :failure-kind :initialization-failed
+                    :failure-kind failure-kind
                     :failure-stage :initialization
                     :error error
                     :error-data edata}}))))
