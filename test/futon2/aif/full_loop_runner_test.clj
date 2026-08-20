@@ -3164,7 +3164,7 @@
     ;; Before this, only "socket closed" was listed, so "Socket is closed" —
     ;; thrown by several JDK call sites for the SAME condition — took the
     ;; machine-failure contract. That was a coin-flip on wording, not a policy.
-    (doseq [m ["Socket closed" "socket closed" "Socket is closed"
+    (doseq [m ["Socket closed" "socket closed"
                "Connection reset" "Broken pipe" "  CONNECTION RESET BY PEER  "]]
       (is (= :transport-unavailable
              (failure-kind-from* (java.net.SocketException. m)))
@@ -3176,4 +3176,16 @@
     (doseq [e [(java.net.SocketException.)
                (java.net.SocketException. "some unrelated socket problem")]]
       (is (= :untyped-failure (failure-kind-from* e)))
-      (is (= :machine-failure (repair-class-for* (failure-kind-from* e)))))))
+      (is (= :machine-failure (repair-class-for* (failure-kind-from* e))))))
+  (testing "\"Socket is closed\" is LOCAL use-after-close and stays a machine fault"
+    ;; One word from a listed entry, and on the opposite side on purpose. On this
+    ;; JDK, calling getInputStream/getOutputStream/setSoTimeout/bind on a closed
+    ;; java.net.Socket throws SocketException "Socket is closed" — that is our
+    ;; own code misusing a socket, not a channel that went away, so it must NOT
+    ;; discharge as :environmental-hold.
+    (let [e (java.net.SocketException. "Socket is closed")]
+      (is (= :untyped-failure (failure-kind-from* e)))
+      (is (= :machine-failure (repair-class-for* (failure-kind-from* e)))))
+    (is (= :transport-unavailable
+           (failure-kind-from* (java.net.SocketException. "Socket closed")))
+        "while \"Socket closed\" — a blocking op aborted by channel loss — is transport")))

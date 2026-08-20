@@ -1850,24 +1850,30 @@
 
 (def ^:private unavailable-socket-messages
   "Bare SocketException is too broad to type wholesale: its subclasses are all
-  transport, but a bare instance can also report local socket lifecycle misuse,
+  transport, but a bare instance can also report LOCAL socket lifecycle misuse,
   which IS a machine fault. Those cases are indistinguishable by type, so this
-  set names the JDK wordings for a channel that went away underneath us.
+  set names only the JDK wordings for a channel that went away underneath us.
+
+  \"Socket is closed\" is DELIBERATELY ABSENT, and the omission is one word away
+  from a listed entry, so do not \"fix\" it. Measured on this JDK:
+
+      (doto (java.net.Socket.) .close) then .getInputStream / .getOutputStream
+      / .setSoTimeout / .bind  ->  SocketException \"Socket is closed\"
+
+  That is OUR code using a socket after closing it — a machine fault, and it
+  must keep the machine-failure contract. \"Socket closed\" (no \"is\") is the
+  different case: a blocking operation aborted because the channel went away,
+  which is the transient condition initialization-6dd14f9e actually hit.
 
   Matching on message text is a known weakness — this same file refuses to do it
   for stopping-rule recognition, on the grounds that text matching misclassifies
   unrelated failures. It is accepted here only because a bare SocketException
   carries no typed discriminator at all, and the alternative (typing every bare
-  SocketException environmental) would hide real use-after-close bugs.
-
-  The set is deliberately enumerated rather than substring-matched, and
-  transport-message-typing-is-enumerated-not-fuzzy pins exactly what is in and
-  what is out. Before this, ONLY \"socket closed\" was listed, so the identical
-  condition worded \"Socket is closed\" — which is what several JDK call sites
-  throw — took the machine-failure contract. That is a coin-flip on wording, not
-  a policy."
+  SocketException environmental) would hide use-after-close bugs precisely like
+  the one above. The set is enumerated rather than substring-matched, and
+  transport-message-typing-is-enumerated-not-fuzzy pins what is in and what is
+  out."
   #{"socket closed"
-    "socket is closed"
     "connection reset"
     "connection reset by peer"
     "broken pipe"})
