@@ -1753,6 +1753,7 @@
 (deftest machine-stop-line-preempts-ordinary-selection-and-awaits-successor-validation
   (let [dispatches (atom [])
         implementations (atom [])
+        transform-called? (atom false)
         stop-line {:repair/id "repair-failed-1"
                    :repair/status :open
                    :repair/class :machine-failure
@@ -1785,6 +1786,10 @@
                               :codex-7 {:status "idle" :invoke-ready? true}
                               :codex-1 {:status "idle" :invoke-ready? true}})
           :judge-fn (fn [_] {:judgement judgement})
+          :judgement-transform-fn
+          (fn [incoming]
+            (reset! transform-called? true)
+            (assoc incoming :campaign/selected? true))
           :refresh-fn (fn [])
           :substrate-preflight-fn (fn [_] {:route :test})
           :code-state-fn (fn [] {:repo "/futon2" :git-sha "head"
@@ -1817,6 +1822,8 @@
                         :implementation-id "impl"})
           :queue-fn identity})]
     (is (= :grounded-change (:outcome result)))
+    (is (false? @transform-called?)
+        "stop-line precedence must bypass optional ordinary-selection transforms")
     (is (= ["repair-failed-1" "repair-failed-1"]
            (mapv :target @dispatches)))
     (is (= ["zai-5" "codex-1"] (mapv :agent @dispatches))
@@ -2954,6 +2961,16 @@
           "a phase that classified its own failure keeps that classification")
       (is (= :machine-failure (repair-class-for* (failure-kind-from* e)))))))
 
+(deftest bare-socket-closure-is-narrowly-typed-environmental
+  (testing "the measured peer closure is transport-unavailable"
+    (let [e (java.net.SocketException. "Socket closed")]
+      (is (= :transport-unavailable (failure-kind-from* e)))
+      (is (= :environmental-hold (repair-class-for* (failure-kind-from* e))))))
+  (testing "other bare SocketException messages remain fail-closed"
+    (let [e (java.net.SocketException. "Socket option failed")]
+      (is (= :untyped-failure (failure-kind-from* e)))
+      (is (= :machine-failure (repair-class-for* (failure-kind-from* e)))))))
+
 ;; --- revision round 2 (reviewer findings) ----------------------------------
 
 (deftest generic-timeout-is-not-a-transport-escape
@@ -3033,6 +3050,24 @@
         "the stage is still honestly :initialization")
     (is (= :transport-timeout (get-in (first @queued) [:failure :kind]))
         "the morning brief carries the same typed kind")))
+
+(deftest initialization-socket-closure-is-environmental
+  (let [findings (atom [])
+        result
+        (runner/run-opportunity!
+         {:cohort? false
+          :phase-log nil
+          :phase-log-fn (fn [_]
+                          (throw (java.net.SocketException. "Socket closed")))
+          :repair-system-record-fn
+          (fn [finding]
+            (swap! findings conj finding)
+            (assoc finding :repair/id "repair-initialization-socket-closed"))
+          :queue-fn (fn [_])})]
+    (is (= :incomplete (:outcome result)))
+    (is (= :transport-unavailable (get-in result [:data :failure-kind])))
+    (is (= :environmental-hold (:repair-class (first @findings))))
+    (is (= :initialization (:failure-stage (first @findings))))))
 
 (deftest initialization-non-transport-failure-stays-machine-failure
   ;; Fail-closed twin of the above, and of

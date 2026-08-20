@@ -1843,6 +1843,12 @@
    "java.net.NoRouteToHostException" :transport-unavailable
    "java.net.PortUnreachableException" :transport-unavailable})
 
+(def ^:private unavailable-socket-messages
+  "Bare SocketException is too broad to classify wholesale: it can also report
+  local socket lifecycle misuse.  This deliberately narrow set contains only
+  the measured transient channel closure during initialization."
+  #{"socket closed"})
+
 (defn- cause-chain
   "The throwable and its causes, bounded: cause chains can be self-referential."
   [e]
@@ -1866,7 +1872,15 @@
   exception STAYS :untyped-failure and keeps the heavy machine-failure contract.
   This narrows the untyped bucket; it must never widen the escape hatch."
   [e]
-  (some (fn [t] (get transport-failure-kinds (.getName (class t))))
+  (some (fn [t]
+          (or (get transport-failure-kinds (.getName (class t)))
+              (when (and (= "java.net.SocketException"
+                            (.getName (class t)))
+                         (contains? unavailable-socket-messages
+                                    (some-> (.getMessage ^Throwable t)
+                                            str/trim
+                                            str/lower-case)))
+                :transport-unavailable)))
         (cause-chain e)))
 
 (defn- failure-kind-from [e]
@@ -2226,7 +2240,12 @@
             (run-phase!
              opts @phase-context :selection
              #(let [judgement (:judgement (selection-judge window-days))]
-                ((or (:judgement-transform-fn opts) identity) judgement)))
+                ;; An open machine stop-line has precedence over ordinary
+                ;; selection.  Do not invite an opt-in campaign to claim it
+                ;; selected an action that the runner is forbidden to enact.
+                (if stop-line
+                  judgement
+                  ((or (:judgement-transform-fn opts) identity) judgement))))
             judgement0 (cond-> judgement0-base
                          @selection-transient?
                          (assoc :readiness/selection-transient true))
