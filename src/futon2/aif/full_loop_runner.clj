@@ -1820,34 +1820,57 @@
       :incomplete
       raw)))
 
-(def ^:private transport-failure-kinds
-  "Raw transport exceptions carry NO ex-data, so before this map they fell
-  through failure-kind-from to :untyped-failure, which repair-class-for then
-  sent down its :else branch to :machine-failure — demanding
-  :distinct-repair-commit plus :independent-review for a network condition no
-  code change can fix. Measured on attempt-057 (2026-07-25): an
-  HttpTimeoutException at :selection, 100s, discharged as a machine failure.
-  Typed here so the discharge is :cleared-precondition instead.
+(def ^:private transport-failure-classes
+  "Recognised transport conditions, matched by CLASS (most specific first), not
+  by exact class name. Name-keyed lookup missed every subclass: it is why
+  attempt-057/058 (HttpTimeoutException) were repaired while
+  initialization-6dd14f9e (SocketException) opened a fresh obligation of the
+  same kind, and why java.net.BindException still fell through.
 
-  DELIBERATELY NOT LISTED: java.util.concurrent.TimeoutException. It is raised
-  by any bounded wait — future/get, executor shutdown, an internal poll — not
-  only by transport, so typing it environmental would let a genuinely hung
-  machine path escape the machine-failure contract. Job-level stalls already
-  have :agent-job-stalled. Every class here names a socket or HTTP condition
-  specifically."
-  {"java.net.http.HttpTimeoutException" :transport-timeout
-   "java.net.http.HttpConnectTimeoutException" :transport-timeout
-   "java.net.SocketTimeoutException" :transport-timeout
-   "java.net.ConnectException" :transport-unavailable
-   "java.net.UnknownHostException" :transport-unavailable
-   "java.net.NoRouteToHostException" :transport-unavailable
-   "java.net.PortUnreachableException" :transport-unavailable})
+  A transport condition is not the machine's fault, so it must discharge as
+  :environmental-hold (:cleared-precondition) rather than :machine-failure,
+  which would demand a distinct repair commit and an independent review for a
+  network fault no code change can fix.
+
+  DELIBERATELY ABSENT: java.util.concurrent.TimeoutException. It is raised by
+  any bounded wait — future/get, executor shutdown, an internal poll — so typing
+  it environmental would let a genuinely hung machine path escape the
+  machine-failure contract. Job-level stalls already have :agent-job-stalled.
+
+  DELIBERATELY ABSENT: bare java.net.SocketException, handled separately below —
+  it is the one entry whose subclasses are all transport but whose own instances
+  are not."
+  [[java.net.http.HttpTimeoutException :transport-timeout]
+   [java.net.SocketTimeoutException :transport-timeout]
+   [java.net.ConnectException :transport-unavailable]
+   [java.net.BindException :transport-unavailable]
+   [java.net.NoRouteToHostException :transport-unavailable]
+   [java.net.PortUnreachableException :transport-unavailable]
+   [java.net.UnknownHostException :transport-unavailable]])
 
 (def ^:private unavailable-socket-messages
-  "Bare SocketException is too broad to classify wholesale: it can also report
-  local socket lifecycle misuse.  This deliberately narrow set contains only
-  the measured transient channel closure during initialization."
-  #{"socket closed"})
+  "Bare SocketException is too broad to type wholesale: its subclasses are all
+  transport, but a bare instance can also report local socket lifecycle misuse,
+  which IS a machine fault. Those cases are indistinguishable by type, so this
+  set names the JDK wordings for a channel that went away underneath us.
+
+  Matching on message text is a known weakness — this same file refuses to do it
+  for stopping-rule recognition, on the grounds that text matching misclassifies
+  unrelated failures. It is accepted here only because a bare SocketException
+  carries no typed discriminator at all, and the alternative (typing every bare
+  SocketException environmental) would hide real use-after-close bugs.
+
+  The set is deliberately enumerated rather than substring-matched, and
+  transport-message-typing-is-enumerated-not-fuzzy pins exactly what is in and
+  what is out. Before this, ONLY \"socket closed\" was listed, so the identical
+  condition worded \"Socket is closed\" — which is what several JDK call sites
+  throw — took the machine-failure contract. That is a coin-flip on wording, not
+  a policy."
+  #{"socket closed"
+    "socket is closed"
+    "connection reset"
+    "connection reset by peer"
+    "broken pipe"})
 
 (defn- cause-chain
   "The throwable and its causes, bounded: cause chains can be self-referential."
@@ -1866,21 +1889,31 @@
   (some (fn [t] (or (:failure-kind (ex-data t)) (:outcome (ex-data t))))
         (cause-chain e)))
 
+(defn- transport-class-kind
+  "Class-based lookup, most specific first. instance? rather than name equality,
+  so a subclass of a recognised condition is covered without being enumerated."
+  [t]
+  (some (fn [[klass kind]] (when (instance? klass t) kind))
+        transport-failure-classes))
+
+(defn- socket-closure-kind
+  "Bare SocketException only, gated on an enumerated message. Subclasses are
+  already handled by class above and never reach here."
+  [t]
+  (when (and (instance? java.net.SocketException t)
+             (contains? unavailable-socket-messages
+                        (some-> (.getMessage ^Throwable t)
+                                str/trim
+                                str/lower-case)))
+    :transport-unavailable))
+
 (defn- transport-failure-kind
   "First recognised transport condition in the cause chain, because these arrive
   wrapped (ex-info ... cause). Returns nil for anything unrecognised: an unknown
   exception STAYS :untyped-failure and keeps the heavy machine-failure contract.
   This narrows the untyped bucket; it must never widen the escape hatch."
   [e]
-  (some (fn [t]
-          (or (get transport-failure-kinds (.getName (class t)))
-              (when (and (= "java.net.SocketException"
-                            (.getName (class t)))
-                         (contains? unavailable-socket-messages
-                                    (some-> (.getMessage ^Throwable t)
-                                            str/trim
-                                            str/lower-case)))
-                :transport-unavailable)))
+  (some (fn [t] (or (transport-class-kind t) (socket-closure-kind t)))
         (cause-chain e)))
 
 (defn- failure-kind-from [e]

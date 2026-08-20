@@ -3138,3 +3138,42 @@
             :queue-fn (fn [_])})]
       (is (= :transport-timeout (get-in result [:data :failure-kind])))
       (is (= :environmental-hold (:repair-class (first @findings)))))))
+
+;; --- class-based transport typing --------------------------------------------
+;; repair-initialization-6dd14f9e: SocketException "Socket closed" at
+;; :initialization. The transport map was keyed on EXACT class name, so every
+;; subclass fell through — java.net.BindException took the machine-failure
+;; contract, and the bare-SocketException carve-out was keyed on one literal
+;; message, so the identical condition worded "Socket is closed" landed on the
+;; opposite side. Matching is now by class, with the message gate enumerated.
+
+(deftest transport-typing-matches-by-class-not-name
+  (testing "subclasses of a recognised condition are covered without enumeration"
+    (doseq [e [(java.net.http.HttpConnectTimeoutException. "connect timed out")
+               (java.net.BindException. "address already in use")
+               (java.net.NoRouteToHostException. "no route")]]
+      (is (= :environmental-hold (repair-class-for* (failure-kind-from* e)))
+          (str (.getName (class e)) " is a transport condition"))))
+  (testing "the recorded initialization failure types environmental"
+    (let [e (java.net.SocketException. "Socket closed")]
+      (is (= :transport-unavailable (failure-kind-from* e)))
+      (is (= :environmental-hold (repair-class-for* (failure-kind-from* e)))))))
+
+(deftest transport-message-typing-is-enumerated-not-fuzzy
+  (testing "known JDK wordings for a channel that went away are all typed alike"
+    ;; Before this, only "socket closed" was listed, so "Socket is closed" —
+    ;; thrown by several JDK call sites for the SAME condition — took the
+    ;; machine-failure contract. That was a coin-flip on wording, not a policy.
+    (doseq [m ["Socket closed" "socket closed" "Socket is closed"
+               "Connection reset" "Broken pipe" "  CONNECTION RESET BY PEER  "]]
+      (is (= :transport-unavailable
+             (failure-kind-from* (java.net.SocketException. m)))
+          (str "SocketException " (pr-str m) " must type as transport"))))
+  (testing "FAIL-CLOSED: a bare SocketException outside the set stays heavy"
+    ;; Not fuzzy-matched: an unrecognised wording keeps the machine-failure
+    ;; contract, so a genuine use-after-close bug is not laundered into an
+    ;; environmental hold.
+    (doseq [e [(java.net.SocketException.)
+               (java.net.SocketException. "some unrelated socket problem")]]
+      (is (= :untyped-failure (failure-kind-from* e)))
+      (is (= :machine-failure (repair-class-for* (failure-kind-from* e)))))))
