@@ -3189,3 +3189,74 @@
     (is (= :transport-unavailable
            (failure-kind-from* (java.net.SocketException. "Socket closed")))
         "while \"Socket closed\" — a blocking op aborted by channel loss — is transport")))
+
+(deftest ineligible-trigger-reaches-the-boundary-as-environmental-hold
+  "Independent review of 4fea3b3 (codex-1): the cohort test proves the throw
+  carries :failure-kind :trigger-ineligible, but stops before the runner mapping
+  it was changed to feed. This drives the WHOLE path — a real cohort refusal,
+  produced by the real start-attempt! guard, through run-opportunity!'s outer
+  boundary — and asserts the obligation that actually gets recorded.
+
+  Grounds repair-initialization-1f894133, where exactly this refusal was
+  recorded as :initialization-failed / :machine-failure."
+  (let [data-root (tmp-cohort-root)
+        prereg-path (str data-root "/cohort.edn")
+        _ (tiny-target-prereg prereg-path)
+        _ (cohort/activate! prereg-path data-root)
+        repair-calls (atom [])
+        queue-calls (atom [])]
+    (with-redefs [cohort/default-preregistration prereg-path
+                  cohort/default-data-root data-root]
+      (let [result (runner/run-opportunity!
+                    {;; NOT in :allowed-triggers — the real guard refuses this
+                     :trigger :instrumented-campaign-repair
+                     :cohort? true
+                     :opportunity-id "test/ineligible-trigger"
+                     :semantic-epoch :test
+                     :author "zai-1"
+                     :reviewer "codex-1"
+                     :repair-system-record-fn
+                     (fn [m] (swap! repair-calls conj m)
+                       (assoc m :repair/id "repair-ineligible-trigger"))
+                     :queue-fn (fn [m] (swap! queue-calls conj m)
+                                 {:morning-brief/addendum-id "brief-ineligible"})})
+            finding (first @repair-calls)]
+        (is (= :incomplete (:outcome result)))
+        (is (= 1 (count @repair-calls))
+            "the refusal must still open exactly one stop-line obligation")
+        (is (= :trigger-ineligible (get-in result [:data :failure-kind]))
+            "the typed kind must survive to the boundary, not become :initialization-failed")
+        (is (= :trigger-ineligible (:failure-kind finding)))
+        (is (= :environmental-hold (:repair-class finding))
+            "an unpreregistered trigger is a precondition, not a machine defect")
+        (is (= [:cleared-precondition :grounded-production-shaped-successor]
+               (:requires (:discharge-contract finding)))
+            "so the discharge is: preregister the trigger, or use an eligible one")
+        (is (= :trigger-ineligible (get-in (first @queue-calls) [:failure :kind]))
+            "and the morning brief carries the same typed kind")))))
+
+(deftest eligible-trigger-does-not-open-a-trigger-ineligible-obligation
+  "Fail-closed twin: the guard is not disabled. An ELIGIBLE trigger on the same
+  cohort must not produce a :trigger-ineligible finding."
+  (let [data-root (tmp-cohort-root)
+        prereg-path (str data-root "/cohort.edn")
+        _ (tiny-target-prereg prereg-path)
+        _ (cohort/activate! prereg-path data-root)
+        repair-calls (atom [])]
+    (with-redefs [cohort/default-preregistration prereg-path
+                  cohort/default-data-root data-root]
+      (let [result (runner/run-opportunity!
+                    {:trigger :test-trigger
+                     :cohort? true
+                     :opportunity-id "test/eligible-trigger"
+                     :semantic-epoch :test
+                     :author "zai-1"
+                     :reviewer "codex-1"
+                     :repair-system-record-fn
+                     (fn [m] (swap! repair-calls conj m)
+                       (assoc m :repair/id "repair-eligible"))
+                     :queue-fn (fn [_] {:morning-brief/addendum-id "brief"})})]
+        (is (not= :trigger-ineligible (get-in result [:data :failure-kind]))
+            "an eligible trigger must never be typed :trigger-ineligible")
+        (is (empty? (filter #(= :trigger-ineligible (:failure-kind %)) @repair-calls))
+            "and must not open a trigger-ineligible obligation")))))
