@@ -2897,11 +2897,17 @@
                 ;; slightly earlier, before an attempt can own it — was
                 ;; therefore charged to the machine, demanding a repair commit
                 ;; and an independent review for a network fault.
-                ;; Only the transport carve-out applies here: the stage really
-                ;; is :initialization, so everything else keeps the existing
-                ;; :initialization-failed / :machine-failure contract. Unknown
-                ;; throwables are unchanged; this narrows, never widens.
-                failure-kind (or (transport-failure-kind e)
+                ;; Precedence is identical to failure-kind-from, deliberately:
+                ;; explicit ex-data typing at ANY depth wins, transport typing
+                ;; only fills the gap, and anything unrecognised falls to
+                ;; :initialization-failed and keeps the machine-failure
+                ;; contract. Consulting transport FIRST (as this did before)
+                ;; was a fail-open: an ex-info{:failure-kind :build-failed}
+                ;; wrapping any transport cause had that cause found by the
+                ;; chain walk and was downgraded to :environmental-hold, so a
+                ;; real typed machine failure escaped its own contract.
+                failure-kind (or (explicit-failure-kind e)
+                                 (transport-failure-kind e)
                                  :initialization-failed)
                 repair-class (repair-class-for failure-kind)
                 finding

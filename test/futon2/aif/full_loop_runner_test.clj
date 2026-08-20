@@ -3054,3 +3054,52 @@
     (is (= [:distinct-repair-commit :independent-review
             :grounded-repair :distinct-production-shaped-successor]
            (:requires (:discharge-contract (first @findings)))))))
+
+;; --- revision round 2 (reviewer finding) ------------------------------------
+;; Consulting transport typing FIRST at the outer boundary was a fail-open: an
+;; ex-info{:failure-kind :build-failed} wrapping any transport cause had that
+;; cause found by the chain walk and was downgraded to :environmental-hold, so a
+;; real typed machine failure escaped its own contract. Precedence at this
+;; boundary now matches failure-kind-from exactly.
+
+(deftest outer-boundary-does-not-downgrade-typed-machine-failures
+  (testing "explicit typing wins over a transport cause deeper in the chain"
+    (let [findings (atom [])
+          result
+          (runner/run-opportunity!
+           {:cohort? false
+            :phase-log nil
+            :phase-log-fn (fn [_]
+                            (throw (ex-info "build failed"
+                                            {:failure-kind :build-failed}
+                                            (java.net.http.HttpTimeoutException.
+                                             "request timed out"))))
+            :repair-system-record-fn
+            (fn [finding]
+              (swap! findings conj finding)
+              (assoc finding :repair/id "repair-initialization-typed"))
+            :queue-fn (fn [_])})]
+      (is (= :build-failed (get-in result [:data :failure-kind]))
+          "a typed machine failure must keep its own kind")
+      (is (= :machine-failure (:repair-class (first @findings)))
+          "and must NOT be downgraded to environmental by its transport cause")
+      (is (= [:distinct-repair-commit :independent-review
+              :grounded-repair :distinct-production-shaped-successor]
+             (:requires (:discharge-contract (first @findings)))))))
+  (testing "a bare transport failure is still typed environmental"
+    ;; attempt-058's own case must survive the precedence change.
+    (let [findings (atom [])
+          result
+          (runner/run-opportunity!
+           {:cohort? false
+            :phase-log nil
+            :phase-log-fn (fn [_]
+                            (throw (java.net.http.HttpTimeoutException.
+                                    "request timed out")))
+            :repair-system-record-fn
+            (fn [finding]
+              (swap! findings conj finding)
+              (assoc finding :repair/id "repair-initialization-transport-2"))
+            :queue-fn (fn [_])})]
+      (is (= :transport-timeout (get-in result [:data :failure-kind])))
+      (is (= :environmental-hold (:repair-class (first @findings)))))))
