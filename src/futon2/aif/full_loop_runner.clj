@@ -1933,7 +1933,7 @@
   (cond
     (#{:agent-unavailable :agent-readiness-failed :substrate-unavailable
        :dispatch-failed :abstained :no-selection :guardrail-refusal
-       :transport-timeout :transport-unavailable}
+       :transport-timeout :transport-unavailable :trigger-ineligible}
      failure-kind)
     :environmental-hold
 

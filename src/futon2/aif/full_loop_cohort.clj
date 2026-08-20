@@ -216,7 +216,21 @@
      (when-not (and (string? opportunity-id) (not (str/blank? opportunity-id)))
        (throw (ex-info "missing opportunity-id" {:cell cell})))
      (when-not (contains? (:allowed-triggers p) trigger)
-       (throw (ex-info "ineligible trigger" {:trigger trigger})))
+       ;; The refusal is CORRECT and stays fail-closed: a cohort preregisters
+       ;; which triggers count, so admitting an unlisted one would contaminate
+       ;; the sample it is running. What was wrong is the discharge. Untyped,
+       ;; this reached the runner's outer boundary as :initialization-failed and
+       ;; was charged :machine-failure — a distinct repair commit plus an
+       ;; independent review for a caller using an unpreregistered trigger, which
+       ;; no code change fixes. Typed here so it discharges as
+       ;; :cleared-precondition: preregister the trigger, or use an eligible one.
+       ;; :allowed carries the eligible set so the obligation names the
+       ;; precondition instead of leaving it to be guessed.
+       (throw (ex-info "ineligible trigger"
+                       {:trigger trigger
+                        :allowed (:allowed-triggers p)
+                        :outcome :incomplete
+                        :failure-kind :trigger-ineligible})))
      (when-not (or (keyword? semantic-epoch)
                    (and (string? semantic-epoch) (not (str/blank? semantic-epoch))))
        (throw (ex-info "missing semantic epoch" {:cell cell})))

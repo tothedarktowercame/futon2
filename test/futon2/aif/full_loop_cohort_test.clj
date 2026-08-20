@@ -163,3 +163,38 @@
       (is (= "bf14dca" (:fresh-commit summary)))
       (is (= "2b912f0"
              (get-in summary [:artifact-binding :pre-dispatch-head]))))))
+
+(deftest ineligible-trigger-is-refused-and-typed-as-a-precondition
+  ;; repair-initialization-1f894133: a run fired with :instrumented-campaign-repair,
+  ;; which the cohort never preregistered. The refusal is correct — admitting an
+  ;; unlisted trigger would contaminate the sample the cohort is running — but
+  ;; untyped it reached the runner's outer boundary as :initialization-failed and
+  ;; was charged :machine-failure, demanding a repair commit and an independent
+  ;; review for a caller-side config condition.
+  (let [root (tmp-root)]
+    (cohort/activate! prereg-path root)
+    (testing "the guard still REFUSES: no unpreregistered trigger is admitted"
+      (let [thrown (try (cohort/start-attempt!
+                         prereg-path root
+                         (term {:opportunity-id "ineligible-1"
+                                :trigger :instrumented-campaign-repair
+                                :machine-state {:tick 1}
+                                :agent-roster []
+                                :code-state {:git-sha "abc"
+                                             :git-dirty? false
+                                             :resolved-mode-flags {}
+                                             :configuration-digest "test"}
+                                :semantic-epoch :epoch-1}))
+                        nil
+                        (catch clojure.lang.ExceptionInfo e e))]
+        (is (some? thrown) "an unlisted trigger must not open an attempt")
+        (is (= "ineligible trigger" (ex-message thrown)))
+        (testing "and it carries the typing that keeps it off the machine-failure line"
+          (is (= :trigger-ineligible (:failure-kind (ex-data thrown))))
+          (is (= :incomplete (:outcome (ex-data thrown)))))
+        (testing "and names the precondition rather than leaving it to be guessed"
+          (is (= :instrumented-campaign-repair (:trigger (ex-data thrown))))
+          (is (contains? (:allowed (ex-data thrown)) :wallclock-cron)
+              "the eligible set travels with the refusal"))))
+    (testing "an eligible trigger still opens normally"
+      (is (some? (open! root "eligible-1"))))))
