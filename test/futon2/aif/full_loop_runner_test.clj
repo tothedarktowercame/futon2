@@ -2911,3 +2911,46 @@
              :attempt-id "cohort-complete-test"}]
     (is (empty? (tripwire/evaluate-wire :T3 obs))
         "T3 must not fire on :cohort-complete (no unknown-outcome, no missing-stop-line)")))
+
+;; --- transport failure typing (repair-attempt-057-untyped-failure) ----------
+;; attempt-057 died at :selection with java.net.http.HttpTimeoutException after
+;; 100s. Raw transport exceptions carry no ex-data, so failure-kind-from fell to
+;; :untyped-failure and repair-class-for sent that down :else to :machine-failure
+;; — demanding :distinct-repair-commit and :independent-review for a network
+;; condition no code change can fix. These pin the typing both ways.
+
+(def ^:private failure-kind-from* #'runner/failure-kind-from)
+(def ^:private repair-class-for* #'runner/repair-class-for)
+
+(deftest transport-exceptions-are-typed-environmental
+  (testing "timeouts type as :transport-timeout and hold, not blame the machine"
+    (doseq [e [(java.net.http.HttpTimeoutException. "request timed out")
+               (java.net.SocketTimeoutException. "read timed out")
+               (java.util.concurrent.TimeoutException. "timed out")]]
+      (is (= :transport-timeout (failure-kind-from* e))
+          (str (.getName (class e)) " must type as :transport-timeout"))
+      (is (= :environmental-hold (repair-class-for* (failure-kind-from* e)))
+          "a transport timeout is an environmental hold, not a machine failure")))
+  (testing "connect-side failures type as :transport-unavailable"
+    (doseq [e [(java.net.ConnectException. "connection refused")
+               (java.net.UnknownHostException. "no such host")]]
+      (is (= :transport-unavailable (failure-kind-from* e)))
+      (is (= :environmental-hold (repair-class-for* (failure-kind-from* e))))))
+  (testing "the cause chain is walked — these arrive wrapped in ex-info"
+    (let [wrapped (ex-info "strategic selection failed" {}
+                           (java.net.http.HttpTimeoutException. "request timed out"))]
+      (is (= :transport-timeout (failure-kind-from* wrapped))
+          "attempt-057's shape: a typed throw wrapping a transport cause"))))
+
+(deftest transport-typing-is-fail-closed
+  (testing "an unrecognised exception STAYS untyped and keeps the heavy contract"
+    (let [e (RuntimeException. "boom")]
+      (is (= :untyped-failure (failure-kind-from* e))
+          "narrowing the untyped bucket must never widen the escape hatch")
+      (is (= :machine-failure (repair-class-for* (failure-kind-from* e))))))
+  (testing "explicit ex-data typing still wins over the transport cause"
+    (let [e (ex-info "build failed" {:failure-kind :build-failed}
+                     (java.net.http.HttpTimeoutException. "request timed out"))]
+      (is (= :build-failed (failure-kind-from* e))
+          "a phase that classified its own failure keeps that classification")
+      (is (= :machine-failure (repair-class-for* (failure-kind-from* e)))))))

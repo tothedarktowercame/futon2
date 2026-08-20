@@ -1820,13 +1820,49 @@
       :incomplete
       raw)))
 
+(def ^:private transport-failure-kinds
+  "Raw transport exceptions carry NO ex-data, so before this map they fell
+  through failure-kind-from to :untyped-failure, which repair-class-for then
+  sent down its :else branch to :machine-failure — demanding
+  :distinct-repair-commit plus :independent-review for a network condition no
+  code change can fix. Measured on attempt-057 (2026-07-25): an
+  HttpTimeoutException at :selection, 100s, discharged as a machine failure.
+  Typed here so the discharge is :cleared-precondition instead."
+  {"java.net.http.HttpTimeoutException" :transport-timeout
+   "java.net.http.HttpConnectTimeoutException" :transport-timeout
+   "java.net.SocketTimeoutException" :transport-timeout
+   "java.util.concurrent.TimeoutException" :transport-timeout
+   "java.net.ConnectException" :transport-unavailable
+   "java.net.UnknownHostException" :transport-unavailable
+   "java.net.NoRouteToHostException" :transport-unavailable
+   "java.net.PortUnreachableException" :transport-unavailable})
+
+(defn- transport-failure-kind
+  "Walk the cause chain for a recognised transport condition, because these
+  arrive wrapped (ex-info ... cause). Returns nil for anything unrecognised:
+  an unknown exception STAYS :untyped-failure and keeps the heavy
+  machine-failure contract. This narrows the untyped bucket; it must never
+  widen the escape hatch."
+  [e]
+  (loop [t e depth 0]
+    (when (and t (< depth 16))
+      (or (get transport-failure-kinds (.getName (class t)))
+          (recur (.getCause ^Throwable t) (inc depth))))))
+
 (defn- failure-kind-from [e]
-  (or (:failure-kind (ex-data e)) (:outcome (ex-data e)) :untyped-failure))
+  ;; ex-data typing wins: a phase that already classified its own failure keeps
+  ;; that classification. Transport typing only fills the gap ahead of
+  ;; :untyped-failure.
+  (or (:failure-kind (ex-data e))
+      (:outcome (ex-data e))
+      (transport-failure-kind e)
+      :untyped-failure))
 
 (defn- repair-class-for [failure-kind]
   (cond
     (#{:agent-unavailable :agent-readiness-failed :substrate-unavailable
-       :dispatch-failed :abstained :no-selection :guardrail-refusal}
+       :dispatch-failed :abstained :no-selection :guardrail-refusal
+       :transport-timeout :transport-unavailable}
      failure-kind)
     :environmental-hold
 
