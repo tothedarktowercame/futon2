@@ -1827,34 +1827,52 @@
   :distinct-repair-commit plus :independent-review for a network condition no
   code change can fix. Measured on attempt-057 (2026-07-25): an
   HttpTimeoutException at :selection, 100s, discharged as a machine failure.
-  Typed here so the discharge is :cleared-precondition instead."
+  Typed here so the discharge is :cleared-precondition instead.
+
+  DELIBERATELY NOT LISTED: java.util.concurrent.TimeoutException. It is raised
+  by any bounded wait — future/get, executor shutdown, an internal poll — not
+  only by transport, so typing it environmental would let a genuinely hung
+  machine path escape the machine-failure contract. Job-level stalls already
+  have :agent-job-stalled. Every class here names a socket or HTTP condition
+  specifically."
   {"java.net.http.HttpTimeoutException" :transport-timeout
    "java.net.http.HttpConnectTimeoutException" :transport-timeout
    "java.net.SocketTimeoutException" :transport-timeout
-   "java.util.concurrent.TimeoutException" :transport-timeout
    "java.net.ConnectException" :transport-unavailable
    "java.net.UnknownHostException" :transport-unavailable
    "java.net.NoRouteToHostException" :transport-unavailable
    "java.net.PortUnreachableException" :transport-unavailable})
 
-(defn- transport-failure-kind
-  "Walk the cause chain for a recognised transport condition, because these
-  arrive wrapped (ex-info ... cause). Returns nil for anything unrecognised:
-  an unknown exception STAYS :untyped-failure and keeps the heavy
-  machine-failure contract. This narrows the untyped bucket; it must never
-  widen the escape hatch."
+(defn- cause-chain
+  "The throwable and its causes, bounded: cause chains can be self-referential."
   [e]
-  (loop [t e depth 0]
-    (when (and t (< depth 16))
-      (or (get transport-failure-kinds (.getName (class t)))
-          (recur (.getCause ^Throwable t) (inc depth))))))
+  (loop [t e acc [] depth 0]
+    (if (and t (< depth 16))
+      (recur (.getCause ^Throwable t) (conj acc t) (inc depth))
+      acc)))
+
+(defn- explicit-failure-kind
+  "First ex-data classification ANYWHERE in the cause chain. A phase that typed
+  its own failure keeps that classification even when an untyped throw wraps it,
+  and even when a transport exception sits deeper in the same chain — otherwise
+  the transport walk below could silently outrank a real typed machine failure."
+  [e]
+  (some (fn [t] (or (:failure-kind (ex-data t)) (:outcome (ex-data t))))
+        (cause-chain e)))
+
+(defn- transport-failure-kind
+  "First recognised transport condition in the cause chain, because these arrive
+  wrapped (ex-info ... cause). Returns nil for anything unrecognised: an unknown
+  exception STAYS :untyped-failure and keeps the heavy machine-failure contract.
+  This narrows the untyped bucket; it must never widen the escape hatch."
+  [e]
+  (some (fn [t] (get transport-failure-kinds (.getName (class t))))
+        (cause-chain e)))
 
 (defn- failure-kind-from [e]
-  ;; ex-data typing wins: a phase that already classified its own failure keeps
-  ;; that classification. Transport typing only fills the gap ahead of
-  ;; :untyped-failure.
-  (or (:failure-kind (ex-data e))
-      (:outcome (ex-data e))
+  ;; Explicit typing wins at ANY depth; transport typing only fills the gap
+  ;; ahead of :untyped-failure.
+  (or (explicit-failure-kind e)
       (transport-failure-kind e)
       :untyped-failure))
 

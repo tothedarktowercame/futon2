@@ -2925,8 +2925,7 @@
 (deftest transport-exceptions-are-typed-environmental
   (testing "timeouts type as :transport-timeout and hold, not blame the machine"
     (doseq [e [(java.net.http.HttpTimeoutException. "request timed out")
-               (java.net.SocketTimeoutException. "read timed out")
-               (java.util.concurrent.TimeoutException. "timed out")]]
+               (java.net.SocketTimeoutException. "read timed out")]]
       (is (= :transport-timeout (failure-kind-from* e))
           (str (.getName (class e)) " must type as :transport-timeout"))
       (is (= :environmental-hold (repair-class-for* (failure-kind-from* e)))
@@ -2954,3 +2953,47 @@
       (is (= :build-failed (failure-kind-from* e))
           "a phase that classified its own failure keeps that classification")
       (is (= :machine-failure (repair-class-for* (failure-kind-from* e)))))))
+
+;; --- revision round 2 (reviewer findings) ----------------------------------
+
+(deftest generic-timeout-is-not-a-transport-escape
+  ;; java.util.concurrent.TimeoutException is raised by ANY bounded wait —
+  ;; future/get, executor shutdown, an internal poll — not only by transport.
+  ;; Typing it environmental would let a genuinely hung machine path escape the
+  ;; machine-failure contract, which is the widening this repair must not do.
+  (let [e (java.util.concurrent.TimeoutException. "timed out")]
+    (is (= :untyped-failure (failure-kind-from* e))
+        "a generic bounded-wait timeout is NOT a transport condition")
+    (is (= :machine-failure (repair-class-for* (failure-kind-from* e)))
+        "it keeps the heavy contract")
+    (is (= :transport-timeout
+           (failure-kind-from* (java.net.SocketTimeoutException. "read timed out")))
+        "while a socket-specific timeout still types as transport")))
+
+(deftest explicit-typing-wins-at-any-depth-in-the-cause-chain
+  (testing "typed ex-info wrapped by an untyped throw, over a transport cause"
+    ;; RuntimeException (untyped) -> ex-info :build-failed -> HttpTimeoutException.
+    ;; Walking only the TOP throwable would miss :build-failed and let the
+    ;; transport cause outrank a real machine failure.
+    (let [e (RuntimeException.
+             "wrapper"
+             (ex-info "build failed" {:failure-kind :build-failed}
+                      (java.net.http.HttpTimeoutException. "request timed out")))]
+      (is (= :build-failed (failure-kind-from* e)))
+      (is (= :machine-failure (repair-class-for* (failure-kind-from* e)))
+          "a typed machine failure must not be downgraded to environmental")))
+  (testing ":outcome typing is honoured at depth too"
+    (let [e (RuntimeException.
+             "wrapper"
+             (ex-info "no selection" {:outcome :no-selection}
+                      (java.net.ConnectException. "connection refused")))]
+      (is (= :no-selection (failure-kind-from* e)))
+      (is (= :environmental-hold (repair-class-for* (failure-kind-from* e))))))
+  (testing "with no explicit typing anywhere, the transport cause still types"
+    (let [e (RuntimeException.
+             "wrapper"
+             (RuntimeException.
+              "inner"
+              (java.net.http.HttpTimeoutException. "request timed out")))]
+      (is (= :transport-timeout (failure-kind-from* e))
+          "attempt-057 remains fixed through a deeper untyped chain"))))
