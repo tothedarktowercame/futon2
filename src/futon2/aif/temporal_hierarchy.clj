@@ -27,9 +27,11 @@
   WHAT THIS SLICE IS NOT (the research-level remainder):
   - A full nested generative model where the slow loop runs its OWN EFE
     minimization over a longer timescale, with message-passing between levels.
-  - Learned slow-loop transitions (the slow-loop state is set explicitly, not
-    learned from fast-loop outcomes — the feedback arc is named but not built).
   - Multi-level hierarchies (this is two levels: slow + fast).
+
+  The two-tick campaign uses `advance-slow-state` below to close the minimal
+  feedback arc: an independently witnessed fast-loop result updates the slow
+  Beta state, and that updated state parameterizes the next fast rollout.
 
   WIRING:
   - R12 (accumulated learning): the slow-loop state is WHERE accumulated
@@ -180,3 +182,56 @@
                           seq
                           (apply concat))]
     (apply rollout/best-rollout state shaped-moves rollout-opts)))
+
+;; ---------------------------------------------------------------------------
+;; FEEDBACK ARC — witnessed fast outcomes update the next slow state
+;; ---------------------------------------------------------------------------
+
+(defn advance-slow-state
+  "Fold one independently witnessed fast-loop result into the slow state.
+
+  SLOW-STATE has `:slow/intrinsics`, in the same entry shape as
+  `intrinsic-values/current`.  OUTCOME must name `:fast/action-class` and set
+  `:fast/witnessed?` true.  A witnessed success contributes one Beta success;
+  a witnessed failure contributes one Beta failure.  An unwitnessed outcome
+  is rejected rather than allowed to teach the strategic loop.
+
+  The caller supplies deterministic audit identifiers in OPTS (`:as-of`,
+  `:run-id`, and optionally `:evidence-ref`).  The result includes the exact
+  posterior update and derives `:slow/mode` for the next fast tick.  This
+  function is pure: persistence, if wanted, remains an outer-loop concern."
+  [slow-state outcome {:keys [as-of run-id evidence-ref]}]
+  (let [action-class (:fast/action-class outcome)]
+    (when-not (keyword? action-class)
+      (throw (ex-info "A temporal feedback outcome requires :fast/action-class"
+                      {:outcome outcome})))
+    (when-not (true? (:fast/witnessed? outcome))
+      (throw (ex-info "The slow loop may learn only from a witnessed fast outcome"
+                      {:outcome outcome})))
+    (when-not (and (some? as-of) (some? run-id))
+      (throw (ex-info "Temporal feedback requires deterministic :as-of and :run-id"
+                      {:opts {:as-of as-of :run-id run-id}})))
+    (let [intrinsics (or (:slow/intrinsics slow-state) {})
+          prior (or (get intrinsics action-class) (iv/fresh-entry))
+          success? (true? (:fast/succeeded? outcome))
+          update (iv/next-update-record
+                  action-class prior 1 (if success? 1 0)
+                  {:as-of as-of
+                   :outer-loop-run-id run-id
+                   :window-days 0
+                   :evidence-refs (cond-> [] evidence-ref (conj evidence-ref))})
+          next-entry {:alpha (:alpha-post update)
+                      :beta (:beta-post update)
+                      :intrinsic-value (:intrinsic-value-post update)
+                      :n-emissions (:n-emissions-in-window update)
+                      :n-followthrough (:n-followthrough-in-window update)
+                      :as-of (:as-of update)}
+          next-intrinsics (assoc intrinsics action-class next-entry)
+          next-mode (slow-context-from-intrinsics
+                     {:intrinsics next-intrinsics})]
+      {:slow/mode next-mode
+       :slow/intrinsics next-intrinsics
+       :slow/previous-mode (:slow/mode slow-state)
+       :slow/feedback {:outcome outcome
+                       :update update
+                       :evidence-ref evidence-ref}})))

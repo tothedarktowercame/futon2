@@ -147,3 +147,53 @@
                      :horizon horizon :top-k 5)]
         (is (= "advance-cap" (-> result :policy first :move/id))
             (str "exploration mode should favor advance-cap at horizon " horizon))))))
+
+(deftest witnessed-fast-outcome-advances-the-slow-state
+  (let [before {:slow/mode :exploration
+                :slow/intrinsics {}}
+        after (th/advance-slow-state
+               before
+               {:fast/action-class :close-hole
+                :fast/witnessed? true
+                :fast/succeeded? true
+                :fast/attempt-id "tick-a"}
+               {:as-of "campaign-time/tick-a"
+                :run-id "campaign-15"
+                :evidence-ref "witness/tick-a"})]
+    (is (= :exploration (:slow/previous-mode after)))
+    (is (= :exploitation (:slow/mode after)))
+    (is (= {:alpha 2.0
+            :beta 1.0
+            :intrinsic-value (/ 2.0 3.0)
+            :n-emissions 1
+            :n-followthrough 1
+            :as-of "campaign-time/tick-a"}
+           (get-in after [:slow/intrinsics :close-hole])))
+    (is (= "witness/tick-a"
+           (get-in after [:slow/feedback :evidence-ref])))
+    (is (= ["witness/tick-a"]
+           (get-in after [:slow/feedback :update :evidence-refs])))))
+
+(deftest witnessed-failure-is-negative-slow-loop-evidence
+  (let [after (th/advance-slow-state
+               {:slow/mode :consolidation :slow/intrinsics {}}
+               {:fast/action-class :advance-capability
+                :fast/witnessed? true
+                :fast/succeeded? false}
+               {:as-of "campaign-time/tick-a"
+                :run-id "campaign-15"})]
+    (is (= 1.0 (get-in after [:slow/intrinsics :advance-capability :alpha])))
+    (is (= 2.0 (get-in after [:slow/intrinsics :advance-capability :beta])))
+    (is (= 0 (get-in after
+                     [:slow/feedback :update :n-followthrough-in-window])))))
+
+(deftest unwitnessed-fast-outcome-cannot-teach-the-slow-loop
+  (is (thrown-with-msg?
+       clojure.lang.ExceptionInfo
+       #"only from a witnessed fast outcome"
+       (th/advance-slow-state
+        {:slow/mode :exploration :slow/intrinsics {}}
+        {:fast/action-class :close-hole
+         :fast/witnessed? false
+         :fast/succeeded? true}
+        {:as-of "campaign-time/tick-a" :run-id "campaign-15"}))))

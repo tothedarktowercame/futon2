@@ -305,7 +305,8 @@
 (defn- run-feature-card-attempt
   [{:keys [author-card author-summary grounded? artifacts? reviewer-execution
            reviewer-events cure-card cure-summary cure-commit build-cure-retries
-           initial-author-job operator-actions delivery-qa-fn]
+           initial-author-job operator-actions delivery-qa-fn
+           judgement-transform-fn]
     :or {grounded? true artifacts? false}}]
   (let [root (.toFile (java.nio.file.Files/createTempDirectory
                        "wm-feature-card-" (make-array java.nio.file.attribute.FileAttribute 0)))
@@ -397,7 +398,9 @@
               (when (some? build-cure-retries)
                 {:build-cure-retries build-cure-retries})
               (when delivery-qa-fn
-                {:delivery-qa-fn delivery-qa-fn}))
+                {:delivery-qa-fn delivery-qa-fn})
+              (when judgement-transform-fn
+                {:judgement-transform-fn judgement-transform-fn}))
         result (runner/run-opportunity! opts)]
     {:result result :item (first @queued)
      :queued-operator-actions @queued-operator-actions
@@ -415,6 +418,18 @@
          {:author-card feature-card-claim :operator-actions [gate]})]
     (is (= :grounded-change (:outcome result)))
     (is (= [gate] queued-operator-actions))))
+
+(deftest opt-in-judgement-transform-runs-inside-the-selection-phase
+  (let [seen (atom nil)
+        {:keys [result]}
+        (run-feature-card-attempt
+         {:author-card feature-card-claim
+          :judgement-transform-fn
+          (fn [incoming]
+            (reset! seen incoming)
+            (assoc incoming :instrumented/campaign? true))})]
+    (is (= (assoc judgement :operator-actions []) @seen))
+    (is (= :grounded-change (:outcome result)))))
 
 (deftest delivered-commit-cannot-close-without-field-desk-qa
   (is (thrown-with-msg?

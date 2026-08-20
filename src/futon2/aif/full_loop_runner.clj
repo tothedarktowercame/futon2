@@ -2169,9 +2169,10 @@
                                           (reset! selection-transient? true))
                                         selection))})))
             judgement0-base
-            (:judgement
-             (run-phase! opts @phase-context :selection
-                         #(selection-judge window-days)))
+            (run-phase!
+             opts @phase-context :selection
+             #(let [judgement (:judgement (selection-judge window-days))]
+                ((or (:judgement-transform-fn opts) identity) judgement)))
             judgement0 (cond-> judgement0-base
                          @selection-transient?
                          (assoc :readiness/selection-transient true))

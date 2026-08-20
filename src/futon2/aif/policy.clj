@@ -16,7 +16,18 @@
    → abstain trips. Abstain semantics: when the best action's controller-score is
    not meaningfully below `:no-op`'s controller-score, the WM declines to act
    and surfaces a gap-report enumerating the `:learn-action-class`
-   recommendations the bootstrap proposer detected.")
+   recommendations the bootstrap proposer detected."
+  (:require [futon2.aif.hierarchical-budget :as hierarchical-budget]))
+
+(defn select-budgeted-actions
+  "R11 policy boundary for collective, hierarchical action selection.
+
+   This is separate from `select-action`, whose output is intentionally one
+   controller-head recommendation. Local agents submit finite proposal fields;
+   the shared-budget arbiter returns a jointly feasible portfolio plus a
+   per-node usage witness."
+  [hierarchy]
+  (hierarchical-budget/arbitrate hierarchy))
 
 (defn adaptive-temperature
   "Compute τ from the EFE spread of a candidate set. High spread → low

@@ -1,6 +1,12 @@
 (ns futon2.aif.bmr
   "Pure Bayesian Model Reduction over Dirichlet concentration parameters.")
 
+(def acceptance-threshold
+  "Maximum delta-F at which a reduced model is accepted.  Public so audit
+  envelopes can report the authoritative decision boundary without copying
+  a second magic number."
+  -3.0)
+
 (def ^:private log-sqrt-two-pi
   (* 0.5 (Math/log (* 2.0 Math/PI))))
 
@@ -129,7 +135,7 @@
                        (log-multivariate-beta A'))]
         {:reduced-posterior A'
          :delta-F delta-F
-         :accept? (<= delta-F -3.0)}))))
+         :accept? (<= delta-F acceptance-threshold)}))))
 
 (def bmr
   "Alias for bayesian-model-reduction."
