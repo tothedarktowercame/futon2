@@ -3348,3 +3348,72 @@
       (is (nil? (runner/resolve-build "deadbee1234567890abcdef1234567890abcdef1")))
       (is (= ["deadbee1234567890abcdef1234567890abcdef1"] @probes)))))
 
+
+;; --- revision prompts must name the AUTHORED commit -------------------------
+;; repair-canary-067cd51a: the revision prompt carried prior-commits ["c0798df"]
+;; — the pre-dispatch head, a trigger-classification test commit — instead of
+;; the repair actually under review. The reviewer read an unrelated commit and
+;; rejected on artifact-binding grounds.
+
+(deftest revision-prompt-names-the-observed-authored-commit
+  (let [prompts (atom [])
+        authored "f0e7778d324a6560582ac231c45ab2085b8bae73"
+        base "c0798dfd8a8200123fe93a845c8547beebe23de0"
+        opts {:revision-rounds 1
+              :phase-log (str (System/getProperty "java.io.tmpdir")
+                              "/revision-binding-test-phase.log")
+              :dispatch-fn (fn [_ _ _ _ prompt]
+                             (swap! prompts conj prompt)
+                             {:job-id "rev-1"})
+              :poll-fn (fn [_ _] {:job-id "rev-1" :state "error"})
+              :repo-head-observation-fn (fn [_] {:head base :observed-at-ms 0})}]
+    (try
+      (#'runner/run-revision-round
+       opts {} "claude-7" "codex-1" (atom 0) "target-x" {}
+       "/home/joe/code/futon2" base ["src/x.clj"]
+       {:job-id "author-1" :state "done"}
+       ;; artifact-binding observed a VALID authored commit
+       {:fresh-author? true :repo "/home/joe/code/futon2" :commit authored}
+       {:job-id "review-1" :state "done"
+        :result-summary "FULL_LOOP_REVIEW: REQUEST_CHANGES do the thing"}
+       nil [])
+      (catch clojure.lang.ExceptionInfo _ nil))
+    (is (seq @prompts) "a revision must have been dispatched")
+    (let [prompt (first @prompts)]
+      (is (str/includes? prompt authored)
+          "the reviewer must be pointed at the commit the author made")
+      (is (not (str/includes? prompt base))
+          "and NOT at the pre-dispatch head, which is an unrelated commit"))))
+
+(deftest revision-prompt-falls-back-when-no-valid-authored-commit
+  "artifact-binding/:commit is nil unless the observation was valid. With no
+  authored commit observed, the prompt falls back rather than inventing one —
+  and a malformed binding is never sent as a commit."
+  (let [prompts (atom [])
+        base "c0798dfd8a8200123fe93a845c8547beebe23de0"
+        run (fn [binding]
+              (reset! prompts [])
+              (let [opts {:revision-rounds 1
+                          :phase-log (str (System/getProperty "java.io.tmpdir")
+                                          "/revision-fallback-test-phase.log")
+                          :dispatch-fn (fn [_ _ _ _ p]
+                                         (swap! prompts conj p) {:job-id "rev-1"})
+                          :poll-fn (fn [_ _] {:job-id "rev-1" :state "error"})
+                          :repo-head-observation-fn (fn [_] {:head base :observed-at-ms 0})}]
+                (try
+                  (#'runner/run-revision-round
+                   opts {} "claude-7" "codex-1" (atom 0) "target-x" {}
+                   "/home/joe/code/futon2" base ["src/x.clj"]
+                   {:job-id "author-1" :state "done"}
+                   binding
+                   {:job-id "review-1" :state "done"
+                    :result-summary "FULL_LOOP_REVIEW: REQUEST_CHANGES x"}
+                   nil [])
+                  (catch clojure.lang.ExceptionInfo _ nil))
+                (first @prompts)))]
+    (testing "no observed commit -> fall back to the bound commit"
+      (is (str/includes? (run {:fresh-author? true :commit nil}) base)))
+    (testing "a non-commit binding is NOT sent as a commit"
+      (let [prompt (run {:fresh-author? true :commit "/tests/x_test.clj"})]
+        (is (not (str/includes? prompt "/tests/x_test.clj")))
+        (is (str/includes? prompt base))))))

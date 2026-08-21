@@ -1424,6 +1424,24 @@
        "or FULL_LOOP_REVIEW: REJECT <reason>\n"
        "You may add FULL_LOOP_REVIEWER_NOTE: <short note> on a second line."))
 
+(def ^:private commit-ish-pattern
+  "A git object name: 7-40 hex digits. Short refs are normal here — an Agency
+  artifact-ref is often abbreviated (e.g. \"5818c67\")."
+  #"(?i)\A[0-9a-f]{7,40}\z")
+
+(defn commit-ish?
+  "Does this even LOOK like a commit?
+
+  find-commit-repo happily shells `git cat-file -e <x>^{commit}` for any string,
+  so a value that is not a commit at all fails identically to a well-formed sha
+  that does not exist. Those are different faults and were being reported as the
+  same one: on 2026-08-20 a cure turn had its claimed commit extracted as
+  \"/test_fm001_budgeted_solve.py\" — a file path — and the bounce was rejected
+  :cure-commit-unresolved, which blames the author for naming a bad commit when
+  in fact nothing ever extracted a commit."
+  [commit]
+  (boolean (and (string? commit) (re-matches commit-ish-pattern commit))))
+
 (defn- run-revision-round
   "Run at most one revise-and-resubmit round. With no typed findings or a
   zero revision budget, return the original artifact and review unchanged."
@@ -1437,7 +1455,24 @@
       {:commit commit :repo repo :files files :author-job author-job
        :artifact-binding artifact-binding :review-job review-job
        :review-gate review-gate}
-      (let [prior-commits [commit]
+      (let [;; The reviewer must be pointed at what the AUTHOR actually
+            ;; committed. `commit` can still be the pre-dispatch head when the
+            ;; attempt was bound before authoring, and sending that makes the
+            ;; reviewer read an unrelated commit and reject the revision on
+            ;; artifact-binding grounds — measured on
+            ;; repair-canary-067cd51a, where prior-commits carried the base
+            ;; head (a trigger-classification test commit) rather than the
+            ;; repair under review.
+            ;;
+            ;; artifact-binding/:commit is set only when the observation was
+            ;; VALID (changed, descendant, inside the author window), so it is
+            ;; the authored commit or nil — never a guess. commit-ish? keeps a
+            ;; malformed binding out of the prompt; anything that is not a git
+            ;; object name falls back rather than being sent as one.
+            observed-author-commit (:commit artifact-binding)
+            prior-commits [(if (commit-ish? observed-author-commit)
+                             observed-author-commit
+                             commit)]
             pre-revision-head (observe-repo-head opts repo)
             revision-response
             (run-phase!
@@ -1570,24 +1605,6 @@
       (throw (ex-info "Cannot inspect authored commit"
                       {:outcome :build-failed :repo repo :commit commit :error (:err r)})))
     (vec (remove str/blank? (str/split-lines (:out r))))))
-
-(def ^:private commit-ish-pattern
-  "A git object name: 7-40 hex digits. Short refs are normal here — an Agency
-  artifact-ref is often abbreviated (e.g. \"5818c67\")."
-  #"(?i)\A[0-9a-f]{7,40}\z")
-
-(defn commit-ish?
-  "Does this even LOOK like a commit?
-
-  find-commit-repo happily shells `git cat-file -e <x>^{commit}` for any string,
-  so a value that is not a commit at all fails identically to a well-formed sha
-  that does not exist. Those are different faults and were being reported as the
-  same one: on 2026-08-20 a cure turn had its claimed commit extracted as
-  \"/test_fm001_budgeted_solve.py\" — a file path — and the bounce was rejected
-  :cure-commit-unresolved, which blames the author for naming a bad commit when
-  in fact nothing ever extracted a commit."
-  [commit]
-  (boolean (and (string? commit) (re-matches commit-ish-pattern commit))))
 
 (defn resolve-build
   "Resolve an Agency artifact-ref to one Futon repository and its changed files.
