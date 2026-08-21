@@ -1571,11 +1571,32 @@
                       {:outcome :build-failed :repo repo :commit commit :error (:err r)})))
     (vec (remove str/blank? (str/split-lines (:out r))))))
 
-(defn resolve-build
-  "Resolve an Agency artifact-ref to one Futon repository and its changed files."
+(def ^:private commit-ish-pattern
+  "A git object name: 7-40 hex digits. Short refs are normal here — an Agency
+  artifact-ref is often abbreviated (e.g. \"5818c67\")."
+  #"(?i)\A[0-9a-f]{7,40}\z")
+
+(defn commit-ish?
+  "Does this even LOOK like a commit?
+
+  find-commit-repo happily shells `git cat-file -e <x>^{commit}` for any string,
+  so a value that is not a commit at all fails identically to a well-formed sha
+  that does not exist. Those are different faults and were being reported as the
+  same one: on 2026-08-20 a cure turn had its claimed commit extracted as
+  \"/test_fm001_budgeted_solve.py\" — a file path — and the bounce was rejected
+  :cure-commit-unresolved, which blames the author for naming a bad commit when
+  in fact nothing ever extracted a commit."
   [commit]
-  (when-let [repo (find-commit-repo commit)]
-    {:repo repo :files (commit-files repo commit)}))
+  (boolean (and (string? commit) (re-matches commit-ish-pattern commit))))
+
+(defn resolve-build
+  "Resolve an Agency artifact-ref to one Futon repository and its changed files.
+  Returns nil for anything that is not commit-shaped, rather than probing every
+  repository with it."
+  [commit]
+  (when (commit-ish? commit)
+    (when-let [repo (find-commit-repo commit)]
+      {:repo repo :files (commit-files repo commit)})))
 
 (defn- artifact-only-files? [files]
   (and (seq files)
@@ -1677,6 +1698,13 @@
               ;; back to the PRIOR file list here, so a card-only validation
               ;; would have declared the bounce cured and bound the phantom
               ;; sha downstream. Reject the bounce wholesale instead.
+              ;;
+              ;; The rejection is TYPED by which fault it is. A well-formed sha
+              ;; that no repository has is :cure-commit-unresolved — the author
+              ;; named a commit that is not there. A value that is not
+              ;; commit-shaped at all is :cure-commit-malformed — nothing
+              ;; extracted a commit, so the fault is upstream in extraction and
+              ;; the author is not the one to look at. Both still reject.
               (recur commit repo files author-job
                      (dec retries-left)
                      (conj build-retries
@@ -1684,7 +1712,9 @@
                             :error error-message
                             :cure-job-id cure-job-id
                             :cured? false
-                            :cure-rejected :cure-commit-unresolved
+                            :cure-rejected (if (commit-ish? new-commit)
+                                             :cure-commit-unresolved
+                                             :cure-commit-malformed)
                             :claimed-commit new-commit}))
               (let [new-repo (or (:repo new-build) repo)
                     new-files (or (:files new-build) files)

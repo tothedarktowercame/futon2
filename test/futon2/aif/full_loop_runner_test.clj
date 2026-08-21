@@ -694,10 +694,10 @@
                              (swap! cure-prompts conj prompt)
                              {:job-id "cure-1"})
               :poll-fn (fn [_ _] {:job-id "cure-1" :state "done"
-                                  :artifact-ref "phantom456"
+                                  :artifact-ref "deadbee1234567890abcdef1234567890abcdef1"
                                   :result-summary
                                   (str good-card
-                                       "\nFULL_LOOP_AUTHOR: DONE phantom456")})
+                                       "\nFULL_LOOP_AUTHOR: DONE deadbee1234567890abcdef1234567890abcdef1")})
               :resolve-build-fn (fn [_] nil)}
         thrown (try
                  (#'runner/build-cure-loop
@@ -717,7 +717,7 @@
     (is (= false (get-in thrown [:build-retries 0 :cured?])))
     (is (= :cure-commit-unresolved
            (get-in thrown [:build-retries 0 :cure-rejected])))
-    (is (= "phantom456" (get-in thrown [:build-retries 0 :claimed-commit])))
+    (is (= "deadbee1234567890abcdef1234567890abcdef1" (get-in thrown [:build-retries 0 :claimed-commit])))
     ;; The cure prompt quotes the actual durable prefix, not job-text: event
     ;; narration must not be presented as what Agency preserved.
     (is (str/includes? (first @cure-prompts)
@@ -3260,3 +3260,91 @@
             "an eligible trigger must never be typed :trigger-ineligible")
         (is (empty? (filter #(= :trigger-ineligible (:failure-kind %)) @repair-calls))
             "and must not open a trigger-ineligible obligation")))))
+
+;; --- claimed-commit shape (repair-canary-067cd51a) ---------------------------
+;; A cure turn had its claimed commit extracted as "/test_fm001_budgeted_solve.py"
+;; — a file path — and the bounce was rejected :cure-commit-unresolved. That
+;; blames the author for naming a commit that is not there, when in fact nothing
+;; ever extracted a commit. find-commit-repo shells `git cat-file -e <x>^{commit}`
+;; for any string, so the two faults were indistinguishable.
+
+(deftest cure-claiming-a-non-commit-is-typed-malformed-not-unresolved
+  "The measured case from repair-canary-067cd51a: a cure turn whose claimed
+  commit was extracted as a FILE PATH. It must still be rejected — nothing is
+  loosened — but typed as an extraction fault, not as the author naming a
+  commit that is not there."
+  (let [cure-prompts (atom [])
+        opts {:build-cure-retries 1
+              :phase-log (str (System/getProperty "java.io.tmpdir")
+                              "/cure-malformed-test-phase.log")
+              :dispatch-fn (fn [_ _ _ _ prompt]
+                             (swap! cure-prompts conj prompt)
+                             {:job-id "cure-1"})
+              :poll-fn (fn [_ _]
+                         {:job-id "cure-1" :state "done"
+                          :artifact-ref "/test_fm001_budgeted_solve.py"
+                          :result-summary
+                          (str "FULL_LOOP_FEATURE_CARD: {:built \"x\" :want-coverage \"y\""
+                               " :matches-intent? true :things-to-try [\"a -> b\"]}"
+                               "\nFULL_LOOP_AUTHOR: DONE /test_fm001_budgeted_solve.py")})
+              :resolve-build-fn (fn [_] nil)}
+        thrown (try
+                 (#'runner/build-cure-loop
+                  opts {} "author-x" (atom 0)
+                  "target-x" "orig123" "/repo" ["src/x.clj"]
+                  {:job-id "author-1" :state "done"
+                   :result-summary "FULL_LOOP_AUTHOR: DONE orig123"
+                   :events [{:type "text" :text "prose"}]}
+                  false
+                  {:repo "/repo" :pre-dispatch-head "base"})
+                 nil
+                 (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+    (is (some? thrown))
+    (is (= false (get-in thrown [:build-retries 0 :cured?]))
+        "still rejected: the guard narrows the diagnosis, not the gate")
+    (is (= :cure-commit-malformed
+           (get-in thrown [:build-retries 0 :cure-rejected]))
+        "a file path is not an unresolvable commit; it is not a commit")
+    (is (= "/test_fm001_budgeted_solve.py"
+           (get-in thrown [:build-retries 0 :claimed-commit]))
+        "the offending value is preserved so the extractor can be found")))
+
+(deftest commit-ish-accepts-real-object-names
+  (testing "full and abbreviated shas, either case"
+    (doseq [c ["7ed10a45534bb135afb26cf494a3d0f240092535"
+               "5818c67"
+               "c0798dfd8a8200123fe93a845c8547beebe23de0"
+               "ABCDEF1234"]]
+      (is (runner/commit-ish? c) (str (pr-str c) " is a git object name")))))
+
+(deftest commit-ish-rejects-things-that-are-not-commits
+  (testing "the measured case: a file path fragment"
+    (is (not (runner/commit-ish? "/test_fm001_budgeted_solve.py"))))
+  (testing "other non-commits"
+    (doseq [c [nil "" "   " "abc123" "not-a-sha"
+               "tests/test_fm001_budgeted_solve.py"
+               "7ed10a45534bb135afb26cf494a3d0f240092535extra"
+               "7ed10a4 " "zzzzzzz" :keyword 42]]
+      (is (not (runner/commit-ish? c))
+          (str (pr-str c) " must not pass as a commit")))))
+
+(deftest resolve-build-refuses-non-commit-without-touching-git
+  "Guard at the source, so every caller is protected — not just the cure path.
+
+  Asserting only that the result is nil would NOT test the guard: git rejects a
+  bogus ref anyway, so deleting the guard leaves the return value unchanged.
+  (Mutation testing showed exactly that.) What the guard actually buys is that a
+  value which is not a commit never reaches the repository probe at all, so this
+  asserts find-commit-repo is not called."
+  (let [probes (atom [])]
+    (with-redefs [futon2.aif.full-loop-runner/find-commit-repo
+                  (fn [c] (swap! probes conj c) nil)]
+      (doseq [bad ["/test_fm001_budgeted_solve.py" nil "not-a-sha" "" "abc123"]]
+        (is (nil? (runner/resolve-build bad))))
+      (is (empty? @probes)
+          "a non-commit must never be probed against the repositories")
+      ;; and a well-formed sha DOES reach the probe — the guard is a filter,
+      ;; not a blanket refusal.
+      (is (nil? (runner/resolve-build "deadbee1234567890abcdef1234567890abcdef1")))
+      (is (= ["deadbee1234567890abcdef1234567890abcdef1"] @probes)))))
+
