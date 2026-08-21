@@ -502,8 +502,12 @@
                "author-1" {:job-id job-id :state "failed"
                             :terminal-code "invoke-exception"
                             :artifact-ref nil}
+               ;; sha-SHAPED but from the wrong repo: this test is about
+               ;; observation failing to validate a claimed commit, not about a
+               ;; ref that is not a commit at all (see
+               ;; agency-artifact-ref-that-is-not-a-commit-is-typed-malformed).
                "author-2" {:job-id job-id :state "done"
-                            :artifact-ref "wrong-repo-commit"}
+                            :artifact-ref "beefcafe1234567890abcdef1234567890abcdef"}
                {:job-id job-id :state "done"}))
            :repair-system-record-fn
            (fn [finding]
@@ -1524,7 +1528,7 @@
            :poll-fn
            (fn [_ job-id]
              (if (= job-id "author-job")
-               {:job-id job-id :state "done" :artifact-ref "narrated123"
+               {:job-id job-id :state "done" :artifact-ref "facade01234567890abcdef1234567890abcdef1"
                 :feature-card feature-card-claim
                 :execution successful-execution}
                {:job-id job-id :state "done"
@@ -1552,7 +1556,7 @@
                    (fn [repo] {:repo repo :head "observed456"
                                :observed-at-ms 2000})
                    :resolve-commit-sha-fn
-                   (fn [_ commit] (when (= commit "narrated123") "old123"))
+                   (fn [_ commit] (when (= commit "facade01234567890abcdef1234567890abcdef1") "old123"))
                    :ancestor-fn (fn [_ ancestor descendant]
                                   (and (= ancestor "base000")
                                        (= descendant "observed456")))
@@ -1560,7 +1564,7 @@
         before {:repo "/repo" :head "base000" :observed-at-ms 1000}
         binding (runner/fresh-artifact-binding
                  base-opts "/repo" before
-                 {:artifact-ref "narrated123"})]
+                 {:artifact-ref "facade01234567890abcdef1234567890abcdef1"})]
     (is (= "observed456" (:commit binding)))
     (is (:descendant? binding))
     (is (:in-author-window? binding))
@@ -1568,7 +1572,7 @@
     (is (nil? (:commit
                (runner/fresh-artifact-binding
                 (assoc base-opts :commit-time-ms-fn (fn [& _] 500000))
-                "/repo" before {:artifact-ref "narrated123"})))
+                "/repo" before {:artifact-ref "facade01234567890abcdef1234567890abcdef1"})))
         "a changed descendant outside the tolerated author window is rejected")))
 
 (deftest narrated-artifact-without-new-repo-head-stops-before-review
@@ -1601,7 +1605,7 @@
              {:job-id "author-job"})
            :poll-fn
            (fn [& _] {:job-id "author-job" :state "done"
-                      :artifact-ref "narrated123"})
+                      :artifact-ref "facade01234567890abcdef1234567890abcdef1"})
            :repair-system-record-fn
            (fn [finding]
              (swap! findings conj finding)
@@ -3417,3 +3421,33 @@
       (let [prompt (run {:fresh-author? true :commit "/tests/x_test.clj"})]
         (is (not (str/includes? prompt "/tests/x_test.clj")))
         (is (str/includes? prompt base))))))
+
+
+;; --- artifact-ref shape at the author-wait boundary (repair-canary-de75cee9) --
+;; The obligation records :artifact-ref "/eoi_network_test.clj" — a file path
+;; scraped from author text. Treating that as a claimed artifact reported
+;; :artifact-binding-mismatch, which says Agency named a commit that observation
+;; could not validate. It named no commit at all.
+
+(deftest unvalidated-artifact-failure-separates-malformed-from-mismatch
+  (testing "a file path is not a commit Agency claimed — it is not a commit"
+    ;; The measured value from canary-de75cee9.
+    (let [f (runner/unvalidated-artifact-failure true "/eoi_network_test.clj" nil)]
+      (is (= :artifact-ref-malformed (:failure-kind f)))
+      (is (= "/eoi_network_test.clj" (:artifact-ref f))
+          "the offending value travels so the extractor can be found")))
+  (testing "a well-formed sha observation could not validate IS a mismatch"
+    (let [f (runner/unvalidated-artifact-failure
+             true "deadbee1234567890abcdef1234567890abcdef1" nil)]
+      (is (= :artifact-binding-mismatch (:failure-kind f)))
+      (is (nil? (:artifact-ref f)))))
+  (testing "nothing to report when observation validated a commit"
+    (is (nil? (runner/unvalidated-artifact-failure
+               true "/eoi_network_test.clj" "abc1234")))
+    (is (nil? (runner/unvalidated-artifact-failure
+               true "deadbee1234567890abcdef1234567890abcdef1" "abc1234"))))
+  (testing "and nothing to report when the author is not fresh"
+    ;; The non-fresh path legitimately carries an Agency ref through;
+    ;; resolve-build refuses a non-commit downstream.
+    (is (nil? (runner/unvalidated-artifact-failure false "/eoi_network_test.clj" nil)))
+    (is (nil? (runner/unvalidated-artifact-failure true nil nil)))))

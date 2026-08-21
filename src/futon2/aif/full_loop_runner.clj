@@ -2027,6 +2027,27 @@
     ((or (:read-job-fn opts) read-job!)
      opts (recovery-job-id obligation))))
 
+(defn unvalidated-artifact-failure
+  "Which failure, if any, a fresh author's unvalidated artifact-ref represents.
+
+  Two different faults were reported as one. :artifact-binding-mismatch says
+  Agency named a commit that repository observation could not validate. But on
+  canary-de75cee9 the ref arrived as \"/eoi_network_test.clj\" — a file path
+  scraped from author text — so Agency named NO commit, and the fault is
+  upstream in extraction rather than in the author's binding.
+
+  Extracted from run-opportunity-core! because the branch was only reachable by
+  driving the whole runner; inline, it could not be tested, which is how the
+  mislabelling survived. Returns nil when there is nothing to report."
+  [fresh-author? text-commit observed-commit]
+  (when (and fresh-author? text-commit (nil? observed-commit))
+    (if (commit-ish? text-commit)
+      {:failure-kind :artifact-binding-mismatch
+       :message "Agency claimed an author artifact that repository observation did not validate"}
+      {:failure-kind :artifact-ref-malformed
+       :artifact-ref text-commit
+       :message "Agency artifact-ref is not a commit"})))
+
 (defn- run-opportunity-core!
   "Run one opportunity synchronously. Dependencies may be injected in opts for tests."
   [raw-opts]
@@ -2636,16 +2657,18 @@
                                               author-job))
                     observed-commit (:commit artifact-binding)
                     text-commit (:artifact-ref author-job)
-                    _ (when (and fresh-author? text-commit (nil? observed-commit))
+                    _ (when-let [failure (unvalidated-artifact-failure
+                                          fresh-author? text-commit observed-commit)]
                         (throw
-                         (ex-info
-                          "Agency claimed an author artifact that repository observation did not validate"
-                          {:outcome :build-failed
-                           :failure-kind :artifact-binding-mismatch
-                           :failure-stage :author-wait
-                           :target target
-                           :author-job author-job
-                           :artifact-binding artifact-binding})))
+                         (ex-info (:message failure)
+                                  (cond-> {:outcome :build-failed
+                                           :failure-kind (:failure-kind failure)
+                                           :failure-stage :author-wait
+                                           :target target
+                                           :author-job author-job
+                                           :artifact-binding artifact-binding}
+                                    (:artifact-ref failure)
+                                    (assoc :artifact-ref (:artifact-ref failure))))))
                     commit (if fresh-author? observed-commit text-commit)
                     author-job (cond-> author-job
                                  fresh-author?
