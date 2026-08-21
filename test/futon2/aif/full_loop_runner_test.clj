@@ -305,9 +305,11 @@
 (defn- run-feature-card-attempt
   [{:keys [author-card author-summary grounded? artifacts? reviewer-execution
            reviewer-events cure-card cure-summary cure-commit build-cure-retries
+           cure-observed-commit
            initial-author-job operator-actions delivery-qa-fn
            judgement-transform-fn]
-    :or {grounded? true artifacts? false}}]
+    :or {grounded? true artifacts? false
+         cure-observed-commit ::from-artifact-ref}}]
   (let [root (.toFile (java.nio.file.Files/createTempDirectory
                        "wm-feature-card-" (make-array java.nio.file.attribute.FileAttribute 0)))
         mission-file (io/file root "M-selected.md")
@@ -349,7 +351,11 @@
                   :pre-dispatch-head (:head before)
                   :observed-head (:artifact-ref author-job)
                   :corroborates? true
-                  :commit (:artifact-ref author-job)})
+                  :commit (if (and (= cure-id (:job-id author-job))
+                                   (not= ::from-artifact-ref
+                                         cure-observed-commit))
+                            cure-observed-commit
+                            (:artifact-ref author-job))})
                :dispatch-fn
                (fn [_ agent _ _ _]
                  (swap! dispatches conj agent)
@@ -2632,6 +2638,25 @@
            (get-in result [:data :build-retries 0 :failure-kind])))
     (is (= true (get-in result [:data :build-retries 0 :cured?])))
     (is (= 1 (count (:build-retries (:data result)))))))
+
+(deftest card-cure-uses-terminal-commit-when-agency-ref-is-a-path
+  ;; Live shape from canary-da9681ce: the substantive author commit was already
+  ;; observed, the cure reply began with a valid feature card, but Agency
+  ;; extracted "/eoi_network_test.clj" as its artifact-ref.  A metadata-only
+  ;; card cure must use the valid terminal claim rather than treating the path
+  ;; as a replacement commit.  The feature-card gate itself remains unchanged.
+  (let [{:keys [result]}
+        (run-feature-card-attempt
+         {:author-card nil
+          :cure-card feature-card-claim
+          :cure-commit "/eoi_network_test.clj"
+          :cure-observed-commit nil
+          :cure-summary "FULL_LOOP_AUTHOR: DONE feature123"
+          :artifacts? true})]
+    (is (= :grounded-change (:outcome result)))
+    (is (= "feature123" (get-in result [:data :commit])))
+    (is (= true (get-in result [:data :build-retries 0 :cured?])))
+    (is (nil? (get-in result [:data :build-retries 0 :cure-rejected])))))
 
 (deftest card-failure-not-cured-fails-after-exhausting-retries
   (let [{:keys [result]}

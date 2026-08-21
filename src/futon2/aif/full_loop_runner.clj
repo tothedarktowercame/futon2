@@ -1649,6 +1649,21 @@
                    :files files
                    :author-job author-job}}))))
 
+(defn- cure-commit-candidate
+  "Choose the commit claimed by a bounded cure.
+
+  Prefer repository observation, then the runner's own parsing of the
+  FULL_LOOP_AUTHOR terminal marker, before Agency's separately extracted
+  :artifact-ref.  The live card-only cure named the existing commit correctly
+  in its terminal marker while Agency extracted a path from intervening prose.
+  An explicitly malformed terminal claim remains malformed and is rejected by
+  the existing typed gate below."
+  [commit cure-observed cure-artifact-ref cure-job]
+  (let [{:keys [verdict detail]} (author-verdict cure-job)
+        terminal-commit (when (= :done verdict)
+                          (some-> detail (str/split #"\s+" 2) first))]
+    (or cure-observed terminal-commit cure-artifact-ref commit)))
+
 (defn- build-cure-loop
   "Bounded cure loop wrapping the artifact-only and feature-card validations.
   On a qualifying failure, if retries remain, dispatches a cure job to the
@@ -1704,7 +1719,8 @@
                                                        cure-pre-head
                                                        cure-job))
                 cure-observed (:commit cure-binding)
-                new-commit (or cure-observed cure-artifact-ref commit)
+                new-commit (cure-commit-candidate commit cure-observed
+                                                  cure-artifact-ref cure-job)
                 commit-changed? (and new-commit (not= new-commit commit))
                 new-build (when commit-changed?
                             ((or (:resolve-build-fn opts) resolve-build)
