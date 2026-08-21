@@ -2327,10 +2327,10 @@
                                (swap! resolutions conj [obligation resolution]))
           :read-job-fn (fn [_ job-id]
                          {:job-id job-id :state "done"
-                          :artifact-ref "late123"
+                          :artifact-ref "1a7e1234567890abcdef1234567890abcdef1234"
                           :feature-card feature-card-claim
                           :execution successful-execution
-                          :result-summary "FULL_LOOP_AUTHOR: DONE late123"})
+                          :result-summary "FULL_LOOP_AUTHOR: DONE 1a7e1234567890abcdef1234567890abcdef1234"})
           :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
                               :codex-7 {:status "idle" :invoke-ready? true}
                               :codex-1 {:status "idle" :invoke-ready? true}})
@@ -2369,7 +2369,7 @@
   (let [dispatches (atom [])
         resolutions (atom [])
         author-job {:job-id "author-job" :state "done"
-                    :artifact-ref "late123"
+                    :artifact-ref "1a7e1234567890abcdef1234567890abcdef1234"
                     :feature-card feature-card-claim
                     :execution successful-execution}
         stop-line {:repair/id "repair-attempt-007-review-recovery"
@@ -2380,7 +2380,7 @@
                    :failure-kind :agent-budget-expired
                    :failure-data {:job-id "late-review-job"
                                   :author-job author-job
-                                  :commit "late123"
+                                  :commit "1a7e1234567890abcdef1234567890abcdef1234"
                                   :repository "/repo"
                                   :files ["src/real.clj"]}}
         result
@@ -3537,3 +3537,67 @@
                :result (str "prose\n" canary-card-text)
                :events [{:type "text" :text canary-card-text}]}]
       (is (= :result (:source (#'runner/feature-card-validation job)))))))
+
+(deftest recovery-artifact-failure-separates-malformed-from-missing
+  (testing "a completed recovery with no artifact-ref is still reported missing"
+    (is (= :recovery-artifact-missing
+           (:failure-kind (runner/recovery-artifact-failure
+                           :author-wait {:job-id "j" :state "done"})))))
+  (testing "a path scraped into artifact-ref is malformed, not missing"
+    ;; The measured value from canary-da9681ce's author job, whose real commit
+    ;; was f285e40 in futon2.
+    (let [failure (runner/recovery-artifact-failure
+                   :author-wait {:job-id "j" :state "done"
+                                 :artifact-ref "/eoi_network_test.clj"})]
+      (is (= :recovery-artifact-ref-malformed (:failure-kind failure)))
+      (is (= "/eoi_network_test.clj" (:artifact-ref failure))
+          "the offending value is carried so the fault is locatable")))
+  (testing "a commit-shaped ref has nothing to report"
+    (is (nil? (runner/recovery-artifact-failure
+               :author-wait {:job-id "j" :state "done"
+                             :artifact-ref "f285e40f6cd150410d66c7f8c555660dba9d4003"}))))
+  (testing "the gate does not widen past a completed author-wait recovery"
+    (is (nil? (runner/recovery-artifact-failure :author-wait nil)))
+    (is (nil? (runner/recovery-artifact-failure
+               :reviewer-wait {:job-id "j" :state "done"
+                               :artifact-ref "/eoi_network_test.clj"})))
+    (is (nil? (runner/recovery-artifact-failure
+               :author-wait {:job-id "j" :state "running"
+                             :artifact-ref "/eoi_network_test.clj"})))))
+
+(deftest done-author-recovery-with-a-non-commit-artifact-is-refused-before-dispatch
+  ;; Outer boundary: the typed refusal must reach run-opportunity!'s result,
+  ;; not stop at the predicate. Without the shape check the snapshot was adopted
+  ;; as the authored turn and its path became the reviewed commit.
+  (let [supersessions (atom [])
+        dispatches (atom [])
+        findings (atom [])
+        stop-line {:repair/id "repair-path-ref" :repair/status :open
+                   :repair/class :incomplete-recoverable
+                   :attempt-id "attempt-path-ref" :failure-stage :author-wait
+                   :failure-data {:job-id "path-ref-job"}}
+        result
+        (runner/run-opportunity!
+         (merge (isolated-runner-opts)
+                {:repair-open-fn (constantly [stop-line])
+                 :read-job-fn (fn [& _] {:job-id "path-ref-job" :state "done"
+                                         :artifact-ref "/eoi_network_test.clj"})
+                 :repair-system-record-fn
+                 (fn [finding]
+                   (let [finding (assoc finding :repair/id
+                                        "repair-path-ref-successor")]
+                     (swap! findings conj finding)
+                     finding))
+                 :repair-supersede-fn
+                 (fn [& args] (swap! supersessions conj args))
+                 :dispatch-fn (fn [& args] (swap! dispatches conj args))}))]
+    (is (= :recovery-artifact-ref-malformed (get-in result [:data :failure-kind])))
+    (is (= "/eoi_network_test.clj"
+           (get-in result [:data :error-data :artifact-ref]))
+        "the offending value survives into the durable failure record")
+    (is (= "/eoi_network_test.clj"
+           (get-in @findings [0 :failure-data :artifact-ref]))
+        "and into the successor obligation, so the fault is locatable later")
+    (is (= 1 (count @supersessions)))
+    (is (empty? @dispatches)
+        "no replacement turn is dispatched on a typed recovery refusal")))

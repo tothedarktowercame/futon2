@@ -2095,6 +2095,40 @@
        :artifact-ref text-commit
        :message "Agency artifact-ref is not a commit"})))
 
+(defn recovery-artifact-failure
+  "Which failure, if any, a completed author-wait recovery snapshot represents.
+
+  The recovery path adopted a snapshot as the authored turn on the strength of
+  `(:artifact-ref snapshot)` being merely PRESENT, and then — because
+  fresh-author? is false for a recovery — took that value as the commit with no
+  repository observation and no shape check. `unvalidated-artifact-failure`
+  guards only the fresh-author side, so this was the one remaining place a
+  non-commit ref became the reviewed commit.
+
+  It is not hypothetical: canary-da9681ce's author job carried
+  :artifact-ref \"/eoi_network_test.clj\" — a path, stale from an unrelated job
+  in another repository — while its actual commit was f285e40 in futon2.
+  Recovering that job would have adopted the path.
+
+  A missing ref and a non-commit ref are different faults and must not share the
+  \"completed without an artifact\" message: one says the turn produced nothing,
+  the other says extraction produced something that is not a commit. Returns nil
+  when there is nothing to report."
+  [recovery-stage snapshot]
+  (when (and snapshot
+             (= :author-wait recovery-stage)
+             (= "done" (:state snapshot)))
+    (let [artifact-ref (:artifact-ref snapshot)]
+      (cond
+        (nil? artifact-ref)
+        {:failure-kind :recovery-artifact-missing
+         :message "Recovered author job completed without an artifact"}
+
+        (not (commit-ish? artifact-ref))
+        {:failure-kind :recovery-artifact-ref-malformed
+         :artifact-ref artifact-ref
+         :message "Recovered author job artifact-ref is not a commit"}))))
+
 (defn- run-opportunity-core!
   "Run one opportunity synchronously. Dependencies may be injected in opts for tests."
   [raw-opts]
@@ -2566,6 +2600,12 @@
                                        snapshot)
                 recovered-author-job
                 (cond
+                  ;; Deliberately unchanged. A commit-shape check here would be
+                  ;; unreachable in effect: recovery-artifact-failure below
+                  ;; refuses a malformed ref before this value is ever used as
+                  ;; the commit, and a non-done snapshot has already thrown
+                  ;; above. A second guard would look like defence and be tested
+                  ;; by nothing.
                   (and snapshot (= :author-wait recovery-stage)
                        (:artifact-ref snapshot))
                   snapshot
@@ -2587,22 +2627,26 @@
                                  :failure-kind :recovery-provenance-missing
                                  :failure-stage :reviewer-wait
                                  :repair-obligation successor}))))
-                _ (when (and snapshot (= :author-wait recovery-stage)
-                             (= "done" (:state snapshot))
-                             (nil? recovered-author-job))
-                    (let [error "Recovered author job completed without an artifact"
+                _ (when-let [failure (recovery-artifact-failure recovery-stage
+                                                                snapshot)]
+                    (let [error (:message failure)
+                          failure-kind (:failure-kind failure)
+                          artifact-ref (:artifact-ref failure)
                           successor
                           (supersede-recovery!
-                           :machine-failure :recovery-artifact-missing
+                           :machine-failure failure-kind
                            :author-wait error
-                           {:job-id (:job-id snapshot)
-                            :job-state (:state snapshot)})]
+                           (cond-> {:job-id (:job-id snapshot)
+                                    :job-state (:state snapshot)}
+                             artifact-ref (assoc :artifact-ref artifact-ref)))]
                       (throw
                        (ex-info error
-                                {:outcome :incomplete
-                                 :failure-kind :recovery-artifact-missing
-                                 :failure-stage :author-wait
-                                 :repair-obligation successor}))))
+                                (cond-> {:outcome :incomplete
+                                         :failure-kind failure-kind
+                                         :failure-stage :author-wait
+                                         :repair-obligation successor}
+                                  artifact-ref
+                                  (assoc :artifact-ref artifact-ref))))))
                 fresh-author? (nil? recovered-author-job)
                 author-repo (when fresh-author?
                               (target-repository opts entry mission code-state))
