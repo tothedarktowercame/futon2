@@ -3476,3 +3476,64 @@
     ;; resolve-build refuses a non-commit downstream.
     (is (nil? (runner/unvalidated-artifact-failure false "/eoi_network_test.clj" nil)))
     (is (nil? (runner/unvalidated-artifact-failure true nil nil)))))
+
+;; --- card recovery from the author's own text events ------------------------
+;; repair-canary-de75cee9: Agency concatenates the author's separate text
+;; blocks into :result with NO separator, so a card that began its own block
+;; ends up abutting the previous block's last word:
+;;   "...doing it precisely:FULL_LOOP_FEATURE_CARD: {...}"
+;; The line-anchored search over :result cannot match, and the run was reported
+;; :marker-not-at-durable-prefix — blaming the author's ordering for what the
+;; concatenation destroyed, and discarding a recoverable card.
+
+(def ^:private canary-card-text
+  (str "FULL_LOOP_FEATURE_CARD: {:built \"a carrier\" :want-coverage \"tension identity\""
+       " :matches-intent? true :things-to-try [\"bb test -> 4 tests\"]}"))
+
+(deftest card-is-recovered-from-the-event-that-begins-with-it
+  (testing "the measured shape: blocks concatenated with no separator"
+    (let [job {:result-summary "Found a genuinely witnessed join: ..."
+               :result (str "Third malformed attempt; doing it precisely:" canary-card-text)
+               :events [{:type "text" :text "Found a genuinely witnessed join: ..."}
+                        {:type "text" :text "Third malformed attempt; doing it precisely:"}
+                        {:type "text" :text (str canary-card-text "\n\nStep (e) is ...")}]}
+          {:keys [card source reason]} (#'runner/feature-card-validation job)]
+      (is (nil? reason) "a card that began its own block must not be discarded")
+      (is (= :events source))
+      (is (= "a carrier" (:built card)))
+      (is (= ["bb test -> 4 tests"] (:things-to-try card))))))
+
+(deftest event-recovery-does-not-widen-the-gate
+  (testing "a marker quoted MID-event never matches"
+    (let [job {:result-summary "prose"
+               :result "prose"
+               :events [{:type "text"
+                         :text (str "I was asked to emit " canary-card-text " at the top.")}]}]
+      (is (= :marker-not-at-durable-prefix
+             (:reason (#'runner/feature-card-validation job)))
+          "quoting the marker inside a sentence must not supply a card")))
+  (testing "non-text events are never read"
+    (let [job {:result-summary "prose"
+               :result "prose"
+               :events [{:type "tool_use" :text canary-card-text}
+                        {:type "done" :text canary-card-text}]}]
+      (is (= :marker-not-at-durable-prefix
+             (:reason (#'runner/feature-card-validation job))))))
+  (testing "no events, no card: the typed reason is unchanged"
+    (is (= :marker-not-at-durable-prefix
+           (:reason (#'runner/feature-card-validation
+                     {:result-summary "prose" :result "prose"}))))
+    (is (= :missing-marker
+           (:reason (#'runner/feature-card-validation
+                     {:result-summary "" :result ""}))))))
+
+(deftest earlier-recovery-paths-still-win
+  (testing "a leading card in the summary is still the fast path"
+    (let [job {:result-summary canary-card-text
+               :events [{:type "text" :text canary-card-text}]}]
+      (is (= :text (:source (#'runner/feature-card-validation job))))))
+  (testing "a line-anchored card in :result is still preferred over events"
+    (let [job {:result-summary "prose"
+               :result (str "prose\n" canary-card-text)
+               :events [{:type "text" :text canary-card-text}]}]
+      (is (= :result (:source (#'runner/feature-card-validation job)))))))

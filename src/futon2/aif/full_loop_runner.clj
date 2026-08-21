@@ -1062,6 +1062,36 @@
               {:card card :source :result})
             (catch Exception _ nil)))))))
 
+(defn- events-feature-card
+  "Last recovery path: the author's own text EVENTS, each checked for the
+  marker at its start.
+
+  Agency concatenates the author's separate text blocks into :result with NO
+  separator, so a card that DID begin its own reply block can end up abutting
+  the previous block's last word — measured on canary-de75cee9, where :result
+  reads \"...doing it precisely:FULL_LOOP_FEATURE_CARD: {...}\". The
+  line-anchored search over :result then cannot match, and the run is reported
+  :marker-not-at-durable-prefix, which says the author put prose before the
+  marker. The author did put prose before it, but in an EARLIER block; the
+  concatenation is what destroyed the line boundary, so the diagnosis blamed
+  the wrong layer and a recoverable card was thrown away.
+
+  This does NOT widen the gate. The marker must still begin its block — a
+  marker quoted mid-sentence inside an event never matches, exactly as line
+  anchoring intends — and only the author's own :text events are read, never
+  terminal messages or tool prose."
+  [job]
+  (some (fn [event]
+          (when (= "text" (str (:type event)))
+            (let [text (str/triml (str (:text event)))]
+              (when (str/starts-with? text feature-card-marker)
+                (try
+                  (when-let [card (read-first-edn-form
+                                   (subs text (count feature-card-marker)))]
+                    {:card card :source :events})
+                  (catch Exception _ nil))))))
+        (:events job)))
+
 (defn- text-feature-card [job]
   ;; :result-summary is a 220-char whitespace-collapsed digest and truncates
   ;; any card whose closing brace falls past the window — attempt-051's valid
@@ -1071,6 +1101,7 @@
   ;; when no parseable card exists on either path.
   (or (summary-feature-card job)
       (result-feature-card job)
+      (events-feature-card job)
       (let [summary (:result-summary job)]
         (cond
           (and (str/blank? summary) (str/blank? (str (:result job))))
