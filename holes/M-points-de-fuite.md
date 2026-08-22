@@ -345,6 +345,49 @@ The per-mission **orbit / phase-portrait** — scattered turns woven and concent
       core `C-c .` hydra (and into γ/label semantics if Joe assigns them).
       Incidental fix: the long-form regex was hardcoded ✘|✓|💡 — now built
       from the registry. Joe (2026-07-11): "we have enough operator turns to cluster them into types (surely)." ~8.8k joe-authored turns in the store; cluster (D1 index terms and/or the stack's MiniLM embeddings, futon6 scripts), operator names the clusters worth marking, each named cluster earns a glyph + hydra key. This replaces a-priori vocabulary growth with the same declare-don't-guess empiricism as PZ1: the types come from the record. Good zai-1 handoff once D1's index is complete (the clustering wants the text substrate). NB this is also the missing grounding for the illocutionary-force hypothesis above — if clusters align with the typed-bell forces, that vocabulary is confirmed from data; if they cut differently (like 💡, which is force+cost), the empirical cut wins.
+  - **✦ WITNESSED NEED (2026-08-22, claude-13 + Joe): sub-document referent
+    binding.** Joe: *"We had a previous M-points-de-fuite that was supposed to
+    help with just this kind of issue, but we hadn't witnessed the 'need' for
+    it quite so tangibly."* The occasion: `M-futon-problems.md` used **D1–D5
+    for two different things in the same file** — the inherited disciplines and
+    the DERIVE items — and an agent writing a new `D8` cited *"D5 (populated ≠
+    correct)"* ambiguously without noticing. Workspace-wide, bare **`D`** has
+    **eight** readings (DERIVE item · discipline · capability-zones handoff
+    item · `[D1]` source citation in the business-model cases · handoff packet
+    id in `p4ng/vetting` · the FTS candidate surface `D1` · UKRNS delivery
+    viability · row D of the backlog cascade). Catalogued in
+    `futon0/holes/GLOSSARY-numbering.md`; the same-file case was renamed
+    `DP1–DP5`.
+    - **Why this is evidence for this mission specifically.** The recognizer's
+      referent vocabulary is `C-/M-/E-` tokens: it resolves *which mission a
+      turn belongs to*, and the `→` override switches that binding. It has no
+      scheme for the marks minted *inside* the artefacts a turn produces. So
+      the structure the agent demonstrably knew at mint time — *this D is the
+      DERIVE series* — was again not recorded, and recovering it cost a
+      four-repo grep sweep two months later, by a different agent. That is the
+      mission's founding complaint (*"paying to recover, twice, after the fact,
+      the very structure the agent knew it was minting"*) recurring **after
+      close, one level below the covered grain.**
+    - **After-the-fact detection fails where it matters — checked, not
+      assumed.** A same-file duplicate-definition scan over six holes trees
+      returned 8 candidates, of which **7 are artefacts of the heuristic**
+      (`B2-F1` truncating to `B2`; `P3-retry design` / `P3-retry results` being
+      one referent in two phases) and **1 is a real duplicate**
+      (`M-fold-ansatz.md`, `### M2 — JAX landscape` twice, lines 108/123) —
+      a duplicated heading, not a collision of meaning. The D-collision itself
+      is invisible to the scan. **Cross-file scheme collision is undetectable
+      in principle after the fact**: nothing distinguishes one `D5` from
+      another without the scheme it was minted under. Cheap detection exists
+      only where the damage is least; where it hurts, mint-time binding is the
+      only route. That is this mission's thesis, witnessed.
+    - **Minimal proposal, per the Table-25 grow-slowly stance** (§ above:
+      *"Glyph minting deliberately NOT done wholesale"*): no new glyph tier.
+      The cheapest thing that would have prevented it is a **scheme
+      declaration** at the head of a numbering series — one line binding a
+      prefix to its meaning, which a linter can then check headings against
+      within the file. Whether that is worth building is Joe's call; recorded,
+      not built.
+
   - **Per-mission thread→pattern map-reduce** (§6.2) — improve/invalidate the binding pattern from the scopes its thread wove, at mission close. The L1 library-evolution loop's missing in-flow signal. *Candidate excursion.*
   - **Historical 蒲團 reconstruction** (§6.3) — depends on **[[M-post-mining-ingest]]** (canonical mine).
   - **Pilot/flight unification** — render `session-overview` as a `flight-mode.el` organ-sibling (optional, §6.1).
