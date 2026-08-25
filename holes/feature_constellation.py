@@ -17,8 +17,14 @@ Retract = the Interest Network's k-collapse, reimplemented faithfully from
 Layout = Futon City coordinates (futon6/data/mission-carpet-pos-embed.json,
         BGE-embedding-derived), reused as-is.
 
-Outputs (same dir): feature-constellation.json (nodes/edges/provenance) and
-feature-constellation.png (print-light, A4-figure-sized).
+Outputs (same dir), all from ONE run because the seed is a live query:
+feature-constellation.json (nodes/edges/provenance), .png (print-light,
+A4-figure-sized), .svg (the web build embeds this) and .pdf (p4ng's print
+build includes this -- pdflatex cannot read SVG).
+
+Run it with the matplotlib that exists on this machine -- there is none in
+the system python:
+    ~/code/chatgpt-tui/.venv/bin/python feature_constellation.py margin
 """
 
 import json
