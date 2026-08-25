@@ -58,6 +58,23 @@ OUT_PDF = os.path.join(HERE, f"feature-constellation{_suffix}.pdf")
 #   died with TimeoutError mid-figure.
 with urllib.request.urlopen(GRAPH_URL, timeout=120) as r:
     graph = json.load(r)
+
+# Fail closed on :section-status before drawing anything. The endpoint has a 5s
+# per-page deadline and marks a section :failed when it blows -- HTTP 200,
+# well-formed, honest in the payload. During the 2026-08-25 mission-scope
+# backfill it did so on 5 of 6 requests, and this script, which reads only
+# graph["patterns"]["edges"], saw an empty edge list: every mission's warrant
+# count came out 0, magnitude collapsed to road attestation alone, the median
+# cut moved 7.595 -> 3.584, and one run died in the retraction with
+# "max() iterable argument is empty". A figure drawn from that is not this
+# figure with fresher numbers, it is a different measurement wearing the same
+# caption. See futon1b/README-backlog-catchup.md §4.
+_bad = sorted(k for k, v in (graph.get("section-status") or {}).items()
+              if v.get("status") != "ok")
+if _bad:
+    raise SystemExit(
+        "refusing to draw: cascade graph sections not ok: " + ", ".join(_bad) +
+        "\n  the substrate is busy or degraded; rerun when they read ok")
 roads = json.load(open(ROADS))
 coords = json.load(open(COORDS))
 
