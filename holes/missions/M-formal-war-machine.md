@@ -114,8 +114,12 @@ the mission's first testable claim, not a finding:
   `M-formal-patterns`, and it is frozen.
 - Closing the five red rings. Each has an `@how` pattern in
   `futon3/library/problems/`; this mission makes them checkable, not closed.
-- Reviving the outer loop, dead since 2026-07-14. Its deadness is a fact the
-  contract should be able to state, not a task here.
+- Reviving the daily `wm-full-loop` cadence, which ran from 2026-05-22 and
+  stopped on 2026-07-14 (last outer-loop run 2026-07-27). Whether it returns is
+  a fact the contract should be able to state, not a task here. Note this is
+  *not* the machine being stopped: instrumented R11/R12/R15/R17 campaigns ran
+  live on 2026-08-20 (`p4ng/empirics.tex`), including the first live R17
+  execution.
 
 ### 1.6 Completion criteria
 
@@ -140,8 +144,8 @@ Testable, in order of increasing cost:
 **The APM contract is enforced; this one would be partly unmet.** APM's
 controller loads its contract and qualification checks the running artifact by
 digest. Figure 4 is partly aspirational: five of sixteen badged constraints do
-not hold, and the outer loop has been dead since 2026-07-14. A Lean model of
-the War Machine would emit a contract the live system fails.
+not hold. A Lean model of the War Machine would emit a contract the live system
+fails.
 
 That is a change in what the artifact is, not a reason to skip it. It moves the
 red rings from dated prose in an EDN to proof obligations with mutation tests,
