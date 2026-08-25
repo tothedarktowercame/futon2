@@ -1,0 +1,864 @@
+[
+ {:stem "M-demonstration-foundry"
+  :cluster "00-futon1a-daily"
+  :file "futon7/holes/M-demonstration-foundry.md"
+  :identify-heading "## IDENTIFY — ratified gap"
+  :gap-verbatim "Joe ratified the gap on 2026-07-06 as multi-sided rather than a simple
+\"find bugs with AI\" automation gap:
+
+- **Cadence gap:** the existing \"daily scan\" is not actually run daily, while
+  the stack now has an hourly cron path being warmed up for stack
+  self-improvement. The same discovery/improvement shape can plausibly apply
+  to external repositories, but the cadence and target surface need to be
+  derived rather than copied literally.
+- **Economic gap:** the work must support T2.5 in the Pudding prover: not just
+  a one-off witness that FUTON can add value, but a cadence that can become a
+  path toward getting paid.
+- **Method gap:** the claim cannot collapse into \"AI agents are smart and can
+  fix bugs.\" The point is to lean on FUTON and the War Machine methods:
+  evidence-backed selection, warrants, consent gates, proof-of-work, and
+  disciplined outward acts.
+- **Demonstration gap:** the stack has one class exemplar
+  (emacs-websocket PR #83), but it was found serendipitously. The mission
+  exists to make that kind of opportunity discoverable and repeatable without
+  degrading into PR farming."
+  :gap-locator "lines 26-44"
+  :problem-1line "The stack lacks a repeatable, disciplined cadence for finding and completing economically meaningful external repository improvements."
+  :confidence :quoted}
+ {:stem "M-futon1a-rebuild"
+  :cluster "00-futon1a-daily"
+  :file "futon3/holes/missions/M-futon1a-rebuild.md"
+  :identify-heading nil
+  :gap-verbatim "**Remaining gap (explicit):**
+- The Futon1 HTTP API was *not* ported as part of the storage rebuild.
+  Futon1a currently provides only a minimal compatibility surface sufficient for
+  futon3 bridging writes (e.g. entity/relation writes and lab session save/load),
+  plus Prototype 1 endpoints. Full `/api/alpha/*` parity remains Phase II work."
+  :gap-locator "lines 731-735"
+  :problem-1line "The Futon1 HTTP API was not ported with the storage rebuild."
+  :confidence :quoted}
+ {:stem "M-pattern-ingest"
+  :cluster "00-futon1a-daily"
+  :file "futon3/holes/missions/M-pattern-ingest.md"
+  :identify-heading nil
+  :gap-verbatim "The substrate-2 thinness is the load-bearing finding. The other stages
+work; the projector is the weak link, and a richer projection (a)
+unlocks cross-content inference today, (b) makes the TSV a derived
+view rather than the authority on sigils, (c) lets WM and future
+consumers query the substrate directly for IF/THEN-shaped lookups
+instead of round-tripping through the file system."
+  :gap-locator "lines 69-74"
+  :problem-1line "Pattern projection into substrate-2 is too thin for strong cross-content inference."
+  :confidence :inferred}
+ {:stem "M-transport-adapters"
+  :cluster "00-futon1a-daily"
+  :file "futon3c/holes/missions/M-transport-adapters.md"
+  :identify-heading nil
+  :gap-verbatim "All internal architecture is wired and tested (280 tests). The pipeline accepts
+typed shapes and returns typed shapes. What's missing: nothing accepts an HTTP
+request and nothing sends a WebSocket frame. The pipeline has no ears or mouth."
+  :gap-locator "lines 17-19"
+  :problem-1line "The typed pipeline has no HTTP input or WebSocket output adapters."
+  :confidence :quoted}
+ {:stem "M-evaluate-policies"
+  :cluster "01-agency-unified"
+  :file "futon2/holes/M-evaluate-policies.md"
+  :identify-heading "## 1. The tension (IDENTIFY)"
+  :gap-verbatim "The gap is one instance of a shape: **an EFE-labelled surface must declare and earn its
+sense** (i canonical quantity / ii design tradition / iii working blend / iv per-step field)."
+  :gap-locator "lines 293-294"
+  :problem-1line "EFE-labelled surfaces do not clearly declare or justify which meaning of EFE they implement."
+  :confidence :quoted}
+ {:stem "M-first-flights"
+  :cluster "01-agency-unified"
+  :file "futon3c/holes/missions/M-first-flights.md"
+  :identify-heading "## 1. IDENTIFY — the tension"
+  :gap-verbatim "There is a third debt, and it is why this mission matters from the
+ground-control seat: return-channel debt. Flight records exist and nothing
+trains on them — FutonZero's own caveat is that realized-G does not yet
+train the gradient prior (the loop's R2), so today's records are
+write-only: produced, rendered, re-read by people, never consumed by the
+learner they are nominally for. The rendering and substrate debts explain"
+  :gap-locator "lines 74-79"
+  :problem-1line "Flight records exist, but nothing learns from their realized outcomes."
+  :confidence :inferred}
+ {:stem "M-portfolio-inference"
+  :cluster "01-agency-unified"
+  :file "futon3c/holes/missions/M-portfolio-inference.md"
+  :identify-heading nil
+  :gap-verbatim "The five-part gap:
+
+1. **No generative model** — the system doesn't predict portfolio state.
+   There is no belief about what the portfolio *should* look like at
+   time t+1 given what it looked like at time t.
+2. **No prediction error** — `mc-diff` computes observation-difference
+   (what changed between two snapshots), not predicted-vs-observed
+   (what we expected vs. what happened).
+3. **No belief update** — there is no posterior. Observations are consumed
+   by humans who update their own beliefs. The system has no beliefs to
+   update.
+4. **No policy selection** — gap-listing is not EFE-based action ranking.
+   \"Here are the gaps\" is not the same as \"here is the action that
+   minimizes expected free energy given current beliefs.\"
+5. **No adjacent-possible computation** — the evolving boundary between
+   what has been realized and what is structurally enabled is not
+   computed. Missions are listed, not situated in a possibility space.
+"
+  :gap-locator "lines 16-33"
+  :problem-1line "The portfolio lacks a generative model, belief updates, precision dynamics, EFE policy selection, and adjacent-possible computation."
+  :confidence :quoted}
+ {:stem "M-structural-law"
+  :cluster "01-agency-unified"
+  :file "futon3c/holes/missions/M-structural-law.md"
+  :identify-heading "## Phase 1: IDENTIFY — Enumerate the Universal Invariants"
+  :gap-verbatim "That's six recurring families with one visible residual pressure. The domain-
+specific files are projections of these patterns onto domain-specific fact
+databases, but `codex_code_logic.clj` also exposes a cross-store
+referential-agreement / session-continuity pressure that does not yet map
+cleanly onto the six-family set. VERIFY resolved that residual as a new
+candidate family, `cross-store-agreement`, rather than pretending it is already"
+  :gap-locator "lines 40-45"
+  :problem-1line "Recurring invariant families remain domain-specific, with an unresolved cross-store agreement family."
+  :confidence :inferred}
+ {:stem "M-trip-journal"
+  :cluster "01-agency-unified"
+  :file "futon5a/holes/missions/M-trip-journal.md"
+  :identify-heading "## The actual sorry being identified (IDENTIFY-phase articulation)"
+  :gap-verbatim "The above frames the apparatus. The sorry the apparatus addresses is
+more specific, and was articulated by Joe at IDENTIFY-exit on
+2026-04-17 (see sidecar, hinge: IDENTIFY-exit):
+
+**A futonic mission is excellent at getting good work done but has
+no mechanism ensuring the operator gains capacity from running it.**
+Under the AI-induces-cognitive-atrophy narrative this is a documented
+risk; in Joe's directly-lived experience the opposite happens
+(enhanced cross-scale thinking with AI) — but the mechanism is
+opaque, so the capability feels lucky rather than trainable. The
+futon stack is large and growing; working with it requires techniques
+for *managing* complexity and techniques for *inhabiting* it.
+Instruments like the War Machine track complexity but are not yet
+inhabitable the way REPL peripherals are. The gap between tracking
+and inhabiting is the structural location of the sorry.
+
+The mission's job, therefore, is not only \"preserve phenomenology
+in a parallel register.\" It is: make the two-register mission
+architecture *an operator-capacity-development loop* — so that"
+  :gap-locator "lines 48-66"
+  :problem-1line "The apparatus tracks complex work but is not yet inhabitable in the way REPL peripherals are."
+  :confidence :quoted}
+ {:stem "M-vsatarcs-invariants-integration"
+  :cluster "01-agency-unified"
+  :file "futon4/holes/missions/M-vsatarcs-invariants-integration.md"
+  :identify-heading "## 1. IDENTIFY"
+  :gap-verbatim "Advanced to MAP on 2026-06-01 at Joe's request. The gap is accepted as real:
+the invariant queue's claimed live status is not evidence-bound, while VSATARCS
+already has a currency pattern that can keep canonical story-adjacent structure
+fresh. Scope remains \"model before code\"; MAP is allowed to survey, count, and"
+  :gap-locator "lines 108-111"
+  :problem-1line "The invariant queue claims to be live without evidence-bound currency."
+  :confidence :quoted}
+ {:stem "M-pilot-appearance"
+  :cluster "02-typed-holes"
+  :file "futon3c/holes/missions/M-pilot-appearance.md"
+  :identify-heading "## 1. IDENTIFY — the gap"
+  :gap-verbatim "The gap this mission addresses is *the appearance asymmetry* identified across the session: the pilot was built to *act on* the futon stack but the apparatus for *understanding how the pilot itself appears* is younger, sparser, and not yet load-bearing. The closest predecessor work is:"
+  :gap-locator "line 36"
+  :problem-1line "The pilot can act on the stack, but its own appearance is not yet comparably understandable or load-bearing."
+  :confidence :quoted}
+ {:stem "M-bounded-in-flight-state"
+  :cluster "03-substrate-live"
+  :file "futon3c/holes/missions/M-bounded-in-flight-state.md"
+  :identify-heading "## 1. IDENTIFY"
+  :gap-verbatim "### The gap (operator's framing, 2026-05-03)
+
+> If the operator doesn't say \"now commit and push\" all the time, we accumulate loads of messy files.
+
+Stated minimally. Empirically true: yesterday's audit surfaced eight repos simultaneously dirty, several with 50-500 uncommitted entries; today's sweep cleared them in 40 commits across 13 repos. The same dynamic applies to PRs (a parallel form of \"in-flight scope\"); it's mentioned here for completeness but the mission's locus is the working tree.
+
+The mess is not a tooling preference. **The mess is a substrate-state defect** — every dirty file is an in-flight transaction the system has no way to reason about. Some of the cascading effects:
+
+- **Obvious effects:** drift between origin and working tree; conflict surface on next pull; lost work when a process clobbers an uncommitted file (cf. the futon7 `*.clj` zero-byte glob misfire); operator confusion about which version is real.
+- **Effects only visible via M-live-geometric-stack:** Δ and drift signals computed over the substrate manifold are corrupted when the substrate carries half-finished transactions; the piano roll's frozen-tape view shows the same; a \"live\" reading of the geometric stack reading mid-edit working trees would yield gibberish (gradients pointing nowhere, drift indistinguishable from authoring).
+
+The first set is the operator-felt cost. The second set is the structural cost — the one that makes this an *invariant* concern rather than a discipline preference."
+  :gap-locator "lines 94-105"
+  :problem-1line "Agent work accumulates messy uncommitted files unless the operator repeatedly orders commits and pushes."
+  :confidence :quoted}
+ {:stem "M-live-efe-map"
+  :cluster "03-substrate-live"
+  :file "futon6/holes/missions/M-live-efe-map.md"
+  :identify-heading "## IDENTIFY (2026-07-04, evening — fused with a thin MAP)"
+  :gap-verbatim "### The gap: an integration inventory
+
+| Piece | Provides | Status | Integration point |
+|---|---|---|---|
+| EFE field embed (`futon6/data/mission-efe-field-embed.html`, 2.4 MB, data inlined; `mission-carpet-pos-embed.json` as probable coordinate table) | the landscape: mission positions + EFE field, incl. the rocket precedent | exists, static | becomes the base layer; live layer overlays it — the inline field is NOT regenerated per event (*verify: which artifact is the coordinate source of truth*) |
+| Clock-lineage agent→mission hyperedges (`futon3c/src/futon3c/agency/clock_lineage.clj` `clock-dispatch!` → substrate-2) | where each agent IS on the mission map, durably | exists, live (writes confirmed 2026-07-04: zai-9's clock) | the join key: agent → mission-id → embedding coords |
+| Registry + invoke-jobs ledger (`/api/alpha/agents`, `/api/alpha/invoke/jobs` with live text/tool events, M-custom-harness) | who is alive; what each agent is doing right now | exists, live | dot state: idle/invoking + activity caption |
+| `recent_coordination` / coordination ledger | who belled whom — the message-trails | exists, live | optional edge overlay (the proto-pheromone; real deposit/decay semantics stay OUT, T1) |
+| Session-mode cross-maps (`futon3c/emacs/session-mode.el` + session↔mission↔pattern material) | the agent/session ↔ landscape/mission/pattern mapping for the eventual push-into-agents step | exists | read-side only in this mission (T2 boundary) |
+| M-emacs-cursor-peripheral code (descendant probably `futon3c/emacs/futon-agency-ws.el` — *verify location*) | Joe's cursor stream | finished mission, code reused once already | ship position = cursor file → mission via enrichment layer (`enrich-file`) → coords; grain + opt-in per T3 |
+| One serving JVM (I-0) + WebArxana static serving | where the endpoint and page live | exists | ONE new aggregating endpoint (agent → clocked mission → coords); page polls it |
+| Capability stars / badges overlays (M-capability-star-map read-contract) | field features for legibility | exists | rendered as landscape features only; MUST consume the existing read-contract, never fork it (T5) |
+
+**The only genuinely new code:** the aggregating endpoint (a join of
+three existing reads) and the overlay/polling layer on the embed page.
+Everything else is wiring to things that already run.
+
+### Completion criteria
+
+- **C1 (the smallest live slice):** real agents visible on the real map
+  at their clocked missions, dot state reflecting live invoke activity,
+  served from the one JVM; `pgrep java` unchanged (I-0 witness).
+- **C2 (the ship):** Joe's cursor appears as the rocket at
+  file→mission grain, opt-in streaming (T3 resolved by operator choice).
+- **C3 (freshness contract):** an explicit, recorded decision on map
+  freshness — the operator's candidate: re-embed at session end vs.
+  slower cadence (T4) — implemented at whatever cadence is chosen. The
+  base field may be stale-but-dated; agent positions are always live.
+- **C4 (guard):** the gamification guard holds under review — no agent
+  behavior or prompt optimizes for map features; the map remains an"
+  :gap-locator "lines 150-179"
+  :problem-1line "The EFE landscape components exist separately but lack a verified live integration inventory."
+  :confidence :quoted}
+ {:stem "M-live-geometric-stack"
+  :cluster "03-substrate-live"
+  :file "futon3/holes/missions/M-live-geometric-stack.md"
+  :identify-heading nil
+  :gap-verbatim "4 cross-column invariants — *but the empirical work in
+`E-cross-prototype-geometry.md` exposed that the existing
+substrate is the wrong shape* for the geometric closure of futon
+theory the parent mission of this excursion targets. Substrate-2
+absorbs substrate-1's plumbing and adds the missing edge classes,
+geometric layer, liveness invariant, and cross-prototype
+schema-sharing."
+  :gap-locator "lines 23-29"
+  :problem-1line "The existing substrate has the wrong shape for the intended geometric closure."
+  :confidence :inferred}
+ {:stem "M-mission-scopes-into-substrate-2"
+  :cluster "03-substrate-live"
+  :file "futon3c/holes/missions/M-mission-scopes-into-substrate-2.md"
+  :identify-heading "## 1. IDENTIFY — the gap"
+  :gap-verbatim "Substrate-2 (the Arxana hypergraph, port 7071) already reflects code **contents** (substrate-1). What it lacks
+is the mission **scopes** — the eightfold phases, sub-scopes and bound concepts that M-web-arxana-missions
+Layer-3 computes. Today those scopes are produced **ad-hoc and position-indexed**
+(`futon6/scripts/mission_scope_detect.py` emits `hx/content {position,end}` char-offsets) — ephemeral,
+recomputed each run, living *outside* substrate-2. Two consequences:
+
+- The Salingaros aliveness/entropy field (`futon6/scripts/mission_wholeness.py`, `L = T·H`, `C = T·(10−H)`,
+  where `(10−H)` is architectural entropy) is a **document-derived** read, **blind to substrate-1**: a fat code
+  file is a real refactor-sorry (high entropy) that no scope-tree sees, because the scopes aren't in the same
+  hypergraph as the code.
+- The field can't be composed with the **War Machine's EFE**, which is the *same notional quantity*
+  (free energy ≈ entropy ≈ `C`) computed a **different way** — live code/agenda state, not mission documents.
+
+**Two computations of one notional entropy, never unified.** This mission unifies them."
+  :gap-locator "lines 14-27"
+  :problem-1line "Mission scopes and their entropy field live outside substrate-2 and cannot compose with code or War Machine state."
+  :confidence :quoted}
+ {:stem "M-web-arxana-ui-improvements"
+  :cluster "03-substrate-live"
+  :file "futon4/holes/missions/M-web-arxana-ui-improvements.md"
+  :identify-heading "### IDENTIFY"
+  :gap-verbatim "The discrepancy is therefore not simply \"UI polish.\" The actual gap is:
+
+> **Sorry-WEBARXANA-LIVE-COHERENCE:** WebArxana has graph, mission-search,
+> and interest-network surfaces, and futon3c has live REPL / evidence traces,
+> but there is no single live graph contract binding them. A mission can move
+> from HEAD to IDENTIFY in Emacs without the browser showing that state change
+> as a graph event, and a browser node can be clicked without a principled"
+  :gap-locator "lines 128-134"
+  :problem-1line "WebArxana lacks one live graph contract joining its graph, mission-search, interest-network, REPL, and evidence surfaces."
+  :confidence :quoted}
+ {:stem "M-a-sorry-enterprise"
+  :cluster "04-stack-code"
+  :file "futon5a/holes/missions/M-a-sorry-enterprise.md"
+  :identify-heading "## 1. IDENTIFY"
+  :gap-verbatim "The futon stack now generates per-turn pattern retrieval from a library of 853+
+patterns. Each turn produces a context-retrieval certificate: the protopattern
+(user prompt + agent response), the top-k retrieved patterns, and their embedding
+similarity scores. These certificates are logged as evidence.
+
+Separately, the stack maintains a sorry topology: typed holes with known types
+and unknown values. Each sorry has a severity, status, and (for some) a closure
+condition.
+
+The insight: the patterns retrieved per turn are not random — they reflect the
+semantic content of the work being done. If a turn's retrieved patterns overlap
+with patterns that are *affine* to a particular sorry, that turn is moving
+toward closing that sorry. The pattern library is a neural substrate; the
+sorrys are targets; the turn-by-turn retrieval is the activation signal."
+  :gap-locator "lines 27-40"
+  :problem-1line "Pattern-retrieval evidence and the sorry topology are not joined into observable closure trajectories."
+  :confidence :inferred}
+ {:stem "M-aif-head"
+  :cluster "04-stack-code"
+  :file "futon2/holes/M-aif-head.md"
+  :identify-heading "## 1. IDENTIFY"
+  :gap-verbatim "This is not analogy. futon2 already has a working AIF engine with the
+`AifAdapter` protocol (`select-pattern` + `update-beliefs`), a full
+`FulabAdapter` with softmax/G-score/tau dynamics, and an ant-level AIF
+stack (observe→perceive→affect→policy). But this infrastructure is
+disconnected from the peripherals where agents actually do work. The gap:
+**peripherals constrain but don't learn.**"
+  :gap-locator "lines 49-54"
+  :problem-1line "The AIF infrastructure is disconnected from peripherals, so peripherals constrain work but do not learn."
+  :confidence :quoted}
+ {:stem "M-categorical-code"
+  :cluster "04-stack-code"
+  :file "futon5/holes/missions/M-categorical-code.md"
+  :identify-heading "## 1. IDENTIFY"
+  :gap-verbatim "### Gaps & doubts (named on purpose — these are the work)
+
+1. **Functoriality must be checkable, not relabelled boxes.** A table mapping objects is not a
+   functor unless it preserves composition. The test: does `F(select ∘ vary)` = `F(select) ∘ F(vary)`
+   on code? Same discipline as the baseline ablations — assert nothing we cannot check.
+2. **The code-side Diagnostics are the novel, uncertain piece.** structural entropy / coupling /
+   churn-sensitivity (≈ damage-spread) must be *defined* and shown to carry signal (not reduce to
+   classical graph metrics — the lesson from the symbol smoke test + ablation).
+3. **`refine`/Lamarck = the Rung-3 apply step** — consent-gated, and needs a real \"did it improve?\"
+   signal (the gap M-differentiable-code surfaced; *inherited, not solved* here).
+4. **`jax_refine` caveat (verified by reading the code):** its loss as-implemented is constant w.r.t.
+   the optimized weights (diagnostics are fixed trace data; only the entropy bonus has gradient). The
+   *loop structure* is the blueprint, **not** that loss — the recurring lesson: the loss must depend
+   on what you optimize.
+5. **CT enrichment is open.** `ct/dsl` today is a documentation-DSL. Turning it into a checkable
+   framework (monoidal composition for wirings — `wiring/compose.clj` already has serial/parallel —,
+   functor laws) is unbuilt; futon6's ncatlab / arxiv-mining could supply the richer categorical
+   vocabulary."
+  :gap-locator "lines 94-111"
+  :problem-1line "Categorical structure is not yet operationally checked across the code transformations the mission studies."
+  :confidence :quoted}
+ {:stem "M-futon3x-e2e"
+  :cluster "04-stack-code"
+  :file "futon3/holes/missions/M-futon3x-e2e.md"
+  :identify-heading "## 1. IDENTIFY"
+  :gap-verbatim "The gap: **no through-line exists from pattern content to actionable output
+via all four futon3x layers.**
+"
+  :gap-locator "lines 22-24"
+  :problem-1line "No end-to-end path connects pattern content to actionable output through all four futon3x layers."
+  :confidence :quoted}
+ {:stem "M-futonzero-capability"
+  :cluster "04-stack-code"
+  :file "futon0/holes/missions/M-futonzero-capability.md"
+  :identify-heading "## 8. IDENTIFY — What Is Observable"
+  :gap-verbatim "Amartya Sen's capability approach asks not \"what do people have?\" but \"what
+are people able to do and become?\" (Sen 1999, *Development as Freedom*).
+The standard way to measure agent performance — task scores, latency, drill
+completion — answers the wrong question. It measures *functionings* (what was
+achieved) without asking about *capabilities* (what could be achieved) or
+*conversion factors* (what conditions enabled the achievement)."
+  :gap-locator "lines 17-22"
+  :problem-1line "Task scores measure achievements but not expanding capabilities or the conditions enabling them."
+  :confidence :inferred}
+ {:stem "M-memes-arrows-patterns-diagrams"
+  :cluster "04-stack-code"
+  :file "futon3a/holes/missions/M-memes-arrows-patterns-diagrams.md"
+  :identify-heading "## 1. IDENTIFY"
+  :gap-verbatim "
+The framing shifts slightly: not \"is meme fit?\" in the abstract, but **what is the
+minimum storage we need so a *pattern cascade* / *wiring diagram* is a thing we can
+hold, attest, and reason over** — rather than a transient artifact.
+
+**Where cascades live today (the actual deficit).** The 559 cross-reference cascade
+edges exist **only** as the computed output of `futon6/scripts/pattern_phylogeny.py`
+— recomputed each run, in a Python EDN dump, with no identity, no attestation, no
+read-back. That is the gap: cascades are a *render*, not a *store*. You cannot point
+at \"the argue→verify→close cascade,\" ask what it's made of, or how often it's been"
+  :gap-locator "lines 230-239"
+  :problem-1line "Pattern cascades are transient renders rather than stored, attestable objects."
+  :confidence :quoted}
+ {:stem "M-patterns-done-right"
+  :cluster "04-stack-code"
+  :file "futon0/holes/missions/M-patterns-done-right.md"
+  :identify-heading "## 1. IDENTIFY"
+  :gap-verbatim "**What's missing for Level-1 completion**:
+- Wiring into futon3c's session-mode dispatch so an agent *enters* the peripheral and has `Edit`/`Write` constrained for `library/**.flexiarg` paths.
+- Surface contract on entry: \"you are in pattern-author mode; your only legal write is via `submit-draft!`.\"
+- Refusal-feedback pointers at the rulebook + the algorithm + the canonical parser so an agent can self-correct.
+
+#### Level 2 — Algorithm-guided authoring"
+  :gap-locator "lines 48-53"
+  :problem-1line "The pattern-library peripheral is not wired into session dispatch with constrained editing."
+  :confidence :quoted}
+ {:stem "M-the-futon-stack"
+  :cluster "04-stack-code"
+  :file "futon0/holes/missions/M-the-futon-stack.md"
+  :identify-heading "## 1. IDENTIFY"
+  :gap-verbatim "### Thesis (what we are building)
+
+**A homeostatic software agent.** Specifically: a software system that participates in its own homeostasis via an Active Inference loop where the precision substrate updates from evidence the system itself emits about itself.
+
+THE-STACK.md (2026-04-22) gives the architectural decomposition: thesis **S0** = a system that participates in its own maintenance via Argument + Invariants + Missions. The three pillars carry the standard active-inference roles: Argument is the generative model (priors), Invariants is precision (calibration weights on the priors), Missions is policy (action selection). The triad isn't three separate ideas — it's the **decomposition of a single homeostatic agent.**
+
+The mission's claim: when the AIF loop closes — when Portfolio Inference (PI) runs against a continuously-updated precision substrate, with policy producing its own next-actions — what we have is **a free-energy-minimising organism whose own model is a participant in the world it's modelling.** Not a tool, not a framework, not a programming aid. An agent. The thing emerges; the apparatus is the substrate it emerges *on*.
+"
+  :gap-locator "lines 10-17"
+  :problem-1line "The stack does not yet close a self-maintaining active-inference loop reliably enough for unattended maintenance."
+  :confidence :inferred}
+ {:stem "M-three-column-stack"
+  :cluster "04-stack-code"
+  :file "futon4/holes/missions/M-three-column-stack.md"
+  :identify-heading "### 1. IDENTIFY (this document)"
+  :gap-verbatim "  **What's missing:**
+  - Code column gaps: no protocol/defmethod/record reflection endpoints
+  - core.logic: invarianto/implementedo have no data source; only one
+    tension type (uncovered-component) can be derived
+  - Browser: adapter needed for futon1a migration (1–5 days)
+  - No conventional CI, but futon5 AIF+ validator provides structural
+    checking — needs to be connected to the hypergraph invariant framework"
+  :gap-locator "lines 388-394"
+  :problem-1line "The three-column stack is missing reflection data sources, invariant wiring, browser migration support, and connected structural checks."
+  :confidence :quoted}
+ {:stem "M-custom-harness"
+  :cluster "05-custom-harness"
+  :file "futon2/holes/M-custom-harness.md"
+  :identify-heading nil
+  :gap-verbatim nil
+  :gap-locator nil
+  :problem-1line nil
+  :confidence :absent}
+ {:stem "M-futonzero-mvp"
+  :cluster "05-custom-harness"
+  :file "futon0/holes/missions/M-futonzero-mvp.md"
+  :identify-heading "## 7. IDENTIFY Inventory — 2026-02-27"
+  :gap-verbatim "we need to know whether agents are actually adapting futonic discipline while
+their task capability improves. We do not want a separate benchmark framework.
+We want a local-first, evidence-backed capability loop that composes with
+existing mission/peripheral infrastructure.
+
+This mission creates that loop as FutonZero MVP.
+
+## 2. Mission Result
+
+Deliver a Clojure-first, local FutonZero kernel in `futon0/scripts/futon0/futonzero/`
+that produces two visible products for First Proof:"
+  :gap-locator "lines 15-25"
+  :problem-1line "The stack cannot yet measure whether agents acquire futonic discipline while improving at tasks."
+  :confidence :inferred}
+ {:stem "M-mission-peripheral"
+  :cluster "05-custom-harness"
+  :file "futon3c/holes/missions/M-mission-peripheral.md"
+  :identify-heading nil
+  :gap-verbatim nil
+  :gap-locator nil
+  :problem-1line nil
+  :confidence :absent}
+ {:stem "M-vsatarcs-writer"
+  :cluster "05-custom-harness"
+  :file "futon4/holes/missions/M-vsatarcs-writer.md"
+  :identify-heading "## 1. IDENTIFY"
+  :gap-verbatim "VSATARCS is currently a *reader* surface for FUTON. The reader-criteria axis Q1-Q8 was closed 2026-05-20 (VSATARCS v0.5.15; 272 tests; 8/8 satisfied; 13 `:bilateral-evidence` entries; 5/5 `:evidence-kind` values activated). But R4, R5, R6 on the VSATARCS R-criteria contract are still `:deferred-pending-writer-capability` — forward-model, EFE composition, and action-selection are absent because VSATARCS doesn't *act*. It renders chrome over the WM trace + canonical sources without writing anywhere.
+
+Two pressures make writer-capability live now:
+
+- **Q8 markdown-vs-typed-closure asymmetry surfaced 2026-05-20**: the M-stack-essay-code-alignment mission scaffold shows 0/4 checkpoints complete in its markdown, while THIS `.aif.edn` overlay records 13+ closures landed for the same mission. The chrome's Q8 block honestly reports the markdown state (V-COV against source-of-truth) but cannot RESOLVE the asymmetry without writer-capability. Sync direction is a design choice deferred until writer-capability lands.
+- **R-criteria contract has an unmet structural shape**: the VSATARCS contract has R4-R6 deferred-pending-writer-capability. Reader-criteria axis is complete; R-criteria axis has structural gaps that closing writer-capability would address. The bilateral-evidence record at v0.5.15 carries R3 as `:partial-three-of-four-sub-properties-satisfied (R3b blocked on R7)` and R4-R6 deferred — closing R4-R6 lifts a structural ceiling on the R-criteria axis at VSATARCS scope.
+
+The discrepancy between ideal and actual: VSATARCS *could* be an AIF agent that proposes actions and learns from operator feedback. Currently it only renders. Closing R4-R6 means VSATARCS becomes an **action-proposing reader** — with consent-gated writes back into the stack."
+  :gap-locator "lines 13-20"
+  :problem-1line "VSATARCS can read and render but cannot propose consent-gated actions or resolve detected substrate drift."
+  :confidence :inferred}
+ {:stem "M-capability-star-map"
+  :cluster "06-pattern-learning"
+  :file "futon0/holes/missions/M-capability-star-map.md"
+  :identify-heading "### Design space (sketch — NOT commitments; IDENTIFY decides which are real)"
+  :gap-verbatim "### The gap (multi-faceted — not \"just structure\")
+
+The stack has ~125 backlog missions and a real shipped capability set, but **no navigable graph of
+capabilities and the missions that mint them** — and that absence is *several* gaps, not one. The
+operative reframe (Joe 2026-06-07): a capability star-map **is a build system** — capabilities are
+build-targets with dependencies, built in topological order, only the *stale* ones rebuilt, and a
+**scheduler** (the WM, with EFE as its cost function) picks the next target. We have no \"Makefile for
+capabilities.\" It decomposes:
+
+**Clarity gap (load-bearing):** **missions ≠ capabilities.** A mission is a unit of *work*; a
+capability is an *ability the stack has*; they are many-to-many. We have been conflating them. The
+bipartite incidence (missions ⊔ capabilities) separates them — and *which is the node* changes what
+\"done\" and \"stale\" mean (the build-system duality between missions and features).
+
+**Representation gaps (missing as DATA):**
+- **A1.** Missions carry substrate-2 *attributes* (`:mission/{phase,criteria,gates,obligations,
+  blocked-by,code-paths,…}`) but no structural *form* — no DEFN/MAP-REDUCE shape; the lifecycle itself
+  has no `.edn` analogue (only `mission-lifecycle.md` + a `.flexiarg`). So missions can't be uplifted as
+  composable nodes. *(Joe's original (1).)*
+- **A2.** No **capability inventory** — capability-nodes don't exist beyond ~10 pudding-prover theses +"
+  :gap-locator "lines 152-171"
+  :problem-1line "The stack lacks a navigable, provenance-bearing graph connecting capabilities to the missions that create them."
+  :confidence :quoted}
+ {:stem "M-learning-loop"
+  :cluster "06-pattern-learning"
+  :file "futon5a/holes/missions/M-learning-loop.md"
+  :identify-heading "## 1. IDENTIFY"
+  :gap-verbatim "### The actual sorry
+
+Twenty-five active missions is already past the threshold where a human
+operator can hold the complete picture in head. The stack generates
+landscape intelligence faster than a flat mission-ledger can surface
+what's going on. The sorry: **there is no condensed, navigable
+mental-model of the stack's mission-work as a whole, and no way to see
+which capabilities the operator is actually developing across missions
+as they run.**"
+  :gap-locator "lines 39-47"
+  :problem-1line "The mission portfolio is too large to hold in mind and lacks a condensed, navigable learning view."
+  :confidence :quoted}
+ {:stem "M-mission-coherence-patterns"
+  :cluster "06-pattern-learning"
+  :file "futon3/holes/missions/M-mission-coherence-patterns.md"
+  :identify-heading "## 1. IDENTIFY"
+  :gap-verbatim "The existing mission lifecycle gives a strong procedural scaffold for
+running mission-shaped work, but it does not yet provide a compiled
+pattern library for what a mission *is*, how it *operates*, and why the
+form works so much better than ad-hoc agentic coding or lightweight
+spec-writing. The gap is not that missions are absent; the gap is that
+their coherence is largely tacit. Joe can use missions effectively, but
+the effective structures are not yet extracted into reusable
+`flexiarg` patterns."
+  :gap-locator "lines 166-173"
+  :problem-1line "The structures that make missions effective remain tacit instead of reusable as patterns."
+  :confidence :quoted}
+ {:stem "M-or-training-as-learning-system"
+  :cluster "06-pattern-learning"
+  :file "futon4/holes/missions/M-or-training-as-learning-system.md"
+  :identify-heading "## 1. IDENTIFY"
+  :gap-verbatim "The ORP evaluation established, with reasonable confidence, that *institutional architecture* — local support structures, role coordination, evaluation feedback loops — determines whether open-research training takes root in any individual institution. This is the central qualitative finding, consistent with NPT-grounded coding of the four T3 focus-group transcripts.
+
+The ORP evaluation did *not* establish four things that UKRN-S's design decisions now depend on. We name these as `sorry`s — proof obligations the predecessor programme could not discharge.
+
+**Sorry 1. Researcher-level behaviour change.** The T1 evaluation wave was planned but has not been run. Whether participants in trained institutions actually adopt open-research practices remains evidentially open.
+
+**Sorry 2. Cross-institutional evidence flow during the work, not just at the end.** The ORP did have evaluation capability — focus-group analysis, role-codebook construction, the population model — but the evaluation happened largely at the *end* of the programme rather than continuously throughout it. The role-codebook analysis showed that the *evaluation-analysis* role (`EV_analyse`) was absent across all four focus-group transcripts at the moments those transcripts captured. The ORP did not have, at any in-flight point, an operational capability for comparing what worked at one institution against what worked at another in a way that could feed back into ongoing decisions. Evidence stayed local; integration was retrospective.
+
+**Sorry 3. Tactical institutional participation in evaluation.** Institutions contributed to programme-level evaluation but did not drive evaluation of their own local contexts. Participation was strategic (\"we ran the training; here are attendance figures\") rather than tactical (\"here is what changed in our institution as a result, and here is what would have to change for it to stick\").
+
+**Sorry 4. Evidence-grounded basis for the design commitments UKRN-S faces.** The working paper synthesising the ORP evidence carries candidate design commitments — a learning-system architecture; six tensions held in the open under evidence; specific bootstrap-phase actions. These are *recommendations* in the WP. They are not yet *verified* recommendations. The WP carries them as candidate framings; the question of which earn their place under evidence is open.
+
+UKRN-S is a Community Interest Company that has just inherited the wind-down of the ORP. It faces design decisions on a calendar (Elle's planning meeting is in May 2026) before any of the four sorries are closed by additional empirical work. The mission's gap is the gap between *what ORP evaluation could establish on its own evidence* and *what UKRN-S's commitments need to be evidence-grounded*."
+  :gap-locator "lines 11-23"
+  :problem-1line "UKRN-S must make design commitments that exceed what the ORP evaluation can currently support."
+  :confidence :quoted}
+ {:stem "M-pattern-application-diagnostic"
+  :cluster "06-pattern-learning"
+  :file "futon3/holes/missions/M-pattern-application-diagnostic.md"
+  :identify-heading nil
+  :gap-verbatim nil
+  :gap-locator nil
+  :problem-1line nil
+  :confidence :absent}
+ {:stem "M-simulating-or-training-as-learning-system"
+  :cluster "06-pattern-learning"
+  :file "futon4/holes/missions/M-simulating-or-training-as-learning-system.md"
+  :identify-heading "## 1. IDENTIFY"
+  :gap-verbatim "The parent mission established a design recommendation for UKRN-S resting on a small computational simulation. That simulation has been useful as a stress-testing harness for the design's claims. But under the scrutiny it has now received — RNG-control audit, calibration against an empirically-grounded landscape, attempts to derive defensible parameter contrasts — the simulation has revealed that several of the working paper's load-bearing claims are not yet things the simulation can warrant.
+
+The gap, named directly: *we do not yet have a simulation we are confident about*. We have an instrument that produces trajectories, that responds to parameter choices in some ways, and that has been useful for narrative pedagogy. But the instrument produces findings that vary with sampling seed, derives some of its differentiation from the calibration choices rather than from the dynamics, and is silent on the things the working paper now most wants to claim — facet-level reach, capabilities-coming-online for UKRN-S and for institutions, time-anchored trajectory readings."
+  :gap-locator "lines 21-23"
+  :problem-1line "The existing simulation is not trustworthy enough to warrant the working paper’s load-bearing claims."
+  :confidence :quoted}
+ {:stem "M-superpod-mark3"
+  :cluster "06-pattern-learning"
+  :file "futon6/holes/missions/M-superpod-mark3.md"
+  :identify-heading "## 1. IDENTIFY — naming the gap"
+  :gap-verbatim "Mark 2 produces 40,000+ processed papers with typed hypergraphs,
+reverse-morphogenesis triples, embeddings, and per-stage chunk
+files. Two structural defects make that output insufficient as a
+substrate for **prototype 2 of M-pattern-application-diagnostic**:
+
+1. **`pattern-tags.json` is empty for ≈99 % of papers.** Stage 3
+   uses the math.SE-derived Q&A prompt with the futon6/P0
+   25-pattern Q&A list. arxiv papers aren't Q&As; the LLM
+   correctly returns `[]`. Confirmed by inspecting
+   `output/stage3-pattern-tags-chunks/chunk-000.json` across
+   `results-001..006` and `results-mfuton-001/002`. **The
+   tagging stage runs cleanly but on the wrong premise.**
+2. **eprint mode wasn't the default for the regular lineage.**
+   The plumbing exists (`74cc161 \"Harden mark2 eprint plumbing\"`)
+   and `mfuton-001/002` invocations exercise it, producing
+   per-paper hypergraphs ≈ 20× denser than the regular lineage
+   (n_nodes ≈ 222 vs. ≈ 9). Same parser; different invocation
+   flag. **The richer substrate already exists in code; it just
+   isn't reached by every batch.**
+
+Plus three derived gaps named by the parent mission's IFR
+(coverage, well-specified, repeatable, demonstrable value,
+replicable under automation):
+
+3. **Coverage gap on triples.** ≈4–12 % of papers in the sample
+   have a silently-null `analysis` field in
+   `reverse-morphogenesis.json`. The IFR's coverage property
+   requires *every* turn to produce a record; a `null` reading
+   mid-batch is indistinguishable from \"this turn never
+   happened.\"
+4. **Slot-collapse gap.** ≈12 % of triples paraphrase `situation_S
+   / xiang_salience / arrow_constraint` as one sentence, with
+   `quality: {form: good, salience: good, arrow: good}` masking
+   the collapse. The IFR's \"well-specified\" property means the
+   slots must be *demonstrably distinct* before the quality
+   check passes.
+5. **No geometric-quantity artifacts.** The hypergraph is
+   present, but T (tension scalar), ∇T, Δ are not computed at
+   batch time. The discrete-DG framing committed by the parent
+   mission requires these as first-class artifacts so downstream
+   consumers don't recompute them per query."
+  :gap-locator "lines 58-98"
+  :problem-1line "The paper pipeline uses an unsuitable tagging premise, inconsistently reaches its richer parser mode, and lacks required geometric artifacts."
+  :confidence :inferred}
+ {:stem "M-expressions-of-interest"
+  :cluster "07-interest-expressions"
+  :file "futon5a/holes/missions/M-expressions-of-interest.md"
+  :identify-heading "## 1. IDENTIFY"
+  :gap-verbatim "### The actual sorry (type-signature form)
+
+There is a structurally-shaped gap in Joe's near-future trajectory. Multiple
+basins of attraction (Anthropic-employee, postdoc, AI-startup, freelancer,
+academic-affiliated, …) could in principle fill it, in *very different ways*
+that route through nearly disjoint regions of phase space. INSTANTIATE-before-
+MAP would mean choosing a basin because it is the legible default rather than
+because its geometry best preserves the structural properties of the gap."
+  :gap-locator "lines 36-43"
+  :problem-1line "Joe’s near-future trajectory contains an unrepresented structurally shaped gap."
+  :confidence :quoted}
+ {:stem "M-futon-enrichment"
+  :cluster "07-interest-expressions"
+  :file "futon4/holes/missions/M-futon-enrichment.md"
+  :identify-heading nil
+  :gap-verbatim "But the columns are mostly empty. The code column has reflection data (live in
+the JVM, queryable via API), the project column has mission/devmap/evidence
+data (live in MC), and the math column has 153 hyperedges from futon6. What's
+missing is the *cross-column connective tissue* — the edges that say \"this
+function was created by this mission, uses this pattern, has this evidence
+trail, participates in these tensions.\""
+  :gap-locator "lines 18-23"
+  :problem-1line "The stack columns lack cross-column edges connecting code, missions, patterns, evidence, and tensions."
+  :confidence :quoted}
+ {:stem "M-interest-network-coupling"
+  :cluster "07-interest-expressions"
+  :file "futon4/holes/missions/M-interest-network-coupling.md"
+  :identify-heading "## 1. IDENTIFY"
+  :gap-verbatim "### The actual sorry
+
+> **Sorry-INTEREST-COUPLING-PRIOR**: the corpus declares interests but has
+> no machinery to track how those interests evolve under work. Lived
+> evidence currently lands in mission docs adjacent to but not connected
+> with the EoI corpus. **Closure condition:** a typed event vocabulary
+> that lets a mission emit posterior updates targeting EoI entities, with
+> provenance preserved.
+>
+> **Sorry-INTEREST-COUPLING-CHECKPOINT**: there is no agreed format for
+> emitting a delta-batch from a mission checkpoint. Pre-condition: the
+> event vocabulary is closed. **Closure condition:** a checkpoint format
+> (markdown + embedded EDN) that XTDB can project from.
+>
+> **Sorry-INTEREST-COUPLING-PROJECTION**: the cross-essay interest-surface
+> in WebArxana doesn't exist yet. Pre-condition: events + checkpoints
+> exist and have actual data. **Closure condition:** a route in WebArxana
+> that renders the corpus as a network with composite-arrow edges,
+> cross-essay annotations, and a temporal trail of state events."
+  :gap-locator "lines 61-79"
+  :problem-1line "The corpus records interests but cannot track how work changes them."
+  :confidence :quoted}
+ {:stem "M-weird-modernism"
+  :cluster "07-interest-expressions"
+  :file "futon3/holes/missions/M-weird-modernism.md"
+  :identify-heading nil
+  :gap-verbatim "### Gap statement, sharpened by the Parr-Friston reading
+
+> Futon theory is the engineering-timescale operationalisation of
+> generalised free energy minimisation. The three-Norn projection
+> (既/化/應-債) is its temporal decomposition: past as δ-collapsed
+> observations, present as action selection, future as hidden state
+> with priors over preferred outcomes. The 鹽/債 ledger is its
+> path-integral accounting: worth (preference satisfaction) and
+> debt (preference divergence) as positive and negative contributions
+> to a Hamiltonian action. Patterns (flexiargs) are its
+> priors-over-preferred-outcomes registry. Pattern canonicalisation
+> is its Baldwin-mechanism. Self-guiding software is its
+> Hamilton's-Principle implementation. Wyrd-salience is the
+> survival diagnostic for which priors are load-bearing across
+> rival containment regimes.
+>
+> The cosmological commitment that crosses all four PKD-Baudrillard-
+> Ballard-Baldwin threads is the free energy principle itself: a
+> property of any system that persists in a fluctuating environment.
+> \"Intelligence exists outside us\" because generalised free energy
+> minimisation is substrate-neutral. Birds, octopuses, agents, and
+> the futon stack all participate in the same imperative."
+  :gap-locator "lines 521-542"
+  :problem-1line "Futon theory has been practised and named but lacks a formal account of its relation to generalized free-energy minimisation."
+  :confidence :quoted}
+ {:stem "M-diagramprover"
+  :cluster "08-rational-reconstruction"
+  :file "futon3c/holes/missions/M-diagramprover.md"
+  :identify-heading "### Phase 1: Sorry Boundary Atlas + Diagram Induction (IDENTIFY → MAP)"
+  :gap-verbatim "**The gap DiagramProver addresses:** All published systems treat each
+theorem as an independent search problem. None exploit cross-problem
+structure (sorry boundary clustering, pattern transfer, targeted Mathlib
+extension as a strategic intervention). This is the Deleuzian contribution:
+reading the *diagram* of failures across a corpus to guide where to extend
+the *axiom system* (Mathlib) next.
+
+## The Name
+
+The name \"DiagramProver\" contrasts with \"AxiomProver\" at the level of
+Deleuze vs Descartes — but this is our framing, not a claim about what
+AxiomProver actually does internally."
+  :gap-locator "lines 80-91"
+  :problem-1line "Proof systems treat theorems independently and do not use the geometry of the stuck proof state across problems."
+  :confidence :quoted}
+ {:stem "M-stack-stereolithography"
+  :cluster "08-rational-reconstruction"
+  :file "futon5a/holes/missions/M-stack-stereolithography.md"
+  :identify-heading "## 1. IDENTIFY"
+  :gap-verbatim "### The actual sorry
+
+> The stack has multiple good projections of capability, but no
+> single printout that says, with provenance, \"here is what exists
+> already\" and \"here is what is still coming out of the bath.\"
+>
+> The operator can inspect live invariants, candidate invariants,
+> mission topology, devmap aspirations, sorry pressure, and War
+> Machine signals separately. The missing thing is a reconciled
+> capability semilattice or DAG that pulls them together without
+> flattening their differences.
+
+This is not a complaint about any one surface. It is an integration
+gap between surfaces that are already doing real work."
+  :gap-locator "lines 61-74"
+  :problem-1line "The stack lacks one provenance-bearing printout of existing and emerging capabilities."
+  :confidence :quoted}
+ {:stem "M-action-cost-modelling"
+  :cluster "09-war-machine"
+  :file "futon3c/holes/missions/M-action-cost-modelling.md"
+  :identify-heading "## 1. IDENTIFY (drafted 2026-05-26 per operator-directed transition)"
+  :gap-verbatim "### Motivation — the gap
+
+We are not 100% confident in two adjacent claims:
+
+- **(a)** that the WM's current AIF scores produce a *meaningful* prioritisation signal for the operator/pilot, beyond their formal correctness;
+- **(b)** that we know how those AIF scores *relate* to the differential-geometry concepts from `M-live-geometric-stack.md` (T-distribution, tangent bundle, conservation of tension under pattern-application).
+
+This pair of unresolved claims is a **meaningful** gap, not a stylistic one, for one concrete reason: **the WM currently presents minute-scale and months-scale work at the same \"next move\" level**. Today's live test case made this visible — the 1-hour HUD-tooltip refactor and the months-scale `r3d-per-entity-attribution` blocked on M-INC step (b) both surface with `G=-4.4228`. As Joe put it: *\"months-scale work almost certainly needs a preliminary 'work breakdown' step (indeed, possibly needing a Mission structure of its own, or in some cases a novel and even bigger structure like a Campaign!)\"*
+
+The gap therefore decomposes into three nested questions:
+
+1. **Cost-signal gap**: How should the WM annotate each candidate action with a scale (minute / hour / session / multi-session / mission / campaign)?
+2. **Benefit-signal gap**: How should the WM annotate each candidate action with a capability-delta (what does closing this unlock)?"
+  :gap-locator "lines 68-80"
+  :problem-1line "The War Machine cannot distinguish cheap and expensive actions within the same action family."
+  :confidence :quoted}
+ {:stem "M-aif2"
+  :cluster "09-war-machine"
+  :file "futon2/holes/M-aif2.md"
+  :identify-heading "## 1. IDENTIFY (shape-first)"
+  :gap-verbatim "The discrepancy: AIF theory has a built-in story for the meta-level (hierarchical priors that re-weight uncertainty-tolerance — Kiverstein & Miller; variational niche construction that redraws the blanket to include the constructed niche — Constant/Ramstead/Veissière/Friston). **Our implementation does not yet use it.** The gap is in the wiring, not the framework."
+  :gap-locator "line 52"
+  :problem-1line "The implementation does not use the hierarchical meta-level already available in active-inference theory."
+  :confidence :quoted}
+ {:stem "M-goals-and-holes"
+  :cluster "09-war-machine"
+  :file "futon2/holes/M-goals-and-holes.md"
+  :identify-heading "## 1. IDENTIFY — name the gap"
+  :gap-verbatim "**Shape-first (the gap is a *family*, not a one-off).** The gap is \"the WM's setpoints are unmodelled.\" A setpoint/hole comes in sibling instances under one shape — `hole/<flavour>`:
+- `hole/stated` — an explicit goal/sorry (spoken: 應-voice, devmap/star-map entry, a `:sorry`);
+- `hole/incompleteness` — a *known* goal not done (started-but-not-run, raised-but-unaddressed, declared-but-empty, asked-but-unanswered);
+- `hole/latent` — an *unnamed* goal (the star-map's negative space — capability accruing with no model). The deepest sibling.
+- `hole/mess` — a *named, run, but low-coherence* goal: a mission scored **messy** by Salingaros `L=T·H` (high mess `C=T·(10−H)`) — not unfinished, not unnamed; it exists and runs, but is tangled, and tidying it *is* a goal (Joe). The implicit hole the other three siblings don't name."
+  :gap-locator "lines 29-33"
+  :problem-1line "The War Machine’s preferred outcomes and setpoints are unmodelled."
+  :confidence :quoted}
+ {:stem "M-war-machine-pilot"
+  :cluster "09-war-machine"
+  :file "futon3c/holes/missions/M-war-machine-pilot.md"
+  :identify-heading "## Inherited ingredients (already in place; named here for IDENTIFY's first pass)"
+  :gap-verbatim "The Operator's Foreword names the \"tantalisingly-close\" possible realisation
+in which software is largely self-guiding — noticing its own points of
+tension and repairing them. The discrepancy:
+
+- **Ideal:** the apparatus closes its own loops; sees tension, takes a
+  next move, generates evidence, surfaces new tension.
+- **Actual (as of 2026-05-24):** the apparatus *sees* tension (the
+  full AIF workup is operational; the 12 observation channels emit;
+  the sorry registry tracks 13 typed obligations; warnings fire;
+  recommendations are generated; the QA round just completed shows
+  all of this is operator-legible). But the *closing* still
+  routes through Joe acting on what the WM displays. WM-I4 explicitly
+  designs this gap in (`:a/note` — \"the operator acts\"); the gap
+  is structural, not accidental."
+  :gap-locator "lines 120-133"
+  :problem-1line "The stack detects and recommends around tension, but loop closure still depends on Joe acting."
+  :confidence :inferred}
+ {:stem "M-war-machine-tuning"
+  :cluster "09-war-machine"
+  :file "futon3c/holes/missions/M-war-machine-tuning.md"
+  :identify-heading "## 1. IDENTIFY"
+  :gap-verbatim "> The War Machine surface is shipped but its validity claim is
+> unsubstantiated. The operator is overwhelmed by an undifferentiated
+> backlog of small tuning items, missing affordances, drift between
+> what is documented and what is rendered, and untested integration
+> seams. There is no single document that lists the tuning items, no
+> rubric for distinguishing \"broken\" from \"ambiguous\" from"
+  :gap-locator "lines 51-56"
+  :problem-1line "The shipped War Machine surface has no substantiated validity claim."
+  :confidence :quoted}
+ {:stem "M-wm-policies"
+  :cluster "09-war-machine"
+  :file "futon2/holes/M-wm-policies.md"
+  :identify-heading "## 1. IDENTIFY"
+  :gap-verbatim "The War Machine currently scores **single next-steps** — it ranks `pursue mission M` as if each mission
+were one atomic action — and picks the minimum-EFE one. Two consequences, both live as of 2026-06-09:
+
+1. **The visible symptom:** the WM's top recommendation is `open-mission M-emacs-cursor-peripheral`
+   (G=−9.25), long noted to be a silly pick. The diagnosis (§2) shows *why*: the \"advance the capability
+   map\" credit is currently **anti-functional** — it buries every on-map mission at the bottom and lets
+   off-map work fill the entire top.
+2. **The structural issue Joe named:** the WM should **select over policies (sequences of steps), not
+   just next steps**. Scoring a mission by its *whole remaining size* is the single-step-vs-policy
+   confusion already biting at the one-step level.
+
+These are the same issue at two depths. This mission fixes the one-step credit (the easy cleanup) **and**
+charters the policy layer (the bigger build)."
+  :gap-locator "lines 20-32"
+  :problem-1line "The War Machine scores missions as single actions instead of policies made of action sequences."
+  :confidence :inferred}
+ {:stem "M-codex-irc-execution"
+  :cluster "10-codex-irc"
+  :file "futon3c/holes/missions/M-codex-irc-execution.md"
+  :identify-heading "## 1. IDENTIFY"
+  :gap-verbatim "The gap is not message transport. IRC relay works in both directions. The real failure is semantic: Codex can emit convincing completion prose with zero runtime execution evidence (`executed?=false`, `tool-events=0`, `command-events=0`). That breaks trust and makes IRC feel like a simulation instead of a working agent surface."
+  :gap-locator "line 8"
+  :problem-1line "Codex can report apparent IRC completion without runtime execution evidence."
+  :confidence :quoted}
+ {:stem "M-typed-bells"
+  :cluster "10-codex-irc"
+  :file "futon3c/holes/missions/M-typed-bells.md"
+  :identify-heading "## Existing Ground (IDENTIFY / MAP — what is already built)"
+  :gap-verbatim "**The gap (Joe's framing, 2026-06-11):**
+- **ArSE exists, but isn't used.** The Q&A substrate is built and starved of input.
+- **Agent exchanges exist, but aren't stored.** Every bell is a real Q&A act; we keep the
+  transport receipt and discard the content.
+- **They also aren't typed.** A bell is one *untyped* imperative — \"invoke B with this
+  text\" — so even what *is* logged carries no illocutionary force."
+  :gap-locator "lines 38-43"
+  :problem-1line "Agent Q&A exchanges occur over bells but their content is not stored in ArSE."
+  :confidence :quoted}
+ {:stem "M-coordination-rewrite"
+  :cluster "11-coordination-rewrite"
+  :file "futon3/holes/missions/M-coordination-rewrite.md"
+  :identify-heading nil
+  :gap-verbatim nil
+  :gap-locator nil
+  :problem-1line nil
+  :confidence :absent}
+ {:stem "M-f6-agents"
+  :cluster "11-coordination-rewrite"
+  :file "futon3/holes/missions/M-f6-agents.md"
+  :identify-heading nil
+  :gap-verbatim "Build agents that don't just answer mathematical questions but *ask* them.
+The Q⊢A framing: a well-posed question constrains its answer. Agents that
+identify what they don't know and formulate the right question are doing
+mathematics, not retrieval."
+  :gap-locator "lines 4-7"
+  :problem-1line "Existing agents answer questions but do not identify ignorance and formulate mathematical questions."
+  :confidence :inferred}
+]

@@ -35,7 +35,14 @@ ROADS = os.path.join(CODE, "futon6/data/mission-carpet-roads.json")
 COORDS = os.path.join(CODE, "futon6/data/mission-carpet-pos-embed.json")
 GRAPH_URL = "http://localhost:7070/api/alpha/cascade-real/graph"
 OUT_JSON = os.path.join(HERE, "feature-constellation.json")
-OUT_PNG = os.path.join(HERE, "feature-constellation.png")
+# "margin" renders the same computed graph at sidebar proportions: the labels
+# that a full-width figure can afford (per-mission satellites, per-cluster
+# counts) collide below ~400px, so the variant drops them rather than shrinking
+# them into illegibility. Same data, same retraction — fewer annotations.
+MARGIN = len(sys.argv) > 1 and sys.argv[1] == "margin"
+_suffix = "-margin" if MARGIN else ""
+OUT_PNG = os.path.join(HERE, f"feature-constellation{_suffix}.png")
+OUT_SVG = os.path.join(HERE, f"feature-constellation{_suffix}.svg")
 
 # ---------------------------------------------------------------- ingest ----
 
@@ -151,6 +158,11 @@ print(json.dumps(provenance, indent=1))
 
 import matplotlib
 matplotlib.use("Agg")
+# Emit real <text> elements rather than glyph outlines. matplotlib's default
+# (svg.fonttype="path") converts every label to vector paths: crisp, but not
+# text -- it cannot be selected, searched, or read by a screen reader, and the
+# consuming document ends up with a picture of words (Joe, 2026-08-25).
+matplotlib.rcParams["svg.fonttype"] = "none"
 import matplotlib.pyplot as plt
 
 SURFACE = "#fcfcfb"
@@ -237,9 +249,13 @@ def ramp_color(g):
     t = 0 if gmax == gmin else (g - gmin) / (gmax - gmin)
     return RAMP[min(len(RAMP) - 1, int(t * len(RAMP)))]
 
-fig, ax = plt.subplots(figsize=(11, 5.5), dpi=200)
-fig.patch.set_facecolor(SURFACE)
-ax.set_facecolor(SURFACE)
+fig, ax = plt.subplots(figsize=(5.2, 3.6) if MARGIN else (11, 5.5), dpi=200)
+# Transparent ground: the consuming document supplies the page colour, and a
+# baked-in near-white panel reads as a pasted-in tile against it (Joe,
+# 2026-08-25). SURFACE survives where it is doing work rather than filling:
+# the label boxes, and the thin rings that keep overlapping nodes apart.
+fig.patch.set_alpha(0.0)
+ax.set_facecolor("none")
 ax.axis("off")
 
 # inter-feature edges (aggregated) between hubs
@@ -265,7 +281,7 @@ for n in nodes:
 
 # selective labels: top-2 missions per feature, pushed outward from the hub
 for cl, ns in by_cluster.items():
-    for n in sorted(ns, key=lambda n: -n["magnitude"])[:2]:
+    for n in sorted(ns, key=lambda n: -n["magnitude"])[:(0 if MARGIN else 2)]:
         x, y = pos[n["id"]]
         cx, cy = hub[cl]
         dx, dy = x - cx, y - cy
@@ -291,19 +307,25 @@ for cl, ns in sorted(by_cluster.items()):
     (ndx, ndy) = LABEL_NUDGE.get(cl, (0, 0))
     ax.annotate(outward(cl), (cx, cy),
                 xytext=(ndx, ndy + 16 + 9 * (s / 1160) ** 0.5),
-                textcoords="offset points", color=INK, fontsize=15,
+                textcoords="offset points", color=INK,
+                fontsize=7 if MARGIN else 15,
                 fontweight="bold", ha="center", zorder=7,
                 bbox=dict(boxstyle="round,pad=0.25", facecolor=SURFACE,
                           edgecolor="#d8d8d3", linewidth=0.7, alpha=0.95))
-    ax.annotate(f"{len(ns)} missions · {warrants} warrants", (cx, cy),
-                xytext=(0, -20 - 9 * (s / 1160) ** 0.5), textcoords="offset points",
-                color=INK3, fontsize=9.5, ha="center", zorder=7)
+    if not MARGIN:
+        ax.annotate(f"{len(ns)} missions · {warrants} warrants", (cx, cy),
+                    xytext=(0, -20 - 9 * (s / 1160) ** 0.5), textcoords="offset points",
+                    color=INK3, fontsize=9.5, ha="center", zorder=7)
 
 # no in-figure title/subtitle (the consuming document captions it);
 # a small corner stamp keeps the artifact self-dating.
 ax.text(1, 0.005, f"computed {time.strftime('%Y-%m-%d')} · zero hand-typed rows",
-        transform=ax.transAxes, color=INK3, fontsize=8, ha="right", va="bottom")
+        transform=ax.transAxes, color=INK3, fontsize=5 if MARGIN else 8,
+        ha="right", va="bottom")
 
 fig.tight_layout()
-fig.savefig(OUT_PNG, facecolor=SURFACE, bbox_inches="tight")
-print("wrote", OUT_PNG, "| ff-edges:", len(ff))
+fig.savefig(OUT_PNG, bbox_inches="tight", transparent=True)
+# SVG as well: the consuming document sets text in the page, and a raster's
+# labels pixelate at print scale. Same figure, same data, vector text.
+fig.savefig(OUT_SVG, bbox_inches="tight", format="svg", transparent=True)
+print("wrote", OUT_PNG, "and", OUT_SVG, "| ff-edges:", len(ff))
