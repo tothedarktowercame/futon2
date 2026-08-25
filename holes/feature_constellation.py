@@ -43,10 +43,14 @@ MARGIN = len(sys.argv) > 1 and sys.argv[1] == "margin"
 _suffix = "-margin" if MARGIN else ""
 OUT_PNG = os.path.join(HERE, f"feature-constellation{_suffix}.png")
 OUT_SVG = os.path.join(HERE, f"feature-constellation{_suffix}.svg")
+OUT_PDF = os.path.join(HERE, f"feature-constellation{_suffix}.pdf")
 
 # ---------------------------------------------------------------- ingest ----
 
-with urllib.request.urlopen(GRAPH_URL, timeout=20) as r:
+#   120s, not 20s: the cascade graph is ~85 KB assembled per request and
+#   measured 13s warm on 2026-08-25; a cold one exceeded 20s and the script
+#   died with TimeoutError mid-figure.
+with urllib.request.urlopen(GRAPH_URL, timeout=120) as r:
     graph = json.load(r)
 roads = json.load(open(ROADS))
 coords = json.load(open(COORDS))
@@ -328,4 +332,8 @@ fig.savefig(OUT_PNG, bbox_inches="tight", transparent=True)
 # SVG as well: the consuming document sets text in the page, and a raster's
 # labels pixelate at print scale. Same figure, same data, vector text.
 fig.savefig(OUT_SVG, bbox_inches="tight", format="svg", transparent=True)
-print("wrote", OUT_PNG, "and", OUT_SVG, "| ff-edges:", len(ff))
+#   PDF for the print build: pdflatex reads PDF natively and cannot read SVG.
+#   Written in the same run as the SVG because the seed is a live query --
+#   a second run is a different figure, not the same one in another format.
+fig.savefig(OUT_PDF, bbox_inches="tight", format="pdf", transparent=True)
+print("wrote", OUT_PNG, OUT_SVG, "and", OUT_PDF, "| ff-edges:", len(ff))
