@@ -189,3 +189,68 @@ inner loop needs either (a) the deposits to reach the embedding file's universe,
 or (b) the inner constructor to traverse the substrate the way `conductor.clj`
 does. That is a wiring requirement the role card does not currently name, and it
 belongs in its "Wiring this card needs" section.
+
+---
+
+## Second correction — the APM constructor is not on the student's path either
+
+*Joe: "it's not yet clear, empirically, whether the Zai agents actually use the
+conductor machinery or its image in XTDB … it looks like:
+`TN-APM-cascades-exist-unused.md`."*
+
+He is right, and the table in the previous section is wrong where it says
+`conductor.clj` is "used by APM / the Zai student". It is not.
+
+`futon3c/holes/technotes/TN-APM-cascades-exist-unused.md` states it in one line:
+**"Zai is handed a flat list of leaf memories sorted by hash; the cascade exists
+in `conductor.clj`, is reachable only from an interactive HTTP surface, and has
+left zero artifacts in the entire campaign."** Its only consumer is
+`conductor_surface.clj` behind HTTP handlers — a surface a person drives.
+`countdown_control.clj`, which drives the campaign, does not require
+`futon3c.apm.conductor`.
+
+Re-ran its checks (2026-08-26, claude-13) and extended them past the single
+campaign it examined. Cascade-artifact file counts across **all seven**
+campaigns on disk — `countdown-f19-f27-r4`, `jit-all-open-nontopology-v1`,
+`jit-m-five-v1`, `jit-m-five-v2`, `jit-m94A03-retry-v1/v2/v3`:
+
+    :hops 0 · :why-hop 0 · :co-incidence 0 · pattern-surfaces 0 · :seed-patterns 0
+
+(`:route` returns 2 in the nontopology campaign, both prose — a *mathematical*
+route in an f33/f34 trace, not a `:route :leaf` cascade label. The technote
+flags this so a later reader is not misled by a non-zero grep.)
+
+### The tally, across every cascade mechanism in the stack
+
+| mechanism | built? | on an automated path? | evidence |
+|---|---|---|---|
+| WM outer — `strategic-cascade/outer-frontier-v1` | yes, as a declared 2026-07-23 fixture | **yes** | live receipt: today's `war-machine/strategic-selection` call returned `components.outer` and selected `M-shared-memory-control-build-test` |
+| WM inner — `cascade_construct.py` via `cascade-policy-for` | yes | **no record** | no `proposed cascade for \|psi=…>` note in 173,652 evidence rows |
+| APM memory cascade — `conductor.clj` | yes, and the technote judges it good, not a sketch | **no** | zero artifacts across 7 campaigns; interactive HTTP surface only |
+
+**Exactly one cascade mechanism runs on an automated path, and its content is a
+frozen fixture. Both mechanisms that construct cascades from live material have
+never run on one.**
+
+### What this changes about the operator-model work
+
+The previous section's consequence — "Joe-Scribe deposits would be reachable by
+the APM constructor and not by the WM inner cascade" — is now moot in both
+directions. Neither constructor feeds anything automated, so improving what
+either would retrieve improves nothing currently in use.
+
+What Zai actually receives is **a flat list of leaf memories sorted by hash**.
+A hash sort carries zero information about relevance. That is the real surface,
+and it is a lower bar than any cascade question: an ordering by almost any
+relevance signal would beat it, and would be measurable against the
+`:memory-use` report the scribe cards already require (`:queries`,
+`:surfaced-ids`, `:used-ids`).
+
+So the first place operator-turn mining could plausibly pay is **not as a
+cascade at all** — it is as an ordering over the leaf memories the student is
+already handed. That is a smaller, live target with an existing measurement.
+
+The cascade work remains interesting for the outer loop, whose fixture is the
+thing R10 tuning is meant to replace. But B2 above should be read as "what a
+constructed mathematical cascade would look like if anything consumed one",
+not as a description of anything running.
