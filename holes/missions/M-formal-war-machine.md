@@ -139,6 +139,85 @@ Testable, in order of increasing cost:
 
 ---
 
+## 2. MAP
+
+*Survey, not design. Opened 2026-08-26 (claude-13) after the
+`E-R8-red-ring-fill` excursion returned findings that change scope.*
+
+### 2.1 The requirement correspondence — the useful one
+
+§1.4 maps the *shape* of the APM contract to the shape of the control map
+(phases → stages, transitions → edges). This maps something different and more
+actionable: **the 35 `def valid…` predicates in
+`DarkTower/APMCycleMachine.lean` to War Machine requirements.** They form seven
+families, and every family has a WM counterpart.
+
+| # | family | APM instance | WM counterpart | status |
+|---|---|---|---|---|
+| 1 | identity threading | `validDispatch:108` — `activatedJobId = announcedJobId = reactivatedJobId = terminalJobId` | the **tick** threaded selection → enactment → outcome → γ | **broken, unobserved** (below) |
+| 2 | non-empty evidence handle | digests/refs `≠ ""` | `:realized-score` must be a number, not `nil` | **broken** — `fold_realized.clj:163` |
+| 3 | digest agreement across a boundary | `validStudentTerminalCandidate:240` — `receiptCandidateDigest = candidateDigest` | the SCALE-MATCH PIN: expected leg is the fold's own coverage-ΔG | **prose only** — a claude-10 must-fix enforced by care |
+| 4 | ordering: durability precedes certification | `:239` — `persistedBeforeReceipt = true` | ⑨ folds only outcomes ㉞ durably wrote | **broken** — the 07-08 silence |
+| 5 | provenance containment | `validControllerMemoryUse:326` — `surfacedIds.all (∈ accessibleIds ∨ ∈ searchReceiptIds)` | the grounded mission must lie in the producer's **declared domain** | **broken** — the four-entry whitelist |
+| 6 | separation of powers | `validGuideSnapshotTransition:357` — `depositor ≠ reviewer` | ㉕/㉘ author ≠ reviewer | **holds** |
+| 7 | exit / status pins | `leanExit = 0`, `worktreeClean = true` | ㉒'s act-gate: `cascade-score > 0` ∧ `coverage-score-delta < 0` | **holds** |
+
+**What this does to "AIF faithfulness."** The mission's premise is that the WM's
+only stated requirement is faithfulness to active inference — one global
+property, and therefore apparently unformalisable. The table decomposes it into
+seven checkable ones. **Families 5 and 7 already hold; 1–4 are where the WM has
+been red all year**, and each is a predicate the APM machine already states in
+another vocabulary. So the mission's work is substantially *translation*, not
+invention.
+
+### 2.2 Ready vs missing
+
+| ready — no new code | missing — the actual work |
+|---|---|
+| the 35 predicates, as a vocabulary to translate from | a WM-side statement of families 1–4 |
+| `APMCycleContractEmitter.lean` — the Lean→JSON→Clojure chain, running | the WM's emitted artefact: **the producer-selection table** |
+| `sec-system.tex` ①–㉞ — a protocol spine already written in prose | that spine as types |
+| family 6 and 7, holding in the running system | the repairs behind families 2, 4, 5 (excursion slices 4 and 5) |
+| a Mathlib-free build path — `APMCycleMachine → ExperimentalDesign → ExperimentPreregistration` elaborates with the Mathlib import stripped, as does `BV.lean` | nothing; cost is not a constraint (32 cores at ~7%) |
+
+### 2.3 Surprises — recorded before DERIVE, per the lifecycle
+
+1. **A test fixture became a production domain in 110 minutes** (2026-07-08).
+   `reviewed-candidate-cleans` is a four-entry live-test map that
+   `fold_realized.clj:113` reads as the set of groundable missions. Ticket:
+   `futon3c/holes/tickets/T-fixture-becomes-registry-26082026.md`. This is what
+   makes family 5 a repair rather than a formality.
+2. **Durable evidence is pinned to a mutable tree.** 8 of 18 fold-turn deposits
+   are dead because two flexiargs were edited on 08-15 and 08-23. Ticket:
+   `T-evidence-pinned-to-mutable-prose-26082026.md`.
+3. **Null results did not name their corpus** — three parties, same day,
+   including R8's own promotion note. Ticket: `T-wm-wrong-corpus-26082026.md`.
+4. **Family 1 is broken and nobody has hit it yet.** `fold_realized` states that
+   γ dedups on `:tick`, but the tick in the realized-outcome record and the
+   `(System/currentTimeMillis)` passed at `scripts/wm_scheduled_run.clj:108` are
+   two clocks read at two moments. Found by reading `validDispatch`, not by
+   chasing a symptom — which is the argument for doing the mapping before the
+   modelling.
+5. **The producer substitution of 2026-07-08 narrowed the domain**, and no
+   commit message, docstring or excursion records that it did.
+   `realized-outcome-of` works for any enacted decision;
+   `realized-outcome-grounded` for four missions.
+
+### 2.4 Excursions from this mission
+
+**`futon3c/holes/excursions/E-R8-red-ring-fill.md`** is an excursion *from this
+mission*, opened 2026-08-26 and dived into before MAP was written. That ordering
+was accidental but productive: the excursion supplied every entry in §2.3, and
+families 1, 2, 4 and 5 above are stated in terms of defects it found. The
+excursion's slices 4 and 5 are the repairs behind families 2 and 5, and are in
+series — neither alone produces a realized outcome.
+
+**Consequence for module order.** The modular plan
+(`p4ng/empirics-futon/NOTE-modular-formalisation-order.md`) makes module 1
+R8 + R14 with a three-clause property. Those three clauses are families 4, 5 and
+1 of the table above. Module 1 is therefore not a special case — it is the first
+instantiation of a vocabulary that covers the whole loop.
+
 ## Honest bounds
 
 **The APM contract is enforced; this one would be partly unmet.** APM's
