@@ -98,3 +98,94 @@ descent that does not depend on the shelf having declared it, which is the lever
 on point 4.
 
 Neither lever is exercised here. This is a sampler, not a result.
+
+---
+
+## Correction, same day — cascade B was built from the wrong psi
+
+*Joe: "item B, one pattern `ai4ci/process-vs-exposition` doesn't match what I'd
+have expected — I'd have thought we'd have patterns from these libraries:
+math-formalization … math-strategy … and maybe, uniquely to the mathematics
+domain, some 'leaf memories' that are not patterns."*
+
+Both halves of that are right, and the second overturns a conclusion above.
+
+### B was psi error, not retrieval failure
+
+The math libraries are all present in the index: **121 patterns across all 15**
+(`math-formalization` 22, `-CA` 23, `-CV` 6, `-FA` 2, `-GN` 2, `-GR` 1, `-MG` 1,
+`math-informal` 24, `-CA` 6, `-CO` 2, `-CT` 7, `-LO` 1, `-NA` 2, `-RA` 2,
+`math-strategy` 20). Nothing was missing.
+
+The psi was. I took the first 950 characters of the f34/f35 coined-pattern
+files, which is file-header bookkeeping — *"Created because no existing math
+library pattern fits the mined rules. This file is ingested explicitly by
+`scripts/apm-ingest-coined-pattern-files.sh`…"*. `ai4ci/process-vs-exposition`
+is a perfectly good match for that text. It is not mathematics.
+
+Rebuilt from the mined rules themselves (f39 + f34 + f35 bodies, boilerplate
+stripped — monotonicity-lemma variants, instance synthesis, argument order):
+
+| | psi | chars | size | C | H | descent | top rel | warrant |
+|---|---|---|---|---|---|---|---|---|
+| B (retracted) | f34/f35 file headers | 950 | 1 | 0.502 | 1.000 | 0 | 0.5020 | yes |
+| **B2** | f39/f34/f35 mined mathematical rules | 950 | **8** | **2.420** | 0.923 | **4** | 0.4360 | no |
+
+B2's members, 7 of 8 in the math libraries:
+
+    0.4360  math-strategy/compose-independent-lemmas
+    0.3770  math-informal/induction-and-well-ordering
+    0.3120  math-informal/parametric-tension-dissolution
+    0.3110  math-strategy/exhaustion-as-theorem
+    0.3020  agent/reduction-to-kernel
+    0.3010  math-informal/split-into-cases
+    0.2910  math-strategy/non-circularity-check
+    0.2900  math-informal/find-the-right-abstraction
+
+### This overturns point 4 above
+
+Point 4 said descent edges are rare, come only from declared phylogeny, and so
+"the only cascade here with reliable internal structure is C, the declared one."
+**B2 has 4 descent edges from the constructor.** The maths libraries declare
+phylogeny among themselves; the general shelf largely does not. So a constructed
+cascade DOES get structure — in a domain whose library was built with relations.
+The correct statement is that structure is a property of the LIBRARY, not of the
+constructor or the psi, and the maths domain is the one that has it.
+
+It also strengthens point 1: B2 is the largest and most coherent constructed
+cascade measured (size 8, C 2.420, H 0.923), from the same 950 characters that
+produced size 1 when they were bookkeeping. Breadth of concern, not length.
+
+And the breadth/decisiveness trade-off in point 3 survives: B2 does **not**
+warrant (0.436 < 0.45) where the single-pattern B did.
+
+### Leaf memories are real, are 682, and are invisible to this constructor
+
+Joe's "leaf memories that are not patterns" exist and are specific to the maths
+domain: **683 `memory/assert` hyperedges, 682 distinct entries**, attached
+across **69 distinct `math-*` patterns**. Ids are the mined rules themselves —
+`e-codexpilot-bound-polynomial-sum-degree-by-a-common-summand-bound`,
+`e-codexpilot-derive-integrable-from-nonzero-bochner-integral`,
+`e-codexpilot-bridge-radial-integrand-order-with-pointwise-commutativity`.
+Prefixes are all APM (`codexpilot` 123, `apm` 35, then problem ids).
+
+**There are two cascade constructors with different universes, and only one
+reaches these:**
+
+| constructor | universe | reaches leaf memories? | used by |
+|---|---|---|---|
+| `conductor.clj` memory cascade | substrate traversal: reviewed `memory/assert` → `pattern/has-semantic-why` | **yes** | APM / the Zai student |
+| `cascade_construct.py` | `minilm_pattern_embeddings.json`, 1371 patterns (line 32) | **no** | the WM inner loop, via `cascade-policy-for` |
+
+So the WM's on-the-fly cascade can only ever return patterns. The 682 leaf
+memories — the specific, actionable rules — are structurally unreachable from
+it. The maths domain has both constructors; the WM has only the pattern one.
+
+**Consequence for the operator-model work.** If Joe-Scribe deposits operator
+corrections as leaf memories attached to patterns (the destination the role card
+specifies), they land in the substrate where the APM constructor can see them
+and the WM inner cascade cannot. Getting operator-derived material into the
+inner loop needs either (a) the deposits to reach the embedding file's universe,
+or (b) the inner constructor to traverse the substrate the way `conductor.clj`
+does. That is a wiring requirement the role card does not currently name, and it
+belongs in its "Wiring this card needs" section.
