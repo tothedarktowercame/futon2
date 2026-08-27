@@ -1,0 +1,76 @@
+{:census-version 1
+ :corpus "data/wm-trace/wm-trace-*.edn"
+ :total-files 52
+ :total-records 791
+ :record-index-base 0
+ :families
+ {:family-1-identity-threading
+  {:witnesses 0
+   :records-checked 791
+   :files-touched 0
+   :examples []
+   :fields {:realized-outcome-tick [:realized-outcome :tick]
+            :record-tick [:tick]}}
+
+  :family-2-non-empty-handle
+  {:witnesses 88
+   :records-checked 791
+   :files-touched 5
+   :examples [{:file "wm-trace-2026-07-02.edn" :record-index 16}
+              {:file "wm-trace-2026-07-02.edn" :record-index 17}
+              {:file "wm-trace-2026-07-02.edn" :record-index 18}]
+   :fields {:handle [:realized-outcome]
+            :realized-leg [:realized-outcome :realized-G]}
+   :realized-leg-types {:number 85 :nil 3 :other 0}}
+
+  :family-4-durability-before-fold
+  {:witnesses 88
+   :records-checked 791
+   :files-touched 5
+   :examples [{:file "wm-trace-2026-07-02.edn" :record-index 16}
+              {:file "wm-trace-2026-07-02.edn" :record-index 17}
+              {:file "wm-trace-2026-07-02.edn" :record-index 18}]
+   :fields {:persisted-handle [:realized-outcome]}}
+
+  :family-5-declared-domain
+  {:witnesses 88
+   :records-checked 791
+   :files-touched 5
+   :examples [{:file "wm-trace-2026-07-02.edn" :record-index 16}
+              {:file "wm-trace-2026-07-02.edn" :record-index 17}
+              {:file "wm-trace-2026-07-02.edn" :record-index 18}]
+   :fields {:enacted-mission [:enactment :mission]}}
+
+  :family-6-separation-of-powers
+  {:witnesses 31
+   :records-checked 791
+   :files-touched 7
+   :examples [{:file "wm-trace-2026-07-14.edn" :record-index 0}
+              {:file "wm-trace-2026-07-14.edn" :record-index 1}
+              {:file "wm-trace-2026-07-14.edn" :record-index 2}]
+   :fields {:author [:wm-version :author]
+            :reviewer [:wm-version :reviewer]}}
+
+  :family-7-exit-status-pins
+  {:witnesses 4
+   :records-checked 791
+   :files-touched 1
+   :examples [{:file "wm-trace-2026-07-14.edn" :record-index 0}
+              {:file "wm-trace-2026-07-14.edn" :record-index 1}
+              {:file "wm-trace-2026-07-14.edn" :record-index 2}]
+   :fields {:container [:ranked-actions 112 :action :act-gate]
+            :cascade-score [:ranked-actions 112 :action :act-gate :cascade-score]
+            :coverage-score-delta [:ranked-actions 112 :action :act-gate
+                                   :coverage-score-delta]}
+   :value-types {:cascade-score-number 4
+                 :coverage-score-delta-number 0
+                 :coverage-score-delta-nil 4}}}
+
+ :realized-outcome-disappearance
+ {:last-present {:file "wm-trace-2026-07-06.edn"
+                 :record-index 12
+                 :timestamp "2026-07-06T12:04:27.412283747Z"}
+  :first-subsequent-absent {:file "wm-trace-2026-07-06.edn"
+                            :record-index 13
+                            :timestamp "2026-07-06T13:04:30.639215623Z"}
+  :date "2026-07-06"}}
