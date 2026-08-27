@@ -599,6 +599,16 @@ work.
 6. **A Clojure mirror, or a typed hole.** `CoverageReport` has
    `futon2/src/futon2/aif/coverage_check.clj`. Where no mirror exists the
    contract entry records the absence rather than omitting the clause.
+7. **Predicate names are checked constants, and a named module is imported.**
+   Added 2026-08-27 after the v2 emitter. Every `lean-predicate` and conjunct in
+   the contract was a hand-copied string, so a rename inside a module would have
+   drifted past the contract with the build still green. They are checked name
+   literals now, which fails elaboration on an unknown constant — and that
+   requires the emitter to import every module it names, because naming a module
+   without importing it is the same defect one level up. The rule earned itself
+   immediately: the policy-grade clause listed `scoreUnderObservedWiring` and
+   `notSustainedSingleAction` as conjuncts and **neither is a declaration
+   anywhere**, which no amount of reading had caught.
 
 #### Build order that follows
 
