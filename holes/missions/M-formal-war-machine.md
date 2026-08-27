@@ -290,8 +290,11 @@ deliberate stop with a written re-arm condition).
 The verdicts mostly survived. **The reporting did not.** So the repairs order
 themselves:
 
-> **(1) make the machine's own reports honest, before (2) changing what it does,
+> **(0) state it in Lean and align a Clojure specification to it, then
+> (1) make the machine's own reports honest, before (2) changing what it does,
 > before (3) adding capability.**
+
+Tier 0 is the reference the other three are stated against; Joe, 2026-08-27.
 
 This is not a preference. `CommitmentTemperature.lean`'s
 `live_gain_repair_changes_no_action` proves that R8's repairs cannot move a
@@ -300,7 +303,75 @@ not be *evaluated*, because nothing would distinguish "it worked" from "it never
 ran". That is the 2026-07-08 failure exactly, and Tier 1 is what makes Tier 3
 checkable.
 
-### 3.2 Tier 1 — attestation and typed absence (additive; no decision logic touched)
+### 3.1b Tier 0 — the Lean/Clojure reference, and everything refers back to it
+
+*Joe, 2026-08-27: "a Lean model with an aligned Clojure specification (like we
+have for the APM cycle machine) would provide a much better reference for what's
+actually true than just about anything else … this should be Tier 0 and
+everything else needs to refer back to it."*
+
+**Accepted, and it repairs a defect in the tiers as first written.** Tier 1 made
+the machine's reports honest **once**. Nothing kept them honest. A contract with
+mutation tests is what converts a one-time edit into a property the build
+defends — WR-8's *typed files are sources of truth*, applied to this mission's own
+output.
+
+**What exists and what is missing.** The Lean half is started:
+`DarkTower/WarMachine/GainChain.lean` (families 1, 2, 4, 5 + the chain property)
+and `CommitmentTemperature.lean` (family 8). Absent: the emitter, the Clojure
+validator, the mutation suite, the qualification record — four of APM's five
+links.
+
+**The validation target is the trace.** APM validates records against schemas;
+our families are about behaviour over time, and the durable record of that
+behaviour is `futon2/data/wm-trace/*.edn` — 52 files carrying `:tau`,
+`:tau-mode`, `:selection-gain`, `:realized-outcome`, `:policy` per record. So the
+emitted contract validates **trace records**, and non-vacuity is countable
+directly: how many records exercise each clause.
+
+#### The acceptance bar, which the corpus already supplies
+
+**The contract must retro-trip on the known incidents.** WR-26 requires exactly
+this of a tripwire before arming, and we have a dated incident corpus:
+
+| date | what a correct contract must flag |
+|---|---|
+| **2026-07-09** | first trace after the producer substitution — `:realized-outcome` absent in every record thereafter |
+| **2026-07-13** | `:tau-mode` → `:selection-gain-only`, so τ_eff = 1/g with g pinned at 1.0 — τ = 1.0 in every file from 07-15 to 07-21 |
+| **2026-07-15** | 22 identical `:no-selection` closes with no repair obligation |
+
+A contract that does not date those three from the trace corpus is a document,
+not a contract. This is APM's `f25`/`f30` refusal-theorem discipline on our own
+incidents, and it is the difference between "the model says X" and "the model
+would have caught X".
+
+#### What the contract will and will not cover — stated before it is built
+
+**Record-shaped families validate.** 1 (identity threading — one tick across
+selection/outcome/fold), 2 (a handle is present and typed), 4 (durable before
+fold), 5 (the mission is in the producer's declared domain).
+
+**Sensitivity-shaped families do not.** Family 8 (`governs`) is a claim about
+counterfactual τ — *would a different temperature have chosen differently* — and
+no record can witness it. Those stay Lean theorems about the code, not contract
+clauses over the trace. Saying so now prevents the contract from being read as
+covering more than it does, which §1.6's criterion 4 names as this mission's
+worst exposure.
+
+#### First increment, kept small
+
+`WarMachineContractEmitter.lean` emitting the four record-shaped families —
+each clause carrying its id, its predicate, its Clojure locus from §2.1b, and its
+current holds-status — plus a Clojure validator that runs the clauses over
+`data/wm-trace/` and reports per-clause witness counts. One file each. Mutation
+tests and the qualification record follow, not in the same packet.
+
+### 3.2 Tier 1 — attestation and typed absence *(each stated as a contract clause first)*
+
+**Ordering consequence of Tier 0.** These four are no longer "make the reports
+honest". Each becomes: **a clause in the emitted contract, then an implementation
+that satisfies it, then a mutation test proving drift is rejected.** The repair is
+the second step of three, not the whole of it.
 
 Each removes one indistinguishability. None changes a decision.
 
@@ -319,7 +390,9 @@ repair is judged with.
 
 ### 3.3 Tier 2 — the paper (zero code, and Joe's stated goal)
 
-For plop-2026's reputability, in descending value:
+For plop-2026's reputability, in descending value. **Every claim below should
+cite the Tier-0 contract rather than prose once it exists** — that is what makes
+the paper's R-number table checkable rather than asserted:
 
 1. **Publish both axes.** `aif-r1-r16-pattern-map.md` asks *is it built and
    load-bearing?*; `wr-overlay.edn` asks *does the discipline hold?* They use the
@@ -335,7 +408,9 @@ For plop-2026's reputability, in descending value:
 
 ### 3.4 Tier 3 — behavioural, one at a time, Joe's call
 
-Held until Tier 1 gives them an instrument:
+Held until Tier 1 gives them an instrument, and **each must leave the Tier-0
+contract satisfied** — a behavioural repair that breaks a clause is drift, and the
+mutation suite is what says so:
 
 - **R8 slice 4** — `deposits-by-id` degrade rather than throw.
 - **R14's edge** — (a) sample `P(π)`, (b) a second non-τ-scaled term, (d) route
