@@ -611,6 +611,73 @@ reason — `wm-counterpart-is-prose-only` (family 3), `already-holds` (6 and 7),
 list said they were one. A top-level conjunction could not have carried any of
 it: there is no field on a `Prop` for what it declines to cover.
 
+#### What we want instead: end-to-end criteria over the operator loop
+
+*Joe, 2026-08-27: "I think we need something considerably weaker than
+`warMachineCompliant` — and this is where the 'closure over the operator'
+matters. E.g. 'every operator turn is stored in the Evidence Landscape' is an
+obvious one … But these can be chained: 'every operator turn is stored in the
+Evidence Landscape, processed with Air, decorated with metadata, forming part of
+a candidate cascade, and used in problem selection by the WM'."*
+
+This is a **third kind of clause**, and neither of the two we have. A family
+clause is about one record's internal consistency — identity threaded, outcome
+durable, mission inside the declared domain. An end-to-end criterion is about a
+**population**: does everything that entered the pipe come out the far end. It is
+a conservation law, not a correctness theorem, which is exactly why it is weaker
+and exactly why it is checkable.
+
+Written as a chain, every prefix is itself a criterion, so the family is graded:
+
+| | criterion |
+|---|---|
+| **C1** | every operator turn is stored in the Evidence Landscape |
+| **C2** | C1, and processed with Air |
+| **C3** | C2, and decorated with metadata |
+| **C4** | C3, and forms part of a candidate cascade |
+| **C5** | C4, and is used in problem selection by the WM |
+
+#### Two things the form has to get right
+
+**The boolean is uninformative; the drop point is the information.** "C5 holds"
+is another dimension with no singularity — true, and it says nothing about which
+stage carried it; false, and nothing about which stage lost the turns. What a
+criterion must report is **where the population falls**, and each stage must
+either pass an element on or record a *typed* reason for dropping it. That is
+family 5's typed absence lifted from record grain to population grain, and it is
+why this fits the standard's first clause rather than sitting beside it: it is
+the same vocabulary at a different grain, not a second notion of absence.
+
+**The denominator has to be external, and that is the point.** C1 asks what
+fraction of operator turns reached the store — and the store cannot answer,
+because the store is the numerator. Anything that never arrived is invisible from
+inside. WR-0 requires *"a verdict it cannot issue to itself"*, and an end-to-end
+criterion is one of the few properties in this mission that structurally has that
+character: it can only be checked against a record the machine did not write.
+
+#### C1 is not checkable today, and the reason is not missing data
+
+Measured 2026-08-27 while drafting this, and the attempt is the finding.
+
+- The external record for this session — the operator's own transcript — carries
+  **26 operator turns** (231 `user`-typed records, of which 205 are tool results
+  rather than turns).
+- The Evidence Landscape carries **324** distinct `claude-13-turn-N` ids.
+
+**The two numbers are in different units and nothing reconciles them.** The
+transcript counts operator messages; the turn id counts *seat* turns, which
+include the agent's. So C1's ratio cannot be formed at all — not because a
+measurement is missing, but because no mapping exists between the external
+record's unit and the store's key. That mapping is the first deliverable, and it
+is smaller than a Lean module.
+
+The later stages are worse off and should be typed as such rather than reported
+as zero: Air processing, metadata decoration, cascade candidacy and WM problem
+selection have no instrumented per-turn survival record at all. `sec-boundary`
+already admits the adjacent case in the paper — *"the two denominators are
+computed in the course of that join and discarded"* — which is this defect one
+join away.
+
 **What unifies is the vocabulary, and that is the whole of it.** Standard clause
 1 is the unity: define a family or adapt to one, and introduce no second notion
 of presence, typed absence, or declared domain. The parts stay separate and
