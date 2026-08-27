@@ -574,7 +574,49 @@ The object that legitimately holds them together is the one APM already uses:
 **the emitted contract document**. Lean states each clause; the document names
 every clause with its predicate, its witnesses and its Clojure locus; the Clojure
 side emits observations against it; Lean judges the trace. Holism belongs at the
-document, and the document is currently missing two of the four modules.
+document.
+
+#### And we may never want that theorem — not just not yet
+
+*Joe, 2026-08-27: "I didn't mean one monolithic build, but 'one vocabulary' …
+given the Deleuzian framing, we may never want a `warMachineCompliant` theorem!
+Certainly not at the start."*
+
+Accepted, and the reasons are stronger than the typing objection above.
+
+**It is the verdict the apparatus issues to itself.** WR-0 requires of this
+stack *"a verdict it cannot issue to itself — every claim the apparatus makes
+about its own success must be movable only by evidence it did not manufacture."*
+A theorem named `warMachineCompliant`, proved inside the machine's own
+formalisation, is that claim in its purest form. The per-clause contract is not a
+weaker version of it; it is the shape that keeps the property.
+
+**It would be a dimension with no singularity.** A conjunction over every clause
+takes two values and in practice one. True, it says nothing about which clause
+carried it; false, nothing about which broke. That is R14's defect one level up —
+a quantity computed, reported, and unable to change any decision — and the whole
+discrimination programme says the information is in what fails.
+
+**The rosetta grows, and a conjunction cannot.** §2.1c records that the table
+grows in two directions, and families 8 and 9 arrived precisely because APM could
+not state them. A conjunction over a growing list is either restated on every
+addition or silently stale. The document absorbs growth; a theorem does not.
+
+**A conjunction has nowhere to put a boundary.** This is the concrete
+consequence, and it is now visible in the emitted document. R5 asks a criterion
+set to name at least one outcome it does not cover; the contract's `reserved`
+list does exactly that, and as of `06327f99b2` each entry carries a **typed**
+reason — `wm-counterpart-is-prose-only` (family 3), `already-holds` (6 and 7),
+`designed-unbuilt` (9). Those are three different things and the earlier flat
+list said they were one. A top-level conjunction could not have carried any of
+it: there is no field on a `Prop` for what it declines to cover.
+
+**What unifies is the vocabulary, and that is the whole of it.** Standard clause
+1 is the unity: define a family or adapt to one, and introduce no second notion
+of presence, typed absence, or declared domain. The parts stay separate and
+share words. That is what a pattern language is, and it is the same structure the
+Snatch measurement found — a semilattice is overlap *without* subsumption, and
+the tree is the monolith.
 
 #### The module standard
 
