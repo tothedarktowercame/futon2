@@ -668,8 +668,46 @@ Measured 2026-08-27 while drafting this, and the attempt is the finding.
 transcript counts operator messages; the turn id counts *seat* turns, which
 include the agent's. So C1's ratio cannot be formed at all — not because a
 measurement is missing, but because no mapping exists between the external
-record's unit and the store's key. That mapping is the first deliverable, and it
-is smaller than a Lean module.
+record's unit and the store's key.
+
+#### What the measurement found once it was built
+
+`futon2/scripts/c1_turn_survival.py` (codex-22, `4e62e97a`; corrected at review,
+`48bf098`). Its most useful output is the negative one: **there is no per-turn
+key.** Session ids join (`sessionId` ↔ `:evidence/session-id`); the transcript's
+`uuid` and `promptId` have zero hits in evidence; `:evidence/in-reply-to` is an
+emacs transport id that does not appear in the transcript at all. So C1 is
+computable only as a text-matched **lower bound**, and the field that would make
+it authoritative is named: evidence must carry `:evidence/source-turn-id` equal
+to the transcript record's `uuid`.
+
+For this session, 23 operator turns — after excluding four records the harness
+types as `user` and the operator never sent: the compaction summary, the
+local-command caveat, the `/compact` block and its stdout. Those four were in the
+first draft's denominator, which is the ordinary way a conservation law goes
+wrong: counting things that never entered the pipe.
+
+Of the 23:
+
+| | |
+|---|---|
+| **15** | stored as `chat-turn` records |
+| **7** | present **only as the truncated `query` string of a context-retrieval event** |
+| **1** | absent from the store entirely |
+
+**The seven are the finding.** Those turns were *processed* — a retrieval ran on
+them, and the store kept the first hundred-odd characters as that retrieval's
+input — while never being stored as turns. So C2 can hold for a turn on which C1
+fails, and the chain is not the totally ordered funnel the criterion assumed:
+stages can be reached out of order, and a downstream record can be the only
+surviving evidence that an upstream one existed. An end-to-end criterion has to
+be stated over a *set* of stages with typed attrition per stage, not over a
+sequence.
+
+This is also why the loss type matters more than the count. The first draft
+reported all eight as `unmatchable-by-text`, which is honest about the join and
+silent about the phenomenon; seven of them turn out to describe a specific,
+fixable defect and one is a genuine hole.
 
 The later stages are worse off and should be typed as such rather than reported
 as zero: Air processing, metadata decoration, cascade candidacy and WM problem
