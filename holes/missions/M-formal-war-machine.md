@@ -366,6 +366,57 @@ current holds-status — plus a Clojure validator that runs the clauses over
 `data/wm-trace/` and reports per-clause witness counts. One file each. Mutation
 tests and the qualification record follow, not in the same packet.
 
+### 3.1c Handoff series — and a census finding that reorders it
+
+*Joe, 2026-08-27: "start to develop handoffs for the Lean formalisation of the
+more straightforward components."*
+
+**First, a measurement that changes what Tier 0 can claim.** A key census over
+`data/wm-trace/` (52 files, counting files carrying each key):
+
+| key | files | family it would witness |
+|---|---|---|
+| `:tau`, `:decision` | **52** | — (family 8, the one that *cannot* be trace-validated) |
+| `:tau-mode` | 11 | — |
+| `:selection-gain`, `:author`, `:reviewer` | 7 | 6 (separated powers) |
+| `:realized-outcome`, `:policy`, `:tick`, `:enactment`, `:act-gate-verdicts` | 5 | 1, 2, 4, 5 |
+| `:cascade-score`, `:coverage-score-delta` | **1** | 7 (pinned exit) |
+
+**So the families that hold today are the least witnessable, and family 7 has one
+file.** The intuitive first move — demonstrate the Tier-0 chain end-to-end on a
+property that already holds, so the pipeline is not entangled with a repair —
+would have produced a **near-vacuous** contract. That is §1.6's criterion 4
+arriving as a measurement rather than a worry, before any code was written.
+
+Note also the irony: the only keys present across the whole corpus are `:tau` and
+`:decision`, and `:tau` belongs to the one family that cannot be validated from a
+record at all.
+
+**What survives.** The 5 files carrying `:realized-outcome` are the enacting
+window, and the corpus **does** contain the incident the contract must retro-trip
+(2026-07-09). So Tier 0 is buildable — on single-digit witness counts, which the
+qualification record must state rather than round up.
+
+#### The series
+
+| # | packet | why this order |
+|---|---|---|
+| **H1** | **Per-clause witness census** over `data/wm-trace/`, *per record* not per file, for each of families 1, 2, 4, 5, 6, 7 | the numbers above are per-file and mine, from one sitting. Nothing should be built on them until they are per-record and independently produced |
+| **H2** | `WarMachineContractEmitter.lean` — emit families **1, 2, 4, 5** as clauses, each carrying id, predicate, Clojure locus (§2.1b), holds-status | the best-witnessed group, and the one containing the retro-trip incident |
+| **H3** | `generated_wm_contract.clj` — load the emitted contract, validate over the trace corpus, report **per-clause witness counts** | the Clojure half; counts are the deliverable, not a pass/fail |
+| **H4** | mutation tests — perturb each emitted clause, prove the Clojure rejects the drift | this is what makes the contract a gate rather than a document |
+| **H5** | qualification record — digest match, non-vacuity with witness counts stated, residual holes for the unwitnessed families | families 3, 6, 7 land here as **recorded holes**, not silent greens |
+
+**H1 gates everything after it.** If the per-record census shows fewer witnesses
+than the per-file count suggests, H2's family selection changes. Splitting the
+census from the emitter is the *"split discovery from implementation"* rule
+applied to our own programme.
+
+**Families 3, 6, 7 are deliberately not modules yet.** With 7, 7 and 1 files of
+evidence they would be preservation properties with almost nothing to preserve
+against. They belong in H5's residual-hole record until the corpus grows —
+which is itself a reason to want the loop running again.
+
 ### 3.2 Tier 1 — attestation and typed absence *(each stated as a contract clause first)*
 
 **Ordering consequence of Tier 0.** These four are no longer "make the reports
