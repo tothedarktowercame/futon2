@@ -111,45 +111,56 @@ def transcript(session_id):
     return path, turns
 
 
-def edn_string(raw):
-    """Decode the JSON-compatible escapes used in an EDN string body."""
-    return json.loads('"' + raw + '"')
+def retrieval_queries(payload):
+    """The `query` strings of context-retrieval events, which the store keeps
+    TRUNCATED.  A turn appearing only here was processed downstream without
+    ever being stored as a turn."""
+    out = []
+    for entry in payload.get("entries", []):
+        body = entry.get("evidence/body")
+        if isinstance(body, str):
+            try:
+                body = json.loads(body)
+            except json.JSONDecodeError:
+                continue
+        if isinstance(body, dict) and body.get("event") == "context-retrieval":
+            query = body.get("query")
+            if query:
+                out.append(query)
+    return out
 
 
-def evidence_entries(raw, session_id):
-    """Extract only fields needed for the join from the Evidence API's EDN."""
-    chunks = [chunk for chunk in re.split(r"(?=\{:evidence/body)", raw)
-              if ":evidence/author" in chunk]
+def evidence_entries(payload, session_id):
+    """Operator chat-turn records, parsed rather than scraped.
+
+    The API serves JSON when asked for it (`Accept: application/json`), so the
+    earlier regex over the EDN text is gone.  That scraping produced three
+    separate extraction bugs in one afternoon -- an anchored `"}`, a
+    first-match event classifier, and a role-blind substring search -- and each
+    one presented as a finding about the pipeline rather than about the
+    instrument.
+    """
     entries = []
-    for chunk in chunks:
-        session = re.search(r':evidence/session-id "([^"]+)"', chunk)
-        if session and session.group(1) != session_id:
+    for entry in payload.get("entries", []):
+        if entry.get("evidence/session-id") not in (None, session_id):
             raise SystemExit(
                 "c1_turn_survival: session-id filter returned another session; "
                 "refusing an unverified API filter")
-        if ':event "chat-turn"' not in chunk or ':role "user"' not in chunk:
+        body = entry.get("evidence/body")
+        if isinstance(body, str):
+            try:
+                body = json.loads(body)
+            except json.JSONDecodeError:
+                continue                      # an EDN-serialised non-chat event
+        if not isinstance(body, dict):
             continue
-        # NOT anchored on "}: :text is not always the last field in the body,
-        # and anchoring dropped every entry where it is not, which showed up as
-        # turns "missing" from the store that were in it.
-        text = re.search(r':text "((?:\\.|[^"\\])*)"', chunk, re.S)
-        if not text:
+        if body.get("event") != "chat-turn" or body.get("role") != "user":
             continue
-        turn_id = re.search(r':turn-id "([^"]+)"', chunk)
-        in_reply_to = re.search(r':evidence/in-reply-to "([^"]+)"', chunk)
-        evidence_id = re.search(r':evidence/id "([^"]+)"', chunk)
-        entries.append({"text": edn_string(text.group(1)),
-                        "turn-id": turn_id.group(1) if turn_id else None,
-                        "in-reply-to": in_reply_to.group(1) if in_reply_to else None,
-                        "evidence-id": evidence_id.group(1) if evidence_id else None})
+        entries.append({"text": body.get("text", ""),
+                        "turn-id": body.get("turn-id"),
+                        "in-reply-to": entry.get("evidence/in-reply-to"),
+                        "evidence-id": entry.get("evidence/id")})
     return entries
-
-
-def retrieval_queries(raw):
-    """The `query` strings of context-retrieval events, which the store keeps
-    TRUNCATED.  A turn appearing only here was processed downstream without ever
-    being stored as a turn — a different loss from not being there at all."""
-    return [q for q in re.findall(r'\\"query\\" \\"((?:[^\\\\"]|\\\\.)*)\\"', raw)]
 
 
 def fetch_evidence(session_id, turns):
@@ -163,14 +174,15 @@ def fetch_evidence(session_id, turns):
                                     "since": since,
                                     "limit": LIMIT})
     url = EVIDENCE_URL + "?" + query
-    with urllib.request.urlopen(url, timeout=180) as response:
+    request = urllib.request.Request(url, headers={"Accept": "application/json"})
+    with urllib.request.urlopen(request, timeout=180) as response:
         if response.status != 200:
             raise SystemExit(f"c1_turn_survival: HTTP {response.status} for {url}")
         raw = response.read().decode("utf-8")
-    counts = re.findall(r':count (\d+)', raw)
-    count = int(counts[-1]) if counts else 0
-    return (evidence_entries(raw, session_id), count >= LIMIT, since, count,
-            retrieval_queries(raw))
+    payload = json.loads(raw)
+    count = payload.get("count", len(payload.get("entries", [])))
+    return (evidence_entries(payload, session_id), count >= LIMIT, since, count,
+            retrieval_queries(payload))
 
 
 def assess(session_id):
