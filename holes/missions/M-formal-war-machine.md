@@ -506,6 +506,111 @@ evidence they would be preservation properties with almost nothing to preserve
 against. They belong in H5's residual-hole record until the corpus grows —
 which is itself a reason to want the loop running again.
 
+### 3.1d The five excursions as one build — a module standard, and three defects it catches
+
+*Joe, 2026-08-27: "we'd now have a more definitive slice of our rosetta stone to
+model formally — although we have developed a modular approach to the design,
+maybe we should take a holistic approach to the build, so they align on a
+standard."*
+
+Reading the five red-ring excursions as a group, against what is actually on
+disk, rather than each against its own excursion.
+
+#### Where the build has got to
+
+| ring | excursion | Lean module | vocabulary | in the emitted contract |
+|---|---|---|---|---|
+| **R8** | `E-R8-red-ring-fill` | `GainChain.lean` | **defines** families 1, 2, 4, 5 | yes — as four family entries |
+| **R14** | `E-R14-red-ring-fill` | `CommitmentTemperature.lean` | **its own** (`governs`, `Selector`, `factorsThroughDiscard`) | **no** |
+| **R5** | `E-R5-red-ring-fill` | `CoverageReport.lean` | **adapts** to families 2 and 5 | yes — `coverage-clause` |
+| **R5** (G) | same | `PolicyGrade.lean` | **its own** (`Run`, `wiringSensitive`) | **no** |
+| **R6** | `E-R6-red-ring-fill` | — | — | reserved, family 6 |
+| **R2** | `E-R2-red-ring-fill` | — | — | no family assigned |
+
+#### Three defects the group reading catches
+
+**1 · Families 8 and 9 exist only in prose.** §2.1c names them — family 8 is
+`I(τ ; action) = 0`, family 9 is weights-versus-membership — and neither appears
+in `GainChain.lean`, in `ContractEmitter.lean`, or in `CommitmentTemperature.lean`
+itself, which never mentions a family number. The emitter reserves 3, 6 and 7 and
+stops. So the mission's rosetta and the emitted contract disagree about how many
+families there are, and the disagreement is invisible from inside either one.
+
+**2 · Two of four modules are islands.** `CoverageReport` does the alignment
+properly: `criterionSelection` and `reportOccurrence` adapt a criterion report to
+the *existing* `inhabitedHandle`, `typedAbsence` and `declaredDomain`, so it adds
+no parallel notion of presence or absence. `CommitmentTemperature` and
+`PolicyGrade` each define their own vocabulary and import nothing. For
+`PolicyGrade` that was deliberate and stated in its packet; for
+`CommitmentTemperature` it was not decided, it just happened.
+
+**3 · The fixture polarities are followed and never named.** Three polarities
+were agreed for fixtures — accepting, refusing-broken, refusing-plausible-fix.
+Every module has all three, and no module says which theorem is which:
+
+| module | accepting | refusing-broken | refusing-plausible-fix |
+|---|---|---|---|
+| `GainChain` | `gain_chain_sound_nonvacuous` | `two_clocks_break_threaded_identity` | `substitution_2026_07_08_narrows_domain_is_refused` |
+| `CommitmentTemperature` | `habit_prior_governs` | `live_selector_does_not_govern` | `record_sensitivity_is_not_governance` |
+| `CoverageReport` | `coverage_reported_nonvacuous` | `warm_customer_pays_…_is_refused` | `adding_a_channel_does_not_satisfy_coverage` |
+| `PolicyGrade` | `pattern_driven_g4_snatcher_earns_policy_grade` | `grim_trigger_sharer_refused_by_sg2` | `grim_trigger_snatcher_passes_sg2_fails_sg4` |
+
+The assignment above is mine, made by reading; it is not recorded anywhere the
+build can check. A module missing its plausible-fix witness is the failure that
+matters, because that witness is what stops the naive repair, and nothing would
+currently notice its absence.
+
+#### The alignment surface is the contract, not a single theorem
+
+The tempting holistic move is one top-level `warMachineCompliant` conjoining
+every module's property. **It would be false unification.** The modules do not
+share a carrier: `CoverageReport` is parametric in an outcome type,
+`PolicyGrade` quantifies over finished runs, `CommitmentTemperature` over
+selectors, `GainChain` over fold occurrences. A conjunction across them would
+either need a fabricated common type or would be a tuple wearing the word
+"sound".
+
+The object that legitimately holds them together is the one APM already uses:
+**the emitted contract document**. Lean states each clause; the document names
+every clause with its predicate, its witnesses and its Clojure locus; the Clojure
+side emits observations against it; Lean judges the trace. Holism belongs at the
+document, and the document is currently missing two of the four modules.
+
+#### The module standard
+
+A Tier 0 module is admissible when all six hold. Five are already true of at
+least one module, so this is mostly making practice checkable rather than new
+work.
+
+1. **One vocabulary.** The module either *defines* a requirement family or
+   *adapts* to one already defined. It introduces no second notion of presence,
+   typed absence, or declared domain. A module that genuinely needs its own
+   vocabulary says so in its docstring and says why.
+2. **Three polarities, named.** At least one accepting witness, one
+   refusing-broken witness, one refusing-plausible-fix witness, each identified
+   as such in the module docstring.
+3. **Every declared field constrained** by some theorem. Three unconstrained
+   items were caught in `GainChain` at review; the rule is what stops the fourth.
+4. **In the contract, or explicitly out of it.** The module emits a clause in
+   `ContractEmitter.lean`, or its docstring records why it does not. Silence is
+   the current state and it is what let defect 1 persist.
+5. **Axioms declared.** `#print axioms` on every theorem, no `sorryAx`, no
+   Mathlib.
+6. **A Clojure mirror, or a typed hole.** `CoverageReport` has
+   `futon2/src/futon2/aif/coverage_check.clj`. Where no mirror exists the
+   contract entry records the absence rather than omitting the clause.
+
+#### Build order that follows
+
+1. **Complete the contract over what exists** — emit family 8 and the
+   policy-grade clause, and reconcile the family numbering between §2.1c and the
+   emitter. This is the alignment act; everything else is easier after it.
+2. **Name the polarities** in the four existing modules.
+3. **R6 (family 9, weights versus membership)** and **R2** — designed in their
+   excursions, unbuilt. Building them *after* the standard is what tests whether
+   the standard was worth writing.
+4. **H3b**, the trace checker: Lean judges a run, verdict as exit code.
+
 ### 3.2 Tier 1 — attestation and typed absence *(each stated as a contract clause first)*
 
 **Ordering consequence of Tier 0.** These four are no longer "make the reports
