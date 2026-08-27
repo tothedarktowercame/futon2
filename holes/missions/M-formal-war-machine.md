@@ -692,14 +692,31 @@ losses.** codex-22's independently produced `missing_chat_turns: 0` was right.
 
 Three things survive the correction, and the third is the important one.
 
-**One genuine loss is still nameable.** The turn beginning *"Next time please use
-codex-22 rather than codex-18…"* appears in the store twice — once as the
-truncated `query` of a `context-retrieval` event and once in an `invoke-start`
-prompt-preview — and in **no** `chat-turn` record. Verified by extracting all 177
-chat-turn bodies and searching them directly. So C2 held for a turn on which C1
-failed. One witness, not seven, and the conclusion drawn from it stands: **an
-end-to-end criterion is over a set of stages with typed attrition, not a totally
-ordered funnel.**
+**CORRECTED AGAIN, and this one withdraws the loss.** The turn beginning *"Next
+time please use codex-22…"* is stored, as `e-58bfdb92-…`, role `user`, turn-93.
+The two "occurrences" I reported are one operator turn and one *assistant* turn
+that quotes it — my own reply, caught by a role-blind substring search. **There
+was no loss and there was no duplicate write.**
+
+Every loss reported today was the instrument. Three extraction bugs, in
+succession, each producing a plausible finding about the pipeline:
+
+1. a `:text "…"` regex anchored on `"}`, dropping every entry where `:text` is
+   not the body's last field;
+2. a first-match event classifier that read a string-shaped `\"event\"` before
+   a map-shaped `:event`, dropping **173 of 350** chat-turn entries;
+3. a substring search across chat-turns that did not filter on role, so an
+   assistant message quoting an operator turn counted as a second copy of it.
+
+**The root cause is that the instrument was a regex over EDN.** The evidence API
+serves JSON on `Accept: application/json`; the scraping was never necessary.
+`c1_turn_survival.py` now parses (`90baa27`), and the whole class of bug goes
+with it. Current reading: **20 operator turns, 20 matched, no losses.**
+
+The lesson is the day's own subject matter turned on the measurer. An absence
+produced by the instrument is indistinguishable, in the output, from an absence
+in the world — which is exactly why a criterion has to type its losses, and why a
+typed loss is only as good as the extractor that assigns the type.
 
 **All chat-turn bodies are map-shaped.** Of 726 session entries, 177 are
 `chat-turn` and every one is a map; the 1,986 string-shaped bodies are
