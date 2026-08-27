@@ -50,3 +50,57 @@ The earlier per-file table and this census use different units, so its values
 do not constrain these per-record counts. Its file-presence estimates do agree
 with the relevant witness spans: five files for realized outcomes/enactments,
 seven for author/reviewer, and one for the paired score keys.
+
+---
+
+## REVIEW CORRECTION — claude-13, 2026-08-27
+
+**The unit was wrong, and the numbers above are inflated by roughly 29×.**
+
+Each `wm-trace-*.edn` file is **one top-level map = one tick**, not a sequence of
+records. The census walked nested structures — `:ranked-actions` alone holds
+**6,656** entries across the corpus — and counted those as records, giving "791
+records" and "88 witnesses". Recomputed at tick level:
+
+| family | census-v1 | **corrected** | of |
+|---|---:|---:|---:|
+| 1 identity threading | 0 | **0** | 52 ticks |
+| 2 non-empty handle | 88 | **3** | 52 |
+| 4 durability | 88 | **3** | 52 |
+| 5 declared domain | 88 | **3** | 52 |
+| 6 separation of powers | 31 | **7** | 52 |
+| 7 exit / status pins | 4 | **0** | 52 |
+
+`:realized-outcome` occurs in exactly **three** files — `2026-07-03`, `-07-04`,
+`-07-05` — and each is a **single map**, not a collection:
+
+    {:policy "M-bayesian-structure-learning", :expected-G -0.2,
+     :realized-G -0.5, :tick 1783235004856}
+
+Family 7 is 0 rather than 4 for the reason the census itself gives: every
+`:coverage-score-delta` is `nil`, so no gate is fully witnessed.
+
+**What survives, and it matters.** The census's headline finding is **correct in
+corrected form**: the realized outcomes stop *before* the 2026-07-08 producer
+substitution. The last is **2026-07-05**; `-07-06` onward carries none.
+`E-R8-red-ring-fill` dates the break to 07-09. The census's "record 12 → 13 of
+`wm-trace-2026-07-06.edn`" is an artifact of the flattened walk — that file has
+one record — but the direction of the correction stands.
+
+**Discrepancy to resolve, not to assume settled.** `E-R8-red-ring-fill` states
+the producer *"fired **88 times**, 2026-07-02..07-06, in `futon2/data/wm-trace/`"*
+— the number it used to overturn its own premise. **The corpus contains three.**
+Either the 88 came from another artifact, or the files have been rewritten, or
+the count measured something else. This needs settling before either number is
+cited again; it is the same shape as the wrong-corpus error that excursion itself
+coined a ticket for.
+
+**Consequence for Tier 0.** The trace corpus exercises the central families
+**three times**. A contract validated over it would be almost entirely
+unexercised. That does not sink Tier 0 — a **retro-trip needs a boundary, not
+volume**, and three present plus forty-nine absent dates the break precisely —
+but the qualification record must claim dating, not coverage.
+
+Verification script: `/tmp/c13/census2.bb` (tick-level, `clojure.edn` with a
+`:default` tag reader — the traces carry `#object[…]` literals, which is itself
+worth noting against family 3, since such a record cannot be reconstructed).
