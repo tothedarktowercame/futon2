@@ -399,13 +399,24 @@ qualification record must state rather than round up.
 
 #### The series
 
+*Dispatch note: send these to **codex-22**, not codex-18 — codex-18 is
+coordinating another project (Joe, 2026-08-27).*
+
 | # | packet | why this order |
 |---|---|---|
 | **H1** | **Per-clause witness census** over `data/wm-trace/`, *per record* not per file, for each of families 1, 2, 4, 5, 6, 7 | the numbers above are per-file and mine, from one sitting. Nothing should be built on them until they are per-record and independently produced |
 | **H2** | `WarMachineContractEmitter.lean` — emit families **1, 2, 4, 5** as clauses, each carrying id, predicate, Clojure locus (§2.1b), holds-status | the best-witnessed group, and the one containing the retro-trip incident |
-| **H3** | `generated_wm_contract.clj` — load the emitted contract, validate over the trace corpus, report **per-clause witness counts** | the Clojure half; counts are the deliverable, not a pass/fail |
+| **H3a** | `generated_wm_contract.clj` — validate the emitted **contract document** against pinned Clojure expectations | direction 1. Structure derived from Lean, values pinned both sides, so drift either way fails |
+| **H3b** | `WarMachineTraceChecker.lean` — `main : List String → IO UInt32`, parses a trace projection, **verdict = exit code**; plus a bb step projecting `wm-trace/*.edn` into JSON | direction 2, and **where the 2026-07-09 retro-trip belongs**: a verdict about a run is Lean's, not Clojure's |
 | **H4** | mutation tests — perturb each emitted clause, prove the Clojure rejects the drift | this is what makes the contract a gate rather than a document |
 | **H5** | qualification record — digest match, non-vacuity with witness counts stated, residual holes for the unwitnessed families | families 3, 6, 7 land here as **recorded holes**, not silent greens |
+
+**Corrected 2026-08-27 after surveying the precedent**
+(`p4ng/empirics-futon/NOTE-apm-lean-clojure-strategy.md`). H3 as first written
+fused APM's *two* directions and put run-verdicts in Clojure. APM's trace checker
+says it plainly: *"The Clojure side emits observations, not verdicts."* Hence the
+H3a/H3b split above. Both Lean sides are `lake env lean --run` — one prints JSON
+to stdout, one takes a path and returns the verdict as an exit code.
 
 **H1 gates everything after it.** If the per-record census shows fewer witnesses
 than the per-file count suggests, H2's family selection changes. Splitting the
