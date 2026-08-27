@@ -329,7 +329,47 @@ behaviour is `futon2/data/wm-trace/*.edn` — 52 files carrying `:tau`,
 emitted contract validates **trace records**, and non-vacuity is countable
 directly: how many records exercise each clause.
 
-#### The acceptance bar, which the corpus already supplies
+#### Acceptance is against FIXTURES, not against the corpus
+
+*Joe, 2026-08-27: "I'm less interested in an audit and rehashing of what happened
+in July than I am in getting the Lean model built, the Clojure mirror of that
+built, and seeing validation of the modules. The only use I can see for the
+historical data in this setting is for the design of fixtures, but since the
+historical data looks quite incomplete throughout the pipeline, I'd see it as
+**indicative** rather than 1-to-1."*
+
+**This supersedes the retro-trip bar drafted below.** Making the corpus the
+acceptance criterion put historical completeness on the critical path, and the
+corpus cannot carry it: 52 ticks, three realized outcomes, families 1 and 7 with
+no witnesses at all. Validating against fixtures removes that dependency
+entirely.
+
+**The fixture discipline.**
+
+- A **fixture** is a synthetic tick, or a short sequence of them, constructed to
+  exercise exactly one clause — one that **accepts** and, per way the clause can
+  fail, one that **refuses**.
+- **History supplies shapes, not data**: field names (`[:realized-outcome
+  :realized-G]`, `[:enactment :mission]`), value ranges (`:expected-G -0.2`,
+  `:realized-G -0.5`), and *scenarios* worth encoding — a fold with a numeric
+  leg, a fold with `nil`, a run where outcomes stop. Nothing is asserted about
+  what actually happened in July.
+- **Fixtures are versioned with the contract** and live beside it, so a clause
+  and its witnesses move together.
+
+**Consequence: the census does not shrink the model.** H1 found family 1
+unwitnessed because the records carry no tick to compare the outcome's tick
+against, and family 7 unwitnessed because every `:coverage-score-delta` is `nil`.
+Under a fixture bar those are **findings about instrumentation** — Tier-1 repairs
+(add a record-level tick; populate the gate fields) — and not reasons to drop a
+family. **Family 1 is reinstated in H2.** A model that shrinks to fit a thin
+corpus would encode the corpus's defects as its scope.
+
+**What the historical census is still for.** Exactly one thing: telling fixture
+design which shapes are real. That is why it was worth doing, and it is now done
+— `holes/labs/wm-contract/`.
+
+#### The retro-trip bar, superseded 2026-08-27 — kept for the reasoning only
 
 **The contract must retro-trip on the known incidents.** WR-26 requires exactly
 this of a tripwire before arming, and we have a dated incident corpus:
@@ -433,9 +473,10 @@ outcome's tick against; family 7 is 0 because every `:coverage-score-delta` is
 
 **Three consequences.**
 
-1. **H2's family selection changes from 1, 2, 4, 5 to 2, 4, 5.** Family 1 cannot
-   be witnessed from this corpus at all — the second tick does not exist in the
-   record. It becomes a residual hole in H5, or a reason to add a field.
+1. ~~**H2's family selection changes from 1, 2, 4, 5 to 2, 4, 5.**~~
+   **Reversed 2026-08-27** — under a fixture bar, an unwitnessed family is an
+   instrumentation finding, not a scope reduction. Family 1 stays in H2; that the
+   record carries no tick to compare against becomes a Tier-1 repair.
 2. **Tier 0's claim changes from coverage to dating.** Three exercises will not
    support a non-vacuity argument by volume. But a **retro-trip needs a boundary,
    not volume**: three present and forty-nine absent dates the break exactly. The
