@@ -42,6 +42,42 @@ def operator_text(record):
     return text.split(marker, 1)[1] if marker in text else text
 
 
+# Records the harness writes into the transcript with type "user" but which are
+# not operator turns: they were never sent, so they cannot have been stored and
+# they must not sit in C1's denominator.  Typed rather than lumped, because
+# "the summary injection" and "a slash command" are different things.
+HARNESS_KINDS = [
+    ("compaction-summary",
+     "This session is being continued from a previous conversation"),
+    ("command-caveat", "<local-command-caveat>"),
+    ("command-output", "<local-command-stdout>"),
+    ("command-output", "<local-command-stderr>"),
+    ("slash-command", "<command-name>"),
+]
+
+
+def harness_kind(text):
+    """The kind of harness record this is, or None if it is an operator turn."""
+    head = text.lstrip()[:400]
+    for kind, marker in HARNESS_KINDS:
+        if head.startswith(marker) or marker in head:
+            return kind
+    return None
+
+
+def normalised(text):
+    """Both sides of the text join, reduced to what they have in common.
+
+    The transcript carries the emacs transport wrapper and the store carries
+    the payload, with whitespace differing between them, so exact equality
+    reports losses that are joins failing rather than turns missing.
+    """
+    marker = "\nUser message:\n"
+    if marker in text:
+        text = text.split(marker, 1)[1]
+    return " ".join(text.split())
+
+
 def transcript(session_id):
     path = os.path.join(TRANSCRIPT_DIR, session_id + ".jsonl")
     if not os.path.exists(path):
@@ -106,6 +142,13 @@ def evidence_entries(raw, session_id):
     return entries
 
 
+def retrieval_queries(raw):
+    """The `query` strings of context-retrieval events, which the store keeps
+    TRUNCATED.  A turn appearing only here was processed downstream without ever
+    being stored as a turn — a different loss from not being there at all."""
+    return [q for q in re.findall(r'\\"query\\" \\"((?:[^\\\\"]|\\\\.)*)\\"', raw)]
+
+
 def fetch_evidence(session_id, turns):
     timestamps = [turn["timestamp"] for turn in turns if turn.get("timestamp")]
     if not timestamps:
@@ -123,27 +166,59 @@ def fetch_evidence(session_id, turns):
         raw = response.read().decode("utf-8")
     counts = re.findall(r':count (\d+)', raw)
     count = int(counts[-1]) if counts else 0
-    return evidence_entries(raw, session_id), count >= LIMIT, since, count
+    return (evidence_entries(raw, session_id), count >= LIMIT, since, count,
+            retrieval_queries(raw))
 
 
 def assess(session_id):
     path, turns = transcript(session_id)
-    evidence, truncated, since, returned = fetch_evidence(session_id, turns)
+    evidence, truncated, since, returned, queries = fetch_evidence(session_id, turns)
+    norm_queries = [" ".join(q.split()) for q in queries]
     by_text = collections.defaultdict(list)
     for entry in evidence:
         by_text[entry["text"]].append(entry)
 
+    norm_index = [(normalised(entry["text"]), entry) for entry in evidence]
+
     matched = []
     losses = []
-    for ordinal, turn in enumerate(turns, 1):
+    excluded = []
+    ordinal = 0
+    for turn in turns:
+        kind = harness_kind(turn["text"])
+        if kind:
+            excluded.append({"transcript-line": turn["line"],
+                             "transcript-uuid": turn["uuid"], "kind": kind})
+            continue
+        ordinal += 1
+        target = normalised(turn["text"])
         candidates = by_text.get(turn["text"], [])
         if candidates:
-            matched.append((turn, candidates.pop(0)))
+            matched.append((turn, candidates.pop(0), "exact"))
+            continue
+        hit = next((e for n, e in norm_index if n == target), None)
+        rule = "normalised"
+        if hit is None and target:
+            hit = next((e for n, e in norm_index
+                        if target in n or n in target), None)
+            rule = "normalised-containment"
+        if hit is not None:
+            matched.append((turn, hit, rule))
         else:
+            # The store keeps the retrieval query truncated, so compare on the
+            # shorter of the two rather than requiring containment one way.
+            def seen_as_query(target=target):
+                for q in norm_queries:
+                    n = min(len(q), len(target))
+                    if n >= 40 and q[:n] == target[:n]:
+                        return True
+                return False
+            reason = ("present-only-as-retrieval-query" if seen_as_query()
+                      else "not-stored")
             losses.append({"operator-turn": ordinal,
                            "transcript-line": turn["line"],
                            "transcript-uuid": turn["uuid"],
-                           "reason": "unmatchable-by-text"})
+                           "reason": reason})
 
     uuid_hits = sum(bool(turn["uuid"]) and
                     any(turn["uuid"] in str(value) for value in entry.values())
@@ -152,6 +227,7 @@ def assess(session_id):
                       any(turn["prompt-id"] in str(value) for value in entry.values())
                       for turn in turns for entry in evidence)
     return {"session": session_id, "transcript": path, "turns": turns,
+            "excluded": excluded, "operator-turns": ordinal,
             "matched": matched, "losses": losses, "evidence-count": returned,
             "evidence-user-turns": len(evidence), "truncated": truncated,
             "since": since, "uuid-hits": uuid_hits, "prompt-hits": prompt_hits}
@@ -171,8 +247,17 @@ def print_report(result):
     print("  authoritative-C1: not-computable")
     print("  required-field: evidence must carry :evidence/source-turn-id equal "
           "to the transcript user record's uuid")
-    print(f"  fallback-denominator-operator-turns: {len(result['turns'])}")
-    print(f"  fallback-numerator-exact-text-matches: {len(result['matched'])}")
+    print(f"  transcript-user-records: {len(result['turns'])}")
+    kinds = collections.Counter(x["kind"] for x in result["excluded"])
+    print("  excluded-as-not-operator-turns: "
+          f"{len(result['excluded'])}"
+          + (" (" + ", ".join(f"{k}={n}" for k, n in sorted(kinds.items())) + ")"
+             if kinds else ""))
+    print(f"  fallback-denominator-operator-turns: {result['operator-turns']}")
+    rules = collections.Counter(rule for _, _, rule in result["matched"])
+    print(f"  fallback-numerator-text-matches: {len(result['matched'])}"
+          + (" (" + ", ".join(f"{r}={n}" for r, n in sorted(rules.items())) + ")"
+             if rules else ""))
     print("  fallback-bound: lower-bound only; a text miss is not proof of non-storage")
     print(f"  typed-losses: {len(result['losses'])}")
     for loss in result["losses"]:
@@ -192,9 +277,11 @@ def main(argv):
     print(f"  any-query-could-be-truncated: "
           f"{'yes' if any(r['truncated'] for r in results) else 'no'}")
     print("  mapping: text-fallback; authoritative-C1: not-computable")
+    print(f"  excluded-as-not-operator-turns: "
+          f"{sum(len(r['excluded']) for r in results)}")
     print(f"  fallback-denominator-operator-turns: "
-          f"{sum(len(r['turns']) for r in results)}")
-    print(f"  fallback-numerator-exact-text-matches: "
+          f"{sum(r['operator-turns'] for r in results)}")
+    print(f"  fallback-numerator-text-matches: "
           f"{sum(len(r['matched']) for r in results)}")
     reasons = collections.Counter(loss["reason"] for result in results
                                   for loss in result["losses"])
