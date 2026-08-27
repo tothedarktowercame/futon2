@@ -270,6 +270,96 @@ R8 + R14 with a three-clause property. Those three clauses are families 4, 5 and
 1 of the table above. Module 1 is therefore not a special case — it is the first
 instantiation of a vocabulary that covers the whole loop.
 
+## 3. DERIVE — the repair programme
+
+*Opened 2026-08-27 at Joe's direction: "we've made a good modular discussion of
+the red rings … I suggest that we focus now on these repairs. Our other ideas
+about AIF-driven metadata for operator turns and so forth are really only useful
+if we have a well-working WM to plug them into."*
+
+### 3.1 The ordering principle, and why it is not arbitrary
+
+Five excursions ran against five red rings on 2026-08-26/27. **In five cases out
+of five, the ring's recorded reason was wrong or unverified** — R8's "no
+producer" (there was one, armed 07-08), R14's "not yet located in the code"
+(`policy.clj:35`), R6's "tension-proposer unbuilt" (`aif2/tension.clj`, live
+since 06-01), R2's citation (the wrong observation vector) and its nag-0
+inference (a gate blocked on unbuilt state), and R8's "dead since 07-14" (a
+deliberate stop with a written re-arm condition).
+
+The verdicts mostly survived. **The reporting did not.** So the repairs order
+themselves:
+
+> **(1) make the machine's own reports honest, before (2) changing what it does,
+> before (3) adding capability.**
+
+This is not a preference. `CommitmentTemperature.lean`'s
+`live_gain_repair_changes_no_action` proves that R8's repairs cannot move a
+selected action while R14's edge is cut — so a Tier-3 repair landed today could
+not be *evaluated*, because nothing would distinguish "it worked" from "it never
+ran". That is the 2026-07-08 failure exactly, and Tier 1 is what makes Tier 3
+checkable.
+
+### 3.2 Tier 1 — attestation and typed absence (additive; no decision logic touched)
+
+Each removes one indistinguishability. None changes a decision.
+
+| # | repair | what it removes | locus |
+|---|---|---|---|
+| 1 | the **composer** writes one attestation per *registered* proposer — ran?, input-ref, emitted-n — whether or not it emitted | "the space is empty" vs "the generator did not run" | `action_proposer/compose-proposers`; `proposer-id` is declared at `:31` and never called |
+| 2 | `read-curvature-signal` returns `fresh \| stale(age) \| absent`, not `[]` | a June signal read as current | `aif2/tension.clj:198` |
+| 3 | the grounded producer returns `:domain-mismatch`, not bare `nil` | "out of domain" vs "no measurement" | `fold_realized.clj:163`; **the vocabulary already exists one function above**, `actuator_a3.clj:395` |
+| 4 | stop reporting τ as governing; record the disconnection | a reported ranking that cannot move the action | `policy.clj` reporting only |
+
+**Why #1 first.** The 2026-07-15 archive shows 24 attempts, each recording *"no
+addressable entities"* for seven action classes, with no record of which
+proposers ran. With attestation the operator sees it at **attempt 2** instead of
+attempt 24. It is additive, it is cheap, and it is the instrument every later
+repair is judged with.
+
+### 3.3 Tier 2 — the paper (zero code, and Joe's stated goal)
+
+For plop-2026's reputability, in descending value:
+
+1. **Publish both axes.** `aif-r1-r16-pattern-map.md` asks *is it built and
+   load-bearing?*; `wr-overlay.edn` asks *does the discipline hold?* They use the
+   same R-numbers and disagree on R6 and R8. A reader meeting `R8 ✓ Real` and
+   `R8 red` has no stated way to reconcile them. One column fixes it.
+2. **Correct the four wrong ring notes** listed in §3.1. Each is a one-line edit
+   against a verified source.
+3. **Refresh the 07-13 map** — it is stale by twelve `aif/*.clj` namespaces,
+   several bearing on rows it marks dark or open (`epistemic_value` on R5's "open
+   third", `habit_prior` on the one branch where τ moves an argmax).
+4. **The non-vacuity column** — per R-node, which run exercised this mechanism
+   and how do we know it executed. Eighteen rows; R8 and R14 are effectively done.
+
+### 3.4 Tier 3 — behavioural, one at a time, Joe's call
+
+Held until Tier 1 gives them an instrument:
+
+- **R8 slice 4** — `deposits-by-id` degrade rather than throw.
+- **R14's edge** — (a) sample `P(π)`, (b) a second non-τ-scaled term, (d) route
+  the gain through the candidate set as `repair-entry` already does. Each changes
+  the *type* of the signal differently; (d) converts a graded quantity into a
+  binary interrupt.
+- **R2's channel** — one edge, between two things that already run. This is the
+  *"close over the operator"* edge, and Joe's sequencing puts it last for the
+  right reason: it is the plug, and the socket is Tier 1.
+
+### 3.5 What this programme does not cover, stated plainly
+
+**Thirteen green rings are unexamined.** Today's record is five-for-five that a
+ring's recorded reason does not survive checking, and every one of those five was
+*red* — a category the stack looks at. The greens have had less attention, not
+more. Nothing here licenses the claim that the rest of the machine is well
+behaved; §3.3's non-vacuity column is the cheapest way to find out.
+
+**Three subsystems, three states, unreconciled:** `wm-full-loop` stopped
+2026-07-15 with a written re-arm condition; `wm-trace` ends 2026-07-21;
+`wm-outer-loop` last ran 2026-07-27; the operator bulletin regenerates live today
+(2026-08-27). Which of these "the War Machine is running" refers to is not
+currently answerable from any single file, and that is the same gap §1.1 opens on.
+
 ## Honest bounds
 
 **The APM contract is enforced; this one would be partly unmet.** APM's
