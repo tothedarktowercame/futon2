@@ -411,6 +411,43 @@ coordinating another project (Joe, 2026-08-27).*
 | **H4** | mutation tests — perturb each emitted clause, prove the Clojure rejects the drift | this is what makes the contract a gate rather than a document |
 | **H5** | qualification record — digest match, non-vacuity with witness counts stated, residual holes for the unwitnessed families | families 3, 6, 7 land here as **recorded holes**, not silent greens |
 
+#### H1 RESULT, 2026-08-27 — per-tick, after review
+
+`holes/labs/wm-contract/` (codex-18 `753911a1`, corrected by review `1d64cdc`).
+**The per-file estimate above and the census's first numbers were both wrong; a
+trace file is one tick, and these are per-tick.**
+
+| family | witnesses | of |
+|---|---:|---:|
+| 1 identity threading | **0** | 52 ticks |
+| 2 non-empty handle | **3** | 52 |
+| 4 durability before fold | **3** | 52 |
+| 5 declared domain | **3** | 52 |
+| 6 separation of powers | **7** | 52 |
+| 7 exit / status pins | **0** | 52 |
+
+`:realized-outcome` occurs in exactly three files — 07-03, 07-04, 07-05 — each a
+single map. Family 1 is 0 because there is no record-level tick to compare the
+outcome's tick against; family 7 is 0 because every `:coverage-score-delta` is
+`nil`.
+
+**Three consequences.**
+
+1. **H2's family selection changes from 1, 2, 4, 5 to 2, 4, 5.** Family 1 cannot
+   be witnessed from this corpus at all — the second tick does not exist in the
+   record. It becomes a residual hole in H5, or a reason to add a field.
+2. **Tier 0's claim changes from coverage to dating.** Three exercises will not
+   support a non-vacuity argument by volume. But a **retro-trip needs a boundary,
+   not volume**: three present and forty-nine absent dates the break exactly. The
+   qualification record must say *"this contract dates the 2026-07-0x break"* and
+   must not say *"this contract is exercised by the corpus."*
+3. **The retro-trip target moves earlier.** The outcomes stop after **2026-07-05**,
+   before the 07-08 substitution — not 07-09. Recorded as a discrepancy against
+   `E-R8-red-ring-fill`, which cites **88** outcomes in this corpus where there
+   are **three**, and dates the break to 07-09. That number is the one E-R8 used
+   to overturn its own premise, so it must be settled before either is cited
+   again.
+
 **Corrected 2026-08-27 after surveying the precedent**
 (`p4ng/empirics-futon/NOTE-apm-lean-clojure-strategy.md`). H3 as first written
 fused APM's *two* directions and put run-verdicts in Clojure. APM's trace checker
