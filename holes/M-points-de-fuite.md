@@ -345,6 +345,32 @@ The per-mission **orbit / phase-portrait** — scattered turns woven and concent
       core `C-c .` hydra (and into γ/label semantics if Joe assigns them).
       Incidental fix: the long-form regex was hardcoded ✘|✓|💡 — now built
       from the registry. Joe (2026-07-11): "we have enough operator turns to cluster them into types (surely)." ~8.8k joe-authored turns in the store; cluster (D1 index terms and/or the stack's MiniLM embeddings, futon6 scripts), operator names the clusters worth marking, each named cluster earns a glyph + hydra key. This replaces a-priori vocabulary growth with the same declare-don't-guess empiricism as PZ1: the types come from the record. Good zai-1 handoff once D1's index is complete (the clustering wants the text substrate). NB this is also the missing grounding for the illocutionary-force hypothesis above — if clusters align with the typed-bell forces, that vocabulary is confirmed from data; if they cut differently (like 💡, which is force+cost), the empirical cut wins.
+  - **Agent self-marks in the zai/zaif runners (BUILT 2026-07-13, Joe + claude-3):**
+    Joe's extension of the ✘ thread: inspect agents' *self-talk* for self-corrections —
+    and rather than recognize them fuzzily, **teach the agents the mission's own glyphs**
+    so the act is declared at the point of creation (the §1 tension resolved for the
+    author whose declaration is free: for an agent the explicit symbol IS the light
+    path — it costs tokens, not operator attention). Empirical grounding first:
+    Claude-side self-talk is NOT capturable at rest (1,524 thinking blocks in
+    ~/.claude/projects, ALL content-stripped, signature only) and PZ1's cue-phrase
+    tier was operator-weak; but the zai harness is fully ours, and its U1 per-round
+    transcript (`persist-round!` → `[:transcript :turn-round]` evidence) already
+    persists the narration channel. Build (futon3c): (i) self-mark tier in
+    `futon3c.marks` — agent-authored `:turn-round` entries get the same recognizer,
+    minting **self-prefixed tags** (`:self-correction`, `:self-idea`, …) so the
+    operator gold channel (`:correction`/`:approval`, z1_views author="joe") stays
+    clean by construction; kill-switch `FUTON3C_SELF_MARKS`; (ii) lexicon taught in
+    the zai system prompt — ✘ at the point of genuine reversal (long form
+    `(✘ :ref <target> "why")`), 💡 for ideas out of scope now; deliberately two
+    glyphs (anti-inflation: "an unmarked correction is better than a marked
+    non-correction"); (iii) wired at `boundary/append!` — zai AND zaif (one harness,
+    zaif is a profile). Verified live in the serving JVM; 18/18 marks tests.
+    Baseline honesty: only 2 turn-round entries existed pre-build (U1 is 2 days
+    old), so no natural-rate baseline — inflation-watch is internal going forward
+    (cue-phrase-fired unmarked rounds vs marked rounds). The learned-rules payoff
+    (cluster context→repair pairs at ✘ sites into CLAUDE.md/pattern rules — the
+    §6.2 L1 loop fed by declared self-correction) is the follow-on experiment once
+    marked rounds accumulate.
   - **✦ WITNESSED NEED (2026-08-22, claude-13 + Joe): sub-document referent
     binding.** Joe: *"We had a previous M-points-de-fuite that was supposed to
     help with just this kind of issue, but we hadn't witnessed the 'need' for
