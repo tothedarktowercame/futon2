@@ -681,33 +681,42 @@ computable only as a text-matched **lower bound**, and the field that would make
 it authoritative is named: evidence must carry `:evidence/source-turn-id` equal
 to the transcript record's `uuid`.
 
-For this session, 23 operator turns — after excluding four records the harness
-types as `user` and the operator never sent: the compaction summary, the
-local-command caveat, the `/compact` block and its stdout. Those four were in the
-first draft's denominator, which is the ordinary way a conservation law goes
-wrong: counting things that never entered the pipe.
+**CORRECTED 2026-08-27, same day.** The first reported figures — 23 operator
+turns, 15 stored, 7 present only as a retrieval query, 1 absent — were mostly an
+artefact of my own measurement. The evidence-text regex in
+`c1_turn_survival.py` was anchored on `"}`, so it matched only entries where
+`:text` is the last field of the body and silently dropped the rest. Those
+dropped entries presented as turns missing from the store that were in it.
+Unanchored, the current snapshot gives **19 operator turns, 19 matched, no
+losses.** codex-22's independently produced `missing_chat_turns: 0` was right.
 
-Of the 23:
+Three things survive the correction, and the third is the important one.
 
-| | |
-|---|---|
-| **15** | stored as `chat-turn` records |
-| **7** | present **only as the truncated `query` string of a context-retrieval event** |
-| **1** | absent from the store entirely |
+**One genuine loss is still nameable.** The turn beginning *"Next time please use
+codex-22 rather than codex-18…"* appears in the store twice — once as the
+truncated `query` of a `context-retrieval` event and once in an `invoke-start`
+prompt-preview — and in **no** `chat-turn` record. Verified by extracting all 177
+chat-turn bodies and searching them directly. So C2 held for a turn on which C1
+failed. One witness, not seven, and the conclusion drawn from it stands: **an
+end-to-end criterion is over a set of stages with typed attrition, not a totally
+ordered funnel.**
 
-**The seven are the finding.** Those turns were *processed* — a retrieval ran on
-them, and the store kept the first hundred-odd characters as that retrieval's
-input — while never being stored as turns. So C2 can hold for a turn on which C1
-fails, and the chain is not the totally ordered funnel the criterion assumed:
-stages can be reached out of order, and a downstream record can be the only
-surviving evidence that an upstream one existed. An end-to-end criterion has to
-be stated over a *set* of stages with typed attrition per stage, not over a
-sequence.
+**All chat-turn bodies are map-shaped.** Of 726 session entries, 177 are
+`chat-turn` and every one is a map; the 1,986 string-shaped bodies are
+`invoke-start`, `context-retrieval` and `invoke-complete`. A branch for
+JSON-string chat-turn bodies handles a case that does not occur.
 
-This is also why the loss type matters more than the count. The first draft
-reported all eight as `unmatchable-by-text`, which is honest about the join and
-silent about the phenomenon; seven of them turn out to describe a specific,
-fixable defect and one is a genuine hole.
+**The external denominator is not stable, and this is the finding.** The
+transcript shrank from 1,968,337 to 1,945,752 bytes *during* the session, and the
+operator-turn count fell from 23 to 19: compaction rewrites the record. C1's
+denominator is supposed to be external precisely so the machine cannot mark its
+own homework — but the harness rewrites it, and turns leave it. **A retrospective
+C1 therefore self-heals: the losses vanish along with the evidence that they
+happened.** The turn named above is only nameable because it was measured before
+the rewrite. Either the external record is snapshotted at measurement time, or C1
+is computed continuously; measured after the fact against a live transcript, it
+cannot be trusted to find anything.
+
 
 The later stages are worse off and should be typed as such rather than reported
 as zero: Air processing, metadata decoration, cascade candidacy and WM problem
