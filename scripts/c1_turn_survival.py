@@ -129,7 +129,10 @@ def evidence_entries(raw, session_id):
                 "refusing an unverified API filter")
         if ':event "chat-turn"' not in chunk or ':role "user"' not in chunk:
             continue
-        text = re.search(r':text "((?:\\.|[^"\\])*)"\}', chunk, re.S)
+        # NOT anchored on "}: :text is not always the last field in the body,
+        # and anchoring dropped every entry where it is not, which showed up as
+        # turns "missing" from the store that were in it.
+        text = re.search(r':text "((?:\\.|[^"\\])*)"', chunk, re.S)
         if not text:
             continue
         turn_id = re.search(r':turn-id "([^"]+)"', chunk)
