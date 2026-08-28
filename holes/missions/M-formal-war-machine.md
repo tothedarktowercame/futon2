@@ -1807,6 +1807,86 @@ system persisting through runs. Registered here as the gap, not proposed as a
 build: it wants one honest example first, and the census pin is the closest thing
 we have to one.
 
+### 3.1l Model first, then a new version — and why hotfixing is the thing to avoid
+
+*Joe, 2026-08-28: "one of the issues Lean can help with is avoiding hotfixing. If
+we were just to fix this in Clojure we are fixing the system as it runs. Better
+to get the model right in Lean, then develop a new version in Clojure, and do the
+tracer-in-the-map by moving across timelines — the old known-failing version
+continues to have the old behaviour, and the new one supersedes it … the R5
+changes have broader implications that go beyond one localized change."*
+
+It makes sense, and it is the direct answer to the measurement in §3.1i's
+correction. The spec is revised at **8% the rate of the code it specifies**, so it
+trails; a description can only follow. **Spec-first inverts that relation**: the
+model stops describing what happened and starts constraining what may be built.
+That is not a process preference, it is the only order in which a specification
+can fail before the implementation does.
+
+#### The R5 claim is not rhetorical — checked
+
+`CoverageReport.lean` imports `GainChain` and adapts to three of its predicates:
+
+    inhabitedHandle × 3    typedAbsence × 3    declaredDomain × 3
+
+Those are **families 2 and 5**, and both are conjuncts of `gainChainSound` and
+`foldCompliant`. So a change to coverage semantics is not a local change to R5;
+it moves predicates that the chain property and the compliance property both
+depend on. Joe's instinct is right and the coupling is visible in the imports.
+
+This is also, note, the *good* case: `CoverageReport` adapts rather than
+inventing its own vocabulary (standard clause 1), which is precisely why the
+blast radius is inspectable. A module that had defined its own `coverageAbsent`
+would have looked local and been coupled anyway, through the Clojure.
+
+#### The precondition, which follows from today's own measurement
+
+**"Get the model right in Lean" is only protective if the Lean says
+terminal-behaviour things.** `APMCycleMachine.lean` *is* a Lean model and it
+prevented none of this — 42 clauses, 27 operational, each modelling a situation
+after it occurred. Spec-first with fixture-witness-only modules reproduces the
+same trailing, just earlier in the calendar.
+
+So **standard clause 9 is the precondition for this proposal working**, not an
+adjacent nicety. A model that states what *no run* may do can lead the
+implementation. A model that enumerates situations can only be updated once
+they happen, whatever order you write it in.
+
+#### Across timelines: yes in git, and NOT in the JVM
+
+The timeline idea is right and the two substrates are not symmetric.
+
+**Git: exactly as described.** A branch is a timeline; the old version keeps the
+old behaviour; the census pin on `master` keeps asserting the old numbers until
+the branch supersedes it.
+
+**The JVM: this is the one standing policy it collides with.** `CLAUDE.md` fixes
+one futon3c JVM and one futon1b JVM, live-loaded only from their own checkouts on
+`master` — never `load-file` a worktree copy, never a second JVM on another port
+to hold the other timeline. That rule exists *because of this exact experiment*:
+on 2026-08-22/23 a branch 56 commits behind master was loaded into the shared
+server, and every master-only route answered `Unknown endpoint` — twice in one
+morning, indistinguishable from a bug at the point of use.
+
+Which is Joe's own argument turned on the JVM: **two live versions in one process
+is hotfixing with extra steps.** The separation he wants is available one level
+up, and the policy already prescribes it — *test a branch in its own JVM, in that
+worktree*. Timelines are separated by **process**, never by namespace.
+
+#### The tracer across timelines already has a mechanism
+
+The pinned census is the tracer mark. `cascade_order_check_test.clj` asserts the
+old timeline's state — 86 records, 46 checked, 4 cyclic, 23 without a meet, every
+defect in the generated producer — and its header already requires that whoever
+moves the numbers updates the pin **in the same commit**.
+
+So the propagation forward is the **diff between pins**. The old version's pin is
+the known-failing behaviour, preserved deliberately; the new version's pin is what
+it achieved; and the difference is the record of what the repair actually did —
+not a claim about it. That is the tracer-in-the-map at the scale of a release, and
+the only thing missing is using the pin-diff as the *acceptance record* rather
+than only as a tripwire.
+
 ### 3.2 Tier 1 — attestation and typed absence *(each stated as a contract clause first)*
 
 **Ordering consequence of Tier 0.** These four are no longer "make the reports
