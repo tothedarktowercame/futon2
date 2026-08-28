@@ -998,6 +998,99 @@ condition. A contract of clauses each refusing a dated incident is a large
 improvement and still not a guarantee, and the difference should be stated in the
 paper rather than discovered by a reader.
 
+### 3.1g The flight has the right structures; nothing checks their type
+
+*Joe, 2026-08-27: "if it's checking things like job ids and not checking the
+wiring, then we can get all kinds of bad behaviour — e.g. an LLM submitted packet
+not passing through the designated tool, and therefore arriving badly formed.
+This is where the level of validation that the WM already does in a flight is
+indicative of what can work. The WM is supposed to identify a cascade, a typed
+hole in the existing system it is extending, and to create a checkable wiring
+diagram for the fix … failures at the level of the outer loop don't have the same
+structures to fall back on, perhaps they should."*
+
+Checked at source, and the premise holds better than expected.
+
+#### The three structures exist, and are typed
+
+`futon2/src/futon2/aif/fold.clj`, first line:
+
+    fold : (cascade, circumstance) → {:wiring :coverage-score-delta :policy-holes}
+
+All three of Joe's items, as one signature. The wiring is a real diagram —
+`{:boxes :wires :terminals}` with typed ports — and `fold_llm.clj` states the
+discipline: *"surfacing as policy-holes whatever it can't ground … explicit
+policy-holes, never fabricated coverage."* The dispatch packet carries
+`:semilattice`, `:construction-kind`, `:capability-contract`,
+`:actuation-contract` and `:repair-contract`. This is a considerably better
+apparatus than the outer loop has, and Joe's instinct to lift it is right.
+
+#### But nothing checks that a semilattice is a semilattice
+
+Across 25 recorded constructions under `data/wm-full-loop/` carrying a `:descent`
+block, **4 contain a directed 2-cycle** and 5 have no edges at all. From
+attempt-018, 2026-07-16:
+
+    :semilattice
+    {:descent [["iching/hexagram-05-xu"   "iching/hexagram-06-song"]
+               ["iching/hexagram-06-song" "iching/hexagram-05-xu"]
+               ["iching/hexagram-10-lu"   "iching/hexagram-05-xu"]],
+     :co_app []}
+
+`normalize-edge` reads a pair as `[from to]`, so those first two edges are
+A→B and B→A. **The relation is not antisymmetric, so it is not a partial order,
+so it is not a semilattice** — under any reading of the direction convention,
+since both directions are present. It was folded anyway, and a
+`:coverage-score-delta` came out.
+
+The field is named for a structure whose defining property nothing tests. This is
+the same defect as `:policy-holes []` hardcoded at `pattern_registry.clj:327`:
+the slot is typed in the docstring and unconstrained in the code.
+
+**And we now have the check.** `futon3/checks/playout_snatch.clj` computes exactly
+this over a pattern collection — antisymmetry via the tree/overlap test, and the
+meet condition per pair — and it discriminated: of six runs, four combinations of
+(overlap, meet-semilattice) occurred. A `valid-semilattice?` in the fold's path,
+refusing a cyclic `:descent` with a typed reason instead of scoring it, is small
+and would have caught all four.
+
+#### The step-contract break, in the WM's own inner loop
+
+`pattern_registry.clj:322` emits `:semilattice` as a **bare vector** of
+`{:from … :to …}` maps. `close_loop.clj`'s gate asks:
+
+    (or (seq (:descent semilattice)) (seq (:co-app semilattice)) (seq (:co_app semilattice)))
+
+`(:descent [{:from :a :to :b}])` is `nil` — verified — so the gate returns false
+and the semilattice fold is skipped for those entries, falling through to the
+classical fold. Meanwhile `semilattice-fold`'s own `normalize-edge` handles the
+map shape perfectly well. **The two steps disagree about the wrapper, not about
+the edges**, both are internally well-formed, and nothing relates them.
+
+That is Joe's APM diagnosis reproduced inside the WM: shape valid at each end,
+contract broken between them, and no test that could fail. It is also the answer
+to *"can the WM even follow along the same track"* — it already carries the
+better structures, and the structures are nominal until something refuses a
+malformed one.
+
+#### What this proposes for the outer loop
+
+Not new machinery. The inner loop's three structures, applied one level up:
+
+1. **A cascade with a validated order** — the outer loop's analogue of
+   `:semilattice`, refused when it is not one.
+2. **Typed holes** — what the outer loop could not ground, as `:policy-holes`
+   are meant to be and are not yet.
+3. **A wiring diagram for the route** — the direct answer to *"an LLM submitted
+   packet not passing through the designated tool"*. A packet's route is already
+   recorded as a mesh edge by `agency_send.py --from`; nothing checks that the
+   route taken is the route the contract requires. That is a wiring check, not a
+   shape check, and it is the outer loop's version of the same missing test.
+
+Bounds: the gate reading is from source rather than from a run; the cycle counts
+are over the 25 construction records on disk under `data/wm-full-loop/`, which is
+not gitignored history but is one machine's.
+
 ### 3.2 Tier 1 — attestation and typed absence *(each stated as a contract clause first)*
 
 **Ordering consequence of Tier 0.** These four are no longer "make the reports
