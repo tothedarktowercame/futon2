@@ -925,8 +925,42 @@ strict analogy Flight ≈ Mission."*
 |---|---|---|
 | **operator turn** | one submission into the REPL | the atom |
 | **agent turn** | one reply, with its tool calls | the atom, other side |
-| **WM tick / click** | one pass of the control loop | *functionally* an operator turn — a decision and an act — but it spans **a series of turns**, so it is coarser |
+| **WM tick / click** | one pass of the control loop | **not a turn at all** — see the correction below |
 | **Flight** | a run of ticks toward one end | **Mission** (Joe's strict analogy) |
+
+**Corrected 2026-08-28.** *Joe: "it wouldn't be unrealistic to think of all
+missions as parallel workflows for the WM, it is just selecting one at a time to
+focus on."* That fixes the row above, which had a tick as a coarse turn. It is
+not coarse; it is a **different kind of thing**. A turn is the atom of one
+thread; a tick is the **scheduler's step** — the act of choosing which thread
+advances. The correspondence is:
+
+| operator | WM |
+|---|---|
+| an agent session | a **mission** |
+| a turn inside it | that mission advancing |
+| running several at once | the set of live missions |
+| deciding which to attend to | **⑯ selection** |
+
+So the WM does have the operator's structure, and the earlier claim that its
+unit of action has no boundary was looking for the boundary in the wrong place:
+the parallel threads are the missions, and they are enumerated.
+
+**The widths are not comparable, and that is the finding.** Joe runs four
+sessions at most (§2.1e, 341 of 500 jobs concurrent, max 4).
+`futon2.aif.mission-registry/open-missions` returns **131 live missions** out of
+236 scanned. The WM's `copar` is thirty times the operator's, and one thread is
+selected per tick.
+
+    :active 41 · :identify 34 · :unknown 35 · :open 20 · :partial 1   = 131 live
+    :complete 51 · :inactive 53 · :draft 1                            = 105 excluded
+
+**And 35 of the 131 are live because nothing could read their status.**
+`live-mission?` excludes only `:complete`, `:inactive` and `:draft`, so
+`:unknown` falls through to eligible. An unreadable status line is treated as an
+open mission — absence read as presence, which is I2 inverted, in the enumerator
+that supplies ⑯ its candidates. A quarter of the WM's declared parallel width is
+missions nobody classified.
 
 A tick is therefore not a turn, and the mismatch is not cosmetic: end-to-end
 criteria quantify over a population, and the population is a different set at
