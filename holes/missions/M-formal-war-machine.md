@@ -1527,6 +1527,85 @@ That is a better answer to *"why has it been so bad"* than enumeration alone.
 Enumeration explains the growth; **self-certification at L0 explains why the
 growth does not converge** — no clause above can detect a violation below it.
 
+#### CORRECTION 2026-08-28 — that was the spec, not the layer that fails
+
+*Joe: "you're focusing on the Lean layer, but the Clojure layer is where almost
+all of the operational nonsense is."* Correct, and it changes the numbers rather
+than the direction.
+
+| | Lean spec | Clojure layer |
+|---|---|---|
+| | `DarkTower/APMCycleMachine.lean` | `futon3c/src/futon3c/apm/` |
+| files | 1 | **97 namespaces** |
+| lines | 1,986 | **27,344** |
+| commits | 42 | **494** |
+| file-revisions | 42 | **921** |
+| added / deleted | +3,420 / −46 | **+31,501 / −4,122** |
+| deletion rate | 1.3% | **13.1%** |
+
+**So §3.1i above was mined over 8% of the commit volume.** And the two layers
+behave differently: at 13.1% deletion the Clojure layer genuinely churns —
+things are removed and replaced — whereas the spec only accretes. The
+enumeration diagnosis describes the **spec**; it does not describe the
+implementation, and I over-generalised it.
+
+#### Where the operational nonsense actually concentrates
+
+One namespace takes **107 revisions** — 12% of every file-revision in the layer,
+and more than double the next:
+
+| revisions | namespace |
+|---|---|
+| **107** | `countdown_control.clj` |
+| 51 | `live_learning_phases.clj` |
+| 49 | `live_promotion.clj` |
+| 46 | `generated_contract.clj` |
+| 34 | `queued_frame_adapter.clj` |
+
+`countdown_control.clj` is *"Operator-stepped controller for the post-baseline
+f19–f27 countdown"* and requires thirteen sibling namespaces — ledger, executor,
+machine, trace, postconditions, runner, stepper, manifest, pre-admission. It is a
+coordination hub, and it is where the machine keeps breaking.
+
+Its recent subjects are the litany, in the vocabulary Joe named — and note the
+third line:
+
+    08-28  fix(apm): enforce authoritative frame seat types
+    08-28  Read APM seat models at each frame mint
+    08-28  Pin APM frame-seat models in campaign config
+    08-28  Revert "fix(apm): contain exhausted terminal repair to frame"
+    08-28  fix(apm): contain exhausted terminal repair to frame
+    08-28  fix(apm): park exhausted role terminals
+    08-27  fix(apm): drain coordinators before witnessed stop
+    08-27  fix(apm): bracket scheduler ticks with durable claims
+
+**A fix and its revert on the same day**, and three consecutive commits pinning,
+reading and enforcing one concept. The verbs across the layer are *pin, bind,
+wire, preserve, persist, park, drain, bracket, retry, prevent, contain* — every
+one about making something stay put or stay connected. None about mathematics.
+
+#### And the spec is not silent about these nouns — which is the real finding
+
+I expected the spec to be disjoint from the failure surface. **It is not.**
+`frame` appears 77 times in `APMCycleMachine.lean`, `coordinator` 24, `campaign`
+17, `seat` 8, `manifest` 6.
+
+So this is not "the failures happen where nothing is specified". It is that the
+spec names the same nouns and **is revised at 8% the rate of the code it
+specifies**, while the failures continue. The spec trails the implementation
+instead of constraining it — which is Joe's original diagnosis exactly:
+*validating data shape but not contracts between steps.* A spec that is
+re-derived from the code after each incident is a description, and a description
+cannot fail.
+
+One noun breaks the pattern and it is the telling one: **`countdown` appears once
+in the spec**, and `countdown_control.clj` is the file with 107 revisions. The
+hub that sequences everything is the least specified thing in the system.
+
+*(The alternative reading — that the spec is revised rarely because it is stable
+and correct — is available and I do not believe it, because the thing it
+specifies is failing. But the ratio alone does not settle it.)*
+
 #### What this gives the War Machine
 
 Not a critique of APM: the layer stack. The WM's own L0 already has a name and a
