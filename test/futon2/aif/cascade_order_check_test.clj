@@ -59,66 +59,93 @@
                          cyclic)))))
 
 ;; ---------------------------------------------------------------------------
-;; A PINNED DEFECT, not a target.
+;; A PINNED DEFECT with a DECLARED BOUNDARY.
 ;;
 ;; Joe, 2026-08-27: "'empty co-app' should be a known failing test, not
 ;; something to chase right away."
+;; Joe, 2026-08-28: "the current census sounds as though maybe we need to do a
+;; cleanup. Which would be relevant to getting the R5-red-ring sorted out."
 ;;
-;; This census runs the checker over the recorded constructions and asserts the
-;; state as measured on 2026-08-27. It is a tripwire, not a goal: if these
-;; numbers change, someone has changed cascade construction, and the change
-;; should be deliberate enough to update the pin in the same commit.
+;; He was right, and the first version made the error it exists to catch. It
+;; reported "25 records" as though that were the corpus. The corpus is 86 files:
+;; 25 carry a :semilattice as {:descent [[from to]…] :co_app […]}, 21 carry one
+;; as the registry's bare vector of {:from … :to …} maps, and 40 carry none. The
+;; first version's regex matched only the first shape, so 21 real cascades were
+;; silently outside the count -- an untyped absence, which is I2, in the test.
 ;;
-;; What it pins, and why each is a defect rather than a fact of life:
-;;   25 records carry a :descent block
-;;    4 of them have a cyclic descent          -- not a partial order at all
-;;   23 of 25 have a pair with no meet         -- the patterns are not related
-;;   22 of 25 have an EMPTY :co_app            -- no co-application edges at all
+;; This is R5's requirement (CoverageReport.lean: declaresCoverage,
+;; outsideIsTyped) applied to a census of our own: state the whole corpus, and
+;; give every member a type, including the ones not checked.
 ;;
-;; The co-app number is the one to read last and act on last. An empty :co_app
-;; may mean the cascade is malformed, or may mean co-application edges were
-;; never produced by the constructor. Those are different repairs and nothing
-;; here distinguishes them.
+;; What it pins, measured 2026-08-28:
 ;;
-;; The corpus is under data/, which is gitignored, so a fresh checkout has no
-;; records. Absence of the corpus is reported as itself and does not fail the
-;; suite (I2, typed absence) -- a green run on an empty corpus would be the
-;; silent success this whole line of work exists to refuse.
+;;   corpus              86   (62 live, 24 archived under a 2026-07-15 stop-line)
+;;     :descent-map      25   futon3c strategic-cascade shape -- CHECKED
+;;     :from-to-vector   21   futon2 pattern-registry shape   -- CHECKED
+;;     :absent           40   no :semilattice key             -- typed, not checked
+;;
+;;   of the 46 checked:  4 cyclic, 23 with a pair having no meet
+;;
+;; THE SPLIT IS THE FINDING, and it is not what the first version implied.
+;; Every defect sits in one producer: all 4 cycles and all 23 missing meets are
+;; :descent-map, while all 21 :from-to-vector cascades pass both checks. The
+;; registry's are well formed because they are a hardcoded four-edge chain
+;; (pattern_registry.clj:322) -- constant, hence trivially an order. The
+;; GENERATED cascades are the malformed ones, 23 of 25.
+;;
+;; Archived records are counted and typed rather than excluded: they are 24 of
+;; the 86 and include a duplicate of attempt-001. Excluding them silently would
+;; be the same defect one level up.
+;;
+;; The corpus is under data/, which is gitignored, so a fresh checkout has none.
+;; Absence of the corpus is reported as itself and does not fail the suite -- a
+;; green run over zero records would be the silent success this work refuses.
 
 (def ^:private corpus-root (io/file "data/wm-full-loop"))
 
-(defn- construction-records []
+(defn- construction-files []
   (when (.isDirectory corpus-root)
     (->> (file-seq corpus-root)
          (filter #(.endsWith (.getName ^java.io.File %) "003-construction.edn"))
          sort)))
 
-(defn- census []
-  (reduce
-   (fn [acc f]
-     (let [t (slurp f)
-           sm (re-find #"(?s):semilattice\s*(\{.*?:co_app[^}]*\})" t)
-           pm (re-find #"(?s):patterns\s*(\[[^]]*\])" t)
-           sl (some-> sm second (as-> x (try (edn/read-string x) (catch Exception _ nil))))
-           ps (some-> pm second (as-> x (try (edn/read-string x) (catch Exception _ nil))))]
-       (if-not sl
-         acc
-         (let [r (sut/check-cascade-order (cond-> sl ps (assoc :elements ps)))]
-           (-> acc
-               (update :records inc)
-               (cond-> (= :failed (get-in r [:acyclic-descent :result])) (update :cyclic inc))
-               (cond-> (= :failed (get-in r [:has-meets :result])) (update :no-meet inc))
-               (cond-> (empty? (:co_app sl)) (update :empty-co-app inc)))))))
-   {:records 0 :cyclic 0 :no-meet 0 :empty-co-app 0}
-   (construction-records)))
+(defn- semilattice-of [t]
+  (or (some-> (re-find #"(?s):semilattice\s*(\{.*?:co_app[^}]*\})" t) second
+              (as-> x (try (edn/read-string x) (catch Exception _ nil))))
+      (some-> (re-find #"(?s):semilattice\s*(\[\{.*?\}\])" t) second
+              (as-> x (try (edn/read-string x) (catch Exception _ nil))))))
 
-(deftest recorded-cascades-are-pinned-as-defective
+(defn- carrier-of [t]
+  (some-> (re-find #"(?s):patterns\s*(\[[^]]*\])" t) second
+          (as-> x (try (edn/read-string x) (catch Exception _ nil)))))
+
+(defn- classify [f]
+  (let [t (slurp f)
+        sl (semilattice-of t)
+        ps (carrier-of t)]
+    {:archived (.contains (str f) "/archives/")
+     :shape (cond (map? sl) :descent-map (vector? sl) :from-to-vector :else :absent)
+     :res (when sl (sut/check-cascade-order (if (and (map? sl) ps)
+                                              (assoc sl :elements ps)
+                                              sl)))}))
+
+(deftest recorded-cascades-are-pinned-with-a-declared-boundary
   (if-not (.isDirectory corpus-root)
     (println "cascade-order census: corpus absent (data/ is gitignored) — not run")
-    (let [c (census)]
-      (testing "the pinned state of the recorded corpus, 2026-08-27"
-        (is (= 25 (:records c)) "construction records carrying a :descent block")
-        (is (= 4  (:cyclic c))  "PINNED DEFECT: cyclic descent — not a partial order")
-        (is (= 23 (:no-meet c)) "PINNED DEFECT: a pair with no greatest lower bound")
-        (is (= 22 (:empty-co-app c))
-            "PINNED DEFECT: no co-application edges — constructor or cascade, undetermined")))))
+    (let [rows (mapv classify (construction-files))
+          by-shape (frequencies (map :shape rows))
+          checked (filter :res rows)
+          failed (fn [k] (filter #(= :failed (get-in % [:res k :result])) checked))]
+      (testing "the corpus is declared in full, and every member is typed"
+        (is (= 86 (count rows)) "construction records in the corpus")
+        (is (= 24 (count (filter :archived rows))) "archived, counted not excluded")
+        (is (= {:descent-map 25 :from-to-vector 21 :absent 40} by-shape)
+            "every record has a shape, including the 40 carrying no cascade")
+        (is (= 46 (count checked)) "records carrying a cascade, both producer shapes"))
+      (testing "PINNED DEFECTS, and they are confined to one producer"
+        (is (= 4 (count (failed :acyclic-descent))) "cyclic descent — not a partial order")
+        (is (= 23 (count (failed :has-meets))) "a pair with no greatest lower bound")
+        (is (= #{:descent-map} (set (map :shape (failed :acyclic-descent))))
+            "every cycle is in the GENERATED strategic-cascade shape")
+        (is (= #{:descent-map} (set (map :shape (failed :has-meets))))
+            "every missing meet is too; all 21 registry cascades pass both")))))
