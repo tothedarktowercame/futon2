@@ -1724,6 +1724,89 @@ So a **ninth standard clause**, and unlike the eighth it is one we mostly fail:
 > against tomorrow. A module with only witnesses is a description, and by §3.1i's
 > measurement, descriptions trail.
 
+### 3.1k Stop-the-line means begin at the next level — and what a general theorem is for
+
+*Joe, 2026-08-28: "the 'property quantified over all runs' is like tuning a
+string instrument. You might not always stay in tune, but you should notice when
+the instrument is out of tune and retune it … supposing the long-term behaviour —
+maybe comprised of 'fluents' — is seen NOT to be quite what we thought. New
+residuals, missing packets, whatever. That should stop the line — but it
+obviously shouldn't stop work. **Stop the line means begin work at the next
+level.**"*
+
+#### That redefines ㉔, and dissolves the objection to it
+
+㉔ currently reads *stop-the-line: pin the failed target ahead of unrelated
+work*, which sounds like a halt, and the standing objection to halting is that
+the work has to continue. Joe's reading removes the objection: **stopping the
+line is a relocation, not a halt.** Work stops at the level where the failure
+surfaced and begins at the level that explains it.
+
+That is only actionable because §3.1i gives the levels. A failure at L4 (typed
+holds) does not mean *stop*; it means the invariant that would have prevented it
+is at L3 or L2, so that is where the next work is. The DAG converts "something
+broke" into "resume here", which a pinned target cannot do — a pinned target
+resumes the same plan.
+
+    failure surfaces at level n
+      → stop work at level n
+      → the DAG names the level that explains it, m < n
+      → begin work at m
+      → if no level explains it, the DAG gains a layer, and that is the finding
+
+The last line is the tail-eating case: an unexplainable failure is not a bug
+report, it is evidence the layering is wrong.
+
+#### A general theorem's job is to notice, not to prevent
+
+The tuning image sets the bar correctly and lower than "guarantee", which is the
+right correction to clause 9 as I first wrote it. An instrument goes out of tune;
+the point of a tuning reference is that you **find out**. So:
+
+> A property quantified over all runs is a **detector**, not a guarantee. It
+> earns its place by being the thing that notices, not by being unbreakable.
+
+This matters practically: a theorem that turns out to be violated in production
+has not failed at its job — it has done it. What fails at the job is a module of
+fixture witnesses, which can only notice the failures somebody already thought
+of.
+
+**And we have a working prototype of exactly this**, built earlier today without
+seeing it in these terms. The pinned census in
+`futon2/test/futon2/aif/cascade_order_check_test.clj` asserts *the state of the
+recorded corpus as measured on 2026-08-27* — 25 records, 4 cyclic, 23 without a
+meet, 22 with an empty `:co_app`. It prevents nothing. It notices when the
+numbers move, and requires whoever moved them to update the pin deliberately.
+That is a tuning reference, and it is the shape the general theorems should take
+at the corpus level.
+
+#### What fluents would buy, and the gap they name
+
+Joe's "maybe comprised of fluents" points at something our vocabulary genuinely
+cannot say. Checked across all five WarMachine modules: **every property is about
+a finished object** — a run (`earnsPolicyGrade`), a selector (`governs`), a
+report (`coverageReported`), a relation (`acyclicDescent`), a fold occurrence
+(`gainChainSound`). Not one is about a **sequence** of them.
+
+So *"the machine has stayed in tune over the last N runs"* is not merely unproved
+here — it is **unstatable**. Long-term behaviour needs properties that hold *at a
+time* and change (`HoldsAt`, initiated and terminated by events), which is what a
+fluent is. Concretely, the claims we would want and cannot currently write:
+
+- the rate of new residuals is not increasing
+- a packet dispatched is a packet arrived, *over the whole campaign* rather than
+  per dispatch
+- an invariant that held at run n still holds at run n+k, or something between
+  them terminated it
+
+**This is the same shape as the C1/end-to-end work** (§3.1d): a property over a
+population rather than over one record — but indexed by *time* instead of by
+*stage*. The two are the missing pair. Families 1–10 all type single occurrences;
+end-to-end criteria type populations crossing stages; fluents would type the
+system persisting through runs. Registered here as the gap, not proposed as a
+build: it wants one honest example first, and the census pin is the closest thing
+we have to one.
+
 ### 3.2 Tier 1 — attestation and typed absence *(each stated as a contract clause first)*
 
 **Ordering consequence of Tier 0.** These four are no longer "make the reports
