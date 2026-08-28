@@ -829,20 +829,47 @@ Session `66f62b84…`, 408 entries in the window, 185 with a JSON-readable body:
 | agent commits | `turn-commits` — **41** | turn | — |
 | agent retrieves context | `context-retrieval` | turn | — |
 | agent dispatches work | `invoke-start` / `invoke-complete` / `invoke-error` | dispatch | — |
-| **a WM tick** | **nothing** | — | — |
-| **a Flight** | **no object of any kind** | — | — |
+| **a WM tick** | `wm-tick` / `wm-click` / `wm-cron` — **emitter built, disabled by default** | click | — |
+| **a click's identity** | `click-id`, `attempt-id`, `phase`, `started-at` via `GET /api/alpha/wm/click` — **live now** | click | — |
 
 **This answers Joe's open question — "I have no idea if they are persisted."
 Agent turns are persisted**, in the same shape as operator turns, with a
 `turn-id` (`claude-13-turn-N`) and a `clocked-mission` on 140 of 144. So the
 operator/agent *pair* is already recorded at turn grain and already pegged to a
-mission. What is missing is one level up: nothing marks where a tick begins and
-ends, and Flight has no record at all — missions exist as documents, not as
-records the loop writes.
+mission.
 
-That is the precise sense in which the WM cannot follow along the same track. It
-is not that its steps are unlike operator steps; it is that **its unit of action
-has no boundary in the record**, so no criterion can quantify over it.
+#### CORRECTION 2026-08-27 — the tick record is built and switched off, not absent
+
+The first draft of this section said a tick leaves *nothing* and a Flight has *no
+object of any kind*. **Both are wrong**, and Joe named the records I had not
+searched. What is actually there:
+
+| | |
+|---|---|
+| `futon2/src/futon2/aif/evidence_emit.clj` | *"Best-effort Evidence Landscape emitter for War Machine ticks. **Disabled by default.** Set `FUTON2_WM_EMIT_EVIDENCE` to 1/true/yes/on."* Emits `wm-tick`, `wm-click`, `wm-cron`. |
+| `GET /api/alpha/wm/click` | **answers right now**: `{"running?":false,"click-id":null,"phase":null,"attempt-id":null,"started-at":null,"last-result":null}` — a click identity model with a phase and a start time |
+| `futon3c/src/futon3c/wm/runner_service.clj` | single-flight service owning one click's lifecycle and its HTTP status projection |
+| `futon2/scripts/wm_clicks_exhibit.bb` | *"THE visual surface for WM click / burn-in evidence"*, deterministic, over `data/wm-trace/*` |
+| `p4ng/empirics/TRACE-061-cross-correlation.md` | one complete attempt cross-correlated against the paper's own ①–㉙ description — click `wm-click-f8569fae`, cohort 46, attempt-061, author claude-7, reviewer codex-7, repair-reviewer codex-1, with a phase log |
+
+So a click **does** have a boundary in the record: a `click-id`, an `attempt-id`,
+a `phase`, a `started-at`. And a run has a three-level identity — cohort,
+attempt, click — which is more structure than the operator side carries, not
+less.
+
+**The correct finding is the one the red rings keep producing: built and switched
+off.** The store has no `wm-tick` because an environment variable is unset, not
+because a writer is missing. That is a materially different claim with a
+materially different repair — flip a switch and verify what it writes, rather
+than build an emitter.
+
+**And the method failure is the same one twice in one day.** Earlier I reported
+seven lost operator turns that were my own regex; here I reported an absent
+record that a `grep -rl wm-click` would have found. Both times the instrument's
+silence was read as the world's. The standing rule — *establish that the search
+was exhausted before recording an absence* — was available and not applied. In
+this case the tell was there to be noticed: "no record at all" is an
+extraordinary claim about a system with a paper written around it.
 
 #### The ①–㉞ key, and the column it is missing
 
@@ -856,9 +883,12 @@ times:
 - On the operator side that is ④ (the conversation is the previous trace), ㉕–㉙
   (dispatch, resolve, cure, review, amend — all `invoke-*`), ㉚ (`turn-commits`),
   and ㉞ (`chat-turn` with session and turn ids).
-- On the WM side **every step's trace goes to `data/wm-trace/*.edn`**, which is
-  gitignored, has no per-tick id, and was last written 2026-07-21
-  (`futon3c/holes/tickets/T-wm-turns-are-not-operator-turns.md`).
+- On the WM side the trace goes to `data/wm-trace/*.edn` (gitignored, last
+  written 2026-07-21) **and**, when `FUTON2_WM_EMIT_EVIDENCE` is set, to the
+  Evidence Landscape as `wm-tick` / `wm-click` / `wm-cron`. The per-step mapping
+  already exists once, by hand, in `p4ng/empirics/TRACE-061-cross-correlation.md`
+  — which is the model for what the third column should contain, and evidence
+  that the mapping is producible rather than hypothetical.
 
 So the honest third column, today, is: the operator half is traced per step into
 a queryable store; the WM half is traced per *day file* into an ignored
