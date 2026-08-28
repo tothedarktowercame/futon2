@@ -207,6 +207,63 @@ recorded constructions whose `:descent` relation contains a directed 2-cycle and
 was folded anyway — the first family whose refusing-broken witness is a dated
 record rather than a designed fixture.
 
+### 2.1e Which formalism types which object
+
+*Joe, 2026-08-27: "it may also be useful to add clarity around which formalism or
+formalisms will be used per each, or at the interfaces — semilattice vs BV vs
+Markov: they're not alternatives, they type different objects."*
+
+They are not competing choices and the table should say so per family. A cascade
+has an authority structure, a temporal shape and a stochastic reading at once;
+asking which formalism is *right* is like asking whether a run has a length or a
+duration.
+
+| object | formalism | where it types something here |
+|---|---|---|
+| **authority structure** — what the acting patterns stand on | order theory: acyclicity, meets, overlap | family 10 (`CascadeOrder.lean`), ⑳ |
+| **trajectory** — patterns co-firing within a step, steps in order | **BV** — `copar` within a step, non-commutative `seq` between them (`DarkTower/BV.lean`) | families 1 and 4; the ⑯→㉒→㉖→⑨ thread is a `seq` claim, and nothing currently states it as one |
+| **uncertainty** — which action, given a distribution | **Markov categories** | family 8 (`factorsThroughDiscard` is already a Markov-shaped statement), ⑯ |
+| **naming discipline** — when a number may be called `G(π)` | declared-domain clauses S-G1…S-G4 | `PolicyGrade.lean`, cross-cutting |
+| **record consistency** — one occurrence's internal shape | plain predicates over records | families 1–7, `GainChain.lean` |
+
+**At the interfaces is where this earns its keep.** Family 1 threads an identity
+across four steps; that is a *sequential* claim and BV's `seq` is the connective
+that forbids reordering it. Today it is stated as a conjunction of equalities
+inside one record — which, per §3.1g, is exactly how a step-contract gets
+smuggled into a record shape. Writing it in BV would make the ordering explicit
+rather than incidental. Registered; not attempted.
+
+### 2.1f The invariants we want enforced, and their standing
+
+*Joe: "it would be good if we kept track of the invariants that we'd like to see
+enforced."* The five are stated in
+`p4ng/empirics-futon/NOTE-fixtures-organised-by-invariant.md`; what has been
+missing is a register of **how far each one is actually enforced**, as opposed to
+described.
+
+| | invariant | families | enforced by | standing |
+|---|---|---|---|---|
+| **I1** | derived-not-enumerated | 5 | — | **described only.** The whitelist is still four entries; nothing refuses a fifth |
+| **I2** | typed-absence | 2, 5 | `typedAbsence` (`GainChain.lean`), `outsideReason` in the contract, `:unwitnessable` in `cascade_order_check.clj` | **partly enforced** — the newest three artefacts all obey it |
+| **I3** | path-to-behaviour | — | — | described only |
+| **I4** | evidence-sound-at-use | — | — | described only |
+| **I5** | every-contributor-accounted | — | — | described only |
+
+**And one invariant that is a claim rather than a description.** From
+`NOTE-from-relations-to-kernels.md`:
+
+> *"The singularity criterion and the EFE ambiguity term are two readings of one
+> object. `discriminates` asks whether the channel is constant; ambiguity asks
+> how diffuse it is. Both are properties of the morphism, in the same category …
+> the five invariants and the expected-free-energy core stop being two
+> vocabularies laid side by side and become one."*
+
+That is the unification worth tracking, and it is **stated as a claim, not a
+theorem**. Its trigger has arrived — `Mathlib.Probability.Kernel.Category.Stoch`
+imports cleanly since the package-authority repair — so the next question is
+whether it survives being written down. It belongs in this register precisely
+because an unenforced unification reads exactly like an enforced one in prose.
+
 ### 2.1c The rosetta is not surjective, and that is where the work went
 
 Families **8 and 9 have no APM source**. APM's controller advances through a
