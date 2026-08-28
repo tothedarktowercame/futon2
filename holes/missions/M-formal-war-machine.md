@@ -233,6 +233,48 @@ inside one record — which, per §3.1g, is exactly how a step-contract gets
 smuggled into a record shape. Writing it in BV would make the ordering explicit
 rather than incidental. Registered; not attempted.
 
+#### The trajectory is not one thread, and the record says otherwise
+
+*Joe, 2026-08-28: "it occurs to me about BV that I'm generally running several
+agent sessions **in parallel**, each with their own workflow — so if we had a
+model of my actual workflow, that's what it would look like."*
+
+Measured over the 500 most recent dispatched jobs (`GET
+/api/alpha/invoke/jobs?limit=500`, 2026-08-27 to 2026-08-28), 8 callers and 20
+agents:
+
+| jobs already running when a job starts | jobs |
+|---|---|
+| 0 | 159 |
+| 1 | 217 |
+| 2 | 98 |
+| 3 | 26 |
+
+**Maximum four concurrent, and 341 of 500 jobs — 68% — start while another is
+already in flight.** Parallel is the ordinary case; a serial model of this
+workflow describes the minority.
+
+So the object BV should type is not a trajectory. It is **`copar` of `seq`s**:
+each session a sequence of turns, the sessions composed with no order between
+them, and the operator's REPL the point where they rejoin. That is a specific
+term shape, not a gesture, and it is the answer to *"what would a model of my
+actual workflow look like"*.
+
+**And the record currently asserts the wrong connective.** A `chat-turn` carries
+`turn-id` — `claude-13-turn-N`, a per-seat linear counter — which is a `seq`
+claim. Nothing in the record states that two sessions were concurrent; the
+concurrency is *derivable* from envelope timestamps across `:evidence/session-id`
+values and *represented* nowhere. Per the BV connective dictionary, `copar` is
+exactly the constructor whose job is to forbid **implying an order that does not
+exist** — and a linear turn counter over parallel sessions implies precisely
+that.
+
+This is the same defect as the others in this section, one level up: not a wrong
+value, a wrong *type*. And unusually, it applies to the operator's half of the
+loop rather than the machine's — the half that came out of the C1 exercise
+clean. Operator turns are durable, queryable and annotatable, and still typed as
+a sequence when they are not one.
+
 ### 2.1f The invariants we want enforced, and their standing
 
 *Joe: "it would be good if we kept track of the invariants that we'd like to see
