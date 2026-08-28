@@ -1620,6 +1620,110 @@ cyclic dependency graph cannot be sorted. Building L4 first — which is what te
 promotion commits are — is the TryHarder loop, and the DAG is what says so in
 advance rather than after fifty frames.
 
+### 3.1j Specs that eat their own tail — and what Lean is actually for
+
+*Joe, 2026-08-28: "trailing is one thing, while not keeping up is another … the
+point of these specs would be to eat their own tail. What if each failure was a
+critical incident, i.e. a singularity? The machine stops and then we need to
+rethink the problematics. So the DAG isn't once-and-done, it's evolving alongside
+the work. Now, the Lean model is something slightly different — it's not
+production rules but a proof which should talk about e.g. terminal behaviour over
+the production system."*
+
+#### Trailing versus not keeping up, made measurable
+
+The distinction is real and needs a number or it will be argued about. The
+measurable quantity is **latency**: the time from an incident being *recorded* to
+the invariant being *stated*.
+
+- **Trailing** — latency is bounded, and the set of recorded-but-unstated
+  incidents does not grow.
+- **Not keeping up** — the backlog grows, or latency does.
+
+Measured from *when it was known*, not from when it was introduced, which matters
+for our own case. The four-element whitelist has been frozen since **2026-06-03**
+— three months as a defect — but it was recorded on **2026-08-27** (`E-R6`,
+`E-R8` slice 5), so its latency is one day. Family 9 in the rosetta is
+`*unstated — the R6 module's slot*`, and it is currently our **only**
+recorded-and-unstated incident.
+
+That is trailing, and Joe is right that it is fine for prototype-driven work. It
+stops being fine the moment a second incident is recorded before the first is
+stated.
+
+#### A failure is a singularity, and the stack already says what that means
+
+This is not new vocabulary — `E-R5-red-ring-fill` defines both failure modes of
+discrimination:
+
+> **R14** — a dimension with **no singularity** on it.
+> **R5** — a **singularity with no dimension to receive it**.
+
+**A failure patched locally is R5 exactly.** The incident is a singular point;
+the apparatus has no dimension on which to register it; so the singularity is
+absorbed as one more ordinary point. The Deleuze passage the excursion already
+quotes names the failure mode precisely — *produce a line of ordinary points that
+stupidly …* — and that line is the TryHarder loop.
+
+**The DAG is the dimension.** Constructing it is how a failure gets somewhere to
+land. Which means the loop is:
+
+    failure → recorded as an incident → the machine STOPS (㉔)
+           → the problematic is re-posed, not the symptom patched
+           → an invariant is stated, or an existing one MOVES LAYER
+           → the DAG is rebuilt and the work order changes
+
+㉔ already exists as *stop-the-line: pin the failed target ahead of unrelated
+work*. What it pins is the **target**. What this proposal needs it to pin is the
+**problematic** — and those are different objects. A pinned target resumes the
+same plan; a re-posed problematic changes which plan is next.
+
+**So the DAG in §3.1i is a hypothesis with a version, not a result.** Its six
+invariants and their layering are what the record supported on 2026-08-28. Each
+future incident may add one, or move one down a layer — and moving an invariant
+*down* is the interesting event, because it means something believed derived was
+foundational.
+
+#### What Lean is for, and the failure mode of forgetting it
+
+Joe's distinction is the sharpest thing in this section, and it explains the
+measurement in §3.1i's correction.
+
+| layer | what it is | what it may say |
+|---|---|---|
+| **patterns** | production rules | `IF ∧ HOWEVER → THEN`, one situation at a time |
+| **the DAG** | dependency order over invariants, evolving | what rests on what; where to work next |
+| **Lean** | **proof about the production system's terminal behaviour** | what *no run* can do; what holds for *every* selector, score, relation |
+
+**Lean is not a third copy of the rules.** `APMCycleMachine.lean` became one: 42
+clauses, each modelling a situation, 27 of them operational. That is the
+implementation restated in another syntax — and *that is why it trails*. **A
+description can only follow.** A theorem about terminal behaviour cannot trail,
+because it is not about any particular situation; it either holds over all runs
+or is refuted by one.
+
+**And the same criticism applies to us, which is the useful part.** Counting
+crudely across our five modules, most theorems are witnesses about fixtures. The
+ones that are not are the ones that have done real work today:
+
+- `factorsThroughDiscard_iff_temperatureInvariant` and
+  `not_governs_iff_factorsThroughDiscard` — over *every* selector
+- `wiringSensitive_needs_two_wirings`, `singleton_wiring_fails_sg4` — over every
+  score family; the second is what let the grim-trigger refusal stop being a type
+  choice
+- `acyclic_of_increasing_rank` — over every relation
+
+Each of those states something no fixture can express. The rest say *this
+fixture is refused*, which is necessary and is not a theorem about the system.
+
+So a **ninth standard clause**, and unlike the eighth it is one we mostly fail:
+
+> **A module states at least one property quantified over all runs, not only
+> witnesses about fixtures.** Witnesses establish that the clause bites on a real
+> incident; a general theorem is the thing the implementation can be checked
+> against tomorrow. A module with only witnesses is a description, and by §3.1i's
+> measurement, descriptions trail.
+
 ### 3.2 Tier 1 — attestation and typed absence *(each stated as a contract clause first)*
 
 **Ordering consequence of Tier 0.** These four are no longer "make the reports
