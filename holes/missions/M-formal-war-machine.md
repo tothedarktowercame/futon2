@@ -207,6 +207,62 @@ recorded constructions whose `:descent` relation contains a directed 2-cycle and
 was folded anyway — the first family whose refusing-broken witness is a dated
 record rather than a designed fixture.
 
+### 2.1d What a cascade is — a dependency DAG over patterns
+
+*Joe, 2026-08-28: "the cascade as a dependency DAG over patterns — that should be
+written down."* It has been used all week without a definition. Here it is, with
+the parts that are required, the parts that are measured, and the parts it is
+routinely confused with.
+
+#### The definition
+
+> A **cascade** is a finite directed acyclic graph whose **nodes are patterns**
+> and whose **edges are dependency**: an edge `p → q` means *p stands on q* —
+> `q` is an authority `p` cites, a precondition `p` needs, or a hole `p` fills.
+> The cascade **of a run** is the up-closure of the patterns that acted, under
+> that edge relation: every pattern they stand on, transitively, and nothing
+> else.
+
+Three things follow from the definition and are worth stating separately,
+because each has been got wrong at least once this week.
+
+**The edges are authored; the sub-graph is derived.** A pattern declares what it
+stands on (`@why` in the library, `:descent` in a WM construction). Nothing
+infers dependency from similarity, co-occurrence or prose. What a *run*
+contributes is only which part of the authored graph it reaches — so the
+cascade's shape is a property of the run, not of the collection
+(`p4ng/app-snatch.tex`: the same twelve patterns give a tree against one
+counterpart and an overlapping structure against another).
+
+**Acyclicity is required.** Not tidiness: a cyclic dependency graph **cannot be
+topologically sorted**, so "work from the bottom up" — the whole point of having
+the DAG — is undefined on it. This is family 10's `acyclicDescent`, and §3.1g
+found 4 of 25 recorded constructions violating it.
+
+**Meets and overlap are measured, not required.** Whether every pair has a
+greatest common dependency (a meet semilattice) and whether any node stands on
+two authorities (overlap, Alexander's *not a tree*) are **independent** of each
+other and of acyclicity — all four combinations occurred across six Snatch runs.
+They are reported; only acyclicity is enforced.
+
+#### What a cascade is not
+
+| not | why the distinction matters |
+|---|---|
+| **the acting chain** | one pattern acts per step, so the sequence of actors is linear. The cascade is what those actors *stand on*, which is a graph. Confusing them makes a semilattice look like a path |
+| **a bag of patterns** | membership without edges. The G4 Snatch run scored +3 and a re-wiring of the same twelve patterns scored −5, so the edges carry the score (S-G4) |
+| **a plan** | a cascade is bounded build context, not permission to act — step ㉑ |
+| **a semilattice** | a rooted tree is a meet semilattice with no overlap at all. "Semilattice" names one measured property, not the object |
+
+#### Why the definition earns its place
+
+Because it is the object step ⑳ is specified to construct, and constructing it
+is the difference between a plan and a TryHarder loop (§3.1h). Joe's topology
+correction — *stop deep-diving one problem, build the DAG of dependencies and
+work up from the easiest* — is exactly "construct the cascade, then topologically
+sort it". A machine that emits a cyclic `:descent` cannot make that move, and 4
+of 25 of ours do.
+
 ### 2.1e Which formalism types which object
 
 *Joe, 2026-08-27: "it may also be useful to add clarity around which formalism or
