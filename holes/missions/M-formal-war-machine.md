@@ -1241,6 +1241,95 @@ Bounds: the gate reading is from source rather than from a run; the cycle counts
 are over the 25 construction records on disk under `data/wm-full-loop/`, which is
 not gitignored history but is one machine's.
 
+### 3.1h Why the APM attempt has not converged — the log says "model", not "fix"
+
+*Joe, 2026-08-28: "not only is it an attempt at formalising a simple machine,
+that attempt has been much more of a shit-show than I thought … fix after fix,
+patch after patch, no guaranteed stability after 50 live frames … my suspicion is
+that it's an example of a TryHarder loop. Every fix generates a possible surface
+for more failures, and the agents involved are gleeful because they seem to have
+fixed something local and have a limited sense of continuity between turns."*
+
+The git log was the thing to check, and it **complicates the diagnosis in a way
+that makes it sharper**.
+
+#### Measured
+
+`DarkTower/APMCycleMachine.lean`, 2026-08-22 to 08-26 — five days, eighteen
+revisions on 08-23 alone:
+
+| | |
+|---|---|
+| revisions | **42** |
+| lines added | **3,420** |
+| lines deleted | **46** — a deletion rate of **1.3%** |
+| size | **131 → 1,986 lines**, fifteenfold |
+
+#### But not one commit is a fix
+
+Zero messages begin `fix`, `repair`, `patch`, `correct`, `harden`, `guard` or
+`prevent`. **Twenty-seven of forty-two begin "Model"**, thirty-three counting
+`state`/`declare`/`retain`/`extend`/`bound`: *Model promotion projection failure
+as apparatus repair · Model recovered student observations separately · Model
+terminal submission field authority · Model bounded same-coordinator retries.*
+
+So the loop is not fix-after-fix. It is **model-after-model**. Each live frame
+surfaced a situation the spec did not cover, and the response was to add a clause
+covering it. With 1.3% deletion, essentially nothing was ever subsumed or
+retracted; the surface only grew.
+
+That is Joe's mechanism — *"every fix generates a possible surface for more
+failures"* — with the mechanism named: it is not repair, it is **enumeration**.
+
+#### Which makes it I1, at the scale of a whole specification
+
+**I1 · derived-not-enumerated** asks: *does this fix scale by editing a list?*
+Here the list is the spec. An enumerated spec converges only when the situation
+space is exhausted, and a live machine generates new situations faster than
+anyone can enumerate them. A *derived* spec — one stating the invariant the cases
+share — converges because it covers cases it never saw.
+
+Fifty frames is not "not enough frames yet". It is the number at which an
+enumerating spec was always going to be, because there is no number at which it
+stops.
+
+#### The topology parallel is the same repair, and we can say why
+
+*Joe: "at first I had Codex pick one problem and do a deep dive … then I realised
+that if it looked at all of the problems holistically, it could create a DAG of
+dependencies, and work its way up from the easiest."*
+
+Deep-diving one problem is enumeration — solve this case. Building the dependency
+DAG and working up from the easiest is derivation — find the structure the cases
+share. **The same repair in both domains**, which is the structural similarity,
+and it explains why 50 frames resembles 130 turns on one Mathlib proof.
+
+**And it is exactly what step ⑳ is for.** ⑳ constructs the cascade once for the
+selected target — a dependency DAG over patterns, worked from the bottom. The WM
+is specified to do automatically what Joe did by hand for the topology problems.
+
+Except that §3.1g measured what ⑳ actually produces: of 25 recorded
+constructions, **4 have a cyclic `:descent`** and, with the real `:patterns`
+carrier supplied, **23 of 25 have a pair with no greatest lower bound**. A cyclic
+dependency graph **cannot be topologically sorted**, so "work up from the easiest"
+is not merely unperformed — it is undefined on that input. And a relation where
+almost no pair has a meet is a bag of patterns with edges drawn on it.
+
+So the WM cannot currently perform, for itself, the move that fixed the topology
+run. That is the connection between today's cascade measurement and Joe's
+question, and it is why family 10 was worth opening: **`acyclicDescent` is the
+precondition for working up from the easiest.** It is not a formalist's tidiness
+requirement; it is the difference between a plan and a TryHarder loop.
+
+#### The part not established here
+
+*"Agents … have a limited sense of continuity between turns"* is plausible and is
+**not** shown by the log. The log shows enumeration; it does not show why. A
+model-after-model pattern is equally consistent with a correct local method
+applied without a global view — which is what Joe's own topology correction was.
+Distinguishing the two would need the per-turn record, and is a separate
+question.
+
 ### 3.2 Tier 1 — attestation and typed absence *(each stated as a contract clause first)*
 
 **Ordering consequence of Tier 0.** These four are no longer "make the reports
