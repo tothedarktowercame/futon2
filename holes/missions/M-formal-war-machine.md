@@ -794,6 +794,90 @@ work.
    the standard was worth writing.
 4. **H3b**, the trace checker: Lean judges a run, verdict as exit code.
 
+### 3.1e Operator behaviours, WM steps, and what each leaves behind
+
+*Joe, 2026-08-27: "what exactly are the operator behaviours, and can the WM even
+follow along the same track? … an obvious behaviour is typing into a REPL. That's
+slightly different from a 'WM turn' because the WM is usually multiple agents
+working across many of what I'd call turns. A WM tick or click is somewhat like an
+operator turn, but it's also like a series of turns pegged to a Mission, with the
+strict analogy Flight ≈ Mission."*
+
+#### The grains do not line up, and that is the first thing to say
+
+| unit | what it is | analogue |
+|---|---|---|
+| **operator turn** | one submission into the REPL | the atom |
+| **agent turn** | one reply, with its tool calls | the atom, other side |
+| **WM tick / click** | one pass of the control loop | *functionally* an operator turn — a decision and an act — but it spans **a series of turns**, so it is coarser |
+| **Flight** | a run of ticks toward one end | **Mission** (Joe's strict analogy) |
+
+A tick is therefore not a turn, and the mismatch is not cosmetic: end-to-end
+criteria quantify over a population, and the population is a different set at
+each grain. "Every operator turn is stored" and "every tick is stored" are not
+the same shape of claim, because a tick has no boundary in the record until
+something writes one.
+
+#### What is persisted today — measured, not assumed
+
+Session `66f62b84…`, 408 entries in the window, 185 with a JSON-readable body:
+
+| behaviour | record | grain | pegged to a mission |
+|---|---|---|---|
+| operator types into the REPL | `chat-turn`, `role: user` — **75** | turn | yes, `clocked-mission` |
+| agent replies | `chat-turn`, `role: assistant` — **69** | turn | yes |
+| agent commits | `turn-commits` — **41** | turn | — |
+| agent retrieves context | `context-retrieval` | turn | — |
+| agent dispatches work | `invoke-start` / `invoke-complete` / `invoke-error` | dispatch | — |
+| **a WM tick** | **nothing** | — | — |
+| **a Flight** | **no object of any kind** | — | — |
+
+**This answers Joe's open question — "I have no idea if they are persisted."
+Agent turns are persisted**, in the same shape as operator turns, with a
+`turn-id` (`claude-13-turn-N`) and a `clocked-mission` on 140 of 144. So the
+operator/agent *pair* is already recorded at turn grain and already pegged to a
+mission. What is missing is one level up: nothing marks where a tick begins and
+ends, and Flight has no record at all — missions exist as documents, not as
+records the loop writes.
+
+That is the precise sense in which the WM cannot follow along the same track. It
+is not that its steps are unlike operator steps; it is that **its unit of action
+has no boundary in the record**, so no criterion can quantify over it.
+
+#### The ①–㉞ key, and the column it is missing
+
+`p4ng/empirics-futon/NOTE-thirtyfour-steps-both-levels.md` already walks all
+thirty-four steps with a WM column and an operator column, which is the key Joe
+is asking for. What it does not carry is a **third column: does the step leave a
+trace.** The rule is short enough to state rather than tabulate thirty-four
+times:
+
+- A step has a trace **iff** some component writes an evidence event for it.
+- On the operator side that is ④ (the conversation is the previous trace), ㉕–㉙
+  (dispatch, resolve, cure, review, amend — all `invoke-*`), ㉚ (`turn-commits`),
+  and ㉞ (`chat-turn` with session and turn ids).
+- On the WM side **every step's trace goes to `data/wm-trace/*.edn`**, which is
+  gitignored, has no per-tick id, and was last written 2026-07-21
+  (`futon3c/holes/tickets/T-wm-turns-are-not-operator-turns.md`).
+
+So the honest third column, today, is: the operator half is traced per step into
+a queryable store; the WM half is traced per *day file* into an ignored
+directory. Filling the column properly is work for after that ticket, because
+until a tick has an id there is nothing for a per-step trace to attach to.
+
+#### One limit found while measuring, which belongs to the ticket
+
+Of 408 entries in the window, **185 have a map body a JSON client can read and
+223 are EDN maps rendered as strings** — `{"prompt-preview" "…"}`, keys and
+values space-separated, which is not JSON. The envelope is queryable; the body is
+not uniformly. Every `invoke-*` and `context-retrieval` event is in the
+unreadable half, which is exactly the half a WM-side criterion would need.
+
+This tripped the measurement twice in one afternoon and is a sharper version of
+the ticket's *queryable* row: the store is not simply "less queryable than the
+operator record", it is **queryable at the envelope and not at the body**, and
+the split runs straight through the events the machine writes about itself.
+
 ### 3.2 Tier 1 — attestation and typed absence *(each stated as a contract clause first)*
 
 **Ordering consequence of Tier 0.** These four are no longer "make the reports
