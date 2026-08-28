@@ -178,17 +178,34 @@ requirements at the level of **concepts**. This maps the same families to the
 **Lean predicate that states them** and the **Clojure that implements them**, so
 the correspondence is checkable rather than asserted.
 
-| # | family | WM Lean predicate | stated in | implementation | R-node |
-|---|---|---|---|---|---|
-| 1 | identity threading | `threadedIdentity` | `GainChain.lean` | γ dedups on `:tick` (`fold_realized.clj`) vs `(System/currentTimeMillis)` at `scripts/wm_scheduled_run.clj:108` — **two clocks** | R8/R14 |
-| 2 | non-empty handle | `inhabitedHandle`, `typedAbsence` | `GainChain.lean` | `fold_realized.clj:163` — `(when (pos? bound) …)` returns bare `nil` | R8 |
-| 3 | self-contained record | `selfContainedRecord` — **reserved, not yet defined** | — | `actuator_a3.clj:149` throws on any rejection; `fold_escrow/load-deposits` degrades | — |
-| 4 | durability before certification | `durableBeforeFold`, `loadYieldsOutcome`/`foldOf` | `GainChain.lean` | `enact.clj:255` catch-all around `close-loop!` | R8/R16 |
-| 5 | provenance containment | `declaredDomain`, `domainNotNarrowed`, `dischargedPrecondition` | `GainChain.lean` | `fold_realized.clj:113` `reviewed-candidate-cleans` (4 entries); the named regime already exists at `actuator_a3.clj:395` (`:domain-mismatch`) | R8 |
-| 6 | separation of powers | `separatedPowers` — **reserved** | — | ㉕/㉘; overlay R9 `:holds true` | R9 |
-| 7 | exit / status pins | `pinnedExit` — **reserved** | — | ㉒ act-gate, `cascade-score > 0 ∧ coverage-score-delta < 0` | — |
-| **8** | **temperature governs the action** | `governs`, `temperatureInvariant`, `gainAdvances` | `CommitmentTemperature.lean` | `policy.clj:35` (τ computed), `:238` and `:377` (argmax, τ-free), `war_machine.clj:4476,4527` | **R14** |
-| **9** | **the ordering step consumes a surveyed space** | *unstated — the R6 module's slot* | — | `full_loop_runner.clj:872` `repair-entry` (works, `##-Inf`); `portfolio_action_proposer.clj` (dark) | **R6** |
+**The step column is restored (2026-08-27).** §2.1 carried circled numbers for
+families 4, 6 and 7; the 2026-08-26 extension added the Lean and Clojure columns
+and dropped them, which lost the tie between the family vocabulary and the
+thirty-four-step vocabulary — the very tie that says *where in the loop a clause
+bites*. Restored and completed below. Assignments marked ° are inferred from the
+step text rather than stated in §2.1 or an excursion, and are the ones to argue
+with.
+
+| # | family | steps | WM Lean predicate | stated in | implementation | R-node |
+|---|---|---|---|---|---|---|
+| 1 | identity threading | ⑯→㉒→㉖→⑨°, persisted ㉞ | `threadedIdentity` | `GainChain.lean` | γ dedups on `:tick` (`fold_realized.clj`) vs `(System/currentTimeMillis)` at `scripts/wm_scheduled_run.clj:108` — **two clocks** | R8/R14 |
+| 2 | non-empty handle | ⑨° | `inhabitedHandle`, `typedAbsence` | `GainChain.lean` | `fold_realized.clj:163` — `(when (pos? bound) …)` returns bare `nil` | R8 |
+| 3 | self-contained record | ⑨/㉒° | `selfContainedRecord` — **reserved, not yet defined** | — | `actuator_a3.clj:149` throws on any rejection; `fold_escrow/load-deposits` degrades | — |
+| 4 | durability before certification | **⑨ folds only what ㉞ wrote** | `durableBeforeFold`, `loadYieldsOutcome`/`foldOf` | `GainChain.lean` | `enact.clj:255` catch-all around `close-loop!` | R8/R16 |
+| 5 | provenance containment | ⑨/㉕° | `declaredDomain`, `domainNotNarrowed`, `dischargedPrecondition` | `GainChain.lean` | `fold_realized.clj:113` `reviewed-candidate-cleans` (4 entries); the named regime already exists at `actuator_a3.clj:395` (`:domain-mismatch`) | R8 |
+| 6 | separation of powers | **㉕/㉘** | `separatedPowers` — **reserved** | — | ㉕/㉘; overlay R9 `:holds true` | R9 |
+| 7 | exit / status pins | **㉒** | `pinnedExit` — **reserved** | — | ㉒ act-gate, `cascade-score > 0 ∧ coverage-score-delta < 0` | — |
+| **8** | **temperature governs the action** | **⑯** | `governs`, `temperatureInvariant`, `gainAdvances` | `CommitmentTemperature.lean` | `policy.clj:35` (τ computed), `:238` and `:377` (argmax, τ-free), `war_machine.clj:4476,4527` | **R14** |
+| **9** | **the ordering step consumes a surveyed space** | **⑪**° | *unstated — the R6 module's slot* | — | `full_loop_runner.clj:872` `repair-entry` (works, `##-Inf`); `portfolio_action_proposer.clj` (dark) | **R6** |
+
+| **10** | **the cascade is a well-formed order** | **⑳**, gated at ㉒ | `acyclicDescent`, `hasMeets` — *dispatched 2026-08-27* | `CascadeOrder.lean` | `fold_semilattice.clj`; 4 of 25 constructions carry a cyclic `:descent` (§3.1g) | R6/R11 |
+
+**Family 10 is new, 2026-08-27.** No existing family covers whether the cascade
+the loop constructs is well formed: family 9 is about the *space consumed* at ⑪,
+this is about the *structure produced* at ⑳. It exists because §3.1g found four
+recorded constructions whose `:descent` relation contains a directed 2-cycle and
+was folded anyway — the first family whose refusing-broken witness is a dated
+record rather than a designed fixture.
 
 ### 2.1c The rosetta is not surjective, and that is where the work went
 
