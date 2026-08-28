@@ -1377,6 +1377,69 @@ question, and it is why family 10 was worth opening: **`acyclicDescent` is the
 precondition for working up from the easiest.** It is not a formalist's tidiness
 requirement; it is the difference between a plan and a TryHarder loop.
 
+#### Amendment, 2026-08-28 — the failures are operational, and that relocates I1
+
+*Joe: "the failures I'm seeing are mostly **operational** — bookkeeping, usage
+limits, writes that go in the wrong place. It would be like using Unix if Unix
+had been written by spiders on LSD."*
+
+This corrects the section above in its object, not its mechanism. Counted over
+the 42 commit subjects:
+
+| | |
+|---|---|
+| carrying an operational noun — dispatch, retry, coordinator, session, workspace, terminal, submission, job, registry, projection, repair, hold, rotation, supersession, authority, snapshot, receipt, publication, accounting | **27** |
+| mentioning the problem domain — proof, sorry, topology, theorem, lemma, Mathlib | **1** |
+
+**The specification is 27:1 about the apparatus's own plumbing versus the problem
+it exists to solve.** So the enumeration diagnosis stands and the layer moves: it
+is not that the domain was enumerated, it is that **each operational failure mode
+was given its own clause.**
+
+The Unix comparison is exact and worth keeping as the statement of what is
+missing. Unix covers an unbounded space of operations with a handful of
+operational invariants — everything is a file, a process has an exit code, pipes
+compose — so situations nobody enumerated still behave. A system that instead
+adds a clause per operational situation has no such invariants, and is locally
+intricate and globally incoherent: spiders, LSD.
+
+**We have one corroborating instance in our own record.** The memory
+`oxf-agents-write-to-own-checkout` records exactly *"writes that go in the wrong
+place"*: cross-site agents reported success while the file landed on another
+host — `state: done` was not completion. That is an operational invariant
+(a write lands where it was addressed, or the write failed) stated nowhere and
+violated silently, which is the class Joe is describing.
+
+So the invariants the register (§2.1f) most needs are not about EFE or cascades.
+They are about **writes, quotas and bookkeeping identity** — and I1–I5 as
+currently written are all domain-flavoured. That gap is now the register's most
+useful open entry.
+
+#### Two structural readings worth keeping, from the same message
+
+**"Work from the bottom up" is a policy-over-policies.** Joe's comparison is to
+the Snatch temperaments, and it lands on something specific. In the Snatch
+harness the **precedence order** — which pattern is consulted first when several
+antecedents hold — was *authored by hand* and recorded as a limitation. Working
+bottom-up over the cascade is a rule for deriving that order from the DAG rather
+than authoring it. And this is not tidiness either: S-G4 says a score that no
+re-wiring can move is not scoring the policy, and re-wiring the Snatch collection
+moved +3 to −5. **A derived precedence changes `G(π)`; it does not merely
+prettify it.** The open question is whether topological order is a *good*
+precedence, which is answerable by running it.
+
+**Production rules and dependency edges are two different relations, and
+conflating them is a category error the word "dependency" invites.** A pattern's
+`IF ∧ HOWEVER` is its *firing precondition*; its `@why` is what it *stands on*.
+These are not the same graph. The Snatch collection carries the witness:
+`exchange-when-both-sides-gain` has a rich antecedent and **no `@why` at all**,
+which made one run's cascade disconnected (`app-snatch.tex`) while the pattern
+fired perfectly well. So §2.1d's DAG is an *authority* graph, not a precondition
+graph, and a topological sort of it orders patterns by what they rest on — not by
+what must be true before they can fire. Whether the two orders should be
+reconciled, or deliberately kept apart, is open and worth a decision rather than
+a drift.
+
 #### The part not established here
 
 *"Agents … have a limited sense of continuity between turns"* is plausible and is
