@@ -908,6 +908,96 @@ the ticket's *queryable* row: the store is not simply "less queryable than the
 operator record", it is **queryable at the envelope and not at the body**, and
 the split runs straight through the events the machine writes about itself.
 
+### 3.1f Written down is not the same as right
+
+*Joe, 2026-08-27: "lots of features have been built and lots of guarantees
+offered, and still the machine is failing left and right, because the guarantees
+turn out to be incomplete — e.g. validating data shape but not contracts between
+steps … what we've seen when we investigated the red ring nodes is a bunch of
+'cheating to get something working' rather than building to a contract; it's not
+clear the contract was ever written down at all, other than 'be faithful to AIF'
+… the fact that things were written down is better than not, but we have no
+guarantee at all that they were the right things."*
+
+#### The APM diagnosis, checked and made precise
+
+`DarkTower/APMCycleMachine.lean` has 42 `valid…` predicates, and `validDispatch`
+is the diagnosis in miniature. It threads five lifecycle stages:
+
+    observation.activatedJobId   = observation.announcedJobId ∧
+    observation.reactivatedJobId = observation.announcedJobId ∧
+    observation.terminalJobId    = observation.announcedJobId ∧
+    observation.resumedJobId     = observation.announcedJobId
+
+That **is** a contract between steps — announce, activate, reactivate, terminate,
+resume. But it holds inside a single `DispatchObservation`, so it is checked only
+because someone built a record that carries all five ends at once. **The
+step-contract is smuggled into a record shape.** Where the two ends of a
+relation live in different records, nothing relates them, and the machine passes
+its shape validation while the step-to-step guarantee silently does not apply.
+
+That is the sharpest statement of why end-to-end criteria (§3.1d) are a third
+kind of clause rather than more families. A family clause asks whether one record
+is internally consistent; an end-to-end criterion asks whether a population
+crossed a boundary between records. APM's months of shape validation, and its
+continuing failures, are the empirical case for the distinction — made at cost,
+by someone else's machine, which is the best kind of evidence we have here.
+
+#### The standard is about form, and form is not the thing
+
+All seven clauses of the module standard (§3.1d) are formal: one vocabulary,
+three polarities, constrained fields, in the contract, axioms declared, a mirror
+or a typed hole, checked predicate names. **Not one of them tests whether a
+clause states the right requirement.** A module can satisfy all seven and
+formalise something nobody needed.
+
+This is not hypothetical, and the day's own record is the evidence. Three
+findings were written up here, committed, and wrong: seven lost operator turns
+that were an anchored regex; a duplicate write that was my own reply quoting
+Joe; a WM tick record reported absent that a `grep -rl wm-click` would have
+found. Each was well-formed. Each was reviewed. **In the commit log a wrong
+finding and a right one are indistinguishable** — which is Joe's point stated as
+a property of this repository rather than as a worry about it.
+
+#### What would give a clause standing: measured, and mostly absent
+
+A clause earns its place by refusing something that actually happened. That is
+what the refusing-broken witness is for — but a witness can be an incident or an
+invention, and nothing currently records which. Checked across the four modules:
+
+| module | refusing-broken witness anchored to a dated incident? |
+|---|---|
+| `GainChain` | **yes** — *"the 2026-07-08 substitution loses an enacted mission from the domain"*; *"the 2026-07-08 chain collapsed into one silence"* |
+| `CommitmentTemperature` | no |
+| `CoverageReport` | no — though `warm_customer_pays` is drawn from R5's finding, the module does not say so |
+| `PolicyGrade` | no — its witnesses are chosen runs of an external game |
+
+One of four. So a candidate **eighth clause**, and it has teeth precisely because
+three modules currently fail it:
+
+> **A module's refusing-broken witness names a dated event in the record.** Not
+> a plausible failure; a failure that happened, with the date it happened on.
+> Where no such event exists, the module says so, and the clause is understood as
+> conjectural until one does.
+
+`GainChain` shows the shape without being asked to. Its theorem names carry the
+date, so the requirement can be traced to the day it was earned.
+
+#### And the honest limit on all of it
+
+An eighth clause makes each clause *earned*; it does not make the set
+*complete*. Nothing above rules out a contract every one of whose clauses refuses
+a real incident and which still misses the failure that matters next — which is
+R5's coverage requirement turned on the contract itself. The `reserved` list with
+its typed `outside-reason` entries is the beginning of that and not the end of
+it: it records four requirements known to be outside, and says nothing about
+requirements nobody has thought of.
+
+"Be faithful to AIF" failed as a contract because it named no refusable
+condition. A contract of clauses each refusing a dated incident is a large
+improvement and still not a guarantee, and the difference should be stated in the
+paper rather than discovered by a reader.
+
 ### 3.2 Tier 1 — attestation and typed absence *(each stated as a contract clause first)*
 
 **Ordering consequence of Tier 0.** These four are no longer "make the reports
