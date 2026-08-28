@@ -1449,6 +1449,98 @@ applied without a global view — which is what Joe's own topology correction wa
 Distinguishing the two would need the per-turn record, and is a separate
 question.
 
+### 3.1i The upside-down DAG — mining the APM failures into a foundational layer
+
+*Joe, 2026-08-28: "'all operator turns are logged to the evidence landscape' is
+the fundamental invariant, and everything else — metadata, inference — builds
+from that. Right now the APM machine is struggling to figure out what its
+foundational layer is. If we mine the git log, we could possibly turn this litany
+of failures into an upside-down DAG that would guarantee success for the War
+Machine process."*
+
+The method is §2.1d applied to our own record: **invert each modelled failure
+into the invariant that would have made it unnecessary, dedupe, order by
+dependency, and read off the roots.** That is "construct the cascade, then work
+up from the easiest" performed by hand on the machine's own foundations — the
+same move that fixed the topology run.
+
+#### 42 clauses collapse to six invariants
+
+Clustering the 42 commit subjects by what they model. *This is my reading of
+subjects, not a validated taxonomy — the boundaries are arguable and the counts
+are the point.*
+
+| | invariant, stated as what should have held | commits |
+|---|---|---|
+| **A** | a job has one authority; a retry does not mint a second | 5 |
+| **B** | a terminal state is reached once, and its record is complete before anything downstream reads it | 8 |
+| **C** | every value read downstream names the recorded event that produced it | 8 |
+| **D** | a pipeline stage either completes or is a **typed hold** naming what is missing | 10 |
+| **E** | a precondition check reports its own authority separately from what it observed | 3 |
+| **F** | a session's close is observable | 2 |
+
+Ten commits are one pipeline — promotion — repeatedly modelled rather than once
+constrained. That ratio is the enumeration diagnosis in one number: **42 clauses
+where six invariants would have done**, if they had been found first.
+
+#### The DAG, bottom-up
+
+Each layer needs the one below it and nothing above it.
+
+    L5  accounting — aggregate counts are DERIVED from L0–L4, never maintained beside them
+    L4  typed holds — a stage completes, or names what is missing        (D, E)
+    L3  completion — a terminal state happens once and is whole before it is read  (B)
+    L2  witness    — any value read downstream names the event that produced it    (C)
+    L1  identity   — every recorded event carries the job it belongs to; retries reuse it  (A, F)
+    L0  THE WRITE LANDS — an operational event is recorded exactly once, in the
+        place it was addressed to, or the operation FAILED
+
+L0 is the analogue of Joe's operator invariant. *All operator turns are logged to
+the evidence landscape* is checkable because the landscape is somewhere else: the
+denominator is external (§3.1d). L0 says the same thing for the machine, and
+everything above it is meaningless without it — a witness (L2) that names an
+event nobody wrote is not a witness.
+
+#### The finding: L0 is absent, and a self-assertion stands in its place
+
+The APM spec does address persistence. It does so like this:
+
+    claimPersisted : Bool
+    receiptPersisted : Bool
+    persistedBeforeReceipt : Bool
+
+and `validDispatch` requires `observation.claimPersisted = true`.
+
+**The record asserts its own durability.** If a write went to the wrong host —
+the failure recorded in `oxf-agents-write-to-own-checkout`, where cross-site
+agents reported success while the file landed elsewhere and `state: done` was not
+completion — the observation would still carry `claimPersisted = true` and
+`validDispatch` would pass.
+
+So the foundational layer is not missing by oversight; **it is occupied by a
+verdict the apparatus issues to itself**, which is exactly the property WR-0
+names as the difference between a war machine and a State apparatus. Every one of
+the 42 clauses above it is sound and rests on a boolean the subject sets about
+itself.
+
+That is a better answer to *"why has it been so bad"* than enumeration alone.
+Enumeration explains the growth; **self-certification at L0 explains why the
+growth does not converge** — no clause above can detect a violation below it.
+
+#### What this gives the War Machine
+
+Not a critique of APM: the layer stack. The WM's own L0 already has a name and a
+switch — `FUTON2_WM_EMIT_EVIDENCE`, disabled by default
+(`T-wm-turns-are-not-operator-turns`) — and the check that would make it real is
+the operator-side one already written, `c1_turn_survival.py`, whose denominator
+is external by construction.
+
+**The order of work follows from the DAG rather than from taste:** L0 before L1,
+and family 10's `acyclicDescent` before any bottom-up scheduling, because a
+cyclic dependency graph cannot be sorted. Building L4 first — which is what ten
+promotion commits are — is the TryHarder loop, and the DAG is what says so in
+advance rather than after fifty frames.
+
 ### 3.2 Tier 1 — attestation and typed absence *(each stated as a contract clause first)*
 
 **Ordering consequence of Tier 0.** These four are no longer "make the reports
