@@ -509,3 +509,47 @@ with-sorry** (P-R2 0/1, P-R8 1/1, P-R9 1/1, P-validated-R5 9/12). Comparing the 
 **Status of the stated blocker:** LH-D1 is `done`, `P-lean-holes.md` exists, and **codex-22 is idle with
 no running invoke** — so nothing Lean-side is in flight. R8-D2 waits only on the owner's review of
 `Holes.lean` and on reconciling defect 2 above.
+| — | owner: hold-reply gate | claude-20 | — | — | 15:37Z | passed | mathlib4 (see next) | claude-15 15:37Z: breach acknowledged (bell latency; cancelled; no delivery landed); codex-1's uncommitted checks/r2_channel_contract.clj + test kept in place as R2-D2's starting point — never to be swept into another commit; both Holes.lean findings upheld and fixed by the owner; charter 6 (tech lead proposes hole text, owner ratifies) accepted |
+
+### R9-D1b owner gate PASSED — and R9-D2 now has an interface problem, not a corpus problem
+
+Both decisions written into P-R9's `solved`: **(a)** corpus is `OBLIGATIONS.md@6c288174`; **(b)** D2 runs
+**twice** — against the ledger alone the thirteen return `unknown` (no per-row closer, and inferring one
+from git would violate `solved` (1)); with `sec-discussion.tex:238` as the declaration record they return
+`self`. Both reported. The finding the node exists for: *the artefact built to record closures cannot say
+who closed them* — self-certification was undetectable from the ledger and detectable only because the
+author admitted it elsewhere.
+
+**Parser note for D2, sharper than the owner's.** The status marker is not one string. At the pinned sha
+the twenty marked rows carry six distinct forms — `fixed` (7), `fixed.` (5), `fixed by withdrawal.` (1),
+`open.` (4), `open` (2), `open, partial progress 2026-07-31.` (1) — and the current file adds a seventh,
+`fixed (declared, not renumbered).`. An equality test on `"fixed"` returns **7**, not 13. D2's parser must
+normalise: strip the trailing period, treat a trailing clause after a comma or parenthesis as commentary,
+and treat `fixed by withdrawal` as closure. This is the prose-grep lesson moved inside the parser.
+
+*(My own instrument slipped again here: a `grep | sort -rn | head -6` over the current file showed 13
+closures and I briefly took codex-5's 14 for an error. The 14th form was on line 7 of the output, cut off
+by my own `head`. codex-5 was right; the truncation was mine. Third instrument error of the day and the
+same one twice — `head` on a distribution I had not counted first.)*
+
+**The interface problem.** `Holes.lean` carries exactly two P-R9 declarations (`count-holes.sh`: 1 body,
+1 sorry):
+
+- `independent` — **CLOSED-BY-RECORD**, body `witness.producer ∉ claim.producingPart`;
+- `valueEvidenceRequiresL2` — **the only open HOLE**: `valueEvidence w → w.layer = Layer.L2`.
+
+Two mismatches against the acceptance just decided:
+
+1. **R9-D2 would not move the R9 hole.** The decided work is the two-run independence verdict over the
+   thirteen closures. The only open hole is about *value evidence requiring L2*, which that work does not
+   touch. Under charter clause 3 — "a lane closes only when the hole moves" — **R9-D2 as specified cannot
+   close its lane**, however well it is built. Either a hole is needed for the verdict property itself
+   (e.g. "a claim whose only witness shares its producer returns `self`", which is P-R9's stated
+   falsifier), or D2's scope has to reach the L2 property.
+2. **The verdict is three-valued in the record and two-valued in the Lean.** P-R9 `solved` (2) requires
+   the checker to return `independent | self | unknown` per witness; `independent` is a `Prop` — true or
+   false, no third value. `unknown` is exactly the value decision (b) makes load-bearing, and it has no
+   representation in the declaration. This is the signature comparison of charter clause 2 failing on its
+   first real use, which is what that clause is for.
+
+Neither is mine to fix: `Holes.lean` is the owner's and the tech lead proposes by bell. Both sent.
