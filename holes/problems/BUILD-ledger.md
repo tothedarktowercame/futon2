@@ -901,7 +901,7 @@ my grep, not the packet — the phrase wraps across two lines and I searched for
 recorded a second false absence while investigating a false presence.
 | — | owner FAULT: two holders of Holes.lean | claude-15 / codex-22 | — | — | 16:05Z | recorded | mathlib4 6fd8a33f | claude-15 16:05Z: AD-D2 gave codex-22 write access to Holes.lean while the owner kept editing it; 6fd8a33f swept codex-22's uncommitted `import DarkTower.Contract.Emit` into history (Emit.lean untracked → that commit does not build standalone until AD-D2 commits Emit.lean). Worktree restored to HEAD; the owner's pending doc-tag fix (one HOLE tag per fixture constant; script 22 vs Lean 23) is DEFERRED until AD-D2 closes. Rule: one holder per file for a packet's duration — hole-text changes queue while a builder holds the file |
 
-| 2 (R2) | R2-D2 (build, re-dispatch) | codex-1 | `invoke-1788106034395-4362-b69280e2` | `park-c4b182a8` | 16:07Z | running | read by claude-13 (3 rounds); **signature diff CLEAN** vs `Holes.lean:322-343`@`6fd8a33f4d`; continues codex-1's preserved files | — |
+| 2 (R2) | R2-D2 (build, re-dispatch) | codex-1 | `invoke-1788106034395-4362-b69280e2` | `park-c4b182a8` | 16:07Z | **closed** | `a74ac42`; gates re-run: kondo 0/0, 3 tests/19 assertions; fixture CORPUS present; Channel reported with source file:line + ordered vector; **pin is my superseded method** | pending |
 
 ### The new row-11 rule, applied on its first run — and a caveat on how to apply it
 
@@ -940,7 +940,7 @@ would discard a nearly-complete build to add a mechanical step. **Decision: let 
 `6fd8a33f4d`, and dispatch the transcription as R8-D3.** Recorded rather than assumed, so the review can
 be judged against it.
 | 1 (R9) | STATE: R9-D2 unblocked | — | — | — | 16:08Z | ready | mathlib4 6fd8a33f | claude-15 16:08Z: r9WmCheckerSound is RETIRED at 6fd8a33f (the ∀-checker form claude-13 refuted); the R9 block is VerdictRow/VerdictTable/r9VerdictsSound (closed) + wmVerdictsLedgerAlone/wmVerdictsDeclared/r9WmVerdictsSound/r9TwoRunCensus (holes) + r9VerdictConsultsChecker. claude-20's hold was read at 2d72d3c9 — correct at that sha; superseded. Charter clause 2: signature vs commentary drift (accepted). Pin method recorded in P-R8 |
-| 2 (R2) | R2-D2 dispatched (re) | codex-1 (via claude-20) | invoke-1788106034395-4362-b69280e2 | park-c4b182a8 | 16:09Z | running | CLEAN vs Holes.lean:322-343@6fd8a33f | claude-15: acknowledged; claude-13's surviving point (Fin 14 = arity only) QUEUED as a Lean change (P-R2) — not a blocker; the packet states the discrimination rests on the fixture corpus |
+| 2 (R2) | R2-D2 dispatched (re) | codex-1 (via claude-20) | invoke-1788106034395-4362-b69280e2 | park-c4b182a8 | 16:09Z | **closed** | `a74ac42`; gates re-run: kondo 0/0, 3 tests/19 assertions; fixture CORPUS present; Channel reported with source file:line + ordered vector; **pin is my superseded method** | pending |
 | 3 (R8) | R8-D2 decision: finish, then R8-D3 | codex-12 / claude-20 | — | — | 16:09Z | accepted | — | claude-15: a bell cannot reach a running turn; cancel-and-redispatch would cost more than the additive transcription step; review against 6fd8a33f, R8-D3 = wmTraceR8 literal + pin. Rule caveat accepted: no ∀ BINDING the artefact as a variable — bounded ∀ over the named fixture is the intended shape |
 
 | 1 (R9) | R9-D2 read (5th) | claude-13 | `invoke-1788106167271-4367-c753e2fb` | `park-796d4a6e` | 16:09Z | reading | re-quoted vs fixture constants; **signature diff CLEAN** vs `Holes.lean:205-278`@`6fd8a33f4d` | — |
@@ -1083,7 +1083,7 @@ half of the packet was impossible while the analysis half was fine. The pattern 
 around: **split D2 packets into an analysis half and a hole-moving half**, so a mid-build declaration
 change costs only the second. That is a charter proposal, not something I will do unilaterally.
 
-| 1 (R9) | R9-D2 (build) | codex-8 | `invoke-1788106564109-4375-983d9beb` | `park-338af982` | 16:16Z | running | read by claude-13 (5 rounds); **signature diff CLEAN** vs `Holes.lean:205-295`@`1bfba954c9` | — |
+| 1 (R9) | R9-D2 (build) | codex-8 | `invoke-1788106564109-4375-983d9beb` | `park-338af982` | 16:16Z | **closed** | `732f4d7`; gates re-run: kondo 0/0, 2 tests/10 assertions; **`lake env lean` on the emitted report EXIT 0** — the four proofs check | pending |
 
 ### R9-D2 dispatched — both proposals landed and the self-certification hole is closed
 
@@ -1192,3 +1192,50 @@ field. By the rule the owner just adopted — *a fixture literal carries facts; 
 derived from them* — that may be the generator writing what the law tests, one level subtler than R9's
 `inDeclaredPart`. It is exactly the shape that took five reads to find in R9, so I would rather ask than
 assume it is fine because it looks like a fact.
+| — | G-D3 read #1: REFUSE | claude-13 | invoke-1788106747818-4380-f5b29b78 | — | 16:22Z | amended | packet rev 2 | claude-15: my transcription of :39 dropped ln E(π) — fixed to the full line and both terms required; T0 pinned to e31b937c (bare HEAD regression); Policy prohibition now a jq/grep gate on the emitted JSON; the five diff cases named; confirm-read sent AFTER the file was verified written |
+| — | AD-D3 read #2: PASS → dispatched | claude-13 (read, md5 6f718dee) → codex-8 (build) | invoke-1788107007642-4387-9d4144c4 | park-488f96ba-4ce0-409e-aef7-c93680a926d5 | 16:23Z | running | packet md5 6f718dee | claude-15: dispatched from the file whose hash the reader quoted; reader notes (i) :result is builder-written — a false :passed is now an affirmative false statement with a timestamp, not an omission; deriving :result by invoking :check is AD-D5; (ii) hash the packet before and after a read — adopted as charter practice |
+
+### R9-D2 closed — the derived-membership design holds up under inspection
+
+Gates re-run here: kondo 0/0, 2 tests / 10 assertions, and **`lake env lean` on the emitted
+`R9-D2-report.lean` exits 0** — `r9VerdictConsultsChecker`, `r9WmVerdictsSound`,
+`r9WmPerRowDeclarations` and `r9TwoRunCensus` all check.
+
+**The thing I most wanted to see is right.** The emitted rows carry facts and let Lean derive membership:
+
+    run (i):  13 rows   producer "unknown"   declaredPart []                                    → verdict unknown
+    run (ii): 10 rows   producer "author"    declaredPart ["author"]                            → self
+              3 rows    producer codex-1×2 / zai   declaredPart ["author","codex-1","codex-7","zai"] → self
+
+`inDeclaredPart` appears **once** in the whole emitted file, inside a `simp` unfolding — never as a
+written field. So the three named-agent rows come out `self` because the *declaration* explicitly places
+commissioned agents inside the producing part (the ruled position from P-R9 `facades`), and membership is
+computed from that. **The falsifier has real mass:** had the declaration listed only `["author"]` for
+those three, `inDeclaredPart` would be false and they would flip to `independent`. That is the argument
+the node exists to have, decided by a declaration someone else wrote rather than by the builder.
+
+**One miss against my packet, small:** I asked for the prose counts reported *separately with identities*.
+The report enumerates tokens per row (so the data is there) but headlines the conflated **8**. Derived
+here from its own data: **3 specific-agent (O7, O14, O15) / 5 generic-only (O1 O3 O5 O8 O20) / 5 neither
+(O2 O6 O9 O16 O17)** — matching claude-13's split and mine exactly. Worth stating in the note rather than
+leaving as the number claude-13 warned would be delivered.
+
+### R2-D2 closed — and its pin is my dead one, through no fault of the builder
+
+Gates re-run: kondo 0/0, 3 tests / 19 assertions. **The discriminating fixture *corpus* is present** — 5
+records each carrying an undeclared fifteenth key, each asserted to fire — and `:channel` reports
+`{:source {:file … :line 11 :definition observation-channels} :values [:loop-health :support-coverage
+:attack-coverage …]}`, the ordered vector claude-13 asked for, which a trace-derived set cannot
+reproduce. Census 790 conforming / 2 firing. The emitted Lean discharges the census by `native_decide`.
+
+**But the pin reads `c434950f2e6a7e9b` — my superseded method.** codex-1 did the right thing: it
+implemented the method my packet stated *and published it* (`:algorithm
+:sha256-over-concatenated-sorted-clojure-form-hashes`). The ruling adopting codex-12's
+`:sha256-over-newline-joined-sorted-form-sha256` landed **after** R2-D2 was dispatched. So the two lanes
+now carry two different, individually-honest published methods differing only in delimiter —
+concatenated versus newline-joined — which is precisely the ambiguity I left. Not a rework: a re-derivation
+under the ruled method, in R2-D3 with the transcription half.
+
+Worth noting for the record: my pin was never *unreproducible in principle* — it was **unstated**. Once
+stated, codex-1 reproduced it exactly. The defect was that I published a value while leaving the method
+in my head, which is the same shape as `claimPersisted : Bool` — an assertion standing in for a check.
