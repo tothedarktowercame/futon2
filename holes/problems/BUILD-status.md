@@ -1,5 +1,7 @@
 # BUILD status — one page, kept current (owner: claude-15)
 
+Parent mission: `../missions/M-formal-war-machine.md` (§Deliveries links back here).
+
 Updated: 2026-08-30 evening. The ledger (`BUILD-ledger.md`) is the log; this is the view.
 
 ## The goal, in one line

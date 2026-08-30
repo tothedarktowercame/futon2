@@ -625,6 +625,27 @@ coordinating another project (Joe, 2026-08-27).*
 
 #### H1 RESULT, 2026-08-27 — per-tick, after review
 
+> **CORRECTED 2026-08-29 (claude-15).** The table and the three consequences
+> below rest on a reading error: `edn/read-string` returns only the *first*
+> top-level form of a file, and each 07-0N trace file holds 18–38 forms (one per
+> hourly tick). Recomputed by reader loop and by `grep -c`: **88 records carry
+> `:realized-outcome`** (18/18/37/13/2 over 07-02..07-06, distinct ticks), so
+> codex-18's census-v1 was right and the review was wrong. Family 6 is 31, not 7.
+> The last outcome is **2026-07-06 12:04Z**, not 07-05; from 13:04Z that day no
+> record carries `:enactment` at all — the loop stopped *enacting* two days
+> before the 07-08 substitution, and the cause is open (commit `2d13ef2`,
+> 12:05Z, is in the gap but changes scoring, not enactment). Consequence 2
+> ("dating, not coverage") is withdrawn; the non-vacuity limit is policy
+> diversity (85 of 88 on one policy), not volume. Consequence 3's "outcomes stop
+> after 07-05" and E-R8's 07-09 are both wrong; the census's 07-06 stands.
+> Method error and commands: `holes/labs/wm-contract/README-census-v1.md`,
+> final section. **Witnessed 2026-08-29** by codex-20 with a third method
+> (`holes/labs/wm-contract/witness-2026-08-29-realized-outcomes.edn`): all
+> counts agree; the one disagreement is that the last timestamp is
+> `12:04:27.412283747Z`, truncated above to seconds. The original text is left
+> in place below for the record.
+
+
 `holes/labs/wm-contract/` (codex-18 `753911a1`, corrected by review `1d64cdc`).
 **The per-file estimate above and the census's first numbers were both wrong; a
 trace file is one tick, and these are per-tick.**
@@ -2006,6 +2027,32 @@ against. Not a dependency in either direction; a place where the two would
 eventually meet.
 
 ---
+
+## Deliveries — the R-node build (2026-08-30) *(filed 2026-08-31 00:55Z; upward link created on claude-20's finding that a full day of work was invisible from this mission)*
+
+Today's work executes §3 DERIVE as a staffed build. It grew its own filing system and, until this section,
+no reader of this mission could reach it. The build's records, in reading order:
+
+- **`../problems/BUILD-status.md`** — the one-page view, kept current at every gate. Start here.
+- **`../problems/BUILD-ledger.md`** — the append-only log: every packet, dispatch, gate, refusal, correction.
+- **`../problems/BUILD-tech-lead-charter.md`** — roles and clauses (owner claude-15; tech lead claude-20; second
+  reader claude-13; author ≠ reviewer throughout).
+- **Node records** (problem records to the lifecycle-v2 shape): `../problems/P-R9.md`, `P-R2.md`, `P-R8.md`,
+  `P-R16.md`, `P-R19-preferences-open.md` (C as a parameter; the preference stack), `P-supersede-stack-logic-model.md`,
+  `P-organise-the-library.md`, `PREREG-war-machine.md` (§4: `I_data_current`, `I_absent_is_loud`).
+- **The Lean contact-point registry**: `mathlib4/DarkTower/WarMachine/Holes.lean` (+ emitted
+  `holes-contract.json`, consumed by `futon2/checks/contract_lint.clj` against `checks/witness-registry.edn`).
+  42 bodies / 34 declared holes as of `84326d17c5`.
+- **Packets**: `../problems/BUILD-packets/` — one file per handoff, md5-pinned in the ledger.
+- **The node simulation**: `../labs/wm-contract/R-NODE-SIM-report.md` (claude-20, `e5ad461`) — codex seats
+  role-playing R-nodes under isolation; its headline is a substantive correction to a gated record (the habit
+  prior's `:counterfactual-only` authority). **Its §5 — the tech lead's own errors, including dispatching into
+  seats in active APM rotation and causing a spawn failure in the APM pipeline — is part of the record and is
+  not to be summarised away: it is what changes how the next run is staffed.**
+
+Standing rule from this filing: **a build lane names its parent mission in `BUILD-status.md`, and this mission
+names the lane here** — work without an upward link is invisible to the mission that governs it, and a mission
+without downward links governs nothing.
 
 ## Provenance
 
