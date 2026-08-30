@@ -2226,3 +2226,49 @@ same ln E(π) object, consumed at `policy.clj:82-104`; the Lean abstracts its va
 prior source. R19-D2 connects rather than coins. And the naming discrepancy is now three-way and
 decidable: the record says the habit prior enters **R14** as g, `efe.clj:698` says **R12**, the live seam
 is `policy/select-action` — one object, three names, owner's to settle.
+
+## Node simulation — 9 agents, one per node, isolated (Joe, 2026-08-30 ~19:00Z)
+
+Joe's proposal, and his correction of my counter-proposal: a small pilot "detects its own success or
+failure" and does not transfer; the real question is **how to divide the work so the project moves**
+rather than fixing one thing after another serially. He is right about the bottleneck. Today everything
+serialised through two seats — the owner holds `Holes.lean`, so every declaration change was a blocking
+round-trip, and one tech lead wrote every packet and every review.
+
+**What makes the idea sharp rather than merely parallel:** the wiring is blocked on a countable thing —
+each edge needs **two independent endpoint proposals**, and 15 of 21 drawn edges have neither end
+recorded. CML-D2 tonight produced exactly one real finding, *one proposal endorsed twice*, because P-R16
+cited P-R9 instead of arriving independently. One agent per node produces the missing second side for
+many edges at once.
+
+**Independence is purchasable by isolation**, so the first pass is NOT conversational: each agent reads
+its own node's artefacts and is forbidden every `P-R*.md`. Then agreement between agents that never spoke
+carries information — precisely what tonight's agreement did not. Conversation comes second, aimed only
+where they disagree. That inverts my objection into the design.
+
+**Built-in calibration:** R8 is dispatched as a **control** — it already has a deep, recently-gated
+record. If its isolated agent reproduces P-R8's substance, the method is calibrated; if it diverges, we
+have learned the output is fiction at the cost of one seat.
+
+**Seat reality, stated because it bounds the run:** Joe asked for 16; there are **9 usable local seats**.
+`lon-*`/`chi-*` are off-site and would write to another host's checkout; `f43`/`f45` are APM lane seats;
+new Codex agents are a terminal op, not callable from here. So 9 now rather than 17 later — 8 nodes
+without records, highest edge-degree first, plus the R8 control.
+
+| node | seat | job-id |
+|---|---|---|
+| R7 (deg 5) | codex-1 | `invoke-1788116508810-4499-f4aa69a6` |
+| R13 | codex-2 | `invoke-1788116511821-4500-9a3b35d9` |
+| R14 | codex-3 | `invoke-1788116515462-4501-2b94aeb9` |
+| R3 | codex-4 | `invoke-1788116519207-4502-155ebb7b` |
+| R5 | codex-8 | `invoke-1788116522976-4503-fa94c58a` |
+| R6 | codex-10 | `invoke-1788116526542-4504-6baafaee` |
+| R11 | codex-12 | `invoke-1788116530088-4505-569fb0ad` |
+| R15 | codex-17 | `invoke-1788116533576-4506-c88b764a` |
+| R8 (CONTROL) | codex-21 | `invoke-1788116536994-4507-4b021810` |
+
+**The discipline that keeps it from being a facade generator:** every entry is tagged `:from-artefact`
+with a `file:line` or `:imagined`. Imagined is allowed and expected — these nodes' wiring is largely
+unspecified, and roughly half `:imagined` is the honest outcome. What is forbidden is an imagined claim
+dressed as a cited one. And `:missing-edges` asks each node to name what it needs from a node it has no
+drawn edge to: the map has 26 derived-but-undrawn edges, and a node needing one is evidence it is real.
