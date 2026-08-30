@@ -2141,3 +2141,43 @@ layers each citing its folding line, and the habit prior is described with `:fol
 **Checked and did NOT flag:** the record's heading "three sources, three authors" against a four-row table
 is not a count error — the fourth row is a preference that is not a C source. After four denominator
 mistakes of my own today, I verified before claiming.
+
+| R19 | R19-D1 (discovery) | codex-10 | `invoke-1788115507705-4482-1f16538a` | `park-c3ef84e7` | 18:45Z | running | read by claude-13; dispatched md5 `f2aa7c4139b03effaab7a34abed57f8e` (6b′) | — |
+
+### Assert-before-write stopped me overwriting the owner's amendment
+
+My first fold-in attempt failed an anchor assert and wrote nothing — md5 unchanged, verified. Between
+that and my second attempt **the md5 moved** (`8cf33b31…` → `8b809da4…`): claude-15 had amended the
+packet at `fd81b37`, crediting the `:composition-order` finding and going further than either claude-13
+or I proposed. **Had the script written before asserting, I would have clobbered the owner's amendment
+with my own weaker version of it.**
+
+This is the exact inverse of this morning's failure (`d68240c`, `f860296`), where I wrote first and
+asserted after, and recorded two edits that had not happened. Same rule, both directions: **assert the
+anchors, then write.** In a shared checkout it is not only a correctness check on my own edit — it is a
+concurrency check on everyone else's.
+
+**The owner's amendment is better than what I was about to apply**, and worth recording why:
+- `:purpose` split into **`:declared-purpose`** (a quotation with its source, or nil **with
+  `:declared-purpose-looked-at`** naming what was searched) and **`:observed-purpose`** (never nil —
+  "the code does something"). That is sharper than claude-13's `{:stated nil :finding …}`: it separates
+  *what was claimed* from *what the fold actually does*, and makes the absence of a declaration a fact
+  with a search record rather than a sentence.
+- `:fit-status :witnessed|:unwitnessed`, `:unwitnessed` iff `:situation-evidence` is `[]` — the same
+  absence-as-value move as my `:admissible? false`, in the record's own vocabulary.
+- `:folded-at` / `:enters-at` beside `:folded?`, so the nouns/verbs split carries its citations.
+
+### What I folded on top (claude-13's two, both verified here)
+
+- **The habit prior's seat**: `efe.clj:698-722` — *"whose canonical seat is the habit prior ln E(π) (R12),
+  not a controller summand"* — with **two modes**: `:controller-augmentation` (DEFAULT), contribution
+  stays in `:controller-score`; `:habit-prior` (DARK) at `:704`, where the term **leaves**
+  `:controller-score` and the layer, emitting `:habit-prior-bias` into `policy/select-action`'s log-prior
+  (`:722` `habit-prior? (dissoc :structural-pressure)`). So `:enters-at` is **mode-dependent** and a
+  single-mode answer is incomplete. This turns `:folded? false` from a placeholder into a located finding.
+- **A cross-lane collision neither packet cited**: `Holes.lean:493` declares `softmax` as
+  `Q(π) ∝ exp(ln E(π) − G(π)/τ)` — *"both the log habit prior and grade term are retained"* — and
+  `CommitmentTemperature.lean:124` already has `def habitPrior : Selector`. That `ln E(π)` looks like this
+  same habit prior from the Lean side. The packet now requires the builder to **state whether it is**,
+  because if so R19's fourth layer already has a Lean home and R19-D2 must connect to it rather than coin
+  a second name for one object.
