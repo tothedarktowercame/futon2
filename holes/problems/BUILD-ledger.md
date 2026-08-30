@@ -2886,3 +2886,43 @@ only seat holding *both* edge schemas — the CML `R16→R2` schema it built and
 anchored. And the owner flagged something possibly novel for the census: **R14's port accepts scores and
 abstains from selecting with them**, which may be the first `:accepts` needing a semantic annotation
 beyond a shape — a declared abstention as part of a port's type.
+
+### PAIR-R5-R14 complete — converged on meaning, blocked on evidence grade
+
+Artefact `holes/labs/wm-contract/pair/R5-R14-delivery.edn` (`8fd0d33` proposed, `bf1ba0c` corrected,
+`31195af` confirmed): **field-provenance 9 `:agreed`, 0 disagreements, 4 blockers,
+`:traffic-today true`.** Round 4 live — codex-8 `invoking` on R14's wiring request with R5's queued.
+
+**The catch that matters.** R5's first joint draft listed `:tau-effective`,
+`:controller-order-authority` and `:temperature-order-authority` under `:receipt :observed`. **R14
+withheld confirmation** — semantic convergence complete, blocked on provenance alone. Verified at
+`policy.clj:259-272`: the map emits `:tau`, `:recommendation-authority :live` and
+`:habit-authority :counterfactual-only`, and **neither authority-order key exists anywhere in the
+machine.** The distinction the pair had drawn was sound; the label was not. R5 relabelled them to
+`:proposed-additions` and R14 confirmed.
+
+**A key that exists nowhere cannot be `:observed`, however true the thing it describes.** Had codex-8
+wired a port citing `:controller-order-authority`, it would have wired against a name the machine has
+never emitted. That is the difference between a specification and a fiction, caught by the node being
+specified rather than by any reviewer.
+
+**Three further findings, all verified here:**
+1. **Both nodes rejected my packet's premise independently in round 1** (recorded above): the machine is a
+   greedy argmax over R5's controller scores; only R14's τ-and-habit-prior reordering is counterfactual.
+2. **R5's exclusions reach the report, not the selector.** `efe.clj:862` attaches
+   `:policy-support/excluded` as metadata; `war_machine.clj:4479` reads it *immediately*, and `:4742`
+   sends it to the report. It is never passed to `select-action`. R5's conclusion was right and its stated
+   mechanism (map/filter destruction) was wrong — the metadata is not destroyed, it is **routed
+   elsewhere**. A reviewer checking only the conclusion would have propagated a wrong cause.
+3. **A typed but UNDISCRIMINATED absence** — R14's find, and a new variant of the family. At the selector
+   boundary an empty input is correctly tagged `{:action :abstain :reason :no-candidates}` (`policy.clj:363`)
+   rather than silently numericised — but `:no-candidates` is emitted from distinct causes (`:167`, `:363`,
+   with `:no-action-beats-no-op` alongside at `:345`). The system says *nothing to choose from* and cannot
+   say **why nothing**. And the information that would discriminate two of those cases is exactly R5's
+   exclusion list — computed, kept, and delivered to a reader instead of the selector.
+
+**One gap in the artefact, noted to R14 as a suggestion:** `:disagreements 0` is honest — the disagreement
+was raised and *resolved* — but the artefact now reads as a frictionless convergence, and the most valuable
+exchange between the two nodes survives only in the commit chain. Per the owner's ruling tonight
+(amendments dated, originals legible), a `:resolved-disagreements` line would carry it into the artefact
+where codex-8 and later readers look.
