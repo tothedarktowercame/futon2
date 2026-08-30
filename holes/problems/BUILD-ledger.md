@@ -186,3 +186,36 @@ to route around. R8-D2 does not depend on this either way; it is for the owner's
 Method note on my own error: this is log row 14's shape one level up — I stated a relation between two
 measurements because their counts matched, without the one-line probe that would have settled it. The
 probe cost ten seconds. Recording it here because the ledger is where this build's method errors go.
+
+### R2-D1 — checklist items 2, 4 and 6, completed when my park fired (claude-20)
+
+Items 1, 3, 5 and 7 were done at the close; 2, 4 and 6 were not. Completed and verified independently:
+
+- **Item 2 — reader named, correctly.** The note states it read each of the 53 files with
+  `clojure.edn/read` on a `java.io.PushbackReader` looping to a unique EOF sentinel, with
+  `:default (fn [_ v] v)` for tagged values, and says explicitly it did **not** use `edn/read-string`
+  (`R2-D1-findings.md:14-18`). That is the log-row-1 requirement met in the form the packet demanded.
+- **Item 4 — the two 13-key records confirmed, and P-R2's falsifier is satisfiable.** My own reader
+  loop over the corpus gives an observation-key distribution of exactly `{13 2, 14 790}` across 792
+  forms. Both 13-key records are in `wm-trace-2026-05-18.edn` at `2026-05-18T19:42:49.284838608Z` and
+  `2026-05-18T20:54:12.717822372Z`, and the single missing key in both is `:annotation-health`. So
+  R2-D2's acceptance — "the falsifier fires on the two records and nothing else" — is **run and
+  satisfiable**, with the expected values 2 fire / 790 pass (charter item 4, done before that packet
+  is written).
+  - **For R2-D2:** there is no `:tick` key on these records; `:tick` reads `nil` and the time is under
+    `:timestamp`. My packet asked for the records "identified by tick" and the builder correctly
+    reported timestamps and flagged file/form position as the record identifier. R2-D2 must not
+    require a `:tick` field that does not exist.
+- **Item 6 — the builder falsified an expectation I wrote, and is right.** My packet registered
+  "`:acknowledged?` producers (expected: none)". Verified at source: `src/futon2/aif/lane_futility.clj:333`
+  hard-codes `:acknowledged? true` in the map built for synthetic lane-futility nags. So a producer
+  exists; what does not exist is *operator-acknowledgement persistence*, which is the production-path
+  comment at `needs_you.clj:156-159`. Unqualified, my expectation was false.
+
+**This is the fourth commissioner-side defect in this build and the second of mine** (after "54
+entries"): rows 9, 10, 11 of the lifecycle log, then my count, now my expectation. It is also the most
+interesting one, because of what the literal is doing. `nag?` is a four-term AND whose last term is
+`acknowledged?` (`futon3c .../operator_lane.clj:29-33`), and the only thing in the corpus that supplies
+that term is a hard-coded `true` on a synthetic path. R2's thesis is that the one channel the machine
+cannot fabricate is the one it does not read; the narrower fact is that where the channel is consumed at
+all, its value is fabricated by construction. That belongs in P-R2's `now` and is the owner's to write.
