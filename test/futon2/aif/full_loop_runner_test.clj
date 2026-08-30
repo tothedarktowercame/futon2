@@ -305,8 +305,11 @@
 (defn- run-feature-card-attempt
   [{:keys [author-card author-summary grounded? artifacts? reviewer-execution
            reviewer-events cure-card cure-summary cure-commit build-cure-retries
-           initial-author-job operator-actions delivery-qa-fn]
-    :or {grounded? true artifacts? false}}]
+           cure-observed-commit
+           initial-author-job operator-actions delivery-qa-fn
+           judgement-transform-fn]
+    :or {grounded? true artifacts? false
+         cure-observed-commit ::from-artifact-ref}}]
   (let [root (.toFile (java.nio.file.Files/createTempDirectory
                        "wm-feature-card-" (make-array java.nio.file.attribute.FileAttribute 0)))
         mission-file (io/file root "M-selected.md")
@@ -348,7 +351,11 @@
                   :pre-dispatch-head (:head before)
                   :observed-head (:artifact-ref author-job)
                   :corroborates? true
-                  :commit (:artifact-ref author-job)})
+                  :commit (if (and (= cure-id (:job-id author-job))
+                                   (not= ::from-artifact-ref
+                                         cure-observed-commit))
+                            cure-observed-commit
+                            (:artifact-ref author-job))})
                :dispatch-fn
                (fn [_ agent _ _ _]
                  (swap! dispatches conj agent)
@@ -397,7 +404,9 @@
               (when (some? build-cure-retries)
                 {:build-cure-retries build-cure-retries})
               (when delivery-qa-fn
-                {:delivery-qa-fn delivery-qa-fn}))
+                {:delivery-qa-fn delivery-qa-fn})
+              (when judgement-transform-fn
+                {:judgement-transform-fn judgement-transform-fn}))
         result (runner/run-opportunity! opts)]
     {:result result :item (first @queued)
      :queued-operator-actions @queued-operator-actions
@@ -415,6 +424,18 @@
          {:author-card feature-card-claim :operator-actions [gate]})]
     (is (= :grounded-change (:outcome result)))
     (is (= [gate] queued-operator-actions))))
+
+(deftest opt-in-judgement-transform-runs-inside-the-selection-phase
+  (let [seen (atom nil)
+        {:keys [result]}
+        (run-feature-card-attempt
+         {:author-card feature-card-claim
+          :judgement-transform-fn
+          (fn [incoming]
+            (reset! seen incoming)
+            (assoc incoming :instrumented/campaign? true))})]
+    (is (= (assoc judgement :operator-actions []) @seen))
+    (is (= :grounded-change (:outcome result)))))
 
 (deftest delivered-commit-cannot-close-without-field-desk-qa
   (is (thrown-with-msg?
@@ -487,8 +508,12 @@
                "author-1" {:job-id job-id :state "failed"
                             :terminal-code "invoke-exception"
                             :artifact-ref nil}
+               ;; sha-SHAPED but from the wrong repo: this test is about
+               ;; observation failing to validate a claimed commit, not about a
+               ;; ref that is not a commit at all (see
+               ;; agency-artifact-ref-that-is-not-a-commit-is-typed-malformed).
                "author-2" {:job-id job-id :state "done"
-                            :artifact-ref "wrong-repo-commit"}
+                            :artifact-ref "beefcafe1234567890abcdef1234567890abcdef"}
                {:job-id job-id :state "done"}))
            :repair-system-record-fn
            (fn [finding]
@@ -679,10 +704,10 @@
                              (swap! cure-prompts conj prompt)
                              {:job-id "cure-1"})
               :poll-fn (fn [_ _] {:job-id "cure-1" :state "done"
-                                  :artifact-ref "phantom456"
+                                  :artifact-ref "deadbee1234567890abcdef1234567890abcdef1"
                                   :result-summary
                                   (str good-card
-                                       "\nFULL_LOOP_AUTHOR: DONE phantom456")})
+                                       "\nFULL_LOOP_AUTHOR: DONE deadbee1234567890abcdef1234567890abcdef1")})
               :resolve-build-fn (fn [_] nil)}
         thrown (try
                  (#'runner/build-cure-loop
@@ -702,7 +727,7 @@
     (is (= false (get-in thrown [:build-retries 0 :cured?])))
     (is (= :cure-commit-unresolved
            (get-in thrown [:build-retries 0 :cure-rejected])))
-    (is (= "phantom456" (get-in thrown [:build-retries 0 :claimed-commit])))
+    (is (= "deadbee1234567890abcdef1234567890abcdef1" (get-in thrown [:build-retries 0 :claimed-commit])))
     ;; The cure prompt quotes the actual durable prefix, not job-text: event
     ;; narration must not be presented as what Agency preserved.
     (is (str/includes? (first @cure-prompts)
@@ -1509,7 +1534,7 @@
            :poll-fn
            (fn [_ job-id]
              (if (= job-id "author-job")
-               {:job-id job-id :state "done" :artifact-ref "narrated123"
+               {:job-id job-id :state "done" :artifact-ref "facade01234567890abcdef1234567890abcdef1"
                 :feature-card feature-card-claim
                 :execution successful-execution}
                {:job-id job-id :state "done"
@@ -1537,7 +1562,7 @@
                    (fn [repo] {:repo repo :head "observed456"
                                :observed-at-ms 2000})
                    :resolve-commit-sha-fn
-                   (fn [_ commit] (when (= commit "narrated123") "old123"))
+                   (fn [_ commit] (when (= commit "facade01234567890abcdef1234567890abcdef1") "old123"))
                    :ancestor-fn (fn [_ ancestor descendant]
                                   (and (= ancestor "base000")
                                        (= descendant "observed456")))
@@ -1545,7 +1570,7 @@
         before {:repo "/repo" :head "base000" :observed-at-ms 1000}
         binding (runner/fresh-artifact-binding
                  base-opts "/repo" before
-                 {:artifact-ref "narrated123"})]
+                 {:artifact-ref "facade01234567890abcdef1234567890abcdef1"})]
     (is (= "observed456" (:commit binding)))
     (is (:descendant? binding))
     (is (:in-author-window? binding))
@@ -1553,7 +1578,7 @@
     (is (nil? (:commit
                (runner/fresh-artifact-binding
                 (assoc base-opts :commit-time-ms-fn (fn [& _] 500000))
-                "/repo" before {:artifact-ref "narrated123"})))
+                "/repo" before {:artifact-ref "facade01234567890abcdef1234567890abcdef1"})))
         "a changed descendant outside the tolerated author window is rejected")))
 
 (deftest narrated-artifact-without-new-repo-head-stops-before-review
@@ -1586,7 +1611,7 @@
              {:job-id "author-job"})
            :poll-fn
            (fn [& _] {:job-id "author-job" :state "done"
-                      :artifact-ref "narrated123"})
+                      :artifact-ref "facade01234567890abcdef1234567890abcdef1"})
            :repair-system-record-fn
            (fn [finding]
              (swap! findings conj finding)
@@ -1738,6 +1763,7 @@
 (deftest machine-stop-line-preempts-ordinary-selection-and-awaits-successor-validation
   (let [dispatches (atom [])
         implementations (atom [])
+        transform-called? (atom false)
         stop-line {:repair/id "repair-failed-1"
                    :repair/status :open
                    :repair/class :machine-failure
@@ -1770,6 +1796,10 @@
                               :codex-7 {:status "idle" :invoke-ready? true}
                               :codex-1 {:status "idle" :invoke-ready? true}})
           :judge-fn (fn [_] {:judgement judgement})
+          :judgement-transform-fn
+          (fn [incoming]
+            (reset! transform-called? true)
+            (assoc incoming :campaign/selected? true))
           :refresh-fn (fn [])
           :substrate-preflight-fn (fn [_] {:route :test})
           :code-state-fn (fn [] {:repo "/futon2" :git-sha "head"
@@ -1802,6 +1832,8 @@
                         :implementation-id "impl"})
           :queue-fn identity})]
     (is (= :grounded-change (:outcome result)))
+    (is (false? @transform-called?)
+        "stop-line precedence must bypass optional ordinary-selection transforms")
     (is (= ["repair-failed-1" "repair-failed-1"]
            (mapv :target @dispatches)))
     (is (= ["zai-5" "codex-1"] (mapv :agent @dispatches))
@@ -2295,10 +2327,10 @@
                                (swap! resolutions conj [obligation resolution]))
           :read-job-fn (fn [_ job-id]
                          {:job-id job-id :state "done"
-                          :artifact-ref "late123"
+                          :artifact-ref "1a7e1234567890abcdef1234567890abcdef1234"
                           :feature-card feature-card-claim
                           :execution successful-execution
-                          :result-summary "FULL_LOOP_AUTHOR: DONE late123"})
+                          :result-summary "FULL_LOOP_AUTHOR: DONE 1a7e1234567890abcdef1234567890abcdef1234"})
           :roster-fn (fn [_] {:zai-5 {:status "idle" :invoke-ready? true}
                               :codex-7 {:status "idle" :invoke-ready? true}
                               :codex-1 {:status "idle" :invoke-ready? true}})
@@ -2337,7 +2369,7 @@
   (let [dispatches (atom [])
         resolutions (atom [])
         author-job {:job-id "author-job" :state "done"
-                    :artifact-ref "late123"
+                    :artifact-ref "1a7e1234567890abcdef1234567890abcdef1234"
                     :feature-card feature-card-claim
                     :execution successful-execution}
         stop-line {:repair/id "repair-attempt-007-review-recovery"
@@ -2348,7 +2380,7 @@
                    :failure-kind :agent-budget-expired
                    :failure-data {:job-id "late-review-job"
                                   :author-job author-job
-                                  :commit "late123"
+                                  :commit "1a7e1234567890abcdef1234567890abcdef1234"
                                   :repository "/repo"
                                   :files ["src/real.clj"]}}
         result
@@ -2606,6 +2638,25 @@
            (get-in result [:data :build-retries 0 :failure-kind])))
     (is (= true (get-in result [:data :build-retries 0 :cured?])))
     (is (= 1 (count (:build-retries (:data result)))))))
+
+(deftest card-cure-uses-terminal-commit-when-agency-ref-is-a-path
+  ;; Live shape from canary-da9681ce: the substantive author commit was already
+  ;; observed, the cure reply began with a valid feature card, but Agency
+  ;; extracted "/eoi_network_test.clj" as its artifact-ref.  A metadata-only
+  ;; card cure must use the valid terminal claim rather than treating the path
+  ;; as a replacement commit.  The feature-card gate itself remains unchanged.
+  (let [{:keys [result]}
+        (run-feature-card-attempt
+         {:author-card nil
+          :cure-card feature-card-claim
+          :cure-commit "/eoi_network_test.clj"
+          :cure-observed-commit nil
+          :cure-summary "FULL_LOOP_AUTHOR: DONE feature123"
+          :artifacts? true})]
+    (is (= :grounded-change (:outcome result)))
+    (is (= "feature123" (get-in result [:data :commit])))
+    (is (= true (get-in result [:data :build-retries 0 :cured?])))
+    (is (nil? (get-in result [:data :build-retries 0 :cure-rejected])))))
 
 (deftest card-failure-not-cured-fails-after-exhausting-retries
   (let [{:keys [result]}
@@ -2896,3 +2947,657 @@
              :attempt-id "cohort-complete-test"}]
     (is (empty? (tripwire/evaluate-wire :T3 obs))
         "T3 must not fire on :cohort-complete (no unknown-outcome, no missing-stop-line)")))
+
+;; --- transport failure typing (repair-attempt-057-untyped-failure) ----------
+;; attempt-057 died at :selection with java.net.http.HttpTimeoutException after
+;; 100s. Raw transport exceptions carry no ex-data, so failure-kind-from fell to
+;; :untyped-failure and repair-class-for sent that down :else to :machine-failure
+;; — demanding :distinct-repair-commit and :independent-review for a network
+;; condition no code change can fix. These pin the typing both ways.
+
+(def ^:private failure-kind-from* #'runner/failure-kind-from)
+(def ^:private repair-class-for* #'runner/repair-class-for)
+
+(deftest transport-exceptions-are-typed-environmental
+  (testing "timeouts type as :transport-timeout and hold, not blame the machine"
+    (doseq [e [(java.net.http.HttpTimeoutException. "request timed out")
+               (java.net.SocketTimeoutException. "read timed out")]]
+      (is (= :transport-timeout (failure-kind-from* e))
+          (str (.getName (class e)) " must type as :transport-timeout"))
+      (is (= :environmental-hold (repair-class-for* (failure-kind-from* e)))
+          "a transport timeout is an environmental hold, not a machine failure")))
+  (testing "connect-side failures type as :transport-unavailable"
+    (doseq [e [(java.net.ConnectException. "connection refused")
+               (java.net.UnknownHostException. "no such host")]]
+      (is (= :transport-unavailable (failure-kind-from* e)))
+      (is (= :environmental-hold (repair-class-for* (failure-kind-from* e))))))
+  (testing "the cause chain is walked — these arrive wrapped in ex-info"
+    (let [wrapped (ex-info "strategic selection failed" {}
+                           (java.net.http.HttpTimeoutException. "request timed out"))]
+      (is (= :transport-timeout (failure-kind-from* wrapped))
+          "attempt-057's shape: a typed throw wrapping a transport cause"))))
+
+(deftest transport-typing-is-fail-closed
+  (testing "an unrecognised exception STAYS untyped and keeps the heavy contract"
+    (let [e (RuntimeException. "boom")]
+      (is (= :untyped-failure (failure-kind-from* e))
+          "narrowing the untyped bucket must never widen the escape hatch")
+      (is (= :machine-failure (repair-class-for* (failure-kind-from* e))))))
+  (testing "explicit ex-data typing still wins over the transport cause"
+    (let [e (ex-info "build failed" {:failure-kind :build-failed}
+                     (java.net.http.HttpTimeoutException. "request timed out"))]
+      (is (= :build-failed (failure-kind-from* e))
+          "a phase that classified its own failure keeps that classification")
+      (is (= :machine-failure (repair-class-for* (failure-kind-from* e)))))))
+
+(deftest bare-socket-closure-is-narrowly-typed-environmental
+  (testing "the measured peer closure is transport-unavailable"
+    (let [e (java.net.SocketException. "Socket closed")]
+      (is (= :transport-unavailable (failure-kind-from* e)))
+      (is (= :environmental-hold (repair-class-for* (failure-kind-from* e))))))
+  (testing "other bare SocketException messages remain fail-closed"
+    (let [e (java.net.SocketException. "Socket option failed")]
+      (is (= :untyped-failure (failure-kind-from* e)))
+      (is (= :machine-failure (repair-class-for* (failure-kind-from* e)))))))
+
+;; --- revision round 2 (reviewer findings) ----------------------------------
+
+(deftest generic-timeout-is-not-a-transport-escape
+  ;; java.util.concurrent.TimeoutException is raised by ANY bounded wait —
+  ;; future/get, executor shutdown, an internal poll — not only by transport.
+  ;; Typing it environmental would let a genuinely hung machine path escape the
+  ;; machine-failure contract, which is the widening this repair must not do.
+  (let [e (java.util.concurrent.TimeoutException. "timed out")]
+    (is (= :untyped-failure (failure-kind-from* e))
+        "a generic bounded-wait timeout is NOT a transport condition")
+    (is (= :machine-failure (repair-class-for* (failure-kind-from* e)))
+        "it keeps the heavy contract")
+    (is (= :transport-timeout
+           (failure-kind-from* (java.net.SocketTimeoutException. "read timed out")))
+        "while a socket-specific timeout still types as transport")))
+
+(deftest explicit-typing-wins-at-any-depth-in-the-cause-chain
+  (testing "typed ex-info wrapped by an untyped throw, over a transport cause"
+    ;; RuntimeException (untyped) -> ex-info :build-failed -> HttpTimeoutException.
+    ;; Walking only the TOP throwable would miss :build-failed and let the
+    ;; transport cause outrank a real machine failure.
+    (let [e (RuntimeException.
+             "wrapper"
+             (ex-info "build failed" {:failure-kind :build-failed}
+                      (java.net.http.HttpTimeoutException. "request timed out")))]
+      (is (= :build-failed (failure-kind-from* e)))
+      (is (= :machine-failure (repair-class-for* (failure-kind-from* e)))
+          "a typed machine failure must not be downgraded to environmental")))
+  (testing ":outcome typing is honoured at depth too"
+    (let [e (RuntimeException.
+             "wrapper"
+             (ex-info "no selection" {:outcome :no-selection}
+                      (java.net.ConnectException. "connection refused")))]
+      (is (= :no-selection (failure-kind-from* e)))
+      (is (= :environmental-hold (repair-class-for* (failure-kind-from* e))))))
+  (testing "with no explicit typing anywhere, the transport cause still types"
+    (let [e (RuntimeException.
+             "wrapper"
+             (RuntimeException.
+              "inner"
+              (java.net.http.HttpTimeoutException. "request timed out")))]
+      (is (= :transport-timeout (failure-kind-from* e))
+          "attempt-057 remains fixed through a deeper untyped chain"))))
+
+;; --- outer-boundary transport typing (repair-attempt-058-untyped-failure) ---
+;; attempt-058 repeated attempt-057's shape: HttpTimeoutException at :selection,
+;; recorded :untyped-failure. The classifier repair covered close! inside
+;; run-opportunity-core!, but run-opportunity!'s outer boundary HARDCODED
+;; :machine-failure / :initialization-failed for every throwable — so the same
+;; network fault arriving a moment earlier, before an attempt can own it, was
+;; still charged to the machine.
+
+(deftest initialization-transport-failure-is-environmental
+  (let [findings (atom [])
+        queued (atom [])
+        result
+        (runner/run-opportunity!
+         {:cohort? false
+          :phase-log nil
+          :phase-log-fn (fn [_]
+                          (throw (java.net.http.HttpTimeoutException.
+                                  "request timed out")))
+          :repair-system-record-fn
+          (fn [finding]
+            (swap! findings conj finding)
+            (assoc finding :repair/id "repair-initialization-transport"))
+          :queue-fn #(swap! queued conj %)})]
+    (is (= :incomplete (:outcome result)))
+    (is (= :transport-timeout (get-in result [:data :failure-kind]))
+        "a transport timeout at the outer boundary is typed, not :initialization-failed")
+    (is (= :environmental-hold (:repair-class (first @findings)))
+        "and it must not open a machine-failure repair")
+    (is (= [:cleared-precondition :grounded-production-shaped-successor]
+           (:requires (:discharge-contract (first @findings))))
+        "the discharge follows the corrected class")
+    (is (= :initialization (:failure-stage (first @findings)))
+        "the stage is still honestly :initialization")
+    (is (= :transport-timeout (get-in (first @queued) [:failure :kind]))
+        "the morning brief carries the same typed kind")))
+
+(deftest initialization-socket-closure-is-environmental
+  (let [findings (atom [])
+        result
+        (runner/run-opportunity!
+         {:cohort? false
+          :phase-log nil
+          :phase-log-fn (fn [_]
+                          (throw (java.net.SocketException. "Socket closed")))
+          :repair-system-record-fn
+          (fn [finding]
+            (swap! findings conj finding)
+            (assoc finding :repair/id "repair-initialization-socket-closed"))
+          :queue-fn (fn [_])})]
+    (is (= :incomplete (:outcome result)))
+    (is (= :transport-unavailable (get-in result [:data :failure-kind])))
+    (is (= :environmental-hold (:repair-class (first @findings))))
+    (is (= :initialization (:failure-stage (first @findings))))))
+
+(deftest initialization-non-transport-failure-stays-machine-failure
+  ;; Fail-closed twin of the above, and of
+  ;; initialization-failure-opens-emergency-stop-line: anything that is not a
+  ;; recognised transport condition keeps the full machine-failure contract.
+  (let [findings (atom [])
+        result
+        (runner/run-opportunity!
+         {:cohort? false
+          :phase-log nil
+          :phase-log-fn (fn [_] (throw (RuntimeException. "sink exploded")))
+          :repair-system-record-fn
+          (fn [finding]
+            (swap! findings conj finding)
+            (assoc finding :repair/id "repair-initialization-unknown"))
+          :queue-fn (fn [_])})]
+    (is (= :initialization-failed (get-in result [:data :failure-kind])))
+    (is (= :machine-failure (:repair-class (first @findings))))
+    (is (= [:distinct-repair-commit :independent-review
+            :grounded-repair :distinct-production-shaped-successor]
+           (:requires (:discharge-contract (first @findings)))))))
+
+;; --- revision round 2 (reviewer finding) ------------------------------------
+;; Consulting transport typing FIRST at the outer boundary was a fail-open: an
+;; ex-info{:failure-kind :build-failed} wrapping any transport cause had that
+;; cause found by the chain walk and was downgraded to :environmental-hold, so a
+;; real typed machine failure escaped its own contract. Precedence at this
+;; boundary now matches failure-kind-from exactly.
+
+(deftest outer-boundary-does-not-downgrade-typed-machine-failures
+  (testing "explicit typing wins over a transport cause deeper in the chain"
+    (let [findings (atom [])
+          result
+          (runner/run-opportunity!
+           {:cohort? false
+            :phase-log nil
+            :phase-log-fn (fn [_]
+                            (throw (ex-info "build failed"
+                                            {:failure-kind :build-failed}
+                                            (java.net.http.HttpTimeoutException.
+                                             "request timed out"))))
+            :repair-system-record-fn
+            (fn [finding]
+              (swap! findings conj finding)
+              (assoc finding :repair/id "repair-initialization-typed"))
+            :queue-fn (fn [_])})]
+      (is (= :build-failed (get-in result [:data :failure-kind]))
+          "a typed machine failure must keep its own kind")
+      (is (= :machine-failure (:repair-class (first @findings)))
+          "and must NOT be downgraded to environmental by its transport cause")
+      (is (= [:distinct-repair-commit :independent-review
+              :grounded-repair :distinct-production-shaped-successor]
+             (:requires (:discharge-contract (first @findings)))))))
+  (testing "a bare transport failure is still typed environmental"
+    ;; attempt-058's own case must survive the precedence change.
+    (let [findings (atom [])
+          result
+          (runner/run-opportunity!
+           {:cohort? false
+            :phase-log nil
+            :phase-log-fn (fn [_]
+                            (throw (java.net.http.HttpTimeoutException.
+                                    "request timed out")))
+            :repair-system-record-fn
+            (fn [finding]
+              (swap! findings conj finding)
+              (assoc finding :repair/id "repair-initialization-transport-2"))
+            :queue-fn (fn [_])})]
+      (is (= :transport-timeout (get-in result [:data :failure-kind])))
+      (is (= :environmental-hold (:repair-class (first @findings)))))))
+
+;; --- class-based transport typing --------------------------------------------
+;; repair-initialization-6dd14f9e: SocketException "Socket closed" at
+;; :initialization. The transport map was keyed on EXACT class name, so every
+;; subclass fell through — java.net.BindException took the machine-failure
+;; contract, and the bare-SocketException carve-out was keyed on one literal
+;; message, so the identical condition worded "Socket is closed" landed on the
+;; opposite side. Matching is now by class, with the message gate enumerated.
+
+(deftest transport-typing-matches-by-class-not-name
+  (testing "subclasses of a recognised condition are covered without enumeration"
+    (doseq [e [(java.net.http.HttpConnectTimeoutException. "connect timed out")
+               (java.net.BindException. "address already in use")
+               (java.net.NoRouteToHostException. "no route")]]
+      (is (= :environmental-hold (repair-class-for* (failure-kind-from* e)))
+          (str (.getName (class e)) " is a transport condition"))))
+  (testing "the recorded initialization failure types environmental"
+    (let [e (java.net.SocketException. "Socket closed")]
+      (is (= :transport-unavailable (failure-kind-from* e)))
+      (is (= :environmental-hold (repair-class-for* (failure-kind-from* e)))))))
+
+(deftest transport-message-typing-is-enumerated-not-fuzzy
+  (testing "known JDK wordings for a channel that went away are all typed alike"
+    ;; Before this, only "socket closed" was listed, so "Socket is closed" —
+    ;; thrown by several JDK call sites for the SAME condition — took the
+    ;; machine-failure contract. That was a coin-flip on wording, not a policy.
+    (doseq [m ["Socket closed" "socket closed"
+               "Connection reset" "Broken pipe" "  CONNECTION RESET BY PEER  "]]
+      (is (= :transport-unavailable
+             (failure-kind-from* (java.net.SocketException. m)))
+          (str "SocketException " (pr-str m) " must type as transport"))))
+  (testing "FAIL-CLOSED: a bare SocketException outside the set stays heavy"
+    ;; Not fuzzy-matched: an unrecognised wording keeps the machine-failure
+    ;; contract, so a genuine use-after-close bug is not laundered into an
+    ;; environmental hold.
+    (doseq [e [(java.net.SocketException.)
+               (java.net.SocketException. "some unrelated socket problem")]]
+      (is (= :untyped-failure (failure-kind-from* e)))
+      (is (= :machine-failure (repair-class-for* (failure-kind-from* e))))))
+  (testing "\"Socket is closed\" is LOCAL use-after-close and stays a machine fault"
+    ;; One word from a listed entry, and on the opposite side on purpose. On this
+    ;; JDK, calling getInputStream/getOutputStream/setSoTimeout/bind on a closed
+    ;; java.net.Socket throws SocketException "Socket is closed" — that is our
+    ;; own code misusing a socket, not a channel that went away, so it must NOT
+    ;; discharge as :environmental-hold.
+    (let [e (java.net.SocketException. "Socket is closed")]
+      (is (= :untyped-failure (failure-kind-from* e)))
+      (is (= :machine-failure (repair-class-for* (failure-kind-from* e)))))
+    (is (= :transport-unavailable
+           (failure-kind-from* (java.net.SocketException. "Socket closed")))
+        "while \"Socket closed\" — a blocking op aborted by channel loss — is transport")))
+
+(deftest ineligible-trigger-reaches-the-boundary-as-environmental-hold
+  "Independent review of 4fea3b3 (codex-1): the cohort test proves the throw
+  carries :failure-kind :trigger-ineligible, but stops before the runner mapping
+  it was changed to feed. This drives the WHOLE path — a real cohort refusal,
+  produced by the real start-attempt! guard, through run-opportunity!'s outer
+  boundary — and asserts the obligation that actually gets recorded.
+
+  Grounds repair-initialization-1f894133, where exactly this refusal was
+  recorded as :initialization-failed / :machine-failure."
+  (let [data-root (tmp-cohort-root)
+        prereg-path (str data-root "/cohort.edn")
+        _ (tiny-target-prereg prereg-path)
+        _ (cohort/activate! prereg-path data-root)
+        repair-calls (atom [])
+        queue-calls (atom [])]
+    (with-redefs [cohort/default-preregistration prereg-path
+                  cohort/default-data-root data-root]
+      (let [result (runner/run-opportunity!
+                    {;; NOT in :allowed-triggers — the real guard refuses this
+                     :trigger :instrumented-campaign-repair
+                     :cohort? true
+                     :opportunity-id "test/ineligible-trigger"
+                     :semantic-epoch :test
+                     :author "zai-1"
+                     :reviewer "codex-1"
+                     :repair-system-record-fn
+                     (fn [m] (swap! repair-calls conj m)
+                       (assoc m :repair/id "repair-ineligible-trigger"))
+                     :queue-fn (fn [m] (swap! queue-calls conj m)
+                                 {:morning-brief/addendum-id "brief-ineligible"})})
+            finding (first @repair-calls)]
+        (is (= :incomplete (:outcome result)))
+        (is (= 1 (count @repair-calls))
+            "the refusal must still open exactly one stop-line obligation")
+        (is (= :trigger-ineligible (get-in result [:data :failure-kind]))
+            "the typed kind must survive to the boundary, not become :initialization-failed")
+        (is (= :trigger-ineligible (:failure-kind finding)))
+        (is (= :environmental-hold (:repair-class finding))
+            "an unpreregistered trigger is a precondition, not a machine defect")
+        (is (= [:cleared-precondition :grounded-production-shaped-successor]
+               (:requires (:discharge-contract finding)))
+            "so the discharge is: preregister the trigger, or use an eligible one")
+        (is (= :trigger-ineligible (get-in (first @queue-calls) [:failure :kind]))
+            "and the morning brief carries the same typed kind")))))
+
+(deftest eligible-trigger-does-not-open-a-trigger-ineligible-obligation
+  "Fail-closed twin: the guard is not disabled. An ELIGIBLE trigger on the same
+  cohort must not produce a :trigger-ineligible finding."
+  (let [data-root (tmp-cohort-root)
+        prereg-path (str data-root "/cohort.edn")
+        _ (tiny-target-prereg prereg-path)
+        _ (cohort/activate! prereg-path data-root)
+        repair-calls (atom [])]
+    (with-redefs [cohort/default-preregistration prereg-path
+                  cohort/default-data-root data-root]
+      (let [result (runner/run-opportunity!
+                    {:trigger :test-trigger
+                     :cohort? true
+                     :opportunity-id "test/eligible-trigger"
+                     :semantic-epoch :test
+                     :author "zai-1"
+                     :reviewer "codex-1"
+                     :repair-system-record-fn
+                     (fn [m] (swap! repair-calls conj m)
+                       (assoc m :repair/id "repair-eligible"))
+                     :queue-fn (fn [_] {:morning-brief/addendum-id "brief"})})]
+        (is (not= :trigger-ineligible (get-in result [:data :failure-kind]))
+            "an eligible trigger must never be typed :trigger-ineligible")
+        (is (empty? (filter #(= :trigger-ineligible (:failure-kind %)) @repair-calls))
+            "and must not open a trigger-ineligible obligation")))))
+
+;; --- claimed-commit shape (repair-canary-067cd51a) ---------------------------
+;; A cure turn had its claimed commit extracted as "/test_fm001_budgeted_solve.py"
+;; — a file path — and the bounce was rejected :cure-commit-unresolved. That
+;; blames the author for naming a commit that is not there, when in fact nothing
+;; ever extracted a commit. find-commit-repo shells `git cat-file -e <x>^{commit}`
+;; for any string, so the two faults were indistinguishable.
+
+(deftest cure-claiming-a-non-commit-is-typed-malformed-not-unresolved
+  "The measured case from repair-canary-067cd51a: a cure turn whose claimed
+  commit was extracted as a FILE PATH. It must still be rejected — nothing is
+  loosened — but typed as an extraction fault, not as the author naming a
+  commit that is not there."
+  (let [cure-prompts (atom [])
+        opts {:build-cure-retries 1
+              :phase-log (str (System/getProperty "java.io.tmpdir")
+                              "/cure-malformed-test-phase.log")
+              :dispatch-fn (fn [_ _ _ _ prompt]
+                             (swap! cure-prompts conj prompt)
+                             {:job-id "cure-1"})
+              :poll-fn (fn [_ _]
+                         {:job-id "cure-1" :state "done"
+                          :artifact-ref "/test_fm001_budgeted_solve.py"
+                          :result-summary
+                          (str "FULL_LOOP_FEATURE_CARD: {:built \"x\" :want-coverage \"y\""
+                               " :matches-intent? true :things-to-try [\"a -> b\"]}"
+                               "\nFULL_LOOP_AUTHOR: DONE /test_fm001_budgeted_solve.py")})
+              :resolve-build-fn (fn [_] nil)}
+        thrown (try
+                 (#'runner/build-cure-loop
+                  opts {} "author-x" (atom 0)
+                  "target-x" "orig123" "/repo" ["src/x.clj"]
+                  {:job-id "author-1" :state "done"
+                   :result-summary "FULL_LOOP_AUTHOR: DONE orig123"
+                   :events [{:type "text" :text "prose"}]}
+                  false
+                  {:repo "/repo" :pre-dispatch-head "base"})
+                 nil
+                 (catch clojure.lang.ExceptionInfo e (ex-data e)))]
+    (is (some? thrown))
+    (is (= false (get-in thrown [:build-retries 0 :cured?]))
+        "still rejected: the guard narrows the diagnosis, not the gate")
+    (is (= :cure-commit-malformed
+           (get-in thrown [:build-retries 0 :cure-rejected]))
+        "a file path is not an unresolvable commit; it is not a commit")
+    (is (= "/test_fm001_budgeted_solve.py"
+           (get-in thrown [:build-retries 0 :claimed-commit]))
+        "the offending value is preserved so the extractor can be found")))
+
+(deftest commit-ish-accepts-real-object-names
+  (testing "full and abbreviated shas, either case"
+    (doseq [c ["7ed10a45534bb135afb26cf494a3d0f240092535"
+               "5818c67"
+               "c0798dfd8a8200123fe93a845c8547beebe23de0"
+               "ABCDEF1234"]]
+      (is (runner/commit-ish? c) (str (pr-str c) " is a git object name")))))
+
+(deftest commit-ish-rejects-things-that-are-not-commits
+  (testing "the measured case: a file path fragment"
+    (is (not (runner/commit-ish? "/test_fm001_budgeted_solve.py"))))
+  (testing "other non-commits"
+    (doseq [c [nil "" "   " "abc123" "not-a-sha"
+               "tests/test_fm001_budgeted_solve.py"
+               "7ed10a45534bb135afb26cf494a3d0f240092535extra"
+               "7ed10a4 " "zzzzzzz" :keyword 42]]
+      (is (not (runner/commit-ish? c))
+          (str (pr-str c) " must not pass as a commit")))))
+
+(deftest resolve-build-refuses-non-commit-without-touching-git
+  "Guard at the source, so every caller is protected — not just the cure path.
+
+  Asserting only that the result is nil would NOT test the guard: git rejects a
+  bogus ref anyway, so deleting the guard leaves the return value unchanged.
+  (Mutation testing showed exactly that.) What the guard actually buys is that a
+  value which is not a commit never reaches the repository probe at all, so this
+  asserts find-commit-repo is not called."
+  (let [probes (atom [])]
+    (with-redefs [futon2.aif.full-loop-runner/find-commit-repo
+                  (fn [c] (swap! probes conj c) nil)]
+      (doseq [bad ["/test_fm001_budgeted_solve.py" nil "not-a-sha" "" "abc123"]]
+        (is (nil? (runner/resolve-build bad))))
+      (is (empty? @probes)
+          "a non-commit must never be probed against the repositories")
+      ;; and a well-formed sha DOES reach the probe — the guard is a filter,
+      ;; not a blanket refusal.
+      (is (nil? (runner/resolve-build "deadbee1234567890abcdef1234567890abcdef1")))
+      (is (= ["deadbee1234567890abcdef1234567890abcdef1"] @probes)))))
+
+
+;; --- revision prompts must name the AUTHORED commit -------------------------
+;; repair-canary-067cd51a: the revision prompt carried prior-commits ["c0798df"]
+;; — the pre-dispatch head, a trigger-classification test commit — instead of
+;; the repair actually under review. The reviewer read an unrelated commit and
+;; rejected on artifact-binding grounds.
+
+(deftest revision-prompt-names-the-observed-authored-commit
+  (let [prompts (atom [])
+        authored "f0e7778d324a6560582ac231c45ab2085b8bae73"
+        base "c0798dfd8a8200123fe93a845c8547beebe23de0"
+        opts {:revision-rounds 1
+              :phase-log (str (System/getProperty "java.io.tmpdir")
+                              "/revision-binding-test-phase.log")
+              :dispatch-fn (fn [_ _ _ _ prompt]
+                             (swap! prompts conj prompt)
+                             {:job-id "rev-1"})
+              :poll-fn (fn [_ _] {:job-id "rev-1" :state "error"})
+              :repo-head-observation-fn (fn [_] {:head base :observed-at-ms 0})}]
+    (try
+      (#'runner/run-revision-round
+       opts {} "claude-7" "codex-1" (atom 0) "target-x" {}
+       "/home/joe/code/futon2" base ["src/x.clj"]
+       {:job-id "author-1" :state "done"}
+       ;; artifact-binding observed a VALID authored commit
+       {:fresh-author? true :repo "/home/joe/code/futon2" :commit authored}
+       {:job-id "review-1" :state "done"
+        :result-summary "FULL_LOOP_REVIEW: REQUEST_CHANGES do the thing"}
+       nil [])
+      (catch clojure.lang.ExceptionInfo _ nil))
+    (is (seq @prompts) "a revision must have been dispatched")
+    (let [prompt (first @prompts)]
+      (is (str/includes? prompt authored)
+          "the reviewer must be pointed at the commit the author made")
+      (is (not (str/includes? prompt base))
+          "and NOT at the pre-dispatch head, which is an unrelated commit"))))
+
+(deftest revision-prompt-falls-back-when-no-valid-authored-commit
+  "artifact-binding/:commit is nil unless the observation was valid. With no
+  authored commit observed, the prompt falls back rather than inventing one —
+  and a malformed binding is never sent as a commit."
+  (let [prompts (atom [])
+        base "c0798dfd8a8200123fe93a845c8547beebe23de0"
+        run (fn [binding]
+              (reset! prompts [])
+              (let [opts {:revision-rounds 1
+                          :phase-log (str (System/getProperty "java.io.tmpdir")
+                                          "/revision-fallback-test-phase.log")
+                          :dispatch-fn (fn [_ _ _ _ p]
+                                         (swap! prompts conj p) {:job-id "rev-1"})
+                          :poll-fn (fn [_ _] {:job-id "rev-1" :state "error"})
+                          :repo-head-observation-fn (fn [_] {:head base :observed-at-ms 0})}]
+                (try
+                  (#'runner/run-revision-round
+                   opts {} "claude-7" "codex-1" (atom 0) "target-x" {}
+                   "/home/joe/code/futon2" base ["src/x.clj"]
+                   {:job-id "author-1" :state "done"}
+                   binding
+                   {:job-id "review-1" :state "done"
+                    :result-summary "FULL_LOOP_REVIEW: REQUEST_CHANGES x"}
+                   nil [])
+                  (catch clojure.lang.ExceptionInfo _ nil))
+                (first @prompts)))]
+    (testing "no observed commit -> fall back to the bound commit"
+      (is (str/includes? (run {:fresh-author? true :commit nil}) base)))
+    (testing "a non-commit binding is NOT sent as a commit"
+      (let [prompt (run {:fresh-author? true :commit "/tests/x_test.clj"})]
+        (is (not (str/includes? prompt "/tests/x_test.clj")))
+        (is (str/includes? prompt base))))))
+
+
+;; --- artifact-ref shape at the author-wait boundary (repair-canary-de75cee9) --
+;; The obligation records :artifact-ref "/eoi_network_test.clj" — a file path
+;; scraped from author text. Treating that as a claimed artifact reported
+;; :artifact-binding-mismatch, which says Agency named a commit that observation
+;; could not validate. It named no commit at all.
+
+(deftest unvalidated-artifact-failure-separates-malformed-from-mismatch
+  (testing "a file path is not a commit Agency claimed — it is not a commit"
+    ;; The measured value from canary-de75cee9.
+    (let [f (runner/unvalidated-artifact-failure true "/eoi_network_test.clj" nil)]
+      (is (= :artifact-ref-malformed (:failure-kind f)))
+      (is (= "/eoi_network_test.clj" (:artifact-ref f))
+          "the offending value travels so the extractor can be found")))
+  (testing "a well-formed sha observation could not validate IS a mismatch"
+    (let [f (runner/unvalidated-artifact-failure
+             true "deadbee1234567890abcdef1234567890abcdef1" nil)]
+      (is (= :artifact-binding-mismatch (:failure-kind f)))
+      (is (nil? (:artifact-ref f)))))
+  (testing "nothing to report when observation validated a commit"
+    (is (nil? (runner/unvalidated-artifact-failure
+               true "/eoi_network_test.clj" "abc1234")))
+    (is (nil? (runner/unvalidated-artifact-failure
+               true "deadbee1234567890abcdef1234567890abcdef1" "abc1234"))))
+  (testing "and nothing to report when the author is not fresh"
+    ;; The non-fresh path legitimately carries an Agency ref through;
+    ;; resolve-build refuses a non-commit downstream.
+    (is (nil? (runner/unvalidated-artifact-failure false "/eoi_network_test.clj" nil)))
+    (is (nil? (runner/unvalidated-artifact-failure true nil nil)))))
+
+;; --- card recovery from the author's own text events ------------------------
+;; repair-canary-de75cee9: Agency concatenates the author's separate text
+;; blocks into :result with NO separator, so a card that began its own block
+;; ends up abutting the previous block's last word:
+;;   "...doing it precisely:FULL_LOOP_FEATURE_CARD: {...}"
+;; The line-anchored search over :result cannot match, and the run was reported
+;; :marker-not-at-durable-prefix — blaming the author's ordering for what the
+;; concatenation destroyed, and discarding a recoverable card.
+
+(def ^:private canary-card-text
+  (str "FULL_LOOP_FEATURE_CARD: {:built \"a carrier\" :want-coverage \"tension identity\""
+       " :matches-intent? true :things-to-try [\"bb test -> 4 tests\"]}"))
+
+(deftest card-is-recovered-from-the-event-that-begins-with-it
+  (testing "the measured shape: blocks concatenated with no separator"
+    (let [job {:result-summary "Found a genuinely witnessed join: ..."
+               :result (str "Third malformed attempt; doing it precisely:" canary-card-text)
+               :events [{:type "text" :text "Found a genuinely witnessed join: ..."}
+                        {:type "text" :text "Third malformed attempt; doing it precisely:"}
+                        {:type "text" :text (str canary-card-text "\n\nStep (e) is ...")}]}
+          {:keys [card source reason]} (#'runner/feature-card-validation job)]
+      (is (nil? reason) "a card that began its own block must not be discarded")
+      (is (= :events source))
+      (is (= "a carrier" (:built card)))
+      (is (= ["bb test -> 4 tests"] (:things-to-try card))))))
+
+(deftest event-recovery-does-not-widen-the-gate
+  (testing "a marker quoted MID-event never matches"
+    (let [job {:result-summary "prose"
+               :result "prose"
+               :events [{:type "text"
+                         :text (str "I was asked to emit " canary-card-text " at the top.")}]}]
+      (is (= :marker-not-at-durable-prefix
+             (:reason (#'runner/feature-card-validation job)))
+          "quoting the marker inside a sentence must not supply a card")))
+  (testing "non-text events are never read"
+    (let [job {:result-summary "prose"
+               :result "prose"
+               :events [{:type "tool_use" :text canary-card-text}
+                        {:type "done" :text canary-card-text}]}]
+      (is (= :marker-not-at-durable-prefix
+             (:reason (#'runner/feature-card-validation job))))))
+  (testing "no events, no card: the typed reason is unchanged"
+    (is (= :marker-not-at-durable-prefix
+           (:reason (#'runner/feature-card-validation
+                     {:result-summary "prose" :result "prose"}))))
+    (is (= :missing-marker
+           (:reason (#'runner/feature-card-validation
+                     {:result-summary "" :result ""}))))))
+
+(deftest earlier-recovery-paths-still-win
+  (testing "a leading card in the summary is still the fast path"
+    (let [job {:result-summary canary-card-text
+               :events [{:type "text" :text canary-card-text}]}]
+      (is (= :text (:source (#'runner/feature-card-validation job))))))
+  (testing "a line-anchored card in :result is still preferred over events"
+    (let [job {:result-summary "prose"
+               :result (str "prose\n" canary-card-text)
+               :events [{:type "text" :text canary-card-text}]}]
+      (is (= :result (:source (#'runner/feature-card-validation job)))))))
+
+(deftest recovery-artifact-failure-separates-malformed-from-missing
+  (testing "a completed recovery with no artifact-ref is still reported missing"
+    (is (= :recovery-artifact-missing
+           (:failure-kind (runner/recovery-artifact-failure
+                           :author-wait {:job-id "j" :state "done"})))))
+  (testing "a path scraped into artifact-ref is malformed, not missing"
+    ;; The measured value from canary-da9681ce's author job, whose real commit
+    ;; was f285e40 in futon2.
+    (let [failure (runner/recovery-artifact-failure
+                   :author-wait {:job-id "j" :state "done"
+                                 :artifact-ref "/eoi_network_test.clj"})]
+      (is (= :recovery-artifact-ref-malformed (:failure-kind failure)))
+      (is (= "/eoi_network_test.clj" (:artifact-ref failure))
+          "the offending value is carried so the fault is locatable")))
+  (testing "a commit-shaped ref has nothing to report"
+    (is (nil? (runner/recovery-artifact-failure
+               :author-wait {:job-id "j" :state "done"
+                             :artifact-ref "f285e40f6cd150410d66c7f8c555660dba9d4003"}))))
+  (testing "the gate does not widen past a completed author-wait recovery"
+    (is (nil? (runner/recovery-artifact-failure :author-wait nil)))
+    (is (nil? (runner/recovery-artifact-failure
+               :reviewer-wait {:job-id "j" :state "done"
+                               :artifact-ref "/eoi_network_test.clj"})))
+    (is (nil? (runner/recovery-artifact-failure
+               :author-wait {:job-id "j" :state "running"
+                             :artifact-ref "/eoi_network_test.clj"})))))
+
+(deftest done-author-recovery-with-a-non-commit-artifact-is-refused-before-dispatch
+  ;; Outer boundary: the typed refusal must reach run-opportunity!'s result,
+  ;; not stop at the predicate. Without the shape check the snapshot was adopted
+  ;; as the authored turn and its path became the reviewed commit.
+  (let [supersessions (atom [])
+        dispatches (atom [])
+        findings (atom [])
+        stop-line {:repair/id "repair-path-ref" :repair/status :open
+                   :repair/class :incomplete-recoverable
+                   :attempt-id "attempt-path-ref" :failure-stage :author-wait
+                   :failure-data {:job-id "path-ref-job"}}
+        result
+        (runner/run-opportunity!
+         (merge (isolated-runner-opts)
+                {:repair-open-fn (constantly [stop-line])
+                 :read-job-fn (fn [& _] {:job-id "path-ref-job" :state "done"
+                                         :artifact-ref "/eoi_network_test.clj"})
+                 :repair-system-record-fn
+                 (fn [finding]
+                   (let [finding (assoc finding :repair/id
+                                        "repair-path-ref-successor")]
+                     (swap! findings conj finding)
+                     finding))
+                 :repair-supersede-fn
+                 (fn [& args] (swap! supersessions conj args))
+                 :dispatch-fn (fn [& args] (swap! dispatches conj args))}))]
+    (is (= :recovery-artifact-ref-malformed (get-in result [:data :failure-kind])))
+    (is (= "/eoi_network_test.clj"
+           (get-in result [:data :error-data :artifact-ref]))
+        "the offending value survives into the durable failure record")
+    (is (= "/eoi_network_test.clj"
+           (get-in @findings [0 :failure-data :artifact-ref]))
+        "and into the successor obligation, so the fault is locatable later")
+    (is (= 1 (count @supersessions)))
+    (is (empty? @dispatches)
+        "no replacement turn is dispatched on a typed recovery refusal")))

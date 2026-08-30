@@ -1062,6 +1062,36 @@
               {:card card :source :result})
             (catch Exception _ nil)))))))
 
+(defn- events-feature-card
+  "Last recovery path: the author's own text EVENTS, each checked for the
+  marker at its start.
+
+  Agency concatenates the author's separate text blocks into :result with NO
+  separator, so a card that DID begin its own reply block can end up abutting
+  the previous block's last word — measured on canary-de75cee9, where :result
+  reads \"...doing it precisely:FULL_LOOP_FEATURE_CARD: {...}\". The
+  line-anchored search over :result then cannot match, and the run is reported
+  :marker-not-at-durable-prefix, which says the author put prose before the
+  marker. The author did put prose before it, but in an EARLIER block; the
+  concatenation is what destroyed the line boundary, so the diagnosis blamed
+  the wrong layer and a recoverable card was thrown away.
+
+  This does NOT widen the gate. The marker must still begin its block — a
+  marker quoted mid-sentence inside an event never matches, exactly as line
+  anchoring intends — and only the author's own :text events are read, never
+  terminal messages or tool prose."
+  [job]
+  (some (fn [event]
+          (when (= "text" (str (:type event)))
+            (let [text (str/triml (str (:text event)))]
+              (when (str/starts-with? text feature-card-marker)
+                (try
+                  (when-let [card (read-first-edn-form
+                                   (subs text (count feature-card-marker)))]
+                    {:card card :source :events})
+                  (catch Exception _ nil))))))
+        (:events job)))
+
 (defn- text-feature-card [job]
   ;; :result-summary is a 220-char whitespace-collapsed digest and truncates
   ;; any card whose closing brace falls past the window — attempt-051's valid
@@ -1071,6 +1101,7 @@
   ;; when no parseable card exists on either path.
   (or (summary-feature-card job)
       (result-feature-card job)
+      (events-feature-card job)
       (let [summary (:result-summary job)]
         (cond
           (and (str/blank? summary) (str/blank? (str (:result job))))
@@ -1424,6 +1455,24 @@
        "or FULL_LOOP_REVIEW: REJECT <reason>\n"
        "You may add FULL_LOOP_REVIEWER_NOTE: <short note> on a second line."))
 
+(def ^:private commit-ish-pattern
+  "A git object name: 7-40 hex digits. Short refs are normal here — an Agency
+  artifact-ref is often abbreviated (e.g. \"5818c67\")."
+  #"(?i)\A[0-9a-f]{7,40}\z")
+
+(defn commit-ish?
+  "Does this even LOOK like a commit?
+
+  find-commit-repo happily shells `git cat-file -e <x>^{commit}` for any string,
+  so a value that is not a commit at all fails identically to a well-formed sha
+  that does not exist. Those are different faults and were being reported as the
+  same one: on 2026-08-20 a cure turn had its claimed commit extracted as
+  \"/test_fm001_budgeted_solve.py\" — a file path — and the bounce was rejected
+  :cure-commit-unresolved, which blames the author for naming a bad commit when
+  in fact nothing ever extracted a commit."
+  [commit]
+  (boolean (and (string? commit) (re-matches commit-ish-pattern commit))))
+
 (defn- run-revision-round
   "Run at most one revise-and-resubmit round. With no typed findings or a
   zero revision budget, return the original artifact and review unchanged."
@@ -1437,7 +1486,24 @@
       {:commit commit :repo repo :files files :author-job author-job
        :artifact-binding artifact-binding :review-job review-job
        :review-gate review-gate}
-      (let [prior-commits [commit]
+      (let [;; The reviewer must be pointed at what the AUTHOR actually
+            ;; committed. `commit` can still be the pre-dispatch head when the
+            ;; attempt was bound before authoring, and sending that makes the
+            ;; reviewer read an unrelated commit and reject the revision on
+            ;; artifact-binding grounds — measured on
+            ;; repair-canary-067cd51a, where prior-commits carried the base
+            ;; head (a trigger-classification test commit) rather than the
+            ;; repair under review.
+            ;;
+            ;; artifact-binding/:commit is set only when the observation was
+            ;; VALID (changed, descendant, inside the author window), so it is
+            ;; the authored commit or nil — never a guess. commit-ish? keeps a
+            ;; malformed binding out of the prompt; anything that is not a git
+            ;; object name falls back rather than being sent as one.
+            observed-author-commit (:commit artifact-binding)
+            prior-commits [(if (commit-ish? observed-author-commit)
+                             observed-author-commit
+                             commit)]
             pre-revision-head (observe-repo-head opts repo)
             revision-response
             (run-phase!
@@ -1572,10 +1638,13 @@
     (vec (remove str/blank? (str/split-lines (:out r))))))
 
 (defn resolve-build
-  "Resolve an Agency artifact-ref to one Futon repository and its changed files."
+  "Resolve an Agency artifact-ref to one Futon repository and its changed files.
+  Returns nil for anything that is not commit-shaped, rather than probing every
+  repository with it."
   [commit]
-  (when-let [repo (find-commit-repo commit)]
-    {:repo repo :files (commit-files repo commit)}))
+  (when (commit-ish? commit)
+    (when-let [repo (find-commit-repo commit)]
+      {:repo repo :files (commit-files repo commit)})))
 
 (defn- artifact-only-files? [files]
   (and (seq files)
@@ -1610,6 +1679,21 @@
                    :target target
                    :files files
                    :author-job author-job}}))))
+
+(defn- cure-commit-candidate
+  "Choose the commit claimed by a bounded cure.
+
+  Prefer repository observation, then the runner's own parsing of the
+  FULL_LOOP_AUTHOR terminal marker, before Agency's separately extracted
+  :artifact-ref.  The live card-only cure named the existing commit correctly
+  in its terminal marker while Agency extracted a path from intervening prose.
+  An explicitly malformed terminal claim remains malformed and is rejected by
+  the existing typed gate below."
+  [commit cure-observed cure-artifact-ref cure-job]
+  (let [{:keys [verdict detail]} (author-verdict cure-job)
+        terminal-commit (when (= :done verdict)
+                          (some-> detail (str/split #"\s+" 2) first))]
+    (or cure-observed terminal-commit cure-artifact-ref commit)))
 
 (defn- build-cure-loop
   "Bounded cure loop wrapping the artifact-only and feature-card validations.
@@ -1666,7 +1750,8 @@
                                                        cure-pre-head
                                                        cure-job))
                 cure-observed (:commit cure-binding)
-                new-commit (or cure-observed cure-artifact-ref commit)
+                new-commit (cure-commit-candidate commit cure-observed
+                                                  cure-artifact-ref cure-job)
                 commit-changed? (and new-commit (not= new-commit commit))
                 new-build (when commit-changed?
                             ((or (:resolve-build-fn opts) resolve-build)
@@ -1677,6 +1762,13 @@
               ;; back to the PRIOR file list here, so a card-only validation
               ;; would have declared the bounce cured and bound the phantom
               ;; sha downstream. Reject the bounce wholesale instead.
+              ;;
+              ;; The rejection is TYPED by which fault it is. A well-formed sha
+              ;; that no repository has is :cure-commit-unresolved — the author
+              ;; named a commit that is not there. A value that is not
+              ;; commit-shaped at all is :cure-commit-malformed — nothing
+              ;; extracted a commit, so the fault is upstream in extraction and
+              ;; the author is not the one to look at. Both still reject.
               (recur commit repo files author-job
                      (dec retries-left)
                      (conj build-retries
@@ -1684,7 +1776,9 @@
                             :error error-message
                             :cure-job-id cure-job-id
                             :cured? false
-                            :cure-rejected :cure-commit-unresolved
+                            :cure-rejected (if (commit-ish? new-commit)
+                                             :cure-commit-unresolved
+                                             :cure-commit-malformed)
                             :claimed-commit new-commit}))
               (let [new-repo (or (:repo new-build) repo)
                     new-files (or (:files new-build) files)
@@ -1820,13 +1914,120 @@
       :incomplete
       raw)))
 
+(def ^:private transport-failure-classes
+  "Recognised transport conditions, matched by CLASS (most specific first), not
+  by exact class name. Name-keyed lookup missed every subclass: it is why
+  attempt-057/058 (HttpTimeoutException) were repaired while
+  initialization-6dd14f9e (SocketException) opened a fresh obligation of the
+  same kind, and why java.net.BindException still fell through.
+
+  A transport condition is not the machine's fault, so it must discharge as
+  :environmental-hold (:cleared-precondition) rather than :machine-failure,
+  which would demand a distinct repair commit and an independent review for a
+  network fault no code change can fix.
+
+  DELIBERATELY ABSENT: java.util.concurrent.TimeoutException. It is raised by
+  any bounded wait — future/get, executor shutdown, an internal poll — so typing
+  it environmental would let a genuinely hung machine path escape the
+  machine-failure contract. Job-level stalls already have :agent-job-stalled.
+
+  DELIBERATELY ABSENT: bare java.net.SocketException, handled separately below —
+  it is the one entry whose subclasses are all transport but whose own instances
+  are not."
+  [[java.net.http.HttpTimeoutException :transport-timeout]
+   [java.net.SocketTimeoutException :transport-timeout]
+   [java.net.ConnectException :transport-unavailable]
+   [java.net.BindException :transport-unavailable]
+   [java.net.NoRouteToHostException :transport-unavailable]
+   [java.net.PortUnreachableException :transport-unavailable]
+   [java.net.UnknownHostException :transport-unavailable]])
+
+(def ^:private unavailable-socket-messages
+  "Bare SocketException is too broad to type wholesale: its subclasses are all
+  transport, but a bare instance can also report LOCAL socket lifecycle misuse,
+  which IS a machine fault. Those cases are indistinguishable by type, so this
+  set names only the JDK wordings for a channel that went away underneath us.
+
+  \"Socket is closed\" is DELIBERATELY ABSENT, and the omission is one word away
+  from a listed entry, so do not \"fix\" it. Measured on this JDK:
+
+      (doto (java.net.Socket.) .close) then .getInputStream / .getOutputStream
+      / .setSoTimeout / .bind  ->  SocketException \"Socket is closed\"
+
+  That is OUR code using a socket after closing it — a machine fault, and it
+  must keep the machine-failure contract. \"Socket closed\" (no \"is\") is the
+  different case: a blocking operation aborted because the channel went away,
+  which is the transient condition initialization-6dd14f9e actually hit.
+
+  Matching on message text is a known weakness — this same file refuses to do it
+  for stopping-rule recognition, on the grounds that text matching misclassifies
+  unrelated failures. It is accepted here only because a bare SocketException
+  carries no typed discriminator at all, and the alternative (typing every bare
+  SocketException environmental) would hide use-after-close bugs precisely like
+  the one above. The set is enumerated rather than substring-matched, and
+  transport-message-typing-is-enumerated-not-fuzzy pins what is in and what is
+  out."
+  #{"socket closed"
+    "connection reset"
+    "connection reset by peer"
+    "broken pipe"})
+
+(defn- cause-chain
+  "The throwable and its causes, bounded: cause chains can be self-referential."
+  [e]
+  (loop [t e acc [] depth 0]
+    (if (and t (< depth 16))
+      (recur (.getCause ^Throwable t) (conj acc t) (inc depth))
+      acc)))
+
+(defn- explicit-failure-kind
+  "First ex-data classification ANYWHERE in the cause chain. A phase that typed
+  its own failure keeps that classification even when an untyped throw wraps it,
+  and even when a transport exception sits deeper in the same chain — otherwise
+  the transport walk below could silently outrank a real typed machine failure."
+  [e]
+  (some (fn [t] (or (:failure-kind (ex-data t)) (:outcome (ex-data t))))
+        (cause-chain e)))
+
+(defn- transport-class-kind
+  "Class-based lookup, most specific first. instance? rather than name equality,
+  so a subclass of a recognised condition is covered without being enumerated."
+  [t]
+  (some (fn [[klass kind]] (when (instance? klass t) kind))
+        transport-failure-classes))
+
+(defn- socket-closure-kind
+  "Bare SocketException only, gated on an enumerated message. Subclasses are
+  already handled by class above and never reach here."
+  [t]
+  (when (and (instance? java.net.SocketException t)
+             (contains? unavailable-socket-messages
+                        (some-> (.getMessage ^Throwable t)
+                                str/trim
+                                str/lower-case)))
+    :transport-unavailable))
+
+(defn- transport-failure-kind
+  "First recognised transport condition in the cause chain, because these arrive
+  wrapped (ex-info ... cause). Returns nil for anything unrecognised: an unknown
+  exception STAYS :untyped-failure and keeps the heavy machine-failure contract.
+  This narrows the untyped bucket; it must never widen the escape hatch."
+  [e]
+  (some (fn [t] (or (transport-class-kind t) (socket-closure-kind t)))
+        (cause-chain e)))
+
 (defn- failure-kind-from [e]
-  (or (:failure-kind (ex-data e)) (:outcome (ex-data e)) :untyped-failure))
+  ;; Explicit typing wins at ANY depth; transport typing only fills the gap
+  ;; ahead of :untyped-failure.
+  (or (explicit-failure-kind e)
+      (transport-failure-kind e)
+      :untyped-failure))
 
 (defn- repair-class-for [failure-kind]
   (cond
     (#{:agent-unavailable :agent-readiness-failed :substrate-unavailable
-       :dispatch-failed :abstained :no-selection :guardrail-refusal}
+       :dispatch-failed :abstained :no-selection :guardrail-refusal
+       :transport-timeout :transport-unavailable :trigger-ineligible}
      failure-kind)
     :environmental-hold
 
@@ -1872,6 +2073,61 @@
              (recovery-job-id obligation))
     ((or (:read-job-fn opts) read-job!)
      opts (recovery-job-id obligation))))
+
+(defn unvalidated-artifact-failure
+  "Which failure, if any, a fresh author's unvalidated artifact-ref represents.
+
+  Two different faults were reported as one. :artifact-binding-mismatch says
+  Agency named a commit that repository observation could not validate. But on
+  canary-de75cee9 the ref arrived as \"/eoi_network_test.clj\" — a file path
+  scraped from author text — so Agency named NO commit, and the fault is
+  upstream in extraction rather than in the author's binding.
+
+  Extracted from run-opportunity-core! because the branch was only reachable by
+  driving the whole runner; inline, it could not be tested, which is how the
+  mislabelling survived. Returns nil when there is nothing to report."
+  [fresh-author? text-commit observed-commit]
+  (when (and fresh-author? text-commit (nil? observed-commit))
+    (if (commit-ish? text-commit)
+      {:failure-kind :artifact-binding-mismatch
+       :message "Agency claimed an author artifact that repository observation did not validate"}
+      {:failure-kind :artifact-ref-malformed
+       :artifact-ref text-commit
+       :message "Agency artifact-ref is not a commit"})))
+
+(defn recovery-artifact-failure
+  "Which failure, if any, a completed author-wait recovery snapshot represents.
+
+  The recovery path adopted a snapshot as the authored turn on the strength of
+  `(:artifact-ref snapshot)` being merely PRESENT, and then — because
+  fresh-author? is false for a recovery — took that value as the commit with no
+  repository observation and no shape check. `unvalidated-artifact-failure`
+  guards only the fresh-author side, so this was the one remaining place a
+  non-commit ref became the reviewed commit.
+
+  It is not hypothetical: canary-da9681ce's author job carried
+  :artifact-ref \"/eoi_network_test.clj\" — a path, stale from an unrelated job
+  in another repository — while its actual commit was f285e40 in futon2.
+  Recovering that job would have adopted the path.
+
+  A missing ref and a non-commit ref are different faults and must not share the
+  \"completed without an artifact\" message: one says the turn produced nothing,
+  the other says extraction produced something that is not a commit. Returns nil
+  when there is nothing to report."
+  [recovery-stage snapshot]
+  (when (and snapshot
+             (= :author-wait recovery-stage)
+             (= "done" (:state snapshot)))
+    (let [artifact-ref (:artifact-ref snapshot)]
+      (cond
+        (nil? artifact-ref)
+        {:failure-kind :recovery-artifact-missing
+         :message "Recovered author job completed without an artifact"}
+
+        (not (commit-ish? artifact-ref))
+        {:failure-kind :recovery-artifact-ref-malformed
+         :artifact-ref artifact-ref
+         :message "Recovered author job artifact-ref is not a commit"}))))
 
 (defn- run-opportunity-core!
   "Run one opportunity synchronously. Dependencies may be injected in opts for tests."
@@ -2169,9 +2425,15 @@
                                           (reset! selection-transient? true))
                                         selection))})))
             judgement0-base
-            (:judgement
-             (run-phase! opts @phase-context :selection
-                         #(selection-judge window-days)))
+            (run-phase!
+             opts @phase-context :selection
+             #(let [judgement (:judgement (selection-judge window-days))]
+                ;; An open machine stop-line has precedence over ordinary
+                ;; selection.  Do not invite an opt-in campaign to claim it
+                ;; selected an action that the runner is forbidden to enact.
+                (if stop-line
+                  judgement
+                  ((or (:judgement-transform-fn opts) identity) judgement))))
             judgement0 (cond-> judgement0-base
                          @selection-transient?
                          (assoc :readiness/selection-transient true))
@@ -2338,6 +2600,12 @@
                                        snapshot)
                 recovered-author-job
                 (cond
+                  ;; Deliberately unchanged. A commit-shape check here would be
+                  ;; unreachable in effect: recovery-artifact-failure below
+                  ;; refuses a malformed ref before this value is ever used as
+                  ;; the commit, and a non-done snapshot has already thrown
+                  ;; above. A second guard would look like defence and be tested
+                  ;; by nothing.
                   (and snapshot (= :author-wait recovery-stage)
                        (:artifact-ref snapshot))
                   snapshot
@@ -2359,22 +2627,26 @@
                                  :failure-kind :recovery-provenance-missing
                                  :failure-stage :reviewer-wait
                                  :repair-obligation successor}))))
-                _ (when (and snapshot (= :author-wait recovery-stage)
-                             (= "done" (:state snapshot))
-                             (nil? recovered-author-job))
-                    (let [error "Recovered author job completed without an artifact"
+                _ (when-let [failure (recovery-artifact-failure recovery-stage
+                                                                snapshot)]
+                    (let [error (:message failure)
+                          failure-kind (:failure-kind failure)
+                          artifact-ref (:artifact-ref failure)
                           successor
                           (supersede-recovery!
-                           :machine-failure :recovery-artifact-missing
+                           :machine-failure failure-kind
                            :author-wait error
-                           {:job-id (:job-id snapshot)
-                            :job-state (:state snapshot)})]
+                           (cond-> {:job-id (:job-id snapshot)
+                                    :job-state (:state snapshot)}
+                             artifact-ref (assoc :artifact-ref artifact-ref)))]
                       (throw
                        (ex-info error
-                                {:outcome :incomplete
-                                 :failure-kind :recovery-artifact-missing
-                                 :failure-stage :author-wait
-                                 :repair-obligation successor}))))
+                                (cond-> {:outcome :incomplete
+                                         :failure-kind failure-kind
+                                         :failure-stage :author-wait
+                                         :repair-obligation successor}
+                                  artifact-ref
+                                  (assoc :artifact-ref artifact-ref))))))
                 fresh-author? (nil? recovered-author-job)
                 author-repo (when fresh-author?
                               (target-repository opts entry mission code-state))
@@ -2476,16 +2748,18 @@
                                               author-job))
                     observed-commit (:commit artifact-binding)
                     text-commit (:artifact-ref author-job)
-                    _ (when (and fresh-author? text-commit (nil? observed-commit))
+                    _ (when-let [failure (unvalidated-artifact-failure
+                                          fresh-author? text-commit observed-commit)]
                         (throw
-                         (ex-info
-                          "Agency claimed an author artifact that repository observation did not validate"
-                          {:outcome :build-failed
-                           :failure-kind :artifact-binding-mismatch
-                           :failure-stage :author-wait
-                           :target target
-                           :author-job author-job
-                           :artifact-binding artifact-binding})))
+                         (ex-info (:message failure)
+                                  (cond-> {:outcome :build-failed
+                                           :failure-kind (:failure-kind failure)
+                                           :failure-stage :author-wait
+                                           :target target
+                                           :author-job author-job
+                                           :artifact-binding artifact-binding}
+                                    (:artifact-ref failure)
+                                    (assoc :artifact-ref (:artifact-ref failure))))))
                     commit (if fresh-author? observed-commit text-commit)
                     author-job (cond-> author-job
                                  fresh-author?
@@ -2834,18 +3108,39 @@
                 error (if (str/blank? (str (.getMessage e)))
                         "Full-loop initialization failed"
                         (.getMessage e))
+                ;; This boundary used to hardcode :machine-failure /
+                ;; :initialization-failed for EVERY throwable, while capturing
+                ;; :error-class into the backtrace and then ignoring it. A
+                ;; transport timeout landing here — the same condition that
+                ;; killed attempt-057 and attempt-058 at :selection, arriving
+                ;; slightly earlier, before an attempt can own it — was
+                ;; therefore charged to the machine, demanding a repair commit
+                ;; and an independent review for a network fault.
+                ;; Precedence is identical to failure-kind-from, deliberately:
+                ;; explicit ex-data typing at ANY depth wins, transport typing
+                ;; only fills the gap, and anything unrecognised falls to
+                ;; :initialization-failed and keeps the machine-failure
+                ;; contract. Consulting transport FIRST (as this did before)
+                ;; was a fail-open: an ex-info{:failure-kind :build-failed}
+                ;; wrapping any transport cause had that cause found by the
+                ;; chain walk and was downgraded to :environmental-hold, so a
+                ;; real typed machine failure escaped its own contract.
+                failure-kind (or (explicit-failure-kind e)
+                                 (transport-failure-kind e)
+                                 :initialization-failed)
+                repair-class (repair-class-for failure-kind)
                 finding
                 ((or (:repair-system-record-fn raw-opts)
                      repair/record-system-failure!)
                  {:attempt-id attempt-id
-                  :repair-class :machine-failure
+                  :repair-class repair-class
                   :failure-stage :initialization
                   :outcome :incomplete
-                  :failure-kind :initialization-failed
+                  :failure-kind failure-kind
                   :error error
                   :failure-data edata
                   :backtrace {:error-class (.getName (class e))}
-                  :discharge-contract (discharge-contract :machine-failure)})
+                  :discharge-contract (discharge-contract repair-class)})
                 brief-ref
                 ((or (:queue-fn raw-opts) brief/queue-item!)
                  {:attempt-id attempt-id
@@ -2856,7 +3151,7 @@
                   :reviewer (or (:reviewer raw-opts) default-reviewer)
                   :achievement {:tier :none
                                 :summary "No achievement; initialization stopped the line"}
-                  :failure {:kind :initialization-failed
+                  :failure {:kind failure-kind
                             :stage :initialization
                             :error error
                             :repair-id (:repair/id finding)
@@ -2866,7 +3161,7 @@
              :checkpoints {}
              :morning-brief-ref brief-ref
              :data {:repair-obligation finding
-                    :failure-kind :initialization-failed
+                    :failure-kind failure-kind
                     :failure-stage :initialization
                     :error error
                     :error-data edata}}))))
