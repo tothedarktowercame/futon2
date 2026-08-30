@@ -33,7 +33,9 @@
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [futon2.aif.preferences :as pref]
-            [futon2.aif.substrate :as substrate]))
+            [futon2.aif.substrate :as substrate])
+  (:import [java.nio.file Files]
+           [java.security MessageDigest]))
 
 ;; 33 open sorries share this templated :if — the boilerplate the audit found
 ;; (143 open → 110 clean). Kept identical to c_vector.bb/BOILERPLATE-IF.
@@ -117,35 +119,54 @@
 (def ^:private cap-meta?
   #{"scope/capability/capabilities" "scope/capability/capability"})
 
+(declare corpus-signature-of)
+
+(defn- with-layer-provenance
+  [entry layer-id author basis]
+  (assoc entry
+         :layer/id layer-id
+         :layer/author author
+         :layer/basis basis))
+
 (defn entries-from-corpus
   "Pure: derive the stated-channel C-entries from already-fetched corpus maps.
    Split out so it is testable without the store (exit-1/3). `caps`/`sorries`
    are the `:entities` vectors from :7071. A cap not yet attested → a preferred
    `:attested` outcome; a clean open sorry → a preferred `:closed` outcome."
-  [caps sorries]
-  (let [unmet   (->> caps
-                     (remove #(get-in % [:props :capability/attested?]))
-                     (remove #(cap-meta? (:id %))))
-        cap-es  (for [c unmet
-                      :let [p (:props c) st (:capability/status p)
-                            ref (or (:capability/id p) (:name c))]]
-                  (c-entry {:flavour :stated
-                            :outcome-ref {:kind :capability :id ref :metric :attested}
-                            :preferred {:op :becomes :value :attested}
-                            :weight {:value (if (= :held st) 0.6 0.4) :basis :star-map-status}
-                            :provenance {:source ":7071/capability" :id (:capability/id p)
-                                         :substrate-id (:id c) :status st}}))
-        open    (filter #(= "open" (get-in % [:props :sorry/status])) sorries)
-        clean   (remove #(str/starts-with? (str (get-in % [:props :sorry/if]))
-                                           boilerplate-if)
-                        open)
-        sorry-es (for [s clean :let [p (:props s)]]
-                   (c-entry {:flavour :stated
-                             :outcome-ref {:kind :sorry :id (:sorry/id p) :metric :closed}
-                             :preferred {:op :becomes :value :closed}
-                             :provenance {:source ":7071/sorry" :id (:sorry/id p)
-                                          :substrate-id (:id s) :title (:sorry/title p)}}))]
-    (vec (concat cap-es sorry-es))))
+  ([caps sorries]
+   (entries-from-corpus caps sorries (corpus-signature-of caps sorries)))
+  ([caps sorries signature]
+   (let [layer    (fn [entry]
+                    (with-layer-provenance
+                      entry
+                      :live-goal-outcomes
+                      "futon2.aif.c-vector/entries-from-corpus, authored by Joseph Corneli"
+                      signature))
+         unmet   (->> caps
+                      (remove #(get-in % [:props :capability/attested?]))
+                      (remove #(cap-meta? (:id %))))
+         cap-es  (for [c unmet
+                       :let [p (:props c) st (:capability/status p)
+                             ref (or (:capability/id p) (:name c))]]
+                   (layer
+                     (c-entry {:flavour :stated
+                               :outcome-ref {:kind :capability :id ref :metric :attested}
+                               :preferred {:op :becomes :value :attested}
+                               :weight {:value (if (= :held st) 0.6 0.4) :basis :star-map-status}
+                               :provenance {:source ":7071/capability" :id (:capability/id p)
+                                            :substrate-id (:id c) :status st}})))
+         open    (filter #(= "open" (get-in % [:props :sorry/status])) sorries)
+         clean   (remove #(str/starts-with? (str (get-in % [:props :sorry/if]))
+                                            boilerplate-if)
+                         open)
+         sorry-es (for [s clean :let [p (:props s)]]
+                    (layer
+                      (c-entry {:flavour :stated
+                                :outcome-ref {:kind :sorry :id (:sorry/id p) :metric :closed}
+                                :preferred {:op :becomes :value :closed}
+                                :provenance {:source ":7071/sorry" :id (:sorry/id p)
+                                             :substrate-id (:id s) :title (:sorry/title p)}})))]
+     (vec (concat cap-es sorry-es)))))
 
 (defn- corpus-signature-of
   "Hash over (entity-id, satisfaction-state) so a corpus change — a sorry
@@ -162,9 +183,10 @@
    the entries and the freshness signature."
   []
   (let [caps    (fetch-entities "capability")
-        sorries (fetch-entities "sorry")]
-    {:entries   (entries-from-corpus caps sorries)
-     :signature (corpus-signature-of caps sorries)
+        sorries (fetch-entities "sorry")
+        signature (corpus-signature-of caps sorries)]
+    {:entries   (entries-from-corpus caps sorries signature)
+     :signature signature
      :n-source  {:caps (count caps) :sorries (count sorries)}}))
 
 ;; ---------------------------------------------------------------------------
@@ -200,6 +222,12 @@
 (def ^:private overlay-files
   ["c-entries.mess.edn" "c-entries.incomplete.edn" "c-entries.yingvoice.edn"])
 
+(defn- sha256-file
+  [f]
+  (let [digest (.digest (MessageDigest/getInstance "SHA-256")
+                        (Files/readAllBytes (.toPath f)))]
+    (apply str (map #(format "%02x" (bit-and (int %) 0xff)) digest))))
+
 (defn read-overlay-channels
   "Read the non-stated channels from the c_vector.bb overlays. Returns the
    merged entry vector ([] if absent/unreadable — the belly degrades to the
@@ -208,7 +236,13 @@
   (vec (mapcat (fn [fname]
                  (let [f (io/file overlay-dir fname)]
                    (when (.exists f)
-                     (try (:entries (edn/read-string (slurp f))) (catch Exception _ nil)))))
+                     (try
+                       (let [basis (sha256-file f)]
+                         (mapv #(with-layer-provenance
+                                  % :c-vector-overlays
+                                  "futon6/scripts/c_vector.bb" basis)
+                               (:entries (edn/read-string (slurp f)))))
+                       (catch Exception _ nil)))))
                overlay-files)))
 
 (defn refresh!
@@ -637,4 +671,5 @@
    channels live without duplicating their producers here."
   [base extra]
   (let [seen (set (map :outcome-ref base))]
+    ;; Duplicate extra/overlay entries are silently dropped; the base layer wins.
     (into (vec base) (remove #(seen (:outcome-ref %)) extra))))
