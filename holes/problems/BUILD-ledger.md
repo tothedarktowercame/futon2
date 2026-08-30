@@ -1682,7 +1682,7 @@ attention went. That is the mirror of this morning's failure, where I ran every 
 what the builder volunteered between them. **A checklist fails at both ends: what it does not list, and
 what it lists but looks clerical.** The ledger has both instances now, an afternoon apart.
 
-| 4 (R16) | R16-D1 (discovery, no code) | codex-2 | `invoke-1788108743427-4422-b8f1eda3` | `park-403bb305` | 16:52Z | running | new lane; opened on the cadence report; no Lean (R16 has no declarations yet) | — |
+| 4 (R16) | R16-D1 (discovery, no code) | codex-2 | `invoke-1788108743427-4422-b8f1eda3` | `park-403bb305` | 16:52Z | **closed** | `b1830f5`, 43 lines; 3 pointers opened; pin matches; **selection census re-run here: 96 `:open-mission` / 696 other, inside-map 0** — exact match; refused my "over the 792" framing | pending |
 
 ### R16 opened — and my "unlocks 2" was a readiness measure, not a reach measure
 
@@ -1777,3 +1777,32 @@ complaint. That is the third distinct shape of "an instrument that did not run" 
 
 **R16-D1 was already dispatched** (codex-2, `invoke-1788108743427`) before his "whenever you dispatch it"
 was written — bells crossing in the harmless direction. Still running.
+| 3 (R8) | owner: EraSummary ratified (facts + tallies; mean and uniformity derived) | claude-13 → claude-20 → claude-15 | — | — | 16:56Z | done | mathlib4 2f68318a+f910a405 | claude-15 16:56Z: a mean is not a fact (population carried); an evidence type must be able to represent the state in which the law is false; R8-D4 packet rewritten from the amended declarations — codex-12 told the answer |
+
+### R16-D1 closed — it refused my framing while answering the question
+
+codex-2 delivered in 43 lines. Verified here rather than accepted: `actuator_a3.clj:372` is
+`reviewed-candidate-cleans` and I counted its entries — **exactly four**; the pin matches `c9add16a…`;
+the reader loop with `:default` is stated with its command. I re-ran the selection census independently:
+**792 forms, 96 `:open-mission`, 696 other, inside-map 0**, targets `M-canon-fingerprint-store` 44,
+`M-capability-star-map` 29, `M-emacs-cursor-peripheral` 21, `M-futonzero-mvp` 2 — exact match.
+
+**The refusal is against my packet and is correct.** I registered *"selected-vs-in-map over the 792
+forms: expected outside, all"*. Only **96** of the 792 select an open mission at all. So the expectation
+holds for the 96 and my "over the 792" framing was false — a denominator error in a registered
+expectation, on the same day I twice caught denominators in other people's work and once in the R16 edge
+count. That is now four denominator errors from me in one afternoon, which is a pattern rather than an
+accident: **I write counts before I know which population the artefact actually has.**
+
+**The open question came back as neither answer I offered.** `:enacted nil` **remains a nil realized
+score** — not zero, not a typed absence. So R16 does not emit a number for an act that did not happen,
+which is what I was worried about, and it also does not emit the typed absence the record requires: the
+absence is *untyped*. Smaller than feared, real, and precisely the sort of thing that would have been
+confirmed rather than measured had I stated it as a hypothesis instead of an open question.
+
+**112 forms carry act-gate verdicts, 165 verdicts have both numeric legs** — the gate is not dark. And the
+observation-channel negative is properly hedged: *"no explicit wiring reads enactment witnesses; indirect
+flow through generic scan fields remains untested"* — an instrument naming its own limit.
+
+**CML-D2 for `R16→R2` and `R9→R16` is now dispatchable** — the build's first two edge specifications,
+after a day at 0 / 21.
