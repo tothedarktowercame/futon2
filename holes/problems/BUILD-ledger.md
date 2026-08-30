@@ -633,7 +633,7 @@ protocol exists to undo, and reader attention is the build's real bottleneck —
 as soon as R9-D2's read returns. R2-D2 is third, and still needs rewriting against `r2WellFormed` /
 `r2ContractCensus`.
 
-| 2 (R2) | R2-D2 (build, re-dispatch) | codex-1 | `invoke-1788104980439-4336-12173cfd` | `park-97da4143` | 15:49Z | running | read by claude-13 (2 rounds); **signature diff CLEAN** vs `Holes.lean:262-277`; continues codex-1's own preserved uncommitted files | — |
+| 2 (R2) | R2-D2 (build, re-dispatch) | codex-1 | `invoke-1788104980439-4336-12173cfd` | `park-97da4143` | 15:49Z | **REFUSED** (job API says `failed`) | codex-1 refused on the signature: `r2ContractCensus` is FALSE as stated; verified here; signature proposal belled to owner | — |
 | 3 (R8) | R8-D2 packet read (charter 6b, 2nd) | claude-13 | `invoke-1788104984233-4337-a785b4b0` | `park-12524473` | 15:49Z | reading | rewritten vs `r8Census`/`r8EraBoundary`; **signature diff CLEAN** vs `Holes.lean:278-320` | — |
 
 ### R9-D2 refused by claude-13 — and the blocker is in the Lean, not the packet
@@ -662,3 +662,32 @@ implication is vacuously true. So my packet's instruction ("include a deliberate
 show the property fails") asks for something the signature cannot express, and the hole would move by
 `simp` while the Clojure test demonstrated only that the port is faithful. Under charter clause 3 that is
 a facade close. **Proposed to the owner as hole text (charter 6, first use).** R9-D2 held until ratified.
+
+### R2-D2 refused by the BUILDER, on the Lean signature — and it is right
+
+codex-1 changed no files and refused: **`r2ContractCensus` is false as stated.** Verified here by reading
+the declaration (`Holes.lean:271-276`):
+
+    ∀ … (illFormed : Nat), (corpus.filter (fun tick => !wellFormed? tick)).length = illFormed
+
+`illFormed` is **universally quantified and then asserted equal to a fixed quantity**. For any corpus the
+left side is one particular natural `n`, and the statement claims `n = illFormed` for *every* natural —
+false as soon as `illFormed ≠ n`. codex-1's counterexample (`Channel := Empty`, empty corpus,
+`illFormed := 1` ⇒ `0 = 1`) is valid, and the defect is more general than the counterexample: the
+declaration is false for **every** instantiation, not only degenerate ones. The prose promised
+`illFormed = 2`; the type never says so. Its proposed shape — make the census a computed `Nat` and state
+a concrete fixture theorem against it — is the right one, and is belled to the owner as a signature
+proposal (charter clause 4).
+
+**This is the second Lean defect of the same family in one hour**, and worth naming as a class: in
+`r9VerdictSound` a hypothesis (`_sound`) is placed so the interesting case can never reach the
+conclusion; in `r2ContractCensus` a quantifier is placed so the conclusion asserts far more than the
+prose. **Both are statements that do not say what their docstring says**, and neither is detectable by
+reading the docstring — only by asking "what would falsify this?" Charter clause 2's mechanical diff
+catches *drift between packet and file*; it does not catch *a declaration that is wrong*. What caught
+both was a reader and a builder each asked to attack the interface rather than implement it.
+
+**Process note: a refusal is reported by the job API as `state: failed`.** The lane is not broken and the
+builder did exactly what the charter asks; nothing in the API distinguishes "refused on principle" from
+"crashed". Anyone reading job states without opening the result would mis-read this lane as an
+infrastructure failure. Worth a field, and worth remembering when triaging.
