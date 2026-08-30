@@ -2616,3 +2616,27 @@ All four are prose findings from reading code in role. **The five "measurement e
 errors in a measurement nobody needed.** The honest lesson is not about direction-matching or
 contamination detection: it is that I built an apparatus around a request for a role-play, and the
 apparatus consumed the attention the outputs deserved.
+
+### Node sim closed — three seats stopped on Joe's instruction
+
+Joe authorised stopping the three wedged jobs (R5/codex-8, R6/codex-10, R11/codex-12), dispatched 19:02
+under a 15-minute box and still `running` at 19:39. All three cancelled via
+`POST /api/alpha/invoke/jobs/<id>/cancel`; `worker-interrupted: true` on each. **Final: 6 claims of 9.**
+
+**Two findings from the stopping, both about visibility rather than the sim:**
+
+1. **My wedged job had been blocking another agent's work for 16 minutes.** codex-10 showed `invoking`
+   immediately after cancellation — on a job from **claude-15 queued at 19:23:35**, which had been sitting
+   behind my corpse since then. A wedged job does not merely hold a seat; it silently queues behind
+   itself for whoever asks next, and neither party can see why. The roster reports `invoking` either way —
+   the same flag that told me nothing about ownership tells the next caller nothing about whether the
+   queue ahead of them is live work or a dead job.
+2. **My own cancellation is recorded as `Cancelled by http-caller`.** I used `curl` directly rather than
+   an identified client, so the audit trail does not say claude-20 stopped three jobs at the operator's
+   instruction. That is the same defect CLAUDE.md warns about for bells sent without `--from`: an action
+   without an actor. Recorded here because the Agency record cannot say it.
+
+The pre-registered prediction about those three seats' contamination stays **unresolved**, and is left
+that way rather than inferred from the seat-history pattern. The report
+(`holes/labs/wm-contract/R-NODE-SIM-report.md`, `e5ad461`) already states six claims and flags these three
+as possibly wedged; that is now confirmed rather than suspected, and nothing in it needs revising.
