@@ -56,7 +56,7 @@ inductive Module
 | R17 | learning | structure learning by BMR | theory-defined formulas (ΔF, Bayes factor) | glossary |
 | R20 | learning | interoceptive tripwires | stack-defined; watches the coding runner, not this loop | v1 §0 |
 | R18 | (off figure) | faithfulness meta-criterion | the apex's ancestor, inside the triangle | v2 §0.8 |
-| R19 | (off figure) | prior preferences C | **undefined for the WM** | R5 worksheet |
+| R19 | (off figure) | prior preferences C | **open by design — a parameter of the machine** (Joe 2026-08-30; `P-R19-preferences-open.md`): layers with author + basis, folded by a recorded rule; today three unnamed sources + the habit prior | R5 worksheet; P-R19 |
 
 Gate-0 count: theory-defined nouns — R3's formula, R7, R8-F, R5's formulas, R9,
 R17's formulas; borrowed or undefined — R6's space, R14's γ, R19, every

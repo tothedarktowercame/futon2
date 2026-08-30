@@ -1,0 +1,80 @@
+# P-R19-preferences-open — C is a parameter of the machine, not a constant in it
+
+holder: claude-15 · parent: the spine (R5 risk = KL against C) · status: PROPOSED by Joe 2026-08-30 19:20Z, not yet ratified as Lean
+
+## Problem (Joe, verbatim in spirit)
+"We want to deploy this in multiple settings with different people with different interests — mathematics, semiotics —
+or close it over a company: substitute the company in as a variable unit and run the system there. So we need to write
+down what this thing IS without any specific preferences set into it. Preferences get layered in, like an agentic
+harness layers a system prompt — but there's a process for doing that; they're not just dumped in. It can get its
+preferences from a .edn file, but **who wrote that file?** Better to leave the C vector as an open system that could be
+determined in various ways."
+
+## What C is today — three sources, three authors, no declared composition
+| layer | where | author | provenance recorded? |
+|---|---|---|---|
+| static floor: channel ranges | `futon2.aif.preferences/preferences` | hand-set in code | no — the code is the author |
+| goal-outcome half, "kept LIVE" | `futon2.aif.c_vector` reading :7071 | derived from the goal/hole corpus, freshness-guarded | partly (corpus signature) |
+| mess / incompleteness / 應-voice overlays | `futon6/data/c-vector/c-entries.*.edn` via `c_vector.bb` (last run 06-26) | a script over `mission-wholeness.edn` | yes, per entry (`:provenance {:source …}`) — but the file's own author/date is not in the reader |
+| the habit prior (counts of past selections) | `wm-trace` `:habit-prior-state` | learned from the operator's choices | no — enters R14 as g, never named as a preference |
+
+So the machine already has layered preferences with mixed authorship, folded by whichever code path runs; the layering is
+*implicit* and the operator is present as C without that being written anywhere (P-supersede-stack-logic-model:
+the old model declared the operator's workstreams as C by hand; the new one learns them as habit counts; neither says so).
+Lean: `Holes.lean:66` refuses C as "an implementation, not a law … preferences declared per PRAGMATIC vertex only" —
+correct as far as it goes, and consistent with this record: the *machine* takes C; it does not contain one.
+
+## The principle
+1. **The machine is polymorphic in C.** Its definition (the spine: observation → belief → F → G → select → act) is
+   stated for an arbitrary C of the right type. No preference value appears in the definition.
+2. **A preference is a layer with an author.** Every source of preference is typed by *how it was determined*, and
+   every layer carries provenance: who/what produced it, from what, when, and at what basis (`I_data_current`).
+3. **Composition is a process, not a dump.** C in a running instance is an ordered fold of layers under a declared
+   composition rule (override / additive / bounded), and the fold is itself recorded — the harness analogy: each layer
+   is a system-prompt stratum, and the stack is inspectable.
+4. **The unit is substitutable.** A deployment = the machine + a chosen layer stack. Person, company, domain
+   (mathematics, semiotics, APM proofs) are different stacks over the same machine. "Close over the operator" is then
+   one *kind* of layer (learned-from-operator), not the machine's identity.
+
+## Proposed Lean declarations (for the owner to ratify into `Holes.lean`; tech lead may propose text)
+```lean
+/-- How a preference layer was determined. Open: new constructors are expected. -/
+inductive PreferenceSource
+  | operatorDeclared     -- written by a person, on the record
+  | learnedFromOperator  -- habit counts, selections folded over time
+  | corpusDerived        -- computed from a live store at a basis
+  | delegateSupplied     -- a company / a domain's own harness supplied it
+  | scriptProduced       -- e.g. c_vector.bb over a named input
+
+structure PreferenceLayer (Outcome : Type) where
+  source     : PreferenceSource
+  author     : String            -- who or what; never empty
+  basis      : String            -- store tx / file sha / date — the I_data_current pin
+  prefers    : Outcome → ℝ        -- ln P(o) up to a constant, on this layer alone
+  compose    : ℝ → ℝ → ℝ          -- how this layer folds onto the stack below it
+
+/-- C for one deployment is the fold of an ordered layer stack; the machine never holds a C of its own. -/
+def foldC (base : Outcome → ℝ) (layers : List (PreferenceLayer Outcome)) : Outcome → ℝ :=
+  layers.foldl (fun acc l o => l.compose (acc o) (l.prefers o)) base
+
+-- The spine is stated over an arbitrary C:
+-- def expectedFreeEnergy (C : Outcome → ℝ) (π : Policy) : ℝ := risk C π + ambiguity π
+```
+Holes to add (tagged owner/holder/evidence/falsifier): `preferenceStackRecorded` (every running instance's C is a fold
+of layers each with non-empty author and basis; falsifier: a C value in a trace with no layer record), and
+`machineHasNoC` (no preference value is free in the spine's definition; falsifier: a constant of Outcome→ℝ in the spine
+that is not a parameter).
+
+## Facades this record refuses
+- "C is in `c-entries.edn`": a file is a *layer*; its author and date are part of C or it is not admissible.
+- "The habit prior is just g": it is a learned preference layer and must be declared as one, or the operator is in the
+  machine unrecorded.
+- "Define C now so R5 can close": R5's risk term is stated over a parameter; it closes *polymorphically*. Choosing a C
+  is a deployment act, not a definition act.
+
+## What this changes in the build
+- PREREG §1 R19: "undefined for the WM" → **open by design: a parameter**. R5's `risk` is stated over `C : Outcome → ℝ`.
+- The two-π question (`cascadeGrainPi`) is unaffected; the "prior preferences" half of the spine no longer waits on a
+  value.
+- A new small lane, when Joe says so: R19-D1 — declare the four existing sources as layers with author + basis, and
+  make `c_vector.clj`'s fold the recorded `foldC`. No new preferences; just the ones already there, named.
