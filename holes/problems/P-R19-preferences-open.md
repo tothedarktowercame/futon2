@@ -176,3 +176,13 @@ the contract lint judging `witnessed`. The check reads the reference record at r
 builder corrections at the gate, both accepted: the registry vocabulary is `:passed` (my packet said `:pass`), and
 the builder refused its own first implementation for needing a manual classpath, then made the bare run
 self-contained. Lane remaining: the D2a′ gate (c_vector entry provenance, codex-10).
+
+## LANE CLOSED (owner, 2026-08-31 02:20Z)
+D2a′ gated (`5ba0c11`): every C entry names its layer, author, and a basis computed at read (live corpus signature;
+overlay sha256s matching the pins). The full arc, every step gated: Joe's principle → the tetrahedron amendment →
+the D1 stack record with its declared-purpose-nil finding and two later owner amendments (fifth source;
+counterfactual-only) → the Lean types with the stack as a type → the emission (`compute-efe` names its C) → entry
+provenance → the executable witness binding the hole `witnessed`. Open inheritances, recorded not lost: R19-D1's
+`:declared-purpose nil` ("this stack is what accumulated") is the standing question for Joe's harness-layering
+design; promoting the habit prior from counterfactual to selector is a deployment decision under `PreferenceStack`;
+the four remaining preference sources' witnesses can follow D2b's template when wanted.
