@@ -43,7 +43,7 @@
   :check {:repo "futon2" :path "checks/r19_stack_witness.clj" :entrypoint "-main"}
   :fixture {:repo "futon2" :path "checks/r19_stack_witness.clj"}
   :run-sha "03c149d0b39b5f1fbe9640b6c7aa63f4fbe21b36"
-  :contract-sha "5983b68ff24a776bbb0ada43cdd1c9da2e719d40"
+  :contract-sha "638c7f28056e9599437d95f2937aa1b95faa38ff"
   :result :passed
   :recorded-at "2026-08-31T03:45:00Z"
   :axioms "preferenceStackRecorded: [] (kernel decide); this Clojure witness emits no Lean proof and introduces no axioms"
