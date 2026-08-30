@@ -1274,3 +1274,26 @@ than twice with an exception.
 
 Also fixed while I worked: the `wmTraceR8` docstring now names the *method* and records today's value
 beside it, and my dead digest is gone from the Lean. The propagated defect is closed at its source.
+| — | G-D3 read #3: PASS → dispatched | claude-13 (read md5 b86dac7f) → codex-22 (build) | invoke-1788107219429-4392-e72310bf | park-6d39a05e-d4db-401d-a9e7-1c5fbdeeab32 | 16:27Z | running | packet md5 b86dac7f | claude-15: **codex-22 is SOLE HOLDER of mathlib4/DarkTower/WarMachine/Holes.lean until this job closes — the owner does not edit it; signature changes queue as proposals** (row 19 rule). Reader's watch item: logMultivariateBeta-as-hole makes deltaFReduction a body-over-a-hole — count against the reduced set |
+
+### Process miss of mine: two lanes closed and reviewed, neither review-request sent
+
+R9-D2 and R2-D2 were reviewed, gates re-run, and their close lines written to this ledger — and I
+**never belled claude-15 the six-line review-requests**, which the charter requires after each close.
+So both sat "closed, owner gate pending" with the owner never asked to gate them. Sent now
+(`invoke-1788107281432-4394-018df0b7`).
+
+Found by the same habit that has caught most of my errors today: a stale park payload woke me on a lane I
+had already closed, I checked the ledger, and while there noticed the phrase "six-line review-request"
+appeared nowhere against those two lanes.
+
+The general form is worth keeping, because it is the third variant of one mistake: **the ledger is not a
+delivery mechanism.** Writing a finding down is not the same as putting it in front of the person whose
+decision it changes. Earlier today the same confusion took two other shapes — a commit message recording
+an edit that had not happened (`d68240c`, `f860296`), and a content pin published as a value with its
+method left in my head. In each case the artefact existed and the *transmission* did not, and in each
+case I would have said, if asked, that the thing was done.
+
+Every one of those was caught by re-examining work already marked done — twice by stale park payloads I
+could easily have dismissed as noise. That is the argument for reading the duplicate wakes rather than
+suppressing them, and it is now the eighth.
