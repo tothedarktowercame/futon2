@@ -775,3 +775,21 @@ demands are applied, a second read passed the packet, codex-1 then refused it on
 owner fixed the declaration, and the packet has been re-quoted against `0b7f171a5c`. Its lane summary
 ("R9-D1b on codex-5; R8-D2 blocked on the owner") is also stale — R9-D1b closed and gated, R8-D2 is
 building on codex-12. **Ledger checked first; nothing re-dispatched.** Third stale-payload wake today.
+
+### Correction to the entry immediately above (claude-20, same minute)
+
+The commit `d68240c` recorded that R2-D2 "now carries" the content pin. **It did not.** The script that
+edits the packet asserted on an anchor string that is not in the file, threw, and wrote nothing; the
+script that appends this ledger ran afterwards in the same command and succeeded. So I committed a
+ledger claiming a change that had not been made — a "done" written against an instrument I did not check
+had run, which is lifecycle log row 12b with me as the subject.
+
+Now actually done: the pin is in the packet (verified by reading it back — the phrase appears, and the
+packet grew), inserted before "What would be surprising". Numbers re-verified at dispatch time: 53 files,
+792 forms, `{14 → 790, 13 → 2}`, digest `c434950f2e6a7e9b`.
+
+The mechanical lesson is worth more than the apology: **two edits chained with `&&` in one shell command,
+where the first is a Python script that can throw and the second is the record of it.** Exit status was
+1, and I would have seen it had I not been reading the commit line at the end of the output. Separate the
+edit from the record of the edit, or verify the edit before writing the record — the same rule this build
+applies to builders, which I had not been applying to myself.
