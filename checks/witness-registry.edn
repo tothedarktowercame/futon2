@@ -12,4 +12,12 @@
   :run-sha "636496449066aed88c00e99492bd351cef0f0821"
   :contract-sha "32b929692533cf0d6294fbb7a5937f9199c1552c"
   :result :passed
-  :recorded-at "2026-08-30T16:23:00Z"}]
+  :recorded-at "2026-08-30T16:23:00Z"}
+ {:witnesses ["r9WmVerdictsSound" "r9WmPerRowDeclarations" "r9TwoRunCensus" "r9VerdictConsultsChecker"]
+  :check {:repo "futon2" :path "checks/r9_independence.clj" :entrypoint "-main"}
+  :fixture {:repo "futon2" :path "holes/labs/wm-contract/R9-D2-report.edn"}
+  :run-sha "732f4d748f08154457d93916d96ab0be0b7f760c"
+  :contract-sha "1b09974aed1ce66dad0b728a6acc64c7b864b31e"
+  :result :passed
+  :recorded-at "2026-08-30T16:45:00Z"
+  :note "R9-D2 (codex-8, 732f4d7): R9-D2-report.lean elaborates with 0 errors / 0 sorries — the four holes discharged by decide over the transcribed VerdictTables; bound by claude-15 at the owner gate"}]
