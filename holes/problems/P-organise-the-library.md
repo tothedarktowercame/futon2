@@ -550,3 +550,14 @@ which **never existed** (no commit in futon5a; nowhere under `~/code`), under `w
 always been silently empty. Lifecycle row 26. Fixes queued: (1) make those reads fail closed / emit `:missing`;
 (2) decide whether the stack-logic model is a thing to build or a dead branch to delete (Joe); (3) mana timer;
 (4) mark2 endpoint or refresh-on-read with basis pin. The bge_ line in my packet was wrong and corrected by the builder.
+
+**AUD-D2 GATED 18:58Z (`082da13` + owner fix `f3e928f`):** `checks/absent_is_loud_lint.clj` is the instrument for
+`I_absent_is_loud`. Bare run: exit 1, 56 helpers (38 loud / 17 silent / 1 declared-optional), 45 silent call sites,
+**7 silent+absent-now** — every one a read of a file planned 05-03 and never produced (`stack-logic-model.edn`,
+`alignment.edn`, and a third, `jsdq-terminal-vocabulary.edn`, in `joe_hud.clj:429`). Owner fix at the gate: a helper
+cannot declare itself optional by being *named* `safe-…` — only a docstring that states the absence result counts
+(the invariant's "the declaration is what the lint reads"); `safe-slurp-json` reclassified silent. My own 7a
+instance: read a piped `$?` as the lint's exit code. AUD-D3 dispatched: delete the three dead reads citing
+`P-supersede-stack-logic-model.md`; make `read-edn-file` return `{:missing path}`/`{:unreadable …}`; call sites
+fail closed or render the marker. Remaining from AUD-D1: mana timer; mark2 endpoint (`safe-slurp-json` reads its
+05-17 cache, present-now so not a lint violation — that is `I_data_current`'s case, not this one).
