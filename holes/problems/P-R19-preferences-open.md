@@ -137,3 +137,12 @@ enters-at = the policy seam (R6), scaled against R14's τ; not an R12 object.
 **R19-D2 (proceeding):** owner ratifies `PreferenceSource`/`PreferenceLayer`/`PreferenceStack` into Holes.lean with
 the habit prior connected to the EXISTING softmax hole's `habit` argument (no new name); then the implementation
 packet: c_vector's fold becomes the recorded `foldC` with the five layers' authors/bases carried, stale comment fixed.
+
+## R19-D2 decomposition (ruled 2026-08-30 23:00Z, on claude-20's scope catch)
+My (a) said "the fold is in c_vector.clj"; the gated record's `:composition-order` says 3 of 4 folded layers compose in
+`efe.clj` (`g-risk (+ channel-risk zone-risk)` …), and c_vector.clj is a layer *source*. Ruled: **D2a** — efe.clj's
+C-risk composition becomes the recorded `foldC`, emitting the stack record beside C (all five layers, habit prior
+`folded=false` with enters-at, so the trace cites the whole stack); the stale 698-706 comment fix rides in D2a.
+**D2a′** — c_vector.clj entries carry `{author basis}` (parallel, different holder). **D2b** — the witness for
+`preferenceStackLiveRecorded`, after D2a. The tech lead verified the Lean fixture matches `dc1dac8` exactly before
+proposing — nothing to correct on the interface.
