@@ -531,3 +531,16 @@ rule; it exposes them as arguments. It does not claim the twelfth support edge;
 it records it unresolved. It is a document until its Lean port compiles and its
 `enforcersInstalled` proof fails in the expected places — which is the first
 test of it, and it is expected to fail.
+
+## 2f. Route-measured edges — the tick's own testimony (WM-RUN2, 2026-08-31; for the CML lane)
+One instrumented tick (`run_tick_once`, receipt 2026-08-30, reproduced by the owner at basis 192,761): 9 hops,
+3 on drawn edges (R7→R3 approx, R5→R6, R8→R5 region — see the receipt), **6 unmapped — proposed amendments**:
+- `R20→R12`, `R12→R2` (the scan preamble: interoception and calibration feed observation — undrawn);
+- `R2→R7` (**triangulated**: also among the node-sim's confirmed derived-but-undrawn edges);
+- `R3→R8` (belief feeds F directly; the node-sim proposed the reverse R8→R3 for the prior — both may be real, one
+  per direction of the tick);
+- `R6→R14` (selection consults the temperature/seam — related to the derived R14 coupling);
+- `R14→TRACE` (the trace write: `I_evidence_consumed`'s consumer edge, which Figure 4 does not draw at all — the
+  diagram has no trace/ledger node, which §0.11 predicts is exactly the kind of omission that hides exhaust).
+`wmRunConformsToWiring` remains honestly unwitnessed until the wiring and the route agree — by amending the map,
+the code, or both; that reconciliation is the CML lane's next concrete input.
