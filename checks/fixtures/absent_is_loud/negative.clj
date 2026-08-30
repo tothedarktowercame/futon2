@@ -57,3 +57,29 @@
 (def negative-marker-threaded
   (threading-caller
    "/home/joe/code/futon2/checks/fixtures/absent_is_loud/missing-marker.edn"))
+
+(def ^:dynamic *input-status* (atom []))
+
+(defn record-marker! [result]
+  (swap! *input-status*
+         (fn [issues]
+           (cond
+             (:missing result) (conj issues {:kind :missing})
+             (:unreadable result) (conj issues {:kind :unreadable})
+             :else issues))))
+
+(defn recording-marker-read [path]
+  (let [result (if (.exists (io/file path))
+                 (edn/read-string (slurp path))
+                 {:missing path})]
+    (record-marker! result)
+    result))
+
+(defn recorded-swallowing-caller [path]
+  (let [result (recording-marker-read path)]
+    (when-not (marker-input? result)
+      result)))
+
+(def negative-recorded-then-substituted
+  (recorded-swallowing-caller
+   "/home/joe/code/futon2/checks/fixtures/absent_is_loud/recorded-missing-marker.edn"))

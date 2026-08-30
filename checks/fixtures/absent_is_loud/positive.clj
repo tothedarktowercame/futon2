@@ -59,3 +59,18 @@
 (def positive-marker-swallowed
   (swallowing-caller
    "/home/joe/code/futon2/checks/fixtures/absent_is_loud/missing-marker.edn"))
+
+(defn another-loud-marker-read [path]
+  (if (.exists (io/file path))
+    (edn/read-string (slurp path))
+    {:unreadable path}))
+
+(defn another-swallowing-caller [path]
+  (let [result (another-loud-marker-read path)]
+    (if (marker-input? result)
+      nil
+      result)))
+
+(def positive-another-marker-swallowed
+  (another-swallowing-caller
+   "/home/joe/code/futon2/checks/fixtures/absent_is_loud/another-missing-marker.edn"))

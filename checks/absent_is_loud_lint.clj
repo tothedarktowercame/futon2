@@ -348,6 +348,33 @@
                  (tree-seq coll? seq (:body arity))))
          (:arities helper))))
 
+(defn marker-recorder?
+  "A recorder makes marker loss observable by swapping marker facts into an
+   accumulator.  This is deliberately structural: callers receive no credit
+   for a recorder name whose body does not visibly perform the write."
+  [helper]
+  (boolean
+   (some (fn [arity]
+           (some (fn [node]
+                   (and (seq? node)
+                        (= 'swap! (first node))
+                        (some #{:missing :unreadable}
+                              (tree-seq coll? seq node))))
+                 (tree-seq coll? seq (:body arity))))
+         (:arities helper))))
+
+(defn calls-marker-recorder? [helper marker-recorders]
+  (boolean
+   (some (fn [arity]
+           (some (fn [node]
+                   (and (seq? node)
+                        (contains? marker-recorders
+                                   (resolve-symbol (:ns helper)
+                                                   (:aliases helper)
+                                                   (first node)))))
+                 (tree-seq coll? seq (:body arity))))
+         (:arities helper))))
+
 (defn resolved-head [parsed form]
   (when (seq? form)
     (resolve-symbol (:ns parsed) (:aliases parsed) (first form))))
@@ -491,12 +518,16 @@
                                       (concat (mapcat identity (subvec bindings (inc idx)))
                                               (rest body)))]
                     (map (fn [{:keys [call helper]}]
-                           {:file (:path parsed)
-                            :line (line-of call)
-                            :helper (helper-key helper)
-                            :value value
-                            :disposition (marker-use-disposition
-                                          parsed marker-predicates value context)})
+                           (let [disposition (marker-use-disposition
+                                              parsed marker-predicates value context)]
+                             {:file (:path parsed)
+                              :line (line-of call)
+                              :helper (helper-key helper)
+                              :value value
+                              :disposition (if (and (:recording? helper)
+                                                    (= :marker-swallowed disposition))
+                                             :conformant-recorded
+                                             disposition)}))
                          (loud-calls-in parsed loud-index rhs)))))
               (range)
               bindings))))
@@ -509,7 +540,7 @@
         consts (collect-constants forms)
         defns (->> forms
                    (keep parse-defn-form)
-                   (map #(assoc % :ns ns :file path))
+                   (map #(assoc % :ns ns :aliases aliases :file path))
                    vec)
         helpers (->> defns
                      (keep helper-classification)
@@ -545,6 +576,15 @@
   (let [parsed (mapv parse-source files)
         helpers (vec (mapcat :helpers parsed))
         helper-index (into {} (map (juxt helper-key identity) helpers))
+        marker-recorders (set (map helper-key
+                                   (filter marker-recorder?
+                                           (mapcat :defns parsed))))
+        helper-index (into {}
+                           (map (fn [[k helper]]
+                                  [k (assoc helper :recording?
+                                            (calls-marker-recorder?
+                                             helper marker-recorders))]))
+                           helper-index)
         silent-helpers (into {} (filter (fn [[_ h]] (= :silent (:class h))) helper-index))
         loud-helpers (into {} (filter (fn [[_ h]] (= :loud (:class h))) helper-index))
         marker-predicates (set (map helper-key
@@ -554,31 +594,25 @@
         bound-loud-call-sites
         (vec (mapcat #(collect-loud-call-sites % loud-helpers marker-predicates)
                      parsed))
-        bound-keys (set (map (juxt :file :line :helper) bound-loud-call-sites))
-        all-loud-calls (vec (mapcat #(collect-call-sites % loud-helpers) parsed))
-        loud-call-sites
-        (vec
-         (concat
-          bound-loud-call-sites
-          (keep (fn [{:keys [file line helper]}]
-                  (when-not (contains? bound-keys [file line helper])
-                    {:file file :line line :helper helper :value 'unbound
-                     :disposition :refused}))
-                all-loud-calls)))
+        loud-call-sites bound-loud-call-sites
         violations (filter #(and (= :silent (:helper-class %))
                                  (false? (:exists-now %)))
                            call-sites)
         marker-swallowed (filter #(= :marker-swallowed (:disposition %)) loud-call-sites)
+        recorded-then-substituted
+        (filter #(= :conformant-recorded (:disposition %)) loud-call-sites)
         loud-refusals (filter #(= :refused (:disposition %)) loud-call-sites)
         refusals (filter #(= :refused (:class %)) helpers)]
     {:helpers helpers
      :call-sites call-sites
      :loud-call-sites loud-call-sites
      :marker-swallowed (vec marker-swallowed)
+     :recorded-then-substituted (vec recorded-then-substituted)
      :violations (vec (concat violations marker-swallowed))
      :refusals (vec (concat refusals loud-refusals))}))
 
 (defn render-findings [{:keys [helpers call-sites loud-call-sites marker-swallowed
+                               recorded-then-substituted
                                violations refusals]} scope-label]
   (let [helper-rows (map (fn [{:keys [ns name file line class reason]}]
                            [(str ns "/" name) (clojure.core/name class) (str (rel file) ":" line) reason])
@@ -615,7 +649,9 @@
                      " silent+absent-now="
                      (- (count violations) (count marker-swallowed))
                      " | loud call sites=" (count loud-call-sites)
-                     " marker-swallowed=" (count marker-swallowed))]
+                     " marker-swallowed=" (count marker-swallowed)
+                     " recorded-then-substituted="
+                     (count recorded-then-substituted))]
     (str "# Absent-is-loud findings\n\n"
          verdict "\n\n"
          "## Helpers\n\n"
@@ -630,8 +666,11 @@
            "| helper | file:line | reason |\n|---|---|---|\n| none | n/a | none |\n"))))
 
 (defn fixture-report [files]
-  (let [{:keys [violations]} (scan! files)]
-    {:files (mapv rel files) :violations (count violations)}))
+  (let [{:keys [violations marker-swallowed recorded-then-substituted]} (scan! files)]
+    {:files (mapv rel files)
+     :violations (count violations)
+     :marker-swallowed (count marker-swallowed)
+     :recorded-then-substituted (count recorded-then-substituted)}))
 
 (defn usage []
   (str "usage: bb checks/absent_is_loud_lint.clj [--files a.clj,b.clj] [--out findings.md]\n"
@@ -652,13 +691,17 @@
     (when out (spit out (str markdown
                              "\nPositive control: " (pr-str positive) "\n"
                              "Negative control: " (pr-str negative) "\n")))
-    (when-not (= 3 (:violations positive))
+    (when-not (= 4 (:violations positive))
       (binding [*out* *err*]
         (println "fixture positive control failed:" (pr-str positive)))
       (System/exit 2))
     (when-not (= 0 (:violations negative))
       (binding [*out* *err*]
         (println "fixture negative control failed:" (pr-str negative)))
+      (System/exit 2))
+    (when-not (= 1 (:recorded-then-substituted negative))
+      (binding [*out* *err*]
+        (println "fixture recording control failed:" (pr-str negative)))
       (System/exit 2))
     (println verdict-line)
     (println "Positive control:" (pr-str positive))
