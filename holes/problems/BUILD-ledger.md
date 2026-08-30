@@ -939,3 +939,37 @@ by the new declarations; what is new is additive — the `wmTraceR8` literal tra
 would discard a nearly-complete build to add a mechanical step. **Decision: let it finish, review against
 `6fd8a33f4d`, and dispatch the transcription as R8-D3.** Recorded rather than assumed, so the review can
 be judged against it.
+| 1 (R9) | STATE: R9-D2 unblocked | — | — | — | 16:08Z | ready | mathlib4 6fd8a33f | claude-15 16:08Z: r9WmCheckerSound is RETIRED at 6fd8a33f (the ∀-checker form claude-13 refuted); the R9 block is VerdictRow/VerdictTable/r9VerdictsSound (closed) + wmVerdictsLedgerAlone/wmVerdictsDeclared/r9WmVerdictsSound/r9TwoRunCensus (holes) + r9VerdictConsultsChecker. claude-20's hold was read at 2d72d3c9 — correct at that sha; superseded. Charter clause 2: signature vs commentary drift (accepted). Pin method recorded in P-R8 |
+| 2 (R2) | R2-D2 dispatched (re) | codex-1 (via claude-20) | invoke-1788106034395-4362-b69280e2 | park-c4b182a8 | 16:09Z | running | CLEAN vs Holes.lean:322-343@6fd8a33f | claude-15: acknowledged; claude-13's surviving point (Fin 14 = arity only) QUEUED as a Lean change (P-R2) — not a blocker; the packet states the discrimination rests on the fixture corpus |
+| 3 (R8) | R8-D2 decision: finish, then R8-D3 | codex-12 / claude-20 | — | — | 16:09Z | accepted | — | claude-15: a bell cannot reach a running turn; cancel-and-redispatch would cost more than the additive transcription step; review against 6fd8a33f, R8-D3 = wmTraceR8 literal + pin. Rule caveat accepted: no ∀ BINDING the artefact as a variable — bounded ∀ over the named fixture is the intended shape |
+
+| 1 (R9) | R9-D2 read (5th) | claude-13 | `invoke-1788106167271-4367-c753e2fb` | `park-796d4a6e` | 16:09Z | reading | re-quoted vs fixture constants; **signature diff CLEAN** vs `Holes.lean:205-278`@`6fd8a33f4d` | — |
+
+### Stale park payload — the CANCELLED R2-D2 dispatch, "(no summary)"
+
+Fired for `invoke-1788103900715-4321-da824f13`, the job I cancelled when the hold landed; it has no
+summary because it never completed. Ledger checked first: recorded cancelled, and its successor has been
+through a signature refusal, a declaration fix and a re-dispatch since. **No action.** Fourth
+stale-payload wake; each has been correctly resolved by reading the ledger before the payload.
+
+### R9-D2 re-quoted against the fixture constants
+
+The owner's generalisation landed: every "Wm" hole is now a decidable proposition over a **named fixture
+constant** transcribed from the run, not a ∀ over a bound corpus. For R9: `r9VerdictsSound (table)` is
+CLOSED and decidable over a *recorded table*; `wmVerdictsLedgerAlone` / `wmVerdictsDeclared` are the
+holes the run fills (`VerdictRow = {row, declarationSource, inDeclaredPart, verdict}`);
+`r9WmVerdictsSound` moves by `decide` once transcribed and is false if the checker is broken. The
+deliverable now includes a **Lean literal transcription** of both tables alongside the EDN, which I diff.
+
+**Three questions put to claude-13 before dispatch**, all of which I could not settle myself:
+whether `decide`-over-a-transcribed-table lets a builder move the hole without the checker being right
+(**the builder writes both the table and the proof about it**); whether `declarationSource` being a free
+`String` lets a builder label all thirteen rows `"paper:…"` and collect 13 `self` trivially; and whether
+anything in the per-row run (ii) is still uniform-by-construction.
+
+**A verification note against myself.** My edit script asserted on three conditions and threw on the
+third — but the file had already been written, so a naive reading would have been "the edit failed".
+It had not: the assert string omitted the backticks the packet actually contains. I checked the four
+substantive conditions directly rather than trusting either the assert or the write, and all four hold.
+After two false "done"s today (`d68240c`, `f860296`) the rule is earning its keep in both directions —
+it catches edits that silently did nothing, and it must not be read as condemning edits that worked.
