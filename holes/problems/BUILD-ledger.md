@@ -899,3 +899,43 @@ duplicate wakes have now paid for themselves twice.
 **Also corrected in passing:** my first check for the ordered-vector clause reported it missing. That was
 my grep, not the packet — the phrase wraps across two lines and I searched for it on one. I nearly
 recorded a second false absence while investigating a false presence.
+| — | owner FAULT: two holders of Holes.lean | claude-15 / codex-22 | — | — | 16:05Z | recorded | mathlib4 6fd8a33f | claude-15 16:05Z: AD-D2 gave codex-22 write access to Holes.lean while the owner kept editing it; 6fd8a33f swept codex-22's uncommitted `import DarkTower.Contract.Emit` into history (Emit.lean untracked → that commit does not build standalone until AD-D2 commits Emit.lean). Worktree restored to HEAD; the owner's pending doc-tag fix (one HOLE tag per fixture constant; script 22 vs Lean 23) is DEFERRED until AD-D2 closes. Rule: one holder per file for a packet's duration — hole-text changes queue while a builder holds the file |
+
+| 2 (R2) | R2-D2 (build, re-dispatch) | codex-1 | `invoke-1788106034395-4362-b69280e2` | `park-c4b182a8` | 16:07Z | running | read by claude-13 (3 rounds); **signature diff CLEAN** vs `Holes.lean:322-343`@`6fd8a33f4d`; continues codex-1's preserved files | — |
+
+### The new row-11 rule, applied on its first run — and a caveat on how to apply it
+
+The owner's rule: *a packet's Lean quote must contain no ∀ over the artefact the run fixes.* My first
+pattern flagged one hit, and **the hit was a false positive of my own instrument**: the surviving ∀s are
+**bounded over the named fixture constant** — `∀ t ∈ wmTraceR8`, `∀ r ∈ wmVerdictsLedgerAlone` — which is
+exactly the intended shape, a decidable proposition over a fixed list. The rule has to be read as *no ∀
+**binding** the artefact as a variable* (`∀ (corpus : List …)`), not *no ∀ mentioning it*. Written down
+because a cruder reading would reject every correct declaration in the file.
+
+### claude-13's R2-D2 read: right, and already fixed before it landed
+
+It found `r2ContractCensusWmTrace` false (`wmTrace` universally bound — `wmTrace = []` gives 0 ≠ 2) and
+`_sound` reintroduced one declaration over from where it had just been removed. Both correct against the
+sha it read; both **already gone** at `6fd8a33f4d`, where the law is stated over `wmTraceR2` with a
+concrete checker and no soundness hypothesis. Ninth crossing today.
+
+**Its third point survives the fix and is now in the packet.** `R2TickLit = R2Tick (Fin 14) Unit` pins
+the channel **arity**, not the channels' identity or order — `Fin 14` cannot express "these fourteen
+names in declaration order". So discharging the Lean law is **not** evidence that `Channel` was
+source-keyed; that discrimination is carried by the packet prose and the fixture-corpus test alone. The
+packet now says so explicitly, so a builder cannot offer the one as proof of the other.
+
+**And it answered the question I could not settle:** the computed-value shape gives a trace-derived
+checker no new way through the fixture-corpus test — it varies the corpus, so a trace-derived `Channel`
+still passes-all where a source-keyed one fires-all. That was the only thing blocking dispatch.
+
+### R8-D2: not interrupted, and why
+
+codex-12 has been building since 15:57 against the pre-`6fd8a33f4d` block. The owner asked for an
+in-reply note "NOW"; **I cannot inject into a running turn** — a bell creates a new job, it does not
+reach a turn already in flight. So the choice was cancel-and-redispatch or finish-and-follow-up. The
+analysis deliverable (census, era partition, content pin, the three labelled quantities) is **unchanged**
+by the new declarations; what is new is additive — the `wmTraceR8` literal transcription. Cancelling
+would discard a nearly-complete build to add a mechanical step. **Decision: let it finish, review against
+`6fd8a33f4d`, and dispatch the transcription as R8-D3.** Recorded rather than assumed, so the review can
+be judged against it.
