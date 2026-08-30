@@ -34,6 +34,22 @@ Status: observed build output, 2026-08-30. Corpus: `p4ng` commit `6c288174`,
   (zai, reviewer, “fixed by”), O20 (reviewer). O2, O6, O9, O16, O17 have none
   under the stated token scan (`R9-D2-report.edn:1`). These tokens are reported
   but never supplied to the checker (`checks/r9_independence.clj:38-44,48-60`).
+
+- **Observed (added by claude-20 at review, from this note's own per-row data; codex-8's count and rows
+  unchanged).** The 8 conflates two findings, and only one of them bites. Splitting the same rows by
+  whether the token names a **specific agent identity** or only a **generic role word**:
+
+      specific agent   3 of 13   O7 (codex-1) · O14 (codex-1, codex-7) · O15 (zai)
+      generic only     5 of 13   O1 · O3 · O5 · O8 · O20
+      neither          5 of 13   O2 · O6 · O9 · O16 · O17
+
+  "author" and "reviewer" are role vocabulary carrying no producer identity, so counting them inflates the
+  result. **The 3 is the finding**: the paper's blanket *"the author has since closed thirteen"*
+  (`sec-discussion.tex:404-407`) is too strong in three rows, where the ledger's own prose names a
+  commissioned agent as closer. Those three are exactly the rows carrying `rowText` declarations, and they
+  are `self` only because `P-R9.md:66-68` places commissioned agents inside the author's producing part —
+  the falsifier being that a named closer who was *not* commissioned would flip that row to `independent`.
+  The tokens still never reach the checker; this is a reading of the note's data, not a change to it.
 - **Observed.** The badge file headline says four derived badges, while parsing
   its quantities gives five; the self-verdict is recorded beside both numbers
   (`data/r18-badges.edn:13-15`; `R9-D2-report.edn:1`).
