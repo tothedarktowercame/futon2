@@ -1014,3 +1014,35 @@ me. It closes the residual I flagged this hour: `Fin 14` pinned arity, not ident
 **codex-1 is building R2-D2 right now against `R2TickLit = R2Tick (Fin 14) Unit`**, which that edit
 replaces — the third mid-build signature drift today. Flagged for its review rather than interrupted, on
 the same reasoning as before, and this time I will check the hole-moving half specifically.
+| — | owner gate: AD-D2 | codex-22 | invoke-1788105584404-4352-b758986c | park-7da0a7d3 | 16:13Z | passed | mathlib4 25d1771d+4e17e37e | claude-15 16:13Z: 18+5=23=23 computed from pinned tags; zero errors; re-emit byte-identical; source sha = module's last commit; 20 typed / 3 refused; licences opened; script reads JSON via jq |
+| 2 (R2) | owner: Channel inductive ratified | claude-15 | — | — | 16:13Z | done | mathlib4 e3f65c5c+5e7b4c2a | claude-15: queued change applied on AD-D2's release (one-holder rule); R2-D2 (codex-1, running) to be told R2TickLit is now over Channel — signature drift for that abbrev |
+| — | AD-D3 read | claude-13 | invoke-1788106295311-4369-80f144d3 | park-2e24b76f | 16:13Z | running | packet BUILD-packets/AD-D3.md | claude-15: dispatch to codex-8 on PASS |
+
+### R9-D2 held again — R9's contract recreated R9's own defect
+
+claude-13's 5th read. The fixture-constant shape is right and closes the ∀ family (no hole now binds what
+the run fixes), but `r9VerdictsSound` relates **two transcribed fields of the same row**: `inDeclaredPart`
+and `verdict` are both written by the builder, so writing `inDeclaredPart := false` on every row
+discharges the hole by `decide` **regardless of what the checker produced, or whether one ran.** Verified
+here by reading the structure. That is *a claim backed by a witness the claimant produced* — R9's own
+definition of what it exists to refuse, appearing inside R9's contract. It compounds: `r9WmVerdictsSound`
+and `r9TwoRunCensus` are both decidable over that one table, so **two of five acceptance holes move from a
+single unguarded transcription**.
+
+Two proposals to the owner (`invoke-1788106410101`): compute `inDeclaredPart` from
+`producer ∈ declaredPart` so the builder writes artefact facts and Lean derives membership; and make
+`declarationSource` a sum type with a per-row clause, since as a free `String` a builder can label all
+thirteen `paperSentence` and collect 13 `self` trivially — the tautology we cut returning through a field.
+
+**Two fixes were mine, applied and verified:**
+- **I had asked the builder to judge whether a commissioned agent is inside the author's producing part.**
+  If the builder decides it, 13 `self` follows from their choice and *both* answers are reportable — the
+  falsifier has no mass. `P-R9:66-68` already rules it (*independence is about who chose what would be
+  attacked, not who typed*). The packet now cites the ruling and forbids re-opening it, which moves the
+  falsifier to something with mass: a named agent **not** commissioned by the author flips that row.
+- **"I will diff the Lean literal against the EDN" was a reviewer's promise, not a check** — same class as
+  the self-asserted provenance string closed in R2-D2, and a promise *by me* is exactly the witness R9
+  refuses. Now: a script emits the Lean from the EDN, gated `regenerate && git diff --exit-code`.
+
+Fifth stale-payload wake also handled — claude-13's third read, whose blocker is long since ratified as
+`r9VerdictConsultsChecker`; ledger checked first, no action.
