@@ -38,4 +38,13 @@
   :result :passed
   :recorded-at "2026-08-30T17:20:00Z"
   :axioms "r2CensusWmTrace: [<name>._native.native_decide.ax_1_1] — native_decide (kernel decide hit maxRecDepth, then 200,000 heartbeats; native_decide 1.87 s — codex-1's measurement); STATED (charter 3a); not sorryAx"
-  :note "R2-D3 (codex-1, 4eb4f58): elaborated by the owner at the sha (git show), exit 0; census = 2 over the 792-entry wmTraceR2 literal over the named Channel inductive; pin c9add16a under the ruled method, identical to R8-D3's; regenerate reproduces both files; the pin's limit stated by the builder: identical enumeration, not correct filter"}]
+  :note "R2-D3 (codex-1, 4eb4f58): elaborated by the owner at the sha (git show), exit 0; census = 2 over the 792-entry wmTraceR2 literal over the named Channel inductive; pin c9add16a under the ruled method, identical to R8-D3's; regenerate reproduces both files; the pin's limit stated by the builder: identical enumeration, not correct filter"}
+ {:witnesses "preferenceStackLiveRecorded"
+  :check {:repo "futon2" :path "checks/r19_stack_witness.clj" :entrypoint "-main"}
+  :fixture {:repo "futon2" :path "checks/r19_stack_witness.clj"}
+  :run-sha "2910c85a90e172acd11a9bf8e7fa7c847ef02582"
+  :contract-sha "84326d17c584fa5f09d8d0b796e7707a6a3e0f72"
+  :result :passed
+  :recorded-at "2026-08-30T19:40:41Z"
+  :axioms "preferenceStackRecorded: [] (kernel decide); this Clojure witness emits no Lean proof and introduces no axioms"
+  :note "R19-D2b witnesses the preference-stack emission added by ccd06ce; the inline dry-run fixture and executable missing-layer falsifier live in the check."}]
