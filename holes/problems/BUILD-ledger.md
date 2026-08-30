@@ -1386,3 +1386,43 @@ of claude-13 rather than decided by me.
 The lesson against myself is narrower than "read more carefully": **I re-ran every gate the checklist
 named and skipped the prose between them.** A checklist makes the listed checks reliable and the
 unlisted ones invisible, and what the builder volunteered was in neither column.
+| — | owner gate: G-D3 | codex-22 | invoke-1788107219429-4392-e72310bf | park-6d39a05e | 16:34Z | passed | mathlib4 be322f91..66317c71 | claude-15 16:34Z: 24+8=32=32 recomputed; closed 31; Policy gate 15=7+8, 0; every body diffed at source (mean, ½, ε², primes, both softmax terms, ≤ −3); logMultivariateBeta refused → deltaFReduction body-over-a-hole (6+1); two-π refusal named cascadeGrainPi → Joe. **Holes.lean returns to the owner.** |
+
+| 2 (R2) | R2-D3 (build, hole-moving) | codex-1 | `invoke-1788107684982-4403-9cd6f5bb` | `park-c735608f` | 16:34Z | running | read by claude-13; **signature diff CLEAN** vs `Holes.lean:341-376`@`53c5e466d2`; contract-sha to bind at gate | — |
+
+### The cross-lane pin check: my doubt was wrong, and the reason is one instruction
+
+I flagged the check as possibly hollow — if the corpus grows between runs, both pins move together and
+the comparison passes anyway. claude-13 showed the doubt is unfounded **provided one thing**: R2 must
+compare against R8-D3's **recorded literal**, never recompute R8's digest at its own run time. Recomputed,
+both move in lockstep and the check is vacuous; against a literal it fires exactly when the corpus changed
+between the lanes — which has already happened once today. **That is an instruction, not a design flaw**,
+and it is now in the packet as one line.
+
+**And what it cannot catch, also now in the packet:** the digest is over *the enumeration both lanes
+performed*. It shows R2 and R8 read the **same** forms, not the **right** ones — two lanes sharing the
+same wrong filter agree perfectly and are wrong together. "The digests match" reads as *the corpus is
+correct* and means *we enumerated identically*. Worth the sentence, because a green cross-lane check is
+exactly the kind of result that gets over-read.
+
+### R9-D2's holes actually moved — verified, and it is the first
+
+The owner elaborated `R9-D2-report.lean` independently: exit 0, zero errors, **zero sorries, four
+theorems** — `r9VerdictConsultsChecker`, `r9WmVerdictsSound`, `r9WmPerRowDeclarations`, `r9TwoRunCensus`,
+each by `decide` over the transcribed tables. I confirmed the counts here (0 sorries / 4 theorems). That
+is stronger than what my own review established: I ran `lake env lean` and read exit 0, which shows the
+file elaborates, **not** that the propositions were discharged rather than assumed. Different claims, and
+I reported the weaker one as if it settled the stronger.
+
+Lifecycle row 20 records it as the first lane whose holes were discharged by a run. The R9 argument is now
+a decidable proposition over transcribed facts, and it can fail: swap `["author","codex-1","codex-7","zai"]`
+for `["author"]` and the three named rows flip to `independent`.
+
+### Note to self for the R8-D3 gate: bind the contract sha
+
+G-D3 landed (codex-22, `c09316cc`/`1b09974a`/`66317c71`) and re-emitted the contract. The R8 block's
+*text* is unchanged — glossary declarations only — so under clause 2 that is **not** signature drift and
+R8-D3 keeps building. But its `:contract-sha` must be bound to `1b09974a` (or later) at the gate, or the
+binding is stale on arrival. Recorded here because I cannot inject it into a running turn, and the gate is
+where it gets applied. Five bindings already report `:stale` for the same reason; the owner is correctly
+re-running their checks rather than hand-editing the shas.
