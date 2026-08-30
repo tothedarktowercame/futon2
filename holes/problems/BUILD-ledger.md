@@ -1681,3 +1681,33 @@ tests, pin comparison — and skipped a *bookkeeping* item, because the substant
 attention went. That is the mirror of this morning's failure, where I ran every listed check and missed
 what the builder volunteered between them. **A checklist fails at both ends: what it does not list, and
 what it lists but looks clerical.** The ledger has both instances now, an afternoon apart.
+
+| 4 (R16) | R16-D1 (discovery, no code) | codex-2 | `invoke-1788108743427-4422-b8f1eda3` | `park-403bb305` | 16:52Z | running | new lane; opened on the cadence report; no Lean (R16 has no declarations yet) | — |
+
+### R16 opened — and my "unlocks 2" was a readiness measure, not a reach measure
+
+The owner wrote `P-R16.md` from the artefacts rather than agreeing with the lookup, and corrected my
+number: **R16 is the missing endpoint on five drawn edges** — `R11→R16`, `R14→R16`, `R15→R16`, `R9→R16`,
+`R16→R2` — where I had said two. Both verified here against the linter's own output:
+
+    drawn edges touching R16:            5
+    of those, already half-recorded:     2   (R16→R2, R9→R16)
+
+**Both numbers are right and they measure different things.** Mine counted edges *already half-recorded*,
+which is the readiness question — how many edge specifications become dispatchable the moment R16 lands.
+The owner's counts R16's total wiring reach. My framing — "R16 unlocks 2, twice any other" — was true and
+understated the case, because restricting to half-recorded edges is a *CML-D2 readiness* filter that I
+did not say I had applied. The lesson is the day's own: **a number needs its denominator stated**, and I
+had just written that into R8-D4's packet about someone else's means.
+
+**The caveat I flagged was measured and holds:** each of the six one-endpoint edges carries exactly one
+payload *proposal* at its recorded end — proposals, not schemas — so 6 was an upper bound, and CML-D2
+still needs a second proposal per edge before it has anything to compare. Two lines stand as given:
+**specified 0 / unspecified 21.**
+
+R16-D1 dispatched to codex-2 (fresh seat for this node). Its expectations are registered as predictions:
+selected-vs-in-map **outside, all**; **no** observation channel reads an act's witness. I added a third as
+an open question rather than a hypothesis — `enact.clj:205` is honest that `:enacted nil` means the
+executor reproduced nothing, and **what that becomes downstream is unmeasured**: if it becomes a *score*,
+R16 emits a number for an act that did not happen, which is the shape found four times today. I have not
+looked, and said so, so it cannot be confirmed by someone trying to please the packet.
