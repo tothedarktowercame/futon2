@@ -2452,3 +2452,37 @@ and their competence will come from the artefacts alone.
 CML-D2 `R16→R2`, read P-R16/P-R2), **codex-10** (built R19-D1, read P-R19) and **codex-12** (built R8-D4).
 On the correlation above I predict **all three report `:contaminated? true`**. If any reports clean, the
 correlation is weaker than it looks and this entry is wrong — recorded now so it cannot be fitted after.
+
+## R19-D2 — ratified, and held on a scope finding
+
+Owner ratified the R19 declarations: `Holes.lean@75efc81b`, contract regenerated at that sha
+(`2fe9ff8c34`, emit-after-commit). `PreferenceSource` / `PreferenceLayerRecord` /
+`wmPreferenceStack2026_08_30` / `preferenceStackRecorded` / `PreferenceLayer` / `foldC` /
+`PreferenceStack` closed-by-record; `preferenceStackLiveRecorded` unwitnessed (D2's deliverable);
+`machineHasNoC` refused (meta).
+
+**Row-11 check against the ratified declarations, before writing anything:** the Lean fixture
+`wmPreferenceStack2026_08_30` matches the gated `dc1dac8` record exactly — five layers, same ids, same
+`PreferenceSource` constructors, `folded=false` on `habit-prior` alone. Correct.
+
+**Then the scope defect.** Packet scope (a) is *"c_vector.clj: the fold becomes the recorded foldC"*. The
+D1 record's own `:composition-order` says otherwise:
+
+    floor                  efe.clj:601-614
+    capability-zone-load   efe.clj:586-614
+    live-goal-outcomes     efe.clj:655-665,725-733
+    c-vector-overlays      c_vector.clj:227-240,633-640
+
+**3 of 4 folded layers compose in `efe.clj`; only the overlays compose in `c_vector.clj`.** A builder
+doing (a) as written would record one layer and miss three — producing a `foldC` that is a quarter of the
+fold wearing the name of the whole. Held; scope is the owner's.
+
+**Proposed instead** — and the conceptual split is the fix, not a file swap: `c_vector.clj` *produces* a
+layer's values, `efe.clj` *composes* them into C-risk. So D2a is efe.clj (with (b)'s stale-comment fix
+riding, same file — a builder writing the habit-prior record must read 698-706 and would be misled by the
+stale DEFAULT/DARK labels); D2a′ is c_vector.clj carrying `{author, basis}` on the entries it supplies;
+D2b is the witness, which **must follow D2a** because nothing can witness that a live C emission includes
+layer records until something emits them.
+
+Sent as a question rather than an amendment: if "the fold" means something narrower than the C-risk
+composition, the packet should say it records one layer, not the stack.
