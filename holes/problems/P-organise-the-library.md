@@ -600,3 +600,9 @@ controls verbatim: positive shows the overridden path under missing; negative: "
 `recorded-then-substituted` sites are compliant per the reconciliation (AUD-D4b teaches the lint to say so). AUD lane
 remaining: the mana-snapshot timer (small) and the mark2 live endpoint vs refresh-on-read (Joe's call; owner recommends
 refresh-on-read with a basis pin).
+
+**AUD-D5 GATED 23:20Z (`c9f36cf`) — passed.** `mana-snapshot.timer` live (5-min cadence per meta-stop's <10-min bound;
+the script is a sub-second git-status sweep over 17 repos); json fresh and parsing; unit texts versioned in the
+findings note; the WM report already renders `:snapshot-age-minutes`/`:stale?`. AUD-D1's mana row closed. The AUD lane
+is now ONE item: mark2 (05-17 cache; live endpoint vs refresh-on-read with basis pin — Joe's decision; owner
+recommends refresh-on-read).

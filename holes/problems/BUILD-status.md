@@ -27,7 +27,7 @@ extensions get a supersession record, not a deletion (first case: `P-supersede-s
 
 ## What is running right now
 - packet 4d (codex-20): exclude the spider's own trace from rung 1; honest coverage columns; wave-1 warrants re-flagged.
-- AUD-D4b (codex-12): lint credits producer-level recording (queued). AUD-D3b and AUD-D4 both gated; the report now renders `## Input status` and the trace carries `:input-status`.
+- AUD-D4b (codex-12, queued). AUD-D3b/D4/D5 gated: `## Input status` renders, the trace carries `:input-status`, and the mana snapshot refreshes every 5 min under its own timer. AUD lane remaining: **mark2 only** (your endpoint-vs-refresh call).
 Nothing else. Every builder lane is closed and gated.
 
 ## Your open decisions (none blocking a running lane)
