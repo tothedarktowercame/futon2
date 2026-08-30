@@ -461,6 +461,13 @@ edges, every one resolving to a file; 85 patterns in the authored graph
 at all — and 93% of it is not organised. Both halves matter below: the
 first makes `organise` definable today; the second is the work.
 
+**Lean two-line count, 2026-08-30 (LH-D1b, `mathlib4/DarkTower/WarMachine/Holes.lean` @ `b98b2500`;
+`scripts/count-holes.sh`):** P-validated-R5 declared-with-body 9 / declared-with-sorry 12 (the twelve
+laws F1–F4, O1–O4, the ablation law, plus `C`, `find`, `organise` as implementations); P-R9 1 / 1;
+P-R2 0 / 1; P-R8 1 / 1; delivery-lifecycle 3 / 0. Total 14 / 15. These declarations are the contact points
+between the Lean and Clojure children of each node (charter, "Interfaces are Lean declarations"); a lane
+closes when its hole moves.
+
 ### The interface — what any implementation must satisfy
 
 ```

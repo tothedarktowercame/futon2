@@ -444,3 +444,66 @@ finding (v2 §2 "inferred edges"); caught by the operator, not by review.
 
 **holder.** claude-15; fleet process (wave 1, pid 2241961) → codex-20 for harvest  
 **parent.** P-validated-R5 §3e  *(fifth precept, §0.10 — added 2026-08-30)*
+
+**WAVE 1 COMPLETE 15:10:51Z** — 91 patterns, 68 attestation records (10 attested from the pilot review, 55 proposed, 3 refused/sent-back), 52 absences, 5 seat failures (all preserved). Packet 5 HARVEST dispatched to codex-20 — job `invoke-1788102740567-4291-bddb18d7`, park `park-98f46f1b-97d0-4d19-b4f2-3b098b776c15`: commit on explicit paths, five-section lint, mechanical verification of every record, ledger before/after, review-sample manifest (claude-15 / codex-22 halves). Semantic review follows the manifest; only sampled-and-passed edges become attested.
+
+**HARVEST (packet 5) REVIEWED 2026-08-30 (claude-15) — passes; claude-15's review half done.**
+futon3 `701a729f` (codex-20; 798 files, none under `checks/`/`test/`); lint re-run here on all five sections:
+green; verification report 68/68 verified, 0 failed, the 2 listing-only being the morning's refused records
+preserved as-is; manifest 12 (claude-15) / 11 (codex-22) / 11 unsampled aif. War-room 28 absences = 18 with
+zero exact hits + 10 with hits that are bulletin inventories naming the ruling but no pattern (codex-20's
+count from the notes) — **`war-room/` cannot be organised from evidence; it needs authored `@why`.**
+*claude-15's twelve (futon3 `70f39a2`, corrected `ebb3609`, `4a94b28`):* attested 4 —
+`candidate-pattern-action-space ↔ evidence-precision-registry` (a chat turn names them as registry
+prior-art peers), `off-continuity-null-discriminates →how measurement-window-hygiene` (the FROM body says a
+clean null *requires* it — an authored method relation), `satisfied-rungs → futonic-logic` (body cites A7;
+`@why` would fit, author's call); sent back 7 — five **self-text** (the rung-2 evidence is the FROM pattern's
+own text and never names the target: `declare-the-conditioning`, `experimental-comparison`,
+`grounded-actuation`, `hierarchical-budget-aware`, `policy-precision`) and two **co-mention lists**
+(`admissibility → advanceability`, `niche-construction → baseline-cyber-ant`); refused 1 —
+`meta-lede → peeragogy/pattern-language` (the turn used "meta-lede" as a template name; unrelated
+conclusions; directive removed).
+**Two lines per section after this review:** aif attested 11 / proposed 48 (refused 3);
+writing-coherence 2 / 1 (refused 1); problems 1 / 1; war-room 0 / 0; features 0 / 0. `fraction-organised`
+(`@why`-based) is unchanged by the wave: aif 18.2%, wc 8.7% — the spider writes `@how`/`@see-also`; `@why`
+stays the author's.
+**Wave-2 fixes from the sample:** (1) rung-2 hits whose record *is* the FROM pattern's own text get a
+`:self-text` flag and do not warrant an edge unless the excerpt names the target (five of twelve in my half);
+(2) co-mention lists (ids cited together in prose) are hypothesis generators like listings — flag
+`:co-mention`, same rule; (3) `war-room/` is excluded from spider waves until it has authored `@why`.
+**Reviewer-side defect, logged (lifecycle row 17):** my first state edit matched records by `:to` alone;
+five verdicts landed on unsampled records sharing a target id, and one reason string with unescaped quotes
+broke the EDN (lint caught that; the misplacement it could not). Rebuilt from the harvest commit by
+`(from, to, kind)` and verified that exactly the ten intended records differ.
+codex-22's half: job `invoke-1788103570154-4314-220bbca9`, park `park-2349b8fc-…` (queued behind LH-D1b).
+
+**codex-22's review half REVIEWED 2026-08-30 (claude-15) — passes.** futon3 `e3e5ef4e`: three files + one
+refused directive removed; lint green on aif/problems/writing-coherence (re-run here). Verdict table
+(`library/.spider/review-codex-22-2026-08-30.md`) names the evidence kind for all 11: stated 5 / self-text
+5 / co-mention 1 / listing 0 → attested 5, sent back 5, refused 1. Spot-checked two attested edges at
+source: `free-energy-as-tick-scalar → expected-free-energy-scorecard` (the FROM body contrasts per-tick F
+with the scorecard's per-candidate G by name) and `posterior-variance-as-epistemic-value →
+predictive-entropy-as-ambiguity` (an authored "Relation to …" paragraph) — both are the **authored
+cross-reference** case, the same rule claude-15 applied to `off-continuity-null →how
+measurement-window-hygiene`; the two halves used one rule.
+**Dissent, decided.** codex-22 would have sent back claude-15's reciprocal
+`candidate-pattern-action-space ↔ evidence-precision-registry` attestations as co-mention. Ruling
+(claude-15, owner): a record that asserts a **shared role** for the listed patterns ("three likely
+registry/credit prior-art patterns that DERIVE must read before defining the registry") states a relation
+among them — peers as prior art for one design — which is more than an enumeration and is the same record
+that warranted `evidence-precision-registry → exotic/full-lift-registry` this morning; a bare list of ids
+with no role asserted (the `admissibility → advanceability` case, sent back) does not. The attestations
+stand; the dissent is recorded here and in codex-22's file so the rule is auditable. **Rule fixed for wave
+2:** evidence kinds are `stated` (the record or the FROM body names the target and the relation),
+`shared-role` (the record asserts one role for both — warrants `@see-also` only), `self-text`,
+`co-mention`, `listing`; only the first two warrant an edge.
+**Wave 1 — final two lines per section (68 records):** aif attested **15** / proposed 43 (refused 4);
+writing-coherence 2 / 1 (refused 1); problems 2 / 0; war-room 0 / 0; features 0 / 0. Attested total 19; the
+`@why` organised fraction is unchanged (the spider writes `@how`/`@see-also`). 43 aif proposals remain
+unsampled-or-sent-back; a second sample of 10 from the 32 never-sampled ones is the next review packet if
+Joe wants the wave closed out rather than carried.
+**Wave 2 gate (before any dispatch):** runner flags `:self-text` (record is the FROM pattern's text) and
+`:co-mention` (ids enumerated without a role) alongside `:listing`; the validator refuses a rung-2 edge
+whose only evidence is any of the three; `war-room/` excluded until it has authored `@why`; problems/
+and features/ are done (5 and 2 patterns).
+

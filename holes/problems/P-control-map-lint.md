@@ -43,3 +43,23 @@ is the only payload the edge has ever carried (a fixture is an example, and the 
 - 2026-08-30 record written (claude-15).
 - 2026-08-30 CML-D1 owner gate PASSED (claude-15): `7272099` + `dfe8c80`; tests 4/20/0 re-run; live lint 15 `:no-endpoint-record` / 6 `:one-endpoint-record`; claude-20's whole-token fix is right (substring matching would have agreed on 'the **id**entity'); `:schema-unspecified` ratified.
 - 2026-08-30 amended (claude-15) on claude-20's pre-dispatch findings: entry count 48 not 49; `:endpoints-agree?` typed absence. Both commissioner-side; caught by the tech lead's row-11 run before the builder saw them.
+
+**Two lines, 16:48Z (claude-20's cadence report, reproduced from the linter):** drawn 21 — **specified 0 /
+unspecified 21**; endpoints: `:no-endpoint-record` 15, `:one-endpoint-record` 6, both 0. The wiring's organised
+fraction is where it was this morning, and that is the honest number after a day of nodes-before-edges.
+**Caveat measured:** each of the six one-endpoint edges (`R2→R3`, `R16→R2`, `R7→R8`, `R8→R5`, `R9→R16`,
+`R10→R8`) has exactly one payload *proposal* line at its recorded end — proposals, not schemas; CML-D2 needs
+two proposals per edge to compare. **Lookup, not judgement:** R16 is the missing endpoint on two of the six
+(and on five drawn edges in all); `P-R16.md` written; its D1 unlocks CML-D2 for `R16→R2` and `R9→R16`.
+
+**First edge schema, 17:06Z:** `R16→R2` (re-observe) written into `control-map-edges.edn` by the owner from
+CML-D2's reconciled proposal (futon2 `031c5f2`): payload `{tick :unspecified-type, mission :unspecified-type,
+witness :ExternalWitness}`, the other six `Delivery` fields `:unspecified` because **neither record states
+them**; the reconciliation is **one-sided** (P-R2 names the edge, specifies only its outgoing payloads) and says
+so. The builder's two refusals stand: no outgoing receipt copied onto an incoming edge; *plausible operational
+defaults are not evidence*. **The artefact itself was untracked** (claude-20; not ignored — 73 sibling files
+tracked): committed first as the version anchor (p4ng `8f83901`), then the schema as a diff. The two lines after
+this: still **specified 0 / unspecified 21** by the linter's rule (a schema with `:unspecified` values is not
+specified) — one entry now exists with one typed field, which is the honest description of the wiring's first
+specification.
+

@@ -56,3 +56,51 @@ key set as the schema and `receipt = {tick, key-set-ok?, consumed-by}`.
 
 ## log
 - 2026-08-30 record written (claude-15).
+
+**Lean interface (2026-08-30):** `mathlib4/DarkTower/WarMachine/Holes.lean@6ee2d0db` — `r2WellFormed` (closed) and `r2ContractCensus` (hole; expected illFormed = 2 — the refuting run is the fixture). Build packets quote these; the lane closes when the hole moves.
+
+**Lean interface @`6fd8a33f4d`:** `R2TickLit := R2Tick (Fin 14) Unit` (declaration order), `wmTraceR2` (hole: transcribed corpus), `r2ContractCensusWmTrace : r2ContractCensus wmTraceR2 (all-14-present) = 2`.
+
+**Queued Lean change (16:09Z, claude-13's R2-D2 read via claude-20; held until AD-D2 releases `Holes.lean`):**
+`R2TickLit := R2Tick (Fin 14) Unit` pins the channel *arity*, not the channels' identity or declaration
+order — `Fin 14` cannot say "these fourteen names in this order", so discharging `r2ContractCensusWmTrace`
+is NOT evidence that `Channel` was source-keyed; that rests on the fixture-corpus test and the
+declaration-order vector in the Clojure report, and the packet now says so. Proposal to ratify at G-D3/after
+AD-D2: `inductive Channel` with the fourteen named constructors in the order of `observation.clj:18–32`
+(evidence: the names themselves; falsifier: a fifteenth key in any tick), and `R2TickLit := R2Tick Channel Unit`.
+
+**Ratified 16:13Z (`Holes.lean@e3f65c5c`):** `inductive Channel` with the fourteen named constructors in declaration order; `Channel.all`; `R2TickLit := R2Tick Channel Unit`. R2-D2's Lean quote at `6fd8a33f` is now commentary-and-signature stale for `R2TickLit` — the builder's next bell gets the new name (the census law's type is otherwise unchanged).
+
+**R2-D2 PASSED the owner gate 16:31Z — analysis half; hole not moved** (codex-1, futon2 `a74ac42`). Tests 3/19
+re-run; the discriminating fixture corpus is real (five records each carrying `:undeclared-fifteenth`, each
+asserted to fire — the test a trace-derived `Channel` cannot pass); `:channel` reports the ordered vector from
+`observation.clj:11` `observation-channels`; census 790 conforming / 2 firing. The content pin is published
+under the *superseded* method (`:sha256-over-concatenated-sorted-clojure-form-hashes`, `c434950f…`) — honest,
+since the packet stated it and the newline-joined ruling landed after dispatch; two published methods differing
+only in delimiter is exactly the ambiguity the ruling closed. **R2-D3:** re-derive the pin under the ruled
+method; `wmTraceR2 : List R2TickLit` over the named `Channel` inductive by a generator gated by `git diff
+--exit-code`; `r2ContractCensusWmTrace` by `decide` (expected 2). The turn-channel refusal stands.
+
+**16:45Z — CORRECTION to the correction:** the "does not elaborate" finding above was made on the
+**working tree**, which codex-1 was editing for R2-D3 at that moment; the committed `R2-D2-report.lean@a74ac42`
+**elaborates (exit 0)** and proves its `example` by `native_decide` (generated axiom
+`…r2CensusCheck._native.native_decide.ax_1_1`) — claude-20 re-ran the committed blob; claude-15 reproduced.
+So R2-D2's hole did move, with a stated-after-the-fact trust in the compiler; the remaining R2-D3 work is the
+naming gap (wire the literal to `wmTraceR2` over the named `Channel`), the pin under the ruled method, a named
+theorem, and `#print axioms` in the file. **Rule from this:** a hole-moving artefact is gated *at its sha*, never
+at the working-tree path (charter 3a(i) amended).
+
+**R2-D3 PASSED the owner gate 16:53Z — the holes moved** (codex-1, futon2 `4eb4f58`; claude-20 first-line;
+gated at the sha). `wmTraceR2` emitted as the 792-entry literal over the named `Channel` inductive;
+`r2ContractCensusWmTrace` (= 2) discharged by `native_decide` — **axioms** `[…r2CensusWmTrace._native.native_decide.ax_1_1]`,
+no `sorryAx`; the trust choice is *measured*, not asserted: kernel `decide` hit `maxRecDepth`, then exhausted
+200,000 heartbeats at raised depth; `native_decide` compiled the same proposition in 1.87 s (codex-1). Pin
+`c9add16ac96c973b…` under the ruled method — identical to R8-D3's — and codex-1 stated its limit unprompted:
+*the matching digest establishes that R2 and R8 enumerated identically; it cannot establish that their shared
+filter selected the correct corpus.* Undeclared keys 0; regeneration reproduces both artefacts (owner re-ran).
+Bound in the witness registry against contract `1b09974a`. **Open on this node:** the turn channel (R2-D3's
+design decision, Joe's), and R2-D4 = the generator emits a named theorem and `#print axioms` (charter 3a(iii)).
+Lean for R2: 2 bodies / 2 holes, both holes witnessed.
+
+**16:59Z:** the `observation.clj` docstring's 13-vs-14 drift — confirmed from a third lane (R16-D1) — fixed by the owner (one word); the instance is preserved here, in the R2 worksheet, and in `a74ac42`'s report (`:docstring-count 13`). It was a facade instance, not evidence R2 depends on.
+
