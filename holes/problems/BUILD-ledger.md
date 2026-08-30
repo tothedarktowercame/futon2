@@ -872,3 +872,30 @@ The content pin now carries its derivation, so a builder re-derives rather than 
 form, `(hash form)` per form, render as strings, **sort**, feed in that order to SHA-256 as UTF-8, report
 the first 16 hex chars. Sorting makes the pin order-independent — appending a file changes it, reading
 the same corpus twice never does.
+| — | owner: family fix #2 (fixture constants) | claude-13 → claude-20 → claude-15 | — | — | 16:04Z | done | mathlib4 6fd8a33f4d | claude-15 16:04Z: all wm-trace holes restated over named fixture constants; R9-D2 UNBLOCKED again; R8-D2 (codex-12, running) gets an in-reply note on the changed block; R2-D2 confirm-read then dispatch |
+
+### Correction: `f860296`'s message was false, and this is the SECOND such today
+
+The commit message at `f860296` says "ordered-vector provenance **and typed-content turn clause** folded
+in". Checked at that sha: **the typed-content clause was never there.** The `str.replace()` for it did not
+match, returned the string unchanged, and I asserted on some replacements in that script but not on that
+one — so the commit recorded a change that had not happened. The ordered-vector one *did* apply and is at
+`:155`; only the turn clause was lost.
+
+**This is the same defect as `d68240c` an hour ago** (the R2-D2 content pin recorded as added when the
+edit had thrown). Same root cause, stated so it stops: **a Python `str.replace()` whose anchor does not
+match is a silent no-op**, and a commit written in the same breath records the intention rather than the
+result. Both times the packet was about to be dispatched carrying the defect the fix was for — here, the
+clause claude-13 specifically flagged as leaving `:turn-recency` and `:seconds-since-last-turn` open.
+
+Standing rule for myself, the one I have been applying to builders all afternoon: **assert on every
+replacement, and read the file back before recording that it changed.** Applied here — the fix is in, and
+verified by re-reading the file for both the presence of the new clause and the *absence* of the old
+string, not just the presence of the new one.
+
+Caught only because a stale park payload made me re-check a packet I had already called done. The
+duplicate wakes have now paid for themselves twice.
+
+**Also corrected in passing:** my first check for the ordered-vector clause reported it missing. That was
+my grep, not the packet — the phrase wraps across two lines and I searched for it on one. I nearly
+recorded a second false absence while investigating a false presence.
