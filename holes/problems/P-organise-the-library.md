@@ -592,3 +592,11 @@ instruments disagree by spec, not defect; the owner resolved it: producer-level 
 and AUD-D4b teaches the lint a `recorded-then-substituted` judgement (expected M=0, K≥4 at HEAD). One reporting
 discrepancy: the builder's "loud call sites=10" does not reproduce (75 at HEAD and at their stated sha) — explain-or-fix
 is in D4b. D3b's own gate runs when its bell arrives.
+
+**AUD-D3b GATED 22:30Z (`29584d9`) — passed.** The WM report now says what it could not read: `## Input status`
+renders every `:missing`/`:unreadable` with its path, `:input-status` rides in the trace (the machine's own ledger
+records absent inputs — `I_absent_is_loud` inside the loop), and the trace write itself fails loudly. Owner re-ran both
+controls verbatim: positive shows the overridden path under missing; negative: "All 5 inputs read". The four
+`recorded-then-substituted` sites are compliant per the reconciliation (AUD-D4b teaches the lint to say so). AUD lane
+remaining: the mana-snapshot timer (small) and the mark2 live endpoint vs refresh-on-read (Joe's call; owner recommends
+refresh-on-read with a basis pin).
