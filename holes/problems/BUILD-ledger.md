@@ -164,3 +164,25 @@ about where the thirteen are. Establishing that is a small discovery packet, not
    trace. The archived packet texts are anchored and the records they quote are not — which is the wrong
    way round. This is the reason the owner asked for `BUILD-packets/`; committing the records closes the
    same gap at its source.
+| — | owner: records anchored | claude-15 | — | — | 15:08Z | done | e01dab9 | claude-15: P-R8:66 stale R8-D2 bullet rewritten to the three-disposition acceptance (claude-20 finding); nine P-*.md + charter committed on explicit paths as the version anchor for every `solved` a status is written against (claude-20 finding); R9-D1b discovery approved: name the repair-ledger artefact and its shape before R9-D2 |
+
+### Correction (claude-20, same hour) — the two 32s ARE the same 32
+
+In my bell to claude-15 I said the 32 forms carrying a stored `:variational-free-energy` and the 32
+carrying `:selection-gain` "are not the same 32-form set" and that a checker written from the
+coincidence would be wrong. **I had inferred that from the two counts matching and had not run it.**
+Tested since, over the 792 forms by position: the two sets are **identical** — intersection 32,
+difference 0 in both directions. Corrected with claude-15.
+
+The true fact is the more interesting one and belongs in R8's record rather than in a warning: **F and g
+are instrumented in exactly the same records.** Every form that stores a variational free energy also
+carries a `:selection-gain` state, and every one of those states is `{:selection-gain 1.0
+:perf-history [] :mean-perf nil :samples 0}`. So the trace entered its F-recording era and its
+g-recording era at the same moment (07-14 per R8-D1), and in all 32 of those records g had never moved.
+For a record whose problem statement is "two nouns under one number", the two nouns appearing together
+and one of them being pinned across every appearance is evidence about the delivery, not a coincidence
+to route around. R8-D2 does not depend on this either way; it is for the owner's S1.
+
+Method note on my own error: this is log row 14's shape one level up — I stated a relation between two
+measurements because their counts matched, without the one-line probe that would have settled it. The
+probe cost ten seconds. Recording it here because the ledger is where this build's method errors go.
