@@ -89,6 +89,41 @@
 ;; :pragmatic-parity is a comparability preset only).
 (def default-kl-channel-weights {})
 
+(def preference-stack-record
+  "R19-D2a transcription of `holes/labs/wm-contract/R19-preference-stack.edn`
+   at futon2 commit `17d779d`, reduced to the Lean `PreferenceLayerRecord`
+   mirror `{:layer/id :source :author :basis :folded? :site}`."
+  [{:layer/id :floor
+    :source :operator-declared
+    :author "Joseph Corneli"
+    :basis "src/futon2/aif/preferences.clj sha256 22ae618a61cb3a4198b431cac214390337e29a01017ef302feb02618ef41e86a; ranges introduced by commit 135efdff5483dd297ce8b3670fe041b4283e6e92"
+    :folded? true
+    :site "src/futon2/aif/efe.clj:601-614,725-733"}
+   {:layer/id :capability-zone-load
+    :source :learned-from-operator
+    :author "wm-outer-loop, implementation authored by Joseph Corneli"
+    :basis "substrate-2 live probe 2026-08-30: 242 code/v05/wm-hyperparameter-update records, 14 classes, max :as-of 2026-07-18T22:33:41+01:00"
+    :folded? true
+    :site "src/futon2/aif/preferences.clj:140-173 and src/futon2/aif/efe.clj:586-600"}
+   {:layer/id :live-goal-outcomes
+    :source :corpus-derived
+    :author "futon2.aif.c-vector/entries-from-corpus, authored by Joseph Corneli"
+    :basis "substrate-2 :7071 live probe 2026-08-30: corpus signature -1131096431, 36 capabilities, 293 sorries"
+    :folded? true
+    :site "src/futon2/aif/c_vector.clj:160-184 and src/futon2/aif/efe.clj:655-665"}
+   {:layer/id :c-vector-overlays
+    :source :script-produced
+    :author "futon6/scripts/c_vector.bb, authored by Joseph Corneli"
+    :basis "2026-06-26 overlay snapshots: mess sha256 ffb40d5f9d3c026d41e1bd2b6047efcf9e5bddbf3dd1a8c7acc667e37fb2a4fd; incomplete sha256 f6c3e137d721f9a4936a176d4991373b18b64fbdcc58b0e600944c006ac3c554; yingvoice sha256 84a0ed72aa7c277e702ec5699de2ba94c7c7d4f00fc414d3aa858c91a47eec4f"
+    :folded? true
+    :site "src/futon2/aif/c_vector.clj:191-212"}
+   {:layer/id :habit-prior
+    :source :learned-from-operator
+    :author "unknown operator whose selections are recorded in wm-trace"
+    :basis "data/wm-trace/wm-trace-2026-08-30.edn sha256 6da3ccdab1dc4ef32d160d4b9ebcbe4bc6c654d529c2e0873971dd4f3aa06a05"
+    :folded? false
+    :site "Mode-dependent: :controller-augmentation keeps structural pressure additively in controller-score at src/futon2/aif/efe.clj:700-703,725-733; today's default :habit-prior replaces it with learned ln E(pi) at src/futon2/aif/habit_prior.clj:121-136 and scripts/futon2/report/war_machine.clj:4465-4472, then policy/select-action consumes that unscaled log prior at src/futon2/aif/policy.clj:368-380. OWNER AMENDMENT 2026-08-30 23:35Z (node-sim finding, verified policy.clj:234-270): in the branch the WM runs (:selection-boundary :strategic-recommendation, war_machine.clj:4503) the scores including ln E(pi) order an INSPECTABLE COUNTERFACTUAL only — chosen = (or (first controller-entries) ...), :habit-prior-applied? false; war_machine.clj:364 declares :scheduler-habit-authority :counterfactual-only. Computed and recorded at the seam; declared abstention from choosing."}])
+
 ;; v0.14: anticipation-driven scaling. When opts carries :time-pressure
 ;; in [0,1], G-risk and homeostatic-pressure are multiplied by
 ;; (1 + time-pressure × default-time-pressure-scale). predictability-bonus is NOT
@@ -421,14 +456,17 @@
       :predictability-bonus        <predictability-bonus term (v0.13, negative weight in controller-score)>
       :homeostatic-pressure    <survival hinge-loss term (v0.13)>
       :structural-pressure <candidate-local structural-pressure term>
-      :gap-exploration-bonus        <mission-fold gap credit; negative weight in controller-score>
-      :G-goal-outcome <E-C-vector-live: additive risk = divergence of this
-                       action's PREDICTED goal-outcomes from the LIVE C-vector
-                       (the belly); advancing a goal lowers it ⇒ re-ranks
-                       policies; 0 when no live C ⇒ reduces to the static floor>
-      :controller-score       <G-risk + G-ambiguity − info-weight×predictability-bonus
-                       + survival-weight×homeostatic-pressure
-                       − structural-pressure-weight×structural-pressure
+	     :gap-exploration-bonus        <mission-fold gap credit; negative weight in controller-score>
+	     :G-goal-outcome <E-C-vector-live: additive risk = divergence of this
+	                      action's PREDICTED goal-outcomes from the LIVE C-vector
+	                      (the belly); advancing a goal lowers it ⇒ re-ranks
+	                      policies; 0 when no live C ⇒ reduces to the static floor>
+	     :preference-stack <the recorded five-layer preference stack mirrored
+	                       from R19-D1; four layers fold into C-risk here and
+	                       the habit prior remains recorded with `:folded? false`>
+	     :controller-score       <G-risk + G-ambiguity − info-weight×predictability-bonus
+	                      + survival-weight×homeostatic-pressure
+	                      − structural-pressure-weight×structural-pressure
                        − gap-exploration-bonus + G-goal-outcome>
       :per-channel   <per-channel risk decomposition (from compute-controller-diagnostics)>}
 
@@ -611,7 +649,9 @@
                                               (pref/c-distribution spec
                                                                    :temperature (ch-temp ch))))))
                         (:preference-gap-score fe-on-predicted))
-         g-risk (+ channel-risk zone-risk)
+	         ;; foldC layer ids: :floor from channel-risk + :capability-zone-load
+	         ;; from zone-risk compose here as the recorded C-risk prefix.
+	         g-risk (+ channel-risk zone-risk)
          g-ambig (if learn-action?
                    (:predictive-variance zone-evidence)
                    (ambiguity next-var ambiguity-mode))
@@ -693,23 +733,17 @@
          ;; below only NAMES the same quantities (float associativity means
          ;; :G-core + :controller-augmentation matches :controller-score to ~1e-15, not to the
          ;; bit — asserted at 1e-9 in efe_struct_split_test).
-         ;; D-1d (M-aif-faithfulness §2.1, relocation RATIFIED 2026-07-04, flip
-         ;; = Joe's): structural-pressure is a documented EXOGENOUS WEIGHT
-         ;; whose canonical seat is the habit prior ln E(π) (R12), not a
-         ;; controller summand. :structural-pressure-mode:
-         ;;   :controller-augmentation (DEFAULT) — the historical position: the (negative,
-         ;;     preference-increasing) contribution stays in :controller-score and in
-         ;;     the :structural-pressure slot of the augmentation layer.
-         ;;     Byte-identical.
-         ;;   :habit-prior (DARK) — the term LEAVES :controller-score and the layer;
-         ;;     :habit-prior-bias (= +w·sp, in ln-E-units-by-declaration) is
-         ;;     emitted instead, consumed by policy/select-action's log-prior
-         ;;     seam (the R12 seat). Semantic difference, documented for the
-         ;;     flip memo: as ln E the term stops being scaled by 1/τ_eff (γ)
-         ;;     — precision no longer modulates habit; and it stops moving
-         ;;     :controller-score, so census/argmin views of G no longer see it.
-         sp-contribution (- (* (double structural-pressure-weight)
-                               g-structural-pressure))
+	         ;; D-1d / R19-D2a: Joe flipped the live default on 2026-07-13.
+	         ;; war_machine.clj:247-268 makes :habit-prior the default mode and
+	         ;; :learned-frequency the default source; the env vars are rollback
+	         ;; hatches only. The object's home is the policy seam consuming
+	         ;; ln E(pi), with R14 supplying tau. policy.clj:234-270 records the
+	         ;; seam's authority as :counterfactual-only: the habit prior is
+	         ;; computed and recorded there, but abstains from choosing. This
+	         ;; local branch still exposes both modes because
+	         ;; :controller-augmentation is the historical rollback path.
+	         sp-contribution (- (* (double structural-pressure-weight)
+	                               g-structural-pressure))
          habit-prior? (= structural-pressure-mode :habit-prior)
          augmentation-terms (cond-> {:risk-control risk-control
                                      :info info-contribution
@@ -722,29 +756,31 @@
                               habit-prior? (dissoc :structural-pressure)
                               move-class-contribution
                               (assoc :move-class-intensity move-class-contribution))
-         g-total-base (+ effective-risk
-                         g-ambig
-                         info-contribution
-                         survival-contribution
-                         (if habit-prior? 0.0 sp-contribution)
-                         (:graph-control-score graph-terms)
-                         (- (:model-uncertainty-bonus graph-terms 0.0))
-                         (- (:gap-exploration-bonus gap-terms))
-                         g-goal-outcome)
+	         g-total-base (+ effective-risk
+	                         g-ambig
+	                         info-contribution
+	                         survival-contribution
+	                         (if habit-prior? 0.0 sp-contribution)
+	                         (:graph-control-score graph-terms)
+	                         (- (:model-uncertainty-bonus graph-terms 0.0))
+	                         (- (:gap-exploration-bonus gap-terms))
+	                         ;; foldC layer id: :live-goal-outcomes composes here.
+	                         g-goal-outcome)
          g-total (if move-class-contribution
                    (+ g-total-base move-class-contribution)
                    g-total-base)]
      (cond->
       (merge
-       {:action action
-        :prediction prediction
-        :G-risk g-risk
-        :G-ambiguity g-ambig
+	       {:action action
+	        :prediction prediction
+	        :G-risk g-risk
+	        :G-ambiguity g-ambig
         :predictability-bonus g-info
         :homeostatic-pressure g-survival
-        :structural-pressure g-structural-pressure
-        :G-goal-outcome g-goal-outcome
-        ;; D2 (M-evaluate-policies §8.3): the canonical EFE CORE, reported
+	        :structural-pressure g-structural-pressure
+	        :G-goal-outcome g-goal-outcome
+	        :preference-stack preference-stack-record
+	        ;; D2 (M-evaluate-policies §8.3): the canonical EFE CORE, reported
         ;; separately from the multi-objective blend — :G-core = risk +
         ;; ambiguity exactly (invariant I3). Pure addition; :controller-score unchanged.
         :G-core (+ g-risk g-ambig)
@@ -794,11 +830,11 @@
        (assoc :c-zone-load (assoc zone-evidence :risk zone-risk)
               :g-ambiguity-source :beta-predictive)
 
-       ;; D-1d dark lane: the relocated term, as a log-prior bias for the R12
-       ;; habit-prior seam in policy/select-action. Positive = preference-
-       ;; increasing (it was SUBTRACTED from G; ln E is ADDED to the score).
-       habit-prior?
-       (assoc :habit-prior-bias (- sp-contribution))
+	      ;; D-1d dark lane: the relocated term, as a log-prior bias for the
+	      ;; habit-prior seam in policy/select-action. Positive = preference-
+	      ;; increasing (it was SUBTRACTED from G; ln E is ADDED to the score).
+	      habit-prior?
+	      (assoc :habit-prior-bias (- sp-contribution))
 
        move-class-intensity
        (assoc :move-class-intensity-mode move-class-intensity-mode
