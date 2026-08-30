@@ -51,6 +51,7 @@
         expanded (mapcat (fn [b] (map #(assoc b :witnesses %) (names b))) registry)
         unknown (vec (remove #(contains? by-name (:witnesses %)) expanded))
         malformed (vec (filter #(or (not (contains? % :result))
+                                    (not (contains? #{:passed :failed} (:result %)))
                                     (not (contains? % :recorded-at))) expanded))
         duplicates (->> expanded (group-by :witnesses)
                         (keep (fn [[n xs]] (when (> (count xs) 1) n))) vec)
