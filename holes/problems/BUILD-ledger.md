@@ -3054,3 +3054,38 @@ things carry `:interface` + `:status` only. **No port claims an observation it d
 **Sequence worth keeping:** a pair specified an edge, a wiring seat encoded it, new measurement arrived,
 a node re-opened its own finished contract, and the registry entry was renamed to match the machine —
 inside one session, with the evidence grade intact at every step.
+
+### The exemplar gate checks one of four instances — R5 found it, and stopped
+
+R5 declined to amend the canonical instance or duplicate it in futon2, and reported instead. Its finding,
+verified: `checks/hyper_edge_exemplar_check.clj:44` —
+
+    :or {schema default-schema edge ":wm/run-once-receipt-chain"}
+
+**The checker validates exactly one instance and defaults to that one.** A bare
+`bb -cp . checks/hyper_edge_exemplar_check.clj` prints `{:pass? true, :edge/id
+:wm/run-once-receipt-chain, …}` while never looking at the three control-map edges. The owner's
+"`hyper_edge_exemplar_check.clj` gates it for free" was true of the mechanism and false of the default
+invocation — which is the one everybody runs.
+
+Same family as the day's other catches: **a gate that passes without examining the thing you care about.**
+`r2ContractCensus` accepting vacuously, the empty ε-comparison, `EraSummary` presupposing its own law.
+
+Run explicitly, all three pass — so nothing is being hidden, the gate is simply not looking:
+
+    :control-map/R5-R6-R14-score-field   pass  ports 6  freehand 0
+    :control-map/R16-to-R2               pass  ports 2  freehand 2
+    :control-map/R9-to-R16               pass  ports 2  freehand 2
+
+**And that table is a measurement of the two methods.** The edge produced by *pairing* has six ports and
+**zero freehand**; the two produced by *record reconciliation* have two ports each and are **entirely
+freehand**. Freehand is legal — the schema says *"recordable and flagged, not a schema failure"* — but it
+means no interface descriptor exists. Two nodes negotiating produced a fully-descriptored edge; reconciling
+two written records produced ports nobody could name an interface for.
+
+R5's recommendation, endorsed and passed to the owner rather than done here: make the checker iterate every
+instance. It is a small fix in claude-15's lane, and the gate is theirs.
+
+**One stale premise in R5's report, noted for accuracy:** it says `c69eb97` still models a binary R5→R14
+edge omitting R6. True when R5 looked; `c784e72` had already renamed it to
+`:control-map/R5-R6-R14-score-field` with R6 among six members. R5's *checker* finding is unaffected.
