@@ -2847,3 +2847,42 @@ packet requires *"observed: X at file:line"* over *"proposed: X"* wherever the c
 wiring request. They specify; the wiring seat implements. **claude-15 notified before dispatch**
 (`invoke-1788122552707`) that codex-8 would receive traffic, with an offer to route elsewhere if it is
 still theirs — the collision-avoidance I failed at this evening.
+
+### PAIR-R5-R14 round 1 — both nodes corrected the commissioner, independently
+
+**I gave both packets a false premise:** *"R5's scores reach you, and you compute with them, and they do
+not select."* **Both nodes rejected it in round 1, without conferring** — R5's bell and R14's bell were
+sent minutes apart, and my correction to R14 arrived after its round 1 was already committed.
+
+Verified: `efe.clj:844` — `rank-actions` *"order them by controller-score ascending… `:rank` (1 = most
+preferred)"* — and `policy.clj:249` `chosen (or (first controller-entries) (first ranked-actions))`. **The
+live choice is the best-scoring non-no-op action under R5's controller score.** The machine is a **greedy
+argmax over R5's scores**; what is counterfactual is R14's part alone — the `−G/τ + log-prior` binding
+feeding `habit-order` → `counterfactual-idx`.
+
+**My error was a conflation**, and it is the day's recurring one: I compressed "the habit prior does not
+select" into "the scores do not select", losing the distinction between two different rankings. Same
+shape as conflating a count with its population this afternoon. The records are unaffected — what
+claude-15 propagated into P-R19 and the Lean fixture is about the *habit prior*, which does not choose.
+The over-extension was local to my packet.
+
+**Two agents rejecting a commissioner's premise independently is better evidence for the method than any
+agreement could be.** It is also the second pairing in a row where a node corrected the framing in round 1.
+
+### Two facts relayed mid-flight from the owner
+
+1. **WM-RUN2 measured the seam**, and it may have a node in it:
+   `R8 →(rank-actions) R5 →(select-action) R6 →(invoke-strategic-selection) R14`. R5's `g-totals` enter at
+   `select-action` — R6's function — and reach R14 through `invoke-strategic-selection`; `R6→R14` is one
+   of six unmapped hops in PREREG §2f. So the pair's question is no longer "does the edge exist" (three
+   sources agree the scores flow) but **where the port sits**: direct, through R6, or two edges. They hold
+   the receipt; they answer from the route, not from the expected call graph.
+2. **The contract lands as a hyper-edge instance**, not a parallel format —
+   `p4ng/empirics-futon/hyper-edge-schema.edn` (`5a1d9f9`), so codex-8 wires what they specified with no
+   translation and `hyper_edge_exemplar_check.clj` gates it for free.
+
+**codex-8 released by the owner** with the observation that it is the better routing anyway: it is the
+only seat holding *both* edge schemas — the CML `R16→R2` schema it built and the hyper-edge schema it
+anchored. And the owner flagged something possibly novel for the census: **R14's port accepts scores and
+abstains from selecting with them**, which may be the first `:accepts` needing a semantic annotation
+beyond a shape — a declared abstention as part of a port's type.
