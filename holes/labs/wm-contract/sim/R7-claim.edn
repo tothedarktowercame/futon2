@@ -1,0 +1,39 @@
+{:node :R7
+ :i-am "I maintain bounded per-observation-channel precision from rolling prediction-error history and use it to weight each channel's current prediction error."
+ :edges
+ [{:edge [:R7 :R3]
+   :direction :out
+   :payload "Per-channel prediction errors annotated with adaptive :precision, :weighted-error, and the preserved :per-call-precision."
+   :without-it "The belief-update driver cannot aggregate signed precision-weighted channel errors using R7's learned weights."
+   :evidence :from-artefact
+   :cite "src/futon2/aif/precision.clj:192-210"}
+  {:edge [:R7 :R8]
+   :direction :out
+   :payload "The current per-channel :precision-state paired with prediction errors for evaluating present fit."
+   :without-it "R8 cannot distinguish equally sized prediction errors that have different reliability histories."
+   :evidence :imagined}
+  {:edge [:R7 :R14]
+   :direction :out
+   :payload "Channel-level uncertainty evidence that might constrain policy-temperature changes."
+   :without-it "R14 can change its policy-selection gain without evidence about whether the observations behind the decision are reliable."
+   :evidence :imagined}
+  {:edge [:R12 :R7]
+   :direction :in
+   :payload "Calibration outcomes that say whether a channel's current precision estimate predicted reliable evidence."
+   :without-it "My rolling variance responds to prediction errors but cannot distinguish a calibrated precision estimate from a merely stable one."
+   :evidence :imagined}
+  {:edge [:R20 :R7]
+   :direction :in
+   :payload "Tripwire evidence identifying precision estimates whose bounds or provenance are unsafe."
+   :without-it "I continue emitting a numerically bounded precision even when an external safety condition says its evidence channel should not be trusted."
+   :evidence :imagined}]
+ :missing-edges
+ [{:to :R3
+   :why "I need R3's prediction errors to update inverse rolling error variance; the map derives R3->R7 but does not draw it."}
+  {:to :R2
+   :why "I need R2's observation-channel identity and observed value so precision remains keyed to the evidence feature; the map derives R2->R7 but does not draw it."}
+  {:to :R5
+   :why "My precision should reach every scoring operation, but the scoring edge R7->R5 is only derived-undrawn."}
+  {:to :R16
+   :why "My precision should constrain evidence-sensitive gating, but R7->R16 is only derived-undrawn."}]
+ :contaminated? true}
