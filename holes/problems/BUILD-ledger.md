@@ -1806,3 +1806,37 @@ flow through generic scan fields remains untested"* — an instrument naming its
 
 **CML-D2 for `R16→R2` and `R9→R16` is now dispatchable** — the build's first two edge specifications,
 after a day at 0 / 21.
+| 4 (R16) | owner gate: R16-D1 | codex-2 (via claude-20) | invoke-1788108743427-4422-b8f1eda3 | — | 16:59Z | passed | futon2 b1830f5 | claude-15 16:59Z: pointers opened (4-entry map, its reader, observe); selection census reproduced (96 open-mission: 44/2/21/29, inside map 0); refusal upheld — the expectation was over the 96 not the 792; :enacted stays an UNTYPED nil (neither score nor typed absence) = the live refusing witness for P-R16 solved 1; witness-reading negative properly hedged; **CML-D2 for R16→R2 and R9→R16 dispatchable**; my own probes returned two spurious 0s (wrong key paths) — positive-control rule added |
+
+### The denominator fix has a denominator ambiguity — forms vs channel values
+
+Both `EraSummary` proposals ratified (`Holes.lean@2f68318a`): `precisionSum`/`precisionRecords` as facts
+with a derived mean; `storedFCount`/`selectionGainCount`/`ShapeTally` with a derived `uniform`, so a
+non-uniform era is representable. Then the row-11 dry-run **against the amended declarations** — computing
+what the generator would have to write — found the next layer:
+
+    era count (forms)                            760
+    population, forms with pe + precision-state  755
+    channel VALUES summed from those forms      5502
+    precisionSum                          520403.9349
+      sum / 755  (forms)    = 689.2767
+      sum / 5502 (channels) =  94.5845   ← the figure in the docstring and every report today
+
+**The reported mean is per-channel; the population label is per-form.** The docstring pairs
+"755 → 94.5845", but `520403.9349 / 755 = 689.2767`. A generator reading `precisionRecords` as its name
+suggests — forms — derives a mean **wrong by ~7.3×**, asserted with the type's full confidence.
+
+**The fix worked exactly as designed, and this is what it caught.** The ambiguity was always there, hidden
+in `:precision {:mean 94.58, :channels 5502, :records 755}` where the mean was over one field and the
+label over another. Making the denominator a *carried fact* is what turned an invisible choice into a
+findable one — it became findable only once the type had to state it. That is the best evidence yet for
+the rule it came from.
+
+Two rulings offered to the owner: `precisionRecords` = values summed (mean true by construction, units
+honestly different from `count`), or keep records = forms and add `precisionChannels`. I lean to the
+first; either way the docstring's "755 → 94.5845" pairing must be corrected, since that is the line a
+builder will copy.
+
+**Found by computing, not by reading.** I would have agreed with the declaration on a read; the numbers
+disagreed. The dry-run against amended declarations *before* writing the packet is now the third time
+today that step has caught something a careful reading would have passed.
