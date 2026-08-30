@@ -1,0 +1,26 @@
+{:node :R13
+ :i-am "I expand candidate moves into bounded multi-step policies, accumulate discounted step costs, and select the lowest-scoring rollout while preserving terminal truncation and one-step comparison."
+ :edges
+ [{:edge [:R6 :R13]
+   :direction :in
+   :payload "Candidate moves and the current state from which I can enumerate policy continuations."
+   :without-it "I have no moves to expand, so temporal depth produces no candidate policies."
+   :evidence :from-artefact
+   :cite "src/futon2/aif/rollout.clj:212"}
+  {:edge [:R13 :R14]
+   :direction :out
+   :payload "Policy rollouts ranked by discounted cumulative score, including their step sequence and terminal-truncation state."
+   :without-it "Commitment control has no temporally evaluated alternatives on which to regulate selection."
+   :evidence :imagined}
+  {:edge [:R15 :R13]
+   :direction :in
+   :payload "A horizon H and temporal discount controlling how far rollout expands and how later step costs are weighted."
+   :without-it "I fall back to the legacy depth and gamma defaults and cannot express the upstream temporal choice explicitly."
+   :evidence :from-artefact
+   :cite "src/futon2/aif/rollout.clj:166"}]
+ :missing-edges
+ [{:to :R4
+   :why "Each policy step needs a state-transition model; the drawn R6 input supplies moves but no drawn edge supplies the transition semantics used by apply-move."}
+  {:to :R12
+   :why "Realized longer-horizon outcomes need to update future temporal choices; the permitted runtime source describes accumulated learning feeding temporal policy behavior, but no drawn R12-to-R13 edge carries it."}]
+ :contaminated? true}
