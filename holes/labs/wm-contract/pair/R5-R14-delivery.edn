@@ -45,14 +45,15 @@
    :controller-score :number
    :selection-gain :number
    :tau-spread :number
-   :tau-effective :number
+   :tau :number
    :selection-boundary :strategic-recommendation
-   :controller-order-authority :live
-   :temperature-order-authority :counterfactual-only}
+   :habit-authority :counterfactual-only}
   :cite "src/futon2/aif/policy.clj:240-280"
   :proposed-additions
-  [:score-field/id :scoring-config/id :temperature-mode
-   :r5/controller-order :r14/temperature-order :sensitivity-witness]}
+  [:score-field/id :scoring-config/id :temperature-mode :tau-effective
+   :r5/controller-order :r14/temperature-order
+   :controller-order-authority :temperature-order-authority
+   :sensitivity-witness]}
  :field-provenance
  {:from :agreed
   :to :agreed
