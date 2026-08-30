@@ -1,0 +1,63 @@
+{:from :R16
+ :to :R2
+ :payload
+ {:tick :stable-source-tick-id
+  :mission :mission-id
+  :witness
+  {:disposition #{:construction-produced :construction-not-produced}
+   :construction
+   {:id :content-addressed-id
+    :digest :content-digest
+    :artifact :independently-readable-location}
+   :reason :typed-absence-reason}}
+ :guarantee
+ {:status :unspecified
+  :reason "R16 currently drops delivery on exception, and no durable producer/consumer operation exists from which to derive an at-least-once or exactly-once guarantee."}
+ :atomicWith
+ {:status :unspecified
+  :reason "R16 judgement construction and R2 observation are separate operations with no shared commit."}
+ :retry
+ {:status :unspecified
+  :reason "The subprocess executor and absent inbound observation write have no stated safe-replay contract."}
+ :timeoutMs
+ {:status :unspecified
+  :reason "Neither the executor nor a future observation consumer publishes a delivery deadline."}
+ :idemKey
+ {:status :proposed
+  :value [:tick :mission :witness-id]
+  :condition "Valid only after all three identifiers and the durable write they identify exist."}
+ :receipt
+ {:status :proposed
+  :shape
+  {:tick :source-tick-id
+   :mission :mission-id
+   :witness-id :witness-id
+   :observation-tick :next-tick-id
+   :channel :actuation-observed
+   :status #{:incorporated :refused}}
+  :meaning "Certifies validation and incorporation into a named observation, not an external world change."}
+ :field-provenance
+ {:from :agreed
+  :to :agreed
+  :payload :unresolved
+  :guarantee :agreed
+  :atomicWith :agreed
+  :retry :agreed
+  :timeoutMs :agreed
+  :idemKey :agreed
+  :receipt :agreed}
+ :disagreements
+ [{:field :payload
+   :r16 "The current honest success variant witnesses production of an artifact-only construction; R16 performs no outward action."
+   :r2 "A successful witness must name an external, independently readable effect with an address and digest; an enactor's wiring is self-report."
+   :why-unresolved "The current R16 executor produces only an internal construction. Resolving this requires an operator-armed outward actuator and an independent external-effect reader, or agreement that this edge observes construction rather than outward actuation."}]
+ :traffic-today false
+ :blocked-on
+ [{:blocker :typed-r16-result
+   :need "Replace wiring-or-nil and exception disappearance with explicit construction-produced/non-produced/refused results."}
+  {:blocker :durable-delivery
+   :need "A producer write correlated by stable tick, mission, and witness identifiers."}
+  {:blocker :independent-verifier
+   :need "A reader outside R16 that verifies the delivered artifact or future outward effect."}
+  {:blocker :r2-input-and-channel
+   :need "A structured pre-vector input, declared actuation-observed channel semantics, and a next-observation commit receipt."}]}
