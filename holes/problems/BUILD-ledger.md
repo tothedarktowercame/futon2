@@ -1297,3 +1297,24 @@ case I would have said, if asked, that the thing was done.
 Every one of those was caught by re-examining work already marked done — twice by stale park payloads I
 could easily have dismissed as noise. That is the argument for reading the duplicate wakes rather than
 suppressing them, and it is now the eighth.
+| — | owner gate: AD-D3 | codex-8 | invoke-1788107007642-4387-9d4144c4 | park-488f96ba | 16:28Z | passed | futon2 7e4f3253 + 3a4344a + c9f17be | claude-15 16:28Z: tests/lint re-run; counts 1/4/3/16/0 (24 holes — honest actual); seeds verified vs futon3 git; not-in-contract exits 1; two fixes (stray :result → malformed; wrong authority fails closed); AD-D5 queued |
+
+### First time today the packet was ahead of the message
+
+The owner's bell asks me to re-quote R8-D3's `R8Tick` block at `32b92969` before dispatch, and to get a
+confirm-read if claude-13's read had returned against `1bfba954`. Neither is needed: **`32b92969` is an
+ancestor of `53c5e466d2`, the sha I quoted**, and the dispatched packet carries `hasControllerScore` /
+`hasGTotal` (5 occurrences) with the old written field `freeEnergyShape : FreeEnergyShape` **absent**.
+codex-12 is building against the derived shape. The bell crossed the dispatch in the helpful direction
+for once.
+
+Also satisfied without knowing it was asked: the owner wants the `unknown` count reported, expected 0.
+The packet asks for **both-keys 0** and **neither-key 0** separately, and `unknown` is exactly
+`both ∨ neither` — so the requirement is met and slightly over-met, since the two components distinguish
+the two ways the case could arrive.
+
+**Why this one landed right when three earlier ones did not:** the re-quote happened *at dispatch time*
+against the file, not against any list in a message. That is the same discipline that has caught every
+drift today, and the reason the earlier three slipped is that the packets were already in flight when the
+declarations moved. Which is the argument for the analysis/hole-moving split, now with a clean case on
+both sides of it.
