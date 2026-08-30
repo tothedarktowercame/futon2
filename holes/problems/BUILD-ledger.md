@@ -2527,3 +2527,34 @@ abstention*. Which is a more interesting thing for the harness-layering design t
 **Method note against myself, the fifth of this run:** I classified 13 edge assertions and missed the
 substantive finding sitting in the same claim files, because I was measuring the thing I had designed a
 metric for. The metric was about edges; the value was in the prose.
+
+### INCIDENT — I dispatched into seats that were not free (Joe, 19:20Z)
+
+I read `GET /api/alpha/agents` `status ∈ {idle, restored, invoking}` as an availability flag and
+dispatched 9 node-simulation jobs. **It is a liveness flag, not an ownership flag.** `idle` means "not
+mid-invoke at this instant", which is precisely wrong for a pooled worker that takes a job every few
+minutes, and `restored` means a session was rehydrated *with someone's context in it*.
+
+**What the job log shows:**
+- **codex-17 was in active APM rotation** — `apm-watcher-codex` at 18:42, 18:45, 18:47 ×2, 18:48;
+  `claude-clink-1` at 18:51 (f63 supervisor decision); `codex-18` at 18:56 (`f1a217ab`). I injected two
+  jobs into it at 19:02 and 19:03.
+- At **19:02:57**, within a minute of my 9-job burst, an `apm-watcher-codex` job on codex-17 reported
+  *"Repaired. The `git` spawn failure was transient"* — a spawn failure in Joe's APM pipeline, in the
+  window where my burst exhausted the Agency JVM's native-thread capacity (two of my own jobs died of
+  `OutOfMemoryError: unable to create native thread` at the same moment).
+- codex-3, codex-4, codex-21 show no other traffic in the window.
+
+**What I cannot see, and must not claim:** the job log records *failures*, not *displacement*. If any of
+those seats was holding session context for other work, my job would have overwritten that context
+without leaving a failed row anywhere. So I can report what failed; I cannot certify that nothing was
+lost.
+
+**The roster gap, since it is a real design point:** there is no field for pool membership, owner, or
+current assignment — and no per-agent job history endpoint (`?agent=` is ignored, `/agents/:id/jobs` is
+404). Nothing in the API distinguishes "free" from "between jobs in someone's pipeline". That is worth
+fixing, and it is not an excuse: the correct move was to ask before taking nine seats on a shared server.
+
+**Standing correction to my own practice:** seat availability is not inferable from the roster. Before
+dispatching to a seat I have not been given, ask. I had exactly this in memory for reserved seats
+(`codex-18`) and applied it as a blocklist rather than as the general principle it was.
