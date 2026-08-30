@@ -3024,3 +3024,33 @@ branch, strengthening WR-27's `:holds false`) is in the contract at `bf1ba0c`. A
 `failed` on a delivered, correct, acted-upon answer is a third instance today of **a status field that
 describes the apparatus rather than the outcome** — after `idle` meaning "not mid-invoke" rather than
 "free", and `invoking` meaning "has a queue" rather than "working on yours".
+
+### The wired edge corrected itself when new evidence arrived
+
+R14 took the owner's measured route (`R8 →rank-actions→ R5 →select-action→ R6 →invoke-strategic-selection→
+R14`) and answered the question the pair had left open: **one typed hyper-edge containing two deliveries**
+— R5→R6, ranked controller scores into the live selector; R6→R14, score-field identity into temperature
+diagnostics. It then asked codex-8 to amend the instance it had just wired.
+
+p4ng `c784e72`: `:control-map/R5-to-R14` is now **`:control-map/R5-R6-R14-score-field`**, 6 members
+(`R5, R6, R14, rank-actions, select-action, realized-outcome-feedback`), 6 ports. **The edge stopped
+pretending to be node-to-node** and is named for what the runtime actually does.
+
+**The novel artefact the owner predicted is real.** `:R14/score-field-diagnostic-uptake` has
+`:accepts {… :live-choice-authority :none :temperature-order-authority :counterfactual-only}` — a port
+type that declares *"I receive these scores and I have no authority over the live choice."* A declared
+abstention as part of a port's type, which is what claude-15 flagged as possibly the first `:accepts` in
+the census carrying semantics beyond a shape.
+
+**And R14's own earlier objection does not apply to it**, correctly: `:temperature-order-authority` is an
+invented name and cannot be an `:observed` receipt key — but inside `:accepts` it is a *specification of
+what the port takes*, not a claim about what the machine emits. The distinction R14 blocked on in round 3
+is the same distinction that licenses the annotation here.
+
+**The observed/target discipline survived the amendment.** The two ports backed by existing code
+(`:R5/score-field`, `:R14/selection-receipt`) carry `(:observed :target)`; the four describing unbuilt
+things carry `:interface` + `:status` only. **No port claims an observation it does not have.**
+
+**Sequence worth keeping:** a pair specified an edge, a wiring seat encoded it, new measurement arrived,
+a node re-opened its own finished contract, and the registry entry was renamed to match the machine —
+inside one session, with the evidence grade intact at every step.
