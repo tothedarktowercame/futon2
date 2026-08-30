@@ -1,0 +1,79 @@
+{:stack/id :wm-2026-08-30
+ :declared-purpose nil
+ :declared-purpose-looked-at
+ ["holes/problems/P-R19-preferences-open.md:1-111"
+  "src/futon2/aif/preferences.clj:1-70"
+  "src/futon2/aif/c_vector.clj:1-31"
+  "git log --follow for preferences.clj and c_vector.clj"]
+ :observed-purpose "The fold ranks the War Machine's candidate actions by preferring predicted channel and learned-action-zone values near their targets and predicted goal, coherence, completion, and reach outcomes closer to the currently recorded targets."
+ :situation-evidence
+ ["holes/problems/P-R19-preferences-open.md:1-52"
+  "src/futon2/aif/efe.clj:601-614"
+  "src/futon2/aif/efe.clj:639-665"
+  "src/futon2/aif/efe.clj:725-735"
+  "scripts/futon2/report/war_machine.clj:4463-4472"]
+ :fit-status :witnessed
+ :falsifier "A live War Machine tick that obtains these preference inputs from a unit other than the current futon corpus and operator trace, or applies them to outcomes other than the candidate actions scored by compute-efe, would make this the wrong model of that deployment."
+ :holder "claude-15"
+ :parent "spine/R5-risk"
+ :composition-order
+ [{:layer/id :floor
+   :folded-at "src/futon2/aif/efe.clj:601-614"}
+  {:layer/id :capability-zone-load
+   :folded-at "src/futon2/aif/efe.clj:586-614"}
+  {:layer/id :live-goal-outcomes
+   :folded-at "src/futon2/aif/efe.clj:655-665,725-733"}
+  {:layer/id :c-vector-overlays
+   :folded-at "src/futon2/aif/c_vector.clj:227-240,633-640"}]
+ :layers
+ [{:layer/id :floor
+   :source :operator-declared
+   :author "Joseph Corneli"
+   :basis "src/futon2/aif/preferences.clj sha256 22ae618a61cb3a4198b431cac214390337e29a01017ef302feb02618ef41e86a; ranges introduced by commit 135efdff5483dd297ce8b3670fe041b4283e6e92"
+   :read-at "src/futon2/aif/efe.clj:601-614"
+   :compose :additive
+   :folded? true
+   :folded-at "src/futon2/aif/efe.clj:601-614,725-733"
+   :enters-at nil
+   :prefers-over "Predicted values of the War Machine's observation channels, preferring values inside the declared healthy ranges."}
+  {:layer/id :capability-zone-load
+   :source :learned-from-operator
+   :author "wm-outer-loop, implementation authored by Joseph Corneli"
+   :basis "substrate-2 live probe 2026-08-30: 242 code/v05/wm-hyperparameter-update records, 14 classes, max :as-of 2026-07-18T22:33:41+01:00"
+   :read-at "src/futon2/aif/preferences.clj:140-173 and src/futon2/aif/efe.clj:586-600"
+   :compose :additive
+   :folded? true
+   :folded-at "src/futon2/aif/efe.clj:586-614"
+   :enters-at nil
+   :prefers-over "Learn-action-class candidates, preferring posterior follow-through probability near the evidence-load preference for the target capability zone."}
+  {:layer/id :live-goal-outcomes
+   :source :corpus-derived
+   :author "futon2.aif.c-vector/entries-from-corpus, authored by Joseph Corneli"
+   :basis "substrate-2 :7071 live probe 2026-08-30: corpus signature -1131096431, 36 capabilities, 293 sorries"
+   :read-at "src/futon2/aif/c_vector.clj:160-184 and src/futon2/aif/efe.clj:655-665"
+   :compose :additive
+   :folded? true
+   :folded-at "src/futon2/aif/efe.clj:655-665,725-733"
+   :enters-at nil
+   :prefers-over "Predicted satisfaction outcomes for open capabilities and clean open sorries represented in the live goal/hole corpus."}
+  {:layer/id :c-vector-overlays
+   :source :script-produced
+   :author "futon6/scripts/c_vector.bb, authored by Joseph Corneli"
+   :basis "2026-06-26 overlay snapshots: mess sha256 ffb40d5f9d3c026d41e1bd2b6047efcf9e5bddbf3dd1a8c7acc667e37fb2a4fd; incomplete sha256 f6c3e137d721f9a4936a176d4991373b18b64fbdcc58b0e600944c006ac3c554; yingvoice sha256 84a0ed72aa7c277e702ec5699de2ba94c7c7d4f00fc414d3aa858c91a47eec4f"
+   :read-at "src/futon2/aif/c_vector.clj:191-212"
+   :compose :bounded
+   :folded? true
+   :folded-at "src/futon2/aif/c_vector.clj:227-240,633-640"
+   :enters-at nil
+   :prefers-over "Predicted mission-coherence, mission-completion, and recorded 應-voice reach outcomes, with duplicate outcome references excluded in favour of the live base."}
+  {:layer/id :habit-prior
+   :source :learned-from-operator
+   :author "unknown operator whose selections are recorded in wm-trace"
+   :basis "data/wm-trace/wm-trace-2026-08-30.edn sha256 6da3ccdab1dc4ef32d160d4b9ebcbe4bc6c654d529c2e0873971dd4f3aa06a05"
+   :read-at "scripts/futon2/report/war_machine.clj:4205-4216,4455-4472"
+   :compose :additive
+   :folded? false
+   :folded-at nil
+   :enters-at "Mode-dependent: :controller-augmentation keeps structural pressure additively in controller-score at src/futon2/aif/efe.clj:700-703,725-733; today's default :habit-prior replaces it with learned ln E(pi) at src/futon2/aif/habit_prior.clj:121-136 and scripts/futon2/report/war_machine.clj:4465-4472, then policy/select-action consumes that unscaled log prior at src/futon2/aif/policy.clj:368-380."
+   :prefers-over "Candidate policies/actions with greater posterior frequency under the operator-selection trace."}]
+ :note "futon2 HEAD 0a03af00fbc7f58f4a773e4115765e7978e40250. No declaration naming the situation modelled by this exact current stack was found in the declared-purpose search; P-R19:88 gives an example rather than declaring this deployment. The code contains a fifth folded preference source absent from P-R19's four-row inventory: capability-zone load. The sole unknown author is the operator identity behind wm-trace; the trace records selections but no author field. No basis is absent. DarkTower/WarMachine/Holes.lean:493-499 and CommitmentTemperature.lean:99-125,224-228 model the same ln E(pi) habit-prior object consumed at src/futon2/aif/policy.clj:82-104; the Lean files abstract its values and do not provide a second prior source."}
