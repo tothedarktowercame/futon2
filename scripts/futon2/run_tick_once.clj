@@ -1,8 +1,12 @@
 (ns futon2.run-tick-once
   "Run one on-demand WM tick and leave a Lean-shaped receipt."
-  (:require [clojure.java.io :as io]
+  (:require [babashka.http-client :as http]
+            [cheshire.core :as json]
+            [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.pprint :as pp]
             [futon2.aif.efe :as efe]
+            [futon2.aif.pattern-registry :as pattern-registry]
             [futon2.report.war-machine :as wm])
   (:import (java.time Instant LocalDate ZoneId)))
 
@@ -31,6 +35,13 @@
     (when (.exists f)
       {:size (.length f)
        :mtime (.lastModified f)})))
+
+(defn- node->str [node]
+  (cond
+    (keyword? node) (subs (str node) 1)
+    (symbol? node) (str node)
+    (string? node) node
+    :else (str node)))
 
 (defn- latest-at [entries]
   (or (->> entries
@@ -87,26 +98,88 @@
        :selector-seam (str "stub:" stub-selector-name)
        :selector-resolution-error resolution-error})))
 
-(defn- evidence-basis [days]
+(defn- get-json [url]
+  (let [resp (http/get url {:headers {"Accept" "application/json"}
+                            :timeout 30000
+                            :throw false})]
+    (when (= 200 (:status resp))
+      (json/parse-string (:body resp) true))))
+
+(defn- evidence-base []
+  (pattern-registry/configured-evidence-base))
+
+(defn- store-basis []
+  (let [base (evidence-base)
+        count-body (get-json (str base "/api/alpha/evidence/count"))
+        latest-body (get-json (str base "/api/alpha/evidence?limit=1"))
+        latest-entry (first (:entries latest-body))]
+    {:count (long (or (:count count-body) 0))
+     :max-at (or (some-> latest-entry :evidence/at str) "")
+     :count-source (str base "/api/alpha/evidence/count")
+     :max-at-source (str base "/api/alpha/evidence?limit=1")}))
+
+(defn- evidence-sample [days]
   (let [limit (#'wm/session-evidence-limit)
         since (#'wm/since-str days)
         result (#'wm/fetch-evidence-result :limit limit :since since)
         entries (or (:entries result) [])]
-    {:count (count entries)
+    {:entries-read (count entries)
+     :entries-limit limit
      :max-at (latest-at entries)
      :diagnostic (dissoc result :entries)}))
 
-(defn- tick-run-record [started-at basis result selector-seam trace-written?]
+(def ^:private control-map-path
+  "/home/joe/code/p4ng/empirics-futon/control-map-edges.edn")
+
+(defn- drawn-edge-pairs []
+  (->> (:edges (edn/read-string (slurp control-map-path)))
+       (filter #(= :drawn (:status %)))
+       (map (fn [{:keys [from to]}]
+              [(node->str from) (node->str to)]))
+       set))
+
+(defn assemble-route [tags]
+  (->> tags
+       (partition 2 1)
+       (mapv (fn [[from to]]
+               {:fromNode (node->str (:node from))
+                :toNode (node->str (:node to))
+                :via (:via to)
+                :at_ (:at to)}))))
+
+(defn route-verdict [hops]
+  (let [drawn (drawn-edge-pairs)
+        classified (mapv (fn [hop]
+                           (assoc hop :drawn?
+                                  (contains? drawn
+                                             [(:fromNode hop) (:toNode hop)])))
+                         hops)
+        conformant (filterv :drawn? classified)
+        unmapped (mapv #(dissoc % :drawn?) (remove :drawn? classified))]
+    {:hops (count hops)
+     :conformant (count conformant)
+     :unmapped (count unmapped)
+     :drawn-edges-fired (count (set (map (juxt :fromNode :toNode) conformant)))
+     :drawn-edges-total (count drawn)
+     :unmapped-hops unmapped}))
+
+(defn- tick-run-record [started-at store-basis sample result selector-seam trace-written?]
   (let [input-status (:input-status result)
-        preference-stack (:preference-stack result)]
+        preference-stack (:preference-stack result)
+        route (assemble-route (:wm/route result))
+        verdict (route-verdict route)]
     {:startedAt started-at
-     :basisCount (:count basis)
-     :basisMaxAt (:max-at basis)
+     :storeBasisCount (:count store-basis)
+     :storeBasisMaxAt (:max-at store-basis)
+     :entriesRead (long (:entries-read sample))
+     :entriesLimit (long (:entries-limit sample))
      :inputsRead (long (or (:inputs-read input-status) 0))
      :inputIssues (long (count (:issues input-status)))
      :preferenceLayers (long (count preference-stack))
      :traceWritten (boolean trace-written?)
-     :selectorSeam selector-seam}))
+     :selectorSeam selector-seam
+     :route route
+     :route-verdict verdict}))
 
 (defn- write-receipt! [path record]
   (io/make-parents path)
@@ -123,7 +196,8 @@
         date-str (today-date-string)
         trace-path (trace-path-for-date date-str)
         before-trace (trace-stat trace-path)
-        basis (evidence-basis days)
+        store-basis (store-basis)
+        sample (evidence-sample days)
         {:keys [selector selector-seam selector-resolution-error]} (selector-seam)
         generated (wm/generate-war-machine
                    days
@@ -140,7 +214,7 @@
         trace-written? (and (nil? (:trace-write-failed result))
                             after-trace
                             (not= before-trace after-trace))
-        record (tick-run-record started-at basis result selector-seam trace-written?)
+        record (tick-run-record started-at store-basis sample result selector-seam trace-written?)
         receipt-path (receipt-path-for-date date-str)]
     (write-receipt! receipt-path record)
     {:days days
@@ -151,7 +225,8 @@
      :receipt-path receipt-path
      :tick-run-record record
      :result result
-     :basis basis}))
+     :store-basis store-basis
+     :sample sample}))
 
 (defn run-tick-once
   "Callable one-shot entrypoint for WM-RUN1."

@@ -54,7 +54,7 @@
             [futon2.aif.sorry-registry :as sorry-registry]
             [futon2.aif.trace :as trace]
             [futon2.aif2.tension :as tension])
-  (:import (java.time LocalDate ZoneId ZonedDateTime)
+  (:import (java.time Instant LocalDate ZoneId ZonedDateTime)
            (java.time.format DateTimeFormatter)))
 
 ;; ---------------------------------------------------------------------------
@@ -4128,6 +4128,13 @@
        :selection-boundary :reviewed-reason-bearing-policy})))
   (selector request))
 
+(defn- route-tag
+  [route node via]
+  (conj (or route [])
+        {:node node
+         :via via
+         :at (str (Instant/now))}))
+
 (defn judge
   "The war machine's inference step.
 
@@ -4151,7 +4158,9 @@
   ([scan-data {:keys [trace? trace-dir scan-id include-advisory-lanes?
                       strategic-selection-fn]
                :or {trace? false include-advisory-lanes? true}}]
-  (let [observation (obs/observe scan-data)
+  (let [route0 (:wm/route scan-data)
+        observation (obs/observe scan-data)
+        route1 (route-tag route0 :R2 "futon2.aif.observation/observe")
         free-energy (fe/compute-controller-diagnostics observation)
         ;; Base mode from equilibrium-classification of observations.
         base-mode (fe/infer-mode observation)
@@ -4376,8 +4385,12 @@
                :micro-step-trace micro-trace'}
               (recur (inc step) belief' prec-state' micro-trace'))))
         wm-belief belief
+        route2 (-> route1
+                   (route-tag :R7 "futon2.aif.precision/update-precision-state")
+                   (route-tag :R3 "futon2.report.war-machine/apply-arena-belief-events"))
         variational-free-energy
         (fe/compute-variational-free-energy prediction-errors)
+        route3 (route-tag route2 :R8 "futon2.aif.free-energy/compute-variational-free-energy")
         ;; v0.13 anticipation v0.13 (read-only): expose upcoming typed
         ;; events to the trace. R5 time-conditioning and R4 multi-horizon
         ;; composition are deferred (v0.14 / v0.15 candidates).
@@ -4387,6 +4400,7 @@
                   :missions wm-missions
                   :patterns wm-patterns
                   :anticipation anticipation-snapshot
+                  :wm/route route3
                   ;; M-aif2 slice-1 live install (consent-gated, Joe 2026-06-01):
                   ;; inject the delivered E1 curvature signal. Fail-safe —
                   ;; absent/malformed ⇒ [] ⇒ tension-proposer silent ⇒ WM unchanged.
@@ -4461,6 +4475,7 @@
                        ;; M-action-vocabulary P2 dark — default :off
                        :move-class-intensity-mode (arena-move-class-intensity-mode)}))
         wm-ranked-domain-base (efe/rank-actions wm-state wm-enriched-candidates wm-efe-opts)
+        route4 (route-tag route3 :R5 "futon2.aif.efe/rank-actions")
         wm-policy-exclusions (-> wm-ranked-domain-base meta :policy-support/excluded)
         wm-ranked-domain (if (= :learned-frequency habit-prior-source)
                            (if (some? habit-prior-span-ratio-cap)
@@ -4507,6 +4522,7 @@
                :temperature-opts {:tau-mode (arena-tau-mode)}})
              (catch Exception _
                (policy/default-mode-select wm-state wm-admissible)))
+        route5 (route-tag route4 :R6 "futon2.aif.policy/select-action")
         strategic-candidate-ids
         #{"M-aif-policy-conditioned-eig"
           "M-shared-memory-control-build-test"
@@ -4523,6 +4539,7 @@
          strategic-selection-fn
          {:scheduler-habit-ranking scheduler-habit-ranking
           :trace-id (str "wm-live-selection-" wm-as-of)})
+        route6 (route-tag route5 :R14 "futon2.report.war-machine/invoke-strategic-selection")
         selected-mission-ids (:selected-mission-ids strategic-selection)
         strategic-action
         (first
@@ -4674,84 +4691,89 @@
                                            " — in avoided range "
                                            (pr-str (get pref/avoided-states ch)))})
                           (:avoided-active free-energy))))
-        result (cond-> {:mode mode
-                :mode-prior (get pref/mode-prior mode 0.0)
-                ;; INV (2026-05-27 staleness-gate): when the metabolic
-                ;; snapshot was stale, the :stop-the-line override is
-                ;; suppressed and :mode falls to base-mode. Record the
-                ;; reason so downstream UI can render "stale" indicator
-                ;; instead of red banner. Per CLAUDE.md §9 (no silent
-                ;; swallow): if we ignore the stale snapshot's override,
-                ;; we MUST surface why.
-                :override-suppressed-reason override-suppressed-reason
-                :metabolic-stale? (boolean metabolic-stale?)
-                :free-energy free-energy
-                :variational-free-energy variational-free-energy
-                :priorities all-priorities
-                :priority-count (count all-priorities)
-                :losses losses
-                :loss-count (count losses)
-                :heads aif-heads
-                :invariants inventory
-                :support-attack-enriched enriched-sa
-                :portfolio-recommendation
-                (when portfolio-step
-                  {:action (:action portfolio-step)
-                   :recommendation (:recommendation portfolio-step)
-                   :adjacent (get-in portfolio-step [:structure :adjacent] [])
-                   :critical-path (get-in portfolio-step [:structure :critical-path] [])})
-                :observation observation
-                :belief wm-belief
-                :belief-pre wm-belief-pre
-                :prediction-errors prediction-errors
-                :precision-state precision-state
-                ;; R14 precision-over-policies (γ): the learned, bounded inverse
-                ;; selection temperature this tick used (τ_eff = τ_spread / γ).
-                ;; Persisted so the next tick continues the rolling outcome window.
-                :selection-gain selection-gain-state
-                :micro-step-trace micro-step-trace
-                :morning-brief-events morning-brief-events
-                :morning-brief-held-events morning-brief-held-events
-                :morning-brief-consumed-event-ids
-                (vec (sort morning-brief-consumed-event-ids))
-                :operator-actions operator-actions
-                :anticipation anticipation-snapshot
-                :ranked-actions wm-ranked+cascades
-                ;; The decision is drawn from this executable support, not the
-                ;; served ranked/advisory display. Full-loop discrimination
-                ;; must inspect the same Π_feasible domain.
-                :admissible-actions wm-admissible
-                :policy-support-exclusions (vec wm-policy-exclusions)
-                :decision wm-decision
-                ;; M-wm-policies v1: the visible cascade-policy lane (additive, defensive —
-                ;; a cascade failure can never break the scan; memoized; shell-out to minilm).
-                :cascade-policies cascade-policies
-                ;; M-wm-policies Track 3 (proactive / defensive driving): the horizon
-                ;; gap-scan — open-mission classes with THIN pattern coverage (candidates
-                ;; for seeding cascades before the WM gets stuck in them). Additive,
-                ;; defensive (a failure never breaks the scan); shares the cascade memo.
-                :pattern-gaps (if include-advisory-lanes?
-                                (try
-                                  ((requiring-resolve 'futon2.report.cascade-lane/gap-lane)
-                                   wm-ranked {:n 10 :budget 6})
-                                  (catch Throwable _ []))
-                                [])
-                :input-status (current-input-status)}
-                 habit-prior-state
-                 (assoc :habit-prior-state habit-prior-state))]
-    (when trace?
-      (if-let [trace-write-failed
-               (try
-                 (if trace-dir
-                   (trace/write-trace! result :dir trace-dir)
-                   (trace/write-trace! result))
-                 nil
-                 (catch Exception e
-                   (binding [*out* *err*]
-                     (println "trace/write-trace! failed:" (ex-message e)))
-                   {:trace-write-failed (ex-message e)}))]
-        (assoc result :trace-write-failed trace-write-failed)
-        result))
+        result0
+        (cond-> {:mode mode
+                 :mode-prior (get pref/mode-prior mode 0.0)
+                 ;; INV (2026-05-27 staleness-gate): when the metabolic
+                 ;; snapshot was stale, the :stop-the-line override is
+                 ;; suppressed and :mode falls to base-mode. Record the
+                 ;; reason so downstream UI can render "stale" indicator
+                 ;; instead of red banner. Per CLAUDE.md §9 (no silent
+                 ;; swallow): if we ignore the stale snapshot's override,
+                 ;; we MUST surface why.
+                 :override-suppressed-reason override-suppressed-reason
+                 :metabolic-stale? (boolean metabolic-stale?)
+                 :free-energy free-energy
+                 :variational-free-energy variational-free-energy
+                 :priorities all-priorities
+                 :priority-count (count all-priorities)
+                 :losses losses
+                 :loss-count (count losses)
+                 :heads aif-heads
+                 :invariants inventory
+                 :support-attack-enriched enriched-sa
+                 :portfolio-recommendation
+                 (when portfolio-step
+                   {:action (:action portfolio-step)
+                    :recommendation (:recommendation portfolio-step)
+                    :adjacent (get-in portfolio-step [:structure :adjacent] [])
+                    :critical-path (get-in portfolio-step [:structure :critical-path] [])})
+                 :observation observation
+                 :belief wm-belief
+                 :belief-pre wm-belief-pre
+                 :prediction-errors prediction-errors
+                 :precision-state precision-state
+                 ;; R14 precision-over-policies (γ): the learned, bounded inverse
+                 ;; selection temperature this tick used (τ_eff = τ_spread / γ).
+                 ;; Persisted so the next tick continues the rolling outcome window.
+                 :selection-gain selection-gain-state
+                 :micro-step-trace micro-step-trace
+                 :morning-brief-events morning-brief-events
+                 :morning-brief-held-events morning-brief-held-events
+                 :morning-brief-consumed-event-ids
+                 (vec (sort morning-brief-consumed-event-ids))
+                 :operator-actions operator-actions
+                 :anticipation anticipation-snapshot
+                 :ranked-actions wm-ranked+cascades
+                 ;; The decision is drawn from this executable support, not the
+                 ;; served ranked/advisory display. Full-loop discrimination
+                 ;; must inspect the same Π_feasible domain.
+                 :admissible-actions wm-admissible
+                 :policy-support-exclusions (vec wm-policy-exclusions)
+                 :decision wm-decision
+                 ;; M-wm-policies v1: the visible cascade-policy lane (additive, defensive —
+                 ;; a cascade failure can never break the scan; memoized; shell-out to minilm).
+                 :cascade-policies cascade-policies
+                 ;; M-wm-policies Track 3 (proactive / defensive driving): the horizon
+                 ;; gap-scan — open-mission classes with THIN pattern coverage (candidates
+                 ;; for seeding cascades before the WM gets stuck in them). Additive,
+                 ;; defensive (a failure never breaks the scan); shares the cascade memo.
+                 :pattern-gaps (if include-advisory-lanes?
+                                 (try
+                                   ((requiring-resolve 'futon2.report.cascade-lane/gap-lane)
+                                    wm-ranked {:n 10 :budget 6})
+                                   (catch Throwable _ []))
+                                 [])
+                 :wm/route route6
+                 :input-status (current-input-status)}
+          habit-prior-state
+          (assoc :habit-prior-state habit-prior-state))
+        result
+        (if trace?
+          (let [result (update result0 :wm/route route-tag :TRACE "futon2.aif.trace/write-trace!")]
+            (if-let [trace-write-failed
+                     (try
+                       (if trace-dir
+                         (trace/write-trace! result :dir trace-dir)
+                         (trace/write-trace! result))
+                       nil
+                       (catch Exception e
+                         (binding [*out* *err*]
+                           (println "trace/write-trace! failed:" (ex-message e)))
+                         {:trace-write-failed (ex-message e)}))]
+              (assoc result :trace-write-failed trace-write-failed)
+              result))
+          result0)]
     result)))
 
 ;; ---------------------------------------------------------------------------
@@ -4966,6 +4988,7 @@
   (binding [*input-status* (atom {:read-paths #{} :issues []})]
     (let [now-zdt (ZonedDateTime/now tz)
           now (.toString (.toLocalDate now-zdt))
+          scan-route0 []
           ;; One bounded recent window feeds all evidence-derived scans. The hard cap is
           ;; intentional: an operator typo must not turn selection into corpus retrieval.
           evidence-limit (session-evidence-limit)
@@ -4990,6 +5013,7 @@
           patterns (scan-patterns)
           frames (scan-frames)
           metabolic-balance (scan-metabolic-balance)
+          scan-route1 (route-tag scan-route0 :R20 "futon2.report.war-machine/scan-metabolic-balance")
           commit-hygiene (summarize-working-tree-hygiene metabolic-balance)
           blocks (scan-blocks days)
           window (scan-window days now-zdt)
@@ -4997,6 +5021,7 @@
           strategic-vocabulary (scan-strategic-vocabulary)
           r-criteria (scan-r-criteria)
           r12-apparatus (scan-r12-apparatus)
+          scan-route2 (route-tag scan-route1 :R12 "futon2.report.war-machine/scan-r12-apparatus")
           vsatarcs-status (scan-vsatarcs-status)
           capability-star-map (capability-star-map)
           scan-data {:self-watch self-watch
@@ -5017,6 +5042,7 @@
                      :strategic-vocabulary strategic-vocabulary
                      :r-criteria r-criteria
                      :r12-apparatus r12-apparatus
+                     :wm/route scan-route2
                      :capability-star-map capability-star-map
                      :vsatarcs-status vsatarcs-status}
           ;; Run the judgement layer

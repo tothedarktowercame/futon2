@@ -24,20 +24,28 @@
   (and (integer? x) (not (neg? x))))
 
 (defn- validate! [record]
-  (doseq [field [:startedAt :basisMaxAt :selectorSeam]]
+  (doseq [field [:startedAt :storeBasisMaxAt :selectorSeam]]
     (when-not (nonblank? (get record field))
       (fail! :blank-string {:field field :value (get record field)})))
-  (doseq [field [:basisCount :inputsRead :inputIssues :preferenceLayers]]
+  (doseq [field [:storeBasisCount :entriesRead :entriesLimit
+                 :inputsRead :inputIssues :preferenceLayers]]
     (when-not (nat? (get record field))
       (fail! :non-nat {:field field :value (get record field)})))
-  (when-not (pos? (:basisCount record))
-    (fail! :basis-count-nonpositive {:basisCount (:basisCount record)}))
+  (when-not (pos? (:storeBasisCount record))
+    (fail! :basis-count-nonpositive {:storeBasisCount (:storeBasisCount record)}))
+  (when-not (pos? (:entriesLimit record))
+    (fail! :entries-limit-nonpositive {:entriesLimit (:entriesLimit record)}))
+  (when (> (:entriesRead record) (:entriesLimit record))
+    (fail! :entries-exceed-limit {:entriesRead (:entriesRead record)
+                                  :entriesLimit (:entriesLimit record)}))
   (when-not (pos? (:inputsRead record))
     (fail! :inputs-read-nonpositive {:inputsRead (:inputsRead record)}))
   (when-not (= 5 (:preferenceLayers record))
     (fail! :preference-layer-count {:expected 5 :actual (:preferenceLayers record)}))
   (when-not (true? (:traceWritten record))
     (fail! :trace-not-written {:traceWritten (:traceWritten record)}))
+  (when-not (vector? (:route record))
+    (fail! :route-not-vector {:route (:route record)}))
   record)
 
 (defn -main [& args]
