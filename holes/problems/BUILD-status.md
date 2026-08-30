@@ -4,6 +4,9 @@ Parent mission: `../missions/M-formal-war-machine.md` (§Deliveries links back h
 
 Updated: 2026-08-30 evening. The ledger (`BUILD-ledger.md`) is the log; this is the view.
 
+## Top-level moves (the gasket as it develops — lifecycle §0.12 register)
+1. The problem stated: the big tetrahedron (§0.8, 08-30). 2. The evidence vertex subdivided: the evidence tetrahedron (§0.12, 08-31) — "what is the evidence of the evidence?"
+
 ## The precepts now standing
 `I_data_current` · `I_absent_is_loud` · `I_evidence_consumed` (lifecycle §0.7, §0.11; PREREG §4) — data is live, absence is loud, every emission names its consumer.
 
