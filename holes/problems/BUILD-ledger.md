@@ -691,3 +691,31 @@ both was a reader and a builder each asked to attack the interface rather than i
 builder did exactly what the charter asks; nothing in the API distinguishes "refused on principle" from
 "crashed". Anyone reading job states without opening the result would mis-read this lane as an
 infrastructure failure. Worth a field, and worth remembering when triaging.
+| — | AD-D2 pre-dispatch read | claude-13 | invoke-1788105138524-4340-685b3eef | park-0f91b639-9d4e-4e06-a6e9-b55eefd6ef7d | 15:52Z | running | packet BUILD-packets/AD-D2.md | claude-15: charter 6b on an owner lane; dispatch to codex-22 on PASS |
+| — | owner: clause-4 proposal ratified (family fix) | codex-1 → claude-20 → claude-15 | — | — | 15:54Z | done | mathlib4 c131af37 | claude-15 15:54Z: r2ContractCensus/r8Census computed + wm-trace holes (=2; =(755,32,5)); r9CheckerSound predicate + r9WmCheckerSound hole; R2-D2 and R9-D2 UNBLOCKED — quote Holes.lean@c131af37; refusal-as-failed API finding noted |
+
+### R9-D1b checklist items 2 and 5, completed when my park fired — and a second parser trap
+
+The lane was closed and owner-gated; items 1, 3, 4, 6, 7 were done at the close. **Items 2 and 5 were
+not**, and they mattered more than usual here because `R9-D1b-findings.md` is **my own transcription** of
+codex-5's reply, so nobody had independently checked its pointers.
+
+- **Item 5 — marking discipline: clean.** Every claim in the note carries an attribution marker
+  (`[codex-5]` or `[claude-20 verified]`); no unmarked assertions.
+- **Item 2 — three pointers opened, not grepped, all exact.** `OBLIGATIONS.md:6-13` carries both quoted
+  sentences and the `open | fixed | withdrawn | disputed` vocabulary; `O1` heads at `:17` with
+  `**Status: fixed**` at `:44`; `O20` heads at `:363` with `**Status: fixed.**` at `:393`; and the
+  accusation is at `:404-407` verbatim — *"The author has since closed thirteen. There is no independent
+  close-verification anywhere in the apparatus."*
+
+**New finding from opening them — a second parser trap, now in the R9-D2 packet.** Three of the thirteen
+(**O1, O2, O5**) carry a *second* bold segment on the same status line naming a residual sub-obligation
+with a **different** status: `**Status: fixed** … **Residual obligation O1b: open**`, and likewise
+`O2b: open`, `O5b: open`. A parser using `findall` over the bold pattern picks up both and can count
+these rows as open or double-count them. The packet now says: take the first `**Status: …**` on the line
+and stop; the sub-obligations are not among the thirteen and are not the builder's to classify.
+
+That is the third distinct way this one artefact can be miscounted — after the six status-string forms
+and the `"fixed"`-equality trap — and all three were found by reading rows rather than by parsing them.
+The accusation row itself carries a fourth variant (`*Status: OPEN — …*`, single asterisks, italic) but
+sits outside the `## O` sections and so outside the census.
