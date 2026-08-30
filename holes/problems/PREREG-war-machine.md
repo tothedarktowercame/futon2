@@ -407,6 +407,10 @@ of §2c–§2d are the list of what they would have to say.
 
 ## 4. Invariants — what a conforming run may not do
 
+**`I_data_current`** (Joe, 2026-08-30): every read of evidence, observations or patterns by an instrument or loop is against the live store and records the basis it read at; a negative produced from a dated export/snapshot is a violation (lifecycle §0.7 invariant; first instance row 25 — the spider's rung 1 over `migration-export`).
+
+**`I_absent_is_loud`** (Joe, 2026-08-30, from AUD-D1): every read of a named input file reports absence or unparseability (fail closed, or an explicit `:missing`/`:unreadable` in the output) and never renders it as an empty result; optional inputs are declared at the read site. Falsifier: a `when-let`/`some->`/`(catch _ nil)` over a file read with no declared optionality (lifecycle §0.7; first instance row 26 — `stack-logic-model.edn`/`alignment.edn`, planned 05-03 in M-war-machine.md, never produced, read silently by `war_machine.clj` and `joe_hud.clj` since). Instrument: AUD-D2 source lint.
+
 Per node, from the worksheets and the mission's families; each is either
 *structural* (about the record's shape; checkable on any tick) or *runtime*
 (about behaviour; checkable only on a run).
