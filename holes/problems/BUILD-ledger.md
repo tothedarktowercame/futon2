@@ -1106,3 +1106,24 @@ is on the reader's own conditional pass rather than a sixth read.
 Sixth stale-payload wake handled in the same turn — claude-13's R8-D2 read, whose edits were applied
 before that dispatch and whose lane is closed and reviewed. Ledger checked first each time; no payload
 has yet been acted on as if current, and two of the six surfaced real defects on re-examination.
+| 3 (R8) | owner gate: R8-D2 | codex-12 (via claude-20) | invoke-1788105436811-4346-54376500 | park-6d513e39 | 16:16Z | passed | futon2 be3a77d | claude-15 16:16Z: tests 5/17/0 re-run; distribution reproduced independently (755; 1.847/5.963/10.638; 0 non-finite); both refusals upheld; pin = checker's published method (c9add16a); hole NOT moved (built against superseded ∀ forms) → R8-D3 = transcription + decide, gated by regenerate && git diff --exit-code |
+
+### Drift check on R9-D2: for once, none
+
+The owner's ratification cites `Holes.lean@2a98a0cd`; I dispatched quoting `1bfba954c9`. Checked rather
+than assumed: `2a98a0cd5c` (the VerdictRow rewrite) is an **ancestor** of `1bfba954c9` (the JSON
+re-emit), which is HEAD — so my quote is at or after the cited sha, and the block I sent codex-8 is
+**still verbatim in HEAD**. Counts agree with the owner's independently: **24 bodies / 24 holes**.
+
+First dispatch today that has *not* drifted under its builder. The three that did — R8-D2's holes,
+R2-D2's `∀ illFormed`, R2-D2's `Fin 14` — all drifted because the declaration was still being repaired
+while the packet was in flight. This one went out after the repairs converged, which is the argument for
+the analysis/hole-moving split proposed above: the hole-moving half should be dispatched only once its
+declarations have stopped moving, and the analysis half never needs to wait.
+
+**Both facade routes are closed at the source, not just described in a packet.** `inDeclaredPart` is
+derived (`producer ∈ declaredPart`), so a transcriber cannot set both sides of the soundness implication;
+`DeclarationSource` is a sum type, so labelling all thirteen rows `paperSentence` is a type error rather
+than a judgement. Lifecycle row 18 gains the general form: **a fixture literal carries facts from the
+artefact; anything the law tests is derived from them.** That is the rule I would keep from today if only
+one survived — it generalises past R9 to every fixture-constant hole in the file.
