@@ -55,7 +55,7 @@ to compare.
    a description, and it must not read as the latter.
 4. **Which of R2's fourteen channels would receive it**, or that none would — `observation.clj:11` is the
    declared list, and R2-D1 found `:acknowledged?` has exactly one producer, a hard-coded `true` at
-   `lane_futility.clj:333`. If the answer is "a channel that does not exist", that is the finding.
+   `lane_futility.clj:334`. If the answer is "a channel that does not exist", that is the finding.
 
 ## What NOT to do
 - **Do not edit** `control-map-edges.edn`, `P-R16.md`, `P-R2.md`, `Holes.lean`, or any source file.

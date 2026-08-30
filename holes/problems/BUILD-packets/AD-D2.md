@@ -44,7 +44,7 @@ D. Counting: the two lines per record now come from the JSON (kind counts per ow
 ACCEPTANCE (report actuals): a THREE-WAY count — (1) HOLE doc-tags in Holes.lean **at the commit you started
 from** (`git show <sha>:DarkTower/WarMachine/Holes.lean | grep -c '^/-- HOLE'`, not the working tree), (2) `:kind hole`
 entries in the JSON, (3) `lake env lean DarkTower/WarMachine/Holes.lean 2>&1 | grep -c 'uses .sorry.'` — all three
-equal after your additions are accounted for, with the pre-existing tags as the leg that can disagree (a hole
+related by the EQUATION, written out in the bell: **18 + N_added = (2) = (3)** — report N_added explicitly (claude-13's confirm-read nit: 'accounted for' left to prose lets a mismatch pass as a rounding of words); the pre-existing tags are the leg that can disagree (a hole
 added without a doc tag fails this; claude-13, 2026-08-30); zero `error` lines; every hole entry has non-null
 `evidence` and `falsifier` OR a doc-tag refusal quoted in the bell; the JSON's `source.git-sha` equals `git log -1 --format=%H -- DarkTower/WarMachine/Holes.lean` at emit;
 re-running emit AFTER committing the JSON is byte-identical (the module's last commit does not change when only the

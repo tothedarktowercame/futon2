@@ -207,7 +207,7 @@ Items 1, 3, 5 and 7 were done at the close; 2, 4 and 6 were not. Completed and v
     reported timestamps and flagged file/form position as the record identifier. R2-D2 must not
     require a `:tick` field that does not exist.
 - **Item 6 — the builder falsified an expectation I wrote, and is right.** My packet registered
-  "`:acknowledged?` producers (expected: none)". Verified at source: `src/futon2/aif/lane_futility.clj:333`
+  "`:acknowledged?` producers (expected: none)". Verified at source: `src/futon2/aif/lane_futility.clj:334`
   hard-codes `:acknowledged? true` in the map built for synthetic lane-futility nags. So a producer
   exists; what does not exist is *operator-acknowledgement persistence*, which is the production-path
   comment at `needs_you.clj:156-159`. Unqualified, my expectation was false.
@@ -1917,7 +1917,7 @@ known and its operational contract is not** — and it is worth more than a comp
 
 It is also a **specification, not a description**: no observation channel can receive the payload, and
 `:acknowledged?` is not a substitute since its only producer is the hard-coded `true` at
-`lane_futility.clj:333`.
+`lane_futility.clj:334`.
 
 ### `control-map-edges.edn` is untracked — the same defect as this morning's records
 
@@ -1932,3 +1932,37 @@ today of *the thing being reasoned about not being anchored*, after the records 
 gate-at-a-path confusion. The pattern is stable enough to state: **before a lane writes to an artefact,
 check the artefact is versioned.** Reported to the owner; not staged by me, since it is his file and his
 call.
+| CML | owner gate: CML-D2 R16→R2 | codex (via claude-20) | — | — | 17:06Z | passed | futon2 031c5f2; p4ng 8f83901 (anchor) + schema commit | claude-15 17:06Z: note 101 lines, EDN/records untouched by the builder; both refusals upheld (no receipt copied across edges; no invented defaults); one-sided reconciliation stated as such; EDN was UNTRACKED (not ignored; 73 siblings tracked) — committed as the anchor BEFORE the first schema; R16→R2 schema written by the owner as the proposal with typed absences (6/9 unspecified) |
+
+| CML | CML-D2 `R9→R16` (edge spec) | codex-2 | `invoke-1788109701708-4439-01b48387` | `park-e6da027e` | 17:08Z | running | second edge; packet asks first whether this is two proposals or one endorsed twice | — |
+
+### My citation was off by one, and it had already propagated
+
+The owner caught it at his gate: `:acknowledged? true` is at `lane_futility.clj:**334**`; line 333 is
+`:risk-mode? true`. **I had cited `:333` four times** — twice here, once in R2-D2's packet, once in
+CML-D2's — and **codex-8 inherited it into its committed findings note**, because it came from my packet.
+All four of mine corrected; the builder's note carries the inherited slip and the owner chose not to send
+it back, which I agree with — the claim is right, the line is off by one.
+
+Second time today a defect of mine propagated past its packet into someone else's artefact, after the
+content pin reaching `wmTraceR8`'s docstring. Both were *values I supplied* rather than judgements I made,
+which is worth noting: **the things that escape are the small transcribed particulars, not the
+arguments.** A wrong argument gets refused; a wrong line number gets copied.
+
+### Second edge dispatched — and the question it has to answer first
+
+`R9→R16` looks two-sided where `R16→R2` was one-sided: P-R9 proposes
+`{claim, witness {id, producer, layer}, verdict ∈ {independent, self, unknown}}` with `guarantee
+ExactlyOnce`, `idem-key (claim-id, witness-id)`, `receipt = the verdict record`; P-R16 names the same edge
+as "an act carries an independent witness of its precondition".
+
+**But P-R16 does not propose independently — it cites P-R9's proposal.** So the packet asks first whether
+this is **two proposals that agree** or **one proposal endorsed twice**, because that is the whole value
+of the lane: agreement carries information only when the two sides arrived separately. **Two records
+agreeing because one quotes the other carries none** — the same shape as two lanes' digests matching
+because they ran the same filter, which claude-13 made me state in R2-D3's packet. The lane's own
+premise, turned on the lane.
+
+Also required: measure whether this delivery happens today rather than assuming it from the sister edge,
+and whether `unknown` as a first-class verdict is a type an act's precondition can consume — a constraint
+that belongs in the proposal if it holds.
