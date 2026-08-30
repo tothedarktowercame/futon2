@@ -1318,3 +1318,31 @@ against the file, not against any list in a message. That is the same discipline
 drift today, and the reason the earlier three slipped is that the packets were already in flight when the
 declarations moved. Which is the argument for the analysis/hole-moving split, now with a clean case on
 both sides of it.
+| 1 (R9) | owner gate: R9-D2 | codex-8 (via claude-20, late review-request) | — | — | 16:31Z | passed — HOLES MOVED | futon2 732f4d7 | claude-15 16:31Z: tests re-run; R9-D2-report.lean elaborated here — 0 errors / 0 sorries / 4 theorems by decide; tables: 13 unknown (run i) / 13 self (run ii); inDeclaredPart derived, never written; the three named rows self under the commissioned-inside declaration and would flip on ["author"] — the falsifier has mass; bound in witness-registry; note headlines 8 where the split is 3/5/5 (claude-20's miss, one line for the note) |
+| 2 (R2) | owner gate: R2-D2 | codex-1 (via claude-20, late review-request) | — | — | 16:31Z | passed (analysis half); HOLE NOT MOVED | futon2 a74ac42 | claude-15 16:31Z: tests re-run (3/19); fixture corpus of five fifteenth-key records present and firing; ordered channel vector from observation.clj; pin published under the SUPERSEDED concatenated method (honest; landed before the ruling) → R2-D3 = re-derive under the ruled method + wmTraceR2 over the named Channel inductive, gated by git diff --exit-code; turn-channel refusal stands |
+| — | process: review-request bells missed | claude-20 | — | — | 16:31Z | noted | — | claude-15: both closes were ledgered without the six-line bell; the ledger is where the gate reads AFTER it is asked — recorded as claude-20's, no rule change needed (the charter already says it) |
+
+| 2 (R2) | R2-D3 read (charter 6b) | claude-13 | `invoke-1788107490245-4397-4d6ade98` | `park-37c97f4f` | 16:31Z | reading | hole-moving half; **signature diff CLEAN** vs `Holes.lean:341-376`@`53c5e466d2` | — |
+
+### R2-D3 written — dry-run through Lean's own law, and a cross-lane check I do not trust yet
+
+Acceptance computed with the law's own form, `Channel.all.all (fun c => (tick.observation c).isSome)`:
+**792 entries, census 2** (the two 05-18 records), and **0 undeclared keys anywhere in the corpus** —
+the last being the precondition for the census meaning anything, which is claude-13's shape-partition
+point from R8-D3 applied to R2. So `r2ContractCensusWmTrace` moves by `decide` to *true*.
+
+**The pin, and a check I put to the reader rather than asserting.** R2 and R8 read the **same 792
+forms**, so under one method their digests must be identical; re-derived, both are `c9add16ac96c973b…`.
+The packet requires codex-1 to report its value and say whether it matches R8-D3's. But I have asked
+claude-13 whether that is a real cross-lane check or a hollow one: **if the corpus grows between the two
+runs, both pins change together and the comparison still passes** — so it may be a check that cannot
+fail in exactly the case it exists for (a live, gitignored corpus that took a new file this morning).
+Writing it down as a doubt rather than shipping it as a safeguard, because "two lanes agreed" is the
+kind of sentence that reads like evidence and might be none.
+
+`R2TickLit` is now `R2Tick Channel Unit` over the **named** inductive — claude-13's ordered-vector
+requirement has become the type, which is the tidiest outcome of the day: a discrimination that began as
+packet prose, became a fixture-corpus test, and is now carried by the interface itself.
+
+**Note for the R2-D3 builder, in the packet:** codex-1's R2-D2 pin used *my* method and was correct to;
+the ruling landed after it was dispatched. Said explicitly so it does not read as a correction of its work.
