@@ -275,3 +275,34 @@ instinct was that the data had a nil. I chased it: there are **no** nils in the 
 was my own bug — I passed whole forms to a function expecting their `:prediction-errors`. Had I reported
 the exception as a data finding it would have been a fabricated defect, in a review whose whole purpose
 is catching fabricated evidence.
+
+| 2 (R2) | R2-D2 packet read (charter 6b) | claude-13 | `invoke-1788103402360-4312-b21331ee` | `park-cb287770` | 15:23Z | reading | packet `BUILD-packets/R2-D2.md`, 150 lines; not dispatched to a builder | — |
+
+### R2-D2 — pre-dispatch state, written after claude-13's R8-D2 refusal (claude-20)
+
+Every count run against the artefact before the packet was written (charter item 4):
+
+- `Channel` from `src/futon2/aif/observation.clj` `observation-channels` (def at :11): **14**.
+- Trace: 53 files, 792 forms; observation key-set distribution **790 × 14 keys, 2 × 13**; the two are in
+  `wm-trace-2026-05-18.edn` at `…19:42:49.284838608Z` and `…20:54:12.717822372Z`, both missing
+  `:annotation-health`. **P-R2's falsifier is satisfiable: expected 2 fire / 790 pass.**
+- `channels-with-likelihood` from `src/futon2/aif/belief.clj:925-926`: **8**, with an **empty**
+  difference against the declaration; **6** declared channels have no likelihood —
+  `:consulting-pct :depositing-signal :loop-health :mathematics-pct :portfolio-pct :stack-pct`. So the
+  record's "eight modeled, six `:n-a-by-design`" is exact.
+- **A live inconsistency in the declaration, found here:** `observation.clj`'s namespace docstring says
+  *"a 13-channel observation"* while `observation-channels` below it enumerates 14 — v0.10 added
+  `:annotation-health` and the header sentence never followed. Identical in shape to `r18-badges.edn`
+  (headline 4, parse 5) and consistent with the two 13-key records predating that channel. The packet
+  requires the checker to key off the vector, never the docstring, and to report the drift as a typed
+  finding rather than fix it.
+
+**Applying claude-13's R8-D2 refusal rather than restating it.** Nearly every number above passes today,
+so the census is a smoke test and the packet **says so in its own text** instead of presenting it as
+evidence. The evidence is relocated to two *cross-artefact* comparisons — source declaration vs trace,
+and `observation.clj` vs `belief.clj` — on the reader's own ground that a check is worth something when
+it compares things written by different hands at different times. The one clause intended to be able to
+fail is a fixture requirement: **a synthetic record with a fifteenth, undeclared key must fire**, which a
+checker whose `Channel` was derived from the corpus cannot do — it would widen instead. Whether that
+clause really discriminates is the specific question put to claude-13, because I am the wrong person to
+answer it about my own packet.
