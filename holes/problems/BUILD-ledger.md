@@ -1873,7 +1873,7 @@ the glossary's act-gate legs. So either two gate shapes coexist in the trace, or
 with two numeric legs" counts a gate the glossary does not describe. Both instruments named, unresolved,
 and it bears on R16 *solved* 3.
 
-| 3 (R8) | R8-D4 (build, conformance) | codex-12 | see bell | park recorded at dispatch | 17:04Z | running | rewritten from `acfb3b13`; **signature diff CLEAN** vs `Holes.lean:530-560`; builder told the answer rather than left to refuse | — |
+| 3 (R8) | R8-D4 (build, conformance) | codex-12 | see bell | park recorded at dispatch | 17:04Z | **closed** | `10826ee`; gated at the sha (EXIT 0, 0 errors); generator-emitted axioms quoted; values exact; **caught my dry-run partitioning by stored-F** | pending |
 
 ### R8-D4 dispatched — the answer told, and the dry-run done against the amended type
 
@@ -2021,3 +2021,32 @@ would have been the wiring lane's first facade, on a day the build spent refusin
 
 The remaining CML work is endpoint amendments — a paired write, a retry identity, a deadline — which are
 record work and the owner's, not a packet.
+| 3 (R8) | IN FLIGHT: R8-D4 | codex-12 (via claude-20) | invoke-1788109437775-4435-c87cf785 | park-d8a7321d | 17:13Z | DONE at the owner's read (was running at claude-20's check moments earlier) | vs Holes.lean@acfb3b13 | claude-15: my "no lane is running" was wrong when written — corrected by claude-20; the job then closed between its check and mine; awaiting claude-20's six-line review, then the owner gate at the sha; registered dry-run values to gate: before 760/0/0/{760,0,0}/520403.9349/5502/755 ⇒ 94.5845 uniform; after 32/32/32/{0,32,0}/2429.5805/256/32 ⇒ 9.4905 uniform; the era-table? shape check follow-up is AD-D3 territory |
+
+### R8-D4 closed — and my dry-run carried the defect it was run to prevent
+
+Gated at the sha: elaborates EXIT 0, zero errors; the **generator emits** both named theorems and both
+`#print axioms` lines — 3a(iii) met by the generator for the first time, output
+`[propext, Classical.choice, Quot.sound, …_native.native_decide.ax_1_1]` for each. kondo 0/0, 6 tests /
+33 assertions. Emitted `EraTable` matches the registered values exactly. `meanPrecision` and `uniform`
+never written, asserted **negatively** in its own tests — `(is (not (re-find #"meanPrecision :=|uniform
+:=" lean)))`.
+
+**The correction is against me and it is the sharpest of the four.** codex-12 partitioned the eras **by
+file date**, not by stored-F presence, stating why: *so non-interleaving failures remain representable*.
+**My dry-run partitioned by stored-F presence.** Under that partition `storedFCount` is necessarily 0 or
+`count`, so `EraSummary.uniform` is **true by construction** — exactly the defect claude-13 found in the
+type, which the whole `storedFCount`/`ShapeTally` rewrite existed to remove. My numbers were right only
+because the biconditional holds on this corpus; the **method** would have reinstated the defect one level
+down, in the generator, immediately after we removed it from the type.
+
+It proved the difference instead of asserting it: a synthetic **post-boundary form with no stored F**
+yields after-era `count 1, storedFCount 0` — a non-uniform era, representable, and impossible under my
+partition.
+
+**The general form, and it is a real gap in the row-11 rule:** *a dry-run can carry the defect it was run
+to prevent.* I verified that the acceptance values were reachable and never asked whether the method
+reaching them was sound. Row 11 checks satisfiability; it does not check the partition, the population, or
+the filter that produced the number — and today those came apart three times: the 760/755 denominator, the
+values-vs-forms unit, and now the era partition itself. **The dry-run needs its own denominator stated,
+the same way the evidence does.**
