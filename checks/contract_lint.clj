@@ -91,7 +91,8 @@
                              :declared-with-body (count (filter #(= "closed" (:kind %)) rs))
                              :declared-with-sorry (count (filter #(= "hole" (:kind %)) rs))})))
         counts (into (sorted-map) (frequencies (map :judgement rows)))]
-    {:summary {:pass? (empty? errors) :authority authority :counts counts}
+    {:summary {:pass? (and (empty? errors) (not (contains? counts :wrong-authority)))
+               :authority authority :counts counts}
      :owners owners :declarations rows :errors errors}))
 
 (defn lint-file [{:keys [contract registry authority]}]
