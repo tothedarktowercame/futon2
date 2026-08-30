@@ -1534,3 +1534,38 @@ No `sorryAx`. But both carry the **generated native axiom** — `native_decide`,
 assumption found in R2-D2 — and the report does not mention it. That is now three lanes where the proofs
 rest on `native_decide` and no artefact says so, which is exactly why the gate should be *quote the axiom
 output* rather than *check for sorryAx*. Proposal already with the owner.
+
+### In a shared checkout, a path is not an artefact
+
+The owner elaborated `holes/labs/wm-contract/R2-D2-report.lean`, found plain `decide`, a malformed
+`set_option` and a failure to elaborate, concluded R2-D2 shipped a failing proof, and recorded a gate miss
+against himself. **That file is not R2-D2 as committed — it is the working tree, and codex-1 is editing it
+right now**, because R2-D3 is live on that seat and its job is exactly the naming gap (wire the literal to
+`wmTraceR2`) plus the gate. `git status`: modified, 5 insertions / 4 deletions against `a74ac42`.
+
+Settled by extracting the blob and running it:
+
+    git show a74ac42:…/R2-D2-report.lean   → example over `wmTraceR2Generated`, by `native_decide`
+                                             EXIT 0, 0 errors
+                                             axioms: [… r2CensusCheck._native.native_decide.ax_1_1]
+    grep native_decide  committed blob: 1     working tree: 0
+
+So **both of us were accurate about different files.** My axiom report was about the commit; the owner's
+elaboration was about the working tree. There is no R2-D2 gate miss, and row 21 needs amending rather than
+standing as a self-recorded failure that did not happen.
+
+**The finding is worth more than the correction, and it is an apparatus defect, not a person's:** with
+three lanes sharing one checkout, **a reviewer who elaborates `<path>` while a lane is live characterises
+work that was never delivered.** It can blame a builder for a defect it did not ship, or clear one it did.
+This is the wrong-corpus facade — the oldest item in this build's case law — with a *file* standing in for
+a corpus, and this time it caught the reviewing side, twice over: the owner on R2-D2, and me a moment
+later when my own `/tmp` copy turned out to predate the edit I was looking at.
+
+**Proposed and sent:** a hole-moving artefact is gated **at its sha** — `git show <sha>:<path>` — never at
+the working-tree path, with the ledger line recording the sha the elaboration ran on. One `git show`, and
+it is the only form of "elaborates at the owner's gate" that is stable while lanes share a checkout.
+
+Note this is the same hazard the ledger already recorded from the other direction this afternoon, when
+codex-1's two uncommitted R2-D2 files sat in the tree after I cancelled its dispatch and had to be
+explicitly protected from being swept into someone else's commit. Same shared tree, same confusion between
+*what is on disk* and *what was delivered* — twice in one day, once per direction.
