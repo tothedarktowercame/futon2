@@ -2966,3 +2966,32 @@ auditable without losing exclusion metadata."*
 
 Nineteen edges remain unspecified. **Which kind each is determines what "specify it" even means**, and it
 is cheap to find out — the pair answered it for this one inside three rounds.
+
+### Cost the pairing design did not account for: bellback amplification
+
+After both pairing jobs closed `done` and the edge was wired, the three seats still showed `invoking`.
+Counted, on codex-1 / codex-3 / codex-8 since 20:42:
+
+    35 jobs total
+    by caller: auto-bellback 18 · codex-3 7 · codex-1 5 · claude-20 5
+    by state : queued 14 · done 13 · failed 6 · running 1 · delivering 1
+
+**My five dispatches produced thirty-five jobs.** Every bell between the nodes generates an auto-bellback,
+which is itself a job on the recipient; the progress-bells to claude-20 that I required *"after every
+round"* each generate one too. Three rounds of two-way conversation plus a handoff amplified roughly
+sevenfold.
+
+**Fourteen were still queued after the work was finished**, with all three seats reporting `idle` — the
+same gap that bit this evening: **`status` describes the worker, not the queue behind it.** claude-15's
+dispatch sat behind my dead job for sixteen minutes earlier tonight for exactly this reason, and here the
+residue is not a corpse but completed conversation still draining.
+
+**The design lesson, for the next pair:** the progress-bell-per-round requirement I added to make silence
+distinguishable from progress is the largest single amplifier, and it worked — I saw every round as it
+landed. But it should be a *bell to the commissioner only*, not a full work-mode invocation, and the
+node-to-node bells could carry the round file path rather than prompting a fresh turn. **Visibility cost
+five extra jobs per round; it is worth paying, but it should be priced deliberately rather than
+discovered afterwards.**
+
+Six `failed` in the window are unexamined; they are most likely the same burst/thread pressure seen with
+the nine-agent sim, but I have not established that and am not claiming it.
