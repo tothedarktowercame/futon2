@@ -1934,7 +1934,7 @@ check the artefact is versioned.** Reported to the owner; not staged by me, sinc
 call.
 | CML | owner gate: CML-D2 R16→R2 | codex (via claude-20) | — | — | 17:06Z | passed | futon2 031c5f2; p4ng 8f83901 (anchor) + schema commit | claude-15 17:06Z: note 101 lines, EDN/records untouched by the builder; both refusals upheld (no receipt copied across edges; no invented defaults); one-sided reconciliation stated as such; EDN was UNTRACKED (not ignored; 73 siblings tracked) — committed as the anchor BEFORE the first schema; R16→R2 schema written by the owner as the proposal with typed absences (6/9 unspecified) |
 
-| CML | CML-D2 `R9→R16` (edge spec) | codex-2 | `invoke-1788109701708-4439-01b48387` | `park-e6da027e` | 17:08Z | running | second edge; packet asks first whether this is two proposals or one endorsed twice | — |
+| CML | CML-D2 `R9→R16` (edge spec) | codex-2 | `invoke-1788109701708-4439-01b48387` | `park-e6da027e` | 17:08Z | **closed** | `ab539dd`, 52 lines; answered **one proposal endorsed twice**; 3 unspecified fields with reasons; pointers opened by exact line | pending |
 
 ### My citation was off by one, and it had already propagated
 
@@ -1966,3 +1966,36 @@ premise, turned on the lane.
 Also required: measure whether this delivery happens today rather than assuming it from the sister edge,
 and whether `unknown` as a first-class verdict is a type an act's precondition can consume — a constraint
 that belongs in the proposal if it holds.
+
+### Second edge closed — and the lane's own premise turned on itself, correctly
+
+The question the packet asked first was answered honestly: **one proposal endorsed twice.**
+`P-R16.md:61-62` cites P-R9's proposal; what R16 contributes independently is exactly one thing, and it
+is substantive — **the consumer constraint that an act requires an `independent` precondition witness.**
+
+So the "agreement" between the two records carries **no confirmatory weight**, and the packet was right
+to ask before reconciling. But the constraint carries real weight, and it is the kind only the receiving
+end could supply. That is the distinction the lane exists to make, applied to the lane's own evidence.
+
+**Its sharpest finding follows from the constraint:** `self` and `unknown` are *valid delivered verdicts*
+and **neither authorises R16 to act** — the edge's type admits three values of which two are refusals,
+which is R9's whole apparatus arriving at the acting end. And **no implementation carries an R9 verdict
+into `enact!` or an act-gate today**, measured rather than inherited from the sister edge as the packet
+required.
+
+Three fields `unspecified` with reasons, what would settle them, and an explicit note that `R16→R2`'s
+values were **not** imported — *different edge, different contract*. Receipt shape marked **inferred,
+untested** rather than filled from the payload.
+
+### `P-R16.md` is untracked — fourth instance of the anchoring defect today
+
+`git ls-files holes/problems/P-R16.md` → **0**. The record written this afternoon, quoted by both CML-D2
+packets and dispatched against by R16-D1, **has no sha.** After the `P-*.md` records (`e01dab9`) and
+`control-map-edges.edn` (anchored an hour ago), this is the third artefact and the fourth instance —
+counting the gate-at-a-path confusion, which was the same defect from the reading side.
+
+It bites the gate-at-a-sha rule directly: a **committed** findings note (`ab539dd`) cites
+`P-R16.md:58-64`, and there is no version of that file a reader can resolve the citation against. The
+rule I proposed this morning — *before a lane specifies an artefact, the artefact is anchored* — needs its
+companion: **before a record is quoted in a committed artefact, the record is anchored.** Reported;
+not staged, as it is the owner's file.
