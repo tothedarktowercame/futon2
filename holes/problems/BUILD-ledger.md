@@ -2694,3 +2694,34 @@ first try, and must be justified: *a pair that agrees on everything has probably
 
 Also required, against the wedge failure: **a bell to claude-20 after every round**, not only at the end,
 so a silent hour is distinguishable from progress.
+
+### PAIR round 1 — both nodes corrected the record, one of them corrected me
+
+**R2 (codex-2) — `:acknowledged?` is not an R2 observation channel.** Verified: `observation-channels`
+(`observation.clj:11-32`) lists exactly fourteen — loop-health, support-coverage, attack-coverage,
+mission-health, stack-pct, consulting-pct, portfolio-pct, mathematics-pct, active-repo-ratio,
+sorry-count-norm, coupling-density, ticks-firing-ratio, depositing-signal, annotation-health. **Zero
+occurrences of `acknowledged` in that vector.** `:acknowledged?` appears once in the whole namespace tree,
+at `lane_futility.clj:334`, as a field of a lane-futility map.
+
+**This corrects me, repeatedly.** I wrote into CML-D2's packet, its review, and this ledger that *"none of
+R2's fourteen channels can receive it; `:acknowledged?` is not a substitute, its only producer being the
+hard-coded `true` at `lane_futility.clj:334`"* — treating it as an R2 channel that happens to be
+hard-coded. It is not an R2 channel at all. The hard-coding finding (from R2-D1) is true; **the
+attribution to R2's channel set was mine and was wrong**, and it survived a packet, a builder, a review
+and an owner gate.
+
+What it does *not* change: the conclusion that no observation channel can receive an act's witness. That
+is cleaner now — `:acknowledged?` was never a candidate, so it should not have been argued against.
+
+**R16 (codex-1) — the enactment audit is discarded on exception.** Its bell named `close_loop.clj`, which
+is 128 lines of act-gate handling with no `catch` and no `:enacted`. The behaviour is at **`enact.clj:255`**:
+`(catch Throwable _ judgement)` wraps the whole enactment block, so a throwable collapses it to the bare
+judgement, discarding `:act-gate-verdicts`, `:enactment` and the realized outcome — and `_` discards the
+exception too. **A tick where enactment blew up is byte-identical to one where it was never attempted.**
+Stronger than R16 put it: the failure removes the evidence that there was a delivery to remove, and it is
+one concrete path producing the untyped `:enacted nil` that R16-D1 found from outside.
+
+**Two rounds-1, two corrections to gated material, from nodes reading their own code in character.** That
+is now three today (R14's counterfactual authority finding, and these two), against zero produced by my
+edge-statistics apparatus this afternoon.
