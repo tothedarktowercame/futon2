@@ -569,3 +569,17 @@ helpers only, reported 0. Lifecycle row 27. Two follow-ups in parallel, differen
 positive control by overriding one path. AUD-D4 (second seat, the lint): marker-swallowing at loud-helper call sites is a
 violation; fixture 3/0. Blocker recorded: the standalone WM report does not run (`requires the shared reason-bearing
 selector`; bb entry blocked in `lane_futility.clj`) — bears on Joe's decision to restart the nightly tick.
+
+**4c GATED 20:40Z (futon3 `cad5034`) — corpus fixed, coverage overstated.** Rung 1 now reads the live store by keyset
+pages, pinned `{:basis {:count :max-at} :built-at :store}` in the cache header and filename; the pin moved between two
+builds seven minutes apart (191,328 → 191,356). The export is gone from all three programs. `I_data_current`: first
+fix landed. But the reported table (aif 33/33, wc 23/23, war-room 28/28 "any/non-listing") is not the number: the
+non-listing column admits self-text and co-mention hits, and — the new finding — **the live store contains the
+instrument.** Of 157 distinct clean war-room citations, 23 are today's zai spider workers' own turns (tool calls
+searching for the pattern they then "cite") and 15 are Agency completion records of the spider seat's own jobs.
+`spider-self-text?` catches three prompt strings, not a worker's tool-call turn. Honest war-room: 28 / 25 clean /
+**21 clean from non-spider records**; wr-5, wr-6, wr-18, wr-23 are covered only by the search for them. So the war-room
+rise over the export era (10 → 21 real) is real and about three-quarters of what was claimed. Lifecycle row 28.
+Packet 4d (codex-20): reflection by provenance (fleet seat set passed in; Agency job records of the spider seat),
+columns any / clean / clean-non-reflection, rung-1 warrant = clean-non-reflection only, wave-1 attestations whose
+warrant was reflection re-flagged `:unwarranted-rung-1` without re-spidering. Wave 2 waits on 4d.
