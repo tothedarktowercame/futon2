@@ -62,12 +62,24 @@
        (remove str/blank?)
        set))
 
+(defn- term-pattern
+  "A schema field name, matched as a whole token.  Bare substring matching
+   reported agreement for records that merely contained the letters -- `id`
+   inside `identity`, `val` inside `evaluation` -- so two records that never
+   mention a field agreed about it.  That manufactures agreement at exactly
+   the point CML-D2 starts creating endpoint records; the instrument is fixed
+   before it runs, not audited after (delivery-lifecycle log row 12a).
+   Hyphen is excluded on both sides so `id` does not match the field `id-key`."
+  [term]
+  (re-pattern (str "(?i)(?<![A-Za-z0-9-])"
+                   (java.util.regex.Pattern/quote term)
+                   "(?![A-Za-z0-9-])")))
+
 (defn- record-agrees?
   [text edge schema]
-  (let [lower (str/lower-case text)]
-    (and (re-find (edge-reference-pattern edge) text)
-         (every? #(str/includes? lower (str/lower-case %))
-                 (schema-terms schema)))))
+  (and (re-find (edge-reference-pattern edge) text)
+       (every? #(re-find (term-pattern %) text)
+               (schema-terms schema))))
 
 (defn endpoint-agreement
   "Compute agreement only when both endpoint records exist.  Typed absence is

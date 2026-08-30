@@ -54,6 +54,25 @@
           (is (false? (get-in report [:edges 0 :endpoints-agree?])))
           (is (false? (get-in report [:edges 0 :fully-specified?]))))))))
 
+(deftest schema-terms-match-whole-tokens-not-substrings
+  ;; Regression (claude-20 review of CML-D1): with substring matching these two
+  ;; records reported :endpoints-agree? true and :fully-specified? true, though
+  ;; neither mentions the `id` or `val` fields -- "identity" and "evaluation"
+  ;; merely contain the letters.
+  (with-records
+    {:R1 "R1→R2 concerns the identity of the sender and its value proposition."
+     :R2 "R1→R2 discusses identity and evaluation, nothing else."}
+    (fn [records-dir]
+      (let [report (lint/lint-data
+                    {:data {:edges [(assoc edge
+                                          :schema {:id :string :val :number}
+                                          :fixture {:id "a" :val 1})]
+                            :derived-undrawn []}
+                     :records-dir records-dir
+                     :expected-drawn #{(lint/edge-key edge)}})]
+        (is (false? (get-in report [:edges 0 :endpoints-agree?])))
+        (is (false? (get-in report [:edges 0 :fully-specified?])))))))
+
 (deftest specified-means-values-and-two-record-agreement
   (with-records
     {:R1 "R1->R2 payload carries tick and value."
