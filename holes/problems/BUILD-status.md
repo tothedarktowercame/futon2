@@ -21,14 +21,15 @@ extensions get a supersession record, not a deletion (first case: `P-supersede-s
 | **Node R16** (grounded actuation) | the registry and the witness | discovery done (4-entry fixture is the domain; `:enacted nil` untyped); build not started | claude-20 | R16-D2 after Lean declarations ratified | no |
 | **Wiring (CML)** | edge schemas between nodes | 2 of 21 edges have entries; **0 fully specified** (operational fields unstated by both records) | claude-15 | endpoint amendments for operational fields | no (unless you want it to move now) |
 | **Library (spider)** | @why/@how edges with evidence | wave 1 done: 19 attested of 68; **rung 1 read a 7-week-old export** — being fixed (packet 4c, live store) | codex-20 | wave 2 after 4c, war-room included | no |
-| **Data currency audit** | find every stale readout the machine or instruments read | **done** (AUD-D1 `d1997fc`): 3 real snapshot reads (evidence export → 4c; mana snapshot, timer missing; mark2 cache, no endpoint); WM core files are canonical/own-output, current by construction; **2 report inputs never existed** (`stack-logic-model.edn`, `alignment.edn` — silent `when-let`) | claude-15 | AUD-D2 **done** (lint exits 1 on 7 silent+absent reads; 3 never-produced files); AUD-D3 running (delete + loud reads); then mana timer; mark2 endpoint | no — decided: stack-logic model was planned 05-03, never produced; **superseded, not rebuilt** — it was a hand-written operator model; R2/`sec-operator.tex` is its successor (`P-supersede-stack-logic-model.md`); dead reads deleted citing that; rule recorded as `I_absent_is_loud` (lifecycle §0.7, PREREG §4) |
+| **Data currency audit** | find every stale readout the machine or instruments read | **done** (AUD-D1 `d1997fc`): 3 real snapshot reads (evidence export → 4c; mana snapshot, timer missing; mark2 cache, no endpoint); WM core files are canonical/own-output, current by construction; **2 report inputs never existed** (`stack-logic-model.edn`, `alignment.edn` — silent `when-let`) | claude-15 | AUD-D2 **done** (lint exits 1 on 7 silent+absent reads; 3 never-produced files); AUD-D3 landed but **not passed** — callers swallowed the marker and the lint couldn't see it; AUD-D3b (markers reach the report + trace) and AUD-D4 (lint follows the value) running in parallel; then mana timer; mark2 endpoint | no — decided: stack-logic model was planned 05-03, never produced; **superseded, not rebuilt** — it was a hand-written operator model; R2/`sec-operator.tex` is its successor (`P-supersede-stack-logic-model.md`); dead reads deleted citing that; rule recorded as `I_absent_is_loud` (lifecycle §0.7, PREREG §4) |
 | **R19 preferences C** | who supplies the preferences, and how they are layered | **stated** (`P-R19-preferences-open.md`, PROPOSED): C is a parameter; a layer has an author and a basis; composition is recorded; today 4 sources, none declared as such | claude-20 (lane) / claude-15 (gate) | **R19-D1 running** (stack record: layers + purpose at the strata level + falsifier + holder); then R19-D2 Lean + recorded fold | no — principle ratified 19:35Z |
 | **Second domain (APM proofs)** | the next microcosm | assessed only; nothing written | — | on your word, after the above | **yes: go/no-go** |
 
 ## What is running right now
 - packet 4c (codex-20): spider rung-1 index from the live store.
 - R19-D1 (claude-20 → codex): the preference-stack record.
-- AUD-D3: the WM report's dead reads deleted (citing the supersession record) and `read-edn-file` made loud.
+- AUD-D3b (codex-5): `## Input status` in the WM report and `:input-status` in the trace; loud trace write.
+- AUD-D4 (second seat): the lint learns marker-swallowing at call sites.
 Nothing else. Every builder lane is closed and gated.
 
 ## Your open decisions (none blocking a running lane)
@@ -37,7 +38,7 @@ Nothing else. Every builder lane is closed and gated.
 3. APM regeneration authority (`apm-lean` vs `mathlib4-apm-validation`) before AD-D4.
 4. The R2 turn channel (what content of a turn→pattern association normalises to [0,1]).
 5. Second domain go/no-go.
-6. ~~The 10:54 WM trace writer~~ identified: a manual WM report build with trace on (`war_machine.clj:4720`; the write is wrapped in `(catch Exception _ nil)`). Its `:decision` folded a `:strategic-memory` last observed **2026-07-24**. No unattended tick has run since R10 stopped: last nightly 23:00 trace 07-05; no unit, no cron, entrypoint not in the repo; zero ticks 07-21→08-30. Decision now: **turn the nightly tick back on (bounded, trace on) or not?**
+6. ~~The 10:54 WM trace writer~~ identified: a manual WM report build with trace on (`war_machine.clj:4720`; the write is wrapped in `(catch Exception _ nil)`). Its `:decision` folded a `:strategic-memory` last observed **2026-07-24**. No unattended tick has run since R10 stopped: last nightly 23:00 trace 07-05; no unit, no cron, entrypoint not in the repo; zero ticks 07-21→08-30. Decision now: **turn the nightly tick back on (bounded, trace on) or not?** — note the standalone WM report currently does not run at all (`requires the shared reason-bearing selector`), so restarting it is a repair first.
 
 ## The one-sentence health check
 Types and laws: mostly in place. Runs: three nodes discharged. Data: one corpus was stale and is being fixed;

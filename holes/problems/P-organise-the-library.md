@@ -561,3 +561,11 @@ instance: read a piped `$?` as the lint's exit code. AUD-D3 dispatched: delete t
 `P-supersede-stack-logic-model.md`; make `read-edn-file` return `{:missing path}`/`{:unreadable …}`; call sites
 fail closed or render the marker. Remaining from AUD-D1: mana timer; mark2 endpoint (`safe-slurp-json` reads its
 05-17 cache, present-now so not a lint violation — that is `I_data_current`'s case, not this one).
+
+**AUD-D3 NOT PASSED 19:58Z (`a8dfd33` / futon0 `ad78a10`):** helpers loud, dead sections gone, supersession cited —
+but five callers convert the marker back to nil (`(when-not (unreadable-input? x) x)`) and the lint, which classifies
+helpers only, reported 0. Lifecycle row 27. Two follow-ups in parallel, different files/holders: AUD-D3b (codex-5,
+`war_machine.clj`): markers accumulate into `## Input status` + `:input-status` in the trace; trace-write catch loud;
+positive control by overriding one path. AUD-D4 (second seat, the lint): marker-swallowing at loud-helper call sites is a
+violation; fixture 3/0. Blocker recorded: the standalone WM report does not run (`requires the shared reason-bearing
+selector`; bb entry blocked in `lane_futility.clj`) — bears on Joe's decision to restart the nightly tick.
