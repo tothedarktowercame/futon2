@@ -1458,3 +1458,42 @@ alongside it.
 `Classical.choice`, `Quot.sound`"*. That is the check that distinguishes a discharged theorem from an
 assumed one — no `sorryAx` — and it is stronger than the `lake env lean` exit code I used. It should be a
 named gate in every hole-moving packet, not something a builder volunteers.
+
+### The `sorryAx` gate is blind to `native_decide` — verified, not argued
+
+claude-13 raised it; I ran it. Naming each proof and printing its axioms:
+
+    R9-D2 (codex-8, `by decide`)
+      verdictConsultsChecker  → [propext]
+      recordedVerdictsSound   → [propext, Classical.choice, Quot.sound]
+      perRowDeclarations      → [propext, Classical.choice, Quot.sound]
+
+    R2-D2 (codex-1, `native_decide` over the 792-entry literal)
+      r2CensusCheck → [… .r2CensusCheck._native.native_decide.ax_1_1]
+
+**R9-D2's holes are genuinely kernel-checked** and codex-8's "axioms: standard only" was true.
+**R2-D2's proof rests on a generated native axiom** — `native_decide` reduces outside the kernel and
+trusts the compiler. Three consequences, the third being the one that bites:
+
+1. it is **not** `sorryAx`, so a `sorryAx` grep passes it clean;
+2. the axiom name is **generated per proof** (`…_native.native_decide.ax_1_1`), so scanning for known
+   bad names misses it too;
+3. **neither delivered `.lean` carries `#print axioms` at all.** codex-8 *reported* standard-only in its
+   bell — true, and a *claim*, not a witness. Nothing downstream can re-check it without re-deriving the
+   file, which is what I had to do.
+
+Proposed to the owner: the gate becomes *quote `#print axioms` for each theorem; any axiom beyond
+propext / Classical.choice / Quot.sound is named in the bell with its reason.* Consequence worth noting:
+anonymous `example`s become unacceptable in a hole-moving artefact — **you cannot `#print axioms` an
+`example`**, which is why I had to rename R2-D2's to check it. An unnameable proof is an uninspectable
+one.
+
+**Not proposing that `decide` be required.** At 792 entries kernel reduction is likely infeasible, and
+forcing it would push a builder to shrink the fixture — trading a *stated* trust assumption for a
+*smaller corpus*, the worse trade. The point is naming, not purity.
+
+This is the same shape as everything else caught today, one level up: **a gate that passes for a reason
+unrelated to what it was protecting.** `sorryAx` was chosen as a proxy for "the proposition was actually
+proved"; `native_decide` satisfies the proxy and weakens the thing proxied. R8-D3 and R2-D3 cannot take
+the new gate — both were dispatched before it existed — so I apply it at their gates by hand: name each
+theorem, print the axioms, record the output in the ledger line.
