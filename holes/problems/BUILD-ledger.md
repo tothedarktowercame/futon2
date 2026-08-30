@@ -1346,3 +1346,43 @@ packet prose, became a fixture-corpus test, and is now carried by the interface 
 
 **Note for the R2-D3 builder, in the packet:** codex-1's R2-D2 pin used *my* method and was correct to;
 the ruling landed after it was dispatched. Said explicitly so it does not read as a correction of its work.
+| 3 (R8) | R8-D3 state | codex-12 (via claude-20) | invoke-1788107199033-4391-f7b1dbb8 | park-2cbc8b2e | 16:32Z | running | vs Holes.lean:376-434@53c5e466 | claude-15: re-quoted AFTER the R8Tick facts fix (hasControllerScore/hasGTotal present, written freeEnergyShape absent) — no confirm-read needed; both-keys and neither-key counts reported separately (unknown over-met); G-D3 has since re-emitted the contract (1b09974a) → R8-D3 binding must carry that contract-sha or it is :stale on arrival (told claude-20 in-thread) |
+
+### Correction to my R2-D2 review: the transcription was delivered and I said it was outstanding
+
+Re-reading codex-1's R2-D2 result **in full** — prompted by a stale park payload replaying it — I found a
+paragraph I had skipped:
+
+> *"Interface drift found during validation: the dispatched `6fd8a33f4d` interface used `Fin 14`, but
+> current Mathlib HEAD `1bfba954` had already replaced it with named `Channel` constructors and
+> `Channel.all`. The generator was adapted to this stronger current interface."*
+
+**codex-1 detected the mid-build drift itself and adapted to the newer interface** — the drift I had
+recorded as something to check at review and "flag rather than interrupt". Verified: `R2-D2-report.lean`
+has **0** occurrences of `Fin 14`, uses `Channel.all`, carries a **792-entry literal**, and discharges
+`r2ContractCensus wmTraceR2Generated … = 2` by `native_decide` with `lake env lean` exit 0.
+
+**So my review was wrong in a specific way:** I read the result's head and tail, ran the gates, checked
+the fixture corpus and the ordered vector — and did not read the middle, where the builder reported doing
+more than the packet asked. I closed the lane describing the transcription as outstanding when it was
+delivered, and then wrote R2-D3 to commission it again. Had claude-13 not been mid-read, codex-1 would
+have been asked to produce a **second, divergent literal** for the same corpus.
+
+**R2-D3 corrected while in read** (`invoke-1788107592521`), and it shrinks to three real items:
+- **the regenerate gate** — absent. "Two runs byte-identical" is *determinism*; `regenerate && git diff
+  --exit-code` is *drift detection*. Different properties, and only the second catches a corpus that
+  moved after the commit;
+- **the naming gap** — the literal is `wmTraceR2Generated`, the hole is `wmTraceR2 := sorry`. The
+  `example` is fixture evidence about a parallel definition, not the hole moving, and only the owner may
+  wire it. Worth stating as a general limit: **a builder can produce the literal and the evidence; it
+  cannot move a hole whose constant lives in a file it may not edit.**
+- **the pin under the ruled method.**
+
+**And one I nearly let pass unremarked:** codex-1 used **`native_decide`**, which evaluates outside the
+kernel and trusts the compiler, where every other lane moves by `decide`. That is a different trust
+assumption arriving without being named — the shape of every facade in this build, in miniature. Asked
+of claude-13 rather than decided by me.
+
+The lesson against myself is narrower than "read more carefully": **I re-ran every gate the checklist
+named and skipped the prose between them.** A checklist makes the listed checks reliable and the
+unlisted ones invisible, and what the builder volunteered was in neither column.
