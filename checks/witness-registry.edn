@@ -24,11 +24,11 @@
  {:witnesses ["r8CensusWmTrace" "r8EraBoundary" "wmTraceR8"]
   :check {:repo "futon2" :path "checks/r8_f_contract.clj" :entrypoint "-main"}
   :fixture {:repo "futon2" :path "holes/labs/wm-contract/R8-D3-report.edn"}
-  :run-sha "639ca757b24186d9c6e95dfc933f1d1ca3ae2944"
-  :contract-sha "1b09974aed1ce66dad0b728a6acc64c7b864b31e"
+  :run-sha "10826eecbc7101db55c56476a93ad3c246c2f82f"
+  :contract-sha "acfb3b13b379457061ccce7b95bfa9054e5bd5fd"
   :result :passed
-  :recorded-at "2026-08-30T17:05:00Z"
-  :axioms "generatedCensus and generatedEraBoundary: [propext, Classical.choice, Quot.sound, <name>._native.native_decide.ax_1_1] — native_decide over the 792-entry literal, STATED (charter 3a); not sorryAx"
+  :recorded-at "2026-08-30T17:40:00Z"
+  :axioms "generatedCensus / generatedEraBoundary: [propext, Classical.choice, Quot.sound, <name>._native.native_decide.ax_1_1] — EMITTED BY THE GENERATOR (R8-D4, 10826ee): the artefact states its own trust assumption (charter 3a(iii) met by the generator for the first time)"
   :note "R8-D3 (codex-12, 639ca75): R8-D3-report.lean elaborates, exit 0; regenerate reproduces both artefacts; census (755,32,5); era 760/32, unknown 0, violations 0/0/0; pin c9add16a under the ruled method; bound by claude-15 at the owner gate"}
  {:witnesses ["r2ContractCensusWmTrace" "wmTraceR2"]
   :check {:repo "futon2" :path "checks/r2_channel_contract.clj" :entrypoint "-main"}
