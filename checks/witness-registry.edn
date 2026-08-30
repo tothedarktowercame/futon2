@@ -41,10 +41,19 @@
   :note "R2-D3 (codex-1, 4eb4f58): elaborated by the owner at the sha (git show), exit 0; census = 2 over the 792-entry wmTraceR2 literal over the named Channel inductive; pin c9add16a under the ruled method, identical to R8-D3's; regenerate reproduces both files; the pin's limit stated by the builder: identical enumeration, not correct filter"}
  {:witnesses "preferenceStackLiveRecorded"
   :check {:repo "futon2" :path "checks/r19_stack_witness.clj" :entrypoint "-main"}
-  :fixture {:repo "futon2" :path "checks/r19_stack_witness.clj"}
-  :run-sha "03c149d0b39b5f1fbe9640b6c7aa63f4fbe21b36"
+ :fixture {:repo "futon2" :path "checks/r19_stack_witness.clj"}
+ :run-sha "03c149d0b39b5f1fbe9640b6c7aa63f4fbe21b36"
   :contract-sha "638c7f28056e9599437d95f2937aa1b95faa38ff"
   :result :passed
   :recorded-at "2026-08-31T03:45:00Z"
   :axioms "preferenceStackRecorded: [] (kernel decide); this Clojure witness emits no Lean proof and introduces no axioms"
-  :note "R19-D2b witnesses the preference-stack emission added by ccd06ce; the inline dry-run fixture and executable missing-layer falsifier live in the check."}]
+  :note "R19-D2b witnesses the preference-stack emission added by ccd06ce; the inline dry-run fixture and executable missing-layer falsifier live in the check."}
+ {:witnesses "wmRunsOnce"
+  :check {:repo "futon2" :path "checks/wm_runs_once_witness.clj" :entrypoint "-main"}
+  :fixture {:repo "futon2" :path "holes/labs/wm-contract/tick-run-record-2026-08-30.edn"}
+  :run-sha "a0205ba2767ad3bc2a68a52ac5a1c27e4e3a84dd"
+  :contract-sha "638c7f28056e9599437d95f2937aa1b95faa38ff"
+  :result :passed
+  :recorded-at "2026-08-30T20:16:30Z"
+  :axioms "wmRunsOnce: [] (receipt witness only); this Clojure witness emits no Lean proof and introduces no axioms"
+  :note "WM-RUN1 witnesses one cold-JVM on-demand tick via scripts/futon2/run_tick_once.clj; on this seat the shared futon3c selector was not on the futon2 runtime classpath, so the run recorded selectorSeam stub:first-ranked-authorized-mission and routed around the lane_futility bb blocker with clojure -M."}]
