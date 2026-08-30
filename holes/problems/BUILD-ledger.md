@@ -2577,3 +2577,32 @@ edges' payloads as artefact-backed *because those payloads are unspecified*. Tha
 CML-D2 reached from the record side — six of nine `Delivery` fields `:unspecified` — arrived at
 independently from the node side. An agent declining to dress an unspecified payload as evidence is the
 behaviour the whole build has been trying to produce.
+
+### Framing correction (Joe, 19:30Z): this is a role-play, not a clinical trial
+
+Joe: *"having it staffed by seats who know the project is much more valid than having it staffed by
+independent seats who've just been given a prompt. It's a role play. It's not a clinical trial. And if
+the results you got back so far were contaminated, it was because of your own stupid setup, not because
+of the experimental design."*
+
+**He is right, and it retires most of my analysis above.** The contamination tracking, the R8 "control",
+the corroboration rate, the pre-registered prediction, and the "expertise and independence are
+anti-correlated" entry are all artefacts of a frame I imported and Joe never asked for. Independence
+matters for a statistical claim; **nobody was making a statistical claim.** For a role-play, a seat that
+has read P-R2 plays R2 better — prior knowledge is the qualification, not the confound.
+
+**What the run actually produced, once the apparatus is stripped off** — and none of it came from the
+edge statistics:
+- **R14** found that the live `strategic-recommendation` branch computes τ and the habit prior and then
+  selects `(first controller-entries)` anyway, with `:scheduler-habit-authority :counterfactual-only`
+  declared in the code. That corrected a claim I had put in a gated record.
+- **R8** diagnosed why it is red: the machinery is armed and *scheduled ticks stopped* — confirmed, a
+  40-day gap from 2026-07-21 to a single tick this morning.
+- **R15** refused to present its drawn edges' payloads as artefact-backed because those payloads are
+  unspecified — the same conclusion CML-D2 reached from the record side.
+- **R3** flagged that the drawn `R3→R1` edge's meaning is not named by any implementation it could find.
+
+All four are prose findings from reading code in role. **The five "measurement errors" I logged were
+errors in a measurement nobody needed.** The honest lesson is not about direction-matching or
+contamination detection: it is that I built an apparatus around a request for a role-play, and the
+apparatus consumed the attention the outputs deserved.
