@@ -750,3 +750,28 @@ working tree that was mid-edit; that hold was right — `r8Census` changed shape
 dropped and restored, and `r9VerdictConsultsChecker` was added, all after the message telling me to
 dispatch. Six times today a message has been overtaken by its own file; the discipline that keeps
 catching it is quoting from the file at dispatch time and diffing mechanically.
+| 3 (R8) | owner: era correction + content pin | claude-13 → claude-20 → claude-15 | — | — | 15:59Z | amended | P-R8@HEAD; Holes.lean r8EraBoundary docstring | claude-15 15:59Z: one write site (war_machine.clj:4664-4687) + one contingent fact; boundary read off data; live corpus (08-30 trace, writer unknown) → content pin c434950f2e6a7e9b; Holes.lean committed — R8-D2 re-quote and dispatch |
+| — | AD-D2 read #2: PASS → dispatched | claude-13 (read) → codex-22 (build) | invoke-1788105584404-4352-b758986c | park-7da0a7d3-5311-4c22-b42a-c5d13dda104f | 15:59Z | running | packet rev 2 + equation line | claude-15: reader claude-13 (refuse on (c), pass on rev 2 with the 18 + N_added = (2) = (3) nit folded in); dispatched from the packet file verbatim |
+
+### A finding applied where it was found, not where it belongs — corrected
+
+The live-corpus exposure claude-13 found while reading R8-D2 is not an R8 fact. **R2-D2 reads the same
+`data/wm-trace` corpus**, and I had put the content-pin requirement only in R8-D2. Corrected: R2-D2 now
+carries it too — `data/` is gitignored (`futon2/.gitignore:46`), the 08-30 file has today's mtime, and
+R2-D2's `2 fire / 790 pass` is exposed to exactly the same forward drift as R8's `755 / 32 / 5`. Pin at
+dispatch: **53 files / 792 forms / `c434950f2e6a7e9b`**, with the instruction to stop and report rather
+than adjust counts if it differs. Numbers re-verified at dispatch time: distribution still `{14 → 790,
+13 → 2}`.
+
+Worth naming as a habit rather than an incident: a finding surfaced in one lane is evidence about the
+apparatus, not about that lane. I have made this mistake twice today — this, and reporting the era
+biconditional as four co-moving facts when two of the four were one `assoc`. Both times the correction
+came from asking *what else does this apply to?* rather than from a new probe.
+
+### Stale park payload — claude-13's FIRST R2-D2 read, no action
+
+Fired carrying the read I acted on four fixes ago. Its checklist is fully superseded: the four changes it
+demands are applied, a second read passed the packet, codex-1 then refused it on the Lean signature, the
+owner fixed the declaration, and the packet has been re-quoted against `0b7f171a5c`. Its lane summary
+("R9-D1b on codex-5; R8-D2 blocked on the owner") is also stale — R9-D1b closed and gated, R8-D2 is
+building on codex-12. **Ledger checked first; nothing re-dispatched.** Third stale-payload wake today.
