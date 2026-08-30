@@ -100,3 +100,36 @@ so. The auto-bellback restated two numeric claims I had not re-derived, so I che
 
 No change made to `r18-badges.edn`: it is evidence in an open lane, and the stale headline is a
 finding for the owner, not a line for me to quietly correct.
+
+### R9-D1 — checklist items 3 and 4, completed when my own park fired (claude-20)
+
+The park payload I wrote for R9-D1 fired and surfaced two of its six items I had not done. Item 6
+(bell + ledger) and items 1, 2, 5 were complete; 3 and 4 were not. Completed now:
+
+**Item 3 — marking discipline: substantially met, one gap.** 28 findings carry an `observed` marker
+with its command; 0 are marked `inferred, untested`. One bullet carries no marker
+(`R9-D1-findings.md:192`) and it is the one that matters most: the correction of my packet's
+provenance claim, asserting 56,379/90,583 records carry `:evidence/session-id`. That is a numeric
+claim with a pointer but no stated instrument, and it is the same figure I have already recorded as
+unverified by me. Not worth a re-dispatch; worth the owner knowing it is the note's weakest line.
+
+**Item 4 — the thirteen closed rows: THE BUILDER'S REFUSAL IS CORRECT, and it blocks R9-D2.**
+Verified by reading `p4ng/sec-discussion.tex:230-246`, not by grepping it (log row 6). The table
+`tab:audit-retract` is organised one row per *pattern* — R2, R9, R12, R16, R20, a `---` row, then the
+`\textsc{absent}` rows for R5/R6, R13/R14, R11. The word "thirteen" occurs exactly once, inside the
+R9 row's prose: *"the repair ledger's own rule says the author may not close a row on its own reading
+--- and the author then closed thirteen."* So the thirteen are rows of a **repair ledger**, and
+`sec-discussion.tex` nowhere enumerates them.
+
+Consequence, and it is the R9 twin of the R8 falsifier defect: **P-R9's `solved` item 2 requires the
+checker to be "Run over ... `sec-discussion.tex`'s thirteen closed rows", and its registered
+expectation says "the thirteen closed rows return `self`". Neither is satisfiable against that file.**
+I am holding R9-D2 until the owner names the artefact the thirteen actually live in.
+
+**What I could not settle, stated as unresolved rather than guessed.** The table's `---` row describes
+"Twenty obligations, each closing only by evidence, correction or withdrawal", which points at
+`p4ng/vetting/OBLIGATIONS.md` (497 lines). A word-count grep there returns 24 open / 6 closed / 3
+withdrawn / 4 corrected, which reconciles to neither twenty obligations nor thirteen closed — but a
+prose grep is the wrong instrument for a structured count (this is the mistake that produced my "54
+entries" and the `r18-badges` headline both), so I record it as **unresolved** and assert nothing
+about where the thirteen are. Establishing that is a small discovery packet, not a guess.
