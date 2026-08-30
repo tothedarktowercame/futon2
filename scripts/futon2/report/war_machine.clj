@@ -479,17 +479,34 @@
   (let [{:keys [exit out]} (apply shell/sh "git" "-C" repo-path args)]
     (when (zero? exit) (str/trim out))))
 
-(defn- read-edn-file [path]
+(defn- parse-edn-string [path text]
   (try
-    (when (.exists (java.io.File. path))
-      (read-string (slurp path)))
-    (catch Exception _ nil)))
+    (read-string text)
+    (catch Exception e
+      {:unreadable path
+       :cause (ex-message e)})))
+
+(defn- read-edn-file [path]
+  (if (.exists (java.io.File. path))
+    (parse-edn-string path (slurp path))
+    {:missing path}))
+
+(defn- parse-json-string [path text]
+  (try
+    (json/parse-string text false)
+    (catch Exception e
+      {:unreadable path
+       :cause (ex-message e)})))
 
 (defn- read-json-file [path]
-  (try
-    (when (.exists (java.io.File. path))
-      (json/parse-string (slurp path) false))
-    (catch Exception _ nil)))
+  (if (.exists (java.io.File. path))
+    (parse-json-string path (slurp path))
+    {:missing path}))
+
+(defn- unreadable-input? [x]
+  (and (map? x)
+       (or (contains? x :missing)
+           (contains? x :unreadable))))
 
 (defn- capability-star-map []
   (let [{:keys [path graph]} @capability-star-map-cache]
@@ -502,7 +519,9 @@
 
 (defn- live-star-map-efe-opts
   [base-opts]
-  (if-let [graph (capability-star-map)]
+  (if-let [graph (let [graph (capability-star-map)]
+                   (when-not (unreadable-input? graph)
+                     graph))]
     (merge base-opts
            live-star-map-efe-weights
            {:capability-graph graph
@@ -532,8 +551,9 @@
   (let [{:keys [path domain-view]} @mission-domain-ratified-cache]
     (if (= path mission-domain-ratified-path)
       domain-view
-      (let [domain-view (normalize-mission-domain-view
-                         (read-edn-file mission-domain-ratified-path))]
+      (let [raw-domain-view (read-edn-file mission-domain-ratified-path)
+            domain-view (when-not (unreadable-input? raw-domain-view)
+                          (normalize-mission-domain-view raw-domain-view))]
         (reset! mission-domain-ratified-cache {:path mission-domain-ratified-path
                                                :domain-view domain-view})
         domain-view))))
@@ -543,8 +563,9 @@
   (let [{:keys [path gap-view]} @mission-fold-view-cache]
     (if (= path mission-fold-view-path)
       gap-view
-      (let [raw-gap-view (normalize-mission-gap-view
-                          (read-edn-file mission-fold-view-path))
+      (let [raw-gap-input (read-edn-file mission-fold-view-path)
+            raw-gap-view (when-not (unreadable-input? raw-gap-input)
+                           (normalize-mission-gap-view raw-gap-input))
             domain-view (mission-domain-ratified)
             gap-view (if (seq domain-view)
                        (into {}
@@ -569,11 +590,14 @@
   (let [{:keys [path centrality]} @centrality-cache]
     (if (= path forward-model-centrality-path)
       centrality
-      (let [centrality (->> (or (read-json-file forward-model-centrality-path) {})
-                            (keep (fn [[mission row]]
-                                    (when-let [c (get row "c_joint")]
-                                      [(str mission) (double c)])))
-                            (into {}))]
+      (let [raw-centrality (read-json-file forward-model-centrality-path)
+            centrality (if (unreadable-input? raw-centrality)
+                         {}
+                         (->> (or raw-centrality {})
+                              (keep (fn [[mission row]]
+                                      (when-let [c (get row "c_joint")]
+                                        [(str mission) (double c)])))
+                              (into {})))]
         (reset! centrality-cache {:path forward-model-centrality-path
                                   :centrality centrality})
         centrality))))
@@ -589,7 +613,9 @@
   (let [{:keys [path results]} @roi-results-cache]
     (if (= path forward-model-roi-results-path)
       results
-      (let [results (read-edn-file forward-model-roi-results-path)]
+      (let [results (let [results (read-edn-file forward-model-roi-results-path)]
+                      (when-not (unreadable-input? results)
+                        results))]
         (reset! roi-results-cache {:path forward-model-roi-results-path
                                    :results results})
         results))))
@@ -2072,29 +2098,14 @@
 (defn- sorry-nodes
   "Build sorry nodes from the topology."
   []
-  (when-let [alignment (read-edn-file (str futon5a-root "/data/alignment.edn"))]
-    (vec
-     (for [s (:sorry-topology alignment)]
-       {:type :sorry
-        :id (:id s)
-        :label (name (:id s))
-        :severity (:severity s)
-        :status (:status s)
-        :layer (:layer s)
-        :closes-by (:closes-by s)}))))
+  ;; superseded — see holes/problems/P-supersede-stack-logic-model.md
+  [])
 
 (defn- workstream-nodes
   "Build workstream nodes from the logic model."
   []
-  (when-let [model (read-edn-file (str futon5a-root "/data/stack-logic-model.edn"))]
-    (vec
-     (for [ws (:workstreams model)]
-       {:type :workstream
-        :id (:id ws)
-        :label (:label ws)
-        :jsdq-mode (:jsdq-mode ws)
-        :target-hours (get-in ws [:pocketwatch-hours :target])
-        :constraint (:constraint ws)}))))
+  ;; superseded — see holes/problems/P-supersede-stack-logic-model.md
+  [])
 
 (defn- mission-nodes
   "Build mission nodes from the API. Limits to active/blocked/ready
@@ -2147,18 +2158,8 @@
 (defn- workstream-dependency-edges
   "Logic model edges between workstreams."
   []
-  (when-let [model (read-edn-file (str futon5a-root "/data/stack-logic-model.edn"))]
-    (vec
-     (for [edge (:edges model)
-           :when (:from edge)]
-       {:type :logic-model-edge
-        :id (:id edge)
-        :from (:from edge)
-        :to (:to edge)
-        :edge-type (:type edge)
-        :status (:status edge)
-        :reinforcing? (:reinforcing edge)
-        :constraint (:constraint edge)}))))
+  ;; superseded — see holes/problems/P-supersede-stack-logic-model.md
+  [])
 
 (defn- evidence-flow-edges
   "Count evidence entries per workstream (approximated by topic)."
@@ -2183,11 +2184,10 @@
 (defn scan-graph
   "Build the strategic state graph.
 
-   Nodes: repos (with commit activity), sorrys (with severity/status),
-          workstreams (with JSDQ mode and pocketwatch targets).
-   Edges: temporal coupling (Jaccard co-change), workstream dependencies
-          (logic model), evidence flow (topic counts).
-   Dynamics: pocketwatch ticks, sorry signals.
+   Nodes: repos (with commit activity) and missions.
+   Edges: temporal coupling (Jaccard co-change) and evidence flow
+          (topic counts).
+   Dynamics: commit-share signals.
 
    This is the core data structure consumed by the visualiser.
    cf. cyberants world grid — here the 'world' is the stack itself."
@@ -2207,9 +2207,8 @@
         coupling (temporal-coupling-edges days)
         dependencies (or (workstream-dependency-edges) [])
         evidence-flows (evidence-flow-edges window-entries)
-        ;; Dynamics: pocketwatch ticks
-        model (read-edn-file (str futon5a-root "/data/stack-logic-model.edn"))
-        ticks (when model (get-in model [:pocketwatch :ticks]))
+        ;; superseded — see holes/problems/P-supersede-stack-logic-model.md
+        tick-results []
         ;; Compute actual workstream commit ratios for tick evaluation
         ws-commits (reduce (fn [acc {:keys [workstream commits]}]
                              (update acc workstream (fnil + 0) commits))
@@ -2219,58 +2218,7 @@
         stack-pct (/ (double (:stack ws-commits 0)) total-commits)
         consulting-pct (/ (double (:consulting ws-commits 0)) total-commits)
         portfolio-pct (/ (double (:portfolio ws-commits 0)) total-commits)
-        math-pct (/ (double (:mathematics ws-commits 0)) total-commits)
-        pct-str (fn [x] (format "%.0f%%" (* 100.0 (double (or x 0.0)))))
-        ;; Evaluate ticks
-        tick-results (vec
-                      (for [t (or ticks [])]
-                        (let [{:keys [fired? observed proxy-note computed?]}
-                              (case (:id t)
-                                :hermit-warning
-                                {:fired? (and (> stack-pct 0.7) (< consulting-pct 0.05))
-                                 :observed (str "stack=" (pct-str stack-pct)
-                                                ", consulting=" (pct-str consulting-pct)
-                                                " of commits in the last " days "d")
-                                 :proxy-note "Directly computed from commit shares in the current 14d/90d window."
-                                 :computed? true}
-
-                                :hobby-warning
-                                {:fired? (and (pos? (:portfolio ws-commits 0))
-                                              (< portfolio-pct 0.05))
-                                 :observed (str "portfolio commits=" (:portfolio ws-commits 0)
-                                                ", share=" (pct-str portfolio-pct))
-                                 :proxy-note "Approximation: the model wants 'portfolio work but no JSDQ maturity advance in 14 days'; current code proxies that as 'portfolio commits exist but still occupy <5% of recent commits'."
-                                 :computed? false}
-
-                                :foraging-warning
-                                {:fired? (> stack-pct 0.7)
-                                 :observed (str "stack=" (pct-str stack-pct)
-                                                ", mathematics=" (pct-str math-pct)
-                                                ", portfolio+consulting="
-                                                (pct-str (+ portfolio-pct consulting-pct)))
-                                 :proxy-note "Approximation: the model wants 'math evidence turns > portfolio+consulting turns AND cargo > 0.5'; current code proxies that as 'stack share >70%' because cargo/evidence-turn accounting is not wired here yet."
-                                 :computed? false}
-
-                                :cargo-warning
-                                (let [wp? (.exists (java.io.File.
-                                                    (str home "/vsat.wiki/ukrn-demo/UKRN_WP_draft_v2.md")))
-                                      prospectus? (.exists (java.io.File.
-                                                            (str home "/vsat.wiki/prospectus.md")))]
-                                  {:fired? (and wp? (not prospectus?))
-                                   :observed (str "working-paper=" (if wp? "present" "absent")
-                                                  ", prospectus=" (if prospectus? "present" "absent"))
-                                   :proxy-note "Direct file-existence check. The warning clears once the prospectus exists."
-                                   :computed? true})
-
-                                {:fired? false
-                                 :observed "no evaluator"
-                                 :proxy-note "No runtime evaluator implemented."
-                                 :computed? false})]
-                          (assoc t
-                                 :fired? fired?
-                                 :observed observed
-                                 :proxy-note proxy-note
-                                 :computed? computed?))))]
+        math-pct (/ (double (:mathematics ws-commits 0)) total-commits)]
     {:nodes {:repos repos
              :sorrys sorrys
              :workstreams workstreams
@@ -2286,8 +2234,6 @@
                                      :mathematics math-pct}}
      :summary {:total-repos (count repos)
                :active-repos (count (filter :active? repos))
-               :total-sorrys (count sorrys)
-               :total-workstreams (count workstreams)
                :coupling-edges (count coupling)
                :ticks-firing (count (filter :fired? tick-results))}})))
 
@@ -3378,27 +3324,19 @@
     (.append sb "## Strategic Graph\n\n")
     (when graph
       (let [{:keys [summary dynamics]} graph
-            {:keys [total-repos active-repos total-sorrys coupling-edges ticks-firing]} summary
-            {:keys [commit-percentages ticks]} dynamics]
+            {:keys [total-repos active-repos coupling-edges]} summary
+            {:keys [commit-percentages]} dynamics]
         (.append sb (render-table
                      ["Metric" "Value"]
                      [:left :right]
                      [["Active repos" (str active-repos "/" total-repos)]
-                      ["Open sorrys" (str total-sorrys)]
-                      ["Temporal coupling edges" (str coupling-edges)]
-                      ["Ticks firing" (str ticks-firing)]]))
+                      ["Temporal coupling edges" (str coupling-edges)]]))
         (.append sb "\n")
         ;; Workstream balance
         (.append sb "**Workstream balance (commit %):**\n\n")
         (doseq [[ws pct] (sort-by val > commit-percentages)]
           (.append sb (str "- " (name ws) ": " (pct-str pct) "\n")))
         (.append sb "\n")
-        ;; Firing ticks
-        (when (seq (filter :fired? ticks))
-          (.append sb "**Ticks firing:**\n\n")
-          (doseq [t (filter :fired? ticks)]
-            (.append sb (str "- **" (name (:id t)) ":** " (:fires t) "\n")))
-          (.append sb "\n"))
         ;; Temporal coupling
         (when-let [coupling (seq (get-in graph [:edges :temporal-coupling]))]
           (.append sb "**Strongest temporal coupling:**\n\n")
@@ -3448,10 +3386,17 @@
 (def ^:private mark2-manifests-dir
   (str home "/code/storage/mark2/manifests"))
 
+(defn- parse-json-keyword-string [path text]
+  (try
+    (json/parse-string text true)
+    (catch Exception e
+      {:unreadable path
+       :cause (ex-message e)})))
+
 (defn- safe-slurp-json [path]
-  (when (.exists (java.io.File. ^String path))
-    (try (json/parse-string (slurp path) true)
-         (catch Exception _ nil))))
+  (if (.exists (java.io.File. ^String path))
+    (parse-json-keyword-string path (slurp path))
+    {:missing path}))
 
 (defn- batch-input-throughput [state-batch]
   (let [papers (or (:papers state-batch) 0)
@@ -3513,33 +3458,45 @@
    If the cache is missing or stale, returns
    {:cache-status :missing :hint \"run scripts/prefetch-mark2.bb\"}."
   []
-  (let [state    (safe-slurp-json mark2-state-path)
+  (let [state (safe-slurp-json mark2-state-path)
         manifest-files (when (.exists (java.io.File. ^String mark2-manifests-dir))
-                        (->> (.listFiles (java.io.File. ^String mark2-manifests-dir))
-                             (filter #(str/ends-with? (.getName ^java.io.File %) ".json"))
-                             (map #(.getAbsolutePath ^java.io.File %))))
+                         (->> (.listFiles (java.io.File. ^String mark2-manifests-dir))
+                              (filter #(str/ends-with? (.getName ^java.io.File %) ".json"))
+                              (map #(.getAbsolutePath ^java.io.File %))))
+        manifest-reads (mapv (fn [f] [f (safe-slurp-json f)])
+                             (or manifest-files []))
+        manifest-issues (->> manifest-reads
+                             (keep (fn [[f m]]
+                                     (when (unreadable-input? m)
+                                       (assoc m :path f))))
+                             vec)
         manifests-by-batch (into {}
-                                 (for [f (or manifest-files [])
-                                       :let [raw-id (-> ^String f
-                                                        (java.io.File.)
-                                                        .getName
-                                                        (str/replace #"\.json$" ""))
-                                             ;; state.json uses "1","2",...; cache uses "001","002",...
-                                             stripped-id (str/replace raw-id #"^0+" "")
-                                             stripped-id (if (empty? stripped-id) raw-id stripped-id)
-                                             m (safe-slurp-json f)]
-                                       :when m
-                                       k [raw-id stripped-id]]
-                                   [k m]))]
+                                 (keep (fn [[f m]]
+                                         (when-not (unreadable-input? m)
+                                           (let [raw-id (-> ^String f
+                                                            (java.io.File.)
+                                                            .getName
+                                                            (str/replace #"\.json$" ""))
+                                                 stripped-id (str/replace raw-id #"^0+" "")
+                                                 stripped-id (if (empty? stripped-id) raw-id stripped-id)]
+                                             [[raw-id stripped-id] m]))))
+                                 manifest-reads)]
     (cond
-      (nil? state)
-      {:cache-status :missing
-       :hint "Local mark2 state.json cache missing. Run scripts/prefetch-mark2.bb to pull from linode-chicago."
-       :state-path mark2-state-path}
+      (unreadable-input? state)
+      (assoc state
+             :cache-status (if (:missing state) :missing :unreadable)
+             :hint "Local mark2 state.json cache missing or unreadable. Run scripts/prefetch-mark2.bb to pull from linode-chicago."
+             :state-path mark2-state-path)
 
       (empty? manifests-by-batch)
       {:cache-status :missing
        :hint "No batch manifests cached. Run scripts/prefetch-mark2.bb to extract from local tarballs."
+       :manifests-dir mark2-manifests-dir}
+
+      (seq manifest-issues)
+      {:cache-status :unreadable
+       :hint "One or more mark2 batch manifests are unreadable."
+       :manifest-issues manifest-issues
        :manifests-dir mark2-manifests-dir}
 
       :else
@@ -3548,58 +3505,56 @@
                          (sort-by first)
                          (mapv (fn [[batch-id batch]]
                                  (let [m (get manifests-by-batch batch-id)]
-                                   {:batch-id        batch-id
-                                    :status          (:status batch)
-                                    :created-at      (:created_at batch)
-                                    :returned-at     (:returned_at batch)
-                                    :collected-at    (:collected_at batch)
+                                   {:batch-id batch-id
+                                    :status (:status batch)
+                                    :created-at (:created_at batch)
+                                    :returned-at (:returned_at batch)
+                                    :collected-at (:collected_at batch)
                                     :collection-lag-days
                                     (when (and (#{"results-ready"} (:status batch))
                                                (:returned_at batch))
                                       (collection-lag-days (:returned_at batch)))
                                     :input-throughput (batch-input-throughput batch)
-                                    :output-quality   (when m (batch-output-quality m))
-                                    :has-manifest     (boolean m)}))))
-            done    (filter #(= "done" (:status %)) batches)
-            ready   (filter #(= "results-ready" (:status %)) batches)
+                                    :output-quality (when m (batch-output-quality m))
+                                    :has-manifest (boolean m)}))))
+            done (filter #(= "done" (:status %)) batches)
+            ready (filter #(= "results-ready" (:status %)) batches)
             total-papers (reduce + 0 (map (comp :papers :input-throughput) batches))
-            total-ok     (reduce + 0 (map (comp :ok :input-throughput) batches))
+            total-ok (reduce + 0 (map (comp :ok :input-throughput) batches))
             total-failed (reduce + 0 (map (comp :failed :input-throughput) batches))
-            ;; Trend: input-throughput rate over the last 4 batches vs first 4
             last-4-itr (->> batches reverse (take 4) (map (comp :ok-rate :input-throughput)))
             first-4-itr (->> batches (take 4) (map (comp :ok-rate :input-throughput)))
             mean (fn [xs] (when (seq xs) (/ (reduce + 0.0 xs) (count xs))))
-            ;; Output quality trend: Stage 6 parse-rate across batches with manifests
             s6-rates (keep #(get-in % [:output-quality :stage6-parse-rate]) batches)]
-        {:cache-status     :ok
-         :as-of            (str (LocalDate/now tz))
-         :state-mtime      (-> (java.io.File. ^String mark2-state-path)
-                               .lastModified
-                               java.time.Instant/ofEpochMilli str)
-         :batches          batches
+        {:cache-status :ok
+         :as-of (str (LocalDate/now tz))
+         :state-mtime (-> (java.io.File. ^String mark2-state-path)
+                          .lastModified
+                          java.time.Instant/ofEpochMilli
+                          str)
+         :batches batches
          :overall
-         {:batches-total     (count batches)
-          :batches-done      (count done)
+         {:batches-total (count batches)
+          :batches-done (count done)
           :batches-uncollected (count ready)
           :uncollected-batch-ids (mapv :batch-id ready)
-          :max-collection-lag-days
-          (reduce max 0 (keep :collection-lag-days ready))
+          :max-collection-lag-days (reduce max 0 (keep :collection-lag-days ready))
           :papers-attempted-total total-papers
-          :papers-ok-total        total-ok
-          :papers-failed-total    total-failed
+          :papers-ok-total total-ok
+          :papers-failed-total total-failed
           :input-throughput-rate-overall
           (if (pos? total-papers) (/ (double total-ok) total-papers) 0.0)
           :input-throughput-trend
           {:first-4-mean (mean first-4-itr)
-           :last-4-mean  (mean last-4-itr)
-           :delta        (when (and (mean first-4-itr) (mean last-4-itr))
-                           (- (mean last-4-itr) (mean first-4-itr)))}
+           :last-4-mean (mean last-4-itr)
+           :delta (when (and (mean first-4-itr) (mean last-4-itr))
+                    (- (mean last-4-itr) (mean first-4-itr)))}
           :output-quality-stage6-stats
-          {:n           (count s6-rates)
-           :min         (when (seq s6-rates) (apply min s6-rates))
-           :max         (when (seq s6-rates) (apply max s6-rates))
-           :mean        (mean s6-rates)
-           :threshold   (some #(get-in % [:output-quality :stage6-parse-threshold]) batches)}}}))))
+          {:n (count s6-rates)
+           :min (when (seq s6-rates) (apply min s6-rates))
+           :max (when (seq s6-rates) (apply max s6-rates))
+           :mean (mean s6-rates)
+           :threshold (some #(get-in % [:output-quality :stage6-parse-threshold]) batches)}}}))))
 
 ;; ---------------------------------------------------------------------------
 ;; Evaluate: per-batch verdicts for the mark2 pipeline (Arm A rubric / A.5)
@@ -3674,14 +3629,23 @@
     (if (empty? manifest-files)
       {:cache-status :missing
        :hint "No batch manifests cached. Run scripts/prefetch-mark2.bb."}
-      (let [manifests (for [f manifest-files
-                            :let [batch-id (-> ^String f
-                                               (java.io.File.)
-                                               .getName
-                                               (str/replace #"\.json$" ""))
-                                  m (safe-slurp-json f)]
-                            :when m]
-                        {:batch-id batch-id :manifest m})
+      (let [manifest-reads (vec (for [f manifest-files]
+                                  [f (safe-slurp-json f)]))
+            manifest-issues (->> manifest-reads
+                                 (keep (fn [[f m]]
+                                         (when (unreadable-input? m)
+                                           (assoc m :path f))))
+                                 vec)]
+        (if (seq manifest-issues)
+          {:cache-status :unreadable
+           :hint "One or more mark2 batch manifests are unreadable."
+           :manifest-issues manifest-issues}
+          (let [manifests (for [[f m] manifest-reads
+                                :let [batch-id (-> ^String f
+                                                   (java.io.File.)
+                                                   .getName
+                                                   (str/replace #"\.json$" ""))]]
+                            {:batch-id batch-id :manifest m})
             ;; Walk batches in cache-order, accumulating prior pattern union
             ;; and running density mean as we go.
             stage6-threshold 0.95  ;; below this = quality regression
@@ -3727,7 +3691,7 @@
           :corpus-pattern-union (sort (reduce clojure.set/union #{}
                                               (map #(set (:patterns %)) batches)))
           :corpus-pattern-count (count (reduce clojure.set/union #{}
-                                               (map #(set (:patterns %)) batches)))}}))))
+                                               (map #(set (:patterns %)) batches)))}}))))))
 
 ;; ---------------------------------------------------------------------------
 ;; Scan: AIF Head integration
@@ -3844,11 +3808,24 @@
    Also queries GET /api/alpha/invariants (when available) for live violation
    data from the invariant runner.
 
-   cf. structural-law-inventory.sexp (source of truth)
-   cf. futon4/futon-stack-invariant-model.edn (machine-readable hypergraph)"
+  cf. structural-law-inventory.sexp (source of truth)
+  cf. futon4/futon-stack-invariant-model.edn (machine-readable hypergraph)"
   []
-  (when-let [model (read-edn-file invariant-model-path)]
-    (let [families (:families model [])
+  (let [model (read-edn-file invariant-model-path)]
+    (if (unreadable-input? model)
+      {:load-status model
+       :layers []
+       :families []
+       :operational-families []
+       :candidate-families []
+       :individual-candidates []
+       :operational-count 0
+       :candidate-count 0
+       :total-candidate-invariants 0
+       :live-available? false
+       :live-summary nil
+       :live-domains nil}
+      (let [families (:families model [])
           invariants (:invariants model [])
           operational (filterv #(= :operational (:status %)) families)
           candidate (filterv #(= :candidate (:status %)) families)
@@ -3915,7 +3892,7 @@
        ;; Live runner data (nil if endpoint not available)
        :live-available? (boolean live-data)
        :live-summary live-summary
-       :live-domains live-domains})))
+       :live-domains live-domains}))))
 
 ;; --- Invariant → Support/Attack enrichment ---
 
