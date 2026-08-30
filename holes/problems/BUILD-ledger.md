@@ -2342,3 +2342,46 @@ few minutes later was 265, so it fluctuates with active work rather than leaking
 So: run 16, but paced, or restart first and then burst. Not "the box can't take it" — I was wrong about
 that in both directions within ten minutes, first dismissing capacity and then locating it in the wrong
 process.
+
+### Node simulation, corrected result — the "23% agent error rate" was my classifier, not the agents
+
+Three method errors of mine, found by checking the agents' reasoning instead of stopping at the totals.
+
+**1. My matcher ran the wrong direction.** The schema field was `:missing-edges [{:to :RN ...}]` with the
+gloss *"what I need FROM them"*, so the implied edge is `:to → node`. My first classification treated it
+as `node → :to`. The agents were unambiguous in their own words — *"no drawn incoming edge supplies those
+scores to R14"*, *"the map derives R16->R15 but does not draw it"*, *"no drawn R12-to-R13 edge"* — and I
+counted three of those as "asked for an edge it already has". **That 23% error rate was mine.** Reclassified
+directionally, the agents made **zero** detectable errors. My schema field name `:to` was itself the
+ambiguity, so the fault is upstream of the classifier too.
+
+**2. I checked contamination in the wrong artefact.** I grepped the job *summaries* for
+`control-map-edges` and found only R7. R15 cites `control-map-edges.edn:66` **in its claim file**, which
+the summary never mentions. Union of both checks: **R7 and R15** read the file carrying the
+`:derived-undrawn` list — the answer key to my own test.
+
+**3. The isolation rule allowed that file in the first place** (recorded above).
+
+**The corrected result, uncontaminated agents only (R14, R8, R13, R3 — 7 assertions):**
+
+    corroborated (directed)   2    R16 -> R14,  R5 -> R14
+    novel                     4    R16->R8, R4->R13, R12->R13, R8->R3
+    opposite-direction        1    R8 asks for R14->R8 where the derivation has R8->R14
+    agent errors              0
+
+And the corroboration is **mechanistic, not coincidental** — I checked the reasons, not just the pairs.
+Derivation for `R5→R14`: *"scores enter the temperature-governed choice"*. R14's agent, from the running
+code: *"the running selector consumes ranked actions and their controller scores from EFE, but no drawn
+incoming edge supplies those scores to R14."* Same object, same direction, two sources.
+
+**The opposite-direction case is the most interesting single output.** R8 (the control) asks for
+`R14→R8` — *"WR-27 requires evidence that my gain reading changes selection, but my only drawn outgoing
+edge ends at evaluation and gives me no return path"* — where the derivation has `R8→R14`. That is not
+disagreement about whether the two nodes couple; it is a **feedback path neither the map nor the
+derivation carries**, identified by a node reasoning about what it would need to be falsifiable.
+
+**Method verdict, honestly:** the run produced 7 clean assertions with zero agent errors, 2 independently
+corroborated and 4 novel — and **I mismeasured it three times before getting that number**. Every
+correction went against my own instrument, not against the builders. That is the same pattern as the rest
+of the day, and it is the argument for the run rather than against it: the agents' output was checkable
+enough that my errors in checking it were themselves findable.
