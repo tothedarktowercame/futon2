@@ -341,13 +341,177 @@
          (form-seq-with-ancestors top)))
       forms))))
 
+(defn marker-predicate? [helper]
+  (boolean
+   (some (fn [arity]
+           (some #{:missing :unreadable}
+                 (tree-seq coll? seq (:body arity))))
+         (:arities helper))))
+
+(defn resolved-head [parsed form]
+  (when (seq? form)
+    (resolve-symbol (:ns parsed) (:aliases parsed) (first form))))
+
+(defn marker-condition-polarity [parsed marker-predicates value condition]
+  (cond
+    (and (seq? condition) (= 'not (first condition)))
+    (case (marker-condition-polarity parsed marker-predicates value
+                                     (second condition))
+      :marker-true :marker-false
+      :marker-false :marker-true
+      nil)
+
+    (and (seq? condition)
+         (contains? marker-predicates (resolved-head parsed condition))
+         (contains-symbol? condition value))
+    :marker-true
+
+    (and (seq? condition)
+         (#{'contains? 'get} (first condition))
+         (contains-symbol? condition value)
+         (some #{:missing :unreadable} condition))
+    :marker-true
+
+    (and (seq? condition)
+         (keyword? (first condition))
+         (#{:missing :unreadable} (first condition))
+         (contains-symbol? condition value))
+    :marker-true
+
+    :else nil))
+
+(defn returned-marker? [form value]
+  (cond
+    (= form value) true
+    (and (seq? form) (= 'do (first form)))
+    (returned-marker? (last form) value)
+    (and (seq? form) (#{'let 'let*} (first form)))
+    (returned-marker? (last form) value)
+    :else false))
+
+(defn preserves-marker? [form value]
+  (or (= form value)
+      (returned-marker? form value)
+      (and (map? form) (contains-symbol? form value))
+      (boolean
+       (some (fn [node]
+               (and (seq? node)
+                    (#{'throw 'conj 'swap!
+                       'assoc 'update 'merge} (first node))
+                    (contains-symbol? node value)))
+             (tree-seq coll? seq form)))
+      (boolean
+       (some (fn [node]
+               (and (seq? node)
+                    (= 'binding (first node))
+                    (vector? (second node))
+                    (some #(and (seq? %)
+                                (#{'println 'prn} (first %))
+                                (contains-symbol? % value))
+                          (tree-seq coll? seq node))
+                    (some (fn [[bound target]]
+                            (and (= '*out* bound) (= '*err* target)))
+                          (partition 2 (second node)))))
+             (tree-seq coll? seq form)))))
+
+(defn marker-conditional-disposition
+  [parsed marker-predicates value node]
+  (when (seq? node)
+    (let [head (first node)
+          conditional? (#{'if 'when 'when-not 'cond} head)
+          condition (second node)
+          cond-marker-branch
+          (when (= 'cond head)
+            (some (fn [[test branch]]
+                    (when (= :marker-true
+                             (marker-condition-polarity
+                              parsed marker-predicates value test))
+                      branch))
+                  (partition 2 (rest node))))
+          polarity (when (and conditional? (not= 'cond head))
+                     (marker-condition-polarity parsed marker-predicates
+                                                value condition))]
+      (when (or polarity cond-marker-branch)
+        (let [then-branch (nth node 2 nil)
+              else-branch (nth node 3 nil)
+              marker-branch
+              (case head
+                when (if (= polarity :marker-true) then-branch nil)
+                when-not (if (= polarity :marker-true) nil then-branch)
+                if (if (= polarity :marker-true) then-branch else-branch)
+                cond cond-marker-branch)]
+          (if (preserves-marker? marker-branch value)
+            :conformant
+            :marker-swallowed))))))
+
+(defn marker-use-disposition [parsed marker-predicates value context]
+  (let [conditional-results
+        (keep #(marker-conditional-disposition parsed marker-predicates value %)
+              (tree-seq coll? seq context))
+        destructive-marker-form?
+        (boolean
+         (some (fn [node]
+                 (and (seq? node)
+                      (or (and (= 'dissoc (first node))
+                               (contains-symbol? node value)
+                               (some #{:missing :unreadable} node))
+                          (and (= 'or (first node))
+                               (contains-symbol? node value)))))
+               (tree-seq coll? seq context)))]
+    (cond
+      (some #{:conformant} conditional-results) :conformant
+      (some #{:marker-swallowed} conditional-results) :marker-swallowed
+      (preserves-marker? context value) :conformant
+      destructive-marker-form? :marker-swallowed
+      :else :refused)))
+
+(defn loud-calls-in [parsed loud-index form]
+  (when-not (and (seq? form) (#{'let 'let*} (first form)))
+    (keep (fn [node]
+            (when (seq? node)
+              (when-let [helper (get loud-index (resolved-head parsed node))]
+                {:call node :helper helper})))
+          (tree-seq coll? seq form))))
+
+(defn collect-loud-call-sites [parsed loud-index marker-predicates]
+  (vec
+   (mapcat
+    (fn [top]
+      (mapcat
+       (fn [node]
+         (when (and (seq? node)
+                    (#{'let 'let*} (first node))
+                    (vector? (second node)))
+           (let [bindings (vec (partition 2 (second node)))
+                 body (cons 'do (drop 2 node))]
+             (mapcat
+              (fn [idx [value rhs]]
+                (when (symbol? value)
+                  (let [context (cons 'do
+                                      (concat (mapcat identity (subvec bindings (inc idx)))
+                                              (rest body)))]
+                    (map (fn [{:keys [call helper]}]
+                           {:file (:path parsed)
+                            :line (line-of call)
+                            :helper (helper-key helper)
+                            :value value
+                            :disposition (marker-use-disposition
+                                          parsed marker-predicates value context)})
+                         (loud-calls-in parsed loud-index rhs)))))
+              (range)
+              bindings))))
+       (tree-seq coll? seq top)))
+    (:forms parsed))))
+
 (defn parse-source [path]
   (let [forms (read-forms path)
         {:keys [ns aliases]} (parse-ns-info forms)
         consts (collect-constants forms)
-        helpers (->> forms
-                     (keep parse-defn-form)
-                     (map #(assoc % :ns ns :file path))
+        defns (->> forms
+                   (keep parse-defn-form)
+                   (map #(assoc % :ns ns :file path))
+                   vec)
+        helpers (->> defns
                      (keep helper-classification)
                      vec)]
     {:path path
@@ -355,6 +519,7 @@
      :aliases aliases
      :consts consts
      :forms forms
+     :defns defns
      :helpers helpers}))
 
 (defn repo-shas-line []
@@ -381,17 +546,40 @@
         helpers (vec (mapcat :helpers parsed))
         helper-index (into {} (map (juxt helper-key identity) helpers))
         silent-helpers (into {} (filter (fn [[_ h]] (= :silent (:class h))) helper-index))
+        loud-helpers (into {} (filter (fn [[_ h]] (= :loud (:class h))) helper-index))
+        marker-predicates (set (map helper-key
+                                    (filter marker-predicate?
+                                            (mapcat :defns parsed))))
         call-sites (vec (mapcat #(collect-call-sites % silent-helpers) parsed))
+        bound-loud-call-sites
+        (vec (mapcat #(collect-loud-call-sites % loud-helpers marker-predicates)
+                     parsed))
+        bound-keys (set (map (juxt :file :line :helper) bound-loud-call-sites))
+        all-loud-calls (vec (mapcat #(collect-call-sites % loud-helpers) parsed))
+        loud-call-sites
+        (vec
+         (concat
+          bound-loud-call-sites
+          (keep (fn [{:keys [file line helper]}]
+                  (when-not (contains? bound-keys [file line helper])
+                    {:file file :line line :helper helper :value 'unbound
+                     :disposition :refused}))
+                all-loud-calls)))
         violations (filter #(and (= :silent (:helper-class %))
                                  (false? (:exists-now %)))
                            call-sites)
+        marker-swallowed (filter #(= :marker-swallowed (:disposition %)) loud-call-sites)
+        loud-refusals (filter #(= :refused (:disposition %)) loud-call-sites)
         refusals (filter #(= :refused (:class %)) helpers)]
     {:helpers helpers
      :call-sites call-sites
-     :violations (vec violations)
-     :refusals (vec refusals)}))
+     :loud-call-sites loud-call-sites
+     :marker-swallowed (vec marker-swallowed)
+     :violations (vec (concat violations marker-swallowed))
+     :refusals (vec (concat refusals loud-refusals))}))
 
-(defn render-findings [{:keys [helpers call-sites violations refusals]} scope-label]
+(defn render-findings [{:keys [helpers call-sites loud-call-sites marker-swallowed
+                               violations refusals]} scope-label]
   (let [helper-rows (map (fn [{:keys [ns name file line class reason]}]
                            [(str ns "/" name) (clojure.core/name class) (str (rel file) ":" line) reason])
                          (sort-by (juxt :file :line :name) helpers))
@@ -406,9 +594,15 @@
                             :else "absent")
                           (or resolved-path "dynamic path")])
                        (sort-by (juxt :file :line) call-sites))
-        refusal-rows (map (fn [{:keys [ns name file line reason]}]
-                            [(str ns "/" name) (str (rel file) ":" line) reason])
+        refusal-rows (map (fn [{:keys [ns name file line reason helper]}]
+                            [(or (when ns (str ns "/" name)) (str helper))
+                             (str (rel file) ":" line)
+                             (or reason "dynamic marker disposition refused")])
                           (sort-by (juxt :file :line :name) refusals))
+        loud-rows (map (fn [{:keys [file line helper value disposition]}]
+                         [(str (rel file) ":" line) (str helper) (str value)
+                          (name disposition)])
+                       (sort-by (juxt :file :line) loud-call-sites))
         helper-counts (frequencies (map :class helpers))
         verdict (str "Verdict: I_absent_is_loud over " scope-label
                      " | repos " (repo-shas-line)
@@ -418,13 +612,18 @@
                      " declared-optional=" (get helper-counts :declared-optional 0)
                      " refused=" (get helper-counts :refused 0)
                      " | silent call sites=" (count call-sites)
-                     " silent+absent-now=" (count violations))]
-    (str "# AUD-D2 findings\n\n"
+                     " silent+absent-now="
+                     (- (count violations) (count marker-swallowed))
+                     " | loud call sites=" (count loud-call-sites)
+                     " marker-swallowed=" (count marker-swallowed))]
+    (str "# Absent-is-loud findings\n\n"
          verdict "\n\n"
          "## Helpers\n\n"
          (markdown-table ["helper" "class" "file:line" "reason"] helper-rows) "\n"
          "## Silent Helper Call Sites\n\n"
          (markdown-table ["file:line" "helper" "path expression" "guard form" "exists now" "resolved path"] call-rows) "\n"
+         "## Loud Helper Call Sites\n\n"
+         (markdown-table ["file:line" "helper" "binding" "marker disposition"] loud-rows) "\n"
          "## Refusals\n\n"
          (if (seq refusal-rows)
            (markdown-table ["helper" "file:line" "reason"] refusal-rows)
@@ -453,7 +652,7 @@
     (when out (spit out (str markdown
                              "\nPositive control: " (pr-str positive) "\n"
                              "Negative control: " (pr-str negative) "\n")))
-    (when-not (= 2 (:violations positive))
+    (when-not (= 3 (:violations positive))
       (binding [*out* *err*]
         (println "fixture positive control failed:" (pr-str positive)))
       (System/exit 2))

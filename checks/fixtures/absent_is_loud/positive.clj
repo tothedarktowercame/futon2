@@ -42,3 +42,20 @@
 
 (def positive-safe-named
   (safe-read "/home/joe/code/futon2/checks/fixtures/absent_is_loud/missing-too.edn"))
+
+(defn marker-input? [x]
+  (and (map? x) (contains? x :missing)))
+
+(defn loud-marker-read [path]
+  (if (.exists (io/file path))
+    (edn/read-string (slurp path))
+    {:missing path}))
+
+(defn swallowing-caller [path]
+  (let [result (loud-marker-read path)]
+    (when-not (marker-input? result)
+      result)))
+
+(def positive-marker-swallowed
+  (swallowing-caller
+   "/home/joe/code/futon2/checks/fixtures/absent_is_loud/missing-marker.edn"))
