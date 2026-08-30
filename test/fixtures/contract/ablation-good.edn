@@ -1,0 +1,2 @@
+{:ablation [{:prior :p :status :ablated :argmin-G [:a]
+             :argmin-risk [:b] :moved? true}]}
