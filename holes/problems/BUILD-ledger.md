@@ -2926,3 +2926,43 @@ was raised and *resolved* — but the artefact now reads as a frictionless conve
 exchange between the two nodes survives only in the commit chain. Per the owner's ruling tonight
 (amendments dated, originals legible), a `:resolved-disagreements` line would carry it into the artefact
 where codex-8 and later readers look.
+
+### Round 4 — the edge is WIRED. Specified and wired in one session.
+
+codex-8 wired the pair's contract into the anchored registry: p4ng `c69eb97`,
+`:control-map/R5-to-R14` — the registry now holds **4 instances, 3 of them control-map edges**
+(`R16-to-R2`, `R9-to-R16`, `R5-to-R14`).
+
+**The wiring is better than the specification it came from, in two ways.**
+
+**Five members, not two:** `[:node/R5 :node/R14 :tool/rank-actions :tool/select-action
+:store/realized-outcome-feedback]`. codex-8 absorbed the route the owner measured tonight
+(`R8 →rank-actions→ R5 →select-action→ R6 →invoke-strategic-selection→ R14`) by making the *tools* members
+of the hyper-edge. The pair's open question — direct edge, through R6, or two edges — is answered by not
+forcing it into a node-to-node shape at all. That is what the hyper-edge schema is for.
+
+**Every port splits `:emitted-by` and `:validated-at-uptake` into `:observed` and `:target`**, with
+`:status :not-implemented` on each target and `:observed :none` where no validation exists. R14's
+provenance objection — a key that exists nowhere cannot be `:observed` — is now structural in the
+registry rather than a thing a reviewer must remember. Example, `:R5/score-field`:
+`:observed {:tool "efe.clj" :function "rank-actions" :lines "844-862"}` beside
+`:target {:interface :R5/versioned-score-envelope-v1 :status :not-implemented}`.
+
+**And R5's round-2 finding became a named check.** `:support-exclusions-preserved` appears in both the
+producer checks and the consumer checks — the exclusion list that is currently computed at
+`war_machine.clj:4479` and delivered to the report at `:4742` instead of to the selector is now a
+validation requirement on the edge. A finding from a role-play, forty minutes later, is a check in the
+wiring registry.
+
+**R5's closing insight, which generalises to the remaining edges:** *"the live edge needs no new transport
+at all; most work is making its existing in-process payload explicit, finite, identity-bearing, and
+auditable without losing exclusion metadata."*
+
+**That gives the wiring lane a taxonomy it did not have this morning:**
+- **Dead edge** (`R16→R2`): no traffic; specifying it cannot proceed until the thing exists. Output is a
+  semantic fork — build the actuator or rename the edge.
+- **Live edge** (`R5→R14`): traffic already flows in-process; there is nothing to transport. Output is
+  making the implicit payload explicit, typed, identified and auditable.
+
+Nineteen edges remain unspecified. **Which kind each is determines what "specify it" even means**, and it
+is cheap to find out — the pair answered it for this one inside three rounds.
