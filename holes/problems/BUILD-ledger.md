@@ -2273,3 +2273,43 @@ with a `file:line` or `:imagined`. Imagined is allowed and expected — these no
 unspecified, and roughly half `:imagined` is the honest outcome. What is forbidden is an imagined claim
 dressed as a cited one. And `:missing-edges` asks each node to name what it needs from a node it has no
 drawn edge to: the map has 26 derived-but-undrawn edges, and a node needing one is evidence it is real.
+
+### Node simulation, first result — and my isolation rule leaked the answer key
+
+Six of nine claims in (R5, R6, R11 still running). **13 missing-edge assertions**, classified against the
+map by an instrument the agents did not write:
+
+    agent-error   3 / 13   asked for an edge that is ALREADY DRAWN in their own seed
+    corroborated  5 / 13   the derivation (`:derived-undrawn`) independently predicts it
+    novel         5 / 13   neither drawn nor derived
+
+**Then I checked contamination rather than reporting the 5.** My packet forbade every `P-R*.md` but
+*allowed* `/home/joe/code/p4ng/empirics-futon/` — which contains `control-map-edges.edn`, and that file
+carries the `:derived-undrawn` list. **That is the answer key to the very check I was running.** One
+agent (R7) provably read it, and R7 supplied **three of the five** corroborations.
+
+    corroborated by agents that provably did NOT read control-map-edges:
+      R14 -> R5
+      R8  -> R14        (R8 is the CONTROL node)
+
+So the honest result is **2 clean corroborations out of 8 assertions from uncontaminated agents**, plus a
+**23% detectable error rate**. Not the 5 the first pass showed.
+
+**The methodological finding is the more useful one, and it is the day's own shape again:** the check and
+the thing checked shared a source. I built an independence test and then granted read access to the file
+holding the expected answer — the same defect as two lanes' digests agreeing because they ran one filter,
+and as P-R16 citing P-R9 and being counted as a second proposal. **An isolation rule must enumerate what
+the check reads, not just what the subject is about.**
+
+**What the run does demonstrate**, stated without inflation:
+- The output is **measurable**, not merely plausible — 3 assertions were provably wrong (an edge the agent
+  already had), which means the method has a checkable error rate rather than uniform fluency.
+- Two independent methods (role-play from source, and derivation from the catalogue's THEN clauses) agree
+  on two edges neither the map nor the packet gave the agent.
+- Contamination is **self-reported and detectable**: two agents set `:contaminated? true` unprompted about
+  the P-R records, and the third leak was found by grepping job results.
+
+**Cost:** 9 seats, ~15 minutes, 2 spawn failures. The failures were `EAGAIN` on the last two of a
+28-second burst — **not capacity** (threads-max 2.04M, ulimit -u 1.02M, 2002 threads in use, load 6.7/32).
+Both succeeded on a spaced retry. So the ceiling Joe worried about is a **spawn-burst limit in the runner,
+not the machine**: 16 agents is fine if they are not launched in one burst.
