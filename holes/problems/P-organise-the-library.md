@@ -616,3 +616,11 @@ frozen expectation rather than special-case the record, correctly). Wave-1 audit
 reflection-only (0 changed). The lint tests run offline under a `SPIDER_EVIDENCE_CACHE` pin — the 4c-gate test-design
 finding is fixed in passing. Wave 2 (war-room included, no special handling) releases after the owner's fresh-basis
 rebuild completes.
+
+**AUD-D4b GATED 02:05Z (`c0a92c6`) — passed; the AUD lane's instrument is finished.** The lint now tells the whole
+truth in one line: `silent+absent-now=0 marker-swallowed=0 recorded-then-substituted=4`, exit 0 — helpers loud,
+markers recorded at the producer, substitutions credited only where the recorder call is statically visible, 36
+undecidable sites refused rather than guessed. The unstable counter is settled (45 bound-and-analysed results is the
+number; 75 appended unbound calls; the '10' was uncommitted intermediate state, said plainly). AUD lane remaining:
+**the mark2 decision only** (Joe: retire the channel + R2-inventory row, or restore the link — owner recommends
+retire+row unless Rob's pipeline is live).

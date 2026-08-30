@@ -28,7 +28,7 @@ extensions get a supersession record, not a deletion (first case: `P-supersede-s
 | **Second domain (APM proofs)** | the next microcosm | assessed only; nothing written | — | on your word, after the above | **yes: go/no-go** |
 
 ## What is running right now
-- AUD-D4b (codex-12, queued). AUD-D3b/D4/D5 gated: `## Input status` renders, the trace carries `:input-status`, and the mana snapshot refreshes every 5 min under its own timer. AUD lane remaining: **mark2 only** (your endpoint-vs-refresh call).
+- AUD lane **complete except mark2** (your call): D1–D5 + D4b all gated; `## Input status` renders, the trace carries `:input-status`, and the mana snapshot refreshes every 5 min under its own timer. AUD lane remaining: **mark2 only** (your endpoint-vs-refresh call).
 Nothing else. Every builder lane is closed and gated.
 
 ## Your open decisions (none blocking a running lane)
