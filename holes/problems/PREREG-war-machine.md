@@ -411,6 +411,8 @@ of §2c–§2d are the list of what they would have to say.
 
 **`I_absent_is_loud`** (Joe, 2026-08-30, from AUD-D1): every read of a named input file reports absence or unparseability (fail closed, or an explicit `:missing`/`:unreadable` in the output) and never renders it as an empty result; optional inputs are declared at the read site. Falsifier: a `when-let`/`some->`/`(catch _ nil)` over a file read with no declared optionality (lifecycle §0.7; first instance row 26 — `stack-logic-model.edn`/`alignment.edn`, planned 05-03 in M-war-machine.md, never produced, read silently by `war_machine.clj` and `joe_hud.clj` since). Instrument: AUD-D2 source lint.
 
+**`I_evidence_consumed`** (Joe, 2026-08-31): every evidence emission names its consumer — the node, agent, or workflow step that reads it and can act on it — and that edge is in the wiring diagram. Falsifier: a field written that nothing reads, a record deposited to no reader, a reply with no return path (lifecycle §0.11; first instances: R16's `:enacted` returning to nobody; `:load-status`; the counterfactual-only habit prior as the declared-honest variant). Instrument: the control map — every evidence-producing node has an outgoing consumer edge (R16-D2 is the first repair this demands).
+
 Per node, from the worksheets and the mission's families; each is either
 *structural* (about the record's shape; checkable on any tick) or *runtime*
 (about behaviour; checkable only on a run).

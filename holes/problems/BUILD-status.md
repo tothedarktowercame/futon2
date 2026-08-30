@@ -4,6 +4,9 @@ Parent mission: `../missions/M-formal-war-machine.md` (§Deliveries links back h
 
 Updated: 2026-08-30 evening. The ledger (`BUILD-ledger.md`) is the log; this is the view.
 
+## The precepts now standing
+`I_data_current` · `I_absent_is_loud` · `I_evidence_consumed` (lifecycle §0.7, §0.11; PREREG §4) — data is live, absence is loud, every emission names its consumer.
+
 ## The goal, in one line
 Rebuild the War Machine — stated **without any preferences in it** (C is a parameter; a deployment is the machine plus a recorded layer stack: a person, a company, a domain) — so that every term is defined on Active Inference's terms in Lean, every implementation
 is held to that definition by a run that Lean can check, and every read is against live data — so it is a war
