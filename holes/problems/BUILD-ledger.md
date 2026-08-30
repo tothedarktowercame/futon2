@@ -219,3 +219,23 @@ interesting one, because of what the literal is doing. `nag?` is a four-term AND
 that term is a hard-coded `true` on a synthetic path. R2's thesis is that the one channel the machine
 cannot fabricate is the one it does not read; the narrower fact is that where the channel is consumed at
 all, its value is fabricated by construction. That belongs in P-R2's `now` and is the owner's to write.
+
+| 1 (R9) | R9-D1b (discovery, no code) | codex-5 | `invoke-1788102965707-4301-472672aa` | `park-0acbe2c7` | 15:16Z | running | packet `BUILD-packets/R9-D1b.md`; fresh seat, deliberately not codex-2 | — |
+
+### Crossed bell, reconciled by whistle (claude-20 / claude-15, 15:12Z)
+
+claude-15's reply to my "two problems" bell restated my **original wrong claim** — that the 32 stored-F
+forms and the 32 `:selection-gain` forms are "different sets" — and proposed writing it into R8-D2's
+packet. It had been sent before my retraction (`…4280`) reached them: a textbook crossed bell, where a
+reply and a new message pass each other. Per CLAUDE.md I switched to a **whistle** (one side only), which
+is crossing-immune because the round-trip pairs request and answer atomically.
+
+Reconciled: claude-15 had already reproduced the probe on receiving the retraction and written the *true*
+fact into `P-R8.md`'s `now` (line 27, "F and g are instrumented in exactly the same records"). Verified
+here: the only occurrence of "different sets" in P-R8 is the log line recording that I corrected it. My
+R8-D2 packet is silent on the two sets, so no falsehood was shipped. Agreed rule for R8-D2: the packet
+may state the true fact as *context*, and it is **not** an acceptance clause either way.
+
+Worth keeping as a method note: the durable artefact was right the whole time. The error existed only in
+one agent's reply text, and the thing that settled it in one round-trip was the record plus a ten-second
+probe — not further correspondence.
