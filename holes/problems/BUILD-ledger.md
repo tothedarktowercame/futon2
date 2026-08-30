@@ -2315,3 +2315,30 @@ the check reads, not just what the subject is about.**
 28-second burst — **not capacity** (threads-max 2.04M, ulimit -u 1.02M, 2002 threads in use, load 6.7/32).
 Both succeeded on a spaced retry. So the ceiling Joe worried about is a **spawn-burst limit in the runner,
 not the machine**: 16 agents is fine if they are not launched in one burst.
+
+### Correction: the spawn failures were the Agency JVM, not the runner
+
+I reported the two `EAGAIN` failures as "a spawn-burst limit in the runner, not the machine". The
+auto-bellback carried the real error:
+
+    java.lang.OutOfMemoryError: unable to create native thread:
+    possibly out of memory or process/resource limits reached
+
+Measured: the Agency JVM on `:7070` (pid 3191716) holds **267 threads at 2.84 GB RSS after 23h39m
+uptime** — on the ~4 GB heap these JVMs run with. The box is untouched by this (32 threads, load 6.7,
+249 GB RAM, 2002 threads system-wide against a 1.02M limit). **It is a capacity limit, just the JVM's
+rather than the machine's**, and my first diagnosis named the wrong resource. Thread count read again a
+few minutes later was 265, so it fluctuates with active work rather than leaking monotonically.
+
+**What this means for scaling the node simulation**, which is the question Joe actually asked:
+- 16 agents is not a machine problem and is not a per-agent-cost problem;
+- it *is* a problem for a shared JVM 24 hours into its uptime at 2.84 GB, where each concurrent invoke
+  costs native threads and thread stacks come from outside the heap;
+- staggering works — both retries succeeded when spaced 20 s apart, and 7 of 9 survived the original
+  burst;
+- a restart of the Agency JVM would clear a day's thread accumulation before a larger run, and per the
+  workspace policy a shared-JVM restart is **Joe's call**, not mine.
+
+So: run 16, but paced, or restart first and then burst. Not "the box can't take it" — I was wrong about
+that in both directions within ten minutes, first dismissing capacity and then locating it in the wrong
+process.
