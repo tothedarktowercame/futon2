@@ -973,3 +973,44 @@ It had not: the assert string omitted the backticks the packet actually contains
 substantive conditions directly rather than trusting either the assert or the write, and all four hold.
 After two false "done"s today (`d68240c`, `f860296`) the rule is earning its keep in both directions —
 it catches edits that silently did nothing, and it must not be read as condemning edits that worked.
+
+| 3 (R8) | R8-D2 (build) | codex-12 | `invoke-1788105436811-4346-54376500` | `park-6d513e39` | 15:57Z | **closed** | `be3a77d`; gates re-run by me: kondo 0/0, parens OK, 5 tests/17 assertions; every number reproduced; **2 refusals, both correct** | pending |
+
+### R8-D2 closed — and one of its two refusals is against me
+
+codex-12's analysis reproduces in full and I re-ran the gates myself: 53 files / 792 forms;
+755 / 32 / 5; missing-F recomputation min **1.847**, median 5.963, max 10.638, non-finite **0**; era
+partition 760 / 32 with **zero** boundary violations both directions; precision means 94.5845 → 9.4905.
+Crucially it **labelled the three quantities exactly as the packet demanded**: the stored-F delta 0.0
+"explicitly labelled tautological"; the boundary "labelled contingent non-interleaving"; the gain/shape
+biconditionals "labelled source consistency from the single unconditional write site". The correction
+claude-13 forced on me survived into the deliverable rather than being quietly dropped.
+
+**Refusal 1 — the two universal Lean holes admit no honest body.** `r8CensusWmTrace` quantified over
+every 792-element list, so a list of 792 input-less ticks gives `(0,0,792)`; the length hypothesis does
+not pin content. Correct, and the same family defect codex-1 found; the owner has since restated both
+over the constant `wmTraceR8`. **codex-12 built against the superseded (false) forms** — I knew the
+signatures had drifted mid-build and let it run because the analysis was unaffected. That judgement holds
+for the analysis and was wrong about the holes: the hole-moving half of the packet was impossible from
+the moment the declarations changed. R8-D3 re-does that half against `6fd8a33f4d`, plus the `wmTraceR8`
+transcription.
+
+**Refusal 2 — my content pin did not reproduce, and codex-12 handled it better than my packet did.**
+Its algorithm yields `c9add16a…`, mine `c434950f…`; **the counts match (53/792)**, so it correctly
+refused to call this corpus drift *or* to substitute my digest, on the ground that the packet never
+specified serialization or delimiters. It is right. **A content pin whose method is ambiguous is worse
+than no pin**, because a mismatch is then unattributable — the one thing the pin exists to distinguish
+(drift from method) is exactly what it cannot distinguish. The deeper error is mine: I published a
+*value* and called the *method* stated, when what a pin needs is a canonical serialization anyone can
+re-derive. Fix for R8-D3/R2-D2: the builder defines and publishes the method (exact serialization,
+delimiter, ordering) and the value; the pin's job is stability across *runs of the same method*, not
+agreement with a number I computed once.
+
+### Not a violation, and a third mid-build drift
+
+`Holes.lean` is modified in the working tree, but by **the owner**, not the builder — a named `Channel`
+inductive (fourteen constructors in declaration order) replacing `Fin 14`, crediting claude-13's read via
+me. It closes the residual I flagged this hour: `Fin 14` pinned arity, not identity or order. But
+**codex-1 is building R2-D2 right now against `R2TickLit = R2Tick (Fin 14) Unit`**, which that edit
+replaces — the third mid-build signature drift today. Flagged for its review rather than interrupted, on
+the same reasoning as before, and this time I will check the hole-moving half specifically.
