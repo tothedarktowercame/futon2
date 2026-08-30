@@ -35,7 +35,7 @@ Nothing else. Every builder lane is closed and gated.
 3. APM regeneration authority (`apm-lean` vs `mathlib4-apm-validation`) before AD-D4.
 4. The R2 turn channel (what content of a turn→pattern association normalises to [0,1]).
 5. Second domain go/no-go.
-6. A WM trace was written at 10:54 today by a runner nobody has identified.
+6. ~~The 10:54 WM trace writer~~ identified: a manual WM report build with trace on (`war_machine.clj:4720`; the write is wrapped in `(catch Exception _ nil)`). Its `:decision` folded a `:strategic-memory` last observed **2026-07-24**. No unattended tick has run since R10 stopped: last nightly 23:00 trace 07-05; no unit, no cron, entrypoint not in the repo; zero ticks 07-21→08-30. Decision now: **turn the nightly tick back on (bounded, trace on) or not?**
 
 ## The one-sentence health check
 Types and laws: mostly in place. Runs: three nodes discharged. Data: one corpus was stale and is being fixed;
