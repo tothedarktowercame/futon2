@@ -1,0 +1,33 @@
+(ns fixtures.absent-is-loud.positive
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]))
+
+(defn loud-read
+  "Read one EDN file and throw if it is absent."
+  [path]
+  (if (.exists (io/file path))
+    (edn/read-string (slurp path))
+    (throw (ex-info "missing fixture file" {:path path}))))
+
+(defn silent-read
+  [path]
+  (try
+    (when (.exists (io/file path))
+      (edn/read-string (slurp path)))
+    (catch Exception _ nil)))
+
+(defn optional-read
+  "Optional fixture input: returns nil when absent."
+  [path]
+  (when (.exists (io/file path))
+    (edn/read-string (slurp path))))
+
+(def positive-loud
+  (loud-read "/home/joe/code/futon2/checks/fixtures/absent_is_loud/present.edn"))
+
+(def positive-silent
+  (when-let [v (silent-read "/home/joe/code/futon2/checks/fixtures/absent_is_loud/missing.edn")]
+    v))
+
+(def positive-optional
+  (optional-read "/home/joe/code/futon2/checks/fixtures/absent_is_loud/optional.edn"))
