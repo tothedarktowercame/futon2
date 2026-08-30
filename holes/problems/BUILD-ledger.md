@@ -75,3 +75,28 @@ what follows is what the owner's gate needs and what I could not settle myself.
   packets from `ls | wc -l`; the trace corpus is **53** files (`wm-shadow-step.json` is not a trace
   file) plus two dotfiles `ls` does not show. Both R2-D1 and R8-D1 independently reported 53/792 and
   refused the 88. My instrument was crude and the packets were right to demand both numbers.
+| CML | owner gate: CML-D1 | codex-1 | — | — | 15:02Z | passed | 7272099+dfe8c80 | claude-15 15:02Z: PASSED: tests 4/20/0 re-run here; live lint 15/6 typed; whole-token fix correct; :schema-unspecified ratified into the record |
+| 1 (R9) | owner gate: R9-D1 | codex-2 | — | — | 15:02Z | passed | 81d074b | claude-15 15:02Z: PASSED: GainChain.lean:71 `inductive Producer where` and r18-badges.edn:5 verified at source; both refusals correct (no 13 identifiable rows; :independent?/reviewer-family/:reviewed-by are not evidence); provenance narrowed to 56,379/90,583 session-ids — keep |
+| 2 (R2) | owner gate: R2-D1 | codex-8 | — | — | 15:02Z | passed | 41cc852 | claude-15 15:02Z: PASSED: operator_lane.clj:29-33 verified — `nag?` is the 4-term AND with :acknowledged?; refusal on the turn-channel normalisation is the deliverable P-R2 asked for |
+| 3 (R8) | owner gate: R8-D1 | codex-12 | — | — | 15:02Z | passed | 08925e6 | claude-15 15:02Z: PASSED, and it corrected S1: claude-15 reproduced 88 realized / 32 selection-gain all pinned / 787 precision-state / 32 stored F / :free-energy holds G on 792-793 forms; falsifier rewritten as three dispositions with expected 755/32/5; R8-D2 unblocked |
+
+### R9-D1 — review deepened after the auto-bellback (claude-20, same day)
+
+My first-line review of R9-D1 rested on the citation audit (28/28) plus three spot-checks, and I said
+so. The auto-bellback restated two numeric claims I had not re-derived, so I checked them:
+
+- **`r18-badges.edn` says four `:derived-from-FEP`, complete parsing finds five — CONFIRMED.** The
+  file's own headline comment (`data/r18-badges.edn:13`, "Current headline: 4 :derived-from-FEP, 1
+  :principled-approximation") contradicts its data: a tree-walk over every nested map finds **5**
+  entries with `:badge :derived-from-FEP`. The drift is dated in the file itself — two badges were
+  raised to `:derived-from-FEP` on 2026-07-04 (`:141`, `:143`) and the headline was never updated.
+  Note `grep -c derived-from-FEP` returns 14, because the legend and the prose narrate it; the count
+  is only visible to a parse. This is the "done is dated against the instrument that produced it"
+  class (lifecycle log row 12b) inside the artefact that was the apex's ancestor — a fitting finding
+  for the node whose thesis is that a claimant cannot certify itself.
+- **Not checked:** the evidence-export figures (author+type on 90,583 records, session-id on 56,379).
+  Reading that export is expensive and I have not run it; the claim stands as the builder's, marked
+  here as unverified by me rather than silently inherited.
+
+No change made to `r18-badges.edn`: it is evidence in an open lane, and the stale headline is a
+finding for the owner, not a line for me to quietly correct.
