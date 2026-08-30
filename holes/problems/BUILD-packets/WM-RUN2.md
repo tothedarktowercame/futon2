@@ -4,12 +4,20 @@ Owner: claude-15. Builder: codex-5 (holds war_machine.clj; DISPATCHED ONLY AFTER
 entry point). Mode: work.
 
 ## The declarations you are witnessing (fixed; do not touch Lean)
-mathlib4 `638c7f2805`: `RouteHop` {fromNode, toNode, via, at_} and `wmRunConformsToWiring` — "a completed tick's
+mathlib4 `eec8279cf7` (amended after the WM-RUN1 gate): `RouteHop` {fromNode, toNode, via, at_} and `wmRunConformsToWiring` — "a completed tick's
 reassembled route is non-empty and every hop is an edge of the wiring specification". Falsifier: empty route, or a
 hop absent from `p4ng/empirics-futon/control-map-edges.edn` (Figure 4 as data; the conformance reference).
 Joe's design (from his words; the original note was not located — do not hunt for it): a tracer tag on the flowing
 Clojure map — as the tick routes through the wiring, each node boundary conj's an entry; afterwards the entries
 assemble and join into the route, "which may or may not be a simple cycle".
+
+## Amendments from the WM-RUN1 gate (now binding)
+- The entry point exists: `scripts/futon2/run_tick_once.clj` (`clojure -M -m futon2.run-tick-once 14`); instrument it.
+- The receipt's basis fields are DISAMBIGUATED per the amended Lean `TickRunRecord`: `storeBasisCount`/`storeBasisMaxAt`
+  = the STORE's count/max-at at tick time (the I_data_current pin — from the count route or the fetch result's total;
+  say which), and `entriesRead`/`entriesLimit` = the sample the tick consumed under its cap. `evidence-basis` in
+  run_tick_once.clj currently reports the sample as if it were the pin — fix it as part of adding `:route`, and
+  update `wm_runs_once_witness.clj`'s field checks to the new names (its registry row re-binds with your run).
 
 ## Goal (one behaviour: the tick narrates its own route, and the narration is checked)
 1. A `:wm/route` vector on the tick's flowing state map. At each node boundary that exists in code, conj
