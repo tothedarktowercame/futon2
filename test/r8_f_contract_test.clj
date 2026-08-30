@@ -45,6 +45,16 @@
     (is (= {:latest-pre-boundary 20260709
             :earliest-post-boundary 20260714}
            (get-in report [:r8EraBoundary :date-margin])))
+    (is (= {:count 760 :storedFCount 0 :selectionGainCount 0
+            :shapes {:gMap 760 :controllerMap 0 :unknown 0}
+            :precisionSum 520403.9349 :precisionValues 5502
+            :precisionForms 755}
+           (get-in report [:r8EraBoundary :perEra :before])))
+    (is (= {:count 32 :storedFCount 32 :selectionGainCount 32
+            :shapes {:gMap 0 :controllerMap 32 :unknown 0}
+            :precisionSum 2429.5805 :precisionValues 256
+            :precisionForms 32}
+           (get-in report [:r8EraBoundary :perEra :after])))
     (is (zero? (get-in report [:F :missing-F-computable :non-finite])))
     (is (= 0.0 (get-in report [:F :stored-recompute-consistency
                                :max-absolute-delta])))))
@@ -85,6 +95,9 @@
           (let [report (r8/lint-paths {:trace-dir trace-dir})]
             (is (= 1 (count (get-in report [:r8EraBoundary :violations
                                             :suffix-without-stored]))))
+            (is (= 1 (get-in report [:r8EraBoundary :perEra :after :count])))
+            (is (zero? (get-in report
+                               [:r8EraBoundary :perEra :after :storedFCount])))
             (is (false? (get-in report [:summary :pass?])))))))
     (testing "an unknown free-energy map is an unexplained regime"
       (is (= :unexplained-regime
@@ -114,7 +127,11 @@
     (is (re-find #"hasControllerScore := false" lean))
     (is (re-find #"hasGTotal := true" lean))
     (is (re-find #"fileDate := 20260709" lean))
-    (is (not (re-find #"disposition :=|freeEnergyShape :=|boundary :=" lean)))))
+    (is (re-find #"noncomputable def generatedEraTable : EraTable" lean))
+    (is (re-find #"#print axioms generatedCensus" lean))
+    (is (re-find #"#print axioms generatedEraBoundary" lean))
+    (is (not (re-find #"meanPrecision :=|uniform :=" lean)))
+    (is (not (re-find #"disposition :=|freeEnergyShape :=" lean)))))
 
 (let [{:keys [fail error]} (run-tests)]
   (System/exit (if (zero? (+ fail error)) 0 1)))

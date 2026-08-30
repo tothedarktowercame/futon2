@@ -151,6 +151,34 @@
                                           usable-records))
                          :records (count usable-records)}}))
 
+(defn- round-decimals [number places]
+  (let [scale (Math/pow 10.0 places)]
+    (/ (Math/round (* (double number) scale)) scale)))
+
+(defn- era-summary [records]
+  (let [usable-records (filter #(and (map? (:prediction-errors (:value %)))
+                                      (map? (:precision-state (:value %))))
+                               records)
+        precision-values (mapcat (fn [{:keys [value]}]
+                                   (keep :precision
+                                         (vals (:precision-state value))))
+                                 usable-records)
+        shape-counts (frequencies (map :shape records))]
+    {:count (count records)
+     :storedFCount (count (filter #(some? (:variational-free-energy (:value %)))
+                                  records))
+     :selectionGainCount (count (filter #(some? (:selection-gain (:value %)))
+                                        records))
+     :shapes {:gMap (get shape-counts :g-map 0)
+              :controllerMap (get shape-counts :controller-map 0)
+              :unknown (get shape-counts :unexplained-regime 0)}
+     ;; Four decimals are the published fixture precision.  The denominator
+     ;; remains explicit; consumers derive the mean rather than trusting a
+     ;; separately emitted quotient.
+     :precisionSum (round-decimals (reduce + 0.0 precision-values) 4)
+     :precisionValues (count precision-values)
+     :precisionForms (count usable-records)}))
+
 (defn analyze-corpus [{:keys [files records]} boundary]
   (let [classified (mapv #(assoc %
                                  :disposition (disposition (:value %))
@@ -168,6 +196,8 @@
                                classified)
         with-stored (filter #(some? (:variational-free-energy (:value %)))
                             classified)
+        before-era (filter #(< (:file-date %) boundary) classified)
+        after-era (filter #(<= boundary (:file-date %)) classified)
         era-violations
         (reduce
          (fn [result {:keys [file-date shape value] :as record}]
@@ -244,6 +274,8 @@
      :r8EraBoundary
      {:status :fixture-evidence
       :boundary boundary
+      :perEra {:before (era-summary before-era)
+               :after (era-summary after-era)}
       :era-counts {:without-stored-F (count without-stored)
                    :with-stored-F (count with-stored)}
       :shape-counts {:g-map (get shape-counts :g-map 0)
@@ -327,6 +359,27 @@
        "      (t.storedF.isSome ↔ t.freeEnergyShape = .controllerMap) ∧\n"
        "      (t.storedF.isSome ↔ 20260714 ≤ t.fileDate) := by\n"
        "  native_decide\n\n"
+       "#print axioms generatedCensus\n"
+       "#print axioms generatedEraBoundary\n\n"
+       "noncomputable def generatedEraTable : EraTable :=\n"
+       "  { boundary := " (str (get-in report [:r8EraBoundary :boundary])) "\n"
+       "    perEra := fun era =>\n"
+       "      match era with\n"
+       (letfn [(summary-text [era constructor]
+                 (let [e (get-in report [:r8EraBoundary :perEra era])]
+                   (str "      | ." constructor " =>\n"
+                        "        { count := " (:count e) "\n"
+                        "          storedFCount := " (:storedFCount e) "\n"
+                        "          selectionGainCount := " (:selectionGainCount e) "\n"
+                        "          shapes := { gMap := " (get-in e [:shapes :gMap])
+                        ", controllerMap := " (get-in e [:shapes :controllerMap])
+                        ", unknown := " (get-in e [:shapes :unknown]) " }\n"
+                        "          precisionSum := " (:precisionSum e) "\n"
+                        "          precisionValues := " (:precisionValues e) "\n"
+                        "          precisionForms := " (:precisionForms e) " }\n")))]
+         (str (summary-text :before "before")
+              (summary-text :after "after")))
+       "  }\n\n"
        "end DarkTower.WarMachine.Holes.R8GeneratedFixture\n"))
 
 (defn- sibling-lean-path [report-path]

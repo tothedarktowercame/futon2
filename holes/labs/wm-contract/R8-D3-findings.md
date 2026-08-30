@@ -23,6 +23,14 @@ Date: 2026-08-30. Predecessor: R8-D2 at `be3a77d`.
 
 ## Computed laws
 
+- **Observed.** The report now presents the declared `EraTable` facts directly
+  under `:r8EraBoundary/:perEra`. Eras are selected by file date, not by the
+  stored-F field whose agreement with the date partition is being tested
+  (`checks/r8_f_contract.clj:199`). Each summary records form and key counts,
+  all three shape tallies, and the precision sum/value/form populations
+  (`checks/r8_f_contract.clj:158`). `meanPrecision` and `uniform` remain Lean
+  derivations rather than generated verdicts.
+
 - **Observed.** The generated literal has 792 entries. Lean's own closed
   `r8Census` reduces its census to `(755, 32, 5)` by `native_decide`
   (`holes/labs/wm-contract/R8-D3-report.lean:5561`). This is the stated fixture
@@ -40,6 +48,13 @@ Date: 2026-08-30. Predecessor: R8-D2 at `be3a77d`.
   (`holes/labs/wm-contract/R8-D3-report.edn:1`). The instrument searched all
   792 generated key-presence pairs; its negative result is limited to this
   content-pinned corpus.
+- **Observed.** Before the boundary the table records 760 forms, zero stored-F
+  and selection-gain keys, shapes 760/0/0, and precision sum `520403.9349`
+  over 5502 values from 755 forms. After it records 32 forms, 32/32 keys,
+  shapes 0/32/0, and precision sum `2429.5805` over 256 values from 32 forms
+  (`holes/labs/wm-contract/R8-D3-report.edn:1`). The corresponding Lean
+  `generatedEraTable` contains those facts and no precomputed mean or
+  uniformity verdict (`holes/labs/wm-contract/R8-D3-report.lean:5575`).
 
 ## Compilation and interface status
 

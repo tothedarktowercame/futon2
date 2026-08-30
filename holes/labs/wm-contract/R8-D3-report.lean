@@ -5569,4 +5569,29 @@ theorem generatedEraBoundary :
       (t.storedF.isSome ↔ 20260714 ≤ t.fileDate) := by
   native_decide
 
+#print axioms generatedCensus
+#print axioms generatedEraBoundary
+
+noncomputable def generatedEraTable : EraTable :=
+  { boundary := 20260714
+    perEra := fun era =>
+      match era with
+      | .before =>
+        { count := 760
+          storedFCount := 0
+          selectionGainCount := 0
+          shapes := { gMap := 760, controllerMap := 0, unknown := 0 }
+          precisionSum := 520403.9349
+          precisionValues := 5502
+          precisionForms := 755 }
+      | .after =>
+        { count := 32
+          storedFCount := 32
+          selectionGainCount := 32
+          shapes := { gMap := 0, controllerMap := 32, unknown := 0 }
+          precisionSum := 2429.5805
+          precisionValues := 256
+          precisionForms := 32 }
+  }
+
 end DarkTower.WarMachine.Holes.R8GeneratedFixture
