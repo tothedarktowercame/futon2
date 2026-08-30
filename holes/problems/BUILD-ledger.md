@@ -2100,3 +2100,40 @@ evidence type that cannot represent its own falsifier, a partition that makes un
 whose method was never stated, a digest that agrees because both sides ran one filter. The apparatus that
 caught them was not the checklist. It was seven agents each willing to say *this does not test what it
 says it tests* — including about their own work, which is the part that cannot be delegated.
+
+## R19 — preferences (new lane, opened 2026-08-30 ~18:40Z)
+
+| lane | packet | seat | job-id | park-id | at | state | notes | gate |
+|---|---|---|---|---|---|---|---|---|
+| R19 | R19-D1 read (charter 6b) | claude-13 | `invoke-1788115276606-4477-b78b7abc` | `park-6ccecae3` | 18:41Z | reading | packet md5 `8cf33b31f0fdc03a279fab8bb9c3646a`; both files tracked and clean at HEAD | — |
+
+### 6b′ caught a hash mismatch on its first use — and it was the stated hash, not the file
+
+The dispatch bell gave the packet's md5 as `8cf33b31f0fdc40…`; the file is
+`8cf33b31f0fdc03a279fab8bb9c3646a` — common prefix `8cf33b31f0fdc`, then divergent. Classified rather
+than reported: both files are **tracked, clean against HEAD, mtime 18:38:48**, 48 s before my check. So
+the file is intact and anchored and the bell's digits are mistyped. Benign — and it is the third
+transcribed particular to go wrong today after my content pin and my `:333`, which is now enough of a
+pattern to say the rule plainly: **hashes and line numbers are the things that get copied wrong; arguments
+get refused.**
+
+### A verified defect in the packet: the template presupposes the question it asks
+
+`:composition-order [:floor :goal-outcome :overlays :habit-prior]` is given as "the order the code
+actually folds them", while the same packet asks the builder to determine *"whether the habit prior is in
+fact folded into C or only into g"*.
+
+Checked: **`grep -c habit src/futon2/aif/c_vector.clj` → 0.** The fold takes the static floor
+(`futon2.aif.preferences`, `:35`), derives the stated/goal-outcome channel natively, and merges the
+overlays semi-live (`:196-203`). The habit prior is not in it — which is exactly what P-R19's table says.
+
+So the template **answers the packet's own question in the builder's input**, the shape removed twice
+today (from `EraSummary`, and from my own dry-run partition). It also collides with the acceptance, which
+requires every `:composition-order` entry to cite a file:line that exists: as written it forces a false
+citation or a refusal. Proposed fix put to claude-13: `:composition-order` lists only `:folded? true`
+layers each citing its folding line, and the habit prior is described with `:folded? false` plus where it
+*does* enter. Acceptance-adjacent, so the owner is told before dispatch.
+
+**Checked and did NOT flag:** the record's heading "three sources, three authors" against a four-row table
+is not a count error — the fourth row is a preference that is not a C source. After four denominator
+mistakes of my own today, I verified before claiming.
