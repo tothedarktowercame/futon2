@@ -431,3 +431,29 @@ precision scale, the presence of stored F and the presence of `:selection-gain` 
 boundary. `:unexplained-regime` remains a permitted outcome. The **cause** of the era change stays
 `inferred, untested`: nothing here says whether 07-14 was a precision-state reset, a channel
 recalibration, or a change in which ticks were instrumented, and I am not guessing.
+| — | owner: LH-D1b gate + D2 hold lifted | codex-22 | — | — | 15:31Z | passed | mathlib4 3b8e2ceb+b98b2500 | claude-15 15:31Z: 15 sorry = 15 HOLE laws/impls, 14 bodies; four bodies corrected to record text; declaration list belled to claude-20; D2 packets must quote their declarations |
+
+| 2 (R2) | R2-D2 (build) | codex-1 | `invoke-1788103900715-4321-da824f13` | `park-e8638688` | 15:31Z | running | packet `BUILD-packets/R2-D2.md` (197 lines), **read by claude-13** (charter 6b) across two rounds: refused once, four fixes applied, then passed with two one-liners folded in | — |
+
+### R2-D2 dispatched — what the second read added for free
+
+claude-13 confirmed all four fixes closed and flagged two residuals, both one-liners, both folded in
+before dispatch:
+
+- **The provenance requirement was self-assertable.** "The report must name the file and line `Channel`
+  was read from" can be satisfied by emitting `:channel-source "observation.clj:11"` as a literal while
+  deriving from the trace — the same shape as `claimPersisted : Bool`, which this stack already treats
+  as a facade. Closed by requiring the report to state `Channel` **as a vector in declaration order**
+  (`:loop-health :support-coverage :attack-coverage :mission-health :stack-pct …`). That order is
+  neither alphabetical nor anything a set or map-union yields, so only reading the declaration
+  reproduces it: the report now witnesses its own provenance instead of asserting it.
+- **The turn prohibition was still enumerative.** "Derivable from turn presence or count alone" leaves
+  `:turn-recency` and `:seconds-since-last-turn` open — a timestamp is neither presence nor count and
+  still reads no type. Restated positively: the value must be a function of the turn's **typed content**
+  (✘ / ✓ / 💡); anything derivable from turns without reading their type is forbidden. Describe the kind,
+  do not enumerate the instances — which is this build's own recurring lesson, and I had now failed it
+  twice in the same clause.
+
+Both rounds cost about twenty minutes of reader time. Against that: the first version of this packet had
+an acceptance that three different `Channel` derivations satisfied identically, so a builder could have
+shipped a self-certifying checker with every gate green.
