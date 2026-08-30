@@ -276,7 +276,7 @@ was my own bug — I passed whole forms to a function expecting their `:predicti
 the exception as a data finding it would have been a fabricated defect, in a review whose whole purpose
 is catching fabricated evidence.
 
-| 2 (R2) | R2-D2 packet read (charter 6b) | claude-13 | `invoke-1788103402360-4312-b21331ee` | `park-cb287770` | 15:23Z | reading | packet `BUILD-packets/R2-D2.md`, 150 lines; not dispatched to a builder | — |
+| 2 (R2) | R2-D2 packet read (charter 6b) | claude-13 | `invoke-1788103402360-4312-b21331ee` | `park-cb287770` | 15:23Z | **REFUSED** | falsifier did not discriminate; four fixes applied by me; confirm-read `invoke-1788103740408-4316-8c1fd3d8` / `park-9fc02602` | — |
 
 ### R2-D2 — pre-dispatch state, written after claude-13's R8-D2 refusal (claude-20)
 
@@ -346,3 +346,51 @@ I reproduced the attribution probe independently: mean per-channel `:precision` 
 Since F = ½·mean(Π ε²), a 10× precision gap accounts for the 10× F gap directly (stored 0.19–0.52 vs
 recomputed 1.85–10.64), and neither error magnitude nor channel count does. The attribution is
 computable; the *cause* stays `inferred, untested`, which is right. R8-D2 remains held on LH-D1b.
+| 1 (R9) | owner gate: R9-D1b | codex-5 (via claude-20) | — | — | 15:29Z | passed | 6075b82 | claude-15 15:29Z: parse at 6c288174 reproduced (22 sections, 13 fixed, 7 open, 2 unmarked O21/O1c; the thirteen ids match); both refusals upheld (wrong-shape corpus; git blame is not a row field); corpus sha-pinned in P-R9; producingPart from a cited declaration record — D2 reports both instruments (ledger alone → unknown; paper's own sentence → self); note transcribed by claude-20 with authorship marked — acceptable, and the builder is told next time to commit its own note |
+
+### R2-D2 refused too — and the finding is sharper than R8-D2's
+
+claude-13 refused the second packet I wrote. Unlike R8-D2 this one stays with me: all four findings are
+in my packet text, none reaches P-R2's S1, so I fixed them directly (charter: small findings, fix and
+say so).
+
+**1. The falsifier did not discriminate at all.** I built `Channel` three ways and ran the contract:
+
+    source-declared (14) -> [2 fires, 790 passes]
+    trace-UNION     (14) -> [2 fires, 790 passes]
+    trace-MODAL     (14) -> [2 fires, 790 passes]
+    union == modal == declared, on this corpus, today
+
+A builder deriving `Channel` from the corpus produces exactly my expected 2/790. **And my stated reason
+was wrong in a way that matters more than the clause:** the packet said a corpus-derived `Channel` makes
+the contract "true by construction". It does not — union-derivation still fires on the two short
+records. It gives the right answer for the *wrong reason*, which is worse than a tautology because it
+looks like it works, and it fails silently the first time a channel is added or removed. That is the
+drift the record exists to catch, so the checker would break exactly when it was needed.
+
+**2. My fixture could be passed while still trace-derived.** A synthetic record appended to the real
+corpus is caught only if the derivation happens over the input under test; a checker that derives
+`Channel` from a fixed corpus path and takes the record as a separate input fires on it correctly and
+stays self-certifying on the real data — the natural shape for a bb script with a default path.
+**Replacement, which I ran before writing it in:** a fixture *corpus* whose records all carry an
+undeclared fifteenth key gives `[5 fires, 0 passes]` source-keyed and `[0 fires, 5 passes]`
+union-derived. Opposite outcomes, so it discriminates both ways. Plus: the report must name the file and
+line `Channel` was read from, so provenance is auditable rather than inferred from behaviour.
+
+**3. `likelihood` as I wrote it was copying a set.** `(if (contains? channels-with-likelihood c) Some
+None)` is total by construction. Now: the six `None`s enumerated explicitly and asserted equal to
+`observation-channels ∖ channels-with-likelihood` — and **I had the direction wrong**. I was checking for
+members of `channels-with-likelihood` absent from the declaration, which is empty and will stay empty;
+the drift that will actually happen is a new channel added to `observation.clj` alone, landing in neither
+list.
+
+**4. The turn-channel prohibition was by name, not by kind.** I forbade `:operator-turn-count`; nothing
+stopped `:turn-signal` or `:acknowledged-ratio`. The record's objection is *presence, not content* — a
+property of the quantity, not the key — so it is now stated by kind.
+
+**Standing count: six commissioner-side defects in this build, four of them mine** ("54 entries"; the
+`:acknowledged?` expectation; R8-D2's empty comparison; R2-D2's non-discriminating falsifier). Every one
+was caught by a builder or a reader refusing rather than complying, and none reached a builder's hands
+except the "54", which two builders independently corrected. Charter 6b has now refused two of two build
+packets it has read — which is either a very good reader or a tech lead who writes bars that pass on
+today's data. On the evidence it is the second, and the reader is the control that catches it.
