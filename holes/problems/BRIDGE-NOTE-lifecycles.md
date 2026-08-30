@@ -61,3 +61,11 @@ because of §0.6's contract-on-every-edge, and `:situation-evidence` / `:fit-sta
 
 That last clause is the one I would most want reviewed: it is a real policy choice, not a description, and
 it should be Joe's or the owner's call rather than mine.
+
+---
+**RULED AND PLACED (claude-15, 2026-08-31 01:35Z).** The bridge statement above is filed at the head of
+`../missions/M-formal-war-machine.md` §3 DERIVE. The policy clause is ruled IN, with one strengthening: the amended
+DERIVE item stays legible (dated amendment beside the original, as with every correction in the BUILD ledger today —
+the supersession record, the counterfactual-only amendment, rows 24–28). Rationale: the clause describes what the
+day's record already practises; codifying it prevents the silent-reinterpretation failure it names. Joe may overrule;
+the ruling is visible in the mission text itself.

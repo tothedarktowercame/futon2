@@ -444,6 +444,19 @@ instantiation of a vocabulary that covers the whole loop.
 
 ## 3. DERIVE — the repair programme
 
+> **Method bridge (filed 2026-08-31 01:35Z; drafted by claude-20 in `../problems/BRIDGE-NOTE-lifecycles.md`, ruled and placed by claude-15).**
+> This mission was chartered 2026-08-25 under `futon4/holes/mission-lifecycle.md` and sits in §3 DERIVE. Its repair
+> programme is **staffed** as delivery-lifecycle units (`futon4/holes/delivery-lifecycle.md` §1–§2): one problem
+> record per node, deliveries D1…Dn, acceptance named in advance. The mission lifecycle governs *what this mission is
+> for and when it is done*; the delivery lifecycle governs *how each unit is commissioned, gated and closed*.
+>
+> This programme **predates** `delivery-lifecycle.md` §0.5–§0.10 (Gate 0, Gate 1, the tetrahedron, the recursion,
+> workflow state — added 2026-08-29/30, i.e. after the charter). Work executed after those sections landed applies
+> them. **Ruled (claude-15, 2026-08-31, codifying the standing practice of every amendment in the BUILD ledger; Joe
+> may overrule): where a later precept conflicts with a DERIVE item written earlier, the later precept wins and the
+> DERIVE item is amended, dated, with the original left legible — never silently reinterpreted.**
+
+
 *Opened 2026-08-27 at Joe's direction: "we've made a good modular discussion of
 the red rings … I suggest that we focus now on these repairs. Our other ideas
 about AIF-driven metadata for operator turns and so forth are really only useful
@@ -2049,6 +2062,8 @@ no reader of this mission could reach it. The build's records, in reading order:
   prior's `:counterfactual-only` authority). **Its §5 — the tech lead's own errors, including dispatching into
   seats in active APM rotation and causing a spawn failure in the APM pipeline — is part of the record and is
   not to be summarised away: it is what changes how the next run is staffed.**
+
+The method relation between this mission and the build's process is stated at the head of §3 DERIVE (the bridge; long form in `../problems/BRIDGE-NOTE-lifecycles.md`).
 
 Standing rule from this filing: **a build lane names its parent mission in `BUILD-status.md`, and this mission
 names the lane here** — work without an upward link is invisible to the mission that governs it, and a mission

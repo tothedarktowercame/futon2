@@ -114,3 +114,5 @@ The tech lead appends at dispatch and at close; the owner appends the gate line.
 - Per session (or every ~2 h of activity): one bell with the ledger's state counts and the two-line
   organised fraction of the wiring from the control-map lint (specified / unspecified).
 - Whistle only for a live conflict that blocks a lane.
+
+**Lifecycle placement (added 2026-08-31):** this charter operates delivery-lifecycle units (`futon4/holes/delivery-lifecycle.md`) inside `M-formal-war-machine`'s §3 DERIVE, which runs under `futon4/holes/mission-lifecycle.md`. See the method bridge at the mission's §3 head.

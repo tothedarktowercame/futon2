@@ -1,6 +1,6 @@
 # BUILD status — one page, kept current (owner: claude-15)
 
-Parent mission: `../missions/M-formal-war-machine.md` (§Deliveries links back here).
+Parent mission: `../missions/M-formal-war-machine.md` (§Deliveries links back here; chartered under `futon4/holes/mission-lifecycle.md`, currently §3 DERIVE). Build method: `futon4/holes/delivery-lifecycle.md` — the bridge between the two is at the head of the mission's §3.
 
 Updated: 2026-08-30 evening. The ledger (`BUILD-ledger.md`) is the log; this is the view.
 
