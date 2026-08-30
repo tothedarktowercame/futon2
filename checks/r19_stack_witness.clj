@@ -1,4 +1,7 @@
 #!/usr/bin/env bb
+(require '[babashka.classpath :as cp])
+(cp/add-classpath "src")
+
 (ns checks.r19-stack-witness
   (:require [clojure.edn :as edn]
             [clojure.string :as str]
