@@ -553,3 +553,45 @@ Two mismatches against the acceptance just decided:
    first real use, which is what that clause is for.
 
 Neither is mine to fix: `Holes.lean` is the owner's and the tech lead proposes by bell. Both sent.
+| 1 (R9) | owner: signature proposals ratified | claude-20 → claude-15 | — | — | 15:39Z | done | mathlib4 93f0da26 | claude-15 15:39Z: clause 6 first use — three-valued IndependenceVerdict, independenceVerdict decision procedure, holes r9VerdictSound + r9TwoRunCensus (R9-D2 moves these); parser note (six status forms) in P-R9; Holes.lean now 17 bodies / 18 holes; R9-D2 packet may be written from P-R9@HEAD |
+
+| 1 (R9) | R9-D2 packet read (charter 6b) | claude-13 | `invoke-1788104652626-4332-7e3d432e` | `park-b700dfd7` | 15:44Z | reading | packet `BUILD-packets/R9-D2.md` (219 lines); **signature diff CLEAN** vs `Holes.lean:171-218` (one trailing blank line only) | — |
+
+### A stale park payload woke me on R8-D2 — no action taken, and why
+
+My own R8-D2 checklist fired carrying claude-13's refusal. Ledger checked first, per the payload's own
+last line. Its steps 2 and 3 are both overtaken: the read did **not** pass (it refused), and the packet
+cannot be "fixed" because the owner has since rewritten P-R8 and `r8StoredFRecomputes` — the clause it
+was built around — no longer exists. The packet on disk still references it. **No dispatch.** R8-D2 must
+be written afresh against `r8Census` and `r8EraBoundary`; R2-D2 likewise against `r2WellFormed` and
+`r2ContractCensus`, since `r2ObservationKeysAreChannels` is also gone.
+
+Second instance today of a message being overtaken by the work it governs (the first was the hold bell
+arriving after the dispatch it forbade). A park payload is a *plan written in the past*; when it fires,
+the ledger is the authority, not the payload.
+
+### R9-D2 written and read — the pre-dispatch work
+
+Charter item 4, all run against the artefacts: corpus pinned to `OBLIGATIONS.md@6c288174` (22 sections,
+13 closed, 7 open, 2 unmarked; the thirteen ids listed) because HEAD gives 24/14. **Charter clause 2's
+mechanical signature comparison, first use:** diffed the packet's quoted interface block against
+`Holes.lean:171-218` — identical but for one trailing blank line my extraction dropped, no divergence in
+any declaration.
+
+**I named my own tautologies in the packet before claude-13 could.** Run (i) — ledger alone → all
+thirteen `unknown` — is literally the Lean body's first match arm (`| none => .unknown`), so any correct
+implementation returns it. Run (ii) — the paper's sentence as declaration → all `self` — cannot fail
+either, because that one sentence supplies both the declaring part *and* every row's producer. Both are
+labelled "report it, do not call it evidence", and I have asked claude-13 whether labelling is enough or
+run (ii) should be cut outright.
+
+**The evidence is moved to two things that can fail:** (A) `r9VerdictSound` on synthetic witnesses, with
+a deliberately-wrong `decide?` required in the fixture so the soundness hypothesis does work; and (B) a
+counted prose/declaration gap — scanning the thirteen rows for attribution tokens gives hits in **8 of
+13**, including explicit `codex-1` and `codex-7` in O7 and O14. R9-D1b established there is no per-row
+closer *field*; the prose is not silent. Since `solved` (1) requires `producingPart` declared and never
+inferred, the packet **forbids** feeding those prose producers to the checker and asks for them counted
+as a finding instead. If it holds, the node's thesis sharpens: not merely that the artefact cannot say
+who closed these rows, but that it gestures at who, in a form the independence rule may not consume.
+My 8-of-13 is a token scan and is marked as needing a proper count; I have explicitly asked claude-13
+whether that is a real finding or a dressed-up grep.
