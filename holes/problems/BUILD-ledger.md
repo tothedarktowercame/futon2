@@ -2772,3 +2772,34 @@ agents in one round.
 **Cost:** 2 seats, ~25 min, 6 commits, no incident. Compare the nine-agent sim: 11 invocations, 9 seats,
 a spawn failure in the APM pipeline, and its best findings also came from prose rather than from my
 metrics. **The pair is the better instrument, and it is cheaper.**
+
+### The pairing found the same defect four times, in four places
+
+R2's closing bell carried a finding about **itself** that I verified: `observation.clj:42` — *"When the
+field is absent, defaults to 0.0 — the apparatus remains operational under missing-canonical-source
+conditions"* — and the code does it across the whole vector (`(:overall loop-health 0.0)`,
+`(:health mission-triage 0.0)`, `(or (:depositing-signal frames) 0.0)`, …).
+
+So **every R2 channel collapses "I observed zero" and "I observed nothing" into one number**, by design
+and with a stated rationale. R2 asked R16 for a typed non-production result while its own channels type
+absence as a legitimate reading.
+
+That makes four instances of one defect inside a single 25-minute pairing:
+
+    enact.clj:255            exception discards the audit AND the exception     (R16 found)
+    :enacted nil             untyped — neither score nor typed absence          (R16-D1, confirmed)
+    delivery payload :6-12   :disposition/:construction/:reason as siblings,
+                             so "produced" can coexist with a non-production
+                             reason                                             (R2 found, in R16's proposal)
+    observation.clj:42       absence defaults to 0.0                            (R2 found, about R2)
+
+Every one is the same failure: **a representation that cannot distinguish "nothing happened" from
+"something happened whose value was nought."** It is the same family as the day's earlier catches —
+`EraSummary` presupposing the law it evidenced, the empty ε-comparison, `r2ContractCensus` and
+`r9WmCheckerSound` as acceptances that could not fail.
+
+**The mechanism worth keeping from this experiment:** each node found its *own* defect only after being
+asked what it could honestly supply the other. The question that surfaced these was not "audit yourself",
+it was **"what can you give me?"** — and answering it truthfully required each to look at what it actually
+emits. Nine agents writing in isolation this afternoon produced no such finding, because nobody was owed
+an answer.
