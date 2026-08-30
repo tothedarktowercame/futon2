@@ -42,7 +42,7 @@
  {:witnesses "preferenceStackLiveRecorded"
   :check {:repo "futon2" :path "checks/r19_stack_witness.clj" :entrypoint "-main"}
   :fixture {:repo "futon2" :path "checks/r19_stack_witness.clj"}
-  :run-sha "2910c85a90e172acd11a9bf8e7fa7c847ef02582"
+  :run-sha "03c149d0b39b5f1fbe9640b6c7aa63f4fbe21b36"
   :contract-sha "84326d17c584fa5f09d8d0b796e7707a6a3e0f72"
   :result :passed
   :recorded-at "2026-08-30T19:40:41Z"
