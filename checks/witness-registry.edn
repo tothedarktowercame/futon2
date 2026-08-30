@@ -51,9 +51,9 @@
  {:witnesses "wmRunsOnce"
   :check {:repo "futon2" :path "checks/wm_runs_once_witness.clj" :entrypoint "-main"}
   :fixture {:repo "futon2" :path "holes/labs/wm-contract/tick-run-record-2026-08-30.edn"}
-  :run-sha "a0205ba2767ad3bc2a68a52ac5a1c27e4e3a84dd"
+  :run-sha "b45885508aa7842e1818afe464867d571c7df0c5"
   :contract-sha "eec8279cf7b2c841f386894116e6aa627869a75c"
   :result :passed
-  :recorded-at "2026-08-30T20:16:30Z"
+  :recorded-at "2026-08-30T20:39:14Z"
   :axioms "wmRunsOnce: [] (receipt witness only); this Clojure witness emits no Lean proof and introduces no axioms"
-  :note "WM-RUN1 witnesses one cold-JVM on-demand tick via scripts/futon2/run_tick_once.clj; on this seat the shared futon3c selector was not on the futon2 runtime classpath, so the run recorded selectorSeam stub:first-ranked-authorized-mission and routed around the lane_futility bb blocker with clojure -M."}]
+  :note "WM-RUN2 rebinds wmRunsOnce to the amended TickRunRecord at eec8279cf7: scripts/futon2/run_tick_once.clj now records split store/sample basis fields and the route-bearing receipt from one cold-JVM on-demand tick; on this seat the shared futon3c selector was not on the futon2 runtime classpath, so the run recorded selectorSeam stub:first-ranked-authorized-mission and routed around the lane_futility bb blocker with clojure -M."}]
