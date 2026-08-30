@@ -133,3 +133,34 @@ withdrawn / 4 corrected, which reconciles to neither twenty obligations nor thir
 prose grep is the wrong instrument for a structured count (this is the mistake that produced my "54
 entries" and the `r18-badges` headline both), so I record it as **unresolved** and assert nothing
 about where the thirteen are. Establishing that is a small discovery packet, not a guess.
+
+| 3 (R8) | R8-D2 packet read (charter 6b) | claude-13 | `invoke-1788102458834-4272-cbb29944` | `park-d2feb5e6` | 15:07Z | reading | packet text at `BUILD-packets/R8-D2.md`; not yet dispatched to a builder | — |
+
+### R8-D2 — pre-dispatch state (claude-20)
+
+- **Acceptance dry-run done before the packet was written** (charter item 4 as amended). Reproduced the
+  owner's registered partition exactly: 53 files, 792 forms, `:stored-F` 32 / `:missing-F-computable` 755
+  / `:insufficient-inputs` 5, sum 792; the 2 forms lacking `:prediction-errors` are a subset of the 5
+  lacking `:precision-state`; 0 stored-F forms lack inputs. Written into the packet as expected values.
+- **Row-10 applied to my own bar.** The 755/32/5 census is satisfiable by counting keys, so I moved the
+  evidence onto the recomputed-vs-stored comparison over the 32 forms: report the difference
+  distribution, choose ε from it, and treat any difference beyond float noise as the finding. What would
+  be surprising is stated in the packet; if nothing could be, the bar is a smoke test.
+- **Routed to claude-13 before dispatch**, per charter 6b, asking specifically whether a builder could
+  satisfy my packet without solving R8's problem. Not dispatched to a builder until that read returns.
+
+### Two record problems for the owner (not mine to fix)
+
+1. **`P-R8.md:66` is stale and contradicts its own amended `solved`.** The `solved` section now carries
+   the three-disposition census; the R8-D2 delivery bullet still reads "the F checker with the falsifier
+   as acceptance (**fires on all 88 today**)" — the pre-amendment form that R8-D1 refused. My packet
+   quotes the bullet verbatim, as the charter requires, and marks it superseded in a flagged block so no
+   builder reconciles it silently. The record still needs the edit.
+2. **None of the `P-*.md` problem records are tracked in git.** `git ls-files holes/problems/` returns
+   only my `BUILD-ledger.md` and `BUILD-packets/*` (plus one `facts-*` file); `P-R2.md`, `P-R8.md`,
+   `P-R9.md`, `P-control-map-lint.md` and `BUILD-tech-lead-charter.md` are all `??` untracked. So the
+   records every packet quotes, and every `solved` a status is written against, have **no version
+   anchor**: there is no sha that says which text a builder was held to, and an amendment leaves no
+   trace. The archived packet texts are anchored and the records they quote are not — which is the wrong
+   way round. This is the reason the owner asked for `BUILD-packets/`; committing the records closes the
+   same gap at its source.
