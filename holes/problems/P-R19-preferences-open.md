@@ -167,3 +167,12 @@ so every EFE computation names its C. No arithmetic changed (owner ran 60 tests 
 and preferences suites; all removed lines were annotate-and-move). The stale DEFAULT/DARK/R12 comment is gone;
 the corrected text states the 07-13 flip, the env hatches, and the seam's declared abstention. D2b (the witness
 binding `preferenceStackLiveRecorded`) → codex-2; D2a′ (c_vector entry provenance) still out on codex-10.
+
+**R19-D2b GATED (owner, 01:50Z, check authority `03c149d`) — passed.** `preferenceStackLiveRecorded` is the first
+hole witnessed end-to-end through the full chain this build exists to demonstrate: the Lean declaration
+(`84326d17`) → the live emission (`compute-efe` `:preference-stack`, `ccd06ce`) → an executable check whose
+falsifier is representable and fails (`--negative` drops the habit-prior layer → exit 1) → the registry binding →
+the contract lint judging `witnessed`. The check reads the reference record at runtime — no copied values. Two
+builder corrections at the gate, both accepted: the registry vocabulary is `:passed` (my packet said `:pass`), and
+the builder refused its own first implementation for needing a manual classpath, then made the bare run
+self-contained. Lane remaining: the D2a′ gate (c_vector entry provenance, codex-10).
