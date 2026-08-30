@@ -1388,7 +1388,7 @@ named and skipped the prose between them.** A checklist makes the listed checks 
 unlisted ones invisible, and what the builder volunteered was in neither column.
 | — | owner gate: G-D3 | codex-22 | invoke-1788107219429-4392-e72310bf | park-6d39a05e | 16:34Z | passed | mathlib4 be322f91..66317c71 | claude-15 16:34Z: 24+8=32=32 recomputed; closed 31; Policy gate 15=7+8, 0; every body diffed at source (mean, ½, ε², primes, both softmax terms, ≤ −3); logMultivariateBeta refused → deltaFReduction body-over-a-hole (6+1); two-π refusal named cascadeGrainPi → Joe. **Holes.lean returns to the owner.** |
 
-| 2 (R2) | R2-D3 (build, hole-moving) | codex-1 | `invoke-1788107684982-4403-9cd6f5bb` | `park-c735608f` | 16:34Z | running | read by claude-13; **signature diff CLEAN** vs `Holes.lean:341-376`@`53c5e466d2`; contract-sha to bind at gate | — |
+| 2 (R2) | R2-D3 (build, hole-moving) | codex-1 | `invoke-1788107684982-4403-9cd6f5bb` | `park-c735608f` | 16:34Z | **closed** | `4eb4f58`; **gated AT THE SHA** (`git show 4eb4f584:…`) — elaborates EXIT 0, 0 errors; axioms `[…r2CensusWmTrace._native.native_decide.ax_1_1]`; kondo 0/0, 4 tests/25 assertions; pin `c9add16a…` matches R8-D3 exactly | pending |
 
 ### The cross-lane pin check: my doubt was wrong, and the reason is one instruction
 
@@ -1624,3 +1624,35 @@ walked into.
 Packet requires the denominator visible or stated, and tells codex-12 that if it thinks `EraSummary` needs
 a `meanPrecisionRecords` field it must **refuse** — that is a signature proposal for the owner, not a
 generator change. Same question put to claude-13.
+| CML | cadence: wiring two lines | claude-20 → claude-15 | — | — | 16:48Z | reported | linter | claude-15: specified 0 / unspecified 21 reproduced; six one-endpoint edges each carry one payload proposal (measured); R16 chosen by lookup — P-R16.md written (owner); R16-D1 dispatchable by the tech lead now (discovery, no Lean); CML-D2 for R16→R2 and R9→R16 on its landing |
+
+### R2-D3 closed — the last builder lane, gated at its sha under 3a(i)
+
+**First lane gated the new way:** I extracted the artefact with `git show 4eb4f584:…` rather than reading
+the path, and elaborated that. **EXIT 0, zero errors.** Given codex-1 was editing this very file an hour
+ago while a review read it, gating at the path would have been a coin flip.
+
+codex-1 delivered everything the shrunk packet asked: the ruled pin algorithm, **`c9add16a…` matching
+R8-D3's recorded digest exactly**; the fixture emitted as **`wmTraceR2`** so its RHS can replace the hole
+directly; the undeclared-key count (0); the regenerate-versus-git gate added and passing; and explicit
+wiring instructions for the owner. Gates re-run here: kondo 0/0, 4 tests / 25 assertions.
+
+**It stated the pin's limit unprompted, in the reviewer's own terms:** *"The matching digest establishes
+that R2 and the recorded R8 run enumerated identically. It cannot establish that their shared
+`wm-trace-*.edn` filter selected the correct corpus; both lanes could share the same incorrect filter."*
+That is claude-13's caveat delivered as a property of the result rather than as a line the packet made it
+copy.
+
+**And it named the trust assumption with measurements, which is what 3a wanted:** kernel `decide` hit
+`maxRecDepth`; with the depth raised it exhausted the default 200,000 heartbeats; `native_decide` compiled
+the same proposition in **1.87 s**. So the `decide`-vs-`native_decide` choice is now a documented
+measurement rather than a preference — and it retires my earlier worry that requiring `decide` would push
+a builder to shrink the fixture: codex-1 *tried* it, at full size, and reported what happened.
+
+**Two gaps, both from timing, neither the builder's fault.** The artefact still carries an **anonymous
+`example`** and **no `#print axioms`** — charter 3a was adopted after this lane was dispatched, so codex-1
+could not have known. I applied the gate by hand: renamed to a theorem, printed axioms, got
+`[…r2CensusWmTrace._native.native_decide.ax_1_1]` — the native axiom, no `sorryAx`, as expected. Same
+remedy as R8-D3, where the owner wrote the axiom lines into the committed artefact afterwards. Worth
+noting the pattern rather than the instance: **a rule adopted mid-flight is met by hand for the lanes
+already dispatched, and the ledger has to say which.**
