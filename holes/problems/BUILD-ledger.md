@@ -2995,3 +2995,32 @@ discovered afterwards.**
 
 Six `failed` in the window are unexamined; they are most likely the same burst/thread pressure seen with
 the nine-agent sim, but I have not established that and am not claiming it.
+
+### The "failed" jobs were not thread pressure — they were my mode choice
+
+I recorded the failures in the pairing window as *"most likely the same burst/thread pressure seen with
+the nine-agent sim, but I have not established that and am not claiming it."* Now established, and it is
+something else entirely. **All nine** failures on the three seats since 20:42 carry one terminal message:
+
+    codex task-mode reply had no execution evidence
+
+with `execution {:executed false :tool-events 0 :command-events 0}` — while carrying a **full, accurate
+reply** (569 chars in the one I opened, R14 confirming it had already incorporated my correction in
+`c110f9a`).
+
+**Cause: I sent informational bells with `--mode work`.** Work mode arms the Codex no-execution gate, and
+a message whose honest answer is "understood, already incorporated" has nothing to execute — so a correct
+reply trips a gate designed to catch agents that answer without doing the work. The gate is right; my mode
+was wrong.
+
+**Rule:** `--mode work` for a packet that asks for work; **`--mode brief` for a relay, a correction, or an
+acknowledgement.** My memory note already said the inverse — *"pass `--mode work`, the default `brief`
+switches off the no-execution gate"* — which is true for dispatches and exactly backwards for messages.
+The note needs the second half.
+
+**And "failed" here does not mean the message failed.** The reply arrived, was accurate, and R14 acted on
+it — the finding it confirmed (R14's gain is computed and persisted and cannot affect the live selection
+branch, strengthening WR-27's `:holds false`) is in the contract at `bf1ba0c`. A job state that reads
+`failed` on a delivered, correct, acted-upon answer is a third instance today of **a status field that
+describes the apparatus rather than the outcome** — after `idle` meaning "not mid-invoke" rather than
+"free", and `invoking` meaning "has a queue" rather than "working on yours".
