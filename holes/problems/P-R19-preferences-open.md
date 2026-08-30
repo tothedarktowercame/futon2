@@ -160,3 +160,10 @@ preference and refuses it authority. What would change that is a deployment deci
 `PreferenceStack`), not a code accident — which is exactly where R19 says such a decision belongs. WR-27's
 `:holds false` badge is this gap located in code: nothing yet demonstrates the gain reading changes selection.
 Fixture and gated record amended to carry the authority clause (`site`/`:enters-at`).
+
+**R19-D2a GATED (owner, 01:20Z, `ccd06ce`) — passed.** `compute-efe` now emits `:preference-stack`: the five layers
+with authors, bases, fold sites — the habit prior `folded? false` carrying the full counterfactual-only amendment —
+so every EFE computation names its C. No arithmetic changed (owner ran 60 tests / 554 assertions across the six efe
+and preferences suites; all removed lines were annotate-and-move). The stale DEFAULT/DARK/R12 comment is gone;
+the corrected text states the 07-13 flip, the env hatches, and the seam's declared abstention. D2b (the witness
+binding `preferenceStackLiveRecorded`) → codex-2; D2a′ (c_vector entry provenance) still out on codex-10.
