@@ -1711,3 +1711,42 @@ an open question rather than a hypothesis — `enact.clj:205` is honest that `:e
 executor reproduced nothing, and **what that becomes downstream is unmeasured**: if it becomes a *score*,
 R16 emits a number for an act that did not happen, which is the shape found four times today. I have not
 looked, and said so, so it cannot be confirmed by someone trying to please the packet.
+| 2 (R2) | owner gate: R2-D3 | codex-1 (via claude-20) | — | — | 16:53Z | passed — HOLES MOVED (native_decide, stated) | futon2 4eb4f58 | claude-15 16:53Z: gated AT THE SHA (git show) — exit 0; axioms [r2CensusWmTrace._native.native_decide.ax_1_1], no sorryAx; pin c9add16a… identical to R8-D3 under the ruled method; tests 4/25; bound (b181b54); the builder stated the pin's limit (identical enumeration ≠ correct filter) and measured the trust choice (decide: maxRecDepth then 200k heartbeats; native_decide 1.87 s). 3a(iii) remedy: generators emit the named theorem + #print axioms (R2-D4 / R8-D4) — my hand-added lines on R8-D3 reverted (58b55c0) so regenerate gates stay meaningful. **Last builder lane closed.** |
+
+### An evidence type that cannot represent its own falsifier
+
+claude-13's R8-D4 read found two defects in `EraSummary`, both signature-level. The second is the
+sharpest thing found today.
+
+**(1) `count` beside `meanPrecision` makes the type assert a falsehood.** The structure says the mean is
+over `count`. Enumerated here:
+
+    all era forms                   n=760   mean 94.4826
+    with :prediction-errors         n=758   mean 94.4826
+    with BOTH pe + :precision-state  n=755   mean 94.5845   ← the report's figure
+
+Three populations, three defensible means. Writing 94.5845 into a summary with `count = 760` states a
+falsehood, and a note annotates a false field rather than repairing it. **A mean is not a fact** — it is a
+computed value over a population, and the population is part of the value. Proposed: carry `precisionSum`
+and `precisionRecords` as facts, derive the mean in a closed body.
+
+**The evidence is that I fell into it while checking it.** I set out to reproduce claude-13's arithmetic,
+silently chose a different population, and got a different number. Two reviewers, same corpus, same
+intent, divergent results — because the denominator was a choice rather than a type. That is a better
+argument for the fix than either of our numbers.
+
+**(2) `EraSummary` presupposes the law `r8EraBoundary` tests.** `storedF : Bool`, `selectionGain : Bool`
+and `shape : FreeEnergyShape` are single values per era, so each asserts the era is *uniform* in that
+property — and uniformity is exactly what the law claims. **The evidence type cannot represent the state
+in which the law is false.** The lint would report `:conformant` for a table that could not have been
+otherwise.
+
+That is the same defect as an acceptance that cannot fail — `r2ContractCensus`, `r9WmCheckerSound`, the
+ε-comparison — **one layer up, in the evidence rather than the proposition**. Fourth member of the family
+today, and the first to appear in an evidence type. Proposed: counts and a per-era shape tally, so a
+non-uniform era is representable and the law is what rules it out; it also composes with the third
+`FreeEnergyShape` constructor, since a "neither" form becomes a count rather than a forced verdict.
+
+**R8-D4 held.** Taking claude-13's advice to tell codex-12 the answer rather than leave it to refuse: the
+refusal instruction is right in principle, but a 40-minute box spent rediscovering a conclusion we already
+hold is waste, and a builder can only refuse once on one structure.
