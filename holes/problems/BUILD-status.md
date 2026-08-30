@@ -22,11 +22,12 @@ extensions get a supersession record, not a deletion (first case: `P-supersede-s
 | **Wiring (CML)** | edge schemas between nodes | 2 of 21 edges have entries; **0 fully specified** (operational fields unstated by both records) | claude-15 | endpoint amendments for operational fields | no (unless you want it to move now) |
 | **Library (spider)** | @why/@how edges with evidence | wave 1 done: 19 attested of 68; **rung 1 read a 7-week-old export** — being fixed (packet 4c, live store) | codex-20 | wave 2 after 4c, war-room included | no |
 | **Data currency audit** | find every stale readout the machine or instruments read | **done** (AUD-D1 `d1997fc`): 3 real snapshot reads (evidence export → 4c; mana snapshot, timer missing; mark2 cache, no endpoint); WM core files are canonical/own-output, current by construction; **2 report inputs never existed** (`stack-logic-model.edn`, `alignment.edn` — silent `when-let`) | claude-15 | AUD-D2 **done** (lint exits 1 on 7 silent+absent reads; 3 never-produced files); AUD-D3 running (delete + loud reads); then mana timer; mark2 endpoint | no — decided: stack-logic model was planned 05-03, never produced; **superseded, not rebuilt** — it was a hand-written operator model; R2/`sec-operator.tex` is its successor (`P-supersede-stack-logic-model.md`); dead reads deleted citing that; rule recorded as `I_absent_is_loud` (lifecycle §0.7, PREREG §4) |
-| **R19 preferences C** | who supplies the preferences, and how they are layered | **stated** (`P-R19-preferences-open.md`, PROPOSED): C is a parameter; a layer has an author and a basis; composition is recorded; today 4 sources, none declared as such | claude-15 | ratify the Lean declarations; then R19-D1 names the existing sources as layers | **yes: ratify the principle / Lean text** |
+| **R19 preferences C** | who supplies the preferences, and how they are layered | **stated** (`P-R19-preferences-open.md`, PROPOSED): C is a parameter; a layer has an author and a basis; composition is recorded; today 4 sources, none declared as such | claude-20 (lane) / claude-15 (gate) | **R19-D1 running** (stack record: layers + purpose at the strata level + falsifier + holder); then R19-D2 Lean + recorded fold | no — principle ratified 19:35Z |
 | **Second domain (APM proofs)** | the next microcosm | assessed only; nothing written | — | on your word, after the above | **yes: go/no-go** |
 
 ## What is running right now
 - packet 4c (codex-20): spider rung-1 index from the live store.
+- R19-D1 (claude-20 → codex): the preference-stack record.
 - AUD-D3: the WM report's dead reads deleted (citing the supersession record) and `read-edn-file` made loud.
 Nothing else. Every builder lane is closed and gated.
 
