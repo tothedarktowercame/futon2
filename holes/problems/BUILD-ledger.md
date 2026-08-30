@@ -2559,3 +2559,21 @@ fixing, and it is not an excuse: the correct move was to ask before taking nine 
 **Standing correction to my own practice:** seat availability is not inferable from the roster. Before
 dispatching to a seat I have not been given, ask. I had exactly this in memory for reserved seats
 (`codex-18`) and applied it as a blocklist rather than as the general principle it was.
+
+### Fairness correction: R15's `:contaminated? false` was correct
+
+I recorded R15 as contaminated because its claim cites `control-map-edges.edn:66` — the file carrying the
+`:derived-undrawn` answer key. But **R15 followed my rule exactly**: the isolation clause forbade
+`P-R*.md` and other agents' sim outputs, and explicitly *permitted* `/home/joe/code/p4ng/empirics-futon/`.
+Its `:contaminated? false` was an honest and accurate answer to the question I asked, and it **cited its
+source in the open**, which is the only reason I could detect the leak at all.
+
+So the contamination is mine, not R15's, and the ledger should not read as if the agent misdeclared. The
+distinction that matters for a rerun: **prior-session exposure** (R7, R13 — seats that had done this
+build's work) is a staffing problem; **in-task exposure** (R15) is a packet problem, and it was my packet.
+
+Also worth keeping from R15: it reported **0 from-artefact, 2 imagined**, refusing to present its drawn
+edges' payloads as artefact-backed *because those payloads are unspecified*. That is the same finding
+CML-D2 reached from the record side — six of nine `Delivery` fields `:unspecified` — arrived at
+independently from the node side. An agent declining to dress an unspecified payload as evidence is the
+behaviour the whole build has been trying to produce.
