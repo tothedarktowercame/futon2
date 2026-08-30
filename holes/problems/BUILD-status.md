@@ -5,7 +5,8 @@ Parent mission: `../missions/M-formal-war-machine.md` (§Deliveries links back h
 Updated: 2026-08-30 evening. The ledger (`BUILD-ledger.md`) is the log; this is the view.
 
 ## Top-level moves (the gasket as it develops — lifecycle §0.12 register)
-1. The problem stated: the big tetrahedron (§0.8, 08-30). 2. The evidence vertex subdivided (§0.12, 08-31): "what is the evidence of the evidence?" 4. The negative space named (§0.14, 08-31, PROPOSED): the **workflow octahedron** — what makes work automatable; seven criteria drafted from this ledger; AUTO-D1 (re-read the day as data) awaits Joe's word.
+1. The problem stated: the big tetrahedron (§0.8, 08-30). 2. The evidence vertex subdivided (§0.12, 08-31): "what is the evidence of the evidence?" 5. The verbs vertex subdivided (§0.15, 08-31, PROPOSED): **handoff formulas with guarantee pairs** — pilot/co-pilot is the paper's exemplar; transparent unsuccess = typed refusal; PILOT-D1 (validate the paper's formula with receipts) awaits Joe's word. Nouns is the last unsubdivided vertex.
+4. The negative space named (§0.14, 08-31, PROPOSED): the **workflow octahedron** — what makes work automatable; seven criteria drafted from this ledger; AUTO-D1 (re-read the day as data) awaits Joe's word.
 3. The organisation vertex subdivided (§0.13 + addendum, 08-31): **edges are typed hyper-edges with ports**; types at handoffs are emitted by interfaces, never freehand; **EDGES-D1 gated**: hyper-edge schema anchored; RUN1 chain is instance 1 (3 ports, 0 freehand); census says the tick path has **8/13 freehand ports** — the measured size of the interface work — transactional? guaranteed flow? — the APM record (50–60 trials, failures at handoffs) as costed evidence; Lean `EdgeType` lands with the CML operational fields.
 
 ## The precepts now standing
