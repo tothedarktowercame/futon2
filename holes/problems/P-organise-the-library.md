@@ -470,7 +470,7 @@ stays the author's.
 **Wave-2 fixes from the sample:** (1) rung-2 hits whose record *is* the FROM pattern's own text get a
 `:self-text` flag and do not warrant an edge unless the excerpt names the target (five of twelve in my half);
 (2) co-mention lists (ids cited together in prose) are hypothesis generators like listings — flag
-`:co-mention`, same rule; (3) `war-room/` is excluded from spider waves until it has authored `@why`.
+`:co-mention`, same rule; (3) ~~`war-room/` is excluded from spider waves until it has authored `@why`~~ — **withdrawn 17:14Z (Joe):** the war-room patterns are the newest in the library (28, written 08-22 to 08-24) and were simply **never indexed** — zero appearances in any embeddings listing against 26 of 33 for `aif/` — so the evidence landscape has no turn-association for them *yet*. That is a process to run, not a reason to exclude them: (a) index them (`futon3a/scripts/index_patterns.sh`, the `library-embedding-refresh` pattern's own rule — CI should fail when a pattern lacks embeddings); (b) associate them to turns by embedding or any other process, exactly as other patterns are; (c) re-run the spider on `war-room/` once records cite them. Their fields and free-text are searchable like any other pattern's today; only the turn-association is missing.
 **Reviewer-side defect, logged (lifecycle row 17):** my first state edit matched records by `:to` alone;
 five verdicts landed on unsampled records sharing a target id, and one reason string with unescaped quotes
 broke the EDN (lint caught that; the misplacement it could not). Rebuilt from the harvest commit by
@@ -507,3 +507,46 @@ Joe wants the wave closed out rather than carried.
 whose only evidence is any of the three; `war-room/` excluded until it has authored `@why`; problems/
 and features/ are done (5 and 2 patterns).
 
+**CORRECTION 17:14Z (Joe):** "`war-room/` cannot be organised from evidence" was the wrong sentence. It has no *turn-association evidence yet* because it was never indexed; the fix is to index and associate, then re-run — a wave-2 item, not an exclusion. The 28 absences were honest about the landscape *as it stood*; the landscape is the thing to change.
+
+**SETTLED 17:23Z (Joe: "they should go through the same standardised, operational process as every other
+pattern"):** they have. `futon-pattern-index.timer` runs `notions_reembed_pipeline.sh` daily (last 05:34 today);
+its output `resources/notions/minilm_pattern_embeddings.json` (dated today) contains **all 28 `war-room/` ids**
+among 1,296 patterns, and the retrieval default (`notions.clj:78`) reads that file. My two earlier sentences —
+"cannot be organised from evidence" and then "never indexed" — were both wrong; the first mistook the landscape's
+state for a property of the patterns, the second mistook a stale June BGE artefact (`bge_pattern_embeddings.json`,
+1,048 ids, read by no default route) for the live index. **What is true:** war-room patterns are ingested,
+embedded and retrievable like every other pattern; they appear in no historical `context-retrieval` record
+because they are a week old and the export's turns predate them. Turn-association accumulates with use; nothing
+special is needed; re-run the spider on `war-room/` when records cite them. Wave-2 line (3) corrected to this.
+
+**WRONG CORPUS, 17:27Z (Joe: "why are you reading an evidence export rather than the live evidence landscape in
+XTDB?"):** because packet 3 specified it — rung 1 = "exact occurrence in the evidence EXPORT
+(`futon1b/migration-export/evidence.edn`)", chosen for a deterministic, mtime-keyed, network-free index, and
+never checked for coverage. The export was generated **2026-07-10** (gitignored; "each box builds its own") and
+holds **90,583** records; the live landscape at `:7073` holds **191,076**, through today, including records that
+cite `war-room/wr-14…` on 08-26..08-30. So every rung-1 absence in wave 1 — the 18 war-room "zero exact hits"
+included — was an absence *from a seven-week-old half of the evidence*. The linter's rung-2 verification already
+reads the live store (`GET :7073/api/alpha/evidence/<id>`); the spider's rung-1 index did not. This is the
+wrong-corpus facade (lifecycle v2 §2) inside the reviewer's own instrument, and it was caught by the operator.
+**Fix (wave-2 prerequisite, packet 4c):** `build-evidence-index` reads the LIVE landscape — an enumeration of
+records by date window from `:7073` if the router exposes one, else `text-search` per pattern id with the
+exact-occurrence filter applied to hydrated bodies — and pins the index by a *query-time snapshot*
+`{:count N :max-at T :built-at …}` (or the XTDB tx-id if exposed), never a file mtime. Absences recorded
+before the fix carry `:corpus :export-2026-07-10` and are re-run. The evidence-kind rules are unchanged.
+
+
+**STATUS 2026-08-30 17:57Z (I_data_current):** packet 4c (rung-1 index from the LIVE store, basis-pinned; export removed) → codex-20, job `invoke-1788112644846-4453-4d0dfcd1`; AUD-D1 (audit of every dated readout vs live endpoint, incl. the WM core .edn reads) → codex-5, job `invoke-1788112641868-4452-9f0f3deb`. Wave 2 waits on 4c's gate; war-room re-run is part of wave 2 with no special handling.
+
+**AUD-D1 GATED 18:12Z (futon2 `d1997fc`, codex-5):** 17 rows, 4 dates re-checked. Only **three** reads are genuine
+snapshots of a live store: `migration-export/evidence.edn` (07-10; packet 4c replaces it), `storage/futon0/mana-snapshot.json`
+(08-12, hand-run — `mana-snapshot.timer` is not a unit despite E-wm-staleness-meta-stop expecting one), and
+`storage/mark2/state.json` + manifests (05-17, a local cache of remote linode state; no endpoint exists — class (iii),
+endpoint to make). The WM core reads Joe asked about — `stack-annotations.edn`, `c-entries.*.edn`, `devmap-*.aif.edn`,
+`*.clean/*.executed.edn`, the `wm-trace` ledgers — are canonical local sources or the machine's own output files:
+current by construction, and `I_data_current` is satisfied for them by their producers' cadence, not by a pin.
+The sharper finding is not staleness: `war_machine.clj` reads `futon5a/data/stack-logic-model.edn` and `alignment.edn`,
+which **never existed** (no commit in futon5a; nowhere under `~/code`), under `when-let` — three report sections have
+always been silently empty. Lifecycle row 26. Fixes queued: (1) make those reads fail closed / emit `:missing`;
+(2) decide whether the stack-logic model is a thing to build or a dead branch to delete (Joe); (3) mana timer;
+(4) mark2 endpoint or refresh-on-read with basis pin. The bge_ line in my packet was wrong and corrected by the builder.
