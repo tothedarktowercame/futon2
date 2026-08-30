@@ -5,7 +5,8 @@ Updated: 2026-08-30 evening. The ledger (`BUILD-ledger.md`) is the log; this is 
 ## The goal, in one line
 Rebuild the War Machine so that every term is defined on Active Inference's terms in Lean, every implementation
 is held to that definition by a run that Lean can check, and every read is against live data — so it is a war
-machine, not an archive machine.
+machine, not an archive machine. **And extend it as we understand what it is** — repairs that turn out to be
+extensions get a supersession record, not a deletion (first case: `P-supersede-stack-logic-model.md`).
 
 ## Where each lane is
 
@@ -20,7 +21,7 @@ machine, not an archive machine.
 | **Node R16** (grounded actuation) | the registry and the witness | discovery done (4-entry fixture is the domain; `:enacted nil` untyped); build not started | claude-20 | R16-D2 after Lean declarations ratified | no |
 | **Wiring (CML)** | edge schemas between nodes | 2 of 21 edges have entries; **0 fully specified** (operational fields unstated by both records) | claude-15 | endpoint amendments for operational fields | no (unless you want it to move now) |
 | **Library (spider)** | @why/@how edges with evidence | wave 1 done: 19 attested of 68; **rung 1 read a 7-week-old export** — being fixed (packet 4c, live store) | codex-20 | wave 2 after 4c, war-room included | no |
-| **Data currency audit** | find every stale readout the machine or instruments read | **done** (AUD-D1 `d1997fc`): 3 real snapshot reads (evidence export → 4c; mana snapshot, timer missing; mark2 cache, no endpoint); WM core files are canonical/own-output, current by construction; **2 report inputs never existed** (`stack-logic-model.edn`, `alignment.edn` — silent `when-let`) | claude-15 | AUD-D2 lint running (codex-5); then AUD-D3 delete dead branches + loud `read-edn-file`; mana timer; mark2 endpoint | no — decided: stack-logic model was planned 05-03, never produced; **not to be built**, dead reads to be deleted; rule recorded as `I_absent_is_loud` (lifecycle §0.7, PREREG §4) |
+| **Data currency audit** | find every stale readout the machine or instruments read | **done** (AUD-D1 `d1997fc`): 3 real snapshot reads (evidence export → 4c; mana snapshot, timer missing; mark2 cache, no endpoint); WM core files are canonical/own-output, current by construction; **2 report inputs never existed** (`stack-logic-model.edn`, `alignment.edn` — silent `when-let`) | claude-15 | AUD-D2 lint running (codex-5); then AUD-D3 delete dead branches + loud `read-edn-file`; mana timer; mark2 endpoint | no — decided: stack-logic model was planned 05-03, never produced; **superseded, not rebuilt** — it was a hand-written operator model; R2/`sec-operator.tex` is its successor (`P-supersede-stack-logic-model.md`); dead reads deleted citing that; rule recorded as `I_absent_is_loud` (lifecycle §0.7, PREREG §4) |
 | **Second domain (APM proofs)** | the next microcosm | assessed only; nothing written | — | on your word, after the above | **yes: go/no-go** |
 
 ## What is running right now
