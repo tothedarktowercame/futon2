@@ -2488,3 +2488,40 @@ layer records until something emits them.
 
 Sent as a question rather than an amendment: if "the fold" means something narrower than the C-risk
 composition, the packet should say it records one layer, not the stack.
+
+### The simulation's real yield: it corrected a claim I had put in a gated record
+
+R14's agent (codex-3, clean) reported something my edge-classification pass skipped because I was
+counting pairs instead of reading findings: *"the live strategic-recommendation branch computes and
+records temperature, but selects the first admitted controller entry independently of it."*
+
+Verified at `policy.clj:234-267`:
+
+    tau     (effective-temperature g-totals selection-gain temperature-opts)
+    scores  (mapv (fn [g lp] (+ (/ (- g) tau) lp)) g-totals log-priors)
+    chosen  (or (first controller-entries) (first ranked-actions))   ;; FIRST, not argmax scores
+    counterfactual-idx (first (sort-by ... scores))                  ;; scores used ONLY here
+
+with the docstring saying *"an inspectable counterfactual"*, `war_machine.clj:4503` setting
+`:selection-boundary :strategic-recommendation` (so this is the branch the WM runs), and
+`war_machine.clj:358-365` declaring **`:scheduler-habit-authority :counterfactual-only`**.
+
+**This corrects me.** I told the owner on R19-D1 that *"the operator's learned preference is live in the
+selection seam right now"*, and it went into the record's framing. The 07-13 flip is real — the term left
+`:controller-score` and reached the policy layer's log prior — but in the branch that runs, **the log
+prior orders a counterfactual and does not choose**. The honest sentence: *computed at the selection seam
+with declared `:counterfactual-only` authority; it does not select.*
+
+**Two clean agents found it from opposite sides** — R14 by reading the branch, R8 (the control) by asking
+what would make its own gain reading falsifiable: *"WR-27 requires evidence that my gain reading changes
+selection."* That is the isolation paying off in the way it was supposed to: not two agents agreeing, but
+two agents converging on a gap from different directions.
+
+**And it reframes R19's central claim.** "The operator is present as C without that being written
+anywhere" is not quite it. The operator's learned preference is present, computed, recorded — and
+**explicitly denied authority in a named field**. That is not an unrecorded presence; it is a *declared
+abstention*. Which is a more interesting thing for the harness-layering design to answer.
+
+**Method note against myself, the fifth of this run:** I classified 13 edge assertions and missed the
+substantive finding sitting in the same claim files, because I was measuring the thing I had designed a
+metric for. The metric was about edges; the value was in the prose.
