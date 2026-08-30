@@ -837,3 +837,38 @@ producers still never enter the checker.
 Worth recording: the reader and I were both right that the old run (ii) was inert, and both wrong that
 cutting was the fix. The finding that gave it mass — 3 of 13 name a commissioned agent — was already in
 my hands; I read it as a *caveat on the corpus* rather than as the *thing to make checkable*.
+
+| 2 (R2) | R2-D2 confirm-read | claude-13 | `invoke-1788105808979-4355-ea16f6bf` | `park-a9b5493b` | 16:03Z | reading | re-quoted vs the fixed declarations; **signature diff CLEAN** vs `Holes.lean:273-291`@`2d72d3c93d`; content pin + digest method added | — |
+
+### R9-D2 is NOT unblocked — the owner's bell crossed my report again
+
+The lift bell says R9-D2 is unblocked. Checked at source at `2d72d3c93d`: `r9WmCheckerSound` is **still**
+the ∀-quantified form, so it is still false and its `sorry` still cannot be discharged. My report of that
+crossed the lift. **R9-D2 stays held** until it is restated over the recorded verdicts. Eighth crossing
+today; the ledger, not the message, is the state.
+
+### R8-D2's quoted docstring went stale mid-build — signature unchanged, content already correct
+
+codex-12 has been building since 15:57 from a block quoted at `0b7f171a`. At `2d72d3c93d` the owner
+rewrote the `r8EraBoundary` **docstring** to carry the write-site correction. Diffed: **the only
+difference is that one `/-- … -/` comment line — the `def` and its type are byte-identical.** So the
+*signature* the builder is working to is current; only the explanatory comment is one commit behind.
+
+Low risk, and stated rather than assumed: **the packet body already carries the correction in full** — I
+wrote the write-site finding (conjuncts 1–2 are one unconditional map literal at
+`war_machine.clj:4664/4665/4687`; only date-contiguity is contingent; the boundary was read off the data)
+into the packet prose before dispatch, so the builder has the corrected content even though the quoted
+docstring predates it. I did **not** bell codex-12 mid-flight: a bell queues a new job rather than
+reaching a running turn, and the substance is unchanged. **To verify at review:** that the findings note
+frames conjuncts 1–2 as a write-site identity and not as two facts.
+
+Worth noting as a limit of clause 2: it compares *quoted text* to *file text*, so a docstring edit makes
+a packet "stale" by its measure even when nothing a builder must implement has moved. The check should
+distinguish signature drift from commentary drift; today's diff would have failed a lane for a comment.
+
+### Digest method stated, per the owner
+
+The content pin now carries its derivation, so a builder re-derives rather than trusts: reader-loop every
+form, `(hash form)` per form, render as strings, **sort**, feed in that order to SHA-256 as UTF-8, report
+the first 16 hex chars. Sorting makes the pin order-independent — appending a file changes it, reading
+the same corpus twice never does.
