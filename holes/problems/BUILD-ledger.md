@@ -2652,3 +2652,44 @@ The pre-registered prediction about those three seats' contamination stays **unr
 that way rather than inferred from the seat-history pattern. The report
 (`holes/labs/wm-contract/R-NODE-SIM-report.md`, `e5ad461`) already states six claims and flags these three
 as possibly wedged; that is now confirmed rather than suspected, and nothing in it needs revising.
+
+## PAIR-R16-R2 — two nodes pair-programming their shared edge (Joe, 2026-08-30 ~20:30Z)
+
+Joe's design, and a better one than my nine-agent sim in three specific ways: **registered node names** put
+identity in the roster rather than only a prompt; **two seats** removes the burst and the contention that
+caused this evening's incident; and **dialogue** produces what my run structurally could not — my nine
+agents wrote in isolation, so the only "interaction" was me diffing their files afterwards. Nobody
+negotiated anything.
+
+**Mechanics, established by probe rather than assumption:**
+- `POST /api/alpha/agents {"agent-id":"R16"}` → 201, and `DELETE` removes it cleanly. **The naming works.**
+- But **HTTP registration alone yields a dead seat**: a bell to it returns the stub `registered-via-http`,
+  not execution. The only difference from a live `codex-1` was **`session-id`** — every other field
+  identical.
+- `codex exec` runs headlessly, but I could not locate a persisted session id from it, so a name cannot
+  currently be bound to a drivable session from here. **Creating named seats is a terminal op**
+  (`AGENCY_AGENT_ID=R16 futon3c/scripts/codex-picker --new`).
+- Probe registered, tested, deregistered, verified gone.
+
+**So: run on real seats, identity in the prompt.** `codex-1` plays **R16**, `codex-2` plays **R2** — both
+seats I used for my own lanes today, both idle with live sessions, neither in anyone else's rotation.
+Dispatches spaced 20 s apart rather than bursting.
+
+    R16 -> codex-1   invoke-1788121596979-4886-4966a4df
+    R2  -> codex-2   invoke-1788121625253-4887-cec5e8f3
+
+**Why this pair:** `R16→R2` already has an entry in `control-map-edges.edn` with **six of nine `Delivery`
+fields `:unspecified`**, because CML-D2's reconciliation was one-sided — R16 proposed `{tick, mission,
+witness}`, R2 proposed nothing for its incoming edge. This is exactly the missing second side, and it is
+the one artefact where a good result moves the wiring off **specified 0 / unspecified 21** for the first
+time today.
+
+**The design guard, learned from this afternoon:** two agents in conversation will always sound coherent,
+so agreement carries no information — but in a *negotiation* that inverts, and disagreement becomes the
+product. So `:disagreements` is a **required field**, alongside `:field-provenance` marking each of the
+nine fields `:agreed` / `:r16-proposed` / `:r2-proposed` / `:unresolved`. The packet states outright that
+an empty disagreement list is a claim that two nodes with no traffic between them agreed on nine fields
+first try, and must be justified: *a pair that agrees on everything has probably just been polite.*
+
+Also required, against the wedge failure: **a bell to claude-20 after every round**, not only at the end,
+so a silent hour is distinguishable from progress.
