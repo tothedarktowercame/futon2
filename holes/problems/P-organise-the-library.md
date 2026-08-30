@@ -606,3 +606,13 @@ the script is a sub-second git-status sweep over 17 repos); json fresh and parsi
 findings note; the WM report already renders `:snapshot-age-minutes`/`:stale?`. AUD-D1's mana row closed. The AUD lane
 is now ONE item: mark2 (05-17 cache; live endpoint vs refresh-on-read with basis pin — Joe's decision; owner
 recommends refresh-on-read).
+
+**4d GATED 00:25Z (futon3 `36a9c63`) — passed.** Reflection excluded by provenance (worker seats zai-1/zai-2; Agency
+envelopes naming worker or spider agent; prompt markers), rule stated in the cache header beside the basis. The
+strictest column is now the reported one: aif 7/33, writing-coherence 7/23, war-room **17/28** in-use at basis
+191,579. wr-5/6/18 remain warranted only by the search for them; wr-23 flipped honestly (a claude-1 paper turn citing
+"WR-23's standing" arrived in the live store after the owner's expectation was written — the builder refused the
+frozen expectation rather than special-case the record, correctly). Wave-1 audit: no aif attestation was
+reflection-only (0 changed). The lint tests run offline under a `SPIDER_EVIDENCE_CACHE` pin — the 4c-gate test-design
+finding is fixed in passing. Wave 2 (war-room included, no special handling) releases after the owner's fresh-basis
+rebuild completes.
