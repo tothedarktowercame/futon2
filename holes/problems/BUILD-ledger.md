@@ -433,7 +433,7 @@ boundary. `:unexplained-regime` remains a permitted outcome. The **cause** of th
 recalibration, or a change in which ticks were instrumented, and I am not guessing.
 | — | owner: LH-D1b gate + D2 hold lifted | codex-22 | — | — | 15:31Z | passed | mathlib4 3b8e2ceb+b98b2500 | claude-15 15:31Z: 15 sorry = 15 HOLE laws/impls, 14 bodies; four bodies corrected to record text; declaration list belled to claude-20; D2 packets must quote their declarations |
 
-| 2 (R2) | R2-D2 (build) | codex-1 | `invoke-1788103900715-4321-da824f13` | `park-e8638688` | 15:31Z | running | packet `BUILD-packets/R2-D2.md` (197 lines), **read by claude-13** (charter 6b) across two rounds: refused once, four fixes applied, then passed with two one-liners folded in | — |
+| 2 (R2) | R2-D2 (build) | codex-1 | `invoke-1788103900715-4321-da824f13` | `park-e8638688` | 15:31Z | **CANCELLED — dispatched inside a hold** | cancelled by me on receipt of the hold; codex-1 had written 231+69 lines, **uncommitted**, no lane closed | — |
 
 ### R2-D2 dispatched — what the second read added for free
 
@@ -457,3 +457,55 @@ before dispatch:
 Both rounds cost about twenty minutes of reader time. Against that: the first version of this packet had
 an acceptance that three different `Channel` derivations satisfied identically, so a builder could have
 shipped a self-certifying checker with every gate green.
+| 3 (R8) | owner: acceptance (iii) → by era | claude-15 | — | — | 15:34Z | amended | P-R8@HEAD | claude-15 15:34Z: two schema eras verified (760 :G-total / 32 :controller-score; boundary 07-14; no mixed file); D2 reports the era and the four co-moving facts, precision as proximate driver, cause untested; R8-D2 still waits on the Holes.lean quote |
+| 2 (R2) | R2-D2 dispatched | codex-1 (via claude-20) | invoke-1788103900715-4321-da824f13 | park-e8638688 | 15:34Z | **CANCELLED — dispatched inside a hold** | cancelled by me on receipt of the hold; codex-1 had written 231+69 lines, **uncommitted**, no lane closed | claude-15: noted — two claude-13 reads (first refused: non-discriminating falsifier; fixed with a fixture corpus [5,0] vs [0,5]; declaration-order Channel vector as self-witnessing provenance); owner gate at close |
+
+## HOLD on all D2+ dispatch (claude-15 on Joe's direction, 2026-08-30 ~15:18Z)
+
+Joe: *"I worry about implementation running ahead of the Lean without those being coordinated … they
+need to be coordinating with each other around interfaces using these tetrahedral model ideas, not just
+working in parallel."* Charter gains **"Interfaces are Lean declarations"**: a D2+ packet quotes the
+term's declaration from `mathlib4/DarkTower/WarMachine/Holes.lean`; the row-11 check compares the
+packet's signature to the declaration mechanically; **a lane closes only when the hole moves**
+(`sorry` → body, or a stated theorem whose fixture is the Clojure run); builders never edit `Holes.lean`.
+
+### I breached the hold, and the breach is mine to record
+
+The hold bell was **sent ~15:18Z and delivered to me after 15:31Z**. I dispatched **R2-D2 to codex-1 at
+15:31Z**, inside the window and without knowledge of it. On reading the bell I cancelled the job
+(`invoke-1788103900715-4321-da824f13` → `state: cancelled, finalized: true`). codex-1 had already
+written `checks/r2_channel_contract.clj` (231 lines) and `test/r2_channel_contract_test.clj` (69 lines).
+**Both are uncommitted and untracked; no delivery landed and no lane closed.** I did not delete them —
+they are another agent's work and are probably most of R2-D2 once the hold lifts — but this checkout is
+shared, so they are at risk of being swept into an unrelated `commit -a` and someone should decide their
+fate deliberately. From its head, codex-1 had honoured the hard clause: `likelihood-none-channels` is
+enumerated explicitly, with a comment that computing it from the difference would let a newly declared
+channel classify itself.
+
+Not an excuse, but the mechanism worth recording: **a bell can be overtaken by the work it governs.**
+A hold issued at 15:18 and read at 15:35 does not stop a dispatch at 15:31. Nothing in the protocol
+timestamps a directive against the actions it is meant to bind.
+
+### Reading the declarations against the artefacts — two interface defects
+
+`Holes.lean` landed (15:30Z, 12,668 bytes); `scripts/count-holes.sh` reports **14 with-body / 15
+with-sorry** (P-R2 0/1, P-R8 1/1, P-R9 1/1, P-validated-R5 9/12). Comparing the declarations to the data:
+
+1. **`r2ObservationKeysAreChannels` is vacuous or refuted, and the declaration does not say which.** It
+   states `∀ tick, {channel | (tick.observation channel).isSome} = Set.univ`, with `Channel` an abstract
+   type parameter. Instantiate `Channel` as the declared 14 and the two 05-18 records refute it;
+   instantiate it as whatever keys a record carries and it is trivially true. **This is the same defect
+   claude-13 caught in my R2-D2 packet, one level up** — the meaning depends entirely on where `Channel`
+   comes from, and neither artefact pins it. The Clojure side is now pinned (ordered-vector provenance);
+   the Lean side is not. Under charter clause 3 this hole cannot move `sorry` → body: the honest move is
+   a stated theorem whose fixture is the run, where the run is the *refutation*.
+2. **`r8StoredFRecomputes` encodes the clause the owner just retired.** It states that stored F agrees
+   with recomputation within ε — precisely the comparison claude-13 proved cannot fail here (32 exact
+   zeros) and which P-R8 removed as evidence. `Holes.lean` and the record are out of step on R8's only
+   open hole. Separately, `r8Disposition` keys `insufficientInputs` off `muPre/observation/precision/
+   storedF` while the Clojure disposition keys off `:prediction-errors`/`:precision-state` — a signature
+   mismatch that charter clause 2's mechanical comparison should catch on R8-D2's first dry-run.
+
+**Status of the stated blocker:** LH-D1 is `done`, `P-lean-holes.md` exists, and **codex-22 is idle with
+no running invoke** — so nothing Lean-side is in flight. R8-D2 waits only on the owner's review of
+`Holes.lean` and on reconciling defect 2 above.
