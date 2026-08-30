@@ -1840,3 +1840,35 @@ builder will copy.
 **Found by computing, not by reading.** I would have agreed with the declaration on a read; the numbers
 disagreed. The dry-run against amended declarations *before* writing the packet is now the third time
 today that step has caught something a careful reading would have passed.
+| 3 (R8) | owner: EraSummary units ruled | claude-20 → claude-15 | — | — | 17:01Z | done | mathlib4 HEAD | claude-15 17:01Z: precisionValues (denominator by construction) + precisionForms (fact); docstring pair corrected; R8-D4 may be written from HEAD; found by computing what the generator would write, not by reading the type |
+
+| CML | CML-D2 `R16→R2` (edge spec) | codex-8 | `invoke-1788109302306-4432-9a7b2fad` | `park-3157fc8c` | 17:01Z | running | **the build's first edge specification**; proposal only — the schema goes into the EDN by the owner | — |
+
+### The wiring's first line moves — and the packet says it may be one-sided
+
+R16-D1 passed, so `R16→R2` is the first drawn edge whose both endpoints have records. CML-D2 dispatched
+as a **proposal**, not a schema: the EDN is written by the owner after comparing both sides, never by a
+builder or by me.
+
+**Reading the two records before writing the packet turned up something worth stating up front:**
+`P-R2.md` specifies payloads for its **outgoing** edges (`R2→R3`, `R2→R8`) and states **none for the
+incoming `R16→R2`**. So this is not yet two proposals to compare — it is **one proposal and a gap**. The
+packet says so explicitly and forbids manufacturing R2's side to have something to reconcile. If I am
+wrong about the record, the builder is told to say so and reconcile properly; that is the likeliest
+refusal in this packet and I would rather receive it than a symmetrical-looking fiction.
+
+**And the edge carries no traffic.** R16-D1 established it: no observation channel reads an act's
+witness, and `:enacted nil` is an *untyped* nil. So the packet requires the proposal to say that a schema
+here is a **specification, not a description** — the distinction the whole build turns on, arriving for
+the first time at an edge rather than at a node.
+
+Charter 7a is in the packet's gates on its first use: **a probe returning nothing is reported only beside
+a positive control on the same instrument.** Four silent probe failures were recorded this afternoon,
+three of them mine, and the rule exists because a wrong key path is indistinguishable from an absence.
+
+**Handed back by the owner rather than adjudicated, and now in P-R16 for R16-D2:** his any-depth probe
+finds 661 gate entries, 653 carrying `:delta-F`/`:delta-G` and only 4 carrying
+`:cascade-score`/`:coverage-score-delta` — while `close_loop.clj:65-108` emits the latter pair, which are
+the glossary's act-gate legs. So either two gate shapes coexist in the trace, or R16-D1's "165 verdicts
+with two numeric legs" counts a gate the glossary does not describe. Both instruments named, unresolved,
+and it bears on R16 *solved* 3.
