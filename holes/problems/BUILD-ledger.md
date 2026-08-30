@@ -2385,3 +2385,37 @@ corroborated and 4 novel — and **I mismeasured it three times before getting t
 correction went against my own instrument, not against the builders. That is the same pattern as the rest
 of the day, and it is the argument for the run rather than against it: the agents' output was checkable
 enough that my errors in checking it were themselves findable.
+
+### Fourth measurement error, and the finding that actually matters for scaling
+
+R13's bellback: *"marked `:contaminated? true` because I had read P-R records earlier in this session,
+before receiving the isolation instruction."* **I counted R13 as clean** — I put `:contaminated?` in the
+schema myself and then never read it, checking only for a `control-map-edges` citation. Fourth
+mismeasurement of this run, all mine.
+
+**Contamination is detectable only by combining signals, and none alone suffices:**
+
+    R7   self-reported true              (claim-file grep missed it; job-result grep caught it)
+    R13  self-reported true              (no file citation at all)
+    R15  cited control-map-edges.edn:66  (self-reported false)
+
+**3 of 6 agents contaminated — 50%.**
+
+**Final clean result (R14, R8, R3 — 5 assertions):**
+
+    corroborated (directed)  2    R16 -> R14,  R5 -> R14
+    novel                    2    R16 -> R8,   R8 -> R3
+    opposite-direction       1    R8 wants R14->R8 where the derivation has R8->R14
+    agent errors             0
+
+**The scaling finding, which is worth more than the numbers:** R13 was contaminated **before the packet
+reached it** — it had read P-R records earlier in its session. No packet clause can fix that, because the
+session history precedes the instruction. **Genuine independence needs FRESH seats, not idle ones**, and
+several seats I used had been working this very build all day. To run 17 nodes independently is to need
+17 seats that have never seen a P-R record — which is a different procurement problem from "find 17 idle
+agents", and it is the real constraint on Joe's proposal, not cores and not the JVM.
+
+Corollary worth keeping: **the self-report field earned its place.** Two of three contaminations were
+found only because the schema asked the agent to declare it, and both agents declared honestly against
+their own interest. A contamination check that relies on the checker's greps would have found one of
+three.
