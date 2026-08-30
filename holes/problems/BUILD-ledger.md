@@ -1159,3 +1159,36 @@ stronger than being merely well-formed and is what row 11 asks me to establish b
 
 **R8-D3 held** pending the owner's gate on R8-D2 and the pin fix. Seventh stale-payload wake handled;
 ledger checked first, no action.
+| — | owner gate: G-D1 | codex-5 | invoke-1788106044356-4363-64f6725a | park-97f15f37 | 16:19Z | passed | futon2 c847bca | claude-15 16:19Z: 33/33; 13/16/4/0; F, G-decomposition (mismatch reported), ΔF ≤ −3 verified at source; prose-only falsifier applied; 35 missing names, 0 overlaps; 5 refusals (two-π question → Joe); G-D2 held for Joe; G-D3 → claude-13 read |
+| — | AD-D3 read #1: REFUSE (a) | claude-13 | invoke-1788106295311-4369-80f144d3 | — | 16:20Z | amended | packet rev 2 | claude-15: judgements never read :result — witnessed/conformant now require :result :passed, :witness-failed added, missing :result/:recorded-at = ERROR; ablation fixture named; :refused-implementation for null-evidence holes; 15/0 labelled forced/tautological; confirm-read invoke-1788106802003-4381-270265d2 (park-75dbac67) |
+| 3 (R8) | owner: wmTraceR8 falsifier fixed | claude-20 → claude-15 | — | — | 16:21Z | done | mathlib4 (see git log) | claude-15: docstring named an unreproducible digest; now method + published value (c9add16a…); R8-D3 may dispatch — Holes.lean is free until G-D3 dispatches |
+
+| 3 (R8) | R8-D3 read (charter 6b) | claude-13 | `invoke-1788106887618-4383-265c5a61` | `park-d6f236e1` | 16:21Z | reading | hole-moving half; **signature diff CLEAN** vs `Holes.lean:376-426`@`1bfba954c9` | — |
+
+### The pin ruling: my number thrown out, the builder's method adopted, and I reproduced it
+
+The owner ruled the pin is codex-12's *published* method — `:sha256-over-newline-joined-sorted-form-sha256`
+(sha256 each form's `pr-str`, sort the hex digests, join with `\n`, sha256 the result). I re-derived it
+**from the description alone**, without loading the builder's file, and got
+`c9add16ac96c973ba4fd9a0c61f3b7319780c304424e2d14ea7b477309947880` — matching. That is what a pin is
+supposed to do and what mine could not: be re-derived by a third party from its stated method. My
+sentence is now a lifecycle rule (row 12 addendum), which is a strange way to be right — the rule exists
+because I broke it.
+
+**The bad value is still in the file.** `wmTraceR8`'s docstring still reads *"falsifier: digest ≠
+c434950f2e6a7e9b"*. Under clause 2 that is commentary drift — reported, not blocking — so R8-D3 goes out
+with the correction stated in the packet and the instruction not to reconcile it. The owner is fixing the
+docstring. Flagged again here because it is the one defect of mine today that escaped its packet into the
+formal record.
+
+### R8-D3 dispatched to read — and one question I could not answer myself
+
+Acceptance dry-run through **Lean's own `r8Disposition` arms**: 792 entries, `r8Census = (755, 32, 5)`,
+era violations **0**. Both laws move by `decide` to *true*, not merely well-formed.
+
+What I put to claude-13 rather than decided: **is `freeEnergyShape` a fact or a verdict?** The generator
+sets `gMap` vs `controllerMap` by looking for `:controller-score`, and `r8EraBoundary` then *tests* that
+field. By the rule the owner just adopted — *a fixture literal carries facts; anything the law tests is
+derived from them* — that may be the generator writing what the law tests, one level subtler than R9's
+`inDeclaredPart`. It is exactly the shape that took five reads to find in R9, so I would rather ask than
+assume it is fine because it looks like a fact.
