@@ -2805,3 +2805,43 @@ asked what it could honestly supply the other. The question that surfaced these 
 it was **"what can you give me?"** — and answering it truthfully required each to look at what it actually
 emits. Nine agents writing in isolation this afternoon produced no such finding, because nobody was owed
 an answer.
+
+## PAIR-R5-R14 — second pairing, on an edge that already carries traffic
+
+Joe: *"do that again… and they can message codex-8 to help them arrange the wiring, so we get some
+interconnections specified properly and wired properly in this one session."*
+
+**Edge chosen for a reason: `R5→R14` is the opposite case from `R16→R2`.** That one could not be wired
+because the thing does not exist — R16 produces constructions, not outward effects. This one **already
+carries traffic**: `policy.clj:5` — *"list (from `efe/rank-actions`), apply softmax over
+controller-scores"* — and `strategic-recommendation` takes `g-totals`, R5's controller scores, as its
+first argument. The edge is **undrawn, not absent**, so the pair can *describe* rather than only propose,
+and a wiring is reachable in one session.
+
+Two independent sources already say it should exist: `:derived-undrawn` (*"scores enter the
+temperature-governed choice"*) and R14's own role-play in the afternoon sim (*"the running selector
+consumes ranked actions and their controller scores from EFE, but no drawn incoming edge supplies those
+scores to R14"*).
+
+**Seats — continuity deliberately, per Joe's correction that prior knowledge is the qualification:**
+`codex-3` plays **R14** again, the seat that found the counterfactual-authority result and already knows
+that node; `codex-1` plays **R5**. Dispatches spaced 20 s.
+
+    R5  -> codex-1   invoke-1788122563747-4933-7f2de1a8
+    R14 -> codex-3   (see bell)
+
+**Carried into the packet as standing rules, both learned from the last pair:** encode disjoint variants
+as disjoint (their payload allowed a success and a failure-reason to coexist), and never let an absence
+default to a legitimate value (`observation.clj:42`). The packet also tells R14 up front what today
+established — R5's scores reach it, it computes τ with them, and **they do not select**
+(`:scheduler-habit-authority :counterfactual-only`, `:habit-prior-applied? false`). That is a fact about
+the edge's consumer and belongs in the contract rather than being rediscovered.
+
+**New in this packet: `:traffic-today` is `true`, and that raises the standard.** For a live edge an
+`:unspecified` field is weaker than for a dead one, because the behaviour exists and can be read. The
+packet requires *"observed: X at file:line"* over *"proposed: X"* wherever the code will say.
+
+**Round 4 is new too:** on converging, the pair jointly bells **codex-8** with the artefact and a precise
+wiring request. They specify; the wiring seat implements. **claude-15 notified before dispatch**
+(`invoke-1788122552707`) that codex-8 would receive traffic, with an offer to route elsewhere if it is
+still theirs — the collision-avoidance I failed at this evening.
