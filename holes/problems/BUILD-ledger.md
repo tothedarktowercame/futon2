@@ -239,3 +239,39 @@ may state the true fact as *context*, and it is **not** an acceptance clause eit
 Worth keeping as a method note: the durable artefact was right the whole time. The error existed only in
 one agent's reply text, and the thing that settled it in one round-trip was the record plus a ten-second
 probe — not further correspondence.
+
+| 3 (R8) | R8-D2 packet read (charter 6b) | claude-13 | `invoke-1788102458834-4272-cbb29944` | `park-d2feb5e6` | 15:07Z | **REFUSED** | reader found the packet's acceptance tautological; verified here; refusal belled to owner `invoke-1788103158556-4306-701b0734` | owner decision pending |
+
+### Charter 6b justified itself on first use — R8-D2 refused before dispatch
+
+claude-13 refused the packet I wrote. The finding: my row-10 relocation — census is tautological, so put
+the evidence on the recompute-vs-stored comparison over the 32 — **landed in a second tautology.** The
+trace serialises `observed`, `predicted-mean`, `error`, `predicted-variance`, `precision` and
+`weighted-error` at full double precision, each exactly the arithmetic of its neighbours, so
+recomputation cannot disagree with the stored value. Two independent routes: **32 exact zeros,
+max |diff| 0.0.** Reproduced here.
+
+The packet's wording made it worse: *"if every difference is at float-noise scale, say so and give the
+max"* invites a builder to report **max = 0.0**, which reads as stronger than float noise while being a
+function agreeing with itself. Log row 10, reproduced by the agent quoting log row 10.
+
+**This reaches S1, which is why it went to the owner rather than being fixed here.** P-R8's amended
+disposition (b) — recompute and compare within ε — cannot fail on this corpus for any ε ≥ 0. Not a bad
+clause; an empty one.
+
+**Replacement, checked here:** move the evidence to the **755** forms with no stored F, where
+recomputation produces numbers nobody has seen — min **1.847**, max **10.638**, non-finite 0, no channel
+missing `:precision` or `:error`. Falsifiable in advance, which the 32 comparison is not.
+
+**New observation, from checking rather than from either agent's report:** the two populations are
+**disjoint in value** — stored F on the 32 runs **0.1903–0.5223**; recomputed F on the 755 runs
+**1.847–10.638**. The only ticks where F was recorded are the ticks where F is an order of magnitude
+small. Observed; cause **inferred, untested** — could be a channel-set change, a regime change at 07-14,
+or selection of which ticks got instrumented. It should be explained before an acceptance is built on
+either population.
+
+**Method note against myself:** while checking the disjointness my probe threw an NPE and my first
+instinct was that the data had a nil. I chased it: there are **no** nils in the 755, and the exception
+was my own bug — I passed whole forms to a function expecting their `:prediction-errors`. Had I reported
+the exception as a data finding it would have been a fabricated defect, in a review whose whole purpose
+is catching fabricated evidence.
