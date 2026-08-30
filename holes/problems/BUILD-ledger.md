@@ -394,3 +394,40 @@ was caught by a builder or a reader refusing rather than complying, and none rea
 except the "54", which two builders independently corrected. Charter 6b has now refused two of two build
 packets it has read — which is either a very good reader or a tech lead who writes bars that pass on
 today's data. On the evidence it is the second, and the reader is the control that catches it.
+
+### R8-D1 checklist item 4, completed when my park fired — and it corrects R8-D2's new bar
+
+Items 1, 2, 3, 5, 6 were done at the close. **Item 4** — "check F recomputation is compared against
+whatever sits under `:free-energy`, with the key named" — was not, and completing it changes the
+attribution the owner just wrote into P-R8.
+
+R8-D1's note (`:60-65`) claims `:free-energy` has **two shapes**. Verified here, and the separation is
+total:
+
+    the 32 WITH a stored F   -> :free-energy is a CONTROLLER map (:controller-score) : 32/32
+    the 760 WITHOUT          -> :free-energy is a G map (:G-total)                   : 760/760
+    files holding the 32: 2026-07-14, 07-15, 07-16, 07-17, 07-18, 07-19, 07-21, 08-30
+    files holding the rest: 2026-05-18 … 2026-07-09
+    no file contains both shapes; the boundary is exactly 07-14
+
+**So the "two populations" are two schema eras, not two samples of one process.** Everything that
+distinguishes them moves at the same instant, 2026-07-14: `:variational-free-energy` appears,
+`:selection-gain` appears (pinned `1.0`, `:samples 0`, and never moves), `:free-energy` is reshaped from
+a G map to a controller map, and mean per-channel `:precision` drops from ~94.6 to ~9.5.
+
+**Consequence for R8-D2, which is still held on LH-D1b, so there is time to fix it.** The owner's
+acceptance (iii) asks the builder to reproduce the split and *attribute it to a per-channel field*, with
+the expected attribution "precision scale, ~10×". That attribution is arithmetically true — F =
+½·mean(Π ε²), so a 10× precision gap gives a 10× F gap, and neither |error| (0.272 vs 0.312) nor channel
+count (8.00 vs 7.29) does — but it is the **proximate** driver, not the explanation. Precision changed
+because the schema era changed; a builder asked to attribute to a per-channel field will name precision
+and stop, and the record will then carry "the split is a precision-scale effect" when what the data shows
+is a single dated schema change that moved four things at once. I stated the arithmetic version to the
+owner earlier today and it was incomplete in exactly this way.
+
+**Recommended amendment:** acceptance (iii) should require the builder to report the split *by era* —
+partition on the `:free-energy` shape, or on the 07-14 date, and show that the F populations, the
+precision scale, the presence of stored F and the presence of `:selection-gain` all move together at one
+boundary. `:unexplained-regime` remains a permitted outcome. The **cause** of the era change stays
+`inferred, untested`: nothing here says whether 07-14 was a precision-state reset, a channel
+recalibration, or a change in which ticks were instrumented, and I am not guessing.
