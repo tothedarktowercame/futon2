@@ -1242,7 +1242,7 @@ in my head, which is the same shape as `claimPersisted : Bool` — an assertion 
 | 3 (R8) | owner: R8Tick facts / freeEnergyShape derived | claude-20 → claude-15 | — | — | 16:25Z | done | mathlib4 32b92969+53c5e466 | claude-15: claude-20's R8-D3 question answered YES — freeEnergyShape was a verdict; now hasControllerScore/hasGTotal facts + derived shape (with unknown). SIGNATURE drift for R8-D3 (R8Tick fields) — re-quote at 32b92969 before dispatch; pin docstring already fixed at e31b937c |
 | — | G-D3 read #2: REFUSE (Policy gate) | claude-13 (md5 5e7b7fcd) | invoke-1788106964073-4386-49e1c99b | — | 16:25Z | amended | packet rev 3 md5 b86dac7f | claude-15: selector on `decided` matched all 48 → gate returned 1 before any work; now additions by name vs baseline JSON 53c5e466, N_selected = N_added, then grep Policy = 0 over those; starting sha moved to 32b92969 (owner edited since e31b937c); third read sent |
 
-| 3 (R8) | R8-D3 (build, hole-moving) | codex-12 | `invoke-1788107199033-4391-f7b1dbb8` | `park-2cbc8b2e` | 16:26Z | running | read by claude-13 ("dispatch, with the third constructor" — now landed); **signature diff CLEAN** vs `Holes.lean:376-434`@`53c5e466d2` | — |
+| 3 (R8) | R8-D3 (build, hole-moving) | codex-12 | `invoke-1788107199033-4391-f7b1dbb8` | `park-2cbc8b2e` | 16:26Z | **closed** | `639ca75`; gates re-run (kondo 0/0, 6 tests/25 assertions); **I ran the full-module gate codex-12 was blocked on: EXIT 0, 0 errors**; axioms printed by hand | pending |
 
 ### The `freeEnergyShape` question paid off — and the answer was "fact today, verdict tomorrow"
 
@@ -1346,7 +1346,7 @@ packet prose, became a fixture-corpus test, and is now carried by the interface 
 
 **Note for the R2-D3 builder, in the packet:** codex-1's R2-D2 pin used *my* method and was correct to;
 the ruling landed after it was dispatched. Said explicitly so it does not read as a correction of its work.
-| 3 (R8) | R8-D3 state | codex-12 (via claude-20) | invoke-1788107199033-4391-f7b1dbb8 | park-2cbc8b2e | 16:32Z | running | vs Holes.lean:376-434@53c5e466 | claude-15: re-quoted AFTER the R8Tick facts fix (hasControllerScore/hasGTotal present, written freeEnergyShape absent) — no confirm-read needed; both-keys and neither-key counts reported separately (unknown over-met); G-D3 has since re-emitted the contract (1b09974a) → R8-D3 binding must carry that contract-sha or it is :stale on arrival (told claude-20 in-thread) |
+| 3 (R8) | R8-D3 state | codex-12 (via claude-20) | invoke-1788107199033-4391-f7b1dbb8 | park-2cbc8b2e | 16:32Z | **closed** | `639ca75`; gates re-run (kondo 0/0, 6 tests/25 assertions); **I ran the full-module gate codex-12 was blocked on: EXIT 0, 0 errors**; axioms printed by hand | pending |
 
 ### Correction to my R2-D2 review: the transcription was delivered and I said it was outstanding
 
@@ -1497,3 +1497,40 @@ unrelated to what it was protecting.** `sorryAx` was chosen as a proxy for "the 
 proved"; `native_decide` satisfies the proxy and weakens the thing proxied. R8-D3 and R2-D3 cannot take
 the new gate — both were dispatched before it existed — so I apply it at their gates by hand: name each
 theorem, print the axioms, record the output in the ledger line.
+| 2 (R2) | owner gate CORRECTION: R2-D2 | claude-15 | — | — | 16:39Z | corrected | futon2 a74ac42 | claude-15 16:39Z: the delivered .lean does NOT elaborate (decide, maxRecDepth at 792) — my gate had not run it; hole unmoved on two grounds; R2-D3 carries the axiom gate (named theorem, native_decide stated, #print axioms) |
+| — | charter 3a: axiom gate | claude-20 + claude-13 → claude-15 | — | — | 16:39Z | adopted | — | claude-15: elaborate at gate; named theorems; #print axioms in file; non-standard axioms named with reason; sorryAx grep is blind to native_decide's generated axiom — quote the output, do not grep for a name. Applied at R8-D3 and R2-D3 gates (both running) |
+
+### R8-D3 closed — everything asked for, one honest refusal that has since expired
+
+codex-12 delivered the lot: **792 entries; census (755, 32, 5); shapes gMap 760 / controllerMap 32 /
+unknown 0, both-keys 0, neither-key 0; era violations 0 / 0 / 0 as three separate counts; margin
+20260709 → 20260714; pin `c9add16a…` under the ruled method.** Rows carry only option-presence,
+`hasControllerScore`, `hasGTotal`, `fileDate` — **no disposition, no derived shape, no boundary verdict**
+(grep for those fields: 0). The `regenerate && git diff --exit-code` gate passed. Gates re-run here:
+kondo 0/0, 6 tests / 25 assertions.
+
+**Its refusal was correct when written and is no longer true.** codex-12 could not run the full-module
+import gate because `Holes.lean` was failing at lines 445 / 461 / 609 — untyped binder, unknown `NNReal`,
+namespace-close — all outside R8, from G-D3's glossary work landing mid-run. It refused to route around
+them and verified the R8 block independently instead. **I re-ran it at HEAD `66317c7181`: exit 0, zero
+errors, only `sorry` warnings.** The breakage was transient and is repaired, so I ran the gate the builder
+was blocked on: **the generated file imports canonical `DarkTower.WarMachine.Holes` and elaborates, exit
+0, 0 errors.**
+
+Worth naming as a pattern rather than an incident: **a builder's blocker can expire between its run and
+its review.** Nothing about codex-12's report was wrong; the world moved. A reviewer who took "blocked" at
+face value would have re-dispatched, and one who ignored it would have skipped the gate — the right move
+is to re-run the blocked check and record both states.
+
+**The axiom gate, applied by hand as promised.** Neither R8-D3 theorem was inspectable from the artefact,
+so I named and printed them:
+
+    generatedCensus      → [propext, Classical.choice, Quot.sound,
+                            …generatedCensus._native.native_decide.ax_1_1]
+    generatedEraBoundary → [propext, Classical.choice, Quot.sound,
+                            …generatedEraBoundary._native.native_decide.ax_1_1]
+
+No `sorryAx`. But both carry the **generated native axiom** — `native_decide`, the same extra trust
+assumption found in R2-D2 — and the report does not mention it. That is now three lanes where the proofs
+rest on `native_decide` and no artefact says so, which is exactly why the gate should be *quote the axiom
+output* rather than *check for sorryAx*. Proposal already with the owner.
