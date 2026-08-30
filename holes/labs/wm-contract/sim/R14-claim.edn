@@ -1,0 +1,26 @@
+{:node :R14
+ :i-am "I fold the prior tick's realized-versus-expected policy outcome into a bounded selection gain, divide the selection temperature by that gain, and persist the gain and temperature alongside the strategic recommendation sent toward downstream act gates."
+ :edges
+ [{:edge [:R13 :R14]
+   :direction :in
+   :payload "A temporally extended, already-ranked policy field whose alternatives are at the depth over which commitment is to be calibrated."
+   :without-it "I can calculate a scalar temperature, but cannot tell which temporal commitment that temperature is meant to sharpen or flatten."
+   :evidence :imagined}
+  {:edge [:R14 :R16]
+   :direction :out
+   :payload "The selected strategic recommendation together with its effective temperature, selection gain, and an explicit pending-downstream-gates disposition."
+   :without-it "My calibrated decision remains diagnostic state and no downstream gate receives a recommendation to enact and later evaluate."
+   :evidence :from-artefact
+   :cite "src/futon2/aif/policy.clj:259"}
+  {:edge [:R7 :R14]
+   :direction :in
+   :payload "The structural calibration pattern: learn bounded precision from error history while keeping policy-scale gain distinct from per-channel precision."
+   :without-it "I lose the implemented distinction between channel precision and engineering commitment gain, and have no stated sibling pattern for the learner."
+   :evidence :from-artefact
+   :cite "src/futon2/aif/selection_gain.clj:4"}]
+ :missing-edges
+ [{:to :R16
+   :why "I require R16's durable realized outcome back on the next tick; without that reverse edge no sample enters the gain learner and selection gain remains at its 1.0 prior."}
+  {:to :R5
+   :why "The running selector consumes ranked actions and their controller scores from EFE, but no drawn incoming edge supplies those scores to R14."}]
+ :contaminated? false}
