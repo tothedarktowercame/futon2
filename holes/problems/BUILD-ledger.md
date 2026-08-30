@@ -793,3 +793,47 @@ where the first is a Python script that can throw and the second is the record o
 1, and I would have seen it had I not been reading the commit line at the end of the output. Separate the
 edit from the record of the edit, or verify the edit before writing the record — the same rule this build
 applies to builders, which I had not been applying to myself.
+
+### A FOURTH member of the family — `r9WmCheckerSound` is false and cannot be discharged
+
+claude-13's 4th read: four of five changes close; change 4 is half-right and **the defect is in the Lean**.
+
+    def r9WmCheckerSound :
+      ∀ {Part : Type*} [DecidableEq Part] (clojureDecide : Part → Set Part → Bool),
+        r9CheckerSound clojureDecide := sorry
+
+It quantifies over **every** checker. Verified here by reading it: take `clojureDecide := fun _ _ => false`;
+`independenceVerdict` becomes `if false then .self else .independent` = `.independent` for every witness,
+so for any claim/witness with `producer ∈ producingPart` the first conjunct of `r9CheckerSound` demands
+`.independent ≠ .independent`. **The statement is false, so its `sorry` can never be discharged by
+correct work.**
+
+**It is the exact mirror of the bug it replaced.** `r9VerdictSound` moved by `simp` because `_sound` made
+the interesting case unreachable — too easy. `r9WmCheckerSound` cannot move at all — impossible. And it
+is the same family again: the docstring says *"the Clojure checker R9-D2 **ships**"*, one specific
+function, while the type binds it as a universal variable. Fourth instance today, after
+`r2ContractCensus`, `r8Census` and `r9VerdictSound`.
+
+**Proposed fix (claude-13's, endorsed):** state it over the **recorded verdicts** rather than over all
+checkers — for every row of the shipped `VerdictTable`, `producer ∈ declared part → verdict ≠
+independent`. Finite, the run's EDN is its fixture, false exactly when the checker is broken, which is
+what P-R9's falsifier says. (`opaque wmDecide` also works but is further from what the run discharges.)
+
+`r9VerdictConsultsChecker` was checked and **is correct** — provable non-trivially, the hypothesis is
+used, so it does what it was meant to. **R9-D2 held**: two of its three holes are sound; the third cannot
+move by any correct work, and a builder would burn the box on it or "discharge" it by weakening
+something.
+
+### Run (ii) restored — the owner's per-row form, which is better than the cut
+
+I had cut run (ii) on claude-13's reasoning that it was uniform-by-prohibition. The owner instead made it
+**per-row**, using my own 3/5/5 split as the reason, and it now has mass: the declaration carries the
+paper's sentence for the ten unnamed rows and the row's own text for the three named ones, and must state
+whether a *commissioned* agent is inside the author's producing part. Registered: 13 `self`; falsifier
+with mass: a declaration placing commissioned agents outside flips the three to `independent`. Packet
+updated to the owner's text; the verdict is reported per row with its declaration source, and prose
+producers still never enter the checker.
+
+Worth recording: the reader and I were both right that the old run (ii) was inert, and both wrong that
+cutting was the fix. The finding that gave it mass — 3 of 13 name a commissioned agent — was already in
+my hands; I read it as a *caveat on the corpus* rather than as the *thing to make checkable*.
