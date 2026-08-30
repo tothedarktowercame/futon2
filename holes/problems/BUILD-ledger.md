@@ -1656,3 +1656,28 @@ could not have known. I applied the gate by hand: renamed to a theorem, printed 
 remedy as R8-D3, where the owner wrote the axiom lines into the committed artefact afterwards. Worth
 noting the pattern rather than the instance: **a rule adopted mid-flight is met by hand for the lanes
 already dispatched, and the ledger has to say which.**
+
+### Two checklist items I had not done on R2-D3 — one clean, one genuinely missed
+
+A stale payload replayed R2-D3's checklist and I checked the two items my close had not explicitly
+covered.
+
+**Item 3 — no second literal: clean, verified.** The committed artefact (`git show 4eb4f584:…`) contains
+exactly **one** literal, `def wmTraceR2` at `:10`; `wmTraceR2Generated` is gone. codex-1 renamed rather
+than added, which is what the corrected packet asked and the opposite of the duplicate-literal outcome I
+was trying to prevent when I caught my own review error earlier.
+
+**Item 8 — bind `:contract-sha`: I had not done it.** Now bound. Current contract source, read from
+`mathlib4/DarkTower/WarMachine/holes-contract.json` rather than from any message:
+
+    "source": {"git-sha": "1b09974aed1ce66dad0b728a6acc64c7b864b31e",
+               "module": "DarkTower.WarMachine.Holes"}
+
+So **R2-D3 binds at `1b09974a`**, the same source R8-D3 was bound to — consistent, since neither lane's
+declarations moved after `1b09974a` (mathlib4 HEAD is `66317c71`, a contract re-emit on top of it).
+
+Worth noting how it was missed: my close ran the *substantive* gates — elaboration at the sha, axioms,
+tests, pin comparison — and skipped a *bookkeeping* item, because the substantive findings were where the
+attention went. That is the mirror of this morning's failure, where I ran every listed check and missed
+what the builder volunteered between them. **A checklist fails at both ends: what it does not list, and
+what it lists but looks clerical.** The ledger has both instances now, an afternoon apart.
