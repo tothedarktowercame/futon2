@@ -5,7 +5,7 @@ Parent mission: `../missions/M-formal-war-machine.md` (§Deliveries links back h
 Updated: 2026-08-30 evening. The ledger (`BUILD-ledger.md`) is the log; this is the view.
 
 ## Top-level moves (the gasket as it develops — lifecycle §0.12 register)
-1. The problem stated: the big tetrahedron (§0.8, 08-30). 2. The evidence vertex subdivided (§0.12, 08-31): "what is the evidence of the evidence?" 3. The organisation vertex subdivided (§0.13 + addendum, 08-31): **edges are typed hyper-edges with ports**; types at handoffs are emitted by interfaces, never freehand; **EDGES lane opened** (codex-8: schema + RUN1 exemplar + tick-path census) — transactional? guaranteed flow? — the APM record (50–60 trials, failures at handoffs) as costed evidence; Lean `EdgeType` lands with the CML operational fields.
+1. The problem stated: the big tetrahedron (§0.8, 08-30). 2. The evidence vertex subdivided (§0.12, 08-31): "what is the evidence of the evidence?" 3. The organisation vertex subdivided (§0.13 + addendum, 08-31): **edges are typed hyper-edges with ports**; types at handoffs are emitted by interfaces, never freehand; **EDGES-D1 gated**: hyper-edge schema anchored; RUN1 chain is instance 1 (3 ports, 0 freehand); census says the tick path has **8/13 freehand ports** — the measured size of the interface work — transactional? guaranteed flow? — the APM record (50–60 trials, failures at handoffs) as costed evidence; Lean `EdgeType` lands with the CML operational fields.
 
 ## The precepts now standing
 `I_data_current` · `I_absent_is_loud` · `I_evidence_consumed` (lifecycle §0.7, §0.11; PREREG §4) — data is live, absence is loud, every emission names its consumer.
