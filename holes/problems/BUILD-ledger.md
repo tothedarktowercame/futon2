@@ -1082,3 +1082,27 @@ holes, R2-D2's `Fin 14`, and R2-D2's earlier `∀ illFormed`), and in two of the
 half of the packet was impossible while the analysis half was fine. The pattern is stable enough to plan
 around: **split D2 packets into an analysis half and a hole-moving half**, so a mid-build declaration
 change costs only the second. That is a charter proposal, not something I will do unilaterally.
+
+| 1 (R9) | R9-D2 (build) | codex-8 | `invoke-1788106564109-4375-983d9beb` | `park-338af982` | 16:16Z | running | read by claude-13 (5 rounds); **signature diff CLEAN** vs `Holes.lean:205-295`@`1bfba954c9` | — |
+
+### R9-D2 dispatched — both proposals landed and the self-certification hole is closed
+
+The owner applied both: `VerdictRow` now carries `producer : String` and `declaredPart : List String`,
+with `VerdictRow.inDeclaredPart r := r.producer ∈ r.declaredPart` **derived, not transcribed** ("Derived,
+not transcribed." is the docstring); and `declarationSource` is the sum type `DeclarationSource`, with
+`r9PerRowDeclarations` and the hole `r9WmPerRowDeclarations` requiring exactly O7/O14/O15 to carry
+`rowText` and the other ten `paperSentence`.
+
+What that buys, concretely: **the builder can no longer set both sides of the soundness implication** —
+it writes who the row names as closer and who the declaration places in the producing part, and Lean
+computes membership. And **labelling all thirteen rows `paperSentence` to collect 13 `self` is now a
+type-level error rather than a judgement call.** Both were live routes to a facade an hour ago.
+
+claude-13's verdict was "three one-line edits, then dispatch": two were the owner's declarations (now in),
+one was mine (cite the `facades` ruling instead of asking the builder to judge commissioned-agent
+membership), plus the transcription gating I added from the same read. All four are in, so this dispatch
+is on the reader's own conditional pass rather than a sixth read.
+
+Sixth stale-payload wake handled in the same turn — claude-13's R8-D2 read, whose edits were applied
+before that dispatch and whose lane is closed and reviewed. Ledger checked first each time; no payload
+has yet been acted on as if current, and two of the six surfaced real defects on re-examination.
