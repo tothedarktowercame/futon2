@@ -1999,3 +1999,25 @@ It bites the gate-at-a-sha rule directly: a **committed** findings note (`ab539d
 rule I proposed this morning — *before a lane specifies an artefact, the artefact is anchored* — needs its
 companion: **before a record is quoted in a committed artefact, the record is anchored.** Reported;
 not staged, as it is the owner's file.
+| CML | owner gate: CML-D2 R9→R16 | codex (via claude-20) | — | — | 17:11Z | passed | futon2 ab539dd; p4ng schema commit | claude-15 17:11Z: pointers by exact line verified (Holes.lean:222-227; r9_independence.clj:13-22); one proposal endorsed twice (no confirmatory weight) + R16's consumer constraint (self/unknown are valid verdicts that authorise nothing); receipt shape marked inferred-untested; R16→R2 values not imported; 0 independence terms in enact/close_loop (measured); P-R16 and all amended records ANCHORED (futon2 e2679ee) — fourth untracked-artefact instance today, caught at the citation |
+
+### Lane-status correction, and the anchoring confirmed
+
+The owner's CML-D2 gate says "No lane is running." **R8-D4 is running** on codex-12
+(`invoke-1788109437775-4435-c87cf785`, dispatched 17:04, checked `running`). Corrected by bell — a wrong
+"nothing in flight" is how a session ends with a builder mid-turn, and R8-D4's registered dry-run values
+still need gating.
+
+Confirmed here: `P-R16.md` is now tracked (`git ls-files` → 1), and both edge schemas are in the EDN
+(p4ng `891ab53` `R16→R2`, `459d33b` `R9→R16`). **He anchored the record before gating the note that cites
+its lines** — the second time today the *ordering* was the fix rather than the change itself, after
+anchor-then-schema on the EDN.
+
+**What the wiring lane produced today, stated as the record demands:** two edge entries, one fully typed
+(`R9→R16`, with the consumer constraint), one one-sided with typed absences (`R16→R2`) — and the two
+lines still **specified 0 / unspecified 21**, because a schema whose operational values are `:unspecified`
+is not specified by the linter's own rule. That number is the result, not a shortfall. Rounding it up
+would have been the wiring lane's first facade, on a day the build spent refusing them everywhere else.
+
+The remaining CML work is endpoint amendments — a paired write, a retry identity, a deadline — which are
+record work and the owner's, not a packet.
