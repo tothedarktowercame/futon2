@@ -719,3 +719,34 @@ That is the third distinct way this one artefact can be miscounted — after the
 and the `"fixed"`-equality trap — and all three were found by reading rows rather than by parsing them.
 The accusation row itself carries a fourth variant (`*Status: OPEN — …*`, single asterisks, italic) but
 sits outside the `## O` sections and so outside the census.
+| 1 (R9) | owner: R9-D2 read (3rd) ratified | claude-13 → claude-20 → claude-15 | — | — | 15:56Z | done | mathlib4 (r9VerdictConsultsChecker) | claude-15 15:56Z: load-bearing lemma added; r9VerdictSound already replaced at c131af37; run (ii) kept per-row with the three named-agent rows as the discriminating cases; R9-D2 UNBLOCKED — quote Holes.lean@HEAD |
+| — | AD-D2 read #1: REFUSE (c) | claude-13 | invoke-1788105138524-4340-685b3eef | — | 15:57Z | amended | packet rev 2 | claude-15: (c) HEAD-at-emit made the committed JSON stale at commit — fixed to the module's last commit (the find_snatch :as-of fix); (a) three-way count with pinned doc-tags as the independent leg; (b) evidence types are owner proposals, each needing a licensing record sentence, else refused; confirm-read sent |
+
+| 3 (R8) | R8-D2 (build) | codex-12 | `invoke-1788105436811-4346-54376500` | `park-6d513e39` | 15:57Z | running | read by claude-13 (2 rounds, "dispatch after one edit"); **signature diff CLEAN** vs `Holes.lean:293-339`@`0b7f171a5c` | — |
+| 1 (R9) | R9-D2 confirm-read | claude-13 | `invoke-1788105461918-4348-1c39f922` | `park-1fb8c5d1` | 15:57Z | reading | revised after refusal; **signature diff CLEAN** vs `Holes.lean:171-228` | — |
+
+### Both blockers lifted — and the defect family had a third member the owner found himself
+
+codex-1's refusal generalised. `r2ContractCensus` universally quantified `illFormed`; **`r8Census` had
+the identical shape** over its triple; and `r9VerdictSound` assumed the checker's soundness so the
+interesting case never reached the conclusion. All three are now **computed values with concrete
+wm-trace holes beside them**:
+
+- `r2ContractCensus : … → Nat` (closed) + `r2ContractCensusWmTrace : … = 2` (hole);
+- `r8Census : … → Nat × Nat × Nat` (closed) + `r8CensusWmTrace : length = 792 → = (755, 32, 5)` (hole);
+- `r9CheckerSound (decide?) : Prop` (closed, **no soundness hypothesis**) + `r9WmCheckerSound` (hole,
+  false if the shipped checker is broken) + `r9VerdictConsultsChecker` (hole, claude-13's load-bearing
+  lemma verbatim, credited in the docstring).
+
+The rule is kept in my wording in `P-lean-holes` and lifecycle row 18: **a HOLE's docstring states the
+expected value, and the type must be able to be false when that value is wrong.** Beside it, the sharper
+point: clause 2 catches drift between packet and file; it cannot catch a wrong declaration. That took a
+reader and a builder each told to *attack* the interface rather than implement it — so the refusal path
+in a build packet is not a courtesy, it is the only check that reaches this class.
+
+**All three packets re-quoted and re-diffed against `0b7f171a5c` after the owner's commits** — clean for
+R9 (`:171-228`), R2 (`:273-291`) and R8 (`:293-339`). I had held R8-D2 rather than dispatch it against a
+working tree that was mid-edit; that hold was right — `r8Census` changed shape, `R8Disposition` was
+dropped and restored, and `r9VerdictConsultsChecker` was added, all after the message telling me to
+dispatch. Six times today a message has been overtaken by its own file; the discipline that keeps
+catching it is quoting from the file at dispatch time and diffing mechanically.
