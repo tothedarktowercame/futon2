@@ -2419,3 +2419,34 @@ Corollary worth keeping: **the self-report field earned its place.** Two of thre
 found only because the schema asked the agent to declare it, and both agents declared honestly against
 their own interest. A contamination check that relies on the checker's greps would have found one of
 three.
+
+### Expertise and independence are in tension — and it maps exactly onto seat history
+
+R7's bellback: *"I marked `:contaminated? true` because I had read `P-R2.md` during the preceding
+handoff."* R7 ran on **codex-1 — the seat that built R2-D3 today**. R13 ran on **codex-2, which built
+CML-D2 `R9→R16`** and therefore read P-R9 and P-R16.
+
+Cross-tabulating contamination against what each seat did earlier today:
+
+    CONTAMINATED (prior session)   R7  = codex-1   (built R2-D3, read P-R2)
+                                   R13 = codex-2   (built CML-D2 R9-R16, read P-R9/P-R16)
+    CLEAN                          R14 = codex-3   (did not work this build today)
+                                   R8  = codex-21  (did not work this build today)
+                                   R3  = codex-4   (did not work this build today)
+    IN-TASK contamination only     R15 = codex-17  (fresh seat; read control-map-edges.edn
+                                                    because MY rule permitted it)
+
+**2 of 2 build-seats prior-contaminated; 0 of 4 fresh seats prior-contaminated.** The two contamination
+kinds separate cleanly: prior-session exposure comes from *having done the work*, in-task exposure comes
+from *my permission being too wide*. Only the second is fixable by a packet clause.
+
+**The tension this exposes is the real design constraint on the proposal:** the agents best equipped to
+role-play a node are precisely the ones that have already read that node's record. Expertise and
+independence are anti-correlated here, and the simulation's value depends on independence. So a 17-node
+run cannot be staffed from the seats that know the project — it has to be staffed from seats that do not,
+and their competence will come from the artefacts alone.
+
+**PRE-REGISTERED, before the data lands** (R5, R6, R11 still running): they run on **codex-8** (built
+CML-D2 `R16→R2`, read P-R16/P-R2), **codex-10** (built R19-D1, read P-R19) and **codex-12** (built R8-D4).
+On the correlation above I predict **all three report `:contaminated? true`**. If any reports clean, the
+correlation is weaker than it looks and this entry is wrong — recorded now so it cannot be fitted after.
