@@ -109,3 +109,31 @@ structure PreferenceStack (Outcome : Type) where
 R19-D1 is the DISCOVERY half: the stack record for today's machine — its four layers named with author + basis, and its
 purpose / evidence / falsifier stated honestly (including "unknown" where that is the truth). R19-D2 (after review) is
 the implementation half: Lean declarations ratified, `c_vector.clj`'s fold made the recorded one.
+
+## R19-D1 GATED (owner, 2026-08-30 21:20Z) — passed; the record corrected this record
+`dc1dac8` (packet folded claude-13's habit-prior seat first, `0a03af00`): `R19-preference-stack.edn` + 15-line findings.
+Verified at the gate: both basis sha256s re-hashed and match (preferences.clj `22ae618a…`, wm-trace `6da3ccda…`);
+cited lines read (`efe.clj:586-614` zone-risk; `war_machine.clj:247-268` the 07-13 flip with both env hatches;
+`policy.clj:368-380`; `habit_prior.clj:121-136`; `c_vector.clj:227-240,633-640` — 640 lines, real); `:declared-purpose
+nil` with a 4-item search — the refusal held; `:observed-purpose` is about the fold; `:fit-status :witnessed` with 5 refs.
+
+**Corrections to this record's own table (the D1 finding):**
+1. **Five sources, four folded — not four/three.** Missing row: `capability-zone-load`
+   (`preferences.clj:140-173` → `efe.clj:586-614`, `g-risk (+ channel-risk zone-risk)`): a `pref/c-distribution`
+   parameterised by the LEARNED `:load-weight` — author class `:learned-from-operator` (posterior evidence mass,
+   242 hyperparameter-update records, max as-of 2026-07-18), not hand-set.
+2. **The habit prior is live in the selection seam, not dark.** The `:controller-augmentation (DEFAULT)` /
+   `:habit-prior (DARK)` labels at `efe.clj:698-706` are STALE — `war_machine.clj:247-268`: flipped live by Joe
+   2026-07-13; today's defaults are `:habit-prior` mode and `:learned-frequency` source, env vars are rollback
+   hatches. So the operator's learned preference is in Q(π) right now — stronger than this record's original
+   "present as C without being written anywhere". (Follow-up for D2's builder: fix the stale comment.)
+
+**Naming settled (three names, one object):** the learned **ln E(π) habit prior at the policy seam**. It is consumed
+by `policy/select-action` (R6/SELECT); R14 contributes the temperature τ that divides G beside it
+(Q(π) ∝ exp(ln E(π) − G(π)/τ), `Holes.lean:493-499`; `CommitmentTemperature.lean` models the same comparison and
+introduces no second prior); the "R12" in efe.clj's comment is stale labelling from before the flip. Records say:
+enters-at = the policy seam (R6), scaled against R14's τ; not an R12 object.
+
+**R19-D2 (proceeding):** owner ratifies `PreferenceSource`/`PreferenceLayer`/`PreferenceStack` into Holes.lean with
+the habit prior connected to the EXISTING softmax hole's `habit` argument (no new name); then the implementation
+packet: c_vector's fold becomes the recorded `foldC` with the five layers' authors/bases carried, stale comment fixed.
