@@ -1,0 +1,19 @@
+{:node :R15
+ :i-am "I select across hierarchy and timescale, carrying the temporal-depth discipline one level above the policy horizon before a choice reaches grounded actuation."
+ :edges
+ [{:edge [:R15 :R13]
+   :direction :out
+   :payload "I supply the higher-level timescale and hierarchy within which R13 may extend a policy beyond a greedy step."
+   :without-it "R13 can deepen a policy horizon without knowing which strategic level or cadence that horizon is meant to serve."
+   :evidence :imagined}
+  {:edge [:R15 :R16]
+   :direction :out
+   :payload "I supply the selected cross-level commitment: which level is acting now and which slower commitments must remain invariant during that act."
+   :without-it "My hierarchy remains an advisory decomposition and never constrains a grounded action."
+   :evidence :imagined}]
+ :missing-edges
+ [{:to :R16
+   :why "I need witnessed tactical outcomes back from actuation to update slower strategic calibration; the map derives R16->R15 but does not draw it (p4ng/empirics-futon/control-map-edges.edn:66)."}
+  {:to :R11
+   :why "I need the shared-budget arbiter's cross-level feasibility result before choosing a hierarchy/timescale commitment, but the drawn map provides no R11->R15 edge."}]
+ :contaminated? false}
