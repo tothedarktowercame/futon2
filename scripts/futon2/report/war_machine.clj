@@ -486,10 +486,44 @@
       {:unreadable path
        :cause (ex-message e)})))
 
+(defn- unreadable-input? [x]
+  (and (map? x)
+       (or (contains? x :missing)
+           (contains? x :unreadable))))
+
+(def ^:dynamic *input-status* nil)
+
+(defn- record-input-read!
+  [path result]
+  (when (instance? clojure.lang.IAtom *input-status*)
+    (swap! *input-status*
+           (fn [{:keys [read-paths issues]}]
+             {:read-paths (conj (or read-paths #{}) path)
+              :issues (cond
+                        (and (map? result) (:missing result))
+                        (conj (vec issues) {:path path :kind :missing})
+
+                        (and (map? result) (:unreadable result))
+                        (conj (vec issues) {:path path
+                                            :kind :unreadable
+                                            :cause (:cause result)})
+
+                        :else
+                        (vec issues))}))))
+
+(defn- current-input-status []
+  (let [{:keys [read-paths issues]} (if (instance? clojure.lang.IAtom *input-status*)
+                                      @*input-status*
+                                      {:read-paths #{} :issues []})]
+    {:inputs-read (count (or read-paths #{}))
+     :issues (vec (or issues []))}))
+
 (defn- read-edn-file [path]
-  (if (.exists (java.io.File. path))
-    (parse-edn-string path (slurp path))
-    {:missing path}))
+  (let [result (if (.exists (java.io.File. path))
+                 (parse-edn-string path (slurp path))
+                 {:missing path})]
+    (record-input-read! path result)
+    result))
 
 (defn- parse-json-string [path text]
   (try
@@ -499,14 +533,11 @@
        :cause (ex-message e)})))
 
 (defn- read-json-file [path]
-  (if (.exists (java.io.File. path))
-    (parse-json-string path (slurp path))
-    {:missing path}))
-
-(defn- unreadable-input? [x]
-  (and (map? x)
-       (or (contains? x :missing)
-           (contains? x :unreadable))))
+  (let [result (if (.exists (java.io.File. path))
+                 (parse-json-string path (slurp path))
+                 {:missing path})]
+    (record-input-read! path result)
+    result))
 
 (defn- capability-star-map []
   (let [{:keys [path graph]} @capability-star-map-cache]
@@ -2804,10 +2835,24 @@
 (defn render-war-machine
   "Render the War Machine strategic synthesis as markdown."
   [{:keys [self-watch loop-health support-attack mission-triage graph
-           metabolic-balance commit-hygiene blocks now days] :as data}]
+           metabolic-balance commit-hygiene blocks now days input-status] :as data}]
   (let [sb (StringBuilder.)]
     (.append sb "# War Machine — Strategic Synthesis\n\n")
     (.append sb (str "**" now "** | " days "-day window\n\n"))
+
+    ;; --- Input Status ---
+    (when input-status
+      (.append sb "## Input status\n\n")
+      (if (seq (:issues input-status))
+        (do
+          (.append sb (render-table
+                       ["Kind" "Path" "Cause"]
+                       [:left :left :left]
+                       (mapv (fn [{:keys [kind path cause]}]
+                               [(name kind) path (or cause "-")])
+                             (:issues input-status))))
+          (.append sb "\n"))
+        (.append sb (str "All " (:inputs-read input-status) " inputs read\n\n"))))
 
     ;; --- Self Watch ---
     (when self-watch
@@ -3394,9 +3439,11 @@
        :cause (ex-message e)})))
 
 (defn- safe-slurp-json [path]
-  (if (.exists (java.io.File. ^String path))
-    (parse-json-keyword-string path (slurp path))
-    {:missing path}))
+  (let [result (if (.exists (java.io.File. ^String path))
+                 (parse-json-keyword-string path (slurp path))
+                 {:missing path})]
+    (record-input-read! path result)
+    result))
 
 (defn- batch-input-throughput [state-batch]
   (let [papers (or (:papers state-batch) 0)
@@ -4688,15 +4735,23 @@
                                   ((requiring-resolve 'futon2.report.cascade-lane/gap-lane)
                                    wm-ranked {:n 10 :budget 6})
                                   (catch Throwable _ []))
-                                [])}
+                                [])
+                :input-status (current-input-status)}
                  habit-prior-state
                  (assoc :habit-prior-state habit-prior-state))]
     (when trace?
-      (try
-        (if trace-dir
-          (trace/write-trace! result :dir trace-dir)
-          (trace/write-trace! result))
-        (catch Exception _ nil)))
+      (if-let [trace-write-failed
+               (try
+                 (if trace-dir
+                   (trace/write-trace! result :dir trace-dir)
+                   (trace/write-trace! result))
+                 nil
+                 (catch Exception e
+                   (binding [*out* *err*]
+                     (println "trace/write-trace! failed:" (ex-message e)))
+                   {:trace-write-failed (ex-message e)}))]
+        (assoc result :trace-write-failed trace-write-failed)
+        result))
     result)))
 
 ;; ---------------------------------------------------------------------------
@@ -4908,79 +4963,84 @@
    argument is passed to `judge`."
   ([days] (generate-war-machine days {}))
   ([days judge-opts]
-  (let [now-zdt (ZonedDateTime/now tz)
-        now (.toString (.toLocalDate now-zdt))
-        ;; One bounded recent window feeds all evidence-derived scans. The hard cap is
-        ;; intentional: an operator typo must not turn selection into corpus retrieval.
-        evidence-limit (session-evidence-limit)
-        ;; One evidence-store query supplies every evidence-derived scan.
-        ;; Consumers apply their own window and projection locally.
-        evidence-snapshot-result
-        (fetch-evidence-result :limit evidence-limit :since (since-str days))
-        evidence-snapshot (or (:entries evidence-snapshot-result) [])
-        ;; One coherent snapshot feeds both mission consumers. The endpoint
-        ;; attaches store-backed turn telemetry and is expensive under load;
-        ;; fetching it twice made an opportunity pay the same query twice.
-        mission-snapshot (fetch-missions)
-        self-watch (scan-self-watch days evidence-snapshot-result)
-        loop-health (scan-loop-health days evidence-snapshot)
-        support-attack (scan-support-attack days evidence-snapshot)
-        mission-triage (scan-mission-triage days (or mission-snapshot []))
-        graph (scan-graph days evidence-snapshot)
-        sessions (scan-sessions days evidence-snapshot mission-snapshot)
-        portfolio (scan-portfolio)
-        mission-detail (when mission-snapshot
-                         (scan-mission-detail mission-snapshot))
-        patterns (scan-patterns)
-        frames (scan-frames)
-        metabolic-balance (scan-metabolic-balance)
-        commit-hygiene (summarize-working-tree-hygiene metabolic-balance)
-        blocks (scan-blocks days)
-        window (scan-window days now-zdt)
-        annotation-graph (scan-annotation-graph)
-        strategic-vocabulary (scan-strategic-vocabulary)
-        r-criteria (scan-r-criteria)
-        r12-apparatus (scan-r12-apparatus)
-        vsatarcs-status (scan-vsatarcs-status)
-        capability-star-map (capability-star-map)
-        scan-data {:self-watch self-watch
-                   :loop-health loop-health
-                   :support-attack support-attack
-                   :mission-triage mission-triage
-                   :graph graph
-                   :sessions sessions
-                   :portfolio portfolio
-                   :mission-detail mission-detail
-                   :patterns patterns
-                   :frames frames
-                   :metabolic-balance metabolic-balance
-                   :commit-hygiene commit-hygiene
-                   :blocks blocks
-                   :window window
-                   :annotation-graph annotation-graph
-                   :strategic-vocabulary strategic-vocabulary
-                   :r-criteria r-criteria
-                   :r12-apparatus r12-apparatus
-                   :capability-star-map capability-star-map
-                   :vsatarcs-status vsatarcs-status}
-        ;; Run the judgement layer
-        judgement (judge scan-data judge-opts)]
-    {:data scan-data
-     :judgement judgement
-     :markdown (render-war-machine {:self-watch self-watch
-                                    :loop-health loop-health
-                                    :support-attack support-attack
-                                    :mission-triage mission-triage
-                                    :graph graph
-                                    :portfolio portfolio
-                                    :metabolic-balance metabolic-balance
-                                    :commit-hygiene commit-hygiene
-                                    :blocks blocks
-                                    :r-criteria r-criteria
-                                    :r12-apparatus r12-apparatus
-                                    :vsatarcs-status vsatarcs-status
-                                    :judgement judgement
-                                    :now now :days days})})))
+  (binding [*input-status* (atom {:read-paths #{} :issues []})]
+    (let [now-zdt (ZonedDateTime/now tz)
+          now (.toString (.toLocalDate now-zdt))
+          ;; One bounded recent window feeds all evidence-derived scans. The hard cap is
+          ;; intentional: an operator typo must not turn selection into corpus retrieval.
+          evidence-limit (session-evidence-limit)
+          ;; One evidence-store query supplies every evidence-derived scan.
+          ;; Consumers apply their own window and projection locally.
+          evidence-snapshot-result
+          (fetch-evidence-result :limit evidence-limit :since (since-str days))
+          evidence-snapshot (or (:entries evidence-snapshot-result) [])
+          ;; One coherent snapshot feeds both mission consumers. The endpoint
+          ;; attaches store-backed turn telemetry and is expensive under load;
+          ;; fetching it twice made an opportunity pay the same query twice.
+          mission-snapshot (fetch-missions)
+          self-watch (scan-self-watch days evidence-snapshot-result)
+          loop-health (scan-loop-health days evidence-snapshot)
+          support-attack (scan-support-attack days evidence-snapshot)
+          mission-triage (scan-mission-triage days (or mission-snapshot []))
+          graph (scan-graph days evidence-snapshot)
+          sessions (scan-sessions days evidence-snapshot mission-snapshot)
+          portfolio (scan-portfolio)
+          mission-detail (when mission-snapshot
+                           (scan-mission-detail mission-snapshot))
+          patterns (scan-patterns)
+          frames (scan-frames)
+          metabolic-balance (scan-metabolic-balance)
+          commit-hygiene (summarize-working-tree-hygiene metabolic-balance)
+          blocks (scan-blocks days)
+          window (scan-window days now-zdt)
+          annotation-graph (scan-annotation-graph)
+          strategic-vocabulary (scan-strategic-vocabulary)
+          r-criteria (scan-r-criteria)
+          r12-apparatus (scan-r12-apparatus)
+          vsatarcs-status (scan-vsatarcs-status)
+          capability-star-map (capability-star-map)
+          scan-data {:self-watch self-watch
+                     :loop-health loop-health
+                     :support-attack support-attack
+                     :mission-triage mission-triage
+                     :graph graph
+                     :sessions sessions
+                     :portfolio portfolio
+                     :mission-detail mission-detail
+                     :patterns patterns
+                     :frames frames
+                     :metabolic-balance metabolic-balance
+                     :commit-hygiene commit-hygiene
+                     :blocks blocks
+                     :window window
+                     :annotation-graph annotation-graph
+                     :strategic-vocabulary strategic-vocabulary
+                     :r-criteria r-criteria
+                     :r12-apparatus r12-apparatus
+                     :capability-star-map capability-star-map
+                     :vsatarcs-status vsatarcs-status}
+          ;; Run the judgement layer
+          judgement (judge scan-data judge-opts)
+          input-status (current-input-status)
+          scan-data (assoc scan-data :input-status input-status)
+          judgement (assoc judgement :input-status input-status)]
+      {:data scan-data
+       :judgement judgement
+       :markdown (render-war-machine {:self-watch self-watch
+                                      :loop-health loop-health
+                                      :support-attack support-attack
+                                      :mission-triage mission-triage
+                                      :graph graph
+                                      :portfolio portfolio
+                                      :metabolic-balance metabolic-balance
+                                      :commit-hygiene commit-hygiene
+                                      :blocks blocks
+                                      :r-criteria r-criteria
+                                      :r12-apparatus r12-apparatus
+                                      :vsatarcs-status vsatarcs-status
+                                      :judgement judgement
+                                      :input-status input-status
+                                      :now now :days days})}))))
 
 ;; ---------------------------------------------------------------------------
 ;; Main
