@@ -1569,3 +1569,25 @@ Note this is the same hazard the ledger already recorded from the other directio
 codex-1's two uncommitted R2-D2 files sat in the tree after I cancelled its dispatch and had to be
 explicitly protected from being swept into someone else's commit. Same shared tree, same confusion between
 *what is on disk* and *what was delivered* — twice in one day, once per direction.
+
+### Cadence report: the CML lane has not moved all afternoon
+
+Ran the linter while R2-D3 builds. **drawn 21 / specified 0 / unspecified 21**; endpoints-agree? census
+`{:no-endpoint-record 15, :one-endpoint-record 6}` — **zero edges with records at both ends**, so
+**CML-D2's precondition is still unmet** and the lane has been silent since CML-D1 closed at ~15:00.
+
+Reported in the two lines the record demands, never as a percentage of done: **specified 0, unspecified
+21.** Three deep node records and four discharged holes today, and the organised fraction of the wiring is
+exactly where it started. Not a complaint about sequencing — nodes had to come first, and the fixture
+shape had to be invented — but it is the number that says what this build has and has not bought.
+
+**Which record would unlock the most, measured:** six drawn edges have one endpoint recorded — R2→R3,
+R16→R2, R7→R8, R8→R5, R9→R16, R10→R8 — and the missing partners rank **R16: 2 edges; R3, R7, R5, R10: 1
+each**. So **P-R16 is worth twice any other next node** to the wiring lane, and it is where the July
+whitelist facade lived, so it is not an arbitrary pick. Sent to the owner as a lookup rather than a
+judgement; node records are his.
+
+**Caveat on my own number**, stated because the day has earned the reflex: `:one-endpoint-record` counts
+*records that exist*, not records that **specify that edge's payload**. CML-D2 compares two proposals, and
+a record proposing nothing is not half of a comparison — so 6 is an **upper bound** on readiness, and the
+real figure is however many of those six carry payload text at both ends. Not measured, not guessed.
