@@ -632,3 +632,33 @@ second packet on the same reader while the first is open invites exactly the cro
 protocol exists to undo, and reader attention is the build's real bottleneck — not seats. R8-D2 goes over
 as soon as R9-D2's read returns. R2-D2 is third, and still needs rewriting against `r2WellFormed` /
 `r2ContractCensus`.
+
+| 2 (R2) | R2-D2 (build, re-dispatch) | codex-1 | `invoke-1788104980439-4336-12173cfd` | `park-97da4143` | 15:49Z | running | read by claude-13 (2 rounds); **signature diff CLEAN** vs `Holes.lean:262-277`; continues codex-1's own preserved uncommitted files | — |
+| 3 (R8) | R8-D2 packet read (charter 6b, 2nd) | claude-13 | `invoke-1788104984233-4337-a785b4b0` | `park-12524473` | 15:49Z | reading | rewritten vs `r8Census`/`r8EraBoundary`; **signature diff CLEAN** vs `Holes.lean:278-320` | — |
+
+### R9-D2 refused by claude-13 — and the blocker is in the Lean, not the packet
+
+Third read, third refusal, and the sharpest. Two findings I am fixing in the packet, one I cannot:
+
+- **Run (ii) should be cut, not labelled.** I had marked it tautological; claude-13 gave the better
+  reason: run (ii) is uniform *because the packet forbids the one input that would break it* — the prose
+  producers. So it reports a consequence of my own prohibition, not a property of the corpus, and a
+  builder may read it as a corpus finding. It also buys no coverage: the only branch it exercises beyond
+  run (i) is `some claim`, which (A)'s synthetic witnesses exercise with controlled inputs. Cut to one
+  sentence.
+- **My 8-of-13 conflated two findings and the weak one is what a builder would deliver.** Verified the
+  split myself: **3 of 13 name a specific agent** — O7 `codex-1`, O14 `codex-1` + `codex-7`, O15 `zai` —
+  **5 carry only generic role words** (O1 O3 O5 O8 O20), **5 neither** (O2 O6 O9 O16 O17). "Author" and
+  "reviewer" are boilerplate and counting them inflated the number. The **3** is what bites, because it
+  is my own "surprising" outcome having already occurred: the paper's blanket *"the author then closed
+  thirteen"* is too strong in three rows. claude-13 also caught a third agent I had missed — `zai` in
+  O15, next to a literal "fixed by".
+
+**The blocker — a Lean defect, not a packet defect.** `r9VerdictSound` carries
+`_sound : ∀ p S, decide? p S = true ↔ p ∈ S` as a **hypothesis**, which pins `decide?` to membership. Both
+conjuncts then follow by unfolding the match — `simp [independenceVerdict, independent]` discharges it —
+and **no wrong `decide?` can ever fail it**, because a wrong one does not satisfy `_sound` and the
+implication is vacuously true. So my packet's instruction ("include a deliberately wrong `decide?` and
+show the property fails") asks for something the signature cannot express, and the hole would move by
+`simp` while the Clojure test demonstrated only that the port is faithful. Under charter clause 3 that is
+a facade close. **Proposed to the owner as hole text (charter 6, first use).** R9-D2 held until ratified.
