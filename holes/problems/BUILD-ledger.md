@@ -1591,3 +1591,36 @@ judgement; node records are his.
 *records that exist*, not records that **specify that edge's payload**. CML-D2 compares two proposals, and
 a record proposing nothing is not half of a comparison — so 6 is an **upper bound** on readiness, and the
 real figure is however many of those six carry payload text at both ends. Not measured, not guessed.
+| 3 (R8) | owner gate: R8-D3 | codex-12 (via claude-20) | invoke-1788107199033-4391-f7b1dbb8 | park-2cbc8b2e | 16:44Z | passed — HOLES MOVED (native_decide, stated) | futon2 639ca75 (+ owner's axiom lines) | claude-15 16:44Z: elaborated here, exit 0; #print axioms added to the artefact — [propext, Classical.choice, Quot.sound, …native_decide.ax_1_1] ×2; regenerate reproduces both artefacts byte-identical; counts (755,32,5), era 760/32, unknown 0, violations 0/0/0, margin 20260709→20260714, pin c9add16a (ruled method); bound with contract-sha 1b09974a; **contract lint: r8EraBoundary :wrong-shape** — the report does not inhabit EraTable — first genuine wrong-shape; R8-D4 = emit an EraTable-shaped section (or amend the type, owner's call) |
+| — | charter: expired blocker | claude-20 → claude-15 | — | — | 16:44Z | adopted | — | claude-15: a builder's blocker can expire between run and review (codex-12 was blocked by G-D3 landing mid-run; claude-20 re-ran at HEAD and recorded both states) — re-run the blocked check, record both states; never take blocked at face value, never ignore it |
+| 2 (R2) | owner gate CORRECTION #2: R2-D2 | claude-20 → claude-15 | — | — | 16:45Z | corrected | futon2 a74ac42 | claude-15 16:45Z: the failing file was the WORKING TREE mid-R2-D3 (codex-1 editing); the committed blob elaborates (exit 0, native_decide axiom stated) — reproduced. Hole moved at a74ac42. Charter 3a(i): gate at the sha, never at the path. My earlier correction line withdrawn |
+
+### R8-D3 gated PASSED — and the adapter found what neither of us claimed
+
+The owner ran the new charter-3a gate: file elaborates under his hands, two named theorems, `#print
+axioms` reproducing mine (`[propext, Classical.choice, Quot.sound, …_native.native_decide.ax_1_1]` both),
+regeneration byte-identical, literal facts-only, all numbers confirmed, bound with `:contract-sha
+1b09974a`. **He then added the two `#print axioms` lines to the committed artefact**, so it states its own
+trust assumption instead of leaving it in a bell — 3a met retroactively for the lane.
+
+**Then the contract lint judged `r8EraBoundary` `:wrong-shape`.** The report's era evidence does not
+inhabit the declared `EraTable` = `{boundary, perEra : Era → EraSummary}`. Proof accepted, numbers
+reproduce, **evidence still not the shape the theory asked for** — the apex question answered by a program
+rather than by a person, which is the first time that has happened in this build.
+
+### R8-D4 written — and rearrangement has a trap in it
+
+Verified the owner's claim that every field is already present: `boundary`, per-era `count`, `shape`,
+`storedF`, `selectionGain` from `:r8EraBoundary`, and `meanPrecision` from `:F/:era-metrics`. True.
+
+**But the denominators differ, and I checked rather than assumed.** The era partition is **760 / 32**; the
+precision means are over **755 / 32** by the report's own `:records` fields. The gap is the 5
+`:insufficient-inputs` forms — in the *before* era, no `:precision-state`, so no precision. **A naive
+mapping writes `meanPrecision = 94.5845` into an `EraSummary` whose `count = 760`**, attributing a mean
+over 755 to an era of 760. That is exactly the 760-vs-755 trap the R8-D3 packet warned about, arriving at
+the one moment both numbers occupy one structure — which is what "just rearrange the fields" would have
+walked into.
+
+Packet requires the denominator visible or stated, and tells codex-12 that if it thinks `EraSummary` needs
+a `meanPrecisionRecords` field it must **refuse** — that is a signature proposal for the owner, not a
+generator change. Same question put to claude-13.
