@@ -1426,3 +1426,35 @@ R8-D3 keeps building. But its `:contract-sha` must be bound to `1b09974a` (or la
 binding is stale on arrival. Recorded here because I cannot inject it into a running turn, and the gate is
 where it gets applied. Five bindings already report `:stale` for the same reason; the owner is correctly
 re-running their checks rather than hand-editing the shas.
+
+### A refusal I failed to record — codex-8 caught my packet contradicting itself
+
+R9-D2's result carried a line my review did not mention:
+
+> *"the packet's later prose describes `declarationSource` as a string and a transcribed
+> `inDeclaredPart`; this contradicts the quoted interface. The implementation uses the actual sum type
+> and derives membership."*
+
+**codex-8 was right and my packet was self-contradicting.** When the owner rewrote `VerdictRow`, I
+replaced the interface block and *added* a note explaining the change — and never removed the older
+bullet further down that still described the superseded shape. So the packet quoted the correct
+declarations at the top and described the wrong ones at line 295. The builder implemented the interface,
+refused the prose, and said so. Fixed now, with the correction dated in place.
+
+**That is the second builder refusal about my packet text that I did not record**, after codex-1's
+volunteered drift-adaptation on R2-D2. Same cause both times: I ran the checklist's named checks and did
+not read what the builder chose to tell me. A checklist makes its own items reliable and everything else
+invisible, and *what the builder volunteers* is precisely the part no checklist can enumerate — it exists
+because the builder saw something the commissioner did not.
+
+The mechanism that produced the defect is worth separating from the missed report: **an edit that adds a
+correction without removing what it contradicts leaves both in the artefact.** That is the same shape as
+the two false `done` commits earlier — I verified the new text was present and never checked the old text
+was gone. My verification habit has now been wrong in both directions in one afternoon: asserting a
+change landed when it had not, and asserting a change was complete when its predecessor survived
+alongside it.
+
+**Also worth adopting from codex-8's own gates:** it reported *"Axioms: standard only — `propext`,
+`Classical.choice`, `Quot.sound`"*. That is the check that distinguishes a discharged theorem from an
+assumed one — no `sorryAx` — and it is stronger than the `lake env lean` exit code I used. It should be a
+named gate in every hole-moving packet, not something a builder volunteers.
