@@ -2050,3 +2050,48 @@ reaching them was sound. Row 11 checks satisfiability; it does not check the par
 the filter that produced the number — and today those came apart three times: the 760/755 denominator, the
 values-vs-forms unit, and now the era partition itself. **The dry-run needs its own denominator stated,
 the same way the evidence does.**
+| 3 (R8) | owner gate: R8-D4 — LAST LANE | codex-12 (via claude-20) | invoke-1788109437775-4435-c87cf785 | park-d8a7321d | 17:16Z | passed | futon2 10826ee | claude-15 17:16Z: gated at the sha — exit 0; generator emits 2 named theorems + 2 #print axioms (3a(iii) by the generator, first time); native axioms named in the artefact; meanPrecision/uniform never written (asserted negatively in its tests); eras partitioned BY FILE DATE (r8_f_contract.clj:199-200) so non-uniform eras are representable; synthetic post-boundary-no-stored-F test fails closed; table = registered values; tests 6/33; registry re-bound; lint: r8EraBoundary still :wrong-shape because era-table? reads the OLD fields — AD-D3b follow-up, reported as an actual |
+
+## Session close — the build's own numbers, stated as the record demands
+
+All lanes gated. Nothing running. Counted rather than recalled:
+
+    Holes.lean            34 bodies / 32 holes   (contract source acfb3b13)
+    packets written       17
+    findings notes        10
+    ledger                2053 lines
+    wiring                two edge entries; specified 0 / unspecified 21
+
+**What the day produced.** Three node records built to the hole (R2, R8, R9) plus P-R16 for the wiring;
+holes discharged by a run for the first time — four by kernel `decide` (R9), three by stated
+`native_decide` (R2, R8); and the wiring's first two edge specifications, one one-sided with typed
+absences, one fully typed with a consumer constraint.
+
+**What it did not produce, said plainly:** the wiring is still **specified 0 / unspecified 21**. Two
+entries exist and neither carries an operational contract, because no endpoint record states a paired
+write, a retry identity or a deadline. That number is the result. Rounding it up would have been the
+wiring lane's first facade.
+
+**The count that matters most for the charter's purpose.** Commissioner-side defects: **eight**, of which
+**six were mine** — "54 entries"; the `:acknowledged?` expectation; R8-D2's empty ε-comparison; R2-D2's
+non-discriminating falsifier; "over the 792"; and the dry-run partitioned by stored-F. Every one was
+caught by a builder or a reader **refusing rather than complying**, and not one by the review checklist
+that was supposed to catch them. Two of my defects escaped their packet into someone else's artefact
+before being caught — a content pin into a Lean docstring, a line number into a committed note — and both
+were *transcribed particulars* rather than arguments. A wrong argument gets refused; a wrong number gets
+copied.
+
+**The rules the day bought, each from a refusal rather than from design:**
+7a (a negative needs a positive control) from four silent probe failures; 3a (quote the axioms, never
+grep for `sorryAx`) from claude-13 asking a question I could not answer; 3a(i) (gate at the sha) from
+elaborating a path a live lane was editing; 7b (a blocker can expire between run and review) from
+codex-12; row 23 (anchor the artefact before specifying it) from four unanchored artefacts; row 24 (a
+dry-run can carry the defect it was run to prevent) from codex-12 again.
+
+**The through-line, if the ledger has one:** every defect found today had the same shape — *something
+that could not have come out otherwise, presented as though it had.* An acceptance that cannot fail, a
+hypothesis that pins the interesting case out of reach, a quantifier over the thing the run fixes, an
+evidence type that cannot represent its own falsifier, a partition that makes uniformity certain, a pin
+whose method was never stated, a digest that agrees because both sides ran one filter. The apparatus that
+caught them was not the checklist. It was seven agents each willing to say *this does not test what it
+says it tests* — including about their own work, which is the part that cannot be delegated.
