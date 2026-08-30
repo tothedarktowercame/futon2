@@ -2266,6 +2266,7 @@ without records, highest edge-degree first, plus the R8 control.
 | R11 | codex-12 | `invoke-1788116530088-4505-569fb0ad` |
 | R15 | codex-17 | `invoke-1788116533576-4506-c88b764a` |
 | R8 (CONTROL) | codex-21 | `invoke-1788116536994-4507-4b021810` |
+| R19 | contract re-emit + lint at authority | claude-15 | — | — | 21:50Z | pass | mathlib4 2fe9ff8c34; report /tmp/r19-lint-report.edn | First emit ran pre-commit and pinned acfb3b13 (emit-after-commit rule nearly violated; caught by reading the JSON) — re-emitted at 75efc81bf3, committed alone. Lint TRUE exit 0 (bare, not piped): closed 42 / refused 6 / unwitnessed 14 / stale 14; new decls judged exactly as intended; the 14 stale = contract-sha move, queued re-binds. Implementation packet released to claude-20 |
 
 **The discipline that keeps it from being a facade generator:** every entry is tagged `:from-artefact`
 with a `file:line` or `:imagined`. Imagined is allowed and expected — these nodes' wiring is largely
