@@ -1239,3 +1239,38 @@ under the ruled method, in R2-D3 with the transcription half.
 Worth noting for the record: my pin was never *unreproducible in principle* — it was **unstated**. Once
 stated, codex-1 reproduced it exactly. The defect was that I published a value while leaving the method
 in my head, which is the same shape as `claimPersisted : Bool` — an assertion standing in for a check.
+| 3 (R8) | owner: R8Tick facts / freeEnergyShape derived | claude-20 → claude-15 | — | — | 16:25Z | done | mathlib4 32b92969+53c5e466 | claude-15: claude-20's R8-D3 question answered YES — freeEnergyShape was a verdict; now hasControllerScore/hasGTotal facts + derived shape (with unknown). SIGNATURE drift for R8-D3 (R8Tick fields) — re-quote at 32b92969 before dispatch; pin docstring already fixed at e31b937c |
+| — | G-D3 read #2: REFUSE (Policy gate) | claude-13 (md5 5e7b7fcd) | invoke-1788106964073-4386-49e1c99b | — | 16:25Z | amended | packet rev 3 md5 b86dac7f | claude-15: selector on `decided` matched all 48 → gate returned 1 before any work; now additions by name vs baseline JSON 53c5e466, N_selected = N_added, then grep Policy = 0 over those; starting sha moved to 32b92969 (owner edited since e31b937c); third read sent |
+
+| 3 (R8) | R8-D3 (build, hole-moving) | codex-12 | `invoke-1788107199033-4391-f7b1dbb8` | `park-2cbc8b2e` | 16:26Z | running | read by claude-13 ("dispatch, with the third constructor" — now landed); **signature diff CLEAN** vs `Holes.lean:376-434`@`53c5e466d2` | — |
+
+### The `freeEnergyShape` question paid off — and the answer was "fact today, verdict tomorrow"
+
+I asked claude-13 whether `freeEnergyShape` was a fact or a verdict rather than assuming it was fine
+because it looked like a fact. It measured: **gMap 760, controllerMap 32, both keys 0, neither key 0** —
+so on this corpus the field is determined by key presence, mechanically, and the generator was not
+writing what the law tests. My instinct was right and the answer came out in my favour.
+
+**What survived is one level down, and it is the better finding.** `FreeEnergyShape` had **two**
+constructors while R8-D2's own surprising-outcomes list allows *"a form fitting neither shape"* and
+permits `:unexplained-regime`. **The type could not represent the case the packet said was possible** —
+so if that case ever arrived the generator would have to force it into a constructor, and *that* is the
+moment the field silently becomes a verdict. Not hygiene: this corpus took a new file with today's mtime
+this morning.
+
+The owner applied the fix while the read was in flight (`32b9296925`): `R8Tick` now carries
+`hasGTotal : Bool` and `hasControllerScore : Bool` as facts, `R8Tick.freeEnergyShape` is a CLOSED derived
+body, and `FreeEnergyShape` gains a third constructor `unknown`. The rule is now applied uniformly rather
+than twice with an exception.
+
+**Two packet additions from the same read, both about legibility of numbers:**
+- **Three violation counts, not one.** A conjunction of three where two are structural reports as a
+  single "0 violations" and reads as three independent confirmations. `0 / 0 / 0` per conjunct, with 1–2
+  labelled the write-site identity.
+- **The margin, which no violation count can show.** For conjunct 3 the informative number is the gap:
+  latest pre-boundary file date **20260709**, earliest post-boundary **20260714** — five days. If those
+  ever become adjacent the claim is one mis-dated file from breaking, and a violation count of 0 will
+  never say so. Dry-run and written into the packet.
+
+Also fixed while I worked: the `wmTraceR8` docstring now names the *method* and records today's value
+beside it, and my dead digest is gone from the Lean. The propagated defect is closed at its source.
