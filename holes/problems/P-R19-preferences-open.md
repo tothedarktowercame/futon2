@@ -78,3 +78,34 @@ that is not a parameter).
   value.
 - A new small lane, when Joe says so: R19-D1 — declare the four existing sources as layers with author + basis, and
   make `c_vector.clj`'s fold the recorded `foldC`. No new preferences; just the ones already there, named.
+
+## The R19 tetrahedron (Joe, 19:35Z — ratified: "R19-D1 should proceed", with this amendment)
+Naming four sources as layers is the *nouns* vertex only. R19 is a new tetrahedron (lifecycle §0.9 subdivision), and a
+list of strata without a purpose is exactly the facade §0.10 warns about — vertices with no mass:
+
+| vertex | R19 content |
+|---|---|
+| nouns | the layers: source, author, basis, prefers |
+| verbs | the fold: composition rule per layer, order, the recorded `foldC` |
+| organisation | **the stack as a whole, with its purpose stated at the strata level**: "these N strata are used to model *this* situation" — not "here are four strata, make sense of it" |
+| evidence | the evidentiary core: what observations show the stack fits the situation it claims to model, and what would show it does not (the falsifier); gathered into one place with a **handoff** |
+| mass (§0.10) | a holder who owns the stack record and can subdivide it (per-layer records) at the next level |
+
+So a preference stack is admissible only with, alongside the list of layers:
+- `purpose` — the situation the stack models (e.g. "the futon stack as maintained by one operator, 2026-08");
+- `situation-evidence` — the observations that back the claim that these layers, so composed, model that situation;
+- `falsifier` — an observation under which the stack would be the wrong model of the situation;
+- `holder` / `parent` — the handoff fields (§0.10).
+Substituting the unit (a company, a domain) = a new stack record with a new purpose, not a new list of files.
+`PreferenceStack` is therefore the Lean type to add beside `PreferenceLayer`:
+```lean
+structure PreferenceStack (Outcome : Type) where
+  layers    : List (PreferenceLayer Outcome)
+  purpose   : String        -- the situation modelled, stated at the strata level
+  evidence  : List String   -- refs into the evidence landscape backing the fit claim
+  falsifier : String        -- what would show this stack is the wrong model
+  holder    : String
+```
+R19-D1 is the DISCOVERY half: the stack record for today's machine — its four layers named with author + basis, and its
+purpose / evidence / falsifier stated honestly (including "unknown" where that is the truth). R19-D2 (after review) is
+the implementation half: Lean declarations ratified, `c_vector.clj`'s fold made the recorded one.
