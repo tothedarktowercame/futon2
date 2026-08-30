@@ -2,7 +2,7 @@
   "AIF observation layer for the War Machine.
 
    Normalises raw scan data (from `futon2.report.war-machine`'s
-   `scan-*` projection functions) into a 13-channel observation
+   `scan-*` projection functions) into a 14-channel observation
    vector in [0,1]. This is the War Machine's g-observe — the bridge
    between scan data and the AIF loop.
 
