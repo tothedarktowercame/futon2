@@ -35,6 +35,16 @@
     (is (= r8/expected-census (get-in report [:r8CensusWmTrace :counts])))
     (is (= {:without-stored-F 760 :with-stored-F 32}
            (get-in report [:r8EraBoundary :era-counts])))
+    (is (= {:g-map 760 :controller-map 32 :unknown 0
+            :both-keys 0 :neither-key 0}
+           (get-in report [:r8EraBoundary :shape-counts])))
+    (is (= {:storedF-iff-selectionGain 0
+            :storedF-iff-controllerMap 0
+            :storedF-iff-dateSuffix 0}
+           (get-in report [:r8EraBoundary :conjunct-violations])))
+    (is (= {:latest-pre-boundary 20260709
+            :earliest-post-boundary 20260714}
+           (get-in report [:r8EraBoundary :date-margin])))
     (is (zero? (get-in report [:F :missing-F-computable :non-finite])))
     (is (= 0.0 (get-in report [:F :stored-recompute-consistency
                                :max-absolute-delta])))))
@@ -80,7 +90,10 @@
       (is (= :unexplained-regime
              (r8/free-energy-shape
               (tick {:errors errors :precision precision :stored 0.5
-                     :gain {} :shape :unknown})))))))
+                     :gain {} :shape :unknown}))))
+      (is (= :unexplained-regime
+             (r8/free-energy-shape
+              {:free-energy {:G-total 0.1 :controller-score 0.2}}))))))
 
 (deftest recomputation-reports-non-finite-values
   (let [{:keys [errors precision]} (channel Double/POSITIVE_INFINITY 1.0)]
@@ -89,6 +102,19 @@
                [(r8/recompute-f (tick {:errors errors :precision precision
                                        :stored :absent :gain :absent
                                        :shape :g}))]))))))
+
+(deftest generated-lean-carries-facts-not-derived-verdicts
+  (let [{:keys [errors precision]} (channel 1.0 2.0)
+        records [{:file-date 20260709
+                  :value (tick {:errors errors :precision precision
+                                :stored :absent :gain :absent :shape :g})}]
+        report {:summary {:files 1 :forms 1}
+                :content-pin {:algorithm :test :sha256 "abc"}}
+        lean (r8/lean-fixture-text report records)]
+    (is (re-find #"hasControllerScore := false" lean))
+    (is (re-find #"hasGTotal := true" lean))
+    (is (re-find #"fileDate := 20260709" lean))
+    (is (not (re-find #"disposition :=|freeEnergyShape :=|boundary :=" lean)))))
 
 (let [{:keys [fail error]} (run-tests)]
   (System/exit (if (zero? (+ fail error)) 0 1)))
