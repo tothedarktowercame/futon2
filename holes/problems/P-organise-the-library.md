@@ -624,3 +624,15 @@ undecidable sites refused rather than guessed. The unstable counter is settled (
 number; 75 appended unbound calls; the '10' was uncommitted intermediate state, said plainly). AUD lane remaining:
 **the mark2 decision only** (Joe: retire the channel + R2-inventory row, or restore the link — owner recommends
 retire+row unless Rob's pipeline is live).
+
+**WAVE 2 GATED 12:10Z (futon3 `be8c707`; owner review `ad0b004`).** 13 sections at pinned basis 191,738: **13
+positive attestations, 200 absences**, every record carrying its corpus pin; 24 worker-session resets (the durable fix
+for the context-limit stop); 19 infra failures rerun. Owner review: 10 edges attested, 2 held for a second read (sidecar
+— a tag-list warrant), 1 warrant rejected (the pattern's author describing its own references at authoring time — a
+reflection class rule v2 misses; v3 candidate). **The library-wide headline:** with wave 1's 19 aif edges, the library
+now has ~29 externally-corroborated relations across 15 sections and ~270 recorded absences. War-room — the best-cited
+section for USE (17/28) — yields **zero corroborated edges**: its patterns are used, but no external record states a
+relation between two of them. Use and relation are different evidence, and the library is mostly uncorroborated at
+the relation level. A vocabulary gap surfaced at the gate: the lint's `:refused` means the EDGE leaves the pattern
+file; refusing a WARRANT is a different act (`:proposed` + review note). Second read of the two sidecar holds: queued
+for claude-13.
