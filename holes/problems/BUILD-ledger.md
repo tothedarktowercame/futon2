@@ -1046,3 +1046,39 @@ thirteen `paperSentence` and collect 13 `self` trivially — the tautology we cu
 
 Fifth stale-payload wake also handled — claude-13's third read, whose blocker is long since ratified as
 `r9VerdictConsultsChecker`; ledger checked first, no action.
+| 1 (R9) | owner: R9-D2 5th-read proposals ratified | claude-13 → claude-20 → claude-15 | — | — | 16:14Z | done | mathlib4 2a98a0cd+1bfba954 | claude-15 16:14Z: VerdictRow facts + computed membership; DeclarationSource sum type; r9PerRowDeclarations + r9WmPerRowDeclarations; 24/24; R9-D2 DISPATCHES on this sha — quote the R9 block from the file |
+
+### R2-D2's interface drifted mid-build — SIGNATURE, not commentary, and it resolves my own residual
+
+codex-1 was dispatched at 16:07 quoting `R2TickLit := R2Tick (Fin 14) Unit`. At mathlib4 `5e7b4c2a11`
+the owner replaced it:
+
+    inductive Channel where
+      | loopHealth | supportCoverage | attackCoverage | missionHealth | stackPct | consultingPct
+      | portfolioPct | mathematicsPct | activeRepoRatio | sorryCountNorm | couplingDensity
+      | ticksFiringRatio | depositingSignal | annotationHealth
+    def Channel.all : List Channel := [ … the fourteen, in declaration order … ]
+    abbrev R2TickLit := R2Tick Channel Unit
+    def r2ContractCensusWmTrace :
+        r2ContractCensus wmTraceR2 (fun tick => Channel.all.all (fun c => (tick.observation c).isSome)) = 2
+
+Under the clause-2 distinction the owner just accepted this is **signature drift, and it blocks** — the
+type of `R2TickLit` changed. Consequence, stated concretely rather than as a category: the Clojure
+checker is unaffected (it never referenced the Lean type), but the **transcription deliverable is now in
+the wrong type** — `wmTraceR2` must be written with named `Channel` constructors, not `Fin 14` indices.
+Mechanical to fix, and the builder's own analysis stands.
+
+**It also closes the residual I flagged an hour ago.** I wrote into the packet that `Fin 14` pins the
+channel *arity* and cannot express "these fourteen names in declaration order", so discharging the Lean
+law was **not** evidence of source-keying and that discrimination rested on the packet prose and the
+fixture corpus alone. With a named `Channel` inductive plus `Channel.all` in declaration order, the Lean
+now says exactly what the ordered-vector requirement says — the two halves of the check finally agree, and
+the caveat can come out of the packet at R2-D3.
+
+**Not interrupting, again, and the reasoning is now on record twice.** The analysis half is unaffected;
+the transcription half is mechanical; and I cannot inject into a running turn. The cost of this policy is
+visible and worth stating: **three builds today have run against superseded declarations** (R8-D2's
+holes, R2-D2's `Fin 14`, and R2-D2's earlier `∀ illFormed`), and in two of the three the *hole-moving*
+half of the packet was impossible while the analysis half was fine. The pattern is stable enough to plan
+around: **split D2 packets into an analysis half and a hole-moving half**, so a mid-build declaration
+change costs only the second. That is a charter proposal, not something I will do unilaterally.
