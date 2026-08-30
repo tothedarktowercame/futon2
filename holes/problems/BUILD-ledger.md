@@ -1127,3 +1127,35 @@ derived (`producer ∈ declaredPart`), so a transcriber cannot set both sides of
 than a judgement. Lifecycle row 18 gains the general form: **a fixture literal carries facts from the
 artefact; anything the law tests is derived from them.** That is the rule I would keep from today if only
 one survived — it generalises past R9 to every fixture-constant hole in the file.
+
+### My bad content pin reached a Lean docstring — flagged to the owner
+
+`wmTraceR8`'s docstring (`Holes.lean:414`) now states *"falsifier: digest ≠ c434950f2e6a7e9b"* — **my
+digest**, the one codex-12 could not reproduce and correctly refused to adopt (its method gave
+`c9add16a…`; counts matched at 53/792, so it declined to call it drift *or* to substitute mine). The
+falsifier therefore names a value **nobody can re-derive**: a builder computing a different digest by a
+different method fails the hole for a reason that is not corpus drift, which inverts the pin's whole
+purpose — the one distinction it exists to make is drift versus method.
+
+Proposed to the owner: the pin's identity **is** its method, so the docstring should cite the method
+recorded in P-R8 and let the *value* be recorded by the first run that follows it — the builder's, not
+mine. A pin buys stability across runs of the same method; agreement with a number I computed once was
+never the point.
+
+Worth naming as a shape, because it is not really about digests: **a defect I introduced in a packet
+propagated into the formal record, where it will outlive the packet.** The packet was reviewed and the
+defect was caught there — by the builder — but the *value* had already been lifted into a docstring in
+the meantime. Review catching a defect downstream does not un-propagate it upstream; something has to go
+back and check where the bad value went. Nothing in the charter does that today.
+
+### R8-D3 row-11 dry-run, done in advance
+
+The hole-moving half D2 could not perform (its declarations were ∀-quantified at dispatch). Transcribing
+all 792 forms to `R8TickLit` and classifying by **Lean's own `r8Disposition` arms** gives exactly
+`(755, 32, 5)`; the era biconditional has **0 violations** across the 792. So `r8CensusWmTrace` and
+`r8EraBoundary` both move by `decide` once the literal exists — and they move to *true*, which is
+stronger than being merely well-formed and is what row 11 asks me to establish before dispatch.
+`R8TickLit = R8Tick Unit Unit Unit` is the right shape: presence-only is all the two laws read.
+
+**R8-D3 held** pending the owner's gate on R8-D2 and the pin fix. Seventh stale-payload wake handled;
+ledger checked first, no action.
