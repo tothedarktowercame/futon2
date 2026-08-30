@@ -1,5 +1,4 @@
 # R5 round 1 — scoring toward R14
-
 ## What I am
 
 I score each admitted candidate with a multi-objective controller score whose
