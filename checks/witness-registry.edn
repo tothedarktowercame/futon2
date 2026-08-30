@@ -43,7 +43,7 @@
   :check {:repo "futon2" :path "checks/r19_stack_witness.clj" :entrypoint "-main"}
  :fixture {:repo "futon2" :path "checks/r19_stack_witness.clj"}
  :run-sha "03c149d0b39b5f1fbe9640b6c7aa63f4fbe21b36"
-  :contract-sha "638c7f28056e9599437d95f2937aa1b95faa38ff"
+  :contract-sha "eec8279cf7b2c841f386894116e6aa627869a75c"
   :result :passed
   :recorded-at "2026-08-31T03:45:00Z"
   :axioms "preferenceStackRecorded: [] (kernel decide); this Clojure witness emits no Lean proof and introduces no axioms"
@@ -52,7 +52,7 @@
   :check {:repo "futon2" :path "checks/wm_runs_once_witness.clj" :entrypoint "-main"}
   :fixture {:repo "futon2" :path "holes/labs/wm-contract/tick-run-record-2026-08-30.edn"}
   :run-sha "a0205ba2767ad3bc2a68a52ac5a1c27e4e3a84dd"
-  :contract-sha "638c7f28056e9599437d95f2937aa1b95faa38ff"
+  :contract-sha "eec8279cf7b2c841f386894116e6aa627869a75c"
   :result :passed
   :recorded-at "2026-08-30T20:16:30Z"
   :axioms "wmRunsOnce: [] (receipt witness only); this Clojure witness emits no Lean proof and introduces no axioms"
