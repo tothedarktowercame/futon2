@@ -18,3 +18,14 @@ I therefore confirm all nine Delivery fields, their field provenance,
 the four blockers. Empty disagreement is warranted because neither side now
 claims an unimplemented field is observed; the remaining work is jointly
 classified as proposed wiring rather than opposed semantics.
+
+## Measured-route addendum
+
+WM-RUN2 subsequently located R6 between the scoring and temperature ports. I
+therefore specify this as one typed hyper-edge with two directed deliveries,
+R5→R6 and R6→R14, not as a direct binary R5→R14 edge. The R14 uptake port must
+accept the versioned score field with the semantic refinement
+`:live-choice-authority :none` and
+`:temperature-order-authority :counterfactual-only`: accepting scores does not
+authorize this port to choose with them. The R6 port owns live selection and
+must preserve the R5 score-field identity into R14's diagnostic computation.
