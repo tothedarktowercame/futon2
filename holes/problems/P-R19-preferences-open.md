@@ -146,3 +146,17 @@ C-risk composition becomes the recorded `foldC`, emitting the stack record besid
 **D2a′** — c_vector.clj entries carry `{author basis}` (parallel, different holder). **D2b** — the witness for
 `preferenceStackLiveRecorded`, after D2a. The tech lead verified the Lean fixture matches `dc1dac8` exactly before
 proposing — nothing to correct on the interface.
+
+## Declared abstention (owner amendment 2026-08-30 23:35Z, from the node-sim's independent finding)
+Two isolated node agents (R14 from the branch, R8 from the missing return path) converged on a fact that corrects the
+gate's own summary: in the branch the WM runs, the habit prior's scores order an *inspectable counterfactual* and do
+not choose — `policy.clj:234-270`: `chosen = (or (first controller-entries) …)`, `:habit-prior-applied? false`;
+`war_machine.clj:364`: `:scheduler-habit-authority :counterfactual-only`. So the 07-13 flip moved the term to the
+seam, and the seam then abstains, on the record. The correct sentence, replacing "live in Q(π) right now": **the
+operator's learned preference is computed and recorded at the selection seam with declared `:counterfactual-only`
+authority; it does not select.** For this record's thesis that is a sharper fact, not a weaker one: the operator-as-C
+is not an unrecorded presence but a *declared abstention* — the machine states, in a field, that it computes your
+preference and refuses it authority. What would change that is a deployment decision (a layer-stack choice under
+`PreferenceStack`), not a code accident — which is exactly where R19 says such a decision belongs. WR-27's
+`:holds false` badge is this gap located in code: nothing yet demonstrates the gain reading changes selection.
+Fixture and gated record amended to carry the authority clause (`site`/`:enters-at`).
