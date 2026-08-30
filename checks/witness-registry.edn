@@ -43,8 +43,8 @@
   :check {:repo "futon2" :path "checks/r19_stack_witness.clj" :entrypoint "-main"}
   :fixture {:repo "futon2" :path "checks/r19_stack_witness.clj"}
   :run-sha "03c149d0b39b5f1fbe9640b6c7aa63f4fbe21b36"
-  :contract-sha "84326d17c584fa5f09d8d0b796e7707a6a3e0f72"
+  :contract-sha "5983b68ff24a776bbb0ada43cdd1c9da2e719d40"
   :result :passed
-  :recorded-at "2026-08-30T19:40:41Z"
+  :recorded-at "2026-08-31T03:45:00Z"
   :axioms "preferenceStackRecorded: [] (kernel decide); this Clojure witness emits no Lean proof and introduces no axioms"
   :note "R19-D2b witnesses the preference-stack emission added by ccd06ce; the inline dry-run fixture and executable missing-layer falsifier live in the check."}]
