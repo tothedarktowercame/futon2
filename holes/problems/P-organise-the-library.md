@@ -583,3 +583,12 @@ rise over the export era (10 → 21 real) is real and about three-quarters of wh
 Packet 4d (codex-20): reflection by provenance (fleet seat set passed in; Agency job records of the spider seat),
 columns any / clean / clean-non-reflection, rung-1 warrant = clean-non-reflection only, wave-1 attestations whose
 warrant was reflection re-flagged `:unwarranted-rung-1` without re-spidering. Wave 2 waits on 4d.
+
+**AUD-D4 GATED 22:10Z (`d2f4200`) — passed core; one amendment.** The lint now follows the value: 4 marker-swallowing
+sites found (including one beyond the commission — the centrality branch mapping its marker to `{}`), exit 1, controls
+3/0. Meanwhile AUD-D3b landed (`29584d9`): the helpers record every read into `*input-status*` (rendered as
+`## Input status`, threaded to the trace) BEFORE the call sites substitute — which D3b's packet sanctioned. So the two
+instruments disagree by spec, not defect; the owner resolved it: producer-level recording satisfies `I_absent_is_loud`,
+and AUD-D4b teaches the lint a `recorded-then-substituted` judgement (expected M=0, K≥4 at HEAD). One reporting
+discrepancy: the builder's "loud call sites=10" does not reproduce (75 at HEAD and at their stated sha) — explain-or-fix
+is in D4b. D3b's own gate runs when its bell arrives.

@@ -27,8 +27,7 @@ extensions get a supersession record, not a deletion (first case: `P-supersede-s
 
 ## What is running right now
 - packet 4d (codex-20): exclude the spider's own trace from rung 1; honest coverage columns; wave-1 warrants re-flagged.
-- AUD-D3b (codex-5): `## Input status` in the WM report and `:input-status` in the trace; loud trace write.
-- AUD-D4 (second seat): the lint learns marker-swallowing at call sites.
+- AUD-D3b landed (`29584d9`, bell pending — owner pre-verified the mechanism); AUD-D4 gated (`d2f4200`); AUD-D4b (codex-12): lint credits producer-level recording — the two specs reconciled.
 Nothing else. Every builder lane is closed and gated.
 
 ## Your open decisions (none blocking a running lane)
