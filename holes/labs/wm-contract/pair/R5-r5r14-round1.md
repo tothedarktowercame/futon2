@@ -50,13 +50,12 @@ capability-zone-risk fold (`src/futon2/aif/efe.clj:645-655`).
   score-component schema/version, and selection boundary. No such digest is
   currently produced.
 
-The edge carries traffic today: the production runner passes ranked admissible
-entries and the prior tick's selection gain into `policy/select-action`
+The production runner passes ranked entries and prior selection gain to `select-action`
 (`scripts/futon2/report/war_machine.clj:4509-4518`). Retry, timeout, atomicity,
 and idempotency are not observable properties of this in-process pure call and
 must not be invented as transport behaviour.
 
-Packet correction: R14's τ-adjusted scores order only the counterfactual in the
-strategic branch, but R5 scores have already sorted `ranked-actions`; `chosen`
+Packet correction: τ-adjusted scores order only the counterfactual in the strategic
+branch, but R5 has already sorted `ranked-actions`; `chosen`
 is the first non-no-op in that R5 order (`efe.clj:844-862`,
 `policy.clj:247-253`). Thus τ does not choose there, but R5 scoring still does.
