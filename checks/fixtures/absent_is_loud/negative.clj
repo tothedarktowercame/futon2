@@ -29,3 +29,15 @@
 
 (def negative-optional
   (optional-read "/home/joe/code/futon2/checks/fixtures/absent_is_loud/optional.edn"))
+
+;; same body, but the docstring DECLARES the absence result: conformant
+(defn safe-read
+  "Optional input: returns nil when the file is absent or unreadable."
+  [path]
+  (try
+    (when (.exists (io/file path))
+      (edn/read-string (slurp path)))
+    (catch Exception _ nil)))
+
+(def negative-safe-named
+  (safe-read "/home/joe/code/futon2/checks/fixtures/absent_is_loud/missing-too.edn"))

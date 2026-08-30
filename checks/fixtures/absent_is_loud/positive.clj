@@ -31,3 +31,14 @@
 
 (def positive-optional
   (optional-read "/home/joe/code/futon2/checks/fixtures/absent_is_loud/optional.edn"))
+
+;; name-only claim of safety, no docstring: NOT a declaration (owner amendment at the gate)
+(defn safe-read
+  [path]
+  (try
+    (when (.exists (io/file path))
+      (edn/read-string (slurp path)))
+    (catch Exception _ nil)))
+
+(def positive-safe-named
+  (safe-read "/home/joe/code/futon2/checks/fixtures/absent_is_loud/missing-too.edn"))

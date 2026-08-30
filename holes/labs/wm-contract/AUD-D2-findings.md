@@ -1,6 +1,6 @@
 # AUD-D2 findings
 
-Verdict: I_absent_is_loud over default scope | repos futon2=126aac2, futon3=e3e5ef4, futon0=7a568e8, futon3a=58ea67a | helpers total=56 loud=38 silent=16 declared-optional=2 refused=0 | silent call sites=42 silent+absent-now=7
+Verdict: I_absent_is_loud over default scope | repos futon2=082da13, futon3=e3e5ef4, futon0=7a568e8, futon3a=58ea67a | helpers total=56 loud=38 silent=17 declared-optional=1 refused=0 | silent call sites=45 silent+absent-now=7
 
 ## Helpers
 
@@ -11,7 +11,7 @@ Verdict: I_absent_is_loud over default scope | repos futon2=126aac2, futon3=e3e5
 | futon0.rhythm.affect/load-json-file | loud | futon0/scripts/futon0/rhythm/affect.clj:332 | missing/unparseable path propagates as an exception |
 | futon0.rhythm.affect/load-jsonl-file | loud | futon0/scripts/futon0/rhythm/affect.clj:339 | missing/unparseable path propagates as an exception |
 | futon0.vitality.scanner/read-json-file | silent | futon0/scripts/futon0/vitality/scanner.clj:38 | absence/parse failure collapses to nil/empty/default |
-| checks.absent-is-loud-lint/read-forms | loud | futon2/checks/absent_is_loud_lint.clj:46 | missing/unparseable path propagates as an exception |
+| checks.absent-is-loud-lint/read-forms | loud | futon2/checks/absent_is_loud_lint.clj:45 | missing/unparseable path propagates as an exception |
 | checks.r2-channel-contract/read-clojure-forms | loud | futon2/checks/r2_channel_contract.clj:41 | missing/unparseable path propagates as an exception |
 | checks.r2-channel-contract/definition-line | loud | futon2/checks/r2_channel_contract.clj:57 | missing/unparseable path propagates as an exception |
 | checks.r2-channel-contract/read-edn-forms | loud | futon2/checks/r2_channel_contract.clj:97 | missing/unparseable path propagates as an exception |
@@ -23,7 +23,7 @@ Verdict: I_absent_is_loud over default scope | repos futon2=126aac2, futon3=e3e5
 | futon2.report.war-machine/read-edn-file | silent | futon2/scripts/futon2/report/war_machine.clj:482 | absence/parse failure collapses to nil/empty/default |
 | futon2.report.war-machine/read-json-file | silent | futon2/scripts/futon2/report/war_machine.clj:488 | absence/parse failure collapses to nil/empty/default |
 | futon2.report.war-machine/read-strategy-cascade | loud | futon2/scripts/futon2/report/war_machine.clj:1029 | missing/unparseable path propagates as an exception |
-| futon2.report.war-machine/safe-slurp-json | declared-optional | futon2/scripts/futon2/report/war_machine.clj:3451 | name/docstring declares optional/graceful read |
+| futon2.report.war-machine/safe-slurp-json | silent | futon2/scripts/futon2/report/war_machine.clj:3451 | absence/parse failure collapses to nil/empty/default |
 | reference-regression/run-constructor | loud | futon2/scripts/reference_regression.clj:71 | missing/unparseable path propagates as an exception |
 | reference-regression/deposit-has-seal-field? | loud | futon2/scripts/reference_regression.clj:333 | missing/unparseable path propagates as an exception |
 | ants.aif.experiment-schema/read-registration | loud | futon2/src/ants/aif/experiment_schema.clj:17 | missing/unparseable path propagates as an exception |
@@ -82,6 +82,9 @@ Verdict: I_absent_is_loud over default scope | repos futon2=126aac2, futon3=e3e5
 | futon2/scripts/futon2/report/war_machine.clj:2089 | futon2.report.war-machine/read-edn-file | (str futon5a-root "/data/stack-logic-model.edn") | when-let | absent | /home/joe/code/futon5a/data/stack-logic-model.edn |
 | futon2/scripts/futon2/report/war_machine.clj:2150 | futon2.report.war-machine/read-edn-file | (str futon5a-root "/data/stack-logic-model.edn") | when-let | absent | /home/joe/code/futon5a/data/stack-logic-model.edn |
 | futon2/scripts/futon2/report/war_machine.clj:2211 | futon2.report.war-machine/read-edn-file | (str futon5a-root "/data/stack-logic-model.edn") | none | absent | /home/joe/code/futon5a/data/stack-logic-model.edn |
+| futon2/scripts/futon2/report/war_machine.clj:3516 | futon2.report.war-machine/safe-slurp-json | mark2-state-path | none | present | /home/joe/code/storage/mark2/state.json |
+| futon2/scripts/futon2/report/war_machine.clj:3530 | futon2.report.war-machine/safe-slurp-json | f | none | dynamic/refused | dynamic path |
+| futon2/scripts/futon2/report/war_machine.clj:3682 | futon2.report.war-machine/safe-slurp-json | f | if | dynamic/refused | dynamic path |
 | futon2/scripts/futon2/report/war_machine.clj:3850 | futon2.report.war-machine/read-edn-file | invariant-model-path | when-let | present | /home/joe/code/futon4/futon-stack-invariant-model.edn |
 | futon2/scripts/futon2/report/war_machine.clj:4223 | futon2.aif.belief/classify-entity-tags-from-stack-annotations | unresolved | none | dynamic/refused | dynamic path |
 | futon2/scripts/futon2/report/war_machine.clj:4224 | futon2.aif.belief/classify-entity-repos-from-stack-annotations | unresolved | none | dynamic/refused | dynamic path |
@@ -116,5 +119,5 @@ Verdict: I_absent_is_loud over default scope | repos futon2=126aac2, futon3=e3e5
 |---|---|---|
 | none | n/a | none |
 
-Positive control: {:files ["futon2/checks/fixtures/absent_is_loud/positive.clj"], :violations 1}
+Positive control: {:files ["futon2/checks/fixtures/absent_is_loud/positive.clj"], :violations 2}
 Negative control: {:files ["futon2/checks/fixtures/absent_is_loud/negative.clj"], :violations 0}

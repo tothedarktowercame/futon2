@@ -15,7 +15,6 @@
 (def guard-heads
   '#{when when-let if if-let when-some if-some some-> some->> or try})
 
-(def optional-name-re #"(?i)(optional|safe|maybe)")
 (def optional-doc-re #"(?i)\boptional\b|graceful|returns nil|returns \[\]|returns \{\}")
 (def path-name-re #"(?i)(path|file|dir|root|cache|artifact|registry|edges|badges|source|ref|prereg|index)")
 (def reader-heads
@@ -225,9 +224,13 @@
                     :else false))))
          (tree-seq coll? seq form))))
 
-(defn declared-optional? [{helper-name :name docstring :docstring}]
-  (or (re-find optional-name-re (name helper-name))
-      (and docstring (re-find optional-doc-re docstring))))
+(defn declared-optional?
+  "Optionality is declared by the DOCSTRING stating the absence result, never by
+   the helper's name: `safe-`/`maybe-` in a name is a claim, not a declaration
+   (I_absent_is_loud: the declaration is what the lint reads). Owner amendment
+   at the AUD-D2 gate; `safe-slurp-json` (war_machine.clj:3451) was the case."
+  [{docstring :docstring}]
+  (boolean (and docstring (re-find optional-doc-re docstring))))
 
 (defn helper-classification [helper]
   (let [path-args (vec (filter #(and (symbol? %) (re-find path-name-re (name %)))
@@ -450,7 +453,7 @@
     (when out (spit out (str markdown
                              "\nPositive control: " (pr-str positive) "\n"
                              "Negative control: " (pr-str negative) "\n")))
-    (when-not (= 1 (:violations positive))
+    (when-not (= 2 (:violations positive))
       (binding [*out* *err*]
         (println "fixture positive control failed:" (pr-str positive)))
       (System/exit 2))
