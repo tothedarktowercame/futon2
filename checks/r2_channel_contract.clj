@@ -122,13 +122,12 @@
     (format "%064x" (BigInteger. 1 (.digest digest)))))
 
 (defn- content-pin [records]
-  ;; This is the recorded R2/R8 pin algorithm: Clojure's value hash for each
-  ;; parsed form, rendered in decimal, sorted, concatenated, then SHA-256.
-  ;; It intentionally pins parsed content rather than file traversal order.
+  ;; Owner-ruled R2/R8 pin: SHA-256 each form's canonical printed EDN, sort
+  ;; those hex digests, join them with newlines, then SHA-256 the result.
   (->> records
-       (map (comp str hash :value))
+       (map (comp sha256 pr-str :value))
        sort
-       (apply str)
+       (str/join "\n")
        sha256))
 
 (defn- record-check [declared {:keys [file form value]}]
@@ -213,6 +212,8 @@
                                  record-checks))
         mismatched (count (filter #(= :observation-keys (:check %))
                                   record-checks))
+        undeclared-count (reduce + 0 (map (comp count :undeclared)
+                                          record-checks))
         finding (docstring-finding (:file channel-source) (count channels))
         digest (content-pin records)]
     {:summary {:pass? (empty? checks)
@@ -220,9 +221,10 @@
                :forms (count records)
                :conformant-records (- (count records) (count record-checks))
                :key-set-mismatches mismatched
+               :undeclared-key-count undeclared-count
                :malformed-observations malformed
                :failures (count checks)}
-     :content-pin {:algorithm :sha256-over-concatenated-sorted-clojure-form-hashes
+     :content-pin {:algorithm :sha256-over-newline-joined-sorted-form-sha256
                    :sha256 digest
                    :prefix (subs digest 0 16)}
      :channel {:source channel-source
@@ -275,11 +277,11 @@
          "   Files/forms: " (get-in report [:summary :files]) "/"
          (get-in report [:summary :forms]) "\n-/\n\n"
          "namespace DarkTower.WarMachine.Holes.R2GeneratedFixture\n\n"
-         "def wmTraceR2Generated : List R2TickLit :=\n[\n"
+         "def wmTraceR2 : List R2TickLit :=\n[\n"
          (str/join ",\n" ticks)
          "\n]\n\n"
          "example :\n"
-         "    r2ContractCensus wmTraceR2Generated\n"
+         "    r2ContractCensus wmTraceR2\n"
          "      (fun tick => Channel.all.all (fun c => (tick.observation c).isSome)) = 2 := by\n"
          "  native_decide\n\n"
          "end DarkTower.WarMachine.Holes.R2GeneratedFixture\n")))

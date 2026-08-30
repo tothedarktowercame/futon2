@@ -24,7 +24,10 @@
     (is (= 790 (get-in report [:summary :conformant-records])))
     (is (= 2 (get-in report [:summary :key-set-mismatches])))
     (is (= 0 (get-in report [:summary :malformed-observations])))
-    (is (= "c434950f2e6a7e9b" (get-in report [:content-pin :prefix])))
+    (is (= 0 (get-in report [:summary :undeclared-key-count])))
+    (is (= :sha256-over-newline-joined-sorted-form-sha256
+           (get-in report [:content-pin :algorithm])))
+    (is (= "c9add16ac96c973b" (get-in report [:content-pin :prefix])))
     (is (= 2 (get-in report [:r2ContractCensusWmTrace :ill-formed])))
     (is (= [:loop-health :support-coverage :attack-coverage :mission-health
             :stack-pct :consulting-pct :portfolio-pct :mathematics-pct
@@ -66,6 +69,15 @@
       (let [report (lint/lint-paths {:trace-dir trace-dir})]
         (is (= 1 (get-in report [:summary :malformed-observations])))
         (is (= :not-a-map (get-in report [:checks 0 :reason])))))))
+
+(deftest generated-lean-is-directly-substitutable-for-the-interface-hole
+  (let [{:keys [records]} (lint/read-trace-corpus lint/default-trace-dir)
+        report (lint/lint-paths {})
+        generated (lint/lean-fixture-text report records)]
+    (is (re-find #"def wmTraceR2 : List R2TickLit" generated))
+    (is (re-find #"r2ContractCensus wmTraceR2" generated))
+    (is (re-find #"(?m)^  native_decide$" generated))
+    (is (not (re-find #"wmTraceR2Generated" generated)))))
 
 (let [{:keys [fail error]} (run-tests)]
   (System/exit (if (zero? (+ fail error)) 0 1)))
