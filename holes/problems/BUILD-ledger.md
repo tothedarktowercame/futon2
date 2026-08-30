@@ -2726,3 +2726,48 @@ one concrete path producing the untyped `:enacted nil` that R16-D1 found from ou
 **Two rounds-1, two corrections to gated material, from nodes reading their own code in character.** That
 is now three today (R14's counterfactual authority finding, and these two), against zero produced by my
 edge-statistics apparatus this afternoon.
+
+### PAIR-R16-R2 complete — the pairing found a semantic fork, not a missing default
+
+Six commits, three rounds, ~25 minutes, two seats. Joint artefact
+`holes/labs/wm-contract/pair/R16-R2-delivery.edn` (`e6403ed` proposed by R16, `cfa9a18` confirmed by R2)
+parses clean: **field-provenance 8 `:agreed` / 1 `:unresolved`; 1 disagreement; 4 blockers;
+`:traffic-today false`.**
+
+**The result, and it is not a filled-in schema.** The edge is *named* `re-observe` — re-observation of
+actuation. R16's executor (`enact.clj:113`, `engine-wiring`) shells the futon3a fold engine and returns
+"the enacted wiring map (`:boxes`/`:policy-holes`) or nil": **a construction inside the model, not an
+outward effect.** R2's requirement is an externally readable referent — *"an enactor's wiring is
+self-report"*. Their `:why-unresolved` states the fork exactly: resolve it either with **an
+operator-armed outward actuator plus an independent external-effect reader**, *or* with **agreement that
+this edge observes construction rather than outward actuation.** Build the actuator, or rename the edge.
+
+That is a decision for Joe and the owner, and neither node could have reached it alone: R2 did not know
+R16 only constructs; R16 did not know R2 needed an independent referent.
+
+**R2 independently rediscovered R9's distinction at a different edge.** Its objection — R16's witness is
+self-report — is exactly `r9_independence.clj:13`'s
+`(if (decide? producer (:producing-part declared)) :self :independent)`, typed at `Holes.lean:222-227`.
+The payload's independence verdict is `:self`; re-observation requires `:independent`. Neither agent read
+P-R9.
+
+**Against my worry that a pair would just be polite:** the one unresolved field is the *payload* — the
+substantive one — while the four fields that stayed `:unspecified` are marked `:agreed`, each with a
+reason (no durable producer/consumer op; no shared commit; no safe-replay contract; no published
+deadline). **Agreement that something cannot be specified is a different act from agreement on a value**,
+and the artefact distinguishes them. `idemKey` and `receipt` are `:proposed` with stated conditions.
+
+**What moved.** Before: six of nine fields `:unspecified` with no reasons, from a one-sided reconciliation.
+After: one unresolved with both positions recorded verbatim, four agreed-unspecified with reasons, two
+proposed with conditions, and four named blockers each with a `:need`. The linter's
+**specified 0 / unspecified 21** likely does not move — the values are still not concrete — but the
+silence has become a typed account of why.
+
+**Round-1 yield, already recorded above:** R2 corrected my `:acknowledged?` misattribution (not an R2
+channel at all), and R16 located `enact.clj:255`'s `(catch Throwable _ judgement)`, which makes a
+blown-up enactment byte-identical to one never attempted. Two corrections to gated material from two
+agents in one round.
+
+**Cost:** 2 seats, ~25 min, 6 commits, no incident. Compare the nine-agent sim: 11 invocations, 9 seats,
+a spawn failure in the APM pipeline, and its best findings also came from prose rather than from my
+metrics. **The pair is the better instrument, and it is cheaper.**
