@@ -1842,7 +1842,7 @@ disagreed. The dry-run against amended declarations *before* writing the packet 
 today that step has caught something a careful reading would have passed.
 | 3 (R8) | owner: EraSummary units ruled | claude-20 → claude-15 | — | — | 17:01Z | done | mathlib4 HEAD | claude-15 17:01Z: precisionValues (denominator by construction) + precisionForms (fact); docstring pair corrected; R8-D4 may be written from HEAD; found by computing what the generator would write, not by reading the type |
 
-| CML | CML-D2 `R16→R2` (edge spec) | codex-8 | `invoke-1788109302306-4432-9a7b2fad` | `park-3157fc8c` | 17:01Z | running | **the build's first edge specification**; proposal only — the schema goes into the EDN by the owner | — |
+| CML | CML-D2 `R16→R2` (edge spec) | codex-8 | `invoke-1788109302306-4432-9a7b2fad` | `park-3157fc8c` | 17:01Z | **closed** | `031c5f2`, 101 lines; EDN and both records untouched; every field filled or `unspecified` with reason+pointer; 2 refusals | pending |
 
 ### The wiring's first line moves — and the packet says it may be one-sided
 
@@ -1902,3 +1902,33 @@ for the old field names, and that is an **AD-D3 follow-up, not codex-12's** — 
 patch it. And 3a(iii) is a **generator** requirement: the named theorem and the `#print axioms` lines are
 emitted, never hand-added, because a hand edit fails the very regenerate gate that proves the file is
 generated.
+
+### The first edge specification — one-sided, and honest about it
+
+CML-D2 `R16→R2` closed. The reconciliation is **one-sided**, as the packet predicted: R16 proposes
+`{tick, mission, witness}`; R2 names the incoming edge but specifies payloads only for its *outgoing*
+edges. **Six of the nine `Delivery` fields are `unspecified`** because neither record states them — each
+with a reason and a pointer to what would settle it, and the builder's own sentence for why it did not
+fill them: *"plausible operational defaults are not evidence."*
+
+Two refusals, both right: it would not copy R2's outgoing receipt onto the incoming edge, and would not
+invent defaults. That is the honest state of the wiring after a day of node work — **the edge's type is
+known and its operational contract is not** — and it is worth more than a complete-looking schema.
+
+It is also a **specification, not a description**: no observation channel can receive the payload, and
+`:acknowledged?` is not a substitute since its only producer is the hard-coded `true` at
+`lane_futility.clj:333`.
+
+### `control-map-edges.edn` is untracked — the same defect as this morning's records
+
+Found while checking the builder had not edited it: **`p4ng/empirics-futon/control-map-edges.edn` is not
+in git.** Not ignored — `git check-ignore` returns nothing, and other files in `empirics-futon/` are
+tracked. So the artefact the whole CML lane exists to specify, and into which the first schema is about
+to be written, **has no version anchor**: nothing to gate at, no diff when a schema lands, and CML-D1's
+hardcoded 21-edge baseline is checked against a file that can change without trace.
+
+Same shape as the `P-*.md` records untracked this morning, fixed at `e01dab9` — and the third instance
+today of *the thing being reasoned about not being anchored*, after the records and after the
+gate-at-a-path confusion. The pattern is stable enough to state: **before a lane writes to an artefact,
+check the artefact is versioned.** Reported to the owner; not staged by me, since it is his file and his
+call.
