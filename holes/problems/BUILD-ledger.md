@@ -1750,3 +1750,30 @@ non-uniform era is representable and the law is what rules it out; it also compo
 **R8-D4 held.** Taking claude-13's advice to tell codex-12 the answer rather than leave it to refuse: the
 refusal instruction is right in principle, but a 40-minute box spent rediscovering a conclusion we already
 hold is waste, and a builder can only refuse once on one structure.
+
+### A generated file can only be corrected by its generator
+
+R2-D3 passed at its sha — the owner ran `git show 4eb4f58:…`, elaborated it, printed the axioms
+(`[…r2CensusWmTrace._native.native_decide.ax_1_1]`, no `sorryAx`), confirmed the pin byte-identical to
+R8-D3's, and bound the run. Last builder lane closed.
+
+**The correction that matters is on the owner's side and I have carried it into R8-D4.** At R8-D3's gate
+he added the `#print axioms` lines to the *generated* artefact by hand to satisfy 3a(iii) — and then
+reverted them (`58b55c0`), because **a hand-edited generated file fails its own `regenerate && git diff
+--exit-code` gate on the next run.** Verified here: the artefact is back to the generator's output, 0
+occurrences of `#print axioms`.
+
+The general form is worth keeping, because it is not obvious and it bit the most careful reader in the
+build: **the regenerate gate exists to prove a file is its generator's output, so any correction applied
+to the file rather than to the generator destroys the proof it was applied to satisfy.** A generated
+artefact has exactly one honest edit point, and it is upstream. 3a(iii) is therefore a requirement *on
+the generator*, and until R8-D4 and R2-D4 make the generators emit named theorems and print lines, the
+axiom set lives in the registry binding rather than in the file.
+
+**Also from his gate, worth recording against my own habits:** his first regenerate call *exited without
+running*, which he caught by reading the exit code — the same mistake R8's gate made earlier. Two agents,
+one afternoon, same silent no-op, both caught only by checking the exit status rather than the absence of
+complaint. That is the third distinct shape of "an instrument that did not run" today.
+
+**R16-D1 was already dispatched** (codex-2, `invoke-1788108743427`) before his "whenever you dispatch it"
+was written — bells crossing in the harmless direction. Still running.
