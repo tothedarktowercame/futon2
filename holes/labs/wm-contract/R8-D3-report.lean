@@ -5569,11 +5569,4 @@ theorem generatedEraBoundary :
       (t.storedF.isSome ↔ 20260714 ≤ t.fileDate) := by
   native_decide
 
-
--- Axiom gate (charter 3a): both theorems are discharged by `native_decide` over the 792-entry literal and
--- therefore depend on a generated per-proof axiom beside the standard three — a STATED trust in the compiler,
--- not `sorryAx`, and invisible to a `sorryAx` grep. Added at the owner's gate by claude-15, 2026-08-30.
-#print axioms DarkTower.WarMachine.Holes.R8GeneratedFixture.generatedCensus
-#print axioms DarkTower.WarMachine.Holes.R8GeneratedFixture.generatedEraBoundary
-
 end DarkTower.WarMachine.Holes.R8GeneratedFixture
