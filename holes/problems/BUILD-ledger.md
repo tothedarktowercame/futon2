@@ -595,3 +595,40 @@ as a finding instead. If it holds, the node's thesis sharpens: not merely that t
 who closed these rows, but that it gestures at who, in a form the independence rule may not consume.
 My 8-of-13 is a token scan and is marked as needing a proper count; I have explicitly asked claude-13
 whether that is a real finding or a dressed-up grep.
+
+### R8-D2 rewritten against the new declarations — written, NOT yet sent to claude-13
+
+The owner reproduced the era finding and amended acceptance (iii) to report the split **by era**, with
+precision named only as the proximate arithmetic driver and the cause left `inferred, untested`. Packet
+rewritten from `P-R8.md@HEAD` against the **current** Lean declarations. **Charter clause 2:** the quoted
+interface block diffs **clean** against `Holes.lean:278-320`.
+
+**A third message overtaken by its own file.** The owner's reply says R8-D2 waits on the `Holes.lean`
+quote "(`r8Disposition` closed, `r8StoredFRecomputes` hole)". `r8StoredFRecomputes` **no longer exists** —
+R8's declarations are now `R8Disposition`, `R8Tick`, `r8Disposition` (body), `r8Census` (hole),
+`r8EraBoundary` (hole). Already flagged in my hold-lift reply; noted again because it is the third time
+today a list inside a message has been overtaken by the file it describes, after the hold bell and the
+declaration list. The charter's own sentence — *quote signatures from the file, not from this list* — is
+the control that keeps catching it.
+
+**Row-11 work, all run before the packet was written.** Two findings worth keeping:
+
+1. **The era biconditional is falsifiable in principle and true in fact.** `r8EraBoundary` asserts, for
+   *every* tick, `storedF present ↔ fileDate ≥ boundary`. That is stronger than what I had measured, so I
+   tested it: boundary `20260714`, **0 violations in each direction** across all 792 forms. One form
+   dated after the boundary without a stored F would have broken it. This is the strongest clause in the
+   packet, and it is a different epistemic animal from the retired recompute identity, which could not
+   have failed for any ε ≥ 0. The packet labels all three quantities explicitly — **cannot fail**
+   (recompute identity, ε reported not tuned, and on this corpus 0), **could have failed and did not**
+   (the era biconditional), **can fail** (the 755 recomputation, non-finite count expected 0 but not
+   guaranteed).
+2. **760 and 755 are two different partitions of the same corpus, and 760 = 755 + 5.** The era partition
+   splits on stored-F presence (760 / 32); the disposition census splits the 760 further into 755 with
+   usable inputs and 5 without. Both numbers are in the record, so a builder can use one where it means
+   the other and still look consistent. The packet requires each count to name its partition.
+
+**Held, not sent.** claude-13 is mid-read on R9-D2 (`invoke-1788104652626-4332-7e3d432e`). Queuing a
+second packet on the same reader while the first is open invites exactly the cross-threading the whistle
+protocol exists to undo, and reader attention is the build's real bottleneck — not seats. R8-D2 goes over
+as soon as R9-D2's read returns. R2-D2 is third, and still needs rewriting against `r2WellFormed` /
+`r2ContractCensus`.
