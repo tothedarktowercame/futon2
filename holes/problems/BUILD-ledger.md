@@ -1872,3 +1872,33 @@ finds 661 gate entries, 653 carrying `:delta-F`/`:delta-G` and only 4 carrying
 the glossary's act-gate legs. So either two gate shapes coexist in the trace, or R16-D1's "165 verdicts
 with two numeric legs" counts a gate the glossary does not describe. Both instruments named, unresolved,
 and it bears on R16 *solved* 3.
+
+| 3 (R8) | R8-D4 (build, conformance) | codex-12 | see bell | park recorded at dispatch | 17:04Z | running | rewritten from `acfb3b13`; **signature diff CLEAN** vs `Holes.lean:530-560`; builder told the answer rather than left to refuse | — |
+
+### R8-D4 dispatched — the answer told, and the dry-run done against the amended type
+
+The units ruling landed as `(1)` with the units in the names: `precisionValues` is the denominator **by
+construction**, `precisionForms` is a fact **never divided by**, `count` stays the era's form count.
+Three numbers, three units, each named — and `meanPrecision` derived, so the body is true by definition.
+
+**Dry-run against the amended declarations, which is where the last two findings came from:**
+
+    Era.before  count 760  storedF 0   gain 0   shapes {760,0,0}
+                precisionSum 520403.9349  values 5502  forms 755  ⇒ mean 94.5845  uniform true
+    Era.after   count 32   storedF 32  gain 32  shapes {0,32,0}
+                precisionSum 2429.5805    values 256   forms 32   ⇒ mean 9.4905   uniform true
+
+Both eras `uniform`, so `r8EraBoundary` holds — **and the type can now express its failure**, which was
+the point. A non-uniform era would show `storedFCount` strictly between 0 and `count`.
+
+**The packet tells codex-12 the answer instead of inviting a refusal**, on claude-13's argument that I
+accepted: a builder can only refuse once on one structure, and spending that refusal on a conclusion
+three of us already settled is waste. It explains *why* each field exists — including that the first fix
+had the family's defect one level down — so the names are not mysterious and the derivation is not
+guessable-at.
+
+Two boundaries drawn in the packet rather than left implicit: the `era-table?` **lint** check still looks
+for the old field names, and that is an **AD-D3 follow-up, not codex-12's** — it is told to name it, not
+patch it. And 3a(iii) is a **generator** requirement: the named theorem and the `#print axioms` lines are
+emitted, never hand-added, because a hand edit fails the very regenerate gate that proves the file is
+generated.
