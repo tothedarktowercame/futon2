@@ -2142,7 +2142,7 @@ layers each citing its folding line, and the habit prior is described with `:fol
 is not a count error — the fourth row is a preference that is not a C source. After four denominator
 mistakes of my own today, I verified before claiming.
 
-| R19 | R19-D1 (discovery) | codex-10 | `invoke-1788115507705-4482-1f16538a` | `park-c3ef84e7` | 18:45Z | running | read by claude-13; dispatched md5 `f2aa7c4139b03effaab7a34abed57f8e` (6b′) | — |
+| R19 | R19-D1 (discovery) | codex-10 | `invoke-1788115507705-4482-1f16538a` | `park-c3ef84e7` | 18:45Z | **closed** | `dc1dac8`; 5 layers / 4 folded; `:declared-purpose nil` with 4 searched records; `:fit-status :witnessed`; **found a fifth folded source and corrected its two readers** | pending |
 | lib | owner gate: packet 4c (live rung-1 index) | codex-20 | invoke-1788112644846-4453-4d0dfcd1 | — | 20:40Z | **passed for the corpus; coverage claim NOT accepted → 4d before wave 2** | futon3 cad5034 | claude-15 20:40Z: no migration-export refs ✓; basis pin differs across two builds (191328 → 191356, 28 records) ✓; kondo ✓; tests 2+2 green ONLY under `bb --classpath .:test` (JVM alias cannot load library-graph-lint-test: babashka.process) — builder did not say which; cursor fixture ✓. NOT accepted: the table 33/33, 23/23, 28/28 — its "non-listing" column counts self-text and co-mention hits. Owner hydrated all 157 clean war-room records: 23 are today's zai spider-worker turns (author zai-1/zai-2, `zai-turn-` bodies, text-search tool calls for the very pattern) and 15 are Agency invoke-complete records of codex-20's fleet jobs — the instrument's own trace in the live store, invisible to `spider-self-text?` (three prompt strings). Honest war-room: 28 patterns / 25 clean / **21 clean from non-spider records**; wr-5, wr-6, wr-18, wr-23 covered only by the spider looking for them. Export-era 10/10 → 21 real: the rise is real and smaller than reported. 4d → codex-20: reflection by provenance; columns any/clean/clean-non-reflection; wave-1 attestations re-flagged; wave 2 held |
 | lib | packet 4d reflection exclusion | codex-20 | (dispatching) | — | 20:42Z | queued | packet md5 992265daf7a57d6fe64f3e6622a1f333 | wave 2 held behind this gate |
 
@@ -2183,3 +2183,43 @@ concurrency check on everyone else's.
   same habit prior from the Lean side. The packet now requires the builder to **state whether it is**,
   because if so R19's fourth layer already has a Lean home and R19-D2 must connect to it rather than coin
   a second name for one object.
+
+### R19-D1 closed — it found a fifth layer and corrected both its readers
+
+Acceptance checked here, not accepted: EDN parses; `:fit-status :witnessed` agrees with 5
+`:situation-evidence` entries; `:composition-order` holds exactly the four `:folded? true` layers each
+with a `:folded-at`; no empty author or basis; pointers opened **by exact line**; note exactly 15 lines;
+no `.clj`/`.bb`/`.lean` touched.
+
+**`:declared-purpose nil`** — refused rather than invented, with 4 searched records recorded and the
+observation that *"P-R19:88 gives an example rather than declaring this deployment."* The owner's
+declared/observed split did its job: the honest answer landed as a **finding** instead of a blank.
+
+**A fifth folded preference source, absent from P-R19's four-row table:** capability-zone load,
+`preferences.clj:140-173` → `efe.clj:586-614`. Verified here: `zone-risk` is a `pref/c-distribution`
+parameterised by the **learned** `:load-weight`, and `g-risk (+ channel-risk zone-risk)` — a separate
+additive fold whose author class (posterior evidence mass) differs from the hand-set floor. **The
+record's own inventory undercounted**, and the packet's "if you find a FIFTH, add it and say where"
+clause is what surfaced it.
+
+**And it corrected claude-13 and me.** We both read `efe.clj:698-706` and took its
+`:controller-augmentation (DEFAULT)` / `:habit-prior (DARK)` labels at face value — I verified the quote
+and folded it into the packet as established. **The labels are stale.**
+`war_machine.clj:247-256`: *"D-1d relocation FLIPPED LIVE by Joe 2026-07-13. Structural pressure leaves
+`controller-score`; the policy layer receives a habit prior at the unscaled ln E(π) seam"*, with
+`FUTON_WM_STRUCTURAL_PRESSURE_MODE=controller-augmentation` as the **rollback hatch**. So `:habit-prior`
+is *today's default*, not a dark path — the operator's learned preference is live in the selection seam
+right now.
+
+Worth stating as a shape, because it is new today: **I verified a quotation and inherited its staleness.**
+The line said what claude-13 said it said; what neither of us checked was whether the label `(DEFAULT)`
+was still true, seven weeks after the mode was flipped live. A citation can be accurate about its text and
+wrong about the world — which is the same gap as a pointer that resolves to a line that no longer means
+what it says. Row 6 covers negatives naming their instrument; this needs its own clause: **a quoted label
+is evidence about the comment, not about the running default.**
+
+**Cross-lane answered:** `Holes.lean:493-499` and `CommitmentTemperature.lean:99-125,224-228` model the
+same ln E(π) object, consumed at `policy.clj:82-104`; the Lean abstracts its values and adds no second
+prior source. R19-D2 connects rather than coins. And the naming discrepancy is now three-way and
+decidable: the record says the habit prior enters **R14** as g, `efe.clj:698` says **R12**, the live seam
+is `policy/select-action` — one object, three names, owner's to settle.
