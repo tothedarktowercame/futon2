@@ -1,0 +1,24 @@
+{:node :R3
+ :i-am "I turn discrepancies between observed and predicted channels into precision-weighted evidence events that revise the carried per-entity posterior."
+ :edges
+ [{:edge [:R2 :R3]
+   :direction :in
+   :payload "I receive normalized channel observations, compare them with belief-derived predictions, and obtain observed-minus-predicted errors."
+   :without-it "I have no empirical discrepancy to drive a belief revision, so the posterior cannot move on current observations."
+   :evidence :from-artefact
+   :cite "scripts/futon2/report/war_machine.clj:4300"}
+  {:edge [:R3 :R1]
+   :direction :out
+   :payload "I emit the revised per-entity posterior as the belief state that the generative-model side should use on its next prediction cycle."
+   :without-it "My update remains local bookkeeping and cannot alter the predictions against which later observations are compared."
+   :evidence :imagined}
+  {:edge [:R7 :R3]
+   :direction :in
+   :payload "I receive per-channel adaptive precision, derived from bounded rolling prediction-error variance, and use it to weight each channel's error before aggregation."
+   :without-it "I cannot distinguish stable, informative discrepancies from noisy ones when forming the signed update driver."
+   :evidence :from-artefact
+   :cite "src/futon2/aif/precision.clj:147"}]
+ :missing-edges
+ [{:to :R8
+   :why "I need the previous tick's persisted :mu-post as this tick's carried prior; no drawn edge supplies that temporal state."}]
+ :contaminated? false}
