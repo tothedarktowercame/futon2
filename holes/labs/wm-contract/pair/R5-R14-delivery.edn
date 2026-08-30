@@ -1,0 +1,78 @@
+{:from :R5
+ :to :R14
+ :payload
+ {:observed
+  {:shape :ranked-actions-vector
+   :entry-fields [:action :controller-score :rank]
+   :order :controller-score-ascending
+   :cite "src/futon2/aif/efe.clj:844-862"}
+  :target
+  [:score-field
+   {:score-field/id :content-digest
+    :scoring-config/id :config-digest
+    :candidates
+    [{:candidate/id [:type :target :target-class]
+      :rank :positive-integer
+      :controller-score :finite-number
+      :score-components :versioned-decomposition}]
+    :support-exclusions :explicit-vector}]
+  :absence
+  [:no-score
+   {:reason #{:no-proposals :all-unsupported :scoring-refused
+              :non-finite-score :malformed-score-field}}]}
+ :guarantee
+ {:observed "One rank-actions call scores included candidates under one state/options value and sorts them by controller score."
+  :cite "src/futon2/aif/efe.clj:853-862"
+  :target "Every score is finite; configuration and decomposition schema are named; absence uses the disjoint no-score variant."
+  :status :partly-implemented}
+ :atomicWith
+ {:observed :same-in-process-select-action-call
+  :cite "scripts/futon2/report/war_machine.clj:4509-4518"
+  :status :not-a-durable-transaction}
+ :retry
+ {:observed :not-applicable/in-process-pure-call
+  :reason "A retry recomputes; no transport or durable delivery is present."}
+ :timeoutMs
+ {:observed :not-applicable/in-process-pure-call
+  :reason "The direct call has no transport timeout."}
+ :idemKey
+ {:observed :none
+  :proposed [:tick :score-field/id :scoring-config/id]
+  :condition "Valid only after R5 emits the two digest identities."}
+ :receipt
+ {:observed
+  {:chosen-action :action
+   :controller-score :number
+   :selection-gain :number
+   :tau-spread :number
+   :tau-effective :number
+   :selection-boundary :strategic-recommendation
+   :controller-order-authority :live
+   :temperature-order-authority :counterfactual-only}
+  :cite "src/futon2/aif/policy.clj:240-280"
+  :proposed-additions
+  [:score-field/id :scoring-config/id :temperature-mode
+   :r5/controller-order :r14/temperature-order :sensitivity-witness]}
+ :field-provenance
+ {:from :agreed
+  :to :agreed
+  :payload :agreed
+  :guarantee :agreed
+  :atomicWith :agreed
+  :retry :agreed
+  :timeoutMs :agreed
+  :idemKey :agreed
+  :receipt :agreed}
+ :disagreements []
+ :agreement-note
+ "The empty disagreement list is deliberate: R14 accepted R5's authority split, and R5 accepted R14's correction that top-level empty input already returns abstain/no-candidates before temperature. Remaining gaps are jointly identified missing implementation, not opposed semantics."
+ :traffic-today true
+ :blocked-on
+ [{:blocker :score-field-envelope
+   :need "Replace the bare vector boundary with disjoint score-field/no-score variants and preserve exclusion reasons explicitly."}
+  {:blocker :numeric-and-schema-validation
+   :need "R5 rejects non-finite scores and emits configuration/decomposition identities; R14 validates the envelope at admission."}
+  {:blocker :identity-and-receipt
+   :need "Carry score-field identity through policy output and later realized-outcome feedback."}
+  {:blocker :sensitivity-witness
+   :need "Evaluate one immutable score field at two gains and report what changes; under the live strategic boundary choice should remain governed by controller order."}]}
