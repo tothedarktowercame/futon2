@@ -1,0 +1,26 @@
+{:node :R8
+ :i-am "I turn each completed tick's predicted-versus-realized present-fit difference into a persisted scalar and feed it into the next outer-loop evaluation."
+ :edges
+ [{:edge [:R7 :R8]
+   :direction :in
+   :payload "I need evidence-channel precision to qualify or weight the predicted and realized terms before treating their difference as a gain reading."
+   :without-it "I can subtract two numbers, but I cannot distinguish a reliable mismatch from one caused by an imprecise evidence channel."
+   :evidence :imagined}
+  {:edge [:R8 :R5]
+   :direction :out
+   :payload "I emit the tick-bound present-fit mismatch for the evaluation step to consume when scoring the next action."
+   :without-it "My scalar can be archived but cannot affect the reward action; the frozen-mismatch replay then produces the same action sequence."
+   :evidence :from-artefact
+   :cite "/home/joe/code/p4ng/empirics-futon/promotion-tests.edn:98-108"}
+  {:edge [:R10 :R8]
+   :direction :in
+   :payload "I need consecutive scheduled outer-loop ticks so the already-armed realized-G path can emit readings and my mismatch can be observed as a time series."
+   :without-it "No realized outcomes reach me, so there is no mismatch to record or freeze in the null-control replay."
+   :evidence :from-artefact
+   :cite "/home/joe/code/p4ng/empirics-futon/NOTE-R8-what-to-build.md:100-147"}]
+ :missing-edges
+ [{:to :R16
+   :why "I need the enacted result, bound to the same tick as the prediction, to supply the realized present-fit term; none of my drawn incoming edges is the actuation/outcome producer."}
+  {:to :R14
+   :why "WR-27 requires evidence that my gain reading changes selection, but my only drawn outgoing edge ends at evaluation and gives me no return path from commitment temperature or the chosen action."}]
+ :contaminated? false}
