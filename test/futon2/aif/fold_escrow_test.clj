@@ -5,6 +5,7 @@
   (:require [clojure.test :refer [deftest is testing]]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.set :as set]
             [futon2.aif.close-loop :as cl]
             [futon2.aif.fold-escrow :as esc]
             [futon2.aif.fold-llm :as fl])
@@ -131,7 +132,7 @@
       (is (nil? (turn-fn (str mock-prompt " ")))))))
 
 (deftest missing-dir-is-empty-not-an-error
-  (is (= {:deposits [] :rejected []}
+  (is (= {:deposits [] :quarantined [] :rejected []}
          (esc/load-deposits "/nonexistent/fold-turns-nowhere"))))
 
 (def expected-real-deposits
@@ -154,14 +155,27 @@
     "ft-state-snapshot-witness-001"
     "ft-canon-fingerprint-store-001"})
 
+(def expected-active-deposits
+  #{"ft-autoclock-in-001"
+    "ft-bounded-in-flight-state-008"
+    "ft-chipwitz-corps-001"
+    "ft-first-flights-007"
+    "ft-fold-ansatz-001"
+    "ft-legacy-sorry-cleanup-001"
+    "ft-live-geometric-stack-002"
+    "ft-pattern-mining-011"})
+
 (defn- real-prose-fn [pattern-id]
   (slurp (str "/home/joe/code/futon3/library/" pattern-id ".flexiarg")))
 
 (deftest real-fold-turns-load-clean-under-pin-1b
-  (let [{:keys [deposits rejected]} (esc/load-deposits)
-        ids (set (map :fold-turn/id deposits))]
+  (let [{:keys [deposits quarantined rejected]} (esc/load-deposits)
+        active-ids (set (map :fold-turn/id deposits))
+        quarantined-ids (set (map :fold-turn/id quarantined))]
     (is (empty? rejected) (pr-str rejected))
-    (is (= expected-real-deposits ids))))
+    (is (= expected-active-deposits active-ids))
+    (is (= expected-real-deposits (into active-ids quarantined-ids)))
+    (is (empty? (set/intersection active-ids quarantined-ids)))))
 
 (deftest first-flights-replays-through-enact-style-seam
   (let [{:keys [deposits rejected]} (esc/load-deposits)

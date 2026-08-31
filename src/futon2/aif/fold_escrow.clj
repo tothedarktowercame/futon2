@@ -40,6 +40,9 @@
    NOT a substrate-2 write (design §B)."
   "/home/joe/code/futon6/data/fold-turns")
 
+(def default-quarantine-path
+  "/home/joe/code/futon2/holes/labs/wm-contract/fold-turn-quarantine.edn")
+
 (def ^:private flexiarg-dir
   "The prose source used by enact.clj's L3 replay reconstruction."
   "/home/joe/code/futon3/library")
@@ -79,7 +82,10 @@
       (finally
         (.delete tmp)))))
 
-(defn- validate-clean [file d strict-clean?]
+(defn validate-clean-block
+  "Validate only the optional embedded CLean block. This is the read-only
+   structural seam for records quarantined from prompt replay."
+  [file d strict-clean?]
   (cond
     (contains? d :clean)
     (let [r (run-clean-argcheck (:clean d))]
@@ -162,7 +168,7 @@
                 (> (Math/abs (- (double recomputed) (double stored))) 1e-9))
         (reject! file :coverage-score-delta-mismatch
                  (str "pin 3: stored " stored " vs recomputed " recomputed)))))
-  (validate-clean file d strict-clean?)))
+  (validate-clean-block file d strict-clean?)))
 
 (defn load-deposit
   "One ft-*.edn file → validated deposit, or throws (reject-loudly)."
@@ -173,25 +179,62 @@
                  (reject! file :unreadable-edn (ex-message e))))]
     (validate-deposit file d opts))))
 
+(defn- quarantine-key [file reason]
+  (try
+    (let [d (edn/read-string (slurp file))]
+      {:fold-turn/id (:fold-turn/id d)
+       :prompt-sha256 (get-in d [:prompt :sha256])
+       :reason reason})
+    (catch Exception _ nil)))
+
+(defn- raw-deposit [file]
+  (try (edn/read-string (slurp file))
+       (catch Exception _ nil)))
+
+(defn- quarantine-index [path]
+  (let [document (edn/read-string (slurp path))]
+    (set (:entries document))))
+
 (defn load-deposits
   "Dir → {:deposits [valid…] :rejected [{:file :reason :message}…]}.
    Rejections go to stderr (loud) AND the return value (auditable); valid
-  deposits still serve. Missing dir ⇒ {:deposits [] :rejected []}."
+  deposits still serve. A digest-pinned quarantine entry moves a known rejection
+  to `:quarantined`; any content/reason drift becomes rejected again. Missing dir
+  ⇒ no deposits."
   ([] (load-deposits default-deposit-dir))
   ([dir] (load-deposits dir {}))
   ([dir opts]
-   (let [files (->> (.listFiles (io/file dir))
+   (let [quarantine (if (contains? opts :quarantine-entries)
+                      (set (:quarantine-entries opts))
+                      (quarantine-index
+                       (or (:quarantine-path opts) default-quarantine-path)))
+         files (->> (.listFiles (io/file dir))
                     (filter #(re-matches #"ft-.*\.edn" (.getName ^java.io.File %)))
                     (sort-by #(.getName ^java.io.File %)))]
-     (reduce (fn [acc f]
-               (try (update acc :deposits conj (load-deposit f opts))
-                    (catch clojure.lang.ExceptionInfo e
-                      (binding [*out* *err*]
-                        (println (ex-message e)))
-                      (update acc :rejected conj
-                              (assoc (ex-data e) :message (ex-message e))))))
-             {:deposits [] :rejected []}
-             files))))
+     (reduce
+      (fn [acc f]
+        (try
+          (update acc :deposits conj (load-deposit f opts))
+          (catch clojure.lang.ExceptionInfo e
+            (let [key (quarantine-key f (:reason (ex-data e)))]
+              (if (contains? quarantine key)
+                (do
+                  (binding [*out* *err*]
+                    (println (str "fold-turn QUARANTINED " f
+                                  " [" (name (:reason key)) "]")))
+                  (update acc :quarantined conj
+                          (assoc key :file (str f)
+                                 :message (ex-message e)
+                                 :record (assoc (raw-deposit f)
+                                                :quarantine/status
+                                                (:reason key)))))
+                (do
+                  (binding [*out* *err*]
+                    (println (ex-message e)))
+                  (update acc :rejected conj
+                          (assoc (ex-data e) :message (ex-message e)))))))))
+      {:deposits [] :quarantined [] :rejected []}
+      files))))
 
 (defn escrow-turn-fn
   "Deposits → a `:turn-fn` for `fold-llm/llm-fold`: sha-256 the incoming prompt,

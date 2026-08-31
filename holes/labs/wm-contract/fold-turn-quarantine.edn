@@ -1,0 +1,17 @@
+{:quarantine/version 1
+ :as-of "2026-08-31"
+ :diagnosis
+ {:reason :prompt-not-reconstructable
+  :finding "Stored prose hashes and psi hashes match current inputs, and fold-prompt has not changed; these stored prompt digests did not bind the prompt reconstructible from their recorded fields."
+  :disposition "Excluded from replay without deletion or digest refresh. An id, digest, or rejection-reason change invalidates the quarantine match and becomes a loud rejection again."}
+ :entries
+ [{:fold-turn/id "ft-aif-faithfulness-001" :prompt-sha256 "4cea144955e9d8d56ee3f64513f44b3cbe0e17fda91d05a753a69189cbd279ba" :reason :prompt-not-reconstructable}
+  {:fold-turn/id "ft-aif-head-004" :prompt-sha256 "4fc9ceac96a13b119e074c7f2fddb609b6e8367abbd6107d29b620f3db83e632" :reason :prompt-not-reconstructable}
+  {:fold-turn/id "ft-bayesian-structure-learning-003" :prompt-sha256 "523ca024a2fc8de4dd7447ad6bb4ad1ebc7dd0046906679a0b367a692c46fd99" :reason :prompt-not-reconstructable}
+  {:fold-turn/id "ft-canon-fingerprint-store-001" :prompt-sha256 "9217e5289eec1a8412fcea558e361ffc739e87e74dce9963119d9b437699b629" :reason :prompt-not-reconstructable}
+  {:fold-turn/id "ft-futonzero-generative-011" :prompt-sha256 "3ce849372f4d382c3205a1a9fa701f11a607ea4217cc7b79d8b4982971483df3" :reason :prompt-not-reconstructable}
+  {:fold-turn/id "ft-learning-loop-010" :prompt-sha256 "279664f0030d06f005ce555b9769b677486481eaf41e1e791049a1cc379b3b29" :reason :prompt-not-reconstructable}
+  {:fold-turn/id "ft-operational-vocabulary-001" :prompt-sha256 "417331cdd971a24469b301bb522c271c49622147b0c74366b39d9f624f91fbd8" :reason :prompt-not-reconstructable}
+  {:fold-turn/id "ft-reachable-from-boot-001" :prompt-sha256 "9d227517968b4667e2ecf7138741c01dbbcb739db67fa0c9adc52a842257a94e" :reason :prompt-not-reconstructable}
+  {:fold-turn/id "ft-state-snapshot-witness-001" :prompt-sha256 "b426db580dd6ea2a17a177f3768beb36cd8662ff216ee99badc4e70e9110b820" :reason :prompt-not-reconstructable}
+  {:fold-turn/id "ft-war-machine-pilot-001" :prompt-sha256 "acae14ae4cc84f5fe56d62f440ecc727d1d2e5d202e567b7a9f1ac8c29c3dff3" :reason :prompt-not-reconstructable}]}

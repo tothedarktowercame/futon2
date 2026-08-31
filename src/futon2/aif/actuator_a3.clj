@@ -143,13 +143,17 @@
 (defn deposits-by-id
   ([] (deposits-by-id nil))
   ([deposit-dir]
-   (let [{:keys [deposits rejected]} (if deposit-dir
-                                       (esc/load-deposits deposit-dir)
-                                       (esc/load-deposits))]
+   (let [{:keys [deposits quarantined rejected]} (if deposit-dir
+                                                   (esc/load-deposits deposit-dir)
+                                                   (esc/load-deposits))]
      (when (seq rejected)
        (throw (ex-info "actuator-a3: rejected deposits in corpus load"
                        {:rejected rejected})))
-     (into {} (map (juxt :fold-turn/id identity) deposits)))))
+     ;; Quarantine forbids prompt replay, not read-only structural inspection.
+     ;; The status remains on each raw record so this consumer cannot mistake
+     ;; it for a replay-valid deposit.
+     (into {} (map (juxt :fold-turn/id identity))
+           (concat deposits (keep :record quarantined))))))
 
 (defn typespec
   "Content-free typespec extraction. Prefer the explicit arrow candidate, then
@@ -323,7 +327,9 @@
 (defn clean-validation
   [deposit]
   (try
-    (esc/validate-deposit "build-match" deposit {:strict-clean? true})
+    (if (:quarantine/status deposit)
+      (esc/validate-clean-block "build-match" deposit true)
+      (esc/validate-deposit "build-match" deposit {:strict-clean? true}))
     {:clean-pass? true}
     (catch clojure.lang.ExceptionInfo e
       {:clean-pass? false
