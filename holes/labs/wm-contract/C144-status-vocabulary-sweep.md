@@ -17,6 +17,11 @@ label census displays `witnessed-instance-obligation=5`.  The underlying
 instrument vocabularies remain legible; the report qualifies them where they
 meet.
 
+C148 subsequently implemented the missing `TickRunRecord` receipt-shape check,
+so the live count is now zero.  The qualified term remains in the renderer for
+any future genuinely unchecked binding rather than reverting to ambiguous
+`witnessed`.
+
 ## Vocabulary sweep
 
 - Contract-lint `:conformant` means a hole's bound fixture passed its implemented
@@ -42,4 +47,3 @@ No other cross-grammar display collision was found.
 independence and display-vocabulary disjointness.  It injects a contract display
 term into the Lean display vocabulary and must reject the collision.  This is
 the failure mode C144 closes.
-

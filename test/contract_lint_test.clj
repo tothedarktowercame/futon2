@@ -85,7 +85,9 @@
         proof-good (edn/read-string
                     (slurp "holes/labs/wm-contract/R9-VerdictConsultsChecker-proof-receipt.edn"))
         tick-good {:startedAt "2026-08-31T00:00:00Z" :traceWritten true
-                   :storeBasisCount 1
+                   :storeBasisCount 1 :storeBasisMaxAt "2026-08-31T00:00:00Z"
+                   :entriesRead 1 :entriesLimit 1 :inputsRead 1 :inputIssues 0
+                   :preferenceLayers 5 :selectorSeam "fixture:selector"
                    :route [{:fromNode "R2" :toNode "R7" :via "f" :at_ "t"}]}]
     (doseq [[check good bad]
             [[lint/find-receipt-table? find-good (assoc-in find-good [:scenarios 0 :round-results 0 :find :receipts] {})]
@@ -100,7 +102,9 @@
              [(get lint/shape-checks "proof term")
               proof-good
               (assoc-in proof-good [:result :exit] 1)]
-             [lint/tick-run-witness? tick-good (assoc tick-good :route [])]]]
+             [lint/tick-run-witness? tick-good (assoc tick-good :route [])]
+             [(get lint/shape-checks "TickRunRecord") tick-good
+              (update-in tick-good [:route 0] dissoc :toNode)]]]
       (is (true? (boolean (check good))))
       (is (false? (boolean (check bad)))))))
 

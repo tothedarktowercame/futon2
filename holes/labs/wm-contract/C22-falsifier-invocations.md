@@ -464,3 +464,10 @@ gate.
 
 As of C144 it also rejects any collision between the report's qualified
 contract-judgement and Lean-label vocabularies.
+
+C148's `TickRunRecord` shape control (valid EDN with a route hop missing
+`toNode`) is exercised by the normal futon2 suite:
+
+```sh
+bb -cp . test/contract_lint_test.clj
+```

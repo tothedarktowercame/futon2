@@ -113,11 +113,18 @@
          (= forms (reduce + (map counts required))))))
 
 (defn tick-run-witness? [x]
-  (and (string? (:startedAt x)) (true? (:traceWritten x))
-       (pos-int? (:storeBasisCount x)) (seq (:route x))
+  (let [nonblank? #(and (string? %) (not (str/blank? %)))
+        nat? #(and (integer? %) (not (neg? %)))]
+  (and (every? nonblank? ((juxt :startedAt :storeBasisMaxAt :selectorSeam) x))
+       (every? nat? ((juxt :storeBasisCount :entriesRead :entriesLimit
+                           :inputsRead :inputIssues :preferenceLayers) x))
+       (pos-int? (:storeBasisCount x)) (pos-int? (:entriesLimit x))
+       (<= (:entriesRead x) (:entriesLimit x))
+       (pos-int? (:inputsRead x)) (= 5 (:preferenceLayers x))
+       (true? (:traceWritten x)) (vector? (:route x)) (seq (:route x))
        (every? #(and (string? (:fromNode %)) (string? (:toNode %))
                      (string? (:via %)) (string? (:at_ %)))
-               (:route x))))
+               (:route x)))))
 
 (defn log-multivariate-beta-witness? [x]
   (let [cases (into {} (map (juxt :concentrations identity) (:cases x)))]
@@ -249,6 +256,7 @@
    "List R8TickLit" r8-tick-list?
    "R8DispositionEvidence" r8-disposition-evidence?
    "TickRunWitness" tick-run-witness?
+   "TickRunRecord" tick-run-witness?
    "LogMultivariateBetaWitness" log-multivariate-beta-witness?
    "ExpectedFreeEnergyWitness" expected-free-energy-witness?
    "ExpectedInformationGainWitness" expected-information-gain-witness?
