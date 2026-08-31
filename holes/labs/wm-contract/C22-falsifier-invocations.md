@@ -143,3 +143,20 @@ live census are retained in `:recorded-census-delta` with status `:unexplained`.
 test asserts that the discrepancy stays loud rather than asserting either moving number. Positive and
 negative exits were `0/0`; the negative mutation still fails the era invariants internally, so a permanent
 green was not introduced.
+
+## C25 — R17 generator/disposer wiring guard
+
+```sh
+bb -cp . checks/r17_generator_disposer_check.clj --report /tmp/r17-generator-disposer.edn
+bb -cp . checks/r17_generator_disposer_check.clj --negative --report /tmp/r17-generator-disposer-negative-unused.edn
+```
+
+The positive check records the present count-only all-pairs proposer as `:dormant-guarded`: R17 reaches
+`reduce-concepts`, but the production War Machine entrypoint does not reach R17. The semantic mutation
+makes that exact all-pairs path live-reachable; the invariant rejects it because an all-pairs enumeration
+is not an independent generator. Observed positive/negative exits: `0/0`.
+
+This check becomes a required pre-merge/CI gate when any production scheduler, server, or War Machine
+entrypoint first references `r17`, `r17-offline`, or `reduce-concepts`. Until that trigger, running it in a
+general green suite would misstate readiness: its green verdict means only that the unsafe path remains
+dormant, not that R17 is safe to wire live.
