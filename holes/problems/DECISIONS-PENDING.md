@@ -5,10 +5,18 @@ brief. Questions, recommendations, evidence, and option analysis remain
 authoritative in the linked source records.
 
 **Operator boundary, not a pending decision:** cancelling Joe's cohort-46 run
-is recorded and counted, but starts a new semantic stratum because
-`:cancelled` was not preregistered. Do not pool it with cohort 46's original
-outcome classes or amend the preregistration retrospectively. Full consequence:
+starts a new semantic stratum, because `:cancelled` was not preregistered. Do
+not pool it with cohort 46's original outcome classes or amend the
+preregistration retrospectively. Full consequence:
 [`C206-cohort-cancellation-boundary.md`](../labs/wm-contract/C206-cohort-cancellation-boundary.md).
+
+**Updated by C211 (futon2 `9a1d432`):** cancellation is now *recorded but not
+counted*. It no longer consumes cohort 46's attempt denominator or stopping
+window; the cancelled attempt is retained under `:post-preregistration/cancelled`
+with its own identity, and the next eligible attempt takes a distinct ordinal.
+The corpus held 62 attempt directories, 58 closed, **0 cancelled**, so no
+published cohort figure required correction. Cancelling a run is therefore safe
+for the operator; this paragraph previously read "recorded and counted".
 
 ## 1. Strategic carrier dependency
 
