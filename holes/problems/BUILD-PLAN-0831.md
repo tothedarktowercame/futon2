@@ -1029,3 +1029,38 @@ type-level match standing in for a semantic one — was caught by a delegate, di
 now been made **structurally impossible** by a third. That is the four-vertex arrangement doing the thing
 one session holding 80 declarations could not: the vertex that owns the vocabulary fixed the vocabulary,
 and the fix is verifiable by anyone who runs the compiler.
+
+---
+
+## APEX-D5 gated — and it names the trap in its own unblocking
+
+`9d89082`: APEX-D4's absence **visibly withdrawn but retained as dated history** (the owner's amendment
+rule applied to the delegate's own finding), claims recast as operational hypotheses carrying posterior
+mean and variance, evidence entering as observations through an observation kernel, precision controlling
+update strength, F as the mismatch to reduce. BMR with its 6903/6903 failure and EIG remain recorded as
+non-solutions; the seven Dirichlet rulings and the licensing-device request stay withdrawn.
+
+**The new finding, verified:** *"Lean currently has no separate `beliefUpdate` declaration … discharging
+the two holes must expose those semantics rather than merely introduce opaque carrier types."*
+
+    grep beliefUpdate|belief_update|updateBelief  in Holes.lean  ->  0
+    BeliefState appears only in its own declaration and the emitter list — NOTHING consumes it
+    its own docstring: "The belief-state carrier is named but not defined by the theory entry."
+
+**This is the trap in the delegate's own unblocking, and it named it.** I told it the apex needs
+`BeliefState` and `observationKernel` discharged. Their falsifiers are *"a channel lacks its mean or
+variance"* and *"some state's output masses are not normalised"* — **shape tests**. A well-formed but
+inert record satisfies the first; a normalised but unused kernel satisfies the second. **Discharging both
+naively would mark two holes witnessed with nothing updating anything** — a check that passes without the
+thing working, which is this build's defining defect, and it would have been introduced by the delivery
+that was supposed to unblock the apex.
+
+**Constraint for whenever wm-nouns discharges these** (relayed as information, not a dispatch — nobody has
+asked for them yet): the discharge must expose the update semantics the glossary and R3 already state, not
+merely inhabit the carrier types. Concretely, a `beliefUpdate` relating prior, observation, precision and
+posterior — with a falsifier that a *shape-correct but non-updating* implementation would fail. Otherwise
+the apex gets two green holes and no belief.
+
+**Four vertices, one day, and the pattern across them is consistent:** every delegate has refused at least
+once, and each refusal was better founded than the instruction that provoked it. This one refused a trap I
+had built into the unblocking itself.
