@@ -5,6 +5,8 @@
    Exit convention: 0 = pass (including a rejected negative mutation),
    1 = ordinary validation/check failure, 2 = negative mutation slipped."
   (:require [clojure.edn :as edn]
+            [cheshire.core :as json]
+            [babashka.http-client :as http]
             [clojure.string :as str])
   (:import [java.time Instant]))
 
@@ -48,9 +50,31 @@
         [{:error :overdue :lane (:lane row)
           :holding holding :expected-by expected}])))))
 
+(def terminal-job-states #{:done :failed :cancelled})
+
+(defn- agency-job-state [job-id]
+  (try
+    (let [response (http/get (str "http://localhost:7070/api/alpha/invoke/jobs/" job-id)
+                             {:throw false :timeout 2000})
+          body (json/parse-string (:body response) true)]
+      (if (and (= 200 (:status response)) (:ok body) (get-in body [:job :state]))
+        {:state (keyword (get-in body [:job :state]))
+         :finished-at (get-in body [:job :finished-at])}
+        {:error :job-state-unavailable
+         :http-status (:status response)}))
+    (catch Exception failure
+      {:error :job-state-unavailable :message (.getMessage failure)})))
+
+(defn- agency-states [rows]
+  (into {}
+        (for [{:keys [holding job-id]} rows
+              :when (and holding (string? job-id) (not (str/blank? job-id)))]
+          [job-id (agency-job-state job-id)])))
+
 (defn validate-registry
-  ([data] (validate-registry data (Instant/now)))
-  ([data now]
+  ([data] (validate-registry data (Instant/now) (agency-states (:lanes data))))
+  ([data now] (validate-registry data now {}))
+  ([data now job-states]
    (let [rows (:lanes data)
          lane-frequencies (frequencies (map :lane rows))
          present (set (keys lane-frequencies))
@@ -66,19 +90,33 @@
                   (for [lane missing] {:error :missing-lane :lane lane})
                   (for [lane unexpected] {:error :unexpected-lane :lane lane})
                   (for [lane duplicates] {:error :duplicate-lane :lane lane})
-                  (mapcat #(row-errors % now) rows)))
+                  (mapcat #(row-errors % now) rows)
+                  (for [{:keys [lane holding job-id]} rows
+                        :let [{:keys [error] :as agency} (get job-states job-id)]
+                        :when (and holding error)]
+                    {:error :job-state-unavailable :lane lane :job-id job-id
+                     :agency agency})
+                  (for [{:keys [lane holding job-id]} rows
+                        :let [{:keys [state finished-at]} (get job-states job-id)]
+                        :when (and holding (contains? terminal-job-states state))]
+                    {:error :stale-holding :lane lane :holding holding
+                     :job-id job-id :job-state state :finished-at finished-at})))
          lane-reports
          (mapv (fn [lane]
                  (if-let [row (get by-lane lane)]
                    (let [expected (parse-instant (:expected-by row))
                          overdue? (and (some? (:holding row)) expected
-                                       (.isBefore expected now))]
+                                       (.isBefore expected now))
+                         job-state (get-in job-states [(:job-id row) :state])]
                      {:lane lane
-                      :state (cond overdue? :overdue
+                      :state (cond (and (:holding row)
+                                        (contains? terminal-job-states job-state)) :stale-holding
+                                   overdue? :overdue
                                    (nil? (:holding row)) :idle
                                    :else :holding)
                       :holding (:holding row)
                       :job-id (:job-id row)
+                      :job-state job-state
                       :expected-by (:expected-by row)})
                    {:lane lane :state :missing :holding nil
                     :job-id nil :expected-by nil}))
@@ -123,20 +161,37 @@
                                         :expected-by "2020-01-01T00:01:00Z")
                                  row))
                              rows)))
-    (throw (ex-info "negative mode must be missing or overdue" {:mode mode}))))
+    :done (update data :lanes
+                  (fn [rows]
+                    (mapv (fn [row]
+                            (if (= :wm-verbs (:lane row))
+                              (assoc row
+                                     :holding :C75-negative-control
+                                     :dispatched-at "2026-08-31T15:00:00Z"
+                                     :job-id "invoke-negative-control-done"
+                                     :expected-by "2099-01-01T00:00:00Z")
+                              row))
+                          rows)))
+    (throw (ex-info "negative mode must be missing, overdue, or done" {:mode mode}))))
 
 (defn -main [& args]
   (let [opts (try (parse-args args)
                   (catch Exception failure
                     (binding [*out* *err*]
                       (println (.getMessage failure))
-                      (println "usage: lane_registry_check.clj [--registry FILE] [--negative missing|overdue]"))
+                      (println "usage: lane_registry_check.clj [--registry FILE] [--negative missing|overdue|done]"))
                     (System/exit 1)))
         negative (:negative opts)
         report (try
                  (let [data (edn/read-string (slurp (:registry opts)))
-                       candidate (if negative (mutate data negative) data)]
-                   (validate-registry candidate))
+                       candidate (if negative (mutate data negative) data)
+                       states (agency-states (:lanes candidate))
+                       states (if (= :done negative)
+                                (assoc states "invoke-negative-control-done"
+                                       {:state :done
+                                        :finished-at "2026-08-31T15:01:00Z"})
+                                states)]
+                   (validate-registry candidate (Instant/now) states))
                  (catch Exception failure
                    {:pass? false :lanes []
                     :errors [{:error :check-failed

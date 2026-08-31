@@ -1,7 +1,7 @@
 ;; Four-vertex War Machine lane registry.
 ;; Idle is explicit data: every idle row retains all dispatch keys with nil values.
 {:registry/version 1
- :as-of "2026-08-31T15:35:40.271184502Z"
+ :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
    :holding nil, :dispatched-at nil, :job-id nil, :expected-by nil}
@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C76-futon3-split, :dispatched-at "2026-08-31T15:39:48Z", :job-id "invoke-1788190770575-5744-0c9d7289", :expected-by "2026-08-31T16:24:48Z"}
   {:lane :wm-evidence
-   :holding :C74-defect-classes, :dispatched-at "2026-08-31T15:34:13Z", :job-id "invoke-1788190442217-5736-9d024c62", :expected-by "2026-08-31T16:19:13Z"}]}
+   :holding nil, :dispatched-at nil, :job-id nil, :expected-by nil}]}
