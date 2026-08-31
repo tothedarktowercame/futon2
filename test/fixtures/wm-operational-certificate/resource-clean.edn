@@ -1,0 +1,7 @@
+{:schema 1
+ :status :clean
+ :command-exit 0
+ :service-result :success
+ :pids-events-max-delta 0
+ :native-thread-exhaustion false
+ :tasks-peak 55}
