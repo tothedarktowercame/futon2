@@ -4030,21 +4030,36 @@
 
 ;; --- Priority computation (the judge) ---
 
-(defn- channel-priorities
-  "Rank observation channels by gap size. Largest gaps = highest priority."
+(defn- channel-priority-result
+  "Rank present positive observation gaps. Unknown/non-numeric gaps are
+   explicit exclusions and never enter the numeric comparator."
   [free-energy]
-  (->> (:per-channel free-energy)
-       (sort-by (comp :gap val) >)
-       (filterv (fn [[_ v]] (pos? (:gap v))))
-       (map-indexed (fn [i [ch v]]
-                      {:rank (inc i)
-                       :type :channel-gap
-                       :id ch
-                       :gap (:gap v)
-                       :value (:value v)
-                       :preferred (:preferred v)
-                       :summary (str (name ch) " at " (format "%.2f" (double (:value v)))
-                                     ", preferred " (pr-str (:preferred v)))}))))
+  (let [entries (vec (:per-channel free-energy))
+        absent (filterv (fn [[_ v]] (not (number? (:gap v)))) entries)
+        present-positive (filterv (fn [[_ v]]
+                                    (and (number? (:gap v))
+                                         (pos? (:gap v))))
+                                  entries)]
+    {:priorities
+     (->> present-positive
+          (sort-by (comp :gap val) >)
+          (map-indexed (fn [i [ch v]]
+                         {:rank (inc i)
+                          :type :channel-gap
+                          :id ch
+                          :gap (:gap v)
+                          :value (:value v)
+                          :preferred (:preferred v)
+                          :summary (str (name ch) " at " (format "%.2f" (double (:value v)))
+                                        ", preferred " (pr-str (:preferred v)))}))
+          vec)
+     :exclusions
+     (mapv (fn [[ch v]]
+             {:type :channel-gap-exclusion
+              :id ch
+              :reason :gap-absent
+              :gap-status (select-keys v [:status :reason :variant])})
+           absent)}))
 
 (defn- invariant-priorities
   "Identify candidate invariant families relevant to current activity.
@@ -4197,7 +4212,7 @@
      appended only after policy selection."
   ([scan-data] (judge scan-data {}))
   ([scan-data {:keys [trace? trace-dir scan-id include-advisory-lanes?
-                      strategic-selection-fn]
+                      strategic-selection-fn wm-version]
                :or {trace? false include-advisory-lanes? true}}]
   (let [route0 (:wm/route scan-data)
         observation (obs/observe scan-data)
@@ -4695,7 +4710,8 @@
         enriched-sa (enrich-support-attack
                      (:support-attack scan-data) inventory aif-heads)
         ;; Compute priorities from all sources
-        ch-pris (channel-priorities free-energy)
+        channel-priority-result (channel-priority-result free-energy)
+        ch-pris (:priorities channel-priority-result)
         inv-pris (invariant-priorities inventory (:mission-triage scan-data))
         hd-pris (head-priorities aif-heads)
         ms-pris (mission-priorities (:mission-triage scan-data) portfolio-step)
@@ -4734,6 +4750,7 @@
                  :variational-free-energy variational-free-energy
                  :priorities all-priorities
                  :priority-count (count all-priorities)
+                 :channel-priority-exclusions (:exclusions channel-priority-result)
                  :losses losses
                  :loss-count (count losses)
                  :heads aif-heads
@@ -4784,7 +4801,9 @@
                  :wm/route route6
                  :input-status (current-input-status)}
           habit-prior-state
-          (assoc :habit-prior-state habit-prior-state))
+          (assoc :habit-prior-state habit-prior-state)
+          wm-version
+          (assoc :wm-version wm-version))
         result
         (if trace?
           (let [result (update result0 :wm/route route-tag :TRACE "futon2.aif.trace/write-trace!")]

@@ -1,0 +1,20 @@
+{:trace/path "data/wm-trace/wm-trace-2026-08-31.edn"
+ :trace/record-timestamp "2026-08-31T20:35:51.187865882Z"
+ :trace/record-pr-str-sha256 "fb9849f6aa5022db1b8c53e4774e0efc051126bea8e107127533d77d53a9a073"
+ :trace/schema-version 20
+ :trace/trigger :diagnostic-run-tick-once
+ :selector-seam "stub:first-ranked-authorized-mission"
+ :record-shape {:top-level-keys 24 :ranked-actions 144}
+ :v15-v20
+ {:goal-outcome-replay-inputs {:status :present}
+  :preference-stack {:status :present :envelope-status :present}
+  :observation-envelope {:status :present}
+  :support-typed-scoring-shadow {:status :present}
+  :avoidance-by-channel {:status :present :channels 5}
+  :producer-contract {:status :present :value :r8/stored-f-controller-v1}}
+ :reader-census
+ {:records 803
+  :versions {:unversioned 689, 2 2, 4 75, 6 1, 13 30, 14 5, 20 1}
+  :read-all 803 :read-range 803 :reduce 803
+  :recent-last-agrees? true :latest-agrees? true}
+ :consumer :checks.trace-schema-compatibility}

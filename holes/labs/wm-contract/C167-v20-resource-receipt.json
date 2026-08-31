@@ -1,0 +1,18 @@
+{
+  "command": "clojure -M -m futon2.run-tick-once 14",
+  "failure-resource-correlation": null,
+  "finished-at": "2026-08-31T20:36:43.054686+00:00",
+  "inner-exit": 0,
+  "native-thread-markers": [],
+  "outer-exit": 0,
+  "pids-events-max-after": 0,
+  "pids-events-max-before": 0,
+  "pids-events-max-delta": 0,
+  "pids-peak": 74,
+  "reason": null,
+  "receipt-path": "holes/labs/wm-contract/C167-v20-resource-receipt.json",
+  "resource-status": "clean",
+  "schema": "futon-bounded-test-v1",
+  "started-at": "2026-08-31T20:35:25.789128+00:00",
+  "verdict": "pass"
+}

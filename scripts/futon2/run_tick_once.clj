@@ -7,6 +7,7 @@
             [clojure.pprint :as pp]
             [futon2.aif.efe :as efe]
             [futon2.aif.pattern-registry :as pattern-registry]
+            [futon2.aif.trace :as trace]
             [futon2.report.war-machine :as wm])
   (:import (java.time Instant LocalDate ZoneId)))
 
@@ -201,11 +202,16 @@
         store-basis (store-basis)
         sample (evidence-sample days)
         {:keys [selector selector-seam selector-resolution-error]} (selector-seam)
+        version-stamp (trace/wm-version-stamp
+                       (assoc (wm/arena-mode-flags)
+                              :trigger :diagnostic-run-tick-once
+                              :live-wire? false))
         generated (wm/generate-war-machine
                    days
                    {:trace? true
                     :include-advisory-lanes? false
-                    :strategic-selection-fn selector})
+                    :strategic-selection-fn selector
+                    :wm-version version-stamp})
         result (-> (:judgement generated)
                    (assoc :preference-stack efe/preference-stack-record
                           :selector-seam selector-seam)

@@ -1,0 +1,10 @@
+{:schema 1
+ :source-schema :futon-bounded-test-v1
+ :status :clean
+ :reason nil
+ :command-exit 0
+ :wrapper-exit 0
+ :pids-events-max-delta 0
+ :native-thread-exhaustion false
+ :tasks-peak 74
+ :source-receipt "holes/labs/wm-contract/C167-v20-resource-receipt.json"}

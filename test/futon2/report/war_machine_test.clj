@@ -50,6 +50,21 @@
         (doseq [file (reverse (file-seq dir))]
           (.delete file))))))
 
+(deftest channel-priorities-exclude-unknown-gaps-before-sorting-test
+  (let [result (#'wm/channel-priority-result
+                {:per-channel
+                 {:known-low {:gap 0.2 :value 0.3 :preferred [0.5 1.0]}
+                  :unknown {:gap nil :status :unknown
+                            :reason :observation-absent}
+                  :known-high {:gap 0.8 :value 0.1 :preferred [0.9 1.0]}}})]
+    (is (= [:known-high :known-low] (mapv :id (:priorities result))))
+    (is (= [{:type :channel-gap-exclusion
+             :id :unknown
+             :reason :gap-absent
+             :gap-status {:status :unknown :reason :observation-absent}}]
+           (:exclusions result)))
+    (is (not-any? #(= :unknown (:id %)) (:priorities result)))))
+
 (deftest strategic-selector-accepts-resolved-vars-and-rejects-absence
   (testing "requiring-resolve returns a callable Var, not a value satisfying fn?"
     (is (= {:probe true}
