@@ -9,7 +9,7 @@
    something that does not exist as drawn."
   :observed-shape
   {:tick :wm-judge-tick
-   :micro-step :0..2 ; r3-max-steps 3, war_machine.clj:4292-4294
+   :micro-step :0..2 ; r3-max-steps 3, war_machine.clj:4271 (cite fixed per R7 confirm)
    :channels-delivered 8 ; the post-R3a projection
    :channels-never-delivered 6 ; of R2's 14 — named nowhere in live output
    :per-channel
@@ -24,7 +24,10 @@
   :proposed-absence-encoding
   {:variant :tagged-union
    :present {:observed double :error double}
-   :absent {:absent #{:no-likelihood-model :scan-source-missing :channel-filtered}}}
+   :absent {:absent #{:no-likelihood-model :scan-source-missing :channel-filtered}}
+   :open-design-choice "tagged map (this proposal) vs R7's omission +
+    :present-channels set — genuinely open (R7 round-3 confirmation); either
+    way all three coercion sites must be repaired, incl. precision.clj:166-167"}}
   ; replaces the TRIPLE absent→0.0 sites: observation.clj:38-41,
   ; war_machine.clj:4319, precision.clj:166-167 — fixing one alone is cosmetic}
   }
@@ -61,7 +64,7 @@
  :idemKey
  {:status :proposed
   :value [:tick :channel-set]
-  :condition "Judge runs up to 3 micro-steps per tick (war_machine.clj:4292),
+  :condition "Judge runs up to 3 micro-steps per tick (war_machine.clj:4271),
    so tick alone is not unique; channel-set key needed because the projection
    vocabulary grew 4→8 historically (belief.clj:915-925). Micro-step may need
    to join the key if receipts become per-micro-step."}
