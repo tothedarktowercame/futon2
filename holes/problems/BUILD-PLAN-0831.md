@@ -901,3 +901,43 @@ a definition and **no existing proof changes**.
 passes; and an explicit statement of whether **R13's pattern entry** changes, since R13 is about *"scoring
 only the next action versus scoring the pattern-language cascade/policy it opens"* — the π distinction
 exactly, and patterns are now updated at gate time.
+
+---
+
+## APEX-D4 gated — the absence is typed, and the obvious candidate is not merely wrong but vacuous
+
+`b8dbf32`: `P-evidence-apex.md` +58 lines. Typed result **`:licensing-device :absent`**, with a real
+falsifier — *"a declaration accepting typed claim/evidence inputs and returning licensed/refused/unknown
+under stated semantics, demonstrated by accepting and refusing cases without `sorry`"*. Note that the
+falsifier requires **both** an accepting and a refusing case: an absence whose falsifier could be
+discharged by a device that only ever accepts would be the same defect it is recording.
+
+**What I verified, and it is worse than "over-merging".** The delegate cited the count-only BMR
+configuration as having *"collapsed 118 patterns into one"*. The recorded experiment says:
+
+    EXPERIMENT 1: BMR over-merge reproduction (count-only reduce-concepts)
+    Patterns (in >=2 missions): 118
+    Pairs scored: 6903
+    Accepted (dF <= -3): 6903 / 6903
+    Rejected: 0
+    delta-F range: [-33.70, -6.45]
+
+**Every pair passed. Zero rejections.** So in the count-only configuration the `ΔF ≤ -3` threshold is not
+a threshold at all — it is **an acceptance that cannot reject**, which is this build's oldest and most
+frequent defect, sitting reproduced in the findings directory since before today.
+
+**That closes the question I had left half-open.** I had thought the licensing chain was proved and only
+the `evidence-source → Dirichlet counts` map was missing. Had anyone built that map, the threshold would
+have **licensed every claim put to it** — the device would not have been merely mis-purposed, it would have
+been vacuous on arrival. The delegate's refusal saved a delivery that would have produced a certifier
+incapable of declining.
+
+**The three non-solutions now stand recorded with pinned evidence:** perceptual F ends as an unconsumed
+surprise value; BMR/ΔF licenses R17 concept reductions and collapses under count-only inputs; EIG is
+policy-directed and REFUSED (`Outcome`/`Q(o∣π)` missing). The seven Dirichlet rulings and APEX-D3's
+proposed suffix are explicitly withdrawn.
+
+**One question goes to Joe, and it is now well-founded rather than speculative:** *the build needs a
+claim-licensing device; AIF as formalised here does not supply one; what should it be?* The apex's first
+output is the honest statement that the instrument it was created to wield does not exist — which is
+§0.8's complaint located in the mathematics, and exactly what an apex is for.
