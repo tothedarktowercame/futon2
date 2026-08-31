@@ -1,7 +1,10 @@
 {:from :R2
  :to :R7
  :payload
- {:status :unresolved
+ {:status :unresolved ; ratified by both owners (see :ratification) — awaiting wm-verbs adoption
+  :open-choice-note "The tagged-vs-omission and port-boundary choices recorded
+   below are now co-signed in :ratification; this section keeps the original
+   open-state text for provenance."
   :mediator "R3a — NO direct R2→R7 call exists. R2 emits 14 channels
    (observation.clj:17-31); selection of 8 happens in R3's territory
    (belief/channels-with-likelihood, belief.clj:913-926; applied in the judge
@@ -102,7 +105,10 @@
     owner update pending — see :blocked-on)."
    :accepted-by :both-seats}]
  :disagreements
+ ;; All three are co-signed as decided in :ratification; kept listed here
+ ;; until wm-verbs adopts, so the unresolved semantics stay visible.
  [{:field :payload-scope
+   :ratified-pending-adoption :post-r3a
    :r2 "R2 publishes the full 14-channel vocabulary (observation.clj:17-31);
         the 6 filtered channels are part of my output."
    :r7 "What arrives at R7 is the 8-channel post-R3a projection; the payload
@@ -112,12 +118,14 @@
         never-delivered channels, but the wiring seat must decide which side
         of the filter the edge is drawn on."}
   {:field :channel-set-versioning
+   :ratified-pending-adoption :member-set-fingerprint
    :r2 "Cannot promise the 14-channel set permanent — grows by version bumps
         (observation.clj:14; belief.clj:915-925)."
    :r7 "Wants a version stamp on the edge contract."
    :why-unresolved "Agreed a version key is needed; its form (count, hash,
         vocabulary id) is unspecified."}
   {:field :first-sight-prior-typing
+   :ratified-pending-adoption :typed-prior-in-receipt
    :r2 :agrees-with-r7
    :r7 "Precision 1.0 on first sight (precision.clj:163-165, :44) must be
         typed as a prior (:initialised) in the receipt, never presented as
