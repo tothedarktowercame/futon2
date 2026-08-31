@@ -45,8 +45,8 @@ the twelve source/artifact checks C107/C111 classified as gateable.  It
 explicitly excludes lane-registry state and the live operational certificate,
 which remain operator-boundary checks.
 
-The R9 check is green inside that runner.  The runner as a whole is currently
-red because concurrent C112 edits made eleven other strict witness bindings
-stale.  C115 does not hide or rebind those unrelated stale witnesses; therefore
-the workspace command is wired but is not declared green.  Repository CI is
-unchanged.
+The first runner invocation was honestly red because concurrent C112 edits had
+made eleven other strict witness bindings stale.  C115 did not hide or rebind
+them.  After C112 published its own fragments, the same unmodified workspace
+command was rerun: all 12 checks passed, live strict qualification reported
+fresh and inspectable, and the gate exited 0.  Repository CI remains unchanged.
