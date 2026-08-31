@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C57-witness-split, :dispatched-at "2026-08-31T14:58:05Z", :job-id "invoke-1788188272847-5706-61d6fe98", :expected-by "2026-08-31T15:43:05Z"}
   {:lane :wm-evidence
-   :holding :C60-find-snatch, :dispatched-at "2026-08-31T14:54:48Z", :job-id "invoke-1788188075356-5702-a20c08da", :expected-by "2026-08-31T15:39:48Z"}]}
+   :holding :C61-strengthen-find, :dispatched-at "2026-08-31T14:59:27Z", :job-id "invoke-1788188356174-5708-0974a1fc", :expected-by "2026-08-31T15:44:27Z"}]}
