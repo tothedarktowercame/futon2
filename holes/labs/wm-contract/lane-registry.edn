@@ -4,7 +4,7 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C119-modelUncertaintyAndEIG, :dispatched-at "2026-08-31T18:41:28Z", :job-id "invoke-1788201645142-5873-efa9ab42", :expected-by "2026-08-31T19:26:28Z"}
+   :holding :C122-machineHasNoC-census, :dispatched-at "2026-08-31T18:46:58Z", :job-id "invoke-1788201996033-5878-793648cd", :expected-by "2026-08-31T19:31:58Z"}
   {:lane :wm-verbs
    :holding :C120-precision-sites, :dispatched-at "2026-08-31T18:41:28Z", :job-id "invoke-1788201671454-5874-72585d5d", :expected-by "2026-08-31T19:26:28Z"}
   {:lane :wm-organization
