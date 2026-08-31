@@ -2,7 +2,8 @@
 (ns checks.wm-operational-certificate
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.pprint :as pprint]))
+            [clojure.pprint :as pprint]
+            [clojure.string :as str]))
 
 (def topology-svg "/home/joe/code/p4ng/aif-control-map-paper.svg")
 (def topology-data "/home/joe/code/p4ng/empirics-futon/control-map-edges.edn")
@@ -35,6 +36,12 @@
   (if-let [run-id (:run/id run)]
     {:id run-id :identity-kind :recorded-run-id}
     {:id (sha256-bytes run-bytes) :identity-kind :content-sha256-fallback}))
+
+(defn selector-seam-envelope [run]
+  (let [seam (:selectorSeam run)]
+    (if (and (string? seam) (not (str/blank? seam)))
+      {:status :present :value seam}
+      {:status :absent :reason :not-recorded})))
 
 (defn certificate-matches-run? [run-bytes certificate]
   (let [run (edn/read-string (String. run-bytes "UTF-8"))]
@@ -69,7 +76,9 @@
                             (empty? undeclared) resources-clean?))]
     {:certificate/schema 1
      :certificate/generated-at (str (java.time.Instant/now))
-     :run (assoc identity :started-at (:startedAt run))
+     :run (assoc identity
+                 :started-at (:startedAt run)
+                 :selector-seam (selector-seam-envelope run))
      :topology {:artifact "p4ng/aif-control-map-paper.svg"
                 :content-sha256 svg-hash :expected-sha256 expected-svg-sha256
                 :edge-data "p4ng/empirics-futon/control-map-edges.edn"

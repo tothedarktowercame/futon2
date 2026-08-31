@@ -32,6 +32,25 @@
                  identified-bytes
                  (assoc-in c [:run :id] "different-run"))))))
 
+(deftest selector-seam-is-recorded-but-does-not-govern-certification
+  (let [production-seam "agency-http:verified-live-selection"
+        production-bytes (edn-bytes (assoc run-record :run/id "production-shape-control"
+                                           :selectorSeam production-seam))
+        missing-bytes (edn-bytes (-> run-record
+                                     (assoc :run/id "missing-seam-control")
+                                     (dissoc :selectorSeam)))
+        production (cert/certificate production-bytes clean-resource false)
+        missing (cert/certificate missing-bytes clean-resource false)]
+    (is (= :pass (:verdict production)))
+    (is (= {:status :present :value production-seam}
+           (get-in production [:run :selector-seam])))
+    (is (= (get-in (cert/certificate run-bytes clean-resource false)
+                   [:traversal :counts])
+           (get-in production [:traversal :counts])))
+    (is (= :pass (:verdict missing)))
+    (is (= {:status :absent :reason :not-recorded}
+           (get-in missing [:run :selector-seam])))))
+
 (deftest undeclared-hop-produces-a-failing-certificate
   (let [c (cert/certificate run-bytes clean-resource true)]
     (is (= :fail (:verdict c)))

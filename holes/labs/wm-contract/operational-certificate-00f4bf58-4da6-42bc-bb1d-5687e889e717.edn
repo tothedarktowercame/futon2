@@ -1,9 +1,11 @@
 {:certificate/schema 1,
- :certificate/generated-at "2026-08-31T21:07:20.417035573Z",
+ :certificate/generated-at "2026-08-31T21:21:11.371826804Z",
  :run
  {:id "00f4bf58-4da6-42bc-bb1d-5687e889e717",
   :identity-kind :recorded-run-id,
-  :started-at "2026-08-31T20:35:27.446481011Z"},
+  :started-at "2026-08-31T20:35:27.446481011Z",
+  :selector-seam
+  {:status :present, :value "stub:first-ranked-authorized-mission"}},
  :topology
  {:artifact "p4ng/aif-control-map-paper.svg",
   :content-sha256
