@@ -6,7 +6,7 @@
  [{:lane :wm-nouns
    :holding :C64-restate-O1-O4, :dispatched-at "2026-08-31T15:06:17Z", :job-id "invoke-1788188766815-5714-37a96647", :expected-by "2026-08-31T15:51:17Z"}
   {:lane :wm-verbs
-   :holding :C63-PreferenceStackWitness, :dispatched-at "2026-08-31T15:02:11Z", :job-id "invoke-1788188519684-5710-5e914ed8", :expected-by "2026-08-31T15:47:11Z"}
+   :holding :C66-persist-pref-stack, :dispatched-at "2026-08-31T15:09:58Z", :job-id "invoke-1788188988101-5718-e8c93f75", :expected-by "2026-08-31T15:54:58Z"}
   {:lane :wm-organization
    :holding :C65-antecedent-cure, :dispatched-at "2026-08-31T15:08:42Z", :job-id "invoke-1788188909150-5716-39052965", :expected-by "2026-08-31T15:53:42Z"}
   {:lane :wm-evidence
