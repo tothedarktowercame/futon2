@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C159-runbook, :dispatched-at "2026-08-31T20:16:31Z", :job-id "invoke-1788207388431-5972-d986a9a9", :expected-by "2026-08-31T21:01:31Z"}
   {:lane :wm-evidence
-   :holding :C156-glossary-omissions, :dispatched-at "2026-08-31T20:09:38Z", :job-id "invoke-1788206974776-5966-1be72d5c", :expected-by "2026-08-31T20:54:38Z"}]}
+   :holding :C160-two-glossary-entries, :dispatched-at "2026-08-31T20:17:33Z", :job-id "invoke-1788207450110-5973-7964a284", :expected-by "2026-08-31T21:02:33Z"}]}
