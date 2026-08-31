@@ -587,3 +587,39 @@ It also reframes the apex's first decision. `wm-evidence` asks whether executabl
 make `:self` evidence admissible — and the glossary is the extreme case: eight holes whose only plausible
 witness is the machine computing its own definitions. If `:self` is inadmissible without a negative
 control, the glossary cannot be witnessed at all until one exists.
+
+---
+
+## VERBS-D1 — gated. The strongest edge in the machine is not an edge
+
+p4ng `a45b8be` (edge fragment + regenerated schema), futon2 `2cd7049` (census refresh), five pairing-round
+commits plus `c41be67`/`7d48c17` for the corrected and confirmed contract.
+
+**What I checked:** `merge_edges.bb --check` — 5 instances, `merge(fragments) == committed`; the exemplar
+gate passes all 5 and its negative control still exits 1; the new instance
+`:control-map/R2-R3a-R7-precision` has **6 ports, 0 freehand**; and I opened its cited line —
+`belief.clj:913` is `(def channels-with-likelihood)`, exactly as claimed.
+
+**`R2→R7` is a two-hop path, not a direct call.** Live traffic is `R2 → R3a → R7`, and the instance names
+its members honestly: `[:node/R2 :mediator/R3a :node/R7 :store/wm-trace]`. **`:mediator/` is a new member
+kind** — the delegate declined to promote R3a to `:node/` when it has no entry in `control-stages.edn`,
+while still refusing to pretend the hop is absent. That is the right call and it is a small piece of
+vocabulary the schema did not have this morning.
+
+**This is the second time in two pairings that the "direct" edge had something in the middle.** `R5→R14`
+turned out to be `R5→R6→R14`; `R2→R7` is `R2→R3a→R7`. Both were discovered by pairing against the running
+code, and neither the drawing nor the theory derivation had the intermediary. **The map's edges are
+consistently one hop shorter than the machine's paths** — which is now a pattern with two instances rather
+than an anecdote, and it is a finding about Figure 4 rather than about either pair.
+
+**The stale-documentation catch, verified.** `belief.clj:913`'s docstring says *"v0.11: 4 channels
+(annotation-health, sorry-count-norm, mission-health, active-repo-ratio)"*. The live set has **8**:
+those four plus `attack-coverage`, `coupling-density`, `support-coverage`, `ticks-firing-ratio`. So the
+projection is **14 observation channels → 8 likelihood channels**, not 13→4. A docstring that lists its
+members by name and then grew four more without the prose changing is exactly the drift the pairing method
+keeps catching, because a pair reads the definition rather than the sentence about it.
+
+**Absence coerced to `0.0` at three sites**, recorded as a blocker rather than papered over. That is now
+the same defect found at `observation.clj:42`, in the first pairing's payload encoding, and here — the
+build's most persistent single fault, and the contract records typed absence, receipt machinery and
+vocabulary versioning as `:blocked-on` instead of inventing completed semantics.
