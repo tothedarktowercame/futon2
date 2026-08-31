@@ -686,3 +686,45 @@ precept that unblocks more work.
 
 **STILL JOE'S — the two π's.** A Gate 0 nouns question: which definition the spine is built on. I can state
 the consequences but not choose the mathematics.
+
+---
+
+## The `:self` question, dissolved rather than decided *(Joe, 2026-08-31)*
+
+I escalated `:self` admissibility as a genuine conflict between two precepts — the apex's falsifiability
+test versus R9's no-self-certification. **Joe reframed it and the reframing retires both horns:**
+
+> *"if `:self` evidence is passed forward, it needs processing … it is basically a bare perception or
+> datum. I think AIF will have better things to say about how that processing should work than I will."*
+
+**`:self` is neither admissible nor inadmissible — it is UNPROCESSED.** A self-witness is an *observation*,
+not a certified claim, and treating it as a claim was the category error on both sides of my framing. R9
+forbids self-**certification**; nothing forbids self-**observation**. The apex's job is not to admit or
+refuse a datum but to say what turns one into evidence.
+
+**And AIF already says, in declarations that are `closed` rather than holes:**
+
+    PrecisionMap := Channel → NonnegativeReal                Holes.lean:466
+    variationalFreeEnergy := ½ · mean_k (Π_k · ε_k²)         Holes.lean:469   precision-WEIGHTED
+    bayesFactorThreshold (deltaF) := deltaF ≤ -3             Holes.lean:491
+    bayesianModelReduction (A a' a) := A + a' - a            Holes.lean:502
+
+So the evidence-merging strategy is **the machine's own loop applied to evidence**: a datum enters as an
+observation on a channel with a prediction error; **precision is where independence lives** — review and
+cross-validation raise Π rather than flipping a boolean, so an unreplicated self-report is *low-precision*,
+which is a different thing from inadmissible; evidence accumulates as `F = ½·mean(Π·ε²)`; and a claim is
+licensed at **`ΔF ≤ -3`** — a stated threshold, which is precisely what "the owner read it" never was.
+
+**The convergence worth noticing:** `P-glossary-mathematics` is **0 of 8 bound** — the whole AIF vocabulary
+defined and unwitnessed — and an evidence-merging strategy built from these declarations, exercised on real
+evidence, is the first thing that would witness them. **The apex and the glossary's emptiest lane are the
+same work.** APEX-D2 is dispatched on that basis, with `expectedInformationGain` flagged as a REFUSED hole
+not to be routed through, and `observationKernel`/`BeliefState`/`GenerativeModel` flagged as carriers that
+are themselves holes.
+
+**Method note for me.** I framed this as "a precept conflict, therefore the operator's". It was a
+**category error I had not noticed** — and the operator's contribution was not a preference between
+precepts but a better type for the thing in question. Escalating with a sharp framing is still right; but
+"two precepts conflict" should have prompted one more question — *are both precepts even talking about the
+same kind of object?* — before it prompted an escalation. They were not: one was about claims, one about
+data.
