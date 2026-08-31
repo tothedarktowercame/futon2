@@ -1,0 +1,23 @@
+{:receipt/type :LeanProofReceipt
+ :receipt/version 2
+ :recorded-at "2026-08-31T23:59:00Z"
+ :theorem "DarkTower.WarMachine.Holes.modelUncertaintyAndEIG"
+ :proof-source
+ {:repo "mathlib4"
+  :path "DarkTower/WarMachine/Holes.lean"
+  :file-git-sha-at-recording "d4056010d5f129ff1da7ce180c6ce8a91a962f6a"
+  :declarations
+  [{:name "modelUncertaintyBonus"
+    :sha256 "2a956226a01cfe5f845273d31c97e759f42e99aced30d57e2dd19acdd6885aec"}
+   {:name "parameterInformationGain"
+    :sha256 "9ff206c94d536551793001be15fcc91b84cbe63101308170ed360f2f76a97fd3"}
+   {:name "expectedInformationGain"
+    :sha256 "f64bf3b57d210b2bb2b5c40d5c670ded7f9f7b9dfe3995864ef4e63aa17d63c9"}
+   {:name "modelUncertaintyAndEIG"
+    :sha256 "c81fdb5422808c57a40542f7590c8737f3b98fdcf51641c65fc31cfdb4aeb626"}]}
+ :elaborator
+ {:command ["lake" "env" "lean"]
+  :cwd "/home/joe/code/mathlib4"}
+ :result
+ {:exit 0
+  :axioms ["propext" "Classical.choice" "Quot.sound"]}}
