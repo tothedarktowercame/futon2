@@ -216,14 +216,23 @@
 
 (defn lean-proof-receipt? [x]
   (and (= :LeanProofReceipt (:receipt/type x))
-       (= 1 (:receipt/version x))
        (string? (:recorded-at x))
        (not (str/blank? (:theorem x)))
-       (= 64 (count (get-in x [:proof-source :sha256] "")))
-       (every? #(not (str/blank? (get-in x % "")))
-               [[:proof-source :repo] [:proof-source :path] [:proof-source :git-sha]
-                [:imported-module :repo] [:imported-module :path]
-                [:imported-module :git-sha]])
+       (case (:receipt/version x)
+         1 (and (= 64 (count (get-in x [:proof-source :sha256] "")))
+                (every? #(not (str/blank? (get-in x % "")))
+                        [[:proof-source :repo] [:proof-source :path]
+                         [:proof-source :git-sha]
+                         [:imported-module :repo] [:imported-module :path]
+                         [:imported-module :git-sha]]))
+         2 (and (seq (get-in x [:proof-source :declarations]))
+                (every? #(and (not (str/blank? (:name %)))
+                              (= 64 (count (:sha256 % ""))))
+                        (get-in x [:proof-source :declarations]))
+                (every? #(not (str/blank? (get-in x % "")))
+                        [[:proof-source :repo] [:proof-source :path]
+                         [:proof-source :file-git-sha-at-recording]]))
+         false)
        (= ["lake" "env" "lean"] (get-in x [:elaborator :command]))
        (= 0 (get-in x [:result :exit]))
        (vector? (get-in x [:result :axioms]))

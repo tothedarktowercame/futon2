@@ -389,6 +389,21 @@ not be invoked with Babashka.  `wm_runs_once_witness` defaults to the newest
 committed dated run record and loudly names the expected filename pattern if no
 such record exists; an explicit path still overrides that selection.
 
+## C115 — declaration-scoped R9 proof receipt and workspace gate
+
+```sh
+bb -cp . checks/r9_proof_receipt_check.clj
+bb -cp . checks/r9_proof_receipt_check.clj tampered
+bb -cp . checks/r9_proof_receipt_check.clj unrelated
+bb -cp . checks/r9_proof_receipt_check.clj absent
+bb -cp . checks/wm_workspace_gate.clj
+```
+
+The positive receipt and unrelated-edit control elaborate live and reproduce
+`axioms: [propext]`.  The tampered theorem source is rejected by its declaration
+hash.  The workspace runner aggregates failures and intentionally excludes the
+manual lane-registry and live operational-certificate boundaries.
+
 Both complete test suites contain `preemptive-repair-gate-test`, so their normal gate commands consume the
 same combined result. Acceptance, artefact boundary, stale baseline, era blindness, and record conflict
 findings hard-fail. Absence coercion is report-only during C81; its count is emitted on every run and may

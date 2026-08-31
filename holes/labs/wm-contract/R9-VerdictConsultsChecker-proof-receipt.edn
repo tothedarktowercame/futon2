@@ -1,14 +1,17 @@
 {:receipt/type :LeanProofReceipt
- :receipt/version 1
+ :receipt/version 2
  :recorded-at "2026-08-31T23:55:00Z"
  :theorem "DarkTower.WarMachine.Holes.r9VerdictConsultsChecker"
  :proof-source {:repo "mathlib4"
                 :path "DarkTower/WarMachine/Holes.lean"
-                :git-sha "5fd2abf6ca78d209958789a16a091235bce2f564"
-                :sha256 "6a56e75a67972cefd21a32962134707ab20bc20834d46b49f9dbc8adc7d8ba23"}
- :imported-module {:repo "mathlib4"
-                   :path "DarkTower/WarMachine/Holes.lean"
-                   :git-sha "5fd2abf6ca78d209958789a16a091235bce2f564"}
+                :file-git-sha-at-recording "5fd2abf6ca78d209958789a16a091235bce2f564"
+                :declarations
+                [{:name "Layer" :sha256 "d760d736123ba06acbdaaaf5b1e5ea343b5930c62104556e2bd88f222594e367"}
+                 {:name "Claim" :sha256 "ec5b1204966e4154ab17d545a683b5a426dd555166a5dc2d2670da5eda5221f5"}
+                 {:name "Witness" :sha256 "63481b5e67834c5d25d002dfa511d269e5b23f3314cd1701683c0f3b20026ab5"}
+                 {:name "IndependenceVerdict" :sha256 "0fb1bb61e1d250dd52daa7d49442ad26d96a091119379cd8b4c3e992d30d452c"}
+                 {:name "independenceVerdict" :sha256 "bce1b93f41b276224be6a24f0abd40249ce9bf175314a370d4badadd8e8c2d90"}
+                 {:name "r9VerdictConsultsChecker" :sha256 "a886cc54d00cd158f4d9ab3ea7efbe61dd2ed455cafcb81ffe1feb0abfdb2849"}]}
  :elaborator {:command ["lake" "env" "lean"] :cwd "/home/joe/code/mathlib4"}
  :result {:exit 0 :axioms ["propext"]}
  :consumer {:binding "r9VerdictConsultsChecker"
