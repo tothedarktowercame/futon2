@@ -1,0 +1,116 @@
+{:census/id :NOUNS-D2
+ :as-of "2026-08-31"
+ :consumer :wm-nouns/NOUNS-D3-ordering
+ :basis
+ {:stages {:path "p4ng/empirics-futon/control-stages.edn"
+           :commit "4140cc5c4a65f9799557984da550bdcaa0f1e4a4"}
+  :catalogue {:path "p4ng/sec-catalog.tex"
+              :commit "4140cc5c4a65f9799557984da550bdcaa0f1e4a4"}
+  :records {:path "futon2/holes/problems/P-R*.md"
+            :present ["R2" "R8" "R9" "R16" "R19"]}}
+ :population
+ {:staged 18
+  :problem-records 5
+  :records-intersecting-staged-nodes 4
+  :recordless-staged-nodes 14
+  :commissioned-count 13
+  :status :refused-count-mismatch
+  :note "R19 has a problem record but no control-stages entry. Subtracting all five records from the 18 staged nodes silently removes no staged node for R19; the honest record-less population is 14."}
+ :carrier-vocabulary
+ {:status :refused-arity-mismatch
+  :commission-says-count 3
+  :commission-names [:chain :cascade :stack :route]
+  :method "Each row records one best candidate and alternatives where the catalogue does not determine a unique carrier. These are census hypotheses, not settled types."}
+ :nodes
+ [{:node "R20" :priority 1
+   :catalogue {:line 366 :name "Interoceptive Tripwires"
+               :says "A harness of invariant tripwires observes machine trajectories and freezes, records, parks, and summons on a trip."}
+   :implementation {:status :present :ref "futon2/src/futon2/aif/tripwire.clj:452" :symbol "evaluate-wire"}
+   :carrier {:candidate :route :alternatives [:stack]
+             :why "It observes and can interrupt the live run route; the wire registry is stack-like."}}
+  {:node "R10" :priority 2
+   :catalogue {:line 159 :name "Scheduled Observer Entrypoint"
+               :says "A scheduled entrypoint is live only when a tick changes observable state; a no-op schedule must be disabled."}
+   :implementation {:status :present :ref "futon2/scripts/wm_scheduled_run.clj:66" :symbol "-main"}
+   :carrier {:candidate :route :alternatives [:chain]
+             :why "It is the entry into the run route, while its successive scheduled ticks can be read as a chain."}}
+  {:node "R12" :priority 3
+   :catalogue {:line 295 :name "Two-Layer Calibration"
+               :says "Keep self-referential prediction/score comparison separate from externally witnessed prediction/outcome comparison; only the latter clears value."}
+   :implementation {:status :present :ref "futon2/src/futon2/aif/enact.clj:194" :symbol "enact calibration pair"}
+   :carrier {:candidate :chain :alternatives [:stack]
+             :why "The predicted-to-realised pair is sequential; its two explicitly separated evidence layers are stack-like."}}
+  {:node "R1" :priority 4
+   :catalogue {:line 188 :name "Belief State as Operational Hypotheses"
+               :says "Represent belief as a map of operational hypotheses rather than conversation history."}
+   :implementation {:status :present :ref "futon2/src/futon2/aif/belief.clj:62" :symbol "initial-belief-state"}
+   :carrier {:candidate :stack :alternatives []
+             :why "It accumulates typed hypothesis state carried between updates."}}
+  {:node "R3" :priority 5
+   :catalogue {:line 196 :name "Predictive-Coding Belief Update"
+               :says "Move beliefs toward observations under learning-rate and channel-trust controls while maintaining a nonzero uncertainty floor."}
+   :implementation {:status :present :ref "futon2/src/futon2/aif/belief.clj:325" :symbol "categorical-filter-step"}
+   :carrier {:candidate :chain :alternatives [:route]
+             :why "It transforms prior belief plus observation into posterior belief step by step."}}
+  {:node "R7" :priority 6
+   :catalogue {:line 198 :name "Evidence Precision Registry"
+               :says "Keep auditable per-channel trust weights and apply them to error, scoring, and gating."}
+   :implementation {:status :present :ref "futon2/src/futon2/aif/precision.clj:147" :symbol "update-precision-state"}
+   :carrier {:candidate :stack :alternatives []
+             :why "It is explicitly a keyed registry carried across ticks."}}
+  {:node "R4" :priority 7
+   :catalogue {:line 202 :name "Shared Kernel for the Predictive Forward Model"
+               :says "Live and predictive dynamics should share one pure deterministic state/action-to-next-state kernel."}
+   :implementation {:status :present :ref "futon2/src/futon2/aif/forward_model.clj:311" :symbol "predict"}
+   :carrier {:candidate :route :alternatives [:chain]
+             :why "It projects state along candidate action routes; a single projection is a state-transition chain."}}
+  {:node "R5" :priority 8
+   :catalogue {:line 235 :name "Expected Free Energy Inside an Auditable Controller"
+               :says "Persist canonical risk plus ambiguity separately from named engineering augmentation."}
+   :implementation {:status :present :ref "futon2/src/futon2/aif/free_energy.clj:34" :symbol "compute-controller-diagnostics"}
+   :carrier {:candidate :cascade :alternatives [:stack]
+             :why "It scores candidate policies/cascades; its separated core and augmentation are stack-like."}}
+  {:node "R6" :priority 9
+   :catalogue {:line 237 :name "Candidate Pattern Action Space"
+               :says "Construct a bounded, gated candidate set of pattern IDs with explicit inclusion and exclusion reasons."}
+   :implementation {:status :present :ref "futon2/src/futon2/aif/action_proposer.clj:34" :symbol "gap-actions"}
+   :carrier {:candidate :cascade :alternatives []
+             :why "The candidates are the vocabulary from which pattern cascades are constructed."}}
+  {:node "R14" :priority 10
+   :catalogue {:line 239 :name "Commitment Temperature"
+               :says "Maintain an explicit diagnostic-coupled dial controlling how decisively the best candidate wins."}
+   :implementation {:status :present :ref "futon2/src/futon2/aif/policy.clj:46" :symbol "effective-temperature"}
+   :carrier {:candidate :stack :alternatives []
+             :why "It is a control value carried with the selector state, not an ordered collection by itself."}}
+  {:node "R11" :priority 11
+   :catalogue {:line 241 :name "Hierarchical, Budget-Aware Action Selection"
+               :says "Local agents propose within sub-budgets and a coordinator arbitrates the shared consumable budget at each hierarchy level."}
+   :implementation {:status :present :ref "futon2/src/futon2/aif/hierarchical_budget.clj:157" :symbol "arbitrate"}
+   :carrier {:candidate :stack :alternatives [:cascade]
+             :why "The resource hierarchy is layered; the selected actions may themselves form cascades."}}
+  {:node "R15" :priority 12
+   :catalogue {:line 243 :name "Hierarchical and Temporal Depth"
+               :says "Couple slow strategic and fast tactical loops explicitly and give longer policies a separate named temporal discount."}
+   :implementation {:status :present :ref "futon2/src/futon2/aif/rollout.clj:174" :symbol "rollout-discount"}
+   :carrier {:candidate :stack :alternatives [:cascade]
+             :why "The defining noun is a hierarchy of timescales, although longer tactical policies are cascades."}}
+  {:node "R13" :priority 13
+   :catalogue {:line 254 :name "Temporal Depth Beyond the Greedy Step"
+               :says "Score the whole pattern cascade over a multi-step horizon rather than only its first action."}
+   :implementation {:status :present :ref "futon2/src/futon2/aif/rollout.clj:215" :symbol "expand-policies"}
+   :carrier {:candidate :cascade :alternatives [:route]
+             :why "The catalogue explicitly makes the scored object a pattern cascade and also calls its temporal projection a route."}}
+  {:node "R17" :priority 14
+   :catalogue {:line 338 :name "Structure Learning by Bayesian Model Reduction"
+               :says "Offline, compare reduced models against a frozen parent using accumulated evidence and accept only above a stated evidence threshold."}
+   :implementation {:status :present :ref "futon2/src/futon2/aif/r17_offline.clj:64" :symbol "run"}
+   :carrier {:candidate :cascade :alternatives [:stack]
+             :why "It reorganises the model/cascade vocabulary through successive proposals; the frozen parent and resulting posterior are stack-like state."}}]
+ :missing-noun
+ {:node "TRACE"
+  :status :observed-not-diagrammed
+  :evidence "NOUNS-D1/WM-RUN2 records R14->TRACE, but control-stages.edn and control-map-edges.edn contain no TRACE or ledger vertex."
+  :implementation {:status :present :ref "futon2/scripts/futon2/report/war_machine.clj:4763" :symbol "TRACE route tag and write-trace!"}
+  :carrier {:candidate :route :alternatives [:stack]
+            :why "A trace records the executed route; an append-only ledger is a stack of such records."}
+  :decision :joe-must-decide-whether-to-add-vertex}}
