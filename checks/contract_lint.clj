@@ -103,7 +103,7 @@
          (= "0" (get-in cases [[1 1] :expected-log]))
          (= {:numerator 1 :denominator 2}
             (get-in cases [[2 1] :normaliser]))
-         (= "-log(2)" (get-in cases [[2 1] :expected-log]))))
+         (= "-log(2)" (get-in cases [[2 1] :expected-log])))))
 
 (def shape-checks
   {"AblationTable" ablation-table?

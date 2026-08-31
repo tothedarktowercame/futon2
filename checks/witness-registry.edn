@@ -16,6 +16,18 @@
   :contract-sha "32b929692533cf0d6294fbb7a5937f9199c1552c",
   :result :passed,
   :recorded-at "2026-08-30T16:23:00Z"}
+ {:witnesses "logMultivariateBeta",
+  :check
+  {:repo "futon2",
+   :path "checks/log_multivariate_beta_witness.clj",
+   :entrypoint "-main"},
+  :fixture
+  {:repo "futon2",
+   :path "holes/labs/wm-contract/log-multivariate-beta-reference.edn"},
+  :run-sha "720af918c430415bf07f4eba29ec73d49b343a10",
+  :contract-sha "15827fc8459f74a983021018a2c83ac52f585bcd",
+  :result :passed,
+  :recorded-at "2026-08-31T23:50:00Z"}
  {:witnesses "nonDegenerateAblationLaw",
   :check
   {:repo "futon3",
