@@ -26,4 +26,4 @@ The carrier question is also under-typed. The charter says “three carrier kind
 
 Finally, `R14→TRACE` terminates at a noun absent from both the stage registry and Figure 4. The implementation writes/assembles trace data, so this is not an absent edge implementation: it is a missing diagram vertex. TRACE is included as a separate `:missing-noun` case, not smuggled into the 14-node staged population. Whether Figure 4 gains that vertex remains Joe's decision.
 
-Spine holding cost (consumer: `wm-nouns` regression watch): **63 declarations contain 32 holes; 14 are bound to passing witnesses and 18 are unbound** (P-validated-R5 5/12, P-glossary-mathematics 0/8, P-R9 4/7, P-R8 3/3, P-R2 2/2; measured from `holes-contract.json` and `checks/witness-registry.edn`, 2026-08-31).
+Spine holding cost (consumer: `wm-nouns` regression watch): **63 declarations contain 31 holes; 14 are bound to passing witnesses and 17 are unbound** (P-validated-R5 5/12, P-glossary-mathematics 0/7, P-R9 4/7, P-R8 3/3, P-R2 2/2; measured from `holes-contract.json` and `checks/witness-registry.edn`, updated by NOUNS-D3 when `cascadeGrainPi` closed on 2026-08-31).
