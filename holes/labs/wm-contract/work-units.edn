@@ -1,0 +1,348 @@
+{:as-of "2026-08-31",
+ :generated-by "futon2/scripts/work_units.bb",
+ :criteria-source "futon4/holes/delivery-lifecycle.md §0.14",
+ :totals
+ {:units 29, :ready-7of7 18, :needs-split 10, :operator-only 1},
+ :units
+ [{:owner-record "sec-glossary.tex:9 · P-glossary-mathematics",
+   :criteria {1 :met, 2 :met, 3 :met, 4 :met, 5 :met, 6 :met, 7 :met},
+   :split-at nil,
+   :acceptance
+   "checks/witness-registry.edn gains an entry naming BeliefState; contract_lint passes at the current authority sha",
+   :id "BIND-BeliefState",
+   :score 7,
+   :kind :bind-hole,
+   :target "BeliefState",
+   :falsifier
+   "the --negative control must exit 1 with the entry removed"}
+  {:owner-record "sec-glossary.tex:7 · P-glossary-mathematics",
+   :criteria {1 :met, 2 :met, 3 :met, 4 :met, 5 :met, 6 :met, 7 :met},
+   :split-at nil,
+   :acceptance
+   "checks/witness-registry.edn gains an entry naming GenerativeModel; contract_lint passes at the current authority sha",
+   :id "BIND-GenerativeModel",
+   :score 7,
+   :kind :bind-hole,
+   :target "GenerativeModel",
+   :falsifier
+   "the --negative control must exit 1 with the entry removed"}
+  {:owner-record "sec-glossary.tex:21–25 · P-glossary-mathematics",
+   :criteria {1 :met, 2 :met, 3 :met, 4 :met, 5 :met, 6 :met, 7 :met},
+   :split-at nil,
+   :acceptance
+   "checks/witness-registry.edn gains an entry naming expectedFreeEnergy; contract_lint passes at the current authority sha",
+   :id "BIND-expectedFreeEnergy",
+   :score 7,
+   :kind :bind-hole,
+   :target "expectedFreeEnergy",
+   :falsifier
+   "the --negative control must exit 1 with the entry removed"}
+  {:owner-record "sec-glossary.tex:29 · P-glossary-mathematics",
+   :criteria {1 :met, 2 :met, 3 :met, 4 :met, 5 :met, 6 :met, 7 :met},
+   :split-at nil,
+   :acceptance
+   "checks/witness-registry.edn gains an entry naming expectedInformationGain; contract_lint passes at the current authority sha",
+   :id "BIND-expectedInformationGain",
+   :score 7,
+   :kind :bind-hole,
+   :target "expectedInformationGain",
+   :falsifier
+   "the --negative control must exit 1 with the entry removed"}
+  {:owner-record "sec-glossary.tex:58 · P-glossary-mathematics",
+   :criteria {1 :met, 2 :met, 3 :met, 4 :met, 5 :met, 6 :met, 7 :met},
+   :split-at nil,
+   :acceptance
+   "checks/witness-registry.edn gains an entry naming logMultivariateBeta; contract_lint passes at the current authority sha",
+   :id "BIND-logMultivariateBeta",
+   :score 7,
+   :kind :bind-hole,
+   :target "logMultivariateBeta",
+   :falsifier
+   "the --negative control must exit 1 with the entry removed"}
+  {:owner-record "sec-glossary.tex:27 · P-glossary-mathematics",
+   :criteria {1 :met, 2 :met, 3 :met, 4 :met, 5 :met, 6 :met, 7 :met},
+   :split-at nil,
+   :acceptance
+   "checks/witness-registry.edn gains an entry naming observationKernel; contract_lint passes at the current authority sha",
+   :id "BIND-observationKernel",
+   :score 7,
+   :kind :bind-hole,
+   :target "observationKernel",
+   :falsifier
+   "the --negative control must exit 1 with the entry removed"}
+  {:owner-record "P-validated-R5 §3e O1",
+   :criteria {1 :met, 2 :met, 3 :met, 4 :met, 5 :met, 6 :met, 7 :met},
+   :split-at nil,
+   :acceptance
+   "checks/witness-registry.edn gains an entry naming organiseO1NodesRecorded; contract_lint passes at the current authority sha",
+   :id "BIND-organiseO1NodesRecorded",
+   :score 7,
+   :kind :bind-hole,
+   :target "organiseO1NodesRecorded",
+   :falsifier
+   "the --negative control must exit 1 with the entry removed"}
+  {:owner-record "P-validated-R5 §3e O2",
+   :criteria {1 :met, 2 :met, 3 :met, 4 :met, 5 :met, 6 :met, 7 :met},
+   :split-at nil,
+   :acceptance
+   "checks/witness-registry.edn gains an entry naming organiseO2AuthoredReachability; contract_lint passes at the current authority sha",
+   :id "BIND-organiseO2AuthoredReachability",
+   :score 7,
+   :kind :bind-hole,
+   :target "organiseO2AuthoredReachability",
+   :falsifier
+   "the --negative control must exit 1 with the entry removed"}
+  {:owner-record "P-validated-R5 §3e O3",
+   :criteria {1 :met, 2 :met, 3 :met, 4 :met, 5 :met, 6 :met, 7 :met},
+   :split-at nil,
+   :acceptance
+   "checks/witness-registry.edn gains an entry naming organiseO3FastForward; contract_lint passes at the current authority sha",
+   :id "BIND-organiseO3FastForward",
+   :score 7,
+   :kind :bind-hole,
+   :target "organiseO3FastForward",
+   :falsifier
+   "the --negative control must exit 1 with the entry removed"}
+  {:owner-record "P-validated-R5 §3e O4 and S-G4",
+   :criteria {1 :met, 2 :met, 3 :met, 4 :met, 5 :met, 6 :met, 7 :met},
+   :split-at nil,
+   :acceptance
+   "checks/witness-registry.edn gains an entry naming organiseO4PrecedenceGovernance; contract_lint passes at the current authority sha",
+   :id "BIND-organiseO4PrecedenceGovernance",
+   :score 7,
+   :kind :bind-hole,
+   :target "organiseO4PrecedenceGovernance",
+   :falsifier
+   "the --negative control must exit 1 with the entry removed"}
+  {:owner-record "P-R9 S1",
+   :criteria {1 :met, 2 :met, 3 :met, 4 :met, 5 :met, 6 :met, 7 :met},
+   :split-at nil,
+   :acceptance
+   "checks/witness-registry.edn gains an entry naming valueEvidenceRequiresL2; contract_lint passes at the current authority sha",
+   :id "BIND-valueEvidenceRequiresL2",
+   :score 7,
+   :kind :bind-hole,
+   :target "valueEvidenceRequiresL2",
+   :falsifier
+   "the --negative control must exit 1 with the entry removed"}
+  {:owner-record "Joe 2026-08-31 · organisation evidence",
+   :criteria {1 :met, 2 :met, 3 :met, 4 :met, 5 :met, 6 :met, 7 :met},
+   :split-at nil,
+   :acceptance
+   "checks/witness-registry.edn gains an entry naming wmRunConformsToWiring; contract_lint passes at the current authority sha",
+   :id "BIND-wmRunConformsToWiring",
+   :score 7,
+   :kind :bind-hole,
+   :target "wmRunConformsToWiring",
+   :falsifier
+   "the --negative control must exit 1 with the entry removed"}
+  {:owner-record "P-R9 §solved 2",
+   :criteria {1 :met, 2 :met, 3 :met, 4 :met, 5 :met, 6 :met, 7 :met},
+   :split-at nil,
+   :acceptance
+   "checks/witness-registry.edn gains an entry naming wmVerdictsDeclared; contract_lint passes at the current authority sha",
+   :id "BIND-wmVerdictsDeclared",
+   :score 7,
+   :kind :bind-hole,
+   :target "wmVerdictsDeclared",
+   :falsifier
+   "the --negative control must exit 1 with the entry removed"}
+  {:owner-record "P-R9 §solved 2",
+   :criteria {1 :met, 2 :met, 3 :met, 4 :met, 5 :met, 6 :met, 7 :met},
+   :split-at nil,
+   :acceptance
+   "checks/witness-registry.edn gains an entry naming wmVerdictsLedgerAlone; contract_lint passes at the current authority sha",
+   :id "BIND-wmVerdictsLedgerAlone",
+   :score 7,
+   :kind :bind-hole,
+   :target "wmVerdictsLedgerAlone",
+   :falsifier
+   "the --negative control must exit 1 with the entry removed"}
+  {:sources 3,
+   :criteria {1 :met, 2 :met, 3 :met, 4 :met, 5 :met, 6 :met, 7 :met},
+   :split-at nil,
+   :acceptance
+   "a hyper-edge instance whose ports are 0-freehand and which passes hyper_edge_exemplar_check",
+   :id "EDGE-R2-R7",
+   :score 7,
+   :kind :specify-edge,
+   :target [:R2 :R7],
+   :live? true,
+   :falsifier
+   "exemplar check --negative exits 1; freehand count > 0 fails the unit"}
+  {:sources 2,
+   :criteria {1 :met, 2 :met, 3 :met, 4 :met, 5 :met, 6 :met, 7 :met},
+   :split-at nil,
+   :acceptance
+   "a hyper-edge instance whose ports are 0-freehand and which passes hyper_edge_exemplar_check",
+   :id "EDGE-R7-R3",
+   :score 7,
+   :kind :specify-edge,
+   :target [:R7 :R3],
+   :live? true,
+   :falsifier
+   "exemplar check --negative exits 1; freehand count > 0 fails the unit"}
+  {:sources 2,
+   :criteria {1 :met, 2 :met, 3 :met, 4 :met, 5 :met, 6 :met, 7 :met},
+   :split-at nil,
+   :acceptance
+   "a hyper-edge instance whose ports are 0-freehand and which passes hyper_edge_exemplar_check",
+   :id "EDGE-R8-R5",
+   :score 7,
+   :kind :specify-edge,
+   :target [:R8 :R5],
+   :live? true,
+   :falsifier
+   "exemplar check --negative exits 1; freehand count > 0 fails the unit"}
+  {:id "HOLD-contract",
+   :kind :governance,
+   :target "all 80 declarations",
+   :acceptance "no declaration names a dead session as holder",
+   :falsifier
+   "grep the contract for the retired holder; must return 0",
+   :criteria {1 :met, 2 :met, 3 :met, 4 :met, 5 :met, 6 :met, 7 :met},
+   :note "mechanical; the single point of failure Joe named",
+   :score 7}
+  {:owner-record "P-validated-R5 §2a",
+   :criteria
+   {1 :gap, 2 :met, 3 :met, 4 :met, 5 :met, 6 :met, 7 :split},
+   :split-at
+   "choose which check witnesses this hole — needs the record's owner",
+   :acceptance
+   "checks/witness-registry.edn gains an entry naming C; contract_lint passes at the current authority sha",
+   :id "BIND-C",
+   :score 5,
+   :kind :bind-hole,
+   :target "C",
+   :falsifier
+   "the --negative control must exit 1 with the entry removed"}
+  {:owner-record "sec-glossary.tex:48 · P-glossary-mathematics",
+   :criteria
+   {1 :gap, 2 :met, 3 :met, 4 :met, 5 :met, 6 :met, 7 :split},
+   :split-at
+   "choose which check witnesses this hole — needs the record's owner",
+   :acceptance
+   "checks/witness-registry.edn gains an entry naming cascadeGrainPi; contract_lint passes at the current authority sha",
+   :id "BIND-cascadeGrainPi",
+   :score 5,
+   :kind :bind-hole,
+   :target "cascadeGrainPi",
+   :falsifier
+   "the --negative control must exit 1 with the entry removed"}
+  {:owner-record "P-validated-R5 §3e find",
+   :criteria
+   {1 :gap, 2 :met, 3 :met, 4 :met, 5 :met, 6 :met, 7 :split},
+   :split-at
+   "choose which check witnesses this hole — needs the record's owner",
+   :acceptance
+   "checks/witness-registry.edn gains an entry naming find; contract_lint passes at the current authority sha",
+   :id "BIND-find",
+   :score 5,
+   :kind :bind-hole,
+   :target "find",
+   :falsifier
+   "the --negative control must exit 1 with the entry removed"}
+  {:owner-record "P-R19-preferences-open §principle",
+   :criteria
+   {1 :gap, 2 :met, 3 :met, 4 :met, 5 :met, 6 :met, 7 :split},
+   :split-at
+   "choose which check witnesses this hole — needs the record's owner",
+   :acceptance
+   "checks/witness-registry.edn gains an entry naming machineHasNoC; contract_lint passes at the current authority sha",
+   :id "BIND-machineHasNoC",
+   :score 5,
+   :kind :bind-hole,
+   :target "machineHasNoC",
+   :falsifier
+   "the --negative control must exit 1 with the entry removed"}
+  {:owner-record "sec-glossary.tex:29 · P-glossary-mathematics",
+   :criteria
+   {1 :gap, 2 :met, 3 :met, 4 :met, 5 :met, 6 :met, 7 :split},
+   :split-at
+   "choose which check witnesses this hole — needs the record's owner",
+   :acceptance
+   "checks/witness-registry.edn gains an entry naming modelUncertaintyAndEIG; contract_lint passes at the current authority sha",
+   :id "BIND-modelUncertaintyAndEIG",
+   :score 5,
+   :kind :bind-hole,
+   :target "modelUncertaintyAndEIG",
+   :falsifier
+   "the --negative control must exit 1 with the entry removed"}
+  {:owner-record "P-validated-R5 §3e organise",
+   :criteria
+   {1 :gap, 2 :met, 3 :met, 4 :met, 5 :met, 6 :met, 7 :split},
+   :split-at
+   "choose which check witnesses this hole — needs the record's owner",
+   :acceptance
+   "checks/witness-registry.edn gains an entry naming organise; contract_lint passes at the current authority sha",
+   :id "BIND-organise",
+   :score 5,
+   :kind :bind-hole,
+   :target "organise",
+   :falsifier
+   "the --negative control must exit 1 with the entry removed"}
+  {:sources 2,
+   :criteria
+   {1 :met, 2 :met, 3 :met, 4 :met, 5 :gap, 6 :met, 7 :split},
+   :split-at
+   "dead edge: if the pair finds a semantic fork (does the thing exist?), that is an operator ruling",
+   :acceptance
+   "a hyper-edge instance whose ports are 0-freehand and which passes hyper_edge_exemplar_check",
+   :id "EDGE-R16-R14",
+   :score 5,
+   :kind :specify-edge,
+   :target [:R16 :R14],
+   :live? false,
+   :falsifier
+   "exemplar check --negative exits 1; freehand count > 0 fails the unit"}
+  {:sources 2,
+   :criteria
+   {1 :met, 2 :met, 3 :met, 4 :met, 5 :gap, 6 :met, 7 :split},
+   :split-at
+   "dead edge: if the pair finds a semantic fork (does the thing exist?), that is an operator ruling",
+   :acceptance
+   "a hyper-edge instance whose ports are 0-freehand and which passes hyper_edge_exemplar_check",
+   :id "EDGE-R16-R15",
+   :score 5,
+   :kind :specify-edge,
+   :target [:R16 :R15],
+   :live? false,
+   :falsifier
+   "exemplar check --negative exits 1; freehand count > 0 fails the unit"}
+  {:sources 2,
+   :criteria
+   {1 :met, 2 :met, 3 :met, 4 :met, 5 :gap, 6 :met, 7 :split},
+   :split-at
+   "dead edge: if the pair finds a semantic fork (does the thing exist?), that is an operator ruling",
+   :acceptance
+   "a hyper-edge instance whose ports are 0-freehand and which passes hyper_edge_exemplar_check",
+   :id "EDGE-R3-R7",
+   :score 5,
+   :kind :specify-edge,
+   :target [:R3 :R7],
+   :live? false,
+   :falsifier
+   "exemplar check --negative exits 1; freehand count > 0 fails the unit"}
+  {:sources 2,
+   :criteria
+   {1 :met, 2 :met, 3 :met, 4 :met, 5 :gap, 6 :met, 7 :split},
+   :split-at
+   "dead edge: if the pair finds a semantic fork (does the thing exist?), that is an operator ruling",
+   :acceptance
+   "a hyper-edge instance whose ports are 0-freehand and which passes hyper_edge_exemplar_check",
+   :id "EDGE-R5-R14",
+   :score 5,
+   :kind :specify-edge,
+   :target [:R5 :R14],
+   :live? false,
+   :falsifier
+   "exemplar check --negative exits 1; freehand count > 0 fails the unit"}
+  {:id "APEX-D1",
+   :kind :standard,
+   :target "the evidence apex",
+   :acceptance "UNDEFINED — this unit's job is to define it",
+   :falsifier "none yet — that is the point",
+   :criteria {1 :gap, 2 :gap, 3 :gap, 4 :met, 5 :met, 6 :met, 7 :gap},
+   :note
+   "cannot be automated: it must SAY what counts as evidence. Operator work, not agent work.",
+   :score 3}]}
