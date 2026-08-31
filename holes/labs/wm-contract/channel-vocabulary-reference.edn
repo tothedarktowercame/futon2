@@ -1,0 +1,7 @@
+{:schema :channel-vocabulary-reference/v1
+ :basis "holes/labs/wm-contract/C58-r2-channel-eras.md"
+ :kind :hand-derived-from-record
+ :channels [:loop-health :support-coverage :attack-coverage :mission-health
+            :stack-pct :consulting-pct :portfolio-pct :mathematics-pct
+            :active-repo-ratio :sorry-count-norm :coupling-density
+            :ticks-firing-ratio :depositing-signal :annotation-health]}

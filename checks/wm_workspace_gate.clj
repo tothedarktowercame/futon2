@@ -49,7 +49,7 @@
   ;; must be classified here before the gate can pass; it is never guessed safe.
   #{"ablation_exact_dyadic_witness.clj" "absence_scoring_counterfactual.clj"
     "c130_immediate_option_measurement.clj"
-    "ambiguity_witness.clj" "belief_state_witness.clj" "observation_kernel_witness.clj"
+    "ambiguity_witness.clj" "belief_state_witness.clj" "channel_witness.clj" "observation_kernel_witness.clj"
     "predictive_outcome_risk_witness.clj"
     "absent_is_loud_lint.clj" "belief_update_check.clj"
     "belief_variance_inputs.clj" "cascade_diff_witness.clj" "certify_live_run.clj" "closed_record_pointer_check.clj" "contract_lint.clj"
@@ -99,6 +99,7 @@
    {:name :have-want-arrow :argv ["bb" "checks/have_want_arrow_witness.clj"]}
    {:name :fold :argv ["bb" "checks/fold_witness.clj"]}
    {:name :belief-state :argv ["bb" "checks/belief_state_witness.clj"]}
+   {:name :channel-vocabulary :argv ["bb" "checks/channel_witness.clj"]}
    {:name :observation-kernel :argv ["bb" "checks/observation_kernel_witness.clj"]}
    {:name :predictive-outcome-risk :argv ["bb" "checks/predictive_outcome_risk_witness.clj"]}
    {:name :control-vocabulary :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "control"]}
@@ -140,6 +141,8 @@
     :argv ["bb" "checks/ambiguity_witness.clj" "--negative-control"]}
    {:name :c192-belief-channel-without-variance
     :argv ["bb" "checks/belief_state_witness.clj" "--negative-control"]}
+   {:name :c205-missing-declared-channel
+    :argv ["bb" "checks/channel_witness.clj" "--negative-control"]}
    {:name :c196-observation-row-not-normalized
     :argv ["bb" "checks/observation_kernel_witness.clj" "--negative-normalisation"]}
    {:name :c196-observation-negative-mass

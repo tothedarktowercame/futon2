@@ -298,6 +298,9 @@
                                                          (not (neg? (:variance v)))))
                                                   (:channels state)))
                                         (:states %)))
+   "ChannelWitness" #(and (= :channel-vocabulary-reference/v1 (:schema %))
+                           (= 14 (count (:channels %)))
+                           (= (count (:channels %)) (count (distinct (:channels %)))))
    "ObservationKernelWitness" #(and (= :observation-kernel-reference/v1 (:schema %))
                                      (every? (fn [row]
                                                (let [masses (vals (:mass row))]
