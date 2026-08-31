@@ -4,10 +4,10 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C217-precision, :dispatched-at "2026-08-31T22:28:37Z", :job-id "invoke-1788215313705-6114-369fb066", :expected-by "2026-08-31T23:13:37Z"}
+   :holding :C221-drift-memory-discovery, :dispatched-at "2026-08-31T22:53:22Z", :job-id "invoke-1788216741637-6132-15280e10", :expected-by "2026-08-31T23:38:22Z"}
   {:lane :wm-verbs
    :holding :C219-dead-timestamp, :dispatched-at "2026-08-31T22:34:05Z", :job-id "invoke-1788215641103-6119-55839441", :expected-by "2026-08-31T23:19:05Z"}
   {:lane :wm-organization
-   :holding :C214-serving-code-identity, :dispatched-at "2026-08-31T22:21:28Z", :job-id "invoke-1788214854670-6107-c625405b", :expected-by "2026-08-31T23:06:28Z"}
+   :holding :C220-reload-procedure, :dispatched-at "2026-08-31T22:53:22Z", :job-id "invoke-1788216708631-6131-6f3591c6", :expected-by "2026-08-31T23:38:22Z"}
   {:lane :wm-evidence
    :holding :C218-gate-concurrency, :dispatched-at "2026-08-31T22:32:18Z", :job-id "invoke-1788215534136-6117-181cd5b1", :expected-by "2026-08-31T23:17:18Z"}]}
