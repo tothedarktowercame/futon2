@@ -78,7 +78,11 @@ If the workspace gate reports an unknown `checks/*.clj`, a lane has added a
 check. Classify that filename in `known-check-files` in
 `checks/wm_workspace_gate.clj`, then either add a positive command, add its
 semantic control, or record a reasoned manual exclusion. Do not delete the
-inventory alarm and do not guess that new code is safe to execute.
+inventory alarm and do not guess that new code is safe to execute. An active
+lane does not make this red expected: it does not prove ownership or execution
+disposition. The filename remains `DEGRADED-NEW` until the classification is
+committed. Adding only the filename to `known-check-files` is insufficient;
+the check must be run or explicitly manual.
 
 ### Lean contract regeneration
 

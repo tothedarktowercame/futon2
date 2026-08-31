@@ -119,6 +119,14 @@
     :argv ["bb" "checks/lean_sorry_category_check.clj"]}
    {:name :model-uncertainty-eig
     :argv ["bb" "checks/model_uncertainty_eig_witness.clj"]}
+   {:name :machine-vocabulary-control
+    :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "control"]}
+   {:name :machine-vocabulary-aliveness
+    :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "aliveness"]}
+   {:name :machine-vocabulary-act-gate
+    :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "act-gate"]}
+   {:name :machine-vocabulary-cohort
+    :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "cohort"]}
    {:name :pinned-operational-certificate
     :argv ["bb" "-cp" "." "checks/wm_operational_certificate.clj"
            "--run" c167-run "--resource" c167-resource
@@ -181,6 +189,14 @@
     :argv ["python3" "detect_drift.py" "--control-unit-change"]}
    {:name :c165-unindexed-correction
     :argv ["bb" "checks/cleanup_queue_correction_index.clj" "--negative-control"]}
+   {:name :c183-control-vocabulary-negative
+    :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "control" "--negative-control"]}
+   {:name :c183-aliveness-negative
+    :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "aliveness" "--negative-control"]}
+   {:name :c183-act-gate-negative
+    :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "act-gate" "--negative-control"]}
+   {:name :c183-cohort-negative
+    :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "cohort" "--negative-control"]}
    {:name :c173-tampered-operational-run
     :argv ["bb" "-cp" "." "checks/wm_operational_certificate.clj"
            "--run" c167-run "--resource" c167-resource
