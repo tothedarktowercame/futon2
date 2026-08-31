@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C210-worktree-design, :dispatched-at "2026-08-31T22:09:36Z", :job-id "invoke-1788214173193-6096-e74a31be", :expected-by "2026-08-31T22:54:36Z"}
   {:lane :wm-evidence
-   :holding :C206-cohort46-stratum, :dispatched-at "2026-08-31T22:00:22Z", :job-id "invoke-1788213618694-6087-5a8f8100", :expected-by "2026-08-31T22:45:22Z"}]}
+   :holding :C211-cohort-denominator, :dispatched-at "2026-08-31T22:11:44Z", :job-id "invoke-1788214300541-6100-669554e1", :expected-by "2026-08-31T22:56:44Z"}]}
