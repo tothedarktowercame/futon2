@@ -6,7 +6,7 @@
  [{:lane :wm-nouns
    :holding :C192-beliefstate, :dispatched-at "2026-08-31T21:35:47Z", :job-id "invoke-1788212143180-6056-a2e8457e", :expected-by "2026-08-31T22:20:47Z"}
   {:lane :wm-verbs
-   :holding :C190-run-observability, :dispatched-at "2026-08-31T21:32:45Z", :job-id "invoke-1788211961993-6052-0e92c884", :expected-by "2026-08-31T22:17:45Z"}
+   :holding :C193-cancellation, :dispatched-at "2026-08-31T21:36:53Z", :job-id "invoke-1788212209430-6057-e8d8b12a", :expected-by "2026-08-31T22:21:53Z"}
   {:lane :wm-organization
    :holding :C189-run-readiness, :dispatched-at "2026-08-31T21:30:22Z", :job-id "invoke-1788211818842-6051-56e5c770", :expected-by "2026-08-31T22:15:22Z"}
   {:lane :wm-evidence
