@@ -27,7 +27,7 @@
    :absent {:absent #{:no-likelihood-model :scan-source-missing :channel-filtered}}
    :open-design-choice "tagged map (this proposal) vs R7's omission +
     :present-channels set — genuinely open (R7 round-3 confirmation); either
-    way all three coercion sites must be repaired, incl. precision.clj:166-167"}}
+    way all three coercion sites must be repaired, incl. precision.clj:166-167"}
   ; replaces the TRIPLE absent→0.0 sites: observation.clj:38-41,
   ; war_machine.clj:4319, precision.clj:166-167 — fixing one alone is cosmetic}
   }
