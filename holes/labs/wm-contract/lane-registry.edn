@@ -6,7 +6,7 @@
  [{:lane :wm-nouns
    :holding :C200-predictive-outcome-risk, :dispatched-at "2026-08-31T21:50:36Z", :job-id "invoke-1788213032517-6073-f21bf061", :expected-by "2026-08-31T22:35:36Z"}
   {:lane :wm-verbs
-   :holding :C199-run-output, :dispatched-at "2026-08-31T21:49:28Z", :job-id "invoke-1788212964719-6072-4ce2b52d", :expected-by "2026-08-31T22:34:28Z"}
+   :holding :C202-qa-verdict-path, :dispatched-at "2026-08-31T21:53:41Z", :job-id "invoke-1788213217759-6079-38e21dd4", :expected-by "2026-08-31T22:38:41Z"}
   {:lane :wm-organization
    :holding :C197-tree-receipts, :dispatched-at "2026-08-31T21:45:10Z", :job-id "invoke-1788212705605-6066-4a13ce88", :expected-by "2026-08-31T22:30:10Z"}
   {:lane :wm-evidence
