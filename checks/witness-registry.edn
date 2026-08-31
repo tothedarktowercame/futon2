@@ -92,21 +92,24 @@
   "C64 fixture-indexed bindings: O1 rejects --negative-o1 (unrecorded addition); O2 rejects --negative-o2 (unsupported reverse edge); O3 rejects --negative-o3 (missing fast-forward); O4 rejects --negative-o4 (precedence variant with unchanged order and score). The bindings witness the pinned cascade only; organise remains refused."}
  {:witnesses "preferenceStackLiveRecorded",
   :freshness :pinned-git-v1,
-  :contract-sha "eec8279cf7b2c841f386894116e6aa627869a75c",
-  :run-sha "03c149d0b39b5f1fbe9640b6c7aa63f4fbe21b36",
+  :contract-sha "a9d78f8904329d7b2393167f7ceaa28c1c4a8f0c",
+  :run-sha "6c87413",
   :check
   {:repo "futon2",
-   :path "checks/r19_stack_witness.clj",
+   :path "checks/preference_stack_binding_check.clj",
    :entrypoint "-main"},
   :axioms
   "preferenceStackRecorded: [] (kernel decide); this Clojure witness emits no Lean proof and introduces no axioms",
   :note
-  "R19-D2b witnesses the preference-stack emission added by ccd06ce; the inline dry-run fixture and executable missing-layer falsifier live in the check.",
-  :recorded-at "2026-08-31T03:45:00Z",
+  "C83 binds C63's serialized PreferenceStackWitness. The binding check proves that exact serialized :preference-stack equals both production compute-efe output and the v16 trace envelope. Binding-level absent and malformed controls are distinct from C63's missing-layer shape mutation.",
+  :recorded-at "2026-08-31T16:52:00Z",
   :live-invariant
-  {:check "checks/r19_stack_witness.clj", :evidence :emitted-by-check},
+  {:check "checks/preference_stack_binding_check.clj",
+   :evidence :serialized-production-value-survives-trace},
   :result :passed,
-  :fixture {:repo "futon2", :path "checks/r19_stack_witness.clj"}}
+  :fixture
+  {:repo "futon2",
+   :path "holes/labs/wm-contract/PreferenceStackWitness.edn"}}
  {:witnesses ["r2ContractCensusWmTrace" "wmTraceR2"],
   :freshness :pinned-git-v1,
   :contract-sha "1b09974aed1ce66dad0b728a6acc64c7b864b31e",
