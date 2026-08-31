@@ -49,7 +49,7 @@
   ;; must be classified here before the gate can pass; it is never guessed safe.
   #{"ablation_exact_dyadic_witness.clj" "absence_scoring_counterfactual.clj"
     "c130_immediate_option_measurement.clj"
-    "ambiguity_witness.clj"
+    "ambiguity_witness.clj" "belief_state_witness.clj"
     "absent_is_loud_lint.clj" "belief_update_check.clj"
     "belief_variance_inputs.clj" "cascade_diff_witness.clj" "certify_live_run.clj" "closed_record_pointer_check.clj" "contract_lint.clj"
     "cleanup_queue_correction_index.clj"
@@ -97,6 +97,7 @@
    {:name :ambiguity :argv ["bb" "checks/ambiguity_witness.clj"]}
    {:name :have-want-arrow :argv ["bb" "checks/have_want_arrow_witness.clj"]}
    {:name :fold :argv ["bb" "checks/fold_witness.clj"]}
+   {:name :belief-state :argv ["bb" "checks/belief_state_witness.clj"]}
    {:name :control-vocabulary :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "control"]}
    {:name :aliveness :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "aliveness"]}
    {:name :act-gate-vocabulary :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "act-gate"]}
@@ -134,6 +135,8 @@
 (defn control-commands []
   [{:name :c157-perturbed-entropy
     :argv ["bb" "checks/ambiguity_witness.clj" "--negative-control"]}
+   {:name :c192-belief-channel-without-variance
+    :argv ["bb" "checks/belief_state_witness.clj" "--negative-control"]}
    {:name :c179-control-outside-vocabulary :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "control" "--negative-control"]}
    {:name :c179-negative-aliveness-factor :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "aliveness" "--negative-control"]}
    {:name :c179-missing-act-gate-leg :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "act-gate" "--negative-control"]}

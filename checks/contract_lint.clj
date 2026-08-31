@@ -289,6 +289,15 @@
    "LogMultivariateBetaWitness" log-multivariate-beta-witness?
    "ExpectedFreeEnergyWitness" expected-free-energy-witness?
    "AmbiguityWitness" ambiguity-witness?
+   "BeliefStateWitness" #(and (= :belief-state-reference/v1 (:schema %))
+                                (seq (:states %))
+                                (every? (fn [state]
+                                          (every? (fn [[_ v]]
+                                                    (and (number? (:mean v))
+                                                         (number? (:variance v))
+                                                         (not (neg? (:variance v)))))
+                                                  (:channels state)))
+                                        (:states %)))
    "HaveWantArrowWitness" have-want-arrow-witness?
    "FoldWitness" fold-witness?
    "FoldEscrowRecordWitness" fold-escrow-record-witness?

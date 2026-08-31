@@ -1,0 +1,7 @@
+{:schema :belief-state-reference/v1
+ :basis "holes/labs/wm-contract/C31-variance-update-findings.md"
+ :kind :hand-derived-from-record
+ :states [{:id :prior
+           :channels {:loop-health {:mean 0.0 :variance 2.0}}}
+          {:id :posterior
+           :channels {:loop-health {:mean 1.0 :variance 1.0}}}]}
