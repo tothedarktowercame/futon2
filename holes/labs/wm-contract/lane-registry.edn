@@ -4,7 +4,7 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C141-closed-by-record-audit, :dispatched-at "2026-08-31T19:34:21Z", :job-id "invoke-1788204857680-5929-823fa66d", :expected-by "2026-08-31T20:19:21Z"}
+   :holding :C143-owner-resolution, :dispatched-at "2026-08-31T19:39:24Z", :job-id "invoke-1788205160106-5934-edb3728b", :expected-by "2026-08-31T20:24:24Z"}
   {:lane :wm-verbs
    :holding :C140-read-string-lint, :dispatched-at "2026-08-31T19:31:13Z", :job-id "invoke-1788204669567-5927-c3503be4", :expected-by "2026-08-31T20:16:13Z"}
   {:lane :wm-organization
