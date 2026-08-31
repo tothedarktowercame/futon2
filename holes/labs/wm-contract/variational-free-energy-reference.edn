@@ -1,0 +1,7 @@
+{:schema :variational-free-energy-reference/v1
+ :basis "sec-glossary.tex:19 — F = 1/2 mean_k(Pi_k epsilon_k^2)"
+ :kind :hand-derived-from-formula
+ :channel-count 14
+ :precision 2
+ :prediction-error 1
+ :expected-variational-F 1}

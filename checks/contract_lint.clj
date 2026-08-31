@@ -321,6 +321,11 @@
    "PolicyPriorKernelWitness" #(and (= :policy-prior-reference/v1 (:schema %))
                                      (= :unit (:conditioning-domain %))
                                      (= 1 (reduce + (vals (:mass %)))))
+   "VariationalFreeEnergyWitness" #(and (= :variational-free-energy-reference/v1 (:schema %))
+                                         (= 14 (:channel-count %))
+                                         (= 2 (:precision %))
+                                         (= 1 (:prediction-error %))
+                                         (= 1 (:expected-variational-F %)))
    "HaveWantArrowWitness" have-want-arrow-witness?
    "FoldWitness" fold-witness?
    "FoldEscrowRecordWitness" fold-escrow-record-witness?

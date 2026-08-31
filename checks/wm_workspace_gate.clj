@@ -52,6 +52,7 @@
     "ambiguity_witness.clj" "belief_state_witness.clj" "channel_witness.clj" "observation_kernel_witness.clj"
     "predictive_outcome_risk_witness.clj"
     "policy_prior_kernel_witness.clj"
+    "variational_free_energy_witness.clj"
     "absent_is_loud_lint.clj" "belief_update_check.clj"
     "belief_variance_inputs.clj" "cascade_diff_witness.clj" "certify_live_run.clj" "closed_record_pointer_check.clj" "contract_lint.clj"
     "cleanup_queue_correction_index.clj"
@@ -104,6 +105,7 @@
    {:name :observation-kernel :argv ["bb" "checks/observation_kernel_witness.clj"]}
    {:name :predictive-outcome-risk :argv ["bb" "checks/predictive_outcome_risk_witness.clj"]}
    {:name :policy-prior-kernel :argv ["bb" "checks/policy_prior_kernel_witness.clj"]}
+   {:name :variational-free-energy :argv ["bb" "checks/variational_free_energy_witness.clj"]}
    {:name :control-vocabulary :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "control"]}
    {:name :aliveness :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "aliveness"]}
    {:name :act-gate-vocabulary :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "act-gate"]}
@@ -153,6 +155,10 @@
     :argv ["bb" "checks/predictive_outcome_risk_witness.clj" "--negative-control"]}
    {:name :c208-state-conditioned-policy-prior
     :argv ["bb" "checks/policy_prior_kernel_witness.clj" "--negative-control"]}
+   {:name :c212-perturbed-variational-f
+    :argv ["bb" "checks/variational_free_energy_witness.clj" "--negative-value"]}
+   {:name :c212-expected-f-as-variational-f
+    :argv ["bb" "checks/variational_free_energy_witness.clj" "--negative-type"]}
    {:name :c179-control-outside-vocabulary :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "control" "--negative-control"]}
    {:name :c179-negative-aliveness-factor :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "aliveness" "--negative-control"]}
    {:name :c179-missing-act-gate-leg :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "act-gate" "--negative-control"]}
