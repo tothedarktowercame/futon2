@@ -1,57 +1,53 @@
 {:lanes
  [{:lane :wm-nouns,
-   :completed 6,
-   :dispatched 7,
-   :in-flight "C240",
-   :holding :C240-next-glossary-term,
-   :blocked 1}
+   :closed-attributed 9,
+   :open-holding 1,
+   :in-flight "C245",
+   :holding :C245-next-glossary-term}
   {:lane :wm-verbs,
-   :completed 4,
-   :dispatched 5,
-   :in-flight "C238",
-   :holding :C238-close-order,
-   :blocked 1}
+   :closed-attributed 7,
+   :open-holding 1,
+   :in-flight "C246",
+   :holding :C246-ledger-read-path}
   {:lane :wm-organization,
-   :completed 5,
-   :dispatched 6,
-   :in-flight "C235",
-   :holding :C235-lifecycle-root-cause,
-   :blocked 1}
+   :closed-attributed 8,
+   :open-holding 1,
+   :in-flight "C247",
+   :holding :C247-drain-checklist}
   {:lane :wm-evidence,
-   :completed 7,
-   :dispatched 8,
-   :in-flight "C241",
-   :holding :C241-repository-gate,
-   :blocked 1}],
- :schema :wm/workflow-report-v1,
+   :closed-attributed 6,
+   :open-holding 1,
+   :in-flight "C244",
+   :holding :C244-vet-workflow-report}],
+ :schema :wm/workflow-report-v2,
  :since "2026-08-30T00:00:00Z",
  :semantics
- {:completed
-  "cases whose latest ledger heading attributes them to that lane",
-  :dispatched
-  "completed plus the lane's current open registry holding, if any",
-  :blocked
-  "1 when the lane holds an open case, else 0; not an error state",
+ {:closed-attributed
+  "cases whose latest ledger heading names that lane; not a dispatch count",
+  :open-holding
+  "1 when the lane currently holds an unclosed case, else 0",
+  :no-dispatch-log
+  "there is no historical dispatch record, so no field reports one; C244 required removing the :dispatched label rather than deriving it",
   :open-dispatched
   "cases recorded as dispatched whose completion has not been recorded",
   :owner-repairs
   "cases repaired by the workflow owner rather than a lane",
   :caveat
-  "there is no separate dispatch log; dispatch is inferred from the case ledger and the current holding, so a case dispatched and abandoned without a ledger entry would be invisible"},
+  "a case dispatched and abandoned without any ledger heading is invisible to this report"},
  :open-dispatched ["C234"],
  :sources
  {:case-ledger
   {:path "p4ng/vetting/CLEANUP-QUEUE.md",
-   :revision "3635cc6",
-   :sha256-prefix "546fbd90b6754035"},
+   :revision "18ea243",
+   :sha256-prefix "34b481b4892ea6d7"},
   :lane-registry
   {:path "futon2/holes/labs/wm-contract/lane-registry.edn",
-   :revision "46b81eb",
-   :sha256-prefix "8453c229b0f0534f",
+   :revision "9b24dec",
+   :sha256-prefix "8151a674295674a2",
    :as-of "2026-08-31T15:39:14.434945104Z"},
   :decisions
   {:path "futon2/holes/problems/DECISIONS-PENDING.md",
-   :sha256-prefix "fd312cf1067e005d"}},
+   :sha256-prefix "efa5dadac14b672a"}},
  :pending
  ["Strategic outcome vocabulary"
   "Authored R16 outward-act binding"
@@ -65,26 +61,22 @@
   "Fulab temperature without prediction error"
   "Historical versus live Morning Brief QA"
   "Support-typed shadow as the live selection authority"],
- :owner-repairs
- ["C146" "C150" "C154" "C161" "C213" "C216" "C91" "C97"],
+ :owner-repairs ["C146" "C150" "C154" "C16" "C161" "C18" "C213"],
  :totals
- {:cases-in-ledger 139,
-  :cases-attributed 31,
-  :completed-by-lanes 22,
-  :owner-repairs 8,
+ {:cases-in-ledger 160,
+  :cases-attributed 38,
+  :closed-by-lanes 30,
+  :owner-repairs 7,
   :open-dispatched 1,
   :pending-decisions 12},
- :as-of "2026-08-31T23:29:03.295775807Z",
+ :as-of "2026-08-31T23:38:59.569439045Z",
  :attribution
- {:systematic-from "C209",
-  :cases-attributed 31,
-  :cases-in-ledger 139,
+ {:systematic-from "C240",
+  :cases-attributed 38,
+  :cases-in-ledger 160,
   :attributed-cases
-  ["C23"
-   "C32"
-   "C33"
-   "C91"
-   "C97"
+  ["C16"
+   "C18"
    "C146"
    "C150"
    "C154"
@@ -96,7 +88,6 @@
    "C213"
    "C214"
    "C215"
-   "C216"
    "C217"
    "C218"
    "C219"
@@ -110,7 +101,20 @@
    "C227"
    "C228"
    "C229"
-   "C234"],
+   "C230"
+   "C231"
+   "C232"
+   "C234"
+   "C235"
+   "C236"
+   "C237"
+   "C238"
+   "C240"
+   "C241"
+   "C242"
+   "C243"],
   :note
-  "per-lane counts cover only cases whose ledger heading names a lane. Attribution is sparse across the early campaign and continuous from :systematic-from onward, so these counts are not a census of the campaign; earlier cases appear in :cases-in-ledger without a lane."},
- :frontier 241}
+  "per-lane counts cover only cases whose ledger heading names a lane. :systematic-from is exact coverage -- every case number from it to the frontier carries an attribution -- and every heading inside that window must be classifiable or the generator fails. Cases below it are counted in :cases-in-ledger without a lane, so these are not a campaign census."},
+ :frontier 247,
+ :schema-change
+ "v1 -> v2 (C244): :dispatched/:completed/:blocked replaced by :closed-attributed/:open-holding, because no dispatch log exists and :dispatched claimed one"}

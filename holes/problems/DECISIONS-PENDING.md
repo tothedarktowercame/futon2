@@ -18,6 +18,8 @@ The corpus held 62 attempt directories, 58 closed, **0 cancelled**, so no
 published cohort figure required correction. Cancelling a run is therefore safe
 for the operator; this paragraph previously read "recorded and counted".
 
+<!-- CURRENT DECISIONS START -->
+
 ## 1. Strategic carrier dependency
 
 ### Strategic outcome vocabulary
@@ -243,3 +245,5 @@ The following were checked and are not counted:
 Deferral is therefore not equivalent to failure or obligation. Each source
 continues to state its honest red/refused/baseline condition until the named
 authority decides it.
+
+<!-- CURRENT DECISIONS END -->

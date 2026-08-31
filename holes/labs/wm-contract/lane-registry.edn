@@ -4,7 +4,7 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C245-next-glossary-term, :dispatched-at "2026-08-31T23:33:18Z", :job-id "invoke-1788219194453-6201-984000ff", :expected-by "2026-09-01T00:18:18Z"}
+   :holding :C248-classify-declaration, :dispatched-at "2026-08-31T23:39:38Z", :job-id "invoke-1788219574681-6208-c07d467b", :expected-by "2026-09-01T00:24:38Z"}
   {:lane :wm-verbs
    :holding :C246-ledger-read-path, :dispatched-at "2026-08-31T23:35:30Z", :job-id "invoke-1788219297593-6202-8754d8f3", :expected-by "2026-09-01T00:20:30Z"}
   {:lane :wm-organization
