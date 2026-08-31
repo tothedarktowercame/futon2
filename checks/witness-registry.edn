@@ -11,7 +11,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/act-gate-reference.edn"},
   :run-sha "d442614ceb8d27e10321bfcf12b59acaf5ba479b",
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
  {:witnesses "aliveness",
@@ -23,7 +23,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/aliveness-reference.edn"},
   :run-sha "d442614ceb8d27e10321bfcf12b59acaf5ba479b",
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
  {:witnesses "BeliefState",
@@ -35,7 +35,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/belief-state-reference.edn"},
   :run-sha "ed8d9e07be2dc043c2c7bc12fe08e9bec4c9ea6a",
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
  {:witnesses "Channel",
@@ -47,7 +47,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/channel-vocabulary-reference.edn"},
   :run-sha "38695fceb78b1888c90a44206118e19f44c959bd",
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
  {:witnesses "Cohort",
@@ -59,7 +59,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/cohort-reference.edn"},
   :run-sha "d442614ceb8d27e10321bfcf12b59acaf5ba479b",
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
  {:witnesses "ControlVocabulary",
@@ -71,7 +71,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/control-vocabulary-reference.edn"},
   :run-sha "d442614ceb8d27e10321bfcf12b59acaf5ba479b",
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
  {:witnesses "Fold",
@@ -82,7 +82,7 @@
   :fixture
   {:repo "futon2", :path "holes/labs/wm-contract/fold-reference.edn"},
   :run-sha "d46f823aa7433d4990b538993e2674255bdeb0b5",
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
  {:witnesses "FoldEscrowRecord",
@@ -94,7 +94,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/fold-turn-quarantine.edn"},
   :run-sha "42a997e0330594c754b388e1e61a50a551ed0a37",
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :freshness :pinned-git-v1,
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
@@ -107,7 +107,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/generative-model-reference.edn"},
   :run-sha "7b31da1fe248a05b35940e9a68544b4ffbef36a7",
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :result :passed,
   :recorded-at "2026-09-01T00:20:00Z"}
  {:witnesses "HaveWantArrow",
@@ -119,7 +119,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/have-want-arrow-reference.edn"},
   :run-sha "b7444680a0dbf45da3ee129b250dadb5260c964f",
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
  {:witnesses "observationKernel",
@@ -131,7 +131,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/observation-kernel-reference.edn"},
   :run-sha "a33ba573c51b790d19e40a93df3bc84285e34475",
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
  {:witnesses "PolicyPriorKernel",
@@ -143,7 +143,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/policy-prior-reference.edn"},
   :run-sha "ed6171e7fb9045f8dc78d6b8fff4768a13271a9a",
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
  {:witnesses "PrecisionMap",
@@ -155,7 +155,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/precision-reference.edn"},
   :run-sha "ec4f5e866d3272479835153ec41c93967faa1268",
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
  {:witnesses "predictiveOutcomeRisk",
@@ -168,7 +168,7 @@
    :path
    "holes/labs/wm-contract/predictive-outcome-risk-reference.edn"},
   :run-sha "d260aed610d74e9f29745777e919a6959fc95e54",
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
  {:witnesses "variationalFreeEnergy",
@@ -181,7 +181,7 @@
    :path
    "holes/labs/wm-contract/variational-free-energy-reference.edn"},
   :run-sha "bb8c549d84f7a17071fb954bbe88746ae47bc379",
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
  {:witnesses "ambiguity",
@@ -193,7 +193,20 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/ambiguity-reference.edn"},
   :run-sha "8ae9f90a536d98664ad040ae0bf89426b1c9f413",
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
+  :result :passed,
+  :recorded-at "2026-08-31T23:59:00Z"}
+ {:witnesses "bayesFactorThreshold",
+  :check
+  {:repo "futon2",
+   :path "checks/bayes_factor_threshold_witness.clj",
+   :entrypoint "-main"},
+  :fixture
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/bayes-factor-threshold-reference.edn"},
+  :run-sha "4703c8862a40bd103f80f92cdc9a526fb316e189",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
  {:witnesses "expectedFreeEnergy",
@@ -205,7 +218,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/expected-free-energy-reference.edn"},
   :run-sha "58d667284a63c69c0027c9bf204e9bc0eac098b9",
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
  {:witnesses "expectedInformationGain",
@@ -218,7 +231,7 @@
    :path
    "holes/labs/wm-contract/expected-information-gain-reference.edn"},
   :run-sha "c99ffdbc13e9b114dbcdca7451651e568588a947",
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :result :passed,
   :recorded-at "2026-09-01T00:10:00Z"}
  {:witnesses
@@ -227,7 +240,7 @@
    "findF3NonSelfCertifying"
    "findF4Falsifiable"],
   :freshness :pinned-git-v1,
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :run-sha "594127059d6a31c5b21f5d34ebfac5b14b1ad993",
   :check
   {:repo "futon3",
@@ -251,12 +264,12 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/log-multivariate-beta-reference.edn"},
   :run-sha "720af918c430415bf07f4eba29ec73d49b343a10",
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :result :passed,
   :recorded-at "2026-08-31T23:50:00Z"}
  {:witnesses "modelUncertaintyAndEIG",
   :freshness :pinned-git-v1,
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :run-sha "6f84763326eca30018574722176c7a23cb20a5ce",
   :check
   {:repo "futon2",
@@ -283,7 +296,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/ablation-exact-dyadic.edn"},
   :run-sha "f54d502acb131f74da40b430a726792a4002dae8",
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :result :passed,
   :recorded-at "2026-08-31T17:05:00Z",
   :note
@@ -301,7 +314,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/cascade-diff-reference.edn"},
   :run-sha "ecf819234cc50afbdfccffb5838b628018584f76",
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z",
   :note
@@ -315,12 +328,12 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/prediction-error-reference.edn"},
   :run-sha "478cacfa0fa2221b4b83a0c04c925132f62f20ef",
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
  {:witnesses "preferenceStackLiveRecorded",
   :freshness :pinned-git-v1,
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :run-sha "6c87413",
   :check
   {:repo "futon2",
@@ -340,7 +353,7 @@
    :path "holes/labs/wm-contract/PreferenceStackWitness.edn"}}
  {:witnesses ["r2ContractCensusWmTrace" "wmTraceR2"],
   :freshness :pinned-git-v1,
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :run-sha "de68356cab018b014a84a3af26ddc831c5c30557",
   :check
   {:repo "futon2",
@@ -359,7 +372,7 @@
   {:repo "futon2", :path "holes/labs/wm-contract/R2-D2-report.edn"}}
  {:witnesses ["r8CensusWmTrace" "r8EraBoundary" "wmTraceR8"],
   :freshness :pinned-git-v1,
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :run-sha "93be32e98bbfdc413fc6aa58ef1d0da7cfdc8414",
   :check
   {:repo "futon2",
@@ -377,7 +390,7 @@
   {:repo "futon2", :path "holes/labs/wm-contract/R8-D3-report.edn"}}
  {:witnesses "r9VerdictConsultsChecker",
   :freshness :pinned-git-v1,
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :run-sha "7dc52f5d8bb6c604ee3358a6c4e4f8a0e3cc3ab6",
   :check
   {:repo "futon2",
@@ -399,7 +412,7 @@
  {:witnesses
   ["r9WmVerdictsSound" "r9WmPerRowDeclarations" "r9TwoRunCensus"],
   :freshness :pinned-git-v1,
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :run-sha "f8c40dc1739a34f98fb84be7805309b17c676c92",
   :check
   {:repo "futon2",
@@ -422,12 +435,12 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/softmax-reference.edn"},
   :run-sha "baa9cac380d3c9506120e064faf8f460acbbeff1",
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
  {:witnesses "wmRunConformsToWiring",
   :freshness :pinned-git-v1,
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :run-sha "f2a09a5",
   :check
   {:repo "futon2",
@@ -447,7 +460,7 @@
    :path "holes/labs/wm-contract/tick-run-record-2026-08-30.edn"}}
  {:witnesses "wmRunsOnce",
   :freshness :pinned-git-v1,
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :run-sha "b45885508aa7842e1818afe464867d571c7df0c5",
   :check
   {:repo "futon2",
@@ -473,7 +486,7 @@
   :fixture
   {:repo "futon2", :path "holes/labs/wm-contract/R9-D2-report.edn"},
   :run-sha "732f4d748f08154457d93916d96ab0be0b7f760c",
-  :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6",
+  :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :result :passed,
   :recorded-at "2026-08-31T23:59:30Z",
   :note
