@@ -5,6 +5,6 @@
  :fixture {:repo "futon2"
            :path "holes/labs/wm-contract/fold-reference.edn"}
  :run-sha "d46f823aa7433d4990b538993e2674255bdeb0b5"
- :contract-sha "b0bb97b0e512c42928d0ea42687d80f2bc486e8f"
+ :contract-sha "b0db500b6bb0927cc3136cc2b83d4d84c5b25e69"
  :result :passed
  :recorded-at "2026-08-31T23:59:00Z"}
