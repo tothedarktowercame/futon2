@@ -59,6 +59,41 @@
       (is (= ["M-a"]
              (get-in @seen [:body :scheduler-habit-ranking]))))))
 
+(deftest cancellation-command-uses-agency-single-finalizer-vocabulary
+  (let [seen (atom nil)]
+    (with-redefs [http/post
+                  (fn [url opts]
+                    (reset! seen {:url url
+                                  :body (json/parse-string (:body opts) true)})
+                    {:status 200
+                     :body (json/generate-string
+                            {:ok true :job-id "job-cancel-control"
+                             :state "cancelled"
+                             :terminal-code "operator-cancelled"})})]
+      (is (= "cancelled"
+             (:state (runner/cancel-job! {:agency-base "http://agency"}
+                                         "job-cancel-control" "joe" "stop"))))
+      (is (= "http://agency/api/alpha/invoke/jobs/job-cancel-control/cancel"
+             (:url @seen)))
+      (is (= {:caller "joe" :reason "stop"} (:body @seen))))))
+
+(deftest cancelled-and-failed-jobs-remain-distinct
+  (let [cancelled (try
+                    (runner/throw-if-cancelled!
+                     {:job-id "job-cancel-control" :state "cancelled"
+                      :terminal-code "operator-cancelled"}
+                     :author-wait)
+                    nil
+                    (catch clojure.lang.ExceptionInfo e e))]
+    (is (= :cancelled (:outcome (ex-data cancelled))))
+    (is (= :operator-cancelled (:failure-kind (ex-data cancelled))))
+    (is (= {:job-id "job-failure-control" :state "failed"
+            :terminal-code "invoke-exception"}
+           (runner/throw-if-cancelled!
+            {:job-id "job-failure-control" :state "failed"
+             :terminal-code "invoke-exception"}
+            :author-wait)))))
+
 (deftest strategic-selection-escalates-and-pins-retry-budgets
   (let [timeouts (atom [])
         sleeps (atom [])
@@ -1759,6 +1794,22 @@
     (is (= :build-failed (:outcome result)))
     (is (= ["zai-5"] @dispatches))
     (is (= :build-failed (get-in result [:data :failure-kind])))))
+
+(deftest cancelled-author-closes-distinctly-from-build-failure
+  (let [dispatches (atom [])
+        findings (atom [])
+        result
+        (runner/run-opportunity!
+         (no-commit-author-opts
+          dispatches findings
+          {:job-id "author-job" :state "cancelled"
+           :terminal-code "operator-cancelled"
+           :terminal-message "cancelled by joe"}))]
+    (is (= :cancelled (:outcome result)))
+    (is (= :operator-cancelled (get-in result [:data :failure-kind])))
+    (is (= :author-wait (get-in result [:data :failure-stage])))
+    (is (= :environmental-hold (:repair-class (first @findings))))
+    (is (= ["zai-5"] @dispatches))))
 
 (deftest machine-stop-line-preempts-ordinary-selection-and-awaits-successor-validation
   (let [dispatches (atom [])

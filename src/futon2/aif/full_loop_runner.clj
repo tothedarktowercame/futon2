@@ -712,11 +712,41 @@
 
 (defn dispatch!
   [{:keys [agency-base]} agent caller mission prompt]
-  (post-json! (str agency-base "/api/alpha/bell")
-              {:agent-id agent :caller caller :mission-id (str mission)
-               :type "request" :mode "work" :prompt prompt}))
+  (let [response
+        (post-json! (str agency-base "/api/alpha/bell")
+                    {:agent-id agent :caller caller :mission-id (str mission)
+                     :type "request" :mode "work" :prompt prompt})]
+    (when-let [job-id (:job-id response)]
+      (println "[wm-cancel] Ctrl-C alone does NOT cancel the Agency job.")
+      (println "[wm-cancel] To stop this runner and its Agency job:")
+      (println (str "clojure -M:wm-full-loop cancel " job-id
+                    " operator-request"))
+      (flush))
+    response))
+
+(defn cancel-job!
+  "Cancel one Agency job through its single-finalizer endpoint. The Agency
+   records cancelled/operator-cancelled before interrupting the process tree."
+  [{:keys [agency-base]} job-id caller reason]
+  (post-json! (str agency-base "/api/alpha/invoke/jobs/" job-id "/cancel")
+              (cond-> {:caller caller}
+                (not (str/blank? reason)) (assoc :reason reason))))
 
 (def terminal-states #{"done" "failed" "cancelled" "timed-out"})
+
+(defn throw-if-cancelled!
+  "Lift Agency's cancellation terminal state into the full-loop vocabulary.
+   Other terminal failures remain for their existing failure boundaries."
+  [job failure-stage]
+  (when (= "cancelled" (:state job))
+    (throw (ex-info "Agency job was cancelled"
+                    {:outcome :cancelled
+                     :failure-kind :operator-cancelled
+                     :failure-stage failure-stage
+                     :job-id (:job-id job)
+                     :terminal-code (:terminal-code job)
+                     :terminal-message (:terminal-message job)})))
+  job)
 
 (defn job-last-activity-ms
   "Latest trustworthy Agency timestamp for a job, or nil when none parses."
@@ -1518,6 +1548,7 @@
             (run-phase!
              opts phase-context :revision-wait
              #((or (:poll-fn opts) poll-job!) opts (:job-id revision-response)))
+            _ (throw-if-cancelled! revision-author-job :revision-wait)
             _ (when-not (= "done" (:state revision-author-job))
                 (throw
                  (ex-info "Revision author job did not complete"
@@ -1606,6 +1637,7 @@
             (run-phase!
              opts phase-context :re-review-wait
              #((or (:poll-fn opts) poll-job!) opts (:job-id re-review-response)))
+            _ (throw-if-cancelled! re-review-job :re-review-wait)
             re-review-gate
             (review-execution-gate (:files revision-build) re-review-job)
             reviews [(review-record 1 commit review-job review-gate)
@@ -1742,6 +1774,7 @@
                 cure-job
                 (run-phase! opts phase-context :build-cure-wait
                             #((or (:poll-fn opts) poll-job!) opts cure-job-id))
+                _ (throw-if-cancelled! cure-job :build-cure-wait)
                 ;; Re-resolve the build: the commit may have changed.
                 cure-artifact-ref (:artifact-ref cure-job)
                 cure-binding (when fresh-author?
@@ -2027,7 +2060,8 @@
   (cond
     (#{:agent-unavailable :agent-readiness-failed :substrate-unavailable
        :dispatch-failed :abstained :no-selection :guardrail-refusal
-       :transport-timeout :transport-unavailable :trigger-ineligible}
+       :transport-timeout :transport-unavailable :trigger-ineligible
+       :operator-cancelled}
      failure-kind)
     :environmental-hold
 
@@ -2735,6 +2769,7 @@
                     retry-author? (assoc :author-retries author-retries))
                   effective-pre-author-head
                   (if retry-author? retry-pre-author-head pre-author-head)]
+              (throw-if-cancelled! author-job :author-wait)
               (when-not (= "done" (:state author-job))
                 (throw (ex-info "Author job did not complete"
                                 (cond-> {:outcome :build-failed
@@ -2860,6 +2895,7 @@
                                               :repository repo
                                               :files files})
                                       e)))))
+                      _ (throw-if-cancelled! review-job :reviewer-wait)
                       review-gate (review-execution-gate files review-job)
                       initial-commit commit
                       revision-state

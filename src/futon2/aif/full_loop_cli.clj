@@ -626,6 +626,7 @@
   (str "War Machine real full-loop runner\n\n"
        "  status\n"
        "  activate\n"
+       "  cancel JOB-ID [REASON]\n"
        "  canary [--out PATH] [agent options]\n"
        "  once [--author zai-5 --reviewer codex-7 --repair-reviewer codex-1]\n"
        "  tick [--author zai-5 --reviewer codex-7 --repair-reviewer codex-1]\n"
@@ -649,6 +650,13 @@
       "status" (print-value {:cohort (cohort/ledger)
                               :readiness (runner/readiness)})
       "activate" (print-value {:activation (cohort/activate!)})
+      "cancel" (let [[job-id reason & extra] rest]
+                 (when (or (str/blank? job-id) (seq extra))
+                   (throw (ex-info "cancel requires JOB-ID and optional REASON"
+                                   {:args rest})))
+                 (print-value
+                  (runner/cancel-job! (runner/config {}) job-id "joe"
+                                      (or reason "operator-request"))))
       "canary" (let [flags (option-map rest)
                      out (or (:out flags) (canary-path))]
                  (print-value
