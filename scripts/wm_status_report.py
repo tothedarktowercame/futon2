@@ -34,6 +34,48 @@ def edn_json(path, expression):
     return json.loads(result.stdout)
 
 
+def pending_brief_state():
+    """Read immutable Morning Brief state through its production reader."""
+    expression = (
+        "(require '[futon2.aif.morning-brief :as brief] '[cheshire.core :as json]) "
+        "(println (json/generate-string "
+        "(mapv #(select-keys % [:attempt-id :pending-objectives]) "
+        "(brief/pending-items))))")
+    result = run(["bb", "-cp", "src:.", "-e", expression])
+    try:
+        rows = json.loads(result.stdout)
+        valid = isinstance(rows, list) and all(
+            isinstance(row.get("attempt-id"), str)
+            and isinstance(row.get("pending-objectives"), list)
+            for row in rows)
+    except (json.JSONDecodeError, AttributeError, TypeError):
+        rows, valid = [], False
+    return result, rows, valid
+
+
+def brief_decision_summary(rows):
+    """Separate all due QA from the subset that blocks belief learning."""
+    normalized = [{"attempt-id": row["attempt-id"],
+                   "pending-objectives": sorted(row["pending-objectives"])}
+                  for row in rows if row.get("pending-objectives")]
+    belief_blocked = [row["attempt-id"] for row in normalized
+                      if "substantive-achievement" in row["pending-objectives"]]
+    return {"count": len(normalized), "attempts": normalized,
+            "belief-blocked-count": len(belief_blocked),
+            "belief-blocked-attempt-ids": belief_blocked}
+
+
+def overall_verdict(new_red, accepted, health_due, brief_due):
+    """Decision debt is visible but never promoted to degradation."""
+    if new_red:
+        return "DEGRADED-NEW", 1
+    if health_due or brief_due:
+        return "DECISION-DUE", 3
+    if accepted:
+        return "DEGRADED-AS-EXPECTED", 0
+    return "OK", 0
+
+
 def launch_suite(command, directory, label):
     result = run(["python3", BG, "launch-test", command, "--agent", "wm-status-report",
                   "--label", label, "--dir", directory, "--window", "measurement"])
@@ -168,8 +210,18 @@ def source_control():
     due = retirement_window(receipts, config)
     retirement_control = (due == {"runs": 30, "passes": 27, "containment-failures": 2,
                                   "test-failures": 1, "eligible": True, "retire": True})
+    brief_due = brief_decision_summary([
+        {"attempt-id": "pending-belief", "pending-objectives":
+         ["feature-verdict", "substantive-achievement"]}])
+    brief_answered = brief_decision_summary([])
+    brief_control = (brief_due["count"] == 1
+                     and brief_due["belief-blocked-attempt-ids"] == ["pending-belief"]
+                     and brief_answered["count"] == 0
+                     and brief_answered["belief-blocked-count"] == 0
+                     and overall_verdict([], [], False, True) == ("DECISION-DUE", 3)
+                     and overall_verdict([], [], False, False) == ("OK", 0))
     passed = (positive and substitution_rejected and vocabulary_positive and collision_rejected
-              and policy_control and retirement_control)
+              and policy_control and retirement_control and brief_control)
     print("wm-status-source-control:", "PASS" if passed else "FAIL",
           f"positive={positive} substituted-hole-as-sorry-rejected={substitution_rejected}",
           f"vocabularies-disjoint={vocabulary_positive} injected-collision-rejected={collision_rejected}",
@@ -177,6 +229,8 @@ def source_control():
           f"expired-is-new={len(expired_new)==1}",
           f"receipt-window-eligible={due['eligible']} receipt-window-retire={due['retire']} "
           f"receipt-window-counts={due['runs']}/{due['passes']}/{due['test-failures']}/{due['containment-failures']}",
+          f"brief-substantive-due={brief_due['belief-blocked-count']==1} "
+          f"brief-fully-answered-clear={brief_answered['count']==0}",
           "exit-convention=0-pass/1-fail")
     return 0 if passed else 1
 
@@ -244,6 +298,11 @@ def main():
     except (json.JSONDecodeError, KeyError, TypeError):
         health, health_window, health_valid = {}, {}, False
 
+    brief_result, brief_rows, brief_valid = pending_brief_state()
+    brief_summary = brief_decision_summary(brief_rows) if brief_valid else {
+        "count": 0, "attempts": [], "belief-blocked-count": 0,
+        "belief-blocked-attempt-ids": []}
+
     futon2, f2_counts = suite_status(futon2_job)
     futon3, f3_counts = suite_status(futon3_job)
 
@@ -304,6 +363,22 @@ def main():
     else:
         print(f"UNREADABLE exit={health_result.returncode} source=bg.py/test-health")
 
+    print("\nMORNING BRIEF DECISIONS")
+    if brief_valid:
+        brief_state = "DECISION-DUE" if brief_summary["count"] else "CLEAR"
+        print(f"state={brief_state} pending-attempts={brief_summary['count']} "
+              f"belief-blocked={brief_summary['belief-blocked-count']} "
+              "source=data/wm-morning-brief/items+reviews")
+        for row in brief_summary["attempts"]:
+            cost = ("belief-learning-blocked"
+                    if "substantive-achievement" in row["pending-objectives"]
+                    else "audit-only")
+            print(f"attempt={row['attempt-id']} outstanding={json.dumps(row['pending-objectives'])} "
+                  f"cost={cost}")
+    else:
+        print(f"UNREADABLE exit={brief_result.returncode} "
+              "source=data/wm-morning-brief/items+reviews")
+
     absence_findings = int(re.search(r'findings=\s*(\d+)', absence_line).group(1))
     absence_dispositions = sorted(set(re.findall(r':disposition\s+:([\w-]+)', absence.stdout)))
     components = [
@@ -320,6 +395,8 @@ def main():
          "signature": {"exit": drift.returncode, "findings": drift_count}},
         {"component": "bounded-test-health", "red": health_result.returncode != 0 or not health_valid,
          "signature": {"exit": health_result.returncode, "readable": health_valid}},
+        {"component": "morning-brief-state", "red": not brief_valid,
+         "signature": {"exit": brief_result.returncode, "readable": brief_valid}},
         {"component": "futon2-suite", "red": futon2["receipt"].get("outer-exit", 1) != 0,
          "signature": {"exit": futon2["receipt"].get("outer-exit", 1)}},
         {"component": "futon3-suite", "red": futon3["receipt"].get("outer-exit", 1) != 0,
@@ -342,10 +419,10 @@ def main():
               f"reason={finding['reason']}")
 
     print("\nOVERALL")
-    decision_due = health_valid and health_window["eligible"]
-    verdict = ("DEGRADED-NEW" if new_red else "DECISION-DUE" if decision_due else
-               "DEGRADED-AS-EXPECTED" if accepted else "OK")
-    exit_code = 1 if new_red else (3 if decision_due else 0)
+    verdict, exit_code = overall_verdict(
+        new_red, accepted,
+        health_valid and health_window["eligible"],
+        brief_valid and brief_summary["count"] > 0)
     print(f"{verdict} exit={exit_code} "
           "convention=OK-0/DEGRADED-AS-EXPECTED-0/DEGRADED-NEW-1/DECISION-DUE-3")
     return exit_code

@@ -79,9 +79,12 @@ nightly tier must name its runner and cadence, never merely remove a check.
   referenced, unexpired acceptance. The findings remain printed.
 - `DEGRADED-NEW` (exit 1): at least one red has no exact active acceptance, or
   an acceptance changed, expired, or became invalid. Act on this state.
-- `DECISION-DUE` (exit 3): no new failure is implied, but the bounded-testing
-  retirement window has reached 30 current-configuration production runs.
-  Joe must record keep/retire and begin a new window or change configuration.
+- `DECISION-DUE` (exit 3): no new failure is implied, but an operator answer is
+  owed. This includes a bounded-testing retirement window reaching 30
+  current-configuration production runs and any Morning Brief attempt with
+  unanswered QA objectives. Status names every attempt and objective, and
+  distinguishes an unanswered `substantive-achievement` (belief learning is
+  blocked) from missing audit-only answers.
 
 The acceptance inventory is
 `checks/wm-status-accepted-red.json`. The report prints every active and unused
@@ -211,7 +214,9 @@ into the next belief update. The other three remain explicit operator and audit
 judgments. If QA is not recorded, the Morning Brief item remains pending and
 `brief` continues to list its unanswered objectives; there is currently no
 expiry or automatic failure. In that case no substantive-achievement event is
-available, so the machine does not learn Joe's judgment from that run.
+available, so the machine does not learn Joe's judgment from that run. `make
+status` surfaces this as `DECISION-DUE` and prints the attempt id plus every
+outstanding objective.
 
 - `bb checks/lane_registry_check.clj` measures commissioner/dispatcher
   discipline (`:stale-holding`), not repository validity. Run it during
