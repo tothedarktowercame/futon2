@@ -7,12 +7,13 @@
 ;; Criteria (§0.14): 1 typed ports · 2 acceptance dry-run satisfiable · 3 executable
 ;; falsifier · 4 evidence has a named consumer · 5 reads pinned / absences loud ·
 ;; 6 blast radius bounded+reversible without arming · 7 decision surface pre-covered.
-(require '[cheshire.core :as json] '[clojure.string :as str] '[clojure.pprint :as pp])
+(require '[cheshire.core :as json] '[clojure.edn :as edn]
+         '[clojure.string :as str] '[clojure.pprint :as pp])
 
 (def F2 "/home/joe/code/futon2/")
 (def contract (json/parse-string (slurp "/home/joe/code/mathlib4/DarkTower/WarMachine/holes-contract.json") true))
-(def registry (read-string (slurp (str F2 "checks/witness-registry.edn"))))
-(def census   (read-string (slurp (str F2 "holes/labs/wm-contract/edge-census.edn"))))
+(def registry (edn/read-string (slurp (str F2 "checks/witness-registry.edn"))))
+(def census   (edn/read-string (slurp (str F2 "holes/labs/wm-contract/edge-census.edn"))))
 
 (defn wit [e] (let [w (:witnesses e)] (cond (string? w) [w] (coll? w) (vec w) :else [])))
 (def bound (set (mapcat wit registry)))

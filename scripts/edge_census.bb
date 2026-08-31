@@ -9,14 +9,15 @@
 ;;   specified p4ng/empirics-futon/hyper-edge-schema.edn :instances       (what is typed)
 ;;   sim       futon2/holes/labs/wm-contract/sim/R*-claim.edn             (what role-played nodes asked for)
 (require '[clojure.java.io :as io]
+         '[clojure.edn :as edn]
          '[clojure.pprint :as pprint]
          '[clojure.string :as str])
 
 (def P "/home/joe/code/p4ng/empirics-futon/")
 (def F2 "/home/joe/code/futon2/")
 
-(def cml (read-string (slurp (str P "control-map-edges.edn"))))
-(def hyper (read-string (slurp (str P "hyper-edge-schema.edn"))))
+(def cml (edn/read-string (slurp (str P "control-map-edges.edn"))))
+(def hyper (edn/read-string (slurp (str P "hyper-edge-schema.edn"))))
 
 (def drawn   (set (map (juxt :from :to) (:edges cml))))
 (def derived (set (map (juxt :from :to) (:derived-undrawn cml))))
@@ -64,7 +65,7 @@
 (def sim
   (->> (file-seq (io/file (str F2 "holes/labs/wm-contract/sim")))
        (filter #(re-find #"-claim\.edn$" (.getName %)))
-       (mapcat (fn [f] (let [c (read-string (slurp f))]
+       (mapcat (fn [f] (let [c (edn/read-string (slurp f))]
                          (map (fn [m] [(:to m) (:node c)]) (:missing-edges c)))))
        set))
 

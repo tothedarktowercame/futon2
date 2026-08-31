@@ -9,7 +9,8 @@
 ;;   --split   one-time: explode the current registry into fragments
 ;;   --check   merge in memory and diff against the committed registry (round-trip test)
 ;;   (default) merge fragments -> registry
-(require '[clojure.java.io :as io] '[clojure.pprint :as pp] '[clojure.string :as str])
+(require '[clojure.edn :as edn] '[clojure.java.io :as io]
+         '[clojure.pprint :as pp] '[clojure.string :as str])
 
 (def frag-dir "checks/witness-fragments")
 (def registry "checks/witness-registry.edn")
@@ -22,7 +23,7 @@
   (->> (.listFiles (io/file frag-dir))
        (filter #(str/ends-with? (.getName %) ".edn"))
        (sort-by #(.getName %))
-       (map #(read-string (slurp %)))))
+       (map #(edn/read-string (slurp %)))))
 
 (defn merged []
   (let [es (read-frags)
@@ -36,12 +37,12 @@
 (defn -main [& args]
   (cond
     (some #{"--split"} args)
-    (let [es (read-string (slurp registry))]
+    (let [es (edn/read-string (slurp registry))]
       (doseq [e es] (spit (str frag-dir "/" (frag-name e)) (with-out-str (pp/pprint e))))
       (println "split" (count es) "entries into" frag-dir))
 
     (some #{"--check"} args)
-    (let [a (read-string (slurp registry)) b (merged)]
+    (let [a (edn/read-string (slurp registry)) b (merged)]
       (if (= (set a) (set b))
         (println (pr-str {:pass? true :entries (count b) :note "merge(fragments) == committed registry"}))
         (do (println (pr-str {:pass? false :registry (count a) :merged (count b)

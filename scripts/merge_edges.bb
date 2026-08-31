@@ -9,7 +9,8 @@
 ;;   --split   one-time: explode current :instances into fragments
 ;;   --check   merge in memory and compare against the committed file
 ;;   (default) merge fragments -> :instances
-(require '[clojure.java.io :as io] '[clojure.pprint :as pp] '[clojure.string :as str])
+(require '[clojure.edn :as edn] '[clojure.java.io :as io]
+         '[clojure.pprint :as pp] '[clojure.string :as str])
 
 (def schema "/home/joe/code/p4ng/empirics-futon/hyper-edge-schema.edn")
 (def frag-dir "/home/joe/code/p4ng/empirics-futon/edge-fragments")
@@ -20,7 +21,7 @@
   (->> (.listFiles (io/file frag-dir))
        (filter #(str/ends-with? (.getName %) ".edn"))
        (sort-by #(.getName %))
-       (map #(read-string (slurp %)))))
+       (map #(edn/read-string (slurp %)))))
 
 (defn merged-instances []
   (let [is (read-frags)
@@ -31,7 +32,7 @@
     (vec is)))
 
 (defn -main [& args]
-  (let [doc (read-string (slurp schema))]
+  (let [doc (edn/read-string (slurp schema))]
     (cond
       (some #{"--split"} args)
       (do (doseq [i (:instances doc)] (spit (str frag-dir "/" (frag-name i)) (with-out-str (pp/pprint i))))

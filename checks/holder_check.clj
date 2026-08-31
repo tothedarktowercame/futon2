@@ -10,7 +10,8 @@
 ;; Ordinary violations exit 1. `--negative` asserts the check can fail (it injects a
 ;; dead holder and requires a violation); rejecting that mutation is a passing control
 ;; and exits 0, while a mutation that slips through exits 2.
-(require '[cheshire.core :as json] '[clojure.string :as str] '[babashka.http-client :as http])
+(require '[cheshire.core :as json] '[clojure.edn :as edn]
+         '[clojure.string :as str] '[babashka.http-client :as http])
 
 (def contract-path "/home/joe/code/mathlib4/DarkTower/WarMachine/holes-contract.json")
 (def registry-path "/home/joe/code/futon2/checks/holder-registry.edn")
@@ -27,7 +28,7 @@
 (defn -main [& args]
   (let [negative? (some #{"--negative"} args)
         contract  (json/parse-string (slurp contract-path) true)
-        reg       (read-string (slurp registry-path))
+        reg       (edn/read-string (slurp registry-path))
         records   (cond-> (:records reg)
                     negative? (assoc "P-R9" {:decls 14 :holder "claude-15-retired" :note "injected"}))
         live      (roster)
