@@ -176,6 +176,16 @@ being built. Full terminal boundary:
 - **Evidence:** no option-effect measurement; judgement call.
 - **If deferred:** missing error remains indistinguishable from perfect
   prediction and the lint finding remains red.
+- **Scope narrowed by C226 (futon2 `b91f706`):** the value Fulab actually
+  receives is not canonical signed ε. It computes
+  `max(0, text-score(outcome) - 1)` internally — a nonnegative outcome-size
+  surplus — and has **no connection to `free-energy/compute-prediction-error`**.
+  Only `compute-tau` reads the key; the generic Fulab branch is its sole
+  writer. Further, no static call site in `src/`, `test/` or `checks/`
+  constructs the adapter or calls `fulab/new-adapter`, so this decision governs
+  a path with no observed live caller. That does not make it moot — the untyped
+  seam would silently clamp signed ε if connected later — but it is a smaller
+  decision than its placement here suggests.
 - **Full analysis:**
   [`C130-absence-decisions.md` §7](../labs/wm-contract/C130-absence-decisions.md).
 
