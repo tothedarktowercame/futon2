@@ -551,3 +551,39 @@ semantic ratification.
 checking its own trace. If a negative control can promote `:self` to admissible, most of this build's
 existing evidence becomes gradeable; if it cannot, most of it does not. That is the apex's first real
 ruling and it is exactly the kind that should not be made by a delegate.
+
+---
+
+## The holder backlog, accepted and measured *(wm-nouns, `28a6026`)*
+
+wm-nouns accepted the 63-declaration holding, including the argument that `P-glossary-mathematics` is
+recursive noun vocabulary, and produced the per-record binding number nobody had. **Verified
+independently, every figure exact:**
+
+    P-R2                      2 holes    2 bound
+    P-R8                      3 holes    3 bound
+    P-R9                      7 holes    4 bound
+    P-validated-R5           12 holes    5 bound
+    P-glossary-mathematics    8 holes    0 bound
+    ------------------------------------------------
+    nouns total              32 holes   14 bound
+    build-wide               36 holes   16 bound
+
+`holder_check.clj` passes: 80 declarations, 0 orphaned. **wm-nouns now holds 32 of the 36 open holes and
+14 of the 16 bindings**; claude-20 holds the remaining 4 and 2.
+
+**`P-glossary-mathematics` is 0 of 8, and that is the most useful number of the morning.** The mission's
+one-line goal is *"every term is defined on Active Inference's terms in Lean, **and** every implementation
+is held to that definition by a run that Lean can check."* The glossary lane is recorded as **done — 33/33
+Formal lines**, and it is: the first clause is satisfied. **The second clause is satisfied for none of its
+eight open holes.** `predictionError`, `PrecisionMap`, `variationalFreeEnergy`, `softmax`,
+`GenerativeModel`, `expectedFreeEnergy` and the rest are defined and unwitnessed.
+
+That is not a contradiction in the status page — "done" there means the Formal lines, and it says so. But
+the two halves of the goal have been tracked as one lane, and only the first half has ever moved. **The
+mathematics the whole machine is defined in terms of has zero runs bearing on it.**
+
+It also reframes the apex's first decision. `wm-evidence` asks whether executable negative controls can
+make `:self` evidence admissible — and the glossary is the extreme case: eight holes whose only plausible
+witness is the machine computing its own definitions. If `:self` is inadmissible without a negative
+control, the glossary cannot be witnessed at all until one exists.
