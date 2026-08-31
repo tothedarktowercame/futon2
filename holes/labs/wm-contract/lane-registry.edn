@@ -8,6 +8,6 @@
   {:lane :wm-verbs
    :holding :C246-ledger-read-path, :dispatched-at "2026-08-31T23:35:30Z", :job-id "invoke-1788219297593-6202-8754d8f3", :expected-by "2026-09-01T00:20:30Z"}
   {:lane :wm-organization
-   :holding :C247-drain-checklist, :dispatched-at "2026-08-31T23:35:30Z", :job-id "invoke-1788219326508-6203-e697fa66", :expected-by "2026-09-01T00:20:30Z"}
+   :holding :C249-click-receipt-design, :dispatched-at "2026-08-31T23:42:53Z", :job-id "invoke-1788219739893-6213-407ab7fd", :expected-by "2026-09-01T00:27:53Z"}
   {:lane :wm-evidence
-   :holding :C244-vet-workflow-report, :dispatched-at "2026-08-31T23:32:18Z", :job-id "invoke-1788219134470-6200-6b8fbd76", :expected-by "2026-09-01T00:17:18Z"}]}
+   :holding :C250-rereview-workflow-repairs, :dispatched-at "2026-08-31T23:42:53Z", :job-id "invoke-1788219769213-6214-5c7ae1d1", :expected-by "2026-09-01T00:27:53Z"}]}
