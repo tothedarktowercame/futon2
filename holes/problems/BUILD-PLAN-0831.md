@@ -815,3 +815,52 @@ vertex's charter sentence.
 **Pattern impact:** R13's pattern is about *"scoring only the next action versus scoring the
 pattern-language cascade/policy it opens"* — the same distinction. If the grain lands as proposed, R13's
 entry in `sec-catalog.tex` should say which object π names, at gate time.
+
+---
+
+## APEX-D3 refused — and checking the refusal found that I had sent it at the wrong device
+
+`bb20cd0`: refusal at the modelling decision. The delegate's grounds: the R2 corpus supplies 796
+conforming / 2 mismatching at the pinned 798-form basis and does **not** determine the categorical
+variable, the full/reduced model pair, their priors, the update rule, or any ε/Π → pseudo-count map —
+and *"choosing these would let the apex manufacture the model it certifies — R18 one level higher."*
+That is its charter applied to itself, and it is right.
+
+**Checking it found a second, stronger reason, and it is against my packet.**
+
+1. **BMR is R17's concept-merging device, not a claim-licensing one.** `sec-glossary.tex` on the threshold:
+   *"It prevents the system from merging **concepts** just because they look superficially similar."* The
+   R17 pattern: *"hand those to R17, which accepts only the mergers its evidence threshold clears."*
+   `ΔF ≤ -3` answers *should these two concepts be merged*, not *is this claim licensed*.
+2. **The count-driven configuration I commissioned has a recorded failure in this repository.**
+   `holes/labs/slush-demo/findings/bmr_constellation_experiment.out.txt` opens
+   *"EXPERIMENT 1: BMR over-merge reproduction (count-only reduce-concepts)"*, and the glossary cites it as
+   a negative finding. **I asked for `evidence-source → Dirichlet counts` and licensing through it — the
+   exact configuration already reproduced as a failure here.**
+
+So my correction of APEX-D2 was itself half wrong: the chain is proved *for concept merging*; it was never
+a claim-licensing device, and "only the source→counts map is missing" was wrong about what the map is for.
+
+**The finding this leaves is bigger than the delivery that was asked for:**
+
+    variationalFreeEnergy    precision-weighted surprise    terminates UNCONSUMED
+    deltaFReduction + threshold   R17 concept merging, count-mode failure on record
+    expectedInformationGain  REFUSED (Outcome/Q(o|π) missing)
+    ------------------------------------------------------------------------------
+    a device that licenses a CLAIM from evidence:  ABSENT from the formalisation
+
+**The build has been gathering evidence with no instrument that can license a claim from it.** That is
+§0.8's original complaint — *"there was no certification at the meta level that would say, this is the
+wrong evidence"* — now located in the mathematics rather than in the process. APEX-D4 asks the delegate to
+**record the absence and not fill it**, with a typed `:licensing-device :absent` and a falsifier, because
+an apex that invents its own licensing rule is R18 one level further up.
+
+**The seven modelling rulings are withdrawn** — they were downstream of my wrong premise. One question goes
+to Joe in their place: *the build needs a claim-licensing device and AIF as formalised here does not supply
+one; what should it be?*
+
+**Method note.** Twice now I have handed this delegate a confident synthesis and been corrected by it —
+first the two free energies, now the wrong device. Both times the delegate refused rather than complied,
+and both times checking its refusal produced the real finding. **A vertex whose job is to say "this is the
+wrong evidence" is worth most when it says it to its own commissioner**, and the second refusal was harder
+to make than the first, because by then I had told it the answer twice.
