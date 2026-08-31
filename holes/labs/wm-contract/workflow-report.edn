@@ -1,9 +1,9 @@
 {:lanes
  [{:lane :wm-nouns,
-   :closed-attributed 9,
-   :open-holding 1,
-   :in-flight "C245",
-   :holding :C245-next-glossary-term}
+   :closed-attributed 11,
+   :open-holding 0,
+   :in-flight :none,
+   :holding :C248-classify-declaration}
   {:lane :wm-verbs,
    :closed-attributed 7,
    :open-holding 1,
@@ -15,9 +15,9 @@
    :in-flight "C247",
    :holding :C247-drain-checklist}
   {:lane :wm-evidence,
-   :closed-attributed 6,
-   :open-holding 1,
-   :in-flight "C244",
+   :closed-attributed 7,
+   :open-holding 0,
+   :in-flight :none,
    :holding :C244-vet-workflow-report}],
  :schema :wm/workflow-report-v2,
  :since "2026-08-30T00:00:00Z",
@@ -38,12 +38,12 @@
  :sources
  {:case-ledger
   {:path "p4ng/vetting/CLEANUP-QUEUE.md",
-   :revision "18ea243",
-   :sha256-prefix "34b481b4892ea6d7"},
+   :revision "dadc8f8",
+   :sha256-prefix "6ca0e968bec65409"},
   :lane-registry
   {:path "futon2/holes/labs/wm-contract/lane-registry.edn",
-   :revision "9b24dec",
-   :sha256-prefix "8151a674295674a2",
+   :revision "02fec27",
+   :sha256-prefix "bb30276a7f46b051",
    :as-of "2026-08-31T15:39:14.434945104Z"},
   :decisions
   {:path "futon2/holes/problems/DECISIONS-PENDING.md",
@@ -63,17 +63,17 @@
   "Support-typed shadow as the live selection authority"],
  :owner-repairs ["C146" "C150" "C154" "C16" "C161" "C18" "C213"],
  :totals
- {:cases-in-ledger 160,
-  :cases-attributed 38,
-  :closed-by-lanes 30,
+ {:cases-in-ledger 163,
+  :cases-attributed 41,
+  :closed-by-lanes 33,
   :owner-repairs 7,
   :open-dispatched 1,
   :pending-decisions 12},
- :as-of "2026-08-31T23:38:59.569439045Z",
+ :as-of "2026-08-31T23:41:28.729709131Z",
  :attribution
- {:systematic-from "C240",
-  :cases-attributed 38,
-  :cases-in-ledger 160,
+ {:systematic-from "C248",
+  :cases-attributed 41,
+  :cases-in-ledger 163,
   :attributed-cases
   ["C16"
    "C18"
@@ -112,9 +112,12 @@
    "C240"
    "C241"
    "C242"
-   "C243"],
+   "C243"
+   "C244"
+   "C245"
+   "C248"],
   :note
   "per-lane counts cover only cases whose ledger heading names a lane. :systematic-from is exact coverage -- every case number from it to the frontier carries an attribution -- and every heading inside that window must be classifiable or the generator fails. Cases below it are counted in :cases-in-ledger without a lane, so these are not a campaign census."},
- :frontier 247,
+ :frontier 248,
  :schema-change
  "v1 -> v2 (C244): :dispatched/:completed/:blocked replaced by :closed-attributed/:open-holding, because no dispatch log exists and :dispatched claimed one"}
