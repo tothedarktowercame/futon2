@@ -1,10 +1,10 @@
-{:witnesses "ambiguity"
+{:witnesses "Fold"
  :check {:repo "futon2"
-         :path "checks/ambiguity_witness.clj"
+         :path "checks/fold_witness.clj"
          :entrypoint "-main"}
  :fixture {:repo "futon2"
-           :path "holes/labs/wm-contract/ambiguity-reference.edn"}
- :run-sha "8ae9f90a536d98664ad040ae0bf89426b1c9f413"
+           :path "holes/labs/wm-contract/fold-reference.edn"}
+ :run-sha "d46f823aa7433d4990b538993e2674255bdeb0b5"
  :contract-sha "43aeb705e407024c49ea9b10d377093eaf4177c5"
  :result :passed
  :recorded-at "2026-08-31T23:59:00Z"}
