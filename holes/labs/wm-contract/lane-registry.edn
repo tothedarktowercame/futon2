@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C242-rehearsal-scheduling, :dispatched-at "2026-08-31T23:30:06Z", :job-id "invoke-1788218974326-6193-82738ae1", :expected-by "2026-09-01T00:15:06Z"}
   {:lane :wm-evidence
-   :holding :C241-repository-gate, :dispatched-at "2026-08-31T23:28:27Z", :job-id "invoke-1788218904282-6191-343f0c30", :expected-by "2026-09-01T00:13:27Z"}]}
+   :holding :C244-vet-workflow-report, :dispatched-at "2026-08-31T23:32:18Z", :job-id "invoke-1788219134470-6200-6b8fbd76", :expected-by "2026-09-01T00:17:18Z"}]}
