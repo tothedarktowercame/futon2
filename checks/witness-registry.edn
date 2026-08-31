@@ -11,7 +11,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/generative-model-reference.edn"},
   :run-sha "7b31da1fe248a05b35940e9a68544b4ffbef36a7",
-  :contract-sha "a9d78f8904329d7b2393167f7ceaa28c1c4a8f0c",
+  :contract-sha "d0ad8d4d09eb45b0e19bc53247ffed07d7d8b816",
   :result :passed,
   :recorded-at "2026-09-01T00:20:00Z"}
  {:witnesses "expectedFreeEnergy",
@@ -23,7 +23,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/expected-free-energy-reference.edn"},
   :run-sha "58d667284a63c69c0027c9bf204e9bc0eac098b9",
-  :contract-sha "a9d78f8904329d7b2393167f7ceaa28c1c4a8f0c",
+  :contract-sha "d0ad8d4d09eb45b0e19bc53247ffed07d7d8b816",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
  {:witnesses "expectedInformationGain",
@@ -36,25 +36,28 @@
    :path
    "holes/labs/wm-contract/expected-information-gain-reference.edn"},
   :run-sha "c99ffdbc13e9b114dbcdca7451651e568588a947",
-  :contract-sha "a9d78f8904329d7b2393167f7ceaa28c1c4a8f0c",
+  :contract-sha "d0ad8d4d09eb45b0e19bc53247ffed07d7d8b816",
   :result :passed,
   :recorded-at "2026-09-01T00:10:00Z"}
  {:witnesses
-  ["findF1Containment" "findF2Receipted" "findF3NonSelfCertifying"],
+  ["findF1Containment"
+   "findF2Receipted"
+   "findF3NonSelfCertifying"
+   "findF4Falsifiable"],
   :freshness :pinned-git-v1,
-  :contract-sha "a9d78f8904329d7b2393167f7ceaa28c1c4a8f0c",
+  :contract-sha "d0ad8d4d09eb45b0e19bc53247ffed07d7d8b816",
   :run-sha "594127059d6a31c5b21f5d34ebfac5b14b1ad993",
   :check
   {:repo "futon3",
    :path "checks/find_snatch.clj",
    :entrypoint "-main"},
   :note
-  "C73: cured checker reports zero representation mismatches and separately rejects --negative-f1 (outside repository), --negative-f2 (selected row lacks receipt), and --negative-f3 (score-only receipt). findF4 remains deliberately unbound.",
+  "C85: cured checker reports zero representation mismatches and separately rejects F1 outside-repository selection, F2 missing receipt, F3 score-only receipt, and F4 removal of the recorded omitted member. F4 is narrowed to the pinned FindReceiptRow.",
   :recorded-at "2026-08-31T15:40:00Z",
   :live-invariant
   {:check "checks/find_snatch.clj",
-   :check-sha "d37a62da39a0a3d78fb7972953df38cc53aac410",
-   :evidence :f1-f2-f3-independent-controls},
+   :check-sha "ab2b290d1caedffd2bde4658300a791d1000b978",
+   :evidence :f1-f2-f3-f4-independent-controls},
   :result :passed,
   :fixture {:repo "futon3", :path "checks/find-snatch.edn"}}
  {:witnesses "logMultivariateBeta",
@@ -66,7 +69,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/log-multivariate-beta-reference.edn"},
   :run-sha "720af918c430415bf07f4eba29ec73d49b343a10",
-  :contract-sha "a9d78f8904329d7b2393167f7ceaa28c1c4a8f0c",
+  :contract-sha "d0ad8d4d09eb45b0e19bc53247ffed07d7d8b816",
   :result :passed,
   :recorded-at "2026-08-31T23:50:00Z"}
  {:witnesses
@@ -82,28 +85,31 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/cascade-diff-reference.edn"},
   :run-sha "ecf819234cc50afbdfccffb5838b628018584f76",
-  :contract-sha "a9d78f8904329d7b2393167f7ceaa28c1c4a8f0c",
+  :contract-sha "d0ad8d4d09eb45b0e19bc53247ffed07d7d8b816",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z",
   :note
   "C64 fixture-indexed bindings: O1 rejects --negative-o1 (unrecorded addition); O2 rejects --negative-o2 (unsupported reverse edge); O3 rejects --negative-o3 (missing fast-forward); O4 rejects --negative-o4 (precedence variant with unchanged order and score). The bindings witness the pinned cascade only; organise remains refused."}
  {:witnesses "preferenceStackLiveRecorded",
   :freshness :pinned-git-v1,
-  :contract-sha "eec8279cf7b2c841f386894116e6aa627869a75c",
-  :run-sha "03c149d0b39b5f1fbe9640b6c7aa63f4fbe21b36",
+  :contract-sha "a9d78f8904329d7b2393167f7ceaa28c1c4a8f0c",
+  :run-sha "6c87413",
   :check
   {:repo "futon2",
-   :path "checks/r19_stack_witness.clj",
+   :path "checks/preference_stack_binding_check.clj",
    :entrypoint "-main"},
   :axioms
   "preferenceStackRecorded: [] (kernel decide); this Clojure witness emits no Lean proof and introduces no axioms",
   :note
-  "R19-D2b witnesses the preference-stack emission added by ccd06ce; the inline dry-run fixture and executable missing-layer falsifier live in the check.",
-  :recorded-at "2026-08-31T03:45:00Z",
+  "C83 binds C63's serialized PreferenceStackWitness. The binding check proves that exact serialized :preference-stack equals both production compute-efe output and the v16 trace envelope. Binding-level absent and malformed controls are distinct from C63's missing-layer shape mutation.",
+  :recorded-at "2026-08-31T16:52:00Z",
   :live-invariant
-  {:check "checks/r19_stack_witness.clj", :evidence :emitted-by-check},
+  {:check "checks/preference_stack_binding_check.clj",
+   :evidence :serialized-production-value-survives-trace},
   :result :passed,
-  :fixture {:repo "futon2", :path "checks/r19_stack_witness.clj"}}
+  :fixture
+  {:repo "futon2",
+   :path "holes/labs/wm-contract/PreferenceStackWitness.edn"}}
  {:witnesses ["r2ContractCensusWmTrace" "wmTraceR2"],
   :freshness :pinned-git-v1,
   :contract-sha "1b09974aed1ce66dad0b728a6acc64c7b864b31e",
@@ -208,7 +214,7 @@
   :fixture
   {:repo "futon2", :path "holes/labs/wm-contract/R9-D2-report.edn"},
   :run-sha "732f4d748f08154457d93916d96ab0be0b7f760c",
-  :contract-sha "a9d78f8904329d7b2393167f7ceaa28c1c4a8f0c",
+  :contract-sha "d0ad8d4d09eb45b0e19bc53247ffed07d7d8b816",
   :result :passed,
   :recorded-at "2026-08-31T23:59:30Z",
   :note
