@@ -1093,3 +1093,38 @@ Both now dispatched, each as a small delivery to the vertex that owns it:
 **Standing correction to my own practice.** Ruling that something is decided is not delivering it, and
 saying "proceeding" in a report is not proceeding. When I retire an escalation by assessment, the same
 message must produce the dispatch — or the assessment becomes a record of work that never happened.
+
+---
+
+## VERBS-D3 — domains and ranges: Joe's key issue, and the façade is still in the code
+
+Joe: *"a key issue … validation of the domains and ranges of the edges. A key example was the '4 mission
+whitelist' façade from the earlier paper."*
+
+**Verified, and it is not only historical:**
+
+    futon2/src/futon2/aif/actuator_a3.clj  reviewed-candidate-cleans  ->  EXACTLY 4 entries
+    docstring: "Operational verification: does the LIVE substrate match the mission's authored
+                CLean structure?"
+    R16-D1:    all 96 :open-mission selections fell OUTSIDE it
+
+A check that says *"the live substrate"* and covers four hand-listed missions, while the machine ran
+ninety-six others.
+
+**The schema gap that permits it is the verbs vertex's own.** `:required/port` is
+`[:port/id :side :owner :direction :emits :accepts :deposit :emitted-by :validated-at-uptake]` — **every
+field types the SHAPE of what crosses; none states the POPULATION it must cover.** So a port can accept
+well-formed payloads for 4 of 96 cases and pass every existing check, `hyper_edge_exemplar_check` included,
+because that validates structure and not coverage. **It is `r2ContractCensus`'s vacuous acceptance one
+level up: an edge contract that cannot fail for the cases it does not carry.**
+
+Dispatched: add `:domain`/`:range` to the port contract, **checkable against an enumeration rather than
+prose** (a domain nobody can enumerate is one nobody can falsify — and if it cannot be enumerated, that is
+the finding), with **the falsifier being coverage, not shape**. The instruction is to build the negative
+control first and confirm it **fails on `reviewed-candidate-cleans`** — *if the new check passes that map,
+the check is wrong.* Explicitly **not** repairing `actuator_a3.clj`: the instrument that makes the gap
+visible is this delivery; the runtime repair is a separate commission.
+
+**Why this is the right issue to put to that vertex.** Every check this build has added today validates
+that a thing is well-formed. Joe's point is that well-formedness over the wrong population is the
+oldest façade in the record — and the one instrument nobody has built is the one that asks *over what?*
