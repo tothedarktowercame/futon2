@@ -1,0 +1,4 @@
+{:schema :aliveness-reference/v1
+ :basis "sec-glossary.tex:50"
+ :temperature 0.8 :harmony 0.6 :aliveness 0.48
+ :kind :hand-derived-from-formula}

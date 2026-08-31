@@ -1,0 +1,5 @@
+{:schema :act-gate-reference/v1
+ :basis "sec-glossary.tex:66 and close_loop.clj:111-116"
+ :passing {:cascade-score 1.2 :coverage-score-delta -0.8 :verdict :pass}
+ :missing {:cascade-score :absent :coverage-score-delta -0.8 :verdict :abstain-missing-leg}
+ :kind :hand-derived-from-record}

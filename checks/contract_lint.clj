@@ -292,6 +292,10 @@
    "HaveWantArrowWitness" have-want-arrow-witness?
    "FoldWitness" fold-witness?
    "FoldEscrowRecordWitness" fold-escrow-record-witness?
+   "ControlVocabularyWitness" #(= :control-vocabulary-reference/v1 (:schema %))
+   "AlivenessWitness" #(= :aliveness-reference/v1 (:schema %))
+   "ActGateWitness" #(= :act-gate-reference/v1 (:schema %))
+   "CohortWitness" #(= :cohort-reference/v1 (:schema %))
    "ExpectedInformationGainWitness" expected-information-gain-witness?
    "GenerativeModelWitness" generative-model-witness?
    "CascadeDiff" cascade-diff?

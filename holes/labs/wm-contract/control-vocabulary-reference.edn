@@ -1,0 +1,6 @@
+{:schema :control-vocabulary-reference/v1
+ :basis "sec-glossary.tex:35"
+ :controls [:observe :act]
+ :policy [:observe :act]
+ :excludes :outside
+ :kind :hand-derived-from-record}

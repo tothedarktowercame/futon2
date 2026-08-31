@@ -1,0 +1,8 @@
+{:schema :cohort-reference/v1
+ :basis "holes/labs/M-aif-full-loop-46/cohort.edn"
+ :cohort/id :wm-outer-loop-46-v1
+ :semantic-epoch :omni-jvm
+ :stopping-target 3
+ :attempts [1 2 3]
+ :outcome-taxonomy :epoch-parameter
+ :kind :hand-derived-from-preregistration}
