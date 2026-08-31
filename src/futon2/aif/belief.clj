@@ -367,7 +367,13 @@
    Event shape (M-INC-compatible):
      {:type      <keyword in status-set>
       :weight    <number, default 1.0>
-      :timestamp <inst, optional>}
+      :timestamp <inst, optional, legacy metadata ACCEPTED BUT IGNORED>}
+
+   `:timestamp` has no effect on the posterior and must not be interpreted as
+   freshness handling.  Temporal provenance belongs in the typed
+   `:evidence/occurred-at`, `:evidence/recorded-at`, and
+   `:evidence/time-provenance` carrier; the updater currently records that
+   provenance upstream but deliberately implements no ageing policy.
 
    Returns a new normalised posterior. Events whose :type is not in
    status-set are ignored (posterior unchanged) — this keeps the

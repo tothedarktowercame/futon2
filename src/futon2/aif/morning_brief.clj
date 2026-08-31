@@ -50,6 +50,40 @@
 
 (def addendum-kinds #{:repro :why-built :note})
 
+(defn evidence-time-provenance
+  "Classify occurrence versus recording time without changing evidence weight.
+
+  Historical events without the v2 occurrence carrier remain readable as
+  typed `:predates-field` absence.  Current events with a missing carrier are
+  malformed.  This function records chronology only; it is deliberately not
+  an ageing, refusal, or decay policy."
+  [{:keys [evidence/occurred-at evidence/recorded-at
+            morning-brief/event-schema-version]}]
+  (let [legacy? (or (nil? event-schema-version) (< event-schema-version 2))]
+    (cond
+      (and (= :present (:status occurred-at))
+           (= :present (:status recorded-at)))
+      (try
+        (let [occurred (Instant/parse (:value occurred-at))
+              recorded (Instant/parse (:value recorded-at))]
+          {:status :present
+           :relationship (cond
+                           (.isBefore occurred recorded) :occurrence-precedes-recording
+                           (.isAfter occurred recorded) :occurrence-follows-recording
+                           :else :same-instant)})
+        (catch Exception e
+          {:status :absent :reason :malformed
+           :cause (ex-message e)}))
+
+      (= :predates-field (:reason occurred-at))
+      {:status :absent :reason :predates-field}
+
+      legacy?
+      {:status :absent :reason :predates-field}
+
+      :else
+      {:status :absent :reason :malformed})))
+
 (defn- nonblank-string? [value]
   (and (string? value) (not (str/blank? value))))
 
@@ -77,9 +111,12 @@
   ([root {:keys [attempt-id] :as item}]
    (when-not (and (string? attempt-id) (not (str/blank? attempt-id)))
      (throw (ex-info "Morning Brief item requires attempt-id" {:item item})))
-   (write-new! (io/file root "items" (str attempt-id ".edn"))
-               (assoc item :queued-at (str (Instant/now))
-                           :morning-brief/schema-version 1))))
+   (let [occurred-at (str (Instant/now))]
+     (write-new! (io/file root "items" (str attempt-id ".edn"))
+                 (assoc item :queued-at occurred-at
+                             :evidence/occurred-at
+                             {:status :present :value occurred-at}
+                             :morning-brief/schema-version 2)))))
 
 (declare reviews items)
 
@@ -134,15 +171,23 @@
   (some #(when (= attempt-id (:attempt-id %)) %)
         (read-records (io/file root "items"))))
 
-(defn- belief-event-for [review-id item objective answer]
+(defn- belief-event-for [review-id item objective answer reviewed-at]
   (when (= :substantive-achievement objective)
     (when-let [entity-id (get-in item [:qa-targets :achievement :entity-id])]
-      {:event-id review-id
-       :entity-id entity-id
-       :type (get achievement-answer->event-type answer)
-       :weight 1.0
-       :source :morning-brief-qa
-       :objective objective})))
+      (let [event {:event-id review-id
+                   :entity-id entity-id
+                   :type (get achievement-answer->event-type answer)
+                   :weight 1.0
+                   :source :morning-brief-qa
+                   :objective objective
+                   :morning-brief/event-schema-version 2
+                   :evidence/occurred-at
+                   (or (:evidence/occurred-at item)
+                       {:status :absent :reason :predates-field})
+                   :evidence/recorded-at
+                   {:status :present :value reviewed-at}}]
+        (assoc event :evidence/time-provenance
+               (evidence-time-provenance event))))))
 
 (defn review!
   ([attempt-id objective answer note reviewer]
@@ -168,7 +213,8 @@
        (throw (ex-info "Morning Brief objective was already reviewed"
                        {:attempt-id attempt-id :objective objective
                         :review-id (:morning-brief/review-id prior-review)})))
-     (let [review-id
+     (let [reviewed-at (str (Instant/now))
+           review-id
            (str "mbqa-"
                 (UUID/nameUUIDFromBytes
                  (.getBytes (str attempt-id "\u0000" (name objective)) "UTF-8")))
@@ -178,9 +224,10 @@
                    :answer answer
                    :note note
                    :reviewer reviewer
-                   :reviewed-at (str (Instant/now))
+                   :reviewed-at reviewed-at
                    :qa-target (get-in item [:qa-targets objective])
-                   :belief-event (belief-event-for review-id item objective answer)}]
+                   :belief-event (belief-event-for review-id item objective answer
+                                                   reviewed-at)}]
        (write-new! (io/file root "reviews" (str review-id ".edn")) record)
        record))))
 

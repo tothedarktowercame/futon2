@@ -215,8 +215,11 @@
   migration cannot silently discard evidence."
   [belief-state consumed-ids unseen-events]
   (let [consumed-pre (set consumed-ids)
-        applied (filterv #(contains? belief-state (:entity-id %)) unseen-events)
-        held (filterv #(not (contains? belief-state (:entity-id %))) unseen-events)]
+        events (mapv #(assoc % :evidence/time-provenance
+                             (morning-brief/evidence-time-provenance %))
+                     unseen-events)
+        applied (filterv #(contains? belief-state (:entity-id %)) events)
+        held (filterv #(not (contains? belief-state (:entity-id %))) events)]
     {:belief (if (seq applied)
                (apply-arena-belief-events belief-state applied)
                belief-state)

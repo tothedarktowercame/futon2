@@ -18,6 +18,10 @@
         event-id (get-in review [:belief-event :event-id])]
     (is (= ["attempt-001"] (mapv :attempt-id pending-before)))
     (is (= :strengthened (get-in review [:belief-event :type])))
+    (is (contains? #{:occurrence-precedes-recording :same-instant}
+                   (get-in review [:belief-event :evidence/time-provenance
+                                   :relationship])))
+    (is (= 1.0 (get-in review [:belief-event :weight])))
     (is (= [:selection-quality]
            (:pending-objectives (first (brief/pending-items root)))))
     (is (= [event-id]
@@ -29,6 +33,27 @@
                                 "duplicate" "joe")))
     (is (thrown? java.nio.file.FileAlreadyExistsException
                  (brief/queue-item! root {:attempt-id "attempt-001"})))))
+
+(deftest evidence-time-provenance-is-recorded-without-ageing
+  (let [event {:morning-brief/event-schema-version 2
+               :weight 1.0
+               :evidence/occurred-at
+               {:status :present :value "2026-07-01T00:00:00Z"}
+               :evidence/recorded-at
+               {:status :present :value "2026-08-31T00:00:00Z"}}
+        classified (assoc event :evidence/time-provenance
+                          (brief/evidence-time-provenance event))]
+    (is (= :occurrence-precedes-recording
+           (get-in classified [:evidence/time-provenance :relationship])))
+    (is (= 1.0 (:weight classified)))
+    (is (= {:status :absent :reason :predates-field}
+           (brief/evidence-time-provenance
+            {:weight 1.0
+             :evidence/occurred-at {:status :absent :reason :predates-field}})))
+    (is (= :malformed
+           (:reason (brief/evidence-time-provenance
+                     {:morning-brief/event-schema-version 2
+                      :weight 1.0}))))))
 
 (deftest operator-gate-items-are-typed-and-idempotent-while-open
   (let [root (temp-root)

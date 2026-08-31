@@ -190,8 +190,14 @@
         known {:event-id "qa-1" :entity-id "known" :type :strengthened :weight 1.0}
         unknown {:event-id "qa-2" :entity-id "unknown" :type :falsified :weight 1.0}
         result (wm/apply-morning-brief-events prior #{"older"} [known unknown])]
-    (is (= [known] (:applied result)))
-    (is (= [unknown] (:held result)))
+    (is (= known
+           (dissoc (first (:applied result)) :evidence/time-provenance)))
+    (is (= :predates-field
+           (get-in result [:applied 0 :evidence/time-provenance :reason])))
+    (is (= :predates-field
+           (get-in result [:held 0 :evidence/time-provenance :reason])))
+    (is (= unknown
+           (dissoc (first (:held result)) :evidence/time-provenance)))
     (is (= #{"older" "qa-1"} (:consumed-ids result)))
     (is (not= prior (:belief result)))))
 
