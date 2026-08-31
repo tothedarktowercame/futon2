@@ -487,6 +487,14 @@ Cascade  := { nodes : Set Pattern, edges : Pattern → Pattern → Prop, acyclic
 - F3 *non-self-certifying*: a receipt cites the pattern's text or authored edges, never the finder's score alone; "embedding nearness is a generator of hypotheses, not proof" (glossary). (Refuses similarity-as-warrant.)
 - F4 *falsifiable*: for a given tension there is at least one pattern in the repository the finder must *not* return (a zero-mass pattern — T1512Z applied to retrieval); a finder that can return anything for anything is unfalsifiable.
 
+**F2 falsifier amendment (2026-08-31, C61):** `findF2Receipted` currently says
+*“selected pattern lacks receipt.”* That falsifier cannot decide F2 while the runner
+fires on a separately maintained abbreviated antecedent and the receipt cites the
+authored clause: a receipt is present, but the check cannot establish that it
+receipts what fired. `find-snatch` now rejects the 21 antecedent mismatches rather
+than treating receipt presence as sufficient. The four `findF*` bindings remain
+stale until the representations are reconciled and the strengthened check passes.
+
 **Laws on `organise`**:
 - O1 *nodes are the input*: `cascade.nodes = selected` (with up-closure under `standsOn` recorded as *added by organise*, not as found — §2.1d's "the cascade of a run is the up-closure").
 - O2 *edges are authored*: `cascade.edges ⊆ Reach repo.standsOn` restricted to `nodes` — never inferred from similarity, co-occurrence or prose (§2.1d, "edges are authored; the sub-graph is derived").
