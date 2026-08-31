@@ -10,6 +10,8 @@
 
 (def default-trace-dir "/home/joe/code/futon2/data/wm-trace")
 (def default-boundary 20260714)
+(def default-recorded-report
+  "holes/labs/wm-contract/R8-D2-report.edn")
 (def recorded-census {:missing-F-computable 755
                       :stored-F 32
                       :insufficient-inputs 5})
@@ -129,6 +131,69 @@
 (defn- tick-id [{:keys [file form value]}]
   {:file file :form form :timestamp (:timestamp value)})
 
+(defn recorded-snapshot [path]
+  (let [report (edn/read-string (slurp path))
+        ticks (get-in report [:r8CensusWmTrace :ticks])
+        identities (into {}
+                         (mapcat (fn [[kind ids]]
+                                   (map (fn [id] [id kind]) ids)))
+                         ticks)
+        timestamps (keep :timestamp (keys identities))]
+    {:recorded-at (get-in report [:recorded-census-delta :recorded-at]
+                          "2026-08-30")
+     :watermark {:timestamp (last (sort timestamps))
+                 :forms (get-in report [:summary :forms])
+                 :content-pin (get-in report [:content-pin :sha256])}
+     :identities identities
+     :census (get-in report [:r8CensusWmTrace :counts])}))
+
+(defn- record-conforms? [boundary {:keys [file-date shape disposition value]}]
+  (let [stored? (some? (:variational-free-energy value))
+        gain? (some? (:selection-gain value))
+        controller? (= :controller-map shape)
+        suffix? (<= boundary file-date)]
+    (and (not= :unexplained-regime shape)
+         (= stored? gain?)
+         (= stored? controller?)
+         (= stored? suffix?)
+         (or (= :insufficient-inputs disposition)
+             (try (finite? (recompute-f value))
+                  (catch Exception _ false))))))
+
+(defn- delta-kind [classified snapshot boundary]
+  (when snapshot
+    (let [current (into {} (map (juxt tick-id :disposition)) classified)
+          pinned (:identities snapshot)
+          missing (vec (remove #(contains? current %) (keys pinned)))
+          reclassified (vec
+                        (keep (fn [[id expected]]
+                                (when-let [actual (get current id)]
+                                  (when (not= expected actual)
+                                    (assoc id :expected expected :actual actual))))
+                              pinned))
+          appended (vec (remove #(contains? pinned (tick-id %)) classified))
+          watermark (get-in snapshot [:watermark :timestamp])
+          conforming-append? (every?
+                              (fn [record]
+                                (let [id (tick-id record)]
+                                  (and (string? (:timestamp id))
+                                       (string? watermark)
+                                       (pos? (compare (:timestamp id) watermark))
+                                       (record-conforms? boundary record))))
+                              appended)
+          kind (cond
+                 (seq reclassified) :reclassification
+                 (seq missing) :unexplained
+                 (and (seq appended) conforming-append?) :append-only-growth
+                 (seq appended) :unexplained
+                 :else :unchanged)]
+      {:kind kind
+       :status kind
+       :watermark (:watermark snapshot)
+       :appended (mapv tick-id appended)
+       :reclassified reclassified
+       :missing-pinned missing})))
+
 (defn- mean [values]
   (when (seq values) (/ (reduce + 0.0 values) (count values))))
 
@@ -180,8 +245,10 @@
      :precisionForms (count usable-records)}))
 
 (defn analyze-corpus
-  ([corpus boundary] (analyze-corpus corpus boundary nil))
-  ([{:keys [files records]} boundary snapshot-expected-census]
+  ([corpus boundary] (analyze-corpus corpus boundary nil nil))
+  ([corpus boundary snapshot-expected-census]
+   (analyze-corpus corpus boundary snapshot-expected-census nil))
+  ([{:keys [files records]} boundary snapshot-expected-census snapshot]
   (let [classified (mapv #(assoc %
                                  :disposition (disposition (:value %))
                                  :shape (free-energy-shape (:value %)))
@@ -251,6 +318,7 @@
         census-delta (into (sorted-map)
                            (for [kind (set (concat (keys recorded-census) (keys census)))]
                              [kind (- (get census kind 0) (get recorded-census kind 0))]))
+        delta-classification (delta-kind classified snapshot boundary)
         checks (cond-> []
                  (and snapshot-expected-census (not= snapshot-expected-census census))
                  (conj {:check :snapshot-census
@@ -280,12 +348,15 @@
       :ticks (into {} (map (fn [[kind xs]] [kind (mapv tick-id xs)]))
                    by-disposition)}
      :recorded-census-delta
-     {:status (if (every? zero? (vals census-delta)) :unchanged :unexplained)
-      :recorded-at "2026-08-30"
-      :recorded recorded-census
+     (merge
+      {:status (if (every? zero? (vals census-delta)) :unchanged :unexplained)
+       :kind (if (every? zero? (vals census-delta)) :unchanged :unexplained)
+       :recorded-at (or (:recorded-at snapshot) "2026-08-30")
+       :recorded (or (:census snapshot) recorded-census)
       :current census
       :delta census-delta
-      :note "Evidence only; live invariant validity is not determined by corpus-size literals."}
+       :note "Evidence only; live invariant validity is not determined by corpus-size literals."}
+      delta-classification)
      :r8EraBoundary
      {:status :fixture-evidence
       :boundary boundary
@@ -330,13 +401,15 @@
 
 (defn lint-paths [{:keys [trace-dir boundary]
                     :or {trace-dir default-trace-dir boundary default-boundary}}]
-  (analyze-corpus (read-corpus trace-dir) boundary))
+  (analyze-corpus (read-corpus trace-dir) boundary nil
+                  (recorded-snapshot default-recorded-report)))
 
 (defn negative-era-corpus [corpus boundary]
   (let [index (first
                (keep-indexed
                 (fn [index {:keys [file-date value]}]
                   (when (and (< file-date boundary)
+                             (= :missing-F-computable (disposition value))
                              (nil? (:variational-free-energy value))
                              (nil? (:selection-gain value))
                              (= :g-map (free-energy-shape value)))
@@ -449,7 +522,8 @@
                       (read-corpus (or (:trace-dir opts) default-trace-dir)) boundary))
           report (try
                    (if negative?
-                     (assoc (analyze-corpus (:corpus mutation) boundary)
+                     (assoc (analyze-corpus (:corpus mutation) boundary nil
+                                            (recorded-snapshot default-recorded-report))
                             :negative-mutation (:target mutation))
                      (lint-paths (assoc opts :boundary boundary)))
                    (catch Exception exception
@@ -472,6 +546,8 @@
         (let [target (:negative-mutation report)
               violations (get-in report [:r8EraBoundary :violations])
               caught? (and target
+                           (= :reclassification
+                              (get-in report [:recorded-census-delta :kind]))
                            (some #{target} (:stored-without-gain violations))
                            (some #{target} (:stored-not-controller violations))
                            (some #{target} (:stored-before-boundary violations)))]

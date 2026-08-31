@@ -74,7 +74,9 @@ bb -cp . checks/r8_f_contract.clj --report /tmp/r8-f-contract.edn
 bb -cp . checks/r8_f_contract.clj --negative --report /tmp/r8-f-contract-negative-unused.edn
 ```
 
-Mutation: select a pre-boundary g-map record with neither stored F nor selection gain, then add stored F.
+Mutation: select a pre-boundary, pinned `:missing-F-computable` g-map record with neither stored F nor
+selection gain, then add stored F. In addition to the era violations, the delta classifier must report
+that exact pinned identity as `:reclassification`, never `:append-only-growth`.
 The checker must identify that exact record under `:stored-without-gain`, `:stored-not-controller`, and
 `:stored-before-boundary`. Observed exits: `1/0`; the current live corpus is independently red at 54 files,
 799 forms, and dispositions `755/39/5` against the recorded `755/32/5`. Negative mode writes no report or
@@ -136,13 +138,16 @@ enforce no undeclared channels, no new failure class, identified failures, and t
 interface. Positive/negative exits were `1/0`; the negative mutation added another missing-channel record.
 
 The live R8 gate is green because its era boundary, shape, disposition partition, and finite-F invariants
-hold; it no longer compares the live census to literal counts. The recorded `755/32/5` census and every
-live census are retained in `:recorded-census-delta` with status `:unexplained`. The dispatch began at
+hold; it no longer compares the live census to literal counts. The recorded `755/32/5` census is pinned
+to its 792-form content digest and last-record timestamp. Each live delta is classified as
+`:append-only-growth`, `:reclassification`, or `:unexplained`; append-only requires every new identity to
+postdate the watermark and satisfy the live invariants. The dispatch began at
 `755/39/5` (the required unexplained +7 finding); during verification the shared corpus grew again to
 800 forms and `755/40/5`, making the same discrepancy +8. This additional drift is exactly why the live
-test asserts that the discrepancy stays loud rather than asserting either moving number. Positive and
-negative exits were `0/0`; the negative mutation still fails the era invariants internally, so a permanent
-green was not introduced.
+test asserts the delta kind rather than either moving number. C44's canonical positive/negative invocations
+are the two `r8_f_contract.clj` commands above; observed exits were `0/0`. The negative mutation is both
+rejected by the era invariants and typed as a pinned-population reclassification, so a permanent green or
+an “everything is append-only” classifier was not introduced.
 
 ## C25 — R17 generator/disposer wiring guard
 

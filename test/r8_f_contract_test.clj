@@ -43,7 +43,7 @@
     (is (= (:census expected) (get-in report [:r8CensusWmTrace :counts])))
     (is (= (:content-pin expected) (get-in report [:content-pin :sha256])))))
 
-(deftest live-r8-gate-enforces-invariants-and-retains-the-unexplained-delta
+(deftest live-r8-gate-enforces-invariants-and-types-append-growth
   (let [report (r8/lint-paths {})
         summary (:summary report)
         delta (:recorded-census-delta report)]
@@ -58,8 +58,27 @@
            (get-in report [:r8EraBoundary :conjunct-violations])))
     (is (zero? (get-in report [:r8EraBoundary :shape-counts :unknown])))
     (is (zero? (get-in report [:F :missing-F-computable :non-finite])))
-    (is (= :unexplained (:status delta)))
+    (is (= :append-only-growth (:kind delta)))
+    (is (= :append-only-growth (:status delta)))
+    (is (= 792 (get-in delta [:watermark :forms])))
+    (is (= (reduce + (vals (:delta delta)))
+           (count (:appended delta))))
+    (is (empty? (:reclassified delta)))
     (is (pos? (get-in delta [:delta :stored-F])))))
+
+(deftest pinned-record-reclassification-is-never-append-growth
+  (let [corpus (r8/read-corpus r8/default-trace-dir)
+        mutation (r8/negative-era-corpus corpus r8/default-boundary)
+        report (r8/analyze-corpus
+                (:corpus mutation) r8/default-boundary nil
+                (r8/recorded-snapshot r8/default-recorded-report))
+        delta (:recorded-census-delta report)]
+    (is (= :reclassification (:kind delta)))
+    (is (not= :append-only-growth (:kind delta)))
+    (is (= 1 (count (:reclassified delta))))
+    (is (= (:target mutation)
+           (select-keys (first (:reclassified delta))
+                        [:file :form :timestamp])))))
 
 (deftest disposition-follows-all-three-lean-option-arms
   (let [{:keys [errors precision]} (channel 2.0 3.0)]
