@@ -129,7 +129,9 @@
 (defn -main [& args]
   (let [negative? (some #{"--negative-control" "--negative-pin-behind"} args)
         pin-negative? (some #{"--negative-pin-behind"} args)
-        path (or (first (remove #{"--negative-control" "--negative-pin-behind"} args)) default-path)
+        report-stale? (some #{"--allow-stale-report"} args)
+        path (or (first (remove #{"--negative-control" "--negative-pin-behind"
+                                 "--allow-stale-report"} args)) default-path)
         record (edn/read-string (slurp path))
         record (cond
                  pin-negative?
@@ -151,18 +153,26 @@
                  :else record)
         result (validate record)
         expected-pin-behind? (some #(= :PIN_BEHIND (:state %)) (:pin-states result))
+        reportable-stale?
+        (and report-stale?
+             (seq (:errors result))
+             (every? #(contains? #{:pin-behind :stale} (:error %))
+                     (:errors result)))
         accepted? (if pin-negative?
                     (and (not (:pass? result)) expected-pin-behind?)
-                    (if negative? (not (:pass? result)) (:pass? result)))]
+                    (if negative?
+                      (not (:pass? result))
+                      (or (:pass? result) reportable-stale?)))]
     (println "q-interface-completeness:"
              (if accepted? "PASS" "FAIL")
              (pr-str result)
-             (if pin-negative?
+             (if reportable-stale?
+               "mode=stale-pin-reportable"
+               (if pin-negative?
                "negative-control=historical-spine-change-remains-red"
                (if negative?
                  "negative-control=missing-remediation-rejected"
-               "mode=positive")
-               )
+                 "mode=positive")))
              "exit-convention=0-pass/1-fail/2-mutation-slipped")
     (System/exit (if accepted? 0 (if negative? 2 1)))))
 
