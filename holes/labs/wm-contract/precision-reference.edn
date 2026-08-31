@@ -1,0 +1,6 @@
+{:schema :precision-reference/v1
+ :basis "sec-glossary.tex:17,19 — precision multiplicatively weights squared prediction error"
+ :kind :hand-derived-from-formula
+ :channel-count 14
+ :weighted {:precision 2 :prediction-error 1 :expected-variational-F 1}
+ :swapped {:precision 1 :prediction-error 2 :expected-variational-F 2}}
