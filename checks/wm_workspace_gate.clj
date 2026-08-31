@@ -52,6 +52,7 @@
     "ambiguity_witness.clj" "belief_state_witness.clj" "channel_witness.clj" "observation_kernel_witness.clj"
     "predictive_outcome_risk_witness.clj"
     "policy_prior_kernel_witness.clj"
+    "q_interface_completeness_check.clj"
     "variational_free_energy_witness.clj"
     "absent_is_loud_lint.clj" "belief_update_check.clj"
     "belief_variance_inputs.clj" "cascade_diff_witness.clj" "certify_live_run.clj" "closed_record_pointer_check.clj" "contract_lint.clj"
@@ -105,6 +106,8 @@
    {:name :observation-kernel :argv ["bb" "checks/observation_kernel_witness.clj"]}
    {:name :predictive-outcome-risk :argv ["bb" "checks/predictive_outcome_risk_witness.clj"]}
    {:name :policy-prior-kernel :argv ["bb" "checks/policy_prior_kernel_witness.clj"]}
+   {:name :q-interface-completeness
+    :argv ["bb" "checks/q_interface_completeness_check.clj"]}
    {:name :variational-free-energy :argv ["bb" "checks/variational_free_energy_witness.clj"]}
    {:name :control-vocabulary :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "control"]}
    {:name :aliveness :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "aliveness"]}
@@ -155,6 +158,8 @@
     :argv ["bb" "checks/predictive_outcome_risk_witness.clj" "--negative-control"]}
    {:name :c208-state-conditioned-policy-prior
     :argv ["bb" "checks/policy_prior_kernel_witness.clj" "--negative-control"]}
+   {:name :q-interface-missing-remediation
+    :argv ["bb" "checks/q_interface_completeness_check.clj" "--negative-control"]}
    {:name :c212-perturbed-variational-f
     :argv ["bb" "checks/variational_free_energy_witness.clj" "--negative-value"]}
    {:name :c212-expected-f-as-variational-f

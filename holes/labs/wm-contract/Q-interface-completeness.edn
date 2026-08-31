@@ -1,0 +1,135 @@
+{:schema :wm/q-interface-completeness-v1
+ :as-of "2026-08-31"
+ :owner :wm-verbs
+ :subject :predictive-outcome-Q
+ :notation {:primary "Q(o|pi)"
+            :not-the-same-as ["Q(pi), the policy posterior/softmax"
+                              "Q(s), the variational state posterior"
+                              "Beta/Dirichlet structure-learning posteriors"]}
+ :claim
+ "Lean defines the finite-support carrier and Q-consuming formulas, but the War Machine has no Lean construction of its predictive outcome kernel from belief/model/policy inputs and no concrete policy-grain binding. Runtime action-grain Gaussian prediction is a scoped proxy, not that missing construction."
+ :source-pins
+ [{:id :lean-spine
+   :path "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean"
+   :sha256 "b38591cc90213594b5ba3379ba000f2762a95c95a3818e10f778e99d1c2271ce"}
+  {:id :lean-risk-fixture
+   :path "/home/joe/code/mathlib4/DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean"
+   :sha256 "9c29f229f7eb01fb68de72f29b244858140c09f1ed5a1fd25ef9e91ab4520de0"}
+  {:id :runtime-forward-model
+   :path "/home/joe/code/futon2/src/futon2/aif/forward_model.clj"
+   :sha256 "14caaf3db19478267d5473ba48a565328d72d118289d4241b2d57c2177895227"}
+  {:id :runtime-efe
+   :path "/home/joe/code/futon2/src/futon2/aif/efe.clj"
+   :sha256 "bab60d47054f2b555afdc276c37d3f29b1ca497476318e41502f920d0b93ea84"}
+  {:id :runtime-core-efe
+   :path "/home/joe/code/futon2/src/futon2/aif/core_efe.clj"
+   :sha256 "519c8983328d17e5a3adacb405f9b4d7851e170340d693959c2c5854bdbbe6e3"}
+  {:id :runtime-eig
+   :path "/home/joe/code/futon2/src/futon2/aif/epistemic_value.clj"
+   :sha256 "0df62893adfdce64189c99724a4e1fb80ff0d0a07f84c74a5acf780cc370b690"}
+  {:id :runtime-selection
+   :path "/home/joe/code/futon2/src/futon2/aif/policy.clj"
+   :sha256 "35235b9d84bcd8bc471725064f06f4381300de6d7e9644cbe40d83de591c4dc6"}
+  {:id :topology
+   :path "/home/joe/code/p4ng/empirics-futon/control-map-edges.edn"
+   :sha256 "64485bb0165fe4abdaf799b59853c05efb0e09fbaf293bf9511d91e5098f509d"}]
+ :definitions
+ [{:id :lean/Q-carrier
+   :status :implemented-generic
+   :symbol "PredictiveOutcomeKernel"
+   :meaning "PolicyIndex -> finite normalized distribution over heterogeneous Outcome Obs"
+   :limitation "A type and laws, not the War Machine's kernel instance."}
+  {:id :lean/Q-machine-construction
+   :status :missing
+   :required-signature "GenerativeModel + BeliefState + policy/cascade -> PredictiveOutcomeKernel"
+   :blocker "No Lean definition composes transition and observation kernels over a concrete policy/cascade to construct Q(o|pi)."
+   :acceptance "A non-toy machine instance is constructed from pinned model inputs and proves row normalization."
+   :falsifier "The constructor cannot elaborate for a declared machine policy, or its row mass differs from one."}
+  {:id :lean/Q-risk-consumer
+   :status :implemented-parametric
+   :symbols ["predictiveOutcomeRisk" "expectedFreeEnergy"]
+   :limitation "Both consume a caller-supplied Q; neither establishes where the machine obtains it."}
+  {:id :lean/Q-eig-consumer
+   :status :implemented-parametric-unwired
+   :symbol "expectedInformationGain"
+   :limitation "Canonical EIG consumes Q but no machine Q is bound to it."}
+  {:id :lean/Q-reference-fixture
+   :status :toy-only
+   :symbol "PredictiveOutcomeRiskWitness.predictive"
+   :limitation "One policy and a hand-constructed point mass prove KL arithmetic, not model construction or topology."}
+  {:id :runtime/Q-action-proxy
+   :status :implemented-scoped
+   :symbols ["forward-model/predict" "efe/compute-efe" "core-efe/g-efe"]
+   :meaning "Per-action, per-channel Gaussian means/variances feed risk and ambiguity."
+   :limitation "Action grain, hand-scoped channel model; not a distribution over declared policy/cascade outcomes and not bound to Lean's machine Q."}
+  {:id :runtime/Q-policy
+   :status :distinct-object
+   :symbol "policy/select-action"
+   :meaning "Softmax/selection distribution Q(pi)."
+   :limitation "Must not be offered as Q(o|pi). It is downstream of G, which itself needs Q(o|pi)."}]
+ :interfaces
+ [{:id :Q/in-belief
+   :edge [:R1 :R4]
+   :role :producer-input
+   :payload "belief state"
+   :runtime :wired
+   :lean :carrier-only
+   :effect :underpowered
+   :blocker "No Lean composition maps the belief through transition/observation kernels into machine Q."
+   :next-action "Define the machine-Q constructor input and normalization obligation."}
+  {:id :Q/in-candidates
+   :edge [:R6 :R4]
+   :role :producer-input
+   :payload "candidate action"
+   :runtime :wired-action-grain
+   :lean :unbound
+   :effect :underpowered
+   :blocker "The live candidate is an action; canonical Q is conditioned on a declared policy/cascade."
+   :next-action "Name the policy carrier and its action/cascade projection before binding Q."}
+  {:id :Q/in-policy-depth
+   :edge [:R13 :R4]
+   :role :missing-producer-input
+   :payload "constructed temporal policy/cascade"
+   :runtime :absent
+   :lean :absent
+   :effect :missing-wire
+   :blocker "The control map has no R13-to-R4 route; the forward model never receives the constructed cascade."
+   :next-action "Pair R13 and R4 to specify the policy/cascade prediction delivery."}
+  {:id :Q/producer-to-risk
+   :edge [:R4 :R5]
+   :role :primary-Q-delivery
+   :payload "Q(o|pi)"
+   :runtime :proxy-only
+   :lean :parameter-only
+   :effect :underpowered
+   :blocker "R4 emits action-conditioned Gaussian channel predictions; Lean R5 accepts an arbitrary kernel, with no equality/binding between them."
+   :next-action "Specify a typed delivery with outcome domain, policy grain, normalization receipt, and source-model pin."}
+  {:id :Q/risk-to-ranking
+   :edge [:R5 :R6]
+   :role :downstream-consumer
+   :payload "G core and controller score"
+   :runtime :wired
+   :lean :formula-only
+   :effect :underpowered
+   :blocker "Ranking runs, but its canonical interpretation is only as strong as the unbound Q proxy upstream."
+   :next-action "Retain the runtime result as scoped action-grain evidence; do not label it policy-grain G until Q is bound."}
+  {:id :Q/to-EIG
+   :edge nil
+   :role :unmapped-consumer
+   :payload "Q(o|pi) into expected information gain"
+   :runtime :function-exists-unwired
+   :lean :parameter-only
+   :effect :missing-wire
+   :blocker "Neither the control map nor runtime binds the predictive outcome distribution to canonical EIG."
+   :next-action "Add an edge only after a machine Q producer exists; posterior spread remains outside EIG."}]
+ :work-order
+ [{:order 1 :unit :name-policy-and-outcome-domain
+   :acceptance "One concrete policy/cascade and enumerable outcome space are declared; absences are typed."}
+  {:order 2 :unit :construct-machine-Q-in-Lean
+   :acceptance "Transition plus observation composition produces a normalized PredictiveOutcomeKernel for that policy."}
+  {:order 3 :unit :specify-R13-R4-and-R4-R5
+   :acceptance "Both sides expose typed ports, normalization receipt, source pins, and executable falsifiers."}
+  {:order 4 :unit :bind-risk-and-EIG
+   :acceptance "The same constructed Q feeds risk and EIG fixtures; toy point masses are no longer the only instances."}
+  {:order 5 :unit :reclassify-downstream
+   :acceptance "R5/R6 claims state their proven grain; no node is called canonical-policy-complete merely because action-grain scoring runs."}]}
