@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C235-lifecycle-root-cause, :dispatched-at "2026-08-31T23:18:45Z", :job-id "invoke-1788218320096-6173-51d020c9", :expected-by "2026-09-01T00:03:45Z"}
   {:lane :wm-evidence
-   :holding :C234-cascade-drift, :dispatched-at "2026-08-31T23:15:07Z", :job-id "invoke-1788218098950-6170-efd2009f", :expected-by "2026-09-01T00:00:07Z"}]}
+   :holding :C237-q-pin-coupling, :dispatched-at "2026-08-31T23:21:11Z", :job-id "invoke-1788218467400-6180-d7e73d66", :expected-by "2026-09-01T00:06:11Z"}]}
