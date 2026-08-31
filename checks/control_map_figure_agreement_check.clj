@@ -129,7 +129,7 @@
     (if (empty? xs)
       opts
       (let [[arg & more] xs]
-        (if (= "--negative-control" arg)
+        (if (or (= "--negative-control" arg) (= "--negative" arg))
           (recur (assoc opts :negative-control true) more)
           (if-let [value (first more)]
             (recur (assoc opts (keyword (subs arg 2)) value) (rest more))
@@ -158,10 +158,23 @@
                       :data (ex-data e)}]}))]
     (doseq [failure (:failures report)]
       (binding [*out* *err*] (println (pr-str failure))))
-    (println (str "control-map-figure-agreement: "
-                  (if (:pass? report) "PASS" "FAIL")
-                  " exit-convention=0-pass/1-fail counts=" (pr-str (:counts report))))
-    (System/exit (if (:pass? report) 0 1))))
+    ;; C16 convention (futon2 addeb05): 0 = pass, 1 = ordinary failure,
+    ;; 2 = mutation slipped through. In --negative mode the CONTROL is what is
+    ;; being scored, so a rejected mutation is a PASS of the control (0) and a
+    ;; mutation that survives is the serious case (2).
+    (if (:negative-control opts)
+      (let [control-passed? (not (:pass? report))]
+        (println (str "control-map-figure-agreement: negative-control "
+                      (if control-passed? "PASS (mutation rejected)"
+                          "FAIL (mutation slipped through)")
+                      " exit-convention=0-pass/1-fail/2-mutation-slipped counts="
+                      (pr-str (:counts report))))
+        (System/exit (if control-passed? 0 2)))
+      (do
+        (println (str "control-map-figure-agreement: "
+                      (if (:pass? report) "PASS" "FAIL")
+                      " exit-convention=0-pass/1-fail counts=" (pr-str (:counts report))))
+        (System/exit (if (:pass? report) 0 1))))))
 
 (when (= *file* (System/getProperty "babashka.file"))
   (apply -main *command-line-args*))
