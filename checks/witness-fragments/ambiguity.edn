@@ -1,0 +1,10 @@
+{:witnesses "ambiguity"
+ :check {:repo "futon2"
+         :path "checks/ambiguity_witness.clj"
+         :entrypoint "-main"}
+ :fixture {:repo "futon2"
+           :path "holes/labs/wm-contract/ambiguity-reference.edn"}
+ :run-sha "8ae9f90a536d98664ad040ae0bf89426b1c9f413"
+ :contract-sha "d4056010d5f129ff1da7ce180c6ce8a91a962f6a"
+ :result :passed
+ :recorded-at "2026-08-31T23:59:00Z"}
