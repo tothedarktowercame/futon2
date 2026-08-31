@@ -4,7 +4,7 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C168-foundry-arrows, :dispatched-at "2026-08-31T20:31:39Z", :job-id "invoke-1788208295066-5994-128c9e0a", :expected-by "2026-08-31T21:16:39Z"}
+   :holding :C172-fold, :dispatched-at "2026-08-31T20:45:32Z", :job-id "invoke-1788209128644-6006-cd62b4bb", :expected-by "2026-08-31T21:30:32Z"}
   {:lane :wm-verbs
    :holding :C167-channel-priorities-npe, :dispatched-at "2026-08-31T20:30:30Z", :job-id "invoke-1788208226292-5991-e07f0a00", :expected-by "2026-08-31T21:15:30Z"}
   {:lane :wm-organization
