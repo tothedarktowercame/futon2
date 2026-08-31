@@ -8,6 +8,6 @@
   {:lane :wm-verbs
    :holding :C167-channel-priorities-npe, :dispatched-at "2026-08-31T20:30:30Z", :job-id "invoke-1788208226292-5991-e07f0a00", :expected-by "2026-08-31T21:15:30Z"}
   {:lane :wm-organization
-   :holding :C162-gate-timing, :dispatched-at "2026-08-31T20:22:54Z", :job-id "invoke-1788207771180-5981-5f2f00b3", :expected-by "2026-08-31T21:07:54Z"}
+   :holding :C170-retirement-visible, :dispatched-at "2026-08-31T20:43:03Z", :job-id "invoke-1788208978566-6003-62b87a96", :expected-by "2026-08-31T21:28:03Z"}
   {:lane :wm-evidence
    :holding :C169-decision-digest, :dispatched-at "2026-08-31T20:32:59Z", :job-id "invoke-1788208374971-5995-8ed4fbfe", :expected-by "2026-08-31T21:17:59Z"}]}
