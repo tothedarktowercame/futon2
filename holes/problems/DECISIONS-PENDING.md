@@ -147,15 +147,31 @@ does not create a new failure, but the legacy coercion remains live.
 
 ## Census boundary
 
-**Pending now: 10 decisions** — one strategic carrier, one outward binding, one
-hard-guard authority question, and seven observation/belief/ranking migrations.
+### Support-typed shadow as the live selection authority
+
+- **Question:** Should the support-typed scoring path remain shadow-only or
+  replace legacy comparison at the selection boundary?
+- **Unblocks:** live refusal of unequal-support comparisons and retirement of
+  legacy support-blind ranking.
+- **Care:** ranking/selection relevant; it changes which candidates are
+  comparable.
+- **If deferred:** nothing breaks; live selection retains legacy semantics and
+  the support-typed result continues to be emitted as shadow evidence.
+- **Full analysis:**
+  [`C108-support-typed-scoring-shadow.md`](../labs/wm-contract/C108-support-typed-scoring-shadow.md).
+
+**Pending now: 11 decisions** — one strategic carrier, one outward binding, one
+hard-guard authority question, seven observation/belief/ranking migrations,
+and the now-evidence-bearing support-typed shadow switch.
 
 The following were checked and are not counted:
 
 - C130 item 1, the public numeric-vector representation, was decided and its
   unused legacy projection retired by C133/C136.
-- C108's support-typed shadow-to-live switch explicitly waits for post-v18
-  evidence; it is a future decision gate, not presently answerable.
+- C108's support-typed shadow-to-live switch was excluded at C169 because it
+  required post-v18 evidence. C167 has now produced two shadow-bearing records;
+  C171 therefore moves it into the pending population without asserting that
+  two diagnostic ticks are an adequate empirical denominator.
 - Older `BUILD-PLAN-0831.md` / `BUILD-status.md` decision lists are historical
   snapshots containing calls since settled or reframed; this digest takes only
   decisions whose current source record still states an unresolved owner call.
