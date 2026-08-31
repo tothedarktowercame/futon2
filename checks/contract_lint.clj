@@ -340,6 +340,11 @@
                             (= [1 3] (:temperature %))
                             (= {:lower [1 1] :higher [1 8]} (:unnormalised %))
                             (= {:lower [8 9] :higher [1 9]} (:probabilities %)))
+   "BayesFactorThresholdWitness" #(and (= :bayes-factor-threshold-reference/v1 (:schema %))
+                                         (= [-3 1] (:threshold %))
+                                         (= [-7 2] (:passing-change %))
+                                         (= [-2 1] (:failing-change %))
+                                         (= :model-reduction-free-energy-change (:quantity %)))
    "HaveWantArrowWitness" have-want-arrow-witness?
    "FoldWitness" fold-witness?
    "FoldEscrowRecordWitness" fold-escrow-record-witness?

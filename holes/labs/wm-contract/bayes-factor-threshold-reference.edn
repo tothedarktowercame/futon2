@@ -1,0 +1,8 @@
+{:schema :bayes-factor-threshold-reference/v1
+ :basis "sec-glossary.tex:60 — a BMR reduction passes exactly when delta-F <= -3"
+ :kind :hand-derived-from-threshold
+ :threshold [-3 1]
+ :passing-change [-7 2]
+ :failing-change [-2 1]
+ :quantity :model-reduction-free-energy-change
+ :excluded-quantity :variational-free-energy}
