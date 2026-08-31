@@ -361,6 +361,44 @@
   [record]
   (:wm-version record))
 
+(def trace-evidence-fields
+  "Evidence fields added by the rapid v15-v20 trace sequence. Paths name the
+   persisted location; `:introduced` is the first contract that requires it."
+  {:goal-outcome-replay-inputs {:path [:ranked-actions 0 :goal-outcome-replay-inputs]
+                                :introduced 15}
+   :preference-stack {:path [:preference-stack] :introduced 16}
+   :observation-envelope {:path [:observation-envelope] :introduced 17}
+   :support-typed-scoring-shadow {:path [:support-typed-scoring-shadow]
+                                  :introduced 18}
+   :avoidance-by-channel {:path [:free-energy :avoidance-by-channel]
+                          :introduced 19}
+   :producer-contract {:path [:producer-contract] :introduced 20}})
+
+(defn trace-field-evidence
+  "Read one versioned evidence field without turning version skew into nil or
+   a numeric/container default. Missing pre-contract fields are typed legacy
+   absence; a field required by the record's declared version is malformed."
+  [record field]
+  (let [{:keys [path introduced]} (get trace-evidence-fields field)
+        version (get-in record [:wm-version :trace-schema-version])
+        missing (Object.)
+        value (when path (get-in record path missing))]
+    (cond
+      (nil? path)
+      {:status :absent :reason :unknown-field-contract :field field}
+
+      (not (identical? missing value))
+      {:status :present :value value :record-schema-version (or version :unversioned)}
+
+      (or (nil? version) (< version introduced))
+      {:status :absent :reason :predates-field :field field
+       :introduced-version introduced
+       :record-schema-version (or version :unversioned)}
+
+      :else
+      {:status :absent :reason :malformed :field field
+       :introduced-version introduced :record-schema-version version})))
+
 (defn trace-record
   "Pure: construct a v1 trace record from a `judge`-style output map.
    Accepts a map carrying at minimum `:belief`, `:observation`,

@@ -64,6 +64,7 @@
     "r17_generator_disposer_check.clj" "r19_stack_witness.clj"
     "r2_channel_contract.clj" "r2_pinned_snapshot_witness.clj"
     "r8_f_contract.clj" "r8_pinned_snapshot_witness.clj"
+    "trace_schema_compatibility.clj"
     "r9_independence.clj" "r9_proof_receipt_check.clj"
     "wm_operational_certificate.clj" "wm_route_conformance.clj"
     "wm_runs_once_witness.clj" "wm_workspace_gate.clj"})

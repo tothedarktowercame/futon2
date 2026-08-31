@@ -401,3 +401,24 @@
           "present-only, so bare judge calls and old records are unchanged")
       (is (nil? (trace/wm-version-of r))
           "the accessor answers nil, not a throw, for pre-B-0a records"))))
+
+(deftest older-trace-fields-have-typed-version-skew-absence-test
+  (let [v14 {:wm-version {:trace-schema-version 14}
+             :ranked-actions [{}]}
+        unversioned {:ranked-actions [{}]}]
+    (doseq [record [v14 unversioned]
+            field (keys trace/trace-evidence-fields)]
+      (is (= :predates-field
+             (:reason (trace/trace-field-evidence record field)))
+          (str field " must be legacy absence, never a default")))
+    (is (= {:status :present :value 0.0 :record-schema-version 17}
+           (trace/trace-field-evidence
+            {:wm-version {:trace-schema-version 17}
+             :observation-envelope 0.0}
+            :observation-envelope))
+        "an explicit zero remains present")
+    (is (= :malformed
+           (:reason (trace/trace-field-evidence
+                     {:wm-version {:trace-schema-version 20}}
+                     :observation-envelope)))
+        "a current contract cannot enter the permissive legacy arm")))
