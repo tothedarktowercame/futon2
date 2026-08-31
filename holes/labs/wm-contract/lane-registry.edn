@@ -6,7 +6,7 @@
  [{:lane :wm-nouns
    :holding :C188-bind-seven, :dispatched-at "2026-08-31T21:27:05Z", :job-id "invoke-1788211621378-6046-b16f1e91", :expected-by "2026-08-31T22:12:05Z"}
   {:lane :wm-verbs
-   :holding :C187-live-selection-no-act, :dispatched-at "2026-08-31T21:26:02Z", :job-id "invoke-1788211558860-6045-9ef7f1d1", :expected-by "2026-08-31T22:11:02Z"}
+   :holding :C190-run-observability, :dispatched-at "2026-08-31T21:32:45Z", :job-id "invoke-1788211961993-6052-0e92c884", :expected-by "2026-08-31T22:17:45Z"}
   {:lane :wm-organization
    :holding :C189-run-readiness, :dispatched-at "2026-08-31T21:30:22Z", :job-id "invoke-1788211818842-6051-56e5c770", :expected-by "2026-08-31T22:15:22Z"}
   {:lane :wm-evidence
