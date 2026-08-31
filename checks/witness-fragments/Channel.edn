@@ -2,6 +2,6 @@
  :check {:repo "futon2" :path "checks/channel_witness.clj" :entrypoint "-main"}
  :fixture {:repo "futon2" :path "holes/labs/wm-contract/channel-vocabulary-reference.edn"}
  :run-sha "38695fceb78b1888c90a44206118e19f44c959bd"
- :contract-sha "0c0f2876a55c528629a43103df3d4c38e36472f8"
+ :contract-sha "24634504e8dd97caf8894916d62e99fb1116c030"
  :result :passed
  :recorded-at "2026-08-31T23:59:00Z"}
