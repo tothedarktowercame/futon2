@@ -11,8 +11,8 @@
  :freshness :pinned-git-v1,
  :live-invariant {:check "checks/r9_independence.clj" :evidence :emitted-by-check},
  :run-sha "732f4d748f08154457d93916d96ab0be0b7f760c",
- :contract-sha "1b09974aed1ce66dad0b728a6acc64c7b864b31e",
+ :contract-sha "187ff33bfd3e9d6e518fe241bc1029b48996cdfd",
  :result :passed,
  :recorded-at "2026-08-30T16:45:00Z",
  :note
- "R9-D2 (codex-8, 732f4d7): R9-D2-report.lean elaborates with 0 errors / 0 sorries — the four holes discharged by decide over the transcribed VerdictTables; bound by claude-15 at the owner gate"}
+ "C99: Holes.r9WmVerdictsSound proves the source wmVerdictsDeclared directly. The former R9-D2 proof covered only a generated sibling. --negative-sound changes an inside producer to independent and is rejected."}

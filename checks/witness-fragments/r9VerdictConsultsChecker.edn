@@ -7,9 +7,9 @@
  :freshness :pinned-git-v1
  :live-invariant {:check "checks/r9_proof_receipt_check.clj"
                   :evidence :lean-elaboration-and-axiom-output}
- :run-sha "76b772e4cdb0868ca06b590f5f1e8a0e572ad21a"
- :contract-sha "535979ae83ec35839c76ab50274580784c6c68a7"
+ :run-sha "e68b1b2c19970535948a224d3acdff8938367c64"
+ :contract-sha "187ff33bfd3e9d6e518fe241bc1029b48996cdfd"
  :result :passed
  :recorded-at "2026-08-31T17:08:57Z"
  :axioms "DarkTower.WarMachine.Holes.R9D2.verdictConsultsChecker: [propext]; no sorryAx"
- :note "C87: independently re-elaborates the exact content-pinned R9-D2 proof source and compares #print axioms output. The EDN is an inspectable receipt, not a replacement proof. Absent and tampered receipt controls are rejected."}
+ :note "C99: re-elaborates and inspects axioms of the exact source theorem DarkTower.WarMachine.Holes.r9VerdictConsultsChecker. Absent and tampered receipt controls are rejected."}

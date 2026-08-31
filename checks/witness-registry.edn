@@ -11,7 +11,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/generative-model-reference.edn"},
   :run-sha "7b31da1fe248a05b35940e9a68544b4ffbef36a7",
-  :contract-sha "535979ae83ec35839c76ab50274580784c6c68a7",
+  :contract-sha "187ff33bfd3e9d6e518fe241bc1029b48996cdfd",
   :result :passed,
   :recorded-at "2026-09-01T00:20:00Z"}
  {:witnesses "expectedFreeEnergy",
@@ -23,7 +23,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/expected-free-energy-reference.edn"},
   :run-sha "58d667284a63c69c0027c9bf204e9bc0eac098b9",
-  :contract-sha "535979ae83ec35839c76ab50274580784c6c68a7",
+  :contract-sha "187ff33bfd3e9d6e518fe241bc1029b48996cdfd",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
  {:witnesses "expectedInformationGain",
@@ -36,7 +36,7 @@
    :path
    "holes/labs/wm-contract/expected-information-gain-reference.edn"},
   :run-sha "c99ffdbc13e9b114dbcdca7451651e568588a947",
-  :contract-sha "535979ae83ec35839c76ab50274580784c6c68a7",
+  :contract-sha "187ff33bfd3e9d6e518fe241bc1029b48996cdfd",
   :result :passed,
   :recorded-at "2026-09-01T00:10:00Z"}
  {:witnesses
@@ -45,7 +45,7 @@
    "findF3NonSelfCertifying"
    "findF4Falsifiable"],
   :freshness :pinned-git-v1,
-  :contract-sha "535979ae83ec35839c76ab50274580784c6c68a7",
+  :contract-sha "187ff33bfd3e9d6e518fe241bc1029b48996cdfd",
   :run-sha "594127059d6a31c5b21f5d34ebfac5b14b1ad993",
   :check
   {:repo "futon3",
@@ -69,7 +69,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/log-multivariate-beta-reference.edn"},
   :run-sha "720af918c430415bf07f4eba29ec73d49b343a10",
-  :contract-sha "535979ae83ec35839c76ab50274580784c6c68a7",
+  :contract-sha "187ff33bfd3e9d6e518fe241bc1029b48996cdfd",
   :result :passed,
   :recorded-at "2026-08-31T23:50:00Z"}
  {:witnesses "nonDegenerateAblationLaw",
@@ -81,7 +81,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/ablation-exact-dyadic.edn"},
   :run-sha "f54d502acb131f74da40b430a726792a4002dae8",
-  :contract-sha "535979ae83ec35839c76ab50274580784c6c68a7",
+  :contract-sha "187ff33bfd3e9d6e518fe241bc1029b48996cdfd",
   :result :passed,
   :recorded-at "2026-08-31T17:05:00Z",
   :note
@@ -99,7 +99,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/cascade-diff-reference.edn"},
   :run-sha "ecf819234cc50afbdfccffb5838b628018584f76",
-  :contract-sha "535979ae83ec35839c76ab50274580784c6c68a7",
+  :contract-sha "187ff33bfd3e9d6e518fe241bc1029b48996cdfd",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z",
   :note
@@ -126,7 +126,7 @@
    :path "holes/labs/wm-contract/PreferenceStackWitness.edn"}}
  {:witnesses ["r2ContractCensusWmTrace" "wmTraceR2"],
   :freshness :pinned-git-v1,
-  :contract-sha "535979ae83ec35839c76ab50274580784c6c68a7",
+  :contract-sha "187ff33bfd3e9d6e518fe241bc1029b48996cdfd",
   :run-sha "de68356cab018b014a84a3af26ddc831c5c30557",
   :check
   {:repo "futon2",
@@ -163,8 +163,8 @@
   {:repo "futon2", :path "holes/labs/wm-contract/R8-D3-report.edn"}}
  {:witnesses "r9VerdictConsultsChecker",
   :freshness :pinned-git-v1,
-  :contract-sha "535979ae83ec35839c76ab50274580784c6c68a7",
-  :run-sha "76b772e4cdb0868ca06b590f5f1e8a0e572ad21a",
+  :contract-sha "187ff33bfd3e9d6e518fe241bc1029b48996cdfd",
+  :run-sha "e68b1b2c19970535948a224d3acdff8938367c64",
   :check
   {:repo "futon2",
    :path "checks/r9_proof_receipt_check.clj",
@@ -172,7 +172,7 @@
   :axioms
   "DarkTower.WarMachine.Holes.R9D2.verdictConsultsChecker: [propext]; no sorryAx",
   :note
-  "C87: independently re-elaborates the exact content-pinned R9-D2 proof source and compares #print axioms output. The EDN is an inspectable receipt, not a replacement proof. Absent and tampered receipt controls are rejected.",
+  "C99: re-elaborates and inspects axioms of the exact source theorem DarkTower.WarMachine.Holes.r9VerdictConsultsChecker. Absent and tampered receipt controls are rejected.",
   :recorded-at "2026-08-31T17:08:57Z",
   :live-invariant
   {:check "checks/r9_proof_receipt_check.clj",
@@ -185,14 +185,14 @@
  {:witnesses
   ["r9WmVerdictsSound" "r9WmPerRowDeclarations" "r9TwoRunCensus"],
   :freshness :pinned-git-v1,
-  :contract-sha "1b09974aed1ce66dad0b728a6acc64c7b864b31e",
+  :contract-sha "187ff33bfd3e9d6e518fe241bc1029b48996cdfd",
   :run-sha "732f4d748f08154457d93916d96ab0be0b7f760c",
   :check
   {:repo "futon2",
    :path "checks/r9_independence.clj",
    :entrypoint "-main"},
   :note
-  "R9-D2 (codex-8, 732f4d7): R9-D2-report.lean elaborates with 0 errors / 0 sorries — the four holes discharged by decide over the transcribed VerdictTables; bound by claude-15 at the owner gate",
+  "C99: Holes.r9WmVerdictsSound proves the source wmVerdictsDeclared directly. The former R9-D2 proof covered only a generated sibling. --negative-sound changes an inside producer to independent and is rejected.",
   :recorded-at "2026-08-30T16:45:00Z",
   :live-invariant
   {:check "checks/r9_independence.clj", :evidence :emitted-by-check},
@@ -247,7 +247,7 @@
   :fixture
   {:repo "futon2", :path "holes/labs/wm-contract/R9-D2-report.edn"},
   :run-sha "732f4d748f08154457d93916d96ab0be0b7f760c",
-  :contract-sha "535979ae83ec35839c76ab50274580784c6c68a7",
+  :contract-sha "187ff33bfd3e9d6e518fe241bc1029b48996cdfd",
   :result :passed,
   :recorded-at "2026-08-31T23:59:30Z",
   :note
