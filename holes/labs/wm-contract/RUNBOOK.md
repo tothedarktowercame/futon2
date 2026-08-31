@@ -18,16 +18,21 @@ futon2, mathlib4, p4ng, and futon3; these are provenance, not stale equality
 assertions.
 
 Before an operator run, use `make run-readiness`. Every precondition is printed
-by name. `NOT-READY` means repair the named failures and rerun; do not infer
-readiness from the summary alone. The reviewer is selected live rather than
+by name. `NOT-READY (waiting)` means every blocker is `SELF-CLEARING`: wait for
+the in-flight delivery, bounded job, or capacity pressure to settle and rerun.
+`NOT-READY (needs-you)` means at least one `OPERATOR-ACTION` blocker is present;
+it stays loud even when several waiting blockers are also present. The reviewer
+is selected live rather than
 using the absent `codex-7` default. Only run the printed
 `clojure -M:wm-full-loop once --reviewer ...` command after the preflight says
 `READY`.
 
-Readiness blockers have two kinds. `UNAVAILABLE` means a required live resource
+Readiness reports two independent axes. Evidence kind `UNAVAILABLE` means a required live resource
 cannot be used now (reviewer, roster, or bounded admission). `UNVERIFIED` means
 the machine might run, but the exact code/evidence it would use has not passed
-the required check. Both block; they call for different action.
+the required check. Resolution kind says `SELF-CLEARING` or `OPERATOR-ACTION`.
+The axes cannot be collapsed: bounded capacity and reviewer absence are both
+unavailable, but capacity drains while an absent reviewer needs a selection.
 
 In particular, the last code-affecting action before the operator run must be a
 **bounded** futon2 suite run. An ordinary `bg.py launch "make ci"` can show an

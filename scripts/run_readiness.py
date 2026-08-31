@@ -18,9 +18,20 @@ def run(argv, cwd=ROOT):
     return subprocess.run(argv, cwd=cwd, text=True, capture_output=True)
 
 
-def result(name, passed, blocker_kind, **evidence):
+def result(name, passed, blocker_kind, resolution_kind, **evidence):
     return {"name": name, "pass": bool(passed),
-            "blocker-kind": None if passed else blocker_kind, "evidence": evidence}
+            "blocker-kind": None if passed else blocker_kind,
+            "resolution-kind": None if passed else resolution_kind,
+            "evidence": evidence}
+
+
+def readiness_instruction(checks):
+    blocked = [item for item in checks if not item["pass"]]
+    if not blocked:
+        return "ready"
+    if any(item.get("resolution-kind") == "operator-action" for item in blocked):
+        return "needs-you"
+    return "waiting"
 
 
 def repository_state(path):
@@ -64,14 +75,14 @@ def latest_suite(records, command, repo):
         equivalent.add("cd /home/joe/code/futon2 && make ci")
     candidates = [r for r in records if r.get("cmd") in equivalent and r.get("receipt")]
     if not candidates:
-        return result(repo + "-suite", False, "unverified",
+        return result(repo + "-suite", False, "unverified", "self-clearing",
                       reason="no-terminal-bounded-receipt", command=command)
     record = max(candidates, key=lambda r: r["receipt"].get("finished-at", ""))
     state = repository_state(ROOT if repo == "futon2" else FUTON3)
     receipt = record["receipt"]
     fresh, freshness_reason = receipt_matches_tree(receipt, state)
     passed = receipt.get("outer-exit") == 0 and receipt.get("verdict") == "pass" and fresh
-    return result(repo + "-suite", passed, "unverified", receipt=record["id"],
+    return result(repo + "-suite", passed, "unverified", "self-clearing", receipt=record["id"],
                   verdict=receipt.get("verdict"), outer_exit=receipt.get("outer-exit"),
                   finished_at=receipt.get("finished-at"), repository=state, fresh=fresh,
                   freshness_reason=freshness_reason,
@@ -104,13 +115,25 @@ def tree_control():
     return 0 if passed else 2
 
 
+def resolution_control():
+    checks = [result("dirty-tree", False, "unverified", "self-clearing"),
+              result("missing-reviewer", False, "unavailable", "operator-action")]
+    instruction = readiness_instruction(checks)
+    passed = instruction == "needs-you"
+    print(json.dumps({"checks": checks, "instruction": instruction}, indent=2, sort_keys=True))
+    print("run-readiness-resolution-control:", "PASS" if passed else "FAIL",
+          "operator action remains loud beside wait blockers",
+          "exit-convention=0-pass/2-control-slipped")
+    return 0 if passed else 2
+
+
 def roster_readiness(negative=False):
     try:
         with urllib.request.urlopen(ROSTER, timeout=3) as response:
             body = json.load(response)
         agents = body.get("agents", {})
     except Exception as error:
-        return result("reviewer-availability", False, "unavailable",
+        return result("reviewer-availability", False, "unavailable", "operator-action",
                       reason="roster-unavailable", error=str(error)), None
     def available(name):
         entry = agents.get(name) or {}
@@ -120,7 +143,7 @@ def roster_readiness(negative=False):
     chosen = next((name for name in preferred if available(name)), None)
     if negative:
         chosen = None
-    return result("reviewer-availability", chosen is not None, "unavailable",
+    return result("reviewer-availability", chosen is not None, "unavailable", "operator-action",
                   roster_reachable=True, default_reviewer=default,
                   default_present=default in agents, default_available=available(default),
                   selected=chosen, candidates={name: available(name) for name in preferred},
@@ -130,6 +153,8 @@ def roster_readiness(negative=False):
 def main():
     if "--tree-control" in sys.argv[1:]:
         return tree_control()
+    if "--resolution-control" in sys.argv[1:]:
+        return resolution_control()
     negative = "--negative-reviewer" in sys.argv[1:]
     checks = []
 
@@ -137,16 +162,16 @@ def main():
     checks.append(reviewer)
 
     gate = run(["bb", "-cp", ".", "checks/wm_workspace_gate.clj"])
-    checks.append(result("workspace-gate", gate.returncode == 0, "unverified", exit=gate.returncode,
+    checks.append(result("workspace-gate", gate.returncode == 0, "unverified", "self-clearing", exit=gate.returncode,
                          summary=next((line for line in gate.stdout.splitlines()
                                        if line.startswith("wm-workspace-gate: SUMMARY")), None)))
 
     authority = run(["bb", "checks/contract_authority_current.clj"])
-    checks.append(result("contract-freshness", authority.returncode == 0, "unverified", exit=authority.returncode,
+    checks.append(result("contract-freshness", authority.returncode == 0, "unverified", "self-clearing", exit=authority.returncode,
                          summary=authority.stdout.strip().splitlines()[-1] if authority.stdout.strip() else None))
 
     schema = run(["clojure", "-M", "-m", "checks.trace-schema-compatibility"])
-    checks.append(result("trace-schema-v20-readback", schema.returncode == 0, "unverified", exit=schema.returncode,
+    checks.append(result("trace-schema-v20-readback", schema.returncode == 0, "unverified", "self-clearing", exit=schema.returncode,
                          summary=schema.stdout.strip().splitlines()[-1] if schema.stdout.strip() else None))
 
     listed = run(["python3", BG, "test-list"])
@@ -164,24 +189,28 @@ def main():
         active = sum((r.get("systemd", {}).get("ActiveState") in ("active", "activating"))
                      for r in records)
         capacity = active < config["admission-max"]
-        checks.append(result("bounded-service-capacity", capacity, "unavailable",
+        checks.append(result("bounded-service-capacity", capacity, "unavailable", "self-clearing",
                              active=active, admission_max=config["admission-max"],
                              tasks_max=config["tasks-max"], slice_tasks_max=config["slice-tasks-max"],
                              configuration_hash=config["configuration-hash"]))
     except (json.JSONDecodeError, KeyError, TypeError):
-        checks.append(result("bounded-service-capacity", False, "unavailable", reason="health-unreadable",
+        checks.append(result("bounded-service-capacity", False, "unavailable", "self-clearing", reason="health-unreadable",
                              exit=health_result.returncode))
 
     dry = run(["make", "-n", "certify-run", "RUN_ID=readiness-probe"])
-    checks.append(result("certify-run-command", dry.returncode == 0, "unverified", exit=dry.returncode,
+    checks.append(result("certify-run-command", dry.returncode == 0, "unverified", "self-clearing", exit=dry.returncode,
                          command="make certify-run RUN_ID=<uuid-from-TickRunRecord>"))
 
     ready = all(item["pass"] for item in checks)
+    instruction = readiness_instruction(checks)
     command = (f"clojure -M:wm-full-loop once --reviewer {chosen}" if chosen else None)
-    report = {"readiness": "READY" if ready else "NOT-READY", "checks": checks,
+    report = {"readiness": "READY" if ready else "NOT-READY", "instruction": instruction,
+              "message": ("run the printed command" if ready else
+                          "operator action required, then re-run" if instruction == "needs-you" else
+                          "wait for in-flight work to settle, then re-run"), "checks": checks,
               "operator-command": command, "side-effects": "none; no tick and no dispatch"}
     print(json.dumps(report, indent=2, sort_keys=True))
-    print("run-readiness:", report["readiness"],
+    print("run-readiness:", report["readiness"], "(" + instruction + ")",
           "exit-convention=0-ready/1-not-ready/2-negative-control-slipped")
     if negative:
         reviewer_failed = not next(c for c in checks if c["name"] == "reviewer-availability")["pass"]
