@@ -70,3 +70,10 @@ vocabulary addition, not five.
 - `clojure -X:test :vars '[futon2.aif.full-loop-runner-test/cancelled-author-closes-distinctly-from-build-failure]'`
   exercises the accepted-and-closed cancellation path.
 - No preregistration file was amended.
+
+## Amendment — 2026-08-31, C211
+
+C206 described the then-current runtime faithfully: a cancelled attempt entered
+the denominator. C211 keeps the dossier in its new semantic stratum but removes
+it from cohort 46's denominator and stopping window. See
+[`C211-cancelled-cohort-denominator.md`](C211-cancelled-cohort-denominator.md).

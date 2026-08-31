@@ -158,6 +158,20 @@
        (sort-by #(.getName %))
        (mapv #(read-edn (.getPath %)))))
 
+(defn- attempt-outcome [attempt-dir]
+  (->> (attempt-events attempt-dir)
+       (filter #(= :closed (:checkpoint/type %)))
+       last
+       :payload
+       :judgment
+       :outcome))
+
+(defn- cohort-attempt-dir? [attempt-dir]
+  ;; Cancellation was introduced after cohort 46's outcome taxonomy was
+  ;; preregistered. Keep its immutable dossier, but do not let it consume the
+  ;; preregistered denominator or stopping window.
+  (not= :cancelled (attempt-outcome attempt-dir)))
+
 (defn- all-events [dir]
   (mapcat attempt-events (attempt-dirs dir)))
 
@@ -241,12 +255,15 @@
          (when (contains? (opened-opportunity-ids dir) opportunity-id)
            (throw (ex-info "duplicate scheduler opportunity"
                            {:opportunity-id opportunity-id})))
-         (let [ordinal (inc (count (attempt-dirs dir)))
+         (let [all-attempt-dirs (attempt-dirs dir)
+               cohort-attempt-count (count (filter cohort-attempt-dir?
+                                                   all-attempt-dirs))
+               ordinal (inc (count all-attempt-dirs))
                target (get-in p [:stopping-rule :target])]
-           (when (> ordinal target)
+           (when (>= cohort-attempt-count target)
              (throw (ex-info "cohort stopping rule reached"
                              {:cohort/error :stopping-rule-reached
-                              :target target :attempted (dec ordinal)})))
+                              :target target :attempted cohort-attempt-count})))
            (let [attempt-id (format-attempt-id
                              (max (next-global-attempt-number data-root)
                                   (inc (count (attempt-dirs dir)))))
@@ -356,7 +373,10 @@
   ([prereg-path data-root]
    (let [p (read-edn prereg-path)
          dir (cohort-dir p data-root)
-         attempts (mapv attempt-summary (attempt-dirs dir))
+         recorded-attempts (mapv attempt-summary (attempt-dirs dir))
+         cancelled-attempts (filterv #(= :cancelled (:outcome %))
+                                     recorded-attempts)
+         attempts (filterv #(not= :cancelled (:outcome %)) recorded-attempts)
          outcomes (frequencies (keep :outcome attempts))]
      {:cohort/id (:cohort/id p)
       :protocol/version (:protocol/version p)
@@ -370,7 +390,14 @@
       :grounded-no-change-count (get outcomes :grounded-no-change 0)
       :artifact-only-count (get outcomes :artifact-only 0)
       :outcomes outcomes
-      :attempts attempts})))
+      :attempts attempts
+      :recorded-attempt-count (count recorded-attempts)
+      :recorded-attempts recorded-attempts
+      :semantic-strata
+      [{:stratum/id :post-preregistration/cancelled
+        :reason :outcome-not-in-preregistered-cohort-taxonomy
+        :attempt-count (count cancelled-attempts)
+        :attempts cancelled-attempts}]})))
 
 (defn write-ledger!
   ([out-path] (write-ledger! default-preregistration default-data-root out-path))
@@ -388,7 +415,7 @@
       (str/replace "\"" "&quot;")))
 
 (defn render-html [value]
-  (let [attempts (:attempts value)
+  (let [attempts (or (:recorded-attempts value) (:attempts value))
         activated (get-in value [:activation :activated-at])]
     (str "<!doctype html><html><head><meta charset=\"utf-8\">"
          "<title>WM full-loop cohort</title>"
@@ -405,6 +432,9 @@
                 (for [[label n] [["attempts" (:attempt-count value)]
                                  ["remaining" (:remaining value)]
                                  ["closed" (:closed-count value)]
+                                 ["outside cohort" (- (or (:recorded-attempt-count value)
+                                                           (:attempt-count value))
+                                                        (:attempt-count value))]
                                  ["grounded change" (:grounded-change-count value)]
                                  ["grounded no-change" (:grounded-no-change-count value)]
                                  ["artifact only" (:artifact-only-count value)]]]

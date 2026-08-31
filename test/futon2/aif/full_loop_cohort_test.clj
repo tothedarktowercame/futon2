@@ -128,6 +128,30 @@
                       :dial-moved? true}}))
     (is (= 1 (:grounded-change-count (cohort/ledger prereg-path root))))))
 
+(deftest cancelled-attempt-is-recorded-outside-preregistered-denominator
+  (let [root (tmp-root)
+        _ (cohort/activate! prereg-path root)
+        cancelled-id (:attempt/id (open! root "clock/cancelled"))]
+    (append-required! root cancelled-id)
+    (cohort/close-attempt!
+     prereg-path root cancelled-id
+     (term {:outcome :cancelled :grounded? false :artifact-only? false
+            :duration-ms 20 :resource-use {:agent-turns 0}}))
+    (let [ledger (cohort/ledger prereg-path root)
+          recorded-count (:recorded-attempt-count ledger)
+          cancelled-stratum (first (:semantic-strata ledger))]
+      (is (= 0 (:attempt-count ledger))
+          "cancelled does not dilute the preregistered denominator")
+      (is (= 40 (:remaining ledger)))
+      (is (= 1 recorded-count)
+          "the immutable attempt dossier remains recorded")
+      (is (= :post-preregistration/cancelled (:stratum/id cancelled-stratum)))
+      (is (= [cancelled-id]
+             (mapv :attempt/id (:attempts cancelled-stratum))))
+      (is (= 2 (:attempt/ordinal (open! root "clock/after-cancellation")))
+          "the next cohort attempt is admitted but retains a unique ordinal")
+      (is (= 1 (:attempt-count (cohort/ledger prereg-path root)))))))
+
 (deftest fresh-ledger-renders-without-legacy-rows
   (let [root (tmp-root)
         value (cohort/ledger prereg-path root)
