@@ -308,3 +308,86 @@ prefix and the honest refusal at its first undefined decision surface.
 The named consumer of this draft is Joe for the semantic ruling, then `P-glossary-mathematics` for witness design.
 The first implementable consumer after the bridges are ruled is an apex evidence processor whose output is taken
 up by `checks/contract_lint.clj`; until then, no generated contract or witness-registry binding is warranted.
+
+## APEX-D3 — source-to-Dirichlet mapping: REFUSED at the modelling decision (2026-08-31)
+
+**Correction accepted.** There are two paths and two different free-energy quantities:
+
+```text
+perceptual:       (observation, mean, Π) → predictionError → variationalFreeEnergy → F
+model reduction:  (A, a′, a, A′) → logMultivariateBeta → deltaFReduction → ΔF
+                                                         bayesFactorThreshold ΔF
+```
+
+No F→ΔF bridge is wanted. The first path measures precision-weighted perceptual surprise. The second compares
+model evidence over Dirichlet concentration parameters and can license a reduction when `ΔF ≤ -3`.
+`deltaFReduction` and `bayesFactorThreshold` state the latter composition, but `logMultivariateBeta` remains a
+hole, so the chain is defined and unwitnessed rather than executable end to end today.
+
+### What the R2 corpus actually supplies
+
+At the fresh basis recorded above, the R2 census supplies 798 classified trace forms:
+
+```clojure
+{:outcomes {:channel-key-set-conforming 796
+            :channel-key-set-mismatch 2}
+ :classification-rule "observed key set equals the fourteen named Channel constructors"
+ :basis {:forms 798 :pin-prefix "db71e095a81e8620"}}
+```
+
+Those are observations. They do **not** uniquely determine any of the four arguments to
+`deltaFReduction (A aPrime a APrime)`.
+
+### The decisions a source-to-counts map would silently make
+
+Even the obvious binary map requires all of the following declarations:
+
+1. **Categorical variable:** whether the Dirichlet row models conformance versus mismatch, each channel's
+   presence, trace-era schema membership, or another partition. The 796/2 tally chooses the first.
+2. **Unit and exchangeability:** whether every trace form is one exchangeable trial. Forms are repeated ticks
+   from one evolving machine and the two mismatches share one date, so this is not supplied by the census.
+3. **Full and reduced models:** which hypothesis is `A` and which proposed reduction is `a′`. “The schema
+   conforms” is a claim, not yet a pair of model structures.
+4. **Priors:** the concentration vector `a` and reduced prior `a′`. Symmetric `[1,1]`, Jeffreys `[0.5,0.5]`,
+   and a reliability-informed prior give different Bayes factors; no standing precept selects one.
+5. **Posterior construction:** whether `A = a + [796,2]`, and how `A′` is derived under the reduced model.
+   `bayesianModelReduction A a′ a` gives one algebraic relation after the priors are chosen; it does not choose
+   them or establish that R2 forms are the observations those counts summarize.
+6. **Role of ε and Π:** R2's perceptual error and precision do not become Dirichlet pseudo-counts by type or by
+   any existing declaration. Weighting the 796/2 outcomes by Π would invent a second mapping.
+
+These are semantic decisions, not implementation details. Choosing them here would let the apex manufacture the
+model whose evidence it then certifies — R18 rebuilt one level higher.
+
+### Refusal
+
+```clojure
+{:apex-delivery :APEX-D3
+ :subject :wm/R2-observation-channel
+ :requested :evidence-source-to-dirichlet-counts
+ :status :refused-pending-ruling
+ :available {:outcome-counts [796 2]
+             :basis "798 forms; db71e095a81e8620…"}
+ :missing-decisions
+ [:categorical-variable
+  :exchangeable-trial-unit
+  :full-model
+  :reduced-model
+  :full-prior
+  :reduced-prior
+  :posterior-update-rule]
+ :blocked-on [:Joe/evidence-model-ruling
+              :Holes/logMultivariateBeta]
+ :not-done [:map-precision-to-pseudocounts
+            :choose-symmetric-prior-by-convenience
+            :treat-796-over-798-as-a-bayes-factor
+            :report-threshold-verdict-with-a-sorry-backed-log-beta]
+ :consumer {:id :Joe
+            :next "rule on the seven modelling fields, or select a theory-defined evidence model that fixes them"}}
+```
+
+No licensing verdict was run. A numerical `ΔF` before those choices would answer a model the commissioner did
+not specify; a Lean result while `logMultivariateBeta` is `sorry` would not witness that hole. Once the model is
+ruled, the mechanical suffix is dispatchable: pin the corpus, derive the four concentration vectors, implement
+and independently check log multivariate beta, compute ΔF, apply `≤ -3`, and deliver the verdict to the named
+contract consumer.
