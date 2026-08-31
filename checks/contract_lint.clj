@@ -94,6 +94,17 @@
                      (string? (:via %)) (string? (:at_ %)))
                (:route x))))
 
+(defn log-multivariate-beta-witness? [x]
+  (let [cases (into {} (map (juxt :concentrations identity) (:cases x)))]
+    (and (= :log-multivariate-beta-reference/v1 (:schema x))
+         (= {:nonempty true :concentrations :strictly-positive-real} (:domain x))
+         (= {:numerator 1 :denominator 1}
+            (get-in cases [[1 1] :normaliser]))
+         (= "0" (get-in cases [[1 1] :expected-log]))
+         (= {:numerator 1 :denominator 2}
+            (get-in cases [[2 1] :normaliser]))
+         (= "-log(2)" (get-in cases [[2 1] :expected-log]))))
+
 (def shape-checks
   {"AblationTable" ablation-table?
    "EraTable" era-table?
@@ -103,7 +114,8 @@
    "IllFormedList" ill-formed-list?
    "List R8TickLit" r8-tick-list?
    "R8DispositionEvidence" r8-disposition-evidence?
-   "TickRunWitness" tick-run-witness?})
+   "TickRunWitness" tick-run-witness?
+   "LogMultivariateBetaWitness" log-multivariate-beta-witness?})
 
 (defn shape-result [evidence fixture read-fixture]
   (if-not (contains? shape-checks evidence)

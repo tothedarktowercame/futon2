@@ -1,0 +1,13 @@
+{:schema :log-multivariate-beta-reference/v1
+ :domain {:nonempty true
+          :concentrations :strictly-positive-real}
+ :derivation {:kind :independent-analytic-identities
+              :facts ["Gamma(1) = 1"
+                      "Gamma(n + 1) = n!"
+                      "B(alpha) = product(Gamma(alpha_i)) / Gamma(sum(alpha_i))"]}
+ :cases [{:concentrations [1 1]
+          :normaliser {:numerator 1 :denominator 1}
+          :expected-log "0"}
+         {:concentrations [2 1]
+          :normaliser {:numerator 1 :denominator 2}
+          :expected-log "-log(2)"}]}
