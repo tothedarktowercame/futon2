@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C132-status-report, :dispatched-at "2026-08-31T19:15:03Z", :job-id "invoke-1788203689169-5908-426f53d9", :expected-by "2026-08-31T20:00:03Z"}
   {:lane :wm-evidence
-   :holding :C133-decision-1-B, :dispatched-at "2026-08-31T19:16:32Z", :job-id "invoke-1788203788266-5909-e10c85c6", :expected-by "2026-08-31T20:01:32Z"}]}
+   :holding :C136-retire-legacy, :dispatched-at "2026-08-31T19:22:10Z", :job-id "invoke-1788204126636-5917-5431a22b", :expected-by "2026-08-31T20:07:10Z"}]}
