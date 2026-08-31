@@ -1,0 +1,10 @@
+{:witnesses "expectedFreeEnergy"
+ :check {:repo "futon2"
+         :path "checks/expected_free_energy_witness.clj"
+         :entrypoint "-main"}
+ :fixture {:repo "futon2"
+           :path "holes/labs/wm-contract/expected-free-energy-reference.edn"}
+ :run-sha "58d667284a63c69c0027c9bf204e9bc0eac098b9"
+ :contract-sha "293f3057200658659c6e63b15a97baa43f2700bb"
+ :result :passed
+ :recorded-at "2026-08-31T23:59:00Z"}
