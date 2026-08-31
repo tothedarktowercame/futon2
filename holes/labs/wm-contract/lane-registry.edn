@@ -4,7 +4,7 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C109-R2-R9-pairs, :dispatched-at "2026-08-31T18:07:11Z", :job-id "invoke-1788199609240-5842-b2680382", :expected-by "2026-08-31T18:52:11Z"}
+   :holding :C112-classification-sweep, :dispatched-at "2026-08-31T18:13:54Z", :job-id "invoke-1788200012837-5851-daf0de0d", :expected-by "2026-08-31T18:58:54Z"}
   {:lane :wm-verbs
    :holding :C110-selector-dryrun, :dispatched-at "2026-08-31T18:09:20Z", :job-id "invoke-1788199738867-5844-53a41b6a", :expected-by "2026-08-31T18:54:20Z"}
   {:lane :wm-organization
