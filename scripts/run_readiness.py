@@ -4,6 +4,7 @@
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 import urllib.request
@@ -11,6 +12,7 @@ import urllib.request
 ROOT = "/home/joe/code/futon2"
 FUTON3 = "/home/joe/code/futon3"
 BG = "/home/joe/code/futon3c/scripts/bg.py"
+PROOF_EVAL = "/home/joe/code/futon3c/scripts/proof-eval.sh"
 ROSTER = "http://localhost:7070/api/alpha/agents"
 
 
@@ -89,6 +91,42 @@ def latest_suite(records, command, repo):
                   tested_tree=receipt.get("repository-basis-start"))
 
 
+def serving_code_observation():
+    form = """(let [v (resolve 'futon3c.wm.code-identity/status)
+  s (when v (v)) i (:identity s)]
+  (str "WMCI|" (if v (name (:availability s)) "unavailable")
+       "|" (or (:git-head i) "") "|" (boolean (:dirty? i))
+       "|" (boolean (:stable? i)) "|" (or (:path i) "")
+       "|" (or (some-> s :reason name) "namespace-not-loaded")))"""
+    observed = run(["bash", PROOF_EVAL, form], "/home/joe/code/futon3c")
+    match = re.search(r':value "WMCI\|([^\"]*)"', observed.stdout)
+    if observed.returncode != 0 or not match:
+        return {"availability": "unavailable", "reason": "serving-query-failed",
+                "query-exit": observed.returncode}
+    fields = match.group(1).split("|")
+    if len(fields) != 6:
+        return {"availability": "unavailable", "reason": "serving-response-malformed"}
+    availability, head, dirty, stable, path, reason = fields
+    return {"availability": availability, "git-head": head or None,
+            "dirty": dirty == "true", "stable": stable == "true",
+            "path": path or None, "reason": reason or None}
+
+
+def serving_code_result(tested_tree, observed=None):
+    observed = observed or serving_code_observation()
+    tested_head = (tested_tree or {}).get("head")
+    if observed.get("availability") != "available":
+        return result("serving-runner-code", False, "unavailable", "operator-action",
+                      reason=observed.get("reason"), loaded=observed,
+                      tested_commit=tested_head)
+    matched = (tested_head and observed.get("git-head") == tested_head and
+               observed.get("dirty") is False and observed.get("stable") is True)
+    reason = (None if matched else "loaded-code-does-not-match-tested-commit"
+              if tested_head else "tested-commit-unavailable")
+    return result("serving-runner-code", matched, "unverified", "operator-action",
+                  reason=reason, loaded=observed, tested_commit=tested_head)
+
+
 def tree_control():
     empty = hashlib.sha256(b"").hexdigest()
     state = {"readable": True, "dirty": False, "tree-sha": "tree-current",
@@ -127,6 +165,20 @@ def resolution_control():
     return 0 if passed else 2
 
 
+def serving_code_control():
+    check = serving_code_result(
+        {"head": "tested-commit"},
+        {"availability": "available", "git-head": "different-loaded-commit",
+         "dirty": False, "stable": True,
+         "path": "src/futon2/aif/full_loop_runner.clj"})
+    passed = (not check["pass"] and
+              check["evidence"]["reason"] == "loaded-code-does-not-match-tested-commit")
+    print(json.dumps(check, indent=2, sort_keys=True))
+    print("run-readiness-serving-code-control:", "PASS" if passed else "FAIL",
+          "mismatched loaded commit rejected exit-convention=0-pass/2-control-slipped")
+    return 0 if passed else 2
+
+
 def roster_readiness(negative=False):
     try:
         with urllib.request.urlopen(ROSTER, timeout=3) as response:
@@ -155,6 +207,8 @@ def main():
         return tree_control()
     if "--resolution-control" in sys.argv[1:]:
         return resolution_control()
+    if "--serving-code-control" in sys.argv[1:]:
+        return serving_code_control()
     negative = "--negative-reviewer" in sys.argv[1:]
     checks = []
 
@@ -179,8 +233,10 @@ def main():
         records = json.loads(listed.stdout)
     except json.JSONDecodeError:
         records = []
-    checks.append(latest_suite(records, "clojure -T:build ci", "futon2"))
+    futon2_suite = latest_suite(records, "clojure -T:build ci", "futon2")
+    checks.append(futon2_suite)
     checks.append(latest_suite(records, "clojure -X:test", "futon3"))
+    checks.append(serving_code_result(futon2_suite.get("evidence", {}).get("tested_tree")))
 
     health_result = run(["python3", BG, "test-health"])
     try:

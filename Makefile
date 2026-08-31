@@ -1,4 +1,4 @@
-.PHONY: ci workspace-gate pre-merge status status-control certify-run run-readiness run-readiness-control run-readiness-tree-control run-readiness-resolution-control
+.PHONY: ci workspace-gate pre-merge status status-control certify-run run-readiness run-readiness-control run-readiness-tree-control run-readiness-resolution-control run-readiness-serving-code-control
 
 # C216: `make` exits 2 for any failing recipe, and 2 means "mutation slipped"
 # in the 0-pass/1-fail/2-mutation-slipped convention these scripts print.
@@ -60,4 +60,9 @@ run-readiness-tree-control:
 run-readiness-resolution-control:
 	@python3 scripts/run_readiness.py --resolution-control; c=$$?; \
 	 echo "run-readiness-resolution-control: script-exit=$$c (house convention; make reports 2 for any nonzero)"; \
+	 exit $$c
+
+run-readiness-serving-code-control:
+	@python3 scripts/run_readiness.py --serving-code-control; c=$$?; \
+	 echo "run-readiness-serving-code-control: script-exit=$$c (house convention; make reports 2 for any nonzero)"; \
 	 exit $$c
