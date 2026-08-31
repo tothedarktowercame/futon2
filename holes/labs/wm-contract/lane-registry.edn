@@ -4,7 +4,7 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C192-beliefstate, :dispatched-at "2026-08-31T21:35:47Z", :job-id "invoke-1788212143180-6056-a2e8457e", :expected-by "2026-08-31T22:20:47Z"}
+   :holding :C196-observation-kernel, :dispatched-at "2026-08-31T21:43:49Z", :job-id "invoke-1788212625410-6065-7b13e780", :expected-by "2026-08-31T22:28:49Z"}
   {:lane :wm-verbs
    :holding :C193-cancellation, :dispatched-at "2026-08-31T21:36:53Z", :job-id "invoke-1788212209430-6057-e8d8b12a", :expected-by "2026-08-31T22:21:53Z"}
   {:lane :wm-organization
