@@ -109,6 +109,7 @@
   ;; contribution and the conditioning bundle that produced it.
   (select-keys r [:action :G-risk :G-ambiguity :predictability-bonus :homeostatic-pressure
                   :structural-pressure :G-goal-outcome
+                  :goal-outcome-replay-inputs
                   :gap-exploration-bonus :graph-control-score :G-core :G-efe :score-provenance :risk-mode
                   :ambiguity-mode :g-ambiguity-source :c-zone-load
                   :goal-outcome-mode
@@ -175,8 +176,10 @@
          belief update, the consumed event ids, and any events held because
          their entity is outside the current belief domain (2026-07-14).
     14 — records capability-zone C load and Beta-predictive ambiguity provenance
-         for learn-action-class candidates (2026-07-21)."
-  14)
+         for learn-action-class candidates (2026-07-21).
+    15 — records the exact C-entry, graph/durable projection, and typed q-sat
+         inputs needed to replay goal-outcome risk per candidate (2026-08-31)."
+  15)
 
 (defn- futon2-git-version
   "Git identity of the futon2 checkout this JVM loaded its code from:

@@ -269,6 +269,29 @@
                                                (assoc opts :goal-outcome-mode :kl
                                                       :c-temperature {:some-channel 0.5}))))))))
 
+(deftest goal-outcome-replay-inputs-are-complete-and-typed-test
+  (let [out (efe/compute-efe
+             {:observation {} :belief (belief/initial-belief-state [:m1])}
+             {:type :pursue :target :a}
+             {:goal-outcome-entries c-heavy
+              :goal-outcome-prob-fn (constantly 0.75)
+              :goal-outcome-mode :kl})
+        evidence (:goal-outcome-replay-inputs out)
+        evaluations (:entry-evaluations evidence)]
+    (is (= (:G-goal-outcome out)
+           (cv/predictive-goal-outcome-risk-kl
+            c-heavy {:type :pursue :target :a} nil
+            cv/default-goal-outcome-weight (constantly 0.75)
+            0.1))
+        "recording does not change the score")
+    (is (= (count c-heavy) (count (:c-entries evidence)) (count evaluations)))
+    (is (every? #(= :present (get-in % [:q-sat :status])) evaluations)
+        "q-sat=0 remains present, never absence encoded as zero")
+    (is (some #(zero? (get-in % [:q-sat :value])) evaluations))
+    (is (= {:status :absent :reason :no-capability-graph}
+           (:capability-graph-input evidence)))
+    (is (= :absent (get-in evidence [:durable-join-input :status])))))
+
 ;; ---- §11 step 4: the durable discharged-by join feeds the advanced set ------
 
 (def ^:private durable-join-fixture

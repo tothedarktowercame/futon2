@@ -558,6 +558,77 @@
           (try (let [p (cf cls)] (when (number? p) (double p))) (catch Throwable _ nil))))
       1.0))
 
+(declare kl-risk-of)
+
+(defn goal-outcome-evaluation
+  "Score one action and return the exact replay inputs consumed by that score.
+   `:evidence` is observational: it records the resolved C entries, graph and
+   durable-join projections, and a typed q-sat for every open entry."
+  [mode entries action capability-graph weight satisfy-prob-fn temperature]
+  (let [open (vec (filter #(= :open (:status %)) entries))
+        n (count open)
+        durable-adv (:durable-adv @c-state)
+        target (:target action)
+        produced (when (= :open-mission (:type action))
+                   (get-in capability-graph [:missions target :produces]))
+        base (into #{} (mapcat id-tokens)
+                   (concat (:advances-outcomes action) [target] produced))
+        lookup-tokens (into base (id-tokens (:type action)))
+        durable-lookups (->> lookup-tokens
+                             (keep (fn [token]
+                                     (when-let [refs (seq (get durable-adv token))]
+                                       {:token token
+                                        :entry-ref-tokens (vec (sort-by pr-str refs))})))
+                             (sort-by (comp pr-str :token))
+                             vec)
+        adv (advanced-outcome-ids action capability-graph durable-adv)
+        raw-p (when (pos? n) (satisfy-prob-fn action))
+        p (when (pos? n) (max 0.0 (min 1.0 (double raw-p))))
+        rows (mapv (fn [entry]
+                     (let [advanced? (ref-advanced? adv (:outcome-ref entry))
+                           q-sat (if advanced? p 0.0)
+                           contribution
+                           (case mode
+                             :kl (kl-risk-of entry q-sat temperature)
+                             (* (if advanced? (- 1.0 p) 1.0)
+                                (risk-of entry nil)))]
+                       {:entry (assoc (select-keys entry
+                                                  [:outcome-ref :status :weight :preferred
+                                                   :flavour :layer/id :layer/basis])
+                                      :current-outcome (current-outcome entry))
+                        :advanced? advanced?
+                        :q-sat {:status :present :value q-sat}
+                        :contribution contribution}))
+                   open)
+        score (if (zero? n)
+                0.0
+                (* (double weight)
+                   (/ (reduce + 0.0 (map :contribution rows)) (double n))))]
+    {:score score
+     :evidence
+     {:version 1
+      :mode mode
+      :temperature (when (= mode :kl) temperature)
+      :weight weight
+      :c-entries (mapv :entry rows)
+      :capability-graph-input
+      (if capability-graph
+        {:status :present :target target :produces (vec (or produced []))}
+        {:status :absent :reason :no-capability-graph})
+      :durable-join-input
+      (if (seq durable-adv)
+        {:status :present
+         :lookup-tokens (vec (sort-by pr-str lookup-tokens))
+         :lookups durable-lookups}
+        {:status :absent :reason :no-durable-join-cache})
+      :entry-evaluations
+      (mapv (fn [{:keys [entry advanced? q-sat contribution]}]
+              {:outcome-ref (:outcome-ref entry)
+               :advanced? advanced?
+               :q-sat q-sat
+               :contribution contribution})
+            rows)}}))
+
 (defn predictive-goal-outcome-risk
   "The CANONICAL EFE goal-outcome risk: weight·MEAN divergence of the PREDICTED
    outcomes under the policy from C. An entry the action advances is predicted
@@ -579,21 +650,9 @@
   ([entries action capability-graph weight]
    (predictive-goal-outcome-risk entries action capability-graph weight credit-satisfy-prob))
   ([entries action capability-graph weight satisfy-prob-fn]
-   (let [open (filter #(= :open (:status %)) entries)
-         n    (count open)
-         adv  (advanced-outcome-ids action capability-graph)
-         ;; (1-p): expected residual risk of an advanced entry — p chance it is
-         ;; satisfied (0 risk), (1-p) chance it still carries its divergence.
-         residual (- 1.0 (max 0.0 (min 1.0 (double (satisfy-prob-fn action)))))]
-     (if (zero? n)
-       0.0
-       (* (double weight)
-          (/ (reduce + 0.0
-                     (for [e open]
-                       (if (ref-advanced? adv (:outcome-ref e))
-                         (* residual (risk-of e nil))
-                         (risk-of e nil))))
-             (double n)))))))
+   (:score (goal-outcome-evaluation :hinge entries action capability-graph
+                                    weight satisfy-prob-fn
+                                    pref/default-c-temperature))))
 
 ;; ---------------------------------------------------------------------------
 ;; KL form of the goal-outcome risk — the item-5 Bernoulli consumer
@@ -646,19 +705,8 @@
                                     default-goal-outcome-weight credit-satisfy-prob
                                     pref/default-c-temperature))
   ([entries action capability-graph weight satisfy-prob-fn temperature]
-   (let [open (filter #(= :open (:status %)) entries)
-         n    (count open)
-         adv  (advanced-outcome-ids action capability-graph)
-         p    (max 0.0 (min 1.0 (double (satisfy-prob-fn action))))]
-     (if (zero? n)
-       0.0
-       (* (double weight)
-          (/ (reduce + 0.0
-                     (for [e open]
-                       (kl-risk-of e
-                                   (if (ref-advanced? adv (:outcome-ref e)) p 0.0)
-                                   temperature)))
-             (double n)))))))
+   (:score (goal-outcome-evaluation :kl entries action capability-graph
+                                    weight satisfy-prob-fn temperature))))
 
 ;; ---------------------------------------------------------------------------
 ;; Extension point — fold the c_vector.bb overlay channels (mess/incomplete/應)

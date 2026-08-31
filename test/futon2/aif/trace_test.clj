@@ -32,6 +32,14 @@
    :variational-free-energy 0.0125
    :ranked-actions [{:action {:type :no-op}
                      :G-risk 0.05 :G-ambiguity 0.0 :structural-pressure 0.0
+                     :goal-outcome-replay-inputs
+                     {:version 1
+                      :c-entries [{:outcome-ref {:id :goal/x}
+                                   :status :open :weight {:value 0.4}
+                                   :preferred {:op :becomes :value :closed}}]
+                      :entry-evaluations
+                      [{:outcome-ref {:id :goal/x} :advanced? false
+                        :q-sat {:status :present :value 0.0}}]}
                      :controller-score 0.05 :rank 1
                      :prediction {:huge :nested :map :that-should-be-stripped}}
                     {:action {:type :address-sorry :target :sorry/x}
@@ -66,6 +74,16 @@
           rs (:ranked-actions r)]
       (is (= [0.0 0.7] (mapv :structural-pressure rs))
           "trace preserves the structural-pressure term in ranked-actions"))))
+
+(deftest goal-outcome-replay-inputs-survive-trace-test
+  (let [expected (get-in sample-judge-output
+                         [:ranked-actions 0 :goal-outcome-replay-inputs])
+        actual (get-in (trace/trace-record sample-judge-output)
+                       [:ranked-actions 0 :goal-outcome-replay-inputs])]
+    (is (= expected actual))
+    (is (= {:status :present :value 0.0}
+           (get-in actual [:entry-evaluations 0 :q-sat]))
+        "zero probability survives as a present value")))
 
 (deftest trace-record-strips-softmax-weights-test
   (testing "decision in trace drops :softmax-weights (non-stringable keys)"

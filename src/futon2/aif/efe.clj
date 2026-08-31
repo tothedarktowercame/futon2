@@ -692,17 +692,15 @@
          ;; war_machine.clj, FUTON_WM_GOAL_OUTCOME_MODE=hinge escape hatch).
          ;; The Bernoulli T is the scalar :c-temperature; a per-channel MAP
          ;; falls back to the default (goal-outcomes are not channels).
-         g-goal-outcome (let [entries (or goal-outcome-entries (cv/current-c-vector))
-                              prob-fn (or goal-outcome-prob-fn cv/credit-satisfy-prob)]
-                          (case goal-outcome-mode
-                            :kl (cv/predictive-goal-outcome-risk-kl
-                                 entries action capability-graph goal-outcome-weight
-                                 prob-fn (if (map? c-temperature)
-                                           pref/default-c-temperature
-                                           c-temperature))
-                            (cv/predictive-goal-outcome-risk
-                             entries action capability-graph goal-outcome-weight
-                             prob-fn)))
+         goal-outcome-evaluation
+         (let [entries (or goal-outcome-entries (cv/current-c-vector))
+               prob-fn (or goal-outcome-prob-fn cv/credit-satisfy-prob)]
+           (cv/goal-outcome-evaluation
+            goal-outcome-mode entries action capability-graph goal-outcome-weight
+            prob-fn (if (map? c-temperature)
+                      pref/default-c-temperature
+                      c-temperature)))
+         g-goal-outcome (:score goal-outcome-evaluation)
          move-class-intensity (when (= :v1 move-class-intensity-mode)
                                 (move-intensity/intensity action))
          move-class-contribution (when move-class-intensity
@@ -779,6 +777,7 @@
         :homeostatic-pressure g-survival
 	        :structural-pressure g-structural-pressure
 	        :G-goal-outcome g-goal-outcome
+	        :goal-outcome-replay-inputs (:evidence goal-outcome-evaluation)
 	        :preference-stack preference-stack-record
 	        ;; D2 (M-evaluate-policies §8.3): the canonical EFE CORE, reported
         ;; separately from the multi-objective blend — :G-core = risk +
