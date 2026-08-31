@@ -79,6 +79,33 @@
       (is (contains? avoided :consulting-pct)
           "consulting-pct 0.0 falls in avoided [0.0 0.0]"))))
 
+(deftest absent-avoidance-is-unknown-test
+  (testing "missing source fields never become satisfied or violated guards"
+    (let [g (fe/compute-controller-diagnostics (obs/observe {}))
+          verdicts (vals (:avoidance-by-channel g))]
+      (is (= 5 (count verdicts)))
+      (is (every? #(= :unknown (:status %)) verdicts))
+      (is (empty? (:avoided-active g))
+          "unknown channels are not smuggled into the violated-only view")))
+  (testing "a measured zero remains a real observation"
+    (let [g (fe/compute-controller-diagnostics
+             (obs/observe {:support-attack {:support-coverage 0.0
+                                             :attack-coverage 0.0}
+                           :loop-health {:overall 0.0}
+                           :mission-triage {:health 0.0}
+                           :graph {:dynamics {:commit-percentages
+                                              {:stack 0.0 :consulting 0.0
+                                               :portfolio 0.0 :mathematics 0.0}
+                                             :ticks []}
+                                   :summary {:active-repos 0 :total-repos 1
+                                             :total-sorrys 0 :coupling-edges 0
+                                             :ticks-firing 0}}
+                           :frames {:depositing-signal 0.0}
+                           :annotation-graph {:health 0.0}}))]
+      (is (= :violated
+             (get-in g [:avoidance-by-channel :consulting-pct :status])))
+      (is (some #{:consulting-pct} (:avoided-active g))))))
+
 (defn- with-alive-defaults
   "Avoid the :dark branch (active < 0.2 AND loop-health < 0.3) for cases
    that want to test other mode classifications."

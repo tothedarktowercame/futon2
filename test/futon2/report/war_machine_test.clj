@@ -9,7 +9,19 @@
             [clojure.java.shell]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.efe :as efe]
+            [futon2.aif.free-energy :as free-energy]
+            [futon2.aif.observation :as observation]
             [futon2.report.war-machine :as wm]))
+
+(deftest avoidance-unknown-renders-distinguishably-test
+  (let [diagnostics (free-energy/compute-controller-diagnostics
+                     (observation/observe {}))
+        losses (wm/avoidance-losses :multiplied diagnostics)]
+    (is (= 5 (count losses)))
+    (is (every? #(= :avoidance-unknown (:type %)) losses))
+    (is (every? #(re-find #"avoidance unknown — observation absent"
+                           (:summary %))
+                losses))))
 
 (deftest strategic-selector-accepts-resolved-vars-and-rejects-absence
   (testing "requiring-resolve returns a callable Var, not a value satisfying fn?"

@@ -3149,9 +3149,9 @@
                       ["coverage-uncertainty-pressure (0.35)" (format "%.4f" (double coverage-uncertainty-pressure))]]))
         (.append sb "\n"))
 
-      ;; Losses (avoided states currently active)
+      ;; Avoidance diagnostics: measured violations and loud unknowns.
       (when (seq (:losses j))
-        (.append sb "### Losses (avoided states active)\n\n")
+        (.append sb "### Avoidance diagnostics\n\n")
         (doseq [loss (:losses j)]
           (.append sb (str "- **" (:summary loss) "**\n")))
         (.append sb "\n"))
@@ -4135,6 +4135,38 @@
          :via via
          :at (str (Instant/now))}))
 
+(defn avoidance-losses
+  "Render-ready tri-state avoidance diagnostics. Informational only: no policy
+   or actuator consumes this function's output."
+  [mode free-energy]
+  (vec
+   (concat
+    (when (= mode (:strategic-mode pref/avoided-states))
+      [{:type :avoided-mode
+        :mode mode
+        :summary (str "System in avoided mode: " (name mode))}])
+    (for [[ch verdict] (:avoidance-by-channel free-energy)
+          :when (= :violated (:status verdict))]
+      {:type :avoided-channel
+       :channel ch
+       :value (get-in verdict [:observation :value])
+       :range (:avoided-range verdict)
+       :summary (str (name ch) " at "
+                     (format "%.2f" (double (get-in verdict
+                                                    [:observation :value])))
+                     " — in avoided range "
+                     (pr-str (:avoided-range verdict)))})
+    (for [[ch verdict] (:avoidance-by-channel free-energy)
+          :when (= :unknown (:status verdict))]
+      {:type :avoidance-unknown
+       :channel ch
+       :reason (get-in verdict [:observation :reason])
+       :range (:avoided-range verdict)
+       :summary (str (name ch)
+                     " avoidance unknown — observation absent ("
+                     (name (or (get-in verdict [:observation :reason])
+                               :reason-unavailable)) ")")}))))
+
 (defn judge
   "The war machine's inference step.
 
@@ -4676,21 +4708,7 @@
                             (map-indexed (fn [i p] (assoc p :rank (inc i))))
                             vec)
         ;; Losses: avoided states that are currently active
-        losses (vec (concat
-                     (when (= mode (:strategic-mode pref/avoided-states))
-                       [{:type :avoided-mode
-                         :mode mode
-                         :summary (str "System in avoided mode: " (name mode))}])
-                     (map (fn [ch]
-                            {:type :avoided-channel
-                             :channel ch
-                             :value (get observation ch 0.0)
-                             :range (get pref/avoided-states ch)
-                             :summary (str (name ch) " at "
-                                           (format "%.2f" (double (get observation ch 0.0)))
-                                           " — in avoided range "
-                                           (pr-str (get pref/avoided-states ch)))})
-                          (:avoided-active free-energy))))
+        losses (avoidance-losses mode free-energy)
         result0
         (cond-> {:mode mode
                  :mode-prior (get pref/mode-prior mode 0.0)

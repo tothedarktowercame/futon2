@@ -27,7 +27,7 @@
       :observation      <compatible numeric obs channel map>
       :observation-envelope <lossless tagged channel values/absences>
       :free-energy      {:preference-gap-score :coverage-uncertainty-pressure :controller-score
-                          :per-channel :avoided-active}
+                          :per-channel :avoidance-by-channel :avoided-active}
       :variational-free-energy <F = 1/2 mean(precision * error^2)>
       :ranked-actions   [{:action :G-risk :G-ambiguity :controller-score :rank}]
       :decision         {:action :rank? :controller-score? :tau? :reason?
@@ -191,8 +191,11 @@
          (2026-08-31).
     18 — adds the support-typed scoring shadow. It records current and masked
          scores, support/absence provenance, comparability, and counterfactual
-         rank while retaining zero selection authority (2026-08-31)."
-  18)
+         rank while retaining zero selection authority (2026-08-31).
+    19 — adds the tri-state :avoidance-by-channel diagnostic; missing
+         observations are :unknown rather than tested as numeric zero
+         (2026-08-31)."
+  19)
 
 (defn- preference-stack-evidence
   "Preserve the exact stack carried by ranked evaluation objects without

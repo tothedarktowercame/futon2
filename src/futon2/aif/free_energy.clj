@@ -14,7 +14,8 @@
    Invariants:
    - WM-I1 (read-only — judge produces data, never writes)
    - WM-I4 (sovereignty — priorities are informational, not commands)"
-  (:require [futon2.aif.preferences :as pref]))
+  (:require [futon2.aif.observation :as observation]
+            [futon2.aif.preferences :as pref]))
 
 (defn- channel-gap
   "Distance of observation from preferred range.
@@ -25,16 +26,30 @@
           (> v hi) (- v hi)
           :else 0.0)))
 
-(defn- in-avoided?
-  "True if observation value falls within an avoided range."
-  [obs-val [lo hi]]
-  (let [v (double (or obs-val 0.0))]
-    (and (>= v lo) (<= v hi))))
+(defn- avoidance-verdict
+  "Tri-state avoided-range diagnostic. An absent source is unknown; it is
+   never converted to the numeric observation zero. Plain explicit maps remain
+   supported for library callers that predate observation metadata."
+  [obs channel [lo hi :as avoided-range]]
+  (let [source-status (observation/observation-status obs channel)
+        explicit-legacy-value? (and (= :status-metadata-missing
+                                       (:reason source-status))
+                                    (contains? obs channel)
+                                    (some? (get obs channel)))]
+    (if (or (= :observed (:variant source-status)) explicit-legacy-value?)
+      (let [v (double (get obs channel))]
+        {:status (if (and (>= v lo) (<= v hi)) :violated :satisfied)
+         :observation {:variant :observed :value v}
+         :avoided-range avoided-range})
+      {:status :unknown
+       :observation (select-keys source-status [:variant :reason :paths])
+       :avoided-range avoided-range})))
 
 (defn compute-controller-diagnostics
   "Compute legacy controller diagnostics from an observation vector.
 
-   Returns {:controller-score :preference-gap-score :coverage-uncertainty-pressure :per-channel-gaps :avoided-active}.
+   Returns {:controller-score :preference-gap-score :coverage-uncertainty-pressure
+            :per-channel-gaps :avoidance-by-channel :avoided-active}.
 
    preference-gap-score: weighted distance from preferences (dominated by workstream balance).
    coverage-uncertainty-pressure: uncertainty from dark arrows and unaddressed claims.
@@ -63,16 +78,22 @@
                        (* 0.3 (- 1.0 (:support-coverage obs 0.0))))
         ;; Total
         g-total (+ (* 0.65 g-pragmatic) (* 0.35 g-epistemic))
-        ;; Avoided states currently active
-        avoided (vec (for [[k v] pref/avoided-states
-                           :when (not= k :strategic-mode)
-                           :when (vector? v)
-                           :when (in-avoided? (get obs k 0.0) v)]
+        avoidance-by-channel
+        (into {}
+              (for [[k v] pref/avoided-states
+                    :when (not= k :strategic-mode)
+                    :when (vector? v)]
+                [k (avoidance-verdict obs k v)]))
+        ;; Compatibility view: only measured violations are active. Unknown is
+        ;; retained in :avoidance-by-channel and never silently counted either way.
+        avoided (vec (for [[k verdict] avoidance-by-channel
+                           :when (= :violated (:status verdict))]
                        k))]
     {:controller-score g-total
      :preference-gap-score g-pragmatic
      :coverage-uncertainty-pressure g-epistemic
      :per-channel per-channel
+     :avoidance-by-channel avoidance-by-channel
      :avoided-active avoided}))
 
 ;; ---------------------------------------------------------------------------
@@ -104,8 +125,9 @@
       :predicted-mean pm
       :predicted-variance pv
       :error err
-     :precision precision
-     :weighted-error (* err precision)})))
+      :producer-contract :prediction-error/v1
+      :precision precision
+      :weighted-error (* err precision)})))
 
 (defn compute-variational-free-energy
   "Compute the per-tick Gaussian prediction-error diagnostic
