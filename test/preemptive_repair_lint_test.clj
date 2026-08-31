@@ -24,7 +24,7 @@
 
 (deftest absence-dispositions-cover-and-narrow-the-c12-population
   (let [findings (lint/absence-findings [])]
-    (is (= 16 (count findings)))
+    (is (= 15 (count findings)))
     (is (every? #(= :blocked (:disposition %)) findings))
     (is (not-any? #(re-find #"observation.clj:117-145|trace.clj:249-260" (:path %)) findings))))
 

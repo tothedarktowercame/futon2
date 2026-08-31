@@ -337,9 +337,20 @@
          next-var (into {}
                         (for [k (keys next-mean)]
                           [k (double (get obs-variance k 0.0))]))
+         ;; C94: zero is still the mathematical variance for a deterministic
+         ;; channel, but it no longer erases whether the action model supplied
+         ;; that zero. Consumers can distinguish measured/modelled variance
+         ;; from declared deterministic absence without changing arithmetic.
+         variance-status (into {}
+                               (for [k (keys next-mean)]
+                                 [k (if (contains? obs-variance k)
+                                      {:status :present :value (double (get obs-variance k))}
+                                      {:status :absent
+                                       :reason :deterministic-by-action-model})]))
          next-belief (belief/update-belief-batch (or belief {}) events
                                                   belief-update-opts)]
-     {:next-observation {:mean next-mean :variance next-var}
+     {:next-observation {:mean next-mean :variance next-var
+                         :variance-status variance-status}
       :next-belief next-belief
       :action action
       :predicted-events events})))

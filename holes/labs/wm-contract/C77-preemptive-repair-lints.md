@@ -25,6 +25,10 @@ After C77 was committed, four lints found their own `negative-text` specimens. T
 
 `checks/absence-coercion-dispositions.edn` covers all 18 grouped C12 rows: one producer boundary already fixed, one explicit serialization-compatibility exemption, and sixteen named blockers. The canonical absence scan is therefore 16, not 18. Its exact-coverage guard makes an added or silently removed census row an error rather than an implicit exemption.
 
+### C94 amendment — deterministic variance carries provenance
+
+`forward_model.clj` now emits `:variance-status` beside numeric variance, distinguishing a model-supplied value from `{:status :absent, :reason :deterministic-by-action-model}`. The live absence population is **15**: two fixed, one explicit exemption, fifteen blocked.
+
 ## Canonical invocations
 
 For each stem below, run `bb -cp . checks/preemptive_<stem>_lint.clj` and append `--negative` for its mutation:

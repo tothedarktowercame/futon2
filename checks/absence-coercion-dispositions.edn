@@ -17,7 +17,9 @@
   {:at "src/futon2/aif/free_energy.clj:138-143" :disposition :blocked :blocked-on :infer-mode-tagged-envelope}
   {:at "src/futon2/aif/precision.clj:166-167" :disposition :blocked :blocked-on :validated-error-record-producer}
   {:at "src/futon2/aif/precision.clj:206" :disposition :blocked :blocked-on :validated-error-record-producer}
-  {:at "src/futon2/aif/forward_model.clj:339" :disposition :blocked :blocked-on :variance-presence-model}
+  {:at "src/futon2/aif/forward_model.clj:339" :disposition :fix-now
+   :control "next-observation :variance-status distinguishes supplied variance from :deterministic-by-action-model"
+   :implemented-by :C94}
   {:at "src/futon2/aif/policy.clj:144-145" :disposition :blocked :blocked-on :policy-consumes-channel-status}
   {:at "src/futon2/aif/rollout.clj:129" :disposition :blocked :blocked-on :validated-rollout-step-producer}
   {:at "src/futon2/aif/rollout.clj:158" :disposition :blocked :blocked-on :unscored-move-refusal-variant}
@@ -26,4 +28,4 @@
    :exemption :versioned-read-compatibility
    :reason "Legacy/partial trace reads preserve old records; this is serialization compatibility, not a numeric measurement or score. A schema-version migration remains separately named."}
   {:at "src/futon2/aif/belief.clj:1040-1052" :disposition :blocked :blocked-on :precision-pass-through-tag}]
- :summary {:fix-now 1 :exempt-with-reason 1 :blocked 16}}
+ :summary {:fix-now 2 :exempt-with-reason 1 :blocked 15}}

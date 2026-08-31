@@ -49,6 +49,15 @@
           (fm/predict base-state {:type :address-sorry :target :m1})]
       (is (every? #(>= % 0.0) (vals variance))))))
 
+(deftest variance-presence-is-not-coerced-away-test
+  (let [{{:keys [variance variance-status]} :next-observation}
+        (fm/predict {:observation {:loop-health 0.5} :belief {}}
+                    {:type :no-op})]
+    (is (= 0.0 (:loop-health variance)))
+    (is (= {:status :absent :reason :deterministic-by-action-model}
+           (:loop-health variance-status))
+        "a deterministic zero remains distinguishable from supplied variance")))
+
 (deftest predict-no-op-preserves-state-test
   (testing ":no-op leaves observation unchanged"
     (let [out (fm/predict base-state {:type :no-op})]
