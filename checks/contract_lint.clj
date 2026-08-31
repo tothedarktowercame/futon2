@@ -150,6 +150,12 @@
             :expected-ambiguity 0}]
           (:cases x))))
 
+(defn have-want-arrow-witness? [x]
+  (and (= :have-want-arrow-reference/v1 (:schema x))
+       (= :endpoint-pair (:identity x))
+       (= [:correlated :open :constructed] (:states x))
+       (= :left-want-equals-right-have (get-in x [:composition :law]))))
+
 (defn expected-information-gain-witness? [x]
   (= [{:id :binary-prior-point-posterior
        :predictive-outcome-masses [1]
@@ -268,6 +274,7 @@
    "LogMultivariateBetaWitness" log-multivariate-beta-witness?
    "ExpectedFreeEnergyWitness" expected-free-energy-witness?
    "AmbiguityWitness" ambiguity-witness?
+   "HaveWantArrowWitness" have-want-arrow-witness?
    "ExpectedInformationGainWitness" expected-information-gain-witness?
    "GenerativeModelWitness" generative-model-witness?
    "CascadeDiff" cascade-diff?

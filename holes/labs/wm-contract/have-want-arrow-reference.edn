@@ -1,0 +1,10 @@
+{:schema :have-want-arrow-reference/v1
+ :source {:repo "futon3a"
+          :path "holes/labs/M-memes-arrows/reference-case-one-arrow-three-stages.edn"
+          :git-sha "6fb0143c00b08e6a96cdeae2bc6a48b97c87e25b"
+          :sha256 "27e1172c41f8a5f4d66eec8433e20a162e09d5adb85f0567bdf1e631feb9bd32"}
+ :identity :endpoint-pair
+ :states [:correlated :open :constructed]
+ :arrow {:have :belief-mass-supports-cohort
+         :want :support-coverage-channel}
+ :composition {:law :left-want-equals-right-have}}
