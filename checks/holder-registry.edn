@@ -16,15 +16,15 @@
  :resolves "contract declaration -> its `owner` record -> the holder below"
  :checked-by "futon2/checks/holder_check.clj"
  :records
- {"P-validated-R5"          {:decls 21 :holder :unassigned :note "the spine; blocked on Joe's two-π decision"}
-  "P-glossary-mathematics"  {:decls 15 :holder :unassigned :note "33/33 Formal lines done; G-D2 is Joe's paper"}
-  "P-R9"                    {:decls 14 :holder :unassigned :note "lane closed; holds for regression only"}
-  "P-R8"                    {:decls  8 :holder :unassigned :note "closed for F; g blocked on the spine"}
+ {"P-validated-R5"          {:decls 21 :holder "wm-nouns" :note "the spine; blocked on Joe's two-π decision"}
+  "P-glossary-mathematics"  {:decls 15 :holder "wm-nouns" :note "33/33 Formal lines done; G-D2 is Joe's paper"}
+  "P-R9"                    {:decls 14 :holder "wm-nouns" :note "lane closed; holds for regression only"}
+  "P-R8"                    {:decls  8 :holder "wm-nouns" :note "closed for F; g blocked on the spine"}
   "P-R19-preferences-open"  {:decls  8 :holder "claude-20"  :note "lane closed 08-30; I held D1/D2a review"}
-  "P-R2"                    {:decls  5 :holder :unassigned :note "closed for the contract; turn channel is Joe's"}
+  "P-R2"                    {:decls  5 :holder "wm-nouns" :note "closed for the contract; turn channel is Joe's"}
   "delivery-lifecycle"      {:decls  3 :holder "joe"        :note "the method is Joe's own; §0.7-§0.16"}
   "R19-preference-stack.edn" {:decls 2 :holder "claude-20"  :note "the gated fixture"}
   "runs-once"               {:decls  1 :holder "claude-20"  :note "WM-RUN1"}
   "route"                   {:decls  1 :holder "claude-20"  :note "WM-RUN2; feeds the CML lane"}
-  "run-at-least-once"       {:decls  1 :holder :unassigned  :note "cron question, deferred by Joe"}
+  "run-at-least-once"       {:decls  1 :holder "claude-20"  :note "cron question, deferred by Joe"}
   "organisation"            {:decls  1 :holder "claude-20"  :note "EDGES/hyper-edge schema"}}}
