@@ -1,0 +1,8 @@
+{:schema :fold-reference/v1
+ :source {:repo "futon6"
+          :path "data/fold-turns/ft-bounded-in-flight-state-008.edn"
+          :git-sha "1d9ff5d6ac5ed6f32ae40e323203c336e5cacde7"
+          :sha256 "0d1c4bd9bf2f0fc51206e02373066a797e80ae3801ae0316d14df7d8a2b1fbf2"}
+ :fold {:wiring {:nodes 5 :hyperedges 5 :terminals 1}
+        :coverage-score-delta -1
+        :policy-holes 3}}

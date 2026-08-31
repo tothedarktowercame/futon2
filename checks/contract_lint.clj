@@ -156,6 +156,12 @@
        (= [:correlated :open :constructed] (:states x))
        (= :left-want-equals-right-have (get-in x [:composition :law]))))
 
+(defn fold-witness? [x]
+  (and (= :fold-reference/v1 (:schema x))
+       (= {:wiring {:nodes 5 :hyperedges 5 :terminals 1}
+           :coverage-score-delta -1 :policy-holes 3}
+          (:fold x))))
+
 (defn expected-information-gain-witness? [x]
   (= [{:id :binary-prior-point-posterior
        :predictive-outcome-masses [1]
@@ -275,6 +281,7 @@
    "ExpectedFreeEnergyWitness" expected-free-energy-witness?
    "AmbiguityWitness" ambiguity-witness?
    "HaveWantArrowWitness" have-want-arrow-witness?
+   "FoldWitness" fold-witness?
    "ExpectedInformationGainWitness" expected-information-gain-witness?
    "GenerativeModelWitness" generative-model-witness?
    "CascadeDiff" cascade-diff?

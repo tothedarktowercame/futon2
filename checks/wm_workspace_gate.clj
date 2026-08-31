@@ -51,6 +51,7 @@
     "control_map_figure_agreement_check.clj" "control_map_lint.clj"
     "control_organization_check.clj" "expected_free_energy_witness.clj"
     "expected_information_gain_witness.clj" "fold_turn_quarantine_check.clj"
+    "fold_witness.clj"
     "generative_model_witness.clj" "holder_check.clj"
     "have_want_arrow_witness.clj"
     "hyper_edge_domain_range_check.clj" "hyper_edge_exemplar_check.clj"
@@ -87,6 +88,7 @@
            "--authority" (authority)]}
    {:name :ambiguity :argv ["bb" "checks/ambiguity_witness.clj"]}
    {:name :have-want-arrow :argv ["bb" "checks/have_want_arrow_witness.clj"]}
+   {:name :fold :argv ["bb" "checks/fold_witness.clj"]}
    {:name :holder :argv ["bb" "checks/holder_check.clj"]}
    {:name :closed-record-pointers :argv ["bb" "checks/closed_record_pointer_check.clj"]}
    {:name :figure-agreement :argv ["bb" "checks/control_map_figure_agreement_check.clj"]}
@@ -116,6 +118,8 @@
     :argv ["bb" "checks/ambiguity_witness.clj" "--negative-control"]}
    {:name :c168-malformed-arrow-composition
     :argv ["bb" "checks/have_want_arrow_witness.clj" "--negative-control"]}
+   {:name :c172-missing-policy-holes
+    :argv ["bb" "checks/fold_witness.clj" "--negative-control"]}
    {:name :c116-removed-ledger-row
     :argv ["bb" "-cp" "." "checks/r9_independence.clj" "--negative-ledger"
            "--report" "/tmp/wm-gate-r9-ledger.edn" "--lean" "/tmp/wm-gate-r9-ledger.lean"]}
