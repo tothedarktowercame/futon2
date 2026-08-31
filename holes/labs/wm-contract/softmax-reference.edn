@@ -1,0 +1,11 @@
+{:schema :softmax-reference/v1
+ :basis "sec-glossary.tex:39 — Q(pi) is proportional to exp(log E(pi) - G(pi)/tau)"
+ :kind :hand-derived-from-exp-log-identities
+ :temperature [1 3]
+ :habit {:lower 1 :higher 1}
+ :grades {:lower 0 :higher [:log 8 :divided-by 3]}
+ :unnormalised {:lower [1 1] :higher [1 8]}
+ :probabilities {:lower [8 9] :higher [1 9]}
+ :scope {:positive-temperature true
+         :tau-zero-limit :not-covered
+         :tau-infinity-limit :not-covered}}

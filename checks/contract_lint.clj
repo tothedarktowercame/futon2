@@ -336,6 +336,10 @@
                                     (= 1 (:observation %))
                                     (= 3 (:prediction %))
                                     (= -2 (:expected-error %)))
+   "SoftmaxWitness" #(and (= :softmax-reference/v1 (:schema %))
+                            (= [1 3] (:temperature %))
+                            (= {:lower [1 1] :higher [1 8]} (:unnormalised %))
+                            (= {:lower [8 9] :higher [1 9]} (:probabilities %)))
    "HaveWantArrowWitness" have-want-arrow-witness?
    "FoldWitness" fold-witness?
    "FoldEscrowRecordWitness" fold-escrow-record-witness?
