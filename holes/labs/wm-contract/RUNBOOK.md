@@ -176,6 +176,38 @@ topology hashes, traversal counts, resource status, and verdict. Missing or
 ambiguous run/receipt evidence is a loud failure naming the paths searched.
 This command certifies an already completed run; it does not initiate one.
 
+After certification, inspect the run's Morning Brief and record the operator
+QA verdicts:
+
+```sh
+clojure -M:wm-full-loop brief --attempt-id ATTEMPT_ID
+clojure -M:wm-full-loop review ATTEMPT_ID joe
+```
+
+`review` is the guided entry surface. It shows the evidence for each still-open
+objective, validates the answer vocabulary, requires a nonblank evidence note,
+and appends one immutable review record per answer under
+`data/wm-morning-brief/reviews/`. For a successful grounded run the four
+objectives and answers are:
+
+- `feature-verdict`: `accept-feature`, `accept-with-follow-ups`, or `reject`.
+- `selection-quality`: `yes`, `no`, or `uncertain`.
+- `substantive-achievement`: `yes`, `partial`, `no`, or `uncertain`.
+- `evidence-sufficiency`: `sufficient`, `insufficient`, or `uncertain`.
+
+For non-interactive use, submit each answer separately:
+
+```sh
+clojure -M:wm-full-loop qa ATTEMPT_ID OBJECTIVE ANSWER "EVIDENCE NOTE" joe
+```
+
+Only `substantive-achievement` projects an independent-weight evidence event
+into the next belief update. The other three remain explicit operator and audit
+judgments. If QA is not recorded, the Morning Brief item remains pending and
+`brief` continues to list its unanswered objectives; there is currently no
+expiry or automatic failure. In that case no substantive-achievement event is
+available, so the machine does not learn Joe's judgment from that run.
+
 - `bb checks/lane_registry_check.clj` measures commissioner/dispatcher
   discipline (`:stale-holding`), not repository validity. Run it during
   dispatch and closure review; do not make source CI depend on operator timing.
