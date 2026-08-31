@@ -95,7 +95,7 @@
          "    (∀ r ∈ wmVerdictsDeclaredFixture, r.verdict = .self) := by\n  simp [wmVerdictsLedgerAloneFixture, wmVerdictsDeclaredFixture]\n\n"
          "end DarkTower.WarMachine.Holes.R9D2\n")))
 
-(defn run-check [{:keys [p4ng badges negative?]}]
+(defn run-check [{:keys [p4ng badges negative? negative-table]}]
   (let [p4ng (or p4ng "/home/joe/code/p4ng")
         badges (or badges "/home/joe/code/futon2/data/r18-badges.edn")
         badge-data (edn/read-string (slurp badges))
@@ -108,9 +108,11 @@
         kinds (frequencies (map status-kind (vals statuses)))
         fixed (->> statuses (keep (fn [[id st]] (when (= :fixed (status-kind st)) id))) set)
         attrs (mapv (fn [id] (assoc (attribution (get ss id)) :row id)) closed-ids)
-        ledger (mapv ledger-row closed-ids)
-        declared (mapv declared-row closed-ids)
-        decide? (if negative?
+        ledger0 (mapv ledger-row closed-ids)
+        declared0 (mapv declared-row closed-ids)
+        ledger (if (= negative-table :ledger) (subvec ledger0 1) ledger0)
+        declared (if (= negative-table :declared) (subvec declared0 1) declared0)
+        decide? (if (and negative? (nil? negative-table))
                   ;; Semantic mutation: an inside producer is misclassified as
                   ;; independent while all row and corpus shapes remain valid.
                   (fn [_producer _producing-part] false)
@@ -125,6 +127,8 @@
                 :badge-headline {:path badges :stated 4 :parsed badge-count
                                  :verdict :self}
                 :checks {:expected-closed-ids? (= fixed (set closed-ids))
+                         :ledger-row-set? (= (set closed-ids) (set (map :row ledger)))
+                         :declared-row-set? (= (set closed-ids) (set (map :row declared)))
                          :per-row-sources? (every? #(= (boolean (row-text-ids (:row %)))
                                                         (map? (:declaration-source %))) declared)
                          :declared-sound? (checker-sound? decide?
@@ -134,11 +138,14 @@
     {:report report :lean (lean-source ledger declared)}))
 
 (defn -main [& args]
-  (let [negative? (some #{"--negative"} args)
-        pair-args (remove #{"--negative"} args)
+  (let [negative-table (cond (some #{"--negative-ledger"} args) :ledger
+                             (some #{"--negative-declared"} args) :declared)
+        negative? (or (some #{"--negative"} args) negative-table)
+        pair-args (remove #{"--negative" "--negative-ledger" "--negative-declared"} args)
         opts (assoc (apply hash-map (mapcat (fn [[k v]] [(keyword (subs k 2)) v])
                                             (partition 2 pair-args)))
-                    :negative? negative?)]
+                    :negative? negative?
+                    :negative-table negative-table)]
     (when-not (and (:report opts) (:lean opts))
       (throw (ex-info "usage: [--negative] --report FILE --lean FILE [--p4ng DIR]" {})))
     (try
