@@ -18,8 +18,10 @@ the command nonzero.
 The demonstrated report was honestly `DEGRADED`, exit 1:
 
 - workspace gate: 19 results, 0 failures;
-- contract: 100 declarations, 89 closed and 11 `:= sorry`; the sorry
+- contract: 100 declarations, 89 closed and 11 contract holes; the hole
   classifications were 7 conformant, 3 refused implementations, 1 witnessed;
+- Lean source: 6 literal `:= sorry` terms, classified as 3 deliberate
+  implementation refusals and 3 permanent external attestations;
 - strict lint: stale 0, uninspectable 0, bound-to-false 0, conformant 7;
 - absence lint: 8 findings, exit 1;
 - futon2: 1,042 tests / 6,224 assertions, 0 failures/errors, bounded resource
@@ -39,4 +41,3 @@ The first control run also proved failure rendering during concurrent work: it
 completed every section while showing the absence red, a stale lane holding,
 and a futon2 7-versus-8 assertion failure.  After that lane settled, the second
 report kept the intended red components visible while both suites passed.
-

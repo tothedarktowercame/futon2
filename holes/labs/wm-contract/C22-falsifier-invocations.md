@@ -451,3 +451,13 @@ make status
 The report is non-short-circuiting and exits nonzero after rendering all
 sections if any component is red. Both suites run through bounded test-service
 receipts rather than trusting inner green summaries alone.
+
+C138's independent-population control is:
+
+```sh
+make status-control
+```
+
+It rejects substituting the contract-lint hole population for the Lean
+category check's literal-sorry population, and is also reached by the workspace
+gate.

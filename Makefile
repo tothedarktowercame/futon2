@@ -1,4 +1,4 @@
-.PHONY: ci workspace-gate pre-merge status
+.PHONY: ci workspace-gate pre-merge status status-control
 
 # Hermetic repository boundary: futon2 sources, tests, and build only.
 ci:
@@ -19,3 +19,6 @@ pre-merge:
 # rendered and makes the command nonzero after all sections are printed.
 status:
 	python3 scripts/wm_status_report.py
+
+status-control:
+	python3 scripts/wm_status_report.py --source-control

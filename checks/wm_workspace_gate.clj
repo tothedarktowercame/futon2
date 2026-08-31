@@ -124,7 +124,9 @@
    {:name :c137-missing-obligation-fixture
     :argv ["bb" "checks/lean_sorry_category_check.clj" "--negative-missing-fixture"]}
    {:name :c137-obligation-fixture-drift
-    :argv ["bb" "checks/lean_sorry_category_check.clj" "--negative-fixture-drift"]}])
+    :argv ["bb" "checks/lean_sorry_category_check.clj" "--negative-fixture-drift"]}
+   {:name :c138-status-population-sources
+    :argv ["python3" "scripts/wm_status_report.py" "--source-control"]}])
 
 (defn run-one [{:keys [name argv dir]}]
   (println "wm-workspace-gate: RUN" (clojure.core/name name))

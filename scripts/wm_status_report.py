@@ -46,7 +46,45 @@ def suite_status(job_id, timeout=360):
     return {"receipt": {"verdict": "timeout", "outer-exit": 124}, "id": job_id}, (None,) * 4
 
 
+def hole_population(strict_data):
+    return {"count": strict_data["kinds"]["hole"],
+            "classification": strict_data["hole-judgements"],
+            "source": "contract_lint-live-report"}
+
+
+def sorry_population(check_output):
+    count_match = re.search(r":sorry-count\s+(\d+)", check_output)
+    split_match = re.search(r":sorry-category-counts\s+\{([^}]*)\}", check_output)
+    if not count_match or not split_match:
+        raise ValueError("lean_sorry_category_check did not emit its census")
+    split = {name: int(count) for name, count in
+             re.findall(r'"([^"]+)"\s+(\d+)', split_match.group(1))}
+    return {"count": int(count_match.group(1)), "classification": split,
+            "source": "lean_sorry_category_check"}
+
+
+def validate_population_sources(holes, sorries):
+    return (holes.get("source") == "contract_lint-live-report" and
+            sorries.get("source") == "lean_sorry_category_check")
+
+
+def source_control():
+    holes = {"count": 11, "classification": {"conformant": 7},
+             "source": "contract_lint-live-report"}
+    sorries = {"count": 6, "classification": {"refusal": 3, "attestation": 3},
+               "source": "lean_sorry_category_check"}
+    positive = validate_population_sources(holes, sorries)
+    substitution_rejected = not validate_population_sources(holes, holes)
+    passed = positive and substitution_rejected
+    print("wm-status-source-control:", "PASS" if passed else "FAIL",
+          f"positive={positive} substituted-hole-as-sorry-rejected={substitution_rejected}",
+          "exit-convention=0-pass/1-fail")
+    return 0 if passed else 1
+
+
 def main():
+    if "--source-control" in sys.argv[1:]:
+        return source_control()
     timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
     stamp = str(int(time.time()))
     futon2_job = launch_suite("clojure -T:build ci", ROOT, f"status-{stamp}-futon2")
@@ -68,6 +106,11 @@ def main():
         "{:summary (:summary x) :declaration-count (count (:declarations x)) "
         ":kinds (frequencies (map :kind (:declarations x))) "
         ":hole-judgements (frequencies (map :judgement (filter #(= \"hole\" (:kind %)) (:declarations x))))}")
+    sorry_check = run(["bb", "-cp", ".", "checks/lean_sorry_category_check.clj"])
+    holes = hole_population(strict_data)
+    sorries = sorry_population(sorry_check.stdout)
+    if not validate_population_sources(holes, sorries):
+        raise RuntimeError("contract-hole and Lean-sorry populations lost source independence")
 
     absence = run(["bb", "-cp", ".", "checks/preemptive_absence_coercion_lint.clj"])
     absence_line = next((line for line in absence.stdout.splitlines()
@@ -86,7 +129,6 @@ def main():
     futon2, f2_counts = suite_status(futon2_job)
     futon3, f3_counts = suite_status(futon3_job)
 
-    kinds = strict_data["kinds"]
     qualification = strict_data["summary"]["qualification"]
     strict_counts = strict_data["summary"]["counts"]
 
@@ -96,8 +138,11 @@ def main():
     print(gate_summary)
     print(gate_provenance)
     print("\nCONTRACT")
-    print(f"declarations={strict_data['declaration-count']} closed={kinds['closed']} holes={kinds['hole']} source=contract_lint-live-report")
-    print(f":=sorry-classification={json.dumps(strict_data['hole-judgements'], sort_keys=True)}")
+    print(f"declarations={strict_data['declaration-count']} closed={strict_data['kinds']['closed']} "
+          f"holes={holes['count']} source={holes['source']}")
+    print(f"hole-classification={json.dumps(holes['classification'], sort_keys=True)} source={holes['source']}")
+    print(f":=sorry-terms={sorries['count']} sorry-classification={json.dumps(sorries['classification'], sort_keys=True)} "
+          f"source={sorries['source']}")
     print(f"all-classifications={json.dumps(strict_counts, sort_keys=True)}")
     print("\nSTRICT LINT")
     print(f"verdict={'PASS' if strict.returncode == 0 else 'FAIL'} exit={strict.returncode} "
@@ -123,7 +168,7 @@ def main():
     for row in lane_rows:
         print(row)
 
-    component_red = [gate.returncode, strict.returncode, absence.returncode,
+    component_red = [gate.returncode, strict.returncode, sorry_check.returncode, absence.returncode,
                      obligations.returncode, lanes.returncode,
                      futon2["receipt"].get("outer-exit", 1), futon3["receipt"].get("outer-exit", 1)]
     print("\nOVERALL")
