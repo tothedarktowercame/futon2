@@ -80,6 +80,8 @@
                  :r8CensusWmTrace {:counts {:insufficient-inputs 1
                                              :missing-F-computable 1 :stored-F 1}
                                     :ticks {}}}
+        preference-good (edn/read-string
+                         (slurp "holes/labs/wm-contract/PreferenceStackWitness.edn"))
         tick-good {:startedAt "2026-08-31T00:00:00Z" :traceWritten true
                    :storeBasisCount 1
                    :route [{:fromNode "R2" :toNode "R7" :via "f" :at_ "t"}]}]
@@ -90,6 +92,9 @@
              [lint/ill-formed-list? ill-good (assoc-in ill-good [:r2ContractCensusWmTrace :ill-formed] 0)]
              [lint/r8-tick-list? r8-good (assoc-in r8-good [:content-pin :sha256] "short")]
              [lint/r8-disposition-evidence? r8-good (assoc-in r8-good [:r8CensusWmTrace :counts :stored-F] 2)]
+             [(get lint/shape-checks "PreferenceStackWitness")
+              preference-good
+              (update preference-good :preference-stack pop)]
              [lint/tick-run-witness? tick-good (assoc tick-good :route [])]]]
       (is (true? (boolean (check good))))
       (is (false? (boolean (check bad)))))))

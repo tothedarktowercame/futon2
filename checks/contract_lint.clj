@@ -180,6 +180,29 @@
          (or (not= (:acting-order before) (:acting-order after))
              (not= (:score before) (:score after))))))
 
+(defn preference-stack-witness? [x]
+  (let [stack (:preference-stack x)
+        ids (mapv :layer/id stack)
+        required-top-level
+        #{:witness/type :witness/version :recorded-at :producer :input :consumer
+          :preference-stack}
+        required-layer-fields #{:layer/id :source :author :basis :folded? :site}
+        expected-layer-ids
+        #{:floor :capability-zone-load :live-goal-outcomes :c-vector-overlays :habit-prior}
+        nonblank? #(and (string? %) (not (str/blank? %)))]
+    (and (= required-top-level (set (keys x)))
+         (= :PreferenceStackWitness (:witness/type x))
+         (= 1 (:witness/version x))
+         (nonblank? (:recorded-at x))
+         (= 'futon2.aif.efe/compute-efe (get-in x [:producer :function]))
+         (vector? stack)
+         (= 5 (count stack))
+         (= expected-layer-ids (set ids))
+         (= (count ids) (count (distinct ids)))
+         (= [:habit-prior] (mapv :layer/id (filter #(false? (:folded? %)) stack)))
+         (every? #(= required-layer-fields (set (keys %))) stack)
+         (every? #(every? nonblank? ((juxt :author :basis :site) %)) stack))))
+
 (def shape-checks
   {"AblationTable" ablation-table?
    "EraTable" era-table?
@@ -194,7 +217,8 @@
    "ExpectedFreeEnergyWitness" expected-free-energy-witness?
    "ExpectedInformationGainWitness" expected-information-gain-witness?
    "GenerativeModelWitness" generative-model-witness?
-   "CascadeDiff" cascade-diff?})
+   "CascadeDiff" cascade-diff?
+   "PreferenceStackWitness" preference-stack-witness?})
 
 (defn shape-result [evidence fixture read-fixture]
   (if-not (contains? shape-checks evidence)
