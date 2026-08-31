@@ -10,7 +10,7 @@
   :fixture
   {:repo "futon2",
    :path "holes/labs/wm-contract/act-gate-reference.edn"},
-  :run-sha "dfb4325a0cb5c2074adb5a89dadf4a5d68a1d727",
+  :run-sha "dfb43255c2d4cc55ed77f3a085f7205d834e890b",
   :contract-sha "ea569ae0f0d4ac98d56302a8ca709a9b38b516c0",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
@@ -22,7 +22,7 @@
   :fixture
   {:repo "futon2",
    :path "holes/labs/wm-contract/aliveness-reference.edn"},
-  :run-sha "dfb4325a0cb5c2074adb5a89dadf4a5d68a1d727",
+  :run-sha "dfb43255c2d4cc55ed77f3a085f7205d834e890b",
   :contract-sha "ea569ae0f0d4ac98d56302a8ca709a9b38b516c0",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
@@ -34,7 +34,7 @@
   :fixture
   {:repo "futon2",
    :path "holes/labs/wm-contract/cohort-reference.edn"},
-  :run-sha "dfb4325a0cb5c2074adb5a89dadf4a5d68a1d727",
+  :run-sha "dfb43255c2d4cc55ed77f3a085f7205d834e890b",
   :contract-sha "ea569ae0f0d4ac98d56302a8ca709a9b38b516c0",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
@@ -46,7 +46,7 @@
   :fixture
   {:repo "futon2",
    :path "holes/labs/wm-contract/control-vocabulary-reference.edn"},
-  :run-sha "dfb4325a0cb5c2074adb5a89dadf4a5d68a1d727",
+  :run-sha "dfb43255c2d4cc55ed77f3a085f7205d834e890b",
   :contract-sha "ea569ae0f0d4ac98d56302a8ca709a9b38b516c0",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
