@@ -6,8 +6,8 @@
  [{:lane :wm-nouns
    :holding :C252-next-glossary-term, :dispatched-at "2026-08-31T23:44:06Z", :job-id "invoke-1788219842881-6217-43b93b04", :expected-by "2026-09-01T00:29:06Z"}
   {:lane :wm-verbs
-   :holding :C251-ledger-durability, :dispatched-at "2026-08-31T23:44:06Z", :job-id "invoke-1788219820897-6215-b2346239", :expected-by "2026-09-01T00:29:06Z"}
+   :holding :C254-atomic-ledger-write, :dispatched-at "2026-08-31T23:49:01Z", :job-id "invoke-1788220110353-6225-fa2d85bf", :expected-by "2026-09-01T00:34:01Z"}
   {:lane :wm-organization
    :holding :C253-envelope-producer, :dispatched-at "2026-08-31T23:45:32Z", :job-id "invoke-1788219928043-6221-326383d4", :expected-by "2026-09-01T00:30:32Z"}
   {:lane :wm-evidence
-   :holding :C250-rereview-workflow-repairs, :dispatched-at "2026-08-31T23:42:53Z", :job-id "invoke-1788219769213-6214-5c7ae1d1", :expected-by "2026-09-01T00:27:53Z"}]}
+   :holding :C255-third-workflow-review, :dispatched-at "2026-08-31T23:49:01Z", :job-id "invoke-1788220137712-6226-f3f3b7d8", :expected-by "2026-09-01T00:34:01Z"}]}
