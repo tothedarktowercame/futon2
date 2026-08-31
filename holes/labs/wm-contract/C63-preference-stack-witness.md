@@ -63,6 +63,29 @@ schema from each record's timestamp and ignores additive trace fields. The
 v16 boundary remains directly inspectable in `:wm-version
 :trace-schema-version` for scheduled records.
 
+## C83 binding
+
+`preferenceStackLiveRecorded` now binds to the serialized witness rather than
+checker source. `checks/preference_stack_binding_check.clj` validates the
+committed EDN with the C63 shape checker, then independently invokes production
+`compute-efe` and passes that scored evaluation object through trace v16. The
+serialized stack, production result, and trace envelope must be equal. This
+closes the parallel-artefact risk: the binding points at the value the live
+scoring and trace path actually carry.
+
+Binding-level controls are intentionally different from the C63 missing-layer
+mutation:
+
+```sh
+clojure -M -m checks.preference-stack-binding-check
+clojure -M -m checks.preference-stack-binding-check --negative absent
+clojure -M -m checks.preference-stack-binding-check --negative malformed
+```
+
+The first negative resolves the binding against a nonexistent evidence path;
+the second feeds unambiguously incomplete EDN. Either must be rejected with
+exit 0 under the C16 control convention; a slipped mutation exits 2.
+
 Canonical C66 verification:
 
 ```sh
