@@ -1,0 +1,10 @@
+{:witnesses "HaveWantArrow"
+ :check {:repo "futon2"
+         :path "checks/have_want_arrow_witness.clj"
+         :entrypoint "-main"}
+ :fixture {:repo "futon2"
+           :path "holes/labs/wm-contract/have-want-arrow-reference.edn"}
+ :run-sha "b7444680a0dbf45da3ee129b250dadb5260c964f"
+ :contract-sha "32169797442212c2ab9180029b34b3021513523c"
+ :result :passed
+ :recorded-at "2026-08-31T23:59:00Z"}
