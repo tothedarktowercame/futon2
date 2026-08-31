@@ -7,8 +7,8 @@
   {:lane :wm-verbs,
    :closed-attributed 8,
    :open-holding 1,
-   :in-flight "C254",
-   :holding :C254-atomic-ledger-write}
+   :in-flight "C259",
+   :holding :C259-readiness-double-gate}
   {:lane :wm-organization,
    :closed-attributed 9,
    :open-holding 1,
@@ -17,8 +17,8 @@
   {:lane :wm-evidence,
    :closed-attributed 7,
    :open-holding 1,
-   :in-flight "C255",
-   :holding :C255-third-workflow-review}],
+   :in-flight "C258",
+   :holding :C258-attack-atomicity}],
  :schema :wm/workflow-report-v2,
  :since "2026-08-30T00:00:00Z",
  :semantics
@@ -42,8 +42,8 @@
    :sha256-prefix "f86925baeced963a"},
   :lane-registry
   {:path "futon2/holes/labs/wm-contract/lane-registry.edn",
-   :revision "6f954c9",
-   :sha256-prefix "62d9ca0ebdd9d99f",
+   :revision "5760fc8",
+   :sha256-prefix "a35d6026a46c0ebc",
    :as-of "2026-08-31T15:39:14.434945104Z"},
   :decisions
   {:path "futon2/holes/problems/DECISIONS-PENDING.md",
@@ -71,7 +71,7 @@
   :open-dispatched 1,
   :pending-decisions 13},
  :ledger-frontier 248,
- :as-of "2026-08-31T23:52:32.922755567Z",
+ :as-of "2026-08-31T23:55:48.279117557Z",
  :attribution
  {:systematic-from "C240",
   :systematic-run-length 9,
@@ -118,6 +118,6 @@
    "C248"],
   :note
   "per-lane counts cover only cases whose ledger heading names a lane. :systematic-window? is false when the continuous run is a single case, in which case :systematic-from names a coincidence rather than a window and should not be rendered as one. :systematic-from is exact coverage over the LEDGER only -- every case number from it to :ledger-frontier carries an attribution; :frontier is larger because it also counts open registry holdings, which are not ledger attributions -- and every heading inside that window must be classifiable or the generator fails. Cases below it are counted in :cases-in-ledger without a lane, so these are not a campaign census."},
- :frontier 257,
+ :frontier 259,
  :schema-change
  "v1 -> v2 (C244): :dispatched/:completed/:blocked replaced by :closed-attributed/:open-holding, because no dispatch log exists and :dispatched claimed one"}
