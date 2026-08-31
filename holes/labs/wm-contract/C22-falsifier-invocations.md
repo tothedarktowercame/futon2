@@ -358,3 +358,21 @@ bb checks/control_map_figure_agreement_check.clj
 The positive receipt has nine mapped hops: three in the original edge layer
 and six in the separately counted measured layer. The negative control appends
 one unmapped hop and succeeds only when the checker rejects it.
+
+## C84 — preemptive repair build gate
+
+```sh
+bb -cp . checks/preemptive_repair_suite.clj
+bb -cp . checks/preemptive_repair_suite.clj --negative-gate
+clojure -T:build ci                         # futon2 CI boundary
+cd /home/joe/code/futon3 && clojure -X:test # futon3 repository gate
+```
+
+Both complete test suites contain `preemptive-repair-gate-test`, so their normal gate commands consume the
+same combined result. Acceptance, artefact boundary, stale baseline, era blindness, and record conflict
+findings hard-fail. Absence coercion is report-only during C81; its count is emitted on every run and may
+fall to zero without changing the test or policy. Promotion to hard-fail is an explicit post-C81 action.
+
+`--negative-gate` injects a finding into the combined acceptance result after the underlying lint runs. It
+therefore proves the build-level consumer rejects a finding, independently of each lint's own mutation
+control. Exit convention: 0 pass, 1 corpus failure, 2 gate mutation slipped.
