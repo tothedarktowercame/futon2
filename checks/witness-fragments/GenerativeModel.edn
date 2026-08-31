@@ -5,6 +5,6 @@
  :fixture {:repo "futon2"
            :path "holes/labs/wm-contract/generative-model-reference.edn"}
  :run-sha "7b31da1fe248a05b35940e9a68544b4ffbef36a7"
- :contract-sha "309d1f4874e4ce713ce813ca26a75a5c323eb734"
+ :contract-sha "623aeef009afefc55710392fc79c4297ff129200"
  :result :passed
  :recorded-at "2026-09-01T00:20:00Z"}

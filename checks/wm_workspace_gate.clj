@@ -45,7 +45,7 @@
   ;; must be classified here before the gate can pass; it is never guessed safe.
   #{"ablation_exact_dyadic_witness.clj" "absence_scoring_counterfactual.clj"
     "absent_is_loud_lint.clj" "belief_update_check.clj"
-    "belief_variance_inputs.clj" "cascade_diff_witness.clj" "contract_lint.clj"
+    "belief_variance_inputs.clj" "cascade_diff_witness.clj" "closed_record_pointer_check.clj" "contract_lint.clj"
     "control_map_figure_agreement_check.clj" "control_map_lint.clj"
     "control_organization_check.clj" "expected_free_energy_witness.clj"
     "expected_information_gain_witness.clj" "fold_turn_quarantine_check.clj"
@@ -81,6 +81,7 @@
            "--report" "/tmp/wm-workspace-contract-strict.edn"
            "--authority" (authority)]}
    {:name :holder :argv ["bb" "checks/holder_check.clj"]}
+   {:name :closed-record-pointers :argv ["bb" "checks/closed_record_pointer_check.clj"]}
    {:name :figure-agreement :argv ["bb" "checks/control_map_figure_agreement_check.clj"]}
    {:name :organization :argv ["bb" "-cp" "." "checks/control_organization_check.clj"]}
    {:name :hyper-edge-shape :argv ["bb" "-cp" "." "checks/hyper_edge_exemplar_check.clj"]}
