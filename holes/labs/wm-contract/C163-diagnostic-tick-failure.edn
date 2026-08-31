@@ -1,0 +1,30 @@
+{:attempt/id "bounded-1788207884865-c163-v20-diagnostic"
+ :attempted-at "2026-08-31T20:24:44.903685+00:00"
+ :command "clojure -M -m futon2.run-tick-once 14"
+ :selector-seam "stub:first-ranked-authorized-mission"
+ :production-tick-executed? false
+ :trace-written? false
+ :tick-run-record-written? false
+ :failure
+ {:class "java.lang.NullPointerException"
+  :message "Cannot invoke Object.getClass() because x is null"
+  :phase :channel-priority-sort
+  :site "scripts/futon2/report/war_machine.clj:4037"
+  :cause "sort-by compares a nil :gap with > before the later positive-gap filter"
+  :stack-receipt-sha256 "feb33e7892e108cdc9ab44dc6eaf019917b5d18b2916985fe72256fa73c5ca75"}
+ :resource
+ {:status :clean
+  :command-exit 1
+  :wrapper-exit 125
+  :pids-events-max-delta 0
+  :native-thread-exhaustion false
+  :tasks-peak 72
+  :wrapper-receipt-sha256 "03d3ca7275c635ba748072b95cec58a4634ee69a65d1cf5c2f751eec5bb48710"}
+ :preexisting-trace
+ {:path "data/wm-trace/wm-trace-2026-08-31.edn"
+  :bytes 1568426
+  :last-modified "2026-08-31T14:30:41.411359168Z"
+  :sha256 "93ea0b0de134c24eb5a146aaba25c1be7e1ccab5af1447aa073d10074fba95fd"}
+ :blocked-acceptance
+ [:v20-record-emitted :all-reader-readback :operational-certificate]
+ :consumer :wm-verbs/C163-and-claude-20}
