@@ -10,6 +10,7 @@
 
 (def default-trace-dir "/home/joe/code/futon2/data/wm-trace")
 (def default-boundary 20260714)
+(def current-r8-contract :r8/stored-f-controller-v1)
 (def default-recorded-report
   "holes/labs/wm-contract/R8-D2-report.edn")
 (def recorded-census {:missing-F-computable 755
@@ -147,15 +148,35 @@
      :identities identities
      :census (get-in report [:r8CensusWmTrace :counts])}))
 
-(defn- record-conforms? [boundary {:keys [file-date shape disposition value]}]
+(defn contract-era
+  "Choose the R8 contract from the record-carried tag. Only unversioned
+   historical records may use the filename-day fallback."
+  [boundary {:keys [file-date value]}]
+  (let [declared (:producer-contract value)]
+    (cond
+      (= current-r8-contract declared)
+      {:era :stored-f-controller :source :producer-contract
+       :status :declared :contract declared}
+
+      (nil? declared)
+      {:era (if (<= boundary file-date) :stored-f-controller :pre-stored-f)
+       :source :filename-day-fallback :status :legacy-era :contract nil}
+
+      :else
+      {:era :malformed :source :producer-contract :status :malformed
+       :contract declared :reason :unsupported-producer-contract})))
+
+(defn- record-conforms? [boundary {:keys [shape disposition value] :as record}]
   (let [stored? (some? (:variational-free-energy value))
         gain? (some? (:selection-gain value))
         controller? (= :controller-map shape)
-        suffix? (<= boundary file-date)]
+        contract (contract-era boundary record)
+        current? (= :stored-f-controller (:era contract))]
     (and (not= :unexplained-regime shape)
+         (not= :malformed (:status contract))
          (= stored? gain?)
          (= stored? controller?)
-         (= stored? suffix?)
+         (= stored? current?)
          (or (= :insufficient-inputs disposition)
              (try (finite? (recompute-f value))
                   (catch Exception _ false))))))
@@ -251,7 +272,8 @@
   ([{:keys [files records]} boundary snapshot-expected-census snapshot]
   (let [classified (mapv #(assoc %
                                  :disposition (disposition (:value %))
-                                 :shape (free-energy-shape (:value %)))
+                                 :shape (free-energy-shape (:value %))
+                                 :contract-era (contract-era boundary %))
                          records)
         by-disposition (group-by :disposition classified)
         census (into {} (map (fn [[kind xs]] [kind (count xs)]))
@@ -265,26 +287,28 @@
                                classified)
         with-stored (filter #(some? (:variational-free-energy (:value %)))
                             classified)
-        before-era (filter #(< (:file-date %) boundary) classified)
-        after-era (filter #(<= boundary (:file-date %)) classified)
+        before-era (filter #(= :pre-stored-f (get-in % [:contract-era :era])) classified)
+        after-era (filter #(= :stored-f-controller (get-in % [:contract-era :era])) classified)
         era-violations
         (reduce
-         (fn [result {:keys [file-date shape value] :as record}]
+         (fn [result {:keys [shape value contract-era] :as record}]
            (let [stored? (some? (:variational-free-energy value))
                  gain? (some? (:selection-gain value))
                  controller? (= :controller-map shape)
-                 suffix? (<= boundary file-date)
+                 current? (= :stored-f-controller (:era contract-era))
                  add (fn [m key] (update m key conj (tick-id record)))]
              (cond-> result
+               (= :malformed (:status contract-era)) (add :malformed-contract)
                (and stored? (not gain?)) (add :stored-without-gain)
                (and gain? (not stored?)) (add :gain-without-stored)
                (and stored? (not controller?)) (add :stored-not-controller)
                (and controller? (not stored?)) (add :controller-without-stored)
-               (and stored? (not suffix?)) (add :stored-before-boundary)
-               (and suffix? (not stored?)) (add :suffix-without-stored))))
+               (and stored? (not current?)) (add :stored-outside-current-contract)
+               (and current? (not stored?)) (add :current-contract-without-stored))))
          {:stored-without-gain [] :gain-without-stored []
           :stored-not-controller [] :controller-without-stored []
-          :stored-before-boundary [] :suffix-without-stored []}
+          :stored-outside-current-contract [] :current-contract-without-stored []
+          :malformed-contract []}
          classified)
         stored-computed (get by-computed-disposition :stored-F [])
         stored-deltas (mapv #(Math/abs (- (double (:computed-f %))
@@ -376,9 +400,10 @@
        :storedF-iff-controllerMap
        (+ (count (:stored-not-controller era-violations))
           (count (:controller-without-stored era-violations)))
-       :storedF-iff-dateSuffix
-       (+ (count (:stored-before-boundary era-violations))
-          (count (:suffix-without-stored era-violations)))}
+       :storedF-iff-contractEra
+       (+ (count (:stored-outside-current-contract era-violations))
+          (count (:current-contract-without-stored era-violations))
+          (count (:malformed-contract era-violations)))}
       :date-margin {:latest-pre-boundary (when (seq before-dates)
                                            (apply max before-dates))
                     :earliest-post-boundary (when (seq suffix-dates)
@@ -386,7 +411,11 @@
       :identity-conjuncts {:status :source-consistency
                            :write-site {:file "scripts/futon2/report/war_machine.clj"
                                         :lines [4664 4665 4687]}}
-      :date-conjunct {:status :contingent-non-interleaving}}
+      :contract-discriminator
+      {:status :producer-declared-with-legacy-fallback
+       :current current-r8-contract
+       :legacy-fallback :filename-day
+       :source-counts (frequencies (map #(get-in % [:contract-era :source]) classified))}}
      :F
      {:missing-F-computable (distribution missing-values)
       :stored-F (distribution (mapv :computed-f stored-computed))
@@ -550,7 +579,7 @@
                               (get-in report [:recorded-census-delta :kind]))
                            (some #{target} (:stored-without-gain violations))
                            (some #{target} (:stored-not-controller violations))
-                           (some #{target} (:stored-before-boundary violations)))]
+                           (some #{target} (:stored-outside-current-contract violations)))]
           (if caught?
             (do (println "r8-f-contract: PASS negative era mutation rejected exit-convention=0-pass/1-fail")
                 (System/exit 0))

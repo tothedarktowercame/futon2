@@ -63,6 +63,7 @@
       (is (contains? r :observation))
       (is (contains? r :free-energy))
       (is (= 0.0125 (:variational-free-energy r)))
+      (is (= trace/r8-producer-contract (:producer-contract r)))
       (is (contains? r :ranked-actions))
       (is (contains? r :decision))
       (is (contains? r :mode)))))
@@ -96,6 +97,11 @@
       (is (= :observed
              (get-in record
                      [:observation-envelope :channels :loop-health :variant]))))))
+
+(deftest r8-producer-contract-write-read-preservation-test
+  (trace/write-trace! sample-judge-output :dir *tmpdir* :date-str "2026-08-31")
+  (let [[record] (trace/read-trace :dir *tmpdir* :date-str "2026-08-31")]
+    (is (= trace/r8-producer-contract (:producer-contract record)))))
 
 (deftest support-typed-scoring-shadow-is-non-authoritative-test
   (let [ranked [{:action {:type :a} :rank 1 :controller-score 0.0

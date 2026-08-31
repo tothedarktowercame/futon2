@@ -192,10 +192,18 @@
     18 — adds the support-typed scoring shadow. It records current and masked
          scores, support/absence provenance, comparability, and counterfactual
          rank while retaining zero selection authority (2026-08-31).
-    19 — adds the tri-state :avoidance-by-channel diagnostic; missing
-         observations are :unknown rather than tested as numeric zero
-         (2026-08-31)."
-  19)
+     19 — adds the tri-state :avoidance-by-channel diagnostic; missing
+          observations are :unknown rather than tested as numeric zero
+          (2026-08-31).
+     20 — declares :producer-contract :r8/stored-f-controller-v1. R8 readers
+          use this record-carried contract rather than inferring new-record
+          semantics from the trace filename's day (C129, 2026-08-31)."
+  20)
+
+(def r8-producer-contract
+  "Contract carried by trace records that require stored variational F,
+   selection gain, and the controller-map free-energy shape."
+  :r8/stored-f-controller-v1)
 
 (defn- preference-stack-evidence
   "Preserve the exact stack carried by ranked evaluation objects without
@@ -383,6 +391,7 @@
         observed-envelope (observation/observation-envelope observed)]
     (cond->
    {:timestamp (str (Instant/now))
+    :producer-contract r8-producer-contract
     :mu-pre (or (:belief-pre judge-output) (:belief judge-output))
     :mu-post (:belief judge-output)
     :observation observed
