@@ -1,0 +1,22 @@
+{
+  "acceptances": [
+    {
+      "id": "C152-absence-decisions",
+      "component": "absence-lint",
+      "signature": {"exit": 1, "findings": 7, "dispositions": ["blocked"]},
+      "reason": "Seven action-affecting absence repairs require operator decisions; they remain findings, not defects silently cleared.",
+      "reference": "holes/labs/wm-contract/C130-absence-decisions.md",
+      "review-by": "2026-09-01T12:00:00Z",
+      "clears-when": "Joe resolves the C130 decisions or the exact finding count/disposition changes."
+    },
+    {
+      "id": "C152-single-stale-holding",
+      "component": "lane-registry",
+      "signature": {"exit": 1, "errors": [":stale-holding"]},
+      "reason": "One completed lane is awaiting commissioner redispatch; this measures dispatcher discipline rather than repository validity.",
+      "reference": "holes/labs/wm-contract/C152-accepted-red-status.md",
+      "review-by": "2026-09-01T00:00:00Z",
+      "clears-when": "The commissioner records or redispatches the completed holding; any additional error class is new red."
+    }
+  ]
+}

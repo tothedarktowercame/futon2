@@ -465,6 +465,12 @@ gate.
 As of C144 it also rejects any collision between the report's qualified
 contract-judgement and Lean-label vocabularies.
 
+As of C152 it additionally proves accepted-red policy semantics: an exact,
+referenced, unexpired acceptance yields `DEGRADED-AS-EXPECTED`; an injected
+unaccepted red and an expired acceptance both yield `DEGRADED-NEW`. The report
+uses exit 0 for `OK` and `DEGRADED-AS-EXPECTED`, and exit 1 only for
+`DEGRADED-NEW`; accepted findings remain enumerated in the output.
+
 C148's `TickRunRecord` shape control (valid EDN with a route hop missing
 `toNode`) is exercised by the normal futon2 suite:
 

@@ -15,8 +15,8 @@ pre-merge:
 	$(MAKE) ci
 	$(MAKE) workspace-gate
 
-# Generated, non-short-circuiting operational report. A red component is
-# rendered and makes the command nonzero after all sections are printed.
+# Generated, non-short-circuiting operational report. New/unaccepted red is
+# nonzero; exact, referenced, expiring accepted red remains visible at exit 0.
 status:
 	python3 scripts/wm_status_report.py
 

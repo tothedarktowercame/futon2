@@ -10,8 +10,10 @@ import sys
 import time
 
 ROOT = "/home/joe/code/futon2"
+P4NG = "/home/joe/code/p4ng"
 BG = "/home/joe/code/futon3c/scripts/bg.py"
 CONTRACT = "/home/joe/code/mathlib4/DarkTower/WarMachine/holes-contract.json"
+ACCEPTANCES = ROOT + "/checks/wm-status-accepted-red.json"
 CONTRACT_DISPLAY = {"conformant": "shape-conformant",
                     "refused-implementation": "implementation-refused",
                     "witnessed": "binding-passed-shape-unchecked"}
@@ -88,6 +90,34 @@ def vocabularies_disjoint(holes, lean_labels):
     return set(holes["classification"]).isdisjoint(lean_labels)
 
 
+def classify_red(components, acceptances, now):
+    """Return accepted/new findings. Acceptance matches are deliberately exact."""
+    accepted, new, used = [], [], set()
+    for finding in components:
+        if not finding["red"]:
+            continue
+        match = next((a for a in acceptances
+                      if a["component"] == finding["component"]
+                      and a["signature"] == finding["signature"]), None)
+        if match is None:
+            new.append(dict(finding, reason="no exact active acceptance"))
+            continue
+        try:
+            expires = datetime.datetime.fromisoformat(match["review-by"].replace("Z", "+00:00"))
+        except (KeyError, ValueError):
+            new.append(dict(finding, reason="acceptance has invalid review-by"))
+            continue
+        reference = os.path.join(ROOT, match.get("reference", ""))
+        if expires <= now or not os.path.isfile(reference) or not match.get("reason") or not match.get("clears-when"):
+            why = "acceptance expired" if expires <= now else "acceptance metadata/reference invalid"
+            new.append(dict(finding, reason=why))
+            continue
+        used.add(match["id"])
+        accepted.append({"finding": finding, "acceptance": match})
+    stale = [a for a in acceptances if a["id"] not in used]
+    return accepted, new, stale
+
+
 def source_control():
     holes = {"count": 11, "classification": {"shape-conformant": 7},
              "source": "contract_lint-live-report"}
@@ -99,10 +129,24 @@ def source_control():
     vocabulary_positive = vocabularies_disjoint(holes, sorries["classification"])
     colliding = dict(sorries["classification"], **{"shape-conformant": 1})
     collision_rejected = not vocabularies_disjoint(holes, colliding)
-    passed = positive and substitution_rejected and vocabulary_positive and collision_rejected
+    now = datetime.datetime(2026, 8, 31, tzinfo=datetime.timezone.utc)
+    sample = {"id": "control", "component": "accepted-control", "signature": {"count": 1},
+              "reason": "control", "reference": "Makefile", "review-by": "2026-09-01T00:00:00Z",
+              "clears-when": "control ends"}
+    accepted, new, _ = classify_red(
+        [{"component": "accepted-control", "red": True, "signature": {"count": 1}}], [sample], now)
+    _, injected_new, _ = classify_red(
+        [{"component": "injected-unaccepted", "red": True, "signature": {"count": 1}}], [sample], now)
+    expired = dict(sample, id="expired", **{"review-by": "2026-08-30T00:00:00Z"})
+    _, expired_new, _ = classify_red(
+        [{"component": "accepted-control", "red": True, "signature": {"count": 1}}], [expired], now)
+    policy_control = len(accepted) == 1 and not new and len(injected_new) == 1 and len(expired_new) == 1
+    passed = positive and substitution_rejected and vocabulary_positive and collision_rejected and policy_control
     print("wm-status-source-control:", "PASS" if passed else "FAIL",
           f"positive={positive} substituted-hole-as-sorry-rejected={substitution_rejected}",
           f"vocabularies-disjoint={vocabulary_positive} injected-collision-rejected={collision_rejected}",
+          f"accepted-red={len(accepted)==1} injected-unaccepted-is-new={len(injected_new)==1} "
+          f"expired-is-new={len(expired_new)==1}",
           "exit-convention=0-pass/1-fail")
     return 0 if passed else 1
 
@@ -110,7 +154,8 @@ def source_control():
 def main():
     if "--source-control" in sys.argv[1:]:
         return source_control()
-    timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    now = datetime.datetime.now(datetime.timezone.utc)
+    timestamp = now.isoformat()
     stamp = str(int(time.time()))
     futon2_job = launch_suite("clojure -T:build ci", ROOT, f"status-{stamp}-futon2")
     futon3_job = launch_suite("clojure -X:test", "/home/joe/code/futon3", f"status-{stamp}-futon3")
@@ -154,6 +199,11 @@ def main():
     lanes = run(["bb", "checks/lane_registry_check.clj"])
     lane_rows = [line for line in lanes.stdout.splitlines() if line.startswith("{:lane ")]
     lane_summary = lanes.stdout.splitlines()[-1] if lanes.stdout.splitlines() else "lane summary absent"
+    lane_error_kinds = sorted(re.findall(r':error\s+(:[\w-]+)', lanes.stdout + lanes.stderr))
+
+    drift = run(["python3", "detect_drift.py"], cwd=P4NG)
+    drift_count = sum(int(n) for n in re.findall(r'^(?:DRIFTED|VANISHED|NEW|NO LONGER CITED) \((\d+)\)',
+                                                  drift.stdout, re.MULTILINE))
 
     futon2, f2_counts = suite_status(futon2_job)
     futon3, f3_counts = suite_status(futon3_job)
@@ -199,12 +249,49 @@ def main():
     for row in lane_rows:
         print(row)
 
-    component_red = [gate.returncode, strict.returncode, sorry_check.returncode, absence.returncode,
-                     obligations.returncode, lanes.returncode,
-                     futon2["receipt"].get("outer-exit", 1), futon3["receipt"].get("outer-exit", 1)]
+    print("\nREFERENT DRIFT")
+    print(f"verdict={'PASS' if drift.returncode == 0 else 'FAIL'} exit={drift.returncode} findings={drift_count} "
+          "source=p4ng/detect_drift.py")
+
+    absence_findings = int(re.search(r'findings=\s*(\d+)', absence_line).group(1))
+    absence_dispositions = sorted(set(re.findall(r':disposition\s+:([\w-]+)', absence.stdout)))
+    components = [
+        {"component": "workspace-gate", "red": gate.returncode != 0, "signature": {"exit": gate.returncode}},
+        {"component": "strict-lint", "red": strict.returncode != 0, "signature": {"exit": strict.returncode}},
+        {"component": "sorry-category", "red": sorry_check.returncode != 0, "signature": {"exit": sorry_check.returncode}},
+        {"component": "absence-lint", "red": absence.returncode != 0,
+         "signature": {"exit": absence.returncode, "findings": absence_findings,
+                       "dispositions": absence_dispositions}},
+        {"component": "obligations", "red": obligations.returncode != 0, "signature": {"exit": obligations.returncode}},
+        {"component": "lane-registry", "red": lanes.returncode != 0,
+         "signature": {"exit": lanes.returncode, "errors": lane_error_kinds}},
+        {"component": "referent-drift", "red": drift.returncode != 0,
+         "signature": {"exit": drift.returncode, "findings": drift_count}},
+        {"component": "futon2-suite", "red": futon2["receipt"].get("outer-exit", 1) != 0,
+         "signature": {"exit": futon2["receipt"].get("outer-exit", 1)}},
+        {"component": "futon3-suite", "red": futon3["receipt"].get("outer-exit", 1) != 0,
+         "signature": {"exit": futon3["receipt"].get("outer-exit", 1)}}]
+    acceptances = json.load(open(ACCEPTANCES, encoding="utf-8"))["acceptances"]
+    accepted, new_red, stale_acceptances = classify_red(components, acceptances, now)
+
+    print("\nACCEPTED RED (enumerated; exact signatures only)")
+    for item in accepted:
+        a = item["acceptance"]
+        print(f"{a['id']}: component={a['component']} signature={json.dumps(a['signature'], sort_keys=True)} "
+              f"reason={a['reason']} reference={a['reference']} review-by={a['review-by']} "
+              f"clears-when={a['clears-when']}")
+    print(f"active={len(accepted)} unused-or-superseded={len(stale_acceptances)}")
+    for acceptance in stale_acceptances:
+        print(f"UNUSED id={acceptance['id']} component={acceptance['component']} "
+              f"review-by={acceptance['review-by']} clears-when={acceptance['clears-when']}")
+    for finding in new_red:
+        print(f"NEW component={finding['component']} signature={json.dumps(finding['signature'], sort_keys=True)} "
+              f"reason={finding['reason']}")
+
     print("\nOVERALL")
-    print("DEGRADED" if any(component_red) else "PASS")
-    return 1 if any(component_red) else 0
+    verdict = "DEGRADED-NEW" if new_red else ("DEGRADED-AS-EXPECTED" if accepted else "OK")
+    print(f"{verdict} exit={1 if new_red else 0} convention=OK-0/DEGRADED-AS-EXPECTED-0/DEGRADED-NEW-1")
+    return 1 if new_red else 0
 
 
 if __name__ == "__main__":
