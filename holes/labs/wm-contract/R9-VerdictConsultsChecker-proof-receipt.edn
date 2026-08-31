@@ -1,14 +1,14 @@
 {:receipt/type :LeanProofReceipt
  :receipt/version 1
- :recorded-at "2026-08-31T17:35:00Z"
+ :recorded-at "2026-08-31T23:45:00Z"
  :theorem "DarkTower.WarMachine.Holes.r9VerdictConsultsChecker"
  :proof-source {:repo "mathlib4"
                 :path "DarkTower/WarMachine/Holes.lean"
-                :git-sha "187ff33bfd3e9d6e518fe241bc1029b48996cdfd"
-                :sha256 "2a824b941b658f6afb0748a5556e6ac21b2580c661dfe2e03fe304327f41cf8c"}
+                :git-sha "8d4f5b3488689e03fb038f0bc81c9200d75031a8"
+                :sha256 "027fb62ac70f7fefeb8e9d72c9b09143c5ad596845c33391f31d489935edbc40"}
  :imported-module {:repo "mathlib4"
                    :path "DarkTower/WarMachine/Holes.lean"
-                   :git-sha "187ff33bfd3e9d6e518fe241bc1029b48996cdfd"}
+                   :git-sha "8d4f5b3488689e03fb038f0bc81c9200d75031a8"}
  :elaborator {:command ["lake" "env" "lean"] :cwd "/home/joe/code/mathlib4"}
  :result {:exit 0 :axioms ["propext"]}
  :consumer {:binding "r9VerdictConsultsChecker"
