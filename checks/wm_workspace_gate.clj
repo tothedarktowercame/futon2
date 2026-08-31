@@ -44,6 +44,7 @@
   ;; Discovery is a completeness alarm, not an execution policy.  A new file
   ;; must be classified here before the gate can pass; it is never guessed safe.
   #{"ablation_exact_dyadic_witness.clj" "absence_scoring_counterfactual.clj"
+    "ambiguity_witness.clj"
     "absent_is_loud_lint.clj" "belief_update_check.clj"
     "belief_variance_inputs.clj" "cascade_diff_witness.clj" "closed_record_pointer_check.clj" "contract_lint.clj"
     "control_map_figure_agreement_check.clj" "control_map_lint.clj"
@@ -81,6 +82,7 @@
            "--contract" contract "--registry" "checks/witness-registry.edn"
            "--report" "/tmp/wm-workspace-contract-strict.edn"
            "--authority" (authority)]}
+   {:name :ambiguity :argv ["bb" "checks/ambiguity_witness.clj"]}
    {:name :holder :argv ["bb" "checks/holder_check.clj"]}
    {:name :closed-record-pointers :argv ["bb" "checks/closed_record_pointer_check.clj"]}
    {:name :figure-agreement :argv ["bb" "checks/control_map_figure_agreement_check.clj"]}
@@ -104,7 +106,9 @@
     :argv ["python3" "detect_drift.py"]}])
 
 (defn control-commands []
-  [{:name :c116-removed-ledger-row
+  [{:name :c157-perturbed-entropy
+    :argv ["bb" "checks/ambiguity_witness.clj" "--negative-control"]}
+   {:name :c116-removed-ledger-row
     :argv ["bb" "-cp" "." "checks/r9_independence.clj" "--negative-ledger"
            "--report" "/tmp/wm-gate-r9-ledger.edn" "--lean" "/tmp/wm-gate-r9-ledger.lean"]}
    {:name :c116-changed-o7-source
