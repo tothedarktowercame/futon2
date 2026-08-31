@@ -4,10 +4,10 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C257-next-glossary-term, :dispatched-at "2026-08-31T23:50:42Z", :job-id "invoke-1788220237593-6228-0ae8e9c2", :expected-by "2026-09-01T00:35:42Z"}
+   :holding :C261-next-glossary-term, :dispatched-at "2026-08-31T23:57:41Z", :job-id "invoke-1788220656974-6242-097f091c", :expected-by "2026-09-01T00:42:41Z"}
   {:lane :wm-verbs
    :holding :C259-readiness-double-gate, :dispatched-at "2026-08-31T23:54:54Z", :job-id "invoke-1788220490206-6238-63abc222", :expected-by "2026-09-01T00:39:54Z"}
   {:lane :wm-organization
-   :holding :C256-click-run-id-port, :dispatched-at "2026-08-31T23:50:42Z", :job-id "invoke-1788220214215-6227-dbfe0995", :expected-by "2026-09-01T00:35:42Z"}
+   :holding :C260-production-run-record, :dispatched-at "2026-08-31T23:57:41Z", :job-id "invoke-1788220635108-6241-968e7a62", :expected-by "2026-09-01T00:42:41Z"}
   {:lane :wm-evidence
    :holding :C258-attack-atomicity, :dispatched-at "2026-08-31T23:54:54Z", :job-id "invoke-1788220465618-6237-d1898d70", :expected-by "2026-09-01T00:39:54Z"}]}
