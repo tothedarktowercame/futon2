@@ -21,6 +21,10 @@ The 18 absence findings are grouped sites from the pinned C12 census, not a new 
 
 After C77 was committed, four lints found their own `negative-text` specimens. This was not a repository regression: an untracked implementation file was absent from C77's tracked-file corpus, then became visible after commit. The reusable exemption is an explicit `PREEMPTIVE-REPAIR-SPECIMENS-BEGIN` / `PREEMPTIVE-REPAIR-SPECIMENS-END` region. The loader masks only that region while preserving newlines; it does not exempt `checks/` or the containing file. Direct negative-control rows bypass corpus loading and therefore still exercise the specimens. This is class 9's detector/fixture form: one file truthfully contains both the detector and examples of the state it rejects.
 
+### C81 amendment — live absence population dispositioned
+
+`checks/absence-coercion-dispositions.edn` covers all 18 grouped C12 rows: one producer boundary already fixed, one explicit serialization-compatibility exemption, and sixteen named blockers. The canonical absence scan is therefore 16, not 18. Its exact-coverage guard makes an added or silently removed census row an error rather than an implicit exemption.
+
 ## Canonical invocations
 
 For each stem below, run `bb -cp . checks/preemptive_<stem>_lint.clj` and append `--negative` for its mutation:

@@ -1,0 +1,29 @@
+{:delivery :C81
+ :date "2026-08-31"
+ :authority "holes/labs/wm-contract/C12-absence-census.edn"
+ :consumer "checks/preemptive_absence_coercion_lint.clj"
+ :allowed-dispositions #{:fix-now :exempt-with-reason :blocked}
+ :rows
+ [{:at "src/futon2/aif/observation.clj:117-145" :disposition :fix-now
+   :control "observation-status / observation-envelope preserve :present zero versus reason-bearing :absent"
+   :implemented-by "f94df39"}
+  {:at "src/futon2/aif/observation.clj:152" :disposition :blocked :blocked-on :value-status-vector-migration}
+  {:at "src/futon2/aif/free_energy.clj:23" :disposition :blocked :blocked-on :tagged-free-energy-channel-api}
+  {:at "src/futon2/aif/free_energy.clj:31" :disposition :blocked :blocked-on :absent-avoidance-pass-through-semantics}
+  {:at "src/futon2/aif/free_energy.clj:50" :disposition :blocked :blocked-on :risk-diagnostics-consume-status}
+  {:at "src/futon2/aif/free_energy.clj:61-63" :disposition :blocked :blocked-on :epistemic-diagnostic-absence-semantics}
+  {:at "src/futon2/aif/free_energy.clj:70" :disposition :blocked :blocked-on :absent-avoidance-pass-through-semantics}
+  {:at "src/futon2/aif/free_energy.clj:98-100" :disposition :blocked :blocked-on :prediction-triple-refusal-migration}
+  {:at "src/futon2/aif/free_energy.clj:138-143" :disposition :blocked :blocked-on :infer-mode-tagged-envelope}
+  {:at "src/futon2/aif/precision.clj:166-167" :disposition :blocked :blocked-on :validated-error-record-producer}
+  {:at "src/futon2/aif/precision.clj:206" :disposition :blocked :blocked-on :validated-error-record-producer}
+  {:at "src/futon2/aif/forward_model.clj:339" :disposition :blocked :blocked-on :variance-presence-model}
+  {:at "src/futon2/aif/policy.clj:144-145" :disposition :blocked :blocked-on :policy-consumes-channel-status}
+  {:at "src/futon2/aif/rollout.clj:129" :disposition :blocked :blocked-on :validated-rollout-step-producer}
+  {:at "src/futon2/aif/rollout.clj:158" :disposition :blocked :blocked-on :unscored-move-refusal-variant}
+  {:at "src/futon2/aif/adapters/fulab.clj:81" :disposition :blocked :blocked-on :adapter-no-error-measurement-variant}
+  {:at "src/futon2/aif/trace.clj:249-260" :disposition :exempt-with-reason
+   :exemption :versioned-read-compatibility
+   :reason "Legacy/partial trace reads preserve old records; this is serialization compatibility, not a numeric measurement or score. A schema-version migration remains separately named."}
+  {:at "src/futon2/aif/belief.clj:1040-1052" :disposition :blocked :blocked-on :precision-pass-through-tag}]
+ :summary {:fix-now 1 :exempt-with-reason 1 :blocked 16}}

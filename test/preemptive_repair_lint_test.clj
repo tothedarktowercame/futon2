@@ -22,6 +22,12 @@
     (is (empty? (lint/acceptance-findings
                  [{:repo :fixture :path "checks/specimen.clj" :text masked}])))))
 
+(deftest absence-dispositions-cover-and-narrow-the-c12-population
+  (let [findings (lint/absence-findings [])]
+    (is (= 16 (count findings)))
+    (is (every? #(= :blocked (:disposition %)) findings))
+    (is (not-any? #(re-find #"observation.clj:117-145|trace.clj:249-260" (:path %)) findings))))
+
 (when (= *file* (System/getProperty "babashka.file"))
   (let [{:keys [fail error]} (run-tests)]
     (System/exit (if (zero? (+ fail error)) 0 1))))

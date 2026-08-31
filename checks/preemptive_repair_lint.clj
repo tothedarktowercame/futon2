@@ -79,14 +79,22 @@
            (filter #(re-find #"(?:^|/)(?:test|checks)/" (:path %)) rows))))
 
 (defn absence-findings [_rows]
-  (let [census (edn/read-string (slurp "/home/joe/code/futon2/holes/labs/wm-contract/C12-absence-census.edn"))]
-    (->> (:sites census)
-         (remove #(contains? #{:explicit-model-initialisation :explicit-configuration-default
-                               :sparse-algebra-identity :model-identity :explicit-adapter-policy}
-                             (:status %)))
-         (filter #(or (= false (:consumer-could-tell? %))
-                      (= false (:consumer-could-tell-before? %))))
+  (let [census (edn/read-string (slurp "/home/joe/code/futon2/holes/labs/wm-contract/C12-absence-census.edn"))
+        dispositions (edn/read-string (slurp "/home/joe/code/futon2/checks/absence-coercion-dispositions.edn"))
+        by-at (into {} (map (juxt :at identity) (:rows dispositions)))
+        unsafe (->> (:sites census)
+                    (remove #(contains? #{:explicit-model-initialisation :explicit-configuration-default
+                                          :sparse-algebra-identity :model-identity :explicit-adapter-policy}
+                                        (:status %)))
+                    (filter #(or (= false (:consumer-could-tell? %))
+                                 (= false (:consumer-could-tell-before? %)))))]
+    (when-not (= (set (map :at unsafe)) (set (keys by-at)))
+      (throw (ex-info "absence dispositions do not cover the live C12 population"
+                      {:census (set (map :at unsafe)) :dispositions (set (keys by-at))})))
+    (->> unsafe
+         (filter #(= :blocked (:disposition (by-at (:at %)))))
          (mapv #(hash-map :repo :futon2 :path (:at %) :finding :absence-coerced
+                          :disposition :blocked :blocked-on (:blocked-on (by-at (:at %)))
                           :input (:input %) :becomes (:becomes %))))))
 
 (defn era-findings [rows]
