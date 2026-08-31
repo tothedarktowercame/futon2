@@ -8,6 +8,6 @@
   {:lane :wm-verbs
    :holding :C187-live-selection-no-act, :dispatched-at "2026-08-31T21:26:02Z", :job-id "invoke-1788211558860-6045-9ef7f1d1", :expected-by "2026-08-31T22:11:02Z"}
   {:lane :wm-organization
-   :holding :C183-unclassified-acceptance, :dispatched-at "2026-08-31T21:14:12Z", :job-id "invoke-1788210849073-6033-4b558754", :expected-by "2026-08-31T21:59:12Z"}
+   :holding :C189-run-readiness, :dispatched-at "2026-08-31T21:30:22Z", :job-id "invoke-1788211818842-6051-56e5c770", :expected-by "2026-08-31T22:15:22Z"}
   {:lane :wm-evidence
    :holding :C186-sample-size, :dispatched-at "2026-08-31T21:24:50Z", :job-id "invoke-1788211486523-6044-e16e9252", :expected-by "2026-08-31T22:09:50Z"}]}
