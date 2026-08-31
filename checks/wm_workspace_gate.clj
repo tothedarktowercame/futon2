@@ -218,6 +218,8 @@
     :argv ["bb" "checks/model_uncertainty_eig_witness.clj" "--negative"]}
    {:name :c154-referent-content-change :dir "/home/joe/code/p4ng"
     :argv ["python3" "detect_drift.py" "--control-unit-change"]}
+   {:name :c218-referent-concurrent-modification :dir "/home/joe/code/p4ng"
+    :argv ["python3" "detect_drift.py" "--control-concurrent-modification"]}
    {:name :c165-unindexed-correction
     :argv ["bb" "checks/cleanup_queue_correction_index.clj" "--negative-control"]}
    {:name :c173-tampered-operational-run
