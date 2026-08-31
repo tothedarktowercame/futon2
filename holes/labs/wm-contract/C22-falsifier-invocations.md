@@ -375,6 +375,20 @@ clojure -T:build ci                         # futon2 CI boundary
 cd /home/joe/code/futon3 && clojure -X:test # futon3 repository gate
 ```
 
+## C111 — corrected JVM binding and run-once default
+
+```sh
+clojure -M -m checks.preference-stack-binding-check
+clojure -M -m checks.preference-stack-binding-check --negative absent
+bb checks/wm_runs_once_witness.clj
+bb checks/wm_runs_once_witness.clj --negative
+```
+
+`preference_stack_binding_check` consumes production JVM namespaces and must
+not be invoked with Babashka.  `wm_runs_once_witness` defaults to the newest
+committed dated run record and loudly names the expected filename pattern if no
+such record exists; an explicit path still overrides that selection.
+
 Both complete test suites contain `preemptive-repair-gate-test`, so their normal gate commands consume the
 same combined result. Acceptance, artefact boundary, stale baseline, era blindness, and record conflict
 findings hard-fail. Absence coercion is report-only during C81; its count is emitted on every run and may

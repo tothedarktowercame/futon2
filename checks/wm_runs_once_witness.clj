@@ -7,11 +7,19 @@
             [clojure.java.io :as io]
             [clojure.string :as str]))
 
-(defn- today-date-string []
-  (str (java.time.LocalDate/now (java.time.ZoneId/of "UTC"))))
-
 (defn- default-record-path []
-  (str "holes/labs/wm-contract/tick-run-record-" (today-date-string) ".edn"))
+  (let [dir (io/file "holes/labs/wm-contract")
+        records (->> (or (.listFiles dir) (make-array java.io.File 0))
+                     (filter #(.isFile %))
+                     (filter #(re-matches #"tick-run-record-\d{4}-\d{2}-\d{2}\.edn"
+                                          (.getName %)))
+                     (sort-by #(.getName %)))]
+    (if-let [latest (last records)]
+      (.getPath latest)
+      (throw (ex-info
+              "wm-runs-once-witness: no default run record; expected holes/labs/wm-contract/tick-run-record-YYYY-MM-DD.edn"
+              {:finding :no-default-run-record
+               :expected "holes/labs/wm-contract/tick-run-record-YYYY-MM-DD.edn"})))))
 
 (defn- fail! [finding data]
   (throw (ex-info (str "wm-runs-once-witness: FAIL " (name finding))
