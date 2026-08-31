@@ -6,7 +6,7 @@
  [{:lane :wm-nouns
    :holding :C166-strategic-carriers, :dispatched-at "2026-08-31T20:28:46Z", :job-id "invoke-1788208122088-5988-83a8f2e3", :expected-by "2026-08-31T21:13:46Z"}
   {:lane :wm-verbs
-   :holding :C163-first-v20-tick, :dispatched-at "2026-08-31T20:24:03Z", :job-id "invoke-1788207839332-5982-8b8c2d94", :expected-by "2026-08-31T21:09:03Z"}
+   :holding :C167-channel-priorities-npe, :dispatched-at "2026-08-31T20:30:30Z", :job-id "invoke-1788208226292-5991-e07f0a00", :expected-by "2026-08-31T21:15:30Z"}
   {:lane :wm-organization
    :holding :C162-gate-timing, :dispatched-at "2026-08-31T20:22:54Z", :job-id "invoke-1788207771180-5981-5f2f00b3", :expected-by "2026-08-31T21:07:54Z"}
   {:lane :wm-evidence
