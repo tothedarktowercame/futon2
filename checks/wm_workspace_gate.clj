@@ -52,6 +52,7 @@
     "absent_is_loud_lint.clj" "belief_update_check.clj"
     "belief_variance_inputs.clj" "cascade_diff_witness.clj" "closed_record_pointer_check.clj" "contract_lint.clj"
     "cleanup_queue_correction_index.clj"
+    "contract_authority_current.clj"
     "control_map_figure_agreement_check.clj" "control_map_lint.clj"
     "control_organization_check.clj" "expected_free_energy_witness.clj"
     "expected_information_gain_witness.clj" "fold_turn_quarantine_check.clj"
@@ -90,6 +91,8 @@
            "--contract" contract "--registry" "checks/witness-registry.edn"
            "--report" "/tmp/wm-workspace-contract-strict.edn"
            "--authority" (authority)]}
+   {:name :contract-authority-current
+    :argv ["bb" "checks/contract_authority_current.clj"]}
    {:name :ambiguity :argv ["bb" "checks/ambiguity_witness.clj"]}
    {:name :have-want-arrow :argv ["bb" "checks/have_want_arrow_witness.clj"]}
    {:name :fold :argv ["bb" "checks/fold_witness.clj"]}
@@ -124,6 +127,8 @@
 (defn control-commands []
   [{:name :c157-perturbed-entropy
     :argv ["bb" "checks/ambiguity_witness.clj" "--negative-control"]}
+   {:name :c175-stale-contract-authority
+    :argv ["bb" "checks/contract_authority_current.clj" "--negative-control"]}
    {:name :c168-malformed-arrow-composition
     :argv ["bb" "checks/have_want_arrow_witness.clj" "--negative-control"]}
    {:name :c172-missing-policy-holes
