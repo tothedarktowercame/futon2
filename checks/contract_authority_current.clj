@@ -16,6 +16,7 @@
 
 (defn current-state []
   (let [head-result (shell "git" "rev-parse" "HEAD")
+        last-change-result (shell "git" "log" "-1" "--format=%H" "--" lean-path)
         diff-result (shell "git" "diff" "--quiet" "HEAD" "--" lean-path)
         blob-result (shell "git" "rev-parse" (str "HEAD:" lean-path))
         contract (json/parse-string (slurp contract-path) true)
@@ -24,14 +25,17 @@
                                     (str recorded-authority ":" lean-path))]
     {:recorded-authority recorded-authority
      :mathlib-head (str/trim (:out head-result))
+     :holes-last-content-change (str/trim (:out last-change-result))
      :recorded-holes-blob (str/trim (:out recorded-blob-result))
      :current-holes-blob (str/trim (:out blob-result))
      :holes-clean? (zero? (:exit diff-result))
      :recorded-authority-readable? (zero? (:exit recorded-blob-result))
      :readable? (and (zero? (:exit head-result))
+                     (zero? (:exit last-change-result))
                      (zero? (:exit blob-result)))}))
 
-(defn assess [{:keys [recorded-holes-blob current-holes-blob holes-clean?
+(defn assess [{:keys [recorded-authority holes-last-content-change
+                      recorded-holes-blob current-holes-blob holes-clean?
                       recorded-authority-readable? readable?]
                :as state}]
   (let [failures (cond-> []
@@ -39,6 +43,8 @@
                    (not recorded-authority-readable?)
                    (conj :recorded-authority-unreadable)
                    (not holes-clean?) (conj :holes-working-tree-dirty)
+                   (not= recorded-authority holes-last-content-change)
+                   (conj :contract-authority-not-last-source-change)
                    (and recorded-authority-readable?
                         (not= recorded-holes-blob current-holes-blob))
                    (conj :contract-source-not-current))]
@@ -48,12 +54,15 @@
   (let [negative? (= ["--negative-control"] (vec args))
         state (current-state)
         tested (if negative?
-                 (assoc state :recorded-holes-blob (apply str (repeat 40 "0")))
+                 (assoc state
+                        :recorded-authority (apply str (repeat 40 "0"))
+                        :recorded-holes-blob (apply str (repeat 40 "0")))
                  state)
         result (assess tested)
         success? (if negative? (not (:pass? result)) (:pass? result))]
     (println "contract-authority-current:"
              (if success? "PASS" "FAIL")
+             "assertion=the contract was generated from the current content of Holes.lean"
              (pr-str (assoc result :negative-control negative?))
              "exit-convention=0-pass/1-fail")
     (System/exit (if success? 0 1))))

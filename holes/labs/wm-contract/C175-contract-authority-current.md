@@ -21,6 +21,11 @@ mathlib HEAD moved while the `Holes.lean` blob stayed identical. The contract
 describes that source file, not every file in mathlib, so blob identity is the
 precise invariant.
 
+**C177 amendment.** The checker additionally requires the recorded authority to
+equal `git log -1 --format=%H -- DarkTower/WarMachine/Holes.lean`. This states
+the generator relationship directly; blob equality remains an independent
+content check.
+
 Bindings pinning the old contract are internally reproducible, but that only
 answers “do these witnesses match this export?” It does not answer “does this
 export describe the Lean source now on disk?” Both claims are required.
