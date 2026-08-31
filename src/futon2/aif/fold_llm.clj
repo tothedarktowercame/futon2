@@ -76,10 +76,20 @@
    evaluation (`fold-eval`)."
   ([cascade circumstance] (llm-fold cascade circumstance {}))
   ([cascade circumstance {:keys [turn-fn prose-fn]}]
-   (let [proses (into {} (for [p cascade] [p (when prose-fn (prose-fn p))]))
+   (let [prose-results
+         (into {}
+               (for [p cascade
+                     :let [raw (when prose-fn (prose-fn p))
+                           result (cond
+                                    (string? raw) {:status :available :prose raw}
+                                    (map? raw) raw
+                                    :else {:status :absent})]]
+                 [p result]))
+         proses (into {} (map (fn [[p result]] [p (:prose result)])) prose-results)
          prompt (fold-prompt cascade circumstance proses)
          constr (when turn-fn (parse-construction (turn-fn prompt)))
          wiring (construction->wiring constr)]
      {:wiring       wiring
       :coverage-score-delta      (fe/coverage-score-delta wiring)
-      :policy-holes (:policy-holes wiring)})))
+      :policy-holes (:policy-holes wiring)
+      :prose-read-results prose-results})))

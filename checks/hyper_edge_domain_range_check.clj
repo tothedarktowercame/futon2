@@ -124,14 +124,20 @@
         unknown-ranges (count (filter #(= :unknown (:range-status %)) results))]
     (doseq [result results] (println (pr-str result)))
     (println (str "hyper-edge-domain-range-check: "
-                  (if (if negative? (not= passed (count results)) (= passed (count results))) "PASS" "FAIL")
+                  (if negative?
+                    (if (not= passed (count results))
+                      "negative-control PASS (coverage gap rejected)"
+                      "negative-control FAIL (mutation slipped)"
+                      )
+                    (if (= passed (count results)) "positive PASS" "positive FAIL"))
                   " ports=" (count results)
-                  " passed=" passed
+                  " conforming=" passed
+                  " rejected=" (- (count results) passed)
                   " domain-enumerated=" enumerated-domains
                   " domain-unknown=" unknown-domains
                   " range-enumerated=" enumerated-ranges
                   " range-unknown=" unknown-ranges
-                  " exit-convention=0-pass/1-fail"))
+                  " exit-convention=0-pass/1-fail/2-mutation-slipped"))
     (if negative?
       (System/exit (if (= passed (count results)) 2 0))
       (System/exit (if (= passed (count results)) 0 1)))))

@@ -53,15 +53,25 @@
   (str (System/getProperty "user.home") "/code/futon2/data/fold-escrow"))
 
 (defn- escrow-wiring
-  "impl #2's recorded LLM fold turn for this mission, if an inhabiting agent
-   left one. `{:boxes [...] :policy-holes [...]}` EDN, else nil."
+  "Read the deprecated per-mission escrow without conflating absence with an
+   unreadable file. Returns `:available`, `:absent`, or `:escrow-unreadable`."
   [mission]
-  (try
-    (let [f (io/file escrow-dir (str mission ".edn"))]
-      (when (.exists f)
+  (let [f (io/file escrow-dir (str mission ".edn"))]
+    (if-not (.exists f)
+      {:status :absent}
+      (try
         (let [w (edn/read-string (slurp f))]
-          (when (and (map? w) (seq (:boxes w))) w))))
-    (catch Throwable _ nil)))
+          (if (and (map? w) (seq (:boxes w)))
+            {:status :available :wiring w}
+            {:status :escrow-unreadable
+             :error {:phase :legacy-escrow-read
+                     :exception-class nil
+                     :message "legacy escrow has no non-empty :boxes"}}))
+        (catch Throwable failure
+          {:status :escrow-unreadable
+           :error {:phase :legacy-escrow-read
+                   :exception-class (.getName (class failure))
+                   :message (.getMessage failure)}})))))
 
 ;; ---------------------------------------------------------------------------
 ;; L3 (E-live-loop-3, 2026-07-05): the scheduled caller injects the pinned seam.
@@ -81,11 +91,18 @@
 
 (defn- prose-fn
   "The prose source for the fold-prompt: verbatim slurp of the pattern's
-   flexiarg file. This is the same source the deposit was constructed with
-   (per the deposit's :prose-source field)."
+   flexiarg file. Returns `:available`, `:absent`, or `:prose-unreadable`, so a
+   consumer need not infer read failure from nil."
   [pattern-id]
-  (try (slurp (str flexiarg-dir "/" pattern-id ".flexiarg"))
-       (catch Throwable _ nil)))
+  (let [f (io/file flexiarg-dir (str pattern-id ".flexiarg"))]
+    (if-not (.exists f)
+      {:status :absent}
+      (try {:status :available :prose (slurp f)}
+           (catch Throwable failure
+             {:status :prose-unreadable
+              :error {:phase :prose-read
+                      :exception-class (.getName (class failure))
+                      :message (.getMessage failure)}})))))
 
 (def ^:private !deposits-cache
   (delay
@@ -174,11 +191,18 @@
                            ;; In that case ag2's coverage-score-delta is nil — same as ag.
                            ag2)
                          ;; No deposit for this mission. Legacy loud-ignore (L1):
-                         (do (when (escrow-wiring (:mission entry))
-                               (binding [*out* *err*]
-                                 (println (str "[enact] WARN legacy un-pinned :llm-escrow wiring present for "
-                                               (:mission entry)
-                                               " — IGNORED (deprecated 2026-07-05; migrate to the pinned fold-turns escrow)"))))
+                         (do (let [{:keys [status error]} (escrow-wiring (:mission entry))]
+                               (case status
+                                 :available
+                                 (binding [*out* *err*]
+                                   (println (str "[enact] WARN legacy un-pinned :llm-escrow wiring present for "
+                                                 (:mission entry)
+                                                 " — IGNORED (deprecated 2026-07-05; migrate to the pinned fold-turns escrow)")))
+                                 :escrow-unreadable
+                                 (binding [*out* *err*]
+                                   (println (str "[enact] WARN legacy escrow unreadable for "
+                                                 (:mission entry) " — " (:message error))))
+                                 :absent nil))
                              ag)))]
               {:mission (:mission entry)
                :shown (vec (:shown entry))
