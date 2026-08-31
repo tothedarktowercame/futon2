@@ -298,6 +298,13 @@
                                                          (not (neg? (:variance v)))))
                                                   (:channels state)))
                                         (:states %)))
+   "ObservationKernelWitness" #(and (= :observation-kernel-reference/v1 (:schema %))
+                                     (every? (fn [row]
+                                               (let [masses (vals (:mass row))]
+                                                 (and (seq masses)
+                                                      (every? #(and (number? %) (not (neg? %))) masses)
+                                                      (= 1 (reduce + masses)))))
+                                             (:rows %)))
    "HaveWantArrowWitness" have-want-arrow-witness?
    "FoldWitness" fold-witness?
    "FoldEscrowRecordWitness" fold-escrow-record-witness?

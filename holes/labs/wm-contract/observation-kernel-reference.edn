@@ -1,0 +1,6 @@
+{:schema :observation-kernel-reference/v1
+ :basis "holes/labs/wm-contract/C7-belief-update-findings.md"
+ :kind :hand-derived-from-record
+ :rows [{:state :latent
+         :support [:present :absent]
+         :mass {:present 1/2 :absent 1/2}}]}
