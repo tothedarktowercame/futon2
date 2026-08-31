@@ -15,8 +15,8 @@ number* equalled one and never mentioned `mass`.
 `beliefUpdate` is a relation between learning rate, kernel, prior, observation,
 precision, and posterior. It composes the closed `predictionError` and
 `variationalFreeEnergy` declarations. A valid posterior must apply the paper's
-precision-weighted correction, retain the variance carrier, and reach the zero
-of the declared present-tense mismatch. The kernel row mass occurs in the
+precision-weighted correction, retain the variance carrier, and not increase
+the declared present-tense mismatch. The kernel row mass occurs in the
 correction; normalization makes it one, without making the observation model an
 unused ceremonial argument.
 
