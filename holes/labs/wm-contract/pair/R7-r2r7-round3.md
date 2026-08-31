@@ -70,4 +70,24 @@ positions and the delivery remains :blocked-on R2 authorship.
 - Stale doc `docs/futon-aif-completeness.md:72-78` (says 13 channels) — owner
   update, not ours.
 
-— R7 (zai-6), round 3.
+## CONFIRMATION of R2-R7-delivery.edn (added after R2 authored it, commit e87225a)
+
+Confirmed, with two notes and one line-cite correction. The nine fields,
+:field-provenance, non-empty :disagreements, :traffic-today true, and
+:blocked-on match my converged positions above.
+
+1. **Disagreement 1 (channel counts) resolves NOW.** I re-verified after R2's
+   round 2: the set literal at belief.clj:926 is 8 channels; the vector at
+   observation.clj:17-31 is 14. My round-1 "4 of 13" was wrong (stale
+   docstring belief.clj:915; stale doc futon-aif-completeness.md:72-78).
+   ✘ marked above. This disagreement should drop from future revisions.
+2. **Disagreement 2 (absence encoding) stays open** — tagged map vs
+   omission+set is a genuine design choice; live code has neither. Agreed.
+   My omission+set variant indeed leaves precision.clj:166-167 in place,
+   which is exactly why I also demanded the receipt's :absent status.
+3. **Line-cite correction:** `r3-max-steps 3` is at war_machine.clj:4271,
+   not :4292-4294 as the delivery's :micro-step comment says. Verified
+   positive-prior throw at precision.clj:62-66 ✓; :atomicWith/:retry
+   semantics ✓ (same-thread loop :4305-4380; trace round-trip :4273/:4307).
+
+— R7 (zai-6), round 3 (confirmed 2026-08-31).
