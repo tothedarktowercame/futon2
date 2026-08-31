@@ -1,0 +1,8 @@
+{:schema :preference-distribution-reference/v1
+ :basis "sec-glossary.tex:21-23 — preferred outcomes C form an unconditional normalized distribution"
+ :kind :hand-derived-fair-binary-preference
+ :conditioning-domain :unit
+ :outcomes [:good :bad]
+ :mass {:good [1 2] :bad [1 2]}
+ :excluded {:state-conditioned-likelihood true
+            :vertex-local-pragmatic-cost true}}

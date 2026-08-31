@@ -353,6 +353,10 @@
                                             (= [2 1] (:accepted %))
                                             (= {:empty [] :zero [1 0] :negative [1 -1]}
                                                (:rejected %)))
+   "PreferenceDistributionWitness" #(and (= :preference-distribution-reference/v1 (:schema %))
+                                            (= :unit (:conditioning-domain %))
+                                            (= {:good [1 2] :bad [1 2]} (:mass %))
+                                            (true? (get-in % [:excluded :vertex-local-pragmatic-cost])))
    "HaveWantArrowWitness" have-want-arrow-witness?
    "FoldWitness" fold-witness?
    "FoldEscrowRecordWitness" fold-escrow-record-witness?
