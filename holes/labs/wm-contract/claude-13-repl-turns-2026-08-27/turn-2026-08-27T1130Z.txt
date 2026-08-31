@@ -1,0 +1,21 @@
+That's a better structure than mine, and it fixes a real weakness: my Tier 1 made reports honest once, with nothing to keep them honest.Accepted and restructured — `79156ba`. It repairs a real defect in what I wrote: Tier 1 made the reports honest *once*, with nothing to keep them honest. A contract with mutation tests turns a one-time edit into a property the build defends.
+
+**Where we actually are.** The Lean half is started — `GainChain.lean` (families 1, 2, 4, 5 plus the chain property) and `CommitmentTemperature.lean` (family 8). Missing: the emitter, the Clojure validator, the mutation suite, the qualification record. **Four of APM's five links.**
+
+**The validation target should be the trace.** APM validates records against schemas; our families are about behaviour over time, and the durable record of that is `data/wm-trace/` — **52 files** carrying `:tau`, `:tau-mode`, `:selection-gain`, `:realized-outcome`, `:policy` per record. So non-vacuity becomes countable directly: how many records exercise each clause.
+
+**And the corpus supplies its own acceptance bar.** WR-26 requires a tripwire to retro-trip on the known incident corpus before arming, and we have three dated incidents:
+
+| date | what a correct contract must flag |
+|---|---|
+| **2026-07-09** | first trace after the substitution — `:realized-outcome` absent in every record after |
+| **2026-07-13** | `:tau-mode` → `:selection-gain-only`, τ = 1.0 in every file 07-15 → 07-21 |
+| **2026-07-15** | 22 identical `:no-selection` closes, no repair obligation |
+
+**A contract that doesn't date those three from the traces is a document, not a contract.** That's APM's `f25`/`f30` discipline on our own incidents, and it's the difference between "the model says X" and "the model would have caught X."
+
+**One bound stated before building, not after.** Record-shaped families validate — 1, 2, 4, 5. **Sensitivity-shaped ones don't.** Family 8 (`governs`) is a claim about counterfactual τ — *would a different temperature have chosen differently* — and no record can witness it. Those stay Lean theorems about the code rather than clauses over the trace. Saying so now stops the contract being read as covering more than it does, which §1.6's criterion 4 names as this mission's worst exposure.
+
+Tiers 1–3 now refer back: each Tier-1 repair becomes **clause → implementation → mutation test**, so the repair is the second of three steps rather than the whole of it; Tier 2's paper claims cite the contract instead of prose; and a Tier-3 behavioural change that breaks a clause is drift, with the mutation suite saying so.
+
+**First increment, deliberately small:** `WarMachineContractEmitter.lean` emitting the four record-shaped families — each clause carrying id, predicate, Clojure locus from §2.1b, holds-status — plus a validator running them over `data/wm-trace/` with per-clause witness counts. One file each; mutation tests and qualification follow separately. That's one Codex packet with a hard acceptance bar: it must date 07-09, 07-13 and 07-15 from the corpus. Say the word and I'll dispatch it.

@@ -1,0 +1,24 @@
+That's a precise argument, and it has a checkable consequence. Let me look at the two vocabularies as they stand.Both vocabularies in full, and they answer your worry in an unexpected way.`cd010d0`. Your keeping-warm worry has a precise answer, and it's not the one I expected.
+
+**There are already two vocabularies, and they're unrelated.** Eight *flat* demand-side response classes in `lights.bb`; and five *chained* capability rungs in `M-capability-levels.md`:
+
+```
+cold-eoi-authored-outbox (n=2) → cold-eoi-sent (n=2) → cold-send-response (n=1)
+  → cold-response-conversion (n=1 verbal) → warm-customer-pays (n=1)
+```
+
+**So in your ledger the worry doesn't bite** — vocabulary B *is* the precondition chain. The outreach steps are named, counted, and each carries its own next rung, so optimising the terminal rung can't starve them.
+
+**In the machine it bites completely.** None of the five rungs is among `observation.clj`'s fourteen channels. The machine sees neither the terminal event nor its preconditions.
+
+**Which makes the naive R5 fix worse than doing nothing.** Add a `:warm-customer-pays` channel and the machine gets the terminal rung and none of the four beneath it — so every outreach dimension carries no score, no value of it changes any selection, and each becomes **a line of ordinary points**. Same failure as τ, one domain over, self-inflicted. That's the Kangaroo reading exactly: an LRU evicts what hasn't been touched; a terminal-only criterion set evicts every action whose payoff isn't terminal.
+
+**And `:declined-ground-unknown` gives the membership criterion.** It *is* still `:declined` — the decline is the critical point, the unknown ground is a refinement that changes no downstream action. So:
+
+> An event type earns its own place iff its distinction leads somewhere different. Otherwise it's a refinement, and belongs as a **typed absence** on its parent.
+
+Applied: `-on-merit` vs `-on-capacity` — **yes**, *"you cannot consult these buyers into buying"* versus *"gated on resources"*, different offers follow. `:silent` vs `:unknown` — **yes**, *we asked and got nothing* versus *no offer was ever made*. `:declined-ground-unknown` — **no**; it's `:declined` with the ground marked absent. So vocabulary A isn't too small, it's **mis-shaped**: a flat slot where a parent-plus-absence belongs, which is precisely what makes a decline uncountable *as* a decline.
+
+One thing worth knowing about how we got here — `lights.bb` says it in its own comment: the `other` slot exists because finer classes *"would otherwise each demand a hue nobody can tell apart from its neighbour."* **The granularity of the event ontology was set by how many colours a reader can distinguish.** A defensible figure decision that quietly became the vocabulary.
+
+So a bigger vocabulary needs three things rather than more entries: **structure** (B is a chain, A is a list — a chain states preconditions and can't be optimised terminally), **parent/refinement with refinements as typed absences**, and **the membership test**, so it grows by consequence rather than by noticing a case.

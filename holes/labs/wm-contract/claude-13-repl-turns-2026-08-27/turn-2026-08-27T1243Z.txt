@@ -1,0 +1,25 @@
+That syllogism does technical work, not just framing. Let me check one thing it implies — the cascade already has a policy-level softmax.Your argument is right, and the code already agrees with you — in its own docstring.You're right, and `futon2/src/futon2/aif/cascade_prior.clj` says so in its first line: *"A categorical habit prior over complete pattern-cascade **policies**."* `e414511`.
+
+And its next sentence is your #3, implemented:
+
+> *"A policy identity includes the selected mission, the ordered pattern construction, and **the semilattice wiring**. Consequently two cascades containing the same patterns but **connecting them differently are different policies**."*
+
+A bag of actions has no wiring. That wiring is part of policy *identity* is the institution reading already in code.
+
+**And it lands directly on R14.** The finding was that τ can't move the choice at action grain, because argmax over a single τ-scaled term is τ-invariant — the one exception being the two-term shape `−G/τ + ln E`, where `ln E` isn't τ-scaled. `cascade_prior/shadow-rank` computes exactly that at **policy grain**: `exp(ln E_cascade + cascade-score/τ)`, with `:cascade-prior-bias` as `ln E`. So **at cascade grain the temperature genuinely governs** — and it instruments its own sensitivity, comparing the shadow winner against the score-only winner in `:governed-by`.
+
+The dial R14 says is disconnected has a live socket one grain up.
+
+**It's dark, and it names its own blockers — both of which are rings we hold.** *"Live use is valid only after the War Machine exposes two or more admissible cascades for the same selected mission and supplies an honest cascade-level score."* That is: **R6** (a proposer that populates a policy space) and **the G standard** (an honest cascade-level score). So:
+
+```
+R6 → the G standard → cascade selection arms → τ governs at policy grain
+```
+
+Three red rings on one chain, joined by your syllogism.
+
+**It also corrects the standard I proposed yesterday.** S-G2 required a distribution conditioned on a sequence that isn't a repeated action. **Under the institution reading that's already satisfied at cascade grain** — a cascade is wired, ordered and heterogeneous *by identity, not by luck*. So the gap I named ("condition the forward model on a heterogeneous sequence") isn't the gap; the heterogeneous object exists and is already the unit of policy identity. **Only S-G1 is outstanding**: a predicted outcome distribution under a cascade, scored against `C`. One deliverable, one grain — and the same thing `cascade_prior` is waiting for.
+
+S-G3 still bites: the forward model's per-channel variance is hand-tuned, so any cascade-level distribution inherits a stipulation that has to be declared rather than absorbed.
+
+So "what problems are we solving" answers itself: **make a policy space populable** (R6), **earn the name `G` at policy grain** (S-G1), **arm the selection that already exists**. R14's repair isn't a new mechanism — it's the one already written, at the grain where your theory says selection belongs.

@@ -1,0 +1,29 @@
+Clean and gated. Now the substantive checks — parametricity, vocabulary reuse, and whether theorem 2 actually bites.Everything checks out except one conjunct. **`declaresCoverage` is vacuous** — `∀ outcome, covers o = true ∨ covers o = false` is just `∀ b : Bool, b = true ∨ b = false`, provable for every criterion set. Totality is already forced by the type.Proof breaks exactly where it should — the first goal is now an existential. Patching it.Review done. `dca0c8a5` (codex-22) + my fix at `7b5e7e47`.
+
+**What I verified independently:** one file, 221 lines, worktree clean, `.lake/packages` untouched (still the real directory restored this morning). Re-ran the gate myself — **exit 0**, zero errors, no `sorryAx`. Imports only `DarkTower.WarMachine.GainChain`.
+
+**Checks 3, 4, 6, 7 all pass, and better than I expected:**
+
+- **`Outcome` is a genuine type parameter** — `CriterionSet (Outcome : Type)`, every predicate `{Outcome : Type} [DecidableEq Outcome]`. No domain hardcoded.
+- **GainChain vocabulary is reused, not duplicated** — `coverageReported` conjoins `inhabitedHandle`, `typedAbsence` and `declaredDomain` through adapters (`reportOccurrence`, `criterionSelection`). That's the rosetta working as intended.
+- **`markWithoutForce` has real content** — it demands `≠` on `problemOutcome` *and* `=` on `instrumentFinding`, so the mark must actually change the verdict. `⟨.solved, .defectiveProblem⟩ → ⟨.void, .defectiveProblem⟩` is APM's `:void` exactly.
+- **No probability leaked in**; the docstring disclaims it explicitly.
+- And **theorem 2 genuinely bites**: `oneChannelLarger` is the whitelist *extended to include* `warmCustomerPays`, and `nextUnanticipatedSignal` still maps to `.absent`. So adding the channel doesn't satisfy coverage — the argument, formalised. The constructor name `nextUnanticipatedSignal` is a nice touch: the outcome space itself encodes that there will be a next one.
+
+**The one finding: `declaresCoverage` was vacuous.**
+
+```lean
+∀ outcome, criteria.covers outcome = true ∨ criteria.covers outcome = false
+```
+
+That's `∀ b : Bool, b = true ∨ b = false` — provable of *every* criterion set. Totality is already forced by the type `Outcome → Bool`, so there was nothing to state and the first conjunct of `coverageReported` was decoration. Same class as the three I found in `GainChain`: declared and not constrained.
+
+Replaced with the content R5 actually asks for:
+
+```lean
+def declaresCoverage ... := ∃ outcome, criteria.covers outcome = false
+```
+
+**The set names at least one outcome it does not cover.** A criterion set covering everything has no boundary to report, and stating the boundary is the whole requirement — Klarna measured four real metrics at scale and none reported what they didn't cover. The nonvacuity proof's first goal correspondingly changed from an `intro` to *exhibiting the boundary*, which is the right shape.
+
+So R5 now has a Lean module: coverage with a boundary, absence typed, the naive fix refused, `:void` as a working positive witness. Next is the emitter clause and the forward guarantee on `007-closed.edn` — not an analysis of the 82.

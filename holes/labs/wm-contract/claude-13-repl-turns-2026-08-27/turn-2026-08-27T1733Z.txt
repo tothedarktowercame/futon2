@@ -1,0 +1,18 @@
+This is measurable right now, and the paper already admits it discards exactly these denominators. Let me get them.That's a third kind of clause, and neither of the two we had. A family clause is about one record's internal consistency; an end-to-end criterion is about a **population** — did everything that entered the pipe come out the far end. It's a conservation law rather than a correctness theorem, which is exactly why it's weaker and exactly why it's checkable. Written into §3.1d (`ed44d22`), with the chain graded C1…C5 so every prefix is itself a criterion.
+
+Two things the form has to get right, and the second one I only found by trying to measure it.
+
+**The boolean is uninformative; the drop point is the information.** "C5 holds" is another dimension with no singularity — true and it says nothing about which stage carried it, false and nothing about which stage lost the turns. So each stage must either pass an element on or record a *typed* reason for dropping it. That's family 5's typed absence lifted from record grain to population grain — the same vocabulary at a different grain, which is why this fits your "one vocabulary" rather than sitting beside it.
+
+**The denominator has to be external, and that's the point.** C1 asks what fraction of operator turns reached the store, and the store can't answer, because the store is the numerator. Anything that never arrived is invisible from inside. That gives an end-to-end criterion WR-0's character structurally: it can only be checked against a record the machine didn't write.
+
+**And C1 is not checkable today — but not because data is missing.** I measured it while drafting:
+
+- this session's transcript carries **26 operator turns** (231 `user`-typed records, 205 of them tool results);
+- the Evidence Landscape carries **324** distinct `claude-13-turn-N` ids.
+
+The two are in **different units**. The transcript counts operator messages; the turn id counts *seat* turns, agent turns included. So 26/324 is meaningless, and the ratio can't be formed at all — no mapping exists between the external record's unit and the store's key. That mapping is the first deliverable and it's smaller than a Lean module.
+
+The later stages are worse and I've typed them as un-instrumented rather than reporting zero: Air processing, metadata decoration, cascade candidacy and WM selection have no per-turn survival record. `sec-boundary` already admits the adjacent case — *"the two denominators are computed in the course of that join and discarded"* — which is this defect one join away.
+
+**Dispatched** the reconciliation to codex-22 (job `invoke-1787851992784-2474-95327265`, park `park-fb8f4c15-0201-42ab-9705-e79d736516a0`), with one instruction I want to flag: *a script that reports "C1 is not computable, and here is exactly which field would make it computable" counts as success.* The failure mode here is inventing a join to produce a number, and I'd rather have the missing field named than a ratio I can't trust.

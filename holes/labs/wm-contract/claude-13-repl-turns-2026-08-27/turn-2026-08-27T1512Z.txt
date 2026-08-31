@@ -1,0 +1,30 @@
+That's the sharpest version of the point — they had no Q, no derived check, no spread, so they can't be retrofitted. One new good item it is.That reframing is sharper than "historical" — they had no Q, so **there was never anything they could have refuted.** Built one. `10a524f`.
+
+**Item S-001**, stated with `:status :open` — no outcome yet, which is the point:
+
+| part | value |
+|---|---|
+| **π** | `:probe-one-token` — offer 1 turkey, and on a snatch never offer again |
+| **hidden state + prior** | P2's disposition, Beta(1,1), **declared** as a stipulation per S-G3 |
+| **Q(o∣π)** | `{O1 0.0, O2 0.5, O3 0.0, O4 0.5}` over the G1 flowchart leaves |
+| **spread** | 0.6931 nats = log 2 |
+| **falsifier** | **O3** — *in* the space, *zero* predicted mass |
+| **derived check** | `score_item.clj`, core.logic over the item's own support |
+| **receipt contract** | `:realised-outcome :posterior :refuted?` |
+
+```
+  if O2 -> mass 0.50  in-support true  refuted false  entropy 0.6931 -> 0.0000
+  if O4 -> mass 0.50  in-support true  refuted false  entropy 0.6931 -> 0.0000
+  if O3 -> mass 0.00  in-support false refuted true   entropy 0.6931 -> 0.6931
+  if O1 -> mass 0.00  in-support false refuted false  entropy 0.6931 -> 0.6931
+```
+
+**The design rule that fell out, and I think it's the general one:**
+
+> **Some outcome in the space must carry zero predicted mass** — otherwise no outcome could refute the prediction. That's the mirror discipline in distribution form.
+
+S-001 has two such outcomes of four. A Q that spreads mass everywhere is the stochastic version of a witness that cannot fail — and it's exactly the trap a fitted distribution falls into, which is why the 82 flights couldn't be retrofitted.
+
+**And the complement:** the outcomes that *aren't* falsifiers must move the spread. O2 and O4 each collapse entropy 0.6931 → 0. A prediction that leaves the posterior where it found it has taught nothing, whatever it scored.
+
+By that test the 82 flights aren't items — they're fixture material, telling us which shapes are real, and nothing more. That's now written into `checks/README.md` as the standard, so the next WM flight or maths frame can be held to it: **π, prior, Q, spread, falsifier, check, receipt — before the outcome.**

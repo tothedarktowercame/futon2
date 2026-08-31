@@ -1,0 +1,18 @@
+Pulling it, and checking the library's conventions so the collection matches.Mermaid diagrams per variant — better than the README. Reading the design.Full rules now. The variation has a clean two-axis structure — let me check the flexiarg conventions before writing.Writing the collection.`170e3f8` — `futon3/library/snatch/`, six patterns plus a README. Source cloned to `/tmp/c13/snatchgame`; I worked from its mermaid design diagrams, which are far more precise than the README.
+
+**The patterns:**
+
+- **`protect-the-unprotected-move`** (G1) — with own tokens at 1 and the other's at 2, snatching is the best single-round move, so all the risk sits on the proposer. Measure an arrangement by how much first-mover exposure it leaves standing.
+- **`preserve-the-right-to-abstain`** (G2) — the *"Forzar oferta"* checkbox is **active by default**; it disables P1's "No ofrecer" button. A rule that reads as encouraging exchange, which removes the exposed party's only protection. That's why the designers named it counterproductive.
+- **`mark-without-force`** (G3) — after a snatch, P1 may assign a shame token. It accumulates, it's visible, and **no tokens move**.
+- **`revert-then-invert`** (G4) — the AutoJudge has **two steps**, and this is the sharp one: step 1 reverts the theft, step 2 gives P1 what it asked without giving anything. Step 1 alone would leave the defector exactly where refusing would have — restitution without deterrence.
+- **`non-binding-talk-still-moves-play`** (G5) — a channel changes not what either party *may* do but what each believes the other *will* do.
+- **`institutions-vary-by-position-and-force`** — the family pattern.
+
+**What it confirms.** The family is **generated, not enumerated**: one interaction with an intervention placed on two axes — *where* it acts (before the choice / at the choice set / after the outcome) × *with what force* (none / symbolic / material). Five entries carrying more structure than our eight flat response classes or fourteen-element action set. And the grid shows its own gaps: nothing intervenes before the choice with material force, nothing at the choice set symbolically.
+
+**And the position axis lands on our columns** — before-choice → PERCEIVE/**R2**, at-choice-set → SELECT/**R6**, after-outcome → EVALUATE/**R5, R8**. Three positions, three problem columns. I've recorded that as a correspondence worth noticing, not a proof.
+
+**Two coincidences worth your eye.** G3's mark *"changes nothing in the current round"*, and R5's own `THEN` asks to surface a satisfied rung *"without changing a numerical posterior unless that artifact warrants the change"* — the same mechanism, opposite polarity. And `repair_obligation.clj` is **G4-shaped**: it reverts *and* preempts at `##-Inf`. **The stack has no G3** — no mark that records without acting. Given R5 is asking for exactly that, the gap is now named.
+
+What this doesn't confirm, and I've said so in the README: anything about G(π) or scoring. That the institutions *can* be written as patterns is evidence about the vocabulary, not about the formalism.

@@ -1,0 +1,24 @@
+That's a good fit, and sharper than what I put in the Lean. Let me check what's actually available.Yes — and the payoff is specific rather than aesthetic. `44aee90`.
+
+**What it fixes.** `CommitmentTemperature.lean` states family 8 as `∃ entries τ₁ τ₂, s τ₁ entries ≠ s τ₂ entries`, and its docstring already concedes what codex-18 flagged: non-constancy gives you the *existence* of a temperature distribution with positive mutual information, not positive MI under every input law. It's a deterministic proxy for an information-theoretic claim and it knows it.
+
+**Three things a Markov category gives that we currently do by hand:**
+
+1. **"τ does not govern" becomes a factorisation.** A morphism is independent of its input exactly when it factors through discard: `sel = ε_τ ; c`. That's `temperatureInvariant` stated structurally, **with no probability measure on τ required** — codex-18's caveat dissolves rather than being annotated.
+2. **Data processing becomes the counit law.** `repairing_r8_changes_no_action` is currently a hand proof. Given the factorisation, `g ; τ_eff ; sel = g ; τ_eff ; ε ; c = ε_g ; c` by `f ; ε = ε` — an axiom. The theorem becomes an instance of composition.
+3. **Determinism is first-class** — a morphism is deterministic iff it commutes with copy. Our whole R14 finding is that the system computes a genuinely stochastic object (`:softmax-weights`) then post-composes a deterministic argmax that forgets it. That sentence becomes a diagram, and the repair menu maps onto structure: (a) keep the stochastic morphism, (b) make the composite non-constant, (c) accept the factorisation through `ε`.
+
+Mathlib has it — `Stoch` as a wide subcategory of s-finite kernels, with `Δ[X]`, `ε[X]`, and `Deterministic` as a class.
+
+**But my recommendation is idea now, library later.** The idea costs ~20 lines and no dependency: finite copy/discard, and `governs s := ¬ ∃ c, s = discard ; c`, statable in the existing file, which is deliberately Mathlib-free and elaborates in seconds. That buys points 1 and 2 immediately.
+
+The library currently doesn't even load. I probed it:
+
+```
+import Mathlib.Probability.Kernel.Category.Stoch
+→ failed to read '…/apm-lean/.lake/packages/batteries/…/Logic.olean', incompatible header
+```
+
+`Stoch.olean` and `SFinKer.olean` **are** built (yesterday 18:35), so that's a toolchain mismatch in the shared package authority — an environment repair, not a missing result, and worth knowing before anyone plans on it. The trigger for reaching for the library is named: repair option **(a)**, sampling `P(π)`, which is a genuine stochastic morphism where hand-rolled finite structure would start to hurt.
+
+**One thing I didn't want to slide past.** The 34-steps note records step ⑰ as *"declined to build D3; recommended not dispatching a Markov formalisation"* — an abstain, scored as **correct** AIF behaviour. Reversing that silently would be the drift this stack exists to catch. What changed is that the formalisation now discharges a *named obligation* — family 8's proxy with a reviewer-flagged gap — rather than offering general elegance. A job asking for a tool, rather than a tool looking for a job.

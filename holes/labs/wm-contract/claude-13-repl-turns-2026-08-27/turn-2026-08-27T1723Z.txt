@@ -1,0 +1,24 @@
+Your point sharpens something I'd only argued technically. Let me record it — and there's a concrete consequence.Understood, and I'd been arguing it too weakly — I said a mega-theorem would be *false unification*, which is a typing objection and would dissolve if someone found a common carrier. Your reason doesn't dissolve. Four ways of putting it, now in §3.1d:
+
+**It's the verdict the apparatus issues to itself.** WR-0 requires "a verdict it cannot issue to itself — every claim the apparatus makes about its own success must be movable only by evidence it did not manufacture." A theorem called `warMachineCompliant`, proved inside the machine's own formalisation, is that claim at its purest. The per-clause contract isn't a weaker substitute; it's the shape that keeps the property.
+
+**It would be a dimension with no singularity.** A conjunction over every clause takes two values and in practice one. True, and it says nothing about which clause carried it; false, and nothing about which broke. That's R14's defect one level up — computed, reported, unable to change any decision.
+
+**The rosetta grows and a conjunction can't.** Families 8 and 9 arrived because APM couldn't state them. A conjunction over a growing list is either restated on every addition or silently stale.
+
+**And it has nowhere to put a boundary** — which turned out to be concrete rather than rhetorical. R5 asks a criterion set to name at least one outcome it does *not* cover. The contract's `reserved` list already does that, so **the document is R5-compliant about itself in a way a `Prop` structurally cannot be.**
+
+That last one exposed a real defect while I was checking it. The reserved list said four families are outside and nothing about why, so three different situations read alike. Each entry now carries a typed reason (`4f399fd054`):
+
+```json
+{"id":3,"outside-reason":"wm-counterpart-is-prose-only", "note":"the SCALE-MATCH PIN is enforced by care rather than by code"}
+{"id":6,"outside-reason":"already-holds", "note":"author ≠ reviewer holds in the WM today"}
+{"id":7,"outside-reason":"already-holds"}
+{"id":9,"outside-reason":"designed-unbuilt", "note":"specified in E-R6; no Lean module yet"}
+```
+
+Families 6 and 7 are reserved because they **already hold** — there's no repair to state. Family 3 is reserved because its WM counterpart exists only as prose. Family 9 because it's designed and unbuilt. Reading those as one list was the same error as `absent` versus `uncovered`: silence where a type belongs. Only the `reserved` key changed; the rest of the document is byte-identical.
+
+And the unity you asked for is standard clause 1, which is the whole of it: define a family or adapt to one, introduce no second notion of presence, typed absence, or declared domain. Parts stay separate and share words — which is what a pattern language is, and the same structure the Snatch runs measured. A semilattice is overlap *without* subsumption. The tree is the monolith.
+
+One drift I noticed and left alone: the emitter calls family 3 `self-contained-record` while §2.1 calls it "digest agreement across a boundary". Probably a deliberate WM-side rename, but nothing records that it is.

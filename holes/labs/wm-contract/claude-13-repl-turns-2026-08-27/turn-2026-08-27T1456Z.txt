@@ -1,0 +1,23 @@
+Let me check that — if flights have a terminal vocabulary, my claim was wrong.You're right, and it's a grain error on my part. `full_loop_runner.clj` has a terminal vocabulary — **14 named flight outcomes**. Let me see how many flights exist.82 flights with a populated terminal vocabulary. Let me get the actual (policy, outcome) pairs — that's a Q(o∣π) sample.That's an empirical **Q(o∣π)** from real War Machine data, and it discriminates.You're right, and my claim was wrong for a specific reason: **I measured the tick and concluded about the policy.** `ceb20a7`.
+
+**The WM does have a terminal vocabulary.** `full_loop_runner.clj` names fourteen flight outcomes — `:ok`, `:grounded-change`, `:grounded-no-change`, `:no-selection`, `:artifact-only`, `:build-failed`, `:guardrail-refusal`, `:policy-nondiscrimination`, … Leaves of a state machine: a flight runs and stops in one.
+
+And it's a *better* vocabulary than the observation vector it isn't. `:grounded-change`/`:grounded-no-change` is a refinement pair — the O4a/O4b shape. `:artifact-only` names the R16 mirror as a **terminal state**, so it can be dispreferred. And **`:policy-nondiscrimination` is the singularity criterion, already an outcome** — a flight that ended because nothing discriminated.
+
+**Then the data.** `data/wm-full-loop/` — seven cohorts, **82 closed attempts**, each with a selection step and a terminal disposition. As (π, o) pairs that's an empirical `Q(o∣π)`, and it **discriminates**:
+
+```
+P(grounded-change | :repair-machine-failure)  ≈ 11/28 = 0.39
+P(grounded-change | :advance-mission)         ≈  3/8  = 0.38
+P(grounded-change | :learn-action-class)      =  3/25 = 0.12
+```
+
+**The policy dimension carries a singularity** — measured, not argued. Exactly what the τ dimension didn't.
+
+**And it closes a loop already built:** `intrinsic_values.clj` keeps a Beta posterior **per action class**, which is precisely the key those 82 pairs group by. The evidence for `credit-for` is on disk. At this grain the "missing machinery" argument doesn't apply.
+
+What it doesn't correct: **R8 and R14 remain broken at tick grain.** The realised-outcome fold, γ and τ are tick-level and still do what today's excursions found. Flight and tick are different loops with different evidence, not substitutes.
+
+Four bounds recorded: **21% of flights have no recoverable π** (mostly `:agent-unavailable`/`:incomplete`, which failed before selection — missing-not-at-random, not to be dropped silently); `:address-sorry` is n=2, not a rate; an outcome is not a reward, so a `C` over these is a further stateable choice; and `:ok` is a *step* outcome, not a terminal disposition — the extraction respects that.
+
+The practical upshot: **the R5 build's WM adapter is no longer speculative.** Facts = the (π, o) pairs, outcome space = the terminal vocabulary, Beta state = `intrinsic-values`. Three domains with real carriers — Snatch, mathematics (pending repair), and the War Machine — which is the generality you asked for.

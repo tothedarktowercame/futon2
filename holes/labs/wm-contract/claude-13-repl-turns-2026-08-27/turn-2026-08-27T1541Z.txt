@@ -1,0 +1,17 @@
+That "zero divergence" was wrong — `master..HEAD` returned 0 because **there is no `master` branch**; the command errored and I counted its empty output as a measurement. Same class of error as before.`main`, not `master` — and it's **behind 240**. Measuring the relationship properly this time, with the errors visible.29 commits ahead, 21 behind — that's a real divergence, not the no-op I reported. Checking mergeability read-only before touching a shared checkout.One conflict only, in `holes/M-points-de-fuite.md`. Doing the merge to inspect it — recoverable via `--abort`.Purely additive on both sides — two independent bullets in the same list, neither replacing the other. Keeping both, older first.Done, but it wasn't the small change either of us thought — and my earlier report was wrong, which is worth saying first.
+
+**I reported "zero divergence" from a command that had errored.** `git rev-list master..HEAD` returned nothing because **futon2 has no `master` branch** — its default is `main` — and I counted the empty output of a failure as a measurement. Same class as the truncated `head -25` this morning.
+
+**The actual state was:** `M-propagators-ant-gate` **29 ahead / 21 behind** `origin/main` — a real divergence, not a label. So I measured mergeability read-only first (`git merge-tree`), which showed **exactly one conflict**, in `holes/M-points-de-fuite.md`.
+
+That conflict was **purely additive on both sides** — two independent bullets in the same list: yours-and-claude-3's *"Agent self-marks in the zai/zaif runners (BUILT 2026-07-13)"* from `origin/main`, and *"✦ WITNESSED NEED (2026-08-22): sub-document referent binding"* from the branch. Neither replaces the other, so I kept both, incoming first for chronology with the 2026-07-11 item above them.
+
+**Result:** `main` @ `eb40bc5`, **30 ahead of `origin/main`, 0 behind**, worktree clean, feature branch intact at the same commit. Everything from today is on it — the census, the mission's DERIVE and Tier 0 sections, the H1 result, and `coverage_check.clj`. **Not pushed** — you didn't ask, and that's a separate call.
+
+**On the Snatch playout — yes, and it's the right next thing**, because it would exercise the whole apparatus on one trajectory rather than one edge. Concretely I'd expect it to answer three questions we can't answer yet:
+
+- **Does the pattern collection cover a playout?** Walk five rounds; at each, ask which pattern's IF matches. A round where none does is a gap in the language — Alexander's completeness question, and R6's shape.
+- **Is a cascade really a path through the `@how` graph?** We asserted it; a playout either traces one or doesn't.
+- **Does S-001's Q survive contact?** It predicts `{O2 0.5, O4 0.5}` with O3 as falsifier. A playout that produces O3 refutes the two-disposition model, which is the point of having stated it.
+
+That's a self-contained build and it needs no running machine. Want me to take it?

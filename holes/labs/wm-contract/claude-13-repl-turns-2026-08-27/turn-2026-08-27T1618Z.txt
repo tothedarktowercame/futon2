@@ -1,0 +1,22 @@
+You're right that the method is the transferable part, and it's small enough to state. It's written up in `p4ng/empirics-futon/NOTE-patterns-as-production-rules.md` (`d12bf04`).
+
+**Method 1 — pattern to production rule.** IF becomes a predicate on the situation, THEN becomes a function from situation to action, BECAUSE stays prose. Two disciplines are what separate a rule from a decoration: no guard may mention the action taken this round (that's what produced G1's four phantom gaps), and a THEN the model can't carry emits *no* action rather than an invented one. Four of the twelve play-grain patterns are advisory for that reason — ask size, the talk channel, the free mark. That second discipline is family 5's typed absence showing up at pattern grain.
+
+**Method 2 — behaviour from selection.** Order the firing patterns by precedence, act on the first whose THEN yields an action, and record which one acted.
+
+That last clause is where your point lands. **The `:by` column is the cascade.** G4 against a snatcher runs `probe-before-committing → consult-the-remedy → re-enter → consult-the-remedy → re-enter`, and it isn't authored — collection plus precedence is a cascade *generator*, and the situation sequence picks one out of it. So temperament and cascade are two readings of the same object: naming the generator gives you the temperament, naming the trajectory gives you the cascade, and only the trajectory carries a score.
+
+**And the wiring claim is now runnable.** `cascade_prior` says two cascades with the same patterns wired differently are different policies. I added `pattern-policy`, which takes a precedence override map, so the same twelve patterns can be re-consulted in a different order without editing any of them:
+
+```
+scenario         grim   patterns   exchange-first
+g1  sharer          5         15               5
+g4  snatcher       -1          3              -5
+g2  snatcher      -10        -10             -10
+```
+
+`exchange-first` moves the gain pattern above the remedy and the stop. Identical membership, G4 goes +3 → −5. The wiring isn't bookkeeping about the cascade; it's where the score is.
+
+**The open question the exercise surfaced:** precedence is a third thing beyond IF and THEN, and no pattern states it. The classical production-system answer is specificity — most conjuncts wins — and it fails here: `an-unmodelled-response-stops-the-line` has two conjuncts and would rank last, but has to rank first, because halting dominates acting. That's a commitment about the collection, not a property of any member, and a flexiarg has nowhere to put it. Its shape matches the semilattice wiring in `cascade_prior`, which suggests a collection-level record rather than another field on a pattern.
+
+For the paper: Part IV is `p4ng/sec-boundary.tex`. I've noted the placement in the note but haven't touched the section — say the word and I'll draft the passage, or leave it until the WR/plop carriers give it a second instance.

@@ -1,0 +1,25 @@
+`app-retract.tex` is the right landing place — but first, a live contradiction inside science-2026.The liability isn't that the WM has defects — it's that **the paper says things the excursions have since contradicted.** So the first move is an audit, not a repair programme: `NOTE-red-ring-findings-vs-paper.md` (`4a37e59`), nine findings each with a paper exposure and a disposition.
+
+**One was live and I fixed it while writing** (`fa66a05`). `app-zaif.tex` asserted *"Six dispatches; two failures caught and remediated"* while `sec-future-work.tex` in the **same paper** withdrew exactly that count — *"an audit of this paper could locate only four handoff packets and no six-row adjudication ledger."* The paper stated and withdrew one number. I treated aligning them as applying your decision rather than making a new one; say the word if you'd rather it read differently.
+
+**The audit, by disposition:**
+
+*Correct — editorial, a sentence each:*
+- **R6's proposer is built and live**, and the ring's own text says unbuilt. "Built and switched off" is the finding.
+- **R14's τ cannot change any action.** A dial that moves nothing isn't a commitment temperature — this also touches the trip→dial link in `sec-discussion-patterns`.
+- **R5's `warm-customer-pays` arrived satisfied and unrecorded**, its only trace a line scoping it out. Best-evidenced of the five.
+- **R2's nag-0 inference doesn't hold**; the 0.009 credit is unverified (withdraw) and the citation named the wrong file (correct).
+
+*Repair — machine work:*
+- R6 selects over a pre-ordained whitelist; a whitelist is not a construction.
+- R8's fold step ⑨ silently no-ops on a missing outcome — `GainChain`'s family 4 already states the property.
+- 22 operator notices of one no-op.
+- The R-node wiring exists only as SVG path coordinates; 5 of 18 nodes have a recorded column. Already the mission's first scope item.
+
+*Done:* no emitted quantity meets all four G(π) conditions — already stated in `sec-boundary`, in our own voice.
+
+Four of the five rows your "supposedly run-evidenced" worry actually names are editorial. That's the good news in this.
+
+**And the structural point:** the contradiction I found was greppable and had survived a build. The fix that generalises is the one this repo already applies to numbers — `gen_wr_catalog.bb`, `turn-chain-counts.tex`, *no number in this paper is typed by hand* — extended to **statuses**. The excursions now hold a status per ring; the paper doesn't read them. A generated fragment would make a ring's evidence status something the prose cannot contradict by hand.
+
+I've stopped short of making the editorial corrections themselves — those are four judgement calls about your paper's claims, and I'd rather you take them than find them made. If you want, I'll draft all four as a single diff for you to accept or reject line by line.

@@ -1,0 +1,17 @@
+Recording that as the mission's DERIVE, with an order derived from what today actually constrains.Recorded as §3 DERIVE in `M-formal-war-machine` (`306f954`). The ordering isn't a preference — today's evidence forces it.
+
+**The principle.** Five excursions ran against five rings. **In five cases out of five the ring's recorded reason was wrong or unverified, while the verdict mostly survived.** R8's "no producer", R14's "not yet located", R6's "tension-proposer unbuilt", R2's citation and its nag-0 inference, R8's "dead since 07-14". So the debt is in the *reporting*, not the verdicts — which gives:
+
+> **(1) make the machine's own reports honest, before (2) changing what it does, before (3) adding capability.**
+
+**And Tier 1 is a prerequisite, not a sequencing taste.** `live_gain_repair_changes_no_action` proves an R8 repair cannot move a selected action while R14's edge is cut — so a behavioural repair landed today couldn't be *evaluated*: nothing would distinguish "it worked" from "it never ran". That is the 2026-07-08 failure exactly.
+
+**Tier 1** — four additive changes, no decision logic touched, each removing one indistinguishability: the composer writing a per-proposer attestation (`proposer-id` is declared at `:31` and never called); `read-curvature-signal` returning `fresh | stale(age) | absent`; the grounded producer returning `:domain-mismatch` instead of `nil` (vocabulary already exists one function above); and ceasing to report τ as governing. The first is the standout — with attestation, 07-15 surfaces at **attempt 2** instead of attempt 24, and it's the instrument every later repair gets judged with.
+
+**Tier 2 is the plop-2026 work and needs no code:** publish both axes so `R8 ✓ Real` and `R8 red` reconcile; correct the four wrong ring notes; refresh the 07-13 map (stale by twelve namespaces); add the non-vacuity column.
+
+**Tier 3 held** — R8 slice 4, R14's edge, R2's channel. Your sequencing instinct on the operator work is right for a specific reason: **R2's channel is the plug, and Tier 1 is the socket.**
+
+**What I put in writing as uncovered:** thirteen green rings unexamined. Today's five-for-five was all on *reds* — the category the stack actually looks at. Nothing here licenses "the rest of the machine is well behaved", and §3.3's non-vacuity column is the cheapest way to find out. Also recorded: three subsystems with three end dates (`wm-full-loop` 07-15, `wm-trace` 07-21, `wm-outer-loop` 07-27, bulletin live today) that no single file reconciles.
+
+Two concrete next steps, if you want them: **Tier 2 items 1–2 I can do now** — zero code, directly paper-facing. **Tier 1 #1 is one small Codex packet** with a clean acceptance bar (replay a tick where nothing is addressable; the trace names five proposers with `:emitted 0` and a reason each). Say the word on either.

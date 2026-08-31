@@ -1,0 +1,28 @@
+Gate reproduces: exit 0, no `sorryAx`. The one thing I want to change is where the argument sits.## REVIEW — PolicyGrade.lean, `3677281f8b` (codex-22)
+
+**What I checked.** Read the file; ran `lake env lean DarkTower/WarMachine/PolicyGrade.lean` myself (exit 0); read the `#print axioms` output from my own run; checked theorem 2 against what it claims; checked for unconstrained fields. Fix committed as `0de75bc6e6`.
+
+**Standalone** — no imports at all, not even the other WarMachine modules. **Axioms clean** — `propext`, `Quot.sound`, no `sorryAx`, reproduced independently.
+
+**Theorem 2 does prove the right thing.** `grim_trigger_snatcher_passes_sg2_fails_sg4` asserts all four conjuncts I asked for: score `−1`, `¬ sustainedSingleAction` (passes S-G2), `¬ wiringSensitive` (fails S-G4), and `¬ earnsPolicyGrade`. Nothing weakened.
+
+**But the argument was in the wrong place.** The refusal rested entirely on indexing the score family by `Unit` — `¬ wiringSensitive (f : Unit → Score)` holds for *any* `f`, so the interesting claim ("grim trigger is hardcoded, so it has one wiring") was a modelling choice with the proof following trivially. True, but a reader could fairly say the conclusion was assumed by picking the type.
+
+I split it into two general lemmas, both of which **depend on no axioms at all**:
+
+- `wiringSensitive_needs_two_wirings` — **S-G4 forces a policy space with more than one point.** A score cannot be sensitive to a choice of wiring that does not exist.
+- `singleton_wiring_fails_sg4` — a singleton-indexed family therefore fails S-G4, whatever it scores.
+
+Theorem 2 now discharges its third and fourth conjuncts from those, so the only thing left standing on judgement is the modelling commitment itself, stated in the docstring. It also dropped `Quot.sound` in the process.
+
+The first lemma is worth more than its role here: it states the singularity criterion as a theorem. You cannot earn policy grade if there is only one policy.
+
+**Its unrequested strengthening is good and I kept it.** `earnsPolicyGrade` requires `scoreUnder observedWiring = run.score` — without it an unrelated non-constant family could certify a run whose score it never produces. That's a real hole it found in my spec.
+
+**It argued back on S-G4, and both points are right.** I recorded them in the module docstring and in E-R5 rather than defending the standard:
+
+*The wiring type doesn't witness that its values re-order the same components.* `PatternWiring` has two constructors; nothing forces them to be two orderings of one collection. That's discharged here by evidence outside the proof — both scores measured on the same twelve patterns.
+
+*A wiring-insensitive score may belong to a robust policy, not a degenerate one.* This is the sharper objection. I think the clause survives, for the reason it gave: **S-G4 is a condition on the measurement, not a verdict on the policy.** A number no re-wiring moves supplies no evidence that the cascade produced it. But the cost is real and I've written it down as a bound: a genuinely robust collection cannot earn G(π) on a scenario set that fails to separate its wirings, and the remedy is a scenario set that does, not a weaker clause.
+
+No declared-but-unconstrained fields. One cosmetic note: `Action.stop` appears in the enumeration but in no witness — correct, since the run it belongs to (G1 against a cautious counterpart) isn't one of the three, and an enumeration of the action space should be complete.

@@ -1,0 +1,23 @@
+That's the right lens, and it makes fixtures reviewable by you rather than only by a checker.`ab4984f`. The method: **every fixture is written twice** — as a scenario at the operator level, and as the tick that renders it. The checker runs the tick; the *review* runs the scenario. A fixture whose scenario can't be stated in a sentence you'd recognise is one nobody can audit, and `{:realized-G -0.5}` is not a sentence.
+
+**And the 34-step asymmetry hands us both polarities.** That note found the halves fail in opposite places — the operator loop has the feedback and lacks the machinery, the WM has the machinery and lacks the feedback. So:
+
+- **accepting fixtures** come from *the operator doing it correctly* — a loop that demonstrably closes, which makes it a witness that the property is satisfiable at all. That's exactly the non-vacuity the trace corpus can't supply.
+- **refusing fixtures** come from *the WM's recorded failure shapes* — so the refusal isn't invented.
+
+The four families, both ways:
+
+| family | accepting | refusing |
+|---|---|---|
+| **1** identity threading | "The result I folded in is the result of *the decision I made*, and I can say which one." | "I felt the week went badly and adjusted how boldly I commit — without tying that to any particular call." |
+| **2** non-empty handle | "The instrument didn't apply here, and I wrote *that* down." | "Nothing to record, so I recorded nothing." |
+| **4** durability before fold | "I updated my estimate from the note I had already written." | "I updated from something I was still holding in my head, and later couldn't reconstruct it." |
+| **5** declared domain | "This mission is one my instrument covers, and I said which instrument." | "I scored it anyway, because it was in front of me." |
+
+The refusing column isn't hypothetical — each has its dated incident and its line: `fold_realized.clj:163`'s bare `nil`, the four-entry whitelist, the catch-all at `enact.clj:255`, the two clocks at `wm_scheduled_run.clj:108`.
+
+**Naming follows from that**: `fixture/folded-an-outcome-i-cannot-attribute` rather than `clause-1-negative`. A qualification report listing those reads as a description of what the machine will and won't do.
+
+**And the sharpest case is family 1.** No trace record can witness it — there's no record-level tick — so under a corpus bar it would have been dropped. As an operator scenario it's immediately recognisable: *adjusting how boldly you commit without tying it to any particular call.* Trivial to write as a fixture, and the gap becomes what it actually is — a Tier-1 instrumentation repair rather than a shrunken model.
+
+H2 is still running on codex-22; when it lands I'll review the emitter and then draft these fixtures against the emitted clause ids, so you can read the scenario list before any Clojure gets written.

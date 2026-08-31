@@ -1,0 +1,19 @@
+Good fit — and §5a already tells us the shape it has to take. Let me check the zai seats while I write it up.It fits — and the interesting part is that **§5a has already decided most of its design.** `03cead3`. Ten `zai` seats are idle (`f45-*`, `f49-*`), so a GLM 5.3 pilot needs no new infrastructure.
+
+**First, it isn't harvesting.** §5a's *"the rationale layer can only ever be authored, never harvested"* is a measurement about **usage records** — missions don't record why. A spider reads the **patterns themselves**, which is a third thing: not authored-by-the-author, not harvested-from-usage, but **proposed-from-text**.
+
+**Then §5a decides three things:**
+
+**Every proposal is post-hoc by construction** — a spider can't make an author's causal claim — so every edge carries the marker, without exception.
+
+**And that's a feature, given today's kernel work.** An unattested post-hoc edge is **Beta(1,1)**: maximum spread, maximum epistemic value. So the spider doesn't pollute the graph — **it populates the high-entropy region, which is exactly where the derived witnesses should be pointed.** Generation cheap, uncertainty honest, `checks/` earns attestation. The three pieces compose without anyone having planned it.
+
+**Propose ≠ commit** — §5a says `@how` is *"partial and curatorial… the judgement of which ones is editorial"*. So it writes a proposal file, never edits a `.flexiarg`, and a review step disposes.
+
+**The pilot has ground truth, which is unusual.** `library/snatch/` — six patterns, **nine hand-authored edges**, closed domain, written today. Precision/recall against a known answer: does it find the four `@how` from `protect-the-unprotected-move`, and the `@see-also` pair? But the valuable question is **what it proposes that isn't in the nine** — a spider that only recovers them has learned the format; one that proposes a defensible tenth has done the job. Second validation: `math-formalization`'s 4 `@why` and 11 `@see-also`, held out.
+
+**Why a cheap model is right:** this is **broad generation with narrow verification**. The expensive step is the witness, not the proposal — so model quality buys *recall*, and correctness comes from `core.logic`. That's the shape a small model suits.
+
+**And it's an R6 instance** — *"tension proposes candidates"* at the library stratum, one level up from the proposer that's dark in `futon2`. If it works, R6's requirement gets a worked instance where the candidate space is 1227 patterns and the generator is cheap.
+
+Three things I'd fix before dispatching: the proposal schema needs an **`:evidence-span`** — the text that prompted the edge — or a proposal can only be accepted or rejected, never reviewed; a **declared refusal budget**, since proposing between every pair gives 1227² candidates and no information; and the snatch ground truth held out of the prompt, which is obvious and easy to leak.

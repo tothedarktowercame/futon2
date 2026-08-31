@@ -1,0 +1,21 @@
+That correspondence is exact, not decorative — and it generalises the Lean predicate we already have.`f80a483`. The correspondence is already sitting in the Lean.
+
+```lean
+governs s := ∃ entries τ₁ τ₂, s τ₁ entries ≠ s τ₂ entries
+```
+
+**That is a singularity-existence condition** — somewhere on the τ dimension, two values lead somewhere different. And its negation, in the same file, is `factorsThroughDiscard`: the whole dimension is ordinary, every point like every other, travelable *ad infinitum* with nothing happening.
+
+One honest caution I put in the note: a Poincaré singular point (where a field vanishes) and "output varies with input" aren't the same theorem. What's genuinely shared — and it's the load-bearing part — is the distinction between places where structure changes and places where it doesn't, plus the claim that only the former carry sense. Information theory says it in its own register: a constant channel has zero capacity.
+
+**And the 07-15 archive is the stupid progression, literally.** 22 attempts, each selecting `:learn-action-class`, each recording "no addressable entities" for all seven classes, each closing at `:agent-turns 0`. Twenty-two ordinary points on a dimension carrying no singularity — and it took a person to stop it, because nothing in the machine could tell point 22 from point 2.
+
+**The bigger result: the five invariants are one, seen from five sides.**
+
+> Every dimension the machine records must carry at least one singularity — some pair of values that leads somewhere different. Otherwise it isn't a dimension, it's a line of ordinary points.
+
+And I1 finally gets its *explanation* rather than just its test: **a list is the paradigm case of a dimension with no singularity.** Every entry is an ordinary point; you can add entries forever and the structure never changes. That's *why* editing a list never fixes anything. I2 is "no data" and "out of domain" landing on the same output; I4 is fresh and twelve-weeks-stale indistinguishable at the point of use; I5 is a silent proposer indistinguishable from an absent one. All five rings are the same defect at different dimensions.
+
+Two things it buys immediately. **A general predicate, five lines** — `discriminates (f : α → β) := ∃ x y, f x ≠ f y`, with `governs` as its τ instance, so R2, R6 and R8 get their conditions in R14's vocabulary instead of four bespoke ones. And **a design test that subsumes the list test**: before adding a channel, field, flag or metric, ask whether any two of its values lead anywhere different — if not, adding it is senseless. That also grounds why *vacuity* rather than error is the worst exposure: a clause no witness could fail is a dimension upon which no singularity occurs.
+
+Your phrase — pushing the ability to discriminate into the machine — now has a precise reading: give it dimensions on which singularities occur, *and* the means to notice when one doesn't. The second half is the hard one, and `repair_obligation.clj` — "durable stop-the-line memory" — is the only mechanism in the stack that acts on the judgement that a line has gone ordinary.

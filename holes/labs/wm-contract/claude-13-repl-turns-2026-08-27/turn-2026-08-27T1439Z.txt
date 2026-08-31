@@ -1,0 +1,21 @@
+That's the right move, and it's a precise categorical one rather than an analogy. Let me check the piece that would supply the mass.The mass source exists — `intrinsic_values.clj` carries Beta-posterior arithmetic with a Beta(1,1) prior, `credit-for` returning the mode. Writing the synthesis.`33ad4e4`. It's a precise categorical move rather than an analogy — and it **completes** the core.logic layer rather than replacing it.
+
+**The exact relationship.** A copy–discard category has copy `Δ` and discard `ε` on every object. A **Markov** category is a CD-category where discard is *natural* — `f ; ε = ε` for every morphism — which says every morphism is **total**. core.logic gives us `Rel`, and a relation may be **partial**: `run*` returning `()` is a morphism that loses mass. So `Rel` is CD and **not** Markov; `Stoch` is the total refinement, because a kernel is normalized.
+
+> Moving from core.logic to a Markov category is exactly the move from *which outcomes are possible* to *how the mass is distributed over them*.
+
+**And every piece is already in the stack.**
+
+**The relation already supplies the support.** The witness didn't return a boolean — it returned **four bindings**. Four ways the edge holds. That set *is* the support; we were reading only its emptiness.
+
+**The Beta posterior supplies the mass.** `intrinsic_values.clj` has `prior-alpha 1.0`, `prior-beta 1.0`, and `credit-for` *"defaulting to the Beta(1,1) prior mode (0.5) for any class that has no recorded updates yet"* — and `aif2/tension.clj` already generalises it to per-*entry* keying.
+
+So an `@how` edge is a kernel `Edge → D(Outcome)`; a cascade is Kleisli composition; and **ambiguity is the entropy of that channel**. With the consequence falling out the right way round: **an unattested edge is Beta(1,1) — maximum spread, maximum epistemic value.** You learn most by testing the method nobody has attested. Derived from the edge's own provenance, which is §5a's *"a post-hoc `@why` is a hypothesis… it should earn attestation"* stated numerically.
+
+**The part that looks like the breakthrough.** R14's requirement in Lean is `¬ factorsThroughDiscard` — *the channel is not constant*. Ambiguity is *how spread the same channel is*. **The singularity criterion and the EFE ambiguity term are two readings of one morphism.** If that holds, the five invariants and the expected-free-energy core stop being two vocabularies side by side and become one — which is what this has been circling since `I(τ; action) = 0`.
+
+I've written that as a **claim, not a theorem**. It wants writing down in Lean before anything leans on it — and `Mathlib.Probability.Kernel.Category.Stoch` imports cleanly since this morning's repair, so the trigger I named for reaching for the library has arrived.
+
+**Three bounds recorded.** `Rel → Stoch` isn't free — you supply the normalization, and Beta(1,1) is a *prior*, so S-G3 requires it declared rather than absorbed. The outcome space is still open: entropy over the wrong coordinates is a number, not a measurement. And the mirror discipline carries over — a kernel with mass everywhere is the stochastic version of a witness that cannot fail.
+
+**Next step at one-edge scale again:** rewrite the snatch witness to return a distribution — same relation for support, `credit-for` for weights, report the entropy, check the mirror still has zero mass. That prices the Markov step the way the core.logic step was priced, before anything is planned on it.

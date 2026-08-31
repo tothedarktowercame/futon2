@@ -1,0 +1,18 @@
+No — R5 is the one we never opened. And its salience is the sharpest of the five. Checking its claim first, per the day's record:Never created — R5 is the one gap. Opening it with the Deleuze material as its core, since that's where it belongs.We never did — R5 was the one gap. Opened at `68e31d06`, and it's the right home for the Deleuze material because **R5 is R14's inverse**:
+
+> **R14** — a dimension with **no singularity** on it: τ computed, reported, and no value changes the action.
+> **R5** — a singularity with **no dimension** to receive it: `:warm-customer-pays` became satisfied and the machine had no channel to register it.
+
+Together they exhaust how discrimination fails. Neither alone does.
+
+**And the ring's own salience already states the condition, in the stack's own theory** — *"the one verdict the apparatus cannot issue to itself was received and not perceived … futonic-logic, **A7: without salience, generativity remains inert**."* A7 and Deleuze's negative condition are the same sentence. R5 is it read from the other side: not *we're looking along a dimension where nothing happens*, but *something happened and we were looking elsewhere*.
+
+**I checked the claim before writing, and this is the first of the five that needed no correction.** `warm-customer-pays` occurs **0** times in `observation.clj` (the fourteen channels the machine steers by) and **0** times in `efe.clj`. In the evidence store it occurs **once**, and that occurrence is prose: *"(sales outcome, not an academic demo — **skip** for the fair)"*. So the rung isn't merely uncounted — its sole trace is a line scoping it out. (Fairly: scoped to a demo, not a general dismissal.)
+
+**Two things that fall out.**
+
+R5's node statement is the *general* form: *"the evaluate stage reports what the criterion set does NOT cover."* That's the criterion set declaring its own boundary, so an event outside it registers as **outside** rather than as absent — `declaredDomain` and `typedAbsence` applied to the criteria themselves. WR-25's *good news gets the same discipline as bad* is a **special case** of a polarity-neutral condition; it's just where this stack happened to get caught.
+
+And the naive fix is refused explicitly: **add a `:warm-customer-pays` channel** recreates the defect one rung along — the next unanticipated signal is invisible again, and the fix scales by editing a list, which is the paradigm dimension with no singularity on it. The satisfying fix is that the projection reports its *own coverage*, so an uncovered satisfaction is a typed report rather than a silence — `foldCompliant` one level up.
+
+One sequencing consequence worth flagging: R5's cost is **borne outside the stack** — the only one of the five. The other four can be repaired against our own evidence; R5's acceptance needs an event from outside, arriving on the world's schedule. So the instrument has to be in place *before the next one arrives*, which is WR-27's *born instrumented* applied to the one channel we don't control.

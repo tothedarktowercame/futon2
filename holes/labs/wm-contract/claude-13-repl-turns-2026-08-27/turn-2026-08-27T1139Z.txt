@@ -1,0 +1,19 @@
+Diagnostics first so the packet is specific rather than exploratory.Diagnosed precisely — and it's a shared-mutable-state problem, not a build problem.Now the handoffs. Which family is easiest depends on what the trace actually carries — checking before I draft.The trace corpus is thinner than Tier 0 assumed, and that changes the handoff order.All three, in order.
+
+**1. The 34-steps note is updated** (`2f1a040`) — the reconsideration sits next to ⑰'s abstain, not somewhere else. It records what changed (the abstain declined a formalisation with no named obligation; family 8's proxy and its reviewer-flagged caveat is one), states the idea in the few lines it takes — `governs` as factorisation through discard, data processing as the counit law `f ; ε = ε`, determinism as commuting with copy — and scopes it: adopt the idea, defer the library, **so ⑰'s abstain still stands for what it actually declined.**
+
+**2. Belled to codex-22** — job `invoke-1787830674542-2326-6e7822bb`, park `park-8348000c-35a6-4a1b-9739-87ddf248ea86`, confirmed `running`.
+
+I sent it as **diagnosis-only, no writes**, and you should know why I narrowed it. The diagnosis is: `mathlib4` is on **v4.31.0-rc1**, `apm-lean` on **v4.29.0-rc8**, and `mathlib4/.lake/packages` is a symlink into `apm-lean`'s. Two repos on different toolchains sharing one mutable package authority — each `lake` run reconciles that directory toward its own manifest (my probe printed `checking out revision …` for seven packages). Batteries was rebuilt at 22:04 under v4.29; `Stoch.olean` was built at 18:35. Whichever repo ran last wins. Since **live APM frames depend on that authority**, and `AGENTS.md` forbids rebuilding Mathlib and forbids worktree-add-plus-build as recovery, letting an agent pick a repair unsupervised could break running frames. So the packet produces options with costs and an explicit AGENTS.md compliance check per option — the decision stays yours.
+
+**3. The handoff series is drafted** (`a184971`) — and a census reordered it before I wrote a packet.
+
+I counted keys across the 52 trace files. `:tau` and `:decision` appear in all 52; `:selection-gain`/`:author`/`:reviewer` in **7**; `:realized-outcome`/`:policy`/`:tick`/`:enactment` in **5**; `:cascade-score`/`:coverage-score-delta` in **1**.
+
+**So the families that hold today are the least witnessable.** The intuitive first move — demo the Tier-0 chain end-to-end on a property that already holds, keeping the pipeline unentangled from any repair — would have built it on family 7, with **one file** of evidence. Near-vacuous. That's §1.6's criterion 4 arriving as a measurement instead of a worry, before any code got written. And the irony is sharp: the only universally-present key is `:tau`, which belongs to the one family that can't be validated from a record at all.
+
+What survives: the 5 enacting files contain the 2026-07-09 incident the contract must retro-trip. So Tier 0 is buildable, on single-digit witness counts that the qualification record must state rather than round up.
+
+The series: **H1** per-*record* witness census (my numbers are per-file and from one sitting — nothing should be built on them until they're independently reproduced) → **H2** emitter for families 1/2/4/5 → **H3** Clojure validator reporting counts → **H4** mutation tests → **H5** qualification, with families 3/6/7 as *recorded holes* rather than silent greens. H1 gates the rest — split discovery from implementation, applied to our own programme.
+
+Ready to send H1 whenever you want it.

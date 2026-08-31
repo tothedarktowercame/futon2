@@ -1,0 +1,17 @@
+codex-22 is idle. Let me bell the Lean module while I do the excursion and paper text.One correction to the premise first: **we do have a Lean model for R5** — `CoverageReport.lean`, built and reviewed earlier today. But it states R5's *coverage* clause (declare your criterion boundary, type the outside). It says nothing about G. So the missing model isn't R5's requirement; it's the naming discipline for G(π).
+
+**Did E-R5 need specifying further? Yes, and the Snatch work had already done most of it without being written down.** `NOTE-a-standard-for-G.md` named exactly one gap: *"G is earned at action grain and not at policy grain. The only multi-step prediction repeats a single action, so 'policy' collapses to 'this action, sustained'."* S-G2 was written to make that refusable — and until today nothing in the stack could satisfy it. The pattern policy's G4 run (`offer → denounce → offer → denounce → offer`) is heterogeneous because the *situation* changed, not because a schedule said so. That's the first artefact that meets it.
+
+It also forces a **fourth clause**, now in E-R5:
+
+> **S-G4** · a quantity may be emitted as `G(π)` only if it is sensitive to the policy's wiring — some alternative ordering of the same components gives a different value. A score no re-wiring can move is not scoring the policy.
+
+That's your singularity criterion one level up: a policy space in which every wiring scores alike carries no information about the policy.
+
+**And S-G2 turns out to be necessary but not sufficient** — grim trigger against a snatcher plays `offer, abstain, abstain, abstain, abstain`, which passes S-G2 while being hardcoded with exactly one wiring. S-G4 refuses it; S-G2 doesn't. That's the argument for having both, and it's the theorem the Lean module exists to prove.
+
+**Dispatched:** `PolicyGrade.lean` to codex-22 — job `invoke-1787849563083-2454-fa53aac2`, park `park-013c72d3-7a9f-4735-b72f-21c703bd9c25`. One standalone file, three theorems, the middle one being the S-G2/S-G4 separation. I asked it to argue back if it thinks S-G4 is wrong rather than force a proof.
+
+**The paper:** new subsection in `sec-boundary.tex`, before "What this part does not establish". Builds clean, 41 pages, `Appendix~\ref{app:snatch}` resolving. It opens with your justification — Parts I–III describe the apparatus at a grain that doesn't need the loop's internals, and the objective is the one place that isn't possible. Then the definition, the four conditions in words (codes in a footnote), and the pointer.
+
+I ended it with the part I think Part IV requires: **no quantity the War Machine currently emits meets all four.** Its G is honest at action grain, its multi-step prediction fails S-G2, and its ambiguity variance is hand-tuned and fails S-G3. So the demonstration is real and is not yet a demonstration about this stack — which seemed better said in our own voice than left for a reader to notice.

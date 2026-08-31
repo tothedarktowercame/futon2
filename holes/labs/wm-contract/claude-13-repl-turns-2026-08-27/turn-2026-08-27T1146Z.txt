@@ -1,0 +1,29 @@
+Executing. Only `mathlib4/.lake/` is touched — the authority itself stays put, so the 21 APM consumers are unaffected.Symptom gone — and note there were no `checking out revision` lines this time, so Lake reconciled nothing. Regression check on the day's work:Green across the board. Now the durable half — someone applied the rule in good faith and will again:AGENTS.md is at the workspace root, which isn't a git repo — the edit is on disk, no commit needed. Closing the ticket with the verification:Done and verified. Ticket closed at `5a16ed56`.
+
+**The repair**, on `mathlib4/.lake/` only:
+
+```
+unlink packages                             # the symlink only
+mv packages.pre-canonical-20260826 packages
+```
+
+I used `unlink` deliberately — it refuses to operate on a real directory, so it could not have removed the authority itself. Pre-check first: no `.olean` under `mathlib4/.lake/build` was newer than the alias, so there were no mixed-epoch artifacts to clean up.
+
+**Verification:**
+
+| check | result |
+|---|---|
+| the original symptom — `import …Kernel.Category.Stoch` | **exit 0**, `Stoch : Type (u_1 + 1)` |
+| Lake reconciliation during that run | **none** — no `checking out revision` lines, so packages already matched the manifest |
+| `mathlib4/.lake/packages/batteries` | real dir, `v4.31.0-rc1`, HEAD `708b0578` — matches its manifest |
+| `GainChain.lean` | exit 0, no errors, no `sorryAx` |
+| `CommitmentTemperature.lean` | exit 0, no errors, no `sorryAx` |
+| APM authority after | `bce25af7`, unchanged; `apm-lean` worktree clean |
+
+The absence of `checking out revision` lines is the one I'd point at: previously every invocation from either side rewrote the shared directory. Now Lake finds what it expects and touches nothing.
+
+**Zero blast radius on the APM side.** The repair moved `mathlib4` off the authority rather than moving the authority, so none of the 21 APM consumers was touched.
+
+**And the recurrence is closed off.** `AGENTS.md` now says under the Lean section that `mathlib4` is not a frame worktree, keeps its own `.lake/packages`, and must not be aliased to the APM authority — with the reason (different toolchains, shared mutable dir, last-repo-wins) and a pointer to the ticket. That's the part that actually stops the time loss: the alias was made in good faith by someone reading the frame-worktree rule as universal, and without that line the next person reads it the same way. (`/home/joe/code` isn't a git repo, so that edit is on disk rather than committed.)
+
+Two consequences worth carrying forward: `Stoch` and `SFinKer` are now genuinely usable, so the Markov-category option is live whenever repair option (a) comes up — though my recommendation stands that the ~20-line finite version comes first. And the Tier-0 handoffs are unblocked; H1 is ready to send whenever you want it.

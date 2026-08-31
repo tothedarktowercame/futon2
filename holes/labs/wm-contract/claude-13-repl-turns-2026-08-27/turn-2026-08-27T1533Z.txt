@@ -1,0 +1,21 @@
+That's the right constraint to name before I send it — and it changes the packet. Let me record it, because I think the meta-theory already has a name in our vocabulary.Sent — job `invoke-1787844810545-2401-80b0ca5c` on codex-22, park `park-482227fc-dfa8-412c-b0f9-120e14aad88a`. And your observation changed the packet, so it's worth saying how. `745c86c`.
+
+**Both bounds are real and we've already hit both.** Family 1 has **zero witnesses in 52 ticks** — not because the property is false, but because no record carries a tick to thread against. The predicate is fine; the trace can't feed it. And if Lean states nine families while the trace exercises four, the contract is **44% covered and nothing says so** — a run reports green, where green means *"the four clauses I could evaluate passed"* and reads as *"the contract holds."*
+
+**But I don't think the meta-theory is a new construction. It's R5 applied to itself:**
+
+| R5, over outcomes | the meta-theory, over clauses |
+|---|---|
+| the criterion set declares its coverage | the contract declares which clauses are checkable against available traces |
+| an outcome outside coverage is `uncovered`, never absent | a clause that can't be witnessed is `unwitnessable`, never silently passed |
+| `∃ outcome, covers o = false` — it names a boundary | `∃ clause, ¬checkable` — a contract claiming total coverage is the failure mode |
+
+`CoverageReport.lean` is already parametric in the outcome type, so **instantiating `Outcome := Clause` gives the meta-theory for free** — which is what "the same requirement one level up" ought to mean if the vocabulary is worth anything.
+
+And APM has it partly built already: `qualification-report-v1.edn` carries `non-vacuity`, per-category mutation coverage, and **residual hole tests** — it records the unexercised part as *holes* rather than silence. That exists in the precedent and not in ours.
+
+**So the packet now requires the check to report its own coverage.** Per clause: `:passed`, `:failed`, or **`:unwitnessable` with the missing field named** — a first-class result, not an error and not a skip. A run where every clause is unwitnessable must say exactly that.
+
+The sharpest acceptance case is #4: given a **real** existing `007-closed.edn`, the check must return `:unwitnessable`, **not** `:failed`. Those closes predate the clause — *absent because never asked for* is not *absent because violated*, and conflating them would be the same error as reading the war-room zero as unharvestability rather than as a missing instruction.
+
+Otherwise we'd ship, as the first artefact of a mission about uninstrumented loops, an instrument that can't say what it failed to measure.

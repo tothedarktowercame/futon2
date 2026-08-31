@@ -1,0 +1,28 @@
+Both corrections land. Let me get the directive vocabulary right — §5a is exactly about this.The directive vocabulary is exactly what you mean — and the measurement is stark.Both corrections land, and they kill my `+ predicts:` proposal. `c5df44a`, plus the snatch edges committed in futon3.
+
+**Why it was wrong:** a hand-authored prediction is a **stipulation** — S-G3 says those must be declared, not absorbed — and it's unfalsifiable at the grain it's written. Your version is right: the pattern is abstract, Lean-grade, and `Q(o∣π)` is *derived* as a unit test or `core.logic` rule. Same two-layer split as the APM chain, which is already Tier 0.
+
+**And §5a declares exactly the vocabulary I was reinventing:** `@why` (authority, total, author-written), `@how` (the named methods, partial, curatorial), `@see-also`, and — the one I claimed was missing — **`@holds-at` / `@holds-open`, which point *out of the library* at R-map nodes.** That's the shared observation coordinate, already specified. `@how` is the composition relation; a cascade is a `@how` expansion.
+
+**Then the measurement:**
+
+```
+flexiargs        1227
+with @why          60   (5%)
+with @see-also     38
+with @holds-at     12
+with @holds-open    3
+with @how           1   ← one file, one edge
+```
+
+**The relation that would give cascades has one edge in the whole library.** And that isn't neglect — §5a says `@how` is *"partial and curatorial: only some patterns acquire methods worth naming"*, and the standard is ten days old.
+
+**Two things §5a already says that bear on G directly.**
+
+It knows about uncertainty in its own edges: *"A post-hoc `@why` is a trace, not a cause… a hypothesis… it should earn attestation."* **So the ambiguity term has a home in the library's own metadata** — an unattested post-hoc edge is an uncertain prediction, an author's own `@why` a confident one, and epistemic value is highest where a `@how` edge is least attested. Read off provenance, not stipulated. Eighteen files carry a post-hoc marker today.
+
+And it states the price: *"across 42 missions citing 151 patterns in their ARGUE sections, **zero** cite a war-room ruling… The rationale layer can only ever be authored, never harvested."* **Populating `@how` is authoring work, not mining work.** That's the honest cost of a plausible G.
+
+**Done concretely:** `library/snatch/` now carries **9 structural edges** across 6 patterns, against 1 in the remaining 1221 — `protect-the-unprotected-move` `@how`s the four remedies, each remedy `@why`s it and the family pattern, and the two after-outcome ones are `@see-also` peers. Closed dynamics, so the graph is checkable by inspection. (Deviation noted: §5a says `@how` is editor-written later; I authored these straight after the patterns.)
+
+**Next step I'd take: one derived check over one existing edge** — write the `core.logic` rule that says whether the method actually carries out the pattern, and price it. If cheap, `Q(o∣π)` is reachable by populating and deriving. If expensive, we learn that at the scale of one edge rather than 1227 patterns.

@@ -1,0 +1,17 @@
+You said this about the trace corpus and I've now drifted back to retrospective validation twice. Correcting the adapter design.Correct, and I've recorded it as a **repeat** — this is the second time today I proposed validating against a historical corpus and got redirected. First the retro-trip bar over `wm-trace`, now an adapter over the 82 flights. `c425dcec`.
+
+The pull is real: the data is *there*. But **a frequency computed over closed flights isn't falsifiable; a guarantee on the next flight is.**
+
+So the 82 flights keep exactly the role you gave the trace corpus: **fixture design.** They tell us which shapes are real — the fourteen terminal dispositions, the (π, o) pairing, that 21% lose their π — and nothing more.
+
+**The guarantee, on a seam that already exists.** Every flight writes `007-closed.edn`. So:
+
+> **Every flight's close carries a coverage statement** — the criterion set declared for that flight, and whether the terminal outcome fell inside it. An outcome outside declared coverage is recorded as `:uncovered`, never omitted.
+
+That's R5's requirement made **operative per flight** rather than inferred from a corpus. One point of attachment, on a record the runner already writes, applying to the next flight rather than the previous eighty-two.
+
+In Tier-0 shape: Lean states it (`CoverageReport.lean`, currently with codex-22) → the clause joins the emitted contract → Clojure validates a **new** close → a mutation test proves a close that omits the statement is refused. **Acceptance is the first flight after the clause lands**, with no claim about any flight before it.
+
+One thing this sharpens, looking back at 07-15: those 22 attempts each recorded *"no addressable entities"* per action class — non-coverage reporting at **action** grain — then closed `:no-selection` with nothing at **flight** grain. Under the guarantee the close must say whether `:no-selection` was inside the declared criterion set. It was — and *saying so* is what turns twenty-two silent repetitions into twenty-two records a reader can see agreeing with each other.
+
+The dispatched Lean module is unaffected: it states the property parametrically and boolean-ly, which is exactly what a forward guarantee needs to be stated against.

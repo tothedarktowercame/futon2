@@ -1,0 +1,29 @@
+## Review — snatch gap-fill, `550d478` (codex-22)
+
+**What I checked.** `git show --stat`; re-ran the playout myself; recounted the ratio from the 18 `! conclusion:` lines; read all seven guards against the trace they produce; checked the edges; clj-kondo + check-parens on the changed file. Fixes committed as `da90c44`.
+
+**Scope clean.** Only `library/snatch/` (7 new patterns, cap was 8) and `checks/playout_snatch.clj`. No `commit -a` — the unrelated `patterns-index.tsv` edit and the two untracked math flexiargs are still sitting there untouched.
+
+**Numbers reproduce.** My run gave exactly the reported 4 / 0 / 0 / 0 gaps and the same S-001 line, falsifier included.
+
+### Gap 1 is closed
+
+`exchange-when-both-sides-gain` says the thing I said nothing said: *"each transferred token replaces one point for its giver with two points for its receiver. A completed bilateral exchange therefore creates value for both sides; protection is useful only insofar as it makes that gain reachable."* That comes off the recorded payoff rule (own 1, other's 2), not off an incident — which is the point, since incidents are why the collection was defensive.
+
+On the ratio I count more conservatively than codex did. It reported 1:10 → 5:13; I make it **3 clearly gain-stating in 18**, with `price-the-final-round-as-final` and `re-enter-after-observed-repair` readable either way, and two of the original eleven that aren't really either (`institutions-vary-by-position-and-force` is design taxonomy). The forced binary inflates both counts. But the direction is not in doubt and the missing sentence is written, so gap 1 was addressed rather than routed around.
+
+`@why` edges are real and point the right way — the two derived patterns cite the gain claim as their authority; `use-talk-to-make-a-testable-offer` cites the design-grain talk pattern. No `@how` edges were invented from general patterns to play moves, which is right: these are authority relations, not method.
+
+### Three guards credited coverage they hadn't earned
+
+Same family as the `(contains? p1-actions :abstain)` defect, one level subtler each time — not true in every round, but true in every round where they were evaluated.
+
+1. **`accept-an-offer-that-beats-holding` is a P2 pattern given a P1-shaped guard**, byte-identical to `ask-for-surplus-not-surrender`'s. P2 here is a fixed disposition, so the harness was crediting coverage to a decision it never makes. Now `:actor :p2`, excluded from P1's set. Making P2 pattern-driven would let it back in — that's still the right next packet.
+2. **`:offer-size` and `:ask-size` were both `(if (= act :offer) 1 0)`**, so `(pos? …)` on either *is* `:offer-made?`. The game genuinely names a give and an ask separately; this policy doesn't, so a pattern about ask *size* can't be tested here. Guard reduced to the honest condition, limitation written down.
+3. **`:counterpart-tokens` was initialised to 10 and never updated** — a constant dressed as state, so its `(pos? …)` could not fail. Dropped.
+
+**G2 and G5 treatments were added but never played.** The two patterns written for gap 4 were therefore unexercised; their non-firing witnesses existed only in prose. I added `(show :g2 :snatcher 12)` and `(show :g5 :sharer)`. The long G2 run pays off: forced to keep offering into a snatcher, P1's stock hits zero at round 11 and `exchange-when-both-sides-gain` stops firing — a falsifier the harness produces rather than asserts.
+
+### The G4 result is worth not absorbing
+
+G4 went 4 gaps → 0, and P1 behaved identically: `re-enter-after-observed-repair` fires in rounds 2–5 and π abstains anyway, because π is grim trigger and never consults the collection. So "0 gaps" measures situations being covered, not the policy following the patterns that cover them. Those are different measurements and only the first is being reported. Recorded in the README.

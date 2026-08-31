@@ -1,0 +1,26 @@
+Fair challenge — and I think I over-read §5a. Its measurement was about **war-room rulings** specifically, not authority in general. Let me test your prediction.You're right, and the data says so. `math-informal` — **§5a's own worked example of a `@why` edge** — is the second-most-cited namespace in ARGUE.You're right, and I over-read §5a. `adf630e`.
+
+**What §5a actually measured** is that *"across 42 missions… **zero** cite a war-room ruling."* That's a claim about **one namespace**. `@why` targets aren't only rulings — §5a defines `@why` as *"the authority this pattern rests on — the strategy it is an instance of"*, and its **own worked example** is `math-formalization/layer-cake-crossover-split @why math-informal/estimate-by-bounding`.
+
+And ARGUE's checklist asks a why-shaped question outright — *"**Theoretical coherence:** Does the design serve the theoretical anchoring from IDENTIFY?"* — alongside the how-shaped *"Pattern cross-reference."* Both are in the phase.
+
+**Measured, by namespace:**
+
+| authority-shaped | | method-shaped | |
+|---|---:|---|---:|
+| `futon-theory` | 40 | `realtime` | 28 |
+| `math-informal` | 28 | `aif` | 26 |
+| `structure` | 28 | `orchestration` | 16 |
+| `math-strategy` | 14 | `peripherals` | 16 |
+| `meta` | 14 | `invariant-coherence` | 14 |
+| | | `enrichment` | 14 |
+| | | `sidecar` | 7 |
+| **≈ 124** | | **≈ 130** | |
+
+**Approximately even, as you predicted.** And the sharpest bit: **`math-informal` — the very namespace §5a uses to *illustrate* `@why` — is the second most cited.**
+
+So §5a's corollary should read narrower than it does: **war-room rulings are the unharvested register**, not authority in general. Missions do cite what their designs rest on; they just don't cite rulings.
+
+That's a better result for the pilot than my version. The citation corpus can score **both** edge kinds, and the only class it can't validate is `@why war-room/*` — which is also the class §5a says must be authored, and which a spider therefore shouldn't be asked to propose at all. Clean division of labour: the spider proposes what's evidenced, the war room stays authored.
+
+Classification is by namespace and so a judgement — the counts aren't, and I'd expect you to move one or two of those rows.

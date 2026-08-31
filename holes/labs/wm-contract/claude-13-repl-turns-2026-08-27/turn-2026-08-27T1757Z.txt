@@ -1,0 +1,17 @@
+The transcript **shrank** — 1,968,337 → 1,945,752 bytes while the session ran. That reframes the whole result.My two remaining "losses" are in the store as chat-turns. That means my extractor, not the pipeline, is at fault.My own tool was the main culprit. Let me correct the record.## REVIEW — backfill repair, `67c44b32` (codex-22)
+
+**Its work is sound and its zero was right; my earlier numbers were wrong.**
+
+Checklist: both header forms parse (tested), tool results and four harness-record forms excluded explicitly, unparsed turns counted with zero-parsed exiting status 2, `--apply` not invoked, `py_compile` clean. The candidate count is **0**, not the ~8 my packet demanded — and it said so plainly rather than manufacturing agreement, which is what I asked for.
+
+**Chasing the discrepancy found two things, and one is mine.**
+
+**My tool was the main culprit.** `c1_turn_survival.py`'s evidence-text regex was anchored on `"}`, so it matched only entries where `:text` is the last field of the body and silently dropped every other one. Those dropped entries presented as turns *missing* from the store that were in it. Unanchored: **19 operator turns, 19 matched, no losses.** So `missing_chat_turns: 0` was correct and my 7-plus-1 was not. Fixed in `39dc2b5`, mission corrected in `9de9812`.
+
+**One genuine loss survives and is still nameable.** The turn beginning *"Next time please use codex-22 rather than codex-18…"* appears in the store twice — as the truncated `query` of a `context-retrieval` event and in an `invoke-start` prompt-preview — and in **no** `chat-turn` record. I verified that by extracting all 177 chat-turn bodies and searching them directly, rather than by the crude chunk test that misled me first time. So C2 did hold for a turn on which C1 failed. One witness, not seven — and the conclusion I drew from it stands: an end-to-end criterion is over a *set* of stages with typed attrition, not a totally ordered funnel.
+
+Also worth noting: all 177 chat-turn bodies are map-shaped. The string bodies codex-22 counted are `invoke-start`, `context-retrieval` and `invoke-complete`. Its branch for JSON-string chat-turn bodies handles a case that doesn't occur — harmless, but it should say so.
+
+**The real finding is the one neither packet anticipated.** The transcript **shrank** mid-session, 1,968,337 → 1,945,752 bytes, and the operator-turn count fell 23 → 19. Compaction rewrites the external record. C1's denominator is supposed to be external precisely so the machine can't mark its own homework — but the harness rewrites it and turns leave it. **A retrospective C1 self-heals: the losses vanish along with the evidence that they happened.** The one loss above is nameable only because it was measured before the rewrite.
+
+**So I'd change the next dispatch.** The two deferred packets were live-writer discovery and `:evidence/source-turn-id`. Neither is now the most urgent: with 19/19 matching there's no live symptom to discover, and a per-turn key doesn't help if the record holding the key is rewritten. **Snapshotting the external transcript at measurement time comes first** — without it C1 can't be measured after the fact at all, and the other two can't be validated. I haven't dispatched it; say the word and I will.

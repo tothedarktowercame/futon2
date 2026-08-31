@@ -1,0 +1,29 @@
+Good challenge — let me check my own claim first, because I think I overstated it.Your doubt was right, and checking it found an error in what I wrote.
+
+**"A semilattice rather than a tree" isn't a mathematical contrast.** A rooted tree *is* a meet semilattice — any two nodes have a greatest common ancestor. I had run together two different properties: *overlap* (some pattern stands on two authorities — the negation of the tree condition, which is what *A City Is Not a Tree* argues about) and *being a meet semilattice* (any two patterns have a greatest common authority). The harness now checks both, and all four combinations occur across six runs, so they're independent axes:
+
+```
+scenario           acting nodes edges overlap tree?  meet-slat?  G-grade?
+g1  snatcher          2     4     2      0    yes    NO          refused
+g1  sharer            2     4     3      0    yes    yes         refused
+g1  cautious          2     4     3      0    yes    yes         refused
+g4  snatcher          3     7    10      4    no     yes         earns
+g2  snatcher          4     7     5      1    no     NO          refused
+g5  sharer            2     4     3      0    yes    yes         refused
+```
+
+G4 is the case that is *both* — overlap present and every pair meets. That's the structure Alexander's argument is about, and one of six runs reaches it.
+
+**The check found a defect I'd have missed.** G1 against a snatcher is a tree and still not a meet semilattice, because `exchange-when-both-sides-gain` declares no `@why` at all — we wrote it to state the game's gain and it had nothing above it to stand on. So the cascade is disconnected and two of its patterns have no common authority. The pattern reads fine; only the shape shows it's an orphan.
+
+**On semilattice vs BV vs Markov: they're not alternatives, they type different objects.**
+
+- The **authority structure** — what the acting patterns stand on — is a finite poset. Order theory.
+- The **trajectory** — patterns co-firing within a round, rounds in sequence — is a BV term: `copar` within a round (they hold together, no order), `seq` between rounds, which is *non-commutative* and therefore states that this round preceded that one. The poset has no time in it.
+- The **uncertainty** — which pattern acts given a distribution over dispositions — is a Markov kernel.
+
+`DarkTower/BV.lean` already has the constructors. The theorem worth proving is that the G4 trajectory term is not congruent to a reordering of its rounds — exactly the claim `seq` exists to make, and exactly what a bag of patterns loses. Registered, not attempted; it needs a negative result about the congruence relation, which is a real proof rather than a `decide`.
+
+**Your finding is in.** Holding the collection and the policy fixed, the counterpart's disposition selects which sub-structure of the collection a run inhabits — four distinct shapes across six situations. That's stronger than the score difference, because it says what part of the library a situation reaches rather than how well it did.
+
+One conjecture died on the way: the one run earning policy grade is also the one with most overlap, which invites *wiring sensitivity requires overlap*. G2 against a snatcher has overlap and is refused. Not sufficient, and with a single positive case nothing follows about necessity either. Recorded in `NOTE-which-structure-types-the-cascade.md`; the appendix now carries the corrected table and builds clean at 41 pages.

@@ -1,0 +1,20 @@
+It runs — and it caught a defect in my own encoding that's worth more than the intended findings.Built and run — `0a3a793`. Three findings, and the middle one is about my own work.
+
+**1 · The collection is a *design* language, not a *play* language.** Encoded from the flexiargs' own `IF` clauses, **all six patterns are design-grain**: *"a rule is proposed…"*, *"you want a defection to have consequences…"*, *"you must design, compare, or extend a family…"*. **None has a game state as its antecedent.** So:
+
+```
+DESIGN grain:  designing G1 from scratch    -> 3 patterns
+               a forced-offer rule proposed -> 4 patterns
+               sanctions wanted, no judge   -> 4 patterns
+               a judge is available         -> 3 patterns
+
+PLAY grain:    every round, every treatment -> []   coverage gaps: 5 of 5
+```
+
+Full coverage at design grain, **total failure at play grain.** That isn't a defect in the patterns — it's a fact about what they're for. But it means a pattern collection **cannot guide play unless someone writes play-grain patterns**, and it says concretely what R6's candidate proposer needs at library grain: *antecedents over states, not over design questions.*
+
+**2 · My first encoding hid that, in exactly the way we've been cataloguing all day.** The initial run reported **zero coverage gaps** — because I'd given `preserve-the-right-to-abstain` the guard `(contains? p1-actions :abstain)`, which is true in every round of every treatment. **A guard true in every situation carries no information** — a dimension with no singularity on it, inside the artefact written to study them. The zero was an artefact of the guard, not a property of the collection. I'd have reported a clean result had I not looked at *why* it was clean.
+
+**3 · The falsifier fires.** S-001 predicts `{O2 0.5, O4 0.5}` with `O3` at zero mass. A **cautious** P2 refuses → `O3` → **the two-disposition model is refuted.** A stated prediction failing, which is the entire reason for stating it — and the first thing all session that could have failed and did.
+
+One thing the playout also showed before I re-grained it: under G4, `mark-without-force` and `revert-then-invert` become *applicable* after a snatch while π (grim trigger) has already left the game. **Applicability and selection are different things** — the candidate set can hold the right actions while the policy ignores them. That's R6 in miniature, on six patterns.

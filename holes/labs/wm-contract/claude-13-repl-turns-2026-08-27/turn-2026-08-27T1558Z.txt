@@ -1,0 +1,13 @@
+Sent — job `invoke-1787846278903-2414-79c27ea9` on codex-22, park `park-a0a42b31-6374-49c8-a081-39418c18cc23`, confirmed running.
+
+The packet carries the README's assessment section as its spec, with three things designed to stop it going wrong in the ways today has taught us:
+
+**Gap 1 must come first, and it has a numeric acceptance test.** The obvious failure mode is writing five more defensive patterns for gaps 2–6 and thereby reproducing the defect. So the second acceptance criterion is: **report the defensive-vs-gain ratio before and after.** It's 1:10 today. *If that ratio hasn't moved, gap 1 wasn't addressed — whatever else it wrote.* That's the measurement I made, handed back as a gate.
+
+**Every play-grain pattern must name a situation where it does not fire.** With the precedent quoted: `preserve-the-right-to-abstain` encoded as `(contains? p1-actions :abstain)` was true in every round of every treatment, and produced a clean-looking zero-gap result that meant nothing. A guard true everywhere carries no information — the singularity test, applied to its own output.
+
+**A cap of eight, and an invitation to push back.** Fewer good ones beats more, it must say which gaps it left open and why, and — since the assessment is mine and one sitting old — if it thinks one of the six isn't a real gap, it should argue that rather than fill it.
+
+Practically it also has to add each play-grain pattern to the playout's `collection` with a guard and re-run, so coverage is measured rather than asserted. That keeps the flexiargs and the harness from drifting apart, which is the same discipline as the Lean/Clojure pin.
+
+One limit I noted but didn't try to solve in this packet: **the playout can't exercise P2 patterns**, because P2 is a fixed disposition rather than a pattern-driven policy. So gap 2's patterns will be written but not coverage-tested. Making P2 pattern-driven is the natural follow-on, and it's a better second packet than a bigger first one.

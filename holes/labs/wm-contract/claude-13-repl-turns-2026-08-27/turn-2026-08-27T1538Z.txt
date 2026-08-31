@@ -1,0 +1,28 @@
+codex-22 flagged something important about the branch. Verifying that first, then the gates.Benign — `M-propagators-ant-gate` and `master` point at the **same commit** (0 divergence each way), so nothing is stranded. codex-22 was right to refuse to switch a shared checkout. Now the gates.clj-kondo clean, **no I/O and no statistics over the 82** — the only `frequencies` is over results passed in. Reading the decision logic:Well built — `:unwitnessable` branches precede all failure branches (you can't fail what you couldn't evaluate), nine typed failure reasons, and `summarize`'s docstring states the no-aggregate rule outright. Verifying acceptance case 4 myself:My fixture shape is wrong, not the check — `:close-id` also read `nil`. Let me get the expected accessors.My fixtures were flat; the check reads `[:payload :coverage-statement]`, matching the real record shape. Redoing them correctly:All five behave correctly under independent test. **No review findings to fix** — this one passed clean.
+
+**Verification I ran myself:**
+
+| check | result |
+|---|---|
+| commit scope | mathlib4 `+16` lines to `ContractEmitter.lean` only; futon2 one new file, 105 lines. Both worktrees clean, `.lake/packages` untouched |
+| Lean gate | `lake env lean --run …` → **valid JSON**, families 1/2/4/5, **R5 clause present**, no `holds` field |
+| clj-kondo | 0 errors, 0 warnings |
+| statistics leak | **none** — no `slurp`, no `file-seq`, no reference to `wm-full-loop`. The only `frequencies` is over results passed in |
+| bare boolean | **none** — and `summarize`'s docstring says so outright: *"intentionally has no aggregate success boolean: callers must retain the difference between failed and unwitnessable"* |
+
+**Behaviour, on my own fixtures rather than its:**
+
+```
+REAL existing close          -> :unwitnessable  :missing-field :coverage-statement
+hand passing                 -> :passed
+criteria with NO boundary    -> :failed  :why :criterion-set-declares-no-boundary
+outside but reported :scored -> :failed  :why :outside-outcome-not-recorded-as-uncovered
+outside reported :uncovered  -> :passed
+summary: {:passed 2, :unwitnessable 1, :failed 2}
+```
+
+Three things worth noting. **`:unwitnessable` branches precede every failure branch** — you can't fail a clause you couldn't evaluate, and the ordering enforces it. **My `declaresCoverage` fix propagated into the adapter**: `:criterion-set-declares-no-boundary` is the Clojure enforcement of `∃ outcome, covers o = false`, so the two-sided pin is working across the language boundary. And **`:counts` zips all three result kinds with zero defaults**, so a kind with no occurrences is *reported as zero* rather than absent — typed absence applied to the summary itself, which nobody asked for.
+
+**On the branch flag:** codex-22 was right to refuse to switch a shared checkout, and the situation is benign — `M-propagators-ant-gate` and `master` point at the **same commit**, zero divergence either way. So nothing is stranded, including my earlier futon2 commits today. Worth knowing that futon2's checkout is sitting on a feature-branch label at master's tip.
+
+So the chain now runs end to end for one clause: **Lean states it → the emitter emits it → Clojure validates a close and reports what it couldn't evaluate.** The next flight either carries a coverage statement or is honestly recorded as not having been asked for one.

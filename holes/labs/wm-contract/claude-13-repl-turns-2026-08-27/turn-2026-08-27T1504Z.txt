@@ -1,0 +1,11 @@
+Yes — with a scope I'd hold to, and one thing I'd deliberately leave out.**Yes — for the Lean module. Sent.** Job `invoke-1787843077888-2392-1159764d` on codex-22, park `park-89ced720-1d6b-47c9-91d3-29af491acf4d`, confirmed running.
+
+**Why we're ready.** R5's requirement is stated in family vocabulary, the vocabulary exists in `GainChain.lean` (`typedAbsence`, `declaredDomain`), the emitter pattern works, and — the part that was missing this morning — **there are three real outcome spaces to be parametric over**, not one guessed one. Snatch's 7 flowchart leaves, the WM's 14 flight dispositions, maths' 4+1 with `:void`.
+
+**The scope I held to.** The module states: coverage is *declared* (a total `covers` predicate), an outcome outside it yields `uncovered` and **never** `absent`, and — the mechanism R5 actually needs — `markWithoutForce`, a mark over two projections that alters `problemOutcome` and preserves `instrumentFinding`. That last is APM's `:void`, so **the positive witness is a real implemented mechanism rather than a constructed one.**
+
+Refusal theorems from real cases: `:warm-customer-pays` uncovered and unrecorded; and `adding_a_channel_does_not_satisfy_coverage` — the naive fix refused, with Klarna in the docstring as external witness that four measured, scaled metrics still fail if none reports non-coverage.
+
+**What I deliberately left out, and why.** No probability, no entropy, no kernel. R5's core property is **boolean** — *is non-coverage reported?* The spread is a separate increment (E-R5's build, steps 2–5). Fusing them would make the module large and its acceptance unclear, which is exactly what kept `GainChain` tractable. The packet says: if you find yourself wanting a distribution, stop — that's the next packet.
+
+**Where I'd put the Clojure adapter, once this passes review: the War Machine's 82 flights.** Not because it's the best carrier — maths is, being preregistered — but because the data is *static on disk*, needs no running machine, and yields real witness counts. Snatch stays the fixture domain; maths comes when its apparatus repair lands, and there's a vocabulary drift to settle first (`:tier-a` absent, `:defective-registration` present but not in the protocol's stated set).

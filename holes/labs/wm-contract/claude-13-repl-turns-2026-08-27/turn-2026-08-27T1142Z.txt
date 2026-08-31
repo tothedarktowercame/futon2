@@ -1,0 +1,22 @@
+Verified clean: both repos untouched, symlink intact, and the shared batteries HEAD is `bce25af7` against mathlib4's manifest `708b0578` — the table checks out. One claim I want to test though.`grep` finds **no mention of `mathlib4` in AGENTS.md at all** — the rule is scoped to "an APM frame worktree." One more check, because the symlink's mtime is suspicious.`packages.pre-canonical-20260826` — mathlib4 had its own packages dir until yesterday 22:01. Checking what's in it.Verified — and it changes the recommendation materially.Review done. Ticket at `5d6d9ead`. **Nothing was mutated** — I verified: both repos clean, symlink intact.
+
+**codex-22's diagnosis is sound and I confirmed its central evidence.** Shared `batteries` HEAD is `bce25af7`; mathlib4's manifest wants `708b0578` — the authority sits at apm-lean's revisions, exactly as its table says. It correctly refused to treat even `lake env` as read-only (Lake startup demonstrably reconciles), correctly noted build dirs persist across source checkouts so artifacts can be from a different turn of the flip-flop, and answered all four checklist items including the per-option AGENTS.md compliance.
+
+**Two corrections, and together they change the cost from hours to a rename.**
+
+**1. AGENTS.md doesn't cover `mathlib4`.** `grep mathlib4 AGENTS.md` returns nothing. The rule is scoped *"in an APM frame worktree"*, under the heading *"Lean frame worktrees and Mathlib substrate"*. `mathlib4` is the Mathlib source checkout on branch `darktower` holding `DarkTower/` — not a frame worktree. So option B needs no policy change; it needs recognising the rule's existing scope.
+
+**2. The original packages directory is still on disk.** Next to the symlink:
+
+```
+mathlib4/.lake/packages.pre-canonical-20260826/   (Aug 14 15:59)
+  batteries: toolchain v4.31.0-rc1, HEAD 708b0578, Logic.olean built Aug 14
+```
+
+**That is exactly what mathlib4's manifest asks for**, all eight packages, already compiled. The symlink was created **2026-08-26 22:01 — yesterday, mid-session** — and the directory name *"pre-canonical"* records the intent: someone believed they were bringing mathlib4 into line with the canonical authority. An understandable over-application of a frame-worktree convention.
+
+So codex-22's option B, costed at "15–90 minutes plus policy approval plus fetch/build", is actually **a revert of yesterday's change**. Restore the directory, drop the alias, re-probe the Stoch import. I have not executed it — it mutates a shared Lean workspace and you hold that call.
+
+**And one thing that matters for the day's work: nothing we verified is at risk.** Every Lean gate I ran was on a **Mathlib-free** file — `GainChain.lean` and `CommitmentTemperature.lean` import nothing, per the light standard. So yesterday's nine theorems stand, and the Tier-0 handoffs can proceed while this is pending, as long as they keep that rule. The standalone constraint was adopted because those files elaborate in seconds; it also made the verification immune to a broken package authority.
+
+Two footnotes. My own probe at ~11:30 is the likely cause of the 11:32 reconciliation codex-22 observed — I demonstrated the bug while diagnosing it. And the revert touches none of the 21 APM consumers, because it moves `mathlib4` off the authority rather than moving the authority.

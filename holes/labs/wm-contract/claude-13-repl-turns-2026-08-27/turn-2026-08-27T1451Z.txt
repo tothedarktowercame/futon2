@@ -1,0 +1,32 @@
+Probably derivable directly — the flowcharts have terminal nodes. Let me extract them.No research needed — the game names its own outcome space, and its structure answers a question we've been circling.No research needed — the game names its own outcome space, as the terminal nodes of its five flowcharts. Recorded as `futon3/checks/snatch-outcomes.edn`, note at `45773d7`.
+
+| outcome | label | arises from |
+|---|---|---|
+| `O1` | *sin cambios* — no offer made | P1 abstained |
+| `O2` | *intercambiar tokens* | P2 accepted |
+| `O3` | *sin cambios en tokens* | P2 refused |
+| `O4` | *robo* — P2 takes the offer unpaid | P2 snatched |
+| `O4a` / `O4b` | shame assigned / *sin penalización* | *(G3, **refine** O4)* |
+| `O5` | *sanción aplicada* — revert + invert | *(G4, **refines** O4)* |
+
+**And the structure is the finding.**
+
+```
+G1  {O1 O2 O3 O4}
+G2  {   O2 O3 O4}       ← O1 REMOVED
+G3  {O1 O2 O3 O4a O4b}  ← O4 SPLIT
+G4  {O1 O2 O3 O4  O5}   ← O4 SPLIT
+G5  {O1 O2 O3 O4}
+```
+
+That's sharper than what I wrote earlier. I said each treatment intervenes on a different *term* of G(π); underneath that, **G2 removes an outcome and G3/G4 each split one.** The institution changes the **object `O`**, not merely the morphism into `D(O)`.
+
+And it's the event-type vocabulary's parent/refinement structure arriving from a state machine rather than from an argument: **`O4a` and `O4b` are separate leaves *because they lead to different accumulations*** — which is exactly the membership test I proposed two turns ago. Here it isn't a proposal, it's how the flowchart is drawn. `:declined-ground-unknown` is the same relation left un-refined.
+
+**The contrast that matters for the War Machine.** Snatch's outcome space is the leaf set of its own state machine — run it, see where it stops. The WM's is `observation.clj`'s fourteen channels *"harmonized from all vocabularies"*: holistic argument, JSDQ, joe-hud, sorry topology, daily scan frames. **Leaves of nothing.** Nothing generates them and nothing says when the set is complete.
+
+> A domain has a `G(π)` when it can say where its own machine stops. Snatch can. The War Machine cannot — and that, rather than a missing transition model, is why `G(π)` has no home there.
+
+That's I1 one level below where we found it this morning: not the action space, not the event vocabulary, but the **outcome space itself**.
+
+**For the pilot:** it currently spreads mass over the support of a witness relation — four bindings that are an artefact of how I wrote the check, which I flagged as unjustified. There's now a defensible carrier: `Q(o∣π)` as a distribution on `{O1 … O5}` per treatment. Same Beta machinery, a space that means something. Small next increment whenever you want it.

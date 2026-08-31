@@ -1,0 +1,29 @@
+Fair — that's three drifts and you're right to call it. Point 1 is infrastructure though, and it's a one-line fix, so let me do that and then answer the status question.Done — ARGUE now asks for it (`4139c74`). That converts §5a's *"authored, never harvested"* from a property of the register into a description of the state before the instruction existed.
+
+**Workflow status.** Nothing is currently in flight; the last three dispatches all landed and were reviewed.
+
+**Built and gated today:**
+
+| artefact | state |
+|---|---|
+| `GainChain.lean` — module 1, families 1/2/4/5 | 9 theorems, exit 0 |
+| `CommitmentTemperature.lean` — R14 | 9 theorems + the discard/Markov form, exit 0 |
+| `ContractEmitter.lean` — Lean → JSON | exit 0, valid JSON, families 1/2/4/5 |
+| `CoverageReport.lean` — R5 | 4 theorems, exit 0 (reviewed; `declaresCoverage` was vacuous, fixed) |
+| `checks/how_witness_snatch.clj` | attested, mirror silent |
+| `checks/how_kernel_snatch.clj` | spread present, responds to attestation |
+| `checks/snatch-outcomes.edn` | outcome space from the flowcharts |
+| `checks/item-s001.edn` + `score_item.clj` | the first good item, `:status :open` |
+| `library/snatch/` | 6 patterns, 9 edges |
+
+**Not built — and this is the honest headline: the Lean layer is real for two modules and the Clojure layer is zero.**
+
+- Nothing consumes the emitted contract. **H3a does not exist.**
+- R5's coverage clause isn't in the emitter yet.
+- **No forward guarantee wired to `007-closed.edn`** — the thing you actually asked for.
+- No mutation tests, no qualification record.
+- The spider is designed, not built.
+
+**The single next step**, by your own criteria — future-facing, one good thing, a guarantee on new flights: **emit R5's coverage clause and write the Clojure check that a new `007-closed.edn` carries it.** That's the first artefact that touches a live seam rather than a corpus, and it makes the next flight either satisfy the guarantee or visibly fail it.
+
+It's one packet for codex-22. Say go and it's sent.

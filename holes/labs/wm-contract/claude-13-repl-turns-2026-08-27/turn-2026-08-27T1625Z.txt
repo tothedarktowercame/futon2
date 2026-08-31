@@ -1,0 +1,23 @@
+The `@why` graph already has the shape — `re-enter` cites both `consult-the-remedy` and `revert-then-invert`, and `consult-the-remedy` cites `revert-then-invert` too, so there's a diamond, not a tree. Let me use both of those.Both corrections are in (`2734ac5`, `f58378b`).
+
+**HOWEVER is the other half of the antecedent.** A pattern exists to overcome a counter-force; where the force isn't live the THEN would happen anyway, so IF ∧ HOWEVER now both have to hold. Five of the seven acting patterns gained a real second conjunct — *"play continues"* is false in the final round, so a stop protects nothing; *"exiting looks the same whether or not a remedy existed"* needs exiting to be possible, which G2 removes; *"compulsion does not make a large exposed offer safer"* needs a large offer to exist.
+
+The visible effect: `exchange-when-both-sides-gain` fires on its IF whenever a player holds tokens, but its HOWEVER is about seizure being salient — so against a counterpart who has accepted four times it now correctly says nothing.
+
+**And the singularity test applies to HOWEVERs.** Two of seven are live in every state where their IF holds. *"One acceptance is weak evidence and a snatcher who accepts once has lost nothing by waiting"* is a permanent condition of the game, not a tension in this situation. Recorded as non-discriminating rather than given a guard that can't fail — the same test that catches a fake IF catches a HOWEVER that names the weather.
+
+**On the cascade: you're right and I had it wrong.** `:by` is a chain because one pattern acts per round. The cascade is the sub-graph of `@why` those patterns stand on, and the harness now reads the flexiargs at run time and takes the up-closure:
+
+```
+G4 snatcher   3 acting → 7 nodes, 10 edges — NOT A TREE
+              consult-the-remedy, re-enter, mark-without-force,
+              revert-then-invert each stand on two authorities
+G1 sharer     2 acting → 4 nodes,  3 edges — a tree
+G1 snatcher   2 acting → 4 nodes,  2 edges — a tree
+```
+
+`re-enter-after-observed-repair` cites both `consult-the-remedy-before-exiting` and `revert-then-invert`; `consult-the-remedy-before-exiting` cites `revert-then-invert` as well. So `revert-then-invert` is reached by two paths — that diamond is the semilattice, and it comes from edges that were already in the library rather than anything the harness adds. So the reading holds: BV types the turn, the semilattice types the cascade, and `:descent` is faithful.
+
+What I hadn't expected: **shape is a property of the run, not of the collection.** The same twelve patterns give a tree against a sharer and a semilattice under a remedy — overlap only appears where the situations reach the shared authorities. A collection can *support* a semilattice and still produce trees all day.
+
+One honest cost: tightening the antecedent removed a witness for the re-wiring experiment. `exchange-first` and `patterns` now agree on G1 sharer, because the promoted pattern no longer fires there. G4 still separates them (+3 vs −5), so the wiring claim keeps one witness instead of two.

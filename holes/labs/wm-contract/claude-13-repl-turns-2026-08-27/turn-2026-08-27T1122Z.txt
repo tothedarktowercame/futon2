@@ -1,0 +1,20 @@
+Already created at `01a3e860` — so let me add to it by running slice 1 now, since those figures shouldn't be cited further unverified.`E-wm-operator-lane.md` already exists — R2 has a predecessor excursion.Slice 1 found something. Checking the date and the live numbers.Slice 1 is done, and it corrects the ring's reasoning while strengthening its conclusion.The excursion was already at `01a3e860`; I've added slice 1 to it, now `3534fd0d`. Running it turned out to matter.
+
+**The figures are current, not stale.** I traced *nag 0 / brief 60 / silent 51 / total 111* to `E-wm-operator-lane.md` (**2026-06-05**), then re-queried the live endpoint:
+
+```
+date 2026-08-27 · generated-at 2026-08-27T11:21:24Z
+nag [] · brief 60 · silent-count 51 · total 111
+```
+
+Regenerated today and **identical to twelve weeks ago**. So this is *not* the R6 frozen-artifact shape — the bulletin computes fresh and lands on the same partition. (Counts compared, not membership; whether it's the same 60 items is unchecked.)
+
+**But nag 0 doesn't mean what R2's salience reads into it.** The source excursion reads the same zero the opposite way — *"the nag lane stays empty. **This validates the design**"* — because nag is an **AND of three conditions**, *"a narrow, earned mode — not the default channel for anything that needs him"*, reachable only via `discovered → briefed → [if critical] → nag`. And decisively, from its Remaining list: *"acknowledged-state persistence (**so nag can fire**)"*. **The nag gate is blocked on unbuilt state.** A gate that cannot fire returns 0 whether or not anything deserved escalation — `record_sensitivity_is_not_governance` at the operator lane: a channel with no capacity carries no signal in either direction.
+
+So the clause *"the strongest representation the loop has of the operator fired zero times in a hundred and eleven opportunities"* shouldn't be cited as written. It fired zero times because it isn't wired to fire.
+
+**A stronger datum replaces it.** The partition is **unchanged — 111 / 60 / 51 — across twelve weeks of live regeneration.** That's measured inertness of the operator lane, from a working instrument, with no interpretation of a blocked gate required. R2's conclusion survives; its reasoning gets better.
+
+Two things left explicitly unverified and marked not-to-cite: the **0.009** per-class credit — the salience's other leg, and the one that speaks to the observation vector rather than the lane — and brief membership across the twelve weeks.
+
+That's the fourth time today the number was real and the reading of it wasn't: R8's producer, R14's location, R6's proposer, now R2's nag lane. Worth noting the pattern holds even when, as here, the ring's verdict is right.

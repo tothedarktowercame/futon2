@@ -1,0 +1,21 @@
+The contiguous block of losses is the tell — turns 10–13 aren't operator turns at all.My "fix" for those eight was wrong — checking properly shows codex-22 was pointing at something real, and sharper than it knew.## REVIEW — `c1_turn_survival.py`, `4e62e97a` (codex-22)
+
+**What I checked.** Ran it myself; inspected the transcript records behind every reported loss; queried the store directly for their text. Fixes committed as `48bf098`.
+
+**The headline result is right and is the valuable part.** There is **no per-turn key**: session ids join, but the transcript's `uuid` and `promptId` have zero hits in evidence, and `:evidence/in-reply-to` is an emacs transport id absent from the transcript. It correctly refused to fabricate a join, labelled the mapping `text-fallback`, marked C1 `not-computable`, and named the field that would fix it — `:evidence/source-turn-id` equal to the transcript record's `uuid`. Used `session-id=` and asserted the returned rows carry it. Reported truncation honestly.
+
+**Finding 1 — four of the twelve losses were never operator turns.** The contiguous block 10–13 gave it away. Turn 10 is the 29,714-character compaction summary; 11 is the `<local-command-caveat>`; 12 is the `/compact` block; 13 is `<local-command-stdout>Compacted</local-command-stdout>`. All typed `user` by the harness, none ever sent. They were inflating the denominator — which is the ordinary way a conservation law goes wrong. Now excluded with a typed kind: 27 → **23** operator turns.
+
+**Finding 2 — I was wrong about the other eight, and checking is what caught it.** I found turn 2's text present in the raw evidence response and assumed the exact-match join was broken. It isn't. The text appears *only* inside a `context-retrieval` entry's `query` field, truncated to about 110 characters. Those turns are genuinely not stored as `chat-turn` records.
+
+So `unmatchable-by-text` was pointing at something real — but one type was covering two situations. Split:
+
+| | |
+|---|---|
+| **15** | stored as `chat-turn` records |
+| **7** | present **only as the truncated query of a context-retrieval event** |
+| **1** | absent entirely |
+
+**The seven are the finding, and they break an assumption in my own design.** Those turns were *processed* — a retrieval ran on them and the store kept their first hundred-odd characters as that retrieval's input — while never being stored as turns. So **C2 can hold for a turn on which C1 fails.** The chain isn't the totally ordered funnel I wrote into §3.1d yesterday; stages can be reached out of order, and a downstream record can be the only surviving evidence that an upstream one existed. An end-to-end criterion has to be stated over a *set* of stages with typed attrition per stage, not over a sequence. Corrected in the mission (`209724a`).
+
+That's also the argument for typed losses in miniature. Eight under one type reads as eight unaccounted turns; split, seven describe one specific fixable defect and one is a real hole.

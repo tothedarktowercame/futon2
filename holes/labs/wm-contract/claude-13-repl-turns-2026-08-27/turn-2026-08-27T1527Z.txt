@@ -1,0 +1,18 @@
+That's checkable and it matters — if they're days old, "zero uptake" measures age rather than unharvestability.**21 of 28 existed for at most two days** when §5a measured. But there's a clean discriminating test available — the 07-14 seven have had six weeks.One more check before concluding — six weeks of exposure only counts if missions were being written in it.Exposure was real — **333 mission-file touches across four repos** in that window. So the test is sound.Your objection was well-founded on the dates — and it turned out to be testable. `c04c32f`.
+
+**The dates support you.** The 28 war-room flexiargs landed in three cohorts: **7 on 2026-07-14, 20 on 2026-08-21, 1 on 2026-08-22.** So **21 of 28 (75%) were at most two days old** when §5a measured on 2026-08-23. A null result over a corpus that barely existed isn't a null result about the corpus.
+
+**But the split gives a natural control** — the seven from 07-14 had six weeks:
+
+| cohort | patterns | ARGUE citations | anywhere in a mission |
+|---|---:|---:|---:|
+| 2026-07-14 — **six weeks** | 7 | **0** | **0** |
+| 2026-08-21/22 — two days | 21 | 0 | 0 |
+
+**And the exposure was real**: 333 mission-file touches across `futon2`, `futon3c`, `futon5`, `futon0` since 07-14. Missions were being written throughout, and they cited the six-week-old rulings exactly as often as the two-day-old ones — never.
+
+So the zero is about the **register**, not the age. §5a's corollary survives, but now on a controlled comparison rather than a same-week snapshot. Your objection improved the finding by forcing the control.
+
+**One refinement it surfaced.** Two `war-room/`-namespaced ids *are* cited once each — `war-room/bulletin-evidence` and `war-room/tri-agent-loop` — and **neither is among the 28 numbered rulings.** So the namespace isn't invisible; the **ruling form** is. That's a sharper statement than §5a's, and it slightly widens what the spider may propose: `war-room/*` edges to non-rulings are fair game, `@why war-room/wr-*` still shouldn't be asked for.
+
+Caveat recorded: n = 7 for the control cohort, six weeks isn't long, and the result is consistent rather than conclusive. If you want it firmer, the cheap version is to re-run this in a month — the 08-21 twenty will then have their own six weeks, and n goes from 7 to 28.

@@ -1,0 +1,23 @@
+Yes — and two of them write themselves from what the playout just found.Coverage filled — and one gap survived that *should*. But there's a state-threading bug in my playout: `disposition-known` resets on abstain.Five written, `c2c450a` — the collection is now 11 patterns, six design-grain and five play-grain.
+
+**Two of the five came from the playout itself**, which is the enact-and-review cycle in miniature:
+
+- **`an-unmodelled-response-stops-the-line`** — from the falsifier firing. *IF the counterpart produces an outcome your model assigned no probability; HOWEVER the cheapest next move is always to repeat the policy that just met a surprise — which is trying harder inside a model you now know is wrong; THEN stop, name the disposition that would explain it, re-derive.*
+- **`consult-the-remedy-before-exiting`** — from G4's remedies sitting applicable and unused. *BECAUSE exiting forfeits an entitlement you were granted, and a policy that never consults the institution it plays inside is playing a different, poorer game.*
+
+Plus `probe-before-committing` (the epistemic move, with S-001 as its evidence line), `escalate-only-as-far-as-you-can-lose` (*"size the exposure to what you can survive being wrong about, not to how right you currently feel"*), and `a-free-mark-is-always-worth-assigning`.
+
+**Coverage on re-run:**
+
+```
+G1 snatcher   4 gaps   ← correct
+G1 sharer     0
+G1 cautious   0
+G4 snatcher   0
+```
+
+**The surviving gap is right, not a hole.** In G1 after a snatch there's no remedy to consult, no acceptance to escalate on, and the disposition is already known — so the collection honestly has nothing to say. A state of nature offers a robbed player no move the design layer hasn't already named. **A collection that produced advice there would be inventing it.**
+
+**And the trace now shows a policy ignoring an applicable pattern.** In G4 rounds 2–5, `consult-the-remedy-before-exiting` and `a-free-mark-is-always-worth-assigning` apply in every round and grim-trigger abstains anyway — which is the pattern's own `HOWEVER` (*"a policy written for the state of nature exits on the first defection"*) exhibited by the very playout that motivated writing it. Availability is not use, at play grain.
+
+One defect I found and fixed in my own harness on the way: `disposition-known` was resetting on abstain, so `probe-before-committing` wrongly reappeared after exit. That's what turned a 4-gap G1/snatcher run into a misleading 1-gap one.

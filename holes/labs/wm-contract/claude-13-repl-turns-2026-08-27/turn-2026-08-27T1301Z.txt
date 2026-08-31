@@ -1,0 +1,25 @@
+That definition supplies the dynamic piece my last note was missing — and role 3 names exactly the two halves we found broken.`c580758`. That definition supplies what the previous note was missing.
+
+`NOTE-patterns-as-problems` argued a pattern *is* a problem, but treated the problem as given. *"Conditioned progressively and reciprocally by the events they engender"* plus your definition says otherwise: **a candidate isn't a pattern-in-waiting whose truth is pending — it becomes one *through* the events it engenders**, failure modes folded back in. That's why the definition insists on *survived*, *repeated*, *recorded*.
+
+**And role 3 names precisely the two halves this mission found broken:**
+
+| half of role 3 | in the running system |
+|---|---|
+| *authoring expands the policy vocabulary* | **R6** — `fm/action-types` is a 14-element set literal against WR-20, the portfolio proposer is dark, the tension proposer reads a 4-entry file frozen at 06-03. The vocabulary doesn't expand. |
+| *enactment and review decide standing* | **R8 → R14** — enactment is witnessed (three `:realized-outcome` records) but review can't change standing: `:samples 0` in every late trace, and τ can't move an action. |
+
+Stated fairly: the paper claims the cycle is expressed *within the model*, and that holds — the proposer protocol exists, `aif2/tension.clj` is WR-20's S1 registry instance, `fold_realized` is a real producer. What doesn't hold is that the running system performs either half. Two-axis problem again, and exactly the distinction §3.3 proposes publishing.
+
+**Then the find.** Read `repair_obligation.clj` against your definition: *"Durable stop-the-line memory … an obligation is open until an approved, grounded successor run records a resolution that names the original failure and its replacement artifact."* Failure modes recorded and used to revise; discharge non-vacuous by construction. **That is the pattern-formation loop, already implemented — for the machine's own defects, and only for those.** It's also reciprocal determination in code: what the problem *was* is determined progressively, by the resolution that names it.
+
+So the R6 proposal is to **generalise that mechanism rather than build a second one** — a *candidate obligation* on the same shape:
+
+- opened by candidate authoring rather than by failure
+- discharged by witnessed enactments naming the candidate and their outcomes
+- non-vacuity: the enactment must have **discriminated** — some pair of values leading somewhere different
+- until discharged, the candidate has **no standing**: enactable for review, not countable as a pattern
+
+That last row is your definition verbatim as a machine condition. And the non-vacuity row is the singularity criterion: **a candidate that never discriminates never earns standing, however often it is enacted** — TryHarder refused at the level of pattern formation rather than action selection.
+
+For the paper, that's the difference between asserting role 3 and being able to report it: standing becomes a recorded state with a discharge condition, and the qualification record can say how many candidates hold standing and on what witnesses.

@@ -1,0 +1,18 @@
+Both. The finite comonoid version first — ~30 lines, and it keeps the file Mathlib-free.Gate failed — `sorryAx` in one theorem. Getting the error rather than guessing.`by_contra` is a Mathlib tactic and this file imports nothing. Using core `Classical.byContradiction`:Exit 0, zero errors, zero `sorryAx`. Committing, then H1.Both done.
+
+**The Markov formulation is in** — `dd648bd936`, `CommitmentTemperature.lean` now 292 lines, still importing nothing, exit 0, zero errors, zero `sorryAx`.
+
+```lean
+def factorsThroughDiscard (s : Selector) : Prop :=
+  ∃ c : List Entry → Option Action, ∀ τ entries, s τ entries = c entries
+```
+
+Three theorems make it earn its place. `factorsThroughDiscard_iff_temperatureInvariant` proves the categorical form is **the same condition with the witness exhibited**, not a weaker gloss. `not_governs_iff_factorsThroughDiscard` restates R14 as *the selector does not factor through the discard of τ* — no measure on τ, which is exactly what the `governs` docstring had to caveat. And `discard_absorbs_upstream` is the counit law `f ; ε = ε` in our setting: a discard absorbs everything upstream, so `repairing_r8_changes_no_action` now falls out **structurally, by composition**, rather than by instantiating an invariance hypothesis.
+
+One snag worth recording: **`by_contra` is a Mathlib tactic** and unavailable in a file that imports nothing — the gate caught it as a `sorryAx`. Core `Classical.byContradiction` does the job, and that theorem now honestly carries `Classical.choice` in its axiom list. `rintro`/`obtain` turn out to be core these days; `by_contra` isn't.
+
+**H1 is dispatched** — job `invoke-1787831379811-2328-5d66266e` on codex-18, park `park-b3c231d0-f366-454b-8044-88519e0fe8b4`, confirmed `running`.
+
+It produces `futon2/holes/labs/wm-contract/census-v1.edn` plus a short README: total record count, per-family witness counts with example locations, and — the part that matters for making sense of the excursions — **the date of the first record where `:realized-outcome` stops appearing, derived from the corpus.** E-R8 puts it at 2026-07-09; the packet asks codex-18 to confirm or correct it from the data, since that's the incident the Tier-0 contract must retro-trip.
+
+I told it explicitly that my per-file table is a one-sitting estimate and **its numbers win**, and to report any place the family→field mapping didn't survive contact with the data — given the day's record, that's the likeliest finding.

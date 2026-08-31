@@ -1,0 +1,19 @@
+That's a checkable asymmetry. Let me measure it rather than assert it.You're right, and it's sharper than "less durable" — the numbers:Measured, and it's sharper than "less durable":
+
+| | operator turn | WM tick |
+|---|---|---|
+| **where** | Evidence Landscape (XTDB, bitemporal) | `futon2/data/wm-trace/*.edn`, 53 flat files |
+| **durable** | append-only; survived the transcript rewrite this afternoon | **gitignored** — `.gitignore:46` is `data/*`. One host, no history |
+| **queryable** | HTTP API filtered by session/author/tags/since, JSON on request | open the file and parse EDN — **and the shape differs per day**: one opens `{:timestamp …}`, the newest opens `{:habit-prior-state …}` |
+| **annotatable** | `:evidence/id` per record, `:evidence/in-reply-to` threading | **no per-tick id** — the newest file is 829 KB and contains two `:timestamp` occurrences |
+| **last written** | this turn | **2026-07-21 10:05** — thirty-seven days ago |
+
+**The WM's analogue of C1 is false by construction.** "Every WM tick is stored in the Evidence Landscape" can't hold, because ticks aren't written there — they go to an ignored directory. So the end-to-end criteria can currently be stated for the operator half of the loop and not the machine half, which is backwards for a paper whose subject is the machine.
+
+Three of those four rows are **one repair**: durability, queryability and annotatability all follow from writing a tick as an evidence record with an id instead of appending to a day file. Not a new mechanism — `family-fired`, `mission-sync-snapshot`, `memory-pull-use` and `process-alert` already live in the store, so non-conversational events fit there fine.
+
+**The fourth row is a different question and I'd keep it separate.** No tick since 21 July. Whether the loop ran without tracing or didn't run is *not* established, and the two have very different consequences for what the paper may claim. Worth finding out before repairing the writer — the repair is pointless if nothing calls it, and misleading if something does.
+
+On your broader observation: the two halves of today explain each other. Operator turns are stored, queryable and identified, so a defect in my *reading* was recoverable — I could re-query, re-parse, and find all three extraction bugs. WM ticks have no id, no query surface and no schema stability, so the same class of error wouldn't be recoverable; there'd be nothing to re-query against. **An apparatus that cannot be re-measured cannot be corrected.** That seems a better argument for the repair than "the paper needs the numbers."
+
+Written up in `NOTE-wm-turns-are-not-operator-turns.md` (`3b914f4`), with bounds stated — the store survey covers the most recent 1000 entries; the gitignore, dates and per-file shapes are direct reads.

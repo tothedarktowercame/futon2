@@ -1,0 +1,15 @@
+Accepted — that's a better frame, and it removes a dependency I shouldn't have introduced. Correcting the mission, then getting the chain moving.You're right, and it removes a dependency I shouldn't have created. Mission corrected at `453cedf`; H2 is running on **codex-22** — job `invoke-1787833671602-2337-fd01df21`, park `park-1cc17df1-10fa-4682-8992-636a1366dad5`.
+
+**What I got wrong.** I took WR-26's "tripwires retro-trip before arming" and made it Tier 0's *acceptance bar*. That put historical completeness on the critical path — and then the corpus couldn't carry it, so we spent a cycle on census archaeology. Validating against fixtures removes the dependency entirely.
+
+**The fixture discipline, as recorded:** a fixture is a synthetic tick (or short sequence) exercising exactly one clause — one that accepts, and one that refuses per way it can fail. **History supplies shapes, not data**: field names (`[:realized-outcome :realized-G]`, `[:enactment :mission]`), value ranges (`:expected-G -0.2`, `:realized-G -0.5`), and scenarios worth encoding — a fold with a numeric leg, a fold with `nil`, a run where outcomes stop. Nothing asserted about what actually happened in July.
+
+**And it reverses a decision the census had driven.** I'd concluded family 1 should be dropped from H2 because the corpus has zero witnesses. Under a fixture bar that's backwards: no record-level tick to compare against is an **instrumentation finding** — a Tier-1 repair — not a scope reduction. **Family 1 is reinstated**, and it's in the H2 packet explicitly. A model that shrinks to fit a thin corpus encodes the corpus's defects as its scope.
+
+So the census's one remaining job is telling fixture design which shapes are real. That's done and it stays where it is.
+
+**H2 builds the first link:** `DarkTower/WarMachine/ContractEmitter.lean`, modelled directly on APM's — `Json.mkObj`, `def emit := IO.println contractJson.compress`, `def main`, run as `lake env lean --run … > contract.json`. Families 1, 2, 4, 5 emitted; family 8 excluded (a sensitivity property no record can witness). No Mathlib import, so it keeps elaborating in seconds.
+
+The one thing I asked for beyond the code is the honest measure: **a list of everything it had to write as a literal that should have been derived from the Lean.** That list is how much of the contract is actually Lean-owned rather than retyped — the APM doctrine's real test.
+
+Next after review: fixtures for families 1/2/4/5, then H3a the Clojure mirror. That's the chain you asked to see, and none of it now depends on the July data being complete.

@@ -1,0 +1,28 @@
+Reading the five as a group turned up three things that each excursion, read alone, couldn't show. Written into `M-formal-war-machine` §3.1d (`5092d62`).
+
+**Where the build actually is:**
+
+| ring | module | vocabulary | in the contract |
+|---|---|---|---|
+| R8 | `GainChain` | **defines** families 1/2/4/5 | yes |
+| R14 | `CommitmentTemperature` | **its own** | **no** |
+| R5 | `CoverageReport` | **adapts** to families 2 and 5 | yes |
+| R5 (G) | `PolicyGrade` | **its own** | **no** |
+| R6 | — | — | reserved |
+| R2 | — | — | no family assigned |
+
+**Defect 1 — families 8 and 9 exist only in prose.** §2.1c names them as the WM-native rows APM can't state. Neither appears in `GainChain`, in the emitter (which reserves 3/6/7 and stops), or in `CommitmentTemperature`, which never mentions a family number. The mission's rosetta and the emitted contract disagree about how many families there are, and neither can see the disagreement.
+
+**Defect 2 — two of four modules are islands.** `CoverageReport` did the alignment properly: its adapters reuse the *existing* `inhabitedHandle`/`typedAbsence`/`declaredDomain` rather than adding a second notion of absence. `PolicyGrade` being standalone was deliberate; `CommitmentTemperature` being standalone was never decided, it just happened.
+
+**Defect 3 — the fixture polarities are followed everywhere and named nowhere.** All four modules have an accepting, a refusing-broken, and a refusing-plausible-fix witness. I could assign them by reading, but nothing in the build could. A module missing its plausible-fix witness is the failure that matters — that's the one stopping the naive repair — and nothing would have noticed.
+
+**On "holistic": I'd resist the obvious move.** A top-level `warMachineCompliant` conjoining every module would be false unification — `CoverageReport` is parametric in an outcome type, `PolicyGrade` quantifies over finished runs, `CommitmentTemperature` over selectors, `GainChain` over fold occurrences. There's no shared carrier, so the conjunction would be a tuple wearing the word "sound". The object that legitimately holds them together is the one APM already uses: **the emitted contract document**. Holism belongs there, and it's currently missing half the modules.
+
+So the standard is six clauses (one vocabulary; three polarities named; every field constrained; in the contract or explicitly out; axioms declared; a Clojure mirror or a typed hole) — five of which are already true of at least one module, so it's mostly making practice checkable.
+
+**Done now:** polarity labels in all four modules, with the two islands stating why they're islands (`b78ebc428b`, all four rebuild clean).
+
+**Dispatched:** contract completion to codex-22 — family 8 emitted, family 9 moved to reserved, a `G-naming` clause for `PolicyGrade` with its missing Clojure locus as a *typed* absence rather than an omission, version to `wm-contract-v2`. Job `invoke-1787850898197-2472-b1989887`, park `park-c66b64df-b4e6-410c-b3a6-b7b98e8005ef`. I asked it to correct me on family 8's clause text, since I wrote that from memory of `CommitmentTemperature` rather than with the file open.
+
+After that, R6 (family 9) and R2 are the unbuilt pair — and building them *after* the standard is what tests whether the standard was worth writing.

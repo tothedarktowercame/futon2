@@ -1,0 +1,22 @@
+Agreed — and the stack already has a precedent for exactly this shape. Let me find it before writing another.That's the precedent — a three-layer discipline where core.logic is the behavioural layer, *"a relation over (before, event, after) … ungameable"*. A `@how` check is exactly that shape. Writing one.It runs, and it's attested.They do go together, and it took about forty lines. `e370b8e` — `futon3/checks/how_witness_snatch.clj`, run and passing.
+
+**The edge under test:** `snatch/protect-the-unprotected-move` `@how` `snatch/preserve-the-right-to-abstain`. The parent says *compare arrangements by how much first-mover exposure each leaves standing*; the child claims to be a method for that. So the edge is attested iff **removing abstention strictly worsens P1's guaranteed outcome** — iff abstention is what was protecting the first mover.
+
+Facts read off the game's own diagrams: P1's available actions per treatment (G2 disables "No ofrecer"), and P1's guaranteed floor — abstaining keeps 10 own tokens at 1 point each; forced to offer, a snatch leaves 10−x.
+
+```
+witness bindings [with without floor-with floor-without]:
+   [:g1 :g2 10 9]
+   [:g3 :g2 10 9]
+   [:g4 :g2 10 9]
+   [:g5 :g2 10 9]
+mirror bindings (must be empty): ()
+
+ATTESTED — the @how edge holds behaviourally, and the mirror is silent.
+```
+
+**The mirror matters as much as the witness.** It asks the same relation of G1 vs G3 — both of which preserve abstention — and returns empty. A witness that can't fail isn't one, and `operational_witness.clj`'s own docstring is what taught that: *"a goal either succeeds against reality or it does not."* I've made shipping a mirror a rule in the `checks/` README.
+
+**What it prices.** The relation itself is cheap — the shape is reusable for any `@how` edge. The real cost is **stating the facts**: here, fourteen rows off design diagrams. For a War Machine pattern those facts would have to come from the running system — which is precisely the Clojure mirror that Tier 0's H3a/H3b builds. So **the derived check and the Tier-0 Clojure layer are the same mechanism**, applied to patterns rather than to families. One thing to build, two uses.
+
+One honest limit: this witness is **binary** — attested or not. The ambiguity term needs a *spread*, and a spread requires the facts themselves to be uncertain. Getting from "does this edge hold" to "with what confidence" is a further step, and §5a's attestation status on the edge is the likeliest source of it.

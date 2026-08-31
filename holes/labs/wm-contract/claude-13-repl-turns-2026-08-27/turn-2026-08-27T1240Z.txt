@@ -1,0 +1,21 @@
+The G(π) worry is the more serious one. Let me check what actually exists before answering it.`forward_model.clj` claims `(state, action) → next-state-distribution` — checking whether that's a real distribution:The answer is more precise than "G(π) doesn't exist", and it makes a standard proposable.`09a0813`. Two answers, and the G one is smaller than feared.
+
+**First, a reassurance that's structural rather than rhetorical.** The info-flow spec is deliberately G-agnostic: `GainChain.lean` treats `G` as an *opaque ordered score*, and every `CommitmentTemperature` result holds for **any** `G`. So `I(τ ; action) = 0` and `live_gain_repair_changes_no_action` are true whatever G turns out to be — Tier 0 isn't blocked, and won't be redone when this is settled. That's a design property, but it's also exactly why the question can drift, so it's worth pinning.
+
+**Read at source, the honest statement isn't "G(π) doesn't exist."** It's:
+
+> **`G` is earned at action grain and not at policy grain.** `predict-multi-horizon` chains K steps *"assuming the same action repeats"* — so "policy" collapses to *this action, sustained*, and a sustained action is not a π.
+
+The rest checks out better than I expected: `G_efe(a) = D_KL[Q(o|a)‖C] + 𝔼H[P(o|s)]` is real with both principled terms; `C` is real; `S(π)` is *correctly* called a score already (the paper reserves the word); the model-uncertainty bonus is *correctly* excluded from `G-efe`. The one quiet problem is that the forward model is declared deterministic — *"point-mean + per-channel variance"* — and **that variance is hand-tuned per action type**, sitting inside the ambiguity term without saying so.
+
+**So the standard I'd propose makes `G` a declared domain — family 5 applied to a name:**
+
+- **S-G1** — a quantity may be emitted as `G` only if computed from a predicted outcome distribution *and* preferences `C`. Otherwise it's a `score`.
+- **S-G2** — it may be emitted as `G(π)` only if that distribution is conditioned on a sequence that isn't the repetition of one action.
+- **S-G3** — any stipulated component of `G` is declared, not hidden. The augmentation terms already obey this; the variance model doesn't.
+
+Three of five quantities already comply. It's mostly **retroactive naming discipline plus one honest disclosure**, not new machinery — and it's enforceable by the contract we're building: `:G-*` carries the provenance of its predicted distribution, or it's `:score-*`. It also makes the gap one nameable deliverable rather than an open programme: a predicted distribution conditioned on a heterogeneous sequence.
+
+**On walking Figure 4 — right template, and it has a prerequisite this mission already owns.** §1.5's first in-scope item is *"lift the R-node wiring out of SVG path coordinates into typed data."* Right now only the **five red** nodes have their column recorded in any file; the other thirteen live in Bezier endpoints. So a walkthrough today covers 5 of 18. Doing the wiring lift first makes all eighteen walkable, tests the invariant correlation against the greens (which I couldn't do earlier for exactly this reason), and is the mission's own first scope item. `NOTE-thirtyfour-steps-both-levels.md` is the interim substitute — the same exercise at step grain rather than node grain.
+
+I'd make the wiring lift the next non-Lean packet.

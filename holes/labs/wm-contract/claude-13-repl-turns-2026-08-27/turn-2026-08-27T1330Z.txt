@@ -1,0 +1,17 @@
+Fair correction — I answered a validation question you didn't ask. Let me actually look at it.Read it. Five things worth taking, and one changes how I'd frame R2's repair.`b1bbfe2`. It's simple enough to study and it repays it. (README via fetch; I haven't read the source.)
+
+Players hold 10 tokens, **your own score 1 and the other's score 2** — that asymmetry is where the tension lives. Each round: propose, then **accept / refuse / snatch**. Five variants: G1 state of nature, G2 forced offer (a rule that *encourages* exploitation), G3 shame tokens, G4 property rights with compensation, G5 **communication alone**.
+
+**Five things worth taking:**
+
+**1. Five structured variants beat eight flat classes.** G1–G5 is an ordered progression of enforcement modality — none → perverse → social → legal → communicative — each differing from its neighbour on a named dimension. Ours: eight flat response classes, fourteen action types in a set literal. More entries, less structure. That's the "structure, not more entries" claim demonstrated by a working artefact rather than argued.
+
+**2. Refuse vs snatch is your parent/refinement point, made to matter.** At the resource level both mean *no exchange happened*; institutionally they're opposite — abstention versus defection — and the game **makes the distinction consequential by scoring them differently**. That's `:declined-on-merit` vs `:declined-ground-unknown`, passing the membership test by design.
+
+**3. Shame tokens are repair obligations in another domain.** A separate accumulating currency, attached to the actor, recorded durably, not collapsed into the score — and in G3 it's the *sole* mechanism, no enforcement. That sharpens the candidate-obligation proposal: the missing piece for R6 is a mark that accumulates when a candidate fails to discriminate and must be discharged before it earns standing.
+
+**4. G5 changes how I'd frame R2's repair.** *Communication alone improves cooperation* — pre-round messaging, action space and payoffs untouched. **A channel need not be scored to be worth having.** E-R2 currently frames the repair as getting turns into the observation vector so they reach inference. But the turn→pattern association already exists (27 edges), and surfacing it as *communication* is separable from scoring it. That matters because scoring it well is the hard part — exactly the terminal-event-without-preconditions trap. **G5 is the version of R2 that doesn't require solving the criterion set first.** I've recorded it as a slice-3 alternative, not a replacement.
+
+**5. The experimental design is the fixture design** — vary the institution, hold the action space and payoffs fixed, measure the difference. A fixture that changes two things measures neither. And the admin's *change the variant globally mid-session* is stop-the-line at the institutional level: changing the rules rather than the play.
+
+What I wouldn't take: the payoff asymmetry. It's a stipulated preference structure for a teaching game — lifting it would be importing someone else's `C`. What transfers is the method.

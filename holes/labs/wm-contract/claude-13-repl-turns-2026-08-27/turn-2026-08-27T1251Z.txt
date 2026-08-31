@@ -1,0 +1,17 @@
+This does real work, and one part of it is checkable against what we found today.`11a5543`. The mapping is tighter than an analogy, and one consequence is checkable against what we already found.
+
+**A design pattern is a problem in that sense.** Close to Alexander's own formulation — *"use this solution a million times over, without ever doing it the same way twice"* — the pattern isn't any instance, it's the structure in whose vicinity instances organise. Forces ↔ differential elements; the resolving configuration ↔ singularity; pattern language ↔ problematic field; the flexiarg ↔ an *incarnation* of the problem, not the problem.
+
+**The checkable consequence for G(π).** `G(π)` needs a predicted distribution over outcomes, so something must individuate outcomes — say which differences make a difference. That's the problem's job; the differential structure supplies the coordinates. Now look at where the WM's outcome space actually comes from: `observation.clj` — *"The war machine's observation channels, **harmonized from all vocabularies**"* — fourteen channels from holistic argument, JSDQ, joe-hud, sorry topology, daily scan frames.
+
+That's an **enumeration**. It's **I1 — derived-not-enumerated — upstream of every `G` the machine computes.** So your intuition has a precise form: *G(π) is calling out for pattern-shaped things because a distribution needs coordinates, and only a problem supplies principled ones. A harmonised channel list is a list.* Testable: is adding a fifteenth channel an edit, or a consequence of a structure? Today it's an edit.
+
+**Smith's line lands on this mission directly** — *"the role of axiomatics is to codify and solidify these problematic notions."* That's Tier 0 exactly. And the caution matters: axiomatics *solidifies*, it doesn't generate, so the Lean model is downstream of the problem and mustn't define scope. Twice this week I let it nearly do so — dropping family 1 because the corpus had no witness, and making the retro-trip the acceptance bar. You corrected both, and it's the same correction Smith's sentence implies.
+
+**And it unifies the two strategies.** If solutions organise *in the vicinity of* a problem, there are two distinct operations: **TryHarder** moves within the solution field with the problem held fixed; **stop-the-line returns to the problem and re-poses it.** That's why the second looks locally like "not working" — re-posing yields no instance, so any instrument counting instances scores it zero.
+
+It also explains why the machine can only TryHarder: it represents candidate *actions* (`fm/action-types`, a fourteen-element set literal) and has **no representation of a problem as an object**. Nothing to return to. The 07-15 archive is that in the wild — 22 attempts, each recording "no addressable entities" for every action class, each closing successfully.
+
+Which makes **R6 the Deleuzian ring**: *tension proposes candidates* is differential elements generating singularities, and its own vocabulary — tension field, curvature signal — is already differential-geometric. Your 2026-08-25 remark that *morphogenesis* beats *tension* sits in the same register, so R6's recorded caveat about superseded framing is a live theoretical question rather than bookkeeping.
+
+Honest bound recorded: nothing here proposes a replacement outcome space. Recognising that a list is a list isn't yet a structure.

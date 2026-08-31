@@ -1,0 +1,17 @@
+Both confirmed: the olean is one `lake build` target away, and a wrong name fails elaboration. That makes a real fix available.## REVIEW — ContractEmitter v2, `42a66f11e1` (codex-22)
+
+**What I checked.** Ran `lake env lean --run` myself; parsed the JSON with `json.tool`; read `governs` and `factorsThroughDiscard` against the emitted clause text; diffed the document before and after my fix. Fix committed as `06327f99b2`.
+
+**Checklist passes.** Version `wm-contract-v2`. Families `[1,2,4,5,8]`, reserved `[3,6,7,9]` — family 9 in reserved, not families, as asked. No `holds` field anywhere. The missing Clojure locus is `{"absent": "no-clojure-mirror-yet"}` — a nested object, so a consumer expecting a string fails loudly rather than reading a blank path.
+
+**It corrected me and was right.** My packet said family 8 means "some pair of temperatures that select different actions". `governs s := ∃ entries τ₁ τ₂, s τ₁ entries ≠ s τ₂ entries` — the *same* `entries` is held fixed across both temperatures. It emitted "one fixed ranking and two temperatures", which is the real condition; without the fixed ranking the statement would be near-trivial.
+
+**Its build reasoning was sound but the constraint was mine, not Lean's.** It declined to import `CommitmentTemperature` because the one-module gate command failed on a missing `.olean`. That constraint came from my "build the ONE module" instruction. `lake build DarkTower.WarMachine.CommitmentTemperature` is one target, and APM's own regenerate script builds several — so the workaround was working around my packet.
+
+That matters, because it exposed something that predates this dispatch: **every `lean-predicate` and conjunct in the contract was a hand-copied string.** Rename `threadedIdentity` in `GainChain` and the emitter still compiles and emits the stale name. The imports were decorative. I converted them all to checked name literals (`` ``GainChain.threadedIdentity ``), which fail elaboration on an unknown constant — verified: `Unknown constant DarkTower.WarMachine.GainChain.threadedIdentityTYPO`. The emitted text is the final component, so the document is byte-identical.
+
+**And the discipline caught a real error on its first application.** The policy-grade clause listed `scoreUnderObservedWiring` and `notSustainedSingleAction` as conjuncts. **Neither is a declaration anywhere** — they're descriptions I invented in the packet and codex-22 faithfully copied. `earnsPolicyGrade` has two named predicates and one unnamed equation, and it uses `sustainedSingleAction` *negated*, so listing it positively misreported the clause. Now `conjuncts` carries only real declarations and `clauses` states all three in words, matching the family shape.
+
+The diff confirms nothing else moved: `families`, `chain-property`, `compliance-property`, `coverage-clause`, `reserved`, `contract-version` all byte-identical; only `policy-grade-clause` changed, which is the correction.
+
+This became the standard's **seventh clause** (`c77f7d7`): predicate names are checked constants, and a module the contract names is a module the emitter imports. Worth noting how it was found — not by reading the emitter, which I'd done twice, but by pulling on why an agent worked around a gate.

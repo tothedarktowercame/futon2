@@ -1,0 +1,13 @@
+Found it — page 11 exactly, and it's worth more than the citation.All three references resolve in the print bibliography, 0 missing entries, build clean at 40 pages.
+
+You were right and my search was wrong — the passage is exactly where you said. Page 11, under *"Is There an Underlying Set of Universal Building Blocks?"*:
+
+> "Christopher Alexander (1964) earlier conceptualized all components of social arrangements as having a pattern and being a unit. Units have subunits and are themselves parts of larger units that fit together as a pattern."
+
+Her bibliography carries *Notes on the Synthesis of Form* (Harvard, 1964) — the pre-*Pattern Language* book, which fits "building blocks" better than *A Pattern Language* would have. The appendix now opens with it and no longer hedges; `NOTE-ostrom-what-to-take.md` has its open action closed. One detail for the bib entry: the book is 2005 (Princeton copyright page); a 2009 printing exists, so if you're citing a copy in hand we may want the printing noted.
+
+**The neighbouring sentences turn out to matter more than the citation.** Ostrom takes the pattern-and-unit reading from Alexander, but the *shape* from Koestler's holons, quoting him that such a whole "can be 'dissected' into its constituent branches on which the holons represent the nodes of the **tree**" — and says much of her analysis will be a form of that dissection.
+
+So: Alexander supplies the units, Koestler supplies the tree, and *A City Is Not a Tree* appears the year after the Alexander she cites, arguing that those two come apart. I've written this into the cascade section carefully — not as an error on her part, since dissection into a tree is a way to get started and she says so, but as a consequence: if institutions are patterns in Alexander's sense, their compositions should be expected to overlap, and a decomposition that can't represent overlap loses what a cascade does.
+
+Which makes the G4 figure do more work than I'd planned for it. Four of its seven nodes stand on two authorities, and flattening it to a tree would delete precisely the remedy structure that produces the +3. That's a small checkable instance of the objection, on Ostrom's own material, in a game built from her work.

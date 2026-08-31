@@ -1,0 +1,31 @@
+That's a richer carrier than the WM's. Let me look at what's on disk — particularly the preregistered predictions.The maths domain turns out to be the **strongest** of the three carriers. `analysis/series.edn`:Explored from disk only, and it's the **strongest** of the three carriers. `98e1e5d`.
+
+**The outcome space is specified, then populated.** `PROTOCOL-defective-problem.md` fixes `#{:closed :tier-a :tier-b :defective}` with `:void` at series level; `analysis/series.edn` has it populated — closed 4, defective 4, tier-b 2, defective-registration 1, void 2. Eleven frames, and **specified before it was populated**, which neither other domain can say.
+
+**And `:void` is `mark-without-force`, built.** The protocol: *"Voiding the problem outcome does **not** void the instrument findings… a void frame records: **problem outcome VOID, instrument findings RETAINED**."* A mark that changes one reading and leaves another untouched — G3 in the snatch collection, WR-25 in the war room, and R5's own THEN.
+
+So that claim has now moved three times today, and this is where it lands:
+
+| stage | claim |
+|---|---|
+| after snatch | *"the stack has no G3"* |
+| after gridding the WRs | *"ruled twice, implemented nowhere"* |
+| **now** | **implemented — in APM's `:void`, and only there** |
+
+The mechanism R5 needs exists, one lab over, with a written protocol.
+
+**The policy is a real artefact**: the memory-cascade arm `{:enabled? true :routes [:sibling] :cap 100}`, committed, **pinned into each manifest**, reversible by deleting the file before the mint — with route yields measured per variant (*why-hop 48/41/0, co-incidence 55/55/96*). A pinned config with a stated reversal is a better π than "the treatment the operator picked" or "whatever the proposer emitted".
+
+**And the decisive one: `Q(o∣π)` is preregistered.** Amendment 7 carries **P-a/P-b/P-c** with a named falsifier — *no `:used-via-cascade` in two arm frames* — and receipt fields to check against.
+
+> The WM's 82 flights are **retrospective frequencies**. APM's frames are **forecasts with a falsifier.** That's the difference between fitting a distribution and having one.
+
+| | outcome space | π | Q(o∣π) | n |
+|---|---|---|---|---|
+| **Snatch** | flowchart leaves | treatment G1–G5 | derivable from rules | — |
+| **War Machine** | 14 dispositions | selected action class | **empirical** | 82 |
+| **Mathematics** | 4+1, **specified first** | pinned arm config | **preregistered** | 11 |
+
+Snatch has the cleanest rules, the WM the most data, **mathematics the only stated predictions** — so it's the domain where a spread can be *checked* rather than merely computed.
+
+Two things worth your eye. `:tier-a` doesn't appear in the counts while `:defective-registration` does and **isn't in the protocol's stated set** — one of those is vocabulary drift. And the arm frames are **f45/f46** (f44 predates the wiring), so the two-frame falsifier isn't discharged yet.

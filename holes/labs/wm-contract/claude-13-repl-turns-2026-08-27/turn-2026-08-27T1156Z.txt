@@ -1,0 +1,25 @@
+Noted — codex-22 for subsequent dispatches. Let me record that where the handoff series lives, then survey the APM chain.`APMCampaignTraceChecker.lean` is the closest analogue to what we need — checking it before I write the survey.The survey turned up something that corrects my own H-series. Writing it up.Noted on codex-22 — I've recorded it in the mission next to the H-series so it survives this conversation, and H2 onward will go there.
+
+The survey is at `ca97b84`, and it **corrected my own plan**, which is the useful outcome.
+
+**The headline: it's two directions, not one.**
+
+| direction | who emits | who judges |
+|---|---|---|
+| **1** | Lean emits the contract JSON | Clojure validates the *document* |
+| **2** | Clojure emits the trace | **Lean judges the run** |
+
+`APMCampaignTraceChecker.lean`'s docstring is the sentence to take over verbatim: *"The Clojure side emits **observations, not verdicts**. This checker parses that artifact and accepts exactly a complete refinement of the Lean-owned phase order."* Verdicts about runs live in Lean, where they can carry theorems.
+
+**And the mechanism is far smaller than I expected.** Both Lean sides are just `lake env lean --run`. The emitter's `main` prints compressed JSON to stdout; the checker's `main : List String → IO UInt32` takes a path and **the exit code is the verdict**. No binaries, no FFI, no build product beyond `.olean`.
+
+**The subtlety worth copying:** `generated_contract.clj` doesn't merely obey the JSON. It carries its own `required-bounds`, `required-dispatch-policy`, `required-receipt-schemas`… and validates the emitted contract *against* them, so drift in **either** direction fails. That isn't a contradiction of *"the runtime is not permitted to carry an independently maintained phase table"*, because two categories are handled differently — **structure is derived** (`expected-transitions` is computed from the emitted `phase-order`, never restated) and **values are pinned on both sides**. A Clojure that only obeys can't detect a drifted Lean; one that only declares *is* the forbidden table.
+
+**So H3 was wrong as I wrote it.** It fused both directions and put run-verdicts in Clojure. Corrected at `64ded76`:
+
+- **H3a** — `generated_wm_contract.clj` validates the contract *document* against pinned expectations.
+- **H3b** — `WarMachineTraceChecker.lean`, verdict as exit code, and **this is where the 2026-07-09 retro-trip belongs**, because it's a verdict about a run.
+
+Plus one addition that arrived as a requirement rather than a chore: APM's traces are already JSON and `wm-trace/*.edn` isn't, so we need a small bb step projecting the records into the checker's shape — which is precisely *"the Clojure side emits observations, not verdicts."*
+
+One practical note: APM's Lean is in `apm-lean` at v4.29 and ours is in `mathlib4` at v4.31, so since this morning's revert the two build independently and our `--run` invocations won't disturb the APM frames.

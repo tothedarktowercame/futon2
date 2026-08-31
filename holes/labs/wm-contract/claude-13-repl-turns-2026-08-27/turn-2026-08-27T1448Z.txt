@@ -1,0 +1,33 @@
+Quick check on your assumption first — how memories actually attach.That resolves your assumption, and better than expected — §5a: *"`@how` targets may be patterns OR reviewed memories. **A memory attached to a pattern is already a refinement of it, recorded by the attachment economy — so do not restate an attachment as an `@how`.**"* The edges you're thinking of exist; the standard deliberately keeps them out of `@how`. Now the pilot.Your assumption was closer than the counts suggested — §5a: *"`@how` targets may be patterns **OR reviewed memories**. A memory attached to a pattern is already a refinement of it, recorded by the **attachment economy** — so do not restate an attachment as an `@how`."* The memory→pattern edges exist; the standard deliberately keeps them out of `@how` to avoid duplicating the attachment economy. So `@how`'s emptiness in the maths namespaces is partly *by design*, not drift.
+
+That also sharpens the second-store question into something chaseable: **is the substrate's pattern→pattern relation store the attachment economy's implementation, or a genuinely third store?** Worth an answer eventually, and now precise enough to get one.
+
+**The Snatch pilot runs.** `020e634` — `checks/how_kernel_snatch.clj`:
+
+```
+support (4 bindings) — reused unchanged from the relation
+
+UNATTESTED  Beta(1,1) — uniform
+   each -> 0.2500      entropy = 1.3863 nats   (log 4 = 1.3863)
+
+ATTESTED    3 successes on the first binding, 2 failures on the second
+   0.3902 / 0.1220 / 0.2439 / 0.2439
+                       entropy = 1.3121 nats
+
+MIRROR mass: ZERO — the kernel cannot fire
+discriminates? (unattested vs attested): true
+
+PILOT OK — spread present, responds to attestation, mirror silent.
+```
+
+Three things it establishes at one-edge scale:
+
+**The relation and the kernel compose rather than compete.** `run*` was already computing the support — four bindings — and we were reading only its emptiness. The Beta posterior puts mass on what core.logic found. Nothing was thrown away.
+
+**The spread responds to evidence rather than being stipulated.** Entropy falls 1.3863 → 1.3121 when attestation arrives. An unattested edge sits at Beta(1,1): uniform, maximum entropy, **maximum epistemic value** — you learn most by testing the method nobody has attested.
+
+**The mirror discipline survives the move.** Zero mass, not merely low mass. A kernel that put mass everywhere would be the stochastic form of a witness that cannot fail, and this one doesn't.
+
+`Beta(1,1)` is declared in the source as a stipulation, per S-G3, rather than absorbed into a number.
+
+What's *not* shown: this is entropy over the support of one edge, not over an outcome space anyone has justified. That's still the open question, and the pilot makes it askable rather than answering it.

@@ -1,0 +1,21 @@
+Better ground truth, and §5a constrains what it can validate. Let me measure the citation corpus.My regex caught API paths (`api/alpha`, `ref/type`) rather than patterns. Redoing it against the actual library ids.Clean numbers now, and they carry a trap worth knowing before the pilot.Did some of that reading. `99a4ae5`. Measured against the **real** 1211-id library set — a first pass without that filter counted `api/alpha` and `ref/type` as patterns, so I threw it away:
+
+```
+missions whose ARGUE cites ≥1 real pattern     60
+distinct patterns cited                        64
+citations                                     272
+co-citation pairs                             435
+pairs co-cited in ≥2 missions                  37
+```
+
+It's a genuine held-out relatedness signal, independent of the directive layer — which is exactly what makes it usable. **But two constraints, and the second is a trap.**
+
+**It validates `@how`/`@see-also` and cannot validate `@why`.** §5a's own corollary: *"Missions record the how; the why lives in a register the mission format has no slot for."* Co-citation is evidence of method-relatedness, not authority. **A spider scored on this corpus is being scored on half its output.**
+
+**And the top co-citations are boilerplate.** Four patterns — `futon-theory/futonic-logic`, `invariant-coherence/drain-channel-shape`, `structure/block-as-futonic-revolution`, `structure/cook-ting` — are co-cited **exactly 14 times each, pairwise, all six pairs**. That's one repeated block across fourteen missions, not fourteen independent judgements. A spider validated against that **learns the template**. The corpus needs de-duplicating by mission boilerplate before it's ground truth at all — otherwise the highest-scoring "edges" carry the least information, which is I1 arriving in the *evaluation set* rather than in the vocabulary.
+
+**One discrepancy to settle.** §5a records *"42 missions citing 151 patterns"* (2026-08-23); I get 60 missions and 272 citations over 64 patterns. Probably different scope — mine globs `futon*/holes/missions/*.md` plus `futon*/holes/M-*.md` — but one of the two is wrong or they measure different things, and any recall figure inherits whichever gets used. Worth resolving before it's quoted.
+
+**On the maths setting** — agreed, and for a reason the other corpora can't match: its patterns carry **your own** `@why`/`@see-also`, which are authority claims rather than post-hoc traces, and its outcome space is preregistered. It's the only corpus where a spider's proposals can be scored against *authored* edges.
+
+So the pilot has three validation sets with different properties: snatch (known, closed, tiny), missions (large, real, contaminated by boilerplate), maths (authored, and the only one that can validate `@why`).

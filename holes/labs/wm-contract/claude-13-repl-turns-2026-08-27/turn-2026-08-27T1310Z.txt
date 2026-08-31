@@ -1,0 +1,17 @@
+R5's company instance may be sitting right there. Pulling the three EVALUATE records.Three genuinely different failures — and together they're a complete taxonomy of how a criterion set fails.`3669402`. Three genuinely different failures — and unlike SELECT, where all four cases said the same thing, these three form a taxonomy.
+
+**Linden Lab — no dimension at all.** Stern, asked what the NBA island achieved: *"I think we've had 1,200 visitors. People tell us that's very, very good. But I can't say we have very precise expectations. **We just want to be there.**"* The record's verdict: *"No criterion existed against which the observation could be scored."* That is `:warm-customer-pays` in another firm — a signal received with no dimension to receive it. R5's own shape, externally witnessed.
+
+**Klarna — and this is the sharpest, because the criterion set was *good*.** Conversation volume, deflection rate, resolution time, FTE-equivalents: four real metrics, measured, scaled, reported publicly. And it failed anyway — *"the criterion the firm judged the assistant by did not carry the outcome that turned out to matter"*; cost was over-weighted, quality suffered, and **nothing reported that quality was unscored.**
+
+That's R5's node statement with an external witness. It's also the case that **refutes the naive fix**: a fifth metric wouldn't have helped, because the defect wasn't a missing metric but a missing statement of the boundary. Adding an entry doesn't make a list self-aware. That's the hardest fixture polarity to source from inside the stack, and here it is, public and dated.
+
+(Same grid caveat as Galois in SELECT: the `:engaged` colour is about LangChain's own sale — the record says nothing in the reversal is recorded as a decision about LangSmith. The evaluation failure is *Klarna's*, one level out.)
+
+**Andela — the verdict without its ground.** A criterion was applied and reached a verdict, but *"the direct quotes about demand come from Andela's CEO, i.e. the seller describing the buyer; the buyer-side explanation comes from a named competitor, not from a buyer."* Hence `:declined-ground-unknown` — the class is the finding.
+
+**They instantiate three invariants at criterion grain:** Linden = the singularity with no dimension; Klarna = **I2 typed-absence** (unscored and scored-fine indistinguishable); Andela = **I5 every-contributor-accounted** (a verdict contributed, no attributable basis).
+
+Two things it hands the excursion. **Klarna is R5's business instance** the way Docker is R14's, and a more useful one. And **Andela adds a requirement E-R5 hadn't stated**: a verdict must carry the ground held *by the party that reached it* — which inside the stack is exactly E-R2's slice-3 problem, where a completion summary contradicted its own commits.
+
+Your outside/inside-the-stack strategy is recorded and parked as you asked. It resolves R5's sequencing bind — the ring whose cost is borne outside can't wait on the world's schedule if the operator stands in as the external party during bootstrap — and it bears on E-R2 as much as on R5.

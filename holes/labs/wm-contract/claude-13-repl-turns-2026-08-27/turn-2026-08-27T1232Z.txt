@@ -1,0 +1,27 @@
+codex-22 was right to stop, and the blocker is my packet's fault — I forbade `lake build` on a file that *imports* `GainChain`, and imports need an `.olean`. APM's own regenerate script builds its targets first. Unblocking:The errors went to stdout. Real cause: it tries to *decide* the Lean predicates to compute a `holds` field — and they're `Prop`s with existentials, not `Decidable`. Reading the file:Its instinct was right — derive, don't retype — but `decide` on those existentials can't work, and more importantly the field is circular: `identityThreadingHolds` evaluates the *two-clocks counterexample*, which fails by construction. Fixing the design:The chain's first link works. `7b270a14af`.
+
+**codex-22 was right to stop, and the blocker was mine.** My packet forbade `lake build` — meant to protect `.lake/packages` after this morning's repair — on a file that *imports* `GainChain`, and an import needs an `.olean`. It refused to work around it with an alternate `LEAN_PATH` or a source-adjacent `.olean`, which is exactly right. I built `DarkTower.WarMachine.GainChain` (2 jobs, seconds, `.lake/packages` untouched) — which is precisely what APM's own `regenerate-apm-contract.sh` does before running its emitter.
+
+**Then a real review finding: the `holds` field had to go.** codex-22's instinct was the one I'd asked for — derive, don't retype — and it wrote *"`decide` makes status an evaluation of the imported predicates, rather than copying the current false statuses into the JSON."* But it fails twice over:
+
+- **Technically** — the predicates are existential `Prop`s, not `Decidable`, so `decide` doesn't typecheck. That was the error.
+- **Conceptually, and worse** — `identityThreadingHolds := decide (threadedIdentity clockSplitOccurrence clockSplitSelection)` evaluates the **two-clocks counterexample**, which fails family 1 *by construction*. The field would have reported a property of the fixture, not of the War Machine.
+
+The principled fix is the one my own APM survey already implies: **a contract states what must be true; whether it *was* true on a run is a verdict, and verdicts belong to the trace checker.** I put `"holds": false` in the packet's suggested shape and reintroduced exactly the direction-1/direction-2 conflation I'd corrected in H3 two turns earlier. Statuses live in the rosetta and the qualification record instead.
+
+**Verified after the fix:**
+
+| check | result |
+|---|---|
+| `lake env lean --run … > contract.json` | **exit 0**, valid JSON, 1975 bytes |
+| family 1 emitted | **yes** — fixtures, not corpus |
+| family 8 excluded | **yes** |
+| `holds` anywhere | **no** |
+| families | 1 (5 clauses), 2 (1), 4 (3), 5 (4), each with `lean-predicate` and `clojure-locus` |
+| chain / compliance | `gainChainSound` 7 conjuncts, `foldCompliant` 5 |
+| reserved | 3, 6, 7 |
+| `GainChain`, `CommitmentTemperature` | both still exit 0 |
+
+**On literals-vs-derived**, which was the honest question I asked: clause prose, predicate names and file paths are all string literals, because `GainChain` doesn't represent source metadata as data. So this contract is currently Lean-*named* rather than Lean-*derived*. The conjunct lists for `gainChainSound` and `foldCompliant` are the parts that most want deriving, since they'll silently drift if someone edits the Lean definitions — worth a follow-up, and worth knowing before the Clojure mirror pins against them.
+
+Next: the fixtures for families 1/2/4/5 as operator scenarios, written against these clause ids, then H3a.

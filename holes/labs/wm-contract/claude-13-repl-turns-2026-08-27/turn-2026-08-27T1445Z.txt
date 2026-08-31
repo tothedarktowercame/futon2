@@ -1,0 +1,31 @@
+Let me check the maths corpus first — my earlier count said one `@how` edge library-wide, which doesn't match what you're describing.Important correction to the plan: **`@how` is 1 file library-wide, and 0 across all maths namespaces** — but `@why` (14) and `@see-also` (21) are there, and the substrate carries pattern→pattern edges as relations. So the build must not depend on `@how`.Written into E-R5 at `d542055a` — but I measured the corpora first, and it changes the design.
+
+| corpus | `@why` | `@how` | `@see-also` |
+|---|---:|---:|---:|
+| `futon3/library` (1227) | 60 | **1 file** | 38 |
+| the five maths namespaces (~96) | 14 | **0** | 21 |
+
+**`@how` is 0 across every maths namespace** — the domain closest to live test. What the maths patterns do carry is `@why` and `@see-also`. There's also a second edge store: `TN-APM-cascades-exist-unused.md` confirms substrate pattern→pattern edges *"DO exist, as relations rather than hyperedges"*. And leaf memories — what zai is actually handed — are *"a flat list sorted by hash"*, carrying no structure.
+
+**So the main design consequence: the build must not depend on `@how`.** It takes typed edges from *any* source and is indifferent to which directive supplied them.
+
+**Five steps, only two of them per-domain:**
+
+1. **support** — a `core.logic` relation run forward against domain facts *(the facts are domain-specific; the relation shape isn't)*
+2. **mass** — a Beta posterior per **edge**, `credit-for` generalised per-edge as `aif2/tension.clj` already did per-entry
+3. **kernel** — `node → D(node)`; a cascade is Kleisli composition
+4. **readouts** — `discriminates?` and `entropy`
+5. **mirror** — every witness ships a case that must find **zero mass**
+
+**And it belongs in R5 for a real reason, not by filing convenience.** R5's requirement is that the evaluate stage report what its criterion set does *not* cover. Step 4 makes that computable: a channel's entropy **is** the statement of how much the criterion fails to determine. R5 is where a spread becomes reportable rather than merely present.
+
+**Four slices drafted for codex-22**, each with a numeric acceptance test:
+
+- **S1 · edge-graph reader** — acceptance is it reports 60 / 38 / 1 over the library. The measured counts *are* the test.
+- **S2 · kernel constructor** — acceptance is it reproduces the same four bindings the existing witness returns, Beta(1,1) on unattested edges, entropy `log 4` on a uniform four-point channel.
+- **S3 · snatch adapter + mirror** — witness has positive entropy, **mirror has zero mass**.
+- **S4 · mathematics adapter** — *held* for the apparatus repair, noted because it's the domain that will really exercise this.
+
+S1 and S2 are independent and can go in parallel; S3 needs both.
+
+One bound I'd flag above the others: **`@why`/`@see-also` are not `@how`** — authority and peerage rather than method decomposition. The first real graphs will be shaped from them, and reading a cascade off them would be a category error. Say the word and I'll send S1 and S2.

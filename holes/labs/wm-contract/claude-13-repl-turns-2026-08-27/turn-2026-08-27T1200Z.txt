@@ -1,0 +1,28 @@
+Strong result. Verifying the scope and count, then the date — that one bears on E-R8's central claim.Scope is clean. My crude count (795) differs from 791 — `:decision-explanation` contains `:decision`, so mine over-counts. Settling it with a real parse, and looking at the 07-06 boundary:The traces carry `#object[…]` tagged literals — needs a default reader. (That's itself relevant to family 3.)53 files, one top-level map each — so a "record" isn't a file. Let me see the actual structure before judging the 791.Each file is one *tick*. So "791 records" must be a nested unit — finding which, because the denominator decides what non-vacuity means.Only **3** occurrences of `:realized-outcome` in the whole corpus, not 88. Looking at what they actually contain:Three, and each is a single map — not 88. Establishing the window precisely before I report:Recomputed at tick level. Correcting the artifact in place, with both numbers visible:H1 did its job, but its numbers were wrong and I've corrected them in place (`1d64cdc`, mission updated at `bf8ee42`).
+
+**Scope was clean** — two files added, nothing else, worktree clean.
+
+**The unit was wrong, by ~29×.** Each `wm-trace-*.edn` is **one top-level map = one tick**, not a record sequence. The census walked nested structures — `:ranked-actions` alone holds **6,656** entries across the corpus — and counted those. Per tick:
+
+| family | census | **corrected** | of |
+|---|---:|---:|---:|
+| 1 identity threading | 0 | **0** | 52 ticks |
+| 2 non-empty handle | 88 | **3** | 52 |
+| 4 durability | 88 | **3** | 52 |
+| 5 declared domain | 88 | **3** | 52 |
+| 6 separation of powers | 31 | **7** | 52 |
+| 7 exit / status pins | 4 | **0** | 52 |
+
+`:realized-outcome` occurs in exactly **three** files — 07-03, 07-04, 07-05 — each a *single map*: `{:policy "M-bayesian-structure-learning", :expected-G -0.2, :realized-G -0.5, :tick …}`.
+
+**Its headline survives in corrected form, and it's the valuable part.** The outcomes stop **before** the 07-08 substitution — last is **2026-07-05** — where E-R8 dates the break to 07-09. The "record 12→13 of `wm-trace-2026-07-06.edn`" is an artifact of the flattened walk (that file has one record), but the direction of the correction stands.
+
+**And it surfaced a discrepancy I'd want settled before either number is used again.** E-R8 states the producer *"fired **88 times**, 2026-07-02..07-06, in `futon2/data/wm-trace/`"*. **The corpus contains three.** That 88 is the number E-R8 used to overturn its own premise — the same shape as the wrong-corpus error that excursion coined a ticket for.
+
+**Three consequences for Tier 0:**
+
+1. **H2 drops family 1** — selection becomes 2, 4, 5. There's no record-level tick to compare the outcome's tick against, so identity threading can't be witnessed from this corpus at all. It becomes a residual hole, or a reason to add a field.
+2. **Tier 0's claim moves from coverage to dating.** Three exercises won't support non-vacuity by volume — but a **retro-trip needs a boundary, not volume**, and three present plus forty-nine absent dates the break exactly. The qualification must say *"this contract dates the break"*, never *"this contract is exercised by the corpus."*
+3. **The retro-trip target moves earlier** than 07-09.
+
+One incidental finding worth keeping: the traces carry `#object[…]` tagged literals, so they need a `:default` reader — a record containing an unreadable object literal can't be reconstructed, which is family 3's concern arriving from a new direction.

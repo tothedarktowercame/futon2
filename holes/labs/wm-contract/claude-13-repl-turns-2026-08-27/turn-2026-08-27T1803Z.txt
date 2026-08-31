@@ -1,0 +1,26 @@
+Before explaining a duplicate, let me re-check the loss claim — my extractor was undercounting chat-turns too (177 vs 350).Found it — and it also withdraws my "one genuine loss" claim.**`Accept: application/json` works.** The regex scraping was never necessary.**There was no duplicate write — and chasing it withdrew the loss too.**
+
+The two records are:
+
+```
+e-58bfdb92…  role=user       turn-93   365 chars  "Next time please use codex-22…"
+emacs-ad70f2…  role=assistant  turn-155  8646 chars  "Before belling a repair I need to know why those seven…"
+```
+
+One is your turn, correctly stored. The other is **my own reply quoting you** while reporting the backfill scouting. My search ran across all chat-turns without filtering on role, so my quotation counted as a second copy. No duplicate, and the turn was never missing — which withdraws the "one genuine loss survives" claim I made two turns ago.
+
+**Every loss I reported today was the instrument, in three successive forms:**
+
+1. a `:text "…"` regex anchored on `"}`, dropping every entry where `:text` isn't the body's last field;
+2. a first-match event classifier that read a string-shaped `\"event\"` before a map-shaped `:event`, dropping **173 of 350** chat-turn entries;
+3. the role-blind substring search above.
+
+Each produced a plausible finding about the pipeline. The 7-plus-1, then the 2, then the 1 — all artefacts, and each one survived until I checked the next layer down.
+
+**The root cause is that the instrument was a regex over EDN.** The evidence API serves JSON on `Accept: application/json`. The scraping was never necessary. `c1_turn_survival.py` now parses (`90baa27`), which removes the whole class of bug rather than the three instances. Current reading: **20 operator turns, 20 matched, no losses.**
+
+So C1 holds for this session, and the two deferred packets — live-writer discovery and `:evidence/source-turn-id` — have no symptom behind them any more. The discovery packet in particular would have been sent to explain something that never happened; I'm glad you asked about the duplicate rather than letting me dispatch it.
+
+What survives from the whole line: the denominator instability is real and independently measured (the transcript shrank 1,968,337 → 1,945,752 bytes mid-session), and the design points about typed attrition and an external denominator stand on their own. But the mission section now says plainly that the day's evidence for stage-skipping was mine, not the machine's.
+
+And there's a lesson with teeth, which is the day's own subject matter turned on the measurer: **an absence produced by the instrument is indistinguishable, in the output, from an absence in the world.** That's exactly why a criterion must type its losses — and it's also why a typed loss is only as trustworthy as the extractor assigning the type.

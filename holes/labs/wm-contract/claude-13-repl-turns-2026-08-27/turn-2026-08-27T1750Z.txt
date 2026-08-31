@@ -1,0 +1,15 @@
+Before belling a repair I need to know why those seven have no record — let me find the writer.Two verified defects, one with a named cause. That's specifiable — belling it now.Belled — job `invoke-1787853007935-2492-b3906c3c`, park `park-ecf39092-480d-4883-9b82-7d57d3367b71`.
+
+Scouting first changed what the repair is. **A tool for this already exists** — `futon3c/scripts/backfill_claude_jsonl_chat_turns.py`, "Backfill missing Claude REPL chat-turn evidence from a Claude Code JSONL session." So the gap was known and patched rather than fixed. It doesn't currently run, for two verified reasons:
+
+**Defect 1 — the turn header regex is a format behind.** It requires `Caller:` immediately after `Surface:`. The header emitted today (`futon3c/src/futon3c/transport/http.clj:3476-3480`) carries `From:`, `To:` and `Origin:` in between. Tested directly: matches the old form, does not match the current one.
+
+**Defect 2 — it crashes on the evidence body shape.** `entry.get("evidence/body", {}).get("event")` → `AttributeError: 'str' object has no attribute 'get'`. The body comes back as a JSON string now, not a parsed map.
+
+**Defect 3 — silence where a refusal belongs.** Unparsed turns are skipped without a word, and line 324 prints `No missing chat-turn entries to backfill.` So after defect 1 landed, the tool would have reported *nothing to do* — had defect 2 not crashed first. I'd assumed that was happening and checked rather than asserting it; the crash is the only reason it isn't. The repair makes zero-parsed a loud failure.
+
+The acceptance test is numeric, in the shape that's worked today: 23 operator turns, 15 already stored, so candidates should land **near 8**. If it reports 231 the turn filter is admitting tool results; if 27, it's admitting the four harness records; if 0, nothing parsed. I asked for an honest mismatch over a number that agrees.
+
+**And I explicitly kept two things out of the packet.** Why the live writer missed those turns is *not known* — that's a discovery packet, and bundling it would ship a guess. Adding `:evidence/source-turn-id` depends on knowing the writer, so it follows discovery. Both are named in the packet as out of scope so codex-22 doesn't helpfully attempt them.
+
+One thing I did not authorise: `--apply` writes to the live evidence store through Drawbridge. The packet is dry-run only and says so twice — actually repairing the record is your call, not a side effect of fixing the tool.

@@ -1,0 +1,23 @@
+That test generalises better than the families do. Working it out.`bde9a03`. That test generalises better than the families do, and reorganising around it produced something the family view was missing.
+
+**Families are how requirements are stated; invariants are how defects recur.** Five recurred across R2, R5, R6, R8 and R14, each cutting across several families:
+
+- **I1 · derived-not-enumerated** — *does this fix scale by editing a list?* Violations: `reviewed-candidate-cleans` (4 entries), `fm/action-types` (14-element set literal, against WR-20), `top_propose_candidates` (4 entries frozen at 06-03).
+- **I2 · typed-absence** — an absence is a value, not a gap; out-of-domain ≠ no-measurement. Violations: bare `nil`, `[]` from a dark proposer, 22 `:no-selection` closes with no obligation.
+- **I3 · path-to-behaviour** — a computed and recorded quantity must be able to change something downstream. Violations: `I(τ ; action) = 0`; operator turns persisted and never read.
+- **I4 · evidence-sound-at-use** — evidence available, dated and interpretable *at the moment it's consumed*. Violations: the `enact.clj:255` catch-all, digests against a mutable tree, a June signal read in August, `#object[…]` in the traces.
+- **I5 · every-contributor-accounted** — including those that contributed nothing. Violations: `compose-proposers` never calling `proposer-id`; no record-level tick.
+
+**And your test forced a third polarity, which is the real gain.** The scenario note had accepting (operator doing it right) and refusing (recorded failure). The naive-fix test adds: **refusing — the plausible fix**.
+
+So family 5's refusing fixture isn't "a mission outside the domain." It's **the whitelist with a fifth entry added** — a change that looks like a fix, passes any test that only asks *is this mission in the list?*, and must still be refused because the domain is enumerated rather than derived.
+
+> A contract that refuses only broken inputs is a type-check. A contract that refuses the *tempting wrong answer* is a spec.
+
+Each invariant now carries its own tempting wrong answer: I2's is *log it* (a log line isn't a value the fold can read); I3's is *report it more prominently* (emitting into the record is what already happens); I4's is *regenerate the artifact* (stale again in twelve weeks, and nothing says so); I5's is *make every proposer stamp its id* — which fails because **a proposer that emits nothing stamps nothing**.
+
+That also changes what the qualification record claims. Instead of per-clause pass/fail:
+
+> *This contract refuses: the whitelist under another name (I1); an absence recorded as a gap (I2); a quantity with no path to behaviour (I3); evidence unsound at the point of use (I4); a contributor that vanishes by contributing nothing (I5).*
+
+Five lines, each naming a class rather than a case, each with a dated violation and a plausible fix behind it. That's a claim about what the machine won't do again — which is what Tier 0 was for.

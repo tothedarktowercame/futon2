@@ -1,0 +1,26 @@
+Your frustration is right and my sentence was wrong. Let me check one thing that decides where the actual gap is.The numbers settle it. **1227 flexiargs. `+ predicts:` appears in zero of them.**You're right and my sentence was wrong. `3b07ef9`.
+
+```
+flexiargs in futon3/library:   1227
+carrying + evidence:            172
+carrying ?evidence(required):     5
+carrying + predicts:              0
+```
+
+**1227 conditional rules. Zero predictions.** The library *is* the policy space — that part of my claim was empty.
+
+**The actual gap:** `G(π)` needs `Q(o∣π)` — what will be *observed* if this policy is followed. A flexiarg gives IF (antecedent), HOWEVER (forces), THEN (action), BECAUSE (rationale). That's a **production rule**; G(π) needs a **generative model**. The library says what to *do* and never what you would *see*.
+
+And `+ evidence:` doesn't close it: those 172 carry evidence *for the pattern's claim* — justification pointing backwards. A prediction points forwards, and the format has no field for it.
+
+One detail worth your eye: **the five `?evidence(required)` are exactly the five red-ring problem patterns.** The only patterns in the library that state what would count as evidence are the ones about defects. Nothing that works says what its working would look like.
+
+**So R5's EFE core can't be acted on because both terms of G are undefined for every element of the library** — not because EFE is hard, and not because the policy space is empty. It also re-explains this morning's finding from the other end: `observation.clj`'s fourteen channels are *harmonised from scan outputs*, not derived from patterns, so even a pattern that wanted to predict has no coordinate system to predict in. Two gaps, one gap seen from each side.
+
+**A proposal that needs nothing external: let a pattern predict which patterns' `IF` its `THEN` satisfies.** The vocabulary is derived from the library itself — no harmonised channel list. `Q(o∣π)` becomes a distribution over successor conditions; `C` becomes preference over conditions one wants satisfied, which is what a mission already is; **ambiguity is the spread of that distribution**, so explore/exploit becomes computable in the library's own terms. And a cascade is a path through the resulting graph — composition and prediction become the same relation, which is what a semilattice of patterns ought to mean.
+
+The soft version already exists in your catalogue: *Embedding-Nearness as the Structure-Learning Generator* pushes pattern text into a vector space and reads off nearness. So the machinery to match a `THEN` against others' `IF`s is built; what's missing is the field and the intent.
+
+I'd put `library/snatch/` first — six patterns, fully known dynamics, the fixture case.
+
+**Honest bound, recorded:** this makes `Q(o∣π)` a distribution over *pattern conditions*, not world observations. That's a self-model, and it's falsifiable only where a condition's satisfaction is independently checkable. Where it isn't, the loop closes on itself — the R16 re-observation trap your own catalogue names. So `predicts:` has to be held to R16's discipline: a satisfied condition needs a witness outside the model.

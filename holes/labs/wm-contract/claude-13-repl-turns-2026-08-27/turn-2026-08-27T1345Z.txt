@@ -1,0 +1,22 @@
+Agreed — and it's small enough to do properly rather than gesture at. Let me work it out.`e54b7eb`. Doing it properly was worth it — if we can't state G(π) for a two-player, three-action, five-round game with explicit payoffs, we can't state it anywhere.
+
+**The model falls out cleanly.** Hidden state `s` = the other player's **disposition** (propensity to snatch) — the only genuinely hidden thing, since the treatment is announced and tokens are visible. **The institution is observed; the disposition is not.** And `C` is *given*: the 1/2 payoff asymmetry **is** the preference, stipulated and declarable — exactly what S-G3 asks.
+
+**And π is a rule from history to action** — grim trigger, escalate-while-accepted, accept-iff-ask-below-k. That's the thing `predict-multi-horizon` cannot express, since it chains K steps *"assuming the same action repeats"*. Rolled forward, a conditional rule gives a genuinely heterogeneous sequence. **S-G2 satisfied concretely, by an object that is also a rule-in-use.**
+
+The ambiguity term becomes concrete too: *offer one turkey in round 1* has poor pragmatic value and excellent epistemic value — it buys a clean read on whether P2 snatches, for one token. Explore/exploit separable, which `efe.clj` asserts and our corpus has never exhibited.
+
+**The finding is the payoff, though. Each treatment intervenes on a *different term* of G(π):**
+
+| treatment | changes | term |
+|---|---|---|
+| **G2** forced offer | removes *abstain* | the **policy space Π** — and deletes the policy with the best worst case |
+| **G3** shame token | a durable mark, visible later | the **observation stream** — ambiguity falls across the sequence |
+| **G4** revert-then-invert | a defector's best response | the **likelihood P(o∣s)** — risk falls |
+| **G5** cheap talk | an observation before the choice | the **prior over s** — ambiguity falls at the decision |
+
+**An institution is an intervention on a term of the expected free energy, not on the score.** That's your syllogism made computational, and it explains why cheap talk works despite changing no payoff — otherwise a puzzle.
+
+Read against our rings: **R6** is the unpopulated policy space; **R5** is the missing G3 — `repair_obligation` is G4-shaped, it reverts *and* preempts, so the stack has no mark-without-force; **R2** is the unread pre-choice channel. And **R14 is correctly absent** from that table: τ is *precision over policies*, how sharply you commit to the arg min of G, not a term of G. The game fixes selection and varies the institution, which is why it's a clean instrument.
+
+The conclusion I'd draw for the War Machine: **the missing piece for G(π) is not machinery, it's a policy space of conditional rules** — no learned transition model required. A five-round, three-response game has one by construction; we don't, and that's R6.

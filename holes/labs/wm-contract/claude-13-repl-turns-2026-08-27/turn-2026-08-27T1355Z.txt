@@ -1,0 +1,29 @@
+25 patterns. Placed on the same axes, and the comparison is sharp.`7c04c46`. Twenty-five patterns, same axes, and the comparison is sharper than the WR grid alone.
+
+**before 5 · at-the-choice-set 11 · after-the-outcome 9** — and by force, **none 0 · symbolic 2 · material 23.**
+
+**1. The channel cell is empty — zero of twenty-five.** Not one pattern in the WM's self-description intervenes by opening a channel and changing nothing else. The rulings manage two (WR-12, WR-16); the catalogue manages none. **Every pattern acts.**
+
+And **R2 is the ring for exactly that cell.** So the machine has no vocabulary for the one intervention snatch shows working without enforcement — cheap talk, *a channel changes what each party believes the other will do* — and the ring covering it is red. Two facts sitting adjacent, neither found looking for the other.
+
+**2. The machine describes itself far more materially than the stack rules itself.**
+
+| corpus | none | symbolic | material |
+|---|---:|---:|---:|
+| WR rulings (28) | 2 (7%) | 7 (25%) | 19 (68%) |
+| catalogue (25) | **0** | **2 (8%)** | **23 (92%)** |
+
+The governance layer has a vocabulary of marks — re-arm conditions, HEAD-as-escrow, empirical-or-logical typing, good-news-changes-ordering. **The mechanism layer has almost none.** And one of the catalogue's two symbolic patterns (*Posterior Spread as an Exploration Control*) is a discipline about **not** using a quantity.
+
+**3. The two corpora are inverted, and that's a better diagnosis than neglect.**
+
+```
+WR rulings:  before 12 · at 10 · after 6
+catalogue:   before  5 · at 11 · after 9
+```
+
+The catalogue is heaviest exactly where the rulings are lightest. So **after-the-outcome is richly described and thinly ruled** — nine patterns, six rulings — which is precisely the *built? / holds?* split the mission proposes publishing, and it's where R8's ring lives. Conversely **before-the-choice is heavily ruled and thinly mechanised** — twelve rulings, five patterns — and that's where R2 lives.
+
+**For the paper:** read this way, the catalogue describes **an agent that only ever acts.** All twenty-five moves add, remove, compute or gate; nothing merely *notes*. That's worth saying because it's checkable, it explains a ring distribution, and it names a cheap available class of intervention the system has no pattern for. The gap isn't a criticism of the catalogue's coverage — it's a **coordinate the catalogue doesn't use**.
+
+Same caveat as before: placements are mine from the `Then` clauses, and R8 and R10 are the ones I'd most want you to check.

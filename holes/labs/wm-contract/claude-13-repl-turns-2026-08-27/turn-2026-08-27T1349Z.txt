@@ -1,0 +1,25 @@
+That's a good match — the WRs are the stack's institutions, and each should read as history→action. Let me pull their conclusions and test that.All 28 read as history→action, so the frame holds. Placing them on snatch's two axes.`0985940`. The comparison holds — **all 28 rulings read as *given this history, do this***, which is what a policy is. The war room has been writing policies without calling them that.
+
+Placed on snatch's axes, they give a 9-cell space:
+
+| | **before the choice** | **at the choice set** | **after the outcome** |
+|---|---|---|---|
+| **none** *(channel)* | WR-12, WR-16 | — | — |
+| **symbolic** *(a mark)* | WR-5, WR-15 | WR-7, **WR-26** | WR-9, WR-11, **WR-25** |
+| **material** | 8 rulings | 8 rulings | WR-22, WR-24, **WR-27** |
+
+**before 12 · at-choice-set 10 · after-outcome 6**; **none 2 · symbolic 7 · material 19**.
+
+**Three things it shows.**
+
+**The after-the-outcome column is thinnest — and R5, R8 and R14 all live there.** Six rulings of twenty-eight govern what happens *after* a result. The stack rules heavily on what to build and what to choose, lightly on what to do with an outcome. That's a structural explanation for the ring distribution that doesn't appeal to neglect.
+
+**The channel cell is nearly empty, and R2 sits in it.** Only WR-12 and WR-16 act by opening a channel with no force — the G5 cell. So the stack has almost no vocabulary for *add an observation channel and change nothing else*, which is the one intervention snatch shows working without enforcement.
+
+**And WR-25 *is* `mark-without-force`, already ruled:** *"Let unanchored good news change ordering immediately but leave numerical posteriors unchanged until an artifact supports it."* A mark that changes ordering and moves no posterior — G3 exactly, written down long before we read the game. WR-26 is the same shape at the choice set.
+
+So **my earlier "the stack has no G3" was wrong at the ruling level and right at the implementation level.** Two rulings prescribe mark-without-force; `repair_obligation.clj` is G4-shaped (revert *and* preempt at `##-Inf`); and R5, the ring for WR-25, is red. **The stack has ruled the mechanism it hasn't built.**
+
+That yields one small, ruled, unbuilt thing worth doing: **give `repair_obligation` a G3 mode** — a mark that records without preempting.
+
+Two caveats. The placements are a first pass from one-line conclusions; **WR-5, WR-14 and WR-24 are arguable** (WR-24 plausibly spans two cells, since it demands a replacement discipline *and* a measurement). The grid's value depends on the placement, so it's worth your eye.
