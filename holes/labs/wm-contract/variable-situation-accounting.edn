@@ -1,13 +1,13 @@
 {:schema :wm/variable-situation-accounting-v1,
  :as-of "2026-08-31",
  :authority
- {:contract-git-sha "3aa5a59b0c6a508d72df3f42bc9a10dda7e5e8dd",
+ {:contract-git-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
   :contract-sha256
-  "b41e5def55aaa802035e0ac7585fdff7539e6f60dd15da3e8f7664bd90370e3f",
+  "922487354b48018b87c4eab1c91c2a25834bafb5ab28af22b78775dcdcc760de",
   :glossary-sha256
   "780a64afbdb4a9f47a2e399fd3611f79961b6facbbddac02630895592e867889",
   :witness-registry-sha256
-  "02363082ce816246e07cd8e7e0c8dd53c8036125bb516c2e47673c5ab8be9e43"},
+  "b74c865617285b7d33b8f19a12ae80346211dcb5d45a1f806c93e6a2969150dc"},
  :axes
  {:content-status
   [:named-only
@@ -23,22 +23,6 @@
    :content-status :closed-by-record-negative-space,
    :pointer-status :resolves,
    :pointer-detail {:resolved-title "Bayesian Model Reduction."}}
-  {:name "bayesFactorThreshold",
-   :area :learning,
-   :owner "sec-glossary.tex:60 · P-glossary-mathematics",
-   :content-status :closed-by-record-negative-space,
-   :pointer-status :drifted,
-   :pointer-detail
-   {:resolved-title "Dirichlet concentration parameters.",
-    :reason :line-resolves-to-different-concept}}
-  {:name "softmax",
-   :area :scores,
-   :owner "sec-glossary.tex:39 · P-glossary-mathematics",
-   :content-status :closed-by-record-negative-space,
-   :pointer-status :drifted,
-   :pointer-detail
-   {:resolved-title "Control states $U$ and the policy vocabulary.",
-    :reason :line-resolves-to-different-concept}}
   {:name "bayesianModelReduction",
    :area :learning,
    :owner "sec-glossary.tex:54 · P-glossary-mathematics",
@@ -522,6 +506,22 @@
    :pointer-status :resolves,
    :pointer-detail
    {:resolved-title "Prediction error $\\varepsilon$."}}
+  {:name "softmax",
+   :area :scores,
+   :owner "sec-glossary.tex:39 · P-glossary-mathematics",
+   :content-status :closed-by-record-with-witness,
+   :pointer-status :drifted,
+   :pointer-detail
+   {:resolved-title "Control states $U$ and the policy vocabulary.",
+    :reason :line-resolves-to-different-concept}}
+  {:name "bayesFactorThreshold",
+   :area :learning,
+   :owner "sec-glossary.tex:60 · P-glossary-mathematics",
+   :content-status :closed-by-record-with-witness,
+   :pointer-status :drifted,
+   :pointer-detail
+   {:resolved-title "Dirichlet concentration parameters.",
+    :reason :line-resolves-to-different-concept}}
   {:name "Channel",
    :area :records,
    :owner "P-R2 §solved 1 (Channel)",
@@ -819,8 +819,8 @@
  :counts
  {:rows 126,
   :content
-  {:closed-by-record-negative-space 70,
-   :closed-by-record-with-witness 25,
+  {:closed-by-record-negative-space 68,
+   :closed-by-record-with-witness 27,
    :named-only 9,
    :open-hole 11,
    :proven-against-pinned-source 11},
