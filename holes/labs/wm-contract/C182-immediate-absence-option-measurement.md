@@ -21,9 +21,12 @@ SHA-256 544b6fdf149662bdbf0942e1c8b30d4f2820b397040f1f0663b23331ae729a9e
 
 The 288 candidates are exposure within **two selector decisions**, not 288
 independent decisions. Both records are diagnostic ticks through the stub
-selector, so a third record from Joe's production-path run would improve the
-evidence materially: it would add the first current production selector
-population. It would not, by itself, measure later-tick consequences.
+selector. C186 subsequently established that they are distinct but serially
+dependent states: the second pre-belief is exactly the first post-belief. These
+measurements are therefore **directional immediate-boundary evidence**, not an
+estimate from `n = 288`, or even two independent trials. A production-path
+record would improve the evidence materially by adding the first current live
+selector-seam stratum. It would not, by itself, measure later-tick consequences.
 
 ## Missing sorry pressure
 
@@ -35,7 +38,7 @@ Both records have `:sorry-count-norm {:variant :absent :reason
 | A — abstain/return control | `:abstain :unknown-sorry-pressure` | same |
 | B — continue through branches not inspecting sorry pressure | selects `:learn-action-class/:survey-mission`, recorded rank 144 | same |
 
-Thus the immediate result differs in **2/2 records**: A abstains and B selects.
+Thus the immediate result differs in **2/2 directional diagnostic records**: A abstains and B selects.
 This does not say which is safe, and it does not say what the live strategic
 selector would rank later. It measures exactly the branch-local consequence
 over the retained candidate populations.
@@ -55,7 +58,7 @@ current driver and option A's observed-support-only driver are:
 | `20:32:24.972954701Z` | -0.058013863604 | -0.071218020273 | -0.013204156669 | no | refuse incomplete collection |
 | `20:35:51.187865882Z` | -0.062775435448 | -0.075183402264 | -0.012407966817 | no | refuse incomplete collection |
 
-Option A changes the immediate aggregate in **2/2 records** and its magnitude
+Option A changes the immediate aggregate in **2/2 directional diagnostic records** and its magnitude
 by about 0.0124–0.0132, without changing its sign. Option B refuses both
 collections. The current driver reconstruction agrees exactly with the final
 recorded micro-step driver (error ≤ `1e-12`), so the comparison is against the
