@@ -7,8 +7,9 @@
 ;;   2. Every owning record resolves, via checks/holder-registry.edn, to a holder that
 ;;      is ASSIGNED and LIVE on the Agency roster.
 ;;
-;; Exit 1 on any violation. `--negative` asserts the check can fail (it injects a dead
-;; holder and requires a violation), so a passing run is not vacuous.
+;; Ordinary violations exit 1. `--negative` asserts the check can fail (it injects a
+;; dead holder and requires a violation); rejecting that mutation is a passing control
+;; and exits 0, while a mutation that slips through exits 2.
 (require '[cheshire.core :as json] '[clojure.string :as str] '[babashka.http-client :as http])
 
 (def contract-path "/home/joe/code/mathlib4/DarkTower/WarMachine/holes-contract.json")
@@ -54,8 +55,10 @@
                       :problems (vec (take 6 problems)) :problems-total (count problems)}))
     (when negative?
       (if (seq problems)
-        (do (println "negative control: OK — the check can fail") (System/exit 1))
-        (do (println "negative control: FAILED — injected dead holder was not caught") (System/exit 2))))
+        (do (println "holder-check: PASS negative control rejected exit-convention=0-pass/1-fail") (System/exit 0))
+        (do (println "holder-check: FAIL negative mutation passed exit-convention=0-pass/1-fail") (System/exit 2))))
+    (println (str "holder-check: " (if (empty? problems) "PASS" "FAIL")
+                  " exit-convention=0-pass/1-fail"))
     (System/exit (if (empty? problems) 0 1))))
 
 (when (= *file* (System/getProperty "babashka.file")) (apply -main *command-line-args*))

@@ -49,20 +49,29 @@
   record)
 
 (defn -main [& args]
-  (try
-    (let [negative? (some #{"--negative"} args)
+  (let [negative? (some #{"--negative"} args)]
+   (try
+    (let [
           path (or (some #(when (not= "--negative" %) %) args)
                    (default-record-path))
           record (edn/read-string (slurp (io/file path)))
           record (if negative? (dissoc record :traceWritten) record)]
       (validate! record)
-      (println (str "wm-runs-once-witness: PASS path=" path
-                    " selectorSeam=" (:selectorSeam record)
-                    " preferenceLayers=" (:preferenceLayers record)))
-      (System/exit 0))
+      (if negative?
+        (do (println "wm-runs-once-witness: FAIL negative mutation passed exit-convention=0-pass/1-fail")
+            (System/exit 2))
+        (do (println (str "wm-runs-once-witness: PASS path=" path
+                          " selectorSeam=" (:selectorSeam record)
+                          " preferenceLayers=" (:preferenceLayers record)
+                          " exit-convention=0-pass/1-fail"))
+            (System/exit 0))))
     (catch Exception e
-      (println (.getMessage e))
-      (System/exit 1))))
+      (if negative?
+        (do (println (str "wm-runs-once-witness: PASS negative control rejected finding=" (.getMessage e)
+                          " exit-convention=0-pass/1-fail"))
+            (System/exit 0))
+        (do (println (str (.getMessage e) " exit-convention=0-pass/1-fail"))
+            (System/exit 1)))))))
 
 (when (= *file* (System/getProperty "babashka.file"))
   (apply -main *command-line-args*))

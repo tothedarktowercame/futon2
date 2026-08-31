@@ -60,11 +60,16 @@
                   " | drawn-edges-fired="
                   (:drawn-edges-fired verdict) "/" (:drawn-edges-total verdict))]
     (println line)
-    (when (zero? (:hops verdict))
-      (fail! "wm-route-conformance: FAIL empty-route"))
-    (when (and negative? (pos? (:hops verdict)))
-      (fail! "wm-route-conformance: FAIL negative-control")))
-  (System/exit 0))
+    (if negative?
+      (if (zero? (:hops verdict))
+        (do (println "wm-route-conformance: PASS negative control rejected exit-convention=0-pass/1-fail")
+            (System/exit 0))
+        (do (println "wm-route-conformance: FAIL negative mutation passed exit-convention=0-pass/1-fail")
+            (System/exit 2)))
+      (if (zero? (:hops verdict))
+        (fail! "wm-route-conformance: FAIL empty-route exit-convention=0-pass/1-fail")
+        (do (println "wm-route-conformance: PASS exit-convention=0-pass/1-fail")
+            (System/exit 0))))))
 
 (when (= *file* (System/getProperty "babashka.file"))
   (apply -main *command-line-args*))

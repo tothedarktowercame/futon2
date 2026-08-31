@@ -92,9 +92,12 @@
     (println (pr-str result))
     (if (:negative? opts)
       (if (:pass? result)
-        (do (println "control-organization-check: FAIL negative mutation passed") (System/exit 2))
-        (do (println "control-organization-check: negative control rejected") (System/exit 0)))
-      (when-not (:pass? result) (System/exit 1)))))
+        (do (println "control-organization-check: FAIL negative mutation passed exit-convention=0-pass/1-fail") (System/exit 2))
+        (do (println "control-organization-check: PASS negative control rejected exit-convention=0-pass/1-fail") (System/exit 0)))
+      (do
+        (println (str "control-organization-check: " (if (:pass? result) "PASS" "FAIL")
+                      " exit-convention=0-pass/1-fail"))
+        (when-not (:pass? result) (System/exit 1))))))
 
 (when (= *file* (System/getProperty "babashka.file"))
   (apply -main *command-line-args*))

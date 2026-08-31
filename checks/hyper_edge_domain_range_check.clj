@@ -123,14 +123,18 @@
         enumerated-ranges (count (filter #(= :enumerated (:range-status %)) results))
         unknown-ranges (count (filter #(= :unknown (:range-status %)) results))]
     (doseq [result results] (println (pr-str result)))
-    (println (str "hyper-edge-domain-range-check: ports=" (count results)
+    (println (str "hyper-edge-domain-range-check: "
+                  (if (if negative? (not= passed (count results)) (= passed (count results))) "PASS" "FAIL")
+                  " ports=" (count results)
                   " passed=" passed
                   " domain-enumerated=" enumerated-domains
                   " domain-unknown=" unknown-domains
                   " range-enumerated=" enumerated-ranges
                   " range-unknown=" unknown-ranges
                   " exit-convention=0-pass/1-fail"))
-    (System/exit (if (= passed (count results)) 0 1))))
+    (if negative?
+      (System/exit (if (= passed (count results)) 2 0))
+      (System/exit (if (= passed (count results)) 0 1)))))
 
 (when (= *file* (System/getProperty "babashka.file"))
   (apply -main *command-line-args*))

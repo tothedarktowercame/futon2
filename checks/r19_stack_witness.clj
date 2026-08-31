@@ -58,18 +58,27 @@
     {:layers (count stack) :unfolded (count unfolded)}))
 
 (defn -main [& args]
-  (try
+  (let [negative? (some #{"--negative"} args)]
+   (try
     (let [{:keys [state action opts]} dry-run-fixture
           result (efe/compute-efe state action opts)
           stack (:preference-stack result)
-          stack (if (some #{"--negative"} args)
+          stack (if negative?
                   (filterv #(not= :habit-prior (:layer/id %)) stack)
                   stack)
           {:keys [layers unfolded]} (check-stack! stack)]
-      (println (str "r19-stack-witness: PASS layers=" layers " unfolded=" unfolded)))
+      (if negative?
+        (do (println "r19-stack-witness: FAIL negative mutation passed exit-convention=0-pass/1-fail")
+            (System/exit 2))
+        (println (str "r19-stack-witness: PASS layers=" layers " unfolded=" unfolded
+                      " exit-convention=0-pass/1-fail"))))
     (catch Exception e
-      (println (.getMessage e))
-      (System/exit 1))))
+      (if negative?
+        (do (println (str "r19-stack-witness: PASS negative control rejected finding=" (.getMessage e)
+                          " exit-convention=0-pass/1-fail"))
+            (System/exit 0))
+        (do (println (str (.getMessage e) " exit-convention=0-pass/1-fail"))
+            (System/exit 1)))))))
 
 (when (= *file* (System/getProperty "babashka.file"))
   (apply -main *command-line-args*))

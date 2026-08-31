@@ -65,9 +65,15 @@
                           (validate-instance doc inst)))
                       selected)]
     (doseq [r results] (println (pr-str r)))
-    (println (str "hyper-edge-check: instances=" (count results)
-                  " passed=" (count (filter :pass? results))))
-    (System/exit (if (every? :pass? results) 0 1))))
+    (let [all-pass? (every? :pass? results)
+          control-pass? (if negative? (not all-pass?) all-pass?)]
+      (println (str "hyper-edge-check: " (if control-pass? "PASS" "FAIL")
+                    " instances=" (count results)
+                    " passed=" (count (filter :pass? results))
+                    " exit-convention=0-pass/1-fail"))
+      (if negative?
+        (System/exit (if all-pass? 2 0))
+        (System/exit (if all-pass? 0 1))))))
 
 (when (= *file* (System/getProperty "babashka.file"))
   (apply -main *command-line-args*))
