@@ -391,7 +391,7 @@ express, since `status` is a liveness flag and there is no owner field.
 Joe's structure, and better than my wave-numbered one: **a vertex persists across waves; a wave does not.**
 Four standing delegates replace one session holding all 80 declarations.
 
-    wm-nouns          the R-nodes          18 staged · 5 with records · 13 without
+    wm-nouns          the R-nodes          18 staged · 5 records, 4 intersecting · 14 without
     wm-verbs          the edges            61 distinct · 2 of 22 drawn carry a schema · 8 multi-attested
     wm-organization   the fit              typology of the WHOLE never written as data · 8/13 freehand ports
     wm-evidence       the apex             DOES NOT EXIST — first holder it has ever had
@@ -426,10 +426,46 @@ generated file; write a fragment and merge), and last night's dispatch lessons: 
 not given, stagger, `--mode brief` for messages, and **refusal is a deliverable**.
 
 ### First deliveries
-- **NOUNS-D2** — census the 13 record-less nodes; *not* 13 records. Also holds the `R14→TRACE` finding:
+- **NOUNS-D2** — census the 14 record-less nodes; *not* 14 records. Also holds the `R14→TRACE` finding:
   Figure 4 has no trace/ledger node, which is a missing **noun**.
 - **VERBS-D1** — specify `R2→R7`, the only edge with three independent sources, by pairing.
 - **ORG-D1** — make the typology of the whole into data; `:unclassified` with a reason is the honest
   output, and every classifier must be able to return "no".
 - **APEX-D1** — draft an `EvidenceContract` for one noun and one edge, **for Joe to rule on**. It scores
   3/7 and cannot be automated: naming the acceptance *is* the work.
+
+---
+
+## NOUNS-D2 — gated, and it corrected the commissioner twice *(2026-08-31)*
+
+`88c4bbc`: `holes/labs/wm-contract/noun-census.edn` (14 rows) + `NOUNS-D2-findings.md`.
+
+**What I checked:** the EDN parses; 14 distinct nodes, each with a catalogue line, name and quotation; both
+refusals carry typed statuses in the artefact rather than being silently complied with; carrier candidates
+spread across all four kinds (stack 5, cascade 4, route 3, chain 2) rather than collapsing to one; and I
+opened two cited references — `tripwire.clj:452` is `(defn evaluate-wire` and `wm_scheduled_run.clj:66` is
+`(defn -main`, both exact.
+
+**Correction 1, and I was wrong: the population is 14, not 13.** I wrote "18 staged, 5 with records, 13
+without" — subtracting five records from eighteen staged **without checking the intersection**. The staged
+set is R1–R17 plus R20; **R19 is not in it**, so only four records intersect and 18 − 4 = 14. That is the
+census error class this build has caught three times in others' work, made by me in the packet that
+commissions a census. The delegate recorded it as `:status :refused-count-mismatch` with the arithmetic
+shown, which is the right way to refuse a commissioned number.
+
+**Correction 2: "three carrier kinds" is four.** My packet said three; `BUILD-status.md` says *"chains vs
+cascades vs stacks vs routes"*. The delegate recorded `:refused-arity-mismatch` and — correctly — did not
+invent a partition to fit either number, recording one best candidate plus alternatives per row and
+labelling them *"census hypotheses, not settled types."*
+
+**A finding neither of us commissioned, visible only once the census existed: all 14 record-less nodes are
+implemented.** Every row carries `:implementation {:status :present}` with a `file:line`. So the gap at the
+nouns vertex is **not missing code — it is missing records**: fourteen of the eighteen staged nodes do
+things in Clojure that no problem record describes. That reframes what a node record is for here, and it is
+a better argument for writing them than "we have five and should have eighteen".
+
+**`R14→TRACE` confirmed as a missing noun**, with implementation at `war_machine.clj:4763` and neither
+`control-stages.edn` nor `control-map-edges.edn` carrying a TRACE vertex. Carrier candidate `:route`
+(alternative `:stack` — "a trace records the executed route; an append-only ledger is a stack of such
+records"). Marked `:decision :joe-must-decide-whether-to-add-vertex`. **This is Joe's call**, and it is a
+change to the diagram's nouns, not its edges.
