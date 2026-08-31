@@ -173,11 +173,9 @@ receipt shape; the armed action must remain a split workflow under §0.14 criter
 
 1. Is the proposed split between upward `claim-clause` and downward `requirement`, joined in one record, the
    correct governance contact point?
-2. Must every ratified claim have an independent witness, or may a conformance claim such as R2 admit `:self`
-   evidence when an executable negative control can defeat it? The draft recommends independence be a per-contract
-   requirement, never a universal synonym for evidence.
-3. For R16→R2: rename now to construction observation, build the outward actuator, or both staged. This draft
-   recommends the already-recorded staged choice but does not enact it.
+2. **RESOLVED in APEX-D2 below:** `:self` is an unprocessed observation, not an admissibility verdict.
+3. **RESOLVED in APEX-D2 below:** R16→R2 is both, staged — rename to construction observation now, then build
+   the outward actuator and independent reader.
 4. On ruling, should the first implementation target be EDN + lint, or a Lean `EvidenceContract` projected to
    EDN? No implementation should precede the semantic ruling.
 
@@ -186,3 +184,127 @@ receipt shape; the armed action must remain a split workflow under §0.14 criter
 Joe's answers turn the fields above into acceptance. Then APEX-D2 can define the schema, fixtures, negative
 controls, and lint with typed ports, a named consumer, pinned reads, loud absences, and refusal for every remaining
 decision. Until that ruling, producing a checker would merely encode this author's judgement as a standard.
+
+## APEX-D2 — processing a datum into evidence (2026-08-31)
+
+**Ruling applied.** Decision 2 above is dissolved: `:self` is neither admissible nor inadmissible evidence. It is
+an **unprocessed observation**. R9 forbids self-certification, not self-observation. A producer may emit its own
+datum on a named channel; that datum does not certify its claim. Review, cross-validation, and independent
+reproduction bear on the channel's precision rather than changing the datum into an `:independent` boolean.
+
+Decision 3 is decided **both, staged** by the specification: rename R16→R2 now to the construction observation
+the machine actually emits, then build the outward actuator and independent effect reader required by P-R16.
+The outward step remains operator-armed and split under §0.14 criterion 6.
+
+### Typed processing prefix
+
+This is the pipeline supported by the current closed Lean declarations:
+
+```clojure
+{:datum {:channel Holes.Channel
+         :observation real
+         :producer part-id
+         :producing-part declaration-reference
+         :basis immutable-basis}
+ :belief-mean {:channel Holes.Channel :value real}
+ :prediction-error "Holes.predictionError observation beliefMean"
+ :precision {:type "Holes.PrecisionMap = Channel → NonnegativeReal"
+             :provenance [precision-update-record ...]}
+ :accumulation "Holes.variationalFreeEnergy (fun k => (precision k).value) prediction-error"
+ :result {:kind :precision-weighted-variational-free-energy :value real}}
+```
+
+Precision updates are named operations, not invented arithmetic:
+
+```clojure
+{:operation #{:review :cross-validation :independent-reproduction}
+ :channel Holes.Channel
+ :prior NonnegativeReal
+ :posterior NonnegativeReal
+ :basis immutable-artefact-basis
+ :producer part-id
+ :producing-part declaration-reference
+ :rule rule-reference
+ :consumer :apex/evidence-processor}
+```
+
+All three operations may raise precision only through a cited `:rule`; absence of that rule is a typed refusal.
+No closed Lean declaration currently says **how much** review, cross-validation, or reproduction changes Π, or
+that it must increase it. APEX-D2 therefore names the operations and record shape but does not assign weights.
+
+### The licensing boundary is open
+
+The following tempting composition is **not** currently typed:
+
+```text
+variationalFreeEnergy : (Channel → ℝ) → (Channel → ℝ) → ℝ
+bayesFactorThreshold  : ℝ → Prop
+```
+
+The shared carrier `ℝ` does not establish that the first result is the second function's `deltaF` argument.
+`deltaFReduction` does produce a ΔF-shaped value, but it calls the open `logMultivariateBeta`; and
+`bayesianModelReduction` transforms Dirichlet count lists without a declaration connecting those counts to the
+datum's channel precision, its F value, or a before/after ΔF. BMR is therefore a candidate merge operation, not
+yet a proved merge operator for two `EvidenceContract` sources.
+
+The proposed licensing suffix is recorded, not asserted:
+
+```clojure
+{:merge {:operation "Holes.bayesianModelReduction"
+         :blocked-on [:mapping-evidence-sources-to-dirichlet-counts]}
+ :delta-F {:operation "Holes.deltaFReduction"
+           :blocked-on [:Holes/logMultivariateBeta
+                        :before-after-model-reduction-bridge]}
+ :license {:predicate "Holes.bayesFactorThreshold deltaF"
+           :threshold "deltaF ≤ -3"
+           :blocked-on [:typed-delta-F-from-this-evidence-update]}}
+```
+
+No EIG term occurs. `expectedInformationGain` and `modelUncertaintyAndEIG` remain refused/open pending the
+Outcome, Q(o∣π), and parameter-posterior kernels.
+
+### Worked case — R2 channel census as a self observation
+
+Take the current R2 checker emission “two key-set mismatches” as a datum on a proposed
+`:r2/channel-contract-census` evidence channel. The checker is inside the R2 contract-producing part, so its
+provenance verdict is `:self`; under the ruling that means unprocessed, not rejected.
+
+For a finite worked calculation over the existing fourteen `Channel` constructors, let the observation and
+belief mean differ by `2` on one named channel and agree on the other thirteen. Let an explicitly supplied
+precision map give that channel weight `0.5` and every other channel any nonnegative weight (their errors are
+zero). Then:
+
+```text
+ε_target = 2
+F = ½ × mean_k(Π_k ε_k²)
+  = ½ × ((0.5 × 2²) / 14)
+  = 1/14
+```
+
+This carries the datum through channel → ε → supplied Π → accumulation. It does **not** license the R2 claim:
+
+- the proposed evidence channel is not among the current fourteen observation channels;
+- `BeliefState` is a hole, so the example supplies a mean rather than obtaining one from the model;
+- no ratified precision-update rule derives `0.5` from self provenance, review, or reproduction;
+- no typed bridge turns this F, or a change in it, into the ΔF consumed by `bayesFactorThreshold`.
+
+Consequently the end-to-end result is `:processed-observation`, not `:certified-claim`. This is the executable
+prefix and the honest refusal at its first undefined decision surface.
+
+### Blocked carriers and named consumer
+
+| step | state | blocked on |
+|---|---|---|
+| observation channel and datum | proposed apex record | evidence-channel carrier distinct from or extending WM `Channel` |
+| belief mean | supplied in the worked case | `Holes.BeliefState` |
+| prediction error | closed | — |
+| precision map | closed carrier | ratified update rules for review, cross-validation, independent reproduction |
+| F accumulation | closed | projection `NonnegativeReal.value`, which is already defined |
+| observation likelihood/model | not used by the prefix | `Holes.observationKernel`, `Holes.GenerativeModel` |
+| BMR merge | closed list operation, unconnected | evidence-source → Dirichlet-count interpretation |
+| ΔF computation | body over a hole | `Holes.logMultivariateBeta`; before/after bridge |
+| threshold | closed predicate | a typed ΔF produced by the preceding evidence update |
+
+The named consumer of this draft is Joe for the semantic ruling, then `P-glossary-mathematics` for witness design.
+The first implementable consumer after the bridges are ruled is an apex evidence processor whose output is taken
+up by `checks/contract_lint.clj`; until then, no generated contract or witness-registry binding is warranted.
