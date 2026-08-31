@@ -4,10 +4,10 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C86-ablation, :dispatched-at "2026-08-31T17:00:00Z", :job-id "invoke-1788195576428-5782-b42cb6dc", :expected-by "2026-08-31T17:45:00Z"}
+   :holding nil, :dispatched-at nil, :job-id nil, :expected-by nil}
   {:lane :wm-verbs
-   :holding :C87-r9verdict, :dispatched-at "2026-08-31T17:07:46Z", :job-id "invoke-1788196045904-5788-b9e0c061", :expected-by "2026-08-31T17:52:46Z"}
+   :holding nil, :dispatched-at nil, :job-id nil, :expected-by nil}
   {:lane :wm-organization
    :holding :C91-implement-testing-service, :dispatched-at "2026-08-31T17:33:59Z", :job-id "invoke-1788197618181-5801-4e9c78d5", :expected-by "2026-08-31T18:18:59Z"}
   {:lane :wm-evidence
-   :holding :C88-evidence-index, :dispatched-at "2026-08-31T17:09:23Z", :job-id "invoke-1788196141702-5790-2302d700", :expected-by "2026-08-31T17:54:23Z"}]}
+   :holding nil, :dispatched-at nil, :job-id nil, :expected-by nil}]}
