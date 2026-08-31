@@ -390,7 +390,12 @@ No licensing verdict was run. A numerical `ΔF` before those choices would answe
 not specify; a Lean result while `logMultivariateBeta` is `sorry` would not witness that hole. **APEX-D4
 withdraws the requested rulings and the proposed suffix below:** BMR is not a claim-licensing device at all.
 
-## APEX-D4 — claim-licensing device is absent (2026-08-31)
+## APEX-D4 — claim-licensing device is absent (2026-08-31) — **WITHDRAWN by APEX-D5**
+
+**Supersession notice, 2026-08-31:** the block below is retained as the dated record of a wrong frame. Its
+`:licensing-device :absent` conclusion is withdrawn. It demanded a verdict-returning device that Active
+Inference does not use; APEX-D5 replaces adjudication with belief update. The three candidate analyses remain
+useful boundaries, with D5 correcting the claim that perceptual F has no consumer.
 
 **Typed finding:**
 
@@ -445,3 +450,87 @@ This is an absence report, not a design proposal. APEX-D4 does not select Bayesi
 formal proof, replication policy, review protocol, or any mixture of them. Selecting one is the operator decision
 now sent to Joe. Until then, “gated” remains a workflow judgement rather than a formally licensed claim, and the
 `EvidenceContract` draft must not imply otherwise.
+
+## APEX-D5 — claims are operational hypotheses updated by evidence (2026-08-31)
+
+**Withdrawal.** APEX-D4's `:licensing-device :absent` is withdrawn, not satisfied. Its falsifier required a
+declaration from typed evidence to `licensed / refused / unknown`; that requirement came from an adjudication
+frame rather than Active Inference. The theory's answer is not a verdict. A claim carries a posterior, and new
+evidence updates that posterior.
+
+The corrected apex flow is:
+
+```clojure
+{:claim
+ {:kind :operational-hypothesis
+  :channel evidence-channel
+  :belief {:mean real
+           :variance positive-real}
+  :basis immutable-basis}
+
+ :evidence
+ {:kind :observation
+  :channel evidence-channel
+  :value observation-value
+  :producer part-id
+  :producing-part declaration-reference
+  :basis immutable-basis}
+
+ :model
+ {:observation-kernel "P(observation | state)"
+  :precision {:value nonnegative-real
+              :provenance [precision-update-record ...]}}
+
+ :processing
+ {:error "predictionError observation belief.mean"
+  :present-fit "variationalFreeEnergy precision error"
+  :update "posterior belief after applying the observation model and precision"
+  :output {:mean real :variance positive-real :basis immutable-basis}}
+
+ :consumer {:id operational-hypothesis-store
+            :next-use "the next prediction, action evaluation, or apex report"}}
+```
+
+This is R1 at the meta-level: evidence does not flip a claim from false to licensed; it moves an operational
+hypothesis and changes its uncertainty. Mean records the current estimate. Variance records how settled it is.
+Self-produced evidence may enter as an observation at low precision; review, cross-validation, and independent
+reproduction are precision-setting operations. Strong corroboration can narrow posterior variance; weak
+self-observation should move it little. Multiple sources combine through repeated updates rather than evidence
+counts or a universal threshold.
+
+The exact update is not invented here. The glossary states the mean step
+`μ ← μ + α·Π·ε` (`sec-glossary.tex:15`), the variance as an exponential moving average of squared miss plus a
+sensor-noise floor (`sec-glossary.tex:9`), and R3 requires a trusted-error update with non-zero uncertainty floor
+(`sec-catalog.tex:196`). `predictionError` and the present-fit F are already closed (`Holes.lean:461–472`). F is
+the mismatch the belief update works to reduce; it is not a verdict input.
+
+### Formal blockers — held by wm-nouns, not defined here
+
+The apex cannot operate until these existing glossary holes are discharged:
+
+| declaration | required content | existing falsifier |
+|---|---|---|
+| `Holes.BeliefState` (`Holes.lean:458–459`) | a per-channel belief carrier with mean and variance, capable of representing an operational hypothesis and its uncertainty | **a channel lacks its mean or variance** |
+| `Holes.observationKernel` (`Holes.lean:455–456`) | the normalised Markov kernel `A : State ⇝ Observation` through which evidence updates the posterior | **some state's output masses are not normalised** |
+
+These declarations belong to `P-glossary-mathematics` and the wm-nouns holder. APEX-D5 neither defines nor edits
+them. Their discharge must preserve the update semantics already stated by the glossary/R3, not merely replace
+the two `sorry` bodies with opaque carrier types. There is presently no separate Lean `beliefUpdate` declaration;
+that is an interface fact for wm-nouns to account for while discharging the two named holes, not a third apex
+definition silently supplied here.
+
+### Three standing non-solutions, corrected
+
+1. Perceptual F is **not** a claim verdict and must not feed a licensing threshold. It is nevertheless consumed
+   conceptually by the belief-update process as the mismatch to minimise; APEX-D4's “nothing consumes it” sentence
+   is withdrawn. The formal update route waits on the two holes above.
+2. BMR/`deltaFReduction` remains R17 concept merging, not belief update or claim adjudication. The 6903/6903
+   count-mode result remains the standing example of a threshold incapable of rejecting on that corpus.
+3. Expected information gain remains about predicted posterior uncertainty reduction under a policy and is
+   refused until Outcome, Q(o∣π), and parameter-posterior kernels exist. It is not needed for present evidence
+   to update an operational hypothesis.
+
+APEX-D3's seven proposed Dirichlet rulings remain withdrawn. APEX-D4's question to Joe is also withdrawn: no new
+claim-licensing device is requested. The next work is the glossary delivery discharging `BeliefState` and
+`observationKernel`; after that, the apex can instantiate one evidence-bearing operational hypothesis without
+inventing an adjudication rule.
