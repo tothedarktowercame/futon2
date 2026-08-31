@@ -4,10 +4,10 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C117-narrow-F1-F3, :dispatched-at "2026-08-31T18:31:04Z", :job-id "invoke-1788201040826-5866-f69018e9", :expected-by "2026-08-31T19:16:04Z"}
+   :holding :C119-modelUncertaintyAndEIG, :dispatched-at "2026-08-31T18:41:28Z", :job-id "invoke-1788201645142-5873-efa9ab42", :expected-by "2026-08-31T19:26:28Z"}
   {:lane :wm-verbs
-   :holding :C110-selector-dryrun, :dispatched-at "2026-08-31T18:09:20Z", :job-id "invoke-1788199738867-5844-53a41b6a", :expected-by "2026-08-31T18:54:20Z"}
+   :holding :C120-precision-sites, :dispatched-at "2026-08-31T18:41:28Z", :job-id "invoke-1788201671454-5874-72585d5d", :expected-by "2026-08-31T19:26:28Z"}
   {:lane :wm-organization
-   :holding :C115-narrow-receipt, :dispatched-at "2026-08-31T18:20:06Z", :job-id "invoke-1788200384368-5859-d6f9941b", :expected-by "2026-08-31T19:05:06Z"}
+   :holding :C121-gate-refresh, :dispatched-at "2026-08-31T18:41:28Z", :job-id "invoke-1788201675096-5875-dde38eaa", :expected-by "2026-08-31T19:26:28Z"}
   {:lane :wm-evidence
-   :holding :C113-avoidance-safety, :dispatched-at "2026-08-31T18:16:47Z", :job-id "invoke-1788200183875-5854-2f03840f", :expected-by "2026-08-31T19:01:47Z"}]}
+   :holding :C118-tristate-avoidance, :dispatched-at "2026-08-31T18:41:28Z", :job-id "invoke-1788201641525-5872-03f611b4", :expected-by "2026-08-31T19:26:28Z"}]}
