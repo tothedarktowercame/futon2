@@ -23,16 +23,72 @@
               (recur))))))
     (format "%064x" (java.math.BigInteger. 1 (.digest digest)))))
 
+(defn sha256-bytes [bytes]
+  (let [digest (java.security.MessageDigest/getInstance "SHA-256")]
+    (.update digest bytes)
+    (format "%064x" (java.math.BigInteger. 1 (.digest digest)))))
+
+(defn process [{:keys [dir bytes?]} & argv]
+  (let [pb (ProcessBuilder. (into-array String argv))
+        _ (when dir (.directory pb (io/file dir)))
+        p (.start pb)
+        out (if bytes?
+              (let [stream (.getInputStream p)
+                    sink (java.io.ByteArrayOutputStream.)]
+                (io/copy stream sink)
+                (.toByteArray sink))
+              (slurp (.getInputStream p)))
+        err (slurp (.getErrorStream p))
+        exit (.waitFor p)]
+    {:exit exit :out out :err err}))
+
+(defn git-context [path]
+  (let [file (.getCanonicalFile (io/file path))
+        root-result (process {:dir (.getParent file)} "git" "rev-parse" "--show-toplevel")]
+    (when (zero? (:exit root-result))
+      (let [root (.trim ^String (:out root-result))
+            relative (str (.relativize (.toPath (io/file root)) (.toPath file)))]
+        {:root root :relative relative}))))
+
+(defn historical-pin [path wanted-sha]
+  (when-let [{:keys [root relative]} (git-context path)]
+    (let [history (process {:dir root} "git" "log" "--format=%H" "--" relative)]
+      (when (zero? (:exit history))
+        (some (fn [commit]
+                (let [blob (process {:dir root :bytes? true} "git" "show" (str commit ":" relative))]
+                  (when (and (zero? (:exit blob))
+                             (= wanted-sha (sha256-bytes (:out blob))))
+                    commit)))
+              (remove empty? (.split (.trim ^String (:out history)) "\\n")))))))
+
+(defn pin-diagnosis [{:keys [id path sha256]}]
+  (cond
+    (not (.isFile (io/file path)))
+    {:pin id :state :UNAVAILABLE :error :absent :path path}
+
+    (= sha256 (sha256-file path))
+    {:pin id :state :CURRENT :path path}
+
+    :else
+    (if-let [base (historical-pin path sha256)]
+      (let [{:keys [root relative]} (git-context path)
+            changes (process {:dir root} "git" "log" "--format=%H %s"
+                             (str base "..HEAD") "--" relative)
+            commits (if (zero? (:exit changes))
+                      (vec (remove empty? (.split (.trim ^String (:out changes)) "\\n")))
+                      [])]
+        {:pin id :state :PIN_BEHIND :error :pin-behind :path path
+         :pinned-commit base :spine-changing-commits commits
+         :distinguishable-cause? false
+         :reason :git-proves-content-change-not-landing-intent})
+      {:pin id :state :STALE_UNATTRIBUTED :error :stale :path path
+       :reason :pinned-content-not-found-in-path-history})))
+
 (defn validate [record]
   (let [defs (into {} (map (juxt :id identity) (:definitions record)))
         ports (into {} (map (juxt :id identity) (:interfaces record)))
-        pin-errors
-        (mapcat (fn [{:keys [id path sha256]}]
-                  (cond
-                    (not (.isFile (io/file path))) [{:pin id :error :absent :path path}]
-                    (not= sha256 (sha256-file path)) [{:pin id :error :stale :path path}]
-                    :else []))
-                (:source-pins record))
+        pin-states (mapv pin-diagnosis (:source-pins record))
+        pin-errors (filter :error pin-states)
         missing-defs (remove #(contains? defs %) required-definition-ids)
         missing-ports (remove #(contains? ports %) required-interface-ids)
         unowned-gaps
@@ -56,28 +112,57 @@
      :interfaces (count ports)
      :underpowered (count (filter #(= :underpowered (:effect %)) (vals ports)))
      :missing-wires (count (filter #(= :missing-wire (:effect %)) (vals ports)))
+     :pin-states pin-states
      :errors errors}))
 
+(defn prior-spine-sha [record]
+  (let [{:keys [path]} (some #(when (= :lean-spine (:id %)) %) (:source-pins record))
+        {:keys [root relative]} (git-context path)
+        history (process {:dir root} "git" "log" "--format=%H" "--" relative)]
+    (some (fn [commit]
+            (let [blob (process {:dir root :bytes? true} "git" "show" (str commit ":" relative))]
+              (when (and (zero? (:exit blob))
+                         (not= (sha256-file path) (sha256-bytes (:out blob))))
+                (sha256-bytes (:out blob)))))
+          (remove empty? (.split (.trim ^String (:out history)) "\\n")))))
+
 (defn -main [& args]
-  (let [negative? (some #{"--negative-control"} args)
-        path (or (first (remove #{"--negative-control"} args)) default-path)
+  (let [negative? (some #{"--negative-control" "--negative-pin-behind"} args)
+        pin-negative? (some #{"--negative-pin-behind"} args)
+        path (or (first (remove #{"--negative-control" "--negative-pin-behind"} args)) default-path)
         record (edn/read-string (slurp path))
-        record (if negative?
+        record (cond
+                 pin-negative?
+                 (let [prior (prior-spine-sha record)]
+                   (when-not prior
+                     (binding [*out* *err*]
+                       (println "q-interface-completeness: cannot construct historical spine mutation"))
+                     (System/exit 1))
+                   (update record :source-pins
+                           (fn [pins] (mapv #(if (= :lean-spine (:id %))
+                                              (assoc % :sha256 prior) %) pins))))
+                 negative?
                  (update record :interfaces
                          (fn [rows]
                            (mapv #(if (= :Q/producer-to-risk (:id %))
                                     (dissoc % :next-action)
                                     %)
                                  rows)))
-                 record)
+                 :else record)
         result (validate record)
-        accepted? (if negative? (not (:pass? result)) (:pass? result))]
+        expected-pin-behind? (some #(= :PIN_BEHIND (:state %)) (:pin-states result))
+        accepted? (if pin-negative?
+                    (and (not (:pass? result)) expected-pin-behind?)
+                    (if negative? (not (:pass? result)) (:pass? result)))]
     (println "q-interface-completeness:"
              (if accepted? "PASS" "FAIL")
              (pr-str result)
-             (if negative?
-               "negative-control=missing-remediation-rejected"
+             (if pin-negative?
+               "negative-control=historical-spine-change-remains-red"
+               (if negative?
+                 "negative-control=missing-remediation-rejected"
                "mode=positive")
+               )
              "exit-convention=0-pass/1-fail/2-mutation-slipped")
     (System/exit (if accepted? 0 (if negative? 2 1)))))
 
