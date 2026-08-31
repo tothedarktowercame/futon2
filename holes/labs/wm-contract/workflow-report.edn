@@ -2,8 +2,8 @@
  [{:lane :wm-nouns,
    :completed 6,
    :dispatched 7,
-   :in-flight "C236",
-   :holding :C236-next-glossary-term,
+   :in-flight "C240",
+   :holding :C240-next-glossary-term,
    :blocked 1}
   {:lane :wm-verbs,
    :completed 4,
@@ -20,8 +20,8 @@
   {:lane :wm-evidence,
    :completed 7,
    :dispatched 8,
-   :in-flight "C237",
-   :holding :C237-q-pin-coupling,
+   :in-flight "C241",
+   :holding :C241-repository-gate,
    :blocked 1}],
  :schema :wm/workflow-report-v1,
  :since "2026-08-30T00:00:00Z",
@@ -46,8 +46,8 @@
    :sha256-prefix "546fbd90b6754035"},
   :lane-registry
   {:path "futon2/holes/labs/wm-contract/lane-registry.edn",
-   :revision "ad8bdc0",
-   :sha256-prefix "dbff8d21bc4f5d67",
+   :revision "46b81eb",
+   :sha256-prefix "8453c229b0f0534f",
    :as-of "2026-08-31T15:39:14.434945104Z"},
   :decisions
   {:path "futon2/holes/problems/DECISIONS-PENDING.md",
@@ -74,7 +74,7 @@
   :owner-repairs 8,
   :open-dispatched 1,
   :pending-decisions 12},
- :as-of "2026-08-31T23:26:19.574795143Z",
+ :as-of "2026-08-31T23:29:03.295775807Z",
  :attribution
  {:systematic-from "C209",
   :cases-attributed 31,
@@ -113,4 +113,4 @@
    "C234"],
   :note
   "per-lane counts cover only cases whose ledger heading names a lane. Attribution is sparse across the early campaign and continuous from :systematic-from onward, so these counts are not a census of the campaign; earlier cases appear in :cases-in-ledger without a lane."},
- :frontier 238}
+ :frontier 241}
