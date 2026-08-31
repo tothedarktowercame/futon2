@@ -4,7 +4,7 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C185-defined-unbound, :dispatched-at "2026-08-31T21:19:10Z", :job-id "invoke-1788211146262-6038-d817ece9", :expected-by "2026-08-31T22:04:10Z"}
+   :holding :C188-bind-seven, :dispatched-at "2026-08-31T21:27:05Z", :job-id "invoke-1788211621378-6046-b16f1e91", :expected-by "2026-08-31T22:12:05Z"}
   {:lane :wm-verbs
    :holding :C187-live-selection-no-act, :dispatched-at "2026-08-31T21:26:02Z", :job-id "invoke-1788211558860-6045-9ef7f1d1", :expected-by "2026-08-31T22:11:02Z"}
   {:lane :wm-organization
