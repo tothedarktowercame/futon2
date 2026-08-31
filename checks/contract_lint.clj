@@ -357,6 +357,11 @@
                                             (= :unit (:conditioning-domain %))
                                             (= {:good [1 2] :bad [1 2]} (:mass %))
                                             (true? (get-in % [:excluded :vertex-local-pragmatic-cost])))
+   "PredictiveOutcomeKernelWitness" #(and (= :predictive-outcome-kernel-reference/v1 (:schema %))
+                                             (= [:inspect :repair] (:policies %))
+                                             (= {:inspect {:support [:clear] :mass {:clear 1}}
+                                                 :repair {:support [:fixed] :mass {:fixed 1}}}
+                                                (:rows %)))
    "HaveWantArrowWitness" have-want-arrow-witness?
    "FoldWitness" fold-witness?
    "FoldEscrowRecordWitness" fold-escrow-record-witness?

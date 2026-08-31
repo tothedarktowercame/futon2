@@ -1,0 +1,8 @@
+{:schema :predictive-outcome-kernel-reference/v1
+ :basis "sec-glossary.tex:21-29 — Q(o|pi) is a normalized outcome distribution for each policy"
+ :kind :hand-derived-deterministic-policy-rows
+ :policies [:inspect :repair]
+ :rows {:inspect {:support [:clear] :mass {:clear 1}}
+        :repair {:support [:fixed] :mass {:fixed 1}}}
+ :excluded {:unconditional-outcome-distribution true
+            :softmax-policy-vector true}}
