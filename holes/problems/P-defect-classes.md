@@ -224,6 +224,8 @@ record era; negative controls remove a field required in that record's own era.
 
 ## 9. A record that says two things
 
+**C79 instance (2026-08-31).** `checks/preemptive_repair_lint.clj` contained both the live detector and its four deliberately bad `negative-text` specimens. Once the file became tracked, the detector reported those specimens as current corpus defects. An explicit specimen-region marker now distinguishes executable negative controls from the live corpus without exempting the `checks/` path. Found by rerunning every positive lint after C77 was committed; prevented by a narrow, line-preserving specimen boundary and a control proving the boundary does not disable direct mutation runs.
+
 **Shape.** Current state is duplicated in a summary/table and amendment/prose, or a
 dispatch record has no completion transition; different readers obtain opposite
 answers from the same artefact.

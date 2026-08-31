@@ -13,5 +13,14 @@
                [{:repo :fixture :path "test/x.clj"
                  :text "(is (= 3 (count timestamp-records))) ; era :v2"}]))))
 
+(deftest specimen-region-is-explicit-and-line-preserving
+  (let [raw (str "before\nPREEMPTIVE-REPAIR-SPECIMENS-BEGIN\n"
+                 "findings=3; process exit 0\n"
+                 "PREEMPTIVE-REPAIR-SPECIMENS-END\nafter")
+        masked (lint/mask-specimens raw)]
+    (is (= (count (re-seq #"\n" raw)) (count (re-seq #"\n" masked))))
+    (is (empty? (lint/acceptance-findings
+                 [{:repo :fixture :path "checks/specimen.clj" :text masked}])))))
+
 (let [{:keys [fail error]} (run-tests)]
   (System/exit (if (zero? (+ fail error)) 0 1)))

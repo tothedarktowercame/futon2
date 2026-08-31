@@ -10,6 +10,11 @@
             :p4ng "/home/joe/code/p4ng"})
 
 (def text-exts #{"clj" "bb" "sh" "py" "md" "edn" "tex"})
+(def specimen-region #"(?s)PREEMPTIVE-REPAIR-SPECIMENS-BEGIN.*?PREEMPTIVE-REPAIR-SPECIMENS-END")
+(defn mask-specimens [text]
+  ;; Preserve newlines so findings after a specimen retain their real line.
+  (str/replace text specimen-region
+               #(str/replace % #"[^\n]" " ")))
 (defn- tracked [root]
   (-> (shell {:out :string :err :string} "git" "-C" root "ls-files") :out
       str/split-lines))
@@ -18,7 +23,7 @@
     (when (and (fs/regular-file? p)
                (contains? text-exts (fs/extension p))
                (< (fs/size p) 2000000))
-      (slurp (str p)))))
+      (mask-specimens (slurp (str p))))))
 (defn- corpus []
   (for [[repo root] repos, rel (tracked root), :let [text (readable root rel)], :when text]
     {:repo repo :root root :path rel :text text}))
@@ -115,12 +120,14 @@
                :stale-baseline stale-baseline-findings :absence absence-findings
                :era era-findings :record record-findings})
 
+;; PREEMPTIVE-REPAIR-SPECIMENS-BEGIN
 (def negative-text
   {:acceptance "findings=3; process exit 0"
    :artefact "#!/bin/sh\nif [ \"$1\" = --stage ]; then echo published; fi"
    :stale-baseline "(is (= 42 (count live-contract)))"
    :era "(is (= 14 (count timestamp-records)))"
    :record ":ratification [:x] :disagreements [:x]"})
+;; PREEMPTIVE-REPAIR-SPECIMENS-END
 
 (defn run [kind negative?]
   (let [rows (if negative?

@@ -17,6 +17,10 @@ The six lints share `checks/preemptive_repair_lint.clj` but have separate canoni
 
 The 18 absence findings are grouped sites from the pinned C12 census, not a new recount of source tokens. They remain honest red debt. The other five classes are extinct in the scanned tracked corpus at this pin; their injected controls demonstrate that zero is not caused by an inert scanner. In particular, preserved dated amendment prose is outside the `CURRENT TABLE END` current-status boundary and fixed-size test fixtures are not live-population baselines.
 
+### C79 amendment — detector specimens are not corpus findings
+
+After C77 was committed, four lints found their own `negative-text` specimens. This was not a repository regression: an untracked implementation file was absent from C77's tracked-file corpus, then became visible after commit. The reusable exemption is an explicit `PREEMPTIVE-REPAIR-SPECIMENS-BEGIN` / `PREEMPTIVE-REPAIR-SPECIMENS-END` region. The loader masks only that region while preserving newlines; it does not exempt `checks/` or the containing file. Direct negative-control rows bypass corpus loading and therefore still exercise the specimens. This is class 9's detector/fixture form: one file truthfully contains both the detector and examples of the state it rejects.
+
 ## Canonical invocations
 
 For each stem below, run `bb -cp . checks/preemptive_<stem>_lint.clj` and append `--negative` for its mutation:
