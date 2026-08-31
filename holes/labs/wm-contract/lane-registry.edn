@@ -8,6 +8,6 @@
   {:lane :wm-verbs
    :holding :C193-cancellation, :dispatched-at "2026-08-31T21:36:53Z", :job-id "invoke-1788212209430-6057-e8d8b12a", :expected-by "2026-08-31T22:21:53Z"}
   {:lane :wm-organization
-   :holding :C189-run-readiness, :dispatched-at "2026-08-31T21:30:22Z", :job-id "invoke-1788211818842-6051-56e5c770", :expected-by "2026-08-31T22:15:22Z"}
+   :holding :C194-receipt-freshness, :dispatched-at "2026-08-31T21:39:14Z", :job-id "invoke-1788212349595-6059-300ad919", :expected-by "2026-08-31T22:24:14Z"}
   {:lane :wm-evidence
    :holding :C191-sequential-replay, :dispatched-at "2026-08-31T21:34:34Z", :job-id "invoke-1788212070622-6053-e95feab4", :expected-by "2026-08-31T22:19:34Z"}]}
