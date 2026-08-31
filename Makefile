@@ -1,5 +1,10 @@
 .PHONY: ci workspace-gate pre-merge status status-control certify-run run-readiness run-readiness-control run-readiness-tree-control run-readiness-resolution-control
 
+# C216: `make` exits 2 for any failing recipe, and 2 means "mutation slipped"
+# in the 0-pass/1-fail/2-mutation-slipped convention these scripts print.
+# Each wrapped target therefore reports its script's own exit code on a
+# named line; read that line, not make's.
+
 # Hermetic repository boundary: futon2 sources, tests, and build only.
 ci:
 	clojure -T:build ci
@@ -7,7 +12,9 @@ ci:
 # Four-repository reviewer boundary. Missing sibling repositories are loud
 # failures in the checks; they are never silently skipped.
 workspace-gate:
-	bb -cp . checks/wm_workspace_gate.clj
+	@bb -cp . checks/wm_workspace_gate.clj; c=$$?; \
+	 echo "workspace-gate: script-exit=$$c (house convention; make reports 2 for any nonzero)"; \
+	 exit $$c
 
 # Required War Machine pre-merge/reviewer command. Keep the two boundaries
 # explicit so ordinary futon2 CI remains usable in an isolated checkout.
@@ -18,10 +25,14 @@ pre-merge:
 # Generated, non-short-circuiting operational report. New/unaccepted red is
 # nonzero; exact, referenced, expiring accepted red remains visible at exit 0.
 status:
-	python3 scripts/wm_status_report.py
+	@python3 scripts/wm_status_report.py; c=$$?; \
+	 echo "status: script-exit=$$c (house convention; make reports 2 for any nonzero)"; \
+	 exit $$c
 
 status-control:
-	python3 scripts/wm_status_report.py --source-control
+	@python3 scripts/wm_status_report.py --source-control; c=$$?; \
+	 echo "status-control: script-exit=$$c (house convention; make reports 2 for any nonzero)"; \
+	 exit $$c
 
 # Certify one completed operator/diagnostic run without guessing "latest".
 # Usage: make certify-run RUN_ID=<uuid>
@@ -32,13 +43,21 @@ certify-run:
 # Read-only operator preflight. It runs checks and reads receipts/roster state;
 # it never starts a tick or dispatches an agent.
 run-readiness:
-	python3 scripts/run_readiness.py
+	@python3 scripts/run_readiness.py; c=$$?; \
+	 echo "run-readiness: script-exit=$$c (house convention; make reports 2 for any nonzero)"; \
+	 exit $$c
 
 run-readiness-control:
-	python3 scripts/run_readiness.py --negative-reviewer
+	@python3 scripts/run_readiness.py --negative-reviewer; c=$$?; \
+	 echo "run-readiness-control: script-exit=$$c (house convention; make reports 2 for any nonzero)"; \
+	 exit $$c
 
 run-readiness-tree-control:
-	python3 scripts/run_readiness.py --tree-control
+	@python3 scripts/run_readiness.py --tree-control; c=$$?; \
+	 echo "run-readiness-tree-control: script-exit=$$c (house convention; make reports 2 for any nonzero)"; \
+	 exit $$c
 
 run-readiness-resolution-control:
-	python3 scripts/run_readiness.py --resolution-control
+	@python3 scripts/run_readiness.py --resolution-control; c=$$?; \
+	 echo "run-readiness-resolution-control: script-exit=$$c (house convention; make reports 2 for any nonzero)"; \
+	 exit $$c
