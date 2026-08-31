@@ -673,15 +673,33 @@
      :recorded-then-substituted (count recorded-then-substituted)}))
 
 (defn usage []
-  (str "usage: bb checks/absent_is_loud_lint.clj [--files a.clj,b.clj] [--out findings.md]\n"
+  (str "usage: bb checks/absent_is_loud_lint.clj [--negative] [--files a.clj,b.clj] [--out findings.md]\n"
        "default scope scans futon2/src, futon2/scripts, futon2/checks, futon3/checks, futon0/scripts, futon3a/src"))
 
+(defn parse-args [args]
+  (loop [xs args out {}]
+    (if (empty? xs)
+      out
+      (if (= "--negative" (first xs))
+        (recur (rest xs) (assoc out :negative? true))
+        (do
+          (when-not (second xs) (throw (ex-info "arguments must be --key value pairs" {})))
+          (recur (nnext xs) (assoc out (keyword (subs (first xs) 2)) (second xs))))))))
+
 (defn -main [& args]
-  (let [opts (apply hash-map (mapcat (fn [[k v]] [(keyword (subs k 2)) v]) (partition 2 args)))
-        files (if-let [files-opt (:files opts)]
-                (vec (remove str/blank? (str/split files-opt #",")))
+  (let [{:keys [negative?] :as opts} (parse-args args)
+        files (cond
+                negative?
+                ["/home/joe/code/futon2/checks/fixtures/absent_is_loud/positive.clj"]
+
+                (:files opts)
+                (vec (remove str/blank? (str/split (:files opts) #",")))
+
+                :else
                 (default-scope-files))
-        scope-label (if (:files opts) (str/join "," (map rel files)) "default scope")
+        scope-label (cond negative? "semantic negative fixture"
+                          (:files opts) (str/join "," (map rel files))
+                          :else "default scope")
         report (scan! files)
         markdown (render-findings report scope-label)
         positive (fixture-report ["/home/joe/code/futon2/checks/fixtures/absent_is_loud/positive.clj"])
@@ -706,7 +724,15 @@
     (println verdict-line)
     (println "Positive control:" (pr-str positive))
     (println "Negative control:" (pr-str negative))
-    (System/exit (if (seq (:violations report)) 1 0))))
+    (if negative?
+      (if (= 4 (count (:violations report)))
+        (do (println "absent-is-loud-lint: PASS semantic silent-absence fixture rejected exit-convention=0-pass/1-fail")
+            (System/exit 0))
+        (do (println "absent-is-loud-lint: FAIL semantic silent-absence fixture slipped exit-convention=0-pass/1-fail")
+            (System/exit 2)))
+      (do (println (str "absent-is-loud-lint: " (if (seq (:violations report)) "FAIL" "PASS")
+                        " exit-convention=0-pass/1-fail"))
+          (System/exit (if (seq (:violations report)) 1 0))))))
 
 (when (= *file* (System/getProperty "babashka.file"))
   (apply -main *command-line-args*))

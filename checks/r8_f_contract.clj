@@ -317,6 +317,25 @@
                     :or {trace-dir default-trace-dir boundary default-boundary}}]
   (analyze-corpus (read-corpus trace-dir) boundary))
 
+(defn negative-era-corpus [corpus boundary]
+  (let [index (first
+               (keep-indexed
+                (fn [index {:keys [file-date value]}]
+                  (when (and (< file-date boundary)
+                             (nil? (:variational-free-energy value))
+                             (nil? (:selection-gain value))
+                             (= :g-map (free-energy-shape value)))
+                    index))
+                (:records corpus)))]
+    (if (some? index)
+      (let [record (nth (:records corpus) index)
+            target {:file (:file record) :form (:form record)
+                    :timestamp (get-in record [:value :timestamp])}]
+        {:corpus (update-in corpus [:records index :value]
+                            assoc :variational-free-energy 0.0)
+         :target target})
+      {:corpus corpus :target nil})))
+
 (defn- option-unit-literal [present?]
   (if present? "some ()" "none"))
 
@@ -387,38 +406,64 @@
                 (str (fs/strip-ext (fs/file-name report-path)) ".lean"))))
 
 (defn- parse-args [args]
-  (when (odd? (count args))
-    (throw (ex-info "arguments must be --key value pairs" {})))
-  (into {} (map (fn [[key value]]
-                  [(keyword (str/replace key #"^--" "")) value]))
-        (partition 2 args)))
+  (loop [xs args out {}]
+    (if (empty? xs)
+      out
+      (if (= "--negative" (first xs))
+        (recur (rest xs) (assoc out :negative? true))
+        (do
+          (when-not (second xs) (throw (ex-info "arguments must be --key value pairs" {})))
+          (recur (nnext xs)
+                 (assoc out (keyword (str/replace (first xs) #"^--" ""))
+                        (second xs))))))))
 
 (defn -main [& args]
-  (let [opts (parse-args args)
+  (let [{:keys [negative?] :as opts} (parse-args args)
         report-path (:report opts)]
     (when-not report-path
       (binding [*out* *err*]
-        (println "usage: r8_f_contract.clj [--trace-dir DIR] --report FILE"))
+        (println "usage: r8_f_contract.clj [--negative] [--trace-dir DIR] --report FILE"))
       (System/exit 2))
-    (let [report (try
-                   (lint-paths (cond-> opts (:boundary opts)
-                                       (update :boundary parse-long)))
+    (let [boundary (if (:boundary opts) (parse-long (:boundary opts)) default-boundary)
+          mutation (when negative?
+                     (negative-era-corpus
+                      (read-corpus (or (:trace-dir opts) default-trace-dir)) boundary))
+          report (try
+                   (if negative?
+                     (assoc (analyze-corpus (:corpus mutation) boundary)
+                            :negative-mutation (:target mutation))
+                     (lint-paths (assoc opts :boundary boundary)))
                    (catch Exception exception
                      {:summary {:pass? false :files 0 :forms 0
                                 :boundary default-boundary :failures 1}
                       :checks [{:check :checker :reason :checker-error
                                 :message (.getMessage exception)}]}))]
-      (when-let [parent (fs/parent report-path)] (fs/create-dirs parent))
-      (spit report-path (str (pr-str report) "\n"))
-      (when (get-in report [:summary :pass?])
-        (let [corpus (read-corpus (or (:trace-dir opts) default-trace-dir))]
-          (spit (sibling-lean-path report-path)
-                (lean-fixture-text report (:records corpus)))))
+      (when-not negative?
+        (when-let [parent (fs/parent report-path)] (fs/create-dirs parent))
+        (spit report-path (str (pr-str report) "\n"))
+        (when (get-in report [:summary :pass?])
+          (let [corpus (read-corpus (or (:trace-dir opts) default-trace-dir))]
+            (spit (sibling-lean-path report-path)
+                  (lean-fixture-text report (:records corpus))))))
       (println "trace files:" (get-in report [:summary :files]))
       (println "trace forms:" (get-in report [:summary :forms]))
       (println "dispositions:" (get-in report [:r8CensusWmTrace :counts]))
       (println "content pin:" (get-in report [:content-pin :sha256]))
-      (System/exit (if (get-in report [:summary :pass?]) 0 1)))))
+      (if negative?
+        (let [target (:negative-mutation report)
+              violations (get-in report [:r8EraBoundary :violations])
+              caught? (and target
+                           (some #{target} (:stored-without-gain violations))
+                           (some #{target} (:stored-not-controller violations))
+                           (some #{target} (:stored-before-boundary violations)))]
+          (if caught?
+            (do (println "r8-f-contract: PASS negative era mutation rejected exit-convention=0-pass/1-fail")
+                (System/exit 0))
+            (do (println "r8-f-contract: FAIL negative era mutation slipped exit-convention=0-pass/1-fail")
+                (System/exit 2))))
+        (do (println (str "r8-f-contract: " (if (get-in report [:summary :pass?]) "PASS" "FAIL")
+                          " exit-convention=0-pass/1-fail"))
+            (System/exit (if (get-in report [:summary :pass?]) 0 1)))))))
 
 (when (= *file* (System/getProperty "babashka.file"))
   (apply -main *command-line-args*))

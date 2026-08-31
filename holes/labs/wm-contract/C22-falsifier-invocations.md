@@ -54,3 +54,63 @@ is unchanged by the mutation mode.
 
 The predicate-focused assertions in those files still run; this delivery does not refresh moving-corpus
 snapshots under the cover of adding mutation capability.
+
+## `absent_is_loud_lint`
+
+```sh
+bb -cp . checks/absent_is_loud_lint.clj
+bb -cp . checks/absent_is_loud_lint.clj --negative
+```
+
+The existing fixtures are genuine asserted controls: the bad fixture must produce exactly 4 violations,
+the repaired fixture exactly 0, and the repaired fixture must contain exactly one
+recorded-then-substituted case. `--negative` exposes the bad fixture as the semantic input under test.
+Observed exits: `0/0`.
+
+## `r8_f_contract`
+
+```sh
+bb -cp . checks/r8_f_contract.clj --report /tmp/r8-f-contract.edn
+bb -cp . checks/r8_f_contract.clj --negative --report /tmp/r8-f-contract-negative-unused.edn
+```
+
+Mutation: select a pre-boundary g-map record with neither stored F nor selection gain, then add stored F.
+The checker must identify that exact record under `:stored-without-gain`, `:stored-not-controller`, and
+`:stored-before-boundary`. Observed exits: `1/0`; the current live corpus is independently red at 54 files,
+799 forms, and dispositions `755/39/5` against the recorded `755/32/5`. Negative mode writes no report or
+Lean fixture.
+
+## C28 decision — staleness must fail qualification
+
+`contract_lint`'s top-level qualification verdict should **not** tolerate stale witness bindings. A stale
+hole is not evidence that the contract is structurally malformed, but it is disqualifying evidence for a
+gate claiming that the formal spine is currently bound to runs. The implementation should expose two
+named verdicts: structural validity may remain green, while qualification is green only with zero stale
+bindings; the CLI status used by build gates must be the strict qualification verdict.
+
+Consequence: switching today would deliberately turn current green gates red until the 16 stale bindings
+are refreshed or retired. That is the correct signal, but it requires an announced gate migration rather
+than being smuggled into C22's mutation-only edits. C28 decides the semantics here; the migration is a
+separate bounded implementation unit.
+
+## C35 decision — stable snapshot tests plus a live invariant gate
+
+Do not refresh the four live-corpus literals. Split their two jobs:
+
+1. A committed, compact snapshot fixture tests parsing, channel classification, content-pin computation,
+   and Lean emission with exact counts. It changes only when the fixture's intended semantics change.
+2. The live-corpus gate asserts invariants, not corpus size: every record has the declared observation-key
+   set, no new failure class appears, and every failure is reported with identity. File/form counts and the
+   content pin remain emitted evidence, not expected literals.
+
+Deriving a new expected count from each run would ratify whatever the run produced and recreate the
+vacuity. Keeping literal live counts guarantees chronic red. The split preserves both reproducible unit
+coverage and an honestly red operational monitor; today that live monitor remains red on 2 of 799 forms.
+
+The same construction exists in `r8_f_contract_test`: its current-baseline group now has 7 stale
+assertions at 54/799 and 39 stored-F while the predicate-focused groups remain applicable. C35 therefore
+governs both R2 and R8 live-corpus tests; fixing only R2 would leave its twin chronically stale.
+
+The C22 mutation establishes that `r2ContractCensus` itself can reject a missing channel. Its historical
+vacuity came from the population supplied to it, not from an always-true predicate. Those are different
+failure modes and should no longer be cited interchangeably.
