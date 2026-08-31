@@ -1,6 +1,8 @@
 {:witnesses ["r2ContractCensusWmTrace" "wmTraceR2"],
  :contract-sha "1b09974aed1ce66dad0b728a6acc64c7b864b31e",
  :run-sha "4eb4f584f811ab6037a1a3cc706ccfe4571d6734",
+ :freshness :pinned-git-v1,
+ :live-invariant {:check "checks/r2_channel_contract.clj" :evidence :live-report},
  :check
  {:repo "futon2",
   :path "checks/r2_channel_contract.clj",

@@ -1,6 +1,8 @@
 {:witnesses "preferenceStackLiveRecorded",
  :contract-sha "eec8279cf7b2c841f386894116e6aa627869a75c",
  :run-sha "03c149d0b39b5f1fbe9640b6c7aa63f4fbe21b36",
+ :freshness :pinned-git-v1,
+ :live-invariant {:check "checks/r19_stack_witness.clj" :evidence :emitted-by-check},
  :check
  {:repo "futon2",
   :path "checks/r19_stack_witness.clj",

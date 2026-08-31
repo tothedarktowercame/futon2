@@ -1,6 +1,8 @@
 {:witnesses "wmRunsOnce",
  :contract-sha "eec8279cf7b2c841f386894116e6aa627869a75c",
  :run-sha "b45885508aa7842e1818afe464867d571c7df0c5",
+ :freshness :pinned-git-v1,
+ :live-invariant {:check "checks/wm_runs_once_witness.clj" :evidence :emitted-by-check},
  :check
  {:repo "futon2",
   :path "checks/wm_runs_once_witness.clj",

@@ -6,6 +6,9 @@
  :check
  {:repo "futon3", :path "checks/find_snatch.clj", :entrypoint "-main"},
  :fixture {:repo "futon3", :path "checks/find-snatch.edn"},
+ :freshness :pinned-git-v1,
+ :acceptance :uninspectable,
+ :live-invariant {:check "checks/find_snatch.clj" :status :blocked-by-C60},
  :run-sha "594127059d6a31c5b21f5d34ebfac5b14b1ad993",
  :contract-sha "32b929692533cf0d6294fbb7a5937f9199c1552c",
  :result :passed,

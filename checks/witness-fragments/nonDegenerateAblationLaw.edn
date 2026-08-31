@@ -4,6 +4,8 @@
   :path "checks/ablate_g_snatch.clj",
   :entrypoint "-main"},
  :fixture {:repo "futon3", :path "checks/ablation-snatch.edn"},
+ :freshness :pinned-git-v1,
+ :live-invariant {:check "checks/ablate_g_snatch.clj" :evidence :emitted-by-check},
  :run-sha "636496449066aed88c00e99492bd351cef0f0821",
  :contract-sha "32b929692533cf0d6294fbb7a5937f9199c1552c",
  :result :passed,

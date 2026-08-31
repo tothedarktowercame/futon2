@@ -9,6 +9,8 @@
   :entrypoint "-main"},
  :fixture
  {:repo "futon2", :path "holes/labs/wm-contract/R9-D2-report.edn"},
+ :freshness :pinned-git-v1,
+ :live-invariant {:check "checks/r9_independence.clj" :evidence :emitted-by-check},
  :run-sha "732f4d748f08154457d93916d96ab0be0b7f760c",
  :contract-sha "1b09974aed1ce66dad0b728a6acc64c7b864b31e",
  :result :passed,

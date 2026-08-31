@@ -44,15 +44,19 @@
    "findF2Receipted"
    "findF3NonSelfCertifying"
    "findF4Falsifiable"],
+  :freshness :pinned-git-v1,
+  :contract-sha "32b929692533cf0d6294fbb7a5937f9199c1552c",
+  :run-sha "594127059d6a31c5b21f5d34ebfac5b14b1ad993",
   :check
   {:repo "futon3",
    :path "checks/find_snatch.clj",
    :entrypoint "-main"},
-  :fixture {:repo "futon3", :path "checks/find-snatch.edn"},
-  :run-sha "594127059d6a31c5b21f5d34ebfac5b14b1ad993",
-  :contract-sha "32b929692533cf0d6294fbb7a5937f9199c1552c",
+  :acceptance :uninspectable,
+  :recorded-at "2026-08-30T16:23:00Z",
+  :live-invariant
+  {:check "checks/find_snatch.clj", :status :blocked-by-C60},
   :result :passed,
-  :recorded-at "2026-08-30T16:23:00Z"}
+  :fixture {:repo "futon3", :path "checks/find-snatch.edn"}}
  {:witnesses "logMultivariateBeta",
   :check
   {:repo "futon2",
@@ -66,16 +70,20 @@
   :result :passed,
   :recorded-at "2026-08-31T23:50:00Z"}
  {:witnesses "nonDegenerateAblationLaw",
+  :freshness :pinned-git-v1,
+  :contract-sha "32b929692533cf0d6294fbb7a5937f9199c1552c",
+  :run-sha "636496449066aed88c00e99492bd351cef0f0821",
   :check
   {:repo "futon3",
    :path "checks/ablate_g_snatch.clj",
    :entrypoint "-main"},
-  :fixture {:repo "futon3", :path "checks/ablation-snatch.edn"},
-  :run-sha "636496449066aed88c00e99492bd351cef0f0821",
-  :contract-sha "32b929692533cf0d6294fbb7a5937f9199c1552c",
+  :recorded-at "2026-08-30T16:23:00Z",
+  :live-invariant
+  {:check "checks/ablate_g_snatch.clj", :evidence :emitted-by-check},
   :result :passed,
-  :recorded-at "2026-08-30T16:23:00Z"}
+  :fixture {:repo "futon3", :path "checks/ablation-snatch.edn"}}
  {:witnesses "preferenceStackLiveRecorded",
+  :freshness :pinned-git-v1,
   :contract-sha "eec8279cf7b2c841f386894116e6aa627869a75c",
   :run-sha "03c149d0b39b5f1fbe9640b6c7aa63f4fbe21b36",
   :check
@@ -87,9 +95,12 @@
   :note
   "R19-D2b witnesses the preference-stack emission added by ccd06ce; the inline dry-run fixture and executable missing-layer falsifier live in the check.",
   :recorded-at "2026-08-31T03:45:00Z",
+  :live-invariant
+  {:check "checks/r19_stack_witness.clj", :evidence :emitted-by-check},
   :result :passed,
   :fixture {:repo "futon2", :path "checks/r19_stack_witness.clj"}}
  {:witnesses ["r2ContractCensusWmTrace" "wmTraceR2"],
+  :freshness :pinned-git-v1,
   :contract-sha "1b09974aed1ce66dad0b728a6acc64c7b864b31e",
   :run-sha "4eb4f584f811ab6037a1a3cc706ccfe4571d6734",
   :check
@@ -101,10 +112,13 @@
   :note
   "R2-D3 (codex-1, 4eb4f58): elaborated by the owner at the sha (git show), exit 0; census = 2 over the 792-entry wmTraceR2 literal over the named Channel inductive; pin c9add16a under the ruled method, identical to R8-D3's; regenerate reproduces both files; the pin's limit stated by the builder: identical enumeration, not correct filter",
   :recorded-at "2026-08-30T17:20:00Z",
+  :live-invariant
+  {:check "checks/r2_channel_contract.clj", :evidence :live-report},
   :result :passed,
   :fixture
   {:repo "futon2", :path "holes/labs/wm-contract/R2-D2-report.edn"}}
  {:witnesses ["r8CensusWmTrace" "r8EraBoundary" "wmTraceR8"],
+  :freshness :pinned-git-v1,
   :contract-sha "acfb3b13b379457061ccce7b95bfa9054e5bd5fd",
   :run-sha "10826eecbc7101db55c56476a93ad3c246c2f82f",
   :check
@@ -116,6 +130,8 @@
   :note
   "R8-D3 (codex-12, 639ca75): R8-D3-report.lean elaborates, exit 0; regenerate reproduces both artefacts; census (755,32,5); era 760/32, unknown 0, violations 0/0/0; pin c9add16a under the ruled method; bound by claude-15 at the owner gate",
   :recorded-at "2026-08-30T17:40:00Z",
+  :live-invariant
+  {:check "checks/r8_f_contract.clj", :evidence :live-report},
   :result :passed,
   :fixture
   {:repo "futon2", :path "holes/labs/wm-contract/R8-D3-report.edn"}}
@@ -124,19 +140,23 @@
    "r9WmPerRowDeclarations"
    "r9TwoRunCensus"
    "r9VerdictConsultsChecker"],
+  :freshness :pinned-git-v1,
+  :contract-sha "1b09974aed1ce66dad0b728a6acc64c7b864b31e",
+  :run-sha "732f4d748f08154457d93916d96ab0be0b7f760c",
   :check
   {:repo "futon2",
    :path "checks/r9_independence.clj",
    :entrypoint "-main"},
-  :fixture
-  {:repo "futon2", :path "holes/labs/wm-contract/R9-D2-report.edn"},
-  :run-sha "732f4d748f08154457d93916d96ab0be0b7f760c",
-  :contract-sha "1b09974aed1ce66dad0b728a6acc64c7b864b31e",
-  :result :passed,
-  :recorded-at "2026-08-30T16:45:00Z",
   :note
-  "R9-D2 (codex-8, 732f4d7): R9-D2-report.lean elaborates with 0 errors / 0 sorries — the four holes discharged by decide over the transcribed VerdictTables; bound by claude-15 at the owner gate"}
+  "R9-D2 (codex-8, 732f4d7): R9-D2-report.lean elaborates with 0 errors / 0 sorries — the four holes discharged by decide over the transcribed VerdictTables; bound by claude-15 at the owner gate",
+  :recorded-at "2026-08-30T16:45:00Z",
+  :live-invariant
+  {:check "checks/r9_independence.clj", :evidence :emitted-by-check},
+  :result :passed,
+  :fixture
+  {:repo "futon2", :path "holes/labs/wm-contract/R9-D2-report.edn"}}
  {:witnesses "wmRunsOnce",
+  :freshness :pinned-git-v1,
   :contract-sha "eec8279cf7b2c841f386894116e6aa627869a75c",
   :run-sha "b45885508aa7842e1818afe464867d571c7df0c5",
   :check
@@ -148,6 +168,9 @@
   :note
   "WM-RUN2 rebinds wmRunsOnce to the amended TickRunRecord at eec8279cf7: scripts/futon2/run_tick_once.clj now records split store/sample basis fields and the route-bearing receipt from one cold-JVM on-demand tick; on this seat the shared futon3c selector was not on the futon2 runtime classpath, so the run recorded selectorSeam stub:first-ranked-authorized-mission and routed around the lane_futility bb blocker with clojure -M.",
   :recorded-at "2026-08-30T20:39:14Z",
+  :live-invariant
+  {:check "checks/wm_runs_once_witness.clj",
+   :evidence :emitted-by-check},
   :result :passed,
   :fixture
   {:repo "futon2",

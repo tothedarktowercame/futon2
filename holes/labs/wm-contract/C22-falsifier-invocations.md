@@ -263,3 +263,21 @@ as consumer and pins the ledger bytes.
 Observed positive/negative exits: `0/0`. The positive census is 24 current rows, 24 distinct obligations,
 24 closure-verified, 0 failures. The negative control changes one current row to `still-open` in memory and
 is rejected as `:current-status`; the dated history is not mutated.
+
+## C57 — witness binding snapshot/live split
+
+```sh
+AUTH=$(python3 -c 'import json; print(json.load(open("/home/joe/code/mathlib4/DarkTower/WarMachine/holes-contract.json"))["source"]["git-sha"])')
+bb -cp . checks/contract_lint.clj --strict --contract /home/joe/code/mathlib4/DarkTower/WarMachine/holes-contract.json --registry checks/witness-registry.edn --report /tmp/contract-lint-strict.edn --authority "$AUTH"
+bb -cp . checks/contract_lint.clj --negative-snapshot --contract /home/joe/code/mathlib4/DarkTower/WarMachine/holes-contract.json --registry checks/witness-registry.edn --report /tmp/contract-lint-negative-unused.edn --authority "$AUTH"
+bb scripts/merge_witnesses.bb --check
+```
+
+Bindings marked `:freshness :pinned-git-v1` read their evidence at the binding's own `:run-sha`; unrelated
+contract or live-corpus growth no longer makes that snapshot stale. Each fragment names the live invariant
+that emits current evidence. The semantic negative replaces one pinned commit with an unavailable commit
+and must produce `:fixture-drift`; exit 0 means that mutation was rejected, while exit 2 means it slipped.
+
+The four `findF*` bindings deliberately carry `:acceptance :uninspectable` under C60. A readable snapshot
+therefore does not qualify them. Their state is reported separately from freshness, preventing the split
+from laundering a non-rejecting acceptance into a fresh witness.

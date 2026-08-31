@@ -19,6 +19,20 @@
                            "git" "-C" (str (fs/path repo-root repo))
                            "log" "-1" "--format=%H" "--" path)))))
 
+(defn- pinned-fixture [{:keys [repo path]} git-sha]
+  (let [result (shell {:out :string :err :string :continue true}
+                      "git" "-C" (str (fs/path repo-root repo))
+                      "show" (str git-sha ":" path))]
+    (when-not (zero? (:exit result))
+      (throw (ex-info "pinned witness snapshot is unavailable"
+                      {:repo repo :path path :git-sha git-sha})))
+    (edn/read-string (:out result))))
+
+(defn- pinned-fixture-readable? [{:keys [repo path]} git-sha]
+  (zero? (:exit (shell {:out :string :err :string :continue true}
+                       "git" "-C" (str (fs/path repo-root repo))
+                       "cat-file" "-e" (str git-sha ":" path)))))
+
 (defn ablation-table? [x]
   (let [rows (:ablation x)
         ablated (filter #(= :ablated (:status %)) rows)]
@@ -215,10 +229,21 @@
               (fn [d]
                 (let [b (bindings (:name d))
                       evidence (:evidence d)
-                      contract-stale? (and b (not= (:contract-sha b) (:git-sha source)))
-                      fixture-stale? (and b (not= (:run-sha b) (sha-fn (:fixture b))))
+                      snapshot? (= :pinned-git-v1 (:freshness b))
+                      snapshot-readable? (when snapshot?
+                                           (pinned-fixture-readable? (:fixture b) (:run-sha b)))
+                      contract-stale? (and b (not snapshot?)
+                                           (not= (:contract-sha b) (:git-sha source)))
+                      fixture-stale? (and b
+                                          (if snapshot?
+                                            (not snapshot-readable?)
+                                            (not= (:run-sha b) (sha-fn (:fixture b)))))
                       stale? (or contract-stale? fixture-stale?)
-                      shape (when b (shape-result evidence (:fixture b) read-fixture))
+                      fixture-reader (if snapshot?
+                                       #(pinned-fixture % (:run-sha b))
+                                       read-fixture)
+                      shape (when b (shape-result evidence (:fixture b) fixture-reader))
+                      acceptance-inspectable? (not= :uninspectable (:acceptance b))
                       judgement
                       (cond
                         (= "closed" (:kind d)) :closed-by-record
@@ -226,13 +251,17 @@
                         (nil? evidence) :refused-implementation
                         (nil? b) :unwitnessed
                         stale? :stale
+                        (not acceptance-inspectable?) :acceptance-uninspectable
                         (= :failed (:result b)) :witness-failed
                         (= :wrong-shape shape) :wrong-shape
                         (= :conformant shape) :conformant
                         (= :shape-check-not-implemented shape) :witnessed
                         :else :unwitnessed)]
                   (cond-> (assoc (select-keys d [:name :kind :owner :holder :evidence])
-                                 :judgement judgement :shape-check shape)
+                                 :judgement judgement :shape-check shape
+                                 :freshness-scheme (or (:freshness b) :live-v0)
+                                 :live-invariant (:live-invariant b)
+                                 :acceptance-inspectable? acceptance-inspectable?)
                     stale? (assoc :stale-reasons
                                   (cond-> []
                                     contract-stale? (conj :contract-drift)
@@ -251,15 +280,19 @@
         ;; Freshness is independent of judgement precedence: an authority failure
         ;; must not make stale bindings disappear from the qualification report.
         stale-rows (filterv #(seq (:stale-reasons %)) rows)
+        uninspectable-rows (filterv #(false? (:acceptance-inspectable? %)) rows)
         structural-valid? (and (empty? errors) (not (contains? counts :wrong-authority)))
-        bindings-fresh? (empty? stale-rows)]
+        bindings-fresh? (empty? stale-rows)
+        bindings-inspectable? (empty? uninspectable-rows)]
     {:summary {:pass? structural-valid?
                :authority authority :counts counts
                :qualification
                {:structural-valid? structural-valid?
                 :bindings-fresh? bindings-fresh?
-                :strict-pass? (and structural-valid? bindings-fresh?)
+                :bindings-inspectable? bindings-inspectable?
+                :strict-pass? (and structural-valid? bindings-fresh? bindings-inspectable?)
                 :stale-declarations (mapv :name stale-rows)
+                :uninspectable-declarations (mapv :name uninspectable-rows)
                 :stale-remediation-counts
                 (into (sorted-map) (frequencies (map :stale-remediation stale-rows)))}}
      :owners owners :declarations rows :errors errors}))
@@ -272,17 +305,18 @@
   (loop [xs args out {}]
     (if (empty? xs)
       out
-      (if (contains? #{"--negative" "--strict"} (first xs))
+      (if (contains? #{"--negative" "--negative-snapshot" "--strict"} (first xs))
         (recur (rest xs) (assoc out (keyword (str (subs (first xs) 2) "?")) true))
         (do
           (when-not (second xs) (throw (ex-info "arguments must be flag/value pairs" {})))
           (recur (nnext xs) (assoc out (keyword (subs (first xs) 2)) (second xs))))))))
 
 (defn -main [& args]
-  (let [{:keys [report negative? strict?] :as opts} (args-map args)]
+  (let [{:keys [report negative? negative-snapshot? strict?] :as opts} (args-map args)]
     (when-not (every? opts [:contract :registry :report :authority])
       (throw (ex-info "usage: [--negative] --contract JSON --registry EDN --report EDN --authority SHA" {})))
-    (let [result (try (if negative?
+    (let [negative-mode? (or negative? negative-snapshot?)
+          result (try (cond negative?
                         ;; Semantic mutation: preserve the contract's valid JSON shape but
                         ;; sever its authority pin. The lint exists in part to reject a
                         ;; generated contract that is not from the named authority.
@@ -291,34 +325,49 @@
                                                         "mutation/not-the-authority")
                                     :registry (read-edn (:registry opts))
                                     :authority (:authority opts)})
-                        (lint-file opts))
+                        negative-snapshot?
+                        (let [registry (read-edn (:registry opts))
+                              i (first (keep-indexed #(when (= :pinned-git-v1 (:freshness %2)) %1)
+                                                     registry))]
+                          (lint-data {:contract (read-json (:contract opts))
+                                      :registry (assoc-in registry [i :run-sha]
+                                                          "mutation/pinned-snapshot-missing")
+                                      :authority (:authority opts)}))
+                        :else (lint-file opts))
                       (catch Exception e
                         {:summary {:pass? false :counts {}}
                          :owners [] :declarations []
                          :errors [{:error :lint-exception :message (.getMessage e)}]}))]
       ;; A negative control never overwrites the caller's positive report.
-      (when-not negative? (spit report (str (pr-str result) "\n")))
+      (when-not negative-mode? (spit report (str (pr-str result) "\n")))
       (doseq [{:keys [owner declared-with-body declared-with-sorry]} (:owners result)]
         (println owner "declared-with-body" declared-with-body)
         (println owner "declared-with-sorry" declared-with-sorry))
       (doseq [[j n] (get-in result [:summary :counts])]
         (println (name j) n))
-      (let [{:keys [structural-valid? bindings-fresh? strict-pass?
-                    stale-declarations stale-remediation-counts]}
+      (let [{:keys [structural-valid? bindings-fresh? bindings-inspectable? strict-pass?
+                    stale-declarations uninspectable-declarations stale-remediation-counts]}
             (get-in result [:summary :qualification])]
         (println "structural-valid" structural-valid?)
         (println "bindings-fresh" bindings-fresh?)
+        (println "bindings-inspectable" bindings-inspectable?)
         (println "strict-qualification" strict-pass?)
         (when (seq stale-declarations)
           (println "strict-stale-declarations" (str/join "," stale-declarations))
-          (println "strict-stale-remediation" (pr-str stale-remediation-counts))))
-      (if negative?
-        (if (and (not (get-in result [:summary :pass?]))
-                 (pos? (get-in result [:summary :counts :wrong-authority] 0)))
-          (do (println "contract-lint: PASS negative authority mutation rejected exit-convention=0-pass/1-fail")
-              (System/exit 0))
-          (do (println "contract-lint: FAIL negative authority mutation slipped exit-convention=0-pass/1-fail")
-              (System/exit 2)))
+          (println "strict-stale-remediation" (pr-str stale-remediation-counts)))
+        (when (seq uninspectable-declarations)
+          (println "strict-uninspectable-declarations" (str/join "," uninspectable-declarations))))
+      (if negative-mode?
+        (let [rejected? (if negative-snapshot?
+                          (pos? (get-in result [:summary :counts :stale] 0))
+                          (and (not (get-in result [:summary :pass?]))
+                               (pos? (get-in result [:summary :counts :wrong-authority] 0))))
+              label (if negative-snapshot? "pinned snapshot" "authority")]
+          (if rejected?
+            (do (println "contract-lint: PASS negative" label "mutation rejected exit-convention=0-pass/1-fail/2-mutation-slipped")
+                (System/exit 0))
+            (do (println "contract-lint: FAIL negative" label "mutation slipped exit-convention=0-pass/1-fail/2-mutation-slipped")
+                (System/exit 2))))
         (let [pass? (if strict?
                       (get-in result [:summary :qualification :strict-pass?])
                       (get-in result [:summary :pass?]))]

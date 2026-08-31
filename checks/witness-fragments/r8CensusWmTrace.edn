@@ -1,6 +1,8 @@
 {:witnesses ["r8CensusWmTrace" "r8EraBoundary" "wmTraceR8"],
  :contract-sha "acfb3b13b379457061ccce7b95bfa9054e5bd5fd",
  :run-sha "10826eecbc7101db55c56476a93ad3c246c2f82f",
+ :freshness :pinned-git-v1,
+ :live-invariant {:check "checks/r8_f_contract.clj" :evidence :live-report},
  :check
  {:repo "futon2",
   :path "checks/r8_f_contract.clj",
