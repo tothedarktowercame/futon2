@@ -163,12 +163,13 @@
      :drawn-edges-total (count drawn)
      :unmapped-hops unmapped}))
 
-(defn- tick-run-record [started-at store-basis sample result selector-seam trace-written?]
+(defn- tick-run-record [run-id started-at store-basis sample result selector-seam trace-written?]
   (let [input-status (:input-status result)
         preference-stack (:preference-stack result)
         route (assemble-route (:wm/route result))
         verdict (route-verdict route)]
-    {:startedAt started-at
+    {:run/id run-id
+     :startedAt started-at
      :storeBasisCount (:count store-basis)
      :storeBasisMaxAt (:max-at store-basis)
      :entriesRead (long (:entries-read sample))
@@ -193,6 +194,7 @@
 
 (defn- run-tick-once* [days]
   (let [started-at (str (Instant/now))
+        run-id (str (java.util.UUID/randomUUID))
         date-str (today-date-string)
         trace-path (trace-path-for-date date-str)
         before-trace (trace-stat trace-path)
@@ -214,7 +216,7 @@
         trace-written? (and (nil? (:trace-write-failed result))
                             after-trace
                             (not= before-trace after-trace))
-        record (tick-run-record started-at store-basis sample result selector-seam trace-written?)
+        record (tick-run-record run-id started-at store-basis sample result selector-seam trace-written?)
         receipt-path (receipt-path-for-date date-str)]
     (write-receipt! receipt-path record)
     {:days days

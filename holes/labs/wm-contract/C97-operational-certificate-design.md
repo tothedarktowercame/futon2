@@ -8,7 +8,7 @@ The topology authority is `p4ng/aif-control-map-paper.svg`, pinned at SHA-256 `5
 
 The certificate records:
 
-1. explicit `:run/id` when present, otherwise the SHA-256 of exact record bytes, plus `:startedAt`;
+1. explicit `:run/id` when present, otherwise the SHA-256 of exact record bytes, plus `:startedAt`; `:identity-kind` records `:recorded-run-id` or `:content-sha256-fallback`;
 2. both topology hashes and whether they match;
 3. every run-record hop classified `:original`, `:measured`, or `:undeclared`;
 4. separate undeclared traversal and declared-but-unexercised populations;
@@ -28,5 +28,9 @@ bb -cp . checks/wm_operational_certificate.clj \
 ```
 
 Append `--negative` and use a distinct output path for the undeclared-hop falsifier. It exits 0 only when the emitted certificate has `:verdict :fail`; a falsely certified mutation exits 2. Normal failures exit 1 after writing the certificate.
+
+Append `--negative-run-id` for the identity-binding control. It tampers only
+the certificate ID and exits 0 only when comparison with the source run record
+rejects the certificate.
 
 Gate results: checker positive exit 0; undeclared-hop negative exit 0 with a written failing certificate; 3 focused tests / 9 assertions green; strict contract qualification PASS/exit 0 at the contract's own `.source["git-sha"]` authority; futon2 1,027 tests / 6,166 assertions green. The unchanged futon3 suite was last run at 248 tests / 1,518 assertions, green, immediately before this futon2-only delivery.

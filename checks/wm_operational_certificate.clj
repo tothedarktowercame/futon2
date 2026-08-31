@@ -29,12 +29,22 @@
        (false? (:native-thread-exhaustion r))
        (= 0 (:command-exit r))))
 
+(defn run-identity [run-bytes run]
+  (if-let [run-id (:run/id run)]
+    {:id run-id :identity-kind :recorded-run-id}
+    {:id (sha256-bytes run-bytes) :identity-kind :content-sha256-fallback}))
+
+(defn certificate-matches-run? [run-bytes certificate]
+  (let [run (edn/read-string (String. run-bytes "UTF-8"))]
+    (= (run-identity run-bytes run)
+       (select-keys (:run certificate) [:id :identity-kind]))))
+
 (defn certificate [run-bytes resource negative?]
   (let [run (edn/read-string (String. run-bytes "UTF-8"))
         route (cond-> (vec (:route run))
                 negative? (conj {:fromNode "R99" :toNode "R100"
                                  :via "negative-control/undeclared-hop"}))
-        {:keys [original measured all]} (topology)
+        {:keys [original measured]} (topology)
         traversed (mapv (fn [hop]
                           (let [p (hop-pair hop)]
                             (assoc hop :topology/layer
@@ -50,13 +60,12 @@
         route-present? (seq route)
         run-time? (string? (:startedAt run))
         resources-clean? (resource-clean? resource)
+        identity (run-identity run-bytes run)
         pass? (boolean (and route-present? run-time? topology-pinned?
                             (empty? undeclared) resources-clean?))]
     {:certificate/schema 1
      :certificate/generated-at (str (java.time.Instant/now))
-     :run {:id (or (:run/id run) (sha256-bytes run-bytes))
-           :identity-kind (if (:run/id run) :tick-run-record-id :content-sha256)
-           :started-at (:startedAt run)}
+     :run (assoc identity :started-at (:startedAt run))
      :topology {:artifact "p4ng/aif-control-map-paper.svg"
                 :content-sha256 svg-hash :expected-sha256 expected-svg-sha256
                 :edge-data "p4ng/empirics-futon/control-map-edges.edn"
@@ -72,7 +81,8 @@
                  {:original (vec (sort (remove traversed-pairs original)))
                   :measured (vec (sort (remove traversed-pairs measured)))}}
      :resource-status resource
-     :checks {:run-identity-present? (boolean (or (:run/id run) (seq run-bytes)))
+     :checks {:run-identity-present? (boolean (:id identity))
+              :run-identity-source (:identity-kind identity)
               :run-timestamp-present? run-time?
               :route-present? (boolean route-present?)
               :topology-pin-valid? topology-pinned?
@@ -80,29 +90,42 @@
               :resource-status-clean? resources-clean?}
      :verdict (if pass? :pass :fail)}))
 
+(def boolean-flags #{"--negative" "--negative-run-id"})
+
 (defn parse-args [args]
   (loop [xs args out {}]
     (if-let [x (first xs)]
-      (if (= x "--negative") (recur (rest xs) (assoc out :negative? true))
+      (if (boolean-flags x) (recur (rest xs) (assoc out (keyword (subs x 2)) true))
           (recur (nnext xs) (assoc out (keyword (subs x 2)) (second xs))))
       out)))
 
 (defn main [args]
-  (let [{:keys [run resource negative?] output-path :certificate} (parse-args args)
+  (let [{:keys [run resource negative? negative-run-id] output-path :certificate} (parse-args args)
         run-bytes (java.nio.file.Files/readAllBytes (.toPath (io/file run)))
         resource-data (when resource (edn/read-string (slurp resource)))
-        cert (certificate run-bytes resource-data negative?)]
+        generated (certificate run-bytes resource-data negative?)
+        cert (cond-> generated
+               negative-run-id (assoc-in [:run :id] "mutation/not-the-recorded-run"))
+        identity-matches? (certificate-matches-run? run-bytes cert)]
     (when output-path
       (io/make-parents output-path)
       (spit output-path (with-out-str (pprint/pprint cert))))
     (println (pr-str (dissoc cert :traversal)))
-    (if negative?
+    (cond
+      negative-run-id
+      (if-not identity-matches?
+        (do (println "wm-operational-certificate: PASS run-id mismatch rejected") 0)
+        (do (println "wm-operational-certificate: FAIL run-id mismatch certified") 2))
+
+      negative?
       (if (= :fail (:verdict cert))
         (do (println "wm-operational-certificate: PASS undeclared-hop mutation produced failing certificate") 0)
         (do (println "wm-operational-certificate: FAIL mutation certified") 2))
-      (if (= :pass (:verdict cert))
+
+      (and (= :pass (:verdict cert)) identity-matches?)
         (do (println "wm-operational-certificate: PASS") 0)
-        (do (println "wm-operational-certificate: FAIL certificate written") 1)))))
+      :else
+      (do (println "wm-operational-certificate: FAIL certificate written") 1))))
 
 (when (= *file* (System/getProperty "babashka.file"))
   (System/exit (main *command-line-args*)))
