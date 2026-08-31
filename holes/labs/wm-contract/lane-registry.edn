@@ -6,7 +6,7 @@
  [{:lane :wm-nouns
    :holding :C147-glossary-fifth, :dispatched-at "2026-08-31T19:48:48Z", :job-id "invoke-1788205724659-5946-2717c7d5", :expected-by "2026-08-31T20:33:48Z"}
   {:lane :wm-verbs
-   :holding :C145-frame-drop, :dispatched-at "2026-08-31T19:43:53Z", :job-id "invoke-1788205430083-5940-a9d44b36", :expected-by "2026-08-31T20:28:53Z"}
+   :holding :C149-resource-attribution, :dispatched-at "2026-08-31T19:52:43Z", :job-id "invoke-1788205959551-5950-b0985c4a", :expected-by "2026-08-31T20:37:43Z"}
   {:lane :wm-organization
    :holding :C148-last-shape-check, :dispatched-at "2026-08-31T19:51:33Z", :job-id "invoke-1788205889821-5949-882ec0b3", :expected-by "2026-08-31T20:36:33Z"}
   {:lane :wm-evidence
