@@ -4,9 +4,9 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C228-fulab-rename, :dispatched-at "2026-08-31T23:08:47Z", :job-id "invoke-1788217723778-6159-8ce83650", :expected-by "2026-08-31T23:53:47Z"}
+   :holding :C232-softmax, :dispatched-at "2026-08-31T23:12:25Z", :job-id "invoke-1788217941421-6165-c1401c4d", :expected-by "2026-08-31T23:57:25Z"}
   {:lane :wm-verbs
-   :holding :C223-suite-timeout, :dispatched-at "2026-08-31T22:56:52Z", :job-id "invoke-1788217007360-6138-e5cfcc3e", :expected-by "2026-08-31T23:41:52Z"}
+   :holding :C231-fixture-race, :dispatched-at "2026-08-31T23:12:25Z", :job-id "invoke-1788217916150-6164-d9783594", :expected-by "2026-08-31T23:57:25Z"}
   {:lane :wm-organization
    :holding :C230-chain-rehearsal, :dispatched-at "2026-08-31T23:10:30Z", :job-id "invoke-1788217826279-6162-4cbf0296", :expected-by "2026-08-31T23:55:30Z"}
   {:lane :wm-evidence
