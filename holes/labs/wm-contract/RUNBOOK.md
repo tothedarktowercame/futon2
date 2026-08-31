@@ -27,6 +27,14 @@ using the absent `codex-7` default. Only run the printed
 `clojure -M:wm-full-loop once --reviewer ...` command after the preflight says
 `READY`.
 
+**Cohort 46 cancellation boundary (2026-08-31):** cancelling an in-flight
+Agency job is recorded as a closed `:cancelled` attempt and consumes an attempt
+ordinal, but `:cancelled` was not in cohort 46's preregistered outcome taxonomy.
+The cancelled attempt therefore begins a new semantic stratum and must not be
+pooled with cohort 46's original outcome classes. Do not amend the
+preregistration after the fact. See
+[`C206-cohort-cancellation-boundary.md`](C206-cohort-cancellation-boundary.md).
+
 Readiness reports two independent axes. Evidence kind `UNAVAILABLE` means a required live resource
 cannot be used now (reviewer, roster, or bounded admission). `UNVERIFIED` means
 the machine might run, but the exact code/evidence it would use has not passed

@@ -4,6 +4,12 @@ Current as of 2026-08-31. This is a pointer-only digest, not a second decision
 brief. Questions, recommendations, evidence, and option analysis remain
 authoritative in the linked source records.
 
+**Operator boundary, not a pending decision:** cancelling Joe's cohort-46 run
+is recorded and counted, but starts a new semantic stratum because
+`:cancelled` was not preregistered. Do not pool it with cohort 46's original
+outcome classes or amend the preregistration retrospectively. Full consequence:
+[`C206-cohort-cancellation-boundary.md`](../labs/wm-contract/C206-cohort-cancellation-boundary.md).
+
 ## 1. Strategic carrier dependency
 
 ### Strategic outcome vocabulary
