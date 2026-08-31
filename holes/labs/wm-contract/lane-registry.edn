@@ -6,7 +6,7 @@
  [{:lane :wm-nouns
    :holding nil, :dispatched-at nil, :job-id nil, :expected-by nil}
   {:lane :wm-verbs
-   :holding :C78-outward-act, :dispatched-at "2026-08-31T15:43:30Z", :job-id "invoke-1788190999012-5749-d75d11ae", :expected-by "2026-08-31T16:28:30Z"}
+   :holding nil, :dispatched-at nil, :job-id nil, :expected-by nil}
   {:lane :wm-organization
    :holding :C76-futon3-split, :dispatched-at "2026-08-31T15:39:48Z", :job-id "invoke-1788190770575-5744-0c9d7289", :expected-by "2026-08-31T16:24:48Z"}
   {:lane :wm-evidence
