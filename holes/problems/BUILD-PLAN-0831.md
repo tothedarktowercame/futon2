@@ -469,3 +469,42 @@ a better argument for writing them than "we have five and should have eighteen".
 (alternative `:stack` — "a trace records the executed route; an append-only ledger is a stack of such
 records"). Marked `:decision :joe-must-decide-whether-to-add-vertex`. **This is Joe's call**, and it is a
 change to the diagram's nouns, not its edges.
+
+---
+
+## ORG-D1 — gated. The typology is data, and it refutes the prose that defined the vertex
+
+p4ng `69c60dc` (`empirics-futon/control-organization.edn`, 22 edges) + futon2 `072ab04`
+(`checks/control_organization_check.clj`, 100 lines with a negative control).
+
+**What I checked:** the gate passes all 22 drawn edges (`{:pass? true :classified 11 :unclassified 11}`);
+the negative control genuinely works — it mutates `[:R1 :R4]`'s `from-column` to `:ACT` and the check
+rejects it with `{:error :wrong-from-column :expected :BELIEVE :actual :ACT}`, so the pass is not vacuous;
+every edge row carries `from-column`, `to-column`, `column-relation`, `diagram-role`, `classification` and
+a `basis` string.
+
+**The finding, and it is a refutation.** §0.8 describes the organisation as *"five phased columns, one
+cycle, cross-column support"*. Now that it is data:
+
+    support edges:  7 within-column · 5 cross-column
+
+**The majority of support edges are WITHIN column.** The third clause of the prose characterisation is
+wrong, and it was only checkable once someone wrote the typology down — which is precisely the argument
+for this vertex existing. The within-column support edges are `R5→R5` (a self-loop in EVALUATE),
+`R6→R11`, `R7→R3`, `R9→R16`, `R10→R8`, `R12→R7`, `R15→R13`.
+
+**§1.4's hypothesis is now testable and mostly unsupported.** The mission hypothesised that support edges
+are APM-style policies, i.e. constraints. Of 12 support edges, exactly **one** — `R9→R16` — has
+artefact-level grounds to be classified `:constraint`. The other eleven are `:unclassified` with reasons.
+The delegate did not close the gap by guessing, which is what the charter asked for: *"an honest
+`:unclassified` count is the finding; a complete classification obtained by guessing is the facade this
+build exists to catch."* 11 of 22 unclassified is that honest count.
+
+**A trap for whoever wires these into CI.** The two checks use **opposite exit conventions** for
+`--negative`: `hyper_edge_exemplar_check.clj` exits **1** when its control correctly rejects the mutation;
+`control_organization_check.clj` exits **0**. I misread the second as a control that could not fail before
+reading the source. Both are defensible alone; together they are a hazard, because a runner that treats
+nonzero as failure will score one of them backwards. Worth standardising before there is a third.
+
+**Also noted:** the delegate reported that concurrent lanes advanced futon2 HEAD after its commit and it
+left their changes untouched. That is the shared-checkout discipline holding under actual concurrency.
