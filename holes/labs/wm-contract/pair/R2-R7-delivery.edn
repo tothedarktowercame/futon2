@@ -124,6 +124,28 @@
         a measurement."
    :why-unresolved "Converged proposal; unresolved only until receipt
         machinery exists (blocked-on)."}]
+ :ratification
+ {:date "2026-08-31"
+  :status :co-signed-by-both-endpoint-owners ; adoption sits with wm-verbs
+  :absence-encoding
+  {:decision :tagged-map ; R2 proposal, R7 concurred (incl. amendment)
+   :shape {:absent #{:no-likelihood-model :scan-source-missing :channel-filtered}}
+   :r7-amendment-accepted "A tagged :absent channel maps to PASS-THROUGH
+    semantics at R7 (state unchanged, precision.clj:170-173), never to 0.0 —
+    composing with the receipt's :absent status. Without this, a tagged value
+    could still degrade to a default at the R7 boundary."
+   :closes [:triple-absent-repair :absence-open-design-choice]}
+  :channel-set-version
+  {:decision :member-set-fingerprint ; R2 proposal, R7 concurred
+   :shape {:channel-set/id :string :members #{:sorted-channel-keywords}}
+   :rationale "Count alone lied once (4→8 silently, belief.clj:915-925);
+    a sorted-member fingerprint is checkable."
+   :closes [:channel-set-versioning]}
+  :port-boundary
+  {:decision :post-r3a ; R2 proposal, R7 concurred
+   :rationale "The 8-channel projection is the edge payload; R2's 14-channel
+    map stays loosely typed upstream (observation.clj:17-31)."
+   :closes [:payload-scope]}}
  :traffic-today true
  :blocked-on
  [{:blocker :triple-absent-repair
