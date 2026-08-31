@@ -1,0 +1,108 @@
+{:from :R2
+ :to :R7
+ :payload
+ {:status :unresolved ; shape agreed in principle; absent-encoding is proposed, not live
+  :mediator "R3a (belief/fe layer inside judge) — no direct R2→R7 call exists"
+  :observed-shape
+  {:tick :wm-judge-tick
+   :micro-step :0..r3-max-steps-1 ; war_machine.clj:4292-4294, r3-max-steps 3
+   :channel-set :r3a-projection ; belief/channels-with-likelihood, 8 channels, belief.clj:913-926
+   :per-channel
+   {:observed double ; from obs/observe 14-channel vocabulary, observation.clj:17-31
+    :error double ; observed − predicted-mean, free_energy.clj:82-107
+    :predicted-mean double
+    :predicted-variance double}} ; :predicted-variance/:precision are sent and ignored by R7
+  :proposed-absence-encoding
+  {:variant :tagged-union
+   :present {:observed double :error double}
+   :absent {:absent #{:no-likelihood-model :scan-source-missing :channel-filtered}}}}
+  ; replaces today's three absent→0.0 coercions: observation.clj:38-41,
+  ; war_machine.clj:4319, precision.clj:166-167
+ :guarantee
+ {:status :observed
+  :semantics "Synchronous pure update: Π = bounded inverse regularized rolling
+   error variance (window 20 precision.clj:42, floor 0.1 :53, cap 200.0 :54);
+   need/preference-gap emitted as :salience only — production :salience-mode
+   :separate (arena-salience-mode war_machine.clj:227-234, applied :4325).
+   Untouched channels pass through unchanged (precision.clj:170-173).
+   First-sight channels start at precision 1.0 — a PRIOR, not a measurement
+   (precision.clj:163-165); both seats agree this must be legible at the edge."}
+ :atomicWith
+ {:status :observed
+  :semantics "Same-thread in-process call inside the judge micro-step loop
+   (war_machine.clj:4305-4380); no concurrent access, no partial-update window.
+   Atomic only while judge stays single-threaded — a concurrency fact, not a
+   designed guarantee."}
+ :retry
+ {:status :observed
+  :semantics "No retry concept: call either completes and returns a new
+   precision-state or throws (positive-prior assertion precision.clj:62-66);
+   a throw discards the whole judge tick. Durability is the trace round-trip,
+   not retry: :precision-state persisted per tick and read back as
+   prev-precision-state (war_machine.clj:4273, :4307)."}
+ :timeoutMs
+ {:status :unspecified
+  :reason "In-process synchronous call inside one judge tick; no deadline is
+   published by any participant. Meaningful only if the edge ever becomes
+   cross-process."}
+ :idemKey
+ {:status :proposed
+  :value [:tick :micro-step :channel-set-fingerprint]
+  :condition "Judge can run up to 3 micro-steps per tick (war_machine.clj:4292);
+   tick alone is not unique. Channel-set fingerprint needed because the
+   projection vocabulary has grown 4→8 historically (belief.clj:915-925)."}
+ :receipt
+ {:status :proposed
+  :shape
+  {:tick :tick-id
+   :micro-step :int
+   :channels
+   {ch {:status #{:updated :initialized-prior :passed-through :absent}
+        :new-precision double}}
+   :home ":precision-state trace record (war_machine.clj:4273/:4307) — extend,
+   not a new channel"}
+  :cannot-supply-today "Nothing distinguishes updated vs passed-through vs
+   first-seen channels in live code (R7 round 2, agreed); :initialized-prior
+   is currently silent 1.0 (precision.clj:163-165)."}
+ :field-provenance
+ {:from :agreed
+  :to :agreed
+  :payload :r2-proposed ; observed-shape agreed; absence-encoding jointly proposed
+  :guarantee :agreed
+  :atomicWith :agreed
+  :retry :agreed
+  :timeoutMs :agreed
+  :idemKey :r2-proposed
+  :receipt :unresolved ; R7 proposed shape, R2 amended (:absent + trace home); both agree it does not exist in code
+  }
+ :disagreements
+ [{:field :payload/channel-counts
+   :r2 "channels-with-likelihood is 8 channels (belief.clj:913-926 set literal);
+        R2 vocabulary is 14 (observation.clj:17-31); 6 filtered."
+   :r7 "Round 2 still says '4 of your 13 channels' — carried from the stale
+        v0.11 docstring (belief.clj:915) and an R2-channel miscount."
+   :why-unresolved "R7 has not re-confirmed the corrected counts; the set
+        literal is decisive, so this is expected to resolve in R7's round 3."}
+  {:field :payload/absence-encoding
+   :r2 "Absence must be a tagged value at all three coercion sites
+        (observation.clj:38-41, war_machine.clj:4319, precision.clj:166-167);
+        fixing one alone is cosmetic."
+   :r7 "Proposes encoding via omission + :present-channels receipt set, which
+        leaves the error-side (:error 0.0) default in place."
+   :why-unresolved "Genuinely open design choice: tagged map vs omission+set.
+        Both are proposals; live code has neither."}]
+ :traffic-today true
+ :blocked-on
+ [{:blocker :typed-absence
+   :need "Agreed absence encoding replacing all three absent→0.0 sites
+         (observation.clj:38-41, war_machine.clj:4319, precision.clj:166-167)."}
+  {:blocker :update-receipt
+   :need "update-precision-state to distinguish :updated/:initialized-prior/
+         :passed-through/:absent per channel (R7 proposal, not in code)."}
+  {:blocker :channel-set-declaration
+   :need "R2 to declare channels-present/channels-absent per tick, and the R3a
+         projection (belief.clj:913) to be typed rather than implicit loop
+         iteration (war_machine.clj:4317-4321)."}
+  {:blocker :vocabulary-versioning
+   :need "The 14-channel vocabulary grows by version bumps (observation.clj:14);
+         the contract needs a version stamp, not a fixed list."}]}
