@@ -6,7 +6,7 @@
  [{:lane :wm-nouns
    :holding :C122-machineHasNoC-census, :dispatched-at "2026-08-31T18:46:58Z", :job-id "invoke-1788201996033-5878-793648cd", :expected-by "2026-08-31T19:31:58Z"}
   {:lane :wm-verbs
-   :holding :C120-precision-sites, :dispatched-at "2026-08-31T18:41:28Z", :job-id "invoke-1788201671454-5874-72585d5d", :expected-by "2026-08-31T19:26:28Z"}
+   :holding :C125-era-discriminators, :dispatched-at "2026-08-31T18:58:34Z", :job-id "invoke-1788202693331-5889-d3ff30f9", :expected-by "2026-08-31T19:43:34Z"}
   {:lane :wm-organization
    :holding :C124-xrepo-provenance, :dispatched-at "2026-08-31T18:57:16Z", :job-id "invoke-1788202614857-5888-097ed768", :expected-by "2026-08-31T19:42:16Z"}
   {:lane :wm-evidence
