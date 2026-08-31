@@ -299,3 +299,22 @@ forbidden second text into a valid runner entry and must reject it.
 
 This cure does not rebind the four `findF*` declarations. Their strict state remains
 `:acceptance-uninspectable` until a separate rerun-and-rebind delivery accepts the cured check.
+
+## C71 — WM-RUN2 conforms to the two-layer Figure 4 wiring
+
+Authority: `e3a50c7e02f4171b3c7537be56b102ea7837a42d`.
+
+```sh
+bb checks/wm_route_conformance.clj holes/labs/wm-contract/tick-run-record-2026-08-30.edn
+bb checks/wm_route_conformance.clj --negative holes/labs/wm-contract/tick-run-record-2026-08-30.edn
+bb scripts/merge_witnesses.bb --check
+bb checks/holder_check.clj
+AUTH=$(python3 -c 'import json; print(json.load(open("/home/joe/code/mathlib4/DarkTower/WarMachine/holes-contract.json"))["source"]["git-sha"])')
+bb -cp . checks/contract_lint.clj --contract /home/joe/code/mathlib4/DarkTower/WarMachine/holes-contract.json --registry checks/witness-registry.edn --report /tmp/C71-contract-lint.edn --authority "$AUTH"
+bb -cp . checks/contract_lint.clj --negative --contract /home/joe/code/mathlib4/DarkTower/WarMachine/holes-contract.json --registry checks/witness-registry.edn --report /tmp/C71-contract-lint-negative.edn --authority "$AUTH"
+bb checks/control_map_figure_agreement_check.clj
+```
+
+The positive receipt has nine mapped hops: three in the original edge layer
+and six in the separately counted measured layer. The negative control appends
+one unmapped hop and succeeds only when the checker rejects it.
