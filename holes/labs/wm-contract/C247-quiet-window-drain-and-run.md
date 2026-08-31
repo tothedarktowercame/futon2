@@ -136,11 +136,17 @@ Futon2 commit. Remaining `UNAVAILABLE` means the reload was a silent no-op;
 identity mismatch means `UNVERIFIED`. Both are stop-and-fix conditions; do not
 click.
 
-Current implementation note: `run-readiness` reruns the workspace gate rather
-than consuming step 2's receipt. Thus the apparatus currently executes the gate
-twice, despite step 2 being the one explicit review gate. The second execution
-is bounded by the command above. Removing that duplication requires a separate
-receipt-consumption change; this checklist does not hide it.
+Historical implementation note (superseded): `run-readiness` reran the
+workspace gate rather than consuming step 2's receipt, so the apparatus ran the
+gate twice.
+
+2026-08-31 amendment (C259): `run-readiness`
+now consumes step 2's bounded receipt and does not rerun the workspace gate.
+Reuse requires an exact clean content basis for all four repositories covered
+by the gate (`futon2`, `mathlib4`, `p4ng`, and `futon3`), plus a passing
+inner/outer verdict and clean resource status. A missing legacy provenance
+record, a dirty current tree, or any repository-basis mismatch is `UNVERIFIED`;
+readiness refuses rather than guessing or rerunning.
 
 ## 6. Joe clicks only on READY
 

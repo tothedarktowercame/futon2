@@ -11,6 +11,12 @@ import urllib.request
 
 ROOT = "/home/joe/code/futon2"
 FUTON3 = "/home/joe/code/futon3"
+WORKSPACE_REPOSITORIES = {
+    "futon2": ROOT,
+    "mathlib4": "/home/joe/code/mathlib4",
+    "p4ng": "/home/joe/code/p4ng",
+    "futon3": FUTON3,
+}
 BG = "/home/joe/code/futon3c/scripts/bg.py"
 PROOF_EVAL = "/home/joe/code/futon3c/scripts/proof-eval.sh"
 ROSTER = "http://localhost:7070/api/alpha/agents"
@@ -91,6 +97,82 @@ def latest_suite(records, command, repo):
                   tested_tree=receipt.get("repository-basis-start"))
 
 
+def parse_workspace_provenance(output_file):
+    prefix = "wm-workspace-gate: PROVENANCE "
+    if not output_file:
+        return None
+    try:
+        with open(output_file, encoding="utf-8") as stream:
+            line = next((line for line in stream if line.startswith(prefix)), None)
+        value = json.loads(line[len(prefix):]) if line else None
+        return value if isinstance(value, list) else None
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def workspace_basis_matches(rows, states):
+    if not rows:
+        return False, "receipt-missing-workspace-basis", None
+    by_name = {str(row.get("repository")): row for row in rows}
+    if set(by_name) != set(WORKSPACE_REPOSITORIES):
+        return False, "receipt-workspace-population-differs", None
+    for name in WORKSPACE_REPOSITORIES:
+        row = by_name[name]
+        current = states[name]
+        matches = (row.get("readable?") is True and
+                   row.get("dirty?") is False and
+                   current.get("readable") and
+                   current.get("dirty") is False and
+                   row.get("git-sha") == current.get("head") and
+                   row.get("tree-sha") == current.get("tree-sha") and
+                   row.get("tracked-diff-sha256") ==
+                   current.get("tracked-diff-sha256"))
+        if not matches:
+            return False, "workspace-basis-differs", name
+    return True, None, None
+
+
+def latest_workspace_gate(records):
+    command = "bb -cp . checks/wm_workspace_gate.clj"
+    candidates = [record for record in records
+                  if record.get("cmd") == command
+                  and record.get("dir") == ROOT
+                  and record.get("receipt")]
+    if not candidates:
+        return result("workspace-gate", False, "unverified", "self-clearing",
+                      reason="no-terminal-bounded-receipt", command=command)
+    record = max(candidates,
+                 key=lambda item: item["receipt"].get("finished-at", ""))
+    receipt = record["receipt"]
+    futon2_state = repository_state(ROOT)
+    wrapper_fresh, wrapper_reason = receipt_matches_tree(receipt, futon2_state)
+    workspace_basis = parse_workspace_provenance(record.get("output-file"))
+    states = {name: repository_state(path)
+              for name, path in WORKSPACE_REPOSITORIES.items()}
+    workspace_fresh, workspace_reason, changed_repository = \
+        workspace_basis_matches(workspace_basis, states)
+    passed = (receipt.get("outer-exit") == 0 and
+              receipt.get("inner-exit") == 0 and
+              receipt.get("verdict") == "pass" and
+              receipt.get("resource-status") == "clean" and
+              wrapper_fresh and workspace_fresh)
+    reason = (None if passed else workspace_reason or wrapper_reason or
+              "workspace-gate-verdict-failed")
+    return result(
+        "workspace-gate", passed, "unverified", "self-clearing",
+        reason=reason, receipt=record.get("id"),
+        finished_at=receipt.get("finished-at"),
+        verdict=receipt.get("verdict"), inner_exit=receipt.get("inner-exit"),
+        outer_exit=receipt.get("outer-exit"),
+        resource_status=receipt.get("resource-status"),
+        wrapper_basis_fresh=wrapper_fresh,
+        wrapper_freshness_reason=wrapper_reason,
+        workspace_basis_fresh=workspace_fresh,
+        changed_repository=changed_repository,
+        tested_workspace=workspace_basis,
+        current_workspace=states)
+
+
 def serving_code_observation():
     form = """(let [v (resolve 'futon3c.wm.code-identity/status)
   s (when v (v)) i (:identity s)]
@@ -153,6 +235,33 @@ def tree_control():
     return 0 if passed else 2
 
 
+def workspace_gate_receipt_control():
+    empty = hashlib.sha256(b"").hexdigest()
+    states = {name: {"head": "head-" + name, "tree-sha": "tree-" + name,
+                     "tracked-diff-sha256": empty, "dirty": False,
+                     "readable": True}
+              for name in WORKSPACE_REPOSITORIES}
+    rows = [{"repository": name, "path": WORKSPACE_REPOSITORIES[name],
+             "git-sha": state["head"], "tree-sha": state["tree-sha"],
+             "tracked-diff-sha256": state["tracked-diff-sha256"],
+             "dirty?": False, "readable?": True}
+            for name, state in states.items()]
+    exact, _, _ = workspace_basis_matches(rows, states)
+    changed = {name: dict(state) for name, state in states.items()}
+    changed["p4ng"]["tree-sha"] = "different-tree"
+    stale, reason, repository = workspace_basis_matches(rows, changed)
+    report = {"exact-basis-accepted": exact,
+              "different-basis-rejected": not stale,
+              "reason": reason, "repository": repository}
+    passed = (exact and not stale and reason == "workspace-basis-differs" and
+              repository == "p4ng")
+    print(json.dumps(report, indent=2, sort_keys=True))
+    print("run-readiness-workspace-receipt-control:",
+          "PASS" if passed else "FAIL",
+          "exit-convention=0-pass/2-control-slipped")
+    return 0 if passed else 2
+
+
 def resolution_control():
     checks = [result("dirty-tree", False, "unverified", "self-clearing"),
               result("missing-reviewer", False, "unavailable", "operator-action")]
@@ -209,16 +318,13 @@ def main():
         return resolution_control()
     if "--serving-code-control" in sys.argv[1:]:
         return serving_code_control()
+    if "--workspace-gate-receipt-control" in sys.argv[1:]:
+        return workspace_gate_receipt_control()
     negative = "--negative-reviewer" in sys.argv[1:]
     checks = []
 
     reviewer, chosen = roster_readiness(negative)
     checks.append(reviewer)
-
-    gate = run(["bb", "-cp", ".", "checks/wm_workspace_gate.clj"])
-    checks.append(result("workspace-gate", gate.returncode == 0, "unverified", "self-clearing", exit=gate.returncode,
-                         summary=next((line for line in gate.stdout.splitlines()
-                                       if line.startswith("wm-workspace-gate: SUMMARY")), None)))
 
     authority = run(["bb", "checks/contract_authority_current.clj"])
     checks.append(result("contract-freshness", authority.returncode == 0, "unverified", "self-clearing", exit=authority.returncode,
@@ -233,6 +339,7 @@ def main():
         records = json.loads(listed.stdout)
     except json.JSONDecodeError:
         records = []
+    checks.append(latest_workspace_gate(records))
     futon2_suite = latest_suite(records, "clojure -T:build ci", "futon2")
     checks.append(futon2_suite)
     checks.append(latest_suite(records, "clojure -X:test", "futon3"))

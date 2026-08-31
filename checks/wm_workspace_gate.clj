@@ -282,7 +282,9 @@
 
 (defn -main [& _]
   (let [basis (provenance)
-        _ (println "wm-workspace-gate: PROVENANCE" (pr-str basis))
+        ;; JSON is part of the bounded receipt's consumable output. Readiness
+        ;; must compare all four repositories, not only the wrapper's cwd.
+        _ (println "wm-workspace-gate: PROVENANCE" (json/generate-string basis))
         inventory (inventory-result)
         _ (println "wm-workspace-gate: INVENTORY" (pr-str inventory))
         results (into [inventory] (map run-one (concat (commands) (control-commands))))
