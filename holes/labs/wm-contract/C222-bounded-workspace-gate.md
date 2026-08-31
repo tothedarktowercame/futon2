@@ -56,3 +56,17 @@ Canonical invocation:
 ```sh
 make workspace-gate
 ```
+
+## Suite follow-up
+
+Both authoritative suites completed inside the same bounded service:
+
+- futon2 `clojure -T:build ci`: 1,051 tests / 6,281 assertions / 0
+  failures, receipt
+  `bounded-1788217506930-c222-futon2-ci.receipt.json`;
+- futon3 `clojure -X:test`: 248 tests / 1,518 assertions / 0 failures,
+  receipt `bounded-1788217635380-c222-futon3-suite-real.receipt.json`.
+
+An initial `clojure -M:test` invocation only opened a REPL and was not counted
+as suite evidence. The corrected `-X:test` invocation is the receipt cited
+above.
