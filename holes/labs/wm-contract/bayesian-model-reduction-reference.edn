@@ -1,0 +1,8 @@
+{:schema :bayesian-model-reduction-reference/v1
+ :basis "sec-glossary.tex:54 — A-prime = A + a-prime - a componentwise"
+ :kind :hand-derived-from-count-conservation
+ :old-prior [[1 1] [1 1]]
+ :old-posterior [[10 1] [4 1]]
+ :accumulated-counts [[9 1] [3 1]]
+ :reduced-prior [[1 1] [1 100]]
+ :reduced-posterior [[10 1] [301 100]]}

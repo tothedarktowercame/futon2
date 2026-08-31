@@ -58,6 +58,7 @@
     "prediction_error_witness.clj"
     "softmax_witness.clj"
     "bayes_factor_threshold_witness.clj"
+    "bayesian_model_reduction_witness.clj"
     "absent_is_loud_lint.clj" "belief_update_check.clj"
     "belief_variance_inputs.clj" "cascade_diff_witness.clj" "certify_live_run.clj" "closed_record_pointer_check.clj" "contract_lint.clj"
     "cleanup_queue_correction_index.clj"
@@ -117,6 +118,7 @@
    {:name :prediction-error :argv ["bb" "checks/prediction_error_witness.clj"]}
    {:name :softmax :argv ["bb" "checks/softmax_witness.clj"]}
    {:name :bayes-factor-threshold :argv ["bb" "checks/bayes_factor_threshold_witness.clj"]}
+   {:name :bayesian-model-reduction :argv ["bb" "checks/bayesian_model_reduction_witness.clj"]}
    {:name :control-vocabulary :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "control"]}
    {:name :aliveness :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "aliveness"]}
    {:name :act-gate-vocabulary :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "act-gate"]}
@@ -188,6 +190,8 @@
     :argv ["bb" "checks/bayes_factor_threshold_witness.clj" "--negative-boundary"]}
    {:name :c236-variational-f-as-bmr-evidence
     :argv ["bb" "checks/bayes_factor_threshold_witness.clj" "--negative-type"]}
+   {:name :c240-bmr-count-conservation
+    :argv ["bb" "checks/bayesian_model_reduction_witness.clj" "--negative-counts"]}
    {:name :c179-control-outside-vocabulary :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "control" "--negative-control"]}
    {:name :c179-negative-aliveness-factor :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "aliveness" "--negative-control"]}
    {:name :c179-missing-act-gate-leg :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "act-gate" "--negative-control"]}

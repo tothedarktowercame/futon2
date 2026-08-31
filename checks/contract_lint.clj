@@ -345,6 +345,10 @@
                                          (= [-7 2] (:passing-change %))
                                          (= [-2 1] (:failing-change %))
                                          (= :model-reduction-free-energy-change (:quantity %)))
+   "BayesianModelReductionWitness" #(and (= :bayesian-model-reduction-reference/v1 (:schema %))
+                                           (= [[9 1] [3 1]] (:accumulated-counts %))
+                                           (= [[1 1] [1 100]] (:reduced-prior %))
+                                           (= [[10 1] [301 100]] (:reduced-posterior %)))
    "HaveWantArrowWitness" have-want-arrow-witness?
    "FoldWitness" fold-witness?
    "FoldEscrowRecordWitness" fold-escrow-record-witness?
