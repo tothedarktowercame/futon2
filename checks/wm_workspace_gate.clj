@@ -52,6 +52,7 @@
     "generative_model_witness.clj" "holder_check.clj"
     "hyper_edge_domain_range_check.clj" "hyper_edge_exemplar_check.clj"
     "lane_registry_check.clj" "log_multivariate_beta_witness.clj"
+    "lean_sorry_category_check.clj"
     "obligation_ledger_reconciliation_check.clj"
     "preemptive_absence_coercion_lint.clj" "preemptive_acceptance_lint.clj"
     "preemptive_artefact_boundary_lint.clj" "preemptive_era_blind_lint.clj"
@@ -92,7 +93,9 @@
    {:name :route-conformance
     :argv ["bb" "checks/wm_route_conformance.clj"
            "holes/labs/wm-contract/tick-run-record-2026-08-30.edn"]}
-   {:name :runs-once :argv ["bb" "checks/wm_runs_once_witness.clj"]}])
+   {:name :runs-once :argv ["bb" "checks/wm_runs_once_witness.clj"]}
+   {:name :lean-sorry-categories
+    :argv ["bb" "checks/lean_sorry_category_check.clj"]}])
 
 (defn control-commands []
   [{:name :c116-removed-ledger-row
@@ -109,7 +112,15 @@
    {:name :c117-f2-removed-receipt :dir "/home/joe/code/futon3"
     :argv ["clojure" "-Sdeps" "{:paths [\"checks\"]}" "-M" "-m" "find-snatch" "--negative-f2"]}
    {:name :c117-f3-score-only-receipt :dir "/home/joe/code/futon3"
-    :argv ["clojure" "-Sdeps" "{:paths [\"checks\"]}" "-M" "-m" "find-snatch" "--negative-f3"]}])
+    :argv ["clojure" "-Sdeps" "{:paths [\"checks\"]}" "-M" "-m" "find-snatch" "--negative-f3"]}
+   {:name :c134-unlabelled-sorry
+    :argv ["bb" "checks/lean_sorry_category_check.clj" "--negative-unlabelled"]}
+   {:name :c134-double-labelled
+    :argv ["bb" "checks/lean_sorry_category_check.clj" "--negative-double"]}
+   {:name :c134-label-on-proved
+    :argv ["bb" "checks/lean_sorry_category_check.clj" "--negative-proved-label"]}
+   {:name :c134-missing-checker
+    :argv ["bb" "checks/lean_sorry_category_check.clj" "--negative-missing-checker"]}])
 
 (defn run-one [{:keys [name argv dir]}]
   (println "wm-workspace-gate: RUN" (clojure.core/name name))
