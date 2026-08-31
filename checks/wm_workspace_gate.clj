@@ -7,6 +7,10 @@
             [cheshire.core :as json]))
 
 (def contract "/home/joe/code/mathlib4/DarkTower/WarMachine/holes-contract.json")
+(def c167-run "holes/labs/wm-contract/tick-run-record-2026-08-31.edn")
+(def c167-resource "holes/labs/wm-contract/C167-v20-certificate-resource.edn")
+(def c167-run-sha256 "3d4432d09934517811cda1b1b35d7a5a9c1bbc73f137d76f4aecb30f6ab07875")
+(def c167-resource-sha256 "9c9e566a9d5460ec0bbadf59c58b10627e6434a52974ffd62480dc554e4cfdea")
 
 (def repositories
   {:futon2 "/home/joe/code/futon2"
@@ -108,6 +112,10 @@
     :argv ["bb" "checks/lean_sorry_category_check.clj"]}
    {:name :model-uncertainty-eig
     :argv ["bb" "checks/model_uncertainty_eig_witness.clj"]}
+   {:name :pinned-operational-certificate
+    :argv ["bb" "-cp" "." "checks/wm_operational_certificate.clj"
+           "--run" c167-run "--resource" c167-resource
+           "--run-sha256" c167-run-sha256 "--resource-sha256" c167-resource-sha256]}
    {:name :p4ng-referent-drift :dir "/home/joe/code/p4ng"
     :argv ["python3" "detect_drift.py"]}
    {:name :cleanup-queue-corrections
@@ -156,7 +164,12 @@
    {:name :c154-referent-content-change :dir "/home/joe/code/p4ng"
     :argv ["python3" "detect_drift.py" "--control-unit-change"]}
    {:name :c165-unindexed-correction
-    :argv ["bb" "checks/cleanup_queue_correction_index.clj" "--negative-control"]}])
+    :argv ["bb" "checks/cleanup_queue_correction_index.clj" "--negative-control"]}
+   {:name :c173-tampered-operational-run
+    :argv ["bb" "-cp" "." "checks/wm_operational_certificate.clj"
+           "--run" c167-run "--resource" c167-resource
+           "--run-sha256" c167-run-sha256 "--resource-sha256" c167-resource-sha256
+           "--negative-run-record"]}])
 
 (defn run-one [{:keys [name argv dir]}]
   (println "wm-workspace-gate: RUN" (clojure.core/name name))
@@ -173,7 +186,10 @@
         failures (filterv #(not= 0 (:exit %)) results)]
     (println "wm-workspace-gate: SUMMARY"
              (pr-str {:checks (count results) :executable-checks (dec (count results)) :failures failures
-                      :manual-exclusions [:lane-registry :live-operational-certificate]}))
+                      :manual-exclusions [:lane-registry :current-live-operational-certificate]
+                      :manual-exclusion-reasons
+                      {:lane-registry :dispatcher-discipline-not-repository-validity
+                       :current-live-operational-certificate :requires-new-operator-run-and-resource-receipt}}))
     (System/exit (if (empty? failures) 0 1))))
 
 (when (= *file* (System/getProperty "babashka.file"))

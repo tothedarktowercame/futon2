@@ -90,7 +90,7 @@
               :resource-status-clean? resources-clean?}
      :verdict (if pass? :pass :fail)}))
 
-(def boolean-flags #{"--negative" "--negative-run-id"})
+(def boolean-flags #{"--negative" "--negative-run-id" "--negative-run-record"})
 
 (defn parse-args [args]
   (loop [xs args out {}]
@@ -100,9 +100,18 @@
       out)))
 
 (defn main [args]
-  (let [{:keys [run resource negative? negative-run-id] output-path :certificate} (parse-args args)
-        run-bytes (java.nio.file.Files/readAllBytes (.toPath (io/file run)))
-        resource-data (when resource (edn/read-string (slurp resource)))
+  (let [{:keys [run resource negative? negative-run-id negative-run-record
+                run-sha256 resource-sha256] output-path :certificate} (parse-args args)
+        original-run-bytes (java.nio.file.Files/readAllBytes (.toPath (io/file run)))
+        run-bytes (if negative-run-record
+                    (.getBytes (pr-str (assoc (edn/read-string (String. original-run-bytes "UTF-8"))
+                                              :run/id "mutation/tampered-run-record")) "UTF-8")
+                    original-run-bytes)
+        resource-bytes (when resource (java.nio.file.Files/readAllBytes (.toPath (io/file resource))))
+        resource-data (when resource (edn/read-string (String. resource-bytes "UTF-8")))
+        fixture-pins-valid? (and (or (nil? run-sha256) (= run-sha256 (sha256-bytes run-bytes)))
+                                 (or (nil? resource-sha256)
+                                     (= resource-sha256 (sha256-bytes resource-bytes))))
         generated (certificate run-bytes resource-data negative?)
         cert (cond-> generated
                negative-run-id (assoc-in [:run :id] "mutation/not-the-recorded-run"))
@@ -110,8 +119,16 @@
     (when output-path
       (io/make-parents output-path)
       (spit output-path (with-out-str (pprint/pprint cert))))
-    (println (pr-str (dissoc cert :traversal)))
+    (println (pr-str (assoc (dissoc cert :traversal)
+                            :fixture-pins {:run-sha256 (sha256-bytes run-bytes)
+                                           :resource-sha256 (when resource-bytes (sha256-bytes resource-bytes))
+                                           :valid? fixture-pins-valid?})))
     (cond
+      negative-run-record
+      (if-not fixture-pins-valid?
+        (do (println "wm-operational-certificate: PASS tampered run record rejected by fixture pin") 0)
+        (do (println "wm-operational-certificate: FAIL tampered run record passed fixture pin") 2))
+
       negative-run-id
       (if-not identity-matches?
         (do (println "wm-operational-certificate: PASS run-id mismatch rejected") 0)
@@ -122,7 +139,7 @@
         (do (println "wm-operational-certificate: PASS undeclared-hop mutation produced failing certificate") 0)
         (do (println "wm-operational-certificate: FAIL mutation certified") 2))
 
-      (and (= :pass (:verdict cert)) identity-matches?)
+      (and (= :pass (:verdict cert)) identity-matches? fixture-pins-valid?)
         (do (println "wm-operational-certificate: PASS") 0)
       :else
       (do (println "wm-operational-certificate: FAIL certificate written") 1))))

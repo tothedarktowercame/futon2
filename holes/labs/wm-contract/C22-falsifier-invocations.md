@@ -476,6 +476,11 @@ Thirty current-configuration production receipts with two containment failures
 and one test failure must yield `eligible=true`, `retire=true`, and the status
 vocabulary surfaces an eligible live window as `DECISION-DUE` (exit 3).
 
+C173 wires the content-pinned C167 v20 operational run/resource pair into
+`make workspace-gate`. Its `c173-tampered-operational-run` control changes the
+run record while retaining the expected pin; the gate passes only when that
+tampered record is rejected.
+
 C148's `TickRunRecord` shape control (valid EDN with a route hop missing
 `toNode`) is exercised by the normal futon2 suite:
 

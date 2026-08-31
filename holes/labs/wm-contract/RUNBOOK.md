@@ -8,7 +8,7 @@ Updated 2026-08-31. Run commands from `/home/joe/code/futon2` unless noted.
 |---|---|---|
 | `make status` | Runs and renders the workspace gate, contract/strict/absence checks, both bounded suites, obligations, lanes, and referent drift without stopping at the first red. | It is a report, not a production tick or live operational certificate. |
 | `make pre-merge` | Required review boundary: hermetic futon2 CI, then the four-repository workspace gate. It stops if CI is red. | It does not run the manual checks below or execute the machine. |
-| `make workspace-gate` | Runs the cross-repository War Machine invariants, semantic controls, inventory alarm, and provenance report. Missing sibling repositories fail loudly. | It does not run the complete futon2/futon3 suites. |
+| `make workspace-gate` | Runs the cross-repository War Machine invariants, semantic controls, inventory alarm, provenance report, and certificate machinery against the content-pinned C167 v20 fixture pair. Missing sibling repositories fail loudly. | It does not run the complete futon2/futon3 suites or certify the newest live run. |
 | `make ci` | Runs the hermetic futon2 build and test gate (`clojure -T:build ci`). | It says nothing about sibling checkouts or live operator state. |
 
 Use `make pre-merge` for review. Use the narrower commands to reproduce one
@@ -115,9 +115,12 @@ measurements, and superseded configurations never seed that comparison.
   discipline (`:stale-holding`), not repository validity. Run it during
   dispatch and closure review; do not make source CI depend on operator timing.
 - `bb -cp . checks/wm_operational_certificate.clj --run RUN.edn --resource RESOURCE.edn --certificate OUT.edn`
-  consumes an actual operator-triggered run and its bounded resource receipt.
-  It cannot honestly run during source-only CI because CI has no live run to
-  certify.
+  consumes a newly operator-triggered run and its bounded resource receipt.
+  The workspace gate proves the machinery against the pinned C167 v20
+  run/resource fixtures, including a tampered-record control. That reproducible
+  fixture does **not** certify the current/latest operator run; this command
+  remains attached to every new live-run event.
 
-These exclusions are printed by the workspace gate. “Manual” means attached
+The remaining exclusions and their reasons are printed by the workspace gate.
+“Manual” means attached
 to the named operator event above, not merely available on disk.
