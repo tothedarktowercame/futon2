@@ -11,11 +11,12 @@
   (process/shell {:dir mathlib-root :continue true :out :string :err :string}
                  "lake" "env" "lean" (str path)))
 
-(defn negative-control []
+(defn negative-control [kind]
   (let [source (slurp (str fixture))
-        needle "example : ¬ beliefUpdate learningRate kernel prior observation precision prior := by"
-        mutant (str/replace source needle
-                            "example : beliefUpdate learningRate kernel prior observation precision prior := by")
+        needle (case kind
+                 :mean "example : ¬ beliefUpdate learningRate sensorNoiseFloor evidenceWeight\n    kernel prior observation precision prior := by"
+                 :variance "example : ¬ beliefUpdate learningRate sensorNoiseFloor evidenceWeight\n    kernel prior observation precision unresponsiveVariance := by")
+        mutant (str/replace source needle (str/replace needle "¬ beliefUpdate" "beliefUpdate"))
         tmp (fs/create-temp-file {:dir (fs/parent fixture)
                                   :prefix "BeliefUpdateMutation-" :suffix ".lean"})]
     (try
@@ -26,13 +27,16 @@
           (let [result (lean! tmp)]
             (if (zero? (:exit result))
               (do (binding [*out* *err*] (println "belief-update-check: mutation slipped")) 2)
-              (do (println "belief-update-check: negative-control PASS (inert update rejected)") 0)))))
+              (do (println (str "belief-update-check: negative-control PASS ("
+                                (case kind :mean "inert update" :variance "unresponsive variance")
+                                " rejected)")) 0)))))
       (finally (fs/delete-if-exists tmp)))))
 
 (defn -main [& args]
-  (let [negative? (some #{"--negative" "--negative-control"} args)
-        exit (if negative?
-               (negative-control)
+  (let [variance-negative? (some #{"--negative-variance"} args)
+        mean-negative? (some #{"--negative" "--negative-control"} args)
+        exit (if (or variance-negative? mean-negative?)
+               (negative-control (if variance-negative? :variance :mean))
                (let [result (lean! fixture)]
                  (if (zero? (:exit result))
                    (do (println "belief-update-check: PASS") 0)
