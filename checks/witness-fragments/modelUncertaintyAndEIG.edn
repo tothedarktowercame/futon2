@@ -8,7 +8,7 @@
  :live-invariant {:check "checks/model_uncertainty_eig_witness.clj"
                   :evidence :lean-elaboration-and-collapsed-equality-control}
  :run-sha "6f84763326eca30018574722176c7a23cb20a5ce"
- :contract-sha "e48a3158efa23533c42c53b0d7b5205e9a36b59a"
+ :contract-sha "ea569ae0f0d4ac98d56302a8ca709a9b38b516c0"
  :result :passed
  :recorded-at "2026-08-31T23:59:00Z"
  :axioms "[propext, Classical.choice, Quot.sound]; no sorryAx"

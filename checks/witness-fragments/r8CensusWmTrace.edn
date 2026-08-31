@@ -1,5 +1,5 @@
 {:witnesses ["r8CensusWmTrace" "r8EraBoundary" "wmTraceR8"],
- :contract-sha "e48a3158efa23533c42c53b0d7b5205e9a36b59a",
+ :contract-sha "ea569ae0f0d4ac98d56302a8ca709a9b38b516c0",
  :run-sha "93be32e98bbfdc413fc6aa58ef1d0da7cfdc8414",
  :freshness :pinned-git-v1,
  :live-invariant {:check "checks/r8_f_contract.clj" :evidence :live-report},

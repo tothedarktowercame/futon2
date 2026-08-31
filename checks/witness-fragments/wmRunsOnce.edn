@@ -1,5 +1,5 @@
 {:witnesses "wmRunsOnce",
- :contract-sha "eec8279cf7b2c841f386894116e6aa627869a75c",
+ :contract-sha "ea569ae0f0d4ac98d56302a8ca709a9b38b516c0",
  :run-sha "b45885508aa7842e1818afe464867d571c7df0c5",
  :freshness :pinned-git-v1,
  :live-invariant {:check "checks/wm_runs_once_witness.clj" :evidence :emitted-by-check},

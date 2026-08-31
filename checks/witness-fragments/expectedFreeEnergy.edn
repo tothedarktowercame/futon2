@@ -5,6 +5,6 @@
  :fixture {:repo "futon2"
            :path "holes/labs/wm-contract/expected-free-energy-reference.edn"}
  :run-sha "58d667284a63c69c0027c9bf204e9bc0eac098b9"
- :contract-sha "e48a3158efa23533c42c53b0d7b5205e9a36b59a"
+ :contract-sha "ea569ae0f0d4ac98d56302a8ca709a9b38b516c0"
  :result :passed
  :recorded-at "2026-08-31T23:59:00Z"}

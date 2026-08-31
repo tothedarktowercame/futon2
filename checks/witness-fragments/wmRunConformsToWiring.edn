@@ -1,5 +1,5 @@
 {:witnesses "wmRunConformsToWiring"
- :contract-sha "e3a50c7e02f4171b3c7537be56b102ea7837a42d"
+ :contract-sha "ea569ae0f0d4ac98d56302a8ca709a9b38b516c0"
  :run-sha "f2a09a5"
  :freshness :pinned-git-v1
  :live-invariant
