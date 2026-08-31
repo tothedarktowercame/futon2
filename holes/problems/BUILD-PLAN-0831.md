@@ -292,3 +292,57 @@ contract, the gate, and the queue**. The fragment/merge split breaks the *write*
 criteria break the *decision* bottleneck by routing decisions instead of absorbing them; and the per-unit
 falsifier breaks the *reading* bottleneck, which is the one that actually made claude-15 a single point of
 failure — 25 units a day all validated by one reader.
+
+---
+
+## Wave 0 — DONE, and the write contention is broken *(2026-08-31)*
+
+### Wave 0: the holder is now `by-record`, not a session
+
+**The fix is indirection, not renaming.** Replacing `claude-15` with `claude-20` would have rebuilt the
+same single point of failure under a new name. Instead a declaration's holder resolves through its
+**durable `owner` record** and `checks/holder-registry.edn`. Reassignment is now **one line per record**.
+
+    inline session holders   80  ->  0        (mathlib4 fcffddd82b)
+    declarations             80 (44 closed / 36 holes) — unchanged by the regeneration
+    owning records           12, covering all 80
+
+**A finding on the way, worth recording because it nearly wasted the change.** The doc comments said
+`holder: claude-15` **77 times** and I edited all 77 — then regenerated, and the contract still said
+`claude-15` for all 80. The emitted value comes from **three constructor helpers**
+(`mkClosed`/`mkHole`/`mkRefused`, `Holes.lean:647,651,656`), not the doc comments. Two sources for one
+fact, only one of them load-bearing; my edit had merely made them disagree. **The real fix was 3 lines.**
+
+### The check that makes the remainder loud
+
+`checks/holder_check.clj` — Wave 0's executable falsifier. It asserts (1) no declaration inline-names a
+session, and (2) every owning record resolves to a holder that is assigned *and live on the Agency
+roster*. **It exits 1 today, correctly:**
+
+    inline session holders     0   ✓
+    unassigned records         6   covering 64 of 80 declarations
+      P-validated-R5 21 · P-glossary-mathematics 15 · P-R9 14 · P-R8 8 · P-R2 5 · run-at-least-once 1
+    --negative control        exits 1 — the check can fail, so a future pass is not vacuous
+
+That is the honest state: responsibility is now **addressable** (one line each) rather than **vested in a
+corpse**. The six assignments are Joe's, and they are the last of Wave 0.
+
+### Write contention broken — fragments, with a round-trip proof
+
+Fourteen bind-units appending to one EDN vector is fourteen-way conflict on a shared checkout. Each unit
+now writes its own `checks/witness-fragments/<witness>.edn`, and `scripts/merge_witnesses.bb` assembles
+them. Parallel-safe by construction; the merge refuses on duplicate witness names.
+
+**Validated by round-trip rather than by assertion:** `--split` exploded the committed registry into 7
+fragments, and `--check` proves `merge(fragments) == committed registry` as sets. The registry now carries
+a **GENERATED — DO NOT HAND-EDIT** header, because a generated file that looks hand-editable is how the
+next person silently loses their change.
+
+**Still contended, and the same fix applies:** `p4ng/empirics-futon/hyper-edge-schema.edn` is one vector of
+instances that all edge-units write. Wave 2 is only three pairs, so it is survivable serially — but it
+should get `edge-fragments/` before any wider fan-out.
+
+### Wave 1 is now dispatchable
+14 bind-units, fragment-per-unit, no contention, each validated by the lint plus the negative control.
+The seat discipline from last night applies: ask which seats are lendable, stagger the dispatch, and use
+`--mode brief` for informational bells.
