@@ -17,8 +17,14 @@ default author `zai-5`.
 When ready, the report prints:
 
 ```sh
-clojure -M:wm-full-loop once --reviewer codex-1
+curl -s -X POST localhost:7070/api/alpha/wm/click \
+  -H 'Content-Type: application/json' \
+  -d '{"reviewer":"codex-1","trigger":"duree-click-on-demand"}'
 ```
+
+(Corrected by C213. As written on 2026-08-31 this printed
+`clojure -M:wm-full-loop once --reviewer codex-1`, which starts a runtime JVM
+from this repo — retired for clicks since 2026-07-26.)
 
 `make run-readiness-control` reads the real roster and then removes reviewer
 eligibility. It passes only when the named reviewer condition fails and the

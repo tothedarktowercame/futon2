@@ -23,9 +23,14 @@ the in-flight delivery, bounded job, or capacity pressure to settle and rerun.
 `NOT-READY (needs-you)` means at least one `OPERATOR-ACTION` blocker is present;
 it stays loud even when several waiting blockers are also present. The reviewer
 is selected live rather than
-using the absent `codex-7` default. Only run the printed
-`clojure -M:wm-full-loop once --reviewer ...` command after the preflight says
-`READY`.
+using the absent `codex-7` default. Only run the printed `POST
+/api/alpha/wm/click` command after the preflight says `READY`.
+
+`clojure -M:wm-full-loop ...` **as a process is retired for clicks**
+(`CLAUDE.md`, M-omni-wm-runner 2026-07-26): a click runs in-process in the
+serving JVM, and starting a runtime JVM from this repo is the thing the rule
+forbids. The alias survives only for read-only `status`/`brief`/`review` use
+and tests. Readiness printed the retired command until C213.
 
 **Cohort 46 cancellation boundary (2026-08-31):** cancelling an in-flight
 Agency job is recorded as a closed `:cancelled` attempt and consumes an attempt

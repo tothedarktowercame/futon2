@@ -6,8 +6,8 @@
  [{:lane :wm-nouns
    :holding :C212-variational-f, :dispatched-at "2026-08-31T22:14:26Z", :job-id "invoke-1788214462487-6102-f709f33b", :expected-by "2026-08-31T22:59:26Z"}
   {:lane :wm-verbs
-   :holding :C209-brief-backlog, :dispatched-at "2026-08-31T22:08:08Z", :job-id "invoke-1788214082992-6094-430a5770", :expected-by "2026-08-31T22:53:08Z"}
+   :holding :C215-occurrence-time, :dispatched-at "2026-08-31T22:21:28Z", :job-id "invoke-1788214883810-6108-dfddff2b", :expected-by "2026-08-31T23:06:28Z"}
   {:lane :wm-organization
-   :holding :C210-worktree-design, :dispatched-at "2026-08-31T22:09:36Z", :job-id "invoke-1788214173193-6096-e74a31be", :expected-by "2026-08-31T22:54:36Z"}
+   :holding :C214-serving-code-identity, :dispatched-at "2026-08-31T22:21:28Z", :job-id "invoke-1788214854670-6107-c625405b", :expected-by "2026-08-31T23:06:28Z"}
   {:lane :wm-evidence
    :holding :C211-cohort-denominator, :dispatched-at "2026-08-31T22:11:44Z", :job-id "invoke-1788214300541-6100-669554e1", :expected-by "2026-08-31T22:56:44Z"}]}

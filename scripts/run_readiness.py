@@ -203,7 +203,14 @@ def main():
 
     ready = all(item["pass"] for item in checks)
     instruction = readiness_instruction(checks)
-    command = (f"clojure -M:wm-full-loop once --reviewer {chosen}" if chosen else None)
+    # C213: `clojure -M:wm-full-loop ...` as a process is RETIRED for clicks
+    # (CLAUDE.md, M-omni-wm-runner 2026-07-26).  Clicks run in-process in the
+    # serving JVM; a fresh runtime JVM from this repo is the thing forbidden.
+    command = (
+        "curl -s -X POST localhost:7070/api/alpha/wm/click "
+        "-H 'Content-Type: application/json' "
+        f"""-d '{{"reviewer":"{chosen}","trigger":"duree-click-on-demand"}}'"""
+        if chosen else None)
     report = {"readiness": "READY" if ready else "NOT-READY", "instruction": instruction,
               "message": ("run the printed command" if ready else
                           "operator action required, then re-run" if instruction == "needs-you" else

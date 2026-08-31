@@ -145,8 +145,8 @@ Evidence-Landscape-typed:
 | Forum PSR/PUR/PAR posts (futon3c) | `futon3c/forum/*` | `:duree-click-forum-psr` etc. | partial; futon3c being ported |
 | Mission-doc edits | `~/code/futon{0,7,...}/holes/missions/*.md` | `:duree-click-mission-edit` | file-watch detectable |
 | M-INC `state/*` events | M-INC step (b) — not yet landed | `:duree-click-m-inc-state-*` | HEAD-as-escrow until step (b) commits |
-| Operator on-demand full loop | `clojure -M:wm-full-loop once` | `:duree-click-on-demand` | live |
-| Continuous full loop | `clojure -M:wm-full-loop continuous` | `:duree-click-continuous` | live |
+| Operator on-demand full loop | `POST :7070/api/alpha/wm/click` (in-process; CLI form retired 2026-07-26) | `:duree-click-on-demand` | live |
+| Continuous full loop | serving-JVM runner-service loop (CLI form retired 2026-07-26) | `:duree-click-continuous` | live |
 
 The WM reads from these as-needed; it does not own any of them. Each
 source has its own retention discipline and its own typing convention.
