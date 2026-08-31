@@ -35,9 +35,9 @@
    rollout ΔG): expected over the predicted wiring, realized over the enacted
    one — apples-to-apples for γ's signed perf ratio.
 
-   Resilience: every side-effecting step is guarded; any failure returns the
-   judgement UNCHANGED (the field stays absent ⇒ γ holds). Never throws into
-   the scheduled run."
+   Resilience: every side-effecting step is guarded; a failure is retained as
+   a typed `:enactment-failed` variant so the trace cannot confuse a crash with
+   an unattempted tick. Never throws into the scheduled run."
   (:require [cheshire.core :as json]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
@@ -221,6 +221,7 @@
                 :fold gfold}
      :enactment {:mission mission
                  :source :classical-engine
+                 :status (if enacted :constructed-wiring :no-construction)
                  :predicted-via (:coverage-score/source act-gate)
                  :gate-coverage-score-delta (:coverage-score-delta act-gate)
                  :selection-gain-expected-score selection-gain-expected
@@ -229,27 +230,49 @@
                                  :fold)
                  :cascade shown
                  :boxes (count (:boxes enacted))
-                 :policy-holes (count (:policy-holes enacted))}}))
+                 :policy-holes (count (:policy-holes enacted))
+                 :result (if enacted
+                           {:constructed-wiring
+                            {:boxes (count (:boxes enacted))
+                             :policy-holes (count (:policy-holes enacted))}}
+                           {:no-construction {:reason :engine-returned-nil}})}}))
 
 (defn close-loop!
   "The R16 tick step: act-gates → first :pass → enact → thread the outcome onto
    the judgement via `fold-realized/with-realized-outcome` (the committed seam —
    it honours `fr/*live-wire?*`; bind true in the caller to go live). Also
    attaches `:act-gate-verdicts` + `:enactment` audit fields for the trace.
-   Any failure ⇒ judgement returned unchanged; never throws into the run."
+   Any failure is returned as a typed `:enactment-failed` variant, preserving
+   whatever audit evidence was produced before it; never throws into the run."
   [judgement tick]
-  (try
-    (let [gates (act-gates-with-shown (:ranked-actions judgement))
-          verdicts (mapv (fn [g]
-                           {:mission (:mission g)
-                            :verdict (:verdict g)
-                            :cascade-score (get-in g [:act-gate :cascade-score])
-                            :coverage-score-delta (get-in g [:act-gate :coverage-score-delta])
-                            :coverage-score-source (get-in g [:act-gate :coverage-score/source])})
-                         gates)
-          passed (first (filter #(= :pass (:verdict %)) gates))
-          {:keys [enacted decision enactment]} (when passed (enact! passed))]
-      (cond-> (assoc judgement :act-gate-verdicts verdicts)
-        enactment (assoc :enactment enactment)
-        passed    (fr/with-realized-outcome decision enacted tick)))
-    (catch Throwable _ judgement)))
+  (let [phase (volatile! :act-gates)
+        record (volatile! judgement)]
+    (try
+      (let [gates (act-gates-with-shown (:ranked-actions judgement))
+            _ (vreset! phase :verdict-recording)
+            verdicts (mapv (fn [g]
+                             {:mission (:mission g)
+                              :verdict (:verdict g)
+                              :cascade-score (get-in g [:act-gate :cascade-score])
+                              :coverage-score-delta (get-in g [:act-gate :coverage-score-delta])
+                              :coverage-score-source (get-in g [:act-gate :coverage-score/source])})
+                           gates)
+            passed (first (filter #(= :pass (:verdict %)) gates))
+            _ (vreset! record (assoc judgement :act-gate-verdicts verdicts))
+            _ (vreset! phase :enactment)
+            {:keys [enacted decision enactment]} (when passed (enact! passed))
+            _ (when enactment
+                (vreset! record (assoc @record :enactment enactment)))
+            _ (vreset! phase :outcome-recording)
+            result (cond-> @record
+                     passed (fr/with-realized-outcome decision enacted tick))]
+        result)
+      (catch Throwable failure
+        (update @record :enactment
+                (fn [audit]
+                  (assoc (or audit {})
+                         :status :enactment-failed
+                         :enactment-failed
+                         {:phase @phase
+                          :exception-class (.getName (class failure))
+                          :message (.getMessage failure)})))))))
