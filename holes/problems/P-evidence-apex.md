@@ -93,7 +93,7 @@ Normative meanings proposed for ruling:
            :minimum-diversity "at least one conforming form and the two known 13-key refusing forms"}
   :corpus {:location "futon2/data/wm-trace/"
            :runner "the committed R2 generator using a reader loop over all top-level forms"
-           :basis "content pin recorded by the witness binding (currently c9add16ac96c973b…)"}
+           :basis "fresh content pin from the same run; the registered c9add16ac96c973b… pin is historical, not current"}
   :method {:command ["bb" "checks/r2_channel_contract.clj"]
            :accepts "ordered channel identity is the declared Channel set; corpus census returns exactly 2"
            :falsifier "an undeclared fifteenth key is accepted, either known 13-key form is accepted, or any additional corpus form is ill-formed"
@@ -116,6 +116,12 @@ Normative meanings proposed for ruling:
 This contract is deliberately narrow. It bears on R2's channel-schema/census claim, not the unresolved semantic
 content of the operator-turn channel and not the correctness of the shared corpus filter. The digest proves two
 enumerations agree; it does not prove they selected the right population.
+
+**Loud current-data finding (2026-08-31):** `bb -cp . test/r2_channel_contract_test.clj` still found exactly
+two ill-formed forms, but refused its historical baseline: the live corpus is now 798 forms / 796 conforming,
+not 792 / 790, and its pin is `db71e095a81e8620…`, not `c9add16ac96c973b…`. This is precisely why `:basis`
+cannot mean “the digest once bound in the registry.” APEX-D1 does not update that binding; its named consumer
+must decide whether to requalify the enlarged corpus.
 
 ## Worked edge — R16→R2 re-observe
 
