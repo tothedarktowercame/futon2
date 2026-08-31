@@ -1,0 +1,10 @@
+{:schema :expected-information-gain-reference/v1
+ :derivation {:kind :independent-analytic-identities
+              :facts ["KL(delta_a || uniform(a,b)) = log(2)"
+                      "Q(o|pi) has one outcome of mass 1"
+                      "EIG(pi) = E_Q KL[Q(theta|o,pi) || Q(theta|pi)]"]}
+ :cases [{:id :binary-prior-point-posterior
+          :predictive-outcome-masses [1]
+          :parameter-prior-masses [1/2 1/2]
+          :parameter-posterior-masses [1 0]
+          :expected-information-gain "log(2)"}]}

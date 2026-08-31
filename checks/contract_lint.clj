@@ -110,6 +110,14 @@
        :risk 0 :ambiguity 2 :epistemic-gain -2 :expected-free-energy 2}]
      (:cases x)))
 
+(defn expected-information-gain-witness? [x]
+  (= [{:id :binary-prior-point-posterior
+       :predictive-outcome-masses [1]
+       :parameter-prior-masses [1/2 1/2]
+       :parameter-posterior-masses [1 0]
+       :expected-information-gain "log(2)"}]
+     (:cases x)))
+
 (def shape-checks
   {"AblationTable" ablation-table?
    "EraTable" era-table?
@@ -121,7 +129,8 @@
    "R8DispositionEvidence" r8-disposition-evidence?
    "TickRunWitness" tick-run-witness?
    "LogMultivariateBetaWitness" log-multivariate-beta-witness?
-   "ExpectedFreeEnergyWitness" expected-free-energy-witness?})
+   "ExpectedFreeEnergyWitness" expected-free-energy-witness?
+   "ExpectedInformationGainWitness" expected-information-gain-witness?})
 
 (defn shape-result [evidence fixture read-fixture]
   (if-not (contains? shape-checks evidence)
