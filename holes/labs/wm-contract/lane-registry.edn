@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C181-lane-acceptance, :dispatched-at "2026-08-31T21:06:44Z", :job-id "invoke-1788210400459-6027-cc6e8a0b", :expected-by "2026-08-31T21:51:44Z"}
   {:lane :wm-evidence
-   :holding :C180-measure-seven, :dispatched-at "2026-08-31T21:05:35Z", :job-id "invoke-1788210331451-6026-9cb9fa38", :expected-by "2026-08-31T21:50:35Z"}]}
+   :holding :C182-measure-two, :dispatched-at "2026-08-31T21:12:24Z", :job-id "invoke-1788210740263-6031-372cd437", :expected-by "2026-08-31T21:57:24Z"}]}
