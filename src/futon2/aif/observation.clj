@@ -31,6 +31,75 @@
    :annotation-health     ;; 1 − (lift-anomalies / sections) — from stack-annotations.edn (v0.10; R3a-likelihood-derived)
    ])
 
+(def ^:private missing ::missing)
+
+(defn- present-value?
+  [data path]
+  (let [value (get-in data path missing)]
+    (and (not= missing value) (some? value))))
+
+(defn- channel-statuses
+  "Classify the raw inputs behind each projected channel.
+
+   This deliberately does not change the numeric projection.  It makes the
+   formerly silent distinction between a measured zero and a zero substituted
+   for missing input available to callers that are ready to consume it."
+  [data]
+  (let [requirements
+        {:loop-health [[:loop-health :overall]]
+         :support-coverage [[:support-attack :support-coverage]]
+         :attack-coverage [[:support-attack :attack-coverage]]
+         :mission-health [[:mission-triage :health]]
+         :stack-pct [[:graph :dynamics :commit-percentages :stack]]
+         :consulting-pct [[:graph :dynamics :commit-percentages :consulting]]
+         :portfolio-pct [[:graph :dynamics :commit-percentages :portfolio]]
+         :mathematics-pct [[:graph :dynamics :commit-percentages :mathematics]]
+         :active-repo-ratio [[:graph :summary :active-repos]
+                             [:graph :summary :total-repos]]
+         :sorry-count-norm [[:graph :summary :total-sorrys]]
+         :coupling-density [[:graph :summary :coupling-edges]
+                            [:graph :summary :total-repos]]
+         :ticks-firing-ratio [[:graph :dynamics :ticks]
+                              [:graph :summary :ticks-firing]]
+         :depositing-signal [[:frames :depositing-signal]]
+         :annotation-health [[:annotation-graph :health]]}]
+    (into {}
+          (map (fn [[channel paths]]
+                 (let [absent (remove #(present-value? data %) paths)]
+                   [channel
+                    (if (seq absent)
+                      {:variant :absent
+                       :reason :source-field-missing
+                       :paths (vec absent)
+                       :coerced-to 0.0}
+                      {:variant :observed})])))
+          requirements)))
+
+(defn observation-status
+  "Return the tagged provenance for CHANNEL in an observation from `observe`."
+  [observation channel]
+  (get (::channel-statuses (meta observation)) channel
+       {:variant :absent :reason :status-metadata-missing}))
+
+(defn observation-envelope
+  "Return an EDN-safe tagged observation for persistence or typed consumers.
+
+   Existing numeric consumers can continue to use the map returned by
+   `observe`; new boundaries should persist this envelope so absence is not
+   erased by EDN metadata printing."
+  [observation]
+  {:type :futon2.aif/tagged-observation
+   :channels
+   (into {}
+         (map (fn [channel]
+                (let [status (observation-status observation channel)
+                      value (get observation channel 0.0)]
+                  [channel
+                   (if (= :observed (:variant status))
+                     {:variant :observed :value value}
+                     (assoc status :value value))])))
+         observation-channels)})
+
 (defn observe
   "Produce normalized observation vector from raw scan data.
    Returns a map of channel-id → [0,1] value.
@@ -38,16 +107,18 @@
    This is the war machine's g-observe: the bridge between
    raw scan data and the AIF loop. As of v0.10, also projects
    `:annotation-health` from `(:annotation-graph data)` (sourced
-   upstream by `scan-annotation-graph`). When the field is absent,
-   defaults to 0.0 — the apparatus remains operational under
-   missing-canonical-source conditions."
+   upstream by `scan-annotation-graph`). The numeric projection remains
+   backward-compatible: an absent source is represented as 0.0.  Unlike the
+   old silent default, the returned map carries tagged channel provenance in
+   metadata; use `observation-status` or the EDN-safe `observation-envelope`
+   at a persistence boundary."
   [data]
   (let [{:keys [loop-health support-attack mission-triage graph frames annotation-graph]} data
         {:keys [commit-percentages ticks]} (:dynamics graph {})
         {:keys [summary]} graph
         depositing-signal (or (:depositing-signal frames) 0.0)
-        annotation-health (or (:health annotation-graph) 0.0)]
-    {:loop-health (:overall loop-health 0.0)
+        annotation-health (or (:health annotation-graph) 0.0)
+        values {:loop-health (:overall loop-health 0.0)
      :support-coverage (:support-coverage support-attack 0.0)
      :attack-coverage (:attack-coverage support-attack 0.0)
      :mission-health (:health mission-triage 0.0)
@@ -71,7 +142,8 @@
                               (/ (double firing) total)
                               0.0))
      :depositing-signal depositing-signal
-     :annotation-health annotation-health}))
+     :annotation-health annotation-health}]
+    (with-meta values {::channel-statuses (channel-statuses data)})))
 
 (defn sense->vector
   "Convert observation map to ordered vector (for ML/AIF consumption).

@@ -4,7 +4,8 @@
    These tests verify normalised observation construction from raw scan
    data — moved from `futon2.report.war-machine-test` 2026-05-17 as
    part of the M-war-machine-aif-completion namespace carve."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.edn :as edn]
+            [clojure.test :refer [deftest is testing]]
             [futon2.aif.observation :as obs]))
 
 (def ^:private sample-data
@@ -96,3 +97,32 @@
     (let [o (obs/observe {})]
       (is (every? #(= 0.0 (val %)) o)
           "all channels should be 0.0 for empty data"))))
+
+(deftest absent-input-is-distinct-from-measured-zero-test
+  (testing "the compatible numeric projection no longer erases provenance"
+    (let [absent (obs/observe {})
+          measured-zero (obs/observe
+                         {:loop-health {:overall 0.0}
+                          :support-attack {:support-coverage 0.0
+                                           :attack-coverage 0.0}
+                          :mission-triage {:health 0.0}
+                          :graph {:dynamics {:commit-percentages
+                                             {:stack 0.0 :consulting 0.0
+                                              :portfolio 0.0 :mathematics 0.0}
+                                            :ticks []}
+                                  :summary {:active-repos 0
+                                            :total-repos 0
+                                            :total-sorrys 0
+                                            :coupling-edges 0
+                                            :ticks-firing 0}}
+                          :frames {:depositing-signal 0.0}
+                          :annotation-graph {:health 0.0}})]
+      (is (= absent measured-zero) "legacy numeric consumers see no change")
+      (is (= :absent (:variant (obs/observation-status absent :loop-health))))
+      (is (= :observed (:variant (obs/observation-status measured-zero :loop-health))))
+      (is (not= (obs/observation-envelope absent)
+                (obs/observation-envelope measured-zero)))))
+
+  (testing "the tagged form survives an ordinary EDN round trip"
+    (let [envelope (obs/observation-envelope (obs/observe {}))]
+      (is (= envelope (edn/read-string (pr-str envelope)))))))

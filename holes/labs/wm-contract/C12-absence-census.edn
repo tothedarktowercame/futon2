@@ -1,0 +1,130 @@
+{:delivery :CLEANUP-C12
+ :date "2026-08-31"
+ :scope "src/futon2/aif: semantic input-boundary defaults; one row may cover a contiguous projection"
+ :method {:search "get/get-in keyword defaults, or-to-scalar/empty, destructuring :or, nil guards"
+          :excluded "declared configuration defaults, algebraic identities in complete maps, counters, and collection accumulation"
+          :excluded-examples ["efe.clj default-* constants"
+                              "belief.clj sparse transition/likelihood matrix zero support"
+                              "forward_model.clj merge accumulator zero"]}
+ :counts {:sites 27
+          :unsafe-measurement-or-score-sites 17
+          :explicit-default-or-algebra-sites 9
+          :compatibility-or-serialization-sites 1
+          :fixed-without-numeric-behaviour-change 1
+          :blocked-sites 16}
+ :sites
+ [{:at "src/futon2/aif/observation.clj:117-145"
+   :input "14 raw scan fields (including two ratio denominators)"
+   :absence-means :channel-not-measured
+   :becomes 0.0
+   :consumer-could-tell-before? false
+   :status :fixed-producer-boundary
+   :fix "numeric map now carries tagged provenance; observation-envelope persists it as EDN"}
+  {:at "src/futon2/aif/observation.clj:152"
+   :input "channel missing from an observation map"
+   :absence-means :projection-contract-broken
+   :becomes 0.0
+   :consumer-could-tell? false
+   :status :blocked-on
+   :blocked-on "migrate vector consumers to a value+status vector; changing vector shape is behavioural"}
+  {:at "src/futon2/aif/free_energy.clj:23"
+   :input :observation-value :absence-means :not-measured :becomes 0.0
+   :consumer-could-tell? false :status :blocked-on
+   :blocked-on "free-energy API must accept tagged channels or refuse absence"}
+  {:at "src/futon2/aif/free_energy.clj:31"
+   :input :avoidance-observation :absence-means :not-measured :becomes 0.0
+   :consumer-could-tell? false :status :blocked-on
+   :blocked-on "avoidance scoring must define pass-through for absent channels"}
+  {:at "src/futon2/aif/free_energy.clj:50"
+   :input :preference-channel :absence-means :not-measured :becomes 0.0
+   :consumer-could-tell? false :status :blocked-on
+   :blocked-on "risk diagnostics must consume observation status"}
+  {:at "src/futon2/aif/free_energy.clj:57"
+   :input :computed-gap :absence-means :internal-channel-not-scored :becomes 0.0
+   :consumer-could-tell? false :status :model-identity
+   :basis "weighted sum identity after per-channel construction"}
+  {:at "src/futon2/aif/free_energy.clj:61-63"
+   :input "loop/attack/support observations" :absence-means :not-measured :becomes 0.0
+   :consumer-could-tell? false :status :blocked-on
+   :blocked-on "epistemic diagnostic currently rewards absence as maximal deficit"}
+  {:at "src/futon2/aif/free_energy.clj:70"
+   :input :avoided-channel :absence-means :not-measured :becomes 0.0
+   :consumer-could-tell? false :status :blocked-on
+   :blocked-on "same avoidance pass-through decision as line 31"}
+  {:at "src/futon2/aif/free_energy.clj:98-100"
+   :input "prediction mean, variance, observed value" :absence-means :incomplete-vfe-term
+   :becomes 0.0 :consumer-could-tell? false :status :blocked-on
+   :blocked-on "term should refuse incomplete prediction triples; callers need migration"}
+  {:at "src/futon2/aif/free_energy.clj:138-143"
+   :input "six inference-mode observation channels" :absence-means :not-measured
+   :becomes 0.0 :consumer-could-tell? false :status :blocked-on
+   :blocked-on "infer-mode is live behaviour; consume tagged envelope first"}
+  {:at "src/futon2/aif/precision.clj:123"
+   :input :error-history :absence-means :new-channel :becomes []
+   :consumer-could-tell? true :status :explicit-model-initialisation}
+  {:at "src/futon2/aif/precision.clj:147-159"
+   :input :prior-channel-state :absence-means :new-channel
+   :becomes "declared prior precision/variance/strength" :consumer-could-tell? true
+   :status :explicit-model-initialisation}
+  {:at "src/futon2/aif/precision.clj:166-167"
+   :input "prediction error and observation inside a present error record"
+   :absence-means :malformed-error-record :becomes 0.0 :consumer-could-tell? false
+   :status :blocked-on :blocked-on "make error records a validated tagged input before live precision update"}
+  {:at "src/futon2/aif/precision.clj:179"
+   :input :untracked-channel :absence-means :new-channel :becomes 1.0
+   :consumer-could-tell? true :status :explicit-model-initialisation}
+  {:at "src/futon2/aif/precision.clj:206"
+   :input :prediction-error :absence-means :malformed-error-record :becomes 0.0
+   :consumer-could-tell? false :status :blocked-on
+   :blocked-on "same validated error-record type as lines 166-167"}
+  {:at "src/futon2/aif/forward_model.clj:334"
+   :input :observation :absence-means :empty-initial-state :becomes {}
+   :consumer-could-tell? true :status :explicit-model-initialisation}
+  {:at "src/futon2/aif/forward_model.clj:339"
+   :input :channel-variance :absence-means :no-variance-model :becomes 0.0
+   :consumer-could-tell? false :status :blocked-on
+   :blocked-on "distinguish deterministic prediction from missing variance model"}
+  {:at "src/futon2/aif/forward_model.clj:340"
+   :input :belief :absence-means :empty-initial-belief :becomes {}
+   :consumer-could-tell? true :status :explicit-model-initialisation}
+  {:at "src/futon2/aif/policy.clj:144-145"
+   :input :sorry-count-norm :absence-means :not-measured :becomes 0.0
+   :consumer-could-tell? false :status :blocked-on
+   :blocked-on "policy generator must consume channel status; zero suppresses address-sorry actions"}
+  {:at "src/futon2/aif/rollout.clj:129"
+   :input :action-score :absence-means :malformed-rollout-step :becomes 0.0
+   :consumer-could-tell? false :status :blocked-on
+   :blocked-on "validate rollout step records before exponentiation"}
+  {:at "src/futon2/aif/rollout.clj:158"
+   :input "step delta, then absolute score" :absence-means :unscored-move
+   :becomes 0.0 :consumer-could-tell? false :status :blocked-on
+   :blocked-on "unscored moves need a refusal variant; selection behaviour would change"}
+  {:at "src/futon2/aif/rollout.clj:260"
+   :input :temperature :absence-means :caller-requested-default :becomes 1.0
+   :consumer-could-tell? true :status :explicit-configuration-default}
+  {:at "src/futon2/aif/adapters/fulab.clj:19-22"
+   :input :uncertainty :absence-means :adapter-has-no-uncertainty :becomes 1.0
+   :consumer-could-tell? false :status :explicit-adapter-policy}
+  {:at "src/futon2/aif/adapters/fulab.clj:61-64"
+   :input "missing action weight/count map" :absence-means :no-support
+   :becomes "0.0 / {}" :consumer-could-tell? true :status :sparse-algebra-identity}
+  {:at "src/futon2/aif/adapters/fulab.clj:81"
+   :input :prediction-error :absence-means :adapter-has-no-error :becomes 0.0
+   :consumer-could-tell? false :status :blocked-on
+   :blocked-on "adapter context needs an explicit no-error-measurement variant"}
+  {:at "src/futon2/aif/trace.clj:249-260"
+   :input "missing errors, precision, microsteps, and brief events"
+   :absence-means :older-or-partial-trace-record :becomes "{} / []"
+   :consumer-could-tell? false :status :compatibility-default
+   :blocked-on "trace schema version plus migration; changing historical read semantics is behavioural"}
+  {:at "src/futon2/aif/belief.clj:1040-1052"
+   :input "missing weighted-error/precision diagnostic entries"
+   :absence-means :channel-not-updated :becomes 0.0
+   :consumer-could-tell? false :status :blocked-on
+   :blocked-on "diagnostic aggregation must receive the precision pass-through tag"}]
+ :recorded-result-impact
+ {:verdict :potentially-affected-and-not-reconstructable
+  :reason "persisted numeric observations did not retain raw-field presence, so a stored zero cannot be classified after the fact"
+  :affected-consumers [:risk :epistemic-diagnostic :avoidance :infer-mode
+                       :policy-generation :precision :weighted-error-aggregation]
+  :required-followup "version the persisted observation envelope, then re-run aggregates on post-fix ticks; do not rewrite historical zeros"}}
