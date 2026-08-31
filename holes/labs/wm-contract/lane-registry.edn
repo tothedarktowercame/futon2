@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C121-gate-refresh, :dispatched-at "2026-08-31T18:41:28Z", :job-id "invoke-1788201675096-5875-dde38eaa", :expected-by "2026-08-31T19:26:28Z"}
   {:lane :wm-evidence
-   :holding :C118-tristate-avoidance, :dispatched-at "2026-08-31T18:41:28Z", :job-id "invoke-1788201641525-5872-03f611b4", :expected-by "2026-08-31T19:26:28Z"}]}
+   :holding :C123-blocker-families, :dispatched-at "2026-08-31T18:52:06Z", :job-id "invoke-1788202305417-5883-aa515264", :expected-by "2026-08-31T19:37:06Z"}]}
