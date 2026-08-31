@@ -281,3 +281,21 @@ and must produce `:fixture-drift`; exit 0 means that mutation was rejected, whil
 The four `findF*` bindings deliberately carry `:acceptance :uninspectable` under C60. A readable snapshot
 therefore does not qualify them. Their state is reported separately from freshness, preventing the split
 from laundering a non-rejecting acceptance into a fresh witness.
+
+## C65 — single authored antecedent representation
+
+```sh
+cd /home/joe/code/futon3
+clojure -Sdeps '{:paths ["checks"]}' -M -m find-snatch
+clojure -Sdeps '{:paths ["checks"]}' -M -m find-snatch --negative
+clj-kondo --lint checks/find_snatch.clj checks/playout_snatch.clj
+```
+
+The `.flexiarg` IF/HOWEVER clauses are now the only maintained antecedent text. Runner entries retain the
+executable interpretation and join it to the authored warrant by pattern id; receipts carry the exact
+authored text and source lines. The positive check rejects either an executable id absent from the authored
+repository or any reintroduced `:if-text`/`:however-text` runner field. Its negative control injects the
+forbidden second text into a valid runner entry and must reject it.
+
+This cure does not rebind the four `findF*` declarations. Their strict state remains
+`:acceptance-uninspectable` until a separate rerun-and-rebind delivery accepts the cured check.
