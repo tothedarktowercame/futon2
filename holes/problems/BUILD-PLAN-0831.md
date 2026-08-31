@@ -623,3 +623,66 @@ keeps catching, because a pair reads the definition rather than the sentence abo
 the same defect found at `observation.clj:42`, in the first pairing's payload encoding, and here — the
 build's most persistent single fault, and the contract records typed absence, receipt machinery and
 vocabulary versioning as `:blocked-on` instead of inventing completed semantics.
+
+---
+
+## Workflow: patterns updated as we work, and escalations assessed against the spec *(Joe, 2026-08-31)*
+
+### The paper is now updated, and verified at the artefact
+
+`p4ng 4df9399` revises two patterns in `sec-catalog.tex` against the record, in the paper's own idiom
+(R16 already carried a *"Revised against the record"* clause, so the mechanism existed and was unused):
+
+- **R14 — Selection Gain as Commitment Temperature.** The dial is built and **not connected**:
+  `policy.clj:234-272` computes τ and the habit-adjusted scores, then takes `(first controller-entries)`.
+  The invariant *"exploration is a dial, not a random number generator buried in the selector"* survives
+  **literally** and fails **in substance** — the dial turns nothing. That distinction is why a pattern needs
+  a witness and not only an invariant, and it is why WR-27 reads `:holds false`.
+- **R16 — Grounded Actuation, Not Re-Observation.** No amendment needed: **the pattern named this failure
+  in advance.** It warns of *"an enactor that re-runs its own construction … a mirror, not an act"*, and
+  `enact.clj:113` returns a wiring map. Recorded as a second revision saying exactly that — the pattern
+  diagnosed its own implementation, and two independently role-played endpoints reached it from opposite
+  sides.
+
+Built and published: `/var/www/.../wip/plop-2026.pdf`, 09:52, and I confirmed both revisions are **in the
+published PDF** via `pdftotext`, not by trusting the build's own report. Which matters, because —
+
+**`build-p4ng.sh:118` prints `==> published $WIP/$DOC.html` unconditionally.** Line 114 publishes the PDF
+*inside an `if`*; line 118 announces an HTML publish whether or not anything was written. The HTML does not
+exist at that path. **A success message that cannot fail** — the same defect class as the exemplar gate
+that checked one instance and the acceptances that could not fail. Recorded; the PDF path is sound.
+
+### The rule, since I own the workflow
+
+**Every gated delivery states whether it changes a pattern claim, and pattern-bearing findings are written
+into `sec-catalog.tex` at gate time, not batched.** A finding that contradicts a pattern and lives only in
+a ledger is the repository-boundary failure again at a different boundary: the record exists and the
+document a reader actually reads does not have it.
+
+### Escalations reassessed against the one problem and five precepts
+
+Joe's correction: *look at your own assessment relative to the high-level specification.* Doing that
+retires two of the four things I had been handing back.
+
+**RETIRED — the R16 fork (rename / build / both).** Not a preference. The *fit* precept requires the wiring
+to state what the machine does, and the map currently claims grounded actuation R16 does not perform →
+**rename now.** The problem statement requires every implementation to be held to its definition by a run
+→ **build the outward actuator as the repair.** Both, staged, is what the spec dictates; claude-15's
+recommendation was correct and did not need Joe's ratification. **Proceeding.**
+
+**RETIRED — the TRACE vertex.** `I_evidence_consumed` says an emission without a named consumer is exhaust;
+the *fit* precept says the wiring must contain what the transactions live in. The trace is a real consumer
+the diagram lacks, and `war_machine.clj:4763` writes to it every tick. **It gets a vertex.** What remains is
+naming, which is not a decision requiring the operator.
+
+**STILL JOE'S, and here is the sharper framing — `:self` admissibility.** This is not indecision on my part:
+**two precepts genuinely conflict.** The *evidence apex* certifies that evidence is the right evidence, and
+its operative test is falsifiability — a self-witness with a working negative control *can* say "this is
+wrong". But **R9's whole pattern is no self-certification**, and R2's conformance evidence is the machine
+checking its own trace. Falsifiability says admit it; R9 says refuse it. Whichever way this goes it moves
+a large population — the glossary's 8 holes have no plausible non-self witness at all. **A conflict between
+two precepts is exactly what an operator is for**, and I am not going to resolve it by preferring the
+precept that unblocks more work.
+
+**STILL JOE'S — the two π's.** A Gate 0 nouns question: which definition the spine is built on. I can state
+the consequences but not choose the mathematics.
