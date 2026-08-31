@@ -134,6 +134,20 @@ measurements, and superseded configurations never seed that comparison.
 
 ## Deliberately manual
 
+After a bounded operator run completes, certify it with its UUID:
+
+```sh
+make certify-run RUN_ID=<uuid-from-TickRunRecord>
+```
+
+The command deliberately does not guess “latest”. It locates the unique
+`tick-run-record-*.edn` carrying that UUID, locates the unique bounded-wrapper
+receipt whose interval encloses that tick, stamps the normalized resource
+input with the same UUID, writes the operational certificate, and prints the
+topology hashes, traversal counts, resource status, and verdict. Missing or
+ambiguous run/receipt evidence is a loud failure naming the paths searched.
+This command certifies an already completed run; it does not initiate one.
+
 - `bb checks/lane_registry_check.clj` measures commissioner/dispatcher
   discipline (`:stale-holding`), not repository validity. Run it during
   dispatch and closure review; do not make source CI depend on operator timing.

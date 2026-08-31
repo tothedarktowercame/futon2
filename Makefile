@@ -1,4 +1,4 @@
-.PHONY: ci workspace-gate pre-merge status status-control
+.PHONY: ci workspace-gate pre-merge status status-control certify-run
 
 # Hermetic repository boundary: futon2 sources, tests, and build only.
 ci:
@@ -22,3 +22,9 @@ status:
 
 status-control:
 	python3 scripts/wm_status_report.py --source-control
+
+# Certify one completed operator/diagnostic run without guessing "latest".
+# Usage: make certify-run RUN_ID=<uuid>
+certify-run:
+	@test -n "$(RUN_ID)" || (echo "certify-run: RUN_ID is required" >&2; exit 1)
+	bb -cp . checks/certify_live_run.clj --run-id "$(RUN_ID)"

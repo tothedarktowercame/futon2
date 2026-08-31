@@ -10,7 +10,7 @@
 (def c167-run "holes/labs/wm-contract/tick-run-record-2026-08-31.edn")
 (def c167-resource "holes/labs/wm-contract/C167-v20-certificate-resource.edn")
 (def c167-run-sha256 "3d4432d09934517811cda1b1b35d7a5a9c1bbc73f137d76f4aecb30f6ab07875")
-(def c167-resource-sha256 "9c9e566a9d5460ec0bbadf59c58b10627e6434a52974ffd62480dc554e4cfdea")
+(def c167-resource-sha256 "caaa479309506839b37611d9f2931d77bfb3ef8b75cb4a40826b18bf550319cf")
 
 (def repositories
   {:futon2 "/home/joe/code/futon2"
@@ -50,7 +50,7 @@
   #{"ablation_exact_dyadic_witness.clj" "absence_scoring_counterfactual.clj"
     "ambiguity_witness.clj"
     "absent_is_loud_lint.clj" "belief_update_check.clj"
-    "belief_variance_inputs.clj" "cascade_diff_witness.clj" "closed_record_pointer_check.clj" "contract_lint.clj"
+    "belief_variance_inputs.clj" "cascade_diff_witness.clj" "certify_live_run.clj" "closed_record_pointer_check.clj" "contract_lint.clj"
     "cleanup_queue_correction_index.clj"
     "contract_authority_current.clj"
     "control_map_figure_agreement_check.clj" "control_map_lint.clj"

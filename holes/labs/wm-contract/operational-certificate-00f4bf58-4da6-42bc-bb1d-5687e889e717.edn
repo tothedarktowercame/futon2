@@ -1,0 +1,111 @@
+{:certificate/schema 1,
+ :certificate/generated-at "2026-08-31T21:07:20.417035573Z",
+ :run
+ {:id "00f4bf58-4da6-42bc-bb1d-5687e889e717",
+  :identity-kind :recorded-run-id,
+  :started-at "2026-08-31T20:35:27.446481011Z"},
+ :topology
+ {:artifact "p4ng/aif-control-map-paper.svg",
+  :content-sha256
+  "568938d213c23c79f42a01a36547ced622deec64a3591f847c3e72a234b538ec",
+  :expected-sha256
+  "568938d213c23c79f42a01a36547ced622deec64a3591f847c3e72a234b538ec",
+  :edge-data "p4ng/empirics-futon/control-map-edges.edn",
+  :edge-data-sha256
+  "64485bb0165fe4abdaf799b59853c05efb0e09fbaf293bf9511d91e5098f509d",
+  :edge-data-expected-sha256
+  "64485bb0165fe4abdaf799b59853c05efb0e09fbaf293bf9511d91e5098f509d",
+  :pin-valid? true},
+ :traversal
+ {:hops
+  [{:fromNode "R20",
+    :toNode "R12",
+    :via "futon2.report.war-machine/scan-r12-apparatus",
+    :at_ "2026-08-31T20:35:38.427405427Z",
+    :topology/layer :measured}
+   {:fromNode "R12",
+    :toNode "R2",
+    :via "futon2.aif.observation/observe",
+    :at_ "2026-08-31T20:35:42.698145071Z",
+    :topology/layer :measured}
+   {:fromNode "R2",
+    :toNode "R7",
+    :via "futon2.aif.precision/update-precision-state",
+    :at_ "2026-08-31T20:35:45.843677728Z",
+    :topology/layer :measured}
+   {:fromNode "R7",
+    :toNode "R3",
+    :via "futon2.report.war-machine/apply-arena-belief-events",
+    :at_ "2026-08-31T20:35:45.843741517Z",
+    :topology/layer :original}
+   {:fromNode "R3",
+    :toNode "R8",
+    :via "futon2.aif.free-energy/compute-variational-free-energy",
+    :at_ "2026-08-31T20:35:45.843992928Z",
+    :topology/layer :measured}
+   {:fromNode "R8",
+    :toNode "R5",
+    :via "futon2.aif.efe/rank-actions",
+    :at_ "2026-08-31T20:35:50.669094802Z",
+    :topology/layer :original}
+   {:fromNode "R5",
+    :toNode "R6",
+    :via "futon2.aif.policy/select-action",
+    :at_ "2026-08-31T20:35:51.038071850Z",
+    :topology/layer :original}
+   {:fromNode "R6",
+    :toNode "R14",
+    :via "futon2.report.war-machine/invoke-strategic-selection",
+    :at_ "2026-08-31T20:35:51.038328360Z",
+    :topology/layer :measured}
+   {:fromNode "R14",
+    :toNode "TRACE",
+    :via "futon2.aif.trace/write-trace!",
+    :at_ "2026-08-31T20:35:51.185357568Z",
+    :topology/layer :measured}],
+  :counts {:total 9, :original 3, :measured 6, :undeclared 0},
+  :undeclared-hops [],
+  :declared-not-exercised
+  {:original
+   [["R1" "R4"]
+    ["R10" "R8"]
+    ["R11" "R16"]
+    ["R12" "R7"]
+    ["R13" "R14"]
+    ["R14" "R16"]
+    ["R15" "R13"]
+    ["R15" "R16"]
+    ["R16" "R2"]
+    ["R2" "R3"]
+    ["R20" "R7"]
+    ["R3" "R1"]
+    ["R4" "R5"]
+    ["R6" "R11"]
+    ["R6" "R13"]
+    ["R7" "R14"]
+    ["R7" "R8"]
+    ["R9" "R16"]],
+   :measured [["R2" "R3a"] ["R3a" "R7"]]}},
+ :resource-status
+ {:schema 1,
+  :tasks-peak 74,
+  :source-receipt
+  "holes/labs/wm-contract/C167-v20-resource-receipt.json",
+  :run/id "00f4bf58-4da6-42bc-bb1d-5687e889e717",
+  :wrapper-exit 0,
+  :reason nil,
+  :native-thread-exhaustion false,
+  :status :clean,
+  :pids-events-max-delta 0,
+  :command-exit 0,
+  :source-schema :futon-bounded-test-v1},
+ :checks
+ {:run-identity-present? true,
+  :run-identity-source :recorded-run-id,
+  :run-timestamp-present? true,
+  :route-present? true,
+  :topology-pin-valid? true,
+  :no-undeclared-traversal? true,
+  :resource-run-identity-matches? true,
+  :resource-status-clean? true},
+ :verdict :pass}

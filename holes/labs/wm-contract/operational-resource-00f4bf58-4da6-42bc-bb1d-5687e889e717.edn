@@ -1,0 +1,1 @@
+{:schema 1, :tasks-peak 74, :source-receipt "holes/labs/wm-contract/C167-v20-resource-receipt.json", :run/id "00f4bf58-4da6-42bc-bb1d-5687e889e717", :wrapper-exit 0, :reason nil, :native-thread-exhaustion false, :status :clean, :pids-events-max-delta 0, :command-exit 0, :source-schema :futon-bounded-test-v1}

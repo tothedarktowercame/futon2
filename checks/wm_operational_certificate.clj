@@ -23,8 +23,10 @@
         measured (set (map pair (:route-measured-drawn m)))]
     {:original original :measured measured :all (into original measured)}))
 
-(defn resource-clean? [r]
+(defn resource-clean? [run r]
   (and (= :clean (:status r))
+       (or (nil? (:run/id r))
+           (= (:run/id run) (:run/id r)))
        (zero? (long (or (:pids-events-max-delta r) -1)))
        (false? (:native-thread-exhaustion r))
        (= 0 (:command-exit r))))
@@ -59,7 +61,9 @@
                               (= expected-data-sha256 data-hash))
         route-present? (seq route)
         run-time? (string? (:startedAt run))
-        resources-clean? (resource-clean? resource)
+        resource-identity-matches? (or (nil? (:run/id resource))
+                                       (= (:run/id run) (:run/id resource)))
+        resources-clean? (resource-clean? run resource)
         identity (run-identity run-bytes run)
         pass? (boolean (and route-present? run-time? topology-pinned?
                             (empty? undeclared) resources-clean?))]
@@ -87,6 +91,7 @@
               :route-present? (boolean route-present?)
               :topology-pin-valid? topology-pinned?
               :no-undeclared-traversal? (empty? undeclared)
+              :resource-run-identity-matches? resource-identity-matches?
               :resource-status-clean? resources-clean?}
      :verdict (if pass? :pass :fail)}))
 
