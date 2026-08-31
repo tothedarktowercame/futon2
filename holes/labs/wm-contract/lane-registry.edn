@@ -4,9 +4,9 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C248-classify-declaration, :dispatched-at "2026-08-31T23:39:38Z", :job-id "invoke-1788219574681-6208-c07d467b", :expected-by "2026-09-01T00:24:38Z"}
+   :holding :C252-next-glossary-term, :dispatched-at "2026-08-31T23:44:06Z", :job-id "invoke-1788219842881-6217-43b93b04", :expected-by "2026-09-01T00:29:06Z"}
   {:lane :wm-verbs
-   :holding :C246-ledger-read-path, :dispatched-at "2026-08-31T23:35:30Z", :job-id "invoke-1788219297593-6202-8754d8f3", :expected-by "2026-09-01T00:20:30Z"}
+   :holding :C251-ledger-durability, :dispatched-at "2026-08-31T23:44:06Z", :job-id "invoke-1788219820897-6215-b2346239", :expected-by "2026-09-01T00:29:06Z"}
   {:lane :wm-organization
    :holding :C249-click-receipt-design, :dispatched-at "2026-08-31T23:42:53Z", :job-id "invoke-1788219739893-6213-407ab7fd", :expected-by "2026-09-01T00:27:53Z"}
   {:lane :wm-evidence
