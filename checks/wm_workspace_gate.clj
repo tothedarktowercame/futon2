@@ -144,6 +144,10 @@
     :argv ["bb" "checks/model_uncertainty_eig_witness.clj"]}
    {:name :c130-immediate-option-measurement
     :argv ["bb" "-cp" "." "checks/c130_immediate_option_measurement.clj"]}
+   {:name :reload-click-certificate-rehearsal
+    :dir "/home/joe/code/futon3c"
+    :argv ["clojure" "-M:test:test-all" "-i" ":slow" "-n"
+           "futon3c.wm.chain-rehearsal-test"]}
    {:name :pinned-operational-certificate
     :argv ["bb" "-cp" "." "checks/wm_operational_certificate.clj"
            "--run" c167-run "--resource" c167-resource

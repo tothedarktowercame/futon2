@@ -17,6 +17,13 @@ part of its result. A successful gate records the HEAD/tree/dirtiness basis of
 futon2, mathlib4, p4ng, and futon3; these are provenance, not stale equality
 assertions.
 
+The workspace gate includes the throwaway reload → HTTP click → operational
+certificate rehearsal (`reload-click-certificate-rehearsal`). It deliberately
+does not belong to Futon3's ordinary suite because it reads Futon2 and p4ng
+fixtures. Measured 2026-08-31: 5.54 s cold, 5.70 s warm, about 1 GB peak RSS.
+`make run-readiness` already consumes the workspace-gate verdict, so a broken
+chain becomes a named readiness blocker without running an unbounded duplicate.
+
 Before an operator run, use `make run-readiness`. Every precondition is printed
 by name. `NOT-READY (waiting)` means every blocker is `SELF-CLEARING`: wait for
 the in-flight delivery, bounded job, or capacity pressure to settle and rerun.
