@@ -6,7 +6,7 @@
  [{:lane :wm-nouns
    :holding :C157-ambiguity, :dispatched-at "2026-08-31T20:10:47Z", :job-id "invoke-1788207043695-5968-026cef69", :expected-by "2026-08-31T20:55:47Z"}
   {:lane :wm-verbs
-   :holding :C158-schema-compat, :dispatched-at "2026-08-31T20:12:30Z", :job-id "invoke-1788207146723-5970-20b4b883", :expected-by "2026-08-31T20:57:30Z"}
+   :holding :C163-first-v20-tick, :dispatched-at "2026-08-31T20:24:03Z", :job-id "invoke-1788207839332-5982-8b8c2d94", :expected-by "2026-08-31T21:09:03Z"}
   {:lane :wm-organization
    :holding :C162-gate-timing, :dispatched-at "2026-08-31T20:22:54Z", :job-id "invoke-1788207771180-5981-5f2f00b3", :expected-by "2026-08-31T21:07:54Z"}
   {:lane :wm-evidence
