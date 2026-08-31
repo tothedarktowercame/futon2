@@ -46,6 +46,7 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
+            [clojure.set :as set]
             [clojure.string :as str]
             [futon2.aif.lane-futility :as lane-futility]
             [futon2.aif.observation :as observation]
@@ -187,8 +188,11 @@
     17 — records the lossless observation envelope once per tick, derived from
          the same observation object as the compatible numeric projection;
          absent channels retain their reason and measured zero stays present
-         (2026-08-31)."
-  17)
+         (2026-08-31).
+    18 — adds the support-typed scoring shadow. It records current and masked
+         scores, support/absence provenance, comparability, and counterfactual
+         rank while retaining zero selection authority (2026-08-31)."
+  18)
 
 (defn- preference-stack-evidence
   "Preserve the exact stack carried by ranked evaluation objects without
@@ -230,6 +234,84 @@
       {:status :conflict
        :reason :ranked-actions-recorded-different-stacks
        :by-rank (mapv #(select-keys % [:rank :value]) entries)})))
+
+(defn- support-typed-scoring-shadow
+  "Apply observation support to the exact additive channel decomposition made
+   by the evaluator. This is evidence only: its result is persisted but never
+   returned to policy/select-action."
+  [envelope ranked-actions]
+  (let [statuses (:channels envelope)
+        candidates
+        (mapv (fn [idx candidate]
+                (let [terms (:support-shadow-terms candidate)
+                      by-channel (:by-channel terms)
+                      required (set (keys by-channel))
+                      support (set (for [ch required
+                                         :when (= :observed
+                                                  (get-in statuses [ch :variant]))]
+                                     ch))
+                      absent (into {}
+                                   (for [ch (sort (set/difference required support))]
+                                     [ch (select-keys (get statuses ch)
+                                                      [:reason :paths])]))]
+                  (if-not (and (map? by-channel)
+                               (number? (:non-channel-contribution terms)))
+                    {:candidate-index idx
+                     :rank (:rank candidate)
+                     :action (:action candidate)
+                     :current-score (:controller-score candidate)
+                     :status :unavailable
+                     :reason :evaluator-lacks-channel-decomposition}
+                    {:candidate-index idx
+                     :rank (:rank candidate)
+                     :action (:action candidate)
+                     :current-score (:controller-score candidate)
+                     :support-typed-score
+                     (+ (double (:non-channel-contribution terms))
+                        (reduce + 0.0 (map #(double (get by-channel %)) support)))
+                     :support (vec (sort support))
+                     :required-support (vec (sort required))
+                     :absent-reasons absent
+                     :status :measured})))
+              (range) ranked-actions)
+        measured (filterv #(= :measured (:status %)) candidates)
+        pair-count (quot (* (count measured) (dec (count measured))) 2)
+        incomparable-pairs
+        (count (for [i (range (count measured))
+                     j (range (inc i) (count measured))
+                     :when (not= (:support (nth measured i))
+                                 (:support (nth measured j)))]
+                 [i j]))
+        comparable? (and (seq candidates)
+                         (= (count measured) (count candidates))
+                         (zero? incomparable-pairs))
+        shadow-order (when comparable?
+                       (mapv :candidate-index
+                             (sort-by (juxt :support-typed-score :candidate-index)
+                                      measured)))
+        shadow-ranks (when shadow-order
+                       (zipmap shadow-order (range 1 (inc (count shadow-order)))))
+        candidates (mapv (fn [candidate]
+                           (if-let [shadow-rank (get shadow-ranks
+                                                    (:candidate-index candidate))]
+                             (assoc candidate
+                                    :support-typed-rank shadow-rank
+                                    :would-rank-differently
+                                    (not= (:rank candidate) shadow-rank))
+                             candidate))
+                         candidates)]
+    {:status (cond
+               (empty? candidates) :absent
+               (every? #(= :measured (:status %)) candidates) :measured
+               :else :partial)
+     :authority :shadow-only
+     :score-kind :multi-objective-controller-score
+     :candidates candidates
+     :comparison {:candidate-pairs pair-count
+                  :incomparable-support-pairs incomparable-pairs
+                  :ranking-comparable? comparable?
+                  :winner-changed? (when comparable?
+                                     (not= 0 (first shadow-order)))}}))
 
 (defn- futon2-git-version
   "Git identity of the futon2 checkout this JVM loaded its code from:
@@ -302,6 +384,9 @@
     :mu-post (:belief judge-output)
     :observation observed
     :observation-envelope observed-envelope
+    :support-typed-scoring-shadow
+    (support-typed-scoring-shadow observed-envelope
+                                  (:ranked-actions judge-output))
     :free-energy (:free-energy judge-output)
     :variational-free-energy (:variational-free-energy judge-output)
     :prediction-errors (:prediction-errors judge-output {})

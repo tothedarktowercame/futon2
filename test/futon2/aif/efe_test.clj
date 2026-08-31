@@ -143,7 +143,17 @@
       (is (contains? o :structural-pressure))
       (is (contains? o :gap-exploration-bonus))
       (is (contains? o :controller-score))
-      (is (contains? o :per-channel))))
+      (is (contains? o :per-channel))
+      (is (contains? o :support-shadow-terms))
+      (is (< (Math/abs
+              (- (double (:controller-score o))
+                 (+ (double (get-in o [:support-shadow-terms
+                                       :non-channel-contribution]))
+                    (reduce + 0.0
+                            (vals (get-in o [:support-shadow-terms
+                                             :by-channel]))))))
+             1.0e-12)
+          "full-support shadow decomposition exactly reconstructs the live score")))
   (testing "controller-score composes all six principled terms"
     ;; controller-score = G-risk + G-ambiguity − info-weight·predictability-bonus
     ;;           + survival-weight·homeostatic-pressure

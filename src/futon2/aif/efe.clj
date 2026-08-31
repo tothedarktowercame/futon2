@@ -60,6 +60,20 @@
                         (vals variance-map)))
      (reduce + (vals variance-map)))))
 
+(defn- ambiguity-by-channel
+  "The additive channel decomposition of `ambiguity`. Kept beside the
+   aggregate so a shadow scorer can remove an absent channel without guessing
+   how the aggregate was formed."
+  [variance-map mode]
+  (into {}
+        (map (fn [[ch v]]
+               [ch (case mode
+                     :gaussian-entropy
+                     (* 0.5 (Math/log (* 2.0 Math/PI Math/E
+                                         (max (double v) 1e-9))))
+                     (double v))]))
+        variance-map))
+
 ;; ---------------------------------------------------------------------------
 ;; v0.13 controller augmentation: predictability and homeostatic controls ported from
 ;; ants/aif/policy.clj (the cyberants reference implementation).
@@ -636,25 +650,32 @@
                         (- (double (:predictive-probability zone-evidence))
                            (double (:load-weight zone-evidence)))))
                      0.0)
-         channel-risk (case risk-mode
-                        :kl
-                        (reduce +
-                                0.0
-                                (for [[ch spec] (pref/current-C)
-                                      :let [mu (get next-mean ch)
-                                            s2 (get next-var ch)]
-                                      :when (and mu s2)]
-                                  (* (double (get kcw ch kcw-default))
-                                     (pref/kl {:kind :gaussian :mu mu :sigma2 s2}
-                                              (pref/c-distribution spec
-                                                                   :temperature (ch-temp ch))))))
-                        (:preference-gap-score fe-on-predicted))
+         channel-risk-terms
+         (case risk-mode
+           :kl
+           (into {}
+                 (for [[ch spec] (pref/current-C)
+                       :let [mu (get next-mean ch)
+                             s2 (get next-var ch)]
+                       :when (and mu s2)]
+                   [ch (* (double (get kcw ch kcw-default))
+                          (pref/kl {:kind :gaussian :mu mu :sigma2 s2}
+                                   (pref/c-distribution spec
+                                                        :temperature (ch-temp ch))))]))
+           (into {}
+                 (for [[ch {:keys [gap]}] (:per-channel fe-on-predicted)]
+                   [ch (* (double (get pref/pragmatic-weights ch 0.0))
+                          (double gap))])))
+         channel-risk (reduce + 0.0 (vals channel-risk-terms))
 	         ;; foldC layer ids: :floor from channel-risk + :capability-zone-load
 	         ;; from zone-risk compose here as the recorded C-risk prefix.
 	         g-risk (+ channel-risk zone-risk)
+         ambiguity-terms (if learn-action?
+                           {}
+                           (ambiguity-by-channel next-var ambiguity-mode))
          g-ambig (if learn-action?
                    (:predictive-variance zone-evidence)
-                   (ambiguity next-var ambiguity-mode))
+                   (reduce + 0.0 (vals ambiguity-terms)))
          g-info (predictability-bonus next-var)
          g-survival-base (homeostatic-pressure next-mean)
          g-structural-pressure (double (or (:structural-pressure-per-action action) 0.0))
@@ -766,7 +787,41 @@
 	                         g-goal-outcome)
          g-total (if move-class-contribution
                    (+ g-total-base move-class-contribution)
-                   g-total-base)]
+                   g-total-base)
+         ;; C108 shadow-only decomposition. These terms do not enter scoring;
+         ;; they restate the already-computed sum per observation channel so
+         ;; the trace boundary can omit absent channels exactly. Everything
+         ;; not observation-channel-indexed is retained as one residual.
+         survival-channels #{:annotation-health :sorry-count-norm
+                             :mission-health :active-repo-ratio}
+         channel-terms
+         (into {}
+               (for [ch (set (concat (keys channel-risk-terms)
+                                     (keys ambiguity-terms)
+                                     (keys next-var)))
+                     :let [variance (get next-var ch)
+                           info-term (if (and predictability-active? variance)
+                                       (- (* (double info-weight)
+                                             (max 0.0 (- 1.0 (double variance)))))
+                                       0.0)
+                           survival-gap (if (and homeostatic-active?
+                                                 (contains? survival-channels ch)
+                                                 (contains? next-mean ch)
+                                                 (get (pref/current-C) ch))
+                                          (let [[lo hi] (get (pref/current-C) ch)
+                                                d (double (get next-mean ch))]
+                                            (cond (< d lo) (- lo d)
+                                                  (> d hi) (- d hi)
+                                                  :else 0.0))
+                                          0.0)]]
+                 [ch (+ (* urgency (double (get channel-risk-terms ch 0.0)))
+                        (double (get ambiguity-terms ch 0.0))
+                        info-term
+                        (* (double survival-weight) urgency survival-gap))]))
+         channel-total (reduce + 0.0 (vals channel-terms))
+         support-shadow-terms
+         {:by-channel channel-terms
+          :non-channel-contribution (- g-total channel-total)}]
      (cond->
       (merge
 	       {:action action
@@ -811,6 +866,7 @@
         :homeostatic-control-mode homeostatic-control-mode
         :graph-feasibility-mode graph-feasibility-mode
         :controller-score g-total
+        :support-shadow-terms support-shadow-terms
         :time-pressure (double time-pressure)
         :horizon-steps (when multi (:horizon-steps multi))
         :per-channel (cond-> (:per-channel fe-on-predicted)

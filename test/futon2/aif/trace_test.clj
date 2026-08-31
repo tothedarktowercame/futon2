@@ -97,6 +97,43 @@
              (get-in record
                      [:observation-envelope :channels :loop-health :variant]))))))
 
+(deftest support-typed-scoring-shadow-is-non-authoritative-test
+  (let [ranked [{:action {:type :a} :rank 1 :controller-score 0.0
+                 :support-shadow-terms
+                 {:by-channel {:loop-health -2.0}
+                  :non-channel-contribution 2.0}}
+                {:action {:type :b} :rank 2 :controller-score 1.0
+                 :support-shadow-terms
+                 {:by-channel {:loop-health 2.0}
+                  :non-channel-contribution -1.0}}]
+        output (assoc sample-judge-output
+                      :observation (observation/observe {})
+                      :ranked-actions ranked)
+        record (trace/trace-record output)
+        shadow (:support-typed-scoring-shadow record)]
+    (is (= :shadow-only (:authority shadow)))
+    (is (= [2.0 -1.0]
+           (mapv :support-typed-score (:candidates shadow))))
+    (is (true? (get-in shadow [:comparison :winner-changed?])))
+    (is (= (dissoc (:decision sample-judge-output) :softmax-weights)
+           (:decision record))
+        "the counterfactual cannot feed back into the live decision")))
+
+(deftest measured-zero-remains-in-shadow-support-test
+  (let [ranked [{:action {:type :a} :rank 1 :controller-score 0.0
+                 :support-shadow-terms
+                 {:by-channel {:loop-health -2.0}
+                  :non-channel-contribution 2.0}}]
+        output (assoc sample-judge-output
+                      :observation
+                      (observation/observe {:loop-health {:overall 0.0}})
+                      :ranked-actions ranked)
+        candidate (get-in (trace/trace-record output)
+                          [:support-typed-scoring-shadow :candidates 0])]
+    (is (= [:loop-health] (:support candidate)))
+    (is (= 0.0 (:support-typed-score candidate)))
+    (is (false? (:would-rank-differently candidate)))))
+
 (deftest trace-record-strips-prediction-field-test
   (testing "ranked-actions in trace drop the heavy :prediction field"
     (let [r (trace/trace-record sample-judge-output)

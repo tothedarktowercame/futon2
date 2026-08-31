@@ -27,7 +27,11 @@
   (let [files (trace-files)
         records (mapcat forms files)
         candidates (reduce + 0 (map #(count (:ranked-actions %)) records))
-        tagged (filter #(tagged-observation? (:observation %)) records)
+        tagged (filter #(tagged-observation? (:observation-envelope %)) records)
+        shadowed (filter #(map? (:support-typed-scoring-shadow %)) records)
+        shadow-candidates (mapcat #(get-in % [:support-typed-scoring-shadow
+                                              :candidates])
+                                  shadowed)
         pin-input (apply str (for [f files]
                                (str (fs/file-name f) "\n" (slurp (str f)) "\n")))]
     {:measurement :absence-in-scoring-counterfactual
@@ -37,8 +41,31 @@
      :records-with-presence-provenance (count tagged)
      :classifiable-scored-candidates
      (reduce + 0 (map #(count (:ranked-actions %)) tagged))
-     :candidates-with-absent-channels :unknown
-     :ranking-changes-under-support-aware-semantics :unknown
-     :reason :numeric-observation-persisted-without-channel-presence}))
+     :records-with-support-shadow (count shadowed)
+     :shadowed-scored-candidates (count shadow-candidates)
+     :candidates-with-absent-channels
+     (if (seq shadowed)
+       (count (filter #(seq (:absent-reasons %)) shadow-candidates))
+       :unknown)
+     :candidate-rank-changes
+     (if (seq shadowed)
+       (count (filter true? (map :would-rank-differently shadow-candidates)))
+       :unknown)
+     :winner-changing-records
+     (if (seq shadowed)
+       (count (filter #(true? (get-in % [:support-typed-scoring-shadow
+                                         :comparison :winner-changed?]))
+                      shadowed))
+       :unknown)
+     :incomparable-support-pairs
+     (if (seq shadowed)
+       (reduce + 0 (map #(get-in % [:support-typed-scoring-shadow :comparison
+                                    :incomparable-support-pairs] 0)
+                        shadowed))
+       :unknown)
+     :coverage-limitation
+     (if (seq shadowed)
+       :post-v17-shadow-records-only
+       :no-post-v17-shadow-records-yet)}))
 
 (println (pr-str (report)))
