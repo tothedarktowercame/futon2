@@ -18,8 +18,9 @@ def run(argv, cwd=ROOT):
     return subprocess.run(argv, cwd=cwd, text=True, capture_output=True)
 
 
-def result(name, passed, **evidence):
-    return {"name": name, "pass": bool(passed), "evidence": evidence}
+def result(name, passed, blocker_kind, **evidence):
+    return {"name": name, "pass": bool(passed),
+            "blocker-kind": None if passed else blocker_kind, "evidence": evidence}
 
 
 def instant(value):
@@ -38,14 +39,15 @@ def repository_state(path):
 def latest_suite(records, command, repo):
     candidates = [r for r in records if r.get("cmd") == command and r.get("receipt")]
     if not candidates:
-        return result(repo + "-suite", False, reason="no-terminal-bounded-receipt", command=command)
+        return result(repo + "-suite", False, "unverified",
+                      reason="no-terminal-bounded-receipt", command=command)
     record = max(candidates, key=lambda r: r["receipt"].get("finished-at", ""))
     state = repository_state(ROOT if repo == "futon2" else FUTON3)
     receipt = record["receipt"]
     fresh = (state["readable"] and not state["tracked-dirty"] and
              instant(receipt["finished-at"]) >= instant(state["committed-at"]))
     passed = receipt.get("outer-exit") == 0 and receipt.get("verdict") == "pass" and fresh
-    return result(repo + "-suite", passed, receipt=record["id"],
+    return result(repo + "-suite", passed, "unverified", receipt=record["id"],
                   verdict=receipt.get("verdict"), outer_exit=receipt.get("outer-exit"),
                   finished_at=receipt.get("finished-at"), repository=state, fresh=fresh)
 
@@ -56,7 +58,8 @@ def roster_readiness(negative=False):
             body = json.load(response)
         agents = body.get("agents", {})
     except Exception as error:
-        return result("reviewer-availability", False, reason="roster-unavailable", error=str(error)), None
+        return result("reviewer-availability", False, "unavailable",
+                      reason="roster-unavailable", error=str(error)), None
     def available(name):
         entry = agents.get(name) or {}
         return entry.get("status") == "idle" and entry.get("invoke-ready?") is True
@@ -65,7 +68,7 @@ def roster_readiness(negative=False):
     chosen = next((name for name in preferred if available(name)), None)
     if negative:
         chosen = None
-    return result("reviewer-availability", chosen is not None,
+    return result("reviewer-availability", chosen is not None, "unavailable",
                   roster_reachable=True, default_reviewer=default,
                   default_present=default in agents, default_available=available(default),
                   selected=chosen, candidates={name: available(name) for name in preferred},
@@ -80,16 +83,16 @@ def main():
     checks.append(reviewer)
 
     gate = run(["bb", "-cp", ".", "checks/wm_workspace_gate.clj"])
-    checks.append(result("workspace-gate", gate.returncode == 0, exit=gate.returncode,
+    checks.append(result("workspace-gate", gate.returncode == 0, "unverified", exit=gate.returncode,
                          summary=next((line for line in gate.stdout.splitlines()
                                        if line.startswith("wm-workspace-gate: SUMMARY")), None)))
 
     authority = run(["bb", "checks/contract_authority_current.clj"])
-    checks.append(result("contract-freshness", authority.returncode == 0, exit=authority.returncode,
+    checks.append(result("contract-freshness", authority.returncode == 0, "unverified", exit=authority.returncode,
                          summary=authority.stdout.strip().splitlines()[-1] if authority.stdout.strip() else None))
 
     schema = run(["clojure", "-M", "-m", "checks.trace-schema-compatibility"])
-    checks.append(result("trace-schema-v20-readback", schema.returncode == 0, exit=schema.returncode,
+    checks.append(result("trace-schema-v20-readback", schema.returncode == 0, "unverified", exit=schema.returncode,
                          summary=schema.stdout.strip().splitlines()[-1] if schema.stdout.strip() else None))
 
     listed = run(["python3", BG, "test-list"])
@@ -107,16 +110,16 @@ def main():
         active = sum((r.get("systemd", {}).get("ActiveState") in ("active", "activating"))
                      for r in records)
         capacity = active < config["admission-max"]
-        checks.append(result("bounded-service-capacity", capacity,
+        checks.append(result("bounded-service-capacity", capacity, "unavailable",
                              active=active, admission_max=config["admission-max"],
                              tasks_max=config["tasks-max"], slice_tasks_max=config["slice-tasks-max"],
                              configuration_hash=config["configuration-hash"]))
     except (json.JSONDecodeError, KeyError, TypeError):
-        checks.append(result("bounded-service-capacity", False, reason="health-unreadable",
+        checks.append(result("bounded-service-capacity", False, "unavailable", reason="health-unreadable",
                              exit=health_result.returncode))
 
     dry = run(["make", "-n", "certify-run", "RUN_ID=readiness-probe"])
-    checks.append(result("certify-run-command", dry.returncode == 0, exit=dry.returncode,
+    checks.append(result("certify-run-command", dry.returncode == 0, "unverified", exit=dry.returncode,
                          command="make certify-run RUN_ID=<uuid-from-TickRunRecord>"))
 
     ready = all(item["pass"] for item in checks)

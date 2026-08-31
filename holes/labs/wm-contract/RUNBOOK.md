@@ -24,6 +24,23 @@ using the absent `codex-7` default. Only run the printed
 `clojure -M:wm-full-loop once --reviewer ...` command after the preflight says
 `READY`.
 
+Readiness blockers have two kinds. `UNAVAILABLE` means a required live resource
+cannot be used now (reviewer, roster, or bounded admission). `UNVERIFIED` means
+the machine might run, but the exact code/evidence it would use has not passed
+the required check. Both block; they call for different action.
+
+In particular, the last code-affecting action before the operator run must be a
+**bounded** futon2 suite run. An ordinary `bg.py launch "make ci"` can show an
+inner green summary but does not emit the outer resource receipt, so it does
+not refresh readiness. Today suite freshness is conservative: the receipt must
+finish after the repository's current commit timestamp and the tracked tree
+must be clean. Consequently a docs-only commit also makes it stale. Comparing
+the tested tree's content would be more precise, as C175's source-blob rule is,
+but existing receipts do not record that tree. Do not weaken the proxy; migrate
+when the bounded receipt schema records repository tree SHA plus tracked-diff
+fingerprint. For this rare operation, rerunning the two-minute suite is the
+honest current closure step.
+
 ### Expected duration
 
 C162 measured fresh processes with `/usr/bin/time` on 2026-08-31; “cold” is
