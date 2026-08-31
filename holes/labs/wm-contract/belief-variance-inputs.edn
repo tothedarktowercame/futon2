@@ -1,0 +1,42 @@
+{:record :C32-belief-variance-inputs
+ :decided "2026-08-31"
+ :consumer :C31-belief-variance-update
+ :corpus
+ {:trace-dir "data/wm-trace"
+  :pin {:forms 792
+        :sha256 "c9add16ac96c973ba4fd9a0c61f3b7319780c304424e2d14ea7b477309947880"}
+  :limitation "No adjudicated latent state; irregular tick intervals; pre-C12 zeros do not distinguish measured zero from absence. Residual quantiles therefore mix sensor noise, model error, bias, and missingness."
+  :squared-error-summary
+  {:active-repo-ratio {:n 795 :q05 1.0663270798790355E-6 :mean 0.014062252098601891}
+   :annotation-health {:n 797 :q05 0.13037353529878085 :mean 0.1661514405493397}
+   :attack-coverage {:n 668 :q05 0.00981510970177089 :mean 0.2893023724549942}
+   :coupling-density {:n 651 :q05 0.0474898312525897 :mean 0.14519353680081806}
+   :mission-health {:n 795 :q05 1.612306734917372E-4 :mean 0.011922923200280069}
+   :sorry-count-norm {:n 795 :q05 0.03999999999999998 :mean 0.049660377358489945}
+   :support-coverage {:n 668 :q05 0.08822445792623095 :mean 0.3584250792023235}
+   :ticks-firing-ratio {:n 651 :q05 0.006688685894335353 :mean 0.15448680143167362}}}
+ :ema-rate
+ {:status :declared-default
+  :alpha-rational [2 21]
+  :alpha 0.09523809523809523
+  :basis "Equivalent conventional EMA span for the live precision tracker's declared 20-sample window: alpha=2/(N+1). The corpus cannot identify alpha without an adjudicated posterior target."
+  :consequence "Approximately twenty observations remain influential; this is a sample-count horizon, not elapsed time."}
+ :sensor-noise-floor
+ {:status :declared-default
+  :kind :per-channel-constant-default
+  :default 0.01
+  :overrides {}
+  :basis "Existing precision.default-min-variance is 0.01 on normalized [0,1] channels (standard deviation 0.1). Corpus residual quantiles cannot separate sensor noise from model bias or erased absence, so no channel override is licensed."
+  :consequence "Prevents zero variance/false certainty; every future override requires adjudicated repeated measurements for that channel."}
+ :evidence-class-precision
+ {:status :declared-default
+  :mapping
+  {:independent {:variant :weighted :multiplier 1.0
+                 :reason :externally-produced-evidence-retains-full-channel-precision}
+   :self {:variant :weighted :multiplier 0.25
+          :reason :admitted-but-cannot-be-decisive-alone}
+   :unknown {:variant :absent
+             :reason :provenance-not-recorded
+             :consumer-action :pass-through-with-loud-absence}}
+  :basis "R9 forbids self-certification but does not discard self evidence. One quarter is an explicit conservative default, not corpus calibration: four equally precise self reports equal at most one independent report before correlation controls. Unknown provenance is absence, not a numeric neighbour."
+  :consequence "Independent evidence updates at full channel precision; self evidence is processed at low weight; unknown evidence cannot update mean or variance until provenance is supplied."}}
