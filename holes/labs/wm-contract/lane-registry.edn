@@ -4,7 +4,7 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C200-predictive-outcome-risk, :dispatched-at "2026-08-31T21:50:36Z", :job-id "invoke-1788213032517-6073-f21bf061", :expected-by "2026-08-31T22:35:36Z"}
+   :holding :C205-channel, :dispatched-at "2026-08-31T21:59:11Z", :job-id "invoke-1788213547805-6086-334bf975", :expected-by "2026-08-31T22:44:11Z"}
   {:lane :wm-verbs
    :holding :C204-pending-brief-status, :dispatched-at "2026-08-31T21:57:56Z", :job-id "invoke-1788213472937-6083-eaeb858d", :expected-by "2026-08-31T22:42:56Z"}
   {:lane :wm-organization
