@@ -1,0 +1,12 @@
+{:schema :expected-free-energy-reference/v1
+ :derivation {:kind :independent-analytic-identities
+              :facts ["KL(delta_x || delta_x) = 0"
+                      "G_efe = risk + ambiguity"
+                      "risk - epistemic-gain = risk + ambiguity when ambiguity = -epistemic-gain"]}
+ :cases [{:id :one-point
+          :predictive-masses [1]
+          :preference-masses [1]
+          :risk 0
+          :ambiguity 2
+          :epistemic-gain -2
+          :expected-free-energy 2}]}

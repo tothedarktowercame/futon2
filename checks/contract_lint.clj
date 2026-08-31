@@ -105,6 +105,11 @@
             (get-in cases [[2 1] :normaliser]))
          (= "-log(2)" (get-in cases [[2 1] :expected-log])))))
 
+(defn expected-free-energy-witness? [x]
+  (= [{:id :one-point :predictive-masses [1] :preference-masses [1]
+       :risk 0 :ambiguity 2 :epistemic-gain -2 :expected-free-energy 2}]
+     (:cases x)))
+
 (def shape-checks
   {"AblationTable" ablation-table?
    "EraTable" era-table?
@@ -115,7 +120,8 @@
    "List R8TickLit" r8-tick-list?
    "R8DispositionEvidence" r8-disposition-evidence?
    "TickRunWitness" tick-run-witness?
-   "LogMultivariateBetaWitness" log-multivariate-beta-witness?})
+   "LogMultivariateBetaWitness" log-multivariate-beta-witness?
+   "ExpectedFreeEnergyWitness" expected-free-energy-witness?})
 
 (defn shape-result [evidence fixture read-fixture]
   (if-not (contains? shape-checks evidence)
