@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C53-suite-greens, :dispatched-at "2026-08-31T14:41:27Z", :job-id "invoke-1788187277382-5689-77f8503c", :expected-by "2026-08-31T15:26:27Z"}
   {:lane :wm-evidence
-   :holding :C37-strict-mode, :dispatched-at "2026-08-31T14:38:13Z", :job-id "invoke-1788187081113-5686-6b1a0593", :expected-by "2026-08-31T15:23:13Z"}]}
+   :holding :C56-rerun-rebind, :dispatched-at "2026-08-31T14:47:23Z", :job-id "invoke-1788187631168-5694-41bcc36e", :expected-by "2026-08-31T15:32:23Z"}]}
