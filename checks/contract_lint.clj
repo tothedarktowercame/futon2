@@ -126,6 +126,46 @@
             :joint-factor-mass 1/2}]
           (:cases x))))
 
+(defn- graph-reachable? [edges from to]
+  (loop [frontier [from] seen #{}]
+    (if-let [node (first frontier)]
+      (cond (= node to) true
+            (seen node) (recur (rest frontier) seen)
+            :else (recur (into (vec (rest frontier))
+                               (map second (filter #(= node (first %)) edges)))
+                         (conj seen node)))
+      false)))
+
+(defn- fast-forward-edge? [selected edges from to]
+  (letfn [(walk [node seen]
+            (some (fn [[_ next]]
+                    (cond (= next to) true
+                          (selected next) false
+                          (seen next) false
+                          :else (walk next (conj seen next))))
+                  (filter #(= node (first %)) edges)))]
+    (and (selected from) (selected to) (not= from to)
+         (boolean (walk from #{from})))))
+
+(defn cascade-diff? [x]
+  (let [selected (set (:selected x))
+        additions (set (:added-by-organise x))
+        nodes (set (:nodes x))
+        authored (set (:authored-edges x))
+        organised (set (:organised-edges x))
+        expected (set (for [u selected v selected
+                            :when (fast-forward-edge? selected authored u v)] [u v]))
+        [before after :as variants] (:precedence-variants x)]
+    (and (= :cascade-diff/v1 (:schema x))
+         (seq selected) (= nodes (into selected additions))
+         (every? (fn [[u v]] (graph-reachable? authored u v)) organised)
+         (= organised expected) (= 2 (count variants))
+         (= nodes (set (:precedence before)))
+         (= nodes (set (:precedence after)))
+         (not= (:precedence before) (:precedence after))
+         (or (not= (:acting-order before) (:acting-order after))
+             (not= (:score before) (:score after))))))
+
 (def shape-checks
   {"AblationTable" ablation-table?
    "EraTable" era-table?
@@ -139,7 +179,8 @@
    "LogMultivariateBetaWitness" log-multivariate-beta-witness?
    "ExpectedFreeEnergyWitness" expected-free-energy-witness?
    "ExpectedInformationGainWitness" expected-information-gain-witness?
-   "GenerativeModelWitness" generative-model-witness?})
+   "GenerativeModelWitness" generative-model-witness?
+   "CascadeDiff" cascade-diff?})
 
 (defn shape-result [evidence fixture read-fixture]
   (if-not (contains? shape-checks evidence)

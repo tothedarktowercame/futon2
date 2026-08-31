@@ -1,0 +1,25 @@
+{:schema :cascade-diff/v1
+ :derivation
+ {:kind :hand-derived-from-record
+  :source {:path "holes/problems/P-validated-R5.md"
+           :git-sha "e2679ee34844de533f8c3a5c4b3561b1ee34fcfe"
+           :sha256 "71f63b6ee8159a23307788352cacf5b4bbf198b438ab89337e4c154257c3ca6f"}
+  :facts ["O1: nodes = selected union additions"
+          "O2: every organised edge has authored reachability"
+          "O3: selected endpoints fast-forward across unselected intermediates"
+          "O4/S-G4: changed precedence changes acting order or score"]}
+ :selected [:probe :remedy]
+ :added-by-organise []
+ :nodes [:probe :remedy]
+ :authored-edges [[:probe :unselected-bridge]
+                  [:unselected-bridge :remedy]]
+ :organised-edges [[:probe :remedy]]
+ :precedence-variants
+ [{:id :observed
+   :precedence [:probe :remedy]
+   :acting-order [:probe :remedy]
+   :score 3}
+  {:id :remedy-promoted
+   :precedence [:remedy :probe]
+   :acting-order [:remedy :probe]
+   :score -5}]}
