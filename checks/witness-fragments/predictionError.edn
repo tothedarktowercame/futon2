@@ -1,0 +1,7 @@
+{:witnesses "predictionError"
+ :check {:repo "futon2" :path "checks/prediction_error_witness.clj" :entrypoint "-main"}
+ :fixture {:repo "futon2" :path "holes/labs/wm-contract/prediction-error-reference.edn"}
+ :run-sha "478cacfa0fa2221b4b83a0c04c925132f62f20ef"
+ :contract-sha "3aa5a59b0c6a508d72df3f42bc9a10dda7e5e8dd"
+ :result :passed
+ :recorded-at "2026-08-31T23:59:00Z"}
