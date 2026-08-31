@@ -4,10 +4,10 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding nil, :dispatched-at nil, :job-id nil, :expected-by nil}
+   :holding :C82-adapters, :dispatched-at "2026-08-31T16:51:35Z", :job-id "invoke-1788195063237-5774-df5a744b", :expected-by "2026-08-31T17:36:35Z"}
   {:lane :wm-verbs
-   :holding nil, :dispatched-at nil, :job-id nil, :expected-by nil}
+   :holding :C83-prefstack-rebind, :dispatched-at "2026-08-31T16:51:35Z", :job-id "invoke-1788195066681-5775-3a92e0f1", :expected-by "2026-08-31T17:36:35Z"}
   {:lane :wm-organization
-   :holding nil, :dispatched-at nil, :job-id nil, :expected-by nil}
+   :holding :C84-gate-wiring, :dispatched-at "2026-08-31T16:51:35Z", :job-id "invoke-1788195083719-5776-90db12ac", :expected-by "2026-08-31T17:36:35Z"}
   {:lane :wm-evidence
-   :holding nil, :dispatched-at nil, :job-id nil, :expected-by nil}]}
+   :holding :C81-absence-sites, :dispatched-at "2026-08-31T16:51:35Z", :job-id "invoke-1788195038382-5773-43eba0eb", :expected-by "2026-08-31T17:36:35Z"}]}
