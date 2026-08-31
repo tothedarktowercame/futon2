@@ -62,4 +62,14 @@ tracked): committed first as the version anchor (p4ng `8f83901`), then the schem
 this: still **specified 0 / unspecified 21** by the linter's rule (a schema with `:unspecified` values is not
 specified) — one entry now exists with one typed field, which is the honest description of the wiring's first
 specification.
+**Second edge schema, 17:11Z:** `R9→R16` (assurance into actuation) — payload `{claim, witness {id, producer,
+layer ∈ {L1, L2}}, verdict ∈ {independent, self, unknown}}`; **one proposal endorsed twice** (P-R16 cites
+P-R9's), so the agreement carries no confirmatory weight — what R16 contributes is the **consumer constraint**: an
+act requires an `independent` witness; `self` and `unknown` are valid *delivered* verdicts and neither authorises an
+act — three values of which two are refusals, R9's apparatus arriving at the acting end. Receipt shape marked
+*inferred, untested* rather than filled from the payload; `atomic-with`/`retry`/`timeout-ms` unspecified by both
+records; `R16→R2`'s values not imported. Measured, not inherited: no implementation carries an R9 verdict into
+`enact!` or an act-gate today. Two lines still **specified 0 / unspecified 21** by the linter's rule; two entries
+now exist, one with a fully-typed payload. `P-R16.md` — cited by exact line in a committed note — was untracked
+until this gate (futon2 `e2679ee`), the fourth unanchored artefact found today.
 

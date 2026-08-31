@@ -145,4 +145,13 @@ an adapter that reads the JSON but never fails; a `clojure-locus` string nobody 
   stale 5 (pre-G-D3 bindings, re-run pending) / unwitnessed 13 / refused 5. Every node lane that ran today has its
   run bound; three holes discharged by stated `native_decide`, four by kernel `decide`.
 - 2026-08-30 16:56Z `EraTable`'s evidence type rewritten so a non-uniform era is representable — `:conformant` for `r8EraBoundary` now means something (before, the type could not have been otherwise). The lint's shape check for `EraTable` must follow the new fields (R8-D4 / an AD-D3 follow-up: `era-table?` reads `shapes`, `storedFCount`, `precisionRecords`).
+- 2026-08-30 17:16Z **AD-D3b (queued):** `contract_lint.clj`'s `era-table?` reads the pre-rewrite `EraSummary` fields; the R8-D4 report conforms to the new type and is judged `:wrong-shape` by an outdated check — a lint that lags its contract. Fix: shape checks generated from (or validated against) the contract's evidence types, not hand-written per type. The generator now emits `#print axioms` (3a(iii)); first lane to do so.
+- 2026-08-30 17:17Z **Staleness is too coarse (actual, after R8-D4's re-bind):** lint now reads witnessed 2 /
+  wrong-shape 1 / **stale 11** / unwitnessed 13 / refused 5 — the contract's source sha moved with the owner's
+  `EraSummary` commits, so R9's four and R2's two bindings (made against `1b09974a`) are marked stale although
+  **their declarations did not change**. Stale-by-contract-sha is honest but coarse: every unrelated Lean commit
+  invalidates every binding. **AD-D5 refinement:** staleness per binding = *the text of the bound declarations*
+  (signature + evidence type) differs between the binding's contract sha and the current one, or the fixture's
+  last commit moved — not "the contract moved somewhere." Until then the number is reported as it is, and a
+  re-run is what re-binds.
 

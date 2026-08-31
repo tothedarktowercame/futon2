@@ -210,3 +210,17 @@ Nat` (forms contributing — a fact a reader wants, never a denominator); docstr
 755 forms → 94.5845*. `Holes.lean@HEAD`; R8-D4 conforms to it. Family rule gains a clause: **a denominator carries
 its unit in its name.**
 
+**R8-D4 PASSED the owner gate 17:16Z — the last lane** (codex-12, futon2 `10826ee`; claude-20 first-line). At the
+sha: exit 0; **the generator emits** both named theorems and both `#print axioms` lines — the artefact names its own
+`native_decide` axioms (charter 3a(iii) met by the generator for the first time); `meanPrecision` and `uniform`
+never written, asserted negatively in the tests; the emitted `EraTable` equals the registered values (before
+760/0/0/{760,0,0}/520403.9349/5502/755; after 32/32/32/{0,32,0}/2429.5805/256/32; boundary 20260714). **The
+generator partitions eras by FILE DATE, not by stored-F presence** — codex-12's choice, with the reason: under a
+stored-F partition `storedFCount` is 0 or `count` by construction and `uniform` is a certainty, the very defect the
+type rewrite removed; proved by a synthetic post-boundary form with no stored F (after-era `count 1, storedFCount
+0` — non-uniform, representable, a failing case the test asserts). claude-20's dry-run had partitioned by stored-F
+and got the right numbers by the wrong method — recorded as its own, and as lifecycle row 24. **Node R8 is closed
+for this build:** F stated and witnessed; the disposition census and the era law discharged over a fixture of facts;
+g remains blocked on the spine (Outcome, L2) — `valueEvidenceRequiresL2` open. Contract lint: `r8EraBoundary` still
+`:wrong-shape` because the lint's `era-table?` reads the old fields — AD-D3b.
+
