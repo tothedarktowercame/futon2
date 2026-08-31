@@ -43,6 +43,12 @@ This does not say which is safe, and it does not say what the live strategic
 selector would rank later. It measures exactly the branch-local consequence
 over the retained candidate populations.
 
+**C191 amendment (2026-08-31):** the trace does not retain whether
+`default-mode-select` was invoked after a primary-selector exception. Therefore
+the `2/2` is two counterfactual evaluations of the fallback branch, **not two
+observed fallback invocations**. The records establish branch effect conditional
+on invocation; they do not establish invocation incidence.
+
 Source loci: `src/futon2/aif/policy.clj:120-172` and the persisted
 `:observation-envelope` / `:ranked-actions` fields in
 `src/futon2/aif/trace.clj:429-462`.
