@@ -8,7 +8,7 @@
  :live-invariant {:check "checks/r9_proof_receipt_check.clj"
                   :evidence :lean-elaboration-and-axiom-output}
  :run-sha "7dc52f5d8bb6c604ee3358a6c4e4f8a0e3cc3ab6"
- :contract-sha "28f1c4e30d63a833fae6d0734f7a718bc4679d65"
+ :contract-sha "a93483e2132f2a2af7bef726ed515bcd62b60493"
  :result :passed
  :recorded-at "2026-08-31T23:45:00Z"
  :axioms "DarkTower.WarMachine.Holes.R9D2.verdictConsultsChecker: [propext]; no sorryAx"
