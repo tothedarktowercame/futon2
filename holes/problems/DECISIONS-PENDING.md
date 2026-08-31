@@ -173,6 +173,25 @@ being built. Full terminal boundary:
 
 ## Census boundary
 
+### Historical versus live Morning Brief QA
+
+- **Question:** Should all 72 existing Morning Brief items be classified
+  `:historical-unanswered`, with `:live-pending` beginning at Joe's next
+  operator-triggered run (recommended), or should a subset remain due for
+  retrospective QA?
+- **Unblocks:** a bounded `DECISION-DUE` population and an explicit disposition
+  carrier; no item is dispositioned until Joe chooses.
+- **Care:** belief/evidence relevant. Only 15 historical items carry the entity
+  target needed to emit independent substantive-achievement evidence.
+- **If the recommended boundary is chosen:** the machine permanently receives
+  no independent achievement evidence for 21 historical grounded changes, but
+  no stale July verdict is injected as current evidence.
+- **If retrospective QA is chosen:** the belief carrier first needs an
+  occurrence time and historical-evidence policy; today a late answer appears
+  to the next update as newly current evidence.
+- **Full analysis:**
+  [`C209-morning-brief-disposition.md`](../labs/wm-contract/C209-morning-brief-disposition.md).
+
 ### Support-typed shadow as the live selection authority
 
 - **Question:** Should the support-typed scoring path remain shadow-only or
@@ -186,9 +205,10 @@ being built. Full terminal boundary:
 - **Full analysis:**
   [`C108-support-typed-scoring-shadow.md`](../labs/wm-contract/C108-support-typed-scoring-shadow.md).
 
-**Pending now: 11 decisions** — one strategic carrier, one outward binding, one
+**Pending now: 12 decisions** — one strategic carrier, one outward binding, one
 hard-guard authority question, seven observation/belief/ranking migrations,
-and the now-evidence-bearing support-typed shadow switch.
+one Morning Brief disposition boundary, and the now-evidence-bearing
+support-typed shadow switch.
 
 The following were checked and are not counted:
 

@@ -39,7 +39,8 @@ def pending_brief_state():
     expression = (
         "(require '[futon2.aif.morning-brief :as brief] '[cheshire.core :as json]) "
         "(println (json/generate-string "
-        "(mapv #(select-keys % [:attempt-id :pending-objectives]) "
+        "(mapv #(assoc (select-keys % [:attempt-id :pending-objectives]) "
+        ":belief-target? (string? (get-in % [:qa-targets :achievement :entity-id]))) "
         "(brief/pending-items))))")
     result = run(["bb", "-cp", "src:.", "-e", expression])
     try:
@@ -47,6 +48,7 @@ def pending_brief_state():
         valid = isinstance(rows, list) and all(
             isinstance(row.get("attempt-id"), str)
             and isinstance(row.get("pending-objectives"), list)
+            and isinstance(row.get("belief-target?"), bool)
             for row in rows)
     except (json.JSONDecodeError, AttributeError, TypeError):
         rows, valid = [], False
@@ -56,10 +58,12 @@ def pending_brief_state():
 def brief_decision_summary(rows):
     """Separate all due QA from the subset that blocks belief learning."""
     normalized = [{"attempt-id": row["attempt-id"],
-                   "pending-objectives": sorted(row["pending-objectives"])}
+                   "pending-objectives": sorted(row["pending-objectives"]),
+                   "belief-target?": bool(row.get("belief-target?"))}
                   for row in rows if row.get("pending-objectives")]
     belief_blocked = [row["attempt-id"] for row in normalized
-                      if "substantive-achievement" in row["pending-objectives"]]
+                      if (row["belief-target?"]
+                          and "substantive-achievement" in row["pending-objectives"])]
     return {"count": len(normalized), "attempts": normalized,
             "belief-blocked-count": len(belief_blocked),
             "belief-blocked-attempt-ids": belief_blocked}
@@ -212,7 +216,7 @@ def source_control():
                                   "test-failures": 1, "eligible": True, "retire": True})
     brief_due = brief_decision_summary([
         {"attempt-id": "pending-belief", "pending-objectives":
-         ["feature-verdict", "substantive-achievement"]}])
+         ["feature-verdict", "substantive-achievement"], "belief-target?": True}])
     brief_answered = brief_decision_summary([])
     brief_control = (brief_due["count"] == 1
                      and brief_due["belief-blocked-attempt-ids"] == ["pending-belief"]
@@ -371,7 +375,8 @@ def main():
               "source=data/wm-morning-brief/items+reviews")
         for row in brief_summary["attempts"]:
             cost = ("belief-learning-blocked"
-                    if "substantive-achievement" in row["pending-objectives"]
+                    if (row["belief-target?"]
+                        and "substantive-achievement" in row["pending-objectives"])
                     else "audit-only")
             print(f"attempt={row['attempt-id']} outstanding={json.dumps(row['pending-objectives'])} "
                   f"cost={cost}")
