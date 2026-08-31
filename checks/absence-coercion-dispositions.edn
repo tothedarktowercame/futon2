@@ -8,12 +8,18 @@
    :control "observation-status / observation-envelope preserve :present zero versus reason-bearing :absent"
    :implemented-by "f94df39"}
   {:at "src/futon2/aif/observation.clj:152" :disposition :blocked :blocked-on :value-status-vector-migration}
-  {:at "src/futon2/aif/free_energy.clj:23" :disposition :blocked :blocked-on :tagged-free-energy-channel-api}
+  {:at "src/futon2/aif/free_energy.clj:23" :disposition :fix-now
+   :control "channel-gap accepts only a present numeric reading; absence never reaches arithmetic"
+   :implemented-by :C127}
   {:at "src/futon2/aif/free_energy.clj:31" :disposition :fix-now
    :control "missing observation yields :unknown; measured zero remains an observed avoidance value"
    :implemented-by "6b4df8f"}
-  {:at "src/futon2/aif/free_energy.clj:50" :disposition :blocked :blocked-on :risk-diagnostics-consume-status}
-  {:at "src/futon2/aif/free_energy.clj:61-63" :disposition :blocked :blocked-on :epistemic-diagnostic-absence-semantics}
+  {:at "src/futon2/aif/free_energy.clj:50" :disposition :fix-now
+   :control "per-channel diagnostics retain :present/:absent and reason-bearing support"
+   :implemented-by :C127}
+  {:at "src/futon2/aif/free_energy.clj:61-63" :disposition :fix-now
+   :control "absent epistemic channels contribute no term and remain visible in :score-support"
+   :implemented-by :C127}
   {:at "src/futon2/aif/free_energy.clj:70" :disposition :fix-now
    :control ":avoided-active contains measured violations only; unknown is retained in :avoidance-by-channel"
    :implemented-by "6b4df8f"}
@@ -36,4 +42,4 @@
    :exemption :versioned-read-compatibility
    :reason "Legacy/partial trace reads preserve old records; this is serialization compatibility, not a numeric measurement or score. A schema-version migration remains separately named."}
   {:at "src/futon2/aif/belief.clj:1040-1052" :disposition :blocked :blocked-on :precision-pass-through-tag}]
- :summary {:fix-now 6 :exempt-with-reason 1 :blocked 11}}
+ :summary {:fix-now 9 :exempt-with-reason 1 :blocked 8}}

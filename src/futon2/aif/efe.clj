@@ -612,7 +612,11 @@
                      (get-in multi [:final-state :observation])
                      (get-in single-prediction [:next-observation :mean]))
          next-var (get-in single-prediction [:next-observation :variance])
-         fe-on-predicted (fe/compute-controller-diagnostics next-mean)
+         ;; C127: selection remains on the explicit legacy projection while
+         ;; support-aware diagnostics are measured. Switching comparison
+         ;; semantics is an operator decision, not a diagnostic migration.
+         fe-on-predicted (fe/compute-controller-diagnostics
+                          next-mean {:support-aware? false})
          intrinsic (double (or (:intrinsic-value action) 0))
          ;; D5a (M-evaluate-policies §8.6; contract E-C-vector-live.md:230):
          ;; :risk-mode :kl scores risk as Σ_ch w_ch · KL(N(μ_ch,σ²_ch) ‖ C_ch)

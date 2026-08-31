@@ -69,6 +69,26 @@
       (is (true? (:in-range? loop-entry)))
       (is (zero? (:gap loop-entry))))))
 
+(deftest absent-controller-input-contributes-no-score-test
+  (testing "absence is retained and contributes neither a pragmatic nor epistemic term"
+    (let [g (fe/compute-controller-diagnostics (obs/observe {}))]
+      (is (zero? (:preference-gap-score g)))
+      (is (zero? (:coverage-uncertainty-pressure g)))
+      (is (every? #(= :absent (:status %)) (vals (:per-channel g))))
+      (is (every? #(= :absent (:status %)) (vals (:epistemic-terms g))))
+      (is (empty? (get-in g [:score-support :pragmatic :present])))
+      (is (seq (get-in g [:score-support :pragmatic :absent])))))
+  (testing "an explicit measured zero remains present evidence"
+    (let [g (fe/compute-controller-diagnostics {:loop-health 0.0})]
+      (is (= :present (get-in g [:per-channel :loop-health :status])))
+      (is (= 0.4 (get-in g [:epistemic-terms :loop-health :weighted-term])))))
+  (testing "the full-support scalar decomposition is unchanged"
+    (let [g (fe/compute-controller-diagnostics healthy-obs)]
+      (is (< (Math/abs (- (:controller-score g)
+                          (+ (* 0.65 (:preference-gap-score g))
+                             (* 0.35 (:coverage-uncertainty-pressure g)))))
+             1e-12)))))
+
 (deftest avoided-active-test
   (testing "healthy observation triggers no avoided ranges"
     (is (empty? (:avoided-active (fe/compute-controller-diagnostics healthy-obs)))))

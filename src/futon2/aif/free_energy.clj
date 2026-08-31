@@ -21,10 +21,24 @@
   "Distance of observation from preferred range.
    Returns 0.0 if within [lo, hi], positive distance otherwise."
   [obs-val [lo hi]]
-  (let [v (double (or obs-val 0.0))]
+  (let [v (double obs-val)]
     (cond (< v lo) (- lo v)
           (> v hi) (- v hi)
           :else 0.0)))
+
+(defn- channel-reading
+  "Return a reason-bearing reading for CHANNEL. Plain explicit maps are a
+   supported legacy boundary; metadata-bearing observations retain absence."
+  [obs channel]
+  (let [source-status (observation/observation-status obs channel)
+        explicit-legacy-value? (and (= :status-metadata-missing
+                                       (:reason source-status))
+                                    (contains? obs channel)
+                                    (some? (get obs channel)))]
+    (if (or (= :observed (:variant source-status)) explicit-legacy-value?)
+      {:status :present :value (double (get obs channel))}
+      (merge {:status :absent}
+             (select-keys source-status [:reason :paths])))))
 
 (defn- avoidance-verdict
   "Tri-state avoided-range diagnostic. An absent source is unknown; it is
@@ -56,26 +70,62 @@
    controller-score: 0.65 * preference gap + 0.35 * coverage uncertainty.
 
    cf. war-machine-terminal-vocabulary.edn :G/pragmatic-fn, :G/epistemic-fn"
-  [obs]
+  ([obs] (compute-controller-diagnostics obs {:support-aware? true}))
+  ([obs {:keys [support-aware?] :or {support-aware? true}}]
   (let [;; Pragmatic: gap between observations and preferences. Read through the
         ;; current-C seam (E-C-vector-live §4.5) so the channel preferences can
         ;; go live without touching this consumer; today identical to the static map.
         per-channel (into {}
                           (for [[ch pref-range] (pref/current-C)
-                                :let [v (get obs ch 0.0)
-                                      gap (channel-gap v pref-range)]]
-                            [ch {:value v
-                                 :preferred pref-range
-                                 :gap gap
-                                 :in-range? (zero? gap)}]))
+                                :let [reading (if support-aware?
+                                                (channel-reading obs ch)
+                                                {:status :present
+                                                 :value (double (get obs ch 0.0))})]]
+                            [ch (if (= :present (:status reading))
+                                  (let [v (:value reading)
+                                        gap (channel-gap v pref-range)]
+                                    {:status :present
+                                     :value v
+                                     :preferred pref-range
+                                     :gap gap
+                                     :in-range? (zero? gap)})
+                                  (assoc reading :preferred pref-range))]))
         g-pragmatic (reduce-kv (fn [acc ch weight]
-                                 (+ acc (* weight (get-in per-channel [ch :gap] 0.0))))
+                                 (if-let [gap (get-in per-channel [ch :gap])]
+                                   (+ acc (* weight gap))
+                                   acc))
                                0.0
                                pref/pragmatic-weights)
         ;; Epistemic: uncertainty from dark areas
-        g-epistemic (+ (* 0.4 (- 1.0 (:loop-health obs 0.0)))
-                       (* 0.3 (- 1.0 (:attack-coverage obs 0.0)))
-                       (* 0.3 (- 1.0 (:support-coverage obs 0.0))))
+        epistemic-weights {:loop-health 0.4
+                           :attack-coverage 0.3
+                           :support-coverage 0.3}
+        epistemic-terms
+        (into {}
+              (for [[ch weight] epistemic-weights
+                    :let [reading (if support-aware?
+                                    (channel-reading obs ch)
+                                    {:status :present
+                                     :value (double (get obs ch 0.0))})]]
+                [ch (if (= :present (:status reading))
+                      (assoc reading :weighted-term
+                             (* weight (- 1.0 (:value reading))))
+                      reading)]))
+        g-epistemic (reduce + 0.0 (keep :weighted-term (vals epistemic-terms)))
+        support {:pragmatic
+                 {:present (->> per-channel (keep (fn [[ch x]]
+                                                    (when (= :present (:status x)) ch))) set)
+                  :absent (into {} (keep (fn [[ch x]]
+                                           (when (= :absent (:status x))
+                                             [ch (select-keys x [:reason :paths])]))
+                                         per-channel))}
+                 :epistemic
+                 {:present (->> epistemic-terms (keep (fn [[ch x]]
+                                                        (when (= :present (:status x)) ch))) set)
+                  :absent (into {} (keep (fn [[ch x]]
+                                           (when (= :absent (:status x))
+                                             [ch (select-keys x [:reason :paths])]))
+                                         epistemic-terms))}}
         ;; Total
         g-total (+ (* 0.65 g-pragmatic) (* 0.35 g-epistemic))
         avoidance-by-channel
@@ -92,9 +142,11 @@
     {:controller-score g-total
      :preference-gap-score g-pragmatic
      :coverage-uncertainty-pressure g-epistemic
+     :score-support support
+     :epistemic-terms epistemic-terms
      :per-channel per-channel
      :avoidance-by-channel avoidance-by-channel
-     :avoided-active avoided}))
+     :avoided-active avoided})))
 
 ;; ---------------------------------------------------------------------------
 ;; v0.10: R3a prediction-error computation against a likelihood model.
