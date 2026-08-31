@@ -1,5 +1,5 @@
 {:witnesses "preferenceStackLiveRecorded",
- :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
+ :contract-sha "aaf8817bd5baf148943aa6f31697a8242b7d2826",
  :run-sha "6c87413",
  :freshness :pinned-git-v1,
  :live-invariant

@@ -2,6 +2,6 @@
  :check {:repo "futon2" :path "checks/variational_free_energy_witness.clj" :entrypoint "-main"}
  :fixture {:repo "futon2" :path "holes/labs/wm-contract/variational-free-energy-reference.edn"}
  :run-sha "bb8c549d84f7a17071fb954bbe88746ae47bc379"
- :contract-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5"
+ :contract-sha "aaf8817bd5baf148943aa6f31697a8242b7d2826"
  :result :passed
  :recorded-at "2026-08-31T23:59:00Z"}
