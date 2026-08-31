@@ -2,6 +2,6 @@
  :check {:repo "futon2" :path "checks/belief_state_witness.clj" :entrypoint "-main"}
  :fixture {:repo "futon2" :path "holes/labs/wm-contract/belief-state-reference.edn"}
  :run-sha "ed8d9e07be2dc043c2c7bc12fe08e9bec4c9ea6a"
- :contract-sha "b0db500b6bb0927cc3136cc2b83d4d84c5b25e69"
+ :contract-sha "871160aaca87a8bf9b2c950cd808554d175ac007"
  :result :passed
  :recorded-at "2026-08-31T23:59:00Z"}

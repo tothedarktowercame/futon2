@@ -1,0 +1,7 @@
+{:witnesses "PrecisionMap"
+ :check {:repo "futon2" :path "checks/precision_witness.clj" :entrypoint "-main"}
+ :fixture {:repo "futon2" :path "holes/labs/wm-contract/precision-reference.edn"}
+ :run-sha "ec4f5e866d3272479835153ec41c93967faa1268"
+ :contract-sha "871160aaca87a8bf9b2c950cd808554d175ac007"
+ :result :passed
+ :recorded-at "2026-08-31T23:59:00Z"}
