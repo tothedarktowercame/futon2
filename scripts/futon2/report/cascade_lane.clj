@@ -39,8 +39,9 @@
   (future (with-open [rdr (io/reader stream)] (slurp rdr))))
 
 (defn- sh-timed
-  "Run cmd (a seq of strings) in dir with a HARD timeout. Returns {:exit :out} or nil on
-   timeout/failure. Mirrors futon3c watcher/projections/python.clj: ProcessBuilder + waitFor(timeout)
+  "Run cmd (a seq of strings) in dir with a HARD timeout. Returns a tagged
+   :completed or :timed-out result. Mirrors futon3c watcher/projections/python.clj:
+   ProcessBuilder + waitFor(timeout)
    + destroy/destroyForcibly, so a hung cascade_serve.py can never wedge the calling (scheduler)
    thread — unlike clojure.java.shell/sh, whose waitFor is unbounded."
   [cmd dir timeout-ms]
@@ -50,12 +51,12 @@
         out* (read-stream (.getInputStream proc))
         _err* (read-stream (.getErrorStream proc))]
     (if (.waitFor proc timeout-ms TimeUnit/MILLISECONDS)
-      {:exit (.exitValue proc) :out @out*}
+      {:status :completed :exit (.exitValue proc) :out @out*}
       (do (.destroy proc)
           (when-not (.waitFor proc 1000 TimeUnit/MILLISECONDS)
             (.destroyForcibly proc)
             (.waitFor proc 1000 TimeUnit/MILLISECONDS))
-          nil))))
+          {:status :timed-out :timeout-ms timeout-ms}))))
 
 ;; A cascade is deterministic in (|psi>, budget) — the pattern library + minilm are stable —
 ;; so memoize across windows/ticks. Only successes are cached (failures retry).
@@ -70,11 +71,24 @@
   ([psi-text budget epsilon]
    (or (get @!cache [psi-text budget epsilon])
        (let [v (try
-                 (let [{:keys [exit out]} (sh-timed [py script psi-text (str budget)
-                                                     (str epsilon)]
-                                                    script-dir cascade-timeout-ms)]
-                   (when (and exit (zero? exit))
-                     (json/parse-string out true)))
+                 (let [{:keys [status exit out timeout-ms]}
+                       (sh-timed [py script psi-text (str budget) (str epsilon)]
+                                 script-dir cascade-timeout-ms)]
+                   (case status
+                     :timed-out
+                     (throw (ex-info "Cascade construction timed out"
+                                     {:outcome :timed-out
+                                      :failure-kind :construction-timeout
+                                      :failure-stage :construction
+                                      :timeout-ms timeout-ms}))
+                     :completed
+                     (when (zero? exit)
+                       (json/parse-string out true))
+                     nil))
+                 (catch clojure.lang.ExceptionInfo e
+                   (if (= :construction-timeout (:failure-kind (ex-data e)))
+                     (throw e)
+                     nil))
                  (catch Exception _ nil))]
          (when v (swap! !cache assoc [psi-text budget epsilon] v))
          v))))
