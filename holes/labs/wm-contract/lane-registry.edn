@@ -6,8 +6,8 @@
  [{:lane :wm-nouns
    :holding :C257-next-glossary-term, :dispatched-at "2026-08-31T23:50:42Z", :job-id "invoke-1788220237593-6228-0ae8e9c2", :expected-by "2026-09-01T00:35:42Z"}
   {:lane :wm-verbs
-   :holding :C254-atomic-ledger-write, :dispatched-at "2026-08-31T23:49:01Z", :job-id "invoke-1788220110353-6225-fa2d85bf", :expected-by "2026-09-01T00:34:01Z"}
+   :holding :C259-readiness-double-gate, :dispatched-at "2026-08-31T23:54:54Z", :job-id "invoke-1788220490206-6238-63abc222", :expected-by "2026-09-01T00:39:54Z"}
   {:lane :wm-organization
    :holding :C256-click-run-id-port, :dispatched-at "2026-08-31T23:50:42Z", :job-id "invoke-1788220214215-6227-dbfe0995", :expected-by "2026-09-01T00:35:42Z"}
   {:lane :wm-evidence
-   :holding :C255-third-workflow-review, :dispatched-at "2026-08-31T23:49:01Z", :job-id "invoke-1788220137712-6226-f3f3b7d8", :expected-by "2026-09-01T00:34:01Z"}]}
+   :holding :C258-attack-atomicity, :dispatched-at "2026-08-31T23:54:54Z", :job-id "invoke-1788220465618-6237-d1898d70", :expected-by "2026-09-01T00:39:54Z"}]}
