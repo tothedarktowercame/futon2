@@ -142,6 +142,14 @@
        :risk 0 :ambiguity 2 :epistemic-gain -2 :expected-free-energy 2}]
      (:cases x)))
 
+(defn ambiguity-witness? [x]
+  (and (= :ambiguity-reference/v1 (:schema x))
+       (= [{:id :point-mass-observation
+            :predicted-state-masses [1]
+            :observation-masses [1]
+            :expected-ambiguity 0}]
+          (:cases x))))
+
 (defn expected-information-gain-witness? [x]
   (= [{:id :binary-prior-point-posterior
        :predictive-outcome-masses [1]
@@ -259,6 +267,7 @@
    "TickRunRecord" tick-run-witness?
    "LogMultivariateBetaWitness" log-multivariate-beta-witness?
    "ExpectedFreeEnergyWitness" expected-free-energy-witness?
+   "AmbiguityWitness" ambiguity-witness?
    "ExpectedInformationGainWitness" expected-information-gain-witness?
    "GenerativeModelWitness" generative-model-witness?
    "CascadeDiff" cascade-diff?

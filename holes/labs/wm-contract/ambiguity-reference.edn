@@ -1,0 +1,7 @@
+{:schema :ambiguity-reference/v1
+ :derivation {:kind :independent-shannon-identity
+              :fact "H(delta_x) = -(1 * ln 1) = 0 nats"}
+ :cases [{:id :point-mass-observation
+          :predicted-state-masses [1]
+          :observation-masses [1]
+          :expected-ambiguity 0}]}
