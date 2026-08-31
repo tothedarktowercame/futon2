@@ -6,7 +6,7 @@
  [{:lane :wm-nouns
    :holding :C137-fixture-pins, :dispatched-at "2026-08-31T19:23:43Z", :job-id "invoke-1788204220213-5920-39e616a6", :expected-by "2026-08-31T20:08:43Z"}
   {:lane :wm-verbs
-   :holding :C135-reader-portability, :dispatched-at "2026-08-31T19:21:10Z", :job-id "invoke-1788204066877-5915-9d6ef857", :expected-by "2026-08-31T20:06:10Z"}
+   :holding :C140-read-string-lint, :dispatched-at "2026-08-31T19:31:13Z", :job-id "invoke-1788204669567-5927-c3503be4", :expected-by "2026-08-31T20:16:13Z"}
   {:lane :wm-organization
    :holding :C138-status-field-fix, :dispatched-at "2026-08-31T19:26:40Z", :job-id "invoke-1788204396750-5922-0dc119ea", :expected-by "2026-08-31T20:11:40Z"}
   {:lane :wm-evidence
