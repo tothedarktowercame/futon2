@@ -121,6 +121,12 @@
         declared (cond
                    (= negative-table :declared) (subvec declared0 1)
                    (= negative-table :sound) (assoc-in declared0 [0 :verdict] :independent)
+                   (= negative-table :per-row)
+                   (mapv (fn [row]
+                           (if (= "O7" (:row row))
+                             (assoc row :declaration-source :paper-sentence)
+                             row))
+                         declared0)
                    :else declared0)
         decide? (if (and negative? (nil? negative-table))
                   ;; Semantic mutation: an inside producer is misclassified as
@@ -151,10 +157,11 @@
 (defn -main [& args]
   (let [negative-table (cond (some #{"--negative-ledger"} args) :ledger
                              (some #{"--negative-declared"} args) :declared
-                             (some #{"--negative-sound"} args) :sound)
+                             (some #{"--negative-sound"} args) :sound
+                             (some #{"--negative-per-row"} args) :per-row)
         negative? (or (some #{"--negative"} args) negative-table)
         pair-args (remove #{"--negative" "--negative-ledger" "--negative-declared"
-                            "--negative-sound"} args)
+                            "--negative-sound" "--negative-per-row"} args)
         opts (assoc (apply hash-map (mapcat (fn [[k v]] [(keyword (subs k 2)) v])
                                             (partition 2 pair-args)))
                     :negative? negative?
