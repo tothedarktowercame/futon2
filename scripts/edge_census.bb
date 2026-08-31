@@ -19,17 +19,23 @@
 (def drawn   (set (map (juxt :from :to) (:edges cml))))
 (def derived (set (map (juxt :from :to) (:derived-undrawn cml))))
 
-;; PREREG §2f, transcribed with its own hedges preserved. 9 hops.
-(def measured
-  [{:edge [:R7 :R3]  :note "approx"        :on-map? true}
-   {:edge [:R5 :R6]  :note nil             :on-map? true}
-   {:edge [:R8 :R5]  :note "region"        :on-map? true}
-   {:edge [:R20 :R12] :note "scan preamble — interoception feeds observation" :on-map? false}
-   {:edge [:R12 :R2] :note "scan preamble — calibration feeds observation"    :on-map? false}
-   {:edge [:R2 :R7]  :note "triangulated with node-sim"                       :on-map? false}
-   {:edge [:R3 :R8]  :note "node-sim proposed the REVERSE (R8->R3); both may be real" :on-map? false}
-   {:edge [:R6 :R14] :note "selection consults the temperature/seam"          :on-map? false}
-   {:edge [:R14 :TRACE] :note "Figure 4 has NO trace/ledger node at all"      :on-map? false}])
+;; Three conformant WM-RUN2 hops remain on Figure 4. Undrawn measured routes
+;; live in control-map-edges.edn beside :derived-undrawn, so measurement is data
+;; rather than a second hand-maintained list in this instrument.
+(def measured-drawn
+  [{:edge [:R7 :R3] :measurement :wm-run2 :note "approx" :on-map? true}
+   {:edge [:R5 :R6] :measurement :wm-run2 :note nil :on-map? true}
+   {:edge [:R8 :R5] :measurement :wm-run2 :note "region" :on-map? true}])
+(def measured-undrawn
+  (mapv (fn [{:keys [from to basis] :as route}]
+          {:edge [from to]
+           :measurement (:measurement route)
+           :note basis
+           :via (:via route)
+           :receipt (:receipt route)
+           :on-map? false})
+        (:route-measured-undrawn cml)))
+(def measured (vec (concat measured-drawn measured-undrawn)))
 (def measured-set (set (map :edge measured)))
 
 ;; typed instances: real deliveries = consecutive :out -> :in port pairs (ports are in route
@@ -78,7 +84,12 @@
   {:as-of "2026-08-31"
    :generated-by "futon2/scripts/edge_census.bb"
    :sources {:drawn (count drawn) :derived (count derived)
-             :measured (count measured-set) :specified (count specified) :specified-to-nonnode (count specified-nonnode) :sim (count sim)}
+             :measured (count measured-set)
+             :measured-drawn (count measured-drawn)
+             :route-measured-undrawn (count measured-undrawn)
+             :wm-run2 (count (filter #(= :wm-run2 (:measurement %)) measured))
+             :pairing-decomposition (count (filter #(= :pairing-decomposition (:measurement %)) measured))
+             :specified (count specified) :specified-to-nonnode (count specified-nonnode) :sim (count sim)}
    :totals {:distinct-edges (count rows)
             :drawn-with-schema (n :schema?)
             :attested-by-2+ (n #(< 1 (count (filter true? [(:drawn? %) (:derived? %) (:measured? %) (:sim? %)]))))

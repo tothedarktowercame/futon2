@@ -1,17 +1,21 @@
 {:as-of "2026-08-31",
  :generated-by "futon2/scripts/edge_census.bb",
  :sources
- {:drawn 22,
-  :derived 26,
-  :measured 9,
-  :specified 4,
+ {:measured 11,
   :specified-to-nonnode 4,
+  :route-measured-undrawn 8,
+  :pairing-decomposition 2,
+  :wm-run2 9,
+  :measured-drawn 3,
+  :specified 4,
+  :drawn 22,
+  :derived 26,
   :sim 13},
  :totals
- {:distinct-edges 61,
+ {:distinct-edges 63,
   :drawn-with-schema 2,
   :attested-by-2+ 8,
-  :measured-but-unlisted 5,
+  :measured-but-unlisted 7,
   :drawn-only 19},
  :specified-nonnode
  [[:node/R7 :store/wm-trace]
@@ -19,24 +23,76 @@
   [:node/R14 :store/realized-outcome-feedback]
   [:node/R2 :mediator/R3a]],
  :measured-notes
- [{:edge [:R7 :R3], :note "approx", :on-map? true}
-  {:edge [:R5 :R6], :note nil, :on-map? true}
-  {:edge [:R8 :R5], :note "region", :on-map? true}
+ [{:edge [:R7 :R3],
+   :measurement :wm-run2,
+   :note "approx",
+   :on-map? true}
+  {:edge [:R5 :R6], :measurement :wm-run2, :note nil, :on-map? true}
+  {:edge [:R8 :R5],
+   :measurement :wm-run2,
+   :note "region",
+   :on-map? true}
   {:edge [:R20 :R12],
-   :note "scan preamble — interoception feeds observation",
+   :measurement :wm-run2,
+   :note
+   "WM-RUN2 scan preamble: interoception feeds the R12 apparatus observation.",
+   :via "futon2.report.war-machine/scan-r12-apparatus",
+   :receipt
+   "futon2/holes/labs/wm-contract/tick-run-record-2026-08-30.edn",
    :on-map? false}
   {:edge [:R12 :R2],
-   :note "scan preamble — calibration feeds observation",
+   :measurement :wm-run2,
+   :note
+   "WM-RUN2 scan preamble: calibrated scan data feeds the observation vector.",
+   :via "futon2.aif.observation/observe",
+   :receipt
+   "futon2/holes/labs/wm-contract/tick-run-record-2026-08-30.edn",
    :on-map? false}
-  {:edge [:R2 :R7], :note "triangulated with node-sim", :on-map? false}
+  {:edge [:R2 :R7],
+   :measurement :wm-run2,
+   :note
+   "WM-RUN2 route abstraction, triangulated by the isolated node simulation; endpoint pairing decomposed it through R3a.",
+   :via "futon2.aif.precision/update-precision-state",
+   :receipt
+   "futon2/holes/labs/wm-contract/tick-run-record-2026-08-30.edn",
+   :on-map? false}
+  {:edge [:R2 :R3a],
+   :measurement :pairing-decomposition,
+   :note
+   "R2/R7 pairing: R2's 14-channel observation is projected by R3a before R7; no direct R2-to-R7 call exists.",
+   :via "futon2.aif.free-energy/compute-prediction-error",
+   :receipt "futon2/holes/labs/wm-contract/pair/R2-R7-delivery.edn",
+   :on-map? false}
+  {:edge [:R3a :R7],
+   :measurement :pairing-decomposition,
+   :note
+   "R2/R7 pairing: R7 consumes the 8-channel post-R3a prediction-error projection.",
+   :via "futon2.aif.precision/update-precision-state",
+   :receipt "futon2/holes/labs/wm-contract/pair/R2-R7-delivery.edn",
+   :on-map? false}
   {:edge [:R3 :R8],
-   :note "node-sim proposed the REVERSE (R8->R3); both may be real",
+   :measurement :wm-run2,
+   :note
+   "WM-RUN2: belief-update prediction errors feed the present-fit free-energy calculation.",
+   :via "futon2.aif.free-energy/compute-variational-free-energy",
+   :receipt
+   "futon2/holes/labs/wm-contract/tick-run-record-2026-08-30.edn",
    :on-map? false}
   {:edge [:R6 :R14],
-   :note "selection consults the temperature/seam",
+   :measurement :wm-run2,
+   :note
+   "WM-RUN2 and R5/R14 pairing: selection forwards R5's ranked score field into commitment-temperature diagnostics.",
+   :via "futon2.report.war-machine/invoke-strategic-selection",
+   :receipt
+   "futon2/holes/labs/wm-contract/tick-run-record-2026-08-30.edn",
    :on-map? false}
   {:edge [:R14 :TRACE],
-   :note "Figure 4 has NO trace/ledger node at all",
+   :measurement :wm-run2,
+   :note
+   "WM-RUN2 exhaust: the selection result is written to the TRACE assurance store.",
+   :via "futon2.aif.trace/write-trace!",
+   :receipt
+   "futon2/holes/labs/wm-contract/tick-run-record-2026-08-30.edn",
    :on-map? false}],
  :rows
  [{:edge [:R1 :R14],
@@ -242,6 +298,13 @@
    :specified? false,
    :sim? false,
    :schema? false}
+  {:edge [:R2 :R3a],
+   :drawn? false,
+   :derived? false,
+   :measured? true,
+   :specified? false,
+   :sim? false,
+   :schema? false}
   {:edge [:R2 :R7],
    :drawn? false,
    :derived? true,
@@ -292,6 +355,13 @@
    :sim? true,
    :schema? false}
   {:edge [:R3 :R8],
+   :drawn? false,
+   :derived? false,
+   :measured? true,
+   :specified? false,
+   :sim? false,
+   :schema? false}
+  {:edge [:R3a :R7],
    :drawn? false,
    :derived? false,
    :measured? true,
