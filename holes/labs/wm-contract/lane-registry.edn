@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C91-implement-testing-service, :dispatched-at "2026-08-31T17:33:59Z", :job-id "invoke-1788197618181-5801-4e9c78d5", :expected-by "2026-08-31T18:18:59Z"}
   {:lane :wm-evidence
-   :holding :C97-operational-certificate, :dispatched-at "2026-08-31T17:43:54Z", :job-id "invoke-1788198213522-5814-39c7156a", :expected-by "2026-08-31T18:28:54Z"}]}
+   :holding :C97-operational-certificate, :queued-behind :C98-absence-semantics, :dispatched-at "2026-08-31T17:43:54Z", :job-id "invoke-1788198213522-5814-39c7156a", :expected-by "2026-08-31T18:28:54Z"}]}
