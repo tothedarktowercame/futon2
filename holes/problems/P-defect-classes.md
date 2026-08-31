@@ -238,13 +238,27 @@ type or prose label; no bridge establishes equality, precedence, or conversion.
   `holes/problems/BUILD-PLAN-0831.md:875` and the perceptual/BMR separation is
   preserved at `holes/problems/P-evidence-apex.md:527`.
 
+C135 adds a fifth instance with only **one byte stream** but two interpretations.
+Babashka's `clojure.edn/read-string` accepts `:r8/a/b`, while its source
+`clojure.core/read-string` rejects it; the JVM source reader differs again.
+Both runtimes' EDN readers agreed over 1,160 files / 1,930 top-level forms, so
+the exposed duplication is the grammar selected at the two endpoints, not the
+stored data (`holes/labs/wm-contract/C135-reader-portability-sweep.md:5–38`).
+Five active Babashka persisted-file boundaries used bare source `read-string`
+at that census (`C135-reader-portability-sweep.md:49–65`). C140's executable
+scan corrected that to **12 call sites across six files**, adding the production
+daily-scan frame reader (`holes/labs/wm-contract/C140-reader-portability-lint.md:7–22`).
+
 **Found by.** Count definitions/usages by semantic name; ask what actually calls
 each symbol; reject type-level matches as semantic bridges.
 
 **Would prevent.** One authoritative carrier, or explicit conversion with laws and
-named direction; namespace types by role rather than reuse a scalar alias.
+named direction; namespace types by role rather than reuse a scalar alias. At a
+persistence port, declare one data grammar/reader on both sides and exercise a
+cross-runtime round trip over adversarial tokens.
 **Prevention type: lint + review question.** How much semantic synonym detection
-can be automated is uncertain.
+can be automated is uncertain; bare-reader detection is a mechanical corner,
+not semantic-synonym detection.
 
 ## 8. Era-blind expectation
 
@@ -332,10 +346,24 @@ the population → semantic mutation → inspect the named consumer → repair �
 against the consumer-held artefact**. Promotion priority is deliberately left to
 the owner.
 
-## Reserved portability slot
+## Prevention-type audit after implementation
 
-A possible tenth class is intentionally **not asserted yet**. C135 is sweeping a
-reader-portability incident in which one runtime accepted a token another reader
-rejected. Until that delivery settles whether this is a new class or an instance
-of duplicate representation, adding a tenth heading would violate this
-catalogue's rule against empty or pre-emptive categories.
+This audit compares C74's speculative prevention types with the committed
+apparatus now present. “Exists” means committed and callable, not merely drafted.
+
+| Class | C74 prediction | What exists now | Verdict |
+|---|---|---|---|
+| 1. Acceptance cannot fail | check + lint | Semantic mutations in the individual witnesses; `checks/preemptive_acceptance_lint.clj`, its negative control, and the C84 workspace-gate entry (`checks/wm_workspace_gate.clj:57–60`). | **Held.** The generic lint catches nonzero-findings/zero-exit shape; semantic mutations still carry the claim-specific judgement. |
+| 2. False declaration as hole | review question + possible Lean lint | Degenerate-model review/counterexample sweeps (`C70-hole-quantifier-sweep.md:1–12`); C134's committed category check rejects unlabelled or contradictory `sorry` claims (`checks/lean_sorry_category_check.clj:83–116`). No generic countermodel generator exists. | **Held, partially mechanised.** Labels prevent a false hole being presented as ordinary debt, but reading quantifiers remains review work. |
+| 3. Wrong-object witness | review question + check | Direct-source proofs and source/generated equality controls for R2/R8/R9 (`C96-R2-pinned-discharge.md:1–12`; `C105-R8-pinned-discharge.md:1–18`); C137 requires a witnessed obligation's fixture and content pin (`checks/lean_sorry_category_check.clj:44–75`). | **Held.** Checks enforce named source/fixture identity after review identifies the right object; no generic entailment checker exists. |
+| 4. Artefact boundary | lint + check | `checks/preemptive_artefact_boundary_lint.clj`, negative control, C84 gate wiring, TeX reachability and published-PDF checks (`p4ng/vetting/C45-TEX-REACHABILITY-2026-08-31.md:1–63`). | **Held.** Both static boundary lint and consumer-held artefact checks were built. |
+| 5. Stale baseline | check + lint | `checks/preemptive_stale_baseline_lint.clj`, negative control, C84 wiring, and C35's snapshot/live split recorded in `C22-falsifier-invocations.md:98–138`. | **Held.** Exact reproduction and live invariants are separate instruments. |
+| 6. Absence coerced | lint + check | `checks/preemptive_absence_coercion_lint.clj`, exact disposition coverage, typed-envelope controls, and C84 wiring. Current live finding count is 7. | **Held, not extinct.** The apparatus finds the remaining population; its seven repairs await operator decisions. |
+| 7. Duplicate representation | lint + review question | Review found the four semantic duplications and C135's reader duplication. C140 then committed `checks/reader_portability_lint.bb`: its positive scan reports 12 bare persisted-file reads across six files, and two controls prove rejection plus a reason-bearing source-read exemption (`C140-reader-portability-lint.md:1–29`). No generic synonym lint exists. | **Held, with one mechanical corner automated.** The lint decides which reader a persisted-file call uses; it does not decide whether two πs, antecedents, or free energies mean the same thing. C74's judgement boundary was therefore not wrong. The cross-runtime round-trip and reader migrations remain unbuilt. |
+| 8. Era-blind expectation | check + schema lint | `checks/preemptive_era_blind_lint.clj`, negative control, C84 wiring, plus record-carried producer/schema tags audited by C125 (`C125-era-discriminator-census.md:9–31`). | **Held.** The generic lint catches unqualified timestamped assertions; producer identity still needs a schema contract. |
+| 9. Record says two things | lint + check | `checks/preemptive_record_conflict_lint.clj`, negative control, C84 wiring, obligation-ledger reconciliation and lane-registry checks. | **Held.** Current/history conflicts and missing completion transitions have executable consumers. |
+
+The reserved tenth slot is **closed, not filled**. C135 locates reader
+portability inside class 7: duplication can reside in endpoint grammars even
+when the bytes are singular. The catalogue therefore remains nine nonempty
+classes, with no stale placeholder.
