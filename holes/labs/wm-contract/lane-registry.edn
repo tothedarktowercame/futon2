@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C214-serving-code-identity, :dispatched-at "2026-08-31T22:21:28Z", :job-id "invoke-1788214854670-6107-c625405b", :expected-by "2026-08-31T23:06:28Z"}
   {:lane :wm-evidence
-   :holding :C211-cohort-denominator, :dispatched-at "2026-08-31T22:11:44Z", :job-id "invoke-1788214300541-6100-669554e1", :expected-by "2026-08-31T22:56:44Z"}]}
+   :holding :C218-gate-concurrency, :dispatched-at "2026-08-31T22:32:18Z", :job-id "invoke-1788215534136-6117-181cd5b1", :expected-by "2026-08-31T23:17:18Z"}]}
