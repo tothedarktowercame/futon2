@@ -3,8 +3,9 @@
  :consumer :C31-belief-variance-update
  :corpus
  {:trace-dir "data/wm-trace"
-  :pin {:forms 792
-        :sha256 "c9add16ac96c973ba4fd9a0c61f3b7319780c304424e2d14ea7b477309947880"}
+  :pin {:files 54
+        :forms 799
+        :sha256 "84f356c44a5c9afe5bf3870ca398f9424176a8ba2fe246a718e4280365890866"}
   :limitation "No adjudicated latent state; irregular tick intervals; pre-C12 zeros do not distinguish measured zero from absence. Residual quantiles therefore mix sensor noise, model error, bias, and missingness."
   :squared-error-summary
   {:active-repo-ratio {:n 795 :q05 1.0663270798790355E-6 :mean 0.014062252098601891}
