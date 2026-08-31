@@ -300,6 +300,24 @@ forbidden second text into a valid runner entry and must reject it.
 This cure does not rebind the four `findF*` declarations. Their strict state remains
 `:acceptance-uninspectable` until a separate rerun-and-rebind delivery accepts the cured check.
 
+## C67 — futon3 complete-suite invocation
+
+```sh
+cd /home/joe/code/futon3
+clojure -X:test
+```
+
+The test alias explicitly includes `babashka/process` 0.5.22. The standalone Babashka drivers in
+`library_graph_lint_test.clj` and `spider_runner_test.clj` run their local `run-tests`/`System.exit` only
+when invoked as scripts; Cognitect can therefore load every namespace without the first driver terminating
+the JVM. No test is excluded.
+
+Observed 2026-08-31: 245 tests, 1508 assertions, 2 failures, 0 errors, exit 1. Both failures are in
+`library-graph-lint-test/live-library-passes`: the live file census is 1244 rather than 1243, and live edge
+counts are `{:why 86 :how 27 :see-also 134}` rather than `{:why 86 :how 23 :see-also 125}`. These are
+pre-existing moving-count assertions over the live library; C65 changed only `checks/` files and caused
+neither delta.
+
 ## C71 — WM-RUN2 conforms to the two-layer Figure 4 wiring
 
 Authority: `e3a50c7e02f4171b3c7537be56b102ea7837a42d`.
