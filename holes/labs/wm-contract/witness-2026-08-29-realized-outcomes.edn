@@ -1,0 +1,84 @@
+{:witness/schema 1
+ :witness/agent "codex-20"
+ :witness/date "2026-08-29"
+ :witness/claim-author "claude-15"
+ :witness/corpus "/home/joe/code/futon2/data/wm-trace/"
+ :witness/method "A Python lexical state machine tracked EDN delimiter depth while independently handling strings, escapes, and comments, then tested keyword tokens in each completed depth-zero form."
+ :witness/command "python3 - <<'PY'
+from pathlib import Path
+import re, json
+root = Path('/home/joe/code/futon2/data/wm-trace')
+files = sorted(root.glob('wm-trace-2026-07-*.edn'))
+def forms(text):
+    out=[]; start=None; stack=[]; string=False; escape=False; comment=False
+    pairs={'}':'{',']':'[',')':'('}
+    for i,ch in enumerate(text):
+        if comment:
+            if ch in '\\r\\n': comment=False
+            continue
+        if string:
+            if escape: escape=False
+            elif ch=='\\\\': escape=True
+            elif ch=='\"': string=False
+            continue
+        if ch==';': comment=True; continue
+        if ch=='\"':
+            if start is None: start=i
+            string=True; continue
+        if ch in '{[(':
+            if start is None: start=i
+            stack.append(ch)
+        elif ch in '}])':
+            if not stack or stack[-1] != pairs[ch]: raise ValueError(f'mismatched delimiter at offset {i}')
+            stack.pop()
+            if not stack and start is not None: out.append(text[start:i+1]); start=None
+        elif start is None and not ch.isspace() and ch!=',': raise ValueError(f'unsupported top-level scalar at offset {i}')
+    if string or stack or start is not None: raise ValueError('unterminated EDN form')
+    return out
+def code_tokens(form):
+    chars=[]; string=False; escape=False; comment=False
+    for ch in form:
+        if comment:
+            if ch in '\\r\\n': comment=False; chars.append(ch)
+            else: chars.append(' ')
+        elif string:
+            if escape: escape=False
+            elif ch=='\\\\': escape=True
+            elif ch=='\"': string=False
+            chars.append(' ')
+        elif ch==';': comment=True; chars.append(' ')
+        elif ch=='\"': string=True; chars.append(' ')
+        else: chars.append(ch)
+    return ''.join(chars)
+summary={}; events=[]
+for path in files:
+    fs=forms(path.read_text()); rows=[]
+    for n,form in enumerate(fs,1):
+        code=code_tokens(form)
+        realized=bool(re.search(r'(?<![^\\s\\[\\]{}(),]):realized-outcome(?=$|[\\s\\[\\]{}(),])',code))
+        enactment=bool(re.search(r'(?<![^\\s\\[\\]{}(),]):enactment(?=$|[\\s\\[\\]{}(),])',code))
+        m=re.search(r':timestamp\\s+(?:#inst\\s+)?\"([^\"]+)\"',form); ts=m.group(1) if m else None
+        rows.append((n,realized,enactment,ts))
+        if ts: events.append((ts,path.name,n,realized,enactment))
+    day=path.stem.removeprefix('wm-trace-'); summary[day]={'forms':len(fs),'realized':sum(r[1] for r in rows)}
+last=max((e for e in events if e[3]),default=None); after=sorted(e for e in events if last and e[0]>last[0])
+print(json.dumps({'files':summary,'total':sum(v['realized'] for v in summary.values()),'last':last,'first_after_without_enactment':next((e for e in after if not e[4]),None),'enactment_after':[e for e in after if e[4]]},indent=2))
+PY"
+ :witness/result
+ {:top-level-forms {"2026-07-02" 34
+                    "2026-07-03" 20
+                    "2026-07-04" 38
+                    "2026-07-05" 18
+                    "2026-07-06" 21}
+  :with-realized-outcome {"2026-07-02" 18
+                          "2026-07-03" 18
+                          "2026-07-04" 37
+                          "2026-07-05" 13
+                          "2026-07-06" 2}
+  :total-with-realized-outcome 88
+  :last-realized-outcome-timestamp "2026-07-06T12:04:27.412283747Z"
+  :first-form-after-it-without-enactment "2026-07-06T13:04:30.639215623Z"
+  :any-enactment-after-last-outcome? false}
+ :witness/agrees-with-claim? false
+ :witness/disagreements
+ ["Point (c): the final realized-outcome form is in the claimed file and second, but its stored timestamp is 2026-07-06T12:04:27.412283747Z, not exactly 2026-07-06T12:04:27Z."]}
