@@ -8,6 +8,6 @@
   {:lane :wm-verbs
    :holding :C223-suite-timeout, :dispatched-at "2026-08-31T22:56:52Z", :job-id "invoke-1788217007360-6138-e5cfcc3e", :expected-by "2026-08-31T23:41:52Z"}
   {:lane :wm-organization
-   :holding :C220-reload-procedure, :dispatched-at "2026-08-31T22:53:22Z", :job-id "invoke-1788216708631-6131-6f3591c6", :expected-by "2026-08-31T23:38:22Z"}
+   :holding :C225-pin-behind, :dispatched-at "2026-08-31T23:02:54Z", :job-id "invoke-1788217369708-6149-b1fe46f0", :expected-by "2026-08-31T23:47:54Z"}
   {:lane :wm-evidence
    :holding :C222-gate-admission, :dispatched-at "2026-08-31T22:54:43Z", :job-id "invoke-1788216878317-6135-e94233b8", :expected-by "2026-08-31T23:39:43Z"}]}
