@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Read-only War Machine operator-run readiness report."""
 
-import datetime
+import hashlib
 import json
 import os
 import subprocess
@@ -23,33 +23,85 @@ def result(name, passed, blocker_kind, **evidence):
             "blocker-kind": None if passed else blocker_kind, "evidence": evidence}
 
 
-def instant(value):
-    return datetime.datetime.fromisoformat(value.replace("Z", "+00:00"))
-
-
 def repository_state(path):
     head = run(["git", "rev-parse", "HEAD"], path)
-    committed = run(["git", "show", "-s", "--format=%cI", "HEAD"], path)
-    dirty = run(["git", "status", "--porcelain", "--untracked-files=no"], path)
-    return {"head": head.stdout.strip(), "committed-at": committed.stdout.strip(),
-            "tracked-dirty": bool(dirty.stdout.strip()),
-            "readable": head.returncode == committed.returncode == dirty.returncode == 0}
+    tree = run(["git", "rev-parse", "HEAD^{tree}"], path)
+    tracked = subprocess.run(["git", "diff", "HEAD", "--"], cwd=path,
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    dirty = run(["git", "status", "--porcelain"], path)
+    readable = head.returncode == tree.returncode == tracked.returncode == dirty.returncode == 0
+    return {"head": head.stdout.strip(), "tree-sha": tree.stdout.strip(),
+            "tracked-diff-sha256": hashlib.sha256(tracked.stdout).hexdigest(),
+            "dirty": bool(dirty.stdout.strip()), "readable": readable}
+
+
+def receipt_matches_tree(receipt, state):
+    started = receipt.get("repository-basis-start") or {}
+    finished = receipt.get("repository-basis-finish") or {}
+    stable = receipt.get("repository-basis-stable") is True
+    match = (state.get("readable") and not state.get("dirty") and stable and
+             started.get("readable") and finished.get("readable") and
+             started.get("dirty") is False and finished.get("dirty") is False and
+             started.get("tree-sha") == state.get("tree-sha") == finished.get("tree-sha") and
+             started.get("tracked-diff-sha256") == state.get("tracked-diff-sha256") ==
+             finished.get("tracked-diff-sha256"))
+    if not started or not finished:
+        reason = "receipt-missing-tested-tree"
+    elif state.get("dirty"):
+        reason = "current-tree-dirty"
+    elif not stable:
+        reason = "tested-tree-changed-during-run"
+    elif not match:
+        reason = "tested-tree-differs"
+    else:
+        reason = None
+    return bool(match), reason
 
 
 def latest_suite(records, command, repo):
-    candidates = [r for r in records if r.get("cmd") == command and r.get("receipt")]
+    equivalent = {command}
+    if repo == "futon2":
+        equivalent.add("cd /home/joe/code/futon2 && make ci")
+    candidates = [r for r in records if r.get("cmd") in equivalent and r.get("receipt")]
     if not candidates:
         return result(repo + "-suite", False, "unverified",
                       reason="no-terminal-bounded-receipt", command=command)
     record = max(candidates, key=lambda r: r["receipt"].get("finished-at", ""))
     state = repository_state(ROOT if repo == "futon2" else FUTON3)
     receipt = record["receipt"]
-    fresh = (state["readable"] and not state["tracked-dirty"] and
-             instant(receipt["finished-at"]) >= instant(state["committed-at"]))
+    fresh, freshness_reason = receipt_matches_tree(receipt, state)
     passed = receipt.get("outer-exit") == 0 and receipt.get("verdict") == "pass" and fresh
     return result(repo + "-suite", passed, "unverified", receipt=record["id"],
                   verdict=receipt.get("verdict"), outer_exit=receipt.get("outer-exit"),
-                  finished_at=receipt.get("finished-at"), repository=state, fresh=fresh)
+                  finished_at=receipt.get("finished-at"), repository=state, fresh=fresh,
+                  freshness_reason=freshness_reason,
+                  tested_tree=receipt.get("repository-basis-start"))
+
+
+def tree_control():
+    empty = hashlib.sha256(b"").hexdigest()
+    state = {"readable": True, "dirty": False, "tree-sha": "tree-current",
+             "tracked-diff-sha256": empty}
+    basis = {"readable": True, "dirty": False, "tracked-dirty": False,
+             "tree-sha": "tree-current", "tracked-diff-sha256": empty}
+    old_same = {"finished-at": "2000-01-01T00:00:00+00:00",
+                "repository-basis-start": basis, "repository-basis-finish": basis,
+                "repository-basis-stable": True}
+    recent_other = dict(old_same)
+    other = dict(basis, **{"tree-sha": "tree-other"})
+    recent_other.update({"finished-at": "2999-01-01T00:00:00+00:00",
+                         "repository-basis-start": other,
+                         "repository-basis-finish": other})
+    old_ok, _ = receipt_matches_tree(old_same, state)
+    other_ok, other_reason = receipt_matches_tree(recent_other, state)
+    report = {"old-identical-tree-accepted": old_ok,
+              "recent-different-tree-rejected": not other_ok,
+              "different-tree-reason": other_reason}
+    print(json.dumps(report, indent=2, sort_keys=True))
+    passed = old_ok and not other_ok and other_reason == "tested-tree-differs"
+    print("run-readiness-tree-control:", "PASS" if passed else "FAIL",
+          "exit-convention=0-pass/2-control-slipped")
+    return 0 if passed else 2
 
 
 def roster_readiness(negative=False):
@@ -76,6 +128,8 @@ def roster_readiness(negative=False):
 
 
 def main():
+    if "--tree-control" in sys.argv[1:]:
+        return tree_control()
     negative = "--negative-reviewer" in sys.argv[1:]
     checks = []
 

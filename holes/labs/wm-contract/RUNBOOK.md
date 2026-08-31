@@ -32,14 +32,13 @@ the required check. Both block; they call for different action.
 In particular, the last code-affecting action before the operator run must be a
 **bounded** futon2 suite run. An ordinary `bg.py launch "make ci"` can show an
 inner green summary but does not emit the outer resource receipt, so it does
-not refresh readiness. Today suite freshness is conservative: the receipt must
-finish after the repository's current commit timestamp and the tracked tree
-must be clean. Consequently a docs-only commit also makes it stale. Comparing
-the tested tree's content would be more precise, as C175's source-blob rule is,
-but existing receipts do not record that tree. Do not weaken the proxy; migrate
-when the bounded receipt schema records repository tree SHA plus tracked-diff
-fingerprint. For this rare operation, rerunning the two-minute suite is the
-honest current closure step.
+not refresh readiness. Bounded receipts record the Git tree SHA and tracked-diff
+fingerprint observed before and after the suite. Readiness compares that tested
+content with the current tree, not timestamps: an old receipt for an identical
+tree remains current, while a recent receipt for another tree is `UNVERIFIED`.
+The repository must be clean at both ends of the run and at readiness time;
+uncommitted content has no stable tested-tree identity. Legacy receipts without
+this provenance are also `UNVERIFIED` and must not be backfilled.
 
 ### Expected duration
 

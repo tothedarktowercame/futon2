@@ -1,4 +1,4 @@
-.PHONY: ci workspace-gate pre-merge status status-control certify-run run-readiness run-readiness-control
+.PHONY: ci workspace-gate pre-merge status status-control certify-run run-readiness run-readiness-control run-readiness-tree-control
 
 # Hermetic repository boundary: futon2 sources, tests, and build only.
 ci:
@@ -36,3 +36,6 @@ run-readiness:
 
 run-readiness-control:
 	python3 scripts/run_readiness.py --negative-reviewer
+
+run-readiness-tree-control:
+	python3 scripts/run_readiness.py --tree-control
