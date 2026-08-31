@@ -96,6 +96,10 @@
    {:name :ambiguity :argv ["bb" "checks/ambiguity_witness.clj"]}
    {:name :have-want-arrow :argv ["bb" "checks/have_want_arrow_witness.clj"]}
    {:name :fold :argv ["bb" "checks/fold_witness.clj"]}
+   {:name :control-vocabulary :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "control"]}
+   {:name :aliveness :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "aliveness"]}
+   {:name :act-gate-vocabulary :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "act-gate"]}
+   {:name :cohort-vocabulary :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "cohort"]}
    {:name :holder :argv ["bb" "checks/holder_check.clj"]}
    {:name :closed-record-pointers :argv ["bb" "checks/closed_record_pointer_check.clj"]}
    {:name :figure-agreement :argv ["bb" "checks/control_map_figure_agreement_check.clj"]}
@@ -127,6 +131,10 @@
 (defn control-commands []
   [{:name :c157-perturbed-entropy
     :argv ["bb" "checks/ambiguity_witness.clj" "--negative-control"]}
+   {:name :c179-control-outside-vocabulary :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "control" "--negative-control"]}
+   {:name :c179-negative-aliveness-factor :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "aliveness" "--negative-control"]}
+   {:name :c179-missing-act-gate-leg :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "act-gate" "--negative-control"]}
+   {:name :c179-invalid-cohort-window :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "cohort" "--negative-control"]}
    {:name :c175-stale-contract-authority
     :argv ["bb" "checks/contract_authority_current.clj" "--negative-control"]}
    {:name :c168-malformed-arrow-composition
