@@ -1,4 +1,4 @@
-.PHONY: ci workspace-gate pre-merge
+.PHONY: ci workspace-gate pre-merge status
 
 # Hermetic repository boundary: futon2 sources, tests, and build only.
 ci:
@@ -14,3 +14,8 @@ workspace-gate:
 pre-merge:
 	$(MAKE) ci
 	$(MAKE) workspace-gate
+
+# Generated, non-short-circuiting operational report. A red component is
+# rendered and makes the command nonzero after all sections are printed.
+status:
+	python3 scripts/wm_status_report.py

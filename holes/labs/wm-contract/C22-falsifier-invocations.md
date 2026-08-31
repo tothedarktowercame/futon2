@@ -441,3 +441,13 @@ make pre-merge
 
 For a gate-only rerun use `make workspace-gate`. Missing sibling repositories
 fail loudly; none is silently skipped.
+
+## C132 generated status
+
+```sh
+make status
+```
+
+The report is non-short-circuiting and exits nonzero after rendering all
+sections if any component is red. Both suites run through bounded test-service
+receipts rather than trusting inner green summaries alone.
