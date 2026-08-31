@@ -42,16 +42,19 @@
  {:witnesses
   ["findF1Containment" "findF2Receipted" "findF3NonSelfCertifying"],
   :freshness :pinned-git-v1,
-  :contract-sha "32b929692533cf0d6294fbb7a5937f9199c1552c",
+  :contract-sha "a9d78f8904329d7b2393167f7ceaa28c1c4a8f0c",
   :run-sha "594127059d6a31c5b21f5d34ebfac5b14b1ad993",
   :check
   {:repo "futon3",
    :path "checks/find_snatch.clj",
    :entrypoint "-main"},
-  :acceptance :uninspectable,
-  :recorded-at "2026-08-30T16:23:00Z",
+  :note
+  "C73: cured checker reports zero representation mismatches and separately rejects --negative-f1 (outside repository), --negative-f2 (selected row lacks receipt), and --negative-f3 (score-only receipt). findF4 remains deliberately unbound.",
+  :recorded-at "2026-08-31T15:40:00Z",
   :live-invariant
-  {:check "checks/find_snatch.clj", :status :blocked-by-C60},
+  {:check "checks/find_snatch.clj",
+   :check-sha "d37a62da39a0a3d78fb7972953df38cc53aac410",
+   :evidence :f1-f2-f3-independent-controls},
   :result :passed,
   :fixture {:repo "futon3", :path "checks/find-snatch.edn"}}
  {:witnesses "logMultivariateBeta",
