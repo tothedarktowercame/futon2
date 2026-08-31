@@ -6,8 +6,8 @@
  [{:lane :wm-nouns
    :holding :C240-next-glossary-term, :dispatched-at "2026-08-31T23:28:27Z", :job-id "invoke-1788218878967-6190-fd6627b4", :expected-by "2026-09-01T00:13:27Z"}
   {:lane :wm-verbs
-   :holding :C238-close-order, :dispatched-at "2026-08-31T23:22:33Z", :job-id "invoke-1788218549938-6184-8a5d22c3", :expected-by "2026-09-01T00:07:33Z"}
+   :holding :C243-ledger-cost, :dispatched-at "2026-08-31T23:30:06Z", :job-id "invoke-1788219001445-6195-0d883377", :expected-by "2026-09-01T00:15:06Z"}
   {:lane :wm-organization
-   :holding :C235-lifecycle-root-cause, :dispatched-at "2026-08-31T23:18:45Z", :job-id "invoke-1788218320096-6173-51d020c9", :expected-by "2026-09-01T00:03:45Z"}
+   :holding :C242-rehearsal-scheduling, :dispatched-at "2026-08-31T23:30:06Z", :job-id "invoke-1788218974326-6193-82738ae1", :expected-by "2026-09-01T00:15:06Z"}
   {:lane :wm-evidence
    :holding :C241-repository-gate, :dispatched-at "2026-08-31T23:28:27Z", :job-id "invoke-1788218904282-6191-343f0c30", :expected-by "2026-09-01T00:13:27Z"}]}
