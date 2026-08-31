@@ -769,3 +769,49 @@ bridge between two different constructions would be inventing the semantics.
 carriers four not three), ORG-D1 (support is mostly within-column, refuting §0.8's prose), VERBS-D1 (the
 edge is two hops; the docstring's channel count was stale), APEX-D2 (two free energies, not one). Every one
 of those was a claim I or the record asserted and none of them was caught by a reader.
+
+---
+
+## The two π's — settled by reading the formalisation *(2026-08-31)*
+
+**The question as recorded:** `cascadeGrainPi` is `mkRefused … "glossary π and Holes.Policy have unresolved
+grains"`, falsifier *"REFUSED pending Joe's grain decision"*. The glossary (`sec-glossary.tex:48`) says π is
+*"the active-inference name for a pattern language/cascade when that composition is being scored"* — a
+**semilattice of patterns** with `S(π)=Σ_t ρ^t s(s_t)`. `Holes.lean:54` says
+`abbrev Policy (InformationState Action) := InformationState → Action`.
+
+**But the mathematics never had the conflict.**
+
+    Holes.lean:54   abbrev Policy (InformationState Action) := InformationState → Action
+    Holes.lean:70   def G {Policy : Type*} (risk eig : Policy → ℝ) : Policy → ℝ := fun π => risk π - eig π
+    Holes.lean:494  def softmax {PolicyIndex : Type*} … (policies : List PolicyIndex) : List ℝ
+
+**`G` and `softmax` are polymorphic in the policy type.** They score whatever π is and never commit to the
+state→action reading. Inside `G {Policy : Type*}` the binder **shadows** the abbreviation — one identifier
+naming two different things in one file, which is where the appearance of a grain conflict comes from.
+
+**So the decision is not "which π do we keep".** It is: **stop using one name for two objects.**
+
+- **π is what G scores** — and in AIF that is a *plan being evaluated*, which is the glossary's scored
+  cascade. The problem statement requires every term *"defined on Active Inference's terms"*, and
+  `InformationState → Action` is the control-theory sense of "policy", not AIF's π.
+- The state→action function is a real and useful object — it is what you *get* after inference, not what
+  is scored. It needs its own name (`ActionSelector`/`Controller`), not π's.
+- `cascadeGrainPi` then stops being a refusal and becomes a **definition**: the cascade type at which `G`,
+  `softmax` and `IsArgminOn` are instantiated for the cascade lane. No existing proof changes, because the
+  polymorphism is already there.
+
+**Confidence, stated honestly:** the *observation* — that G is polymorphic and the name is overloaded — is
+verified in the source and is not a matter of taste. The *ruling* — that π should name the scored cascade
+— follows from the problem statement's "on Active Inference's terms", and is Joe's to confirm rather than
+mine to impose. But it is not a coin-flip between two equal readings, and it does not block dispatch.
+
+**Where to dispatch: `wm-nouns`, which already holds both sides.** `cascadeGrainPi`'s owner is
+`sec-glossary.tex:48 · P-glossary-mathematics`; `Policy`'s is `P-validated-R5 §3`. Both records are in
+wm-nouns' 63-declaration holding, so the grain decision has exactly one holder and needs no cross-lane
+coordination. It is a Gate 0 nouns question — *are the terms defined on the theory's terms* — which is that
+vertex's charter sentence.
+
+**Pattern impact:** R13's pattern is about *"scoring only the next action versus scoring the
+pattern-language cascade/policy it opens"* — the same distinction. If the grain lands as proposed, R13's
+entry in `sec-catalog.tex` should say which object π names, at gate time.
