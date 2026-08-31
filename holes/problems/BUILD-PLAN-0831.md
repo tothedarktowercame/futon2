@@ -864,3 +864,40 @@ first the two free energies, now the wrong device. Both times the delegate refus
 and both times checking its refusal produced the real finding. **A vertex whose job is to say "this is the
 wrong evidence" is worth most when it says it to its own commissioner**, and the second refusal was harder
 to make than the first, because by then I had told it the answer twice.
+
+---
+
+## NOUNS-D3 — a Gate 0 vocabulary audit: four free energies and two π's *(Joe, 2026-08-31)*
+
+Joe on the two free energies: *"that seems confusing! an issue for wm-nouns."* Checking it found **four**,
+not two, and the same defect as the π question one level over — so both are dispatched as one delivery.
+
+    G                     (risk eig)                     := risk π - eig π      :70   CLOSED, IN USE
+    variationalFreeEnergy (precision error)              := ½·mean_k(Π_k·ε_k²)  :469  CLOSED
+    expectedFreeEnergy    (outcomeKernel risk ambiguity) := sorry               :475  HOLE
+    deltaFReduction       (A a' a A')                    := ln B(A)+…           :486  CLOSED
+
+**`G` and `expectedFreeEnergy` are the same AIF quantity under two decompositions** — risk − epistemic gain
+versus risk + ambiguity. **The one named `expectedFreeEnergy` is a `sorry`; the one actually grading
+policies is called `G`.** A reader looking for expected free energy finds the hole and not the working
+definition. **`deltaFReduction` reads as "the delta of F"** and is the model-reduction difference over
+Dirichlet parameters instead. The glossary already says they are distinct *in prose* — and the prose did
+not prevent the error, because **all four return bare `ℝ`**.
+
+**The conflation is demonstrated, not hypothetical: I made it.** I told wm-evidence that evidence
+accumulates as F and licenses at ΔF ≤ -3, chaining `variationalFreeEnergy` into `bayesFactorThreshold`.
+It refused with the right diagnosis — *"sharing `ℝ` is not a semantic bridge."* **A distinct type would
+have made that a compile failure rather than a delivered packet.** That is the argument for wrapping, and
+the packet asks wm-nouns to weigh it against Lean's arithmetic and proof-ergonomics cost rather than
+prescribing the fix — refusing to wrap, with reasons, is an acceptable deliverable.
+
+**The two π's ride with it because they are the same fault.** `G {Policy : Type*}` shadows
+`abbrev Policy := InformationState → Action`; the polymorphism means the mathematics never had a grain
+conflict, only the naming did. Recommendation carried, not imposed: π is what G scores — the glossary's
+scored cascade — and the state→action function needs its own name, on which reading `cascadeGrainPi` becomes
+a definition and **no existing proof changes**.
+
+**Gates required:** contract regenerates at 80 declarations with no new `sorry`; `holder_check.clj` still
+passes; and an explicit statement of whether **R13's pattern entry** changes, since R13 is about *"scoring
+only the next action versus scoring the pattern-language cascade/policy it opens"* — the π distinction
+exactly, and patterns are now updated at gate time.
