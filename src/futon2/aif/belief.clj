@@ -912,13 +912,14 @@
 
 (def channels-with-likelihood
   "Set of observation channels for which an R3a likelihood model exists.
-   v0.11: 4 channels (annotation-health, sorry-count-norm, mission-health,
-   active-repo-ratio).
-   E-support-coverage Cycle 3 (2026-05-26): +2 channels (support-coverage,
-   attack-coverage), bringing total to 6.
-   WM pilot cycle 2 (2026-05-30): +1 channel (coupling-density), bridging
+   The set literal below is the count authority: callers and tests derive its
+   size with `count` rather than duplicating a number in this docstring.
+   It began with annotation-health, sorry-count-norm, mission-health, and
+   active-repo-ratio. E-support-coverage Cycle 3 (2026-05-26) added
+   support-coverage and attack-coverage. WM pilot cycle 2 (2026-05-30) added
+   coupling-density, bridging
    repo-level temporal-coupling edges to entity-level belief by source repo.
-   WM pilot cycle 4 (2026-05-30): +1 channel (ticks-firing-ratio), bridging
+   WM pilot cycle 4 (2026-05-30) added ticks-firing-ratio, bridging
    logic-model tick checks to first-class tick entities in stack annotations.
    Remaining sorries in
    `futon2/data/sorrys.edn` stay `:prototyping-forward` pending their own
