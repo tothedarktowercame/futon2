@@ -4,10 +4,10 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C236-next-glossary-term, :dispatched-at "2026-08-31T23:19:59Z", :job-id "invoke-1788218396129-6176-ea331b5a", :expected-by "2026-09-01T00:04:59Z"}
+   :holding :C240-next-glossary-term, :dispatched-at "2026-08-31T23:28:27Z", :job-id "invoke-1788218878967-6190-fd6627b4", :expected-by "2026-09-01T00:13:27Z"}
   {:lane :wm-verbs
    :holding :C238-close-order, :dispatched-at "2026-08-31T23:22:33Z", :job-id "invoke-1788218549938-6184-8a5d22c3", :expected-by "2026-09-01T00:07:33Z"}
   {:lane :wm-organization
    :holding :C235-lifecycle-root-cause, :dispatched-at "2026-08-31T23:18:45Z", :job-id "invoke-1788218320096-6173-51d020c9", :expected-by "2026-09-01T00:03:45Z"}
   {:lane :wm-evidence
-   :holding :C237-q-pin-coupling, :dispatched-at "2026-08-31T23:21:11Z", :job-id "invoke-1788218467400-6180-d7e73d66", :expected-by "2026-09-01T00:06:11Z"}]}
+   :holding :C241-repository-gate, :dispatched-at "2026-08-31T23:28:27Z", :job-id "invoke-1788218904282-6191-343f0c30", :expected-by "2026-09-01T00:13:27Z"}]}
