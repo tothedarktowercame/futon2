@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C111-five-triage, :dispatched-at "2026-08-31T18:11:57Z", :job-id "invoke-1788199906083-5847-8e9c5412", :expected-by "2026-08-31T18:56:57Z"}
   {:lane :wm-evidence
-   :holding :C108-scoring-shadow, :dispatched-at "2026-08-31T18:05:10Z", :job-id "invoke-1788199490759-5840-72d9927d", :expected-by "2026-08-31T18:50:10Z"}]}
+   :holding :C113-avoidance-safety, :dispatched-at "2026-08-31T18:16:47Z", :job-id "invoke-1788200183875-5854-2f03840f", :expected-by "2026-08-31T19:01:47Z"}]}
