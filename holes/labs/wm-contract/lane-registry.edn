@@ -6,7 +6,7 @@
  [{:lane :wm-nouns
    :holding :C208-policy-prior-kernel, :dispatched-at "2026-08-31T22:06:29Z", :job-id "invoke-1788213985270-6093-cfbf26f5", :expected-by "2026-08-31T22:51:29Z"}
   {:lane :wm-verbs
-   :holding :C204-pending-brief-status, :dispatched-at "2026-08-31T21:57:56Z", :job-id "invoke-1788213472937-6083-eaeb858d", :expected-by "2026-08-31T22:42:56Z"}
+   :holding :C209-brief-backlog, :dispatched-at "2026-08-31T22:08:08Z", :job-id "invoke-1788214082992-6094-430a5770", :expected-by "2026-08-31T22:53:08Z"}
   {:lane :wm-organization
    :holding :C207-quiescence, :dispatched-at "2026-08-31T22:03:55Z", :job-id "invoke-1788213831168-6090-8f9c385a", :expected-by "2026-08-31T22:48:55Z"}
   {:lane :wm-evidence
