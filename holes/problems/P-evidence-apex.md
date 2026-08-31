@@ -387,7 +387,61 @@ model whose evidence it then certifies — R18 rebuilt one level higher.
 ```
 
 No licensing verdict was run. A numerical `ΔF` before those choices would answer a model the commissioner did
-not specify; a Lean result while `logMultivariateBeta` is `sorry` would not witness that hole. Once the model is
-ruled, the mechanical suffix is dispatchable: pin the corpus, derive the four concentration vectors, implement
-and independently check log multivariate beta, compute ΔF, apply `≤ -3`, and deliver the verdict to the named
-contract consumer.
+not specify; a Lean result while `logMultivariateBeta` is `sorry` would not witness that hole. **APEX-D4
+withdraws the requested rulings and the proposed suffix below:** BMR is not a claim-licensing device at all.
+
+## APEX-D4 — claim-licensing device is absent (2026-08-31)
+
+**Typed finding:**
+
+```clojure
+{:subject :wm/evidence-apex
+ :licensing-device :absent
+ :meaning "No formal declaration consumes evidence about a claim and returns a licensed/refused/unknown verdict under a stated rule or threshold."
+ :falsifier
+ {:exists "a declaration with typed evidence and claim inputs, a licensing verdict output, and stated decision semantics"
+  :required-demonstration "one accepting and one refusing case elaborate or execute without sorry"}
+ :basis
+ {:lean "mathlib4/DarkTower/WarMachine/Holes.lean"
+  :glossary "p4ng/sec-glossary.tex"
+  :catalogue "p4ng/sec-catalog.tex"
+  :negative-finding "holes/labs/slush-demo/findings/bmr_constellation_experiment.out.txt"}
+ :consumer {:id :Joe
+            :question "The build needs a claim-licensing device and AIF as formalised here does not supply one; what should it be?"}}
+```
+
+The falsifier does not currently fire. A numeric function returning `ℝ`, a threshold about a different subject,
+or a declaration whose body is `sorry` does not inhabit the required input/output contract.
+
+### Three nearby devices, none a claim licenser
+
+| candidate | what it does | why it is not a claim-licensing device | evidence |
+|---|---|---|---|
+| `predictionError` → `variationalFreeEnergy` | Computes per-channel error and precision-weighted perceptual F | Terminates at `ℝ`; it takes no claim or evidence provenance and returns no licensing verdict. Nothing in the formal spine consumes this F for certification. | `Holes.lean:461–472` |
+| `deltaFReduction` → `bayesFactorThreshold` | Compares a full and reduced Dirichlet model; decides whether a structural reduction clears `ΔF ≤ -3` | Its subject is a proposed model reduction/concept merge, not a claim. The paper explicitly assigns it to R17 structure learning. Count-only use has already over-merged every candidate. `logMultivariateBeta` is also still a hole. | `Holes.lean:482–491`; `sec-glossary.tex:54–60`; `sec-catalog.tex:338,342`; `bmr_constellation_experiment.out.txt:5–20` |
+| `expectedInformationGain` / `modelUncertaintyAndEIG` | Intended to represent expected posterior information gain for policy evaluation | It is about information expected from a policy, not certification of a claim; both declarations are open/refused because Outcome, Q(o∣π), and the parameter-posterior kernel are missing. | `Holes.lean:479–480,505–506` |
+
+The recorded BMR negative is discriminating, not a caveat: count-only `reduce-concepts` accepted 6903 of 6903
+pairs, collapsed 118 patterns to one concept, and even accepted disjoint pairs at `ΔF=-6.45`. That instrument's
+threshold can fail at its R17 job; moving it to the apex would import a known failure and change its subject.
+
+### What would have to be true for a licensing device to exist
+
+Without proposing the rule, its interface would have to establish all of the following:
+
+1. A theory-defined `Claim` input and a typed evidence input whose provenance, basis, domain, and producer are
+   part of the value rather than prose beside it.
+2. A three-valued or otherwise explicitly typed verdict that distinguishes licensed, refused, and insufficient /
+   unknown evidence; absence cannot collapse into refusal or success.
+3. Stated decision semantics, including a threshold or rule, fixed independently of the evidence instance being
+   graded and with an executable accepting and refusing case.
+4. A declared treatment of self-observation and subsequent processing that does not permit self-certification.
+5. A named consumer that changes a workflow decision on the verdict, plus a pinned route from evidence emission
+   through processing to that consumer.
+6. A theory or commissioner outside the producing part that authorises the rule. The apex may encode and enforce
+   that rule; it may not invent the rule from the material it is asked to grade.
+
+This is an absence report, not a design proposal. APEX-D4 does not select Bayesian testing, frequentist testing,
+formal proof, replication policy, review protocol, or any mixture of them. Selecting one is the operator decision
+now sent to Joe. Until then, “gated” remains a workflow judgement rather than a formally licensed claim, and the
+`EvidenceContract` draft must not imply otherwise.
