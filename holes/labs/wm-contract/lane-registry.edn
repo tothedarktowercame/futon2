@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C124-xrepo-provenance, :dispatched-at "2026-08-31T18:57:16Z", :job-id "invoke-1788202614857-5888-097ed768", :expected-by "2026-08-31T19:42:16Z"}
   {:lane :wm-evidence
-   :holding :C126-decision-list, :dispatched-at "2026-08-31T18:59:51Z", :job-id "invoke-1788202772138-5892-cebbcae3", :expected-by "2026-08-31T19:44:51Z"}]}
+   :holding :C127-implementations, :dispatched-at "2026-08-31T19:02:36Z", :job-id "invoke-1788202936775-5896-e81ac2e7", :expected-by "2026-08-31T19:47:36Z"}]}
