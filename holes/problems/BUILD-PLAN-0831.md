@@ -346,3 +346,40 @@ should get `edge-fragments/` before any wider fan-out.
 14 bind-units, fragment-per-unit, no contention, each validated by the lint plus the negative control.
 The seat discipline from last night applies: ask which seats are lendable, stagger the dispatch, and use
 `--mode brief` for informational bells.
+
+---
+
+## Minting lanes — what is and is not possible from an agent seat *(2026-08-31)*
+
+Joe reaped inactive agents and proposed **minting new lanes rather than borrowing**, which is the right
+fix for the collision I caused. Roster after the reaping: **79 registered, 65 drivable**. So minting is
+about *dedication*, not scarcity.
+
+**All three registration paths tested; only one produces a worker, and it is not reachable from here.**
+
+| path | outcome |
+|---|---|
+| `POST /agents` plain | registers a name; installs a **stub** `invoke-fn` returning `"registered-via-http"` — never executes (`transport/http.clj:3030-3033`) |
+| `POST /agents` + `session-id` | the field is **silently ignored**; roster reports `session-id: None` |
+| `POST /agents` + `ws-bridge: true` | accepted, then bells fail: *"Agent has no invoke handler (ws bridge not connected)"* |
+| `DELETE /agents/<id>` | works cleanly; probes removed |
+
+**A lane name is free; a lane worker is a terminal op.** `AGENCY_AGENT_ID=<lane> futon3c/scripts/codex-picker --new`,
+which opens an Emacs Codex REPL per lane.
+
+**Correcting last night's account:** I reported that `codex exec` gave no session id. It does —
+`codex exec --json` emits `{"type":"thread.started","thread_id":"…"}` as its first line. I had looked for
+a session *file* and concluded the id did not exist. The id was never the obstacle, though: the Agency
+ignores a supplied `session-id`, and drivability comes from a **WS-connected invoke handler**, not from
+the field.
+
+### Proposed lane shape for Wave 1 — fewer lanes than units
+
+14 bind-units does **not** mean 14 lanes, and it should not: a 9-job burst exhausted the Agency JVM's
+native threads last night. Batch instead — **4–6 dedicated lanes, each taking 3–4 units sequentially**.
+Fragments make the units independent, so batching costs nothing but wall-clock, and it removes both the
+thread pressure and most of the minting burden.
+
+Naming makes collision impossible by construction: `wm-w1-1` … `wm-w1-6`. Nothing else on the box knows
+those names, and this plan records that they are dedicated — the seat-ownership fact the roster cannot
+express, since `status` is a liveness flag and there is no owner field.
