@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C144-witnessed-vocabulary, :dispatched-at "2026-08-31T19:42:20Z", :job-id "invoke-1788205337280-5938-4dc4378b", :expected-by "2026-08-31T20:27:20Z"}
   {:lane :wm-evidence
-   :holding :C142-class7-and-prevention-audit, :dispatched-at "2026-08-31T19:36:52Z", :job-id "invoke-1788205007501-5932-90eda9df", :expected-by "2026-08-31T20:21:52Z"}]}
+   :holding :C146-ledger-reverify, :dispatched-at "2026-08-31T19:45:04Z", :job-id "invoke-1788205500820-5941-2165f4d5", :expected-by "2026-08-31T20:30:04Z"}]}
