@@ -76,10 +76,21 @@
        (* anchors anchor-score)
        (* forecast forecast-score))))
 
+(defn- outcome-size-surplus [context]
+  (when (contains? context :prediction-error)
+    (throw (ex-info "Fulab temperature does not consume canonical signed prediction error"
+                    {:unexpected-key :prediction-error
+                     :expected-key :outcome-size-surplus})))
+  (let [surplus (double (or (:outcome-size-surplus context) 0.0))]
+    (when (neg? surplus)
+      (throw (ex-info "outcome-size surplus must be nonnegative"
+                      {:key :outcome-size-surplus :value surplus})))
+    surplus))
+
 (defn- compute-tau [context config]
   (let [uncertainty (uncertainty-score (:uncertainty context))
-        error (double (max 0.0 (or (:prediction-error context) 0.0)))
-        combined (+ uncertainty error)
+        surplus (outcome-size-surplus context)
+        combined (+ uncertainty surplus)
         tau (double (/ (:tau/scale config) (max 1.0e-6 combined)))]
     (clamp tau (:tau/min config) (:tau/max config))))
 
@@ -198,11 +209,11 @@
                       :session/id (:session/id observation)}
                      result))
         result)
-      ;; Generic observation - compute prediction error
-      (let [error (double (max 0.0 (dec (text-score (:outcome observation)))))
-            tau (compute-tau (assoc observation :prediction-error error) config)
+      ;; Generic observation - use outcome size as an engineering temperature proxy.
+      (let [surplus (double (max 0.0 (dec (text-score (:outcome observation)))))
+            tau (compute-tau (assoc observation :outcome-size-surplus surplus) config)
             result {:aif/state {:belief-updated true}
-                    :aif {:prediction-error error
+                    :aif {:outcome-size-surplus surplus
                           :tau-updated tau
                           :belief-delta {:decision/id (:decision/id observation)
                                          :status (or (:status observation) :unknown)}}}]
