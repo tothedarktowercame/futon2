@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C230-chain-rehearsal, :dispatched-at "2026-08-31T23:10:30Z", :job-id "invoke-1788217826279-6162-4cbf0296", :expected-by "2026-08-31T23:55:30Z"}
   {:lane :wm-evidence
-   :holding :C229-belief-drift-revet, :dispatched-at "2026-08-31T23:10:30Z", :job-id "invoke-1788217795853-6160-18f02e81", :expected-by "2026-08-31T23:55:30Z"}]}
+   :holding :C234-cascade-drift, :dispatched-at "2026-08-31T23:15:07Z", :job-id "invoke-1788218098950-6170-efd2009f", :expected-by "2026-09-01T00:00:07Z"}]}
