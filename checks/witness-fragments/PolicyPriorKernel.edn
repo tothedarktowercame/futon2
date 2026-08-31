@@ -1,0 +1,7 @@
+{:witnesses "PolicyPriorKernel"
+ :check {:repo "futon2" :path "checks/policy_prior_kernel_witness.clj" :entrypoint "-main"}
+ :fixture {:repo "futon2" :path "holes/labs/wm-contract/policy-prior-reference.edn"}
+ :run-sha "ed6171e7fb9045f8dc78d6b8fff4768a13271a9a"
+ :contract-sha "b0bb97b0e512c42928d0ea42687d80f2bc486e8f"
+ :result :passed
+ :recorded-at "2026-08-31T23:59:00Z"}

@@ -11,7 +11,7 @@
                   :check-sha "ab2b290d1caedffd2bde4658300a791d1000b978"
                   :evidence :f1-f2-f3-f4-independent-controls},
  :run-sha "594127059d6a31c5b21f5d34ebfac5b14b1ad993",
- :contract-sha "5df605d2529d4b21cdcc949f0138cf2bb36dc938",
+ :contract-sha "b0bb97b0e512c42928d0ea42687d80f2bc486e8f",
  :result :passed,
  :recorded-at "2026-08-31T15:40:00Z"
  :note "C85: cured checker reports zero representation mismatches and separately rejects F1 outside-repository selection, F2 missing receipt, F3 score-only receipt, and F4 removal of the recorded omitted member. F4 is narrowed to the pinned FindReceiptRow."}
