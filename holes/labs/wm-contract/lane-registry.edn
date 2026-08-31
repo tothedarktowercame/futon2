@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C189-run-readiness, :dispatched-at "2026-08-31T21:30:22Z", :job-id "invoke-1788211818842-6051-56e5c770", :expected-by "2026-08-31T22:15:22Z"}
   {:lane :wm-evidence
-   :holding :C186-sample-size, :dispatched-at "2026-08-31T21:24:50Z", :job-id "invoke-1788211486523-6044-e16e9252", :expected-by "2026-08-31T22:09:50Z"}]}
+   :holding :C191-sequential-replay, :dispatched-at "2026-08-31T21:34:34Z", :job-id "invoke-1788212070622-6053-e95feab4", :expected-by "2026-08-31T22:19:34Z"}]}
