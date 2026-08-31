@@ -11,7 +11,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/generative-model-reference.edn"},
   :run-sha "7b31da1fe248a05b35940e9a68544b4ffbef36a7",
-  :contract-sha "36c9f087f887496f92090399f74acc4ba193b216",
+  :contract-sha "18c3d7bab7d3dde620667eb51da5e863e600dc34",
   :result :passed,
   :recorded-at "2026-09-01T00:20:00Z"}
  {:witnesses "expectedFreeEnergy",
@@ -23,7 +23,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/expected-free-energy-reference.edn"},
   :run-sha "58d667284a63c69c0027c9bf204e9bc0eac098b9",
-  :contract-sha "36c9f087f887496f92090399f74acc4ba193b216",
+  :contract-sha "18c3d7bab7d3dde620667eb51da5e863e600dc34",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
  {:witnesses "expectedInformationGain",
@@ -36,7 +36,7 @@
    :path
    "holes/labs/wm-contract/expected-information-gain-reference.edn"},
   :run-sha "c99ffdbc13e9b114dbcdca7451651e568588a947",
-  :contract-sha "36c9f087f887496f92090399f74acc4ba193b216",
+  :contract-sha "18c3d7bab7d3dde620667eb51da5e863e600dc34",
   :result :passed,
   :recorded-at "2026-09-01T00:10:00Z"}
  {:witnesses
@@ -69,7 +69,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/log-multivariate-beta-reference.edn"},
   :run-sha "720af918c430415bf07f4eba29ec73d49b343a10",
-  :contract-sha "36c9f087f887496f92090399f74acc4ba193b216",
+  :contract-sha "18c3d7bab7d3dde620667eb51da5e863e600dc34",
   :result :passed,
   :recorded-at "2026-08-31T23:50:00Z"}
  {:witnesses "nonDegenerateAblationLaw",
@@ -81,7 +81,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/ablation-exact-dyadic.edn"},
   :run-sha "f54d502acb131f74da40b430a726792a4002dae8",
-  :contract-sha "36c9f087f887496f92090399f74acc4ba193b216",
+  :contract-sha "18c3d7bab7d3dde620667eb51da5e863e600dc34",
   :result :passed,
   :recorded-at "2026-08-31T17:05:00Z",
   :note
@@ -99,7 +99,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/cascade-diff-reference.edn"},
   :run-sha "ecf819234cc50afbdfccffb5838b628018584f76",
-  :contract-sha "36c9f087f887496f92090399f74acc4ba193b216",
+  :contract-sha "18c3d7bab7d3dde620667eb51da5e863e600dc34",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z",
   :note
@@ -145,17 +145,17 @@
   {:repo "futon2", :path "holes/labs/wm-contract/R2-D2-report.edn"}}
  {:witnesses ["r8CensusWmTrace" "r8EraBoundary" "wmTraceR8"],
   :freshness :pinned-git-v1,
-  :contract-sha "acfb3b13b379457061ccce7b95bfa9054e5bd5fd",
-  :run-sha "10826eecbc7101db55c56476a93ad3c246c2f82f",
+  :contract-sha "18c3d7bab7d3dde620667eb51da5e863e600dc34",
+  :run-sha "93be32e98bbfdc413fc6aa58ef1d0da7cfdc8414",
   :check
   {:repo "futon2",
-   :path "checks/r8_f_contract.clj",
+   :path "checks/r8_pinned_snapshot_witness.clj",
    :entrypoint "-main"},
   :axioms
   "generatedCensus / generatedEraBoundary: [propext, Classical.choice, Quot.sound, <name>._native.native_decide.ax_1_1] — EMITTED BY THE GENERATOR (R8-D4, 10826ee): the artefact states its own trust assumption (charter 3a(iii) met by the generator for the first time)",
   :note
-  "R8-D3 (codex-12, 639ca75): R8-D3-report.lean elaborates, exit 0; regenerate reproduces both artefacts; census (755,32,5); era 760/32, unknown 0, violations 0/0/0; pin c9add16a under the ruled method; bound by claude-15 at the owner gate",
-  :recorded-at "2026-08-30T17:40:00Z",
+  "C105: exact 792-row generated literal installed as the source object; native_decide proves census (755,32,5) on that object; pin c9add16a is immutable, not a current count; --negative-pin and --negative-census reject independently.",
+  :recorded-at "2026-08-31T23:30:00Z",
   :live-invariant
   {:check "checks/r8_f_contract.clj", :evidence :live-report},
   :result :passed,
@@ -247,7 +247,7 @@
   :fixture
   {:repo "futon2", :path "holes/labs/wm-contract/R9-D2-report.edn"},
   :run-sha "732f4d748f08154457d93916d96ab0be0b7f760c",
-  :contract-sha "36c9f087f887496f92090399f74acc4ba193b216",
+  :contract-sha "18c3d7bab7d3dde620667eb51da5e863e600dc34",
   :result :passed,
   :recorded-at "2026-08-31T23:59:30Z",
   :note

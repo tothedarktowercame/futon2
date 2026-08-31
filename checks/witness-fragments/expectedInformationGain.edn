@@ -5,6 +5,6 @@
  :fixture {:repo "futon2"
            :path "holes/labs/wm-contract/expected-information-gain-reference.edn"}
  :run-sha "c99ffdbc13e9b114dbcdca7451651e568588a947"
- :contract-sha "36c9f087f887496f92090399f74acc4ba193b216"
+ :contract-sha "18c3d7bab7d3dde620667eb51da5e863e600dc34"
  :result :passed
  :recorded-at "2026-09-01T00:10:00Z"}
