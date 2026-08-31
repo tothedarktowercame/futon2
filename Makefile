@@ -1,4 +1,4 @@
-.PHONY: ci workspace-gate pre-merge status status-control certify-run run-readiness run-readiness-control run-readiness-tree-control run-readiness-resolution-control run-readiness-serving-code-control
+.PHONY: ci workspace-gate pre-merge status status-control certify-run run-readiness run-readiness-control run-readiness-tree-control run-readiness-resolution-control run-readiness-serving-code-control runner-reload-preflight
 
 # C216: `make` exits 2 for any failing recipe, and 2 means "mutation slipped"
 # in the 0-pass/1-fail/2-mutation-slipped convention these scripts print.
@@ -65,4 +65,11 @@ run-readiness-resolution-control:
 run-readiness-serving-code-control:
 	@python3 scripts/run_readiness.py --serving-code-control; c=$$?; \
 	 echo "run-readiness-serving-code-control: script-exit=$$c (house convention; make reports 2 for any nonzero)"; \
+	 exit $$c
+
+# Preparation only. Prints the canonical dev-admin reload command iff every
+# clean-tree/tested-commit precondition passes; never contacts the admin route.
+runner-reload-preflight:
+	@python3 scripts/prepare_runner_reload.py; c=$$?; \
+	 echo "runner-reload-preflight: script-exit=$$c (house convention; make reports 2 for any nonzero)"; \
 	 exit $$c
