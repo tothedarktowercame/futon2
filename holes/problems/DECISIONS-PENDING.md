@@ -246,4 +246,27 @@ Deferral is therefore not equivalent to failure or obligation. Each source
 continues to state its honest red/refused/baseline condition until the named
 authority decides it.
 
+## Durability
+
+### Invoke-jobs ledger storage backend
+
+- **Question:** Should the invoke-jobs ledger keep its single-EDN-map format
+  with atomic snapshot replacement, or move to SQLite WAL with a compatible EDN
+  export?
+- **Unblocks:** scalable ledger growth beyond 134.6 MB / 6,195 jobs; the
+  monolithic full-map rewrite on every mutation.
+- **Care:** durability and atomicity semantics; anything reading the ledger file
+  directly.
+- **Evidence (C251, futon3c `fc03fbba`):** the current writer `spit`s the whole
+  file in place — no temp file, rename, `fsync`, checksum, backup or writer
+  lock. Concurrent writers can persist out of order, persistence errors are
+  printed but not returned to callers, and **a torn file is silently replaced in
+  memory by an empty default ledger on restart.**
+- **Not waiting on this decision:** the atomic-write repair (C254) preserves the
+  current format and is being applied regardless, because silent total loss is
+  not a thing to defer.
+- **If deferred:** the format stays EDN and every mutation continues to rewrite
+  the whole file; cost grows with history.
+- **Full analysis:** `futon3c` C251 discovery commit `fc03fbba`.
+
 <!-- CURRENT DECISIONS END -->
