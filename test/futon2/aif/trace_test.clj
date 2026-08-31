@@ -41,10 +41,12 @@
                       [{:outcome-ref {:id :goal/x} :advanced? false
                         :q-sat {:status :present :value 0.0}}]}
                      :controller-score 0.05 :rank 1
+                     :preference-stack [{:layer/id :floor :folded? true}]
                      :prediction {:huge :nested :map :that-should-be-stripped}}
                     {:action {:type :address-sorry :target :sorry/x}
                      :G-risk 0.03 :G-ambiguity 0.015 :structural-pressure 0.7
                      :controller-score 0.045 :rank 2
+                     :preference-stack [{:layer/id :floor :folded? true}]
                      :prediction {:also :stripped}}]
    :decision {:action {:type :no-op}
               :rank 1 :controller-score 0.05 :tau 0.2
@@ -84,6 +86,41 @@
     (is (= {:status :present :value 0.0}
            (get-in actual [:entry-evaluations 0 :q-sat]))
         "zero probability survives as a present value")))
+
+(deftest preference-stack-survives-trace-with-typed-presence-test
+  (let [rec (trace/trace-record sample-judge-output)
+        evidence (:preference-stack rec)]
+    (is (= :present (:status evidence)))
+    (is (= :all-ranked-actions (:scope evidence)))
+    (is (= 2 (:candidate-count evidence)))
+    (is (= [{:layer/id :floor :folded? true}] (:value evidence)))
+    (is (every? #(not (contains? % :preference-stack)) (:ranked-actions rec))
+        "the identical 2.6KB stack is stored once, not repeated per candidate")))
+
+(deftest preference-stack-empty-is-not-absence-test
+  (let [output (assoc sample-judge-output :ranked-actions
+                      [{:rank 1 :action {:type :no-op} :preference-stack []}])]
+    (is (= {:status :present :scope :all-ranked-actions
+            :candidate-count 1 :value []}
+           (:preference-stack (trace/trace-record output))))))
+
+(deftest preference-stack-absence-and-conflict-are-loud-test
+  (let [missing (assoc sample-judge-output :ranked-actions
+                       [{:rank 1 :action {:type :no-op}}])
+        conflict (assoc sample-judge-output :ranked-actions
+                        [{:rank 1 :preference-stack [{:layer/id :floor}]}
+                         {:rank 2 :preference-stack [{:layer/id :habit-prior}]}])]
+    (is (= {:status :absent :reason :not-recorded-by-evaluator}
+           (:preference-stack (trace/trace-record missing))))
+    (is (= :conflict
+           (get-in (trace/trace-record conflict) [:preference-stack :status])))))
+
+(deftest preference-stack-write-read-preservation-test
+  (let [_ (trace/write-trace! sample-judge-output
+                              :dir *tmpdir* :date-str "2026-08-31")
+        [record] (trace/read-trace :dir *tmpdir* :date-str "2026-08-31")]
+    (is (= (:preference-stack (trace/trace-record sample-judge-output))
+           (:preference-stack record)))))
 
 (deftest trace-record-strips-softmax-weights-test
   (testing "decision in trace drops :softmax-weights (non-stringable keys)"

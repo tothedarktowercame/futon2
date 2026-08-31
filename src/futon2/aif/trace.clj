@@ -178,8 +178,52 @@
     14 — records capability-zone C load and Beta-predictive ambiguity provenance
          for learn-action-class candidates (2026-07-21).
     15 — records the exact C-entry, graph/durable projection, and typed q-sat
-         inputs needed to replay goal-outcome risk per candidate (2026-08-31)."
-  15)
+         inputs needed to replay goal-outcome risk per candidate (2026-08-31).
+    16 — records the preference stack taken from the ranked evaluation objects,
+         deduplicated once per tick with typed absent/partial/conflict variants
+         (2026-08-31)."
+  16)
+
+(defn- preference-stack-evidence
+  "Preserve the exact stack carried by ranked evaluation objects without
+   repeating its static provenance on every row. Empty is a present value;
+   missing is a reason-bearing absence. Divergence is retained per rank rather
+   than silently selecting the first candidate's stack."
+  [ranked-actions]
+  (let [ranked (vec ranked-actions)
+        entries (mapv (fn [idx action]
+                        {:rank (or (:rank action) (inc idx))
+                         :recorded? (contains? action :preference-stack)
+                         :value (:preference-stack action)})
+                      (range) ranked)
+        recorded (filterv :recorded? entries)
+        distinct-stacks (distinct (map :value recorded))]
+    (cond
+      (empty? ranked)
+      {:status :absent :reason :no-ranked-actions}
+
+      (empty? recorded)
+      {:status :absent :reason :not-recorded-by-evaluator}
+
+      (not= (count recorded) (count entries))
+      {:status :partial
+       :reason :missing-from-some-ranked-actions
+       :by-rank (mapv #(if (:recorded? %)
+                         {:rank (:rank %) :status :present :value (:value %)}
+                         {:rank (:rank %) :status :absent
+                          :reason :not-recorded-by-evaluator})
+                      entries)}
+
+      (= 1 (count distinct-stacks))
+      {:status :present
+       :scope :all-ranked-actions
+       :candidate-count (count entries)
+       :value (first distinct-stacks)}
+
+      :else
+      {:status :conflict
+       :reason :ranked-actions-recorded-different-stacks
+       :by-rank (mapv #(select-keys % [:rank :value]) entries)})))
 
 (defn- futon2-git-version
   "Git identity of the futon2 checkout this JVM loaded its code from:
@@ -263,6 +307,10 @@
     (:morning-brief-consumed-event-ids judge-output [])
     :anticipation (:anticipation judge-output {:events-loaded? false :events []})
     :ranked-actions (mapv strip-ranked-action (:ranked-actions judge-output))
+    ;; C66: sourced from the same per-candidate evaluation maps as scoring.
+    ;; Stored once when identical: the current 2,646-byte stack would otherwise
+    ;; add 291,060 bytes to a 110-candidate tick.
+    :preference-stack (preference-stack-evidence (:ranked-actions judge-output))
     :policy-support-exclusions (vec (:policy-support-exclusions judge-output))
     :decision (strip-decision (:decision judge-output))
     :mode (:mode judge-output)}

@@ -42,3 +42,36 @@ emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el \
   --eval '(arxana-check-parens-cli)' -- --no-defaults \
   scripts/emit_preference_stack_witness.clj checks/preference_stack_witness_shape_check.clj
 ```
+
+## C66 trace persistence addendum
+
+Schema v16 adds a top-level `:preference-stack` envelope sourced from the same
+ranked evaluation maps that carry the scores. An empty stack is
+`{:status :present :value []}`; a stack not emitted by the evaluator is
+`{:status :absent :reason :not-recorded-by-evaluator}`. Partial and conflicting
+candidate populations remain explicit and retain their values by rank.
+
+The current serialized stack is 2,646 bytes. Repeating it across the observed
+110-candidate scale would add 291,060 bytes per tick. Since every current
+candidate receives the same production constant, v16 stores one exact value
+with `:scope :all-ranked-actions` and `:candidate-count`; it does not duplicate
+the value inside stripped ranked rows. If candidates ever disagree, the
+`:conflict` variant preserves each value instead of selecting one silently.
+
+The C58 R2 reader needs no new era arm: it classifies the observation-channel
+schema from each record's timestamp and ignores additive trace fields. The
+v16 boundary remains directly inspectable in `:wm-version
+:trace-schema-version` for scheduled records.
+
+Canonical C66 verification:
+
+```sh
+clojure -M:test -m cognitect.test-runner -n futon2.aif.trace-test
+clojure -M:test -m cognitect.test-runner
+bb checks/preference_stack_witness_shape_check.clj
+bb checks/preference_stack_witness_shape_check.clj --negative
+clj-kondo --lint src/futon2/aif/trace.clj test/futon2/aif/trace_test.clj
+emacs -Q --batch -l /home/joe/code/futon4/dev/check-parens.el \
+  --eval '(arxana-check-parens-cli)' -- --no-defaults \
+  src/futon2/aif/trace.clj test/futon2/aif/trace_test.clj
+```
