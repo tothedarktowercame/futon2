@@ -1,0 +1,14 @@
+{:witnesses "preferenceStackLiveRecorded",
+ :contract-sha "eec8279cf7b2c841f386894116e6aa627869a75c",
+ :run-sha "03c149d0b39b5f1fbe9640b6c7aa63f4fbe21b36",
+ :check
+ {:repo "futon2",
+  :path "checks/r19_stack_witness.clj",
+  :entrypoint "-main"},
+ :axioms
+ "preferenceStackRecorded: [] (kernel decide); this Clojure witness emits no Lean proof and introduces no axioms",
+ :note
+ "R19-D2b witnesses the preference-stack emission added by ccd06ce; the inline dry-run fixture and executable missing-layer falsifier live in the check.",
+ :recorded-at "2026-08-31T03:45:00Z",
+ :result :passed,
+ :fixture {:repo "futon2", :path "checks/r19_stack_witness.clj"}}

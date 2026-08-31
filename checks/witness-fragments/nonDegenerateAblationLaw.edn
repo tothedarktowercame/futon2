@@ -1,0 +1,10 @@
+{:witnesses "nonDegenerateAblationLaw",
+ :check
+ {:repo "futon3",
+  :path "checks/ablate_g_snatch.clj",
+  :entrypoint "-main"},
+ :fixture {:repo "futon3", :path "checks/ablation-snatch.edn"},
+ :run-sha "636496449066aed88c00e99492bd351cef0f0821",
+ :contract-sha "32b929692533cf0d6294fbb7a5937f9199c1552c",
+ :result :passed,
+ :recorded-at "2026-08-30T16:23:00Z"}

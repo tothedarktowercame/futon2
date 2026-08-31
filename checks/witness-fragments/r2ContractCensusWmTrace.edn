@@ -1,0 +1,15 @@
+{:witnesses ["r2ContractCensusWmTrace" "wmTraceR2"],
+ :contract-sha "1b09974aed1ce66dad0b728a6acc64c7b864b31e",
+ :run-sha "4eb4f584f811ab6037a1a3cc706ccfe4571d6734",
+ :check
+ {:repo "futon2",
+  :path "checks/r2_channel_contract.clj",
+  :entrypoint "-main"},
+ :axioms
+ "r2CensusWmTrace: [<name>._native.native_decide.ax_1_1] — native_decide (kernel decide hit maxRecDepth, then 200,000 heartbeats; native_decide 1.87 s — codex-1's measurement); STATED (charter 3a); not sorryAx",
+ :note
+ "R2-D3 (codex-1, 4eb4f58): elaborated by the owner at the sha (git show), exit 0; census = 2 over the 792-entry wmTraceR2 literal over the named Channel inductive; pin c9add16a under the ruled method, identical to R8-D3's; regenerate reproduces both files; the pin's limit stated by the builder: identical enumeration, not correct filter",
+ :recorded-at "2026-08-30T17:20:00Z",
+ :result :passed,
+ :fixture
+ {:repo "futon2", :path "holes/labs/wm-contract/R2-D2-report.edn"}}
