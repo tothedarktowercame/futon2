@@ -1,0 +1,7 @@
+{:witnesses "softmax"
+ :check {:repo "futon2" :path "checks/softmax_witness.clj" :entrypoint "-main"}
+ :fixture {:repo "futon2" :path "holes/labs/wm-contract/softmax-reference.edn"}
+ :run-sha "baa9cac380d3c9506120e064faf8f460acbbeff1"
+ :contract-sha "224763cc55d71dac90074a675d21ba81654f5de6"
+ :result :passed
+ :recorded-at "2026-08-31T23:59:00Z"}
