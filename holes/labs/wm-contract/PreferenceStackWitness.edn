@@ -1,0 +1,42 @@
+{:witness/type :PreferenceStackWitness
+ :witness/version 1
+ :recorded-at "2026-08-31T15:38:00Z"
+ :producer {:function futon2.aif.efe/compute-efe
+            :field :preference-stack
+            :source "src/futon2/aif/efe.clj:92-124,781"}
+ :input {:kind :runtime-dry-run
+         :action {:type :no-op}
+         :goal-outcome-entry-count 0}
+ :consumer {:check "checks/preference_stack_witness_shape_check.clj"
+            :binding :preferenceStackLiveRecorded}
+ :preference-stack
+ [{:layer/id :floor
+   :source :operator-declared
+   :author "Joseph Corneli"
+   :basis "src/futon2/aif/preferences.clj sha256 22ae618a61cb3a4198b431cac214390337e29a01017ef302feb02618ef41e86a; ranges introduced by commit 135efdff5483dd297ce8b3670fe041b4283e6e92"
+   :folded? true
+   :site "src/futon2/aif/efe.clj:601-614,725-733"}
+  {:layer/id :capability-zone-load
+   :source :learned-from-operator
+   :author "wm-outer-loop, implementation authored by Joseph Corneli"
+   :basis "substrate-2 live probe 2026-08-30: 242 code/v05/wm-hyperparameter-update records, 14 classes, max :as-of 2026-07-18T22:33:41+01:00"
+   :folded? true
+   :site "src/futon2/aif/preferences.clj:140-173 and src/futon2/aif/efe.clj:586-600"}
+  {:layer/id :live-goal-outcomes
+   :source :corpus-derived
+   :author "futon2.aif.c-vector/entries-from-corpus, authored by Joseph Corneli"
+   :basis "substrate-2 :7071 live probe 2026-08-30: corpus signature -1131096431, 36 capabilities, 293 sorries"
+   :folded? true
+   :site "src/futon2/aif/c_vector.clj:160-184 and src/futon2/aif/efe.clj:655-665"}
+  {:layer/id :c-vector-overlays
+   :source :script-produced
+   :author "futon6/scripts/c_vector.bb, authored by Joseph Corneli"
+   :basis "2026-06-26 overlay snapshots: mess sha256 ffb40d5f9d3c026d41e1bd2b6047efcf9e5bddbf3dd1a8c7acc667e37fb2a4fd; incomplete sha256 f6c3e137d721f9a4936a176d4991373b18b64fbdcc58b0e600944c006ac3c554; yingvoice sha256 84a0ed72aa7c277e702ec5699de2ba94c7c7d4f00fc414d3aa858c91a47eec4f"
+   :folded? true
+   :site "src/futon2/aif/c_vector.clj:191-212"}
+  {:layer/id :habit-prior
+   :source :learned-from-operator
+   :author "unknown operator whose selections are recorded in wm-trace"
+   :basis "data/wm-trace/wm-trace-2026-08-30.edn sha256 6da3ccdab1dc4ef32d160d4b9ebcbe4bc6c654d529c2e0873971dd4f3aa06a05"
+   :folded? false
+   :site "Mode-dependent: :controller-augmentation keeps structural pressure additively in controller-score at src/futon2/aif/efe.clj:700-703,725-733; today's default :habit-prior replaces it with learned ln E(pi) at src/futon2/aif/habit_prior.clj:121-136 and scripts/futon2/report/war_machine.clj:4465-4472, then policy/select-action consumes that unscaled log prior at src/futon2/aif/policy.clj:368-380. OWNER AMENDMENT 2026-08-30 23:35Z (node-sim finding, verified policy.clj:234-270): in the branch the WM runs (:selection-boundary :strategic-recommendation, war_machine.clj:4503) the scores including ln E(pi) order an INSPECTABLE COUNTERFACTUAL only — chosen = (or (first controller-entries) ...), :habit-prior-applied? false; war_machine.clj:364 declares :scheduler-habit-authority :counterfactual-only. Computed and recorded at the seam; declared abstention from choosing."}]}
