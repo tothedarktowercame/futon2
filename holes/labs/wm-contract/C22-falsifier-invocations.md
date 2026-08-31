@@ -429,3 +429,15 @@ controls invoke futon3 `find-snatch --negative-f1`, `--negative-f2`, and
 As of C124 the same command emits repository commit/tree/dirty/diff provenance
 before any check runs.  Provenance records the basis; it is not a freshness
 assertion against a previous run.
+
+## C128 reviewer boundary
+
+Ordinary futon2 CI remains hermetic.  The required War Machine pre-merge review
+composes it with the cross-repository gate:
+
+```sh
+make pre-merge
+```
+
+For a gate-only rerun use `make workspace-gate`. Missing sibling repositories
+fail loudly; none is silently skipped.
