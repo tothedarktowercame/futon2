@@ -100,25 +100,50 @@
               :authority authority}))
 
 (defn- args-map [args]
-  (when (odd? (count args)) (throw (ex-info "arguments must be pairs" {})))
-  (into {} (map (fn [[k v]] [(keyword (subs k 2)) v]) (partition 2 args))))
+  (loop [xs args out {}]
+    (if (empty? xs)
+      out
+      (if (= "--negative" (first xs))
+        (recur (rest xs) (assoc out :negative? true))
+        (do
+          (when-not (second xs) (throw (ex-info "arguments must be flag/value pairs" {})))
+          (recur (nnext xs) (assoc out (keyword (subs (first xs) 2)) (second xs))))))))
 
 (defn -main [& args]
-  (let [{:keys [report] :as opts} (args-map args)]
+  (let [{:keys [report negative?] :as opts} (args-map args)]
     (when-not (every? opts [:contract :registry :report :authority])
-      (throw (ex-info "usage: --contract JSON --registry EDN --report EDN --authority SHA" {})))
-    (let [result (try (lint-file opts)
+      (throw (ex-info "usage: [--negative] --contract JSON --registry EDN --report EDN --authority SHA" {})))
+    (let [result (try (if negative?
+                        ;; Semantic mutation: preserve the contract's valid JSON shape but
+                        ;; sever its authority pin. The lint exists in part to reject a
+                        ;; generated contract that is not from the named authority.
+                        (lint-data {:contract (assoc-in (read-json (:contract opts))
+                                                        [:source :git-sha]
+                                                        "mutation/not-the-authority")
+                                    :registry (read-edn (:registry opts))
+                                    :authority (:authority opts)})
+                        (lint-file opts))
                       (catch Exception e
                         {:summary {:pass? false :counts {}}
                          :owners [] :declarations []
                          :errors [{:error :lint-exception :message (.getMessage e)}]}))]
-      (spit report (str (pr-str result) "\n"))
+      ;; A negative control never overwrites the caller's positive report.
+      (when-not negative? (spit report (str (pr-str result) "\n")))
       (doseq [{:keys [owner declared-with-body declared-with-sorry]} (:owners result)]
         (println owner "declared-with-body" declared-with-body)
         (println owner "declared-with-sorry" declared-with-sorry))
       (doseq [[j n] (get-in result [:summary :counts])]
         (println (name j) n))
-      (when-not (get-in result [:summary :pass?]) (System/exit 1)))))
+      (if negative?
+        (if (and (not (get-in result [:summary :pass?]))
+                 (pos? (get-in result [:summary :counts :wrong-authority] 0)))
+          (do (println "contract-lint: PASS negative authority mutation rejected exit-convention=0-pass/1-fail")
+              (System/exit 0))
+          (do (println "contract-lint: FAIL negative authority mutation slipped exit-convention=0-pass/1-fail")
+              (System/exit 2)))
+        (do (println (str "contract-lint: " (if (get-in result [:summary :pass?]) "PASS" "FAIL")
+                          " exit-convention=0-pass/1-fail"))
+            (when-not (get-in result [:summary :pass?]) (System/exit 1)))))))
 
 (when (= *file* (System/getProperty "babashka.file"))
   (apply -main *command-line-args*))

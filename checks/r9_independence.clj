@@ -95,7 +95,7 @@
          "    (∀ r ∈ wmVerdictsDeclaredFixture, r.verdict = .self) := by\n  simp [wmVerdictsLedgerAloneFixture, wmVerdictsDeclaredFixture]\n\n"
          "end DarkTower.WarMachine.Holes.R9D2\n")))
 
-(defn run-check [{:keys [p4ng badges]}]
+(defn run-check [{:keys [p4ng badges negative?]}]
   (let [p4ng (or p4ng "/home/joe/code/p4ng")
         badges (or badges "/home/joe/code/futon2/data/r18-badges.edn")
         badge-data (edn/read-string (slurp badges))
@@ -110,6 +110,11 @@
         attrs (mapv (fn [id] (assoc (attribution (get ss id)) :row id)) closed-ids)
         ledger (mapv ledger-row closed-ids)
         declared (mapv declared-row closed-ids)
+        decide? (if negative?
+                  ;; Semantic mutation: an inside producer is misclassified as
+                  ;; independent while all row and corpus shapes remain valid.
+                  (fn [_producer _producing-part] false)
+                  (fn [producer producing-part] (contains? producing-part producer)))
         report {:corpus {:repository p4ng :sha corpus-sha :path corpus-path}
                 :sections {:total (count ss) :fixed (:fixed kinds 0)
                            :open (:open kinds 0) :unmarked (:unmarked kinds 0)
@@ -122,20 +127,36 @@
                 :checks {:expected-closed-ids? (= fixed (set closed-ids))
                          :per-row-sources? (every? #(= (boolean (row-text-ids (:row %)))
                                                         (map? (:declaration-source %))) declared)
-                         :declared-sound? (checker-sound? (fn [p s] (contains? s p))
+                         :declared-sound? (checker-sound? decide?
                             (map #(hash-map :producer (:producer %) :producing-part (set (:declared-part %))) declared))}}]
     (when-not (every? true? (vals (:checks report)))
       (throw (ex-info "R9 checker failed closed" report)))
     {:report report :lean (lean-source ledger declared)}))
 
 (defn -main [& args]
-  (let [opts (apply hash-map (mapcat (fn [[k v]] [(keyword (subs k 2)) v]) (partition 2 args)))
-        {:keys [report lean]} (run-check opts)]
+  (let [negative? (some #{"--negative"} args)
+        pair-args (remove #{"--negative"} args)
+        opts (assoc (apply hash-map (mapcat (fn [[k v]] [(keyword (subs k 2)) v])
+                                            (partition 2 pair-args)))
+                    :negative? negative?)]
     (when-not (and (:report opts) (:lean opts))
-      (throw (ex-info "usage: --report FILE --lean FILE [--p4ng DIR]" {})))
-    (spit (:report opts) (str (pr-str report) "\n"))
-    (spit (:lean opts) lean)
-    (println (pr-str {:runs (get report :runs) :prose-attribution (get report :prose-attribution)}))))
+      (throw (ex-info "usage: [--negative] --report FILE --lean FILE [--p4ng DIR]" {})))
+    (try
+      (let [{:keys [report lean]} (run-check opts)]
+        (if negative?
+          (do (println "r9-independence: FAIL negative independence mutation slipped exit-convention=0-pass/1-fail")
+              (System/exit 2))
+          (do (spit (:report opts) (str (pr-str report) "\n"))
+              (spit (:lean opts) lean)
+              (println (pr-str {:runs (get report :runs) :prose-attribution (get report :prose-attribution)}))
+              (println "r9-independence: PASS exit-convention=0-pass/1-fail"))))
+      (catch Exception e
+        (if negative?
+          (do (println (str "r9-independence: PASS negative independence mutation rejected"
+                            " checks=" (pr-str (get-in (ex-data e) [:checks]))
+                            " exit-convention=0-pass/1-fail"))
+              (System/exit 0))
+          (throw e))))))
 
 (when (= *file* (System/getProperty "babashka.file"))
   (apply -main *command-line-args*))
