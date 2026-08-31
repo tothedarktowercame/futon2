@@ -508,3 +508,46 @@ nonzero as failure will score one of them backwards. Worth standardising before 
 
 **Also noted:** the delegate reported that concurrent lanes advanced futon2 HEAD after its commit and it
 left their changes untouched. That is the shared-checkout discipline holding under actual concurrency.
+
+---
+
+## APEX-D1 — gated. The apex has its first holder and its first draft
+
+`2dfb7f7` + `6c867d3`: `holes/problems/P-evidence-apex.md` (188 lines). Sections: the problem, a proposed
+`EvidenceContract` shape, a worked **noun** (R2's channel contract), a worked **edge** (`R16→R2`, status
+`:refused`), decisions requested from Joe, and what would make APEX-D2 dispatchable.
+
+**It did the thing the charter asked and did not do the thing it warned against.** The charter said this
+unit scores 3/7, cannot be automated, and must produce *a draft for Joe to rule on, not a decision* — and
+warned it not to rebuild R18 (an apex that is one of the nouns, wearing the word "meta"). The delivery is
+a draft with four named decisions and one worked case explicitly `:status :refused`. **The R16→R2 contract
+refuses itself**: it states the claim (`P-R16/solved-2` — an outward actuation yields an external witness)
+and the requirement (`:external-effect-receipt`), then refuses, because R16 constructs and does not
+actuate. That is an evidence contract correctly declining to certify.
+
+**And it fired `I_data_current` on its own worked case.** Running the R2 test it cites:
+
+    FAIL current-r2-channel-contract-baseline
+    expected "c9add16ac96c973b"  actual "db71e095a81e8620"     3 failures, 25 assertions
+
+**I verified the corpus independently:** 53 files, **798 forms / 796 conformant**, pin `db71e095a81e8620`
+— against the registered 792 / 790. The check refused its own baseline rather than passing quietly or
+silently re-pinning.
+
+**And the growth is fully explained, which answers the question the delegate left open.**
+`wm-trace-2026-08-30.edn` held **1 form** when I measured it earlier today and holds **7** now — exactly
+the +6 — with the last timestamped `20:41:52`, the WM-RUN2 tick. So the corpus grew by **the build's own
+instrumented runs**, after R2-D2 pinned 792. Nothing anomalous: the disposition is **requalify**, not
+investigate. That is worth stating plainly because "the pin moved" and "the data is wrong" look identical
+from inside a failing test, and this build has spent two days on the difference.
+
+**Joe's four decisions, unchanged and his:** (1) ratify the joined upward `claim-clause` / downward
+`requirement` shape; (2) may executable negative controls make `:self` evidence admissible for conformance
+claims like R2's; (3) the R16→R2 fork — rename, build, or both staged; (4) EDN-first or Lean-first after
+semantic ratification.
+
+**Decision 2 is the load-bearing one** and deserves flagging: R9's machinery types a witness as
+`independent` / `self` / `unknown`, and R2's conformance evidence is *self*-produced — the machine
+checking its own trace. If a negative control can promote `:self` to admissible, most of this build's
+existing evidence becomes gradeable; if it cannot, most of it does not. That is the apex's first real
+ruling and it is exactly the kind that should not be made by a delegate.
