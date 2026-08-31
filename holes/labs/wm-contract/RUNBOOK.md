@@ -73,6 +73,22 @@ check. Classify that filename in `known-check-files` in
 semantic control, or record a reasoned manual exclusion. Do not delete the
 inventory alarm and do not guess that new code is safe to execute.
 
+### Lean contract regeneration
+
+Lean source and its generated contract are a two-phase lane delivery, not one
+atomic commit. Commit the `Holes.lean` change first; then regenerate against
+that committed authority, rebind affected witness fragments, merge the
+registry, and run `contract_authority_current`, strict lint, and the workspace
+gate before declaring the lane complete. The intermediate red is truthful.
+
+Do not broadly accept `workspace-gate exit 1` while Lean work is active: that
+could hide another check. An in-flight classification would require the exact
+failure set, an explicit Lean-changing lane record, source-blob pins, and an
+expiry. Until the lane schema carries those facts, `DEGRADED-NEW` means the
+owning Lean lane still owes its closure phase. Unrelated mathlib commits do not
+cause churn: freshness follows the pinned `Holes.lean` blob, not repository
+HEAD alone.
+
 ## Durable and bounded jobs
 
 Ordinary durable background work uses:
