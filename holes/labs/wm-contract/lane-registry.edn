@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C103-retirement-window, :dispatched-at "2026-08-31T17:56:10Z", :job-id "invoke-1788198947844-5828-ae9ffd66", :expected-by "2026-08-31T18:41:10Z"}
   {:lane :wm-evidence
-   :holding :C97-operational-certificate, :queued-behind :C98-absence-semantics, :dispatched-at "2026-08-31T17:43:54Z", :job-id "invoke-1788198213522-5814-39c7156a", :expected-by "2026-08-31T18:28:54Z"}]}
+   :holding :C104-envelope, :dispatched-at "2026-08-31T17:57:52Z", :job-id "invoke-1788199050414-5830-c5654e95", :expected-by "2026-08-31T18:42:52Z"}]}
