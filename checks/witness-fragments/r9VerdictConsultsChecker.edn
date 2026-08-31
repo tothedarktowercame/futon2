@@ -1,0 +1,15 @@
+{:witnesses "r9VerdictConsultsChecker"
+ :check {:repo "futon2"
+         :path "checks/r9_proof_receipt_check.clj"
+         :entrypoint "-main"}
+ :fixture {:repo "futon2"
+           :path "holes/labs/wm-contract/R9-VerdictConsultsChecker-proof-receipt.edn"}
+ :freshness :pinned-git-v1
+ :live-invariant {:check "checks/r9_proof_receipt_check.clj"
+                  :evidence :lean-elaboration-and-axiom-output}
+ :run-sha "76b772e4cdb0868ca06b590f5f1e8a0e572ad21a"
+ :contract-sha "86186c37444ac9f1b9d54818b092bbbc586854f4"
+ :result :passed
+ :recorded-at "2026-08-31T17:08:57Z"
+ :axioms "DarkTower.WarMachine.Holes.R9D2.verdictConsultsChecker: [propext]; no sorryAx"
+ :note "C87: independently re-elaborates the exact content-pinned R9-D2 proof source and compares #print axioms output. The EDN is an inspectable receipt, not a replacement proof. Absent and tampered receipt controls are rejected."}

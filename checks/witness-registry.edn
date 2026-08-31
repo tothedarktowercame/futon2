@@ -160,11 +160,29 @@
   :result :passed,
   :fixture
   {:repo "futon2", :path "holes/labs/wm-contract/R8-D3-report.edn"}}
+ {:witnesses "r9VerdictConsultsChecker",
+  :freshness :pinned-git-v1,
+  :contract-sha "86186c37444ac9f1b9d54818b092bbbc586854f4",
+  :run-sha "76b772e4cdb0868ca06b590f5f1e8a0e572ad21a",
+  :check
+  {:repo "futon2",
+   :path "checks/r9_proof_receipt_check.clj",
+   :entrypoint "-main"},
+  :axioms
+  "DarkTower.WarMachine.Holes.R9D2.verdictConsultsChecker: [propext]; no sorryAx",
+  :note
+  "C87: independently re-elaborates the exact content-pinned R9-D2 proof source and compares #print axioms output. The EDN is an inspectable receipt, not a replacement proof. Absent and tampered receipt controls are rejected.",
+  :recorded-at "2026-08-31T17:08:57Z",
+  :live-invariant
+  {:check "checks/r9_proof_receipt_check.clj",
+   :evidence :lean-elaboration-and-axiom-output},
+  :result :passed,
+  :fixture
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/R9-VerdictConsultsChecker-proof-receipt.edn"}}
  {:witnesses
-  ["r9WmVerdictsSound"
-   "r9WmPerRowDeclarations"
-   "r9TwoRunCensus"
-   "r9VerdictConsultsChecker"],
+  ["r9WmVerdictsSound" "r9WmPerRowDeclarations" "r9TwoRunCensus"],
   :freshness :pinned-git-v1,
   :contract-sha "1b09974aed1ce66dad0b728a6acc64c7b864b31e",
   :run-sha "732f4d748f08154457d93916d96ab0be0b7f760c",

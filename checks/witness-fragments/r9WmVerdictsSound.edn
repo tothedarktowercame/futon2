@@ -1,8 +1,7 @@
 {:witnesses
  ["r9WmVerdictsSound"
   "r9WmPerRowDeclarations"
-  "r9TwoRunCensus"
-  "r9VerdictConsultsChecker"],
+  "r9TwoRunCensus"],
  :check
  {:repo "futon2",
   :path "checks/r9_independence.clj",
