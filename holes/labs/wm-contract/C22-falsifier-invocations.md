@@ -318,6 +318,28 @@ counts are `{:why 86 :how 27 :see-also 134}` rather than `{:why 86 :how 23 :see-
 pre-existing moving-count assertions over the live library; C65 changed only `checks/` files and caused
 neither delta.
 
+## C76 — library graph snapshot/live split
+
+```sh
+cd /home/joe/code/futon3
+clojure -X:test
+clj-kondo --lint test/library_graph_lint_test.clj
+```
+
+The dated fixture `test/fixtures/library-graph/snapshot.edn` owns the exact 2026-08-31 census and scan
+digest: 1244 files, 247 edges (`86/27/134` why/how/see-also), content SHA-256
+`1614ec7a1da6ac79eff57f2242ea0ce5f01be0c26add2c239ac6acf6923f959d`. Its falsifier increments the frozen
+edge total without changing the typed partition and must be rejected.
+
+The live gate emits files and per-kind counts as evidence and asserts only declared edge kinds, zero
+dangling targets, zero why-cycles, and the linter's full structural verdict. Its existing semantic
+falsifiers include a dangling authored target and why-cycle; both must remain rejected. Test convention is
+the suite convention: exit 0 pass, exit 1 failure.
+
+The `+4 @how` and `+9 @see-also` delta was authored directly in committed `.flexiarg` edits; the parser did
+not change after the old literals were recorded. Later math authoring added three pattern files. Thus the
+old count failures were corpus growth, not a hidden change in edge derivation.
+
 ## C71 — WM-RUN2 conforms to the two-layer Figure 4 wiring
 
 Authority: `e3a50c7e02f4171b3c7537be56b102ea7837a42d`.

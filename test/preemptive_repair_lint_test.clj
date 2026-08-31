@@ -22,5 +22,6 @@
     (is (empty? (lint/acceptance-findings
                  [{:repo :fixture :path "checks/specimen.clj" :text masked}])))))
 
-(let [{:keys [fail error]} (run-tests)]
-  (System/exit (if (zero? (+ fail error)) 0 1)))
+(when (= *file* (System/getProperty "babashka.file"))
+  (let [{:keys [fail error]} (run-tests)]
+    (System/exit (if (zero? (+ fail error)) 0 1))))
