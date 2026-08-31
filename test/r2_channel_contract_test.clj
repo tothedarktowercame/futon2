@@ -42,15 +42,18 @@
 (deftest live-r2-gate-emits-moving-counts-and-enforces-channel-invariants
   (let [report (lint/lint-paths {})
         summary (:summary report)]
-    ;; Counts are evidence, not fixed expectations. The two known malformed
-    ;; observations keep this live gate honestly red until their source is fixed.
+    ;; Counts are evidence, not fixed expectations. Historical observations are
+    ;; checked against the channel declaration in force for their schema era.
     (is (every? #(contains? summary %)
                 [:files :forms :conformant-records :conformance-ratio]))
     (is (<= 0.0 (:conformance-ratio summary) 1.0))
     (is (zero? (:undeclared-key-count summary)))
-    (is (= [:observation-keys] (:failure-classes summary)))
-    (is (false? (:pass? summary)))
-    (is (every? #(seq (:missing %)) (:checks report)))
+    (is (empty? (:failure-classes summary)))
+    (is (true? (:pass? summary)))
+    (is (empty? (:checks report)))
+    (is (= 2 (get-in report [:channel :eras :pre-annotation-health :records])))
+    (is (= lint/annotation-health-boundary
+           (get-in report [:channel :eras :v0.10-and-later :from])))
     (is (= [:loop-health :support-coverage :attack-coverage :mission-health
             :stack-pct :consulting-pct :portfolio-pct :mathematics-pct
             :active-repo-ratio :sorry-count-norm :coupling-density
@@ -58,6 +61,22 @@
            (get-in report [:channel :values])))
     (is (= 11 (get-in report [:channel :source :line])))
     (is (true? (get-in report [:likelihood :partition-valid?])))))
+
+(deftest annotation-health-boundary-is-falsifiable
+  (let [declared (:channels (lint/read-declarations {}))
+        old-channels (remove #{:annotation-health} declared)
+        old-observation (observation old-channels)]
+    (with-corpus
+      [{:timestamp "2026-05-18T20:54:12.717822372Z"
+        :observation old-observation}
+       {:timestamp lint/annotation-health-boundary
+        :observation old-observation}]
+      (fn [trace-dir]
+        (let [report (lint/lint-paths {:trace-dir trace-dir})]
+          (is (= 1 (get-in report [:summary :conformant-records])))
+          (is (= 1 (get-in report [:summary :key-set-mismatches])))
+          (is (= :v0.10-and-later (get-in report [:checks 0 :schema-era])))
+          (is (= [:annotation-health] (get-in report [:checks 0 :missing]))))))))
 
 (deftest corpus-fixtures-discriminate-source-keyed-contract
   (let [declared (:channels (lint/read-declarations {}))

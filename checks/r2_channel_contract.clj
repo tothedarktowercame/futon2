@@ -15,6 +15,12 @@
   "/home/joe/code/futon2/src/futon2/aif/belief.clj")
 (def default-trace-dir "/home/joe/code/futon2/data/wm-trace")
 
+(def annotation-health-boundary
+  "First trace produced by the v0.10 schema. The two earlier 2026-05-18
+   records predate :annotation-health; the v0.10 record and every later record
+   carry it."
+  "2026-05-18T21:33:02.386043914Z")
+
 ;; This is an independent, explicit Option-None arm.  Computing it from the
 ;; declaration difference would make a newly declared but unmodelled channel
 ;; silently classify itself.
@@ -130,8 +136,22 @@
        (str/join "\n")
        sha256))
 
+(defn schema-era [value]
+  (let [timestamp (:timestamp value)]
+    (if (and (string? timestamp)
+             (neg? (compare timestamp annotation-health-boundary)))
+      :pre-annotation-health
+      :v0.10-and-later)))
+
+(defn required-channels [declared value]
+  (if (= :pre-annotation-health (schema-era value))
+    (disj declared :annotation-health)
+    declared))
+
 (defn- record-check [declared {:keys [file form value]}]
-  (let [observation (:observation value)]
+  (let [observation (:observation value)
+        required (required-channels declared value)
+        era (schema-era value)]
     (cond
       (not (map? value))
       {:check :trace-form :reason :not-a-map :file file :form form}
@@ -140,12 +160,13 @@
       {:check :observation :reason :not-a-map :file file :form form
        :timestamp (:timestamp value)}
 
-      (not= declared (set (keys observation)))
+      (not= required (set (keys observation)))
       {:check :observation-keys :reason :channel-key-set-mismatch
        :file file :form form :timestamp (:timestamp value)
-       :missing (vec (filter #(not (contains? observation %)) declared))
+       :schema-era era
+       :missing (vec (filter #(not (contains? observation %)) required))
        :undeclared (vec (sort (set/difference (set (keys observation))
-                                             (set declared))))}
+                                             required)))}
 
       :else nil)))
 
@@ -221,6 +242,7 @@
                                     (not (contains? explicit-none %)))
                               channels))}))
         record-checks (vec (keep #(record-check declared %) records))
+        era-counts (frequencies (map (comp schema-era :value) records))
         checks (into (vec partition-checks) record-checks)
         malformed (count (filter #(contains? #{:trace-form :observation}
                                                (:check %))
@@ -251,7 +273,15 @@
                    :prefix (subs digest 0 16)}
      :negative-mutation mutation-target
      :channel {:source channel-source
-               :values channels}
+               :values channels
+               :eras {:pre-annotation-health
+                      {:before annotation-health-boundary
+                       :values (vec (remove #{:annotation-health} channels))
+                       :records (get era-counts :pre-annotation-health 0)}
+                      :v0.10-and-later
+                      {:from annotation-health-boundary
+                       :values channels
+                       :records (get era-counts :v0.10-and-later 0)}}}
      :likelihood {:source likelihood-source
                   :options (mapv (fn [channel]
                                    [channel (likelihood-option modeled channel)])
@@ -264,7 +294,7 @@
       "fun tick => Channel.all.all (fun c => (tick.observation c).isSome)"
       :ill-formed (+ mismatched malformed)
       :ill-formed-ticks
-      (mapv #(select-keys % [:file :form :timestamp :missing :undeclared])
+      (mapv #(select-keys % [:file :form :timestamp :schema-era :missing :undeclared])
             record-checks)}
      :turn-channel
      {:status :blocked-design-decision
@@ -278,9 +308,13 @@
      :findings (cond-> [] finding (conj finding))
      :checks checks}))
 
-(defn- lean-tick-literal [channels observation]
+(defn- lean-tick-literal [channels required observation]
+  ;; The generated literal represents the ERA-AWARE obligation. A channel that
+  ;; did not yet exist is `some ()` (not required), while an absent channel in
+  ;; the record's declared era remains `none` and is falsifiable.
   (let [missing (keep (fn [channel]
-                        (when-not (contains? observation channel)
+                        (when (and (contains? required channel)
+                                   (not (contains? observation channel)))
                           (get lean-channel-constructors channel)))
                       channels)]
     (if (empty? missing)
@@ -293,7 +327,10 @@
   (let [channels (get-in report [:channel :values])
         digest (get-in report [:content-pin :sha256])
         ill-formed (get-in report [:r2ContractCensusWmTrace :ill-formed])
-        ticks (map #(lean-tick-literal channels (get-in % [:value :observation]))
+        declared (set channels)
+        ticks (map #(lean-tick-literal channels
+                                       (required-channels declared (:value %))
+                                       (get-in % [:value :observation]))
                    records)]
     (str "import DarkTower.WarMachine.Holes\n\n"
          "/- Generated by checks/r2_channel_contract.clj.\n"

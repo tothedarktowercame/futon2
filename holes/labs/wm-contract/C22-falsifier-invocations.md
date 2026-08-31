@@ -137,6 +137,23 @@ channels. Its moving file/form/conformance counts and ratio are report evidence,
 enforce no undeclared channels, no new failure class, identified failures, and the declared 14-channel
 interface. Positive/negative exits were `1/0`; the negative mutation added another missing-channel record.
 
+### C58 era correction
+
+The two omissions were subsequently proved era-valid, not malformed. The first two May 18 records use
+the 13-channel pre-v0.10 schema; form 3 at `2026-05-18T21:33:02.386043914Z` is the first v0.10 record and
+already carries both `:annotation-health` and its prediction error. The checker now reports both era
+populations separately. Canonical invocations remain:
+
+```sh
+bb -cp . checks/r2_channel_contract.clj --report /tmp/r2-channel-contract.edn
+bb -cp . checks/r2_channel_contract.clj --negative --report /tmp/r2-channel-contract-negative-unused.edn
+bb -cp . test/r2_channel_contract_test.clj
+cd /home/joe/code/mathlib4 && lake env lean /tmp/r2-channel-contract.lean
+```
+
+Observed exits: `0/0/0/0`. The negative control removes a channel required in its selected record's own
+era; it remains a semantic key-set rejection rather than being excused by the historical boundary.
+
 The live R8 gate is green because its era boundary, shape, disposition partition, and finite-F invariants
 hold; it no longer compares the live census to literal counts. The recorded `755/32/5` census is pinned
 to its 792-form content digest and last-record timestamp. Each live delta is classified as
