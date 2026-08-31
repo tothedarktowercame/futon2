@@ -107,11 +107,11 @@
          (filter #(= target (a3/mission-key (:mission %))))
          first)))
 
-(defn- reviewed-clean-for
+(defn- sampled-clean-for
   [mission-id deposit]
   (let [mission (:mission deposit mission-id)
-        path (or (get a3/reviewed-candidate-cleans mission)
-                 (get a3/reviewed-candidate-cleans mission-id))]
+        path (or (get a3/sampled-candidate-cleans mission)
+                 (get a3/sampled-candidate-cleans mission-id))]
     (when path
       (edn/read-string (slurp path)))))
 
@@ -122,7 +122,7 @@
                  {:mission mission-id})
         clean' (or clean
                    (:clean base)
-                   (reviewed-clean-for mission-id base))
+                   (sampled-clean-for mission-id base))
         mission (or (:mission base) mission-id)]
     (cond-> (assoc base :mission mission)
       clean' (assoc :clean clean')

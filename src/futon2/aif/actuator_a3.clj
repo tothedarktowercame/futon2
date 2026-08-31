@@ -369,10 +369,11 @@
                  :clean-pass? true
                  :discharged? (and (pos? bound) (= inhabited bound))}})))))
 
-(def reviewed-candidate-cleans
-  "Mission -> CLean path, for the A3 live-test suite. Operational verification:
-   does the LIVE substrate match the mission's authored CLean structure? Not a
-   formal proof — a grounded, re-runnable check against the running system."
+(def sampled-candidate-cleans
+  "Four hand-selected missions -> CLean paths for the A3 live-test sample.
+   This is a grounded, re-runnable check of those four authored bindings against
+   the running substrate. It is not a census of open missions and makes no claim
+   about missions outside this explicitly enumerated sample."
   {"futon5a-d/mission/learning-loop"          "/home/joe/code/futon6/holes/clean/M-learning-loop.clean.edn"
    "futon3c-d/mission/autoclock-in"           "/home/joe/code/futon6/holes/clean/autoclock-in.clean.edn"
    "futon3c-d/mission/state-snapshot-witness" "/home/joe/code/futon6/holes/clean/state-snapshot-witness.clean.edn"
@@ -385,7 +386,7 @@
    :all-inhabited (all pass — verify it is not merely a coarse generic-type match)."
   ([mission] (a3-live-test mission {}))
   ([mission opts]
-   (let [clean-path (get reviewed-candidate-cleans mission)
+   (let [clean-path (get sampled-candidate-cleans mission)
          clean (when clean-path (edn/read-string (slurp clean-path)))
          snap (box-match-snapshot {:mission mission :clean clean} opts)
          inhabited (count (filter :inhabited? snap))
@@ -398,11 +399,11 @@
       :boxes (mapv #(select-keys % [:box :produces :type :inhabited?]) snap)})))
 
 (defn a3-live-tests
-  "The A3 live-test suite: substrate build-match over every bound candidate mission.
-   An operational verification the system carries — re-run any time to check whether
-   the live builds still match their CLean specs."
+  "The A3 live-test sample: substrate build-match over the four hand-selected
+   candidate missions in `sampled-candidate-cleans`. Re-run to check those bindings;
+   this does not establish coverage of the wider open-mission population."
   ([] (a3-live-tests {}))
-  ([opts] (mapv #(a3-live-test % opts) (sort (keys reviewed-candidate-cleans)))))
+  ([opts] (mapv #(a3-live-test % opts) (sort (keys sampled-candidate-cleans)))))
 
 (defn- file-safe [s]
   (-> (str s)
