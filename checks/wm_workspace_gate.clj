@@ -52,6 +52,7 @@
     "generative_model_witness.clj" "holder_check.clj"
     "hyper_edge_domain_range_check.clj" "hyper_edge_exemplar_check.clj"
     "lane_registry_check.clj" "log_multivariate_beta_witness.clj"
+    "model_uncertainty_eig_witness.clj"
     "lean_sorry_category_check.clj"
     "obligation_ledger_reconciliation_check.clj"
     "preemptive_absence_coercion_lint.clj" "preemptive_acceptance_lint.clj"
@@ -96,7 +97,9 @@
            "holes/labs/wm-contract/tick-run-record-2026-08-30.edn"]}
    {:name :runs-once :argv ["bb" "checks/wm_runs_once_witness.clj"]}
    {:name :lean-sorry-categories
-    :argv ["bb" "checks/lean_sorry_category_check.clj"]}])
+    :argv ["bb" "checks/lean_sorry_category_check.clj"]}
+   {:name :model-uncertainty-eig
+    :argv ["bb" "checks/model_uncertainty_eig_witness.clj"]}])
 
 (defn control-commands []
   [{:name :c116-removed-ledger-row
@@ -127,7 +130,11 @@
    {:name :c137-obligation-fixture-drift
     :argv ["bb" "checks/lean_sorry_category_check.clj" "--negative-fixture-drift"]}
    {:name :c138-status-population-sources
-    :argv ["python3" "scripts/wm_status_report.py" "--source-control"]}])
+    :argv ["python3" "scripts/wm_status_report.py" "--source-control"]}
+   {:name :c143-missing-record-pointer
+    :argv ["bb" "checks/closed_record_pointer_check.clj" "--negative"]}
+   {:name :c147-collapsed-eig-equality
+    :argv ["bb" "checks/model_uncertainty_eig_witness.clj" "--negative"]}])
 
 (defn run-one [{:keys [name argv dir]}]
   (println "wm-workspace-gate: RUN" (clojure.core/name name))
