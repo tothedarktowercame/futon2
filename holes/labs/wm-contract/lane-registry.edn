@@ -6,7 +6,7 @@
  [{:lane :wm-nouns
    :holding :C86-ablation, :dispatched-at "2026-08-31T17:00:00Z", :job-id "invoke-1788195576428-5782-b42cb6dc", :expected-by "2026-08-31T17:45:00Z"}
   {:lane :wm-verbs
-   :holding :C83-prefstack-rebind, :dispatched-at "2026-08-31T16:51:35Z", :job-id "invoke-1788195066681-5775-3a92e0f1", :expected-by "2026-08-31T17:36:35Z"}
+   :holding :C87-r9verdict, :dispatched-at "2026-08-31T17:07:46Z", :job-id "invoke-1788196045904-5788-b9e0c061", :expected-by "2026-08-31T17:52:46Z"}
   {:lane :wm-organization
    :holding :C84-gate-wiring, :dispatched-at "2026-08-31T16:51:35Z", :job-id "invoke-1788195083719-5776-90db12ac", :expected-by "2026-08-31T17:36:35Z"}
   {:lane :wm-evidence
