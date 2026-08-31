@@ -50,6 +50,9 @@ nightly tier must name its runner and cadence, never merely remove a check.
   referenced, unexpired acceptance. The findings remain printed.
 - `DEGRADED-NEW` (exit 1): at least one red has no exact active acceptance, or
   an acceptance changed, expired, or became invalid. Act on this state.
+- `DECISION-DUE` (exit 3): no new failure is implied, but the bounded-testing
+  retirement window has reached 30 current-configuration production runs.
+  Joe must record keep/retire and begin a new window or change configuration.
 
 The acceptance inventory is
 `checks/wm-status-accepted-red.json`. The report prints every active and unused
@@ -57,6 +60,12 @@ entry, including reason, reference, review deadline, and clearing condition.
 Adding a line is insufficient: signatures match exactly, references must
 exist, and review dates expire. Growth in this visible list is itself a review
 signal.
+
+Status also prints the bounded-testing retirement window directly from
+`bg.py test-health`: runs, passes, test failures, containment failures,
+eligibility, and the retirement comparison. Eligibility is not an accepted
+red; it is a fourth state because a promised decision becoming due is neither
+healthy silence nor degradation.
 
 If the workspace gate reports an unknown `checks/*.clj`, a lane has added a
 check. Classify that filename in `known-check-files` in

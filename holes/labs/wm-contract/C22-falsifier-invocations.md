@@ -471,6 +471,11 @@ unaccepted red and an expired acceptance both yield `DEGRADED-NEW`. The report
 uses exit 0 for `OK` and `DEGRADED-AS-EXPECTED`, and exit 1 only for
 `DEGRADED-NEW`; accepted findings remain enumerated in the output.
 
+C170 adds a receipt-derived retirement-window control to the same command.
+Thirty current-configuration production receipts with two containment failures
+and one test failure must yield `eligible=true`, `retire=true`, and the status
+vocabulary surfaces an eligible live window as `DECISION-DUE` (exit 3).
+
 C148's `TickRunRecord` shape control (valid EDN with a route hop missing
 `toNode`) is exercised by the normal futon2 suite:
 

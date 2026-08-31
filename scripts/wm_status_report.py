@@ -90,6 +90,23 @@ def vocabularies_disjoint(holes, lean_labels):
     return set(holes["classification"]).isdisjoint(lean_labels)
 
 
+def retirement_window(receipts, configuration_hash, minimum=30):
+    """Evaluate the committed rule from terminal, current-config production receipts."""
+    scoped = [r for r in receipts
+              if r.get("window-kind") == "production"
+              and r.get("configuration", {}).get("configuration-hash") == configuration_hash]
+    result = {"runs": len(scoped),
+              "passes": sum(r.get("receipt", {}).get("outer-exit") == 0 for r in scoped),
+              "containment-failures": sum(r.get("receipt", {}).get("reason") ==
+                                          "resource-limit-failure" for r in scoped),
+              "test-failures": sum(r.get("receipt", {}).get("reason") ==
+                                    "test-failure" for r in scoped)}
+    result.update({"eligible": len(scoped) >= minimum,
+                   "retire": (len(scoped) >= minimum and
+                              result["containment-failures"] > result["test-failures"])})
+    return result
+
+
 def classify_red(components, acceptances, now):
     """Return accepted/new findings. Acceptance matches are deliberately exact."""
     accepted, new, used = [], [], set()
@@ -141,12 +158,25 @@ def source_control():
     _, expired_new, _ = classify_red(
         [{"component": "accepted-control", "red": True, "signature": {"count": 1}}], [expired], now)
     policy_control = len(accepted) == 1 and not new and len(injected_new) == 1 and len(expired_new) == 1
-    passed = positive and substitution_rejected and vocabulary_positive and collision_rejected and policy_control
+    config = "control-configuration"
+    receipts = ([{"window-kind": "production", "configuration": {"configuration-hash": config},
+                  "receipt": {"outer-exit": 0}} for _ in range(27)] +
+                [{"window-kind": "production", "configuration": {"configuration-hash": config},
+                  "receipt": {"outer-exit": 125, "reason": "resource-limit-failure"}} for _ in range(2)] +
+                [{"window-kind": "production", "configuration": {"configuration-hash": config},
+                  "receipt": {"outer-exit": 125, "reason": "test-failure"}}])
+    due = retirement_window(receipts, config)
+    retirement_control = (due == {"runs": 30, "passes": 27, "containment-failures": 2,
+                                  "test-failures": 1, "eligible": True, "retire": True})
+    passed = (positive and substitution_rejected and vocabulary_positive and collision_rejected
+              and policy_control and retirement_control)
     print("wm-status-source-control:", "PASS" if passed else "FAIL",
           f"positive={positive} substituted-hole-as-sorry-rejected={substitution_rejected}",
           f"vocabularies-disjoint={vocabulary_positive} injected-collision-rejected={collision_rejected}",
           f"accepted-red={len(accepted)==1} injected-unaccepted-is-new={len(injected_new)==1} "
           f"expired-is-new={len(expired_new)==1}",
+          f"receipt-window-eligible={due['eligible']} receipt-window-retire={due['retire']} "
+          f"receipt-window-counts={due['runs']}/{due['passes']}/{due['test-failures']}/{due['containment-failures']}",
           "exit-convention=0-pass/1-fail")
     return 0 if passed else 1
 
@@ -205,6 +235,15 @@ def main():
     drift_count = sum(int(n) for n in re.findall(r'^(?:DRIFTED|VANISHED|NEW|NO LONGER CITED) \((\d+)\)',
                                                   drift.stdout, re.MULTILINE))
 
+    health_result = run(["python3", BG, "test-health"])
+    try:
+        health = json.loads(health_result.stdout)
+        health_window = health["current-window"]
+        health_valid = all(key in health_window for key in
+                           ("runs", "passes", "test-failures", "containment-failures", "eligible", "retire"))
+    except (json.JSONDecodeError, KeyError, TypeError):
+        health, health_window, health_valid = {}, {}, False
+
     futon2, f2_counts = suite_status(futon2_job)
     futon3, f3_counts = suite_status(futon3_job)
 
@@ -253,6 +292,18 @@ def main():
     print(f"verdict={'PASS' if drift.returncode == 0 else 'FAIL'} exit={drift.returncode} findings={drift_count} "
           "source=p4ng/detect_drift.py")
 
+    print("\nBOUNDED TESTING RETIREMENT WINDOW")
+    if health_valid:
+        print(f"runs={health_window['runs']} passes={health_window['passes']} "
+              f"test-failures={health_window['test-failures']} "
+              f"containment-failures={health_window['containment-failures']} "
+              f"eligible={str(health_window['eligible']).lower()} retire={str(health_window['retire']).lower()} "
+              f"configuration={health.get('current-configuration', {}).get('configuration-hash')} "
+              "source=bg.py/test-health")
+        print("clears-when=Joe records keep/retire and begins a new evaluation window or changes configuration")
+    else:
+        print(f"UNREADABLE exit={health_result.returncode} source=bg.py/test-health")
+
     absence_findings = int(re.search(r'findings=\s*(\d+)', absence_line).group(1))
     absence_dispositions = sorted(set(re.findall(r':disposition\s+:([\w-]+)', absence.stdout)))
     components = [
@@ -267,6 +318,8 @@ def main():
          "signature": {"exit": lanes.returncode, "errors": lane_error_kinds}},
         {"component": "referent-drift", "red": drift.returncode != 0,
          "signature": {"exit": drift.returncode, "findings": drift_count}},
+        {"component": "bounded-test-health", "red": health_result.returncode != 0 or not health_valid,
+         "signature": {"exit": health_result.returncode, "readable": health_valid}},
         {"component": "futon2-suite", "red": futon2["receipt"].get("outer-exit", 1) != 0,
          "signature": {"exit": futon2["receipt"].get("outer-exit", 1)}},
         {"component": "futon3-suite", "red": futon3["receipt"].get("outer-exit", 1) != 0,
@@ -289,9 +342,13 @@ def main():
               f"reason={finding['reason']}")
 
     print("\nOVERALL")
-    verdict = "DEGRADED-NEW" if new_red else ("DEGRADED-AS-EXPECTED" if accepted else "OK")
-    print(f"{verdict} exit={1 if new_red else 0} convention=OK-0/DEGRADED-AS-EXPECTED-0/DEGRADED-NEW-1")
-    return 1 if new_red else 0
+    decision_due = health_valid and health_window["eligible"]
+    verdict = ("DEGRADED-NEW" if new_red else "DECISION-DUE" if decision_due else
+               "DEGRADED-AS-EXPECTED" if accepted else "OK")
+    exit_code = 1 if new_red else (3 if decision_due else 0)
+    print(f"{verdict} exit={exit_code} "
+          "convention=OK-0/DEGRADED-AS-EXPECTED-0/DEGRADED-NEW-1/DECISION-DUE-3")
+    return exit_code
 
 
 if __name__ == "__main__":
