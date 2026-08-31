@@ -1,0 +1,15 @@
+{:receipt/type :LeanProofReceipt
+ :receipt/version 1
+ :recorded-at "2026-08-31T17:08:57Z"
+ :theorem "DarkTower.WarMachine.Holes.R9D2.verdictConsultsChecker"
+ :proof-source {:repo "futon2"
+                :path "holes/labs/wm-contract/R9-D2-report.lean"
+                :git-sha "732f4d748f08154457d93916d96ab0be0b7f760c"
+                :sha256 "4ed68e71dab4d81daeb92c863177f726a38be9758bf3157ee5477bf9cc0506d2"}
+ :imported-module {:repo "mathlib4"
+                   :path "DarkTower/WarMachine/Holes.lean"
+                   :git-sha "86186c37444ac9f1b9d54818b092bbbc586854f4"}
+ :elaborator {:command ["lake" "env" "lean"] :cwd "/home/joe/code/mathlib4"}
+ :result {:exit 0 :axioms ["propext"]}
+ :consumer {:binding "r9VerdictConsultsChecker"
+            :check "checks/r9_proof_receipt_check.clj"}}

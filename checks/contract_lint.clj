@@ -214,6 +214,21 @@
          (every? #(= required-layer-fields (set (keys %))) stack)
          (every? #(every? nonblank? ((juxt :author :basis :site) %)) stack))))
 
+(defn lean-proof-receipt? [x]
+  (and (= :LeanProofReceipt (:receipt/type x))
+       (= 1 (:receipt/version x))
+       (string? (:recorded-at x))
+       (not (str/blank? (:theorem x)))
+       (= 64 (count (get-in x [:proof-source :sha256] "")))
+       (every? #(not (str/blank? (get-in x % "")))
+               [[:proof-source :repo] [:proof-source :path] [:proof-source :git-sha]
+                [:imported-module :repo] [:imported-module :path]
+                [:imported-module :git-sha]])
+       (= ["lake" "env" "lean"] (get-in x [:elaborator :command]))
+       (= 0 (get-in x [:result :exit]))
+       (vector? (get-in x [:result :axioms]))
+       (every? string? (get-in x [:result :axioms]))))
+
 (def shape-checks
   {"AblationTable" ablation-table?
    "ExactDyadicAblationTable" exact-dyadic-ablation-table?
@@ -230,7 +245,8 @@
    "ExpectedInformationGainWitness" expected-information-gain-witness?
    "GenerativeModelWitness" generative-model-witness?
    "CascadeDiff" cascade-diff?
-   "PreferenceStackWitness" preference-stack-witness?})
+   "PreferenceStackWitness" preference-stack-witness?
+   "proof term" lean-proof-receipt?})
 
 (defn shape-result [evidence fixture read-fixture]
   (if-not (contains? shape-checks evidence)

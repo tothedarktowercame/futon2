@@ -82,6 +82,8 @@
                                     :ticks {}}}
         preference-good (edn/read-string
                          (slurp "holes/labs/wm-contract/PreferenceStackWitness.edn"))
+        proof-good (edn/read-string
+                    (slurp "holes/labs/wm-contract/R9-VerdictConsultsChecker-proof-receipt.edn"))
         tick-good {:startedAt "2026-08-31T00:00:00Z" :traceWritten true
                    :storeBasisCount 1
                    :route [{:fromNode "R2" :toNode "R7" :via "f" :at_ "t"}]}]
@@ -95,6 +97,9 @@
              [(get lint/shape-checks "PreferenceStackWitness")
               preference-good
               (update preference-good :preference-stack pop)]
+             [(get lint/shape-checks "proof term")
+              proof-good
+              (assoc-in proof-good [:result :exit] 1)]
              [lint/tick-run-witness? tick-good (assoc tick-good :route [])]]]
       (is (true? (boolean (check good))))
       (is (false? (boolean (check bad)))))))
