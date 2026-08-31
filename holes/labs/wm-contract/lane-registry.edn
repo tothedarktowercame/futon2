@@ -4,9 +4,9 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C174-fold-escrow, :dispatched-at "2026-08-31T20:51:26Z", :job-id "invoke-1788209482606-6012-637518cb", :expected-by "2026-08-31T21:36:26Z"}
+   :holding :C179-remaining-four, :dispatched-at "2026-08-31T21:04:14Z", :job-id "invoke-1788210250415-6025-410386d2", :expected-by "2026-08-31T21:49:14Z"}
   {:lane :wm-verbs
-   :holding :C167-channel-priorities-npe, :dispatched-at "2026-08-31T20:30:30Z", :job-id "invoke-1788208226292-5991-e07f0a00", :expected-by "2026-08-31T21:15:30Z"}
+   :holding :C178-certify-command, :dispatched-at "2026-08-31T21:04:14Z", :job-id "invoke-1788210224564-6023-10075d40", :expected-by "2026-08-31T21:49:14Z"}
   {:lane :wm-organization
    :holding :C176-regen-workflow, :dispatched-at "2026-08-31T20:59:56Z", :job-id "invoke-1788209992378-6019-294022fa", :expected-by "2026-08-31T21:44:56Z"}
   {:lane :wm-evidence
