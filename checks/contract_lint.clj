@@ -118,6 +118,14 @@
        :expected-information-gain "log(2)"}]
      (:cases x)))
 
+(defn generative-model-witness? [x]
+  (and (= [:observation-mass :transition-mass :policy-prior-mass]
+          (:factorisation x))
+       (= [{:id :binary-observation-deterministic-transition
+            :observation-mass 1/2 :transition-mass 1 :policy-prior-mass 1
+            :joint-factor-mass 1/2}]
+          (:cases x))))
+
 (def shape-checks
   {"AblationTable" ablation-table?
    "EraTable" era-table?
@@ -130,7 +138,8 @@
    "TickRunWitness" tick-run-witness?
    "LogMultivariateBetaWitness" log-multivariate-beta-witness?
    "ExpectedFreeEnergyWitness" expected-free-energy-witness?
-   "ExpectedInformationGainWitness" expected-information-gain-witness?})
+   "ExpectedInformationGainWitness" expected-information-gain-witness?
+   "GenerativeModelWitness" generative-model-witness?})
 
 (defn shape-result [evidence fixture read-fixture]
   (if-not (contains? shape-checks evidence)
@@ -165,8 +174,9 @@
               (fn [d]
                 (let [b (bindings (:name d))
                       evidence (:evidence d)
-                      stale? (and b (or (not= (:contract-sha b) (:git-sha source))
-                                        (not= (:run-sha b) (sha-fn (:fixture b)))))
+                      contract-stale? (and b (not= (:contract-sha b) (:git-sha source)))
+                      fixture-stale? (and b (not= (:run-sha b) (sha-fn (:fixture b))))
+                      stale? (or contract-stale? fixture-stale?)
                       shape (when b (shape-result evidence (:fixture b) read-fixture))
                       judgement
                       (cond
@@ -180,17 +190,37 @@
                         (= :conformant shape) :conformant
                         (= :shape-check-not-implemented shape) :witnessed
                         :else :unwitnessed)]
-                  (assoc (select-keys d [:name :kind :owner :holder :evidence])
-                         :judgement judgement :shape-check shape)))
+                  (cond-> (assoc (select-keys d [:name :kind :owner :holder :evidence])
+                                 :judgement judgement :shape-check shape)
+                    stale? (assoc :stale-reasons
+                                  (cond-> []
+                                    contract-stale? (conj :contract-drift)
+                                    fixture-stale? (conj :fixture-drift))
+                                  :stale-remediation
+                                  (if (every? #(get-in b [:check %]) [:repo :path :entrypoint])
+                                    :rerun-and-rebind
+                                    :manual-triage-required)))))
               decls)
         owners (->> rows (group-by :owner) (sort-by key)
                     (mapv (fn [[owner rs]]
                             {:owner owner
                              :declared-with-body (count (filter #(= "closed" (:kind %)) rs))
                              :declared-with-sorry (count (filter #(= "hole" (:kind %)) rs))})))
-        counts (into (sorted-map) (frequencies (map :judgement rows)))]
-    {:summary {:pass? (and (empty? errors) (not (contains? counts :wrong-authority)))
-               :authority authority :counts counts}
+        counts (into (sorted-map) (frequencies (map :judgement rows)))
+        ;; Freshness is independent of judgement precedence: an authority failure
+        ;; must not make stale bindings disappear from the qualification report.
+        stale-rows (filterv #(seq (:stale-reasons %)) rows)
+        structural-valid? (and (empty? errors) (not (contains? counts :wrong-authority)))
+        bindings-fresh? (empty? stale-rows)]
+    {:summary {:pass? structural-valid?
+               :authority authority :counts counts
+               :qualification
+               {:structural-valid? structural-valid?
+                :bindings-fresh? bindings-fresh?
+                :strict-pass? (and structural-valid? bindings-fresh?)
+                :stale-declarations (mapv :name stale-rows)
+                :stale-remediation-counts
+                (into (sorted-map) (frequencies (map :stale-remediation stale-rows)))}}
      :owners owners :declarations rows :errors errors}))
 
 (defn lint-file [{:keys [contract registry authority]}]
@@ -201,14 +231,14 @@
   (loop [xs args out {}]
     (if (empty? xs)
       out
-      (if (= "--negative" (first xs))
-        (recur (rest xs) (assoc out :negative? true))
+      (if (contains? #{"--negative" "--strict"} (first xs))
+        (recur (rest xs) (assoc out (keyword (str (subs (first xs) 2) "?")) true))
         (do
           (when-not (second xs) (throw (ex-info "arguments must be flag/value pairs" {})))
           (recur (nnext xs) (assoc out (keyword (subs (first xs) 2)) (second xs))))))))
 
 (defn -main [& args]
-  (let [{:keys [report negative?] :as opts} (args-map args)]
+  (let [{:keys [report negative? strict?] :as opts} (args-map args)]
     (when-not (every? opts [:contract :registry :report :authority])
       (throw (ex-info "usage: [--negative] --contract JSON --registry EDN --report EDN --authority SHA" {})))
     (let [result (try (if negative?
@@ -232,6 +262,15 @@
         (println owner "declared-with-sorry" declared-with-sorry))
       (doseq [[j n] (get-in result [:summary :counts])]
         (println (name j) n))
+      (let [{:keys [structural-valid? bindings-fresh? strict-pass?
+                    stale-declarations stale-remediation-counts]}
+            (get-in result [:summary :qualification])]
+        (println "structural-valid" structural-valid?)
+        (println "bindings-fresh" bindings-fresh?)
+        (println "strict-qualification" strict-pass?)
+        (when (seq stale-declarations)
+          (println "strict-stale-declarations" (str/join "," stale-declarations))
+          (println "strict-stale-remediation" (pr-str stale-remediation-counts))))
       (if negative?
         (if (and (not (get-in result [:summary :pass?]))
                  (pos? (get-in result [:summary :counts :wrong-authority] 0)))
@@ -239,9 +278,13 @@
               (System/exit 0))
           (do (println "contract-lint: FAIL negative authority mutation slipped exit-convention=0-pass/1-fail")
               (System/exit 2)))
-        (do (println (str "contract-lint: " (if (get-in result [:summary :pass?]) "PASS" "FAIL")
-                          " exit-convention=0-pass/1-fail"))
-            (when-not (get-in result [:summary :pass?]) (System/exit 1)))))))
+        (let [pass? (if strict?
+                      (get-in result [:summary :qualification :strict-pass?])
+                      (get-in result [:summary :pass?]))]
+          (println (str "contract-lint: " (if pass? "PASS" "FAIL")
+                        (when strict? " mode=strict")
+                        " exit-convention=0-pass/1-fail"))
+          (when-not pass? (System/exit 1)))))))
 
 (when (= *file* (System/getProperty "babashka.file"))
   (apply -main *command-line-args*))

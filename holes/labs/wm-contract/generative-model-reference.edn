@@ -1,0 +1,10 @@
+{:schema :generative-model-reference/v1
+ :ports {:observation [:state :outcome]
+         :transition [[:state :action] :state]
+         :policy-prior [:unit :policy]}
+ :factorisation [:observation-mass :transition-mass :policy-prior-mass]
+ :cases [{:id :binary-observation-deterministic-transition
+          :observation-mass 1/2
+          :transition-mass 1
+          :policy-prior-mass 1
+          :joint-factor-mass 1/2}]}
