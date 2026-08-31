@@ -4,7 +4,7 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C208-policy-prior-kernel, :dispatched-at "2026-08-31T22:06:29Z", :job-id "invoke-1788213985270-6093-cfbf26f5", :expected-by "2026-08-31T22:51:29Z"}
+   :holding :C212-variational-f, :dispatched-at "2026-08-31T22:14:26Z", :job-id "invoke-1788214462487-6102-f709f33b", :expected-by "2026-08-31T22:59:26Z"}
   {:lane :wm-verbs
    :holding :C209-brief-backlog, :dispatched-at "2026-08-31T22:08:08Z", :job-id "invoke-1788214082992-6094-430a5770", :expected-by "2026-08-31T22:53:08Z"}
   {:lane :wm-organization
