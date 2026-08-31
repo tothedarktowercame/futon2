@@ -2,7 +2,12 @@
 (ns r2-channel-contract-test
   (:require [babashka.fs :as fs]
             [checks.r2-channel-contract :as lint]
+            [clojure.edn :as edn]
             [clojure.test :refer [deftest is run-tests testing]]))
+
+(def snapshot-path "test/fixtures/r2-channel-contract/snapshot.edn")
+
+(defn- snapshot [] (edn/read-string (slurp snapshot-path)))
 
 (defn- observation [extra-or-missing]
   (into {}
@@ -17,28 +22,42 @@
       (f (str dir))
       (finally (fs/delete-tree dir)))))
 
-(deftest current-r2-channel-contract-baseline
-  (let [report (lint/lint-paths {})]
-    (is (= 53 (get-in report [:summary :files])))
-    (is (= 792 (get-in report [:summary :forms])))
-    (is (= 790 (get-in report [:summary :conformant-records])))
-    (is (= 2 (get-in report [:summary :key-set-mismatches])))
-    (is (= 0 (get-in report [:summary :malformed-observations])))
-    (is (= 0 (get-in report [:summary :undeclared-key-count])))
-    (is (= :sha256-over-newline-joined-sorted-form-sha256
-           (get-in report [:content-pin :algorithm])))
-    (is (= "c9add16ac96c973b" (get-in report [:content-pin :prefix])))
-    (is (= 2 (get-in report [:r2ContractCensusWmTrace :ill-formed])))
+(deftest committed-r2-snapshot-owns-exact-counts-and-pin
+  (let [{:keys [records expected recorded-at]} (snapshot)]
+    (is (= "2026-08-31" recorded-at))
+    (with-corpus
+      records
+      (fn [trace-dir]
+        (let [report (lint/lint-paths {:trace-dir trace-dir})]
+          (is (= (:files expected) (get-in report [:summary :files])))
+          (is (= (:forms expected) (get-in report [:summary :forms])))
+          (is (= (:conformant-records expected)
+                 (get-in report [:summary :conformant-records])))
+          (is (= (:key-set-mismatches expected)
+                 (get-in report [:summary :key-set-mismatches])))
+          (is (= (:failure-classes expected)
+                 (get-in report [:summary :failure-classes])))
+          (is (= (:content-pin expected) (get-in report [:content-pin :sha256]))))))))
+
+(deftest live-r2-gate-emits-moving-counts-and-enforces-channel-invariants
+  (let [report (lint/lint-paths {})
+        summary (:summary report)]
+    ;; Counts are evidence, not fixed expectations. The two known malformed
+    ;; observations keep this live gate honestly red until their source is fixed.
+    (is (every? #(contains? summary %)
+                [:files :forms :conformant-records :conformance-ratio]))
+    (is (<= 0.0 (:conformance-ratio summary) 1.0))
+    (is (zero? (:undeclared-key-count summary)))
+    (is (= [:observation-keys] (:failure-classes summary)))
+    (is (false? (:pass? summary)))
+    (is (every? #(seq (:missing %)) (:checks report)))
     (is (= [:loop-health :support-coverage :attack-coverage :mission-health
             :stack-pct :consulting-pct :portfolio-pct :mathematics-pct
             :active-repo-ratio :sorry-count-norm :coupling-density
             :ticks-firing-ratio :depositing-signal :annotation-health]
            (get-in report [:channel :values])))
     (is (= 11 (get-in report [:channel :source :line])))
-    (is (true? (get-in report [:likelihood :partition-valid?])))
-    (is (= #{"2026-05-18T19:42:49.284838608Z"
-             "2026-05-18T20:54:12.717822372Z"}
-           (set (map (comp str :timestamp) (:checks report)))))))
+    (is (true? (get-in report [:likelihood :partition-valid?])))))
 
 (deftest corpus-fixtures-discriminate-source-keyed-contract
   (let [declared (:channels (lint/read-declarations {}))
@@ -71,13 +90,18 @@
         (is (= :not-a-map (get-in report [:checks 0 :reason])))))))
 
 (deftest generated-lean-is-directly-substitutable-for-the-interface-hole
-  (let [{:keys [records]} (lint/read-trace-corpus lint/default-trace-dir)
-        report (lint/lint-paths {})
-        generated (lint/lean-fixture-text report records)]
-    (is (re-find #"def wmTraceR2 : List R2TickLit" generated))
-    (is (re-find #"r2ContractCensus wmTraceR2" generated))
-    (is (re-find #"(?m)^  native_decide$" generated))
-    (is (not (re-find #"wmTraceR2Generated" generated)))))
+  (let [{:keys [records]} (snapshot)]
+    (with-corpus
+      records
+      (fn [trace-dir]
+        (let [{normalized :records} (lint/read-trace-corpus trace-dir)
+              report (lint/lint-paths {:trace-dir trace-dir})
+              generated (lint/lean-fixture-text report normalized)]
+          (is (re-find #"def wmTraceR2 : List R2TickLit" generated))
+          (is (re-find #"r2ContractCensus wmTraceR2" generated))
+          (is (re-find #"= 1 := by" generated))
+          (is (re-find #"(?m)^  native_decide$" generated))
+          (is (not (re-find #"wmTraceR2Generated" generated))))))))
 
 (let [{:keys [fail error]} (run-tests)]
   (System/exit (if (zero? (+ fail error)) 0 1)))

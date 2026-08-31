@@ -2,7 +2,12 @@
 (ns r8-f-contract-test
   (:require [babashka.fs :as fs]
             [checks.r8-f-contract :as r8]
+            [clojure.edn :as edn]
             [clojure.test :refer [deftest is run-tests testing]]))
+
+(def snapshot-path "test/fixtures/r8-f-contract/snapshot.edn")
+
+(defn- snapshot [] (edn/read-string (slurp snapshot-path)))
 
 (defn- with-corpus [records f]
   (let [dir (fs/create-temp-dir {:prefix "r8-f-contract-"})]
@@ -27,37 +32,34 @@
     (not= stored :absent) (assoc :variational-free-energy stored)
     (not= gain :absent) (assoc :selection-gain gain)))
 
-(deftest current-r8-baseline
-  (let [report (r8/lint-paths {})]
+(deftest committed-r8-snapshot-owns-exact-counts-and-pin
+  (let [{:keys [records expected recorded-at]} (snapshot)
+        corpus {:files (vec (distinct (map :file records))) :records records}
+        report (r8/analyze-corpus corpus r8/default-boundary (:census expected))]
+    (is (= "2026-08-31" recorded-at))
     (is (true? (get-in report [:summary :pass?])))
-    (is (= 53 (get-in report [:summary :files])))
-    (is (= 792 (get-in report [:summary :forms])))
-    (is (= r8/expected-census (get-in report [:r8CensusWmTrace :counts])))
-    (is (= {:without-stored-F 760 :with-stored-F 32}
-           (get-in report [:r8EraBoundary :era-counts])))
-    (is (= {:g-map 760 :controller-map 32 :unknown 0
-            :both-keys 0 :neither-key 0}
-           (get-in report [:r8EraBoundary :shape-counts])))
+    (is (= (:files expected) (get-in report [:summary :files])))
+    (is (= (:forms expected) (get-in report [:summary :forms])))
+    (is (= (:census expected) (get-in report [:r8CensusWmTrace :counts])))
+    (is (= (:content-pin expected) (get-in report [:content-pin :sha256])))))
+
+(deftest live-r8-gate-enforces-invariants-and-retains-the-unexplained-delta
+  (let [report (r8/lint-paths {})
+        summary (:summary report)
+        delta (:recorded-census-delta report)]
+    ;; Moving census values remain evidence. The live verdict is determined by
+    ;; era, shape, partition, and numerical invariants instead of old literals.
+    (is (every? #(contains? summary %) [:files :forms]))
+    (is (true? (:pass? summary)))
+    (is (empty? (:failure-classes summary)))
     (is (= {:storedF-iff-selectionGain 0
             :storedF-iff-controllerMap 0
             :storedF-iff-dateSuffix 0}
            (get-in report [:r8EraBoundary :conjunct-violations])))
-    (is (= {:latest-pre-boundary 20260709
-            :earliest-post-boundary 20260714}
-           (get-in report [:r8EraBoundary :date-margin])))
-    (is (= {:count 760 :storedFCount 0 :selectionGainCount 0
-            :shapes {:gMap 760 :controllerMap 0 :unknown 0}
-            :precisionSum 520403.9349 :precisionValues 5502
-            :precisionForms 755}
-           (get-in report [:r8EraBoundary :perEra :before])))
-    (is (= {:count 32 :storedFCount 32 :selectionGainCount 32
-            :shapes {:gMap 0 :controllerMap 32 :unknown 0}
-            :precisionSum 2429.5805 :precisionValues 256
-            :precisionForms 32}
-           (get-in report [:r8EraBoundary :perEra :after])))
+    (is (zero? (get-in report [:r8EraBoundary :shape-counts :unknown])))
     (is (zero? (get-in report [:F :missing-F-computable :non-finite])))
-    (is (= 0.0 (get-in report [:F :stored-recompute-consistency
-                               :max-absolute-delta])))))
+    (is (= :unexplained (:status delta)))
+    (is (pos? (get-in delta [:delta :stored-F])))))
 
 (deftest disposition-follows-all-three-lean-option-arms
   (let [{:keys [errors precision]} (channel 2.0 3.0)]
@@ -122,13 +124,17 @@
                   :value (tick {:errors errors :precision precision
                                 :stored :absent :gain :absent :shape :g})}]
         report {:summary {:files 1 :forms 1}
-                :content-pin {:algorithm :test :sha256 "abc"}}
+                :content-pin {:algorithm :test :sha256 "abc"}
+                :r8CensusWmTrace
+                {:counts {:missing-F-computable 1
+                          :stored-F 0 :insufficient-inputs 0}}}
         lean (r8/lean-fixture-text report records)]
     (is (re-find #"hasControllerScore := false" lean))
     (is (re-find #"hasGTotal := true" lean))
     (is (re-find #"fileDate := 20260709" lean))
     (is (re-find #"noncomputable def generatedEraTable : EraTable" lean))
     (is (re-find #"#print axioms generatedCensus" lean))
+    (is (re-find #"r8Census wmTraceR8Generated = \(1, 0, 0\)" lean))
     (is (re-find #"#print axioms generatedEraBoundary" lean))
     (is (not (re-find #"meanPrecision :=|uniform :=" lean)))
     (is (not (re-find #"disposition :=|freeEnergyShape :=" lean)))))

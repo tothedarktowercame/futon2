@@ -230,7 +230,12 @@
         undeclared-count (reduce + 0 (map (comp count :undeclared)
                                           record-checks))
         finding (docstring-finding (:file channel-source) (count channels))
-        digest (content-pin records)]
+        digest (content-pin records)
+        failure-classes (vec (sort (set (map :check checks))))
+        conformance-ratio (if (seq records)
+                            (/ (- (count records) (count record-checks))
+                               (double (count records)))
+                            1.0)]
     {:summary {:pass? (empty? checks)
                :files (count files)
                :forms (count records)
@@ -238,6 +243,8 @@
                :key-set-mismatches mismatched
                :undeclared-key-count undeclared-count
                :malformed-observations malformed
+               :conformance-ratio conformance-ratio
+               :failure-classes failure-classes
                :failures (count checks)}
      :content-pin {:algorithm :sha256-over-newline-joined-sorted-form-sha256
                    :sha256 digest
@@ -285,6 +292,7 @@
 (defn lean-fixture-text [report records]
   (let [channels (get-in report [:channel :values])
         digest (get-in report [:content-pin :sha256])
+        ill-formed (get-in report [:r2ContractCensusWmTrace :ill-formed])
         ticks (map #(lean-tick-literal channels (get-in % [:value :observation]))
                    records)]
     (str "import DarkTower.WarMachine.Holes\n\n"
@@ -298,7 +306,7 @@
          "\n]\n\n"
          "example :\n"
          "    r2ContractCensus wmTraceR2\n"
-         "      (fun tick => Channel.all.all (fun c => (tick.observation c).isSome)) = 2 := by\n"
+         "      (fun tick => Channel.all.all (fun c => (tick.observation c).isSome)) = " ill-formed " := by\n"
          "  native_decide\n\n"
          "end DarkTower.WarMachine.Holes.R2GeneratedFixture\n")))
 

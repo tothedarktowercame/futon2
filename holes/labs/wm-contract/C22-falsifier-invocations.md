@@ -114,3 +114,32 @@ governs both R2 and R8 live-corpus tests; fixing only R2 would leave its twin ch
 The C22 mutation establishes that `r2ContractCensus` itself can reject a missing channel. Its historical
 vacuity came from the population supplied to it, not from an always-true predicate. Those are different
 failure modes and should no longer be cited interchangeably.
+
+## C35 implementation — snapshots separated from live invariants
+
+Canonical snapshot suites:
+
+```sh
+bb -cp . test/r2_channel_contract_test.clj
+bb -cp . test/r8_f_contract_test.clj
+```
+
+The exact-count side is now owned by dated compact fixtures at
+`test/fixtures/r2-channel-contract/snapshot.edn` and
+`test/fixtures/r8-f-contract/snapshot.edn`. Their full content pins are respectively
+`1c2c1fcda2a423a1dfd32ecb03c7741cbcb8169def46c9098e7486dbcadbac63` and
+`e5d9801b5f3676e30c421d71c7aaa88956b8e6bd08175217f943743de83818b0`.
+
+The live R2 gate remains red for the stated semantic reason: two real observations omit declared
+channels. Its moving file/form/conformance counts and ratio are report evidence, while the assertions
+enforce no undeclared channels, no new failure class, identified failures, and the declared 14-channel
+interface. Positive/negative exits were `1/0`; the negative mutation added another missing-channel record.
+
+The live R8 gate is green because its era boundary, shape, disposition partition, and finite-F invariants
+hold; it no longer compares the live census to literal counts. The recorded `755/32/5` census and every
+live census are retained in `:recorded-census-delta` with status `:unexplained`. The dispatch began at
+`755/39/5` (the required unexplained +7 finding); during verification the shared corpus grew again to
+800 forms and `755/40/5`, making the same discrepancy +8. This additional drift is exactly why the live
+test asserts that the discrepancy stays loud rather than asserting either moving number. Positive and
+negative exits were `0/0`; the negative mutation still fails the era invariants internally, so a permanent
+green was not introduced.

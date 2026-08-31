@@ -1,0 +1,17 @@
+{:snapshot/id :r2-channel-contract/snapshot-2026-08-31-semantic-fixture
+ :recorded-at "2026-08-31"
+ :describes "Compact stable corpus: one conforming 14-channel observation and one record missing :annotation-health."
+ :records
+ [{:observation
+   {:loop-health 0.5 :support-coverage 0.5 :attack-coverage 0.5 :mission-health 0.5
+    :stack-pct 0.5 :consulting-pct 0.5 :portfolio-pct 0.5 :mathematics-pct 0.5
+    :active-repo-ratio 0.5 :sorry-count-norm 0.5 :coupling-density 0.5
+    :ticks-firing-ratio 0.5 :depositing-signal 0.5 :annotation-health 0.5}}
+  {:observation
+   {:loop-health 0.5 :support-coverage 0.5 :attack-coverage 0.5 :mission-health 0.5
+    :stack-pct 0.5 :consulting-pct 0.5 :portfolio-pct 0.5 :mathematics-pct 0.5
+    :active-repo-ratio 0.5 :sorry-count-norm 0.5 :coupling-density 0.5
+    :ticks-firing-ratio 0.5 :depositing-signal 0.5}}]
+ :expected {:files 1 :forms 2 :conformant-records 1 :key-set-mismatches 1
+            :failure-classes [:observation-keys]
+            :content-pin "1c2c1fcda2a423a1dfd32ecb03c7741cbcb8169def46c9098e7486dbcadbac63"}}

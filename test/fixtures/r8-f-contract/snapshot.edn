@@ -1,0 +1,21 @@
+{:snapshot/id :r8-f-contract/snapshot-2026-08-31-semantic-fixture
+ :recorded-at "2026-08-31"
+ :describes "Compact stable corpus with one tick in each disposition arm and a well-formed era boundary."
+ :records
+ [{:file "wm-trace-2026-07-09.edn" :form 1 :file-date 20260709
+   :value {:prediction-errors {:x {:error 2.0}}
+           :precision-state {:x {:precision 3.0}}
+           :free-energy {:G-total 0.1}}}
+  {:file "wm-trace-2026-07-14.edn" :form 1 :file-date 20260714
+   :value {:prediction-errors {:x {:error 1.0}}
+           :precision-state {:x {:precision 2.0}}
+           :variational-free-energy 1.0
+           :selection-gain 0.5
+           :free-energy {:controller-score 0.1}}}
+  {:file "wm-trace-2026-07-09.edn" :form 2 :file-date 20260709
+   :value {:prediction-errors nil
+           :precision-state {:x {:precision 1.0}}
+           :free-energy {:G-total 0.1}}}]
+ :expected {:files 2 :forms 3
+            :census {:missing-F-computable 1 :stored-F 1 :insufficient-inputs 1}
+            :content-pin "e5d9801b5f3676e30c421d71c7aaa88956b8e6bd08175217f943743de83818b0"}}
