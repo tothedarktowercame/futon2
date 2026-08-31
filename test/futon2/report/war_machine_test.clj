@@ -23,6 +23,33 @@
                            (:summary %))
                 losses))))
 
+(deftest scan-frames-retains-unreadable-population-members-test
+  (let [dir (.toFile (java.nio.file.Files/createTempDirectory
+                      "wm-daily-frames-"
+                      (make-array java.nio.file.attribute.FileAttribute 0)))]
+    (try
+      (spit (io/file dir "01-good.edn")
+            (pr-str {:frame/id :one :frame/type :daily-scan
+                     :frame/cardinal-direction {:depositing 0.2}}))
+      (spit (io/file dir "02-broken.edn") "{:frame/id :broken")
+      (spit (io/file dir "03-good.edn")
+            (pr-str {:frame/id :three :frame/type :daily-scan
+                     :frame/cardinal-direction {:depositing 0.6}}))
+      (with-redefs-fn {#'wm/frames-dir (.getPath dir)}
+        (fn []
+          (let [result (wm/scan-frames)
+                unreadable (first (:unreadable-frames result))]
+            (is (= 3 (:frames-count result)) "the supplied population is retained")
+            (is (= 2 (:readable-frames-count result)))
+            (is (= 1 (:unreadable-frames-count result)))
+            (is (= 2 (:daily-scan-count result)))
+            (is (re-find #"02-broken[.]edn$" (:unreadable unreadable)))
+            (is (string? (:cause unreadable)))
+            (is (= :three (get-in result [:latest-frame :frame/id]))))))
+      (finally
+        (doseq [file (reverse (file-seq dir))]
+          (.delete file))))))
+
 (deftest strategic-selector-accepts-resolved-vars-and-rejects-absence
   (testing "requiring-resolve returns a callable Var, not a value satisfying fn?"
     (is (= {:probe true}

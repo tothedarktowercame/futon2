@@ -2414,10 +2414,16 @@
                                (filter #(str/ends-with? (.getName %) ".edn"))
                                (sort-by #(.getName %))
                                vec)
-              frames (mapv #(try (read-string (slurp %))
-                                (catch Exception _ nil))
-                           frame-files)
-              frames (filterv some? frames)
+              frame-results
+              (mapv (fn [frame-file]
+                      (try
+                        (clojure.edn/read-string (slurp frame-file))
+                        (catch Exception e
+                          {:unreadable (.getPath frame-file)
+                           :cause (ex-message e)})))
+                    frame-files)
+              unreadable-frames (filterv unreadable-input? frame-results)
+              frames (filterv (complement unreadable-input?) frame-results)
               ;; Find daily scan frames specifically
               daily-frames (filterv #(= :daily-scan (:frame/type %)) frames)
               latest (last frames)
@@ -2442,7 +2448,10 @@
                                 :foraging (/ (:foraging cardinal-trend) n)
                                 :cargo (/ (:cargo cardinal-trend) n)
                                 :depositing (/ (:depositing cardinal-trend) n)}))]
-          {:frames-count (count frames)
+          {:frames-count (count frame-results)
+           :readable-frames-count (count frames)
+           :unreadable-frames-count (count unreadable-frames)
+           :unreadable-frames unreadable-frames
            :daily-scan-count (count daily-frames)
            :latest-frame (select-keys latest [:frame/id :frame/timestamp
                                               :frame/mode :frame/cardinal-direction
