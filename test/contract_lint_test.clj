@@ -100,5 +100,6 @@
             :stale 16 :unwitnessed 12}
            (get-in result [:summary :counts])))))
 
-(let [{:keys [fail error]} (run-tests)]
-  (System/exit (if (zero? (+ fail error)) 0 1)))
+(when (= *file* (System/getProperty "babashka.file"))
+  (let [{:keys [fail error]} (run-tests)]
+    (System/exit (if (zero? (+ fail error)) 0 1))))

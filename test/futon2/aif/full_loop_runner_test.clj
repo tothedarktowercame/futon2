@@ -3281,6 +3281,11 @@
                      :semantic-epoch :test
                      :author "zai-1"
                      :reviewer "codex-1"
+                     ;; This test exercises trigger admission only. An empty
+                     ;; injected roster bounds it immediately after the real
+                     ;; cohort guard, before substrate, selection, or a live
+                     ;; Agency author can be reached.
+                     :roster-fn (fn [_] {})
                      :repair-system-record-fn
                      (fn [m] (swap! repair-calls conj m)
                        (assoc m :repair/id "repair-eligible"))

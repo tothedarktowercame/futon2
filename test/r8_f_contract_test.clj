@@ -158,5 +158,6 @@
     (is (not (re-find #"meanPrecision :=|uniform :=" lean)))
     (is (not (re-find #"disposition :=|freeEnergyShape :=" lean)))))
 
-(let [{:keys [fail error]} (run-tests)]
-  (System/exit (if (zero? (+ fail error)) 0 1)))
+(when (= *file* (System/getProperty "babashka.file"))
+  (let [{:keys [fail error]} (run-tests)]
+    (System/exit (if (zero? (+ fail error)) 0 1))))

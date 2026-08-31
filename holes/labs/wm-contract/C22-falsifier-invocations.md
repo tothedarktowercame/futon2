@@ -165,3 +165,37 @@ This check becomes a required pre-merge/CI gate when any production scheduler, s
 entrypoint first references `r17`, `r17-offline`, or `reduce-concepts`. Until that trigger, running it in a
 general green suite would misstate readiness: its green verdict means only that the unsafe path remains
 dormant, not that R17 is safe to wire live.
+
+## C40 — canonical full suite and bounded author wait
+
+```sh
+clojure -X:test
+```
+
+This is the canonical full Clojure suite command. The `:test` alias explicitly carries the JVM
+dependencies used by check-backed test namespaces. Five Babashka-compatible test files guard their
+standalone `run-tests`/`System.exit` driver with `babashka.file`, so Cognitect can load all namespaces in
+one process. The ant entrypoint test also stubs its production `shutdown-agents`; otherwise it terminates
+the JVM's global future/solo-agent executors and causes false `RejectedExecutionException` errors in every
+later shell-using test.
+
+The reported `author-wait` was a broken unit fixture, not a slow unit assertion. The
+`eligible-trigger-does-not-open-a-trigger-ineligible-obligation` test crossed its intended trigger guard,
+then used live substrate, selection, Agency dispatch, and `poll-job!`. The production poll waits on a live
+LLM author job, sleeps two seconds between reads, and has a 45-minute absolute budget. The fixture now
+injects an empty roster after the real cohort admission guard, proving the intended assertion while
+terminating before substrate or author dispatch. It remains in the default suite; no test is skipped.
+
+Observed completed run on 2026-08-31: **1006 tests, 6087 assertions, 2 failures, 0 errors**, exit 1.
+Every failing test:
+
+- `contract-lint-test/live-contract-registered-counts`: stale live literal; expected judgement counts
+  `49/5/16/12`, observed `59/5/16/10`.
+- `control-map-lint-test/current-control-map-baseline`: stale endpoint-agreement literal; expected
+  `{:no-endpoint-record 15, :one-endpoint-record 6}`, observed
+  `{:no-endpoint-record 12, :one-endpoint-record 7, false 2}`.
+
+The operational gates are separate CLI qualifications and were run immediately after the suite:
+`r2_channel_contract` exited 1 at 54 files / 801 forms / 799 conforming / 2 firing;
+`r8_f_contract` exited 0 at 54 / 801 with census `755/41/5`, classified by C39 as conforming
+append-only growth rather than the earlier unexplained +8.

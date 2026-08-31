@@ -24,5 +24,6 @@
     (is (= 8 (get-in report [:prose-attribution :count])))
     (is (every? true? (vals (:checks report))))))
 
-(let [{:keys [fail error]} (run-tests)]
-  (System/exit (if (zero? (+ fail error)) 0 1)))
+(when (= *file* (System/getProperty "babashka.file"))
+  (let [{:keys [fail error]} (run-tests)]
+    (System/exit (if (zero? (+ fail error)) 0 1))))

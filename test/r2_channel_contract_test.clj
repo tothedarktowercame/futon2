@@ -103,5 +103,6 @@
           (is (re-find #"(?m)^  native_decide$" generated))
           (is (not (re-find #"wmTraceR2Generated" generated))))))))
 
-(let [{:keys [fail error]} (run-tests)]
-  (System/exit (if (zero? (+ fail error)) 0 1)))
+(when (= *file* (System/getProperty "babashka.file"))
+  (let [{:keys [fail error]} (run-tests)]
+    (System/exit (if (zero? (+ fail error)) 0 1))))
