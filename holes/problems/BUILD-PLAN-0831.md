@@ -984,3 +984,48 @@ wrong device; a threshold that accepts 6903/6903; and now the verdict frame itse
 correctly. **The fourth it could not refuse, because I never relayed the operator's actual answer** — Joe
 gave it in plain words and I went looking for a threshold instead. That is a relay failure, and it is the
 most expensive kind, because a delegate cannot check a premise it was never shown.
+
+---
+
+## NOUNS-D3 gated — my error is now a compile error
+
+mathlib4 `00c408d933` + `1e607b85eb`, futon2 `110bba0`.
+
+**What I checked, and one check is the point of the whole delivery.** Contract: **80 declarations, 45
+closed / 35 holes** (was 44/36 — `cascadeGrainPi`'s refusal is discharged). `holder_check.clj` passes, 0
+orphaned. Renames landed: `deltaFReduction` → `modelReductionFreeEnergyChange`, `Policy` → `DecisionRule`.
+
+**Then the acceptance test that matters — I attempted my own conflation in Lean:**
+
+    example (precision error : Channel → ℝ) : Prop :=
+      bayesFactorThreshold (variationalFreeEnergy precision error)
+
+    error: Application type mismatch:
+      variationalFreeEnergy precision error
+    has type      VariationalFreeEnergyValue
+    but is expected to have type
+      ModelReductionFreeEnergyChange
+
+**The exact packet error I sent wm-evidence this morning is now rejected by the type checker.** Not
+asserted — run. `variationalFreeEnergy : … → VariationalFreeEnergyValue`,
+`bayesFactorThreshold (change : ModelReductionFreeEnergyChange) : Prop`, and the bridge cannot be written
+by accident any more.
+
+**The judgement calls, and they are good ones.** `G` and `expectedFreeEnergy` now **share**
+`ExpectedFreeEnergyValue` — the delegate unified where the objects genuinely are one quantity and separated
+where they are not, rather than wrapping everything mechanically. `IsArgminOn` generalised to
+`{Policy Score : Type*} [LE Score]` with an `LE` instance on the wrapper, so ordering still works without
+unwrapping. And `cascadeGrainPi (P) := Cascade P` turns a refusal *"pending Joe's grain decision"* into a
+definition — the grain question is closed, exactly as predicted, **without changing a single proof**,
+because `G` and `softmax` were already polymorphic.
+
+**R13 needs no change** — the delegate checked and reports the pattern *already* states the corrected
+cascade-policy distinction. That is the right answer to a pattern-impact question: look, then say no.
+
+**Holding cost updated: 14 of 31 holes witnessed, 17 unbound** (was 14/32 — one fewer hole to carry).
+
+**What this delivery demonstrates beyond its own scope.** The morning's most expensive error — a
+type-level match standing in for a semantic one — was caught by a delegate, diagnosed by a second, and has
+now been made **structurally impossible** by a third. That is the four-vertex arrangement doing the thing
+one session holding 80 declarations could not: the vertex that owns the vocabulary fixed the vocabulary,
+and the fix is verifiable by anyone who runs the compiler.
