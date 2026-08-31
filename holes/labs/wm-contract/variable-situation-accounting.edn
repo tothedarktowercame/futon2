@@ -1,13 +1,13 @@
 {:schema :wm/variable-situation-accounting-v1,
  :as-of "2026-08-31",
  :authority
- {:contract-git-sha "38a5c2188fddc9bbdddf47dc3efc4b259b11ced5",
+ {:contract-git-sha "e924102c3b5df57d0e6c848b5b7256350c198e42",
   :contract-sha256
-  "922487354b48018b87c4eab1c91c2a25834bafb5ab28af22b78775dcdcc760de",
+  "82a45388ff7428e34ba83e0a4932b772e9eb6d3a52a60e5208717572271a4a79",
   :glossary-sha256
   "780a64afbdb4a9f47a2e399fd3611f79961b6facbbddac02630895592e867889",
   :witness-registry-sha256
-  "b74c865617285b7d33b8f19a12ae80346211dcb5d45a1f806c93e6a2969150dc"},
+  "f1422d6009ee871553c89d90d8b15d83a424cb6b41c97644ddaa1a7dbeda784f"},
  :axes
  {:content-status
   [:named-only
@@ -23,14 +23,6 @@
    :content-status :closed-by-record-negative-space,
    :pointer-status :resolves,
    :pointer-detail {:resolved-title "Bayesian Model Reduction."}}
-  {:name "bayesianModelReduction",
-   :area :learning,
-   :owner "sec-glossary.tex:54 · P-glossary-mathematics",
-   :content-status :closed-by-record-negative-space,
-   :pointer-status :drifted,
-   :pointer-detail
-   {:resolved-title "Aliveness $L = T\\cdot H$.",
-    :reason :line-resolves-to-different-concept}}
   {:name "Pattern",
    :area :demo,
    :owner "P-validated-R5 §2.1d",
@@ -522,6 +514,22 @@
    :pointer-detail
    {:resolved-title "Dirichlet concentration parameters.",
     :reason :line-resolves-to-different-concept}}
+  {:name "bayesianModelReduction",
+   :area :learning,
+   :owner "sec-glossary.tex:54 · P-glossary-mathematics",
+   :content-status :closed-by-record-with-witness,
+   :pointer-status :drifted,
+   :pointer-detail
+   {:resolved-title "Aliveness $L = T\\cdot H$.",
+    :reason :line-resolves-to-different-concept}}
+  {:name "DirichletConcentrations",
+   :area :learning,
+   :owner "sec-glossary.tex:56 · P-glossary-mathematics",
+   :content-status :closed-by-record-with-witness,
+   :pointer-status :drifted,
+   :pointer-detail
+   {:resolved-title "Embedding space.",
+    :reason :line-resolves-to-different-concept}}
   {:name "Channel",
    :area :records,
    :owner "P-R2 §solved 1 (Channel)",
@@ -817,11 +825,11 @@
    :pointer-status :resolves,
    :pointer-detail {:resolution :paragraph-name}}],
  :counts
- {:rows 126,
+ {:rows 127,
   :content
-  {:closed-by-record-negative-space 68,
-   :closed-by-record-with-witness 27,
+  {:closed-by-record-negative-space 67,
+   :closed-by-record-with-witness 29,
    :named-only 9,
    :open-hole 11,
    :proven-against-pinned-source 11},
-  :pointer {:drifted 21, :resolves 105}}}
+  :pointer {:drifted 22, :resolves 105}}}

@@ -169,6 +169,12 @@ are unchanged. If they changed, leave `PIN_BEHIND` red and report the semantic
 change. The checker names this remedy but never performs or accepts the refresh
 automatically.
 
+Every newly named contract declaration also requires an explicit model area in
+`scripts/generate_variable_situation_accounting.bb`; regenerate
+`variable-situation-accounting.edn`, then stage-build the paper before closing
+the binding.  `gen_model_coverage.py` must keep rejecting
+`:unclassified` and unknown areas; there is no default classification.
+
 Do not broadly accept `workspace-gate exit 1` while Lean work is active: that
 could hide another check. An in-flight classification would require the exact
 failure set, an explicit Lean-changing lane record, source-blob pins, and an

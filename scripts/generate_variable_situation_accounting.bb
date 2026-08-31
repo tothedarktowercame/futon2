@@ -25,7 +25,7 @@
    :preferences #{"PreferenceDistribution"}
    :policy #{"ControlPolicy" "ControlVocabulary" "cascadeGrainPi" "PolicyPriorKernel"}
    :learning #{"bayesianModelReduction" "modelReductionFreeEnergyChange"
-               "logMultivariateBeta" "bayesFactorThreshold"}
+               "logMultivariateBeta" "DirichletConcentrations" "bayesFactorThreshold"}
    :demo #{"Fold" "FoldEscrowRecord" "FoldEscrowRecord.reconstructible" "actGate"
            "ActGateVerdict" "HaveWantArrow" "HaveWantArrowState"
            "HaveWantArrowComposition" "aliveness" "AlivenessFactor"}
