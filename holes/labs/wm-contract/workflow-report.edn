@@ -71,7 +71,7 @@
   :open-dispatched 1,
   :pending-decisions 13},
  :ledger-frontier 248,
- :as-of "2026-08-31T23:55:48.279117557Z",
+ :as-of "2026-08-31T23:56:10.808775708Z",
  :attribution
  {:systematic-from "C240",
   :systematic-run-length 9,
