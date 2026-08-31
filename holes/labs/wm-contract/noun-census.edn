@@ -108,9 +108,9 @@
              :why "It reorganises the model/cascade vocabulary through successive proposals; the frozen parent and resulting posterior are stack-like state."}}]
  :missing-noun
  {:node "TRACE"
-  :status :observed-not-diagrammed
-  :evidence "NOUNS-D1/WM-RUN2 records R14->TRACE, but control-stages.edn and control-map-edges.edn contain no TRACE or ledger vertex."
+  :status :store-member-not-r-node
+  :evidence "NOUNS-D1/WM-RUN2 records R14->TRACE. NOUNS-D4 adds TRACE to control-stages.edn as an ACT/assurance :store member; Figure 4 and its edge registry still do not draw the store."
   :implementation {:status :present :ref "futon2/scripts/futon2/report/war_machine.clj:4763" :symbol "TRACE route tag and write-trace!"}
   :carrier {:candidate :route :alternatives [:stack]
             :why "A trace records the executed route; an append-only ledger is a stack of such records."}
-  :decision :joe-must-decide-whether-to-add-vertex}}
+  :decision :resolved-as-nonpattern-store}}
