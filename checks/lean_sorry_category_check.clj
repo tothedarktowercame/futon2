@@ -112,7 +112,8 @@
                 [{:declaration name :reason :witnessed-obligation-has-sorry}])
               (for [label unknown]
                 {:declaration name :reason :unknown-category :category label})
-              checker-errors)))
+              checker-errors
+              fixture-errors)))
          decls)]
     {:pass? (empty? findings)
      :declarations (count decls)
