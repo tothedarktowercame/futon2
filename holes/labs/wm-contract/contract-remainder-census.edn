@@ -1,0 +1,85 @@
+{:schema :wm-contract-remainder-census/v1
+ :authority "26a66d88ca2ad67e779406be9bb0faddb283837f"
+ :contract {:declarations 93 :closed 64 :holes 29}
+ :lint {:unwitnessed 8 :stale 16 :refused 5}
+ :stale-cost
+ {:fixable 16
+  :unlooked-at 0
+  :contract-drift-only 14
+  :contract-and-fixture-drift 2
+  :shape-conformant 14
+  :shape-check-not-implemented 2
+  :warning "Refreshing pins makes the two unimplemented-shape rows fresh but does not make their evidence structurally inspectable."}
+ :records
+ [{:record "P-validated-R5"
+   :holder "wm-nouns"
+   :unwitnessed
+   [{:names ["organiseO1NodesRecorded" "organiseO2AuthoredReachability"
+             "organiseO3FastForward" "organiseO4PrecedenceGovernance"]
+     :status :blocked
+     :blocked-on "a serialized CascadeDiff fixture plus an executable shape/falsifier check; no such artefact or checker was found"}]
+   :stale
+   [{:names ["nonDegenerateAblationLaw"] :status :dischargeable-now
+     :needs "rerun futon3/checks/ablate_g_snatch.clj and rebind at current contract authority"
+     :drift [:contract] :shape :conformant}
+    {:names ["findF1Containment" "findF2Receipted" "findF3NonSelfCertifying" "findF4Falsifiable"]
+     :status :dischargeable-now
+     :needs "one rerun of futon3/checks/find_snatch.clj and one four-name rebind"
+     :drift [:contract] :shape :conformant}]
+   :refused
+   [{:name "C" :reason "implementation choice; no recorded observation selects a preference function" :specificity :unchanged}
+    {:name "find" :reason "implementation, not a law" :specificity :unchanged}
+    {:name "organise" :reason "implementation, not a law" :specificity :unchanged}]}
+
+  {:record "P-R9"
+   :holder "wm-nouns"
+   :unwitnessed
+   [{:names ["wmVerdictsLedgerAlone" "wmVerdictsDeclared"]
+     :status :dischargeable-now
+     :needs "bind the existing R9-D2 VerdictTable fixture/check; both work units are already scored 7/7"}
+    {:names ["valueEvidenceRequiresL2"]
+     :status :dischargeable-now
+     :needs "run and bind its existing 7/7 work unit, adding a WitnessLayerTable shape check and negative control"}]
+   :stale
+   [{:names ["r9WmVerdictsSound" "r9TwoRunCensus" "r9WmPerRowDeclarations"]
+     :status :dischargeable-now :needs "one r9_independence rerun and three-name rebind"
+     :drift [:contract] :shape :conformant}
+    {:names ["r9VerdictConsultsChecker"]
+     :status :dischargeable-now-for-freshness
+     :needs "rerun r9_independence and rebind; a separately inspectable Lean proof artefact is still needed for shape-level qualification"
+     :drift [:contract] :shape :shape-check-not-implemented}]}
+
+  {:record "P-R2" :holder "wm-nouns" :unwitnessed []
+   :stale [{:names ["wmTraceR2" "r2ContractCensusWmTrace"]
+            :status :dischargeable-now :needs "one r2_channel_contract rerun and two-name rebind"
+            :drift [:contract] :shape :conformant}]}
+
+  {:record "P-R8" :holder "wm-nouns" :unwitnessed []
+   :stale [{:names ["wmTraceR8" "r8CensusWmTrace" "r8EraBoundary"]
+            :status :dischargeable-now :needs "one r8_f_contract regeneration/rerun and three-name rebind"
+            :drift [:contract] :shape :conformant}]}
+
+  {:record "P-glossary-mathematics" :holder "wm-nouns"
+   :unwitnessed [] :stale []
+   :refused [{:name "modelUncertaintyAndEIG"
+              :reason "no theorem identifies live aggregate posterior spread with canonical outcome-weighted posterior-to-prior KL"
+              :specificity :sharpened-after-carriers-and-canonical-eig}]}
+
+  {:record "P-R19-preferences-open" :holder "claude-20" :unwitnessed []
+   :stale [{:names ["preferenceStackLiveRecorded"]
+            :status :dischargeable-now-for-freshness
+            :needs "rerun r19_stack_witness and rebind; serialize a PreferenceStackWitness for shape-level qualification"
+            :drift [:contract :fixture] :shape :shape-check-not-implemented}]
+   :refused [{:name "machineHasNoC"
+              :reason "meta-claim; no in-language census of free preference constants"
+              :specificity :unchanged}]}
+
+  {:record "run-at-least-once" :holder "claude-20" :unwitnessed []
+   :stale [{:names ["wmRunsOnce"] :status :dischargeable-now
+            :needs "rerun the tick witness against the current fixture and rebind"
+            :drift [:contract :fixture] :shape :conformant}]}
+
+  {:record "organisation" :holder "claude-20"
+   :unwitnessed [{:names ["wmRunConformsToWiring"] :status :dischargeable-now
+                  :needs "run and bind checks/wm_route_conformance.clj using the existing route receipt; work unit is scored 7/7"}]
+   :stale []}]}
