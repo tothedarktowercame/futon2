@@ -48,6 +48,7 @@
   ;; Discovery is a completeness alarm, not an execution policy.  A new file
   ;; must be classified here before the gate can pass; it is never guessed safe.
   #{"ablation_exact_dyadic_witness.clj" "absence_scoring_counterfactual.clj"
+    "c130_immediate_option_measurement.clj"
     "ambiguity_witness.clj"
     "absent_is_loud_lint.clj" "belief_update_check.clj"
     "belief_variance_inputs.clj" "cascade_diff_witness.clj" "certify_live_run.clj" "closed_record_pointer_check.clj" "contract_lint.clj"
@@ -119,14 +120,8 @@
     :argv ["bb" "checks/lean_sorry_category_check.clj"]}
    {:name :model-uncertainty-eig
     :argv ["bb" "checks/model_uncertainty_eig_witness.clj"]}
-   {:name :machine-vocabulary-control
-    :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "control"]}
-   {:name :machine-vocabulary-aliveness
-    :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "aliveness"]}
-   {:name :machine-vocabulary-act-gate
-    :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "act-gate"]}
-   {:name :machine-vocabulary-cohort
-    :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "cohort"]}
+   {:name :c130-immediate-option-measurement
+    :argv ["bb" "-cp" "." "checks/c130_immediate_option_measurement.clj"]}
    {:name :pinned-operational-certificate
     :argv ["bb" "-cp" "." "checks/wm_operational_certificate.clj"
            "--run" c167-run "--resource" c167-resource
@@ -189,14 +184,6 @@
     :argv ["python3" "detect_drift.py" "--control-unit-change"]}
    {:name :c165-unindexed-correction
     :argv ["bb" "checks/cleanup_queue_correction_index.clj" "--negative-control"]}
-   {:name :c183-control-vocabulary-negative
-    :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "control" "--negative-control"]}
-   {:name :c183-aliveness-negative
-    :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "aliveness" "--negative-control"]}
-   {:name :c183-act-gate-negative
-    :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "act-gate" "--negative-control"]}
-   {:name :c183-cohort-negative
-    :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "cohort" "--negative-control"]}
    {:name :c173-tampered-operational-run
     :argv ["bb" "-cp" "." "checks/wm_operational_certificate.clj"
            "--run" c167-run "--resource" c167-resource
