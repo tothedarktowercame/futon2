@@ -18,10 +18,13 @@ the command nonzero.
 The demonstrated report was honestly `DEGRADED`, exit 1:
 
 - workspace gate: 19 results, 0 failures;
-- contract: 100 declarations, 89 closed and 11 contract holes; the hole
-  classifications were 7 conformant, 3 refused implementations, 1 witnessed;
+- contract: 100 declarations, 89 closed and 11 contract holes; the displayed
+  contract-hole judgements were 7 shape-conformant, 3 implementation-refused,
+  and 1 binding-passed-shape-unchecked (`wmRunConformsToWiring`);
 - Lean source: 6 literal `:= sorry` terms, classified as 3 deliberate
-  implementation refusals and 3 permanent external attestations;
+  implementation refusals and 3 permanent external attestations; its broader
+  declaration-label census separately includes 5 witnessed-instance
+  obligations with proved bodies;
 - strict lint: stale 0, uninspectable 0, bound-to-false 0, conformant 7;
 - absence lint: 8 findings, exit 1;
 - futon2: 1,042 tests / 6,224 assertions, 0 failures/errors, bounded resource

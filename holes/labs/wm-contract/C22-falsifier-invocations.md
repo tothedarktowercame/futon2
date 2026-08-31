@@ -461,3 +461,6 @@ make status-control
 It rejects substituting the contract-lint hole population for the Lean
 category check's literal-sorry population, and is also reached by the workspace
 gate.
+
+As of C144 it also rejects any collision between the report's qualified
+contract-judgement and Lean-label vocabularies.

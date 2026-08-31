@@ -12,6 +12,12 @@ import time
 ROOT = "/home/joe/code/futon2"
 BG = "/home/joe/code/futon3c/scripts/bg.py"
 CONTRACT = "/home/joe/code/mathlib4/DarkTower/WarMachine/holes-contract.json"
+CONTRACT_DISPLAY = {"conformant": "shape-conformant",
+                    "refused-implementation": "implementation-refused",
+                    "witnessed": "binding-passed-shape-unchecked"}
+LEAN_DISPLAY = {"DELIBERATE IMPLEMENTATION REFUSAL": "deliberate-implementation-refusal",
+                "PERMANENT EXTERNAL ATTESTATION": "permanent-external-attestation",
+                "WITNESSED-INSTANCE OBLIGATION": "witnessed-instance-obligation"}
 
 
 def run(argv, cwd=ROOT):
@@ -48,7 +54,9 @@ def suite_status(job_id, timeout=360):
 
 def hole_population(strict_data):
     return {"count": strict_data["kinds"]["hole"],
-            "classification": strict_data["hole-judgements"],
+            "classification": {CONTRACT_DISPLAY.get(key, "contract-" + key): value
+                               for key, value in strict_data["hole-judgements"].items()},
+            "shape-unchecked": strict_data["shape-unchecked"],
             "source": "contract_lint-live-report"}
 
 
@@ -57,10 +65,18 @@ def sorry_population(check_output):
     split_match = re.search(r":sorry-category-counts\s+\{([^}]*)\}", check_output)
     if not count_match or not split_match:
         raise ValueError("lean_sorry_category_check did not emit its census")
-    split = {name: int(count) for name, count in
+    split = {LEAN_DISPLAY[name]: int(count) for name, count in
              re.findall(r'"([^"]+)"\s+(\d+)', split_match.group(1))}
     return {"count": int(count_match.group(1)), "classification": split,
             "source": "lean_sorry_category_check"}
+
+
+def lean_label_population(check_output):
+    match = re.search(r":category-counts\s+\{([^}]*)\}", check_output)
+    if not match:
+        raise ValueError("lean_sorry_category_check did not emit declaration labels")
+    return {LEAN_DISPLAY[name]: int(count) for name, count in
+            re.findall(r'"([^"]+)"\s+(\d+)', match.group(1))}
 
 
 def validate_population_sources(holes, sorries):
@@ -68,16 +84,25 @@ def validate_population_sources(holes, sorries):
             sorries.get("source") == "lean_sorry_category_check")
 
 
+def vocabularies_disjoint(holes, lean_labels):
+    return set(holes["classification"]).isdisjoint(lean_labels)
+
+
 def source_control():
-    holes = {"count": 11, "classification": {"conformant": 7},
+    holes = {"count": 11, "classification": {"shape-conformant": 7},
              "source": "contract_lint-live-report"}
-    sorries = {"count": 6, "classification": {"refusal": 3, "attestation": 3},
+    sorries = {"count": 6, "classification": {"deliberate-implementation-refusal": 3,
+                                                 "permanent-external-attestation": 3},
                "source": "lean_sorry_category_check"}
     positive = validate_population_sources(holes, sorries)
     substitution_rejected = not validate_population_sources(holes, holes)
-    passed = positive and substitution_rejected
+    vocabulary_positive = vocabularies_disjoint(holes, sorries["classification"])
+    colliding = dict(sorries["classification"], **{"shape-conformant": 1})
+    collision_rejected = not vocabularies_disjoint(holes, colliding)
+    passed = positive and substitution_rejected and vocabulary_positive and collision_rejected
     print("wm-status-source-control:", "PASS" if passed else "FAIL",
           f"positive={positive} substituted-hole-as-sorry-rejected={substitution_rejected}",
+          f"vocabularies-disjoint={vocabulary_positive} injected-collision-rejected={collision_rejected}",
           "exit-convention=0-pass/1-fail")
     return 0 if passed else 1
 
@@ -105,12 +130,16 @@ def main():
     strict_data = edn_json(strict_path,
         "{:summary (:summary x) :declaration-count (count (:declarations x)) "
         ":kinds (frequencies (map :kind (:declarations x))) "
+        ":shape-unchecked (mapv :name (filter #(= :witnessed (:judgement %)) (:declarations x))) "
         ":hole-judgements (frequencies (map :judgement (filter #(= \"hole\" (:kind %)) (:declarations x))))}")
     sorry_check = run(["bb", "-cp", ".", "checks/lean_sorry_category_check.clj"])
     holes = hole_population(strict_data)
     sorries = sorry_population(sorry_check.stdout)
+    lean_labels = lean_label_population(sorry_check.stdout)
     if not validate_population_sources(holes, sorries):
         raise RuntimeError("contract-hole and Lean-sorry populations lost source independence")
+    if not vocabularies_disjoint(holes, lean_labels):
+        raise RuntimeError("contract and Lean display vocabularies collide")
 
     absence = run(["bb", "-cp", ".", "checks/preemptive_absence_coercion_lint.clj"])
     absence_line = next((line for line in absence.stdout.splitlines()
@@ -140,9 +169,11 @@ def main():
     print("\nCONTRACT")
     print(f"declarations={strict_data['declaration-count']} closed={strict_data['kinds']['closed']} "
           f"holes={holes['count']} source={holes['source']}")
-    print(f"hole-classification={json.dumps(holes['classification'], sort_keys=True)} source={holes['source']}")
+    print(f"contract-hole-judgement={json.dumps(holes['classification'], sort_keys=True)} source={holes['source']}")
+    print(f"binding-passed-shape-unchecked-declarations={json.dumps(holes['shape-unchecked'])}")
     print(f":=sorry-terms={sorries['count']} sorry-classification={json.dumps(sorries['classification'], sort_keys=True)} "
           f"source={sorries['source']}")
+    print(f"lean-declaration-labels={json.dumps(lean_labels, sort_keys=True)} source={sorries['source']}")
     print(f"all-classifications={json.dumps(strict_counts, sort_keys=True)}")
     print("\nSTRICT LINT")
     print(f"verdict={'PASS' if strict.returncode == 0 else 'FAIL'} exit={strict.returncode} "
