@@ -6,7 +6,7 @@
  [{:lane :wm-nouns
    :holding :C221-drift-memory-discovery, :dispatched-at "2026-08-31T22:53:22Z", :job-id "invoke-1788216741637-6132-15280e10", :expected-by "2026-08-31T23:38:22Z"}
   {:lane :wm-verbs
-   :holding :C219-dead-timestamp, :dispatched-at "2026-08-31T22:34:05Z", :job-id "invoke-1788215641103-6119-55839441", :expected-by "2026-08-31T23:19:05Z"}
+   :holding :C223-suite-timeout, :dispatched-at "2026-08-31T22:56:52Z", :job-id "invoke-1788217007360-6138-e5cfcc3e", :expected-by "2026-08-31T23:41:52Z"}
   {:lane :wm-organization
    :holding :C220-reload-procedure, :dispatched-at "2026-08-31T22:53:22Z", :job-id "invoke-1788216708631-6131-6f3591c6", :expected-by "2026-08-31T23:38:22Z"}
   {:lane :wm-evidence
