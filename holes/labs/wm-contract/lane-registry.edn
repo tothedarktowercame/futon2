@@ -4,7 +4,7 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C179-remaining-four, :dispatched-at "2026-08-31T21:04:14Z", :job-id "invoke-1788210250415-6025-410386d2", :expected-by "2026-08-31T21:49:14Z"}
+   :holding :C185-defined-unbound, :dispatched-at "2026-08-31T21:19:10Z", :job-id "invoke-1788211146262-6038-d817ece9", :expected-by "2026-08-31T22:04:10Z"}
   {:lane :wm-verbs
    :holding :C184-selector-seam, :dispatched-at "2026-08-31T21:15:36Z", :job-id "invoke-1788210932408-6035-a373f061", :expected-by "2026-08-31T22:00:36Z"}
   {:lane :wm-organization
