@@ -349,6 +349,10 @@
                                            (= [[9 1] [3 1]] (:accumulated-counts %))
                                            (= [[1 1] [1 100]] (:reduced-prior %))
                                            (= [[10 1] [301 100]] (:reduced-posterior %)))
+   "DirichletConcentrationsWitness" #(and (= :dirichlet-concentrations-reference/v1 (:schema %))
+                                            (= [2 1] (:accepted %))
+                                            (= {:empty [] :zero [1 0] :negative [1 -1]}
+                                               (:rejected %)))
    "HaveWantArrowWitness" have-want-arrow-witness?
    "FoldWitness" fold-witness?
    "FoldEscrowRecordWitness" fold-escrow-record-witness?

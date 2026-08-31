@@ -1,0 +1,5 @@
+{:schema :dirichlet-concentrations-reference/v1
+ :basis "sec-glossary.tex:56 — Dirichlet concentrations are nonempty and strictly positive"
+ :kind :hand-derived-from-domain
+ :accepted [2 1]
+ :rejected {:empty [] :zero [1 0] :negative [1 -1]}}
