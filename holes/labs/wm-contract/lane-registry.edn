@@ -8,6 +8,6 @@
   {:lane :wm-verbs
    :holding :C110-selector-dryrun, :dispatched-at "2026-08-31T18:09:20Z", :job-id "invoke-1788199738867-5844-53a41b6a", :expected-by "2026-08-31T18:54:20Z"}
   {:lane :wm-organization
-   :holding :C111-five-triage, :dispatched-at "2026-08-31T18:11:57Z", :job-id "invoke-1788199906083-5847-8e9c5412", :expected-by "2026-08-31T18:56:57Z"}
+   :holding :C115-narrow-receipt, :dispatched-at "2026-08-31T18:20:06Z", :job-id "invoke-1788200384368-5859-d6f9941b", :expected-by "2026-08-31T19:05:06Z"}
   {:lane :wm-evidence
    :holding :C113-avoidance-safety, :dispatched-at "2026-08-31T18:16:47Z", :job-id "invoke-1788200183875-5854-2f03840f", :expected-by "2026-08-31T19:01:47Z"}]}
