@@ -941,3 +941,46 @@ proposed suffix are explicitly withdrawn.
 claim-licensing device; AIF as formalised here does not supply one; what should it be?* The apex's first
 output is the honest statement that the instrument it was created to wield does not exist — which is
 §0.8's complaint located in the mathematics, and exactly what an apex is for.
+
+---
+
+## APEX-D4's absence WITHDRAWN — I imported a verdict frame the theory does not use *(Joe, 2026-08-31)*
+
+Joe: *"I answered this question already, and AIF does say what to do actually."* He did, before APEX-D2:
+*"if `:self` evidence is passed forward, it needs **processing** … it is basically a bare perception or
+datum. I think AIF will have better things to say about how that processing should work than I will."*
+
+**I asked for a device returning licensed / refused / unknown. That is adjudication, and AIF has no such
+step.** A claim does not become licensed — **it acquires a posterior.** I imported the shape from
+verdict-giving, commissioned three deliveries inside it, and then had the delegate record the theory's
+failure to supply what the theory never had.
+
+    BeliefState : Type                        HOLE   falsifier: "a channel lacks its mean or VARIANCE"
+    observationKernel (State Observation)     HOLE   the Markov kernel A : S ⇝ O
+    predictionError (observation beliefMean)  CLOSED ε_k := o_k − μ_k   (consumes the belief's MEAN)
+    variationalFreeEnergy (precision error)   CLOSED F = ½·mean_k(Π_k·ε_k²)
+
+**The variance is what I kept missing.** I argued at length that the build could not represent graded or
+plural evidence — several partial sources, differing quality, accumulation toward a threshold. **A belief
+state with a mean and a variance per channel is exactly that representation.** Strong independent evidence
+narrows the variance; weak self-evidence barely moves it; sources combine by ordinary updating. The
+precision operations wm-evidence had already named — review, cross-validation, independent reproduction —
+are precision on the update, where they always belonged.
+
+**And `variationalFreeEnergy` never "terminated unconsumed".** F is what belief update *minimises*. I read
+it as a dead end because I was looking for something to consume it as a verdict input. The chain was
+complete; my frame was wrong.
+
+**So the apex needs no new device — it needs `BeliefState` and `observationKernel` discharged**, two of the
+glossary's eight unbound holes. Third convergence on the same lane. And R1's pattern is already named
+**"Belief State as Operational Hypotheses — makes the state updateable and falsifiable"**: the apex's claims
+should *be* operational hypotheses in a belief state, which is R1 applied at the meta level.
+
+APEX-D5 dispatched to withdraw the absence (dated, original legible), state the corrected shape, and name
+what must be discharged — explicitly *not* defining `BeliefState`, which is wm-nouns' holding.
+
+**The honest tally.** Four of my directions to this delegate were wrong: two free energies conflated; the
+wrong device; a threshold that accepts 6903/6903; and now the verdict frame itself. It refused three
+correctly. **The fourth it could not refuse, because I never relayed the operator's actual answer** — Joe
+gave it in plain words and I went looking for a threshold instead. That is a relay failure, and it is the
+most expensive kind, because a delegate cannot check a premise it was never shown.
