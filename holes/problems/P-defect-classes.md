@@ -6,6 +6,17 @@ decision; it proposes no `sec-catalog` pattern text.
 Each class below has a nonempty witnessed population. “Prevention type” is a
 classification of the likely machine intervention, not approval to build it.
 
+## Current measured state
+
+C77/C79's six mechanical lints now measure classes 1, 4, 5, 8, and 9 as
+**tested-extinct** across futon2, futon3, and p4ng: their historical instances
+remain below, but the current scans find zero. Class 6 is the sole live
+mechanical population. Its broad semantic census began at 27 sites; the guarded
+disposition/lint population has fallen from 18 grouped unsafe sites to **7 live
+blocked sites** after C136. All seven now require operator decisions rather than
+mechanical edits (`checks/absence-coercion-dispositions.edn`). Classes 2, 3,
+and 7 remain judgement-scoped and therefore have no honest extinction claim.
+
 ## 1. Acceptance that cannot fail
 
 **Shape.** The instrument either accepts an empty/degenerate population, ignores a
@@ -65,6 +76,16 @@ instantiation that refutes the proposition.
   required omitted member (same source, lines 8–10). Both latter declarations were
   restated at mathlib4 `a9d78f8904`.
 
+Two later counterexamples extend the same method beyond the original four-hole
+sweep. An unconditional identification of posterior spread with canonical EIG
+is refuted by a one-policy, one-outcome normalized point-mass model whose EIG is
+0 while the supplied spread bonus is 1
+(`holes/labs/wm-contract/C119-model-uncertainty-counterexample.md:1–18`). The
+historical `machineHasNoC` proposition is refuted by the in-language census's
+free `vertexLocalC` constructor
+(`holes/labs/wm-contract/C122-free-preference-census.md:1–27`). Both were settled
+by counterexample rather than retained as unwitnessed truths.
+
 **Found by.** Reading quantifiers and constructing the smallest degenerate model,
 not by trying harder to produce a positive witness.
 
@@ -96,6 +117,18 @@ mechanism.
 - The find witness passed six scenarios but was bound to the former universal
   `findF4Falsifiable`; both false bindings were removed and characterised in
   `holes/labs/wm-contract/C72-false-binding-audit.md:5–10`.
+
+The same class appeared four times as **proof about a copy**: a theorem over a
+generated sibling was offered for a contract-source constant with no equality
+between them. The four witnessed surfaces were R9's verdict table
+(`holes/labs/wm-contract/C99-R9-source-proofs.md:1–8`), R2's trace census
+(`holes/labs/wm-contract/C92-R9-R2-hole-census.md:17–20`), R8's trace census
+(`holes/labs/wm-contract/C102-R8-hole-census.md:27–38`), and the APM adapter's
+hand-restated `required-*` contract copy
+(`holes/labs/wm-contract/AD-D1-findings.md:131–149`). The first three require a
+proof over the source object or checked source/generated equality; the fourth
+requires an independently meaningful consumer check rather than equality to a
+second authored table.
 
 **Found by.** Ask “what does this witness actually demonstrate?”, then compare its
 quantifiers, carrier, and referent to the declaration; trace the value to the code
@@ -170,6 +203,16 @@ trace (`C12-absence-findings.md:9–27`). Historical numeric-only traces make th
 counterfactual permanently unreconstructable (`C12-absence-findings.md:29–34`;
 `p4ng/vetting/CLEANUP-QUEUE.md:2276`).
 
+A concrete later instance showed why the class is semantic, not stylistic:
+`free_energy.clj` converted the same missing observation to `0.0`, then returned
+opposite avoidance verdicts solely according to whether each channel's avoided
+range happened to contain zero. C118 replaced that diagnostic with
+`:satisfied` / `:violated` / `:unknown`, preserving absence reasons
+(`holes/labs/wm-contract/C118-tristate-avoidance-diagnostic.md:7–31`). The live
+lint trajectory is 18 grouped unsafe sites at C81, then 16, 15, 13, 11, 8, and
+now **7**; seven is not extinction, and each remaining site is held on a named
+behavioural decision.
+
 **Found by.** Census `get`/`get-in` defaults, `or`-to-scalar, destructuring `:or`,
 nil guards, and serialization boundaries before attempting repair.
 
@@ -205,8 +248,10 @@ can be automated is uncertain.
 
 ## 8. Era-blind expectation
 
-**Shape.** Today's schema is applied to records created under an earlier schema,
-turning valid history into apparent malformed data.
+**Shape.** A schema is selected from a clock that does not identify the producer
+contract. This includes applying today's schema to old records, but is sharper:
+even a date-aware branch is unsound when multiple producer versions can occupy
+the same time bucket.
 
 **Instance.** C58 proved the two May 18 records lacking `:annotation-health` belong
 to the 13-channel era; the third record at `2026-05-18T21:33:02Z` starts v0.10 and
@@ -214,12 +259,23 @@ has the field. The last old record and first new record are only about 39 minute
 apart (`holes/labs/wm-contract/C22-falsifier-invocations.md:140–155`;
 `holes/labs/wm-contract/C58-r2-channel-eras.md:1–20`).
 
+C125 found the stronger case. R8's filename-day discriminator classifies the
+pinned 760/41-era population correctly because the corpus happens to contain a
+gap, yet is unsound in principle: an old binary writing on July 14 or a new one
+writing under another filename date is misclassified. In contrast, trace-schema
+versions 15–19 all landed on **2026-08-31**, so their date cannot distinguish
+them at all (`holes/labs/wm-contract/C125-era-discriminator-census.md:9–31`).
+
 **Found by.** Sort records by time, inspect adjacent boundary records, and search
 the producer history for the schema-changing commit rather than assuming a
 day-sized era.
 
-**Would prevent.** Persist schema/version at write time and dispatch validation by
-record era; negative controls remove a field required in that record's own era.
+**Would prevent.** Persist a producer-issued contract/schema tag and dispatch by
+that tag, with an explicit unversioned legacy arm. A clock is acceptable only as
+pinned legacy evidence whose adjacent records locate the transition, never as a
+general producer identity. Negative controls place two versions in the same time
+bucket. The falsifier is a producer/consumer change that lands atomically or two
+versions written within one clock bucket.
 **Prevention type: check + schema lint.**
 
 ## 9. A record that says two things
@@ -241,6 +297,13 @@ answers from the same artefact.
 - The lane registry still showed C61 active two hours after completion because it
   had a dispatch transition but no completion transition
   (`p4ng/vetting/CLEANUP-QUEUE.md:3219–3229`).
+- The generated status report called a strict-lint classification count
+  `conformant`, although the instrument was built specifically to replace
+  hand-maintained status counts; the misnamed output is visible at
+  `scripts/wm_status_report.py:145–153` and in its first recorded report at
+  `holes/labs/wm-contract/C132-generated-status-report.md:19–24`. A generated
+  value can still say two things when its field label names a different
+  predicate than its source.
 
 **Found by.** Parse and tally each representation independently; compare registry
 jobs with live Agency state; never rely on the summary produced by the same record.
@@ -261,8 +324,18 @@ checks reject a live/history contradiction and reconcile dispatch with completio
 | Independent fixture from mathematics | Implementation self-certification | Derive expected values independently; implementation output is the observed leg, not its own oracle. |
 | Census before repair | Pipeline-wide defaults, reachability, referent drift | Bound the population, classify every member, then change only the justified subset. |
 | Ask “what does this witness actually demonstrate?” | Claim/evidence quantifier and referent mismatch | State the narrow empirical proposition first; bind only if it entails the declaration. |
+| Challenge `blocked` as a claim | Deferred sites whose unblocking condition was never tested | Re-run or trace the named blocker; C126 found that 6 of 11 “blocked” sites were already settled implementations or exposed decisions, rather than one undifferentiated blocked population. |
+| Trace consumers beyond the local site | Locally mechanical edits that alter belief, ranking, or safety downstream | Follow every changed value to selection/actuation before classifying the work. C127 found that 2 of 5 apparently implementation-only rows could change later rankings and stopped them. |
 
 These methods compose. The strongest recurring sequence today was: **census → pin
 the population → semantic mutation → inspect the named consumer → repair → rerun
 against the consumer-held artefact**. Promotion priority is deliberately left to
 the owner.
+
+## Reserved portability slot
+
+A possible tenth class is intentionally **not asserted yet**. C135 is sweeping a
+reader-portability incident in which one runtime accepted a token another reader
+rejected. Until that delivery settles whether this is a new class or an instance
+of duplicate representation, adding a tenth heading would violate this
+catalogue's rule against empty or pre-emptive categories.
