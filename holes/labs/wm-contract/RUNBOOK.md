@@ -16,6 +16,33 @@ part of its result. A successful gate records the HEAD/tree/dirtiness basis of
 futon2, mathlib4, p4ng, and futon3; these are provenance, not stale equality
 assertions.
 
+### Expected duration
+
+C162 measured fresh processes with `/usr/bin/time` on 2026-08-31; “cold” is
+the first fresh JVM/process and “warm” is an immediate repeat with ordinary OS
+caches retained. Dropping kernel caches was deliberately avoided because it is
+invasive and unlike the operator path.
+
+| Target | Cold wall | Warm wall | Result |
+|---|---:|---:|---|
+| `make ci` | 105.65 s | 101.61 s | both exit 0 |
+| `make workspace-gate` | 32.91 s | 33.53 s | both exit 0 |
+| `make pre-merge` | 118.08 s | 125.35 s | cold exit 0; warm completed red on concurrent strict-contract drift |
+
+The warm composed duration is a real timing but not a green-gate claim. An
+earlier immediate repeat stopped in CI at 89.62 seconds on concurrent artefact
+drift, demonstrating the intended fail-fast behavior.
+
+CI dominates. Streaming timestamps attributed about 79 of 106 seconds to four
+test namespaces: `wm-operational-certificate-test` (28.2 s),
+`r8-f-contract-test` (25.9 s), `futon2.aif.full-loop-runner-test` (12.6 s), and
+`r2-channel-contract-test` (12.4 s). In the workspace gate,
+`c116-pre-boundary-stored-f` took 17.9 of 29.7 seconds. This is fast enough for
+the required pre-merge review (roughly two minutes), so no existing check is
+moved to nightly. If adoption evidence later shows the review command being
+skipped, optimize these named dominators before changing schedules; any future
+nightly tier must name its runner and cadence, never merely remove a check.
+
 ## Reading `make status`
 
 - `OK` (exit 0): no component is red.
