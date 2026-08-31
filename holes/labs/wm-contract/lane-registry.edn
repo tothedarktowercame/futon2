@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C260-production-run-record, :dispatched-at "2026-08-31T23:57:41Z", :job-id "invoke-1788220635108-6241-968e7a62", :expected-by "2026-09-01T00:42:41Z"}
   {:lane :wm-evidence
-   :holding :C258-attack-atomicity, :dispatched-at "2026-08-31T23:54:54Z", :job-id "invoke-1788220465618-6237-d1898d70", :expected-by "2026-09-01T00:39:54Z"}]}
+   :holding :C262-attack-identity-binding, :dispatched-at "2026-08-31T23:59:40Z", :job-id "invoke-1788220776665-6246-a6ebb411", :expected-by "2026-09-01T00:44:40Z"}]}
