@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C203-readiness-actionable, :dispatched-at "2026-08-31T21:56:49Z", :job-id "invoke-1788213405244-6082-d7f4202c", :expected-by "2026-08-31T22:41:49Z"}
   {:lane :wm-evidence
-   :holding :C201-classify-drift, :dispatched-at "2026-08-31T21:52:17Z", :job-id "invoke-1788213133416-6075-00e297e1", :expected-by "2026-08-31T22:37:17Z"}]}
+   :holding :C206-cohort46-stratum, :dispatched-at "2026-08-31T22:00:22Z", :job-id "invoke-1788213618694-6087-5a8f8100", :expected-by "2026-08-31T22:45:22Z"}]}
