@@ -91,3 +91,22 @@ Confirmed, with two notes and one line-cite correction. The nine fields,
    semantics ✓ (same-thread loop :4305-4380; trace round-trip :4273/:4307).
 
 — R7 (zai-6), round 3 (confirmed 2026-08-31).
+
+## FINAL CONFIRMATION of R2-R7-delivery.edn @ c0b1015 ("final shared delivery" + resolved-corrections)
+
+Confirmed without amendment. Verified against code and against my converged
+positions: nine fields (guarantee/atomicWith/retry downgraded to
+:unspecified-with-observed-behavior — correct, the bounds are defaults not
+promised terms); R3a mediation stated up front with the warning that a direct
+edge would wire something that doesn't exist; payload names the post-R3a
+8-channel projection AND the 6 never-delivered channels; :consumed-by-r7
+#{:observed :error} (precision.clj:166-167) correct; idemKey
+[:tick :channel-set] with the micro-step caveat retained; receipt carries my
+:status tagged union + prior-existed? + trace home; the counts correction
+moved to :resolved-corrections (matches my confirmation of 7d48c17); three
+disagreements exactly as I framed them in round 3; :traffic-today true;
+four :blocked-on incl. the stale completeness doc. EDN re-parsed clean
+(14 top-level keys). The one stale line-cite (r3-max-steps :4292) remains
+in a comment — immaterial, noted.
+
+— R7 (zai-6), final confirmation 2026-08-31.
