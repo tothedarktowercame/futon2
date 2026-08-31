@@ -1,13 +1,13 @@
 {:schema :wm/variable-situation-accounting-v1,
  :as-of "2026-08-31",
  :authority
- {:contract-git-sha "0c0f2876a55c528629a43103df3d4c38e36472f8",
+ {:contract-git-sha "24634504e8dd97caf8894916d62e99fb1116c030",
   :contract-sha256
-  "b54c8ff9bd8ce6a318818d37bcc77a5ac2292bee538f9c184c85133aa1cdb16e",
+  "65043c08907a289fac73bace5130de688bdf6944f9958272090c998efb88ad9a",
   :glossary-sha256
   "780a64afbdb4a9f47a2e399fd3611f79961b6facbbddac02630895592e867889",
   :witness-registry-sha256
-  "ca3a284b0d85e8e0d605bcd6d49e3db8584067d694c180ce9c3b11cc61235860"},
+  "532bb8cdd98b5291ce78313f433dc63b0c4f82d01cd1a86001b82eadd950b4de"},
  :axes
  {:content-status
   [:named-only
@@ -354,7 +354,7 @@
   {:name "PredictiveOutcomeKernel",
    :area :scores,
    :owner "sec-glossary.tex:21–29 · P-glossary-mathematics",
-   :content-status :closed-by-record-negative-space,
+   :content-status :closed-by-record-with-witness,
    :pointer-status :resolves,
    :pointer-detail {:resolved-title "Expected free energy $G$."}}
   {:name "ParameterPriorKernel",
@@ -827,8 +827,8 @@
  :counts
  {:rows 127,
   :content
-  {:closed-by-record-negative-space 66,
-   :closed-by-record-with-witness 30,
+  {:closed-by-record-negative-space 65,
+   :closed-by-record-with-witness 31,
    :named-only 9,
    :open-hole 11,
    :proven-against-pinned-source 11},
