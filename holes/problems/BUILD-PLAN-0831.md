@@ -383,3 +383,53 @@ thread pressure and most of the minting burden.
 Naming makes collision impossible by construction: `wm-w1-1` … `wm-w1-6`. Nothing else on the box knows
 those names, and this plan records that they are dedicated — the seat-ownership fact the roster cannot
 express, since `status` is a liveness flag and there is no owner field.
+
+---
+
+## Four delegates, one per vertex *(Joe, 2026-08-31)*
+
+Joe's structure, and better than my wave-numbered one: **a vertex persists across waves; a wave does not.**
+Four standing delegates replace one session holding all 80 declarations.
+
+    wm-nouns          the R-nodes          18 staged · 5 with records · 13 without
+    wm-verbs          the edges            61 distinct · 2 of 22 drawn carry a schema · 8 multi-attested
+    wm-organization   the fit              typology of the WHOLE never written as data · 8/13 freehand ports
+    wm-evidence       the apex             DOES NOT EXIST — first holder it has ever had
+
+Charters at `holes/problems/BUILD-packets/DELEGATE-wm-*.md` (~100 lines each: shared preamble + vertex
+specifics), dispatched staggered 20s.
+
+### Both minting paths verified before being taught
+
+I would not put a procedure in a packet I had not run. Four attempts, two dead ends:
+
+| path | result |
+|---|---|
+| `POST /api/alpha/agents` (any type) | **stub** — installs an `invoke-fn` returning `"registered-via-http"`; never executes |
+| `POST /agents` + `session-id` | field silently ignored |
+| `POST /agents` + `ws-bridge: true` | *"no invoke handler (ws bridge not connected)"* — that path is for a remote laptop |
+| **`POST /api/alpha/agents/auto`** `{type, session-id, cwd}` | **WORKS** — Agency assigns the name, returns a session-file; minted `zai-4`, belled it, it ran |
+| **emacsclient → `codex-repl--open-instance`** with a lane name | **WORKS** — minted all four delegates; `wm-nouns` answered its probe |
+
+`codex-picker --new` fails from a non-TTY seat (*"stdin is not a terminal"*) — its **picker UI** needs a
+terminal, but the elisp it ultimately evaluates does not. Calling `codex-repl--open-instance` directly via
+emacsclient bypasses the UI and mints the lane. **So minting is self-service after all**, in both
+directions, and Joe does not have to run a terminal command per lane.
+
+The delegates are taught the `/auto` path for zai helpers and told explicitly **not** to use plain
+`POST /agents`, because that failure is silent — the agent registers, accepts bells, and never runs.
+
+### What each charter carries
+The measured state of its vertex (so no delegate starts by re-deriving it), its first delivery, the seven
+§0.14 criteria as the standard for what may run unattended, the fragment discipline (never hand-edit a
+generated file; write a fragment and merge), and last night's dispatch lessons: never take a seat you were
+not given, stagger, `--mode brief` for messages, and **refusal is a deliverable**.
+
+### First deliveries
+- **NOUNS-D2** — census the 13 record-less nodes; *not* 13 records. Also holds the `R14→TRACE` finding:
+  Figure 4 has no trace/ledger node, which is a missing **noun**.
+- **VERBS-D1** — specify `R2→R7`, the only edge with three independent sources, by pairing.
+- **ORG-D1** — make the typology of the whole into data; `:unclassified` with a reason is the honest
+  output, and every classifier must be able to return "no".
+- **APEX-D1** — draft an `EvidenceContract` for one noun and one edge, **for Joe to rule on**. It scores
+  3/7 and cannot be automated: naming the acceptance *is* the work.
