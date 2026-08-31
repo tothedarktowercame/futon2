@@ -171,3 +171,56 @@ ordered pairs, including `R14→R5`, which nothing asserts). Fixed to pair conse
 which is what the instance actually states: 61 and 4. **The bug inflated the count of the very thing the
 census exists to measure**, and it is the same shape as the errors this build keeps finding — a
 convenient expansion standing in for a recorded claim.
+
+---
+
+## The higher-level view — all four vertices, not just the edges *(added after Joe's correction)*
+
+Edges were one facet. Here is the same census across the whole tetrahedron plus the formal spine, measured
+this morning.
+
+| vertex | population | how much is specified / graded | measured by |
+|---|---|---|---|
+| **Nouns** — R-nodes | 18 with stage entries, 17 touched by a drawn edge | **5 of 18 have a problem record** (R2, R8, R9, R16, R19) | `control-stages.edn`, `holes/problems/P-R*.md` |
+| **Verbs** — edges | **61 distinct** across four sources; 22 drawn | **2 of 22 carry a `:schema`**; 4 typed as real deliveries | `edge-census.edn` (Phase 1) |
+| **Organisation** — fit | hyper-edge schema anchored, 4 instances | the typology *of the whole* — five phased columns, one cycle, cross-column support — **is still prose**, never written as data | `hyper-edge-schema.edn`; §0.8 |
+| **Evidence apex** | — | **does not exist. No lane. No holder.** | §0.8: "does not exist"; §0.12 subdivided it and nothing was staffed |
+| **Formal spine** — Lean | 80 declarations: 44 closed, 36 holes | **16 of 36 holes bound** to a recorded passing witness; 20 unbound | `holes-contract.json`, `checks/witness-registry.edn` |
+| **WR badges** | 16 | 11 hold, 5 do not — but a badge is a *dated sentence*, not a check | `wr-overlay.edn` |
+
+### Two facts that outrank every lane question
+
+**1. There is an ownership vacuum over the entire formal spine.** All **80** declarations — 44 closed and
+36 holes — carry `holder: claude-15`, whose session is dead. Not one names a Clojure locus or a fixture
+(`clojure-locus` and `fixture` are empty on all 80); the Lean↔Clojure binding lives entirely in
+`checks/witness-registry.edn`, which has **7 entries covering 16 of the 36 holes**. So: the contract that
+defines what the machine must satisfy has no living holder, and just under half its open obligations are
+tied to anything runnable.
+
+**2. The vertex whose job is to grade the other three has never been staffed.** §0.8 recorded the evidence
+apex as *"does not exist"* on 08-30; §0.12 subdivided it on 08-31 — *"what is the evidence of the
+evidence?"* — and no lane, no record, and no holder followed. Meanwhile the other three vertices kept
+producing material: 61 edges, 36 falsifiers, 16 WR badges, nine empirical campaigns.
+
+**The shape of the problem is a ratio, not a backlog.** The build is producing *specifications* far faster
+than it can produce a *standard for judging them* — 36 holes with falsifiers against 16 bindings; 61 edges
+against 2 schemas; 16 badges that are dated sentences rather than checks. Adding more edges, more nodes or
+more empirics widens that gap. **That is the leadership call, and it is not "which edge next".**
+
+### What I would put to Joe, in priority order
+
+1. **Re-hold the contract.** 80 declarations need a living holder. This is mechanical but it is the
+   precondition for anyone gating anything — a `holder` field naming a dead session is a governance hole,
+   and it is exactly the `I_absent_is_loud` class the build has been enforcing on everyone else.
+2. **Staff the apex.** It is the only vertex with no lane, and it is the one the other three report to
+   (§0.9's flow-up: each recursing node sends *one typed thing* to the apex). Until it exists, "gated"
+   means "the owner read it", which is a person, not a standard.
+3. **Then Phase 2 fill**, ordered by the census: `R2→R7` first (three independent sources).
+4. **Hold the second domain and further empirics** until 1–3 land. Both add material the current standard
+   cannot grade.
+
+### Method note against myself
+I dove into edges because that is the vertex I had been working in, and reported a Phase-1 census as
+though it were the state of the build. It was the state of one vertex. Joe's correction is the same error
+class this project keeps finding — **a measurement of the part presented with the authority of the
+whole** — and it is worth recording that the tech lead made it about his own lane.
