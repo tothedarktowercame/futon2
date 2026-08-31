@@ -3110,8 +3110,10 @@
   completion. Returning :cohort-complete avoids spurious repair obligations
   that would otherwise fire every time the scheduler probes a finished cohort."
   [raw-opts]
-  (try
-    (run-opportunity-core! raw-opts)
+  (let [run-id (or (:run-id raw-opts) (str (UUID/randomUUID)))]
+   (assoc
+    (try
+      (run-opportunity-core! raw-opts)
     (catch Throwable e
       (when (= :delivery-qa-gate-failed
                (:failure-kind (ex-data e)))
@@ -3201,6 +3203,7 @@
                     :failure-stage :initialization
                     :error error
                     :error-data edata}}))))
-    (finally
-      (post-wm-status! (config raw-opts)
-                       {:source "wm-full-loop" :status "idle"}))))
+      (finally
+        (post-wm-status! (config raw-opts)
+                         {:source "wm-full-loop" :status "idle"})))
+    :run/id run-id)))

@@ -35,6 +35,17 @@
 
 (use-fixtures :each with-field-desk-stub without-live-wm-status)
 
+(deftest run-opportunity-surfaces-stable-run-identity
+  (with-redefs-fn
+    {#'runner/run-opportunity-core!
+     (fn [_] {:attempt-id "attempt-run-port" :outcome :grounded-change})}
+    (fn []
+      (let [assigned (runner/run-opportunity! {:run-id "run-assigned"})
+            generated (runner/run-opportunity! {})]
+        (is (= "run-assigned" (:run/id assigned)))
+        (is (string? (:run/id generated)))
+        (is (not (str/blank? (:run/id generated))))))))
+
 (deftest production-repair-root-is-unreachable-during-runner-suite
   (is (not= hermetic/production-repair-root repair/default-root))
   (is (not= hermetic/production-trip-root tripwire/default-trip-root)))
