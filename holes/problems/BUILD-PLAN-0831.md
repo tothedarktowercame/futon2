@@ -728,3 +728,44 @@ precepts but a better type for the thing in question. Escalating with a sharp fr
 "two precepts conflict" should have prompted one more question — *are both precepts even talking about the
 same kind of object?* — before it prompted an escalation. They were not: one was about claims, one about
 data.
+
+---
+
+## APEX-D2 gated — and it corrected me on the thing I had just told it
+
+`61be372`: the evidence-processing pipeline, documentation-only. It records `:self` as an unprocessed
+observation rather than an admissibility verdict, the channel→ε→Π→F chain, named precision operations
+(review, cross-validation, independent reproduction), an R2 worked case yielding `F = 1/14`, typed blockers,
+no EIG dependency, and R16→R2 as both-staged.
+
+**Its surprise corrects the packet I sent it.** I wrote that the closed Lean pieces formed a licensing
+pipeline — *"evidence accumulates as F = ½·mean(Π·ε²) … a claim is licensed at ΔF ≤ -3."* The delegate:
+*"`variationalFreeEnergy` produces F, while `bayesFactorThreshold` consumes ΔF; sharing `ℝ` is not a
+semantic bridge."* **Verified, and it is right.**
+
+    PERCEPTUAL       variationalFreeEnergy = ½·mean_k(Π_k·ε_k²)                 :469  closed
+                     terminates at F; nothing consumes it
+
+    MODEL-REDUCTION  deltaFReduction (A a' a A') = ln B(A)+ln B(a')-ln B(a)-ln B(A')  :486  closed
+                     bayesFactorThreshold (deltaF) := deltaF ≤ -3                :491  closed
+                     a COMPLETE licensing chain over Dirichlet concentration parameters
+
+**There are two free energies, and I conflated them.** `deltaFReduction` is the *Bayesian model reduction*
+ΔF over Dirichlet counts, not a difference of variational free energies. My error is this build's own
+defect class — **a type-level match standing in for a semantic one** — committed in the packet that
+commissioned the vertex whose job is to catch exactly that. The delegate's `F = 1/14` case correctly stops
+at `:processed-observation` rather than `:certified-claim`.
+
+**What the correction buys, which is more than it costs.** The licensing half is *already proved end to
+end*: Dirichlet counts → `logMultivariateBeta` → `deltaFReduction` → `bayesFactorThreshold`, all closed.
+**The single missing piece is the one the delegate named: a map from evidence sources to Dirichlet
+concentration parameters.** That is not a gap in AIF — it is a modelling step nobody has taken, and it is
+small and well-posed. `logMultivariateBeta` is a **hole**, so the chain is defined and unwitnessed: writing
+the source→counts map and running it would witness it *and* give the apex a threshold in one delivery.
+APEX-D3 dispatched on that basis, with an explicit instruction **not** to bridge F to ΔF, because forcing a
+bridge between two different constructions would be inventing the semantics.
+
+**Score so far on delegates correcting the commissioner: four for four.** NOUNS-D2 (population 14 not 13,
+carriers four not three), ORG-D1 (support is mostly within-column, refuting §0.8's prose), VERBS-D1 (the
+edge is two hops; the docstring's channel count was stale), APEX-D2 (two free energies, not one). Every one
+of those was a claim I or the record asserted and none of them was caught by a reader.
