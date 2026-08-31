@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C40-full-suite, :dispatched-at "2026-08-31T14:21:45Z", :job-id "invoke-1788186094292-5668-bbf8a117", :expected-by "2026-08-31T15:06:45Z"}
   {:lane :wm-evidence
-   :holding :O21-O22, :dispatched-at "2026-08-31T14:18:13Z", :job-id "invoke-1788185882254-5663-cf2e59de", :expected-by "2026-08-31T15:03:13Z"}]}
+   :holding :C45-dormancy, :dispatched-at "2026-08-31T14:25:10Z", :job-id "invoke-1788186298958-5672-a18e3faa", :expected-by "2026-08-31T15:10:10Z"}]}
