@@ -155,6 +155,13 @@ that committed authority, rebind affected witness fragments, merge the
 registry, and run `contract_authority_current`, strict lint, and the workspace
 gate before declaring the lane complete. The intermediate red is truthful.
 
+Every glossary binding that changes `Holes.lean` also requires a Q-interface
+closure step: re-verify the Q-facing declarations and refresh the
+`:lean-spine` pin in `Q-interface-completeness.edn` only when their semantics
+are unchanged. If they changed, leave `PIN_BEHIND` red and report the semantic
+change. The checker names this remedy but never performs or accepts the refresh
+automatically.
+
 Do not broadly accept `workspace-gate exit 1` while Lean work is active: that
 could hide another check. An in-flight classification would require the exact
 failure set, an explicit Lean-changing lane record, source-blob pins, and an

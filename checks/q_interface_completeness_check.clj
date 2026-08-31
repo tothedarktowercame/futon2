@@ -77,10 +77,13 @@
             commits (if (zero? (:exit changes))
                       (vec (remove empty? (.split (.trim ^String (:out changes)) "\\n")))
                       [])]
-        {:pin id :state :PIN_BEHIND :error :pin-behind :path path
-         :pinned-commit base :spine-changing-commits commits
-         :distinguishable-cause? false
-         :reason :git-proves-content-change-not-landing-intent})
+        (cond-> {:pin id :state :PIN_BEHIND :error :pin-behind :path path
+                 :pinned-commit base :spine-changing-commits commits
+                 :distinguishable-cause? false
+                 :reason :git-proves-content-change-not-landing-intent}
+          (= id :lean-spine)
+          (assoc :remedy
+                 "Re-verify the Q-facing declarations after the Holes.lean binding, then refresh :lean-spine; do not accept the moved pin automatically.")))
       {:pin id :state :STALE_UNATTRIBUTED :error :stale :path path
        :reason :pinned-content-not-found-in-path-history})))
 
