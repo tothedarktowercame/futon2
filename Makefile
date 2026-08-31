@@ -12,7 +12,7 @@ ci:
 # Four-repository reviewer boundary. Missing sibling repositories are loud
 # failures in the checks; they are never silently skipped.
 workspace-gate:
-	@bb -cp . checks/wm_workspace_gate.clj; c=$$?; \
+	@python3 scripts/run_workspace_gate_bounded.py; c=$$?; \
 	 echo "workspace-gate: script-exit=$$c (house convention; make reports 2 for any nonzero)"; \
 	 exit $$c
 

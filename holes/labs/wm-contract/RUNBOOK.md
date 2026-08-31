@@ -8,7 +8,7 @@ Updated 2026-08-31. Run commands from `/home/joe/code/futon2` unless noted.
 |---|---|---|
 | `make status` | Runs and renders the workspace gate, contract/strict/absence checks, both bounded suites, obligations, lanes, and referent drift without stopping at the first red. | It is a report, not a production tick or live operational certificate. |
 | `make pre-merge` | Required review boundary: hermetic futon2 CI, then the four-repository workspace gate. It stops if CI is red. | It does not run the manual checks below or execute the machine. |
-| `make workspace-gate` | Runs the cross-repository War Machine invariants, semantic controls, inventory alarm, provenance report, and certificate machinery against the content-pinned C167 v20 fixture pair. Missing sibling repositories fail loudly. | It does not run the complete futon2/futon3 suites or certify the newest live run. |
+| `make workspace-gate` | Submits the cross-repository War Machine invariants to the bounded testing service, waits visibly when its two admission slots are occupied, and reports the completed resource receipt. Missing sibling repositories fail loudly. | A `QUEUED` line is waiting, not a verdict; `INTERRUPTED exit=130` and `ADMISSION_TIMEOUT` likewise certify nothing. |
 | `make ci` | Runs the hermetic futon2 build and test gate (`clojure -T:build ci`). | It says nothing about sibling checkouts or live operator state. |
 | `make run-readiness` | Read-only preflight over the gate, contract/schema, bounded suite receipts and capacity, live reviewer roster, and certification command. It prints the filled operator command when ready. | It does not select work, start a tick, or dispatch an agent. |
 
