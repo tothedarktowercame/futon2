@@ -4,7 +4,7 @@
  :as-of "2026-08-31T13:42:07Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C64-restate-O1-O4, :dispatched-at "2026-08-31T15:06:17Z", :job-id "invoke-1788188766815-5714-37a96647", :expected-by "2026-08-31T15:51:17Z"}
+   :holding :C68-last-four, :dispatched-at "2026-08-31T15:15:01Z", :job-id "invoke-1788189289177-5723-377fb019", :expected-by "2026-08-31T16:00:01Z"}
   {:lane :wm-verbs
    :holding :C66-persist-pref-stack, :dispatched-at "2026-08-31T15:09:58Z", :job-id "invoke-1788188988101-5718-e8c93f75", :expected-by "2026-08-31T15:54:58Z"}
   {:lane :wm-organization
