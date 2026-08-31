@@ -47,6 +47,7 @@
     "ambiguity_witness.clj"
     "absent_is_loud_lint.clj" "belief_update_check.clj"
     "belief_variance_inputs.clj" "cascade_diff_witness.clj" "closed_record_pointer_check.clj" "contract_lint.clj"
+    "cleanup_queue_correction_index.clj"
     "control_map_figure_agreement_check.clj" "control_map_lint.clj"
     "control_organization_check.clj" "expected_free_energy_witness.clj"
     "expected_information_gain_witness.clj" "fold_turn_quarantine_check.clj"
@@ -104,7 +105,9 @@
    {:name :model-uncertainty-eig
     :argv ["bb" "checks/model_uncertainty_eig_witness.clj"]}
    {:name :p4ng-referent-drift :dir "/home/joe/code/p4ng"
-    :argv ["python3" "detect_drift.py"]}])
+    :argv ["python3" "detect_drift.py"]}
+   {:name :cleanup-queue-corrections
+    :argv ["bb" "checks/cleanup_queue_correction_index.clj"]}])
 
 (defn control-commands []
   [{:name :c157-perturbed-entropy
@@ -143,7 +146,9 @@
    {:name :c147-collapsed-eig-equality
     :argv ["bb" "checks/model_uncertainty_eig_witness.clj" "--negative"]}
    {:name :c154-referent-content-change :dir "/home/joe/code/p4ng"
-    :argv ["python3" "detect_drift.py" "--control-unit-change"]}])
+    :argv ["python3" "detect_drift.py" "--control-unit-change"]}
+   {:name :c165-unindexed-correction
+    :argv ["bb" "checks/cleanup_queue_correction_index.clj" "--negative-control"]}])
 
 (defn run-one [{:keys [name argv dir]}]
   (println "wm-workspace-gate: RUN" (clojure.core/name name))
