@@ -183,21 +183,36 @@
                     :data (edn/read-string (slurp (or edges default-edge-path))))))
 
 (defn- parse-args [args]
-  (when (odd? (count args))
-    (throw (ex-info "arguments must be --key value pairs" {})))
-  (into {} (map (fn [[k v]]
-                  [(keyword (str/replace k #"^--" "")) v]))
-        (partition 2 args)))
+  (loop [xs args out {}]
+    (if (empty? xs)
+      out
+      (if (= "--negative" (first xs))
+        (recur (rest xs) (assoc out :negative? true))
+        (do
+          (when-not (second xs) (throw (ex-info "arguments must be --key value pairs" {})))
+          (recur (nnext xs)
+                 (assoc out (keyword (str/replace (first xs) #"^--" ""))
+                        (second xs))))))))
 
 (defn -main [& args]
-  (let [opts (parse-args args)
+  (let [{:keys [negative?] :as opts} (parse-args args)
         report-path (:report opts)]
     (when-not report-path
       (binding [*out* *err*]
-        (println "usage: control_map_lint.clj [--edges FILE] [--records-dir DIR] --report FILE"))
+        (println "usage: control_map_lint.clj [--negative] [--edges FILE] [--records-dir DIR] --report FILE"))
       (System/exit 2))
     (let [report (try
-                   (lint-file opts)
+                   (if negative?
+                     ;; Semantic mutation: keep valid EDN and edge shapes, but
+                     ;; remove one drawn edge the independent baseline requires.
+                     (let [data (edn/read-string (slurp (or (:edges opts) default-edge-path)))
+                           victim (first (filter #(= :drawn (:status %)) (:edges data)))
+                           mutated (update data :edges
+                                           #(vec (remove (fn [edge] (= (edge-key edge)
+                                                                       (edge-key victim))) %)))]
+                       (lint-data {:data mutated
+                                   :records-dir (or (:records-dir opts) default-records-dir)}))
+                     (lint-file opts))
                    (catch Exception e
                      {:summary {:pass? false :specified 0 :unspecified 0
                                 :failures 1}
@@ -205,12 +220,22 @@
                       :edges []
                       :checks [{:check :linter :reason :linter-error
                                 :message (.getMessage e)}]}))]
-      (when-let [parent (fs/parent report-path)]
-        (fs/create-dirs parent))
-      (spit report-path (str (pr-str report) "\n"))
+      (when-not negative?
+        (when-let [parent (fs/parent report-path)]
+          (fs/create-dirs parent))
+        (spit report-path (str (pr-str report) "\n")))
       (println "drawn edges specified:" (get-in report [:summary :specified]))
       (println "drawn edges unspecified:" (get-in report [:summary :unspecified]))
-      (System/exit (if (get-in report [:summary :pass?]) 0 1)))))
+      (if negative?
+        (if (and (not (get-in report [:summary :pass?]))
+                 (some #(= :drawn-edge-baseline (:check %)) (:checks report)))
+          (do (println "control-map-lint: PASS negative drawn-edge mutation rejected exit-convention=0-pass/1-fail")
+              (System/exit 0))
+          (do (println "control-map-lint: FAIL negative drawn-edge mutation slipped exit-convention=0-pass/1-fail")
+              (System/exit 2)))
+        (do (println (str "control-map-lint: " (if (get-in report [:summary :pass?]) "PASS" "FAIL")
+                          " exit-convention=0-pass/1-fail"))
+            (System/exit (if (get-in report [:summary :pass?]) 0 1)))))))
 
 (when (= *file* (System/getProperty "babashka.file"))
   (apply -main *command-line-args*))

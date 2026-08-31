@@ -174,8 +174,23 @@
   (let [{:keys [channels modeled channel-source likelihood-source]}
         (read-declarations opts)
         trace-dir (or trace-dir default-trace-dir)
-        {:keys [files records]} (read-trace-corpus trace-dir)
         declared (set channels)
+        {:keys [files records]} (read-trace-corpus trace-dir)
+        mutation-index (when (:negative? opts)
+                         (first (keep-indexed
+                                 (fn [index record]
+                                   (when (nil? (record-check declared record)) index))
+                                 records)))
+        mutation-target (when (some? mutation-index)
+                          (let [record (nth records mutation-index)]
+                            {:file (:file record) :form (:form record)
+                             :channel (first channels)}))
+        records (if (some? mutation-index)
+                  ;; Semantic mutation: retain a valid, previously conformant
+                  ;; trace record but remove one declared observation channel.
+                  (update-in records [mutation-index :value :observation]
+                             dissoc (first channels))
+                  records)
         explicit-none (set likelihood-none-channels)
         actual-none (set/difference declared modeled)
         modeled-undeclared (set/difference modeled declared)
@@ -227,6 +242,7 @@
      :content-pin {:algorithm :sha256-over-newline-joined-sorted-form-sha256
                    :sha256 digest
                    :prefix (subs digest 0 16)}
+     :negative-mutation mutation-target
      :channel {:source channel-source
                :values channels}
      :likelihood {:source likelihood-source
@@ -291,18 +307,23 @@
                 (str (fs/strip-ext (fs/file-name report-path)) ".lean"))))
 
 (defn- parse-args [args]
-  (when (odd? (count args))
-    (throw (ex-info "arguments must be --key value pairs" {})))
-  (into {} (map (fn [[key value]]
-                  [(keyword (str/replace key #"^--" "")) value]))
-        (partition 2 args)))
+  (loop [xs args out {}]
+    (if (empty? xs)
+      out
+      (if (= "--negative" (first xs))
+        (recur (rest xs) (assoc out :negative? true))
+        (do
+          (when-not (second xs) (throw (ex-info "arguments must be --key value pairs" {})))
+          (recur (nnext xs)
+                 (assoc out (keyword (str/replace (first xs) #"^--" ""))
+                        (second xs))))))))
 
 (defn -main [& args]
-  (let [opts (parse-args args)
+  (let [{:keys [negative?] :as opts} (parse-args args)
         report-path (:report opts)]
     (when-not report-path
       (binding [*out* *err*]
-        (println (str "usage: r2_channel_contract.clj [--trace-dir DIR] "
+        (println (str "usage: r2_channel_contract.clj [--negative] [--trace-dir DIR] "
                       "[--observation-source FILE] [--belief-source FILE] "
                       "--report FILE")))
       (System/exit 2))
@@ -327,19 +348,34 @@
                       :records []}))
           report (:report result)
           lean-path (sibling-lean-path report-path)]
-      (when-let [parent (fs/parent report-path)]
-        (fs/create-dirs parent))
-      (spit report-path (str (pr-str report) "\n"))
-      (when (seq (:records result))
-        (spit lean-path (lean-fixture-text report (:records result))))
+      (when-not negative?
+        (when-let [parent (fs/parent report-path)]
+          (fs/create-dirs parent))
+        (spit report-path (str (pr-str report) "\n"))
+        (when (seq (:records result))
+          (spit lean-path (lean-fixture-text report (:records result)))))
       (println "trace files:" (get-in report [:summary :files]))
       (println "trace forms:" (get-in report [:summary :forms]))
       (println "content pin:" (get-in report [:content-pin :prefix]))
       (println "records conforming:" (get-in report [:summary :conformant-records]))
       (println "records firing:" (+ (get-in report [:summary :key-set-mismatches])
                                      (get-in report [:summary :malformed-observations])))
-      (println "Lean fixture:" lean-path)
-      (System/exit (if (get-in report [:summary :pass?]) 0 1)))))
+      (println "Lean fixture:" (if negative? :not-written lean-path))
+      (if negative?
+        (let [{:keys [file form channel]} (:negative-mutation report)
+              caught? (some #(and (= :observation-keys (:check %))
+                                  (= file (:file %))
+                                  (= form (:form %))
+                                  (some #{channel} (:missing %)))
+                            (:checks report))]
+         (if (and (not (get-in report [:summary :pass?])) caught?)
+          (do (println "r2-channel-contract: PASS negative channel-key mutation rejected exit-convention=0-pass/1-fail")
+              (System/exit 0))
+          (do (println "r2-channel-contract: FAIL negative channel-key mutation slipped exit-convention=0-pass/1-fail")
+              (System/exit 2))))
+        (do (println (str "r2-channel-contract: " (if (get-in report [:summary :pass?]) "PASS" "FAIL")
+                          " exit-convention=0-pass/1-fail"))
+            (System/exit (if (get-in report [:summary :pass?]) 0 1)))))))
 
 (when (= *file* (System/getProperty "babashka.file"))
   (apply -main *command-line-args*))
