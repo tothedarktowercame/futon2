@@ -28,7 +28,7 @@
   (and (= :LeanProofReceipt (:receipt/type x))
        (= 1 (:receipt/version x))
        (string? (:recorded-at x))
-       (= "DarkTower.WarMachine.Holes.R9D2.verdictConsultsChecker" (:theorem x))
+       (= "DarkTower.WarMachine.Holes.r9VerdictConsultsChecker" (:theorem x))
        (= 64 (count (get-in x [:proof-source :sha256] "")))
        (= ["lake" "env" "lean"] (get-in x [:elaborator :command]))
        (= 0 (get-in x [:result :exit]))
@@ -38,12 +38,8 @@
 (defn elaborate [receipt]
   (let [source (str repo-root "/" (get-in receipt [:proof-source :repo]) "/"
                     (get-in receipt [:proof-source :path]))
-        theorem (last (str/split (:theorem receipt) #"\."))
-        text (slurp source)
-        augmented (str/replace text
-                               "end DarkTower.WarMachine.Holes.R9D2"
-                               (str "#print axioms " theorem
-                                    "\nend DarkTower.WarMachine.Holes.R9D2"))
+        theorem (:theorem receipt)
+        augmented (str "import DarkTower.WarMachine.Holes\n#print axioms " theorem "\n")
         tmp (java.io.File/createTempFile "r9-proof-receipt-" ".lean")]
     (try
       (spit tmp augmented)

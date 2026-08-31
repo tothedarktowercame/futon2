@@ -22,6 +22,13 @@
                    (or (not= v :independent) (not inside?)))))
           claims))
 
+(defn recorded-sound? [rows]
+  (every? (fn [{:keys [producer declared-part verdict]}]
+            (let [inside? (contains? (set declared-part) producer)]
+              (and (or (not inside?) (not= verdict :independent))
+                   (or (not= verdict :independent) (not inside?)))))
+          rows))
+
 (defn- sections [text]
   (->> (str/split text #"(?m)(?=^## O)")
        (keep (fn [s]
@@ -111,7 +118,10 @@
         ledger0 (mapv ledger-row closed-ids)
         declared0 (mapv declared-row closed-ids)
         ledger (if (= negative-table :ledger) (subvec ledger0 1) ledger0)
-        declared (if (= negative-table :declared) (subvec declared0 1) declared0)
+        declared (cond
+                   (= negative-table :declared) (subvec declared0 1)
+                   (= negative-table :sound) (assoc-in declared0 [0 :verdict] :independent)
+                   :else declared0)
         decide? (if (and negative? (nil? negative-table))
                   ;; Semantic mutation: an inside producer is misclassified as
                   ;; independent while all row and corpus shapes remain valid.
@@ -129,6 +139,7 @@
                 :checks {:expected-closed-ids? (= fixed (set closed-ids))
                          :ledger-row-set? (= (set closed-ids) (set (map :row ledger)))
                          :declared-row-set? (= (set closed-ids) (set (map :row declared)))
+                         :recorded-sound? (recorded-sound? declared)
                          :per-row-sources? (every? #(= (boolean (row-text-ids (:row %)))
                                                         (map? (:declaration-source %))) declared)
                          :declared-sound? (checker-sound? decide?
@@ -139,9 +150,11 @@
 
 (defn -main [& args]
   (let [negative-table (cond (some #{"--negative-ledger"} args) :ledger
-                             (some #{"--negative-declared"} args) :declared)
+                             (some #{"--negative-declared"} args) :declared
+                             (some #{"--negative-sound"} args) :sound)
         negative? (or (some #{"--negative"} args) negative-table)
-        pair-args (remove #{"--negative" "--negative-ledger" "--negative-declared"} args)
+        pair-args (remove #{"--negative" "--negative-ledger" "--negative-declared"
+                            "--negative-sound"} args)
         opts (assoc (apply hash-map (mapcat (fn [[k v]] [(keyword (subs k 2)) v])
                                             (partition 2 pair-args)))
                     :negative? negative?
