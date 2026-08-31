@@ -2756,6 +2756,10 @@ self-report"*. Their `:why-unresolved` states the fork exactly: resolve it eithe
 operator-armed outward actuator plus an independent external-effect reader**, *or* with **agreement that
 this edge observes construction rather than outward actuation.** Build the actuator, or rename the edge.
 
+**Citation amendment (2026-08-31):** the executor moved to `enact.clj:131–145` during the 2026-08-31
+repairs; the `enact.clj:113` citation above was correct as of the commit this ledger entry describes.
+File-level citations survive refactors; line-level citations require dated or commit-pinned context.
+
 That is a decision for Joe and the owner, and neither node could have reached it alone: R2 did not know
 R16 only constructs; R16 did not know R2 needed an independent referent.
 

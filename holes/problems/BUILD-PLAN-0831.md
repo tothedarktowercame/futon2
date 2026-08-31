@@ -644,6 +644,11 @@ vocabulary versioning as `:blocked-on` instead of inventing completed semantics.
   diagnosed its own implementation, and two independently role-played endpoints reached it from opposite
   sides.
 
+**Citation amendment (2026-08-31):** the executor moved to `enact.clj:131–145` during the 2026-08-31
+repairs. The historical `enact.clj:113` citations in this plan were correct as of the commits they
+describe and remain legible for that reason. Citation convention: prefer a file-level citation when the
+claim does not require a precise locus; when it does, pair the line-level citation with a date or commit.
+
 Built and published: `/var/www/.../wip/plop-2026.pdf`, 09:52, and I confirmed both revisions are **in the
 published PDF** via `pdftotext`, not by trusting the build's own report. Which matters, because —
 
