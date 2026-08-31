@@ -318,6 +318,9 @@
                                                        (pos? (get (:preference-mass %) o 0))))
                                                  (:predictive-mass %))
                                          (= [:log 2] (:expected-risk %)))
+   "PolicyPriorKernelWitness" #(and (= :policy-prior-reference/v1 (:schema %))
+                                     (= :unit (:conditioning-domain %))
+                                     (= 1 (reduce + (vals (:mass %)))))
    "HaveWantArrowWitness" have-want-arrow-witness?
    "FoldWitness" fold-witness?
    "FoldEscrowRecordWitness" fold-escrow-record-witness?

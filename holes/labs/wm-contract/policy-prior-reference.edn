@@ -1,0 +1,6 @@
+{:schema :policy-prior-reference/v1
+ :basis "sec-glossary.tex:35,37 — E has one entry per allowable policy"
+ :kind :hand-derived-from-record
+ :conditioning-domain :unit
+ :allowable-policies [:inspect :repair]
+ :mass {:inspect 1/2 :repair 1/2}}
