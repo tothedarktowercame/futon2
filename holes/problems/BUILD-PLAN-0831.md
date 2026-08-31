@@ -1165,3 +1165,39 @@ one place the build has failed it four times.
 **Pattern impact answered and I agree:** no `sec-catalog.tex` change. R16's second revision already records
 that this implementation is the mirror its own pattern warns against, citing the same `engine-wiring`
 behaviour; the relabel makes the wiring agree with a diagnosis the paper already carries.
+
+---
+
+## NOUNS-D4 gated — TRACE is a store, and a cross-lane pin break was caught by the wrong lane
+
+p4ng `8b59ebe`, futon2 `6ce3788`.
+
+    {:node "TRACE" :stage "ACT" :band :assurance :kind :store
+     :label "WM trace store (route ledger)"
+     :basis "futon2/scripts/futon2/report/war_machine.clj:4763 writes TRACE via write-trace!"}
+
+**The delegate took the genuinely open part and answered it well.** I flagged that TRACE might be a
+**store** rather than a node; it decided store, on its own NOUNS-D2 carrier reasoning — *"a trace carries
+one executed route; `:store/wm-trace` stacks those records"* — and declined a `sec-catalog.tex` entry
+because *"the store is infrastructure, not a behavioural pattern."* It also edited the **generator**
+(`gen_control_stages.py`), not the generated file.
+
+**And it protected the denominator without being asked.** Node entries went 18 → 19, and 18 was the
+denominator behind "14 record-less staged nodes". By adding **`:kind`**, the two populations stay
+separable: `{:r-node 18, :store 1}`. Had TRACE gone in as a bare entry, `:staged` would silently have
+become 19 and the record-less count drifted to 15 — a denominator moving under a recorded finding, which
+is this build's most-repeated arithmetic fault.
+
+**The surprise is a cross-lane pin break, and I am the one who should have caught it.**
+`control-organization.edn` pins its reads by sha256. VERBS-D2's relabel changed
+`control-map-edges.edn`, which invalidated the pin recorded by ORG-D1. wm-nouns noticed and refreshed it;
+I verified both pins against `sha256sum` and they now match exactly.
+
+`control_organization_check.clj:77-81` **does** enforce those pins. So **between VERBS-D2 and NOUNS-D4 the
+organisation check was failing**, and I gated VERBS-D2 without running it — I ran the edge checks, which
+are the changing lane's own, and not the check belonging to a different lane that pins the same file.
+
+**Workflow correction, mine:** *a change to a shared input requires re-running every check that pins it,
+not only the checks of the lane that changed it.* Three lanes now read `control-map-edges.edn` — the edge
+census, the exemplar gate, and the organisation check — and a gate that runs only the author's own checks
+will keep missing this. The pin discipline worked; my gating did not.
