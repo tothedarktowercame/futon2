@@ -302,7 +302,10 @@
                                      (every? (fn [row]
                                                (let [masses (vals (:mass row))]
                                                  (and (seq masses)
-                                                      (every? #(and (number? %) (not (neg? %))) masses)
+                                                      (every? (fn [mass]
+                                                                (and (number? mass)
+                                                                     (not (neg? mass))))
+                                                              masses)
                                                       (= 1 (reduce + masses)))))
                                              (:rows %)))
    "HaveWantArrowWitness" have-want-arrow-witness?
