@@ -1,0 +1,38 @@
+{:fixture/id :negative/reviewed-candidate-cleans-4-of-96
+ :port/id :R16/reviewed-candidate-cleans
+ :domain
+ {:population :open-mission-selection-events
+  :claim :all
+  :enumeration
+  {:status :enumerated
+   :members
+   ["M-canon-fingerprint-store"
+    "M-capability-star-map"
+    "M-emacs-cursor-peripheral"
+    "M-futonzero-mvp"]
+   :event-counts
+   {"M-canon-fingerprint-store" 44
+    "M-capability-star-map" 29
+    "M-emacs-cursor-peripheral" 21
+    "M-futonzero-mvp" 2}
+   :event-count 96
+   :source "futon2/holes/labs/wm-contract/R16-D1-findings.md"
+   :basis-sha-256 "c9add16ac96c973ba4fd9a0c61f3b7319780c304424e2d14ea7b477309947880"}
+  :coverage
+  {:status :enumerated
+   :members
+   ["futon5a-d/mission/learning-loop"
+    "futon3c-d/mission/autoclock-in"
+    "futon3c-d/mission/state-snapshot-witness"
+    "futon3c-d/mission/single-entry-point"]
+   :source "futon2/src/futon2/aif/actuator_a3.clj:372-379"}}
+ :range
+ {:population :clean-document-paths
+  :enumeration
+  {:status :enumerated
+   :members
+   ["/home/joe/code/futon6/holes/clean/M-learning-loop.clean.edn"
+    "/home/joe/code/futon6/holes/clean/autoclock-in.clean.edn"
+    "/home/joe/code/futon6/holes/clean/state-snapshot-witness.clean.edn"
+    "/home/joe/code/futon6/holes/clean/single-entry-point.clean.edn"]
+   :source "futon2/src/futon2/aif/actuator_a3.clj:372-379"}}}
