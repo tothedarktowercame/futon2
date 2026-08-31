@@ -110,3 +110,64 @@ before more empirics are gathered, or we accumulate more evidence with no standa
 ### What I would not do yet
 Start the second domain, or gather more empirics, until Phase 1 gives an honest denominator and the apex
 has a lane. Both would add material the current standard cannot grade.
+
+---
+
+## Phase 1 — DONE (2026-08-31). The denominator, honestly
+
+`scripts/edge_census.bb` → `holes/labs/wm-contract/edge-census.edn`. Reproducible; re-run it after any
+amendment.
+
+    distinct edges across all sources   61
+      drawn (Figure 4)                  22      derived (theory)   26
+      measured (WM-RUN2)                 9      sim (role-play)    13
+      specified (typed, node->node)      4      + 1 node->store
+
+    drawn edges carrying a :schema       2  of 22
+    attested by 2+ independent sources   8
+    measured but on NO list              5
+    drawn only, nothing corroborates    19
+
+**"21 edges" was never the population.** Depending on the question the denominator is 22, 26, 61, or 13
+— and the build has been quoting one number across all of them. That is the same census error this
+project has caught three times in other people's work and had not yet caught in its own headline.
+
+### The eight worth doing first — attested by two or more sources
+
+    R2  -> R7     derived + measured + sim   <- THREE sources; the only one
+    R5  -> R6     drawn + measured + SPEC    <- done
+    R7  -> R3     drawn + measured
+    R8  -> R5     drawn + measured
+    R16 -> R14    derived + sim
+    R16 -> R15    derived + sim
+    R3  -> R7     derived + sim
+    R5  -> R14    derived + sim
+
+`R2→R7` is the strongest unspecified edge in the machine: the theory implies it, the tick did it, and an
+isolated role-played node asked for it without seeing either. **That is Phase 2's first pair.**
+
+### Five the machine did that no list claims
+
+    R20 -> R12    scan preamble — interoception feeds observation
+    R12 -> R2     scan preamble — calibration feeds observation
+    R3  -> R8     belief feeds F directly (sim proposed the REVERSE; both may be real)
+    R6  -> R14    selection consults the temperature seam        <- already SPECIFIED
+    R14 -> TRACE  the trace write
+
+**`R14→TRACE` is not a missing edge — it is a missing node.** Figure 4 has no trace/ledger vertex at all,
+so the exhaust of every tick leaves the diagram through a hole the diagram cannot draw. §0.11
+(`I_evidence_consumed`) predicts exactly this omission. Adding it is a change to the *nouns*, not the
+verbs, and it belongs to Joe's §0.16 nouns question rather than to the wiring lane.
+
+### Nineteen drawn-only
+Figure 4 asserts them; no theory derivation, no measured hop, and no node asked for them. That is not
+evidence they are wrong — one tick exercised one path. But it is the honest statement of what the map
+claims on its own authority, and it is the population the apex standard (§0.12) would have to grade.
+
+### My own instrument error, caught mid-Phase
+The first run reported **65** edges and **10** specified, by taking the member cross-product of each
+hyper-edge instance — which invents deliveries the instance never claims (a 3-node instance yields 6
+ordered pairs, including `R14→R5`, which nothing asserts). Fixed to pair consecutive `:out`→`:in` ports,
+which is what the instance actually states: 61 and 4. **The bug inflated the count of the very thing the
+census exists to measure**, and it is the same shape as the errors this build keeps finding — a
+convenient expansion standing in for a recorded claim.
