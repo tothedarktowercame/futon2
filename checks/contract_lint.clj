@@ -7,8 +7,6 @@
             [clojure.string :as str]))
 
 (def repo-root "/home/joe/code")
-(def implemented-shapes #{"AblationTable" "EraTable"})
-
 (defn- read-json [p] (json/parse-string (slurp p) true))
 (defn- read-edn [p] (edn/read-string (slurp p)))
 (defn- names [binding]
@@ -31,15 +29,88 @@
                        (boolean? (:moved? %))) ablated))))
 
 (defn era-table? [x]
-  (and (map? x) (integer? (:boundary x)) (map? (:per-era x))
-       (every? #(contains? (:per-era x) %) [:pre :post])))
+  (let [era (or (:r8EraBoundary x) x)
+        per-era (:perEra era)]
+    (and (map? era) (integer? (:boundary era)) (map? per-era)
+         (every? #(contains? per-era %) [:before :after]))))
+
+(defn find-receipt-table? [x]
+  (let [scenarios (:scenarios x)
+        rounds (mapcat :round-results scenarios)]
+    (and (vector? scenarios) (seq scenarios) (seq rounds)
+         (every? (fn [round]
+                   (let [find (:find round)
+                         selected (:selected find)
+                         receipts (:receipts find)]
+                     (and (sequential? selected) (map? receipts)
+                          (every? #(contains? receipts %) selected)
+                          (every? (fn [receipt]
+                                    (and (keyword? (:route receipt))
+                                         (string? (get-in receipt [:warrant :file]))))
+                                  (vals receipts)))))
+                 rounds))))
+
+(defn verdict-table? [x]
+  (let [runs (:runs x)
+        ledger (get-in runs [:ledger-alone :rows])
+        declared (get-in runs [:declared :rows])
+        valid-row? #(and (string? (:row %))
+                         (contains? #{:unknown :self :independent} (:verdict %))
+                         (contains? % :declaration-source))]
+    (and (seq ledger) (seq declared)
+         (= (mapv :row ledger) (mapv :row declared))
+         (every? valid-row? (concat ledger declared))
+         (true? (get-in x [:checks :per-row-sources?]))
+         (true? (get-in x [:checks :declared-sound?])))))
+
+(defn r2-tick-list? [x]
+  (and (pos-int? (get-in x [:summary :forms]))
+       (= 64 (count (get-in x [:content-pin :sha256] "")))
+       (= 14 (count (get-in x [:channel :values])))))
+
+(defn ill-formed-list? [x]
+  (let [n (get-in x [:r2ContractCensusWmTrace :ill-formed])
+        rows (get-in x [:r2ContractCensusWmTrace :ill-formed-ticks])]
+    (and (nat-int? n) (vector? rows) (= n (count rows))
+         (every? #(and (string? (:file %)) (seq (:missing %))) rows))))
+
+(defn r8-tick-list? [x]
+  (and (pos-int? (get-in x [:summary :forms]))
+       (= 64 (count (get-in x [:content-pin :sha256] "")))
+       (map? (get-in x [:r8CensusWmTrace :ticks]))))
+
+(defn r8-disposition-evidence? [x]
+  (let [forms (get-in x [:summary :forms])
+        counts (get-in x [:r8CensusWmTrace :counts])
+        required [:insufficient-inputs :missing-F-computable :stored-F]]
+    (and (pos-int? forms) (map? counts)
+         (every? #(nat-int? (get counts %)) required)
+         (= forms (reduce + (map counts required))))))
+
+(defn tick-run-witness? [x]
+  (and (string? (:startedAt x)) (true? (:traceWritten x))
+       (pos-int? (:storeBasisCount x)) (seq (:route x))
+       (every? #(and (string? (:fromNode %)) (string? (:toNode %))
+                     (string? (:via %)) (string? (:at_ %)))
+               (:route x))))
+
+(def shape-checks
+  {"AblationTable" ablation-table?
+   "EraTable" era-table?
+   "FindReceiptTable" find-receipt-table?
+   "VerdictTable" verdict-table?
+   "List R2TickLit" r2-tick-list?
+   "IllFormedList" ill-formed-list?
+   "List R8TickLit" r8-tick-list?
+   "R8DispositionEvidence" r8-disposition-evidence?
+   "TickRunWitness" tick-run-witness?})
 
 (defn shape-result [evidence fixture read-fixture]
-  (if-not (implemented-shapes evidence)
+  (if-not (contains? shape-checks evidence)
     :shape-check-not-implemented
     (try
       (let [x (read-fixture fixture)]
-        (if ((case evidence "AblationTable" ablation-table? "EraTable" era-table?) x)
+        (if ((get shape-checks evidence) x)
           :conformant :wrong-shape))
       (catch Exception _ :wrong-shape))))
 
