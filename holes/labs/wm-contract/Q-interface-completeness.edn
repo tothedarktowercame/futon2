@@ -11,7 +11,7 @@
  :source-pins
  [{:id :lean-spine
    :path "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean"
-   :sha256 "b38591cc90213594b5ba3379ba000f2762a95c95a3818e10f778e99d1c2271ce"}
+   :sha256 "4d25c38b8bc5ae7f5d79a672f125696151b310f3eb363930682c7cee64748701"}
   {:id :lean-risk-fixture
    :path "/home/joe/code/mathlib4/DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean"
    :sha256 "9c29f229f7eb01fb68de72f29b244858140c09f1ed5a1fd25ef9e91ab4520de0"}
