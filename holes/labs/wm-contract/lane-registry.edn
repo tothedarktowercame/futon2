@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C76-futon3-split, :dispatched-at "2026-08-31T15:39:48Z", :job-id "invoke-1788190770575-5744-0c9d7289", :expected-by "2026-08-31T16:24:48Z"}
   {:lane :wm-evidence
-   :holding :C77-six-lints, :dispatched-at "2026-08-31T15:41:46Z", :job-id "invoke-1788190863419-5746-beae51c6", :expected-by "2026-08-31T16:26:46Z"}]}
+   :holding :C79-specimen-exemption, :dispatched-at "2026-08-31T15:53:10Z", :job-id "invoke-1788191567560-5756-102630c3", :expected-by "2026-08-31T16:38:10Z"}]}
