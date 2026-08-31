@@ -24,13 +24,9 @@
 
 (deftest absence-dispositions-cover-and-narrow-the-c12-population
   (let [findings (lint/absence-findings [])]
-    (is (= 8 (count findings)))
+    (is (= 7 (count findings)))
     (is (= 7 (count (filter #(= :blocked (:disposition %)) findings))))
-    (is (= [{:disposition :exempt-with-reason
-             :exemption :deprecated-legacy-projection
-             :migration-target "sense->vector with the matching observation-envelope"}]
-           (mapv #(select-keys % [:disposition :exemption :migration-target])
-                 (filter #(= :exempt-with-reason (:disposition %)) findings))))
+    (is (not-any? #(= "src/futon2/aif/observation.clj:152" (:path %)) findings))
     (is (not-any? #(re-find #"observation.clj:117-145|trace.clj:249-260" (:path %)) findings))))
 
 (when (= *file* (System/getProperty "babashka.file"))

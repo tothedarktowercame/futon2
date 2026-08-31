@@ -82,16 +82,20 @@
   (let [census (edn/read-string (slurp "/home/joe/code/futon2/holes/labs/wm-contract/C12-absence-census.edn"))
         dispositions (edn/read-string (slurp "/home/joe/code/futon2/checks/absence-coercion-dispositions.edn"))
         by-at (into {} (map (juxt :at identity) (:rows dispositions)))
+        retired (set (map :at (:retired-sites dispositions)))
         unsafe (->> (:sites census)
                     (remove #(contains? #{:explicit-model-initialisation :explicit-configuration-default
                                           :sparse-algebra-identity :model-identity :explicit-adapter-policy}
                                         (:status %)))
                     (filter #(or (= false (:consumer-could-tell? %))
                                  (= false (:consumer-could-tell-before? %)))))]
-    (when-not (= (set (map :at unsafe)) (set (keys by-at)))
+    (when-not (= (set (map :at unsafe)) (into (set (keys by-at)) retired))
       (throw (ex-info "absence dispositions do not cover the live C12 population"
-                      {:census (set (map :at unsafe)) :dispositions (set (keys by-at))})))
+                      {:census (set (map :at unsafe))
+                       :dispositions (set (keys by-at))
+                       :retired retired})))
     (->> unsafe
+         (remove #(contains? retired (:at %)))
          (filter #(let [row (by-at (:at %))]
                     (or (= :blocked (:disposition row))
                         (:lint-visible row))))
