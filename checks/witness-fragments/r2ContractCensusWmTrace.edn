@@ -1,5 +1,5 @@
 {:witnesses ["r2ContractCensusWmTrace" "wmTraceR2"],
- :contract-sha "a93483e2132f2a2af7bef726ed515bcd62b60493",
+ :contract-sha "1bbde1a8a74389ffaa019feb7ea4923409335c91",
  :run-sha "de68356cab018b014a84a3af26ddc831c5c30557",
  :freshness :pinned-git-v1,
  :live-invariant {:check "checks/r2_pinned_snapshot_witness.clj"

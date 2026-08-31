@@ -11,7 +11,7 @@
  :freshness :pinned-git-v1,
  :live-invariant {:check "checks/r9_independence.clj" :evidence :emitted-by-check},
  :run-sha "f8c40dc1739a34f98fb84be7805309b17c676c92",
- :contract-sha "a93483e2132f2a2af7bef726ed515bcd62b60493",
+ :contract-sha "1bbde1a8a74389ffaa019feb7ea4923409335c91",
  :result :passed,
  :recorded-at "2026-08-30T16:45:00Z",
  :note
