@@ -8,6 +8,6 @@
   {:lane :wm-verbs
    :holding :C106-resource-wiring, :dispatched-at "2026-08-31T18:02:30Z", :job-id "invoke-1788199327487-5837-5b910996", :expected-by "2026-08-31T18:47:30Z"}
   {:lane :wm-organization
-   :holding :C103-retirement-window, :dispatched-at "2026-08-31T17:56:10Z", :job-id "invoke-1788198947844-5828-ae9ffd66", :expected-by "2026-08-31T18:41:10Z"}
+   :holding :C107-gate-coverage, :dispatched-at "2026-08-31T18:03:53Z", :job-id "invoke-1788199411099-5838-1620a898", :expected-by "2026-08-31T18:48:53Z"}
   {:lane :wm-evidence
    :holding :C104-envelope, :dispatched-at "2026-08-31T17:57:52Z", :job-id "invoke-1788199050414-5830-c5654e95", :expected-by "2026-08-31T18:42:52Z"}]}
