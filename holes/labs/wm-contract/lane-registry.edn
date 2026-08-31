@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C197-tree-receipts, :dispatched-at "2026-08-31T21:45:10Z", :job-id "invoke-1788212705605-6066-4a13ce88", :expected-by "2026-08-31T22:30:10Z"}
   {:lane :wm-evidence
-   :holding :C195-terminal-position, :dispatched-at "2026-08-31T21:41:23Z", :job-id "invoke-1788212479475-6063-69e43630", :expected-by "2026-08-31T22:26:23Z"}]}
+   :holding :C198-detector-crash, :dispatched-at "2026-08-31T21:46:16Z", :job-id "invoke-1788212770988-6068-a2c12f81", :expected-by "2026-08-31T22:31:16Z"}]}
