@@ -1,0 +1,20 @@
+{:schema :exact-dyadic-ablation/v1
+ :numeric-semantics {:source :ieee-754-binary64
+                     :interpretation :exact-dyadic-rational
+                     :note "Each recorded double is decoded to its exact numerator/denominator; no ideal-real claim is made."}
+ :source {:repo "futon3" :path "checks/ablation-snatch.edn"
+          :case {:prior :snatcher-dominant :treatment :g1}}
+ :policies [:grim :patterns :exchange-first :probe-one-token :always-abstain]
+ :rows [{:policy :grim :G [2075861046811937 140737488355328]
+         :risk [8486449631976525 562949953421312]}
+        {:policy :patterns :G [1220889258267895 70368744177664]
+         :risk [4975059755435969 281474976710656]}
+        {:policy :exchange-first :G [1220889258267895 70368744177664]
+         :risk [4975059755435969 281474976710656]}
+        {:policy :probe-one-token :G [2075861046811937 140737488355328]
+         :risk [8486449631976525 562949953421312]}
+        {:policy :always-abstain :G [4222137547668389 281474976710656]
+         :risk [4222137547668389 281474976710656]}]
+ :expected {:argmin-G #{:grim :probe-one-token}
+            :argmin-risk #{:always-abstain}
+            :disjoint true}}

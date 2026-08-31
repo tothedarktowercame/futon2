@@ -42,6 +42,17 @@
                        (sequential? (:argmin-risk %))
                        (boolean? (:moved? %))) ablated))))
 
+(defn exact-dyadic-ablation-table? [x]
+  (and (= :exact-dyadic-ablation/v1 (:schema x))
+       (= :exact-dyadic-rational (get-in x [:numeric-semantics :interpretation]))
+       (seq (:rows x))
+       (every? (fn [row]
+                 (and (keyword? (:policy row))
+                      (every? #(and (vector? %) (= 2 (count %))
+                                    (every? integer? %) (pos? (second %)))
+                              [(:G row) (:risk row)])))
+               (:rows x))))
+
 (defn era-table? [x]
   (let [era (or (:r8EraBoundary x) x)
         per-era (:perEra era)]
@@ -205,6 +216,7 @@
 
 (def shape-checks
   {"AblationTable" ablation-table?
+   "ExactDyadicAblationTable" exact-dyadic-ablation-table?
    "EraTable" era-table?
    "FindReceiptTable" find-receipt-table?
    "VerdictTable" verdict-table?
