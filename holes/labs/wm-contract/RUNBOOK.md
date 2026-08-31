@@ -10,11 +10,19 @@ Updated 2026-08-31. Run commands from `/home/joe/code/futon2` unless noted.
 | `make pre-merge` | Required review boundary: hermetic futon2 CI, then the four-repository workspace gate. It stops if CI is red. | It does not run the manual checks below or execute the machine. |
 | `make workspace-gate` | Runs the cross-repository War Machine invariants, semantic controls, inventory alarm, provenance report, and certificate machinery against the content-pinned C167 v20 fixture pair. Missing sibling repositories fail loudly. | It does not run the complete futon2/futon3 suites or certify the newest live run. |
 | `make ci` | Runs the hermetic futon2 build and test gate (`clojure -T:build ci`). | It says nothing about sibling checkouts or live operator state. |
+| `make run-readiness` | Read-only preflight over the gate, contract/schema, bounded suite receipts and capacity, live reviewer roster, and certification command. It prints the filled operator command when ready. | It does not select work, start a tick, or dispatch an agent. |
 
 Use `make pre-merge` for review. Use the narrower commands to reproduce one
 part of its result. A successful gate records the HEAD/tree/dirtiness basis of
 futon2, mathlib4, p4ng, and futon3; these are provenance, not stale equality
 assertions.
+
+Before an operator run, use `make run-readiness`. Every precondition is printed
+by name. `NOT-READY` means repair the named failures and rerun; do not infer
+readiness from the summary alone. The reviewer is selected live rather than
+using the absent `codex-7` default. Only run the printed
+`clojure -M:wm-full-loop once --reviewer ...` command after the preflight says
+`READY`.
 
 ### Expected duration
 

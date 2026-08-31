@@ -1,4 +1,4 @@
-.PHONY: ci workspace-gate pre-merge status status-control certify-run
+.PHONY: ci workspace-gate pre-merge status status-control certify-run run-readiness run-readiness-control
 
 # Hermetic repository boundary: futon2 sources, tests, and build only.
 ci:
@@ -28,3 +28,11 @@ status-control:
 certify-run:
 	@test -n "$(RUN_ID)" || (echo "certify-run: RUN_ID is required" >&2; exit 1)
 	bb -cp . checks/certify_live_run.clj --run-id "$(RUN_ID)"
+
+# Read-only operator preflight. It runs checks and reads receipts/roster state;
+# it never starts a tick or dispatches an agent.
+run-readiness:
+	python3 scripts/run_readiness.py
+
+run-readiness-control:
+	python3 scripts/run_readiness.py --negative-reviewer
