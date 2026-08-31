@@ -1,0 +1,11 @@
+{:schema :transition-kernel-reference/v1
+ :basis "sec-glossary.tex:7 — controlled transition B maps (state, action) to a normalized next-state distribution"
+ :kind :hand-derived-deterministic-controlled-rows
+ :states [:idle :active]
+ :actions [:stay :start]
+ :rows {[:idle :stay] :idle
+        [:active :stay] :active
+        [:idle :start] :active
+        [:active :start] :active}
+ :excluded {:action-unconditioned-kernel true
+            :multivariate-beta-normalizer true}}

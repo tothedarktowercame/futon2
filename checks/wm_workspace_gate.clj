@@ -62,6 +62,7 @@
     "dirichlet_concentrations_witness.clj"
     "preference_distribution_witness.clj"
     "predictive_outcome_kernel_witness.clj"
+    "transition_kernel_witness.clj"
     "absent_is_loud_lint.clj" "belief_update_check.clj"
     "belief_variance_inputs.clj" "cascade_diff_witness.clj" "certify_live_run.clj" "closed_record_pointer_check.clj" "contract_lint.clj"
     "cleanup_queue_correction_index.clj"
@@ -125,6 +126,7 @@
    {:name :dirichlet-concentrations :argv ["bb" "checks/dirichlet_concentrations_witness.clj"]}
    {:name :preference-distribution :argv ["bb" "checks/preference_distribution_witness.clj"]}
    {:name :predictive-outcome-kernel :argv ["bb" "checks/predictive_outcome_kernel_witness.clj"]}
+   {:name :transition-kernel :argv ["bb" "checks/transition_kernel_witness.clj"]}
    {:name :control-vocabulary :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "control"]}
    {:name :aliveness :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "aliveness"]}
    {:name :act-gate-vocabulary :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "act-gate"]}
@@ -216,6 +218,10 @@
     :argv ["bb" "checks/predictive_outcome_kernel_witness.clj" "--negative-unconditional"]}
    {:name :c257-softmax-as-predictive-q
     :argv ["bb" "checks/predictive_outcome_kernel_witness.clj" "--negative-softmax"]}
+   {:name :c261-uncontrolled-as-transition-b
+    :argv ["bb" "checks/transition_kernel_witness.clj" "--negative-uncontrolled"]}
+   {:name :c261-beta-normalizer-as-transition-b
+    :argv ["bb" "checks/transition_kernel_witness.clj" "--negative-beta"]}
    {:name :c179-control-outside-vocabulary :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "control" "--negative-control"]}
    {:name :c179-negative-aliveness-factor :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "aliveness" "--negative-control"]}
    {:name :c179-missing-act-gate-leg :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "act-gate" "--negative-control"]}

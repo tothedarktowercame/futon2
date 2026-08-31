@@ -362,6 +362,10 @@
                                              (= {:inspect {:support [:clear] :mass {:clear 1}}
                                                  :repair {:support [:fixed] :mass {:fixed 1}}}
                                                 (:rows %)))
+   "TransitionKernelWitness" #(and (= :transition-kernel-reference/v1 (:schema %))
+                                      (= [:idle :active] (:states %))
+                                      (= [:stay :start] (:actions %))
+                                      (= :active (get-in % [:rows [:idle :start]])))
    "HaveWantArrowWitness" have-want-arrow-witness?
    "FoldWitness" fold-witness?
    "FoldEscrowRecordWitness" fold-escrow-record-witness?
