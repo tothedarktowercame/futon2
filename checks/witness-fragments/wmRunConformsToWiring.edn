@@ -1,0 +1,20 @@
+{:witnesses "wmRunConformsToWiring"
+ :contract-sha "e3a50c7e02f4171b3c7537be56b102ea7837a42d"
+ :run-sha "f2a09a5"
+ :freshness :pinned-git-v1
+ :live-invariant
+ {:check "checks/wm_route_conformance.clj"
+  :evidence :wm-run2-route-against-two-layer-figure-wiring}
+ :check
+ {:repo "futon2"
+  :path "checks/wm_route_conformance.clj"
+  :entrypoint "-main"}
+ :axioms
+ "wmRunConformsToWiring: receipt witness only; this Clojure witness emits no Lean proof and introduces no axioms"
+ :note
+ "C71 lifts the earlier refusal only after C69 changed Figure 4 itself: p4ng 0598d19 draws the eight measured routes as a distinct layer. Against futon2 f2a09a5, WM-RUN2 has 9/9 mapped hops (3 original, 6 measured). The checker now rejects any unmapped hop; its negative control appends R99->R100 and must be rejected. Recording the earlier disagreement did not count as conformance."
+ :recorded-at "2026-08-31T15:30:00Z"
+ :result :passed
+ :fixture
+ {:repo "futon2"
+  :path "holes/labs/wm-contract/tick-run-record-2026-08-30.edn"}}

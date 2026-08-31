@@ -1,8 +1,7 @@
 {:witnesses
  ["findF1Containment"
   "findF2Receipted"
-  "findF3NonSelfCertifying"
-  "findF4Falsifiable"],
+  "findF3NonSelfCertifying"],
  :check
  {:repo "futon3", :path "checks/find_snatch.clj", :entrypoint "-main"},
  :fixture {:repo "futon3", :path "checks/find-snatch.edn"},

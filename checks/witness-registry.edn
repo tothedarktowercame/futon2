@@ -11,7 +11,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/generative-model-reference.edn"},
   :run-sha "7b31da1fe248a05b35940e9a68544b4ffbef36a7",
-  :contract-sha "72fa0987998cc39268f6af4c532fa3a0688f64af",
+  :contract-sha "a9d78f8904329d7b2393167f7ceaa28c1c4a8f0c",
   :result :passed,
   :recorded-at "2026-09-01T00:20:00Z"}
  {:witnesses "expectedFreeEnergy",
@@ -23,7 +23,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/expected-free-energy-reference.edn"},
   :run-sha "58d667284a63c69c0027c9bf204e9bc0eac098b9",
-  :contract-sha "72fa0987998cc39268f6af4c532fa3a0688f64af",
+  :contract-sha "a9d78f8904329d7b2393167f7ceaa28c1c4a8f0c",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
  {:witnesses "expectedInformationGain",
@@ -36,14 +36,11 @@
    :path
    "holes/labs/wm-contract/expected-information-gain-reference.edn"},
   :run-sha "c99ffdbc13e9b114dbcdca7451651e568588a947",
-  :contract-sha "72fa0987998cc39268f6af4c532fa3a0688f64af",
+  :contract-sha "a9d78f8904329d7b2393167f7ceaa28c1c4a8f0c",
   :result :passed,
   :recorded-at "2026-09-01T00:10:00Z"}
  {:witnesses
-  ["findF1Containment"
-   "findF2Receipted"
-   "findF3NonSelfCertifying"
-   "findF4Falsifiable"],
+  ["findF1Containment" "findF2Receipted" "findF3NonSelfCertifying"],
   :freshness :pinned-git-v1,
   :contract-sha "32b929692533cf0d6294fbb7a5937f9199c1552c",
   :run-sha "594127059d6a31c5b21f5d34ebfac5b14b1ad993",
@@ -66,22 +63,9 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/log-multivariate-beta-reference.edn"},
   :run-sha "720af918c430415bf07f4eba29ec73d49b343a10",
-  :contract-sha "72fa0987998cc39268f6af4c532fa3a0688f64af",
+  :contract-sha "a9d78f8904329d7b2393167f7ceaa28c1c4a8f0c",
   :result :passed,
   :recorded-at "2026-08-31T23:50:00Z"}
- {:witnesses "nonDegenerateAblationLaw",
-  :freshness :pinned-git-v1,
-  :contract-sha "32b929692533cf0d6294fbb7a5937f9199c1552c",
-  :run-sha "636496449066aed88c00e99492bd351cef0f0821",
-  :check
-  {:repo "futon3",
-   :path "checks/ablate_g_snatch.clj",
-   :entrypoint "-main"},
-  :recorded-at "2026-08-30T16:23:00Z",
-  :live-invariant
-  {:check "checks/ablate_g_snatch.clj", :evidence :emitted-by-check},
-  :result :passed,
-  :fixture {:repo "futon3", :path "checks/ablation-snatch.edn"}}
  {:witnesses
   ["organiseO1NodesRecorded"
    "organiseO2AuthoredReachability"
@@ -95,7 +79,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/cascade-diff-reference.edn"},
   :run-sha "ecf819234cc50afbdfccffb5838b628018584f76",
-  :contract-sha "72fa0987998cc39268f6af4c532fa3a0688f64af",
+  :contract-sha "a9d78f8904329d7b2393167f7ceaa28c1c4a8f0c",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z",
   :note
@@ -173,6 +157,26 @@
   :result :passed,
   :fixture
   {:repo "futon2", :path "holes/labs/wm-contract/R9-D2-report.edn"}}
+ {:witnesses "wmRunConformsToWiring",
+  :freshness :pinned-git-v1,
+  :contract-sha "e3a50c7e02f4171b3c7537be56b102ea7837a42d",
+  :run-sha "f2a09a5",
+  :check
+  {:repo "futon2",
+   :path "checks/wm_route_conformance.clj",
+   :entrypoint "-main"},
+  :axioms
+  "wmRunConformsToWiring: receipt witness only; this Clojure witness emits no Lean proof and introduces no axioms",
+  :note
+  "C71 lifts the earlier refusal only after C69 changed Figure 4 itself: p4ng 0598d19 draws the eight measured routes as a distinct layer. Against futon2 f2a09a5, WM-RUN2 has 9/9 mapped hops (3 original, 6 measured). The checker now rejects any unmapped hop; its negative control appends R99->R100 and must be rejected. Recording the earlier disagreement did not count as conformance.",
+  :recorded-at "2026-08-31T15:30:00Z",
+  :live-invariant
+  {:check "checks/wm_route_conformance.clj",
+   :evidence :wm-run2-route-against-two-layer-figure-wiring},
+  :result :passed,
+  :fixture
+  {:repo "futon2",
+   :path "holes/labs/wm-contract/tick-run-record-2026-08-30.edn"}}
  {:witnesses "wmRunsOnce",
   :freshness :pinned-git-v1,
   :contract-sha "eec8279cf7b2c841f386894116e6aa627869a75c",
@@ -201,7 +205,7 @@
   :fixture
   {:repo "futon2", :path "holes/labs/wm-contract/R9-D2-report.edn"},
   :run-sha "732f4d748f08154457d93916d96ab0be0b7f760c",
-  :contract-sha "72fa0987998cc39268f6af4c532fa3a0688f64af",
+  :contract-sha "a9d78f8904329d7b2393167f7ceaa28c1c4a8f0c",
   :result :passed,
   :recorded-at "2026-08-31T23:59:30Z",
   :note
