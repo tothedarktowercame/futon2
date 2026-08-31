@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C107-gate-coverage, :dispatched-at "2026-08-31T18:03:53Z", :job-id "invoke-1788199411099-5838-1620a898", :expected-by "2026-08-31T18:48:53Z"}
   {:lane :wm-evidence
-   :holding :C104-envelope, :dispatched-at "2026-08-31T17:57:52Z", :job-id "invoke-1788199050414-5830-c5654e95", :expected-by "2026-08-31T18:42:52Z"}]}
+   :holding :C108-scoring-shadow, :dispatched-at "2026-08-31T18:05:10Z", :job-id "invoke-1788199490759-5840-72d9927d", :expected-by "2026-08-31T18:50:10Z"}]}
