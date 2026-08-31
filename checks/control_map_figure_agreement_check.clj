@@ -88,10 +88,13 @@
         nodes (parse-nodes svg-text)
         svg-control (parse-control-paths svg-text nodes)
         svg-support (parse-paths svg-text nodes "support-edge")
+        svg-measured (parse-paths svg-text nodes "measured-edge")
         expected-control (mapv #(select-keys % [:from :to :label])
                                (filter #(= :control (:kind %)) (:edges data)))
         expected-support (mapv #(select-keys % [:from :to])
                                (filter #(= :support (:kind %)) (:edges data)))
+        expected-measured (mapv #(select-keys % [:from :to])
+                                (:route-measured-drawn data))
         expected-nodes (set (map keyword (:nodes data)))
         extracted (pdf-text pdf)
         svg-labels (keep :label svg-control)
@@ -107,6 +110,11 @@
                    (when (not= (frequencies expected-support) (frequencies svg-support))
                      [{:check :edn-svg-support-edges
                        :expected expected-support :actual svg-support}])
+                   (when (not= (frequencies expected-measured) (frequencies svg-measured))
+                     [{:check :edn-svg-measured-routes
+                       :expected expected-measured :actual svg-measured}])
+                   (when (not (str/includes? extracted "measured route"))
+                     [{:check :svg-pdf-measured-route-legend}])
                    (for [label svg-labels
                          :when (not (str/includes? extracted (norm label)))]
                      {:check :svg-pdf-edge-label :missing label})
@@ -121,6 +129,7 @@
      :counts {:nodes (count nodes)
               :control-edges (count svg-control)
               :support-edges (count svg-support)
+              :measured-routes (count svg-measured)
               :edge-labels (count svg-labels)}
      :failures failures}))
 

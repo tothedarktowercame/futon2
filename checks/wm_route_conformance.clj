@@ -19,27 +19,36 @@
     (string? node) node
     :else (str node)))
 
-(defn- drawn-edge-pairs []
-  (->> (:edges (edn/read-string (slurp control-map-path)))
-       (filter #(= :drawn (:status %)))
-       (map (fn [{:keys [from to]}]
-              [(node->str from) (node->str to)]))
-       set))
+(defn- pair-set [entries]
+  (set (map (fn [{:keys [from to]}]
+              [(node->str from) (node->str to)]) entries)))
+
+(defn- figure-wiring []
+  (let [data (edn/read-string (slurp control-map-path))]
+    {:original (pair-set (filter #(= :drawn (:status %)) (:edges data)))
+     :measured (pair-set (:route-measured-drawn data))}))
 
 (defn- route-verdict [route]
-  (let [drawn (drawn-edge-pairs)
+  (let [{:keys [original measured]} (figure-wiring)
+        wired (into original measured)
         classified (mapv (fn [hop]
-                           (assoc hop :drawn?
-                                  (contains? drawn
-                                             [(:fromNode hop) (:toNode hop)])))
+                           (let [pair [(:fromNode hop) (:toNode hop)]]
+                             (assoc hop
+                                    :wired? (contains? wired pair)
+                                    :figure-layer (cond
+                                                    (contains? original pair) :original
+                                                    (contains? measured pair) :measured
+                                                    :else :absent))))
                          route)
-        conformant (filterv :drawn? classified)
-        unmapped (mapv #(dissoc % :drawn?) (remove :drawn? classified))]
+        conformant (filterv :wired? classified)
+        unmapped (mapv #(dissoc % :wired?) (remove :wired? classified))]
     {:hops (count route)
      :conformant (count conformant)
      :unmapped (count unmapped)
-     :drawn-edges-fired (count (set (map (juxt :fromNode :toNode) conformant)))
-     :drawn-edges-total (count drawn)
+     :original-fired (count (filter #(= :original (:figure-layer %)) conformant))
+     :measured-fired (count (filter #(= :measured (:figure-layer %)) conformant))
+     :original-total (count original)
+     :measured-total (count measured)
      :unmapped-hops unmapped}))
 
 (defn- fail! [message]
@@ -50,24 +59,33 @@
   (let [negative? (some #{"--negative"} args)
         path (or (some #(when (not= "--negative" %) %) args)
                  (default-record-path))
+        receipt (edn/read-string (slurp (io/file path)))
         receipt (if negative?
-                  {:route []}
-                  (edn/read-string (slurp (io/file path))))
+                  (update receipt :route conj
+                          {:fromNode "R99" :toNode "R100"
+                           :via "negative-control/unmapped-hop"})
+                  receipt)
         verdict (route-verdict (:route receipt))
         line (str "route: hops=" (:hops verdict)
                   " conformant=" (:conformant verdict)
                   " unmapped=" (:unmapped verdict)
-                  " | drawn-edges-fired="
-                  (:drawn-edges-fired verdict) "/" (:drawn-edges-total verdict))]
+                  " | original-fired=" (:original-fired verdict) "/" (:original-total verdict)
+                  " measured-fired=" (:measured-fired verdict) "/" (:measured-total verdict))]
     (println line)
     (if negative?
-      (if (zero? (:hops verdict))
-        (do (println "wm-route-conformance: PASS negative control rejected exit-convention=0-pass/1-fail")
+      (if (pos? (:unmapped verdict))
+        (do (println "wm-route-conformance: PASS negative control rejected unmapped mutation exit-convention=0-pass/1-fail/2-mutation-slipped")
             (System/exit 0))
-        (do (println "wm-route-conformance: FAIL negative mutation passed exit-convention=0-pass/1-fail")
+        (do (println "wm-route-conformance: FAIL negative mutation passed exit-convention=0-pass/1-fail/2-mutation-slipped")
             (System/exit 2)))
-      (if (zero? (:hops verdict))
+      (cond
+        (zero? (:hops verdict))
         (fail! "wm-route-conformance: FAIL empty-route exit-convention=0-pass/1-fail")
+
+        (pos? (:unmapped verdict))
+        (fail! "wm-route-conformance: FAIL unmapped-hop exit-convention=0-pass/1-fail")
+
+        :else
         (do (println "wm-route-conformance: PASS exit-convention=0-pass/1-fail")
             (System/exit 0))))))
 

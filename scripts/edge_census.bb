@@ -8,7 +8,9 @@
 ;;   measured  futon2/holes/problems/PREREG-war-machine.md §2f            (what the machine did)
 ;;   specified p4ng/empirics-futon/hyper-edge-schema.edn :instances       (what is typed)
 ;;   sim       futon2/holes/labs/wm-contract/sim/R*-claim.edn             (what role-played nodes asked for)
-(require '[clojure.java.io :as io] '[clojure.string :as str])
+(require '[clojure.java.io :as io]
+         '[clojure.pprint :as pprint]
+         '[clojure.string :as str])
 
 (def P "/home/joe/code/p4ng/empirics-futon/")
 (def F2 "/home/joe/code/futon2/")
@@ -19,23 +21,24 @@
 (def drawn   (set (map (juxt :from :to) (:edges cml))))
 (def derived (set (map (juxt :from :to) (:derived-undrawn cml))))
 
-;; Three conformant WM-RUN2 hops remain on Figure 4. Undrawn measured routes
-;; live in control-map-edges.edn beside :derived-undrawn, so measurement is data
-;; rather than a second hand-maintained list in this instrument.
+;; Three conformant WM-RUN2 hops are in Figure 4's original edge population.
+;; The measured overlay routes live in a separate sibling key even though the
+;; figure now displays them distinguishably; source populations must not merge.
 (def measured-drawn
   [{:edge [:R7 :R3] :measurement :wm-run2 :note "approx" :on-map? true}
    {:edge [:R5 :R6] :measurement :wm-run2 :note nil :on-map? true}
    {:edge [:R8 :R5] :measurement :wm-run2 :note "region" :on-map? true}])
-(def measured-undrawn
+(def measured-routes
   (mapv (fn [{:keys [from to basis] :as route}]
           {:edge [from to]
            :measurement (:measurement route)
            :note basis
            :via (:via route)
            :receipt (:receipt route)
-           :on-map? false})
-        (:route-measured-undrawn cml)))
-(def measured (vec (concat measured-drawn measured-undrawn)))
+           :on-map? true
+           :figure-layer :measured-route})
+        (:route-measured-drawn cml)))
+(def measured (vec (concat measured-drawn measured-routes)))
 (def measured-set (set (map :edge measured)))
 
 ;; typed instances: real deliveries = consecutive :out -> :in port pairs (ports are in route
@@ -88,7 +91,7 @@
              :derived (count derived)
              :wm-run2 (count (filter #(= :wm-run2 (:measurement %)) measured))
              :measured-drawn (count measured-drawn)
-             :route-measured-undrawn (count measured-undrawn)
+             :route-measured-drawn (count measured-routes)
              :pairing-decomposition (count (filter #(= :pairing-decomposition (:measurement %)) measured))
              :measured-union (count measured-set)
              :specified (count specified)
@@ -103,7 +106,7 @@
    :measured-notes measured
    :rows (vec rows)})
 
-(spit (str F2 "holes/labs/wm-contract/edge-census.edn") (with-out-str (clojure.pprint/pprint out)))
+(spit (str F2 "holes/labs/wm-contract/edge-census.edn") (with-out-str (pprint/pprint out)))
 (println "distinct edges across all sources:" (count rows))
 (doseq [[k v] (:sources out)] (println (format "  %-11s %s" (name k) v)))
 (println)
