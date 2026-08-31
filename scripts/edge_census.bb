@@ -83,13 +83,17 @@
 (def out
   {:as-of "2026-08-31"
    :generated-by "futon2/scripts/edge_census.bb"
-   :sources {:drawn (count drawn) :derived (count derived)
-             :measured (count measured-set)
+   :sources (array-map
+             :drawn (count drawn)
+             :derived (count derived)
+             :wm-run2 (count (filter #(= :wm-run2 (:measurement %)) measured))
              :measured-drawn (count measured-drawn)
              :route-measured-undrawn (count measured-undrawn)
-             :wm-run2 (count (filter #(= :wm-run2 (:measurement %)) measured))
              :pairing-decomposition (count (filter #(= :pairing-decomposition (:measurement %)) measured))
-             :specified (count specified) :specified-to-nonnode (count specified-nonnode) :sim (count sim)}
+             :measured-union (count measured-set)
+             :specified (count specified)
+             :specified-to-nonnode (count specified-nonnode)
+             :sim (count sim))
    :totals {:distinct-edges (count rows)
             :drawn-with-schema (n :schema?)
             :attested-by-2+ (n #(< 1 (count (filter true? [(:drawn? %) (:derived? %) (:measured? %) (:sim? %)]))))
