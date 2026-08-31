@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C152-accepted-red, :dispatched-at "2026-08-31T20:02:13Z", :job-id "invoke-1788206529543-5960-9f38e39f", :expected-by "2026-08-31T20:47:13Z"}
   {:lane :wm-evidence
-   :holding :C154-relocation-vs-drift, :dispatched-at "2026-08-31T20:04:37Z", :job-id "invoke-1788206673285-5962-12c140c9", :expected-by "2026-08-31T20:49:37Z"}]}
+   :holding :C156-glossary-omissions, :dispatched-at "2026-08-31T20:09:38Z", :job-id "invoke-1788206974776-5966-1be72d5c", :expected-by "2026-08-31T20:54:38Z"}]}
