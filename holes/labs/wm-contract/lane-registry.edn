@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C67-futon3-suite, :dispatched-at "2026-08-31T15:13:38Z", :job-id "invoke-1788189207329-5720-112f2a30", :expected-by "2026-08-31T15:58:38Z"}
   {:lane :wm-evidence
-   :holding :C61-strengthen-find, :dispatched-at "2026-08-31T14:59:27Z", :job-id "invoke-1788188356174-5708-0974a1fc", :expected-by "2026-08-31T15:44:27Z"}]}
+   :holding nil, :dispatched-at nil, :job-id nil, :expected-by nil}]}
