@@ -4,7 +4,7 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C105-R8-discharge, :dispatched-at "2026-08-31T17:59:42Z", :job-id "invoke-1788199161203-5833-f040e04d", :expected-by "2026-08-31T18:44:42Z"}
+   :holding :C109-R2-R9-pairs, :dispatched-at "2026-08-31T18:07:11Z", :job-id "invoke-1788199609240-5842-b2680382", :expected-by "2026-08-31T18:52:11Z"}
   {:lane :wm-verbs
    :holding :C106-resource-wiring, :dispatched-at "2026-08-31T18:02:30Z", :job-id "invoke-1788199327487-5837-5b910996", :expected-by "2026-08-31T18:47:30Z"}
   {:lane :wm-organization
