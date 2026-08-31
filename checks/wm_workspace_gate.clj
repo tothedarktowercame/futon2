@@ -1,12 +1,47 @@
 #!/usr/bin/env bb
 (ns checks.wm-workspace-gate
   (:require [babashka.process :as process]
+            [babashka.fs :as fs]
+            [clojure.set :as set]
             [cheshire.core :as json]))
 
 (def contract "/home/joe/code/mathlib4/DarkTower/WarMachine/holes-contract.json")
 
 (defn authority []
   (get-in (json/parse-string (slurp contract) true) [:source :git-sha]))
+
+(def known-check-files
+  ;; Discovery is a completeness alarm, not an execution policy.  A new file
+  ;; must be classified here before the gate can pass; it is never guessed safe.
+  #{"ablation_exact_dyadic_witness.clj" "absence_scoring_counterfactual.clj"
+    "absent_is_loud_lint.clj" "belief_update_check.clj"
+    "belief_variance_inputs.clj" "cascade_diff_witness.clj" "contract_lint.clj"
+    "control_map_figure_agreement_check.clj" "control_map_lint.clj"
+    "control_organization_check.clj" "expected_free_energy_witness.clj"
+    "expected_information_gain_witness.clj" "fold_turn_quarantine_check.clj"
+    "generative_model_witness.clj" "holder_check.clj"
+    "hyper_edge_domain_range_check.clj" "hyper_edge_exemplar_check.clj"
+    "lane_registry_check.clj" "log_multivariate_beta_witness.clj"
+    "obligation_ledger_reconciliation_check.clj"
+    "preemptive_absence_coercion_lint.clj" "preemptive_acceptance_lint.clj"
+    "preemptive_artefact_boundary_lint.clj" "preemptive_era_blind_lint.clj"
+    "preemptive_record_conflict_lint.clj" "preemptive_repair_lint.clj"
+    "preemptive_repair_suite.clj" "preemptive_stale_baseline_lint.clj"
+    "preference_stack_binding_check.clj" "preference_stack_witness_shape_check.clj"
+    "r17_generator_disposer_check.clj" "r19_stack_witness.clj"
+    "r2_channel_contract.clj" "r2_pinned_snapshot_witness.clj"
+    "r8_f_contract.clj" "r8_pinned_snapshot_witness.clj"
+    "r9_independence.clj" "r9_proof_receipt_check.clj"
+    "wm_operational_certificate.clj" "wm_route_conformance.clj"
+    "wm_runs_once_witness.clj" "wm_workspace_gate.clj"})
+
+(defn inventory-result []
+  (let [found (set (map (comp str fs/file-name) (fs/glob "checks" "*.clj")))
+        unknown (sort (set/difference found known-check-files))
+        missing (sort (set/difference known-check-files found))]
+    {:name :check-inventory
+     :exit (if (and (empty? unknown) (empty? missing)) 0 1)
+     :unknown unknown :missing missing}))
 
 (defn commands []
   [{:name :strict-contract
@@ -29,16 +64,36 @@
            "holes/labs/wm-contract/tick-run-record-2026-08-30.edn"]}
    {:name :runs-once :argv ["bb" "checks/wm_runs_once_witness.clj"]}])
 
-(defn run-one [{:keys [name argv]}]
+(defn control-commands []
+  [{:name :c116-removed-ledger-row
+    :argv ["bb" "-cp" "." "checks/r9_independence.clj" "--negative-ledger"
+           "--report" "/tmp/wm-gate-r9-ledger.edn" "--lean" "/tmp/wm-gate-r9-ledger.lean"]}
+   {:name :c116-changed-o7-source
+    :argv ["bb" "-cp" "." "checks/r9_independence.clj" "--negative-per-row"
+           "--report" "/tmp/wm-gate-r9-row.edn" "--lean" "/tmp/wm-gate-r9-row.lean"]}
+   {:name :c116-pre-boundary-stored-f
+    :argv ["bb" "-cp" "." "checks/r8_f_contract.clj" "--negative"
+           "--report" "/tmp/wm-gate-r8-era.edn"]}
+   {:name :c117-f1-outside-repository :dir "/home/joe/code/futon3"
+    :argv ["clojure" "-Sdeps" "{:paths [\"checks\"]}" "-M" "-m" "find-snatch" "--negative-f1"]}
+   {:name :c117-f2-removed-receipt :dir "/home/joe/code/futon3"
+    :argv ["clojure" "-Sdeps" "{:paths [\"checks\"]}" "-M" "-m" "find-snatch" "--negative-f2"]}
+   {:name :c117-f3-score-only-receipt :dir "/home/joe/code/futon3"
+    :argv ["clojure" "-Sdeps" "{:paths [\"checks\"]}" "-M" "-m" "find-snatch" "--negative-f3"]}])
+
+(defn run-one [{:keys [name argv dir]}]
   (println "wm-workspace-gate: RUN" (clojure.core/name name))
-  (let [result (apply process/shell {:continue true :out :inherit :err :inherit} argv)]
+  (let [opts (cond-> {:continue true :out :inherit :err :inherit} dir (assoc :dir dir))
+        result (apply process/shell opts argv)]
     {:name name :exit (:exit result)}))
 
 (defn -main [& _]
-  (let [results (mapv run-one (commands))
+  (let [inventory (inventory-result)
+        _ (println "wm-workspace-gate: INVENTORY" (pr-str inventory))
+        results (into [inventory] (map run-one (concat (commands) (control-commands))))
         failures (filterv #(not= 0 (:exit %)) results)]
     (println "wm-workspace-gate: SUMMARY"
-             (pr-str {:checks (count results) :failures failures
+             (pr-str {:checks (count results) :executable-checks (dec (count results)) :failures failures
                       :manual-exclusions [:lane-registry :live-operational-certificate]}))
     (System/exit (if (empty? failures) 0 1))))
 

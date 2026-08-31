@@ -36,8 +36,10 @@ The producer tag and typed statuses survive trace EDN serialization. Focused
 precision, free-energy, and trace tests cover present zero, legacy absence,
 malformed absence, unchanged arithmetic, and round-trip preservation.
 
-The absence lint moved from 15 blocked findings to 13. It remains exit 1 by
-design because thirteen separately owned coercions remain.
+This delivery moved the absence lint from 15 blocked findings to 13. Concurrent
+C118 then resolved two avoidance sites, so the final shared-tree count is 11.
+The lint remains exit 1 by design because eleven separately owned coercions
+remain; C120 accounts for exactly two of the four-site reduction.
 
 Canonical gates:
 

@@ -412,3 +412,16 @@ fall to zero without changing the test or policy. Promotion to hard-fail is an e
 `--negative-gate` injects a finding into the combined acceptance result after the underlying lint runs. It
 therefore proves the build-level consumer rejects a finding, independently of each lint's own mutation
 control. Exit convention: 0 pass, 1 corpus failure, 2 gate mutation slipped.
+# Workspace gate (C121)
+
+The comprehensive committed-artifact gate, including C116/C117 semantic
+controls and top-level check inventory drift detection, is:
+
+```sh
+bb -cp . checks/wm_workspace_gate.clj
+```
+
+Its C116 controls invoke `r9_independence --negative-ledger`,
+`r9_independence --negative-per-row`, and `r8_f_contract --negative`.  Its C117
+controls invoke futon3 `find-snatch --negative-f1`, `--negative-f2`, and
+`--negative-f3` through the JVM.  A control rejection is a gate pass.
