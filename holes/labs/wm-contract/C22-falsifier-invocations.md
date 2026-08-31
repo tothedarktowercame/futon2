@@ -229,3 +229,20 @@ Observed positive/negative exits were `0/0` for both checkers. The authority mut
 edge remain semantic rejecting cases. The full canonical suite then completed at **1009 tests, 6107
 assertions, 0 failures, 0 errors**, exit 0. R2 remains independently red on its two real missing-channel
 records; C53 does not touch or suppress that operational gate.
+
+## C51 — obligation current-table/history reconciliation
+
+```sh
+bb -cp . checks/obligation_ledger_reconciliation_check.clj --report /tmp/obligation-ledger-reconciliation.edn
+bb -cp . checks/obligation_ledger_reconciliation_check.clj --negative --report /tmp/obligation-ledger-reconciliation-negative-unused.edn
+```
+
+The current table is delimited by `<!-- CURRENT TABLE END -->`; parsing never falls through into dated
+history. Combined labels such as O7/O7b are tokenised, then filtered against the canonical 24-obligation
+population. Every current row must be `closure-verified`, point to a named dated section, and find its
+obligation plus a closure-verification record in that section. The report names the paper-vetting reviewer
+as consumer and pins the ledger bytes.
+
+Observed positive/negative exits: `0/0`. The positive census is 24 current rows, 24 distinct obligations,
+24 closure-verified, 0 failures. The negative control changes one current row to `still-open` in memory and
+is rejected as `:current-status`; the dated history is not mutated.
