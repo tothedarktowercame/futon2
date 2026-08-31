@@ -112,21 +112,35 @@
 
 (defn- engine-wiring
   "The deterministic EXECUTOR: shell the futon3a fold engine (the Car-3
-   apply-cascade! executor) over the cascade's shown patterns. Returns the
-   enacted wiring map (`:boxes`/`:policy-holes`) or nil."
+   apply-cascade! executor) over the cascade's shown patterns. Returns a typed
+   result: `:constructed-wiring`, `:no-construction`, or `:enactment-failed`."
   [shown]
   (try
-    (let [{:keys [exit out]}
+    (let [{:keys [exit out err]}
           (shell/sh "bb" "--classpath" "src" fold-engine-rel
                     "apply" (json/generate-string (vec shown))
                     "MissionState -> {Wiring, PolicyHoles}"
                     :dir futon3a-dir)]
-      (when (zero? exit)
+      (if (zero? exit)
         ;; the engine returns {:wiring {...} :box-ids :policy-holes ...}; the
         ;; :wiring map itself carries :boxes + :policy-holes — the shape
         ;; fold-eval/coverage consumes.
-        (:wiring (json/parse-string out true))))
-    (catch Throwable _ nil)))
+        (if-let [wiring (:wiring (json/parse-string out true))]
+          {:status :constructed-wiring :wiring wiring}
+          {:status :no-construction :reason :engine-returned-no-wiring})
+        {:status :enactment-failed
+         :enactment-failed
+         {:phase :engine-execution
+          :exception-class nil
+          :message (str "fold engine exited " exit)
+          :exit exit
+          :stderr err}}))
+    (catch Throwable failure
+      {:status :enactment-failed
+       :enactment-failed
+       {:phase :engine-execution
+        :exception-class (.getName (class failure))
+        :message (.getMessage failure)}})))
 
 (defn- act-gates-with-shown
   "Act-gates over the cascade lane, carrying each entry's :shown (the cascade's
@@ -212,7 +226,11 @@
    from — `fold-realized/realized-outcome-of` prefers `(:coverage-score-delta fold)`, so
    passing a different fold there would silently override the fed value."
   [{:keys [mission shown act-gate]}]
-  (let [enacted (when (seq shown) (engine-wiring shown))
+  (let [engine-result (if (seq shown)
+                        (engine-wiring shown)
+                        {:status :no-construction :reason :empty-cascade})
+        enacted (:wiring engine-result)
+        engine-failure (:enactment-failed engine-result)
         gfold (selection-gain-fold-of act-gate)
         selection-gain-expected (:coverage-score-delta gfold)]
     {:enacted enacted
@@ -221,7 +239,7 @@
                 :fold gfold}
      :enactment {:mission mission
                  :source :classical-engine
-                 :status (if enacted :constructed-wiring :no-construction)
+                 :status (:status engine-result)
                  :predicted-via (:coverage-score/source act-gate)
                  :gate-coverage-score-delta (:coverage-score-delta act-gate)
                  :selection-gain-expected-score selection-gain-expected
@@ -231,11 +249,16 @@
                  :cascade shown
                  :boxes (count (:boxes enacted))
                  :policy-holes (count (:policy-holes enacted))
-                 :result (if enacted
+                 :result (case (:status engine-result)
+                           :constructed-wiring
                            {:constructed-wiring
                             {:boxes (count (:boxes enacted))
                              :policy-holes (count (:policy-holes enacted))}}
-                           {:no-construction {:reason :engine-returned-nil}})}}))
+                           :no-construction
+                           {:no-construction {:reason (:reason engine-result)}}
+                           :enactment-failed
+                           {:enactment-failed engine-failure})
+                 :enactment-failed engine-failure}}))
 
 (defn close-loop!
   "The R16 tick step: act-gates → first :pass → enact → thread the outcome onto
@@ -265,7 +288,8 @@
                 (vreset! record (assoc @record :enactment enactment)))
             _ (vreset! phase :outcome-recording)
             result (cond-> @record
-                     passed (fr/with-realized-outcome decision enacted tick))]
+                     (and passed (not= :enactment-failed (:status enactment)))
+                     (fr/with-realized-outcome decision enacted tick))]
         result)
       (catch Throwable failure
         (update @record :enactment
