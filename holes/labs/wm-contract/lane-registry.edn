@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C84-gate-wiring, :dispatched-at "2026-08-31T16:51:35Z", :job-id "invoke-1788195083719-5776-90db12ac", :expected-by "2026-08-31T17:36:35Z"}
   {:lane :wm-evidence
-   :holding :C81-absence-sites, :dispatched-at "2026-08-31T16:51:35Z", :job-id "invoke-1788195038382-5773-43eba0eb", :expected-by "2026-08-31T17:36:35Z"}]}
+   :holding :C88-evidence-index, :dispatched-at "2026-08-31T17:09:23Z", :job-id "invoke-1788196141702-5790-2302d700", :expected-by "2026-08-31T17:54:23Z"}]}
