@@ -4,7 +4,7 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C143-owner-resolution, :dispatched-at "2026-08-31T19:39:24Z", :job-id "invoke-1788205160106-5934-edb3728b", :expected-by "2026-08-31T20:24:24Z"}
+   :holding :C147-glossary-fifth, :dispatched-at "2026-08-31T19:48:48Z", :job-id "invoke-1788205724659-5946-2717c7d5", :expected-by "2026-08-31T20:33:48Z"}
   {:lane :wm-verbs
    :holding :C145-frame-drop, :dispatched-at "2026-08-31T19:43:53Z", :job-id "invoke-1788205430083-5940-a9d44b36", :expected-by "2026-08-31T20:28:53Z"}
   {:lane :wm-organization
