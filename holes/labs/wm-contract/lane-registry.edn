@@ -6,7 +6,7 @@
  [{:lane :wm-nouns
    :holding :C134-label-check, :dispatched-at "2026-08-31T19:18:41Z", :job-id "invoke-1788203917966-5912-63dcf648", :expected-by "2026-08-31T20:03:41Z"}
   {:lane :wm-verbs
-   :holding :C129-R8-contract-tag, :dispatched-at "2026-08-31T19:08:36Z", :job-id "invoke-1788203295107-5902-b3bbbb1b", :expected-by "2026-08-31T19:53:36Z"}
+   :holding :C135-reader-portability, :dispatched-at "2026-08-31T19:21:10Z", :job-id "invoke-1788204066877-5915-9d6ef857", :expected-by "2026-08-31T20:06:10Z"}
   {:lane :wm-organization
    :holding :C132-status-report, :dispatched-at "2026-08-31T19:15:03Z", :job-id "invoke-1788203689169-5908-426f53d9", :expected-by "2026-08-31T20:00:03Z"}
   {:lane :wm-evidence
