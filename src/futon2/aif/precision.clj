@@ -52,6 +52,19 @@
 (def default-need-scale 5.0)
 (def default-precision-floor 0.1)
 (def default-precision-cap 200.0)
+(def current-error-contract :prediction-error/v1)
+
+(defn error-field-status
+  "Classify one prediction-error field without using a date boundary.
+   Unversioned records are legacy; a v1 producer record missing a required
+   field is malformed. Present numeric zero remains present."
+  [error-map field]
+  (if (contains? error-map field)
+    {:status :present :value (get error-map field)}
+    {:status :absent
+     :reason (if (= current-error-contract (:producer-contract error-map))
+               :malformed
+               :legacy-era)}))
 
 ;; :summed names the historical experiment that added need to Π.
 ;; Production/default :separate keeps need under the named :salience key.
@@ -163,10 +176,17 @@
                             (let [channel-state (get prev-state ch
                                                      {:precision default-initial-precision
                                                       :error-history []})
-                                  new-err (:error error-map 0.0)
-                                  observed (:observed error-map 0.0)]
-                              [ch (update-channel-precision ch channel-state
-                                                            new-err observed opts)])))
+                                  error-status (error-field-status error-map :error)
+                                  observed-status (error-field-status error-map :observed)
+                                  new-err (if (= :present (:status error-status))
+                                            (:value error-status) 0.0)
+                                  observed (if (= :present (:status observed-status))
+                                             (:value observed-status) 0.0)]
+                              [ch (assoc (update-channel-precision
+                                          ch channel-state new-err observed opts)
+                                         :input-status
+                                         {:error error-status
+                                          :observed observed-status})])))
          untouched (into {} (for [[ch s] prev-state
                                   :when (not (contains? touched-channels ch))]
                               [ch s]))]
@@ -202,9 +222,12 @@
    `:per-call-precision` so the trace records both sources."
   [precision-state channel-id error-map]
   (let [adaptive-π (precision-for precision-state channel-id)
-        per-call-π (:precision error-map)
+        per-call-status (error-field-status error-map :precision)
+        per-call-π (when (= :present (:status per-call-status))
+                     (:value per-call-status))
         err (:error error-map 0.0)]
     (assoc error-map
            :precision adaptive-π
            :weighted-error (* (double err) adaptive-π)
-           :per-call-precision per-call-π)))
+           :per-call-precision per-call-π
+           :per-call-precision-status per-call-status)))

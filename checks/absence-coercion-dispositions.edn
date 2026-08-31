@@ -15,8 +15,12 @@
   {:at "src/futon2/aif/free_energy.clj:70" :disposition :blocked :blocked-on :absent-avoidance-pass-through-semantics}
   {:at "src/futon2/aif/free_energy.clj:98-100" :disposition :blocked :blocked-on :prediction-triple-refusal-migration}
   {:at "src/futon2/aif/free_energy.clj:138-143" :disposition :blocked :blocked-on :infer-mode-tagged-envelope}
-  {:at "src/futon2/aif/precision.clj:166-167" :disposition :blocked :blocked-on :validated-error-record-producer}
-  {:at "src/futon2/aif/precision.clj:206" :disposition :blocked :blocked-on :validated-error-record-producer}
+  {:at "src/futon2/aif/precision.clj:166-167" :disposition :fix-now
+   :control "versioned error records distinguish :legacy-era from :malformed without changing numeric compatibility"
+   :implemented-by :C120}
+  {:at "src/futon2/aif/precision.clj:206" :disposition :fix-now
+   :control "per-call precision absence carries :legacy-era or :malformed provenance"
+   :implemented-by :C120}
   {:at "src/futon2/aif/forward_model.clj:339" :disposition :fix-now
    :control "next-observation :variance-status distinguishes supplied variance from :deterministic-by-action-model"
    :implemented-by :C94}
@@ -28,4 +32,4 @@
    :exemption :versioned-read-compatibility
    :reason "Legacy/partial trace reads preserve old records; this is serialization compatibility, not a numeric measurement or score. A schema-version migration remains separately named."}
   {:at "src/futon2/aif/belief.clj:1040-1052" :disposition :blocked :blocked-on :precision-pass-through-tag}]
- :summary {:fix-now 2 :exempt-with-reason 1 :blocked 15}}
+ :summary {:fix-now 4 :exempt-with-reason 1 :blocked 13}}

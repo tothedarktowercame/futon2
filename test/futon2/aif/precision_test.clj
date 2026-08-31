@@ -1,7 +1,9 @@
 (ns futon2.aif.precision-test
   "Tests for R7 adaptive precision (per-channel Π tracked across calls
    via prediction-error history)."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.edn :as edn]
+            [clojure.test :refer [deftest is testing]]
+            [futon2.aif.trace :as trace]
             [futon2.aif.belief :as belief]
             [futon2.aif.precision :as precision]))
 
@@ -106,6 +108,34 @@
           "original per-call precision preserved under :per-call-precision")
       (is (= 4.0 (:weighted-error wt))
           "weighted-error = error * adaptive precision = 0.5 * 8.0"))))
+
+(deftest prediction-error-contract-distinguishes-legacy-from-malformed
+  (let [legacy {:error 0.25}
+        malformed {:producer-contract :prediction-error/v1 :error 0.25}
+        legacy-state (precision/update-precision-state {} {:ch legacy})
+        malformed-state (precision/update-precision-state {} {:ch malformed})
+        legacy-weighted (precision/weighted-error {} :ch legacy)
+        malformed-weighted (precision/weighted-error {} :ch malformed)]
+    (is (= {:status :absent :reason :legacy-era}
+           (get-in legacy-state [:ch :input-status :observed])))
+    (is (= {:status :absent :reason :malformed}
+           (get-in malformed-state [:ch :input-status :observed])))
+    (is (= {:status :absent :reason :legacy-era}
+           (:per-call-precision-status legacy-weighted)))
+    (is (= {:status :absent :reason :malformed}
+           (:per-call-precision-status malformed-weighted)))
+    (is (= (:weighted-error legacy-weighted)
+           (:weighted-error malformed-weighted))
+        "provenance classification does not change scoring arithmetic")))
+
+(deftest prediction-error-contract-survives-trace-serialization
+  (let [error-record {:producer-contract :prediction-error/v1
+                      :observed 0.0 :error 0.0 :precision 1.0}
+        trace-record (trace/trace-record
+                      {:prediction-errors {:loop-health error-record}})
+        roundtrip (edn/read-string (pr-str trace-record))]
+    (is (= error-record
+           (get-in roundtrip [:prediction-errors :loop-health])))))
 
 (deftest update-preserves-purity-test
   (testing "update-precision-state is pure: same input → same output"
