@@ -59,6 +59,15 @@ These seven decisions are ordered by the boundary they unblock. All seven keep
 the corresponding absence-coercion site honestly red until decided; deferral
 does not create a new failure, but the legacy coercion remains live.
 
+**Evidence status (C195): these are judgement calls, not decisions awaiting a
+future measurement delivery.** Directional immediate-boundary evidence exists
+for belief aggregation and missing sorry pressure only. The other five have no
+option-effect measurement. C191 established that downstream propagation would
+require five coherent persistence additions plus a replay harness and would
+still not establish production-selected-action divergence. That replay is not
+being built. Full terminal boundary:
+[`C195-c130-evidence-terminal.md`](../labs/wm-contract/C195-c130-evidence-terminal.md).
+
 ### Prediction triple
 
 - **Question:** When observation, predicted mean, or variance is missing, does
@@ -66,6 +75,7 @@ does not create a new failure, but the legacy coercion remains live.
 - **Unblocks:** typed prediction records and removal of the coercions at
   `free_energy.clj:98-100`.
 - **Care:** belief/ranking relevant; malformed model output must remain loud.
+- **Evidence:** no option-effect measurement; judgement call.
 - **If deferred:** current zero-coercing belief update remains unchanged and the
   lint finding remains red.
 - **Full analysis:**
@@ -78,6 +88,9 @@ does not create a new failure, but the legacy coercion remains live.
 - **Unblocks:** support-preserving aggregation and removal of the coercions at
   `belief.clj:1040-1052`.
 - **Care:** belief/ranking relevant.
+- **Evidence:** directional only: two serially dependent diagnostic records;
+  omitting the absent channel changed the immediate driver twice without a sign
+  change. Downstream ranking is unmeasured.
 - **If deferred:** current absent/malformed/measured-zero collapse remains and
   the lint finding remains red.
 - **Full analysis:**
@@ -89,6 +102,7 @@ does not create a new failure, but the legacy coercion remains live.
   reason-bearing `:unknown` or use an explicitly specified partial/prior rule?
 - **Unblocks:** the tagged-envelope migration at `free_energy.clj:138-143`.
 - **Care:** **safety and ranking relevant**; a fallback can select while blind.
+- **Evidence:** no option-effect measurement; judgement call.
 - **If deferred:** missing features continue to enter mode inference as zero and
   the lint finding remains red.
 - **Full analysis:**
@@ -102,6 +116,9 @@ does not create a new failure, but the legacy coercion remains live.
 - **Unblocks:** status-consuming policy selection at `policy.clj:144-145`.
 - **Care:** **safety and action-selection relevant**; the current zero can act
   while blind to a declared priority.
+- **Evidence:** directional conditional evaluation only: over two serially
+  dependent diagnostic records, A abstained and B selected. The trace does not
+  establish that the fallback was invoked in either tick.
 - **If deferred:** unknown pressure continues to look low and the lint finding
   remains red.
 - **Full analysis:**
@@ -115,6 +132,7 @@ does not create a new failure, but the legacy coercion remains live.
 - **Unblocks:** a typed rollout producer and removal of the coercion at
   `rollout.clj:129`.
 - **Care:** ranking-population relevant.
+- **Evidence:** no option-effect measurement; judgement call.
 - **If deferred:** moves with fabricated zero scores may still enter ranking and
   the lint finding remains red.
 - **Full analysis:**
@@ -127,6 +145,7 @@ does not create a new failure, but the legacy coercion remains live.
 - **Unblocks:** the refusal/exclusion variant at `rollout.clj:158`.
 - **Care:** **safety and selection relevant** wherever rollout authorizes an
   action.
+- **Evidence:** no option-effect measurement; judgement call.
 - **If deferred:** missing delta/absolute scores continue to become zero cost
   and the lint finding remains red.
 - **Full analysis:**
@@ -140,6 +159,7 @@ does not create a new failure, but the legacy coercion remains live.
   `adapters/fulab.clj:81`.
 - **Care:** sampling/ranking relevant; uncertainty-only temperature would be a
   new model.
+- **Evidence:** no option-effect measurement; judgement call.
 - **If deferred:** missing error remains indistinguishable from perfect
   prediction and the lint finding remains red.
 - **Full analysis:**
