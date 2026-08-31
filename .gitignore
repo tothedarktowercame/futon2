@@ -14,6 +14,9 @@ generic-questing-sun.md
 
 # local outputs
 out/
+# C220: `clojure -T:build ci` writes target/ (build.clj:8,23,31).  It was the
+# untracked path failing the reload preflight's clean-tree precondition.
+target/
 resources/
 
 # but keep the war-machine subproject's entry HTML tracked
