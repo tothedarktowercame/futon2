@@ -7,8 +7,8 @@
  :freshness :pinned-git-v1
  :live-invariant {:check "checks/r9_proof_receipt_check.clj"
                   :evidence :lean-elaboration-and-axiom-output}
- :run-sha "40582f00f4507ebc9f76afae6efa9ecd5e887d3b"
- :contract-sha "8d4f5b3488689e03fb038f0bc81c9200d75031a8"
+ :run-sha "7dc52f5d8bb6c604ee3358a6c4e4f8a0e3cc3ab6"
+ :contract-sha "5fd2abf6ca78d209958789a16a091235bce2f564"
  :result :passed
  :recorded-at "2026-08-31T23:45:00Z"
  :axioms "DarkTower.WarMachine.Holes.R9D2.verdictConsultsChecker: [propext]; no sorryAx"

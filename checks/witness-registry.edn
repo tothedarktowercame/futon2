@@ -11,7 +11,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/generative-model-reference.edn"},
   :run-sha "7b31da1fe248a05b35940e9a68544b4ffbef36a7",
-  :contract-sha "8d4f5b3488689e03fb038f0bc81c9200d75031a8",
+  :contract-sha "5fd2abf6ca78d209958789a16a091235bce2f564",
   :result :passed,
   :recorded-at "2026-09-01T00:20:00Z"}
  {:witnesses "expectedFreeEnergy",
@@ -23,7 +23,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/expected-free-energy-reference.edn"},
   :run-sha "58d667284a63c69c0027c9bf204e9bc0eac098b9",
-  :contract-sha "8d4f5b3488689e03fb038f0bc81c9200d75031a8",
+  :contract-sha "5fd2abf6ca78d209958789a16a091235bce2f564",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
  {:witnesses "expectedInformationGain",
@@ -36,7 +36,7 @@
    :path
    "holes/labs/wm-contract/expected-information-gain-reference.edn"},
   :run-sha "c99ffdbc13e9b114dbcdca7451651e568588a947",
-  :contract-sha "8d4f5b3488689e03fb038f0bc81c9200d75031a8",
+  :contract-sha "5fd2abf6ca78d209958789a16a091235bce2f564",
   :result :passed,
   :recorded-at "2026-09-01T00:10:00Z"}
  {:witnesses
@@ -69,7 +69,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/log-multivariate-beta-reference.edn"},
   :run-sha "720af918c430415bf07f4eba29ec73d49b343a10",
-  :contract-sha "8d4f5b3488689e03fb038f0bc81c9200d75031a8",
+  :contract-sha "5fd2abf6ca78d209958789a16a091235bce2f564",
   :result :passed,
   :recorded-at "2026-08-31T23:50:00Z"}
  {:witnesses "nonDegenerateAblationLaw",
@@ -81,7 +81,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/ablation-exact-dyadic.edn"},
   :run-sha "f54d502acb131f74da40b430a726792a4002dae8",
-  :contract-sha "8d4f5b3488689e03fb038f0bc81c9200d75031a8",
+  :contract-sha "5fd2abf6ca78d209958789a16a091235bce2f564",
   :result :passed,
   :recorded-at "2026-08-31T17:05:00Z",
   :note
@@ -99,7 +99,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/cascade-diff-reference.edn"},
   :run-sha "ecf819234cc50afbdfccffb5838b628018584f76",
-  :contract-sha "8d4f5b3488689e03fb038f0bc81c9200d75031a8",
+  :contract-sha "5fd2abf6ca78d209958789a16a091235bce2f564",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z",
   :note
@@ -126,7 +126,7 @@
    :path "holes/labs/wm-contract/PreferenceStackWitness.edn"}}
  {:witnesses ["r2ContractCensusWmTrace" "wmTraceR2"],
   :freshness :pinned-git-v1,
-  :contract-sha "8d4f5b3488689e03fb038f0bc81c9200d75031a8",
+  :contract-sha "5fd2abf6ca78d209958789a16a091235bce2f564",
   :run-sha "de68356cab018b014a84a3af26ddc831c5c30557",
   :check
   {:repo "futon2",
@@ -145,7 +145,7 @@
   {:repo "futon2", :path "holes/labs/wm-contract/R2-D2-report.edn"}}
  {:witnesses ["r8CensusWmTrace" "r8EraBoundary" "wmTraceR8"],
   :freshness :pinned-git-v1,
-  :contract-sha "8d4f5b3488689e03fb038f0bc81c9200d75031a8",
+  :contract-sha "5fd2abf6ca78d209958789a16a091235bce2f564",
   :run-sha "93be32e98bbfdc413fc6aa58ef1d0da7cfdc8414",
   :check
   {:repo "futon2",
@@ -163,8 +163,8 @@
   {:repo "futon2", :path "holes/labs/wm-contract/R8-D3-report.edn"}}
  {:witnesses "r9VerdictConsultsChecker",
   :freshness :pinned-git-v1,
-  :contract-sha "8d4f5b3488689e03fb038f0bc81c9200d75031a8",
-  :run-sha "40582f00f4507ebc9f76afae6efa9ecd5e887d3b",
+  :contract-sha "5fd2abf6ca78d209958789a16a091235bce2f564",
+  :run-sha "7dc52f5d8bb6c604ee3358a6c4e4f8a0e3cc3ab6",
   :check
   {:repo "futon2",
    :path "checks/r9_proof_receipt_check.clj",
@@ -185,7 +185,7 @@
  {:witnesses
   ["r9WmVerdictsSound" "r9WmPerRowDeclarations" "r9TwoRunCensus"],
   :freshness :pinned-git-v1,
-  :contract-sha "8d4f5b3488689e03fb038f0bc81c9200d75031a8",
+  :contract-sha "5fd2abf6ca78d209958789a16a091235bce2f564",
   :run-sha "732f4d748f08154457d93916d96ab0be0b7f760c",
   :check
   {:repo "futon2",
@@ -247,7 +247,7 @@
   :fixture
   {:repo "futon2", :path "holes/labs/wm-contract/R9-D2-report.edn"},
   :run-sha "732f4d748f08154457d93916d96ab0be0b7f760c",
-  :contract-sha "8d4f5b3488689e03fb038f0bc81c9200d75031a8",
+  :contract-sha "5fd2abf6ca78d209958789a16a091235bce2f564",
   :result :passed,
   :recorded-at "2026-08-31T23:59:30Z",
   :note
