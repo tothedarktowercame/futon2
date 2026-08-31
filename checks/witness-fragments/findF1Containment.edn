@@ -1,16 +1,17 @@
 {:witnesses
  ["findF1Containment"
   "findF2Receipted"
-  "findF3NonSelfCertifying"],
+  "findF3NonSelfCertifying"
+  "findF4Falsifiable"],
  :check
  {:repo "futon3", :path "checks/find_snatch.clj", :entrypoint "-main"},
  :fixture {:repo "futon3", :path "checks/find-snatch.edn"},
  :freshness :pinned-git-v1,
  :live-invariant {:check "checks/find_snatch.clj"
-                  :check-sha "d37a62da39a0a3d78fb7972953df38cc53aac410"
-                  :evidence :f1-f2-f3-independent-controls},
+                  :check-sha "ab2b290d1caedffd2bde4658300a791d1000b978"
+                  :evidence :f1-f2-f3-f4-independent-controls},
  :run-sha "594127059d6a31c5b21f5d34ebfac5b14b1ad993",
- :contract-sha "a9d78f8904329d7b2393167f7ceaa28c1c4a8f0c",
+ :contract-sha "d0ad8d4d09eb45b0e19bc53247ffed07d7d8b816",
  :result :passed,
  :recorded-at "2026-08-31T15:40:00Z"
- :note "C73: cured checker reports zero representation mismatches and separately rejects --negative-f1 (outside repository), --negative-f2 (selected row lacks receipt), and --negative-f3 (score-only receipt). findF4 remains deliberately unbound."}
+ :note "C85: cured checker reports zero representation mismatches and separately rejects F1 outside-repository selection, F2 missing receipt, F3 score-only receipt, and F4 removal of the recorded omitted member. F4 is narrowed to the pinned FindReceiptRow."}
