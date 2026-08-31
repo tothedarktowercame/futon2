@@ -61,6 +61,13 @@ Adding a line is insufficient: signatures match exactly, references must
 exist, and review dates expire. Growth in this visible list is itself a review
 signal.
 
+The most likely lane-registry red is `:stale-holding`: a lane's job is already
+done but the commissioner has not recorded or redispatched it. Exactly one is
+the accepted handoff interval. Two or more produce `DEGRADED-NEW` because they
+mean dispatcher backlog and idle capacity—not invalid source, but still a real
+operator lapse. Clear it by recording or redispatching completed lanes; do not
+raise the accepted count to match the backlog.
+
 Status also prints the bounded-testing retirement window directly from
 `bg.py test-health`: runs, passes, test failures, containment failures,
 eligibility, and the retirement comparison. Eligibility is not an accepted
