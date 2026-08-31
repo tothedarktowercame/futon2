@@ -8,6 +8,6 @@
   {:lane :wm-verbs
    :holding :C125-era-discriminators, :dispatched-at "2026-08-31T18:58:34Z", :job-id "invoke-1788202693331-5889-d3ff30f9", :expected-by "2026-08-31T19:43:34Z"}
   {:lane :wm-organization
-   :holding :C124-xrepo-provenance, :dispatched-at "2026-08-31T18:57:16Z", :job-id "invoke-1788202614857-5888-097ed768", :expected-by "2026-08-31T19:42:16Z"}
+   :holding :C128-gate-in-ci, :dispatched-at "2026-08-31T19:04:45Z", :job-id "invoke-1788203064355-5899-c709b78e", :expected-by "2026-08-31T19:49:45Z"}
   {:lane :wm-evidence
    :holding :C127-implementations, :dispatched-at "2026-08-31T19:02:36Z", :job-id "invoke-1788202936775-5896-e81ac2e7", :expected-by "2026-08-31T19:47:36Z"}]}
