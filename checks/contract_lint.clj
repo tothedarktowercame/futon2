@@ -308,6 +308,13 @@
                                                               masses)
                                                       (= 1 (reduce + masses)))))
                                              (:rows %)))
+   "PredictiveOutcomeRiskWitness" #(and (= :predictive-outcome-risk-reference/v1 (:schema %))
+                                         (= 1 (reduce + (vals (:predictive-mass %))))
+                                         (every? (fn [[o mass]]
+                                                   (or (zero? mass)
+                                                       (pos? (get (:preference-mass %) o 0))))
+                                                 (:predictive-mass %))
+                                         (= [:log 2] (:expected-risk %)))
    "HaveWantArrowWitness" have-want-arrow-witness?
    "FoldWitness" fold-witness?
    "FoldEscrowRecordWitness" fold-escrow-record-witness?
