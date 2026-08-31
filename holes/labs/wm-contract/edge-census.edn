@@ -5,7 +5,7 @@
   :derived 26,
   :measured 9,
   :specified 4,
-  :specified-to-nonnode 1,
+  :specified-to-nonnode 4,
   :sim 13},
  :totals
  {:distinct-edges 61,
@@ -13,7 +13,11 @@
   :attested-by-2+ 8,
   :measured-but-unlisted 5,
   :drawn-only 19},
- :specified-nonnode [[:node/R14 :store/realized-outcome-feedback]],
+ :specified-nonnode
+ [[:node/R7 :store/wm-trace]
+  [:mediator/R3a :node/R7]
+  [:node/R14 :store/realized-outcome-feedback]
+  [:node/R2 :mediator/R3a]],
  :measured-notes
  [{:edge [:R7 :R3], :note "approx", :on-map? true}
   {:edge [:R5 :R6], :note nil, :on-map? true}
