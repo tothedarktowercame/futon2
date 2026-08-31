@@ -1,0 +1,25 @@
+;; Four-vertex War Machine lane registry.
+;; Idle is explicit data: every idle row retains all dispatch keys with nil values.
+{:registry/version 1
+ :as-of "2026-08-31T13:42:07Z"
+ :lanes
+ [{:lane :wm-nouns
+   :holding nil
+   :dispatched-at nil
+   :job-id nil
+   :expected-by nil}
+  {:lane :wm-verbs
+   :holding nil
+   :dispatched-at nil
+   :job-id nil
+   :expected-by nil}
+  {:lane :wm-organization
+   :holding nil
+   :dispatched-at nil
+   :job-id nil
+   :expected-by nil}
+  {:lane :wm-evidence
+   :holding nil
+   :dispatched-at nil
+   :job-id nil
+   :expected-by nil}]}
