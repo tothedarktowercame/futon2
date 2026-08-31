@@ -6,7 +6,7 @@
  [{:lane :wm-nouns
    :holding :C236-next-glossary-term, :dispatched-at "2026-08-31T23:19:59Z", :job-id "invoke-1788218396129-6176-ea331b5a", :expected-by "2026-09-01T00:04:59Z"}
   {:lane :wm-verbs
-   :holding :C231-fixture-race, :dispatched-at "2026-08-31T23:12:25Z", :job-id "invoke-1788217916150-6164-d9783594", :expected-by "2026-08-31T23:57:25Z"}
+   :holding :C238-close-order, :dispatched-at "2026-08-31T23:22:33Z", :job-id "invoke-1788218549938-6184-8a5d22c3", :expected-by "2026-09-01T00:07:33Z"}
   {:lane :wm-organization
    :holding :C235-lifecycle-root-cause, :dispatched-at "2026-08-31T23:18:45Z", :job-id "invoke-1788218320096-6173-51d020c9", :expected-by "2026-09-01T00:03:45Z"}
   {:lane :wm-evidence
