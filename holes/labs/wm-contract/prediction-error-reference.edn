@@ -1,0 +1,6 @@
+{:schema :prediction-error-reference/v1
+ :basis "sec-glossary.tex:15 — epsilon_k = o_k - mu_k"
+ :kind :hand-derived-from-formula
+ :observation 1
+ :prediction 3
+ :expected-error -2}

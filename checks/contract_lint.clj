@@ -332,6 +332,10 @@
                                  (:weighted %))
                               (= {:precision 1 :prediction-error 2 :expected-variational-F 2}
                                  (:swapped %)))
+   "PredictionErrorWitness" #(and (= :prediction-error-reference/v1 (:schema %))
+                                    (= 1 (:observation %))
+                                    (= 3 (:prediction %))
+                                    (= -2 (:expected-error %)))
    "HaveWantArrowWitness" have-want-arrow-witness?
    "FoldWitness" fold-witness?
    "FoldEscrowRecordWitness" fold-escrow-record-witness?
