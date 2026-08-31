@@ -1,0 +1,7 @@
+{:witnesses "PreferenceDistribution"
+ :check {:repo "futon2" :path "checks/preference_distribution_witness.clj" :entrypoint "-main"}
+ :fixture {:repo "futon2" :path "holes/labs/wm-contract/preference-distribution-reference.edn"}
+ :run-sha "146dfcf2679d3a7218d8983782d8a28ef64a8d72"
+ :contract-sha "0c0f2876a55c528629a43103df3d4c38e36472f8"
+ :result :passed
+ :recorded-at "2026-08-31T23:59:00Z"}
