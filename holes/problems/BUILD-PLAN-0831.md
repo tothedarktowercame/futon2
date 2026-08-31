@@ -1064,3 +1064,32 @@ the apex gets two green holes and no belief.
 **Four vertices, one day, and the pattern across them is consistent:** every delegate has refused at least
 once, and each refusal was better founded than the instruction that provoked it. This one refused a trap I
 had built into the unblocking itself.
+
+---
+
+## Two rulings I declared and did not deliver *(caught 2026-08-31, by checking myself)*
+
+I ruled both the R16 fork and the TRACE vertex "settled by the spec, not by taste", wrote *"Proceeding"*
+and *"It gets a vertex"* — and delivered neither. Checked just now:
+
+    control-map-edges.edn   R16->R2 label still "re-observe"
+    control-stages.edn      TRACE among staged nodes: false
+
+**A claim recorded as settled with nothing behind it** is the defect this build exists to catch, and the
+distance between "decided" and "done" is exactly where it hides. It is also a smaller version of what the
+inbox-zero checkpoint recorded this morning: the record said one thing and the artefact said another.
+
+Both now dispatched, each as a small delivery to the vertex that owns it:
+
+- **VERBS-D2** — relabel `R16→R2` away from "re-observe", with the old label left legible and the
+  `enact.clj:113` citation, and the hyper-edge instance's `:semantics` checked for the same false claim.
+  Explicitly **not** touching P-R16's CONTESTED clause, which is the second stage.
+- **NOUNS-D4** — add the TRACE vertex, with the genuinely open part left to the delegate: whether it is a
+  **store** rather than a node. There is precedent — `:store/wm-trace` is already a member of the
+  R2-R3a-R7 instance, and wm-verbs introduced `:mediator/` rather than promoting R3a — so forcing TRACE
+  into the R-series would be the wrong kind of tidiness. It is told not to take an R-number unless it
+  concludes it genuinely is a pattern.
+
+**Standing correction to my own practice.** Ruling that something is decided is not delivering it, and
+saying "proceeding" in a report is not proceeding. When I retire an escalation by assessment, the same
+message must produce the dispatch — or the assessment becomes a record of work that never happened.
