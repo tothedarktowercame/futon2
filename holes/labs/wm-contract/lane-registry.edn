@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C170-retirement-visible, :dispatched-at "2026-08-31T20:43:03Z", :job-id "invoke-1788208978566-6003-62b87a96", :expected-by "2026-08-31T21:28:03Z"}
   {:lane :wm-evidence
-   :holding :C169-decision-digest, :dispatched-at "2026-08-31T20:32:59Z", :job-id "invoke-1788208374971-5995-8ed4fbfe", :expected-by "2026-08-31T21:17:59Z"}]}
+   :holding :C171-critical-path, :dispatched-at "2026-08-31T20:44:24Z", :job-id "invoke-1788209060290-6004-851a97ed", :expected-by "2026-08-31T21:29:24Z"}]}
