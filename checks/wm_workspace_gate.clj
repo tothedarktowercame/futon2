@@ -61,7 +61,7 @@
     "have_want_arrow_witness.clj"
     "hyper_edge_domain_range_check.clj" "hyper_edge_exemplar_check.clj"
     "lane_registry_check.clj" "log_multivariate_beta_witness.clj"
-    "model_uncertainty_eig_witness.clj"
+    "model_uncertainty_eig_witness.clj" "machine_vocabulary_witness.clj"
     "lean_sorry_category_check.clj"
     "obligation_ledger_reconciliation_check.clj"
     "preemptive_absence_coercion_lint.clj" "preemptive_acceptance_lint.clj"
