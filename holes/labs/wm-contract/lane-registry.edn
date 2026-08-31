@@ -4,7 +4,7 @@
  :as-of "2026-08-31T13:42:07Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C38-logMultivariateBeta, :dispatched-at "2026-08-31T14:01:34Z", :job-id "invoke-1788184883643-5651-fac4b5b2", :expected-by "2026-08-31T14:46:34Z"}
+   :holding :C42-carriers, :dispatched-at "2026-08-31T14:20:05Z", :job-id "invoke-1788185993285-5666-1d221d57", :expected-by "2026-08-31T15:05:05Z"}
   {:lane :wm-verbs
    :holding :C39-R8-delta, :dispatched-at "2026-08-31T14:16:36Z", :job-id "invoke-1788185786286-5660-fc163aee", :expected-by "2026-08-31T15:01:36Z"}
   {:lane :wm-organization
