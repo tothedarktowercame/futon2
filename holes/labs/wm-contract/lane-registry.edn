@@ -6,7 +6,7 @@
  [{:lane :wm-nouns
    :holding :C70-restate-sweep, :dispatched-at "2026-08-31T15:21:30Z", :job-id "invoke-1788189677324-5727-5bdf63a7", :expected-by "2026-08-31T16:06:30Z"}
   {:lane :wm-verbs
-   :holding :C69-draw-measured-hops, :dispatched-at "2026-08-31T15:16:40Z", :job-id "invoke-1788189389660-5724-5e137d7d", :expected-by "2026-08-31T16:01:40Z"}
+   :holding :C71-bind-conformance, :dispatched-at "2026-08-31T15:25:20Z", :job-id "invoke-1788189909084-5730-252eb180", :expected-by "2026-08-31T16:10:20Z"}
   {:lane :wm-organization
    :holding :C67-futon3-suite, :dispatched-at "2026-08-31T15:13:38Z", :job-id "invoke-1788189207329-5720-112f2a30", :expected-by "2026-08-31T15:58:38Z"}
   {:lane :wm-evidence
