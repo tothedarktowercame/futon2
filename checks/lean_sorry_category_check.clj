@@ -117,6 +117,11 @@
     {:pass? (empty? findings)
      :declarations (count decls)
      :sorry-count (count (filter :sorry? decls))
+     :sorry-category-counts
+     (frequencies
+      (keep (fn [{:keys [doc sorry?]}]
+              (when sorry? (first (filter #(str/includes? doc %) labels))))
+            decls))
      :category-counts (frequencies
                        (mapcat (fn [{:keys [doc]}]
                                  (filter #(str/includes? doc %) labels))
