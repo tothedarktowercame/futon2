@@ -1,0 +1,12 @@
+{:snapshot/id :control-map-lint/snapshot-2026-08-31
+ :recorded-at "2026-08-31"
+ :describes "Compact stable edge census; live derived and endpoint-record counts are deliberately excluded."
+ :input
+ {:data
+  {:edges [{:from :R1 :to :R2 :kind :control :status :drawn}]
+   :derived-undrawn [{:from :R2 :to :R3 :kind :support :by [:snapshot]}]}
+  :expected-drawn #{{:from :R1 :to :R2 :kind :control}}}
+ :expected
+ {:summary {:pass? true :source nil :drawn 1 :unresolved 0 :derived-undrawn 1
+            :derived-chartered 0 :specified 0 :unspecified 1 :failures 0}
+  :content-pin "dfb28d266c3836a075490cb179981997986902ecff26241e001663fe669a1569"}}

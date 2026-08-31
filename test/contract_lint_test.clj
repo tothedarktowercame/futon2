@@ -15,6 +15,12 @@
 (def fixtures
   {"good" (edn/read-string (slurp "test/fixtures/contract/ablation-good.edn"))
    "bad" (edn/read-string (slurp "test/fixtures/contract/ablation-bad.edn"))})
+(def snapshot-path "test/fixtures/contract/snapshot.edn")
+
+(defn- content-pin [value]
+  (let [digest (java.security.MessageDigest/getInstance "SHA-256")]
+    (.update digest (.getBytes (pr-str value) "UTF-8"))
+    (format "%064x" (java.math.BigInteger. 1 (.digest digest)))))
 (defn run [decls registry & [authority sha-fn]]
   (lint/lint-data {:contract {:source source :declarations decls}
                    :registry registry :authority (or authority "contract-sha")
@@ -88,7 +94,19 @@
       (is (true? (boolean (check good))))
       (is (false? (boolean (check bad)))))))
 
-(deftest live-contract-registered-counts
+(deftest committed-contract-snapshot-owns-exact-counts-and-pin
+  (let [{:keys [input expected recorded-at]} (edn/read-string (slurp snapshot-path))
+        result (lint/lint-data
+                (assoc input
+                       :authority "snapshot-contract-sha"
+                       :sha-fn (constantly "snapshot-run-sha")
+                       :read-fixture (constantly {})))]
+    (is (= "2026-08-31" recorded-at))
+    (is (= (:content-pin expected) (content-pin input)))
+    (is (= (:counts expected) (get-in result [:summary :counts])))
+    (is (true? (get-in result [:summary :pass?])))))
+
+(deftest live-contract-enforces-structure-and-emits-moving-counts
   (let [contract-path "/home/joe/code/mathlib4/DarkTower/WarMachine/holes-contract.json"
         authority (get-in (json/parse-string (slurp contract-path) true) [:source :git-sha])
         result (lint/lint-file
@@ -96,9 +114,13 @@
                  :registry "checks/witness-registry.edn"
                  :authority authority})]
     (is (true? (get-in result [:summary :pass?])))
-    (is (= {:closed-by-record 49 :refused-implementation 5
-            :stale 16 :unwitnessed 12}
-           (get-in result [:summary :counts])))))
+    (is (map? (get-in result [:summary :counts])))
+    (is (every? (comp seq :owner) (:declarations result)))
+    (is (every? (comp seq :holder) (:declarations result)))
+    (is (apply distinct? (map :name (:declarations result))))
+    (is (every? #(= :closed-by-record (:judgement %))
+                (filter #(= "closed" (:kind %)) (:declarations result))))
+    (is (empty? (:errors result)))))
 
 (when (= *file* (System/getProperty "babashka.file"))
   (let [{:keys [fail error]} (run-tests)]

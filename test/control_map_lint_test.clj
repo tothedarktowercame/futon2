@@ -2,9 +2,16 @@
 (ns control-map-lint-test
   (:require [babashka.fs :as fs]
             [checks.control-map-lint :as lint]
+            [clojure.edn :as edn]
             [clojure.test :refer [deftest is run-tests testing]]))
 
 (def edge {:from :R1 :to :R2 :kind :control :status :drawn})
+(def snapshot-path "test/fixtures/control-map/snapshot.edn")
+
+(defn- content-pin [value]
+  (let [digest (java.security.MessageDigest/getInstance "SHA-256")]
+    (.update digest (.getBytes (pr-str value) "UTF-8"))
+    (format "%064x" (java.math.BigInteger. 1 (.digest digest)))))
 
 (defn- with-records [texts f]
   (let [dir (fs/create-temp-dir {:prefix "control-map-lint-"})]
@@ -14,17 +21,26 @@
       (f (str dir))
       (finally (fs/delete-tree dir)))))
 
-(deftest current-control-map-baseline
+(deftest committed-control-map-snapshot-owns-exact-counts-and-pin
+  (let [{:keys [input expected recorded-at]} (edn/read-string (slurp snapshot-path))
+        report (lint/lint-data input)]
+    (is (= "2026-08-31" recorded-at))
+    (is (= (:content-pin expected) (content-pin input)))
+    (is (= (:summary expected) (:summary report)))
+    (is (true? (get-in report [:summary :pass?])))))
+
+(deftest live-control-map-enforces-independent-baseline-and-emits-moving-counts
   (let [report (lint/lint-file {})]
     (is (true? (get-in report [:summary :pass?])))
-    (is (= 21 (get-in report [:summary :drawn])))
-    (is (= 1 (get-in report [:summary :unresolved])))
-    (is (= 26 (get-in report [:summary :derived-undrawn])))
-    (is (= 1 (get-in report [:summary :derived-chartered])))
-    (is (= 0 (get-in report [:summary :specified])))
-    (is (= 21 (get-in report [:summary :unspecified])))
-    (is (= {:no-endpoint-record 15 :one-endpoint-record 6}
-           (frequencies (map :endpoints-agree? (:edges report)))))))
+    (is (every? #(contains? (:summary report) %)
+                [:drawn :unresolved :derived-undrawn :specified :unspecified]))
+    (is (= lint/expected-drawn-edges
+           (set (map lint/edge-key (:edges report)))))
+    (is (apply distinct? (map lint/edge-key (:edges report))))
+    (is (every? #(contains? #{:no-endpoint-record :one-endpoint-record
+                              :schema-unspecified true false} %)
+                (map :endpoints-agree? (:edges report))))
+    (is (empty? (:checks report)))))
 
 (deftest drawn-edge-baseline-and-endpoint-agreement-falsifiers
   (testing "a baseline drawn edge missing from the EDN fails closed"

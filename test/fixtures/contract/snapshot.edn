@@ -1,0 +1,19 @@
+{:snapshot/id :contract-lint/snapshot-2026-08-31
+ :recorded-at "2026-08-31"
+ :describes "Compact stable judgement census; live contract size is deliberately excluded."
+ :input
+ {:contract
+  {:source {:module "DarkTower.WarMachine.Holes" :git-sha "snapshot-contract-sha"}
+   :declarations
+   [{:name "closed" :kind "closed" :owner "owner-a" :holder "holder-a" :evidence nil}
+    {:name "refused" :kind "hole" :owner "owner-b" :holder "holder-b" :evidence nil}
+    {:name "unwitnessed" :kind "hole" :owner "owner-c" :holder "holder-c" :evidence "OtherTable"}
+    {:name "witnessed" :kind "hole" :owner "owner-d" :holder "holder-d" :evidence "OtherTable"}]}
+  :registry
+  [{:witnesses "witnessed"
+    :fixture {:repo "fixture" :path "semantic-fixture"}
+    :run-sha "snapshot-run-sha" :contract-sha "snapshot-contract-sha"
+    :result :passed :recorded-at "2026-08-31T00:00:00Z"}]}
+ :expected
+ {:counts {:closed-by-record 1 :refused-implementation 1 :unwitnessed 1 :witnessed 1}
+  :content-pin "83698531922c4e4b757428cd90020c363336c768ce4b8563360a7f7e48c1bcd4"}}

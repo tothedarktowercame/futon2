@@ -199,3 +199,33 @@ The operational gates are separate CLI qualifications and were run immediately a
 `r2_channel_contract` exited 1 at 54 files / 801 forms / 799 conforming / 2 firing;
 `r8_f_contract` exited 0 at 54 / 801 with census `755/41/5`, classified by C39 as conforming
 append-only growth rather than the earlier unexplained +8.
+
+## C53 — contract and control-map snapshot/live split
+
+Canonical snapshot suites and live falsifiers:
+
+```sh
+bb -cp . test/contract_lint_test.clj
+bb -cp . test/control_map_lint_test.clj
+AUTH=$(python3 -c 'import json; print(json.load(open("/home/joe/code/mathlib4/DarkTower/WarMachine/holes-contract.json"))["source"]["git-sha"])')
+bb -cp . checks/contract_lint.clj --contract /home/joe/code/mathlib4/DarkTower/WarMachine/holes-contract.json --registry checks/witness-registry.edn --report /tmp/contract-lint.edn --authority "$AUTH"
+bb -cp . checks/contract_lint.clj --negative --contract /home/joe/code/mathlib4/DarkTower/WarMachine/holes-contract.json --registry checks/witness-registry.edn --report /tmp/contract-lint-negative-unused.edn --authority "$AUTH"
+bb -cp . checks/control_map_lint.clj --report /tmp/control-map-lint.edn
+bb -cp . checks/control_map_lint.clj --negative --report /tmp/control-map-lint-negative-unused.edn
+```
+
+The dated compact fixtures own exact counts and canonical-input pins:
+
+- contract: `83698531922c4e4b757428cd90020c363336c768ce4b8563360a7f7e48c1bcd4`
+- control map: `dfb28d266c3836a075490cb179981997986902ecff26241e001663fe669a1569`
+
+Live contract counts remain emitted evidence. Its test enforces authority, unique declaration names,
+nonempty owner and holder, empty structural errors, and that every closed declaration is classified
+`:closed-by-record`. Live control-map counts remain evidence; its test enforces the independent 21-edge
+identity set, unique drawn identities, typed endpoint outcomes, and no structural findings. Neither test
+asserts moving judgement, derived-edge, endpoint-record, or specified/unspecified census literals.
+
+Observed positive/negative exits were `0/0` for both checkers. The authority mutation and missing drawn
+edge remain semantic rejecting cases. The full canonical suite then completed at **1009 tests, 6107
+assertions, 0 failures, 0 errors**, exit 0. R2 remains independently red on its two real missing-channel
+records; C53 does not touch or suppress that operational gate.
