@@ -8,6 +8,6 @@
   {:lane :wm-verbs
    :holding :C202-qa-verdict-path, :dispatched-at "2026-08-31T21:53:41Z", :job-id "invoke-1788213217759-6079-38e21dd4", :expected-by "2026-08-31T22:38:41Z"}
   {:lane :wm-organization
-   :holding :C197-tree-receipts, :dispatched-at "2026-08-31T21:45:10Z", :job-id "invoke-1788212705605-6066-4a13ce88", :expected-by "2026-08-31T22:30:10Z"}
+   :holding :C203-readiness-actionable, :dispatched-at "2026-08-31T21:56:49Z", :job-id "invoke-1788213405244-6082-d7f4202c", :expected-by "2026-08-31T22:41:49Z"}
   {:lane :wm-evidence
    :holding :C201-classify-drift, :dispatched-at "2026-08-31T21:52:17Z", :job-id "invoke-1788213133416-6075-00e297e1", :expected-by "2026-08-31T22:37:17Z"}]}
