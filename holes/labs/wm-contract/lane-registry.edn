@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C162-gate-timing, :dispatched-at "2026-08-31T20:22:54Z", :job-id "invoke-1788207771180-5981-5f2f00b3", :expected-by "2026-08-31T21:07:54Z"}
   {:lane :wm-evidence
-   :holding :C165-index-check, :dispatched-at "2026-08-31T20:27:29Z", :job-id "invoke-1788208044571-5986-46c59faf", :expected-by "2026-08-31T21:12:29Z"}]}
+   :holding :C169-decision-digest, :dispatched-at "2026-08-31T20:32:59Z", :job-id "invoke-1788208374971-5995-8ed4fbfe", :expected-by "2026-08-31T21:17:59Z"}]}
