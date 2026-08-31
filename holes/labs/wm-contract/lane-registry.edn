@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C138-status-field-fix, :dispatched-at "2026-08-31T19:26:40Z", :job-id "invoke-1788204396750-5922-0dc119ea", :expected-by "2026-08-31T20:11:40Z"}
   {:lane :wm-evidence
-   :holding :C139-catalogue-update, :dispatched-at "2026-08-31T19:27:48Z", :job-id "invoke-1788204464251-5924-c7130960", :expected-by "2026-08-31T20:12:48Z"}]}
+   :holding :C142-class7-and-prevention-audit, :dispatched-at "2026-08-31T19:36:52Z", :job-id "invoke-1788205007501-5932-90eda9df", :expected-by "2026-08-31T20:21:52Z"}]}
