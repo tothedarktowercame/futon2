@@ -99,7 +99,9 @@
    {:name :lean-sorry-categories
     :argv ["bb" "checks/lean_sorry_category_check.clj"]}
    {:name :model-uncertainty-eig
-    :argv ["bb" "checks/model_uncertainty_eig_witness.clj"]}])
+    :argv ["bb" "checks/model_uncertainty_eig_witness.clj"]}
+   {:name :p4ng-referent-drift :dir "/home/joe/code/p4ng"
+    :argv ["python3" "detect_drift.py"]}])
 
 (defn control-commands []
   [{:name :c116-removed-ledger-row
@@ -134,7 +136,9 @@
    {:name :c143-missing-record-pointer
     :argv ["bb" "checks/closed_record_pointer_check.clj" "--negative"]}
    {:name :c147-collapsed-eig-equality
-    :argv ["bb" "checks/model_uncertainty_eig_witness.clj" "--negative"]}])
+    :argv ["bb" "checks/model_uncertainty_eig_witness.clj" "--negative"]}
+   {:name :c154-referent-content-change :dir "/home/joe/code/p4ng"
+    :argv ["python3" "detect_drift.py" "--control-unit-change"]}])
 
 (defn run-one [{:keys [name argv dir]}]
   (println "wm-workspace-gate: RUN" (clojure.core/name name))
