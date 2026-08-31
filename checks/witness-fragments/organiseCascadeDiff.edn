@@ -8,7 +8,7 @@
  :fixture {:repo "futon2"
            :path "holes/labs/wm-contract/cascade-diff-reference.edn"}
  :run-sha "ecf819234cc50afbdfccffb5838b628018584f76"
- :contract-sha "ed25007ad78ab64de7818a4628bee246c08a7419"
+ :contract-sha "309d1f4874e4ce713ce813ca26a75a5c323eb734"
  :result :passed
  :recorded-at "2026-08-31T23:59:00Z"
  :note "C64 fixture-indexed bindings: O1 rejects --negative-o1 (unrecorded addition); O2 rejects --negative-o2 (unsupported reverse edge); O3 rejects --negative-o3 (missing fast-forward); O4 rejects --negative-o4 (precedence variant with unchanged order and score). The bindings witness the pinned cascade only; organise remains refused."}

@@ -120,7 +120,11 @@
    {:name :c134-label-on-proved
     :argv ["bb" "checks/lean_sorry_category_check.clj" "--negative-proved-label"]}
    {:name :c134-missing-checker
-    :argv ["bb" "checks/lean_sorry_category_check.clj" "--negative-missing-checker"]}])
+    :argv ["bb" "checks/lean_sorry_category_check.clj" "--negative-missing-checker"]}
+   {:name :c137-missing-obligation-fixture
+    :argv ["bb" "checks/lean_sorry_category_check.clj" "--negative-missing-fixture"]}
+   {:name :c137-obligation-fixture-drift
+    :argv ["bb" "checks/lean_sorry_category_check.clj" "--negative-fixture-drift"]}])
 
 (defn run-one [{:keys [name argv dir]}]
   (println "wm-workspace-gate: RUN" (clojure.core/name name))

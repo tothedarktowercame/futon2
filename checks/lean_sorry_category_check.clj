@@ -6,6 +6,12 @@
 (def source-path "/home/joe/code/mathlib4/DarkTower/WarMachine/Holes.lean")
 (def workspace "/home/joe/code/futon2")
 
+(def repository-roots
+  {"futon2" "/home/joe/code/futon2"
+   "futon3" "/home/joe/code/futon3"
+   "mathlib4" "/home/joe/code/mathlib4"
+   "p4ng" "/home/joe/code/p4ng"})
+
 (def labels
   ["DELIBERATE IMPLEMENTATION REFUSAL"
    "PERMANENT EXTERNAL ATTESTATION"
@@ -24,6 +30,51 @@
 (defn checker-paths [doc]
   (map second (re-seq #"`(checks/[^` ]+\.clj)`" doc)))
 
+(defn sha256-file [path]
+  (let [digest (java.security.MessageDigest/getInstance "SHA-256")]
+    (with-open [input (java.io.BufferedInputStream. (java.io.FileInputStream. (str path)))]
+      (let [buffer (byte-array 8192)]
+        (loop []
+          (let [n (.read input buffer)]
+            (when (pos? n)
+              (.update digest buffer 0 n)
+              (recur))))))
+    (format "%064x" (java.math.BigInteger. 1 (.digest digest)))))
+
+(defn fixture-references [doc]
+  (let [fixtures (mapv (fn [[_ repo path]] {:repo repo :path path})
+                       (re-seq #"fixture: `([^:` ]+):([^`]+)`" doc))
+        pins (mapv second (re-seq #"fixture-sha256: `([0-9a-f]{64})`" doc))]
+    {:fixtures fixtures :pins pins}))
+
+(defn obligation-fixture-errors [name doc]
+  (let [{:keys [fixtures pins]} (fixture-references doc)]
+    (cond
+      (not= 1 (count fixtures))
+      [{:declaration name :reason :obligation-fixture-count :count (count fixtures)}]
+
+      (not= 1 (count pins))
+      [{:declaration name :reason :obligation-fixture-pin-count :count (count pins)}]
+
+      :else
+      (let [{:keys [repo path]} (first fixtures)
+            root (get repository-roots repo)
+            target (when root (fs/path root path))]
+        (cond
+          (nil? root)
+          [{:declaration name :reason :obligation-fixture-unknown-repository :repo repo}]
+
+          (not (fs/regular-file? target))
+          [{:declaration name :reason :obligation-fixture-missing
+            :repo repo :path path}]
+
+          (not= (first pins) (sha256-file target))
+          [{:declaration name :reason :obligation-fixture-pin-mismatch
+            :repo repo :path path :recorded (first pins)
+            :actual (sha256-file target)}]
+
+          :else [])))))
+
 (defn validate-source [source]
   (let [decls (declarations source)
         findings
@@ -35,14 +86,18 @@
                                (re-seq #"([A-Z][A-Z -]+) · contract kind HOLE intentionally" doc))
                  unknown (remove (set labels) unknown)
                  checker-errors
-                 (when (= category "PERMANENT EXTERNAL ATTESTATION")
+                 (if (= category "PERMANENT EXTERNAL ATTESTATION")
                    (let [paths (vec (checker-paths doc))]
-                     (cond
-                       (empty? paths) [{:declaration name :reason :attestation-checker-absent}]
-                       :else (for [path paths
-                                   :when (not (fs/regular-file? (fs/path workspace path)))]
-                               {:declaration name :reason :attestation-checker-missing
-                                :path path}))))]
+                     (if (empty? paths)
+                       [{:declaration name :reason :attestation-checker-absent}]
+                       (for [path paths
+                             :when (not (fs/regular-file? (fs/path workspace path)))]
+                         {:declaration name :reason :attestation-checker-missing
+                          :path path})))
+                   [])
+                 fixture-errors
+                 (when (= category "WITNESSED-INSTANCE OBLIGATION")
+                   (obligation-fixture-errors name doc))]
              (concat
               (when (and sorry? (not= 1 (count present)))
                 [{:declaration name :reason :sorry-category-count
@@ -86,6 +141,16 @@
     "--negative-missing-checker"
     (str/replace-first source "checks/preference_stack_binding_check.clj"
                        "checks/does_not_exist.clj")
+
+    "--negative-missing-fixture"
+    (str/replace-first source
+                       "futon2:holes/labs/wm-contract/ablation-exact-dyadic.edn"
+                       "futon2:holes/labs/wm-contract/does-not-exist.edn")
+
+    "--negative-fixture-drift"
+    (str/replace-first source
+                       "f315b748420540688ef81086101b5789a4ecb2bd2a84c7a2b491f94fe8c56261"
+                       (apply str (repeat 64 "0")))
 
     source))
 
