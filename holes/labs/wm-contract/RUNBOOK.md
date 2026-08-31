@@ -27,6 +27,14 @@ using the absent `codex-7` default. Only run the printed
 `clojure -M:wm-full-loop once --reviewer ...` command after the preflight says
 `READY`.
 
+**Cohort 46 cancellation boundary (2026-08-31):** cancelling an in-flight
+Agency job is recorded as a closed `:cancelled` attempt and consumes an attempt
+ordinal, but `:cancelled` was not in cohort 46's preregistered outcome taxonomy.
+The cancelled attempt therefore begins a new semantic stratum and must not be
+pooled with cohort 46's original outcome classes. Do not amend the
+preregistration after the fact. See
+[`C206-cohort-cancellation-boundary.md`](C206-cohort-cancellation-boundary.md).
+
 Readiness reports two independent axes. Evidence kind `UNAVAILABLE` means a required live resource
 cannot be used now (reviewer, roster, or bounded admission). `UNVERIFIED` means
 the machine might run, but the exact code/evidence it would use has not passed
@@ -44,6 +52,24 @@ tree remains current, while a recent receipt for another tree is `UNVERIFIED`.
 The repository must be clean at both ends of the run and at readiness time;
 uncommitted content has no stable tested-tree identity. Legacy receipts without
 this provenance are also `UNVERIFIED` and must not be backfilled.
+
+Readiness therefore requires a **quiescent tree**: run it between deliveries,
+not while lanes are editing or committing. Pause repository writes long enough
+to obtain a clean tree, complete the bounded suite (about 105 seconds in C162),
+run readiness, and finish the operator run. The pause extends through the run,
+not merely through preflight: readiness does not lock the checkout, and the
+loop may read repository data after startup. A change during the suite makes
+the receipt basis unstable; a change after the suite makes it differ from the
+current tree; a change after readiness is an unguarded time-of-check/time-of-use
+change. In each case, stop and repeat from a clean tree rather than treating
+the earlier verdict as current.
+
+The clean-tree rule remains repository-wide. There is no maintained manifest
+of every source, generated input, classpath resource, and dynamically opened
+file the suite or operator loop can consume, so a tested-path subset would be
+an assertion without a complete dependency boundary. An isolated committed
+worktree could provide a lighter future execution path while other lanes work
+elsewhere, but the current shared checkout provides no such isolation.
 
 ### Expected duration
 
