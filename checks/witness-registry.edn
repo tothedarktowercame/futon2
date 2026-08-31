@@ -11,7 +11,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/generative-model-reference.edn"},
   :run-sha "7b31da1fe248a05b35940e9a68544b4ffbef36a7",
-  :contract-sha "26a66d88ca2ad67e779406be9bb0faddb283837f",
+  :contract-sha "ef6e501f0bfd3caf76667d44993b151bd1d4233a",
   :result :passed,
   :recorded-at "2026-09-01T00:20:00Z"}
  {:witnesses "expectedFreeEnergy",
@@ -23,7 +23,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/expected-free-energy-reference.edn"},
   :run-sha "58d667284a63c69c0027c9bf204e9bc0eac098b9",
-  :contract-sha "26a66d88ca2ad67e779406be9bb0faddb283837f",
+  :contract-sha "ef6e501f0bfd3caf76667d44993b151bd1d4233a",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
  {:witnesses "expectedInformationGain",
@@ -36,7 +36,7 @@
    :path
    "holes/labs/wm-contract/expected-information-gain-reference.edn"},
   :run-sha "c99ffdbc13e9b114dbcdca7451651e568588a947",
-  :contract-sha "26a66d88ca2ad67e779406be9bb0faddb283837f",
+  :contract-sha "ef6e501f0bfd3caf76667d44993b151bd1d4233a",
   :result :passed,
   :recorded-at "2026-09-01T00:10:00Z"}
  {:witnesses
@@ -66,7 +66,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/log-multivariate-beta-reference.edn"},
   :run-sha "720af918c430415bf07f4eba29ec73d49b343a10",
-  :contract-sha "26a66d88ca2ad67e779406be9bb0faddb283837f",
+  :contract-sha "ef6e501f0bfd3caf76667d44993b151bd1d4233a",
   :result :passed,
   :recorded-at "2026-08-31T23:50:00Z"}
  {:witnesses "nonDegenerateAblationLaw",
@@ -82,6 +82,24 @@
   {:check "checks/ablate_g_snatch.clj", :evidence :emitted-by-check},
   :result :passed,
   :fixture {:repo "futon3", :path "checks/ablation-snatch.edn"}}
+ {:witnesses
+  ["organiseO1NodesRecorded"
+   "organiseO2AuthoredReachability"
+   "organiseO3FastForward"
+   "organiseO4PrecedenceGovernance"],
+  :check
+  {:repo "futon2",
+   :path "checks/cascade_diff_witness.clj",
+   :entrypoint "-main"},
+  :fixture
+  {:repo "futon2",
+   :path "holes/labs/wm-contract/cascade-diff-reference.edn"},
+  :run-sha "ecf819234cc50afbdfccffb5838b628018584f76",
+  :contract-sha "ef6e501f0bfd3caf76667d44993b151bd1d4233a",
+  :result :passed,
+  :recorded-at "2026-08-31T23:59:00Z",
+  :note
+  "C64 fixture-indexed bindings: O1 rejects --negative-o1 (unrecorded addition); O2 rejects --negative-o2 (unsupported reverse edge); O3 rejects --negative-o3 (missing fast-forward); O4 rejects --negative-o4 (precedence variant with unchanged order and score). The bindings witness the pinned cascade only; organise remains refused."}
  {:witnesses "preferenceStackLiveRecorded",
   :freshness :pinned-git-v1,
   :contract-sha "eec8279cf7b2c841f386894116e6aa627869a75c",
