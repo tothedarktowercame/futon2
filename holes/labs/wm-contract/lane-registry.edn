@@ -4,7 +4,7 @@
  :as-of "2026-08-31T13:42:07Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C31, :dispatched-at "2026-08-31T13:52:18Z", :job-id "invoke-1788184329114-5641-411da09f", :expected-by "2026-08-31T14:37:18Z"}
+   :holding :C36-glossary-census, :dispatched-at "2026-08-31T13:57:29Z", :job-id "invoke-1788184639277-5647-5e0af480", :expected-by "2026-08-31T14:42:29Z"}
   {:lane :wm-verbs
    :holding :C24-edn-audit, :dispatched-at "2026-08-31T13:54:09Z", :job-id "invoke-1788184439058-5642-96f7c4c1", :expected-by "2026-08-31T14:39:09Z"}
   {:lane :wm-organization
