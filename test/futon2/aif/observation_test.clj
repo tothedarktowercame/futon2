@@ -70,7 +70,7 @@
 
   (testing "sense->vector produces ordered vector"
     (let [o (obs/observe sample-data)
-          v (obs/sense->vector o)]
+          v (obs/sense->vector-legacy o)]
       (is (= (count obs/observation-channels) (count v))
           "vector length matches declared channel count")
       (is (every? number? v) "all values should be numbers")
@@ -88,7 +88,7 @@
   (testing ":annotation-health appears in sense->vector at the last position"
     (let [data {:annotation-graph {:health 0.7}}
           o (obs/observe data)
-          v (obs/sense->vector o)]
+          v (obs/sense->vector-legacy o)]
       (is (= 0.7 (last v))
           ":annotation-health is the last channel and matches its observed value"))))
 
@@ -126,3 +126,17 @@
   (testing "the tagged form survives an ordinary EDN round trip"
     (let [envelope (obs/observation-envelope (obs/observe {}))]
       (is (= envelope (edn/read-string (pr-str envelope)))))))
+
+(deftest vector-boundary-requires-matching-envelope-test
+  (let [o (obs/observe sample-data)
+        envelope (obs/observation-envelope o)]
+    (is (= (obs/sense->vector-legacy o)
+           (obs/sense->vector o envelope)))
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                          #"requires its matching envelope"
+                          (obs/sense->vector o
+                                             (obs/observation-envelope
+                                              (obs/observe {})))))
+    (is (thrown? clojure.lang.ArityException
+                 (obs/sense->vector o))
+        "a new caller cannot obtain the vector without supplying an envelope")))

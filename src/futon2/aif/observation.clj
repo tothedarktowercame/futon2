@@ -145,8 +145,23 @@
      :annotation-health annotation-health}]
     (with-meta values {::channel-statuses (channel-statuses data)})))
 
-(defn sense->vector
-  "Convert observation map to ordered vector (for ML/AIF consumption).
-   cf. cyberants observe.clj/sense->vector."
+(defn ^:deprecated sense->vector-legacy
+  "Deprecated numeric-only observation projection.
+
+   Missing channels still become 0.0 for compatibility. New consumers must
+   call `sense->vector` with the tagged observation envelope."
   [obs]
   (mapv #(get obs % 0.0) observation-channels))
+
+(defn sense->vector
+  "Convert an observation to its ordered numeric vector, requiring the exact
+   tagged envelope beside it. Requiring both objects makes absence provenance
+   part of every new vector boundary; use `sense->vector-legacy` only for the
+   enumerated compatibility population."
+  [obs envelope]
+  (let [expected (observation-envelope obs)]
+    (when-not (= expected envelope)
+      (throw (ex-info "numeric observation vector requires its matching envelope"
+                      {:expected-type (:type expected)
+                       :provided-type (:type envelope)})))
+    (mapv #(get obs % 0.0) observation-channels)))

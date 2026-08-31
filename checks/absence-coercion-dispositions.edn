@@ -7,7 +7,12 @@
  [{:at "src/futon2/aif/observation.clj:117-145" :disposition :fix-now
    :control "observation-status / observation-envelope preserve :present zero versus reason-bearing :absent"
    :implemented-by "f94df39"}
-  {:at "src/futon2/aif/observation.clj:152" :disposition :blocked :blocked-on :value-status-vector-migration}
+  {:at "src/futon2/aif/observation.clj:152" :disposition :exempt-with-reason
+   :lint-visible true
+   :exemption :deprecated-legacy-projection
+   :reason "sense->vector-legacy retains numeric coercion only for the enumerated compatibility population"
+   :migration-target "sense->vector with the matching observation-envelope"
+   :deprecated-by :C133}
   {:at "src/futon2/aif/free_energy.clj:23" :disposition :fix-now
    :control "channel-gap accepts only a present numeric reading; absence never reaches arithmetic"
    :implemented-by :C127}
@@ -42,4 +47,4 @@
    :exemption :versioned-read-compatibility
    :reason "Legacy/partial trace reads preserve old records; this is serialization compatibility, not a numeric measurement or score. A schema-version migration remains separately named."}
   {:at "src/futon2/aif/belief.clj:1040-1052" :disposition :blocked :blocked-on :precision-pass-through-tag}]
- :summary {:fix-now 9 :exempt-with-reason 1 :blocked 8}}
+ :summary {:fix-now 9 :exempt-with-reason 2 :blocked 7}}

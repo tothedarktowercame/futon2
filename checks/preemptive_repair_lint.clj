@@ -92,10 +92,16 @@
       (throw (ex-info "absence dispositions do not cover the live C12 population"
                       {:census (set (map :at unsafe)) :dispositions (set (keys by-at))})))
     (->> unsafe
-         (filter #(= :blocked (:disposition (by-at (:at %)))))
-         (mapv #(hash-map :repo :futon2 :path (:at %) :finding :absence-coerced
-                          :disposition :blocked :blocked-on (:blocked-on (by-at (:at %)))
-                          :input (:input %) :becomes (:becomes %))))))
+         (filter #(let [row (by-at (:at %))]
+                    (or (= :blocked (:disposition row))
+                        (:lint-visible row))))
+         (mapv #(let [row (by-at (:at %))]
+                  (cond-> {:repo :futon2 :path (:at %) :finding :absence-coerced
+                           :disposition (:disposition row)
+                           :input (:input %) :becomes (:becomes %)}
+                    (:blocked-on row) (assoc :blocked-on (:blocked-on row))
+                    (:exemption row) (assoc :exemption (:exemption row)
+                                            :migration-target (:migration-target row))))))))
 
 (defn era-findings [rows]
   (vec
