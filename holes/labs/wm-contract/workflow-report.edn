@@ -1,0 +1,116 @@
+{:lanes
+ [{:lane :wm-nouns,
+   :completed 6,
+   :dispatched 7,
+   :in-flight "C236",
+   :holding :C236-next-glossary-term,
+   :blocked 1}
+  {:lane :wm-verbs,
+   :completed 4,
+   :dispatched 5,
+   :in-flight "C238",
+   :holding :C238-close-order,
+   :blocked 1}
+  {:lane :wm-organization,
+   :completed 5,
+   :dispatched 6,
+   :in-flight "C235",
+   :holding :C235-lifecycle-root-cause,
+   :blocked 1}
+  {:lane :wm-evidence,
+   :completed 7,
+   :dispatched 8,
+   :in-flight "C237",
+   :holding :C237-q-pin-coupling,
+   :blocked 1}],
+ :schema :wm/workflow-report-v1,
+ :since "2026-08-30T00:00:00Z",
+ :semantics
+ {:completed
+  "cases whose latest ledger heading attributes them to that lane",
+  :dispatched
+  "completed plus the lane's current open registry holding, if any",
+  :blocked
+  "1 when the lane holds an open case, else 0; not an error state",
+  :open-dispatched
+  "cases recorded as dispatched whose completion has not been recorded",
+  :owner-repairs
+  "cases repaired by the workflow owner rather than a lane",
+  :caveat
+  "there is no separate dispatch log; dispatch is inferred from the case ledger and the current holding, so a case dispatched and abandoned without a ledger entry would be invisible"},
+ :open-dispatched ["C234"],
+ :sources
+ {:case-ledger
+  {:path "p4ng/vetting/CLEANUP-QUEUE.md",
+   :revision "3635cc6",
+   :sha256-prefix "546fbd90b6754035"},
+  :lane-registry
+  {:path "futon2/holes/labs/wm-contract/lane-registry.edn",
+   :revision "ad8bdc0",
+   :sha256-prefix "dbff8d21bc4f5d67",
+   :as-of "2026-08-31T15:39:14.434945104Z"},
+  :decisions
+  {:path "futon2/holes/problems/DECISIONS-PENDING.md",
+   :sha256-prefix "fd312cf1067e005d"}},
+ :pending
+ ["Strategic outcome vocabulary"
+  "Authored R16 outward-act binding"
+  "Avoided-range diagnostics as action guards"
+  "Prediction triple"
+  "Belief aggregation"
+  "Strategic-mode inference"
+  "Missing sorry pressure"
+  "Validated rollout-step producer"
+  "Unscored rollout moves"
+  "Fulab temperature without prediction error"
+  "Historical versus live Morning Brief QA"
+  "Support-typed shadow as the live selection authority"],
+ :owner-repairs
+ ["C146" "C150" "C154" "C161" "C213" "C216" "C91" "C97"],
+ :totals
+ {:cases-in-ledger 139,
+  :cases-attributed 31,
+  :completed-by-lanes 22,
+  :owner-repairs 8,
+  :open-dispatched 1,
+  :pending-decisions 12},
+ :as-of "2026-08-31T23:26:19.574795143Z",
+ :attribution
+ {:systematic-from "C209",
+  :cases-attributed 31,
+  :cases-in-ledger 139,
+  :attributed-cases
+  ["C23"
+   "C32"
+   "C33"
+   "C91"
+   "C97"
+   "C146"
+   "C150"
+   "C154"
+   "C161"
+   "C209"
+   "C210"
+   "C211"
+   "C212"
+   "C213"
+   "C214"
+   "C215"
+   "C216"
+   "C217"
+   "C218"
+   "C219"
+   "C220"
+   "C221"
+   "C222"
+   "C223"
+   "C224"
+   "C225"
+   "C226"
+   "C227"
+   "C228"
+   "C229"
+   "C234"],
+  :note
+  "per-lane counts cover only cases whose ledger heading names a lane. Attribution is sparse across the early campaign and continuous from :systematic-from onward, so these counts are not a census of the campaign; earlier cases appear in :cases-in-ledger without a lane."},
+ :frontier 238}
