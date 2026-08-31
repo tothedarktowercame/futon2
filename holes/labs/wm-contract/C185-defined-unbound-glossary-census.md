@@ -37,18 +37,41 @@ shape.
 
 ## Partition and consequence
 
-- **12 bindable now**: seven already have adjacent executable evidence that is
-  merely unregistered at the glossary-term grain; five need small adapters or
-  independent numeric fixtures around existing executing referents.
+- **12 bindable now**: six have adjacent executable evidence, but still need
+  contract metadata and term-specific adapters; six need independent numeric
+  fixtures around existing executing referents.
 - **2 blocked**: Pattern/cascade and Policy π, both on object identity at the
   glossary grain rather than on missing implementations.
 - **0 not bindable**.
 
 The actionable population is therefore not smaller than fourteen in the way
 the undefined-term census was: twelve terms can move.  The important shrinkage
-is qualitative—seven are registration/adapter work around evidence that already
-exists, while only five require new reference fixtures.  Neither blocked term
+is qualitative—six are adapter work around evidence that already exists, while
+six require new reference fixtures.  Neither blocked term
 should be made green by treating a generated or scheduler-grain sibling as the
 declared object.
+
+## C188 audit amendment
+
+C188 checked the proposed “registration-only” group before binding it.  The
+earlier seven/five split was an arithmetic error: the table names six adjacent-
+evidence terms and six fixture-needing terms.  More importantly, none of the
+six is plain registration:
+
+- `BeliefState`, `Channel`, `predictiveOutcomeRisk`, `observationKernel`, and
+  `PolicyPriorKernel` are emitted as ordinary closed declarations with no
+  evidence or falsifier fields.  A registry row would therefore not change
+  their contract judgement; their emitter metadata must first be amended.
+- The existing EFE and GenerativeModel controls do not isolate risk and policy
+  prior respectively.  Reusing them unchanged would bind a component to a
+  container-level falsifier.
+- “Dirichlet concentration parameters” is represented only by an inline
+  positive, nonempty subtype.  There is no named declaration to bind; it first
+  needs a named domain type, without changing `logMultivariateBeta`'s existing
+  binding.
+
+Thus C188 binds zero terms.  Each of the six remains bindable, but each needs a
+scoped adapter/metadata delivery with its own isolating control.  Calling that
+work registration would reproduce C72's evidence-for-an-adjacent-object error.
 
 This census changes no declaration or binding.
