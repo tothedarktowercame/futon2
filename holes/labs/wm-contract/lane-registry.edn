@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C51-ledger-reconcile, :dispatched-at "2026-08-31T14:48:56Z", :job-id "invoke-1788187727049-5697-2b779cf9", :expected-by "2026-08-31T15:33:56Z"}
   {:lane :wm-evidence
-   :holding :C56-rerun-rebind, :dispatched-at "2026-08-31T14:47:23Z", :job-id "invoke-1788187631168-5694-41bcc36e", :expected-by "2026-08-31T15:32:23Z"}]}
+   :holding :C60-find-snatch, :dispatched-at "2026-08-31T14:54:48Z", :job-id "invoke-1788188075356-5702-a20c08da", :expected-by "2026-08-31T15:39:48Z"}]}
