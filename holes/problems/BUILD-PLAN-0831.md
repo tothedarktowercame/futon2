@@ -1128,3 +1128,40 @@ visible is this delivery; the runtime repair is a separate commission.
 **Why this is the right issue to put to that vertex.** Every check this build has added today validates
 that a thing is well-formed. Joe's point is that well-formedness over the wrong population is the
 oldest façade in the record — and the one instrument nobody has built is the one that asks *over what?*
+
+---
+
+## VERBS-D2 gated — the label was the smaller half
+
+p4ng `199252b`. **What I checked:** the edge label is now `"observe construction"` with a dated
+`:label-amendment` citing `enact.clj:113`; the merge round-trips at 5 instances; all exemplars pass;
+`R16→R2` went from **2 freehand ports to 0**; the edge census round-trips unchanged (61/22/26); the
+control-map lint passes.
+
+**`ExternalWitness` still appears once — and it is in the right place.** It lives under `:amendment`,
+preserved as dated history, not as a live claim. That is the owner's rule applied correctly: original
+legible, amendment dated.
+
+**The delegate's surprise is the real finding, and it is bigger than the relabel I commissioned.** I asked
+for a false *label* to be corrected. It found the fragment also **typed the payload as `ExternalWitness`**
+— so the schema asserted an external witness where the executor returns a wiring map. *Both the noun and
+the verb falsely implied outward actuation.* A wrong label misleads a reader; a wrong type misleads every
+consumer and every check.
+
+**And its replacement applies a lesson from a different vertex:**
+
+    :result {:union [[:constructed-wiring {:boxes :map, :policy-holes :value}]
+                     [:no-construction   {:reason :engine-returned-nil}]]}
+
+A **tagged union** — success and non-production cannot coexist — which is exactly the refinement R2 caught
+in R16's payload during the *first* pairing last night, when the map allowed `:disposition
+:construction-produced` to sit beside a non-production reason. That fix has now propagated from a pairing
+record into the schema, by a different delegate, without anyone re-deriving it. And `:no-construction
+{:reason :engine-returned-nil}` is a **typed absence** rather than a nil, which is `I_absent_is_loud` in the
+one place the build has failed it four times.
+
+`:tick` and `:mission` remain `:unspecified-type` — honest unspecifieds rather than invented types.
+
+**Pattern impact answered and I agree:** no `sec-catalog.tex` change. R16's second revision already records
+that this implementation is the mirror its own pattern warns against, citing the same `engine-wiring`
+behaviour; the relabel makes the wiring agree with a diagnosis the paper already carries.
