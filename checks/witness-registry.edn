@@ -11,7 +11,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/generative-model-reference.edn"},
   :run-sha "7b31da1fe248a05b35940e9a68544b4ffbef36a7",
-  :contract-sha "d0ad8d4d09eb45b0e19bc53247ffed07d7d8b816",
+  :contract-sha "86186c37444ac9f1b9d54818b092bbbc586854f4",
   :result :passed,
   :recorded-at "2026-09-01T00:20:00Z"}
  {:witnesses "expectedFreeEnergy",
@@ -23,7 +23,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/expected-free-energy-reference.edn"},
   :run-sha "58d667284a63c69c0027c9bf204e9bc0eac098b9",
-  :contract-sha "d0ad8d4d09eb45b0e19bc53247ffed07d7d8b816",
+  :contract-sha "86186c37444ac9f1b9d54818b092bbbc586854f4",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
  {:witnesses "expectedInformationGain",
@@ -36,7 +36,7 @@
    :path
    "holes/labs/wm-contract/expected-information-gain-reference.edn"},
   :run-sha "c99ffdbc13e9b114dbcdca7451651e568588a947",
-  :contract-sha "d0ad8d4d09eb45b0e19bc53247ffed07d7d8b816",
+  :contract-sha "86186c37444ac9f1b9d54818b092bbbc586854f4",
   :result :passed,
   :recorded-at "2026-09-01T00:10:00Z"}
  {:witnesses
@@ -45,7 +45,7 @@
    "findF3NonSelfCertifying"
    "findF4Falsifiable"],
   :freshness :pinned-git-v1,
-  :contract-sha "d0ad8d4d09eb45b0e19bc53247ffed07d7d8b816",
+  :contract-sha "86186c37444ac9f1b9d54818b092bbbc586854f4",
   :run-sha "594127059d6a31c5b21f5d34ebfac5b14b1ad993",
   :check
   {:repo "futon3",
@@ -69,9 +69,23 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/log-multivariate-beta-reference.edn"},
   :run-sha "720af918c430415bf07f4eba29ec73d49b343a10",
-  :contract-sha "d0ad8d4d09eb45b0e19bc53247ffed07d7d8b816",
+  :contract-sha "86186c37444ac9f1b9d54818b092bbbc586854f4",
   :result :passed,
   :recorded-at "2026-08-31T23:50:00Z"}
+ {:witnesses "nonDegenerateAblationLaw",
+  :check
+  {:repo "futon2",
+   :path "checks/ablation_exact_dyadic_witness.clj",
+   :entrypoint "-main"},
+  :fixture
+  {:repo "futon2",
+   :path "holes/labs/wm-contract/ablation-exact-dyadic.edn"},
+  :run-sha "f54d502acb131f74da40b430a726792a4002dae8",
+  :contract-sha "86186c37444ac9f1b9d54818b092bbbc586854f4",
+  :result :passed,
+  :recorded-at "2026-08-31T17:05:00Z",
+  :note
+  "C86 exact binary64-to-dyadic table; Lean proves G argmins {grim,probe-one-token}, risk argmin {always-abstain}, and disjointness. --negative makes the tables share minimizers and is rejected."}
  {:witnesses
   ["organiseO1NodesRecorded"
    "organiseO2AuthoredReachability"
@@ -85,7 +99,7 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/cascade-diff-reference.edn"},
   :run-sha "ecf819234cc50afbdfccffb5838b628018584f76",
-  :contract-sha "d0ad8d4d09eb45b0e19bc53247ffed07d7d8b816",
+  :contract-sha "86186c37444ac9f1b9d54818b092bbbc586854f4",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z",
   :note
@@ -214,7 +228,7 @@
   :fixture
   {:repo "futon2", :path "holes/labs/wm-contract/R9-D2-report.edn"},
   :run-sha "732f4d748f08154457d93916d96ab0be0b7f760c",
-  :contract-sha "d0ad8d4d09eb45b0e19bc53247ffed07d7d8b816",
+  :contract-sha "86186c37444ac9f1b9d54818b092bbbc586854f4",
   :result :passed,
   :recorded-at "2026-08-31T23:59:30Z",
   :note
