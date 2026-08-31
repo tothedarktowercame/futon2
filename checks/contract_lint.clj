@@ -162,6 +162,15 @@
            :coverage-score-delta -1 :policy-holes 3}
           (:fold x))))
 
+(defn fold-escrow-record-witness? [x]
+  (and (= 1 (:quarantine/version x))
+       (= 10 (count (:entries x)))
+       (every? #(and (string? (:fold-turn/id %))
+                     (string? (:prompt-sha256 %))
+                     (= 64 (count (:prompt-sha256 %)))
+                     (= :prompt-not-reconstructable (:reason %)))
+               (:entries x))))
+
 (defn expected-information-gain-witness? [x]
   (= [{:id :binary-prior-point-posterior
        :predictive-outcome-masses [1]
@@ -282,6 +291,7 @@
    "AmbiguityWitness" ambiguity-witness?
    "HaveWantArrowWitness" have-want-arrow-witness?
    "FoldWitness" fold-witness?
+   "FoldEscrowRecordWitness" fold-escrow-record-witness?
    "ExpectedInformationGainWitness" expected-information-gain-witness?
    "GenerativeModelWitness" generative-model-witness?
    "CascadeDiff" cascade-diff?

@@ -128,6 +128,9 @@
     :argv ["bb" "checks/have_want_arrow_witness.clj" "--negative-control"]}
    {:name :c172-missing-policy-holes
     :argv ["bb" "checks/fold_witness.clj" "--negative-control"]}
+   {:name :c174-reconstructible-quarantine-member
+    :argv ["bb" "-cp" "src:." "checks/fold_turn_quarantine_check.clj"
+           "--negative-reconstructible-member"]}
    {:name :c116-removed-ledger-row
     :argv ["bb" "-cp" "." "checks/r9_independence.clj" "--negative-ledger"
            "--report" "/tmp/wm-gate-r9-ledger.edn" "--lean" "/tmp/wm-gate-r9-ledger.lean"]}
