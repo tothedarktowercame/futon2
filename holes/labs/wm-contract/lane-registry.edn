@@ -6,7 +6,7 @@
  [{:lane :wm-nouns
    :holding :C105-R8-discharge, :dispatched-at "2026-08-31T17:59:42Z", :job-id "invoke-1788199161203-5833-f040e04d", :expected-by "2026-08-31T18:44:42Z"}
   {:lane :wm-verbs
-   :holding :C101-run-id, :dispatched-at "2026-08-31T17:52:30Z", :job-id "invoke-1788198728063-5823-0ab1c6e5", :expected-by "2026-08-31T18:37:30Z"}
+   :holding :C106-resource-wiring, :dispatched-at "2026-08-31T18:02:30Z", :job-id "invoke-1788199327487-5837-5b910996", :expected-by "2026-08-31T18:47:30Z"}
   {:lane :wm-organization
    :holding :C103-retirement-window, :dispatched-at "2026-08-31T17:56:10Z", :job-id "invoke-1788198947844-5828-ae9ffd66", :expected-by "2026-08-31T18:41:10Z"}
   {:lane :wm-evidence
