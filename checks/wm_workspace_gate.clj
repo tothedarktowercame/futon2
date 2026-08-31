@@ -3,9 +3,39 @@
   (:require [babashka.process :as process]
             [babashka.fs :as fs]
             [clojure.set :as set]
+            [clojure.string :as str]
             [cheshire.core :as json]))
 
 (def contract "/home/joe/code/mathlib4/DarkTower/WarMachine/holes-contract.json")
+
+(def repositories
+  {:futon2 "/home/joe/code/futon2"
+   :mathlib4 "/home/joe/code/mathlib4"
+   :p4ng "/home/joe/code/p4ng"
+   :futon3 "/home/joe/code/futon3"})
+
+(defn sha256-text [value]
+  (let [digest (java.security.MessageDigest/getInstance "SHA-256")]
+    (.update digest (.getBytes value "UTF-8"))
+    (format "%064x" (java.math.BigInteger. 1 (.digest digest)))))
+
+(defn repository-provenance [[repo dir]]
+  (letfn [(git [& argv]
+            (apply process/shell {:continue true :out :string :err :string :dir dir}
+                   "git" argv))]
+    (let [head (git "rev-parse" "HEAD")
+          tree (git "rev-parse" "HEAD^{tree}")
+          status (git "status" "--porcelain")
+          diff (git "diff" "HEAD" "--")]
+      {:repository repo :path dir
+       :git-sha (some-> (:out head) str/trim)
+       :tree-sha (some-> (:out tree) str/trim)
+       :dirty? (not (str/blank? (:out status)))
+       :tracked-diff-sha256 (sha256-text (:out diff))
+       :readable? (every? zero? (map :exit [head tree status diff]))})))
+
+(defn provenance []
+  (mapv repository-provenance repositories))
 
 (defn authority []
   (get-in (json/parse-string (slurp contract) true) [:source :git-sha]))
@@ -88,7 +118,9 @@
     {:name name :exit (:exit result)}))
 
 (defn -main [& _]
-  (let [inventory (inventory-result)
+  (let [basis (provenance)
+        _ (println "wm-workspace-gate: PROVENANCE" (pr-str basis))
+        inventory (inventory-result)
         _ (println "wm-workspace-gate: INVENTORY" (pr-str inventory))
         results (into [inventory] (map run-one (concat (commands) (control-commands))))
         failures (filterv #(not= 0 (:exit %)) results)]

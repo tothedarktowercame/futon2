@@ -425,3 +425,7 @@ Its C116 controls invoke `r9_independence --negative-ledger`,
 `r9_independence --negative-per-row`, and `r8_f_contract --negative`.  Its C117
 controls invoke futon3 `find-snatch --negative-f1`, `--negative-f2`, and
 `--negative-f3` through the JVM.  A control rejection is a gate pass.
+
+As of C124 the same command emits repository commit/tree/dirty/diff provenance
+before any check runs.  Provenance records the basis; it is not a freshness
+assertion against a previous run.
