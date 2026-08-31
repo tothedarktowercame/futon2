@@ -359,6 +359,13 @@ The positive receipt has nine mapped hops: three in the original edge layer
 and six in the separately counted measured layer. The negative control appends
 one unmapped hop and succeeds only when the checker rejects it.
 
+## C106 — wrapper-emitted resource receipt
+
+See `holes/labs/wm-contract/C106-resource-certificate-wiring.md` for the two
+`bg.py launch-test` invocations and their exact emitted receipt paths.  The
+clean replay certificate exits 0; the wrapper-emitted dirty control
+certificate exits 1.  No production tick is invoked.
+
 ## C84 — preemptive repair build gate
 
 ```sh
