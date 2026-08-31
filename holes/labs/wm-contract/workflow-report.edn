@@ -2,23 +2,23 @@
  [{:lane :wm-nouns,
    :closed-attributed 11,
    :open-holding 1,
-   :in-flight "C252",
-   :holding :C252-next-glossary-term}
+   :in-flight "C257",
+   :holding :C257-next-glossary-term}
   {:lane :wm-verbs,
    :closed-attributed 8,
    :open-holding 1,
-   :in-flight "C251",
-   :holding :C251-ledger-durability}
+   :in-flight "C254",
+   :holding :C254-atomic-ledger-write}
   {:lane :wm-organization,
    :closed-attributed 9,
    :open-holding 1,
-   :in-flight "C253",
-   :holding :C253-envelope-producer}
+   :in-flight "C256",
+   :holding :C256-click-run-id-port}
   {:lane :wm-evidence,
    :closed-attributed 7,
    :open-holding 1,
-   :in-flight "C250",
-   :holding :C250-rereview-workflow-repairs}],
+   :in-flight "C255",
+   :holding :C255-third-workflow-review}],
  :schema :wm/workflow-report-v2,
  :since "2026-08-30T00:00:00Z",
  :semantics
@@ -42,12 +42,12 @@
    :sha256-prefix "f86925baeced963a"},
   :lane-registry
   {:path "futon2/holes/labs/wm-contract/lane-registry.edn",
-   :revision "02c734c",
-   :sha256-prefix "6200ae95855ea80a",
+   :revision "6f954c9",
+   :sha256-prefix "62d9ca0ebdd9d99f",
    :as-of "2026-08-31T15:39:14.434945104Z"},
   :decisions
   {:path "futon2/holes/problems/DECISIONS-PENDING.md",
-   :sha256-prefix "efa5dadac14b672a"}},
+   :sha256-prefix "2be40f4a3ef24eba"}},
  :pending
  ["Strategic outcome vocabulary"
   "Authored R16 outward-act binding"
@@ -60,7 +60,8 @@
   "Unscored rollout moves"
   "Fulab temperature without prediction error"
   "Historical versus live Morning Brief QA"
-  "Support-typed shadow as the live selection authority"],
+  "Support-typed shadow as the live selection authority"
+  "Invoke-jobs ledger storage backend"],
  :owner-repairs ["C213"],
  :totals
  {:cases-in-ledger 165,
@@ -68,11 +69,13 @@
   :closed-by-lanes 35,
   :owner-repairs 1,
   :open-dispatched 1,
-  :pending-decisions 12},
+  :pending-decisions 13},
  :ledger-frontier 248,
- :as-of "2026-08-31T23:47:30.208863661Z",
+ :as-of "2026-08-31T23:51:32.381999329Z",
  :attribution
  {:systematic-from "C240",
+  :systematic-run-length 9,
+  :systematic-window? true,
   :cases-attributed 37,
   :cases-in-ledger 165,
   :attributed-cases
@@ -114,7 +117,7 @@
    "C247"
    "C248"],
   :note
-  "per-lane counts cover only cases whose ledger heading names a lane. :systematic-from is exact coverage over the LEDGER only -- every case number from it to :ledger-frontier carries an attribution; :frontier is larger because it also counts open registry holdings, which are not ledger attributions -- and every heading inside that window must be classifiable or the generator fails. Cases below it are counted in :cases-in-ledger without a lane, so these are not a campaign census."},
- :frontier 253,
+  "per-lane counts cover only cases whose ledger heading names a lane. :systematic-window? is false when the continuous run is a single case, in which case :systematic-from names a coincidence rather than a window and should not be rendered as one. :systematic-from is exact coverage over the LEDGER only -- every case number from it to :ledger-frontier carries an attribution; :frontier is larger because it also counts open registry holdings, which are not ledger attributions -- and every heading inside that window must be classifiable or the generator fails. Cases below it are counted in :cases-in-ledger without a lane, so these are not a campaign census."},
+ :frontier 257,
  :schema-change
  "v1 -> v2 (C244): :dispatched/:completed/:blocked replaced by :closed-attributed/:open-holding, because no dispatch log exists and :dispatched claimed one"}
