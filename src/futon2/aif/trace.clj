@@ -24,7 +24,8 @@
                           R3d belief update; carried forward as the next tick's
                           :mu-pre prior (reconciled to the new entity domain)
                           when belief/*carry-belief?* is on>
-      :observation      <obs channel map>
+      :observation      <compatible numeric obs channel map>
+      :observation-envelope <lossless tagged channel values/absences>
       :free-energy      {:preference-gap-score :coverage-uncertainty-pressure :controller-score
                           :per-channel :avoided-active}
       :variational-free-energy <F = 1/2 mean(precision * error^2)>
@@ -47,6 +48,7 @@
             [clojure.java.shell :as shell]
             [clojure.string :as str]
             [futon2.aif.lane-futility :as lane-futility]
+            [futon2.aif.observation :as observation]
             [futon2.aif.selection-gain :as selection-gain])
   (:import (java.io PushbackReader)
            (java.time Instant LocalDate ZoneId)
@@ -181,8 +183,12 @@
          inputs needed to replay goal-outcome risk per candidate (2026-08-31).
     16 — records the preference stack taken from the ranked evaluation objects,
          deduplicated once per tick with typed absent/partial/conflict variants
+         (2026-08-31).
+    17 — records the lossless observation envelope once per tick, derived from
+         the same observation object as the compatible numeric projection;
+         absent channels retain their reason and measured zero stays present
          (2026-08-31)."
-  16)
+  17)
 
 (defn- preference-stack-evidence
   "Preserve the exact stack carried by ranked evaluation objects without
@@ -286,11 +292,16 @@
    outcomes of chosen policies. Same cross-call read-back pattern as
    `:precision-state`; absent ⇒ the prior (γ=1.0) is reconstructed."
   [judge-output]
-  (cond->
+  (let [observed (:observation judge-output)
+        ;; C104: derive both persisted views from the one evaluation object.
+        ;; Calling observe again here could let the trace disagree with scoring.
+        observed-envelope (observation/observation-envelope observed)]
+    (cond->
    {:timestamp (str (Instant/now))
     :mu-pre (or (:belief-pre judge-output) (:belief judge-output))
     :mu-post (:belief judge-output)
-    :observation (:observation judge-output)
+    :observation observed
+    :observation-envelope observed-envelope
     :free-energy (:free-energy judge-output)
     :variational-free-energy (:variational-free-energy judge-output)
     :prediction-errors (:prediction-errors judge-output {})
@@ -336,7 +347,7 @@
     ;; stamps it via `wm-version-stamp`; bare judge calls don't — purely
     ;; additive, no nil seam in un-stamped records.
     (:wm-version judge-output)
-    (assoc :wm-version (:wm-version judge-output))))
+    (assoc :wm-version (:wm-version judge-output)))))
 
 (defn write-trace!
   "Append one trace record (constructed from a judge-style output) to

@@ -4,6 +4,7 @@
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing use-fixtures]]
             [futon2.aif.belief :as belief]
+            [futon2.aif.observation :as observation]
             [futon2.aif.trace :as trace])
   (:import (java.io File)
            (java.nio.file Files)
@@ -65,6 +66,36 @@
       (is (contains? r :ranked-actions))
       (is (contains? r :decision))
       (is (contains? r :mode)))))
+
+(deftest observation-envelope-distinguishes-absence-from-zero-test
+  (testing "the trace derives a lossless envelope from the exact scored observation"
+    (let [absent (observation/observe {})
+          measured-zero (observation/observe {:loop-health {:overall 0.0}})
+          absent-record (trace/trace-record
+                         (assoc sample-judge-output :observation absent))
+          zero-record (trace/trace-record
+                       (assoc sample-judge-output :observation measured-zero))]
+      (is (= absent measured-zero)
+          "the compatible numeric projections are deliberately equal")
+      (is (= :absent
+             (get-in absent-record
+                     [:observation-envelope :channels :loop-health :variant])))
+      (is (= :observed
+             (get-in zero-record
+                     [:observation-envelope :channels :loop-health :variant])))
+      (is (= measured-zero (:observation zero-record))
+          "persistence does not alter the object used by scoring"))))
+
+(deftest observation-envelope-write-read-preservation-test
+  (let [observed (observation/observe {:loop-health {:overall 0.0}})
+        output (assoc sample-judge-output :observation observed)
+        expected (:observation-envelope (trace/trace-record output))]
+    (trace/write-trace! output :dir *tmpdir* :date-str "2026-08-31")
+    (let [[record] (trace/read-trace :dir *tmpdir* :date-str "2026-08-31")]
+      (is (= expected (:observation-envelope record)))
+      (is (= :observed
+             (get-in record
+                     [:observation-envelope :channels :loop-health :variant]))))))
 
 (deftest trace-record-strips-prediction-field-test
   (testing "ranked-actions in trace drop the heavy :prediction field"
