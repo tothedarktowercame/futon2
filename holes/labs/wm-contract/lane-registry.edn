@@ -8,6 +8,6 @@
   {:lane :wm-verbs
    :holding :C158-schema-compat, :dispatched-at "2026-08-31T20:12:30Z", :job-id "invoke-1788207146723-5970-20b4b883", :expected-by "2026-08-31T20:57:30Z"}
   {:lane :wm-organization
-   :holding :C159-runbook, :dispatched-at "2026-08-31T20:16:31Z", :job-id "invoke-1788207388431-5972-d986a9a9", :expected-by "2026-08-31T21:01:31Z"}
+   :holding :C162-gate-timing, :dispatched-at "2026-08-31T20:22:54Z", :job-id "invoke-1788207771180-5981-5f2f00b3", :expected-by "2026-08-31T21:07:54Z"}
   {:lane :wm-evidence
    :holding :C161-queue-audit, :dispatched-at "2026-08-31T20:20:50Z", :job-id "invoke-1788207646216-5976-24dd348e", :expected-by "2026-08-31T21:05:50Z"}]}
