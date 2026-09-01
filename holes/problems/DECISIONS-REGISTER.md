@@ -60,6 +60,7 @@ recording why it cannot be closed, so nobody re-opens it by accident.
 | S24 | Cancelling an operator run is recorded but not counted; `:cancelled` starts a new semantic stratum and is not pooled with cohort 46. | `C206`, C211 |
 | S25 | No existing check is moved to nightly. Any future nightly tier must name its runner and cadence, never merely remove a check. | `RUNBOOK.md` |
 | S26 | Lean negative controls are revalidated **targeted**: a packet that changes a witness runs that witness's negative modes before landing. The full 32 stay on the gate. | O15, Joe 2026-09-01 |
+| S30 | The 72 historical Morning Brief items are **retained as a log and not opened**. Joe's reason is not the false-currency hazard C209 raised: *"they're just there as a log of how the system was working in some earlier iterations, and as we've seen, it comprehensively was not working very well."* No retrospective QA, no disposition pass, no epoch boundary. | O11, Joe 2026-09-01 |
 | S29 | Tree hygiene is repaired by **fixing inbox zero**, not by giving each agent a worktree. Worktrees relocate the merge-discipline problem rather than removing it, five stale forks already exist unmerged, and the one-JVM policy exists because a worktree reached the shared server. First repair is to make refusals visible and countable; only then the `:no-session-id` cause. | O27, Joe 2026-09-01 |
 | S28 | Lanes run **continuously and in parallel** — this uses the machine well and is the intended steady state. It is gated on tree hygiene being a facility rather than an event, which `claude-20` owns. | O24, Joe 2026-09-01 |
 | S27 | **No War Machine check gets a timer.** The full suite's trigger is a milestone event, not a clock; it is invoked when something needs it and never on a schedule. Gate runs required by `make pre-merge` or by a certified commit are unaffected. | O15, Joe 2026-09-01 |
@@ -88,7 +89,7 @@ complete.
 | O8 | Validated rollout-step producer | current |
 | O9 | Unscored rollout moves (downstream of O8) | current |
 | O10 | Fulab: `outcome-size-surplus` absence default at `adapters/fulab.clj:81` | stale-and-how — referent corrected by `13ed674`; narrower decision remains |
-| O11 | Historical vs live Morning Brief epoch — **gates the operator run** | current |
+| ~~O11~~ | **SETTLED 2026-09-01 — retain, do not process.** Moved to S30. | Joe |
 | O12 | Support-typed shadow as live selection authority | stale-and-how — evidence is directional, not absent |
 | O13 | Invoke-jobs ledger backend (EDN vs SQLite) | stale-and-how — durability repaired by C254/C263; now a scaling cost choice |
 | O14 | Cascade meet semantics | current |
@@ -120,7 +121,7 @@ the Lean checks, the absence lint, or the census-basis check.
 |---:|---|---|---|
 | O19 | **Send the writer-fence parking request.** Generated at `/tmp/parking-request-wm-fence-2026-09-01-a.json` (3 coordinators, 8 units, `futon3c-zone.service` must remain running). **Nothing is parked.** Owner-side standing condition — the quiet-run state machine surviving a review it did not write — is met. | Joe | |
 | O20 | **Dirty trees are not covered by the fence.** The fence stops new writes; it does nothing about trees already dirty. futon3c has 6 APM-written files and futon3 has 1 probe artifact, neither the owner's to commit. A fenced run still fails to certify a commit unless all five trees are clean going in. | Joe | `RUNBOOK.md` clean-tree rule |
-| O21 | O11 (Morning Brief epoch) must be answered **before** the run, not during it. | Joe | C209, C295 |
+| ~~O21~~ | Dissolved with O11: no epoch boundary is being set, so nothing sequences against the run. | Joe | S30 |
 
 ### B4. Campaign continuation (open)
 
@@ -130,6 +131,9 @@ the Lean checks, the absence lint, or the census-basis check.
 | O23 | **Who records lane deliveries in the ledger going forward.** C441 found the ledger degraded exactly as throughput rose: 13 of 61 numbers in C380–C440, all of them owner reviews. Either lanes write their own heading or the owner writes one per delivery; today neither is required. | owner | C441 |
 | ~~O24~~ | **SETTLED 2026-09-01 — yes, continuously and in parallel, but not until tree hygiene is a working facility.** Joe: *"I like them working continuously and in parallel because that uses the resources of this machine well. But we need to prepare the ground for that."* Ownership of that groundwork assigned to `claude-20`. Moved to S28. | Joe | C446 |
 | ~~O27~~ | **SETTLED 2026-09-01 — option A, repair inbox zero.** Not per-agent worktrees. Moved to S29. | Joe | C446 |
+| O30 | **Can a run produce its own brief?** Joe's acceptance bar: a run must emit the outstanding-decisions list and the build-state numbers without a person assembling them. The numbers half exists in p4ng's 22 generators, aimed at a paper; the decisions half has no producer at all. Mission: `holes/missions/M-run-produces-its-own-brief.md`. | owner, with Joe on the bar | M-run-produces-its-own-brief |
+| O31 | **The architecture of a run.** Joe: *"rather than having two agents like we used to, maybe we want to have four agents exactly with this kind of handoff... the architecture of a run needs to be rethought."* | Joe | same mission |
+| O32 | **Comprehensive rethink of operator-facing surfaces.** Ten face Joe today, several overlapping, one unreachable without knowing an alias. | Joe | same mission |
 | O29 | **Pinned-commit orchestration across repositories** is untouched by O27's answer. Joe raised it and worktrees would have addressed it; repairing inbox zero does not. Still open, still needed for a certified run. | Joe | raised in the O24 sitting |
 | O28 | **Whether large EDN state files move off a full-map rewrite.** `state.edn` is 125.7 MB and `invoke-jobs` is 134.6 MB; two facilities reached the same ceiling independently. Probably one decision with O13, not two. | Joe | C446, O13 |
 

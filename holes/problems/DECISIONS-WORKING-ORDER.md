@@ -58,7 +58,7 @@ answer is possible. This grouping does.
 | O8 | Validated rollout producer | **R** | Mine. |
 | O9 | Unscored rollout moves | **B** | After O8. |
 | O10 | Fulab surplus absence | **R** | No live caller. Mine, and small. |
-| O11 | Morning Brief epoch | **P** | C209 already recommends. **Gates the operator run** — the run is itself the boundary event. |
+| ~~O11~~ | Morning Brief epoch | **DONE** | **Dissolved 2026-09-01**, not resolved: the premise that the 72 items were worth dispositioning did not survive contact with Joe. |
 | O12 | Support-typed shadow → live | **M** | Two sequentially dependent records is not a denominator. |
 | O13 | EDN vs SQLite ledger | **M** | Growth rate and per-mutation write cost at 134.6 MB / 6,195 jobs. |
 | O14 | Cascade meet semantics | **D** | A modelling decision a lane must not invent. Needs the semantics laid out, not summarised. |
@@ -89,7 +89,7 @@ decision.)
 1. ~~**O15** Lean cadence~~ — **DONE 2026-09-01: option C.**
 2. ~~**O16** any check on a timer~~ — **DONE: no timer**, answered by the same sitting. O17 is now blocked on the new O25 (define "major milestone").
 3. ~~**O24** lane campaign continuation~~ — **DONE 2026-09-01: yes, continuously and in parallel, once tree hygiene is a facility.** My framing that quiescence only comes from stopping was wrong: that is a consequence of a broken helper, not a law. See C446 and the new O27.
-4. **O11** Morning Brief epoch — gates the operator run.
+4. ~~**O11** Morning Brief epoch~~ — **DONE 2026-09-01: retain, do not process.**
 5. **O19** send the writer-fence parking request.
 6. **O20** who cleans the dirty trees.
 7. **O2** R16 outward-act binding — I bring one concrete proposed act.
@@ -133,5 +133,12 @@ Joe reads one brief and says whether the format works before I write seven more.
 | 1 | O15 Lean cadence | targeted revalidation (option C); settled O16 too, reframed O17, opened O25/O26 |
 | 2 | O24 lane continuation | continuous and parallel, gated on tree hygiene; opened O27/O28, found C446 |
 | 3 | O27 hygiene mechanism | repair inbox zero, not worktrees; opened O29 (pinned-commit orchestration is still unsolved) |
+| 4 | O11 Morning Brief epoch | retain and do not process; the decision dissolved rather than resolved. Opened O30/O31/O32 and the mission M-run-produces-its-own-brief |
 
-Six of nine remain: O11, O19, O20, O2, O6, O7 — plus O25 and O29 raised along the way.
+Five of nine remain: **O19, O20, O2, O6, O7**.
+
+Raised along the way and now larger than what they came from: O25 (define
+"major milestone" — promoted to a prerequisite), O29 (pinned-commit
+orchestration), O30/O31/O32 (a run produces its own brief, the architecture of
+a run, the operator-facing rethink). The last three are one mission:
+`holes/missions/M-run-produces-its-own-brief.md`.
