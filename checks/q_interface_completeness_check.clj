@@ -130,13 +130,15 @@
           (remove empty? (.split (.trim ^String (:out history)) "\\n")))))
 
 (defn -main [& args]
-  (let [negative? (some #{"--negative-control" "--negative-pin-behind"} args)
+  (let [negative? (some #{"--negative-control" "--negative-pin-behind" "--negative-empty"} args)
         pin-negative? (some #{"--negative-pin-behind"} args)
+        empty-negative? (some #{"--negative-empty"} args)
         report-stale? (some #{"--allow-stale-report"} args)
-        path (or (first (remove #{"--negative-control" "--negative-pin-behind"
+        path (or (first (remove #{"--negative-control" "--negative-pin-behind" "--negative-empty"
                                  "--allow-stale-report"} args)) default-path)
         record (edn/read-string (slurp path))
         record (cond
+                 empty-negative? (assoc record :definitions [] :interfaces [] :source-pins [])
                  pin-negative?
                  (let [prior (prior-spine-sha record)]
                    (when-not prior

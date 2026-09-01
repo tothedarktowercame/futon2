@@ -27,16 +27,19 @@
 
 (defn -main [& args]
   (let [negative? (some #{"--negative"} args)
+        empty-negative? (some #{"--negative-empty"} args)
         contract  (json/parse-string (slurp contract-path) true)
         reg       (edn/read-string (slurp registry-path))
         records   (cond-> (:records reg)
                     negative? (assoc "P-R9" {:decls 14 :holder "claude-15-retired" :note "injected"}))
         live      (roster)
-        decls     (:declarations contract)
+        decls     (if empty-negative? [] (:declarations contract))
         inline    (filter #(and (:holder %) (not= "by-record" (:holder %))) decls)
         by-rec    (group-by owning-record decls)
         problems
         (concat
+         (when (empty? decls)
+           [{:kind :contract-unavailable :reason :zero-declarations}])
          (for [d inline] {:kind :inline-session-holder :decl (:name d) :holder (:holder d)})
          (for [[rec ds] by-rec
                :let [h (get-in records [rec :holder])]
@@ -54,7 +57,7 @@
                       :inline-session-holders (count inline)
                       :orphaned-declarations orphaned
                       :problems (vec (take 6 problems)) :problems-total (count problems)}))
-    (when negative?
+    (when (or negative? empty-negative?)
       (if (seq problems)
         (do (println "holder-check: PASS negative control rejected exit-convention=0-pass/1-fail") (System/exit 0))
         (do (println "holder-check: FAIL negative mutation passed exit-convention=0-pass/1-fail") (System/exit 2))))

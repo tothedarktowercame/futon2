@@ -105,8 +105,12 @@
   (let [w (:witnesses binding)]
     (if (sequential? w) w [w])))
 
-(defn build-registry []
-  (let [contract (json/parse-string (slurp contract-file) true)
+(defn build-registry
+  ([] (build-registry (json/parse-string (slurp contract-file) true)))
+  ([contract]
+  (let [_ (when (empty? (:declarations contract))
+            (throw (ex-info "model coverage unavailable: zero contract declarations"
+                            {:error :zero-declarations})))
         witnesses (edn/read-string (slurp witness-file))
         bindings (into {}
                        (mapcat (fn [binding]
@@ -138,10 +142,20 @@
      :rows rows
      :counts {:rows (count rows)
               :content (into (sorted-map) (frequencies (map :content-status rows)))
-              :pointer (into (sorted-map) (frequencies (map :pointer-status rows)))}}))
+              :pointer (into (sorted-map) (frequencies (map :pointer-status rows)))}})))
 
 (let [check? (some #{"--check"} *command-line-args*)
-      value (build-registry)
+      empty-negative? (some #{"--negative-empty"} *command-line-args*)
+      value (if empty-negative?
+              (try
+                (build-registry {:source {} :declarations []})
+                (binding [*out* *err*]
+                  (println "variable-situation-accounting: FAIL empty contract accepted"))
+                (System/exit 2)
+                (catch Exception _
+                  (println "variable-situation-accounting: PASS empty contract rejected")
+                  (System/exit 0)))
+              (build-registry))
       rendered (with-out-str (pp/pprint value))]
   (if check?
     (if (and (.isFile output-file) (= value (edn/read-string (slurp output-file))))

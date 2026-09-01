@@ -414,6 +414,8 @@
         duplicates (->> expanded (group-by :witnesses)
                         (keep (fn [[n xs]] (when (> (count xs) 1) n))) vec)
         errors (vec (concat
+                     (when (empty? decls)
+                       [{:error :contract-unavailable :reason :zero-declarations}])
                      (map #(hash-map :error :not-in-contract :name (:witnesses %)) unknown)
                      (map #(hash-map :error :missing-run-result :name (:witnesses %)) malformed)
                      (map #(hash-map :error :duplicate-binding :name %) duplicates)))
@@ -501,18 +503,22 @@
   (loop [xs args out {}]
     (if (empty? xs)
       out
-      (if (contains? #{"--negative" "--negative-snapshot" "--strict"} (first xs))
+      (if (contains? #{"--negative" "--negative-snapshot" "--negative-empty" "--strict"} (first xs))
         (recur (rest xs) (assoc out (keyword (str (subs (first xs) 2) "?")) true))
         (do
           (when-not (second xs) (throw (ex-info "arguments must be flag/value pairs" {})))
           (recur (nnext xs) (assoc out (keyword (subs (first xs) 2)) (second xs))))))))
 
 (defn -main [& args]
-  (let [{:keys [report negative? negative-snapshot? strict?] :as opts} (args-map args)]
+  (let [{:keys [report negative? negative-snapshot? negative-empty? strict?] :as opts} (args-map args)]
     (when-not (every? opts [:contract :registry :report :authority])
       (throw (ex-info "usage: [--negative] --contract JSON --registry EDN --report EDN --authority SHA" {})))
-    (let [negative-mode? (or negative? negative-snapshot?)
-          result (try (cond negative?
+    (let [negative-mode? (or negative? negative-snapshot? negative-empty?)
+          result (try (cond negative-empty?
+                        (lint-data {:contract (assoc (read-json (:contract opts)) :declarations [])
+                                    :registry (read-edn (:registry opts))
+                                    :authority (:authority opts)})
+                        negative?
                         ;; Semantic mutation: preserve the contract's valid JSON shape but
                         ;; sever its authority pin. The lint exists in part to reject a
                         ;; generated contract that is not from the named authority.
@@ -554,11 +560,14 @@
         (when (seq uninspectable-declarations)
           (println "strict-uninspectable-declarations" (str/join "," uninspectable-declarations))))
       (if negative-mode?
-        (let [rejected? (if negative-snapshot?
-                          (pos? (get-in result [:summary :counts :stale] 0))
-                          (and (not (get-in result [:summary :pass?]))
-                               (pos? (get-in result [:summary :counts :wrong-authority] 0))))
-              label (if negative-snapshot? "pinned snapshot" "authority")]
+        (let [rejected? (cond
+                          negative-empty? (some #(= :contract-unavailable (:error %)) (:errors result))
+                          negative-snapshot? (pos? (get-in result [:summary :counts :stale] 0))
+                          :else (and (not (get-in result [:summary :pass?]))
+                                     (pos? (get-in result [:summary :counts :wrong-authority] 0))))
+              label (cond negative-empty? "empty contract"
+                          negative-snapshot? "pinned snapshot"
+                          :else "authority")]
           (if rejected?
             (do (println "contract-lint: PASS negative" label "mutation rejected exit-convention=0-pass/1-fail/2-mutation-slipped")
                 (System/exit 0))

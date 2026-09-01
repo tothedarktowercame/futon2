@@ -62,6 +62,13 @@
     (is (false? (get-in (run [(decl "good" "hole" "AblationTable")] [b])
                         [:summary :pass?])))))
 
+(deftest empty-contract-is-unavailable-not-valid
+  (let [result (run [] [])]
+    (is (false? (get-in result [:summary :pass?])))
+    (is (false? (get-in result [:summary :qualification :strict-pass?])))
+    (is (= [{:error :contract-unavailable :reason :zero-declarations}]
+           (:errors result)))))
+
 (deftest evidence-shape-checks-have-rejecting-cases
   (let [find-good {:scenarios [{:round-results [{:find {:selected [:p]
                                                          :receipts {:p {:route :r

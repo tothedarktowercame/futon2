@@ -25,17 +25,28 @@
        (sort-by #(.getName %))
        (map #(edn/read-string (slurp %)))))
 
-(defn merged []
-  (let [es (read-frags)
+(defn merged
+  ([] (merged (read-frags)))
+  ([es]
+  (let [es (vec es)
         wits (mapcat #(let [w (:witnesses %)] (if (string? w) [w] w)) es)
         dupes (->> wits frequencies (filter (fn [[_ n]] (< 1 n))) (map first))]
+    (when (empty? es)
+      (throw (ex-info "witness registry unavailable: zero fragments" {:error :zero-fragments})))
     (when (seq dupes)
       (println "DUPLICATE witness names across fragments:" (pr-str dupes))
       (System/exit 1))
-    (vec es)))
+    es)))
 
 (defn -main [& args]
   (cond
+    (some #{"--negative-empty"} args)
+    (try
+      (merged [])
+      (println "merge-witnesses: FAIL empty fragment set accepted")
+      (catch Exception _
+        (println "merge-witnesses: PASS empty fragment set rejected")))
+
     (some #{"--split"} args)
     (let [es (edn/read-string (slurp registry))]
       (doseq [e es] (spit (str frag-dir "/" (frag-name e)) (with-out-str (pp/pprint e))))

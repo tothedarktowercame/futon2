@@ -232,6 +232,20 @@
     :argv ["bb" "checks/parameter_posterior_kernel_witness.clj" "--negative-prior"]}
    {:name :c270-outcome-q-as-parameter-posterior
     :argv ["bb" "checks/parameter_posterior_kernel_witness.clj" "--negative-outcome"]}
+   {:name :c274-empty-contract-lint
+    :argv ["bb" "checks/contract_lint.clj" "--negative-empty"
+           "--contract" "/home/joe/code/mathlib4/DarkTower/WarMachine/holes-contract.json"
+           "--registry" "checks/witness-registry.edn"
+           "--report" "/tmp/wm-gate-empty-contract.edn"
+           "--authority" "b475bc72dcf6a91f8a90fb1da1bb8a8058e9a7f4"]}
+   {:name :c274-empty-holder-contract
+    :argv ["bb" "checks/holder_check.clj" "--negative-empty"]}
+   {:name :c274-empty-witness-fragments
+    :argv ["bb" "scripts/merge_witnesses.bb" "--negative-empty"]}
+   {:name :c274-empty-q-interface
+    :argv ["bb" "checks/q_interface_completeness_check.clj" "--negative-empty"]}
+   {:name :c274-empty-model-contract
+    :argv ["bb" "scripts/generate_variable_situation_accounting.bb" "--negative-empty"]}
    {:name :c179-control-outside-vocabulary :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "control" "--negative-control"]}
    {:name :c179-negative-aliveness-factor :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "aliveness" "--negative-control"]}
    {:name :c179-missing-act-gate-leg :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "act-gate" "--negative-control"]}
