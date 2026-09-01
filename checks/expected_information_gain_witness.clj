@@ -32,12 +32,16 @@
         tested (if negative?
                  (assoc-in fixture [:cases 0 :expected-information-gain] "log(3)")
                  fixture)
-        accepted? (and (reference-valid? tested) (or negative? (lean-pass?)))
-        exit (cond (and negative? accepted?) 2 negative? 0 accepted? 0 :else 1)]
+        baseline-valid? (and (reference-valid? fixture) (lean-pass?))
+        mutation-rejected? (not (reference-valid? tested))
+        exit (cond (and negative? (not baseline-valid?)) 1
+                   (and negative? (not mutation-rejected?)) 2
+                   negative? 0 baseline-valid? 0 :else 1)]
     (println (cond
+               (and negative? (not baseline-valid?)) "expected-information-gain-witness: BASELINE-INVALID (control reason not established)"
                (= exit 2) "expected-information-gain-witness: mutation slipped"
                negative? "expected-information-gain-witness: negative-control PASS (perturbed value rejected)"
-               accepted? "expected-information-gain-witness: PASS"
+               baseline-valid? "expected-information-gain-witness: PASS"
                :else "expected-information-gain-witness: FAIL"))
     (System/exit exit)))
 

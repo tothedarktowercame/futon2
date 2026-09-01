@@ -81,14 +81,18 @@
         tested (if negative-kind
                  ((mutations negative-kind) fixture)
                  fixture)
-        accepted? (and (cascade-diff? tested) (or negative-kind (source-pinned? tested)))
-        exit (cond (and negative-kind accepted?) 2 negative-kind 0 accepted? 0 :else 1)]
+        baseline-valid? (and (cascade-diff? fixture) (source-pinned? fixture))
+        mutation-rejected? (not (cascade-diff? tested))
+        exit (cond (and negative-kind (not baseline-valid?)) 1
+                   (and negative-kind (not mutation-rejected?)) 2
+                   negative-kind 0 baseline-valid? 0 :else 1)]
     (println (cond
+               (and negative-kind (not baseline-valid?)) "cascade-diff-witness: BASELINE-INVALID (control reason not established)"
                (= exit 2) "cascade-diff-witness: mutation slipped"
                negative-kind (str "cascade-diff-witness: negative-control PASS ("
                                   (name negative-kind) " mutation rejected; claims "
                                   (pr-str (cascade-claims tested)) ")")
-               accepted? (str "cascade-diff-witness: PASS claim=" claim)
+               baseline-valid? (str "cascade-diff-witness: PASS claim=" claim)
                :else "cascade-diff-witness: FAIL"))
     (System/exit exit)))
 

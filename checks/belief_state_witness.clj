@@ -24,12 +24,16 @@
         fixture (edn/read-string (slurp fixture-path))
         tested (if negative? (update-in fixture [:states 1 :channels :loop-health]
                                                dissoc :variance) fixture)
-        accepted? (and (fixture-valid? tested) (or negative? (lean-pass?)))
-        exit (cond (and negative? accepted?) 2 negative? 0 accepted? 0 :else 1)]
+        baseline-valid? (and (fixture-valid? fixture) (lean-pass?))
+        mutation-rejected? (not (fixture-valid? tested))
+        exit (cond (and negative? (not baseline-valid?)) 1
+                   (and negative? (not mutation-rejected?)) 2
+                   negative? 0 baseline-valid? 0 :else 1)]
     (println "belief-state-witness:"
-             (cond (= exit 2) "mutation slipped"
+             (cond (and negative? (not baseline-valid?)) "BASELINE-INVALID (control reason not established)"
+                   (= exit 2) "mutation slipped"
                    negative? "negative-control PASS (missing channel variance rejected)"
-                   accepted? "PASS" :else "FAIL")
+                   baseline-valid? "PASS" :else "FAIL")
              "exit-convention=0-pass/1-fail/2-mutation-slipped")
     (System/exit exit)))
 (apply -main *command-line-args*)

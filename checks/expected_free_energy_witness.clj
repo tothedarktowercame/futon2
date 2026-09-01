@@ -26,12 +26,16 @@
   (let [negative? (some #{"--negative" "--negative-control"} args)
         fixture (edn/read-string (slurp (str fixture-path)))
         tested (if negative? (assoc-in fixture [:cases 0 :expected-free-energy] 3) fixture)
-        accepted? (and (reference-valid? tested) (or negative? (lean-pass?)))
-        exit (cond (and negative? accepted?) 2 negative? 0 accepted? 0 :else 1)]
+        baseline-valid? (and (reference-valid? fixture) (lean-pass?))
+        mutation-rejected? (not (reference-valid? tested))
+        exit (cond (and negative? (not baseline-valid?)) 1
+                   (and negative? (not mutation-rejected?)) 2
+                   negative? 0 baseline-valid? 0 :else 1)]
     (println (cond
+               (and negative? (not baseline-valid?)) "expected-free-energy-witness: BASELINE-INVALID (control reason not established)"
                (= exit 2) "expected-free-energy-witness: mutation slipped"
                negative? "expected-free-energy-witness: negative-control PASS (perturbed value rejected)"
-               accepted? "expected-free-energy-witness: PASS"
+               baseline-valid? "expected-free-energy-witness: PASS"
                :else "expected-free-energy-witness: FAIL"))
     (System/exit exit)))
 

@@ -24,13 +24,16 @@
   (let [negative? (some #{"--negative" "--negative-control"} args)
         fixture (edn/read-string (slurp (str fixture-path)))
         fixture-ok? (fixture-valid? fixture)
-        positive-exit (if negative? 0 (lean-exit "DarkTower/WarMachine/HaveWantArrowWitness.lean"))
+        positive-exit (lean-exit "DarkTower/WarMachine/HaveWantArrowWitness.lean")
         negative-exit (if negative?
                         (lean-exit "DarkTower/WarMachine/HaveWantArrowNegative.lean") 1)
-        accepted? (and fixture-ok? (zero? positive-exit)
-                       (if negative? (zero? negative-exit) true))
-        exit (if accepted? 0 (if negative? 2 1))]
+        baseline-valid? (and fixture-ok? (zero? positive-exit))
+        mutation-rejected? (zero? negative-exit)
+        accepted? (if negative? (and baseline-valid? mutation-rejected?) baseline-valid?)
+        exit (cond (and negative? (not baseline-valid?)) 1
+                   accepted? 0 negative? 2 :else 1)]
     (println (cond
+               (and negative? (not baseline-valid?)) "have-want-arrow-witness: BASELINE-INVALID (control reason not established)"
                (and negative? accepted?) "have-want-arrow-witness: negative-control PASS (malformed composition rejected)"
                negative? "have-want-arrow-witness: mutation slipped"
                accepted? "have-want-arrow-witness: PASS"

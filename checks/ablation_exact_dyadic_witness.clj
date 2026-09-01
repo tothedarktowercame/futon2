@@ -25,11 +25,15 @@
                           :expected (assoc (:expected x)
                                            :argmin-risk #{:grim :probe-one-token}))
                  x)
-        accepted? (valid? tested)]
+        baseline-valid? (valid? x)
+        mutation-rejected? (not (valid? tested))]
     (println (if negative?
-               (if accepted? "ablation-exact-dyadic: mutation slipped"
-                   "ablation-exact-dyadic: negative-control PASS (minimizer separation removed and rejected)")
-               (str (if accepted? "ablation-exact-dyadic: PASS" "ablation-exact-dyadic: FAIL")
+               (cond (not baseline-valid?) "ablation-exact-dyadic: BASELINE-INVALID (control reason not established)"
+                     (not mutation-rejected?) "ablation-exact-dyadic: mutation slipped"
+                     :else "ablation-exact-dyadic: negative-control PASS (minimizer separation removed and rejected)")
+               (str (if baseline-valid? "ablation-exact-dyadic: PASS" "ablation-exact-dyadic: FAIL")
                     " claim=" claim)))
-    (System/exit (cond (and negative? accepted?) 2 negative? 0 accepted? 0 :else 1))))
+    (System/exit (cond (and negative? (not baseline-valid?)) 1
+                       (and negative? (not mutation-rejected?)) 2
+                       negative? 0 baseline-valid? 0 :else 1))))
 (apply -main *command-line-args*)

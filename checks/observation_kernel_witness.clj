@@ -23,13 +23,17 @@
                      mass-neg? (assoc-in fixture [:rows 0 :mass :present] -1/2)
                      :else fixture)
         negative? (or sum-neg? mass-neg?)
-        accepted? (and (valid? tested) (or negative? (lean-pass?)))
-        exit (cond (and negative? accepted?) 2 negative? 0 accepted? 0 :else 1)]
+        baseline-valid? (and (valid? fixture) (lean-pass?))
+        mutation-rejected? (not (valid? tested))
+        exit (cond (and negative? (not baseline-valid?)) 1
+                   (and negative? (not mutation-rejected?)) 2
+                   negative? 0 baseline-valid? 0 :else 1)]
     (println "observation-kernel-witness:"
-             (cond (= exit 2) "mutation slipped"
+             (cond (and negative? (not baseline-valid?)) "BASELINE-INVALID (control reason not established)"
+                   (= exit 2) "mutation slipped"
                    sum-neg? "negative-control PASS (non-normalized row rejected)"
                    mass-neg? "negative-control PASS (negative mass rejected)"
-                   accepted? "PASS" :else "FAIL")
+                   baseline-valid? "PASS" :else "FAIL")
              "exit-convention=0-pass/1-fail/2-mutation-slipped")
     (System/exit exit)))
 (apply -main *command-line-args*)

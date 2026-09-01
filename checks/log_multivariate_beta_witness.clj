@@ -35,16 +35,19 @@
         tested (if negative?
                  (assoc-in fixture [:cases 1 :normaliser :denominator] 3)
                  fixture)
-        accepted? (and (reference-valid? tested) (or negative? (lean-pass?)))
+        baseline-valid? (and (reference-valid? fixture) (lean-pass?))
+        mutation-rejected? (not (reference-valid? tested))
         exit (cond
-               (and negative? accepted?) 2
+               (and negative? (not baseline-valid?)) 1
+               (and negative? (not mutation-rejected?)) 2
                negative? 0
-               accepted? 0
+               baseline-valid? 0
                :else 1)]
     (println (cond
+               (and negative? (not baseline-valid?)) "log-multivariate-beta-witness: BASELINE-INVALID (control reason not established)"
                (= exit 2) "log-multivariate-beta-witness: mutation slipped"
                negative? "log-multivariate-beta-witness: negative-control PASS (perturbed normaliser rejected)"
-               accepted? "log-multivariate-beta-witness: PASS"
+               baseline-valid? "log-multivariate-beta-witness: PASS"
                :else "log-multivariate-beta-witness: FAIL"))
     (System/exit exit)))
 

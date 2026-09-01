@@ -21,12 +21,15 @@
 (defn -main [& args]
   (let [negative? (some #{"--negative" "--negative-control"} args)
         fixture (edn/read-string (slurp (str fixture-path)))
-        accepted? (and (fixture-valid? fixture)
-                       (if negative?
-                         (zero? (lean-exit "DarkTower/WarMachine/FoldNegative.lean"))
-                         (zero? (lean-exit "DarkTower/WarMachine/FoldWitness.lean"))))
-        exit (if accepted? 0 (if negative? 2 1))]
+        baseline-valid? (and (fixture-valid? fixture)
+                             (zero? (lean-exit "DarkTower/WarMachine/FoldWitness.lean")))
+        mutation-rejected? (and negative?
+                                (zero? (lean-exit "DarkTower/WarMachine/FoldNegative.lean")))
+        accepted? (if negative? (and baseline-valid? mutation-rejected?) baseline-valid?)
+        exit (cond (and negative? (not baseline-valid?)) 1
+                   accepted? 0 negative? 2 :else 1)]
     (println (cond
+               (and negative? (not baseline-valid?)) "fold-witness: BASELINE-INVALID (control reason not established)"
                (and negative? accepted?) "fold-witness: negative-control PASS (missing policy holes rejected)"
                negative? "fold-witness: mutation slipped"
                accepted? "fold-witness: PASS"

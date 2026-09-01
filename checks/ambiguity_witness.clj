@@ -27,12 +27,16 @@
   (let [negative? (some #{"--negative" "--negative-control"} args)
         fixture (edn/read-string (slurp (str fixture-path)))
         tested (if negative? (assoc-in fixture [:cases 0 :expected-ambiguity] 1) fixture)
-        accepted? (and (fixture-valid? tested) (or negative? (lean-pass?)))
-        exit (cond (and negative? accepted?) 2 negative? 0 accepted? 0 :else 1)]
+        baseline-valid? (and (fixture-valid? fixture) (lean-pass?))
+        mutation-rejected? (not (fixture-valid? tested))
+        exit (cond (and negative? (not baseline-valid?)) 1
+                   (and negative? (not mutation-rejected?)) 2
+                   negative? 0 baseline-valid? 0 :else 1)]
     (println (cond
+               (and negative? (not baseline-valid?)) "ambiguity-witness: BASELINE-INVALID (control reason not established)"
                (= exit 2) "ambiguity-witness: mutation slipped"
                negative? "ambiguity-witness: negative-control PASS (perturbed entropy rejected)"
-               accepted? "ambiguity-witness: PASS"
+               baseline-valid? "ambiguity-witness: PASS"
                :else "ambiguity-witness: FAIL")
              "exit-convention=0-pass/1-fail/2-mutation-slipped")
     (System/exit exit)))
