@@ -1,7 +1,8 @@
 #!/usr/bin/env bb
 ;; worklist_check.bb -- prove the ledger before anyone acts on it (class 6a).
 (require '[clojure.edn :as edn])
-(def w (edn/read-string (slurp (or (first *command-line-args*) "worklist.edn"))))
+(def w (edn/read-string (slurp (or (first *command-line-args*)
+                                    (str (.getParent (.getAbsoluteFile (java.io.File. *file*))) "/worklist.edn")))))
 (defn die [& m] (binding [*out* *err*] (apply println "worklist_check:" m)) (System/exit 1))
 (when-not (= :wm/worklist-v1 (:schema w)) (die "unexpected schema"))
 (def ids (map :id (:items w)))
@@ -32,10 +33,21 @@
 (require '[clojure.java.shell :as shell]
          '[clojure.string :as str])
 
+(require '[clojure.java.io :as io])
+;; Resolve every path against the REPO ROOT, found from this script's own
+;; location -- not from the caller's cwd. wm-edge-loop.sh calls this script by
+;; absolute path from wherever the loop was started; run from /tmp the old
+;; relative slurp and cwd-bound `git show` reported "the signed sha is not in
+;; this history", a cwd problem wearing a history problem's message (C16 review).
+(def script-dir (let [f (io/file *file*)] (.getParentFile (.getAbsoluteFile f))))
+(def repo-root (let [{:keys [exit out]} (shell/sh "git" "rev-parse" "--show-toplevel" :dir script-dir)]
+                 (when (zero? exit) (str/trim out))))
+(when-not repo-root (die "cannot find the git repo root from" (str script-dir)))
+
 (defn- registry-at
   "The registry map as of SHA, or nil when the file did not exist there."
   [sha path]
-  (let [{:keys [exit out]} (shell/sh "git" "show" (str sha ":" path))]
+  (let [{:keys [exit out]} (shell/sh "git" "show" (str sha ":" path) :dir repo-root)]
     (when (zero? exit) (edn/read-string out))))
 
 (def superseded-rows
@@ -73,7 +85,7 @@
       (when-not then
         (die (:id i) "cannot read" path "at" sha "-- the signed sha is not in this history"))
       (let [was (get-in then key-path ::absent)
-            now (get-in (edn/read-string (slurp (str "../../../" path))) key-path ::absent)]
+            now (get-in (edn/read-string (slurp (io/file repo-root path))) key-path ::absent)]
         (when (not= was now)
           (die (:id i) "signature is stale:" (pr-str key-path) "in" path
                "changed after" sha "was signed by" (:reviewed-by i)
