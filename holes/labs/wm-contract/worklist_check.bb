@@ -1,6 +1,7 @@
 #!/usr/bin/env bb
 ;; worklist_check.bb -- prove the ledger before anyone acts on it (class 6a).
-(require '[clojure.edn :as edn])
+(require '[clojure.edn :as edn]
+         '[clojure.string])
 (def w (edn/read-string (slurp (or (first *command-line-args*)
                                     (str (.getParent (.getAbsoluteFile (java.io.File. *file*))) "/worklist.edn")))))
 (defn die [& m] (binding [*out* *err*] (apply println "worklist_check:" m)) (System/exit 1))
@@ -11,7 +12,26 @@
   (doseq [k [:id :class :status :owner :statement :acceptance]] (when-not (contains? i k) (die (:id i) "lacks" k)))
   (when-not (contains? (:classes w) (:class i)) (die (:id i) "unknown class" (:class i)))
   (when-not (contains? (:statuses w) (:status i)) (die (:id i) "unknown status" (:status i)))
-  (when (and (= :J (:class i)) (not (or (= :needs-joe (:status i)) (and (= :done (:status i)) (:ruling i) (= "joe" (:reviewed-by i)))))) (die (:id i) "class J must be :needs-joe, or :done with :ruling and :reviewed-by joe"))
+  (when (and (= :J (:class i)) (not (or (= :needs-joe (:status i)) (= :done (:status i))))) (die (:id i) "class J must be :needs-joe or :done"))
+  ;; Joe, 2026-09-01: "I'm getting a little bit tired of being asked to approve
+  ;; J3, J4, J5... asking me which thing to align, I don't have anything to go
+  ;; on to decide which one is better." A J row now has to earn his attention.
+  ;; BOTH must hold: (a) not decidable from the sources, the code, or a ruling
+  ;; he has already made; AND (b) the arms produce observably different machine
+  ;; behaviour that no experiment on recorded fields would distinguish.
+  ;; Everything else is the steward's to decide and record under :choices with
+  ;; :grounds :steward-default, and reaches him as a digest he can veto.
+  (when (= :J (:class i))
+    (when-not (map? (:bar i))
+      (die (:id i) "class J needs a :bar map saying how it earns Joe's attention"
+           "-- {:a \"not decidable from sources/code/a prior ruling because...\" :b \"no experiment on a recorded field distinguishes the arms because...\"},"
+           "or {:retrospective \"...\"} for a row that did not meet the bar"))
+    (let [bar (:bar i)]
+      (when (= :needs-joe (:status i))
+        (doseq [k [:a :b]]
+          (when (clojure.string/blank? (str (get bar k)))
+            (die (:id i) "is :needs-joe but its :bar lacks" k
+                 "-- an open J row must state BOTH conditions; if it cannot, the steward decides it"))))))
   (when (and (#{:done-unreviewed :done} (:status i)) (not (:evidence i))) (die (:id i) "done without :evidence"))
   (when (and (= :done (:status i)) (not (:reviewed-by i))) (die (:id i) ":done without :reviewed-by")))
 
