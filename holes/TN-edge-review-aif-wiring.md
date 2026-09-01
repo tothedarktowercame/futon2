@@ -417,6 +417,27 @@ in a new row that says what it supersedes. The cause both times was amending
 faster than reads land; the fix is to batch the amendments, not to loosen the
 gate.
 
+**A read is against a commit, never against the working tree; a signature
+names that commit** (claude-1, 2026-09-01). The checkout is shared, so one
+seat's in-progress edit is visible to the other's `slurp`. A reader can
+therefore sign content that is still in motion, and a `git add` of the ledger
+can sweep the other seat's half-finished work into the signer's commit. The
+stale-signature check catches this only when the covered key happens to have
+moved already; if the edit were on a key the signature did not cover, nothing
+would fire. `worklist_check.bb` now prints a warning naming every uncommitted
+file in the ledger directory — not fatal, since ordinary editing leaves it
+dirty, but nobody should sign while that line is printed.
+
+The instance: claude-1 read C20 at `805e6a5`, saw that an uncommitted
+amendment had already moved one of the covered entries, and backed their
+signature out rather than sign content in motion. I then wrote into the ledger
+that I had *destroyed* their signature in a read-modify-write race. I had not —
+my script did have that bug, but what it clobbered was my own amendment. I saw
+a field disappear between two greps, inferred a collision, and recorded the
+inference as a fact. The correction is in the C20 row rather than edited away,
+because a ledger that quietly loses a wrong entry is worth less than one that
+shows what was wrong.
+
 **Fixture rule.** The rule this review's own testing produced — *at least one
 fixture looks like the data* — lives in `futon2/AGENTS.md`, not here, because
 its reader is whoever writes the next test rather than whoever reads this

@@ -172,6 +172,24 @@
                    "changed after" sha "was signed by" (:reviewed-by i)
                    "-- set the row back to :done-unreviewed, or open a new row that supersedes it (TN 9a)"))))))))
 
+
+;; A read is against a COMMIT, never against the working tree (claude-1, TN 9a,
+;; 2026-09-01). The shared checkout means one seat's in-progress edit is visible
+;; to the other's slurp: a reader can sign content that is in motion, and a
+;; `git add` of the ledger can sweep the other seat's half-finished work into
+;; the signer's commit. The stale-signature check only catches this when the
+;; covered key happens to have moved already. So: warn, loudly and by name,
+;; whenever the ledger directory is dirty. Not fatal -- ordinary editing leaves
+;; it dirty all the time -- but nobody should sign while this line is printed.
+(let [{:keys [exit out]} (apply shell/sh
+                                ["git" "status" "--porcelain" "--"
+                                 (str script-dir) :dir repo-root])
+      dirty (when (zero? exit) (remove clojure.string/blank? (str/split-lines out)))]
+  (when (seq dirty)
+    (println "worklist_check: WARNING -- ledger directory has uncommitted changes;"
+             "a signature taken now would cover content in motion. Do not sign until clean:")
+    (doseq [d dirty] (println "worklist_check:   " (str/trim d)))))
+
 (def by-status (frequencies (map :status (:items w))))
 (println (format "worklist_check: %d items OK; %s; %d signed registry entries verified unchanged since signature, %d superseded and skipped, %d declared :covers-key :none, %d signed registry rows carry no :covers-key and are NOT checked"
                  (count (:items w)) (pr-str by-status)
