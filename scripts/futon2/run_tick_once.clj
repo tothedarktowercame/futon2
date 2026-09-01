@@ -8,7 +8,8 @@
             [futon2.aif.efe :as efe]
             [futon2.aif.pattern-registry :as pattern-registry]
             [futon2.aif.trace :as trace]
-            [futon2.report.war-machine :as wm])
+            [futon2.report.war-machine :as wm]
+            [futon2.wm-run-lock :as run-lock])
   (:import (java.time Instant LocalDate ZoneId)))
 
 (def ^:private utc-zone
@@ -22,6 +23,11 @@
 
 (defn- today-date-string []
   (str (LocalDate/now utc-zone)))
+
+(defn- lock-path
+  "Beside the per-date trace file this tick appends to."
+  []
+  (run-lock/default-lock-path))
 
 (defn- trace-path-for-date [date-str]
   (str (System/getProperty "user.home")
@@ -203,10 +209,8 @@
    :strategic-selection-fn selector
    :wm-version version-stamp})
 
-(defn- run-tick-once* [days]
-  (let [started-at (str (Instant/now))
-        run-id (str (java.util.UUID/randomUUID))
-        date-str (today-date-string)
+(defn- tick* [days started-at run-id]
+  (let [date-str (today-date-string)
         trace-path (trace-path-for-date date-str)
         before-trace (trace-stat trace-path)
         store-basis (store-basis)
@@ -242,6 +246,19 @@
      :store-basis store-basis
      :sample sample}))
 
+(defn- run-tick-once*
+  "One machine, one runner (RUN12): the lock is taken before any of the tick's
+  reads and released after the trace write, so a second starter refuses instead
+  of appending into the same per-date trace file. Under a run script that has
+  taken the outer lock and exported FUTON_WM_RUN_LOCK_TOKEN this nests and the
+  script holds the lock across every tick."
+  [days]
+  (let [started-at (str (Instant/now))
+        run-id (str (java.util.UUID/randomUUID))]
+    (run-lock/call-with-run-lock
+     {:path (lock-path) :run-id run-id}
+     (fn [_handle] (tick* days started-at run-id)))))
+
 (defn run-tick-once
   "Callable one-shot entrypoint for WM-RUN1."
   ([] (run-tick-once 14))
@@ -250,7 +267,12 @@
 
 (defn -main [& args]
   (let [days (parse-days args)
-        run (run-tick-once days)]
+        run (try (run-tick-once days)
+                 (catch clojure.lang.ExceptionInfo e
+                   (if (run-lock/refused? e)
+                     (do (binding [*out* *err*] (println (ex-message e)) (flush))
+                         (System/exit 3))
+                     (throw e))))]
     (pp/pprint
      (select-keys run
                   [:selector-seam :trace-path :trace-before :trace-after

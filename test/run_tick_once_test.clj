@@ -49,6 +49,12 @@
                                         :selector-seam "test"})
        #'tick/trace-stat (constantly nil)
        #'tick/write-receipt! (fn [path _] path)
+       ;; RUN12: the entrypoint now takes data/wm-trace/.run-lock. Point it at a
+       ;; temp file so the suite neither blocks on nor clobbers a live runner's.
+       #'tick/lock-path (constantly
+                         (str (System/getProperty "java.io.tmpdir")
+                              "/futon2-run-tick-once-test-" (System/nanoTime)
+                              ".run-lock"))
        #'wm/arena-mode-flags (constantly {})
        #'wm/http-get-json (constantly nil)
        #'wm/read-edn-file (constantly {:families [] :invariants []})
