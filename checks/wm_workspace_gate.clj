@@ -239,7 +239,12 @@
    {:name :p4ng-referent-drift :dir "/home/joe/code/p4ng"
     :argv ["python3" "detect_drift.py"]}
    {:name :cleanup-queue-corrections
-    :argv ["bb" "checks/cleanup_queue_correction_index.clj"]}])
+    :argv ["bb" "checks/cleanup_queue_correction_index.clj"]}
+   ;; Report-only until the independently owned generator repairs land. Exit 0
+   ;; means the census ran; the emitted `findings=N` line is the build state.
+   ;; UNAVAILABLE remains nonzero and therefore fails this gate.
+   {:name :live-artifact-format-boundaries
+    :argv ["python3" "checks/live_artifact_format_boundary_lint.py" "--report"]}])
 
 (defn control-commands []
   [{:name :c157-perturbed-entropy
@@ -384,7 +389,10 @@
     :argv ["bb" "-cp" "." "checks/wm_operational_certificate.clj"
            "--run" c167-run "--resource" c167-resource
            "--run-sha256" c167-run-sha256 "--resource-sha256" c167-resource-sha256
-           "--negative-run-record"]}])
+           "--negative-run-record"]}
+   {:name :c284-format-proof-must-be-executable
+    :argv ["python3" "checks/live_artifact_format_boundary_lint.py"
+           "--negative-control"]}])
 
 (defn run-one [{:keys [name argv dir]}]
   (println "wm-workspace-gate: RUN" (clojure.core/name name))

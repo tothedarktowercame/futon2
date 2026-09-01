@@ -259,8 +259,13 @@ and identifies model coverage plus defect tally as clean. It requires an
 explicit field/population proof to retire each finding. Its negative
 control flags an unproved `%d` value while accepting the same formatter after
 a same-scope non-nil assertion. The lint is deliberately bounded rather than a
-claim of whole-program data-flow analysis; helper-hidden proofs require an
-explicit `FORMAT-PROOF` marker backed by that generator's control.
+claim of whole-program data-flow analysis.
+
+**2026-09-01 C284 correction.** A marker is a claim about proof, not proof.
+`FORMAT-PROOF` comments are no longer accepted by the lint. Only recognised
+executable validation/reconciliation shapes retire a finding; a helper-hidden
+proof stays review-required until the lint learns its executable shape. The
+control proves that a marker-only formatter remains flagged.
 
 **Related.** Renaming a field under an unchanged schema version is what let
 this reach a consumer; the workflow report now bumps its schema version on any

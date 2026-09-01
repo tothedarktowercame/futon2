@@ -34,31 +34,31 @@ GENERATORS = {
 RULES = [
     {"generator": "live-topology", "id": "classification-counts-before-format",
      "unsafe": r"classification-counts\s+:transition",
-     "proof": r"FORMAT-PROOF\s+classification-counts|every\?\s+some\?[^\n]*classification-counts",
+     "proof": r"every\?\s+some\?[^\n]*classification-counts",
      "detail": "classification counts reach %d without required-key/non-nil proof"},
     {"generator": "lane-campaign", "id": "blank-active-identities",
      "unsafe": r"active\?\s+\(every\?\s+some\?\s+values\)",
-     "proof": r"FORMAT-PROOF\s+active-identities|str/blank\?[^\n]*(holding|job-id)",
+     "proof": r"str/blank\?[^\n]*(holding|job-id)",
      "detail": "non-nil permits blank holding/job values to render as empty cells"},
     {"generator": "model-coverage", "id": "empty-population-to-zero",
      "unsafe": r"rows\s*=\s*reg(?:\[\"rows\"\]|\.get\(\"rows\"\))",
-     "proof": r"FORMAT-PROOF\s+nonempty-rows|if\s+not\s+isinstance\(rows,\s*list\)\s+or\s+not\s+rows|if\s+not\s+rows\s*:|assert\s+rows\b",
+     "proof": r"if\s+not\s+isinstance\(rows,\s*list\)\s+or\s+not\s+rows|if\s+not\s+rows\s*:|assert\s+rows\b",
      "detail": "empty authoritative rows render a plausible all-zero table"},
     {"generator": "q-interface", "id": "missing-as-of-to-empty",
      "unsafe": r"\(tex\s+\(:as-of\s+data\)\)",
-     "proof": r"FORMAT-PROOF\s+as-of|\(string\?\s+\(:as-of\s+data\)\)",
+     "proof": r"\(string\?\s+\(:as-of\s+data\)\)",
      "detail": "nil :as-of is stringified into a blank publication stamp"},
     {"generator": "variable-situation", "id": "unreconciled-cell-population",
      "unsafe": r"cell\s+\(fn\s+\[c\s+p\]",
-     "proof": r"FORMAT-PROOF\s+cell-population|cell-total|row accounting broken",
+     "proof": r"cell-total|row accounting broken",
      "detail": "unknown/missing pointer status disappears from both columns"},
     {"generator": "war-room", "id": "default-zero-and-null-metrics",
      "unsafe": r"\(get\s+st\s+:repaired\s+0\)",
-     "proof": r"FORMAT-PROOF\s+war-room-metrics|repair-status-population-valid",
+     "proof": r"repair-status-population-valid",
      "detail": "missing categories default to zero and unchecked workflow numerics reach %d"},
     {"generator": "workflow-report", "id": "missing-lane-to-idle",
      "unsafe": r"\(get\s+holdings\s+lane\)",
-     "proof": r"FORMAT-PROOF\s+four-lane-population|required-lanes[^\n]*set",
+     "proof": r"required-lanes[^\n]*set|when-not\s+\(=\s+\(set\s+lanes\)\s+registry-lanes\)",
      "detail": "missing registry lane becomes idle/open=0 in the generated report"},
 ]
 
@@ -92,7 +92,8 @@ def lint() -> dict:
             "limits": [
                 "bounded to the generators declared in README-live-artifacts.md",
                 "recognises explicit source proofs, not arbitrary interprocedural data flow",
-                "a proof hidden behind a helper needs a FORMAT-PROOF marker plus its own test",
+                "comments and FORMAT-PROOF markers are never accepted as proof",
+                "a proof hidden behind a helper remains review-required until this lint learns its executable shape",
                 "categorical reconciliation and expected populations remain generator-specific",
             ]}
 
@@ -111,8 +112,10 @@ def format_probe(text: str) -> list[str]:
 
 def negative_control() -> int:
     unsafe = '(format "%d" (:count row))'
+    marker_only = ';; FORMAT-PROOF count\n(format "%d" (:count row))'
     safe = '(assert (some? (:count row)))\n(format "%d" (:count row))'
     result = {"unsafe-flagged": format_probe(unsafe) == ["count"],
+              "marker-only-flagged": format_probe(marker_only) == ["count"],
               "proved-safe-not-flagged": format_probe(safe) == []}
     passed = all(result.values())
     print(json.dumps(result, sort_keys=True))
@@ -124,6 +127,8 @@ def negative_control() -> int:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--negative-control", action="store_true")
+    parser.add_argument("--report", action="store_true",
+                        help="report findings but fail only when the lint is unavailable")
     args = parser.parse_args()
     if args.negative_control:
         return negative_control()
@@ -132,9 +137,12 @@ def main() -> int:
     if result["unavailable"]:
         print("live-artifact-format-boundary-lint: UNAVAILABLE", file=sys.stderr)
         return 2
-    # Findings are the expected live state until the seven owners repair them.
-    print(f"live-artifact-format-boundary-lint: FINDINGS {result['finding-count']}")
-    return 1 if result["findings"] else 0
+    # Findings are report-only in the workspace gate until their owners repair
+    # them. Direct invocation remains red so the population cannot be mistaken
+    # for extinction.
+    mode = "REPORT" if args.report else "FINDINGS"
+    print(f"live-artifact-format-boundary-lint: {mode} findings={result['finding-count']}")
+    return 0 if args.report else (1 if result["findings"] else 0)
 
 
 if __name__ == "__main__":

@@ -42,9 +42,13 @@ prevents the lint from degenerating into “all format calls are forbidden.”
 ## Honest boundary
 
 This is a bounded contract lint, not interprocedural type inference. It can
-prove direct validations, expected-population reconciliations, and explicit
-`FORMAT-PROOF` markers. A proof hidden in a helper is review-required until the
-generator names it with a marker and backs that marker with its own control.
+prove direct validations and expected-population reconciliations.
+
+**2026-09-01 C284 amendment:** comments and `FORMAT-PROOF` markers are not
+evidence and are never accepted. A proof hidden in a helper remains
+review-required until this lint learns that executable shape. This supersedes
+the original marker-plus-control rule: a marker could be added without its
+claimed control and therefore made the lint self-certifying.
 Categorical reconciliation remains generator-specific: the lint can demand
 that pointer-status rows reconcile, but it cannot infer the intended vocabulary
 from a generic `filter`.
@@ -53,4 +57,3 @@ Missing generator files are `UNAVAILABLE`/exit 2, not clean. Findings are exit
 1. A clean fully proved population is exit 0.
 
 No live-artifact generator or generated paper artefact was edited in C281.
-
