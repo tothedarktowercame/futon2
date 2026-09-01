@@ -126,3 +126,28 @@ on this field" rather than as agreement.
 
 Sibling of *at least one fixture looks like the data*: that rule is about the
 shape of the input, this one is about where in the parameter space you stood.
+
+## Before signing that a code path is safe, enumerate — don't verify the pointer (2026-09-01)
+
+A discovery reported one unsafe actuator on a path, with a file:line. I opened
+the file, confirmed the line said what the report claimed, and signed. The
+verification was correct and the signature was wrong: `grep -n 'http/post'`
+over the same file returns **four** sites, two of which fire on that path. One
+of them POSTs Clojure source to Drawbridge `/eval` on `:6768` — loading code
+into the shared JVM from a diagnostic run, which the workspace rule of
+2026-08-23 forbids outright.
+
+A pointer that resolves *feels* like verification, which is why this one is
+easy to miss. But confirming a claim and establishing an absence are different
+operations, and only the second is what a safety signature asserts. So:
+
+**When the question is "does this path do X anywhere", the answer comes from a
+search over the space, never from checking the instances you were handed.**
+Run the grep, list every site, state each one's reachability. Four seconds.
+
+Same family as the other entries here — the range-end pointer check,
+`read-string` on a multi-form file, a piped gate's exit code, a fixture of the
+wrong shape, a comparison at the one parameter value where the arms coincide.
+In all of them a narrower question was asked than the one that mattered and its
+answer was read as the wider one. This is the only instance so far where the
+cost would have been an actuator firing rather than a sentence being wrong.
