@@ -73,14 +73,15 @@ write set is `write-set-unknown`: STOP until its owner and write set are named.
 
 ## 1. Joe parks the background writers
 
-Joe runs from the canonical serving-JVM surface:
+Joe runs from the canonical serving-JVM surface. The completed/no-runtime
+coordinator parks only its independent watchdog; its terminal state remains
+untouched:
 
 ```sh
 cd /home/joe/code/futon3c
-for id in \
-  'jit-queue:jit-m94A03-retry-v3' \
-  'jit-queue:jit-all-open-v2' \
-  'ftriangle-live-smoke-v1'
+scripts/proof-eval.sh '(do (require (quote futon3c.apm.semantic-progress-watchdog)) (futon3c.apm.semantic-progress-watchdog/stop! "semantic-progress:jit-queue:jit-m94A03-retry-v3"))'
+
+for id in 'jit-queue:jit-all-open-v2' 'ftriangle-live-smoke-v1'
 do
   printf '%s\n' "(do (require 'futon3c.apm.durable-coordinator) (futon3c.apm.durable-coordinator/stop! \"/home/joe/code/futon3c/data/apm-coordinators/registry.edn\" \"$id\"))" \
     | scripts/proof-eval.sh -
@@ -97,7 +98,7 @@ systemctl --user is-active apm-axiom-audit.service futon-pattern-index.service
 systemctl --user stop apm-campaign-babysit-jit-all-open-v2.service
 ```
 
-Expected per coordinator: `:ok true`, `:durably-disabled? true`, and
+Expected for each running coordinator: `:ok true`, `:durably-disabled? true`, and
 `:status :stopped` with a quiescence witness. `:draining` is not success; wait
 for its in-flight tick and observe again. Let already-running closer/audit/index
 work finish rather than killing it, then explicitly stop
@@ -107,10 +108,11 @@ Never stop `futon3c-zone.service`.
 **Restoration precondition:** stopping a coordinator is allowed only when its
 pre-state has a reversible activation intent. `resume!` is not an inverse for a
 durable `:complete` state: it invokes `continue-complete!` and can create new
-work. An enabled-but-complete coordinator with no runtime is already a
-non-writer and must not be stopped merely to satisfy a blanket list. If the
-fence checker nevertheless requires it stopped, STOP: the checker and the
-restoration semantics disagree and the window is not executable yet.
+work. An enabled-but-complete coordinator with no runtime cannot tick, but its
+independent semantic watchdog is still a writer. Park only that watchdog.
+Record it as `rearm-terminal-coordinator<TAB>ID`; restoration uses
+`start-registered!`, which re-arms the watchdog while preserving terminal
+`:complete`.
 
 After each successful park, append exactly the corresponding allowlisted action,
 for example `resume-coordinator<TAB>ID` or `start-unit<TAB>UNIT`, to
@@ -297,7 +299,7 @@ Say to Joe verbatim with actual values substituted:
 Joe restores only entries both changed according to
 `/tmp/$FENCE_ID-restore.actions` and recorded with reversible active intent in
 step 0. Do not blanket-resume the three coordinator IDs. Execute allowlisted
-actions in reverse parking order. For a coordinator, use `resume!` only when
+actions in reverse parking order. For a running coordinator, use `resume!` only when
 the captured durable pre-state was genuinely running; `enabled? true` alone is
 insufficient. For a unit, start it only when its captured `ActiveState` was
 active/activating.
@@ -310,6 +312,9 @@ nl -ba "/tmp/$FENCE_ID-restore.actions"
 printf '%s\n' "(do (require 'futon3c.apm.durable-coordinator) (futon3c.apm.durable-coordinator/resume! \"/home/joe/code/futon3c/data/apm-coordinators/registry.edn\" \"COORDINATOR_ID\"))" | scripts/proof-eval.sh -
 # For each start-unit row whose captured ActiveState was active/activating:
 systemctl --user start UNIT
+# For a rearm-terminal-coordinator row, after reconfirming durable :complete
+# and no runtime scheduler:
+printf '%s\n' "(do (require 'futon3c.apm.durable-coordinator) (futon3c.apm.durable-coordinator/start-registered! \"/home/joe/code/futon3c/data/apm-coordinators/registry.edn\" \"COORDINATOR_ID\"))" | scripts/proof-eval.sh -
 ```
 
 Coordinator verifies restored states with the same serving-JVM `status` forms
@@ -329,8 +334,10 @@ Joe can restore a partially parked window without this session:
 2. Run `nl -ba /tmp/$FENCE_ID-restore.actions`. Only rows present were actually
    parked; never restore a name merely because it appears elsewhere in this
    document.
-3. Work bottom-to-top using the two allowlisted command forms above. Refuse a
+3. Work bottom-to-top using the allowlisted command forms above. Refuse a
    coordinator resume unless its captured durable pre-status was `:running`.
+   A terminal re-arm requires captured and current `:complete` and uses
+   `start-registered!`, never `resume!`.
 4. Re-run the coordinator `status` loop and `systemctl show` from step 0.
    Success means restored activation intent plus explicit new epoch/InvocationID,
    not equality with the old runtime state.

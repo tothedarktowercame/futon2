@@ -60,6 +60,7 @@ def coordinator_state():
     ids = " ".join(json.dumps(x) for x in COORDINATORS)
     form = f'''(do
       (require 'futon3c.apm.durable-coordinator)
+      (require 'futon3c.apm.semantic-progress-watchdog)
       (into {{}}
         (for [id [{ids}]
               :let [s (futon3c.apm.durable-coordinator/status {json.dumps(REGISTRY)} id)
@@ -68,6 +69,10 @@ def coordinator_state():
                 :enabled? (get-in s [:registration :coordinator/enabled?])
                 :lifecycle (get-in s [:registration :coordinator/lifecycle])
                 :runtime-scheduler-present? (some? (:runtime s))
+                :watchdog-scheduler-present?
+                (boolean
+                 (futon3c.apm.semantic-progress-watchdog/running?
+                  (str "semantic-progress:" id)))
                 :durable-status (get-in s [:durable-state :regulator/status])
                 :durable-epoch (get-in s [:durable-state :regulator/epoch])
                 :tick-claim (:tick-claim s)
@@ -162,22 +167,33 @@ def coordinator_findings(state):
     rows = state["coordinator-state"]["coordinators"]
     for identity in COORDINATORS:
         row = rows.get(identity)
-        expected = {
-            "present?": True, "enabled?": False,
-            "runtime-scheduler-present?": False,
-            "durable-status": "stopped", "tick-claim": None,
-            "witness-type": "durable-quiescence-witness",
-            "witness-coordinator": identity, "witness-tick-claim": None,
-        }
         if not isinstance(row, dict):
             findings.append({"component": "coordinator", "id": identity,
                              "reason": "status-missing"})
             continue
+        terminal_complete = (row.get("durable-status") == "complete"
+                             and row.get("tick-claim") is None
+                             and row.get("runtime-scheduler-present?") is False)
+        if terminal_complete:
+            expected = {"present?": True,
+                        "runtime-scheduler-present?": False,
+                        "watchdog-scheduler-present?": False,
+                        "durable-status": "complete", "tick-claim": None}
+        else:
+            expected = {
+                "present?": True, "enabled?": False,
+                "runtime-scheduler-present?": False,
+                "watchdog-scheduler-present?": False,
+                "durable-status": "stopped", "tick-claim": None,
+                "witness-type": "durable-quiescence-witness",
+                "witness-coordinator": identity, "witness-tick-claim": None,
+            }
         mismatches = {key: {"expected": value, "observed": row.get(key)}
                       for key, value in expected.items() if row.get(key) != value}
-        if row.get("lifecycle") == "running":
+        if not terminal_complete and row.get("lifecycle") == "running":
             mismatches["lifecycle"] = {"expected": "not-running", "observed": "running"}
-        if row.get("witness-epoch") != row.get("durable-epoch"):
+        if (not terminal_complete
+                and row.get("witness-epoch") != row.get("durable-epoch")):
             mismatches["witness-epoch"] = {"expected": row.get("durable-epoch"),
                                             "observed": row.get("witness-epoch")}
         if mismatches:
@@ -244,7 +260,8 @@ def evaluate(first, second, attestations):
 def fixture():
     witness = lambda identity: {
         "present?": True, "enabled?": False, "lifecycle": "draining",
-        "runtime-scheduler-present?": False, "durable-status": "stopped",
+        "runtime-scheduler-present?": False,
+        "watchdog-scheduler-present?": False, "durable-status": "stopped",
         "durable-epoch": 7, "tick-claim": None,
         "witness-type": "durable-quiescence-witness",
         "witness-coordinator": identity, "witness-epoch": 7,
@@ -271,6 +288,20 @@ def self_test():
     moved = json.loads(json.dumps(base))
     moved["unit-state"][UNITS[0]]["InvocationID"] = "new"
     cases.append(("state-moved", base, moved, complete, 3))
+    terminal = json.loads(json.dumps(base))
+    identity = COORDINATORS[0]
+    terminal["coordinator-state"]["coordinators"][identity] = {
+        "present?": True, "enabled?": True, "lifecycle": "running",
+        "runtime-scheduler-present?": False,
+        "watchdog-scheduler-present?": False,
+        "durable-status": "complete", "tick-claim": None,
+    }
+    cases.append(("terminal-watchdog-parked", terminal, terminal, complete, 0))
+    terminal_live_watchdog = json.loads(json.dumps(terminal))
+    terminal_live_watchdog["coordinator-state"]["coordinators"][identity][
+        "watchdog-scheduler-present?"] = True
+    cases.append(("terminal-watchdog-live", terminal_live_watchdog,
+                  terminal_live_watchdog, complete, 1))
     escaped = []
     for name, first, second, attest, expected in cases:
         actual, report = evaluate(first, second, attest)

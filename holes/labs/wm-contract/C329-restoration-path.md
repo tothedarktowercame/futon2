@@ -33,11 +33,10 @@ starting a writer that was never stopped. Coordinator restoration additionally
 requires captured durable pre-status `:running`; service restoration requires
 captured `ActiveState` active/activating.
 
-The current terminal-enabled coordinator exposes a remaining pre-window
-decision: either the fence checker must recognise durable complete/no-runtime
-as a non-writer, or the owner must explicitly accept a non-equivalent state
-transition. Blanket stop/resume is refused. Until that is resolved, the writer
-fence must fail closed before parking.
+Superseded by C333: the terminal coordinator itself cannot tick, but its
+independent semantic watchdog was live and writing. The corrected reversible
+operation parks only that watchdog and re-arms it with `start-registered!`;
+blanket coordinator stop/resume remains refused.
 
 ## What was dry-run
 
