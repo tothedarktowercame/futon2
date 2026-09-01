@@ -579,12 +579,15 @@ would have handed its consumer a precision to invent — plus Q(π) keyed by
 `rank/N` and the live `*effects-mode*`, without which a flat per-candidate
 field cannot be told from a machine that had no discrimination.
 
-Two review points worth keeping. The delivered byte-identity test re-listed
+Two review points worth keeping. The delivered test for the identity of the
+DEFAULT output — the flag-OFF record, which is the only one that can regress,
+since the flag-ON path is new by construction and is covered by the tests —
+re-listed
 the 35-key whitelist and compared it to the function built from that
 whitelist: a control that passes for any edit made in both places guards
 nothing. It was replaced by a golden captured from the pre-I3 implementation
 run against the current one in a single process (3714 = 3714), so what is
-pinned is the old bytes rather than a description of the new code. And the
+pinned is the old default bytes rather than a description of the new code. And the
 measurement decided the design: +92,985 bytes/tick, 30.2% of a 307,910-byte
 110-candidate record, 198,075 bytes (68%) under the naive form the C66
 comment warns about — so the write won over the recompute route, which would
