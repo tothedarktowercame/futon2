@@ -547,3 +547,45 @@ publish of p4ng `futon-2026` from the registries, only when no registry row is
 on J3). State at handover: 42 done, 3 open (I1, I2, H1b), J3 `:needs-joe`
 with claude-20's recommendation (c) then (a) and claude-1's reading that J1/J2
 already exclude (b). Figures published through p4ng `41ec60c`.
+
+### 10d. A methods rule, and I3 (2026-09-01)
+
+**A file of forms is read with `edn/read` in a loop, never `read-string`.**
+`clojure.edn/read-string` returns the FIRST form and stops. Both readers hit
+this on the same files within an hour: C11's reproduction and its second read
+each reported `wm-trace-2026-07-04.edn` as holding one record. It holds 38.
+Read form by form, 07-04 has 37 records carrying both a selection and a
+realized policy and 07-05 has 13 — and in **50 of those 50 the enacted action
+differs from the selection, with no record anywhere in either file where they
+agree**. The verdict did not change; its scale did, from two anecdotes to
+every comparable record we have. H1b's `:statement` and `:acceptance` now
+carry the number, with the constraint that the restated hole may state the
+agreeing case as a bound to be tested but not as a claim believed true, since
+nothing on record supports it.
+
+This is the same shape as the pointer rule of §9a and the `find | head -1`
+trap the CLI seat recorded under H2: **a tool that returns one thing where
+there are many, read as if it had returned the thing.** The defence is the
+same in each case — establish that the read was exhaustive before treating
+its result as the whole.
+
+**I3, the shared trace write** (`5febaee` + `941d243`, signed `1282248`).
+Both I1 and I2 needed a write before they needed an equation:
+`strip-ranked-action` dropped each candidate's `:prediction` and
+`strip-decision` dropped Q(π). Behind `FUTON_WM_TRACE_POLICY_DETAILS=1`,
+default OFF, a tick now carries per ranked action its predicted mean **and
+variance** — F_π scores an observation under a distribution, so a mean alone
+would have handed its consumer a precision to invent — plus Q(π) keyed by
+`rank/N` and the live `*effects-mode*`, without which a flat per-candidate
+field cannot be told from a machine that had no discrimination.
+
+Two review points worth keeping. The delivered byte-identity test re-listed
+the 35-key whitelist and compared it to the function built from that
+whitelist: a control that passes for any edit made in both places guards
+nothing. It was replaced by a golden captured from the pre-I3 implementation
+run against the current one in a single process (3714 = 3714), so what is
+pinned is the old bytes rather than a description of the new code. And the
+measurement decided the design: +92,985 bytes/tick, 30.2% of a 307,910-byte
+110-candidate record, 198,075 bytes (68%) under the naive form the C66
+comment warns about — so the write won over the recompute route, which would
+have needed the belief and the mode per candidate anyway.
