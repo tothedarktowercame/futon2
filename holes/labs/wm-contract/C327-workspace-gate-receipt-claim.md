@@ -134,9 +134,9 @@ Consequently the receipt proves aggregation of exit conventions, not a uniform
 notion of constituent soundness. A reader must not promote every row to “this
 check independently proved its prose claim.”
 
-## Recommended receipt language
+## Recommended receipt language (superseded by C352)
 
-The operator-facing summary should say:
+The original operator-facing summary was:
 
 > `WORKSPACE-GATE PASS — FENCE-CONDITIONAL FENCE_ID. Enumerated checks and
 > controls accepted on the recorded clean, stable repository basis; bounded
@@ -161,3 +161,6 @@ The packet handed to Joe must include, or point immutably to:
 Quoting only `outer verdict=pass`, `inner exit=0`, or “the tree is sound” drops
 conditions material to the claim and is not supported.
 
+C352 supersedes these two templates after C330, C342, and C345. In particular,
+the blanket composites-only and unaudited-population clauses are retired, while
+the gate receipt's unearned event claim is now called out until C350 lands.

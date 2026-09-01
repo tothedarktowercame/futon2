@@ -186,7 +186,9 @@ fence; it does not acquire one.
 
 ```sh
 cd /home/joe/code/futon2
-FUTON_WRITER_FENCE_ID="$FENCE_ID" make workspace-gate
+FUTON_WRITER_FENCE_ID="$FENCE_ID" \
+FUTON_WRITER_FENCE_EVIDENCE="/tmp/$FENCE_ID-evidence-01.json" \
+make workspace-gate
 ```
 
 Expected: terminal bounded receipt with inner exit 0, outer exit 0, verdict
@@ -320,7 +322,7 @@ Say to Joe verbatim with actual values substituted:
 > observed. The production phase allowed only the exact click/run-bound outputs
 > named in certificate `<PATH>`, whose verdict is `<VERDICT>`. This claim is
 > conditional on that declared boundary. Mutable-input population v1 contains
-> 62 content readers, 6 event readers, 1 library reader, and 0 unexplained
+> 61 content claims, 6 event claims, 1 non-verdict library, and 0 unexplained
 > programs; this does not claim that an undeclared external mutable input is
 > impossible. FENCE-RELEASE: the pre-fence background manifest
 > may now be restored.
