@@ -43,9 +43,40 @@
      (let [spread (- (apply max g-totals) (apply min g-totals))]
        (max tau-min (/ spread k))))))
 
+(defn- finite-pos?
+  "A usable temperature: a number, finite, strictly positive. Mirrors
+   `policy-precision/finite-number?` — the same guard the beta carry applies to
+   a state read back from a trace, applied again at the point of use so a beta
+   that reached here through some other route cannot become a τ."
+  [x]
+  (and (number? x)
+       (let [d (double x)]
+         (and (not (Double/isNaN d)) (not (Double/isInfinite d)) (pos? d)))))
+
+(defn temperature-source
+  "Which law produced τ_eff, as a value to put on the decision beside `:tau`.
+
+   Named per tick because I1 (b2b) requires it: a held variational τ is the
+   PREVIOUS tick's solved posterior, and a selection-gain τ is a different
+   quantity wearing the same name. A run may not be reported as N ticks of
+   variational τ without the count of `:converged-posterior` ticks beside it,
+   and that count is only recoverable from a per-tick source field.
+
+   For the two engineering-calibration modes the source IS the mode. For
+   `:variational-beta-gamma` it is `carry-beta`'s own `:beta-source`
+   (`:converged-posterior` | `:held-unsolved` | `:held-absent` | `:initial`),
+   passed in as `:variational-beta-source`."
+  [{:keys [tau-mode variational-beta-source] :or {tau-mode :spread}}]
+  (case tau-mode
+    :spread :selection-gain-spread
+    :selection-gain-only :selection-gain-only
+    :variational-beta-gamma (or variational-beta-source :unnamed-beta-source)
+    :unknown-tau-mode))
+
 (defn effective-temperature
-  "The selection temperature actually used. TWO layers, separated per the R6
-   faithfulness audit (M-aif-faithfulness §2.2 B-2d):
+  "The selection temperature actually used. THREE layers, the first two
+   separated per the R6 faithfulness audit (M-aif-faithfulness §2.2 B-2d) and
+   the third added by I1 (b2c) / RUN8 stage S3:
 
      g        — R14 engineering outcome-feedback selection gain. High g ⇒
                 lower τ_eff ⇒ sharper commitment; low g ⇒ flatter. It is
@@ -54,6 +85,11 @@
                 heuristic (tight spread → diffuse selection → abstain trips)
                 historically STACKED on g. Not part of the canonical form; now
                 a separately-justified layer that can be switched off.
+     β        — variational policy precision, γ = 1/β with β the root of
+                friston2017 eq. 2.7 (`policy-precision/converge-beta`). τ = β
+                exactly: γ = 1/β and the softmax consumes −G/τ, so the
+                temperature the machine uses IS β (I1 slice-b1 (a), verified
+                numerically there).
 
    `:tau-mode` in the opt-map selects the layering:
 
@@ -61,22 +97,51 @@
                          historical stacked behaviour.
      :selection-gain-only τ_eff = 1 / g — fixed-baseline controller mode; the spread
                          calibration layer is OFF.
+     :variational-beta-gamma  τ_eff = β, supplied by the caller as
+                         `:variational-beta` with its provenance as
+                         `:variational-beta-source`. g and τ_spread are BOTH
+                         out of the expression; this is a different law, not a
+                         third calibration of the same one.
 
-   g is floored at `tau-min` defensively in both modes so a degenerate g can
-   never divide τ to zero or flip its sign. g = 1.0 (the default and burn-in
-   prior) reduces :spread EXACTLY to the spread-only temperature, and
-   :selection-gain-only to τ_eff = 1.
+   THE VARIATIONAL MODE NEVER FALLS BACK TO THE SELECTION-GAIN LAW (I1 b2b (2)).
+   A tick whose solve did not both converge and bracket still supplies a β —
+   `carry-beta` holds the last solved posterior, or β₀ on a cold start — so the
+   HOLD happens upstream in the carry and is visible in
+   `:variational-beta-source`. If no β reaches here at all that is a wiring
+   error, and it throws rather than quietly reverting to 1/g: mixing the two
+   laws inside one run makes the τ series uninterpretable, which is the whole
+   thing S3 exists to produce.
 
-   Both modes are engineering calibration policies and are reported as such."
+   g is floored at `tau-min` defensively in the two selection-gain modes so a
+   degenerate g can never divide τ to zero or flip its sign. g = 1.0 (the
+   default and burn-in prior) reduces :spread EXACTLY to the spread-only
+   temperature, and :selection-gain-only to τ_eff = 1. β is NOT floored at
+   `tau-min`: a floor there would silently substitute an engineering constant
+   for the solved temperature, which is the substitution this mode exists to
+   stop. It is validated instead.
+
+   The first two modes are engineering calibration policies and are reported as
+   such; the third is the variational quantity and is reported as such, via
+   `temperature-source`."
   ([g-totals selection-gain] (effective-temperature g-totals selection-gain {}))
-  ([g-totals selection-gain {:keys [tau-min tau-mode]
+  ([g-totals selection-gain {:keys [tau-min tau-mode variational-beta]
                     :or {tau-min 0.01 tau-mode :spread}
                     :as temperature-opts}]
    (let [g (max (double tau-min) (double selection-gain))]
      (case tau-mode
        :spread (/ (adaptive-temperature g-totals temperature-opts) g)
        :selection-gain-only (/ 1.0 g)
-       (throw (ex-info "unknown :tau-mode (expected :spread or :selection-gain-only)"
+       :variational-beta-gamma
+       (if (finite-pos? variational-beta)
+         (double variational-beta)
+         (throw (ex-info (str ":variational-beta-gamma requires a finite positive "
+                              ":variational-beta (τ = β); it does NOT fall back to 1/g")
+                         {:tau-mode tau-mode
+                          :variational-beta variational-beta
+                          :variational-beta-source
+                          (:variational-beta-source temperature-opts)})))
+       (throw (ex-info (str "unknown :tau-mode (expected :spread, :selection-gain-only "
+                            "or :variational-beta-gamma)")
                        {:tau-mode tau-mode}))))))
 
 (defn softmax-weights
@@ -246,6 +311,11 @@
      :top-G top-g
      :top-mission-value-factor top-mission-value
      :tau-mode (get temperature-opts :tau-mode :spread)
+     ;; I1 (b2b) (2): which LAW produced this τ, per tick. A held variational τ
+     ;; is the previous tick's solved posterior; a selection-gain τ is a
+     ;; different quantity with the same name. The mode alone cannot tell them
+     ;; apart, so the source is recorded beside it.
+     :tau-source (temperature-source temperature-opts)
      :tau-effective (double tau)
      :selection-gain (double selection-gain)
      :habit-prior-stats (or habit-prior-stats
@@ -296,6 +366,7 @@
      :rank (:rank chosen)
      :controller-score chosen-g
      :tau tau
+     :tau-source (temperature-source temperature-opts)
      :tau-spread tau-spread
      :selection-gain (double selection-gain)
      :selection-boundary :strategic-recommendation
@@ -343,7 +414,11 @@
      :temperature-opts — passed to `adaptive-temperature` AND
                         `effective-temperature`; may carry `:tau-mode`
                         (:spread default | :selection-gain-only — see
-                        `effective-temperature`, B-2d τ-layer separation).
+                        `effective-temperature`, B-2d τ-layer separation —
+                        | :variational-beta-gamma, which additionally requires
+                        `:variational-beta` and `:variational-beta-source` from
+                        the caller's `policy-precision/carry-beta` state,
+                        RUN8 stage S3).
      :selection-gain — g, the R14 learned inverse-temperature
                         (`futon2.aif.selection-gain`). τ_eff = τ_spread / g.
                         Default 1.0 ⇒ behaviour identical to the spread-only path.
@@ -374,6 +449,7 @@
       :rank 1
       :controller-score <number>
       :tau <number>
+      :tau-source <keyword>   ; which law produced τ — see `temperature-source`
       :softmax-weights {<action> → <probability>}}
 
    Abstain branch:
@@ -440,6 +516,7 @@
                 :rank 1
                 :controller-score best-g
                 :tau tau
+                :tau-source (temperature-source temperature-opts)
                 :tau-spread tau-spread
                 :selection-gain (double selection-gain)
                 :decision-explanation explanation
@@ -467,6 +544,7 @@
                 :rank (:rank chosen)
                 :controller-score chosen-g
                 :tau tau
+                :tau-source (temperature-source temperature-opts)
                 :tau-spread tau-spread
                 :selection-gain (double selection-gain)
                 :habit-prior-applied? true

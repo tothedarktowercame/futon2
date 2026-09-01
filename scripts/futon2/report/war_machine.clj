@@ -99,6 +99,53 @@
    Dynamic binding exists only for isolated tests."
   (= "1" (System/getenv "FUTON_WM_BETA_DARK")))
 
+(defn variational-tau-preconditions!
+  "RUN8 / stage S3. `:variational-beta-gamma` needs a β to use as τ, and β is
+   produced by the same three-flag chain the S2 dark carry runs on:
+   `FUTON_WM_BETA_DARK=1` consumes `FUTON_WM_FPI_DARK=1`, which consumes what
+   `FUTON_WM_TRACE_POLICY_DETAILS=1` wrote on the PREVIOUS tick.
+
+   With the tau mode on and any of those off, `carry-beta` holds β₀ on every
+   tick and τ ≡ 1.0 forever -- correct, and useless, and indistinguishable in a
+   run record from a converged carry that happens to sit at 1.0. So this is a
+   loud config error at the top of the tick rather than a run nobody can read
+   afterwards. It does NOT check the previous tick's trace flag, which is not
+   knowable from here; the per-tick `:tau-source` is what exposes that case
+   (every tick `:held-absent`).
+
+   Throws or returns nil. Takes the resolved mode so it cannot drift from
+   `arena-tau-mode`."
+  [tau-mode]
+  (when (= :variational-beta-gamma tau-mode)
+    (let [missing (cond-> []
+                    (not *beta-dark?*) (conj "FUTON_WM_BETA_DARK=1")
+                    (not *f-pi-dark?*) (conj "FUTON_WM_FPI_DARK=1")
+                    (not trace/*persist-policy-trace-details?*)
+                    (conj "FUTON_WM_TRACE_POLICY_DETAILS=1"))]
+      (when (seq missing)
+        (throw (ex-info (str "FUTON_WM_TAU_MODE=variational-beta-gamma requires "
+                             (str/join ", " missing)
+                             " -- without them every tick holds beta_0 and tau is 1.0")
+                        {:tau-mode tau-mode :missing missing}))))))
+
+(defn variational-temperature-opts
+  "The `:temperature-opts` a tick hands `policy/select-action`.
+
+   For the two selection-gain modes this is the historical `{:tau-mode ...}`
+   map and nothing else, so their behaviour is structurally unchanged rather
+   than numerically lucky. For `:variational-beta-gamma` it additionally
+   carries β and its provenance, read from the `carry-beta` state this tick
+   just computed -- `:beta` is the value to USE (a solved posterior, or the
+   held one when the solve did not both converge and bracket) and
+   `:beta-source` says which, per I1 (b2b) (2)."
+  [tau-mode beta-fields]
+  (cond-> {:tau-mode tau-mode}
+    (= :variational-beta-gamma tau-mode)
+    (assoc :variational-beta
+           (get-in beta-fields [:policy-precision-state :beta])
+           :variational-beta-source
+           (get-in beta-fields [:policy-precision-state :beta-source]))))
+
 (defn- ranked-candidate-id [ranked-action]
   (str "rank/" (:rank ranked-action)))
 
@@ -444,17 +491,44 @@
   []
   :separate)
 
+(defn tau-mode-of
+  "The FUTON_WM_TAU_MODE string -> mode keyword mapping, as a pure function so
+   the parser can be driven from a test with strings rather than by mutating the
+   process environment. `arena-tau-mode` is this applied to the env read, and
+   nothing else, so the two cannot diverge.
+
+   EVERY value this returns must be one `policy/effective-temperature` handles:
+   that dispatch is closed and throws on anything else, so the pair changes
+   together (RUN8 :acceptance). Pinned by
+   war-machine-test/tau-mode-parser-admits-exactly-what-the-dispatch-accepts-test."
+  [env-value]
+  (case env-value
+    "spread" :spread
+    "variational-beta-gamma" :variational-beta-gamma
+    :selection-gain-only))
+
 (defn- arena-tau-mode
   "B-2d R6 τ-layer separation, FLIPPED LIVE by Joe 2026-07-13.
    `:selection-gain-only` removes the score-spread calibration heuristic so
    the explicitly engineering selection gain alone controls commitment:
    τ_eff = 1/g. `FUTON_WM_TAU_MODE=spread` is the provenance-stamped rollback
    hatch to historical τ_spread/g behaviour. This does not relabel g as
-   variational policy precision."
+   variational policy precision.
+
+   `FUTON_WM_TAU_MODE=variational-beta-gamma` is RUN8 / stage S3: τ_eff = β,
+   the root of friston2017 eq. 2.7 solved on THIS tick's field, with γ = 1/β.
+   It is a DIFFERENT LAW, not a third calibration of g — g leaves the
+   expression entirely. It is off by default and stays behind the flag until
+   the arms are adjudicated (`aif-equations.edn :choices :pi-zero-form` remains
+   `:open-branches`).
+
+   The mode string is matched exactly and an unrecognised
+   `FUTON_WM_TAU_MODE` falls to the live default, as it always has; the
+   coupling that CAN silently produce a useless run — the variational mode
+   without the flags that compute β — is checked separately and loudly by
+   `variational-tau-preconditions!`."
   []
-  (if (= "spread" (System/getenv "FUTON_WM_TAU_MODE"))
-    :spread
-    :selection-gain-only))
+  (tau-mode-of (System/getenv "FUTON_WM_TAU_MODE")))
 
 (defn- arena-structural-pressure-mode
   "D-1d relocation FLIPPED LIVE by Joe 2026-07-13. Structural pressure leaves
@@ -4821,6 +4895,58 @@
                             (assoc e :G-constant gc)
                             e))
                         wm-ranked)
+        ;; RUN8 / stage S3: resolved ONCE and threaded, so the mode the
+        ;; preconditions check, the mode the temperature-opts carry and the mode
+        ;; the :wm-version stamp records cannot drift apart.
+        wm-tau-mode (arena-tau-mode)
+        _ (variational-tau-preconditions! wm-tau-mode)
+        ;; Car-3 (R16) seam 1: lift the acquired cascade-policies out of the read-only lane
+        ;; into the differential as SELECTABLE :apply-cascade actions, each carrying BOTH
+        ;; act-gate legs (ΔF = cascade cascade-score, ΔG = rollout G(π)) + the conjunction
+        ;; verdict. They are APPENDED to the served ranked-actions (so wm-admissible/wm-decision
+        ;; — the WM's own auto-selection — are unaffected) and tagged :held-for-arming? true:
+        ;; the pilot can SELECT one as v and mint a consent gate over it, but EXECUTING it is
+        ;; Part B, held for operator arming (WM-I4). cascade-policies computed once, reused below.
+        cascade-policies (if include-advisory-lanes?
+                           (try ((requiring-resolve 'futon2.report.cascade-lane/cascade-lane)
+                                 wm-ranked {:n 3 :budget 6})
+                                (catch Throwable _ []))
+                           [])
+        cascade-actions (mapv (fn [cp]
+                                (let [dF (:cascade-score cp) dG (:policy-rollout-score cp)
+                                      pass? (boolean (and dF (pos? dF) dG (neg? dG)))]
+                                  {:action {:type :apply-cascade
+                                            :target (:mission cp)
+                                            :rationale "apply the acquired cascade-policy (Car-3 / R16); execution HELD for operator arming"
+                                            :cascade {:shown (:shown cp) :wholeness (:wholeness cp)}
+                                            :act-gate {:cascade-score dF :coverage-score-delta dG :pass? pass?}}
+                                   :controller-score (or dG 0.0)
+                                   ;; D1b (M-evaluate-policies §8.2): the 0.0 fallback is
+                                   ;; load-bearing (IHTB-2) — the marker makes the constant
+                                   ;; self-describing instead of silently rank-neutral.
+                                   :score-provenance (if dG :rollout-dG :placeholder)
+                                   :held-for-arming? true}))
+                              cascade-policies)
+        wm-ranked+cascades (vec (map-indexed (fn [i e] (assoc e :rank (inc i)))
+                                             (into (vec wm-ranked) cascade-actions)))
+        ;; RUN8 / stage S3. The F_pi readback and the beta carry are computed
+        ;; HERE, BEFORE selection, because under
+        ;; `FUTON_WM_TAU_MODE=variational-beta-gamma` the tick's own solved beta
+        ;; IS the selection temperature. Under the two selection-gain modes
+        ;; nothing below reads them and they are, as in S2, merged onto the
+        ;; judgement for persistence only -- the move is a reordering of pure
+        ;; bindings, not a change to what they compute. They run after ranking
+        ;; because G is each candidate's own :controller-score, and on
+        ;; `wm-ranked+cascades` -- the SAME field the S2 dark carry used, so the
+        ;; beta series stays comparable across the two stages.
+        f-pi-dark-fields (when (or *f-pi-dark?* (= :variational-beta-gamma wm-tau-mode))
+                           (f-pi-dark-readback prev-trace-record
+                                               wm-ranked+cascades
+                                               observation))
+        beta-dark-fields (when (or *beta-dark?* (= :variational-beta-gamma wm-tau-mode))
+                           (beta-dark-carry prev-trace-record
+                                            f-pi-dark-fields
+                                            wm-ranked+cascades))
         ;; v0.13 R6 enhancement: pre-filter by can-execute? admissibility
         ;; (composes with can-propose? at proposer-side); then run
         ;; deliberative select-action with default-mode-select as a
@@ -4834,7 +4960,8 @@
                :habit-prior-stats
                (when habit-prior-pre
                  (habit-prior/state-stats habit-prior-pre))
-               :temperature-opts {:tau-mode (arena-tau-mode)}})
+               :temperature-opts
+               (variational-temperature-opts wm-tau-mode beta-dark-fields)})
              (catch Exception _
                (policy/default-mode-select wm-state wm-admissible)))
         route5 (route-tag route4 :R6 "futon2.aif.policy/select-action")
@@ -4923,35 +5050,6 @@
           ;; recommendations while it is counterfactual-only. A distinct E_S
           ;; will learn from reviewed strategic selection events.
           habit-prior-pre)
-        ;; Car-3 (R16) seam 1: lift the acquired cascade-policies out of the read-only lane
-        ;; into the differential as SELECTABLE :apply-cascade actions, each carrying BOTH
-        ;; act-gate legs (ΔF = cascade cascade-score, ΔG = rollout G(π)) + the conjunction
-        ;; verdict. They are APPENDED to the served ranked-actions (so wm-admissible/wm-decision
-        ;; — the WM's own auto-selection — are unaffected) and tagged :held-for-arming? true:
-        ;; the pilot can SELECT one as v and mint a consent gate over it, but EXECUTING it is
-        ;; Part B, held for operator arming (WM-I4). cascade-policies computed once, reused below.
-        cascade-policies (if include-advisory-lanes?
-                           (try ((requiring-resolve 'futon2.report.cascade-lane/cascade-lane)
-                                 wm-ranked {:n 3 :budget 6})
-                                (catch Throwable _ []))
-                           [])
-        cascade-actions (mapv (fn [cp]
-                                (let [dF (:cascade-score cp) dG (:policy-rollout-score cp)
-                                      pass? (boolean (and dF (pos? dF) dG (neg? dG)))]
-                                  {:action {:type :apply-cascade
-                                            :target (:mission cp)
-                                            :rationale "apply the acquired cascade-policy (Car-3 / R16); execution HELD for operator arming"
-                                            :cascade {:shown (:shown cp) :wholeness (:wholeness cp)}
-                                            :act-gate {:cascade-score dF :coverage-score-delta dG :pass? pass?}}
-                                   :controller-score (or dG 0.0)
-                                   ;; D1b (M-evaluate-policies §8.2): the 0.0 fallback is
-                                   ;; load-bearing (IHTB-2) — the marker makes the constant
-                                   ;; self-describing instead of silently rank-neutral.
-                                   :score-provenance (if dG :rollout-dG :placeholder)
-                                   :held-for-arming? true}))
-                              cascade-policies)
-        wm-ranked+cascades (vec (map-indexed (fn [i e] (assoc e :rank (inc i)))
-                                             (into (vec wm-ranked) cascade-actions)))
         aif-heads (scan-aif-heads)
         inventory (load-invariant-inventory eval-invariant-fallback?)
         ;; Get portfolio step data for structural info
@@ -4984,18 +5082,6 @@
                             vec)
         ;; Losses: avoided states that are currently active
         losses (avoidance-losses mode free-energy)
-        f-pi-dark-fields (when *f-pi-dark?*
-                           (f-pi-dark-readback prev-trace-record
-                                               wm-ranked+cascades
-                                               observation))
-        ;; RUN7 / stage S2. Computed AFTER the F_pi readback because it
-        ;; consumes it, and after ranking because G is each candidate's own
-        ;; :controller-score. Nothing below reads it: it is merged onto the
-        ;; judgement for persistence and never back into this tick.
-        beta-dark-fields (when *beta-dark?*
-                           (beta-dark-carry prev-trace-record
-                                            f-pi-dark-fields
-                                            wm-ranked+cascades))
         result0
         (cond-> (cond-> {:mode mode
                  :mode-prior (get pref/mode-prior mode 0.0)

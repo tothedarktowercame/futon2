@@ -6,8 +6,17 @@
 ;; No writes to data/wm-trace. Sibling of a_matrix_shadow.bb (the belief-side one).
 ;; Cascade placeholder rows (no :G-risk) excluded (E6 convention).
 ;;
-;;   :tau-mode :gamma-only (B-2d, policy/effective-temperature)
-;;     τ_eff :spread = τ_spread/γ (recorded :tau) vs :gamma-only = 1/γ.
+;;   :tau-mode :selection-gain-only (B-2d, policy/effective-temperature)
+;;     τ_eff :spread = τ_spread/g (recorded :tau) vs :selection-gain-only = 1/g.
+;;     THE LABEL WAS WRONG UNTIL RUN8 (stage S3) and is corrected here: this arm's
+;;     divisor is g, the R14 ENGINEERING selection gain read off
+;;     (:decision :selection-gain), and the live mode has been called
+;;     :selection-gain-only since B-2d — never :gamma-only. Writing it γ collides
+;;     with the variational policy precision γ = 1/β that S3 puts on the live path
+;;     (policy/effective-temperature :variational-beta-gamma), which is a DIFFERENT
+;;     quantity solved from friston2017 eq. 2.7. Nothing this script computes
+;;     changes; only what it is called. This script does not shadow the S3 arm at
+;;     all — β is not recoverable from the pre-S2 corpus it reads.
 ;;     Selection winner = argmin controller-score ⇒ τ-INVARIANT; abstain = gap-exploration-bonus
 ;;     (no-op.G − best.G < ε) ⇒ ALSO τ-invariant. So the ONLY effect is softmax
 ;;     ENTROPY (commitment sharpness). Reported: winner-flip (0 by construction),
@@ -61,15 +70,15 @@
         :when (seq ras)]
     {:day (subs (str (:timestamp t)) 0 10)
      :ras ras
-     :gamma (get-in t [:decision :selection-gain])
+     :selection-gain (get-in t [:decision :selection-gain])
      :tau-spread (get-in t [:decision :tau])
      :precision-state (:precision-state t)}))
 
 ;; --- TAU ---------------------------------------------------------------------
 (def tau-recs
-  (for [{:keys [day ras gamma tau-spread]} ticks
+  (for [{:keys [day ras selection-gain tau-spread]} ticks
         :let [gs (mapv #(double (:controller-score %)) ras)
-              g (max tau-min (double (or gamma 1.0)))
+              g (max tau-min (double (or selection-gain 1.0)))
               ts (double (or tau-spread (/ 1.0 g)))
               tg (/ 1.0 g)
               noop (some #(when (= :no-op (get-in % [:action :type])) (double (:controller-score %))) ras)
@@ -78,8 +87,10 @@
               abstain? (fn [_] (and gap (< gap abstain-eps)))]]
     {:day day
      :winner-flip? false                     ; argmin G — τ-invariant
-     :abstain-spread (boolean (abstain? ts)) :abstain-gamma (boolean (abstain? tg))
-     :ent-spread (entropy (softmax gs ts)) :ent-gamma (entropy (softmax gs tg))}))
+     :abstain-spread (boolean (abstain? ts))
+     :abstain-selection-gain-only (boolean (abstain? tg))
+     :ent-spread (entropy (softmax gs ts))
+     :ent-selection-gain-only (entropy (softmax gs tg))}))
 
 ;; --- SALIENCE ----------------------------------------------------------------
 (def sal-recs
@@ -98,10 +109,10 @@
 
 ;; --- STRUCTURAL PRESSURE -----------------------------------------------------
 (def sp-recs
-  (for [{:keys [day ras gamma tau-spread]} ticks
+  (for [{:keys [day ras selection-gain tau-spread]} ticks
         :let [gs (mapv #(double (:controller-score %)) ras)
               spc (mapv #(double (or (:structural-pressure %) 0.0)) ras)
-              tau (double (or tau-spread (/ 1.0 (max tau-min (double (or gamma 1.0))))))
+              tau (double (or tau-spread (/ 1.0 (max tau-min (double (or selection-gain 1.0))))))
               live-win (argmin-idx gs)
               habit-score (mapv (fn [g s] (- g (* s (+ 1.0 tau)))) gs spc)
               habit-win (argmin-idx habit-score)
@@ -118,12 +129,13 @@
   {:ticks (count tau-recs)
    :winner-flips 0
    :winner-flip-note "0 by construction — softmax winner = argmin controller-score, τ-invariant."
-   :abstain-flips (count (filter #(not= (:abstain-spread %) (:abstain-gamma %)) tau-recs))
+   :abstain-flips (count (filter #(not= (:abstain-spread %) (:abstain-selection-gain-only %)) tau-recs))
    :abstain-note "abstain = (no-op.G − best.G) < ε, a gap-exploration-bonus ⇒ τ-invariant."
    :mean-entropy-spread (mean :ent-spread tau-recs)
-   :mean-entropy-gamma-only (mean :ent-gamma tau-recs)
-   :mean-entropy-delta (mean #(- (:ent-gamma %) (:ent-spread %)) tau-recs)
-   :recommendation-seed "τ-mode :gamma-only changes NEITHER winner NOR abstain — only softmax entropy (commitment sharpness). Flip is behaviourally inert on argmax/abstain; decide jointly with B-3b (γ β-update) as the docstring notes."})
+   :mean-entropy-selection-gain-only (mean :ent-selection-gain-only tau-recs)
+   :mean-entropy-delta (mean #(- (:ent-selection-gain-only %) (:ent-spread %)) tau-recs)
+   :arm-note "RUN8: both arms divide by g, the R14 selection gain. Neither is the variational γ = 1/β; :variational-beta-gamma is not shadowed here because β is absent from this corpus."
+   :recommendation-seed "τ-mode :selection-gain-only changes NEITHER winner NOR abstain — only softmax entropy (commitment sharpness). Flip is behaviourally inert on argmax/abstain; decide jointly with B-3b (the β update) as the docstring notes."})
 
 (def sal-summary
   {:ticks (count sal-recs)
@@ -146,7 +158,7 @@
    :sim-only true :read-only true :corpus {:files (count files) :ticks (count ticks)}
    :per-mode {:tau tau-summary :salience sal-summary :structural-pressure sp-summary}})
 
-(doseq [[k summ] [[:tau (assoc combined :mode :tau-mode/:gamma-only :summary tau-summary)]
+(doseq [[k summ] [[:tau (assoc combined :mode :tau-mode/:selection-gain-only :summary tau-summary)]
                   [:salience (assoc combined :mode :salience-mode/:separate :summary sal-summary)]
                   [:structural-pressure (assoc combined :mode :structural-pressure-mode/:habit-prior :summary sp-summary)]]]
   (let [f (str out-dir "/dark-mode-shadow-" (name k) ".edn")]
@@ -156,7 +168,7 @@
 
 (println "\n=== DARK-MODE SHADOW TRIO ===")
 (println (format "corpus: %d files, %d ticks" (count files) (count ticks)))
-(println (format "TAU  :gamma-only → winner-flips 0 (τ-invariant) · abstain-flips %d · mean softmax-entropy Δ %.4f"
+(println (format "TAU  :selection-gain-only → winner-flips 0 (τ-invariant) · abstain-flips %d · mean softmax-entropy Δ %.4f"
                  (:abstain-flips tau-summary) (double (or (:mean-entropy-delta tau-summary) 0))))
 (println (format "SALIENCE :separate → mean need-share of Π %.4f · mean rel-Π-change %.4f · downstream G-recompute NOT done"
                  (double (or (:mean-need-share sal-summary) 0)) (double (or (:mean-rel-Pi-change sal-summary) 0))))

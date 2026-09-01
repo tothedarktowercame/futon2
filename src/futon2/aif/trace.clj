@@ -30,8 +30,8 @@
                           :per-channel :avoidance-by-channel :avoided-active}
       :variational-free-energy <F = 1/2 mean(precision * error^2)>
       :ranked-actions   [{:action :G-risk :G-ambiguity :controller-score :rank}]
-      :decision         {:action :rank? :controller-score? :tau? :reason?
-                          :gap-report? ...}
+      :decision         {:action :rank? :controller-score? :tau? :tau-source?
+                          :reason? :gap-report? ...}
       :mode             <strategic-mode keyword>}
 
    Honest gap: prediction errors (ε per R8) are not yet recorded because

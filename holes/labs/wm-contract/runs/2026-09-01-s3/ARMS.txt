@@ -1,0 +1,109 @@
+RUN8 / stage S3 arms -- rank and argmax movement, tau_live vs tau = beta
+generated 2026-09-01T20:13:44.624196596Z
+
+beta series (S2, 20 ticks): 1.0026460727 ... 1.0343423166
+beta sources: {:converged-posterior 20}
+
+=== S1 -- holes/labs/wm-contract/runs/2026-09-01/wm-trace-2026-09-01.edn
+20 ticks; tau_live (1.0) (selection-gain (1.0)); native beta: {nil 20}
+CONTROL replay at tau_live: max |-G/tau delta| 0.0000000000; habit order reproduced 20/20 (max |habit score delta| 0.0000000000); max |softmax delta| 0.0000000000
+beta source for this field: TRANSPLANTED from S2 by tick index
+tau_s3 range: 1.0026460727 .. 1.0343423166
+CONTROLLER rank moves (argmin G): 0 over 20 ticks x 145 candidates
+HABIT-ADJUSTED rank moves: total 0, ticks with any 0/20, max displacement 0
+HABIT-ADJUSTED argmax moved on 0/20 ticks
+  ln E: (3) distinct values, spread 3.0445224377 -- within one value the order is tau-invariant (the shift is monotone in G), so only cross-group pairs can move
+  near-miss at tau_s3: smallest adjacent margin 0.0000000000; smallest CROSS-GROUP adjacent margin 0.7355590795 (negative = a flip)
+SOFTMAX argmax moved on 0/20 ticks; mean TV distance 0.0003573076; mean entropy 4.6672728725 -> 4.6672519263
+RECORDED :action equals controller rank 1 on 0/20 ticks (the strategic selector replaces it)
+per-tick:
+  t1   tau_live 1.0000000000 tau_s3 1.0026460727 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0000517665 dH -0.0000031850
+  t2   tau_live 1.0000000000 tau_s3 1.0043676361 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0000853166 dH -0.0000052267
+  t3   tau_live 1.0000000000 tau_s3 1.0060682047 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0001183575 dH -0.0000072203
+  t4   tau_live 1.0000000000 tau_s3 1.0077643164 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0001512134 dH -0.0000091859
+  t5   tau_live 1.0000000000 tau_s3 1.0094525055 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0001838186 dH -0.0000111198
+  t6   tau_live 1.0000000000 tau_s3 1.0111259278 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0002160762 dH -0.0000131342
+  t7   tau_live 1.0000000000 tau_s3 1.0128030200 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0002483045 dH -0.0000151146
+  t8   tau_live 1.0000000000 tau_s3 1.0144748418 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0002802997 dH -0.0000169227
+  t9   tau_live 1.0000000000 tau_s3 1.0161694010 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0003126493 dH -0.0000187913
+  t10  tau_live 1.0000000000 tau_s3 1.0178377393 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0003444065 dH -0.0000206159
+  t11  tau_live 1.0000000000 tau_s3 1.0195044630 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0003760502 dH -0.0000224545
+  t12  tau_live 1.0000000000 tau_s3 1.0211517639 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0004072268 dH -0.0000242188
+  t13  tau_live 1.0000000000 tau_s3 1.0227993083 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0004382661 dH -0.0000257564
+  t14  tau_live 1.0000000000 tau_s3 1.0244591201 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0004694831 dH -0.0000274259
+  t15  tau_live 1.0000000000 tau_s3 1.0261085563 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0005004286 dH -0.0000291145
+  t16  tau_live 1.0000000000 tau_s3 1.0277582429 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0005312908 dH -0.0000307840
+  t17  tau_live 1.0000000000 tau_s3 1.0294055314 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0005620207 dH -0.0000324320
+  t18  tau_live 1.0000000000 tau_s3 1.0310502087 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0005925527 dH -0.0000338176
+  t19  tau_live 1.0000000000 tau_s3 1.0326970478 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0006230976 dH -0.0000354143
+  t20  tau_live 1.0000000000 tau_s3 1.0343423166 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0006535273 dH -0.0000369908
+
+=== S1b -- holes/labs/wm-contract/runs/2026-09-01-s1b/wm-trace-s1b.edn
+20 ticks; tau_live (1.0) (selection-gain (1.0)); native beta: {nil 20}
+CONTROL replay at tau_live: max |-G/tau delta| 0.0000000000; habit order reproduced 20/20 (max |habit score delta| 0.0000000000); max |softmax delta| 0.0000000000
+beta source for this field: TRANSPLANTED from S2 by tick index
+tau_s3 range: 1.0026460727 .. 1.0343423166
+CONTROLLER rank moves (argmin G): 0 over 20 ticks x 145 candidates
+HABIT-ADJUSTED rank moves: total 0, ticks with any 0/20, max displacement 0
+HABIT-ADJUSTED argmax moved on 0/20 ticks
+  ln E: (3) distinct values, spread 3.0445224377 -- within one value the order is tau-invariant (the shift is monotone in G), so only cross-group pairs can move
+  near-miss at tau_s3: smallest adjacent margin 0.0000000000; smallest CROSS-GROUP adjacent margin 0.7355590795 (negative = a flip)
+SOFTMAX argmax moved on 0/20 ticks; mean TV distance 0.0003572421; mean entropy 4.6672343598 -> 4.6672136586
+RECORDED :action equals controller rank 1 on 0/20 ticks (the strategic selector replaces it)
+per-tick:
+  t1   tau_live 1.0000000000 tau_s3 1.0026460727 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0000517568 dH -0.0000031503
+  t2   tau_live 1.0000000000 tau_s3 1.0043676361 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0000853046 dH -0.0000051835
+  t3   tau_live 1.0000000000 tau_s3 1.0060682047 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0001183410 dH -0.0000071601
+  t4   tau_live 1.0000000000 tau_s3 1.0077643164 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0001511923 dH -0.0000091087
+  t5   tau_live 1.0000000000 tau_s3 1.0094525055 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0001837931 dH -0.0000110257
+  t6   tau_live 1.0000000000 tau_s3 1.0111259278 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0002160134 dH -0.0000129040
+  t7   tau_live 1.0000000000 tau_s3 1.0128030200 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0002482226 dH -0.0000148095
+  t8   tau_live 1.0000000000 tau_s3 1.0144748418 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0002802255 dH -0.0000166488
+  t9   tau_live 1.0000000000 tau_s3 1.0161694010 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0003125684 dH -0.0000184915
+  t10  tau_live 1.0000000000 tau_s3 1.0178377393 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0003443232 dH -0.0000203053
+  t11  tau_live 1.0000000000 tau_s3 1.0195044630 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0003759274 dH -0.0000219965
+  t12  tau_live 1.0000000000 tau_s3 1.0211517639 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0004070998 dH -0.0000237397
+  t13  tau_live 1.0000000000 tau_s3 1.0227993083 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0004381826 dH -0.0000254463
+  t14  tau_live 1.0000000000 tau_s3 1.0244591201 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0004694116 dH -0.0000271603
+  t15  tau_live 1.0000000000 tau_s3 1.0261085563 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0005003526 dH -0.0000288305
+  t16  tau_live 1.0000000000 tau_s3 1.0277582429 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0005312083 dH -0.0000304736
+  t17  tau_live 1.0000000000 tau_s3 1.0294055314 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0005619335 dH -0.0000321026
+  t18  tau_live 1.0000000000 tau_s3 1.0310502087 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0005924919 dH -0.0000335847
+  t19  tau_live 1.0000000000 tau_s3 1.0326970478 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0006230338 dH -0.0000351686
+  t20  tau_live 1.0000000000 tau_s3 1.0343423166 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0006534606 dH -0.0000367324
+
+=== S2 -- holes/labs/wm-contract/runs/2026-09-01-s2/wm-trace-s2.edn
+20 ticks; tau_live (1.0) (selection-gain (1.0)); native beta: {:converged-posterior 20}
+CONTROL replay at tau_live: max |-G/tau delta| 0.0000000000; habit order reproduced 20/20 (max |habit score delta| 0.0000000000); max |softmax delta| 0.0000000000
+beta source for this field: NATIVE (each tick's own solve)
+tau_s3 range: 1.0026460727 .. 1.0343423166
+CONTROLLER rank moves (argmin G): 0 over 20 ticks x 145 candidates
+HABIT-ADJUSTED rank moves: total 0, ticks with any 0/20, max displacement 0
+HABIT-ADJUSTED argmax moved on 0/20 ticks
+  ln E: (3) distinct values, spread 3.0445224377 -- within one value the order is tau-invariant (the shift is monotone in G), so only cross-group pairs can move
+  near-miss at tau_s3: smallest adjacent margin 0.0000000000; smallest CROSS-GROUP adjacent margin 0.7355590795 (negative = a flip)
+SOFTMAX argmax moved on 0/20 ticks; mean TV distance 0.0003571305; mean entropy 4.6671761687 -> 4.6671558858
+RECORDED :action equals controller rank 1 on 0/20 ticks (the strategic selector replaces it)
+per-tick:
+  t1   tau_live 1.0000000000 tau_s3 1.0026460727 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0000517531 dH -0.0000031357
+  t2   tau_live 1.0000000000 tau_s3 1.0043676361 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0000852864 dH -0.0000051175
+  t3   tau_live 1.0000000000 tau_s3 1.0060682047 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0001183144 dH -0.0000070635
+  t4   tau_live 1.0000000000 tau_s3 1.0077643164 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0001511539 dH -0.0000089690
+  t5   tau_live 1.0000000000 tau_s3 1.0094525055 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0001837355 dH -0.0000108178
+  t6   tau_live 1.0000000000 tau_s3 1.0111259278 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0002159523 dH -0.0000126808
+  t7   tau_live 1.0000000000 tau_s3 1.0128030200 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0002481376 dH -0.0000145004
+  t8   tau_live 1.0000000000 tau_s3 1.0144748418 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0002801627 dH -0.0000164148
+  t9   tau_live 1.0000000000 tau_s3 1.0161694010 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0003124622 dH -0.0000181010
+  t10  tau_live 1.0000000000 tau_s3 1.0178377393 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0003442009 dH -0.0000198531
+  t11  tau_live 1.0000000000 tau_s3 1.0195044630 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0003757866 dH -0.0000214756
+  t12  tau_live 1.0000000000 tau_s3 1.0211517639 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0004069485 dH -0.0000231786
+  t13  tau_live 1.0000000000 tau_s3 1.0227993083 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0004380498 dH -0.0000249473
+  t14  tau_live 1.0000000000 tau_s3 1.0244591201 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0004692478 dH -0.0000265464
+  t15  tau_live 1.0000000000 tau_s3 1.0261085563 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0005001846 dH -0.0000281966
+  t16  tau_live 1.0000000000 tau_s3 1.0277582429 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0005310323 dH -0.0000298066
+  t17  tau_live 1.0000000000 tau_s3 1.0294055314 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0005617478 dH -0.0000313950
+  t18  tau_live 1.0000000000 tau_s3 1.0310502087 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0005923404 dH -0.0000330079
+  t19  tau_live 1.0000000000 tau_s3 1.0326970478 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0006228748 dH -0.0000345604
+  t20  tau_live 1.0000000000 tau_s3 1.0343423166 | ctl-moves 0 | habit-moves   0 (max  0, argmax same) | softmax argmax same TV 0.0006532393 dH -0.0000358898
+
+CONTROLS: ALL PASSED

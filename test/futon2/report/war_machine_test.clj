@@ -13,6 +13,7 @@
             [futon2.aif.efe :as efe]
             [futon2.aif.free-energy :as free-energy]
             [futon2.aif.observation :as observation]
+            [futon2.aif.policy :as policy]
             [futon2.aif.trace :as trace]
             [futon2.report.war-machine :as wm])
   (:import (java.io PushbackReader StringReader)))
@@ -1044,3 +1045,96 @@
           (is (= (mapv #(get-in % [:action :target]) ranked)
                  (mapv #(get-in % [:action :target]) reordered)))
           (is (= [1 2 3] (mapv :rank reordered))))))))
+
+;; ---------------------------------------------------------------------------
+;; RUN8 / stage S3 — the FUTON_WM_TAU_MODE parser and the β hand-off.
+;;
+;; The parser and `policy/effective-temperature`'s closed dispatch have to
+;; change together: one throws on any mode the other admits. These tests pin
+;; the pair, so a later edit to one alone fails here rather than at tick time.
+;; ---------------------------------------------------------------------------
+
+(deftest tau-mode-parser-admits-exactly-what-the-dispatch-accepts-test
+  (testing "the REAL parser: which strings map to which mode"
+    (is (= :spread (wm/tau-mode-of "spread")))
+    (is (= :variational-beta-gamma (wm/tau-mode-of "variational-beta-gamma")))
+    (is (= :selection-gain-only (wm/tau-mode-of nil))
+        "unset is the live default, flipped by Joe 2026-07-13")
+    (doseq [junk ["" "gamma-only" "variational" "VARIATIONAL-BETA-GAMMA" "1"]]
+      (is (= :selection-gain-only (wm/tau-mode-of junk))
+          (str "unrecognised " (pr-str junk) " falls to the live default"))))
+  (testing "and every mode it can produce is one effective-temperature handles
+            -- the pair the acceptance says must change together"
+    (let [produced (set (map wm/tau-mode-of
+                             [nil "spread" "variational-beta-gamma"
+                              "" "gamma-only" "typo"]))]
+      (is (= #{:spread :selection-gain-only :variational-beta-gamma} produced))
+      (doseq [m produced]
+        (is (number?
+             (policy/effective-temperature
+              [0.0 1.0] 1.0 (cond-> {:tau-mode m}
+                              (= m :variational-beta-gamma)
+                              (assoc :variational-beta 1.25))))
+            (str "effective-temperature accepts " m)))))
+  (testing "the env read is the parser applied to the env and nothing else"
+    (is (= (wm/tau-mode-of (System/getenv "FUTON_WM_TAU_MODE"))
+           (#'wm/arena-tau-mode)))))
+
+(deftest variational-tau-preconditions-are-loud-test
+  (testing "the variational mode without the flags that compute β holds β₀ on
+            every tick and τ ≡ 1.0 — correct, and useless, so it throws"
+    (doseq [[beta? fpi? details?] [[false true true]
+                                   [true false true]
+                                   [true true false]
+                                   [false false false]]]
+      (with-redefs-fn {#'wm/*beta-dark?* beta?
+                       #'wm/*f-pi-dark?* fpi?
+                       #'trace/*persist-policy-trace-details?* details?}
+        (fn []
+          (is (thrown? clojure.lang.ExceptionInfo
+                       (wm/variational-tau-preconditions! :variational-beta-gamma))
+              (str "missing flags " [beta? fpi? details?] " must throw"))
+          ;; and the two selection-gain modes are unaffected by the flags
+          (is (nil? (wm/variational-tau-preconditions! :selection-gain-only)))
+          (is (nil? (wm/variational-tau-preconditions! :spread))))))
+    (with-redefs-fn {#'wm/*beta-dark?* true
+                     #'wm/*f-pi-dark?* true
+                     #'trace/*persist-policy-trace-details?* true}
+      (fn []
+        (is (nil? (wm/variational-tau-preconditions! :variational-beta-gamma))
+            "all three flags on: no complaint")))))
+
+(deftest variational-temperature-opts-carry-beta-and-its-source-test
+  (testing "the two selection-gain modes get the historical bare map; the
+            variational mode gets β and the provenance carry-beta assigned it"
+    (is (= {:tau-mode :spread}
+           (wm/variational-temperature-opts :spread {:policy-precision-state
+                                                     {:beta 9.9 :beta-source :converged-posterior}}))
+        "β is not smuggled into a mode that does not use it")
+    (is (= {:tau-mode :selection-gain-only}
+           (wm/variational-temperature-opts :selection-gain-only nil)))
+    (is (= {:tau-mode :variational-beta-gamma
+            :variational-beta 1.034342317
+            :variational-beta-source :converged-posterior}
+           (wm/variational-temperature-opts
+            :variational-beta-gamma
+            {:policy-precision-state {:beta 1.034342317
+                                      :beta-source :converged-posterior}})))
+    (testing "a HELD tick still supplies a β — the hold happened in the carry,
+              and the source is what says so"
+      (let [opts (wm/variational-temperature-opts
+                  :variational-beta-gamma
+                  {:policy-precision-state {:status :absent
+                                            :reason :no-f-pi-readback
+                                            :beta 1.0
+                                            :beta-source :initial}})]
+        (is (= 1.0 (:variational-beta opts)))
+        (is (= :initial (:variational-beta-source opts)))
+        (is (= 1.0 (policy/effective-temperature [0.0 1.0] 4.0 opts))
+            "and it is used as τ, NOT crossed to 1/g = 0.25")))
+    (testing "no beta state at all reaches effective-temperature's throw
+              rather than a silent 1/g"
+      (is (thrown? clojure.lang.ExceptionInfo
+                   (policy/effective-temperature
+                    [0.0 1.0] 4.0
+                    (wm/variational-temperature-opts :variational-beta-gamma nil)))))))

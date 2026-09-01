@@ -428,3 +428,117 @@
              (get-in out [:controller-ranking 0 :action :target])))
       (is (false? (get-in out [:no-op-comparison
                                :blocks-recommendation?]))))))
+
+;; ---------------------------------------------------------------------------
+;; RUN8 / stage S3 — :variational-beta-gamma, τ_eff = β
+;;
+;; A different LAW, not a third calibration of g: g and τ_spread both leave the
+;; expression, and the mode never falls back to either of them.
+;; ---------------------------------------------------------------------------
+
+(deftest effective-temperature-variational-beta-is-tau-exactly-test
+  (testing "τ_eff = β exactly, with neither g nor the spread entering"
+    (doseq [beta [0.25 1.0 1.034342317 5.0 1.0e6]]
+      (let [opts {:tau-mode :variational-beta-gamma :variational-beta beta}]
+        (is (= (double beta) (policy/effective-temperature [0.0 1.0] 1.0 opts))
+            "τ is the beta itself, not a function of it")
+        (is (= (policy/effective-temperature [0.0 99.0] 0.5 opts)
+               (policy/effective-temperature [0.10 0.11] 40.0 opts))
+            "neither the G spread nor the selection gain moves τ")))))
+
+(deftest effective-temperature-variational-beta-is-not-floored-test
+  (testing "β is NOT clamped to tau-min: a floor would substitute an
+            engineering constant for the solved temperature"
+    (let [tiny 1.0e-9
+          opts {:tau-mode :variational-beta-gamma :variational-beta tiny}]
+      (is (= tiny (policy/effective-temperature [0.0 1.0] 1.0 opts)))
+      (is (not= 0.01 (policy/effective-temperature [0.0 1.0] 1.0 opts))))))
+
+(deftest effective-temperature-variational-beta-never-falls-back-test
+  (testing "I1 (b2b) (2): a missing or unusable β THROWS rather than reverting
+            to the selection-gain law — mixing the two inside one run makes the
+            τ series uninterpretable"
+    (doseq [bad [nil 0.0 -1.0 ##NaN ##Inf ##-Inf "1.0" :converged-posterior]]
+      (is (thrown? clojure.lang.ExceptionInfo
+                   (policy/effective-temperature
+                    [0.0 1.0] 2.0 {:tau-mode :variational-beta-gamma
+                                   :variational-beta bad}))
+          (str "must throw on " (pr-str bad))))
+    (is (thrown? clojure.lang.ExceptionInfo
+                 (policy/effective-temperature
+                  [0.0 1.0] 2.0 {:tau-mode :variational-beta-gamma}))
+        "no :variational-beta at all is a wiring error, not a default")
+    ;; the throw must not be mistakable for the 1/g answer
+    (is (not= (/ 1.0 2.0)
+              (try (policy/effective-temperature
+                    [0.0 1.0] 2.0 {:tau-mode :variational-beta-gamma})
+                   (catch clojure.lang.ExceptionInfo _ ::threw))))))
+
+(deftest temperature-source-names-the-law-per-tick-test
+  (testing "the source distinguishes a held variational τ from a
+            selection-gain τ, which the mode alone cannot"
+    (is (= :selection-gain-spread (policy/temperature-source {})))
+    (is (= :selection-gain-spread (policy/temperature-source {:tau-mode :spread})))
+    (is (= :selection-gain-only
+           (policy/temperature-source {:tau-mode :selection-gain-only})))
+    (doseq [src [:converged-posterior :held-unsolved :held-absent :initial]]
+      (is (= src (policy/temperature-source
+                  {:tau-mode :variational-beta-gamma
+                   :variational-beta-source src}))
+          "carry-beta's own :beta-source is carried through verbatim"))
+    (is (= :unnamed-beta-source
+           (policy/temperature-source {:tau-mode :variational-beta-gamma}))
+        "an unnamed source is named as unnamed, not silently the mode")))
+
+(deftest decision-carries-tau-source-beside-tau-test
+  (testing "the run record can tell solved from held without re-deriving it"
+    (let [ranked (ranked-with-actions
+                  [[{:type :address-sorry :target :sorry/x} 0.2]
+                   [{:type :learn-action-class :target-class :a} 0.5]
+                   [{:type :no-op} 0.9]])]
+      (doseq [boundary [:actuation :strategic-recommendation]]
+        (let [out (policy/select-action
+                   ranked
+                   {:selection-boundary boundary
+                    :selection-gain 1.0
+                    :temperature-opts {:tau-mode :variational-beta-gamma
+                                       :variational-beta 1.034342317
+                                       :variational-beta-source :held-unsolved}})]
+          (is (= 1.034342317 (:tau out)))
+          (is (= :held-unsolved (:tau-source out)))
+          (is (= :held-unsolved (get-in out [:decision-explanation :tau-source])))
+          (is (= :variational-beta-gamma
+                 (get-in out [:decision-explanation :tau-mode])))))
+      ;; and the two selection-gain modes name themselves
+      (is (= :selection-gain-only
+             (:tau-source (policy/select-action
+                           ranked {:selection-gain 1.0
+                                   :temperature-opts
+                                   {:tau-mode :selection-gain-only}}))))
+      (is (= :selection-gain-spread
+             (:tau-source (policy/select-action ranked {:selection-gain 1.0})))))))
+
+(deftest variational-tau-moves-the-softmax-not-the-argmax-test
+  (testing "MEASURED HERE, not asserted in prose: over a τ change the softmax
+            posterior moves and its argmax does not, because the ranking is
+            argmin G and −G/τ is monotone in G for every τ > 0. This is what
+            bounds what stage S3 can change (RUN8 :premise-challenged)"
+    (let [ranked (ranked-with-actions
+                  [[{:type :advance-mission :target "M-a"} 0.2]
+                   [{:type :advance-mission :target "M-b"} 0.5]
+                   [{:type :advance-mission :target "M-c"} 0.9]])
+          decide (fn [opts] (policy/select-action
+                             ranked {:selection-boundary :strategic-recommendation
+                                     :selection-gain 1.0
+                                     :temperature-opts opts}))
+          live (decide {:tau-mode :selection-gain-only})
+          s3 (decide {:tau-mode :variational-beta-gamma
+                      :variational-beta 1.034342317
+                      :variational-beta-source :converged-posterior})]
+      (is (not= (:tau live) (:tau s3)) "the temperatures really do differ")
+      (is (not= (:softmax-weights live) (:softmax-weights s3))
+          "the posterior moves")
+      (is (= (mapv :action (:controller-ranking live))
+             (mapv :action (:controller-ranking s3)))
+          "no controller rank moves")
+      (is (= (:action live) (:action s3)) "the argmax does not move"))))
