@@ -8,6 +8,6 @@
   {:lane :wm-verbs
    :holding :C342-predicate-baselines, :dispatched-at "2026-09-01T01:39:26Z", :job-id "invoke-1788226762441-6433-5ade179b", :expected-by "2026-09-01T02:24:26Z"}
   {:lane :wm-organization
-   :holding :C338-c331-document-fixes, :dispatched-at "2026-09-01T01:32:49Z", :job-id "invoke-1788226361212-6424-e54f486d", :expected-by "2026-09-01T02:17:49Z"}
+   :holding :C344-restoration-reverify, :dispatched-at "2026-09-01T01:41:36Z", :job-id "invoke-1788226892116-6437-6ab38c1a", :expected-by "2026-09-01T02:26:36Z"}
   {:lane :wm-evidence
    :holding :C341-reattack-execution-doc, :dispatched-at "2026-09-01T01:39:26Z", :job-id "invoke-1788226758248-6431-f306cd81", :expected-by "2026-09-01T02:24:26Z"}]}
