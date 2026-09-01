@@ -1,6 +1,9 @@
 {:witnesses "ParameterPosteriorKernel"
  :check {:repo "futon2" :path "checks/parameter_posterior_kernel_witness.clj" :entrypoint "-main"}
  :fixture {:repo "futon2" :path "holes/labs/wm-contract/parameter-posterior-kernel-reference.edn"}
+ :positive-proof-receipt {:repo "futon2" :path "holes/labs/wm-contract/parameter-posterior-kernel-positive-receipt.edn" :schema :PositiveLeanWitnessReceipt/v1}
+ :positive-evidence-limit :construction-or-projection-only
+ :positive-evidence-scope "Establishes carrier construction or stored normalization only; the source pin prevents silent weakening but does not establish downstream behaviour."
  :expected-rejection {:mode :lean-guard-msgs :controls
                       [{:fixture "DarkTower/WarMachine/ParameterPosteriorKernelPriorNegative.lean" :claim :posterior-requires-outcome-conditioning}
                        {:fixture "DarkTower/WarMachine/ParameterPosteriorKernelOutcomeNegative.lean" :claim :posterior-is-not-outcome-prediction}]}

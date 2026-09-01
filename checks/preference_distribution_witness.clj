@@ -1,8 +1,9 @@
 #!/usr/bin/env bb
 (ns checks.preference-distribution-witness
-  (:require [babashka.process :as p] [clojure.edn :as edn]))
+  (:require [babashka.process :as p] [checks.positive-proof-receipt :as receipt] [clojure.edn :as edn]))
 
 (def fixture-path "holes/labs/wm-contract/preference-distribution-reference.edn")
+(def receipt-path "holes/labs/wm-contract/preference-distribution-positive-receipt.edn")
 (def mathlib "/home/joe/code/mathlib4")
 (def expected
   {:schema :preference-distribution-reference/v1
@@ -25,7 +26,7 @@
 (defn -main [& args]
   (let [negative-flag (some (set (keys negative-files)) args)
         fixture (edn/read-string (slurp fixture-path))
-        positive? (and (= expected fixture)
+        positive? (and (:pass? (receipt/validate (edn/read-string (slurp receipt-path)))) (= expected fixture)
                        (zero? (lean-exit "DarkTower/WarMachine/PreferenceDistributionWitness.lean")))
         rejected? (if negative-flag
                     (zero? (lean-exit (get negative-files negative-flag)))

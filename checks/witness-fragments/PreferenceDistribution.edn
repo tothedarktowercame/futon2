@@ -1,6 +1,7 @@
 {:witnesses "PreferenceDistribution"
  :check {:repo "futon2" :path "checks/preference_distribution_witness.clj" :entrypoint "-main"}
  :fixture {:repo "futon2" :path "holes/labs/wm-contract/preference-distribution-reference.edn"}
+ :positive-proof-receipt {:repo "futon2" :path "holes/labs/wm-contract/preference-distribution-positive-receipt.edn" :schema :PositiveLeanWitnessReceipt/v1}
  :positive-evidence-limit :construction-or-projection-only
  :positive-evidence-scope "Establishes carrier construction or stored normalization only; a future source pin can prevent silent weakening but cannot establish downstream behaviour."
  :expected-rejection {:mode :lean-guard-msgs :controls

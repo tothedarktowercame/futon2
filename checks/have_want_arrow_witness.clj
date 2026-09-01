@@ -3,10 +3,12 @@
   (:require [babashka.fs :as fs]
             [babashka.process :as process]
             [checks.lean-positive-witness :as lean-positive]
+            [checks.positive-proof-receipt :as receipt]
             [clojure.edn :as edn]))
 
 (def root (fs/cwd))
 (def fixture-path (fs/path root "holes/labs/wm-contract/have-want-arrow-reference.edn"))
+(def receipt-path "holes/labs/wm-contract/have-want-arrow-positive-receipt.edn")
 (def mathlib-root (str (fs/normalize (fs/path root "../mathlib4"))))
 
 (defn fixture-valid? [x]
@@ -28,7 +30,8 @@
         positive-ok? (lean-positive/pass? mathlib-root "DarkTower/WarMachine/HaveWantArrowWitness.lean")
         negative-exit (if negative?
                         (lean-exit "DarkTower/WarMachine/HaveWantArrowNegative.lean") 1)
-        baseline-valid? (and fixture-ok? positive-ok?)
+        receipt-ok? (:pass? (receipt/validate (edn/read-string (slurp receipt-path))))
+        baseline-valid? (and receipt-ok? fixture-ok? positive-ok?)
         mutation-rejected? (zero? negative-exit)
         accepted? (if negative? (and baseline-valid? mutation-rejected?) baseline-valid?)
         exit (cond (and negative? (not baseline-valid?)) 1

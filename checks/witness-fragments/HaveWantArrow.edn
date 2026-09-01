@@ -4,6 +4,7 @@
          :entrypoint "-main"}
  :fixture {:repo "futon2"
            :path "holes/labs/wm-contract/have-want-arrow-reference.edn"}
+ :positive-proof-receipt {:repo "futon2" :path "holes/labs/wm-contract/have-want-arrow-positive-receipt.edn" :schema :PositiveLeanWitnessReceipt/v1}
  :positive-evidence-limit :construction-or-projection-only
  :positive-evidence-scope "Establishes carrier construction only; a future source pin can prevent silent weakening but cannot establish downstream behaviour."
  :expected-rejection {:mode :lean-guard-msgs :controls [{:fixture "DarkTower/WarMachine/HaveWantArrowNegative.lean" :claim :composition-requires-matching-endpoint}]}

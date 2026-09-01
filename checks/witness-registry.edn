@@ -178,6 +178,10 @@
   {:repo "futon2",
    :path "checks/fold_witness.clj",
    :entrypoint "-main"},
+  :positive-proof-receipt
+  {:repo "futon2",
+   :path "holes/labs/wm-contract/fold-positive-receipt.edn",
+   :schema :PositiveLeanWitnessReceipt/v1},
   :positive-evidence-limit :construction-or-projection-only,
   :recorded-at "2026-08-31T23:59:00Z",
   :result :passed,
@@ -232,6 +236,10 @@
   {:repo "futon2",
    :path "checks/have_want_arrow_witness.clj",
    :entrypoint "-main"},
+  :positive-proof-receipt
+  {:repo "futon2",
+   :path "holes/labs/wm-contract/have-want-arrow-positive-receipt.edn",
+   :schema :PositiveLeanWitnessReceipt/v1},
   :positive-evidence-limit :construction-or-projection-only,
   :recorded-at "2026-08-31T23:59:00Z",
   :result :passed,
@@ -247,6 +255,11 @@
   {:repo "futon2",
    :path "checks/observation_kernel_witness.clj",
    :entrypoint "-main"},
+  :positive-proof-receipt
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/observation-kernel-positive-receipt.edn",
+   :schema :PositiveLeanWitnessReceipt/v1},
   :positive-evidence-limit :construction-or-projection-only,
   :recorded-at "2026-08-31T23:59:00Z",
   :result :passed,
@@ -254,13 +267,8 @@
   {:repo "futon2",
    :path "holes/labs/wm-contract/observation-kernel-reference.edn"}}
  {:witnesses "ObservationVector",
-  :check
-  {:repo "futon2",
-   :path "checks/observation_vector_witness.clj",
-   :entrypoint "-main"},
-  :fixture
-  {:repo "futon2",
-   :path "holes/labs/wm-contract/observation-vector-reference.edn"},
+  :positive-evidence-scope
+  "Establishes carrier construction only; the source pin prevents silent weakening but does not establish downstream behaviour.",
   :expected-rejection
   {:mode :lean-guard-msgs,
    :controls
@@ -270,19 +278,26 @@
     {:fixture
      "DarkTower/WarMachine/ObservationVectorOutcomeNegative.lean",
      :claim :vector-not-single-outcome}]},
-  :run-sha "2972f9f064683919dd2eb75cc969008d44c0443e",
   :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
-  :result :passed,
-  :recorded-at "2026-09-01T00:00:00Z"}
- {:witnesses "ParameterPosteriorKernel",
+  :run-sha "2972f9f064683919dd2eb75cc969008d44c0443e",
   :check
   {:repo "futon2",
-   :path "checks/parameter_posterior_kernel_witness.clj",
+   :path "checks/observation_vector_witness.clj",
    :entrypoint "-main"},
-  :fixture
+  :positive-proof-receipt
   {:repo "futon2",
    :path
-   "holes/labs/wm-contract/parameter-posterior-kernel-reference.edn"},
+   "holes/labs/wm-contract/observation-vector-positive-receipt.edn",
+   :schema :PositiveLeanWitnessReceipt/v1},
+  :positive-evidence-limit :construction-or-projection-only,
+  :recorded-at "2026-09-01T00:00:00Z",
+  :result :passed,
+  :fixture
+  {:repo "futon2",
+   :path "holes/labs/wm-contract/observation-vector-reference.edn"}}
+ {:witnesses "ParameterPosteriorKernel",
+  :positive-evidence-scope
+  "Establishes carrier construction or stored normalization only; the source pin prevents silent weakening but does not establish downstream behaviour.",
   :expected-rejection
   {:mode :lean-guard-msgs,
    :controls
@@ -292,19 +307,27 @@
     {:fixture
      "DarkTower/WarMachine/ParameterPosteriorKernelOutcomeNegative.lean",
      :claim :posterior-is-not-outcome-prediction}]},
-  :run-sha "d2b43fb61ad94126f77996296748feed0d6f4bfd",
   :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
-  :result :passed,
-  :recorded-at "2026-09-01T00:00:00Z"}
- {:witnesses "ParameterPriorKernel",
+  :run-sha "d2b43fb61ad94126f77996296748feed0d6f4bfd",
   :check
   {:repo "futon2",
-   :path "checks/parameter_prior_kernel_witness.clj",
+   :path "checks/parameter_posterior_kernel_witness.clj",
    :entrypoint "-main"},
+  :positive-proof-receipt
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/parameter-posterior-kernel-positive-receipt.edn",
+   :schema :PositiveLeanWitnessReceipt/v1},
+  :positive-evidence-limit :construction-or-projection-only,
+  :recorded-at "2026-09-01T00:00:00Z",
+  :result :passed,
   :fixture
   {:repo "futon2",
    :path
-   "holes/labs/wm-contract/parameter-prior-kernel-reference.edn"},
+   "holes/labs/wm-contract/parameter-posterior-kernel-reference.edn"}}
+ {:witnesses "ParameterPriorKernel",
+  :positive-evidence-scope
+  "Establishes carrier construction or stored normalization only; the source pin prevents silent weakening but does not establish downstream behaviour.",
   :expected-rejection
   {:mode :lean-guard-msgs,
    :controls
@@ -314,27 +337,49 @@
     {:fixture
      "DarkTower/WarMachine/ParameterPriorKernelHabitNegative.lean",
      :claim :parameter-prior-is-not-policy-habit}]},
-  :run-sha "8fb951e4911f94495b62902ea293086fee20eaaa",
   :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
-  :result :passed,
-  :recorded-at "2026-09-01T00:00:00Z"}
- {:witnesses "PolicyPriorKernel",
+  :run-sha "8fb951e4911f94495b62902ea293086fee20eaaa",
   :check
   {:repo "futon2",
-   :path "checks/policy_prior_kernel_witness.clj",
+   :path "checks/parameter_prior_kernel_witness.clj",
    :entrypoint "-main"},
+  :positive-proof-receipt
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/parameter-prior-kernel-positive-receipt.edn",
+   :schema :PositiveLeanWitnessReceipt/v1},
+  :positive-evidence-limit :construction-or-projection-only,
+  :recorded-at "2026-09-01T00:00:00Z",
+  :result :passed,
   :fixture
   {:repo "futon2",
-   :path "holes/labs/wm-contract/policy-prior-reference.edn"},
+   :path
+   "holes/labs/wm-contract/parameter-prior-kernel-reference.edn"}}
+ {:witnesses "PolicyPriorKernel",
+  :positive-evidence-scope
+  "Establishes carrier construction or stored normalization only; the source pin prevents silent weakening but does not establish downstream behaviour.",
   :expected-rejection
   {:mode :lean-guard-msgs,
    :controls
    [{:fixture "DarkTower/WarMachine/PolicyPriorKernelNegative.lean",
      :claim :policy-prior-is-unconditioned}]},
-  :run-sha "ed6171e7fb9045f8dc78d6b8fff4768a13271a9a",
   :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
+  :run-sha "ed6171e7fb9045f8dc78d6b8fff4768a13271a9a",
+  :check
+  {:repo "futon2",
+   :path "checks/policy_prior_kernel_witness.clj",
+   :entrypoint "-main"},
+  :positive-proof-receipt
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/policy-prior-kernel-positive-receipt.edn",
+   :schema :PositiveLeanWitnessReceipt/v1},
+  :positive-evidence-limit :construction-or-projection-only,
+  :recorded-at "2026-08-31T23:59:00Z",
   :result :passed,
-  :recorded-at "2026-08-31T23:59:00Z"}
+  :fixture
+  {:repo "futon2",
+   :path "holes/labs/wm-contract/policy-prior-reference.edn"}}
  {:witnesses "PrecisionMap",
   :expected-rejection
   {:mode :lean-guard-msgs,
@@ -374,6 +419,11 @@
   {:repo "futon2",
    :path "checks/predictive_outcome_kernel_witness.clj",
    :entrypoint "-main"},
+  :positive-proof-receipt
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/predictive-outcome-kernel-positive-receipt.edn",
+   :schema :PositiveLeanWitnessReceipt/v1},
   :positive-evidence-limit :construction-or-projection-only,
   :recorded-at "2026-08-31T23:59:00Z",
   :result :passed,
@@ -417,6 +467,11 @@
   {:repo "futon2",
    :path "checks/preference_distribution_witness.clj",
    :entrypoint "-main"},
+  :positive-proof-receipt
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/preference-distribution-positive-receipt.edn",
+   :schema :PositiveLeanWitnessReceipt/v1},
   :positive-evidence-limit :construction-or-projection-only,
   :recorded-at "2026-08-31T23:59:00Z",
   :result :passed,
@@ -441,6 +496,11 @@
   {:repo "futon2",
    :path "checks/transition_kernel_witness.clj",
    :entrypoint "-main"},
+  :positive-proof-receipt
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/transition-kernel-positive-receipt.edn",
+   :schema :PositiveLeanWitnessReceipt/v1},
   :positive-evidence-limit :construction-or-projection-only,
   :recorded-at "2026-08-31T23:59:00Z",
   :result :passed,

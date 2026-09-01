@@ -1,7 +1,8 @@
 #!/usr/bin/env bb
 (ns checks.policy-prior-kernel-witness
-  (:require [babashka.process :as p] [clojure.edn :as edn]))
+  (:require [babashka.process :as p] [checks.positive-proof-receipt :as receipt] [clojure.edn :as edn]))
 (def fixture-path "holes/labs/wm-contract/policy-prior-reference.edn")
+(def receipt-path "holes/labs/wm-contract/policy-prior-kernel-positive-receipt.edn")
 (def mathlib "/home/joe/code/mathlib4")
 (defn valid? [x]
   (and (= :policy-prior-reference/v1 (:schema x))
@@ -16,7 +17,7 @@
   (let [negative? (some #{"--negative" "--negative-control"} args)
         fixture (edn/read-string (slurp fixture-path))
         tested (if negative? (assoc fixture :conditioning-domain :hidden-state) fixture)
-        positive? (and (valid? fixture)
+        positive? (and (:pass? (receipt/validate (edn/read-string (slurp receipt-path)))) (valid? fixture)
                        (zero? (lean-exit "DarkTower/WarMachine/PolicyPriorKernelWitness.lean")))
         rejected? (and (not (valid? tested))
                        (zero? (lean-exit "DarkTower/WarMachine/PolicyPriorKernelNegative.lean")))

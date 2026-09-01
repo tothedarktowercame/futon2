@@ -3,10 +3,12 @@
   (:require [babashka.fs :as fs]
             [babashka.process :as process]
             [checks.lean-positive-witness :as lean-positive]
+            [checks.positive-proof-receipt :as receipt]
             [clojure.edn :as edn]))
 
 (def root (fs/cwd))
 (def fixture-path (fs/path root "holes/labs/wm-contract/fold-reference.edn"))
+(def receipt-path "holes/labs/wm-contract/fold-positive-receipt.edn")
 (def mathlib-root (str (fs/normalize (fs/path root "../mathlib4"))))
 
 (defn fixture-valid? [x]
@@ -22,7 +24,8 @@
 (defn -main [& args]
   (let [negative? (some #{"--negative" "--negative-control"} args)
         fixture (edn/read-string (slurp (str fixture-path)))
-        baseline-valid? (and (fixture-valid? fixture)
+        baseline-valid? (and (:pass? (receipt/validate (edn/read-string (slurp receipt-path))))
+                             (fixture-valid? fixture)
                              (lean-positive/pass? mathlib-root "DarkTower/WarMachine/FoldWitness.lean"))
         mutation-rejected? (and negative?
                                 (zero? (lean-exit "DarkTower/WarMachine/FoldNegative.lean")))

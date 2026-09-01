@@ -1,7 +1,8 @@
 #!/usr/bin/env bb
 (ns checks.observation-kernel-witness
-  (:require [checks.lean-positive-witness :as lean-positive] [clojure.edn :as edn]))
+  (:require [checks.lean-positive-witness :as lean-positive] [checks.positive-proof-receipt :as receipt] [clojure.edn :as edn]))
 (def fixture-path "holes/labs/wm-contract/observation-kernel-reference.edn")
+(def receipt-path "holes/labs/wm-contract/observation-kernel-positive-receipt.edn")
 (defn valid-row? [row]
   (let [masses (vals (:mass row))]
     (and (seq masses) (every? #(and (number? %) (not (neg? %))) masses)
@@ -21,7 +22,7 @@
                      mass-neg? (assoc-in fixture [:rows 0 :mass :present] -1/2)
                      :else fixture)
         negative? (or sum-neg? mass-neg?)
-        baseline-valid? (and (valid? fixture) (lean-pass?))
+        baseline-valid? (and (:pass? (receipt/validate (edn/read-string (slurp receipt-path)))) (valid? fixture) (lean-pass?))
         mutation-rejected? (not (valid? tested))
         exit (cond (and negative? (not baseline-valid?)) 1
                    (and negative? (not mutation-rejected?)) 2

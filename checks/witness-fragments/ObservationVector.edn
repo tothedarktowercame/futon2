@@ -1,6 +1,9 @@
 {:witnesses "ObservationVector"
  :check {:repo "futon2" :path "checks/observation_vector_witness.clj" :entrypoint "-main"}
  :fixture {:repo "futon2" :path "holes/labs/wm-contract/observation-vector-reference.edn"}
+ :positive-proof-receipt {:repo "futon2" :path "holes/labs/wm-contract/observation-vector-positive-receipt.edn" :schema :PositiveLeanWitnessReceipt/v1}
+ :positive-evidence-limit :construction-or-projection-only
+ :positive-evidence-scope "Establishes carrier construction only; the source pin prevents silent weakening but does not establish downstream behaviour."
  :expected-rejection {:mode :lean-guard-msgs :controls
                       [{:fixture "DarkTower/WarMachine/ObservationVectorPartialNegative.lean" :claim :complete-coordinate-map}
                        {:fixture "DarkTower/WarMachine/ObservationVectorOutcomeNegative.lean" :claim :vector-not-single-outcome}]}
