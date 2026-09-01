@@ -4,10 +4,10 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C411-unmarked-boundary-census, :dispatched-at "2026-09-01T02:55:35Z", :job-id "invoke-1788231330813-6557-e4857445", :expected-by "2026-09-01T03:40:35Z"}
+   :holding :C417-authority-sibling-vocabulary, :dispatched-at "2026-09-01T03:01:48Z", :job-id "invoke-1788231694796-6569-10b0381a", :expected-by "2026-09-01T03:46:48Z"}
   {:lane :wm-verbs
-   :holding :C414-self-anchored-evidence-class, :dispatched-at "2026-09-01T02:58:39Z", :job-id "invoke-1788231509741-6562-69dc8ef6", :expected-by "2026-09-01T03:43:39Z"}
+   :holding :C418-mark-catalogue-boundaries, :dispatched-at "2026-09-01T03:01:48Z", :job-id "invoke-1788231699210-6570-23e62f9c", :expected-by "2026-09-01T03:46:48Z"}
   {:lane :wm-organization
    :holding :C413-empty-restoration-population, :dispatched-at "2026-09-01T02:58:39Z", :job-id "invoke-1788231505542-6561-a82d4069", :expected-by "2026-09-01T03:43:39Z"}
   {:lane :wm-evidence
-   :holding :C415-journal-anchoring-assessment, :dispatched-at "2026-09-01T02:58:39Z", :job-id "invoke-1788231514210-6563-f0e0b754", :expected-by "2026-09-01T03:43:39Z"}]}
+   :holding :C419-reattack-certificate, :dispatched-at "2026-09-01T03:01:48Z", :job-id "invoke-1788231703946-6571-fb6b3bf2", :expected-by "2026-09-01T03:46:48Z"}]}
