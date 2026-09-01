@@ -51,6 +51,10 @@
     {:subjects (vec (distinct (keep :subject resolutions)))
      :unresolved (filterv #(not= :resolved (:status %)) resolutions)}))
 
+(def allowed-provenance #{:artifact-commit :author-recorded :reconstructed-at-artifact-time})
+(def allowed-correspondence #{:verified :unverified})
+(defn basis-commit [basis repo] (get-in basis [repo :commit]))
+
 (defn entry-result [{:keys [artifact kind basis subjects] :as entry}]
   (let [shape? (and (string? artifact) (contains? #{:audit :census} kind)
                     (map? basis) (seq basis) (vector? subjects) (seq subjects))
@@ -67,13 +71,18 @@
            (concat
             (when-not (zero? (:exit (git (:futon2 roots) "ls-files" "--error-unmatch" artifact)))
               [{:reason :artifact-unavailable :artifact artifact}])
-            (for [[repo commit] basis
+            (for [[repo basis-entry] basis
                   :let [root (get roots repo)]
                   :when (or (nil? root)
-                            (not (string? commit))
+                            (not (map? basis-entry))
+                            (not (string? (:commit basis-entry)))
+                            (not (contains? allowed-provenance (:provenance basis-entry)))
+                            (not (contains? allowed-correspondence (:correspondence basis-entry)))
+                            (and (= :reconstructed-at-artifact-time (:provenance basis-entry))
+                                 (not= :latest-commit-not-after-artifact-commit-time (:method basis-entry)))
                             (not (zero? (:exit (git (or root (:futon2 roots))
-                                                    "cat-file" "-e" (str commit "^{commit}"))))))]
-              {:reason :basis-unavailable :repo repo :commit commit})
+                                                    "cat-file" "-e" (str (:commit basis-entry) "^{commit}"))))))]
+              {:reason :basis-unavailable :repo repo :basis basis-entry})
             (for [{:keys [repo path]} subjects
                   :let [root (get roots repo)]
                   :when (or (nil? root) (not (string? path))
@@ -85,7 +94,7 @@
             ;; subject is reported as MOVED -- a wrong answer that looks like a
             ;; right one, since "possibly-stale" is exactly what a real move says.
             (for [{:keys [repo path]} subjects
-                  :when (and (get roots repo) (nil? (get basis repo)))]
+                  :when (and (get roots repo) (nil? (basis-commit basis repo)))]
               {:reason :subject-repo-not-pinned-by-basis :repo repo :path path})
             (for [subject undeclared]
               {:reason :derived-subject-undeclared :subject subject})
@@ -94,24 +103,30 @@
             (for [resolution (:unresolved derivation)]
               {:reason :cited-subject-unresolved :citation resolution})
             (for [{:keys [repo path]} derived-set
-                  :when (nil? (get basis repo))]
+                  :when (nil? (basis-commit basis repo))]
               {:reason :cited-repo-not-pinned-by-basis :repo repo :path path}))))
         moved
         (when (empty? failures)
           (vec
-           (for [{:keys [repo path]} subjects
-                 :let [root (roots repo) commit (basis repo)
+          (for [{:keys [repo path]} subjects
+                 :let [root (roots repo) commit (basis-commit basis repo)
                        diff (git root "diff" "--quiet" commit "HEAD" "--" path)]
                  :when (not (zero? (:exit diff)))]
-             {:repo repo :path path :basis commit})))]
+             {:repo repo :path path :basis commit
+              :basis-provenance (get-in basis [repo :provenance])})))]
     {:artifact artifact
      :status (cond (seq failures) :unavailable (seq moved) :possibly-stale :else :current)
      :failures failures :moved-subjects moved
+     :basis-assessment
+     (into (sorted-map)
+           (map (fn [[repo b]]
+                  [repo (select-keys b [:commit :provenance :method :correspondence])]))
+           basis)
      :derived-subjects (vec (sort-by (juxt :repo :path) derived-set))
      :declared-subjects (vec (sort-by (juxt :repo :path) declared-set))}))
 
 (defn evaluate [registry]
-  (if-not (and (= :repository-census-bases/v1 (:schema registry))
+  (if-not (and (= :repository-census-bases/v2 (:schema registry))
                (vector? (:entries registry)))
     {:status :unavailable :failures [{:reason :malformed-registry}] :entries []}
     (let [entries (mapv entry-result (:entries registry))]
@@ -122,7 +137,9 @@
   (let [negative? (some #{"--negative-control"} args)
         registry0 (edn/read-string (slurp registry-path))
         registry (if negative?
-                   (update-in registry0 [:entries 0 :subjects] #(vec (rest %)))
+                   (-> registry0
+                       (update-in [:entries 0 :subjects] #(vec (rest %)))
+                       (assoc-in [:entries 0 :basis :futon3c :method] nil))
                    registry0)
         result (evaluate registry)
         unavailable? (= :unavailable (:status result))]

@@ -18,3 +18,10 @@ New repository-state censuses must add a registry entry in their delivery. A
 census citing multiple repositories must record a basis commit for each cited
 repository; cross-repository but unpinned is unavailable evidence, not a
 silently narrower scope.
+
+A reconstructed commit is admissible only as a weakened re-evaluation anchor,
+never as the author's observation basis. It must declare
+`:provenance :reconstructed-at-artifact-time`, the reconstruction `:method`, and
+`:correspondence :unverified`. Author-recorded or same-repository artifact
+commits declare their stronger provenance explicitly. The checker renders this
+quality in every result; comments are not evidence.
