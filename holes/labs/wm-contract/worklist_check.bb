@@ -63,8 +63,19 @@
     (die (:id i) "names" (:superseded-by i) "as superseding it, and no such row exists")))
 
 (def signed-registry-rows
-  (filter #(and (= :done (:status %)) (:covers-key %) (not (:superseded-by %)))
+  (filter #(and (= :done (:status %)) (vector? (:covers-key %))
+                (not (:superseded-by %)))
           (:items w)))
+
+;; `:covers-key :none` is a DECLARATION that the row touched no registry entry
+;; (C16 covers a script; a report row covers a .md). It keeps the unchecked
+;; count honest without hiding anything -- but it must not become the way a row
+;; opts out of the check, so a row claiming :none may not also name a registry
+;; path (claude-1's convention, C16 review).
+(doseq [i (:items w)]
+  (when (and (= :none (:covers-key i)) (:registry-path i))
+    (die (:id i) "declares :covers-key :none and also names a :registry-path"
+         "-- one of them is wrong; :none means the row touched no registry entry")))
 
 (def unchecked-signed-rows
   ;; Deliberately a SUPERSET: every signed C row without a :covers-key, not
@@ -74,6 +85,9 @@
   ;; class this ledger exists to catch.
   (filter #(and (= :done (:status %)) (= :C (:class %)) (not (:covers-key %)))
           (:items w)))
+
+(def declared-no-registry-rows
+  (filter #(and (= :done (:status %)) (= :none (:covers-key %))) (:items w)))
 
 (doseq [i signed-registry-rows]
   (let [sha (:review-covers i)
@@ -92,7 +106,8 @@
                "-- set the row back to :done-unreviewed, or open a new row that supersedes it (TN 9a)"))))))
 
 (def by-status (frequencies (map :status (:items w))))
-(println (format "worklist_check: %d items OK; %s; %d signed registry entries verified unchanged since signature, %d superseded and skipped, %d signed registry rows carry no :covers-key and are NOT checked"
+(println (format "worklist_check: %d items OK; %s; %d signed registry entries verified unchanged since signature, %d superseded and skipped, %d declared :covers-key :none, %d signed registry rows carry no :covers-key and are NOT checked"
                  (count (:items w)) (pr-str by-status)
                  (count signed-registry-rows) (count superseded-rows)
+                 (count declared-no-registry-rows)
                  (count unchecked-signed-rows)))
