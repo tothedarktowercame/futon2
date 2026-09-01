@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C333-resume-inverse, :dispatched-at "2026-09-01T01:26:42Z", :job-id "invoke-1788225994515-6415-48f570e1", :expected-by "2026-09-01T02:11:42Z"}
   {:lane :wm-evidence
-   :holding :C331-attack-execution-doc, :dispatched-at "2026-09-01T01:23:05Z", :job-id "invoke-1788225781620-6407-c08cf343", :expected-by "2026-09-01T02:08:05Z"}]}
+   :holding :C335-forgeable-fence, :dispatched-at "2026-09-01T01:28:02Z", :job-id "invoke-1788226078595-6417-78488626", :expected-by "2026-09-01T02:13:02Z"}]}
