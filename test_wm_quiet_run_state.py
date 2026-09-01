@@ -266,6 +266,15 @@ class QuietRunStateTest(unittest.TestCase):
         self.assertEqual("self-owned", authority["authority/type"])
         self.assertFalse(authority["independent-canonical-head?"])
         self.assertEqual(3, len(authority["history-limitations"]))
+        attempt_limit = authority["cross-producer-limitations"][0]
+        self.assertEqual("bounded-test-and-serving-run-share-one-attempt",
+                         attempt_limit["claim"])
+        self.assertEqual("unprovable", attempt_limit["status"])
+        self.assertTrue(attempt_limit["label-equality-enforced?"])
+        self.assertEqual("consistency-not-independent-identity",
+                         attempt_limit["label-equality-establishes"])
+        self.assertEqual("independently-issued-verify-at-use-attempt-capability",
+                         attempt_limit["clearing-condition"]["required"])
         output = io.StringIO()
         with contextlib.redirect_stdout(output):
             self.assertEqual(1, sut.main(["advance", "--ledger", str(self.ledger),

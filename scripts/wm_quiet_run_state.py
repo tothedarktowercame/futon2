@@ -53,6 +53,19 @@ def evidence_authority():
              "reason": "byte-identical-copy-indistinguishable-from-original"},
             {"claim": "fence-id-unique-across-ledgers", "status": "unprovable",
              "reason": "no-independent-canonical-head-selects-one-ledger"}],
+        "cross-producer-limitations": [
+            {"claim": "bounded-test-and-serving-run-share-one-attempt",
+             "status": "unprovable",
+             "reason": "only-shared-attempt-value-is-caller-authored",
+             "classification": "authority-limit-not-pending-local-repair",
+             "label-equality-enforced?": True,
+             "label-equality-establishes": "consistency-not-independent-identity",
+             "nearest-independent-material": {
+                 "systemd-unit-identity": "producer-assigned-but-not-carried-into-run",
+                 "exec-main-start-monotonic": "producer-assigned-but-not-carried-into-run"},
+             "clearing-condition": {
+                 "required": "independently-issued-verify-at-use-attempt-capability",
+                 "property": "capability-bound-and-verified-by-bounded-job-and-serving-run-producers"}}],
         "classification": "authority-limit-not-pending-local-repair",
         "clearing-condition": {
             "required": "independent-canonical-head",
