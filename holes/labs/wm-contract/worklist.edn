@@ -17,7 +17,8 @@
            :C "correct the registry (aif-equations.edn)"
            :D "correct the drawing so Figure 5A matches code and equations (control-map-edges.edn)"
            :H "record a hole: an input the formalism requires that the code does not supply (Holes.lean)"
-           :J "needs Joe; the loop never takes these"}
+           :J "needs Joe; the loop never takes these"
+            :R "validated run: produce or check evidence that the machine actually traverses the topology we have drawn"}
  :statuses #{:open :done-unreviewed :done :blocked :needs-joe}
  :gate "A row touching aif-equations.edn or control-map-edges.edn stays :done-unreviewed until a second reader sets :reviewed-by; p4ng regenerates from those registries only when no such row is :done-unreviewed (TN §9a)."
  :items
@@ -331,6 +332,20 @@
    :generator-fix "p4ng gen_aif_dag.bb counted only :observed-not-decided as undecided, so the new :open-branches status would have vanished from the figure -- 4 reported against 5 unsettled, an undercount introduced the moment the first choice point was written. Both count sites now accept either status."
    :acceptance ":choices :pi-zero-form :status :open-branches with :arms, :measurement and :interim; :choices :gamma-fixed-point :ruling :also-to-be-run naming V6; worklist_check :bar requires :why-not-runnable on a :needs-joe row; worklist_check WARNS by name when the ledger directory is dirty, since a read is against a commit and never against the working tree (TN 9a, claude-1); gen_aif_dag.bb counts :open-branches as undecided. C20 :superseded-by :C21, read by claude-1 at 805e6a5 but deliberately NOT signed because the entries had already moved. Second reader signs both in one pass against the committed sha."
    :evidence "futon2 (this commit); p4ng b34ce09; worklist V6."}
+  ;; ---------- R: validated runs (Joe, 2026-09-01: "get some validated runs that prove the topology is what we think it should be") ----------
+  {:id :R1 :class :R :status :open :owner :claude-20 :assigned "2026-09-01, dispatched to codex-21. Discovery only, no run."
+   :statement "Before any validation run: how were tick-run-record-2026-08-30/31.edn produced -- entrypoint, flags, wall time? What shadow or dry mode exists (dark_mode_shadow.bb, and anything in war_machine.clj or full_loop_runner.clj)? And WHAT WOULD A LIVE TICK ENACT: close-loop! enacts missions on record (V1/C460), so name every actuator a tick can reach and state, per actuator, the mechanism that disables it in shadow."
+   :acceptance "The exact command for a shadow run of N ticks with FUTON_WM_TRACE_POLICY_DETAILS=1 and FUTON_WM_FPI_DARK=1; what files it writes and where; and a statement of every side effect it does NOT have, per actuator, each with a file:line for the disabling mechanism. A VALIDATION RUN MUST NOT FIRE REAL ACTUATORS -- that is the acceptance, not a preference (claude-1). An actuator whose disabling mechanism cannot be pointed at is reported as NOT SAFE TO RUN rather than assumed safe; discovery reporting that we cannot yet run safely is a successful discovery."
+   :evidence "C465 report; no code change."}
+  {:id :R2 :class :R :status :blocked :owner :claude-20
+   :statement "The run itself: about 20 ticks, shadow, current master, after R1 is read and signed. Records must carry the route, I3 per-candidate predictions and Q(pi), the machine own controller scores -- the July records lacked :controller-score, which is why every rank measurement so far has been over a proxy -- and dark F_pi."
+   :acceptance "Records committed under holes/labs/wm-contract/runs/<date>/ with the exact command and the git sha of the code that ran. Blocked until R1 names a disabling mechanism for every actuator."}
+  {:id :R3 :class :R :status :blocked :owner :claude-20
+   :statement "Conformance, mechanically: (i) every recorded hop is an edge of the checked topology, drawn-not-retired or decision-added; (ii) NO RETIRED EDGE IS TRAVERSED -- if the route records R6->R13, R7->R14, R5->R6, R11->R16, R14->R16 or R8->R5 as a hop then the RETIREMENT was wrong and the figure changes, not the run; (iii) every realised-undrawn theory edge whose :code pointer lies on the tick path executed."
+   :acceptance "A bb script with negative controls: a planted hop on a retired edge must fail, and a planted hop on an unknown pair must fail. Output a conformance report; gen_live_topology.bb then stamps conformant with run <sha>, N ticks in the legend, replacing checked against two August records. Blocked on R2."}
+  {:id :R4 :class :R :status :blocked :owner :claude-20
+   :statement "Evidence for the holes, from the fresh records: wmRunConformsToWiring closes by record or is refuted; H1b bound tested against records that carry both halves; and the choice-point branches run on these fields -- carried against fixed beta (V6), and pi_0 with and without ln E once the habit prior is live."
+   :acceptance "The Lean edit for wmRunConformsToWiring is OWNER JOE -- he named himself; ask him, do not edit under his name. Everything else lands as C/D rows with the usual second read. Blocked on R3."}
   ;; ---------- J: needs Joe (never taken by the loop) ----------
   {:id :J1 :class :J :status :done :owner :joe :reviewed-by "joe" :reviewed-at "2026-09-01"
    :bar {:a "Met. Whether the machine decisiveness should be the formalism policy precision or an engineering proxy is not decidable from the sources -- both are coherent -- nor from the code, which only shows what was built. It is a question about what the machine is FOR." :b "Met. The arms differ observably and no recorded field could have distinguished them, because the theory-aligned quantity did not exist to be measured until Joe said to build it." :judged "retrospectively by claude-20, 2026-09-01, against the bar Joe set that day"}
