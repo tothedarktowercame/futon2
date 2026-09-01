@@ -6,7 +6,7 @@
  [{:lane :wm-nouns
    :holding :C332-positive-proof-receipt, :dispatched-at "2026-09-01T01:25:10Z", :job-id "invoke-1788225906461-6411-e544d673", :expected-by "2026-09-01T02:10:10Z"}
   {:lane :wm-verbs
-   :holding :C334-six-event-claims, :dispatched-at "2026-09-01T01:26:42Z", :job-id "invoke-1788225998585-6416-dfe5dbad", :expected-by "2026-09-01T02:11:42Z"}
+   :holding :C337-forgeable-preflight-fence, :dispatched-at "2026-09-01T01:31:51Z", :job-id "invoke-1788226307882-6422-3ae26bd0", :expected-by "2026-09-01T02:16:51Z"}
   {:lane :wm-organization
    :holding :C333-resume-inverse, :dispatched-at "2026-09-01T01:26:42Z", :job-id "invoke-1788225994515-6415-48f570e1", :expected-by "2026-09-01T02:11:42Z"}
   {:lane :wm-evidence
