@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C279-certificate-provenance, :dispatched-at "2026-09-01T00:21:02Z", :job-id "invoke-1788222031879-6284-15aac3a3", :expected-by "2026-09-01T01:06:02Z"}
   {:lane :wm-evidence
-   :holding :C278-format-boundary-audit, :dispatched-at "2026-09-01T00:19:26Z", :job-id "invoke-1788221962293-6283-7d6df96c", :expected-by "2026-09-01T01:04:26Z"}]}
+   :holding :C281-presence-before-format-lint, :dispatched-at "2026-09-01T00:22:18Z", :job-id "invoke-1788222134451-6287-47b4483c", :expected-by "2026-09-01T01:07:18Z"}]}
