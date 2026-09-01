@@ -197,4 +197,6 @@
    :evidence "war_machine.clj:4450-4452, 4753"}]
 
  ;; Nodes that run no equation. Legitimate plumbing, not AIF.
- :plumbing [:R9 :R10 :R11 :R12 :R15 :R20 :TRACE]}
+ :plumbing [:R9 :R10 :R11 :R12 :R15 :R20 :TRACE]
+ :plumbing-notes
+ {:TRACE "C462 §6 (I2 slice a, claude-20, 2026-09-01; verified by claude-1 against trace.clj): the trace store drops the two quantities the theory-aligned replacements need. strip-ranked-action (trace.clj:76-127) persists a 37-key whitelist per ranked action and drops each candidate's :prediction -- its docstring calls it 'recoverable on demand by re-running forward-model/predict', which holds only if predict is deterministic given the stored belief AND the effects mode is recorded (C462 §6 item 3). strip-decision (trace.clj:128-137) dissocs :softmax-weights (Q(π), keyed by action maps) and :ranked-actions from the persisted decision. So I2's F_π (each candidate's prediction at t joined to o at t+1) and I1's β update (needs π) both require a trace WRITE before they require an equation -- a statement about trace.clj, not policy.clj."}}

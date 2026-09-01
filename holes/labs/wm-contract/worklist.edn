@@ -235,6 +235,10 @@
    :statement "aif-equations.edn :holes entry for [:R6 :R16] said whether the two actuation paths agree was 'the open question'. C460 answered it for the close-loop! path: they differ on record (07-04, 07-05)."
    :acceptance ":holes entry keeps :status :path-dependent (the figure class) and carries :record :differs-on-record with the two trace files and C460 as evidence; the full_loop_runner path remains not determinable (no record pairs its enactment with a decision); second reader signs before p4ng regenerates."
    :evidence "futon2 (this commit): :holes [:R6 :R16] entry updated; evidence data/wm-trace/wm-trace-2026-07-04.edn, -07-05.edn; C460-enacted-vs-selected.md."}
+  {:id :C12 :class :C :status :done-unreviewed :owner :claude-1
+   :statement "C462 §6 (I2 slice a, claude-20): the trace store drops per-candidate :prediction (strip-ranked-action, trace.clj:76-127) and Q(π) :softmax-weights (strip-decision, trace.clj:128-137). I1 and I2 both need a trace write before an equation. Verified by claude-1 against trace.clj."
+   :acceptance "aif-equations.edn :plumbing-notes :TRACE names both functions and both quantities and the condition under which 'recoverable' holds; second reader signs before p4ng regenerates."
+   :evidence "futon2 (this commit): :plumbing-notes :TRACE."}
   ;; ---------- J: needs Joe (never taken by the loop) ----------
   {:id :J1 :class :J :status :done :owner :joe :reviewed-by "joe" :reviewed-at "2026-09-01"
    :ruling "No: the drawn R7->R14 was a conflation of two precision-like scalars. Pursue the theory-aligned policy precision (gamma = 1/beta, beta dynamics: friston2017 eq. 2.7). Recorded in aif-equations.edn :choices :temperature-update :ruling and control-map-edges.edn :decisions :j1-r7-r14-conflation." :evidence "futon2 (this commit); p4ng (this commit)"
