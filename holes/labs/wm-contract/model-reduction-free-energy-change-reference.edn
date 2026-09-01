@@ -1,0 +1,7 @@
+{:schema :model-reduction-free-energy-change-reference/v1
+ :basis "sec-glossary.tex:62 — delta-F is the four Dirichlet log-normalizer terms"
+ :kind :hand-derived-from-gamma-identities
+ :inputs {:A [1 1] :reduced-prior [1 1] :prior [2 1] :reduced-posterior [1 1]}
+ :log-beta-identities {"B(1,1)" 0 "B(2,1)" :negative-log-2}
+ :expected-change :log-2
+ :excluded-quantity :variational-free-energy}

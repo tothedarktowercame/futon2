@@ -194,6 +194,8 @@
    {:name :softmax :argv ["bb" "checks/softmax_witness.clj"]}
    {:name :bayes-factor-threshold :argv ["bb" "checks/bayes_factor_threshold_witness.clj"]}
    {:name :bayesian-model-reduction :argv ["bb" "checks/bayesian_model_reduction_witness.clj"]}
+   {:name :model-reduction-free-energy-change
+    :argv ["bb" "checks/model_reduction_free_energy_change_witness.clj"]}
    {:name :dirichlet-concentrations :argv ["bb" "checks/dirichlet_concentrations_witness.clj"]}
    {:name :preference-distribution :argv ["bb" "checks/preference_distribution_witness.clj"]}
    {:name :predictive-outcome-kernel :argv ["bb" "checks/predictive_outcome_kernel_witness.clj"]}
@@ -317,6 +319,10 @@
     :argv ["bb" "checks/q_interface_completeness_check.clj" "--negative-empty"]}
    {:name :c274-empty-model-contract
     :argv ["bb" "scripts/generate_variable_situation_accounting.bb" "--negative-empty"]}
+   {:name :c277-perturbed-reduction-free-energy
+    :argv ["bb" "checks/model_reduction_free_energy_change_witness.clj" "--negative-value"]}
+   {:name :c277-variational-f-as-reduction-change
+    :argv ["bb" "checks/model_reduction_free_energy_change_witness.clj" "--negative-type"]}
    {:name :c179-control-outside-vocabulary :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "control" "--negative-control"]}
    {:name :c179-negative-aliveness-factor :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "aliveness" "--negative-control"]}
    {:name :c179-missing-act-gate-leg :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "act-gate" "--negative-control"]}

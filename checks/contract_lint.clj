@@ -349,6 +349,10 @@
                                            (= [[9 1] [3 1]] (:accumulated-counts %))
                                            (= [[1 1] [1 100]] (:reduced-prior %))
                                            (= [[10 1] [301 100]] (:reduced-posterior %)))
+   "ModelReductionFreeEnergyChangeWitness" #(and (= :model-reduction-free-energy-change-reference/v1 (:schema %))
+                                                     (= :hand-derived-from-gamma-identities (:kind %))
+                                                     (= :log-2 (:expected-change %))
+                                                     (= :variational-free-energy (:excluded-quantity %)))
    "DirichletConcentrationsWitness" #(and (= :dirichlet-concentrations-reference/v1 (:schema %))
                                             (= [2 1] (:accepted %))
                                             (= {:empty [] :zero [1 0] :negative [1 -1]}
