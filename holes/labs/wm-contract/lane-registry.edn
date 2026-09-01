@@ -6,8 +6,8 @@
  [{:lane :wm-nouns
    :holding :C299-control-reason-preservation, :dispatched-at "2026-09-01T00:47:30Z", :job-id "invoke-1788223646206-6335-0df1e4ee", :expected-by "2026-09-01T01:32:30Z"}
   {:lane :wm-verbs
-   :holding :C297-snapshot-substrate, :dispatched-at "2026-09-01T00:46:15Z", :job-id "invoke-1788223543733-6332-3088a99a", :expected-by "2026-09-01T01:31:15Z"}
+   :holding :C301-agency-snapshot-token, :dispatched-at "2026-09-01T00:49:02Z", :job-id "invoke-1788223739015-6339-13e4c13f", :expected-by "2026-09-01T01:34:02Z"}
   {:lane :wm-organization
    :holding :C298-gate-inventory, :dispatched-at "2026-09-01T00:46:15Z", :job-id "invoke-1788223571548-6333-c511a36f", :expected-by "2026-09-01T01:31:15Z"}
   {:lane :wm-evidence
-   :holding :C296-lint-false-positive, :dispatched-at "2026-09-01T00:46:15Z", :job-id "invoke-1788223522633-6331-452ee879", :expected-by "2026-09-01T01:31:15Z"}]}
+   :holding :C300-attack-read-set, :dispatched-at "2026-09-01T00:49:02Z", :job-id "invoke-1788223711893-6338-93294916", :expected-by "2026-09-01T01:34:02Z"}]}
