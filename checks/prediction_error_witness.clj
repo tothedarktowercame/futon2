@@ -23,7 +23,7 @@
                        (zero? (lean-exit "DarkTower/WarMachine/PredictionErrorWitness.lean")))
         rejected? (cond
                     operand-neg? (not= expected tested)
-                    sign-neg? (not (zero? (lean-exit "DarkTower/WarMachine/PredictionErrorNegative.lean")))
+                    sign-neg? (zero? (lean-exit "DarkTower/WarMachine/PredictionErrorNegative.lean"))
                     :else true)
         negative? (or operand-neg? sign-neg?)
         ok? (and positive? rejected?)

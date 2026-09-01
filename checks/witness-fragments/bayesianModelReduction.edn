@@ -1,6 +1,7 @@
 {:witnesses "bayesianModelReduction"
  :check {:repo "futon2" :path "checks/bayesian_model_reduction_witness.clj" :entrypoint "-main"}
  :fixture {:repo "futon2" :path "holes/labs/wm-contract/bayesian-model-reduction-reference.edn"}
+ :expected-rejection {:mode :lean-guard-msgs :controls [{:fixture "DarkTower/WarMachine/BayesianModelReductionNegative.lean" :claim :reduction-preserves-count-arithmetic}]}
  :run-sha "b048066070e1646c9105067ed6c405621381a2c9"
  :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a"
  :result :passed

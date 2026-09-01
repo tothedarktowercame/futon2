@@ -1,6 +1,9 @@
 {:witnesses "PredictiveOutcomeKernel"
  :check {:repo "futon2" :path "checks/predictive_outcome_kernel_witness.clj" :entrypoint "-main"}
  :fixture {:repo "futon2" :path "holes/labs/wm-contract/predictive-outcome-kernel-reference.edn"}
+ :expected-rejection {:mode :lean-guard-msgs :controls
+                      [{:fixture "DarkTower/WarMachine/PredictiveOutcomeKernelUnconditionalNegative.lean" :claim :predictive-outcomes-are-policy-conditioned}
+                       {:fixture "DarkTower/WarMachine/PredictiveOutcomeKernelSoftmaxNegative.lean" :claim :outcome-prediction-is-not-policy-posterior}]}
  :run-sha "f0be231606149d5b9e34a62cde01c6b122c2aeba"
  :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a"
  :result :passed

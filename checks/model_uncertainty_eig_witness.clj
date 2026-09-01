@@ -46,11 +46,9 @@
   (lean-run (str "import DarkTower.WarMachine.Holes\n#print axioms " theorem "\n")))
 
 (defn collapsed-equality-run []
-  (lean-run
-   (str "import DarkTower.WarMachine.Holes\n"
-        "open DarkTower.WarMachine.Holes\n"
-        "example : (modelUncertaintyBonus [⟨1, by norm_num⟩]).value = 0 := by\n"
-        "  norm_num [modelUncertaintyBonus]\n")))
+  (process/shell {:dir mathlib-root :continue true :out :string :err :string}
+                 "lake" "env" "lean"
+                 "DarkTower/WarMachine/ModelUncertaintyEIGCollapsedNegative.lean"))
 
 (defn validate [receipt]
   (let [live (positive-run)
@@ -71,7 +69,7 @@
       (let [negative? (= "--negative" mode)
             report (if negative?
                      (let [run (collapsed-equality-run)]
-                       {:pass? (not= 0 (:exit run)) :collapsed-equality-exit (:exit run)})
+                       {:pass? (= 0 (:exit run)) :guarded-collapsed-equality-exit (:exit run)})
                      (validate (edn/read-string (slurp receipt-path))))
             exit (cond (and negative? (:pass? report)) 0
                        negative? 2 (:pass? report) 0 :else 1)]

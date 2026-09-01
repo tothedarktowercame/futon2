@@ -1,1 +1,8 @@
-{:witnesses "Cohort" :check {:repo "futon2" :path "checks/machine_vocabulary_witness.clj" :entrypoint "-main --term cohort"} :fixture {:repo "futon2" :path "holes/labs/wm-contract/cohort-reference.edn"} :run-sha "d442614ceb8d27e10321bfcf12b59acaf5ba479b" :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a" :result :passed :recorded-at "2026-08-31T23:59:00Z"}
+{:witnesses "Cohort"
+ :check {:repo "futon2" :path "checks/machine_vocabulary_witness.clj" :entrypoint "-main --term cohort"}
+ :fixture {:repo "futon2" :path "holes/labs/wm-contract/cohort-reference.edn"}
+ :expected-rejection {:mode :lean-guard-msgs :controls [{:fixture "DarkTower/WarMachine/CohortNegative.lean" :claim :cohort-window-is-positive}]}
+ :run-sha "d442614ceb8d27e10321bfcf12b59acaf5ba479b"
+ :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a"
+ :result :passed
+ :recorded-at "2026-08-31T23:59:00Z"}

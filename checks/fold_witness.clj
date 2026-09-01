@@ -23,7 +23,7 @@
         fixture (edn/read-string (slurp (str fixture-path)))
         accepted? (and (fixture-valid? fixture)
                        (if negative?
-                         (not (zero? (lean-exit "DarkTower/WarMachine/FoldNegative.lean")))
+                         (zero? (lean-exit "DarkTower/WarMachine/FoldNegative.lean"))
                          (zero? (lean-exit "DarkTower/WarMachine/FoldWitness.lean"))))
         exit (if accepted? 0 (if negative? 2 1))]
     (println (cond

@@ -1,6 +1,9 @@
 {:witnesses "TransitionKernel"
  :check {:repo "futon2" :path "checks/transition_kernel_witness.clj" :entrypoint "-main"}
  :fixture {:repo "futon2" :path "holes/labs/wm-contract/transition-kernel-reference.edn"}
+ :expected-rejection {:mode :lean-guard-msgs :controls
+                      [{:fixture "DarkTower/WarMachine/TransitionKernelUncontrolledNegative.lean" :claim :transition-is-action-conditioned}
+                       {:fixture "DarkTower/WarMachine/TransitionKernelBetaNegative.lean" :claim :transition-B-is-not-beta-normaliser}]}
  :run-sha "1ce10c346dc82dc030355990db5c8257317f958a"
  :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a"
  :result :passed

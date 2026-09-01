@@ -4,6 +4,7 @@
          :entrypoint "-main"}
  :fixture {:repo "futon2"
            :path "holes/labs/wm-contract/model-uncertainty-eig-proof-receipt.edn"}
+ :expected-rejection {:mode :lean-guard-msgs :controls [{:fixture "DarkTower/WarMachine/ModelUncertaintyEIGCollapsedNegative.lean" :claim :live-spread-bonus-is-not-canonical-eig}]}
  :freshness :pinned-git-v1
  :live-invariant {:check "checks/model_uncertainty_eig_witness.clj"
                   :evidence :lean-elaboration-and-collapsed-equality-control}

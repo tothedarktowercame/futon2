@@ -28,7 +28,7 @@
         negative-exit (if negative?
                         (lean-exit "DarkTower/WarMachine/HaveWantArrowNegative.lean") 1)
         accepted? (and fixture-ok? (zero? positive-exit)
-                       (if negative? (not (zero? negative-exit)) true))
+                       (if negative? (zero? negative-exit) true))
         exit (if accepted? 0 (if negative? 2 1))]
     (println (cond
                (and negative? accepted?) "have-want-arrow-witness: negative-control PASS (malformed composition rejected)"

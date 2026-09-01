@@ -1,6 +1,9 @@
 {:witnesses "ParameterPosteriorKernel"
  :check {:repo "futon2" :path "checks/parameter_posterior_kernel_witness.clj" :entrypoint "-main"}
  :fixture {:repo "futon2" :path "holes/labs/wm-contract/parameter-posterior-kernel-reference.edn"}
+ :expected-rejection {:mode :lean-guard-msgs :controls
+                      [{:fixture "DarkTower/WarMachine/ParameterPosteriorKernelPriorNegative.lean" :claim :posterior-requires-outcome-conditioning}
+                       {:fixture "DarkTower/WarMachine/ParameterPosteriorKernelOutcomeNegative.lean" :claim :posterior-is-not-outcome-prediction}]}
  :run-sha "d2b43fb61ad94126f77996296748feed0d6f4bfd"
  :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a"
  :result :passed

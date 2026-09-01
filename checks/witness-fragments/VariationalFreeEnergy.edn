@@ -1,6 +1,7 @@
 {:witnesses "variationalFreeEnergy"
  :check {:repo "futon2" :path "checks/variational_free_energy_witness.clj" :entrypoint "-main"}
  :fixture {:repo "futon2" :path "holes/labs/wm-contract/variational-free-energy-reference.edn"}
+ :expected-rejection {:mode :lean-guard-msgs :controls [{:fixture "DarkTower/WarMachine/VariationalFreeEnergyNegative.lean" :claim :distinct-semantic-types}]}
  :run-sha "bb8c549d84f7a17071fb954bbe88746ae47bc379"
  :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a"
  :result :passed

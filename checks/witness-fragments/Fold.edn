@@ -4,6 +4,7 @@
          :entrypoint "-main"}
  :fixture {:repo "futon2"
            :path "holes/labs/wm-contract/fold-reference.edn"}
+ :expected-rejection {:mode :lean-guard-msgs :controls [{:fixture "DarkTower/WarMachine/FoldNegative.lean" :claim :fold-requires-policy-holes}]}
  :run-sha "d46f823aa7433d4990b538993e2674255bdeb0b5"
  :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a"
  :result :passed

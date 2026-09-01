@@ -1,6 +1,9 @@
 {:witnesses "ObservationVector"
  :check {:repo "futon2" :path "checks/observation_vector_witness.clj" :entrypoint "-main"}
  :fixture {:repo "futon2" :path "holes/labs/wm-contract/observation-vector-reference.edn"}
+ :expected-rejection {:mode :lean-guard-msgs :controls
+                      [{:fixture "DarkTower/WarMachine/ObservationVectorPartialNegative.lean" :claim :complete-coordinate-map}
+                       {:fixture "DarkTower/WarMachine/ObservationVectorOutcomeNegative.lean" :claim :vector-not-single-outcome}]}
  :run-sha "2972f9f064683919dd2eb75cc969008d44c0443e"
  :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a"
  :result :passed

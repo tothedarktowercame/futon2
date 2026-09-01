@@ -28,7 +28,7 @@
                        (zero? (lean-exit "DarkTower/WarMachine/BayesianModelReductionWitness.lean")))
         rejected? (if counts-neg?
                     (and (not= expected tested)
-                         (not (zero? (lean-exit "DarkTower/WarMachine/BayesianModelReductionNegative.lean"))))
+                         (zero? (lean-exit "DarkTower/WarMachine/BayesianModelReductionNegative.lean")))
                     true)
         ok? (and positive? rejected?)
         exit (if ok? 0 (if counts-neg? 2 1))]

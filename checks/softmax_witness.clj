@@ -33,7 +33,7 @@
                        (zero? (lean-exit "DarkTower/WarMachine/SoftmaxWitness.lean")))
         rejected? (cond
                     order-neg? (and (not= expected tested)
-                                    (not (zero? (lean-exit "DarkTower/WarMachine/SoftmaxNegative.lean"))))
+                                    (zero? (lean-exit "DarkTower/WarMachine/SoftmaxNegative.lean")))
                     norm-neg? (not= expected tested)
                     :else true)
         negative? (or order-neg? norm-neg?)

@@ -199,12 +199,15 @@ the binding.  `gen_model_coverage.py` must keep rejecting
 
 ### Negative-control reason preservation
 
-Until every Lean negative fixture uses `#guard_msgs`, rerun the complete
-glossary mutation inventory and inspect the direct Lean diagnostics before a
-publication/release candidate, after a Lean toolchain upgrade, after module or
-import movement, and after changes to `Holes.lean` or a negative fixture's
-dependency surface. A nonzero Lean exit alone is not evidence of the intended
-rejection: C294 found a type control passing on a missing `.olean`.
+All glossary controls whose evidence is Lean elaboration now use
+`#guard_msgs`. Run the complete glossary mutation inventory before a
+publication/release candidate and after changes to `Holes.lean`, negative
+fixtures, modules, or imports; ordinary focused execution is sufficient because
+the guarded fixture checks its own diagnostic. Manually review/update exact
+diagnostics after a Lean toolchain upgrade, where wording changes are expected.
+The former periodic manual inspection of all Lean stderr is retired: C311 made
+the intended reason executable. A nonzero Lean exit alone remains inadmissible
+evidence; C294 found a type control passing on a missing `.olean`.
 
 For migrated controls, put the expected diagnostic beside the failing command
 under `#guard_msgs` and make the outer wrapper require the guarded file to exit
@@ -212,6 +215,11 @@ zero. Record the semantic purpose and fixture path under
 `:expected-rejection` in `checks/witness-registry.edn`; do not duplicate the
 rendered diagnostic there. Import, syntax, extra-diagnostic, and mismatch drift
 must turn the focused check red.
+
+EDN/data mutations and direct semantic predicates do not use `#guard_msgs`:
+their named predicate returning false is already the executable rejection
+reason. They remain in the full mutation inventory, but do not require manual
+compiler-diagnostic inspection.
 
 Do not broadly accept `workspace-gate exit 1` while Lean work is active: that
 could hide another check. An in-flight classification would require the exact

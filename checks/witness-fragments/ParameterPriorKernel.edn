@@ -1,6 +1,9 @@
 {:witnesses "ParameterPriorKernel"
  :check {:repo "futon2" :path "checks/parameter_prior_kernel_witness.clj" :entrypoint "-main"}
  :fixture {:repo "futon2" :path "holes/labs/wm-contract/parameter-prior-kernel-reference.edn"}
+ :expected-rejection {:mode :lean-guard-msgs :controls
+                      [{:fixture "DarkTower/WarMachine/ParameterPriorKernelOutcomeNegative.lean" :claim :parameter-prior-is-not-outcome-prediction}
+                       {:fixture "DarkTower/WarMachine/ParameterPriorKernelHabitNegative.lean" :claim :parameter-prior-is-not-policy-habit}]}
  :run-sha "8fb951e4911f94495b62902ea293086fee20eaaa"
  :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a"
  :result :passed

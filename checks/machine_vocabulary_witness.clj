@@ -21,7 +21,7 @@
         fixture (when path (edn/read-string (slurp path)))
         shape? (= schema (:schema fixture))
         ok? (and shape? (zero? (lean "MachineVocabularyWitness.lean"))
-                 (or (not neg?) (not (zero? (lean negative)))))
+                 (or (not neg?) (zero? (lean negative))))
         exit (if ok? 0 (if neg? 2 1))]
     (println "machine-vocabulary-witness" term
              (if ok? (if neg? "negative-control PASS" "PASS") "FAIL")
