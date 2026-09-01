@@ -49,6 +49,12 @@ measured on 2026-09-01:
    their positive baseline was valid. C356 requires a declaration-bearing,
    `sorry`-free source before elaboration
    (`holes/labs/wm-contract/C356-nonvacuous-positive-lean-witness.md`).
+8. C277's guarded model-reduction negative stopped reaching its intended
+   `log 2 ≠ 0` mutation after the positive witness replaced the public
+   `alpha11`/`alpha21` names with `reductionChangeReference`. The stale negative
+   rejected on unrelated elaboration diagnostics, so its wrapper reported
+   `mutation-slipped`; C426 restored the referent without weakening the mutation
+   (`holes/labs/wm-contract/C426-reduction-free-energy-negative-control.md`).
 
 The C361 population showed the same empty-subject acceptance in nine independent
 boundaries: a semantically empty ledger; an incomplete run certificate; a
