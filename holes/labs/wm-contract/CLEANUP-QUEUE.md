@@ -443,3 +443,37 @@ as C431 recorded.
 **No repair dispatched.** Running 32 Lean elaborations on every commit is not obviously right, and C437 was
 told not to propose it. **The finding is that the risk is now measurable rather than invisible**, which is the
 precondition for deciding whether to pay for it.
+
+## C441 — my ledger is incomplete for C380–C440, and the generator caught it (my fix, owner)
+
+**The workflow report's frontier moved backwards — 421 to 382 — and a frontier should not do that.** The
+generator is right and I am the defect.
+
+**Of C380–C440, only 13 numbers have ledger headings here**: C391, C394, C397, C401, C406, C407, C412, C416,
+C422, C424, C430, C436, C438. **All thirteen are my own owner reviews.** Every lane delivery in that range —
+C426's mutation diagnosis, C433's 115-control survey, C435's five-repository derivation, C437's invocation
+census, C439's claim boundary, C440's 32 registrations — **is recorded in the lane's own commit and its
+`C<n>-*.md` report, and nowhere in this file.**
+
+**The generator's frontier logic takes the contiguous attributed run from the top and refuses to claim across a
+gap** (C255: exact coverage, no gap tolerance). With 48 missing numbers it correctly fell back to 382. **A
+generator that had reported 440 would have been lying about a ledger it could not see.**
+
+### Why I am not back-filling
+
+**Writing 48 headings now, from the bellbacks, would be reconstruction presented as record.** That is the
+question `wm-verbs` settled in C408 about my reconstructed census bases: admissible as an anchor, **not
+admissible as the author's contemporaneous observation** — and there the reconstruction had a defensible
+method. Here I would be reconstructing attribution and timing from memory of a conversation.
+
+**So the boundary is declared rather than papered over**: this ledger is **complete for owner reviews and
+incomplete for lane deliveries in C380–C440**. The authoritative record of the lane work is the set of
+`holes/labs/wm-contract/C<n>-*.md` reports plus the lane commits; the workflow report's per-lane counts
+(31/41/43/29 = 144) are therefore a **floor, not a total.**
+
+**The discipline that failed** was mine and it is specific: I recorded what I reviewed and stopped recording
+what I dispatched, roughly from C425 onward, while the campaign accelerated. **The ledger degraded exactly when
+the throughput rose** — which is when a ledger is worth the most.
+
+**Not dispatched.** Changing the generator to count lane report files instead would make the number look right
+and remove the signal that told me this.
