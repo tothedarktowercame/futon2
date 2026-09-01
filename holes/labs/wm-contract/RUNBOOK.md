@@ -159,6 +159,23 @@ run `bb -cp . -e "(require '[checks.wm-workspace-gate :as g])
 `:exit 0` before handing the delivery off. A later gate finding means the
 adding delivery did not close.
 
+**Why this was skipped four times (C290/C298, 2026-09-01).** The step above was
+already written here, and four glossary witnesses still landed without it —
+`8fb951e` at 00:06:11Z first, then three more repeating the split. The cause was
+an instruction of mine, not a lapse of theirs: after C241 showed that four
+concurrent repository-wide gates against a moving tree can certify nothing, I
+told every lane **"focused checks only, the repository-wide gate is mine."**
+The gate is what detects inventory drift, so nobody ran the thing that would
+have caught it, and `{:unknown ()}` stayed stale for hours while being quoted as
+evidence.
+
+**The inventory command above is NOT the full gate.** It costs under a second
+and requires no settled tree. Run it in the delivering commit even under a
+focused-checks instruction; if a standing instruction ever appears to forbid it,
+the instruction is wrong. Documentation did not enforce this — the same evening,
+a documented ledger-heading convention was violated three times by its own
+author.
+
 ### Lean contract regeneration
 
 Lean source and its generated contract are a two-phase lane delivery, not one
