@@ -6,7 +6,7 @@
  [{:lane :wm-nouns
    :holding :C364-construction-pins, :dispatched-at "2026-09-01T02:01:20Z", :job-id "invoke-1788228076495-6469-e01db596", :expected-by "2026-09-01T02:46:20Z"}
   {:lane :wm-verbs
-   :holding :C363-inprocess-forgeability, :dispatched-at "2026-09-01T02:00:12Z", :job-id "invoke-1788228007697-6466-a98002ef", :expected-by "2026-09-01T02:45:12Z"}
+   :holding :C366-subprocess-window-cost, :dispatched-at "2026-09-01T02:05:22Z", :job-id "invoke-1788228318337-6474-f9fe45ef", :expected-by "2026-09-01T02:50:22Z"}
   {:lane :wm-organization
    :holding :C360-c341-remaining, :dispatched-at "2026-09-01T01:59:03Z", :job-id "invoke-1788227863329-6462-cb3834fc", :expected-by "2026-09-01T02:44:03Z"}
   {:lane :wm-evidence
