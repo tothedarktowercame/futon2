@@ -6,7 +6,7 @@
  [{:lane :wm-nouns
    :holding :C348-migrate-ten-nontrivial, :dispatched-at "2026-09-01T01:44:24Z", :job-id "invoke-1788227058532-6443-b88c3a62", :expected-by "2026-09-01T02:29:24Z"}
   {:lane :wm-verbs
-   :holding :C350-fence-chokepoint, :dispatched-at "2026-09-01T01:45:59Z", :job-id "invoke-1788227149412-6446-25507206", :expected-by "2026-09-01T02:30:59Z"}
+   :holding :C356-empty-baseline, :dispatched-at "2026-09-01T01:53:41Z", :job-id "invoke-1788227617845-6456-a88442a8", :expected-by "2026-09-01T02:38:41Z"}
   {:lane :wm-organization
    :holding :C355-count-and-caveat, :dispatched-at "2026-09-01T01:52:31Z", :job-id "invoke-1788227547253-6454-83429b23", :expected-by "2026-09-01T02:37:31Z"}
   {:lane :wm-evidence
