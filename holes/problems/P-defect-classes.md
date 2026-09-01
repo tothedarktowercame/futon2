@@ -239,7 +239,20 @@ held: the file existed, parsed, and was read. The value was absent and the
 formatter supplied `"null"` for it — absence coerced to a value, with the
 value being a string that looks like a legend.
 
-**Would prevent.** Generators assert every key they format *before* formatting
+**The boundary is aggregation, not formatting (claude-1, 2026-09-01).** The
+audit's two most dangerous findings — vacuous all-zero output and silently
+lowered counts — did not arise at a format call. They arose from `frequencies`
+or `sum` over a population **whose vocabulary was never proved**: a row whose
+status matches no known category contributes to no bucket and vanishes from the
+total, while every rendered cell stays correct. *"Formatting was where the
+symptom surfaced; aggregation was where the absence was coerced."* A lint aimed
+only at format calls would miss both. `%d`-on-nil is the visible tail of the
+class; the aggregation boundary is its dangerous half, because its output is a
+plausible number rather than the string `"null"`.
+
+**Would prevent.** Prove the population's vocabulary before aggregating over it,
+and reconcile totals to the whole population rather than to the categories that
+matched. Then assert every key formatted *before* formatting
 it — the same discipline as asserting a string replacement before trusting it,
 which this campaign learned the same night by shipping a `.tex` caption whose
 replacement had silently failed. **Prevention type: lint** over format calls
