@@ -6,8 +6,8 @@
  [{:lane :wm-nouns
    :holding :C288-final-glossary-terms, :dispatched-at "2026-09-01T00:31:57Z", :job-id "invoke-1788222714068-6307-aed9fa37", :expected-by "2026-09-01T01:16:57Z"}
   {:lane :wm-verbs
-   :holding :C285-generator-format-boundary, :dispatched-at "2026-09-01T00:29:16Z", :job-id "invoke-1788222551922-6299-6c8525c3", :expected-by "2026-09-01T01:14:16Z"}
+   :holding :C289-transient-suite-failure, :dispatched-at "2026-09-01T00:33:32Z", :job-id "invoke-1788222780164-6308-2d30e32b", :expected-by "2026-09-01T01:18:32Z"}
   {:lane :wm-organization
-   :holding :C286-lane-campaign-format, :dispatched-at "2026-09-01T00:30:23Z", :job-id "invoke-1788222619769-6303-fd413603", :expected-by "2026-09-01T01:15:23Z"}
+   :holding :C290-window-cost, :dispatched-at "2026-09-01T00:33:32Z", :job-id "invoke-1788222808200-6310-9afdf4de", :expected-by "2026-09-01T01:18:32Z"}
   {:lane :wm-evidence
    :holding :C287-quiescence-can-pass, :dispatched-at "2026-09-01T00:31:57Z", :job-id "invoke-1788222689643-6304-7b793d55", :expected-by "2026-09-01T01:16:57Z"}]}
