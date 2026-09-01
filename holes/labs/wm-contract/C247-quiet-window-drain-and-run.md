@@ -44,6 +44,15 @@ Acceptance:
 If a tree changes, a lane is holding work, or a job is active, the window has
 not started: wait/drain and repeat step 1. Do not “accept” the moving state.
 
+This is a **procedurally fenced observation**, not an atomic snapshot across
+Git, the lane/Agency state, and systemd. The coordinator's dispatch freeze and
+writer acknowledgements are preconditions: the two complete C292 snapshots
+then detect persistent endpoint changes across all authorities, but cannot
+exclude a start-and-finish or write-and-restore ABA transition between reads.
+If any uncontrolled dispatcher, timer, watcher, generator, human, or agent can
+still mutate those authorities, the drain is not established. Do not wait for
+an Agency-only revision token to solve this: it cannot version Git or systemd.
+
 ### C290 live drain list (2026-09-01T00:39Z)
 
 This is an observation to execute, not a permanent allowance. Re-run the
@@ -51,6 +60,9 @@ commands above after every item; new work replaces this list rather than being
 silently outside it.
 
 1. Freeze new dispatches.
+   Obtain explicit acknowledgement that no lane, operator shell, scheduled
+   generator, or service other than the operator run will write the five
+   repositories or launch ordinary/bounded jobs during the window.
 2. Let `wm-organization` finish `C290-window-cost`; do not kill it. The other
    three recorded jobs have already finished.
 3. Record the completed transitions for `wm-nouns/C291`, `wm-verbs/C293`, and
