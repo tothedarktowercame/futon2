@@ -360,6 +360,16 @@ witness.
    rather than their own, so a fabricated attempt plus externally restored state
    reconciled as though an inverse had run. Copying a readable signature proves
    the copier could read the manifest.
+5. **A recorded digest never revalidated at use.** C385 censused every logical
+   hash/signature carrier in the verification and operator paths and classified
+   each by what its consumer actually does. Two load-bearing carriers in
+   `scripts/wm_quiet_run_state.py` recorded strong-looking SHA-256 values but did
+   not compare them with their subjects when the ledger was resumed: transition
+   evidence file hashes and the parking-specification hash. The row digest
+   proved that the writer once had access to those bytes; it did not prove that
+   the bytes later being trusted were the same. A filename looks like a pointer,
+   while a SHA-256 looks like proof, but without recomputation both establish
+   only past access (`holes/labs/wm-contract/C385-recorded-hash-revalidation-census.md`).
 
 **Why it recurs.** Each repair replaced the previous credential with a new one
 and re-derived trust from possession. The question that catches it is not "is
@@ -370,8 +380,28 @@ event occurring?"**
 authenticate each record over its own content plus the identity and ordinal of
 what it attests; verify the world rather than the claim; and where a boundary
 cannot be enforced in-process, **say so and move the boundary** rather than
-defending a convention. **Prevention type: review question**, applied to every
-repair of this class before it is declared done.
+defending a convention. For digest carriers, the checkable cure is narrower:
+every digest used as acceptance evidence has a read-path control that changes
+the named subject after recording and proves that recomputation rejects it. A
+digest intentionally used only for provenance must be typed and rendered as
+provenance, and must not participate in acceptance. The universal discovery
+step is **auditable, not honestly lintable**: census every digest/signature
+carrier, name its writer and every consumer, then classify it as
+`verify-at-use`, `provenance`, or `neighbour-binding`. Syntax alone cannot tell
+whether a recomputation covers the exact semantic subject. Once a carrier is
+classified, its schema-specific verify-at-use control is executable and can
+fail. **Prevention type: carrier census + schema-specific check**, with the
+question “could the presenter have produced this without the event occurring?”
+applied before closure.
+
+**Discovery timing and freshness.** C385 was accurate at its pinned commit;
+another lane closed one of its two live findings four minutes later. That did
+not make the census wrong when written, but it made an unpinned “live” reading
+misleading. C393 therefore records the census's full Git basis and exact subject
+paths, and reports source movement as nonblocking `:possibly-stale` rather than
+as falsity (`checks/repository-census-bases.edn`). The carrier census finds the
+trust error; the census-basis check keeps that finding tied to the code it
+actually examined.
 
 **Related.** Class 1 (acceptance that cannot fail) is the general case; this is
 its credential-shaped instance. Class 6a's "a lint that checks for a token rather
