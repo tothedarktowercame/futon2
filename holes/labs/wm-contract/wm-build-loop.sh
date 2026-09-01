@@ -34,7 +34,7 @@ run_seat() { # $1 seat, $2 prompt file, $3 label
   local seat="$1" prompt="$2" label="$3"
   log "$label: $seat starting"
   case "$seat" in
-    claude) (cd "$HOME/code" && timeout 2400 claude -p "$(cat "$prompt")" >> "$LOG" 2>&1) ;;
+    claude) (cd "$HOME/code" && timeout 2400 claude -p --permission-mode bypassPermissions "$(cat "$prompt")" >> "$LOG" 2>&1) ;;
     codex)  (cd "$HOME/code" && timeout 2400 codex exec --skip-git-repo-check --sandbox danger-full-access "$(cat "$prompt")" >> "$LOG" 2>&1) ;;
     *) log "unknown seat $seat"; return 2 ;;
   esac
@@ -64,12 +64,17 @@ while [ $i -lt "$MAX_ITER" ]; do
   [ -z "$unrev" ] && stall_check "$next"
   if [ "$next" = "NONE" ] && [ -z "$unrev" ]; then log "nothing open or unreviewed; done"; publish; notify "DONE: nothing open or unreviewed"; break; fi
   if [ "$next" != "NONE" ]; then
-    run_seat "$WORK_SEAT" "$HERE/worklist-prompt.md" "work($next)"
+    # The loop chose the row (build_step.bb priorities); the prompt must say so,
+    # or the seat takes the first open row in ledger order (iteration 1 took I1
+    # when RUN12 was meant). The prompt is composed per iteration.
+    { echo "ROW TO DO THIS INVOCATION: $next -- the build loop chose it by priority; take this row and no other. If it carries :loop-mode :one-slice-per-invocation, do its next slice."; echo; cat "$HERE/worklist-prompt.md"; } > /tmp/wm-build-work-prompt.md
+    run_seat "$WORK_SEAT" /tmp/wm-build-work-prompt.md "work($next)"
     ledger_ok || { log "ledger invalid after work; stopping"; notify "ledger invalid after work"; exit 1; }
   fi
   unrev="$(bb "$HERE/build_step.bb" unreviewed)"
   if [ -n "$unrev" ]; then
-    run_seat "$REVIEW_SEAT" "$HERE/review-prompt.md" "review($unrev)"
+    { echo "ROWS AWAITING REVIEW: $unrev -- review the FIRST of these."; echo; cat "$HERE/review-prompt.md"; } > /tmp/wm-build-review-prompt.md
+    run_seat "$REVIEW_SEAT" /tmp/wm-build-review-prompt.md "review($unrev)"
     ledger_ok || { log "ledger invalid after review; stopping"; notify "ledger invalid after review"; exit 1; }
   fi
   publish
