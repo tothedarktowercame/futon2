@@ -235,3 +235,33 @@ basis.
 
 **The durable lesson is C403's, not mine:** a hand-declared subject list was wrong twice in a row, once by the
 original author and once by me while reviewing that exact defect.
+
+## C412 — owner review of C402: the click binding is real (my fix, owner review)
+
+**Gated C402 (`d704401`), the repair for the C395 finding I had previously mis-cleared.**
+
+**`producer_bound_click` reaches the producer over a channel the caller does not own.**
+`serving_click_status()` issues an HTTP GET to `http://127.0.0.1:7070/api/alpha/wm/click` — **the live serving
+JVM, not a file on disk.** That is the property that matters: the earlier `evidence_click_terminal` and
+`evidence_certified` compared caller-supplied JSON against caller-supplied context, so both sides of every
+comparison were writable by the presenter.
+
+**The receipt must now agree with what the JVM independently reports** on click id, run id,
+`binding-status: verified`, `run-record-status: present`, and terminal outcome — **and the run record and
+durable binding are then read from paths the JVM named**, not paths the caller supplied, with identity
+re-checked in both. A handwritten file cannot satisfy this unless the serving JVM actually ran that click.
+
+**`produce_certificate` selects its tested job from `context["bounded-job-ids"]`** — the fence-bound ids
+recorded at `tested-commit` — so **C404's caller-selected-receipt finding does not apply to this path.** It
+applies to the standalone certifier invoked with `TESTED_JOB_ID`, which is what C410 addresses. **Two paths
+into the same certifier, one bound and one not.**
+
+**Ran the suite: 14 tests green.**
+
+**Residual, conservative in the right direction:** the endpoint reports `last-result`, so the state machine
+queries the JVM at transition time rather than at click time. A restart or a later click between the two makes
+the transition **fail**, not pass. Presenting a *different real* click's receipt is not forgery — it is a
+different run, and the ids will not match.
+
+**C395 finding 1 is closed. Four remain**, two of which (truncate-and-re-extend, copied ledger) wait on C409's
+answer about whether any append-only authority exists locally.
