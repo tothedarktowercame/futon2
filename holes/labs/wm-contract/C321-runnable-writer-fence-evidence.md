@@ -6,7 +6,8 @@ Date: 2026-09-01. Owner: `wm-evidence`.
 
 ```sh
 cd /home/joe/code/futon2
-python3 checks/writer_fence_evidence.py --attestations /path/to/fence-attestations.json
+python3 checks/writer_fence_evidence.py \
+  --fence-id FENCE-ID --attestations /path/to/fence-attestations.json
 ```
 
 - exit `0`: `FENCE-VERIFIABLE` — every named observed condition is parked and
@@ -20,17 +21,48 @@ The command is read-only. It neither stops nor resumes a unit, coordinator, or
 job. An observed breach dominates missing attestations: an unfenced world is a
 breach, not merely indeterminate because nobody attested to it.
 
-The attestation file is JSON and requires these exact booleans:
+The attestation file is structured JSON. Its content, rather than its filename,
+binds the acknowledgement to one named, expiring fence window:
 
 ```json
 {
-  "operator-no-workspace-write": true,
-  "dispatch-frozen": true,
-  "publisher-paused": true,
-  "sessions-reconciled": true,
-  "coordinators-not-resumed-before-release": true
+  "schema": "wm-writer-fence-attestation-v1",
+  "fence-id": "FENCE-ID",
+  "issued-at": "2026-09-01T01:00:00Z",
+  "expires-at": "2026-09-01T02:00:00Z",
+  "acknowledged-by": {
+    "operator": "joe",
+    "dispatch-coordinator": "claude-20",
+    "publisher": "claude-1",
+    "sessions": ["wm-nouns", "wm-verbs", "wm-organization", "wm-evidence"]
+  },
+  "writer-population": {
+    "coordinators": [
+      "jit-queue:jit-m94A03-retry-v3",
+      "jit-queue:jit-all-open-v2",
+      "ftriangle-live-smoke-v1"
+    ],
+    "units": [
+      "apm-campaign-babysit-jit-all-open-v2.service",
+      "apm-watchdog.timer", "apm-watchdog.service", "apm-closer.service",
+      "apm-axiom-audit.timer", "apm-axiom-audit.service",
+      "futon-pattern-index.timer", "futon-pattern-index.service"
+    ]
+  },
+  "intended-state": {
+    "coordinators": "durably-stopped",
+    "units": "inactive",
+    "writable-handles": "none",
+    "c292": "QUIESCENT"
+  }
 }
 ```
+
+The interval must contain the observation time and may span at most two hours.
+A foreign, stale, incomplete, or differently scoped attestation is invalid.
+The report records the canonical attestation content SHA-256. This is a content
+binding, not a digital signature: human identity remains attested, while the
+machine independently observes the named world state twice.
 
 The output keeps `observed`, `attested`, and `unverifiable` as separate data.
 The last category always names the limits that the first two do not turn into
@@ -67,7 +99,7 @@ python3 checks/writer_fence_evidence.py --self-test
 The controls demonstrate all three verdicts: a parked fixture plus complete
 attestations is verifiable; the same observations without attestations are
 indeterminate; an active unit is a breach; and movement between clean
-observations is indeterminate.
+observations is indeterminate. They also reject foreign and stale attestations.
 
 The required read-only dry run against the unfenced live world returned exit
 `1`, `FENCE-BREACH`. At both endpoints it reported:
@@ -81,4 +113,3 @@ The required read-only dry run against the unfenced live world returned exit
 The dry run had no attestation file (`:status absent` in the emitted JSON), and
 still returned breach because multiple observed writers were present. Nothing
 was parked to produce this control.
-

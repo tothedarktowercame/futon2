@@ -6,11 +6,13 @@ Exit 0 = FENCE-VERIFIABLE, 1 = FENCE-BREACH, 3 = FENCE-INDETERMINATE,
 """
 
 import argparse
+import datetime
 import hashlib
 import json
 import os
 import subprocess
 import sys
+import tempfile
 
 
 FUTON3C = "/home/joe/code/futon3c"
@@ -39,6 +41,8 @@ ATTESTATIONS = (
     "sessions-reconciled",
     "coordinators-not-resumed-before-release",
 )
+ATTESTATION_SCHEMA = "wm-writer-fence-attestation-v1"
+MAX_ATTESTATION_SECONDS = 2 * 60 * 60
 
 
 def run(argv, *, stdin=None, cwd=None):
@@ -217,7 +221,17 @@ def observed_findings(state):
     return findings
 
 
-def load_attestations(path):
+def iso_instant(value):
+    if not isinstance(value, str):
+        return None
+    try:
+        return datetime.datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def load_attestations(path, fence_id, now=None):
+    now = now or datetime.datetime.now(datetime.timezone.utc)
     if path is None:
         return {"status": "absent", "required": list(ATTESTATIONS)}
     try:
@@ -226,15 +240,46 @@ def load_attestations(path):
     except (OSError, json.JSONDecodeError) as failure:
         return {"status": "unavailable", "reason": str(failure),
                 "required": list(ATTESTATIONS)}
-    missing = [key for key in ATTESTATIONS if value.get(key) is not True]
-    return {"status": "complete" if not missing else "incomplete",
-            "required": list(ATTESTATIONS), "missing": missing, "value": value}
+    issued = iso_instant(value.get("issued-at"))
+    expires = iso_instant(value.get("expires-at"))
+    acknowledgers = value.get("acknowledged-by")
+    writers = value.get("writer-population")
+    intended = value.get("intended-state")
+    problems = []
+    if value.get("schema") != ATTESTATION_SCHEMA:
+        problems.append("schema-invalid")
+    if not fence_id or value.get("fence-id") != fence_id:
+        problems.append("fence-id-mismatch")
+    if issued is None or expires is None:
+        problems.append("attestation-interval-invalid")
+    elif not (issued <= now <= expires):
+        problems.append("attestation-not-current")
+    elif (expires - issued).total_seconds() > MAX_ATTESTATION_SECONDS:
+        problems.append("attestation-window-too-wide")
+    required_people = {"operator", "dispatch-coordinator", "publisher", "sessions"}
+    if (not isinstance(acknowledgers, dict) or set(acknowledgers) != required_people
+            or not all(acknowledgers.get(key) for key in required_people)):
+        problems.append("acknowledgers-invalid")
+    if not isinstance(acknowledgers, dict) or not isinstance(acknowledgers.get("sessions"), list):
+        problems.append("session-acknowledgers-not-enumerated")
+    expected_writers = {"coordinators": list(COORDINATORS), "units": list(UNITS)}
+    if writers != expected_writers:
+        problems.append("writer-population-mismatch")
+    expected_state = {"coordinators": "durably-stopped", "units": "inactive",
+                      "writable-handles": "none", "c292": "QUIESCENT"}
+    if intended != expected_state:
+        problems.append("intended-state-mismatch")
+    encoded = json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
+    return {"status": "complete" if not problems else "invalid",
+            "required": list(ATTESTATIONS), "problems": problems,
+            "content-sha256": hashlib.sha256(encoded).hexdigest(), "value": value}
 
 
-def evaluate(first, second, attestations):
+def evaluate(first, second, attestations, fence_id=None, interval=None):
     first_findings = observed_findings(first)
     second_findings = observed_findings(second)
     classification = {
+        "fence-id": fence_id,
         "observed": {"start": first, "finish": second},
         "attested": attestations,
         "unverifiable": [
@@ -246,15 +291,19 @@ def evaluate(first, second, attestations):
         ],
     }
     if first_findings or second_findings:
-        return 1, {"verdict": "FENCE-BREACH", "classification": classification,
+        return 1, {"verdict": "FENCE-BREACH", "fence-id": fence_id,
+                   "observation-interval": interval, "classification": classification,
                    "findings": {"start": first_findings, "finish": second_findings}}
     if first != second:
-        return 3, {"verdict": "FENCE-INDETERMINATE",
+        return 3, {"verdict": "FENCE-INDETERMINATE", "fence-id": fence_id,
+                   "observation-interval": interval,
                    "reason": "observed-state-moved", "classification": classification}
     if attestations.get("status") != "complete":
-        return 3, {"verdict": "FENCE-INDETERMINATE",
+        return 3, {"verdict": "FENCE-INDETERMINATE", "fence-id": fence_id,
+                   "observation-interval": interval,
                    "reason": "attestations-not-complete", "classification": classification}
-    return 0, {"verdict": "FENCE-VERIFIABLE", "classification": classification}
+    return 0, {"verdict": "FENCE-VERIFIABLE", "fence-id": fence_id,
+               "observation-interval": interval, "classification": classification}
 
 
 def fixture():
@@ -279,7 +328,7 @@ def fixture():
 
 def self_test():
     base = fixture()
-    complete = {"status": "complete"}
+    complete = {"status": "complete", "value": {"fence-id": "fixture-fence"}}
     cases = [("verifiable", base, base, complete, 0),
              ("unattested", base, base, {"status": "absent"}, 3)]
     breached = json.loads(json.dumps(base))
@@ -304,27 +353,61 @@ def self_test():
                   terminal_live_watchdog, complete, 1))
     escaped = []
     for name, first, second, attest, expected in cases:
-        actual, report = evaluate(first, second, attest)
+        actual, report = evaluate(first, second, attest, "fixture-fence")
         print("CONTROL", name, "expected", expected, "actual", actual, report["verdict"])
         if actual != expected:
+            escaped.append(name)
+    now = datetime.datetime.now(datetime.timezone.utc)
+    value = {
+        "schema": ATTESTATION_SCHEMA, "fence-id": "fixture-fence",
+        "issued-at": (now - datetime.timedelta(minutes=1)).isoformat(),
+        "expires-at": (now + datetime.timedelta(minutes=1)).isoformat(),
+        "acknowledged-by": {"operator": "fixture", "dispatch-coordinator": "fixture",
+                            "publisher": "fixture", "sessions": ["fixture"]},
+        "writer-population": {"coordinators": list(COORDINATORS), "units": list(UNITS)},
+        "intended-state": {"coordinators": "durably-stopped", "units": "inactive",
+                           "writable-handles": "none", "c292": "QUIESCENT"},
+    }
+    with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8") as handle:
+        json.dump(value, handle)
+        handle.flush()
+        controls = {
+            "bound-attestation": load_attestations(handle.name, "fixture-fence", now),
+            "foreign-attestation": load_attestations(handle.name, "other-fence", now),
+            "stale-attestation": load_attestations(
+                handle.name, "fixture-fence", now + datetime.timedelta(hours=1)),
+        }
+    for name, result in controls.items():
+        expected = "complete" if name == "bound-attestation" else "invalid"
+        print("CONTROL", name, "expected", expected, "actual", result["status"])
+        if result["status"] != expected:
             escaped.append(name)
     return 2 if escaped else 0
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--attestations", help="JSON object with the five required true attestations")
+    parser.add_argument("--fence-id", help="identity of the observed fence window")
+    parser.add_argument("--attestations", help="structured JSON attestation bound to --fence-id")
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     if args.self_test:
         return self_test()
-    attestations = load_attestations(args.attestations)
+    if bool(args.fence_id) != bool(args.attestations):
+        report = {"verdict": "FENCE-INDETERMINATE", "fence-id": args.fence_id,
+                  "reason": "fence-id-and-attestations-required-together"}
+        print(json.dumps(report, indent=2, sort_keys=True))
+        return 3
+    started = datetime.datetime.now(datetime.timezone.utc)
+    attestations = load_attestations(args.attestations, args.fence_id, started)
     try:
         first = snapshot()
         second = snapshot()
-        code, report = evaluate(first, second, attestations)
+        finished = datetime.datetime.now(datetime.timezone.utc)
+        interval = {"started-at": started.isoformat(), "finished-at": finished.isoformat()}
+        code, report = evaluate(first, second, attestations, args.fence_id, interval)
     except Exception as failure:
-        code, report = 3, {"verdict": "FENCE-INDETERMINATE",
+        code, report = 3, {"verdict": "FENCE-INDETERMINATE", "fence-id": args.fence_id,
                            "reason": "observation-unavailable", "detail": str(failure),
                            "classification": {"observed": "unavailable",
                                               "attested": attestations,
