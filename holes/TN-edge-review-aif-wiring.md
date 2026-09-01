@@ -495,3 +495,43 @@ The CLI seat found and fixed three defects in its own work with controls
 before review (last-writer-wins attribution in D0; overprinted additions in
 D5a; a stroke-blind control in D0b), and flagged the three rows it thought a
 reviewer might reject. The reviewer's fixes were one layout defect (D8).
+
+### 10b. The two rulings, and the second read (2026-09-01)
+
+**Second read.** claude-20 read the twelve rows of claude-1's registry work
+(C1–C8, C10, V2–V4) and signed all twelve (`b815800`), checking sources on
+disk by checksum, the no-consumer claim for F exhaustively, the ΔF sign
+against `bmr.clj:132-138`, and — the row asked to be doubted — every path by
+which the observation could reach production precision in `precision.clj`
+(none; C10 stands). The gate of §9a has now been exercised in both
+directions: claude-1 read the CLI seat's D rows, claude-20 read claude-1's C
+rows, and p4ng regenerated only after each.
+
+**J1 — ruled "no."** Joe, 2026-09-01: the drawn R7→R14 was a conflation of
+two precision-like scalars; the theory-aligned policy precision
+(γ = 1/β with β updated from G and π, Friston 2017 eq. 2.7; Da Costa A.2) is
+to be pursued instead of the selection-gain proxy. Recorded in
+`control-map-edges.edn :decisions :j1-r7-r14-conflation` and
+`aif-equations.edn :choices :temperature-update :ruling`. Opened **H3**
+(hole: the machine's policy precision is not the formalism's γ) and **I1**
+(implement the β/γ dynamics behind a flag).
+
+**J2 — the Laplace F is a shortcut.** Joe, 2026-09-01: do not keep the
+channel F as a diagnostic; retire it and replace it with free-energy
+quantities the formalism actually consumes — the per-policy F_π of
+π = σ(ln E − F − G) (Parr 2022 B.9), and a belief update that is the gradient
+of the F the machine reports, at one grain. Recorded in
+`:choices :free-energy-form :ruling`; the F row is `:status
+:shortcut-to-retire` and stays in the registry and the figure until its
+replacement is realised and consumed, so the drawing keeps matching the
+code. Opened **H4** (hole: F_π not computed, F not consumed) and **I2**
+(implement F_π into Q(π), then retire R8's scalar).
+
+A new ledger class **I** carries the implementation track; it is separate
+from this review, whose job was to find the wiring the equations force and
+say where the code does otherwise. With J1 and J2 ruled, every drawn edge of
+Figure 5A is now either forced by an equation, retired by a named decision,
+added by a named decision with its grounds, marked as carrying no data, or
+listed as plumbing — and every theory edge is drawn, realised-undrawn,
+not-realised, or path-dependent, with the three unrealised ones held open as
+Lean holes (H1, H2) or queued (H3, H4).
