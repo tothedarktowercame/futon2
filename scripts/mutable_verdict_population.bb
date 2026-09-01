@@ -23,12 +23,16 @@
        (map str)
        sort vec))
 
-(let [members (population)]
-  (prn {:schema :mutable-verdict-population/v1
-        :criterion {:roots (mapv str roots)
-                    :top-level-only true
-                    :extensions (sort extensions)
-                    :fixtures-excluded true
-                    :boundary-pattern (str boundary-pattern)}
-        :count (count members)
-        :members members}))
+(defn report []
+  (let [members (population)]
+    {:schema :mutable-verdict-population/v1
+     :criterion {:roots (mapv str roots)
+                 :top-level-only true
+                 :extensions (sort extensions)
+                 :fixtures-excluded true
+                 :boundary-pattern (str boundary-pattern)}
+     :count (count members)
+     :members members}))
+
+(when (= *file* (System/getProperty "babashka.file"))
+  (prn (report)))

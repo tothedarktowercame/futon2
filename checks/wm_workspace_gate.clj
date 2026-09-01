@@ -183,6 +183,8 @@
            "--authority" (authority)]}
    {:name :contract-authority-current
     :argv ["bb" "checks/contract_authority_current.clj"]}
+   {:name :mutable-verdict-claims
+    :argv ["bb" "-cp" "." "scripts/check_mutable_verdict_claims.bb"]}
    {:name :ambiguity :argv ["bb" "checks/ambiguity_witness.clj"]}
    {:name :have-want-arrow :argv ["bb" "checks/have_want_arrow_witness.clj"]}
    {:name :fold :argv ["bb" "checks/fold_witness.clj"]}

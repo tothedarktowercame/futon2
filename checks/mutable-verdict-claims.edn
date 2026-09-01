@@ -1,0 +1,73 @@
+{:schema :mutable-verdict-claims/v1
+ :population-schema :mutable-verdict-population/v1
+ :content-shaped
+ ["checks/ablation_exact_dyadic_witness.clj"
+  "checks/absence_scoring_counterfactual.clj"
+  "checks/absent_is_loud_lint.clj"
+  "checks/ambiguity_witness.clj"
+  "checks/bayes_factor_threshold_witness.clj"
+  "checks/bayesian_model_reduction_witness.clj"
+  "checks/belief_state_witness.clj"
+  "checks/belief_update_check.clj"
+  "checks/belief_variance_inputs.clj"
+  "checks/c130_immediate_option_measurement.clj"
+  "checks/cascade_diff_witness.clj"
+  "checks/certify_live_run.clj"
+  "checks/channel_witness.clj"
+  "checks/cleanup_queue_correction_index.clj"
+  "checks/closed_record_pointer_check.clj"
+  "checks/contract_lint.clj"
+  "checks/control_map_figure_agreement_check.clj"
+  "checks/control_map_lint.clj"
+  "checks/dirichlet_concentrations_witness.clj"
+  "checks/expected_free_energy_witness.clj"
+  "checks/expected_information_gain_witness.clj"
+  "checks/fold_turn_quarantine_check.clj"
+  "checks/fold_witness.clj"
+  "checks/generative_model_witness.clj"
+  "checks/have_want_arrow_witness.clj"
+  "checks/holder_check.clj"
+  "checks/hyper_edge_domain_range_check.clj"
+  "checks/hyper_edge_exemplar_check.clj"
+  "checks/lean_sorry_category_check.clj"
+  "checks/live_artifact_format_boundary_lint.py"
+  "checks/log_multivariate_beta_witness.clj"
+  "checks/machine_vocabulary_witness.clj"
+  "checks/model_reduction_free_energy_change_witness.clj"
+  "checks/model_uncertainty_eig_witness.clj"
+  "checks/obligation_ledger_reconciliation_check.clj"
+  "checks/observation_kernel_witness.clj"
+  "checks/observation_vector_witness.clj"
+  "checks/parameter_posterior_kernel_witness.clj"
+  "checks/parameter_prior_kernel_witness.clj"
+  "checks/policy_prior_kernel_witness.clj"
+  "checks/precision_witness.clj"
+  "checks/prediction_error_witness.clj"
+  "checks/predictive_outcome_kernel_witness.clj"
+  "checks/predictive_outcome_risk_witness.clj"
+  "checks/preemptive_repair_lint.clj"
+  "checks/preference_distribution_witness.clj"
+  "checks/preference_stack_binding_check.clj"
+  "checks/preference_stack_witness_shape_check.clj"
+  "checks/q_interface_completeness_check.clj"
+  "checks/r19_stack_witness.clj"
+  "checks/r2_channel_contract.clj"
+  "checks/r2_pinned_snapshot_witness.clj"
+  "checks/r8_f_contract.clj"
+  "checks/r9_independence.clj"
+  "checks/r9_proof_receipt_check.clj"
+  "checks/reader_portability_lint.bb"
+  "checks/softmax_witness.clj"
+  "checks/transition_kernel_witness.clj"
+  "checks/variational_free_energy_witness.clj"
+  "checks/wm_operational_certificate.clj"
+  "checks/wm_runs_once_witness.clj"]
+ :event-shaped
+ {"checks/contract_authority_current.clj" :repository-authority-interval
+  "checks/lane_registry_check.clj" :agency-job-state-interval
+  "checks/quiescence_check.py" :multi-authority-quiescence-interval
+  "checks/wm_click_resource_observer.clj" :resource-delta-interval
+  "checks/wm_workspace_gate.clj" :repository-basis-interval
+  "checks/writer_fence_evidence.py" :writer-fence-interval}
+ :neither
+ {"checks/mutable_read_set.clj" :shared-observation-library}}
