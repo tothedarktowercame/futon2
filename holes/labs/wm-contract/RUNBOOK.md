@@ -15,8 +15,14 @@ Updated 2026-08-31. Run commands from `/home/joe/code/futon2` unless noted.
 
 Use `make pre-merge` for review. Use the narrower commands to reproduce one
 part of its result. A successful gate records the HEAD/tree/dirtiness basis of
-futon2, mathlib4, p4ng, and futon3; these are provenance, not stale equality
-assertions.
+Futon2, Mathlib4, p4ng, Futon3, and Futon3c. These are provenance, not stale
+equality assertions. Read the receipt's `:certified-commit` separately from
+`:verdict`: an unfenced run whose checks pass while any repository moves may
+truthfully report `:verdict :pass`, but must report `:certified-commit
+{:status :absent :reason :repository-basis-not-stable}`. It certifies no commit.
+A five-repository certified commit requires the named writer fence to remain
+held for the gate interval; do not remove a live repository from provenance to
+obtain a stable-looking result.
 
 The workspace gate includes the throwaway reload → HTTP click → operational
 certificate rehearsal (`reload-click-certificate-rehearsal`). It deliberately
