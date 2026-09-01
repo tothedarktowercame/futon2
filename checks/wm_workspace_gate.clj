@@ -19,7 +19,8 @@
   {:futon2 "/home/joe/code/futon2"
    :mathlib4 "/home/joe/code/mathlib4"
    :p4ng "/home/joe/code/p4ng"
-   :futon3 "/home/joe/code/futon3"})
+   :futon3 "/home/joe/code/futon3"
+   :futon3c "/home/joe/code/futon3c"})
 
 (defn repo-git [root & argv]
   (apply process/shell {:continue true :out :string :err :string :dir root}
@@ -380,6 +381,8 @@
     :argv ["bb" "-cp" "." "checks/exit_code_scope_check.clj" "--negative-control"]}
    {:name :c431-gate-receipt-roundtrip
     :argv ["bb" "-cp" "." "checks/wm_workspace_gate.clj" "--receipt-control"]}
+   {:name :c435-unpinned-command-repository
+    :argv ["bb" "-cp" "." "checks/wm_workspace_gate.clj" "--repository-scope-control"]}
    {:name :c393-malformed-census-basis
     :argv ["bb" "-cp" "." "checks/repository_census_basis_check.clj" "--negative-control"]}
    {:name :c157-perturbed-entropy
@@ -535,6 +538,43 @@
    {:name :c361-empty-subject-lint-controls
     :argv ["python3" "checks/empty_subject_acceptance_lint.py" "--self-test"]}])
 
+(defn repo-for-path [path]
+  (let [path (str path)]
+    (some (fn [[repo root]]
+            (when (or (= path root) (str/starts-with? path (str root "/"))) repo))
+          (sort-by (comp - count second) repositories))))
+
+(defn command-repository-reach [command]
+  (let [execution-path (or (:dir command) (:futon2 repositories))
+        paths (into [execution-path]
+                    (filter #(str/starts-with? (str %) "/home/joe/code/") (:argv command)))]
+    {:command (:name command)
+     :repositories (set (keep repo-for-path paths))
+     :unresolved-paths (vec (remove repo-for-path paths))}))
+
+(defn repository-scope-result
+  ([] (repository-scope-result (concat (commands) (control-commands))))
+  ([all-commands]
+   (let [reach (mapv command-repository-reach all-commands)
+         reached (set (mapcat :repositories reach))
+         pinned (set (keys repositories))
+         unresolved (mapv #(select-keys % [:command :unresolved-paths])
+                          (filter #(seq (:unresolved-paths %)) reach))
+         unpinned (set/difference reached pinned)]
+     {:name :repository-scope
+      :exit (if (and (empty? unresolved) (empty? unpinned)) 0 1)
+      :reached (vec (sort reached)) :pinned (vec (sort pinned))
+      :unpinned (vec (sort unpinned)) :unresolved unresolved
+      :commands reach})))
+
+(defn repository-scope-control! []
+  (let [result (repository-scope-result
+                [{:name :synthetic-unpinned
+                  :dir "/home/joe/code/NOT-PINNED" :argv ["true"]}])
+        rejected? (not= 0 (:exit result))]
+    (println "wm-workspace-gate: REPOSITORY-SCOPE-CONTROL" (pr-str result))
+    (if rejected? 0 2)))
+
 (defn run-one [{:keys [name argv dir expected-exits]
                 :or {expected-exits #{0}}}]
   (println "wm-workspace-gate: RUN" (clojure.core/name name))
@@ -552,6 +592,9 @@
     (some #{"--receipt-control"} args)
     (System/exit (receipt-control!))
 
+    (some #{"--repository-scope-control"} args)
+    (System/exit (repository-scope-control!))
+
     (some #{"--last-receipt"} args)
     (let [status (gate-receipt-status gate-receipt-path)]
       (println "wm-workspace-gate: LAST-RECEIPT" (pr-str status))
@@ -563,18 +606,21 @@
         writer-fence-id (System/getenv "FUTON_WRITER_FENCE_ID")
         writer-fence-evidence (System/getenv "FUTON_WRITER_FENCE_EVIDENCE")
         ;; JSON is part of the bounded receipt's consumable output. Readiness
-        ;; must compare all four repositories, not only the wrapper's cwd.
+        ;; must compare all five repositories, not only the wrapper's cwd.
         _ (println "wm-workspace-gate: PROVENANCE" (json/generate-string basis-start))
         inventory (inventory-result)
         _ (println "wm-workspace-gate: INVENTORY" (pr-str inventory))
-        results (into [inventory] (map run-one (concat (commands) (control-commands))))
+        repository-scope (repository-scope-result)
+        _ (println "wm-workspace-gate: REPOSITORY-SCOPE" (pr-str repository-scope))
+        results (into [inventory repository-scope]
+                      (map run-one (concat (commands) (control-commands))))
         failures (filterv #(not= 0 (:exit %)) results)
         basis-finish (provenance)
         movement (print-provenance-result! basis-start basis-finish)
         gate-finished-at (str (java.time.Instant/now))
         event-claim (gate-event-claim movement writer-fence-id writer-fence-evidence
                                       gate-started-at gate-finished-at)
-        summary {:checks (count results) :executable-checks (dec (count results)) :failures failures
+        summary {:checks (count results) :executable-checks (- (count results) 2) :failures failures
                  :basis-status (:status movement)
                  :basis-repositories (:repositories movement)
                  :event-claim event-claim

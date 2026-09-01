@@ -2,7 +2,7 @@
 
 Every completed workspace-gate invocation now atomically replaces one ignored
 runtime artifact: `data/wm-workspace-gate/latest.edn`. It records start/finish
-timestamps, all four start and finish repository bases, basis status, check
+timestamps, all five start and finish repository bases, basis status, check
 counts, verdict, failures, and a typed Futon2 certified commit. A stable but
 dirty/unreadable basis or a moving basis cannot acquire a present certified
 commit.
@@ -22,6 +22,6 @@ The receipt is explicitly class-10-limited:
 does not make the gate an independent certifier of itself.
 
 The artifact adds information Git history lacks: exact gate population and
-failures, the four-repository observation sandwich, dirtiness, and verdict.
+failures, the five-repository observation sandwich, dirtiness, and verdict.
 Atomic round-trip, positive reader, and malformed-receipt controls pass.
 Clj-kondo and inventory are clean. No full gate was run for this focused packet.

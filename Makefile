@@ -9,7 +9,7 @@
 ci:
 	clojure -T:build ci
 
-# Four-repository reviewer boundary. Missing sibling repositories are loud
+# Five-repository reviewer boundary. Missing sibling repositories are loud
 # failures in the checks; they are never silently skipped.
 workspace-gate:
 	@python3 scripts/run_workspace_gate_bounded.py; c=$$?; \
