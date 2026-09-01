@@ -25,4 +25,22 @@
               {:repo :futon2 :path "writer_fence_capability.clj"}
               {:repo :futon3c :path "scripts/bounded_test_job.py"}
               {:repo :futon3c :path "scripts/bg.py"}
-              {:repo :p4ng :path "empirics-futon/gen_workflow_report.bb"}]}]}
+              {:repo :p4ng :path "empirics-futon/gen_workflow_report.bb"}]}
+  {:artifact "holes/labs/wm-contract/C411-unmarked-declared-boundary-census.md"
+   :kind :census
+   :basis
+   {:futon2 {:commit "771885b0a12ccd1f5f244298549ade03fbb4212a"
+             :provenance :author-recorded
+             :correspondence :verified}}
+   :subjects
+   [{:repo :futon2 :path "checks/repository-census-bases.edn"}
+    {:repo :futon2 :path "scripts/wm_quiet_run_state.py"}
+    {:repo :futon2 :path "checks/q_interface_completeness_check.clj"}
+    {:repo :futon2 :path "checks/preference_stack_witness_shape_check.clj"}
+    {:repo :futon2 :path "checks/empty_subject_acceptance_lint.py"}
+    {:repo :futon2 :path "checks/live_artifact_format_boundary_lint.py"}
+    {:repo :futon2 :path "checks/absent_is_loud_lint.clj"}
+    {:repo :futon2 :path "checks/preemptive_repair_lint.clj"}
+    {:repo :futon2 :path "checks/repository_census_basis_check.clj"}
+    {:repo :futon2 :path "checks/wm_workspace_gate.clj"}
+    {:repo :futon2 :path "scripts/mutable_verdict_population.bb"}]}]}
