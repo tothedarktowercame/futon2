@@ -34,7 +34,7 @@ GENERATORS = {
 RULES = [
     {"generator": "live-topology", "id": "classification-counts-before-format",
      "unsafe": r"classification-counts\s+:transition",
-     "proof": r"every\?\s+some\?[^\n]*classification-counts",
+     "proof-kind": "clojure-map-vocabulary-before-format",
      "detail": "classification counts reach %d without required-key/non-nil proof"},
     {"generator": "lane-campaign", "id": "blank-active-identities",
      "unsafe": r"active\?\s+\(every\?\s+some\?\s+values\)",
@@ -54,7 +54,8 @@ RULES = [
      "detail": "unknown/missing pointer status disappears from both columns"},
     {"generator": "war-room", "id": "default-zero-and-null-metrics",
      "unsafe": r"\(get\s+st\s+:repaired\s+0\)",
-     "proof": r"repair-status-population-valid",
+     "proof-kind": "clojure-membership-before-aggregation",
+     "collection": "insts", "key": "status",
      "detail": "missing categories default to zero and unchecked workflow numerics reach %d"},
     {"generator": "workflow-report", "id": "missing-lane-to-idle",
      "unsafe": r"\(get\s+holdings\s+lane\)",
@@ -67,6 +68,96 @@ def line_for(text: str, match: re.Match[str]) -> int:
     return text.count("\n", 0, match.start()) + 1
 
 
+def without_comments(text: str) -> str:
+    """Remove line comments so declarations of proof cannot satisfy the lint."""
+    return "\n".join(line.split(";", 1)[0] for line in text.splitlines())
+
+
+def balanced_form(text: str, start: int) -> str | None:
+    """Return one balanced Clojure form, ignoring strings sufficiently for lint input."""
+    depth, quoted, escaped = 0, False, False
+    for pos in range(start, len(text)):
+        char = text[pos]
+        if quoted:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                quoted = False
+            continue
+        if char == '"':
+            quoted = True
+        elif char == "(":
+            depth += 1
+        elif char == ")":
+            depth -= 1
+            if depth == 0:
+                return text[start:pos + 1]
+    return None
+
+
+def clojure_membership_before_aggregation(text: str, collection: str, key: str) -> bool:
+    """Recognise a bounded executable categorical-population proof.
+
+    The exact collection/key later aggregated must first be traversed, every
+    value must be checked against a literal finite set, and rejection must be
+    loud in the same doseq form. This intentionally does not infer helper or
+    interprocedural validation.
+    """
+    code = without_comments(text)
+    aggregate = re.search(
+        rf"\(frequencies\s+\(map\s+:{re.escape(key)}\s+{re.escape(collection)}\)\)",
+        code,
+    )
+    if not aggregate:
+        return False
+    prefix = code[:aggregate.start()]
+    starts = list(re.finditer(
+        rf"\(doseq\s+\[([\w-]+)\s+{re.escape(collection)}\]", prefix
+    ))
+    for start_match in reversed(starts):
+        form = balanced_form(prefix, start_match.start())
+        if not form:
+            continue
+        var = re.escape(start_match.group(1))
+        membership = re.search(
+            rf"\(when-not\s+\(\#\{{[^}}]+\}}\s+\(:{re.escape(key)}\s+{var}\)\)",
+            form,
+            re.S,
+        )
+        loud = re.search(r"\((?:die|throw)\b", form)
+        if membership and loud:
+            return True
+    return False
+
+
+def rule_proved(rule: dict, text: str) -> bool:
+    if rule.get("proof-kind") == "clojure-map-vocabulary-before-format":
+        code = without_comments(text)
+        format_pos = code.find("(get-in org [:classification-counts :transition])")
+        if format_pos < 0:
+            return False
+        prefix = code[:format_pos]
+        # Bounded recognition of an alias for the exact source map followed by
+        # presence, numeric type, and closed-vocabulary rejection. All four
+        # failures must be loud before the formatter.
+        required = [
+            r"\[counts\s+\(:classification-counts\s+org\)\]",
+            r"\(when-not\s+\(map\?\s+counts\)",
+            r"\(when-not\s+\(every\?\s+some\?\s+\(map\s+counts\s+classification-keys\)\)",
+            r"\(when-not\s+\(every\?\s+integer\?\s+\(map\s+counts\s+classification-keys\)\)",
+            r"\(remove\s+\(set\s+classification-keys\)\s+\(keys\s+counts\)\)",
+        ]
+        return all(re.search(pattern, prefix, re.S) for pattern in required) and \
+            len(re.findall(r"\(System/exit\s+1\)", prefix)) >= 4
+    if rule.get("proof-kind") == "clojure-membership-before-aggregation":
+        return clojure_membership_before_aggregation(
+            text, rule["collection"], rule["key"]
+        )
+    return bool(re.search(rule["proof"], without_comments(text), re.S | re.I))
+
+
 def lint() -> dict:
     findings, unavailable = [], []
     for name, path in GENERATORS.items():
@@ -77,12 +168,13 @@ def lint() -> dict:
             continue
         for rule in (r for r in RULES if r["generator"] == name):
             unsafe = re.search(rule["unsafe"], text, re.S)
-            proved = re.search(rule["proof"], text, re.S | re.I)
+            proved = rule_proved(rule, text)
             if unsafe and not proved:
                 findings.append({"generator": name, "path": str(path),
                                  "line": line_for(text, unsafe),
                                  "finding": rule["id"], "detail": rule["detail"],
-                                 "proof-required": rule["proof"]})
+                                 "proof-required": (rule.get("proof") or
+                                                    rule.get("proof-kind"))})
     return {"schema": "live-artifact-format-boundary-lint/v1",
             "generators": len(GENERATORS), "findings": findings,
             "finding-count": len(findings), "unavailable": unavailable,
@@ -117,6 +209,45 @@ def negative_control() -> int:
     result = {"unsafe-flagged": format_probe(unsafe) == ["count"],
               "marker-only-flagged": format_probe(marker_only) == ["count"],
               "proved-safe-not-flagged": format_probe(safe) == []}
+    unproved_population = """
+(def insts source)
+;; repair-status-population-valid
+(def st (frequencies (map :status insts)))
+(get st :repaired 0)
+"""
+    proved_population = """
+(def insts source)
+(doseq [i insts]
+  (when-not (#{:repaired :partial :open} (:status i))
+    (die "unknown status")))
+(def st (frequencies (map :status insts)))
+(get st :repaired 0)
+"""
+    wrong_collection = """
+(doseq [i other-insts]
+  (when-not (#{:repaired :partial :open} (:status i)) (die "bad")))
+(def st (frequencies (map :status insts)))
+(get st :repaired 0)
+"""
+    topology_marker_only = """
+;; FORMAT-PROOF classification-counts
+(get-in org [:classification-counts :transition])
+"""
+    result.update({
+        "population-marker-only-flagged":
+            not clojure_membership_before_aggregation(unproved_population, "insts", "status"),
+        "membership-proof-accepted":
+            clojure_membership_before_aggregation(proved_population, "insts", "status"),
+        "wrong-collection-proof-rejected":
+            not clojure_membership_before_aggregation(wrong_collection, "insts", "status"),
+        "current-war-room-proof-accepted":
+            clojure_membership_before_aggregation(
+                GENERATORS["war-room"].read_text(), "insts", "status"),
+        "current-live-topology-proof-accepted":
+            rule_proved(RULES[0], GENERATORS["live-topology"].read_text()),
+        "topology-marker-only-rejected":
+            not rule_proved(RULES[0], topology_marker_only),
+    })
     passed = all(result.values())
     print(json.dumps(result, sort_keys=True))
     print("live-artifact-format-boundary-lint:", "PASS" if passed else "FAIL",
