@@ -15,6 +15,14 @@ claim it could honestly support. Presented as “the ledger is externally
 anchored,” it would be theatre: a stronger-looking token for a much narrower
 fact.
 
+Authority classification: `:authority/type :externally-administered-unsealed`,
+with
+`:independent-canonical-head? false`. The evidence writer is `joe`; the
+storage owner is `root/systemd-journal`; root is retention administrator and
+can rotate, vacuum, delete, or replace storage; and there is no current
+quiet-run canonical-head selector or verifier over journal entries. This is
+the six-role C417 record, not a sealed tier.
+
 ## What a retained anchor could prove
 
 Assume every transition records the logical ledger identity, ordinal,

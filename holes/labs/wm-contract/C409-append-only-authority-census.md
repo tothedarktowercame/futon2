@@ -21,6 +21,18 @@ That distinction matters:
 - if it means permanent, sealed, independently verifiable history, **nothing
   assessed qualifies**.
 
+In the shared C417 authority vocabulary, the current ledger is
+`:authority/type :self-owned`: `joe` is evidence writer, canonical-head
+selector, storage owner, retention administrator, rollback-capable principal,
+and the principal running the verifier. Its internally verified hash chain
+therefore composes with `:independent-canonical-head? false`; derivation and
+authority give different answers.
+
+The system journal is `:authority/type :externally-administered-unsealed`:
+`joe` submits messages, `root/systemd-journal` owns storage, root administers
+retention and can rotate/delete/replace it, and no quiet-run canonical-head
+selector or verifier consumes it. The complete six-role records are in C417.
+
 ## Candidate assessment
 
 | candidate | durable? | can the artifact writer rewrite/delete the authority? | disposition |

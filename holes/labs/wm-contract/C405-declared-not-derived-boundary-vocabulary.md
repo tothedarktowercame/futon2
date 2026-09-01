@@ -5,6 +5,10 @@ Date: 2026-09-01
 Three existing records need one narrow vocabulary for an honest pin boundary.
 This record does not propose a general theory of evidence boundaries.
 
+This is the **derivation axis only**. C417 defines the orthogonal authority
+axis: who writes, selects, stores, retains, can roll back, and verifies the
+authority. Neither axis upgrades the other.
+
 ```clojure
 {:boundary/type :declared-not-derived
  :subject <the boundary being described>
