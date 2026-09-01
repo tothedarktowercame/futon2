@@ -19,7 +19,9 @@
   (is (rejected? (assoc-in baseline [:adapter :mappings] [])) "empty adapter")
   (is (rejected? (dissoc baseline :adapter)) "missing adapter")
   (is (rejected? (assoc-in baseline [:adapter :mappings 0 :lean-field]
-                           "unrelatedField")) "unbound Lean field"))
+                           "unrelatedField")) "unbound Lean field")
+  (is (rejected? (dissoc baseline :dependency-closure))
+      "unrecorded dependency-closure boundary"))
 
 (deftest reproducible-failure-is-not-verification
   (is (rejected? (assoc-in baseline [:result :exit] 1)))

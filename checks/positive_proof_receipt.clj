@@ -89,6 +89,7 @@
         names (set (map :name declarations))
         adapter (:adapter receipt)
         mappings (:mappings adapter)
+        closure (:dependency-closure receipt)
         retained-text
         (str/join "\n"
                   (for [{:keys [repo path declarations]} basis
@@ -99,6 +100,10 @@
     (and (vector? basis) (<= 2 (count basis))
          (every? #(and (seq (:repo %)) (seq (:path %)) (seq (:declarations %))) basis)
          (contains? names theorem-name)
+         (= {:mode :author-declared-source-slices
+             :machine-complete false
+             :reason :lean-transitive-closure-not-content-pinned}
+            closure)
          (= :edn-fields-to-lean-declaration/v1 (:kind adapter))
          (contains? names (:lean-declaration adapter))
          (vector? mappings) (seq mappings)
