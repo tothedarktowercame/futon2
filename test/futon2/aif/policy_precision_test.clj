@@ -18,20 +18,28 @@
    reader has to be able to see that without a git archaeology detour."
   "039b0b8")
 
+(def ^:private previous-converge-beta-fn
+  "The solver as it stood at `pre-log-prior-revision`, loaded from git into a
+   parallel namespace. Loaded ONCE: the identity control below calls it over
+   several input classes, and re-shelling out per call made the control slow
+   enough to discourage adding classes to it."
+  (delay
+    (let [{:keys [exit out err]}
+          (shell/sh "git" "show"
+                    (str pre-log-prior-revision
+                         ":src/futon2/aif/policy_precision.clj"))]
+      (when-not (zero? exit)
+        (throw (ex-info "could not load pre-log-prior solver" {:err err})))
+      (load-string
+       (str/replace-first out
+                          "(ns futon2.aif.policy-precision"
+                          "(ns futon2.aif.policy-precision-before-log-priors"))
+      (ns-resolve 'futon2.aif.policy-precision-before-log-priors
+                  'converge-beta))))
+
 (defn- previous-converge-beta
   [beta-prior g-values f-pi-values opts]
-  (let [{:keys [exit out err]}
-        (shell/sh "git" "show"
-                  (str pre-log-prior-revision
-                       ":src/futon2/aif/policy_precision.clj"))]
-    (when-not (zero? exit)
-      (throw (ex-info "could not load pre-log-prior solver" {:err err})))
-    (load-string
-     (str/replace-first out
-                        "(ns futon2.aif.policy-precision"
-                        "(ns futon2.aif.policy-precision-before-log-priors"))
-    ((ns-resolve 'futon2.aif.policy-precision-before-log-priors 'converge-beta)
-     beta-prior g-values f-pi-values opts)))
+  (@previous-converge-beta-fn beta-prior g-values f-pi-values opts))
 
 (defn- close?
   [x y tolerance]
@@ -80,15 +88,42 @@
     (is (= 110 (count (:pi-0 result))))))
 
 (deftest default-path-is-bit-identical-to-pre-log-prior-solver-test
+  ;; The one control that can catch this change moving a caller that did not ask
+  ;; for ln E, so it is run over several input classes rather than one: the two
+  ;; solvers, a bound cut short, a bracket that does not straddle the root, and
+  ;; a two-candidate field. A single-input identity check would pass while any
+  ;; of the other branches drifted (claude-20, owner review 2026-09-01).
   (let [g-values (mapv #(+ 0.25 (* 0.004 %)) (range 110))
         f-pi-values (mapv #(+ -18.0 (* 0.03 (mod % 17))) (range 110))
-        before (previous-converge-beta 1.0 g-values f-pi-values {})
-        after (policy-precision/converge-beta 1.0 g-values f-pi-values {})]
-    (is (= before (dissoc after :log-prior-placement))
-        "all pre-existing keys and numeric values are bit-identical")
-    (is (= :none (:log-prior-placement after)))
-    (is (= (conj (set (keys before)) :log-prior-placement)
-           (set (keys after))))))
+        classes [["bisect on a field-shaped input"
+                  [1.0 g-values f-pi-values {}]]
+                 ["the gradient solver"
+                  [1.0 g-values f-pi-values
+                   {:solver :gradient :max-iterations 200000}]]
+                 ["a bound cut short (:hit-bound? true)"
+                  [1.0 g-values f-pi-values {:max-iterations 3}]]
+                 ["an unbracketed root (:bracketed? false)"
+                  [1.0 [0.0 1.0] [0.0 0.0]
+                   {:solver :bisect :beta-floor 10.0 :beta-ceiling 1.0e6}]]
+                 ["a two-candidate field"
+                  [0.5 [0.2 1.7] [-1.3 -0.2] {}]]]]
+    (doseq [[label [beta-prior g f opts]] classes]
+      (let [before (previous-converge-beta beta-prior g f opts)
+            after (policy-precision/converge-beta beta-prior g f opts)]
+        (is (= before (dissoc after :log-prior-placement))
+            (str "pre-existing keys and values are bit-identical: " label))
+        (is (= :none (:log-prior-placement after)) label)
+        (is (= (conj (set (keys before)) :log-prior-placement)
+               (set (keys after)))
+            (str "exactly one key was added: " label))))
+    (testing "the classes are distinct states, not five runs of the same one"
+      (let [results (mapv (fn [[_ [bp g f opts]]]
+                            (policy-precision/converge-beta bp g f opts))
+                          classes)]
+        (is (some :converged? results))
+        (is (some (comp false? :converged?) results))
+        (is (some :hit-bound? results))
+        (is (some (comp false? :bracketed?) results))))))
 
 (deftest uniform-log-prior-is-a-no-op-test
   (let [g-values [0.1 0.6 1.4 2.0]
@@ -148,19 +183,24 @@
                 tolerance))))))
 
 (deftest gradient-and-bisect-agree-with-log-priors-test
+  ;; Both placements, not just :pi -- :both is the SPM code form and the likelier
+  ;; candidate for the live wiring, so it is the one that must not be the arm
+  ;; only one solver implements (claude-20, owner review 2026-09-01).
   (let [g-values (mapv #(+ 0.25 (* 0.004 %)) (range 110))
         f-pi-values (mapv #(+ -18.0 (* 0.03 (mod % 17))) (range 110))
-        log-priors (mapv #(* 0.03 (mod (* 7 %) 23)) (range 110))
-        opts {:log-priors log-priors :log-prior-placement :pi
-              :max-iterations 200000}
-        bisect (policy-precision/converge-beta
-                1.0 g-values f-pi-values (assoc opts :solver :bisect))
-        gradient (policy-precision/converge-beta
-                  1.0 g-values f-pi-values (assoc opts :solver :gradient))]
-    (is (:converged? bisect))
-    (is (:converged? gradient))
-    (is (close? (:beta-posterior bisect)
-                (:beta-posterior gradient) 1.0e-6))))
+        log-priors (mapv #(* 0.03 (mod (* 7 %) 23)) (range 110))]
+    (doseq [placement [:pi :both]]
+      (let [opts {:log-priors log-priors :log-prior-placement placement
+                  :max-iterations 200000}
+            bisect (policy-precision/converge-beta
+                    1.0 g-values f-pi-values (assoc opts :solver :bisect))
+            gradient (policy-precision/converge-beta
+                      1.0 g-values f-pi-values (assoc opts :solver :gradient))]
+        (is (:converged? bisect) (str "bisect converged under " placement))
+        (is (:converged? gradient) (str "gradient converged under " placement))
+        (is (close? (:beta-posterior bisect)
+                    (:beta-posterior gradient) 1.0e-6)
+            (str "solvers disagree under " placement))))))
 
 (deftest log-prior-validation-is-loud-test
   (let [solve #(policy-precision/converge-beta 1.0 [0.0 1.0] [0.0 0.5] %)]
