@@ -6,7 +6,7 @@
  [{:lane :wm-nouns
    :holding :C282-next-glossary-term, :dispatched-at "2026-09-01T00:24:34Z", :job-id "invoke-1788222243161-6291-21318a2c", :expected-by "2026-09-01T01:09:34Z"}
   {:lane :wm-verbs
-   :holding :C280-full-suites, :dispatched-at "2026-09-01T00:21:02Z", :job-id "invoke-1788222058343-6285-4aba7aad", :expected-by "2026-09-01T01:06:02Z"}
+   :holding :C285-generator-format-boundary, :dispatched-at "2026-09-01T00:29:16Z", :job-id "invoke-1788222551922-6299-6c8525c3", :expected-by "2026-09-01T01:14:16Z"}
   {:lane :wm-organization
    :holding :C283-checklist-dry-run, :dispatched-at "2026-09-01T00:24:34Z", :job-id "invoke-1788222269084-6292-61ddce3e", :expected-by "2026-09-01T01:09:34Z"}
   {:lane :wm-evidence
