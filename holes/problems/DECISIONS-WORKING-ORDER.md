@@ -126,6 +126,23 @@ this order, because the order is the point:
 
 Joe reads one brief and says whether the format works before I write seven more.
 
+## HELD 2026-09-01 — the decision queue is paused
+
+Joe, after decision 5: *"discussions about systemd are far out of scope! we
+need to get this sorted out… i suggest we hold further decisions until that is
+done."*
+
+The queue stops at five of nine. The remaining four (O20, O2, O6, O7) are not
+withdrawn, they are waiting. The work in front is
+`holes/TN-edge-review-aif-wiring.md` — claude-1's review of the War Machine's
+wiring against the equations that force it, which is the same subject as the
+3-of-21 edge observation in C450 and is squarely on the validation side of S31.
+
+Its four queries are dispatched as four discovery packets: C451 (3a, six drawn
+edges with no equation across them), C452 (3b, ten theory edges not drawn),
+C453 (3d, citations), and C454 (3c, the eight free choices) once wm-organization
+finishes C448.
+
 ## Progress
 
 | Sitting | Decision | Outcome |
