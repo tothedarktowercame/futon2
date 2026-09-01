@@ -1,8 +1,9 @@
 #!/usr/bin/env bb
 (ns checks.prediction-error-witness
-  (:require [babashka.process :as p] [clojure.edn :as edn]))
+  (:require [babashka.process :as p] [checks.positive-proof-receipt :as receipt] [clojure.edn :as edn]))
 
 (def fixture-path "holes/labs/wm-contract/prediction-error-reference.edn")
+(def receipt-path "holes/labs/wm-contract/prediction-error-positive-receipt.edn")
 (def mathlib "/home/joe/code/mathlib4")
 (def expected
   {:schema :prediction-error-reference/v1
@@ -19,7 +20,8 @@
         sign-neg? (some #{"--negative-sign"} args)
         fixture (edn/read-string (slurp fixture-path))
         tested (if operand-neg? (assoc fixture :expected-error (:observation fixture)) fixture)
-        positive? (and (= expected fixture)
+        receipt-ok? (:pass? (receipt/validate (edn/read-string (slurp receipt-path))))
+        positive? (and receipt-ok? (= expected fixture)
                        (zero? (lean-exit "DarkTower/WarMachine/PredictionErrorWitness.lean")))
         rejected? (cond
                     operand-neg? (not= expected tested)

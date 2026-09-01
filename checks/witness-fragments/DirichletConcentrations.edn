@@ -1,6 +1,8 @@
 {:witnesses "DirichletConcentrations"
  :check {:repo "futon2" :path "checks/dirichlet_concentrations_witness.clj" :entrypoint "-main"}
  :fixture {:repo "futon2" :path "holes/labs/wm-contract/dirichlet-concentrations-reference.edn"}
+ :positive-evidence-limit :construction-or-projection-only
+ :positive-evidence-scope "Establishes carrier construction only; a future source pin can prevent silent weakening but cannot establish downstream behaviour."
  :expected-rejection {:mode :lean-guard-msgs :controls
                       [{:fixture "DarkTower/WarMachine/DirichletConcentrationsEmptyNegative.lean" :claim :concentrations-are-nonempty}
                        {:fixture "DarkTower/WarMachine/DirichletConcentrationsZeroNegative.lean" :claim :concentrations-exclude-zero}

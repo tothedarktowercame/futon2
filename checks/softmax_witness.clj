@@ -1,8 +1,9 @@
 #!/usr/bin/env bb
 (ns checks.softmax-witness
-  (:require [babashka.process :as p] [clojure.edn :as edn]))
+  (:require [babashka.process :as p] [checks.positive-proof-receipt :as receipt] [clojure.edn :as edn]))
 
 (def fixture-path "holes/labs/wm-contract/softmax-reference.edn")
+(def receipt-path "holes/labs/wm-contract/softmax-positive-receipt.edn")
 (def mathlib "/home/joe/code/mathlib4")
 (def expected
   {:schema :softmax-reference/v1
@@ -29,7 +30,8 @@
                  order-neg? (assoc fixture :probabilities {:lower [1 9] :higher [8 9]})
                  norm-neg? (assoc fixture :probabilities {:lower [1 1] :higher [1 8]})
                  :else fixture)
-        positive? (and (= expected fixture)
+        receipt-ok? (:pass? (receipt/validate (edn/read-string (slurp receipt-path))))
+        positive? (and receipt-ok? (= expected fixture)
                        (zero? (lean-exit "DarkTower/WarMachine/SoftmaxWitness.lean")))
         rejected? (cond
                     order-neg? (and (not= expected tested)

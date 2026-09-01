@@ -1,6 +1,8 @@
 {:witnesses "PreferenceDistribution"
  :check {:repo "futon2" :path "checks/preference_distribution_witness.clj" :entrypoint "-main"}
  :fixture {:repo "futon2" :path "holes/labs/wm-contract/preference-distribution-reference.edn"}
+ :positive-evidence-limit :construction-or-projection-only
+ :positive-evidence-scope "Establishes carrier construction or stored normalization only; a future source pin can prevent silent weakening but cannot establish downstream behaviour."
  :expected-rejection {:mode :lean-guard-msgs :controls
                       [{:fixture "DarkTower/WarMachine/PreferenceDistributionConditioningNegative.lean" :claim :preferences-are-unconditional}
                        {:fixture "DarkTower/WarMachine/PreferenceDistributionPragmaticCostNegative.lean" :claim :preference-distribution-is-not-pragmatic-cost}]}

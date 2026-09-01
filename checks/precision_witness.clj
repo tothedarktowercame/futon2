@@ -1,8 +1,9 @@
 #!/usr/bin/env bb
 (ns checks.precision-witness
-  (:require [babashka.process :as p] [clojure.edn :as edn]))
+  (:require [babashka.process :as p] [checks.positive-proof-receipt :as receipt] [clojure.edn :as edn]))
 
 (def fixture-path "holes/labs/wm-contract/precision-reference.edn")
+(def receipt-path "holes/labs/wm-contract/precision-positive-receipt.edn")
 (def mathlib "/home/joe/code/mathlib4")
 (def expected
   {:schema :precision-reference/v1
@@ -21,7 +22,8 @@
         type-neg? (some #{"--negative-type"} args)
         fixture (edn/read-string (slurp fixture-path))
         tested (if swap-neg? (assoc-in fixture [:swapped :expected-variational-F] 1) fixture)
-        positive? (and (= expected fixture)
+        receipt-ok? (:pass? (receipt/validate (edn/read-string (slurp receipt-path))))
+        positive? (and receipt-ok? (= expected fixture)
                        (zero? (lean-exit "DarkTower/WarMachine/PrecisionWitness.lean")))
         rejected? (cond
                     swap-neg? (not= expected tested)

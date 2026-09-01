@@ -1,15 +1,17 @@
 #!/usr/bin/env bb
 (ns checks.machine-vocabulary-witness
-  (:require [babashka.process :as p] [clojure.edn :as edn]))
+  (:require [babashka.process :as p] [checks.positive-proof-receipt :as receipt] [clojure.edn :as edn]))
 
 (def root "/home/joe/code/mathlib4")
 (def specs
   {:control ["holes/labs/wm-contract/control-vocabulary-reference.edn"
              :control-vocabulary-reference/v1 "ControlVocabularyNegative.lean"]
    :aliveness ["holes/labs/wm-contract/aliveness-reference.edn"
-               :aliveness-reference/v1 "AlivenessNegative.lean"]
+               :aliveness-reference/v1 "AlivenessNegative.lean"
+               "holes/labs/wm-contract/aliveness-positive-receipt.edn"]
    :act-gate ["holes/labs/wm-contract/act-gate-reference.edn"
-              :act-gate-reference/v1 "ActGateNegative.lean"]
+              :act-gate-reference/v1 "ActGateNegative.lean"
+              "holes/labs/wm-contract/act-gate-positive-receipt.edn"]
    :cohort ["holes/labs/wm-contract/cohort-reference.edn"
             :cohort-reference/v1 "CohortNegative.lean"]})
 (defn lean [f] (:exit (p/shell {:dir root :continue true :out :string :err :string}
@@ -17,10 +19,12 @@
 (defn -main [& args]
   (let [term (keyword (or (second (drop-while #(not= % "--term") args)) ""))
         neg? (some #((set ["--negative" "--negative-control"]) %) args)
-        [path schema negative] (get specs term)
+        [path schema negative receipt-path] (get specs term)
         fixture (when path (edn/read-string (slurp path)))
         shape? (= schema (:schema fixture))
-        ok? (and shape? (zero? (lean "MachineVocabularyWitness.lean"))
+        receipt-ok? (or (nil? receipt-path)
+                        (:pass? (receipt/validate (edn/read-string (slurp receipt-path)))))
+        ok? (and receipt-ok? shape? (zero? (lean "MachineVocabularyWitness.lean"))
                  (or (not neg?) (zero? (lean negative))))
         exit (if ok? 0 (if neg? 2 1))]
     (println "machine-vocabulary-witness" term

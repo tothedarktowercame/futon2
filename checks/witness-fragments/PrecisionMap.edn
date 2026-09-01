@@ -1,6 +1,7 @@
 {:witnesses "PrecisionMap"
  :check {:repo "futon2" :path "checks/precision_witness.clj" :entrypoint "-main"}
  :fixture {:repo "futon2" :path "holes/labs/wm-contract/precision-reference.edn"}
+ :positive-proof-receipt {:repo "futon2" :path "holes/labs/wm-contract/precision-positive-receipt.edn" :schema :PositiveLeanWitnessReceipt/v1}
  :expected-rejection {:mode :lean-guard-msgs :controls [{:fixture "DarkTower/WarMachine/PrecisionNegative.lean" :claim :precision-is-not-signed-error}]}
  :run-sha "ec4f5e866d3272479835153ec41c93967faa1268"
  :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a"

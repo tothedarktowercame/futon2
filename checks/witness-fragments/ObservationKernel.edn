@@ -1,6 +1,8 @@
 {:witnesses "observationKernel"
  :check {:repo "futon2" :path "checks/observation_kernel_witness.clj" :entrypoint "-main"}
  :fixture {:repo "futon2" :path "holes/labs/wm-contract/observation-kernel-reference.edn"}
+ :positive-evidence-limit :construction-or-projection-only
+ :positive-evidence-scope "Establishes carrier construction or stored normalization only; a future source pin can prevent silent weakening but cannot establish downstream behaviour."
  :run-sha "a33ba573c51b790d19e40a93df3bc84285e34475"
  :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a"
  :result :passed

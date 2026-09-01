@@ -1,6 +1,8 @@
 {:witnesses "PredictiveOutcomeKernel"
  :check {:repo "futon2" :path "checks/predictive_outcome_kernel_witness.clj" :entrypoint "-main"}
  :fixture {:repo "futon2" :path "holes/labs/wm-contract/predictive-outcome-kernel-reference.edn"}
+ :positive-evidence-limit :construction-or-projection-only
+ :positive-evidence-scope "Establishes carrier construction or stored normalization only; a future source pin can prevent silent weakening but cannot establish downstream behaviour."
  :expected-rejection {:mode :lean-guard-msgs :controls
                       [{:fixture "DarkTower/WarMachine/PredictiveOutcomeKernelUnconditionalNegative.lean" :claim :predictive-outcomes-are-policy-conditioned}
                        {:fixture "DarkTower/WarMachine/PredictiveOutcomeKernelSoftmaxNegative.lean" :claim :outcome-prediction-is-not-policy-posterior}]}

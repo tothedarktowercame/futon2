@@ -1,6 +1,7 @@
 {:witnesses "predictionError"
  :check {:repo "futon2" :path "checks/prediction_error_witness.clj" :entrypoint "-main"}
  :fixture {:repo "futon2" :path "holes/labs/wm-contract/prediction-error-reference.edn"}
+ :positive-proof-receipt {:repo "futon2" :path "holes/labs/wm-contract/prediction-error-positive-receipt.edn" :schema :PositiveLeanWitnessReceipt/v1}
  :expected-rejection {:mode :lean-guard-msgs :controls [{:fixture "DarkTower/WarMachine/PredictionErrorNegative.lean" :claim :prediction-error-has-observation-minus-prediction-sign}]}
  :run-sha "478cacfa0fa2221b4b83a0c04c925132f62f20ef"
  :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a"
