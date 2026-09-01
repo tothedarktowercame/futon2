@@ -8,6 +8,6 @@
   {:lane :wm-verbs
    :holding :C307-substrate-byte-contract, :dispatched-at "2026-09-01T00:57:33Z", :job-id "invoke-1788224224061-6354-14c1b537", :expected-by "2026-09-01T01:42:33Z"}
   {:lane :wm-organization
-   :holding :C305-writer-fence, :dispatched-at "2026-09-01T00:54:49Z", :job-id "invoke-1788224057580-6349-f3c4c81f", :expected-by "2026-09-01T01:39:49Z"}
+   :holding :C309-writer-enumeration, :dispatched-at "2026-09-01T00:58:38Z", :job-id "invoke-1788224314585-6356-49e69563", :expected-by "2026-09-01T01:43:38Z"}
   {:lane :wm-evidence
    :holding :C308-eight-unconverted, :dispatched-at "2026-09-01T00:57:33Z", :job-id "invoke-1788224249517-6355-bb03551e", :expected-by "2026-09-01T01:42:33Z"}]}
