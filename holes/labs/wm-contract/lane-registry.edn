@@ -4,10 +4,10 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C405-declared-boundary-vocabulary, :dispatched-at "2026-09-01T02:51:27Z", :job-id "invoke-1788231083687-6547-4577948f", :expected-by "2026-09-01T03:36:27Z"}
+   :holding :C411-unmarked-boundary-census, :dispatched-at "2026-09-01T02:55:35Z", :job-id "invoke-1788231330813-6557-e4857445", :expected-by "2026-09-01T03:40:35Z"}
   {:lane :wm-verbs
    :holding :C408-reconstructed-basis-admissibility, :dispatched-at "2026-09-01T02:54:01Z", :job-id "invoke-1788231233082-6551-7cb62e5c", :expected-by "2026-09-01T03:39:01Z"}
   {:lane :wm-organization
-   :holding :C402-certified-without-a-run, :dispatched-at "2026-09-01T02:49:55Z", :job-id "invoke-1788230982824-6544-01912120", :expected-by "2026-09-01T03:34:55Z"}
+   :holding :C410-bind-tested-job-to-attempt, :dispatched-at "2026-09-01T02:55:35Z", :job-id "invoke-1788231326203-6555-80adab9c", :expected-by "2026-09-01T03:40:35Z"}
   {:lane :wm-evidence
    :holding :C409-append-only-authority-survey, :dispatched-at "2026-09-01T02:54:01Z", :job-id "invoke-1788231237155-6552-3bc356eb", :expected-by "2026-09-01T03:39:01Z"}]}
