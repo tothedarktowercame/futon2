@@ -10,14 +10,21 @@
 (defn report-only-commands [commands]
   (filterv #(contains? (set (:expected-exits %)) 3) commands))
 
-(defn command-path [{:keys [argv]}]
+(defn command-path
+  "The script a command runs.  Returns nil when the argv names no .py/.clj
+   script -- a .bb or .sh report-only command is not a hypothetical, and
+   returning nil here used to reach str/includes? and throw a bare NPE, which
+   named the guard rather than the command it could not resolve."
+  [{:keys [argv]}]
   (first (filter #(re-find #"\.(?:py|clj)$" %) argv)))
 
 (defn findings
   ([commands files] (findings commands files false))
   ([commands files inject-direct?]
    (let [declared (report-only-commands commands)
-         paths (mapv command-path declared)
+         resolved (mapv (juxt :name command-path) declared)
+         unresolvable (filterv (comp nil? second) resolved)
+         paths (filterv some? (mapv second resolved))
          make-text (str (get files makefile "")
                         (when inject-direct?
                           (str "\nunsafe:\n\tpython3 " (first paths) " --report\n")))
@@ -27,6 +34,10 @@
       (concat
        (when (empty? declared)
          [{:reason :report-only-set-empty}])
+       ;; Fail closed, but say which command could not be resolved.  A crossing
+       ;; check that cannot locate a command's script has not cleared it.
+       (for [[name _] unresolvable]
+         {:reason :report-only-command-path-unresolvable :command name})
        (for [command declared
              :when (not= #{0 3} (set (:expected-exits command)))]
          {:reason :invalid-report-only-exits :command (:name command)})

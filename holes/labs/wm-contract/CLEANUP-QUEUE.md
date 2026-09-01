@@ -80,3 +80,44 @@ commit under review and read at that commit, not at `HEAD`.
 
 **Both C385 exceptions are now closed.** With C389 (`fe698f3`) amending C284's prose, **both full suites are
 green**: Futon2 CI exit 0, Futon3 248 tests / 1,518 assertions, zero failures.
+
+## C397 — owner review of C390; fixed the guard's unresolvable-path crash (my fix)
+
+**Gated C390 (`c9f71ff`) with my own fixtures rather than its self-test**, because a guard that cannot fail is
+the defect class this campaign has been auditing others for.
+
+**Its self-test is real.** `--negative-control` injects a Make target invoking a report-only command and
+requires rejection; it exits 2 if detection silently stops working. **Shipped positive: 0 findings, exit 0.
+Control: rejects, exit 0.**
+
+**Fixtures I wrote, against synthetic file text (no shared file mutated):**
+
+| exposure | result |
+|---|---|
+| clean Makefile | not caught (correct) |
+| direct `python3 <path>` in a recipe | **CAUGHT** |
+| indirect via Make variable `P=<path>` | **CAUGHT** — the literal path is in the file text |
+| indirect via a wrapper `.sh` | **not caught** |
+
+**The wrapper gap is real and not live.** Both report-only commands
+(`live_artifact_format_boundary_lint.py`, `empty_subject_acceptance_lint.py`) are invoked **only** from
+`checks/wm_workspace_gate.clj`, which is exactly where exit 3 is understood. C390's own claim is *"direct
+exposure"*, so behaviour matches the claim.
+
+**`:report-only-set-empty` deserves noting**: the guard reports a finding when the report-only set is empty, so
+it cannot pass by having nothing to check. **That is class 1 addressed in the design**, not bolted on.
+
+### What I fixed
+
+**A report-only command whose argv names no `.py`/`.clj` script made `command-path` return nil, which reached
+`str/includes?` and threw a bare `NullPointerException`.** Not hypothetical: this repo has `.bb` checks. It
+failed *closed*, which is the right direction, but the error named the guard rather than the command it could
+not resolve.
+
+**Repaired directly** (owner carve-out — I held the full context and re-belling would have cost a round trip
+for six lines): nil paths are now collected and reported as
+`:report-only-command-path-unresolvable :command <name>`. **A crossing check that cannot locate a command's
+script has not cleared it**, so it stays a finding.
+
+**Verified after the fix:** the `.bb` fixture now yields that finding instead of an NPE; shipped positive still
+exit 0; negative control still rejects; all four Make fixtures unchanged; clj-kondo 0 errors 0 warnings.
