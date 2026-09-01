@@ -36,6 +36,7 @@
 (def default-reviewer "codex-7")
 (def default-repair-reviewer "codex-1")
 (def default-phase-log "/home/joe/code/futon2/data/wm-full-loop-phases.edn.log")
+(def default-run-record-dir "/home/joe/code/futon2/holes/labs/wm-contract")
 (def default-agent-budget-ms (* 45 60 1000))
 (def semantic-epoch :full-loop-real-actuation-v6)
 (def required-checkpoints [:selection :construction :dispatch :build :adjudication])
@@ -209,6 +210,47 @@
   (let [bytes (.digest (MessageDigest/getInstance "SHA-256")
                        (.getBytes (pr-str x) "UTF-8"))]
     (apply str (map #(format "%02x" (bit-and 0xff %)) bytes))))
+
+(defn- route-node-str [node]
+  (cond
+    (keyword? node) (name node)
+    (symbol? node) (str node)
+    (string? node) node
+    :else (str node)))
+
+(defn- observed-route [tags]
+  (->> tags
+       (partition 2 1)
+       (mapv (fn [[from to]]
+               {:fromNode (route-node-str (:node from))
+                :toNode (route-node-str (:node to))
+                :via (:via to)
+                :at_ (:at to)}))))
+
+(defn- persist-run-record!
+  [raw-opts run-id started-at result]
+  (let [route (observed-route (:wm/route result))]
+    (if (seq route)
+      (let [dir (io/file (or (:run-record-dir raw-opts) default-run-record-dir))
+            target (io/file dir (str "tick-run-record-" run-id ".edn"))
+            tmp (io/file dir (str "." (.getName target) "." (UUID/randomUUID) ".tmp"))
+            record {:run/id run-id
+                    :click/id (:click-id raw-opts)
+                    :startedAt started-at
+                    :selectorSeam "live:validated-selection"
+                    :traceWritten (boolean (:trace-path result))
+                    :route route}]
+        (io/make-parents target)
+        (spit tmp (str (pr-str record) "\n"))
+        (java.nio.file.Files/move
+         (.toPath tmp) (.toPath target)
+         (into-array java.nio.file.StandardCopyOption
+                     [java.nio.file.StandardCopyOption/ATOMIC_MOVE
+                      java.nio.file.StandardCopyOption/REPLACE_EXISTING]))
+        {:run-record-status :present
+         :run-record (.getAbsolutePath target)})
+      {:run-record-status :absent
+       :run-record-absence :runner-did-not-observe-topology-route})))
 
 (defn- git [repo & args]
   (apply shell/sh "git" "-C" repo args))
@@ -2360,10 +2402,19 @@
                                             {:agent-turns @dispatched-turns}}
                                            (select-keys data [:witness]))
                                     {:kind :full-loop-outcome :attempt-id attempt-id})
+                       trace-path (get-in @checkpoints
+                                          [:construction :judgment :trace-path])
+                       run-route (cond-> (vec (:wm/route selection-judgment))
+                                   trace-path
+                                   (conj {:node :TRACE
+                                          :via "futon2.aif.trace/write-trace!"
+                                          :at (str (Instant/now))}))
                        result {:attempt-id attempt-id :opportunity-id opportunity-id
                                :outcome outcome :checkpoints @checkpoints
                                :morning-brief-ref brief-ref
                                :delivery-qa-ref delivery-qa-ref
+                               :wm/route run-route
+                               :trace-path trace-path
                                :data data}]
                    (when cohort? (cohort/close-attempt! attempt-id closed))
                    (if-let [path (:canary-out opts)]
@@ -3110,9 +3161,10 @@
   completion. Returning :cohort-complete avoids spurious repair obligations
   that would otherwise fire every time the scheduler probes a finished cohort."
   [raw-opts]
-  (let [run-id (or (:run-id raw-opts) (str (UUID/randomUUID)))]
-   (assoc
-    (try
+  (let [run-id (or (:run-id raw-opts) (str (UUID/randomUUID)))
+        started-at (str (Instant/now))
+        result
+        (try
       (run-opportunity-core! raw-opts)
     (catch Throwable e
       (when (= :delivery-qa-gate-failed
@@ -3205,5 +3257,7 @@
                     :error-data edata}}))))
       (finally
         (post-wm-status! (config raw-opts)
-                         {:source "wm-full-loop" :status "idle"})))
-    :run/id run-id)))
+                         {:source "wm-full-loop" :status "idle"})))]
+    (merge result
+           {:run/id run-id}
+           (persist-run-record! raw-opts run-id started-at result))))

@@ -1,6 +1,7 @@
 (ns futon2.aif.full-loop-runner-test
   (:require [babashka.http-client :as http]
             [cheshire.core :as json]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing use-fixtures]]
@@ -36,15 +37,31 @@
 (use-fixtures :each with-field-desk-stub without-live-wm-status)
 
 (deftest run-opportunity-surfaces-stable-run-identity
-  (with-redefs-fn
-    {#'runner/run-opportunity-core!
-     (fn [_] {:attempt-id "attempt-run-port" :outcome :grounded-change})}
-    (fn []
-      (let [assigned (runner/run-opportunity! {:run-id "run-assigned"})
-            generated (runner/run-opportunity! {})]
+  (let [record-dir (.getPath
+                    (.toFile
+                     (Files/createTempDirectory
+                      "wm-run-record-test-" (make-array FileAttribute 0))))]
+    (with-redefs-fn
+      {#'runner/run-opportunity-core!
+       (fn [_] {:attempt-id "attempt-run-port" :outcome :grounded-change
+                :trace-path "/tmp/observed-trace"
+                :wm/route [{:node :R20 :via "scan" :at "2026-08-31T00:00:00Z"}
+                           {:node :R12 :via "observe" :at "2026-08-31T00:00:01Z"}]})}
+      (fn []
+       (let [assigned (runner/run-opportunity! {:run-id "run-assigned"
+                                                :click-id "click-assigned"
+                                                :run-record-dir record-dir})
+            generated (runner/run-opportunity! {:run-record-dir record-dir})
+            record (edn/read-string (slurp (:run-record assigned)))]
         (is (= "run-assigned" (:run/id assigned)))
         (is (string? (:run/id generated)))
-        (is (not (str/blank? (:run/id generated))))))))
+        (is (not (str/blank? (:run/id generated))))
+        (is (= :present (:run-record-status assigned)))
+        (is (= "run-assigned" (:run/id record)))
+        (is (= "click-assigned" (:click/id record)))
+        (is (= [{:fromNode "R20" :toNode "R12"
+                 :via "observe" :at_ "2026-08-31T00:00:01Z"}]
+               (:route record))))))))
 
 (deftest production-repair-root-is-unreachable-during-runner-suite
   (is (not= hermetic/production-repair-root repair/default-root))
