@@ -1,7 +1,8 @@
 #!/usr/bin/env bb
 (ns checks.log-multivariate-beta-witness
   (:require [babashka.fs :as fs]
-            [babashka.process :as process]
+            [checks.lean-positive-witness :as lean-positive]
+            [checks.positive-proof-receipt :as receipt]
             [clojure.edn :as edn]))
 
 (def root (fs/cwd))
@@ -9,6 +10,7 @@
 (def fixture-path
   (fs/path root "holes/labs/wm-contract/log-multivariate-beta-reference.edn"))
 (def lean-witness "DarkTower/WarMachine/LogMultivariateBetaWitness.lean")
+(def receipt-path "holes/labs/wm-contract/log-multivariate-beta-positive-receipt.edn")
 
 (def independent-cases
   {[1 1] {:normaliser {:numerator 1 :denominator 1} :expected-log "0"}
@@ -25,9 +27,7 @@
                (:cases x))))
 
 (defn lean-pass? []
-  (zero? (:exit (process/shell {:dir mathlib-root :continue true
-                                :out :string :err :string}
-                               "lake" "env" "lean" lean-witness))))
+  (lean-positive/pass? mathlib-root lean-witness))
 
 (defn -main [& args]
   (let [negative? (some #{"--negative" "--negative-control"} args)
@@ -35,7 +35,8 @@
         tested (if negative?
                  (assoc-in fixture [:cases 1 :normaliser :denominator] 3)
                  fixture)
-        baseline-valid? (and (reference-valid? fixture) (lean-pass?))
+        receipt-ok? (:pass? (receipt/validate (edn/read-string (slurp receipt-path))))
+        baseline-valid? (and receipt-ok? (reference-valid? fixture) (lean-pass?))
         mutation-rejected? (not (reference-valid? tested))
         exit (cond
                (and negative? (not baseline-valid?)) 1
