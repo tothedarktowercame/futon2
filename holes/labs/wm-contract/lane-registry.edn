@@ -6,8 +6,8 @@
  [{:lane :wm-nouns
    :holding :C411-unmarked-boundary-census, :dispatched-at "2026-09-01T02:55:35Z", :job-id "invoke-1788231330813-6557-e4857445", :expected-by "2026-09-01T03:40:35Z"}
   {:lane :wm-verbs
-   :holding :C408-reconstructed-basis-admissibility, :dispatched-at "2026-09-01T02:54:01Z", :job-id "invoke-1788231233082-6551-7cb62e5c", :expected-by "2026-09-01T03:39:01Z"}
+   :holding :C414-self-anchored-evidence-class, :dispatched-at "2026-09-01T02:58:39Z", :job-id "invoke-1788231509741-6562-69dc8ef6", :expected-by "2026-09-01T03:43:39Z"}
   {:lane :wm-organization
-   :holding :C410-bind-tested-job-to-attempt, :dispatched-at "2026-09-01T02:55:35Z", :job-id "invoke-1788231326203-6555-80adab9c", :expected-by "2026-09-01T03:40:35Z"}
+   :holding :C413-empty-restoration-population, :dispatched-at "2026-09-01T02:58:39Z", :job-id "invoke-1788231505542-6561-a82d4069", :expected-by "2026-09-01T03:43:39Z"}
   {:lane :wm-evidence
-   :holding :C409-append-only-authority-survey, :dispatched-at "2026-09-01T02:54:01Z", :job-id "invoke-1788231237155-6552-3bc356eb", :expected-by "2026-09-01T03:39:01Z"}]}
+   :holding :C415-journal-anchoring-assessment, :dispatched-at "2026-09-01T02:58:39Z", :job-id "invoke-1788231514210-6563-f0e0b754", :expected-by "2026-09-01T03:43:39Z"}]}
