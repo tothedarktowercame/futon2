@@ -59,24 +59,24 @@ class RestoreTest(unittest.TestCase):
         states[sut.RUNNING_IDS[0]] = manifest["targets"][sut.RUNNING_IDS[0]]["pre-state"]
         rows = self.rows(manifest, [("resume-coordinator", sut.RUNNING_IDS[0])])
         with tempfile.TemporaryDirectory() as d, self.assertRaisesRegex(ValueError, "restored-state-without-inverse-attempt"):
-            sut.restore(manifest, rows, FakeBackend(states), Path(d) / "outcomes")
+            sut.restore(manifest, rows, FakeBackend(states), Path(d) / "outcomes", self.KEY)
 
     def test_swapped_verb_and_contradictory_current_state_refuse(self):
         manifest = self.manifest(); states = self.parked_states()
         wrong = self.rows(manifest, [("resume-coordinator", sut.TERMINAL_ID)])
         with tempfile.TemporaryDirectory() as d, self.assertRaisesRegex(ValueError, "journal-row-invalid"):
-            sut.restore(manifest, wrong, FakeBackend(states), Path(d) / "outcomes")
+            sut.restore(manifest, wrong, FakeBackend(states), Path(d) / "outcomes", self.KEY)
         states[sut.TERMINAL_ID]["durable-status"] = "stopped"
         right = self.rows(manifest, [("rearm-terminal-coordinator", sut.TERMINAL_ID)])
         with tempfile.TemporaryDirectory() as d, self.assertRaisesRegex(ValueError, "journal-action-not-observed"):
-            sut.restore(manifest, right, FakeBackend(states), Path(d) / "outcomes")
+            sut.restore(manifest, right, FakeBackend(states), Path(d) / "outcomes", self.KEY)
 
     def test_partial_prefix_restores_only_prefix_in_reverse(self):
         manifest = self.manifest(); backend = FakeBackend(self.parked_states())
         specs = [("rearm-terminal-coordinator", sut.TERMINAL_ID),
                  ("resume-coordinator", sut.RUNNING_IDS[0])]
         with tempfile.TemporaryDirectory() as d:
-            outcomes = sut.restore(manifest, self.rows(manifest, specs), backend, Path(d) / "outcomes")
+            outcomes = sut.restore(manifest, self.rows(manifest, specs), backend, Path(d) / "outcomes", self.KEY)
         self.assertEqual(list(reversed(specs)), backend.executed)
         self.assertEqual(2, len(outcomes["outcomes"]))
         self.assertNotIn(("start-unit", "fixture.timer"), backend.executed)
@@ -108,7 +108,7 @@ class RestoreTest(unittest.TestCase):
     def test_empty_subject_is_not_success(self):
         manifest = self.manifest()
         with tempfile.TemporaryDirectory() as d, self.assertRaisesRegex(ValueError, "NOTHING-RECORDED"):
-            sut.restore(manifest, [], FakeBackend(self.parked_states()), Path(d) / "outcomes")
+            sut.restore(manifest, [], FakeBackend(self.parked_states()), Path(d) / "outcomes", self.KEY)
         body = {"schema": sut.SCHEMA, "fence-id": "fixture", "captured-at": "now", "targets": {}}
         empty = dict(body, **{"manifest-hmac-sha256": sut.authenticate(body, self.KEY)})
         with self.assertRaisesRegex(ValueError, "NOTHING-RECORDED:manifest-zero-targets"):
@@ -123,11 +123,11 @@ class RestoreTest(unittest.TestCase):
             path = Path(d) / "outcomes"
             backend = FakeBackend(states, fail={sut.TERMINAL_ID})
             with self.assertRaisesRegex(RuntimeError, "restore-action-failed"):
-                sut.restore(manifest, rows, backend, path)
+                sut.restore(manifest, rows, backend, path, self.KEY)
             self.assertEqual([("resume-coordinator", sut.RUNNING_IDS[0]),
                               ("rearm-terminal-coordinator", sut.TERMINAL_ID)], backend.executed)
             backend.fail.clear(); backend.executed.clear()
-            sut.restore(manifest, rows, backend, path)
+            sut.restore(manifest, rows, backend, path, self.KEY)
             self.assertEqual([("rearm-terminal-coordinator", sut.TERMINAL_ID)], backend.executed)
 
     def test_restore_reobserves_immediately_before_inverse(self):
@@ -137,7 +137,7 @@ class RestoreTest(unittest.TestCase):
         sut.validate_rows(manifest, rows)
         backend.states[sut.RUNNING_IDS[0]] = coordinator("stopped", True, False, False)
         with tempfile.TemporaryDirectory() as d, self.assertRaisesRegex(ValueError, "journal-action-not-observed"):
-            sut.restore(manifest, rows, backend, Path(d) / "outcomes")
+            sut.restore(manifest, rows, backend, Path(d) / "outcomes", self.KEY)
         self.assertEqual([], backend.executed)
 
     def test_key_must_be_owner_only(self):
@@ -168,16 +168,37 @@ class RestoreTest(unittest.TestCase):
                 return real_append(path_arg, row)
             with mock.patch.object(sut, "append_record", side_effect=fail_outcome):
                 with self.assertRaisesRegex(OSError, "fixture-append-failed"):
-                    sut.restore(manifest, rows, backend, path)
+                    sut.restore(manifest, rows, backend, path, self.KEY)
             self.assertEqual([("resume-coordinator", sut.RUNNING_IDS[0])], backend.executed)
             backend.executed.clear()
-            result = sut.restore(manifest, rows, backend, path)
+            result = sut.restore(manifest, rows, backend, path, self.KEY)
             self.assertEqual([], backend.executed)
             self.assertEqual([sut.RUNNING_IDS[0]], result["reconciled-missing-outcomes"])
             recorded = sut.load_journal(path)
             self.assertEqual("observed-restored-outcome-record-missing",
                              recorded[0]["reconciliation"])
             self.assertIs(real_append, sut.append_record)
+
+    def test_fabricated_attempt_cannot_authorize_reconciliation(self):
+        manifest = self.manifest(); rows = self.rows(
+            manifest, [("resume-coordinator", sut.RUNNING_IDS[0])])
+        restored = {sut.RUNNING_IDS[0]: coordinator("running", True, False, False)}
+        with tempfile.TemporaryDirectory() as directory:
+            outcomes = Path(directory) / "outcomes"
+            attempt = {"schema": sut.SCHEMA, "fence-id": manifest["fence-id"],
+                       "manifest-hmac-sha256": manifest["manifest-hmac-sha256"],
+                       "ordinal": 1, "target": sut.RUNNING_IDS[0],
+                       "action": "resume-coordinator",
+                       "status": "inverse-attempt-recorded", "recorded-at": "forged"}
+            sut.append_record(str(outcomes) + ".attempts.jsonl", attempt)
+            with self.assertRaisesRegex(ValueError, "restore-attempt-invalid"):
+                sut.restore(manifest, rows, FakeBackend(restored), outcomes, self.KEY)
+
+    def test_every_verdict_envelope_carries_residual_limitation(self):
+        for envelope in (sut.verdict_envelope(True, value={}),
+                         sut.verdict_envelope(False, reason="fixture")):
+            self.assertEqual(sut.RESIDUAL_LIMITATION,
+                             envelope["residual-limitation"])
 
 
 if __name__ == "__main__": unittest.main()

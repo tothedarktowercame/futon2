@@ -9,12 +9,14 @@ Two C357 claims were incomplete:
   a regular file owned by the effective user with no group/world permission
   bits. The named refusal is `manifest-key-not-owner-only`.
 - an inverse could succeed and crash while appending its outcome. Restoration
-  now fsyncs a fence-bound `inverse-attempt-recorded` row before executing. On
+  now fsyncs an independently HMAC-authenticated, fence-bound
+  `inverse-attempt-recorded` row before executing. On
   retry, restored reality plus that exact attempt reconciles the missing
   outcome; restored reality without an attempt remains
   `restored-state-without-inverse-attempt`.
 
-The tool reports rather than closes the remaining boundary:
+The tool reports rather than closes the remaining boundary on every CLI
+verdict, including refusals:
 
 ```text
 residual-limitation=

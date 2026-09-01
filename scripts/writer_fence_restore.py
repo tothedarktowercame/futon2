@@ -33,6 +33,8 @@ SCHEMA = "wm-writer-fence-restore-v2"
 DEFAULT_KEY = Path(os.environ.get(
     "FUTON_WRITER_FENCE_KEY",
     "/home/joe/.config/futon/writer-fence-restore.key"))
+RESIDUAL_LIMITATION = (
+    "compare-before-act-narrows-race-but-does-not-prove-event-freedom")
 
 
 def canonical(value):
@@ -294,14 +296,17 @@ def load_outcomes(path, manifest, rows):
     return outcomes
 
 
-def load_attempts(path, manifest, rows):
+def load_attempts(path, manifest, rows, key):
     attempts = load_journal(path, missing_ok=True)
     expected_ordinals = list(range(len(rows), len(rows) - len(attempts), -1))
     if [row.get("ordinal") for row in attempts] != expected_ordinals:
         raise ValueError("restore-attempts-not-reverse-prefix")
     for attempt in attempts:
+        authenticated = dict(attempt)
+        supplied = authenticated.pop("attempt-hmac-sha256", None)
         source = rows[attempt["ordinal"] - 1]
-        if (attempt.get("schema") != SCHEMA
+        if (not hmac.compare_digest(supplied or "", authenticate(authenticated, key))
+                or attempt.get("schema") != SCHEMA
                 or attempt.get("fence-id") != manifest["fence-id"]
                 or attempt.get("manifest-hmac-sha256") != manifest["manifest-hmac-sha256"]
                 or attempt.get("target") != source["target"]
@@ -322,12 +327,16 @@ def outcome_record(manifest, row, reconciliation=None):
     return value
 
 
-def restore(manifest, rows, backend, outcomes_path):
+def verdict_envelope(ok, **fields):
+    return {"ok": bool(ok), **fields, "residual-limitation": RESIDUAL_LIMITATION}
+
+
+def restore(manifest, rows, backend, outcomes_path, key):
     if not rows: raise ValueError("NOTHING-RECORDED")
     validate_rows(manifest, rows)
     prior = load_outcomes(outcomes_path, manifest, rows)
     attempts_path = str(outcomes_path) + ".attempts.jsonl"
-    attempts = load_attempts(attempts_path, manifest, rows)
+    attempts = load_attempts(attempts_path, manifest, rows, key)
     completed = {row["ordinal"] for row in prior}
     attempted = {row["ordinal"] for row in attempts}
     outcomes, reconciled = [], []
@@ -356,6 +365,7 @@ def restore(manifest, rows, backend, outcomes_path):
                        "ordinal": row["ordinal"], "target": row["target"],
                        "action": row["action"], "status": "inverse-attempt-recorded",
                        "recorded-at": datetime.datetime.now(datetime.timezone.utc).isoformat()}
+            attempt["attempt-hmac-sha256"] = authenticate(attempt, key)
             append_record(attempts_path, attempt)
             attempted.add(row["ordinal"])
         outcome = backend.execute(row["action"], row["target"])
@@ -368,8 +378,7 @@ def restore(manifest, rows, backend, outcomes_path):
         outcomes.append(recorded)
     return {"outcomes": outcomes, "reconciled-missing-outcomes": reconciled,
             "assurance": "final-state-observed",
-            "residual-limitation":
-            "compare-before-act-narrows-race-but-does-not-prove-event-freedom"}
+            "residual-limitation": RESIDUAL_LIMITATION}
 
 
 def main(argv=None):
@@ -391,10 +400,12 @@ def main(argv=None):
                            args.action, args.target, LiveBackend())
         else:
             value = restore(load_manifest(args.manifest, key, args.fence_id),
-                            load_journal(args.journal), LiveBackend(), args.outcomes)
-        print(json.dumps({"ok": True, "value": value}, indent=2, sort_keys=True)); return 0
+                            load_journal(args.journal), LiveBackend(), args.outcomes, key)
+        print(json.dumps(verdict_envelope(True, value=value),
+                         indent=2, sort_keys=True)); return 0
     except (OSError, ValueError, RuntimeError) as exc:
-        print(json.dumps({"ok": False, "reason": str(exc)}, indent=2, sort_keys=True)); return 1
+        print(json.dumps(verdict_envelope(False, reason=str(exc)),
+                         indent=2, sort_keys=True)); return 1
 
 
 if __name__ == "__main__": raise SystemExit(main())
