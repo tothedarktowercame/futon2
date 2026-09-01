@@ -6,8 +6,8 @@
  [{:lane :wm-nouns
    :holding :C311-guard-migration-rest, :dispatched-at "2026-09-01T01:01:22Z", :job-id "invoke-1788224474428-6362-46964434", :expected-by "2026-09-01T01:46:22Z"}
   {:lane :wm-verbs
-   :holding :C316-preflight-event-shape, :dispatched-at "2026-09-01T01:08:16Z", :job-id "invoke-1788224886496-6374-1293dbea", :expected-by "2026-09-01T01:53:16Z"}
+   :holding :C320-tail-audit, :dispatched-at "2026-09-01T01:12:17Z", :job-id "invoke-1788225127609-6384-d0181211", :expected-by "2026-09-01T01:57:17Z"}
   {:lane :wm-organization
    :holding :C319-drain-consolidation, :dispatched-at "2026-09-01T01:10:42Z", :job-id "invoke-1788225038668-6380-8b5fd87e", :expected-by "2026-09-01T01:55:42Z"}
   {:lane :wm-evidence
-   :holding :C318-fence-verification, :dispatched-at "2026-09-01T01:09:30Z", :job-id "invoke-1788224965229-6377-acd0284c", :expected-by "2026-09-01T01:54:30Z"}]}
+   :holding :C321-runnable-fence-bundle, :dispatched-at "2026-09-01T01:12:17Z", :job-id "invoke-1788225132395-6385-f25e4036", :expected-by "2026-09-01T01:57:17Z"}]}
