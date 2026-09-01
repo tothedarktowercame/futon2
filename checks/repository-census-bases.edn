@@ -1,5 +1,12 @@
 {:schema :repository-census-bases/v2
  :convention "checks/REPOSITORY-CENSUS-BASES.md"
+ :population-boundary
+ {:boundary/type :declared-not-derived
+  :subject :registered-repository-census-population
+  :pinned :registry-entries-and-derived-citations-within-each-entry
+  :not-pinned :all-repository-state-audits-and-censuses
+  :derivation-status :not-exactly-derivable
+  :reason :semantic-identification-of-prose-censuses-requires-explicit-registration}
  :entries
  [{:artifact "holes/labs/wm-contract/C385-recorded-hash-revalidation-census.md"
    :kind :census

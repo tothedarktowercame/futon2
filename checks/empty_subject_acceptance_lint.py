@@ -18,6 +18,15 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
+POPULATION_BOUNDARY = {
+    "boundary/type": "declared-not-derived",
+    "subject": "empty-subject-acceptance-catalogue",
+    "pinned": "registered-acceptance-boundary-rules",
+    "not-pinned": "all-empty-or-absent-semantic-subjects",
+    "derivation-status": "not-exactly-derivable",
+    "reason": "helper-hidden-and-novel-data-flow-shapes-require-registration",
+}
+
 RULES = [
     {"id": "strict-contract-declarations", "path": "checks/contract_lint.clj",
      "accept": r"strict-pass\?", "proof": r"\(empty\?\s+decls\).*zero-declarations",
@@ -77,7 +86,8 @@ def scan() -> dict:
             continue
         if re.search(rule["accept"], text, re.S) and not proved(rule, text):
             findings.append({k: rule[k] for k in ("id", "path", "subject")})
-    return {"schema": "empty-subject-acceptance-lint/v1", "rules": len(RULES),
+    return {"schema": "empty-subject-acceptance-lint/v1",
+            "population-boundary": POPULATION_BOUNDARY, "rules": len(RULES),
             "finding-count": len(findings), "findings": findings,
             "unavailable": unavailable,
             "limits": [

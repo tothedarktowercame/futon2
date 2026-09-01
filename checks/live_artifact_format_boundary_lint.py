@@ -17,6 +17,15 @@ from pathlib import Path
 P4NG = Path("/home/joe/code/p4ng")
 GEN = P4NG / "empirics-futon"
 
+POPULATION_BOUNDARY = {
+    "boundary/type": "declared-not-derived",
+    "subject": "live-artifact-format-catalogue",
+    "pinned": "named-live-generators-and-recognised-source-proof-shapes",
+    "not-pinned": "all-publication-generators-and-lossy-aggregation-boundaries",
+    "derivation-status": "not-exactly-derivable",
+    "reason": "semantic-and-interprocedural-format-boundaries-are-not-a-syntactic-population",
+}
+
 GENERATORS = {
     "live-topology": GEN / "gen_live_topology.bb",
     "lane-campaign": GEN / "gen_lane_campaign_table.bb",
@@ -176,6 +185,7 @@ def lint() -> dict:
                                  "proof-required": (rule.get("proof") or
                                                     rule.get("proof-kind"))})
     return {"schema": "live-artifact-format-boundary-lint/v1",
+            "population-boundary": POPULATION_BOUNDARY,
             "generators": len(GENERATORS), "findings": findings,
             "finding-count": len(findings), "unavailable": unavailable,
             "clean-generators": sorted(set(GENERATORS) -

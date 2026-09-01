@@ -55,6 +55,12 @@
 (def allowed-correspondence #{:verified :unverified})
 (defn basis-commit [basis repo] (get-in basis [repo :commit]))
 
+(defn declared-population-boundary? [boundary]
+  (and (= :declared-not-derived (:boundary/type boundary))
+       (= :registered-repository-census-population (:subject boundary))
+       (= :not-exactly-derivable (:derivation-status boundary))
+       (every? #(some? (get boundary %)) [:pinned :not-pinned :reason])))
+
 (defn entry-result [{:keys [artifact kind basis subjects] :as entry}]
   (let [shape? (and (string? artifact) (contains? #{:audit :census} kind)
                     (map? basis) (seq basis) (vector? subjects) (seq subjects))
@@ -127,6 +133,7 @@
 
 (defn evaluate [registry]
   (if-not (and (= :repository-census-bases/v2 (:schema registry))
+               (declared-population-boundary? (:population-boundary registry))
                (vector? (:entries registry)))
     {:status :unavailable :failures [{:reason :malformed-registry}] :entries []}
     (let [entries (mapv entry-result (:entries registry))]
@@ -139,6 +146,7 @@
         registry (if negative?
                    (-> registry0
                        (update-in [:entries 0 :subjects] #(vec (rest %)))
+                       (assoc :population-boundary nil)
                        (assoc-in [:entries 0 :basis :futon3c :method] nil))
                    registry0)
         result (evaluate registry)
