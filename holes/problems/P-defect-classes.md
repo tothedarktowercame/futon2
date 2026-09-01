@@ -245,6 +245,23 @@ which this campaign learned the same night by shipping a `.tex` caption whose
 replacement had silently failed. **Prevention type: lint** over format calls
 whose arguments are not previously asserted non-nil.
 
+**2026-09-01 population and executable prevention (C278/C281).** An audit of
+the eight live-paper generators found seven exposed boundaries: literal
+`null`, blank strings, vacuous all-zero tables, silently lowered cell totals,
+default-zero categories, and missing lanes rendered as idle. Only the
+defect-repair tally validated every reader-facing value it rendered
+(`holes/labs/wm-contract/C278-live-artifact-format-boundary-audit.md`).
+`checks/live_artifact_format_boundary_lint.py` makes that population
+executable. The audit census reported seven; while the lint was being built,
+`gen_model_coverage.py` added a nonempty population and per-row field proof, so
+the live lint now reports **six** findings across the eight declared generators
+and identifies model coverage plus defect tally as clean. It requires an
+explicit field/population proof to retire each finding. Its negative
+control flags an unproved `%d` value while accepting the same formatter after
+a same-scope non-nil assertion. The lint is deliberately bounded rather than a
+claim of whole-program data-flow analysis; helper-hidden proofs require an
+explicit `FORMAT-PROOF` marker backed by that generator's control.
+
 **Related.** Renaming a field under an unchanged schema version is what let
 this reach a consumer; the workflow report now bumps its schema version on any
 field rename, and notifies consumers with an explicit field table.
