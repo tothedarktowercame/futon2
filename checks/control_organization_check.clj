@@ -1,9 +1,8 @@
 #!/usr/bin/env bb
 (ns checks.control-organization-check
-  (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]
-            [clojure.set :as set])
-  (:import [java.security MessageDigest]))
+  (:require [checks.mutable-read-set :as read-set]
+            [clojure.edn :as edn]
+            [clojure.set :as set]))
 
 (def defaults
   {:organization "/home/joe/code/p4ng/empirics-futon/control-organization.edn"
@@ -12,11 +11,6 @@
 
 (def required-edge-fields
   [:from :to :from-column :to-column :column-relation :diagram-role :classification])
-
-(defn sha256 [path]
-  (let [digest (.digest (MessageDigest/getInstance "SHA-256")
-                        (java.nio.file.Files/readAllBytes (.toPath (io/file path))))]
-    (apply str (map #(format "%02x" (bit-and % 0xff)) digest))))
 
 (defn parse-args [args]
   (loop [xs args out defaults]
@@ -29,10 +23,18 @@
 (defn edge-key [e] [(:from e) (:to e)])
 
 (defn validate [{:keys [organization stages edges negative?]}]
-  (let [org (edn/read-string (slurp organization))
+  (let [discovery (-> (read-set/observe-files [organization]) read-set/require-stable!)
+        discovered-org (edn/read-string
+                        (:text (read-set/entry-by-path discovery organization)))
+        pinned-paths (mapv #(str "/home/joe/code/" (:path %)) (:reads discovered-org))
+        snapshot (-> (read-set/observe-files
+                      (distinct (concat [organization stages edges] pinned-paths)))
+                     read-set/require-stable!)
+        text #(-> (read-set/entry-by-path snapshot %) :text)
+        org (edn/read-string (text organization))
         org (if negative? (assoc-in org [:edges 0 :from-column] :ACT) org)
-        stage-doc (edn/read-string (slurp stages))
-        edge-doc (edn/read-string (slurp edges))
+        stage-doc (edn/read-string (text stages))
+        edge-doc (edn/read-string (text edges))
         stages-by-node (into {} (map (juxt (comp keyword :node) (comp keyword :stage)) (:nodes stage-doc)))
         source-by-key (into {} (map (juxt edge-key identity) (:edges edge-doc)))
         org-by-key (into {} (map (juxt edge-key identity) (:edges org)))
@@ -75,10 +77,9 @@
                   [{:error :classified-without-basis :edge (edge-key e)}]))))
            (:edges org))
           (for [{:keys [path sha256] :as read} (:reads org)
-                :let [actual-path (str "/home/joe/code/" path)]
-                :when (or (not (.exists (io/file actual-path)))
-                          (not= sha256 (when (.exists (io/file actual-path))
-                                         (checks.control-organization-check/sha256 actual-path))))]
+                :let [actual-path (str "/home/joe/code/" path)
+                      captured (read-set/entry-by-path snapshot actual-path)]
+                :when (or (nil? captured) (not= sha256 (:sha256 captured)))]
             {:error :unpinned-or-absent-read :read read})))]
     {:pass? (empty? errors)
      :drawn-edges (count source-keys)

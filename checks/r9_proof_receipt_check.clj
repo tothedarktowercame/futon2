@@ -1,8 +1,8 @@
 #!/usr/bin/env bb
 (ns checks.r9-proof-receipt-check
   (:require [babashka.process :as process]
+            [checks.mutable-read-set :as read-set]
             [clojure.edn :as edn]
-            [clojure.java.io :as io]
             [clojure.string :as str]))
 
 (def receipt-path "holes/labs/wm-contract/R9-VerdictConsultsChecker-proof-receipt.edn")
@@ -44,9 +44,7 @@
        (every? string? (get-in x [:result :axioms]))))
 
 (defn elaborate [receipt]
-  (let [source (str repo-root "/" (get-in receipt [:proof-source :repo]) "/"
-                    (get-in receipt [:proof-source :path]))
-        theorem (:theorem receipt)
+  (let [theorem (:theorem receipt)
         augmented (str "import DarkTower.WarMachine.Holes\n#print axioms " theorem "\n")
         tmp (java.io.File/createTempFile "r9-proof-receipt-" ".lean")]
     (try
@@ -87,28 +85,45 @@
      :declaration-failures declaration-failures
      :theorem (:theorem receipt) :axioms (:axioms live)})))
 
-(defn read-receipt [mode]
-  (case mode
-    "absent" (edn/read-string (slurp (str receipt-path ".absent-control")))
-    (edn/read-string (slurp receipt-path))))
+(defn receipt-file [mode]
+  (if (= "absent" mode) (str receipt-path ".absent-control") receipt-path))
 
 (defn -main [& [mode]]
   (let [negative? (#{"absent" "tampered"} mode)
-        receipt-result (try {:receipt (read-receipt mode)}
+        receipt-result (try
+                         (let [first-observation (read-set/observe-files [(receipt-file mode)])
+                               first-snapshot (read-set/require-stable! first-observation)
+                               receipt (edn/read-string
+                                        (:text (read-set/entry-by-path first-snapshot
+                                                                       (receipt-file mode))))
+                               source-path (str repo-root "/" (get-in receipt [:proof-source :repo]) "/"
+                                                (get-in receipt [:proof-source :path]))
+                               observation (read-set/observe-files [(receipt-file mode) source-path])
+                               snapshot (read-set/require-stable! observation)
+                               final-receipt (edn/read-string
+                                              (:text (read-set/entry-by-path snapshot
+                                                                             (receipt-file mode))))
+                               final-source-path (str repo-root "/"
+                                                      (get-in final-receipt [:proof-source :repo]) "/"
+                                                      (get-in final-receipt [:proof-source :path]))
+                               _ (when-not (= source-path final-source-path)
+                                   (throw (ex-info "proof receipt source changed during discovery"
+                                                   {:before source-path :after final-source-path})))]
+                           {:receipt final-receipt
+                            :source-text (:text (read-set/entry-by-path snapshot source-path))})
                             (catch Exception e {:error e}))
         receipt (:receipt receipt-result)
         report (if-let [read-error (:error receipt-result)]
                  {:pass? false :failures [:unreadable]
                   :message (.getMessage read-error)}
-                 (let [source-path (str repo-root "/" (get-in receipt [:proof-source :repo]) "/"
-                                        (get-in receipt [:proof-source :path]))
+                 (let [captured-source (:source-text receipt-result)
                        source-override (case mode
-                                         "tampered" (str/replace-first (slurp source-path)
+                                         "tampered" (str/replace-first captured-source
                                                                        "fun _ _ => false"
                                                                        "fun _ _ => true")
-                                         "unrelated" (str (slurp source-path)
+                                         "unrelated" (str captured-source
                                                           "\n-- unrelated C115 control\n")
-                                         nil)]
+                                         captured-source)]
                    (try (validate receipt source-override)
                         (catch Exception e {:pass? false :failures [:unreadable]
                                             :message (.getMessage e)}))))]

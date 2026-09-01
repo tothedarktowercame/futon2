@@ -5,6 +5,7 @@
    Exit convention: 0 = agreement, 1 = disagreement/check failure, 2 = usage."
   (:require [babashka.fs :as fs]
             [babashka.process :as process]
+            [checks.mutable-read-set :as read-set]
             [clojure.edn :as edn]
             [clojure.string :as str]))
 
@@ -83,8 +84,11 @@
     (norm out)))
 
 (defn check-files [{:keys [edges svg pdf]}]
-  (let [data (edn/read-string (slurp edges))
-        svg-text (slurp svg)
+  (let [snapshot (-> (read-set/observe-files [edges svg pdf]) read-set/require-stable!)
+        data (edn/read-string (:text (read-set/entry-by-path snapshot edges)))
+        svg-text (:text (read-set/entry-by-path snapshot svg))
+        captured-pdf (read-set/entry-by-path snapshot pdf)
+        pdf-copy (fs/create-temp-file {:prefix "control-map-captured-" :suffix ".pdf"})
         nodes (parse-nodes svg-text)
         svg-control (parse-control-paths svg-text nodes)
         svg-support (parse-paths svg-text nodes "support-edge")
@@ -96,7 +100,11 @@
         expected-measured (mapv #(select-keys % [:from :to])
                                 (:route-measured-drawn data))
         expected-nodes (set (map keyword (:nodes data)))
-        extracted (pdf-text pdf)
+        extracted (try
+                    (java.nio.file.Files/write pdf-copy (:bytes captured-pdf)
+                                               (make-array java.nio.file.OpenOption 0))
+                    (pdf-text (str pdf-copy))
+                    (finally (fs/delete-if-exists pdf-copy)))
         svg-labels (keep :label svg-control)
         failures (vec
                   (concat

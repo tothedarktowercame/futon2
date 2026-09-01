@@ -11,7 +11,8 @@
 ;; dead holder and requires a violation); rejecting that mutation is a passing control
 ;; and exits 0, while a mutation that slips through exits 2.
 (require '[cheshire.core :as json] '[clojure.edn :as edn]
-         '[clojure.string :as str] '[babashka.http-client :as http])
+         '[clojure.string :as str] '[babashka.http-client :as http]
+         '[checks.mutable-read-set :as read-set])
 
 (def contract-path "/home/joe/code/mathlib4/DarkTower/WarMachine/holes-contract.json")
 (def registry-path "/home/joe/code/futon2/checks/holder-registry.edn")
@@ -28,8 +29,12 @@
 (defn -main [& args]
   (let [negative? (some #{"--negative"} args)
         empty-negative? (some #{"--negative-empty"} args)
-        contract  (json/parse-string (slurp contract-path) true)
-        reg       (edn/read-string (slurp registry-path))
+        observation (read-set/observe-files [contract-path registry-path])
+        snapshot (read-set/require-stable! observation)
+        contract  (json/parse-string
+                   (:text (read-set/entry-by-path snapshot contract-path)) true)
+        reg       (edn/read-string
+                   (:text (read-set/entry-by-path snapshot registry-path)))
         records   (cond-> (:records reg)
                     negative? (assoc "P-R9" {:decls 14 :holder "claude-15-retired" :note "injected"}))
         live      (roster)

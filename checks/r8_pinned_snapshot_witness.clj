@@ -1,6 +1,7 @@
 #!/usr/bin/env bb
 (ns checks.r8-pinned-snapshot-witness
-  (:require [clojure.edn :as edn]
+  (:require [checks.mutable-read-set :as read-set]
+            [clojure.edn :as edn]
             [clojure.string :as str]))
 
 (def fixture "holes/labs/wm-contract/R8-D3-report.edn")
@@ -16,9 +17,9 @@
                             next-marker))
            text)))
 
-(defn valid? [report]
-  (let [source-literal (literal (slurp source) "wmTraceR8" "/-- CLOSED-BY-RECORD")
-        generated-literal (literal (slurp generated) "wmTraceR8Generated" "theorem generatedCensus")]
+(defn valid? [report source-text generated-text]
+  (let [source-literal (literal source-text "wmTraceR8" "/-- CLOSED-BY-RECORD")
+        generated-literal (literal generated-text "wmTraceR8Generated" "theorem generatedCensus")]
     (and (= 53 (get-in report [:summary :files]))
          (= 792 (get-in report [:summary :forms]))
          (= expected-pin (get-in report [:content-pin :sha256]))
@@ -30,14 +31,17 @@
 (defn -main [& args]
   (let [kind (cond (some #{"--negative-pin"} args) :pin
                    (some #{"--negative-census"} args) :census)
-        report (edn/read-string (slurp fixture))
+        observation (read-set/observe-files [fixture generated source])
+        snapshot (read-set/require-stable! observation)
+        text #(-> (read-set/entry-by-path snapshot %) :text)
+        report (edn/read-string (text fixture))
         tested (case kind
                  :pin (assoc-in report [:content-pin :sha256]
                                 (str/join (repeat 64 "0")))
                  :census (assoc-in report
                                    [:r8CensusWmTrace :counts :stored-F] 31)
                  report)
-        accepted? (valid? tested)]
+        accepted? (valid? tested (text source) (text generated))]
     (println (cond
                (and kind accepted?) "r8-pinned-snapshot: mutation slipped"
                kind (str "r8-pinned-snapshot: negative-control PASS ("
