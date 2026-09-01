@@ -8,9 +8,8 @@ want to validate against their criteria... they may well go through a process of
 building naively, like I did, and expecting it's going to work the way they thought it
 was going to, and then realizing that it doesn't. So that case should generalize."*
 
-*Sections marked **[steward]** are for claude-20 to fill: the I track, the R/RUN track,
-the pymdp/SPM cross-check, the choice-point experiments. Everything else is what
-claude-1 ran or read.*
+*Sections 9 and 10 were written by claude-20 as steward; the rest by claude-1. Neither
+reviewed only their own: each read the other against a commit.*
 
 The specific artefacts are named throughout so a reader can open them; the steps are
 stated generally so a reader with a different system and a different formalism can do
@@ -276,6 +275,8 @@ the one asked, and the answer was read as though it were the wide one.**
 | 2-of-110 gate field | enactment unchanged | any permutation leaves it unchanged |
 | one pointer verified | "the unsafe call is here" | four `http/post` sites; two live; one was an `/eval` into the shared JVM |
 | two greps of a shared file | "the other agent's field vanished" | one's own write clobbered one's own edit |
+| a retired-edge list in a brief | six retired pairs | eight in the registry; one named was `:drawn` |
+| `:edges` alone | five recorded hops unmapped | none were; `:route-measured-drawn` held five |
 
 Rule: **establish that the read was exhaustive before treating its result as the
 whole.** Concretely: read files of forms in a loop; enumerate call sites, don't verify
@@ -283,7 +284,7 @@ the pointer you were handed; capture a gate's exit code before anything else run
 check the diff before believing a tamper landed; count with a parser, not a grep. These
 are in `AGENTS.md` as their own sections so the next test author reads them.
 
-## 9. Validated runs: the drawing is not the machine  **[steward]**
+## 9. Validated runs: the drawing is not the machine
 
 *(claude-1's part:)* Everything above validates the *drawing* against the theory and the
 code. It does not validate the machine. The RUN track does: a **pre-flight** that
@@ -297,17 +298,142 @@ retirement is not testable by routes; a `:ruling`-retired edge traversed means t
 ruling is not yet realised in code and opens a build row. Figures then carry "conformant
 with run `<sha>`, N ticks" instead of "checked against two old records."
 
-*[steward: RUN1–RUN10 as they land — the persistence defect, the pre-flight script, the
-conformance report format, what S1 showed.]*
+*(steward's part:)*
 
-## 10. Extracting the formalism's edges and making them work  **[steward]**
+**Ask what a tick enacts before running one, and accept "not safe" as the answer.**
+RUN1 audited every actuator a tick can reach and concluded **NOT SAFE TO RUN**: the
+judgement path posted to another service unconditionally. That is a successful
+discovery. The packet said so in advance — *"an actuator whose disabling mechanism you
+cannot point at is reported as NOT SAFE, not assumed harmless; a discovery that
+concludes we cannot yet run this safely is the answer I would rather have"* — and
+without that sentence the likely deliverable is a confident command.
 
-*[steward: the I track — I3 trace seam (mean+variance, Q(π), effects mode; measured
-+92,985 bytes/tick against the naive form), I2 F_π (absent-variance handling; the
-rank/N join trap avoided; unscaled by source), I1 β/γ (the fixed point; bisection over
-fixed-step gradient, with the 1/β² cost shown to belong to the solver), the pymdp/SPM
-cross-check and the novelty table (what is ours alone, with every absence a recorded
-search).]*
+**Then enumerate, because verifying the pointer you were handed is not the same
+operation.** I signed RUN1 by opening its one file:line, confirming it, and stopping.
+`grep -n 'http/post'` over the same file takes four seconds and returns **four** sites,
+two of them live on the tick path — one an `/eval` POST of Clojure source into the
+shared JVM, which the workspace rule forbids outright and which every packet I had
+written that day told Codex agents not to do. RUN2 went from blocked to open on my
+reading and back to blocked within a minute. Then widen past the axis you were given:
+HTTP was the axis in the report; `git` (all `log`, read-only), subprocesses (writes to a
+temp dir) and file writes were not, and one of those held the finding below.
+
+**Make the gate an intercepted real run, not an audit.**
+`holes/labs/wm-contract/r6_zero_post_preflight.clj` redefines `http/post` to record
+rather than send, leaves `http/get` alone so the tick sees real data, intercepts `spit`,
+and runs the actual entrypoint end to end. Result: **0 POSTs, 34 s** — and a write
+**two audits had missed**, `data/wm-trace/.lane-futility-index.edn`, persistent state
+carried between ticks. An audit enumerates what someone thought to look for; an
+intercepted run enumerates what happened.
+
+**A test that exercises the two sites of interest is not a whole-tick test.** The one
+delivered redefined the generator with a stub calling exactly the two functions under
+suspicion — so it could not find a third. Kept for what it does pin; the pre-flight
+carries the acceptance.
+
+**Add a tripwire for the route you have not thought of.** Zero-POST proves the known
+doors shut; asserting the tick never reads `.admintoken` proves the key was never taken
+off the hook, since any future path into that JVM must read it first. Negative control:
+re-enable the fallback and both detectors fire (1 POST to `:6768/eval`, 1 token read).
+
+**Run on a named sha with the pre-flight immediately before, and record what a tick
+costs.** S1: 20 ticks, sha `5006200` unchanged throughout, pre-flight PASS on that sha,
+per-tick 77–102 s, 27 m 32 s total, effects mode recorded, three files written per tick,
+committed under `holes/labs/wm-contract/runs/2026-09-01/`. Per-tick wall time varied
+28 s / 34 s / 81 s across pre-flight runs, so it is measured per run, not assumed.
+
+**Expect the first run to be about the instrumentation.** S1 landed 20/20 records
+carrying `:controller-score` — which **lifts a limit every measurement in the campaign
+had been living under**: the older fields carried `G-total` but not the score the
+machine ranks on, so every rank number until then was over a proxy. And it persisted
+`:wm/route` in **0 of 20** records: the tick computes the route, the receipt holds it,
+and the receipt is one file per *date*, overwritten each tick. Nineteen routes were
+lost. Conformance is a check of recorded hops; without hops it does not run (RUN10).
+
+**Read the drawing correctly before calling a traversal a refutation.** From the one
+surviving route I reported two retired edges traversed and five hops unmapped. Checking
+`:route-measured-drawn` as well as `:edges`: **no hop was unmapped**. Seven of eight
+retired pairs are still `:status :drawn` — *by design*, `gen_live_topology.bb` draws a
+retired edge in a distinct class rather than removing it; I was one step from reporting
+the registry self-contradictory. And the two traversals fail to be refutations for
+different reasons, which is why §9's rule is by grounds: `R2→R7` retired a *dependency*
+claim while the *route* is drawn as measured, and a route can only refute a route-grain
+claim; `R5→R6` was retired by an operator ruling that no code was ever changed to match,
+so the traversal says the ruling is unrealised and opens a build row (`I4`), not that
+the figure is wrong.
+
+## 10. Extracting the formalism's edges and making them work
+
+*(steward's part:)* Replacing an engineering shortcut with the formalism's own quantity
+is four moves, and the order is forced by what consumes what.
+
+**1. Find what the machine throws away, and write it before you write an equation.**
+Both replacements needed quantities the trace dropped: per-candidate predictions
+(`strip-ranked-action`) and Q(π) (`strip-decision`, dropped because it was keyed by
+un-stringable action maps — a shape problem recorded as a reason). So the first slice
+was neither equation but a **trace write** (I3), behind a flag defaulting off, with
+flag-off byte-identity proven against the *previous* implementation loaded as a parallel
+namespace — not against a restatement of the new one. And **measured before enabled**:
++92,985 bytes/tick on a real 110-candidate tick, 30% of the record, 68% under the naive
+form an old code comment had warned about. A comment warning of a cost is not a
+measurement of it.
+
+**2. Compute the quantity in isolation, consumed by nothing.** F_π (I2) landed as pure
+functions wired into nothing. It passed every delivered test and **could not be called
+on real data**: it treated every zero variance as a deterministic claim, and the forward
+model gives a zero to every channel the action does not touch, marked
+`:variance-status :absent` — twelve of fourteen channels, seven of which move between
+ticks. The fix is a declared option (`:reject` default, `:floor` for absent channels
+only), not a silent default; the finding came from a fixture with the real channel
+count, which is why that rule is in `AGENTS.md`.
+
+**3. Wire it dark: compute, persist, consume nothing.** Then the join problem is visible
+before it can bite. Scoring last tick's predictions against this tick's observation needs
+a candidate identity, and the persisted key is `rank/N`, which is *tick-local* — `rank/7`
+is a different action next tick. Joining by rank would score one action's prediction
+against another's outcome. It was joined by action identity with rank kept only as the
+result key. The dark slice also caught that I3 had not persisted `:variance-status`,
+without which every real tick would have rejected — a defect in a slice I had signed.
+
+**4. Only then the equation, and let a measurement pick the solver.** β/γ (I1) is
+`friston2017` eq. 2.7's fixed point. Implemented first as the paper's appendix gradient
+flow, it cost `step/β²` per iteration: 5 iterations at β₀=0.5, 171,018 at β₀=50. That
+looked like a cost of the operator's carried-β ruling and I reported it as one. It is a
+cost of *stepping in β*: the residual is monotone with one sign change, so bracketing
+and bisecting takes ~65 evaluations flat in β, and slightly fewer as β grows. Reported
+retraction, solver replaced. The tolerance is stated in β units because γ = 1/β and the
+softmax consumes `−G/τ`, so **τ *is* β** — the tolerance is on the quantity the machine
+uses.
+
+**Cross-check against other implementations, and let the absences be the finding.**
+Joe: *"we might as well check on these sources... that way if we propose something new,
+we will know it is new."* Two codebases cloned outside the repo with their shas recorded
+(`refs/README.md`), three questions each, every answer a file:line **and a quote**, with
+a remembered expectation marked as a hypothesis to refute — it was, in the detail (the
+default is 1.0, not 16.0). Results: one treats precision as a fixed constructor
+argument and never updates it; the other implements the update, does **not** iterate to
+convergence (a fixed count with no break, so "converged" means "sixteen steps
+happened"), steps β with no `γ²` factor at all — so the reference disagrees with its own
+paper's appendix and pays neither cost we found — and includes the habit prior in *both*
+π and π₀ where the paper's text includes it in neither.
+
+**The novelty table is the deliverable, and its rule is what makes it worth anything.**
+One row per decision, three columns: shared-with-A, shared-with-B, ours-alone; **a cell
+may say "ours alone" only when both other columns say "absent" *with a pointer to where
+it would have been***. The reviewer builds it, not the reporter, because every
+"ours-alone" cell is an absence claim and absence is this campaign's recurring failure.
+Result: what matched the formalism was shared and worth checking; ours alone were the
+apparatus (registry, build order from `:defines`/`:imports`, trace, conformance figure),
+the horizon-one grain the tick forces — and, unexpectedly, **the solver**, which nobody
+else has because one takes sixteen steps toward the root and the other never poses the
+question.
+
+**A cross-check can also weaken a ruling's grounds without touching the ruling.** The
+operator ruled β carried, partly because the paper groups β with the parameters that
+accumulate. The reference implementation carries every *other* member of that group
+across trials and resets β. The ruling survives on its other ground (a tick is a time
+step, not a trial — the machine has no episode boundary); the group argument does not.
+Both are recorded, and which one survives is stated.
 
 ## 11. What the operator should expect, in order
 
