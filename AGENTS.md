@@ -101,3 +101,28 @@ the wrong shape. **A tool answering a narrower question than the one being
 asked, and its answer read as though it were the wide one.** The defence is
 always the same: look at what the tool actually did — the exit code, the diff,
 the count — before believing what it seems to have said.
+
+## Measure a comparison where the arms are supposed to differ (2026-09-01)
+
+A comparison run at the one parameter value where its arms coincide by
+construction is a control chosen where it cannot fail. Two instances in one
+slice:
+
+- F_π entering the policy posterior can be scaled by τ or not. Both arms were
+  measured at the live τ — which is exactly **1.0**, where `F/τ = F`. The two
+  arms were the same computation, and the identical numbers were reported as
+  though they had distinguished the options. Re-run at τ = 0.1 and 2.0 they
+  differ by a factor of four in rank changes.
+- "Does the enacted action change?" was then tested on a field where the act
+  gate had verdicts for **2 of 110** candidates, only one of them passing. The
+  first gate-passing candidate is invariant under *any* permutation of that
+  field, including one that reverses it. The test could not have failed.
+
+So: **name the parameter the two arms differ in, pick values where they do,
+and say in the report which values you used and why.** If no available value
+separates them — because the live path pins the parameter, or the fixture has
+one qualifying case — that is the finding. Report it as "not distinguishable
+on this field" rather than as agreement.
+
+Sibling of *at least one fixture looks like the data*: that rule is about the
+shape of the input, this one is about where in the parameter space you stood.
