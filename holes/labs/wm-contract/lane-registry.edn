@@ -6,7 +6,7 @@
  [{:lane :wm-nouns
    :holding :C274-vacuous-pass, :dispatched-at "2026-09-01T00:16:25Z", :job-id "invoke-1788221754875-6274-1d6b7507", :expected-by "2026-09-01T01:01:25Z"}
   {:lane :wm-verbs
-   :holding :C272-binding-status, :dispatched-at "2026-09-01T00:13:28Z", :job-id "invoke-1788221604320-6269-f2271cb5", :expected-by "2026-09-01T00:58:28Z"}
+   :holding :C276-duplicate-run-id, :dispatched-at "2026-09-01T00:17:29Z", :job-id "invoke-1788221845436-6278-e5da4e4c", :expected-by "2026-09-01T01:02:29Z"}
   {:lane :wm-organization
    :holding :C275-raw-gate-provenance, :dispatched-at "2026-09-01T00:16:25Z", :job-id "invoke-1788221781997-6275-32cc598e", :expected-by "2026-09-01T01:01:25Z"}
   {:lane :wm-evidence
