@@ -71,11 +71,42 @@
       (let [r (process/shell {:dir cwd :out :string :err :string :continue true}
                              "lake" "env" "lean" (.getAbsolutePath tmp))
             output (str (:out r) (:err r))
-            axioms (if-let [[_ body] (re-find #"depends on axioms: \[([^]]*)\]" output)]
-                     (if (str/blank? body) [] (mapv str/trim (str/split body #",")))
-                     nil)]
+            axioms (cond
+                     (re-find #"does not depend on any axioms" output) []
+                     (re-find #"depends on axioms: \[([^]]*)\]" output)
+                     (let [[_ body] (re-find #"depends on axioms: \[([^]]*)\]" output)]
+                       (if (str/blank? body) [] (mapv str/trim (str/split body #","))))
+                     :else nil)]
         {:exit (:exit r) :axioms axioms})
       (finally (.delete tmp)))))
+
+(def allowed-axioms #{"propext" "Classical.choice" "Quot.sound"})
+
+(defn receipt-shape-valid? [receipt source-overrides]
+  (let [basis (:source-basis receipt)
+        theorem-name (last (str/split (:theorem receipt "") #"\."))
+        declarations (mapcat :declarations basis)
+        names (set (map :name declarations))
+        adapter (:adapter receipt)
+        mappings (:mappings adapter)
+        retained-text
+        (str/join "\n"
+                  (for [{:keys [repo path declarations]} basis
+                        :let [source (or (get source-overrides [repo path])
+                                         (slurp (source-path {:repo repo :path path})))]
+                        {:keys [name]} declarations]
+                    (declaration-text source name)))]
+    (and (vector? basis) (<= 2 (count basis))
+         (every? #(and (seq (:repo %)) (seq (:path %)) (seq (:declarations %))) basis)
+         (contains? names theorem-name)
+         (= :edn-fields-to-lean-declaration/v1 (:kind adapter))
+         (contains? names (:lean-declaration adapter))
+         (vector? mappings) (seq mappings)
+         (every? (fn [{:keys [fixture-path lean-field]}]
+                   (and (vector? fixture-path) (seq fixture-path)
+                        (string? lean-field) (not (str/blank? lean-field))
+                        (str/includes? retained-text lean-field)))
+                 mappings))))
 
 (defn validate
   ([receipt] (validate receipt {}))
@@ -91,17 +122,28 @@
                             {:name name :sha256 (sha256-text (declaration-text source name))})
                           declarations)}))
                (:source-basis receipt))
+         shape-ok? (try (receipt-shape-valid? receipt source-overrides)
+                        (catch Exception _ false))
          source-ok? (= basis (:source-basis receipt))
          fixture-ok? (fixture-valid? receipt)
          toolchain-ok? (= (:toolchain receipt) (live-toolchain receipt))
          live (elaborate receipt)
-         elaboration-ok? (= (:result receipt) live)
+         recorded-result (:result receipt)
+         result-success? (and (= 0 (:exit recorded-result))
+                              (vector? (:axioms recorded-result))
+                              (every? allowed-axioms (:axioms recorded-result)))
+         live-success? (and (= 0 (:exit live))
+                            (vector? (:axioms live))
+                            (every? allowed-axioms (:axioms live)))
+         elaboration-ok? (and result-success? live-success? (= recorded-result live))
          failures (cond-> []
+                    (not shape-ok?) (conj :receipt-components-not-load-bearing)
                     (not source-ok?) (conj :positive-source-drift)
                     (not fixture-ok?) (conj :fixture-or-adapter-drift)
                     (not toolchain-ok?) (conj :toolchain-drift)
                     (not elaboration-ok?) (conj :elaboration-or-axiom-drift))]
      {:pass? (empty? failures) :failures failures
+      :receipt-shape-valid? shape-ok? :successful-elaboration? (and result-success? live-success?)
       :source-basis-matches? source-ok? :fixture-adapter-matches? fixture-ok?
       :toolchain-matches? toolchain-ok? :elaboration-matches? elaboration-ok?})))
 
