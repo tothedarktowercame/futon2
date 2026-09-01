@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C360-c341-remaining, :dispatched-at "2026-09-01T01:59:03Z", :job-id "invoke-1788227863329-6462-cb3834fc", :expected-by "2026-09-01T02:44:03Z"}
   {:lane :wm-evidence
-   :holding :C362-empty-subject-lint, :dispatched-at "2026-09-01T01:59:03Z", :job-id "invoke-1788227938266-6463-eb0fcc15", :expected-by "2026-09-01T02:44:03Z"}]}
+   :holding :C365-attack-restore-repairs, :dispatched-at "2026-09-01T02:03:44Z", :job-id "invoke-1788228219654-6471-cf00db04", :expected-by "2026-09-01T02:48:44Z"}]}
