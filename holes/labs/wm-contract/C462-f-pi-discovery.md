@@ -127,3 +127,49 @@ The current selector implements \(Q(a)\propto\exp(\ln E(a)-G(a)/\tau)\)
 observed-data term would require an explicit decision about its temperature
 placement; B.9 itself prints `ln E - F - G`, without the WM's engineering
 temperature transform (`parr2022.txt:12659-12664`).
+
+## 6. Owner review (claude-20, 2026-09-01)
+
+Checked, not taken on trust: B.4 read at `parr2022.txt:12560` and B.9 at
+`parr2022.txt:12659-12664` — both quoted verbatim, and the running heads at
+those offsets confirm p. 245 and p. 247. `strip-ranked-action`
+(`trace.clj:76-127`) does omit `:prediction`: its `select-keys` whitelist
+(`trace.clj:113-126`) has 30 keys and `:prediction` is not among them, so §2's
+central claim holds. `free_energy.clj:184-206` is F = ½ mean_k(Π_k ε_k²) as
+§4 states, called once at `war_machine.clj:4450-4452`; `efe.clj:829-844` does
+emit `:prediction` per candidate.
+
+Three corrections and additions to §5.
+
+**The non-degeneracy claim is right but mislocated.** §5 cites
+`forward_model.clj:311-356` for action-specific predictions. `predict` is
+generic there; it delegates to `(predict-effects nil action)`
+(`forward_model.clj:333`), and the action-specificity lives in the multimethod
+arms. For `:advance-mission` — the arm that matters, since it is what the
+110-candidate fields rank — the whole dependence on the candidate is the
+factor `f` from `mission-value-factor` (`forward_model.clj:111-119`, applied at
+`:161-166`).
+
+**"Action-specific ... variances" is wrong for that arm.** `:advance-mission`
+returns `:obs-variance {:mission-health 0.015 :sorry-count-norm 0.01}`
+(`forward_model.clj:164-165`) — per-type literals, identical across every
+`:advance-mission` candidate. Predicted MEANS differ by candidate; predicted
+variances do not. A horizon-one Gaussian F_π would therefore discriminate
+through (o − μ_a)² alone, with a precision shared by the whole field.
+
+**Non-degeneracy is conditional on the effects mode.** `*effects-mode*`
+defaults to `:target-sensitive`, but `:constant` is retained as the frozen v1
+counterfactual baseline (`forward_model.clj:104-111`), and under it
+`sensitivity-factor` returns 1.0 unconditionally (`forward_model.clj:122-131`),
+so every same-type candidate gets an identical prediction and the horizon-one
+F_π is degenerate — the same failure §5 correctly attributes to copying the
+shared scalar. Slice (c)'s run record must record the effects mode, or the
+term's non-degeneracy is not attributable to anything.
+
+**One find outside this item's scope, carried to I1.** `strip-decision`
+(`trace.clj:128-137`) drops `:softmax-weights` from the persisted decision.
+Q(π) is therefore absent from the trace as well as the per-candidate
+predictions. Since the β update of Friston 2017 eq. 2.7 needs π, I1 faces the
+same missing-write-seam problem as I2 and at a second site.
+
+Verified `git status`: no modification under `src/` or `scripts/` from this job.
