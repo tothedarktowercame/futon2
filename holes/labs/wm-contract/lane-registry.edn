@@ -4,10 +4,10 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C386-dependency-closure, :dispatched-at "2026-09-01T02:29:16Z", :job-id "invoke-1788229746720-6515-80a09379", :expected-by "2026-09-01T03:14:16Z"}
+   :holding :C391-adapter-correspondence, :dispatched-at "2026-09-01T02:38:27Z", :job-id "invoke-1788230293148-6527-9a9f3fc4", :expected-by "2026-09-01T03:23:27Z"}
   {:lane :wm-verbs
-   :holding :C390-exit-vocabulary-scope, :dispatched-at "2026-09-01T02:33:31Z", :job-id "invoke-1788230007051-6522-059ef774", :expected-by "2026-09-01T03:18:31Z"}
+   :holding :C393-census-basis-commit, :dispatched-at "2026-09-01T02:38:27Z", :job-id "invoke-1788230302505-6529-024d34a5", :expected-by "2026-09-01T03:23:27Z"}
   {:lane :wm-organization
-   :holding :C384-bind-evidence-to-producer, :dispatched-at "2026-09-01T02:25:24Z", :job-id "invoke-1788229514396-6508-2d7e7592", :expected-by "2026-09-01T03:10:24Z"}
+   :holding :C392-parking-spec-verify-at-use, :dispatched-at "2026-09-01T02:38:27Z", :job-id "invoke-1788230297748-6528-cef45006", :expected-by "2026-09-01T03:23:27Z"}
   {:lane :wm-evidence
    :holding :C389-c284-prose-amendment, :dispatched-at "2026-09-01T02:33:31Z", :job-id "invoke-1788230002419-6521-3e1c26d0", :expected-by "2026-09-01T03:18:31Z"}]}
