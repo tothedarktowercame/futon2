@@ -60,6 +60,8 @@ recording why it cannot be closed, so nobody re-opens it by accident.
 | S24 | Cancelling an operator run is recorded but not counted; `:cancelled` starts a new semantic stratum and is not pooled with cohort 46. | `C206`, C211 |
 | S25 | No existing check is moved to nightly. Any future nightly tier must name its runner and cadence, never merely remove a check. | `RUNBOOK.md` |
 | S26 | Lean negative controls are revalidated **targeted**: a packet that changes a witness runs that witness's negative modes before landing. The full 32 stay on the gate. | O15, Joe 2026-09-01 |
+| S31 | Work divides into **validation** (does the machine do what it claims, and can that be shown) and **overlay** (scheduling, fencing, run certification, systemd entry points, pinned-commit orchestration). Overlay is held as a source of ideas, not worked, because it builds on a claim not yet established and consumes a machine shared with Joe's other projects. Joe: *"just having an entry point on systemd isn't that interesting… this is an overlay layer on top of the validation."* | O19, Joe 2026-09-01 |
+| S32 | **This machine is not given over to this project.** Campaign work that would interrupt Joe's other work needs his call first, not a proposal after the fact. | Joe 2026-09-01 |
 | S30 | The 72 historical Morning Brief items are **retained as a log and not opened**. Joe's reason is not the false-currency hazard C209 raised: *"they're just there as a log of how the system was working in some earlier iterations, and as we've seen, it comprehensively was not working very well."* No retrospective QA, no disposition pass, no epoch boundary. | O11, Joe 2026-09-01 |
 | S29 | Tree hygiene is repaired by **fixing inbox zero**, not by giving each agent a worktree. Worktrees relocate the merge-discipline problem rather than removing it, five stale forks already exist unmerged, and the one-JVM policy exists because a worktree reached the shared server. First repair is to make refusals visible and countable; only then the `:no-session-id` cause. | O27, Joe 2026-09-01 |
 | S28 | Lanes run **continuously and in parallel** — this uses the machine well and is the intended steady state. It is gated on tree hygiene being a facility rather than an event, which `claude-20` owns. | O24, Joe 2026-09-01 |
@@ -119,7 +121,8 @@ the Lean checks, the absence lint, or the census-basis check.
 
 | # | Decision | Who | Note |
 |---:|---|---|---|
-| O19 | **Send the writer-fence parking request.** Generated at `/tmp/parking-request-wm-fence-2026-09-01-a.json` (3 coordinators, 8 units, `futon3c-zone.service` must remain running). **Nothing is parked.** Owner-side standing condition — the quiet-run state machine surviving a review it did not write — is met. | Joe | |
+| ~~O19~~ | **HELD 2026-09-01 as overlay, not decided.** Would park a live APM campaign (196 open sorries, 81 proved, reporting every 15 min) to certify a commit for a run architecture under review, and would still return `:certified-commit :absent` because trees are dirty. Nothing expires. See S31. | Joe | C450 |
+| ~~O19-orig~~ | **Send the writer-fence parking request.** Generated at `/tmp/parking-request-wm-fence-2026-09-01-a.json` (3 coordinators, 8 units, `futon3c-zone.service` must remain running). **Nothing is parked.** Owner-side standing condition — the quiet-run state machine surviving a review it did not write — is met. | Joe | |
 | O20 | **Dirty trees are not covered by the fence.** The fence stops new writes; it does nothing about trees already dirty. futon3c has 6 APM-written files and futon3 has 1 probe artifact, neither the owner's to commit. A fenced run still fails to certify a commit unless all five trees are clean going in. | Joe | `RUNBOOK.md` clean-tree rule |
 | ~~O21~~ | Dissolved with O11: no epoch boundary is being set, so nothing sequences against the run. | Joe | S30 |
 
@@ -134,7 +137,7 @@ the Lean checks, the absence lint, or the census-basis check.
 | O30 | **Can a run produce its own brief?** Joe's acceptance bar: a run must emit the outstanding-decisions list and the build-state numbers without a person assembling them. The numbers half exists in p4ng's 22 generators, aimed at a paper; the decisions half has no producer at all. Mission: `holes/missions/M-run-produces-its-own-brief.md`. | owner, with Joe on the bar | M-run-produces-its-own-brief |
 | O31 | **The architecture of a run.** Joe: *"rather than having two agents like we used to, maybe we want to have four agents exactly with this kind of handoff... the architecture of a run needs to be rethought."* | Joe | same mission |
 | O32 | **Comprehensive rethink of operator-facing surfaces.** Ten face Joe today, several overlapping, one unreachable without knowing an alias. | Joe | same mission |
-| O29 | **Pinned-commit orchestration across repositories** is untouched by O27's answer. Joe raised it and worktrees would have addressed it; repairing inbox zero does not. Still open, still needed for a certified run. | Joe | raised in the O24 sitting |
+| O29 | *(overlay, held)* **Pinned-commit orchestration across repositories** is untouched by O27's answer. Joe raised it and worktrees would have addressed it; repairing inbox zero does not. Still open, still needed for a certified run. | Joe | raised in the O24 sitting |
 | O28 | **Whether large EDN state files move off a full-map rewrite.** `state.edn` is 125.7 MB and `invoke-jobs` is 134.6 MB; two facilities reached the same ceiling independently. Probably one decision with O13, not two. | Joe | C446, O13 |
 
 ---
@@ -144,3 +147,16 @@ the Lean checks, the absence lint, or the census-basis check.
 Add a row when a decision is made or discovered; move rows from Part B to Part
 A with the record that settled them. Do not restate analysis here — a row that
 needs a paragraph needs a `C<n>` record instead.
+
+## Overlay, held 2026-09-01
+
+O19, O29, and the systemd/timer aspects of O16–O17 are held under S31. They are
+retained with their reasoning so a later need finds the work already thought
+through; they are not scheduled. O20 splits — clean trees so agents are not
+misled is validation-adjacent and stays open; clean trees so a commit certifies
+is overlay.
+
+**The question S31 leaves open, and it is the largest one here:** what would
+count as evidence that the machine works? C450 sets out what the last two run
+records show — 9 hops, 3 of 21 declared edges firing, a diagnostic selector
+seam. That is the state any validation criterion has to be written against.
