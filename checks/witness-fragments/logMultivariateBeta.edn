@@ -5,6 +5,6 @@
  :fixture {:repo "futon2"
            :path "holes/labs/wm-contract/log-multivariate-beta-reference.edn"}
  :run-sha "720af918c430415bf07f4eba29ec73d49b343a10"
- :contract-sha "8078028d24528d172cc91697f84e52c42021b7e1"
+ :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a"
  :result :passed
  :recorded-at "2026-08-31T23:50:00Z"}

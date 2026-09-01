@@ -2,6 +2,6 @@
  :check {:repo "futon2" :path "checks/dirichlet_concentrations_witness.clj" :entrypoint "-main"}
  :fixture {:repo "futon2" :path "holes/labs/wm-contract/dirichlet-concentrations-reference.edn"}
  :run-sha "ee5e6a1d50b6980684086c1d157954777ec6176b"
- :contract-sha "8078028d24528d172cc91697f84e52c42021b7e1"
+ :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a"
  :result :passed
  :recorded-at "2026-08-31T23:59:00Z"}
