@@ -32,10 +32,20 @@
        (false? (:native-thread-exhaustion r))
        (case (:source-schema r)
          :wm-click-resource-v1
-         (and (= :shared-serving-jvm (:observation-scope r))
-              (not (contains? #{nil :unknown :service-failed}
-                              (:execution-outcome r))))
+         (= :shared-serving-jvm (:observation-scope r))
          (= 0 (:command-exit r)))))
+
+(def completed-click-outcomes #{:grounded-change :grounded-no-change})
+
+(defn execution-complete? [run resource]
+  (let [route (:route run)
+        trace-hop? (= "TRACE" (some-> route last :toNode node-str))
+        click? (= :wm-click-resource-v1 (:source-schema resource))]
+    (and (true? (:traceWritten run))
+         trace-hop?
+         (or (not click?)
+             (contains? completed-click-outcomes
+                        (:execution-outcome resource))))))
 
 (defn run-identity [run-bytes run]
   (if-let [run-id (:run/id run)]
@@ -76,9 +86,14 @@
         resource-identity-matches? (or (nil? (:run/id resource))
                                        (= (:run/id run) (:run/id resource)))
         resources-clean? (resource-clean? run resource)
+        execution-complete? (execution-complete? run resource)
         identity (run-identity run-bytes run)
-        pass? (boolean (and route-present? run-time? topology-pinned?
-                            (empty? undeclared) resources-clean?))]
+        base-valid? (boolean (and route-present? run-time? topology-pinned?
+                                  (empty? undeclared) resources-clean?))
+        verdict (cond
+                  (not base-valid?) :fail
+                  (not execution-complete?) :incomplete
+                  :else :pass)]
     {:certificate/schema 1
      :certificate/generated-at (str (java.time.Instant/now))
      :run (assoc identity
@@ -99,6 +114,11 @@
                  {:original (vec (sort (remove traversed-pairs original)))
                   :measured (vec (sort (remove traversed-pairs measured)))}}
      :resource-status resource
+     :execution-status {:status (if execution-complete? :complete :incomplete)
+                        :trace-written? (true? (:traceWritten run))
+                        :trace-hop-observed?
+                        (= "TRACE" (some-> route last :toNode node-str))
+                        :terminal-outcome (:execution-outcome resource)}
      :checks {:run-identity-present? (boolean (:id identity))
               :run-identity-source (:identity-kind identity)
               :run-timestamp-present? run-time?
@@ -106,8 +126,9 @@
               :topology-pin-valid? topology-pinned?
               :no-undeclared-traversal? (empty? undeclared)
               :resource-run-identity-matches? resource-identity-matches?
-              :resource-status-clean? resources-clean?}
-     :verdict (if pass? :pass :fail)}))
+              :resource-status-clean? resources-clean?
+              :execution-complete? execution-complete?}
+     :verdict verdict}))
 
 (def boolean-flags #{"--negative" "--negative-run-id" "--negative-run-record"})
 

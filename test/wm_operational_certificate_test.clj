@@ -63,3 +63,27 @@
                 (cert/certificate run-bytes
                                   (assoc clean-resource :native-thread-exhaustion true)
                                   false)))))
+
+(deftest incomplete-click-is-not-certified-as-a-complete-run
+  (let [partial-run (assoc run-record
+                           :run/id "partial-failed-run"
+                           :click/id "partial-click"
+                           :traceWritten false
+                           :route [{:fromNode "R1" :toNode "R4"
+                                    :via "partial-before-failure"
+                                    :at_ "2026-09-01T00:00:01Z"}])
+        partial-resource {:schema 2
+                          :run/id "partial-failed-run"
+                          :source-schema :wm-click-resource-v1
+                          :observation-scope :shared-serving-jvm
+                          :status :clean
+                          :execution-outcome :incomplete
+                          :pids-events-max-delta 0
+                          :native-thread-exhaustion false
+                          :tasks-peak 1}
+        c (cert/certificate (edn-bytes partial-run) partial-resource false)]
+    (is (= :incomplete (:verdict c)))
+    (is (= :clean (get-in c [:resource-status :status])))
+    (is (= :incomplete (get-in c [:execution-status :status])))
+    (is (true? (get-in c [:checks :resource-status-clean?])))
+    (is (false? (get-in c [:checks :execution-complete?])))))
