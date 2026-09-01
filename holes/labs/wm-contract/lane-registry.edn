@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C317-window-evidence-worth, :dispatched-at "2026-09-01T01:08:16Z", :job-id "invoke-1788224890936-6375-ffd3f61c", :expected-by "2026-09-01T01:53:16Z"}
   {:lane :wm-evidence
-   :holding :C314-attack-census, :dispatched-at "2026-09-01T01:05:33Z", :job-id "invoke-1788224724572-6369-41d75193", :expected-by "2026-09-01T01:50:33Z"}]}
+   :holding :C318-fence-verification, :dispatched-at "2026-09-01T01:09:30Z", :job-id "invoke-1788224965229-6377-acd0284c", :expected-by "2026-09-01T01:54:30Z"}]}
