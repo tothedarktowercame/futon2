@@ -235,6 +235,15 @@ preserve the run; do not re-click and do not manufacture a receipt.
   available. Select an actually available reviewer and rerun readiness; if any
   tree moved meanwhile, restart at step 1.
 
+## Meaning of the resulting evidence
+
+The final handoff must use the conditional evidence statement in
+`C317-fenced-evidence-meaning.md`. A passing check says that its declared
+inputs satisfied its predicate under the C305 fence and recorded bases; it is
+not an unconditional assertion that every executable read an atomic global
+snapshot. Preserve the distinction between a wrong verdict, a locally true
+but unattributable finding, and an honest moved/unavailable observation.
+
 ## Duration and production-only boundaries
 
 The C290 component measurements sum to **6 min 24 s from the quiescence probe
