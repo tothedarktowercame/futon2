@@ -196,3 +196,69 @@ following are absent:
 These absences mean beta/gamma dynamics require new formal state and update
 inputs. They cannot be obtained by renaming `:selection-gain`, `log-priors`, or
 the current `:softmax-weights`.
+
+## 6. Owner review (claude-20, 2026-09-01)
+
+Checked against the sources rather than taken on trust.
+
+**§1 is verbatim correct.** Eq. 2.7's inference block reads
+`π = σ(−F − γ · G)` and `β = β + (π − π₀) · G` at `friston2017.txt:660-666`,
+and the paragraph immediately after (`:683-685`) gives `γ = 1/β`,
+`π₀ = σ(−γ · G)`, and "usually one would iterate the equalities in equation 2.7
+until convergence". The page break at 13/14 is where the report says it is.
+
+**The Da Costa refutation is correct and matters for the packet that sent it.**
+A.2 (`dacosta2020.txt:1262-1271`) says only that `σ(−G(π))` can be extended to
+`σ(−γG(π))` with γ an inverse temperature, and closes "We refer the reader to
+[44] for a discussion of the associated belief updating scheme." So A.2 supports
+γ's role in selection and explicitly does NOT state the β update. I1's framing
+cited Da Costa A.2 alongside Friston eq. 2.7 as if both gave the update; one
+does.
+
+**The π₀ refutation is right, and it refutes my own packet.** I proposed
+`π₀ → log-priors`. π₀ is `σ(−γ · G)`, the EFE-only policy distribution
+(`friston2017.txt:684`); `log-priors` is the habit seam `ln E(π)`
+(`policy.clj:82-100`). They are different objects at the same grain, and no WM
+field holds π₀ today.
+
+### The finding neither the report nor the packet drew: I1 depends on I2
+
+The `F` in `π = σ(−F − γ · G)` is not the WM's aggregate channel scalar. Friston's
+notation table defines it as `F : F_π = F(π) = Σ_τ F(π,τ) ∈ ℝ`, "Variational free
+energy for each policy" (`friston2017.txt:291`). That is the same object as Parr
+2022 B.4 — the per-policy F_π that item **I2** exists to compute (C462 §1).
+
+So the β update needs π; π needs F_π; F_π is I2. I1 as written cannot be
+implemented faithfully before I2 lands. The report names the absence (§5 item 5)
+but treats it as one missing input among seven; it is the one that orders the two
+items.
+
+Three ways forward, and the choice is Joe's, not mine — opened as **J3**:
+(a) sequence I2 before I1 and implement 2.7 whole;
+(b) implement β against an F-free π (`σ(ln E − γG)`), a declared deviation that
+    makes the β update measure something eq. 2.7 does not define;
+(c) land the shared trace write seam first as one handoff, then I2, then I1.
+
+### Both items need the same trace write, at two sites
+
+C462 §2 found that `strip-ranked-action` (`trace.clj:76-127`) drops
+`:prediction`, so no per-candidate prediction survives a tick. The sibling
+`strip-decision` (`trace.clj:128-137`) drops `:softmax-weights`, so π does not
+survive either. §3 of this report picks the right home for β — the selection-gain
+read/coerce/write lifecycle at `war_machine.clj:4332-4361` and `:4773-4776` — but
+β is not the only thing that has to persist: the update also needs π and π₀ at
+the tick they were formed. That is a second write at the decision-strip site.
+Section 3's comparison against the anticipation snapshot is sound as far as it
+goes; it answers where β lives, not where π does.
+
+**§4 accepted.** The collision is real: `arena-tau-mode`
+(`war_machine.clj:238-248`) maps every non-`spread` value to
+`:selection-gain-only`, so a new environment value silently produces the old mode
+at the parser, and `effective-temperature` (`policy.clj:72-80`) throws on any
+third keyword — both parser and dispatch must change together. The stale
+`:gamma-only` labels are at `dark_mode_shadow.bb:9-13` and `:144-151`.
+`:variational-beta-gamma` is a good name; adopting it, and correcting the stale
+shadow labels in the same slice rather than aliasing them.
+
+`pointer_check.bb`: 180 pointers in 3 files, 0 unresolved. No `src/` or
+`scripts/` modification from this job.
