@@ -7,6 +7,7 @@
 
 (def root (fs/cwd))
 (def fixture-path (fs/path root "holes/labs/wm-contract/cascade-diff-reference.edn"))
+(def claim :content-current)
 
 (defn reachable? [edges from to]
   (loop [frontier [from] seen #{}]
@@ -87,7 +88,7 @@
                negative-kind (str "cascade-diff-witness: negative-control PASS ("
                                   (name negative-kind) " mutation rejected; claims "
                                   (pr-str (cascade-claims tested)) ")")
-               accepted? "cascade-diff-witness: PASS"
+               accepted? (str "cascade-diff-witness: PASS claim=" claim)
                :else "cascade-diff-witness: FAIL"))
     (System/exit exit)))
 

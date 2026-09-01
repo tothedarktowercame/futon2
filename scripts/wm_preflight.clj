@@ -18,7 +18,8 @@
             [futon2.aif.actuator-a6 :as a6]
             [futon2.aif.close-loop :as cl]
             [futon2.aif.fold-escrow :as esc]
-            [clojure.string :as str]))
+            [clojure.string :as str])
+  (:import [java.time Instant]))
 
 (defn- onoff [b] (if b "ON " "off"))
 
@@ -31,8 +32,39 @@
     (boolean (some #(let [m (stem %)] (or (str/includes? m s) (str/includes? s m)))
                    missions))))
 
+(defn parse-cli [args]
+  (loop [xs args fence-id nil missions []]
+    (if (empty? xs)
+      {:writer-fence-id fence-id :missions missions}
+      (if (= "--writer-fence" (first xs))
+        (if-let [id (second xs)]
+          (recur (nnext xs) id missions)
+          (throw (ex-info "--writer-fence requires an id" {})))
+        (recur (rest xs) fence-id (conj missions (first xs)))))))
+
+(defn readiness-claim [started-at finished-at writer-fence-id]
+  {:claim :event-free
+   :interval {:started-at (str started-at) :finished-at (str finished-at)}
+   :writer-fence (if writer-fence-id
+                   {:status :held :id writer-fence-id}
+                   {:status :absent :reason :not-declared})
+   :event-free? (if writer-fence-id true :unverified)
+   :distinguishable-cause? (boolean writer-fence-id)})
+
+(defn readiness-label [ready? writer-fence-id]
+  (cond
+    (not ready?) "NOT-READY ✗"
+    writer-fence-id (str "READY (FENCE-CONDITIONAL " writer-fence-id ") ✓")
+    :else "READY-CONTENT-ONLY (event-free unverified) ⚠"))
+
 (defn -main [& missions]
+  (let [{:keys [writer-fence-id missions]} (parse-cli missions)
+        started-at (Instant/now)]
   (println "══ WM readiness preflight (G4) ══")
+  (println "claim: readiness-over-observation-interval"
+           "writer-fence:" (if writer-fence-id
+                              (str "HELD (declared) " writer-fence-id)
+                              "ABSENT — event freedom unverified"))
 
   (println "\n── Deliberation arms (Tier-1, world-inert; change thinking) ──")
   (doseq [[label v] [["pattern model-uncertainty bonus" a6/*pattern-grain-model-uncertainty?*]
@@ -71,7 +103,8 @@
                 (let [has (deposit-for? dmissions m)
                       ready (and enact-armed has)]
                   (println (format "  %-32s deposit:%-4s → %s"
-                                   m (if has "yes" "NONE") (if ready "READY ✓" "NOT-READY ✗")))
+                                   m (if has "yes" "NONE")
+                                   (readiness-label ready writer-fence-id)))
                   (when-not has
                     (println "      ↳ no deposit → fold abstains, ΔG nil, γ holds (silent no-op — the G1 gap)"))
                   (when-not enact-armed
@@ -79,4 +112,6 @@
             (do
               (println "  missions WITH a deposit (runnable without new authoring):")
               (doseq [m (sort (distinct dmissions))] (println "    •" m))
-              (println "\n  (pass mission ids as args for a per-mission READY verdict)"))))))))
+              (println "\n  (pass mission ids as args for a per-mission readiness verdict)"))))))
+    (println "\nobservation:" (pr-str (readiness-claim started-at (Instant/now)
+                                                       writer-fence-id))))))

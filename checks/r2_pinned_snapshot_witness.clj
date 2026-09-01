@@ -3,6 +3,7 @@
   (:require [clojure.edn :as edn]))
 
 (def fixture "holes/labs/wm-contract/R2-D2-report.edn")
+(def claim :content-current)
 (def expected-pin "b2c3aeb408cc4de59947ad93f9c1ea17b735fc0da26e188ada7c24609bffbca1")
 (defn valid? [x]
   (and (= 54 (get-in x [:summary :files]))
@@ -22,7 +23,7 @@
     (println (cond
                (and kind accepted?) "r2-pinned-snapshot: mutation slipped"
                kind (str "r2-pinned-snapshot: negative-control PASS (" (name kind) " rejected)")
-               accepted? "r2-pinned-snapshot: PASS"
+               accepted? (str "r2-pinned-snapshot: PASS claim=" claim)
                :else "r2-pinned-snapshot: FAIL"))
     (System/exit (cond (and kind accepted?) 2 kind 0 accepted? 0 :else 1))))
 (apply -main *command-line-args*)

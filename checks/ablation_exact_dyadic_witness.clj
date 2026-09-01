@@ -4,6 +4,7 @@
             [clojure.set :as set]))
 
 (def fixture "holes/labs/wm-contract/ablation-exact-dyadic.edn")
+(def claim :content-current)
 (defn q [[n d]] (/ n d))
 (defn argmins [rows k]
   (let [best (apply min (map #(q (k %)) rows))]
@@ -28,6 +29,7 @@
     (println (if negative?
                (if accepted? "ablation-exact-dyadic: mutation slipped"
                    "ablation-exact-dyadic: negative-control PASS (minimizer separation removed and rejected)")
-               (if accepted? "ablation-exact-dyadic: PASS" "ablation-exact-dyadic: FAIL")))
+               (str (if accepted? "ablation-exact-dyadic: PASS" "ablation-exact-dyadic: FAIL")
+                    " claim=" claim)))
     (System/exit (cond (and negative? accepted?) 2 negative? 0 accepted? 0 :else 1))))
 (apply -main *command-line-args*)

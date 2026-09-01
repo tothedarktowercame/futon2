@@ -6,6 +6,7 @@
 (def default-ledger
   "/home/joe/code/p4ng/vetting/OBLIGATIONS-REVERIFY-2026-08-31.md")
 (def table-end "<!-- CURRENT TABLE END -->")
+(def claim :content-current)
 (def canonical-obligations
   (set (concat (map #(str "O" %) (range 1 23)) ["O1c" "O1d"])))
 
@@ -99,6 +100,7 @@
                                     "| **still-open** |")
                  original)]
       (assoc (check-text text)
+             :claim claim
              :reads [{:path path :sha256 (sha256 original)}]
              :negative-mutation (when negative? :one-current-row-reverted-to-still-open)))))
 

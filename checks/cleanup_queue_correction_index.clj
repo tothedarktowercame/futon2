@@ -3,6 +3,7 @@
   (:require [clojure.string :as str]))
 
 (def queue-path "/home/joe/code/p4ng/vetting/CLEANUP-QUEUE.md")
+(def claim :content-current)
 
 (def index-pattern
   #"<!-- CORRECTION id=([^ ]+) target=([^ ]+) -->")
@@ -62,7 +63,7 @@
         success? (if negative? (not (:pass? result)) (:pass? result))]
     (println "cleanup-queue-correction-index:"
              (if success? "PASS" "FAIL")
-             (pr-str (assoc result :negative-control negative?))
+             (pr-str (assoc result :negative-control negative? :claim claim))
              "exit-convention=0-pass/1-fail")
     (System/exit (if success? 0 1))))
 
