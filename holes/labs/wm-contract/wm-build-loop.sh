@@ -10,6 +10,26 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOG="$HERE/runs/build-loop.log"; mkdir -p "$HERE/runs"
 WORK_SEAT="${WORK_SEAT:-claude}"; REVIEW_SEAT="${REVIEW_SEAT:-codex}"; SLEEP="${SLEEP:-20}"; MAX_ITER="${MAX_ITER:-60}"
 log() { echo "[$(date -u '+%H:%M:%S')] $*" | tee -a "$LOG"; }
+# Every way out of this loop bells claude-1 (the Emacs seat) with the reason and
+# the tail of the log, so a stopped loop is a message in that session, not a
+# discovery the next day (Joe, 2026-09-01: "if it stops, I feel like you should
+# get an error message sent through to this session so that you could fix it").
+NOTIFIED=0
+notify() { # $1 reason
+  [ "$NOTIFIED" = 1 ] && return 0; NOTIFIED=1
+  { echo "From wm-build-loop.sh, $(date -u '+%Y-%m-%d %H:%M:%S') UTC. STOPPED: $1"
+    echo "Ledger counts: $(bb "$HERE/build_step.bb" counts 2>/dev/null)"
+    echo "Last 40 log lines ($LOG):"; tail -40 "$LOG"
+    echo; echo "To restart after fixing: cd $HERE && nohup ./wm-build-loop.sh > /tmp/wm-build-nohup.out 2>&1 &"
+  } > /tmp/wm-build-notify.md
+  (cd "$HOME/code" && python3 futon3c/scripts/agency_send.py --from wm-build-loop --to claude-1 --kind bell < /tmp/wm-build-notify.md >> "$LOG" 2>&1) || log "notify: bell to claude-1 failed"
+}
+trap 'rc=$?; notify "exit code $rc (trap)"' EXIT
+STALL_ID=""; STALL_N=0
+stall_check() { # $1 next-open id; three iterations on the same open row with nothing reviewed = stalled
+  if [ "$1" = "$STALL_ID" ]; then STALL_N=$((STALL_N+1)); else STALL_ID="$1"; STALL_N=1; fi
+  if [ "$STALL_N" -ge 3 ] && [ "$1" != "NONE" ]; then log "stalled: $1 has been next-open for $STALL_N iterations without changing status"; notify "stalled on row $1 (3 iterations, no status change)"; exit 3; fi
+}
 run_seat() { # $1 seat, $2 prompt file, $3 label
   local seat="$1" prompt="$2" label="$3"
   log "$label: $seat starting"
@@ -36,22 +56,23 @@ log "=== wm-build-loop start (work=$WORK_SEAT review=$REVIEW_SEAT) ==="
 i=0
 while [ $i -lt "$MAX_ITER" ]; do
   i=$((i+1))
-  ledger_ok || { log "ledger invalid; stopping"; exit 1; }
+  ledger_ok || { log "ledger invalid; stopping"; notify "ledger invalid before work"; exit 1; }
   bb "$HERE/build_step.bb" unblock | tee -a "$LOG"
   if [ -n "$(bb "$HERE/build_step.bb" unblock)" ]; then (cd "$HOME/code/futon2" && git add holes/labs/wm-contract/worklist.edn && git commit -q -m "worklist: wm-build-loop unblocked rows whose :depends-on are done"); fi
   next="$(bb "$HERE/build_step.bb" next-open)"; unrev="$(bb "$HERE/build_step.bb" unreviewed)"
   log "iteration $i: next-open=$next unreviewed=[$unrev] counts=$(bb "$HERE/build_step.bb" counts)"
-  if [ "$next" = "NONE" ] && [ -z "$unrev" ]; then log "nothing open or unreviewed; done"; publish; break; fi
+  [ -z "$unrev" ] && stall_check "$next"
+  if [ "$next" = "NONE" ] && [ -z "$unrev" ]; then log "nothing open or unreviewed; done"; publish; notify "DONE: nothing open or unreviewed"; break; fi
   if [ "$next" != "NONE" ]; then
     run_seat "$WORK_SEAT" "$HERE/worklist-prompt.md" "work($next)"
-    ledger_ok || { log "ledger invalid after work; stopping"; exit 1; }
+    ledger_ok || { log "ledger invalid after work; stopping"; notify "ledger invalid after work"; exit 1; }
   fi
   unrev="$(bb "$HERE/build_step.bb" unreviewed)"
   if [ -n "$unrev" ]; then
     run_seat "$REVIEW_SEAT" "$HERE/review-prompt.md" "review($unrev)"
-    ledger_ok || { log "ledger invalid after review; stopping"; exit 1; }
+    ledger_ok || { log "ledger invalid after review; stopping"; notify "ledger invalid after review"; exit 1; }
   fi
   publish
   sleep "$SLEEP"
 done
-log "=== wm-build-loop end after $i iterations ==="
+log "=== wm-build-loop end after $i iterations ==="; notify "ended after $i iterations (MAX_ITER=$MAX_ITER or done)"
