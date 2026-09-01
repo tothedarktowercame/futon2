@@ -1,6 +1,6 @@
 (ns run-tick-once-test
   (:require [babashka.http-client :as http]
-            [clojure.test :refer [deftest is]]
+            [clojure.test :refer [deftest is testing]]
             [futon2.report.war-machine :as wm]
             [futon2.run-tick-once :as tick]))
 
@@ -26,6 +26,28 @@
     (is (not= first-path second-path))
     (is (.endsWith first-path "tick-run-record-2026-09-01-run-one.edn"))
     (is (.endsWith second-path "tick-run-record-2026-09-01-run-two.edn"))))
+
+(deftest diagnostic-judge-opts-carry-the-run-id-test
+  (testing "RUN11: the id the receipt will carry reaches the judge, and so the trace"
+    (let [opts (#'tick/diagnostic-judge-opts :selector {:version :test} "run-42")]
+      (is (= "run-42" (:run-id opts))))
+    (is (not (contains? (#'tick/diagnostic-judge-opts :selector {:version :test})
+                        :run-id))
+        "no run id passed ⇒ no key, so the trace record makes no run claim")))
+
+(deftest receipt-and-trace-name-the-same-run-test
+  (testing "RUN11: the receipt's :run/id is the key the trace record is selected by"
+    (let [run-id "run-42"
+          receipt (#'tick/tick-run-record run-id "2026-09-01T00:00:00Z"
+                                          {:count 1 :max-at "x"}
+                                          {:entries-read 1 :entries-limit 2}
+                                          {:input-status {:inputs-read 0 :issues []}
+                                           :preference-stack []
+                                           :wm/route []}
+                                          {:seam :test} true)
+          judge-opts (#'tick/diagnostic-judge-opts :selector {:version :test} run-id)]
+      (is (= (:run/id receipt) (:run-id judge-opts))
+          "one id is minted per tick and both sides read it"))))
 
 (deftest diagnostic-entrypoint-suppresses-portfolio-step-test
   (let [opts (#'tick/diagnostic-judge-opts :selector {:version :test})]
@@ -79,4 +101,11 @@
                   :reason :invariant-eval-fallback-suppressed}
                  (get-in run [:result :invariants :live-status])))
           (is (false? (:step-mission-detail-portfolio? @generated-opts)))
-          (is (false? (:eval-invariant-fallback? @generated-opts))))))))
+          (is (false? (:eval-invariant-fallback? @generated-opts)))
+          ;; RUN11: on the real entrypoint path, the id minted for this tick
+          ;; reaches the judge opts AND the receipt as one value. That is what
+          ;; puts :run/id on the trace record the judge writes.
+          (is (string? (:run-id @generated-opts)))
+          (is (= (get-in run [:tick-run-record :run/id])
+                 (:run-id @generated-opts))
+              "receipt and judge opts name the same run"))))))

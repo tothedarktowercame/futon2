@@ -518,6 +518,22 @@
     ;; claim, and therefore no :wm/route key.
     (seq (:wm/route judge-output))
     (assoc :wm/route (:wm/route judge-output))
+    ;; RUN11 run identity. The per-date trace file is shared by every run on
+    ;; the day, so without this key the only discriminator between two runs'
+    ;; records is the timestamp and a reader has to select by range. `:run/id`
+    ;; is the SAME key and the same value the tick's receipt carries
+    ;; (`run_tick_once.clj/tick-run-record`), so a receipt and its trace record
+    ;; join literally. MEASURED cost, on the twenty S1b policy-detail records
+    ;; (holes/labs/wm-contract/runs/2026-09-01-s1b/wm-trace-s1b.edn): +48 bytes
+    ;; on a 1,045,286-byte record, 0.0046%, identical on every record because
+    ;; a UUID string has fixed width. So it is unconditional, not flagged.
+    ;; Present-only: a producer that has no run id (the scheduled runner,
+    ;; `scripts/wm_scheduled_run.clj:113`, and the full-loop runner,
+    ;; `src/futon2/aif/full_loop_runner.clj:2639`, neither of which mints one)
+    ;; writes no key — an absent `:run/id` means the producer could not name a
+    ;; run, NOT that the record belongs to an unnamed one.
+    (:run/id judge-output)
+    (assoc :run/id (:run/id judge-output))
     ;; R16 close-the-loop seam (interface paired with claude-10): the enactor
     ;; writes `:realized-outcome` at enactment; R14's γ reader consumes it next
     ;; tick (see `selection-gain/fold-realized-outcome`). Present-only —

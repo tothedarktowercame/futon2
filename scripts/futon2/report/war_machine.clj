@@ -4394,11 +4394,17 @@
      `:include-advisory-lanes? false` for real actuation, where the selected
      target is constructed once in the subsequent construction phase. This
      does not change `wm-decision`: cascade actions are held-for-arming and
-     appended only after policy selection."
+     appended only after policy selection.
+
+   `:run-id` (RUN11) names the run whose receipt this tick will write; it is
+     carried onto the judgement as `:run/id` and persisted by
+     `futon2.aif.trace/trace-record`, so a trace record can be selected by run
+     identity rather than by timestamp range. Optional: callers that mint no
+     run id leave the key off the record."
   ([scan-data] (judge scan-data {}))
   ([scan-data {:keys [trace? trace-dir scan-id include-advisory-lanes?
                       step-portfolio? eval-invariant-fallback?
-                      strategic-selection-fn wm-version]
+                      strategic-selection-fn wm-version run-id]
                :or {trace? false include-advisory-lanes? true
                     step-portfolio? true eval-invariant-fallback? true}}]
   (let [route0 (:wm/route scan-data)
@@ -4990,7 +4996,14 @@
           habit-prior-state
           (assoc :habit-prior-state habit-prior-state)
           wm-version
-          (assoc :wm-version wm-version))
+          (assoc :wm-version wm-version)
+          ;; RUN11: the caller's run id, carried onto the judgement so
+          ;; `trace/trace-record` can persist it under the same `:run/id` the
+          ;; tick receipt uses. Present-only — a caller that passes no
+          ;; `:run-id` (the scheduled runner and the full-loop runner) leaves
+          ;; the key off the record entirely.
+          run-id
+          (assoc :run/id run-id))
         result
         (if trace?
           (let [result (update result0 :wm/route route-tag :TRACE "futon2.aif.trace/write-trace!")]

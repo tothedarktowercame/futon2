@@ -200,14 +200,21 @@
     (Long/parseLong s)
     14))
 
-(defn- diagnostic-judge-opts [selector version-stamp]
-  {:trace? true
-   :include-advisory-lanes? false
-   :step-portfolio? false
-   :step-mission-detail-portfolio? false
-   :eval-invariant-fallback? false
-   :strategic-selection-fn selector
-   :wm-version version-stamp})
+(defn- diagnostic-judge-opts
+  "RUN11: `run-id` is threaded into the judge opts so the trace record carries
+  the same `:run/id` this tick's receipt carries. Both come from the one id
+  minted in `run-tick-once*`, so the join between a receipt file and its trace
+  record is an equality, not a timestamp comparison."
+  ([selector version-stamp] (diagnostic-judge-opts selector version-stamp nil))
+  ([selector version-stamp run-id]
+   (cond-> {:trace? true
+            :include-advisory-lanes? false
+            :step-portfolio? false
+            :step-mission-detail-portfolio? false
+            :eval-invariant-fallback? false
+            :strategic-selection-fn selector
+            :wm-version version-stamp}
+     run-id (assoc :run-id run-id))))
 
 (defn- tick* [days started-at run-id]
   (let [date-str (today-date-string)
@@ -221,7 +228,7 @@
                               :trigger :diagnostic-run-tick-once
                               :live-wire? false))
         generated (wm/generate-war-machine
-                   days (diagnostic-judge-opts selector version-stamp))
+                   days (diagnostic-judge-opts selector version-stamp run-id))
         result (-> (:judgement generated)
                    (assoc :preference-stack efe/preference-stack-record
                           :selector-seam selector-seam)

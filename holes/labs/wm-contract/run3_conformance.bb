@@ -1,7 +1,19 @@
 #!/usr/bin/env bb
 ;; RUN3 -- conformance of a recorded run against the drawn topology.
 ;;
-;;   bb run3_conformance.bb runs/2026-09-01-s1b/wm-trace-s1b.edn
+;;   bb run3_conformance.bb runs/2026-09-01-s1b            ; select by run id
+;;   bb run3_conformance.bb runs/2026-09-01-s1b/wm-trace-s1b.edn  ; a trace file
+;;
+;; SELECTION (RUN11). Given a RUN DIRECTORY, the records of that run are the
+;; records of the shared per-date trace file whose `:run/id` is one of the ids
+;; the run's `tick-run-record-<date>-<id>.edn` receipts carry. That is an
+;; equality on identity, so it needs no clock reasoning and cannot be widened
+;; by a neighbouring run. Records written before RUN11 landed carry no
+;; `:run/id`, and for those the run directory's pre-extracted
+;; `wm-trace-*.edn` -- which S1b built from a timestamp range
+;; (runs/2026-09-01-s1b/COLLISION-NOTE.md) -- is the FALLBACK, used only when
+;; by-id selection finds nothing. Which of the two was used is printed and
+;; recorded in conformance.edn as `:selection`.
 ;;
 ;; A route is a SEQUENCE of {:node :via :at} tags (war_machine.clj:4340-4345),
 ;; so a hop is a CONSECUTIVE PAIR of nodes. The receipt's :fromNode/:toNode is a
@@ -49,6 +61,55 @@
                         {} (:decisions m))]
     {:drawn drawn :measured measured :retired retired}))
 
+(def trace-dir
+  ;; The shared per-date trace directory. Overridable only so the negative
+  ;; controls can exercise by-id selection against a planted file: every record
+  ;; written before RUN11 landed carries no :run/id, so without an override the
+  ;; by-id branch would be unexercised code claiming to be the method.
+  (or (System/getenv "FUTON_WM_TRACE_DIR")
+      "/home/joe/code/futon2/data/wm-trace"))
+
+(def receipt-re #"^tick-run-record-(\d{4}-\d{2}-\d{2})-(.+)\.edn$")
+
+(defn receipts
+  "The run's tick receipts: [date run-id] per file, from the names RUN10 gave
+   them. The run id is read from the receipt's :run/id, not from the filename,
+   so a renamed file cannot silently widen the selection."
+  [run-dir]
+  (->> (.listFiles (io/file run-dir))
+       (keep (fn [f]
+               (when-let [[_ date _] (re-matches receipt-re (.getName f))]
+                 (when-let [id (:run/id (edn/read-string (slurp f)))]
+                   [date id]))))
+       vec))
+
+(defn select-records
+  "Records of one run, and how they were selected. Returns
+   {:records [...] :selection :by-run-id|:by-timestamp-range ...}."
+  [run-dir]
+  (let [rs (receipts run-dir)
+        ids (set (map second rs))
+        dates (sort (distinct (map first rs)))
+        shared (mapcat #(let [f (io/file trace-dir (str "wm-trace-" % ".edn"))]
+                          (when (.exists f) (read-forms (str f))))
+                       dates)
+        by-id (filterv #(contains? ids (:run/id %)) shared)]
+    (if (seq by-id)
+      {:records by-id :selection :by-run-id
+       :receipts (count rs) :run-ids (count ids) :dates dates}
+      (let [extracted (->> (.listFiles (io/file run-dir))
+                           (filter #(re-matches #"wm-trace-.*\.edn" (.getName %)))
+                           sort
+                           first)]
+        (when-not extracted
+          (binding [*out* *err*]
+            (println (str "run3: no record of this run carries :run/id (pre-RUN11), "
+                          "and no extracted wm-trace-*.edn is in " run-dir)))
+          (System/exit 2))
+        {:records (read-forms (str extracted)) :selection :by-timestamp-range
+         :receipts (count rs) :run-ids (count ids) :dates dates
+         :fallback-file (.getName extracted)}))))
+
 (defn hops [record]
   (->> (:wm/route record) (map :node) (map name) (partition 2 1) (mapv vec)))
 
@@ -62,9 +123,8 @@
       (measured hop)                   :route-measured
       :else                            :unmapped)))
 
-(defn report [trace-path]
+(defn report [records]
   (let [topo (topology)
-        records (read-forms trace-path)
         all (mapcat hops records)
         by-class (group-by #(classify topo %) (distinct all))
         f-pi (count (filter #(contains? % :f-pi-by-candidate-id) records))
@@ -91,14 +151,35 @@
        :unfired (count never) :drawn (count (:drawn topo))})))
 
 (let [args *command-line-args*
-      path (or (first args) "runs/2026-09-01-s1b/wm-trace-s1b.edn")
-      summary (report path)
+      path (or (first args) "runs/2026-09-01-s1b")
+      target (io/file path)
+      dir? (.isDirectory target)
+      ;; RUN11: a run directory selects by run id; a file is read as given,
+      ;; which is how a pre-RUN11 timestamp-extracted trace is still checkable.
+      selected (if dir?
+                 (select-records path)
+                 {:records (read-forms path) :selection :file-as-given})
+      _ (println (format "run3: selection %s (%s)"
+                         (name (:selection selected))
+                         (if dir?
+                           (format "%d receipts, %d run ids, dates %s%s"
+                                   (:receipts selected) (:run-ids selected)
+                                   (str/join "," (:dates selected))
+                                   (if-let [f (:fallback-file selected)]
+                                     (str ", fallback " f) ""))
+                           path)))
+      summary (cond-> (assoc (report (:records selected))
+                             :selection (:selection selected)
+                             :selection-run-ids (:run-ids selected))
+                (:fallback-file selected)
+                (assoc :selection-fallback-file (:fallback-file selected)))
       {:keys [refutations unmapped]} summary
       ;; Machine-readable summary beside the trace, and a stable copy the figure
       ;; generator reads (p4ng gen_live_topology.bb: legend line "route
       ;; conformance"), so the drawing names the run it was last checked
       ;; against instead of two August records. Only for a file under runs/.
-      run-dir (let [f (io/file path)] (when (re-find #"runs/" (str f)) (.getParentFile f)))
+      run-dir (when (re-find #"runs/" (str target))
+                (if dir? target (.getParentFile target)))
       readme (when run-dir (io/file run-dir "README.md"))
       sha (when (and readme (.exists readme))
             (second (re-find #"sha `([0-9a-f]{7,40})`" (slurp readme))))

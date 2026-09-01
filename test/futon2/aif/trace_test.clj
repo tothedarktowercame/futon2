@@ -105,6 +105,32 @@
                         :wm/route))
         "an empty route is also absent rather than persisted as evidence")))
 
+(deftest run-id-roundtrips-through-the-shared-trace-file-test
+  (testing "RUN11: records of two runs in one per-date file are separable by id"
+    (let [run-id "0a1b2c3d-4e5f-6071-8293-a4b5c6d7e8f9"
+          other-id "ffffffff-0000-1111-2222-333333333333"
+          date "2026-09-01"]
+      (trace/write-trace! (assoc sample-judge-output :run/id run-id)
+                          :dir *tmpdir* :date-str date)
+      (trace/write-trace! (assoc sample-judge-output :run/id other-id)
+                          :dir *tmpdir* :date-str date)
+      (trace/write-trace! sample-judge-output :dir *tmpdir* :date-str date)
+      (let [records (trace/read-trace :dir *tmpdir* :date-str date)]
+        (is (= 3 (count records)))
+        (is (= [run-id other-id] (keep :run/id records))
+            "the id survives the EDN write/read round trip, in write order")
+        (is (= 1 (count (filter #(= run-id (:run/id %)) records)))
+            "selection is by identity, with no timestamp arithmetic")
+        (is (not (contains? (nth records 2) :run/id))
+            "a producer with no run id makes no claim about which run wrote it")))))
+
+(deftest run-id-is-absent-not-nil-when-the-producer-has-none-test
+  (is (not (contains? (trace/trace-record sample-judge-output) :run/id))
+      "absence is the explicit signal that the producer minted no run id")
+  (is (= "run-7" (:run/id (trace/trace-record
+                           (assoc sample-judge-output :run/id "run-7"))))
+      "and a producer that has one persists it verbatim"))
+
 (deftest f-pi-dark-off-is-byte-identical-to-previous-implementation-test
   (testing "the default-off record matches HEAD~ byte-for-byte apart from its clock"
     (binding [trace/*persist-policy-trace-details?* false]
