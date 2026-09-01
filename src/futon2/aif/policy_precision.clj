@@ -42,6 +42,43 @@
   [pi pi-0 g-values]
   (reduce + (map (fn [p p0 g] (* (- p p0) g)) pi pi-0 g-values)))
 
+(defn- fixed-point-residual
+  "eq. 2.7's residual at BETA for a fixed carried BETA-PRIOR:
+   beta_prior + (pi(beta) - pi_0(beta)) . G - beta."
+  [beta-prior beta g-values f-pi-values]
+  (let [{:keys [pi-0 pi]} (distributions beta g-values f-pi-values)]
+    (- (+ beta-prior (dot-difference pi pi-0 g-values)) beta)))
+
+(defn- bisect-beta
+  "Close a bracket on eq. 2.7's root instead of stepping toward it.
+
+   The residual above was measured strictly decreasing in beta with exactly one
+   sign change over exp(-6)..exp(6) on the 110-candidate 07-04 field, for every
+   beta_prior in {0.5, 1, 2, 5} -- so the root is unique there and bisection
+   reaches it. That is a NUMERICAL observation on one field, not a proof of
+   monotonicity, which is why the bracket ends are checked for opposite signs
+   and reported rather than assumed: if they ever agree, this returns
+   `:bracketed? false` and no root, instead of halving its way to a midpoint
+   that means nothing."
+  [beta-prior lo hi g-values f-pi-values tolerance max-iterations]
+  (let [f #(fixed-point-residual beta-prior % g-values f-pi-values)
+        f-lo (f lo)
+        f-hi (f hi)]
+    (if (pos? (* f-lo f-hi))
+      {:bracketed? false :beta nil :evaluations 2
+       :residual-at-floor f-lo :residual-at-ceiling f-hi}
+      (loop [lo lo hi hi n 2]
+        (let [mid (* 0.5 (+ lo hi))
+              width (- hi lo)]
+          (if (or (>= n max-iterations)
+                  (<= width (* 1.0e-15 (max 1.0 (Math/abs mid))))
+                  (<= (Math/abs (f mid)) tolerance))
+            {:bracketed? true :beta mid :evaluations n
+             :bracket-width width}
+            (if (pos? (f mid))
+              (recur mid hi (inc n))
+              (recur lo mid (inc n)))))))))
+
 (defn converge-beta
   "Iterate Friston 2017 Appendix B's beta gradient flow to eq. 2.7's fixed point.
 
@@ -56,10 +93,38 @@
      epsilon_gamma = (beta_prior - beta) + (pi - pi_0) dot G
      beta_next = beta + step_size * gamma^2 * epsilon_gamma
 
-   This is Appendix B's discrete relaxation (default `:step-size` 0.25, the
-   paper's simulation value), rather than repeatedly assigning the right side
-   of eq. 2.7. Both have the same fixed point, while the restoring term makes
-   the carried prior explicit.
+   TWO SOLVERS. `:solver :bisect` (DEFAULT) closes a bracket on the root of
+   eq. 2.7 directly; `:solver :gradient` runs Appendix B's discrete relaxation,
+   which is the scheme the paper used. They agree on this field to 1e-9 or
+   better wherever the gradient solver converges, so the gradient path is
+   retained as a cross-check rather than as the working solver.
+
+   WHY BISECTION IS THE DEFAULT, on measurements against the 110-candidate
+   07-04 field. Eq. 2.7 defines a scalar fixed point in one unknown; iterating
+   to it is the paper's scheme, not a property the object has. Stepping in beta
+   costs `step * gamma^2 = step / beta^2` per iteration, so the beta-space
+   landscape flattens as beta grows and everything degrades with it:
+
+     beta_prior   0.5      1.0      2.0      5.0       50        500
+     gradient       5       24      258     1726   171018   >200000 (wrong
+                                                             in the 8th
+                                                             decimal)
+     bisect        70       70       70       68       65        61
+
+   Bisection is flat in beta and slightly CHEAPER for large beta, because the
+   bracket is fixed while the root moves toward one end. It also has no step
+   size, so it has no stability boundary: at `:step-size` 1.0 the gradient
+   solver settles on the WRONG gamma for beta_prior 0.5 and 1.0 (0.319 against
+   the true 2.009), and at 4.0 it diverges to beta 2e12. None of that arises
+   here. Under the carried-prior ruling (worklist J4) beta is the previous
+   tick's posterior, so a solver whose cost grows with beta would have made a
+   drifting beta progressively more expensive every tick; with this one it does
+   not (claude-1's finding, C461 review thread, 2026-09-01).
+
+   `:beta-floor` and `:beta-ceiling` are the BRACKET under `:bisect`, not
+   guards to clamp against, and the bracket ends are checked for opposite signs
+   rather than assumed: `:bracketed? false` is returned with both end residuals
+   if they ever agree.
 
    `:step-size` 0.25 is not only the paper's number; it is inside this
    iteration's STABILITY BOUNDARY at small beta, and the boundary moves with
@@ -102,8 +167,9 @@
   ([beta-prior g-values f-pi-values]
    (converge-beta beta-prior g-values f-pi-values {}))
   ([beta-prior g-values f-pi-values
-    {:keys [step-size tolerance max-iterations beta-floor beta-ceiling]
-     :or {step-size 0.25
+    {:keys [solver step-size tolerance max-iterations beta-floor beta-ceiling]
+     :or {solver :bisect
+          step-size 0.25
           tolerance 1.0e-9
           max-iterations 4096
           beta-floor 1.0e-6
@@ -128,6 +194,9 @@
      (fail! "beta-ceiling must be finite and above beta-floor"
             {:error :invalid-beta-ceiling
              :value beta-ceiling :beta-floor beta-floor}))
+   (when-not (#{:bisect :gradient} solver)
+     (fail! ":solver must be :bisect or :gradient"
+            {:error :invalid-solver :value solver}))
    (let [beta-prior (double beta-prior)
          step-size (double step-size)
          tolerance (double tolerance)
@@ -140,7 +209,40 @@
               {:error :length-mismatch
                :g-count (count g-values)
                :f-pi-count (count f-pi-values)}))
-     (loop [beta (-> beta-prior (max beta-floor) (min beta-ceiling))
+     (if (= :bisect solver)
+       (let [{:keys [bracketed? beta evaluations bracket-width
+                     residual-at-floor residual-at-ceiling]}
+             (bisect-beta beta-prior beta-floor beta-ceiling
+                          g-values f-pi-values tolerance max-iterations)
+             beta (or beta beta-prior)
+             {:keys [gamma pi-0 pi]} (distributions beta g-values f-pi-values)
+             policy-error (dot-difference pi pi-0 g-values)
+             residual (+ (- beta-prior beta) policy-error)]
+         {:solver :bisect
+          :beta-prior beta-prior
+          :beta-posterior beta
+          :gamma gamma
+          :pi-0 pi-0
+          :pi pi
+          :policy-error policy-error
+          :fixed-point-residual residual
+          :iterations evaluations
+          :converged? (boolean (and bracketed?
+                                    (<= (Math/abs residual) tolerance)))
+          :hit-bound? (boolean (and bracketed?
+                                    (>= evaluations max-iterations)
+                                    (> (Math/abs residual) tolerance)))
+          :bracketed? bracketed?
+          :bracket-width bracket-width
+          :residual-at-floor residual-at-floor
+          :residual-at-ceiling residual-at-ceiling
+          ;; the floor and ceiling ARE the bracket under this solver, so they
+          ;; are never "hit" the way a stepping solver hits them
+          :beta-floor-hit? false
+          :beta-floor-hit-count 0
+          :beta-ceiling-hit? false
+          :beta-ceiling-hit-count 0})
+       (loop [beta (-> beta-prior (max beta-floor) (min beta-ceiling))
             iteration 0
             floor-hit? (< beta-prior beta-floor)
             floor-hit-count (if (< beta-prior beta-floor) 1 0)
@@ -164,7 +266,8 @@
                      :beta-floor-hit? floor-hit?
                      :beta-floor-hit-count floor-hit-count
                      :beta-ceiling-hit? ceiling-hit?
-                     :beta-ceiling-hit-count ceiling-hit-count}]
+                     :beta-ceiling-hit-count ceiling-hit-count
+                     :solver :gradient}]
          (if (or converged? hit-bound?)
            result
            (let [proposed (+ beta (* step-size gamma gamma residual))
@@ -185,4 +288,4 @@
                     (or ceiling-hit? ceiling-now?)
                     (if ceiling-now?
                       (inc ceiling-hit-count)
-                      ceiling-hit-count)))))))))
+                      ceiling-hit-count))))))))))

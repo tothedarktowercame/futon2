@@ -18,7 +18,10 @@
 (deftest beta-floor-is-explicit-test
   (let [result (policy-precision/converge-beta
                 0.1 [0.0 0.2] [0.0 100.0]
-                {:step-size 0.25 :max-iterations 1 :beta-floor 1.0e-5})]
+                ;; the floor is a CLAMP only under the stepping solver; under
+                ;; :bisect the floor is the lower bracket end and is never hit
+                {:solver :gradient
+                 :step-size 0.25 :max-iterations 1 :beta-floor 1.0e-5})]
     (is (:beta-floor-hit? result))
     (is (pos? (:beta-posterior result)))
     (is (pos? (:gamma result)))
@@ -27,7 +30,7 @@
 (deftest iteration-bound-is-reported-test
   (let [result (policy-precision/converge-beta
                 1.0 [0.0 1.0] [0.0 4.0]
-                {:max-iterations 0 :tolerance 0.0})]
+                {:solver :gradient :max-iterations 0 :tolerance 0.0})]
     (is (false? (:converged? result)))
     (is (:hit-bound? result))
     (is (= 0 (:iterations result)))))
@@ -73,6 +76,7 @@
       (is (not= (:gamma truncated) (:gamma full))))))
 
 (deftest beta-ceiling-catches-upward-divergence-test
+  ;; Under :solver :gradient only -- :bisect has no step size to destabilise.
   ;; beta -> 0 gives infinite gamma and is floored. beta -> infinity gives
   ;; gamma -> 0 and a near-uniform pi, which looks like an answer. Measured on
   ;; the real-shaped field at :step-size 4.0, beta reached 2e12 and gamma
@@ -81,7 +85,8 @@
         f-pi-values (mapv #(+ -18.0 (* 0.03 (mod % 17))) (range 110))
         result (policy-precision/converge-beta
                 0.5 g-values f-pi-values
-                {:step-size 4.0 :max-iterations 5000 :beta-ceiling 1.0e6})]
+                {:solver :gradient
+                 :step-size 4.0 :max-iterations 5000 :beta-ceiling 1.0e6})]
     (is (:beta-ceiling-hit? result)
         "upward divergence is recorded, not left as a plausible small gamma")
     (is (pos? (:beta-ceiling-hit-count result)))
@@ -93,3 +98,37 @@
        clojure.lang.ExceptionInfo #"beta-ceiling"
        (policy-precision/converge-beta
         1.0 [0.0 1.0] [0.0 0.0] {:beta-floor 1.0 :beta-ceiling 0.5}))))
+
+(deftest bisect-and-gradient-agree-and-bisect-is-flat-in-beta-test
+  ;; claude-1's finding: the 1/beta^2 slowdown is the stepping solver's, not the
+  ;; fixed point's. Bisection has no step size, so no stability boundary either.
+  (let [g-values (mapv #(+ 0.25 (* 0.004 %)) (range 110))
+        f-pi-values (mapv #(+ -18.0 (* 0.03 (mod % 17))) (range 110))
+        run (fn [bp solver]
+              (policy-precision/converge-beta
+               bp g-values f-pi-values
+               {:solver solver :max-iterations 200000}))]
+    (testing "the two solvers find the same root"
+      (doseq [bp [0.5 1.0 2.0]]
+        (let [b (run bp :bisect) g (run bp :gradient)]
+          (is (:converged? b))
+          (is (:converged? g))
+          (is (< (Math/abs (- (:gamma b) (:gamma g))) 1.0e-6)
+              (str "solvers disagree at beta_prior " bp)))))
+    (testing "bisection's cost does not grow with beta; the gradient's does"
+      (let [b-small (run 0.5 :bisect) b-large (run 50.0 :bisect)
+            g-small (run 0.5 :gradient) g-large (run 50.0 :gradient)]
+        (is (< (:iterations b-large) (* 2 (:iterations b-small))))
+        (is (> (:iterations g-large) (* 100 (:iterations g-small))))))))
+
+(deftest bisect-reports-an-unbracketed-root-rather-than-a-midpoint-test
+  ;; If the residual ever stops being monotone on the bracket, halving still
+  ;; returns a number. It must say it found no root instead.
+  (let [result (policy-precision/converge-beta
+                1.0 [0.0 1.0] [0.0 0.0]
+                {:solver :bisect :beta-floor 10.0 :beta-ceiling 1.0e6})]
+    (is (false? (:bracketed? result))
+        "floor above the root means both ends share a sign")
+    (is (false? (:converged? result)))
+    (is (some? (:residual-at-floor result)))
+    (is (some? (:residual-at-ceiling result)))))
