@@ -342,9 +342,19 @@
    the scheduler-grain habit calculation as an inspectable counterfactual.
 
    This is a live selection, not an operator-approval request. It deliberately
-   does not authorize enactment: downstream act gates own that decision."
+   does not authorize enactment: downstream act gates own that decision.
+
+   RUN9 / stage S4. `f-pi-opts` is the caller's already-decided F_pi posterior
+   input (`war-machine/f-pi-posterior-opts`): the three keys `softmax-weights`
+   understands, plus a `:f-pi-posterior` envelope that is echoed onto the
+   decision as the RECORD of what this tick did. The envelope is not
+   recomputed here, so the record and the seam cannot disagree about whether
+   F_pi entered. It reaches ONE site, the posterior; `scores` -- the
+   habit-adjusted counterfactual ordering -- is deliberately left at
+   ln E - G/tau, and the difference between the two is a datum RUN9 measures
+   rather than a discrepancy to paper over."
   [ranked-actions g-totals log-priors selection-gain temperature-opts
-   habit-prior-stats no-op-entry]
+   habit-prior-stats no-op-entry f-pi-opts]
   (let [tau-spread (adaptive-temperature g-totals temperature-opts)
         tau (effective-temperature g-totals selection-gain temperature-opts)
         scores (mapv (fn [g lp] (+ (/ (- (double g)) (double tau))
@@ -400,9 +410,16 @@
             (get-in (ranking-entry (nth ranked-actions counterfactual-idx)
                                    0 (nth scores counterfactual-idx))
                     [:action]))
+     :f-pi-posterior
+     (assoc (or (:f-pi-posterior f-pi-opts)
+                {:status :absent :reason :no-f-pi-opts})
+            :applied? (boolean (:f-pi-policy-posterior? f-pi-opts)))
      :softmax-weights
      (zipmap (mapv :action ranked-actions)
-             (softmax-weights g-totals tau log-priors))}))
+             (softmax-weights g-totals tau log-priors
+                              (select-keys f-pi-opts
+                                           [:f-pi-policy-posterior?
+                                            :f-pi-values :f-pi-scaling])))}))
 
 (defn select-action
   "Top-level action selection.
@@ -424,6 +441,12 @@
                         Default 1.0 ⇒ behaviour identical to the spread-only path.
      :habit-prior-stats — optional sufficient-statistic summary for the
                           decision explanation; it never changes selection.
+     :f-pi-opts — RUN9 / stage S4. The caller's F_pi posterior input, already
+                        decided: `:f-pi-policy-posterior?`, `:f-pi-values`,
+                        `:f-pi-scaling` (passed to `softmax-weights`) and a
+                        `:f-pi-posterior` envelope echoed onto the decision.
+                        Requires `:selection-boundary
+                        :strategic-recommendation` when the flag is true.
      :selection-boundary — :actuation (default, historical semantics) or
                            :strategic-recommendation. The latter emits a live
                            non-abstaining controller-head recommendation,
@@ -464,11 +487,21 @@
      (i.e. the best action isn't meaningfully better than doing nothing)."
   ([ranked-actions] (select-action ranked-actions {}))
   ([ranked-actions {:keys [abstain-epsilon temperature-opts selection-gain
-                           habit-prior-stats selection-boundary]
+                           habit-prior-stats selection-boundary f-pi-opts]
                     :or {abstain-epsilon 0.01
                          temperature-opts {}
                          selection-gain 1.0
                          selection-boundary :actuation}}]
+   ;; RUN9 / stage S4. F_pi enters the posterior at the strategic boundary and
+   ;; nowhere else. The :actuation branches below have their own softmax call
+   ;; sites, and quietly ignoring the option there would let a caller believe
+   ;; B.9 was in force on a path where it was not; a caller that asks for it
+   ;; on the wrong boundary is a config error, not a default to absorb.
+   (when (and (:f-pi-policy-posterior? f-pi-opts)
+              (not= :strategic-recommendation selection-boundary))
+     (throw (ex-info (str ":f-pi-opts with :f-pi-policy-posterior? true requires "
+                          ":selection-boundary :strategic-recommendation")
+                     {:selection-boundary selection-boundary})))
    (cond
      (empty? ranked-actions)
      {:action :abstain
@@ -495,7 +528,7 @@
        (if (= :strategic-recommendation selection-boundary)
          (strategic-recommendation
           ranked-actions g-totals log-priors selection-gain temperature-opts
-          habit-prior-stats no-op-entry)
+          habit-prior-stats no-op-entry f-pi-opts)
          (if-not priors?
          (let [best (first ranked-actions)
                best-g (:controller-score best)

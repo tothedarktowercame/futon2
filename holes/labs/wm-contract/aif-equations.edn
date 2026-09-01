@@ -85,8 +85,22 @@
   {:id :free-energy :defines :F :node :R8 :class :theory-defined :ref :buckley2017
    :imports [:Pi :eps]
    :formal "F = 1/2 * mean_k (Pi_k eps_k^2)" :eq "buckley2017 eq. 45 (reduction: ½ ln σ terms dropped; mean over channels instead of sum)" :lean "variationalFreeEnergy" :lean-status :closed
-   :code "free_energy.clj:184-205; war_machine.clj:4450-4452"
-   :live-consumer nil :status :shortcut-to-retire :note "Computed and stored each tick; NO live consumer reads it (C448 5c.1). Joe's ruling 2026-09-01 (J2, :choices :free-energy-form): a shortcut to retire, not a diagnostic to keep."}
+   :code "free_energy.clj:184-205; war_machine.clj:4913-4915"
+   :live-consumer nil :status :retired
+   :retired {:at "2026-09-01" :grounds :ruling :ruling-key :free-energy-form :by "joe (J2)"
+             :condition "Joe's :consequence set one -- the F row stays until its replacement is realised and consumed. The replacement he named is the per-policy F_pi that the POLICY POSTERIOR imports (parr2022 eq. B.9), not any other consumer."
+             :discharged-by "RUN9 / stage S4, holes/labs/wm-contract/runs/2026-09-01-s4/: four ticks with FUTON_WM_FPI_POSTERIOR=1 on futon2 sha in this commit; F_pi entered the LIVE policy posterior on three of them, the fourth declining because 1 of 145 candidates was uncovered. Replay control reproduced every record's own posterior at delta 0.0e+00 before any arm was read. Effect measured: 133 of 145 posterior ranks move, argmax unchanged. Full account C470-s4-live-f-pi.md; the term itself is the :policy-free-energy row below."
+             :not-claimed "The scalar F is STILL COMPUTED AND STORED by the code above, as :variational-free-energy on every record. This retires the ROW's standing as wiring; it does not claim the computation stopped -- RUN3's :ruling-retired class. Unlike R5->R6 it cannot be refuted by a route, because NO :imports list in this registry contains :F, so there is no edge for a run to traverse. Removing the computation is a build row (I5), not this correction."}
+   :note "Computed and stored each tick; NO live consumer reads it (C448 5c.1; re-checked by RUN9 2026-09-01 -- no equation row imports :F). Joe's ruling 2026-09-01 (J2, :choices :free-energy-form): a shortcut to retire, not a diagnostic to keep. The war_machine pointer above was corrected by RUN9: 4450-4452 had drifted onto an unrelated invariant-signal map and kept resolving because pointer_check verifies line ranges, not content."}
+  {:id :policy-free-energy :defines :F-pi :node :R8 :class :theory-defined :ref :parr2022
+   :imports [:Q-o-pi :o]
+   :formal "F_pi := sum_k 1/2 ( ln(2 pi v_k(pi)) + (o_k - mu_k(pi))^2 / v_k(pi) )"
+   :eq "parr2022 eq. B.9, p. 247 -- the F term of pi = sigma(ln E - F - G). B.9 names the term and does not fix the likelihood; the Gaussian per-channel form is this stack's reduction, so like :precision this row is theory-defined in ROLE and stack-defined in CONTENT."
+   :lean nil :lean-status :missing
+   :code "policy_free_energy.clj:41-144 (f-pi-for-candidate), 146-151 (f-pi-vector); war_machine.clj:123-155 (f-pi-posterior-preconditions!), 213-336 (f-pi-dark-readback, the per-tick scoring), 384-461 (f-pi-posterior-opts, the join and the coverage rule), 5095-5096 (the call site); policy.clj:147-203 (softmax-weights, the posterior seam), 413-421 (what the decision records)"
+   :live-consumer :policy-posterior
+   :status :realised-flag-gated
+   :note "HORIZON ONE AND RETROSPECTIVE, the reduction to state plainly: B.9's F_pi is the free energy of observations already made under pi, and the WM scores the PREVIOUS tick's per-candidate predictions against THIS tick's observation, joined by action identity (type + target). A current candidate with no matched previous prediction has no F_pi, and the tick then declines to use the term at all rather than impute one -- COMPLETE-OR-OFF. Measured live: F_pi runs -19.716..-18.962 within a tick against a G spread of 125.34, so imputing 0.0 for an uncovered candidate would hand it the posterior outright. Behind FUTON_WM_FPI_POSTERIOR=1, DEFAULT OFF, coupled to FUTON_WM_FPI_DARK=1 and to FUTON_WM_TRACE_POLICY_DETAILS=1 having been on the PREVIOUS tick; the preconditions refuse the flag without them rather than record a tick that did nothing. Scaling is :unscaled, settled by source and not chosen: friston2017 eq. 2.7 multiplies G by gamma alone and leaves F unscaled, and B.9 has no temperature at all."}
   {:id :belief-update :defines :mu-next :node :R3 :class :theory-defined :ref :buckley2017
    :imports [:mu :Pi :eps :alpha]
    :formal "mu <- mu + alpha Pi eps" :eq "buckley2017 eq. 59 (reduction: one gradient step with fixed step size alpha)" :lean nil :lean-status :missing
@@ -120,9 +134,11 @@
    :imports []
    :formal "tau := commitment temperature (inverse precision gamma of policy selection)" :eq "friston2017 eq. 2.1 (γ = 1/β); dacosta2020 A.2" :code "policy.clj:242-245 (effective-temperature from selection gain / score spread)"}
   {:id :policy-posterior :defines :Q-pi :node :R6 :class :theory-defined :ref :parr2022 :also-refs [:dacosta2020 :friston2017 :friston2016]
-   :imports [:E :G :tau :pi]
-   :formal "Q(pi) := softmax(ln E(pi) - G(pi)/tau)" :eq "parr2022 eq. B.9 (π = σ(ln E − F − G), p. 247) with γ = 1/τ from friston2017 eq. 2.1 / dacosta2020 A.2; the registry form drops F_π (the WM scores policies by G only) -- a stack specialisation. E's meaning: friston2016 eq. 6 (habit as policy concentration parameters)" :lean "softmax" :lean-status :closed
-   :code "policy.clj:242-245, 411-438" :note "Computed and recorded; the live path then selects deterministically (see :action)."}
+   :imports [:E :G :tau :pi :F-pi]
+   :formal "Q(pi) := softmax(ln E(pi) - G(pi)/tau - F_pi(pi))" :eq "parr2022 eq. B.9 (π = σ(ln E − F − G), p. 247) with γ = 1/τ from friston2017 eq. 2.1 / dacosta2020 A.2. E's meaning: friston2016 eq. 6 (habit as policy concentration parameters)"
+   :lean "softmax" :lean-status :closed
+   :code "policy.clj:196-201 (the score expression, F_π subtracted unscaled), 360-362 (the counterfactual ordering, which is NOT B.9 -- see :note), 413-421"
+   :note "F_π ENTERED THIS ROW 2026-09-01 (RUN9 / stage S4), which is why :imports gained :F-pi and the formal line its third term: the registry previously said the WM scores policies by G only, and that is no longer true when FUTON_WM_FPI_POSTERIOR=1. It reaches ONE site, this posterior. The decision map records a second ordering beside it -- :habit-adjusted-ranking and its :counterfactual winner, at policy.clj:360-362 -- and that one is still ln E - G/tau with no F_π, so a reader must not take the two as the same object. Computed and recorded; the live path then selects deterministically (see :action), so what F_π moves here is the recorded posterior and not the enacted action -- measured, RUN9: 133 of 145 ranks move and the argmax does not."}
   {:id :action :defines :u :node :R16 :class :theory-defined :ref :friston2017
    :imports [:Q-pi]
    :formal "u_t := argmax_u sum_pi delta(u, pi_t) Q(pi)" :eq "dacosta2020 eq. 11 (Bayesian-model-average argmax); friston2017 eq. 2.3 selects the action minimising expected outcome prediction error -- two deterministic rules in the literature, neither is sampling (C453)"

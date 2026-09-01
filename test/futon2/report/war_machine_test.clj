@@ -1138,3 +1138,133 @@
                    (policy/effective-temperature
                     [0.0 1.0] 4.0
                     (wm/variational-temperature-opts :variational-beta-gamma nil)))))))
+
+;; ---------------------------------------------------------------------------
+;; RUN9 / stage S4 — the F_π the live posterior is handed
+;; ---------------------------------------------------------------------------
+
+(defn- s4-scored-field []
+  ;; The same 110-candidate real-shape fixture the readback and the beta carry
+  ;; are measured on: 108 candidates score, one fails on a channel mismatch,
+  ;; one left the tick. So it exercises incomplete coverage as a run meets it.
+  (let [{:keys [previous current observation]} (real-shape-f-pi-fixture)
+        scored (mapv (fn [index action]
+                       (assoc action :controller-score (+ 0.25 (* 0.004 index))))
+                     (range) current)]
+    {:scored scored
+     :f-pi-fields (wm/f-pi-dark-readback previous scored observation)}))
+
+(deftest f-pi-posterior-opts-is-off-unless-the-flag-is-on-test
+  (let [{:keys [scored f-pi-fields]} (s4-scored-field)]
+    (with-redefs-fn {#'wm/*f-pi-posterior?* false}
+      (fn []
+        (let [opts (wm/f-pi-posterior-opts f-pi-fields scored)]
+          (is (false? (:f-pi-policy-posterior? opts)))
+          (is (nil? (:f-pi-values opts)))
+          (is (= :flag-off (get-in opts [:f-pi-posterior :reason]))))))))
+
+(deftest f-pi-posterior-opts-refuses-incomplete-coverage-test
+  (testing "RUN9: F_π here runs ~61.6, so a candidate with no matched previous
+            prediction would win the posterior by an artefact of the join.
+            Complete-or-off, with the count of what was uncovered."
+    (let [{:keys [scored f-pi-fields]} (s4-scored-field)]
+      (with-redefs-fn {#'wm/*f-pi-posterior?* true}
+        (fn []
+          (let [opts (wm/f-pi-posterior-opts f-pi-fields scored)]
+            (is (false? (:f-pi-policy-posterior? opts)))
+            (is (nil? (:f-pi-values opts))
+                "no partial vector escapes: there is nothing to misalign")
+            (is (= :incomplete-coverage (get-in opts [:f-pi-posterior :reason])))
+            (is (= 2 (get-in opts [:f-pi-posterior :uncovered-count])))
+            (is (= 110 (get-in opts [:f-pi-posterior :candidate-count])))))))))
+
+(deftest f-pi-posterior-opts-joins-by-identity-not-by-position-test
+  (testing "RUN9: `select-action` receives `wm-admissible`, a can-execute?
+            filter of the field the readback ran over, so the values must
+            follow the action identity and not the index. Reversing the
+            selector's field must reverse the vector."
+    (let [{:keys [scored f-pi-fields]} (s4-scored-field)
+          covered (filterv (fn [entry]
+                             (let [id (#'wm/candidate-identity entry)]
+                               (some (fn [result]
+                                       (and (= id (:candidate-identity result))
+                                            (= :present (:status result))))
+                                     (vals (get-in f-pi-fields
+                                                   [:f-pi-by-candidate-id
+                                                    :by-candidate-id])))))
+                           scored)]
+      (with-redefs-fn {#'wm/*f-pi-posterior?* true}
+        (fn []
+          (let [opts (wm/f-pi-posterior-opts f-pi-fields covered)
+                reversed (wm/f-pi-posterior-opts f-pi-fields (vec (reverse covered)))]
+            (is (= 108 (count covered)))
+            (is (true? (:f-pi-policy-posterior? opts)))
+            (is (= 108 (count (:f-pi-values opts))))
+            (is (every? number? (:f-pi-values opts)))
+            (is (= :unscaled (:f-pi-scaling opts))
+                "settled by friston2017 eq. 2.7; the live path offers no choice")
+            (is (= :complete (get-in opts [:f-pi-posterior :coverage])))
+            (is (= 0 (get-in opts [:f-pi-posterior :uncovered-count])))
+            (is (= (vec (reverse (:f-pi-values opts))) (:f-pi-values reversed))
+                "positional join would have returned the same vector twice")))))))
+
+(deftest f-pi-posterior-opts-counts-an-ambiguous-identity-as-uncovered-test
+  (with-redefs-fn {#'wm/*f-pi-posterior?* true}
+    (fn []
+      (let [fields {:f-pi-by-candidate-id
+                    {:status :present
+                     :by-candidate-id
+                     {"rank/1" {:candidate-identity :c0 :status :present :value 1.0}
+                      "rank/2" {:candidate-identity :c0 :status :present :value 2.0}}}}
+            ranked [{:action {:type :open-mission :target "M-x"}}]]
+        ;; both readback entries claim the same identity; picking one would be
+        ;; a coin flip, so the tick declines rather than choosing
+        (with-redefs-fn {#'wm/candidate-identity (constantly :c0)}
+          (fn []
+            (let [opts (wm/f-pi-posterior-opts fields ranked)]
+              (is (false? (:f-pi-policy-posterior? opts)))
+              (is (= :incomplete-coverage
+                     (get-in opts [:f-pi-posterior :reason])))
+              (is (= 1 (get-in opts [:f-pi-posterior :uncovered-count]))))))))))
+
+(deftest f-pi-posterior-opts-carries-a-whole-tick-absence-reason-test
+  (with-redefs-fn {#'wm/*f-pi-posterior?* true}
+    (fn []
+      (is (= :no-previous-trace-record
+             (get-in (wm/f-pi-posterior-opts (wm/f-pi-dark-readback nil [] {})
+                                             [{:action {:type :no-op}}])
+                     [:f-pi-posterior :reason])))
+      (is (= :no-f-pi-readback
+             (get-in (wm/f-pi-posterior-opts nil [{:action {:type :no-op}}])
+                     [:f-pi-posterior :reason]))))))
+
+(deftest f-pi-posterior-preconditions-refuse-a-run-that-would-do-nothing-test
+  (testing "RUN9: with FUTON_WM_FPI_POSTERIOR=1 and the chain off, every tick
+            records :no-f-pi-readback and the posterior is the old one --
+            indistinguishable in a record from a tick whose coverage was
+            merely incomplete, so it throws at the top of the tick instead"
+    (doseq [[fpi? details?] [[false true] [true false] [false false]]]
+      (with-redefs-fn {#'wm/*f-pi-posterior?* true
+                       #'wm/*f-pi-dark?* fpi?
+                       #'trace/*persist-policy-trace-details?* details?}
+        (fn []
+          (is (thrown? clojure.lang.ExceptionInfo
+                       (wm/f-pi-posterior-preconditions! :selection-gain-only))
+              (str "missing flags " [fpi? details?] " must throw")))))
+    (with-redefs-fn {#'wm/*f-pi-posterior?* true
+                     #'wm/*f-pi-dark?* true
+                     #'trace/*persist-policy-trace-details?* true}
+      (fn []
+        (is (nil? (wm/f-pi-posterior-preconditions! :selection-gain-only)))))
+    (with-redefs-fn {#'wm/*f-pi-posterior?* true
+                     #'wm/*f-pi-dark?* false
+                     #'trace/*persist-policy-trace-details?* true}
+      (fn []
+        (is (nil? (wm/f-pi-posterior-preconditions! :variational-beta-gamma))
+            "the tau mode runs the readback itself, so it satisfies the F_π half")))
+    (with-redefs-fn {#'wm/*f-pi-posterior?* false
+                     #'wm/*f-pi-dark?* false
+                     #'trace/*persist-policy-trace-details?* false}
+      (fn []
+        (is (nil? (wm/f-pi-posterior-preconditions! :selection-gain-only))
+            "flag off: no complaint about anything")))))

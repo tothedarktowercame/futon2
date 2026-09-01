@@ -542,3 +542,89 @@
              (mapv :action (:controller-ranking s3)))
           "no controller rank moves")
       (is (= (:action live) (:action s3)) "the argmax does not move"))))
+
+;; ---------------------------------------------------------------------------
+;; RUN9 / stage S4 — F_π in the LIVE policy posterior
+;; ---------------------------------------------------------------------------
+
+(def ^:private s4-ranked
+  [{:action {:type :advance-mission :target "M-a"} :rank 1
+    :controller-score 15.0 :habit-prior-bias -4.3}
+   {:action {:type :no-op} :rank 2
+    :controller-score 15.6 :habit-prior-bias -4.3}
+   {:action {:type :advance-mission :target "M-b"} :rank 3
+    :controller-score 15.7 :habit-prior-bias -1.9}])
+
+(defn- s4-select [f-pi-opts]
+  (policy/select-action
+   s4-ranked
+   (cond-> {:selection-boundary :strategic-recommendation
+            :selection-gain 1.0
+            :temperature-opts {:tau-mode :selection-gain-only}}
+     f-pi-opts (assoc :f-pi-opts f-pi-opts))))
+
+(deftest select-action-f-pi-reaches-the-posterior-and-nothing-else-test
+  (testing "RUN9: F_π enters σ(ln E − G/τ − F_π) and no other field of the
+            decision. The habit-adjusted ordering stays at ln E − G/τ, so the
+            record carries the B.9 posterior beside a counterfactual that is
+            NOT B.9 — stated here so the difference is a datum, not a surprise."
+    (let [base (s4-select nil)
+          with (s4-select {:f-pi-policy-posterior? true
+                           :f-pi-values [60.0 62.0 61.0]
+                           :f-pi-scaling :unscaled
+                           :f-pi-posterior {:status :present
+                                            :coverage :complete
+                                            :candidate-count 3}})]
+      (is (not= (:softmax-weights base) (:softmax-weights with))
+          "the posterior moved")
+      (is (= (:action base) (:action with)))
+      (is (= (:rank base) (:rank with)))
+      (is (= (:tau base) (:tau with)))
+      (is (= (:controller-ranking base) (:controller-ranking with)))
+      (is (= (:habit-adjusted-ranking base) (:habit-adjusted-ranking with))
+          "the counterfactual habit ordering is untouched by F_π")
+      (is (= (:counterfactual base) (:counterfactual with)))
+      (is (= (:decision-explanation base) (:decision-explanation with)))
+      ;; lowest F_π wins the posterior among equal-ln E candidates
+      (is (> (get (:softmax-weights with) {:type :advance-mission :target "M-a"})
+             (get (:softmax-weights base) {:type :advance-mission :target "M-a"}))))))
+
+(deftest select-action-echoes-the-f-pi-envelope-it-was-handed-test
+  (testing "RUN9: the record of what the tick did is the caller's own
+            envelope with :applied? set from the flag actually used, so the
+            record and the seam cannot disagree"
+    (let [envelope {:status :present :coverage :complete :candidate-count 3
+                    :scaling :unscaled}
+          with (s4-select {:f-pi-policy-posterior? true
+                           :f-pi-values [60.0 62.0 61.0]
+                           :f-pi-scaling :unscaled
+                           :f-pi-posterior envelope})
+          off (s4-select {:f-pi-policy-posterior? false
+                          :f-pi-posterior {:status :absent
+                                           :reason :incomplete-coverage
+                                           :uncovered-count 2}})
+          none (s4-select nil)]
+      (is (= (assoc envelope :applied? true) (:f-pi-posterior with)))
+      (is (= {:status :absent :reason :incomplete-coverage
+              :uncovered-count 2 :applied? false}
+             (:f-pi-posterior off)))
+      (is (= {:status :absent :reason :no-f-pi-opts :applied? false}
+             (:f-pi-posterior none))
+          "a caller that passes nothing is recorded as such, not as a value"))))
+
+(deftest select-action-f-pi-refuses-the-actuation-boundary-test
+  (testing "RUN9: the :actuation branches have their own softmax call sites;
+            silently ignoring the option there would let a caller believe B.9
+            was in force on a path where it was not"
+    (is (thrown-with-msg?
+         clojure.lang.ExceptionInfo #"strategic-recommendation"
+         (policy/select-action
+          s4-ranked
+          {:selection-boundary :actuation
+           :f-pi-opts {:f-pi-policy-posterior? true
+                       :f-pi-values [1.0 2.0 3.0]}})))
+    (is (map? (policy/select-action
+               s4-ranked
+               {:selection-boundary :actuation
+                :f-pi-opts {:f-pi-policy-posterior? false}}))
+        "an off envelope on the actuation boundary is not an error")))

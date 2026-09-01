@@ -1,0 +1,33 @@
+run9_s4_arms.clj output, 2026-09-01. Read the CONTROL line before any arm line.
+4 records
+CONTROL: 4/4 ticks re-joined; identities unique on every tick: true; max |delta| 0.000e+00
+coverage: F_pi complete on 3/4 ticks; the tick APPLIED it on 3
+  2026-09-01T20:36:03.800627763Z applied?=true n=145 | TV 0.012027 | ranks moved 133/145 max 130 | argmax UNCHANGED | F_pi spread 0.7540, G spread 125.3363
+  2026-09-01T20:38:39.644885551Z applied?=true n=145 | TV 0.012023 | ranks moved 133/145 max 130 | argmax UNCHANGED | F_pi spread 0.7540, G spread 125.3363
+  2026-09-01T20:40:00.843332453Z applied?=true n=145 | TV 0.012023 | ranks moved 133/145 max 130 | argmax UNCHANGED | F_pi spread 0.7540, G spread 125.3363
+
+=== S2 (F_pi dark; arm = the counterfactual) -- holes/labs/wm-contract/runs/2026-09-01-s2/wm-trace-s2.edn
+20 records
+CONTROL: 20/20 ticks re-joined; identities unique on every tick: true; max |delta| 0.000e+00
+coverage: F_pi complete on 19/20 ticks; the tick APPLIED it on 0
+  2026-09-01T18:41:17.673842025Z applied?=false n=145 | TV 0.012026 | ranks moved 133/145 max 130 | argmax UNCHANGED | F_pi spread 0.7540, G spread 125.3363
+  2026-09-01T18:42:44.308772615Z applied?=false n=145 | TV 0.012026 | ranks moved 133/145 max 130 | argmax UNCHANGED | F_pi spread 0.7540, G spread 125.3363
+  2026-09-01T18:44:02.116009268Z applied?=false n=145 | TV 0.012026 | ranks moved 135/145 max 130 | argmax UNCHANGED | F_pi spread 0.7540, G spread 125.3363
+  2026-09-01T18:45:21.699083224Z applied?=false n=145 | TV 0.012027 | ranks moved 133/145 max 130 | argmax UNCHANGED | F_pi spread 0.7540, G spread 125.3363
+  2026-09-01T18:46:42.192036549Z applied?=false n=145 | TV 0.012027 | ranks moved 133/145 max 130 | argmax UNCHANGED | F_pi spread 0.7540, G spread 125.3363
+  2026-09-01T18:48:06.102484692Z applied?=false n=145 | TV 0.012027 | ranks moved 133/145 max 130 | argmax UNCHANGED | F_pi spread 0.7540, G spread 125.3363
+  2026-09-01T18:49:29.000443159Z applied?=false n=145 | TV 0.012027 | ranks moved 133/145 max 130 | argmax UNCHANGED | F_pi spread 0.7540, G spread 125.3363
+  2026-09-01T18:50:49.722240111Z applied?=false n=145 | TV 0.012026 | ranks moved 135/145 max 130 | argmax UNCHANGED | F_pi spread 0.7540, G spread 125.3363
+  2026-09-01T18:52:06.660826546Z applied?=false n=145 | TV 0.012027 | ranks moved 133/145 max 130 | argmax UNCHANGED | F_pi spread 0.7540, G spread 125.3363
+  2026-09-01T18:53:42.508820253Z applied?=false n=145 | TV 0.012027 | ranks moved 133/145 max 130 | argmax UNCHANGED | F_pi spread 0.7540, G spread 125.3363
+  2026-09-01T18:55:10.063339417Z applied?=false n=145 | TV 0.012027 | ranks moved 135/145 max 130 | argmax UNCHANGED | F_pi spread 0.7540, G spread 125.3363
+  2026-09-01T18:56:38.237872177Z applied?=false n=145 | TV 0.012027 | ranks moved 135/145 max 130 | argmax UNCHANGED | F_pi spread 0.7540, G spread 125.3363
+  2026-09-01T18:58:00.441023885Z applied?=false n=145 | TV 0.012027 | ranks moved 136/145 max 130 | argmax UNCHANGED | F_pi spread 0.7540, G spread 125.3363
+  2026-09-01T18:59:24.217804513Z applied?=false n=145 | TV 0.012027 | ranks moved 133/145 max 130 | argmax UNCHANGED | F_pi spread 0.7540, G spread 125.3363
+  2026-09-01T19:00:53.002942157Z applied?=false n=145 | TV 0.012027 | ranks moved 133/145 max 130 | argmax UNCHANGED | F_pi spread 0.7540, G spread 125.3363
+  2026-09-01T19:02:23.880997306Z applied?=false n=145 | TV 0.012027 | ranks moved 133/145 max 130 | argmax UNCHANGED | F_pi spread 0.7540, G spread 125.3363
+  2026-09-01T19:03:47.733626368Z applied?=false n=145 | TV 0.012027 | ranks moved 135/145 max 130 | argmax UNCHANGED | F_pi spread 0.7540, G spread 125.3363
+  2026-09-01T19:05:05.636608579Z applied?=false n=145 | TV 0.012027 | ranks moved 133/145 max 130 | argmax UNCHANGED | F_pi spread 0.7540, G spread 125.3363
+  2026-09-01T19:06:25.174660123Z applied?=false n=145 | TV 0.012027 | ranks moved 135/145 max 130 | argmax UNCHANGED | F_pi spread 0.7540, G spread 125.3363
+
+run9-s4-arms: done

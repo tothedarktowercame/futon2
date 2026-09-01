@@ -99,6 +99,60 @@
    Dynamic binding exists only for isolated tests."
   (= "1" (System/getenv "FUTON_WM_BETA_DARK")))
 
+(def ^:dynamic *f-pi-posterior?*
+  "RUN9 / stage S4 live-posterior switch, read once when this namespace loads.
+   `FUTON_WM_FPI_POSTERIOR=1` puts the F_pi the dark readback computed INTO
+   the live policy posterior at the one seam I2 (b2) built --
+   `policy/softmax-weights`, score = ln E - G/tau - F_pi (parr2022 B.9).
+
+   FOUR FLAGS, COUPLED: this consumes what `FUTON_WM_FPI_DARK=1` computed,
+   which consumes what `FUTON_WM_TRACE_POLICY_DETAILS=1` wrote on the PREVIOUS
+   tick. Without them the readback is a whole-tick absence and this flag
+   changes nothing while claiming to -- `f-pi-posterior-preconditions!` refuses
+   that configuration rather than leaving it to be read off a record later.
+
+   SCALING IS NOT A CHOICE HERE: `:unscaled`, settled by source (I2
+   :slice-b2-followup (1) -- friston2017 eq. 2.7 at friston2017.txt:660-666
+   multiplies G by gamma alone and leaves F unscaled; B.9 has no temperature
+   at all). The `:by-tau` arm stays reachable in `softmax-weights` for the
+   replay arms and is not offered to the live path.
+
+   Dynamic binding exists only for isolated tests."
+  (= "1" (System/getenv "FUTON_WM_FPI_POSTERIOR")))
+
+(defn f-pi-posterior-preconditions!
+  "RUN9 / stage S4. `FUTON_WM_FPI_POSTERIOR=1` needs an F_pi to put in the
+   posterior, and F_pi comes from the same chain S2 and S3 run on:
+   `FUTON_WM_FPI_DARK=1` consumes what `FUTON_WM_TRACE_POLICY_DETAILS=1` wrote
+   on the PREVIOUS tick.
+
+   With the flag on and either of those off, every tick records
+   `:reason :no-f-pi-readback` and the posterior is the old one -- correct, and
+   indistinguishable in a record from a tick whose coverage happened to be
+   incomplete. Same shape and same reason as `variational-tau-preconditions!`:
+   a loud config error at the top of the tick beats a run nobody can read.
+   It does NOT check the previous tick's trace flag, which is not knowable
+   from here; the per-tick `:f-pi-posterior` envelope exposes that case.
+
+   `:variational-beta-gamma` implies the F_pi readback (the readback binding
+   runs under either), so the tau mode satisfies the F_pi half.
+
+   Throws or returns nil."
+  [tau-mode]
+  (when *f-pi-posterior?*
+    (let [missing (cond-> []
+                    (not (or *f-pi-dark?*
+                             (= :variational-beta-gamma tau-mode)))
+                    (conj "FUTON_WM_FPI_DARK=1")
+                    (not trace/*persist-policy-trace-details?*)
+                    (conj "FUTON_WM_TRACE_POLICY_DETAILS=1"))]
+      (when (seq missing)
+        (throw (ex-info (str "FUTON_WM_FPI_POSTERIOR=1 requires "
+                             (str/join ", " missing)
+                             " -- without them every tick records "
+                             ":no-f-pi-readback and the posterior is unchanged")
+                        {:missing missing :tau-mode tau-mode}))))))
+
 (defn variational-tau-preconditions!
   "RUN8 / stage S3. `:variational-beta-gamma` needs a β to use as τ, and β is
    produced by the same three-flag chain the S2 dark carry runs on:
@@ -326,6 +380,85 @@
                   :error-data (ex-data error))))
        (policy-precision/held-state
         carried (or (:reason readback) :no-f-pi-readback)))}))
+
+(defn f-pi-posterior-opts
+  "RUN9 / stage S4: the `:f-pi-opts` this tick hands `policy/select-action`.
+
+   `f-pi-fields` is what `f-pi-dark-readback` returned; `ranked` is the field
+   `select-action` will actually receive (`wm-admissible`), NOT the wider
+   `wm-ranked+cascades` the readback and the beta carry were computed over.
+   The two differ by `can-execute?`, so the join has to be done against the
+   selector's own list or the values would be misaligned with `g-totals`.
+
+   The readback is keyed by the PREVIOUS tick's rank/N and carries
+   `:candidate-identity`; the join is by that identity, the same one the beta
+   carry uses. Result values are aligned positionally with `ranked`.
+
+   COVERAGE IS COMPLETE-OR-OFF, and that is the design decision this row makes
+   rather than inherits. A current candidate with no matched previous
+   prediction has no F_pi. Scoring it against candidates that do would compare
+   ln E - G/tau against ln E - G/tau - F_pi -- and F_pi is nowhere near zero
+   (measured on the live 145-candidate field, RUN9: -19.716..-18.962 within
+   one tick, a spread of 0.754 sitting about 19 nats below zero), so the
+   unmatched candidate would win the posterior by an artefact of the join.
+   Substituting 0.0 is not neutral either: in B.9
+   every policy is scored against the SAME observed data, so a missing F_pi is
+   a join failure, not a policy that has observed nothing. So: if any
+   candidate is uncovered, F_pi does not enter this tick at all, and the
+   record says why. MEASURED COST on the S2 field
+   (runs/2026-09-01-s2/wm-trace-s2.edn): 19 of 20 ticks have
+   `:unmatched-current-count` 0 and tick 1 has 2, so this is expected to turn
+   the term off on the first tick of a run and leave it on afterwards --
+   stated as a prediction this stage's own run then checks.
+
+   Ambiguous identities (a value appearing for two candidates) count as
+   uncovered, for the same reason `f-pi-dark-readback` records them as
+   absences rather than picking one.
+
+   Pure: reads no state, writes none."
+  [f-pi-fields ranked]
+  (let [readback (:f-pi-by-candidate-id f-pi-fields)
+        by-candidate (when (= :present (:status readback))
+                       (:by-candidate-id readback))
+        n (count ranked)
+        off (fn [reason extra]
+              {:f-pi-policy-posterior? false
+               :f-pi-posterior (merge {:status :absent :reason reason
+                                       :candidate-count n}
+                                      extra)})]
+    (cond
+      (not *f-pi-posterior?*) (off :flag-off nil)
+      (nil? f-pi-fields) (off :no-f-pi-readback nil)
+      (not (map? by-candidate)) (off (or (:reason readback) :no-f-pi-readback) nil)
+      (zero? n) (off :no-candidates nil)
+      :else
+      (let [by-identity (reduce (fn [acc entry]
+                                  (let [id (:candidate-identity entry)]
+                                    (if (and (some? id)
+                                             (= :present (:status entry))
+                                             (number? (:value entry)))
+                                      (update acc id (fnil conj []) (double (:value entry)))
+                                      acc)))
+                                {}
+                                (vals by-candidate))
+            values (mapv (fn [entry]
+                           (let [vs (get by-identity (candidate-identity entry))]
+                             (when (= 1 (count vs)) (first vs))))
+                         ranked)
+            uncovered (count (filter nil? values))]
+        (if (pos? uncovered)
+          (off :incomplete-coverage {:uncovered-count uncovered})
+          {:f-pi-policy-posterior? true
+           :f-pi-values values
+           :f-pi-scaling :unscaled
+           :f-pi-posterior {:status :present
+                            :coverage :complete
+                            :scaling :unscaled
+                            :candidate-count n
+                            :uncovered-count 0
+                            :join-key :action-type-and-target
+                            :f-pi-min (apply min values)
+                            :f-pi-max (apply max values)}})))))
 ;; ---------------------------------------------------------------------------
 
 (def ^:private home (System/getProperty "user.home"))
@@ -4900,6 +5033,7 @@
         ;; the :wm-version stamp records cannot drift apart.
         wm-tau-mode (arena-tau-mode)
         _ (variational-tau-preconditions! wm-tau-mode)
+        _ (f-pi-posterior-preconditions! wm-tau-mode)
         ;; Car-3 (R16) seam 1: lift the acquired cascade-policies out of the read-only lane
         ;; into the differential as SELECTABLE :apply-cascade actions, each carrying BOTH
         ;; act-gate legs (ΔF = cascade cascade-score, ΔG = rollout G(π)) + the conjunction
@@ -4952,6 +5086,14 @@
         ;; deliberative select-action with default-mode-select as a
         ;; try/catch fallback for I6 compositional closure.
         wm-admissible (filterv #(fm/can-execute? wm-state (:action %)) wm-ranked)
+        ;; RUN9 / stage S4. Joined against `wm-admissible` and not against the
+        ;; wider `wm-ranked+cascades` the readback ran over, because this is
+        ;; the field `select-action` receives and `:f-pi-values` must align
+        ;; with its `g-totals`. Off unless FUTON_WM_FPI_POSTERIOR=1, and off
+        ;; on any tick whose coverage is incomplete -- see
+        ;; `f-pi-posterior-opts`.
+        f-pi-posterior-fields (f-pi-posterior-opts f-pi-dark-fields
+                                                   wm-admissible)
         controller-decision
         (try (policy/select-action
               wm-admissible
@@ -4960,6 +5102,7 @@
                :habit-prior-stats
                (when habit-prior-pre
                  (habit-prior/state-stats habit-prior-pre))
+               :f-pi-opts f-pi-posterior-fields
                :temperature-opts
                (variational-temperature-opts wm-tau-mode beta-dark-fields)})
              (catch Exception _
