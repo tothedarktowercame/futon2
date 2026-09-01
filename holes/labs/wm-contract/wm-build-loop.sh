@@ -34,8 +34,8 @@ run_seat() { # $1 seat, $2 prompt file, $3 label
   local seat="$1" prompt="$2" label="$3"
   log "$label: $seat starting"
   case "$seat" in
-    claude) (cd "$HOME/code" && timeout 2400 claude -p --permission-mode bypassPermissions "$(cat "$prompt")" >> "$LOG" 2>&1) ;;
-    codex)  (cd "$HOME/code" && timeout 2400 codex exec --skip-git-repo-check --sandbox danger-full-access "$(cat "$prompt")" >> "$LOG" 2>&1) ;;
+    claude) (cd "$HOME/code" && timeout 7200 claude -p --permission-mode bypassPermissions "$(cat "$prompt")" >> "$LOG" 2>&1) ;;
+    codex)  (cd "$HOME/code" && timeout 5400 codex exec --skip-git-repo-check --sandbox danger-full-access "$(cat "$prompt")" >> "$LOG" 2>&1) ;;
     *) log "unknown seat $seat"; return 2 ;;
   esac
   local rc=$?; log "$label: $seat exit=$rc"; return $rc
