@@ -8,6 +8,6 @@
   {:lane :wm-verbs
    :holding :C350-fence-chokepoint, :dispatched-at "2026-09-01T01:45:59Z", :job-id "invoke-1788227149412-6446-25507206", :expected-by "2026-09-01T02:30:59Z"}
   {:lane :wm-organization
-   :holding :C346-restoration-tool, :dispatched-at "2026-09-01T01:44:24Z", :job-id "invoke-1788227053593-6442-3773ec78", :expected-by "2026-09-01T02:29:24Z"}
+   :holding :C352-evidence-wording-refresh, :dispatched-at "2026-09-01T01:49:39Z", :job-id "invoke-1788227374812-6449-464a14e1", :expected-by "2026-09-01T02:34:39Z"}
   {:lane :wm-evidence
    :holding :C351-attack-predicate-repair, :dispatched-at "2026-09-01T01:45:59Z", :job-id "invoke-1788227153968-6447-ef76478f", :expected-by "2026-09-01T02:30:59Z"}]}
