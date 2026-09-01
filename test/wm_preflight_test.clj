@@ -1,6 +1,7 @@
 (ns wm-preflight-test
   (:require [clojure.test :refer [deftest is]]
             [cheshire.core :as json]
+            [writer-fence-capability :as fence]
             [wm-preflight :as preflight])
   (:import [java.time Instant]))
 
@@ -8,17 +9,18 @@
   (let [start (Instant/parse "2026-09-01T00:00:00Z")
         finish (Instant/parse "2026-09-01T00:00:01Z")
         absent {:verified? false :status :absent :reason :not-declared}
-        held {:verified? true :status :observed-held :id "quiet-window-42"
-              :receipt-sha256 "abc"}
         unfenced (preflight/readiness-claim start finish absent)
-        fenced (preflight/readiness-claim start finish held)]
+        forged (preflight/readiness-claim start finish
+                                            {:verified? true :status :observed-held
+                                             :id "quiet-window-42"})]
     (is (= :unverified (:event-free? unfenced)))
     (is (= false (:distinguishable-cause? unfenced)))
     (is (= {:status :absent :reason :not-declared} (:writer-fence unfenced)))
-    (is (= true (:event-free? fenced)))
-    (is (= :observed-held (get-in fenced [:writer-fence :status])))
-    (is (re-find #"FENCE-VERIFIED quiet-window-42"
-                 (preflight/readiness-label true held)))
+    (is (= :unverified (:event-free? forged)))
+    (is (not (re-find #"FENCE-VERIFIED"
+                      (preflight/readiness-label true
+                                                 {:verified? true :status :observed-held
+                                                  :id "quiet-window-42"}))))
     (is (re-find #"event-free unverified"
                  (preflight/readiness-label true absent)))))
 
@@ -48,16 +50,19 @@
       (spit (.toFile path) (json/generate-string receipt))
       (let [live {:verdict "FENCE-VERIFIABLE" :fence-id "fence-7"
                   :observation-interval {:started-at "s" :finished-at "f"}}
-            verified (binding [preflight/*run-fence-evidence*
+            verified (binding [fence/*run-evidence*
                                (fn [_ _] {:exit 0 :out (json/generate-string live)})]
                        (preflight/verify-fence-evidence "fence-7" (str path)))
-            breached (binding [preflight/*run-fence-evidence*
+            breached (binding [fence/*run-evidence*
                                (fn [_ _] {:exit 1
                                           :out (json/generate-string
                                                 {:verdict "FENCE-BREACH"
                                                  :fence-id "fence-7"})})]
                        (preflight/verify-fence-evidence "fence-7" (str path)))]
         (is (:verified? verified))
+        (is (fence/observed-held? verified))
+        (is (= true (:event-free? (preflight/readiness-claim
+                                   (Instant/now) (Instant/now) verified))))
         (is (= :observed-held (:status verified)))
         (is (false? (:verified? breached)))
         (is (= :unverified (:status breached)))

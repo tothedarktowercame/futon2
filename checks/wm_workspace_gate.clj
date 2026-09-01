@@ -1,6 +1,7 @@
 #!/usr/bin/env bb
 (ns checks.wm-workspace-gate
   (:require [babashka.process :as process]
+            [writer-fence-capability :as fence]
             [babashka.fs :as fs]
             [clojure.set :as set]
             [clojure.string :as str]
@@ -82,18 +83,9 @@
       (println "wm-workspace-gate: BASIS-NOT-STABLE" (pr-str movement)))
     movement))
 
-(defn gate-event-claim [movement writer-fence-id started-at finished-at]
-  {:claim :event-free
-   :interval {:started-at started-at :finished-at finished-at}
-   :writer-fence (if writer-fence-id
-                   {:status :held :id writer-fence-id}
-                   {:status :absent :reason :not-declared})
-   :event-free? (cond
-                  (not= :stable (:status movement)) false
-                  writer-fence-id true
-                  :else :unverified)
-   :distinguishable-cause?
-   (boolean (or writer-fence-id (not= :stable (:status movement))))})
+(defn gate-event-claim [movement capability started-at finished-at]
+  (fence/event-claim {:started-at started-at :finished-at finished-at}
+                     (not= :stable (:status movement)) capability))
 
 (defn provenance-movement-control! []
   (let [tmp (str (fs/create-temp-dir {:prefix "wm-gate-basis-control-"}))
@@ -431,6 +423,8 @@
     (let [basis-start (provenance)
         gate-started-at (str (java.time.Instant/now))
         writer-fence-id (System/getenv "FUTON_WRITER_FENCE_ID")
+        writer-fence-evidence (System/getenv "FUTON_WRITER_FENCE_EVIDENCE")
+        capability (fence/verify writer-fence-id writer-fence-evidence)
         ;; JSON is part of the bounded receipt's consumable output. Readiness
         ;; must compare all four repositories, not only the wrapper's cwd.
         _ (println "wm-workspace-gate: PROVENANCE" (json/generate-string basis-start))
@@ -441,7 +435,7 @@
         basis-finish (provenance)
         movement (print-provenance-result! basis-start basis-finish)
         gate-finished-at (str (java.time.Instant/now))
-        event-claim (gate-event-claim movement writer-fence-id
+        event-claim (gate-event-claim movement capability
                                       gate-started-at gate-finished-at)]
       (println "wm-workspace-gate: SUMMARY"
                (pr-str {:checks (count results) :executable-checks (dec (count results)) :failures failures
@@ -451,7 +445,7 @@
                         :verdict-qualification
                         (cond
                           (not= :stable (:status movement)) :repository-basis-moved
-                          writer-fence-id :fence-conditional
+                          (fence/observed-held? capability) :fence-conditional
                           :else :content-only-event-free-unverified)
                         :manual-exclusions [:lane-registry :current-live-operational-certificate
                                             :production-click-resource-observer

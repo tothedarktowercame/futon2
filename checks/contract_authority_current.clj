@@ -1,6 +1,7 @@
 #!/usr/bin/env bb
 (ns checks.contract-authority-current
   (:require [babashka.process :as process]
+            [writer-fence-capability :as fence]
             [cheshire.core :as json]
             [clojure.string :as str])
   (:import [java.time Instant]))
@@ -66,28 +67,27 @@
 
 (defn parse-args [args]
   (loop [xs args out {:negative? false
-                      :writer-fence-id (System/getenv "FUTON_WRITER_FENCE_ID")}]
+                      :writer-fence-id (System/getenv "FUTON_WRITER_FENCE_ID")
+                      :writer-fence-evidence (System/getenv "FUTON_WRITER_FENCE_EVIDENCE")}]
     (if-let [x (first xs)]
       (case x
         "--negative-control" (recur (rest xs) (assoc out :negative? true))
         "--writer-fence" (if-let [id (second xs)]
                            (recur (nnext xs) (assoc out :writer-fence-id id))
                            (throw (ex-info "--writer-fence requires an id" {})))
+        "--writer-fence-evidence" (if-let [path (second xs)]
+                                    (recur (nnext xs) (assoc out :writer-fence-evidence path))
+                                    (throw (ex-info "--writer-fence-evidence requires a path" {})))
         (throw (ex-info "unknown argument" {:argument x})))
       out)))
 
-(defn event-claim [result writer-fence-id]
+(defn event-claim [result capability]
   (let [moved? (some #{:repository-basis-moved} (:failures result))]
-    {:claim :event-free
-     :interval (:observation-interval result)
-     :writer-fence (if writer-fence-id
-                     {:status :held :id writer-fence-id}
-                     {:status :absent :reason :not-declared})
-     :event-free? (cond moved? false writer-fence-id true :else :unverified)
-     :distinguishable-cause? (boolean (or moved? writer-fence-id))}))
+    (fence/event-claim (:observation-interval result) moved? capability)))
 
 (defn -main [& args]
-  (let [{:keys [negative? writer-fence-id]} (parse-args args)
+  (let [{:keys [negative? writer-fence-id writer-fence-evidence]} (parse-args args)
+        capability (fence/verify writer-fence-id writer-fence-evidence)
         state (current-state)
         tested (if negative?
                  (assoc state
@@ -95,13 +95,13 @@
                         :recorded-holes-blob (apply str (repeat 40 "0")))
                  state)
         result (assess tested)
-        claim (event-claim result writer-fence-id)
+        claim (event-claim result capability)
         success? (if negative? (not (:pass? result)) (:pass? result))]
     (println "contract-authority-current:"
              (cond
                negative? (if success? "negative-control PASS" "mutation slipped")
                (not success?) "FAIL"
-               writer-fence-id (str "PASS (FENCE-CONDITIONAL " writer-fence-id ")")
+               (fence/observed-held? capability) (str "PASS (FENCE-CONDITIONAL " writer-fence-id ")")
                :else "PASS-CONTENT-ONLY (event-free unverified)")
              "assertion=the contract was generated from the current content of Holes.lean"
              (pr-str (assoc result :negative-control negative? :event-claim claim))

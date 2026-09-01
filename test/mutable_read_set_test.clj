@@ -87,3 +87,12 @@
     (is (= :unverified (:verdict events)))
     (is (= :unverified (:event-free? events)))
     (is (= false (:distinguishable-cause? events)))))
+
+(deftest caller-cannot-assert-a-held-fence
+  (let [observation {:endpoint-equal? true :interval {:started-at "s" :finished-at "f"}}
+        forged (read-set/assess-claim observation :event-free
+                                      {:writer-fence-capability
+                                       {:schema :writer-fence-capability/v1
+                                        :verified? true :status :observed-held}})]
+    (is (= :unverified (:event-free? forged)))
+    (is (false? (:distinguishable-cause? forged)))))

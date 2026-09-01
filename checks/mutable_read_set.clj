@@ -5,7 +5,8 @@
    `observe-files` compares captured digests with a second observation. Callers
    then declare whether they need content equality or evidence of event freedom;
    the substrate never guesses from endpoint equality alone."
-  (:require [babashka.fs :as fs])
+  (:require [babashka.fs :as fs]
+            [writer-fence-capability :as fence])
   (:import [java.nio ByteBuffer]
            [java.nio.charset CodingErrorAction StandardCharsets]
            [java.nio.file Files Paths]
@@ -99,16 +100,16 @@
   "Interpret a neutral observation under a caller-declared claim.
 
    Content currency needs equal endpoint bytes. Event freedom additionally
-   needs a monotonic witness whose before/after token is equal, or a declared
-   held fence. Without one it is explicitly unverified, including ABA cases."
+   needs a monotonic witness whose before/after token is equal, or a receipt-
+   validated writer-fence capability. A caller-declared held map is not proof.
+   Without a witness it is explicitly unverified, including ABA cases."
   ([observation claim] (assess-claim observation claim {}))
-  ([observation claim {:keys [monotonic-witness declared-fence]}]
+  ([observation claim {:keys [monotonic-witness writer-fence-capability]}]
    (let [equal? (:endpoint-equal? observation)
          witnessed? (or (and (map? monotonic-witness)
                               (contains? monotonic-witness :before)
                               (= (:before monotonic-witness) (:after monotonic-witness)))
-                         (and (map? declared-fence)
-                              (= :held (:status declared-fence))))]
+                         (fence/observed-held? writer-fence-capability))]
      (case claim
        :content-current
        {:claim claim

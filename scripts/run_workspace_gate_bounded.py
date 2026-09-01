@@ -36,14 +36,20 @@ def main():
     ap.add_argument("--admission-timeout", type=float, default=2700.0)
     args = ap.parse_args()
     fence_id = os.environ.get("FUTON_WRITER_FENCE_ID")
+    fence_evidence = os.environ.get("FUTON_WRITER_FENCE_EVIDENCE")
     if fence_id and not re.fullmatch(r"[A-Za-z0-9._:-]+", fence_id):
         print("workspace-gate-bounded: INVALID_WRITER_FENCE_ID", file=sys.stderr)
         return 125
     command = args.command
+    if bool(fence_id) != bool(fence_evidence):
+        print("workspace-gate-bounded: WRITER_FENCE_ID_AND_EVIDENCE_REQUIRED_TOGETHER",
+              file=sys.stderr)
+        return 125
     if fence_id:
         # bg.py/systemd-run does not propagate this submitting shell's local
         # environment. Bind the reviewed identifier into the bounded command.
         command = ("env FUTON_WRITER_FENCE_ID=" + shlex.quote(fence_id)
+                   + " FUTON_WRITER_FENCE_EVIDENCE=" + shlex.quote(fence_evidence)
                    + " " + command)
     launch = ["launch-test", command, "--agent", args.agent,
               "--label", args.label, "--dir", str(ROOT), "--window", "measurement"]

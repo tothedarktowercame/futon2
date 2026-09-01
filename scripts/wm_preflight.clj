@@ -18,12 +18,9 @@
             [futon2.aif.actuator-a6 :as a6]
             [futon2.aif.close-loop :as cl]
             [futon2.aif.fold-escrow :as esc]
-            [cheshire.core :as json]
-            [clojure.java.shell :as shell]
+            [writer-fence-capability :as fence]
             [clojure.string :as str])
-  (:import [java.time Instant]
-           [java.security MessageDigest]
-           [java.math BigInteger]))
+  (:import [java.time Instant]))
 
 (defn- onoff [b] (if b "ON " "off"))
 
@@ -51,73 +48,17 @@
           (throw (ex-info "--writer-fence-evidence requires a path" {})))
         (recur (rest xs) fence-id evidence (conj missions (first xs)))))))
 
-(defn- sha256 [bytes]
-  (format "%064x" (BigInteger. 1 (.digest (MessageDigest/getInstance "SHA-256") bytes))))
-
-(def fence-evidence-checker
-  "/home/joe/code/futon2/checks/writer_fence_evidence.py")
-
-(def ^:dynamic *run-fence-evidence*
-  (fn [fence-id attestation-path]
-    (shell/sh "python3" fence-evidence-checker
-              "--fence-id" fence-id "--attestations" attestation-path)))
-
 (defn verify-fence-evidence [fence-id path]
-  (cond
-    (and (nil? fence-id) (nil? path))
-    {:verified? false :status :absent :reason :not-declared}
+  (fence/verify fence-id path))
 
-    (or (nil? fence-id) (nil? path))
-    {:verified? false :status :invalid :reason :id-and-evidence-required-together}
-
-    :else
-    (try
-      (let [bytes (java.nio.file.Files/readAllBytes (java.nio.file.Paths/get path (make-array String 0)))
-            receipt (json/parse-string (String. bytes "UTF-8") true)
-            attested (get-in receipt [:classification :attested])
-            attestation (:value attested)
-            expires (some-> attestation :expires-at Instant/parse)
-            temp (java.io.File/createTempFile "wm-preflight-fence-attestation-" ".json")]
-        (try
-          (spit temp (json/generate-string attestation))
-          (let [live (*run-fence-evidence* fence-id (.getAbsolutePath temp))
-                live-receipt (try (json/parse-string (:out live) true)
-                                  (catch Throwable _ nil))
-                problems (cond-> []
-                           (not= "FENCE-VERIFIABLE" (:verdict receipt)) (conj :prior-verdict-not-verifiable)
-                           (not= fence-id (:fence-id receipt)) (conj :receipt-fence-id-mismatch)
-                           (not= fence-id (get-in receipt [:classification :fence-id])) (conj :classification-fence-id-mismatch)
-                           (not= "complete" (:status attested)) (conj :attestation-incomplete)
-                           (not= fence-id (:fence-id attestation)) (conj :attestation-fence-id-mismatch)
-                           (nil? (:observation-interval receipt)) (conj :observation-interval-absent)
-                           (or (nil? expires) (.isBefore expires (Instant/now))) (conj :attestation-expired)
-                           (not= 0 (:exit live)) (conj :live-fence-check-failed)
-                           (not= "FENCE-VERIFIABLE" (:verdict live-receipt)) (conj :live-fence-not-verifiable)
-                           (not= fence-id (:fence-id live-receipt)) (conj :live-fence-id-mismatch)
-                           (nil? (:observation-interval live-receipt)) (conj :live-observation-interval-absent))]
-            {:verified? (empty? problems)
-             :status (if (empty? problems) :observed-held :unverified)
-             :id fence-id :path path :receipt-sha256 (sha256 bytes)
-             :live-receipt-sha256 (some-> (:out live) .getBytes sha256)
-             :live-verdict (:verdict live-receipt)
-             :live-observation-interval (:observation-interval live-receipt)
-             :problems problems})
-          (finally (.delete temp))))
-      (catch Throwable t
-        {:verified? false :status :unavailable :id fence-id :path path
-         :reason :evidence-unreadable :detail (.getMessage t)}))))
-
-(defn readiness-claim [started-at finished-at fence]
-  {:claim :event-free
-   :interval {:started-at (str started-at) :finished-at (str finished-at)}
-   :writer-fence (dissoc fence :verified?)
-   :event-free? (if (:verified? fence) true :unverified)
-   :distinguishable-cause? (:verified? fence)})
+(defn readiness-claim [started-at finished-at capability]
+  (fence/event-claim {:started-at (str started-at) :finished-at (str finished-at)}
+                     false capability))
 
 (defn readiness-label [ready? fence]
   (cond
     (not ready?) "NOT-READY ✗"
-    (:verified? fence) (str "READY (FENCE-VERIFIED " (:id fence) ") ✓")
+    (fence/observed-held? fence) (str "READY (FENCE-VERIFIED " (:id fence) ") ✓")
     :else "READY-CONTENT-ONLY (event-free unverified) ⚠"))
 
 (defn -main [& missions]
@@ -126,7 +67,7 @@
         started-at (Instant/now)]
   (println "══ WM readiness preflight (G4) ══")
   (println "claim: readiness-over-observation-interval"
-           "writer-fence:" (if (:verified? fence)
+           "writer-fence:" (if (fence/observed-held? fence)
                               (str "OBSERVED-HELD " writer-fence-id)
                               (str "UNVERIFIED " (pr-str (dissoc fence :verified?)))))
 
@@ -179,5 +120,5 @@
               (println "\n  (pass mission ids as args for a per-mission readiness verdict)"))))))
     (println "\nobservation:" (pr-str (readiness-claim started-at (Instant/now)
                                                        fence)))
-    (when (and (or writer-fence-id writer-fence-evidence) (not (:verified? fence)))
+    (when (and (or writer-fence-id writer-fence-evidence) (not (fence/observed-held? fence)))
       (System/exit 1)))))
