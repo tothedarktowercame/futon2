@@ -1,13 +1,13 @@
 {:schema :wm/variable-situation-accounting-v1,
  :as-of "2026-08-31",
  :authority
- {:contract-git-sha "b475bc72dcf6a91f8a90fb1da1bb8a8058e9a7f4",
+ {:contract-git-sha "36c2c2da681eb724fe0dbad027b6ac855d24bd15",
   :contract-sha256
-  "4b3e54e967becd2e5b71296c853ff969932fc98c988dd4fd47d9f992470a00d1",
+  "0bbb4627f424ad81b4756d1ea85029679ef52c1b011b2f4f69f2277e994bc451",
   :glossary-sha256
   "780a64afbdb4a9f47a2e399fd3611f79961b6facbbddac02630895592e867889",
   :witness-registry-sha256
-  "317bb872732b9cc4bbfd839d5e3838a1bb777e578a964b3136812e51456ad3fc"},
+  "9c27a2852d0c73316e5839450e679b73728ee2563585fffb507b78d17477579f"},
  :axes
  {:content-status
   [:named-only
@@ -17,13 +17,7 @@
    :proven-against-pinned-source],
   :pointer-status [:resolves :drifted]},
  :rows
- [{:name "modelReductionFreeEnergyChange",
-   :area :learning,
-   :owner "sec-glossary.tex:58 · P-glossary-mathematics",
-   :content-status :closed-by-record-negative-space,
-   :pointer-status :resolves,
-   :pointer-detail {:resolved-title "Bayesian Model Reduction."}}
-  {:name "Pattern",
+ [{:name "Pattern",
    :area :demo,
    :owner "P-validated-R5 §2.1d",
    :content-status :closed-by-record-negative-space,
@@ -351,6 +345,12 @@
    :content-status :closed-by-record-negative-space,
    :pointer-status :resolves,
    :pointer-detail {:resolved-title "Belief state $\\mu$."}}
+  {:name "modelReductionFreeEnergyChange",
+   :area :learning,
+   :owner "sec-glossary.tex:58 · P-glossary-mathematics",
+   :content-status :closed-by-record-with-witness,
+   :pointer-status :resolves,
+   :pointer-detail {:resolved-title "Bayesian Model Reduction."}}
   {:name "PredictiveOutcomeKernel",
    :area :scores,
    :owner "sec-glossary.tex:21–29 · P-glossary-mathematics",
@@ -827,8 +827,8 @@
  :counts
  {:rows 127,
   :content
-  {:closed-by-record-negative-space 62,
-   :closed-by-record-with-witness 34,
+  {:closed-by-record-negative-space 61,
+   :closed-by-record-with-witness 35,
    :named-only 9,
    :open-hole 11,
    :proven-against-pinned-source 11},
