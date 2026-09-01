@@ -8,6 +8,6 @@
   {:lane :wm-verbs
    :holding :C378-suite-recheck, :dispatched-at "2026-09-01T02:16:51Z", :job-id "invoke-1788229006793-6494-1e1743a2", :expected-by "2026-09-01T03:01:51Z"}
   {:lane :wm-organization
-   :holding :C375-attempt-authentication, :dispatched-at "2026-09-01T02:15:18Z", :job-id "invoke-1788228909278-6490-bf219a0c", :expected-by "2026-09-01T03:00:18Z"}
+   :holding :C381-reparking-from-machine, :dispatched-at "2026-09-01T02:21:48Z", :job-id "invoke-1788229304026-6503-fe3fe0c0", :expected-by "2026-09-01T03:06:48Z"}
   {:lane :wm-evidence
-   :holding :C376-attack-receipt-schema, :dispatched-at "2026-09-01T02:15:18Z", :job-id "invoke-1788228914141-6491-e006ce55", :expected-by "2026-09-01T03:00:18Z"}]}
+   :holding :C380-attack-state-machine, :dispatched-at "2026-09-01T02:21:48Z", :job-id "invoke-1788229300043-6502-fa62af8d", :expected-by "2026-09-01T03:06:48Z"}]}
