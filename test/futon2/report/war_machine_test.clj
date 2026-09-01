@@ -58,7 +58,9 @@
 (deftest f-pi-dark-readback-real-wm-shape-test
   (let [{:keys [previous current observation]} (real-shape-f-pi-fixture)
         result (wm/f-pi-dark-readback previous current observation)
-        values (:f-pi-by-candidate-id result)]
+        envelope (:f-pi-by-candidate-id result)
+        values (:by-candidate-id envelope)]
+    (is (= :present (:status envelope)))
     (is (= 110 (count values)))
     (is (= :channel-mismatch (get-in values ["rank/1" :reason])))
     (is (= :candidate-not-in-current-tick
@@ -69,6 +71,21 @@
     (is (every? #(= :present (get-in values [(str "rank/" %) :status]))
                 (range 2 110)))
     (is (= result (edn/read-string (pr-str result))))))
+
+(deftest f-pi-whole-tick-absence-cannot-be-read-as-values-test
+  ;; Both cases used to be bare maps, so `vals` on a whole-tick absence
+  ;; returned (:absent :no-previous-trace-record) as though those were F_pi
+  ;; numbers. The envelope makes the two shapes distinguishable by :status.
+  (let [absent (:f-pi-by-candidate-id (wm/f-pi-dark-readback nil [] {}))
+        {:keys [previous current observation]} (real-shape-f-pi-fixture)
+        present (:f-pi-by-candidate-id
+                 (wm/f-pi-dark-readback previous current observation))]
+    (is (= :absent (:status absent)))
+    (is (nil? (:by-candidate-id absent)))
+    (is (= :present (:status present)))
+    (is (map? (:by-candidate-id present)))
+    (is (every? #(contains? % :status) [absent present])
+        "one envelope, so a consumer reads :status before anything else")))
 
 (deftest f-pi-dark-readback-explicit-whole-tick-absence-test
   (is (= :no-previous-trace-record

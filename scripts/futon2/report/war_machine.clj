@@ -97,19 +97,29 @@
    the predictions that produced them. Duplicate identities are explicit
    absences. Missing previous data, candidate-set differences, and channel
    mismatches are recorded rather than silently skipped. `:absent-variance
-   :floor` is intentional because untouched WM channels carry no variance
-   prediction rather than a deterministic claim."
+:floor` is intentional because untouched WM channels carry no variance
+   prediction rather than a deterministic claim.
+
+   The result is always `{:status ... :by-candidate-id ...}` -- present with a
+   map of results, or absent with a reason and nil -- so a whole-tick absence
+   cannot be mistaken for a set of values.
+
+   TWO FLAGS, AND THEY ARE COUPLED: this reads what
+   `FUTON_WM_TRACE_POLICY_DETAILS=1` wrote on the PREVIOUS tick. With
+   `FUTON_WM_FPI_DARK=1` alone every tick records
+   `:previous-trace-has-no-policy-predictions` -- correct, and useless. Both
+   must be on, and the previous tick must already have had the trace flag on."
   [previous-trace current-ranked observation]
   (let [previous-timestamp (:timestamp previous-trace)
         previous-ranked (:ranked-actions previous-trace)]
     (cond
       (nil? previous-trace)
-      {:f-pi-by-candidate-id {:status :absent :reason :no-previous-trace-record}
+      {:f-pi-by-candidate-id {:status :absent :reason :no-previous-trace-record :by-candidate-id nil}
        :f-pi-provenance {:previous-trace-timestamp nil
                          :matched-count 0 :unmatched-count 0}}
 
       (not (seq previous-ranked))
-      {:f-pi-by-candidate-id {:status :absent :reason :previous-trace-has-no-ranked-actions}
+      {:f-pi-by-candidate-id {:status :absent :reason :previous-trace-has-no-ranked-actions :by-candidate-id nil}
        :f-pi-provenance {:previous-trace-timestamp previous-timestamp
                          :matched-count 0 :unmatched-count 0}}
 
@@ -117,14 +127,16 @@
                       (map? (:prediction-variance %)))
                 previous-ranked)
       {:f-pi-by-candidate-id {:status :absent
-                              :reason :previous-trace-has-no-policy-predictions}
+                              :reason :previous-trace-has-no-policy-predictions
+                              :by-candidate-id nil}
        :f-pi-provenance {:previous-trace-timestamp previous-timestamp
                          :matched-count 0
                          :unmatched-count (count previous-ranked)}}
 
       (nil? (:effects-mode previous-trace))
       {:f-pi-by-candidate-id {:status :absent
-                              :reason :previous-trace-has-no-effects-mode}
+                              :reason :previous-trace-has-no-effects-mode
+                              :by-candidate-id nil}
        :f-pi-provenance {:previous-trace-timestamp previous-timestamp
                          :matched-count 0
                          :unmatched-count (count previous-ranked)}}
@@ -179,9 +191,17 @@
             matched-count (count (filter :identity-matched? joined))
             scored-count (count (filter #(= :present (:status %)) joined))]
         {:f-pi-by-candidate-id
-         (into {} (map (juxt :candidate-id
-                             #(dissoc % :candidate-id :identity-matched?)))
-               joined)
+         ;; Same envelope as the whole-tick absences above: :status, and the
+         ;; per-candidate map under :by-candidate-id. Without it both cases are
+         ;; bare maps, and a consumer calling `vals` on a whole-tick absence
+         ;; would silently get (:absent :no-previous-trace-record) as if those
+         ;; were F_pi values. Nothing consumes this yet, which is exactly when
+         ;; to fix the shape (claude-20 review, I2(c)).
+         {:status :present
+          :by-candidate-id
+          (into {} (map (juxt :candidate-id
+                              #(dissoc % :candidate-id :identity-matched?)))
+                joined)}
          :f-pi-provenance
          {:previous-trace-timestamp previous-timestamp
           :previous-effects-mode (:effects-mode previous-trace)
