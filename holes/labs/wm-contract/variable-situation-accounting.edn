@@ -1,13 +1,13 @@
 {:schema :wm/variable-situation-accounting-v1,
  :as-of "2026-08-31",
  :authority
- {:contract-git-sha "5241ffa129d3fd9c84ee28b8e5d4bb020ea8e466",
+ {:contract-git-sha "b475bc72dcf6a91f8a90fb1da1bb8a8058e9a7f4",
   :contract-sha256
-  "3441d5be6f2b6b88c28ac4bd399f5554a8748f018e190d302ba335d4b4e2eb76",
+  "4b3e54e967becd2e5b71296c853ff969932fc98c988dd4fd47d9f992470a00d1",
   :glossary-sha256
   "780a64afbdb4a9f47a2e399fd3611f79961b6facbbddac02630895592e867889",
   :witness-registry-sha256
-  "34c51c34934392025e06ef66fdf3e12060ae77f377cab3d88dda26bb4becb682"},
+  "317bb872732b9cc4bbfd839d5e3838a1bb777e578a964b3136812e51456ad3fc"},
  :axes
  {:content-status
   [:named-only
@@ -366,7 +366,7 @@
   {:name "ParameterPosteriorKernel",
    :area :scores,
    :owner "sec-glossary.tex:29 · P-glossary-mathematics",
-   :content-status :closed-by-record-negative-space,
+   :content-status :closed-by-record-with-witness,
    :pointer-status :resolves,
    :pointer-detail {:resolved-title "Ambiguity."}}
   {:name "TransitionKernel",
@@ -827,8 +827,8 @@
  :counts
  {:rows 127,
   :content
-  {:closed-by-record-negative-space 63,
-   :closed-by-record-with-witness 33,
+  {:closed-by-record-negative-space 62,
+   :closed-by-record-with-witness 34,
    :named-only 9,
    :open-hole 11,
    :proven-against-pinned-source 11},
