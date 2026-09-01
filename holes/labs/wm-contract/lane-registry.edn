@@ -4,10 +4,10 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C391-adapter-correspondence, :dispatched-at "2026-09-01T02:38:27Z", :job-id "invoke-1788230293148-6527-9a9f3fc4", :expected-by "2026-09-01T03:23:27Z"}
+   :holding :C399-topology-code-closure, :dispatched-at "2026-09-01T02:45:42Z", :job-id "invoke-1788230733953-6539-a11fde1e", :expected-by "2026-09-01T03:30:42Z"}
   {:lane :wm-verbs
-   :holding :C393-census-basis-commit, :dispatched-at "2026-09-01T02:38:27Z", :job-id "invoke-1788230302505-6529-024d34a5", :expected-by "2026-09-01T03:23:27Z"}
+   :holding :C400-class-6b-digest-provenance, :dispatched-at "2026-09-01T02:45:42Z", :job-id "invoke-1788230738157-6540-5d7afefc", :expected-by "2026-09-01T03:30:42Z"}
   {:lane :wm-organization
-   :holding :C396-operational-certificate-binding, :dispatched-at "2026-09-01T02:41:25Z", :job-id "invoke-1788230481225-6535-329cbfe7", :expected-by "2026-09-01T03:26:25Z"}
+   :holding :C398-certificate-serving-identity, :dispatched-at "2026-09-01T02:45:42Z", :job-id "invoke-1788230729761-6538-ffb35be3", :expected-by "2026-09-01T03:30:42Z"}
   {:lane :wm-evidence
    :holding :C395-state-machine-attack, :dispatched-at "2026-09-01T02:41:25Z", :job-id "invoke-1788230476809-6534-1f0c8625", :expected-by "2026-09-01T03:26:25Z"}]}
