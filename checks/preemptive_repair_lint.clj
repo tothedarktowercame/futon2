@@ -24,7 +24,11 @@
                (contains? text-exts (fs/extension p))
                (< (fs/size p) 2000000))
       (mask-specimens (slurp (str p))))))
-(defn- corpus []
+(defn corpus
+  "Read one in-memory view of the tracked source corpus. Callers combining
+   several scanners must obtain this once so one verdict cannot mix worktree
+   states observed at different times."
+  []
   (for [[repo root] repos, rel (tracked root), :let [text (readable root rel)], :when text]
     {:repo repo :root root :path rel :text text}))
 (defn- line-no [text offset]
@@ -147,12 +151,15 @@
    :record ":ratification [:x] :disagreements [:x]"})
 ;; PREEMPTIVE-REPAIR-SPECIMENS-END
 
-(defn run [kind negative?]
+(defn run-with-rows
+  "Run one scanner against an already captured corpus. Negative controls own
+   their synthetic rows and intentionally ignore the supplied corpus."
+  [kind negative? captured-rows]
   (let [rows (if negative?
                (if (= kind :absence) [] [{:repo :negative :root "/tmp"
                                           :path (if (= kind :artefact) "test/mutation.sh" "test/mutation.clj")
                                           :text (get negative-text kind)}])
-               (corpus))
+               captured-rows)
         findings (if (and negative? (= kind :absence))
                    [{:repo :negative :path "mutation.edn" :finding :absence-coerced
                      :input :missing :becomes 0.0}]
@@ -162,6 +169,9 @@
                (into (sorted-map) (frequencies (map :repo findings)))
                (merge (sorted-map :futon2 0 :futon3 0 :p4ng 0)
                       (frequencies (map :repo findings))))}))
+
+(defn run [kind negative?]
+  (run-with-rows kind negative? (when-not negative? (corpus))))
 
 (defn main [kind args]
   (let [negative? (some #{"--negative"} args)

@@ -12,7 +12,8 @@
    gate's consumption of a lint result, not the lint's own falsifier."
   ([] (gate-result false))
   ([mutation?]
-   (let [results (into {} (map (juxt identity #(lint/run % false)) all-kinds))
+   (let [rows (vec (lint/corpus))
+         results (into {} (map (juxt identity #(lint/run-with-rows % false rows)) all-kinds))
          results (if mutation?
                    (update-in results [:acceptance :findings]
                               conj {:repo :gate-control :path "mutation.clj"
