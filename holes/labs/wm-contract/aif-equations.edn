@@ -79,9 +79,9 @@
    :formal "eps_k := o_k - mu_k" :eq "buckley2017 eq. 45 error terms (reduction: no generalised coordinates)" :lean nil :lean-status :missing
    :code "war_machine.clj:4368-4379"}
   {:id :precision :defines :Pi :node :R7 :class :theory-defined :ref :buckley2017
-   :imports [:o :eps0]
-   :formal "Pi_k := 1 / max(Var_k, eps0)" :eq nil :lean nil :lean-status :missing
-   :note "Var_k is the running channel sample variance of o_k. In buckley2017 eq. 45 the variances σ are model parameters, not sample statistics; this row is therefore stack-defined in content and only theory-defined in role." :code "war_machine.clj:4380-4388"}
+   :imports [:eps :eps0]
+   :formal "Pi_k := 1 / max(Var(eps_k), eps0)" :eq nil :lean nil :lean-status :missing
+   :note "Var(eps_k) is the bounded rolling variance of channel k's prediction ERROR history (precision.clj:116-135 update-channel-precision: production precision is the variance component of new-error; the observation enters only the separately emitted :salience term under the default :salience-mode :separate). Earlier this row imported :o and said 'variance of o_k' -- corrected 2026-09-01 (C10, found reviewing D5f): at symbol grain R7 imports eps, so the theory edge is R8->R7, and R2->R7 holds only at route grain. In buckley2017 eq. 45 the variances σ are model parameters, not sample statistics; this row is therefore stack-defined in content and only theory-defined in role." :code "precision.clj:116-135, 160-190; war_machine.clj:4380-4388"}
   {:id :free-energy :defines :F :node :R8 :class :theory-defined :ref :buckley2017
    :imports [:Pi :eps]
    :formal "F = 1/2 * mean_k (Pi_k eps_k^2)" :eq "buckley2017 eq. 45 (reduction: ½ ln σ terms dropped; mean over channels instead of sum)" :lean "variationalFreeEnergy" :lean-status :closed

@@ -174,7 +174,8 @@
   {:id :C9 :class :C :status :open :owner :claude-1
    :statement "Figure 5A and 5B captions must say they measure different things: route conformance (a run's hops are wiring edges) vs equation dependency (an edge is forced by an import). The route record is not the dependency DAG (TN §5e)."
    :acceptance "p4ng sec-operator.tex captions of fig:wr-overlay-live and fig:aif-dag each carry one sentence stating the distinction; build passes; sha here."}
-  {:id :C10 :class :C :status :open :owner :claude-1
+  {:id :C10 :class :C :status :done-unreviewed :owner :claude-1
+   :evidence "futon2 (this commit): :precision imports [:eps :eps0], :formal Pi_k := 1/max(Var(eps_k), eps0), :code precision.clj:116-135, 160-190, :note names the salience path for o. Closure check passes; pointer_check 128+/0. Dry run of gen_aif_dag (not committed): theory edges 18 (R2->R7 out, R8->R7 in), R8->R7 realised-undrawn. NOT regenerated into p4ng: awaits a second reader (TN 9a)."
    :statement "aif-equations.edn :precision (R7) imports [:o :eps0] and its note says Var_k is the sample variance of o_k. precision.clj:116-135 (update-channel-precision) computes production precision as the bounded variance component of the ERROR history; observed enters only the :salience term, emitted separately under the default :salience-mode :separate. At symbol grain R7 imports eps, not o (found reviewing D5f)."
    :acceptance ":precision row imports [:eps :eps0], :formal 'Pi_k := 1 / max(Var(eps_k), eps0)', :code precision.clj:116-135, :note stating o reaches R7 only through salience; aif-conformance regenerates with R8->R7 realised-undrawn and R2->R7 gone; a second reader sets :reviewed-by before p4ng regenerates (TN 9a)."}
   ;; ---------- J: needs Joe (never taken by the loop) ----------
