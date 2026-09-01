@@ -41,3 +41,42 @@ rewritten receipts the gap between the two is widest.
 **Not a defect in C379 and 31/31 stands.** It is a limit of the same shape as C379's stated residual: the pin
 is load-bearing without being complete. **Route to `wm-nouns` after C386 returns** — same file, same question,
 and two lanes in one file is how a repair gets lost in a merge.
+
+## C394 — owner review of C383/C392, and the file moved under me (my fix, owner review)
+
+**Gated C383 (`8d4bd99`) because the parking request rests on it.** What I checked.
+
+**Read the evidence acceptance paths, not the summary.** `evidence_quiescent` and `evidence_fence` invoke their
+producers directly — there is no caller-supplied path into either. `evidence_tested` resolves three bounded job
+IDs through the Futon3c registry, requires the terminal systemd unit and on-disk receipt to agree, and takes
+the gate start instant from **systemd's `ExecMainStartTimestampMonotonic`**, so a presenter cannot freshen a
+day-old fence by editing a receipt's `started-at`.
+
+**`evidence_reload` and `evidence_click_issued` DO accept a caller-supplied JSON path** and check only its
+contents. **This is a documented boundary, not a gap.** C371: *"The attestation claim deliberately ends at
+`tested-commit`."* The code agrees — those transitions carry `attestation-coverage:
+not-claimed-after-tested-phase`. C383's *"Caller substitutions are not accepted"* is the closing sentence of
+its quiescence-and-fence paragraph, scoped by it.
+
+**So two of the eight states rest on caller-supplied JSON by design**, because reload and click are Joe's
+operations with unbounded latency and no bounded producer. The machine enforces their identity, terminal,
+certificate, restoration and ordering predicates; **it does not claim the attestation covered them.** That is
+the honest limit the operational certificate has to live with, and it is stated in the right place.
+
+**Ran the controls rather than trusting the count: 13 green** (the report said 12).
+
+### The file moved under me
+
+**I grepped for a `parking-specification-sha256` comparison, found none, and dispatched C392 to add one.**
+Between that grep and the test run, **C392 landed as `386b0e9` at 02:38** — and `load_ledger` now raises
+`parking-specification-changed:recorded-request-differs-from-current;abort-or-re-initialize`, distinguishing
+changed operator authority from ledger corruption.
+
+**I noticed because a test name did not match what I had just told a lane**, not because I saw the commit. This
+is the read-side of the hazard I flagged one hour earlier when `wm-organization` closed `wm-evidence`'s census
+finding four minutes after it committed. **Holding a dispatch prevents two lanes writing one file; it does not
+prevent reading one mid-write.** C393 is the durable answer for censuses; for review, the rule is to pin the
+commit under review and read at that commit, not at `HEAD`.
+
+**Both C385 exceptions are now closed.** With C389 (`fe698f3`) amending C284's prose, **both full suites are
+green**: Futon2 CI exit 0, Futon3 248 tests / 1,518 assertions, zero failures.
