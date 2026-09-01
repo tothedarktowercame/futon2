@@ -258,7 +258,24 @@ asserted equal to the population count is its *cure*. So the checkable rule is
 `sum(buckets) == count(population)` — e.g. `closed + open + named-only +
 unclassified == len(rows)`. Vocabulary proof stops a renamed category becoming a
 silent zero; the reconciliation assertion stops an unmatched row vanishing from
-the total. Both are needed: the first catches renames, the second catches
+the total.
+
+**A rule-defined count is not a historical floor (2026-09-01).** wm-nouns
+refused a numeric floor for the declaration count because *"a historical minimum
+would become another stale count."* That reasoning was then misapplied by me to
+a population **fixed by construction under a stated counting rule**, where the
+invariant is genuine. The distinction: a floor derived from observed history
+drifts; a count defined by a rule does not, and asserting it is correct. But
+**key the assertion on the rule version**, so a legitimate rule change fails as
+*"version 2 not understood"* rather than as a population mismatch that reads
+like truncation.
+
+**On lint design (claude-1):** *"A lint that accepts a comment as proof and a
+lint that rejects proof without a specific spelling are the same mistake facing
+opposite directions — both check for a token rather than the property."* This
+campaign's lint made both errors within two hours. The checkable property is
+"every `frequencies`/`sum` over a field is preceded, in the same file, by a
+membership check on that field against a literal set". Both are needed: the first catches renames, the second catches
 categories nobody anticipated. Then assert every key formatted *before* formatting
 it — the same discipline as asserting a string replacement before trusting it,
 which this campaign learned the same night by shipping a `.tex` caption whose
