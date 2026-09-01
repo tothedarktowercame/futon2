@@ -607,3 +607,36 @@ measurement decided the design: +92,985 bytes/tick, 30.2% of a 307,910-byte
 110-candidate record, 198,075 bytes (68%) under the naive form the C66
 comment warns about — so the write won over the recompute route, which would
 have needed the belief and the mode per candidate anyway.
+
+### 11. Next: validated runs (R track) — proposed 2026-09-01
+
+Joe: "since it has now basically a validated topology... the first order of
+business is probably to check that out and see if it's really true... get some
+validated runs that prove that the topology is what we think it should be."
+
+What is validated is the drawing: every edge of Figure 5A classified against
+the registries, the sources, and two August run records. What has not been done
+is to run the machine as it now stands and check that the route it takes is
+the topology drawn — including the seven retired edges and the eight added.
+`wmRunConformsToWiring` (Holes.lean, kind HOLE, evidence `TickRunRecord`) is
+the declaration waiting for exactly this.
+
+- **R1 discovery** — how the 08-30/31 records were produced; what shadow mode
+  exists; what a live tick would enact. **A validation run must not fire real
+  actuators** (`close-loop!` enacts missions). Deliverable: the exact shadow
+  command for N ticks with `FUTON_WM_TRACE_POLICY_DETAILS=1`, and what it
+  writes. No run.
+- **R2 the run** — ~20 ticks, shadow, current code; records carry the route,
+  I3's per-candidate predictions and Q(π), and the machine's own scores.
+- **R3 conformance, mechanically** — every recorded hop is an edge of the
+  checked topology; no retired edge is traversed (a traversed retirement
+  changes the figure, not the run); realised theory edges on the tick path
+  execute. Output stamped into Figure 5A's legend: "conformant with run
+  `<sha>`, N ticks".
+- **R4 evidence for the holes** — `wmRunConformsToWiring` closes by record or
+  is refuted; H1b's bound tested on fresh records; dark F_π (and dark β when it
+  lands) present in the records so the choice-point branches run on our own
+  fields.
+
+The next build level (live γ, live F_π, the branch experiments) follows from
+what R3/R4 show, not from a plan made before the run.
