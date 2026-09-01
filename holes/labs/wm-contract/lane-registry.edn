@@ -4,7 +4,7 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C348-migrate-ten-nontrivial, :dispatched-at "2026-09-01T01:44:24Z", :job-id "invoke-1788227058532-6443-b88c3a62", :expected-by "2026-09-01T02:29:24Z"}
+   :holding :C364-construction-pins, :dispatched-at "2026-09-01T02:01:20Z", :job-id "invoke-1788228076495-6469-e01db596", :expected-by "2026-09-01T02:46:20Z"}
   {:lane :wm-verbs
    :holding :C363-inprocess-forgeability, :dispatched-at "2026-09-01T02:00:12Z", :job-id "invoke-1788228007697-6466-a98002ef", :expected-by "2026-09-01T02:45:12Z"}
   {:lane :wm-organization
