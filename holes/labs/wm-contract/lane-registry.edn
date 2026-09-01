@@ -4,10 +4,10 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C274-vacuous-pass, :dispatched-at "2026-09-01T00:16:25Z", :job-id "invoke-1788221754875-6274-1d6b7507", :expected-by "2026-09-01T01:01:25Z"}
+   :holding :C277-next-glossary-term, :dispatched-at "2026-09-01T00:19:26Z", :job-id "invoke-1788221934833-6281-557dc36d", :expected-by "2026-09-01T01:04:26Z"}
   {:lane :wm-verbs
    :holding :C276-duplicate-run-id, :dispatched-at "2026-09-01T00:17:29Z", :job-id "invoke-1788221845436-6278-e5da4e4c", :expected-by "2026-09-01T01:02:29Z"}
   {:lane :wm-organization
    :holding :C275-raw-gate-provenance, :dispatched-at "2026-09-01T00:16:25Z", :job-id "invoke-1788221781997-6275-32cc598e", :expected-by "2026-09-01T01:01:25Z"}
   {:lane :wm-evidence
-   :holding :C273-attack-certificate, :dispatched-at "2026-09-01T00:14:48Z", :job-id "invoke-1788221684192-6272-dc676448", :expected-by "2026-09-01T00:59:48Z"}]}
+   :holding :C278-format-boundary-audit, :dispatched-at "2026-09-01T00:19:26Z", :job-id "invoke-1788221962293-6283-7d6df96c", :expected-by "2026-09-01T01:04:26Z"}]}
