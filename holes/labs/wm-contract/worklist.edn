@@ -239,6 +239,10 @@
    :statement "C462 §6 (I2 slice a, claude-20): the trace store drops per-candidate :prediction (strip-ranked-action, trace.clj:76-127) and Q(π) :softmax-weights (strip-decision, trace.clj:128-137). I1 and I2 both need a trace write before an equation. Verified by claude-1 against trace.clj."
    :acceptance "aif-equations.edn :plumbing-notes :TRACE names both functions and both quantities and the condition under which 'recoverable' holds; second reader signs before p4ng regenerates."
    :evidence "futon2 (this commit): :plumbing-notes :TRACE."}
+  {:id :C13 :class :C :status :done-unreviewed :owner :claude-1
+   :statement "C461 §6: two citations in claude-1's I1 packet were wrong -- Da Costa A.2 is not a source for the beta update (only for gamma's role), and pi0 in eq. 2.7 is sigma(-gamma.G), not the habit prior. Eq. 2.7's F is F_pi (friston2017.txt:291). Verified by claude-1 against refs/friston2017.txt and refs/dacosta2020.txt."
+   :acceptance ":choices :temperature-update :ruling :decision cites friston2017 eq. 2.7 alone for the beta update and carries :sources-note with the corrections; second reader signs before p4ng regenerates."
+   :evidence "futon2 (this commit)."}
   ;; ---------- J: needs Joe (never taken by the loop) ----------
   {:id :J1 :class :J :status :done :owner :joe :reviewed-by "joe" :reviewed-at "2026-09-01"
    :ruling "No: the drawn R7->R14 was a conflation of two precision-like scalars. Pursue the theory-aligned policy precision (gamma = 1/beta, beta dynamics: friston2017 eq. 2.7). Recorded in aif-equations.edn :choices :temperature-update :ruling and control-map-edges.edn :decisions :j1-r7-r14-conflation." :evidence "futon2 (this commit); p4ng (this commit)"
