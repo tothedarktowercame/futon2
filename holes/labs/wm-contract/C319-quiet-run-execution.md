@@ -48,6 +48,9 @@ EOF
 Capture the actual pre-fence manifest before changing it:
 
 ```sh
+python3 /home/joe/code/futon2/scripts/writer_fence_restore.py capture \
+  --fence-id "$FENCE_ID" \
+  --manifest "/tmp/$FENCE_ID-restore-manifest.json"
 date -u +%FT%TZ
 systemctl --user list-timers --all --no-pager
 systemctl --user list-units --type=service --state=running --no-pager
@@ -73,9 +76,9 @@ for id in jit-queue:jit-m94A03-retry-v3 jit-queue:jit-all-open-v2 ftriangle-live
 done
 ```
 
-Create an initially empty `/tmp/$FENCE_ID-restore.actions`. Append an allowlisted
-undo action only **after** its corresponding park command succeeds. This is the
-authoritative partial-parking journal; never populate it in advance.
+The capture creates the structured, digest-bound restoration authority. The
+journal `/tmp/$FENCE_ID-restore.actions.jsonl` does not exist yet; the tool
+creates it only after observing a successful park.
 
 Expected: an observed manifest, not a pass. Any new process with an unclassified
 write set is `write-set-unknown`: STOP until its owner and write set are named.
@@ -89,6 +92,10 @@ untouched:
 ```sh
 cd /home/joe/code/futon3c
 scripts/proof-eval.sh '(do (require (quote futon3c.apm.semantic-progress-watchdog)) (futon3c.apm.semantic-progress-watchdog/stop! "semantic-progress:jit-queue:jit-m94A03-retry-v3"))'
+python3 /home/joe/code/futon2/scripts/writer_fence_restore.py record \
+  --manifest "/tmp/$FENCE_ID-restore-manifest.json" \
+  --journal "/tmp/$FENCE_ID-restore.actions.jsonl" \
+  --action rearm-terminal-coordinator --target jit-queue:jit-m94A03-retry-v3
 
 for id in 'jit-queue:jit-all-open-v2' 'ftriangle-live-smoke-v1'
 do
@@ -123,9 +130,12 @@ Record it as `rearm-terminal-coordinator<TAB>ID`; restoration uses
 `start-registered!`, which re-arms the watchdog while preserving terminal
 `:complete`.
 
-After each successful park, append exactly the corresponding allowlisted action,
-for example `resume-coordinator<TAB>ID` or `start-unit<TAB>UNIT`, to
-`/tmp/$FENCE_ID-restore.actions`. A failed or merely attempted park gets no row.
+After each running coordinator reaches witnessed `:stopped`, invoke `record`
+with `--action resume-coordinator --target ID`. After each unit stop that changed
+a pre-manifest active/activating unit to inactive, invoke it with `--action
+start-unit --target UNIT`. Use the same manifest and JSONL paths shown above.
+The tool refuses inactive pre-state, an unobserved park, a duplicate target, a
+swapped verb, or a mismatched manifest. Never edit the journal by hand.
 
 ## 2. Coordinator independently verifies the fence
 
@@ -315,25 +325,14 @@ Say to Joe verbatim with actual values substituted:
 > impossible. FENCE-RELEASE: the pre-fence background manifest
 > may now be restored.
 
-Joe restores only entries both changed according to
-`/tmp/$FENCE_ID-restore.actions` and recorded with reversible active intent in
-step 0. Do not blanket-resume the three coordinator IDs. Execute allowlisted
-actions in reverse parking order. For a running coordinator, use `resume!` only when
-the captured durable pre-state was genuinely running; `enabled? true` alone is
-insufficient. For a unit, start it only when its captured `ActiveState` was
-active/activating.
+Joe restores only typed, successfully observed journal entries. The tool
+validates manifest digest, journal order, action class, captured pre-state, and
+current parked state before acting, then restores the partial prefix in reverse.
 
 ```sh
-cd /home/joe/code/futon3c
-nl -ba "/tmp/$FENCE_ID-restore.actions"
-# Read the journal bottom-to-top. For each resume-coordinator row whose captured
-# durable pre-state was :running:
-printf '%s\n' "(do (require 'futon3c.apm.durable-coordinator) (futon3c.apm.durable-coordinator/resume! \"/home/joe/code/futon3c/data/apm-coordinators/registry.edn\" \"COORDINATOR_ID\"))" | scripts/proof-eval.sh -
-# For each start-unit row whose captured ActiveState was active/activating:
-systemctl --user start UNIT
-# For a rearm-terminal-coordinator row, after reconfirming durable :complete
-# and no runtime scheduler:
-printf '%s\n' "(do (require 'futon3c.apm.durable-coordinator) (futon3c.apm.durable-coordinator/start-registered! \"/home/joe/code/futon3c/data/apm-coordinators/registry.edn\" \"COORDINATOR_ID\"))" | scripts/proof-eval.sh -
+python3 /home/joe/code/futon2/scripts/writer_fence_restore.py restore \
+  --manifest "/tmp/$FENCE_ID-restore-manifest.json" \
+  --journal "/tmp/$FENCE_ID-restore.actions.jsonl"
 ```
 
 Coordinator verifies restored states with the same serving-JVM `status` forms
@@ -348,15 +347,13 @@ complete, draining, stopped, disabled, or inactive in the manifest.
 
 Joe can restore a partially parked window without this session:
 
-1. Set the recorded `FENCE_ID`; preserve its attestations, pre-state output, and
-   `restore.actions` file.
-2. Run `nl -ba /tmp/$FENCE_ID-restore.actions`. Only rows present were actually
-   parked; never restore a name merely because it appears elsewhere in this
-   document.
-3. Work bottom-to-top using the allowlisted command forms above. Refuse a
-   coordinator resume unless its captured durable pre-status was `:running`.
-   A terminal re-arm requires captured and current `:complete` and uses
-   `start-registered!`, never `resume!`.
+1. Set the recorded `FENCE_ID`; preserve its attestations, structured restore
+   manifest, and JSONL journal.
+2. Run the single `writer_fence_restore.py restore` command above. Do not edit
+   the journal or select a verb manually. An empty journal is a safe no-op; a
+   mismatch refuses and leaves the remaining writers parked.
+3. The tool selects `start-registered!` only for captured/current terminal
+   `:complete`, and `resume!` only for captured-running/current-witnessed-stopped.
 4. Re-run the coordinator `status` loop and `systemctl show` from step 0.
    Success means restored activation intent plus explicit new epoch/InvocationID,
    not equality with the old runtime state.
