@@ -43,6 +43,12 @@ ATTESTATIONS = (
 )
 ATTESTATION_SCHEMA = "wm-writer-fence-attestation-v1"
 MAX_ATTESTATION_SECONDS = 2 * 60 * 60
+EXPECTED_ACKNOWLEDGERS = {
+    "operator": "joe",
+    "dispatch-coordinator": "claude-20",
+    "publisher": "claude-1",
+    "sessions": ["wm-nouns", "wm-verbs", "wm-organization", "wm-evidence"],
+}
 
 
 def run(argv, *, stdin=None, cwd=None):
@@ -206,7 +212,7 @@ def coordinator_findings(state):
     return findings
 
 
-def observed_findings(state):
+def observed_findings(state, include_c292=True):
     findings = coordinator_findings(state)
     for identity, row in state["unit-state"].items():
         if row.get("ActiveState") != "inactive":
@@ -215,7 +221,9 @@ def observed_findings(state):
     if state["writable-handles"]:
         findings.append({"component": "writable-handles", "reason": "observed",
                          "detail": state["writable-handles"]})
-    if state["c292"]["exit"] != 0 or state["c292"]["report"].get("verdict") != "QUIESCENT":
+    if (include_c292 and
+            (state["c292"]["exit"] != 0
+             or state["c292"]["report"].get("verdict") != "QUIESCENT")):
         findings.append({"component": "c292", "reason": "not-quiescent",
                          "detail": state["c292"]})
     return findings
@@ -256,9 +264,7 @@ def load_attestations(path, fence_id, now=None):
         problems.append("attestation-not-current")
     elif (expires - issued).total_seconds() > MAX_ATTESTATION_SECONDS:
         problems.append("attestation-window-too-wide")
-    required_people = {"operator", "dispatch-coordinator", "publisher", "sessions"}
-    if (not isinstance(acknowledgers, dict) or set(acknowledgers) != required_people
-            or not all(acknowledgers.get(key) for key in required_people)):
+    if acknowledgers != EXPECTED_ACKNOWLEDGERS:
         problems.append("acknowledgers-invalid")
     if not isinstance(acknowledgers, dict) or not isinstance(acknowledgers.get("sessions"), list):
         problems.append("session-acknowledgers-not-enumerated")
@@ -280,13 +286,20 @@ def load_attestations(path, fence_id, now=None):
             "content-sha256": hashlib.sha256(encoded).hexdigest(), "value": value}
 
 
-def evaluate(first, second, attestations, fence_id=None, interval=None):
-    first_findings = observed_findings(first)
-    second_findings = observed_findings(second)
+def evaluate(first, second, attestations, fence_id=None, interval=None,
+             writer_state_only=False):
+    first_findings = observed_findings(first, not writer_state_only)
+    second_findings = observed_findings(second, not writer_state_only)
+    comparable_first = ({key: value for key, value in first.items() if key != "c292"}
+                        if writer_state_only else first)
+    comparable_second = ({key: value for key, value in second.items() if key != "c292"}
+                         if writer_state_only else second)
     classification = {
         "fence-id": fence_id,
         "observed": {"start": first, "finish": second},
         "attested": attestations,
+        "observation-scope": ("parked-writer-population-post-click"
+                              if writer_state_only else "full-pre-click-fence"),
         "unverifiable": [
             "future-manual-or-editor-writer-start",
             "future-agent-or-publisher-dispatch",
@@ -299,7 +312,7 @@ def evaluate(first, second, attestations, fence_id=None, interval=None):
         return 1, {"verdict": "FENCE-BREACH", "fence-id": fence_id,
                    "observation-interval": interval, "classification": classification,
                    "findings": {"start": first_findings, "finish": second_findings}}
-    if first != second:
+    if comparable_first != comparable_second:
         return 3, {"verdict": "FENCE-INDETERMINATE", "fence-id": fence_id,
                    "observation-interval": interval,
                    "reason": "observed-state-moved", "classification": classification}
@@ -307,7 +320,8 @@ def evaluate(first, second, attestations, fence_id=None, interval=None):
         return 3, {"verdict": "FENCE-INDETERMINATE", "fence-id": fence_id,
                    "observation-interval": interval,
                    "reason": "attestations-not-complete", "classification": classification}
-    return 0, {"verdict": "FENCE-VERIFIABLE", "fence-id": fence_id,
+    return 0, {"verdict": ("WRITERS-STILL-PARKED" if writer_state_only
+                            else "FENCE-VERIFIABLE"), "fence-id": fence_id,
                "observation-interval": interval, "classification": classification}
 
 
@@ -362,13 +376,26 @@ def self_test():
         print("CONTROL", name, "expected", expected, "actual", actual, report["verdict"])
         if actual != expected:
             escaped.append(name)
+    post_click = json.loads(json.dumps(base))
+    post_click["c292"] = {"exit": 1, "report": {"verdict": "NOT-QUIESCENT",
+                                                   "findings": ["authorised-output"]}}
+    actual, report = evaluate(post_click, post_click, complete, "fixture-fence",
+                              writer_state_only=True)
+    print("CONTROL post-click-scope expected 0 actual", actual, report["verdict"])
+    if actual != 0 or report["verdict"] != "WRITERS-STILL-PARKED":
+        escaped.append("post-click-scope")
+    post_click["unit-state"][UNITS[0]]["ActiveState"] = "active"
+    actual, report = evaluate(post_click, post_click, complete, "fixture-fence",
+                              writer_state_only=True)
+    print("CONTROL post-click-active-writer expected 1 actual", actual, report["verdict"])
+    if actual != 1:
+        escaped.append("post-click-active-writer")
     now = datetime.datetime.now(datetime.timezone.utc)
     value = {
         "schema": ATTESTATION_SCHEMA, "fence-id": "fixture-fence",
         "issued-at": (now - datetime.timedelta(minutes=1)).isoformat(),
         "expires-at": (now + datetime.timedelta(minutes=1)).isoformat(),
-        "acknowledged-by": {"operator": "fixture", "dispatch-coordinator": "fixture",
-                            "publisher": "fixture", "sessions": ["fixture"]},
+        "acknowledged-by": EXPECTED_ACKNOWLEDGERS,
         "writer-population": {"coordinators": list(COORDINATORS), "units": list(UNITS)},
         "intended-state": {
             "coordinators": {
@@ -394,6 +421,13 @@ def self_test():
         print("CONTROL", name, "expected", expected, "actual", result["status"])
         if result["status"] != expected:
             escaped.append(name)
+    value["acknowledged-by"] = dict(EXPECTED_ACKNOWLEDGERS, sessions=["wm-nouns"])
+    with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8") as handle:
+        json.dump(value, handle); handle.flush()
+        result = load_attestations(handle.name, "fixture-fence", now)
+    print("CONTROL incomplete-session-population expected invalid actual", result["status"])
+    if result["status"] != "invalid":
+        escaped.append("incomplete-session-population")
     return 2 if escaped else 0
 
 
@@ -402,6 +436,8 @@ def main():
     parser.add_argument("--fence-id", help="identity of the observed fence window")
     parser.add_argument("--attestations", help="structured JSON attestation bound to --fence-id")
     parser.add_argument("--self-test", action="store_true")
+    parser.add_argument("--writer-state-only", action="store_true",
+                        help="post-click observation; does not claim clean repositories/jobs")
     args = parser.parse_args()
     if args.self_test:
         return self_test()
@@ -417,7 +453,8 @@ def main():
         second = snapshot()
         finished = datetime.datetime.now(datetime.timezone.utc)
         interval = {"started-at": started.isoformat(), "finished-at": finished.isoformat()}
-        code, report = evaluate(first, second, attestations, args.fence_id, interval)
+        code, report = evaluate(first, second, attestations, args.fence_id, interval,
+                                args.writer_state_only)
     except Exception as failure:
         code, report = 3, {"verdict": "FENCE-INDETERMINATE", "fence-id": args.fence_id,
                            "reason": "observation-unavailable", "detail": str(failure),

@@ -21,8 +21,10 @@ Say to Joe verbatim:
 > not resume anything before that message.
 
 Freeze dispatch. Obtain and record `NO-WRITE/NO-JOB UNTIL FENCE-RELEASE` from
-all four WM lanes, `claude-1`, Joe, and every other session retaining workspace
-write authority. Choose and retain one identifier, for example
+exactly the principals represented below: all four WM lanes, publisher
+`claude-1`, dispatch coordinator `claude-20`, and Joe. Any additional session
+with workspace write authority must first be added by name to `sessions`; an
+unnamed promise is not part of the fence. Choose and retain one identifier, for example
 `FENCE_ID=wm-quiet-YYYYMMDDTHHMMSSZ`. Create
 `/tmp/$FENCE_ID-attestations.json` with these exact true fields; the recorded
 acknowledgements, not the booleans alone, are its authority:
@@ -94,6 +96,21 @@ untouched:
 
 ```sh
 cd /home/joe/code/futon3c
+wait_inactive () {
+  unit=$1 deadline=$((SECONDS + 600))
+  while [ "$(systemctl --user show "$unit" -p ActiveState --value)" != inactive ]; do
+    [ "$SECONDS" -lt "$deadline" ] || { echo "SERVICE-SETTLE-TIMEOUT $unit"; return 1; }
+    sleep 2
+  done
+}
+require_stably_inactive () {
+  unit=$1
+  first=$(systemctl --user show "$unit" -p ActiveState -p SubState -p InvocationID -p NRestarts)
+  sleep 5
+  second=$(systemctl --user show "$unit" -p ActiveState -p SubState -p InvocationID -p NRestarts)
+  [ "$first" = "$second" ] && printf '%s\n' "$second" | grep -qx 'ActiveState=inactive' \
+    || { echo "SERVICE-NOT-STABLY-INACTIVE $unit"; return 1; }
+}
 scripts/proof-eval.sh '(do (require (quote futon3c.apm.semantic-progress-watchdog)) (futon3c.apm.semantic-progress-watchdog/stop! "semantic-progress:jit-queue:jit-m94A03-retry-v3"))'
 python3 /home/joe/code/futon2/scripts/writer_fence_restore.py record \
   --fence-id "$FENCE_ID" --key-file "$RESTORE_KEY" \
@@ -108,14 +125,24 @@ do
 done
 
 systemctl --user stop apm-watchdog.timer
-# Wait for an active watchdog invocation and closer work to finish.
-systemctl --user is-active apm-watchdog.service apm-closer.service
+# Let an active watchdog invocation finish. The closer has Restart=always, so
+# stop it explicitly; systemctl waits for the stop job, and the interval check
+# below proves it did not immediately restart.
+wait_inactive apm-watchdog.service
 systemctl --user stop apm-closer.service
 systemctl --user stop apm-axiom-audit.timer
 systemctl --user stop futon-pattern-index.timer
 # Wait for either active paired service to finish.
-systemctl --user is-active apm-axiom-audit.service futon-pattern-index.service
+wait_inactive apm-axiom-audit.service
+wait_inactive futon-pattern-index.service
 systemctl --user stop apm-campaign-babysit-jit-all-open-v2.service
+for unit in apm-watchdog.timer apm-watchdog.service apm-closer.service \
+  apm-axiom-audit.timer apm-axiom-audit.service \
+  futon-pattern-index.timer futon-pattern-index.service \
+  apm-campaign-babysit-jit-all-open-v2.service
+do
+  require_stably_inactive "$unit" || exit 1
+done
 ```
 
 Expected for each running coordinator: `:ok true`, `:durably-disabled? true`, and
@@ -213,19 +240,39 @@ basis, new process/job, or missing acknowledgement is `FENCE-BREACH`.
 ## 4. Produce settled suite receipts
 
 ```sh
-python3 /home/joe/code/futon3c/scripts/bg.py launch-test \
+launch_bounded () {
+  output=$(python3 /home/joe/code/futon3c/scripts/bg.py launch-test "$@") || return 1
+  printf '%s\n' "$output" >&2
+  printf '%s' "$output" | python3 -c 'import json,sys; x=json.load(sys.stdin); assert x.get("ok"); print(x["value"]["id"])'
+}
+await_bounded () {
+  id=$1 deadline=$((SECONDS + 2700))
+  while [ "$SECONDS" -lt "$deadline" ]; do
+    status=$(python3 /home/joe/code/futon3c/scripts/bg.py test-status "$id") || return 1
+    terminal=$(printf '%s' "$status" | python3 -c 'import json,sys; x=json.load(sys.stdin); print("yes" if x and x.get("receipt") else "no")')
+    if [ "$terminal" = yes ]; then
+      printf '%s\n' "$status"
+      printf '%s' "$status" | python3 -c 'import json,sys; x=json.load(sys.stdin); raise SystemExit(0 if x["receipt"].get("outer-exit") == 0 else 1)' \
+        || { echo "BOUNDED-JOB-FAILED $id"; return 1; }
+      return 0
+    fi
+    sleep 5
+  done
+  echo "BOUNDED-JOB-TIMEOUT $id"; return 1
+}
+FUTON2_JOB_ID=$(launch_bounded \
   'clojure -T:build ci' --agent quiet-window --label quiet-futon2-ci \
-  --dir /home/joe/code/futon2 --window production
-python3 /home/joe/code/futon3c/scripts/bg.py test-status FUTON2_JOB_ID
+  --dir /home/joe/code/futon2 --window production) || exit 1
+await_bounded "$FUTON2_JOB_ID" || exit 1
 ```
 
 Only after that receipt is terminal and accepted, launch Futon3:
 
 ```sh
-python3 /home/joe/code/futon3c/scripts/bg.py launch-test \
+FUTON3_JOB_ID=$(launch_bounded \
   'clojure -X:test' --agent quiet-window --label quiet-futon3-suite \
-  --dir /home/joe/code/futon3 --window production
-python3 /home/joe/code/futon3c/scripts/bg.py test-status FUTON3_JOB_ID
+  --dir /home/joe/code/futon3 --window production) || exit 1
+await_bounded "$FUTON3_JOB_ID" || exit 1
 ```
 
 Expected for each terminal receipt: inner 0, outer 0, `verdict=pass`, clean
@@ -262,10 +309,10 @@ command, then run step 6.
 ## 6. Establish READY without rerunning the click
 
 ```sh
-python3 /home/joe/code/futon3c/scripts/bg.py launch-test \
+READINESS_JOB_ID=$(launch_bounded \
   'make run-readiness' --agent quiet-window --label post-reload-readiness \
-  --dir /home/joe/code/futon2 --window measurement
-python3 /home/joe/code/futon3c/scripts/bg.py test-status JOB_ID
+  --dir /home/joe/code/futon2 --window measurement) || exit 1
+await_bounded "$READINESS_JOB_ID" || exit 1
 ```
 
 Expected outer receipt: pass/clean/stable. Expected inner report: all named
@@ -300,6 +347,38 @@ execution is terminal. Save the exact printed run ID. This phase authorises
 only that binding, run record, trace/store output, observer receipt, and final
 certificate. Any other write is a breach.
 
+If the observer returns `click-status-unavailable`, do not restore writers.
+Use the click ID persisted in its receipt and run this read-only recovery
+observation:
+
+```sh
+RECEIPT=holes/labs/wm-contract/wm-click-resource-YYYYMMDDTHHMMSS.receipt.json
+export CLICK_ID=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["click-id"])' "$RECEIPT")
+deadline=$((SECONDS + 900)); decision=CONTINUE-WAITING
+while [ "$SECONDS" -lt "$deadline" ]; do
+  status=$(curl -fsS http://127.0.0.1:7070/api/alpha/wm/click) || { sleep 5; continue; }
+  decision=$(printf '%s' "$status" | python3 -c '
+import json,sys,os
+x=json.load(sys.stdin); wanted=os.environ["CLICK_ID"]
+last=x.get("last-result")
+if x.get("click-id") != wanted: print("IDENTITY-MISMATCH")
+elif x.get("running?") is True: print("CONTINUE-WAITING")
+elif isinstance(last,dict) and last.get("outcome") and (last.get("run-id-observation") or {}).get("value"):
+ print("TERMINAL " + str(last["run-id-observation"]["value"]))
+else: print("TERMINAL-EVIDENCE-ABSENT")')
+  printf '%s\n' "$decision"
+  case "$decision" in TERMINAL\ *) break;; IDENTITY-MISMATCH|TERMINAL-EVIDENCE-ABSENT) exit 1;; esac
+  sleep 5
+done
+[ "${decision#TERMINAL }" != "$decision" ] || { echo 'ABORT-WITH-WRITERS-PARKED'; exit 1; }
+```
+
+`CONTINUE-WAITING` is not release authority. `ABORT-WITH-WRITERS-PARKED`,
+identity mismatch, absent terminal evidence, or an unreadable endpoint requires
+Joe to inspect the serving JVM; do not restore. Only an exact typed terminal
+result permits step 8, and release still requires certification plus the
+post-click writer observation below.
+
 ## 8. Certify the exact run
 
 ```sh
@@ -315,15 +394,36 @@ do not click again.
 
 ## 9. Hand off evidence and release the fence
 
+First observe the parked writer population again across an interval:
+
+```sh
+python3 checks/writer_fence_evidence.py \
+  --fence-id "$FENCE_ID" \
+  --attestations "/tmp/$FENCE_ID-attestations.json" \
+  --writer-state-only > "/tmp/$FENCE_ID-evidence-post-click.json"
+post_fence_exit=$?
+cat "/tmp/$FENCE_ID-evidence-post-click.json"
+test "$post_fence_exit" -eq 0
+grep -q 'WRITERS-STILL-PARKED' "/tmp/$FENCE_ID-evidence-post-click.json"
+echo "RELEASE-AUTHORISED $FENCE_ID"
+```
+
+This post-click mode deliberately does not claim clean repositories or zero
+jobs: the authorised run has created evidence. It proves only that the named
+coordinators and units remain parked and no repository writable handle survived
+the two observations. Any other result keeps the fence held.
+
 Say to Joe verbatim with actual values substituted:
 
 > The operator run is complete. These verdicts were produced under the C305
 > writer fence held from `<FENCE-HELD UTC>` through `<FENCE-RELEASE UTC>`. The
 > attached manifest names every acknowledged writer and parked
 > coordinator/timer; C292 reported five clean repositories, four idle lanes,
-> and zero ordinary/bounded jobs at each pre-click checkpoint. Gate and suite
-> receipts recorded stable start/finish content bases, and no fence breach was
-> observed. The production phase allowed only the exact click/run-bound outputs
+> and zero ordinary/bounded jobs at each pre-click checkpoint. A post-click
+> interval observation reported `WRITERS-STILL-PARKED` for the named writer
+> population; it did not reassert pre-click repository cleanliness. Gate and suite
+> receipts recorded stable start/finish content bases, and no breach of the
+> named parked-writer population was observed. The production phase allowed only the exact click/run-bound outputs
 > named in certificate `<PATH>`, whose verdict is `<VERDICT>`. This claim is
 > conditional on that declared boundary. The gate-time mutable-input
 > reconciliation classified every then-current member as content, event, or
@@ -408,4 +508,6 @@ machine observations.
 - C313: verified park/resume operator request.
 - C314: adversarial boundary—`write-set-unknown` is unverified, not empty.
 - C317: conditional meaning and residual hybrid-window limitation.
+- C360: interval settling, exact attestation population, bounded-job polling,
+  click recovery observation, and post-click writer-state evidence.
 - C318/C321: observed/attested/unverifiable fence bundle and runnable command.
