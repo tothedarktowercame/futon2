@@ -170,3 +170,35 @@ a comment in the registry** so the omission is visible rather than looking like 
 **The durable repair — derive cited paths from the document instead of declaring them — goes to `wm-verbs`
 when C400 returns.** My registry edit closes today's gap; it does not stop the next census from being declared
 incompletely.
+
+## C406 — owner review of C395; and the precise shape of my C394 error (my fix, owner review)
+
+**Verified C395's finding 1 in code rather than accepting the attack narrative.** `evidence_click_terminal`
+checks a schema string, matches `click-id` against **caller-supplied context**, and requires `run-id`,
+`terminal-outcome` and a `resource-status` in `("clean","dirty")`. `evidence_certified` checks
+`verdict == "pass"` and `run/id` against the same caller-supplied context. **Neither resolves its artifact
+through the producer meant to have emitted it.** Handwritten files satisfy both. **Confirmed.**
+
+**Both transitions do stamp `attestation-coverage: "not-claimed"`.** So the code is honest about what it
+verified; **the state name `certified` is what overclaims.** That is why C402 asks what the name may mean
+rather than asking for more validation.
+
+### What I actually got wrong in C394
+
+**Not "I called a forgeable seam acceptable."** C394 examined `evidence_reload` and `evidence_click_issued`,
+found them caller-supplied, checked them against C371's *"the attestation claim deliberately ends at
+`tested-commit`"*, and concluded code matched prose. **That conclusion was correct for those two states.**
+
+**The error was stopping there.** I confirmed the documented boundary held where I looked and never tested
+**whether the same caller authority continued past it** — into `click-terminal` and `certified`, which the
+documentation does not cover and which purport to attest a run and its certificate. `wm-evidence` states it
+exactly: *"The successful attack is therefore not the existence of those two seams. The finding is that the
+same authority continues through `click-terminal` and `certified`."*
+
+**The reusable form: verifying that a documented boundary holds at the sites you inspected is not verifying
+where the boundary ends.** A boundary is a claim about the *first* state not covered, and that is the state to
+test.
+
+**Consequence for the parking request:** it does not go to Joe until C402 resolves what `certified` means, and
+the remaining four C395 findings are repaired and re-attacked. **I told Joe I was one step from sending it; I
+was not.**

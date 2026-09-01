@@ -4,7 +4,7 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C399-topology-code-closure, :dispatched-at "2026-09-01T02:45:42Z", :job-id "invoke-1788230733953-6539-a11fde1e", :expected-by "2026-09-01T03:30:42Z"}
+   :holding :C405-declared-boundary-vocabulary, :dispatched-at "2026-09-01T02:51:27Z", :job-id "invoke-1788231083687-6547-4577948f", :expected-by "2026-09-01T03:36:27Z"}
   {:lane :wm-verbs
    :holding :C403-derive-census-subjects, :dispatched-at "2026-09-01T02:49:55Z", :job-id "invoke-1788230991326-6546-50d51be5", :expected-by "2026-09-01T03:34:55Z"}
   {:lane :wm-organization
