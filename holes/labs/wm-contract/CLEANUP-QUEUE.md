@@ -121,3 +121,52 @@ script has not cleared it**, so it stays a finding.
 
 **Verified after the fix:** the `.bb` fixture now yields that finding instead of an NPE; shipped positive still
 exit 0; negative control still rejects; all four Make fixtures unchanged; clj-kondo 0 errors 0 warnings.
+
+## C401 — owner review of C393; the staleness check was blind to two-thirds of its own census (my fix)
+
+**Gated C393 (`fc445bb`) because it went into the workspace gate**, which gives it the widest blast radius of
+anything landed tonight.
+
+**Exit semantics are as claimed:** `:possibly-stale` exits 0 (nonblocking), `:unavailable` exits 1 (blocking),
+negative control rejects a malformed registry. **The nonblocking/blocking split is the one I asked for.**
+
+### The finding
+
+**The check compares only the subjects it is told about, and the declared list omitted most of the census's
+citations.** C385 cites **nine** source paths; the registry declared **three**.
+
+**One of the omitted files had already moved.** `checks/positive_proof_receipt.clj` is cited in the census and
+has **two commits since the pinned basis** (`f30a8e7`, `a6e1c24` — C386 and C391). **The check reported
+`:possibly-stale` for two subjects while silently missing a third.** A staleness check that reports staleness
+is the hardest kind to doubt.
+
+**This is the same shape as C391 and C386**: an author-declared list standing in for a derivable set. The
+census's citations are *in the document*; deriving them is possible and would have caught this.
+
+### The second defect
+
+**`moved` reads `(basis repo)`.** For a subject in a repo the basis does not pin, `commit` is nil,
+`git diff --quiet nil HEAD -- path` exits nonzero, and the subject is reported **MOVED**. **A wrong answer
+that looks like a right one** — "possibly-stale" is exactly what a genuine move reports, so the error is
+invisible in the output. Both cross-repo citations (`futon3c/scripts/bounded_test_job.py`,
+`p4ng/empirics-futon/gen_workflow_report.bb`) would have hit it.
+
+### What I fixed
+
+**Both, directly** (owner carve-out; I held the full context and this was ~15 lines):
+
+1. **Registry extended to all eight futon2 paths the census cites.** The check now reports
+   `positive_proof_receipt.clj` as a third moved subject.
+2. **A subject whose repo the basis does not pin is now the failure
+   `:subject-repo-not-pinned-by-basis`**, not a phantom move. Verified with a synthetic `:futon3c` entry:
+   status `:unavailable`, that failure, `moved: nil`.
+
+**The two cross-repo citations are deliberately still absent, and that is the honest position:** C385 pinned no
+basis commit for futon3c or p4ng, and inventing one would pin a basis the census never recorded. **Recorded as
+a comment in the registry** so the omission is visible rather than looking like completeness.
+
+**Verified after:** positive exit 0, negative control rejects, clj-kondo 0/0.
+
+**The durable repair — derive cited paths from the document instead of declaring them — goes to `wm-verbs`
+when C400 returns.** My registry edit closes today's gap; it does not stop the next census from being declared
+incompletely.

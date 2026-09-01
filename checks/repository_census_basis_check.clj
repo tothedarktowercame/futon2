@@ -36,7 +36,14 @@
                   :when (or (nil? root) (not (string? path))
                             (not (zero? (:exit (git (or root (:futon2 roots))
                                                     "ls-files" "--error-unmatch" (or path ""))))))]
-              {:reason :subject-unavailable :repo repo :path path}))))
+              {:reason :subject-unavailable :repo repo :path path})
+            ;; A subject in a repo the basis does not pin has no commit to diff
+            ;; against.  Without this, `git diff nil HEAD` exits nonzero and the
+            ;; subject is reported as MOVED -- a wrong answer that looks like a
+            ;; right one, since "possibly-stale" is exactly what a real move says.
+            (for [{:keys [repo path]} subjects
+                  :when (and (get roots repo) (nil? (get basis repo)))]
+              {:reason :subject-repo-not-pinned-by-basis :repo repo :path path}))))
         moved
         (when (empty? failures)
           (vec
