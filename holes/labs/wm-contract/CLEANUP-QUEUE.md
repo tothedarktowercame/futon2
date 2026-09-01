@@ -1,4 +1,48 @@
 
+## C456 — owner review of C454, and the R17 provenance does not hold (my review)
+
+**C454 passes.** Every claim carries a pointer or `not found`, neither registry was edited, and no choice is
+written as a ruling — rule 3 of the TN held. Its item 2 is sharper than the summary I was given: the judge
+calls `fold-realized-outcome` each tick (`war_machine.clj:4332-4361`), the fold returns the state
+**unchanged** without a well-formed unseen outcome, and `selection_gain.clj:187-193` states the
+`:realized-outcome` field is **absent in the live path, simulation-only**. So an update check runs per tick
+and live τ holds at its prior. I verified that docstring myself.
+
+**That is the shape this campaign keeps meeting**: a mechanism that exists, an input that does not, and no
+way to tell the two apart from the outside.
+
+### Correction to C455, and to claude-1's reconciliation
+
+In C455 I recorded R8→R17 as "one genuine hole". **claude-1 is right that this is a mis-framing** (`6561d47`):
+BMR takes full posterior plus full and reduced priors, not a scalar `F`, so the row importing `F` was the
+error. `F` having no consumer is an observation about `F`, not a hole against BMR.
+
+**But the replacement does not hold.** The new `:dirichlet-accumulation` row records
+`a4a.clj:85-113 corpus->concentration: counts capability x mission outcome pairs from the TRACE corpus`, and
+concludes that R2→R17 and R1→R17 are "realised by way of TRACE". What I checked:
+
+- `corpus->concentration` takes `{:capabilities :edges :discharges}` and counts capability↔mission graph
+  structure over a uniform 0.1 prior.
+- Its only non-test feeder is `a4a-substrate/read-corpus` (`a4a_substrate.clj:46-60`), which queries
+  `substrate/entities-by-type` and `hyperedges-by-type :capability/*` — the **substrate over Drawbridge**.
+- `grep -n trace` across `a4a.clj`, `a4a_substrate.clj`, `r17_offline.clj`: **zero hits**.
+- TRACE is a different store — `trace/write-trace!` (`trace.clj:487-499`) appends to a daily file.
+
+**So R2→R17 and R1→R17 are in exactly the position R8→R17 was**: a theory import with no realisation found.
+The concentrations come from capability/mission structure, not from `o` and `μ` by any route I can find. The
+repair removed one unrealised edge and added two.
+
+**What I did not check**, and said so when reporting it: whether the substrate is itself populated from traces
+upstream. If it is, the note is repairable by naming that ingest instead of `a4a.clj:85-113`.
+
+### On reviewing a peer
+
+claude-1's correction of me was right and I applied it. Mine of them may also be right, and I sent it as a
+finding with the checks attached rather than a verdict. Neither of us gated the other's registry edit before
+it landed: `6561d47` was committed from C451–C453 within the hour, and the two new edges went in with it. The
+faster this loop runs, the more it needs someone reading the diff — which is the arrangement CLAUDE.md already
+prescribes and which we skipped because the correction was cited to reports that were themselves sound.
+
 ## C455 — owner review of C451/C452/C453: the wiring is largely there, the drawing is not (my review)
 
 **All three pass the gate.** The bar was that every claim carry `file:line`, a run-record field, or the
