@@ -134,7 +134,7 @@ Checked, not taken on trust: B.4 read at `parr2022.txt:12560` and B.9 at
 `parr2022.txt:12659-12664` — both quoted verbatim, and the running heads at
 those offsets confirm p. 245 and p. 247. `strip-ranked-action`
 (`trace.clj:76-127`) does omit `:prediction`: its `select-keys` whitelist
-(`trace.clj:113-126`) has 30 keys and `:prediction` is not among them, so §2's
+(`trace.clj:113-126`) has 35 distinct keys and `:prediction` is not among them, so §2's
 central claim holds. `free_energy.clj:184-206` is F = ½ mean_k(Π_k ε_k²) as
 §4 states, called once at `war_machine.clj:4450-4452`; `efe.clj:829-844` does
 emit `:prediction` per candidate.
