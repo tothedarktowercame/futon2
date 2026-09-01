@@ -86,8 +86,8 @@ decision.)
 
 ### The order we work them
 
-1. **O15** Lean cadence — brief written; O16 and O17 both follow from it.
-2. **O16** any check on a timer.
+1. ~~**O15** Lean cadence~~ — **DONE 2026-09-01: option C.**
+2. ~~**O16** any check on a timer~~ — **DONE: no timer**, answered by the same sitting. O17 is now blocked on the new O25 (define "major milestone").
 3. **O24** lane campaign continuation — decides whether the trees can go quiet at all.
 4. **O11** Morning Brief epoch — gates the operator run.
 5. **O19** send the writer-fence parking request.

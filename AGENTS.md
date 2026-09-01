@@ -22,3 +22,33 @@ Ant map keys (always present):
  :mu   {:pos [x y] :goal [gx gy] :h double}   ; latent beliefs
  :prec {:Pi-o {:food double :pher double :h double}
         :tau double}}                         ; action temperature
+
+## Changing a witness: run its negative modes before you land (adopted 2026-09-01)
+
+The 32 Lean `#guard_msgs` fixtures are the checks that prove the *other* checks
+still detect. Each is a deliberately wrong statement that passes only when the
+machinery rejects it. If a definition changes so one stops rejecting, the
+ordinary checks stay green and say nothing — the alarm broke, not the thing
+being watched.
+
+**If your packet changes a witness or its dependency, run that witness
+wrapper's negative modes before you land.** One costs about 6.5 s (3.4 GB peak
+RSS, so run them one at a time — the memory is Mathlib importing, and this
+machine has hit a cgroup throttle from memory pressure). Example:
+
+```sh
+bb checks/softmax_witness.clj --negative-order
+bb checks/softmax_witness.clj --negative-normalisation
+```
+
+The mapping from wrapper to its registered negative modes is in
+`checks/wm_workspace_gate.clj` and tabulated in
+`holes/labs/wm-contract/C437-guarded-control-invocation-census.md`.
+
+**Do not run the full 32 per commit** — that is about 3 min 30 s and re-proves
+31 things nobody touched. **Do not put the full suite on a timer.** Its trigger
+is a milestone, and "major milestone" is not yet defined (register O25). Gate
+runs required by `make pre-merge` or by a certified commit are unaffected by
+this: what is ruled out is running the suite on a schedule or out of habit.
+
+Decision and measurements: `holes/problems/decision-briefs/O15-lean-check-cadence.md`.

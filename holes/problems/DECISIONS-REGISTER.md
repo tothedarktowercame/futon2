@@ -59,6 +59,8 @@ recording why it cannot be closed, so nobody re-opens it by accident.
 | S23 | Both halves of the ceiling — what the certificate establishes and what it cannot — belong in the artifact. Stating only the first half would instance class 10 (evidence anchored by its producer). | `CERTIFICATE-CEILING.md`, C414 |
 | S24 | Cancelling an operator run is recorded but not counted; `:cancelled` starts a new semantic stratum and is not pooled with cohort 46. | `C206`, C211 |
 | S25 | No existing check is moved to nightly. Any future nightly tier must name its runner and cadence, never merely remove a check. | `RUNBOOK.md` |
+| S26 | Lean negative controls are revalidated **targeted**: a packet that changes a witness runs that witness's negative modes before landing. The full 32 stay on the gate. | O15, Joe 2026-09-01 |
+| S27 | **No War Machine check gets a timer.** The full suite's trigger is a milestone event, not a clock; it is invoked when something needs it and never on a schedule. Gate runs required by `make pre-merge` or by a certified commit are unaffected. | O15, Joe 2026-09-01 |
 
 ---
 
@@ -103,9 +105,11 @@ the Lean checks, the absence lint, or the census-basis check.
 
 | # | Decision | Who | Note |
 |---:|---|---|---|
-| O15 | **How often the Lean checks run.** All 32 `#guard_msgs` negative controls are gate-only, so between full gate runs nothing establishes that the detectors still detect. The gate costs about 6m35s CPU and needs a quiescent tree. C438 deliberately did not propose running 32 Lean elaborations per commit. | Joe | C434, C437, C438 |
-| O16 | **Whether any War Machine check gets a timer at all**, and if so which runner owns it. S25 forbids a nightly tier that merely drops checks; it does not forbid one that names its runner. | Joe | `RUNBOOK.md` |
-| O17 | **What "distance since the last full gate" is acceptable.** The gate receipt is the only artifact that answers it, and C438 established it measures staleness of the whole negative-control population, not operational trivia. | Joe | `data/wm-workspace-gate/latest.edn`, C431 |
+| ~~O15~~ | **SETTLED 2026-09-01 — option C.** Targeted revalidation: a packet that changes a witness runs that witness's negative modes (~6.5 s each). Full suite not on a cadence until a milestone is defined. Moved to S26. | Joe | brief `O15` |
+| ~~O16~~ | **SETTLED 2026-09-01 — no timer.** The trigger for the full suite is an event, not a clock. Moved to S27. | Joe | brief `O15` |
+| O17 | **What gate distance is acceptable** — now measured in milestones rather than elapsed time, so it cannot be answered before O25. | Joe | reframed; blocked on O25 |
+| O25 | **Define "major milestone."** Joe: *"we don't have a definition of major milestone, [so] there's no real way to get the overall suite to run at a sensible cadence."* The full suite runs at each milestone once this exists. Until then it is invoked when needed and never on a schedule. | Joe | new, from the O15 sitting |
+| O26 | **Make option C followable.** The wrapper→negative-mode mapping lives in a C437 report table, not in anything a packet author can query. A rule nobody can mechanically follow will be followed unevenly. | owner | C437 |
 | O18 | **How often the census basis is refreshed**, given reconstructed cross-repo pins carry `:correspondence :unverified` and never become verified by waiting. | owner | C407, C408 |
 
 ### B3. The operator run and the writer fence (open)

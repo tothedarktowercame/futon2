@@ -2,6 +2,25 @@
 
 **Class:** ready to decide. **Decides:** Joe. **Written:** 2026-09-01 by `claude-20`.
 
+> ## DECIDED 2026-09-01 by Joe: **Option C**, with a boundary.
+>
+> Targeted revalidation is adopted now. The full suite is **not** put on any
+> cadence, and is not to be run as routine, **until "major milestone" is
+> defined** — at which point the full suite runs at each milestone.
+>
+> Joe: *"since we don't have a definition of major milestone, there's no real
+> way to get the overall suite to run at a sensible cadence."*
+>
+> **This does not stop invoking the gate when something needs it** — `make
+> pre-merge` before a review, and the gate run required for a certified commit,
+> are unaffected. What is ruled out is scheduling it, or running it as a habit,
+> against a cadence nobody can justify. Flagged as my reading; correct it if
+> wrong.
+>
+> Consequence: the trigger for full-suite runs is an **event, not a clock**.
+> That is why no cadence answer was satisfying, and it resolves O16 and reframes
+> O17. Defining the milestone is now a decision in its own right.
+
 ## The question
 
 There are 32 Lean checks whose only job is to prove the *other* checks still
