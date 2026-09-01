@@ -6,8 +6,8 @@
  [{:lane :wm-nouns
    :holding :C339-positive-pin-migration, :dispatched-at "2026-09-01T01:32:49Z", :job-id "invoke-1788226365369-6425-191faab8", :expected-by "2026-09-01T02:17:49Z"}
   {:lane :wm-verbs
-   :holding :C337-forgeable-preflight-fence, :dispatched-at "2026-09-01T01:31:51Z", :job-id "invoke-1788226307882-6422-3ae26bd0", :expected-by "2026-09-01T02:16:51Z"}
+   :holding :C342-predicate-baselines, :dispatched-at "2026-09-01T01:39:26Z", :job-id "invoke-1788226762441-6433-5ade179b", :expected-by "2026-09-01T02:24:26Z"}
   {:lane :wm-organization
    :holding :C338-c331-document-fixes, :dispatched-at "2026-09-01T01:32:49Z", :job-id "invoke-1788226361212-6424-e54f486d", :expected-by "2026-09-01T02:17:49Z"}
   {:lane :wm-evidence
-   :holding :C335-forgeable-fence, :dispatched-at "2026-09-01T01:28:02Z", :job-id "invoke-1788226078595-6417-78488626", :expected-by "2026-09-01T02:13:02Z"}]}
+   :holding :C341-reattack-execution-doc, :dispatched-at "2026-09-01T01:39:26Z", :job-id "invoke-1788226758248-6431-f306cd81", :expected-by "2026-09-01T02:24:26Z"}]}
