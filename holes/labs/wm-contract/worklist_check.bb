@@ -10,7 +10,7 @@
   (doseq [k [:id :class :status :owner :statement :acceptance]] (when-not (contains? i k) (die (:id i) "lacks" k)))
   (when-not (contains? (:classes w) (:class i)) (die (:id i) "unknown class" (:class i)))
   (when-not (contains? (:statuses w) (:status i)) (die (:id i) "unknown status" (:status i)))
-  (when (and (= :J (:class i)) (not= :needs-joe (:status i))) (die (:id i) "class J must be :needs-joe"))
+  (when (and (= :J (:class i)) (not (or (= :needs-joe (:status i)) (and (= :done (:status i)) (:ruling i) (= "joe" (:reviewed-by i)))))) (die (:id i) "class J must be :needs-joe, or :done with :ruling and :reviewed-by joe"))
   (when (and (#{:done-unreviewed :done} (:status i)) (not (:evidence i))) (die (:id i) "done without :evidence"))
   (when (and (= :done (:status i)) (not (:reviewed-by i))) (die (:id i) ":done without :reviewed-by")))
 (def by-status (frequencies (map :status (:items w))))

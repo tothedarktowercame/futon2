@@ -86,7 +86,7 @@
    :imports [:Pi :eps]
    :formal "F = 1/2 * mean_k (Pi_k eps_k^2)" :eq "buckley2017 eq. 45 (reduction: ½ ln σ terms dropped; mean over channels instead of sum)" :lean "variationalFreeEnergy" :lean-status :closed
    :code "free_energy.clj:184-205; war_machine.clj:4450-4452"
-   :live-consumer nil :note "Computed and stored each tick; NO live consumer reads it (C448 5c.1). It is a diagnostic."}
+   :live-consumer nil :status :shortcut-to-retire :note "Computed and stored each tick; NO live consumer reads it (C448 5c.1). Joe's ruling 2026-09-01 (J2, :choices :free-energy-form): a shortcut to retire, not a diagnostic to keep."}
   {:id :belief-update :defines :mu-next :node :R3 :class :theory-defined :ref :buckley2017
    :imports [:mu :Pi :eps :alpha]
    :formal "mu <- mu + alpha Pi eps" :eq "buckley2017 eq. 59 (reduction: one gradient step with fixed step size alpha)" :lean nil :lean-status :missing
@@ -144,10 +144,16 @@
  ;; the War Machine as of 2026-09-01; Joe decides. Format mirrors
  ;; control-map-edges.edn :decisions so a decision can replace an observation.
  :choices
- {:free-energy-form {:observed :laplace-channel-grain-diagnostic :status :observed-not-decided
+ {:free-energy-form {:observed :laplace-channel-grain-diagnostic :status :decided
+                     :ruling {:by "joe" :at "2026-09-01" :grounds :ruling
+                              :decision "The current Laplace channel F is a shortcut (J2). Do not accept it as a diagnostic to keep: retire it, and replace it with theory-aligned free-energy quantities that are actually needed and consumed -- the per-policy F_pi that the policy posterior imports (parr2022 eq. B.9: pi = sigma(ln E - F - G)), and a belief update that is the gradient of the F the machine reports, at one grain."
+                              :consequence "The F row (R8) is marked :status :shortcut-to-retire; it stays in the registry and the figure until its replacement is realised and consumed, so the drawing keeps matching the code. Opened H4 (hole: F_pi not computed, F not consumed) and I2 (implement F_pi into Q(pi)) in worklist.edn."}
                      :evidence "free_energy.clj:184-205; war_machine.clj:4450-4452; efe.clj:601-619, 782-794 (C448 5c.1)"
                      :statement "F is the continuous Laplace form over error channels and has no live consumer; the policy side is the discrete formulation (dacosta2020). No retrieved source cites this mixed-grain composition as one formalism; it is a stack composition unless a source is found."}
-  :temperature-update {:observed :selection-gain-fold-default :status :observed-not-decided
+  :temperature-update {:observed :selection-gain-fold-default :status :decided
+                       :ruling {:by "joe" :at "2026-09-01" :grounds :ruling
+                                :decision "The current tau -- from selection gain / score spread -- is a shortcut, and the drawn R7->R14 was a conflation of two precision-like scalars (J1: no). Pursue the theory-aligned policy precision: gamma = 1/beta with beta updated from the policies' expected free energy (friston2017 eq. 2.1, 2.7; dacosta2020 A.2), so that the machine's decisiveness is the formalism's, not an engineering proxy."
+                                :consequence "D4's retirement of R7->R14 stands; no ruling-added edge. Opened H3 (hole: gamma is not the theory's) and I1 (implement beta/gamma dynamics) in worklist.edn."}
                        :evidence "war_machine.clj:238-248 (default :selection-gain-only; FUTON_WM_TAU_MODE selects score-spread); selection_gain.clj:173-206 folds realised outcomes; policy.clj:32-80 (C448 5c.2)"
                        :theory-alternative "friston2017 eq. 2.7: β = β + (π - π₀)·G, γ = 1/β -- not implemented"
                        :statement "The mechanism updates tau from realised selection gain (default) or score spread, not by the β/γ precision dynamics. But LIVE: the judge calls fold-realized-outcome every tick (war_machine.clj:4332-4361) and the fold returns the state unchanged unless a well-formed unseen :realized-outcome is present, and that field is absent on today's live path, simulation-only (selection_gain.clj:187-193; C454). So live tau holds at its prior: an update check runs per tick and never fires. 'Fixed-calibrated' described the live behaviour; 'folds realised outcomes' describes the mechanism; both are needed."}
