@@ -290,3 +290,31 @@ with the change stashed:**
   (§4). The amendments are load-bearing in one direction: if a future change
   removes a key it should not, the `i5-retired-keys` list is where it would be
   hidden. It has two entries and they are named in the commit message.
+
+## 9. The gate was red again, in the same place, one directory over
+
+Running step 4 of the worklist protocol **after** writing the ledger row — which
+is the lesson C472 §7 carried back — `negative_controls.sh` failed:
+`pointer_check` reported `trace_test.clj:66-84` unresolved, "file not found".
+
+The pointer is valid: `futon2/test/futon2/aif/trace_test.clj` is 640 lines.
+`pointer_check.bb`'s `roots` covered `src/`, `scripts/`, `checks/`, `data/`,
+wm-contract, mathlib4, the p4ng registry and the futon6 clean corpus — **and not
+futon2's test tree**. Three test roots appended, so no existing first-match
+resolution changes.
+
+**That this recurred is the finding, not the fix.** C472 §7 repaired the same
+defect for `checks/`, `data/`, the registry and the futon6 corpus; RUN11's review
+(p4ng `c320107`) repaired it for `scripts/`. `roots` is a hand-maintained
+allowlist of directories, so *every* pointer into a directory nobody has cited
+before is a false negative waiting to happen — and it fails in the direction that
+looks like the ledger's fault rather than the checker's. Three repairs of one
+shape is a design, not an accident.
+
+Still refuses bad pointers — controlled on all four modes plus two positives
+after the change: file-not-found, end-beyond-file, inverted-range and a dotted
+name past its line count all exit 1; the new test-tree pointer and a valid dotted
+name exit 0.
+
+Gates after the repair: `negative_controls.sh` PASS (16 negative, 10 positive);
+`pointer_check` 433 pointers, 0 unresolved.
