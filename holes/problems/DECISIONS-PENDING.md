@@ -269,4 +269,32 @@ authority decides it.
   the whole file; cost grows with history.
 - **Full analysis:** `futon3c` C251 discovery commit `fc03fbba`.
 
+## Model semantics
+
+### Cascade carrier: how meets are established
+
+- **Question:** Should the cascade carrier gain (a) an explicit meet
+  operation with a witness for each relevant node pair, or (b) a declared
+  order derived from co-application plus a proof that greatest lower bounds
+  exist?
+- **Unblocks:** the last two glossary terms — pattern language / cascade, and
+  policy `π`, which aliases the cascade carrier. Glossary coverage is stuck at
+  **31/33** until this is decided.
+- **Care:** this is a modelling decision about cascade semantics, not a
+  refactor. A lane should not invent it.
+- **Evidence (C288, C291):** the glossary requires a semilattice with distinct
+  sequential `BV.seq` and cross-cutting `BV.copar` composition. Lean's
+  `Cascade` has one acyclic edge relation and a precedence list, and
+  `CascadeOrder.lean` states it models no overlap, wiring or fold behaviour.
+  C291 built the serialized producer establishing both relations with shared
+  node identity, then **stopped**: applying `CascadeOrder.hasMeets` to
+  symmetric weighted adjacency **would invent semantics**. A partial carrier
+  was forbidden, so nothing was added.
+- **If deferred:** 31/33 stands as an honest ceiling. The seven notation
+  hazards are enumerated and structurally closed (C288); the remaining gap is
+  semantic under-modelling, not name conflation, and nothing is being reported
+  as bound that is not.
+- **Full analysis:**
+  [`C291-cascade-carrier-repair-blocked.md`](../labs/wm-contract/C291-cascade-carrier-repair-blocked.md).
+
 <!-- CURRENT DECISIONS END -->
