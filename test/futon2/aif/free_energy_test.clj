@@ -209,18 +209,12 @@
     (let [e (fe/compute-prediction-error nil {:mean 0.5 :variance 0.04})]
       (is (= 0.0 (:observed e))))))
 
-(deftest compute-variational-free-energy-test
-  (testing "F is half the mean precision-weighted squared prediction error"
-    (is (= 2.5
-           (fe/compute-variational-free-energy
-            {:a {:error 1.0 :precision 2.0}
-             :b {:error -2.0 :precision 2.0}}))))
-  (testing "F is non-negative and zero only for zero error"
-    (is (zero? (fe/compute-variational-free-energy
-                {:a {:error 0.0 :precision 10.0}}))))
-  (testing "missing and invalid terms fail closed"
-    (is (thrown? clojure.lang.ExceptionInfo
-                 (fe/compute-variational-free-energy {})))
-    (is (thrown? clojure.lang.ExceptionInfo
-                 (fe/compute-variational-free-energy
-                  {:a {:error 1.0 :precision -1.0}})))))
+;; I5 slice (c) removed `compute-variational-free-energy`. What its tests
+;; covered that nothing else does is the ABSENCE itself: a later reader who
+;; needs a per-tick scalar should reach for F_pi
+;; (`futon2.aif.policy-free-energy`), not reinstate this one.
+(deftest variational-free-energy-stays-retired-test
+  (testing "the retired scalar has no var in this namespace"
+    (is (nil? (resolve 'futon2.aif.free-energy/compute-variational-free-energy)))
+    (is (nil? (ns-resolve 'futon2.aif.free-energy
+                          'compute-variational-free-energy)))))

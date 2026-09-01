@@ -215,7 +215,7 @@
    :computes
    "coverage-reward − λ·prior-cost",
    :repair "complete: renamed the Python, Clojure, act-gate, and persisted-corpus contract",
-   :note "A separate per-tick variational-free-energy field now reports the declared Gaussian prediction-error objective."},
+   :note "A separate per-tick variational-free-energy field used to report the declared Gaussian prediction-error objective; it was retired on 2026-09-01 (Joe's J2 ruling, worklist I5) because no equation in the registry imported it. The per-channel :prediction-errors it averaged are still recorded every tick, and the policy-grain free energy F_pi (futon2.aif.policy-free-energy) is the replacement the ruling required."},
   :outcome-feedback-selection-gain
   {:badge :engineering-control,
    :claims "outcome-feedback selection gain",

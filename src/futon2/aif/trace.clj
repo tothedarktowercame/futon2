@@ -28,7 +28,6 @@
       :observation-envelope <lossless tagged channel values/absences>
       :free-energy      {:preference-gap-score :coverage-uncertainty-pressure :controller-score
                           :per-channel :avoidance-by-channel :avoided-active}
-      :variational-free-energy <F = 1/2 mean(precision * error^2)>
       :ranked-actions   [{:action :G-risk :G-ambiguity :controller-score :rank}]
       :decision         {:action :rank? :controller-score? :tau? :tau-source?
                           :reason? :gap-report? ...}
@@ -238,13 +237,24 @@
           (2026-08-31).
      20 — declares :producer-contract :r8/stored-f-controller-v1. R8 readers
           use this record-carried contract rather than inferring new-record
-          semantics from the trace filename's day (C129, 2026-08-31)."
-  20)
+          semantics from the trace filename's day (C129, 2026-08-31).
+     21 — removes the per-tick :variational-free-energy scalar added at 7 and
+          declares :producer-contract :r8/retired-f-controller-v1. Joe's J2
+          ruling retired the Laplace-channel F once its replacement F_pi was
+          realised and consumed; :selection-gain and the controller-map
+          free-energy shape are unchanged, which is why the R8 era needed a
+          third member rather than a bumped version string (I5 slice (c),
+          C473, 2026-09-01)."
+  21)
 
 (def r8-producer-contract
-  "Contract carried by trace records that require stored variational F,
-   selection gain, and the controller-map free-energy shape."
-  :r8/stored-f-controller-v1)
+  "Contract carried by trace records that require selection gain and the
+   controller-map free-energy shape and that carry NO stored variational F.
+   Its predecessor :r8/stored-f-controller-v1 required all three; F was retired
+   by I5 slice (c) on Joe's J2 ruling, and the two surviving requirements are
+   why checks/r8_f_contract.clj now reads a per-era expectation rather than the
+   identity stored? = gain? = controller?."
+  :r8/retired-f-controller-v1)
 
 (defn- preference-stack-evidence
   "Preserve the exact stack carried by ranked evaluation objects without
@@ -479,7 +489,6 @@
     (support-typed-scoring-shadow observed-envelope
                                   (:ranked-actions judge-output))
     :free-energy (:free-energy judge-output)
-    :variational-free-energy (:variational-free-energy judge-output)
     :prediction-errors (:prediction-errors judge-output {})
     :precision-state (:precision-state judge-output {})
     ;; R14 precision-over-policies (γ): the policy-scale sibling of

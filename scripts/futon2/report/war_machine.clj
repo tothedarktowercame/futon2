@@ -4910,9 +4910,12 @@
         route2 (-> route1
                    (route-tag :R7 "futon2.aif.precision/update-precision-state")
                    (route-tag :R3 "futon2.report.war-machine/apply-arena-belief-events"))
-        variational-free-energy
-        (fe/compute-variational-free-energy prediction-errors)
-        route3 (route-tag route2 :R8 "futon2.aif.free-energy/compute-variational-free-energy")
+        ;; I5(c): the R8 tag survives the retirement of F because R8 the box
+        ;; hosts eps as well (aif-equations.edn :prediction-error), and eps ran
+        ;; at fe/compute-prediction-error above. Like the :R7 and :R3 tags on
+        ;; the line before, this tag is emitted after the loop returns for work
+        ;; done inside it -- see control-map-edges.edn D6 on tag order.
+        route3 (route-tag route2 :R8 "futon2.aif.free-energy/compute-prediction-error")
         ;; v0.13 anticipation v0.13 (read-only): expose upcoming typed
         ;; events to the trace. R5 time-conditioning and R4 multi-horizon
         ;; composition are deferred (v0.14 / v0.15 candidates).
@@ -5238,7 +5241,6 @@
                  :override-suppressed-reason override-suppressed-reason
                  :metabolic-stale? (boolean metabolic-stale?)
                  :free-energy free-energy
-                 :variational-free-energy variational-free-energy
                  :priorities all-priorities
                  :priority-count (count all-priorities)
                  :channel-priority-exclusions (:exclusions channel-priority-result)

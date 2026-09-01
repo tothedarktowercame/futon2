@@ -55,9 +55,19 @@
       (throw (ex-info "could not load previous war-machine implementation"
                       {:revision pre-suppression-revision :err show-err})))
     (load-string
-     (str/replace-first out
-                        "(ns futon2.report.war-machine"
-                        "(ns futon2.report.war-machine-previous"))
+     (-> out
+         (str/replace-first "(ns futon2.report.war-machine"
+                            "(ns futon2.report.war-machine-previous")
+         ;; I5 slice (c) deleted `compute-variational-free-energy` from
+         ;; futon2.aif.free-energy, and this control compiles a HISTORICAL
+         ;; war_machine against TODAY's libraries -- so every revision that
+         ;; predates the retirement now fails to compile on a call the control
+         ;; does not exercise. The anchor stays pinned (moving it would replace
+         ;; the claim, as its own docstring says); the retired call is replaced
+         ;; with nil, which is sound here precisely because F is off the
+         ;; portfolio-step path this test reads.
+         (str/replace "(fe/compute-variational-free-energy prediction-errors)"
+                      "nil")))
     (let [judge-form (some #(when (and (seq? %)
                                        (= 'defn (first %))
                                        (= 'judge (second %)))

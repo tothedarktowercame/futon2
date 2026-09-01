@@ -54,7 +54,8 @@
     (is (empty? (:failure-classes summary)))
     (is (= {:storedF-iff-selectionGain 0
             :storedF-iff-controllerMap 0
-            :storedF-iff-contractEra 0}
+            :storedF-iff-contractEra 0
+            :eraRequiredFieldAbsent 0}
            (get-in report [:r8EraBoundary :conjunct-violations])))
     (is (zero? (get-in report [:r8EraBoundary :shape-counts :unknown])))
     (is (zero? (get-in report [:F :missing-F-computable :non-finite])))
@@ -133,24 +134,24 @@
   (let [{:keys [errors precision]} (channel 1.0 1.0)
         value (assoc (tick {:errors errors :precision precision
                             :stored 0.5 :gain {} :shape :controller})
-                     :producer-contract r8/current-r8-contract)
+                     :producer-contract r8/stored-f-r8-contract)
         record {:file "wm-trace-2026-07-09.edn" :form 1
                 :file-date 20260709 :value value}
         report (r8/analyze-corpus {:files [(:file record)] :records [record]}
                                   r8/default-boundary)]
     (is (= {:era :stored-f-controller :source :producer-contract
-            :status :declared :contract r8/current-r8-contract}
+            :status :declared :contract r8/stored-f-r8-contract}
            (r8/contract-era r8/default-boundary record)))
     (is (true? (get-in report [:summary :pass?]))
         "the declared contract wins where the old filename-day test rejected")
     (is (= 1 (get-in report [:r8EraBoundary :perEra :after :count])))
     (is (= 0 (get-in report [:r8EraBoundary :perEra :before :count])))))
 
-(deftest declared-current-contract-missing-fields-is-malformed
+(deftest declared-stored-f-contract-missing-fields-is-malformed
   (let [{:keys [errors precision]} (channel 1.0 1.0)
         value (assoc (tick {:errors errors :precision precision
                             :stored :absent :gain :absent :shape :g})
-                     :producer-contract r8/current-r8-contract)
+                     :producer-contract r8/stored-f-r8-contract)
         record {:file "wm-trace-2026-07-09.edn" :form 1
                 :file-date 20260709 :value value}
         report (r8/analyze-corpus {:files [(:file record)] :records [record]}
@@ -158,6 +159,64 @@
     (is (false? (get-in report [:summary :pass?])))
     (is (= 1 (count (get-in report [:r8EraBoundary :violations
                                     :current-contract-without-stored]))))))
+
+;; I5 slice (c). The retired-F era is the first era for which "F absent" is
+;; CORRECT, so both directions need a test: a record that matches it passes,
+;; and one that drops a field the era still requires fails. Before this era the
+;; second case could not arise -- gain and the controller map were only ever
+;; absent together with F.
+(deftest retired-f-contract-record-conforms-without-stored-f
+  (let [{:keys [errors precision]} (channel 1.0 1.0)
+        value (assoc (tick {:errors errors :precision precision
+                            :stored :absent :gain {} :shape :controller})
+                     :producer-contract r8/current-r8-contract)
+        record {:file "wm-trace-2026-09-01.edn" :form 1
+                :file-date 20260901 :value value}
+        report (r8/analyze-corpus {:files [(:file record)] :records [record]}
+                                  r8/default-boundary)]
+    (is (= {:era :retired-f-controller :source :producer-contract
+            :status :declared :contract r8/current-r8-contract}
+           (r8/contract-era r8/default-boundary record)))
+    (is (true? (get-in report [:summary :pass?])))
+    (is (= 1 (get-in report [:r8CensusWmTrace :counts :missing-F-computable]))
+        "an F-less record is computable-and-missing, the same disposition as
+         the pre-boundary era; retiring F did not add a fourth arm")
+    (is (= 1 (get-in report [:r8EraBoundary :perEra :after :count]))
+        "the retired-F era is post-boundary; the era table keeps two sides")
+    (is (zero? (get-in report [:r8EraBoundary :perEra :after :storedFCount])))
+    (is (= 1 (get-in report [:r8EraBoundary :perEra :after :selectionGainCount])))))
+
+(deftest retired-f-contract-still-requires-gain-and-controller-map
+  (let [{:keys [errors precision]} (channel 1.0 1.0)
+        value (assoc (tick {:errors errors :precision precision
+                            :stored :absent :gain :absent :shape :g})
+                     :producer-contract r8/current-r8-contract)
+        record {:file "wm-trace-2026-09-01.edn" :form 1
+                :file-date 20260901 :value value}
+        report (r8/analyze-corpus {:files [(:file record)] :records [record]}
+                                  r8/default-boundary)]
+    (is (false? (get-in report [:summary :pass?])))
+    (is (= 1 (count (get-in report [:r8EraBoundary :violations
+                                    :era-requires-gain]))))
+    (is (= 1 (count (get-in report [:r8EraBoundary :violations
+                                    :era-requires-controller]))))
+    (is (empty? (get-in report [:r8EraBoundary :violations
+                                :current-contract-without-stored]))
+        "F's absence is not the violation in this era")))
+
+(deftest unknown-producer-contract-is-malformed-not-legacy
+  (let [{:keys [errors precision]} (channel 1.0 1.0)
+        value (assoc (tick {:errors errors :precision precision
+                            :stored :absent :gain {} :shape :controller})
+                     :producer-contract :r8/invented-v9)
+        record {:file "wm-trace-2026-09-01.edn" :form 1
+                :file-date 20260901 :value value}
+        report (r8/analyze-corpus {:files [(:file record)] :records [record]}
+                                  r8/default-boundary)]
+    (is (= :malformed (:era (r8/contract-era r8/default-boundary record))))
+    (is (false? (get-in report [:summary :pass?])))
+    (is (= 1 (count (get-in report [:r8EraBoundary :violations
+                                    :malformed-contract]))))))
 
 (deftest recomputation-reports-non-finite-values
   (let [{:keys [errors precision]} (channel Double/POSITIVE_INFINITY 1.0)]
@@ -185,6 +244,9 @@
     (is (re-find #"#print axioms generatedCensus" lean))
     (is (re-find #"r8Census wmTraceR8Generated = \(1, 0, 0\)" lean))
     (is (re-find #"#print axioms generatedEraBoundary" lean))
+    (is (re-find #"def wmTraceR8StoredEra : List R8TickLit" lean)
+        "the era-boundary theorem is stated over the pre-retirement records")
+    (is (re-find #"∀ t ∈ wmTraceR8StoredEra" lean))
     (is (not (re-find #"meanPrecision :=|uniform :=" lean)))
     (is (not (re-find #"disposition :=|freeEnergyShape :=" lean)))))
 

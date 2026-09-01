@@ -10,7 +10,42 @@
 
 (def default-trace-dir "/home/joe/code/futon2/data/wm-trace")
 (def default-boundary 20260714)
-(def current-r8-contract :r8/stored-f-controller-v1)
+
+(def stored-f-r8-contract
+  "The producer contract that REQUIRED a stored variational F, alongside the
+   selection gain and the controller-map free-energy shape (trace schema 20)."
+  :r8/stored-f-controller-v1)
+
+(def current-r8-contract
+  "The contract new records declare (trace schema 21): F retired by Joe's J2
+   ruling once F_pi was realised and consumed (I5 slice (c), C473); the
+   selection gain and the controller-map shape are still required."
+  :r8/retired-f-controller-v1)
+
+(def contract-eras
+  "Declared producer contract -> R8 era. A contract this map does not name is
+   :malformed rather than silently legacy."
+  {:r8/stored-f-controller-v1 :stored-f-controller
+   :r8/retired-f-controller-v1 :retired-f-controller})
+
+(def era-expectations
+  "What each era REQUIRES of a record: the stored F, the selection gain, the
+   controller-map free-energy shape. Until I5 slice (c) these three were one
+   identity (stored? = gain? = controller?) because no era had ever separated
+   them; retiring F while keeping the other two is exactly the separation, so
+   the conjuncts are now read off the era rather than off each other."
+  {:pre-stored-f         {:f false :gain false :controller false}
+   :stored-f-controller  {:f true  :gain true  :controller true}
+   :retired-f-controller {:f false :gain true  :controller true}})
+
+(def f-retirement-date
+  "The trace filename day on which `compute-variational-free-energy` was
+   removed. Records on this day are MIXED -- those written before the removal
+   carry F and those after do not -- so the day is not a discriminator at
+   record grain and only the record-carried :producer-contract is. Used solely
+   to restrict the generated Lean era-boundary theorem, whose R8TickLit carries
+   no contract field (see `lean-fixture-text`)."
+  20260901)
 (def default-recorded-report
   "holes/labs/wm-contract/R8-D2-report.edn")
 (def recorded-census {:missing-F-computable 755
@@ -154,8 +189,8 @@
   [boundary {:keys [file-date value]}]
   (let [declared (:producer-contract value)]
     (cond
-      (= current-r8-contract declared)
-      {:era :stored-f-controller :source :producer-contract
+      (contains? contract-eras declared)
+      {:era (get contract-eras declared) :source :producer-contract
        :status :declared :contract declared}
 
       (nil? declared)
@@ -171,12 +206,13 @@
         gain? (some? (:selection-gain value))
         controller? (= :controller-map shape)
         contract (contract-era boundary record)
-        current? (= :stored-f-controller (:era contract))]
+        expect (get era-expectations (:era contract))]
     (and (not= :unexplained-regime shape)
          (not= :malformed (:status contract))
-         (= stored? gain?)
-         (= stored? controller?)
-         (= stored? current?)
+         (some? expect)
+         (= stored? (:f expect))
+         (= gain? (:gain expect))
+         (= controller? (:controller expect))
          (or (= :insufficient-inputs disposition)
              (try (finite? (recompute-f value))
                   (catch Exception _ false))))))
@@ -287,27 +323,46 @@
                                classified)
         with-stored (filter #(some? (:variational-free-energy (:value %)))
                             classified)
+        ;; The era TABLE is still the two sides of the 20260714 date boundary;
+        ;; :retired-f-controller is a post-boundary contract, not a third side.
         before-era (filter #(= :pre-stored-f (get-in % [:contract-era :era])) classified)
-        after-era (filter #(= :stored-f-controller (get-in % [:contract-era :era])) classified)
+        after-era (filter #(contains? #{:stored-f-controller :retired-f-controller}
+                                      (get-in % [:contract-era :era]))
+                          classified)
         era-violations
         (reduce
          (fn [result {:keys [shape value contract-era] :as record}]
+           ;; Each field is read against what its RECORD'S ERA requires. The
+           ;; six original keys keep their names and their old meanings on the
+           ;; two eras that existed when they were written; :era-requires-gain
+           ;; and :era-requires-controller are what the retired-F era adds --
+           ;; the case where a field the era demands is simply absent, which no
+           ;; earlier era could produce because F's presence implied both.
            (let [stored? (some? (:variational-free-energy value))
                  gain? (some? (:selection-gain value))
                  controller? (= :controller-map shape)
-                 current? (= :stored-f-controller (:era contract-era))
+                 expect (get era-expectations (:era contract-era))
+                 f-required? (true? (:f expect))
+                 gain-required? (true? (:gain expect))
+                 controller-required? (true? (:controller expect))
                  add (fn [m key] (update m key conj (tick-id record)))]
              (cond-> result
                (= :malformed (:status contract-era)) (add :malformed-contract)
                (and stored? (not gain?)) (add :stored-without-gain)
-               (and gain? (not stored?)) (add :gain-without-stored)
+               (and gain? (not stored?) (not gain-required?))
+               (add :gain-without-stored)
                (and stored? (not controller?)) (add :stored-not-controller)
-               (and controller? (not stored?)) (add :controller-without-stored)
-               (and stored? (not current?)) (add :stored-outside-current-contract)
-               (and current? (not stored?)) (add :current-contract-without-stored))))
+               (and controller? (not stored?) (not controller-required?))
+               (add :controller-without-stored)
+               (and stored? (not f-required?)) (add :stored-outside-current-contract)
+               (and f-required? (not stored?)) (add :current-contract-without-stored)
+               (and gain-required? (not gain?)) (add :era-requires-gain)
+               (and controller-required? (not controller?))
+               (add :era-requires-controller))))
          {:stored-without-gain [] :gain-without-stored []
           :stored-not-controller [] :controller-without-stored []
           :stored-outside-current-contract [] :current-contract-without-stored []
+          :era-requires-gain [] :era-requires-controller []
           :malformed-contract []}
          classified)
         stored-computed (get by-computed-disposition :stored-F [])
@@ -403,7 +458,10 @@
        :storedF-iff-contractEra
        (+ (count (:stored-outside-current-contract era-violations))
           (count (:current-contract-without-stored era-violations))
-          (count (:malformed-contract era-violations)))}
+          (count (:malformed-contract era-violations)))
+       :eraRequiredFieldAbsent
+       (+ (count (:era-requires-gain era-violations))
+          (count (:era-requires-controller era-violations)))}
       :date-margin {:latest-pre-boundary (when (seq before-dates)
                                            (apply max before-dates))
                     :earliest-post-boundary (when (seq suffix-dates)
@@ -493,8 +551,20 @@
        (get census :stored-F 0) ", "
        (get census :insufficient-inputs 0) ") := by\n"
        "  native_decide\n\n"
+       ;; The three iffs held while EVERY post-boundary record stored F. I5
+       ;; slice (c) retired F and kept the selection gain and the controller
+       ;; map, so from `f-retirement-date` on, only the record-carried
+       ;; :producer-contract separates the eras -- and R8TickLit has no
+       ;; contract field. The theorem is therefore stated over the records
+       ;; that PREDATE the retirement day, and what it now excludes is named
+       ;; here rather than left for a reader to notice. The enforcing artefact
+       ;; is :r8EraBoundary :violations in this report, which reads the
+       ;; contract and covers every record.
+       "def wmTraceR8StoredEra : List R8TickLit :=\n"
+       "  wmTraceR8Generated.filter (fun t => decide (t.fileDate < "
+       f-retirement-date "))\n\n"
        "theorem generatedEraBoundary :\n"
-       "    ∀ t ∈ wmTraceR8Generated,\n"
+       "    ∀ t ∈ wmTraceR8StoredEra,\n"
        "      (t.storedF.isSome ↔ t.selectionGain.isSome) ∧\n"
        "      (t.storedF.isSome ↔ t.freeEnergyShape = .controllerMap) ∧\n"
        "      (t.storedF.isSome ↔ 20260714 ≤ t.fileDate) := by\n"

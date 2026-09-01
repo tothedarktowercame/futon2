@@ -63,6 +63,24 @@
 (defn- previous-trace-record [judge-output]
   (record-at pre-beta-dark-trace-sha "previous" judge-output))
 
+(def ^:private i5-retired-keys
+  "The two keys whose difference from the pinned historical anchors below is
+   DELIBERATE and belongs to I5 slice (c) rather than to any flag: the retired
+   scalar F, and the producer contract that declares its retirement.
+
+   The anchors are NOT re-pinned to HEAD. Re-pinning would turn each control's
+   claim from `this flag adds nothing to the record` into `the last commit
+   changed nothing` -- exactly the rot `pre-beta-dark-trace-sha` was pinned to
+   avoid. So the anchors stay and the comparison drops these two keys from both
+   sides, which keeps every remaining byte under the control."
+  [:variational-free-energy :producer-contract])
+
+(defn- modulo-i5
+  "A record with the I5-retired keys removed, for comparison against an anchor
+   written before the retirement."
+  [record]
+  (apply dissoc record i5-retired-keys))
+
 (def ^:private sample-judge-output
   "Minimal judge-style output covering the trace-record fields."
   {:belief (belief/initial-belief-state [:m1])
@@ -70,7 +88,6 @@
    :free-energy {:preference-gap-score 0.05 :coverage-uncertainty-pressure 0.10 :controller-score 0.075
                  :per-channel {:loop-health {:value 0.7 :gap 0.0 :in-range? false}}
                  :avoided-active []}
-   :variational-free-energy 0.0125
    :ranked-actions [{:action {:type :no-op}
                      :G-risk 0.05 :G-ambiguity 0.0 :structural-pressure 0.0
                      :goal-outcome-replay-inputs
@@ -107,8 +124,12 @@
       (is (contains? r :mu-post))
       (is (contains? r :observation))
       (is (contains? r :free-energy))
-      (is (= 0.0125 (:variational-free-energy r)))
       (is (= trace/r8-producer-contract (:producer-contract r)))
+      ;; I5 slice (c): the scalar F is retired, and a record that carries the
+      ;; retired-F contract must not carry the key -- absence is the contract,
+      ;; not an omission the reader should tolerate.
+      (is (not (contains? r :variational-free-energy)))
+      (is (= :r8/retired-f-controller-v1 (:producer-contract r)))
       (is (contains? r :ranked-actions))
       (is (contains? r :decision))
       (is (contains? r :mode)))))
@@ -160,7 +181,7 @@
     (binding [trace/*persist-policy-trace-details?* false]
       (let [now (trace/trace-record sample-judge-output)
             before (previous-trace-record sample-judge-output)
-            fix-clock #(assoc % :timestamp "<same-instant>")]
+            fix-clock #(assoc (modulo-i5 %) :timestamp "<same-instant>")]
         (is (= (pr-str (fix-clock before))
                (pr-str (fix-clock now))))))))
 
@@ -318,13 +339,18 @@
   ;; one process and confirming the serialized bytes were equal. What is pinned
   ;; here is therefore the pre-I3 output, not a description of today's code.
   (binding [trace/*persist-policy-trace-details?* false]
+    ;; The golden FILE is left exactly as captured; only the comparison changes,
+    ;; dropping the two keys I5 slice (c) retired from both sides (see
+    ;; `i5-retired-keys`). Re-capturing the file would delete the pre-I3 claim
+    ;; this test exists to make.
     (let [golden (str/trim-newline
                   (slurp (io/resource "futon2/aif/trace-flag-off-golden.txt")))
-          actual (pr-str (dissoc (trace/trace-record sample-judge-output)
-                                 :timestamp))]
-      (is (= (count golden) (count actual))
+          strip #(pr-str (modulo-i5 (dissoc % :timestamp)))
+          golden' (strip (edn/read-string golden))
+          actual' (strip (trace/trace-record sample-judge-output))]
+      (is (= (count golden') (count actual'))
           "flag-off record changed size against the pre-I3 bytes")
-      (is (= golden actual)
+      (is (= golden' actual')
           "flag-off record is no longer byte-identical to the pre-I3 record"))))
 
 (deftest policy-trace-details-flag-on-roundtrip-test
@@ -576,14 +602,14 @@
 (deftest beta-dark-off-is-byte-identical-to-the-pinned-pre-beta-record-test
   (testing "RUN7: with the dark beta flag off the record matches 183749a's"
     (binding [trace/*persist-policy-trace-details?* false]
-      (let [fix-clock #(assoc % :timestamp "<same-instant>")]
+      (let [fix-clock #(assoc (modulo-i5 %) :timestamp "<same-instant>")]
         (is (= (pr-str (fix-clock (record-at pre-beta-dark-trace-sha
                                              "pre-beta" sample-judge-output)))
                (pr-str (fix-clock (trace/trace-record sample-judge-output))))
             "no key appears, and no key moves, when the flag is off")))
     (testing "and with the policy-detail flag on, which is the shape S2 runs in"
       (binding [trace/*persist-policy-trace-details?* true]
-        (let [fix-clock #(assoc % :timestamp "<same-instant>")]
+        (let [fix-clock #(assoc (modulo-i5 %) :timestamp "<same-instant>")]
           (is (= (pr-str (fix-clock (record-at pre-beta-dark-trace-sha
                                                "pre-beta-details" sample-judge-output)))
                  (pr-str (fix-clock (trace/trace-record sample-judge-output))))))))))

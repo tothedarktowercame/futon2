@@ -1,11 +1,15 @@
 (ns futon2.aif.free-energy
-  "Controller diagnostics and variational free-energy computation for the War Machine.
+  "Controller diagnostics and prediction-error computation for the War Machine.
 
    The inference step between observation and render. Reads observation
    vectors from `futon2.aif.observation/observe` and preferences from
    `futon2.aif.preferences`, producing explicitly named engineering diagnostics.
-   The distinct `compute-variational-free-energy` function reports the Gaussian
-   prediction-error objective.
+   The per-tick scalar `compute-variational-free-energy` was removed by
+   worklist I5 slice (c) on Joe's J2 ruling (holes/labs/wm-contract/
+   aif-equations.edn :choices :free-energy-form): the Laplace-channel F was a
+   shortcut that no equation in the registry imported, and the replacement his
+   ruling required -- F_pi in `futon2.aif.policy-free-energy`, entering the
+   policy posterior -- is realised and consumed (RUN9/S4).
 
    cf. cyberants `ants/aif/policy.clj` — EFE computation
    cf. portfolio/policy.clj — action ranking
@@ -180,30 +184,6 @@
       :producer-contract :prediction-error/v1
       :precision precision
       :weighted-error (* err precision)})))
-
-(defn compute-variational-free-energy
-  "Compute the per-tick Gaussian prediction-error diagnostic
-
-     F = 1/2 mean_k(precision_k * error_k^2).
-
-   `prediction-errors` must be a non-empty map whose values carry finite,
-   numeric `:error` and non-negative `:precision`. This is deliberately a
-   distinct quantity from the strategic controller's historical
-   `compute-controller-diagnostics` map and from cascade model-selection scores."
-  [prediction-errors]
-  (when-not (seq prediction-errors)
-    (throw (ex-info "variational free energy requires prediction errors" {})))
-  (let [terms
-        (mapv (fn [[channel {:keys [error precision]}]]
-                (when-not (and (number? error) (Double/isFinite (double error))
-                               (number? precision) (Double/isFinite (double precision))
-                               (not (neg? (double precision))))
-                  (throw (ex-info "invalid prediction-error term for variational F"
-                                  {:channel channel :error error
-                                   :precision precision})))
-                (* (double precision) (double error) (double error)))
-              prediction-errors)]
-    (* 0.5 (/ (reduce + terms) (double (count terms))))))
 
 (defn infer-mode
   "Infer strategic mode from observation vector.
