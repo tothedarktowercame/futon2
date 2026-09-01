@@ -31,11 +31,19 @@
         (some #(find-binding-expression % binding-symbol) form))))
 
 (defn- previous-portfolio-step-fn []
-  (let [{:keys [exit out err]}
-        (shell/sh "git" "show" "HEAD~:scripts/futon2/report/war_machine.clj")]
-    (when-not (zero? exit)
+  (let [{log-exit :exit changing-commit :out log-err :err}
+        (shell/sh "git" "log" "-1" "--format=%H" "--"
+                  "scripts/futon2/report/war_machine.clj")
+        previous-revision (str (str/trim changing-commit) "^")
+        {show-exit :exit out :out show-err :err}
+        (if (zero? log-exit)
+          (shell/sh "git" "show"
+                    (str previous-revision
+                         ":scripts/futon2/report/war_machine.clj"))
+          {:exit log-exit :out "" :err log-err})]
+    (when-not (zero? show-exit)
       (throw (ex-info "could not load previous war-machine implementation"
-                      {:err err})))
+                      {:revision previous-revision :err show-err})))
     (load-string
      (str/replace-first out
                         "(ns futon2.report.war-machine"
