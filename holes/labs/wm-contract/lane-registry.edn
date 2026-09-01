@@ -6,8 +6,8 @@
  [{:lane :wm-nouns
    :holding :C332-positive-proof-receipt, :dispatched-at "2026-09-01T01:25:10Z", :job-id "invoke-1788225906461-6411-e544d673", :expected-by "2026-09-01T02:10:10Z"}
   {:lane :wm-verbs
-   :holding :C330-audit-68, :dispatched-at "2026-09-01T01:23:05Z", :job-id "invoke-1788225777683-6406-4a20ebde", :expected-by "2026-09-01T02:08:05Z"}
+   :holding :C334-six-event-claims, :dispatched-at "2026-09-01T01:26:42Z", :job-id "invoke-1788225998585-6416-dfe5dbad", :expected-by "2026-09-01T02:11:42Z"}
   {:lane :wm-organization
-   :holding :C329-restoration-path, :dispatched-at "2026-09-01T01:21:39Z", :job-id "invoke-1788225695845-6404-4ade2762", :expected-by "2026-09-01T02:06:39Z"}
+   :holding :C333-resume-inverse, :dispatched-at "2026-09-01T01:26:42Z", :job-id "invoke-1788225994515-6415-48f570e1", :expected-by "2026-09-01T02:11:42Z"}
   {:lane :wm-evidence
    :holding :C331-attack-execution-doc, :dispatched-at "2026-09-01T01:23:05Z", :job-id "invoke-1788225781620-6407-c08cf343", :expected-by "2026-09-01T02:08:05Z"}]}
