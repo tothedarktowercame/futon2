@@ -4,9 +4,9 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C379-receipt-validator, :dispatched-at "2026-09-01T02:20:21Z", :job-id "invoke-1788229217013-6499-c60f7742", :expected-by "2026-09-01T03:05:21Z"}
+   :holding :C386-dependency-closure, :dispatched-at "2026-09-01T02:29:16Z", :job-id "invoke-1788229746720-6515-80a09379", :expected-by "2026-09-01T03:14:16Z"}
   {:lane :wm-verbs
-   :holding :C382-report-only-vs-nonzero, :dispatched-at "2026-09-01T02:22:58Z", :job-id "invoke-1788229373781-6504-f5b1153a", :expected-by "2026-09-01T03:07:58Z"}
+   :holding :C388-exit3-consumers, :dispatched-at "2026-09-01T02:29:16Z", :job-id "invoke-1788229751543-6516-d74bb296", :expected-by "2026-09-01T03:14:16Z"}
   {:lane :wm-organization
    :holding :C384-bind-evidence-to-producer, :dispatched-at "2026-09-01T02:25:24Z", :job-id "invoke-1788229514396-6508-2d7e7592", :expected-by "2026-09-01T03:10:24Z"}
   {:lane :wm-evidence
