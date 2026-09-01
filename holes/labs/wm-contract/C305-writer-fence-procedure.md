@@ -1,5 +1,8 @@
 # C305 — writer fence for the quiet operator run
 
+**Execution consolidated in `C319-quiet-run-execution.md`.** This file remains
+the fence reasoning and restart-semantics record.
+
 Date: 2026-09-01. Owner: `wm-organization`.
 
 This is the procedural authority behind C292's composite quiescence check. It

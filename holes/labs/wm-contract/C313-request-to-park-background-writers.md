@@ -1,5 +1,8 @@
 # C313 — paste-ready request to Joe for the quiet run
 
+**Execution consolidated in `C319-quiet-run-execution.md`.** This file remains
+the source request and command-verification record.
+
 Date: 2026-09-01. Prepared by `wm-organization`; to be sent and executed by
 `claude-20` and Joe. Nothing below was executed while preparing this request.
 

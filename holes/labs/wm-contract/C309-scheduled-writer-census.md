@@ -1,5 +1,8 @@
 # C309 — live timers, watchers, and coordinator write sets
 
+**Execution consolidated in `C319-quiet-run-execution.md`.** This file remains
+the observed write-set census.
+
 Observed 2026-09-01T00:58Z–01:00Z. Owner: `wm-organization`. This is a
 point-in-time census to refresh immediately before the C305 writer fence. No
 unit or process was stopped, disabled, restarted, or reconfigured during this

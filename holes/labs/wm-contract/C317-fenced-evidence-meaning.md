@@ -1,5 +1,8 @@
 # C317 — what drain verdicts mean under a writer fence
 
+**Execution language consolidated in `C319-quiet-run-execution.md`.** This
+file remains the evidence-semantics assessment.
+
 Date: 2026-09-01. Owner: `wm-organization`. Assessment only; no checker was
 converted or repaired.
 

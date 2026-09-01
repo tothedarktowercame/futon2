@@ -1,5 +1,8 @@
 # C247 — quiet-window drain and operator-run checklist
 
+**Execution superseded by `C319-quiet-run-execution.md`.** This file remains
+the historical sequence and timing record; do not execute it in parallel.
+
 Date: 2026-08-31. Owner: `wm-organization`.
 
 This is an ordered, fail-closed checklist. Preparation commands may be run by
