@@ -8,6 +8,6 @@
   {:lane :wm-verbs
    :holding :C382-report-only-vs-nonzero, :dispatched-at "2026-09-01T02:22:58Z", :job-id "invoke-1788229373781-6504-f5b1153a", :expected-by "2026-09-01T03:07:58Z"}
   {:lane :wm-organization
-   :holding :C381-reparking-from-machine, :dispatched-at "2026-09-01T02:21:48Z", :job-id "invoke-1788229304026-6503-fe3fe0c0", :expected-by "2026-09-01T03:06:48Z"}
+   :holding :C384-bind-evidence-to-producer, :dispatched-at "2026-09-01T02:25:24Z", :job-id "invoke-1788229514396-6508-2d7e7592", :expected-by "2026-09-01T03:10:24Z"}
   {:lane :wm-evidence
-   :holding :C380-attack-state-machine, :dispatched-at "2026-09-01T02:21:48Z", :job-id "invoke-1788229300043-6502-fa62af8d", :expected-by "2026-09-01T03:06:48Z"}]}
+   :holding :C385-hash-revalidation-sweep, :dispatched-at "2026-09-01T02:25:24Z", :job-id "invoke-1788229519360-6509-6a19090d", :expected-by "2026-09-01T03:10:24Z"}]}
