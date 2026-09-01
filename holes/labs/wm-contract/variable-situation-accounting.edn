@@ -1,13 +1,13 @@
 {:schema :wm/variable-situation-accounting-v1,
  :as-of "2026-08-31",
  :authority
- {:contract-git-sha "36c2c2da681eb724fe0dbad027b6ac855d24bd15",
+ {:contract-git-sha "8078028d24528d172cc91697f84e52c42021b7e1",
   :contract-sha256
-  "0bbb4627f424ad81b4756d1ea85029679ef52c1b011b2f4f69f2277e994bc451",
+  "4273e48f56c09187e074f0ba7f7a43a2326827a2e2df2b039c8fadb2c224e3bf",
   :glossary-sha256
   "780a64afbdb4a9f47a2e399fd3611f79961b6facbbddac02630895592e867889",
   :witness-registry-sha256
-  "9c27a2852d0c73316e5839450e679b73728ee2563585fffb507b78d17477579f"},
+  "ef55f823fc7e64ad1da14c59f796817a435fcfcaa42bb7bc552993ec2c6cd58d"},
  :axes
  {:content-status
   [:named-only
@@ -351,6 +351,14 @@
    :content-status :closed-by-record-with-witness,
    :pointer-status :resolves,
    :pointer-detail {:resolved-title "Bayesian Model Reduction."}}
+  {:name "ObservationVector",
+   :area :belief,
+   :owner "sec-glossary.tex:12 · P-glossary-mathematics",
+   :content-status :closed-by-record-with-witness,
+   :pointer-status :drifted,
+   :pointer-detail
+   {:resolved-title "Observation vector $o$.",
+    :reason :line-resolves-to-different-concept}}
   {:name "PredictiveOutcomeKernel",
    :area :scores,
    :owner "sec-glossary.tex:21–29 · P-glossary-mathematics",
@@ -825,11 +833,11 @@
    :pointer-status :resolves,
    :pointer-detail {:resolution :paragraph-name}}],
  :counts
- {:rows 127,
+ {:rows 128,
   :content
   {:closed-by-record-negative-space 61,
-   :closed-by-record-with-witness 35,
+   :closed-by-record-with-witness 36,
    :named-only 9,
    :open-hole 11,
    :proven-against-pinned-source 11},
-  :pointer {:drifted 22, :resolves 105}}}
+  :pointer {:drifted 23, :resolves 105}}}
