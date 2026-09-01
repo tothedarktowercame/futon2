@@ -202,3 +202,36 @@ test.
 **Consequence for the parking request:** it does not go to Joe until C402 resolves what `certified` means, and
 the remaining four C395 findings are repaired and re-attacked. **I told Joe I was one step from sending it; I
 was not.**
+
+## C407 — C403 blocked the gate on a real incompleteness; I pinned the reconstructed bases (my fix)
+
+**C403 (`fc445bb` → derivation) shipped and immediately turned the workspace gate red**, exit 1, status
+`:unavailable`. **The check was right and the gate was correctly blocked**: C385 cites three cross-repo files
+— `futon3c/scripts/bounded_test_job.py`, `futon3c/scripts/bg.py`, `p4ng/empirics-futon/gen_workflow_report.bb`
+— that the registry did not declare and whose repos the basis did not pin.
+
+**Derivation found a citation I had missed by hand.** My C401 pass extended the registry to the eight futon2
+citations I found by grepping the document; **`futon3c/scripts/bg.py` was not among them.** The derived scan
+caught it. **That is the argument for deriving rather than declaring, made against my own manual attempt.**
+
+**I asked C403 to say what the cross-repo convention should be. It answered by making it a failure** —
+`:cited-repo-not-pinned-by-basis` — which is the right answer: a census that cites a repository must pin it,
+or the citation cannot be validated at all.
+
+### What I did
+
+**Pinned both cross-repo bases as each repo's HEAD at the census commit's instant** (2026-09-01T02:28:46Z):
+futon3c `e5f1d94`, p4ng `8ee6190`. **Declared the three cross-repo subjects.**
+
+**These bases are reconstructed, not recorded, and the registry says so in a comment.** Earlier I refused to
+add a basis on the grounds that inventing one would pin something the census never recorded. **Reconstructing
+each repo's HEAD at the census's own commit instant is not inventing** — it is recovering the state the author
+was necessarily reading — but it is weaker than a basis the author pinned, and the distinction belongs in the
+file rather than in my memory of why I did it.
+
+**Verified: status `:available`, no failures, exit 0. Negative control still rejects. Three subjects report
+`:possibly-stale`**, including `positive_proof_receipt.clj`, which is correct — it has moved twice since the
+basis.
+
+**The durable lesson is C403's, not mine:** a hand-declared subject list was wrong twice in a row, once by the
+original author and once by me while reviewing that exact defect.

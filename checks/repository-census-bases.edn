@@ -3,7 +3,14 @@
  :entries
  [{:artifact "holes/labs/wm-contract/C385-recorded-hash-revalidation-census.md"
    :kind :census
-   :basis {:futon2 "0d6a627b67b91f53031528bea1eaa4bf2e94905d"}
+   ;; The census pinned only futon2.  Its three cross-repo citations left the
+   ;; check unable to validate them at all, which C403 correctly made a failure.
+   ;; These two bases are RECONSTRUCTED as each repo's HEAD at the census
+   ;; commit's instant (2026-09-01T02:28:46Z) -- not invented, but not recorded
+   ;; by the census author either.  A census that cites a repo should pin it.
+   :basis {:futon2 "0d6a627b67b91f53031528bea1eaa4bf2e94905d"
+           :futon3c "e5f1d94ce22e58e0c6aae85a2cca44ec75f754d6"   ; reconstructed
+           :p4ng "8ee6190cf88827b4153b89befd312435435dc524"}     ; reconstructed
    ;; Every futon2 path the census cites.  The first three were the declared
    ;; set; positive_proof_receipt.clj was cited AND had moved twice since the
    ;; basis, and the check could not see it.  The two cross-repo citations
@@ -17,4 +24,7 @@
               {:repo :futon2 :path "checks/mutable_read_set.clj"}
               {:repo :futon2 :path "checks/writer_fence_evidence.py"}
               {:repo :futon2 :path "scripts/writer_fence_restore.py"}
-              {:repo :futon2 :path "writer_fence_capability.clj"}]}]}
+              {:repo :futon2 :path "writer_fence_capability.clj"}
+              {:repo :futon3c :path "scripts/bounded_test_job.py"}
+              {:repo :futon3c :path "scripts/bg.py"}
+              {:repo :p4ng :path "empirics-futon/gen_workflow_report.bb"}]}]}
