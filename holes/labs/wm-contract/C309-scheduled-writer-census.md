@@ -50,3 +50,7 @@ command line or replacement PID invalidates this write-set disposition.
 Anything not named above is `write-set-unknown` and blocks `FENCE-HELD`. In
 particular, “running inside the serving JVM” is not evidence of read-only
 behaviour: the durable coordinators are the counterexample.
+
+The paste-ready Joe request, confirmed stop/resume forms, verification, and
+restoration ownership are recorded in
+`C313-request-to-park-background-writers.md`.
