@@ -75,6 +75,34 @@
     {:kind :unsupported-schema
      :source-schema (:source-schema resource)}))
 
+(defn program-identity [resource]
+  (if-not (= :wm-click-resource-v1 (:source-schema resource))
+    {:status :not-applicable :reason :non-serving-process-schema}
+    (let [serving (:serving-runner-code resource)
+          loaded (:identity serving)
+          tested (:tested-commit resource)]
+      (cond
+        (not (contains? #{:available "available"} (:availability serving)))
+        {:status :unavailable :reason :serving-runner-identity-unavailable
+         :tested-commit tested :serving-runner-code serving}
+
+        (or (not (string? tested)) (str/blank? tested))
+        {:status :unavailable :reason :tested-commit-unavailable
+         :tested-commit tested :serving-runner-code serving}
+
+        (and (= tested (:git-head loaded))
+             (false? (:dirty? loaded))
+             (true? (:stable? loaded)))
+        {:status :match :reason nil :tested-commit tested
+         :loaded-commit (:git-head loaded) :serving-runner-code serving}
+
+        :else
+        {:status :mismatch
+         :reason :serving-program-differs-from-tested-program
+         :tested-commit tested :loaded-commit (:git-head loaded)
+         :loaded-dirty? (:dirty? loaded) :reload-stable? (:stable? loaded)
+         :serving-runner-code serving}))))
+
 (defn bind-fixture-provenance [cert run-bytes resource-bytes valid?]
   (let [pins {:run-sha256 (sha256-bytes run-bytes)
               :resource-sha256 (when resource-bytes (sha256-bytes resource-bytes))
@@ -125,8 +153,12 @@
         resources-clean? (resource-clean? run resource)
         execution-complete? (execution-complete? run resource)
         identity (run-identity run-bytes run)
+        program-identity (program-identity resource)
+        program-identity-valid? (contains? #{:match :not-applicable}
+                                            (:status program-identity))
         base-valid? (boolean (and route-present? run-time? topology-pinned?
-                                  (empty? undeclared) resources-clean?))
+                                  (empty? undeclared) resources-clean?
+                                  program-identity-valid?))
         verdict (cond
                   (not base-valid?) :fail
                   (not execution-complete?) :incomplete
@@ -151,6 +183,7 @@
                  {:original (vec (sort (remove traversed-pairs original)))
                   :measured (vec (sort (remove traversed-pairs measured)))}}
      :resource-status resource
+     :program-identity-status program-identity
      :execution-status {:status (if execution-complete? :complete :incomplete)
                         :completion-evidence (completion-evidence resource)
                         :trace-written? (true? (:traceWritten run))
@@ -165,6 +198,7 @@
               :no-undeclared-traversal? (empty? undeclared)
               :resource-run-identity-matches? resource-identity-matches?
               :resource-status-clean? resources-clean?
+              :serving-program-matches-tested-program? program-identity-valid?
               :execution-complete? execution-complete?}
      :verdict verdict}))
 

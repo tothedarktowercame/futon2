@@ -13,7 +13,9 @@
    :click-id "click-1" :run-id "run-1"
    :started-at "2026-09-01T00:00:00Z"
    :finished-at "2026-09-01T00:00:20Z"
-   :resource-status "clean"})
+   :resource-status "clean"
+   :serving-runner-code {:availability "available"
+                         :identity {:git-head "tested"}}})
 
 (deftest click-resource-envelope-falsifiers
   (is (true? (observer/envelope-valid? run clean-envelope)))
@@ -28,3 +30,8 @@
            :native-markers []})))
   (is (false? (observer/envelope-valid?
                run (assoc clean-envelope :resource-status "unavailable")))))
+
+(deftest serving-code-identity-survives-resource-normalization
+  (is (= (:serving-runner-code clean-envelope)
+         (:serving-runner-code
+          (observer/certificate-resource "run-1" "fixture" clean-envelope)))))

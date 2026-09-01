@@ -80,13 +80,38 @@
                           :execution-outcome :incomplete
                           :pids-events-max-delta 0
                           :native-thread-exhaustion false
-                          :tasks-peak 1}
+                          :tasks-peak 1
+                          :tested-commit "tested-sha"
+                          :serving-runner-code
+                          {:availability :available
+                           :identity {:git-head "tested-sha"
+                                      :dirty? false :stable? true}}}
         c (cert/certificate (edn-bytes partial-run) partial-resource false)]
     (is (= :incomplete (:verdict c)))
     (is (= :clean (get-in c [:resource-status :status])))
     (is (= :incomplete (get-in c [:execution-status :status])))
     (is (true? (get-in c [:checks :resource-status-clean?])))
     (is (false? (get-in c [:checks :execution-complete?])))))
+
+(deftest serving-program-must-match-tested-commit
+  (let [base {:schema 2
+              :run/id (:run/id run-record)
+              :source-schema :wm-click-resource-v1
+              :observation-scope :shared-serving-jvm
+              :status :clean
+              :execution-outcome :grounded-no-change
+              :pids-events-max-delta 0
+              :native-thread-exhaustion false
+              :tested-commit "tested-sha"
+              :serving-runner-code
+              {:availability :available
+               :identity {:git-head "different-sha" :dirty? false :stable? true}}}
+        c (cert/certificate run-bytes base false)]
+    (is (= :fail (:verdict c)))
+    (is (= :mismatch (get-in c [:program-identity-status :status])))
+    (is (= :serving-program-differs-from-tested-program
+           (get-in c [:program-identity-status :reason])))
+    (is (false? (get-in c [:checks :serving-program-matches-tested-program?])))))
 
 (deftest diagnostic-receipt-with-missing-terminal-exit-is-incomplete
   (let [resource (-> clean-resource

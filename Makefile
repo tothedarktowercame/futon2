@@ -35,10 +35,12 @@ status-control:
 	 exit $$c
 
 # Certify one completed operator/diagnostic run without guessing "latest".
-# Usage: make certify-run RUN_ID=<uuid>
+# TESTED_JOB_ID is the Futon2 CI bounded-job id recorded by tested-commit.
+# Usage: make certify-run RUN_ID=<uuid> TESTED_JOB_ID=<bounded-id>
 certify-run:
 	@test -n "$(RUN_ID)" || (echo "certify-run: RUN_ID is required" >&2; exit 1)
-	bb -cp . checks/certify_live_run.clj --run-id "$(RUN_ID)"
+	@test -n "$(TESTED_JOB_ID)" || (echo "certify-run: TESTED_JOB_ID is required" >&2; exit 1)
+	bb -cp . checks/certify_live_run.clj --run-id "$(RUN_ID)" --tested-job-id "$(TESTED_JOB_ID)"
 
 # Read-only operator preflight. It runs checks and reads receipts/roster state;
 # it never starts a tick or dispatches an agent.

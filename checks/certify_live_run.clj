@@ -3,12 +3,14 @@
   (:require [babashka.fs :as fs]
             [cheshire.core :as json]
             [clojure.edn :as edn]
+            [clojure.java.shell :as shell]
             [clojure.string :as str]
             [checks.wm-click-resource-observer :as click-observer]
             [checks.wm-operational-certificate :as certificate]))
 
 (def default-run-dir "holes/labs/wm-contract")
 (def default-resource-dirs ["holes/labs/wm-contract" "/tmp/futon-bounded-tests"])
+(def bg "/home/joe/code/futon3c/scripts/bg.py")
 
 (defn fail! [message data]
   (binding [*out* *err*]
@@ -97,10 +99,11 @@
       (fail! "bounded resource receipt is ambiguous"
              {:run/id run-id :matches (mapv :path matches)}))))
 
-(defn normalized-resource [run-id source-path r]
+(defn normalized-resource [run-id source-path r tested-commit]
   (let [click? (= "wm-click-resource-v1" (:schema r))]
     (if click?
-      (click-observer/certificate-resource run-id source-path r)
+      (assoc (click-observer/certificate-resource run-id source-path r)
+             :tested-commit tested-commit)
       {:schema 2
      :run/id run-id
      :source-schema (keyword (:schema r))
@@ -115,8 +118,30 @@
      :tasks-peak (:pids-peak r)
        :source-receipt source-path})))
 
+(defn tested-commit-from-job! [job-id]
+  (when (str/blank? job-id)
+    (fail! "--tested-job-id is required for production click certification"
+           {:reason :tested-job-id-unavailable}))
+  (let [{:keys [exit out]} (shell/sh "python3" bg "test-status" job-id)
+        record (when (zero? exit) (try (json/parse-string out true)
+                                      (catch Throwable _ nil)))
+        receipt (:receipt record)
+        head (get-in receipt [:repository-basis-finish :head])]
+    (when-not (and (= job-id (:id record))
+                   (= "inactive" (get-in record [:systemd :ActiveState]))
+                   (= "clojure -T:build ci" (:command receipt))
+                   (= 0 (:outer-exit receipt))
+                   (= "pass" (:verdict receipt))
+                   (true? (:repository-basis-stable receipt))
+                   (false? (get-in receipt [:repository-basis-start :dirty]))
+                   (false? (get-in receipt [:repository-basis-finish :dirty]))
+                   (string? head) (not (str/blank? head)))
+      (fail! "tested Futon2 producer receipt is unavailable or invalid"
+             {:reason :tested-commit-producer-invalid :job-id job-id}))
+    head))
+
 (defn main [args]
-  (let [{:keys [run-id run-dir resource-dirs out-dir]
+  (let [{:keys [run-id run-dir resource-dirs out-dir tested-job-id]
          :or {run-dir default-run-dir
               resource-dirs (str/join ":" default-resource-dirs)
               out-dir default-run-dir}} (parse-args args)]
@@ -126,7 +151,10 @@
     (let [run-path (locate-run! run-id run-dir)
           run (read-edn run-path)
           resource-match (locate-resource! run-id run (str/split resource-dirs #":"))
-          resource (normalized-resource run-id (:path resource-match) (:receipt resource-match))
+          click? (= "wm-click-resource-v1" (get-in resource-match [:receipt :schema]))
+          tested-commit (when click? (tested-commit-from-job! tested-job-id))
+          resource (normalized-resource run-id (:path resource-match)
+                                        (:receipt resource-match) tested-commit)
           safe-id (str/replace run-id #"[^A-Za-z0-9._-]" "_")
           resource-path (str out-dir "/operational-resource-" safe-id ".edn")
           certificate-path (str out-dir "/operational-certificate-" safe-id ".edn")]

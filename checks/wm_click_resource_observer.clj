@@ -49,6 +49,7 @@
    :pids-events-max-delta (:pids-events-max-delta receipt)
    :native-thread-exhaustion (boolean (seq (:native-thread-markers receipt)))
    :tasks-peak (:pids-peak receipt)
+   :serving-runner-code (:serving-runner-code receipt)
    :source-receipt source-path})
 
 (defn observe!
