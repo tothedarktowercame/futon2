@@ -4,10 +4,10 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C417-authority-sibling-vocabulary, :dispatched-at "2026-09-01T03:01:48Z", :job-id "invoke-1788231694796-6569-10b0381a", :expected-by "2026-09-01T03:46:48Z"}
+   :holding nil, :dispatched-at nil, :job-id nil, :expected-by nil}
   {:lane :wm-verbs
-   :holding :C418-mark-catalogue-boundaries, :dispatched-at "2026-09-01T03:01:48Z", :job-id "invoke-1788231699210-6570-23e62f9c", :expected-by "2026-09-01T03:46:48Z"}
+   :holding nil, :dispatched-at nil, :job-id nil, :expected-by nil}
   {:lane :wm-organization
-   :holding :C420-monotonic-presence-check, :dispatched-at "2026-09-01T03:03:32Z", :job-id "invoke-1788231808438-6574-ff577ea4", :expected-by "2026-09-01T03:48:32Z"}
+   :holding :C421-declare-unrepairable-limits, :dispatched-at "2026-09-01T03:05:30Z", :job-id "invoke-1788231921725-6578-2033c0c5", :expected-by "2026-09-01T03:50:30Z"}
   {:lane :wm-evidence
-   :holding :C419-reattack-certificate, :dispatched-at "2026-09-01T03:01:48Z", :job-id "invoke-1788231703946-6571-fb6b3bf2", :expected-by "2026-09-01T03:46:48Z"}]}
+   :holding :C419-reattack-certificate-retry, :dispatched-at "2026-09-01T03:05:30Z", :job-id "invoke-1788231926106-6579-c68e95b6", :expected-by "2026-09-01T03:50:30Z"}]}
