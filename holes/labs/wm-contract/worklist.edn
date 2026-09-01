@@ -25,7 +25,9 @@
    :pointers ["holes/labs/wm-contract/C451-unexplained-drawn-edges.md" "p4ng/empirics-futon/control-map-edges.edn"]
    :taken-by "claude-cli (any-lane; owner row unchanged)"
    :evidence "p4ng b969ba0. Registry: control-map-edges.edn R8->R5 :data-flow :none, :basis citing C451. Generator: gen_live_topology.bb edge-svg :drawn branch + legend swatch. Verified independently: war_machine.clj:4450-4451 binds F, :4452 route-tags :R8, :4458-4466 (wm-state) omits it, :4536 passes wm-state to rank-actions, efe.clj:601-619 predicts from state and action, and F's only other occurrence is the report copy at war_machine.clj:4753 -- nothing between :4452 and :4753 reads it. Gates: negative_controls.sh PASS (9 negative, 3 positive); pointer_check 50 pointers, 0 unresolved. aif-control-map-live.svg deliberately NOT regenerated (gate, TN 9a)."}
-  {:id :D2 :class :D :status :open :owner :wm-organization
+  {:id :D2 :class :D :status :done-unreviewed :owner :wm-organization
+   :taken-by "claude-cli (any-lane; owner row unchanged)"
+   :evidence "p4ng 32cac76. :decisions :r2-r3-shortcut retires [[:R2 :R3]], adds [[:R2 :R8] [:R8 :R3]], :basis C448/C451 plus verified pointers: war_machine.clj:4368-4379 (o into compute-prediction-error), :4382-4388 (precision weighting), :4392-4428 (belief events from the weighted error), :4429-4431 (apply-arena-belief-events). Between :4392 and :4432 `observation` occurs only in a comment. Route tags :R7 :4448, :R3 :4449, :R8 :4452 -- the route record is not the dependency order. No generator reads :decisions, so nothing regenerated (gate, TN 9a). negative_controls PASS; pointer_check 50/0."
    :statement "R2->R3 is the theory path R2->R8->R3 drawn short; R3 reads o only through eps and Pi (war_machine.clj:4368-4388)."
    :acceptance "control-map-edges.edn :decisions gains an entry retiring [:R2 :R3] and adding [:R2 :R8] [:R8 :R3], :by the agent id, :at date, :basis C448/C451 pointers; regenerate; controls pass."
    :pointers ["holes/labs/wm-contract/C448-TN-edge-review-discovery.md"]}
