@@ -10,5 +10,7 @@ value carrying the identical numeric payload.
 
 Only evidence metadata changed; Q-facing definitions are untouched. The Q pin
 is nevertheless refreshed as the required binding-closure check, after
-confirming Q semantics unchanged. The existing `:learning` model-area
+confirming Q semantics unchanged; the refreshed pin is
+`e2436038a96f9a64b4e9bdd2dff3ca516f43affa0debeba2c6762e00dc3476e3`.
+The existing `:learning` model-area
 classification remains explicit.
