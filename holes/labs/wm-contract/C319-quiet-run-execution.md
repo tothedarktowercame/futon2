@@ -132,12 +132,15 @@ fence; it does not acquire one.
 
 ```sh
 cd /home/joe/code/futon2
-make workspace-gate
+FUTON_WRITER_FENCE_ID="$FENCE_ID" make workspace-gate
 ```
 
 Expected: terminal bounded receipt with inner exit 0, outer exit 0, verdict
 `pass`, resource status `clean`, stable clean repository bases, gate failures
-zero, and `workspace-gate: script-exit=0`. Read the named script exit; a
+zero, `contract-authority-current` labelled
+`PASS (FENCE-CONDITIONAL $FENCE_ID)`, and `workspace-gate: script-exit=0`.
+The environment value names the already-established fence; it does not acquire
+one. Read the named script exit; a
 failing Make recipe itself reports exit 2 and must not be mistaken for the
 house mutation-slipped meaning.
 
