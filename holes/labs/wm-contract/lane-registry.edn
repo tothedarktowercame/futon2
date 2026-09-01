@@ -8,6 +8,6 @@
   {:lane :wm-verbs
    :holding :C285-generator-format-boundary, :dispatched-at "2026-09-01T00:29:16Z", :job-id "invoke-1788222551922-6299-6c8525c3", :expected-by "2026-09-01T01:14:16Z"}
   {:lane :wm-organization
-   :holding :C283-checklist-dry-run, :dispatched-at "2026-09-01T00:24:34Z", :job-id "invoke-1788222269084-6292-61ddce3e", :expected-by "2026-09-01T01:09:34Z"}
+   :holding :C286-lane-campaign-format, :dispatched-at "2026-09-01T00:30:23Z", :job-id "invoke-1788222619769-6303-fd413603", :expected-by "2026-09-01T01:15:23Z"}
   {:lane :wm-evidence
    :holding :C284-lint-marker-verification, :dispatched-at "2026-09-01T00:27:43Z", :job-id "invoke-1788222459445-6296-b92666e9", :expected-by "2026-09-01T01:12:43Z"}]}
