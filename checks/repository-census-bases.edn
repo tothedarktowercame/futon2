@@ -29,7 +29,7 @@
   {:artifact "holes/labs/wm-contract/C411-unmarked-declared-boundary-census.md"
    :kind :census
    :basis
-   {:futon2 {:commit "771885b0a12ccd1f5f244298549ade03fbb4212a"
+   {:futon2 {:commit "ca152b89c3a7cfd784bffec47a44f2549c170b05"
              :provenance :author-recorded
              :correspondence :verified}}
    :subjects

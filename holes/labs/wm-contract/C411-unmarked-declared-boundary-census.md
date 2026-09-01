@@ -5,7 +5,7 @@ Date: 2026-09-01
 ## Basis and scope
 
 This census was read against Futon2 commit
-`771885b0a12ccd1f5f244298549ade03fbb4212a`.  The machine-readable basis is in
+`ca152b89c3a7cfd784bffec47a44f2549c170b05`.  The machine-readable basis is in
 `checks/repository-census-bases.edn`; it names every source subject cited below.
 
 Selection rule: inspect active verification code that (a) enumerates a
@@ -28,6 +28,12 @@ This census records its own limit:
 
 The repository basis makes the reported observations reproducible.  It cannot
 turn “all semantic boundary claims” into a mechanically enumerable population.
+Registration is self-referential here: adding this entry necessarily moves
+`repository-census-bases.edn` after the observation basis, so the basis checker
+immediately and correctly reports that one subject `:possibly-stale`.  The
+substantive checker/code subjects are unchanged from the recorded basis.  This
+is awkward but preferable to pretending a self-modifying registry can equal
+its own prior basis commit.
 
 ## Unmarked boundaries found
 
