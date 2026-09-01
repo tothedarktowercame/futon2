@@ -131,6 +131,33 @@
       (println ";; solver control: local" (:beta mine) " src" (:beta-posterior theirs)
                " delta" (Math/abs (- (:beta mine) (:beta-posterior theirs)))))
 
+    ;; --- the scale of the two terms, before any arm is read ---------------
+    ;; Whether beta can matter at all is a question about magnitudes, and the
+    ;; useful magnitude is NOT the ratio of the two spreads. G's spread over the
+    ;; whole field is dominated by the tail; what decides the argmax is how the
+    ;; two terms differ AT THE TOP. So the line below reports, per tick, the
+    ;; machine's rank of the dark posterior's argmax and the G gap and F_pi gap
+    ;; between that candidate and the machine's own rank 1.
+    (println "\n;; === FIELD SCALE (G against F_pi, per tick)")
+    (doseq [[i f] usable]
+      (let [g (:g f) fp (:f f)
+            spread #(- (apply max %) (apply min %))
+            pi (:pi (residual 1.0 1.0 g fp (:ln-e f)
+                              {:e-in-pi? false :e-in-pi-0? false}))
+            top (argmax-index pi)
+              r1 (.indexOf ^java.util.List (:machine-rank f) 1)]
+          (println (format (str "tick %2d n=%3d  G spread %.4f  F_pi spread %.4f | "
+                                "argmax(pi) is machine rank %s of %d | "
+                                "vs machine rank 1: dG %+.4f dF %+.4f | "
+                                "argmax(pi) ties with %d others")
+                           (inc i) (count g) (spread g) (spread fp)
+                           (nth (:machine-rank f) top) (count g)
+                           (if (neg? r1) Double/NaN (- (nth g top) (nth g r1)))
+                           (if (neg? r1) Double/NaN (- (nth fp top) (nth fp r1)))
+                           (dec (count (filter #(< (Math/abs (- % (nth pi top)))
+                                                   1.0e-15)
+                                               pi)))))))
+
     ;; --- J4 arms: carried prior vs fixed prior, at four beta_0 -------------
     (println "\n;; === J4 ARMS (carry vs reset), on the machine's own controller scores")
     (doseq [b0 beta-zeros]
