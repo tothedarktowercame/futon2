@@ -13,14 +13,21 @@
   (when-not (contains? (:classes w) (:class i)) (die (:id i) "unknown class" (:class i)))
   (when-not (contains? (:statuses w) (:status i)) (die (:id i) "unknown status" (:status i)))
   (when (and (= :J (:class i)) (not (or (= :needs-joe (:status i)) (= :done (:status i))))) (die (:id i) "class J must be :needs-joe or :done"))
-  ;; Joe, 2026-09-01: "I'm getting a little bit tired of being asked to approve
-  ;; J3, J4, J5... asking me which thing to align, I don't have anything to go
-  ;; on to decide which one is better." A J row now has to earn his attention.
-  ;; BOTH must hold: (a) not decidable from the sources, the code, or a ruling
-  ;; he has already made; AND (b) the arms produce observably different machine
-  ;; behaviour that no experiment on recorded fields would distinguish.
-  ;; Everything else is the steward's to decide and record under :choices with
-  ;; :grounds :steward-default, and reaches him as a digest he can veto.
+  ;; Joe, 2026-09-01: "if there's a decision to be made that isn't
+  ;; predetermined by the theory, then we need to note that down as a decision.
+  ;; And probably explore all the different branches ... so that we can make an
+  ;; informed decision about which one performs best. But asking me to make an
+  ;; advanced ruling is just not a great way to get good results because I have
+  ;; nothing to go on."
+  ;;
+  ;; So a choice the theory does not determine is a CHOICE POINT in :choices,
+  ;; with the arms named and the measurement that separates them; the branches
+  ;; are BUILT AND RUN behind flags; the decision is made on the numbers and
+  ;; recorded with them. Joe sees RESULTS and can veto or reopen.
+  ;;
+  ;; A J row is the residue only: the arms differ in machine behaviour AND no
+  ;; experiment we can run would separate them. Its :bar must therefore say why
+  ;; the arms CANNOT BE RUN -- not merely that the answer is unclear.
   (when (= :J (:class i))
     (when-not (map? (:bar i))
       (die (:id i) "class J needs a :bar map saying how it earns Joe's attention"
@@ -31,7 +38,11 @@
         (doseq [k [:a :b]]
           (when (clojure.string/blank? (str (get bar k)))
             (die (:id i) "is :needs-joe but its :bar lacks" k
-                 "-- an open J row must state BOTH conditions; if it cannot, the steward decides it"))))))
+                 "-- an open J row must state BOTH conditions; if it cannot, build the branches instead")))
+        (when (clojure.string/blank? (str (:why-not-runnable bar)))
+          (die (:id i) "is :needs-joe but its :bar lacks :why-not-runnable"
+               "-- Joe's rule of 2026-09-01: a choice the theory does not settle gets BRANCHES BUILT AND RUN,"
+               "not an advance ruling. Only a choice whose arms cannot be run reaches him as a question.")))))
   (when (and (#{:done-unreviewed :done} (:status i)) (not (:evidence i))) (die (:id i) "done without :evidence"))
   (when (and (= :done (:status i)) (not (:reviewed-by i))) (die (:id i) ":done without :reviewed-by")))
 
