@@ -224,6 +224,14 @@ class QuietRunStateTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "state-ledger-evidence-changed"):
             sut.load_ledger(self.ledger)
 
+    def test_changed_parking_specification_requires_reinitialization(self):
+        changed = dict(sut.parking_specification(), writers=[])
+        with mock.patch.object(sut, "parking_specification", return_value=changed):
+            with self.assertRaisesRegex(
+                    ValueError,
+                    "parking-specification-changed:.*abort-or-re-initialize"):
+                sut.load_ledger(self.ledger)
+
     def test_handwritten_bounded_receipt_is_not_a_producer(self):
         fence, att = self.reach_fence()
         with mock.patch.object(sut, "bounded_job", side_effect=ValueError(

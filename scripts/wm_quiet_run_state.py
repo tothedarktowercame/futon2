@@ -171,6 +171,13 @@ def load_ledger(path):
                 raise ValueError(f"state-ledger-evidence-changed:{number}")
         rows.append(row)
     if not rows: raise ValueError("state-ledger-empty")
+    recorded_specification = rows[0].get("facts", {}).get(
+        "parking-specification-sha256")
+    current_specification = digest(parking_specification())
+    if recorded_specification != current_specification:
+        raise ValueError(
+            "parking-specification-changed:recorded-request-differs-from-current;"
+            "abort-or-re-initialize")
     return rows
 
 
