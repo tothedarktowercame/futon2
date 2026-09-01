@@ -142,7 +142,11 @@
            ;; DISTRIBUTION, so the mean alone is not enough — a Gaussian free
            ;; energy needs the precision too. Persisting the mean without the
            ;; variance would leave the consumer inventing one (C462 §5).
-           :prediction-variance (get-in r [:prediction :next-observation :variance]))))
+           :prediction-variance (get-in r [:prediction :next-observation :variance])
+           ;; F_pi distinguishes a genuinely deterministic zero from a channel
+           ;; for which the action model supplied no variance.
+           :prediction-variance-status
+           (get-in r [:prediction :next-observation :variance-status]))))
 
 (defn- ranked-candidate-id
   "Tick-local stable candidate id retained across stripping. Rank is already
@@ -534,6 +538,12 @@
     ;; (C462 §6 item 3).
     *persist-policy-trace-details?*
     (assoc :effects-mode forward-model/*effects-mode*)
+    ;; I2(c) dark F_pi readback. Present only when the separately default-off
+    ;; FUTON_WM_FPI_DARK path put a result on the judge output. Nothing in
+    ;; policy selection reads either field.
+    (contains? judge-output :f-pi-by-candidate-id)
+    (assoc :f-pi-by-candidate-id (:f-pi-by-candidate-id judge-output)
+           :f-pi-provenance (:f-pi-provenance judge-output))
     ;; B-0a tick provenance (present-only, schema v2): the scheduled runner
     ;; stamps it via `wm-version-stamp`; bare judge calls don't — purely
     ;; additive, no nil seam in un-stamped records.

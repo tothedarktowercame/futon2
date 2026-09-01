@@ -48,6 +48,7 @@
             [futon2.aif.observation :as obs]
             [futon2.aif.pattern-registry :as pattern-registry]
             [futon2.aif.policy :as policy]
+            [futon2.aif.policy-free-energy :as policy-free-energy]
             [futon2.aif.selection-gain :as selection-gain]
             [futon2.aif.precision :as precision]
             [futon2.aif.preferences :as pref]
@@ -70,6 +71,128 @@
   (delay (trace/reduce-traces habit-prior/fold-record
                               (habit-prior/initial-state)
                               :dir default-wm-trace-dir)))
+
+(def ^:dynamic *f-pi-dark?*
+  "I2(c) dark readback switch, read once when this namespace loads.
+   `FUTON_WM_FPI_DARK=1` computes and records previous-policy fit without
+   changing ranking, softmax weights, effective temperature, or selection.
+   Dynamic binding exists only for isolated tests."
+  (= "1" (System/getenv "FUTON_WM_FPI_DARK")))
+
+(defn- ranked-candidate-id [ranked-action]
+  (str "rank/" (:rank ranked-action)))
+
+(defn- candidate-identity
+  "Cross-tick identity for F_pi. rank/N is tick-local, so joining by rank
+   could score a different action. The habit-prior identity excludes volatile
+   scores and rationale while retaining action type and target."
+  [ranked-action]
+  (habit-prior/policy-key (:action ranked-action)))
+
+(defn f-pi-dark-readback
+  "Score the previous tick's predictions against `observation`, for tracing only.
+
+   Matching uses semantic action identity (type + target), never tick-local
+   rank. Results remain keyed by the previous tick's rank/N, so they join to
+   the predictions that produced them. Duplicate identities are explicit
+   absences. Missing previous data, candidate-set differences, and channel
+   mismatches are recorded rather than silently skipped. `:absent-variance
+   :floor` is intentional because untouched WM channels carry no variance
+   prediction rather than a deterministic claim."
+  [previous-trace current-ranked observation]
+  (let [previous-timestamp (:timestamp previous-trace)
+        previous-ranked (:ranked-actions previous-trace)]
+    (cond
+      (nil? previous-trace)
+      {:f-pi-by-candidate-id {:status :absent :reason :no-previous-trace-record}
+       :f-pi-provenance {:previous-trace-timestamp nil
+                         :matched-count 0 :unmatched-count 0}}
+
+      (not (seq previous-ranked))
+      {:f-pi-by-candidate-id {:status :absent :reason :previous-trace-has-no-ranked-actions}
+       :f-pi-provenance {:previous-trace-timestamp previous-timestamp
+                         :matched-count 0 :unmatched-count 0}}
+
+      (not-any? #(and (map? (:prediction-mean %))
+                      (map? (:prediction-variance %)))
+                previous-ranked)
+      {:f-pi-by-candidate-id {:status :absent
+                              :reason :previous-trace-has-no-policy-predictions}
+       :f-pi-provenance {:previous-trace-timestamp previous-timestamp
+                         :matched-count 0
+                         :unmatched-count (count previous-ranked)}}
+
+      (nil? (:effects-mode previous-trace))
+      {:f-pi-by-candidate-id {:status :absent
+                              :reason :previous-trace-has-no-effects-mode}
+       :f-pi-provenance {:previous-trace-timestamp previous-timestamp
+                         :matched-count 0
+                         :unmatched-count (count previous-ranked)}}
+
+      :else
+      (let [current-by-identity (group-by candidate-identity current-ranked)
+            previous-by-identity (group-by candidate-identity previous-ranked)
+            joined
+            (mapv
+             (fn [previous]
+               (let [candidate-id (ranked-candidate-id previous)
+                     identity (candidate-identity previous)
+                     current-matches (get current-by-identity identity)
+                     previous-matches (get previous-by-identity identity)
+                     base {:candidate-id candidate-id
+                           :candidate-identity identity}]
+                 (cond
+                   (nil? identity)
+                   (assoc base :status :absent :reason :missing-action-identity)
+
+                   (not= 1 (count previous-matches))
+                   (assoc base :status :absent :reason :ambiguous-previous-action-identity)
+
+                   (empty? current-matches)
+                   (assoc base :status :absent :reason :candidate-not-in-current-tick)
+
+                   (not= 1 (count current-matches))
+                   (assoc base :status :absent :reason :ambiguous-current-action-identity)
+
+                   (not (and (map? (:prediction-mean previous))
+                             (map? (:prediction-variance previous))))
+                   (assoc base :identity-matched? true
+                          :status :absent :reason :missing-prediction-details)
+
+                   :else
+                   (try
+                     (assoc base :identity-matched? true :status :present
+                            :value
+                            (first
+                             (policy-free-energy/f-pi-vector
+                              [{:prediction-mean (:prediction-mean previous)
+                                :prediction-variance (:prediction-variance previous)
+                                :variance-status (:prediction-variance-status previous)}]
+                              observation
+                              {:absent-variance :floor})))
+                     (catch clojure.lang.ExceptionInfo error
+                       (assoc base :identity-matched? true :status :absent
+                              :reason (or (:error (ex-data error))
+                                          :f-pi-scoring-error)
+                              :error-data (ex-data error)))))))
+             previous-ranked)
+            matched-count (count (filter :identity-matched? joined))
+            scored-count (count (filter #(= :present (:status %)) joined))]
+        {:f-pi-by-candidate-id
+         (into {} (map (juxt :candidate-id
+                             #(dissoc % :candidate-id :identity-matched?)))
+               joined)
+         :f-pi-provenance
+         {:previous-trace-timestamp previous-timestamp
+          :previous-effects-mode (:effects-mode previous-trace)
+          :join-key :action-type-and-target
+          :previous-candidate-count (count previous-ranked)
+          :current-candidate-count (count current-ranked)
+          :matched-count matched-count
+          :unmatched-count (- (count previous-ranked) matched-count)
+          :unmatched-current-count (- (count current-ranked) matched-count)
+          :scored-count scored-count
+          :scoring-absence-count (- matched-count scored-count)}}))))
 ;; ---------------------------------------------------------------------------
 
 (def ^:private home (System/getProperty "user.home"))
@@ -4737,8 +4860,12 @@
                             vec)
         ;; Losses: avoided states that are currently active
         losses (avoidance-losses mode free-energy)
+        f-pi-dark-fields (when *f-pi-dark?*
+                           (f-pi-dark-readback prev-trace-record
+                                               wm-ranked+cascades
+                                               observation))
         result0
-        (cond-> {:mode mode
+        (cond-> (cond-> {:mode mode
                  :mode-prior (get pref/mode-prior mode 0.0)
                  ;; INV (2026-05-27 staleness-gate): when the metabolic
                  ;; snapshot was stale, the :stop-the-line override is
@@ -4803,6 +4930,8 @@
                                  [])
                  :wm/route route6
                  :input-status (current-input-status)}
+                  f-pi-dark-fields
+                  (merge f-pi-dark-fields))
           habit-prior-state
           (assoc :habit-prior-state habit-prior-state)
           wm-version

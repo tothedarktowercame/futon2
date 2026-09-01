@@ -5,6 +5,7 @@
    observation vector, and data shape contracts — without requiring
    live APIs or git repos."
   (:require [babashka.http-client :as http]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.java.shell]
             [clojure.test :refer [deftest is testing]]
@@ -12,6 +13,73 @@
             [futon2.aif.free-energy :as free-energy]
             [futon2.aif.observation :as observation]
             [futon2.report.war-machine :as wm]))
+
+(def ^:private real-wm-channels
+  ;; Exact channel set from data/wm-trace/wm-trace-2026-07-04.edn.
+  [:mathematics-pct :coupling-density :support-coverage :depositing-signal
+   :loop-health :mission-health :portfolio-pct :annotation-health
+   :ticks-firing-ratio :active-repo-ratio :attack-coverage :consulting-pct
+   :sorry-count-norm :stack-pct])
+
+(defn- real-shape-f-pi-fixture []
+  (let [mean (zipmap real-wm-channels (repeat 0.5))
+        variance (zipmap real-wm-channels
+                         (concat [0.02 0.03] (repeat 12 0.0)))
+        variance-status
+        (into {} (map (fn [channel]
+                        [channel {:status :absent
+                                  :reason :deterministic-by-action-model}])
+                      (drop 2 real-wm-channels)))
+        previous-ranked
+        (mapv (fn [index]
+                {:rank (inc index)
+                 :action {:type :open-mission :target (str "M-real-" index)}
+                 :prediction-mean mean
+                 :prediction-variance variance
+                 :prediction-variance-status variance-status})
+              (range 110))
+        ;; Candidate 109 disappeared; rank/110 now denotes a different action.
+        current-ranked (assoc previous-ranked 109
+                              {:rank 110
+                               :action {:type :open-mission
+                                        :target "M-new-this-tick"}})
+        ;; Candidate 0 has one prediction-only channel. Its failure must not
+        ;; prevent the other 108 shared candidates from being scored.
+        previous-ranked (update-in previous-ranked [0 :prediction-mean]
+                                   assoc :prediction-only 0.1)
+        observation (zipmap real-wm-channels
+                            (map #(+ 0.45 (* 0.001 %)) (range 14)))]
+    {:previous {:timestamp "2026-07-04T12:00:00Z"
+                :effects-mode :target-scaled
+                :ranked-actions previous-ranked}
+     :current current-ranked
+     :observation observation}))
+
+(deftest f-pi-dark-readback-real-wm-shape-test
+  (let [{:keys [previous current observation]} (real-shape-f-pi-fixture)
+        result (wm/f-pi-dark-readback previous current observation)
+        values (:f-pi-by-candidate-id result)]
+    (is (= 110 (count values)))
+    (is (= :channel-mismatch (get-in values ["rank/1" :reason])))
+    (is (= :candidate-not-in-current-tick
+           (get-in values ["rank/110" :reason])))
+    (is (= 109 (get-in result [:f-pi-provenance :matched-count])))
+    (is (= 1 (get-in result [:f-pi-provenance :unmatched-count])))
+    (is (= 108 (get-in result [:f-pi-provenance :scored-count])))
+    (is (every? #(= :present (get-in values [(str "rank/" %) :status]))
+                (range 2 110)))
+    (is (= result (edn/read-string (pr-str result))))))
+
+(deftest f-pi-dark-readback-explicit-whole-tick-absence-test
+  (is (= :no-previous-trace-record
+         (get-in (wm/f-pi-dark-readback nil [] {})
+                 [:f-pi-by-candidate-id :reason])))
+  (is (= :previous-trace-has-no-policy-predictions
+         (get-in (wm/f-pi-dark-readback
+                  {:timestamp "old" :ranked-actions [{:rank 1 :action {:type :no-op}}]}
+                  [{:rank 1 :action {:type :no-op}}]
+                  {})
+                 [:f-pi-by-candidate-id :reason]))))
 
 (deftest avoidance-unknown-renders-distinguishably-test
   (let [diagnostics (free-energy/compute-controller-diagnostics

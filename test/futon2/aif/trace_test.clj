@@ -2,6 +2,7 @@
   "Tests for R8 per-call trace persistence."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing use-fixtures]]
             [futon2.aif.belief :as belief]
@@ -23,6 +24,20 @@
                (.delete child)))))))
 
 (use-fixtures :each with-tmpdir)
+
+(defn- previous-trace-record
+  "Load HEAD~'s trace implementation under a parallel namespace. This is the
+   cross-version control: it does not restate the current strip logic."
+  [judge-output]
+  (let [{:keys [exit out err]}
+        (shell/sh "git" "show" "HEAD~:src/futon2/aif/trace.clj")]
+    (when-not (zero? exit)
+      (throw (ex-info "could not load previous trace implementation" {:err err})))
+    (load-string
+     (str/replace-first out
+                        "(ns futon2.aif.trace"
+                        "(ns futon2.aif.trace-previous"))
+    ((ns-resolve 'futon2.aif.trace-previous 'trace-record) judge-output)))
 
 (def ^:private sample-judge-output
   "Minimal judge-style output covering the trace-record fields."
@@ -73,6 +88,26 @@
       (is (contains? r :ranked-actions))
       (is (contains? r :decision))
       (is (contains? r :mode)))))
+
+(deftest f-pi-dark-off-is-byte-identical-to-previous-implementation-test
+  (testing "the default-off record matches HEAD~ byte-for-byte apart from its clock"
+    (binding [trace/*persist-policy-trace-details?* false]
+      (let [now (trace/trace-record sample-judge-output)
+            before (previous-trace-record sample-judge-output)
+            fix-clock #(assoc % :timestamp "<same-instant>")]
+        (is (= (pr-str (fix-clock before))
+               (pr-str (fix-clock now))))))))
+
+(deftest f-pi-dark-fields-roundtrip-when-supplied-test
+  (let [details {:f-pi-by-candidate-id
+                 {"rank/1" {:status :present :value 1.25}
+                  "rank/2" {:status :absent :reason :channel-mismatch}}
+                 :f-pi-provenance
+                 {:previous-trace-timestamp "2026-07-04T00:00:00Z"
+                  :matched-count 1 :unmatched-count 1}}
+        record (trace/trace-record (merge sample-judge-output details))
+        roundtrip (edn/read-string (pr-str record))]
+    (is (= details (select-keys roundtrip (keys details))))))
 
 (deftest observation-envelope-distinguishes-absence-from-zero-test
   (testing "the trace derives a lossless envelope from the exact scored observation"
