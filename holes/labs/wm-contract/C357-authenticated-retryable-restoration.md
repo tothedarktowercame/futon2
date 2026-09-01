@@ -24,6 +24,16 @@ python3 -m unittest -v test_writer_fence_restore.py
 ```
 
 The authentication key is deliberately absent from every manifest and journal.
-The operator supplies it with `--key-file`; a missing or short key fails before
-capture, record, or restore. C319 names the canonical key path and outcome
-ledger. Existing v1 manifests are intentionally not accepted by v2.
+The operator supplies it with `--key-file`; a missing, short, non-regular,
+foreign-owned, group-readable, or world-readable key fails before capture,
+record, or restore. C319 names the canonical key path, attempt ledger, and
+outcome ledger. Existing v1 manifests are intentionally not accepted by v2.
+
+Every inverse now has a durable attempt record written before execution. A
+restored target with a missing outcome can be reconciled only when that exact
+fence-bound attempt exists; restored reality without an attempt still refuses.
+
+Residual limitation: compare-before-act narrows the validation/execution race
+and the postcondition proves final state, but neither proves event-freedom in
+the intervening instant. `restore` returns this limitation in its
+machine-readable `residual-limitation` field.

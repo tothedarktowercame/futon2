@@ -52,6 +52,7 @@ Capture the actual pre-fence manifest before changing it:
 ```sh
 RESTORE_KEY=/home/joe/.config/futon/writer-fence-restore.key
 test -r "$RESTORE_KEY"
+test "$(stat -c %a "$RESTORE_KEY")" = 600
 python3 /home/joe/code/futon2/scripts/writer_fence_restore.py capture \
   --fence-id "$FENCE_ID" \
   --key-file "$RESTORE_KEY" \
@@ -457,8 +458,10 @@ complete, draining, stopped, disabled, or inactive in the manifest.
 Joe can restore a partially parked window without this session:
 
 1. Set the recorded `FENCE_ID`; preserve its attestations, structured restore
-   manifest, JSONL journal, outcome ledger, and the locally held authentication
-   key. The fence ID supplied to `restore` must match all three records.
+   manifest, JSONL journal, outcome ledger, inverse-attempt ledger
+   (`$FENCE_ID-restore.outcomes.jsonl.attempts.jsonl`), and the locally held
+   owner-only authentication key. The fence ID supplied to `restore` must match
+   every record.
 2. Run the single `writer_fence_restore.py restore` command above. Do not edit
    the journal or select a verb manually. A missing/empty journal reports
    `NOTHING-RECORDED`; a mismatch refuses and leaves remaining writers parked.

@@ -1,6 +1,7 @@
 import copy
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 from scripts import writer_fence_restore as sut
@@ -57,7 +58,7 @@ class RestoreTest(unittest.TestCase):
         manifest = self.manifest(); states = self.parked_states()
         states[sut.RUNNING_IDS[0]] = manifest["targets"][sut.RUNNING_IDS[0]]["pre-state"]
         rows = self.rows(manifest, [("resume-coordinator", sut.RUNNING_IDS[0])])
-        with tempfile.TemporaryDirectory() as d, self.assertRaisesRegex(ValueError, "journal-action-not-observed"):
+        with tempfile.TemporaryDirectory() as d, self.assertRaisesRegex(ValueError, "restored-state-without-inverse-attempt"):
             sut.restore(manifest, rows, FakeBackend(states), Path(d) / "outcomes")
 
     def test_swapped_verb_and_contradictory_current_state_refuse(self):
@@ -77,7 +78,7 @@ class RestoreTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             outcomes = sut.restore(manifest, self.rows(manifest, specs), backend, Path(d) / "outcomes")
         self.assertEqual(list(reversed(specs)), backend.executed)
-        self.assertEqual(2, len(outcomes))
+        self.assertEqual(2, len(outcomes["outcomes"]))
         self.assertNotIn(("start-unit", "fixture.timer"), backend.executed)
 
     def test_record_appends_only_after_park_is_observed(self):
@@ -134,10 +135,49 @@ class RestoreTest(unittest.TestCase):
             manifest, [("resume-coordinator", sut.RUNNING_IDS[0])])
         backend = FakeBackend(self.parked_states())
         sut.validate_rows(manifest, rows)
-        backend.states[sut.RUNNING_IDS[0]] = manifest["targets"][sut.RUNNING_IDS[0]]["pre-state"]
+        backend.states[sut.RUNNING_IDS[0]] = coordinator("stopped", True, False, False)
         with tempfile.TemporaryDirectory() as d, self.assertRaisesRegex(ValueError, "journal-action-not-observed"):
             sut.restore(manifest, rows, backend, Path(d) / "outcomes")
         self.assertEqual([], backend.executed)
+
+    def test_key_must_be_owner_only(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "key"
+            path.write_bytes(self.KEY)
+            for mode in (0o640, 0o604, 0o644):
+                with self.subTest(mode=oct(mode)):
+                    path.chmod(mode)
+                    with self.assertRaisesRegex(ValueError, "manifest-key-not-owner-only"):
+                        sut.read_key(path)
+            path.chmod(0o600)
+            self.assertEqual(self.KEY, sut.read_key(path))
+
+    def test_successful_inverse_with_lost_append_is_reconciled(self):
+        manifest = self.manifest(); rows = self.rows(
+            manifest, [("resume-coordinator", sut.RUNNING_IDS[0])])
+        backend = FakeBackend(self.parked_states())
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "outcomes"
+            real_append = sut.append_record
+            calls = 0
+            def fail_outcome(path_arg, row):
+                nonlocal calls
+                calls += 1
+                if calls == 2:
+                    raise OSError("fixture-append-failed")
+                return real_append(path_arg, row)
+            with mock.patch.object(sut, "append_record", side_effect=fail_outcome):
+                with self.assertRaisesRegex(OSError, "fixture-append-failed"):
+                    sut.restore(manifest, rows, backend, path)
+            self.assertEqual([("resume-coordinator", sut.RUNNING_IDS[0])], backend.executed)
+            backend.executed.clear()
+            result = sut.restore(manifest, rows, backend, path)
+            self.assertEqual([], backend.executed)
+            self.assertEqual([sut.RUNNING_IDS[0]], result["reconciled-missing-outcomes"])
+            recorded = sut.load_journal(path)
+            self.assertEqual("observed-restored-outcome-record-missing",
+                             recorded[0]["reconciliation"])
+            self.assertIs(real_append, sut.append_record)
 
 
 if __name__ == "__main__": unittest.main()

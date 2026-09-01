@@ -15,6 +15,7 @@ from pathlib import Path
 import subprocess
 import sys
 import tempfile
+import stat
 
 FUTON3C = Path("/home/joe/code/futon3c")
 REGISTRY = FUTON3C / "data/apm-coordinators/registry.edn"
@@ -43,7 +44,21 @@ def authenticate(value, key):
 
 
 def read_key(path):
-    key = Path(path).read_bytes().strip()
+    path = Path(path)
+    fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+    try:
+        metadata = os.fstat(fd)
+        if not stat.S_ISREG(metadata.st_mode):
+            raise ValueError("manifest-key-not-regular-file")
+        if metadata.st_uid != os.geteuid():
+            raise ValueError("manifest-key-owner-mismatch")
+        if stat.S_IMODE(metadata.st_mode) & 0o077:
+            raise ValueError("manifest-key-not-owner-only")
+        with os.fdopen(fd, "rb") as handle:
+            fd = None
+            key = handle.read().strip()
+    finally:
+        if fd is not None: os.close(fd)
     if len(key) < 32:
         raise ValueError("manifest-key-too-short")
     return key
@@ -278,12 +293,43 @@ def load_outcomes(path, manifest, rows):
     return outcomes
 
 
+def load_attempts(path, manifest, rows):
+    attempts = load_journal(path, missing_ok=True)
+    expected_ordinals = list(range(len(rows), len(rows) - len(attempts), -1))
+    if [row.get("ordinal") for row in attempts] != expected_ordinals:
+        raise ValueError("restore-attempts-not-reverse-prefix")
+    for attempt in attempts:
+        source = rows[attempt["ordinal"] - 1]
+        if (attempt.get("schema") != SCHEMA
+                or attempt.get("fence-id") != manifest["fence-id"]
+                or attempt.get("manifest-hmac-sha256") != manifest["manifest-hmac-sha256"]
+                or attempt.get("target") != source["target"]
+                or attempt.get("action") != source["action"]
+                or attempt.get("status") != "inverse-attempt-recorded"):
+            raise ValueError("restore-attempt-invalid")
+    return attempts
+
+
+def outcome_record(manifest, row, reconciliation=None):
+    value = {"schema": SCHEMA, "fence-id": manifest["fence-id"],
+             "manifest-hmac-sha256": manifest["manifest-hmac-sha256"],
+             "ordinal": row["ordinal"], "target": row["target"],
+             "action": row["action"], "status": "restored",
+             "recorded-at": datetime.datetime.now(datetime.timezone.utc).isoformat()}
+    if reconciliation:
+        value["reconciliation"] = reconciliation
+    return value
+
+
 def restore(manifest, rows, backend, outcomes_path):
     if not rows: raise ValueError("NOTHING-RECORDED")
     validate_rows(manifest, rows)
     prior = load_outcomes(outcomes_path, manifest, rows)
+    attempts_path = str(outcomes_path) + ".attempts.jsonl"
+    attempts = load_attempts(attempts_path, manifest, rows)
     completed = {row["ordinal"] for row in prior}
-    outcomes = []
+    attempted = {row["ordinal"] for row in attempts}
+    outcomes, reconciled = [], []
     for row in reversed(rows):
         entry = manifest["targets"][row["target"]]
         if row["ordinal"] in completed:
@@ -292,21 +338,37 @@ def restore(manifest, rows, backend, outcomes_path):
             continue
         # This observation is deliberately adjacent to the inverse.  Earlier
         # validation never substitutes for compare-before-act.
-        if not parked(entry, backend.observe(row["target"], entry)):
+        current = backend.observe(row["target"], entry)
+        if restored(entry, current) and row["ordinal"] in attempted:
+            recorded = outcome_record(
+                manifest, row, "observed-restored-outcome-record-missing")
+            append_record(outcomes_path, recorded)
+            outcomes.append(recorded); reconciled.append(row["target"])
+            continue
+        if restored(entry, current):
+            raise ValueError("restored-state-without-inverse-attempt:" + row["target"])
+        if not parked(entry, current):
             raise ValueError("journal-action-not-observed:" + str(row["ordinal"]))
+        if row["ordinal"] not in attempted:
+            attempt = {"schema": SCHEMA, "fence-id": manifest["fence-id"],
+                       "manifest-hmac-sha256": manifest["manifest-hmac-sha256"],
+                       "ordinal": row["ordinal"], "target": row["target"],
+                       "action": row["action"], "status": "inverse-attempt-recorded",
+                       "recorded-at": datetime.datetime.now(datetime.timezone.utc).isoformat()}
+            append_record(attempts_path, attempt)
+            attempted.add(row["ordinal"])
         outcome = backend.execute(row["action"], row["target"])
         if not outcome.get("ok"):
             raise RuntimeError("restore-action-failed:" + row["target"])
         if not restored(entry, backend.observe(row["target"], entry)):
             raise RuntimeError("restore-postcondition-unconfirmed:" + row["target"])
-        recorded = {"schema": SCHEMA, "fence-id": manifest["fence-id"],
-                    "manifest-hmac-sha256": manifest["manifest-hmac-sha256"],
-                    "ordinal": row["ordinal"], "target": row["target"],
-                    "action": row["action"], "status": "restored",
-                    "recorded-at": datetime.datetime.now(datetime.timezone.utc).isoformat()}
+        recorded = outcome_record(manifest, row)
         append_record(outcomes_path, recorded)
         outcomes.append(recorded)
-    return outcomes
+    return {"outcomes": outcomes, "reconciled-missing-outcomes": reconciled,
+            "assurance": "final-state-observed",
+            "residual-limitation":
+            "compare-before-act-narrows-race-but-does-not-prove-event-freedom"}
 
 
 def main(argv=None):
