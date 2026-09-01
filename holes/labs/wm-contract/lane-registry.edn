@@ -4,7 +4,7 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C328-positive-pin-census, :dispatched-at "2026-09-01T01:21:39Z", :job-id "invoke-1788225692102-6403-15b6d698", :expected-by "2026-09-01T02:06:39Z"}
+   :holding :C332-positive-proof-receipt, :dispatched-at "2026-09-01T01:25:10Z", :job-id "invoke-1788225906461-6411-e544d673", :expected-by "2026-09-01T02:10:10Z"}
   {:lane :wm-verbs
    :holding :C330-audit-68, :dispatched-at "2026-09-01T01:23:05Z", :job-id "invoke-1788225777683-6406-4a20ebde", :expected-by "2026-09-01T02:08:05Z"}
   {:lane :wm-organization
