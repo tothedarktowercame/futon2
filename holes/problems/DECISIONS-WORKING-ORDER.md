@@ -77,9 +77,26 @@ into it.
 
 ## What this reduces to
 
-**Joe's pile today is 8 P-class decisions, not 24.** Nine are mine and come back
-as recommendations he can overrule. Four need me to measure something first. Two
-need a demonstration built. One is sequenced behind another.
+**Joe's pile today is 9 decisions, not 24** — seven P, plus O6 and O7, which are
+mine to recommend but his to rule on because each can act while blind. Seven are
+mine outright and come back as recommendations he can overrule. Three need me to
+measure something first. Two need a demonstration built. Two are sequenced
+behind another decision. (23 rows: O21 was a sequencing constraint, not a
+decision.)
+
+### The order we work them
+
+1. **O15** Lean cadence — brief written; O16 and O17 both follow from it.
+2. **O16** any check on a timer.
+3. **O24** lane campaign continuation — decides whether the trees can go quiet at all.
+4. **O11** Morning Brief epoch — gates the operator run.
+5. **O19** send the writer-fence parking request.
+6. **O20** who cleans the dirty trees.
+7. **O2** R16 outward-act binding — I bring one concrete proposed act.
+8. **O6** strategic-mode inference.
+9. **O7** missing sorry pressure.
+
+Items 3–6 are one sitting: they are all about getting to a certified run.
 
 Of the eight, three touch the operator run and can be taken as one sitting:
 **O11** (epoch boundary, gates the run), **O19** (send the parking request),
