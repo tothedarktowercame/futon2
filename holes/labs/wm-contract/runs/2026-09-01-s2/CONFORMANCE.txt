@@ -1,0 +1,38 @@
+run3: selection by-run-id (20 receipts, 20 run ids, dates 2026-09-01)
+run3: 20 records, 20 routes, 180 hops (9 distinct)
+run3: :controller-score on 20/20, :f-pi-by-candidate-id on 20/20 (:present 20)
+run3: ruling-unrealised          1
+run3:     R5->R6
+run3: excluded-dependency-grain  1
+run3:     R2->R7
+run3: drawn                      2
+run3:     R7->R3
+run3:     R8->R5
+run3: route-measured             5
+run3:     R12->R2
+run3:     R14->TRACE
+run3:     R20->R12
+run3:     R3->R8
+run3:     R6->R14
+run3: drawn edges never traversed: 19 of 22
+run3:     unfired R1->R4
+run3:     unfired R10->R8
+run3:     unfired R11->R16
+run3:     unfired R12->R7
+run3:     unfired R13->R14
+run3:     unfired R14->R16
+run3:     unfired R15->R13
+run3:     unfired R15->R16
+run3:     unfired R16->R2
+run3:     unfired R2->R3
+run3:     unfired R20->R7
+run3:     unfired R3->R1
+run3:     unfired R4->R5
+run3:     unfired R5->R5
+run3:     unfired R6->R11
+run3:     unfired R6->R13
+run3:     unfired R7->R14
+run3:     unfired R7->R8
+run3:     unfired R9->R16
+
+run3: CONFORMANT -- every hop is an edge of the checked topology, and no code-retired route-grain edge was traversed

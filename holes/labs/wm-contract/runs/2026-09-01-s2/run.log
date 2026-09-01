@@ -1,0 +1,1762 @@
+wm_run.sh: run lock held by claude-20-s2, sha ed2be78, 20 ticks
+--- tick 1/20 2026-09-01T18:39:18Z
+{:selector-seam "stub:first-ranked-authorized-mission",
+ :trace-path
+ "/home/joe/code/futon2/data/wm-trace/wm-trace-2026-09-01.edn",
+ :trace-before {:size 52151952, :mtime 1788282797394},
+ :trace-after {:size 53197915, :mtime 1788287997522},
+ :receipt-path
+ "/home/joe/code/futon2/holes/labs/wm-contract/tick-run-record-2026-09-01-6763baee-1f2b-4d5e-aa60-3580e77dc270.edn",
+ :tick-run-record
+ {:startedAt "2026-09-01T18:39:19.798242809Z",
+  :inputIssues 0,
+  :storeBasisCount 205654,
+  :route-verdict
+  {:hops 9,
+   :conformant 3,
+   :unmapped 6,
+   :drawn-edges-fired 3,
+   :drawn-edges-total 21,
+   :unmapped-hops
+   [{:fromNode "R20",
+     :toNode "R12",
+     :via "futon2.report.war-machine/scan-r12-apparatus",
+     :at_ "2026-09-01T18:39:36.264011426Z"}
+    {:fromNode "R12",
+     :toNode "R2",
+     :via "futon2.aif.observation/observe",
+     :at_ "2026-09-01T18:39:41.458134932Z"}
+    {:fromNode "R2",
+     :toNode "R7",
+     :via "futon2.aif.precision/update-precision-state",
+     :at_ "2026-09-01T18:39:47.889777693Z"}
+    {:fromNode "R3",
+     :toNode "R8",
+     :via "futon2.aif.free-energy/compute-variational-free-energy",
+     :at_ "2026-09-01T18:39:47.890063307Z"}
+    {:fromNode "R6",
+     :toNode "R14",
+     :via "futon2.report.war-machine/invoke-strategic-selection",
+     :at_ "2026-09-01T18:39:57.395355251Z"}
+    {:fromNode "R14",
+     :toNode "TRACE",
+     :via "futon2.aif.trace/write-trace!",
+     :at_ "2026-09-01T18:39:57.439091202Z"}]},
+  :entriesLimit 500,
+  :run/id "6763baee-1f2b-4d5e-aa60-3580e77dc270",
+  :inputsRead 5,
+  :preferenceLayers 5,
+  :entriesRead 500,
+  :route
+  [{:fromNode "R20",
+    :toNode "R12",
+    :via "futon2.report.war-machine/scan-r12-apparatus",
+    :at_ "2026-09-01T18:39:36.264011426Z"}
+   {:fromNode "R12",
+    :toNode "R2",
+    :via "futon2.aif.observation/observe",
+    :at_ "2026-09-01T18:39:41.458134932Z"}
+   {:fromNode "R2",
+    :toNode "R7",
+    :via "futon2.aif.precision/update-precision-state",
+    :at_ "2026-09-01T18:39:47.889777693Z"}
+   {:fromNode "R7",
+    :toNode "R3",
+    :via "futon2.report.war-machine/apply-arena-belief-events",
+    :at_ "2026-09-01T18:39:47.889833257Z"}
+   {:fromNode "R3",
+    :toNode "R8",
+    :via "futon2.aif.free-energy/compute-variational-free-energy",
+    :at_ "2026-09-01T18:39:47.890063307Z"}
+   {:fromNode "R8",
+    :toNode "R5",
+    :via "futon2.aif.efe/rank-actions",
+    :at_ "2026-09-01T18:39:57.127981945Z"}
+   {:fromNode "R5",
+    :toNode "R6",
+    :via "futon2.aif.policy/select-action",
+    :at_ "2026-09-01T18:39:57.395120001Z"}
+   {:fromNode "R6",
+    :toNode "R14",
+    :via "futon2.report.war-machine/invoke-strategic-selection",
+    :at_ "2026-09-01T18:39:57.395355251Z"}
+   {:fromNode "R14",
+    :toNode "TRACE",
+    :via "futon2.aif.trace/write-trace!",
+    :at_ "2026-09-01T18:39:57.439091202Z"}],
+  :traceWritten true,
+  :selectorSeam "stub:first-ranked-authorized-mission",
+  :storeBasisMaxAt "2026-09-01T18:38:53.237540178Z"}}
+--- tick 2/20 2026-09-01T18:40:41Z
+{:selector-seam "stub:first-ranked-authorized-mission",
+ :trace-path
+ "/home/joe/code/futon2/data/wm-trace/wm-trace-2026-09-01.edn",
+ :trace-before {:size 53197915, :mtime 1788287997522},
+ :trace-after {:size 54243960, :mtime 1788288077725},
+ :receipt-path
+ "/home/joe/code/futon2/holes/labs/wm-contract/tick-run-record-2026-09-01-38743801-e7b1-48cd-b6bd-ab70fbab1471.edn",
+ :tick-run-record
+ {:startedAt "2026-09-01T18:40:43.380242171Z",
+  :inputIssues 0,
+  :storeBasisCount 205665,
+  :route-verdict
+  {:hops 9,
+   :conformant 3,
+   :unmapped 6,
+   :drawn-edges-fired 3,
+   :drawn-edges-total 21,
+   :unmapped-hops
+   [{:fromNode "R20",
+     :toNode "R12",
+     :via "futon2.report.war-machine/scan-r12-apparatus",
+     :at_ "2026-09-01T18:40:57.843182330Z"}
+    {:fromNode "R12",
+     :toNode "R2",
+     :via "futon2.aif.observation/observe",
+     :at_ "2026-09-01T18:41:02.505240872Z"}
+    {:fromNode "R2",
+     :toNode "R7",
+     :via "futon2.aif.precision/update-precision-state",
+     :at_ "2026-09-01T18:41:08.501592115Z"}
+    {:fromNode "R3",
+     :toNode "R8",
+     :via "futon2.aif.free-energy/compute-variational-free-energy",
+     :at_ "2026-09-01T18:41:08.502411308Z"}
+    {:fromNode "R6",
+     :toNode "R14",
+     :via "futon2.report.war-machine/invoke-strategic-selection",
+     :at_ "2026-09-01T18:41:17.643592682Z"}
+    {:fromNode "R14",
+     :toNode "TRACE",
+     :via "futon2.aif.trace/write-trace!",
+     :at_ "2026-09-01T18:41:17.671420993Z"}]},
+  :entriesLimit 500,
+  :run/id "38743801-e7b1-48cd-b6bd-ab70fbab1471",
+  :inputsRead 5,
+  :preferenceLayers 5,
+  :entriesRead 500,
+  :route
+  [{:fromNode "R20",
+    :toNode "R12",
+    :via "futon2.report.war-machine/scan-r12-apparatus",
+    :at_ "2026-09-01T18:40:57.843182330Z"}
+   {:fromNode "R12",
+    :toNode "R2",
+    :via "futon2.aif.observation/observe",
+    :at_ "2026-09-01T18:41:02.505240872Z"}
+   {:fromNode "R2",
+    :toNode "R7",
+    :via "futon2.aif.precision/update-precision-state",
+    :at_ "2026-09-01T18:41:08.501592115Z"}
+   {:fromNode "R7",
+    :toNode "R3",
+    :via "futon2.report.war-machine/apply-arena-belief-events",
+    :at_ "2026-09-01T18:41:08.501714614Z"}
+   {:fromNode "R3",
+    :toNode "R8",
+    :via "futon2.aif.free-energy/compute-variational-free-energy",
+    :at_ "2026-09-01T18:41:08.502411308Z"}
+   {:fromNode "R8",
+    :toNode "R5",
+    :via "futon2.aif.efe/rank-actions",
+    :at_ "2026-09-01T18:41:17.431309065Z"}
+   {:fromNode "R5",
+    :toNode "R6",
+    :via "futon2.aif.policy/select-action",
+    :at_ "2026-09-01T18:41:17.643404510Z"}
+   {:fromNode "R6",
+    :toNode "R14",
+    :via "futon2.report.war-machine/invoke-strategic-selection",
+    :at_ "2026-09-01T18:41:17.643592682Z"}
+   {:fromNode "R14",
+    :toNode "TRACE",
+    :via "futon2.aif.trace/write-trace!",
+    :at_ "2026-09-01T18:41:17.671420993Z"}],
+  :traceWritten true,
+  :selectorSeam "stub:first-ranked-authorized-mission",
+  :storeBasisMaxAt "2026-09-01T18:40:47.818479050Z"}}
+--- tick 3/20 2026-09-01T18:42:02Z
+{:selector-seam "stub:first-ranked-authorized-mission",
+ :trace-path
+ "/home/joe/code/futon2/data/wm-trace/wm-trace-2026-09-01.edn",
+ :trace-before {:size 54243960, :mtime 1788288077725},
+ :trace-after {:size 55290775, :mtime 1788288164363},
+ :receipt-path
+ "/home/joe/code/futon2/holes/labs/wm-contract/tick-run-record-2026-09-01-aa70c2cc-992f-4b2b-b36d-7af33675b17d.edn",
+ :tick-run-record
+ {:startedAt "2026-09-01T18:42:04.425730350Z",
+  :inputIssues 0,
+  :storeBasisCount 205672,
+  :route-verdict
+  {:hops 9,
+   :conformant 3,
+   :unmapped 6,
+   :drawn-edges-fired 3,
+   :drawn-edges-total 21,
+   :unmapped-hops
+   [{:fromNode "R20",
+     :toNode "R12",
+     :via "futon2.report.war-machine/scan-r12-apparatus",
+     :at_ "2026-09-01T18:42:28.700797426Z"}
+    {:fromNode "R12",
+     :toNode "R2",
+     :via "futon2.aif.observation/observe",
+     :at_ "2026-09-01T18:42:33.422634909Z"}
+    {:fromNode "R2",
+     :toNode "R7",
+     :via "futon2.aif.precision/update-precision-state",
+     :at_ "2026-09-01T18:42:38.329645254Z"}
+    {:fromNode "R3",
+     :toNode "R8",
+     :via "futon2.aif.free-energy/compute-variational-free-energy",
+     :at_ "2026-09-01T18:42:38.329899711Z"}
+    {:fromNode "R6",
+     :toNode "R14",
+     :via "futon2.report.war-machine/invoke-strategic-selection",
+     :at_ "2026-09-01T18:42:44.273523516Z"}
+    {:fromNode "R14",
+     :toNode "TRACE",
+     :via "futon2.aif.trace/write-trace!",
+     :at_ "2026-09-01T18:42:44.306401848Z"}]},
+  :entriesLimit 500,
+  :run/id "aa70c2cc-992f-4b2b-b36d-7af33675b17d",
+  :inputsRead 5,
+  :preferenceLayers 5,
+  :entriesRead 500,
+  :route
+  [{:fromNode "R20",
+    :toNode "R12",
+    :via "futon2.report.war-machine/scan-r12-apparatus",
+    :at_ "2026-09-01T18:42:28.700797426Z"}
+   {:fromNode "R12",
+    :toNode "R2",
+    :via "futon2.aif.observation/observe",
+    :at_ "2026-09-01T18:42:33.422634909Z"}
+   {:fromNode "R2",
+    :toNode "R7",
+    :via "futon2.aif.precision/update-precision-state",
+    :at_ "2026-09-01T18:42:38.329645254Z"}
+   {:fromNode "R7",
+    :toNode "R3",
+    :via "futon2.report.war-machine/apply-arena-belief-events",
+    :at_ "2026-09-01T18:42:38.329688796Z"}
+   {:fromNode "R3",
+    :toNode "R8",
+    :via "futon2.aif.free-energy/compute-variational-free-energy",
+    :at_ "2026-09-01T18:42:38.329899711Z"}
+   {:fromNode "R8",
+    :toNode "R5",
+    :via "futon2.aif.efe/rank-actions",
+    :at_ "2026-09-01T18:42:44.011543421Z"}
+   {:fromNode "R5",
+    :toNode "R6",
+    :via "futon2.aif.policy/select-action",
+    :at_ "2026-09-01T18:42:44.273290429Z"}
+   {:fromNode "R6",
+    :toNode "R14",
+    :via "futon2.report.war-machine/invoke-strategic-selection",
+    :at_ "2026-09-01T18:42:44.273523516Z"}
+   {:fromNode "R14",
+    :toNode "TRACE",
+    :via "futon2.aif.trace/write-trace!",
+    :at_ "2026-09-01T18:42:44.306401848Z"}],
+  :traceWritten true,
+  :selectorSeam "stub:first-ranked-authorized-mission",
+  :storeBasisMaxAt "2026-09-01T18:42:11.926190886Z"}}
+--- tick 4/20 2026-09-01T18:43:33Z
+{:selector-seam "stub:first-ranked-authorized-mission",
+ :trace-path
+ "/home/joe/code/futon2/data/wm-trace/wm-trace-2026-09-01.edn",
+ :trace-before {:size 55290775, :mtime 1788288164363},
+ :trace-after {:size 56337979, :mtime 1788288242162},
+ :receipt-path
+ "/home/joe/code/futon2/holes/labs/wm-contract/tick-run-record-2026-09-01-f135821a-c51c-4b21-be6e-d340ff562305.edn",
+ :tick-run-record
+ {:startedAt "2026-09-01T18:43:35.545994880Z",
+  :inputIssues 0,
+  :storeBasisCount 205683,
+  :route-verdict
+  {:hops 9,
+   :conformant 3,
+   :unmapped 6,
+   :drawn-edges-fired 3,
+   :drawn-edges-total 21,
+   :unmapped-hops
+   [{:fromNode "R20",
+     :toNode "R12",
+     :via "futon2.report.war-machine/scan-r12-apparatus",
+     :at_ "2026-09-01T18:43:47.554700469Z"}
+    {:fromNode "R12",
+     :toNode "R2",
+     :via "futon2.aif.observation/observe",
+     :at_ "2026-09-01T18:43:51.775062850Z"}
+    {:fromNode "R2",
+     :toNode "R7",
+     :via "futon2.aif.precision/update-precision-state",
+     :at_ "2026-09-01T18:43:56.527226483Z"}
+    {:fromNode "R3",
+     :toNode "R8",
+     :via "futon2.aif.free-energy/compute-variational-free-energy",
+     :at_ "2026-09-01T18:43:56.527612395Z"}
+    {:fromNode "R6",
+     :toNode "R14",
+     :via "futon2.report.war-machine/invoke-strategic-selection",
+     :at_ "2026-09-01T18:44:02.083669696Z"}
+    {:fromNode "R14",
+     :toNode "TRACE",
+     :via "futon2.aif.trace/write-trace!",
+     :at_ "2026-09-01T18:44:02.113338269Z"}]},
+  :entriesLimit 500,
+  :run/id "f135821a-c51c-4b21-be6e-d340ff562305",
+  :inputsRead 5,
+  :preferenceLayers 5,
+  :entriesRead 500,
+  :route
+  [{:fromNode "R20",
+    :toNode "R12",
+    :via "futon2.report.war-machine/scan-r12-apparatus",
+    :at_ "2026-09-01T18:43:47.554700469Z"}
+   {:fromNode "R12",
+    :toNode "R2",
+    :via "futon2.aif.observation/observe",
+    :at_ "2026-09-01T18:43:51.775062850Z"}
+   {:fromNode "R2",
+    :toNode "R7",
+    :via "futon2.aif.precision/update-precision-state",
+    :at_ "2026-09-01T18:43:56.527226483Z"}
+   {:fromNode "R7",
+    :toNode "R3",
+    :via "futon2.report.war-machine/apply-arena-belief-events",
+    :at_ "2026-09-01T18:43:56.527268822Z"}
+   {:fromNode "R3",
+    :toNode "R8",
+    :via "futon2.aif.free-energy/compute-variational-free-energy",
+    :at_ "2026-09-01T18:43:56.527612395Z"}
+   {:fromNode "R8",
+    :toNode "R5",
+    :via "futon2.aif.efe/rank-actions",
+    :at_ "2026-09-01T18:44:01.857368376Z"}
+   {:fromNode "R5",
+    :toNode "R6",
+    :via "futon2.aif.policy/select-action",
+    :at_ "2026-09-01T18:44:02.083471365Z"}
+   {:fromNode "R6",
+    :toNode "R14",
+    :via "futon2.report.war-machine/invoke-strategic-selection",
+    :at_ "2026-09-01T18:44:02.083669696Z"}
+   {:fromNode "R14",
+    :toNode "TRACE",
+    :via "futon2.aif.trace/write-trace!",
+    :at_ "2026-09-01T18:44:02.113338269Z"}],
+  :traceWritten true,
+  :selectorSeam "stub:first-ranked-authorized-mission",
+  :storeBasisMaxAt "2026-09-01T18:43:17.089987645Z"}}
+--- tick 5/20 2026-09-01T18:44:52Z
+{:selector-seam "stub:first-ranked-authorized-mission",
+ :trace-path
+ "/home/joe/code/futon2/data/wm-trace/wm-trace-2026-09-01.edn",
+ :trace-before {:size 56337979, :mtime 1788288242162},
+ :trace-after {:size 57384764, :mtime 1788288321749},
+ :receipt-path
+ "/home/joe/code/futon2/holes/labs/wm-contract/tick-run-record-2026-09-01-cc0a0703-e9a5-4ee0-9a8e-b098a6a2b929.edn",
+ :tick-run-record
+ {:startedAt "2026-09-01T18:44:54.075733183Z",
+  :inputIssues 0,
+  :storeBasisCount 205693,
+  :route-verdict
+  {:hops 9,
+   :conformant 3,
+   :unmapped 6,
+   :drawn-edges-fired 3,
+   :drawn-edges-total 21,
+   :unmapped-hops
+   [{:fromNode "R20",
+     :toNode "R12",
+     :via "futon2.report.war-machine/scan-r12-apparatus",
+     :at_ "2026-09-01T18:45:05.860370359Z"}
+    {:fromNode "R12",
+     :toNode "R2",
+     :via "futon2.aif.observation/observe",
+     :at_ "2026-09-01T18:45:10.193000590Z"}
+    {:fromNode "R2",
+     :toNode "R7",
+     :via "futon2.aif.precision/update-precision-state",
+     :at_ "2026-09-01T18:45:15.094934666Z"}
+    {:fromNode "R3",
+     :toNode "R8",
+     :via "futon2.aif.free-energy/compute-variational-free-energy",
+     :at_ "2026-09-01T18:45:15.095230750Z"}
+    {:fromNode "R6",
+     :toNode "R14",
+     :via "futon2.report.war-machine/invoke-strategic-selection",
+     :at_ "2026-09-01T18:45:21.664810395Z"}
+    {:fromNode "R14",
+     :toNode "TRACE",
+     :via "futon2.aif.trace/write-trace!",
+     :at_ "2026-09-01T18:45:21.696917510Z"}]},
+  :entriesLimit 500,
+  :run/id "cc0a0703-e9a5-4ee0-9a8e-b098a6a2b929",
+  :inputsRead 5,
+  :preferenceLayers 5,
+  :entriesRead 500,
+  :route
+  [{:fromNode "R20",
+    :toNode "R12",
+    :via "futon2.report.war-machine/scan-r12-apparatus",
+    :at_ "2026-09-01T18:45:05.860370359Z"}
+   {:fromNode "R12",
+    :toNode "R2",
+    :via "futon2.aif.observation/observe",
+    :at_ "2026-09-01T18:45:10.193000590Z"}
+   {:fromNode "R2",
+    :toNode "R7",
+    :via "futon2.aif.precision/update-precision-state",
+    :at_ "2026-09-01T18:45:15.094934666Z"}
+   {:fromNode "R7",
+    :toNode "R3",
+    :via "futon2.report.war-machine/apply-arena-belief-events",
+    :at_ "2026-09-01T18:45:15.094984299Z"}
+   {:fromNode "R3",
+    :toNode "R8",
+    :via "futon2.aif.free-energy/compute-variational-free-energy",
+    :at_ "2026-09-01T18:45:15.095230750Z"}
+   {:fromNode "R8",
+    :toNode "R5",
+    :via "futon2.aif.efe/rank-actions",
+    :at_ "2026-09-01T18:45:21.441712129Z"}
+   {:fromNode "R5",
+    :toNode "R6",
+    :via "futon2.aif.policy/select-action",
+    :at_ "2026-09-01T18:45:21.664657919Z"}
+   {:fromNode "R6",
+    :toNode "R14",
+    :via "futon2.report.war-machine/invoke-strategic-selection",
+    :at_ "2026-09-01T18:45:21.664810395Z"}
+   {:fromNode "R14",
+    :toNode "TRACE",
+    :via "futon2.aif.trace/write-trace!",
+    :at_ "2026-09-01T18:45:21.696917510Z"}],
+  :traceWritten true,
+  :selectorSeam "stub:first-ranked-authorized-mission",
+  :storeBasisMaxAt "2026-09-01T18:44:53.829258179Z"}}
+--- tick 6/20 2026-09-01T18:46:10Z
+{:selector-seam "stub:first-ranked-authorized-mission",
+ :trace-path
+ "/home/joe/code/futon2/data/wm-trace/wm-trace-2026-09-01.edn",
+ :trace-before {:size 57384764, :mtime 1788288321749},
+ :trace-after {:size 58431347, :mtime 1788288402244},
+ :receipt-path
+ "/home/joe/code/futon2/holes/labs/wm-contract/tick-run-record-2026-09-01-1772dc01-bdd4-4ffb-8433-a20d828e61aa.edn",
+ :tick-run-record
+ {:startedAt "2026-09-01T18:46:12.401170608Z",
+  :inputIssues 0,
+  :storeBasisCount 205697,
+  :route-verdict
+  {:hops 9,
+   :conformant 3,
+   :unmapped 6,
+   :drawn-edges-fired 3,
+   :drawn-edges-total 21,
+   :unmapped-hops
+   [{:fromNode "R20",
+     :toNode "R12",
+     :via "futon2.report.war-machine/scan-r12-apparatus",
+     :at_ "2026-09-01T18:46:24.904458010Z"}
+    {:fromNode "R12",
+     :toNode "R2",
+     :via "futon2.aif.observation/observe",
+     :at_ "2026-09-01T18:46:29.524932069Z"}
+    {:fromNode "R2",
+     :toNode "R7",
+     :via "futon2.aif.precision/update-precision-state",
+     :at_ "2026-09-01T18:46:34.892770885Z"}
+    {:fromNode "R3",
+     :toNode "R8",
+     :via "futon2.aif.free-energy/compute-variational-free-energy",
+     :at_ "2026-09-01T18:46:34.893075875Z"}
+    {:fromNode "R6",
+     :toNode "R14",
+     :via "futon2.report.war-machine/invoke-strategic-selection",
+     :at_ "2026-09-01T18:46:42.159954261Z"}
+    {:fromNode "R14",
+     :toNode "TRACE",
+     :via "futon2.aif.trace/write-trace!",
+     :at_ "2026-09-01T18:46:42.189789553Z"}]},
+  :entriesLimit 500,
+  :run/id "1772dc01-bdd4-4ffb-8433-a20d828e61aa",
+  :inputsRead 5,
+  :preferenceLayers 5,
+  :entriesRead 500,
+  :route
+  [{:fromNode "R20",
+    :toNode "R12",
+    :via "futon2.report.war-machine/scan-r12-apparatus",
+    :at_ "2026-09-01T18:46:24.904458010Z"}
+   {:fromNode "R12",
+    :toNode "R2",
+    :via "futon2.aif.observation/observe",
+    :at_ "2026-09-01T18:46:29.524932069Z"}
+   {:fromNode "R2",
+    :toNode "R7",
+    :via "futon2.aif.precision/update-precision-state",
+    :at_ "2026-09-01T18:46:34.892770885Z"}
+   {:fromNode "R7",
+    :toNode "R3",
+    :via "futon2.report.war-machine/apply-arena-belief-events",
+    :at_ "2026-09-01T18:46:34.892822361Z"}
+   {:fromNode "R3",
+    :toNode "R8",
+    :via "futon2.aif.free-energy/compute-variational-free-energy",
+    :at_ "2026-09-01T18:46:34.893075875Z"}
+   {:fromNode "R8",
+    :toNode "R5",
+    :via "futon2.aif.efe/rank-actions",
+    :at_ "2026-09-01T18:46:41.938785375Z"}
+   {:fromNode "R5",
+    :toNode "R6",
+    :via "futon2.aif.policy/select-action",
+    :at_ "2026-09-01T18:46:42.159795604Z"}
+   {:fromNode "R6",
+    :toNode "R14",
+    :via "futon2.report.war-machine/invoke-strategic-selection",
+    :at_ "2026-09-01T18:46:42.159954261Z"}
+   {:fromNode "R14",
+    :toNode "TRACE",
+    :via "futon2.aif.trace/write-trace!",
+    :at_ "2026-09-01T18:46:42.189789553Z"}],
+  :traceWritten true,
+  :selectorSeam "stub:first-ranked-authorized-mission",
+  :storeBasisMaxAt "2026-09-01T18:45:21.767207062Z"}}
+--- tick 7/20 2026-09-01T18:47:29Z
+{:selector-seam "stub:first-ranked-authorized-mission",
+ :trace-path
+ "/home/joe/code/futon2/data/wm-trace/wm-trace-2026-09-01.edn",
+ :trace-before {:size 58431347, :mtime 1788288402244},
+ :trace-after {:size 59477461, :mtime 1788288486148},
+ :receipt-path
+ "/home/joe/code/futon2/holes/labs/wm-contract/tick-run-record-2026-09-01-1cfa12ba-0108-4cea-b75f-7f72bf6b0242.edn",
+ :tick-run-record
+ {:startedAt "2026-09-01T18:47:31.847710702Z",
+  :inputIssues 0,
+  :storeBasisCount 205708,
+  :route-verdict
+  {:hops 9,
+   :conformant 3,
+   :unmapped 6,
+   :drawn-edges-fired 3,
+   :drawn-edges-total 21,
+   :unmapped-hops
+   [{:fromNode "R20",
+     :toNode "R12",
+     :via "futon2.report.war-machine/scan-r12-apparatus",
+     :at_ "2026-09-01T18:47:48.629893016Z"}
+    {:fromNode "R12",
+     :toNode "R2",
+     :via "futon2.aif.observation/observe",
+     :at_ "2026-09-01T18:47:53.748920774Z"}
+    {:fromNode "R2",
+     :toNode "R7",
+     :via "futon2.aif.precision/update-precision-state",
+     :at_ "2026-09-01T18:47:59.580032259Z"}
+    {:fromNode "R3",
+     :toNode "R8",
+     :via "futon2.aif.free-energy/compute-variational-free-energy",
+     :at_ "2026-09-01T18:47:59.580519230Z"}
+    {:fromNode "R6",
+     :toNode "R14",
+     :via "futon2.report.war-machine/invoke-strategic-selection",
+     :at_ "2026-09-01T18:48:06.069456215Z"}
+    {:fromNode "R14",
+     :toNode "TRACE",
+     :via "futon2.aif.trace/write-trace!",
+     :at_ "2026-09-01T18:48:06.100558998Z"}]},
+  :entriesLimit 500,
+  :run/id "1cfa12ba-0108-4cea-b75f-7f72bf6b0242",
+  :inputsRead 5,
+  :preferenceLayers 5,
+  :entriesRead 500,
+  :route
+  [{:fromNode "R20",
+    :toNode "R12",
+    :via "futon2.report.war-machine/scan-r12-apparatus",
+    :at_ "2026-09-01T18:47:48.629893016Z"}
+   {:fromNode "R12",
+    :toNode "R2",
+    :via "futon2.aif.observation/observe",
+    :at_ "2026-09-01T18:47:53.748920774Z"}
+   {:fromNode "R2",
+    :toNode "R7",
+    :via "futon2.aif.precision/update-precision-state",
+    :at_ "2026-09-01T18:47:59.580032259Z"}
+   {:fromNode "R7",
+    :toNode "R3",
+    :via "futon2.report.war-machine/apply-arena-belief-events",
+    :at_ "2026-09-01T18:47:59.580089125Z"}
+   {:fromNode "R3",
+    :toNode "R8",
+    :via "futon2.aif.free-energy/compute-variational-free-energy",
+    :at_ "2026-09-01T18:47:59.580519230Z"}
+   {:fromNode "R8",
+    :toNode "R5",
+    :via "futon2.aif.efe/rank-actions",
+    :at_ "2026-09-01T18:48:05.853043328Z"}
+   {:fromNode "R5",
+    :toNode "R6",
+    :via "futon2.aif.policy/select-action",
+    :at_ "2026-09-01T18:48:06.069294162Z"}
+   {:fromNode "R6",
+    :toNode "R14",
+    :via "futon2.report.war-machine/invoke-strategic-selection",
+    :at_ "2026-09-01T18:48:06.069456215Z"}
+   {:fromNode "R14",
+    :toNode "TRACE",
+    :via "futon2.aif.trace/write-trace!",
+    :at_ "2026-09-01T18:48:06.100558998Z"}],
+  :traceWritten true,
+  :selectorSeam "stub:first-ranked-authorized-mission",
+  :storeBasisMaxAt "2026-09-01T18:47:38.082016945Z"}}
+--- tick 8/20 2026-09-01T18:48:54Z
+{:selector-seam "stub:first-ranked-authorized-mission",
+ :trace-path
+ "/home/joe/code/futon2/data/wm-trace/wm-trace-2026-09-01.edn",
+ :trace-before {:size 59477461, :mtime 1788288486148},
+ :trace-after {:size 60523019, :mtime 1788288569055},
+ :receipt-path
+ "/home/joe/code/futon2/holes/labs/wm-contract/tick-run-record-2026-09-01-85125689-18fc-4894-9193-8b3ca9eb2cdd.edn",
+ :tick-run-record
+ {:startedAt "2026-09-01T18:48:56.100562722Z",
+  :inputIssues 0,
+  :storeBasisCount 205719,
+  :route-verdict
+  {:hops 9,
+   :conformant 3,
+   :unmapped 6,
+   :drawn-edges-fired 3,
+   :drawn-edges-total 21,
+   :unmapped-hops
+   [{:fromNode "R20",
+     :toNode "R12",
+     :via "futon2.report.war-machine/scan-r12-apparatus",
+     :at_ "2026-09-01T18:49:10.499724404Z"}
+    {:fromNode "R12",
+     :toNode "R2",
+     :via "futon2.aif.observation/observe",
+     :at_ "2026-09-01T18:49:15.327699208Z"}
+    {:fromNode "R2",
+     :toNode "R7",
+     :via "futon2.aif.precision/update-precision-state",
+     :at_ "2026-09-01T18:49:20.547923254Z"}
+    {:fromNode "R3",
+     :toNode "R8",
+     :via "futon2.aif.free-energy/compute-variational-free-energy",
+     :at_ "2026-09-01T18:49:20.548434801Z"}
+    {:fromNode "R6",
+     :toNode "R14",
+     :via "futon2.report.war-machine/invoke-strategic-selection",
+     :at_ "2026-09-01T18:49:28.958825056Z"}
+    {:fromNode "R14",
+     :toNode "TRACE",
+     :via "futon2.aif.trace/write-trace!",
+     :at_ "2026-09-01T18:49:28.998663188Z"}]},
+  :entriesLimit 500,
+  :run/id "85125689-18fc-4894-9193-8b3ca9eb2cdd",
+  :inputsRead 5,
+  :preferenceLayers 5,
+  :entriesRead 500,
+  :route
+  [{:fromNode "R20",
+    :toNode "R12",
+    :via "futon2.report.war-machine/scan-r12-apparatus",
+    :at_ "2026-09-01T18:49:10.499724404Z"}
+   {:fromNode "R12",
+    :toNode "R2",
+    :via "futon2.aif.observation/observe",
+    :at_ "2026-09-01T18:49:15.327699208Z"}
+   {:fromNode "R2",
+    :toNode "R7",
+    :via "futon2.aif.precision/update-precision-state",
+    :at_ "2026-09-01T18:49:20.547923254Z"}
+   {:fromNode "R7",
+    :toNode "R3",
+    :via "futon2.report.war-machine/apply-arena-belief-events",
+    :at_ "2026-09-01T18:49:20.547990099Z"}
+   {:fromNode "R3",
+    :toNode "R8",
+    :via "futon2.aif.free-energy/compute-variational-free-energy",
+    :at_ "2026-09-01T18:49:20.548434801Z"}
+   {:fromNode "R8",
+    :toNode "R5",
+    :via "futon2.aif.efe/rank-actions",
+    :at_ "2026-09-01T18:49:28.708730987Z"}
+   {:fromNode "R5",
+    :toNode "R6",
+    :via "futon2.aif.policy/select-action",
+    :at_ "2026-09-01T18:49:28.958542337Z"}
+   {:fromNode "R6",
+    :toNode "R14",
+    :via "futon2.report.war-machine/invoke-strategic-selection",
+    :at_ "2026-09-01T18:49:28.958825056Z"}
+   {:fromNode "R14",
+    :toNode "TRACE",
+    :via "futon2.aif.trace/write-trace!",
+    :at_ "2026-09-01T18:49:28.998663188Z"}],
+  :traceWritten true,
+  :selectorSeam "stub:first-ranked-authorized-mission",
+  :storeBasisMaxAt "2026-09-01T18:48:54.755113809Z"}}
+--- tick 9/20 2026-09-01T18:50:15Z
+{:selector-seam "stub:first-ranked-authorized-mission",
+ :trace-path
+ "/home/joe/code/futon2/data/wm-trace/wm-trace-2026-09-01.edn",
+ :trace-before {:size 60523019, :mtime 1788288569055},
+ :trace-after {:size 61568687, :mtime 1788288649772},
+ :receipt-path
+ "/home/joe/code/futon2/holes/labs/wm-contract/tick-run-record-2026-09-01-e2ba54bd-a4eb-4583-a54a-99d44f1d9fb8.edn",
+ :tick-run-record
+ {:startedAt "2026-09-01T18:50:17.411680287Z",
+  :inputIssues 0,
+  :storeBasisCount 205726,
+  :route-verdict
+  {:hops 9,
+   :conformant 3,
+   :unmapped 6,
+   :drawn-edges-fired 3,
+   :drawn-edges-total 21,
+   :unmapped-hops
+   [{:fromNode "R20",
+     :toNode "R12",
+     :via "futon2.report.war-machine/scan-r12-apparatus",
+     :at_ "2026-09-01T18:50:33.907163072Z"}
+    {:fromNode "R12",
+     :toNode "R2",
+     :via "futon2.aif.observation/observe",
+     :at_ "2026-09-01T18:50:38.246465101Z"}
+    {:fromNode "R2",
+     :toNode "R7",
+     :via "futon2.aif.precision/update-precision-state",
+     :at_ "2026-09-01T18:50:43.501349321Z"}
+    {:fromNode "R3",
+     :toNode "R8",
+     :via "futon2.aif.free-energy/compute-variational-free-energy",
+     :at_ "2026-09-01T18:50:43.501674018Z"}
+    {:fromNode "R6",
+     :toNode "R14",
+     :via "futon2.report.war-machine/invoke-strategic-selection",
+     :at_ "2026-09-01T18:50:49.694824590Z"}
+    {:fromNode "R14",
+     :toNode "TRACE",
+     :via "futon2.aif.trace/write-trace!",
+     :at_ "2026-09-01T18:50:49.720341728Z"}]},
+  :entriesLimit 500,
+  :run/id "e2ba54bd-a4eb-4583-a54a-99d44f1d9fb8",
+  :inputsRead 5,
+  :preferenceLayers 5,
+  :entriesRead 500,
+  :route
+  [{:fromNode "R20",
+    :toNode "R12",
+    :via "futon2.report.war-machine/scan-r12-apparatus",
+    :at_ "2026-09-01T18:50:33.907163072Z"}
+   {:fromNode "R12",
+    :toNode "R2",
+    :via "futon2.aif.observation/observe",
+    :at_ "2026-09-01T18:50:38.246465101Z"}
+   {:fromNode "R2",
+    :toNode "R7",
+    :via "futon2.aif.precision/update-precision-state",
+    :at_ "2026-09-01T18:50:43.501349321Z"}
+   {:fromNode "R7",
+    :toNode "R3",
+    :via "futon2.report.war-machine/apply-arena-belief-events",
+    :at_ "2026-09-01T18:50:43.501406457Z"}
+   {:fromNode "R3",
+    :toNode "R8",
+    :via "futon2.aif.free-energy/compute-variational-free-energy",
+    :at_ "2026-09-01T18:50:43.501674018Z"}
+   {:fromNode "R8",
+    :toNode "R5",
+    :via "futon2.aif.efe/rank-actions",
+    :at_ "2026-09-01T18:50:49.483084099Z"}
+   {:fromNode "R5",
+    :toNode "R6",
+    :via "futon2.aif.policy/select-action",
+    :at_ "2026-09-01T18:50:49.694671063Z"}
+   {:fromNode "R6",
+    :toNode "R14",
+    :via "futon2.report.war-machine/invoke-strategic-selection",
+    :at_ "2026-09-01T18:50:49.694824590Z"}
+   {:fromNode "R14",
+    :toNode "TRACE",
+    :via "futon2.aif.trace/write-trace!",
+    :at_ "2026-09-01T18:50:49.720341728Z"}],
+  :traceWritten true,
+  :selectorSeam "stub:first-ranked-authorized-mission",
+  :storeBasisMaxAt "2026-09-01T18:50:20.789986288Z"}}
+--- tick 10/20 2026-09-01T18:51:38Z
+{:selector-seam "stub:first-ranked-authorized-mission",
+ :trace-path
+ "/home/joe/code/futon2/data/wm-trace/wm-trace-2026-09-01.edn",
+ :trace-before {:size 61568687, :mtime 1788288649772},
+ :trace-after {:size 62613552, :mtime 1788288726709},
+ :receipt-path
+ "/home/joe/code/futon2/holes/labs/wm-contract/tick-run-record-2026-09-01-0d9b3025-ce3c-43f3-ab91-7d88f1509daf.edn",
+ :tick-run-record
+ {:startedAt "2026-09-01T18:51:40.320376556Z",
+  :inputIssues 0,
+  :storeBasisCount 205730,
+  :route-verdict
+  {:hops 9,
+   :conformant 3,
+   :unmapped 6,
+   :drawn-edges-fired 3,
+   :drawn-edges-total 21,
+   :unmapped-hops
+   [{:fromNode "R20",
+     :toNode "R12",
+     :via "futon2.report.war-machine/scan-r12-apparatus",
+     :at_ "2026-09-01T18:51:52.921300277Z"}
+    {:fromNode "R12",
+     :toNode "R2",
+     :via "futon2.aif.observation/observe",
+     :at_ "2026-09-01T18:51:57.606373967Z"}
+    {:fromNode "R2",
+     :toNode "R7",
+     :via "futon2.aif.precision/update-precision-state",
+     :at_ "2026-09-01T18:52:02.759609680Z"}
+    {:fromNode "R3",
+     :toNode "R8",
+     :via "futon2.aif.free-energy/compute-variational-free-energy",
+     :at_ "2026-09-01T18:52:02.759896197Z"}
+    {:fromNode "R6",
+     :toNode "R14",
+     :via "futon2.report.war-machine/invoke-strategic-selection",
+     :at_ "2026-09-01T18:52:06.629236123Z"}
+    {:fromNode "R14",
+     :toNode "TRACE",
+     :via "futon2.aif.trace/write-trace!",
+     :at_ "2026-09-01T18:52:06.657742634Z"}]},
+  :entriesLimit 500,
+  :run/id "0d9b3025-ce3c-43f3-ab91-7d88f1509daf",
+  :inputsRead 5,
+  :preferenceLayers 5,
+  :entriesRead 500,
+  :route
+  [{:fromNode "R20",
+    :toNode "R12",
+    :via "futon2.report.war-machine/scan-r12-apparatus",
+    :at_ "2026-09-01T18:51:52.921300277Z"}
+   {:fromNode "R12",
+    :toNode "R2",
+    :via "futon2.aif.observation/observe",
+    :at_ "2026-09-01T18:51:57.606373967Z"}
+   {:fromNode "R2",
+    :toNode "R7",
+    :via "futon2.aif.precision/update-precision-state",
+    :at_ "2026-09-01T18:52:02.759609680Z"}
+   {:fromNode "R7",
+    :toNode "R3",
+    :via "futon2.report.war-machine/apply-arena-belief-events",
+    :at_ "2026-09-01T18:52:02.759658492Z"}
+   {:fromNode "R3",
+    :toNode "R8",
+    :via "futon2.aif.free-energy/compute-variational-free-energy",
+    :at_ "2026-09-01T18:52:02.759896197Z"}
+   {:fromNode "R8",
+    :toNode "R5",
+    :via "futon2.aif.efe/rank-actions",
+    :at_ "2026-09-01T18:52:06.423136703Z"}
+   {:fromNode "R5",
+    :toNode "R6",
+    :via "futon2.aif.policy/select-action",
+    :at_ "2026-09-01T18:52:06.629085581Z"}
+   {:fromNode "R6",
+    :toNode "R14",
+    :via "futon2.report.war-machine/invoke-strategic-selection",
+    :at_ "2026-09-01T18:52:06.629236123Z"}
+   {:fromNode "R14",
+    :toNode "TRACE",
+    :via "futon2.aif.trace/write-trace!",
+    :at_ "2026-09-01T18:52:06.657742634Z"}],
+  :traceWritten true,
+  :selectorSeam "stub:first-ranked-authorized-mission",
+  :storeBasisMaxAt "2026-09-01T18:50:32.545884080Z"}}
+--- tick 11/20 2026-09-01T18:52:58Z
+{:selector-seam "stub:first-ranked-authorized-mission",
+ :trace-path
+ "/home/joe/code/futon2/data/wm-trace/wm-trace-2026-09-01.edn",
+ :trace-before {:size 62613552, :mtime 1788288726709},
+ :trace-after {:size 63660895, :mtime 1788288822564},
+ :receipt-path
+ "/home/joe/code/futon2/holes/labs/wm-contract/tick-run-record-2026-09-01-fac6d798-4389-4104-a8ff-74e755ad821b.edn",
+ :tick-run-record
+ {:startedAt "2026-09-01T18:53:00.388371741Z",
+  :inputIssues 0,
+  :storeBasisCount 205733,
+  :route-verdict
+  {:hops 9,
+   :conformant 3,
+   :unmapped 6,
+   :drawn-edges-fired 3,
+   :drawn-edges-total 21,
+   :unmapped-hops
+   [{:fromNode "R20",
+     :toNode "R12",
+     :via "futon2.report.war-machine/scan-r12-apparatus",
+     :at_ "2026-09-01T18:53:25.449154029Z"}
+    {:fromNode "R12",
+     :toNode "R2",
+     :via "futon2.aif.observation/observe",
+     :at_ "2026-09-01T18:53:30.681690963Z"}
+    {:fromNode "R2",
+     :toNode "R7",
+     :via "futon2.aif.precision/update-precision-state",
+     :at_ "2026-09-01T18:53:37.897669357Z"}
+    {:fromNode "R3",
+     :toNode "R8",
+     :via "futon2.aif.free-energy/compute-variational-free-energy",
+     :at_ "2026-09-01T18:53:37.897971312Z"}
+    {:fromNode "R6",
+     :toNode "R14",
+     :via "futon2.report.war-machine/invoke-strategic-selection",
+     :at_ "2026-09-01T18:53:42.477436367Z"}
+    {:fromNode "R14",
+     :toNode "TRACE",
+     :via "futon2.aif.trace/write-trace!",
+     :at_ "2026-09-01T18:53:42.506420842Z"}]},
+  :entriesLimit 500,
+  :run/id "fac6d798-4389-4104-a8ff-74e755ad821b",
+  :inputsRead 5,
+  :preferenceLayers 5,
+  :entriesRead 500,
+  :route
+  [{:fromNode "R20",
+    :toNode "R12",
+    :via "futon2.report.war-machine/scan-r12-apparatus",
+    :at_ "2026-09-01T18:53:25.449154029Z"}
+   {:fromNode "R12",
+    :toNode "R2",
+    :via "futon2.aif.observation/observe",
+    :at_ "2026-09-01T18:53:30.681690963Z"}
+   {:fromNode "R2",
+    :toNode "R7",
+    :via "futon2.aif.precision/update-precision-state",
+    :at_ "2026-09-01T18:53:37.897669357Z"}
+   {:fromNode "R7",
+    :toNode "R3",
+    :via "futon2.report.war-machine/apply-arena-belief-events",
+    :at_ "2026-09-01T18:53:37.897719691Z"}
+   {:fromNode "R3",
+    :toNode "R8",
+    :via "futon2.aif.free-energy/compute-variational-free-energy",
+    :at_ "2026-09-01T18:53:37.897971312Z"}
+   {:fromNode "R8",
+    :toNode "R5",
+    :via "futon2.aif.efe/rank-actions",
+    :at_ "2026-09-01T18:53:42.192173683Z"}
+   {:fromNode "R5",
+    :toNode "R6",
+    :via "futon2.aif.policy/select-action",
+    :at_ "2026-09-01T18:53:42.477266078Z"}
+   {:fromNode "R6",
+    :toNode "R14",
+    :via "futon2.report.war-machine/invoke-strategic-selection",
+    :at_ "2026-09-01T18:53:42.477436367Z"}
+   {:fromNode "R14",
+    :toNode "TRACE",
+    :via "futon2.aif.trace/write-trace!",
+    :at_ "2026-09-01T18:53:42.506420842Z"}],
+  :traceWritten true,
+  :selectorSeam "stub:first-ranked-authorized-mission",
+  :storeBasisMaxAt "2026-09-01T18:52:53.296373289Z"}}
+--- tick 12/20 2026-09-01T18:54:31Z
+{:selector-seam "stub:first-ranked-authorized-mission",
+ :trace-path
+ "/home/joe/code/futon2/data/wm-trace/wm-trace-2026-09-01.edn",
+ :trace-before {:size 63660895, :mtime 1788288822564},
+ :trace-after {:size 64709806, :mtime 1788288910119},
+ :receipt-path
+ "/home/joe/code/futon2/holes/labs/wm-contract/tick-run-record-2026-09-01-4ef287e1-ef8e-4101-91e1-5d7c4032ebc8.edn",
+ :tick-run-record
+ {:startedAt "2026-09-01T18:54:34.184136764Z",
+  :inputIssues 0,
+  :storeBasisCount 205744,
+  :route-verdict
+  {:hops 9,
+   :conformant 3,
+   :unmapped 6,
+   :drawn-edges-fired 3,
+   :drawn-edges-total 21,
+   :unmapped-hops
+   [{:fromNode "R20",
+     :toNode "R12",
+     :via "futon2.report.war-machine/scan-r12-apparatus",
+     :at_ "2026-09-01T18:54:53.186391379Z"}
+    {:fromNode "R12",
+     :toNode "R2",
+     :via "futon2.aif.observation/observe",
+     :at_ "2026-09-01T18:54:57.891161296Z"}
+    {:fromNode "R2",
+     :toNode "R7",
+     :via "futon2.aif.precision/update-precision-state",
+     :at_ "2026-09-01T18:55:03.530184840Z"}
+    {:fromNode "R3",
+     :toNode "R8",
+     :via "futon2.aif.free-energy/compute-variational-free-energy",
+     :at_ "2026-09-01T18:55:03.530509327Z"}
+    {:fromNode "R6",
+     :toNode "R14",
+     :via "futon2.report.war-machine/invoke-strategic-selection",
+     :at_ "2026-09-01T18:55:10.028683036Z"}
+    {:fromNode "R14",
+     :toNode "TRACE",
+     :via "futon2.aif.trace/write-trace!",
+     :at_ "2026-09-01T18:55:10.060763085Z"}]},
+  :entriesLimit 500,
+  :run/id "4ef287e1-ef8e-4101-91e1-5d7c4032ebc8",
+  :inputsRead 5,
+  :preferenceLayers 5,
+  :entriesRead 500,
+  :route
+  [{:fromNode "R20",
+    :toNode "R12",
+    :via "futon2.report.war-machine/scan-r12-apparatus",
+    :at_ "2026-09-01T18:54:53.186391379Z"}
+   {:fromNode "R12",
+    :toNode "R2",
+    :via "futon2.aif.observation/observe",
+    :at_ "2026-09-01T18:54:57.891161296Z"}
+   {:fromNode "R2",
+    :toNode "R7",
+    :via "futon2.aif.precision/update-precision-state",
+    :at_ "2026-09-01T18:55:03.530184840Z"}
+   {:fromNode "R7",
+    :toNode "R3",
+    :via "futon2.report.war-machine/apply-arena-belief-events",
+    :at_ "2026-09-01T18:55:03.530236296Z"}
+   {:fromNode "R3",
+    :toNode "R8",
+    :via "futon2.aif.free-energy/compute-variational-free-energy",
+    :at_ "2026-09-01T18:55:03.530509327Z"}
+   {:fromNode "R8",
+    :toNode "R5",
+    :via "futon2.aif.efe/rank-actions",
+    :at_ "2026-09-01T18:55:09.744482214Z"}
+   {:fromNode "R5",
+    :toNode "R6",
+    :via "futon2.aif.policy/select-action",
+    :at_ "2026-09-01T18:55:10.028489093Z"}
+   {:fromNode "R6",
+    :toNode "R14",
+    :via "futon2.report.war-machine/invoke-strategic-selection",
+    :at_ "2026-09-01T18:55:10.028683036Z"}
+   {:fromNode "R14",
+    :toNode "TRACE",
+    :via "futon2.aif.trace/write-trace!",
+    :at_ "2026-09-01T18:55:10.060763085Z"}],
+  :traceWritten true,
+  :selectorSeam "stub:first-ranked-authorized-mission",
+  :storeBasisMaxAt "2026-09-01T18:54:42.881814195Z"}}
+--- tick 13/20 2026-09-01T18:55:58Z
+{:selector-seam "stub:first-ranked-authorized-mission",
+ :trace-path
+ "/home/joe/code/futon2/data/wm-trace/wm-trace-2026-09-01.edn",
+ :trace-before {:size 64709806, :mtime 1788288910119},
+ :trace-after {:size 65758176, :mtime 1788288998287},
+ :receipt-path
+ "/home/joe/code/futon2/holes/labs/wm-contract/tick-run-record-2026-09-01-49001423-81d6-4915-b6e9-c377ef3de41e.edn",
+ :tick-run-record
+ {:startedAt "2026-09-01T18:56:00.008365641Z",
+  :inputIssues 0,
+  :storeBasisCount 205753,
+  :route-verdict
+  {:hops 9,
+   :conformant 3,
+   :unmapped 6,
+   :drawn-edges-fired 3,
+   :drawn-edges-total 21,
+   :unmapped-hops
+   [{:fromNode "R20",
+     :toNode "R12",
+     :via "futon2.report.war-machine/scan-r12-apparatus",
+     :at_ "2026-09-01T18:56:20.959448186Z"}
+    {:fromNode "R12",
+     :toNode "R2",
+     :via "futon2.aif.observation/observe",
+     :at_ "2026-09-01T18:56:26.050548328Z"}
+    {:fromNode "R2",
+     :toNode "R7",
+     :via "futon2.aif.precision/update-precision-state",
+     :at_ "2026-09-01T18:56:31.886503571Z"}
+    {:fromNode "R3",
+     :toNode "R8",
+     :via "futon2.aif.free-energy/compute-variational-free-energy",
+     :at_ "2026-09-01T18:56:31.886794676Z"}
+    {:fromNode "R6",
+     :toNode "R14",
+     :via "futon2.report.war-machine/invoke-strategic-selection",
+     :at_ "2026-09-01T18:56:38.204965622Z"}
+    {:fromNode "R14",
+     :toNode "TRACE",
+     :via "futon2.aif.trace/write-trace!",
+     :at_ "2026-09-01T18:56:38.235663774Z"}]},
+  :entriesLimit 500,
+  :run/id "49001423-81d6-4915-b6e9-c377ef3de41e",
+  :inputsRead 5,
+  :preferenceLayers 5,
+  :entriesRead 500,
+  :route
+  [{:fromNode "R20",
+    :toNode "R12",
+    :via "futon2.report.war-machine/scan-r12-apparatus",
+    :at_ "2026-09-01T18:56:20.959448186Z"}
+   {:fromNode "R12",
+    :toNode "R2",
+    :via "futon2.aif.observation/observe",
+    :at_ "2026-09-01T18:56:26.050548328Z"}
+   {:fromNode "R2",
+    :toNode "R7",
+    :via "futon2.aif.precision/update-precision-state",
+    :at_ "2026-09-01T18:56:31.886503571Z"}
+   {:fromNode "R7",
+    :toNode "R3",
+    :via "futon2.report.war-machine/apply-arena-belief-events",
+    :at_ "2026-09-01T18:56:31.886558353Z"}
+   {:fromNode "R3",
+    :toNode "R8",
+    :via "futon2.aif.free-energy/compute-variational-free-energy",
+    :at_ "2026-09-01T18:56:31.886794676Z"}
+   {:fromNode "R8",
+    :toNode "R5",
+    :via "futon2.aif.efe/rank-actions",
+    :at_ "2026-09-01T18:56:37.976916903Z"}
+   {:fromNode "R5",
+    :toNode "R6",
+    :via "futon2.aif.policy/select-action",
+    :at_ "2026-09-01T18:56:38.204806664Z"}
+   {:fromNode "R6",
+    :toNode "R14",
+    :via "futon2.report.war-machine/invoke-strategic-selection",
+    :at_ "2026-09-01T18:56:38.204965622Z"}
+   {:fromNode "R14",
+    :toNode "TRACE",
+    :via "futon2.aif.trace/write-trace!",
+    :at_ "2026-09-01T18:56:38.235663774Z"}],
+  :traceWritten true,
+  :selectorSeam "stub:first-ranked-authorized-mission",
+  :storeBasisMaxAt "2026-09-01T18:56:09.902125607Z"}}
+--- tick 14/20 2026-09-01T18:57:26Z
+{:selector-seam "stub:first-ranked-authorized-mission",
+ :trace-path
+ "/home/joe/code/futon2/data/wm-trace/wm-trace-2026-09-01.edn",
+ :trace-before {:size 65758176, :mtime 1788288998287},
+ :trace-after {:size 66805425, :mtime 1788289080521},
+ :receipt-path
+ "/home/joe/code/futon2/holes/labs/wm-contract/tick-run-record-2026-09-01-4ff6effd-05dd-44eb-b7ea-862f8084df5a.edn",
+ :tick-run-record
+ {:startedAt "2026-09-01T18:57:28.691644024Z",
+  :inputIssues 0,
+  :storeBasisCount 205774,
+  :route-verdict
+  {:hops 9,
+   :conformant 3,
+   :unmapped 6,
+   :drawn-edges-fired 3,
+   :drawn-edges-total 21,
+   :unmapped-hops
+   [{:fromNode "R20",
+     :toNode "R12",
+     :via "futon2.report.war-machine/scan-r12-apparatus",
+     :at_ "2026-09-01T18:57:42.828655146Z"}
+    {:fromNode "R12",
+     :toNode "R2",
+     :via "futon2.aif.observation/observe",
+     :at_ "2026-09-01T18:57:48.205225079Z"}
+    {:fromNode "R2",
+     :toNode "R7",
+     :via "futon2.aif.precision/update-precision-state",
+     :at_ "2026-09-01T18:57:54.050536321Z"}
+    {:fromNode "R3",
+     :toNode "R8",
+     :via "futon2.aif.free-energy/compute-variational-free-energy",
+     :at_ "2026-09-01T18:57:54.050897327Z"}
+    {:fromNode "R6",
+     :toNode "R14",
+     :via "futon2.report.war-machine/invoke-strategic-selection",
+     :at_ "2026-09-01T18:58:00.400574894Z"}
+    {:fromNode "R14",
+     :toNode "TRACE",
+     :via "futon2.aif.trace/write-trace!",
+     :at_ "2026-09-01T18:58:00.438250404Z"}]},
+  :entriesLimit 500,
+  :run/id "4ff6effd-05dd-44eb-b7ea-862f8084df5a",
+  :inputsRead 5,
+  :preferenceLayers 5,
+  :entriesRead 500,
+  :route
+  [{:fromNode "R20",
+    :toNode "R12",
+    :via "futon2.report.war-machine/scan-r12-apparatus",
+    :at_ "2026-09-01T18:57:42.828655146Z"}
+   {:fromNode "R12",
+    :toNode "R2",
+    :via "futon2.aif.observation/observe",
+    :at_ "2026-09-01T18:57:48.205225079Z"}
+   {:fromNode "R2",
+    :toNode "R7",
+    :via "futon2.aif.precision/update-precision-state",
+    :at_ "2026-09-01T18:57:54.050536321Z"}
+   {:fromNode "R7",
+    :toNode "R3",
+    :via "futon2.report.war-machine/apply-arena-belief-events",
+    :at_ "2026-09-01T18:57:54.050597997Z"}
+   {:fromNode "R3",
+    :toNode "R8",
+    :via "futon2.aif.free-energy/compute-variational-free-energy",
+    :at_ "2026-09-01T18:57:54.050897327Z"}
+   {:fromNode "R8",
+    :toNode "R5",
+    :via "futon2.aif.efe/rank-actions",
+    :at_ "2026-09-01T18:58:00.118215895Z"}
+   {:fromNode "R5",
+    :toNode "R6",
+    :via "futon2.aif.policy/select-action",
+    :at_ "2026-09-01T18:58:00.400379558Z"}
+   {:fromNode "R6",
+    :toNode "R14",
+    :via "futon2.report.war-machine/invoke-strategic-selection",
+    :at_ "2026-09-01T18:58:00.400574894Z"}
+   {:fromNode "R14",
+    :toNode "TRACE",
+    :via "futon2.aif.trace/write-trace!",
+    :at_ "2026-09-01T18:58:00.438250404Z"}],
+  :traceWritten true,
+  :selectorSeam "stub:first-ranked-authorized-mission",
+  :storeBasisMaxAt "2026-09-01T18:57:30.922606658Z"}}
+--- tick 15/20 2026-09-01T18:58:48Z
+{:selector-seam "stub:first-ranked-authorized-mission",
+ :trace-path
+ "/home/joe/code/futon2/data/wm-trace/wm-trace-2026-09-01.edn",
+ :trace-before {:size 66805425, :mtime 1788289080521},
+ :trace-after {:size 67852103, :mtime 1788289164263},
+ :receipt-path
+ "/home/joe/code/futon2/holes/labs/wm-contract/tick-run-record-2026-09-01-2d84e9a8-4f19-4080-82f7-5d2ff2899fca.edn",
+ :tick-run-record
+ {:startedAt "2026-09-01T18:58:51.511769857Z",
+  :inputIssues 0,
+  :storeBasisCount 205784,
+  :route-verdict
+  {:hops 9,
+   :conformant 3,
+   :unmapped 6,
+   :drawn-edges-fired 3,
+   :drawn-edges-total 21,
+   :unmapped-hops
+   [{:fromNode "R20",
+     :toNode "R12",
+     :via "futon2.report.war-machine/scan-r12-apparatus",
+     :at_ "2026-09-01T18:59:09.297283794Z"}
+    {:fromNode "R12",
+     :toNode "R2",
+     :via "futon2.aif.observation/observe",
+     :at_ "2026-09-01T18:59:13.665255026Z"}
+    {:fromNode "R2",
+     :toNode "R7",
+     :via "futon2.aif.precision/update-precision-state",
+     :at_ "2026-09-01T18:59:18.740474004Z"}
+    {:fromNode "R3",
+     :toNode "R8",
+     :via "futon2.aif.free-energy/compute-variational-free-energy",
+     :at_ "2026-09-01T18:59:18.740905041Z"}
+    {:fromNode "R6",
+     :toNode "R14",
+     :via "futon2.report.war-machine/invoke-strategic-selection",
+     :at_ "2026-09-01T18:59:24.188971211Z"}
+    {:fromNode "R14",
+     :toNode "TRACE",
+     :via "futon2.aif.trace/write-trace!",
+     :at_ "2026-09-01T18:59:24.215830959Z"}]},
+  :entriesLimit 500,
+  :run/id "2d84e9a8-4f19-4080-82f7-5d2ff2899fca",
+  :inputsRead 5,
+  :preferenceLayers 5,
+  :entriesRead 500,
+  :route
+  [{:fromNode "R20",
+    :toNode "R12",
+    :via "futon2.report.war-machine/scan-r12-apparatus",
+    :at_ "2026-09-01T18:59:09.297283794Z"}
+   {:fromNode "R12",
+    :toNode "R2",
+    :via "futon2.aif.observation/observe",
+    :at_ "2026-09-01T18:59:13.665255026Z"}
+   {:fromNode "R2",
+    :toNode "R7",
+    :via "futon2.aif.precision/update-precision-state",
+    :at_ "2026-09-01T18:59:18.740474004Z"}
+   {:fromNode "R7",
+    :toNode "R3",
+    :via "futon2.report.war-machine/apply-arena-belief-events",
+    :at_ "2026-09-01T18:59:18.740522094Z"}
+   {:fromNode "R3",
+    :toNode "R8",
+    :via "futon2.aif.free-energy/compute-variational-free-energy",
+    :at_ "2026-09-01T18:59:18.740905041Z"}
+   {:fromNode "R8",
+    :toNode "R5",
+    :via "futon2.aif.efe/rank-actions",
+    :at_ "2026-09-01T18:59:23.984306551Z"}
+   {:fromNode "R5",
+    :toNode "R6",
+    :via "futon2.aif.policy/select-action",
+    :at_ "2026-09-01T18:59:24.188821591Z"}
+   {:fromNode "R6",
+    :toNode "R14",
+    :via "futon2.report.war-machine/invoke-strategic-selection",
+    :at_ "2026-09-01T18:59:24.188971211Z"}
+   {:fromNode "R14",
+    :toNode "TRACE",
+    :via "futon2.aif.trace/write-trace!",
+    :at_ "2026-09-01T18:59:24.215830959Z"}],
+  :traceWritten true,
+  :selectorSeam "stub:first-ranked-authorized-mission",
+  :storeBasisMaxAt "2026-09-01T18:58:15.278365059Z"}}
+--- tick 16/20 2026-09-01T19:00:14Z
+{:selector-seam "stub:first-ranked-authorized-mission",
+ :trace-path
+ "/home/joe/code/futon2/data/wm-trace/wm-trace-2026-09-01.edn",
+ :trace-before {:size 67852103, :mtime 1788289164263},
+ :trace-after {:size 68899141, :mtime 1788289253082},
+ :receipt-path
+ "/home/joe/code/futon2/holes/labs/wm-contract/tick-run-record-2026-09-01-b5bd631f-445e-46a7-8fe1-88f0c95e3d09.edn",
+ :tick-run-record
+ {:startedAt "2026-09-01T19:00:15.878779182Z",
+  :inputIssues 0,
+  :storeBasisCount 205790,
+  :route-verdict
+  {:hops 9,
+   :conformant 3,
+   :unmapped 6,
+   :drawn-edges-fired 3,
+   :drawn-edges-total 21,
+   :unmapped-hops
+   [{:fromNode "R20",
+     :toNode "R12",
+     :via "futon2.report.war-machine/scan-r12-apparatus",
+     :at_ "2026-09-01T19:00:30.899278580Z"}
+    {:fromNode "R12",
+     :toNode "R2",
+     :via "futon2.aif.observation/observe",
+     :at_ "2026-09-01T19:00:35.562327076Z"}
+    {:fromNode "R2",
+     :toNode "R7",
+     :via "futon2.aif.precision/update-precision-state",
+     :at_ "2026-09-01T19:00:41.537113484Z"}
+    {:fromNode "R3",
+     :toNode "R8",
+     :via "futon2.aif.free-energy/compute-variational-free-energy",
+     :at_ "2026-09-01T19:00:41.537496140Z"}
+    {:fromNode "R6",
+     :toNode "R14",
+     :via "futon2.report.war-machine/invoke-strategic-selection",
+     :at_ "2026-09-01T19:00:52.922107996Z"}
+    {:fromNode "R14",
+     :toNode "TRACE",
+     :via "futon2.aif.trace/write-trace!",
+     :at_ "2026-09-01T19:00:52.999209792Z"}]},
+  :entriesLimit 500,
+  :run/id "b5bd631f-445e-46a7-8fe1-88f0c95e3d09",
+  :inputsRead 5,
+  :preferenceLayers 5,
+  :entriesRead 500,
+  :route
+  [{:fromNode "R20",
+    :toNode "R12",
+    :via "futon2.report.war-machine/scan-r12-apparatus",
+    :at_ "2026-09-01T19:00:30.899278580Z"}
+   {:fromNode "R12",
+    :toNode "R2",
+    :via "futon2.aif.observation/observe",
+    :at_ "2026-09-01T19:00:35.562327076Z"}
+   {:fromNode "R2",
+    :toNode "R7",
+    :via "futon2.aif.precision/update-precision-state",
+    :at_ "2026-09-01T19:00:41.537113484Z"}
+   {:fromNode "R7",
+    :toNode "R3",
+    :via "futon2.report.war-machine/apply-arena-belief-events",
+    :at_ "2026-09-01T19:00:41.537178356Z"}
+   {:fromNode "R3",
+    :toNode "R8",
+    :via "futon2.aif.free-energy/compute-variational-free-energy",
+    :at_ "2026-09-01T19:00:41.537496140Z"}
+   {:fromNode "R8",
+    :toNode "R5",
+    :via "futon2.aif.efe/rank-actions",
+    :at_ "2026-09-01T19:00:52.665119122Z"}
+   {:fromNode "R5",
+    :toNode "R6",
+    :via "futon2.aif.policy/select-action",
+    :at_ "2026-09-01T19:00:52.921914444Z"}
+   {:fromNode "R6",
+    :toNode "R14",
+    :via "futon2.report.war-machine/invoke-strategic-selection",
+    :at_ "2026-09-01T19:00:52.922107996Z"}
+   {:fromNode "R14",
+    :toNode "TRACE",
+    :via "futon2.aif.trace/write-trace!",
+    :at_ "2026-09-01T19:00:52.999209792Z"}],
+  :traceWritten true,
+  :selectorSeam "stub:first-ranked-authorized-mission",
+  :storeBasisMaxAt "2026-09-01T19:00:04.173669399Z"}}
+--- tick 17/20 2026-09-01T19:01:35Z
+{:selector-seam "stub:first-ranked-authorized-mission",
+ :trace-path
+ "/home/joe/code/futon2/data/wm-trace/wm-trace-2026-09-01.edn",
+ :trace-before {:size 68899141, :mtime 1788289253082},
+ :trace-after {:size 69946192, :mtime 1788289343931},
+ :receipt-path
+ "/home/joe/code/futon2/holes/labs/wm-contract/tick-run-record-2026-09-01-4f486ddc-ecf1-4af3-9315-b6484c81a39b.edn",
+ :tick-run-record
+ {:startedAt "2026-09-01T19:01:38.286210211Z",
+  :inputIssues 0,
+  :storeBasisCount 205791,
+  :route-verdict
+  {:hops 9,
+   :conformant 3,
+   :unmapped 6,
+   :drawn-edges-fired 3,
+   :drawn-edges-total 21,
+   :unmapped-hops
+   [{:fromNode "R20",
+     :toNode "R12",
+     :via "futon2.report.war-machine/scan-r12-apparatus",
+     :at_ "2026-09-01T19:02:01.215846142Z"}
+    {:fromNode "R12",
+     :toNode "R2",
+     :via "futon2.aif.observation/observe",
+     :at_ "2026-09-01T19:02:06.269977454Z"}
+    {:fromNode "R2",
+     :toNode "R7",
+     :via "futon2.aif.precision/update-precision-state",
+     :at_ "2026-09-01T19:02:12.540353424Z"}
+    {:fromNode "R3",
+     :toNode "R8",
+     :via "futon2.aif.free-energy/compute-variational-free-energy",
+     :at_ "2026-09-01T19:02:12.540858439Z"}
+    {:fromNode "R6",
+     :toNode "R14",
+     :via "futon2.report.war-machine/invoke-strategic-selection",
+     :at_ "2026-09-01T19:02:23.846189533Z"}
+    {:fromNode "R14",
+     :toNode "TRACE",
+     :via "futon2.aif.trace/write-trace!",
+     :at_ "2026-09-01T19:02:23.878751232Z"}]},
+  :entriesLimit 500,
+  :run/id "4f486ddc-ecf1-4af3-9315-b6484c81a39b",
+  :inputsRead 5,
+  :preferenceLayers 5,
+  :entriesRead 500,
+  :route
+  [{:fromNode "R20",
+    :toNode "R12",
+    :via "futon2.report.war-machine/scan-r12-apparatus",
+    :at_ "2026-09-01T19:02:01.215846142Z"}
+   {:fromNode "R12",
+    :toNode "R2",
+    :via "futon2.aif.observation/observe",
+    :at_ "2026-09-01T19:02:06.269977454Z"}
+   {:fromNode "R2",
+    :toNode "R7",
+    :via "futon2.aif.precision/update-precision-state",
+    :at_ "2026-09-01T19:02:12.540353424Z"}
+   {:fromNode "R7",
+    :toNode "R3",
+    :via "futon2.report.war-machine/apply-arena-belief-events",
+    :at_ "2026-09-01T19:02:12.540413065Z"}
+   {:fromNode "R3",
+    :toNode "R8",
+    :via "futon2.aif.free-energy/compute-variational-free-energy",
+    :at_ "2026-09-01T19:02:12.540858439Z"}
+   {:fromNode "R8",
+    :toNode "R5",
+    :via "futon2.aif.efe/rank-actions",
+    :at_ "2026-09-01T19:02:21.667042081Z"}
+   {:fromNode "R5",
+    :toNode "R6",
+    :via "futon2.aif.policy/select-action",
+    :at_ "2026-09-01T19:02:23.846040064Z"}
+   {:fromNode "R6",
+    :toNode "R14",
+    :via "futon2.report.war-machine/invoke-strategic-selection",
+    :at_ "2026-09-01T19:02:23.846189533Z"}
+   {:fromNode "R14",
+    :toNode "TRACE",
+    :via "futon2.aif.trace/write-trace!",
+    :at_ "2026-09-01T19:02:23.878751232Z"}],
+  :traceWritten true,
+  :selectorSeam "stub:first-ranked-authorized-mission",
+  :storeBasisMaxAt "2026-09-01T19:01:14.689873742Z"}}
+--- tick 18/20 2026-09-01T19:03:06Z
+{:selector-seam "stub:first-ranked-authorized-mission",
+ :trace-path
+ "/home/joe/code/futon2/data/wm-trace/wm-trace-2026-09-01.edn",
+ :trace-before {:size 69946192, :mtime 1788289343931},
+ :trace-after {:size 70992411, :mtime 1788289427788},
+ :receipt-path
+ "/home/joe/code/futon2/holes/labs/wm-contract/tick-run-record-2026-09-01-826c6cee-aa7e-4092-b430-053da84cd1af.edn",
+ :tick-run-record
+ {:startedAt "2026-09-01T19:03:08.750425270Z",
+  :inputIssues 0,
+  :storeBasisCount 205803,
+  :route-verdict
+  {:hops 9,
+   :conformant 3,
+   :unmapped 6,
+   :drawn-edges-fired 3,
+   :drawn-edges-total 21,
+   :unmapped-hops
+   [{:fromNode "R20",
+     :toNode "R12",
+     :via "futon2.report.war-machine/scan-r12-apparatus",
+     :at_ "2026-09-01T19:03:26.360993065Z"}
+    {:fromNode "R12",
+     :toNode "R2",
+     :via "futon2.aif.observation/observe",
+     :at_ "2026-09-01T19:03:31.276130142Z"}
+    {:fromNode "R2",
+     :toNode "R7",
+     :via "futon2.aif.precision/update-precision-state",
+     :at_ "2026-09-01T19:03:37.501006556Z"}
+    {:fromNode "R3",
+     :toNode "R8",
+     :via "futon2.aif.free-energy/compute-variational-free-energy",
+     :at_ "2026-09-01T19:03:37.501352494Z"}
+    {:fromNode "R6",
+     :toNode "R14",
+     :via "futon2.report.war-machine/invoke-strategic-selection",
+     :at_ "2026-09-01T19:03:47.700002632Z"}
+    {:fromNode "R14",
+     :toNode "TRACE",
+     :via "futon2.aif.trace/write-trace!",
+     :at_ "2026-09-01T19:03:47.731330772Z"}]},
+  :entriesLimit 500,
+  :run/id "826c6cee-aa7e-4092-b430-053da84cd1af",
+  :inputsRead 5,
+  :preferenceLayers 5,
+  :entriesRead 500,
+  :route
+  [{:fromNode "R20",
+    :toNode "R12",
+    :via "futon2.report.war-machine/scan-r12-apparatus",
+    :at_ "2026-09-01T19:03:26.360993065Z"}
+   {:fromNode "R12",
+    :toNode "R2",
+    :via "futon2.aif.observation/observe",
+    :at_ "2026-09-01T19:03:31.276130142Z"}
+   {:fromNode "R2",
+    :toNode "R7",
+    :via "futon2.aif.precision/update-precision-state",
+    :at_ "2026-09-01T19:03:37.501006556Z"}
+   {:fromNode "R7",
+    :toNode "R3",
+    :via "futon2.report.war-machine/apply-arena-belief-events",
+    :at_ "2026-09-01T19:03:37.501064845Z"}
+   {:fromNode "R3",
+    :toNode "R8",
+    :via "futon2.aif.free-energy/compute-variational-free-energy",
+    :at_ "2026-09-01T19:03:37.501352494Z"}
+   {:fromNode "R8",
+    :toNode "R5",
+    :via "futon2.aif.efe/rank-actions",
+    :at_ "2026-09-01T19:03:47.454601788Z"}
+   {:fromNode "R5",
+    :toNode "R6",
+    :via "futon2.aif.policy/select-action",
+    :at_ "2026-09-01T19:03:47.699830560Z"}
+   {:fromNode "R6",
+    :toNode "R14",
+    :via "futon2.report.war-machine/invoke-strategic-selection",
+    :at_ "2026-09-01T19:03:47.700002632Z"}
+   {:fromNode "R14",
+    :toNode "TRACE",
+    :via "futon2.aif.trace/write-trace!",
+    :at_ "2026-09-01T19:03:47.731330772Z"}],
+  :traceWritten true,
+  :selectorSeam "stub:first-ranked-authorized-mission",
+  :storeBasisMaxAt "2026-09-01T19:03:00.603243936Z"}}
+--- tick 19/20 2026-09-01T19:04:31Z
+{:selector-seam "stub:first-ranked-authorized-mission",
+ :trace-path
+ "/home/joe/code/futon2/data/wm-trace/wm-trace-2026-09-01.edn",
+ :trace-before {:size 70992411, :mtime 1788289427788},
+ :trace-after {:size 72038841, :mtime 1788289505686},
+ :receipt-path
+ "/home/joe/code/futon2/holes/labs/wm-contract/tick-run-record-2026-09-01-8dbf0aca-92d6-4f65-8083-1cdce77407bd.edn",
+ :tick-run-record
+ {:startedAt "2026-09-01T19:04:33.854335387Z",
+  :inputIssues 0,
+  :storeBasisCount 205812,
+  :route-verdict
+  {:hops 9,
+   :conformant 3,
+   :unmapped 6,
+   :drawn-edges-fired 3,
+   :drawn-edges-total 21,
+   :unmapped-hops
+   [{:fromNode "R20",
+     :toNode "R12",
+     :via "futon2.report.war-machine/scan-r12-apparatus",
+     :at_ "2026-09-01T19:04:49.573056071Z"}
+    {:fromNode "R12",
+     :toNode "R2",
+     :via "futon2.aif.observation/observe",
+     :at_ "2026-09-01T19:04:53.947950683Z"}
+    {:fromNode "R2",
+     :toNode "R7",
+     :via "futon2.aif.precision/update-precision-state",
+     :at_ "2026-09-01T19:04:59.500196714Z"}
+    {:fromNode "R3",
+     :toNode "R8",
+     :via "futon2.aif.free-energy/compute-variational-free-energy",
+     :at_ "2026-09-01T19:04:59.500550797Z"}
+    {:fromNode "R6",
+     :toNode "R14",
+     :via "futon2.report.war-machine/invoke-strategic-selection",
+     :at_ "2026-09-01T19:05:05.608482812Z"}
+    {:fromNode "R14",
+     :toNode "TRACE",
+     :via "futon2.aif.trace/write-trace!",
+     :at_ "2026-09-01T19:05:05.634708273Z"}]},
+  :entriesLimit 500,
+  :run/id "8dbf0aca-92d6-4f65-8083-1cdce77407bd",
+  :inputsRead 5,
+  :preferenceLayers 5,
+  :entriesRead 500,
+  :route
+  [{:fromNode "R20",
+    :toNode "R12",
+    :via "futon2.report.war-machine/scan-r12-apparatus",
+    :at_ "2026-09-01T19:04:49.573056071Z"}
+   {:fromNode "R12",
+    :toNode "R2",
+    :via "futon2.aif.observation/observe",
+    :at_ "2026-09-01T19:04:53.947950683Z"}
+   {:fromNode "R2",
+    :toNode "R7",
+    :via "futon2.aif.precision/update-precision-state",
+    :at_ "2026-09-01T19:04:59.500196714Z"}
+   {:fromNode "R7",
+    :toNode "R3",
+    :via "futon2.report.war-machine/apply-arena-belief-events",
+    :at_ "2026-09-01T19:04:59.500250665Z"}
+   {:fromNode "R3",
+    :toNode "R8",
+    :via "futon2.aif.free-energy/compute-variational-free-energy",
+    :at_ "2026-09-01T19:04:59.500550797Z"}
+   {:fromNode "R8",
+    :toNode "R5",
+    :via "futon2.aif.efe/rank-actions",
+    :at_ "2026-09-01T19:05:05.381460825Z"}
+   {:fromNode "R5",
+    :toNode "R6",
+    :via "futon2.aif.policy/select-action",
+    :at_ "2026-09-01T19:05:05.608273140Z"}
+   {:fromNode "R6",
+    :toNode "R14",
+    :via "futon2.report.war-machine/invoke-strategic-selection",
+    :at_ "2026-09-01T19:05:05.608482812Z"}
+   {:fromNode "R14",
+    :toNode "TRACE",
+    :via "futon2.aif.trace/write-trace!",
+    :at_ "2026-09-01T19:05:05.634708273Z"}],
+  :traceWritten true,
+  :selectorSeam "stub:first-ranked-authorized-mission",
+  :storeBasisMaxAt "2026-09-01T19:03:58.832266456Z"}}
+--- tick 20/20 2026-09-01T19:05:54Z
+{:selector-seam "stub:first-ranked-authorized-mission",
+ :trace-path
+ "/home/joe/code/futon2/data/wm-trace/wm-trace-2026-09-01.edn",
+ :trace-before {:size 72038841, :mtime 1788289505686},
+ :trace-after {:size 73085797, :mtime 1788289585227},
+ :receipt-path
+ "/home/joe/code/futon2/holes/labs/wm-contract/tick-run-record-2026-09-01-1b6fa012-204f-4ddd-b6ae-28aaea3a6d7e.edn",
+ :tick-run-record
+ {:startedAt "2026-09-01T19:05:56.186429279Z",
+  :inputIssues 0,
+  :storeBasisCount 205817,
+  :route-verdict
+  {:hops 9,
+   :conformant 3,
+   :unmapped 6,
+   :drawn-edges-fired 3,
+   :drawn-edges-total 21,
+   :unmapped-hops
+   [{:fromNode "R20",
+     :toNode "R12",
+     :via "futon2.report.war-machine/scan-r12-apparatus",
+     :at_ "2026-09-01T19:06:08.951617904Z"}
+    {:fromNode "R12",
+     :toNode "R2",
+     :via "futon2.aif.observation/observe",
+     :at_ "2026-09-01T19:06:13.812618085Z"}
+    {:fromNode "R2",
+     :toNode "R7",
+     :via "futon2.aif.precision/update-precision-state",
+     :at_ "2026-09-01T19:06:19.790339513Z"}
+    {:fromNode "R3",
+     :toNode "R8",
+     :via "futon2.aif.free-energy/compute-variational-free-energy",
+     :at_ "2026-09-01T19:06:19.790603827Z"}
+    {:fromNode "R6",
+     :toNode "R14",
+     :via "futon2.report.war-machine/invoke-strategic-selection",
+     :at_ "2026-09-01T19:06:25.142467065Z"}
+    {:fromNode "R14",
+     :toNode "TRACE",
+     :via "futon2.aif.trace/write-trace!",
+     :at_ "2026-09-01T19:06:25.172651725Z"}]},
+  :entriesLimit 500,
+  :run/id "1b6fa012-204f-4ddd-b6ae-28aaea3a6d7e",
+  :inputsRead 5,
+  :preferenceLayers 5,
+  :entriesRead 500,
+  :route
+  [{:fromNode "R20",
+    :toNode "R12",
+    :via "futon2.report.war-machine/scan-r12-apparatus",
+    :at_ "2026-09-01T19:06:08.951617904Z"}
+   {:fromNode "R12",
+    :toNode "R2",
+    :via "futon2.aif.observation/observe",
+    :at_ "2026-09-01T19:06:13.812618085Z"}
+   {:fromNode "R2",
+    :toNode "R7",
+    :via "futon2.aif.precision/update-precision-state",
+    :at_ "2026-09-01T19:06:19.790339513Z"}
+   {:fromNode "R7",
+    :toNode "R3",
+    :via "futon2.report.war-machine/apply-arena-belief-events",
+    :at_ "2026-09-01T19:06:19.790386180Z"}
+   {:fromNode "R3",
+    :toNode "R8",
+    :via "futon2.aif.free-energy/compute-variational-free-energy",
+    :at_ "2026-09-01T19:06:19.790603827Z"}
+   {:fromNode "R8",
+    :toNode "R5",
+    :via "futon2.aif.efe/rank-actions",
+    :at_ "2026-09-01T19:06:24.903978359Z"}
+   {:fromNode "R5",
+    :toNode "R6",
+    :via "futon2.aif.policy/select-action",
+    :at_ "2026-09-01T19:06:25.142296726Z"}
+   {:fromNode "R6",
+    :toNode "R14",
+    :via "futon2.report.war-machine/invoke-strategic-selection",
+    :at_ "2026-09-01T19:06:25.142467065Z"}
+   {:fromNode "R14",
+    :toNode "TRACE",
+    :via "futon2.aif.trace/write-trace!",
+    :at_ "2026-09-01T19:06:25.172651725Z"}],
+  :traceWritten true,
+  :selectorSeam "stub:first-ranked-authorized-mission",
+  :storeBasisMaxAt "2026-09-01T19:05:35.367914379Z"}}
+wm_run.sh: done rc=0

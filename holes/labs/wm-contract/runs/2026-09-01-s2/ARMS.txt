@@ -1,0 +1,308 @@
+;; records: 20  with a usable aligned field: 20
+;; solver control: local 1.0026460727441648  src 1.0026460727441648  delta 0.0
+
+;; === FIELD SCALE (G against F_pi, per tick)
+tick  1 n=143  G spread 125.3363  F_pi spread 0.7540 | argmax(pi) is machine rank 134 of 143 | vs machine rank 1: dG +0.3168 dF -0.5634 | argmax(pi) ties with 1 others
+tick  2 n=145  G spread 125.3363  F_pi spread 0.7540 | argmax(pi) is machine rank 134 of 145 | vs machine rank 1: dG +0.3168 dF -0.5634 | argmax(pi) ties with 1 others
+tick  3 n=145  G spread 125.3363  F_pi spread 0.7540 | argmax(pi) is machine rank 134 of 145 | vs machine rank 1: dG +0.3168 dF -0.5634 | argmax(pi) ties with 1 others
+tick  4 n=145  G spread 125.3363  F_pi spread 0.7540 | argmax(pi) is machine rank 134 of 145 | vs machine rank 1: dG +0.3168 dF -0.5634 | argmax(pi) ties with 1 others
+tick  5 n=145  G spread 125.3363  F_pi spread 0.7540 | argmax(pi) is machine rank 134 of 145 | vs machine rank 1: dG +0.3168 dF -0.5634 | argmax(pi) ties with 1 others
+tick  6 n=145  G spread 125.3363  F_pi spread 0.7540 | argmax(pi) is machine rank 134 of 145 | vs machine rank 1: dG +0.3168 dF -0.5634 | argmax(pi) ties with 1 others
+tick  7 n=145  G spread 125.3363  F_pi spread 0.7540 | argmax(pi) is machine rank 134 of 145 | vs machine rank 1: dG +0.3168 dF -0.5634 | argmax(pi) ties with 1 others
+tick  8 n=145  G spread 125.3363  F_pi spread 0.7540 | argmax(pi) is machine rank 134 of 145 | vs machine rank 1: dG +0.3168 dF -0.5634 | argmax(pi) ties with 1 others
+tick  9 n=145  G spread 125.3363  F_pi spread 0.7540 | argmax(pi) is machine rank 134 of 145 | vs machine rank 1: dG +0.3168 dF -0.5634 | argmax(pi) ties with 1 others
+tick 10 n=145  G spread 125.3363  F_pi spread 0.7540 | argmax(pi) is machine rank 134 of 145 | vs machine rank 1: dG +0.3168 dF -0.5634 | argmax(pi) ties with 1 others
+tick 11 n=145  G spread 125.3363  F_pi spread 0.7540 | argmax(pi) is machine rank 134 of 145 | vs machine rank 1: dG +0.3168 dF -0.5634 | argmax(pi) ties with 1 others
+tick 12 n=145  G spread 125.3363  F_pi spread 0.7540 | argmax(pi) is machine rank 134 of 145 | vs machine rank 1: dG +0.3168 dF -0.5634 | argmax(pi) ties with 1 others
+tick 13 n=145  G spread 125.3363  F_pi spread 0.7540 | argmax(pi) is machine rank 134 of 145 | vs machine rank 1: dG +0.3168 dF -0.5634 | argmax(pi) ties with 1 others
+tick 14 n=145  G spread 125.3363  F_pi spread 0.7540 | argmax(pi) is machine rank 134 of 145 | vs machine rank 1: dG +0.3168 dF -0.5634 | argmax(pi) ties with 1 others
+tick 15 n=145  G spread 125.3363  F_pi spread 0.7540 | argmax(pi) is machine rank 134 of 145 | vs machine rank 1: dG +0.3168 dF -0.5634 | argmax(pi) ties with 1 others
+tick 16 n=145  G spread 125.3363  F_pi spread 0.7540 | argmax(pi) is machine rank 134 of 145 | vs machine rank 1: dG +0.3168 dF -0.5634 | argmax(pi) ties with 1 others
+tick 17 n=145  G spread 125.3363  F_pi spread 0.7540 | argmax(pi) is machine rank 134 of 145 | vs machine rank 1: dG +0.3168 dF -0.5634 | argmax(pi) ties with 1 others
+tick 18 n=145  G spread 125.3363  F_pi spread 0.7540 | argmax(pi) is machine rank 134 of 145 | vs machine rank 1: dG +0.3168 dF -0.5634 | argmax(pi) ties with 1 others
+tick 19 n=145  G spread 125.3363  F_pi spread 0.7540 | argmax(pi) is machine rank 134 of 145 | vs machine rank 1: dG +0.3168 dF -0.5634 | argmax(pi) ties with 1 others
+tick 20 n=145  G spread 125.3363  F_pi spread 0.7540 | argmax(pi) is machine rank 134 of 145 | vs machine rank 1: dG +0.3168 dF -0.5634 | argmax(pi) ties with 1 others
+
+;; === J4 ARMS (carry vs reset), on the machine's own controller scores
+{:max-rank-move 41,
+ :beta-0 0.5,
+ :argmax-differs-on-ticks 0,
+ :rank-moved-per-tick
+ [0 3 5 8 9 10 11 16 19 20 22 25 25 27 35 37 38 39 42 42],
+ :fixed-beta-first 0.5024450401508151,
+ :carried-beta
+ [0.502445
+  0.504672
+  0.506894
+  0.509117
+  0.511339
+  0.513557
+  0.515777
+  0.517995
+  0.520221
+  0.52244
+  0.52466
+  0.526876
+  0.529091
+  0.531309
+  0.533526
+  0.535742
+  0.537958
+  0.540173
+  0.542389
+  0.544606],
+ :fixed-converged 20,
+ :ticks 20,
+ :carried-converged 20}
+{:max-rank-move 0,
+ :beta-0 1.0,
+ :argmax-differs-on-ticks 0,
+ :rank-moved-per-tick [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0],
+ :fixed-beta-first 1.0026460727441648,
+ :carried-beta
+ [1.002646
+  1.004368
+  1.006068
+  1.007764
+  1.009453
+  1.011126
+  1.012803
+  1.014475
+  1.016169
+  1.017838
+  1.019504
+  1.021152
+  1.022799
+  1.024459
+  1.026109
+  1.027758
+  1.029406
+  1.03105
+  1.032697
+  1.034342],
+ :fixed-converged 20,
+ :ticks 20,
+ :carried-converged 20}
+{:max-rank-move 0,
+ :beta-0 2.0,
+ :argmax-differs-on-ticks 0,
+ :rank-moved-per-tick [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0],
+ :fixed-beta-first 2.0024541970343996,
+ :carried-beta
+ [2.002454
+  2.003025
+  2.003558
+  2.004085
+  2.004599
+  2.005088
+  2.005589
+  2.006088
+  2.006633
+  2.007129
+  2.007625
+  2.008086
+  2.008555
+  2.009051
+  2.009531
+  2.010016
+  2.010501
+  2.010985
+  2.011478
+  2.011969],
+ :fixed-converged 20,
+ :ticks 20,
+ :carried-converged 20}
+{:max-rank-move 0,
+ :beta-0 5.0,
+ :argmax-differs-on-ticks 0,
+ :rank-moved-per-tick [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0],
+ :fixed-beta-first 5.00211404732045,
+ :carried-beta
+ [5.002114
+  5.001354
+  5.000536
+  4.999709
+  4.99886
+  4.997977
+  4.997111
+  4.996247
+  4.99545
+  4.994581
+  4.993708
+  4.992785
+  4.991876
+  4.991008
+  4.990118
+  4.989235
+  4.988353
+  4.987472
+  4.986605
+  4.985734],
+ :fixed-converged 20,
+ :ticks 20,
+ :carried-converged 20}
+
+;; === PI_0 ARMS (where ln E enters), beta_0 = 1.0, carried
+{:arm "neither (as run, and as src computes it)",
+ :beta
+ [1.002646
+  1.004368
+  1.006068
+  1.007764
+  1.009453
+  1.011126
+  1.012803
+  1.014475
+  1.016169
+  1.017838
+  1.019504
+  1.021152
+  1.022799
+  1.024459
+  1.026109
+  1.027758
+  1.029406
+  1.03105
+  1.032697
+  1.034342],
+ :gamma-first 0.9973609104786869,
+ :gamma-last 0.9667979197554702,
+ :converged 20,
+ :bracketed 20,
+ :argmax-vs-machine-rank-1
+ [false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false]}
+{:arm "pi only (friston2017 text, pi_0 = sigma(-gamma G))",
+ :beta
+ [1.006849
+  1.012224
+  1.017568
+  1.022897
+  1.028207
+  1.033493
+  1.038771
+  1.044031
+  1.049302
+  1.054537
+  1.059761
+  1.064955
+  1.070137
+  1.075321
+  1.080483
+  1.085635
+  1.090774
+  1.095899
+  1.101016
+  1.106121],
+ :gamma-first 0.9931972650172853,
+ :gamma-last 0.9040600731260442,
+ :converged 20,
+ :bracketed 20,
+ :argmax-vs-machine-rank-1
+ [false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false]}
+{:arm "both (SPM spm_MDP_VB_X.m:964 code form)",
+ :beta
+ [1.002278
+  1.003761
+  1.005225
+  1.006686
+  1.008141
+  1.009583
+  1.011028
+  1.012469
+  1.01393
+  1.015369
+  1.016806
+  1.018227
+  1.019648
+  1.021081
+  1.022504
+  1.023928
+  1.02535
+  1.026771
+  1.028193
+  1.029614],
+ :gamma-first 0.9977268847771033,
+ :gamma-last 0.9712374387398894,
+ :converged 20,
+ :bracketed 20,
+ :argmax-vs-machine-rank-1
+ [false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false
+  false]}
+
+;; === RECORDED vs REPRODUCED (the run's own :policy-precision-state)
+tick  1 recorded beta 1.002646073 gamma 0.997360910 n=143 | reproduced beta 1.002646073 delta 0.00e+00
+tick  2 recorded beta 1.004367636 gamma 0.995651357 n=145 | reproduced beta 1.004367636 delta 0.00e+00
+tick  3 recorded beta 1.006068205 gamma 0.993968396 n=145 | reproduced beta 1.006068205 delta 0.00e+00
+tick  4 recorded beta 1.007764316 gamma 0.992295504 n=145 | reproduced beta 1.007764316 delta 0.00e+00
+tick  5 recorded beta 1.009452505 gamma 0.990636008 n=145 | reproduced beta 1.009452505 delta 0.00e+00
+tick  6 recorded beta 1.011125928 gamma 0.988996496 n=145 | reproduced beta 1.011125928 delta 0.00e+00
+tick  7 recorded beta 1.012803020 gamma 0.987358825 n=145 | reproduced beta 1.012803020 delta 0.00e+00
+tick  8 recorded beta 1.014474842 gamma 0.985731690 n=145 | reproduced beta 1.014474842 delta 0.00e+00
+tick  9 recorded beta 1.016169401 gamma 0.984087888 n=145 | reproduced beta 1.016169401 delta 0.00e+00
+tick 10 recorded beta 1.017837739 gamma 0.982474869 n=145 | reproduced beta 1.017837739 delta 0.00e+00
+tick 11 recorded beta 1.019504463 gamma 0.980868683 n=145 | reproduced beta 1.019504463 delta 0.00e+00
+tick 12 recorded beta 1.021151764 gamma 0.979286366 n=145 | reproduced beta 1.021151764 delta 0.00e+00
+tick 13 recorded beta 1.022799308 gamma 0.977708913 n=145 | reproduced beta 1.022799308 delta 0.00e+00
+tick 14 recorded beta 1.024459120 gamma 0.976124845 n=145 | reproduced beta 1.024459120 delta 0.00e+00
+tick 15 recorded beta 1.026108556 gamma 0.974555756 n=145 | reproduced beta 1.026108556 delta 0.00e+00
+tick 16 recorded beta 1.027758243 gamma 0.972991467 n=145 | reproduced beta 1.027758243 delta 0.00e+00
+tick 17 recorded beta 1.029405531 gamma 0.971434454 n=145 | reproduced beta 1.029405531 delta 0.00e+00
+tick 18 recorded beta 1.031050209 gamma 0.969884872 n=145 | reproduced beta 1.031050209 delta 0.00e+00
+tick 19 recorded beta 1.032697048 gamma 0.968338200 n=145 | reproduced beta 1.032697048 delta 0.00e+00
+tick 20 recorded beta 1.034342317 gamma 0.966797920 n=145 | reproduced beta 1.034342317 delta 0.00e+00
