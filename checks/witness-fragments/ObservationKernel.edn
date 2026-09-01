@@ -2,6 +2,6 @@
  :check {:repo "futon2" :path "checks/observation_kernel_witness.clj" :entrypoint "-main"}
  :fixture {:repo "futon2" :path "holes/labs/wm-contract/observation-kernel-reference.edn"}
  :run-sha "a33ba573c51b790d19e40a93df3bc84285e34475"
- :contract-sha "05af21ca04ccee86f104fe0f773961fcd4ce209d"
+ :contract-sha "5241ffa129d3fd9c84ee28b8e5d4bb020ea8e466"
  :result :passed
  :recorded-at "2026-08-31T23:59:00Z"}

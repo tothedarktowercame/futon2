@@ -1,0 +1,7 @@
+{:witnesses "ParameterPriorKernel"
+ :check {:repo "futon2" :path "checks/parameter_prior_kernel_witness.clj" :entrypoint "-main"}
+ :fixture {:repo "futon2" :path "holes/labs/wm-contract/parameter-prior-kernel-reference.edn"}
+ :run-sha "8fb951e4911f94495b62902ea293086fee20eaaa"
+ :contract-sha "5241ffa129d3fd9c84ee28b8e5d4bb020ea8e466"
+ :result :passed
+ :recorded-at "2026-09-01T00:00:00Z"}
