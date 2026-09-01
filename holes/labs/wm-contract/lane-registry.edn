@@ -6,7 +6,7 @@
  [{:lane :wm-nouns
    :holding :C324-positive-witness-integrity, :dispatched-at "2026-09-01T01:16:36Z", :job-id "invoke-1788225387526-6393-37e3c8d8", :expected-by "2026-09-01T02:01:36Z"}
   {:lane :wm-verbs
-   :holding :C322-tail-finish, :dispatched-at "2026-09-01T01:15:01Z", :job-id "invoke-1788225291464-6389-a7d117f5", :expected-by "2026-09-01T02:00:01Z"}
+   :holding :C326-authority-interval, :dispatched-at "2026-09-01T01:18:53Z", :job-id "invoke-1788225529492-6396-cefaac27", :expected-by "2026-09-01T02:03:53Z"}
   {:lane :wm-organization
    :holding :C323-dry-run-execution-doc, :dispatched-at "2026-09-01T01:15:01Z", :job-id "invoke-1788225296229-6390-fa844c44", :expected-by "2026-09-01T02:00:01Z"}
   {:lane :wm-evidence
