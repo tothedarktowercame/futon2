@@ -147,9 +147,23 @@
    `:converged? false` for beta_0 = 2.0, which converges at 258 -- a bound two
    iterations short, reported as though it were a property of the problem.
 
-   Convergence means `abs(epsilon_gamma) <= :tolerance` (default 1e-9). This
-   directly tests the eq. 2.7 fixed-point residual; a delta-beta test could
-   report convergence merely because gamma^2 made a step small. Iteration is
+   CONVERGENCE IS DEFINED ON THE RESIDUAL, not on the bracket width:
+   `abs(residual) <= :tolerance` (default 1e-9), where the residual is
+   `beta_prior + (pi - pi_0) . G - beta` and is therefore in BETA UNITS. Under
+   `:bisect` the width test is a backstop against a non-terminating loop only,
+   and `:converged?` is computed from the residual at the returned beta either
+   way -- so a run that stops on width with a residual above tolerance reports
+   `:converged? false`.
+
+   Beta units are the right units here, and it is worth saying why rather than
+   leaving it to be re-derived: gamma = 1/beta and the softmax consumes
+   -G/tau, so tau = 1/gamma = beta. The tolerance is therefore a tolerance on
+   the temperature the machine actually uses. A tolerance stated in gamma
+   would be the awkward one -- a fixed gamma width is a coarse beta width at
+   small gamma and a fine one at large (claude-1's question, 2026-09-01).
+
+   Under `:gradient` this same test also avoids reporting convergence merely
+   because gamma^2 made a step small. Iteration is
    bounded by `:max-iterations` (default 256). The result always reports
    `:iterations`, `:converged?`, and `:hit-bound?`.
 
