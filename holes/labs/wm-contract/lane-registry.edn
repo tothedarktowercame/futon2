@@ -4,7 +4,7 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C294-control-liveness, :dispatched-at "2026-09-01T00:40:02Z", :job-id "invoke-1788223171143-6321-6f771259", :expected-by "2026-09-01T01:25:02Z"}
+   :holding :C299-control-reason-preservation, :dispatched-at "2026-09-01T00:47:30Z", :job-id "invoke-1788223646206-6335-0df1e4ee", :expected-by "2026-09-01T01:32:30Z"}
   {:lane :wm-verbs
    :holding :C297-snapshot-substrate, :dispatched-at "2026-09-01T00:46:15Z", :job-id "invoke-1788223543733-6332-3088a99a", :expected-by "2026-09-01T01:31:15Z"}
   {:lane :wm-organization
