@@ -156,10 +156,10 @@
    :statement "J2 ruling: the Laplace channel F at R8 is a shortcut -- computed, stored, consumed by nothing (C448, C452) -- and the free energy the formalism consumes, the per-policy F_pi in pi = sigma(ln E - F - G) (parr2022 B.9), is not computed."
    :acceptance "A Holes.lean declaration (kind HOLE) stating that the policy posterior imports F_pi, with falsifier 'a run record in which Q(pi) is computed with an F_pi term from the observations under each policy'; registered in mkHole; lake build passes; sha here."}
   ;; ---------- I: theory-aligned replacements decided by J rulings (separate track) ----------
-  {:id :I1 :class :I :status :open :owner :unassigned
+  {:id :I1 :class :I :status :open :owner :claude-20 :assigned "2026-09-01 by Joe: claude-20 orchestrates under the coding-handoff protocol (Codex implements in small handoffs; claude-20 reviews); registry/ledger rows it produces are read by claude-1"
    :statement "Implement policy precision as gamma = 1/beta with the beta update of friston2017 eq. 2.7 (beta <- beta + (pi - pi0) . G), replacing effective-temperature's selection-gain proxy on the live path, behind a flag until compared."
    :acceptance "policy.clj computes tau = 1/gamma from the beta update; a run record shows gamma changing tick to tick from G and pi; the selection-gain path remains available under FUTON_WM_TAU_MODE for comparison; tests; clj-kondo clean; registry :temperature-update :observed updated by a reviewed C row; sha here."}
-  {:id :I2 :class :I :status :open :owner :unassigned
+  {:id :I2 :class :I :status :open :owner :claude-20 :assigned "2026-09-01 by Joe: claude-20 orchestrates under the coding-handoff protocol (Codex implements in small handoffs; claude-20 reviews); registry/ledger rows it produces are read by claude-1"
    :statement "Implement the per-policy free energy F_pi and include it in the policy posterior pi = sigma(ln E - F_pi - G) (parr2022 B.9), then retire the Laplace channel F at R8 once F_pi is consumed."
    :acceptance "efe.clj/policy.clj compute F_pi per candidate from the observations under that policy and Q(pi) includes it; a run record shows the term; the R8 scalar F is removed or its row re-derived from F_pi by a reviewed C row and D row; tests; clj-kondo clean; sha here."}
   ;; ---------- V: verification items ----------
