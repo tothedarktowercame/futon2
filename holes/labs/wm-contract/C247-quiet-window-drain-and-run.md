@@ -6,23 +6,13 @@ This is an ordered, fail-closed checklist. Preparation commands may be run by
 the coordinator. The serving-JVM reload and production click are Joe's actions.
 No step was performed while writing this document.
 
-## Important current blocker
+## External observation boundary
 
-The sequence cannot yet honestly reach an operational certificate for the
-approved HTTP click.
-
-`checks/certify_live_run.clj` accepts only a bounded receipt whose interval
-encloses the run and whose command contains `run-tick-once`. The approved
-production action is `POST /api/alpha/wm/click`; it executes the already-loaded
-runner inside the serving Futon3c JVM and currently emits no per-click bounded
-resource receipt. A bounded suite/gate receipt is not evidence about the click
-and must not be substituted.
-
-Therefore steps 1–6 below prepare and execute the run, but step 7 is a **STOP**
-until the HTTP click has a real resource-receipt producer or the certificate's
-typed resource input is deliberately redesigned. This is precisely the
-“real bounded resource envelope around the click” boundary C230 listed as not
-rehearsed.
+C264/C271 closed the former resource-receipt blocker. The operator must submit
+the click through `wm_click_resource_observer.clj`, not through a bare `curl`.
+That separate process samples the shared serving-JVM cgroup before, during and
+after the click, then binds its envelope to the exact click and run IDs. A
+suite/gate receipt remains invalid evidence about the click.
 
 ## 1. Declare and prove quiescence
 
@@ -150,30 +140,25 @@ readiness refuses rather than guessing or rerunning.
 
 ## 6. Joe clicks only on READY
 
-Use exactly the filled command printed by readiness, including its live-selected
-reviewer. Its shape is:
+Use the live-selected reviewer printed by readiness. Choose a new explicit
+receipt filename ending in `.receipt.json`, then run:
 
 ```sh
-curl -s -X POST localhost:7070/api/alpha/wm/click \
-  -H 'Content-Type: application/json' \
-  -d '{"reviewer":"SELECTED","trigger":"duree-click-on-demand"}'
+cd /home/joe/code/futon2
+bb -cp . checks/wm_click_resource_observer.clj \
+  holes/labs/wm-contract/wm-click-resource-YYYYMMDDTHHMMSS.receipt.json \
+  SELECTED
 ```
 
-This is Joe-only. Save the returned click id and start time. Poll without
-starting another click:
+This is Joe-only and performs the POST and polling. Require a clean receipt
+with scope `shared-serving-jvm`, exact `click-id`/`run-id`, a terminal result,
+and a readable matching run record. Save the printed `run-id`; do not guess
+“latest”. Any unavailable/dirty observation, lifecycle failure, or identity
+mismatch is stop-and-fix; never click again merely to obtain a cleaner result.
 
-```sh
-curl -s localhost:7070/api/alpha/wm/click
-```
+## 7. Certify the exact run
 
-Require `running? false` and a non-null terminal `last-result`. A service
-failure or a lifecycle that does not close is stop-and-fix; never click again
-merely to obtain a cleaner result. Identify the emitted `TickRunRecord` by its
-recorded start time and capture its exact `:run/id`; do not guess “latest”.
-
-## 7. STOP: certificate awaits the missing click resource receipt
-
-Once that producer exists, the intended command is:
+Use the exact ID printed by the observer:
 
 ```sh
 cd /home/joe/code/futon2
