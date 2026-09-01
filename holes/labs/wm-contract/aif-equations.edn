@@ -186,7 +186,8 @@
  ;; Holes.lean declaration carries each.
  :holes
  [{:edge [:R6 :R16] :equation :action :status :path-dependent
-   :finding "In the WM judge + close-loop! path, close-loop! enacts the first passing act gate from ranked actions, not the recorded Q(π) selection (C448). In the production runner, selected-entry resolves the decision's action to its ranked entry and enacts it (C452: full_loop_runner.clj:870-873). Whether the two paths agree on the enacted action is the open question."
+   :finding "In the WM judge + close-loop! path, close-loop! enacts the first passing act gate from ranked actions, not the recorded Q(π) selection (C448). In the production runner, selected-entry resolves the decision's action to its ranked entry and enacts it (C452: full_loop_runner.clj:870-873). ANSWERED FOR THE close-loop! PATH (C460, 2026-09-01): on wm-trace-2026-07-04 and 07-05 the enacted action DIFFERS from the rank-1 selection -- the selection was not gated, the first passing lower-ranked candidate was enacted (reproduced by claude-1 against the 07-04 record: 110 ranked, rank 1 M-first-flights, realized policy M-bayesian-structure-learning). The full_loop_runner path is not determinable from any record. H1 (Holes.lean enactedActionEqualsSelected) is refuted as written; H1b restates it."
+   :record :differs-on-record
    :evidence "war_machine.clj:4573-4584, 4804-4817; enact.clj:287-316; full_loop_runner.clj:870-873"}
   {:edges [[:R2 :R17] [:R1 :R17]] :equation :dirichlet-accumulation :status :not-realised
    :finding "Da Costa eq. 21 accumulates Dirichlet concentrations from observed (o, s) pairs. The WM's a4a accumulates a capability x mission model from substrate hyperedges and discharges instead; no path from the tick model's o or μ into R17 was found."
