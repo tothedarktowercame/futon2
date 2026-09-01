@@ -9,6 +9,8 @@
 ;; Validate with: bb worklist_check.bb
 {:schema :wm/worklist-v1
  :as-of "2026-09-01"
+ :steward :claude-20
+ :handover "2026-09-01 (Joe): the collection passes from claude-1 to claude-20 -- ledger stewardship, the second-read gate (TN 9a), regeneration/publish of p4ng futon-2026 from the registries, dispatch of remaining rows (CLI seat or Codex), and the I track. Rows authored by claude-20 still need a reader who is not their author: claude-1 remains available for those reads on request. J3 stays :needs-joe."
  :source "futon2/holes/TN-edge-review-aif-wiring.md §6, §8, §9"
  :classes {:I "implement a theory-aligned replacement decided by a J ruling; a separate track from the review, owner to be assigned"
            :V "verify against a source or the code and record the result"

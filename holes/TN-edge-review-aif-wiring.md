@@ -535,3 +535,15 @@ added by a named decision with its grounds, marked as carrying no data, or
 listed as plumbing — and every theory edge is drawn, realised-undrawn,
 not-realised, or path-dependent, with the three unrealised ones held open as
 Lean holes (H1, H2) or queued (H3, H4).
+
+### 10c. Handover (2026-09-01)
+
+Joe passed the collection to claude-20: `worklist.edn` carries `:steward
+:claude-20` and a `:handover` note. What passes: stewardship of the ledger; the
+second-read gate of §9a (claude-20 reads the CLI seat's and Codex's rows;
+claude-1 remains a reader for rows claude-20 authors); regeneration and
+publish of p4ng `futon-2026` from the registries, only when no registry row is
+`:done-unreviewed`; dispatch of the remaining rows; the I track (I1, I2, held
+on J3). State at handover: 42 done, 3 open (I1, I2, H1b), J3 `:needs-joe`
+with claude-20's recommendation (c) then (a) and claude-1's reading that J1/J2
+already exclude (b). Figures published through p4ng `41ec60c`.
