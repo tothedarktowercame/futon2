@@ -166,7 +166,7 @@
      :claim :vector-not-single-outcome,
      :actual-type "Outcome Obs",
      :expected-type "ObservationVector"}]},
-  :run-sha "e1713b12cd19687b226431dc4609ac13fb662dbc",
+  :run-sha "2972f9f064683919dd2eb75cc969008d44c0443e",
   :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
   :result :passed,
   :recorded-at "2026-09-01T00:00:00Z"}
@@ -190,7 +190,7 @@
      :claim :posterior-is-not-outcome-prediction,
      :actual-type "PredictiveOutcomeKernel Policy Obs",
      :expected-type "ParameterPosteriorKernel Policy Obs Parameter"}]},
-  :run-sha "e1713b12cd19687b226431dc4609ac13fb662dbc",
+  :run-sha "d2b43fb61ad94126f77996296748feed0d6f4bfd",
   :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
   :result :passed,
   :recorded-at "2026-09-01T00:00:00Z"}
@@ -298,7 +298,7 @@
      :claim :distinct-semantic-types,
      :actual-type "ExpectedFreeEnergyValue",
      :expected-type "VariationalFreeEnergyValue"}]},
-  :run-sha "e1713b12cd19687b226431dc4609ac13fb662dbc",
+  :run-sha "bb8c549d84f7a17071fb954bbe88746ae47bc379",
   :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
@@ -330,7 +330,7 @@
      :claim :threshold-requires-model-change-evidence,
      :actual-type "VariationalFreeEnergyValue",
      :expected-type "ModelReductionFreeEnergyChange"}]},
-  :run-sha "e1713b12cd19687b226431dc4609ac13fb662dbc",
+  :run-sha "4703c8862a40bd103f80f92cdc9a526fb316e189",
   :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
@@ -421,7 +421,7 @@
      :claim :present-free-energy-is-not-model-change,
      :actual-type "VariationalFreeEnergyValue",
      :expected-type "ModelReductionFreeEnergyChange"}]},
-  :run-sha "e1713b12cd19687b226431dc4609ac13fb662dbc",
+  :run-sha "ab33ba4cac8e494d122b940d8163692067fc39b8",
   :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
   :result :passed,
   :recorded-at "2026-09-01T00:00:00Z"}

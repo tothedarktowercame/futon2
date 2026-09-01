@@ -29,5 +29,11 @@ inversions; all seven controls execute in roughly 25 seconds on this checkout.
 The remaining controls retain the C299 interim audit cadence now recorded in
 `RUNBOOK.md`.
 
+The first registry edit also exposed that `:run-sha` is named more broadly than
+it is used: contract lint resolves the fixture bytes at that SHA.  Pointing it
+at the new wrapper commit made five unchanged fixtures stale.  Their historical
+fixture pins were therefore retained; guarded-source identity lives in the new
+metadata instead of overloading the fixture pin.
+
 No binding, contract declaration, Q-facing definition, or model area changed.
 Glossary coverage remains 31/33.
