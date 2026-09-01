@@ -6,7 +6,7 @@
  [{:lane :wm-nouns
    :holding :C261-next-glossary-term, :dispatched-at "2026-08-31T23:57:41Z", :job-id "invoke-1788220656974-6242-097f091c", :expected-by "2026-09-01T00:42:41Z"}
   {:lane :wm-verbs
-   :holding :C259-readiness-double-gate, :dispatched-at "2026-08-31T23:54:54Z", :job-id "invoke-1788220490206-6238-63abc222", :expected-by "2026-09-01T00:39:54Z"}
+   :holding :C263-schema-guard-rollback, :dispatched-at "2026-09-01T00:00:43Z", :job-id "invoke-1788220839357-6247-ca05d2ec", :expected-by "2026-09-01T00:45:43Z"}
   {:lane :wm-organization
    :holding :C260-production-run-record, :dispatched-at "2026-08-31T23:57:41Z", :job-id "invoke-1788220635108-6241-968e7a62", :expected-by "2026-09-01T00:42:41Z"}
   {:lane :wm-evidence
