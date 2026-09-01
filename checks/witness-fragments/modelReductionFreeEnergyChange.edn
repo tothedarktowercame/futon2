@@ -1,0 +1,7 @@
+{:witnesses "modelReductionFreeEnergyChange"
+ :check {:repo "futon2" :path "checks/model_reduction_free_energy_change_witness.clj" :entrypoint "-main"}
+ :fixture {:repo "futon2" :path "holes/labs/wm-contract/model-reduction-free-energy-change-reference.edn"}
+ :run-sha "ab33ba4cac8e494d122b940d8163692067fc39b8"
+ :contract-sha "36c2c2da681eb724fe0dbad027b6ac855d24bd15"
+ :result :passed
+ :recorded-at "2026-09-01T00:00:00Z"}

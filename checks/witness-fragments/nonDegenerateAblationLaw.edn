@@ -2,7 +2,7 @@
  :check {:repo "futon2" :path "checks/ablation_exact_dyadic_witness.clj" :entrypoint "-main"}
  :fixture {:repo "futon2" :path "holes/labs/wm-contract/ablation-exact-dyadic.edn"}
  :run-sha "f54d502acb131f74da40b430a726792a4002dae8"
- :contract-sha "b475bc72dcf6a91f8a90fb1da1bb8a8058e9a7f4"
+ :contract-sha "36c2c2da681eb724fe0dbad027b6ac855d24bd15"
  :result :passed
  :recorded-at "2026-08-31T17:05:00Z"
  :note "C86 exact binary64-to-dyadic table; Lean proves G argmins {grim,probe-one-token}, risk argmin {always-abstain}, and disjointness. --negative makes the tables share minimizers and is rejected."}

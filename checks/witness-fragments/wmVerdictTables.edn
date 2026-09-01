@@ -2,7 +2,7 @@
  :check {:repo "futon2" :path "checks/r9_independence.clj" :entrypoint "-main"}
  :fixture {:repo "futon2" :path "holes/labs/wm-contract/R9-D2-report.edn"}
  :run-sha "732f4d748f08154457d93916d96ab0be0b7f760c"
- :contract-sha "b475bc72dcf6a91f8a90fb1da1bb8a8058e9a7f4"
+ :contract-sha "36c2c2da681eb724fe0dbad027b6ac855d24bd15"
  :result :passed
  :recorded-at "2026-08-31T23:59:30Z"
  :note "C68: ledger and declared tables are independently row-complete; --negative-ledger and --negative-declared each remove a row and are rejected."}
