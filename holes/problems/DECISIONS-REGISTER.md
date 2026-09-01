@@ -60,6 +60,7 @@ recording why it cannot be closed, so nobody re-opens it by accident.
 | S24 | Cancelling an operator run is recorded but not counted; `:cancelled` starts a new semantic stratum and is not pooled with cohort 46. | `C206`, C211 |
 | S25 | No existing check is moved to nightly. Any future nightly tier must name its runner and cadence, never merely remove a check. | `RUNBOOK.md` |
 | S26 | Lean negative controls are revalidated **targeted**: a packet that changes a witness runs that witness's negative modes before landing. The full 32 stay on the gate. | O15, Joe 2026-09-01 |
+| S29 | Tree hygiene is repaired by **fixing inbox zero**, not by giving each agent a worktree. Worktrees relocate the merge-discipline problem rather than removing it, five stale forks already exist unmerged, and the one-JVM policy exists because a worktree reached the shared server. First repair is to make refusals visible and countable; only then the `:no-session-id` cause. | O27, Joe 2026-09-01 |
 | S28 | Lanes run **continuously and in parallel** — this uses the machine well and is the intended steady state. It is gated on tree hygiene being a facility rather than an event, which `claude-20` owns. | O24, Joe 2026-09-01 |
 | S27 | **No War Machine check gets a timer.** The full suite's trigger is a milestone event, not a clock; it is invoked when something needs it and never on a schedule. Gate runs required by `make pre-merge` or by a certified commit are unaffected. | O15, Joe 2026-09-01 |
 
@@ -128,7 +129,8 @@ the Lean checks, the absence lint, or the census-basis check.
 | O22 | **Repair or accept C404 limit 3** — the observed program is bound to terminal observation, not to the run. Unlike limits 1, 2 and 4 this looks repairable (the run record could carry program identity at start). Not dispatched. | owner | `CERTIFICATE-CEILING.md` limit 3 |
 | O23 | **Who records lane deliveries in the ledger going forward.** C441 found the ledger degraded exactly as throughput rose: 13 of 61 numbers in C380–C440, all of them owner reviews. Either lanes write their own heading or the owner writes one per delivery; today neither is required. | owner | C441 |
 | ~~O24~~ | **SETTLED 2026-09-01 — yes, continuously and in parallel, but not until tree hygiene is a working facility.** Joe: *"I like them working continuously and in parallel because that uses the resources of this machine well. But we need to prepare the ground for that."* Ownership of that groundwork assigned to `claude-20`. Moved to S28. | Joe | C446 |
-| O27 | **Which mechanism prepares the ground** — repair inbox zero, or give each agent a worktree that merges back to master. Joe called the second *"considerably more complicated"* and left the choice with me. | owner (Joe overrules) | C446 |
+| ~~O27~~ | **SETTLED 2026-09-01 — option A, repair inbox zero.** Not per-agent worktrees. Moved to S29. | Joe | C446 |
+| O29 | **Pinned-commit orchestration across repositories** is untouched by O27's answer. Joe raised it and worktrees would have addressed it; repairing inbox zero does not. Still open, still needed for a certified run. | Joe | raised in the O24 sitting |
 | O28 | **Whether large EDN state files move off a full-map rewrite.** `state.edn` is 125.7 MB and `invoke-jobs` is 134.6 MB; two facilities reached the same ceiling independently. Probably one decision with O13, not two. | Joe | C446, O13 |
 
 ---

@@ -125,3 +125,13 @@ this order, because the order is the point:
    piece of work here.
 
 Joe reads one brief and says whether the format works before I write seven more.
+
+## Progress
+
+| Sitting | Decision | Outcome |
+|---|---|---|
+| 1 | O15 Lean cadence | targeted revalidation (option C); settled O16 too, reframed O17, opened O25/O26 |
+| 2 | O24 lane continuation | continuous and parallel, gated on tree hygiene; opened O27/O28, found C446 |
+| 3 | O27 hygiene mechanism | repair inbox zero, not worktrees; opened O29 (pinned-commit orchestration is still unsolved) |
+
+Six of nine remain: O11, O19, O20, O2, O6, O7 — plus O25 and O29 raised along the way.
