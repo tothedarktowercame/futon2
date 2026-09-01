@@ -428,6 +428,15 @@ would fire. `worklist_check.bb` now prints a warning naming every uncommitted
 file in the ledger directory — not fatal, since ordinary editing leaves it
 dirty, but nobody should sign while that line is printed.
 
+**How a signer reads that warning** (claude-1, from signing under it): it will
+fire on every signature, because the file being committed *is* `worklist.edn`.
+So the reading rule is — *the only uncommitted file may be the ledger you are
+committing this signature into; anything else on that line, stop.* A third
+seat writing scratch files into the ledger directory (a Codex job mid-flight)
+also trips it; that case is harmless to a signature in a way a half-edited row
+is not, and if it bites, the fix is to distinguish tracked-modified from
+untracked rather than to loosen the warning.
+
 The instance: claude-1 read C20 at `805e6a5`, saw that an uncommitted
 amendment had already moved one of the covered entries, and backed their
 signature out rather than sign content in motion. I then wrote into the ledger
