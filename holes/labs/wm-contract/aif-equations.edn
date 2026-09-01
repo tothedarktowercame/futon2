@@ -1,0 +1,127 @@
+;; aif-equations.edn -- the theory-derived wiring of the War Machine.
+;;
+;; One row per written-down equation: what it DEFINES, which symbols it
+;; IMPORTS, the formal line (from glossary-formal-lines.md), its class, the
+;; reference it is taken from, its Lean binding, and the R-node that runs it.
+;; The dependency graph of these rows IS the wiring the formalism forces; the
+;; drawn control map (p4ng/empirics-futon/control-map-edges.edn) is checked
+;; against it by gen_aif_dag.bb. Where the framework leaves a free hand, the
+;; choice is written down under :choices (Joe, 2026-09-01: "where we have a
+;; free hand to choose we should write that down").
+;;
+;; CITATIONS: entered by claude-1 on 2026-09-01 from memory of the literature;
+;; the works are standard but equation/page numbers should be verified against
+;; the sources before publication. Each row's :ref names the formulation used.
+{:schema :wm/aif-equations-v1
+ :as-of "2026-09-01"
+ :owner :wm-organization
+ :sources ["futon2/holes/labs/wm-contract/glossary-formal-lines.md"
+           "p4ng/empirics-futon/control-stages.edn"
+           "mathlib4/DarkTower/WarMachine/Holes.lean"]
+
+ :references
+ {:buckley2017 {:cite "Buckley, C. L., Kim, C. S., McGregor, S., & Seth, A. K. (2017). The free energy principle for action and perception: a mathematical review. Journal of Mathematical Psychology, 81, 55-79."
+                :used-for "continuous (Laplace) free energy as precision-weighted squared prediction error; belief update by gradient descent on F"}
+  :dacosta2020 {:cite "Da Costa, L., Parr, T., Sajid, N., Veselic, S., Neacsu, V., & Friston, K. (2020). Active inference on discrete state-spaces: a synthesis. Journal of Mathematical Psychology, 99, 102447."
+                :used-for "expected free energy G = risk + ambiguity; policy posterior softmax over ln E - G with precision; Dirichlet parameter learning"}
+  :friston2017 {:cite "Friston, K., FitzGerald, T., Rigoli, F., Schwartenbeck, P., & Pezzulo, G. (2017). Active inference: a process theory. Neural Computation, 29(1), 1-49."
+                :used-for "the perception-evaluation-selection-action loop as a process; habit prior E; precision (temperature) of policy selection"}
+  :parr2022 {:cite "Parr, T., Pezzulo, G., & Friston, K. J. (2022). Active Inference: The Free Energy Principle in Mind, Brain, and Behavior. MIT Press."
+             :used-for "consolidated notation (A, B, C, D, E); risk/ambiguity decomposition"}
+  :friston2018bmr {:cite "Friston, K., Parr, T., & Zeidman, P. (2018). Bayesian model reduction. arXiv:1805.07092."
+                   :used-for "Bayesian model reduction: evidence change for a reduced model, used by structure learning"}
+  :kass1995 {:cite "Kass, R. E., & Raftery, A. E. (1995). Bayes factors. Journal of the American Statistical Association, 90(430), 773-795."
+             :used-for "the log-evidence threshold of 3 ('strong') behind bayesFactorThreshold"}}
+
+ ;; Exogenous symbols: imported by equations, defined by no equation here.
+ ;; :class :stack-defined means the War Machine supplies the content.
+ :exogenous
+ [{:symbol :A :meaning "observation model P(o|s)" :class :stack-defined :glossary "Observation model A" :node :R4}
+  {:symbol :B :meaning "transition model P(s'|s,pi)" :class :stack-defined :glossary "Generative model" :node :R4}
+  {:symbol :C :meaning "preference distribution over outcomes" :class :stack-defined :glossary "Preferences (R19 stack)" :node nil
+   :note "C has no node in control-stages.edn; it lives in the R19 preference stack registry"}
+  {:symbol :E :meaning "habit prior over policies" :class :stack-defined :glossary "Softmax and controller calibration" :node :R6}
+  {:symbol :alpha :meaning "belief-update step size" :class :stack-defined :glossary "Prediction error" :node :R3}
+  {:symbol :eps0 :meaning "variance floor in the precision map" :class :stack-defined :glossary "Precision" :node :R7}
+  {:symbol :world :meaning "the environment: actuation changes what is next observed" :class :external :node :R16}]
+
+ ;; Equations. :imports lists symbols; each is defined by another row's
+ ;; :defines or listed under :exogenous. :node is the R-box that runs it.
+ :equations
+ [{:id :observe :defines :o :node :R2 :class :stack-defined :ref :friston2017
+   :imports [:world]
+   :formal "o_t <- structured observation of the world after action u_{t-1}"}
+  {:id :prediction-error :defines :eps :node :R8 :class :theory-defined :ref :buckley2017
+   :imports [:o :mu]
+   :formal "eps_k := o_k - mu_k" :lean nil :lean-status :missing}
+  {:id :precision :defines :Pi :node :R7 :class :theory-defined :ref :buckley2017
+   :imports [:o :eps0]
+   :formal "Pi_k := 1 / max(Var_k, eps0)" :lean nil :lean-status :missing
+   :note "Var_k is the running channel variance of o_k"}
+  {:id :free-energy :defines :F :node :R8 :class :theory-defined :ref :buckley2017
+   :imports [:Pi :eps]
+   :formal "F = 1/2 * mean_k (Pi_k eps_k^2)" :lean "variationalFreeEnergy" :lean-status :closed}
+  {:id :belief-update :defines :mu-next :node :R3 :class :theory-defined :ref :buckley2017
+   :imports [:mu :Pi :eps :alpha]
+   :formal "mu <- mu + alpha Pi eps" :lean nil :lean-status :missing}
+  {:id :belief-state :defines :mu :node :R1 :class :stack-defined :ref :buckley2017
+   :imports [:mu-next]
+   :formal "mu_t := the stored belief after the update at t-1"}
+  {:id :forward-model :defines :Q-o-pi :node :R4 :class :theory-defined :ref :dacosta2020
+   :imports [:mu :A :B :pi :T]
+   :formal "Q(o|pi) := sum_s A(o|s) Q(s|pi), Q(s|pi) rolled forward by B from mu over depth T"
+   :lean "PredictiveOutcomeKernel" :lean-status :carrier-only
+   :note "Q-interface-completeness.edn records 2 missing wires for this row"}
+  {:id :risk :defines :risk :node :R5 :class :theory-defined :ref :dacosta2020
+   :imports [:Q-o-pi :C]
+   :formal "risk(pi) := D_KL[Q(o|pi) || C]" :lean "predictiveOutcomeRisk" :lean-status :closed}
+  {:id :ambiguity :defines :ambiguity :node :R5 :class :theory-defined :ref :dacosta2020
+   :imports [:Q-o-pi :A]
+   :formal "ambiguity(pi) := E_{Q(s|pi)}[H(P(o|s))]" :lean "ambiguity" :lean-status :closed}
+  {:id :expected-free-energy :defines :G :node :R5 :class :theory-defined :ref :dacosta2020
+   :imports [:risk :ambiguity]
+   :formal "G(pi) := risk(pi) + ambiguity(pi)" :lean "expectedFreeEnergy" :lean-status :closed
+   :conflict "Holes.G := risk - eig over a generic Policy; G_eq_expectedFreeEnergy bridges the two under stated assumptions (glossary-formal-lines.md, G entry)"}
+  {:id :policy-set :defines :pi :node :R6 :class :stack-defined :ref :friston2017
+   :imports []
+   :formal "pi ranges over the candidate action space"}
+  {:id :depth :defines :T :node :R13 :class :theory-defined :ref :dacosta2020
+   :imports []
+   :formal "T := temporal policy depth (the range of the sums in Q(o|pi) and G)"}
+  {:id :temperature :defines :tau :node :R14 :class :stack-defined :ref :friston2017
+   :imports []
+   :formal "tau := commitment temperature (inverse precision gamma of policy selection)"}
+  {:id :policy-posterior :defines :Q-pi :node :R6 :class :theory-defined :ref :dacosta2020
+   :imports [:E :G :tau :pi]
+   :formal "Q(pi) := softmax(ln E(pi) - G(pi)/tau)" :lean "softmax" :lean-status :closed}
+  {:id :action :defines :u :node :R16 :class :theory-defined :ref :friston2017
+   :imports [:Q-pi]
+   :formal "u_t := the action of the selected policy (argmax or sample of Q(pi))"}
+  {:id :model-reduction :defines :Delta-F :node :R17 :class :theory-defined :ref :friston2018bmr
+   :imports [:F]
+   :formal "Delta F := log-evidence change for a reduced model; accepted when Delta F <= -3"
+   :lean "bayesFactorThreshold" :lean-status :closed :threshold-ref :kass1995}]
+
+ ;; Where the framework leaves a free hand. Each is recorded as OBSERVED in
+ ;; the War Machine as of 2026-09-01; Joe decides. Format mirrors
+ ;; control-map-edges.edn :decisions so a decision can replace an observation.
+ :choices
+ {:free-energy-form {:observed :laplace-channel-grain :status :observed-not-decided :by nil :at nil
+                     :statement "F is the continuous Laplace form over error channels, not the discrete categorical F of the POMDP formulation; the policy side uses the discrete formulation. Both are AIF; the mixed grain is a choice."}
+  :temperature-update {:observed :fixed-calibrated :status :observed-not-decided
+                       :statement "tau (R14) is set by controller calibration, not updated by the beta/gamma precision dynamics of dacosta2020."}
+  :habit-prior {:observed :present :status :observed-not-decided
+                :statement "E is present: the Lean softmax takes a habit argument."}
+  :policy-depth {:observed :present :status :observed-not-decided
+                 :statement "T (R13) is a node; its value and whether it varies per tick are stack choices."}
+  :hierarchy {:observed :single-level-drawn :status :observed-not-decided
+              :statement "R15 hierarchy composes loops; at one level it adds no imports and is not drawn as an equation."}
+  :learning {:observed :bmr-present-dirichlet-in-progress :status :observed-not-decided
+             :statement "Structure learning by BMR (R17) is present; Dirichlet parameter learning of A appeared in Lean on 2026-09-01 (DirichletConcentrations) and is not yet wired."}
+  :policy-posterior-node {:observed :assigned-to-R6 :status :observed-not-decided
+                          :statement "No R-node is named for the policy posterior; this registry assigns Q(pi) to R6 (candidate action space) rather than inventing a node."}
+  :selection-rule {:observed :unrecorded :status :observed-not-decided
+                   :statement "Whether u is the argmax or a sample of Q(pi) is not recorded anywhere found; the action row says 'argmax or sample'."}}
+
+ ;; Nodes that run no equation. Legitimate plumbing, not AIF.
+ :plumbing [:R9 :R10 :R11 :R12 :R15 :R20 :TRACE]}
