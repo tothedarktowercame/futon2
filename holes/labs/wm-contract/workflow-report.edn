@@ -1,24 +1,24 @@
 {:lanes
  [{:lane :wm-nouns,
-   :closed-attributed 16,
+   :closed-attributed 17,
    :open-holding 1,
-   :in-flight "C277",
-   :holding :C277-next-glossary-term}
+   :in-flight "C294",
+   :holding :C294-control-liveness}
   {:lane :wm-verbs,
-   :closed-attributed 15,
+   :closed-attributed 19,
    :open-holding 1,
-   :in-flight "C280",
-   :holding :C280-full-suites}
+   :in-flight "C293",
+   :holding :C293-multiread-sweep}
   {:lane :wm-organization,
-   :closed-attributed 15,
+   :closed-attributed 20,
    :open-holding 1,
-   :in-flight "C279",
-   :holding :C279-certificate-provenance}
+   :in-flight "C290",
+   :holding :C290-window-cost}
   {:lane :wm-evidence,
-   :closed-attributed 10,
+   :closed-attributed 14,
    :open-holding 1,
-   :in-flight "C281",
-   :holding :C281-presence-before-format-lint}],
+   :in-flight "C295",
+   :holding :C295-decision-staleness}],
  :schema :wm/workflow-report-v2,
  :since "2026-08-30T00:00:00Z",
  :semantics
@@ -38,16 +38,16 @@
  :sources
  {:case-ledger
   {:path "p4ng/vetting/CLEANUP-QUEUE.md",
-   :revision "7145b9f",
-   :sha256-prefix "b4455e0082de8550"},
+   :revision "2d0d199",
+   :sha256-prefix "ca48ea574f6f8b45"},
   :lane-registry
   {:path "futon2/holes/labs/wm-contract/lane-registry.edn",
-   :revision "6ef6ee0",
-   :sha256-prefix "d6f93d9f3bafa7ce",
+   :revision "8031bf3",
+   :sha256-prefix "da176771898a902c",
    :as-of "2026-08-31T15:39:14.434945104Z"},
   :decisions
   {:path "futon2/holes/problems/DECISIONS-PENDING.md",
-   :sha256-prefix "2be40f4a3ef24eba"}},
+   :sha256-prefix "a3f89acc67e9c55b"}},
  :pending
  ["Strategic outcome vocabulary"
   "Authored R16 outward-act binding"
@@ -61,23 +61,24 @@
   "Fulab temperature without prediction error"
   "Historical versus live Morning Brief QA"
   "Support-typed shadow as the live selection authority"
-  "Invoke-jobs ledger storage backend"],
+  "Invoke-jobs ledger storage backend"
+  "Cascade carrier: how meets are established"],
  :owner-repairs ["C213"],
  :totals
- {:cases-in-ledger 188,
-  :cases-attributed 58,
-  :closed-by-lanes 56,
+ {:cases-in-ledger 202,
+  :cases-attributed 72,
+  :closed-by-lanes 70,
   :owner-repairs 1,
   :open-dispatched 1,
-  :pending-decisions 13},
- :ledger-frontier 272,
- :as-of "2026-09-01T00:24:14.669129934Z",
+  :pending-decisions 14},
+ :ledger-frontier 289,
+ :as-of "2026-09-01T00:42:08.574596379Z",
  :attribution
- {:systematic-from "C268",
-  :systematic-run-length 5,
+ {:systematic-from "C283",
+  :systematic-run-length 7,
   :systematic-window? true,
-  :cases-attributed 58,
-  :cases-in-ledger 188,
+  :cases-attributed 72,
+  :cases-in-ledger 202,
   :attributed-cases
   ["C209"
    "C210"
@@ -136,9 +137,23 @@
    "C269"
    "C270"
    "C271"
-   "C272"],
+   "C272"
+   "C273"
+   "C275"
+   "C276"
+   "C278"
+   "C279"
+   "C280"
+   "C281"
+   "C283"
+   "C284"
+   "C285"
+   "C286"
+   "C287"
+   "C288"
+   "C289"],
   :note
   "per-lane counts cover only cases whose ledger heading names a lane. :systematic-window? is false when the continuous run is a single case, in which case :systematic-from names a coincidence rather than a window and should not be rendered as one. :systematic-from is exact coverage over the LEDGER only -- every case number from it to :ledger-frontier carries an attribution; :frontier is larger because it also counts open registry holdings, which are not ledger attributions -- and every heading inside that window must be classifiable or the generator fails. Cases below it are counted in :cases-in-ledger without a lane, so these are not a campaign census."},
- :frontier 281,
+ :frontier 295,
  :schema-change
  "v1 -> v2 (C244): :dispatched/:completed/:blocked replaced by :closed-attributed/:open-holding, because no dispatch log exists and :dispatched claimed one"}
