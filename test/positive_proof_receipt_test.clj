@@ -21,7 +21,12 @@
   (is (rejected? (assoc-in baseline [:adapter :mappings 0 :lean-field]
                            "unrelatedField")) "unbound Lean field")
   (is (rejected? (dissoc baseline :dependency-closure))
-      "unrecorded dependency-closure boundary"))
+      "unrecorded dependency-closure boundary")
+  (is (rejected? (update baseline :adapter dissoc :correspondence))
+      "unrecorded adapter-correspondence boundary")
+  (is (rejected? (assoc-in baseline [:adapter :mappings 0 :expected-shape]
+                           :structured))
+      "incorrect expected-value shape"))
 
 (deftest reproducible-failure-is-not-verification
   (is (rejected? (assoc-in baseline [:result :exit] 1)))

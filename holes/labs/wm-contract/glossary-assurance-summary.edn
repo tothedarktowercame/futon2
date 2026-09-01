@@ -18,6 +18,9 @@
  :dependency-closure {:mode :author-declared-source-slices
                       :machine-complete false
                       :reason :lean-transitive-closure-not-content-pinned}
+ :adapter-correspondence {:mode :retained-slice-occurrence
+                          :machine-verified-correspondence false
+                          :expected-shape-checked true}
  :limits ["The fifteen construction/projection witnesses establish carrier construction or stored normalization, not downstream behaviour."
           "A source pin prevents silent weakening; it does not make a limited proposition evidence of runtime correctness."
           "The bindings do not prove that live Clojure values or runs match their Lean fixtures unless a binding explicitly includes an identity-preserving runtime adapter."

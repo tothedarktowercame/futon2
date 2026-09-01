@@ -82,6 +82,11 @@
 
 (def allowed-axioms #{"propext" "Classical.choice" "Quot.sound"})
 
+(defn expected-shape [x]
+  (cond (map? x) :structured
+        (or (sequential? x) (set? x)) :collection
+        :else :scalar))
+
 (defn receipt-shape-valid? [receipt source-overrides]
   (let [basis (:source-basis receipt)
         theorem-name (last (str/split (:theorem receipt "") #"\."))
@@ -105,12 +110,17 @@
              :reason :lean-transitive-closure-not-content-pinned}
             closure)
          (= :edn-fields-to-lean-declaration/v1 (:kind adapter))
+         (= {:mode :retained-slice-occurrence
+             :machine-verified-correspondence false
+             :expected-shape-checked true}
+            (:correspondence adapter))
          (contains? names (:lean-declaration adapter))
          (vector? mappings) (seq mappings)
-         (every? (fn [{:keys [fixture-path lean-field]}]
+         (every? (fn [{:keys [fixture-path lean-field expected] :as mapping}]
                    (and (vector? fixture-path) (seq fixture-path)
                         (string? lean-field) (not (str/blank? lean-field))
-                        (str/includes? retained-text lean-field)))
+                        (str/includes? retained-text lean-field)
+                        (= (expected-shape expected) (:expected-shape mapping))))
                  mappings))))
 
 (defn validate
