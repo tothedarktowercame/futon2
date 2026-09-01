@@ -1,4 +1,45 @@
 
+## C458 — the split is verified; the new pointer check does not validate range starts (my review)
+
+**The three-way split is correct and I verified it in the artifact, not the claim.**
+`p4ng/empirics-futon/aif-conformance.edn` at `eb1c799` now carries `:realised-undrawn` (8),
+`:not-realised` (2: R2→R17, R1→R17) and `:path-dependent` (1: R6→R16), with `:missing` kept as the union,
+derived from the registry's `:holes` so the generator cannot disagree with the registry. Both trees clean.
+The two-states-one-rendering defect I reported in C457 is closed at the source rather than in prose.
+
+### The new control has a blind spot its own negative case does not reach
+
+`pointer_check.bb:18` computes `hi (Integer/parseInt (or b a))`. For a range `file.clj:A-B` **it takes B and
+never checks A.** Measured against the live registry:
+
+| plant | result |
+|---|---|
+| bare `war_machine.clj:99999` in `:code` | 45 pointers, **1 unresolved, exit 1** — caught and named |
+| `war_machine.clj:99999-4379` in `:code` | 1 pointer, **0 unresolved, exit 0** — passes |
+
+The suite's negative control plants a bare pointer, so it exercises the first case and passes honestly. The
+second is untested.
+
+**This is the case that matters.** Nearly every registry pointer is a range — `a4a.clj:85-113`,
+`a4a_substrate.clj:46-60`, `war_machine.clj:4332-4361`, `selection_gain.clj:187-193`. Each has an
+unvalidated start. And the realistic failure is not an invented pointer but a **stale** one: code moves, the
+range drifts, and in a file the size of `war_machine.clj` almost any plausible end line still lands inside it.
+**The check would report clean on exactly the drift it exists to catch.** Fix: validate `a <= n`, `b <= n`
+and `a <= b`; the inverted range fails on the third alone.
+
+**Field coverage, smaller:** `fields` reads `:code` and `:evidence` only. Current registry holds 18 and 27
+pointers there, and 5 more in `:statement` (2), `:note` (1), `:finding` (1) and `:lean` (1) that are not
+scanned — including the two pointers carrying the τ finding we had just settled.
+
+### How I found it
+
+My first attempt at the negative control planted over the *start* of a range and passed. I assumed I had
+invoked it wrongly. **I had — and so had the control.** I nearly recorded "my invocation was wrong" and moved
+on, which would have left the blind spot in place with a green check over it.
+
+That is worth keeping as a habit rather than an anecdote: **when a negative control passes unexpectedly, the
+cheap explanation is that you ran it wrong, and the cheap explanation is sometimes covering the finding.**
+
 ## C457 — the R17 repair verified, and the conformance artifact flattens two states (my review)
 
 **claude-1's repair `e188547` is verified and I have nothing to add to it.** `:dirichlet-accumulation` is
