@@ -10,9 +10,12 @@ Every `PositiveLeanWitnessReceipt/v1` now records:
 
 ```edn
 :correspondence
-{:mode :retained-slice-occurrence
- :machine-verified-correspondence false
- :expected-shape-checked true}
+{:boundary/type :declared-not-derived
+ :subject :fixture-to-lean-correspondence
+ :pinned :fixture-identity-shape-and-retained-slice-occurrence
+ :not-pinned :semantic-value-correspondence
+ :derivation-status :derivable-not-adopted
+ :reason :identity-preserving-adapter-and-proof-not-provided}
 ```
 
 Each mapping also records one of `:scalar`, `:collection`, or `:structured`, derived and checked from `:expected`. Thus a four-row posterior table is visibly `:structured`, while a count or individual mass is `:scalar`. This classification describes evidential grain; it does not upgrade occurrence into correspondence.

@@ -21,9 +21,12 @@ Every v1 receipt now carries, and the validator requires:
 
 ```edn
 :dependency-closure
-{:mode :author-declared-source-slices
- :machine-complete false
- :reason :lean-transitive-closure-not-content-pinned}
+{:boundary/type :declared-not-derived
+ :subject :lean-semantic-dependency-closure
+ :pinned :author-declared-source-slices
+ :not-pinned :complete-transitive-constant-closure
+ :derivation-status :derivable-not-adopted
+ :reason :closure-derivable-but-impractical-to-content-pin}
 ```
 
 Thus v1 verifies every recorded component and successful proof, while explicitly declining the claim that the author-declared slices are the complete semantic dependency closure. The residual is **not theoretically permanent**—Lean supplies the traversal needed for a schema-v2 closure digest—but it is permanent for v1 unless that larger, noisier representation is deliberately adopted and tested.

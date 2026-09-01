@@ -61,17 +61,20 @@ presented as a machine-complete closure.
 The honest future certificate shape is consequently a **declared boundary**:
 
 ```clojure
-{:topology-code-boundary
- {:route-shape-sources
-  ["scripts/futon2/report/war_machine.clj"
-   "src/futon2/aif/full_loop_runner.clj"]
-  :execution-semantic-namespaces
-  '[futon2.aif.observation futon2.aif.precision futon2.aif.free-energy
-    futon2.aif.efe futon2.aif.policy futon2.aif.trace]
-  :external-boundaries [:agency-strategic-selection]
-  :runtime-injection-seams [:judge-fn :strategic-selection-invoke-fn]
-  :machine-complete false
-  :boundary-reason :clojure-runtime-call-closure-not-exactly-derivable}}
+{:boundary/type :declared-not-derived
+ :subject :serving-topology-code-closure
+ :pinned :declared-route-shape-sources
+ :not-pinned :complete-runtime-call-closure
+ :derivation-status :not-exactly-derivable
+ :reason :runtime-injection-rebinding-and-external-call-boundaries
+ :route-shape-sources
+ ["scripts/futon2/report/war_machine.clj"
+  "src/futon2/aif/full_loop_runner.clj"]
+ :execution-semantic-namespaces
+ '[futon2.aif.observation futon2.aif.precision futon2.aif.free-energy
+   futon2.aif.efe futon2.aif.policy futon2.aif.trace]
+ :external-boundaries [:agency-strategic-selection]
+ :runtime-injection-seams [:judge-fn :strategic-selection-invoke-fn]}
 ```
 
 That declaration could be checked for source identity and for absence of
@@ -88,5 +91,6 @@ the narrow claim “these bytes authored and serialized this fixed route shape�
 only when the production judgment seam is shown not to have been replaced.
 They are not sufficient for the broader claim “all code affecting the meaning
 or completion of this traversal is closed.”  That broader set must currently
-be declared with `:machine-complete false` and the external and injection
-boundaries made explicit.
+use the shared `:declared-not-derived` vocabulary with
+`:derivation-status :not-exactly-derivable`, and make the external and
+injection boundaries explicit.

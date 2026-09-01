@@ -87,6 +87,22 @@
         (or (sequential? x) (set? x)) :collection
         :else :scalar))
 
+(def dependency-boundary
+  {:boundary/type :declared-not-derived
+   :subject :lean-semantic-dependency-closure
+   :pinned :author-declared-source-slices
+   :not-pinned :complete-transitive-constant-closure
+   :derivation-status :derivable-not-adopted
+   :reason :closure-derivable-but-impractical-to-content-pin})
+
+(def correspondence-boundary
+  {:boundary/type :declared-not-derived
+   :subject :fixture-to-lean-correspondence
+   :pinned :fixture-identity-shape-and-retained-slice-occurrence
+   :not-pinned :semantic-value-correspondence
+   :derivation-status :derivable-not-adopted
+   :reason :identity-preserving-adapter-and-proof-not-provided})
+
 (defn receipt-shape-valid? [receipt source-overrides]
   (let [basis (:source-basis receipt)
         theorem-name (last (str/split (:theorem receipt "") #"\."))
@@ -105,15 +121,9 @@
     (and (vector? basis) (<= 2 (count basis))
          (every? #(and (seq (:repo %)) (seq (:path %)) (seq (:declarations %))) basis)
          (contains? names theorem-name)
-         (= {:mode :author-declared-source-slices
-             :machine-complete false
-             :reason :lean-transitive-closure-not-content-pinned}
-            closure)
+         (= dependency-boundary closure)
          (= :edn-fields-to-lean-declaration/v1 (:kind adapter))
-         (= {:mode :retained-slice-occurrence
-             :machine-verified-correspondence false
-             :expected-shape-checked true}
-            (:correspondence adapter))
+         (= correspondence-boundary (:correspondence adapter))
          (contains? names (:lean-declaration adapter))
          (vector? mappings) (seq mappings)
          (every? (fn [{:keys [fixture-path lean-field expected] :as mapping}]

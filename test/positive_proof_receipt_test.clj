@@ -22,6 +22,9 @@
                            "unrelatedField")) "unbound Lean field")
   (is (rejected? (dissoc baseline :dependency-closure))
       "unrecorded dependency-closure boundary")
+  (is (rejected? (assoc-in baseline [:dependency-closure :derivation-status]
+                           :not-exactly-derivable))
+      "wrong derivability class")
   (is (rejected? (update baseline :adapter dissoc :correspondence))
       "unrecorded adapter-correspondence boundary")
   (is (rejected? (assoc-in baseline [:adapter :mappings 0 :expected-shape]
