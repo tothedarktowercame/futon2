@@ -343,3 +343,42 @@ claim the wrong one would misdirect exactly the reader the vocabulary exists for
 (C390) and `:repository-census-bases` (C393) — both "wired into the gate" claims hold. Receipt work is gated
 under `:r9-proof-receipt`, `:pinned-operational-certificate` and `:lean-sorry-categories`. **`quiescence` is
 correctly absent**: it observes live process state, not repository state, and belongs to the state machine.
+
+## C430 — the repository-wide gate run: 128 checks, basis stable, three failures (my fix, owner)
+
+**Held all four lanes idle to get a fixed tree**, then ran `make workspace-gate` under the bounded service
+(`futon-test-bounded-…-wm-gate-c424`). **This is the first verdict tonight covering the whole repository rather
+than one lane's corner**, and it found three things no lane could have seen — each lane ran focused checks, and
+the gate is the only thing that runs these.
+
+**Basis `:stable` across all four repositories**, futon2 at `7a646d1` with `dirty? false`. **The idle hold
+worked**: a gate run against a moving tree returns `repository-basis-changed` and certifies nothing.
+**128 checks, 127 executable, 6m35s CPU, 1.6 GB peak.**
+
+**Verdict qualification `:content-only-event-free-unverified`** — no writer fence was declared for this run, so
+event-freedom is unverified and the gate says so rather than assuming it. **That is the C292/C313 machinery
+behaving correctly on an ordinary run.**
+
+### The three failures
+
+**1. `c277-perturbed-reduction-free-energy`, exit 2 — `mutation slipped`.** The most serious. **A negative
+control perturbed its witness and the check did not notice**, so it has been reporting success for nothing.
+Class 1 in the least visible place: the artifact that fails is itself a negative control. → `wm-nouns` (C426).
+
+**2. `reload-click-certificate-rehearsal` — expected `:pass`, got `:fail`.** A regression from tonight:
+C398/C410 added `:serving-program-matches-tested-program?` and run-identity checks that C230's rehearsal
+fixture predates. The certificate reports `:program-identity-status :unavailable` and
+`:resource-run-identity-matches? false`. **The open question is whether an unavailable serving identity should
+collapse to `:fail`** — C404 established `:unavailable` blocks throughout the certificate path, which is right
+for production and may be wrong for a rehearsal. → `wm-organization` (C427).
+
+**3. `mutable-verdict-claims` — `:undeclared-member` ×3.** `exit_code_scope_check.clj` (C390) and
+`repository_census_basis_check.clj` (C393) joined the gate tonight **without joining the verdict census**;
+`empty_subject_acceptance_lint.py` has been undeclared longer. **The census caught its own authors**, which is
+what a 73-member population with zero unexplained members is for. → `wm-verbs` (C428).
+
+### One confirmation worth keeping
+
+**The bounded wrapper exited 125 while the inner gate exited 1** — exactly as C387's census predicted:
+*"Bounded runner: collapses any inner nonzero to outer 125/`test-failure`, while retaining `inner-exit`."*
+**Tonight's own analysis of the exit vocabulary was verified by an unrelated run of the thing it described.**

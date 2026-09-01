@@ -4,10 +4,10 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding nil, :dispatched-at nil, :job-id nil, :expected-by nil}
+   :holding :C426-mutation-slipped, :dispatched-at "2026-09-01T03:19:21Z", :job-id "invoke-1788232717657-6585-173578a5", :expected-by "2026-09-01T04:04:21Z"}
   {:lane :wm-verbs
-   :holding nil, :dispatched-at nil, :job-id nil, :expected-by nil}
+   :holding :C428-undeclared-census-members, :dispatched-at "2026-09-01T03:19:21Z", :job-id "invoke-1788232726480-6587-6dfebc3d", :expected-by "2026-09-01T04:04:21Z"}
   {:lane :wm-organization
-   :holding nil, :dispatched-at nil, :job-id nil, :expected-by nil}
+   :holding :C427-rehearsal-regression, :dispatched-at "2026-09-01T03:19:21Z", :job-id "invoke-1788232721980-6586-f85f6565", :expected-by "2026-09-01T04:04:21Z"}
   {:lane :wm-evidence
-   :holding :C423-certificate-negative-controls, :dispatched-at "2026-09-01T03:08:40Z", :job-id "invoke-1788232070615-6582-7aca9c4e", :expected-by "2026-09-01T03:53:40Z"}]}
+   :holding :C429-attempt-identity-survey, :dispatched-at "2026-09-01T03:19:21Z", :job-id "invoke-1788232731189-6588-5bf9ba0d", :expected-by "2026-09-01T04:04:21Z"}]}
