@@ -132,3 +132,136 @@
     (is (false? (:converged? result)))
     (is (some? (:residual-at-floor result)))
     (is (some? (:residual-at-ceiling result)))))
+
+;; ---------------------------------------------------------------------------
+;; RUN7 / stage S2 -- the carry lifecycle
+
+(defn- ranked [identity score]
+  {:action {:type :address-sorry :target identity}
+   :controller-score score})
+
+(def ^:private identity-of (comp :target :action))
+
+(defn- field
+  "n candidates with a present F_pi each, and this tick's G beside them."
+  [n]
+  {:by-candidate-id
+   (into {} (for [i (range n)]
+              [(str "rank/" (inc i))
+               {:candidate-identity (keyword (str "c" i))
+                :status :present
+                :value (+ -18.0 (* 0.03 (mod i 17)))}]))
+   :ranked (mapv #(ranked (keyword (str "c" %)) (+ 0.25 (* 0.004 %))) (range n))})
+
+(deftest carry-solves-and-hands-the-posterior-to-the-next-tick-test
+  (let [{:keys [by-candidate-id ranked]} (field 110)
+        first-tick (policy-precision/carry-beta nil by-candidate-id ranked
+                                                {:identity-fn identity-of})]
+    (is (= :present (:status first-tick)))
+    (is (= 110 (:f-pi-present-count first-tick)))
+    (is (= :converged-posterior (:beta-source first-tick)))
+    (is (= 1 (:solved-tick-count first-tick)))
+    (testing "the acceptance's five quantities are on the record as data"
+      (let [solve (:solve first-tick)]
+        (is (number? (:beta-posterior solve)))
+        (is (number? (:gamma solve)))
+        (is (integer? (:iterations solve)))
+        (is (contains? solve :converged?))
+        (is (contains? solve :bracketed?))))
+    (testing "gamma is 1/beta, so the persisted pair cannot drift apart"
+      (is (< (Math/abs (- (:gamma (:solve first-tick))
+                          (/ 1.0 (:beta-posterior (:solve first-tick)))))
+             1.0e-12)))
+    (testing "the distributions are dropped rather than persisted per tick"
+      (is (not (contains? (:solve first-tick) :pi)))
+      (is (not (contains? (:solve first-tick) :pi-0))))
+    (testing "the next tick's prior IS this tick's posterior (worklist J4)"
+      (let [second-tick (policy-precision/carry-beta
+                         first-tick by-candidate-id ranked
+                         {:identity-fn identity-of})]
+        (is (= (:beta first-tick) (:beta-prior (:solve second-tick))))
+        (is (= 2 (:solved-tick-count second-tick)))))))
+
+(deftest carry-holds-rather-than-resets-when-the-field-is-absent-test
+  (let [{:keys [by-candidate-id ranked]} (field 110)
+        solved (policy-precision/carry-beta nil by-candidate-id ranked
+                                            {:identity-fn identity-of})
+        held (policy-precision/carry-beta solved {} ranked
+                                          {:identity-fn identity-of})]
+    (is (= :absent (:status held)))
+    (is (= :empty-f-pi-readback (:reason held)))
+    (is (= (:beta solved) (:beta held)) "the carried beta is held, not reset")
+    (is (= :held-absent (:beta-source held)))
+    (is (not (contains? held :solve))
+        "no stale solve rides forward to be read as this tick's")
+    (is (= 1 (:solved-tick-count held)))))
+
+(deftest a-tick-that-never-solved-is-on-beta-0-not-holding-test
+  (let [held (policy-precision/carry-beta nil {} [] {:identity-fn identity-of})]
+    (is (= :initial (:beta-source held))
+        "held-absent would imply a solve behind a beta that beta_0 put there")
+    (is (= policy-precision/default-initial-beta (:beta held)))
+    (is (= 0 (:solved-tick-count held)))))
+
+(deftest unsolved-holds-and-persists-the-failed-solve-test
+  (testing "an unbracketed root holds beta and keeps its diagnostics"
+    (let [{:keys [by-candidate-id ranked]} (field 110)
+          ;; a bracket that cannot straddle the root: both ends above it
+          result (policy-precision/carry-beta
+                  {:beta 2.0 :solved-tick-count 3} by-candidate-id ranked
+                  {:identity-fn identity-of
+                   :beta-floor 1.0e5 :beta-ceiling 1.0e6})]
+      (is (= :present (:status result)) "the tick DID compute; it did not solve")
+      (is (false? (:bracketed? (:solve result))))
+      (is (= :held-unsolved (:beta-source result)))
+      (is (= 2.0 (:beta result)) "an unsolved tick carries its prior forward")
+      (is (= 3 (:solved-tick-count result)) "and does not count as a solve")
+      (is (contains? (:solve result) :residual-at-floor)
+          "the failed solve is DATA, not a discarded exception"))))
+
+(deftest absent-and-unjoinable-candidates-are-counted-not-dropped-test
+  (let [{:keys [ranked]} (field 4)
+        mixed {"rank/1" {:candidate-identity :c0 :status :present :value -1.0}
+               "rank/2" {:candidate-identity :c1 :status :absent
+                         :reason :missing-prediction-details}
+               ;; identity present in the readback but gone from this tick
+               "rank/3" {:candidate-identity :vanished :status :present :value -2.0}
+               ;; a non-numeric F_pi is an absence, not a zero
+               "rank/4" {:candidate-identity :c2 :status :present :value nil}}
+        result (policy-precision/carry-beta nil mixed ranked
+                                            {:identity-fn identity-of})]
+    (is (= 1 (:f-pi-present-count result)))
+    (is (= 3 (:f-pi-absent-count result)))
+    (is (= 1 (:candidate-count (:solve result))))))
+
+(deftest carried-state-is-guarded-not-inherited-test
+  (testing "the R14 v0 lesson: a malformed carried state reconstructs the prior"
+    (doseq [bad [nil {} {:beta 0.0} {:beta -1.0} {:beta ##NaN} {:beta "1.0"} :not-a-map]]
+      (let [coerced (policy-precision/coerce-state bad)]
+        (is (= policy-precision/default-initial-beta (:beta coerced))
+            (str "reset for " (pr-str bad)))
+        (is (= :initial (:beta-source coerced)))
+        (is (= 0 (:solved-tick-count coerced))))))
+  (testing "and a well-formed one is passed through untouched"
+    (let [good {:beta 1.5 :beta-source :converged-posterior :solved-tick-count 7}]
+      (is (= good (policy-precision/coerce-state good))))))
+
+(deftest the-join-identity-is-required-rather-than-defaulted-test
+  (is (thrown-with-msg?
+       clojure.lang.ExceptionInfo #":identity-fn is required"
+       (policy-precision/carry-beta nil {"rank/1" {:status :present :value -1.0}}
+                                    [] {}))
+      "a defaulted identity would return :no-aligned-candidates every tick"))
+
+(deftest g-is-the-controller-score-selection-itself-uses-test
+  (let [by-id {"rank/1" {:candidate-identity :c0 :status :present :value -1.0}
+               "rank/2" {:candidate-identity :c1 :status :present :value -2.0}}
+        sharp (policy-precision/carry-beta
+               nil by-id [(ranked :c0 0.0) (ranked :c1 4.0)]
+               {:identity-fn identity-of})
+        flat (policy-precision/carry-beta
+              nil by-id [(ranked :c0 0.0) (ranked :c1 0.0)]
+              {:identity-fn identity-of})]
+    (is (not= (:beta sharp) (:beta flat))
+        "changing only :controller-score moves the solved beta, so G is read
+         from the field selection uses and not from a constant")))

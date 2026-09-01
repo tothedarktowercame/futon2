@@ -303,3 +303,198 @@
                     (if ceiling-now?
                       (inc ceiling-hit-count)
                       ceiling-hit-count))))))))))
+
+;; ---------------------------------------------------------------------------
+;; RUN7 / stage S2 -- the DARK carry lifecycle.
+;;
+;; `converge-beta` above is pure and stateless: one solve, one field. What a
+;; run needs on top of it is a beta that persists from tick to tick, which is
+;; the carried-prior ruling (worklist J4) made operational. The read/coerce/
+;; write shape here is deliberately the one `futon2.aif.selection-gain` already
+;; uses for the R14 gain state -- read the previous tick's map out of the trace,
+;; put it through a schema guard rather than trusting it, fold this tick's
+;; evidence in, hand the new map back for persistence -- so there is one
+;; cross-tick state pattern in this apparatus and not two.
+;;
+;; NOTHING CONSUMES THIS. `carry-beta` returns a map to persist; no selection,
+;; ranking, temperature or softmax path reads it. That is what makes S2 dark,
+;; and it is the property RUN7's acceptance asks a reviewer to check.
+
+(def default-initial-beta
+  "beta_0 for a tick with no carried state. gamma = 1/beta, so beta = 1.0 is
+   gamma = 1.0 -- the same unit prior `selection-gain/default-initial-selection-gain`
+   takes, and the only value that makes the first dark tick's pi comparable to
+   the live selection-gain path's.
+
+   C22 / V6 bound, to be quoted with every number derived from a carry: over
+   about 20 ticks a carried beta is STILL DOMINATED BY ITS beta_0 -- the four
+   07-04 trajectories were 0.50, 0.87, 1.58 and 2.48 apart at t=17 and only
+   contracted to a common value between t=17 and t=37. A 20-tick carry is not
+   converged and must not be reported as one."
+  1.0)
+
+(defn initial-beta-state
+  "The honest prior: beta_0, carried, with nothing solved behind it yet."
+  []
+  {:status :absent
+   :reason :no-carried-state
+   :beta default-initial-beta
+   :beta-source :initial
+   :solved-tick-count 0})
+
+(defn coerce-state
+  "Schema guard for a beta-carry state read back from a persisted trace record.
+
+   Same job as `selection-gain/coerce-state`, and opened for the same reason:
+   the R14 v0 gain state rode a retired schema forward through the trace for
+   days because the reader inherited whatever it found. A state is usable only
+   if it carries a finite positive `:beta`; anything else -- nil, a non-map, a
+   later schema's shape, a beta that a bug drove to zero or NaN -- reconstructs
+   the prior instead of inheriting it, and says so in `:beta-source`."
+  [state]
+  (if (and (map? state)
+           (finite-number? (:beta state))
+           (pos? (double (:beta state))))
+    state
+    (assoc (initial-beta-state)
+           :reason (if (nil? state) :no-carried-state :malformed-carried-state))))
+
+(defn beta-for
+  "Read the beta a state carries, defaulting to beta_0. Mirrors
+   `selection-gain/selection-gain-for`."
+  [state]
+  (double (get state :beta default-initial-beta)))
+
+(defn held-state
+  "The state a tick persists when it could not solve: beta unchanged, the
+   reason named, and NO `:solve` -- the previous tick's diagnostics are dropped
+   rather than carried forward, since a reader finding `:solve` on a record
+   would take it for this tick's.
+
+   `:beta-source` distinguishes a beta that is still beta_0 from one that a
+   solve put there and a later tick is holding."
+  [prev-state reason]
+  (let [state (coerce-state prev-state)
+        solved-count (long (:solved-tick-count state 0))]
+    {:status :absent
+     :reason reason
+     :beta (beta-for state)
+     :beta-source (if (zero? solved-count) :initial :held-absent)
+     :solved-tick-count solved-count}))
+
+(defn align-f-pi-and-g
+  "Join the dark F_pi readback to this tick's G, by semantic action identity.
+
+   `f-pi-by-candidate-id` is `war-machine/f-pi-dark-readback`'s per-candidate
+   map: keyed by the PREVIOUS tick's `rank/N`, each entry carrying the
+   `:candidate-identity` it was matched on and either `:status :present` with a
+   `:value`, or `:status :absent` with a `:reason`. `current-ranked` is this
+   tick's ranked-action list, whose `:controller-score` is the G that selection
+   itself divides by tau -- so the G here is the machine's own, not a proxy
+   recomputed from persisted terms.
+
+   THE TWO TERMS ARE NOT CONTEMPORANEOUS, and that is a property of the
+   quantity rather than of this join: G(pi) is expected under THIS tick's
+   candidates, while F_pi(pi) can only be scored from a prediction the previous
+   tick made about this tick's observation. So the pair is (this tick's G,
+   last tick's prediction scored now) for the same policy identity. Stated here
+   because a reader of a beta trajectory would otherwise take the two as
+   simultaneous.
+
+   Returns `{:g-values [...] :f-pi-values [...] :candidate-ids [...]
+   :present-count n :absent-count m}` over exactly the entries that are present
+   AND identity-resolvable in `current-ranked`; entries failing either are
+   counted, not silently dropped to a shorter vector with no record of it."
+  [f-pi-by-candidate-id current-ranked identity-fn score-fn]
+  (let [by-identity (group-by identity-fn current-ranked)
+        entries (sort-by key (seq (or f-pi-by-candidate-id {})))]
+    (reduce
+     (fn [acc [candidate-id entry]]
+       (let [identity (:candidate-identity entry)
+             matches (get by-identity identity)
+             g (when (= 1 (count matches)) (score-fn (first matches)))]
+         (cond
+           (not= :present (:status entry))
+           (update acc :absent-count inc)
+
+           (not (finite-number? (:value entry)))
+           (update acc :absent-count inc)
+
+           (not (finite-number? g))
+           (update acc :absent-count inc)
+
+           :else
+           (-> acc
+               (update :g-values conj (double g))
+               (update :f-pi-values conj (double (:value entry)))
+               (update :candidate-ids conj candidate-id)
+               (update :present-count inc)))))
+     {:g-values [] :f-pi-values [] :candidate-ids []
+      :present-count 0 :absent-count 0}
+     entries)))
+
+(defn carry-beta
+  "One dark tick of the beta carry: coerce the carried state, solve eq. 2.7 over
+   the aligned (F_pi, G) field, and return the state to persist.
+
+   WHAT CARRIES, named here rather than left to a reader of a run record
+   (the constraint claude-1 put on this slice): only a SOLVED posterior
+   carries. `:converged? true` AND `:bracketed? true` gives
+   `:beta-source :converged-posterior` and the posterior becomes the next
+   tick's prior. A solve that did not converge, or whose bracket ends did not
+   straddle the root, HOLDS the beta the tick came in with --
+   `:beta-source :held-unsolved` -- and the failed solve is persisted beside it
+   under `:solve` rather than discarded. A tick with no usable field holds too,
+   as `:held-absent` with a reason. So a later reader can always tell solved
+   from held, which is the distinction a silent fallback destroys.
+
+   `opts` are `converge-beta`'s, plus the join accessors. `:identity-fn` is
+   REQUIRED and is not defaulted: the cross-tick identity lives in the caller
+   (`war-machine/candidate-identity`, a habit-prior policy key), and a default
+   that never matched would return `:no-aligned-candidates` on every tick --
+   correct, and useless, which is the failure mode the F_pi dark flag's own
+   docstring warns about. `:score-fn` defaults to `:controller-score`, the
+   quantity selection itself divides by tau.
+   Returns a map; writes nothing."
+  [prev-state f-pi-by-candidate-id current-ranked
+   {:keys [identity-fn score-fn] :as opts}]
+  (when-not (ifn? identity-fn)
+    (fail! ":identity-fn is required for the F_pi/G join"
+           {:error :missing-identity-fn}))
+  (let [state (coerce-state prev-state)
+        beta-prior (beta-for state)
+        held (partial held-state state)]
+    (cond
+      (not (map? f-pi-by-candidate-id))
+      (held :no-f-pi-readback)
+
+      (empty? f-pi-by-candidate-id)
+      (held :empty-f-pi-readback)
+
+      :else
+      (let [{:keys [g-values f-pi-values present-count absent-count]}
+            (align-f-pi-and-g f-pi-by-candidate-id current-ranked
+                              identity-fn
+                              (or score-fn :controller-score))]
+        (if (zero? present-count)
+          (assoc (held :no-aligned-candidates)
+                 :f-pi-present-count 0
+                 :f-pi-absent-count absent-count)
+          (let [solve (converge-beta beta-prior g-values f-pi-values
+                                     (dissoc opts :identity-fn :score-fn))
+                solved? (boolean (and (:converged? solve)
+                                      (not (false? (:bracketed? solve)))))]
+            {:status :present
+             ;; the value the NEXT tick carries, and why it is that value
+             :beta (if solved? (:beta-posterior solve) beta-prior)
+             :beta-source (if solved? :converged-posterior :held-unsolved)
+             :solved-tick-count (cond-> (long (:solved-tick-count state 0))
+                                  solved? inc)
+             :f-pi-present-count present-count
+             :f-pi-absent-count absent-count
+             ;; The solve, as DATA (RUN7 acceptance). pi and pi-0 are dropped:
+             ;; they are two 110-element vectors per tick and nothing here needs
+             ;; the distributions, only the scalars they produced.
+             :solve (-> solve
+                        (dissoc :pi :pi-0)
+                        (assoc :candidate-count present-count))}))))))

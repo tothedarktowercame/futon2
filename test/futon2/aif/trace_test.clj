@@ -25,19 +25,43 @@
 
 (use-fixtures :each with-tmpdir)
 
-(defn- previous-trace-record
-  "Load HEAD~'s trace implementation under a parallel namespace. This is the
-   cross-version control: it does not restate the current strip logic."
-  [judge-output]
+(def ^:private pre-beta-dark-trace-sha
+  "The last commit that touched src/futon2/aif/trace.clj before the RUN7 dark
+   beta field was added.
+
+   PINNED, NOT HEAD~ (the RUN5 review finding, 2026-09-01): a moving anchor
+   rots. After the next edit to this file HEAD~ already CONTAINS the field, so
+   the control compares the flag-off path with itself and the claim it backs
+   turns quietly from `the default record is unchanged by dark beta` into `the
+   last commit changed nothing`. Both are checks; only the first is the claim.
+   A control for a fixed claim gets a fixed anchor."
+  "183749a")
+
+(defn- record-at
+  "Load a past revision's trace implementation under a parallel namespace and
+   build a record with it. This is the cross-version control: it does not
+   restate the current strip logic."
+  [sha ns-suffix judge-output]
   (let [{:keys [exit out err]}
-        (shell/sh "git" "show" "HEAD~:src/futon2/aif/trace.clj")]
+        (shell/sh "git" "show" (str sha ":src/futon2/aif/trace.clj"))]
     (when-not (zero? exit)
-      (throw (ex-info "could not load previous trace implementation" {:err err})))
+      (throw (ex-info "could not load previous trace implementation"
+                      {:sha sha :err err})))
     (load-string
      (str/replace-first out
                         "(ns futon2.aif.trace"
-                        "(ns futon2.aif.trace-previous"))
-    ((ns-resolve 'futon2.aif.trace-previous 'trace-record) judge-output)))
+                        (str "(ns futon2.aif.trace-" ns-suffix)))
+    ;; The parallel namespace has its OWN copy of the policy-detail var, which
+    ;; reads the env at load. Without this the "flag on" comparison would put a
+    ;; details-on record beside a details-off one and fail for a reason that has
+    ;; nothing to do with the change under test.
+    (let [old-ns (symbol (str "futon2.aif.trace-" ns-suffix))]
+      (with-bindings {(ns-resolve old-ns '*persist-policy-trace-details?*)
+                      trace/*persist-policy-trace-details?*}
+        ((ns-resolve old-ns 'trace-record) judge-output)))))
+
+(defn- previous-trace-record [judge-output]
+  (record-at pre-beta-dark-trace-sha "previous" judge-output))
 
 (def ^:private sample-judge-output
   "Minimal judge-style output covering the trace-record fields."
@@ -548,3 +572,43 @@
                      {:wm-version {:trace-schema-version 20}}
                      :observation-envelope)))
         "a current contract cannot enter the permissive legacy arm")))
+
+(deftest beta-dark-off-is-byte-identical-to-the-pinned-pre-beta-record-test
+  (testing "RUN7: with the dark beta flag off the record matches 183749a's"
+    (binding [trace/*persist-policy-trace-details?* false]
+      (let [fix-clock #(assoc % :timestamp "<same-instant>")]
+        (is (= (pr-str (fix-clock (record-at pre-beta-dark-trace-sha
+                                             "pre-beta" sample-judge-output)))
+               (pr-str (fix-clock (trace/trace-record sample-judge-output))))
+            "no key appears, and no key moves, when the flag is off")))
+    (testing "and with the policy-detail flag on, which is the shape S2 runs in"
+      (binding [trace/*persist-policy-trace-details?* true]
+        (let [fix-clock #(assoc % :timestamp "<same-instant>")]
+          (is (= (pr-str (fix-clock (record-at pre-beta-dark-trace-sha
+                                               "pre-beta-details" sample-judge-output)))
+                 (pr-str (fix-clock (trace/trace-record sample-judge-output))))))))))
+
+(deftest beta-dark-state-roundtrips-when-supplied-test
+  (let [state {:status :present
+               :beta 0.9877
+               :beta-source :converged-posterior
+               :solved-tick-count 3
+               :f-pi-present-count 108
+               :f-pi-absent-count 2
+               :solve {:solver :bisect
+                       :beta-prior 1.0
+                       :beta-posterior 0.9877
+                       :gamma 1.012452
+                       :iterations 70
+                       :converged? true
+                       :bracketed? true
+                       :fixed-point-residual 1.1e-13
+                       :candidate-count 108}}
+        record (trace/trace-record
+                (assoc sample-judge-output :policy-precision-state state))
+        roundtrip (edn/read-string (pr-str record))]
+    (is (= state (:policy-precision-state roundtrip))
+        "the carried beta survives the EDN write/read the next tick reads it through")
+    (is (not (contains? (trace/trace-record sample-judge-output)
+                        :policy-precision-state))
+        "a producer with the flag off makes no claim about policy precision")))

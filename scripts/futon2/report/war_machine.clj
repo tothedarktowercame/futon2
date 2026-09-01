@@ -49,6 +49,7 @@
             [futon2.aif.pattern-registry :as pattern-registry]
             [futon2.aif.policy :as policy]
             [futon2.aif.policy-free-energy :as policy-free-energy]
+            [futon2.aif.policy-precision :as policy-precision]
             [futon2.aif.selection-gain :as selection-gain]
             [futon2.aif.precision :as precision]
             [futon2.aif.preferences :as pref]
@@ -78,6 +79,25 @@
    changing ranking, softmax weights, effective temperature, or selection.
    Dynamic binding exists only for isolated tests."
   (= "1" (System/getenv "FUTON_WM_FPI_DARK")))
+
+(def ^:dynamic *beta-dark?*
+  "RUN7 / stage S2 dark beta switch, read once when this namespace loads.
+   `FUTON_WM_BETA_DARK=1` solves Friston eq. 2.7 for policy precision over the
+   dark F_pi readback and this tick's own controller scores, carries the
+   solved beta to the next tick through the trace, and persists the solve with
+   its diagnostics. It changes no ranking, no softmax weight, no effective
+   temperature and no selection -- gamma is computed and written, never read
+   back into the tick that produced it.
+
+   THREE FLAGS, AND THEY ARE COUPLED, one link further than the F_pi pair:
+   this consumes what `FUTON_WM_FPI_DARK=1` computed, which in turn consumes
+   what `FUTON_WM_TRACE_POLICY_DETAILS=1` wrote on the PREVIOUS tick. With
+   this flag alone every tick records `:reason :no-f-pi-readback` -- correct,
+   and useless. All three must be on, and the previous tick must already have
+   had the trace flag on.
+
+   Dynamic binding exists only for isolated tests."
+  (= "1" (System/getenv "FUTON_WM_BETA_DARK")))
 
 (defn- ranked-candidate-id [ranked-action]
   (str "rank/" (:rank ranked-action)))
@@ -213,6 +233,52 @@
           :unmatched-current-count (- (count current-ranked) matched-count)
           :scored-count scored-count
           :scoring-absence-count (- matched-count scored-count)}}))))
+
+(defn beta-dark-carry
+  "RUN7 / stage S2: one dark tick of the policy-precision beta carry.
+
+   `previous-trace` supplies the carried state (`:policy-precision-state`),
+   `f-pi-fields` is the map `f-pi-dark-readback` just returned, and
+   `current-ranked` this tick's ranked actions. The join is by the SAME
+   semantic action identity F_pi itself matched on, and G is each candidate's
+   own `:controller-score` -- the quantity selection divides by tau, not a
+   G-total proxy recomputed from persisted terms.
+
+   Returns `{:policy-precision-state <state>}` for merging onto the judgement,
+   or `nil` when there is nothing to say. Reads no state and writes none; the
+   returned map is data for `trace/trace-record` to persist."
+  [previous-trace f-pi-fields current-ranked]
+  (let [carried (:policy-precision-state previous-trace)
+        readback (:f-pi-by-candidate-id f-pi-fields)
+        ;; the whole-tick absence envelope and the per-candidate map are
+        ;; different shapes; `vals` on the former would read
+        ;; (:absent :no-previous-trace-record) as if those were F_pi values,
+        ;; which is exactly the confusion the envelope was introduced to stop
+        by-candidate (when (= :present (:status readback))
+                       (:by-candidate-id readback))]
+    {:policy-precision-state
+     (if (map? by-candidate)
+       (try
+         (policy-precision/carry-beta carried by-candidate current-ranked
+                                      {:identity-fn #(candidate-identity %)
+                                       :score-fn :controller-score})
+         ;; A solver rejection is recorded as an explicit absence with the
+         ;; solver's own reason -- the same shape f-pi-dark-readback uses for a
+         ;; per-candidate scoring error. It is NOT a catch-all into nil: a
+         ;; whole-tick production run must not abort on a dark diagnostic, and
+         ;; a reader must still be able to see that this tick did not solve and
+         ;; why. Throwable, not ExceptionInfo: the point is that the live path
+         ;; is unaffected by anything this computation does. With the join's
+         ;; numeric filters in place no input reachable here makes converge-beta
+         ;; throw, so this is a guard against a later change to the solver's
+         ;; validation rather than a path any test exercises -- said plainly so
+         ;; nobody reads a passing suite as having covered it.
+         (catch Throwable error
+           (assoc (policy-precision/held-state
+                   carried (or (:error (ex-data error)) :beta-solver-error))
+                  :error-data (ex-data error))))
+       (policy-precision/held-state
+        carried (or (:reason readback) :no-f-pi-readback)))}))
 ;; ---------------------------------------------------------------------------
 
 (def ^:private home (System/getProperty "user.home"))
@@ -4922,6 +4988,14 @@
                            (f-pi-dark-readback prev-trace-record
                                                wm-ranked+cascades
                                                observation))
+        ;; RUN7 / stage S2. Computed AFTER the F_pi readback because it
+        ;; consumes it, and after ranking because G is each candidate's own
+        ;; :controller-score. Nothing below reads it: it is merged onto the
+        ;; judgement for persistence and never back into this tick.
+        beta-dark-fields (when *beta-dark?*
+                           (beta-dark-carry prev-trace-record
+                                            f-pi-dark-fields
+                                            wm-ranked+cascades))
         result0
         (cond-> (cond-> {:mode mode
                  :mode-prior (get pref/mode-prior mode 0.0)
@@ -4992,7 +5066,10 @@
                  :wm/route route6
                  :input-status (current-input-status)}
                   f-pi-dark-fields
-                  (merge f-pi-dark-fields))
+                  (merge f-pi-dark-fields)
+
+                  beta-dark-fields
+                  (merge beta-dark-fields))
           habit-prior-state
           (assoc :habit-prior-state habit-prior-state)
           wm-version

@@ -13,6 +13,7 @@
             [futon2.aif.efe :as efe]
             [futon2.aif.free-energy :as free-energy]
             [futon2.aif.observation :as observation]
+            [futon2.aif.trace :as trace]
             [futon2.report.war-machine :as wm])
   (:import (java.io PushbackReader StringReader)))
 
@@ -190,6 +191,106 @@
                   [{:rank 1 :action {:type :no-op}}]
                   {})
                  [:f-pi-by-candidate-id :reason]))))
+
+(deftest beta-dark-carry-solves-over-the-real-shape-field-test
+  ;; RUN7 / stage S2. The same 110-candidate fixture the F_pi readback is
+  ;; measured on, with this tick's controller scores added -- so the join under
+  ;; test is the one a run performs, not a two-candidate toy.
+  (let [{:keys [previous current observation]} (real-shape-f-pi-fixture)
+        scored (mapv (fn [index action]
+                       (assoc action :controller-score (+ 0.25 (* 0.004 index))))
+                     (range) current)
+        f-pi-fields (wm/f-pi-dark-readback previous scored observation)
+        result (wm/beta-dark-carry {} f-pi-fields scored)
+        state (:policy-precision-state result)]
+    (is (= :present (:status state)))
+    (is (= 108 (:f-pi-present-count state))
+        "the 108 candidates F_pi scored, and only those, enter the solve")
+    (is (= 2 (:f-pi-absent-count state))
+        "the channel-mismatch candidate and the one that left the tick are
+         counted rather than dropped into a shorter vector")
+    (is (= 108 (get-in state [:solve :candidate-count])))
+    (is (true? (get-in state [:solve :converged?])))
+    (is (true? (get-in state [:solve :bracketed?])))
+    (is (= :converged-posterior (:beta-source state)))
+    (is (number? (get-in state [:solve :gamma])))
+    (is (= state (edn/read-string (pr-str state)))
+        "the state survives the EDN round trip it is carried through"))
+
+  (testing "the carry closes through the trace: this tick's beta is next tick's prior"
+    (let [{:keys [previous current observation]} (real-shape-f-pi-fixture)
+          scored (mapv (fn [index action]
+                         (assoc action :controller-score (+ 0.25 (* 0.004 index))))
+                       (range) current)
+          f-pi-fields (wm/f-pi-dark-readback previous scored observation)
+          first-state (:policy-precision-state
+                       (wm/beta-dark-carry {} f-pi-fields scored))
+          ;; exactly how a run does it: through a persisted trace record
+          record (trace/trace-record {:belief {} :observation observation
+                                      :policy-precision-state first-state})
+          second-state (:policy-precision-state
+                        (wm/beta-dark-carry (edn/read-string (pr-str record))
+                                            f-pi-fields scored))]
+      (is (= (:beta first-state) (get-in second-state [:solve :beta-prior])))
+      (is (= 2 (:solved-tick-count second-state))))))
+
+(deftest beta-dark-carry-names-the-reason-it-could-not-solve-test
+  (testing "a whole-tick F_pi absence is carried through as its own reason"
+    (let [f-pi-fields (wm/f-pi-dark-readback nil [] {})
+          state (:policy-precision-state (wm/beta-dark-carry nil f-pi-fields []))]
+      (is (= :absent (:status state)))
+      (is (= :no-previous-trace-record (:reason state))
+          "the F_pi reason propagates, rather than being flattened to a
+           generic one that hides which of the three flags was off")
+      (is (= 1.0 (:beta state)))
+      (is (= :initial (:beta-source state)))
+      (is (not (contains? state :solve)))))
+  (testing "and the dark beta flag on its own says so rather than reporting nothing"
+    (let [state (:policy-precision-state (wm/beta-dark-carry nil nil []))]
+      (is (= :no-f-pi-readback (:reason state)))))
+  (testing "an F_pi entry whose identity no current candidate carries is absence"
+    ;; NOT a test of the Throwable catch in beta-dark-carry: with the join's
+    ;; numeric filters in place no input reachable through this seam makes
+    ;; converge-beta throw, so that catch is a guard against a future change to
+    ;; the solver's validation and is deliberately not claimed as covered.
+    (let [fields {:f-pi-by-candidate-id
+                  {:status :present
+                   :by-candidate-id
+                   {"rank/1" {:candidate-identity :c0 :status :present :value -1.0}}}}
+          ranked [{:action {:type :open-mission :target "c0"} :controller-score 0.1}]
+          state (:policy-precision-state
+                 (wm/beta-dark-carry {:policy-precision-state {:beta 1.0}}
+                                     fields ranked))]
+      ;; the identity fn is the habit-prior policy key, so the readback's :c0
+      ;; never matches; the tick records that rather than a number
+      (is (= :absent (:status state)))
+      (is (= :no-aligned-candidates (:reason state)))
+      (is (= 1.0 (:beta state))))))
+
+(deftest beta-dark-carry-consumes-nothing-test
+  ;; What makes S2 dark: the state is on the judgement for persistence and no
+  ;; selection quantity moves when it changes. Two carries whose only
+  ;; difference is the beta they came in with must produce the SAME decision
+  ;; inputs -- here checked at the seam, since beta-dark-carry returns only the
+  ;; state and touches no ranking, softmax weight or temperature.
+  (let [{:keys [previous current observation]} (real-shape-f-pi-fixture)
+        scored (mapv (fn [index action]
+                       (assoc action :controller-score (+ 0.25 (* 0.004 index))))
+                     (range) current)
+        f-pi-fields (wm/f-pi-dark-readback previous scored observation)
+        low (wm/beta-dark-carry {:policy-precision-state {:beta 0.5}} f-pi-fields scored)
+        high (wm/beta-dark-carry {:policy-precision-state {:beta 5.0}} f-pi-fields scored)]
+    (is (= [:policy-precision-state] (keys low))
+        "one key, and it is not one selection reads")
+    (is (= [:policy-precision-state] (keys high)))
+    (is (= 0.5 (get-in low [:policy-precision-state :solve :beta-prior])))
+    (is (= 5.0 (get-in high [:policy-precision-state :solve :beta-prior])))
+    (is (= (:f-pi-present-count (:policy-precision-state low))
+           (:f-pi-present-count (:policy-precision-state high)))
+        "the carried beta changes the solve and nothing about the field")
+    (is (not= (get-in low [:policy-precision-state :solve :gamma])
+              (get-in high [:policy-precision-state :solve :gamma]))
+        "and the solve does move, so the previous assertion is not vacuous")))
 
 (deftest avoidance-unknown-renders-distinguishably-test
   (let [diagnostics (free-energy/compute-controller-diagnostics

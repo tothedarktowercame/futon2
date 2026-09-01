@@ -567,6 +567,18 @@
     (contains? judge-output :f-pi-by-candidate-id)
     (assoc :f-pi-by-candidate-id (:f-pi-by-candidate-id judge-output)
            :f-pi-provenance (:f-pi-provenance judge-output))
+    ;; RUN7 / stage S2 dark beta carry. Present only when the separately
+    ;; default-off FUTON_WM_BETA_DARK path put a state on the judge output.
+    ;; This is the field the NEXT tick reads its carried beta back out of, so
+    ;; unlike :f-pi-by-candidate-id it closes a loop through the trace -- and
+    ;; the loop is still dark, because nothing in selection reads it at either
+    ;; end. `futon2.aif.policy-precision/coerce-state` is the read-side guard.
+    ;; The persisted state drops the two 110-element distributions (pi, pi_0)
+    ;; and keeps the scalars, so the cost is a few hundred bytes on a ~1 MB
+    ;; policy-detail record rather than the tens of kilobytes the vectors would
+    ;; add.
+    (contains? judge-output :policy-precision-state)
+    (assoc :policy-precision-state (:policy-precision-state judge-output))
     ;; B-0a tick provenance (present-only, schema v2): the scheduled runner
     ;; stamps it via `wm-version-stamp`; bare judge calls don't — purely
     ;; additive, no nil seam in un-stamped records.
