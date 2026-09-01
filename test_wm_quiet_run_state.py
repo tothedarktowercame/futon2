@@ -6,6 +6,7 @@ import unittest
 
 from scripts import wm_quiet_run_state as sut
 from scripts import writer_fence_restore as restore_sut
+from checks import writer_fence_evidence as fence_authority
 
 
 class QuietRunStateTest(unittest.TestCase):
@@ -120,6 +121,19 @@ class QuietRunStateTest(unittest.TestCase):
         evidence = self.write("quiet.json", {"verdict": "QUIESCENT"})
         self.assertEqual(1, self.advance("fence-held", evidence, "--attestations", evidence))
         self.assertEqual(1, self.advance("released"))
+
+    def test_parking_request_is_derived_from_enforced_population(self):
+        request = sut.parking_request(self.fence_id)
+        spec = request["specification"]
+        ids = {row["id"] for row in spec["writers"]}
+        self.assertEqual(set(fence_authority.COORDINATORS + fence_authority.UNITS), ids)
+        self.assertEqual(set(restore_sut.COORDINATORS + restore_sut.UNITS), ids)
+        self.assertEqual(3, spec["coordinator-count"])
+        self.assertEqual(8, spec["systemd-unit-count"])
+        self.assertNotIn("five background units", request["request"])
+        initial = sut.load_ledger(self.ledger)[0]
+        self.assertEqual(sut.digest(spec),
+                         initial["facts"]["parking-specification-sha256"])
 
     def test_stale_fence_receipt_cannot_gate_test(self):
         old = dt.datetime.now(dt.timezone.utc) - dt.timedelta(seconds=301)

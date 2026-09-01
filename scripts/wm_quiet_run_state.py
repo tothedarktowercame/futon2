@@ -15,16 +15,64 @@ from pathlib import Path
 import subprocess
 import sys
 
-try:
-    from scripts import writer_fence_restore as restoration
-except ModuleNotFoundError:
-    import writer_fence_restore as restoration
+ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path: sys.path.insert(0, str(ROOT))
+from scripts import writer_fence_restore as restoration
+from checks import writer_fence_evidence as fence_authority
 
 SCHEMA = "wm-quiet-run-state-v1"
 ORDER = ["initial", "quiescence", "fence-held", "tested-commit",
          "reload-recorded", "click-issued", "click-terminal", "certified",
          "restored", "released"]
 MAX_FENCE_RECEIPT_AGE = 300
+
+
+def parking_specification():
+    writers = []
+    for identity in fence_authority.COORDINATORS:
+        terminal = identity == restoration.TERMINAL_ID
+        writers.append({
+            "id": identity, "kind": "coordinator",
+            "park-action": ("semantic-watchdog-stop" if terminal
+                            else "durable-coordinator-stop"),
+            "operator-command": (
+                "cd /home/joe/code/futon3c && scripts/proof-eval.sh "
+                f"'(do (require (quote futon3c.apm.semantic-progress-watchdog)) "
+                f"(futon3c.apm.semantic-progress-watchdog/stop! \"semantic-progress:{identity}\"))'"
+                if terminal else
+                "cd /home/joe/code/futon3c && scripts/proof-eval.sh "
+                f"'(do (require (quote futon3c.apm.durable-coordinator)) "
+                "(futon3c.apm.durable-coordinator/stop! "
+                f"\"{restoration.REGISTRY}\" \"{identity}\"))'"),
+            "required-observation": (
+                "durable-complete; regulator absent; tick claim absent; watchdog absent"
+                if terminal else
+                "durable-stopped; disabled; regulator/watchdog/tick absent; quiescence witness present")})
+    for identity in fence_authority.UNITS:
+        writers.append({"id": identity, "kind": "systemd-unit",
+                        "park-action": "systemctl-user-stop",
+                        "operator-command": f"systemctl --user stop {identity}",
+                        "required-observation":
+                        "inactive with identical state across the fence observation interval"})
+    return {"schema": "wm-quiet-run-parking-spec-v1",
+            "coordinator-count": len(fence_authority.COORDINATORS),
+            "systemd-unit-count": len(fence_authority.UNITS),
+            "writers": writers,
+            "acknowledgers": fence_authority.EXPECTED_ACKNOWLEDGERS,
+            "entry-receipts": ["QUIESCENT", "FENCE-VERIFIABLE"],
+            "must-remain-running": ["futon3c-zone.service"]}
+
+
+def parking_request(fence_id):
+    spec = parking_specification()
+    return {"schema": "wm-quiet-run-parking-request-v1", "fence-id": fence_id,
+            "specification-sha256": digest(spec), "specification": spec,
+            "request": (
+                f"Joe — request writer fence {fence_id}. Keep futon3c-zone.service running. "
+                f"Park the {spec['coordinator-count']} named coordinator writers and "
+                f"the {spec['systemd-unit-count']} named systemd units exactly as rendered; "
+                "hold the named acknowledgers until the state machine emits FENCE-RELEASE. "
+                "Entry is established only by QUIESCENT followed by FENCE-VERIFIABLE.")}
 
 
 def canonical(value):
@@ -237,13 +285,19 @@ def main(argv=None):
     init = sub.add_parser("init"); init.add_argument("--ledger", required=True); init.add_argument("--fence-id", required=True)
     advance = sub.add_parser("advance"); advance.add_argument("--ledger", required=True); advance.add_argument("--to", required=True, choices=ORDER[1:]); advance.add_argument("--evidence"); advance.add_argument("--attestations"); advance.add_argument("--fence-evidence"); advance.add_argument("--suite-receipt", action="append", default=[]); advance.add_argument("--manifest"); advance.add_argument("--journal"); advance.add_argument("--outcomes"); advance.add_argument("--key-file")
     status = sub.add_parser("status"); status.add_argument("--ledger", required=True)
+    parking = sub.add_parser("parking-request"); parking.add_argument("--fence-id", required=True)
     args = parser.parse_args(argv)
     try:
+        if args.command == "parking-request":
+            print(json.dumps(parking_request(args.fence_id), indent=2, sort_keys=True))
+            return 0
         if args.command == "init":
             require(not Path(args.ledger).exists(), "state-ledger-already-exists")
             body = {"schema": SCHEMA, "previous-receipt-sha256": None,
                     "state": "initial", "fence-id": args.fence_id,
-                    "transitioned-at": now().isoformat(), "evidence": [], "facts": {}}
+                    "transitioned-at": now().isoformat(), "evidence": [],
+                    "facts": {"parking-specification-sha256":
+                              digest(parking_specification())}}
             row = append(args.ledger, body)
         elif args.command == "status":
             rows = load_ledger(args.ledger); row = rows[-1]

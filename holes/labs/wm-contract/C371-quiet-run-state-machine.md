@@ -22,9 +22,16 @@ Choose one ledger and never edit it:
 
 ```sh
 STATE=/tmp/$FENCE_ID-quiet-run-state.jsonl
+python3 scripts/wm_quiet_run_state.py parking-request --fence-id "$FENCE_ID" \
+  > "/tmp/$FENCE_ID-parking-request.json"
 python3 scripts/wm_quiet_run_state.py init --ledger "$STATE" --fence-id "$FENCE_ID"
 python3 scripts/wm_quiet_run_state.py status --ledger "$STATE"
 ```
+
+The generated parking request is the only current request to Joe. Its writer
+IDs, exact commands, required observations, acknowledgers, and counts are
+rendered from the same restoration/fence authorities the transitions consume;
+they are not copied from C319 prose.
 
 Advance by supplying the receipt produced by the named external operation:
 
