@@ -273,7 +273,9 @@ def main() -> int:
     # for extinction.
     mode = "REPORT" if args.report else "FINDINGS"
     print(f"live-artifact-format-boundary-lint: {mode} findings={result['finding-count']}")
-    return 0 if args.report else (1 if result["findings"] else 0)
+    # Exit 3 is a truthful census verdict: the instrument ran, its self-test is
+    # separately blocking, and findings remain. Exit 0 continues to mean clean.
+    return (3 if result["findings"] else 0) if args.report else (1 if result["findings"] else 0)
 
 
 if __name__ == "__main__":

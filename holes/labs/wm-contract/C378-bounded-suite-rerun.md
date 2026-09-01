@@ -52,7 +52,7 @@ finding:
  :path "holes/labs/wm-contract/C284-verifiable-format-proof-and-gate.md"
  :line 42
  :finding :nonzero-finding-zero-exit
- :excerpt "findings=5, exit 1\ngate:    REPORT findings=5, exit 0"}
+ :excerpt "the direct census was red while the historical report-only branch returned a clean exit"}
 ```
 
 Thus this is not resource exhaustion and not an unexplained ordering flake.

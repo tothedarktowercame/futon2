@@ -261,15 +261,16 @@
     :argv ["python3" "detect_drift.py"]}
    {:name :cleanup-queue-corrections
     :argv ["bb" "checks/cleanup_queue_correction_index.clj"]}
-   ;; Report-only until the independently owned generator repairs land. Exit 0
-   ;; means the census ran; the emitted `findings=N` line is the build state.
-   ;; UNAVAILABLE remains nonzero and therefore fails this gate.
+   ;; Exit 3 is the explicit report-only verdict; 0 remains clean and 2 remains
+   ;; unavailable. The blocking self-test is a separate command below.
    {:name :live-artifact-format-boundaries
-    :argv ["python3" "checks/live_artifact_format_boundary_lint.py" "--report"]}
+    :argv ["python3" "checks/live_artifact_format_boundary_lint.py" "--report"]
+    :expected-exits #{0 3}}
    ;; Report-only while independently owned acceptance boundaries are repaired.
    ;; Missing inputs remain a blocking instrument failure; findings stay visible.
    {:name :empty-subject-acceptance
-    :argv ["python3" "checks/empty_subject_acceptance_lint.py" "--report"]}])
+    :argv ["python3" "checks/empty_subject_acceptance_lint.py" "--report"]
+    :expected-exits #{0 3}}])
 
 (defn control-commands []
   [{:name :c157-perturbed-entropy
@@ -425,11 +426,14 @@
    {:name :c361-empty-subject-lint-controls
     :argv ["python3" "checks/empty_subject_acceptance_lint.py" "--self-test"]}])
 
-(defn run-one [{:keys [name argv dir]}]
+(defn run-one [{:keys [name argv dir expected-exits]
+                :or {expected-exits #{0}}}]
   (println "wm-workspace-gate: RUN" (clojure.core/name name))
   (let [opts (cond-> {:continue true :out :inherit :err :inherit} dir (assoc :dir dir))
-        result (apply process/shell opts argv)]
-    {:name name :exit (:exit result)}))
+        result (apply process/shell opts argv)
+        observed (:exit result)]
+    {:name name :exit (if (contains? expected-exits observed) 0 observed)
+     :observed-exit observed :expected-exits expected-exits}))
 
 (defn -main [& args]
   (if (some #{"--provenance-control"} args)

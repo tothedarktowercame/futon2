@@ -29,3 +29,13 @@
     (is (= :absent (get-in content-only [:writer-fence :status])))
     (is (= true (:event-free? conditional)))
     (is (= :observed-held (get-in conditional [:writer-fence :status])))))
+
+(deftest report-only-exit-is-explicitly-consumed
+  (is (= {:name :report :exit 0 :observed-exit 3 :expected-exits #{0 3}}
+         (gate/run-one {:name :report :argv ["sh" "-c" "exit 3"]
+                        :expected-exits #{0 3}})))
+  (is (= 3 (:exit (gate/run-one {:name :undeclared
+                                 :argv ["sh" "-c" "exit 3"]}))))
+  (is (= 1 (:exit (gate/run-one {:name :real-failure
+                                 :argv ["sh" "-c" "exit 1"]
+                                 :expected-exits #{0 3}})))))

@@ -22,6 +22,14 @@
     (is (empty? (lint/acceptance-findings
                  [{:repo :fixture :path "checks/specimen.clj" :text masked}])))))
 
+(deftest report-only-is-not-a-clean-exit
+  (is (seq (lint/acceptance-findings
+            [{:repo :fixture :path "checks/bad.clj"
+              :text (str "findings=3; process exit " 0)}])))
+  (is (empty? (lint/acceptance-findings
+               [{:repo :fixture :path "checks/report.clj"
+                 :text "REPORT findings=3; process exit 3"}]))))
+
 (deftest absence-dispositions-cover-and-narrow-the-c12-population
   (let [findings (lint/absence-findings [])]
     (is (= 7 (count findings)))

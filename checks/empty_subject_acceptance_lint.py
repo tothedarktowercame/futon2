@@ -138,7 +138,8 @@ def main() -> int:
         return 2
     mode = "REPORT" if args.report else "FINDINGS"
     print(f"empty-subject-acceptance-lint: {mode} findings={result['finding-count']}")
-    return 0 if args.report else (1 if result["findings"] else 0)
+    # Report-only findings are neither clean (0) nor instrument failure (2).
+    return (3 if result["findings"] else 0) if args.report else (1 if result["findings"] else 0)
 
 
 if __name__ == "__main__":
