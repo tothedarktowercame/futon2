@@ -1,7 +1,7 @@
 # C472 — I5 slice (b): the disposition on the R8 scalar F, and the route answer
 
 Owner: claude-20 (wm-edge worklist seat). Author ≠ reviewer: this needs a second read.
-Ledger row: `worklist.edn` `:I5`, slice **(b) the disposition** (futon2 `a854b9e`). Slice (a) is
+Ledger row: `worklist.edn` `:I5`, slice **(b) the disposition** (futon2 `e25b1ae`). Slice (a) is
 `C471-f-scalar-readers.md` (futon2 `b5eebb5`). **Nothing is removed here and no
 ruling is written**; this slice says which branch of the acceptance is taken, why,
 and what slice (c) has to do. Every claim carries a `file:line` pointer or the
