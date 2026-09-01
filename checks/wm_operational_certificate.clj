@@ -40,12 +40,49 @@
 (defn execution-complete? [run resource]
   (let [route (:route run)
         trace-hop? (= "TRACE" (some-> route last :toNode node-str))
-        click? (= :wm-click-resource-v1 (:source-schema resource))]
+        source-schema (:source-schema resource)
+        terminal-evidence?
+        (case source-schema
+          :wm-click-resource-v1
+          (contains? completed-click-outcomes (:execution-outcome resource))
+
+          :futon-bounded-test-v1
+          ;; A diagnostic process terminates through two independently
+          ;; observed exits. Missing either is missing completion evidence.
+          (and (= 0 (:command-exit resource))
+               (= 0 (:wrapper-exit resource)))
+
+          ;; Historical committed fixtures predate source-schema but do carry
+          ;; the service's explicit terminal result. This is not a default for
+          ;; unknown schemas: absent evidence remains incomplete.
+          nil (= :success (:service-result resource))
+          false)]
     (and (true? (:traceWritten run))
          trace-hop?
-         (or (not click?)
-             (contains? completed-click-outcomes
-                        (:execution-outcome resource))))))
+         terminal-evidence?)))
+
+(defn completion-evidence [resource]
+  (case (:source-schema resource)
+    :wm-click-resource-v1
+    {:kind :grounded-terminal-outcome
+     :value (:execution-outcome resource)}
+    :futon-bounded-test-v1
+    {:kind :observed-process-exits
+     :command-exit (:command-exit resource)
+     :wrapper-exit (:wrapper-exit resource)}
+    nil {:kind :legacy-service-result
+         :value (:service-result resource)}
+    {:kind :unsupported-schema
+     :source-schema (:source-schema resource)}))
+
+(defn bind-fixture-provenance [cert run-bytes resource-bytes valid?]
+  (let [pins {:run-sha256 (sha256-bytes run-bytes)
+              :resource-sha256 (when resource-bytes (sha256-bytes resource-bytes))
+              :valid? valid?}]
+    (cond-> (-> cert
+                (assoc :fixture-pins pins)
+                (assoc-in [:checks :fixture-pins-valid?] valid?))
+      (not valid?) (assoc :verdict :fail))))
 
 (defn run-identity [run-bytes run]
   (if-let [run-id (:run/id run)]
@@ -115,6 +152,7 @@
                   :measured (vec (sort (remove traversed-pairs measured)))}}
      :resource-status resource
      :execution-status {:status (if execution-complete? :complete :incomplete)
+                        :completion-evidence (completion-evidence resource)
                         :trace-written? (true? (:traceWritten run))
                         :trace-hop-observed?
                         (= "TRACE" (some-> route last :toNode node-str))
@@ -153,16 +191,14 @@
                                  (or (nil? resource-sha256)
                                      (= resource-sha256 (sha256-bytes resource-bytes))))
         generated (certificate run-bytes resource-data negative?)
-        cert (cond-> generated
+        cert (cond-> (bind-fixture-provenance generated run-bytes resource-bytes
+                                               fixture-pins-valid?)
                negative-run-id (assoc-in [:run :id] "mutation/not-the-recorded-run"))
         identity-matches? (certificate-matches-run? run-bytes cert)]
     (when output-path
       (io/make-parents output-path)
       (spit output-path (with-out-str (pprint/pprint cert))))
-    (println (pr-str (assoc (dissoc cert :traversal)
-                            :fixture-pins {:run-sha256 (sha256-bytes run-bytes)
-                                           :resource-sha256 (when resource-bytes (sha256-bytes resource-bytes))
-                                           :valid? fixture-pins-valid?})))
+    (println (pr-str (dissoc cert :traversal)))
     (cond
       negative-run-record
       (if-not fixture-pins-valid?

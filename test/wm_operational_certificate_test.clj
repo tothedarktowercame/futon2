@@ -87,3 +87,27 @@
     (is (= :incomplete (get-in c [:execution-status :status])))
     (is (true? (get-in c [:checks :resource-status-clean?])))
     (is (false? (get-in c [:checks :execution-complete?])))))
+
+(deftest diagnostic-receipt-with-missing-terminal-exit-is-incomplete
+  (let [resource (-> clean-resource
+                     (assoc :source-schema :futon-bounded-test-v1
+                            :wrapper-exit nil)
+                     (dissoc :service-result))
+        c (cert/certificate run-bytes resource false)]
+    (is (= :incomplete (:verdict c)))
+    (is (= :incomplete (get-in c [:execution-status :status])))
+    (is (false? (get-in c [:checks :execution-complete?])))))
+
+(deftest invalid-fixture-pin-is-inside-written-verdict
+  (let [out (str (java.nio.file.Files/createTempFile
+                  "wm-bad-provenance-" ".edn"
+                  (make-array java.nio.file.attribute.FileAttribute 0)))
+        exit (cert/main ["--run" run-path
+                         "--resource" "test/fixtures/wm-operational-certificate/resource-clean.edn"
+                         "--run-sha256" (apply str (repeat 64 "0"))
+                         "--certificate" out])
+        written (edn/read-string (slurp out))]
+    (is (= 1 exit))
+    (is (= :fail (:verdict written)))
+    (is (false? (get-in written [:fixture-pins :valid?])))
+    (is (false? (get-in written [:checks :fixture-pins-valid?])))))
