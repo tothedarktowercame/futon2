@@ -13,5 +13,7 @@ now consume the nominal vector, while producer-side absence remains in its
 measurement envelope. This witnesses completeness, not observation semantics.
 
 Q-facing definitions are unchanged; the Q pin is refreshed after verification
-to `b3dc5477aa408c136142f7c2ff582bee3ed4b23e85e12e74acf8a8f26632e26d`.
+to `fef255009bf391b75900fb0fee35bcb7073f21660f89ad8d7df6c6e54753cdf1`.
 `ObservationVector` is explicitly classified in the `:belief` model area.
+Its owner uses the stable glossary paragraph anchor; regeneration caught and
+removed the initially introduced line-number drift before publication.
