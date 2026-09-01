@@ -11,8 +11,11 @@ initial → quiescence → fence-held → tested-commit → reload-recorded
         → click-issued → click-terminal → certified → restored → released
 ```
 
-Every transition except `released` consumes named files, stores their absolute
-paths and SHA-256 hashes, and validates their verdict and identity. `released`
+Every transition except `released` stores the absolute paths and SHA-256 hashes
+of its evidence. Every resume re-reads every prior artifact, re-hashes it, and
+validates the complete state order and fence identity. Quiescence and fence
+observations are run by the machine itself; bounded evidence is resolved by
+durable job ID through `bg.py` and systemd. `released`
 has no operator shortcut: it is available only from `restored`, and is the sole
 transition that emits `FENCE-RELEASE`.
 
@@ -33,22 +36,21 @@ IDs, exact commands, required observations, acknowledgers, and counts are
 rendered from the same restoration/fence authorities the transitions consume;
 they are not copied from C319 prose.
 
-Advance by supplying the receipt produced by the named external operation:
+Advance using producer observations and durable job identities:
 
 ```sh
 python3 scripts/wm_quiet_run_state.py advance --ledger "$STATE" \
-  --to quiescence --evidence /tmp/quiescence.json
+  --to quiescence
 
 python3 scripts/wm_quiet_run_state.py advance --ledger "$STATE" \
-  --to fence-held --evidence /tmp/fence.json \
+  --to fence-held \
   --attestations /tmp/$FENCE_ID-attestations.json
 
 python3 scripts/wm_quiet_run_state.py advance --ledger "$STATE" \
-  --to tested-commit --evidence /tmp/workspace-gate.receipt.json \
-  --suite-receipt /tmp/futon2.receipt.json \
-  --suite-receipt /tmp/futon3.receipt.json \
-  --fence-evidence /tmp/fence-at-gate-start.json \
-  --attestations /tmp/$FENCE_ID-attestations.json
+  --to tested-commit \
+  --job-id "$WORKSPACE_GATE_JOB_ID" \
+  --job-id "$FUTON2_SUITE_JOB_ID" \
+  --job-id "$FUTON3_SUITE_JOB_ID"
 
 python3 scripts/wm_quiet_run_state.py advance --ledger "$STATE" \
   --to reload-recorded --evidence /tmp/run-readiness.json
@@ -74,20 +76,27 @@ python3 scripts/wm_quiet_run_state.py advance --ledger "$STATE" \
 python3 scripts/wm_quiet_run_state.py advance --ledger "$STATE" --to released
 ```
 
+Launch all three bounded jobs with `--agent "$FENCE_ID"`. The transition
+requires that producer-recorded attempt identity on every job, exactly one of
+each canonical command, terminal systemd units, and the same Futon2 commit for
+the workspace gate and Futon2 suite.
+
 The `restored` transition uses the restoration tool's owner-only key, HMAC,
 fence-ID, journal, and outcome validators. It then independently derives the
 changed target population from the authenticated manifest and requires exactly
 that population in both the park journal and successful outcome ledger. A
-successful restore command with incomplete rows cannot release the fence.
+successful restore command with incomplete rows cannot release the fence. It
+also observes every target through the live backend; records alone do not
+establish restoration.
 
 ## Interval policy
 
-The machine chooses refusal, not implicit refresh. The fence observation must
-be at most 300 seconds old when the bounded gate actually starts, and the
-attestation must remain valid through gate finish. Admission delay is included
-because the comparison uses the gate receipt's `started-at`, not submission
-time. If either condition fails, obtain a new observation and a new gate run;
-the existing transition does not fire.
+The machine chooses refusal, not implicit refresh. Systemd must supply the
+gate process's actual monotonic start observation, and the fence observation
+must still be at most 300 seconds old at machine ingestion; caller-authored
+receipt times cannot freshen it. The attestation must remain valid through gate
+finish. If either condition fails, obtain a new observation and new bounded
+runs; the existing transition does not fire.
 
 The attestation claim deliberately ends at `tested-commit`. Reload and live
 author/reviewer latency are unbounded, so later receipts carry
@@ -109,5 +118,6 @@ Focused falsifiers:
 python3 -m unittest -v test_wm_quiet_run_state.py
 ```
 
-They reject skipped states, early release, stale fence evidence both before
-fence entry and at gate start, and incomplete restoration populations.
+They reject synthesized mid-chain ledgers, changed evidence, handwritten
+bounded evidence, stale evidence paired with an asserted fresh timestamp,
+mismatched gate/suite commits, early release, and incomplete restoration.

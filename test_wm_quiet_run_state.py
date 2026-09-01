@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest import mock
 
 from scripts import wm_quiet_run_state as sut
 from scripts import writer_fence_restore as restore_sut
@@ -13,10 +14,22 @@ class QuietRunStateTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory(); self.root = Path(self.tmp.name)
         self.ledger = self.root / "state.jsonl"; self.fence_id = "fixture-fence"
+        self.quiet_patch = mock.patch.object(
+            sut, "observe_quiescence", return_value={"verdict": "QUIESCENT"})
+        self.fence_patch = mock.patch.object(sut, "observe_fence",
+                                             side_effect=self.observed_fence)
+        self.quiet_patch.start(); self.fence_patch.start()
         self.assertEqual(0, sut.main(["init", "--ledger", str(self.ledger),
                                       "--fence-id", self.fence_id]))
 
-    def tearDown(self): self.tmp.cleanup()
+    def tearDown(self):
+        self.fence_patch.stop(); self.quiet_patch.stop(); self.tmp.cleanup()
+
+    def observed_fence(self, fence_id, attestations):
+        current = dt.datetime.now(dt.timezone.utc)
+        return {"verdict": "FENCE-VERIFIABLE", "fence-id": fence_id,
+                "observation-interval": {"started-at": current.isoformat(),
+                                         "finished-at": current.isoformat()}}
 
     def write(self, name, value):
         path = self.root / name
@@ -51,6 +64,22 @@ class QuietRunStateTest(unittest.TestCase):
             "started-at": (started or current).isoformat(),
             "finished-at": (finished or current).isoformat()})
 
+    def bounded_records(self, heads=None, agent=None):
+        heads = heads or {"gate": "tested", "futon2": "tested", "futon3": "futon3-tested"}
+        records = {}
+        for name in ("gate", "futon2", "futon3"):
+            path = self.bounded(name + ".json")
+            receipt = json.loads(Path(path).read_text())
+            receipt["repository-basis-start"]["head"] = heads[name]
+            receipt["repository-basis-finish"]["head"] = heads[name]
+            Path(path).write_text(json.dumps(receipt) + "\n")
+            job_id = "job-" + name
+            records[job_id] = {"id": job_id, "unit": job_id + ".service",
+                "agent-id": agent or self.fence_id, "receipt-file": path,
+                "receipt": receipt, "systemd": {"ActiveState": "inactive",
+                    "ExecMainStartTimestampMonotonic": "12345"}}
+        return records
+
     def reach_fence(self):
         quiet = self.write("quiet.json", {"verdict": "QUIESCENT"})
         self.assertEqual(0, self.advance("quiescence", quiet))
@@ -61,11 +90,12 @@ class QuietRunStateTest(unittest.TestCase):
 
     def reach_tested(self):
         fence, att = self.reach_fence()
-        gate = self.bounded("gate.json")
-        suites = [self.bounded("futon2.json"), self.bounded("futon3.json")]
-        self.assertEqual(0, self.advance("tested-commit", gate,
-            "--fence-evidence", fence, "--attestations", att,
-            "--suite-receipt", suites[0], "--suite-receipt", suites[1]))
+        records = self.bounded_records()
+        with mock.patch.object(sut, "bounded_job", side_effect=records.__getitem__):
+            self.assertEqual(0, self.advance("tested-commit", None,
+                "--fence-evidence", fence, "--attestations", att,
+                "--job-id", "job-gate", "--job-id", "job-futon2",
+                "--job-id", "job-futon3"))
 
     def restoration_artifacts(self, incomplete=False):
         key = self.root / "restore.key"; key.write_bytes(b"fixture secret at least thirty two bytes"); key.chmod(0o600)
@@ -112,8 +142,11 @@ class QuietRunStateTest(unittest.TestCase):
         cert = self.root / "cert.edn"; cert.write_text('{:verdict :pass :run/id "run-1"}\n')
         self.assertEqual(0, self.advance("certified", str(cert)))
         result, manifest, journal, outcomes, key = self.restoration_artifacts()
-        self.assertEqual(0, self.advance("restored", result, "--manifest", manifest,
-            "--journal", journal, "--outcomes", outcomes, "--key-file", key))
+        backend = mock.Mock()
+        backend.observe.side_effect = lambda identity, entry: entry["pre-state"]
+        with mock.patch.object(restore_sut, "LiveBackend", return_value=backend):
+            self.assertEqual(0, self.advance("restored", result, "--manifest", manifest,
+                "--journal", journal, "--outcomes", outcomes, "--key-file", key))
         self.assertEqual(0, self.advance("released"))
         self.assertEqual("released", sut.load_ledger(self.ledger)[-1]["state"])
 
@@ -141,20 +174,22 @@ class QuietRunStateTest(unittest.TestCase):
         self.assertEqual(0, self.advance("quiescence", quiet))
         # The initial fence transition itself refuses the stale receipt.
         fence, att = self.fence_pair(old)
-        self.assertEqual(1, self.advance("fence-held", fence, "--attestations", att))
+        stale = {"verdict": "FENCE-VERIFIABLE", "fence-id": self.fence_id,
+                 "observation-interval": {"started-at": old.isoformat(),
+                                          "finished-at": old.isoformat()}}
+        with mock.patch.object(sut, "observe_fence", return_value=stale):
+            self.assertEqual(1, self.advance("fence-held", fence, "--attestations", att))
 
     def test_fence_that_ages_before_gate_start_is_refused(self):
         fence, att = self.reach_fence()
-        old = dt.datetime.now(dt.timezone.utc) - dt.timedelta(seconds=301)
-        self.write("fence.json", {"verdict": "FENCE-VERIFIABLE",
-            "fence-id": self.fence_id,
-            "observation-interval": {"started-at": old.isoformat(),
-                                     "finished-at": old.isoformat()}})
-        gate = self.bounded("gate.json")
-        suites = [self.bounded("futon2.json"), self.bounded("futon3.json")]
-        self.assertEqual(1, self.advance("tested-commit", gate,
-            "--fence-evidence", fence, "--attestations", att,
-            "--suite-receipt", suites[0], "--suite-receipt", suites[1]))
+        records = self.bounded_records()
+        future = dt.datetime.now(dt.timezone.utc) + dt.timedelta(seconds=301)
+        with mock.patch.object(sut, "bounded_job", side_effect=records.__getitem__), \
+             mock.patch.object(sut, "now", return_value=future):
+            self.assertEqual(1, self.advance("tested-commit", None,
+                "--fence-evidence", fence, "--attestations", att,
+                "--job-id", "job-gate", "--job-id", "job-futon2",
+                "--job-id", "job-futon3"))
 
     def test_restoration_requires_every_changed_target(self):
         self.reach_tested()
@@ -171,6 +206,61 @@ class QuietRunStateTest(unittest.TestCase):
         result, manifest, journal, outcomes, key = self.restoration_artifacts(incomplete=True)
         self.assertEqual(1, self.advance("restored", result, "--manifest", manifest,
             "--journal", journal, "--outcomes", outcomes, "--key-file", key))
+
+    def test_synthesized_midchain_ledger_refuses(self):
+        body = {"schema": sut.SCHEMA, "previous-receipt-sha256": None,
+                "state": "click-issued", "fence-id": self.fence_id,
+                "transitioned-at": sut.now().isoformat(), "evidence": [],
+                "facts": {"click-id": "forged"}}
+        self.ledger.write_text(json.dumps(dict(body, **{"receipt-sha256": sut.digest(body)})) + "\n")
+        with self.assertRaisesRegex(ValueError, "state-ledger-history-invalid"):
+            sut.load_ledger(self.ledger)
+
+    def test_recorded_evidence_hash_is_revalidated(self):
+        evidence = self.write("quiet.json", {"verdict": "QUIESCENT"})
+        self.assertEqual(0, self.advance("quiescence", evidence))
+        recorded = sut.load_ledger(self.ledger)[-1]["evidence"][0]["path"]
+        Path(recorded).write_text('{"verdict":"NOT-QUIESCENT"}\n')
+        with self.assertRaisesRegex(ValueError, "state-ledger-evidence-changed"):
+            sut.load_ledger(self.ledger)
+
+    def test_handwritten_bounded_receipt_is_not_a_producer(self):
+        fence, att = self.reach_fence()
+        with mock.patch.object(sut, "bounded_job", side_effect=ValueError(
+                "bounded-job-not-in-producer-registry")):
+            self.assertEqual(1, self.advance("tested-commit", None,
+                "--fence-evidence", fence, "--attestations", att,
+                "--job-id", "made-up", "--job-id", "made-up-2",
+                "--job-id", "made-up-3"))
+
+    def test_stale_fence_cannot_be_freshened_by_gate_timestamp(self):
+        fence, att = self.reach_fence()
+        records = self.bounded_records()
+        for record in records.values():
+            record["receipt"]["started-at"] = dt.datetime.now(dt.timezone.utc).isoformat()
+            Path(record["receipt-file"]).write_text(json.dumps(record["receipt"]) + "\n")
+        future = dt.datetime.now(dt.timezone.utc) + dt.timedelta(days=1)
+        with mock.patch.object(sut, "bounded_job", side_effect=records.__getitem__), \
+             mock.patch.object(sut, "now", return_value=future):
+            self.assertEqual(1, self.advance("tested-commit", None,
+                "--fence-evidence", fence, "--attestations", att,
+                "--job-id", "job-gate", "--job-id", "job-futon2",
+                "--job-id", "job-futon3"))
+
+    def test_handwritten_quiescence_evidence_is_not_consumed(self):
+        fake = self.write("fake-quiet.json", {"verdict": "QUIESCENT"})
+        with mock.patch.object(sut, "observe_quiescence",
+                               side_effect=ValueError("quiescence-not-proven")):
+            self.assertEqual(1, self.advance("quiescence", fake))
+
+    def test_mismatched_gate_and_suite_commit_refuses(self):
+        fence, att = self.reach_fence()
+        records = self.bounded_records({"gate": "A", "futon2": "B", "futon3": "C"})
+        with mock.patch.object(sut, "bounded_job", side_effect=records.__getitem__):
+            self.assertEqual(1, self.advance("tested-commit", None,
+                "--fence-evidence", fence, "--attestations", att,
+                "--job-id", "job-gate", "--job-id", "job-futon2",
+                "--job-id", "job-futon3"))
 
 
 if __name__ == "__main__": unittest.main()

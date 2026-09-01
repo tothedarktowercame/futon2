@@ -94,7 +94,8 @@ def now(): return dt.datetime.now(dt.timezone.utc)
 
 def json_file(path):
     text = Path(path).read_text()
-    value, _ = json.JSONDecoder().raw_decode(text.lstrip())
+    value, end = json.JSONDecoder().raw_decode(text.lstrip())
+    require(not text.lstrip()[end:].strip(), "evidence-trailing-content")
     return value
 
 
@@ -112,6 +113,38 @@ def file_ref(path):
     return {"path": str(Path(path).resolve()), "sha256": hashlib.sha256(data).hexdigest()}
 
 
+def persist_observation(ledger, state, value):
+    directory = Path(str(ledger) + ".evidence")
+    directory.mkdir(mode=0o700, parents=True, exist_ok=True)
+    path = directory / f"{state}.json"
+    temporary = path.with_suffix(".json.tmp")
+    temporary.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n")
+    os.replace(temporary, path)
+    return str(path)
+
+
+def observe_quiescence():
+    result = subprocess.run(["python3", str(ROOT / "checks/quiescence_check.py")],
+                            capture_output=True, text=True)
+    try: value = json.loads(result.stdout)
+    except json.JSONDecodeError as exc: raise ValueError("quiescence-producer-unreadable") from exc
+    require(result.returncode == 0 and value.get("verdict") == "QUIESCENT",
+            "quiescence-not-proven")
+    return value
+
+
+def observe_fence(fence_id, attestations):
+    result = subprocess.run(
+        ["python3", str(ROOT / "checks/writer_fence_evidence.py"),
+         "--fence-id", fence_id, "--attestations", attestations],
+        capture_output=True, text=True)
+    try: value = json.loads(result.stdout)
+    except json.JSONDecodeError as exc: raise ValueError("fence-producer-unreadable") from exc
+    require(result.returncode == 0 and value.get("verdict") == "FENCE-VERIFIABLE",
+            "fence-not-verifiable")
+    return value
+
+
 def load_ledger(path):
     rows = []
     if not Path(path).exists(): raise ValueError("state-ledger-missing")
@@ -124,6 +157,18 @@ def load_ledger(path):
         expected_previous = rows[-1]["receipt-sha256"] if rows else None
         if body.get("previous-receipt-sha256") != expected_previous:
             raise ValueError(f"state-ledger-chain-failure:{number}")
+        expected_state = ORDER[number - 1] if number <= len(ORDER) else None
+        if body.get("state") != expected_state:
+            raise ValueError(f"state-ledger-history-invalid:{number}")
+        if rows and body.get("fence-id") != rows[0].get("fence-id"):
+            raise ValueError(f"state-ledger-fence-id-changed:{number}")
+        for ref in body.get("evidence", []):
+            evidence_path = Path(ref.get("path", ""))
+            try: actual = hashlib.sha256(evidence_path.read_bytes()).hexdigest()
+            except OSError as exc:
+                raise ValueError(f"state-ledger-evidence-unavailable:{number}") from exc
+            if actual != ref.get("sha256"):
+                raise ValueError(f"state-ledger-evidence-changed:{number}")
         rows.append(row)
     if not rows: raise ValueError("state-ledger-empty")
     return rows
@@ -152,15 +197,46 @@ def receipt_ok(receipt, name):
             name + "-basis-finish-dirty")
 
 
+BG = Path("/home/joe/code/futon3c/scripts/bg.py")
+
+
+def bounded_job(job_id):
+    """Resolve a bounded receipt through its durable producer registry.
+
+    A caller-authored JSON file is not a bounded-job receipt.  The registry
+    record, systemd unit, and on-disk receipt must independently agree.
+    """
+    require(isinstance(job_id, str) and job_id, "bounded-job-id-required")
+    result = subprocess.run(["python3", str(BG), "test-status", job_id],
+                            capture_output=True, text=True)
+    require(result.returncode == 0, "bounded-job-status-unavailable")
+    try: record = json.loads(result.stdout)
+    except json.JSONDecodeError as exc:
+        raise ValueError("bounded-job-status-unreadable") from exc
+    require(isinstance(record, dict) and record.get("id") == job_id,
+            "bounded-job-not-in-producer-registry")
+    require(record.get("unit") and record.get("receipt-file"),
+            "bounded-job-producer-identity-incomplete")
+    require(record.get("systemd", {}).get("ActiveState") == "inactive",
+            "bounded-job-not-terminal")
+    require(isinstance(record.get("receipt"), dict), "bounded-job-receipt-unavailable")
+    require(json_file(record["receipt-file"]) == record["receipt"],
+            "bounded-job-receipt-registry-mismatch")
+    return record
+
+
 def evidence_quiescent(args, context):
-    value = json_file(args.evidence)
-    require(value.get("verdict") == "QUIESCENT", "quiescence-not-proven")
-    return [file_ref(args.evidence)], {"quiescence": "QUIESCENT"}
+    value = observe_quiescence()
+    path = persist_observation(args.ledger, "quiescence", value)
+    return [file_ref(path)], {"quiescence": "QUIESCENT",
+                              "producer": "checks/quiescence_check.py"}
 
 
 def evidence_fence(args, context):
-    value = json_file(args.evidence); att = json_file(args.attestations)
-    require(value.get("verdict") == "FENCE-VERIFIABLE", "fence-not-verifiable")
+    require(args.attestations, "fence-attestations-required")
+    value = observe_fence(context["fence-id"], args.attestations)
+    path = persist_observation(args.ledger, "fence-held", value)
+    att = json_file(args.attestations)
     require(value.get("fence-id") == context["fence-id"] == att.get("fence-id"),
             "fence-id-mismatch")
     finished = instant(value.get("observation-interval", {}).get("finished-at"))
@@ -168,35 +244,57 @@ def evidence_fence(args, context):
     require(finished is not None and 0 <= (current - finished).total_seconds()
             <= MAX_FENCE_RECEIPT_AGE, "fence-receipt-stale")
     require(expires is not None and current < expires, "fence-attestation-expired")
-    return [file_ref(args.evidence), file_ref(args.attestations)], {
+    return [file_ref(path), file_ref(args.attestations)], {
         "fence-observed-at": finished.isoformat(), "attestation-expires-at": expires.isoformat(),
-        "coverage": "bounded-through-tested-commit-only"}
+        "coverage": "bounded-through-tested-commit-only",
+        "producer": "checks/writer_fence_evidence.py"}
 
 
 def evidence_tested(args, context):
-    gate = json_file(args.evidence); receipt_ok(gate, "workspace-gate")
+    require(len(args.job_id) == 3, "exactly-three-bounded-job-ids-required")
+    records = [bounded_job(x) for x in args.job_id]
+    require(all(x.get("agent-id") == context["fence-id"] for x in records),
+            "tested-attempt-identity-mismatch")
+    by_command = {str(x.get("receipt", {}).get("command")): x for x in records}
+    require(set(by_command) == {"make workspace-gate", "clojure -T:build ci",
+                                "clojure -X:test"},
+            "tested-command-population-mismatch")
+    gate_record = by_command["make workspace-gate"]
+    gate = gate_record["receipt"]; receipt_ok(gate, "workspace-gate")
     require("workspace-gate" in str(gate.get("command", "")),
             "workspace-gate-command-identity-mismatch")
-    suites = [json_file(path) for path in args.suite_receipt]
-    require(len(suites) == 2, "exactly-two-suite-receipts-required")
+    suites = [by_command[x]["receipt"] for x in
+              ("clojure -T:build ci", "clojure -X:test")]
     for index, receipt in enumerate(suites): receipt_ok(receipt, f"suite-{index + 1}")
-    require({str(x.get("command")) for x in suites} ==
-            {"clojure -T:build ci", "clojure -X:test"},
-            "suite-command-population-mismatch")
-    fence = json_file(args.fence_evidence); att = json_file(args.attestations)
+    futon2 = by_command["clojure -T:build ci"]["receipt"]
+    gate_head = gate.get("repository-basis-finish", {}).get("head")
+    require(gate_head and gate_head == futon2.get("repository-basis-finish", {}).get("head"),
+            "tested-commit-mismatch")
+    fence_path = context.get("fence-evidence")
+    attestation_path = context.get("fence-attestations")
+    require(fence_path and attestation_path, "recorded-fence-evidence-absent")
+    fence = json_file(fence_path); att = json_file(attestation_path)
     require(fence.get("verdict") == "FENCE-VERIFIABLE", "tested-fence-not-verifiable")
     observed = instant(fence.get("observation-interval", {}).get("finished-at"))
-    gate_start = instant(gate.get("started-at")); gate_finish = instant(gate.get("finished-at"))
+    # The start instant comes from systemd, not from receipt JSON supplied by
+    # the presenter.  It is monotonic on the same boot as the producer.
+    gate_start_mono = gate_record.get("systemd", {}).get("ExecMainStartTimestampMonotonic")
+    require(str(gate_start_mono or "").isdigit() and int(gate_start_mono) > 0,
+            "gate-start-substrate-unavailable")
+    gate_finish = instant(gate.get("finished-at"))
     expires = instant(att.get("expires-at"))
-    require(all((observed, gate_start, gate_finish, expires)), "tested-interval-unreadable")
-    age = (gate_start - observed).total_seconds()
-    require(0 <= age <= MAX_FENCE_RECEIPT_AGE,
-            "fence-receipt-expired-before-gate-start")
+    require(all((observed, gate_finish, expires)), "tested-interval-unreadable")
+    # Current ingestion time is machine-measured.  A presenter cannot freshen
+    # a day-old fence by editing a gate receipt's started-at field.
+    age = (now() - observed).total_seconds()
+    require(0 <= age <= MAX_FENCE_RECEIPT_AGE, "fence-receipt-expired-at-ingestion")
     require(gate_finish <= expires, "attestation-expired-before-gate-finished")
-    refs = [file_ref(args.evidence), file_ref(args.fence_evidence),
-            file_ref(args.attestations)] + [file_ref(x) for x in args.suite_receipt]
-    return refs, {"tested-commit": gate.get("repository-basis-finish", {}).get("head"),
-                  "fence-receipt-age-at-gate-start-seconds": age,
+    refs = [file_ref(fence_path), file_ref(attestation_path)] + [
+        file_ref(x["receipt-file"]) for x in records]
+    return refs, {"tested-commit": gate_head,
+                  "tested-attempt": context["fence-id"],
+                  "bounded-job-ids": sorted(args.job_id),
+                  "fence-receipt-age-at-ingestion-seconds": age,
                   "attestation-coverage": "ends-with-bounded-tested-phase"}
 
 
@@ -262,6 +360,11 @@ def evidence_restored(args, context):
     require(journal_targets == expected, "park-journal-target-population-incomplete")
     require(len(journal_targets) == len(journal), "park-journal-target-duplicate")
     require(outcome_targets == journal_targets, "restoration-outcome-population-incomplete")
+    backend = restoration.LiveBackend()
+    for identity in sorted(journal_targets):
+        entry = manifest["targets"][identity]
+        require(restoration.restored(entry, backend.observe(identity, entry)),
+                "restoration-live-state-mismatch:" + identity)
     refs = [file_ref(x) for x in (args.evidence, args.manifest, args.journal, args.outcomes)]
     return refs, {"restored-targets": sorted(outcome_targets),
                   "attestation-coverage": "not-claimed"}
@@ -275,7 +378,11 @@ VALIDATORS = {"quiescence": evidence_quiescent, "fence-held": evidence_fence,
 
 def context(rows):
     result = {"fence-id": rows[0]["fence-id"]}
-    for row in rows: result.update(row.get("facts", {}))
+    for row in rows:
+        result.update(row.get("facts", {}))
+        if row.get("state") == "fence-held" and len(row.get("evidence", [])) == 2:
+            result["fence-evidence"] = row["evidence"][0]["path"]
+            result["fence-attestations"] = row["evidence"][1]["path"]
     return result
 
 
@@ -283,7 +390,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser()
     sub = parser.add_subparsers(dest="command", required=True)
     init = sub.add_parser("init"); init.add_argument("--ledger", required=True); init.add_argument("--fence-id", required=True)
-    advance = sub.add_parser("advance"); advance.add_argument("--ledger", required=True); advance.add_argument("--to", required=True, choices=ORDER[1:]); advance.add_argument("--evidence"); advance.add_argument("--attestations"); advance.add_argument("--fence-evidence"); advance.add_argument("--suite-receipt", action="append", default=[]); advance.add_argument("--manifest"); advance.add_argument("--journal"); advance.add_argument("--outcomes"); advance.add_argument("--key-file")
+    advance = sub.add_parser("advance"); advance.add_argument("--ledger", required=True); advance.add_argument("--to", required=True, choices=ORDER[1:]); advance.add_argument("--evidence"); advance.add_argument("--attestations"); advance.add_argument("--fence-evidence"); advance.add_argument("--job-id", action="append", default=[]); advance.add_argument("--manifest"); advance.add_argument("--journal"); advance.add_argument("--outcomes"); advance.add_argument("--key-file")
     status = sub.add_parser("status"); status.add_argument("--ledger", required=True)
     parking = sub.add_parser("parking-request"); parking.add_argument("--fence-id", required=True)
     args = parser.parse_args(argv)
@@ -310,7 +417,8 @@ def main(argv=None):
                 refs, facts = [], {"release-authority": "FENCE-RELEASE",
                                    "attestation-coverage": "not-claimed"}
             else:
-                require(args.evidence, "transition-evidence-required")
+                if args.to not in ("quiescence", "fence-held", "tested-commit"):
+                    require(args.evidence, "transition-evidence-required")
                 refs, facts = VALIDATORS[args.to](args, context(rows))
             body = {"schema": SCHEMA,
                     "previous-receipt-sha256": rows[-1]["receipt-sha256"],
