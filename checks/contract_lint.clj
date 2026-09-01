@@ -368,6 +368,13 @@
                                            (= {:inspect {:support [:cautious] :mass {:cautious 1}}
                                                :repair {:support [:bold] :mass {:bold 1}}}
                                               (:rows %)))
+   "ParameterPosteriorKernelWitness" #(and (= :parameter-posterior-kernel-reference/v1 (:schema %))
+                                               (= [:inspect :repair] (:policies %))
+                                               (= [:clear :blocked] (:observations %))
+                                               (= 4 (count (:rows %)))
+                                               (every? (fn [row]
+                                                         (= {:support [:cautious] :mass {:cautious 1}} row))
+                                                       (vals (:rows %))))
    "TransitionKernelWitness" #(and (= :transition-kernel-reference/v1 (:schema %))
                                       (= [:idle :active] (:states %))
                                       (= [:stay :start] (:actions %))

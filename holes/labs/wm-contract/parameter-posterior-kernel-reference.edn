@@ -1,0 +1,12 @@
+{:schema :parameter-posterior-kernel-reference/v1
+ :basis "sec-glossary.tex:29 — Q(theta|o,pi) is normalized for every joint observation/policy input"
+ :kind :hand-derived-total-deterministic-rows
+ :policies [:inspect :repair]
+ :observations [:clear :blocked]
+ :parameters [:cautious :bold]
+ :rows {[:inspect :clear] {:support [:cautious] :mass {:cautious 1}}
+        [:inspect :blocked] {:support [:cautious] :mass {:cautious 1}}
+        [:repair :clear] {:support [:cautious] :mass {:cautious 1}}
+        [:repair :blocked] {:support [:cautious] :mass {:cautious 1}}}
+ :excluded {:parameter-prior-q true
+            :predictive-outcome-q true}}

@@ -127,6 +127,7 @@
    {:name :preference-distribution :argv ["bb" "checks/preference_distribution_witness.clj"]}
    {:name :predictive-outcome-kernel :argv ["bb" "checks/predictive_outcome_kernel_witness.clj"]}
    {:name :parameter-prior-kernel :argv ["bb" "checks/parameter_prior_kernel_witness.clj"]}
+   {:name :parameter-posterior-kernel :argv ["bb" "checks/parameter_posterior_kernel_witness.clj"]}
    {:name :transition-kernel :argv ["bb" "checks/transition_kernel_witness.clj"]}
    {:name :control-vocabulary :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "control"]}
    {:name :aliveness :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "aliveness"]}
@@ -227,6 +228,10 @@
     :argv ["bb" "checks/parameter_prior_kernel_witness.clj" "--negative-outcome"]}
    {:name :c265-habit-q-as-parameter-prior
     :argv ["bb" "checks/parameter_prior_kernel_witness.clj" "--negative-habit"]}
+   {:name :c270-prior-q-as-parameter-posterior
+    :argv ["bb" "checks/parameter_posterior_kernel_witness.clj" "--negative-prior"]}
+   {:name :c270-outcome-q-as-parameter-posterior
+    :argv ["bb" "checks/parameter_posterior_kernel_witness.clj" "--negative-outcome"]}
    {:name :c179-control-outside-vocabulary :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "control" "--negative-control"]}
    {:name :c179-negative-aliveness-factor :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "aliveness" "--negative-control"]}
    {:name :c179-missing-act-gate-leg :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "act-gate" "--negative-control"]}
