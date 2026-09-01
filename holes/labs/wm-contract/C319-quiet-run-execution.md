@@ -54,6 +54,20 @@ python3 /home/joe/code/futon3c/scripts/bg.py list
 python3 /home/joe/code/futon3c/scripts/bg.py test-list
 ```
 
+Also capture each coordinator's registration, durable status/epoch/tick claim,
+and process-local runtime. Do not infer these from `:coordinator/enabled?`:
+
+```sh
+cd /home/joe/code/futon3c
+for id in jit-queue:jit-m94A03-retry-v3 jit-queue:jit-all-open-v2 ftriangle-live-smoke-v1; do
+  scripts/proof-eval.sh "(do (require 'futon3c.apm.durable-coordinator) (futon3c.apm.durable-coordinator/status \"data/apm-coordinators/registry.edn\" \"$id\"))"
+done
+```
+
+Create an initially empty `/tmp/$FENCE_ID-restore.actions`. Append an allowlisted
+undo action only **after** its corresponding park command succeeds. This is the
+authoritative partial-parking journal; never populate it in advance.
+
 Expected: an observed manifest, not a pass. Any new process with an unclassified
 write set is `write-set-unknown`: STOP until its owner and write set are named.
 
@@ -89,6 +103,18 @@ for its in-flight tick and observe again. Let already-running closer/audit/index
 work finish rather than killing it, then explicitly stop
 `apm-closer.service`: its `Restart=always` can restart it without the watchdog.
 Never stop `futon3c-zone.service`.
+
+**Restoration precondition:** stopping a coordinator is allowed only when its
+pre-state has a reversible activation intent. `resume!` is not an inverse for a
+durable `:complete` state: it invokes `continue-complete!` and can create new
+work. An enabled-but-complete coordinator with no runtime is already a
+non-writer and must not be stopped merely to satisfy a blanket list. If the
+fence checker nevertheless requires it stopped, STOP: the checker and the
+restoration semantics disagree and the window is not executable yet.
+
+After each successful park, append exactly the corresponding allowlisted action,
+for example `resume-coordinator<TAB>ID` or `start-unit<TAB>UNIT`, to
+`/tmp/$FENCE_ID-restore.actions`. A failed or merely attempted park gets no row.
 
 ## 2. Coordinator independently verifies the fence
 
@@ -268,32 +294,49 @@ Say to Joe verbatim with actual values substituted:
 > mutable input is impossible. FENCE-RELEASE: the pre-fence background manifest
 > may now be restored.
 
-Joe restores only entries recorded active/enabled in step 0. For the observed
-three coordinators and four units, if the actual manifest confirms them:
+Joe restores only entries both changed according to
+`/tmp/$FENCE_ID-restore.actions` and recorded with reversible active intent in
+step 0. Do not blanket-resume the three coordinator IDs. Execute allowlisted
+actions in reverse parking order. For a coordinator, use `resume!` only when
+the captured durable pre-state was genuinely running; `enabled? true` alone is
+insufficient. For a unit, start it only when its captured `ActiveState` was
+active/activating.
 
 ```sh
 cd /home/joe/code/futon3c
-for id in \
-  'jit-queue:jit-m94A03-retry-v3' \
-  'jit-queue:jit-all-open-v2' \
-  'ftriangle-live-smoke-v1'
-do
-  printf '%s\n' "(do (require 'futon3c.apm.durable-coordinator) (futon3c.apm.durable-coordinator/resume! \"/home/joe/code/futon3c/data/apm-coordinators/registry.edn\" \"$id\"))" \
-    | scripts/proof-eval.sh -
-done
-systemctl --user start apm-watchdog.timer
-systemctl --user start apm-axiom-audit.timer
-systemctl --user start futon-pattern-index.timer
-systemctl --user start apm-campaign-babysit-jit-all-open-v2.service
-# Only if apm-closer.service was active in the captured manifest:
-systemctl --user start apm-closer.service
+nl -ba "/tmp/$FENCE_ID-restore.actions"
+# Read the journal bottom-to-top. For each resume-coordinator row whose captured
+# durable pre-state was :running:
+printf '%s\n' "(do (require 'futon3c.apm.durable-coordinator) (futon3c.apm.durable-coordinator/resume! \"/home/joe/code/futon3c/data/apm-coordinators/registry.edn\" \"COORDINATOR_ID\"))" | scripts/proof-eval.sh -
+# For each start-unit row whose captured ActiveState was active/activating:
+systemctl --user start UNIT
 ```
 
 Coordinator verifies restored states with the same serving-JVM `status` forms
 and `systemctl show` command captured in step 0. Expected values equal the
-pre-fence manifest: the formerly enabled coordinator entries are enabled and
-running with schedulers, and only the formerly active timers/services are
-active. Do not resume something that was already inactive in the manifest.
+pre-fence **activation intent**, not byte/state identity: a resumed coordinator
+may have a new epoch/runtime; a restarted unit has a new InvocationID; a timer
+may compute a new next elapse. Record those transitions. Exact epoch, process,
+and timer-schedule restoration is impossible. Do not resume something that was
+complete, draining, stopped, disabled, or inactive in the manifest.
+
+### Emergency restoration if the coordinator session disappears
+
+Joe can restore a partially parked window without this session:
+
+1. Set the recorded `FENCE_ID`; preserve its attestations, pre-state output, and
+   `restore.actions` file.
+2. Run `nl -ba /tmp/$FENCE_ID-restore.actions`. Only rows present were actually
+   parked; never restore a name merely because it appears elsewhere in this
+   document.
+3. Work bottom-to-top using the two allowlisted command forms above. Refuse a
+   coordinator resume unless its captured durable pre-status was `:running`.
+4. Re-run the coordinator `status` loop and `systemctl show` from step 0.
+   Success means restored activation intent plus explicit new epoch/InvocationID,
+   not equality with the old runtime state.
+5. Announce `FENCE-RELEASE (emergency restoration) <FENCE_ID>` and retain the
+   manifest/journal. Any failed undo remains named and is escalated to that
+   writer's owner; do not compensate by starting every listed writer.
 
 ## Abort/undo table
 
