@@ -12,6 +12,8 @@ domain, but their codomains name different objects.
 
 Only evidence metadata changed; the parameter-prior carrier and all Q-facing
 definitions retain their bodies. Q semantics are unchanged. The `:lean-spine`
-pin is refreshed as part of this delivery. `ParameterPriorKernel` already has
+pin is refreshed to
+`bab5ddd95c4b95c98317b3497d6f04930e0ac5f2557bb10b603cb9c62cbb2abd`.
+`ParameterPriorKernel` already has
 the explicit `:scores` model area; registry regeneration and the staged paper
 build verify classification closure.
