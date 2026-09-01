@@ -110,3 +110,65 @@ by the reproduction command rather than rounded independently here.
   for different starts to finish at materially different posteriors.  More
   fields would be needed to distinguish stable field dependence from long-run
   drift.
+
+---
+
+## Owner review (claude-20, 2026-09-01)
+
+Re-ran `clojure -M holes/labs/wm-contract/c464_beta_carry_experiment.clj`
+myself. Every number reproduces. Reading with `edn/read` in a loop is confirmed
+in the script (`read-forms`), the rank-proxy limit is stated wherever a rank
+appears, and derived predictions are labelled as derived rather than presented
+as persisted. The arms differ (14–36 transitions per field/start), the argmax
+never moves, and the carry stays inside 0.28–5.58, far from either solver bound.
+
+**One headline claim does not survive: the field contrast is a length artifact.**
+
+The report says July 4 forgets its initial β while July 5 retains path
+dependence, and reads that as a difference between the fields. It is a
+difference in how much sequence each field has. Carried β on 07-04, at the
+**same** transition count 07-05 ends at:
+
+| β₀ | β at t=17 (07-04) | β at t=37 (07-04) | β at t=17 (07-05) |
+|---|---|---|---|
+| 0.5 | 0.4977 | 0.4529 | 0.2814 |
+| 1.0 | 0.8698 | 0.4530 | 1.1439 |
+| 2.0 | 1.5757 | 0.4532 | 1.6925 |
+| 5.0 | 2.4844 | 0.4538 | 5.5766 |
+
+At t=17 the four 07-04 trajectories are still fully separated and still
+remember where they started — exactly like 07-05. The collapse to ~0.453 happens
+between t=17 and t=37, which 07-05 does not have. **Both fields retain path
+dependence at 17 transitions; only one field has enough transitions to lose
+it.** The comparison was made at two different sequence lengths, which is the
+`AGENTS.md` rule — *measure a comparison where the arms are supposed to differ*
+— failing in the mirror direction: two things compared at different values of
+the parameter that governs the effect.
+
+The trajectory also is not a smooth decay. From β₀ = 5 on 07-04 it falls to
+2.48 by t=18, jumps to 3.58 at t=19, decays to 1.19 by t=26, jumps to 2.85 at
+t=27, then decays to 0.45. Something in the field pushes β up twice; the
+contraction is what pulls it back. Four trajectories from 0.5, 1, 2 and 5
+landing within 0.001 of each other at t=37 is real contraction rather than
+coincidence — but it takes more than twenty ticks to show.
+
+**What this means for R2, which is the reason it matters.** The planned
+validation run is about 20 ticks. On this evidence a carried β over 20 ticks is
+still dominated by whatever β₀ it started from — the four starts were 0.50,
+0.87, 1.58 and 2.48 apart at t=17. So R2 will *not* show the carry learning
+anything, and a reader expecting it to will misread a length limit as a null
+result. R2's report must state its β₀ and its tick count beside any β number,
+and must not describe a 20-tick carry as having converged.
+
+**What this does not do is contradict Joe's ruling.** Carrying and resetting
+produce different orderings on every field/start combination tested, so the
+choice is real; it simply does not reach the top of the ranking on these
+fields, and the horizon over which carrying accumulates anything is longer than
+either recorded field. The ruling stands, with the measurement recorded beside
+it as Joe's own rule asks.
+
+**Method note.** I first read my own results file with `edn/read-string` and got
+one form of sixteen, then reported "16 rows" as "18 keys" before catching it.
+Fourth instance today of a tool returning part of a thing and being read as the
+whole — and the first where the rule I wrote into `AGENTS.md` this afternoon
+caught me rather than someone else.
