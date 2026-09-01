@@ -63,7 +63,20 @@ the **time** binding of the one identity that is observed, and it is a different
 question. Unlike (1) and (2) this looks repairable — the run record could carry
 the identity at start — and it is not yet dispatched.
 
-**4. Adapter pins establish occurrence, not correspondence** (C391 `a6e1c24`).
+**4. Attempt membership across producers is unprovable** (C423 `987bd1a`, C429
+`4a58e90`, C432 `33aac56`). `agent-id` reaches the bounded receipt from
+`bg.py --agent`: producer-persisted and caller-authored at once. C410's check
+**detects a mismatch but does not prove shared attempt identity**. C429 surveyed
+the alternatives and found none: the bounded receipt carries no run identity,
+the fence id is caller-selected, click and run ids join to each other rather
+than to the job, and *"adding the current attempt label to the run record would
+only create another copy of a caller-authored assertion."* Systemd's unit
+identity and monotonic start **are** genuine and unforgeable by the caller, and
+neither is carried into the run — the nearest available material, recorded so a
+future attempt starts there. Clearing condition: an independently issued,
+verify-at-use capability bound by both producers.
+
+**5. Adapter pins establish occurrence, not correspondence** (C391 `a6e1c24`).
 A receipt whose `:expected` is a four-row table pinned by one source line has
 not been shown to match the Lean definition. 31/31 holds under the stated
 meaning and is not a claim of identity-preserving adapters.
@@ -76,7 +89,8 @@ loaded runner identity, with a declared topology boundary of stated
 completeness.*
 
 It cannot say: *this is the whole program*, *this is the only history*,
-*this ledger is not a copy*, or *this program ran every stage*.
+*this ledger is not a copy*, *this program ran every stage*, or
+*this tested job belongs to this attempt*.
 
 **Both halves belong in the artifact.** Class 10 (C414 `1a075c0`) is the reason:
 evidence anchored by its own producer can verify perfectly while the principal
