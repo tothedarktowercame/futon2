@@ -1,0 +1,24 @@
+sha-before 6917ba0dbd7cb3e2aec253e6aa95ed75384eaa40
+command: FUTON_WM_TRACE_POLICY_DETAILS=1 FUTON_WM_FPI_DARK=1 clojure -M -m futon2.run-tick-once 14  (x20)
+tick 1 exit=0 wall=79s
+tick 2 exit=0 wall=80s
+tick 3 exit=0 wall=78s
+tick 4 exit=0 wall=78s
+tick 5 exit=0 wall=79s
+tick 6 exit=0 wall=79s
+tick 7 exit=0 wall=81s
+tick 8 exit=0 wall=77s
+tick 9 exit=0 wall=78s
+tick 10 exit=0 wall=78s
+tick 11 exit=0 wall=77s
+tick 12 exit=0 wall=79s
+tick 13 exit=0 wall=77s
+tick 14 exit=0 wall=78s
+tick 15 exit=0 wall=78s
+tick 16 exit=0 wall=80s
+tick 17 exit=0 wall=76s
+tick 18 exit=0 wall=78s
+tick 19 exit=0 wall=78s
+tick 20 exit=0 wall=78s
+sha-after fb7f503c75b47418559d140e026bec73a0f0e10c
+DONE
