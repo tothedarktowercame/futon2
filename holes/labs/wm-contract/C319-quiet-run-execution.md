@@ -11,7 +11,7 @@ No command in this sheet was executed while it was assembled.
 Say to Joe verbatim:
 
 > Joe — may I have a fenced War Machine operator window? Please keep Futon3c
-> running but park the three durable coordinators and four background units
+> running but park the three durable coordinators and five background units
 > listed below. I need a 60-minute planning reservation beginning when all
 > report parked. Preparation to READY measured 6m24s and is budgeted at 10
 > minutes; reload and live author/reviewer latency are unbounded, so I will send
@@ -20,12 +20,35 @@ Say to Joe verbatim:
 
 Freeze dispatch. Obtain and record `NO-WRITE/NO-JOB UNTIL FENCE-RELEASE` from
 all four WM lanes, `claude-1`, Joe, and every other session retaining workspace
-write authority. Capture the actual pre-fence manifest before changing it:
+write authority. Choose and retain one identifier, for example
+`FENCE_ID=wm-quiet-YYYYMMDDTHHMMSSZ`. Create
+`/tmp/$FENCE_ID-attestations.json` with these exact true fields; the recorded
+acknowledgements, not the booleans alone, are its authority:
+
+```sh
+FENCE_ID=wm-quiet-YYYYMMDDTHHMMSSZ
+cat > "/tmp/$FENCE_ID-attestations.json" <<'EOF'
+{"operator-no-workspace-write":true,
+ "dispatch-frozen":true,
+ "publisher-paused":true,
+ "sessions-reconciled":true,
+ "coordinators-not-resumed-before-release":true}
+EOF
+```
+
+Capture the actual pre-fence manifest before changing it:
 
 ```sh
 date -u +%FT%TZ
 systemctl --user list-timers --all --no-pager
 systemctl --user list-units --type=service --state=running --no-pager
+systemctl --user show \
+  apm-campaign-babysit-jit-all-open-v2.service \
+  apm-watchdog.timer apm-watchdog.service apm-closer.service \
+  apm-axiom-audit.timer apm-axiom-audit.service \
+  futon-pattern-index.timer futon-pattern-index.service \
+  -p Id -p ActiveState -p SubState -p InvocationID \
+  -p NextElapseUSecRealtime --no-pager
 ps -eo pid,ppid,lstart,args | rg -i 'watch|timer|cron|generator|publish|apm|bg\.py'
 python3 /home/joe/code/futon3c/scripts/bg.py list
 python3 /home/joe/code/futon3c/scripts/bg.py test-list
@@ -49,43 +72,61 @@ do
     | scripts/proof-eval.sh -
 done
 
-systemctl --user stop apm-campaign-babysit-jit-all-open-v2.service
 systemctl --user stop apm-watchdog.timer
+# Wait for an active watchdog invocation and closer work to finish.
+systemctl --user is-active apm-watchdog.service apm-closer.service
+systemctl --user stop apm-closer.service
 systemctl --user stop apm-axiom-audit.timer
 systemctl --user stop futon-pattern-index.timer
+# Wait for either active paired service to finish.
+systemctl --user is-active apm-axiom-audit.service futon-pattern-index.service
+systemctl --user stop apm-campaign-babysit-jit-all-open-v2.service
 ```
 
 Expected per coordinator: `:ok true`, `:durably-disabled? true`, and
 `:status :stopped` with a quiescence witness. `:draining` is not success; wait
 for its in-flight tick and observe again. Let already-running closer/audit/index
-jobs finish rather than killing them. Never stop `futon3c-zone.service`.
+work finish rather than killing it, then explicitly stop
+`apm-closer.service`: its `Restart=always` can restart it without the watchdog.
+Never stop `futon3c-zone.service`.
 
 ## 2. Coordinator independently verifies the fence
 
 ```sh
-systemctl --user is-active \
-  apm-campaign-babysit-jit-all-open-v2.service \
-  apm-watchdog.timer apm-axiom-audit.timer futon-pattern-index.timer \
-  apm-closer.service
-systemctl --user list-timers --all --no-pager
-python3 /home/joe/code/futon3c/scripts/bg.py list
-python3 /home/joe/code/futon3c/scripts/bg.py test-list
-
 cd /home/joe/code/futon2
-python3 checks/quiescence_check.py
+python3 checks/writer_fence_evidence.py \
+  --attestations /tmp/$FENCE_ID-attestations.json \
+  > /tmp/$FENCE_ID-evidence-01.json
+fence_exit=$?
+cat /tmp/$FENCE_ID-evidence-01.json
+test "$fence_exit" -eq 0
 ```
 
-Expected: parked units inactive, no active/activating ordinary or bounded job,
-and C292 exit 0 with JSON `"verdict": "QUIESCENT"`, five clean repositories,
-four idle lanes, and stable state sandwich. Also inspect the three coordinator
-registry/state records twice: enabled false, no tick claim, and a quiescence
-witness. Record `FENCE-HELD <UTC>` only after every owner acknowledgement and
-machine observation agrees.
+Expected script exit 0 and top-level verdict `FENCE-VERIFIABLE`. Its two
+endpoint captures must agree and show: all three coordinators durably stopped
+with no runtime scheduler/tick claim and a same-epoch quiescence witness;
+paired timers/services and closer inactive; no writable handle beneath the
+five repositories; and C292 `QUIESCENT` with five clean repositories, four idle
+lanes, and no jobs. `FENCE-BREACH` (1) and `FENCE-INDETERMINATE` (3) both refuse
+the window. Record `FENCE-HELD <UTC> $FENCE_ID` only after this verdict and the
+underlying owner acknowledgements agree.
 
 Important boundary: C292 verifies Git, lane rows, and job lists. It does **not**
 see embedded APM coordinators, ignored writable handles, editors, or promises
-not to resume. Those remain operator-attested and are re-observed from the
-manifest at every checkpoint.
+not to resume. `writer_fence_evidence.py` adds coordinator/unit/handle
+observations, but future writer absence and owner promises remain attested.
+
+Make the interval claim visible to WM preflight:
+
+```sh
+clojure -M:wm-preflight --writer-fence "$FENCE_ID"
+```
+
+Expected observation: `:writer-fence {:status :held :id "$FENCE_ID"}` and
+`:event-free? true`. Where a mission ID is supplied, readiness must say
+`READY (FENCE-CONDITIONAL $FENCE_ID)`, not unfenced `READY-CONTENT-ONLY
+(event-free unverified)`. This declaration names the already established
+fence; it does not acquire one.
 
 ## 3. Run the bounded workspace gate
 
@@ -100,7 +141,8 @@ zero, and `workspace-gate: script-exit=0`. Read the named script exit; a
 failing Make recipe itself reports exit 2 and must not be mistaken for the
 house mutation-slipped meaning.
 
-Immediately repeat step 2. Any `repository-basis-changed`, moved/unavailable
+Immediately rerun the step-2 evidence command to a new numbered `/tmp` file.
+Any `repository-basis-changed`, moved/unavailable
 basis, new process/job, or missing acknowledgement is `FENCE-BREACH`.
 
 ## 4. Produce settled suite receipts
@@ -123,7 +165,7 @@ python3 /home/joe/code/futon3c/scripts/bg.py test-status JOB_ID
 
 Expected for each terminal receipt: inner 0, outer 0, `verdict=pass`, clean
 resource status, and identical clean start/finish repository bases matching
-step 2. Then repeat step 2.
+step 2. Then rerun the step-2 evidence command.
 
 ## 5. Release and perform Joe's reload
 
@@ -149,8 +191,8 @@ clojure -M:dev-admin load-file \
   /home/joe/code/futon2/src/futon2/aif/full_loop_runner.clj
 ```
 
-The reload mutates serving-JVM state. Immediately repeat the machine/owner
-fence observations from step 2, then run step 6.
+The reload mutates serving-JVM state. Immediately rerun the step-2 evidence
+command, then run step 6.
 
 ## 6. Establish READY without rerunning the click
 
@@ -167,7 +209,7 @@ tested Futon2 commit; verdict `READY`; `run-readiness: script-exit=0`; an
 available reviewer is selected. `NOT-READY (waiting)` and `NOT-READY
 (needs-you)` are both refusal verdicts even if Make's wrapper prints exit 2.
 
-Repeat step 2 one final time before the click.
+Rerun the step-2 evidence command one final time before the click.
 
 ## 7. Joe performs the observed production click
 
@@ -240,19 +282,24 @@ systemctl --user start apm-watchdog.timer
 systemctl --user start apm-axiom-audit.timer
 systemctl --user start futon-pattern-index.timer
 systemctl --user start apm-campaign-babysit-jit-all-open-v2.service
+# Only if apm-closer.service was active in the captured manifest:
+systemctl --user start apm-closer.service
 ```
 
-Coordinator verifies restored states. Do not resume something that was already
-inactive in the captured manifest.
+Coordinator verifies restored states with the same serving-JVM `status` forms
+and `systemctl show` command captured in step 0. Expected values equal the
+pre-fence manifest: the formerly enabled coordinator entries are enabled and
+running with schedulers, and only the formerly active timers/services are
+active. Do not resume something that was already inactive in the manifest.
 
 ## Abort/undo table
 
 | Last completed phase | Action |
 |---|---|
 | Before parking | Clean abort; nothing to undo. |
-| Parked, before reload | Preserve failed receipts, say `FENCE-RELEASE (aborted before reload)`, restore the exact pre-fence manifest. A retry starts at step 0. |
-| Reloaded, before click | Serving code need not be rolled back. Restore writers on abort. On retry, reuse the reload only if its recorded Futon2 identity still equals the newly tested settled commit; otherwise obtain a new preflight and Joe reloads again. |
-| Click started or terminal | Never click again merely to clean evidence. Preserve binding, run record, observer envelope, trace, and logs. Certify if exact evidence permits; otherwise record incomplete/fail/unavailable, then release and restore. |
+| Parked, before reload | Preserve failed receipts, say `FENCE-RELEASE (aborted before reload)`, execute the step-9 manifest restoration commands, and confirm with coordinator `status` plus `systemctl show`. A retry starts at step 0. |
+| Reloaded, before click | Serving code need not be rolled back. Execute and verify step-9 restoration. On retry, reuse the reload only if `make run-readiness` records its Futon2 identity equal to the newly tested settled commit; otherwise obtain a new preflight and Joe reloads again. |
+| Click started or terminal | Never click again merely to clean evidence. Preserve binding, run record, observer envelope, trace, and logs. Run `make certify-run RUN_ID=<exact-id>` if exact evidence permits; otherwise record incomplete/fail/unavailable, then execute and verify step-9 restoration. |
 | Certificate persisted | The evidence is immutable for that exact run. Deliver it, release, and confirm restoration. |
 
 Any stable-basis predicate failure is “stop and fix before another window.” Any
@@ -280,3 +327,4 @@ machine observations.
 - C313: verified park/resume operator request.
 - C314: adversarial boundary—`write-set-unknown` is unverified, not empty.
 - C317: conditional meaning and residual hybrid-window limitation.
+- C318/C321: observed/attested/unverifiable fence bundle and runnable command.
