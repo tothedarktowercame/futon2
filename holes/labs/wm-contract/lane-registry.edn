@@ -6,8 +6,8 @@
  [{:lane :wm-nouns
    :holding :C265-next-glossary-term, :dispatched-at "2026-09-01T00:03:28Z", :job-id "invoke-1788221005057-6252-8316e6ff", :expected-by "2026-09-01T00:48:28Z"}
   {:lane :wm-verbs
-   :holding :C263-schema-guard-rollback, :dispatched-at "2026-09-01T00:00:43Z", :job-id "invoke-1788220839357-6247-ca05d2ec", :expected-by "2026-09-01T00:45:43Z"}
+   :holding :C266-binding-durability, :dispatched-at "2026-09-01T00:05:29Z", :job-id "invoke-1788221097078-6254-3fc023f3", :expected-by "2026-09-01T00:50:29Z"}
   {:lane :wm-organization
    :holding :C264-cgroup-observer, :dispatched-at "2026-09-01T00:03:28Z", :job-id "invoke-1788220982080-6250-58edfc55", :expected-by "2026-09-01T00:48:28Z"}
   {:lane :wm-evidence
-   :holding :C262-attack-identity-binding, :dispatched-at "2026-08-31T23:59:40Z", :job-id "invoke-1788220776665-6246-a6ebb411", :expected-by "2026-09-01T00:44:40Z"}]}
+   :holding :C267-class9-scope, :dispatched-at "2026-09-01T00:05:29Z", :job-id "invoke-1788221124508-6255-63d0c076", :expected-by "2026-09-01T00:50:29Z"}]}
