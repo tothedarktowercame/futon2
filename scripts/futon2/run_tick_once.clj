@@ -193,6 +193,13 @@
     (Long/parseLong s)
     14))
 
+(defn- diagnostic-judge-opts [selector version-stamp]
+  {:trace? true
+   :include-advisory-lanes? false
+   :step-portfolio? false
+   :strategic-selection-fn selector
+   :wm-version version-stamp})
+
 (defn- run-tick-once* [days]
   (let [started-at (str (Instant/now))
         run-id (str (java.util.UUID/randomUUID))
@@ -207,11 +214,7 @@
                               :trigger :diagnostic-run-tick-once
                               :live-wire? false))
         generated (wm/generate-war-machine
-                   days
-                   {:trace? true
-                    :include-advisory-lanes? false
-                    :strategic-selection-fn selector
-                    :wm-version version-stamp})
+                   days (diagnostic-judge-opts selector version-stamp))
         result (-> (:judgement generated)
                    (assoc :preference-stack efe/preference-stack-record
                           :selector-seam selector-seam)

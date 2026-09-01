@@ -7,12 +7,64 @@
   (:require [babashka.http-client :as http]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.java.shell]
+            [clojure.java.shell :as shell]
+            [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [futon2.aif.efe :as efe]
             [futon2.aif.free-energy :as free-energy]
             [futon2.aif.observation :as observation]
-            [futon2.report.war-machine :as wm]))
+            [futon2.report.war-machine :as wm])
+  (:import (java.io PushbackReader StringReader)))
+
+(defn- read-all-forms [source]
+  (with-open [reader (PushbackReader. (StringReader. source))]
+    (loop [forms []]
+      (let [form (read {:eof ::eof} reader)]
+        (if (= ::eof form) forms (recur (conj forms form)))))))
+
+(defn- find-binding-expression [form binding-symbol]
+  (or (when (vector? form)
+        (some (fn [[binding value]]
+                (when (= binding-symbol binding) value))
+              (partition 2 form)))
+      (when (coll? form)
+        (some #(find-binding-expression % binding-symbol) form))))
+
+(defn- previous-portfolio-step-fn []
+  (let [{:keys [exit out err]}
+        (shell/sh "git" "show" "HEAD~:scripts/futon2/report/war_machine.clj")]
+    (when-not (zero? exit)
+      (throw (ex-info "could not load previous war-machine implementation"
+                      {:err err})))
+    (load-string
+     (str/replace-first out
+                        "(ns futon2.report.war-machine"
+                        "(ns futon2.report.war-machine-previous"))
+    (let [judge-form (some #(when (and (seq? %)
+                                       (= 'defn (first %))
+                                       (= 'judge (second %)))
+                              %)
+                           (read-all-forms out))
+          expression (find-binding-expression judge-form 'portfolio-step)]
+      (when-not expression
+        (throw (ex-info "HEAD~ judge has no portfolio-step binding" {})))
+      (binding [*ns* (the-ns 'futon2.report.war-machine-previous)]
+        (eval (list 'fn [] expression))))))
+
+(deftest suppressed-judge-portfolio-step-issues-no-post-test
+  (with-redefs [http/post
+                (fn [& request]
+                  (throw (ex-info "suppressed path issued a POST"
+                                  {:request request})))]
+    (is (= {:status :absent :reason :portfolio-step-suppressed}
+           (#'wm/portfolio-step-for-judge false)))))
+
+(deftest unsuppressed-judge-portfolio-step-matches-head-previous-test
+  (let [response {:status 200
+                  :body "{\"action\":{\"type\":\"inspect\"},\"recommendation\":\"continue\",\"structure\":{\"adjacent\":[\"A\"]}}"}
+        old-step (previous-portfolio-step-fn)]
+    (with-redefs [http/post (fn [& _] response)]
+      (is (= (old-step) (#'wm/portfolio-step-for-judge true))))))
 
 (def ^:private real-wm-channels
   ;; Exact channel set from data/wm-trace/wm-trace-2026-07-04.edn.

@@ -2243,6 +2243,27 @@
                            :structure (:structure step-data)})}
        {:available? false}))))
 
+(defn- portfolio-step-for-judge
+  "Return the portfolio step used by judgement, or an explicit absence.
+
+   `step?` defaults true at the judge option boundary, preserving production
+   behaviour. False is for diagnostic traversal: the ordinary scan has
+   already read GET /portfolio/state, and this function then issues no POST
+   and records why recommendation/structure data is unavailable."
+  [step?]
+  (if-not step?
+    {:status :absent :reason :portfolio-step-suppressed}
+    (try
+      (let [resp (http/post (str futon3c-url "/api/alpha/portfolio/step")
+                            {:headers {"Content-Type" "application/json"
+                                       "Accept" "application/json"}
+                             :body "{\"emit-evidence\":false}"
+                             :timeout 10000
+                             :throw false})]
+        (when (= 200 (:status resp))
+          (json/parse-string (:body resp) true)))
+      (catch Exception _ nil))))
+
 ;; ---------------------------------------------------------------------------
 ;; Scan 8: Graph (strategic state graph)
 ;;
@@ -4358,8 +4379,10 @@
      appended only after policy selection."
   ([scan-data] (judge scan-data {}))
   ([scan-data {:keys [trace? trace-dir scan-id include-advisory-lanes?
+                      step-portfolio?
                       strategic-selection-fn wm-version]
-               :or {trace? false include-advisory-lanes? true}}]
+               :or {trace? false include-advisory-lanes? true
+                    step-portfolio? true}}]
   (let [route0 (:wm/route scan-data)
         observation (obs/observe scan-data)
         route1 (route-tag route0 :R2 "futon2.aif.observation/observe")
@@ -4842,16 +4865,7 @@
         aif-heads (scan-aif-heads)
         inventory (load-invariant-inventory)
         ;; Get portfolio step data for structural info
-        portfolio-step (try
-                         (let [resp (http/post (str futon3c-url "/api/alpha/portfolio/step")
-                                              {:headers {"Content-Type" "application/json"
-                                                         "Accept" "application/json"}
-                                                :body "{\"emit-evidence\":false}"
-                                                :timeout 10000
-                                                :throw false})]
-                           (when (= 200 (:status resp))
-                             (json/parse-string (:body resp) true)))
-                         (catch Exception _ nil))
+        portfolio-step (portfolio-step-for-judge step-portfolio?)
         ;; Enrich support/attack with invariant + head evidence
         enriched-sa (enrich-support-attack
                      (:support-attack scan-data) inventory aif-heads)
@@ -4907,11 +4921,14 @@
                  :invariants inventory
                  :support-attack-enriched enriched-sa
                  :portfolio-recommendation
-                 (when portfolio-step
+                 (cond
+                   (= :absent (:status portfolio-step)) portfolio-step
+                   portfolio-step
                    {:action (:action portfolio-step)
                     :recommendation (:recommendation portfolio-step)
                     :adjacent (get-in portfolio-step [:structure :adjacent] [])
-                    :critical-path (get-in portfolio-step [:structure :critical-path] [])})
+                    :critical-path (get-in portfolio-step [:structure :critical-path] [])}
+                   :else nil)
                  :observation observation
                  :belief wm-belief
                  :belief-pre wm-belief-pre

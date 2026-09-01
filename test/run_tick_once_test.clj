@@ -16,3 +16,7 @@
     (is (= "run-issued-before-tick" (:run/id record)))
     (is (= "2026-08-31T00:00:00Z" (:startedAt record)))
     (is (true? (:traceWritten record)))))
+
+(deftest diagnostic-entrypoint-suppresses-portfolio-step-test
+  (is (false? (:step-portfolio?
+               (#'tick/diagnostic-judge-opts :selector {:version :test})))))
