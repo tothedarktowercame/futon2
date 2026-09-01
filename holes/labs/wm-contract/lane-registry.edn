@@ -4,10 +4,10 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C302-guard-msgs-migration, :dispatched-at "2026-09-01T00:51:41Z", :job-id "invoke-1788223870717-6345-9c9c9ab3", :expected-by "2026-09-01T01:36:41Z"}
+   :holding :C311-guard-migration-rest, :dispatched-at "2026-09-01T01:01:22Z", :job-id "invoke-1788224474428-6362-46964434", :expected-by "2026-09-01T01:46:22Z"}
   {:lane :wm-verbs
-   :holding :C307-substrate-byte-contract, :dispatched-at "2026-09-01T00:57:33Z", :job-id "invoke-1788224224061-6354-14c1b537", :expected-by "2026-09-01T01:42:33Z"}
+   :holding :C310-claim-seam, :dispatched-at "2026-09-01T01:01:22Z", :job-id "invoke-1788224436559-6360-4eaab82e", :expected-by "2026-09-01T01:46:22Z"}
   {:lane :wm-organization
    :holding :C309-writer-enumeration, :dispatched-at "2026-09-01T00:58:38Z", :job-id "invoke-1788224314585-6356-49e69563", :expected-by "2026-09-01T01:43:38Z"}
   {:lane :wm-evidence
-   :holding :C308-eight-unconverted, :dispatched-at "2026-09-01T00:57:33Z", :job-id "invoke-1788224249517-6355-bb03551e", :expected-by "2026-09-01T01:42:33Z"}]}
+   :holding :C312-attack-byte-contract, :dispatched-at "2026-09-01T01:01:22Z", :job-id "invoke-1788224478302-6363-7f238a79", :expected-by "2026-09-01T01:46:22Z"}]}
