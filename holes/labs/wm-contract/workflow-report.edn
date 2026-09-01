@@ -1,24 +1,24 @@
 {:lanes
  [{:lane :wm-nouns,
-   :closed-attributed 11,
+   :closed-attributed 13,
    :open-holding 1,
-   :in-flight "C257",
-   :holding :C257-next-glossary-term}
+   :in-flight "C265",
+   :holding :C265-next-glossary-term}
   {:lane :wm-verbs,
-   :closed-attributed 8,
+   :closed-attributed 10,
    :open-holding 1,
-   :in-flight "C259",
-   :holding :C259-readiness-double-gate}
+   :in-flight "C263",
+   :holding :C263-schema-guard-rollback}
   {:lane :wm-organization,
+   :closed-attributed 12,
+   :open-holding 1,
+   :in-flight "C264",
+   :holding :C264-cgroup-observer}
+  {:lane :wm-evidence,
    :closed-attributed 9,
    :open-holding 1,
-   :in-flight "C256",
-   :holding :C256-click-run-id-port}
-  {:lane :wm-evidence,
-   :closed-attributed 7,
-   :open-holding 1,
-   :in-flight "C258",
-   :holding :C258-attack-atomicity}],
+   :in-flight "C262",
+   :holding :C262-attack-identity-binding}],
  :schema :wm/workflow-report-v2,
  :since "2026-08-30T00:00:00Z",
  :semantics
@@ -38,12 +38,12 @@
  :sources
  {:case-ledger
   {:path "p4ng/vetting/CLEANUP-QUEUE.md",
-   :revision "1080d87",
-   :sha256-prefix "f86925baeced963a"},
+   :revision "f72c4c3",
+   :sha256-prefix "e27b0c5bd1f77498"},
   :lane-registry
   {:path "futon2/holes/labs/wm-contract/lane-registry.edn",
-   :revision "5760fc8",
-   :sha256-prefix "a35d6026a46c0ebc",
+   :revision "d451023",
+   :sha256-prefix "29576a506c290b4c",
    :as-of "2026-08-31T15:39:14.434945104Z"},
   :decisions
   {:path "futon2/holes/problems/DECISIONS-PENDING.md",
@@ -64,20 +64,20 @@
   "Invoke-jobs ledger storage backend"],
  :owner-repairs ["C213"],
  :totals
- {:cases-in-ledger 165,
-  :cases-attributed 37,
-  :closed-by-lanes 35,
+ {:cases-in-ledger 174,
+  :cases-attributed 46,
+  :closed-by-lanes 44,
   :owner-repairs 1,
   :open-dispatched 1,
   :pending-decisions 13},
- :ledger-frontier 248,
- :as-of "2026-08-31T23:56:10.808775708Z",
+ :ledger-frontier 257,
+ :as-of "2026-09-01T00:03:36.103433034Z",
  :attribution
  {:systematic-from "C240",
-  :systematic-run-length 9,
+  :systematic-run-length 18,
   :systematic-window? true,
-  :cases-attributed 37,
-  :cases-in-ledger 165,
+  :cases-attributed 46,
+  :cases-in-ledger 174,
   :attributed-cases
   ["C209"
    "C210"
@@ -115,9 +115,18 @@
    "C245"
    "C246"
    "C247"
-   "C248"],
+   "C248"
+   "C249"
+   "C250"
+   "C251"
+   "C252"
+   "C253"
+   "C254"
+   "C255"
+   "C256"
+   "C257"],
   :note
   "per-lane counts cover only cases whose ledger heading names a lane. :systematic-window? is false when the continuous run is a single case, in which case :systematic-from names a coincidence rather than a window and should not be rendered as one. :systematic-from is exact coverage over the LEDGER only -- every case number from it to :ledger-frontier carries an attribution; :frontier is larger because it also counts open registry holdings, which are not ledger attributions -- and every heading inside that window must be classifiable or the generator fails. Cases below it are counted in :cases-in-ledger without a lane, so these are not a campaign census."},
- :frontier 259,
+ :frontier 265,
  :schema-change
  "v1 -> v2 (C244): :dispatched/:completed/:blocked replaced by :closed-attributed/:open-holding, because no dispatch log exists and :dispatched claimed one"}
