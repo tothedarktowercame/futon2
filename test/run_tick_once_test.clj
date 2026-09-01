@@ -19,6 +19,14 @@
     (is (= "2026-08-31T00:00:00Z" (:startedAt record)))
     (is (true? (:traceWritten record)))))
 
+(deftest receipt-path-is-unique-per-run-test
+  (let [date "2026-09-01"
+        first-path (#'tick/receipt-path-for-run date "run-one")
+        second-path (#'tick/receipt-path-for-run date "run-two")]
+    (is (not= first-path second-path))
+    (is (.endsWith first-path "tick-run-record-2026-09-01-run-one.edn"))
+    (is (.endsWith second-path "tick-run-record-2026-09-01-run-two.edn"))))
+
 (deftest diagnostic-entrypoint-suppresses-portfolio-step-test
   (let [opts (#'tick/diagnostic-judge-opts :selector {:version :test})]
     (is (false? (:step-portfolio? opts)))

@@ -89,6 +89,22 @@
       (is (contains? r :decision))
       (is (contains? r :mode)))))
 
+(deftest route-roundtrips-in-hop-order-test
+  (let [route [{:node :R20 :via "scan" :at "2026-09-01T00:00:01Z"}
+               {:node :R12 :via "inventory" :at "2026-09-01T00:00:02Z"}
+               {:node :R2 :via "observe" :at "2026-09-01T00:00:03Z"}]
+        record (trace/trace-record (assoc sample-judge-output :wm/route route))
+        roundtrip (edn/read-string (pr-str record))]
+    (is (= route (:wm/route roundtrip))
+        "EDN round-trip preserves the traversal sequence")
+    (is (= [:R20 :R12 :R2] (mapv :node (:wm/route roundtrip))))
+    (is (not (contains? (trace/trace-record sample-judge-output) :wm/route))
+        "a producer with no route makes no traversal claim")
+    (is (not (contains? (trace/trace-record
+                         (assoc sample-judge-output :wm/route []))
+                        :wm/route))
+        "an empty route is also absent rather than persisted as evidence")))
+
 (deftest f-pi-dark-off-is-byte-identical-to-previous-implementation-test
   (testing "the default-off record matches HEAD~ byte-for-byte apart from its clock"
     (binding [trace/*persist-policy-trace-details?* false]

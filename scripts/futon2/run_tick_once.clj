@@ -27,9 +27,10 @@
   (str (System/getProperty "user.home")
        "/code/futon2/data/wm-trace/wm-trace-" date-str ".edn"))
 
-(defn- receipt-path-for-date [date-str]
+(defn- receipt-path-for-run [date-str run-id]
   (str (System/getProperty "user.home")
-       "/code/futon2/holes/labs/wm-contract/tick-run-record-" date-str ".edn"))
+       "/code/futon2/holes/labs/wm-contract/tick-run-record-"
+       date-str "-" run-id ".edn"))
 
 (defn- trace-stat [path]
   (let [f (io/file path)]
@@ -228,7 +229,7 @@
                             after-trace
                             (not= before-trace after-trace))
         record (tick-run-record run-id started-at store-basis sample result selector-seam trace-written?)
-        receipt-path (receipt-path-for-date date-str)]
+        receipt-path (receipt-path-for-run date-str run-id)]
     (write-receipt! receipt-path record)
     {:days days
      :selector-seam selector-seam

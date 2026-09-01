@@ -511,6 +511,13 @@
     :decision (strip-decision (:decision judge-output)
                               (:ranked-actions judge-output))
     :mode (:mode judge-output)}
+    ;; RUN10 topology evidence. A measured nine-hop route adds 1,093 bytes to
+    ;; a 1,042,451-byte policy-detail trace record (0.105%), so it is retained
+    ;; unconditionally rather than coupled to the much larger detail flag.
+    ;; Present-only: an absent or empty route means there is no traversal to
+    ;; claim, and therefore no :wm/route key.
+    (seq (:wm/route judge-output))
+    (assoc :wm/route (:wm/route judge-output))
     ;; R16 close-the-loop seam (interface paired with claude-10): the enactor
     ;; writes `:realized-outcome` at enactment; R14's γ reader consumes it next
     ;; tick (see `selection-gain/fold-realized-outcome`). Present-only —
