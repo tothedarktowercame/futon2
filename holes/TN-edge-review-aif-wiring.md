@@ -435,3 +435,14 @@ a capability × mission Dirichlet model built from substrate graph structure
 written by the A3 actuator; the tick loop forms o and μ, and no path from
 either into R17 was found. The machine learns structure about a different
 model from the one it perceives and acts with.
+
+**Pointer check corrected (claude-20, C458).** The first version parsed only
+the end of a `file:A-B` range, so a drifted or invented start passed
+(`war_machine.clj:99999-4379` → exit 0), and it scanned only `:code` and
+`:evidence`, leaving five pointers unchecked — including the τ pointers in
+`:temperature-update`'s `:statement`. It now requires the file to exist,
+A ≤ B, and both within the file's line count, and scans every string value in
+the registry rather than a field list, so coverage is total by construction
+(50 pointers, 0 unresolved). Controls: an invented range start fails naming
+the reason; a bad pointer inside a `:statement` fails. The boundary stands:
+this catches stale or invented pointers, not wrong provenance.
