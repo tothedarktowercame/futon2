@@ -166,6 +166,7 @@
     "preemptive_record_conflict_lint.clj" "preemptive_repair_lint.clj"
     "preemptive_repair_suite.clj" "preemptive_stale_baseline_lint.clj"
     "exit_code_scope_check.clj"
+    "repository_census_basis_check.clj"
     "preference_stack_binding_check.clj" "preference_stack_witness_shape_check.clj"
     "positive_proof_receipt.clj"
     "r17_generator_disposer_check.clj" "r19_stack_witness.clj"
@@ -202,6 +203,8 @@
     :argv ["bb" "-cp" "." "scripts/check_mutable_verdict_claims.bb"]}
    {:name :exit-code-scopes
     :argv ["bb" "-cp" "." "checks/exit_code_scope_check.clj"]}
+   {:name :repository-census-bases
+    :argv ["bb" "-cp" "." "checks/repository_census_basis_check.clj"]}
    {:name :ambiguity :argv ["bb" "checks/ambiguity_witness.clj"]}
    {:name :have-want-arrow :argv ["bb" "checks/have_want_arrow_witness.clj"]}
    {:name :fold :argv ["bb" "checks/fold_witness.clj"]}
@@ -278,6 +281,8 @@
 (defn control-commands []
   [{:name :c390-report-only-crosses-lossy-boundary
     :argv ["bb" "-cp" "." "checks/exit_code_scope_check.clj" "--negative-control"]}
+   {:name :c393-malformed-census-basis
+    :argv ["bb" "-cp" "." "checks/repository_census_basis_check.clj" "--negative-control"]}
    {:name :c157-perturbed-entropy
     :argv ["bb" "checks/ambiguity_witness.clj" "--negative-control"]}
    {:name :c192-belief-channel-without-variance

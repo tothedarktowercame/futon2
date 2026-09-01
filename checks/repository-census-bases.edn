@@ -1,0 +1,9 @@
+{:schema :repository-census-bases/v1
+ :convention "checks/REPOSITORY-CENSUS-BASES.md"
+ :entries
+ [{:artifact "holes/labs/wm-contract/C385-recorded-hash-revalidation-census.md"
+   :kind :census
+   :basis {:futon2 "0d6a627b67b91f53031528bea1eaa4bf2e94905d"}
+   :subjects [{:repo :futon2 :path "scripts/wm_quiet_run_state.py"}
+              {:repo :futon2 :path "scripts/run_readiness.py"}
+              {:repo :futon2 :path "checks/wm_workspace_gate.clj"}]}]}
