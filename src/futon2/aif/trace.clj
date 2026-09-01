@@ -48,6 +48,7 @@
             [clojure.java.shell :as shell]
             [clojure.set :as set]
             [clojure.string :as str]
+            [futon2.aif.forward-model :as forward-model]
             [futon2.aif.lane-futility :as lane-futility]
             [futon2.aif.observation :as observation]
             [futon2.aif.selection-gain :as selection-gain])
@@ -136,7 +137,12 @@
                    :move-class-intensity
                    :controller-score :rank :time-pressure :horizon-steps])
     *persist-policy-trace-details?*
-    (assoc :prediction-mean (get-in r [:prediction :next-observation :mean]))))
+    (assoc :prediction-mean (get-in r [:prediction :next-observation :mean])
+           ;; F_π scores an observation under each candidate's predictive
+           ;; DISTRIBUTION, so the mean alone is not enough — a Gaussian free
+           ;; energy needs the precision too. Persisting the mean without the
+           ;; variance would leave the consumer inventing one (C462 §5).
+           :prediction-variance (get-in r [:prediction :next-observation :variance]))))
 
 (defn- ranked-candidate-id
   "Tick-local stable candidate id retained across stripping. Rank is already
@@ -485,10 +491,14 @@
     :anticipation (:anticipation judge-output {:events-loaded? false :events []})
     :ranked-actions (mapv strip-ranked-action (:ranked-actions judge-output))
     ;; I3 optional policy detail cost, measured on the first 110-candidate tick
-    ;; in wm-trace-2026-07-04.edn: +55,826 bytes/tick (+507.51/candidate),
-    ;; 18.126% of that 307,994-byte record. This beats C66's naive 291,060-byte
-    ;; comparison by 235,234 bytes (80.82%). The file itself contains 38 EDN
-    ;; records / 13,206,620 bytes; default OFF preserves the prior bytes.
+    ;; in wm-trace-2026-07-04.edn (307,910 bytes, 14 observation channels):
+    ;; +92,985 bytes/tick = 30.2% of that record. Of it, 824 bytes/candidate is
+    ;; the predicted mean AND variance (the mean alone would be 467, but F_π
+    ;; needs the distribution, not its centre), 2,312 bytes is the Q(π) map, and
+    ;; 33 bytes is :effects-mode. This beats the naive form C66 warns about by
+    ;; 198,075 bytes (68%). Default OFF is byte-identical to the pre-I3 record,
+    ;; verified against the previous implementation, not merely against a
+    ;; restatement of the current one.
     ;; C66: sourced from the same per-candidate evaluation maps as scoring.
     ;; Stored once when identical: the current 2,646-byte stack would otherwise
     ;; add 291,060 bytes to a 110-candidate tick.
@@ -515,6 +525,15 @@
     ;; unchanged, while enabled ticks carry the sufficient-statistic state.
     (:habit-prior-state judge-output)
     (assoc :habit-prior-state (:habit-prior-state judge-output))
+    ;; I3: one keyword per tick, not per candidate, and inside the flag so the
+    ;; default record stays byte-identical. Storing the prediction itself means
+    ;; REPLAY does not need the mode — but READING does: under
+    ;; `forward-model/*effects-mode*` :constant every same-type candidate
+    ;; predicts identically, so a flat per-candidate field cannot be told from a
+    ;; machine with no discrimination unless the mode is on the record
+    ;; (C462 §6 item 3).
+    *persist-policy-trace-details?*
+    (assoc :effects-mode forward-model/*effects-mode*)
     ;; B-0a tick provenance (present-only, schema v2): the scheduled runner
     ;; stamps it via `wm-version-stamp`; bare judge calls don't — purely
     ;; additive, no nil seam in un-stamped records.

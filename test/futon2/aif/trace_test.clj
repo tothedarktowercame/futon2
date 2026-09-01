@@ -45,7 +45,8 @@
                      :controller-score 0.05 :rank 1
                      :preference-stack [{:layer/id :floor :folded? true}]
                      :prediction {:next-observation
-                                  {:mean {:loop-health 0.8 :stack-pct 0.3}}
+                                  {:mean {:loop-health 0.8 :stack-pct 0.3}
+                                   :variance {:loop-health 0.02 :stack-pct 0.01}}
                                   :next-belief {:huge :nested}}}
                     {:action {:type :address-sorry :target :sorry/x}
                      :G-risk 0.03 :G-ambiguity 0.015 :structural-pressure 0.7
@@ -208,29 +209,22 @@
           "decision in trace doesn't carry :softmax-weights"))))
 
 (deftest policy-trace-details-flag-off-is-byte-identical-test
+  ;; The point of this test is that the DEFAULT record did not change when I3
+  ;; landed. An assertion that re-lists the whitelist cannot show that: it
+  ;; restates the current implementation, so it passes for any edit made in
+  ;; both places. The golden below was captured by running the PRE-I3
+  ;; `trace-record` (git 5febaee^) and the current one over the same input in
+  ;; one process and confirming the serialized bytes were equal. What is pinned
+  ;; here is therefore the pre-I3 output, not a description of today's code.
   (binding [trace/*persist-policy-trace-details?* false]
-    (let [ranked (first (:ranked-actions sample-judge-output))
-          decision (:decision sample-judge-output)
-          legacy-ranked (select-keys
-                         ranked
-                         [:action :G-risk :G-ambiguity :predictability-bonus
-                          :homeostatic-pressure :structural-pressure :G-goal-outcome
-                          :goal-outcome-replay-inputs :gap-exploration-bonus
-                          :graph-control-score :G-core :G-efe :score-provenance
-                          :risk-mode :ambiguity-mode :g-ambiguity-source :c-zone-load
-                          :goal-outcome-mode :controller-augmentation :augmentation-terms
-                          :graph-feasibility-penalty :graph-control-score-proxy
-                          :predictability-control-mode :homeostatic-control-mode
-                          :graph-feasibility-mode :structural-pressure-mode
-                          :habit-prior-bias :habit-prior-source
-                          :move-class-intensity-mode :move-class-intensity-contribution
-                          :move-class-intensity :controller-score :rank :time-pressure
-                          :horizon-steps])]
-      (is (= (pr-str legacy-ranked)
-             (pr-str (#'trace/strip-ranked-action ranked))))
-      (is (= (pr-str (dissoc decision :softmax-weights :ranked-actions))
-             (pr-str (#'trace/strip-decision
-                      decision (:ranked-actions sample-judge-output))))))))
+    (let [golden (str/trim-newline
+                  (slurp (io/resource "futon2/aif/trace-flag-off-golden.txt")))
+          actual (pr-str (dissoc (trace/trace-record sample-judge-output)
+                                 :timestamp))]
+      (is (= (count golden) (count actual))
+          "flag-off record changed size against the pre-I3 bytes")
+      (is (= golden actual)
+          "flag-off record is no longer byte-identical to the pre-I3 record"))))
 
 (deftest policy-trace-details-flag-on-roundtrip-test
   (binding [trace/*persist-policy-trace-details?* true]
@@ -244,6 +238,13 @@
              (get-in decoded [:ranked-actions 0 :prediction-mean])))
       (is (not (contains? (first (:ranked-actions decoded)) :prediction))
           "the repeated next-belief is not persisted")
+      ;; F_pi scores an observation under a DISTRIBUTION; a mean without a
+      ;; variance leaves the consumer inventing the precision.
+      (is (= {:loop-health 0.02 :stack-pct 0.01}
+             (get-in decoded [:ranked-actions 0 :prediction-variance])))
+      ;; without the mode on the record, a flat per-candidate field cannot be
+      ;; told from a machine that had no discrimination
+      (is (contains? decoded :effects-mode))
       (is (= {"rank/1" 0.75 "rank/2" 0.25}
              (get-in decoded [:decision :softmax-weights-by-candidate-id])))
       (is (every? string?
