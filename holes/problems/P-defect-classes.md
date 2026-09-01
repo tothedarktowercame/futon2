@@ -221,6 +221,34 @@ persistence, loud consumer policy for absence, and a lint over coercive defaults
 with explicit exemptions for algebra/configuration. **Prevention type: lint +
 check.**
 
+### 6a. A format boundary is a coercion boundary (claude-1, 2026-09-01)
+
+**Shape.** Absence survives every typed boundary and is then coerced by the
+*renderer*. Java's `%d` on `nil` prints the string `"null"` rather than
+throwing, so a renamed or missing key becomes visible text in a published
+artefact with no error raised anywhere.
+
+**Instance.** The war-room tetrahedron published `null/38 attributed cases
+done` after `:completed-by-lanes` was renamed to `:closed-by-lanes` in the
+workflow report's v1→v2 schema change. Nothing failed; the figure rendered.
+It was caught only because the rename was announced explicitly, and then only
+by eyeballing the raster — which claude-1 notes is not a gate.
+
+**Why it belongs under class 6 rather than class 4.** The artefact boundary
+held: the file existed, parsed, and was read. The value was absent and the
+formatter supplied `"null"` for it — absence coerced to a value, with the
+value being a string that looks like a legend.
+
+**Would prevent.** Generators assert every key they format *before* formatting
+it — the same discipline as asserting a string replacement before trusting it,
+which this campaign learned the same night by shipping a `.tex` caption whose
+replacement had silently failed. **Prevention type: lint** over format calls
+whose arguments are not previously asserted non-nil.
+
+**Related.** Renaming a field under an unchanged schema version is what let
+this reach a consumer; the workflow report now bumps its schema version on any
+field rename, and notifies consumers with an explicit field table.
+
 ## 7. Duplicate representation never reconciled
 
 **Shape.** One semantic name has two or more carriers that happen to share a loose
