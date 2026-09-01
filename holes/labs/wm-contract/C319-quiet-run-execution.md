@@ -321,10 +321,11 @@ Say to Joe verbatim with actual values substituted:
 > receipts recorded stable start/finish content bases, and no fence breach was
 > observed. The production phase allowed only the exact click/run-bound outputs
 > named in certificate `<PATH>`, whose verdict is `<VERDICT>`. This claim is
-> conditional on that declared boundary. Mutable-input population v1 contains
-> 61 content claims, 6 event claims, 1 non-verdict library, and 0 unexplained
-> programs; this does not claim that an undeclared external mutable input is
-> impossible. FENCE-RELEASE: the pre-fence background manifest
+> conditional on that declared boundary. The gate-time mutable-input
+> reconciliation classified every then-current member as content, event, or
+> non-verdict library, with zero unexplained; see its revision-bound report
+> rather than a copied count. This does not claim that an undeclared external
+> mutable input is impossible. FENCE-RELEASE: the pre-fence background manifest
 > may now be restored.
 
 Joe restores only typed, successfully observed journal entries. The tool
