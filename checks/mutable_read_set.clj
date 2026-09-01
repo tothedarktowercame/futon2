@@ -5,7 +5,8 @@
    `observe-files` then compares the captured digest with a second observation,
    making movement an explicit result rather than silently combining states."
   (:require [babashka.fs :as fs])
-  (:import [java.nio.charset StandardCharsets]
+  (:import [java.nio ByteBuffer]
+           [java.nio.charset CodingErrorAction StandardCharsets]
            [java.nio.file Files Paths]
            [java.security MessageDigest]
            [java.time Instant]))
@@ -15,18 +16,42 @@
     (.update digest bytes)
     (format "%064x" (java.math.BigInteger. 1 (.digest digest)))))
 
-(defn- read-bytes [path]
+(defn read-bytes [path]
   (Files/readAllBytes (Paths/get (str path) (make-array String 0))))
 
+(defn- strict-utf8 [bytes]
+  (try
+    (let [decoder (doto (.newDecoder StandardCharsets/UTF_8)
+                    (.onMalformedInput CodingErrorAction/REPORT)
+                    (.onUnmappableCharacter CodingErrorAction/REPORT))]
+      {:status :present :value (str (.decode decoder (ByteBuffer/wrap bytes)))})
+    (catch java.nio.charset.CharacterCodingException _
+      {:status :absent :reason :non-utf8})))
+
+(defn- path-kind [path]
+  (cond
+    (not (fs/exists? path)) :absent
+    (not (fs/regular-file? path)) :wrong-kind
+    :else :regular-file))
+
 (defn capture-file [path]
-  (when-not (fs/regular-file? path)
-    (throw (ex-info "mutable read-set input is absent" {:path (str path)})))
-  (let [bytes (read-bytes path)]
-    {:path (str path)
-     :bytes bytes
-     :text (String. bytes StandardCharsets/UTF_8)
-     :size (alength bytes)
-     :sha256 (sha256-bytes bytes)}))
+  (let [kind (path-kind path)]
+    (when-not (= :regular-file kind)
+      (throw (ex-info "mutable read-set input cannot be captured"
+                      {:path (str path) :read-set/reason kind})))
+    (try
+      (let [bytes (read-bytes path)
+            decoded (strict-utf8 bytes)]
+        (cond-> {:path (str path)
+                 :bytes bytes
+                 :text-status (dissoc decoded :value)
+                 :size (alength bytes)
+                 :sha256 (sha256-bytes bytes)}
+          (= :present (:status decoded)) (assoc :text (:value decoded))))
+      (catch Throwable failure
+        (throw (ex-info "mutable read-set input is unreadable"
+                        {:path (str path) :read-set/reason :unreadable}
+                        failure))))))
 
 (defn capture-files [paths]
   {:captured-at (str (Instant/now))
@@ -34,16 +59,21 @@
 
 (defn compare-current [{:keys [entries]}]
   (mapv (fn [{:keys [path sha256]}]
-          (try
-            (let [current (read-bytes path)
-                  current-sha (sha256-bytes current)]
-              {:path path
-               :status (if (= sha256 current-sha) :unchanged :changed)
-               :captured-sha256 sha256
-               :current-sha256 current-sha})
-            (catch Throwable failure
-              {:path path :status :unavailable :captured-sha256 sha256
-               :cause (ex-message failure)})))
+          (let [kind (path-kind path)]
+            (if-not (= :regular-file kind)
+              {:path path :status :unavailable :reason kind
+               :captured-sha256 sha256}
+              (try
+                (let [current (read-bytes path)
+                      current-sha (sha256-bytes current)]
+                  {:path path
+                   :status (if (= sha256 current-sha) :unchanged :changed)
+                   :captured-sha256 sha256
+                   :current-sha256 current-sha})
+                (catch Throwable failure
+                  {:path path :status :unavailable :reason :unreadable
+                   :captured-sha256 sha256
+                   :cause-class (str (class failure))})))))
         entries))
 
 (defn observe-files
