@@ -1,0 +1,9 @@
+{:schema :parameter-prior-kernel-reference/v1
+ :basis "sec-glossary.tex:29 — Q(theta|pi) is a normalized parameter distribution for each policy"
+ :kind :hand-derived-deterministic-policy-rows
+ :policies [:inspect :repair]
+ :parameters [:cautious :bold]
+ :rows {:inspect {:support [:cautious] :mass {:cautious 1}}
+        :repair {:support [:bold] :mass {:bold 1}}}
+ :excluded {:predictive-outcome-q true
+            :policy-habit-q true}}

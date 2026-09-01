@@ -362,6 +362,12 @@
                                              (= {:inspect {:support [:clear] :mass {:clear 1}}
                                                  :repair {:support [:fixed] :mass {:fixed 1}}}
                                                 (:rows %)))
+   "ParameterPriorKernelWitness" #(and (= :parameter-prior-kernel-reference/v1 (:schema %))
+                                           (= [:inspect :repair] (:policies %))
+                                           (= [:cautious :bold] (:parameters %))
+                                           (= {:inspect {:support [:cautious] :mass {:cautious 1}}
+                                               :repair {:support [:bold] :mass {:bold 1}}}
+                                              (:rows %)))
    "TransitionKernelWitness" #(and (= :transition-kernel-reference/v1 (:schema %))
                                       (= [:idle :active] (:states %))
                                       (= [:stay :start] (:actions %))
