@@ -1,4 +1,65 @@
 
+## C455 — owner review of C451/C452/C453: the wiring is largely there, the drawing is not (my review)
+
+**All three pass the gate.** The bar was that every claim carry `file:line`, a run-record field, or the
+literal words "not found". All three met it, and C453 exceeded its packet by fetching the sources rather
+than reporting them unavailable.
+
+**What I checked, rather than read.** I opened two of C451's pointers myself. `src/futon2/aif/selection_gain.clj:1-15`
+does say *"It is not Friston's variational policy precision: its learning signal is realised controller
+performance, not expected free energy under the policy posterior"* — so the report's claim that R7's Π does
+not feed τ is supported by the code's own docstring. And `scripts/futon2/report/war_machine.clj:4537` reads
+`route4 (route-tag route3 :R5 "futon2.aif.efe/rank-actions")`, confirming that the recorded R8→R5 hop is a
+**route tag**, not a data dependency.
+
+### The correction this forces on my own C450
+
+In C450 I reported the run records as showing "3 of 21 declared edges fire" and treated that as the state of
+the wiring. **That number measures route instrumentation, not data flow.** Both C451 and C452 establish it
+independently: the recorded route is a coarser sequence (`R2→R7→R3→R8`) than the imports, and C452 found
+**no exact traversal for any of the ten theory edges in either run record** while nine of them are realised
+in code. So the run record cannot be read as an inventory of which wiring fired, and I read it that way.
+
+The honest restatement: the machine's route instrumentation tags 9 hops of which 3 match the drawn map. That
+is a fact about the tags.
+
+### What the three reports establish
+
+**C452 — nine of ten undrawn theory edges are realised in code.** The priority chain in particular:
+`o` and `μ` both reach `compute-prediction-error` (`war_machine.clj:4221-4223`, `:4368-4379`), and the
+precision-weighted error drives the belief update (`:4392-4431`, `belief.clj:1023-1036`). So R8 does form ε
+and R3 does update from it. **Figure 5A is incomplete; the machine is not unwired.**
+
+**One genuine hole: R8→R17.** `F` is computed at `war_machine.clj:4450-4452`, placed in the judgement at
+`:4753`, and never read by BMR, which builds its own concentration vectors at `src/futon2/aif/a4a.clj:115-131`.
+C453 independently shows why the registry row was wrong to expect otherwise: BMR needs the full posterior plus
+full and reduced priors, not a scalar `F`.
+
+**C451 — of six drawn edges with no equation across them, none is a formalism departure.** One is route
+sequencing (R8→R5; F is not an input to R5's score), one is a shortened drawing of an implemented path
+(R2→R3, which goes through ε and Π), and four have no realised reader found. The precision-modulated-temperature
+hypothesis the TN raised is **not supported**: τ uses the engineering `selection-gain`, which disclaims being
+variational policy precision.
+
+**C453 — four of six citations are unverified as recorded**, under a rule that treats a partial match as
+unverified for publication. The registry's channel equations are local specialisations of Buckley et al.
+rather than equations in it; `Q(π) := softmax(ln E − G/τ)` is not Da Costa eq. (10), which omits both `E` and
+temperature. **`:parr2022` is verified and is the source that actually writes the form the registry uses**
+(eq. B.7, B.9, pp. 246–247) — and no equation row cites it. That is the cheapest repair on the table.
+
+### Coordination
+
+Belled `claude-1` with C453's table, since Joe said they are fetching the same papers. C454 (query 3c) is
+dispatched to `wm-organization`, carrying C451's τ finding and C453's item-8 finding so it does not re-derive
+them.
+
+### One defect in my own dispatch
+
+`C448` names two different deliveries — my sweeper-stop diagnosis and a TN edge-review discovery committed as
+`96917d8`. I issued the number without checking it was free. The sweeper report is
+`C448-sweeper-stop-diagnosis.md`; the other is `C448-TN-edge-review-discovery.md`. Recorded rather than
+renamed, since both are committed and cited.
+
 ## C391 — the adapter check pins occurrence, not correspondence (my fix, owner review of C379)
 
 **Verified C379 (`9e3da2f`) independently.** What I checked, and what it establishes.
