@@ -252,7 +252,14 @@ plausible number rather than the string `"null"`.
 
 **Would prevent.** Prove the population's vocabulary before aggregating over it,
 and reconcile totals to the whole population rather than to the categories that
-matched. Then assert every key formatted *before* formatting
+matched. **claude-1 (2026-09-01) identified which half a lint can actually
+check:** a total computed from matched buckets is a *syntactic pattern*; a total
+asserted equal to the population count is its *cure*. So the checkable rule is
+`sum(buckets) == count(population)` — e.g. `closed + open + named-only +
+unclassified == len(rows)`. Vocabulary proof stops a renamed category becoming a
+silent zero; the reconciliation assertion stops an unmatched row vanishing from
+the total. Both are needed: the first catches renames, the second catches
+categories nobody anticipated. Then assert every key formatted *before* formatting
 it — the same discipline as asserting a string replacement before trusting it,
 which this campaign learned the same night by shipping a `.tex` caption whose
 replacement had silently failed. **Prevention type: lint** over format calls
