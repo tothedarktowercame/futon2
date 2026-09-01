@@ -1,0 +1,21 @@
+{:schema :wm/glossary-assurance-summary-v1
+ :as-of "2026-09-01"
+ :owner :wm-nouns
+ :coverage {:glossary-terms 33
+            :bound 31
+            :blocked 2
+            :blocker "cascade carrier semantics: a fixture over the present carrier can omit the glossary's dominant sequential/co-application overlap axis and still pass"
+            :decision-anchor "C291-cascade-carrier-repair-blocked.md / decision 14"}
+ :notation-collisions ["C" "Q(o|pi)" "B" "Q(theta|pi)" "Q(theta|o,pi)" "DeltaF" "o"]
+ :notation-census-closed true
+ :negative-controls {:total 46
+                     :guarded-diagnostics 32
+                     :predicate-with-baseline 14
+                     :wrong-reason-found-before-hardening 4}
+ :positive-source-pins {:total 31
+                        :nontrivial-value-or-coherence 16
+                        :construction-or-projection-only 15}
+ :limits ["The fifteen construction/projection witnesses establish carrier construction or stored normalization, not downstream behaviour."
+          "A source pin prevents silent weakening; it does not make a limited proposition evidence of runtime correctness."
+          "The bindings do not prove that live Clojure values or runs match their Lean fixtures unless a binding explicitly includes an identity-preserving runtime adapter."
+          "The two cascade terms remain unbound rather than certifying a partial carrier that omits co-application semantics."]}
