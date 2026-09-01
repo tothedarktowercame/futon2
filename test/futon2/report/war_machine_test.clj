@@ -30,20 +30,28 @@
       (when (coll? form)
         (some #(find-binding-expression % binding-symbol) form))))
 
+(def ^:private pre-suppression-revision
+  "The commit before R5 added :step-portfolio? — e7a9bb6^, PINNED.
+
+   It was `HEAD~`, which broke in the shared checkout when an unrelated commit
+   landed between. The fix for that anchored to the parent of the latest commit
+   touching war_machine.clj, which survives concurrency but DECAYS: after the
+   next edit to this file, that parent already contains R5's change, so the
+   control compares R5's default path against itself and the claim it backs —
+   \"the default preserves the behaviour that existed before suppression\" —
+   silently becomes \"the last commit changed nothing\". A rolling check is
+   useful, but it is not this claim, and nobody would notice the substitution.
+   A control for a fixed claim gets a fixed anchor (claude-20 review, R5)."
+  "e7a9bb64bbe166f8648e47ff0bc1e7baff59a0a2^")
+
 (defn- previous-portfolio-step-fn []
-  (let [{log-exit :exit changing-commit :out log-err :err}
-        (shell/sh "git" "log" "-1" "--format=%H" "--"
-                  "scripts/futon2/report/war_machine.clj")
-        previous-revision (str (str/trim changing-commit) "^")
-        {show-exit :exit out :out show-err :err}
-        (if (zero? log-exit)
-          (shell/sh "git" "show"
-                    (str previous-revision
-                         ":scripts/futon2/report/war_machine.clj"))
-          {:exit log-exit :out "" :err log-err})]
+  (let [{show-exit :exit out :out show-err :err}
+        (shell/sh "git" "show"
+                  (str pre-suppression-revision
+                       ":scripts/futon2/report/war_machine.clj"))]
     (when-not (zero? show-exit)
       (throw (ex-info "could not load previous war-machine implementation"
-                      {:revision previous-revision :err show-err})))
+                      {:revision pre-suppression-revision :err show-err})))
     (load-string
      (str/replace-first out
                         "(ns futon2.report.war-machine"
