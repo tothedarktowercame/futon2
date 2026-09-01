@@ -6,8 +6,8 @@
  [{:lane :wm-nouns
    :holding :C348-migrate-ten-nontrivial, :dispatched-at "2026-09-01T01:44:24Z", :job-id "invoke-1788227058532-6443-b88c3a62", :expected-by "2026-09-01T02:29:24Z"}
   {:lane :wm-verbs
-   :holding :C342-predicate-baselines, :dispatched-at "2026-09-01T01:39:26Z", :job-id "invoke-1788226762441-6433-5ade179b", :expected-by "2026-09-01T02:24:26Z"}
+   :holding :C350-fence-chokepoint, :dispatched-at "2026-09-01T01:45:59Z", :job-id "invoke-1788227149412-6446-25507206", :expected-by "2026-09-01T02:30:59Z"}
   {:lane :wm-organization
    :holding :C346-restoration-tool, :dispatched-at "2026-09-01T01:44:24Z", :job-id "invoke-1788227053593-6442-3773ec78", :expected-by "2026-09-01T02:29:24Z"}
   {:lane :wm-evidence
-   :holding :C345-fence-id-sweep, :dispatched-at "2026-09-01T01:42:56Z", :job-id "invoke-1788226972051-6439-8bcaac9a", :expected-by "2026-09-01T02:27:56Z"}]}
+   :holding :C351-attack-predicate-repair, :dispatched-at "2026-09-01T01:45:59Z", :job-id "invoke-1788227153968-6447-ef76478f", :expected-by "2026-09-01T02:30:59Z"}]}
