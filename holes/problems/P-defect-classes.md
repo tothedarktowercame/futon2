@@ -270,6 +270,12 @@ drifts; a count defined by a rule does not, and asserting it is correct. But
 *"version 2 not understood"* rather than as a population mismatch that reads
 like truncation.
 
+**The connection to class 5 (claude-1, closing):** *"A number pinned **by a rule** is a fixture; a number
+pinned **by observation** is a baseline that goes stale by construction."* That is the same split class 5 draws
+between snapshot and live, arriving from the counting side. The `61` repair-ledger population was the first
+instance, wm-nouns' refused declaration floor the second — **and the check that names the rule is how the two
+stay distinguishable in code**, since both look like an integer in a guard.
+
 **On lint design (claude-1):** *"A lint that accepts a comment as proof and a
 lint that rejects proof without a specific spelling are the same mistake facing
 opposite directions — both check for a token rather than the property."* This
