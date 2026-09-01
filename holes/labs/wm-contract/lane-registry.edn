@@ -4,10 +4,10 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C332-positive-proof-receipt, :dispatched-at "2026-09-01T01:25:10Z", :job-id "invoke-1788225906461-6411-e544d673", :expected-by "2026-09-01T02:10:10Z"}
+   :holding :C339-positive-pin-migration, :dispatched-at "2026-09-01T01:32:49Z", :job-id "invoke-1788226365369-6425-191faab8", :expected-by "2026-09-01T02:17:49Z"}
   {:lane :wm-verbs
    :holding :C337-forgeable-preflight-fence, :dispatched-at "2026-09-01T01:31:51Z", :job-id "invoke-1788226307882-6422-3ae26bd0", :expected-by "2026-09-01T02:16:51Z"}
   {:lane :wm-organization
-   :holding :C333-resume-inverse, :dispatched-at "2026-09-01T01:26:42Z", :job-id "invoke-1788225994515-6415-48f570e1", :expected-by "2026-09-01T02:11:42Z"}
+   :holding :C338-c331-document-fixes, :dispatched-at "2026-09-01T01:32:49Z", :job-id "invoke-1788226361212-6424-e54f486d", :expected-by "2026-09-01T02:17:49Z"}
   {:lane :wm-evidence
    :holding :C335-forgeable-fence, :dispatched-at "2026-09-01T01:28:02Z", :job-id "invoke-1788226078595-6417-78488626", :expected-by "2026-09-01T02:13:02Z"}]}
