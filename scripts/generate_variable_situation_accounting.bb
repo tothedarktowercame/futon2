@@ -14,7 +14,7 @@
 (def output-file (io/file root "holes/labs/wm-contract/variable-situation-accounting.edn"))
 
 (def area-names
-  {:belief #{"GenerativeModel" "generativeFactorMass" "TransitionKernel" "BeliefState"
+  {:belief #{"GenerativeModel" "generativeFactorMass" "TransitionKernel" "BeliefState" "ObservationVector"
              "beliefUpdate" "predictionError" "PrecisionMap" "observationKernel"
              "observationKernelRowMass"}
    :scores #{"variationalFreeEnergy" "expectedFreeEnergy" "G_eq_expectedFreeEnergy"

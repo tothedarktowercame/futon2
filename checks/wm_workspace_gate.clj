@@ -182,6 +182,7 @@
    {:name :have-want-arrow :argv ["bb" "checks/have_want_arrow_witness.clj"]}
    {:name :fold :argv ["bb" "checks/fold_witness.clj"]}
    {:name :belief-state :argv ["bb" "checks/belief_state_witness.clj"]}
+   {:name :observation-vector :argv ["bb" "checks/observation_vector_witness.clj"]}
    {:name :channel-vocabulary :argv ["bb" "checks/channel_witness.clj"]}
    {:name :observation-kernel :argv ["bb" "checks/observation_kernel_witness.clj"]}
    {:name :predictive-outcome-risk :argv ["bb" "checks/predictive_outcome_risk_witness.clj"]}
@@ -323,6 +324,10 @@
     :argv ["bb" "checks/model_reduction_free_energy_change_witness.clj" "--negative-value"]}
    {:name :c277-variational-f-as-reduction-change
     :argv ["bb" "checks/model_reduction_free_energy_change_witness.clj" "--negative-type"]}
+   {:name :c282-partial-observation-vector
+    :argv ["bb" "checks/observation_vector_witness.clj" "--negative-partial"]}
+   {:name :c282-single-outcome-as-vector
+    :argv ["bb" "checks/observation_vector_witness.clj" "--negative-outcome"]}
    {:name :c179-control-outside-vocabulary :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "control" "--negative-control"]}
    {:name :c179-negative-aliveness-factor :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "aliveness" "--negative-control"]}
    {:name :c179-missing-act-gate-leg :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "act-gate" "--negative-control"]}
