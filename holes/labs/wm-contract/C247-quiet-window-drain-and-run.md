@@ -17,6 +17,10 @@ suite/gate receipt remains invalid evidence about the click.
 ## 1. Declare and prove quiescence
 
 Stop dispatching first. Then require all of the following simultaneously.
+The executable writer census, acknowledgements, checkpoints, authorised
+post-click writes, and restart rules are in
+`C305-writer-fence-procedure.md`; completing that procedure is a precondition,
+not optional context for this checklist.
 
 ```sh
 for repo in /home/joe/code/futon2 /home/joe/code/futon3c \
