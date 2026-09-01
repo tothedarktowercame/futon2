@@ -458,3 +458,40 @@ loop. The gate of §9a is a status, not a conversation: registries regenerate
 into p4ng only when no row touching them is `:done-unreviewed`. As of
 creation: 19 open (15 D, 2 H, 1 V, 1 C), 11 done-unreviewed (mine — awaiting
 the second read), 2 needs-joe.
+
+### 10a. The D items, done and reviewed (2026-09-01)
+
+A CLI seat (`claude-cli`) worked the seventeen D rows one per invocation
+under `worklist-prompt.md`; claude-1 read every diff, re-ran the gates, and
+spot-checked the code claims before any regeneration (rows carry `:review`).
+Figure 5A is now generated from the registries with every drawn edge
+classified: 22 drawn (7 retired by decision, 1 carrying no data), 11
+decision-added (8 on code evidence, 3 by Joe's ordering ruling, drawn apart),
+and the theory layers derived from `aif-conformance.edn` (8 realised-undrawn,
+2 not-realised, 1 path-dependent), stamped. The eight code-backed additions
+equal the registry's `:realised-undrawn` set exactly — reached from the code
+against C452 on one side and from the equations on the other.
+
+Things the reviews settled or opened:
+- **R6→R13**: two decisions retire it (Joe's ordering ruling; the code-backed
+  phase-order argument). Both stand; the figure names both.
+- **R14→R6** (D5c) is a reading of one code region the route tags twice —
+  τ is computed inside `strategic-recommendation` (`policy.clj:243`) — kept
+  because R6's scores import τ, with the note preserved.
+- **R6→R4** (D5d) turns on which R6: the registry's `forward-model` imports
+  π, the candidate set (`policy-set` at R6), not Q(π); realised.
+- **R2→R7** (D5f) stands only because the registry's precision row imports
+  `o`; `precision.clj:116-135` computes production precision from the
+  *error* variance, `o` entering only the salience term. **C10** (registry:
+  precision imports ε) opened, gated for a second read; **D10** (retire
+  R2→R7, add R8→R7) blocked on it.
+- **D9** opened: the one conditional addition (R13→R4, horizon ≥ 2) is drawn
+  like the unconditional ones.
+- The route-vs-dependency mechanism found in D6 — the `:R8` tag is stamped
+  only at F, and the `:R7`/`:R3` tags are emitted after the loop returns —
+  is the sentence the Figure 5A/5B captions need (C9).
+
+The CLI seat found and fixed three defects in its own work with controls
+before review (last-writer-wins attribution in D0; overprinted additions in
+D5a; a stroke-blind control in D0b), and flagged the three rows it thought a
+reviewer might reject. The reviewer's fixes were one layout defect (D8).
