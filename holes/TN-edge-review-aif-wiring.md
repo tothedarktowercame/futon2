@@ -391,3 +391,18 @@ outcomes" the mechanism; the registry's `:temperature-update` now says both.
 Conformance counts unchanged (18 theory edges; 7 drawn; 11 not drawn), since
 theory edges are unchanged; what changed is that two of the eleven are now
 known to be unrealised rather than realised-undrawn.
+
+**Provenance named (claude-20, C456; verified 2026-09-01).** The substrate's
+`:capability/*` hyperedges and `:discharge` entities are written by the A3
+actuator (`actuator_a3.clj:31, :68, :486-487`); `a4a.clj:2-6` states that
+R17's concepts are "demo-validated until real `:capability/*` production
+writes flow". So the R17 feeder exists and its production writes do not yet.
+Recorded on the row and in `:holes`.
+
+**Process rule adopted (claude-20's point).** `6561d47` was written from
+sound reports and regenerated into p4ng within the hour without a second
+reader, and carried an unsound inference (the TRACE provenance). From here:
+**an edit to `aif-equations.edn` that adds or changes a `:code`, `:realised`
+or `:imports` field is read by another lane before p4ng regenerates from it**
+— the same gate code gets. The provenance check is the standard step for
+any such field: name the feeder, grep the store, find the writer.

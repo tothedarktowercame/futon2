@@ -132,7 +132,7 @@
    :formal "a = a + sum_tau o_tau (x) s_tau  (Dirichlet concentrations accumulated from observed outcome/state pairs)" :eq "dacosta2020 eq. 21 (A-learning; B/D learning A.1 eqs. 27-33 per C453)"
    :lean "DirichletConcentrations (carrier only, Holes.lean:6380-6385)" :lean-status :carrier-only
    :realised false
-   :code "NOT realised. What a4a accumulates is a different model: corpus->concentration (a4a.clj:85-113) counts capability x mission edge/discharge pairs over a uniform 0.1 prior, fed only by a4a-substrate/read-corpus (a4a_substrate.clj:46-60), which reads capability entities, mission docs, :capability/* hyperedges and discharges from the SUBSTRATE over Drawbridge. No trace mention in a4a.clj, a4a_substrate.clj or r17_offline.clj; no writer of capability hyperedges from WM runs found (claude-20 check + claude-1 re-check, 2026-09-01)."
+   :code "NOT realised. What a4a accumulates is a different model: corpus->concentration (a4a.clj:85-113) counts capability x mission edge/discharge pairs over a uniform 0.1 prior, fed only by a4a-substrate/read-corpus (a4a_substrate.clj:46-60), which reads capability entities, mission docs, :capability/* hyperedges and discharges from the SUBSTRATE over Drawbridge. No trace mention in a4a.clj, a4a_substrate.clj or r17_offline.clj. The substrate's :capability/* hyperedges and :discharge entities are written by the A3 actuator (actuator_a3.clj:31, :68, :486-487), and a4a.clj:2-6 states that concepts are 'demo-validated until real :capability/* production writes flow' -- i.e. the feeder exists but production writes do not yet (claude-20 check, C456; claude-1 re-check, 2026-09-01)."
    :note "The theory edges R2->R17 and R1->R17 (o and μ into the Dirichlet accumulation, eq. 21) have no realisation found. An earlier version of this row claimed realisation 'by way of TRACE'; that was wrong (registry author's error, corrected on claude-20's check). The BMR the WM runs is over a capability x mission Dirichlet model built from substrate graph structure, not over the tick model's o and μ."}
   {:id :model-reduction :defines :Delta-F :node :R17 :class :theory-defined :ref :friston2018bmr
    :imports [:a-conc]  ;; C453: BMR takes the full posterior and full/reduced priors (Dirichlet concentrations), not the scalar F. Earlier [:F] was the registry author's error.
@@ -184,7 +184,7 @@
    :evidence "war_machine.clj:4573-4584, 4804-4817; enact.clj:287-316; full_loop_runner.clj:870-873"}
   {:edges [[:R2 :R17] [:R1 :R17]] :equation :dirichlet-accumulation :status :not-realised
    :finding "Da Costa eq. 21 accumulates Dirichlet concentrations from observed (o, s) pairs. The WM's a4a accumulates a capability x mission model from substrate hyperedges and discharges instead; no path from the tick model's o or μ into R17 was found."
-   :evidence "a4a.clj:85-113; a4a_substrate.clj:46-60; grep trace -> 0 hits in a4a.clj, a4a_substrate.clj, r17_offline.clj"}
+   :evidence "a4a.clj:2-6, 85-113; a4a_substrate.clj:46-60; actuator_a3.clj:31, 68, 486-487 (A3 writes the hyperedges/discharges); grep trace -> 0 hits in a4a.clj, a4a_substrate.clj, r17_offline.clj"}
   {:symbol :F :status :no-consumer
    :finding "Per-tick F is computed and stored and read by nothing (C448, C452). This is NOT a theory hole: BMR does not import F (see :model-reduction). It is an observation about the F row: a diagnostic."
    :evidence "war_machine.clj:4450-4452, 4753"}]
