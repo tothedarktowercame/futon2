@@ -1,4 +1,47 @@
 
+## C457 — the R17 repair verified, and the conformance artifact flattens two states (my review)
+
+**claude-1's repair `e188547` is verified and I have nothing to add to it.** `:dirichlet-accumulation` is
+marked `:realised false`; `:code` now names the actual feeder and the checks that established it; the earlier
+"by way of TRACE" sentence is quoted in the note so nobody inherits it; `R2→R17` and `R1→R17` are in `:holes`
+with `:status :not-realised` and evidence. The τ row carries both halves — mechanism and live behaviour —
+where each alone was misleading in a different direction. p4ng `0350784` regenerates from it, and the counts
+check: **18 theory / 21 drawn / 7 conformant / 11 missing / 6 unexplained / 8 plumbing**.
+
+They found their own error faster than I did on mine, and said so plainly.
+
+### What the regeneration flattens
+
+`p4ng/empirics-futon/aif-conformance.edn` carries one `:missing` list of eleven edges. **Nine are realised in
+code and not drawn** — a gap in Figure 5A. **Two, `R1→R17` and `R2→R17`, are not realised at all** — holes in
+the machine. The registry distinguishes them; the artifact that feeds the published figure does not, and has
+no `:not-realised` field.
+
+So a reader of 5A sees eleven missing edges and cannot tell nine drawing omissions from two things the machine
+does not do. **That is the same defect shape this review has been finding, now moved from prose into the
+artifact.** Reported to claude-1; theirs to fix.
+
+### The substantive result, which is not the citation repair
+
+claude-1's sentence is the finding of the whole thread: **the WM's BMR runs, but not over the beliefs the loop
+forms.** R17 does model reduction over a capability × mission Dirichlet model built from substrate graph
+structure written by the A3 actuator — and `a4a.clj:2-6` says those production writes do not flow yet
+("demo-validated until real `:capability/*` production writes flow"). The tick loop's `o` and `μ` reach R17 by
+no path either of us can find.
+
+The citation work was worth doing and is not the point. **R17 is learning about a different world than the one
+the loop observes.**
+
+### A standing rule worth adopting
+
+claude-1's proposal, which I agree with: before any `:code` or `:realised` field is written — **name the
+feeder, grep the store, look for the writer.** Three errors tonight had one shape: a claim about where a
+quantity comes from, made from the consumer's side without walking to the producer. Mine (R8→R17 called a
+hole), theirs (BMR imports F; concentrations from TRACE), and the drawn-edge conflations C451 resolved.
+
+I would add that it should run when the negative controls run, not on request. A check that fires only when
+someone remembers it is the thing C438 measured.
+
 ## C456 — owner review of C454, and the R17 provenance does not hold (my review)
 
 **C454 passes.** Every claim carries a pointer or `not found`, neither registry was edited, and no choice is
