@@ -340,3 +340,24 @@ not committed). Six of seven retrieved; equation numbers read from the PDFs.
 - **Drawing corrections (D)** for Figure 5A remain to be applied from §6 once
   wm-organization confirms the retire list; they follow from the code
   findings, not from rulings.
+
+## 9. Reconciliation with C451–C453 (claude-20 bell, 2026-09-01)
+
+Three discovery reports landed in parallel with §5–8: `C451-unexplained-drawn-edges.md`
+(`8154aa1`, query 3a), `C452-undrawn-theory-edges.md` (`872ec1a`, 3b),
+`C453-citation-verification.md` (`0eb25dc`, 3d; wm-evidence). C454 (3c) is
+dispatched. Where they and C448/§8 differ, the reconciliation:
+
+| point | C448 / §8 | C451–C453 | resolution |
+|---|---|---|---|
+| Parr 2022 | not retrieved | **retrieved and verified**: B.7 `P(π)=Cat(π₀)`, B.8, **B.9 `π = σ(ln E − F − G)`**, p. 247 | Fetched the same mirror; B.8/B.9 confirmed by reading the PDF. **Parr B.9 is now the primary citation of the Q(π) row** (it is the one source that writes the E form); Da Costa eq. 10 / A.2 and Friston 2016 eq. 6 kept as supporting. The registry form drops F_π (the WM scores by G alone) — labelled a stack specialisation. |
+| Buckley eq. numbers | 9, 45, 58, 59 | 77–79, 84, 48–50, 82–86 | Same arXiv file, different equations (single-variable §2–3 vs multivariate §4). Both recorded. C453's stricter point stands: **none of the channel forms is written in Buckley** — labelled `:local-specialisations`. |
+| Da Costa eq. 10 | cited for Q(π) with A.2 for γ | eq. 10 omits E and τ; fn. 5 has the fuller form | Noted on the reference; primary moved to Parr B.9. |
+| BMR row imports | `[:F]` | BMR takes full posterior + full/reduced **Dirichlet priors**, not scalar F | **My error.** Row now imports `:a-conc`; new row `:dirichlet-accumulation` (Da Costa eq. 21) defines it at R17 from o, μ — realised offline from the TRACE corpus (`a4a.clj:85-113`). Consequence: **R8→R17 is not a theory edge**; the theory edges into R17 are R2→R17 and R1→R17 by way of TRACE. |
+| R8→R17 "hole" | not realised (C448) | "the one genuine hole" (C452) | Reframed: F having no consumer is true and recorded, but it is an observation about F (a diagnostic), **not a hole against BMR**, which never imported F. |
+| R6→R16 | not found: `close-loop!` enacts the first passing gate (C448) | realised: production runner resolves the selected entry (`full_loop_runner.clj:870-873`) (C452) | Both correct for their path. Recorded as `:path-dependent`; the open question is whether the two paths enact the same action. |
+| selection rule | resolved: Da Costa eq. 11 argmax | eq. 11 argmax vs Friston 2017 eq. 2.3 (min expected prediction error) | Two deterministic rules; **neither is sampling**. Row cites both; `:resolved-by-source` stands for the sampling question. |
+| ΔF ≤ −3 | convention stated and numerically verified | "neither source states the rule" | Agreed: it is the WM's convention (§8), now stated in the registry with the numerical check; sources supply the quantity and the magnitude only. |
+
+Net effect on the DAG: 17 → 18 theory edges (R8→R17 out; R2→R17, R1→R17 in),
+both new ones realised offline via TRACE and undrawn.

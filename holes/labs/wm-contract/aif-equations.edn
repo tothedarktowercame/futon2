@@ -24,11 +24,13 @@
  :references
  {:buckley2017 {:cite "Buckley, C. L., Kim, C. S., McGregor, S., & Seth, A. K. (2017). The free energy principle for action and perception: a mathematical review. Journal of Mathematical Psychology, 81, 55-79."
                 :used-for "continuous (Laplace) free energy as precision-weighted squared prediction error; belief update by gradient descent on F"
-                :verified {:eq9 "general variational free energy F" :eq45 "Laplace-encoded energy: sum over channels of ½ ε²/σ + ½ ln σ" :eq58 "instance for the worked model" :eq59 "recognition dynamics (gradient descent on the energy)"}
+                :verified {:eq9 "general variational free energy F" :eq45 "Laplace-encoded energy: sum over channels of ½ ε²/σ + ½ ln σ" :eq58 "instance for the worked model" :eq59 "recognition dynamics (gradient descent on the energy)"
+                           :eq77 "multivariate Laplace-encoded energy as precision-weighted sum of squared errors (per C453)" :eq78-79 "prediction errors (per C453)" :eq84 "precision as inverse variance (per C453)" :eq48-50 "recognition dynamics as gradient descent (per C453)" :eq82-86 "precision-weighted errors (per C453)"}
+                :local-specialisations "The registry's channel forms -- ε_k := o_k − μ_k, Π_k := 1/max(Var_k, ε₀), F = ½ mean_k Π_k ε_k², μ ← μ + αΠε -- are NOT written in this paper (C453). They are stack specialisations of eqs. 45/77-79/84/59: single channel per error, sample variance with a floor, mean over channels, one fixed-step update."
                 :retrieved "refs/buckley2017.pdf"}
   :dacosta2020 {:cite "Da Costa, L., Parr, T., Sajid, N., Veselic, S., Neacsu, V., & Friston, K. (2020). Active inference on discrete state-spaces: a synthesis. Journal of Mathematical Psychology, 99, 102447."
                 :used-for "expected free energy G = ambiguity + risk (- novelty); policy posterior softmax over -G; action as argmax; Dirichlet parameter learning; deep temporal models"
-                :verified {:eq42 "G(π) = E_Q(s|π)[H[P(o|s)]] + D_KL[Q(s|π)||P(s)] - novelty (Appendix C)" :eq44 "risk over outcomes: (A s)·(log(A s) - log C), the form used when preferences are over outcomes" :eq45-48 "ambiguity = H · s_π, H := -diag[A·log A]" :eq10 "Q(π) = σ(-G(π))" :eq11 "u_t = argmax_u Σ_π δ_{u,π_t} Q(π)" :eq21 "a = a + Σ_τ o_τ ⊗ s_τ" :eq38 "Q(π) = σ(-G(π; β)), β ≥ 0" :A2 "γ as inverse temperature: σ(-γ G(π))" :A4 "deep temporal (hierarchical) models"}
+                :verified {:eq42 "G(π) = E_Q(s|π)[H[P(o|s)]] + D_KL[Q(s|π)||P(s)] - novelty (Appendix C)" :eq44 "risk over outcomes: (A s)·(log(A s) - log C), the form used when preferences are over outcomes" :eq45-48 "ambiguity = H · s_π, H := -diag[A·log A]" :eq10 "Q(π) = σ(-G(π)) -- omits E and temperature; footnote 5 gives the fuller σ(−ln E − F − G) per C453 (sign of the E term as transcribed there); A.2 adds γ separately" :eq11 "u_t = argmax_u Σ_π δ_{u,π_t} Q(π)" :eq21 "a = a + Σ_τ o_τ ⊗ s_τ" :eq38 "Q(π) = σ(-G(π; β)), β ≥ 0" :A2 "γ as inverse temperature: σ(-γ G(π))" :A4 "deep temporal (hierarchical) models"}
                 :retrieved "refs/dacosta2020.pdf"}
   :friston2017 {:cite "Friston, K., FitzGerald, T., Rigoli, F., Schwartenbeck, P., & Pezzulo, G. (2017). Active inference: a process theory. Neural Computation, 29(1), 1-49."
                 :used-for "the perception-evaluation-selection-action loop as a process; precision γ of policy selection and its β update"
@@ -36,8 +38,9 @@
                 :note "The habit prior E does NOT appear in this paper; see :friston2016."
                 :retrieved "refs/friston2017.pdf"}
   :parr2022 {:cite "Parr, T., Pezzulo, G., & Friston, K. J. (2022). Active Inference: The Free Energy Principle in Mind, Brain, and Behavior. MIT Press."
-             :used-for "consolidated notation (A, B, C, D, E) only"
-             :verified nil :note "Not retrieved (MIT Press / OAPEN refused automated fetch, 2026-09-01). No registry equation depends on it."}
+             :used-for "consolidated discrete notation; THE source that writes the policy posterior with the habit term: π = σ(ln E − F − G)"
+             :verified {:eq4.7 "policy prior and expected free energy (ch. 4, pp. 72-74; per C453)" :eq4.9 "risk/ambiguity and information-gain/pragmatic forms (per C453)" :eq4.10 "linear-algebra form with A, C, softmax (per C453)" :eqB.7 "P(π) = Cat(π₀), p. 246" :eqB.8 "F = π · (ln π − ln E + F + G), p. 247" :eqB.9 "π = σ(ln E − F − G), p. 247 -- read from the retrieved PDF by claude-1"}
+             :retrieved "refs/parr2022.pdf (mirror located by wm-evidence, C453)"}
   :friston2016 {:cite "Friston, K., FitzGerald, T., Rigoli, F., Schwartenbeck, P., O'Doherty, J., & Pezzulo, G. (2016). Active inference and learning. Neuroscience and Biobehavioral Reviews, 68, 862-879."
                 :used-for "the habit prior E over policies, learned as Dirichlet concentration parameters over policies"
                 :verified {:eq6 "referenced at §5.3, p. 874: 'this prior probability is based upon the policy concentration parameters, e ⊂ η (see Eq. (6))' -- verified by eye from the rendered page"}
@@ -116,17 +119,23 @@
   {:id :temperature :defines :tau :node :R14 :class :stack-defined :ref :friston2017
    :imports []
    :formal "tau := commitment temperature (inverse precision gamma of policy selection)" :eq "friston2017 eq. 2.1 (γ = 1/β); dacosta2020 A.2" :code "policy.clj:242-245 (effective-temperature from selection gain / score spread)"}
-  {:id :policy-posterior :defines :Q-pi :node :R6 :class :theory-defined :ref :dacosta2020
+  {:id :policy-posterior :defines :Q-pi :node :R6 :class :theory-defined :ref :parr2022 :also-refs [:dacosta2020 :friston2017 :friston2016]
    :imports [:E :G :tau :pi]
-   :formal "Q(pi) := softmax(ln E(pi) - G(pi)/tau)" :eq "dacosta2020 eq. 10 with A.2 (γ); E from friston2016 eq. 6" :lean "softmax" :lean-status :closed
+   :formal "Q(pi) := softmax(ln E(pi) - G(pi)/tau)" :eq "parr2022 eq. B.9 (π = σ(ln E − F − G), p. 247) with γ = 1/τ from friston2017 eq. 2.1 / dacosta2020 A.2; the registry form drops F_π (the WM scores policies by G only) -- a stack specialisation. E's meaning: friston2016 eq. 6 (habit as policy concentration parameters)" :lean "softmax" :lean-status :closed
    :code "policy.clj:242-245, 411-438" :note "Computed and recorded; the live path then selects deterministically (see :action)."}
   {:id :action :defines :u :node :R16 :class :theory-defined :ref :friston2017
    :imports [:Q-pi]
-   :formal "u_t := argmax_u sum_pi delta(u, pi_t) Q(pi)" :eq "dacosta2020 eq. 11 (argmax; the formalism's stated rule is deterministic)"
+   :formal "u_t := argmax_u sum_pi delta(u, pi_t) Q(pi)" :eq "dacosta2020 eq. 11 (Bayesian-model-average argmax); friston2017 eq. 2.3 selects the action minimising expected outcome prediction error -- two deterministic rules in the literature, neither is sampling (C453)"
    :code "policy.clj:247-250 (first admissible controller entry), :411-438 (max-key)" :note "The code's deterministic selection conforms to eq. 11. C448 5b: the enacted action at R16 is the first passing act gate (enact.clj:287-316), not the recorded selection -- see :holes."}
+  {:id :dirichlet-accumulation :defines :a-conc :node :R17 :class :theory-defined :ref :dacosta2020
+   :imports [:o :mu]
+   :formal "a = a + sum_tau o_tau (x) s_tau  (Dirichlet concentrations accumulated from observed outcome/state pairs)" :eq "dacosta2020 eq. 21 (A-learning; B/D learning A.1 eqs. 27-33 per C453)"
+   :lean "DirichletConcentrations (carrier only, Holes.lean:6380-6385)" :lean-status :carrier-only
+   :code "a4a.clj:85-113 corpus->concentration: counts capability x mission outcome pairs from the TRACE corpus, offline"
+   :note "The WM realises the accumulation offline from the trace corpus (TRACE store), not per tick from o and μ; the theory edges R2->R17, R1->R17 are therefore realised by way of TRACE, not directly."}
   {:id :model-reduction :defines :Delta-F :node :R17 :class :theory-defined :ref :friston2018bmr
-   :imports [:F]  ;; theory import; NOT realised (C448 5b: R8->R17 not found)
-   :formal "Delta F := ln P(y|full) - ln P(y|reduced) = ln B(A) + ln B(a') - ln B(a) - ln B(A'); a reduction is accepted when Delta F <= -3" :eq "friston2018bmr eq. 9 and Table 1 (Dirichlet), sign reversed: see :references :friston2018bmr :sign-convention"
+   :imports [:a-conc]  ;; C453: BMR takes the full posterior and full/reduced priors (Dirichlet concentrations), not the scalar F. Earlier [:F] was the registry author's error.
+   :formal "Delta F := ln P(y|full) - ln P(y|reduced) = ln B(A) + ln B(a') - ln B(a) - ln B(A') over Dirichlet concentrations a (prior), A (posterior), a' (reduced prior); a reduction is accepted when Delta F <= -3" :eq "friston2018bmr eq. 9 and Table 1 (Dirichlet), sign reversed: see :references :friston2018bmr :sign-convention"
    :code "bmr.clj:108-130; a4a.clj:126-159 (offline)" :note "No live consumer of per-tick F feeds this; R17 runs offline (r17_offline.clj)."
    :lean "bayesFactorThreshold" :lean-status :closed :threshold-ref :kass1995}]
 
@@ -169,8 +178,12 @@
  ;; Theory imports the code does not realise (C448 5b). Recorded here until a
  ;; Holes.lean declaration carries each.
  :holes
- [{:edge [:R6 :R16] :equation :action :finding "the WM run stops at TRACE with a recommendation; close-loop! enacts the first passing act gate from ranked actions, not the recorded Q(π) selection" :evidence "war_machine.clj:4573-4584, 4804-4817; enact.clj:287-316"}
-  {:edge [:R8 :R17] :equation :model-reduction :finding "live F is only stored; R17 is an offline replay path computing BMR from Dirichlet models" :evidence "war_machine.clj:4753; r17_offline.clj:1-6, 64-96; a4a.clj:126-159"}]
+ [{:edge [:R6 :R16] :equation :action :status :path-dependent
+   :finding "In the WM judge + close-loop! path, close-loop! enacts the first passing act gate from ranked actions, not the recorded Q(π) selection (C448). In the production runner, selected-entry resolves the decision's action to its ranked entry and enacts it (C452: full_loop_runner.clj:870-873). Whether the two paths agree on the enacted action is the open question."
+   :evidence "war_machine.clj:4573-4584, 4804-4817; enact.clj:287-316; full_loop_runner.clj:870-873"}
+  {:symbol :F :status :no-consumer
+   :finding "Per-tick F is computed and stored and read by nothing (C448, C452). This is NOT a theory hole: BMR does not import F (see :model-reduction). It is an observation about the F row: a diagnostic."
+   :evidence "war_machine.clj:4450-4452, 4753"}]
 
  ;; Nodes that run no equation. Legitimate plumbing, not AIF.
  :plumbing [:R9 :R10 :R11 :R12 :R15 :R20 :TRACE]}
