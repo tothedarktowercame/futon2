@@ -4,10 +4,10 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C291-cascade-carrier-repair, :dispatched-at "2026-09-01T00:35:04Z", :job-id "invoke-1788222873720-6313-e2738dae", :expected-by "2026-09-01T01:20:04Z"}
+   :holding :C294-control-liveness, :dispatched-at "2026-09-01T00:40:02Z", :job-id "invoke-1788223171143-6321-6f771259", :expected-by "2026-09-01T01:25:02Z"}
   {:lane :wm-verbs
    :holding :C293-multiread-sweep, :dispatched-at "2026-09-01T00:36:12Z", :job-id "invoke-1788222967367-6316-0965d2e7", :expected-by "2026-09-01T01:21:12Z"}
   {:lane :wm-organization
    :holding :C290-window-cost, :dispatched-at "2026-09-01T00:33:32Z", :job-id "invoke-1788222808200-6310-9afdf4de", :expected-by "2026-09-01T01:18:32Z"}
   {:lane :wm-evidence
-   :holding :C292-composite-quiescence, :dispatched-at "2026-09-01T00:35:04Z", :job-id "invoke-1788222900108-6314-37562fae", :expected-by "2026-09-01T01:20:04Z"}]}
+   :holding :C295-decision-staleness, :dispatched-at "2026-09-01T00:40:02Z", :job-id "invoke-1788223197983-6322-c46a7f21", :expected-by "2026-09-01T01:25:02Z"}]}
