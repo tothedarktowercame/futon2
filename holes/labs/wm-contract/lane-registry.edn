@@ -4,10 +4,10 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C437-invocation-coverage-census, :dispatched-at "2026-09-01T03:28:30Z", :job-id "invoke-1788233306430-6604-bdcceaf9", :expected-by "2026-09-01T04:13:30Z"}
+   :holding nil, :dispatched-at nil, :job-id nil, :expected-by nil}
   {:lane :wm-verbs
-   :holding :C440-unregistered-negative-modes, :dispatched-at "2026-09-01T03:39:50Z", :job-id "invoke-1788233986482-6614-e676fb27", :expected-by "2026-09-01T04:24:50Z"}
+   :holding nil, :dispatched-at nil, :job-id nil, :expected-by nil}
   {:lane :wm-organization
-   :holding :C439-gate-fence-coupling, :dispatched-at "2026-09-01T03:39:50Z", :job-id "invoke-1788233982357-6613-aa0cbe20", :expected-by "2026-09-01T04:24:50Z"}
+   :holding nil, :dispatched-at nil, :job-id nil, :expected-by nil}
   {:lane :wm-evidence
-   :holding :C433-negative-control-survey, :dispatched-at "2026-09-01T03:22:14Z", :job-id "invoke-1788232929938-6597-75eb914f", :expected-by "2026-09-01T04:07:14Z"}]}
+   :holding nil, :dispatched-at nil, :job-id nil, :expected-by nil}]}
