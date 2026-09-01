@@ -15,7 +15,7 @@ mechanical population. Its broad semantic census began at 27 sites; the guarded
 disposition/lint population has fallen from 18 grouped unsafe sites to **7 live
 blocked sites** after C136. All seven now require operator decisions rather than
 mechanical edits (`checks/absence-coercion-dispositions.edn`). Classes 2, 3,
-and 7 remain judgement-scoped and therefore have no honest extinction claim.
+7, and 10 remain judgement-scoped and therefore have no honest extinction claim.
 
 ## 1. Acceptance that cannot fail
 
@@ -517,6 +517,47 @@ applies that convention to `p4ng/vetting/CLEANUP-QUEUE.md`, and
 `checks/cleanup_queue_correction_index.clj` enforces its exhaustive index rule.
 **Prevention type: lint + check.**
 
+## 10. Evidence anchored by its producer
+
+**Shape.** Evidence is internally consistent and may be fully revalidated, but
+the party it is meant to constrain can also replace, rewind, delete, or rename
+the complete authority that decides which valid chain is canonical. Hashes,
+HMACs, atomic writes, and chain verification can prove consistency of the
+presented history without proving that it is **the** history.
+
+**C409 instance.** The Agency ledgers, bounded receipts, Git refs/reflogs,
+timestamps, and local state are all mutable by the same `joe` authority that
+writes or selects the evidence. This differs from class 6b: the digest may be
+recomputed correctly and every link may verify; the missing property is an
+independent canonical head. C409's authority census records the worked example
+at `holes/labs/wm-contract/C409-append-only-external-authority-census.md`.
+
+The root-owned systemd journal provides one limited asymmetry relative to
+unprivileged artifact writers: after ingestion, `joe` cannot rewrite retained
+journal files. It is nevertheless retention-bounded, unsealed, root-mutable,
+and currently anchors none of the relevant artifacts. It raises the cost of
+rewriting an observation; it is not permanent, independently verifiable proof.
+
+**Found by.** For every claimed authority, enumerate the evidence writer, the
+canonical-head selector, filesystem/service owner, deletion and rollback
+capabilities, retention administrator, and verifier. Ask the decisive question:
+**can the party writing the evidence also rewrite or choose the authority
+against which it is checked?** Repeat this at every layer; moving from a file to
+a hash chain or local Git ref does not change the authority if the principal is
+unchanged.
+
+**Would prevent.** First declare the boundary honestly. This needs a sibling to
+`:boundary/type :declared-not-derived`, not an extension of it: derivation asks
+whether a correspondence was computed, while authority asks who can rewrite
+the canonical source. The appropriate vocabulary is an explicit authority
+assessment such as `:authority/type :producer-controlled`,
+`:externally-administered`, or `:independently-sealed`, accompanied by writer,
+selector, retention, and rewrite capabilities. A real cure requires anchoring a
+head outside the producer's rewrite authority and verifying it at use. Merely
+declaring the limit prevents overclaiming but does not repair it. **Prevention
+type: authority census + typed boundary declaration; external anchoring only by
+separate design decision.**
+
 ## Reusable discovery and repair methods
 
 | Method | Finds | Repair discipline |
@@ -531,6 +572,7 @@ applies that convention to `p4ng/vetting/CLEANUP-QUEUE.md`, and
 | Ask “what does this witness actually demonstrate?” | Claim/evidence quantifier and referent mismatch | State the narrow empirical proposition first; bind only if it entails the declaration. |
 | Challenge `blocked` as a claim | Deferred sites whose unblocking condition was never tested | Re-run or trace the named blocker; C126 found that 6 of 11 “blocked” sites were already settled implementations or exposed decisions, rather than one undifferentiated blocked population. |
 | Trace consumers beyond the local site | Locally mechanical edits that alter belief, ranking, or safety downstream | Follow every changed value to selection/actuation before classifying the work. C127 found that 2 of 5 apparently implementation-only rows could change later rankings and stopped them. |
+| Audit who controls the authority | Internally valid evidence whose canonical history is producer-selectable | Name writer, head selector, storage owner, retention administrator, and verifier; treat same-principal control as a declared limit, not independent evidence. |
 
 These methods compose. The strongest recurring sequence today was: **census → pin
 the population → semantic mutation → inspect the named consumer → repair → rerun
@@ -553,8 +595,8 @@ apparatus now present. “Exists” means committed and callable, not merely dra
 | 7. Duplicate representation | lint + review question | Review found the four semantic duplications and C135's reader duplication. C140 then committed `checks/reader_portability_lint.bb`: its positive scan reports 12 bare persisted-file reads across six files, and two controls prove rejection plus a reason-bearing source-read exemption (`C140-reader-portability-lint.md:1–29`). No generic synonym lint exists. | **Held, with one mechanical corner automated.** The lint decides which reader a persisted-file call uses; it does not decide whether two πs, antecedents, or free energies mean the same thing. C74's judgement boundary was therefore not wrong. The cross-runtime round-trip and reader migrations remain unbuilt. |
 | 8. Era-blind expectation | check + schema lint | `checks/preemptive_era_blind_lint.clj`, negative control, C84 wiring, plus record-carried producer/schema tags audited by C125 (`C125-era-discriminator-census.md:9–31`). | **Held.** The generic lint catches unqualified timestamped assertions; producer identity still needs a schema contract. |
 | 9. Record says two things | lint + check | `checks/preemptive_record_conflict_lint.clj`, negative control, C84 wiring, obligation-ledger reconciliation, lane-registry checks, and C165's reciprocal correction-index check. | **Held.** Current/history conflicts, missing completion transitions, and unindexed amendments have executable consumers. |
+| 10. Evidence anchored by its producer | not in C74 | C409's authority census establishes that every relevant current authority is producer-controlled; the root-owned journal is only externally administered, retention-bounded, and unused as an anchor. | **New judgement-scoped class.** Honest authority typing is specified; no external anchoring protocol exists or is implied. |
 
-The reserved tenth slot is **closed, not filled**. C135 locates reader
-portability inside class 7: duplication can reside in endpoint grammars even
-when the bytes are singular. The catalogue therefore remains nine nonempty
-classes, with no stale placeholder.
+The former reserved tenth slot is now filled by C409. C135 remains inside class
+7: duplication can reside in endpoint grammars even when the bytes are singular.
+The catalogue therefore contains ten nonempty classes.
