@@ -3,6 +3,7 @@
   (:require [babashka.process :as process]
             [writer-fence-capability :as fence]
             [babashka.fs :as fs]
+            [clojure.edn :as edn]
             [clojure.set :as set]
             [clojure.string :as str]
             [cheshire.core :as json]))
@@ -12,12 +13,17 @@
 (def c167-resource "holes/labs/wm-contract/C167-v20-certificate-resource.edn")
 (def c167-run-sha256 "3d4432d09934517811cda1b1b35d7a5a9c1bbc73f137d76f4aecb30f6ab07875")
 (def c167-resource-sha256 "caaa479309506839b37611d9f2931d77bfb3ef8b75cb4a40826b18bf550319cf")
+(def gate-receipt-path "data/wm-workspace-gate/latest.edn")
 
 (def repositories
   {:futon2 "/home/joe/code/futon2"
    :mathlib4 "/home/joe/code/mathlib4"
    :p4ng "/home/joe/code/p4ng"
    :futon3 "/home/joe/code/futon3"})
+
+(defn repo-git [root & argv]
+  (apply process/shell {:continue true :out :string :err :string :dir root}
+         "git" argv))
 
 (defn sha256-text [value]
   (let [digest (java.security.MessageDigest/getInstance "SHA-256")]
@@ -41,6 +47,97 @@
 
 (defn provenance []
   (mapv repository-provenance repositories))
+
+(def gate-receipt-authority
+  {:authority/type :producer-controlled
+   :writer :wm-workspace-gate
+   :canonical-head-selector :latest-completed-local-run
+   :storage-owner :joe
+   :retention :single-latest-receipt
+   :writer-can-rewrite? true
+   :independent-certification? false})
+
+(defn write-gate-receipt! [path receipt]
+  (let [target (.toPath (java.io.File. path))
+        parent (.getParent target)
+        _ (java.nio.file.Files/createDirectories parent (make-array java.nio.file.attribute.FileAttribute 0))
+        tmp (java.nio.file.Files/createTempFile parent ".gate-receipt-" ".edn"
+                                                (make-array java.nio.file.attribute.FileAttribute 0))]
+    (try
+      (spit (.toFile tmp) (str (pr-str receipt) "\n"))
+      (java.nio.file.Files/move tmp target
+                                (into-array java.nio.file.CopyOption
+                                            [java.nio.file.StandardCopyOption/ATOMIC_MOVE
+                                             java.nio.file.StandardCopyOption/REPLACE_EXISTING]))
+      receipt
+      (finally (java.nio.file.Files/deleteIfExists tmp)))))
+
+(defn receipt-shape? [receipt]
+  (and (= :wm-workspace-gate-run/v1 (:schema receipt))
+       (string? (:started-at receipt)) (string? (:finished-at receipt))
+       (integer? (:check-count receipt)) (vector? (:failures receipt))
+       (contains? #{:pass :fail} (:verdict receipt))
+       (contains? #{:stable :moved :unavailable} (:basis-status receipt))
+       (= gate-receipt-authority (:authority receipt))
+       (vector? (:basis-start receipt)) (vector? (:basis-finish receipt))))
+
+(defn commit-distance [repo recorded current]
+  (let [root (repositories repo)
+        ancestor (repo-git root "merge-base" "--is-ancestor" recorded current)]
+    (if (zero? (:exit ancestor))
+      (let [count-result (repo-git root "rev-list" "--count" (str recorded ".." current))]
+        (if (zero? (:exit count-result))
+          {:status (if (= recorded current) :current :possibly-stale)
+           :commits-ahead (parse-long (str/trim (:out count-result)))}
+          {:status :unavailable :reason :distance-unreadable}))
+      {:status :possibly-stale :reason :recorded-commit-not-ancestor})))
+
+(defn gate-receipt-status [path]
+  (try
+    (let [receipt (edn/read-string (slurp path))]
+      (if-not (receipt-shape? receipt)
+        {:status :unavailable :reason :malformed-receipt :path path}
+        (let [current (provenance)
+              finish-by-repo (into {} (map (juxt :repository identity) (:basis-finish receipt)))
+              distances (into (sorted-map)
+                              (for [{:keys [repository git-sha dirty? readable?]} current
+                                    :let [recorded (:git-sha (finish-by-repo repository))]]
+                                [repository
+                                 (cond
+                                   (or (not readable?) (not (string? recorded)))
+                                   {:status :unavailable :reason :basis-unreadable}
+                                   :else (assoc (commit-distance repository recorded git-sha)
+                                                :recorded recorded :current git-sha :dirty? dirty?))]))
+              stale? (some #(not= :current (:status %)) (vals distances))]
+          {:status (if stale? :possibly-stale :current)
+           :receipt receipt :repository-distance distances})))
+    (catch Exception e
+      {:status :unavailable :reason :receipt-unreadable :path path :cause (ex-message e)})))
+
+(defn receipt-control! []
+  (let [dir (str (fs/create-temp-dir {:prefix "gate-receipt-control-"}))
+        path (str (fs/path dir "latest.edn"))
+        basis (provenance)
+        specimen {:schema :wm-workspace-gate-run/v1 :started-at "2026-09-01T00:00:00Z"
+                  :finished-at "2026-09-01T00:01:00Z" :check-count 1
+                  :executable-check-count 1 :verdict :pass :failures []
+                  :basis-status :stable :basis-start basis :basis-finish basis
+                  :certified-commit {:status :present
+                                     :value (:git-sha (first (filter #(= :futon2 (:repository %)) basis)))}
+                  :authority gate-receipt-authority}]
+    (try
+      (write-gate-receipt! path specimen)
+      (let [roundtrip (= specimen (edn/read-string (slurp path)))
+            readable? (contains? #{:current :possibly-stale}
+                                 (:status (gate-receipt-status path)))]
+        (spit path "{}\n")
+        (let [malformed? (= :unavailable (:status (gate-receipt-status path)))
+              pass? (and roundtrip readable? malformed?)]
+          (println "wm-workspace-gate: RECEIPT-CONTROL"
+                   (pr-str {:atomic-roundtrip roundtrip :reader-accepted readable?
+                            :malformed-rejected malformed?}))
+          (if pass? 0 2)))
+      (finally (fs/delete-tree dir)))))
 
 (def provenance-identity-fields
   [:git-sha :tree-sha :dirty? :tracked-diff-sha256 :readable?])
@@ -281,6 +378,8 @@
 (defn control-commands []
   [{:name :c390-report-only-crosses-lossy-boundary
     :argv ["bb" "-cp" "." "checks/exit_code_scope_check.clj" "--negative-control"]}
+   {:name :c431-gate-receipt-roundtrip
+    :argv ["bb" "-cp" "." "checks/wm_workspace_gate.clj" "--receipt-control"]}
    {:name :c393-malformed-census-basis
     :argv ["bb" "-cp" "." "checks/repository_census_basis_check.clj" "--negative-control"]}
    {:name :c157-perturbed-entropy
@@ -446,8 +545,19 @@
      :observed-exit observed :expected-exits expected-exits}))
 
 (defn -main [& args]
-  (if (some #{"--provenance-control"} args)
+  (cond
+    (some #{"--provenance-control"} args)
     (System/exit (provenance-movement-control!))
+
+    (some #{"--receipt-control"} args)
+    (System/exit (receipt-control!))
+
+    (some #{"--last-receipt"} args)
+    (let [status (gate-receipt-status gate-receipt-path)]
+      (println "wm-workspace-gate: LAST-RECEIPT" (pr-str status))
+      (System/exit (if (= :unavailable (:status status)) 1 0)))
+
+    :else
     (let [basis-start (provenance)
         gate-started-at (str (java.time.Instant/now))
         writer-fence-id (System/getenv "FUTON_WRITER_FENCE_ID")
@@ -463,25 +573,48 @@
         movement (print-provenance-result! basis-start basis-finish)
         gate-finished-at (str (java.time.Instant/now))
         event-claim (gate-event-claim movement writer-fence-id writer-fence-evidence
-                                      gate-started-at gate-finished-at)]
+                                      gate-started-at gate-finished-at)
+        summary {:checks (count results) :executable-checks (dec (count results)) :failures failures
+                 :basis-status (:status movement)
+                 :basis-repositories (:repositories movement)
+                 :event-claim event-claim
+                 :verdict-qualification
+                 (cond
+                   (not= :stable (:status movement)) :repository-basis-moved
+                   (= true (:event-free? event-claim)) :fence-conditional
+                   :else :content-only-event-free-unverified)
+                 :manual-exclusions [:lane-registry :current-live-operational-certificate
+                                     :production-click-resource-observer
+                                     :mutable-read-set-library]
+                 :manual-exclusion-reasons
+                 {:lane-registry :dispatcher-discipline-not-repository-validity
+                  :current-live-operational-certificate :requires-new-operator-run-and-resource-receipt
+                  :production-click-resource-observer :joe-only-command-that-performs-production-click
+                  :mutable-read-set-library :support-namespace-exercised-by-consumer-controls-and-unit-tests}}
+        futon2-start (some #(when (= :futon2 (:repository %)) %) basis-start)
+        certifiable? (and (= :stable (:status movement))
+                          (every? #(and (:readable? %) (not (:dirty? %))) basis-start)
+                          (every? #(and (:readable? %) (not (:dirty? %))) basis-finish))
+        receipt {:schema :wm-workspace-gate-run/v1
+                 :started-at gate-started-at :finished-at gate-finished-at
+                 :check-count (:checks summary)
+                 :executable-check-count (:executable-checks summary)
+                 :verdict (if (empty? failures) :pass :fail)
+                 :failures failures :basis-status (:status movement)
+                 :basis-start basis-start :basis-finish basis-finish
+                 :certified-commit (if certifiable?
+                                     {:status :present :value (:git-sha futon2-start)}
+                                     {:status :absent
+                                      :reason (if (= :stable (:status movement))
+                                                :repository-basis-dirty-or-unreadable
+                                                :repository-basis-not-stable)})
+                 :authority gate-receipt-authority}]
       (println "wm-workspace-gate: SUMMARY"
-               (pr-str {:checks (count results) :executable-checks (dec (count results)) :failures failures
-                        :basis-status (:status movement)
-                        :basis-repositories (:repositories movement)
-                        :event-claim event-claim
-                        :verdict-qualification
-                        (cond
-                          (not= :stable (:status movement)) :repository-basis-moved
-                          (= true (:event-free? event-claim)) :fence-conditional
-                          :else :content-only-event-free-unverified)
-                        :manual-exclusions [:lane-registry :current-live-operational-certificate
-                                            :production-click-resource-observer
-                                            :mutable-read-set-library]
-                        :manual-exclusion-reasons
-                        {:lane-registry :dispatcher-discipline-not-repository-validity
-                         :current-live-operational-certificate :requires-new-operator-run-and-resource-receipt
-                         :production-click-resource-observer :joe-only-command-that-performs-production-click
-                         :mutable-read-set-library :support-namespace-exercised-by-consumer-controls-and-unit-tests}}))
+               (pr-str summary))
+      (write-gate-receipt! gate-receipt-path receipt)
+      (println "wm-workspace-gate: RECEIPT" gate-receipt-path
+               (pr-str (select-keys receipt [:certified-commit :check-count :verdict
+                                             :basis-status :finished-at :authority])))
       ;; Repository movement qualifies the observation but does not turn a
       ;; passing set of checks into a failing set. The bounded wrapper and
       ;; run-readiness impose the stricter stable-basis operator policy.

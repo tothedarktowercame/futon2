@@ -1,4 +1,4 @@
-.PHONY: ci workspace-gate pre-merge status status-control certify-run run-readiness run-readiness-control run-readiness-tree-control run-readiness-resolution-control run-readiness-serving-code-control run-readiness-workspace-receipt-control runner-reload-preflight
+.PHONY: ci workspace-gate gate-last-receipt pre-merge status status-control certify-run run-readiness run-readiness-control run-readiness-tree-control run-readiness-resolution-control run-readiness-serving-code-control run-readiness-workspace-receipt-control runner-reload-preflight
 
 # C216: `make` exits 2 for any failing recipe, and 2 means "mutation slipped"
 # in the 0-pass/1-fail/2-mutation-slipped convention these scripts print.
@@ -14,6 +14,13 @@ ci:
 workspace-gate:
 	@python3 scripts/run_workspace_gate_bounded.py; c=$$?; \
 	 echo "workspace-gate: script-exit=$$c (house convention; make reports 2 for any nonzero)"; \
+	 exit $$c
+
+# Read the latest completed whole-workspace observation without rerunning it.
+# Staleness is reported in the payload and remains exit 0; missing/malformed is 1.
+gate-last-receipt:
+	@bb -cp . checks/wm_workspace_gate.clj --last-receipt; c=$$?; \
+	 echo "gate-last-receipt: script-exit=$$c (make reports 2 for any nonzero)"; \
 	 exit $$c
 
 # Required War Machine pre-merge/reviewer command. Keep the two boundaries
