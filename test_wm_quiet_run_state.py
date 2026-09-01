@@ -18,11 +18,20 @@ class QuietRunStateTest(unittest.TestCase):
             sut, "observe_quiescence", return_value={"verdict": "QUIESCENT"})
         self.fence_patch = mock.patch.object(sut, "observe_fence",
                                              side_effect=self.observed_fence)
+        self.click_status = None
+        self.click_patch = mock.patch.object(
+            sut, "serving_click_status", side_effect=lambda: self.click_status)
+        self.certificate_patch = mock.patch.object(
+            sut, "produce_certificate",
+            side_effect=lambda args, context: (args.evidence,
+                                                sut.edn_file(args.evidence)))
         self.quiet_patch.start(); self.fence_patch.start()
+        self.click_patch.start(); self.certificate_patch.start()
         self.assertEqual(0, sut.main(["init", "--ledger", str(self.ledger),
                                       "--fence-id", self.fence_id]))
 
     def tearDown(self):
+        self.certificate_patch.stop(); self.click_patch.stop()
         self.fence_patch.stop(); self.quiet_patch.stop(); self.tmp.cleanup()
 
     def observed_fence(self, fence_id, attestations):
@@ -80,6 +89,23 @@ class QuietRunStateTest(unittest.TestCase):
                     "ExecMainStartTimestampMonotonic": "12345"}}
         return records
 
+    def terminal_receipt(self, click_id, run_id, outcome="grounded-no-change"):
+        run = self.root / (run_id + ".edn")
+        run.write_text('{:run/id "' + run_id + '" :click/id "' + click_id + '"}\n')
+        binding = self.root / (click_id + "-binding.edn")
+        binding.write_text('{:click/id "' + click_id +
+                           '" :run-id-observation {:status :present :value "' +
+                           run_id + '"}}\n')
+        self.click_status = {"running?": False, "click-id": click_id,
+            "last-result": {"click-id": click_id, "outcome": outcome,
+                "binding-status": "verified", "run-record-status": "present",
+                "run-id-observation": {"status": "present", "value": run_id},
+                "run-record": str(run), "run-binding": str(binding)}}
+        return self.write("terminal.json", {"schema": "wm-click-resource-v1",
+            "click-id": click_id, "run-id": run_id, "terminal-outcome": outcome,
+            "resource-status": "clean",
+            "started-at": dt.datetime.now(dt.timezone.utc).isoformat()})
+
     def reach_fence(self):
         quiet = self.write("quiet.json", {"verdict": "QUIESCENT"})
         self.assertEqual(0, self.advance("quiescence", quiet))
@@ -132,14 +158,11 @@ class QuietRunStateTest(unittest.TestCase):
         ready = self.write("ready.json", {"readiness": "READY", "checks": [
             {"name": "serving-runner-code", "pass": True}]})
         self.assertEqual(0, self.advance("reload-recorded", ready))
-        issued = self.write("issued.json", {"click-id": "click-1",
-                                             "started-at": dt.datetime.now(dt.timezone.utc).isoformat()})
-        self.assertEqual(0, self.advance("click-issued", issued))
-        terminal = self.write("terminal.json", {"schema": "wm-click-resource-v1",
-            "click-id": "click-1", "run-id": "run-1", "terminal-outcome": "grounded-no-change",
-            "resource-status": "clean"})
+        terminal = self.terminal_receipt("click-1", "run-1")
+        self.assertEqual(0, self.advance("click-issued", terminal))
         self.assertEqual(0, self.advance("click-terminal", terminal))
-        cert = self.root / "cert.edn"; cert.write_text('{:verdict :pass :run/id "run-1"}\n')
+        cert = self.root / "cert.edn"; cert.write_text(
+            '{:verdict :pass :run {:id "run-1"}}\n')
         self.assertEqual(0, self.advance("certified", str(cert)))
         result, manifest, journal, outcomes, key = self.restoration_artifacts()
         backend = mock.Mock()
@@ -196,12 +219,11 @@ class QuietRunStateTest(unittest.TestCase):
         ready = self.write("ready.json", {"readiness": "READY", "checks": [
             {"name": "serving-runner-code", "pass": True}]})
         self.advance("reload-recorded", ready)
-        issued = self.write("issued.json", {"click-id": "c", "started-at": dt.datetime.now(dt.timezone.utc).isoformat()})
-        self.advance("click-issued", issued)
-        terminal = self.write("terminal.json", {"schema": "wm-click-resource-v1", "click-id": "c",
-            "run-id": "r", "terminal-outcome": "grounded-no-change", "resource-status": "clean"})
+        terminal = self.terminal_receipt("c", "r")
+        self.advance("click-issued", terminal)
         self.advance("click-terminal", terminal)
-        cert = self.root / "cert.edn"; cert.write_text('{:verdict :pass :run/id "r"}\n')
+        cert = self.root / "cert.edn"; cert.write_text(
+            '{:verdict :pass :run {:id "r"}}\n')
         self.advance("certified", str(cert))
         result, manifest, journal, outcomes, key = self.restoration_artifacts(incomplete=True)
         self.assertEqual(1, self.advance("restored", result, "--manifest", manifest,
@@ -269,6 +291,19 @@ class QuietRunStateTest(unittest.TestCase):
                 "--fence-evidence", fence, "--attestations", att,
                 "--job-id", "job-gate", "--job-id", "job-futon2",
                 "--job-id", "job-futon3"))
+
+    def test_handwritten_post_test_chain_cannot_reach_certified(self):
+        self.reach_tested()
+        ready = self.write("ready.json", {"readiness": "READY", "checks": [
+            {"name": "serving-runner-code", "pass": True}]})
+        self.assertEqual(0, self.advance("reload-recorded", ready))
+        fake = self.write("fake-click.json", {"schema": "wm-click-resource-v1",
+            "click-id": "never-clicked", "run-id": "never-ran",
+            "terminal-outcome": "grounded-no-change", "resource-status": "clean",
+            "started-at": dt.datetime.now(dt.timezone.utc).isoformat()})
+        self.click_status = {"running?": False, "click-id": None, "last-result": None}
+        self.assertEqual(1, self.advance("click-issued", fake))
+        self.assertEqual("reload-recorded", sut.load_ledger(self.ledger)[-1]["state"])
 
 
 if __name__ == "__main__": unittest.main()

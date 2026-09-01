@@ -55,16 +55,18 @@ python3 scripts/wm_quiet_run_state.py advance --ledger "$STATE" \
 python3 scripts/wm_quiet_run_state.py advance --ledger "$STATE" \
   --to reload-recorded --evidence /tmp/run-readiness.json
 
-# The external observer writes one receipt after terminal status. Its accepted
-# click identity retrospectively establishes click-issued; the next transition
-# consumes the same immutable receipt for terminal identity/outcome.
+# The external observer writes one receipt after terminal status. Both
+# transitions resolve the serving JVM's terminal status, durable click/run
+# binding, and run record; the receipt alone is insufficient.
 python3 scripts/wm_quiet_run_state.py advance --ledger "$STATE" \
   --to click-issued --evidence "$CLICK_RECEIPT"
 python3 scripts/wm_quiet_run_state.py advance --ledger "$STATE" \
   --to click-terminal --evidence "$CLICK_RECEIPT"
 
+# The machine invokes certify_live_run.clj itself, using the recorded click
+# receipt and producer-bound Futon2 test job. It persists the generated output.
 python3 scripts/wm_quiet_run_state.py advance --ledger "$STATE" \
-  --to certified --evidence "$CERTIFICATE"
+  --to certified
 
 python3 scripts/wm_quiet_run_state.py advance --ledger "$STATE" \
   --to restored --evidence /tmp/restore-command.json \

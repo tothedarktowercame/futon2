@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import urllib.request
 
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path: sys.path.insert(0, str(ROOT))
@@ -314,31 +315,101 @@ def evidence_reload(args, context):
     return [file_ref(args.evidence)], {"attestation-coverage": "not-claimed-after-tested-phase"}
 
 
+def serving_click_status():
+    try:
+        with urllib.request.urlopen("http://127.0.0.1:7070/api/alpha/wm/click",
+                                    timeout=5) as response:
+            return json.loads(response.read())
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        raise ValueError("serving-click-status-unavailable") from exc
+
+
+def producer_bound_click(value):
+    require(value.get("schema") == "wm-click-resource-v1",
+            "click-receipt-schema-invalid")
+    click_id = value.get("click-id"); run_id = value.get("run-id")
+    status = serving_click_status()
+    terminal = status.get("last-result") or {}
+    observed_run_id = (terminal.get("run-id-observation") or {}).get("value")
+    require(status.get("running?") is False, "serving-click-not-terminal")
+    require(status.get("click-id") == click_id == terminal.get("click-id"),
+            "serving-click-id-mismatch")
+    require(run_id and observed_run_id == run_id, "serving-run-id-mismatch")
+    require(terminal.get("binding-status") == "verified",
+            "serving-click-binding-not-verified")
+    require(terminal.get("run-record-status") == "present",
+            "serving-run-record-not-present")
+    require(terminal.get("outcome") == value.get("terminal-outcome"),
+            "serving-terminal-outcome-mismatch")
+    run_path = terminal.get("run-record")
+    require(run_path and Path(run_path).is_file(), "serving-run-record-unavailable")
+    run = edn_file(run_path)
+    require(run.get("run/id") == run_id and run.get("click/id") == click_id,
+            "serving-run-record-identity-mismatch")
+    binding_path = terminal.get("run-binding")
+    require(binding_path and Path(binding_path).is_file(), "serving-run-binding-unavailable")
+    binding = edn_file(binding_path)
+    require(binding.get("click/id") == click_id and
+            (binding.get("run-id-observation") or {}).get("value") == run_id,
+            "serving-durable-binding-identity-mismatch")
+    return status, run_path, binding_path
+
+
 def evidence_click_issued(args, context):
     value = json_file(args.evidence)
-    click_id = value.get("click-id"); require(isinstance(click_id, str) and click_id, "click-id-absent")
+    status, run_path, binding_path = producer_bound_click(value)
+    click_id = value.get("click-id")
     require(instant(value.get("started-at")) is not None, "click-start-time-absent")
-    return [file_ref(args.evidence)], {"click-id": click_id,
+    return [file_ref(args.evidence), file_ref(run_path), file_ref(binding_path)], {
+                                      "click-id": click_id,
+                                      "run-id": value["run-id"],
+                                      "click-producer": "serving-jvm-terminal-status",
                                       "attestation-coverage": "not-claimed"}
 
 
 def evidence_click_terminal(args, context):
     value = json_file(args.evidence)
-    require(value.get("schema") == "wm-click-resource-v1", "click-receipt-schema-invalid")
+    _, run_path, binding_path = producer_bound_click(value)
     require(value.get("click-id") == context.get("click-id"), "terminal-click-id-mismatch")
     require(value.get("run-id"), "terminal-run-id-absent")
     require(value.get("terminal-outcome"), "terminal-outcome-absent")
     require(value.get("resource-status") in ("clean", "dirty"), "terminal-resource-unavailable")
-    return [file_ref(args.evidence)], {"run-id": value["run-id"],
+    return [file_ref(args.evidence), file_ref(run_path), file_ref(binding_path)], {
+                                      "run-id": value["run-id"],
                                       "terminal-outcome": value["terminal-outcome"],
                                       "attestation-coverage": "not-claimed"}
 
 
+def produce_certificate(args, context):
+    tested_ids = context.get("bounded-job-ids") or []
+    tested_job = next((job_id for job_id in tested_ids
+                       if bounded_job(job_id).get("receipt", {}).get("command") ==
+                       "clojure -T:build ci"), None)
+    require(tested_job, "tested-futon2-job-identity-unavailable")
+    click_receipt = context.get("click-receipt")
+    require(click_receipt, "recorded-click-receipt-unavailable")
+    out_dir = Path(str(args.ledger) + ".evidence") / "certificate"
+    out_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
+    result = subprocess.run(
+        ["bb", "-cp", ".", "checks/certify_live_run.clj",
+         "--run-id", context["run-id"], "--tested-job-id", tested_job,
+         "--resource-dirs", str(Path(click_receipt).parent),
+         "--out-dir", str(out_dir)], cwd=ROOT, capture_output=True, text=True)
+    require(result.returncode == 0, "certificate-producer-failed")
+    safe_id = "".join(x if x.isalnum() or x in "._-" else "_"
+                      for x in context["run-id"])
+    path = out_dir / ("operational-certificate-" + safe_id + ".edn")
+    require(path.is_file(), "certificate-producer-output-absent")
+    return str(path), edn_file(path)
+
+
 def evidence_certified(args, context):
-    value = edn_file(args.evidence)
+    path, value = produce_certificate(args, context)
     require(value.get("verdict") == "pass", "certificate-not-pass")
-    require(value.get("run/id") == context.get("run-id"), "certificate-run-id-mismatch")
-    return [file_ref(args.evidence)], {"certificate": str(Path(args.evidence).resolve()),
+    require((value.get("run") or {}).get("id") == context.get("run-id"),
+            "certificate-run-id-mismatch")
+    return [file_ref(path)], {"certificate": str(Path(path).resolve()),
+                                      "certificate-producer": "certify_live_run.clj",
                                       "attestation-coverage": "not-claimed"}
 
 
@@ -390,6 +461,8 @@ def context(rows):
         if row.get("state") == "fence-held" and len(row.get("evidence", [])) == 2:
             result["fence-evidence"] = row["evidence"][0]["path"]
             result["fence-attestations"] = row["evidence"][1]["path"]
+        if row.get("state") == "click-terminal" and row.get("evidence"):
+            result["click-receipt"] = row["evidence"][0]["path"]
     return result
 
 
@@ -424,7 +497,8 @@ def main(argv=None):
                 refs, facts = [], {"release-authority": "FENCE-RELEASE",
                                    "attestation-coverage": "not-claimed"}
             else:
-                if args.to not in ("quiescence", "fence-held", "tested-commit"):
+                if args.to not in ("quiescence", "fence-held", "tested-commit",
+                                   "certified"):
                     require(args.evidence, "transition-evidence-required")
                 refs, facts = VALIDATORS[args.to](args, context(rows))
             body = {"schema": SCHEMA,
