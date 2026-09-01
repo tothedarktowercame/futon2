@@ -1,8 +1,10 @@
 #!/usr/bin/env bb
 (ns checks.model-reduction-free-energy-change-witness
-  (:require [babashka.process :as p] [clojure.edn :as edn]))
+  (:require [babashka.process :as p] [checks.positive-proof-receipt :as receipt]
+            [clojure.edn :as edn]))
 
 (def fixture-path "holes/labs/wm-contract/model-reduction-free-energy-change-reference.edn")
+(def receipt-path "holes/labs/wm-contract/model-reduction-free-energy-change-positive-receipt.edn")
 (def mathlib "/home/joe/code/mathlib4")
 (def expected
   {:schema :model-reduction-free-energy-change-reference/v1
@@ -24,7 +26,8 @@
 (defn -main [& args]
   (let [negative-flag (some (set (keys negative-files)) args)
         fixture (edn/read-string (slurp fixture-path))
-        positive? (and (= expected fixture)
+        receipt-ok? (:pass? (receipt/validate (edn/read-string (slurp receipt-path))))
+        positive? (and receipt-ok? (= expected fixture)
                        (zero? (lean-exit "DarkTower/WarMachine/ModelReductionFreeEnergyChangeWitness.lean")))
         rejected? (if negative-flag
                     (zero? (lean-exit (get negative-files negative-flag)))

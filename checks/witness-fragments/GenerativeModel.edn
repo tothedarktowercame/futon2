@@ -4,6 +4,9 @@
          :entrypoint "-main"}
  :fixture {:repo "futon2"
            :path "holes/labs/wm-contract/generative-model-reference.edn"}
+ :positive-proof-receipt {:repo "futon2"
+                          :path "holes/labs/wm-contract/generative-model-positive-receipt.edn"
+                          :schema :PositiveLeanWitnessReceipt/v1}
  :expected-rejection {:mode :lean-guard-msgs :controls [{:fixture "DarkTower/WarMachine/GenerativeModelNegative.lean" :claim :model-carriers-share-state-type}]}
  :run-sha "7b31da1fe248a05b35940e9a68544b4ffbef36a7"
  :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a"

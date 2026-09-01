@@ -1,8 +1,10 @@
 #!/usr/bin/env bb
 (ns checks.bayes-factor-threshold-witness
-  (:require [babashka.process :as p] [clojure.edn :as edn]))
+  (:require [babashka.process :as p] [checks.positive-proof-receipt :as receipt]
+            [clojure.edn :as edn]))
 
 (def fixture-path "holes/labs/wm-contract/bayes-factor-threshold-reference.edn")
+(def receipt-path "holes/labs/wm-contract/bayes-factor-threshold-positive-receipt.edn")
 (def mathlib "/home/joe/code/mathlib4")
 (def expected
   {:schema :bayes-factor-threshold-reference/v1
@@ -22,8 +24,9 @@
   (let [boundary-neg? (some #{"--negative-boundary"} args)
         type-neg? (some #{"--negative-type"} args)
         fixture (edn/read-string (slurp fixture-path))
+        receipt-ok? (:pass? (receipt/validate (edn/read-string (slurp receipt-path))))
         tested (if boundary-neg? (assoc fixture :failing-change [-7 2]) fixture)
-        positive? (and (= expected fixture)
+        positive? (and receipt-ok? (= expected fixture)
                        (zero? (lean-exit "DarkTower/WarMachine/BayesFactorThresholdWitness.lean")))
         rejected? (cond
                     boundary-neg? (not= expected tested)

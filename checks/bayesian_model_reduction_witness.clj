@@ -1,8 +1,10 @@
 #!/usr/bin/env bb
 (ns checks.bayesian-model-reduction-witness
-  (:require [babashka.process :as p] [clojure.edn :as edn]))
+  (:require [babashka.process :as p] [checks.positive-proof-receipt :as receipt]
+            [clojure.edn :as edn]))
 
 (def fixture-path "holes/labs/wm-contract/bayesian-model-reduction-reference.edn")
+(def receipt-path "holes/labs/wm-contract/bayesian-model-reduction-positive-receipt.edn")
 (def mathlib "/home/joe/code/mathlib4")
 (def expected
   {:schema :bayesian-model-reduction-reference/v1
@@ -21,10 +23,11 @@
 (defn -main [& args]
   (let [counts-neg? (some #{"--negative-counts"} args)
         fixture (edn/read-string (slurp fixture-path))
+        receipt-ok? (:pass? (receipt/validate (edn/read-string (slurp receipt-path))))
         tested (if counts-neg?
                  (assoc fixture :reduced-posterior [[10 1] [401 100]])
                  fixture)
-        positive? (and (= expected fixture)
+        positive? (and receipt-ok? (= expected fixture)
                        (zero? (lean-exit "DarkTower/WarMachine/BayesianModelReductionWitness.lean")))
         rejected? (if counts-neg?
                     (and (not= expected tested)

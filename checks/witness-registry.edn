@@ -149,22 +149,27 @@
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
  {:witnesses "GenerativeModel",
-  :check
-  {:repo "futon2",
-   :path "checks/generative_model_witness.clj",
-   :entrypoint "-main"},
-  :fixture
-  {:repo "futon2",
-   :path "holes/labs/wm-contract/generative-model-reference.edn"},
   :expected-rejection
   {:mode :lean-guard-msgs,
    :controls
    [{:fixture "DarkTower/WarMachine/GenerativeModelNegative.lean",
      :claim :model-carriers-share-state-type}]},
-  :run-sha "7b31da1fe248a05b35940e9a68544b4ffbef36a7",
   :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
+  :run-sha "7b31da1fe248a05b35940e9a68544b4ffbef36a7",
+  :check
+  {:repo "futon2",
+   :path "checks/generative_model_witness.clj",
+   :entrypoint "-main"},
+  :positive-proof-receipt
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/generative-model-positive-receipt.edn",
+   :schema :PositiveLeanWitnessReceipt/v1},
+  :recorded-at "2026-09-01T00:20:00Z",
   :result :passed,
-  :recorded-at "2026-09-01T00:20:00Z"}
+  :fixture
+  {:repo "futon2",
+   :path "holes/labs/wm-contract/generative-model-reference.edn"}}
  {:witnesses "HaveWantArrow",
   :check
   {:repo "futon2",
@@ -411,42 +416,52 @@
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
  {:witnesses "bayesFactorThreshold",
-  :check
-  {:repo "futon2",
-   :path "checks/bayes_factor_threshold_witness.clj",
-   :entrypoint "-main"},
-  :fixture
-  {:repo "futon2",
-   :path
-   "holes/labs/wm-contract/bayes-factor-threshold-reference.edn"},
   :expected-rejection
   {:mode :lean-guard-msgs,
    :controls
    [{:fixture "DarkTower/WarMachine/BayesFactorThresholdNegative.lean",
      :claim :threshold-requires-model-change-evidence}]},
-  :run-sha "4703c8862a40bd103f80f92cdc9a526fb316e189",
   :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
-  :result :passed,
-  :recorded-at "2026-08-31T23:59:00Z"}
- {:witnesses "bayesianModelReduction",
+  :run-sha "4703c8862a40bd103f80f92cdc9a526fb316e189",
   :check
   {:repo "futon2",
-   :path "checks/bayesian_model_reduction_witness.clj",
+   :path "checks/bayes_factor_threshold_witness.clj",
    :entrypoint "-main"},
+  :positive-proof-receipt
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/bayes-factor-threshold-positive-receipt.edn",
+   :schema :PositiveLeanWitnessReceipt/v1},
+  :recorded-at "2026-08-31T23:59:00Z",
+  :result :passed,
   :fixture
   {:repo "futon2",
    :path
-   "holes/labs/wm-contract/bayesian-model-reduction-reference.edn"},
+   "holes/labs/wm-contract/bayes-factor-threshold-reference.edn"}}
+ {:witnesses "bayesianModelReduction",
   :expected-rejection
   {:mode :lean-guard-msgs,
    :controls
    [{:fixture
      "DarkTower/WarMachine/BayesianModelReductionNegative.lean",
      :claim :reduction-preserves-count-arithmetic}]},
-  :run-sha "b048066070e1646c9105067ed6c405621381a2c9",
   :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
+  :run-sha "b048066070e1646c9105067ed6c405621381a2c9",
+  :check
+  {:repo "futon2",
+   :path "checks/bayesian_model_reduction_witness.clj",
+   :entrypoint "-main"},
+  :positive-proof-receipt
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/bayesian-model-reduction-positive-receipt.edn",
+   :schema :PositiveLeanWitnessReceipt/v1},
+  :recorded-at "2026-08-31T23:59:00Z",
   :result :passed,
-  :recorded-at "2026-08-31T23:59:00Z"}
+  :fixture
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/bayesian-model-reduction-reference.edn"}}
  {:witnesses "expectedFreeEnergy",
   :check
   {:repo "futon2",
@@ -506,14 +521,6 @@
   :result :passed,
   :recorded-at "2026-08-31T23:50:00Z"}
  {:witnesses "modelReductionFreeEnergyChange",
-  :check
-  {:repo "futon2",
-   :path "checks/model_reduction_free_energy_change_witness.clj",
-   :entrypoint "-main"},
-  :fixture
-  {:repo "futon2",
-   :path
-   "holes/labs/wm-contract/model-reduction-free-energy-change-reference.edn"},
   :expected-rejection
   {:mode :lean-guard-msgs,
    :controls
@@ -523,10 +530,23 @@
     {:fixture
      "DarkTower/WarMachine/ModelReductionFreeEnergyChangeTypeNegative.lean",
      :claim :present-free-energy-is-not-model-change}]},
-  :run-sha "ab33ba4cac8e494d122b940d8163692067fc39b8",
   :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
+  :run-sha "ab33ba4cac8e494d122b940d8163692067fc39b8",
+  :check
+  {:repo "futon2",
+   :path "checks/model_reduction_free_energy_change_witness.clj",
+   :entrypoint "-main"},
+  :positive-proof-receipt
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/model-reduction-free-energy-change-positive-receipt.edn",
+   :schema :PositiveLeanWitnessReceipt/v1},
+  :recorded-at "2026-09-01T00:00:00Z",
   :result :passed,
-  :recorded-at "2026-09-01T00:00:00Z"}
+  :fixture
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/model-reduction-free-energy-change-reference.edn"}}
  {:witnesses "modelUncertaintyAndEIG",
   :freshness :pinned-git-v1,
   :expected-rejection

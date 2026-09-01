@@ -1,6 +1,7 @@
 {:witnesses "modelReductionFreeEnergyChange"
  :check {:repo "futon2" :path "checks/model_reduction_free_energy_change_witness.clj" :entrypoint "-main"}
  :fixture {:repo "futon2" :path "holes/labs/wm-contract/model-reduction-free-energy-change-reference.edn"}
+ :positive-proof-receipt {:repo "futon2" :path "holes/labs/wm-contract/model-reduction-free-energy-change-positive-receipt.edn" :schema :PositiveLeanWitnessReceipt/v1}
  :expected-rejection {:mode :lean-guard-msgs :controls
                       [{:fixture "DarkTower/WarMachine/ModelReductionFreeEnergyChangeValueNegative.lean" :claim :model-reduction-change-has-derived-value}
                        {:fixture "DarkTower/WarMachine/ModelReductionFreeEnergyChangeTypeNegative.lean" :claim :present-free-energy-is-not-model-change}]}

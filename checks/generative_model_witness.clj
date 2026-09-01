@@ -2,6 +2,7 @@
 (ns checks.generative-model-witness
   (:require [babashka.fs :as fs]
             [babashka.process :as process]
+            [checks.positive-proof-receipt :as receipt]
             [clojure.edn :as edn]))
 
 (def root (fs/cwd))
@@ -9,6 +10,7 @@
 (def lean-path
   (fs/path mathlib-root "DarkTower/WarMachine/GenerativeModelWitness.lean"))
 (def fixture-path (fs/path root "holes/labs/wm-contract/generative-model-reference.edn"))
+(def receipt-path (fs/path root "holes/labs/wm-contract/generative-model-positive-receipt.edn"))
 
 (def expected-case
   {:id :binary-observation-deterministic-transition
@@ -33,9 +35,10 @@
 (defn -main [& args]
   (let [negative? (some #{"--negative" "--negative-control"} args)
         fixture (edn/read-string (slurp (str fixture-path)))
+        receipt-ok? (:pass? (receipt/validate (edn/read-string (slurp (str receipt-path)))))
         exit (if negative?
                (structural-negative)
-               (if (and (reference-valid? fixture) (zero? (:exit (lean! lean-path)))) 0 1))]
+               (if (and receipt-ok? (reference-valid? fixture) (zero? (:exit (lean! lean-path)))) 0 1))]
     (println (cond
                (= exit 2) "generative-model-witness: mutation slipped"
                negative? "generative-model-witness: negative-control PASS (mis-wired state carrier rejected)"

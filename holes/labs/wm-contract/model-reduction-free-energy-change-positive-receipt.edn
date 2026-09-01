@@ -1,0 +1,22 @@
+{:receipt/type :PositiveLeanWitnessReceipt :receipt/version 1 :recorded-at "2026-09-01T01:40:00Z"
+ :theorem "DarkTower.WarMachine.ModelReductionFreeEnergyChangeWitness.gammaIdentityChange"
+ :module "DarkTower.WarMachine.ModelReductionFreeEnergyChangeWitness"
+ :source-basis
+ [{:repo "mathlib4" :path "DarkTower/WarMachine/ModelReductionFreeEnergyChangeWitness.lean"
+   :declarations [{:name "ReductionChangeReference" :sha256 "5b7a84fa9ff1d5af3bf95793b7cb29ac6313a5bd9684096fdbaca1f0096858d3"} {:name "reductionChangeReference" :sha256 "ac835bdae2cf1962de9583652e5b33f7009fc249ed2a137e1e51b8714cae79df"}
+                  {:name "gammaIdentityChange" :sha256 "3c57093fdfe6656a652a4e0f19aa5aa8cbe62b08b3670f0af4efa58edcaa224c"}]}
+  {:repo "mathlib4" :path "DarkTower/WarMachine/Holes.lean"
+   :declarations [{:name "DirichletConcentrations" :sha256 "98416449fc188607cbf7217a719a2163488c14a300d1627819e3fd99f78d149b"}
+                  {:name "logMultivariateBeta" :sha256 "824fef547fd2c803e80176f2b0b05881cfe64fda417c4b1d55be3bcad1dc5f19"}
+                  {:name "modelReductionFreeEnergyChange" :sha256 "3bfefb720807afcffaef8f23c76db7a2956e4354dbccb07d0096c6687a7f2fd9"}]}]
+ :fixture {:repo "futon2" :path "holes/labs/wm-contract/model-reduction-free-energy-change-reference.edn"
+           :schema :model-reduction-free-energy-change-reference/v1 :sha256 "894133bd295da4ea77b528df2a2e97c690a378d726f576330edfe71339043dd1"}
+ :adapter {:kind :edn-fields-to-lean-declaration/v1 :lean-declaration "reductionChangeReference"
+           :mappings [{:fixture-path [:inputs :A] :lean-field "A" :expected [1 1]}
+                      {:fixture-path [:inputs :reduced-prior] :lean-field "reducedPrior" :expected [1 1]}
+                      {:fixture-path [:inputs :prior] :lean-field "prior" :expected [2 1]}
+                      {:fixture-path [:inputs :reduced-posterior] :lean-field "reducedPosterior" :expected [1 1]}
+                      {:fixture-path [:expected-change] :lean-field "expectedChange" :expected :log-2}]}
+ :elaborator {:command ["lake" "env" "lean"] :cwd "/home/joe/code/mathlib4"}
+ :toolchain {:lean-version "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)" :lean-toolchain-sha256 "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8" :lake-manifest-sha256 "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"}
+ :result {:exit 0 :axioms ["propext" "Classical.choice" "Quot.sound"]}}
