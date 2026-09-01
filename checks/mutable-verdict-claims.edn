@@ -71,4 +71,5 @@
   "checks/wm_workspace_gate.clj" :repository-basis-interval
   "checks/writer_fence_evidence.py" :writer-fence-interval}
  :neither
- {"checks/mutable_read_set.clj" :shared-observation-library}}
+ {"checks/mutable_read_set.clj" :shared-observation-library
+  "checks/lean_positive_witness.clj" :shared-positive-witness-library}}

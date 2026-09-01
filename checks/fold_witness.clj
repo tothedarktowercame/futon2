@@ -2,6 +2,7 @@
 (ns checks.fold-witness
   (:require [babashka.fs :as fs]
             [babashka.process :as process]
+            [checks.lean-positive-witness :as lean-positive]
             [clojure.edn :as edn]))
 
 (def root (fs/cwd))
@@ -22,7 +23,7 @@
   (let [negative? (some #{"--negative" "--negative-control"} args)
         fixture (edn/read-string (slurp (str fixture-path)))
         baseline-valid? (and (fixture-valid? fixture)
-                             (zero? (lean-exit "DarkTower/WarMachine/FoldWitness.lean")))
+                             (lean-positive/pass? mathlib-root "DarkTower/WarMachine/FoldWitness.lean"))
         mutation-rejected? (and negative?
                                 (zero? (lean-exit "DarkTower/WarMachine/FoldNegative.lean")))
         accepted? (if negative? (and baseline-valid? mutation-rejected?) baseline-valid?)

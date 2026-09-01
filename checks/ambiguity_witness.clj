@@ -1,7 +1,7 @@
 #!/usr/bin/env bb
 (ns checks.ambiguity-witness
   (:require [babashka.fs :as fs]
-            [babashka.process :as process]
+            [checks.lean-positive-witness :as lean-positive]
             [checks.positive-proof-receipt :as receipt]
             [clojure.edn :as edn]))
 
@@ -19,11 +19,8 @@
        (= [expected-case] (:cases x))))
 
 (defn lean-pass? []
-  (zero? (:exit (process/shell
-                  {:dir (str (fs/normalize (fs/path root "../mathlib4")))
-                   :continue true :out :string :err :string}
-                  "lake" "env" "lean"
-                  "DarkTower/WarMachine/AmbiguityWitness.lean"))))
+  (lean-positive/pass? (str (fs/normalize (fs/path root "../mathlib4")))
+                       "DarkTower/WarMachine/AmbiguityWitness.lean"))
 
 (defn -main [& args]
   (let [negative? (some #{"--negative" "--negative-control"} args)

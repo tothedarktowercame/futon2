@@ -2,6 +2,7 @@
 (ns checks.have-want-arrow-witness
   (:require [babashka.fs :as fs]
             [babashka.process :as process]
+            [checks.lean-positive-witness :as lean-positive]
             [clojure.edn :as edn]))
 
 (def root (fs/cwd))
@@ -24,10 +25,10 @@
   (let [negative? (some #{"--negative" "--negative-control"} args)
         fixture (edn/read-string (slurp (str fixture-path)))
         fixture-ok? (fixture-valid? fixture)
-        positive-exit (lean-exit "DarkTower/WarMachine/HaveWantArrowWitness.lean")
+        positive-ok? (lean-positive/pass? mathlib-root "DarkTower/WarMachine/HaveWantArrowWitness.lean")
         negative-exit (if negative?
                         (lean-exit "DarkTower/WarMachine/HaveWantArrowNegative.lean") 1)
-        baseline-valid? (and fixture-ok? (zero? positive-exit))
+        baseline-valid? (and fixture-ok? positive-ok?)
         mutation-rejected? (zero? negative-exit)
         accepted? (if negative? (and baseline-valid? mutation-rejected?) baseline-valid?)
         exit (cond (and negative? (not baseline-valid?)) 1

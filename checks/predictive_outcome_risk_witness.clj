@@ -1,6 +1,6 @@
 #!/usr/bin/env bb
 (ns checks.predictive-outcome-risk-witness
-  (:require [babashka.process :as p] [checks.positive-proof-receipt :as receipt]
+  (:require [checks.lean-positive-witness :as lean-positive] [checks.positive-proof-receipt :as receipt]
             [clojure.edn :as edn]))
 (def fixture-path "holes/labs/wm-contract/predictive-outcome-risk-reference.edn")
 (def receipt-path "holes/labs/wm-contract/predictive-outcome-risk-positive-receipt.edn")
@@ -13,10 +13,8 @@
                (:predictive-mass x))
        (= [:log 2] (:expected-risk x))))
 (defn lean-pass? []
-  (zero? (:exit (p/shell {:dir "/home/joe/code/mathlib4" :continue true
-                          :out :string :err :string}
-                         "lake" "env" "lean"
-                         "DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean"))))
+  (lean-positive/pass? "/home/joe/code/mathlib4"
+                       "DarkTower/WarMachine/PredictiveOutcomeRiskWitness.lean"))
 (defn -main [& args]
   (let [negative? (some #{"--negative" "--negative-control"} args)
         fixture (edn/read-string (slurp fixture-path))

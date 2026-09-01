@@ -1,6 +1,6 @@
 #!/usr/bin/env bb
 (ns checks.channel-witness
-  (:require [babashka.process :as p] [clojure.edn :as edn]))
+  (:require [checks.lean-positive-witness :as lean-positive] [clojure.edn :as edn]))
 (def fixture-path "holes/labs/wm-contract/channel-vocabulary-reference.edn")
 (def expected
   [:loop-health :support-coverage :attack-coverage :mission-health :stack-pct
@@ -12,10 +12,8 @@
        (= "holes/labs/wm-contract/C58-r2-channel-eras.md" (:basis x))
        (= expected (:channels x))))
 (defn lean-pass? []
-  (zero? (:exit (p/shell {:dir "/home/joe/code/mathlib4" :continue true
-                          :out :string :err :string}
-                         "lake" "env" "lean"
-                         "DarkTower/WarMachine/ChannelWitness.lean"))))
+  (lean-positive/pass? "/home/joe/code/mathlib4"
+                       "DarkTower/WarMachine/ChannelWitness.lean"))
 (defn -main [& args]
   (let [negative? (some #{"--negative" "--negative-control"} args)
         fixture (edn/read-string (slurp fixture-path))

@@ -1,6 +1,6 @@
 #!/usr/bin/env bb
 (ns checks.observation-kernel-witness
-  (:require [babashka.process :as p] [clojure.edn :as edn]))
+  (:require [checks.lean-positive-witness :as lean-positive] [clojure.edn :as edn]))
 (def fixture-path "holes/labs/wm-contract/observation-kernel-reference.edn")
 (defn valid-row? [row]
   (let [masses (vals (:mass row))]
@@ -11,10 +11,8 @@
        (= "holes/labs/wm-contract/C7-belief-update-findings.md" (:basis x))
        (seq (:rows x)) (every? valid-row? (:rows x))))
 (defn lean-pass? []
-  (zero? (:exit (p/shell {:dir "/home/joe/code/mathlib4" :continue true
-                          :out :string :err :string}
-                         "lake" "env" "lean"
-                         "DarkTower/WarMachine/ObservationKernelWitness.lean"))))
+  (lean-positive/pass? "/home/joe/code/mathlib4"
+                       "DarkTower/WarMachine/ObservationKernelWitness.lean"))
 (defn -main [& args]
   (let [sum-neg? (some #{"--negative-normalisation" "--negative-control"} args)
         mass-neg? (some #{"--negative-mass"} args)

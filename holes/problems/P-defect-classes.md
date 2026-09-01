@@ -23,7 +23,7 @@ and 7 remain judgement-scoped and therefore have no honest extinction claim.
 failure quantity it computes, tests only shape/nonemptiness, or announces success
 without inspecting the reader-held result.
 
-**Instances.** Six:
+**Instances.** Seven:
 
 1. R2's historical census ran over a supplied empty population and passed
    vacuously. C35 distinguishes this population defect from the now-rejecting
@@ -43,6 +43,11 @@ without inspecting the reader-held result.
    current `mathlib4/DarkTower/WarMachine/Holes.lean:511`).
 6. `p4ng/build-p4ng.sh:118` printed a publication-success line unconditionally;
    the discovery is recorded at `holes/problems/BUILD-PLAN-0831.md:655`.
+7. Ten Lean witness wrappers treated a successful elaborator exit as sufficient
+   positive evidence, so an empty source file made eleven negative modes claim
+   their positive baseline was valid. C356 requires a declaration-bearing,
+   `sorry`-free source before elaboration
+   (`holes/labs/wm-contract/C356-nonvacuous-positive-lean-witness.md`).
 
 **Found by.** Semantic mutations; deliberately empty populations; counting
 accepted/rejected outcomes; reading the proposition rather than satisfying it;

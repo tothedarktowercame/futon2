@@ -157,6 +157,7 @@
     "lane_registry_check.clj" "log_multivariate_beta_witness.clj"
     "model_uncertainty_eig_witness.clj" "machine_vocabulary_witness.clj"
     "mutable_read_set.clj"
+    "lean_positive_witness.clj"
     "lean_sorry_category_check.clj"
     "obligation_ledger_reconciliation_check.clj"
     "preemptive_absence_coercion_lint.clj" "preemptive_acceptance_lint.clj"

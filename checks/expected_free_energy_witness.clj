@@ -1,7 +1,7 @@
 #!/usr/bin/env bb
 (ns checks.expected-free-energy-witness
   (:require [babashka.fs :as fs]
-            [babashka.process :as process]
+            [checks.lean-positive-witness :as lean-positive]
             [checks.positive-proof-receipt :as receipt]
             [clojure.edn :as edn]))
 
@@ -19,10 +19,8 @@
        (= [independent-case] (:cases x))))
 
 (defn lean-pass? []
-  (zero? (:exit (process/shell
-                  {:dir mathlib-root :continue true :out :string :err :string}
-                  "lake" "env" "lean"
-                  "DarkTower/WarMachine/ExpectedFreeEnergyWitness.lean"))))
+  (lean-positive/pass? mathlib-root
+                       "DarkTower/WarMachine/ExpectedFreeEnergyWitness.lean"))
 
 (defn -main [& args]
   (let [negative? (some #{"--negative" "--negative-control"} args)
