@@ -197,6 +197,8 @@
   {:trace? true
    :include-advisory-lanes? false
    :step-portfolio? false
+   :step-mission-detail-portfolio? false
+   :eval-invariant-fallback? false
    :strategic-selection-fn selector
    :wm-version version-stamp})
 

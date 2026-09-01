@@ -82,6 +82,31 @@
     (with-redefs [http/post (fn [& _] response)]
       (is (= (old-step) (#'wm/portfolio-step-for-judge true))))))
 
+(deftest suppressed-mission-detail-step-is-explicit-test
+  (with-redefs [http/post
+                (fn [& request]
+                  (throw (ex-info "suppressed path issued a POST"
+                                  {:request request})))]
+    (is (= {:status :absent
+            :reason :mission-detail-portfolio-step-suppressed}
+           (:portfolio-step-status
+            (wm/scan-mission-detail [{:mission/id "M-test"}] false))))))
+
+(deftest suppressed-invariant-eval-fallback-is-explicit-test
+  (with-redefs-fn
+    {#'http/post
+     (fn [& request]
+       (throw (ex-info "suppressed path issued a POST"
+                       {:request request})))
+     #'wm/http-get-json (constantly nil)
+     #'wm/read-edn-file (constantly {:families [] :invariants []})}
+    (fn []
+      (let [inventory (wm/load-invariant-inventory false)]
+        (is (false? (:live-available? inventory)))
+        (is (= {:status :absent
+                :reason :invariant-eval-fallback-suppressed}
+               (:live-status inventory)))))))
+
 (def ^:private real-wm-channels
   ;; Exact channel set from data/wm-trace/wm-trace-2026-07-04.edn.
   [:mathematics-pct :coupling-density :support-coverage :depositing-signal

@@ -2163,26 +2163,33 @@
 
 (defn scan-mission-detail
   "Fetch detailed mission data for the mission hex view.
-   Returns missions grouped by repo with dependency info."
+   Returns missions grouped by repo with dependency info. The three-arity's
+   `step-portfolio?` defaults true through the public arities. When false, no
+   portfolio POST occurs and `:portfolio-step-status` records the suppression."
   ([] (when-let [missions (fetch-missions)]
-        (scan-mission-detail missions)))
-  ([missions]
+        (scan-mission-detail missions true)))
+  ([missions] (scan-mission-detail missions true))
+  ([missions step-portfolio?]
     (let [by-repo (group-by :mission/repo missions)
           ;; Extract blocked-by pairs from the portfolio structure
-          step-data (try
-                      (let [resp (http/post (str futon3c-url "/api/alpha/portfolio/step")
-                                           {:headers {"Content-Type" "application/json"
-                                                      "Accept" "application/json"}
-                                            :body "{\"emit-evidence\":false}"
-                                            :timeout 10000
-                                            :throw false})]
-                        (when (= 200 (:status resp))
-                          (json/parse-string (:body resp) true)))
-                      (catch Exception _ nil))
+          step-data (if-not step-portfolio?
+                      {:status :absent
+                       :reason :mission-detail-portfolio-step-suppressed}
+                      (try
+                        (let [resp (http/post (str futon3c-url "/api/alpha/portfolio/step")
+                                             {:headers {"Content-Type" "application/json"
+                                                        "Accept" "application/json"}
+                                              :body "{\"emit-evidence\":false}"
+                                              :timeout 10000
+                                              :throw false})]
+                          (when (= 200 (:status resp))
+                            (json/parse-string (:body resp) true)))
+                        (catch Exception _ nil)))
           blocked-pairs (get-in step-data [:structure :blocked-pairs] [])
           dep-edges (mapv (fn [[a b]] {:from a :to b :type :blocked-by}) blocked-pairs)]
       {:missions missions
        :by-repo by-repo
+       :portfolio-step-status (when (= :absent (:status step-data)) step-data)
        :dependency-edges dep-edges
        :total (count missions)
        :repos (keys by-repo)})))
@@ -3408,7 +3415,10 @@
                                                          (:violation-categories d)))
                                      "\n")))
                   (.append sb "\n")))))
-          (.append sb "*Live invariant runner not available (endpoint `/api/alpha/invariants` not yet loaded)*\n\n"))
+          (.append sb
+                   (if-let [status (:live-status inv)]
+                     (str "*Live invariant runner absent: `" (name (:reason status)) "`*\n\n")
+                     "*Live invariant runner not available (endpoint `/api/alpha/invariants` not yet loaded)*\n\n")))
         (when (seq (:candidate-families inv))
           (.append sb "**Candidate families (unwired structural laws):**\n\n")
           (doseq [fam (:candidate-families inv)]
@@ -4029,11 +4039,13 @@
    what properties the system claims to maintain and whether they're enforced.
 
    Also queries GET /api/alpha/invariants (when available) for live violation
-   data from the invariant runner.
+   data from the invariant runner. `eval-fallback?` defaults true; false forbids
+   the Drawbridge POST fallback and records the reason in `:live-status`.
 
   cf. structural-law-inventory.sexp (source of truth)
   cf. futon4/futon-stack-invariant-model.edn (machine-readable hypergraph)"
-  []
+  ([] (load-invariant-inventory true))
+  ([eval-fallback?]
   (let [model (read-edn-file invariant-model-path)]
     (if (unreadable-input? model)
       {:load-status model
@@ -4054,8 +4066,13 @@
           candidate (filterv #(= :candidate (:status %)) families)
           ;; Try to get live invariant runner results.
           ;; First try the dedicated endpoint, then fall back to /eval (Drawbridge).
-          live-data (or (http-get-json (str futon3c-url "/api/alpha/invariants"))
-                        (try
+          endpoint-data (http-get-json (str futon3c-url "/api/alpha/invariants"))
+          fallback-status (when (and (nil? endpoint-data) (not eval-fallback?))
+                            {:status :absent
+                             :reason :invariant-eval-fallback-suppressed})
+          live-data (or endpoint-data
+                        (when eval-fallback?
+                          (try
                           (let [token (try (str/trim (slurp (str home "/code/futon3c/.admintoken")))
                                           (catch Exception _ nil))
                                 drawbridge-port (or (System/getenv "FUTON3C_DRAWBRIDGE_PORT") "6768")
@@ -4090,7 +4107,7 @@
                                   (let [result (read-string (:body resp))]
                                     (when (:ok result)
                                       (:value result)))))))
-                          (catch Exception _ nil)))
+                            (catch Exception _ nil))))
           live-summary (when (and live-data (:ok live-data))
                          (:summary live-data))
           live-domains (when (and live-data (:ok live-data))
@@ -4114,8 +4131,9 @@
        :total-candidate-invariants (count individual-candidates)
        ;; Live runner data (nil if endpoint not available)
        :live-available? (boolean live-data)
+       :live-status fallback-status
        :live-summary live-summary
-       :live-domains live-domains}))))
+       :live-domains live-domains})))))
 
 ;; --- Invariant → Support/Attack enrichment ---
 
@@ -4379,10 +4397,10 @@
      appended only after policy selection."
   ([scan-data] (judge scan-data {}))
   ([scan-data {:keys [trace? trace-dir scan-id include-advisory-lanes?
-                      step-portfolio?
+                      step-portfolio? eval-invariant-fallback?
                       strategic-selection-fn wm-version]
                :or {trace? false include-advisory-lanes? true
-                    step-portfolio? true}}]
+                    step-portfolio? true eval-invariant-fallback? true}}]
   (let [route0 (:wm/route scan-data)
         observation (obs/observe scan-data)
         route1 (route-tag route0 :R2 "futon2.aif.observation/observe")
@@ -4863,7 +4881,7 @@
         wm-ranked+cascades (vec (map-indexed (fn [i e] (assoc e :rank (inc i)))
                                              (into (vec wm-ranked) cascade-actions)))
         aif-heads (scan-aif-heads)
-        inventory (load-invariant-inventory)
+        inventory (load-invariant-inventory eval-invariant-fallback?)
         ;; Get portfolio step data for structural info
         portfolio-step (portfolio-step-for-judge step-portfolio?)
         ;; Enrich support/attack with invariant + head evidence
@@ -5197,7 +5215,8 @@
 (defn generate-war-machine
   "Collect all strategic scans, run judgement layer, and render.
    Returns {:data ... :judgement ... :markdown ...}. The optional second
-   argument is passed to `judge`."
+   argument is passed to `judge`; `:step-mission-detail-portfolio?` additionally
+   controls the scan-phase portfolio step and defaults true."
   ([days] (generate-war-machine days {}))
   ([days judge-opts]
   (binding [*input-status* (atom {:read-paths #{} :issues []})]
@@ -5224,7 +5243,9 @@
           sessions (scan-sessions days evidence-snapshot mission-snapshot)
           portfolio (scan-portfolio)
           mission-detail (when mission-snapshot
-                           (scan-mission-detail mission-snapshot))
+                           (scan-mission-detail
+                            mission-snapshot
+                            (get judge-opts :step-mission-detail-portfolio? true)))
           patterns (scan-patterns)
           frames (scan-frames)
           metabolic-balance (scan-metabolic-balance)
