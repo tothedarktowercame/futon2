@@ -136,7 +136,8 @@ def capture(fence_id, key):
 
 
 def validate_manifest(value, key, expected_fence_id):
-    value = copy = dict(value)
+    value = dict(value)
+    copy = dict(value)
     supplied = copy.pop("manifest-hmac-sha256", None)
     if (copy.get("schema") != SCHEMA
             or not hmac.compare_digest(supplied or "", authenticate(copy, key))):

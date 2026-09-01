@@ -1,4 +1,9 @@
-# C319 — canonical quiet-run execution sheet
+# C319 — quiet-run narrative record (superseded execution surface)
+
+**Do not execute this document.** C371 replaced it with the receipt-consuming
+state machine `scripts/wm_quiet_run_state.py`; see
+`C371-quiet-run-state-machine.md`. This file remains the narrative and recovery
+provenance that led to the machine.
 
 Date: 2026-09-01. Operator coordinator: `claude-20`. Reload/click operator:
 Joe. **Execute from this document only.** C247, C305, C309, C313, and C317
