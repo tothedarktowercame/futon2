@@ -1,0 +1,7 @@
+{:witnesses "ParameterPosteriorKernel"
+ :check {:repo "futon2" :path "checks/parameter_posterior_kernel_witness.clj" :entrypoint "-main"}
+ :fixture {:repo "futon2" :path "holes/labs/wm-contract/parameter-posterior-kernel-reference.edn"}
+ :run-sha "d2b43fb61ad94126f77996296748feed0d6f4bfd"
+ :contract-sha "b475bc72dcf6a91f8a90fb1da1bb8a8058e9a7f4"
+ :result :passed
+ :recorded-at "2026-09-01T00:00:00Z"}

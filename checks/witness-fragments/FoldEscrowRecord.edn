@@ -5,7 +5,7 @@
  :fixture {:repo "futon2"
            :path "holes/labs/wm-contract/fold-turn-quarantine.edn"}
  :run-sha "42a997e0330594c754b388e1e61a50a551ed0a37"
- :contract-sha "5241ffa129d3fd9c84ee28b8e5d4bb020ea8e466"
+ :contract-sha "b475bc72dcf6a91f8a90fb1da1bb8a8058e9a7f4"
  :freshness :pinned-git-v1
  :result :passed
  :recorded-at "2026-08-31T23:59:00Z"}
