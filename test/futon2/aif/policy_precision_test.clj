@@ -5,7 +5,18 @@
             [futon2.aif.policy-precision :as policy-precision]))
 
 (def ^:private pre-log-prior-revision
-  "e9bcf35")
+  "The last commit that changed policy_precision.clj before I1(b2a) — RUN7's
+   dark-beta carry. PINNED, and named for what it is.
+
+   It was `e9bcf35`, which holds byte-identical content for this file and so
+   gave the right answer, but is `P-organise-the-library` from an unrelated
+   lane: whatever happened to be HEAD when the work started. That is the moving
+   anchor the RUN5 review found and 039b0b8 fixed for the sibling controls
+   (`trace_test.clj` pins 183749a) — arriving again as \"HEAD at dispatch\"
+   rather than \"HEAD~\". The claim this control makes is *I1(b2a) did not move
+   the default path RUN7 left*, so the anchor has to be RUN7's commit, and a
+   reader has to be able to see that without a git archaeology detour."
+  "039b0b8")
 
 (defn- previous-converge-beta
   [beta-prior g-values f-pi-values opts]
