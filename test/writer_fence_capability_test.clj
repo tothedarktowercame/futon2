@@ -1,48 +1,38 @@
 (ns writer-fence-capability-test
   (:require [cheshire.core :as json]
             [clojure.test :refer [deftest is]]
-            [checks.contract-authority-current :as authority]
-            [checks.mutable-read-set :as read-set]
-            [checks.wm-workspace-gate :as gate]
             [writer-fence-capability :as fence]))
 
-(defn- verified-capability []
+(deftest no-in-process-bearer-or-runner-seam-exists
+  (is (nil? (ns-resolve 'writer-fence-capability 'capability-token)))
+  (is (nil? (ns-resolve 'writer-fence-capability '*run-evidence*)))
+  (is (= :unverified
+         (:event-free? (fence/assess {:started-at "s" :finished-at "f"}
+                                     false "fabricated" nil)))))
+
+(deftest empty-receipt-cannot-establish-a-fence
   (let [path (java.nio.file.Files/createTempFile
-              "writer-fence-capability-" ".json"
-              (make-array java.nio.file.attribute.FileAttribute 0))
-        receipt {:verdict "FENCE-VERIFIABLE" :fence-id "fence-real"
-                 :observation-interval {:started-at "s" :finished-at "f"}
-                 :classification {:fence-id "fence-real"
-                                  :attested {:status "complete"
-                                             :value {:fence-id "fence-real"
-                                                     :expires-at "2099-01-01T00:00:00Z"}}}}
-        live {:verdict "FENCE-VERIFIABLE" :fence-id "fence-real"
-              :observation-interval {:started-at "s2" :finished-at "f2"}}]
+              "empty-fence-receipt-" ".json"
+              (make-array java.nio.file.attribute.FileAttribute 0))]
     (try
-      (spit (.toFile path) (json/generate-string receipt))
-      (binding [fence/*run-evidence*
-                (fn [_ _] {:exit 0 :out (json/generate-string live)})]
-        (fence/verify "fence-real" (str path)))
+      (is (= :unavailable (:status (fence/verify "fence" (str path)))))
       (finally (java.nio.file.Files/deleteIfExists path)))))
 
-(deftest all-acceptors-require-the-shared-capability
-  (let [forged {:schema :writer-fence-capability/v1
-                :verified? true :status :observed-held :id "fabricated"}
-        genuine (verified-capability)
-        movement {:status :stable}
-        result {:observation-interval {:started-at "s" :finished-at "f"}
-                :failures []}
-        observation {:endpoint-equal? true
-                     :interval {:started-at "s" :finished-at "f"}}]
-    (is (not (fence/observed-held? forged)))
-    (is (= :unverified (:event-free? (gate/gate-event-claim movement forged "s" "f"))))
-    (is (= :unverified (:event-free? (authority/event-claim result forged))))
-    (is (= :unverified (:event-free? (read-set/assess-claim
-                                      observation :event-free
-                                      {:writer-fence-capability forged}))))
-    (is (fence/observed-held? genuine))
-    (is (= true (:event-free? (gate/gate-event-claim movement genuine "s" "f"))))
-    (is (= true (:event-free? (authority/event-claim result genuine))))
-    (is (= true (:event-free? (read-set/assess-claim
-                               observation :event-free
-                               {:writer-fence-capability genuine}))))))
+(deftest replayed-observation-interval-is-rejected
+  (let [path (java.nio.file.Files/createTempFile
+              "stale-fence-receipt-" ".json"
+              (make-array java.nio.file.attribute.FileAttribute 0))
+        receipt {:verdict "FENCE-VERIFIABLE" :fence-id "stale"
+                 :observation-interval {:started-at "1900-01-01T00:00:00Z"
+                                        :finished-at "1900-01-01T00:00:01Z"}
+                 :classification
+                 {:fence-id "stale" :observed {:start {} :finish {}}
+                  :attested {:status "complete"
+                             :value {:fence-id "stale"
+                                     :expires-at "2099-01-01T00:00:00Z"}}}}]
+    (try
+      (spit (.toFile path) (json/generate-string receipt))
+      (let [result (fence/verify "stale" (str path))]
+        (is (false? (:verified? result)))
+        (is (some #{:prior-observation-interval-stale} (:problems result))))
+      (finally (java.nio.file.Files/deleteIfExists path)))))

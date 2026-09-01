@@ -83,9 +83,10 @@
       (println "wm-workspace-gate: BASIS-NOT-STABLE" (pr-str movement)))
     movement))
 
-(defn gate-event-claim [movement capability started-at finished-at]
-  (fence/event-claim {:started-at started-at :finished-at finished-at}
-                     (not= :stable (:status movement)) capability))
+(defn gate-event-claim [movement writer-fence-id writer-fence-evidence started-at finished-at]
+  (fence/assess {:started-at started-at :finished-at finished-at}
+                (not= :stable (:status movement))
+                writer-fence-id writer-fence-evidence))
 
 (defn provenance-movement-control! []
   (let [tmp (str (fs/create-temp-dir {:prefix "wm-gate-basis-control-"}))
@@ -431,7 +432,6 @@
         gate-started-at (str (java.time.Instant/now))
         writer-fence-id (System/getenv "FUTON_WRITER_FENCE_ID")
         writer-fence-evidence (System/getenv "FUTON_WRITER_FENCE_EVIDENCE")
-        capability (fence/verify writer-fence-id writer-fence-evidence)
         ;; JSON is part of the bounded receipt's consumable output. Readiness
         ;; must compare all four repositories, not only the wrapper's cwd.
         _ (println "wm-workspace-gate: PROVENANCE" (json/generate-string basis-start))
@@ -442,7 +442,7 @@
         basis-finish (provenance)
         movement (print-provenance-result! basis-start basis-finish)
         gate-finished-at (str (java.time.Instant/now))
-        event-claim (gate-event-claim movement capability
+        event-claim (gate-event-claim movement writer-fence-id writer-fence-evidence
                                       gate-started-at gate-finished-at)]
       (println "wm-workspace-gate: SUMMARY"
                (pr-str {:checks (count results) :executable-checks (dec (count results)) :failures failures
@@ -452,7 +452,7 @@
                         :verdict-qualification
                         (cond
                           (not= :stable (:status movement)) :repository-basis-moved
-                          (fence/observed-held? capability) :fence-conditional
+                          (= true (:event-free? event-claim)) :fence-conditional
                           :else :content-only-event-free-unverified)
                         :manual-exclusions [:lane-registry :current-live-operational-certificate
                                             :production-click-resource-observer

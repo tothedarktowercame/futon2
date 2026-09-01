@@ -104,12 +104,14 @@
    validated writer-fence capability. A caller-declared held map is not proof.
    Without a witness it is explicitly unverified, including ABA cases."
   ([observation claim] (assess-claim observation claim {}))
-  ([observation claim {:keys [monotonic-witness writer-fence-capability]}]
+  ([observation claim {:keys [monotonic-witness writer-fence-id writer-fence-evidence]}]
    (let [equal? (:endpoint-equal? observation)
          witnessed? (or (and (map? monotonic-witness)
                               (contains? monotonic-witness :before)
                               (= (:before monotonic-witness) (:after monotonic-witness)))
-                         (fence/observed-held? writer-fence-capability))]
+                         (= true (:event-free?
+                                  (fence/assess (:interval observation) false
+                                                writer-fence-id writer-fence-evidence))))]
      (case claim
        :content-current
        {:claim claim

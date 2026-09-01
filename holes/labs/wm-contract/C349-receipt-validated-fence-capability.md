@@ -3,16 +3,16 @@
 ## Result
 
 `writer_fence_capability.clj` is the single conversion from transported fence
-material to an event-freedom capability. It requires both an identifier and a
+material to an event-freedom claim. It requires both an identifier and a
 receipt, validates the receipt, and re-runs `writer_fence_evidence.py` against
-the live world. Its successful value carries a private in-process token;
-copying or hand-authoring `{:status :observed-held}` cannot satisfy
-`observed-held?`.
+the live world. C363 superseded the original private-token implementation:
+Clojure privacy is not an integrity boundary, so no reusable bearer capability
+is now issued.
 
-The three acceptors now consume that capability:
+The three acceptors now consume that shared verification path:
 
 - `wm_workspace_gate.clj` and `contract_authority_current.clj` emit a
-  fence-conditional verdict only for an observed capability;
+  fence-conditional verdict only after observed verification;
 - `mutable_read_set.clj` no longer accepts caller-declared `:held` maps;
 - `wm_preflight.clj` uses the same verifier instead of retaining a parallel
   implementation.
@@ -28,9 +28,9 @@ clojure -M:test -m cognitect.test-runner \
   -n writer-fence-capability-test -n wm-preflight-test -n mutable-read-set-test
 ```
 
-Result: 10 tests, 46 assertions, zero failures/errors. One shared fixture proves
-that a fabricated capability yields `:event-free? :unverified` at all three
-acceptors while a receipt-validated capability yields `true` at all three.
+Historical C349 result: 10 tests, 46 assertions, zero failures/errors. C363
+supersedes the synthetic-capability control with subprocess-bound controls;
+see its note for the current invocation and counts.
 
 ```sh
 bb checks/contract_authority_current.clj --writer-fence fabricated

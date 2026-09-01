@@ -48,28 +48,27 @@
           (throw (ex-info "--writer-fence-evidence requires a path" {})))
         (recur (rest xs) fence-id evidence (conj missions (first xs)))))))
 
-(defn verify-fence-evidence [fence-id path]
-  (fence/verify fence-id path))
+(defn readiness-claim [started-at finished-at fence-id evidence-path]
+  (fence/assess {:started-at (str started-at) :finished-at (str finished-at)}
+                false fence-id evidence-path))
 
-(defn readiness-claim [started-at finished-at capability]
-  (fence/event-claim {:started-at (str started-at) :finished-at (str finished-at)}
-                     false capability))
-
-(defn readiness-label [ready? fence]
+(defn readiness-label [ready? claim]
   (cond
     (not ready?) "NOT-READY ✗"
-    (fence/observed-held? fence) (str "READY (FENCE-VERIFIED " (:id fence) ") ✓")
+    (= true (:event-free? claim))
+    (str "READY (FENCE-VERIFIED " (get-in claim [:writer-fence :id]) ") ✓")
     :else "READY-CONTENT-ONLY (event-free unverified) ⚠"))
 
 (defn -main [& missions]
   (let [{:keys [writer-fence-id writer-fence-evidence missions]} (parse-cli missions)
-        fence (verify-fence-evidence writer-fence-id writer-fence-evidence)
-        started-at (Instant/now)]
+        started-at (Instant/now)
+        claim (readiness-claim started-at (Instant/now)
+                               writer-fence-id writer-fence-evidence)]
   (println "══ WM readiness preflight (G4) ══")
   (println "claim: readiness-over-observation-interval"
-           "writer-fence:" (if (fence/observed-held? fence)
+           "writer-fence:" (if (= true (:event-free? claim))
                               (str "OBSERVED-HELD " writer-fence-id)
-                              (str "UNVERIFIED " (pr-str (dissoc fence :verified?)))))
+                              (str "UNVERIFIED " (pr-str (:writer-fence claim)))))
 
   (println "\n── Deliberation arms (Tier-1, world-inert; change thinking) ──")
   (doseq [[label v] [["pattern model-uncertainty bonus" a6/*pattern-grain-model-uncertainty?*]
@@ -109,7 +108,7 @@
                       ready (and enact-armed has)]
                   (println (format "  %-32s deposit:%-4s → %s"
                                    m (if has "yes" "NONE")
-                                   (readiness-label ready fence)))
+                                   (readiness-label ready claim)))
                   (when-not has
                     (println "      ↳ no deposit → fold abstains, ΔG nil, γ holds (silent no-op — the G1 gap)"))
                   (when-not enact-armed
@@ -118,7 +117,7 @@
               (println "  missions WITH a deposit (runnable without new authoring):")
               (doseq [m (sort (distinct dmissions))] (println "    •" m))
               (println "\n  (pass mission ids as args for a per-mission readiness verdict)"))))))
-    (println "\nobservation:" (pr-str (readiness-claim started-at (Instant/now)
-                                                       fence)))
-    (when (and (or writer-fence-id writer-fence-evidence) (not (fence/observed-held? fence)))
+    (println "\nobservation:" (pr-str claim))
+    (when (and (or writer-fence-id writer-fence-evidence)
+               (not= true (:event-free? claim)))
       (System/exit 1)))))

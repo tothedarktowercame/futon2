@@ -81,13 +81,13 @@
         (throw (ex-info "unknown argument" {:argument x})))
       out)))
 
-(defn event-claim [result capability]
+(defn event-claim [result writer-fence-id writer-fence-evidence]
   (let [moved? (some #{:repository-basis-moved} (:failures result))]
-    (fence/event-claim (:observation-interval result) moved? capability)))
+    (fence/assess (:observation-interval result) moved?
+                  writer-fence-id writer-fence-evidence)))
 
 (defn -main [& args]
   (let [{:keys [negative? writer-fence-id writer-fence-evidence]} (parse-args args)
-        capability (fence/verify writer-fence-id writer-fence-evidence)
         state (current-state)
         tested (if negative?
                  (assoc state
@@ -95,13 +95,13 @@
                         :recorded-holes-blob (apply str (repeat 40 "0")))
                  state)
         result (assess tested)
-        claim (event-claim result capability)
+        claim (event-claim result writer-fence-id writer-fence-evidence)
         success? (if negative? (not (:pass? result)) (:pass? result))]
     (println "contract-authority-current:"
              (cond
                negative? (if success? "negative-control PASS" "mutation slipped")
                (not success?) "FAIL"
-               (fence/observed-held? capability) (str "PASS (FENCE-CONDITIONAL " writer-fence-id ")")
+               (= true (:event-free? claim)) (str "PASS (FENCE-CONDITIONAL " writer-fence-id ")")
                :else "PASS-CONTENT-ONLY (event-free unverified)")
              "assertion=the contract was generated from the current content of Holes.lean"
              (pr-str (assoc result :negative-control negative? :event-claim claim))

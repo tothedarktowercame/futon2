@@ -1,70 +1,24 @@
 (ns wm-preflight-test
   (:require [clojure.test :refer [deftest is]]
-            [cheshire.core :as json]
-            [writer-fence-capability :as fence]
             [wm-preflight :as preflight])
   (:import [java.time Instant]))
 
-(deftest readiness-is-explicitly-fence-conditional
-  (let [start (Instant/parse "2026-09-01T00:00:00Z")
-        finish (Instant/parse "2026-09-01T00:00:01Z")
-        absent {:verified? false :status :absent :reason :not-declared}
-        unfenced (preflight/readiness-claim start finish absent)
-        forged (preflight/readiness-claim start finish
-                                            {:verified? true :status :observed-held
-                                             :id "quiet-window-42"})]
-    (is (= :unverified (:event-free? unfenced)))
-    (is (= false (:distinguishable-cause? unfenced)))
-    (is (= {:status :absent :reason :not-declared} (:writer-fence unfenced)))
-    (is (= :unverified (:event-free? forged)))
-    (is (not (re-find #"FENCE-VERIFIED"
-                      (preflight/readiness-label true
-                                                 {:verified? true :status :observed-held
-                                                  :id "quiet-window-42"}))))
+(deftest readiness-is-explicitly-unverified-without-evidence
+  (let [claim (preflight/readiness-claim
+               (Instant/parse "2026-09-01T00:00:00Z")
+               (Instant/parse "2026-09-01T00:00:01Z") nil nil)]
+    (is (= :unverified (:event-free? claim)))
+    (is (= false (:distinguishable-cause? claim)))
+    (is (= {:status :absent :reason :not-declared}
+           (:writer-fence claim)))
     (is (re-find #"event-free unverified"
-                 (preflight/readiness-label true absent)))))
+                 (preflight/readiness-label true claim)))))
 
 (deftest writer-fence-requires-evidence-not-an-id-alone
   (is (= {:writer-fence-id "fence-7" :writer-fence-evidence "receipt.json"
           :missions ["M-one" "M-two"]}
          (preflight/parse-cli ["M-one" "--writer-fence" "fence-7"
                                "--writer-fence-evidence" "receipt.json" "M-two"])))
-  (is (= :invalid (:status (preflight/verify-fence-evidence "fabricated" nil))))
   (is (= :unverified
          (:event-free? (preflight/readiness-claim
-                        (Instant/now) (Instant/now)
-                        (preflight/verify-fence-evidence "fabricated" nil))))))
-
-(deftest evidence-content-not-filename-binds-the-fence
-  (let [path (java.nio.file.Files/createTempFile "wm-fence" ".json"
-                                                  (make-array java.nio.file.attribute.FileAttribute 0))
-        receipt {:verdict "FENCE-VERIFIABLE" :fence-id "fence-7"
-                 :observation-interval {:started-at "2026-09-01T00:00:00Z"
-                                        :finished-at "2026-09-01T00:00:01Z"}
-                 :classification
-                 {:fence-id "fence-7"
-                  :attested {:status "complete"
-                             :value {:fence-id "fence-7"
-                                     :expires-at "2099-01-01T00:00:00Z"}}}}]
-    (try
-      (spit (.toFile path) (json/generate-string receipt))
-      (let [live {:verdict "FENCE-VERIFIABLE" :fence-id "fence-7"
-                  :observation-interval {:started-at "s" :finished-at "f"}}
-            verified (binding [fence/*run-evidence*
-                               (fn [_ _] {:exit 0 :out (json/generate-string live)})]
-                       (preflight/verify-fence-evidence "fence-7" (str path)))
-            breached (binding [fence/*run-evidence*
-                               (fn [_ _] {:exit 1
-                                          :out (json/generate-string
-                                                {:verdict "FENCE-BREACH"
-                                                 :fence-id "fence-7"})})]
-                       (preflight/verify-fence-evidence "fence-7" (str path)))]
-        (is (:verified? verified))
-        (is (fence/observed-held? verified))
-        (is (= true (:event-free? (preflight/readiness-claim
-                                   (Instant/now) (Instant/now) verified))))
-        (is (= :observed-held (:status verified)))
-        (is (false? (:verified? breached)))
-        (is (= :unverified (:status breached)))
-        (is (some #{:live-fence-check-failed} (:problems breached))))
-      (finally (java.nio.file.Files/deleteIfExists path)))))
+                        (Instant/now) (Instant/now) "fabricated" nil)))))
