@@ -20,6 +20,22 @@ for the operator; this paragraph previously read "recorded and counted".
 
 <!-- CURRENT DECISIONS START -->
 
+**Ordering (C295, 2026-09-01).** Four dependencies make one order materially
+better than another:
+
+1. **Cascade semantics** before or with strategic carrier design.
+2. **Typed rollout producer** before unscored-move policy.
+3. **Prediction-triple behaviour** before belief aggregation.
+4. **Morning Brief epoch boundary before Joe's operator run.**
+
+**The fourth one gates the run.** C209 recommended that `:live-pending` begin at
+Joe's next operator-triggered run — so **the run is itself the boundary event**.
+Performing it before the decision sets the boundary implicitly rather than
+deliberately, and the 72 historical items would be fixed as historical by
+accident. This corrects my earlier statement that the run was gated only on
+quiescence and the reload.
+
+
 ## 1. Strategic carrier dependency
 
 ### Strategic outcome vocabulary
@@ -245,6 +261,9 @@ The following were checked and are not counted:
 Deferral is therefore not equivalent to failure or obligation. Each source
 continues to state its honest red/refused/baseline condition until the named
 authority decides it.
+- **Re-scoped by C295 (2026-09-01):** this now has **two sequentially dependent
+  records and directional evidence**; it is no longer waiting for first
+  evidence, so "awaiting measurement" no longer describes it.
 
 ## Durability
 
@@ -265,6 +284,11 @@ authority decides it.
 - **Not waiting on this decision:** the atomic-write repair (C254) preserves the
   current format and is being applied regardless, because silent total loss is
   not a thing to defer.
+- **Re-scoped by C295 (2026-09-01):** C254 and C263 have since repaired
+  atomicity, schema validation, locking, and memory/disk consistency. **The
+  remaining decision is scaling — EDN full-map rewrites versus SQLite — not
+  acute durability.** This entry was written while the durability hole was
+  open; it is no longer urgent.
 - **If deferred:** the format stays EDN and every mutation continues to rewrite
   the whole file; cost grows with history.
 - **Full analysis:** `futon3c` C251 discovery commit `fc03fbba`.
