@@ -44,6 +44,37 @@ Acceptance:
 If a tree changes, a lane is holding work, or a job is active, the window has
 not started: wait/drain and repeat step 1. Do not “accept” the moving state.
 
+### C290 live drain list (2026-09-01T00:39Z)
+
+This is an observation to execute, not a permanent allowance. Re-run the
+commands above after every item; new work replaces this list rather than being
+silently outside it.
+
+1. Freeze new dispatches.
+2. Let `wm-organization` finish `C290-window-cost`; do not kill it. The other
+   three recorded jobs have already finished.
+3. Record the completed transitions for `wm-nouns/C291`, `wm-verbs/C293`, and
+   `wm-evidence/C292`, then record `wm-organization/C290` after this delivery.
+   All four registry rows must finish explicitly idle.
+4. Resolve Futon2's modified
+   `holes/labs/wm-contract/workflow-report.edn` through its owning generator or
+   commit; do not discard it as “just generated.”
+5. Resolve Futon3c's four untracked
+   `pattern-library-zai-scribe-{f65-b01J04,f66-b03J01,f68-b90A03,f69-b93A01}.md`
+   files by their owning lane.
+6. Resolve p4ng's modified `sec-lane-campaign-generated.tex`,
+   `sec-lean-holes-generated.tex`, and `sec-model-coverage-generated.tex`, plus
+   untracked `aif-control-map-live.pdf`, through their owning generators and
+   commits.
+7. Mathlib4 and Futon3 were clean at observation time; verify them again rather
+   than carrying that fact forward.
+8. No bounded job was active after the C290 measurement. If `test-list` shows
+   a later active job, let it reach a terminal receipt; do not kill it merely
+   to make the list empty.
+9. Classify every workspace-gate inventory discovery before the quiet run. The
+   measurement saw five newly unclassified check files; a green inventory must
+   establish their committed disposition rather than exclude them ad hoc.
+
 ## 2. Run the cross-repository gate once, bounded
 
 ```sh
@@ -190,13 +221,35 @@ preserve the run; do not re-click and do not manufacture a receipt.
 
 ## Duration and production-only boundaries
 
-Reserve **20 minutes after drain**, plus the click's actual work time. Measured
-components are Futon2 CI about 102–106 s; the older 39-check workspace gate
-about 33–41 s, with the current 78-check bounded run observed at about 149 s;
-the chain rehearsal adds 5.5–5.7 s; preflight is seconds. Futon3 suite, the
-reload transport, readiness receipt validation, and live click duration add
-variable time. Readiness consumes the settled gate receipt from step 2; it
-does not run a second gate. Twenty minutes is a window budget, not a timeout.
+The C290 component measurements sum to **6 min 24 s from the quiescence probe
+through certification, excluding reload and click**:
+
+| Component | Observed wall time |
+|---|---:|
+| Quiescence probes | 0.67 s |
+| Bounded workspace gate, 119 results | 215.78 s |
+| Bounded Futon2 CI | 90.38 s |
+| Bounded Futon3 suite | 36.55 s |
+| Reload preflight | 2.77 s |
+| Readiness (consuming, not rerunning, the gate receipt) | 37.46 s |
+| Certificate generation | 0.04 s |
+
+The workspace gate is the dominant cost: **3 min 36 s, 56%** of measured
+pre-click work. Its run was intentionally the sole bounded job. It was not a
+valid gate verdict: concurrent commits moved Futon2 and p4ng, and inventory
+found five unclassified checks. The elapsed time remains an observed cost;
+the verdict does not become evidence for a settled tree. The suite timings are
+likewise execution-cost observations, not substitutes for the clean receipts
+required above.
+
+Reserve **10 minutes after drain to reach READY**, then add the production
+reload and click time. Ten minutes gives roughly 56% headroom over the measured
+6:24 preparation and is a planning allowance, not a timeout. There is no
+defensible end-to-end bound yet for the Joe-only part: authenticated reload and
+the production selector/author/reviewer path have never run together. The
+observer polls terminal status for about 60 seconds after click acceptance,
+but its initial HTTP request has no independently demonstrated production
+latency bound; do not present that polling budget as a bound on the click.
 
 Never executed together against production: authenticated Drawbridge reload,
 serving-JVM identity transition, live Agency HTTP click, live selector/author/
