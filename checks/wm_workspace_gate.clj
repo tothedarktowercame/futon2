@@ -183,6 +183,12 @@
      :exit (if (and (empty? unknown) (empty? missing)) 0 1)
      :unknown unknown :missing missing}))
 
+(defn content-only-authority-argv [& args]
+  (into ["env" "-u" "FUTON_WRITER_FENCE_ID"
+         "-u" "FUTON_WRITER_FENCE_EVIDENCE"
+         "bb" "checks/contract_authority_current.clj"]
+        args))
+
 (defn commands []
   [{:name :strict-contract
     :argv ["bb" "-cp" "." "checks/contract_lint.clj" "--strict"
@@ -190,7 +196,7 @@
            "--report" "/tmp/wm-workspace-contract-strict.edn"
            "--authority" (authority)]}
    {:name :contract-authority-current
-    :argv ["bb" "checks/contract_authority_current.clj"]}
+    :argv (content-only-authority-argv)}
    {:name :mutable-verdict-claims
     :argv ["bb" "-cp" "." "scripts/check_mutable_verdict_claims.bb"]}
    {:name :ambiguity :argv ["bb" "checks/ambiguity_witness.clj"]}
@@ -361,7 +367,7 @@
    {:name :c179-missing-act-gate-leg :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "act-gate" "--negative-control"]}
    {:name :c179-invalid-cohort-window :argv ["bb" "checks/machine_vocabulary_witness.clj" "--term" "cohort" "--negative-control"]}
    {:name :c175-stale-contract-authority
-    :argv ["bb" "checks/contract_authority_current.clj" "--negative-control"]}
+    :argv (content-only-authority-argv "--negative-control")}
    {:name :c168-malformed-arrow-composition
     :argv ["bb" "checks/have_want_arrow_witness.clj" "--negative-control"]}
    {:name :c172-missing-policy-holes
