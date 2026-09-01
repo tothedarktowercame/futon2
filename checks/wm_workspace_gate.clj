@@ -165,6 +165,7 @@
     "preemptive_artefact_boundary_lint.clj" "preemptive_era_blind_lint.clj"
     "preemptive_record_conflict_lint.clj" "preemptive_repair_lint.clj"
     "preemptive_repair_suite.clj" "preemptive_stale_baseline_lint.clj"
+    "exit_code_scope_check.clj"
     "preference_stack_binding_check.clj" "preference_stack_witness_shape_check.clj"
     "positive_proof_receipt.clj"
     "r17_generator_disposer_check.clj" "r19_stack_witness.clj"
@@ -199,6 +200,8 @@
     :argv (content-only-authority-argv)}
    {:name :mutable-verdict-claims
     :argv ["bb" "-cp" "." "scripts/check_mutable_verdict_claims.bb"]}
+   {:name :exit-code-scopes
+    :argv ["bb" "-cp" "." "checks/exit_code_scope_check.clj"]}
    {:name :ambiguity :argv ["bb" "checks/ambiguity_witness.clj"]}
    {:name :have-want-arrow :argv ["bb" "checks/have_want_arrow_witness.clj"]}
    {:name :fold :argv ["bb" "checks/fold_witness.clj"]}
@@ -273,7 +276,9 @@
     :expected-exits #{0 3}}])
 
 (defn control-commands []
-  [{:name :c157-perturbed-entropy
+  [{:name :c390-report-only-crosses-lossy-boundary
+    :argv ["bb" "-cp" "." "checks/exit_code_scope_check.clj" "--negative-control"]}
+   {:name :c157-perturbed-entropy
     :argv ["bb" "checks/ambiguity_witness.clj" "--negative-control"]}
    {:name :c192-belief-channel-without-variance
     :argv ["bb" "checks/belief_state_witness.clj" "--negative-control"]}
