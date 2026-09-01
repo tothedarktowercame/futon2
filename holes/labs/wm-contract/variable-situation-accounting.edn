@@ -1,13 +1,13 @@
 {:schema :wm/variable-situation-accounting-v1,
  :as-of "2026-08-31",
  :authority
- {:contract-git-sha "24634504e8dd97caf8894916d62e99fb1116c030",
+ {:contract-git-sha "05af21ca04ccee86f104fe0f773961fcd4ce209d",
   :contract-sha256
-  "65043c08907a289fac73bace5130de688bdf6944f9958272090c998efb88ad9a",
+  "afc55bcef7c3317cf718e59a06382ab3acd65815ff1d39cf0c0353a134cd9977",
   :glossary-sha256
   "780a64afbdb4a9f47a2e399fd3611f79961b6facbbddac02630895592e867889",
   :witness-registry-sha256
-  "532bb8cdd98b5291ce78313f433dc63b0c4f82d01cd1a86001b82eadd950b4de"},
+  "771280e19e500d02e730a262ca0365fb39c5466f52a682ddb5e3d5e655975e4a"},
  :axes
  {:content-status
   [:named-only
@@ -372,7 +372,7 @@
   {:name "TransitionKernel",
    :area :belief,
    :owner "sec-glossary.tex:7 · P-glossary-mathematics",
-   :content-status :closed-by-record-negative-space,
+   :content-status :closed-by-record-with-witness,
    :pointer-status :resolves,
    :pointer-detail {:resolved-title "Generative model."}}
   {:name "PreferenceDistribution",
@@ -827,8 +827,8 @@
  :counts
  {:rows 127,
   :content
-  {:closed-by-record-negative-space 65,
-   :closed-by-record-with-witness 31,
+  {:closed-by-record-negative-space 64,
+   :closed-by-record-with-witness 32,
    :named-only 9,
    :open-hole 11,
    :proven-against-pinned-source 11},
