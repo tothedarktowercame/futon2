@@ -18,6 +18,12 @@ The corpus held 62 attempt directories, 58 closed, **0 cancelled**, so no
 published cohort figure required correction. Cancelling a run is therefore safe
 for the operator; this paragraph previously read "recorded and counted".
 
+**Wider index:** this file is the operator brief for the fourteen decisions
+below. Decisions already *settled* — workspace protocol, campaign method,
+declared evidence boundaries — and open operating questions such as check
+cadence are indexed in [`DECISIONS-REGISTER.md`](DECISIONS-REGISTER.md), which
+points back here rather than restating these.
+
 <!-- CURRENT DECISIONS START -->
 
 **Ordering (C295, 2026-09-01).** Four dependencies make one order materially
