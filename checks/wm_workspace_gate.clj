@@ -376,8 +376,65 @@
     :argv ["python3" "checks/empty_subject_acceptance_lint.py" "--report"]
     :expected-exits #{0 3}}])
 
+(def control-exclusions
+  ;; C440: these negative modes are already executed as assertions in the
+  ;; named suite tests.  Keeping this as data makes the gate boundary
+  ;; inspectable without paying twice for identical mutations.
+  [{:mode :obligation-reconciliation
+    :covered-by "test/obligation_ledger_reconciliation_check_test.clj"
+    :reason :same-negative-fixture-executed-by-suite}
+   {:mode :r2-channel-contract
+    :covered-by "test/r2_channel_contract_test.clj"
+    :reason :stronger-corpus-falsifiers-executed-by-suite}
+   {:mode :preemptive-absence :covered-by "test/preemptive_repair_lint_test.clj"
+    :reason :all-six-negative-kinds-executed-by-suite}
+   {:mode :preemptive-acceptance :covered-by "test/preemptive_repair_lint_test.clj"
+    :reason :all-six-negative-kinds-executed-by-suite}
+   {:mode :preemptive-artefact :covered-by "test/preemptive_repair_lint_test.clj"
+    :reason :all-six-negative-kinds-executed-by-suite}
+   {:mode :preemptive-era :covered-by "test/preemptive_repair_lint_test.clj"
+    :reason :all-six-negative-kinds-executed-by-suite}
+   {:mode :preemptive-conflict :covered-by "test/preemptive_repair_lint_test.clj"
+    :reason :all-six-negative-kinds-executed-by-suite}
+   {:mode :preemptive-stale :covered-by "test/preemptive_repair_lint_test.clj"
+    :reason :all-six-negative-kinds-executed-by-suite}
+   {:mode :preemptive-composite :covered-by "test/preemptive_repair_lint_test.clj"
+    :reason :composite-is-the-same-six-scanners}])
+
 (defn control-commands []
-  [{:name :c390-report-only-crosses-lossy-boundary
+  [{:name :c440-ablation-exact-dyadic :argv ["bb" "checks/ablation_exact_dyadic_witness.clj" "--negative"]}
+   {:name :c440-belief-update-mean :argv ["bb" "checks/belief_update_check.clj" "--negative"]}
+   {:name :c440-belief-update-variance :argv ["bb" "checks/belief_update_check.clj" "--negative-variance"]}
+   {:name :c440-belief-variance-inputs :argv ["bb" "checks/belief_variance_inputs.clj" "--negative"]}
+   {:name :c440-cascade-o1 :argv ["bb" "checks/cascade_diff_witness.clj" "--negative-o1"]}
+   {:name :c440-cascade-o2 :argv ["bb" "checks/cascade_diff_witness.clj" "--negative-o2"]}
+   {:name :c440-cascade-o3 :argv ["bb" "checks/cascade_diff_witness.clj" "--negative-o3"]}
+   {:name :c440-cascade-o4 :argv ["bb" "checks/cascade_diff_witness.clj" "--negative-o4"]}
+   {:name :c440-control-map-figure :argv ["bb" "checks/control_map_figure_agreement_check.clj" "--negative-control"]}
+   {:name :c440-control-map-lint :argv ["bb" "checks/control_map_lint.clj" "--negative" "--report" "/tmp/wm-gate-c440-control-map.edn"]}
+   {:name :c440-expected-free-energy :argv ["bb" "checks/expected_free_energy_witness.clj" "--negative"]}
+   {:name :c440-expected-information-gain :argv ["bb" "checks/expected_information_gain_witness.clj" "--negative"]}
+   {:name :c440-generative-model :argv ["bb" "checks/generative_model_witness.clj" "--negative"]}
+   {:name :c440-log-multivariate-beta :argv ["bb" "checks/log_multivariate_beta_witness.clj" "--negative"]}
+   {:name :c440-hyper-edge-domain-range :argv ["bb" "-cp" "." "checks/hyper_edge_domain_range_check.clj" "--negative"]}
+   {:name :c440-lane-missing :argv ["bb" "checks/lane_registry_check.clj" "--negative" "missing"]}
+   {:name :c440-lane-overdue :argv ["bb" "checks/lane_registry_check.clj" "--negative" "overdue"]}
+   {:name :c440-lane-done :argv ["bb" "checks/lane_registry_check.clj" "--negative" "done"]}
+   {:name :c440-preference-binding-absent :argv ["clojure" "-M" "-m" "checks.preference-stack-binding-check" "--negative" "absent"]}
+   {:name :c440-preference-binding-malformed :argv ["clojure" "-M" "-m" "checks.preference-stack-binding-check" "--negative" "malformed"]}
+   {:name :c440-preference-shape :argv ["bb" "-cp" "." "checks/preference_stack_witness_shape_check.clj" "--negative"]}
+   {:name :c440-r17-disposer :argv ["bb" "checks/r17_generator_disposer_check.clj" "--negative" "--report" "/tmp/wm-gate-c440-r17.edn"]}
+   {:name :c440-r2-pin :argv ["bb" "checks/r2_pinned_snapshot_witness.clj" "--negative-pin"]}
+   {:name :c440-r2-census :argv ["bb" "checks/r2_pinned_snapshot_witness.clj" "--negative-census"]}
+   {:name :c440-r8-pin :argv ["bb" "checks/r8_pinned_snapshot_witness.clj" "--negative-pin"]}
+   {:name :c440-r8-census :argv ["bb" "checks/r8_pinned_snapshot_witness.clj" "--negative-census"]}
+   {:name :c440-r9-receipt-absent :argv ["bb" "-cp" "." "checks/r9_proof_receipt_check.clj" "absent"]}
+   {:name :c440-r9-receipt-tampered :argv ["bb" "-cp" "." "checks/r9_proof_receipt_check.clj" "tampered"]}
+   {:name :c440-trace-schema :argv ["clojure" "-M" "-m" "checks.trace-schema-compatibility" "--negative"]}
+   {:name :c440-route-conformance :argv ["bb" "checks/wm_route_conformance.clj" "--negative" "holes/labs/wm-contract/tick-run-record-2026-08-30.edn"]}
+   {:name :c440-mutable-verdict :argv ["bb" "-cp" "." "scripts/check_mutable_verdict_claims.bb" "--negative-control" "missing"]}
+   {:name :c440-readiness-reviewer :argv ["python3" "scripts/run_readiness.py" "--negative-reviewer"]}
+   {:name :c390-report-only-crosses-lossy-boundary
     :argv ["bb" "-cp" "." "checks/exit_code_scope_check.clj" "--negative-control"]}
    {:name :c431-gate-receipt-roundtrip
     :argv ["bb" "-cp" "." "checks/wm_workspace_gate.clj" "--receipt-control"]}
