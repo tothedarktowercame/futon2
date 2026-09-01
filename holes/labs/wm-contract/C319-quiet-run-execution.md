@@ -48,8 +48,11 @@ EOF
 Capture the actual pre-fence manifest before changing it:
 
 ```sh
+RESTORE_KEY=/home/joe/.config/futon/writer-fence-restore.key
+test -r "$RESTORE_KEY"
 python3 /home/joe/code/futon2/scripts/writer_fence_restore.py capture \
   --fence-id "$FENCE_ID" \
+  --key-file "$RESTORE_KEY" \
   --manifest "/tmp/$FENCE_ID-restore-manifest.json"
 date -u +%FT%TZ
 systemctl --user list-timers --all --no-pager
@@ -93,6 +96,7 @@ untouched:
 cd /home/joe/code/futon3c
 scripts/proof-eval.sh '(do (require (quote futon3c.apm.semantic-progress-watchdog)) (futon3c.apm.semantic-progress-watchdog/stop! "semantic-progress:jit-queue:jit-m94A03-retry-v3"))'
 python3 /home/joe/code/futon2/scripts/writer_fence_restore.py record \
+  --fence-id "$FENCE_ID" --key-file "$RESTORE_KEY" \
   --manifest "/tmp/$FENCE_ID-restore-manifest.json" \
   --journal "/tmp/$FENCE_ID-restore.actions.jsonl" \
   --action rearm-terminal-coordinator --target jit-queue:jit-m94A03-retry-v3
@@ -334,8 +338,10 @@ current parked state before acting, then restores the partial prefix in reverse.
 
 ```sh
 python3 /home/joe/code/futon2/scripts/writer_fence_restore.py restore \
+  --fence-id "$FENCE_ID" --key-file "$RESTORE_KEY" \
   --manifest "/tmp/$FENCE_ID-restore-manifest.json" \
-  --journal "/tmp/$FENCE_ID-restore.actions.jsonl"
+  --journal "/tmp/$FENCE_ID-restore.actions.jsonl" \
+  --outcomes "/tmp/$FENCE_ID-restore.outcomes.jsonl"
 ```
 
 Coordinator verifies restored states with the same serving-JVM `status` forms
@@ -351,10 +357,13 @@ complete, draining, stopped, disabled, or inactive in the manifest.
 Joe can restore a partially parked window without this session:
 
 1. Set the recorded `FENCE_ID`; preserve its attestations, structured restore
-   manifest, and JSONL journal.
+   manifest, JSONL journal, outcome ledger, and the locally held authentication
+   key. The fence ID supplied to `restore` must match all three records.
 2. Run the single `writer_fence_restore.py restore` command above. Do not edit
-   the journal or select a verb manually. An empty journal is a safe no-op; a
-   mismatch refuses and leaves the remaining writers parked.
+   the journal or select a verb manually. A missing/empty journal reports
+   `NOTHING-RECORDED`; a mismatch refuses and leaves remaining writers parked.
+   A retry verifies and skips only inverses already recorded successful in the
+   append-only outcome ledger.
 3. The tool selects `start-registered!` only for captured/current terminal
    `:complete`, and `resume!` only for captured-running/current-witnessed-stopped.
 4. Re-run the coordinator `status` loop and `systemctl show` from step 0.

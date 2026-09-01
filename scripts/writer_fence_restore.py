@@ -8,6 +8,7 @@ Capture is read-only. `record` observes a completed park before appending it.
 import argparse
 import datetime
 import hashlib
+import hmac
 import json
 import os
 from pathlib import Path
@@ -27,15 +28,25 @@ UNITS = (
     "apm-axiom-audit.timer", "apm-axiom-audit.service",
     "futon-pattern-index.timer", "futon-pattern-index.service",
 )
-SCHEMA = "wm-writer-fence-restore-v1"
+SCHEMA = "wm-writer-fence-restore-v2"
+DEFAULT_KEY = Path(os.environ.get(
+    "FUTON_WRITER_FENCE_KEY",
+    "/home/joe/.config/futon/writer-fence-restore.key"))
 
 
 def canonical(value):
     return json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
 
 
-def digest(value):
-    return hashlib.sha256(canonical(value)).hexdigest()
+def authenticate(value, key):
+    return hmac.new(key, canonical(value), hashlib.sha256).hexdigest()
+
+
+def read_key(path):
+    key = Path(path).read_bytes().strip()
+    if len(key) < 32:
+        raise ValueError("manifest-key-too-short")
+    return key
 
 
 def atomic_json(path, value):
@@ -93,7 +104,7 @@ def observe_unit(identity):
     return dict(line.split("=", 1) for line in result.stdout.splitlines() if "=" in line)
 
 
-def capture(fence_id):
+def capture(fence_id, key):
     targets = {}
     for identity in COORDINATORS:
         observed = observe_coordinator(identity)
@@ -106,15 +117,32 @@ def capture(fence_id):
     body = {"schema": SCHEMA, "fence-id": fence_id,
             "captured-at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
             "targets": targets}
-    return dict(body, **{"manifest-sha256": digest(body)})
+    return dict(body, **{"manifest-hmac-sha256": authenticate(body, key)})
 
 
-def load_manifest(path):
-    value = json.loads(Path(path).read_text())
-    supplied = value.pop("manifest-sha256", None)
-    if value.get("schema") != SCHEMA or supplied != digest(value):
-        raise ValueError("manifest-invalid")
-    return dict(value, **{"manifest-sha256": supplied})
+def validate_manifest(value, key, expected_fence_id):
+    value = copy = dict(value)
+    supplied = copy.pop("manifest-hmac-sha256", None)
+    if (copy.get("schema") != SCHEMA
+            or not hmac.compare_digest(supplied or "", authenticate(copy, key))):
+        raise ValueError("manifest-authentication-invalid")
+    if copy.get("fence-id") != expected_fence_id:
+        raise ValueError("manifest-fence-id-mismatch")
+    targets = copy.get("targets")
+    if not isinstance(targets, dict) or not targets:
+        raise ValueError("NOTHING-RECORDED:manifest-zero-targets")
+    for identity, entry in targets.items():
+        required = ("terminal-watchdog" if identity == TERMINAL_ID else
+                    "running-coordinator" if identity in RUNNING_IDS else
+                    "systemd-unit" if identity in UNITS else None)
+        if required is None or entry.get("class") != required:
+            raise ValueError("manifest-target-class-invalid:" + identity)
+    return value
+
+
+def load_manifest(path, key, expected_fence_id):
+    return validate_manifest(json.loads(Path(path).read_text()), key,
+                             expected_fence_id)
 
 
 def expected_action(entry):
@@ -156,8 +184,10 @@ def parked(entry, current):
     return False
 
 
-def load_journal(path):
-    if not Path(path).exists(): return []
+def load_journal(path, missing_ok=False):
+    if not Path(path).exists():
+        if missing_ok: return []
+        raise ValueError("NOTHING-RECORDED:journal-missing")
     rows = []
     for number, line in enumerate(Path(path).read_text().splitlines(), 1):
         try: rows.append(json.loads(line))
@@ -191,60 +221,114 @@ def record(manifest, journal_path, action, identity, backend):
     entry = manifest["targets"].get(identity)
     if not entry or expected_action(entry) != action or not validate_pre(entry):
         raise ValueError("record-action-or-prestate-mismatch")
-    prior = load_journal(journal_path)
+    prior = load_journal(journal_path, missing_ok=True)
     if any(row.get("target") == identity for row in prior):
         raise ValueError("journal-target-duplicate")
     current = backend.observe(identity, entry)
     if not parked(entry, current): raise ValueError("park-not-observed")
-    row = {"schema": SCHEMA, "manifest-sha256": manifest["manifest-sha256"],
+    row = {"schema": SCHEMA, "fence-id": manifest["fence-id"],
+           "manifest-hmac-sha256": manifest["manifest-hmac-sha256"],
            "ordinal": len(prior) + 1, "action": action, "target": identity,
            "recorded-at": datetime.datetime.now(datetime.timezone.utc).isoformat()}
     append_record(journal_path, row)
     return row
 
 
-def validate_rows(manifest, rows, backend):
+def validate_rows(manifest, rows):
     seen = set()
     for index, row in enumerate(rows, 1):
         identity = row.get("target"); entry = manifest["targets"].get(identity)
         if (row.get("schema") != SCHEMA
-                or row.get("manifest-sha256") != manifest["manifest-sha256"]
+                or row.get("fence-id") != manifest["fence-id"]
+                or row.get("manifest-hmac-sha256") != manifest["manifest-hmac-sha256"]
                 or row.get("ordinal") != index or identity in seen or not entry
                 or row.get("action") != expected_action(entry)
                 or not validate_pre(entry)):
             raise ValueError(f"journal-row-invalid:{index}")
-        if not parked(entry, backend.observe(identity, entry)):
-            raise ValueError(f"journal-action-not-observed:{index}")
         seen.add(identity)
 
 
-def restore(manifest, rows, backend):
-    validate_rows(manifest, rows, backend)
+def restored(entry, current):
+    if entry["class"] == "terminal-watchdog":
+        return (current.get("durable-status") == "complete"
+                and not current.get("runtime-scheduler-present?")
+                and current.get("watchdog-scheduler-present?") is True)
+    if entry["class"] == "running-coordinator":
+        return (current.get("durable-status") == "running"
+                and current.get("enabled?") is True)
+    if entry["class"] == "systemd-unit":
+        return current.get("ActiveState") in ("active", "activating")
+    return False
+
+
+def load_outcomes(path, manifest, rows):
+    outcomes = load_journal(path, missing_ok=True)
+    expected_ordinals = list(range(len(rows), len(rows) - len(outcomes), -1))
+    if [row.get("ordinal") for row in outcomes] != expected_ordinals:
+        raise ValueError("restore-outcomes-not-reverse-prefix")
+    for outcome in outcomes:
+        source = rows[outcome["ordinal"] - 1]
+        if (outcome.get("schema") != SCHEMA
+                or outcome.get("fence-id") != manifest["fence-id"]
+                or outcome.get("manifest-hmac-sha256") != manifest["manifest-hmac-sha256"]
+                or outcome.get("target") != source["target"]
+                or outcome.get("action") != source["action"]
+                or outcome.get("status") != "restored"):
+            raise ValueError("restore-outcome-invalid")
+    return outcomes
+
+
+def restore(manifest, rows, backend, outcomes_path):
+    if not rows: raise ValueError("NOTHING-RECORDED")
+    validate_rows(manifest, rows)
+    prior = load_outcomes(outcomes_path, manifest, rows)
+    completed = {row["ordinal"] for row in prior}
     outcomes = []
     for row in reversed(rows):
+        entry = manifest["targets"][row["target"]]
+        if row["ordinal"] in completed:
+            if not restored(entry, backend.observe(row["target"], entry)):
+                raise ValueError("restored-outcome-current-state-mismatch:" + row["target"])
+            continue
+        # This observation is deliberately adjacent to the inverse.  Earlier
+        # validation never substitutes for compare-before-act.
+        if not parked(entry, backend.observe(row["target"], entry)):
+            raise ValueError("journal-action-not-observed:" + str(row["ordinal"]))
         outcome = backend.execute(row["action"], row["target"])
         if not outcome.get("ok"):
             raise RuntimeError("restore-action-failed:" + row["target"])
-        outcomes.append({"target": row["target"], "action": row["action"],
-                         "outcome": outcome})
+        if not restored(entry, backend.observe(row["target"], entry)):
+            raise RuntimeError("restore-postcondition-unconfirmed:" + row["target"])
+        recorded = {"schema": SCHEMA, "fence-id": manifest["fence-id"],
+                    "manifest-hmac-sha256": manifest["manifest-hmac-sha256"],
+                    "ordinal": row["ordinal"], "target": row["target"],
+                    "action": row["action"], "status": "restored",
+                    "recorded-at": datetime.datetime.now(datetime.timezone.utc).isoformat()}
+        append_record(outcomes_path, recorded)
+        outcomes.append(recorded)
     return outcomes
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser()
     sub = parser.add_subparsers(dest="command", required=True)
-    cap = sub.add_parser("capture"); cap.add_argument("--fence-id", required=True); cap.add_argument("--manifest", required=True)
+    cap = sub.add_parser("capture"); cap.add_argument("--manifest", required=True)
     rec = sub.add_parser("record"); rec.add_argument("--manifest", required=True); rec.add_argument("--journal", required=True); rec.add_argument("--action", required=True); rec.add_argument("--target", required=True)
-    res = sub.add_parser("restore"); res.add_argument("--manifest", required=True); res.add_argument("--journal", required=True)
+    res = sub.add_parser("restore"); res.add_argument("--manifest", required=True); res.add_argument("--journal", required=True); res.add_argument("--outcomes", required=True)
+    for command in (cap, rec, res):
+        command.add_argument("--fence-id", required=True)
+        command.add_argument("--key-file", default=str(DEFAULT_KEY))
     args = parser.parse_args(argv)
     try:
+        key = read_key(args.key_file)
         if args.command == "capture":
-            value = capture(args.fence_id); atomic_json(args.manifest, value)
+            value = capture(args.fence_id, key); atomic_json(args.manifest, value)
         elif args.command == "record":
-            value = record(load_manifest(args.manifest), args.journal,
+            value = record(load_manifest(args.manifest, key, args.fence_id), args.journal,
                            args.action, args.target, LiveBackend())
         else:
-            value = restore(load_manifest(args.manifest), load_journal(args.journal), LiveBackend())
+            value = restore(load_manifest(args.manifest, key, args.fence_id),
+                            load_journal(args.journal), LiveBackend(), args.outcomes)
         print(json.dumps({"ok": True, "value": value}, indent=2, sort_keys=True)); return 0
     except (OSError, ValueError, RuntimeError) as exc:
         print(json.dumps({"ok": False, "reason": str(exc)}, indent=2, sort_keys=True)); return 1
