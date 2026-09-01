@@ -6,7 +6,7 @@
  [{:lane :wm-nouns
    :holding :C434-stale-fixture-referent-survey, :dispatched-at "2026-09-01T03:23:28Z", :job-id "invoke-1788233003926-6599-2846c0fb", :expected-by "2026-09-01T04:08:28Z"}
   {:lane :wm-verbs
-   :holding nil, :dispatched-at nil, :job-id nil, :expected-by nil}
+   :holding :C435-gate-basis-excludes-futon3c, :dispatched-at "2026-09-01T03:27:13Z", :job-id "invoke-1788233227578-6603-61e8ad1d", :expected-by "2026-09-01T04:12:13Z"}
   {:lane :wm-organization
    :holding nil, :dispatched-at nil, :job-id nil, :expected-by nil}
   {:lane :wm-evidence

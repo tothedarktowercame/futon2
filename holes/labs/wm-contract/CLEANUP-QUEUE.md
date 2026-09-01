@@ -382,3 +382,28 @@ what a 73-member population with zero unexplained members is for. → `wm-verbs`
 **The bounded wrapper exited 125 while the inner gate exited 1** — exactly as C387's census predicted:
 *"Bounded runner: collapses any inner nonzero to outer 125/`test-failure`, while retaining `inner-exit`."*
 **Tonight's own analysis of the exit vocabulary was verified by an unrelated run of the thing it described.**
+
+## C436 — correction: the gate's basis claim excludes a repository it runs (my fix)
+
+**C430 records the gate run as certifying a fixed tree because basis was `:stable` across all four
+repositories. That is narrower than I made it sound.**
+
+**The gate runs `futon3c.wm.chain-rehearsal-test` with `:dir "/home/joe/code/futon3c"`, and
+`checks/wm_workspace_gate.clj:18` pins `:futon2`, `:mathlib4`, `:p4ng`, `:futon3` — no `:futon3c`.** So the
+gate executes a test from a repository whose commit it does not record, does not report in
+`PROVENANCE-FINISH`, and does not check for stability.
+
+**`futon3` and `futon3c` are different repositories.** That near-collision is presumably why nobody noticed;
+it is also why I did not, reading the provenance line and counting four.
+
+**What the gate run does still establish**: futon2 at `7a646d1`, `dirty? false`, stable through the run, and
+the same for mathlib4 and p4ng. **What it does not**: that the futon3c tree supplying the rehearsal was fixed,
+or which commit of it was tested. **C427's repair for that very rehearsal landed in futon3c (`529428d9`)** —
+the fix for a gate failure lives in the repository the gate does not pin.
+
+**Same shape, fourth instance tonight**: a declared population standing in for the derived one (C386's closure,
+C391's adapter fields, C393's census subjects, C429's identity survey — and now the gate's own basis). **The
+derivable version exists: the commands carry `:dir` and argv.**
+
+**Dispatched to `wm-verbs` as C435, and I am holding the gate re-run until it lands.** A whole-tree verdict
+whose basis claim is knowingly incomplete is worth less than one that waits.
