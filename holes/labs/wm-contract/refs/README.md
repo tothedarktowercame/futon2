@@ -20,6 +20,18 @@ files; where the text extraction garbled a formula, the registry says so.
 Extraction: `pdftotext -layout <pdf> <txt>` (and `-raw` for the two-column
 Friston 2016). Re-verify a file with `sha256sum`.
 
+## External implementation cross-checks
+
+Cloned outside this repository on 2026-09-01 for C463:
+
+| implementation | source | revision | local checkout |
+|---|---|---|---|
+| pymdp | https://github.com/infer-actively/pymdp | `050519043922fcf16797aea1e24edadc8e789691` | `/home/joe/code/refs-external/pymdp` |
+| SPM | https://github.com/spm/spm | `530ec5271b229c94369a85f651bc607e7e016c52` | `/home/joe/code/refs-external/spm` |
+
+Both were depth-one clones. The SPM checkout is sparse at `toolbox/DEM`, which
+contains the reviewed `spm_MDP_VB_X.m`.
+
 **The extraction drops overbars, and Friston 2017 uses them to separate prior
 from posterior.** `β` and `β̄` both come out as `β`, so eq. 2.7 reads
 `β = β + (π − π₀)·G` in the text layer and looks like a self-assignment. It is
