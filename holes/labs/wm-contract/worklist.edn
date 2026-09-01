@@ -37,7 +37,9 @@
    :statement "R2->R3 is the theory path R2->R8->R3 drawn short; R3 reads o only through eps and Pi (war_machine.clj:4368-4388)."
    :acceptance "control-map-edges.edn :decisions gains an entry retiring [:R2 :R3] and adding [:R2 :R8] [:R8 :R3], :by the agent id, :at date, :basis C448/C451 pointers; regenerate; controls pass."
    :pointers ["holes/labs/wm-contract/C448-TN-edge-review-discovery.md"]}
-  {:id :D3a :class :D :status :open :owner :wm-organization
+  {:id :D3a :class :D :status :done-unreviewed :owner :wm-organization
+   :taken-by "claude-cli (any-lane; owner row unchanged)"
+   :evidence "p4ng 08937aa. :decisions :r13-r14-no-dependency retires [[:R13 :R14]], basis C451 plus an exhaustive trace: wm-horizon-steps occurs exactly twice in war_machine.clj -- bound at :4485-4487, consumed at :4519 into wm-efe-opts -- so depth reaches scoring and nothing else; effective-temperature takes only g-totals and selection-gain (policy.clj:73-80). Gates: negative_controls PASS; pointer_check 87 pointers in 3 files, 0 unresolved (checker extended by p4ng c57ba62 to scan this registry and this ledger). Nothing regenerated (gate, TN 9a)."
    :statement "R13->R14 drawn; no dependency in code (C451) and none in theory."
    :acceptance ":decisions entry retiring [:R13 :R14] with basis C451; regenerate; controls pass."}
   {:id :D3b :class :D :status :open :owner :wm-organization
