@@ -203,6 +203,17 @@
   {:repo "futon2",
    :path
    "holes/labs/wm-contract/parameter-prior-kernel-reference.edn"},
+  :expected-rejection
+  {:mode :lean-guard-msgs,
+   :controls
+   [{:fixture "DarkTower/WarMachine/ParameterPriorKernelOutcomeNegative.lean",
+     :claim :parameter-prior-is-not-outcome-prediction,
+     :actual-type "PredictiveOutcomeKernel Policy Obs",
+     :expected-type "ParameterPriorKernel Policy Parameter"}
+    {:fixture "DarkTower/WarMachine/ParameterPriorKernelHabitNegative.lean",
+     :claim :parameter-prior-is-not-policy-habit,
+     :actual-type "PolicyPriorKernel Policy",
+     :expected-type "ParameterPriorKernel Policy Parameter"}]},
   :run-sha "8fb951e4911f94495b62902ea293086fee20eaaa",
   :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
   :result :passed,
@@ -215,6 +226,13 @@
   :fixture
   {:repo "futon2",
    :path "holes/labs/wm-contract/policy-prior-reference.edn"},
+  :expected-rejection
+  {:mode :lean-guard-msgs,
+   :controls
+   [{:fixture "DarkTower/WarMachine/PolicyPriorKernelNegative.lean",
+     :claim :policy-prior-is-unconditioned,
+     :actual-type "ProbabilityKernel HiddenState Policy",
+     :expected-type "PolicyPriorKernel Policy"}]},
   :run-sha "ed6171e7fb9045f8dc78d6b8fff4768a13271a9a",
   :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
   :result :passed,
@@ -227,6 +245,13 @@
   :fixture
   {:repo "futon2",
    :path "holes/labs/wm-contract/precision-reference.edn"},
+  :expected-rejection
+  {:mode :lean-guard-msgs,
+   :controls
+   [{:fixture "DarkTower/WarMachine/PrecisionNegative.lean",
+     :claim :precision-is-not-signed-error,
+     :actual-type "Channel -> Real",
+     :expected-type "PrecisionMap"}]},
   :run-sha "ec4f5e866d3272479835153ec41c93967faa1268",
   :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
   :result :passed,
@@ -240,6 +265,17 @@
   {:repo "futon2",
    :path
    "holes/labs/wm-contract/predictive-outcome-kernel-reference.edn"},
+  :expected-rejection
+  {:mode :lean-guard-msgs,
+   :controls
+   [{:fixture "DarkTower/WarMachine/PredictiveOutcomeKernelUnconditionalNegative.lean",
+     :claim :predictive-outcomes-are-policy-conditioned,
+     :actual-type "PreferenceDistribution Obs",
+     :expected-type "PredictiveOutcomeKernel Policy Obs"}
+    {:fixture "DarkTower/WarMachine/PredictiveOutcomeKernelSoftmaxNegative.lean",
+     :claim :outcome-prediction-is-not-policy-posterior,
+     :actual-type "List Real",
+     :expected-type "PredictiveOutcomeKernel Policy Obs"}]},
   :run-sha "f0be231606149d5b9e34a62cde01c6b122c2aeba",
   :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
   :result :passed,
@@ -266,6 +302,17 @@
   {:repo "futon2",
    :path
    "holes/labs/wm-contract/preference-distribution-reference.edn"},
+  :expected-rejection
+  {:mode :lean-guard-msgs,
+   :controls
+   [{:fixture "DarkTower/WarMachine/PreferenceDistributionConditioningNegative.lean",
+     :claim :preferences-are-unconditional,
+     :actual-type "ProbabilityKernel HiddenState (Outcome Obs)",
+     :expected-type "PreferenceDistribution Obs"}
+    {:fixture "DarkTower/WarMachine/PreferenceDistributionPragmaticCostNegative.lean",
+     :claim :preference-distribution-is-not-pragmatic-cost,
+     :actual-type "Obs Vertex.people -> Real",
+     :expected-type "PreferenceDistribution Obs"}]},
   :run-sha "146dfcf2679d3a7218d8983782d8a28ef64a8d72",
   :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
   :result :passed,
@@ -278,6 +325,17 @@
   :fixture
   {:repo "futon2",
    :path "holes/labs/wm-contract/transition-kernel-reference.edn"},
+  :expected-rejection
+  {:mode :lean-guard-msgs,
+   :controls
+   [{:fixture "DarkTower/WarMachine/TransitionKernelUncontrolledNegative.lean",
+     :claim :transition-is-action-conditioned,
+     :actual-type "ProbabilityKernel State State",
+     :expected-type "TransitionKernel State Action"}
+    {:fixture "DarkTower/WarMachine/TransitionKernelBetaNegative.lean",
+     :claim :transition-B-is-not-beta-normaliser,
+     :actual-type "Real",
+     :expected-type "TransitionKernel State Action"}]},
   :run-sha "1ce10c346dc82dc030355990db5c8257317f958a",
   :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
   :result :passed,

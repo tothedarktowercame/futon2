@@ -19,7 +19,7 @@
         positive? (and (valid? fixture)
                        (zero? (lean-exit "DarkTower/WarMachine/PolicyPriorKernelWitness.lean")))
         rejected? (and (not (valid? tested))
-                       (not (zero? (lean-exit "DarkTower/WarMachine/PolicyPriorKernelNegative.lean"))))
+                       (zero? (lean-exit "DarkTower/WarMachine/PolicyPriorKernelNegative.lean")))
         accepted? (if negative? (and positive? rejected?) positive?)
         exit (if accepted? 0 (if negative? 2 1))]
     (println "policy-prior-kernel-witness:"

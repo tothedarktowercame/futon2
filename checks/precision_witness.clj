@@ -25,7 +25,7 @@
                        (zero? (lean-exit "DarkTower/WarMachine/PrecisionWitness.lean")))
         rejected? (cond
                     swap-neg? (not= expected tested)
-                    type-neg? (not (zero? (lean-exit "DarkTower/WarMachine/PrecisionNegative.lean")))
+                    type-neg? (zero? (lean-exit "DarkTower/WarMachine/PrecisionNegative.lean"))
                     :else true)
         negative? (or swap-neg? type-neg?)
         ok? (and positive? rejected?)
