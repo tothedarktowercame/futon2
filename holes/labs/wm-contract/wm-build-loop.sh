@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# wm-build-loop.sh -- continuous build of the war machine from the ledger:
+#   unblock -> work (one row, seat A) -> review (one row, seat B != A) -> publish (when the
+#   registries are clear) -> repeat, until nothing is open, unreviewed, or unblockable.
+# Runs unattended. Log: runs/build-loop.log (tail it; voxterm shows the process tree).
+# Seats: WORK_SEAT=claude|codex (default claude), REVIEW_SEAT the other. Author != reviewer
+# is enforced by using different tools for the two phases within an iteration.
+set -uo pipefail
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LOG="$HERE/runs/build-loop.log"; mkdir -p "$HERE/runs"
+WORK_SEAT="${WORK_SEAT:-claude}"; REVIEW_SEAT="${REVIEW_SEAT:-codex}"; SLEEP="${SLEEP:-20}"; MAX_ITER="${MAX_ITER:-60}"
+log() { echo "[$(date -u '+%H:%M:%S')] $*" | tee -a "$LOG"; }
+run_seat() { # $1 seat, $2 prompt file, $3 label
+  local seat="$1" prompt="$2" label="$3"
+  log "$label: $seat starting"
+  case "$seat" in
+    claude) (cd "$HOME/code" && timeout 2400 claude -p "$(cat "$prompt")" >> "$LOG" 2>&1) ;;
+    codex)  (cd "$HOME/code" && timeout 2400 codex exec --skip-git-repo-check --sandbox danger-full-access "$(cat "$prompt")" >> "$LOG" 2>&1) ;;
+    *) log "unknown seat $seat"; return 2 ;;
+  esac
+  local rc=$?; log "$label: $seat exit=$rc"; return $rc
+}
+ledger_ok() { bb "$HERE/worklist_check.bb" "$HERE/worklist.edn" > /tmp/wm-build-check.out 2>&1; local rc=$?; grep -vE 'WARNING|^worklist_check:\s+(M|\?\?) ' /tmp/wm-build-check.out | tail -1 | tee -a "$LOG"; return $rc; }
+publish() {
+  if [ "$(bb "$HERE/build_step.bb" registry-held)" = "0" ]; then
+    log "publish: registries clear -> build-p4ng.sh futon-2026"
+    (cd "$HOME/code/p4ng" && bash build-p4ng.sh futon-2026 > /tmp/wm-build-p4ng.log 2>&1); local rc=$?
+    grep -E 'negative_controls|figure-4a-generator|gate' /tmp/wm-build-p4ng.log | tee -a "$LOG"
+    if [ $rc -eq 0 ]; then
+      (cd "$HOME/code/p4ng" && git add -A aif-control-map-live.svg aif-control-map-live.pdf empirics-futon/aif-conformance.edn aif-equation-dag.svg aif-equation-dag.pdf sec-*-generated.tex war-room-tetrahedron.svg war-room-tetrahedron.pdf defect-repair-tally.svg defect-repair-tally.pdf 2>/dev/null; git diff --cached --quiet || git commit -q -m "futon-2026: regenerate (wm-build-loop, ledger clear)" ) && log "publish: committed"
+      (cd "$HOME/code/futon2" && git add holes/labs/wm-contract/workflow-report.edn 2>/dev/null; git diff --cached --quiet || git commit -q -m "wm-contract: workflow-report snapshot (wm-build-loop)")
+    else log "publish: build failed rc=$rc (see /tmp/wm-build-p4ng.log)"; fi
+  else log "publish: held -- a registry row awaits review"; fi
+}
+log "=== wm-build-loop start (work=$WORK_SEAT review=$REVIEW_SEAT) ==="
+i=0
+while [ $i -lt "$MAX_ITER" ]; do
+  i=$((i+1))
+  ledger_ok || { log "ledger invalid; stopping"; exit 1; }
+  bb "$HERE/build_step.bb" unblock | tee -a "$LOG"
+  if [ -n "$(bb "$HERE/build_step.bb" unblock)" ]; then (cd "$HOME/code/futon2" && git add holes/labs/wm-contract/worklist.edn && git commit -q -m "worklist: wm-build-loop unblocked rows whose :depends-on are done"); fi
+  next="$(bb "$HERE/build_step.bb" next-open)"; unrev="$(bb "$HERE/build_step.bb" unreviewed)"
+  log "iteration $i: next-open=$next unreviewed=[$unrev] counts=$(bb "$HERE/build_step.bb" counts)"
+  if [ "$next" = "NONE" ] && [ -z "$unrev" ]; then log "nothing open or unreviewed; done"; publish; break; fi
+  if [ "$next" != "NONE" ]; then
+    run_seat "$WORK_SEAT" "$HERE/worklist-prompt.md" "work($next)"
+    ledger_ok || { log "ledger invalid after work; stopping"; exit 1; }
+  fi
+  unrev="$(bb "$HERE/build_step.bb" unreviewed)"
+  if [ -n "$unrev" ]; then
+    run_seat "$REVIEW_SEAT" "$HERE/review-prompt.md" "review($unrev)"
+    ledger_ok || { log "ledger invalid after review; stopping"; exit 1; }
+  fi
+  publish
+  sleep "$SLEEP"
+done
+log "=== wm-build-loop end after $i iterations ==="

@@ -24,3 +24,9 @@ ledger of `futon2/holes/TN-edge-review-aif-wiring.md` (read §1 for the standard
    ledger. Run `bb worklist_check.bb` again.
 6. Report in three lines: item id, what changed (sha), what the reviewer should
    check. Stop.
+
+7. If the row carries `:loop-mode :one-slice-per-invocation` (a multi-slice item such as I1/I2), do
+   the NEXT unfinished slice named in its `:statement`/`:progress`, append what you did to
+   `:progress "<slice>: <sha>"`, and leave `:status :open` unless the last slice is done. A slice
+   that touches src/ needs clj-kondo, check-parens and tests; a slice that runs the machine needs
+   the pre-flight first and must hold `data/wm-trace/.run-lock` (RUN12) once it exists.
