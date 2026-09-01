@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C283-checklist-dry-run, :dispatched-at "2026-09-01T00:24:34Z", :job-id "invoke-1788222269084-6292-61ddce3e", :expected-by "2026-09-01T01:09:34Z"}
   {:lane :wm-evidence
-   :holding :C281-presence-before-format-lint, :dispatched-at "2026-09-01T00:22:18Z", :job-id "invoke-1788222134451-6287-47b4483c", :expected-by "2026-09-01T01:07:18Z"}]}
+   :holding :C284-lint-marker-verification, :dispatched-at "2026-09-01T00:27:43Z", :job-id "invoke-1788222459445-6296-b92666e9", :expected-by "2026-09-01T01:12:43Z"}]}
