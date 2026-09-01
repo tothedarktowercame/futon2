@@ -88,7 +88,7 @@ decision.)
 
 1. ~~**O15** Lean cadence~~ — **DONE 2026-09-01: option C.**
 2. ~~**O16** any check on a timer~~ — **DONE: no timer**, answered by the same sitting. O17 is now blocked on the new O25 (define "major milestone").
-3. **O24** lane campaign continuation — decides whether the trees can go quiet at all.
+3. ~~**O24** lane campaign continuation~~ — **DONE 2026-09-01: yes, continuously and in parallel, once tree hygiene is a facility.** My framing that quiescence only comes from stopping was wrong: that is a consequence of a broken helper, not a law. See C446 and the new O27.
 4. **O11** Morning Brief epoch — gates the operator run.
 5. **O19** send the writer-fence parking request.
 6. **O20** who cleans the dirty trees.
