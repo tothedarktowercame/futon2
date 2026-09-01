@@ -6,7 +6,7 @@
  [{:lane :wm-nouns
    :holding :C270-next-glossary-term, :dispatched-at "2026-09-01T00:10:52Z", :job-id "invoke-1788221448346-6264-194cd953", :expected-by "2026-09-01T00:55:52Z"}
   {:lane :wm-verbs
-   :holding :C266-binding-durability, :dispatched-at "2026-09-01T00:05:29Z", :job-id "invoke-1788221097078-6254-3fc023f3", :expected-by "2026-09-01T00:50:29Z"}
+   :holding :C272-binding-status, :dispatched-at "2026-09-01T00:13:28Z", :job-id "invoke-1788221604320-6269-f2271cb5", :expected-by "2026-09-01T00:58:28Z"}
   {:lane :wm-organization
    :holding :C271-step7-integration, :dispatched-at "2026-09-01T00:12:07Z", :job-id "invoke-1788221523259-6266-fa9046cd", :expected-by "2026-09-01T00:57:07Z"}
   {:lane :wm-evidence
