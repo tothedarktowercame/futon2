@@ -288,3 +288,55 @@ mixed grain is accepted as a stack choice), and each only after the V step.
 | Parr, Pezzulo & Friston 2022 | MIT Press open access (direct.mit.edu, oa-monograph) |
 | Friston, Parr & Zeidman 2018 | arXiv:1805.07092 |
 | Kass & Raftery 1995 | stat.cmu.edu/~kass/papers/bayesfactors.pdf |
+
+## 8. Sources retrieved and what they settle (2026-09-01)
+
+Files, URLs and checksums: `holes/labs/wm-contract/refs/README.md` (PDFs
+not committed). Six of seven retrieved; equation numbers read from the PDFs.
+
+| ref | retrieved | what was verified |
+|---|---|---|
+| Buckley et al. 2017 | arXiv 1705.09156 | eq. 9 general F; **eq. 45** Laplace-encoded energy Σ ½ε²/σ + ½ ln σ; eq. 58 worked instance; **eq. 59** recognition dynamics (gradient descent). The registry's F, ε and update rows are *reductions* of eqs. 45/59: ln σ terms dropped, mean over channels, one fixed-step gradient step. Π from sample variance is not in Buckley (his σ are model parameters) → Π is stack-defined in content. |
+| Da Costa et al. 2020 | arXiv 2001.07203 | **eq. 42** G = ambiguity + risk − *novelty*; **eq. 44** risk over outcomes (the WM's form); eqs. 45–48 ambiguity; **eq. 10** Q(π)=σ(−G); **eq. 11** u = argmax; eq. 21 Dirichlet accumulation; eq. 38 β-family; A.2 γ as inverse temperature; A.4 deep temporal models. |
+| Friston et al. 2017 | author's page (NECO OA) | **eq. 2.1** P(π)=σ(−γ·G); **eq. 2.7** the update set incl. π=σ(−F−γ·G), β=β+(π−π₀)·G, γ=1/β. **The habit prior E is not in this paper** — the registry's citation for E was wrong. |
+| Friston et al. 2016 (added) | PMC 5167251 | "Active inference and learning": E as policy concentration parameters (habit learning). Equation not recoverable from text extraction; identity confirmed from the prose; number unverified. |
+| Friston, Parr & Zeidman 2018 | arXiv 1805.07092 | **eq. 9** reduced free energy; Table 1 Dirichlet closed form; text: a reduced model is accepted when its log-evidence gain is > 0 — the paper's ΔF is reduced − full. |
+| Kass & Raftery 1995 | author's page; scanned | **Table 2, p. 777** (by eye): 2 ln B₁₀ ∈ 6–10 "strong", > 10 "very strong" → ln BF ≥ 3 is the lower edge of "strong". Magnitude only. |
+| Parr, Pezzulo & Friston 2022 | **not retrieved** | MIT Press and OAPEN refused automated fetch. Cited for notation only; no equation depends on it. |
+
+### What the sources settle (no ruling needed)
+
+- **ΔF sign (§6, C).** The WM's ΔF = ln B(A) + ln B(a′) − ln B(a) − ln B(A′)
+  (`Holes.lean:6394-6399`, `bmr.clj:108-130`) is the *negative* of Friston
+  2018's reduced-minus-full log evidence — checked numerically (identical
+  rows: WM −5.01, paper +5.01; different rows: WM +11.38). So ΔF_WM =
+  ln P(y|full) − ln P(y|reduced), and "accept when ΔF ≤ −3" means the reduced
+  model wins by ≥ 3 nats = Kass–Raftery "strong". A convention, now stated in
+  the registry; not an error.
+- **Selection rule (§6 choice 8, was C+J).** Da Costa eq. 11 *is* argmax.
+  The code's deterministic selection conforms; "sample" was the registry
+  author's wording, not a formalism option in any retrieved source. **No
+  ruling needed** — `:status :resolved-by-source`.
+- **Habit prior citation (C).** Moved from Friston 2017 to Friston et al.
+  2016.
+- **Novelty term (new, C).** Da Costa eq. 42 has a third term, −E[D_KL[Q(A|o,s)‖Q(A)]]
+  (parameter exploration). The WM's G omits it; since no Dirichlet Q(A) is live,
+  the term is identically absent rather than approximated. Recorded on the G row.
+- **Registry rows corrected (C):** F marked diagnostic with no live consumer;
+  τ update rewritten (selection-gain fold default; score-spread mode; β/γ
+  not implemented — earlier "fixed-calibrated" was wrong); E "implemented,
+  not applied live"; depth values and where set; hierarchy single-level
+  (R15 plumbing); learning offline-BMR-only. Q(π) node verified R6. Two
+  **holes** recorded in the registry (`:holes`): R6→R16 (enacted action is
+  not the selected one) and R8→R17 (live F feeds nothing).
+
+### Still open after the sources
+
+- **J1** Π→τ intent (drawn R7→R14): no code, no theory; retire unless it was
+  a deliberate variant.
+- **J2** Mixed-grain F: a stack composition unless a source is found; F has
+  no live consumer, so the practical question is whether F should feed
+  anything (R17 is the candidate the theory names).
+- **Drawing corrections (D)** for Figure 5A remain to be applied from §6 once
+  wm-organization confirms the retire list; they follow from the code
+  findings, not from rulings.

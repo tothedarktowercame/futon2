@@ -9,11 +9,13 @@
 ;; choice is written down under :choices (Joe, 2026-09-01: "where we have a
 ;; free hand to choose we should write that down").
 ;;
-;; CITATIONS: entered by claude-1 on 2026-09-01 from memory of the literature;
-;; the works are standard but equation/page numbers should be verified against
-;; the sources before publication. Each row's :ref names the formulation used.
+;; CITATIONS: verified 2026-09-01 against retrieved sources (see refs/README.md
+;; for files, URLs and checksums). Equation numbers below were read from the
+;; retrieved PDFs; :eq on a row is the specific equation the row reduces from.
+;; Parr-Pezzulo-Friston 2022 could not be retrieved and is cited for notation only.
 {:schema :wm/aif-equations-v1
  :as-of "2026-09-01"
+ :verified "2026-09-01 (claude-1; TN-edge-review-aif-wiring §8)"
  :owner :wm-organization
  :sources ["futon2/holes/labs/wm-contract/glossary-formal-lines.md"
            "p4ng/empirics-futon/control-stages.edn"
@@ -21,17 +23,35 @@
 
  :references
  {:buckley2017 {:cite "Buckley, C. L., Kim, C. S., McGregor, S., & Seth, A. K. (2017). The free energy principle for action and perception: a mathematical review. Journal of Mathematical Psychology, 81, 55-79."
-                :used-for "continuous (Laplace) free energy as precision-weighted squared prediction error; belief update by gradient descent on F"}
+                :used-for "continuous (Laplace) free energy as precision-weighted squared prediction error; belief update by gradient descent on F"
+                :verified {:eq9 "general variational free energy F" :eq45 "Laplace-encoded energy: sum over channels of ½ ε²/σ + ½ ln σ" :eq58 "instance for the worked model" :eq59 "recognition dynamics (gradient descent on the energy)"}
+                :retrieved "refs/buckley2017.pdf"}
   :dacosta2020 {:cite "Da Costa, L., Parr, T., Sajid, N., Veselic, S., Neacsu, V., & Friston, K. (2020). Active inference on discrete state-spaces: a synthesis. Journal of Mathematical Psychology, 99, 102447."
-                :used-for "expected free energy G = risk + ambiguity; policy posterior softmax over ln E - G with precision; Dirichlet parameter learning"}
+                :used-for "expected free energy G = ambiguity + risk (- novelty); policy posterior softmax over -G; action as argmax; Dirichlet parameter learning; deep temporal models"
+                :verified {:eq42 "G(π) = E_Q(s|π)[H[P(o|s)]] + D_KL[Q(s|π)||P(s)] - novelty (Appendix C)" :eq44 "risk over outcomes: (A s)·(log(A s) - log C), the form used when preferences are over outcomes" :eq45-48 "ambiguity = H · s_π, H := -diag[A·log A]" :eq10 "Q(π) = σ(-G(π))" :eq11 "u_t = argmax_u Σ_π δ_{u,π_t} Q(π)" :eq21 "a = a + Σ_τ o_τ ⊗ s_τ" :eq38 "Q(π) = σ(-G(π; β)), β ≥ 0" :A2 "γ as inverse temperature: σ(-γ G(π))" :A4 "deep temporal (hierarchical) models"}
+                :retrieved "refs/dacosta2020.pdf"}
   :friston2017 {:cite "Friston, K., FitzGerald, T., Rigoli, F., Schwartenbeck, P., & Pezzulo, G. (2017). Active inference: a process theory. Neural Computation, 29(1), 1-49."
-                :used-for "the perception-evaluation-selection-action loop as a process; habit prior E; precision (temperature) of policy selection"}
+                :used-for "the perception-evaluation-selection-action loop as a process; precision γ of policy selection and its β update"
+                :verified {:eq2.1 "P(π) = σ(-γ · G(π))" :eq2.7 "belief-update set: s = σ(A·o + B s_{τ-1} + B·s_{τ+1}); π = σ(-F - γ·G); β = β + (π - π₀)·G; γ = 1/β"}
+                :note "The habit prior E does NOT appear in this paper; see :friston2016."
+                :retrieved "refs/friston2017.pdf"}
   :parr2022 {:cite "Parr, T., Pezzulo, G., & Friston, K. J. (2022). Active Inference: The Free Energy Principle in Mind, Brain, and Behavior. MIT Press."
-             :used-for "consolidated notation (A, B, C, D, E); risk/ambiguity decomposition"}
+             :used-for "consolidated notation (A, B, C, D, E) only"
+             :verified nil :note "Not retrieved (MIT Press / OAPEN refused automated fetch, 2026-09-01). No registry equation depends on it."}
+  :friston2016 {:cite "Friston, K., FitzGerald, T., Rigoli, F., Schwartenbeck, P., O'Doherty, J., & Pezzulo, G. (2016). Active inference and learning. Neuroscience and Biobehavioral Reviews, 68, 862-879."
+                :used-for "the habit prior E over policies, learned as Dirichlet concentration parameters over policies"
+                :verified {:eq6 "referenced at §5.3, p. 874: 'this prior probability is based upon the policy concentration parameters, e ⊂ η (see Eq. (6))' -- verified by eye from the rendered page"}
+                :retrieved "refs/friston2016.pdf"}
   :friston2018bmr {:cite "Friston, K., Parr, T., & Zeidman, P. (2018). Bayesian model reduction. arXiv:1805.07092."
-                   :used-for "Bayesian model reduction: evidence change for a reduced model, used by structure learning"}
+                   :used-for "Bayesian model reduction: evidence change for a reduced model, used by structure learning"
+                   :verified {:eq9 "F[P̃:P] = ln E_Q[P̃(θ)/P(θ)] + F[P]: log evidence of the reduced model" :table1 "closed forms; Dirichlet row" :text "p. 617 region: a reduced model is accepted when its log-evidence gain is greater than zero (the paper's ΔF is reduced minus full)"}
+                   :sign-convention "The War Machine's ΔF (Holes.lean modelReductionFreeEnergyChange; bmr.clj) is ln B(A) + ln B(a′) − ln B(a) − ln B(A′), which is the NEGATIVE of the paper's reduced-minus-full log evidence, i.e. ΔF_WM = ln P(y|full) − ln P(y|reduced). Verified numerically 2026-09-01: identical rows give ΔF_WM = −5.01, paper +5.01. Hence 'accept when ΔF_WM ≤ −3' means the reduced model wins by ≥ 3 nats."
+                   :retrieved "refs/friston2018bmr.pdf"}
   :kass1995 {:cite "Kass, R. E., & Raftery, A. E. (1995). Bayes factors. Journal of the American Statistical Association, 90(430), 773-795."
-             :used-for "the log-evidence threshold of 3 ('strong') behind bayesFactorThreshold"}}
+             :used-for "the log-evidence threshold of 3 ('strong') behind bayesFactorThreshold"
+             :verified {:table2 "p. 777: 2 ln B₁₀ in 6–10 (B₁₀ 20–150) = 'strong'; > 10 = 'very strong'. So ln BF ≥ 3 is the lower edge of 'strong'. Verified by eye (scanned PDF)."}
+             :note "Supports the magnitude 3 only; the direction is the WM sign convention stated under :friston2018bmr."
+             :retrieved "refs/kass1995.pdf"}}
 
  ;; Exogenous symbols: imported by equations, defined by no equation here.
  ;; :class :stack-defined means the War Machine supplies the content.
@@ -53,75 +73,104 @@
    :formal "o_t <- structured observation of the world after action u_{t-1}"}
   {:id :prediction-error :defines :eps :node :R8 :class :theory-defined :ref :buckley2017
    :imports [:o :mu]
-   :formal "eps_k := o_k - mu_k" :lean nil :lean-status :missing}
+   :formal "eps_k := o_k - mu_k" :eq "buckley2017 eq. 45 error terms (reduction: no generalised coordinates)" :lean nil :lean-status :missing
+   :code "war_machine.clj:4368-4379"}
   {:id :precision :defines :Pi :node :R7 :class :theory-defined :ref :buckley2017
    :imports [:o :eps0]
-   :formal "Pi_k := 1 / max(Var_k, eps0)" :lean nil :lean-status :missing
-   :note "Var_k is the running channel variance of o_k"}
+   :formal "Pi_k := 1 / max(Var_k, eps0)" :eq nil :lean nil :lean-status :missing
+   :note "Var_k is the running channel sample variance of o_k. In buckley2017 eq. 45 the variances σ are model parameters, not sample statistics; this row is therefore stack-defined in content and only theory-defined in role." :code "war_machine.clj:4380-4388"}
   {:id :free-energy :defines :F :node :R8 :class :theory-defined :ref :buckley2017
    :imports [:Pi :eps]
-   :formal "F = 1/2 * mean_k (Pi_k eps_k^2)" :lean "variationalFreeEnergy" :lean-status :closed}
+   :formal "F = 1/2 * mean_k (Pi_k eps_k^2)" :eq "buckley2017 eq. 45 (reduction: ½ ln σ terms dropped; mean over channels instead of sum)" :lean "variationalFreeEnergy" :lean-status :closed
+   :code "free_energy.clj:184-205; war_machine.clj:4450-4452"
+   :live-consumer nil :note "Computed and stored each tick; NO live consumer reads it (C448 5c.1). It is a diagnostic."}
   {:id :belief-update :defines :mu-next :node :R3 :class :theory-defined :ref :buckley2017
    :imports [:mu :Pi :eps :alpha]
-   :formal "mu <- mu + alpha Pi eps" :lean nil :lean-status :missing}
+   :formal "mu <- mu + alpha Pi eps" :eq "buckley2017 eq. 59 (reduction: one gradient step with fixed step size alpha)" :lean nil :lean-status :missing
+   :code "war_machine.clj:4375-4388, 4429-4431"}
   {:id :belief-state :defines :mu :node :R1 :class :stack-defined :ref :buckley2017
    :imports [:mu-next]
    :formal "mu_t := the stored belief after the update at t-1"}
   {:id :forward-model :defines :Q-o-pi :node :R4 :class :theory-defined :ref :dacosta2020
    :imports [:mu :A :B :pi :T]
-   :formal "Q(o|pi) := sum_s A(o|s) Q(s|pi), Q(s|pi) rolled forward by B from mu over depth T"
+   :formal "Q(o|pi) := sum_s A(o|s) Q(s|pi), Q(s|pi) rolled forward by B from mu over depth T" :eq "dacosta2020 eq. 42-44 (the predictive terms A s_π)" :code "efe.clj:601-609; forward_model.clj:279-324"
    :lean "PredictiveOutcomeKernel" :lean-status :carrier-only
    :note "Q-interface-completeness.edn records 2 missing wires for this row"}
   {:id :risk :defines :risk :node :R5 :class :theory-defined :ref :dacosta2020
    :imports [:Q-o-pi :C]
-   :formal "risk(pi) := D_KL[Q(o|pi) || C]" :lean "predictiveOutcomeRisk" :lean-status :closed}
+   :formal "risk(pi) := D_KL[Q(o|pi) || C]" :eq "dacosta2020 eq. 44 (risk over outcomes)" :lean "predictiveOutcomeRisk" :lean-status :closed}
   {:id :ambiguity :defines :ambiguity :node :R5 :class :theory-defined :ref :dacosta2020
    :imports [:Q-o-pi :A]
-   :formal "ambiguity(pi) := E_{Q(s|pi)}[H(P(o|s))]" :lean "ambiguity" :lean-status :closed}
+   :formal "ambiguity(pi) := E_{Q(s|pi)}[H(P(o|s))]" :eq "dacosta2020 eq. 45-48" :lean "ambiguity" :lean-status :closed}
   {:id :expected-free-energy :defines :G :node :R5 :class :theory-defined :ref :dacosta2020
    :imports [:risk :ambiguity]
-   :formal "G(pi) := risk(pi) + ambiguity(pi)" :lean "expectedFreeEnergy" :lean-status :closed
+   :formal "G(pi) := risk(pi) + ambiguity(pi)" :eq "dacosta2020 eq. 42 WITHOUT the novelty term -E[D_KL[Q(A|o,s)||Q(A)]]" :lean "expectedFreeEnergy" :lean-status :closed
+   :omits "novelty (parameter-exploration) term of eq. 42; the WM has no Dirichlet Q(A) live, so the term is identically absent rather than approximated"
    :conflict "Holes.G := risk - eig over a generic Policy; G_eq_expectedFreeEnergy bridges the two under stated assumptions (glossary-formal-lines.md, G entry)"}
   {:id :policy-set :defines :pi :node :R6 :class :stack-defined :ref :friston2017
    :imports []
    :formal "pi ranges over the candidate action space"}
   {:id :depth :defines :T :node :R13 :class :theory-defined :ref :dacosta2020
    :imports []
-   :formal "T := temporal policy depth (the range of the sums in Q(o|pi) and G)"}
+   :formal "T := temporal policy depth (the range of the sums in Q(o|pi) and G)" :eq "dacosta2020 eq. 42 (sum over τ)" :code "war_machine.clj:4485-4487 (3 when an anticipation snapshot loads); rollout.clj:166-171 (default 2)"}
   {:id :temperature :defines :tau :node :R14 :class :stack-defined :ref :friston2017
    :imports []
-   :formal "tau := commitment temperature (inverse precision gamma of policy selection)"}
+   :formal "tau := commitment temperature (inverse precision gamma of policy selection)" :eq "friston2017 eq. 2.1 (γ = 1/β); dacosta2020 A.2" :code "policy.clj:242-245 (effective-temperature from selection gain / score spread)"}
   {:id :policy-posterior :defines :Q-pi :node :R6 :class :theory-defined :ref :dacosta2020
    :imports [:E :G :tau :pi]
-   :formal "Q(pi) := softmax(ln E(pi) - G(pi)/tau)" :lean "softmax" :lean-status :closed}
+   :formal "Q(pi) := softmax(ln E(pi) - G(pi)/tau)" :eq "dacosta2020 eq. 10 with A.2 (γ); E from friston2016 eq. 6" :lean "softmax" :lean-status :closed
+   :code "policy.clj:242-245, 411-438" :note "Computed and recorded; the live path then selects deterministically (see :action)."}
   {:id :action :defines :u :node :R16 :class :theory-defined :ref :friston2017
    :imports [:Q-pi]
-   :formal "u_t := the action of the selected policy (argmax or sample of Q(pi))"}
+   :formal "u_t := argmax_u sum_pi delta(u, pi_t) Q(pi)" :eq "dacosta2020 eq. 11 (argmax; the formalism's stated rule is deterministic)"
+   :code "policy.clj:247-250 (first admissible controller entry), :411-438 (max-key)" :note "The code's deterministic selection conforms to eq. 11. C448 5b: the enacted action at R16 is the first passing act gate (enact.clj:287-316), not the recorded selection -- see :holes."}
   {:id :model-reduction :defines :Delta-F :node :R17 :class :theory-defined :ref :friston2018bmr
-   :imports [:F]
-   :formal "Delta F := log-evidence change for a reduced model; accepted when Delta F <= -3"
+   :imports [:F]  ;; theory import; NOT realised (C448 5b: R8->R17 not found)
+   :formal "Delta F := ln P(y|full) - ln P(y|reduced) = ln B(A) + ln B(a') - ln B(a) - ln B(A'); a reduction is accepted when Delta F <= -3" :eq "friston2018bmr eq. 9 and Table 1 (Dirichlet), sign reversed: see :references :friston2018bmr :sign-convention"
+   :code "bmr.clj:108-130; a4a.clj:126-159 (offline)" :note "No live consumer of per-tick F feeds this; R17 runs offline (r17_offline.clj)."
    :lean "bayesFactorThreshold" :lean-status :closed :threshold-ref :kass1995}]
 
  ;; Where the framework leaves a free hand. Each is recorded as OBSERVED in
  ;; the War Machine as of 2026-09-01; Joe decides. Format mirrors
  ;; control-map-edges.edn :decisions so a decision can replace an observation.
  :choices
- {:free-energy-form {:observed :laplace-channel-grain :status :observed-not-decided :by nil :at nil
-                     :statement "F is the continuous Laplace form over error channels, not the discrete categorical F of the POMDP formulation; the policy side uses the discrete formulation. Both are AIF; the mixed grain is a choice."}
-  :temperature-update {:observed :fixed-calibrated :status :observed-not-decided
-                       :statement "tau (R14) is set by controller calibration, not updated by the beta/gamma precision dynamics of dacosta2020."}
-  :habit-prior {:observed :present :status :observed-not-decided
-                :statement "E is present: the Lean softmax takes a habit argument."}
-  :policy-depth {:observed :present :status :observed-not-decided
-                 :statement "T (R13) is a node; its value and whether it varies per tick are stack choices."}
-  :hierarchy {:observed :single-level-drawn :status :observed-not-decided
-              :statement "R15 hierarchy composes loops; at one level it adds no imports and is not drawn as an equation."}
-  :learning {:observed :bmr-present-dirichlet-in-progress :status :observed-not-decided
-             :statement "Structure learning by BMR (R17) is present; Dirichlet parameter learning of A appeared in Lean on 2026-09-01 (DirichletConcentrations) and is not yet wired."}
-  :policy-posterior-node {:observed :assigned-to-R6 :status :observed-not-decided
-                          :statement "No R-node is named for the policy posterior; this registry assigns Q(pi) to R6 (candidate action space) rather than inventing a node."}
-  :selection-rule {:observed :unrecorded :status :observed-not-decided
-                   :statement "Whether u is the argmax or a sample of Q(pi) is not recorded anywhere found; the action row says 'argmax or sample'."}}
+ {:free-energy-form {:observed :laplace-channel-grain-diagnostic :status :observed-not-decided
+                     :evidence "free_energy.clj:184-205; war_machine.clj:4450-4452; efe.clj:601-619, 782-794 (C448 5c.1)"
+                     :statement "F is the continuous Laplace form over error channels and has no live consumer; the policy side is the discrete formulation (dacosta2020). No retrieved source cites this mixed-grain composition as one formalism; it is a stack composition unless a source is found."}
+  :temperature-update {:observed :selection-gain-fold-default :status :observed-not-decided
+                       :evidence "war_machine.clj:238-248 (default :selection-gain-only; FUTON_WM_TAU_MODE selects score-spread); selection_gain.clj:173-206 folds realised outcomes; policy.clj:32-80 (C448 5c.2)"
+                       :theory-alternative "friston2017 eq. 2.7: β = β + (π - π₀)·G, γ = 1/β -- not implemented"
+                       :statement "tau is updated from realised selection gain (default) or score spread, not by the β/γ precision dynamics. (Earlier 'fixed-calibrated' was wrong.)"}
+  :habit-prior {:observed :implemented-not-applied-live :status :observed-not-decided
+                :evidence "habit_prior.clj:70-89, 100-163 (learned, persisted); war_machine.clj:262-271, 4276-4283; policy.clj:234-271 (:habit-prior-applied? false on the live path) (C448 5c.3)"
+                :statement "E is learned and persisted but the live strategic path does not apply it; the two run records carry no habit state."}
+  :policy-depth {:observed :fixed-per-configuration :status :observed-not-decided
+                 :evidence "war_machine.clj:4485-4487, 4516-4520 (3 with anticipation snapshot, else single-step); rollout.clj:166-171, 212-230 (default 2) (C448 5c.4)"
+                 :statement "T varies by invocation/configuration, never per candidate policy."}
+  :hierarchy {:observed :single-level :status :observed-not-decided
+              :evidence "rollout.clj:166-176 ('flat temporal rollout, not nested fast/slow hierarchy'); hierarchical_budget.clj exists but is not wired as a generative hierarchy (C448 5c.5)"
+              :theory-alternative "dacosta2020 A.4 deep temporal models"
+              :statement "One level is realised; R15 runs no equation and is listed under :plumbing."}
+  :learning {:observed :offline-bmr-only :status :observed-not-decided
+             :evidence "r17_offline.clj:1-6, 64-96; a4a.clj:126-159; Holes.lean:6380-6385 DirichletConcentrations (carrier only) (C448 5c.6)"
+             :theory-alternative "dacosta2020 eq. 21 Dirichlet accumulation -- Lean carrier exists, no live counterpart"
+             :statement "Structure learning by BMR runs offline on Dirichlet models; live F is not its input (R8->R17 not realised)."}
+  :policy-posterior-node {:observed :R6 :status :verified
+                          :evidence "policy.clj:300-438 select-action; route tag war_machine.clj:4584 (C448 5c.7)"
+                          :statement "Q(π) is computed in R6's implementation; no other node computes it. No decision needed."}
+  :selection-rule {:observed :argmax :status :resolved-by-source
+                   :evidence "policy.clj:247-250, 387-410, 411-438: deterministic; softmax weights recorded, never sampled (C448 5c.8)"
+                   :source "dacosta2020 eq. 11: u_t = argmax -- the formalism's stated rule is deterministic"
+                   :statement "The code conforms to eq. 11. 'Sample' was not a formalism option in the retrieved sources; the earlier 'argmax or sample' wording was the registry author's, not the theory's."}
+  :delta-f-sign {:observed :full-minus-reduced :status :verified
+                 :evidence "Holes.lean:6394-6399; bmr.clj:108-130; numerical check 2026-09-01 (identical rows: WM -5.01, paper +5.01)"
+                 :statement "ΔF_WM = ln P(y|full) − ln P(y|reduced), the negative of friston2018bmr's Table 1 column; accept when ≤ −3 ⇔ reduced model wins by ≥ 3 nats (kass1995 Table 2, 'strong'). A convention to state, not an error."}}
+
+ ;; Theory imports the code does not realise (C448 5b). Recorded here until a
+ ;; Holes.lean declaration carries each.
+ :holes
+ [{:edge [:R6 :R16] :equation :action :finding "the WM run stops at TRACE with a recommendation; close-loop! enacts the first passing act gate from ranked actions, not the recorded Q(π) selection" :evidence "war_machine.clj:4573-4584, 4804-4817; enact.clj:287-316"}
+  {:edge [:R8 :R17] :equation :model-reduction :finding "live F is only stored; R17 is an offline replay path computing BMR from Dirichlet models" :evidence "war_machine.clj:4753; r17_offline.clj:1-6, 64-96; a4a.clj:126-159"}]
 
  ;; Nodes that run no equation. Legitimate plumbing, not AIF.
  :plumbing [:R9 :R10 :R11 :R12 :R15 :R20 :TRACE]}
