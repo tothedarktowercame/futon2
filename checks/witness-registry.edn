@@ -329,6 +329,11 @@
   {:repo "futon2",
    :path
    "holes/labs/wm-contract/predictive-outcome-risk-reference.edn"},
+  :positive-proof-receipt
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/predictive-outcome-risk-positive-receipt.edn",
+   :schema :PositiveLeanWitnessReceipt/v1},
   :run-sha "d260aed610d74e9f29745777e919a6959fc95e54",
   :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
   :result :passed,
@@ -411,6 +416,10 @@
   :fixture
   {:repo "futon2",
    :path "holes/labs/wm-contract/ambiguity-reference.edn"},
+  :positive-proof-receipt
+  {:repo "futon2",
+   :path "holes/labs/wm-contract/ambiguity-positive-receipt.edn",
+   :schema :PositiveLeanWitnessReceipt/v1},
   :run-sha "8ae9f90a536d98664ad040ae0bf89426b1c9f413",
   :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
   :result :passed,
@@ -470,6 +479,11 @@
   :fixture
   {:repo "futon2",
    :path "holes/labs/wm-contract/expected-free-energy-reference.edn"},
+  :positive-proof-receipt
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/expected-free-energy-positive-receipt.edn",
+   :schema :PositiveLeanWitnessReceipt/v1},
   :run-sha "58d667284a63c69c0027c9bf204e9bc0eac098b9",
   :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
   :result :passed,
@@ -483,6 +497,11 @@
   {:repo "futon2",
    :path
    "holes/labs/wm-contract/expected-information-gain-reference.edn"},
+  :positive-proof-receipt
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/expected-information-gain-positive-receipt.edn",
+   :schema :PositiveLeanWitnessReceipt/v1},
   :run-sha "c99ffdbc13e9b114dbcdca7451651e568588a947",
   :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
   :result :passed,

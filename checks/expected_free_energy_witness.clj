@@ -2,11 +2,13 @@
 (ns checks.expected-free-energy-witness
   (:require [babashka.fs :as fs]
             [babashka.process :as process]
+            [checks.positive-proof-receipt :as receipt]
             [clojure.edn :as edn]))
 
 (def root (fs/cwd))
 (def mathlib-root (str (fs/normalize (fs/path root "../mathlib4"))))
 (def fixture-path (fs/path root "holes/labs/wm-contract/expected-free-energy-reference.edn"))
+(def receipt-path (fs/path root "holes/labs/wm-contract/expected-free-energy-positive-receipt.edn"))
 
 (def independent-case
   {:id :one-point :predictive-masses [1] :preference-masses [1]
@@ -26,7 +28,8 @@
   (let [negative? (some #{"--negative" "--negative-control"} args)
         fixture (edn/read-string (slurp (str fixture-path)))
         tested (if negative? (assoc-in fixture [:cases 0 :expected-free-energy] 3) fixture)
-        baseline-valid? (and (reference-valid? fixture) (lean-pass?))
+        receipt-ok? (:pass? (receipt/validate (edn/read-string (slurp (str receipt-path)))))
+        baseline-valid? (and receipt-ok? (reference-valid? fixture) (lean-pass?))
         mutation-rejected? (not (reference-valid? tested))
         exit (cond (and negative? (not baseline-valid?)) 1
                    (and negative? (not mutation-rejected?)) 2

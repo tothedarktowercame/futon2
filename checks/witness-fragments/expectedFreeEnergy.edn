@@ -4,6 +4,7 @@
          :entrypoint "-main"}
  :fixture {:repo "futon2"
            :path "holes/labs/wm-contract/expected-free-energy-reference.edn"}
+ :positive-proof-receipt {:repo "futon2" :path "holes/labs/wm-contract/expected-free-energy-positive-receipt.edn" :schema :PositiveLeanWitnessReceipt/v1}
  :run-sha "58d667284a63c69c0027c9bf204e9bc0eac098b9"
  :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a"
  :result :passed

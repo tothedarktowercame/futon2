@@ -1,7 +1,9 @@
 #!/usr/bin/env bb
 (ns checks.predictive-outcome-risk-witness
-  (:require [babashka.process :as p] [clojure.edn :as edn]))
+  (:require [babashka.process :as p] [checks.positive-proof-receipt :as receipt]
+            [clojure.edn :as edn]))
 (def fixture-path "holes/labs/wm-contract/predictive-outcome-risk-reference.edn")
+(def receipt-path "holes/labs/wm-contract/predictive-outcome-risk-positive-receipt.edn")
 (defn valid? [x]
   (and (= :predictive-outcome-risk-reference/v1 (:schema x))
        (= 1 (reduce + (vals (:predictive-mass x))))
@@ -19,7 +21,8 @@
   (let [negative? (some #{"--negative" "--negative-control"} args)
         fixture (edn/read-string (slurp fixture-path))
         tested (if negative? (assoc-in fixture [:preference-mass :a] 0) fixture)
-        baseline-valid? (and (valid? fixture) (lean-pass?))
+        receipt-ok? (:pass? (receipt/validate (edn/read-string (slurp receipt-path))))
+        baseline-valid? (and receipt-ok? (valid? fixture) (lean-pass?))
         mutation-rejected? (not (valid? tested))
         exit (cond (and negative? (not baseline-valid?)) 1
                    (and negative? (not mutation-rejected?)) 2

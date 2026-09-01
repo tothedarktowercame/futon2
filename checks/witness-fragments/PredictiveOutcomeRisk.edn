@@ -1,6 +1,7 @@
 {:witnesses "predictiveOutcomeRisk"
  :check {:repo "futon2" :path "checks/predictive_outcome_risk_witness.clj" :entrypoint "-main"}
  :fixture {:repo "futon2" :path "holes/labs/wm-contract/predictive-outcome-risk-reference.edn"}
+ :positive-proof-receipt {:repo "futon2" :path "holes/labs/wm-contract/predictive-outcome-risk-positive-receipt.edn" :schema :PositiveLeanWitnessReceipt/v1}
  :run-sha "d260aed610d74e9f29745777e919a6959fc95e54"
  :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a"
  :result :passed

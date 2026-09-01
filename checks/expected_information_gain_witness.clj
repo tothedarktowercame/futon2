@@ -2,12 +2,15 @@
 (ns checks.expected-information-gain-witness
   (:require [babashka.fs :as fs]
             [babashka.process :as process]
+            [checks.positive-proof-receipt :as receipt]
             [clojure.edn :as edn]))
 
 (def root (fs/cwd))
 (def mathlib-root (str (fs/normalize (fs/path root "../mathlib4"))))
 (def fixture-path
   (fs/path root "holes/labs/wm-contract/expected-information-gain-reference.edn"))
+(def receipt-path
+  (fs/path root "holes/labs/wm-contract/expected-information-gain-positive-receipt.edn"))
 
 (def independent-case
   {:id :binary-prior-point-posterior
@@ -32,7 +35,8 @@
         tested (if negative?
                  (assoc-in fixture [:cases 0 :expected-information-gain] "log(3)")
                  fixture)
-        baseline-valid? (and (reference-valid? fixture) (lean-pass?))
+        receipt-ok? (:pass? (receipt/validate (edn/read-string (slurp (str receipt-path)))))
+        baseline-valid? (and receipt-ok? (reference-valid? fixture) (lean-pass?))
         mutation-rejected? (not (reference-valid? tested))
         exit (cond (and negative? (not baseline-valid?)) 1
                    (and negative? (not mutation-rejected?)) 2
