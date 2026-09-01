@@ -153,6 +153,11 @@ lane does not make this red expected: it does not prove ownership or execution
 disposition. The filename remains `DEGRADED-NEW` until the classification is
 committed. Adding only the filename to `known-check-files` is insufficient;
 the check must be run or explicitly manual.
+This classification is a closure step in the same commit that adds the check:
+run `bb -cp . -e "(require '[checks.wm-workspace-gate :as g])
+(prn (g/inventory-result))"` and require `:unknown ()`, `:missing ()`, and
+`:exit 0` before handing the delivery off. A later gate finding means the
+adding delivery did not close.
 
 ### Lean contract regeneration
 

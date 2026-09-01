@@ -120,7 +120,8 @@
   ;; must be classified here before the gate can pass; it is never guessed safe.
   #{"ablation_exact_dyadic_witness.clj" "absence_scoring_counterfactual.clj"
     "c130_immediate_option_measurement.clj"
-    "ambiguity_witness.clj" "belief_state_witness.clj" "channel_witness.clj" "observation_kernel_witness.clj"
+    "ambiguity_witness.clj" "belief_state_witness.clj" "channel_witness.clj"
+    "observation_vector_witness.clj" "observation_kernel_witness.clj"
     "predictive_outcome_risk_witness.clj"
     "policy_prior_kernel_witness.clj"
     "q_interface_completeness_check.clj"
@@ -130,9 +131,12 @@
     "softmax_witness.clj"
     "bayes_factor_threshold_witness.clj"
     "bayesian_model_reduction_witness.clj"
+    "model_reduction_free_energy_change_witness.clj"
     "dirichlet_concentrations_witness.clj"
     "preference_distribution_witness.clj"
     "predictive_outcome_kernel_witness.clj"
+    "parameter_prior_kernel_witness.clj"
+    "parameter_posterior_kernel_witness.clj"
     "transition_kernel_witness.clj"
     "absent_is_loud_lint.clj" "belief_update_check.clj"
     "belief_variance_inputs.clj" "cascade_diff_witness.clj" "certify_live_run.clj" "closed_record_pointer_check.clj" "contract_lint.clj"
@@ -147,6 +151,7 @@
     "hyper_edge_domain_range_check.clj" "hyper_edge_exemplar_check.clj"
     "lane_registry_check.clj" "log_multivariate_beta_witness.clj"
     "model_uncertainty_eig_witness.clj" "machine_vocabulary_witness.clj"
+    "mutable_read_set.clj"
     "lean_sorry_category_check.clj"
     "obligation_ledger_reconciliation_check.clj"
     "preemptive_absence_coercion_lint.clj" "preemptive_acceptance_lint.clj"
@@ -159,7 +164,7 @@
     "r8_f_contract.clj" "r8_pinned_snapshot_witness.clj"
     "trace_schema_compatibility.clj"
     "r9_independence.clj" "r9_proof_receipt_check.clj"
-    "wm_operational_certificate.clj" "wm_route_conformance.clj"
+    "wm_click_resource_observer.clj" "wm_operational_certificate.clj" "wm_route_conformance.clj"
     "wm_runs_once_witness.clj" "wm_workspace_gate.clj"})
 
 (defn inventory-result []
@@ -417,10 +422,14 @@
                (pr-str {:checks (count results) :executable-checks (dec (count results)) :failures failures
                         :basis-status (:status movement)
                         :basis-repositories (:repositories movement)
-                        :manual-exclusions [:lane-registry :current-live-operational-certificate]
+                        :manual-exclusions [:lane-registry :current-live-operational-certificate
+                                            :production-click-resource-observer
+                                            :mutable-read-set-library]
                         :manual-exclusion-reasons
                         {:lane-registry :dispatcher-discipline-not-repository-validity
-                         :current-live-operational-certificate :requires-new-operator-run-and-resource-receipt}}))
+                         :current-live-operational-certificate :requires-new-operator-run-and-resource-receipt
+                         :production-click-resource-observer :joe-only-command-that-performs-production-click
+                         :mutable-read-set-library :support-namespace-exercised-by-consumer-controls-and-unit-tests}}))
       ;; Repository movement qualifies the observation but does not turn a
       ;; passing set of checks into a failing set. The bounded wrapper and
       ;; run-readiness impose the stricter stable-basis operator policy.
