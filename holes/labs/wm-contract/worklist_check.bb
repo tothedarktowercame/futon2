@@ -190,6 +190,17 @@
              "a signature taken now would cover content in motion. Do not sign until clean:")
     (doseq [d dirty] (println "worklist_check:   " (str/trim d)))))
 
+
+;; A row id must never look like a control-map node. The nodes are R1..R20
+;; (R2 = observe, R7 = precision, R14 = temperature); the run rows are
+;; RUN1.. . Until 2026-09-01 both were R<digit> and "R2 traverses R2->R7" was a
+;; sentence you had to parse twice. Reject the collision rather than trusting
+;; everyone to remember it.
+(doseq [i (:items w)]
+  (when (re-matches #"R\d+[a-z]?" (name (:id i)))
+    (die (:id i) "looks like a control-map node (R1..R20). Run rows are RUN1.., "
+         "so a bare R<digit> always means a node.")))
+
 (def by-status (frequencies (map :status (:items w))))
 (println (format "worklist_check: %d items OK; %s; %d signed registry entries verified unchanged since signature, %d superseded and skipped, %d declared :covers-key :none, %d signed registry rows carry no :covers-key and are NOT checked"
                  (count (:items w)) (pr-str by-status)
