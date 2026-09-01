@@ -1,21 +1,19 @@
 #!/usr/bin/env bb
 (ns checks.r17-generator-disposer-check
   (:require [babashka.fs :as fs]
+            [checks.mutable-read-set :as read-set]
             [clojure.string :as str]))
 
 (def default-a4a "src/futon2/aif/a4a.clj")
 (def default-r17 "src/futon2/aif/r17_offline.clj")
 (def default-live-paths ["scripts/futon2/report/war_machine.clj"])
 
-(defn- sha256 [path]
-  (let [digest (java.security.MessageDigest/getInstance "SHA-256")]
-    (.update digest (.getBytes (slurp path) "UTF-8"))
-    (format "%064x" (java.math.BigInteger. 1 (.digest digest)))))
-
-(defn- require-read [path]
-  (when-not (fs/regular-file? path)
-    (throw (ex-info "required R17 guard input is absent" {:path path})))
-  {:path path :sha256 (sha256 path) :text (slurp path)})
+(defn- captured-read [snapshot path]
+  (let [entry (read-set/entry-by-path snapshot path)]
+    (when-not entry
+      (throw (ex-info "required R17 guard input is absent from read-set"
+                      {:path path})))
+    (select-keys entry [:path :sha256 :text])))
 
 (defn wiring-verdict
   "A dormant unsafe reducer is recorded but cannot pass once live-reachable.
@@ -53,9 +51,14 @@
      :live-reference-paths live-hits}))
 
 (defn run-check [{:keys [a4a r17 live-paths negative?]}]
-  (let [a4a-read (require-read (or a4a default-a4a))
-        r17-read (require-read (or r17 default-r17))
-        live-reads (mapv require-read (or live-paths default-live-paths))
+  (let [a4a (or a4a default-a4a)
+        r17 (or r17 default-r17)
+        live-paths (or live-paths default-live-paths)
+        observation (read-set/observe-files (concat [a4a r17] live-paths))
+        snapshot (read-set/require-stable! observation)
+        a4a-read (captured-read snapshot a4a)
+        r17-read (captured-read snapshot r17)
+        live-reads (mapv #(captured-read snapshot %) live-paths)
         facts (source-facts a4a-read r17-read live-reads)
         evaluated (wiring-verdict (cond-> facts negative?
                                     (assoc :live-reachable? true)))

@@ -1,8 +1,8 @@
 #!/usr/bin/env bb
 
 (ns checks.wm-route-conformance
-  (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]))
+  (:require [checks.mutable-read-set :as read-set]
+            [clojure.edn :as edn]))
 
 (def control-map-path "/home/joe/code/p4ng/empirics-futon/control-map-edges.edn")
 
@@ -23,13 +23,13 @@
   (set (map (fn [{:keys [from to]}]
               [(node->str from) (node->str to)]) entries)))
 
-(defn- figure-wiring []
-  (let [data (edn/read-string (slurp control-map-path))]
+(defn- figure-wiring [control-map-text]
+  (let [data (edn/read-string control-map-text)]
     {:original (pair-set (filter #(= :drawn (:status %)) (:edges data)))
      :measured (pair-set (:route-measured-drawn data))}))
 
-(defn- route-verdict [route]
-  (let [{:keys [original measured]} (figure-wiring)
+(defn- route-verdict [route control-map-text]
+  (let [{:keys [original measured]} (figure-wiring control-map-text)
         wired (into original measured)
         classified (mapv (fn [hop]
                            (let [pair [(:fromNode hop) (:toNode hop)]]
@@ -59,13 +59,20 @@
   (let [negative? (some #{"--negative"} args)
         path (or (some #(when (not= "--negative" %) %) args)
                  (default-record-path))
-        receipt (edn/read-string (slurp (io/file path)))
+        observation (read-set/observe-files [control-map-path path])
+        snapshot (try (read-set/require-stable! observation)
+                      (catch Exception failure
+                        (fail! (str "wm-route-conformance: UNAVAILABLE "
+                                    (pr-str (ex-data failure))
+                                    " exit-convention=0-pass/1-fail"))))
+        control-map-text (:text (read-set/entry-by-path snapshot control-map-path))
+        receipt (edn/read-string (:text (read-set/entry-by-path snapshot path)))
         receipt (if negative?
                   (update receipt :route conj
                           {:fromNode "R99" :toNode "R100"
                            :via "negative-control/unmapped-hop"})
                   receipt)
-        verdict (route-verdict (:route receipt))
+        verdict (route-verdict (:route receipt) control-map-text)
         line (str "route: hops=" (:hops verdict)
                   " conformant=" (:conformant verdict)
                   " unmapped=" (:unmapped verdict)
