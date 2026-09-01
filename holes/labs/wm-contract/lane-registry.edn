@@ -4,7 +4,7 @@
  :as-of "2026-08-31T15:39:14.434945104Z"
  :lanes
  [{:lane :wm-nouns
-   :holding :C339-positive-pin-migration, :dispatched-at "2026-09-01T01:32:49Z", :job-id "invoke-1788226365369-6425-191faab8", :expected-by "2026-09-01T02:17:49Z"}
+   :holding :C343-unsampled-witness-shapes, :dispatched-at "2026-09-01T01:40:33Z", :job-id "invoke-1788226829516-6434-87e0a8e9", :expected-by "2026-09-01T02:25:33Z"}
   {:lane :wm-verbs
    :holding :C342-predicate-baselines, :dispatched-at "2026-09-01T01:39:26Z", :job-id "invoke-1788226762441-6433-5ade179b", :expected-by "2026-09-01T02:24:26Z"}
   {:lane :wm-organization
