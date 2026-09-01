@@ -265,3 +265,32 @@ different run, and the ids will not match.
 
 **C395 finding 1 is closed. Four remain**, two of which (truncate-and-re-extend, copied ledger) wait on C409's
 answer about whether any append-only authority exists locally.
+
+## C416 — owner review of C409: the negative result holds, and the journal asymmetry is sharper than stated
+
+**Gated C409 (`a843c45`) because I acted on it immediately** — I told `wm-organization` not to attempt the
+truncate-and-re-extend and copied-ledger repairs. **A wrong census would have closed a line of work
+wrongly**, so it needed checking rather than accepting.
+
+**Verified, running as `joe`:**
+
+| claim | check | result |
+|---|---|---|
+| evidence stores mutable by their writer | `stat` on the coordinator registry, `.git` | `joe:joe -rw-------`, `joe:joe drwxrwxr-x` — **confirmed** |
+| journal externally administered | `stat /var/log/journal` | `root:systemd-journal drwxr-sr-x` — **confirmed** |
+| no append-only/immutable protection | `lsattr` on both repos | `-------------e-------` (extents only) — **confirmed** |
+| `joe` can append to the journal | `systemd-cat -t wm-anchor-probe`, read back | **wrote and read back** |
+
+**One refinement, in C409's favour.** The report calls the journal *"unsealed, root-mutable"*, which is true
+and understates the asymmetry **for the threat model that matters here**. The relevant adversary is the account
+that writes the evidence, and **`joe` can append to the journal but cannot unlink or rewrite it**: the journal
+directory is `root:systemd-journal` with group `r-x`, so even group membership grants no write. **Append
+without erase is exactly the asymmetry a ledger anchor needs.**
+
+**It remains not a proof.** Root can still rewrite, retention still expires, and nothing is sealed — so an
+anchor raises the cost of forgery without establishing history length. **That is the distinction C415 is
+assessing, and I have not pre-empted its answer**; this note records the probe so the review has the same
+ground truth.
+
+**Recorded rather than belled** — `wm-evidence` is mid-C415 and a second bell into a running job is how a
+question gets mistaken for an answer.
