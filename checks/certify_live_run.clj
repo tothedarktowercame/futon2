@@ -4,6 +4,7 @@
             [cheshire.core :as json]
             [clojure.edn :as edn]
             [clojure.string :as str]
+            [checks.wm-click-resource-observer :as click-observer]
             [checks.wm-operational-certificate :as certificate]))
 
 (def default-run-dir "holes/labs/wm-contract")
@@ -45,7 +46,8 @@
 (defn json-receipt [path]
   (try
     (let [m (json/parse-string (slurp path) true)]
-      (when (= "futon-bounded-test-v1" (:schema m)) m))
+      (when (contains? #{"futon-bounded-test-v1" "wm-click-resource-v1"}
+                       (:schema m)) m))
     (catch Exception _ nil)))
 
 (defn receipt-files [dirs]
@@ -56,27 +58,37 @@
                            (fs/glob dir "*resource-receipt.json")))))
        (map str) distinct sort vec))
 
-(defn encloses-run? [run-start receipt]
+(defn encloses-run? [run receipt]
   (let [started (instant (:started-at receipt))
-        finished (instant (:finished-at receipt))]
+        finished (instant (:finished-at receipt))
+        run-start (instant (:startedAt run))]
     (and started finished run-start
          (not (.isAfter started run-start))
          (not (.isBefore finished run-start))
-         (str/includes? (str (:command receipt)) "run-tick-once"))))
+         (case (:schema receipt)
+           "futon-bounded-test-v1"
+           (str/includes? (str (:command receipt)) "run-tick-once")
 
-(defn matching-resources [run-start dir]
+           "wm-click-resource-v1"
+           (and (= "shared-serving-jvm" (:observation-scope receipt))
+                (= (:run/id run) (:run-id receipt))
+                (= (:click/id run) (:click-id receipt))
+                (contains? #{"clean" "dirty" "unavailable"}
+                           (:resource-status receipt)))
+           false))))
+
+(defn matching-resources [run dir]
   (->> (receipt-files [dir])
        (keep (fn [path]
                (when-let [receipt (json-receipt path)]
-                 (when (encloses-run? run-start receipt)
+                 (when (encloses-run? run receipt)
                    {:path path :receipt receipt}))))
        vec))
 
 (defn locate-resource! [run-id run resource-dirs]
-  (let [run-start (instant (:startedAt run))
-        ;; Directories are precedence tiers: committed receipts win over the
+  (let [;; Directories are precedence tiers: committed receipts win over the
         ;; wrapper's transient spool, but ambiguity inside one tier is loud.
-        matches (or (some #(not-empty (matching-resources run-start %)) resource-dirs) [])]
+        matches (or (some #(not-empty (matching-resources run %)) resource-dirs) [])]
     (case (count matches)
       1 (first matches)
       0 (fail! "bounded resource receipt missing"
@@ -86,17 +98,22 @@
              {:run/id run-id :matches (mapv :path matches)}))))
 
 (defn normalized-resource [run-id source-path r]
-  {:schema 1
-   :run/id run-id
-   :source-schema :futon-bounded-test-v1
-   :status (keyword (:resource-status r))
-   :reason (some-> (:reason r) keyword)
-   :command-exit (:inner-exit r)
-   :wrapper-exit (:outer-exit r)
-   :pids-events-max-delta (:pids-events-max-delta r)
-   :native-thread-exhaustion (boolean (seq (:native-thread-markers r)))
-   :tasks-peak (:pids-peak r)
-   :source-receipt source-path})
+  (let [click? (= "wm-click-resource-v1" (:schema r))]
+    (if click?
+      (click-observer/certificate-resource run-id source-path r)
+      {:schema 2
+     :run/id run-id
+     :source-schema (keyword (:schema r))
+     :observation-scope (some-> (:observation-scope r) keyword)
+     :status (keyword (:resource-status r))
+     :reason (some-> (:reason r) keyword)
+     :execution-outcome (when click? (keyword (:terminal-outcome r)))
+     :command-exit (when-not click? (:inner-exit r))
+     :wrapper-exit (when-not click? (:outer-exit r))
+     :pids-events-max-delta (:pids-events-max-delta r)
+     :native-thread-exhaustion (boolean (seq (:native-thread-markers r)))
+     :tasks-peak (:pids-peak r)
+       :source-receipt source-path})))
 
 (defn main [args]
   (let [{:keys [run-id run-dir resource-dirs out-dir]

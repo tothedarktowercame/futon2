@@ -30,7 +30,12 @@
            (= (:run/id run) (:run/id r)))
        (zero? (long (or (:pids-events-max-delta r) -1)))
        (false? (:native-thread-exhaustion r))
-       (= 0 (:command-exit r))))
+       (case (:source-schema r)
+         :wm-click-resource-v1
+         (and (= :shared-serving-jvm (:observation-scope r))
+              (not (contains? #{nil :unknown :service-failed}
+                              (:execution-outcome r))))
+         (= 0 (:command-exit r)))))
 
 (defn run-identity [run-bytes run]
   (if-let [run-id (:run/id run)]
