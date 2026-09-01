@@ -7,7 +7,7 @@
   :glossary-sha256
   "780a64afbdb4a9f47a2e399fd3611f79961b6facbbddac02630895592e867889",
   :witness-registry-sha256
-  "278dfb6ccfa106ab85330fe61f8a7a6e2918c87b1f82694ac7de0a5cf76dba52"},
+  "e3db8b8fca6f411d6a1a46b4925429b9a6b91993cc927f4bbc40287aa4fe6288"},
  :axes
  {:content-status
   [:named-only

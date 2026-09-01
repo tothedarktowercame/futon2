@@ -1,24 +1,24 @@
 {:lanes
  [{:lane :wm-nouns,
-   :closed-attributed 17,
-   :open-holding 1,
-   :in-flight "C294",
-   :holding :C294-control-liveness}
+   :closed-attributed 31,
+   :open-holding 0,
+   :in-flight :none,
+   :holding :idle}
   {:lane :wm-verbs,
-   :closed-attributed 19,
-   :open-holding 1,
-   :in-flight "C293",
-   :holding :C293-multiread-sweep}
+   :closed-attributed 41,
+   :open-holding 0,
+   :in-flight :none,
+   :holding :idle}
   {:lane :wm-organization,
-   :closed-attributed 20,
-   :open-holding 1,
-   :in-flight "C290",
-   :holding :C290-window-cost}
+   :closed-attributed 43,
+   :open-holding 0,
+   :in-flight :none,
+   :holding :idle}
   {:lane :wm-evidence,
-   :closed-attributed 14,
+   :closed-attributed 29,
    :open-holding 1,
-   :in-flight "C295",
-   :holding :C295-decision-staleness}],
+   :in-flight "C423",
+   :holding :C423-certificate-negative-controls}],
  :schema :wm/workflow-report-v2,
  :since "2026-08-30T00:00:00Z",
  :semantics
@@ -38,16 +38,16 @@
  :sources
  {:case-ledger
   {:path "p4ng/vetting/CLEANUP-QUEUE.md",
-   :revision "2d0d199",
-   :sha256-prefix "ca48ea574f6f8b45"},
+   :revision "8ee6190",
+   :sha256-prefix "a7834793fb31e20d"},
   :lane-registry
   {:path "futon2/holes/labs/wm-contract/lane-registry.edn",
-   :revision "8031bf3",
-   :sha256-prefix "da176771898a902c",
+   :revision "b0af511",
+   :sha256-prefix "4d5ee665cb169c7e",
    :as-of "2026-08-31T15:39:14.434945104Z"},
   :decisions
   {:path "futon2/holes/problems/DECISIONS-PENDING.md",
-   :sha256-prefix "a3f89acc67e9c55b"}},
+   :sha256-prefix "59c084129473318d"}},
  :pending
  ["Strategic outcome vocabulary"
   "Authored R16 outward-act binding"
@@ -63,22 +63,22 @@
   "Support-typed shadow as the live selection authority"
   "Invoke-jobs ledger storage backend"
   "Cascade carrier: how meets are established"],
- :owner-repairs ["C213"],
+ :owner-repairs ["C213" "C335" "C336"],
  :totals
- {:cases-in-ledger 202,
-  :cases-attributed 72,
-  :closed-by-lanes 70,
-  :owner-repairs 1,
+ {:cases-in-ledger 278,
+  :cases-attributed 148,
+  :closed-by-lanes 144,
+  :owner-repairs 3,
   :open-dispatched 1,
   :pending-decisions 14},
- :ledger-frontier 289,
- :as-of "2026-09-01T00:43:03.728204199Z",
+ :ledger-frontier 382,
+ :as-of "2026-09-01T03:08:40.383152032Z",
  :attribution
- {:systematic-from "C283",
-  :systematic-run-length 7,
+ {:systematic-from "C378",
+  :systematic-run-length 5,
   :systematic-window? true,
-  :cases-attributed 72,
-  :cases-in-ledger 202,
+  :cases-attributed 148,
+  :cases-in-ledger 278,
   :attributed-cases
   ["C209"
    "C210"
@@ -151,9 +151,85 @@
    "C286"
    "C287"
    "C288"
-   "C289"],
+   "C289"
+   "C290"
+   "C293"
+   "C294"
+   "C295"
+   "C296"
+   "C297"
+   "C298"
+   "C299"
+   "C300"
+   "C301"
+   "C302"
+   "C303"
+   "C304"
+   "C305"
+   "C307"
+   "C308"
+   "C309"
+   "C310"
+   "C311"
+   "C312"
+   "C313"
+   "C315"
+   "C316"
+   "C317"
+   "C318"
+   "C319"
+   "C321"
+   "C323"
+   "C324"
+   "C325"
+   "C326"
+   "C327"
+   "C328"
+   "C329"
+   "C330"
+   "C331"
+   "C332"
+   "C335"
+   "C336"
+   "C337"
+   "C338"
+   "C339"
+   "C341"
+   "C342"
+   "C343"
+   "C344"
+   "C345"
+   "C346"
+   "C347"
+   "C349"
+   "C351"
+   "C352"
+   "C353"
+   "C355"
+   "C356"
+   "C357"
+   "C359"
+   "C360"
+   "C361"
+   "C363"
+   "C364"
+   "C365"
+   "C366"
+   "C367"
+   "C369"
+   "C370"
+   "C371"
+   "C372"
+   "C373"
+   "C375"
+   "C376"
+   "C378"
+   "C379"
+   "C380"
+   "C381"
+   "C382"],
   :note
   "per-lane counts cover only cases whose ledger heading names a lane. :systematic-window? is false when the continuous run is a single case, in which case :systematic-from names a coincidence rather than a window and should not be rendered as one. :systematic-from is exact coverage over the LEDGER only -- every case number from it to :ledger-frontier carries an attribution; :frontier is larger because it also counts open registry holdings, which are not ledger attributions -- and every heading inside that window must be classifiable or the generator fails. Cases below it are counted in :cases-in-ledger without a lane, so these are not a campaign census."},
- :frontier 295,
+ :frontier 423,
  :schema-change
  "v1 -> v2 (C244): :dispatched/:completed/:blocked replaced by :closed-attributed/:open-holding, because no dispatch log exists and :dispatched claimed one"}

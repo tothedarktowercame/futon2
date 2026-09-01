@@ -8,6 +8,6 @@
   {:lane :wm-verbs
    :holding nil, :dispatched-at nil, :job-id nil, :expected-by nil}
   {:lane :wm-organization
-   :holding :C421-declare-unrepairable-limits, :dispatched-at "2026-09-01T03:05:30Z", :job-id "invoke-1788231921725-6578-2033c0c5", :expected-by "2026-09-01T03:50:30Z"}
+   :holding nil, :dispatched-at nil, :job-id nil, :expected-by nil}
   {:lane :wm-evidence
-   :holding :C419-reattack-certificate-retry, :dispatched-at "2026-09-01T03:05:30Z", :job-id "invoke-1788231926106-6579-c68e95b6", :expected-by "2026-09-01T03:50:30Z"}]}
+   :holding :C423-certificate-negative-controls, :dispatched-at "2026-09-01T03:08:40Z", :job-id "invoke-1788232070615-6582-7aca9c4e", :expected-by "2026-09-01T03:53:40Z"}]}
