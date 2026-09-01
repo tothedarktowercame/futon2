@@ -1,6 +1,59 @@
 (ns futon2.aif.policy-precision-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.java.shell :as shell]
+            [clojure.string :as str]
+            [clojure.test :refer [deftest is testing]]
             [futon2.aif.policy-precision :as policy-precision]))
+
+(def ^:private pre-log-prior-revision
+  "e9bcf35")
+
+(defn- previous-converge-beta
+  [beta-prior g-values f-pi-values opts]
+  (let [{:keys [exit out err]}
+        (shell/sh "git" "show"
+                  (str pre-log-prior-revision
+                       ":src/futon2/aif/policy_precision.clj"))]
+    (when-not (zero? exit)
+      (throw (ex-info "could not load pre-log-prior solver" {:err err})))
+    (load-string
+     (str/replace-first out
+                        "(ns futon2.aif.policy-precision"
+                        "(ns futon2.aif.policy-precision-before-log-priors"))
+    ((ns-resolve 'futon2.aif.policy-precision-before-log-priors 'converge-beta)
+     beta-prior g-values f-pi-values opts)))
+
+(defn- close?
+  [x y tolerance]
+  (<= (Math/abs (- (double x) (double y))) tolerance))
+
+(defn- test-softmax
+  [scores]
+  (let [maximum (apply max scores)
+        exponentials (mapv #(Math/exp (- (double %) maximum)) scores)
+        total (reduce + exponentials)]
+    (mapv #(/ % total) exponentials)))
+
+(defn- arm-residual
+  [beta beta-prior g-values f-pi-values log-priors placement]
+  (let [gamma (/ 1.0 beta)
+        pi (test-softmax
+            (mapv (fn [e f g] (+ e (- f) (- (* gamma g))))
+                  log-priors f-pi-values g-values))
+        pi-0 (test-softmax
+              (mapv (fn [e g]
+                      (+ (if (= :both placement) e 0.0) (- (* gamma g))))
+                    log-priors g-values))
+        policy-error (reduce + (map (fn [p p0 g] (* (- p p0) g))
+                                    pi pi-0 g-values))]
+    (+ (- beta-prior beta) policy-error)))
+
+(defn- thrown-error
+  [f]
+  (try
+    (f)
+    nil
+    (catch clojure.lang.ExceptionInfo e
+      (:error (ex-data e)))))
 
 (deftest converges-on-real-field-shaped-input-test
   ;; Shape copied from the measured WM field: 110 aligned candidates, rather
@@ -14,6 +67,104 @@
     (is (<= (Math/abs (:fixed-point-residual result)) 1.0e-9))
     (is (= 110 (count (:pi result))))
     (is (= 110 (count (:pi-0 result))))))
+
+(deftest default-path-is-bit-identical-to-pre-log-prior-solver-test
+  (let [g-values (mapv #(+ 0.25 (* 0.004 %)) (range 110))
+        f-pi-values (mapv #(+ -18.0 (* 0.03 (mod % 17))) (range 110))
+        before (previous-converge-beta 1.0 g-values f-pi-values {})
+        after (policy-precision/converge-beta 1.0 g-values f-pi-values {})]
+    (is (= before (dissoc after :log-prior-placement))
+        "all pre-existing keys and numeric values are bit-identical")
+    (is (= :none (:log-prior-placement after)))
+    (is (= (conj (set (keys before)) :log-prior-placement)
+           (set (keys after))))))
+
+(deftest uniform-log-prior-is-a-no-op-test
+  (let [g-values [0.1 0.6 1.4 2.0]
+        f-pi-values [-2.0 -1.7 -1.1 -0.8]
+        log-priors (vec (repeat 4 3.7))
+        none (policy-precision/converge-beta 1.0 g-values f-pi-values)]
+    (doseq [placement [:pi :both]]
+      (let [placed (policy-precision/converge-beta
+                    1.0 g-values f-pi-values
+                    {:log-priors log-priors
+                     :log-prior-placement placement})]
+        (is (close? (:beta-posterior none) (:beta-posterior placed) 1.0e-12))
+        (is (close? (:gamma none) (:gamma placed) 1.0e-12))))))
+
+(deftest nonuniform-log-prior-shift-invariance-test
+  (let [g-values [0.1 0.6 1.4 2.0]
+        f-pi-values [-2.0 -1.7 -1.1 -0.8]
+        log-priors [-1.2 0.4 1.1 -0.3]
+        shifted (mapv #(+ 8.25 %) log-priors)]
+    (doseq [placement [:pi :both]]
+      (let [run #(policy-precision/converge-beta
+                  1.0 g-values f-pi-values
+                  {:log-priors % :log-prior-placement placement})]
+        (is (close? (:beta-posterior (run log-priors))
+                    (:beta-posterior (run shifted)) 1.0e-12))))))
+
+(deftest three-log-prior-arms-are-distinct-on-field-shaped-input-test
+  (let [g-values (mapv #(+ 0.25 (* 0.004 %)) (range 110))
+        f-pi-values (mapv #(+ -18.0 (* 0.03 (mod % 17))) (range 110))
+        log-priors (mapv #(* 0.07 (mod (* 13 %) 19)) (range 110))
+        run (fn [placement]
+              (policy-precision/converge-beta
+               1.0 g-values f-pi-values
+               (if (= :none placement)
+                 {}
+                 {:log-priors log-priors
+                  :log-prior-placement placement})))
+        betas (mapv (comp :beta-posterior run) [:none :pi :both])]
+    (is (= 3 (count (distinct betas))))))
+
+(deftest returned-beta-zeroes-its-own-log-prior-residual-test
+  (let [beta-prior 1.0
+        g-values [0.2 1.7]
+        f-pi-values [-1.3 -0.2]
+        log-priors [-0.8 0.9]
+        tolerance 1.0e-10]
+    (doseq [placement [:pi :both]]
+      (let [result (policy-precision/converge-beta
+                    beta-prior g-values f-pi-values
+                    {:log-priors log-priors
+                     :log-prior-placement placement
+                     :tolerance tolerance})]
+        (is (:converged? result))
+        (is (<= (Math/abs
+                 (arm-residual (:beta-posterior result) beta-prior
+                               g-values f-pi-values log-priors placement))
+                tolerance))))))
+
+(deftest gradient-and-bisect-agree-with-log-priors-test
+  (let [g-values (mapv #(+ 0.25 (* 0.004 %)) (range 110))
+        f-pi-values (mapv #(+ -18.0 (* 0.03 (mod % 17))) (range 110))
+        log-priors (mapv #(* 0.03 (mod (* 7 %) 23)) (range 110))
+        opts {:log-priors log-priors :log-prior-placement :pi
+              :max-iterations 200000}
+        bisect (policy-precision/converge-beta
+                1.0 g-values f-pi-values (assoc opts :solver :bisect))
+        gradient (policy-precision/converge-beta
+                  1.0 g-values f-pi-values (assoc opts :solver :gradient))]
+    (is (:converged? bisect))
+    (is (:converged? gradient))
+    (is (close? (:beta-posterior bisect)
+                (:beta-posterior gradient) 1.0e-6))))
+
+(deftest log-prior-validation-is-loud-test
+  (let [solve #(policy-precision/converge-beta 1.0 [0.0 1.0] [0.0 0.5] %)]
+    (is (= :log-priors-with-no-placement
+           (thrown-error #(solve {:log-priors [0.0 1.0]}))))
+    (is (= :missing-log-priors
+           (thrown-error #(solve {:log-prior-placement :pi}))))
+    (is (= :invalid-log-prior-placement
+           (thrown-error #(solve {:log-prior-placement :elsewhere}))))
+    (is (= :length-mismatch
+           (thrown-error #(solve {:log-prior-placement :both
+                                  :log-priors [0.0]}))))
+    (is (= :non-finite-vector
+           (thrown-error #(solve {:log-prior-placement :pi
+                                  :log-priors [0.0 ##Inf]}))))))
 
 (deftest beta-floor-is-explicit-test
   (let [result (policy-precision/converge-beta

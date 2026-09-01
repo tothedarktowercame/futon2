@@ -14,14 +14,14 @@
   (when-not (sequential? xs)
     (fail! (str label " must be sequential")
            {:error :invalid-vector :field label :value xs}))
-  (let [values (mapv double xs)]
+  (let [values (vec xs)]
     (when (empty? values)
       (fail! (str label " must not be empty")
              {:error :empty-vector :field label}))
     (when-not (every? finite-number? values)
       (fail! (str label " must contain only finite numbers")
              {:error :non-finite-vector :field label :value xs}))
-    values))
+    (mapv double values)))
 
 (defn- softmax
   [scores]
@@ -31,11 +31,20 @@
     (mapv #(/ % total) exponentials)))
 
 (defn- distributions
-  [beta g-values f-pi-values]
+  [beta g-values f-pi-values log-priors log-prior-placement]
   (let [gamma (/ 1.0 beta)
-        pi-0 (softmax (mapv #(- (* gamma %)) g-values))
-        pi (softmax (mapv (fn [f g] (- (+ f (* gamma g))))
-                          f-pi-values g-values))]
+        prior-at (fn [i] (if (= :none log-prior-placement)
+                           0.0
+                           (nth log-priors i)))
+        pi-0 (softmax
+              (mapv (fn [i g]
+                      (+ (if (= :both log-prior-placement) (prior-at i) 0.0)
+                         (- (* gamma g))))
+                    (range) g-values))
+        pi (softmax
+            (mapv (fn [i f g]
+                    (+ (prior-at i) (- f) (- (* gamma g))))
+                  (range) f-pi-values g-values))]
     {:gamma gamma :pi-0 pi-0 :pi pi}))
 
 (defn- dot-difference
@@ -45,8 +54,10 @@
 (defn- fixed-point-residual
   "eq. 2.7's residual at BETA for a fixed carried BETA-PRIOR:
    beta_prior + (pi(beta) - pi_0(beta)) . G - beta."
-  [beta-prior beta g-values f-pi-values]
-  (let [{:keys [pi-0 pi]} (distributions beta g-values f-pi-values)]
+  [beta-prior beta g-values f-pi-values log-priors log-prior-placement]
+  (let [{:keys [pi-0 pi]}
+        (distributions beta g-values f-pi-values
+                       log-priors log-prior-placement)]
     (- (+ beta-prior (dot-difference pi pi-0 g-values)) beta)))
 
 (defn- bisect-beta
@@ -60,8 +71,10 @@
    and reported rather than assumed: if they ever agree, this returns
    `:bracketed? false` and no root, instead of halving its way to a midpoint
    that means nothing."
-  [beta-prior lo hi g-values f-pi-values tolerance max-iterations]
-  (let [f #(fixed-point-residual beta-prior % g-values f-pi-values)
+  [beta-prior lo hi g-values f-pi-values log-priors log-prior-placement
+   tolerance max-iterations]
+  (let [f #(fixed-point-residual beta-prior % g-values f-pi-values
+                                 log-priors log-prior-placement)
         f-lo (f lo)
         f-hi (f hi)]
     (if (pos? (* f-lo f-hi))
@@ -92,6 +105,27 @@
      pi    = softmax(-F_pi - gamma * G)
      epsilon_gamma = (beta_prior - beta) + (pi - pi_0) dot G
      beta_next = beta + step_size * gamma^2 * epsilon_gamma
+
+   HABIT-PRIOR PLACEMENT is explicit and default-off. `:log-priors` is the
+   candidate-aligned ln E vector and must be aligned to the SAME candidate
+   subset as `g-values`:
+
+     :none  pi_0 = softmax(-gamma*G)
+            pi   = softmax(-F_pi - gamma*G)
+     :pi    pi_0 = softmax(-gamma*G)
+            pi   = softmax(lnE - F_pi - gamma*G)
+     :both  pi_0 = softmax(lnE - gamma*G)
+            pi   = softmax(lnE - F_pi - gamma*G)
+
+   ln E is ADDED. `:pi` is Friston 2017's printed form
+   (`friston2017.txt:684`); `:both` is the SPM implementation form
+   (`spm_MDP_VB_X.m:964`). RUN7 measured gamma at tick 20 as 0.9668 for
+   `:none`, 0.9041 for `:pi`, and 0.9712 for `:both`
+   (`futon2/holes/labs/wm-contract/worklist.edn :RUN7 :result`). The default is
+   `:none` because that is what S2 computed, and a reader that did not request
+   ln E must not move. `carry-beta` does not construct the aligned ln E vector
+   yet; that join is the next slice. Passing an unaligned vector through it
+   therefore fails loudly on length rather than producing a wrong join.
 
    TWO SOLVERS. `:solver :bisect` (DEFAULT) closes a bracket on the root of
    eq. 2.7 directly; `:solver :gradient` runs Appendix B's discrete relaxation,
@@ -181,13 +215,15 @@
   ([beta-prior g-values f-pi-values]
    (converge-beta beta-prior g-values f-pi-values {}))
   ([beta-prior g-values f-pi-values
-    {:keys [solver step-size tolerance max-iterations beta-floor beta-ceiling]
+    {:keys [solver step-size tolerance max-iterations beta-floor beta-ceiling
+            log-priors log-prior-placement]
      :or {solver :bisect
           step-size 0.25
           tolerance 1.0e-9
           max-iterations 4096
           beta-floor 1.0e-6
-          beta-ceiling 1.0e6}}]
+          beta-ceiling 1.0e6
+          log-prior-placement :none}}]
    (when-not (and (finite-number? beta-prior) (pos? (double beta-prior)))
      (fail! "beta-prior is required and must be finite and positive"
             {:error :invalid-beta-prior :value beta-prior}))
@@ -211,29 +247,51 @@
    (when-not (#{:bisect :gradient} solver)
      (fail! ":solver must be :bisect or :gradient"
             {:error :invalid-solver :value solver}))
+   (when-not (#{:none :pi :both} log-prior-placement)
+     (fail! ":log-prior-placement must be :none, :pi, or :both"
+            {:error :invalid-log-prior-placement
+             :value log-prior-placement}))
+   (when (and (= :none log-prior-placement) (some? log-priors))
+     (fail! ":log-priors cannot be supplied with :none placement"
+            {:error :log-priors-with-no-placement}))
+   (when (and (#{:pi :both} log-prior-placement) (nil? log-priors))
+     (fail! ":log-priors are required for the requested placement"
+            {:error :missing-log-priors
+             :log-prior-placement log-prior-placement}))
    (let [beta-prior (double beta-prior)
          step-size (double step-size)
          tolerance (double tolerance)
          beta-floor (double beta-floor)
          beta-ceiling (double beta-ceiling)
          g-values (checked-vector :g-values g-values)
-         f-pi-values (checked-vector :f-pi-values f-pi-values)]
+         f-pi-values (checked-vector :f-pi-values f-pi-values)
+         log-priors (when-not (= :none log-prior-placement)
+                      (checked-vector :log-priors log-priors))]
      (when-not (= (count g-values) (count f-pi-values))
        (fail! "g-values and f-pi-values must have identical lengths"
               {:error :length-mismatch
                :g-count (count g-values)
                :f-pi-count (count f-pi-values)}))
+     (when (and log-priors (not= (count g-values) (count log-priors)))
+       (fail! "g-values and log-priors must have identical lengths"
+              {:error :length-mismatch
+               :g-count (count g-values)
+               :log-prior-count (count log-priors)}))
      (if (= :bisect solver)
        (let [{:keys [bracketed? beta evaluations bracket-width
                      residual-at-floor residual-at-ceiling]}
              (bisect-beta beta-prior beta-floor beta-ceiling
-                          g-values f-pi-values tolerance max-iterations)
+                          g-values f-pi-values log-priors log-prior-placement
+                          tolerance max-iterations)
              beta (or beta beta-prior)
-             {:keys [gamma pi-0 pi]} (distributions beta g-values f-pi-values)
+             {:keys [gamma pi-0 pi]}
+             (distributions beta g-values f-pi-values
+                            log-priors log-prior-placement)
              policy-error (dot-difference pi pi-0 g-values)
              residual (+ (- beta-prior beta) policy-error)]
          {:solver :bisect
           :beta-prior beta-prior
+          :log-prior-placement log-prior-placement
           :beta-posterior beta
           :gamma gamma
           :pi-0 pi-0
@@ -262,12 +320,15 @@
             floor-hit-count (if (< beta-prior beta-floor) 1 0)
             ceiling-hit? (> beta-prior beta-ceiling)
             ceiling-hit-count (if (> beta-prior beta-ceiling) 1 0)]
-       (let [{:keys [gamma pi-0 pi]} (distributions beta g-values f-pi-values)
+       (let [{:keys [gamma pi-0 pi]}
+             (distributions beta g-values f-pi-values
+                            log-priors log-prior-placement)
              policy-error (dot-difference pi pi-0 g-values)
              residual (+ (- beta-prior beta) policy-error)
              converged? (<= (Math/abs residual) tolerance)
              hit-bound? (and (not converged?) (>= iteration max-iterations))
              result {:beta-prior beta-prior
+                     :log-prior-placement log-prior-placement
                      :beta-posterior beta
                      :gamma gamma
                      :pi-0 pi-0
