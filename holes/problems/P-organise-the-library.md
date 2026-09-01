@@ -636,3 +636,5 @@ relation between two of them. Use and relation are different evidence, and the l
 the relation level. A vocabulary gap surfaced at the gate: the lint's `:refused` means the EDGE leaves the pattern
 file; refusing a WARRANT is a different act (`:proposed` + review note). Second read of the two sidecar holds: queued
 for claude-13.
+
+**2026-09-01: resumed under the wm-contract build-loop pattern.** Ledger: `futon3/holes/labs/library-contract/worklist.edn` (loop, prompts, decisions.edn beside it). Gate 0 recorded as interim decisions (:spider-editorial-standing, :posthoc-why-syntax) with Joe veto; P-validated-R5 §1 is row LJ1 :needs-joe.
