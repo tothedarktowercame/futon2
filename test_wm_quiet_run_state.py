@@ -125,21 +125,25 @@ class QuietRunStateTest(unittest.TestCase):
 
     def restoration_artifacts(self, incomplete=False):
         key = self.root / "restore.key"; key.write_bytes(b"fixture secret at least thirty two bytes"); key.chmod(0o600)
+        targets = {
+            restore_sut.TERMINAL_ID: {"kind": "coordinator", "class": "terminal-watchdog",
+                "pre-state": {"durable-status": "complete",
+                              "runtime-scheduler-present?": False,
+                              "watchdog-scheduler-present?": True}}}
+        for identity in restore_sut.RUNNING_IDS:
+            targets[identity] = {"kind": "coordinator", "class": "running-coordinator",
+                "pre-state": {"durable-status": "running", "enabled?": True}}
+        for index, identity in enumerate(restore_sut.UNITS):
+            targets[identity] = {"kind": "unit", "class": "systemd-unit",
+                "pre-state": {"ActiveState": "active" if index == 0 else "inactive"}}
         body = {"schema": restore_sut.SCHEMA, "fence-id": self.fence_id,
-                "captured-at": "fixture", "targets": {
-                    restore_sut.TERMINAL_ID: {"kind": "coordinator", "class": "terminal-watchdog",
-                        "pre-state": {"durable-status": "complete",
-                                      "runtime-scheduler-present?": False,
-                                      "watchdog-scheduler-present?": True}},
-                    restore_sut.UNITS[0]: {"kind": "unit", "class": "systemd-unit",
-                        "pre-state": {"ActiveState": "active"}},
-                    restore_sut.UNITS[1]: {"kind": "unit", "class": "systemd-unit",
-                        "pre-state": {"ActiveState": "inactive"}}}}
+                "captured-at": "fixture", "targets": targets}
         manifest_value = dict(body, **{"manifest-hmac-sha256":
                                        restore_sut.authenticate(body, key.read_bytes())})
         manifest = self.write("manifest.json", manifest_value)
-        specs = [("rearm-terminal-coordinator", restore_sut.TERMINAL_ID),
-                 ("start-unit", restore_sut.UNITS[0])]
+        specs = [("rearm-terminal-coordinator", restore_sut.TERMINAL_ID)] + [
+            ("resume-coordinator", identity) for identity in restore_sut.RUNNING_IDS] + [
+            ("start-unit", restore_sut.UNITS[0])]
         if incomplete: specs = specs[:1]
         rows = [{"schema": restore_sut.SCHEMA, "fence-id": self.fence_id,
                  "manifest-hmac-sha256": manifest_value["manifest-hmac-sha256"],
@@ -304,6 +308,54 @@ class QuietRunStateTest(unittest.TestCase):
         self.click_status = {"running?": False, "click-id": None, "last-result": None}
         self.assertEqual(1, self.advance("click-issued", fake))
         self.assertEqual("reload-recorded", sut.load_ledger(self.ledger)[-1]["state"])
+
+    def test_inactive_single_target_manifest_cannot_restore_vacuously(self):
+        key = self.root / "empty.key"
+        key.write_bytes(b"fixture secret at least thirty two bytes"); key.chmod(0o600)
+        body = {"schema": restore_sut.SCHEMA, "fence-id": self.fence_id,
+                "captured-at": "fixture", "targets": {
+                    restore_sut.UNITS[0]: {"kind": "unit", "class": "systemd-unit",
+                        "pre-state": {"ActiveState": "inactive"}}}}
+        manifest_value = dict(body, **{"manifest-hmac-sha256":
+                                       restore_sut.authenticate(body, key.read_bytes())})
+        manifest = self.write("inactive-manifest.json", manifest_value)
+        journal = self.write("empty-journal.jsonl", {})
+        Path(journal).write_text("")
+        outcomes = self.write("empty-outcomes.jsonl", {})
+        Path(outcomes).write_text("")
+        result = self.write("empty-restore.json", {"ok": True})
+        args = type("Args", (), {"evidence": result, "manifest": manifest,
+            "journal": journal, "outcomes": outcomes, "key_file": str(key)})()
+        with self.assertRaisesRegex(ValueError,
+                                    "restoration-manifest-population-incomplete"):
+            sut.evidence_restored(args, {"fence-id": self.fence_id})
+
+    def test_complete_manifest_with_no_active_writers_is_not_restoration(self):
+        key = self.root / "none.key"
+        key.write_bytes(b"fixture secret at least thirty two bytes"); key.chmod(0o600)
+        targets = {restore_sut.TERMINAL_ID: {"kind": "coordinator",
+            "class": "terminal-watchdog", "pre-state": {
+                "durable-status": "complete", "runtime-scheduler-present?": False,
+                "watchdog-scheduler-present?": False}}}
+        for identity in restore_sut.RUNNING_IDS:
+            targets[identity] = {"kind": "coordinator", "class": "running-coordinator",
+                "pre-state": {"durable-status": "stopped", "enabled?": False}}
+        for identity in restore_sut.UNITS:
+            targets[identity] = {"kind": "unit", "class": "systemd-unit",
+                "pre-state": {"ActiveState": "inactive"}}
+        body = {"schema": restore_sut.SCHEMA, "fence-id": self.fence_id,
+                "captured-at": "fixture", "targets": targets}
+        manifest_value = dict(body, **{"manifest-hmac-sha256":
+                                       restore_sut.authenticate(body, key.read_bytes())})
+        manifest = self.write("none-manifest.json", manifest_value)
+        journal = self.root / "none-journal.jsonl"; journal.write_text("")
+        outcomes = self.root / "none-outcomes.jsonl"; outcomes.write_text("")
+        result = self.write("none-restore.json", {"ok": True})
+        args = type("Args", (), {"evidence": result, "manifest": manifest,
+            "journal": str(journal), "outcomes": str(outcomes), "key_file": str(key)})()
+        with self.assertRaisesRegex(ValueError,
+                                    "restoration-not-required:no-active-writers-recorded"):
+            sut.evidence_restored(args, {"fence-id": self.fence_id})
 
 
 if __name__ == "__main__": unittest.main()

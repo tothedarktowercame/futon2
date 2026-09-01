@@ -418,7 +418,12 @@ def active_manifest_targets(manifest):
     result = set()
     for identity, entry in manifest.get("targets", {}).items():
         pre = entry.get("pre-state", {})
-        if entry.get("class") in ("terminal-watchdog", "running-coordinator"):
+        if (entry.get("class") == "terminal-watchdog" and
+                pre.get("watchdog-scheduler-present?") is True):
+            result.add(identity)
+        elif (entry.get("class") == "running-coordinator" and
+              pre.get("durable-status") == "running" and
+              pre.get("enabled?") is True):
             result.add(identity)
         elif entry.get("class") == "systemd-unit" and pre.get("ActiveState") in ("active", "activating"):
             result.add(identity)
@@ -433,7 +438,13 @@ def evidence_restored(args, context):
     journal = restoration.load_journal(args.journal)
     restoration.validate_rows(manifest, journal)
     outcomes = restoration.load_outcomes(args.outcomes, manifest, journal)
+    required_manifest_population = set(restoration.COORDINATORS + restoration.UNITS)
+    observed_manifest_population = set(manifest.get("targets", {}))
+    require(observed_manifest_population == required_manifest_population,
+            "restoration-manifest-population-incomplete:capture-invalid")
     expected = active_manifest_targets(manifest)
+    require(expected,
+            "restoration-not-required:no-active-writers-recorded")
     journal_targets = {x.get("target") for x in journal}
     outcome_targets = {x.get("target") for x in outcomes if x.get("status") == "restored"}
     require(journal_targets == expected, "park-journal-target-population-incomplete")

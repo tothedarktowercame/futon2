@@ -34,6 +34,11 @@ RULES = [
     {"id": "restore-journal", "path": "scripts/writer_fence_restore.py",
      "accept": r"def restore\(", "proof": r"NOTHING-RECORDED:journal-(?:missing|empty)",
      "subject": "restoration journal"},
+    {"id": "quiet-run-active-restoration-population",
+     "path": "scripts/wm_quiet_run_state.py",
+     "accept": r"def evidence_restored\(",
+     "proof": r"restoration-not-required:no-active-writers-recorded",
+     "subject": "active writers requiring restoration"},
     {"id": "fence-receipt-observations", "path": "writer_fence_capability.clj",
      "accept": r"held\?\s+\(empty\?\s+problems\)",
      "proof": r"(?:prior|receipt)-observations-(?:absent|empty)|observation-population-(?:absent|empty)",
@@ -51,6 +56,8 @@ HISTORICAL = [
     ("fbd204c^", "checks/wm_operational_certificate.clj", "historical-incomplete-certificate"),
     ("6591647^", "checks/ambiguity_witness.clj", "historical-empty-lean-baseline"),
     ("adfa555^", "scripts/writer_fence_restore.py", "historical-empty-restoration"),
+    ("d704401", "scripts/wm_quiet_run_state.py",
+     "quiet-run-active-restoration-population"),
     ("30dd5b1", "writer_fence_capability.clj", "fence-receipt-observations"),
 ]
 
