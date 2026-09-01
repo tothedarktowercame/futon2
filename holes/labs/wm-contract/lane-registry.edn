@@ -8,6 +8,6 @@
   {:lane :wm-verbs
    :holding :C418-mark-catalogue-boundaries, :dispatched-at "2026-09-01T03:01:48Z", :job-id "invoke-1788231699210-6570-23e62f9c", :expected-by "2026-09-01T03:46:48Z"}
   {:lane :wm-organization
-   :holding :C413-empty-restoration-population, :dispatched-at "2026-09-01T02:58:39Z", :job-id "invoke-1788231505542-6561-a82d4069", :expected-by "2026-09-01T03:43:39Z"}
+   :holding :C420-monotonic-presence-check, :dispatched-at "2026-09-01T03:03:32Z", :job-id "invoke-1788231808438-6574-ff577ea4", :expected-by "2026-09-01T03:48:32Z"}
   {:lane :wm-evidence
    :holding :C419-reattack-certificate, :dispatched-at "2026-09-01T03:01:48Z", :job-id "invoke-1788231703946-6571-fb6b3bf2", :expected-by "2026-09-01T03:46:48Z"}]}
