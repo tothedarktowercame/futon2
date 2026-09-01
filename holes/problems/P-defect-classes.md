@@ -23,7 +23,8 @@ and 7 remain judgement-scoped and therefore have no honest extinction claim.
 failure quantity it computes, tests only shape/nonemptiness, or announces success
 without inspecting the reader-held result.
 
-**Instances.** Seven:
+**Instances.** The original seven below, plus a nine-site cross-layer population
+measured on 2026-09-01:
 
 1. R2's historical census ran over a supplied empty population and passed
    vacuously. C35 distinguishes this population defect from the now-rejecting
@@ -48,6 +49,21 @@ without inspecting the reader-held result.
    their positive baseline was valid. C356 requires a declaration-bearing,
    `sorry`-free source before elaboration
    (`holes/labs/wm-contract/C356-nonvacuous-positive-lean-witness.md`).
+
+The C361 population showed the same empty-subject acceptance in nine independent
+boundaries: a semantically empty ledger; an incomplete run certificate; a
+zero-declaration strict contract; unreadable run-id history treated as proof of
+uniqueness; an all-zero model-coverage table; empty Lean positive witnesses; a
+zero-target restoration manifest; a missing/empty restoration journal; and an
+observation-free writer-fence receipt. These are one property, not nine local
+idioms: success must establish that its subject existed and was examined.
+`checks/empty_subject_acceptance_lint.py` registers the acceptance subject and
+its executable nonempty proof, tests real pre-repair revisions, and runs in the
+workspace gate in report-only mode. Its blocking self-test proves that Python
+`all`, Clojure `every?`, and truthy defaults are rejected without a nonempty
+precondition while explicit empty rejection is accepted. The lint is bounded:
+novel and helper-hidden data flow is `unverified`, not automatically declared
+defective. **Prevention type: check + lint.**
 
 **Found by.** Semantic mutations; deliberately empty populations; counting
 accepted/rejected outcomes; reading the proposition rather than satisfying it;

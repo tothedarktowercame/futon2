@@ -258,7 +258,11 @@
    ;; means the census ran; the emitted `findings=N` line is the build state.
    ;; UNAVAILABLE remains nonzero and therefore fails this gate.
    {:name :live-artifact-format-boundaries
-    :argv ["python3" "checks/live_artifact_format_boundary_lint.py" "--report"]}])
+    :argv ["python3" "checks/live_artifact_format_boundary_lint.py" "--report"]}
+   ;; Report-only while independently owned acceptance boundaries are repaired.
+   ;; Missing inputs remain a blocking instrument failure; findings stay visible.
+   {:name :empty-subject-acceptance
+    :argv ["python3" "checks/empty_subject_acceptance_lint.py" "--report"]}])
 
 (defn control-commands []
   [{:name :c157-perturbed-entropy
@@ -410,7 +414,9 @@
            "--negative-run-record"]}
    {:name :c284-format-proof-must-be-executable
     :argv ["python3" "checks/live_artifact_format_boundary_lint.py"
-           "--negative-control"]}])
+           "--negative-control"]}
+   {:name :c361-empty-subject-lint-controls
+    :argv ["python3" "checks/empty_subject_acceptance_lint.py" "--self-test"]}])
 
 (defn run-one [{:keys [name argv dir]}]
   (println "wm-workspace-gate: RUN" (clojure.core/name name))
