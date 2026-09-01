@@ -19,10 +19,12 @@
  :gate "A row touching aif-equations.edn or control-map-edges.edn stays :done-unreviewed until a second reader sets :reviewed-by; p4ng regenerates from those registries only when no such row is :done-unreviewed (TN §9a)."
  :items
  [;; ---------- D: drawing corrections to Figure 5A (owner wm-organization) ----------
-  {:id :D1 :class :D :status :open :owner :wm-organization
+  {:id :D1 :class :D :status :done-unreviewed :owner :wm-organization
    :statement "R8->R5 is drawn as an edge but carries no data: R5 never receives F (C448, C451)."
    :acceptance "control-map-edges.edn: the R8->R5 edge gains :data-flow :none and :basis citing C451 (war_machine.clj:4458-4466 omits F; efe.clj:601-619 predicts from state and action); gen_live_topology.bb renders :data-flow :none distinctly with a legend entry; negative_controls.sh passes; commit sha recorded here."
-   :pointers ["holes/labs/wm-contract/C451-unexplained-drawn-edges.md" "p4ng/empirics-futon/control-map-edges.edn"]}
+   :pointers ["holes/labs/wm-contract/C451-unexplained-drawn-edges.md" "p4ng/empirics-futon/control-map-edges.edn"]
+   :taken-by "claude-cli (any-lane; owner row unchanged)"
+   :evidence "p4ng b969ba0. Registry: control-map-edges.edn R8->R5 :data-flow :none, :basis citing C451. Generator: gen_live_topology.bb edge-svg :drawn branch + legend swatch. Verified independently: war_machine.clj:4450-4451 binds F, :4452 route-tags :R8, :4458-4466 (wm-state) omits it, :4536 passes wm-state to rank-actions, efe.clj:601-619 predicts from state and action, and F's only other occurrence is the report copy at war_machine.clj:4753 -- nothing between :4452 and :4753 reads it. Gates: negative_controls.sh PASS (9 negative, 3 positive); pointer_check 50 pointers, 0 unresolved. aif-control-map-live.svg deliberately NOT regenerated (gate, TN 9a)."}
   {:id :D2 :class :D :status :open :owner :wm-organization
    :statement "R2->R3 is the theory path R2->R8->R3 drawn short; R3 reads o only through eps and Pi (war_machine.clj:4368-4388)."
    :acceptance "control-map-edges.edn :decisions gains an entry retiring [:R2 :R3] and adding [:R2 :R8] [:R8 :R3], :by the agent id, :at date, :basis C448/C451 pointers; regenerate; controls pass."
