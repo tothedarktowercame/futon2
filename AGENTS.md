@@ -76,3 +76,28 @@ would be.
 The instance: `test/futon2/aif/policy_free_energy_test.clj`, the block below
 the rule comment. The finding: `holes/labs/wm-contract/worklist.edn` row `:I2`
 `:slice-b1`.
+
+## Never pipe a gate's output (2026-09-01)
+
+A pipeline's exit status is the *last* command's. `bb worklist_check.bb | cut`
+reports `cut`'s success no matter what the check found, so an invalid ledger
+committed cleanly and sat in history for a minute before anyone noticed. Run
+the gate bare, or capture its status and read that:
+
+```bash
+bb worklist_check.bb worklist.edn; rc=$?      # not: ... | tail -1
+[ "$rc" -eq 0 ] || exit "$rc"
+```
+
+`&&` chains have the mirror problem: a `cd` earlier in the chain can send a
+later command somewhere the file isn't, and a trailing `tail -1` eats the
+error, so the run looks like silence rather than failure. Both of us hit this
+within an hour of each other, in opposite directions.
+
+This is the same shape as three other defects this campaign found — a pointer
+check that read a range's end and ignored its start, `edn/read-string`
+returning the first form of a 38-record file, and a test whose fixtures were
+the wrong shape. **A tool answering a narrower question than the one being
+asked, and its answer read as though it were the wide one.** The defence is
+always the same: look at what the tool actually did — the exit code, the diff,
+the count — before believing what it seems to have said.
