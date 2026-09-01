@@ -25,6 +25,21 @@
 ;; rather than sent; `http/get` is left alone because GETs are read-only and we
 ;; want the tick to see real data; `spit` is intercepted so the run leaves no
 ;; artifact behind. If the recorded POST list is non-empty, do not run R2.
+;;
+;; ONE WRITE IS PASSED THROUGH, AND IT HAS TO BE (RUN7, 2026-09-01). The run
+;; lock (RUN12) is taken by `spit`ting the holder record into
+;; data/wm-trace/.run-lock, and `release!` deletes the file only when it can
+;; read its own token back out of it. Intercepting that write left a ZERO-BYTE
+;; lock file behind: `acquire!` had already called `.createNewFile`, the
+;; content never arrived, and release read `:not-ours` and kept the file. That
+;; is precisely the shape RUN12 fails closed on -- "a lock file with no pid is
+;; what an acquirer looks like between creating the file and writing it" -- so
+;; the FIRST S2 run attempt was refused by a lock its own pre-flight had
+;; stranded, and every later run would have been too. The two mechanisms had
+;; never met: RUN12 ran no tick, and the pre-flights before it predate the lock.
+;; The lock is not an artifact to suppress; it is mutual exclusion, and a
+;; pre-flight tick is a tick that should hold it. So its writes pass through and
+;; are reported separately from the intercepted ones.
 (require '[clojure.string]
          '[babashka.http-client :as http]
          '[futon2.run-tick-once :as tick])
@@ -39,12 +54,21 @@
 ;; futon3c/.admintoken first, whether or not it is an http/post. A gate that
 ;; only counts POSTs would pass a tick that reached :6768 some other way.
 (def ^:private original-slurp slurp)
+(def ^:private original-spit spit)
+(def ^:private lock-writes (atom []))
+
+(defn- run-lock-path? [path]
+  (clojure.string/ends-with? (str path) "/.run-lock"))
 
 (defn- forbidden-read? [path]
   (clojure.string/includes? (str path) ".admintoken"))
 
 (with-redefs [http/post (fn [& r] (swap! posts conj (first r)) {:status 500 :body ""})
-              spit (fn [p & _] (swap! writes conj (str p)) nil)
+              spit (fn [p & r]
+                     (if (run-lock-path? p)
+                       (do (swap! lock-writes conj (str p))
+                           (apply original-spit p r))
+                       (do (swap! writes conj (str p)) nil)))
               ;; pass through, but record every path the tick reads
               slurp (fn [src & opts]
                       (swap! reads conj (str src))
@@ -57,6 +81,18 @@
     (doseq [p (distinct @posts)] (println "r6-preflight:   POST ->" p))
     (println "r6-preflight: writes the tick would make:")
     (doseq [w (distinct @writes)] (println "r6-preflight:  " w))
+    (println (format "r6-preflight: run-lock writes PASSED THROUGH: %d"
+                     (count @lock-writes)))
+    (doseq [w (distinct @lock-writes)] (println "r6-preflight:   LOCK ->" w))
+    ;; A pre-flight that took the lock must not leave it: report it, because a
+    ;; stranded lock is what this repair exists to stop happening silently.
+    (let [lock-file (java.io.File. (str (System/getProperty "user.home")
+                                        "/code/futon2/data/wm-trace/.run-lock"))]
+      (println (format "r6-preflight: run lock after the tick: %s"
+                       (if (.exists lock-file)
+                         (str "STILL PRESENT (" (.length lock-file)
+                              " bytes) -- the run will be refused")
+                         "released"))))
     (let [token-reads (filter forbidden-read? @reads)]
       (println (format "r6-preflight: paths read: %d; .admintoken reads: %d"
                        (count (distinct @reads)) (count token-reads)))
