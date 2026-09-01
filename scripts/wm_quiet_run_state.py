@@ -284,11 +284,6 @@ def evidence_tested(args, context):
     fence = json_file(fence_path); att = json_file(attestation_path)
     require(fence.get("verdict") == "FENCE-VERIFIABLE", "tested-fence-not-verifiable")
     observed = instant(fence.get("observation-interval", {}).get("finished-at"))
-    # The start instant comes from systemd, not from receipt JSON supplied by
-    # the presenter.  It is monotonic on the same boot as the producer.
-    gate_start_mono = gate_record.get("systemd", {}).get("ExecMainStartTimestampMonotonic")
-    require(str(gate_start_mono or "").isdigit() and int(gate_start_mono) > 0,
-            "gate-start-substrate-unavailable")
     gate_finish = instant(gate.get("finished-at"))
     expires = instant(att.get("expires-at"))
     require(all((observed, gate_finish, expires)), "tested-interval-unreadable")

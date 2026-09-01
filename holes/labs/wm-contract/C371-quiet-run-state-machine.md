@@ -93,12 +93,13 @@ establish restoration.
 
 ## Interval policy
 
-The machine chooses refusal, not implicit refresh. Systemd must supply the
-gate process's actual monotonic start observation, and the fence observation
-must still be at most 300 seconds old at machine ingestion; caller-authored
-receipt times cannot freshen it. The attestation must remain valid through gate
-finish. If either condition fails, obtain a new observation and new bounded
-runs; the existing transition does not fire.
+The machine chooses refusal, not implicit refresh. The fence observation must
+still be at most 300 seconds old at machine ingestion; caller-authored receipt
+times cannot freshen it. The attestation must remain valid through gate finish.
+Systemd's boot-relative process-start field is deliberately not claimed: the
+fence observation is wall-clock based and records no boot identity or monotonic
+sample with which to compare it. If either enforced condition fails, obtain a
+new observation and new bounded runs; the existing transition does not fire.
 
 The attestation claim deliberately ends at `tested-commit`. Reload and live
 author/reviewer latency are unbounded, so later receipts carry

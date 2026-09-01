@@ -281,6 +281,17 @@ class QuietRunStateTest(unittest.TestCase):
                 "--job-id", "job-gate", "--job-id", "job-futon2",
                 "--job-id", "job-futon3"))
 
+    def test_systemd_monotonic_presence_is_not_a_freshness_claim(self):
+        fence, att = self.reach_fence()
+        records = self.bounded_records()
+        for record in records.values():
+            record["systemd"].pop("ExecMainStartTimestampMonotonic", None)
+        with mock.patch.object(sut, "bounded_job", side_effect=records.__getitem__):
+            self.assertEqual(0, self.advance("tested-commit", None,
+                "--fence-evidence", fence, "--attestations", att,
+                "--job-id", "job-gate", "--job-id", "job-futon2",
+                "--job-id", "job-futon3"))
+
     def test_handwritten_quiescence_evidence_is_not_consumed(self):
         fake = self.write("fake-quiet.json", {"verdict": "QUIESCENT"})
         with mock.patch.object(sut, "observe_quiescence",

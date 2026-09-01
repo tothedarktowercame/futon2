@@ -15,7 +15,9 @@ much of that is achievable on this machine.
 C410 `1d0cc90`). Quiescence and fence evidence are produced by direct
 invocation of their checks. Bounded job records resolve through the Futon3c
 registry, must carry the fence id as attempt identity, and their gate start
-instant comes from systemd's monotonic clock rather than receipt JSON. Click
+freshness is measured at state-machine ingestion rather than trusted from
+receipt JSON. The available systemd monotonic start is not claimed because the
+fence supplies no comparable boot-relative observation. Click
 evidence is checked against the serving JVM over HTTP — a channel the
 presenter does not own — and `certified` invokes the certifier itself. C395's
 handwritten no-run chain is now a passing regression test that refuses at

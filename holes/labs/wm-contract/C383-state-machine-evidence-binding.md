@@ -21,9 +21,10 @@ and every evidence path must remain readable with its recorded SHA-256. JSON
 parsing rejects a valid prefix followed by trailing content.
 
 Freshness is measured when the machine consumes the durable job records, not
-from caller-supplied `started-at`. The registry must expose systemd's actual
-process-start observation, and a fence over 300 seconds old at ingestion
+from caller-supplied `started-at`. A fence over 300 seconds old at ingestion
 refuses. Thus a presenter cannot freshen day-old evidence by editing JSON.
+Systemd's boot-relative monotonic start is not used because the fence record
+has no comparable boot identity and monotonic observation.
 
 `restored` authenticates its records and independently observes every changed
 target through the live restoration backend. Records are necessary but no
