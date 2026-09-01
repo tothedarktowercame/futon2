@@ -44,6 +44,37 @@
                  (when (zero? exit) (str/trim out))))
 (when-not repo-root (die "cannot find the git repo root from" (str script-dir)))
 
+(defn- resolve-path
+  "get-in, except that a MAP element selects by content instead of position.
+
+   `[:equations {:id :precision}]` finds the equation whose :id is :precision;
+   `[:holes {:edge [:R6 :R16]}]` finds that hole. Index addressing into
+   :equations and :holes is a false-positive generator: inserting a row -- as
+   C8 did with :dirichlet-accumulation -- shifts every later index, and the
+   check would then report content drift that is really position drift, a
+   stale signature that is not stale (claude-1, C17 review). Returns ::absent
+   when any step misses, which compares unequal to a real value and equal to
+   another absence -- so a key deleted on both sides is not silently a match
+   with something else."
+  [m key-path]
+  (reduce (fn [acc step]
+            (cond
+              (= ::absent acc) (reduced ::absent)
+              (map? step) (or (first (filter #(= step (select-keys % (keys step)))
+                                             acc))
+                              (reduced ::absent))
+              :else (get acc step ::absent)))
+          m
+          key-path))
+
+(defn- key-paths
+  "One key-path, or several. A vector of vectors is several; anything else is
+   one. C4, C6, C7 and C8 each signed more than one registry entry, and giving
+   such a row a single key-path would check one entry while implying coverage
+   of all of them."
+  [covers-key]
+  (if (vector? (first covers-key)) covers-key [covers-key]))
+
 (defn- registry-at
   "The registry map as of SHA, or nil when the file did not exist there."
   [sha path]
@@ -98,12 +129,17 @@
     (let [then (registry-at sha path)]
       (when-not then
         (die (:id i) "cannot read" path "at" sha "-- the signed sha is not in this history"))
-      (let [was (get-in then key-path ::absent)
-            now (get-in (edn/read-string (slurp (io/file repo-root path))) key-path ::absent)]
-        (when (not= was now)
-          (die (:id i) "signature is stale:" (pr-str key-path) "in" path
-               "changed after" sha "was signed by" (:reviewed-by i)
-               "-- set the row back to :done-unreviewed, or open a new row that supersedes it (TN 9a)"))))))
+      (let [now-file (edn/read-string (slurp (io/file repo-root path)))]
+        (doseq [kp (key-paths key-path)]
+          (let [was (resolve-path then kp)
+                now (resolve-path now-file kp)]
+            (when (= ::absent was)
+              (die (:id i) "covers" (pr-str kp) "which did not exist at" sha
+                   "-- the signature names an entry that was not there to sign"))
+            (when (not= was now)
+              (die (:id i) "signature is stale:" (pr-str kp) "in" path
+                   "changed after" sha "was signed by" (:reviewed-by i)
+                   "-- set the row back to :done-unreviewed, or open a new row that supersedes it (TN 9a)"))))))))
 
 (def by-status (frequencies (map :status (:items w))))
 (println (format "worklist_check: %d items OK; %s; %d signed registry entries verified unchanged since signature, %d superseded and skipped, %d declared :covers-key :none, %d signed registry rows carry no :covers-key and are NOT checked"
