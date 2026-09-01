@@ -1,6 +1,7 @@
 (ns futon2.aif.trace-test
   "Tests for R8 per-call trace persistence."
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing use-fixtures]]
             [futon2.aif.belief :as belief]
@@ -43,12 +44,16 @@
                         :q-sat {:status :present :value 0.0}}]}
                      :controller-score 0.05 :rank 1
                      :preference-stack [{:layer/id :floor :folded? true}]
-                     :prediction {:huge :nested :map :that-should-be-stripped}}
+                     :prediction {:next-observation
+                                  {:mean {:loop-health 0.8 :stack-pct 0.3}}
+                                  :next-belief {:huge :nested}}}
                     {:action {:type :address-sorry :target :sorry/x}
                      :G-risk 0.03 :G-ambiguity 0.015 :structural-pressure 0.7
                      :controller-score 0.045 :rank 2
                      :preference-stack [{:layer/id :floor :folded? true}]
-                     :prediction {:also :stripped}}]
+                     :prediction {:next-observation
+                                  {:mean {:loop-health 0.6 :stack-pct 0.4}}
+                                  :next-belief {:also :stripped}}}]
    :decision {:action {:type :no-op}
               :rank 1 :controller-score 0.05 :tau 0.2
               :softmax-weights {:will-be-stripped :for-trace}}
@@ -201,6 +206,49 @@
     (let [r (trace/trace-record sample-judge-output)]
       (is (not (contains? (:decision r) :softmax-weights))
           "decision in trace doesn't carry :softmax-weights"))))
+
+(deftest policy-trace-details-flag-off-is-byte-identical-test
+  (binding [trace/*persist-policy-trace-details?* false]
+    (let [ranked (first (:ranked-actions sample-judge-output))
+          decision (:decision sample-judge-output)
+          legacy-ranked (select-keys
+                         ranked
+                         [:action :G-risk :G-ambiguity :predictability-bonus
+                          :homeostatic-pressure :structural-pressure :G-goal-outcome
+                          :goal-outcome-replay-inputs :gap-exploration-bonus
+                          :graph-control-score :G-core :G-efe :score-provenance
+                          :risk-mode :ambiguity-mode :g-ambiguity-source :c-zone-load
+                          :goal-outcome-mode :controller-augmentation :augmentation-terms
+                          :graph-feasibility-penalty :graph-control-score-proxy
+                          :predictability-control-mode :homeostatic-control-mode
+                          :graph-feasibility-mode :structural-pressure-mode
+                          :habit-prior-bias :habit-prior-source
+                          :move-class-intensity-mode :move-class-intensity-contribution
+                          :move-class-intensity :controller-score :rank :time-pressure
+                          :horizon-steps])]
+      (is (= (pr-str legacy-ranked)
+             (pr-str (#'trace/strip-ranked-action ranked))))
+      (is (= (pr-str (dissoc decision :softmax-weights :ranked-actions))
+             (pr-str (#'trace/strip-decision
+                      decision (:ranked-actions sample-judge-output))))))))
+
+(deftest policy-trace-details-flag-on-roundtrip-test
+  (binding [trace/*persist-policy-trace-details?* true]
+    (let [weights {{:type :no-op} 0.75
+                   {:type :address-sorry :target :sorry/x} 0.25}
+          output (assoc-in sample-judge-output [:decision :softmax-weights] weights)
+          record (trace/trace-record output)
+          encoded (pr-str record)
+          decoded (edn/read-string encoded)]
+      (is (= {:loop-health 0.8 :stack-pct 0.3}
+             (get-in decoded [:ranked-actions 0 :prediction-mean])))
+      (is (not (contains? (first (:ranked-actions decoded)) :prediction))
+          "the repeated next-belief is not persisted")
+      (is (= {"rank/1" 0.75 "rank/2" 0.25}
+             (get-in decoded [:decision :softmax-weights-by-candidate-id])))
+      (is (every? string?
+                  (keys (get-in decoded
+                                [:decision :softmax-weights-by-candidate-id])))))))
 
 (deftest trace-record-pure-test
   (testing "trace-record is pure (modulo timestamp): same input → same shape"

@@ -64,6 +64,14 @@
 (def ^:private utc-zone
   (ZoneId/of "UTC"))
 
+(def ^:dynamic *persist-policy-trace-details?*
+  "Whether trace records retain the policy prediction and Q(π) diagnostics.
+   Read once when this namespace loads. `FUTON_WM_TRACE_POLICY_DETAILS=1`
+   enables the additive fields; absent or any other value preserves the
+   historical byte shape. Dynamic binding exists only for isolated tests and
+   offline measurement."
+  (= "1" (System/getenv "FUTON_WM_TRACE_POLICY_DETAILS")))
+
 (defn- today-date-string []
   (.format (LocalDate/now utc-zone) date-fmt))
 
@@ -75,8 +83,10 @@
 
 (defn- strip-ranked-action
   "Compact a ranked-action entry for trace — keep the EFE summary plus
-   the action, drop the deeply-nested :prediction (recoverable on
-   demand by re-running forward-model/predict). v0.13 added
+   the action. By default the deeply-nested :prediction remains omitted.
+   `FUTON_WM_TRACE_POLICY_DETAILS=1` retains the exact recorded predicted
+   observation mean (rather than repeating the much larger next-belief),
+   avoiding the dishonest claim that replay is mode-independent. v0.13 added
    `:predictability-bonus` + `:homeostatic-pressure`; v0.14 added `:time-pressure`; v0.15
    added `:horizon-steps`; v0.20 adds `:structural-pressure`."
   [r]
@@ -110,31 +120,52 @@
   ;; (M-action-vocabulary P2 dark build, 2026-07-05): same birth rule. If the
   ;; dark term enters :controller-score, the trace must carry both the signed G
   ;; contribution and the conditioning bundle that produced it.
-  (select-keys r [:action :G-risk :G-ambiguity :predictability-bonus :homeostatic-pressure
-                  :structural-pressure :G-goal-outcome
-                  :goal-outcome-replay-inputs
-                  :gap-exploration-bonus :graph-control-score :G-core :G-efe :score-provenance :risk-mode
-                  :ambiguity-mode :g-ambiguity-source :c-zone-load
-                  :goal-outcome-mode
-                  :controller-augmentation :augmentation-terms
-                  :graph-feasibility-penalty :graph-control-score-proxy
-                  :predictability-control-mode :homeostatic-control-mode
-                  :graph-feasibility-mode
-                  :structural-pressure-mode :habit-prior-bias :habit-prior-source
-                  :move-class-intensity-mode :move-class-intensity-contribution
-                  :move-class-intensity
-                  :controller-score :rank :time-pressure :horizon-steps]))
+  (cond->
+   (select-keys r [:action :G-risk :G-ambiguity :predictability-bonus :homeostatic-pressure
+                   :structural-pressure :G-goal-outcome
+                   :goal-outcome-replay-inputs
+                   :gap-exploration-bonus :graph-control-score :G-core :G-efe :score-provenance :risk-mode
+                   :ambiguity-mode :g-ambiguity-source :c-zone-load
+                   :goal-outcome-mode
+                   :controller-augmentation :augmentation-terms
+                   :graph-feasibility-penalty :graph-control-score-proxy
+                   :predictability-control-mode :homeostatic-control-mode
+                   :graph-feasibility-mode
+                   :structural-pressure-mode :habit-prior-bias :habit-prior-source
+                   :move-class-intensity-mode :move-class-intensity-contribution
+                   :move-class-intensity
+                   :controller-score :rank :time-pressure :horizon-steps])
+    *persist-policy-trace-details?*
+    (assoc :prediction-mean (get-in r [:prediction :next-observation :mean]))))
+
+(defn- ranked-candidate-id
+  "Tick-local stable candidate id retained across stripping. Rank is already
+   persisted on every ranked action and uniquely identifies the exact scored
+   candidate within the decision whose Q(π) map is being serialized."
+  [ranked-action]
+  (str "rank/" (:rank ranked-action)))
+
+(defn- stringable-softmax-weights
+  [softmax-weights ranked-actions]
+  (into {}
+        (keep (fn [ranked-action]
+                (let [action (:action ranked-action)]
+                  (when (contains? softmax-weights action)
+                    [(ranked-candidate-id ranked-action)
+                     (get softmax-weights action)]))))
+        ranked-actions))
 
 (defn- strip-decision
   "Compact the decision for trace. The full softmax-weights map is
-   keyed by action maps (non-stringable); drop it from the persisted
-   form. Chosen-action / abstain identity is preserved."
-  [d]
-  (-> d
-      (dissoc :softmax-weights :ranked-actions)
-      ;; If the decision carries a gap-report, keep it (it's the
-      ;; operator-facing output of the abstain branch).
-      ))
+   keyed by action maps (non-stringable), so the default-off form drops it.
+   When policy trace details are enabled, Q(π) is re-keyed by `rank/N`, the
+   stable rank already retained by `strip-ranked-action`. Chosen-action /
+   abstain identity is preserved."
+  [d ranked-actions]
+  (cond-> (dissoc d :softmax-weights :ranked-actions)
+    *persist-policy-trace-details?*
+    (assoc :softmax-weights-by-candidate-id
+           (stringable-softmax-weights (:softmax-weights d) ranked-actions))))
 
 ;; ---------------------------------------------------------------------------
 ;; B-0a tick provenance (M-aif-faithfulness §2.0, V-1) — which code, which
@@ -453,12 +484,18 @@
     (:morning-brief-consumed-event-ids judge-output [])
     :anticipation (:anticipation judge-output {:events-loaded? false :events []})
     :ranked-actions (mapv strip-ranked-action (:ranked-actions judge-output))
+    ;; I3 optional policy detail cost, measured on the first 110-candidate tick
+    ;; in wm-trace-2026-07-04.edn: +55,826 bytes/tick (+507.51/candidate),
+    ;; 18.126% of that 307,994-byte record. This beats C66's naive 291,060-byte
+    ;; comparison by 235,234 bytes (80.82%). The file itself contains 38 EDN
+    ;; records / 13,206,620 bytes; default OFF preserves the prior bytes.
     ;; C66: sourced from the same per-candidate evaluation maps as scoring.
     ;; Stored once when identical: the current 2,646-byte stack would otherwise
     ;; add 291,060 bytes to a 110-candidate tick.
     :preference-stack (preference-stack-evidence (:ranked-actions judge-output))
     :policy-support-exclusions (vec (:policy-support-exclusions judge-output))
-    :decision (strip-decision (:decision judge-output))
+    :decision (strip-decision (:decision judge-output)
+                              (:ranked-actions judge-output))
     :mode (:mode judge-output)}
     ;; R16 close-the-loop seam (interface paired with claude-10): the enactor
     ;; writes `:realized-outcome` at enactment; R14's γ reader consumes it next
