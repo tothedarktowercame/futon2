@@ -407,3 +407,39 @@ derivable version exists: the commands carry `:dir` and argv.**
 
 **Dispatched to `wm-verbs` as C435, and I am holding the gate re-run until it lands.** A whole-tree verdict
 whose basis claim is knowingly incomplete is worth less than one that waits.
+
+## C438 — every negative control in the Lean domain is gate-only (my fix, owner note)
+
+**C437 (`0b637af`) turned a one-off into a property of the system:**
+
+| invocation | count |
+|---|---|
+| automatically invoked **outside** the full gate | **0** |
+| automatically invoked **only by** the full gate | **32** |
+| invoked by nothing | 0 |
+
+**All 32 remain independently runnable through 20 focused wrappers — but only when their explicit negative
+flags are supplied.** An ordinary positive wrapper run omits them. **So C277 was correctly wired the entire
+time**; its coverage was *"only as fresh as the last completed full gate"*, which is exactly the measured
+**1:29:08** gap.
+
+### Why this matters more than the original defect
+
+**These 32 are the checks that prove the other checks still detect.** If their freshness is bounded by the last
+full gate run, then between full runs **nobody knows whether any detector still detects** — and the full gate
+costs 6m35s of CPU and needs a quiescent tree, so it runs rarely. Tonight it had not run for over an hour while
+four lanes committed continuously.
+
+**This corrects my framing twice over.** I called C277 a silent-detector defect (C426 packet); C434 showed
+`#guard_msgs` catches unresolved referents loudly and **structurally silent controls number 0**. I then called
+the follow-up an invocation-coverage question, which was right — **but I expected a small gate-only set. It is
+all of them.**
+
+**Consequence for C431's receipt**: *"distance since the last full gate"* is not operational trivia. **It is
+the staleness of the entire negative-control population**, and the receipt is the only artifact that will
+answer it. That raises its value and does not change its honest limit — it remains producer-controlled history,
+as C431 recorded.
+
+**No repair dispatched.** Running 32 Lean elaborations on every commit is not obviously right, and C437 was
+told not to propose it. **The finding is that the risk is now measurable rather than invisible**, which is the
+precondition for deciding whether to pay for it.
