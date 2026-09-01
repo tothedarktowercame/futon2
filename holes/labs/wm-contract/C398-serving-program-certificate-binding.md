@@ -7,7 +7,8 @@ Production-click certification now carries the terminal service's
 tested commit is not accepted as an unauthenticated SHA argument: the operator
 supplies the Futon2 CI bounded-job ID recorded by the quiet-run
 `tested-commit` transition, and `certify_live_run.clj` resolves that ID through
-the durable Futon3c job registry. It requires a terminal, passing, clean,
+the durable Futon3c job registry. It also requires the job's producer-recorded
+`agent-id` to equal the quiet-run fence ID. It requires a terminal, passing, clean,
 basis-stable canonical Futon2 CI receipt and derives the commit from its finish
 basis.
 
@@ -26,6 +27,8 @@ The persisted result is explicit:
   a different program from the one the bounded suite tested.
 
 The mismatch is part of the certificate verdict, not a warning outside it.
+The persisted program-identity block retains the tested job ID and fence
+attempt as well as the derived commit, so the derivation can be rechecked.
 The focused control constructs an otherwise clean production resource with
 different loaded and tested commits and requires `:verdict :fail` plus the
 distinguishable mismatch reason.

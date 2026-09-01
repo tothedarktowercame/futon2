@@ -94,12 +94,16 @@
              (false? (:dirty? loaded))
              (true? (:stable? loaded)))
         {:status :match :reason nil :tested-commit tested
+         :tested-job-id (:tested-job-id resource)
+         :tested-attempt (:tested-attempt resource)
          :loaded-commit (:git-head loaded) :serving-runner-code serving}
 
         :else
         {:status :mismatch
          :reason :serving-program-differs-from-tested-program
          :tested-commit tested :loaded-commit (:git-head loaded)
+         :tested-job-id (:tested-job-id resource)
+         :tested-attempt (:tested-attempt resource)
          :loaded-dirty? (:dirty? loaded) :reload-stable? (:stable? loaded)
          :serving-runner-code serving}))))
 

@@ -35,3 +35,16 @@
   (is (= (:serving-runner-code clean-envelope)
          (:serving-runner-code
           (observer/certificate-resource "run-1" "fixture" clean-envelope)))))
+
+(deftest tested-job-from-another-attempt-is-rejected
+  (let [receipt {:command "clojure -T:build ci" :outer-exit 0 :verdict "pass"
+                 :repository-basis-stable true
+                 :repository-basis-start {:dirty false}
+                 :repository-basis-finish {:dirty false :head "same-head"}}
+        foreign {:id "job-foreign" :agent-id "other-fence"
+                 :systemd {:ActiveState "inactive"} :receipt receipt}]
+    (try
+      (certify/tested-commit-from-record foreign "job-foreign" "this-fence")
+      (is false "foreign attempt unexpectedly accepted")
+      (catch clojure.lang.ExceptionInfo failure
+        (is (= :tested-job-attempt-mismatch (:reason (ex-data failure))))))))

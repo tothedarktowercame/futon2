@@ -393,6 +393,7 @@ def produce_certificate(args, context):
     result = subprocess.run(
         ["bb", "-cp", ".", "checks/certify_live_run.clj",
          "--run-id", context["run-id"], "--tested-job-id", tested_job,
+         "--fence-id", context["fence-id"],
          "--resource-dirs", str(Path(click_receipt).parent),
          "--out-dir", str(out_dir)], cwd=ROOT, capture_output=True, text=True)
     require(result.returncode == 0, "certificate-producer-failed")

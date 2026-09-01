@@ -271,7 +271,7 @@ After a bounded operator run completes, certify it with its UUID:
 
 ```sh
 make certify-run RUN_ID=<uuid-from-TickRunRecord> \
-  TESTED_JOB_ID=<futon2-ci-job-id-from-tested-commit>
+  TESTED_JOB_ID=<futon2-ci-job-id-from-tested-commit> FENCE_ID=<quiet-run-id>
 ```
 
 The command deliberately does not guess “latest”. It locates the unique

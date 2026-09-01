@@ -99,11 +99,13 @@
       (fail! "bounded resource receipt is ambiguous"
              {:run/id run-id :matches (mapv :path matches)}))))
 
-(defn normalized-resource [run-id source-path r tested-commit]
+(defn normalized-resource [run-id source-path r tested-commit tested-job-id tested-attempt]
   (let [click? (= "wm-click-resource-v1" (:schema r))]
     (if click?
       (assoc (click-observer/certificate-resource run-id source-path r)
-             :tested-commit tested-commit)
+             :tested-commit tested-commit
+             :tested-job-id tested-job-id
+             :tested-attempt tested-attempt)
       {:schema 2
      :run/id run-id
      :source-schema (keyword (:schema r))
@@ -118,16 +120,11 @@
      :tasks-peak (:pids-peak r)
        :source-receipt source-path})))
 
-(defn tested-commit-from-job! [job-id]
-  (when (str/blank? job-id)
-    (fail! "--tested-job-id is required for production click certification"
-           {:reason :tested-job-id-unavailable}))
-  (let [{:keys [exit out]} (shell/sh "python3" bg "test-status" job-id)
-        record (when (zero? exit) (try (json/parse-string out true)
-                                      (catch Throwable _ nil)))
-        receipt (:receipt record)
+(defn tested-commit-from-record [record job-id expected-attempt]
+  (let [receipt (:receipt record)
         head (get-in receipt [:repository-basis-finish :head])]
     (when-not (and (= job-id (:id record))
+                   (= expected-attempt (:agent-id record))
                    (= "inactive" (get-in record [:systemd :ActiveState]))
                    (= "clojure -T:build ci" (:command receipt))
                    (= 0 (:outer-exit receipt))
@@ -136,12 +133,31 @@
                    (false? (get-in receipt [:repository-basis-start :dirty]))
                    (false? (get-in receipt [:repository-basis-finish :dirty]))
                    (string? head) (not (str/blank? head)))
-      (fail! "tested Futon2 producer receipt is unavailable or invalid"
-             {:reason :tested-commit-producer-invalid :job-id job-id}))
+      (throw (ex-info "tested Futon2 producer receipt is unavailable or invalid"
+                      {:reason (if (and (:agent-id record)
+                                        (not= expected-attempt (:agent-id record)))
+                                 :tested-job-attempt-mismatch
+                                 :tested-commit-producer-invalid)
+                       :job-id job-id :expected-attempt expected-attempt
+                       :observed-attempt (:agent-id record)})))
     head))
 
+(defn tested-commit-from-job! [job-id expected-attempt]
+  (when (str/blank? job-id)
+    (fail! "--tested-job-id is required for production click certification"
+           {:reason :tested-job-id-unavailable}))
+  (when (str/blank? expected-attempt)
+    (fail! "--fence-id is required for production click certification"
+           {:reason :tested-attempt-unavailable}))
+  (let [{:keys [exit out]} (shell/sh "python3" bg "test-status" job-id)
+        record (when (zero? exit) (try (json/parse-string out true)
+                                      (catch Throwable _ nil)))]
+    (try (tested-commit-from-record record job-id expected-attempt)
+         (catch clojure.lang.ExceptionInfo failure
+           (fail! (ex-message failure) (ex-data failure))))))
+
 (defn main [args]
-  (let [{:keys [run-id run-dir resource-dirs out-dir tested-job-id]
+  (let [{:keys [run-id run-dir resource-dirs out-dir tested-job-id fence-id]
          :or {run-dir default-run-dir
               resource-dirs (str/join ":" default-resource-dirs)
               out-dir default-run-dir}} (parse-args args)]
@@ -152,9 +168,10 @@
           run (read-edn run-path)
           resource-match (locate-resource! run-id run (str/split resource-dirs #":"))
           click? (= "wm-click-resource-v1" (get-in resource-match [:receipt :schema]))
-          tested-commit (when click? (tested-commit-from-job! tested-job-id))
+          tested-commit (when click? (tested-commit-from-job! tested-job-id fence-id))
           resource (normalized-resource run-id (:path resource-match)
-                                        (:receipt resource-match) tested-commit)
+                                        (:receipt resource-match) tested-commit
+                                        tested-job-id fence-id)
           safe-id (str/replace run-id #"[^A-Za-z0-9._-]" "_")
           resource-path (str out-dir "/operational-resource-" safe-id ".edn")
           certificate-path (str out-dir "/operational-certificate-" safe-id ".edn")]

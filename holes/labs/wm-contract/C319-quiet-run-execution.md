@@ -390,7 +390,7 @@ post-click writer observation below.
 ```sh
 cd /home/joe/code/futon2
 make certify-run RUN_ID=<exact-uuid-printed-by-observer> \
-  TESTED_JOB_ID=<futon2-ci-job-id-recorded-at-tested-commit>
+  TESTED_JOB_ID=<futon2-ci-job-id-recorded-at-tested-commit> FENCE_ID=<quiet-run-id>
 ```
 
 Expected: unique run and receipt, valid fixture pins, matching identities,
