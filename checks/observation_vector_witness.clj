@@ -31,7 +31,7 @@
                        (= 14 (count (:values fixture)))
                        (zero? (lean-exit "DarkTower/WarMachine/ObservationVectorWitness.lean")))
         rejected? (if negative-flag
-                    (not (zero? (lean-exit (get negative-files negative-flag))))
+                    (zero? (lean-exit (get negative-files negative-flag)))
                     true)
         ok? (and positive? rejected?)
         exit (if ok? 0 (if negative-flag 2 1))]

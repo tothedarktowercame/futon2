@@ -197,6 +197,22 @@ Every newly named contract declaration also requires an explicit model area in
 the binding.  `gen_model_coverage.py` must keep rejecting
 `:unclassified` and unknown areas; there is no default classification.
 
+### Negative-control reason preservation
+
+Until every Lean negative fixture uses `#guard_msgs`, rerun the complete
+glossary mutation inventory and inspect the direct Lean diagnostics before a
+publication/release candidate, after a Lean toolchain upgrade, after module or
+import movement, and after changes to `Holes.lean` or a negative fixture's
+dependency surface. A nonzero Lean exit alone is not evidence of the intended
+rejection: C294 found a type control passing on a missing `.olean`.
+
+For migrated controls, put the expected diagnostic beside the failing command
+under `#guard_msgs` and make the outer wrapper require the guarded file to exit
+zero. Record the semantic purpose and fixture path under
+`:expected-rejection` in `checks/witness-registry.edn`; do not duplicate the
+rendered diagnostic there. Import, syntax, extra-diagnostic, and mismatch drift
+must turn the focused check red.
+
 Do not broadly accept `workspace-gate exit 1` while Lean work is active: that
 could hide another check. An in-flight classification would require the exact
 failure set, an explicit Lean-changing lane record, source-blob pins, and an

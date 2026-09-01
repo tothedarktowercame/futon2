@@ -27,7 +27,7 @@
                        (zero? (lean-exit "DarkTower/WarMachine/BayesFactorThresholdWitness.lean")))
         rejected? (cond
                     boundary-neg? (not= expected tested)
-                    type-neg? (not (zero? (lean-exit "DarkTower/WarMachine/BayesFactorThresholdNegative.lean")))
+                    type-neg? (zero? (lean-exit "DarkTower/WarMachine/BayesFactorThresholdNegative.lean"))
                     :else true)
         negative? (or boundary-neg? type-neg?)
         ok? (and positive? rejected?)

@@ -18,7 +18,7 @@
         positive? (and (= expected fixture)
                        (zero? (lean-exit "DarkTower/WarMachine/VariationalFreeEnergyWitness.lean")))
         rejected? (cond value-neg? (not= expected tested)
-                        type-neg? (not (zero? (lean-exit "DarkTower/WarMachine/VariationalFreeEnergyNegative.lean")))
+                        type-neg? (zero? (lean-exit "DarkTower/WarMachine/VariationalFreeEnergyNegative.lean"))
                         :else true)
         negative? (or value-neg? type-neg?)
         ok? (and positive? rejected?)
