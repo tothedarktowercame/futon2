@@ -80,8 +80,18 @@
                        {:tau-mode tau-mode}))))))
 
 (defn softmax-weights
-  "P(a) ∝ exp(ln E(a) − G(a) / τ), normalised to sum to 1.0. Numerically
-   stable via the standard log-sum-exp trick.
+  "P(a) ∝ exp(ln E(a) − G(a) / τ), optionally including horizon-one
+   observed-data free energy F_pi at this same posterior seam. Normalised to
+   sum to 1.0 and numerically stable via the standard log-sum-exp trick.
+
+   The four-arity opts are:
+     :f-pi-policy-posterior?  flag, DEFAULT false
+     :f-pi-values             values aligned with g-totals when enabled
+     :f-pi-scaling            :unscaled (DEFAULT, score subtracts F_pi) or
+                              :by-tau (score subtracts F_pi / tau)
+
+   Disabled means the old score expression is evaluated without inspecting
+   any F_pi option. Enabled input must be numeric and exactly aligned.
 
    The 2-arity form is the historical σ(−G/τ) — equivalently ln E ≡ 0 — and
    is byte-identical to its pre-D-1d behaviour. The 3-arity form is the R12
@@ -93,11 +103,37 @@
   ([g-totals tau]
    (softmax-weights g-totals tau nil))
   ([g-totals tau log-priors]
+   (softmax-weights g-totals tau log-priors {}))
+  ([g-totals tau log-priors {:keys [f-pi-policy-posterior? f-pi-values
+                                    f-pi-scaling]
+                             :or {f-pi-policy-posterior? false
+                                  f-pi-scaling :unscaled}}]
    (when (seq g-totals)
-     (let [lps (or log-priors (repeat (count g-totals) 0.0))
-           scores (mapv (fn [g lp] (+ (/ (- (double g)) (double tau))
-                                      (double lp)))
-                        g-totals lps)
+     (let [n (count g-totals)
+           lps (or log-priors (repeat n 0.0))
+           _ (when (and f-pi-policy-posterior?
+                        (not (contains? #{:unscaled :by-tau} f-pi-scaling)))
+               (throw (ex-info "unknown :f-pi-scaling"
+                               {:f-pi-scaling f-pi-scaling})))
+           _ (when (and f-pi-policy-posterior?
+                        (not= n (count f-pi-values)))
+               (throw (ex-info ":f-pi-values must align with g-totals"
+                               {:g-count n :f-pi-count (count f-pi-values)})))
+           f-terms (when f-pi-policy-posterior?
+                     (mapv (fn [f-pi]
+                             (when-not (number? f-pi)
+                               (throw (ex-info ":f-pi-values must be numeric"
+                                               {:f-pi f-pi})))
+                             (case f-pi-scaling
+                               :unscaled (double f-pi)
+                               :by-tau (/ (double f-pi) (double tau))))
+                           f-pi-values))
+           scores (mapv (fn [idx g lp]
+                          (cond-> (+ (/ (- (double g)) (double tau))
+                                     (double lp))
+                            f-pi-policy-posterior?
+                            (- (nth f-terms idx))))
+                        (range n) g-totals lps)
            max-x (apply max scores)
            exps (mapv #(Math/exp (- % max-x)) scores)
            z (reduce + exps)]

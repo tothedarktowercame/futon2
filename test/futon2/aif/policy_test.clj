@@ -71,6 +71,55 @@
   (testing "empty input returns nil"
     (is (nil? (policy/softmax-weights [] 0.1)))))
 
+(deftest softmax-weights-f-pi-flag-off-ignores-options-test
+  (let [g [0.2 0.4 0.8]
+        tau 0.3
+        ln-e [-0.1 -0.2 -0.3]
+        historical (policy/softmax-weights g tau ln-e)]
+    (is (= historical
+           (policy/softmax-weights
+            g tau ln-e
+            {:f-pi-policy-posterior? false
+             :f-pi-values [:deliberately :invalid :and :misaligned]
+             :f-pi-scaling :not-a-scaling})))))
+
+(deftest softmax-weights-f-pi-enters-at-the-posterior-seam-test
+  (let [g [0.0 0.0]
+        f-pi [0.0 1.0]
+        unscaled (policy/softmax-weights
+                  g 0.5 nil
+                  {:f-pi-policy-posterior? true
+                   :f-pi-values f-pi
+                   :f-pi-scaling :unscaled})
+        by-tau (policy/softmax-weights
+                g 0.5 nil
+                {:f-pi-policy-posterior? true
+                 :f-pi-values f-pi
+                 :f-pi-scaling :by-tau})]
+    (is (> (first unscaled) (second unscaled)))
+    (is (> (first by-tau) (second by-tau)))
+    (is (> (first by-tau) (first unscaled))
+        "dividing F_pi by tau=0.5 gives it twice the posterior leverage")))
+
+(deftest softmax-weights-f-pi-requires-typed-alignment-test
+  (is (thrown-with-msg?
+       clojure.lang.ExceptionInfo #"align"
+       (policy/softmax-weights
+        [0.0 1.0] 1.0 nil
+        {:f-pi-policy-posterior? true :f-pi-values [0.0]})))
+  (is (thrown-with-msg?
+       clojure.lang.ExceptionInfo #"numeric"
+       (policy/softmax-weights
+        [0.0] 1.0 nil
+        {:f-pi-policy-posterior? true :f-pi-values [:unknown]})))
+  (is (thrown-with-msg?
+       clojure.lang.ExceptionInfo #"scaling"
+       (policy/softmax-weights
+        [0.0] 1.0 nil
+        {:f-pi-policy-posterior? true
+         :f-pi-values [0.0]
+         :f-pi-scaling :other}))))
+
 ;; ---------------------------------------------------------------------------
 ;; select-action — chosen branch
 ;; ---------------------------------------------------------------------------
