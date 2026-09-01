@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C371-shrink-to-state-machine, :dispatched-at "2026-09-01T02:11:16Z", :job-id "invoke-1788228672700-6483-a9c36bf3", :expected-by "2026-09-01T02:56:16Z"}
   {:lane :wm-evidence
-   :holding :C369-third-attack, :dispatched-at "2026-09-01T02:06:52Z", :job-id "invoke-1788228408113-6479-e9026e51", :expected-by "2026-09-01T02:51:52Z"}]}
+   :holding :C372-attack-hmac-retry, :dispatched-at "2026-09-01T02:12:17Z", :job-id "invoke-1788228732846-6484-960a7985", :expected-by "2026-09-01T02:57:17Z"}]}
