@@ -8,6 +8,6 @@
   {:lane :wm-verbs
    :holding :C366-subprocess-window-cost, :dispatched-at "2026-09-01T02:05:22Z", :job-id "invoke-1788228318337-6474-f9fe45ef", :expected-by "2026-09-01T02:50:22Z"}
   {:lane :wm-organization
-   :holding :C368-hmac-and-retry, :dispatched-at "2026-09-01T02:06:52Z", :job-id "invoke-1788228403603-6477-b36c865d", :expected-by "2026-09-01T02:51:52Z"}
+   :holding :C371-shrink-to-state-machine, :dispatched-at "2026-09-01T02:11:16Z", :job-id "invoke-1788228672700-6483-a9c36bf3", :expected-by "2026-09-01T02:56:16Z"}
   {:lane :wm-evidence
    :holding :C369-third-attack, :dispatched-at "2026-09-01T02:06:52Z", :job-id "invoke-1788228408113-6479-e9026e51", :expected-by "2026-09-01T02:51:52Z"}]}
