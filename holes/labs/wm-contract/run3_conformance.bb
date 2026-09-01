@@ -81,14 +81,36 @@
         (doseq [h hs] (println "run3:    " (str/join "->" h)))))
     (let [never (sort (remove (set all) (:drawn topo)))]
       (println (format "run3: drawn edges never traversed: %d of %d" (count never) (count (:drawn topo))))
-      (doseq [h never] (println "run3:     unfired" (str/join "->" h))))
-    {:refutations (by-class :refutation)
-     :unmapped (by-class :unmapped)
-     :ruling-unrealised (by-class :ruling-unrealised)}))
+      (doseq [h never] (println "run3:     unfired" (str/join "->" h)))
+      {:refutations (by-class :refutation)
+       :unmapped (by-class :unmapped)
+       :ruling-unrealised (by-class :ruling-unrealised)
+       :excluded (by-class :excluded-dependency-grain)
+       :records (count records) :routes (count (filter :wm/route records))
+       :hops (count all) :distinct (count (distinct all))
+       :unfired (count never) :drawn (count (:drawn topo))})))
 
 (let [args *command-line-args*
       path (or (first args) "runs/2026-09-01-s1b/wm-trace-s1b.edn")
-      {:keys [refutations unmapped]} (report path)]
+      summary (report path)
+      {:keys [refutations unmapped]} summary
+      ;; Machine-readable summary beside the trace, and a stable copy the figure
+      ;; generator reads (p4ng gen_live_topology.bb: legend line "route
+      ;; conformance"), so the drawing names the run it was last checked
+      ;; against instead of two August records. Only for a file under runs/.
+      run-dir (let [f (io/file path)] (when (re-find #"runs/" (str f)) (.getParentFile f)))
+      readme (when run-dir (io/file run-dir "README.md"))
+      sha (when (and readme (.exists readme))
+            (second (re-find #"sha `([0-9a-f]{7,40})`" (slurp readme))))
+      edn-summary (assoc summary
+                         :verdict (if (or (seq refutations) (seq unmapped)) :not-conformant :conformant)
+                         :run (when run-dir (.getName run-dir))
+                         :sha (when sha (subs sha 0 7))
+                         :trace (str path)
+                         :checked-at (str (java.time.Instant/now)))]
+  (when run-dir
+    (spit (io/file run-dir "conformance.edn") (pr-str edn-summary))
+    (spit (io/file (.getParentFile run-dir) "latest-conformance.edn") (pr-str edn-summary)))
   (println)
   (if (or (seq refutations) (seq unmapped))
     (do (println "run3: NOT CONFORMANT --"
