@@ -4,6 +4,8 @@ import argparse
 import json
 import os
 from pathlib import Path
+import re
+import shlex
 import subprocess
 import sys
 import time
@@ -33,7 +35,17 @@ def main():
     ap.add_argument("--poll-seconds", type=float, default=2.0)
     ap.add_argument("--admission-timeout", type=float, default=2700.0)
     args = ap.parse_args()
-    launch = ["launch-test", args.command, "--agent", args.agent,
+    fence_id = os.environ.get("FUTON_WRITER_FENCE_ID")
+    if fence_id and not re.fullmatch(r"[A-Za-z0-9._:-]+", fence_id):
+        print("workspace-gate-bounded: INVALID_WRITER_FENCE_ID", file=sys.stderr)
+        return 125
+    command = args.command
+    if fence_id:
+        # bg.py/systemd-run does not propagate this submitting shell's local
+        # environment. Bind the reviewed identifier into the bounded command.
+        command = ("env FUTON_WRITER_FENCE_ID=" + shlex.quote(fence_id)
+                   + " " + command)
+    launch = ["launch-test", command, "--agent", args.agent,
               "--label", args.label, "--dir", str(ROOT), "--window", "measurement"]
     deadline = time.monotonic() + args.admission_timeout
     queued_reported = False
@@ -73,7 +85,11 @@ def main():
                                   "inner-exit": receipt.get("inner-exit"),
                                   "outer-exit": receipt.get("outer-exit"),
                                   "verdict": receipt.get("verdict"),
+                                  "reason": receipt.get("reason"),
                                   "resource-status": receipt.get("resource-status"),
+                                  "repository-basis-start": receipt.get("repository-basis-start"),
+                                  "repository-basis-finish": receipt.get("repository-basis-finish"),
+                                  "repository-basis-stable": receipt.get("repository-basis-stable"),
                                   "receipt-file": status.get("receipt-file"),
                                   "resource-receipt": status.get("certificate-resource-file")},
                                  sort_keys=True))

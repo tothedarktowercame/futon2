@@ -265,8 +265,13 @@ def load_attestations(path, fence_id, now=None):
     expected_writers = {"coordinators": list(COORDINATORS), "units": list(UNITS)}
     if writers != expected_writers:
         problems.append("writer-population-mismatch")
-    expected_state = {"coordinators": "durably-stopped", "units": "inactive",
-                      "writable-handles": "none", "c292": "QUIESCENT"}
+    expected_state = {
+        "coordinators": {
+            "jit-queue:jit-m94A03-retry-v3": "terminal-complete-watchdog-stopped",
+            "jit-queue:jit-all-open-v2": "durably-stopped",
+            "ftriangle-live-smoke-v1": "durably-stopped",
+        },
+        "units": "inactive", "writable-handles": "none", "c292": "QUIESCENT"}
     if intended != expected_state:
         problems.append("intended-state-mismatch")
     encoded = json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
@@ -365,8 +370,15 @@ def self_test():
         "acknowledged-by": {"operator": "fixture", "dispatch-coordinator": "fixture",
                             "publisher": "fixture", "sessions": ["fixture"]},
         "writer-population": {"coordinators": list(COORDINATORS), "units": list(UNITS)},
-        "intended-state": {"coordinators": "durably-stopped", "units": "inactive",
-                           "writable-handles": "none", "c292": "QUIESCENT"},
+        "intended-state": {
+            "coordinators": {
+                "jit-queue:jit-m94A03-retry-v3":
+                "terminal-complete-watchdog-stopped",
+                "jit-queue:jit-all-open-v2": "durably-stopped",
+                "ftriangle-live-smoke-v1": "durably-stopped",
+            },
+            "units": "inactive", "writable-handles": "none",
+            "c292": "QUIESCENT"},
     }
     with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8") as handle:
         json.dump(value, handle)

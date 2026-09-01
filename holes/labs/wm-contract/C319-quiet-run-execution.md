@@ -11,8 +11,10 @@ No command in this sheet was executed while it was assembled.
 Say to Joe verbatim:
 
 > Joe — may I have a fenced War Machine operator window? Please keep Futon3c
-> running but park the three durable coordinators and five background units
-> listed below. I need a 60-minute planning reservation beginning when all
+> running. Park only the semantic watchdog for completed coordinator
+> `jit-queue:jit-m94A03-retry-v3`; durably park the two running coordinators
+> `jit-queue:jit-all-open-v2` and `ftriangle-live-smoke-v1`; and park the five
+> background units listed below. I need a 60-minute planning reservation when all
 > report parked. Preparation to READY measured 6m24s and is budgeted at 10
 > minutes; reload and live author/reviewer latency are unbounded, so I will send
 > `FENCE-RELEASE` explicitly after certification or an orderly abort. Please do
@@ -27,12 +29,19 @@ acknowledgements, not the booleans alone, are its authority:
 
 ```sh
 FENCE_ID=wm-quiet-YYYYMMDDTHHMMSSZ
-cat > "/tmp/$FENCE_ID-attestations.json" <<'EOF'
-{"operator-no-workspace-write":true,
- "dispatch-frozen":true,
- "publisher-paused":true,
- "sessions-reconciled":true,
- "coordinators-not-resumed-before-release":true}
+ISSUED_AT=$(date -u +%FT%TZ)
+EXPIRES_AT=$(date -u -d '+60 minutes' +%FT%TZ)
+cat > "/tmp/$FENCE_ID-attestations.json" <<EOF
+{"schema":"wm-writer-fence-attestation-v1",
+ "fence-id":"$FENCE_ID",
+ "issued-at":"$ISSUED_AT",
+ "expires-at":"$EXPIRES_AT",
+ "acknowledged-by":{"operator":"joe","dispatch-coordinator":"claude-20",
+  "publisher":"claude-1","sessions":["wm-nouns","wm-verbs","wm-organization","wm-evidence"]},
+ "writer-population":{"coordinators":["jit-queue:jit-m94A03-retry-v3","jit-queue:jit-all-open-v2","ftriangle-live-smoke-v1"],
+  "units":["apm-campaign-babysit-jit-all-open-v2.service","apm-watchdog.timer","apm-watchdog.service","apm-closer.service","apm-axiom-audit.timer","apm-axiom-audit.service","futon-pattern-index.timer","futon-pattern-index.service"]},
+ "intended-state":{"coordinators":{"jit-queue:jit-m94A03-retry-v3":"terminal-complete-watchdog-stopped","jit-queue:jit-all-open-v2":"durably-stopped","ftriangle-live-smoke-v1":"durably-stopped"},
+  "units":"inactive","writable-handles":"none","c292":"QUIESCENT"}}
 EOF
 ```
 
@@ -60,7 +69,7 @@ and process-local runtime. Do not infer these from `:coordinator/enabled?`:
 ```sh
 cd /home/joe/code/futon3c
 for id in jit-queue:jit-m94A03-retry-v3 jit-queue:jit-all-open-v2 ftriangle-live-smoke-v1; do
-  scripts/proof-eval.sh "(do (require 'futon3c.apm.durable-coordinator) (futon3c.apm.durable-coordinator/status \"data/apm-coordinators/registry.edn\" \"$id\"))"
+  scripts/proof-eval.sh "(do (require 'futon3c.apm.durable-coordinator 'futon3c.apm.semantic-progress-watchdog) {:coordinator (futon3c.apm.durable-coordinator/status \"data/apm-coordinators/registry.edn\" \"$id\") :watchdog-running? (boolean (futon3c.apm.semantic-progress-watchdog/running? (str \"semantic-progress:\" \"$id\")))})"
 done
 ```
 
@@ -123,6 +132,7 @@ for example `resume-coordinator<TAB>ID` or `start-unit<TAB>UNIT`, to
 ```sh
 cd /home/joe/code/futon2
 python3 checks/writer_fence_evidence.py \
+  --fence-id "$FENCE_ID" \
   --attestations /tmp/$FENCE_ID-attestations.json \
   > /tmp/$FENCE_ID-evidence-01.json
 fence_exit=$?
@@ -131,8 +141,10 @@ test "$fence_exit" -eq 0
 ```
 
 Expected script exit 0 and top-level verdict `FENCE-VERIFIABLE`. Its two
-endpoint captures must agree and show: all three coordinators durably stopped
-with no runtime scheduler/tick claim and a same-epoch quiescence witness;
+endpoint captures must agree and show: the completed coordinator remains
+durably `:complete`, with no regulator runtime/tick claim and its watchdog
+stopped; the two running coordinators are durably stopped with no regulator or
+watchdog scheduler/tick claim and a same-epoch quiescence witness;
 paired timers/services and closer inactive; no writable handle beneath the
 five repositories; and C292 `QUIESCENT` with five clean repositories, four idle
 lanes, and no jobs. `FENCE-BREACH` (1) and `FENCE-INDETERMINATE` (3) both refuse
@@ -147,12 +159,16 @@ observations, but future writer absence and owner promises remain attested.
 Make the interval claim visible to WM preflight:
 
 ```sh
-clojure -M:wm-preflight --writer-fence "$FENCE_ID"
+clojure -M:wm-preflight \
+  --writer-fence "$FENCE_ID" \
+  --writer-fence-evidence "/tmp/$FENCE_ID-evidence-01.json"
 ```
 
-Expected observation: `:writer-fence {:status :held :id "$FENCE_ID"}` and
-`:event-free? true`. Where a mission ID is supplied, readiness must say
-`READY (FENCE-CONDITIONAL $FENCE_ID)`, not unfenced `READY-CONTENT-ONLY
+Expected observation: `:writer-fence {:status :observed-held :id "$FENCE_ID" ...}`
+and `:event-free? true`. Preflight reruns the independent evidence checker using
+the receipt's structured attestation; the receipt name alone is not proof.
+Where a mission ID is supplied, readiness must say
+`READY (FENCE-VERIFIED $FENCE_ID)`, not unfenced `READY-CONTENT-ONLY
 (event-free unverified)`. This declaration names the already established
 fence; it does not acquire one.
 
@@ -168,7 +184,9 @@ Expected: terminal bounded receipt with inner exit 0, outer exit 0, verdict
 zero, `contract-authority-current` labelled
 `PASS (FENCE-CONDITIONAL $FENCE_ID)`, and `workspace-gate: script-exit=0`.
 The environment value names the already-established fence; it does not acquire
-one. Read the named script exit; a
+one. The bounded summary must display `reason`, `repository-basis-start`,
+`repository-basis-finish`, and `repository-basis-stable`; inspect those fields,
+not only the inner gate log. Read the named script exit; a
 failing Make recipe itself reports exit 2 and must not be mistaken for the
 house mutation-slipped meaning.
 
@@ -182,16 +200,16 @@ basis, new process/job, or missing acknowledgement is `FENCE-BREACH`.
 python3 /home/joe/code/futon3c/scripts/bg.py launch-test \
   'clojure -T:build ci' --agent quiet-window --label quiet-futon2-ci \
   --dir /home/joe/code/futon2 --window production
+python3 /home/joe/code/futon3c/scripts/bg.py test-status FUTON2_JOB_ID
+```
 
+Only after that receipt is terminal and accepted, launch Futon3:
+
+```sh
 python3 /home/joe/code/futon3c/scripts/bg.py launch-test \
   'clojure -X:test' --agent quiet-window --label quiet-futon3-suite \
   --dir /home/joe/code/futon3 --window production
-```
-
-Run them one at a time. For each returned ID:
-
-```sh
-python3 /home/joe/code/futon3c/scripts/bg.py test-status JOB_ID
+python3 /home/joe/code/futon3c/scripts/bg.py test-status FUTON3_JOB_ID
 ```
 
 Expected for each terminal receipt: inner 0, outer 0, `verdict=pass`, clean
@@ -291,9 +309,10 @@ Say to Joe verbatim with actual values substituted:
 > receipts recorded stable start/finish content bases, and no fence breach was
 > observed. The production phase allowed only the exact click/run-bound outputs
 > named in certificate `<PATH>`, whose verdict is `<VERDICT>`. This claim is
-> conditional on that declared boundary. Seventy-five lexical hybrid-window
-> candidates remain unaudited, so it does not claim that an undeclared external
-> mutable input is impossible. FENCE-RELEASE: the pre-fence background manifest
+> conditional on that declared boundary. Mutable-input population v1 contains
+> 62 content readers, 6 event readers, 1 library reader, and 0 unexplained
+> programs; this does not claim that an undeclared external mutable input is
+> impossible. FENCE-RELEASE: the pre-fence background manifest
 > may now be restored.
 
 Joe restores only entries both changed according to
@@ -349,10 +368,10 @@ Joe can restore a partially parked window without this session:
 
 | Last completed phase | Action |
 |---|---|
-| Before parking | Clean abort; nothing to undo. |
+| After acknowledgements, before parking | Mark `/tmp/$FENCE_ID-attestations.json` aborted, announce `FENCE-RELEASE (aborted before parking)`, release dispatch/publisher/session promises, and retain the file. No writer-state undo is needed. |
 | Parked, before reload | Preserve failed receipts, say `FENCE-RELEASE (aborted before reload)`, execute the step-9 manifest restoration commands, and confirm with coordinator `status` plus `systemctl show`. A retry starts at step 0. |
 | Reloaded, before click | Serving code need not be rolled back. Execute and verify step-9 restoration. On retry, reuse the reload only if `make run-readiness` records its Futon2 identity equal to the newly tested settled commit; otherwise obtain a new preflight and Joe reloads again. |
-| Click started or terminal | Never click again merely to clean evidence. Preserve binding, run record, observer envelope, trace, and logs. Run `make certify-run RUN_ID=<exact-id>` if exact evidence permits; otherwise record incomplete/fail/unavailable, then execute and verify step-9 restoration. |
+| Click started or terminal | Never click again merely to clean evidence. First require the observer/service to report a typed terminal outcome and no click write in flight. Then preserve binding, run record, envelope, trace, and logs; certify if exact evidence permits; and restore. If terminal state is unavailable or the click may still be active, keep every background writer parked and escalate to Joe—do not release or restore. |
 | Certificate persisted | The evidence is immutable for that exact run. Deliver it, release, and confirm restoration. |
 
 Any stable-basis predicate failure is “stop and fix before another window.” Any

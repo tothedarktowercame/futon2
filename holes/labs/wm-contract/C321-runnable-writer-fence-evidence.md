@@ -50,7 +50,11 @@ binds the acknowledgement to one named, expiring fence window:
     ]
   },
   "intended-state": {
-    "coordinators": "durably-stopped",
+    "coordinators": {
+      "jit-queue:jit-m94A03-retry-v3": "terminal-complete-watchdog-stopped",
+      "jit-queue:jit-all-open-v2": "durably-stopped",
+      "ftriangle-live-smoke-v1": "durably-stopped"
+    },
     "units": "inactive",
     "writable-handles": "none",
     "c292": "QUIESCENT"
