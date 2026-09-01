@@ -108,8 +108,8 @@
 
 (defn- registry-at
   "The registry map as of SHA, or nil when the file did not exist there."
-  [sha path]
-  (let [{:keys [exit out]} (shell/sh "git" "show" (str sha ":" path) :dir repo-root)]
+  [registry-root sha path]
+  (let [{:keys [exit out]} (shell/sh "git" "show" (str sha ":" path) :dir registry-root)]
     (when (zero? exit) (edn/read-string out))))
 
 (def superseded-rows
@@ -153,14 +153,17 @@
 
 (doseq [i signed-registry-rows]
   (let [sha (:review-covers i)
+        registry-root (if-let [p (:registry-repo i)]
+                        (.getCanonicalPath (io/file repo-root p))
+                        repo-root)
         path (or (:registry-path i) "holes/labs/wm-contract/aif-equations.edn")
         key-path (:covers-key i)]
     (when-not sha
       (die (:id i) "has :covers-key but no :review-covers -- the signature names no sha"))
-    (let [then (registry-at sha path)]
+    (let [then (registry-at registry-root sha path)]
       (when-not then
         (die (:id i) "cannot read" path "at" sha "-- the signed sha is not in this history"))
-      (let [now-file (edn/read-string (slurp (io/file repo-root path)))]
+      (let [now-file (edn/read-string (slurp (io/file registry-root path)))]
         (doseq [kp (key-paths key-path)]
           (let [was (resolve-path then kp)
                 now (resolve-path now-file kp)]
