@@ -8,6 +8,6 @@
   {:lane :wm-verbs
    :holding :C266-binding-durability, :dispatched-at "2026-09-01T00:05:29Z", :job-id "invoke-1788221097078-6254-3fc023f3", :expected-by "2026-09-01T00:50:29Z"}
   {:lane :wm-organization
-   :holding :C264-cgroup-observer, :dispatched-at "2026-09-01T00:03:28Z", :job-id "invoke-1788220982080-6250-58edfc55", :expected-by "2026-09-01T00:48:28Z"}
+   :holding :C268-certificate-completion, :dispatched-at "2026-09-01T00:09:57Z", :job-id "invoke-1788221368163-6261-b7a8f976", :expected-by "2026-09-01T00:54:57Z"}
   {:lane :wm-evidence
-   :holding :C267-class9-scope, :dispatched-at "2026-09-01T00:05:29Z", :job-id "invoke-1788221124508-6255-63d0c076", :expected-by "2026-09-01T00:50:29Z"}]}
+   :holding :C269-incomplete-verdict-scope, :dispatched-at "2026-09-01T00:09:57Z", :job-id "invoke-1788221393644-6263-b2199e4a", :expected-by "2026-09-01T00:54:57Z"}]}
