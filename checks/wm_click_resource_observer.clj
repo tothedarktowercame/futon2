@@ -161,7 +161,7 @@
 (defn -main [& args]
   (let [[receipt-path reviewer] args
         base "http://127.0.0.1:7070"]
-    (when (str/blank? receipt-path)
+    (when (or (str/blank? receipt-path) (str/blank? reviewer))
       (binding [*out* *err*] (println "usage: wm_click_resource_observer.clj RECEIPT REVIEWER"))
       (System/exit 1))
     (let [receipt

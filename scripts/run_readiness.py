@@ -370,9 +370,9 @@ def main():
     # (CLAUDE.md, M-omni-wm-runner 2026-07-26).  Clicks run in-process in the
     # serving JVM; a fresh runtime JVM from this repo is the thing forbidden.
     command = (
-        "curl -s -X POST localhost:7070/api/alpha/wm/click "
-        "-H 'Content-Type: application/json' "
-        f"""-d '{{"reviewer":"{chosen}","trigger":"duree-click-on-demand"}}'"""
+        "bb -cp . checks/wm_click_resource_observer.clj "
+        "holes/labs/wm-contract/wm-click-resource-YYYYMMDDTHHMMSS.receipt.json "
+        f"{chosen}"
         if chosen else None)
     report = {"readiness": "READY" if ready else "NOT-READY", "instruction": instruction,
               "message": ("run the printed command" if ready else
