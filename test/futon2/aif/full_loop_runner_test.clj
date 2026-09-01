@@ -52,10 +52,13 @@
                                                 :click-id "click-assigned"
                                                 :run-record-dir record-dir})
             generated (runner/run-opportunity! {:run-record-dir record-dir})
+            generated-again (runner/run-opportunity! {:run-record-dir record-dir})
             record (edn/read-string (slurp (:run-record assigned)))]
         (is (= "run-assigned" (:run/id assigned)))
         (is (string? (:run/id generated)))
         (is (not (str/blank? (:run/id generated))))
+        (is (not= (:run/id generated) (:run/id generated-again))
+            "identical production-shaped invocations receive distinct occurrence ids")
         (is (= :present (:run-record-status assigned)))
         (is (= "run-assigned" (:run/id record)))
         (is (= "click-assigned" (:click/id record)))
