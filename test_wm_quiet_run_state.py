@@ -4,6 +4,8 @@ from pathlib import Path
 import tempfile
 import unittest
 from unittest import mock
+import contextlib
+import io
 
 from scripts import wm_quiet_run_state as sut
 from scripts import writer_fence_restore as restore_sut
@@ -257,6 +259,22 @@ class QuietRunStateTest(unittest.TestCase):
                     ValueError,
                     "parking-specification-changed:.*abort-or-re-initialize"):
                 sut.load_ledger(self.ledger)
+
+    def test_authority_limits_are_persisted_and_emitted_on_refusal(self):
+        initial = sut.load_ledger(self.ledger)[0]
+        authority = initial["facts"]["evidence-authority"]
+        self.assertEqual("self-owned", authority["authority/type"])
+        self.assertFalse(authority["independent-canonical-head?"])
+        self.assertEqual(3, len(authority["history-limitations"]))
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            self.assertEqual(1, sut.main(["advance", "--ledger", str(self.ledger),
+                                          "--to", "released"]))
+        refused = json.loads(output.getvalue())
+        self.assertEqual("authority-limit-not-pending-local-repair",
+                         refused["evidence-authority"]["classification"])
+        self.assertEqual("independent-canonical-head",
+                         refused["evidence-authority"]["clearing-condition"]["required"])
 
     def test_handwritten_bounded_receipt_is_not_a_producer(self):
         fence, att = self.reach_fence()

@@ -28,6 +28,37 @@ ORDER = ["initial", "quiescence", "fence-held", "tested-commit",
 MAX_FENCE_RECEIPT_AGE = 300
 
 
+def evidence_authority():
+    """Machine-readable C417 authority classification for this ledger."""
+    return {
+        "authority/type": "self-owned",
+        "subject": "quiet-run-ledger-canonical-head",
+        "evidence-writer": {"principal": "joe", "mechanism": "quiet-run-state-machine"},
+        "canonical-head-selector": {
+            "principal": "joe", "mechanism": "caller-selected-ledger-path"},
+        "storage-owner": "joe",
+        "retention-administrator": "joe",
+        "rewrite-rollback-capability": {
+            "principal": "joe",
+            "capabilities": ["delete", "rename", "replace",
+                             "select-alternate-valid-chain", "truncate"],
+            "limit": "content-hashes-detect-row-mutation-only-for-presented-chain"},
+        "verifier": {"principal": "joe", "mechanism": "quiet-run-ledger-loader"},
+        "independent-canonical-head?": False,
+        "reason": "same-principal-writes-selects-retains-and-verifies",
+        "history-limitations": [
+            {"claim": "history-complete", "status": "unprovable",
+             "reason": "valid-prefix-can-be-truncated-and-re-extended"},
+            {"claim": "ledger-original-not-copy", "status": "unprovable",
+             "reason": "byte-identical-copy-indistinguishable-from-original"},
+            {"claim": "fence-id-unique-across-ledgers", "status": "unprovable",
+             "reason": "no-independent-canonical-head-selects-one-ledger"}],
+        "classification": "authority-limit-not-pending-local-repair",
+        "clearing-condition": {
+            "required": "independent-canonical-head",
+            "property": "authority-selects-and-retains-head-without-evidence-writer-rewrite-rollback"}}
+
+
 def parking_specification():
     writers = []
     for identity in fence_authority.COORDINATORS:
@@ -68,6 +99,7 @@ def parking_request(fence_id):
     spec = parking_specification()
     return {"schema": "wm-quiet-run-parking-request-v1", "fence-id": fence_id,
             "specification-sha256": digest(spec), "specification": spec,
+            "evidence-authority": evidence_authority(),
             "request": (
                 f"Joe — request writer fence {fence_id}. Keep futon3c-zone.service running. "
                 f"Park the {spec['coordinator-count']} named coordinator writers and "
@@ -491,7 +523,8 @@ def main(argv=None):
                     "state": "initial", "fence-id": args.fence_id,
                     "transitioned-at": now().isoformat(), "evidence": [],
                     "facts": {"parking-specification-sha256":
-                              digest(parking_specification())}}
+                              digest(parking_specification()),
+                              "evidence-authority": evidence_authority()}}
             row = append(args.ledger, body)
         elif args.command == "status":
             rows = load_ledger(args.ledger); row = rows[-1]
@@ -514,10 +547,13 @@ def main(argv=None):
                     "transitioned-at": now().isoformat(), "evidence": refs, "facts": facts}
             row = append(args.ledger, body)
         print(json.dumps({"ok": True, "state": row["state"], "receipt": row,
+                          "evidence-authority": evidence_authority(),
                           "operator-note": ("FENCE-RELEASE" if row["state"] == "released" else None)}, indent=2, sort_keys=True))
         return 0
     except (OSError, ValueError, KeyError, json.JSONDecodeError) as exc:
-        print(json.dumps({"ok": False, "reason": str(exc)}, sort_keys=True)); return 1
+        print(json.dumps({"ok": False, "reason": str(exc),
+                          "evidence-authority": evidence_authority()},
+                         sort_keys=True)); return 1
 
 
 if __name__ == "__main__": raise SystemExit(main())
