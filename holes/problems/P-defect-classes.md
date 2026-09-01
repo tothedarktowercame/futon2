@@ -335,6 +335,48 @@ control proves that a marker-only formatter remains flagged.
 this reach a consumer; the workflow report now bumps its schema version on any
 field rename, and notifies consumers with an explicit field table.
 
+## 6b. Access mistaken for evidence (2026-09-01)
+
+**Shape.** A verification accepts a token, identifier or copied signature that
+proves the presenter could **reach** something, and treats it as proof that
+something **happened**. The artefact is well-formed and the check is real; what
+is absent is any link between the credential and the event it is taken to
+witness.
+
+**Four instances in one night, each inside a repair for the previous one:**
+
+1. **A fence identifier.** `--writer-fence <anything>` made the preflight report
+   `:status :held` and `:event-free? true`. Knowing a name is not observing a
+   fence.
+2. **Caller-authored state maps.** Three consumers accepted a caller-supplied
+   `{:status :held}`; one API offered it as an interface, so it would have
+   manufactured new acceptors indefinitely.
+3. **A private in-process token.** `ns-resolve` reached the supposedly private
+   minting seam, and a public dynamic var could be rebound to mint a genuine
+   token from fabricated output. **Privacy in Clojure is a convention, not a
+   boundary** — resolved by removing the in-process capability entirely and
+   making a fixed subprocess the integrity boundary.
+4. **A copied HMAC.** Restoration attempt rows carried the manifest's signature
+   rather than their own, so a fabricated attempt plus externally restored state
+   reconciled as though an inverse had run. Copying a readable signature proves
+   the copier could read the manifest.
+
+**Why it recurs.** Each repair replaced the previous credential with a new one
+and re-derived trust from possession. The question that catches it is not "is
+this credential valid" but **"could the presenter have produced this without the
+event occurring?"**
+
+**Would prevent.** Bind the credential to the event, not to the actor:
+authenticate each record over its own content plus the identity and ordinal of
+what it attests; verify the world rather than the claim; and where a boundary
+cannot be enforced in-process, **say so and move the boundary** rather than
+defending a convention. **Prevention type: review question**, applied to every
+repair of this class before it is declared done.
+
+**Related.** Class 1 (acceptance that cannot fail) is the general case; this is
+its credential-shaped instance. Class 6a's "a lint that checks for a token rather
+than the property" is the same error in a lint rather than in a fence.
+
 ## 7. Duplicate representation never reconciled
 
 **Shape.** One semantic name has two or more carriers that happen to share a loose
