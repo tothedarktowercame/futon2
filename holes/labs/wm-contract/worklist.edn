@@ -1,0 +1,118 @@
+;; worklist.edn -- the TN-edge-review item ledger, as data.
+;;
+;; One row per item of TN-edge-review-aif-wiring.md §6 (as amended by §8-§9).
+;; A CLI agent loops over it ONE ROW PER INVOCATION (see worklist-prompt.md and
+;; wm-edge-loop.sh). Statuses: :open -> :done-unreviewed -> :done (a second
+;; reader sets :reviewed-by) | :blocked | :needs-joe. Class J rows are never
+;; taken by the loop. Rulings are never written by the loop: they go only into
+;; aif-equations.edn :choices or control-map-edges.edn :decisions, by Joe.
+;; Validate with: bb worklist_check.bb
+{:schema :wm/worklist-v1
+ :as-of "2026-09-01"
+ :source "futon2/holes/TN-edge-review-aif-wiring.md §6, §8, §9"
+ :classes {:V "verify against a source or the code and record the result"
+           :C "correct the registry (aif-equations.edn)"
+           :D "correct the drawing so Figure 5A matches code and equations (control-map-edges.edn)"
+           :H "record a hole: an input the formalism requires that the code does not supply (Holes.lean)"
+           :J "needs Joe; the loop never takes these"}
+ :statuses #{:open :done-unreviewed :done :blocked :needs-joe}
+ :gate "A row touching aif-equations.edn or control-map-edges.edn stays :done-unreviewed until a second reader sets :reviewed-by; p4ng regenerates from those registries only when no such row is :done-unreviewed (TN §9a)."
+ :items
+ [;; ---------- D: drawing corrections to Figure 5A (owner wm-organization) ----------
+  {:id :D1 :class :D :status :open :owner :wm-organization
+   :statement "R8->R5 is drawn as an edge but carries no data: R5 never receives F (C448, C451)."
+   :acceptance "control-map-edges.edn: the R8->R5 edge gains :data-flow :none and :basis citing C451 (war_machine.clj:4458-4466 omits F; efe.clj:601-619 predicts from state and action); gen_live_topology.bb renders :data-flow :none distinctly with a legend entry; negative_controls.sh passes; commit sha recorded here."
+   :pointers ["holes/labs/wm-contract/C451-unexplained-drawn-edges.md" "p4ng/empirics-futon/control-map-edges.edn"]}
+  {:id :D2 :class :D :status :open :owner :wm-organization
+   :statement "R2->R3 is the theory path R2->R8->R3 drawn short; R3 reads o only through eps and Pi (war_machine.clj:4368-4388)."
+   :acceptance "control-map-edges.edn :decisions gains an entry retiring [:R2 :R3] and adding [:R2 :R8] [:R8 :R3], :by the agent id, :at date, :basis C448/C451 pointers; regenerate; controls pass."
+   :pointers ["holes/labs/wm-contract/C448-TN-edge-review-discovery.md"]}
+  {:id :D3a :class :D :status :open :owner :wm-organization
+   :statement "R13->R14 drawn; no dependency in code (C451) and none in theory."
+   :acceptance ":decisions entry retiring [:R13 :R14] with basis C451; regenerate; controls pass."}
+  {:id :D3b :class :D :status :open :owner :wm-organization
+   :statement "R14->R16 drawn; WM route ends R14->TRACE and close-loop! does not read tau (C448, C451)."
+   :acceptance ":decisions entry retiring [:R14 :R16] with basis; regenerate; controls pass."}
+  {:id :D3c :class :D :status :open :owner :wm-organization
+   :statement "R6->R13 drawn; pi and T are supplied independently (C448, C451)."
+   :acceptance ":decisions entry retiring [:R6 :R13] with basis; regenerate; controls pass."}
+  {:id :D4 :class :D :status :open :owner :wm-organization
+   :statement "R7->R14 drawn; tau comes from score spread / selection gain, not Pi (policy.clj:242-245)."
+   :acceptance ":decisions entry retiring [:R7 :R14] as drawn, with basis; regenerate; controls pass. (Whether Pi->tau was ever intended is J1, separate.)"}
+  {:id :D5a :class :D :status :open :owner :wm-organization
+   :statement "R2->R8 (o into eps) is realised in code and undrawn (C452: war_machine.clj:4221-4223, 4375-4379)."
+   :acceptance ":decisions entry adding [:R2 :R8] with :basis the C452 pointers and :label 'o'; regenerate; controls pass."}
+  {:id :D5b :class :D :status :open :owner :wm-organization
+   :statement "R1->R8 (mu into eps) realised, undrawn (C452: war_machine.clj:4289-4294, 4368-4379)."
+   :acceptance ":decisions entry adding [:R1 :R8] :label 'mu'; regenerate; controls pass."}
+  {:id :D5c :class :D :status :open :owner :wm-organization
+   :statement "R14->R6 (tau into selection) realised, undrawn (C452: policy.clj:242-245; war_machine.clj:4573-4584)."
+   :acceptance ":decisions entry adding [:R14 :R6] :label 'tau'; regenerate; controls pass."}
+  {:id :D5d :class :D :status :open :owner :wm-organization
+   :statement "R6->R4 (pi into forward model) realised, undrawn (C452: efe.clj:601-609, 903-921)."
+   :acceptance ":decisions entry adding [:R6 :R4] :label 'pi'; regenerate; controls pass."}
+  {:id :D5e :class :D :status :open :owner :wm-organization
+   :statement "R1->R3 (mu into belief update) realised, undrawn (C452: war_machine.clj:4289-4294, 4429-4431)."
+   :acceptance ":decisions entry adding [:R1 :R3] :label 'mu'; regenerate; controls pass."}
+  {:id :D5f :class :D :status :open :owner :wm-organization
+   :statement "R2->R7 (o into precision) realised AND recorded in both runs, undrawn (C452: war_machine.clj:4375-4388)."
+   :acceptance ":decisions entry adding [:R2 :R7] :label 'o'; regenerate; controls pass."}
+  {:id :D6 :class :D :status :open :owner :wm-organization
+   :statement "R8->R3 (eps into belief update) realised at the equation level; route tags say R7->R3 then R3->R8, so the route record is not the dependency DAG (C448, C452)."
+   :acceptance ":decisions entry adding [:R8 :R3] :label 'eps' with :note that route tags are not a dependency record; regenerate; controls pass."}
+  {:id :D7 :class :D :status :open :owner :wm-organization
+   :statement "R13->R4 (T into forward model) realised when horizon >= 2 (efe.clj:601-609; forward_model.clj:279-324)."
+   :acceptance ":decisions entry adding [:R13 :R4] :label 'T' :condition 'horizon >= 2'; regenerate; controls pass."}
+  {:id :D8 :class :D :status :open :owner :wm-organization
+   :statement "Figure 5A's derived-undrawn / drawn-not-derivable layers were produced by two agents' reading (:by [:claude-15 :codex-22]); the standard (TN §1 item 4) requires them derived from the equations registry."
+   :acceptance "gen_live_topology.bb reads p4ng/empirics-futon/aif-conformance.edn and draws :realised-undrawn, :not-realised and :path-dependent from it (three classes, distinct), replacing the hand-derived layers; the legend names the registry stamp; negative_controls.sh passes; commit sha here."
+   :pointers ["p4ng/empirics-futon/gen_live_topology.bb" "p4ng/empirics-futon/aif-conformance.edn"]}
+  ;; ---------- H: holes to record (owner wm-organization; Lean edits reviewed by wm-nouns) ----------
+  {:id :H1 :class :H :status :open :owner :wm-organization
+   :statement "R6->R16 is path-dependent: full_loop_runner enacts the selected entry (full_loop_runner.clj:870-873); close-loop! enacts the first passing act gate (enact.clj:287-316). Whether both paths enact the same action is unknown."
+   :acceptance "A Holes.lean declaration (kind HOLE, owner named, falsifier: 'a run in which the enacted action differs from the recorded Q(pi) selection') stating that the enacted action equals the selected action on every path; registered in mkHole; lake build passes; sha here."}
+  {:id :H2 :class :H :status :open :owner :wm-organization
+   :statement "R2->R17 and R1->R17 are not realised: Da Costa eq. 21 accumulates Dirichlet concentrations from (o, s); a4a accumulates a capability x mission model from substrate hyperedges written by the A3 actuator, whose production writes do not yet flow (a4a.clj:2-6; a4a_substrate.clj:46-60; actuator_a3.clj:31, 68, 486-487)."
+   :acceptance "A Holes.lean declaration (kind HOLE) for the dirichlet-accumulation import, with falsifier 'a code path from the tick model's o or mu into R17's concentrations'; registered in mkHole; lake build passes; sha here."}
+  ;; ---------- V: verification items ----------
+  {:id :V1 :class :V :status :open :owner :wm-organization
+   :statement "Do the two actuation paths (full_loop_runner selected-entry vs close-loop! first passing gate) enact the same action on recorded runs?"
+   :acceptance "A report C4xx in holes/labs/wm-contract/ comparing, for each available run record, the recorded Q(pi) selection with the enacted action on each path, with pointers; verdict same / differs / not determinable, per run."}
+  {:id :V2 :class :V :status :done-unreviewed :owner :claude-1
+   :statement "Equation numbers for every registry row verified against retrieved sources (Buckley, Da Costa, Friston 2016/2017, BMR, Kass-Raftery, Parr 2022)."
+   :acceptance "aif-equations.edn :references carry :verified equation pointers; refs/README.md lists files and sha256; TN §8-§9."
+   :evidence "futon2 3f81dff, 6561d47; refs/README.md"}
+  {:id :V3 :class :V :status :done-unreviewed :owner :claude-1
+   :statement "Q(pi) node confirmed as R6 (policy.clj:300-438); no other node computes it."
+   :acceptance "registry :choices :policy-posterior-node :status :verified with pointer." :evidence "futon2 3f81dff"}
+  {:id :V4 :class :V :status :done-unreviewed :owner :claude-1
+   :statement "Is the mixed-grain composition (Laplace channel F beside discrete G) cited anywhere as one formalism? Searched retrieved sources: no (C453 concurs)."
+   :acceptance "registry :choices :free-energy-form :statement records 'no retrieved source cites this composition'; feeds J2." :evidence "futon2 3f81dff"}
+  ;; ---------- C: registry corrections (owner claude-1; done, awaiting second read) ----------
+  {:id :C1 :class :C :status :done-unreviewed :owner :claude-1
+   :statement "F row: diagnostic; no live consumer; reduction of Buckley eq. 45." :acceptance "row carries :live-consumer nil and :eq." :evidence "futon2 3f81dff"}
+  {:id :C2 :class :C :status :done-unreviewed :owner :claude-1
+   :statement "tau update: mechanism folds realised outcomes; live the fold never fires (:realized-outcome absent, selection_gain.clj:187-193); 'fixed-calibrated' and 'folds realised outcomes' both needed."
+   :acceptance ":choices :temperature-update :statement says both, with pointers." :evidence "futon2 3f81dff, e188547"}
+  {:id :C3 :class :C :status :done-unreviewed :owner :claude-1
+   :statement "Habit E: implemented and persisted, not applied on the live path (policy.clj:234-271)." :acceptance ":choices :habit-prior updated." :evidence "futon2 3f81dff"}
+  {:id :C4 :class :C :status :done-unreviewed :owner :claude-1
+   :statement "Depth T, hierarchy, learning: observed values and pointers recorded; R15 plumbing." :acceptance ":choices rows updated." :evidence "futon2 3f81dff"}
+  {:id :C5 :class :C :status :done-unreviewed :owner :claude-1
+   :statement "Selection rule resolved by source: Da Costa eq. 11 argmax and Friston 2017 eq. 2.3 are deterministic; code conforms; no sampling in the literature." :acceptance ":choices :selection-rule :status :resolved-by-source." :evidence "futon2 3f81dff, 6561d47"}
+  {:id :C6 :class :C :status :done-unreviewed :owner :claude-1
+   :statement "Delta-F sign: WM convention full-minus-reduced, negative of Friston 2018 Table 1; verified numerically (-5.01 / +5.01); Kass-Raftery magnitude only." :acceptance ":references :friston2018bmr :sign-convention; :choices :delta-f-sign :verified." :evidence "futon2 3f81dff"}
+  {:id :C7 :class :C :status :done-unreviewed :owner :claude-1
+   :statement "Buckley rows annotated as local specialisations (both equation sets recorded); Parr 2022 B.9 primary for Q(pi); habit E re-cited to Friston 2016 eq. 6; G row records omitted novelty term." :acceptance "rows carry :eq / :local-specialisations / :omits." :evidence "futon2 3f81dff, 6561d47"}
+  {:id :C8 :class :C :status :done-unreviewed :owner :claude-1
+   :statement "BMR row imports Dirichlet concentrations (:a-conc), not F; dirichlet-accumulation row added, :realised false, provenance named (A3 actuator)." :acceptance "rows as stated; :holes entries; pointer_check passes." :evidence "futon2 6561d47, e188547, 918f8d7"}
+  {:id :C9 :class :C :status :open :owner :claude-1
+   :statement "Figure 5A and 5B captions must say they measure different things: route conformance (a run's hops are wiring edges) vs equation dependency (an edge is forced by an import). The route record is not the dependency DAG (TN §5e)."
+   :acceptance "p4ng sec-operator.tex captions of fig:wr-overlay-live and fig:aif-dag each carry one sentence stating the distinction; build passes; sha here."}
+  ;; ---------- J: needs Joe (never taken by the loop) ----------
+  {:id :J1 :class :J :status :needs-joe :owner :joe
+   :statement "Was the drawn R7->R14 (Pi -> tau) ever intended as a formalism variant (precision-modulated temperature)? No code, no theory (C448, C451). If yes: cite and declare under :choices; if no: nothing beyond D4."
+   :acceptance "A one-line ruling recorded in control-map-edges.edn :decisions (or 'no') by Joe."}
+  {:id :J2 :class :J :status :needs-joe :owner :joe
+   :statement "The Laplace channel F is a diagnostic with no live consumer, beside a discrete policy side; no source cites the composition (V4). Accept as a stack composition? And should F feed anything (R17 is the candidate the theory names, but a4a's model is not the tick model)?"
+   :acceptance "A ruling recorded in aif-equations.edn :choices :free-energy-form (:status :decided :by joe :at date)."}]}

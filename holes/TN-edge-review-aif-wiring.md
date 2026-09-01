@@ -446,3 +446,15 @@ the registry rather than a field list, so coverage is total by construction
 (50 pointers, 0 unresolved). Controls: an invented range start fails naming
 the reason; a bad pointer inside a `:statement` fails. The boundary stands:
 this catches stale or invented pointers, not wrong provenance.
+
+## 10. The ledger
+
+§6 is now data: `holes/labs/wm-contract/worklist.edn` (32 rows; validate with
+`worklist_check.bb`), worked one row per invocation by a CLI agent under
+`worklist-prompt.md`, driven by `wm-edge-loop.sh`. Statuses `:open →
+:done-unreviewed → :done` (a second reader sets `:reviewed-by`); class J rows
+are `:needs-joe` and never taken by the loop; rulings are never written by the
+loop. The gate of §9a is a status, not a conversation: registries regenerate
+into p4ng only when no row touching them is `:done-unreviewed`. As of
+creation: 19 open (15 D, 2 H, 1 V, 1 C), 11 done-unreviewed (mine — awaiting
+the second read), 2 needs-joe.
