@@ -92,14 +92,16 @@
   (let [negative? (#{"absent" "tampered"} mode)
         receipt-result (try
                          (let [first-observation (read-set/observe-files [(receipt-file mode)])
-                               first-snapshot (read-set/require-stable! first-observation)
+                               first-snapshot (read-set/require-claim!
+                                               first-observation :content-current)
                                receipt (edn/read-string
                                         (:text (read-set/entry-by-path first-snapshot
                                                                        (receipt-file mode))))
                                source-path (str repo-root "/" (get-in receipt [:proof-source :repo]) "/"
                                                 (get-in receipt [:proof-source :path]))
                                observation (read-set/observe-files [(receipt-file mode) source-path])
-                               snapshot (read-set/require-stable! observation)
+                               snapshot (read-set/require-claim!
+                                         observation :content-current)
                                final-receipt (edn/read-string
                                               (:text (read-set/entry-by-path snapshot
                                                                              (receipt-file mode))))

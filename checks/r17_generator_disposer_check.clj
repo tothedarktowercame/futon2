@@ -55,7 +55,7 @@
         r17 (or r17 default-r17)
         live-paths (or live-paths default-live-paths)
         observation (read-set/observe-files (concat [a4a r17] live-paths))
-        snapshot (read-set/require-stable! observation)
+        snapshot (read-set/require-claim! observation :content-current)
         a4a-read (captured-read snapshot a4a)
         r17-read (captured-read snapshot r17)
         live-reads (mapv #(captured-read snapshot %) live-paths)

@@ -30,7 +30,7 @@
   (let [negative? (some #{"--negative"} args)
         empty-negative? (some #{"--negative-empty"} args)
         observation (read-set/observe-files [contract-path registry-path])
-        snapshot (read-set/require-stable! observation)
+        snapshot (read-set/require-claim! observation :content-current)
         contract  (json/parse-string
                    (:text (read-set/entry-by-path snapshot contract-path)) true)
         reg       (edn/read-string

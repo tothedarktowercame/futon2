@@ -60,7 +60,7 @@
         path (or (some #(when (not= "--negative" %) %) args)
                  (default-record-path))
         observation (read-set/observe-files [control-map-path path])
-        snapshot (try (read-set/require-stable! observation)
+        snapshot (try (read-set/require-claim! observation :content-current)
                       (catch Exception failure
                         (fail! (str "wm-route-conformance: UNAVAILABLE "
                                     (pr-str (ex-data failure))

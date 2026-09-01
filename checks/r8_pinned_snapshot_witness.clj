@@ -32,7 +32,7 @@
   (let [kind (cond (some #{"--negative-pin"} args) :pin
                    (some #{"--negative-census"} args) :census)
         observation (read-set/observe-files [fixture generated source])
-        snapshot (read-set/require-stable! observation)
+        snapshot (read-set/require-claim! observation :content-current)
         text #(-> (read-set/entry-by-path snapshot %) :text)
         report (edn/read-string (text fixture))
         tested (case kind

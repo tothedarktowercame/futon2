@@ -26,8 +26,8 @@
     (is (= :moved (:status observation)))
     (is (= :changed (get-in observation [:comparison 0 :status])))
     (is (thrown-with-msg? clojure.lang.ExceptionInfo
-                          #"moved during observation"
-                          (read-set/require-stable! observation)))))
+                          #"claim not satisfied"
+                          (read-set/require-claim! observation :content-current)))))
 
 (deftest non-utf8-keeps-authoritative-bytes-without-lossy-text
   (let [dir (Files/createTempDirectory "mutable-read-set-binary-" (make-array java.nio.file.attribute.FileAttribute 0))
@@ -67,3 +67,23 @@
                                        (throw (java.nio.file.AccessDeniedException. (str p)))))]
                        (read-set/observe-files [(str path)]))]
       (is (= :unreadable (get-in unreadable [:comparison 0 :reason]))))))
+
+(deftest aba-is-content-current-but-not-event-free
+  (let [dir (Files/createTempDirectory "mutable-read-set-aba-" (make-array java.nio.file.attribute.FileAttribute 0))
+        path (str (.resolve dir "aba.edn"))
+        before "{:state :a}\n"
+        observation (do
+                      (spit path before)
+                      (read-set/observe-files
+                       [path]
+                       {:after-capture (fn [_]
+                                         (spit path "{:state :b}\n")
+                                         (spit path before))}))
+        content (read-set/assess-claim observation :content-current)
+        events (read-set/assess-claim observation :event-free)]
+    (is (:endpoint-equal? observation))
+    (is (= :satisfied (:verdict content)))
+    (is (= true (:content-current? content)))
+    (is (= :unverified (:verdict events)))
+    (is (= :unverified (:event-free? events)))
+    (is (= false (:distinguishable-cause? events)))))

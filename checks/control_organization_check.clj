@@ -23,13 +23,15 @@
 (defn edge-key [e] [(:from e) (:to e)])
 
 (defn validate [{:keys [organization stages edges negative?]}]
-  (let [discovery (-> (read-set/observe-files [organization]) read-set/require-stable!)
+  (let [discovery (read-set/require-claim!
+                   (read-set/observe-files [organization]) :content-current)
         discovered-org (edn/read-string
                         (:text (read-set/entry-by-path discovery organization)))
         pinned-paths (mapv #(str "/home/joe/code/" (:path %)) (:reads discovered-org))
-        snapshot (-> (read-set/observe-files
-                      (distinct (concat [organization stages edges] pinned-paths)))
-                     read-set/require-stable!)
+        snapshot (read-set/require-claim!
+                  (read-set/observe-files
+                   (distinct (concat [organization stages edges] pinned-paths)))
+                  :content-current)
         text #(-> (read-set/entry-by-path snapshot %) :text)
         org (edn/read-string (text organization))
         org (if negative? (assoc-in org [:edges 0 :from-column] :ACT) org)

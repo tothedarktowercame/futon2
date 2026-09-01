@@ -84,7 +84,8 @@
     (norm out)))
 
 (defn check-files [{:keys [edges svg pdf]}]
-  (let [snapshot (-> (read-set/observe-files [edges svg pdf]) read-set/require-stable!)
+  (let [snapshot (read-set/require-claim!
+                  (read-set/observe-files [edges svg pdf]) :content-current)
         data (edn/read-string (:text (read-set/entry-by-path snapshot edges)))
         svg-text (:text (read-set/entry-by-path snapshot svg))
         captured-pdf (read-set/entry-by-path snapshot pdf)

@@ -2,8 +2,9 @@
   "Shared observation boundary for checks that consume mutable files.
 
    A captured entry derives its text and digest from the same byte array.
-   `observe-files` then compares the captured digest with a second observation,
-   making movement an explicit result rather than silently combining states."
+   `observe-files` compares captured digests with a second observation. Callers
+   then declare whether they need content equality or evidence of event freedom;
+   the substrate never guesses from endpoint equality alone."
   (:require [babashka.fs :as fs])
   (:import [java.nio ByteBuffer]
            [java.nio.charset CodingErrorAction StandardCharsets]
@@ -86,16 +87,52 @@
    (let [snapshot (capture-files paths)
          _ (when after-capture (after-capture snapshot))
          comparison (compare-current snapshot)
+         compared-at (str (Instant/now))
          stable? (every? #(= :unchanged (:status %)) comparison)]
      {:status (if stable? :stable :moved)
+      :interval {:started-at (:captured-at snapshot) :finished-at compared-at}
+      :endpoint-equal? stable?
       :snapshot snapshot
       :comparison comparison})))
 
-(defn require-stable! [observation]
-  (when-not (= :stable (:status observation))
-    (throw (ex-info "mutable read-set moved during observation"
-                    (select-keys observation [:status :comparison]))))
-  (:snapshot observation))
+(defn assess-claim
+  "Interpret a neutral observation under a caller-declared claim.
+
+   Content currency needs equal endpoint bytes. Event freedom additionally
+   needs a monotonic witness whose before/after token is equal, or a declared
+   held fence. Without one it is explicitly unverified, including ABA cases."
+  ([observation claim] (assess-claim observation claim {}))
+  ([observation claim {:keys [monotonic-witness declared-fence]}]
+   (let [equal? (:endpoint-equal? observation)
+         witnessed? (or (and (map? monotonic-witness)
+                              (contains? monotonic-witness :before)
+                              (= (:before monotonic-witness) (:after monotonic-witness)))
+                         (and (map? declared-fence)
+                              (= :held (:status declared-fence))))]
+     (case claim
+       :content-current
+       {:claim claim
+        :verdict (if equal? :satisfied :moved)
+        :content-current? equal?
+        :interval (:interval observation)}
+
+       :event-free
+       {:claim claim
+        :verdict (cond (not equal?) :moved witnessed? :satisfied :else :unverified)
+        :event-free? (cond (not equal?) false witnessed? true :else :unverified)
+        :distinguishable-cause? (boolean witnessed?)
+        :interval (:interval observation)}
+
+       (throw (ex-info "unknown mutable read-set claim" {:claim claim}))))))
+
+(defn require-claim! [observation claim]
+  (let [assessment (assess-claim observation claim)]
+    (when-not (= :satisfied (:verdict assessment))
+      (throw (ex-info "mutable read-set claim not satisfied"
+                      {:claim claim :assessment assessment
+                       :status (:status observation)
+                       :comparison (:comparison observation)})))
+    (:snapshot observation)))
 
 (defn entry-by-path [snapshot path]
   (some #(when (= (str path) (:path %)) %) (:entries snapshot)))
