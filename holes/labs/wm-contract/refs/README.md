@@ -19,3 +19,15 @@ files; where the text extraction garbled a formula, the registry says so.
 
 Extraction: `pdftotext -layout <pdf> <txt>` (and `-raw` for the two-column
 Friston 2016). Re-verify a file with `sha256sum`.
+
+**The extraction drops overbars, and Friston 2017 uses them to separate prior
+from posterior.** `β` and `β̄` both come out as `β`, so eq. 2.7 reads
+`β = β + (π − π₀)·G` in the text layer and looks like a self-assignment. It is
+not: it is `β_posterior = β_prior + …`. Three lines settle it —
+`friston2017.txt:339` `P(γ) = Γ(1, β̄)` (generative model, prior),
+`:357` `Q(γ) = Γ(1, β)` (approximate posterior), and `:1711`
+`ε_γ = (β̄ − β) + (π − π₀)·G`, whose first term is identically zero if the two
+are one symbol. **Before trusting any equation in this text with two
+same-named variables, check `:1711`** — and prefer the PDF for any formula the
+registry is going to quote. Found 2026-09-01 when the collapsed β made a
+sequencing question (worklist J4) look like a different question than it is.

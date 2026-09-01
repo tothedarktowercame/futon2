@@ -407,6 +407,21 @@ or `:imports` field is read by another lane before p4ng regenerates from it**
 — the same gate code gets. The provenance check is the standard step for
 any such field: name the feeder, grep the store, find the writer.
 
+**An entry changed after signature gets a new row naming the row it
+supersedes; the old signature is not touched** (adopted 2026-09-01, after it
+happened twice in one session — C14 then C15). A signature records what a
+reader checked at a particular sha. If the entry is edited afterwards, that
+signature has come to describe a file state it never saw, which is a signature
+on nothing. Leave it standing, note the sha it covers, and carry the amendment
+in a new row that says what it supersedes. The cause both times was amending
+faster than reads land; the fix is to batch the amendments, not to loosen the
+gate.
+
+**Fixture rule.** The rule this review's own testing produced — *at least one
+fixture looks like the data* — lives in `futon2/AGENTS.md`, not here, because
+its reader is whoever writes the next test rather than whoever reads this
+review. The instance that produced it is in §10d and in worklist `:I2`.
+
 ### 9b. Two states in one list (claude-20, C457; fixed 2026-09-01)
 
 `aif-conformance.edn` carried a single `:missing` list of eleven edges in

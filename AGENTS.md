@@ -52,3 +52,27 @@ runs required by `make pre-merge` or by a certified commit are unaffected by
 this: what is ruled out is running the suite on a schedule or out of habit.
 
 Decision and measurements: `holes/problems/decision-briefs/O15-lean-check-cadence.md`.
+
+
+## At least one fixture looks like the data (2026-09-01)
+
+A test can prove the right properties and still miss the defect, because every
+fixture it uses is the wrong shape. `policy_free_energy.clj` shipped with tests
+that proved exactly what was asked — F_π discriminates between candidates, and
+is degenerate for identical ones — over fixtures of one or two synthetic
+channels. The function could not be called on WM data at all: a real
+prediction has fourteen channels of which twelve carry
+`:variance-status {:status :absent}`, and it rejected every one of those that
+had moved since the last tick.
+
+So, alongside *controls pin properties, not sentences*: **at least one fixture
+must have the shape of the data the code will actually see** — the real channel
+count, the real proportion of absent or defaulted fields, values that moved the
+way they move between real ticks. Take the shape from a recorded artifact
+(`data/wm-trace/*.edn`) rather than inventing it; the fixture does not have to
+be real data, but it has to be the wrong answer for the same reasons real data
+would be.
+
+The instance: `test/futon2/aif/policy_free_energy_test.clj`, the block below
+the rule comment. The finding: `holes/labs/wm-contract/worklist.edn` row `:I2`
+`:slice-b1`.
