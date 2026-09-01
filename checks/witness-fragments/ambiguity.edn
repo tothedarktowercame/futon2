@@ -5,6 +5,6 @@
  :fixture {:repo "futon2"
            :path "holes/labs/wm-contract/ambiguity-reference.edn"}
  :run-sha "8ae9f90a536d98664ad040ae0bf89426b1c9f413"
- :contract-sha "24634504e8dd97caf8894916d62e99fb1116c030"
+ :contract-sha "05af21ca04ccee86f104fe0f773961fcd4ce209d"
  :result :passed
  :recorded-at "2026-08-31T23:59:00Z"}

@@ -1,0 +1,7 @@
+{:witnesses "TransitionKernel"
+ :check {:repo "futon2" :path "checks/transition_kernel_witness.clj" :entrypoint "-main"}
+ :fixture {:repo "futon2" :path "holes/labs/wm-contract/transition-kernel-reference.edn"}
+ :run-sha "1ce10c346dc82dc030355990db5c8257317f958a"
+ :contract-sha "05af21ca04ccee86f104fe0f773961fcd4ce209d"
+ :result :passed
+ :recorded-at "2026-08-31T23:59:00Z"}
