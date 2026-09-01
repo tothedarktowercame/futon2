@@ -1,6 +1,7 @@
 {:witnesses "BeliefState"
  :check {:repo "futon2" :path "checks/belief_state_witness.clj" :entrypoint "-main"}
  :fixture {:repo "futon2" :path "holes/labs/wm-contract/belief-state-reference.edn"}
+ :positive-proof-receipt {:repo "futon2" :path "holes/labs/wm-contract/belief-state-positive-receipt.edn" :schema :PositiveLeanWitnessReceipt/v1}
  :positive-evidence-limit :construction-or-projection-only
  :positive-evidence-scope "Establishes carrier construction only; a future source pin can prevent silent weakening but cannot establish downstream behaviour."
  :run-sha "ed8d9e07be2dc043c2c7bc12fe08e9bec4c9ea6a"

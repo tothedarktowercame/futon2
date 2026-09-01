@@ -1,7 +1,10 @@
 #!/usr/bin/env bb
 (ns checks.channel-witness
-  (:require [checks.lean-positive-witness :as lean-positive] [clojure.edn :as edn]))
+  (:require [checks.lean-positive-witness :as lean-positive]
+            [checks.positive-proof-receipt :as receipt]
+            [clojure.edn :as edn]))
 (def fixture-path "holes/labs/wm-contract/channel-vocabulary-reference.edn")
+(def receipt-path "holes/labs/wm-contract/channel-positive-receipt.edn")
 (def expected
   [:loop-health :support-coverage :attack-coverage :mission-health :stack-pct
    :consulting-pct :portfolio-pct :mathematics-pct :active-repo-ratio
@@ -18,7 +21,8 @@
   (let [negative? (some #{"--negative" "--negative-control"} args)
         fixture (edn/read-string (slurp fixture-path))
         tested (if negative? (update fixture :channels pop) fixture)
-        baseline-valid? (and (valid? fixture) (lean-pass?))
+        receipt-ok? (:pass? (receipt/validate (edn/read-string (slurp receipt-path))))
+        baseline-valid? (and receipt-ok? (valid? fixture) (lean-pass?))
         mutation-rejected? (not (valid? tested))
         exit (cond (and negative? (not baseline-valid?)) 1
                    (and negative? (not mutation-rejected?)) 2

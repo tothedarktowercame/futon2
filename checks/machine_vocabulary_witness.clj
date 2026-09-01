@@ -5,7 +5,8 @@
 (def root "/home/joe/code/mathlib4")
 (def specs
   {:control ["holes/labs/wm-contract/control-vocabulary-reference.edn"
-             :control-vocabulary-reference/v1 "ControlVocabularyNegative.lean"]
+             :control-vocabulary-reference/v1 "ControlVocabularyNegative.lean"
+             "holes/labs/wm-contract/control-vocabulary-positive-receipt.edn"]
    :aliveness ["holes/labs/wm-contract/aliveness-reference.edn"
                :aliveness-reference/v1 "AlivenessNegative.lean"
                "holes/labs/wm-contract/aliveness-positive-receipt.edn"]
@@ -13,7 +14,8 @@
               :act-gate-reference/v1 "ActGateNegative.lean"
               "holes/labs/wm-contract/act-gate-positive-receipt.edn"]
    :cohort ["holes/labs/wm-contract/cohort-reference.edn"
-            :cohort-reference/v1 "CohortNegative.lean"]})
+            :cohort-reference/v1 "CohortNegative.lean"
+            "holes/labs/wm-contract/cohort-positive-receipt.edn"]})
 (defn lean [f] (:exit (p/shell {:dir root :continue true :out :string :err :string}
                                "lake" "env" "lean" (str "DarkTower/WarMachine/" f))))
 (defn -main [& args]

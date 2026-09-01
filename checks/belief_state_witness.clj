@@ -1,8 +1,11 @@
 #!/usr/bin/env bb
 (ns checks.belief-state-witness
-  (:require [checks.lean-positive-witness :as lean-positive] [clojure.edn :as edn]))
+  (:require [checks.lean-positive-witness :as lean-positive]
+            [checks.positive-proof-receipt :as receipt]
+            [clojure.edn :as edn]))
 
 (def fixture-path "holes/labs/wm-contract/belief-state-reference.edn")
+(def receipt-path "holes/labs/wm-contract/belief-state-positive-receipt.edn")
 (defn state-valid? [state]
   (and (seq (:channels state))
        (every? (fn [[_ v]]
@@ -22,7 +25,8 @@
         fixture (edn/read-string (slurp fixture-path))
         tested (if negative? (update-in fixture [:states 1 :channels :loop-health]
                                                dissoc :variance) fixture)
-        baseline-valid? (and (fixture-valid? fixture) (lean-pass?))
+        receipt-ok? (:pass? (receipt/validate (edn/read-string (slurp receipt-path))))
+        baseline-valid? (and receipt-ok? (fixture-valid? fixture) (lean-pass?))
         mutation-rejected? (not (fixture-valid? tested))
         exit (cond (and negative? (not baseline-valid?)) 1
                    (and negative? (not mutation-rejected?)) 2

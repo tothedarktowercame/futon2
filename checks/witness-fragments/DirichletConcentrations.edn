@@ -1,6 +1,7 @@
 {:witnesses "DirichletConcentrations"
  :check {:repo "futon2" :path "checks/dirichlet_concentrations_witness.clj" :entrypoint "-main"}
  :fixture {:repo "futon2" :path "holes/labs/wm-contract/dirichlet-concentrations-reference.edn"}
+ :positive-proof-receipt {:repo "futon2" :path "holes/labs/wm-contract/dirichlet-concentrations-positive-receipt.edn" :schema :PositiveLeanWitnessReceipt/v1}
  :positive-evidence-limit :construction-or-projection-only
  :positive-evidence-scope "Establishes carrier construction only; a future source pin can prevent silent weakening but cannot establish downstream behaviour."
  :expected-rejection {:mode :lean-guard-msgs :controls

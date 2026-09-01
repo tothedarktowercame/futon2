@@ -53,6 +53,10 @@
   {:repo "futon2",
    :path "checks/belief_state_witness.clj",
    :entrypoint "-main"},
+  :positive-proof-receipt
+  {:repo "futon2",
+   :path "holes/labs/wm-contract/belief-state-positive-receipt.edn",
+   :schema :PositiveLeanWitnessReceipt/v1},
   :positive-evidence-limit :construction-or-projection-only,
   :recorded-at "2026-08-31T23:59:00Z",
   :result :passed,
@@ -68,6 +72,10 @@
   {:repo "futon2",
    :path "checks/channel_witness.clj",
    :entrypoint "-main"},
+  :positive-proof-receipt
+  {:repo "futon2",
+   :path "holes/labs/wm-contract/channel-positive-receipt.edn",
+   :schema :PositiveLeanWitnessReceipt/v1},
   :positive-evidence-limit :construction-or-projection-only,
   :recorded-at "2026-08-31T23:59:00Z",
   :result :passed,
@@ -88,6 +96,10 @@
   {:repo "futon2",
    :path "checks/machine_vocabulary_witness.clj",
    :entrypoint "-main --term cohort"},
+  :positive-proof-receipt
+  {:repo "futon2",
+   :path "holes/labs/wm-contract/cohort-positive-receipt.edn",
+   :schema :PositiveLeanWitnessReceipt/v1},
   :positive-evidence-limit :construction-or-projection-only,
   :recorded-at "2026-08-31T23:59:00Z",
   :result :passed,
@@ -108,6 +120,11 @@
   {:repo "futon2",
    :path "checks/machine_vocabulary_witness.clj",
    :entrypoint "-main --term control"},
+  :positive-proof-receipt
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/control-vocabulary-positive-receipt.edn",
+   :schema :PositiveLeanWitnessReceipt/v1},
   :positive-evidence-limit :construction-or-projection-only,
   :recorded-at "2026-08-31T23:59:00Z",
   :result :passed,
@@ -135,6 +152,11 @@
   {:repo "futon2",
    :path "checks/dirichlet_concentrations_witness.clj",
    :entrypoint "-main"},
+  :positive-proof-receipt
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/dirichlet-concentrations-positive-receipt.edn",
+   :schema :PositiveLeanWitnessReceipt/v1},
   :positive-evidence-limit :construction-or-projection-only,
   :recorded-at "2026-08-31T23:59:00Z",
   :result :passed,
