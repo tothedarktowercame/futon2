@@ -317,3 +317,29 @@ stage*.
 summaries chose to foreground. **A lane that reports four findings and lists three in its bell is not being
 careless** — the bell is a summary. **Reading the report is the owner's job**, and I did it for the attacks I
 gated and not for the one I only summarised.
+
+## C424 — owner review of C405/C417: the boundaries are enforced, not decorative (my fix, owner review)
+
+**The ceiling document's closing claim rests on this**, so it needed checking: *"the limits are machine-readable
+rather than prose, so a consumer cannot silently inherit the stronger reading."* **If the boundary records were
+merely written into receipts and not enforced, that sentence would be false** — and it would be an instance of
+the class it describes.
+
+**Called `receipt-shape-valid?` directly on mutated maps** rather than swapping receipt files, so no shared
+artifact was touched while lanes could read it:
+
+| receipt | result |
+|---|---|
+| intact | **valid** |
+| `:derivation-status` changed to the false class (`:not-exactly-derivable` for Lean, which *is* derivable) | **rejected** |
+| `:dependency-closure` removed entirely | **rejected** |
+
+**Both failure directions are closed**: a receipt cannot drop its boundary, and cannot misdescribe why
+derivation stopped. **The second matters more** — `:derivable-not-adopted` and `:not-exactly-derivable` are the
+difference between a limit worth investing to close and one that cannot be closed, and a receipt that could
+claim the wrong one would misdirect exactly the reader the vocabulary exists for.
+
+**Confirmed the wiring claims too.** The gate carries 53 registered checks including `:exit-code-scopes`
+(C390) and `:repository-census-bases` (C393) — both "wired into the gate" claims hold. Receipt work is gated
+under `:r9-proof-receipt`, `:pinned-operational-certificate` and `:lean-sorry-categories`. **`quiescence` is
+correctly absent**: it observes live process state, not repository state, and belongs to the state machine.
