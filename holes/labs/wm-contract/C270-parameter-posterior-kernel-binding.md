@@ -16,5 +16,6 @@ separate witnessed declaration.
 
 Only evidence metadata changed; the posterior carrier and Q consumers retain
 their bodies. Q semantics are unchanged and the `:lean-spine` pin is refreshed
-in this delivery. `ParameterPosteriorKernel` already has explicit `:scores`
+to `5b1a411a29dedc11a1e643eefd2a1cca968573e60cee2e451fdcee1c452083a4`.
+`ParameterPosteriorKernel` already has explicit `:scores`
 model-area classification.
