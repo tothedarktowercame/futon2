@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C271-step7-integration, :dispatched-at "2026-09-01T00:12:07Z", :job-id "invoke-1788221523259-6266-fa9046cd", :expected-by "2026-09-01T00:57:07Z"}
   {:lane :wm-evidence
-   :holding :C269-incomplete-verdict-scope, :dispatched-at "2026-09-01T00:09:57Z", :job-id "invoke-1788221393644-6263-b2199e4a", :expected-by "2026-09-01T00:54:57Z"}]}
+   :holding :C273-attack-certificate, :dispatched-at "2026-09-01T00:14:48Z", :job-id "invoke-1788221684192-6272-dc676448", :expected-by "2026-09-01T00:59:48Z"}]}
