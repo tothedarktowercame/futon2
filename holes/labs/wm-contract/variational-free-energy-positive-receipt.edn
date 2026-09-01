@@ -1,0 +1,39 @@
+{:receipt/type :PositiveLeanWitnessReceipt
+ :receipt/version 1
+ :recorded-at "2026-09-01T01:30:00Z"
+ :theorem "DarkTower.WarMachine.VariationalFreeEnergyWitness.constantGaussianReference"
+ :module "DarkTower.WarMachine.VariationalFreeEnergyWitness"
+ :source-basis
+ [{:repo "mathlib4"
+   :path "DarkTower/WarMachine/VariationalFreeEnergyWitness.lean"
+   :declarations
+   [{:name "GaussianReference" :sha256 "fd9623934ea149e09de5bd1e3f039763db4a7adc11b53b76694d9668de0032fe"}
+    {:name "gaussianReference" :sha256 "34602f9bf1b27e270c0aaf1acba604f548a915575426d8448253e1479553b430"}
+    {:name "constantGaussianReference" :sha256 "b3954989c51a720f9495d134640385682bcd953607485cb15bdf74aabd8e3f2d"}]}
+  {:repo "mathlib4"
+   :path "DarkTower/WarMachine/Holes.lean"
+   :declarations
+   [{:name "VariationalFreeEnergyValue" :sha256 "7ebaffa6d69e18d2f2fab47c0a75e27d44583e3f7094b410a592223b3a73da71"}
+    {:name "Channel" :sha256 "d3d6259d040c584bb36d3f238dea41644fff5458c7c74fadfac429b1226b3235"}
+    {:name "variationalFreeEnergy" :sha256 "c4fe37cbb2c41a4ac788795f1dd765debe0838df5385e156d7f4d8e647f3fc0e"}]}]
+ :fixture
+ {:repo "futon2"
+  :path "holes/labs/wm-contract/variational-free-energy-reference.edn"
+  :schema :variational-free-energy-reference/v1
+  :sha256 "0515b1203e1f04689f1d095a10318e38a91b0dd9c00ba604f3f346a38d21683d"}
+ :adapter
+ {:kind :edn-fields-to-lean-declaration/v1
+  :lean-declaration "gaussianReference"
+  :mappings
+  [{:fixture-path [:channel-count] :lean-field "channelCount" :expected 14}
+   {:fixture-path [:precision] :lean-field "precision" :expected 2}
+   {:fixture-path [:prediction-error] :lean-field "predictionError" :expected 1}
+   {:fixture-path [:expected-variational-F] :lean-field "expectedVariationalF" :expected 1}]}
+ :elaborator
+ {:command ["lake" "env" "lean"]
+  :cwd "/home/joe/code/mathlib4"}
+ :toolchain
+ {:lean-version "Lean (version 4.31.0-rc1, x86_64-unknown-linux-gnu, commit fd009949156901e6cf15b6d9bf1122294b8e697a, Release)"
+  :lean-toolchain-sha256 "33cbab0d3ba76bdf58d9f3638748f12cb9e3befb1336b223ddbd3567589a09e8"
+  :lake-manifest-sha256 "a57d555a62046897b995eb353f8667a96d87352a30874023937af39ea3b6b36b"}
+ :result {:exit 0 :axioms ["propext" "Classical.choice" "Quot.sound"]}}

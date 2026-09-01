@@ -159,6 +159,7 @@
     "preemptive_record_conflict_lint.clj" "preemptive_repair_lint.clj"
     "preemptive_repair_suite.clj" "preemptive_stale_baseline_lint.clj"
     "preference_stack_binding_check.clj" "preference_stack_witness_shape_check.clj"
+    "positive_proof_receipt.clj"
     "r17_generator_disposer_check.clj" "r19_stack_witness.clj"
     "r2_channel_contract.clj" "r2_pinned_snapshot_witness.clj"
     "r8_f_contract.clj" "r8_pinned_snapshot_witness.clj"
@@ -274,6 +275,10 @@
     :argv ["bb" "checks/variational_free_energy_witness.clj" "--negative-value"]}
    {:name :c212-expected-f-as-variational-f
     :argv ["bb" "checks/variational_free_energy_witness.clj" "--negative-type"]}
+   {:name :c332-weakened-variational-positive
+    :argv ["bb" "checks/variational_free_energy_witness.clj" "--negative-weakened-positive"]}
+   {:name :c332-unrelated-variational-edit
+    :argv ["bb" "checks/variational_free_energy_witness.clj" "--unrelated-positive-edit"]}
    {:name :c217-swapped-precision-and-error
     :argv ["bb" "checks/precision_witness.clj" "--negative-swap"]}
    {:name :c217-signed-error-as-precision

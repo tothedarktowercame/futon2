@@ -371,24 +371,33 @@
   :result :passed,
   :recorded-at "2026-08-31T23:59:00Z"}
  {:witnesses "variationalFreeEnergy",
-  :check
-  {:repo "futon2",
-   :path "checks/variational_free_energy_witness.clj",
-   :entrypoint "-main"},
-  :fixture
-  {:repo "futon2",
-   :path
-   "holes/labs/wm-contract/variational-free-energy-reference.edn"},
   :expected-rejection
   {:mode :lean-guard-msgs,
    :controls
    [{:fixture
      "DarkTower/WarMachine/VariationalFreeEnergyNegative.lean",
-     :claim :distinct-semantic-types}]},
-  :run-sha "bb8c549d84f7a17071fb954bbe88746ae47bc379",
+     :claim :distinct-semantic-types}
+    {:mode "--negative-weakened-positive",
+     :claim :positive-statement-source-identity}
+    {:mode "--unrelated-positive-edit",
+     :claim :declaration-slice-locality}]},
   :contract-sha "f812795ca68c4edd8b9c9668f5cd8b24832b688a",
+  :run-sha "bb8c549d84f7a17071fb954bbe88746ae47bc379",
+  :check
+  {:repo "futon2",
+   :path "checks/variational_free_energy_witness.clj",
+   :entrypoint "-main"},
+  :positive-proof-receipt
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/variational-free-energy-positive-receipt.edn",
+   :schema :PositiveLeanWitnessReceipt/v1},
+  :recorded-at "2026-08-31T23:59:00Z",
   :result :passed,
-  :recorded-at "2026-08-31T23:59:00Z"}
+  :fixture
+  {:repo "futon2",
+   :path
+   "holes/labs/wm-contract/variational-free-energy-reference.edn"}}
  {:witnesses "ambiguity",
   :check
   {:repo "futon2",
