@@ -51,13 +51,17 @@ def edn_to_json(text):
 def lane_state():
     check = run(["bb", "checks/lane_registry_check.clj"])
     rows = []
+    event_claim = None
     for line in check.stdout.splitlines():
         if line.startswith("{:lane "):
             rows.append(edn_to_json(line))
+        elif line.startswith("{:event-claim "):
+            event_claim = edn_to_json(line).get("event-claim")
     registry_bytes = open(REGISTRY, "rb").read()
     return {
         "validator-exit": check.returncode,
         "rows": rows,
+        "event-claim": event_claim,
         "registry-sha256": hashlib.sha256(registry_bytes).hexdigest(),
     }
 
@@ -134,7 +138,9 @@ def evaluate(first, second):
     return 0, {"verdict": "QUIESCENT", "conditions": {
         "clean-repositories": len(REPOS), "idle-lanes": 4,
         "ordinary-active": 0, "bounded-active": 0,
-        "state-sandwich-stable": True}}
+        "state-sandwich-stable": True,
+        "agency-instantaneous": first["lanes"].get("event-claim", {}).get(
+            "instantaneous?", "unverified")}}
 
 
 def clean_fixture():

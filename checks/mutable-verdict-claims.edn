@@ -49,6 +49,7 @@
   "checks/preference_distribution_witness.clj"
   "checks/preference_stack_binding_check.clj"
   "checks/preference_stack_witness_shape_check.clj"
+  "checks/positive_proof_receipt.clj"
   "checks/q_interface_completeness_check.clj"
   "checks/r19_stack_witness.clj"
   "checks/r2_channel_contract.clj"

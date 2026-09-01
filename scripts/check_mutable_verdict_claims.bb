@@ -34,15 +34,24 @@
      :failures failures}))
 
 (let [registry (edn/read-string (slurp registry-path))
-      negative? (= ["--negative-control"] (vec *command-line-args*))
-      tested (if negative? (update registry :content-shaped subvec 1) registry)
+      negative-mode (when (= "--negative-control" (first *command-line-args*))
+                      (keyword (or (second *command-line-args*) "missing")))
+      tested (case negative-mode
+               :missing (update registry :content-shaped subvec 1)
+               :stale (update registry :content-shaped conj "checks/DOES-NOT-EXIST.clj")
+               :overlap (assoc-in registry [:event-shaped (first (:content-shaped registry))]
+                                  :negative-overlap)
+               nil registry
+               (throw (ex-info "negative mode must be missing, stale, or overlap"
+                               {:mode negative-mode})))
       result (assess tested (population/report))
-      success? (if negative? (not (:pass? result)) (:pass? result))]
+      success? (if negative-mode (not (:pass? result)) (:pass? result))]
   (println "mutable-verdict-claims:"
-           (cond (and negative? success?) "negative-control PASS (member missing and rejected)"
-                 negative? "mutation slipped"
+           (cond (and negative-mode success?)
+                 (str "negative-control PASS (" (name negative-mode) " rejected)")
+                 negative-mode "mutation slipped"
                  success? "PASS"
                  :else "FAIL")
            (pr-str result)
            "exit-convention=0-pass/1-fail/2-mutation-slipped")
-  (System/exit (cond success? 0 negative? 2 :else 1)))
+  (System/exit (cond success? 0 negative-mode 2 :else 1)))

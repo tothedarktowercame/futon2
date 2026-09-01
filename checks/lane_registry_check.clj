@@ -52,6 +52,13 @@
 
 (def terminal-job-states #{:done :failed :cancelled})
 
+(def agency-event-claim
+  {:claim :event-free
+   :observation-scope :sequential-job-reads
+   :instantaneous? :unverified
+   :distinguishable-cause? false
+   :reason :agency-revision-token-absent})
+
 (defn- agency-job-state [job-id]
   (try
     (let [response (http/get (str "http://localhost:7070/api/alpha/invoke/jobs/" job-id)
@@ -123,6 +130,7 @@
                (sort required-lanes))]
      {:pass? (empty? errors)
       :as-of (:as-of data)
+      :event-claim agency-event-claim
       :lanes lane-reports
       :errors errors})))
 
@@ -197,6 +205,7 @@
                     :errors [{:error :check-failed
                               :message (.getMessage failure)}]}))]
     (doseq [lane (:lanes report)] (println (pr-str lane)))
+    (println (pr-str {:event-claim (:event-claim report)}))
     (doseq [error (:errors report)]
       (binding [*out* *err*] (println (pr-str error))))
     (if negative
