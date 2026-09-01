@@ -57,6 +57,13 @@ window, `repository-basis-changed` means quiescence failed: close the window
 and restart at step 1. A named gate failure on a stable basis means stop and
 fix that check before opening another window.
 
+The raw gate also records `PROVENANCE` at start, `PROVENANCE-FINISH` at end,
+and a `BASIS` comparison. `BASIS-NOT-STABLE` is loud even when all individual
+checks pass; it qualifies the raw verdict rather than changing its exit code.
+During this quiet window, any raw `:moved` or `:unavailable` basis has the same
+meaning as the bounded wrapper's `repository-basis-changed`: the window
+closed, so restart at step 1.
+
 The gate includes the reload → click → certificate rehearsal and its mismatch
 control. It does not execute production.
 
@@ -187,11 +194,14 @@ Reserve **20 minutes after drain**, plus the click's actual work time. Measured
 components are Futon2 CI about 102–106 s; the older 39-check workspace gate
 about 33–41 s, with the current 78-check bounded run observed at about 149 s;
 the chain rehearsal adds 5.5–5.7 s; preflight is seconds. Futon3 suite, the
-second gate currently embedded in readiness, reload transport, and live click
-duration add variable time. Twenty minutes is a window budget, not a timeout.
+reload transport, readiness receipt validation, and live click duration add
+variable time. Readiness consumes the settled gate receipt from step 2; it
+does not run a second gate. Twenty minutes is a window budget, not a timeout.
 
 Never executed together against production: authenticated Drawbridge reload,
 serving-JVM identity transition, live Agency HTTP click, live selector/author/
-reviewer dispatch, live store writes, and a per-click bounded resource receipt.
-The throwaway rehearsal proves the internal seams and mismatch refusal; it does
-not turn these production-only boundaries into witnessed facts.
+reviewer dispatch, live store writes, the external shared-serving-JVM resource
+envelope, and certification of that exact production run. The throwaway
+rehearsal proves the internal seams, complete/incomplete distinction, temporal
+enclosure, and identity-mismatch refusal; it does not turn these
+production-only boundaries into witnessed facts.

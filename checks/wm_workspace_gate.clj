@@ -41,6 +41,77 @@
 (defn provenance []
   (mapv repository-provenance repositories))
 
+(def provenance-identity-fields
+  [:git-sha :tree-sha :dirty? :tracked-diff-sha256 :readable?])
+
+(defn provenance-movement [start finish]
+  (let [by-repo #(into {} (map (juxt :repository identity) %))
+        starts (by-repo start)
+        finishes (by-repo finish)
+        names (sort (set/union (set (keys starts)) (set (keys finishes))))
+        observations
+        (mapv (fn [repo]
+                (let [before (get starts repo)
+                      after (get finishes repo)
+                      unreadable? (or (not (:readable? before))
+                                      (not (:readable? after)))
+                      changed (when (and before after)
+                                (filterv #(not= (get before %) (get after %))
+                                         provenance-identity-fields))]
+                  {:repository repo
+                   :status (cond
+                             (or (nil? before) (nil? after) unreadable?) :unavailable
+                             (seq changed) :moved
+                             :else :stable)
+                   :changed-fields (or changed [])}))
+              names)]
+    {:status (cond
+               (some #(= :unavailable (:status %)) observations) :unavailable
+               (some #(= :moved (:status %)) observations) :moved
+               :else :stable)
+     :repositories observations}))
+
+(defn print-provenance-result! [start finish]
+  (let [movement (provenance-movement start finish)]
+    ;; Keep PROVENANCE as the start observation: run-readiness consumes this
+    ;; established line. The finish and comparison make a raw invocation
+    ;; readable without changing its check verdict.
+    (println "wm-workspace-gate: PROVENANCE-FINISH" (json/generate-string finish))
+    (println "wm-workspace-gate: BASIS" (pr-str movement))
+    (when (not= :stable (:status movement))
+      (println "wm-workspace-gate: BASIS-NOT-STABLE" (pr-str movement)))
+    movement))
+
+(defn provenance-movement-control! []
+  (let [tmp (str (fs/create-temp-dir {:prefix "wm-gate-basis-control-"}))
+        git (fn [& argv]
+              (apply process/shell {:continue true :out :string :err :string :dir tmp}
+                     "git" argv))]
+    (try
+      (git "init" "-q")
+      (git "config" "user.email" "wm-gate-control@example.invalid")
+      (git "config" "user.name" "WM gate control")
+      (spit (str (fs/path tmp "basis.txt")) "before\n")
+      (git "add" "basis.txt")
+      (git "commit" "-q" "-m" "control basis before")
+      (let [start [(repository-provenance [:control tmp])]]
+        ;; This real commit is the deliberate mid-run movement. The synthetic
+        ;; inner verdict stays passing to prove movement is reported
+        ;; independently of check outcomes.
+        (spit (str (fs/path tmp "basis.txt")) "after\n")
+        (git "add" "basis.txt")
+        (git "commit" "-q" "-m" "control basis after")
+        (let [finish [(repository-provenance [:control tmp])]
+              movement (print-provenance-result! start finish)
+              passed? (= :moved (:status movement))]
+          (println "wm-workspace-gate: PROVENANCE-CONTROL"
+                   (pr-str {:inner-verdict :pass
+                            :movement (:status movement)
+                            :exit-convention "0-control-rejected/2-control-slipped"}))
+          (if passed? 0 2)))
+      (finally
+        (fs/delete-tree tmp)))))
+
 (defn authority []
   (get-in (json/parse-string (slurp contract) true) [:source :git-sha]))
 
@@ -310,22 +381,31 @@
         result (apply process/shell opts argv)]
     {:name name :exit (:exit result)}))
 
-(defn -main [& _]
-  (let [basis (provenance)
+(defn -main [& args]
+  (if (some #{"--provenance-control"} args)
+    (System/exit (provenance-movement-control!))
+    (let [basis-start (provenance)
         ;; JSON is part of the bounded receipt's consumable output. Readiness
         ;; must compare all four repositories, not only the wrapper's cwd.
-        _ (println "wm-workspace-gate: PROVENANCE" (json/generate-string basis))
+        _ (println "wm-workspace-gate: PROVENANCE" (json/generate-string basis-start))
         inventory (inventory-result)
         _ (println "wm-workspace-gate: INVENTORY" (pr-str inventory))
         results (into [inventory] (map run-one (concat (commands) (control-commands))))
-        failures (filterv #(not= 0 (:exit %)) results)]
-    (println "wm-workspace-gate: SUMMARY"
-             (pr-str {:checks (count results) :executable-checks (dec (count results)) :failures failures
-                      :manual-exclusions [:lane-registry :current-live-operational-certificate]
-                      :manual-exclusion-reasons
-                      {:lane-registry :dispatcher-discipline-not-repository-validity
-                       :current-live-operational-certificate :requires-new-operator-run-and-resource-receipt}}))
-    (System/exit (if (empty? failures) 0 1))))
+        failures (filterv #(not= 0 (:exit %)) results)
+        basis-finish (provenance)
+        movement (print-provenance-result! basis-start basis-finish)]
+      (println "wm-workspace-gate: SUMMARY"
+               (pr-str {:checks (count results) :executable-checks (dec (count results)) :failures failures
+                        :basis-status (:status movement)
+                        :basis-repositories (:repositories movement)
+                        :manual-exclusions [:lane-registry :current-live-operational-certificate]
+                        :manual-exclusion-reasons
+                        {:lane-registry :dispatcher-discipline-not-repository-validity
+                         :current-live-operational-certificate :requires-new-operator-run-and-resource-receipt}}))
+      ;; Repository movement qualifies the observation but does not turn a
+      ;; passing set of checks into a failing set. The bounded wrapper and
+      ;; run-readiness impose the stricter stable-basis operator policy.
+      (System/exit (if (empty? failures) 0 1)))))
 
 (when (= *file* (System/getProperty "babashka.file"))
   (apply -main *command-line-args*))
