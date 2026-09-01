@@ -31,6 +31,13 @@ Mathlib4 commit `444c22e92c` restores the negative to the same structured
 `reductionChangeReference` used by the positive and unfolds that fixture. It does
 not make the mutation coarser or change the positive theorem.
 
+The blind interval is bounded exactly by the mathlib4 commit timestamps:
+`b068089813` at 2026-09-01 01:51:00 UTC through `444c22e92c` at 03:20:08 UTC,
+**1 hour 29 minutes 8 seconds**. The control was not silently green during that
+interval: whenever invoked, its guarded Lean file exited 1 and its wrapper
+reported exit 2, `mutation-slipped`. The exposure was that focused binding runs
+did not invoke it; the later repository-wide gate did.
+
 ## Verification
 
 - Positive witness: PASS.
