@@ -8,6 +8,6 @@
   {:lane :wm-verbs
    :holding :C316-preflight-event-shape, :dispatched-at "2026-09-01T01:08:16Z", :job-id "invoke-1788224886496-6374-1293dbea", :expected-by "2026-09-01T01:53:16Z"}
   {:lane :wm-organization
-   :holding :C317-window-evidence-worth, :dispatched-at "2026-09-01T01:08:16Z", :job-id "invoke-1788224890936-6375-ffd3f61c", :expected-by "2026-09-01T01:53:16Z"}
+   :holding :C319-drain-consolidation, :dispatched-at "2026-09-01T01:10:42Z", :job-id "invoke-1788225038668-6380-8b5fd87e", :expected-by "2026-09-01T01:55:42Z"}
   {:lane :wm-evidence
    :holding :C318-fence-verification, :dispatched-at "2026-09-01T01:09:30Z", :job-id "invoke-1788224965229-6377-acd0284c", :expected-by "2026-09-01T01:54:30Z"}]}
