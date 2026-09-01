@@ -30,6 +30,8 @@ audit, and Futon pattern-index timers; several `apm-watch.sh` processes; an
 APM campaign babysitter; and the Futon1b/Futon3c serving services. There were
 no user path units. This list is evidence of what to inspect, not a permanent
 claim that those processes write (or do not write) the repositories.
+The executable-by-executable write-set findings and owner dispositions are in
+`C309-scheduled-writer-census.md`.
 
 Use these commands for the machine-side census:
 
