@@ -10,4 +10,4 @@
   {:lane :wm-organization
    :holding :C344-restoration-reverify, :dispatched-at "2026-09-01T01:41:36Z", :job-id "invoke-1788226892116-6437-6ab38c1a", :expected-by "2026-09-01T02:26:36Z"}
   {:lane :wm-evidence
-   :holding :C341-reattack-execution-doc, :dispatched-at "2026-09-01T01:39:26Z", :job-id "invoke-1788226758248-6431-f306cd81", :expected-by "2026-09-01T02:24:26Z"}]}
+   :holding :C345-fence-id-sweep, :dispatched-at "2026-09-01T01:42:56Z", :job-id "invoke-1788226972051-6439-8bcaac9a", :expected-by "2026-09-01T02:27:56Z"}]}
