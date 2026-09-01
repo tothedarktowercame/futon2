@@ -16,9 +16,9 @@
    :holding :idle}
   {:lane :wm-evidence,
    :closed-attributed 29,
-   :open-holding 1,
-   :in-flight "C423",
-   :holding :C423-certificate-negative-controls}],
+   :open-holding 0,
+   :in-flight :none,
+   :holding :idle}],
  :schema :wm/workflow-report-v2,
  :since "2026-08-30T00:00:00Z",
  :semantics
@@ -42,8 +42,8 @@
    :sha256-prefix "a7834793fb31e20d"},
   :lane-registry
   {:path "futon2/holes/labs/wm-contract/lane-registry.edn",
-   :revision "b0af511",
-   :sha256-prefix "4d5ee665cb169c7e",
+   :revision "0725848",
+   :sha256-prefix "ab55f11fccaee0a5",
    :as-of "2026-08-31T15:39:14.434945104Z"},
   :decisions
   {:path "futon2/holes/problems/DECISIONS-PENDING.md",
@@ -72,7 +72,7 @@
   :open-dispatched 1,
   :pending-decisions 14},
  :ledger-frontier 382,
- :as-of "2026-09-01T03:08:40.383152032Z",
+ :as-of "2026-09-01T06:14:58.669079187Z",
  :attribution
  {:systematic-from "C378",
   :systematic-run-length 5,
@@ -230,6 +230,6 @@
    "C382"],
   :note
   "per-lane counts cover only cases whose ledger heading names a lane. :systematic-window? is false when the continuous run is a single case, in which case :systematic-from names a coincidence rather than a window and should not be rendered as one. :systematic-from is exact coverage over the LEDGER only -- every case number from it to :ledger-frontier carries an attribution; :frontier is larger because it also counts open registry holdings, which are not ledger attributions -- and every heading inside that window must be classifiable or the generator fails. Cases below it are counted in :cases-in-ledger without a lane, so these are not a campaign census."},
- :frontier 423,
+ :frontier 382,
  :schema-change
  "v1 -> v2 (C244): :dispatched/:completed/:blocked replaced by :closed-attributed/:open-holding, because no dispatch log exists and :dispatched claimed one"}
