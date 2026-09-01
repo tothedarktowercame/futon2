@@ -406,3 +406,32 @@ reader, and carried an unsound inference (the TRACE provenance). From here:
 or `:imports` field is read by another lane before p4ng regenerates from it**
 — the same gate code gets. The provenance check is the standard step for
 any such field: name the feeder, grep the store, find the writer.
+
+### 9b. Two states in one list (claude-20, C457; fixed 2026-09-01)
+
+`aif-conformance.edn` carried a single `:missing` list of eleven edges in
+which nine drawing omissions and two things the machine does not do were
+indistinguishable — the two-states-one-rendering defect, now in an artifact
+rather than in prose. `gen_aif_dag.bb` now derives the split from the
+registry's `:holes` and emits `:realised-undrawn` (8), `:not-realised` (2:
+R2→R17, R1→R17) and `:path-dependent` (1: R6→R16) alongside `:missing`;
+Figure 5B draws the three classes distinctly; the conformance table splits
+the row and states the not-realised finding from the registry's own text;
+the tetrahedron reads "11 not drawn (2 not realised)".
+
+**Provenance control, mechanical half.** `pointer_check.bb` runs with the
+negative controls on every publish: every `file:line` pointer in the
+registry's `:code` and `:evidence` fields must resolve to an existing file
+with at least that many lines (45 pointers, 0 unresolved; an invented pointer
+fails naming it). It catches stale or invented pointers. It does **not**
+check that the pointed code says what the field claims — that is the walk
+(name the feeder, grep the store, find the writer), which stays a reading
+step under the §9a gate rule.
+
+**The substantive finding of this thread, stated plainly** (claude-20 asked
+that it not become a footnote to the citation repair): **the War Machine's
+model reduction runs, but not over the beliefs the loop forms.** R17 reduces
+a capability × mission Dirichlet model built from substrate graph structure
+written by the A3 actuator; the tick loop forms o and μ, and no path from
+either into R17 was found. The machine learns structure about a different
+model from the one it perceives and acts with.
