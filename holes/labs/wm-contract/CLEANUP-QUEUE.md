@@ -294,3 +294,26 @@ ground truth.
 
 **Recorded rather than belled** — `wm-evidence` is mid-C415 and a second bell into a running job is how a
 question gets mistaken for an answer.
+
+## C422 — my ceiling document omitted C404's fourth limit (my fix)
+
+**`CERTIFICATE-CEILING.md` listed three limits; C404 reported four.** I wrote the ceiling from the lanes'
+*summaries* and the fourth appears only in the report body, under "Program-that-ran limit":
+
+> *"The certificate does not bind the observation to the instant the run began… A reload or substituted click
+> receipt between execution and terminal observation is not distinguishable from a single stable serving
+> program by this artifact alone."*
+
+**C410 bound the tested receipt to the fence attempt. This is the time binding of the one identity that is
+observed** — the report says so explicitly: *"This is separate from the closed-dependency-set limitation; it
+concerns the time/attempt binding of the one identity the implementation does observe."*
+
+**Corrected**: the ceiling now carries four limits, and records that unlike the closure and history-length
+limits **this one looks repairable** (the run record could carry program identity at start) and is **not yet
+dispatched.** The summary claim gains a fourth clause: the certificate cannot say *this program ran every
+stage*.
+
+**The method error is worth keeping.** A ceiling assembled from delivery summaries inherits whatever the
+summaries chose to foreground. **A lane that reports four findings and lists three in its bell is not being
+careless** — the bell is a summary. **Reading the report is the owner's job**, and I did it for the attacks I
+gated and not for the one I only summarised.

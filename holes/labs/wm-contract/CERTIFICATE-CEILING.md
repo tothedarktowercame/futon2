@@ -18,8 +18,8 @@ registry, must carry the fence id as attempt identity, and their gate start
 freshness is measured at state-machine ingestion rather than trusted from
 receipt JSON. The available systemd monotonic start is not claimed because the
 fence supplies no comparable boot-relative observation. Click
-evidence is checked against the serving JVM over HTTP — a channel the
-presenter does not own — and `certified` invokes the certifier itself. C395's
+evidence is checked against live serving-JVM status over HTTP rather than a
+caller-authored receipt alone, and `certified` invokes the certifier itself. C395's
 handwritten no-run chain is now a passing regression test that refuses at
 `click-issued`.
 
@@ -52,7 +52,18 @@ assessed and rejected: it *"cannot distinguish an unchanged copy from its
 original"*, expires under retention, and yields to root. **Best-effort anchoring
 would be misleading**, so none is wired.
 
-**3. Adapter pins establish occurrence, not correspondence** (C391 `a6e1c24`).
+**3. The observed program is bound to terminal observation, not to the run**
+(C404 `5c7a125`, still open). The click observer records `:serving-runner-code`
+from *terminal* service status; the run record does not carry program identity,
+and the certificate does not bind the observation to the instant the run began.
+So *"a reload or substituted click receipt between execution and terminal
+observation is not distinguishable from a single stable serving program by this
+artifact alone."* C410 bound the tested *receipt* to the fence attempt; this is
+the **time** binding of the one identity that is observed, and it is a different
+question. Unlike (1) and (2) this looks repairable — the run record could carry
+the identity at start — and it is not yet dispatched.
+
+**4. Adapter pins establish occurrence, not correspondence** (C391 `a6e1c24`).
 A receipt whose `:expected` is a four-row table pinned by one source line has
 not been shown to match the Lean definition. 31/31 holds under the stated
 meaning and is not a claim of identity-preserving adapters.
@@ -64,8 +75,8 @@ bounded jobs sharing one fence attempt, against a tested commit equal to the
 loaded runner identity, with a declared topology boundary of stated
 completeness.*
 
-It cannot say: *this is the whole program*, *this is the only history*, or
-*this ledger is not a copy*.
+It cannot say: *this is the whole program*, *this is the only history*,
+*this ledger is not a copy*, or *this program ran every stage*.
 
 **Both halves belong in the artifact.** Class 10 (C414 `1a075c0`) is the reason:
 evidence anchored by its own producer can verify perfectly while the principal
@@ -74,8 +85,9 @@ half would be an instance of the class it was built to avoid.
 
 ## What this means for authorising the run
 
-The residual risk is **not** that a forged certificate slips past — the producer
-bindings above close the paths that were demonstrated. It is that a *true*
-certificate is read as proving more than it does. The mitigation is that the
-limits are machine-readable (C405 `771885b`, C417 pending) rather than prose, so
-a consumer cannot silently inherit the stronger reading.
+The demonstrated shape-only certificate paths are closed by the producer
+bindings above. The remaining risk is that a valid certificate or valid ledger
+prefix is selected as canonical by the same principal that writes it, or that
+the certificate is read as proving more than it does. The limits are now
+machine-readable using C417 (`b185982`) authority vocabulary, rather than prose
+alone, so a consumer cannot silently inherit the stronger reading.
