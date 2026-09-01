@@ -131,8 +131,9 @@
    :imports [:o :mu]
    :formal "a = a + sum_tau o_tau (x) s_tau  (Dirichlet concentrations accumulated from observed outcome/state pairs)" :eq "dacosta2020 eq. 21 (A-learning; B/D learning A.1 eqs. 27-33 per C453)"
    :lean "DirichletConcentrations (carrier only, Holes.lean:6380-6385)" :lean-status :carrier-only
-   :code "a4a.clj:85-113 corpus->concentration: counts capability x mission outcome pairs from the TRACE corpus, offline"
-   :note "The WM realises the accumulation offline from the trace corpus (TRACE store), not per tick from o and μ; the theory edges R2->R17, R1->R17 are therefore realised by way of TRACE, not directly."}
+   :realised false
+   :code "NOT realised. What a4a accumulates is a different model: corpus->concentration (a4a.clj:85-113) counts capability x mission edge/discharge pairs over a uniform 0.1 prior, fed only by a4a-substrate/read-corpus (a4a_substrate.clj:46-60), which reads capability entities, mission docs, :capability/* hyperedges and discharges from the SUBSTRATE over Drawbridge. No trace mention in a4a.clj, a4a_substrate.clj or r17_offline.clj; no writer of capability hyperedges from WM runs found (claude-20 check + claude-1 re-check, 2026-09-01)."
+   :note "The theory edges R2->R17 and R1->R17 (o and μ into the Dirichlet accumulation, eq. 21) have no realisation found. An earlier version of this row claimed realisation 'by way of TRACE'; that was wrong (registry author's error, corrected on claude-20's check). The BMR the WM runs is over a capability x mission Dirichlet model built from substrate graph structure, not over the tick model's o and μ."}
   {:id :model-reduction :defines :Delta-F :node :R17 :class :theory-defined :ref :friston2018bmr
    :imports [:a-conc]  ;; C453: BMR takes the full posterior and full/reduced priors (Dirichlet concentrations), not the scalar F. Earlier [:F] was the registry author's error.
    :formal "Delta F := ln P(y|full) - ln P(y|reduced) = ln B(A) + ln B(a') - ln B(a) - ln B(A') over Dirichlet concentrations a (prior), A (posterior), a' (reduced prior); a reduction is accepted when Delta F <= -3" :eq "friston2018bmr eq. 9 and Table 1 (Dirichlet), sign reversed: see :references :friston2018bmr :sign-convention"
@@ -149,7 +150,7 @@
   :temperature-update {:observed :selection-gain-fold-default :status :observed-not-decided
                        :evidence "war_machine.clj:238-248 (default :selection-gain-only; FUTON_WM_TAU_MODE selects score-spread); selection_gain.clj:173-206 folds realised outcomes; policy.clj:32-80 (C448 5c.2)"
                        :theory-alternative "friston2017 eq. 2.7: β = β + (π - π₀)·G, γ = 1/β -- not implemented"
-                       :statement "tau is updated from realised selection gain (default) or score spread, not by the β/γ precision dynamics. (Earlier 'fixed-calibrated' was wrong.)"}
+                       :statement "The mechanism updates tau from realised selection gain (default) or score spread, not by the β/γ precision dynamics. But LIVE: the judge calls fold-realized-outcome every tick (war_machine.clj:4332-4361) and the fold returns the state unchanged unless a well-formed unseen :realized-outcome is present, and that field is absent on today's live path, simulation-only (selection_gain.clj:187-193; C454). So live tau holds at its prior: an update check runs per tick and never fires. 'Fixed-calibrated' described the live behaviour; 'folds realised outcomes' describes the mechanism; both are needed."}
   :habit-prior {:observed :implemented-not-applied-live :status :observed-not-decided
                 :evidence "habit_prior.clj:70-89, 100-163 (learned, persisted); war_machine.clj:262-271, 4276-4283; policy.clj:234-271 (:habit-prior-applied? false on the live path) (C448 5c.3)"
                 :statement "E is learned and persisted but the live strategic path does not apply it; the two run records carry no habit state."}
@@ -181,6 +182,9 @@
  [{:edge [:R6 :R16] :equation :action :status :path-dependent
    :finding "In the WM judge + close-loop! path, close-loop! enacts the first passing act gate from ranked actions, not the recorded Q(π) selection (C448). In the production runner, selected-entry resolves the decision's action to its ranked entry and enacts it (C452: full_loop_runner.clj:870-873). Whether the two paths agree on the enacted action is the open question."
    :evidence "war_machine.clj:4573-4584, 4804-4817; enact.clj:287-316; full_loop_runner.clj:870-873"}
+  {:edges [[:R2 :R17] [:R1 :R17]] :equation :dirichlet-accumulation :status :not-realised
+   :finding "Da Costa eq. 21 accumulates Dirichlet concentrations from observed (o, s) pairs. The WM's a4a accumulates a capability x mission model from substrate hyperedges and discharges instead; no path from the tick model's o or μ into R17 was found."
+   :evidence "a4a.clj:85-113; a4a_substrate.clj:46-60; grep trace -> 0 hits in a4a.clj, a4a_substrate.clj, r17_offline.clj"}
   {:symbol :F :status :no-consumer
    :finding "Per-tick F is computed and stored and read by nothing (C448, C452). This is NOT a theory hole: BMR does not import F (see :model-reduction). It is an observation about the F row: a diagnostic."
    :evidence "war_machine.clj:4450-4452, 4753"}]

@@ -361,3 +361,33 @@ dispatched. Where they and C448/§8 differ, the reconciliation:
 
 Net effect on the DAG: 17 → 18 theory edges (R8→R17 out; R2→R17, R1→R17 in),
 both new ones realised offline via TRACE and undrawn.
+
+### 9a. Correction to §9 (claude-20 check, 2026-09-01)
+
+§9 said the new `:dirichlet-accumulation` row was "realised offline from the
+TRACE corpus". **That was wrong**, and the error was mine: I read
+`corpus->concentration`'s shape and not its feeder. Checked and confirmed:
+the only non-test feeder is `a4a-substrate/read-corpus`
+(`a4a_substrate.clj:46-60`), which reads capability entities, mission docs,
+`:capability/*` hyperedges and discharges from the **substrate over
+Drawbridge**; `trace` occurs zero times in `a4a.clj`, `a4a_substrate.clj`,
+`r17_offline.clj`; and no writer of capability hyperedges from WM runs was
+found, so no upstream ingest rescues the claim.
+
+Consequence: **R2→R17 and R1→R17 are not realised** — the same position
+R8→R17 was in before the BMR correction. The correction replaced one
+unrealised theory edge with two. What a4a actually runs BMR over is a
+*different* generative model (capability × mission Dirichlet counts from
+substrate graph structure), not the tick model's o and μ. Recorded in the
+registry as `:realised false` on the row and a `:holes` entry.
+
+Also from C454 (verified by claude-20): the τ fold runs every tick
+(`war_machine.clj:4332-4361`) but returns the state unchanged unless a
+well-formed unseen `:realized-outcome` is present, and that field is absent
+on today's live path (`selection_gain.clj:187-193`). So **live τ holds at its
+prior**: "fixed-calibrated" described the live behaviour, "folds realised
+outcomes" the mechanism; the registry's `:temperature-update` now says both.
+
+Conformance counts unchanged (18 theory edges; 7 drawn; 11 not drawn), since
+theory edges are unchanged; what changed is that two of the eleven are now
+known to be unrealised rather than realised-undrawn.
