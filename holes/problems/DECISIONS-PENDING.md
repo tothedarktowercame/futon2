@@ -328,3 +328,27 @@ authority decides it.
   [`C291-cascade-carrier-repair-blocked.md`](../labs/wm-contract/C291-cascade-carrier-repair-blocked.md).
 
 <!-- CURRENT DECISIONS END -->
+
+## RULING 2026-09-02 (Joe): the seven observation/belief/ranking migrations, decided as one
+
+All seven C130 migrations are decided per the recommendations of 2026-09-02
+(typed absence with reason; malformed stays loud; no fabricated values;
+abstain/refuse where selection would act blind on a safety signal — prediction
+triple: omit-typed/refuse-malformed; belief aggregation: omit+reject, don't
+refuse the collection; strategic mode: reason-bearing :unknown; sorry pressure:
+abstain-and-return-control; rollout producer: every move :scored or typed
+:unscored; unscored moves: exclude-and-continue with a refuse floor (empty set,
+or authorizing rollout); fulab: refuse without error) — **on one condition**:
+
+> "A common failure mode of the WM was refuse-and-stop. The antidote is to eat
+> its own tail. I would be ok with your recommendations across all 7, but only
+> if refusals and :unscored etc are fed back in as issues needing to be
+> addressed, so the machine can become self repairing. We saw that happen with
+> empirics.tex so I know it is possible. Similarly with the ongoing APM work.
+> Making this process efficient will take some work — but for now this is one
+> decision that unblocks 7." (Joe, 2026-09-02, reported)
+
+So every refusal, abstention, :unknown, and :unscored emission is persisted as
+a typed record, and a harvester sweeps them into a reviewed queue of proposed
+work items. Implementation: wm-contract rows :AC1-:AC7 (one per site) and
+:AC8 (the tail-eater v0). The seven tally instances flip as the rows land.
