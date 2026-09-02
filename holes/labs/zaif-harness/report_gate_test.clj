@@ -53,6 +53,42 @@
     (is (= [:u8/claim-unbacked] (:failures result)))
     (is (= claim (:claim (first failed))))))
 
+(deftest mission-mismatch-is-unbacked-not-absent
+  ;; Review fix (claude-2): a recorded-but-different mission is a false claim
+  ;; (:u8/claim-unbacked); only a missing record/clock is attribution-absent.
+  (let [other-decision (assoc-in decision [:evidence/body :mission] "M-other")
+        mismatch-sources (-> fixture-sources
+                             (assoc-in [:decisions :records] [other-decision])
+                             (assoc-in [:clocks :records]
+                                       [{:join join :mission "M-other"}]))
+        result (adjudicate [{:claim/type :mission-attribution
+                             :value "M-fixture" :join join}]
+                           mismatch-sources)
+        absent-decision (assoc-in decision [:evidence/body :mission] nil)
+        absent-sources (-> fixture-sources
+                           (assoc-in [:decisions :records] [absent-decision])
+                           (assoc-in [:clocks :records] []))
+        absent-result (adjudicate [{:claim/type :mission-attribution
+                                    :value "M-fixture" :join join}]
+                                  absent-sources)]
+    (is (= [:u8/claim-unbacked] (:failures result)))
+    (is (= [:u8/decision-mission-attribution-absent]
+           (:failures absent-result)))))
+
+(deftest chat-derived-status-fails-despite-older-commit-signal
+  ;; Review fix (claude-2): only the deriving (newest) signal can vouch for
+  ;; :derived-status. An older commit-subject signal further down the list
+  ;; must not launder a chat-derived status.
+  (let [sources (assoc fixture-sources :status
+                       {:query {:view :mission-status :mission "M-fixture"}
+                        :derived-status :complete
+                        :derived-from [{:source :chat-turn
+                                        :text-preview "parked dependencies complete (1)"}
+                                       {:source :commit-subject
+                                        :subject "M-fixture work COMPLETE earlier"}]})
+        result (adjudicate [{:claim/type :status :value :complete}] sources)]
+    (is (= [:u8/mission-status-signal-overbroad] (:failures result)))))
+
 (deftest real-recorded-decision-exposes-both-known-findings
   (let [{:keys [report sources decision round]}
         (real-case "M-zaif-harness-v1")

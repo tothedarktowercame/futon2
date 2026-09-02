@@ -67,21 +67,38 @@
              (let [decision (matching-decision
                              (get-in sources [:decisions :records]) claim)
                    clock (matching-clock (get-in sources [:clocks :records]) claim)
-                   mission (:value claim)]
-               (if (and (= mission (get-in decision [:evidence/body :mission]))
-                        (= mission (:mission clock)))
+                   mission (:value claim)
+                   recorded (get-in decision [:evidence/body :mission])]
+               (cond
+                 (and (= mission recorded) (= mission (:mission clock)))
                  (query-result claim (get-in sources [:clocks :query]) :backed)
+
+                 ;; No recorded mission on the decision, or no clock witness
+                 ;; joining to it: attribution is ABSENT from the record.
+                 (or (nil? recorded) (nil? clock))
                  (query-result claim (get-in sources [:clocks :query]) :failed
-                               :u8/decision-mission-attribution-absent)))
+                               :u8/decision-mission-attribution-absent)
+
+                 ;; A mission IS recorded but disagrees with the claim (or the
+                 ;; clock names a different mission): the claim is unbacked,
+                 ;; not unattributable.
+                 :else
+                 (query-result claim (get-in sources [:clocks :query]) :failed
+                               :u8/claim-unbacked)))
 
              :status
              (let [oracle (:status sources)
                    derived (:derived-status oracle)
                    evidence (:derived-from oracle)
-                   declared? (some #(contains? #{:commit-subject
-                                                 :mission-sync-snapshot}
-                                               (:source %))
-                                   evidence)]
+                   ;; :derived-status comes from the NEWEST signal
+                   ;; (z1_views.clj: derived = first all-signals, and
+                   ;; :derived-from = take 10 all-signals in that order), so
+                   ;; only the FIRST entry's source can vouch for it. `some`
+                   ;; over the list would let any older commit signal launder
+                   ;; a chat-derived status.
+                   declared? (contains? #{:commit-subject
+                                          :mission-sync-snapshot}
+                                        (:source (first evidence)))]
                (cond
                  (not= (:value claim) derived)
                  (query-result claim (:query oracle) :failed :u8/claim-unbacked)
