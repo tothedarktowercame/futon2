@@ -118,6 +118,18 @@ guard), my own staged receipt (fixed: unstaged, and path-scoped commits
 adopted). Plus one commit collision (206bb02 carries two authors' changes;
 message says so).
 
+Second collision, 2026-09-02 evening, a NEW mechanism the morning's
+path-scoping does not stop: claude-1 ran `git commit --amend` on what it
+assumed was its own U14-U17 mint (821980d), but claude-2's lane had landed
+the D11 z1_views predicate fix (b8c4463) at HEAD seconds earlier — the
+amend REWROTE claude-2's commit as 33f7a46, folding claude-1's U16 reshape
+(worklist.edn, 8 lines) into it under claude-2's message. Content intact;
+b8c4463 dangling (reflog-reachable); disclosure could not be amended into
+33f7a46's message because HEAD moved AGAIN (d0ef0ae) before the fix — the
+verify-HEAD-first guard caught that one. Lesson adopted both lanes: in a
+shared tree, NEVER --amend; corrections are follow-up commits. Path-scoping
+protects what you sweep IN; only never-amend protects what you rewrite.
+
 ## Next (the recommendation this ledger feeds)
 
 Lining up the inner loop and trying again is right, in this order: let the
