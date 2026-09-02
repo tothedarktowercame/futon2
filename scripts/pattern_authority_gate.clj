@@ -84,13 +84,17 @@
           (or metrics {:actions {} :last-actions {} :thrash 0})
           events))
 
-(defn run-cell
-  "Run one pattern/lambda cell on one paired seed.  Besides yield, retain
-  action counts and forage/return alternation as behavior diagnostics."
-  [pattern-id lambda-pattern seed ticks]
+(defn run-cell-with
+  "`run-cell` with the ACTIVATION left open: `activate` is a world -> world that
+  puts one arm on the board.  The loop, the metrics, the trace and the returned
+  map are the same for every arm, which is the point -- scripts/
+  cascade_authority_gate.clj (futon3 worklist row :LA4) measures a different
+  channel of the same patterns and has to do it with THIS cell runner and THIS
+  summarize, not with a second one that could drift."
+  [activate seed ticks]
   (loop [world (-> (experiment/make-seeded-world
                     species food seed (+ 10000 seed) size ticks)
-                   (activate-pattern pattern-id lambda-pattern))
+                   activate)
          tick 0
          metrics {:actions {} :last-actions {} :thrash 0 :trace []}]
     (if (>= tick ticks)
@@ -116,6 +120,16 @@
                (inc tick)
                (-> (accumulate-events metrics (:last-events next-world))
                    (update :trace into (:last-events next-world))))))))
+
+(defn run-cell
+  "Run one pattern/lambda cell on one paired seed.  Besides yield, retain
+  action counts and forage/return alternation as behavior diagnostics."
+  [pattern-id lambda-pattern seed ticks]
+  (run-cell-with #(activate-pattern % pattern-id lambda-pattern) seed ticks))
+
+(defn run-arm-with
+  [activate seeds ticks]
+  (mapv #(run-cell-with activate % ticks) seeds))
 
 (defn run-arm
   [pattern-id lambda-pattern seeds ticks]

@@ -55,6 +55,26 @@
   "Reverse mapping for discovery."
   (into {} (map (fn [[k v]] [v k]) pattern-key->filename)))
 
+(def library-key->pattern-key
+  "The futon3 library id of a pattern (`:ants/white-space-scout`, the id
+   `checks/find_organise.clj` keys the repository by) -> the `:cyber/*` key the
+   two consumers in this repository dispatch on
+   (`ants.aif.pattern-sense/constraint-satisfied?:78`,
+   `ants.aif.pattern-efe/pattern-action-risk:117`).
+
+   Derived from `pattern-key->filename` read backwards through the filename, NOT
+   written out a second time by hand: the two names denote the same five files,
+   and a second hand-kept table would be a place for them to drift apart.
+
+   This matters because both of those consumers `case` on the key and fall
+   through to a 0.0 / `true` default for anything they do not recognise.  Handing
+   them a library id would leave channel 2 silently inert -- a lambda sweep over
+   an arm that contributes exactly zero at every lambda, which is the shape of
+   the tautology README-xeno-loop.md §0 exists to warn about."
+  (into {} (map (fn [[k filename]]
+                  [(keyword "ants" (str/replace filename #"\.flexiarg$" "")) k]))
+        pattern-key->filename))
+
 ;; -----------------------------------------------------------------------------
 ;; Flexiarg parsing
 
@@ -211,6 +231,132 @@
                                :title (:title config)
                                :delta (:aif-delta config)})
         (update :aif-config merge-deep (:aif-delta config)))))
+
+;; -----------------------------------------------------------------------------
+;; Cascade attachment - the actuator takes a CASCADE, not one pattern
+;;
+;; futon3 worklist row :LA4.  `attach-config` above takes a single `pattern-key`,
+;; so a cascade of @aif-delta patterns had no expression at all: futon2/holes/
+;; cascade-ants.edn:148 records the consequence -- "`:pattern/active` is singular
+;; -- one pattern at a time.  A cascade is by definition composed.  Composition
+;; is not merely unimplemented: :cascade/contentions shows it is currently
+;; INCOHERENT (info 0.5 vs 0.6).  Composition needs a resolution rule, and 'last
+;; write wins' is not one."
+;;
+;; The resolution rule is the cascade's own PRECEDENCE field.  That is not a new
+;; concept invented here: it is law O4 of P-validated-R5 §3e -- precedence is
+;; recorded on the cascade as a collection-level field, so which of two
+;; contending patterns takes a key is DATA on the cascade rather than a property
+;; of either pattern or an accident of attachment order.
+
+(defn ordered-members
+  "The cascade's members in precedence order, MOST PRECEDENT FIRST.
+
+   This recomputes futon3/checks/find_organise.clj:376 `ordered` from the two
+   fields the cascade carries -- sort the members by the cascade's own
+   `:precedence`, least number first, ties broken by `:authored-order` (the sort
+   is stable).  It is recomputed rather than read off the artefact's own
+   `:ordered` key so that the two derivations can be compared; the caller that
+   cares is scripts/cascade_authority_gate.clj, which checks they agree."
+  [{:keys [members precedence authored-order]}]
+  (let [members (set members)
+        base (or (seq (filter members authored-order)) (sort members))]
+    (vec (sort-by #(get precedence % Integer/MAX_VALUE) base))))
+
+(defn cascade-delta
+  "Fold the members' `@aif-delta` maps into one delta, with PRECEDENCE deciding
+   every key collision.
+
+   Direction, stated because it is the one thing here a reader could get
+   backwards.  `merge-deep` is last-wins (see above), and `ordered-members` is
+   most-precedent-FIRST, so this fold runs that list BACKWARDS: the least
+   precedent member writes first and the most precedent member writes last and
+   therefore takes any contended key.  That matches how precedence is read
+   everywhere else in this line of work -- find_organise.clj:396 `fire` consults
+   the rules in `ordered` order and takes the FIRST one that yields, so the most
+   precedent rule is the one that decides.  A fold that let the least precedent
+   member win would make `attach` and `fire` disagree about what precedence means.
+
+   The empty cascade folds to `{}`, which is the identity: `merge-deep` with no
+   arguments returns `{}` and `ants/baseline-cyber-ant`'s delta is `{}` too, so
+   the sham arm of the authority gate is the identity by two separate routes."
+  [cascade]
+  (let [ordered (ordered-members cascade)]
+    (apply merge-deep (reverse (map #(:aif-delta (cyber-config %)) ordered)))))
+
+(defn delta-paths
+  "Every LEAF of a nested delta map, as `[[k ...] value]`.  A delta contends with
+   another at a leaf, not at a top-level key: `pheromone-trail-tuner` and
+   `white-space-scout` both write under `:efe`, but they collide only at
+   `[:efe :lambda :info]`."
+  [m]
+  (mapcat (fn [[k v]]
+            (if (map? v)
+              (map (fn [[path leaf]] [(vec (cons k path)) leaf]) (delta-paths v))
+              [[[k] v]]))
+          m))
+
+(defn cascade-contentions
+  "Every config path that more than one member of the cascade writes, with the
+   value each member writes and the member whose value won.
+
+   This is reported rather than resolved silently because a contention is the
+   thing cascade-ants.edn:120-126 says goes undetected: three patterns shape tau
+   through DIFFERENT keys, so a merge sees no collision at all while they argue
+   about one quantity.  This function finds the collisions a merge CAN see; it
+   does not claim to find the other kind."
+  [cascade]
+  (let [ordered (ordered-members cascade)
+        writes (for [p ordered
+                     [path v] (delta-paths (:aif-delta (cyber-config p)))]
+                 {:path path :value v :pattern p})
+        winner (cascade-delta cascade)]
+    (->> (group-by :path writes)
+         (filter (fn [[_ ws]] (> (count ws) 1)))
+         (map (fn [[path ws]]
+                (let [won (get-in winner path)]
+                  {:path path
+                   :writers (mapv (fn [w] [(:pattern w) (:value w)]) ws)
+                   :won won
+                   ;; derived from the folded value, not from position, so a
+                   ;; wrong fold direction shows up as a mismatch here instead
+                   ;; of being restated as if it were the intent.
+                   :won-by (:pattern (first (filter #(= won (:value %)) ws)))})))
+         (sort-by :path)
+         vec)))
+
+(defn attach-cascade-config
+  "Attach a CASCADE's folded AIF config to an ant.  The cascade-taking sibling of
+   `attach-config`.
+
+   `cascade` is `{:members [...] :precedence {pattern int} :authored-order [...]}`
+   -- the fields futon3/checks/construct_ants_cascade.clj writes to
+   checks/ants-cascade.edn.  Two things are set, and they are the ant's two
+   pattern channels:
+
+     :aif-config    channel 1 -- the folded @aif-delta, read by
+                    ants.aif.core/aif-config:67-71 on every step.
+     :cyber-pattern channel 2 -- read by ants.aif.pattern-sense:109 through a
+                    SINGULAR `:id`.  A cascade has no single id, so the most
+                    precedent member is what channel 2 is shown, under its
+                    `:cyber/*` alias (`library-key->pattern-key`) because that is
+                    the key channel 2's two `case` tables dispatch on.  Its
+                    library id is kept beside it as `:library-id`, and the whole
+                    cascade under :cascade/:ordered/:delta, so nothing about the
+                    composition is lost to a reader of the ant."
+  [ant cascade]
+  (let [ordered (ordered-members cascade)
+        configs (mapv cyber-config ordered)
+        head (:id (first configs))
+        delta (cascade-delta cascade)]
+    (-> ant
+        (assoc :cyber-pattern {:id (get library-key->pattern-key head head)
+                               :library-id head
+                               :title (:title (first configs))
+                               :cascade (:id cascade)
+                               :ordered (mapv :id configs)
+                               :delta delta})
+        (update :aif-config merge-deep delta))))
 
 ;; -----------------------------------------------------------------------------
 ;; External config loader (pattern programs)

@@ -37,7 +37,42 @@
   "README-xeno-loop §0 says `config->aif-delta` merges ONLY :precision (:tau,:Pi-o). TRUE —
    but that is `apply-external-config`, the `{:config ...}` path used by the old futon5
    cyberant configs. The FLEXIARG path (`attach-config`, keyword id) merges the WHOLE delta.
-   §0's inertness critique does not transfer to the library patterns."}
+   §0's inertness critique does not transfer to the library patterns."
+  :channel-1-measured
+  "2026-09-02, futon3 worklist row :LA4. scripts/cascade_authority_gate.clj, 20 held-out
+   paired seeds x 300 ticks, on the cascade futon3/checks/construct_ants_cascade.clj
+   constructed (the four real patterns; the constructor's F4 falsifier, named before the
+   run, was this file's b0 and it was not selected). Artefact: holes/cascade-authority-gate.edn.
+
+   VERDICT: CASCADE AUTHORITY FAIL on yield. Mean paired delta +0.315 off a base of 18.445,
+   and it is one seed: 19 of 20 tied EXACTLY, one gained 6.3, sign-p 1.0. Controls sound --
+   the sham cascade (b0 alone, delta {}) tied `off` exactly on every seed at every lambda
+   including 0.
+
+   BUT NOT NULL ON BEHAVIOUR, and this is the part that differs from 2026-07-16. Channel 2
+   moved no action trace at all; channel 1 moves 16 of 20. Mean per-run action deltas against
+   off: pheromone -12.1, forage +11.45, hold +1.0, return +0.45, forage/return thrash +0.5,
+   deaths -0.05. So the declared parameters ARE a live actuator on what the ant DOES and are
+   not one on what the colony EATS. That is a statement about the ants' preferences, not
+   about the wiring: the gate's preconditions require the folded config to change the
+   expected free energy before any arm runs (off 152.789157 -> cascade 154.502288 on seed 1),
+   so this null is not the README-xeno-loop §0 tautology.
+
+   THE CONTENTION AT :cascade/contentions IS IMMATERIAL ON THIS ORACLE. Exchanging the
+   precedence of pt and ws -- which flips [:efe :lambda :info] between 0.5 and 0.6 and
+   nothing else -- changes the EFE (154.502288 -> 154.452288) and changes NOTHING
+   observable: identical yields and identical action traces on all 20 seeds at all four
+   lambdas. The incoherence this file recorded is real as a semantics problem and null as a
+   behaviour problem, at least here.
+
+   WHAT IS NOW RESOLVED, AND WHAT IS NOT. :cascade/holes `hole-channel1` is closed: the
+   untried path is tried, and the answer is on behaviour rather than on yield. `hole-compose`
+   asked for a resolution rule, having said last-write-wins is not one. There is one: the cascade's
+   PRECEDENCE field, law O4's collection-level datum, folded by
+   futon2/src/ants/cyber.clj `cascade-delta` / `attach-cascade-config`. What is NOT resolved
+   is `:pattern/active` being singular: channel 2 still takes one id, and a cascade is shown
+   to it through its most precedent member (futon3 decisions.edn
+   :cascade-identity-for-a-singular-channel)."}
 
  :cascade/boxes
  [;; ---- the floor: the given ----
