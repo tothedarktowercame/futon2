@@ -361,9 +361,14 @@
 
 (defn- policy-rollout-result
   "The memoized rollout for one mission stem: {:score <double or nil>
-   :events <AC5 typed move-score records>}. Split out of `policy-rollout` so
-   the ΔG leg and the AC5 records come from the SAME rollout rather than two,
-   which is also why the cache now holds a map."
+   :events <AC5 move-score, AC6 move-cost and AC6 refusal records>}. Split out
+   of `policy-rollout` so the ΔG leg and the records come from the SAME rollout
+   rather than two, which is also why the cache now holds a map.
+
+   AC6: this leg reads only the rollout's SCORE — it never enacts the returned
+   `:policy` — so it declares `:authority :diagnose`. When the rollout refuses
+   there is no `:policy-rollout-score` key, `:score` is nil, and the act gate
+   abstains on the ΔG leg exactly as it does when the mission has no moves."
   [mission-target]
   (let [stem (-> (str mission-target) (str/replace #"^M-" ""))]
     (if (contains? @!rollout-g-cache stem)
@@ -373,9 +378,12 @@
                            mv  (filter #(re-find pat (str (:have %) (:want %))) @!rollout-moves)]
                        (when (seq mv)
                          (let [seed (rollout/seed-roots {:arrows {} :cap-overlay @!rollout-cap-overlay :reachable #{}} mv)
-                               best (rollout/best-rollout seed mv :depth 5 :top-k 3 :gamma 0.9)]
+                               best (rollout/best-rollout seed mv :depth 5 :top-k 3 :gamma 0.9
+                                                          :authority :diagnose)]
                            {:score (some-> (:policy-rollout-score best) double)
-                            :events (vec (:move-score-events best))})))
+                            :events (vec (concat (:move-score-events best)
+                                                 (:move-cost-events best)
+                                                 (when-let [r (:rollout/refusal best)] [r])))})))
                      (catch Throwable _ nil))
             result (or result {:score nil :events []})]
         (swap! !rollout-g-cache assoc stem result)
@@ -389,10 +397,14 @@
   (:score (policy-rollout-result mission-target)))
 
 (defn policy-rollout-events
-  "AC5 self-repair condition: the typed `:unscored`/`:refused` records the
-   rollout's move-score validation emitted for this mission, or [] when every
-   move in its slice of the v2 set carried a finite score. Same memoized
-   rollout as `policy-rollout`, so reading both costs one search."
+  "AC5/AC6 self-repair condition: the typed records the rollout's validation
+   emitted for this mission — `:unscored`/`:refused` move-score records
+   (`:rollout-move-score/v1`), `:uncosted`/`:refused` move-cost records
+   (`:rollout-move-cost/v1`), and the search's refusal if it refused
+   (`:rollout-refusal/v1`) — or [] when every move in its slice of the v2 set
+   scored and costed. Each record carries its own `:producer-contract`, which
+   is how a consumer tells the three apart. Same memoized rollout as
+   `policy-rollout`, so reading both costs one search."
   [mission-target]
   (vec (:events (policy-rollout-result mission-target))))
 

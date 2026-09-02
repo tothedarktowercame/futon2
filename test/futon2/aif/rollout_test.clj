@@ -294,15 +294,247 @@
              [(rollout/move-score-record (ac5-move "s" :score 1.0))]))))
 
 (deftest ac5-exclusion-can-empty-the-candidate-set
-  ;; NOT DONE HERE, asserted so the boundary is visible rather than assumed:
-  ;; when every move is unscored the ranking population is empty and the
-  ;; expansion stops with the prefix it had -- the SAME shape it already had
-  ;; for a state with no reachable moves. Telling those two apart is AC6's
-  ;; refuse floor ("refuse when exclusion empties the candidate set"), and it
-  ;; is deliberately not implemented at this row.
+  ;; The boundary AC5 left open, now closed by AC6's refuse floor. When every
+  ;; move is unscored the ranking population is empty; before AC6 the expansion
+  ;; stopped with the prefix it had -- the SAME shape it already had for a state
+  ;; with no reachable moves -- and best-rollout returned a real-looking
+  ;; :policy-rollout-score of 0.0 for the empty policy. Now the rollout refuses.
   (let [moves [(ac5-move "u") (ac5-move "v")]
         best (rollout/best-rollout ac5-state moves :depth 1 :top-k 5)]
     (is (empty? (rollout/ranked-survivors ac5-state moves :top-k 5)))
-    (is (= [] (:policy best)))
+    (is (= :candidate-set-emptied-by-exclusion
+           (get-in best [:rollout/refusal :reason])))
+    (is (not (contains? best :policy-rollout-score)))
     (is (= 2 (count (:move-score-events best)))
         "the records still ride out, so the empty set is explicable")))
+
+;; ---------------------------------------------------------------------------
+;; AC6 (Joe's 2026-09-02 ruling on C130 §6, futon2 2f34c26) -- the rollout COST
+;; leg and the refuse floor under exclude-and-continue. Before this row
+;; `move-cost` read `(or (:step-score-delta m) (- (double (or (:score m) 0.0))))`,
+;; so a move nobody costed contributed exactly the same 0.0 to
+;; `project-policy`'s accumulator as a truncated state, an already-satisfied
+;; capability, and a move that genuinely scored zero.
+;; ---------------------------------------------------------------------------
+
+(def ^:private ac6-state
+  {:arrows {} :cap-overlay {} :reachable #{"root"}})
+
+(defn- ac6-move
+  "A reachable move carrying a positive :prior, so AC5's score validation is on
+   the prior path and does NOT exclude anything -- whatever this row's tests
+   observe is AC6's cost leg, not AC5's."
+  [id & {:as extra}]
+  (merge {:move/id id :move/class :close-hole
+          :have "root" :want (str "w-" id)
+          :rank 1 :move/terminal? false :prior 0.5}
+         extra))
+
+(deftest ac6-uncosted-move-is-not-zero-cost
+  ;; ABSENT: neither field supplied. Both keys are named, with which of them
+  ;; was present, so a nil-valued key and a missing key stay apart.
+  (let [record (rollout/move-cost-record ac6-state (ac6-move "u"))]
+    (is (= :uncosted (:status record)))
+    (is (= :cost-not-supplied (:reason record)))
+    (is (not (contains? record :value))
+        "an uncosted move must carry no numeric cost at all")
+    (is (= [:step-score-delta :score] (mapv :field (:absent record))))
+    (is (= [false false] (mapv :key-present? (:absent record))))
+    (is (= :rollout-move-cost/v1 (:producer-contract record)))
+    (is (nil? (rollout/move-cost ac6-state (ac6-move "u")))
+        "the numeric projection is nil, not 0.0"))
+  ;; ABSENT: keys present and nil. Same status, and the record says which.
+  (let [record (rollout/move-cost-record
+                ac6-state (ac6-move "n" :step-score-delta nil :score nil))]
+    (is (= :uncosted (:status record)))
+    (is (= [true true] (mapv :key-present? (:absent record))))))
+
+(deftest ac6-measured-zero-is-costed
+  ;; THE CONTROL the row turns on: same number, four different provenances, and
+  ;; the old expression produced the identical 0.0 for all four.
+  (let [delta-zero (rollout/move-cost-record ac6-state (ac6-move "d" :step-score-delta 0.0))
+        score-zero (rollout/move-cost-record ac6-state (ac6-move "s" :score 0.0))
+        truncated (rollout/move-cost-record (assoc ac6-state :truncated? true) (ac6-move "u"))
+        satisfied (rollout/move-cost-record
+                   (assoc ac6-state :cap-overlay
+                          {"c" {:props {:capability/status :satisfied}}})
+                   (ac6-move "c" :advances-cap "c"))
+        unsupplied (rollout/move-cost-record ac6-state (ac6-move "u"))]
+    (is (= [:present :present :present :present]
+           (mapv :status [delta-zero score-zero truncated satisfied])))
+    (is (= [0.0 0.0 0.0 0.0] (mapv :value [delta-zero score-zero truncated satisfied])))
+    (is (= [:step-score-delta :negated-score :truncated-state :satisfied-capability]
+           (mapv :basis [delta-zero score-zero truncated satisfied]))
+        "four zeros, four bases -- the distinction the bare 0.0 destroyed")
+    (is (= :uncosted (:status unsupplied)))
+    ;; and the pre-AC6 expression collapsed exactly this distinction
+    (let [pre (fn [m] (double (or (:step-score-delta m) (- (double (or (:score m) 0.0))))))]
+      (is (= 0.0 (Math/abs (pre (ac6-move "d" :step-score-delta 0.0)))))
+      (is (= 0.0 (Math/abs (pre (ac6-move "s" :score 0.0)))))
+      (is (= 0.0 (Math/abs (pre (ac6-move "u"))))))))
+
+(deftest ac6-delta-is-preferred-and-score-is-negated
+  ;; The fallback chain itself, unchanged: the delta wins when both are there,
+  ;; and the score enters negated (a benefit is negative cost).
+  (is (= -3.0 (:value (rollout/move-cost-record ac6-state (ac6-move "a" :step-score-delta -3.0 :score 9.0)))))
+  (is (= :step-score-delta (:basis (rollout/move-cost-record ac6-state (ac6-move "a" :step-score-delta -3.0 :score 9.0)))))
+  (is (= -2.0 (:value (rollout/move-cost-record ac6-state (ac6-move "b" :score 2.0)))))
+  (is (= :negated-score (:basis (rollout/move-cost-record ac6-state (ac6-move "b" :score 2.0))))))
+
+(deftest ac6-malformed-cost-is-refused-loudly
+  ;; MALFORMED: present but not a finite number, in either field. Refused, not
+  ;; omitted, with :offending naming the field and the value it was given.
+  (doseq [bad ["0.4" :zero true [] {} Double/NaN Double/POSITIVE_INFINITY
+               Double/NEGATIVE_INFINITY]]
+    (let [d (rollout/move-cost-record ac6-state (ac6-move "m" :step-score-delta bad))
+          s (rollout/move-cost-record ac6-state (ac6-move "m" :score bad))]
+      (is (= :refused (:status d)) (str "delta " (pr-str bad)))
+      (is (= :malformed-move-cost (:reason d)))
+      (is (= :step-score-delta (get-in d [:offending :field])))
+      (is (= bad (get-in d [:offending :value])))
+      (is (not (contains? d :value)))
+      (is (= :refused (:status s)) (str "score " (pr-str bad)))
+      (is (= :score (get-in s [:offending :field])))))
+  ;; A malformed delta is refused rather than silently falling through to a
+  ;; perfectly good :score -- absence omits, malformation refuses.
+  (let [record (rollout/move-cost-record ac6-state (ac6-move "f" :step-score-delta "x" :score 1.0))]
+    (is (= :refused (:status record)))
+    (is (= :step-score-delta (get-in record [:offending :field]))))
+  ;; Not a map at all, and loud even in a truncated state, where the old
+  ;; expression short-circuited to 0.0 without ever reading the move.
+  (is (= :malformed-move-record
+         (:reason (rollout/move-cost-record ac6-state "not-a-move"))))
+  (is (= :refused
+         (:status (rollout/move-cost-record (assoc ac6-state :truncated? true) "not-a-move")))))
+
+(deftest ac6-separation-of-uncosted-and-malformed
+  ;; nil and "x" in the same field give different statuses and different
+  ;; reasons -- the AC1 boundary, restated at the cost leg.
+  (let [absent (rollout/move-cost-record ac6-state (ac6-move "a" :step-score-delta nil))
+        refused (rollout/move-cost-record ac6-state (ac6-move "a" :step-score-delta "x"))]
+    (is (= :uncosted (:status absent)))
+    (is (= :refused (:status refused)))
+    (is (not= (:reason absent) (:reason refused)))))
+
+(deftest ac6-uncostable-move-is-excluded-and-the-search-continues
+  ;; EXCLUDE-AND-CONTINUE, the ruling's first half. Both moves are on the
+  ;; sharpened-:prior path so AC5 excludes nothing; the uncostable one is
+  ;; dropped by AC6 and the costable one continues -- and takes the whole
+  ;; renormalized prior mass, because the branching weights of a node are
+  ;; rescaled over its actual candidates.
+  (let [moves [(ac6-move "u") (ac6-move "s" :score 1.0)]
+        {:keys [survivors move-score-events move-cost-events candidate-set-emptied?]}
+        (rollout/ranked-survivors-with-records ac6-state moves :top-k 5)]
+    (is (= ["s"] (mapv :move/id survivors)))
+    (is (= 1.0 (:prior (first survivors))))
+    ;; AC5 still REPORTS the absent score (its record rides on every
+    ;; validation), but on the prior path it excludes nothing -- so the
+    ;; exclusion under test here is AC6's.
+    (is (= [false] (mapv :score-required? move-score-events)))
+    (is (not-any? :excluded-from-ranking? move-score-events)
+        "AC5 is on the prior path here and excludes nothing")
+    (is (= ["u"] (mapv :move/id move-cost-events)))
+    (is (true? (:excluded-from-rollout? (first move-cost-events))))
+    (is (nil? candidate-set-emptied?))
+    ;; and the search runs to a policy over the survivor
+    (let [best (rollout/best-rollout ac6-state moves :depth 1 :top-k 5)]
+      (is (= ["s"] (mapv :move/id (:policy best))))
+      (is (= -1.0 (:policy-rollout-score best)))
+      (is (= ["u"] (mapv :move/id (:move-cost-events best)))
+          "the record rides out, or the exclusion is a silently smaller set"))))
+
+(deftest ac6-refuse-floor-when-exclusion-empties-the-candidate-set
+  ;; REFUSE FLOOR, condition one. Two reachable moves, neither costable: the
+  ;; candidate set is emptied BY EXCLUSION, which is not the same as a node
+  ;; with nothing reachable, and the rollout refuses instead of returning the
+  ;; prefix it happened to have.
+  (let [moves [(ac6-move "u") (ac6-move "v")]
+        {:keys [survivors candidate-set-emptied? reachable-count]}
+        (rollout/ranked-survivors-with-records ac6-state moves :top-k 5)
+        best (rollout/best-rollout ac6-state moves :depth 1 :top-k 5)
+        refusal (:rollout/refusal best)]
+    (is (empty? survivors))
+    (is (true? candidate-set-emptied?))
+    (is (= 2 reachable-count))
+    (is (= :rollout-refusal/v1 (:producer-contract refusal)))
+    (is (= :candidate-set-emptied-by-exclusion (:reason refusal)))
+    (is (= #{"u" "v"} (set (:excluded refusal))))
+    (is (= [[]] (mapv :prefix (:emptied-nodes refusal))) "refused at the root")
+    (is (not (contains? best :policy-rollout-score))
+        "a refused rollout produces NO number -- the ΔG leg reads nil and the gate abstains")
+    (is (not (contains? best :policy))))
+  ;; THE OTHER DIRECTION: nothing reachable at all is a genuine terminal node,
+  ;; not an exclusion, and does not refuse.
+  (let [best (rollout/best-rollout {:arrows {} :cap-overlay {} :reachable #{}}
+                                   [(ac6-move "u" :have "elsewhere")]
+                                   :depth 1 :top-k 5)]
+    (is (nil? (:rollout/refusal best)))
+    (is (= 0.0 (:policy-rollout-score best)))))
+
+(deftest ac6-refuse-floor-when-the-rollout-authorizes
+  ;; REFUSE FLOOR, condition two. The SAME population that a diagnosing rollout
+  ;; runs on (one uncostable move excluded, one survivor) refuses when the
+  ;; caller declares it is choosing an action: a reduced candidate set changes
+  ;; which action is chosen.
+  (let [moves [(ac6-move "u") (ac6-move "s" :score 1.0)]
+        diagnosing (rollout/best-rollout ac6-state moves :depth 1 :top-k 5 :authority :diagnose)
+        authorizing (rollout/best-rollout ac6-state moves :depth 1 :top-k 5 :authority :authorize)]
+    (is (= -1.0 (:policy-rollout-score diagnosing)))
+    (is (nil? (:rollout/refusal diagnosing)))
+    (is (= :exclusion-under-authorizing-rollout
+           (get-in authorizing [:rollout/refusal :reason])))
+    (is (true? (get-in authorizing [:rollout/refusal :authority-declared?])))
+    (is (not (contains? authorizing :policy-rollout-score))))
+  ;; An authorizing rollout with NOTHING excluded stands: the floor is about
+  ;; exclusion, not about authority.
+  (let [moves [(ac6-move "a" :score 1.0) (ac6-move "b" :score 2.0)]
+        best (rollout/best-rollout ac6-state moves :depth 1 :top-k 5 :authority :authorize)]
+    (is (nil? (:rollout/refusal best)))
+    (is (number? (:policy-rollout-score best))))
+  ;; An undeclared authority is reported as undeclared -- a default is not a
+  ;; claim, so AC8's harvester can see the difference.
+  (let [moves [(ac6-move "u") (ac6-move "v")]
+        refusal (:rollout/refusal (rollout/best-rollout ac6-state moves :depth 1 :top-k 5))]
+    (is (= :diagnose (:authority refusal)))
+    (is (false? (:authority-declared? refusal))))
+  ;; An authority that is neither is loud, not silently coerced to the default.
+  (is (thrown? clojure.lang.ExceptionInfo
+               (rollout/best-rollout ac6-state [(ac6-move "a" :score 1.0)]
+                                     :depth 1 :top-k 5 :authority :whatever))))
+
+(deftest ac6-project-policy-refuses-an-uncostable-step
+  ;; A policy is an ORDERED plan: a step that cannot be costed cannot be
+  ;; dropped with the rest kept, so the projection refuses rather than
+  ;; returning a total one term short. The search never reaches this branch --
+  ;; it is for a caller-supplied policy.
+  (let [result (rollout/project-policy ac6-state [(ac6-move "s" :score 1.0) (ac6-move "u")])]
+    (is (= :uncostable-move-in-policy (get-in result [:rollout/refusal :reason])))
+    (is (= "u" (get-in result [:rollout/refusal :move/id])))
+    (is (= 1 (get-in result [:rollout/refusal :step])) "refused at the second step")
+    (is (not (contains? result :policy-rollout-score))))
+  ;; select-policy returns control instead of sorting over a missing number.
+  (let [decision (rollout/select-policy
+                  (rollout/score-policies ac6-state [(ac6-move "u") (ac6-move "v")] :depth 1))]
+    (is (= :refuse (:decision decision)))
+    (is (= :candidate-set-emptied-by-exclusion (:reason decision)))
+    (is (nil? (:selected decision)))))
+
+(deftest ac6-fully-costable-population-is-unchanged
+  ;; The regression floor: on a population where every move can be costed the
+  ;; rollout is what it was, NO events key and no refusal key are written, and
+  ;; the priors are not rescaled. This is the case both real v2 move-sets are
+  ;; in (every move carries a finite :score, and :step-score-delta is absent on
+  ;; 19/19 and 55/55, so :negated-score is the live basis there).
+  (let [moves [(ac6-move "a" :score 1.0 :prior 0.25) (ac6-move "b" :score 2.0 :prior 0.75)]
+        {:keys [survivors move-cost-events]}
+        (rollout/ranked-survivors-with-records ac6-state moves :top-k 5)
+        best (rollout/best-rollout ac6-state moves :depth 1 :top-k 5)]
+    (is (empty? move-cost-events))
+    (is (= [0.75 0.25] (mapv :prior survivors))
+        "priors are left bit-for-bit alone when nothing was excluded")
+    (is (not (contains? best :move-cost-events)))
+    (is (not (contains? best :rollout/refusal)))
+    (is (= -2.0 (:policy-rollout-score best))))
+  ;; and the present-only projection over a clean record collection
+  (is (= [] (rollout/move-cost-events
+             [(rollout/move-cost-record ac6-state (ac6-move "s" :score 1.0))]))))
