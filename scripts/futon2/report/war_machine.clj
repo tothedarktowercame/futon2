@@ -46,6 +46,7 @@
             [futon2.aif.forward-model :as fm]
             [futon2.aif.free-energy :as fe]
             [futon2.aif.habit-prior :as habit-prior]
+            [futon2.aif.mission-c :as mission-c]
             [futon2.aif.mission-registry :as mission-registry]
             [futon2.aif.morning-brief :as morning-brief]
             [futon2.aif.observation :as obs]
@@ -80,6 +81,22 @@
   "S4 durable active-focus read, resolved once when this namespace loads.
    Default OFF preserves the historical tick without an HTTP read or field."
   (= "1" (System/getenv "FUTON_WM_CLOCK_FOCUS")))
+
+(def ^:dynamic *mission-c?*
+  "U11 (d): C_mis readback, resolved once when this namespace loads.
+   `FUTON_WM_MISSION_C=1` reads the CLOCKED mission's completion criteria,
+   builds C_mis, and RECORDS risk_mis per mission action. It moves no
+   selection -- structurally, not by promise: the fields are attached to the
+   judgement AFTER ranking and selection are complete (`carry-mission-c`,
+   beside `carry-active-mission`), so no ranking, weight, temperature,
+   admissibility or selector can read them. U10's lesson applies -- record
+   first, consult as its own gated act (that would be a later row).
+
+   Depends on FUTON_WM_CLOCK_FOCUS=1 for its input: without the S4 focus read
+   there is no clocked mission and every enabled tick records the typed
+   absence `:no-clocked-mission`. Dynamic binding exists only for isolated
+   tests."
+  (= "1" (System/getenv "FUTON_WM_MISSION_C")))
 
 (def ^:dynamic *f-pi-dark?*
   "I2(c) dark readback switch, read once when this namespace loads.
@@ -1507,6 +1524,101 @@
   [result active-mission]
   (cond-> result
     *clock-focus?* (assoc :active-mission active-mission)))
+
+;; ---------------------------------------------------------------------------
+;; U11 (d) -- C_mis readback. Same terminal-projection discipline as the S4
+;; focus read above: computed from bindings that already exist, attached after
+;; selection, consumed by nothing in this tick.
+
+(def mission-c-criteria-sources
+  "DECLARED criteria sources, mission-id -> path. A mission listed here has a
+   typed IDENTIFY ingest and that ingest is authority over the doc's prose;
+   anything else falls back to the mission doc the candidate itself names
+   (`:action :mission-path`), so the source is always one the tick could point
+   at. The single entry is the hand exemplar DESIGN-c-vector.md \u00a72 names."
+  {"M-zaif-harness-v1"
+   (str (System/getProperty "user.home")
+        "/code/futon2/holes/labs/zaif-harness/runs/S4-identify-ingest.edn")})
+
+(defn- mission-action?
+  [entry]
+  (= :advance-mission (get-in entry [:action :type])))
+
+(defn- mission-c-criteria-path
+  "The clocked mission's criteria source: the declared ingest if there is one,
+   otherwise the `:mission-path` its own candidate carries."
+  [mission-id ranked]
+  (or (get mission-c-criteria-sources mission-id)
+      (some (fn [e]
+              (when (= mission-id (get-in e [:action :target]))
+                (get-in e [:action :mission-path])))
+            ranked)))
+
+(defn- mission-c-readback
+  "U11 (d). risk_mis for the clocked mission, recorded per mission action.
+
+   Every failure is TYPED and none of them produces a number: no clocked
+   mission, no criteria source, no criteria section, no measurable criterion
+   and an unreadable observable are five distinct `:status :absent` reasons,
+   because they want five different repairs. A flat 0.0 for any of them would
+   read as `this mission's criteria are met`.
+
+   `:action-sensitivity` is on the record because v0's forward model is the
+   status quo for every candidate, so risk_mis is expected CONSTANT across
+   this tick's mission actions. Recording the distinct-value count means U12
+   reads that off the record instead of re-deriving it, and means the day the
+   real Q(o|\u03c0) lands the change is visible in one field."
+  [active-mission ranked observation]
+  (let [mission-id (:mission-id active-mission)]
+    (if-not mission-id
+      {:version mission-c/version :status :absent
+       :reason (or (:reason active-mission) :no-clocked-mission)}
+      (if-let [path (mission-c-criteria-path mission-id ranked)]
+        (let [read-result (mission-c/read-criteria path
+                                                   :observables observation
+                                                   :mission mission-id)
+              c (mission-c/c-mis read-result)
+              risk (mission-c/risk-mis c observation)
+              actions (filterv mission-action? ranked)
+              clocked? (fn [e] (= mission-id (get-in e [:action :target])))
+              per-action
+              (when (= :measured (:status risk))
+                (mapv (fn [e]
+                        {:rank (:rank e)
+                         :target (get-in e [:action :target])
+                         :scope (if (clocked? e) :clocked-mission :other-mission)
+                         :risk-mis (:risk risk)})
+                      actions))]
+          (cond-> {:version mission-c/version
+                   :mission mission-id
+                   :criteria-source path
+                   :criteria-shape (:shape read-result)
+                   :criterion-count (:criterion-count c)
+                   :measurable-count (:measurable-count c)
+                   :weight-basis (:weight-basis c)
+                   :temperature (:temperature c)
+                   :unmeasurable (:unmeasurable c)
+                   :mission-action-count (count actions)
+                   :non-mission-action-count (- (count ranked) (count actions))
+                   :status (:status risk)}
+            (:per-criterion risk) (assoc :risk-mis-per-criterion (:per-criterion risk))
+            (:reason risk) (assoc :reason (:reason risk))
+            (:missing risk) (assoc :missing-observables (:missing risk))
+            (:criteria-reason c) (assoc :criteria-reason (:criteria-reason c))
+            per-action (assoc :per-mission-action per-action
+                              :action-sensitivity
+                              {:distinct-risk-values (count (into #{} (map :risk-mis) per-action))
+                               :constant? (<= (count (into #{} (map :risk-mis) per-action)) 1)})))
+        {:version mission-c/version :mission mission-id
+         :status :absent :reason :no-criteria-source}))))
+
+(defn- carry-mission-c
+  "Attach the C_mis readback after decision/ranking, exactly as
+   `carry-active-mission` attaches the focus read. Off by default; the
+   flag-off judgement is byte-identical."
+  [result fields]
+  (cond-> result
+    *mission-c?* (assoc :mission-c fields)))
 
 (defn- mission-id-for-clock-witness
   [target]
@@ -5673,110 +5785,123 @@
                             vec)
         ;; Losses: avoided states that are currently active
         losses (avoidance-losses mode free-energy)
+        ;; U11 (d): computed here, AFTER every ranking/selection binding above
+        ;; is final, and attached by `carry-mission-c` below. Nothing between
+        ;; this binding and `result0` reads it.
+        mission-c-fields (when *mission-c?*
+                           (try (mission-c-readback active-mission
+                                                    wm-ranked+cascades
+                                                    observation)
+                                (catch Exception e
+                                  {:version mission-c/version :status :absent
+                                   :reason :readback-failed
+                                   :message (ex-message e)})))
         result0
-        (carry-active-mission
-         (cond-> (cond-> {:mode mode
-                 :mode-prior (get pref/mode-prior mode 0.0)
-                 ;; INV (2026-05-27 staleness-gate): when the metabolic
-                 ;; snapshot was stale, the :stop-the-line override is
-                 ;; suppressed and :mode falls to base-mode. Record the
-                 ;; reason so downstream UI can render "stale" indicator
-                 ;; instead of red banner. Per CLAUDE.md §9 (no silent
-                 ;; swallow): if we ignore the stale snapshot's override,
-                 ;; we MUST surface why.
-                 :override-suppressed-reason override-suppressed-reason
-                 :metabolic-stale? (boolean metabolic-stale?)
-                 :free-energy free-energy
-                 :priorities all-priorities
-                 :priority-count (count all-priorities)
-                 :channel-priority-exclusions (:exclusions channel-priority-result)
-                 :losses losses
-                 :loss-count (count losses)
-                 :heads aif-heads
-                 :invariants inventory
-                 :support-attack-enriched enriched-sa
-                 :portfolio-recommendation
-                 (cond
-                   (= :absent (:status portfolio-step)) portfolio-step
-                   portfolio-step
-                   {:action (:action portfolio-step)
-                    :recommendation (:recommendation portfolio-step)
-                    :adjacent (get-in portfolio-step [:structure :adjacent] [])
-                    :critical-path (get-in portfolio-step [:structure :critical-path] [])}
-                   :else nil)
-                 :observation observation
-                 :belief wm-belief
-                 :belief-pre wm-belief-pre
-                 :prediction-errors prediction-errors
-                 ;; AC1: the tick's typed prediction-triple omissions and
-                 ;; refusals. Present-only at the trace boundary (trace.clj) --
-                 ;; an absent key means the triple was complete on every
-                 ;; channel, not that nobody looked.
-                 :prediction-triple-events prediction-triple-events
-                 ;; AC2: the belief aggregator's typed omissions and per-entry
-                 ;; rejections, same present-only discipline at the trace
-                 ;; boundary.
-                 :belief-aggregation-events belief-aggregation-events
-                 ;; AC3: the strategic-mode record, kept only when the
-                 ;; classifier could NOT classify. Same present-only discipline:
-                 ;; an absent key means the mode was inferred from six observed
-                 ;; features, not that nobody looked.
-                 :strategic-mode-events strategic-mode-events
-                 ;; AC4: the fallback selector's sorry-pressure record, kept
-                 ;; only when the fallback ran AND could not read the channel.
-                 ;; Same present-only discipline at the trace boundary.
-                 :default-mode-events default-mode-events
-                 :precision-state precision-state
-                 ;; R14 precision-over-policies (γ): the learned, bounded inverse
-                 ;; selection temperature this tick used (τ_eff = τ_spread / γ).
-                 ;; Persisted so the next tick continues the rolling outcome window.
-                 :selection-gain selection-gain-state
-                 :micro-step-trace micro-step-trace
-                 :morning-brief-events morning-brief-events
-                 :morning-brief-held-events morning-brief-held-events
-                 :morning-brief-consumed-event-ids
-                 (vec (sort morning-brief-consumed-event-ids))
-                 :operator-actions operator-actions
-                 :anticipation anticipation-snapshot
-                 :ranked-actions wm-ranked+cascades
-                 ;; The decision is drawn from this executable support, not the
-                 ;; served ranked/advisory display. Full-loop discrimination
-                 ;; must inspect the same Π_feasible domain.
-                 :admissible-actions wm-admissible
-                 :policy-support-exclusions (vec wm-policy-exclusions)
-                 :decision wm-decision
-                 ;; M-wm-policies v1: the visible cascade-policy lane (additive, defensive —
-                 ;; a cascade failure can never break the scan; memoized; shell-out to minilm).
-                 :cascade-policies cascade-policies
-                 ;; M-wm-policies Track 3 (proactive / defensive driving): the horizon
-                 ;; gap-scan — open-mission classes with THIN pattern coverage (candidates
-                 ;; for seeding cascades before the WM gets stuck in them). Additive,
-                 ;; defensive (a failure never breaks the scan); shares the cascade memo.
-                 :pattern-gaps (if include-advisory-lanes?
-                                 (try
-                                   ((requiring-resolve 'futon2.report.cascade-lane/gap-lane)
-                                    wm-ranked {:n 10 :budget 6})
-                                   (catch Throwable _ []))
-                                 [])
-                 :wm/route route6
-                 :input-status (current-input-status)}
-                  f-pi-dark-fields
-                  (merge f-pi-dark-fields)
+        (carry-mission-c
+         (carry-active-mission
+          (cond-> (cond-> {:mode mode
+                  :mode-prior (get pref/mode-prior mode 0.0)
+                  ;; INV (2026-05-27 staleness-gate): when the metabolic
+                  ;; snapshot was stale, the :stop-the-line override is
+                  ;; suppressed and :mode falls to base-mode. Record the
+                  ;; reason so downstream UI can render "stale" indicator
+                  ;; instead of red banner. Per CLAUDE.md §9 (no silent
+                  ;; swallow): if we ignore the stale snapshot's override,
+                  ;; we MUST surface why.
+                  :override-suppressed-reason override-suppressed-reason
+                  :metabolic-stale? (boolean metabolic-stale?)
+                  :free-energy free-energy
+                  :priorities all-priorities
+                  :priority-count (count all-priorities)
+                  :channel-priority-exclusions (:exclusions channel-priority-result)
+                  :losses losses
+                  :loss-count (count losses)
+                  :heads aif-heads
+                  :invariants inventory
+                  :support-attack-enriched enriched-sa
+                  :portfolio-recommendation
+                  (cond
+                    (= :absent (:status portfolio-step)) portfolio-step
+                    portfolio-step
+                    {:action (:action portfolio-step)
+                     :recommendation (:recommendation portfolio-step)
+                     :adjacent (get-in portfolio-step [:structure :adjacent] [])
+                     :critical-path (get-in portfolio-step [:structure :critical-path] [])}
+                    :else nil)
+                  :observation observation
+                  :belief wm-belief
+                  :belief-pre wm-belief-pre
+                  :prediction-errors prediction-errors
+                  ;; AC1: the tick's typed prediction-triple omissions and
+                  ;; refusals. Present-only at the trace boundary (trace.clj) --
+                  ;; an absent key means the triple was complete on every
+                  ;; channel, not that nobody looked.
+                  :prediction-triple-events prediction-triple-events
+                  ;; AC2: the belief aggregator's typed omissions and per-entry
+                  ;; rejections, same present-only discipline at the trace
+                  ;; boundary.
+                  :belief-aggregation-events belief-aggregation-events
+                  ;; AC3: the strategic-mode record, kept only when the
+                  ;; classifier could NOT classify. Same present-only discipline:
+                  ;; an absent key means the mode was inferred from six observed
+                  ;; features, not that nobody looked.
+                  :strategic-mode-events strategic-mode-events
+                  ;; AC4: the fallback selector's sorry-pressure record, kept
+                  ;; only when the fallback ran AND could not read the channel.
+                  ;; Same present-only discipline at the trace boundary.
+                  :default-mode-events default-mode-events
+                  :precision-state precision-state
+                  ;; R14 precision-over-policies (γ): the learned, bounded inverse
+                  ;; selection temperature this tick used (τ_eff = τ_spread / γ).
+                  ;; Persisted so the next tick continues the rolling outcome window.
+                  :selection-gain selection-gain-state
+                  :micro-step-trace micro-step-trace
+                  :morning-brief-events morning-brief-events
+                  :morning-brief-held-events morning-brief-held-events
+                  :morning-brief-consumed-event-ids
+                  (vec (sort morning-brief-consumed-event-ids))
+                  :operator-actions operator-actions
+                  :anticipation anticipation-snapshot
+                  :ranked-actions wm-ranked+cascades
+                  ;; The decision is drawn from this executable support, not the
+                  ;; served ranked/advisory display. Full-loop discrimination
+                  ;; must inspect the same Π_feasible domain.
+                  :admissible-actions wm-admissible
+                  :policy-support-exclusions (vec wm-policy-exclusions)
+                  :decision wm-decision
+                  ;; M-wm-policies v1: the visible cascade-policy lane (additive, defensive —
+                  ;; a cascade failure can never break the scan; memoized; shell-out to minilm).
+                  :cascade-policies cascade-policies
+                  ;; M-wm-policies Track 3 (proactive / defensive driving): the horizon
+                  ;; gap-scan — open-mission classes with THIN pattern coverage (candidates
+                  ;; for seeding cascades before the WM gets stuck in them). Additive,
+                  ;; defensive (a failure never breaks the scan); shares the cascade memo.
+                  :pattern-gaps (if include-advisory-lanes?
+                                  (try
+                                    ((requiring-resolve 'futon2.report.cascade-lane/gap-lane)
+                                     wm-ranked {:n 10 :budget 6})
+                                    (catch Throwable _ []))
+                                  [])
+                  :wm/route route6
+                  :input-status (current-input-status)}
+                   f-pi-dark-fields
+                   (merge f-pi-dark-fields)
 
-                  beta-dark-fields
-                  (merge beta-dark-fields))
-          habit-prior-state
-          (assoc :habit-prior-state habit-prior-state)
-          wm-version
-          (assoc :wm-version wm-version)
-          ;; RUN11: the caller's run id, carried onto the judgement so
-          ;; `trace/trace-record` can persist it under the same `:run/id` the
-          ;; tick receipt uses. Present-only — a caller that passes no
-          ;; `:run-id` (the scheduled runner and the full-loop runner) leaves
-          ;; the key off the record entirely.
-          run-id
-          (assoc :run/id run-id))
-         active-mission)
+                   beta-dark-fields
+                   (merge beta-dark-fields))
+           habit-prior-state
+           (assoc :habit-prior-state habit-prior-state)
+           wm-version
+           (assoc :wm-version wm-version)
+           ;; RUN11: the caller's run id, carried onto the judgement so
+           ;; `trace/trace-record` can persist it under the same `:run/id` the
+           ;; tick receipt uses. Present-only — a caller that passes no
+           ;; `:run-id` (the scheduled runner and the full-loop runner) leaves
+           ;; the key off the record entirely.
+           run-id
+           (assoc :run/id run-id))
+          active-mission)
+         mission-c-fields)
         result
         (if trace?
           (let [result (update result0 :wm/route route-tag :TRACE "futon2.aif.trace/write-trace!")]

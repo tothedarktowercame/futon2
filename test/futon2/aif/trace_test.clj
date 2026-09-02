@@ -415,6 +415,24 @@
                         :active-mission))
         "flag-off producer shape remains unchanged")))
 
+(deftest trace-record-carries-typed-mission-c-test
+  (testing "U11 (d): present-only, and the flag-off record is byte-identical"
+    (let [fields {:version 1 :mission "M-clocked" :status :absent
+                  :reason :no-measurable-criteria
+                  :unmeasurable [{:criterion :u-rows-green :status :unmeasurable
+                                  :reason :unresolved-observable
+                                  :source "S4-identify-ingest.edn:30"}]}
+          off (trace/trace-record sample-judge-output)
+          on (trace/trace-record (assoc sample-judge-output :mission-c fields))]
+      (is (not (contains? off :mission-c))
+          "no key at all when the flag never put one on the judgement")
+      (is (= fields (:mission-c on)))
+      (is (= (dissoc off :timestamp) (dissoc on :mission-c :timestamp))
+          "the enabled record differs from the disabled one in exactly this key
+           (:timestamp aside, which trace-record stamps per call)")
+      (is (= 23 trace/trace-schema-version)
+          "and the bump is what separates 'producer predates C_mis' from 'flag was off'"))))
+
 (deftest write-trace-appends-test
   (testing "two writes produce two records in the file"
     (trace/write-trace! sample-judge-output :dir *tmpdir* :date-str "2026-05-17")

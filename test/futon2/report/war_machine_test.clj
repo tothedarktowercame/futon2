@@ -15,6 +15,7 @@
             [futon2.aif.free-energy :as free-energy]
             [futon2.aif.observation :as observation]
             [futon2.aif.policy :as policy]
+            [futon2.aif.preferences :as pref]
             [futon2.aif.sorry-registry :as sorry-registry]
             [futon2.aif.trace :as trace]
             [futon2.report.war-machine :as wm])
@@ -1541,3 +1542,139 @@
       (is (= [[:graph :summary :total-sorrys]] (:paths triple)))
       (is (not (contains? triple :observed))
           "no fabricated observation for an unreadable registry"))))
+
+;; ---------------------------------------------------------------------------
+;; U11 (d) — the C_mis binding. Records, consults nothing.
+
+(def ^:private u11-ranked
+  "Two mission actions and two non-mission ones. The clocked mission's own
+   candidate carries the `:mission-path` the readback falls back to when no
+   ingest is declared for it — the shape the 2026-09-02 records have."
+  [{:rank 1 :action {:type :advance-mission :target "M-clocked"
+                     :mission-path "holes/missions/M-zaif-harness-v1.md"}}
+   {:rank 2 :action {:type :advance-mission :target "M-other"
+                     :mission-path "holes/missions/M-other.md"}}
+   {:rank 3 :action {:type :address-sorry :target :sorry/a}}
+   {:rank 4 :action {:type :no-op}}])
+
+(def ^:private u11-clocked
+  {:endpoint "futon2-d/mission/clocked" :mission-id "M-clocked"
+   :clocked-at-ms 1788357629629 :witness-rule "selection-decision"})
+
+(deftest mission-c-flag-off-leaves-the-judgement-byte-identical-test
+  (let [selected {:ranked-actions u11-ranked
+                  :decision {:action (:action (first u11-ranked))}
+                  :active-mission u11-clocked}
+        fields {:version 1 :status :measured :risk-mis-per-criterion []}
+        off (with-redefs-fn {#'wm/*mission-c?* false}
+              (fn [] (#'wm/carry-mission-c selected fields)))
+        on (with-redefs-fn {#'wm/*mission-c?* true}
+             (fn [] (#'wm/carry-mission-c selected fields)))]
+    (is (= selected off) "flag off: the judgement is the same map, key for key")
+    (is (not (contains? off :mission-c)))
+    (is (= fields (:mission-c on)))
+    (is (= (:ranked-actions off) (:ranked-actions on)))
+    (is (= (:decision off) (:decision on))
+        "the readback is attached after the decision and cannot move it")))
+
+(deftest mission-c-without-a-clocked-mission-is-a-typed-absence-test
+  (testing "the S4 focus read's own typed absence is carried through, not flattened"
+    (let [r (#'wm/mission-c-readback {:ok false :reason :no-active-clock}
+                                     u11-ranked {})]
+      (is (= :absent (:status r)))
+      (is (= :no-active-clock (:reason r)))
+      (is (not (contains? r :risk-mis-per-criterion)))))
+  (testing "and a focus read that never ran at all"
+    (is (= :no-clocked-mission (:reason (#'wm/mission-c-readback nil u11-ranked {}))))))
+
+(deftest mission-c-records-typed-unmeasurable-criteria-on-a-real-fixture-test
+  (testing "the clocked mission resolves to its declared ingest, and every
+            criterion in it is unmeasurable — loudly, per criterion"
+    (let [clocked (assoc u11-clocked :mission-id "M-zaif-harness-v1")
+          ranked (assoc-in u11-ranked [0 :action :target] "M-zaif-harness-v1")
+          r (#'wm/mission-c-readback clocked ranked {:sorry-count-norm 0.0})]
+      (is (str/ends-with? (:criteria-source r) "S4-identify-ingest.edn")
+          "the declared ingest wins over the candidate's :mission-path")
+      (is (= :ingest-edn (:criteria-shape r)))
+      (is (= 3 (:criterion-count r)))
+      (is (= 0 (:measurable-count r)))
+      (is (= :absent (:status r)))
+      (is (= :no-measurable-criteria (:reason r)))
+      (is (not (contains? r :risk-mis-per-criterion))
+          "present-only: no key rather than a nil standing in for numbers")
+      (is (= 3 (count (:unmeasurable r))))
+      (is (every? #(re-find #":\d+$" (:source %)) (:unmeasurable r))
+          "each typed record points at the line it came from")
+      (is (not (contains? r :per-mission-action))
+          "no per-action numbers when there is no number to record"))))
+
+(deftest mission-c-falls-back-to-the-candidates-own-mission-doc-test
+  (let [r (#'wm/mission-c-readback u11-clocked u11-ranked {})]
+    (is (= "holes/missions/M-zaif-harness-v1.md" (:criteria-source r))
+        "no declared ingest for M-clocked, so the clocked candidate's path answers")
+    (is (= :markdown-inline-paragraph (:criteria-shape r)))
+    (is (= 3 (:criterion-count r)))
+    (is (= 2 (:mission-action-count r)))
+    (is (= 2 (:non-mission-action-count r)))))
+
+(deftest mission-c-with-no-criteria-source-is-typed-test
+  (let [r (#'wm/mission-c-readback u11-clocked
+                                   [{:rank 1 :action {:type :no-op}}] {})]
+    (is (= :absent (:status r)))
+    (is (= :no-criteria-source (:reason r)))))
+
+(deftest mission-c-records-risk-per-mission-action-with-traceable-numbers-test
+  (testing "a mission whose criteria DO declare observables: the numeric path,
+            end to end, with every number derivable from the record"
+    (let [dir (str (System/getProperty "java.io.tmpdir") "/u11-" (System/nanoTime))
+          _ (.mkdirs (io/file dir))
+          path (str dir "/S4-identify-ingest.edn")
+          _ (spit path (pr-str
+                        {:ingest/mission "M-planted"
+                         :preferences/c
+                         [{:criterion :sorries-cleared :observable :sorry-count-norm}
+                          {:criterion :mission-healthy :observable :mission-health
+                           :spec [0.5 1.0]}
+                          {:criterion :prose-only :carrier "a human reads the worklist"}]}))
+          observation {:sorry-count-norm 0 :mission-health 0.0234}
+          r (with-redefs-fn {#'wm/mission-c-criteria-sources {"M-clocked" path}}
+              (fn [] (#'wm/mission-c-readback u11-clocked u11-ranked observation)))
+          per-criterion (into {} (map (juxt :criterion identity))
+                              (:risk-mis-per-criterion r))]
+      (is (= :measured (:status r)))
+      (is (= 3 (:criterion-count r)))
+      (is (= 2 (:measurable-count r)))
+      (is (= :uniform-over-measurable (:weight-basis r)))
+      (is (= 1 (count (:unmeasurable r)))
+          "the prose criterion is still recorded, typed, alongside the numbers")
+      (is (= :unresolved-observable (:reason (first (:unmeasurable r)))))
+      (testing "every recorded number reproduces from pref/ directly"
+        (doseq [[criterion observable spec] [[:sorries-cleared :sorry-count-norm {:becomes 1}]
+                                             [:mission-healthy :mission-health [0.5 1.0]]]]
+          (let [e (get per-criterion criterion)
+                d (pref/c-distribution spec :temperature (:temperature r))
+                value (get observation observable)]
+            (is (= observable (:observable e)))
+            (is (= value (:value e)))
+            (is (< (Math/abs (- (pref/log-preference d value) (:log-c e))) 1e-9))
+            (is (< (Math/abs (- 0.5 (:weight e))) 1e-9))
+            (is (< (Math/abs (- (* 0.5 (- (pref/log-preference d value)))
+                                (:contribution e)))
+                   1e-9)))))
+      (testing "one record per MISSION action, scoped, and no record for the others"
+        (is (= 2 (count (:per-mission-action r))))
+        (is (= 2 (:mission-action-count r)))
+        (is (= 2 (:non-mission-action-count r)))
+        (is (= [:clocked-mission :other-mission]
+               (mapv :scope (:per-mission-action r))))
+        (is (= [1 2] (mapv :rank (:per-mission-action r)))))
+      (testing "v0's status-quo forward model is action-INSENSITIVE, and the
+                record says so rather than leaving it to be re-derived"
+        (is (= 1 (get-in r [:action-sensitivity :distinct-risk-values])))
+        (is (true? (get-in r [:action-sensitivity :constant?]))))
+      (testing "the per-action risk is the sum of the recorded contributions"
+        (let [total (reduce + (map :contribution (:risk-mis-per-criterion r)))]
+          (is (every? #(< (Math/abs (- total (:risk-mis %))) 1e-9)
+                      (:per-mission-action r)))))
+      (io/delete-file path true)
+      (io/delete-file dir true))))

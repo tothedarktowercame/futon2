@@ -254,8 +254,16 @@
          “no key because the law was absent”; the decision's
          :f-pi-posterior (RUN9, 9867157) was added inside era 21 without a
          bump, so 22 is the first version that declares anything about the
-         decision's selection law at all."
-  22)
+         decision's selection law at all.
+    23 — adds the present-only :mission-c C_mis readback (U11 (d),
+         2026-09-02). Additive and default-off (FUTON_WM_MISSION_C), so no
+         record's existing bytes change. Bumped for the same reason as 22 and
+         under the ledger rule that any key-set change bumps: absence of
+         :mission-c must be readable as \"this producer predates C_mis\" versus
+         \"the flag was off on this tick\", and only the version separates
+         them. It declares nothing about selection — the key is attached after
+         the decision and no selection path reads it."
+  23)
 
 (def r8-producer-contract
   "Contract carried by trace records that require selection gain and the
@@ -593,6 +601,13 @@
     ;; absence, while default-OFF trace bytes remain unchanged.
     (contains? judge-output :active-mission)
     (assoc :active-mission (:active-mission judge-output))
+    ;; U11 (d) C_mis readback. Present only behind FUTON_WM_MISSION_C=1; the
+    ;; enabled record always carries either the per-mission-action risk_mis
+    ;; fields or the typed absence that says which of the five links broke,
+    ;; while default-OFF trace bytes remain unchanged. Nothing in selection
+    ;; reads it -- it is attached after the decision (`carry-mission-c`).
+    (contains? judge-output :mission-c)
+    (assoc :mission-c (:mission-c judge-output))
     ;; R16 close-the-loop seam (interface paired with claude-10): the enactor
     ;; writes `:realized-outcome` at enactment; R14's γ reader consumes it next
     ;; tick (see `selection-gain/fold-realized-outcome`). Present-only —
