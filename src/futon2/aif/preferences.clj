@@ -241,6 +241,136 @@
              (- (- (/ gap temperature)) log-z))
     :bernoulli (Math/log (max 1e-12 (if (or (= 0 x) (false? x)) (- 1.0 p1) p1)))))
 
+;; ---------------------------------------------------------------------------
+;; U16 — the three candidate readings of a Bernoulli OUTCOME, built and run
+;; behind a declared per-call selector (Joe, 2026-09-01: a choice the theory
+;; does not settle gets its branches built and run, not an advance ruling).
+;;
+;; WHAT IS UNDER TEST. `log-preference`'s Bernoulli branch selects the
+;; non-target pole with `(= 0 x)`, Clojure value equality, which is FALSE
+;; across number classes: it holds for the long 0 and not for the double 0.0.
+;; R2's observation vector is doubles throughout, so on the live path the
+;; unsatisfied pole is unreachable and `nil` — an unread channel — also reads
+;; as the target. Measured in U12
+;; (holes/labs/wm-contract/runs/U12-c-mis-falsifier/measurements.edn
+;; :clause-c, :defect); the only production caller of that branch is U11's
+;; mission_c (mission_c.clj:333, :370). C_int and the c-vector lane go through
+;; `kl` with an explicit `{:kind :bernoulli :p q}` and are not exposed.
+;;
+;; `log-preference` ITSELF IS UNTOUCHED. The arms live in new functions that a
+;; caller must name; nothing acquires an arm by default, so the shipped numbers
+;; do not move. THE DECLARATION RIDES ON THE SELECTOR, NOT ON THE DIST: a
+;; selector may be a bare arm keyword or a map carrying `:threshold` /
+;; `:observable-kind`. That keeps `c-distribution` — shared with C_int and
+;; pinned by `mission_c_test/c-distribution-is-the-pinned-constructor` —
+;; byte-identical while the arms are being compared. If an arm that needs a
+;; declaration wins, the declaration's shipping home is the criterion's
+;; `:spec`, and moving it there is a separate change.
+;;
+;; NIL IS A TYPED ABSENCE UNDER EVERY ARM, and that is not one of the branches:
+;; it is C130 discipline (an unread observable is absent, never satisfied)
+;; applied here, so no arm can be chosen that keeps today's reading of nil.
+
+(def bernoulli-outcome-arms
+  "The three candidate semantics U16 compares. Not a default: every call names
+   one.
+
+   `:numeric-equality`      — `==` rather than `=`, so the double 0.0 and the
+                              long 0 are the same outcome. Needs no
+                              declaration; every other value reads as the
+                              target.
+   `:declared-binarization` — a Bernoulli spec on a continuous observable must
+                              carry a `:threshold`; with one, x < threshold is
+                              outcome 0 and x >= threshold is outcome 1.
+                              Without one, only an exactly-binary value is
+                              read; anything else refuses.
+   `:typed-binary-only`     — the outcome is read only where the observable is
+                              DECLARED `:binary`, by `==`; a `:continuous`
+                              observable under a Bernoulli spec is a typed
+                              spec/observable mismatch, and an undeclared kind
+                              is its own refusal."
+  #{:numeric-equality :declared-binarization :typed-binary-only})
+
+(defn- selector-map [selector]
+  (cond (keyword? selector) {:arm selector}
+        (map? selector) selector
+        :else (throw (ex-info "bernoulli-outcome: selector must be an arm keyword or a map"
+                              {:selector selector}))))
+
+(defn- exactly-binary?
+  "True for a number that IS one of the two outcomes, under `==` so the class
+   does not decide it. This is the value-level test; it says nothing about
+   whether the observable it came from is binary."
+  [x]
+  (and (number? x) (or (== 0 x) (== 1 x))))
+
+(defn bernoulli-outcome
+  "Which pole of a `:bernoulli` preference the observed value `x` selects, under
+   the declared arm. Returns `{:status :present :outcome 0|1}` or
+   `{:status :absent :reason <keyword>}` — never a bare number, because two of
+   the three arms refuse on values the third scores.
+
+   `selector`: an arm keyword from `bernoulli-outcome-arms`, or a map
+   `{:arm <kw> :threshold <number> :observable-kind :binary|:continuous}`."
+  [selector x]
+  (let [{:keys [arm threshold observable-kind]} (selector-map selector)]
+    (when-not (contains? bernoulli-outcome-arms arm)
+      (throw (ex-info "bernoulli-outcome: unknown arm"
+                      {:arm arm :known bernoulli-outcome-arms})))
+    (cond
+      ;; Before any arm: an unread channel is absent, not satisfied (C130).
+      (nil? x) {:status :absent :reason :no-outcome-observed :arm arm}
+
+      ;; A boolean already IS an outcome; no arm reads it differently.
+      (boolean? x) {:status :present :outcome (if x 1 0) :arm arm}
+
+      (not (number? x)) {:status :absent :reason :uninterpretable-outcome
+                         :arm arm :class (.getName (class x))}
+
+      (= :numeric-equality arm)
+      {:status :present :outcome (if (== 0 x) 0 1) :arm arm}
+
+      (= :declared-binarization arm)
+      (cond
+        (number? threshold)
+        {:status :present :outcome (if (< (double x) (double threshold)) 0 1)
+         :arm arm :threshold (double threshold)}
+
+        (exactly-binary? x)
+        {:status :present :outcome (if (== 0 x) 0 1) :arm arm}
+
+        :else {:status :absent :reason :no-declared-threshold :arm arm})
+
+      (= :typed-binary-only arm)
+      (case observable-kind
+        :binary (if (exactly-binary? x)
+                  {:status :present :outcome (if (== 0 x) 0 1) :arm arm}
+                  {:status :absent :reason :non-binary-value-on-binary-observable
+                   :arm arm})
+        :continuous {:status :absent :reason :spec-observable-mismatch :arm arm}
+        {:status :absent :reason :undeclared-observable-kind :arm arm}))))
+
+(defn log-preference-under
+  "`log-preference` with the Bernoulli outcome read under a declared arm, and
+   with a typed return so a refusal is not a number.
+
+   Returns `{:status :present :log-c <nats>}` or
+   `{:status :absent :reason <keyword>}`. The `:range` branch is arithmetically
+   unchanged — it already has a gradient and U12's finding does not touch it —
+   but it too refuses on `nil` rather than throwing on `(double nil)`."
+  [{:keys [kind lo hi temperature log-z p1] :as _dist} x selector]
+  (case kind
+    :range (if (nil? x)
+             {:status :absent :reason :no-outcome-observed}
+             (let [gap (max 0.0 (- lo (double x)) (- (double x) hi))]
+               {:status :present :log-c (- (- (/ gap temperature)) log-z)}))
+    :bernoulli (let [o (bernoulli-outcome selector x)]
+                 (if (= :present (:status o))
+                   {:status :present
+                    :log-c (Math/log (max 1e-12 (if (= 0 (:outcome o)) (- 1.0 p1) p1)))
+                    :outcome (:outcome o)}
+                   o))))
+
 (defn- kl-gaussian-range
   "Item 1 (E-KL-refinements): KL(Q~ ‖ C) for Q~ = N(mu,sigma2) TRUNCATED and
    renormalised to [0,1], against a `:range` preference density C on [0,1]. A true

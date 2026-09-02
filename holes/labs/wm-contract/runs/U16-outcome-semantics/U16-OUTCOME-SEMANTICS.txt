@@ -1,0 +1,206 @@
+U16 -- THE THREE BERNOULLI OUTCOME SEMANTICS, BUILT AND RUN. Replay only.
+
+Under test: futon2.aif.preferences/bernoulli-outcome + log-preference-under
+            (preferences.clj:274-370), reached through mission-c/risk-mis's
+            :outcome-semantics option (mission_c.clj:330-420). No default is
+            flipped: every column below except the baseline names its arm.
+Corpus:     data/wm-trace/wm-trace-2026-09-02.edn -- 3 records: 0a18c4f7 4abad68c 801976e7
+Plant:      holes/labs/wm-contract/runs/U12-c-mis-falsifier/planted-criteria-declared-observable.edn
+            sha256 f3e123fd8a043f2e425c36d1c97e5682fe154dce9d37ff7bdccbc7a5fe17e5fc (the U12 artifact, read not rebuilt)
+            bindings {:u-rows-green :support-coverage, :reporting-gate-holds :mission-health, :honest-gap-list-published :annotation-health}
+
+=== 1. THE PRIMITIVE: WHAT EACH COLUMN READS A VALUE AS ===
+
+  C = c-distribution {:becomes 1} at the default T=0.1. `met` is -4.5399e-5 nats
+  and `unmet` is -10.0000454; a REFUSAL carries no number at all.
+
+  value      class                    v0-shipped                   numeric-equality             declared-binarization        typed-binary-only            declared-binarization+t0.5   typed-binary-only+binary    
+  0          java.lang.Long           UNMET (--)                   UNMET (0)                    UNMET (0)                    refuse undeclared-observable-kind UNMET (0)                    UNMET (0)                   
+  0.0        java.lang.Double         met (--)                     UNMET (0)                    UNMET (0)                    refuse undeclared-observable-kind UNMET (0)                    UNMET (0)                   
+  1.0        java.lang.Double         met (--)                     met (1)                      met (1)                      refuse undeclared-observable-kind met (1)                      met (1)                     
+  1          java.lang.Long           met (--)                     met (1)                      met (1)                      refuse undeclared-observable-kind met (1)                      met (1)                     
+  0.5        java.lang.Double         met (--)                     met (1)                      refuse no-declared-threshold refuse undeclared-observable-kind met (1)                      refuse non-binary-value-on-binary-observable
+  0.75       java.lang.Double         met (--)                     met (1)                      refuse no-declared-threshold refuse undeclared-observable-kind met (1)                      refuse non-binary-value-on-binary-observable
+  -3.0       java.lang.Double         met (--)                     met (1)                      refuse no-declared-threshold refuse undeclared-observable-kind UNMET (0)                    refuse non-binary-value-on-binary-observable
+  false      java.lang.Boolean        UNMET (--)                   UNMET (0)                    UNMET (0)                    UNMET (0)                    UNMET (0)                    UNMET (0)                   
+  true       java.lang.Boolean        met (--)                     met (1)                      met (1)                      met (1)                      met (1)                      met (1)                     
+  nil        nil                      met (--)                     refuse no-outcome-observed   refuse no-outcome-observed   refuse no-outcome-observed   refuse no-outcome-observed   refuse no-outcome-observed  
+
+  THE ONE ROW THAT NAMES THE DEFECT is `0.0`: the baseline reads it `met`,
+  identically to 1.0, and every arm either reads it UNMET or refuses it.
+  THE ROW THAT SEPARATES THE ARMS is `0.75`, not `0.0` -- 0.0 is exactly binary,
+  so :declared-binarization reads it without a threshold and agrees with
+  :numeric-equality there.
+
+=== 2. THE 14-CHANNEL SWEEP: DOES risk_mis VARY WITH THE WORLD? ===
+
+  One criterion at a time over every channel R2 observes on the last clocked
+  record, same composition the readback uses. U12 measured 1 distinct value over
+  14 channels on the baseline -- the world could not move the number.
+
+  record 801976e7, 14 channels
+
+  channel                value                    v0-shipped                 numeric-equality           declared-binarization      typed-binary-only          declared-binarization+t0.5 typed-binary-only+binary  
+  active-repo-ratio      0.75                     0.0000454                  0.0000454                  refuse no-declared-threshold refuse undeclared-observable-kind 0.0000454                  refuse non-binary-value-on-binary-observable
+  annotation-health      0.9951690821256038       0.0000454                  0.0000454                  refuse no-declared-threshold refuse undeclared-observable-kind 0.0000454                  refuse non-binary-value-on-binary-observable
+  attack-coverage        0.5                      0.0000454                  0.0000454                  refuse no-declared-threshold refuse undeclared-observable-kind 0.0000454                  refuse non-binary-value-on-binary-observable
+  consulting-pct         0.0                      0.0000454                  10.0000454                 10.0000454                 refuse undeclared-observable-kind 10.0000454                 10.0000454                
+  coupling-density       0.4666666666666667       0.0000454                  0.0000454                  refuse no-declared-threshold refuse undeclared-observable-kind 10.0000454                 refuse non-binary-value-on-binary-observable
+  depositing-signal      0.0                      0.0000454                  10.0000454                 10.0000454                 refuse undeclared-observable-kind 10.0000454                 10.0000454                
+  loop-health            0.5173603175429513       0.0000454                  0.0000454                  refuse no-declared-threshold refuse undeclared-observable-kind 0.0000454                  refuse non-binary-value-on-binary-observable
+  mathematics-pct        9.430996541967935E-4     0.0000454                  0.0000454                  refuse no-declared-threshold refuse undeclared-observable-kind 10.0000454                 refuse non-binary-value-on-binary-observable
+  mission-health         0.023376623376623377     0.0000454                  0.0000454                  refuse no-declared-threshold refuse undeclared-observable-kind 10.0000454                 refuse non-binary-value-on-binary-observable
+  portfolio-pct          0.0022005658597925182    0.0000454                  0.0000454                  refuse no-declared-threshold refuse undeclared-observable-kind 10.0000454                 refuse non-binary-value-on-binary-observable
+  sorry-count-norm       0.0                      0.0000454                  10.0000454                 10.0000454                 refuse undeclared-observable-kind 10.0000454                 10.0000454                
+  stack-pct              0.9968563344860107       0.0000454                  0.0000454                  refuse no-declared-threshold refuse undeclared-observable-kind 0.0000454                  refuse non-binary-value-on-binary-observable
+  support-coverage       0.6                      0.0000454                  0.0000454                  refuse no-declared-threshold refuse undeclared-observable-kind 0.0000454                  refuse non-binary-value-on-binary-observable
+  ticks-firing-ratio     0.0                      0.0000454                  10.0000454                 10.0000454                 refuse undeclared-observable-kind 10.0000454                 10.0000454                
+
+  v0-shipped                   14/14 measured, 1 distinct risk_mis value(s) [4.539889921682063E-5]
+  numeric-equality             14/14 measured, 2 distinct risk_mis value(s) [4.539889921682063E-5 10.000045398900186]
+  declared-binarization         4/14 measured, 1 distinct risk_mis value(s) [10.000045398900186]
+  typed-binary-only             0/14 measured, 0 distinct risk_mis value(s) []
+  declared-binarization+t0.5   14/14 measured, 2 distinct risk_mis value(s) [4.539889921682063E-5 10.000045398900186]
+  typed-binary-only+binary      4/14 measured, 1 distinct risk_mis value(s) [10.000045398900186]
+
+=== 3. THE MIRROR CONTROL (before any (b) number is read) ===
+
+  `readback-under` with NO arm, against the shipped mission-c-readback, on the
+  same records and the same plant. If these differ, the (b) numbers in §4 are
+  about this script and not about the machine.
+
+  4abad68c  fields equal: true   risk_mis equal: true   {:status :measured, :measurable-count 3}
+  801976e7  fields equal: true   risk_mis equal: true   {:status :measured, :measurable-count 3}
+  CONTROL: PASSES -- the mirror is the shipped readback with an arm hole in it
+
+=== 4. CLAUSE (b) DISCRIMINATION, PER ARM ===
+
+  §7 asks whether the clocked mission's advance actions carry LOWER risk_mis than
+  non-mission actions. U12's verdict was FAIL, structurally.
+
+  record 4abad68c  clocked M-wm-aif-policy-grain-compliance
+    v0-shipped                   measured   0.0000453989             mission actions 133, non-mission 13, distinct risk 1
+    numeric-equality             measured   0.0000453989             mission actions 133, non-mission 13, distinct risk 1
+    declared-binarization        absent     unread-outcome [:no-declared-threshold :no-declared-threshold :no-declared-threshold] mission actions 133, non-mission 13, distinct risk --
+    typed-binary-only            absent     unread-outcome [:undeclared-observable-kind :undeclared-observable-kind :undeclared-observable-kind] mission actions 133, non-mission 13, distinct risk --
+    declared-binarization+t0.5   measured   3.3333787322             mission actions 133, non-mission 13, distinct risk 1
+    typed-binary-only+binary     absent     unread-outcome [:non-binary-value-on-binary-observable :non-binary-value-on-binary-observable :non-binary-value-on-binary-observable] mission actions 133, non-mission 13, distinct risk --
+
+  record 801976e7  clocked M-zaif-harness-v1
+    v0-shipped                   measured   0.0000453989             mission actions 133, non-mission 13, distinct risk 1
+    numeric-equality             measured   0.0000453989             mission actions 133, non-mission 13, distinct risk 1
+    declared-binarization        absent     unread-outcome [:no-declared-threshold :no-declared-threshold :no-declared-threshold] mission actions 133, non-mission 13, distinct risk --
+    typed-binary-only            absent     unread-outcome [:undeclared-observable-kind :undeclared-observable-kind :undeclared-observable-kind] mission actions 133, non-mission 13, distinct risk --
+    declared-binarization+t0.5   measured   3.3333787322             mission actions 133, non-mission 13, distinct risk 1
+    typed-binary-only+binary     absent     unread-outcome [:non-binary-value-on-binary-observable :non-binary-value-on-binary-observable :non-binary-value-on-binary-observable] mission actions 133, non-mission 13, distinct risk --
+
+  VERDICT (b): UNCHANGED BY EVERY ARM, and the reason is not numerical.
+  mission-c-readback assigns ONE risk value -- (:risk risk) -- to every mission
+  action (war_machine.clj:1594-1600), because v0's forward model is the status
+  quo for every candidate. No reading of an OUTCOME can make a number that is
+  copied vary across the things it is copied to. An arm can only change WHICH
+  constant it is, or refuse to produce one. Non-mission actions still carry no
+  risk_mis field at all, so the comparison §7 names still has an absent side.
+  U16 therefore does not unblock (b); U13's forward model is what would.
+
+=== 5. CLAUSE (c) THE SATISFIED-CRITERIA ZERO, PER ARM ===
+
+  Four planted fields over the plant's three criteria: every observable at its
+  {:becomes 1} target; at the long 0; at the double 0.0; and nil. U12's numbers on
+  the baseline: satisfied 4.5399e-5 (a temperature floor, not zero), unsatisfied
+  long-0 10.0000454, unsatisfied double-0.0 4.5399e-5 -- the last being the defect.
+
+  column                       satisfied                  unsatisfied-long-0         unsatisfied-double-0.0     nil-field                 
+  v0-shipped                   0.0000453989               10.0000453989              0.0000453989               0.0000453989              
+  numeric-equality             0.0000453989               10.0000453989              10.0000453989              refuse no-outcome-observed
+  declared-binarization        0.0000453989               10.0000453989              10.0000453989              refuse no-outcome-observed
+  typed-binary-only            refuse undeclared-observable-kind refuse undeclared-observable-kind refuse undeclared-observable-kind refuse no-outcome-observed
+  declared-binarization+t0.5   0.0000453989               10.0000453989              10.0000453989              refuse no-outcome-observed
+  typed-binary-only+binary     0.0000453989               10.0000453989              10.0000453989              refuse no-outcome-observed
+
+  v0-shipped                   pole ratio (double-0.0 / satisfied): 1.0000
+  numeric-equality             pole ratio (double-0.0 / satisfied): 220270.6579
+  declared-binarization        pole ratio (double-0.0 / satisfied): 220270.6579
+  typed-binary-only            pole ratio (double-0.0 / satisfied): -- (one side refuses)
+  declared-binarization+t0.5   pole ratio (double-0.0 / satisfied): 220270.6579
+  typed-binary-only+binary     pole ratio (double-0.0 / satisfied): 220270.6579
+
+  VERDICT (c): THE ZERO IS NOT REACHED UNDER ANY ARM. A met Bernoulli criterion
+  costs 4.5399e-5 nats at T=0.1, which is the temperature floor and not zero;
+  that is a property of c* = 1/(1+e^(-1/T)) and no outcome reading moves it.
+  WHAT THE ARMS DO FIX is the OTHER half of U12's clause (c): the unsatisfied
+  pole becomes reachable from a double (:numeric-equality, :declared-binarization)
+  or the field is refused outright (:typed-binary-only), and under every arm the
+  nil field is a typed absence rather than a satisfied mission.
+
+=== 6. WHERE THE COLUMNS AGREE AND WHERE THEY PART ===
+
+  Over the value vocabulary of §1: agree = same outcome pole; differ = different
+  pole; split = one reads a number where the other refuses; both-refuse.
+
+  v0-shipped                   vs numeric-equality             {:agree 8, :differ 1, :split 1}
+        differ on 0.0
+        split on  nil
+  v0-shipped                   vs declared-binarization        {:agree 5, :differ 1, :split 4}
+        differ on 0.0
+        split on  0.5 0.75 -3.0 nil
+  v0-shipped                   vs typed-binary-only            {:split 8, :agree 2}
+        split on  0 0.0 1.0 1 0.5 0.75 -3.0 nil
+  v0-shipped                   vs declared-binarization+t0.5   {:agree 7, :differ 2, :split 1}
+        differ on 0.0 -3.0
+        split on  nil
+  v0-shipped                   vs typed-binary-only+binary     {:agree 5, :differ 1, :split 4}
+        differ on 0.0
+        split on  0.5 0.75 -3.0 nil
+  numeric-equality             vs declared-binarization        {:agree 6, :split 3, :both-refuse 1}
+        split on  0.5 0.75 -3.0
+  numeric-equality             vs typed-binary-only            {:split 7, :agree 2, :both-refuse 1}
+        split on  0 0.0 1.0 1 0.5 0.75 -3.0
+  numeric-equality             vs declared-binarization+t0.5   {:agree 8, :differ 1, :both-refuse 1}
+        differ on -3.0
+  numeric-equality             vs typed-binary-only+binary     {:agree 6, :split 3, :both-refuse 1}
+        split on  0.5 0.75 -3.0
+  declared-binarization        vs typed-binary-only            {:split 4, :both-refuse 4, :agree 2}
+        split on  0 0.0 1.0 1
+  declared-binarization        vs declared-binarization+t0.5   {:agree 6, :split 3, :both-refuse 1}
+        split on  0.5 0.75 -3.0
+  declared-binarization        vs typed-binary-only+binary     {:agree 6, :both-refuse 4}
+  typed-binary-only            vs declared-binarization+t0.5   {:split 7, :agree 2, :both-refuse 1}
+        split on  0 0.0 1.0 1 0.5 0.75 -3.0
+  typed-binary-only            vs typed-binary-only+binary     {:split 4, :both-refuse 4, :agree 2}
+        split on  0 0.0 1.0 1
+  declared-binarization+t0.5   vs typed-binary-only+binary     {:agree 6, :split 3, :both-refuse 1}
+        split on  0.5 0.75 -3.0
+
+=== 7. WHAT IS LEFT TO CHOOSE ===
+
+  MEASURED, not argued:
+   - All three arms fix what U12 named: the double 0.0 no longer reads as met, and
+     nil is a typed absence rather than a satisfied criterion (§1, §5).
+   - None of them changes clause (b). risk_mis is one number copied to every
+     mission action; an outcome reading cannot make it vary (§4).
+   - None of them reaches the clause (c) zero. That is the T=0.1 floor (§5).
+   - ONE OF U12's TWO FINDINGS IS LIFTED, and it is worth separating from the
+     choice below. U12: 'risk_mis does not vary with the world either -- 1 distinct
+     value over 14 channels'. Under :numeric-equality the same sweep returns 2
+     distinct values (§2), so the number moves with the world once the type
+     comparison is fixed. That is a property of the outcome reading and it holds
+     for every arm that scores anything at all; it is not the residual.
+   - THE COST IS COVERAGE, and it is measured in §2. Over the 14 channels R2
+     observes, :numeric-equality scores every one, :declared-binarization scores
+     only the channels reading exactly 0 or 1, and :typed-binary-only scores none,
+     because no criterion in the corpus declares an observable kind.
+   - :declared-binarization and :typed-binary-only are INDISTINGUISHABLE on this
+     corpus at the composition (§2, §4, §5) and part company only where a
+     declaration exists (§1, §6, and the two declared columns).
+
+  THE RESIDUAL CHOICE, stated as what the numbers do NOT settle: whether a
+  criterion whose observable carries no declaration should be SCORED on a type
+  fix alone (:numeric-equality -- 14/14 channels, and 0.75 reads as met) or
+  REFUSED until someone writes the declaration down (:declared-binarization,
+  :typed-binary-only -- 4/14 and 0/14). Both are self-consistent; the measurement
+  says what each costs and cannot say which cost is the right one to pay,
+  because nothing recorded says whether R2's channels ARE binary observables.
+  That is a question about what the criteria mean, not about the code.
+
+  NO RULING IS MADE HERE and no registry is written.

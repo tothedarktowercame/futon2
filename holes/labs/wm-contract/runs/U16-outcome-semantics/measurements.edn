@@ -1,0 +1,391 @@
+{:columns
+ [{:key :v0-shipped,
+   :selector nil,
+   :note "today: (= 0 x), long-0 only; nil reads as the target"}
+  {:key :numeric-equality,
+   :selector :numeric-equality,
+   :note "== ; needs no declaration"}
+  {:key :declared-binarization,
+   :selector :declared-binarization,
+   :note "threshold required on a non-binary value"}
+  {:key :typed-binary-only,
+   :selector :typed-binary-only,
+   :note "observable kind required"}
+  {:key :declared-binarization+t0.5,
+   :selector {:arm :declared-binarization, :threshold 0.5},
+   :note "the same arm WITH the declaration it asks for"}
+  {:key :typed-binary-only+binary,
+   :selector {:arm :typed-binary-only, :observable-kind :binary},
+   :note "the same arm WITH the observable declared binary"}],
+ :agreement
+ [{:a :v0-shipped,
+   :b :numeric-equality,
+   :counts {:agree 8, :differ 1, :split 1},
+   :differ-on ["0.0"],
+   :split-on ["nil"]}
+  {:a :v0-shipped,
+   :b :declared-binarization,
+   :counts {:agree 5, :differ 1, :split 4},
+   :differ-on ["0.0"],
+   :split-on ["0.5" "0.75" "-3.0" "nil"]}
+  {:a :v0-shipped,
+   :b :typed-binary-only,
+   :counts {:split 8, :agree 2},
+   :differ-on [],
+   :split-on ["0" "0.0" "1.0" "1" "0.5" "0.75" "-3.0" "nil"]}
+  {:a :v0-shipped,
+   :b :declared-binarization+t0.5,
+   :counts {:agree 7, :differ 2, :split 1},
+   :differ-on ["0.0" "-3.0"],
+   :split-on ["nil"]}
+  {:a :v0-shipped,
+   :b :typed-binary-only+binary,
+   :counts {:agree 5, :differ 1, :split 4},
+   :differ-on ["0.0"],
+   :split-on ["0.5" "0.75" "-3.0" "nil"]}
+  {:a :numeric-equality,
+   :b :declared-binarization,
+   :counts {:agree 6, :split 3, :both-refuse 1},
+   :differ-on [],
+   :split-on ["0.5" "0.75" "-3.0"]}
+  {:a :numeric-equality,
+   :b :typed-binary-only,
+   :counts {:split 7, :agree 2, :both-refuse 1},
+   :differ-on [],
+   :split-on ["0" "0.0" "1.0" "1" "0.5" "0.75" "-3.0"]}
+  {:a :numeric-equality,
+   :b :declared-binarization+t0.5,
+   :counts {:agree 8, :differ 1, :both-refuse 1},
+   :differ-on ["-3.0"],
+   :split-on []}
+  {:a :numeric-equality,
+   :b :typed-binary-only+binary,
+   :counts {:agree 6, :split 3, :both-refuse 1},
+   :differ-on [],
+   :split-on ["0.5" "0.75" "-3.0"]}
+  {:a :declared-binarization,
+   :b :typed-binary-only,
+   :counts {:split 4, :both-refuse 4, :agree 2},
+   :differ-on [],
+   :split-on ["0" "0.0" "1.0" "1"]}
+  {:a :declared-binarization,
+   :b :declared-binarization+t0.5,
+   :counts {:agree 6, :split 3, :both-refuse 1},
+   :differ-on [],
+   :split-on ["0.5" "0.75" "-3.0"]}
+  {:a :declared-binarization,
+   :b :typed-binary-only+binary,
+   :counts {:agree 6, :both-refuse 4},
+   :differ-on [],
+   :split-on []}
+  {:a :typed-binary-only,
+   :b :declared-binarization+t0.5,
+   :counts {:split 7, :agree 2, :both-refuse 1},
+   :differ-on [],
+   :split-on ["0" "0.0" "1.0" "1" "0.5" "0.75" "-3.0"]}
+  {:a :typed-binary-only,
+   :b :typed-binary-only+binary,
+   :counts {:split 4, :both-refuse 4, :agree 2},
+   :differ-on [],
+   :split-on ["0" "0.0" "1.0" "1"]}
+  {:a :declared-binarization+t0.5,
+   :b :typed-binary-only+binary,
+   :counts {:agree 6, :split 3, :both-refuse 1},
+   :differ-on [],
+   :split-on ["0.5" "0.75" "-3.0"]}],
+ :plant
+ {:path
+  "holes/labs/wm-contract/runs/U12-c-mis-falsifier/planted-criteria-declared-observable.edn",
+  :sha256
+  "f3e123fd8a043f2e425c36d1c97e5682fe154dce9d37ff7bdccbc7a5fe17e5fc",
+  :bindings
+  {:u-rows-green :support-coverage,
+   :reporting-gate-holds :mission-health,
+   :honest-gap-list-published :annotation-health}},
+ :mirror-control
+ {:records
+  [{:run/id "4abad68c-5481-4402-8f0e-252add62c54b",
+    :equal? true,
+    :risk-equal? true}
+   {:run/id "801976e7-01c6-4e39-aada-27f620f7c2f1",
+    :equal? true,
+    :risk-equal? true}],
+  :passes? true},
+ :corpus
+ {:files ["data/wm-trace/wm-trace-2026-09-02.edn"],
+  :record-count 3,
+  :run-ids
+  ["0a18c4f7-758e-400a-8223-9c52edf07450"
+   "4abad68c-5481-4402-8f0e-252add62c54b"
+   "801976e7-01c6-4e39-aada-27f620f7c2f1"]},
+ :primitive
+ [{:value "0",
+   :class "java.lang.Long",
+   :readings
+   {:v0-shipped {:log-c -10.000045398900186, :outcome nil},
+    :numeric-equality {:log-c -10.000045398900186, :outcome 0},
+    :declared-binarization {:log-c -10.000045398900186, :outcome 0},
+    :typed-binary-only {:refused :undeclared-observable-kind},
+    :declared-binarization+t0.5
+    {:log-c -10.000045398900186, :outcome 0},
+    :typed-binary-only+binary
+    {:log-c -10.000045398900186, :outcome 0}}}
+  {:value "0.0",
+   :class "java.lang.Double",
+   :readings
+   {:v0-shipped {:log-c -4.539889921682063E-5, :outcome nil},
+    :numeric-equality {:log-c -10.000045398900186, :outcome 0},
+    :declared-binarization {:log-c -10.000045398900186, :outcome 0},
+    :typed-binary-only {:refused :undeclared-observable-kind},
+    :declared-binarization+t0.5
+    {:log-c -10.000045398900186, :outcome 0},
+    :typed-binary-only+binary
+    {:log-c -10.000045398900186, :outcome 0}}}
+  {:value "1.0",
+   :class "java.lang.Double",
+   :readings
+   {:v0-shipped {:log-c -4.539889921682063E-5, :outcome nil},
+    :numeric-equality {:log-c -4.539889921682063E-5, :outcome 1},
+    :declared-binarization {:log-c -4.539889921682063E-5, :outcome 1},
+    :typed-binary-only {:refused :undeclared-observable-kind},
+    :declared-binarization+t0.5
+    {:log-c -4.539889921682063E-5, :outcome 1},
+    :typed-binary-only+binary
+    {:log-c -4.539889921682063E-5, :outcome 1}}}
+  {:value "1",
+   :class "java.lang.Long",
+   :readings
+   {:v0-shipped {:log-c -4.539889921682063E-5, :outcome nil},
+    :numeric-equality {:log-c -4.539889921682063E-5, :outcome 1},
+    :declared-binarization {:log-c -4.539889921682063E-5, :outcome 1},
+    :typed-binary-only {:refused :undeclared-observable-kind},
+    :declared-binarization+t0.5
+    {:log-c -4.539889921682063E-5, :outcome 1},
+    :typed-binary-only+binary
+    {:log-c -4.539889921682063E-5, :outcome 1}}}
+  {:value "0.5",
+   :class "java.lang.Double",
+   :readings
+   {:v0-shipped {:log-c -4.539889921682063E-5, :outcome nil},
+    :numeric-equality {:log-c -4.539889921682063E-5, :outcome 1},
+    :declared-binarization {:refused :no-declared-threshold},
+    :typed-binary-only {:refused :undeclared-observable-kind},
+    :declared-binarization+t0.5
+    {:log-c -4.539889921682063E-5, :outcome 1},
+    :typed-binary-only+binary
+    {:refused :non-binary-value-on-binary-observable}}}
+  {:value "0.75",
+   :class "java.lang.Double",
+   :readings
+   {:v0-shipped {:log-c -4.539889921682063E-5, :outcome nil},
+    :numeric-equality {:log-c -4.539889921682063E-5, :outcome 1},
+    :declared-binarization {:refused :no-declared-threshold},
+    :typed-binary-only {:refused :undeclared-observable-kind},
+    :declared-binarization+t0.5
+    {:log-c -4.539889921682063E-5, :outcome 1},
+    :typed-binary-only+binary
+    {:refused :non-binary-value-on-binary-observable}}}
+  {:value "-3.0",
+   :class "java.lang.Double",
+   :readings
+   {:v0-shipped {:log-c -4.539889921682063E-5, :outcome nil},
+    :numeric-equality {:log-c -4.539889921682063E-5, :outcome 1},
+    :declared-binarization {:refused :no-declared-threshold},
+    :typed-binary-only {:refused :undeclared-observable-kind},
+    :declared-binarization+t0.5
+    {:log-c -10.000045398900186, :outcome 0},
+    :typed-binary-only+binary
+    {:refused :non-binary-value-on-binary-observable}}}
+  {:value "false",
+   :class "java.lang.Boolean",
+   :readings
+   {:v0-shipped {:log-c -10.000045398900186, :outcome nil},
+    :numeric-equality {:log-c -10.000045398900186, :outcome 0},
+    :declared-binarization {:log-c -10.000045398900186, :outcome 0},
+    :typed-binary-only {:log-c -10.000045398900186, :outcome 0},
+    :declared-binarization+t0.5
+    {:log-c -10.000045398900186, :outcome 0},
+    :typed-binary-only+binary
+    {:log-c -10.000045398900186, :outcome 0}}}
+  {:value "true",
+   :class "java.lang.Boolean",
+   :readings
+   {:v0-shipped {:log-c -4.539889921682063E-5, :outcome nil},
+    :numeric-equality {:log-c -4.539889921682063E-5, :outcome 1},
+    :declared-binarization {:log-c -4.539889921682063E-5, :outcome 1},
+    :typed-binary-only {:log-c -4.539889921682063E-5, :outcome 1},
+    :declared-binarization+t0.5
+    {:log-c -4.539889921682063E-5, :outcome 1},
+    :typed-binary-only+binary
+    {:log-c -4.539889921682063E-5, :outcome 1}}}
+  {:value "nil",
+   :class "nil",
+   :readings
+   {:v0-shipped {:log-c -4.539889921682063E-5, :outcome nil},
+    :numeric-equality {:refused :no-outcome-observed},
+    :declared-binarization {:refused :no-outcome-observed},
+    :typed-binary-only {:refused :no-outcome-observed},
+    :declared-binarization+t0.5 {:refused :no-outcome-observed},
+    :typed-binary-only+binary {:refused :no-outcome-observed}}}],
+ :sweep
+ {:record "801976e7-01c6-4e39-aada-27f620f7c2f1",
+  :channel-count 14,
+  :per-column
+  {:v0-shipped
+   {:measured 14,
+    :of 14,
+    :distinct-risk-values 1,
+    :risk-values [4.539889921682063E-5],
+    :refusal-reasons {}},
+   :numeric-equality
+   {:measured 14,
+    :of 14,
+    :distinct-risk-values 2,
+    :risk-values [4.539889921682063E-5 10.000045398900186],
+    :refusal-reasons {}},
+   :declared-binarization
+   {:measured 4,
+    :of 14,
+    :distinct-risk-values 1,
+    :risk-values [10.000045398900186],
+    :refusal-reasons {:no-declared-threshold 10}},
+   :typed-binary-only
+   {:measured 0,
+    :of 14,
+    :distinct-risk-values 0,
+    :risk-values [],
+    :refusal-reasons {:undeclared-observable-kind 14}},
+   :declared-binarization+t0.5
+   {:measured 14,
+    :of 14,
+    :distinct-risk-values 2,
+    :risk-values [4.539889921682063E-5 10.000045398900186],
+    :refusal-reasons {}},
+   :typed-binary-only+binary
+   {:measured 4,
+    :of 14,
+    :distinct-risk-values 1,
+    :risk-values [10.000045398900186],
+    :refusal-reasons {:non-binary-value-on-binary-observable 10}}}},
+ :clause-c
+ {:verdict :satisfied-floor-unchanged-unsatisfied-pole-reachable,
+  :fields
+  {:satisfied true,
+   :unsatisfied-long-0 true,
+   :unsatisfied-double-0.0 true,
+   :nil-field true},
+  :per-column
+  {:v0-shipped
+   {:satisfied {:risk 4.539889921682063E-5},
+    :unsatisfied-long-0 {:risk 10.000045398900184},
+    :unsatisfied-double-0.0 {:risk 4.539889921682063E-5},
+    :nil-field {:risk 4.539889921682063E-5}},
+   :numeric-equality
+   {:satisfied {:risk 4.539889921682063E-5},
+    :unsatisfied-long-0 {:risk 10.000045398900184},
+    :unsatisfied-double-0.0 {:risk 10.000045398900184},
+    :nil-field {:refused :no-outcome-observed}},
+   :declared-binarization
+   {:satisfied {:risk 4.539889921682063E-5},
+    :unsatisfied-long-0 {:risk 10.000045398900184},
+    :unsatisfied-double-0.0 {:risk 10.000045398900184},
+    :nil-field {:refused :no-outcome-observed}},
+   :typed-binary-only
+   {:satisfied {:refused :undeclared-observable-kind},
+    :unsatisfied-long-0 {:refused :undeclared-observable-kind},
+    :unsatisfied-double-0.0 {:refused :undeclared-observable-kind},
+    :nil-field {:refused :no-outcome-observed}},
+   :declared-binarization+t0.5
+   {:satisfied {:risk 4.539889921682063E-5},
+    :unsatisfied-long-0 {:risk 10.000045398900184},
+    :unsatisfied-double-0.0 {:risk 10.000045398900184},
+    :nil-field {:refused :no-outcome-observed}},
+   :typed-binary-only+binary
+   {:satisfied {:risk 4.539889921682063E-5},
+    :unsatisfied-long-0 {:risk 10.000045398900184},
+    :unsatisfied-double-0.0 {:risk 10.000045398900184},
+    :nil-field {:refused :no-outcome-observed}}}},
+ :clause-b
+ {:verdict :unchanged-by-every-arm,
+  :cause :one-risk-value-copied-to-every-mission-action,
+  :pointer "scripts/futon2/report/war_machine.clj:1594-1600",
+  :rows
+  [{:run/id "4abad68c-5481-4402-8f0e-252add62c54b",
+    :column :v0-shipped,
+    :status :measured,
+    :risk-mis 4.539889921682063E-5,
+    :mission-action-count 133,
+    :non-mission-action-count 13,
+    :action-sensitivity {:distinct-risk-values 1, :constant? true}}
+   {:run/id "4abad68c-5481-4402-8f0e-252add62c54b",
+    :column :numeric-equality,
+    :status :measured,
+    :risk-mis 4.539889921682063E-5,
+    :mission-action-count 133,
+    :non-mission-action-count 13,
+    :action-sensitivity {:distinct-risk-values 1, :constant? true}}
+   {:run/id "4abad68c-5481-4402-8f0e-252add62c54b",
+    :column :declared-binarization,
+    :status :absent,
+    :reason :unread-outcome,
+    :mission-action-count 133,
+    :non-mission-action-count 13}
+   {:run/id "4abad68c-5481-4402-8f0e-252add62c54b",
+    :column :typed-binary-only,
+    :status :absent,
+    :reason :unread-outcome,
+    :mission-action-count 133,
+    :non-mission-action-count 13}
+   {:run/id "4abad68c-5481-4402-8f0e-252add62c54b",
+    :column :declared-binarization+t0.5,
+    :status :measured,
+    :risk-mis 3.333378732232873,
+    :mission-action-count 133,
+    :non-mission-action-count 13,
+    :action-sensitivity {:distinct-risk-values 1, :constant? true}}
+   {:run/id "4abad68c-5481-4402-8f0e-252add62c54b",
+    :column :typed-binary-only+binary,
+    :status :absent,
+    :reason :unread-outcome,
+    :mission-action-count 133,
+    :non-mission-action-count 13}
+   {:run/id "801976e7-01c6-4e39-aada-27f620f7c2f1",
+    :column :v0-shipped,
+    :status :measured,
+    :risk-mis 4.539889921682063E-5,
+    :mission-action-count 133,
+    :non-mission-action-count 13,
+    :action-sensitivity {:distinct-risk-values 1, :constant? true}}
+   {:run/id "801976e7-01c6-4e39-aada-27f620f7c2f1",
+    :column :numeric-equality,
+    :status :measured,
+    :risk-mis 4.539889921682063E-5,
+    :mission-action-count 133,
+    :non-mission-action-count 13,
+    :action-sensitivity {:distinct-risk-values 1, :constant? true}}
+   {:run/id "801976e7-01c6-4e39-aada-27f620f7c2f1",
+    :column :declared-binarization,
+    :status :absent,
+    :reason :unread-outcome,
+    :mission-action-count 133,
+    :non-mission-action-count 13}
+   {:run/id "801976e7-01c6-4e39-aada-27f620f7c2f1",
+    :column :typed-binary-only,
+    :status :absent,
+    :reason :unread-outcome,
+    :mission-action-count 133,
+    :non-mission-action-count 13}
+   {:run/id "801976e7-01c6-4e39-aada-27f620f7c2f1",
+    :column :declared-binarization+t0.5,
+    :status :measured,
+    :risk-mis 3.333378732232873,
+    :mission-action-count 133,
+    :non-mission-action-count 13,
+    :action-sensitivity {:distinct-risk-values 1, :constant? true}}
+   {:run/id "801976e7-01c6-4e39-aada-27f620f7c2f1",
+    :column :typed-binary-only+binary,
+    :status :absent,
+    :reason :unread-outcome,
+    :mission-action-count 133,
+    :non-mission-action-count 13}]},
+ :row :U16}

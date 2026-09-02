@@ -338,26 +338,55 @@
       ;; Present-only: an absence reason appears when there is one, never as nil.
       reason (assoc :criteria-reason reason))))
 
+(defn- term
+  "One criterion's ln C_k(o_k), typed. With no `outcome-semantics` this is the
+   shipped call to `pref/log-preference` wrapped in a `:present` map and cannot
+   refuse; with an arm named it is `pref/log-preference-under`, which refuses on
+   a value the arm declines to read (U16). Keeping both on one shape means the
+   composition below has one code path, not two."
+  [factors observable value outcome-semantics]
+  (if outcome-semantics
+    (pref/log-preference-under (get factors observable) value outcome-semantics)
+    {:status :present :log-c (pref/log-preference (get factors observable) value)}))
+
 (defn log-c-mis
   "ln C_mis(o) in nats — the weighted log-sum composition of design §2:
    Σ_k w_k · ln C_k(o_k). `outcomes` maps observable -> value. Returns a typed
    absence rather than a number when C_mis has no measurable factor or the
-   reading does not cover one."
-  [{:keys [factors weights observable-of unmeasurable]} outcomes]
+   reading does not cover one.
+
+   `:outcome-semantics` (U16, DEFAULT NIL AND NOTHING SUPPLIES IT) names one of
+   `pref/bernoulli-outcome-arms` for the Bernoulli branch. Nil is the shipped
+   path, byte for byte. Under an arm, a criterion whose value the arm refuses to
+   read makes the WHOLE number absent (`:unread-outcome`, with the refusals
+   listed) — the same discipline `:unreadable-observable` already applies, since
+   a partial sum over the criteria the arm happened to accept would be a
+   different mission's risk wearing this one's name."
+  [{:keys [factors weights observable-of unmeasurable]} outcomes
+   & {:keys [outcome-semantics]}]
   (if (empty? factors)
     {:status :absent :reason :no-measurable-criteria :unmeasurable unmeasurable}
     (let [missing (vec (remove #(contains? outcomes %) (vals observable-of)))]
       (if (seq missing)
         {:status :absent :reason :unreadable-observable :missing missing
          :unmeasurable unmeasurable}
-        {:status :present
-         :log-c (reduce + 0.0
-                        (map (fn [[criterion observable]]
-                               (* (get weights criterion)
-                                  (pref/log-preference (get factors observable)
-                                                       (get outcomes observable))))
-                             observable-of))
-         :unmeasurable unmeasurable}))))
+        (let [terms (mapv (fn [[criterion observable]]
+                            (assoc (term factors observable (get outcomes observable)
+                                         outcome-semantics)
+                                   :criterion criterion :observable observable
+                                   :value (get outcomes observable)))
+                          observable-of)
+              refused (filterv #(= :absent (:status %)) terms)]
+          (if (seq refused)
+            {:status :absent :reason :unread-outcome
+             :outcome-semantics outcome-semantics
+             :refused (mapv #(select-keys % [:criterion :observable :value :reason]) refused)
+             :unmeasurable unmeasurable}
+            (cond-> {:status :present
+                     :log-c (reduce + 0.0 (map #(* (get weights (:criterion %)) (:log-c %))
+                                               terms))
+                     :unmeasurable unmeasurable}
+              outcome-semantics (assoc :outcome-semantics outcome-semantics))))))))
 
 (defn risk-mis
   "risk_mis under the v0 status-quo forward model (design §3).
@@ -375,26 +404,32 @@
 
    Refuses rather than partially scores: any measurable criterion whose
    observable the reading does not cover makes the whole number absent. The
-   typed `:unmeasurable` records ride on every return."
-  [c reading]
+   typed `:unmeasurable` records ride on every return.
+
+   `:outcome-semantics` (U16) is passed through to `log-c-mis`; nil — what every
+   caller supplies today — is the shipped path unchanged."
+  [c reading & {:keys [outcome-semantics]}]
   (let [{:keys [factors weights observable-of unmeasurable mission] :as _c} c
-        composed (log-c-mis c reading)]
+        composed (log-c-mis c reading :outcome-semantics outcome-semantics)]
     (merge
      {:version version
       :forward-model :status-quo-v0
       :mission mission
       :measurable-count (count factors)
       :unmeasurable unmeasurable}
+     (when outcome-semantics {:outcome-semantics outcome-semantics})
      (if (= :present (:status composed))
        {:status :measured
         :risk (- (:log-c composed))
         :per-criterion
         (mapv (fn [[criterion observable]]
                 (let [value (get reading observable)
-                      log-c (pref/log-preference (get factors observable) value)
+                      t (term factors observable value outcome-semantics)
+                      log-c (:log-c t)
                       w (get weights criterion)]
-                  {:criterion criterion :observable observable :value value
-                   :log-c log-c :surprisal (- log-c)
-                   :weight w :contribution (* w (- log-c))}))
+                  (cond-> {:criterion criterion :observable observable :value value
+                           :log-c log-c :surprisal (- log-c)
+                           :weight w :contribution (* w (- log-c))}
+                    (contains? t :outcome) (assoc :outcome (:outcome t)))))
               observable-of)}
-       (select-keys composed [:status :reason :missing])))))
+       (select-keys composed [:status :reason :missing :refused])))))

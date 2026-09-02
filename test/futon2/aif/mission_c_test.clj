@@ -276,3 +276,97 @@
       (is (> unmet met))
       (is (close? (- (pref/log-preference (pref/c-distribution {:becomes 1}) 1)) met))
       (is (< met 1.0e-4) "T=0.1 puts ~all the mass on the target, so met ≈ 0"))))
+
+;; ---------------------------------------------------------------------------
+;; U16 — the three outcome-semantics arms AT THE COMPOSITION, with the DOUBLE
+;; zero and nil that the long-0 pins above cannot reach. `a-met-criterion-stops-
+;; pulling` and `risk-mis-numbers-are-reproducible-from-the-record` both read
+;; their Bernoulli criterion at the LONG 0, which is the one value R2's
+;; all-doubles observation vector never produces (U12 :clause-c). These add the
+;; vocabulary the live path actually speaks.
+
+(defn- one-criterion-c []
+  (mc/c-mis {:criteria [(mc/criterion-row {:criterion :a :observable :x} {:x 0} "f:1")]}))
+
+(deftest the-shipped-path-still-reads-a-double-zero-as-met
+  (testing "U12's defect, pinned as the BASELINE the arms are compared against —
+            this is what does not move until a semantics is chosen"
+    (let [unmet-long (:risk (mc/risk-mis (one-criterion-c) {:x (long 0)}))
+          zero-double (:risk (mc/risk-mis (one-criterion-c) {:x 0.0}))
+          met (:risk (mc/risk-mis (one-criterion-c) {:x 1}))]
+      (is (> unmet-long 9.0))
+      (is (close? met zero-double)
+          "the double 0.0 scores as the MET criterion, not the unmet one")
+      (is (close? met (:risk (mc/risk-mis (one-criterion-c) {:x nil})))
+          "and so does an unread channel")))
+  (testing "no arm named ⇒ no :outcome-semantics key on the record either"
+    (is (not (contains? (mc/risk-mis (one-criterion-c) {:x 0.0}) :outcome-semantics)))))
+
+(deftest arms-read-the-double-zero-each-in-their-own-way
+  (let [risk-at (fn [arm v] (mc/risk-mis (one-criterion-c) {:x v} :outcome-semantics arm))
+        long-0-unmet (:risk (mc/risk-mis (one-criterion-c) {:x (long 0)}))]
+    (testing ":numeric-equality — the double 0.0 now scores as the long 0 does"
+      (let [r (risk-at :numeric-equality 0.0)]
+        (is (= :measured (:status r)))
+        (is (close? long-0-unmet (:risk r)))
+        (is (= :numeric-equality (:outcome-semantics r)))
+        (is (= 0 (:outcome (first (:per-criterion r))))
+            "the record says WHICH pole, not just the number")))
+    (testing ":declared-binarization — 0.0 is exactly binary, so it reads with no threshold"
+      (let [r (risk-at :declared-binarization 0.0)]
+        (is (= :measured (:status r)))
+        (is (close? long-0-unmet (:risk r)))))
+    (testing ":typed-binary-only — refuses, because nothing declared :x binary"
+      (let [r (risk-at :typed-binary-only 0.0)]
+        (is (= :absent (:status r)))
+        (is (= :unread-outcome (:reason r)))
+        (is (not (contains? r :risk)))
+        (is (= [:undeclared-observable-kind] (mapv :reason (:refused r))))
+        (is (= [:x] (mapv :observable (:refused r))))))))
+
+(deftest arms-refuse-nil-rather-than-scoring-it-satisfied
+  (testing "C130 at the composition: every arm, no number, the reason typed"
+    (doseq [arm pref/bernoulli-outcome-arms]
+      (let [r (mc/risk-mis (one-criterion-c) {:x nil} :outcome-semantics arm)]
+        (is (= :absent (:status r)) (str arm))
+        (is (= :unread-outcome (:reason r)) (str arm))
+        (is (not (contains? r :risk)) (str arm))
+        (is (= [:no-outcome-observed] (mapv :reason (:refused r))) (str arm))))))
+
+(deftest arms-part-company-on-a-continuous-reading
+  (testing "0.75 — the case that separates the three, since 0.0 does not"
+    (let [r1 (mc/risk-mis (one-criterion-c) {:x 0.75} :outcome-semantics :numeric-equality)
+          r2 (mc/risk-mis (one-criterion-c) {:x 0.75} :outcome-semantics :declared-binarization)
+          r3 (mc/risk-mis (one-criterion-c) {:x 0.75} :outcome-semantics :typed-binary-only)]
+      (is (= :measured (:status r1)))
+      (is (< (:risk r1) 1.0e-4) "numeric-equality calls 0.75 met, at the temperature floor")
+      (is (= [:absent :no-declared-threshold] [(:status r2) (:reason (first (:refused r2)))]))
+      (is (= [:absent :undeclared-observable-kind] [(:status r3) (:reason (first (:refused r3)))]))))
+  (testing "and a declared threshold turns the same value into an UNMET criterion"
+    (let [r (mc/risk-mis (one-criterion-c) {:x 0.75}
+                         :outcome-semantics {:arm :declared-binarization :threshold 0.8})]
+      (is (= :measured (:status r)))
+      (is (> (:risk r) 9.0)))))
+
+(deftest one-refused-criterion-refuses-the-whole-number
+  (testing "the same discipline :unreadable-observable already applies — a partial
+            sum over the criteria an arm happened to accept is not this mission's risk"
+    (let [reading {:x 0.0 :y 0.75}
+          c (mc/c-mis {:criteria [(mc/criterion-row {:criterion :a :observable :x} reading "f:1")
+                                  (mc/criterion-row {:criterion :b :observable :y} reading "f:2")]})
+          r (mc/risk-mis c reading :outcome-semantics :declared-binarization)]
+      (is (= :absent (:status r)))
+      (is (= :unread-outcome (:reason r)))
+      (is (= [:y] (mapv :observable (:refused r)))
+          ":x was readable; the refusal names only the criterion that refused")
+      (is (not (contains? r :risk))))))
+
+(deftest naming-an-arm-does-not-move-the-range-branch
+  (testing "U12's finding is about the Bernoulli branch; a range spec is
+            arithmetically identical under every arm"
+    (let [reading {:y 0.9}
+          c (fn [] (mc/c-mis {:criteria [(mc/criterion-row {:criterion :b :observable :y
+                                                            :spec [0.0 0.3]} reading "f:2")]}))
+          base (:risk (mc/risk-mis (c) reading))]
+      (doseq [arm pref/bernoulli-outcome-arms]
+        (is (close? base (:risk (mc/risk-mis (c) reading :outcome-semantics arm))) (str arm))))))

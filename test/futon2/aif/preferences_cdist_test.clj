@@ -117,3 +117,94 @@
     (let [dist (pref/c-distribution [0.3 0.5] :temperature 0.1)
           k (fn [mu] (pref/kl {:kind :gaussian :mu mu :sigma2 0.01} dist))]
       (is (< (k 0.5) (k 0.6) (k 0.7) (k 0.8) (k 0.95))))))
+
+;; ---------------------------------------------------------------------------
+;; U16 — the three Bernoulli-outcome arms. What each test pins is the property
+;; the arm EXISTS for, so a reader comparing them reads the differences here.
+
+(deftest shipped-log-preference-is-unchanged-by-the-arms
+  (testing "the defect U12 measured is still exactly the shipped behaviour —
+            the arms are additions, not a flip"
+    (let [d (pref/c-distribution {:becomes 1})]
+      (is (< (Math/abs (- (pref/log-preference d 0.0) (pref/log-preference d 0.75))) 1e-12)
+          "double 0.0 and 0.75 still score identically on the shipped fn")
+      (is (< (pref/log-preference d (long 0)) -9.0)
+          "and the long 0 still reaches the unsatisfied pole")
+      (is (< (Math/abs (- (pref/log-preference d nil) (pref/log-preference d 1))) 1e-12)
+          "and nil still reads as the target"))))
+
+(deftest nil-is-a-typed-absence-under-every-arm
+  (testing "C130 discipline, not a branch: no arm may read an unread channel as met"
+    (doseq [arm pref/bernoulli-outcome-arms]
+      (let [r (pref/log-preference-under (pref/c-distribution {:becomes 1}) nil arm)]
+        (is (= :absent (:status r)) (str arm))
+        (is (= :no-outcome-observed (:reason r)) (str arm))
+        (is (not (contains? r :log-c)) (str arm " — no number where an absence belongs")))))
+  (testing "including on a range spec, which would otherwise NPE on (double nil)"
+    (let [r (pref/log-preference-under (pref/c-distribution [0.5 1.0]) nil :numeric-equality)]
+      (is (= :absent (:status r)))
+      (is (= :no-outcome-observed (:reason r))))))
+
+(deftest arm-numeric-equality-reaches-the-unsatisfied-pole-from-a-double
+  (let [d (pref/c-distribution {:becomes 1})
+        under #(pref/log-preference-under d % :numeric-equality)]
+    (testing "the double 0.0 and the long 0 are now the SAME outcome — the U12 defect"
+      (is (= 0 (:outcome (under 0.0))))
+      (is (= 0 (:outcome (under (long 0)))))
+      (is (< (Math/abs (- (:log-c (under 0.0)) (:log-c (under (long 0))))) 1e-12)))
+    (testing "and every other value still reads as the target, declaration-free"
+      (is (= 1 (:outcome (under 0.75))))
+      (is (= 1 (:outcome (under 1.0))))
+      (is (= 1 (:outcome (under -3.0)))
+          "including a negative one — this arm buys the type fix and nothing else"))
+    (testing "booleans read as themselves under this arm as under the others"
+      (is (= 0 (:outcome (under false))))
+      (is (= 1 (:outcome (under true)))))))
+
+(deftest arm-declared-binarization-refuses-a-continuous-value-with-no-threshold
+  (let [d (pref/c-distribution {:becomes 1})]
+    (testing "no threshold: an exactly-binary value is read, anything else refuses"
+      (is (= 0 (:outcome (pref/log-preference-under d 0.0 :declared-binarization))))
+      (is (= 1 (:outcome (pref/log-preference-under d 1.0 :declared-binarization))))
+      (let [r (pref/log-preference-under d 0.75 :declared-binarization)]
+        (is (= :absent (:status r)))
+        (is (= :no-declared-threshold (:reason r)))))
+    (testing "with a declared threshold the same value is read, on either side"
+      (let [sel {:arm :declared-binarization :threshold 0.8}]
+        (is (= 0 (:outcome (pref/log-preference-under d 0.75 sel))))
+        (is (= 1 (:outcome (pref/log-preference-under d 0.85 sel))))
+        (is (= 1 (:outcome (pref/log-preference-under d 0.8 sel)))
+            "the threshold itself is the target side: x >= threshold")))
+    (testing "the threshold is what MOVES the reading — the point of declaring it"
+      (is (= 1 (:outcome (pref/bernoulli-outcome {:arm :declared-binarization :threshold 0.5} 0.75))))
+      (is (= 0 (:outcome (pref/bernoulli-outcome {:arm :declared-binarization :threshold 0.9} 0.75)))))))
+
+(deftest arm-typed-binary-only-needs-the-observable-declared
+  (let [d (pref/c-distribution {:becomes 1})]
+    (testing "undeclared kind refuses every value, 0.0 included — the strictest arm"
+      (doseq [x [0.0 (long 0) 1.0 0.75]]
+        (let [r (pref/log-preference-under d x :typed-binary-only)]
+          (is (= :absent (:status r)) (pr-str x))
+          (is (= :undeclared-observable-kind (:reason r)) (pr-str x)))))
+    (testing "a continuous observable under a Bernoulli spec is a typed mismatch,
+              and says so rather than reusing the undeclared reason"
+      (let [r (pref/log-preference-under d 0.75 {:arm :typed-binary-only
+                                                 :observable-kind :continuous})]
+        (is (= :absent (:status r)))
+        (is (= :spec-observable-mismatch (:reason r)))))
+    (testing "a declared binary observable is read by ==, both classes of zero"
+      (let [sel {:arm :typed-binary-only :observable-kind :binary}]
+        (is (= 0 (:outcome (pref/log-preference-under d 0.0 sel))))
+        (is (= 0 (:outcome (pref/log-preference-under d (long 0) sel))))
+        (is (= 1 (:outcome (pref/log-preference-under d 1.0 sel))))))
+    (testing "and a non-binary value ON a declared binary observable is its own refusal"
+      (let [r (pref/log-preference-under d 0.75 {:arm :typed-binary-only
+                                                 :observable-kind :binary})]
+        (is (= :absent (:status r)))
+        (is (= :non-binary-value-on-binary-observable (:reason r)))))))
+
+(deftest arm-selector-must-name-a-known-arm
+  (is (thrown-with-msg? clojure.lang.ExceptionInfo #"unknown arm"
+                        (pref/bernoulli-outcome :whatever-i-like 0.0)))
+  (is (thrown-with-msg? clojure.lang.ExceptionInfo #"arm keyword or a map"
+                        (pref/bernoulli-outcome "numeric-equality" 0.0))))
