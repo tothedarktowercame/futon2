@@ -4824,7 +4824,7 @@
         selection-gain-value (selection-gain/selection-gain-for selection-gain-state)
         ;; Inner loop result
         {:keys [belief precision-state prediction-errors micro-step-trace
-                prediction-triple-events]}
+                prediction-triple-events belief-aggregation-events]}
         (loop [step 0
                belief wm-belief-after-brief
                prec-state prev-precision-state
@@ -4870,9 +4870,20 @@
                 ;; v0.25 R3d sign-aggregation: flag-gated.
                 ;; OFF (default): annotation-health weighted-error alone (byte-identical pre-v0.16).
                 ;; ON: 8-channel signed precision-weighted average (belief/r3d-aggregate-driver).
-                aggregated-signed-error
-                (belief/r3d-aggregate-driver weighted-errors)
-                aggregated-magnitude (Math/abs aggregated-signed-error)
+                ;; AC2 (Joe's 2026-09-02 ruling on C130 2): the aggregator now
+                ;; returns a typed record. :present carries a driver; :unknown
+                ;; means no channel could contribute one, and then this tick
+                ;; applies NO belief event rather than moving belief by a
+                ;; fabricated zero. Malformed entries are rejected one at a
+                ;; time and the surviving channels still aggregate -- the
+                ;; collection is never refused as a whole.
+                driver-record (belief/r3d-aggregate-driver weighted-errors)
+                aggregated-signed-error (:driver driver-record)
+                aggregated-magnitude (if (some? aggregated-signed-error)
+                                       (Math/abs aggregated-signed-error)
+                                       0.0)
+                driver-omissions (vec (:omitted driver-record))
+                driver-rejections (vec (:rejected driver-record))
                 ann-error (get weighted-errors :annotation-health)
                 error-mag (Math/abs (double (:error ann-error 0.0)))
                 ;; Anneal event weight by step: step 0 = full; step K-1 = small
@@ -4912,18 +4923,35 @@
                           belief)
                 ;; Present-only: a tick with nothing absent and nothing
                 ;; refused writes the same step entry it wrote before AC1.
-                step-entry (cond-> {:step step
-                                    :error-magnitude error-mag
-                                    :aggregated-signed-error aggregated-signed-error
-                                    :anneal-factor anneal-factor
-                                    :events-applied (count events)
-                                    :event-weight event-weight}
+                ;; AC2: `:aggregated-signed-error` is present-only and keeps
+                ;; its original position, so a step where every channel
+                ;; contributed writes the same map, in the same order, as
+                ;; before. No key means the aggregator reported :unknown --
+                ;; a different claim from a driver that measured zero, and
+                ;; `:aggregated-driver-unknown` says which reason.
+                step-entry (cond-> (merge {:step step
+                                           :error-magnitude error-mag}
+                                          (when (some? aggregated-signed-error)
+                                            {:aggregated-signed-error
+                                             aggregated-signed-error})
+                                          {:anneal-factor anneal-factor
+                                           :events-applied (count events)
+                                           :event-weight event-weight})
+                             (nil? aggregated-signed-error)
+                             (assoc :aggregated-driver-unknown
+                                    (:reason driver-record))
                              (seq triple-omissions)
                              (assoc :prediction-triple-omitted
                                     (count triple-omissions))
                              (seq triple-refusals)
                              (assoc :prediction-triple-refused
-                                    (count triple-refusals)))
+                                    (count triple-refusals))
+                             (seq driver-omissions)
+                             (assoc :belief-aggregation-omitted
+                                    (count driver-omissions))
+                             (seq driver-rejections)
+                             (assoc :belief-aggregation-rejected
+                                    (count driver-rejections)))
                 micro-trace' (conj micro-trace step-entry)]
             (if (or (seq triple-refusals)
                     (>= (inc step) r3-max-steps)
@@ -4934,7 +4962,14 @@
                :micro-step-trace micro-trace'
                ;; The typed absence/refusal records themselves, carried out of
                ;; the loop so the trace can persist them (AC8 sweeps them).
-               :prediction-triple-events (into triple-omissions triple-refusals)}
+               ;; This is the TERMINAL step's records, matching what AC1's
+               ;; sibling stream carries; the per-step counts in
+               ;; `micro-step-trace` are what covers the earlier steps.
+               :prediction-triple-events (into triple-omissions triple-refusals)
+               ;; AC2: same, for the belief aggregator's own omissions and
+               ;; per-entry rejections.
+               :belief-aggregation-events (into driver-omissions
+                                                driver-rejections)}
               (recur (inc step) belief' prec-state' micro-trace'))))
         wm-belief belief
         route2 (-> route1
@@ -5297,6 +5332,10 @@
                  ;; an absent key means the triple was complete on every
                  ;; channel, not that nobody looked.
                  :prediction-triple-events prediction-triple-events
+                 ;; AC2: the belief aggregator's typed omissions and per-entry
+                 ;; rejections, same present-only discipline at the trace
+                 ;; boundary.
+                 :belief-aggregation-events belief-aggregation-events
                  :precision-state precision-state
                  ;; R14 precision-over-policies (γ): the learned, bounded inverse
                  ;; selection temperature this tick used (τ_eff = τ_spread / γ).

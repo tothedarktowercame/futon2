@@ -1020,42 +1020,181 @@
    :coupling-density   1   ; high = more interconnected
    :ticks-firing-ratio 1}) ; high = more ticks passing
 
+(def r3d-driver-contract
+  "Producer stamp on every record `r3d-aggregate-driver` emits. A record
+   carrying this key is a v1 producer record, so a required field missing
+   from it is a producer defect and not a legacy read."
+  :r3d-aggregate-driver/v1)
+
+(defn- finite-double
+  "The double value of X when X is a finite number, else nil. Missing and
+   non-finite are separate verdicts upstream, so this reports only
+   finiteness and the caller keeps the two apart by whether the key was
+   there at all. Mirrors free-energy's member classifier; belief cannot
+   require free-energy or precision (precision requires belief)."
+  [x]
+  (when (number? x)
+    (let [d (double x)]
+      (when-not (or (Double/isNaN d) (Double/isInfinite d)) d))))
+
+(defn- aggregate-member
+  "Classify one required field K of a channel's weighted-error entry.
+   :missing when the key is not there, :not-finite when it is there and is
+   not a finite number, :present with the double otherwise. The
+   :legacy-era / :malformed split on a missing field is the same one
+   precision/error-field-status makes (src/futon2/aif/precision.clj:57-67):
+   a record stamped with a producer contract that lacks a required field is
+   malformed, an unstamped one is a legacy-era read."
+  [err-map k]
+  (let [raw (get err-map k)]
+    (cond
+      (not (contains? err-map k))
+      {:member k :status :missing
+       :provenance (if (:producer-contract err-map) :malformed :legacy-era)}
+
+      (nil? (finite-double raw)) {:member k :status :not-finite :value raw}
+      :else {:member k :status :present :value (finite-double raw)})))
+
+(defn- classify-channel-entry
+  "Verdict on one CH → ERR-MAP entry of the aggregation input.
+
+   AC2 (Joe's 2026-09-02 ruling on C130 §2) replaced the two zero
+   substitutions here. Three verdicts, and which one this returns is the
+   decision:
+
+   `:contributing` — the entry carries a finite `:weighted-error` and, in
+   multichannel mode, a finite `:precision`, and the channel has a health
+   sign to orient it by.
+
+   `:omitted` — the channel is honestly absent: either the entry is an
+   upstream typed absence record (`:status :absent`, AC1's shape), or the
+   channel has no entry in `channel-health-signs` so this aggregator has no
+   direction to read it in. An omitted channel contributes nothing to
+   either sum; it is not an error of zero.
+
+   `:rejected` — the entry is malformed: an upstream typed refusal, or a
+   required field missing or non-finite. The record names the offending
+   members. Rejection is per ENTRY; the collection is never refused as a
+   whole, which is what distinguishes this site from AC1's caller."
+  [ch err-map multichannel?]
+  (let [stamp {:channel ch :producer-contract r3d-driver-contract}
+        sign (get channel-health-signs ch)]
+    (cond
+      (not (map? err-map))
+      (merge stamp {:status :rejected :reason :malformed-error-entry
+                    :offending [{:member :entry :status :not-a-map}]})
+
+      ;; Two producers, two reasons: this aggregator's verdict stays under
+      ;; `:reason` and the upstream record's own reason travels beside it as
+      ;; `:upstream-reason`. Merging them into one key would let whichever
+      ;; producer wrote last decide what the record says it means.
+      (= :refused (:status err-map))
+      (cond-> (merge stamp {:status :rejected :reason :upstream-refusal})
+        (:reason err-map) (assoc :upstream-reason (:reason err-map))
+        (:offending err-map) (assoc :offending (:offending err-map)))
+
+      (= :absent (:status err-map))
+      (cond-> (merge stamp {:status :omitted :reason :observation-absent})
+        (:reason err-map) (assoc :upstream-reason (:reason err-map))
+        (:paths err-map) (assoc :paths (:paths err-map)))
+
+      ;; Multichannel aggregation orients each channel by its health sign;
+      ;; a channel with no sign cannot be added to a signed sum at all. It
+      ;; used to enter with sign 0 (contributing 0 to the numerator and
+      ;; skipped in the denominator) -- numerically the same omission,
+      ;; silently.
+      (and multichannel? (nil? sign))
+      (merge stamp {:status :omitted :reason :no-health-sign})
+
+      :else
+      (let [required (if multichannel? [:weighted-error :precision] [:weighted-error])
+            members (mapv #(aggregate-member err-map %) required)
+            offending (vec (remove #(= :present (:status %)) members))]
+        (if (seq offending)
+          (merge stamp {:status :rejected :reason :malformed-error-entry
+                        :offending offending})
+          (merge stamp
+                 {:status :contributing
+                  :weighted-error (:value (first members))}
+                 (when multichannel?
+                   {:sign (double sign) :precision (:value (second members))})))))))
+
 (defn r3d-aggregate-driver
   "Aggregate per-channel prediction errors into a single signed R3d driver.
 
    WEIGHTED-ERRORS is a map: channel-id → {:weighted-error <num> :precision <num> ...}
    (as produced by free-energy/compute-prediction-error + precision/weighted-error).
 
-   Returns a single signed scalar:
-   - Positive = system healthier than predicted across channels
-   - Negative = system less healthy than predicted
-   - Near zero = accurate predictions or balanced signals
+   Returns a TYPED RECORD, not a bare scalar (AC2, Joe's 2026-09-02 ruling
+   on C130 §2). Two statuses, and never a third:
+
+   `:present` — at least one channel contributed.
+     {:status :present
+      :driver <signed scalar>
+      :mode :multichannel | :annotation-health-only
+      :contributing [<channel-ids>]
+      :producer-contract :r3d-aggregate-driver/v1}
+     Positive driver = system healthier than predicted across the
+     contributing channels; negative = less healthy; near zero = accurate
+     predictions or balanced signals.
+
+   `:unknown` — no channel contributed, so there is no driver to report and
+     the record carries `:reason` instead of a number. The caller applies no
+     belief event. There is deliberately NO `:refused` status: a malformed
+     entry is rejected on its own, the surviving channels still aggregate,
+     and the collection is never refused as a whole.
+
+   Both statuses carry `:omitted` and `:rejected` present-only — a key that
+   is absent means there was nothing of that kind, which is a different
+   claim from \"the producer did not look\". These are the records the
+   harvester sweeps (the ruling's self-repair condition).
 
    Uses the PRECISION-WEIGHTED AVERAGE (canonical predictive coding):
    driver = Σ(sign_c × precision_c × error_c) / Σ(precision_c)
    so low-precision channels dilute proportionally.
 
-   When *r3d-multichannel?* is OFF, returns the :annotation-health
-   weighted-error alone (the pre-v0.25 behavior, byte-identical)."
+   When *r3d-multichannel?* is OFF, the driver is the :annotation-health
+   weighted-error alone (the pre-v0.25 behavior: on a present, finite
+   entry the number is byte-identical; an absent or malformed entry now
+   yields :unknown where it used to yield 0.0)."
   [weighted-errors]
-  (if *r3d-multichannel?*
-    ;; 8-channel signed precision-weighted average
-    (let [signed-sum (reduce +
-                             (for [[ch err-map] weighted-errors
-                                   :let [sign (double (get channel-health-signs ch 0))
-                                         we (double (:weighted-error err-map 0.0))]]
-                               (* sign we)))
-          total-precision (reduce +
-                                  (for [[ch err-map] weighted-errors
-                                        :let [sign (double (get channel-health-signs ch 0))
-                                              prec (double (:precision err-map 0.0))]
-                                        :when (not (zero? sign))]
-                                    prec))]
-      (if (pos? total-precision)
-        (/ signed-sum total-precision)
-        0.0))
-    ;; OFF: annotation-health weighted-error alone (pre-v0.25 byte-identical)
-    (double (:weighted-error (get weighted-errors :annotation-health {}) 0.0))))
+  (let [multichannel? (boolean *r3d-multichannel?*)
+        considered (if multichannel?
+                     weighted-errors
+                     (select-keys weighted-errors [:annotation-health]))
+        verdicts (mapv (fn [[ch err-map]]
+                         (classify-channel-entry ch err-map multichannel?))
+                       considered)
+        contributing (filterv #(= :contributing (:status %)) verdicts)
+        omitted (filterv #(= :omitted (:status %)) verdicts)
+        rejected (filterv #(= :rejected (:status %)) verdicts)
+        base (cond-> {:producer-contract r3d-driver-contract
+                      :mode (if multichannel? :multichannel :annotation-health-only)}
+               (seq omitted) (assoc :omitted omitted)
+               (seq rejected) (assoc :rejected rejected))
+        unknown (fn [reason]
+                  (assoc base :status :unknown :reason reason))]
+    (cond
+      (empty? contributing)
+      (unknown (cond (seq rejected) :every-channel-rejected
+                     (seq omitted) :every-channel-omitted
+                     :else :no-channel-supplied))
+
+      multichannel?
+      (let [signed-sum (reduce + 0.0 (map #(* (:sign %) (:weighted-error %)) contributing))
+            total-precision (reduce + 0.0 (map :precision contributing))]
+        (if (pos? total-precision)
+          (assoc base :status :present
+                 :driver (/ signed-sum total-precision)
+                 :contributing (mapv :channel contributing))
+          ;; No positive precision anywhere is an absence of evidence, not a
+          ;; driver of zero: dividing by it would fabricate one.
+          (unknown :no-positive-precision)))
+
+      :else
+      (assoc base :status :present
+             :driver (:weighted-error (first contributing))
+             :contributing (mapv :channel contributing)))))
 
 (defn predict-observation
   "Predict observation distributions across all channels for which a

@@ -48,5 +48,8 @@
   {:at "src/futon2/aif/trace.clj:249-260" :disposition :exempt-with-reason
    :exemption :versioned-read-compatibility
    :reason "Legacy/partial trace reads preserve old records; this is serialization compatibility, not a numeric measurement or score. A schema-version migration remains separately named."}
-  {:at "src/futon2/aif/belief.clj:1040-1052" :disposition :blocked :blocked-on :precision-pass-through-tag}]
- :summary {:fix-now 10 :exempt-with-reason 1 :blocked 6 :retired 1}}
+  {:at "src/futon2/aif/belief.clj:1040-1052" :disposition :fix-now
+   :control "r3d-aggregate-driver emits a typed record and coerces no member of a channel entry. An honestly-absent channel (upstream :absent record, or a channel this aggregator has no health sign for) is OMITTED -- it enters neither the signed numerator nor the precision denominator, and the omission is reported with its reason. A malformed entry (upstream :refused, or :weighted-error/:precision missing or non-finite) is REJECTED on its own; the surviving channels still aggregate, so the collection is never refused as a whole and there is no :refused status at this site. With no contributor left the record is a reason-bearing :unknown carrying NO :driver key, where the old code returned 0.0. Code: src/futon2/aif/belief.clj:1023-1197 (entry classifier :1058-1120, aggregator :1122-1197); caller reads the record and applies no belief event on :unknown at scripts/futon2/report/war_machine.clj:4874-4886; the typed omission/rejection records persist present-only at src/futon2/aif/trace.clj:539-546."
+   :decided-by "Joe 2026-09-02 ruling, futon2 2f34c26"
+   :implemented-by :AC2}]
+ :summary {:fix-now 11 :exempt-with-reason 1 :blocked 5 :retired 1}}

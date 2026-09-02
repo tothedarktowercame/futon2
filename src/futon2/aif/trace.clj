@@ -536,6 +536,14 @@
     ;; is a different claim from "the producer did not report".
     (seq (:prediction-triple-events judge-output))
     (assoc :prediction-triple-events (:prediction-triple-events judge-output))
+    ;; AC2 (same ruling, same condition): the typed records the R3d belief
+    ;; aggregator emitted instead of substituting zero for a missing
+    ;; weighted-error or precision -- one per omitted channel, one per
+    ;; rejected entry. Present-only: no key means every channel in the
+    ;; aggregation contributed, which is a different claim from "the
+    ;; aggregator did not report".
+    (seq (:belief-aggregation-events judge-output))
+    (assoc :belief-aggregation-events (:belief-aggregation-events judge-output))
     ;; RUN11 run identity. The per-date trace file is shared by every run on
     ;; the day, so without this key the only discriminator between two runs'
     ;; records is the timestamp and a reader has to select by range. `:run/id`

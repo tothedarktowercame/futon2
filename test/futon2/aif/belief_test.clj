@@ -719,8 +719,14 @@
            :sorry-count-norm  {:weighted-error -0.20 :precision 5.0}
            :mission-health    {:weighted-error -0.15 :precision 8.0}}]
       (binding [belief/*r3d-multichannel?* false]
-        (is (< (Math/abs (- (belief/r3d-aggregate-driver weighted-errors) 0.37)) 1e-9)
-            "OFF should return annotation-health weighted-error alone (0.37)")))))
+        (let [r (belief/r3d-aggregate-driver weighted-errors)]
+          (is (= :present (:status r)))
+          (is (= :annotation-health-only (:mode r)))
+          (is (= [:annotation-health] (:contributing r)))
+          (is (< (Math/abs (- (:driver r) 0.37)) 1e-9)
+              "OFF should return annotation-health weighted-error alone (0.37)")
+          (is (not (contains? r :omitted)) "nothing omitted")
+          (is (not (contains? r :rejected)) "nothing rejected"))))))
 
 (deftest r3d-flag-on-multichannel
   (testing "*r3d-multichannel?* ON => 8-channel signed precision-weighted average"
@@ -730,7 +736,7 @@
            :mission-health    {:weighted-error -0.15 :precision 8.0}
            :active-repo-ratio {:weighted-error -0.24 :precision 6.0}}]
       (binding [belief/*r3d-multichannel?* true]
-        (let [driver (belief/r3d-aggregate-driver weighted-errors)
+        (let [driver (:driver (belief/r3d-aggregate-driver weighted-errors))
               ;; manual: sum(sign * weighted-error) / sum(precision)
               ;; = (1*0.37 + (-1)*(-0.20) + 1*(-0.15) + 1*(-0.24)) / (10+5+8+6)
               ;; = (0.37 + 0.20 - 0.15 - 0.24) / 29 = 0.18 / 29 ≈ 0.00621
@@ -748,7 +754,7 @@
           {:annotation-health {:weighted-error 0.0  :precision 10.0}
            :sorry-count-norm  {:weighted-error 0.50 :precision 10.0}}]
       (binding [belief/*r3d-multichannel?* true]
-        (let [driver (belief/r3d-aggregate-driver weighted-errors)]
+        (let [driver (:driver (belief/r3d-aggregate-driver weighted-errors))]
           ;; sign(-1) * 0.50 = -0.50; / (10+10) = -0.025
           (is (neg? driver)
               "positive sorry-count-norm error with sign -1 must yield negative driver")
@@ -771,7 +777,7 @@
            :mission-health    {:weighted-error -0.15 :precision 8.0}
            :active-repo-ratio {:weighted-error -0.24 :precision 6.0}}]
       (binding [belief/*r3d-multichannel?* true]
-        (let [driver (belief/r3d-aggregate-driver weighted-errors)
+        (let [driver (:driver (belief/r3d-aggregate-driver weighted-errors))
               naive-sum (+ 0.37 -0.15 -0.24 -0.20)]
           (is (pos? driver)
               (format "signed aggregate must be POSITIVE (coherent healthy signal), got %.6f" driver))
@@ -781,6 +787,202 @@
               "signed aggregate is positive — system slightly healthier")
           (is (neg? (Math/signum (double naive-sum)))
               "naive sum is negative — misleading near-cancel"))))))
+
+
+;; ---------------------------------------------------------------------------
+;; AC2 (Joe's 2026-09-02 ruling on C130 §2): the R3d aggregator substitutes no
+;; zeros. Omit honestly-absent channels, reject malformed ENTRIES, never refuse
+;; the whole collection. Planted absent AND malformed cases below.
+;; ---------------------------------------------------------------------------
+
+(deftest r3d-absent-channel-is-omitted-not-zero
+  (testing "an upstream typed absence record contributes nothing and carries its reason"
+    (binding [belief/*r3d-multichannel?* true]
+      (let [r (belief/r3d-aggregate-driver
+               {:annotation-health {:weighted-error 0.40 :precision 10.0}
+                :mission-health {:status :absent :reason :no-source-field
+                                 :paths [:graph :missions]}})]
+        (is (= :present (:status r)) "the surviving channel still aggregates")
+        (is (= [:annotation-health] (:contributing r)))
+        ;; sign 1 * 0.40 / 10.0 — mission-health is NOT in either sum
+        (is (< (Math/abs (- (:driver r) 0.04)) 1e-9)
+            "an absent channel must not enter the denominator as precision 0")
+        (is (= 1 (count (:omitted r))))
+        (is (= :mission-health (:channel (first (:omitted r)))))
+        (is (= :observation-absent (:reason (first (:omitted r))))
+            "the aggregator's own verdict")
+        (is (= :no-source-field (:upstream-reason (first (:omitted r))))
+            "and the upstream reason beside it, not overwriting it")
+        (is (= [:graph :missions] (:paths (first (:omitted r)))))
+        (is (not (contains? r :rejected))))))
+  (testing "the absent channel's driver differs from the zero-substituted one"
+    (binding [belief/*r3d-multichannel?* true]
+      (let [omitted (:driver (belief/r3d-aggregate-driver
+                              {:annotation-health {:weighted-error 0.40 :precision 10.0}
+                               :mission-health {:status :absent :reason :unobserved}}))
+            ;; what the pre-AC2 code computed: 0.0 error at precision 0.0,
+            ;; which still put mission-health in the denominator as 0.
+            substituted (/ (+ 0.40 0.0) (+ 10.0 0.0))]
+        (is (< (Math/abs (- omitted substituted)) 1e-9)
+            "with precision 0 the numbers coincide; the RECORD is the difference")
+        (is (seq (:omitted (belief/r3d-aggregate-driver
+                            {:annotation-health {:weighted-error 0.40 :precision 10.0}
+                             :mission-health {:status :absent :reason :unobserved}})))
+            "and the omission is reported rather than silent")))))
+
+(deftest r3d-missing-fields-are-rejected-not-zeroed
+  (testing "a v1 producer entry missing :weighted-error is malformed, not an error of zero"
+    (binding [belief/*r3d-multichannel?* true]
+      (let [r (belief/r3d-aggregate-driver
+               {:annotation-health {:weighted-error 0.40 :precision 10.0}
+                :sorry-count-norm {:producer-contract :prediction-error/v1
+                                   :precision 5.0}})]
+        (is (= :present (:status r)) "one bad entry does not refuse the collection")
+        (is (= [:annotation-health] (:contributing r)))
+        (is (< (Math/abs (- (:driver r) 0.04)) 1e-9))
+        (is (= 1 (count (:rejected r))))
+        (let [bad (first (:rejected r))]
+          (is (= :sorry-count-norm (:channel bad)))
+          (is (= :malformed-error-entry (:reason bad)))
+          (is (= [{:member :weighted-error :status :missing :provenance :malformed}]
+                 (:offending bad)))))))
+  (testing "an UNSTAMPED entry missing the field reads as :legacy-era, still rejected"
+    (binding [belief/*r3d-multichannel?* true]
+      (let [r (belief/r3d-aggregate-driver
+               {:annotation-health {:weighted-error 0.40 :precision 10.0}
+                :mission-health {:precision 5.0}})]
+        (is (= :legacy-era (:provenance (first (:offending (first (:rejected r)))))))
+        (is (= [:annotation-health] (:contributing r))))))
+  (testing "missing :precision is rejected too — it is a denominator, not an option"
+    (binding [belief/*r3d-multichannel?* true]
+      (let [r (belief/r3d-aggregate-driver
+               {:annotation-health {:weighted-error 0.40 :precision 10.0}
+                :mission-health {:weighted-error 0.20}})]
+        (is (= [:precision] (mapv :member (:offending (first (:rejected r))))))
+        (is (= [:annotation-health] (:contributing r)))))))
+
+(deftest r3d-non-finite-members-are-rejected
+  (testing "NaN, infinity and a non-number are each rejected, each named"
+    (binding [belief/*r3d-multichannel?* true]
+      (doseq [[bad-val label] [[Double/NaN "NaN weighted-error"]
+                               [Double/POSITIVE_INFINITY "infinite weighted-error"]
+                               ["0.4" "string weighted-error"]]]
+        (let [r (belief/r3d-aggregate-driver
+                 {:annotation-health {:weighted-error 0.40 :precision 10.0}
+                  :mission-health {:weighted-error bad-val :precision 5.0}})]
+          (is (= :present (:status r)) label)
+          (is (= [:annotation-health] (:contributing r)) label)
+          (is (= :not-finite (:status (first (:offending (first (:rejected r))))))
+              label)
+          (is (< (Math/abs (- (:driver r) 0.04)) 1e-9)
+              (str label ": the malformed channel enters neither sum"))))))
+  (testing "an infinite :precision cannot silently dominate the denominator"
+    (binding [belief/*r3d-multichannel?* true]
+      (let [r (belief/r3d-aggregate-driver
+               {:annotation-health {:weighted-error 0.40 :precision 10.0}
+                :mission-health {:weighted-error 0.20
+                                 :precision Double/POSITIVE_INFINITY}})]
+        (is (= [:annotation-health] (:contributing r)))
+        (is (= [:precision] (mapv :member (:offending (first (:rejected r))))))))))
+
+(deftest r3d-upstream-refusal-is-rejected-entry-not-collection-refusal
+  (testing "AC1's :refused record rejects its own channel and no other"
+    (binding [belief/*r3d-multichannel?* true]
+      (let [r (belief/r3d-aggregate-driver
+               {:annotation-health {:weighted-error 0.40 :precision 10.0}
+                :sorry-count-norm {:status :refused
+                                   :reason :malformed-prediction-triple
+                                   :offending [{:member :mean :status :missing}]}})]
+        (is (= :present (:status r)))
+        (is (= [:annotation-health] (:contributing r)))
+        (is (= :upstream-refusal (:reason (first (:rejected r))))
+            "the aggregator names WHY it rejected, not just that it did")
+        (is (= :malformed-prediction-triple (:upstream-reason (first (:rejected r))))
+            "and AC1's reason survives beside it rather than replacing it")
+        (is (= [{:member :mean :status :missing}]
+               (:offending (first (:rejected r))))
+            "the upstream record's offending members travel with the rejection")))))
+
+(deftest r3d-unsigned-channel-is-omitted-loudly
+  (testing "a channel with no health sign has no direction; it is omitted, not scored"
+    (binding [belief/*r3d-multichannel?* true]
+      (let [r (belief/r3d-aggregate-driver
+               {:annotation-health {:weighted-error 0.40 :precision 10.0}
+                :not-a-channel {:weighted-error 99.0 :precision 1000.0}})]
+        (is (= [:annotation-health] (:contributing r)))
+        (is (= :no-health-sign (:reason (first (:omitted r))))
+            "sign 0 used to drop it silently from both sums")
+        (is (< (Math/abs (- (:driver r) 0.04)) 1e-9))))))
+
+(deftest r3d-empty-and-all-bad-collections-are-unknown-never-refused
+  (testing "no channels at all: reason-bearing :unknown, no driver key"
+    (binding [belief/*r3d-multichannel?* true]
+      (let [r (belief/r3d-aggregate-driver {})]
+        (is (= :unknown (:status r)))
+        (is (= :no-channel-supplied (:reason r)))
+        (is (not (contains? r :driver)) "no fabricated 0.0 driver"))))
+  (testing "every channel absent: :every-channel-omitted, all omissions reported"
+    (binding [belief/*r3d-multichannel?* true]
+      (let [r (belief/r3d-aggregate-driver
+               {:annotation-health {:status :absent :reason :unobserved}
+                :mission-health {:status :absent :reason :unobserved}})]
+        (is (= :unknown (:status r)))
+        (is (= :every-channel-omitted (:reason r)))
+        (is (= 2 (count (:omitted r))))
+        (is (not (contains? r :driver))))))
+  (testing "every channel malformed: :every-channel-rejected, still not :refused"
+    (binding [belief/*r3d-multichannel?* true]
+      (let [r (belief/r3d-aggregate-driver
+               {:annotation-health {:producer-contract :prediction-error/v1}
+                :mission-health {:weighted-error Double/NaN :precision 5.0}})]
+        (is (= :unknown (:status r)) "there is no :refused status at this site")
+        (is (= :every-channel-rejected (:reason r)))
+        (is (= 2 (count (:rejected r))))
+        (is (not (contains? r :driver))))))
+  (testing "all precision zero: absence of evidence, not a driver of zero"
+    (binding [belief/*r3d-multichannel?* true]
+      (let [r (belief/r3d-aggregate-driver
+               {:annotation-health {:weighted-error 0.40 :precision 0.0}})]
+        (is (= :unknown (:status r)))
+        (is (= :no-positive-precision (:reason r)))
+        (is (not (contains? r :driver)))))))
+
+(deftest r3d-flag-off-absent-and-malformed
+  (testing "OFF with no :annotation-health entry: :unknown, not 0.0"
+    (binding [belief/*r3d-multichannel?* false]
+      (let [r (belief/r3d-aggregate-driver
+               {:mission-health {:weighted-error 0.9 :precision 3.0}})]
+        (is (= :unknown (:status r)))
+        (is (= :no-channel-supplied (:reason r)))
+        (is (not (contains? r :driver))))))
+  (testing "OFF with a malformed :annotation-health entry: :unknown, and it is named"
+    (binding [belief/*r3d-multichannel?* false]
+      (let [r (belief/r3d-aggregate-driver
+               {:annotation-health {:producer-contract :prediction-error/v1
+                                    :precision 10.0}})]
+        (is (= :unknown (:status r)))
+        (is (= :every-channel-rejected (:reason r)))
+        (is (= :annotation-health (:channel (first (:rejected r))))))))
+  (testing "OFF ignores a missing :precision — the single-channel driver needs none"
+    (binding [belief/*r3d-multichannel?* false]
+      (let [r (belief/r3d-aggregate-driver {:annotation-health {:weighted-error 0.37}})]
+        (is (= :present (:status r)))
+        (is (< (Math/abs (- (:driver r) 0.37)) 1e-9)))))
+  (testing "OFF: a typed absence record omits rather than scoring zero"
+    (binding [belief/*r3d-multichannel?* false]
+      (let [r (belief/r3d-aggregate-driver
+               {:annotation-health {:status :absent :reason :observation-absent}})]
+        (is (= :unknown (:status r)))
+        (is (= :every-channel-omitted (:reason r)))))))
+
+(deftest r3d-present-record-carries-the-producer-stamp
+  (testing "every record names its producer so a consumer can tell v1 from legacy"
+    (binding [belief/*r3d-multichannel?* true]
+      (is (= :r3d-aggregate-driver/v1
+             (:producer-contract (belief/r3d-aggregate-driver
+                                  {:annotation-health {:weighted-error 0.1 :precision 1.0}}))))
+      (is (= :r3d-aggregate-driver/v1
+             (:producer-contract (belief/r3d-aggregate-driver {})))))))
 
 (deftest reconcile-belief-carry-r8
   (testing "R8 carry: survivors keep carried posterior, new get fresh prior, vanished drop"
