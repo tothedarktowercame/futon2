@@ -1,0 +1,1 @@
+R7's registry row at `holes/labs/wm-contract/SPEC-zaif-harness-v1.md:24` should point to `holes/labs/zaif-harness/runs/U9-r7-precision-table.edn` and its data-reading assertion `U9-r7-precision-table_test.bb`.

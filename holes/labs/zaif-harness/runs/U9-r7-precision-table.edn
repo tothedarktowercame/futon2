@@ -1,0 +1,40 @@
+{:schema :zaif-harness/r7-precision-table-v1
+ :registry-target "holes/labs/wm-contract/SPEC-zaif-harness-v1.md:24"
+ :rows
+ [{:channel-class :declared-operator-mark
+   :precision 1.0
+   :status :declared-by-construction
+   :source "holes/M-wm-capability-claim.md:88-91"
+   :corroboration "holes/N-peircean-codebook.md:79-81"}
+  {:channel-class :lexical-probe
+   :precision 0.42
+   :recall 0.19
+   :status :disqualified-as-instrument
+   :retained-as :seeder
+   :source "holes/missions/M-zaif-harness-v1.md:106-108"}
+  {:channel-class :tool-result
+   :precision {:status :absent
+               :reason :no-measured-tool-result-precision
+               :instrument "rg ':precision|precision' over holes/labs/zaif-harness/runs, zaif-harness checks, and the U12 fixture README"
+               :limits "This search covers the recorded zaif-harness runs and shipped U12 index, not every repository or future trace."}
+   :source "holes/labs/wm-contract/SPEC-zaif-harness-v1.md:19,24"}
+  {:channel-class :war-machine-observation
+   :status :recorded-partial-coverage
+   :run/id "801976e7-01c6-4e39-aada-27f620f7c2f1"
+   :field [:precision-state]
+   :covered-count 8
+   :observation-count 14
+   :precision
+   {:sorry-count-norm 1.0
+    :coupling-density 7.285663818719639
+    :support-coverage 6.9171380590403535
+    :mission-health 5.331253968186035
+    :annotation-health 6.461496038384332
+    :ticks-firing-ratio 21.0
+    :active-repo-ratio 20.962379842027154
+    :attack-coverage 15.554371525776283}
+   :absent-not-zero
+   [:mathematics-pct :depositing-signal :loop-health
+    :portfolio-pct :consulting-pct :stack-pct]
+   :source "holes/labs/wm-contract/runs/U12-c-mis-falsifier/node-fixtures/README.md:36-48"
+   :value-source "holes/labs/wm-contract/runs/U12-c-mis-falsifier/node-fixtures/801976e7-R7.edn:2-212"}]}
