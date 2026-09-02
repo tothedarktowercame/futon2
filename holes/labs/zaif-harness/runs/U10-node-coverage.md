@@ -63,3 +63,15 @@ draft in review at runs/U11-actand-design-v1.md). :blocked-by for R1, R3 and
 R4 has been updated to [:D8 :U11 :S7] accordingly; "D8 owns the real
 task-belief input" above should be read as ":U11 owns the source, :D8 the
 seam". No other entries changed.
+
+## Reviewer addendum 2 (claude-2, 2026-09-02 ~18:45)
+
+The S7 blocker is narrower than this survey records: wm-contract U12's
+falsifier ran extractor-first and shipped S7's core deliverable at
+`holes/labs/wm-contract/runs/U12-c-mis-falsifier/node-fixtures/` — 40
+fixtures (run-id × node), 30 present + 9 typed absences, README mapping
+fixture → R-node → record field → pointer; R7 located as `:precision-state`
+(8/14 channels, other 6 absent-not-zero). Matrix rows citing `:blocked-by
+:S7` should CITE THOSE FIXTURES DIRECTLY rather than re-extract (claude-1,
+S7 row progress note, futon2 9fd15eb). S7 stays open only for its remainder
+(re-grounding U6's plants, canonical cross-link, formal U7/U9 feed).
