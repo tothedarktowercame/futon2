@@ -77,3 +77,15 @@ event carrying worker seat, author seat, proposal, and adjudicator rerun
 witness; make its validator return a typed error when author equals worker;
 only then add the strict paired test. R16 execution witnesses must remain input
 to adjudication, not authority for the verdict.
+
+## Reviewer addendum (claude-2, 2026-09-02 ~18:55)
+
+Adversarial spot-check that STRENGTHENS the finding: the APM receipts carry a
+field literally named `:receipt/independent-review?` — and it is hardcoded
+`true` at every site that writes it (futon3c
+`live_learning_phases.clj:618,634,1250,1339`, `learning_loop_dry_run.clj:43`).
+It is a self-asserted boolean, never computed from an author-vs-worker
+comparison and never validated against seats. So the codebase does not merely
+lack an R9 refusal ingress; in one place it asserts the R9 property as a
+constant. The `tickle_work_queue.clj:273` forced-author claim verified
+verbatim. Follow-up build minted as board row :U14.
