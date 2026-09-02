@@ -28,6 +28,33 @@ def run(argv, cwd=ROOT):
     return subprocess.run(argv, cwd=cwd, text=True, capture_output=True)
 
 
+class _Tee:
+    """Capture stdout while still streaming it, so the receipt can be checked
+    against the text report that was actually printed rather than against a
+    second reading of the same variables."""
+
+    def __init__(self, stream):
+        self.stream, self.chunks = stream, []
+
+    def write(self, data):
+        self.chunks.append(data)
+        return self.stream.write(data)
+
+    def flush(self):
+        self.stream.flush()
+
+    def text(self):
+        return "".join(self.chunks)
+
+
+def suite_count(value):
+    """Suite counts arrive as regex captures, or as None on a timeout."""
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
 def contract_pin(contract):
     module_commit = run(
         ["git", "log", "-1", "--format=%H", "--", HOLES_MODULE], cwd=MATHLIB4)
@@ -296,6 +323,10 @@ def main():
         else:
             print("usage: wm_status_report.py [--receipt PATH]", file=sys.stderr)
             return 2
+    tee = None
+    if receipt_path:
+        tee = _Tee(sys.stdout)
+        sys.stdout = tee
     now = datetime.datetime.now(datetime.timezone.utc)
     timestamp = now.isoformat()
     stamp = str(int(time.time()))
@@ -485,7 +516,8 @@ def main():
         health_valid and health_window["eligible"],
         brief_valid and brief_summary["count"] > 0)
     print(f"{verdict} exit={exit_code} "
-          "convention=OK-0/DEGRADED-AS-EXPECTED-0/DEGRADED-NEW-1/DECISION-DUE-3")
+          "convention=OK-0/DEGRADED-AS-EXPECTED-0/DEGRADED-NEW-1/DECISION-DUE-3"
+          "/RECEIPT-DISAGREES-4")
     if receipt_path:
         component_classification = {
             item["finding"]["component"]: "accepted" for item in accepted}
@@ -499,8 +531,10 @@ def main():
         for name, payload, counts in (("futon2", futon2, f2_counts),
                                       ("futon3", futon3, f3_counts)):
             suite_receipt = payload["receipt"]
-            suites.append({"name": name, "tests": counts[0], "assertions": counts[1],
-                           "failures": counts[2], "errors": counts[3],
+            suites.append({"name": name, "tests": suite_count(counts[0]),
+                           "assertions": suite_count(counts[1]),
+                           "failures": suite_count(counts[2]),
+                           "errors": suite_count(counts[3]),
                            "receipt": payload.get("receipt-file"),
                            "verdict": suite_receipt.get("verdict"),
                            "exit": suite_receipt.get("outer-exit"),
@@ -546,6 +580,14 @@ def main():
             "morning-brief": (brief_summary if brief_valid else
                               {"unreadable": True, "exit": brief_result.returncode}),
         }
+        sys.stdout = tee.stream
+        sys.stdout.flush()   # the tee's stream is block-buffered when redirected;
+                             # without this the stderr line lands mid-sentence.
+        if not receipt_agrees_with_text(receipt, tee.text()):
+            print("wm-status-receipt: FAIL the receipt disagrees with the text "
+                  "report it was built beside; nothing written",
+                  file=sys.stderr)
+            return 4
         with open(receipt_path, "w", encoding="utf-8") as output:
             json.dump(receipt, output, sort_keys=True, indent=2)
             output.write("\n")

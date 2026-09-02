@@ -42,5 +42,37 @@ DEGRADED-NEW exit=1 convention=OK-0/DEGRADED-AS-EXPECTED-0/DEGRADED-NEW-1/DECISI
         self.assertFalse(REPORTER.receipt_agrees_with_text(corrupted, text))
 
 
+class PairedRunAgreementTest(unittest.TestCase):
+    """The unit test above compares two fixtures the test itself wrote, so it
+    cannot see a wiring error in main()'s receipt construction.  This one uses a
+    text report and a receipt emitted by the SAME reporter run, so sourcing a
+    receipt field from the wrong variable makes it fail."""
+
+    FIXTURES = pathlib.Path(__file__).parent / "fixtures"
+
+    def setUp(self):
+        self.text = (self.FIXTURES / "wm-status-report-2026-09-02.txt").read_text()
+        self.receipt = json.loads(
+            (self.FIXTURES / "wm-status-receipt-2026-09-02.json").read_text())
+
+    def test_paired_run_agrees(self):
+        self.assertTrue(REPORTER.receipt_agrees_with_text(self.receipt, self.text))
+
+    def test_paired_run_rejects_a_miswired_field(self):
+        """The exact defect this guards: contract.hole sourced from the closed
+        count.  11 holes reported as 108 is the number the paper's figure hangs
+        on, and the fixture-only test passes straight through it."""
+        miswired = json.loads(json.dumps(self.receipt))
+        miswired["contract"]["hole"] = miswired["contract"]["closed"]
+        self.assertFalse(REPORTER.receipt_agrees_with_text(miswired, self.text))
+
+    def test_pin_staleness_is_recorded_not_hidden(self):
+        pin = self.receipt["contract-pin"]
+        self.assertIn("json-sha", pin)
+        self.assertIn("module-last-commit-sha", pin)
+        self.assertEqual(pin["fresh?"],
+                         pin["json-sha"] == pin["module-last-commit-sha"])
+
+
 if __name__ == "__main__":
     unittest.main()
