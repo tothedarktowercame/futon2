@@ -406,14 +406,6 @@
 ;; View 4: mission-status — status DERIVED from the event stream
 ;; ---------------------------------------------------------------------------
 
-(def ^:const status-keywords
-  "Keywords in commit subjects and chat text that signal a mission status.
-   Maps to a canonical status keyword."
-  {:closed   #{"CLOSED" "close" "closed"}
-   :draft    #{"DRAFT" "draft"}
-   :open     #{"OPEN" "open" "armed"}
-   :complete #{"COMPLETE" "complete" "done"}})
-
 (defn- mission-doc-path
   "Resolve the markdown doc path for a mission ID.
    Tries the standard holes/ locations across repos."
@@ -444,22 +436,42 @@
                    :else nil)]
           {:status raw :keyword kw :doc-path doc-path})))))
 
-(defn- classify-status-text
-  "Given a string (commit subject or chat text), classify the mission status
-   signal it carries. Returns a canonical keyword or nil."
+(defn- classify-commit-status-text
+  "Classify a commit subject that mentions the mission and a status keyword.
+   Commit subjects are already a declared status channel; unlike chat prose,
+   their grammar need not put the mission at the start of the subject."
   [text mission-id]
-  (let [upper (str/upper-case (str text))
-        has-mission (str/includes? upper (str/upper-case mission-id))]
-    ;; The text must reference the mission to be a status signal FOR it
-    (when (or has-mission
-              ;; For clocked-mission events, the subject may not repeat the ID
-              false)
+  (let [upper (str/upper-case (str text))]
+    (when (str/includes? upper (str/upper-case mission-id))
       (cond
-        (some #(str/includes? upper %) (:closed status-keywords)) :closed
-        (some #(str/includes? upper %) (:complete status-keywords)) :complete
-        (some #(str/includes? upper %) (:draft status-keywords)) :draft
-        (some #(str/includes? upper %) (:open status-keywords)) :open
+        (str/includes? upper "CLOSED") :closed
+        (str/includes? upper "COMPLETE") :complete
+        (str/includes? upper "DRAFT") :draft
+        (str/includes? upper "OPEN") :open
         :else nil))))
+
+(defn- classify-status-text
+  "Classify only a declared status statement of the form
+   `<mission-id> [status:|is [now|in]] STATUS` at the start of a line.
+
+   STATUS is CLOSED, COMPLETE, DRAFT, or OPEN. This deliberately rejects a
+   mission mention and an incidental status word elsewhere in the same chat
+   turn (for example, `dependencies complete` or `the job completes OK`).
+   Returns the canonical keyword or nil."
+  [text mission-id]
+  (let [mission (java.util.regex.Pattern/quote (str mission-id))
+        declaration (re-pattern
+                     (str "(?im)^\\s*(?:[-*#>]\\s*)?" mission
+                          "\\s+(?:(?:status)\\s*[:=-]\\s*|"
+                          "(?:is|was)\\s+(?:now\\s+|in\\s+)?)?"
+                          "(CLOSED|COMPLETE|DRAFT|OPEN)\\b"))
+        status (some-> (re-find declaration (str text)) second str/upper-case)]
+    (case status
+      "CLOSED" :closed
+      "COMPLETE" :complete
+      "DRAFT" :draft
+      "OPEN" :open
+      nil)))
 
 (defn- extract-commit-subjects
   "Extract commit subjects from a :turn-commits entry body.
@@ -484,7 +496,9 @@
    The status is DERIVED from:
    1. :turn-commits events whose commit subjects mention the mission + a
       status keyword (CLOSED, DRAFT, checkpoint, etc.)
-   2. Chat turns from joe/assistants that state a status for the mission
+   2. Chat turns containing a declared status line shaped as
+      `<mission-id> [status:|is [now|in]] STATUS`; incidental status words do
+      not qualify
    3. mission-sync-snapshot events (when available)
 
    The doc header is read directly from the .md file.
@@ -526,7 +540,7 @@
                                                     (str/upper-case mission))
                                                  subjects)))
                             s subjects
-                            :let [kw (classify-status-text s mission)]
+                            :let [kw (classify-commit-status-text s mission)]
                             :when kw]
                         {:source      :commit-subject
                          :at          (:evidence/at e)
@@ -540,19 +554,12 @@
         chat-signals (for [e entries
                            :let [tags (set (:evidence/tags e))
                                  text (or (get-in e [:evidence/body :text]) "")]
+                           :let [kw (classify-status-text text mission)]
                            :when (and (not (some #{:turn-round :transcript} tags))
-                                      (str/includes? (str/upper-case text)
-                                                     (str/upper-case mission))
-                                      (or (str/includes? (str/upper-case text) "CLOSED")
-                                          (str/includes? (str/upper-case text) "DRAFT")
-                                          (str/includes? (str/upper-case text) "COMPLETE")))]
+                                      kw)]
                        {:source   :chat-turn
                         :at       (:evidence/at e)
-                        :keyword  (cond
-                                    (str/includes? (str/upper-case text) "CLOSED") :closed
-                                    (str/includes? (str/upper-case text) "COMPLETE") :complete
-                                    (str/includes? (str/upper-case text) "DRAFT") :draft
-                                    :else nil)
+                        :keyword  kw
                         :text-preview (subs text 0 (min 200 (count text)))
                         :entry-id (:evidence/id e)})
         ;; Merge all signals, sort newest-first

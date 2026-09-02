@@ -188,11 +188,33 @@
       (fs/delete tmp))))
 
 (deftest classify-status-keywords
-  (testing "classify-status-text maps keywords correctly"
+  (testing "classify-status-text accepts declared mission status lines"
     (is (= :closed (classify-status-text "M-test CLOSED yesterday" "M-test")))
     (is (= :draft (classify-status-text "M-test is in DRAFT" "M-test")))
     (is (= :complete (classify-status-text "M-test COMPLETE" "M-test")))
-    (is (nil? (classify-status-text "M-test is great" "M-test")))))
+    (is (= :open (classify-status-text "# M-test status: OPEN" "M-test")))
+    (is (nil? (classify-status-text "M-test is great" "M-test"))))
+  (testing "incidental status words in real chat prose are not declarations"
+    (is (nil? (classify-status-text
+               (str "review claude-2's reply to this dispatch per the coding-handoff protocol\n\n"
+                    "--- resumed: parked dependencies complete (1) ---\n"
+                    "• invoke-1788370746205-7471-5b2274b9: Board is clean and the checker's rules are clear. "
+                    "Minting my rows now: flip U8 to `:open` with the in-flight discovery recorded, and add D8/D9 "
+                    "from SURPRISES entries 8 and 9.**(a) Accepted.** I own the M-zaif-harness-v1 direct-build lane: "
+                    "U8, U9, and the defect rows. First act on y")
+               "M-zaif-harness-v1"))
+        "park-resume boilerplate does not declare the mission complete")
+    (is (nil? (classify-status-text
+               (str "Yes — that's a second lane we can open right now without touching the wm loop's C pass: "
+                    "an agent punches into M-zaif-harness-v1 directly and builds the per-R-node runners in the zaif "
+                    "codebase itself. The durable witnessed `clocked-on` edge is written post-turn when the job "
+                    "completes OK.")
+               "M-zaif-harness-v1"))
+        "review prose about a completing job does not complete the mission")
+    (is (nil? (classify-status-text
+               "the X dependency is COMPLETE, M-foo continues"
+               "M-foo"))
+        "dependency completion is not mission completion")))
 
 (deftest mission-status-well-formed
   (testing "mission-status returns well-formed EDN with required keys"
