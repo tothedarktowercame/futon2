@@ -1,0 +1,7 @@
+{:declaration :mission-value-weights
+ :value {:central 0.20 :strategic 0.50 :doable 0.30}
+ :carrier "FUTON_WM_VALUE_WEIGHTS (read at invocation by war_machine.clj:1484-1499 mission-value-weights)"
+ :authority "Joe, 2026-09-02, in session: 'Yes, B is a good option in this case... let's continue with option B and see if we can push through this probe that we've developed ourselves.'"
+ :meaning "Operator strategy currently outweighs graph centrality in mission selection: central 0.25->0.20, strategic 0.45->0.50, doable unchanged 0.30."
+ :reversal "Unset the env var; the default weights (war_machine.clj:1400-1403) resume."
+ :scope-note "Applied to the hand step-throughs now; any future live tick must set this env at launch for the declaration to bind there (noted for S4)."}
