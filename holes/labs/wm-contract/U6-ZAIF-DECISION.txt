@@ -1,0 +1,96 @@
+=== U6-ZAIF-DECISION: one recorded zaif v0 decision, and its corpus ===
+
+controller  futon3c/src/futon3c/agents/zaif_controller.clj
+hydrator    futon3c/src/futon3c/agents/zaif_inputs.clj
+sessions    futon2/holes/labs/M-zaif-harness/calibration-sessions.edn
+gamma       futon2/holes/labs/M-zaif-harness/b1-gamma-mission.edn
+
+--- SHIPPED CONSTANTS (zaif_controller.clj:11-20) ---
+{:retrieve-eig-scale 1.0,
+ :retrieve-token-cost 5.0E-4,
+ :default-retrieve-tokens 800,
+ :act-pragmatic-scale 1.0,
+ :ask-eig-scale 1.0,
+ :operator-attention-cost 0.65,
+ :yield-baseline 0.0}
+
+--- THE FROZEN SESSION ---
+{:id "e-ce907fcf-c7e1-4272-a4a2-13def7aaaa50",
+ :at "2026-06-08T15:26:51.274850972Z",
+ :is_correction true,
+ :route :gamma,
+ :gold_judged true}
+context:
+"chat-turn With regard to M-futon-forward-model — could we set up some experimental regimes that tune the delicacy (and any other/related) settings in a possible-world model, rather than shooting in the dark?  What we'd want would be the equivalent of Playwright for exploring possible futures.  Broadly, the concepts from futon5 are related — we want the EFE to generate things, but we need an evaluator — or \\\"regulator\\\" in Mama Claude's terms — with the Ashby requisite variety feature that allows"
+
+--- HYDRATED INPUTS (zaif_inputs.clj:177-194) ---
+{:mission "M-futon-forward-model",
+ :gamma
+ {"M-futon-forward-model" {:policy-precision 0.7071067811865476}},
+ :task-belief {},
+ :c-belief {:operator-c-uncertainty 1.0},
+ :observations
+ {:posting-stats
+  {:total-docs 80, :dfs [1 1 1 1 1 1 1 1 1 1], :estimated-tokens 160}}}
+
+--- THE DECISION (zaif_controller.clj:105-141) ---
+{:arm :retrieve,
+ :g-terms
+ {:retrieve 0.7622675616071356, :act 0.0, :ask 0.35, :yield 0.0},
+ :gamma-used 0.7071067811865476,
+ :mission "M-futon-forward-model",
+ :operator-attention-cost 0.65,
+ :why
+ "zaif v0 chose retrieve: retrieve 0.762, act 0.000, ask 0.350, yield 0.000"}
+chosen arm was a tie at the maximum? false
+
+--- THE SAME INPUTS UNDER BOTH Z3a CONSTANTS (zaif_controller.clj:150-171) ---
+({:label :shipped,
+  :operator-attention-cost 0.65,
+  :decision
+  {:arm :retrieve,
+   :g-terms
+   {:retrieve 0.7622675616071356, :act 0.0, :ask 0.35, :yield 0.0},
+   :gamma-used 0.7071067811865476,
+   :mission "M-futon-forward-model",
+   :operator-attention-cost 0.65,
+   :why
+   "zaif v0 chose retrieve: retrieve 0.762, act 0.000, ask 0.350, yield 0.000"}}
+ {:label :sweep,
+  :operator-attention-cost 0.15,
+  :decision
+  {:arm :ask,
+   :g-terms
+   {:retrieve 0.7622675616071356, :act 0.0, :ask 0.85, :yield 0.0},
+   :gamma-used 0.7071067811865476,
+   :mission "M-futon-forward-model",
+   :operator-attention-cost 0.15,
+   :why
+   "zaif v0 chose ask: retrieve 0.762, act 0.000, ask 0.850, yield 0.000"}})
+
+--- CORPUS (all recorded sessions, live hydrator, shipped constants) ---
+sessions                     114
+arm distribution             {:retrieve 31, :act 83}
+chosen by TIE-BREAK, not score 83   by arm {:act 83}
+:act G-term non-zero on      0
+:task-belief non-empty on    0
+distinct gamma-used          [0.7071067811865476 1.0]
+distinct :ask G-terms        [-0.35000000000000003 0.35]
+:retrieve G-term range       [-0.4 0.7738964064459891]
+arm distribution at the Z3a sweep constant 0.15 {:retrieve 15, :ask 99}
+
+--- EVIDENCE BODY KEYS (zaif_controller.clj:185-218) ---
+[:arm
+ :constant
+ :constant-label
+ :event
+ :g-terms
+ :gamma-used
+ :inputs-digest
+ :inputs-snapshot
+ :mission
+ :operator-attention-cost
+ :pairing-key
+ :round
+ :turn-id
+ :why]

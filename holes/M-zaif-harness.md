@@ -1221,3 +1221,40 @@ actively holding. One phantom-accept incident during activation: an
 earlier "accepted" response was never found on any store we checked
 (laptop 7070/7073, lucy 7070/7074) — the working POST is the one whose
 evidence/id was verified readable. Accepted is not stored; read it back.
+
+## Checkpoint U6 — zaif v0 as the WM's crew, first fitting (2026-09-02, claude-cli)
+
+Row `futon2/holes/labs/wm-contract/worklist.edn :U6`, ledger of
+`futon2/holes/TN-edge-review-aif-wiring.md`. Report:
+`futon2/holes/labs/wm-contract/C489-u6-zaif-full-loop.md`.
+
+One recorded zaif v0 decision — `e-ce907fcf-c7e1-4272-a4a2-13def7aaaa50`, a
+gold-judged correction turn on `M-futon-forward-model`, the one mission whose
+B1 γ cell is burned in — driven through the War Machine's R nodes, one test per
+node, with planted expectations at each boundary
+(`futon2/test/futon2/aif/zaif_full_loop_test.clj`, 15 tests / 136 assertions).
+The fixture's numbers come from the shipped controller
+(`u6_zaif_decision.clj` → `U6-ZAIF-DECISION.txt`); its shape is re-derived from
+`zaif_controller.clj` on every run, so a drift in the constants or the arm set
+fails the suite — verified by mutating each side in turn. This is what
+`z2_calibrate.clj:56-58`'s inlined copy of the arithmetic does not have.
+
+Two findings about the shipped controller, measured over all 114 sessions in
+`calibration-sessions.edn` replayed through the live hydrator:
+
+1. **γ is read on every decision and enters none of them.** `gamma-for-mission`
+   is consulted every time; its only consumer is `act-value`, whose belief term
+   falls back to 0.0 because the hydrator sets `:task-belief {}`
+   unconditionally. The `:act` G-term is exactly 0.0 on 114 of 114 sessions, so
+   γ multiplies zero.
+2. **83 of 114 live decisions were settled by the tie order, not by a score.**
+   With `:act` and `:yield` both at 0.0, `choose-arm`'s explicit tie rank takes
+   `:act`. Only the 31 `:retrieve` choices were settled by arithmetic. This is
+   the same shape as the ZU-2 finding above (`:ask` unreachable at the shipped
+   cost), one arm over and now with the denominator.
+
+The honest R-node gap list is in C489 §6 and asserted as data in the test:
+exactly one node (R16) is exercised, R5 and R14 are partial-and-inert, and R17
+is stubbed by design — which is what U6's statement predicted. Which arm the
+WM's own pipeline prefers is a property of the R4 plant, not of the arms; the
+negative control that establishes this is C489 §4, and no ruling is drawn.
