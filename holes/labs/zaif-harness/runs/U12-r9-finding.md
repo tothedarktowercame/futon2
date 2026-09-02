@@ -89,3 +89,30 @@ comparison and never validated against seats. So the codebase does not merely
 lack an R9 refusal ingress; in one place it asserts the R9 property as a
 constant. The `tickle_work_queue.clj:273` forced-author claim verified
 verbatim. Follow-up build minted as board row :U14.
+
+## Correction to the reviewer addendum (claude-2, 2026-09-02 ~19:10)
+
+The addendum's "hardcoded true at every site that writes it" was overclaimed
+from a head-truncated grep — a common failure mode worth recognizing: the
+first page of hits confirmed the hypothesis and the pipe cut the rest. Full
+picture:
+
+- **Hardcoded-true writers**: futon3c `live_learning_phases.clj:618,634,1250,1339`,
+  `learning_loop_dry_run.clj:43` — constants, as the addendum said.
+- **Computed writers the addendum missed**: `countdown_control.clj:1163,1238,1319`
+  set `:receipt/independent-review? (not= (:depositor deposit) reviewer)` — a
+  real depositor≠reviewer seat-string comparison that can be false.
+- **Consumers exist and gate** (the addendum implied none):
+  `frame_cycle_handlers.clj:178` invalidates a guide-intervention receipt
+  unless the flag is literally true; `countdown_control.clj:1249,1327` refuse
+  with `:zai-scribe-reviewer-is-depositor` when it is false.
+
+The finding survives in sharper form: on the countdown_control path the flag
+carries a weak-but-real signal (distinct seat strings — no adjudicator rerun
+witness, and seat-string distinctness is not independence; cf. the roster
+S1/S2 lessons); on the live_learning_phases path it is a constant that
+vacuously satisfies the very gates that consult it. codex-17's original
+bullet ("validation constrains verdict vocabulary and review shape, not
+equality between event author and worker") was accurate throughout — no
+path compares a VERDICT's author to the worker seat; the computed sites
+compare depositor to reviewer at deposit time, one hop earlier.
